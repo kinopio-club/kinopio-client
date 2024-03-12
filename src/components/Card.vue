@@ -1,17 +1,1884 @@
+<script setup>
+import { reactive, computed, onMounted, onUnmounted, defineProps, defineEmits, watch, ref, nextTick } from 'vue'
+import { useStore, mapState, mapGetters } from 'vuex'
+
+import utils from '@/utils.js'
+import Frames from '@/components/Frames.vue'
+import Loader from '@/components/Loader.vue'
+import Audio from '@/components/Audio.vue'
+import NameSegment from '@/components/NameSegment.vue'
+import UserLabelInline from '@/components/UserLabelInline.vue'
+import OtherCardPreview from '@/components/OtherCardPreview.vue'
+import consts from '@/consts.js'
+import postMessage from '@/postMessage.js'
+
+// Card only child components
+import OtherSpacePreviewCard from '@/components/OtherSpacePreviewCard.vue'
+import CardCounter from '@/components/CardCounter.vue'
+import TiltResize from '@/components/TiltResize.vue'
+import UrlPreviewCard from '@/components/UrlPreviewCard.vue'
+import ImageOrVideo from '@/components/ImageOrVideo.vue'
+
+import dayjs from 'dayjs'
+import qs from '@aguezz/qs-parse'
+import debounce from 'lodash-es/debounce'
+
+const store = useStore()
+
+const cardElement = ref(null)
+
+let isMultiTouch
+let initialTouchEvent = {}
+let touchPosition = {}
+let currentTouchPosition = {}
+const defaultCardPosition = 100
+
+// locking
+// long press to touch drag card
+const lockingPreDuration = 100 // ms
+const lockingDuration = 100 // ms
+let lockingAnimationTimer, lockingStartTime, shouldCancelLocking
+
+// sticky
+const stickyTimerDuration = 250
+let preventSticking = false
+let stickyTimerComplete = false
+let stickyTimer
+
+onMounted(async () => {
+  store.subscribe((mutation, state) => {
+    const { type, payload } = mutation
+    if (type === 'updateRemoteCurrentConnection' || type === 'removeRemoteCurrentConnection') {
+      updateRemoteConnections()
+    } else if (type === 'triggerScrollCardIntoView') {
+      if (payload === props.card.id) {
+        const element = cardElement.value
+        utils.scrollIntoView({ element })
+      }
+    } else if (type === 'triggerUploadComplete') {
+      let { cardId, url } = payload
+      if (cardId !== props.card.id) { return }
+      addFile({ url })
+    } else if (type === 'triggerUpdateUrlPreview') {
+      if (payload === props.card.id) {
+        updateMediaUrls()
+        updateUrlPreview()
+      }
+    } else if (type === 'triggerUpdateTheme') {
+      updateDefaultBackgroundColor(utils.cssVariable('secondary-background'))
+    } else if (type === 'triggerCancelLocking') {
+      cancelLocking()
+    }
+  })
+  updateDefaultBackgroundColor(utils.cssVariable('secondary-background'))
+  const shouldShowDetails = store.state.loadSpaceShowDetailsForCardId === props.card.id
+  if (shouldShowDetails) {
+    store.commit('preventCardDetailsOpeningAnimation', false)
+    store.dispatch('currentCards/showCardDetails', props.card.id)
+  }
+  await updateUrlPreviewOnload()
+  checkIfShouldUpdatePreviewHtml()
+  const defaultCardMaxWidth = store.getters['currentCards/defaultCardMaxWidth'] + 'px'
+  utils.setCssVariable('card-width', defaultCardMaxWidth)
+  initIsVisibleInViewportObserver()
+})
+
+const props = defineProps({
+  card: Object
+})
+
+const state = reactive({
+  sessionStartDate: new Date(),
+  isRemoteConnecting: false,
+  remoteConnectionColor: '',
+  uploadIsDraggedOver: false,
+  isPlayingAudio: false,
+  preventDraggedButtonBadgeFromShowingDetails: false,
+  error: {
+    sizeLimit: false,
+    unknownUploadError: false,
+    signUpToUpload: false,
+    spaceIsReadOnly: false
+  },
+  formats: {
+    image: '',
+    video: '',
+    audio: '',
+    link: '',
+    file: ''
+  },
+  linkToPreview: '',
+  prevNameLineMinWidth: 0,
+  isLocking: true,
+  lockingPercent: 0,
+  lockingAlpha: 0,
+  stickyTranslateX: 0,
+  stickyTranslateY: 0,
+  isAnimationUnsticking: false,
+  stickyStretchResistance: 6,
+  defaultBackgroundColor: '#e3e3e3',
+  pathIsUpdated: false,
+  isVisibleInViewport: true
+})
+watch(() => state.linkToPreview, (value, prevValue) => {
+  updateUrlData()
+})
+const updateUrlData = () => {
+  updateOtherItems()
+  if (store.state.isLoadingSpace) { return }
+  updateUrlPreview()
+}
+
+const canEditCard = computed(() => store.getters['currentUser/canEditCard'](props.card))
+const isSelectedOrDragging = computed(() => {
+  return Boolean(isSelected.value || isRemoteSelected.value || isRemoteCardDetailsVisible.value || isRemoteCardDragging.value || state.uploadIsDraggedOver || remoteUploadDraggedOverCardColor.value || remoteUserResizingCardsColor.value || remoteUserTiltingCardsColor.value)
+})
+
+// current space
+
+const canEditSpace = computed(() => store.getters['currentUser/canEditSpace']())
+const changeSpace = async (url) => {
+  const { spaceId, spaceUrl, cardId } = utils.spaceAndCardIdFromUrl(url)
+  if (cardId) {
+    changeSpaceAndCard(spaceId, cardId)
+  } else {
+    const space = { id: spaceId }
+    store.dispatch('currentSpace/changeSpace', space)
+  }
+  store.dispatch('closeAllDialogs')
+}
+const changeSpaceAndCard = async (spaceId, cardId) => {
+  const currentSpaceId = store.state.currentSpace.id
+  // space and card
+  if (currentSpaceId !== spaceId) {
+    store.commit('loadSpaceShowDetailsForCardId', cardId)
+    const space = { id: spaceId }
+    store.dispatch('currentSpace/changeSpace', space)
+  // card in current space
+  } else {
+    await nextTick()
+    store.dispatch('currentCards/showCardDetails', cardId)
+  }
+}
+
+// user theme
+
+const isThemeDark = computed(() => store.state.currentUser.theme === 'dark')
+const isDarkInLightTheme = computed(() => backgroundColorIsDark.value && !isThemeDark.value)
+const isLightInDarkTheme = computed(() => !backgroundColorIsDark.value && isThemeDark.value)
+
+// background color
+
+const updateDefaultBackgroundColor = (color) => {
+  state.defaultBackgroundColor = color
+}
+const currentBackgroundColor = computed(() => {
+  let background = 'transparent'
+  if (isImageCard.value) {
+    background = props.card.backgroundColor
+  }
+  return selectedColor.value || remoteSelectedColor.value || background
+})
+const backgroundColor = computed(() => {
+  let nameColor
+  if (nameIsColor.value) {
+    nameColor = props.card.name
+  }
+  let color = selectedColor.value || remoteCardDetailsVisibleColor.value || remoteSelectedColor.value || selectedColorUpload.value || remoteCardDraggingColor.value || remoteUploadDraggedOverCardColor.value || remoteUserResizingCardsColor.value || remoteUserTiltingCardsColor.value || nameColor || props.card.backgroundColor
+  return color
+})
+const backgroundColorIsDark = computed(() => {
+  const color = props.card.backgroundColor || state.defaultBackgroundColor
+  return utils.colorIsDark(color)
+})
+const nameIsColor = computed(() => {
+  return utils.colorNameIsValid(props.card.name)
+})
+
+// comment
+
+const isComment = computed(() => props.card.isComment || utils.isNameComment(name.value))
+const cardNameIfComment = computed(() => {
+  if (!isComment.value) { return }
+  return props.card.name
+})
+const removeCommentBrackets = (name) => {
+  if (!isComment.value) { return name }
+  if (props.card.isComment) { return name }
+  const commentPattern = utils.commentPattern()
+  const comments = name.match(commentPattern)
+  comments.forEach(comment => {
+    const content = comment.substring(2, comment.length - 2)
+    name = name.replace(comment, content)
+  })
+  return name
+}
+
+// checkbox
+
+const isChecked = computed(() => utils.nameIsChecked(name.value))
+const hasCheckbox = computed(() => {
+  if (isLocked.value) { return }
+  return utils.checkboxFromString(name.value)
+})
+const checkboxState = computed({
+  get () {
+    return isChecked.value
+  }
+})
+const toggleCardChecked = () => {
+  if (store.state.currentUserIsDraggingConnectionIdLabel) { return }
+  if (store.state.preventDraggedCardFromShowingDetails) { return }
+  if (!canEditSpace.value) { return }
+  const value = !isChecked.value
+  store.dispatch('closeAllDialogs')
+  store.dispatch('currentCards/toggleChecked', { cardId: props.card.id, value })
+  postMessage.sendHaptics({ name: 'heavyImpact' })
+  cancelLocking()
+  store.commit('currentUserIsDraggingCard', false)
+  const userId = store.state.currentUser.id
+  store.commit('broadcast/updateStore', { updates: { userId }, type: 'clearRemoteCardsDragging' })
+  event.stopPropagation()
+}
+
+// media
+
+const isImageCard = computed(() => Boolean(state.formats.image || state.formats.video))
+const urlEmbedIsVisible = computed(() => {
+  // youtube, spotify etc.
+  const urlEmbedIsVisibleForCardId = store.state.urlEmbedIsVisibleForCardId
+  return props.card.id === urlEmbedIsVisibleForCardId
+})
+const isVisualCard = computed(() => {
+  if (isComment.value) { return }
+  return state.formats.image || state.formats.video
+})
+const isAudioCard = computed(() => {
+  if (isComment.value) { return }
+  return state.formats.audio
+})
+const cardHasMedia = computed(() => state.formats.image || state.formats.video || state.formats.audio)
+const updateMediaUrls = (urls) => {
+  urls = urls || utils.urlsFromString(props.card.name)
+  state.formats.image = ''
+  state.formats.video = ''
+  state.formats.audio = ''
+  state.formats.link = ''
+  if (!urls) { return }
+  if (!urls.length) { return }
+  urls.forEach(url => {
+    if (utils.urlIsImage(url)) {
+      state.formats.image = url
+    } else if (utils.urlIsVideo(url)) {
+      state.formats.video = url
+    } else if (utils.urlIsAudio(url)) {
+      state.formats.audio = url
+    } else if (utils.urlIsFile(url)) {
+      state.formats.file = url
+    } else {
+      state.formats.link = url
+      state.linkToPreview = url
+    }
+  })
+}
+const updateIsPlayingAudio = (value) => {
+  state.isPlayingAudio = value
+  cancelLocking()
+}
+
+// other card
+
+const otherCardIsVisible = computed(() => Boolean(props.card.linkToCardId))
+const otherCardUrl = computed(() => utils.urlFromSpaceAndCard({ cardId: props.card.linkToCardId, spaceId: props.card.linkToSpaceId }))
+const otherCard = computed(() => {
+  const card = store.getters.otherCardById(props.card.linkToCardId)
+  return card
+})
+
+// other space
+
+const otherSpaceIsVisible = computed(() => Boolean(props.card.linkToSpaceId))
+const otherSpace = computed(() => {
+  let isInviteLink, collaboratorKey, readOnlyKey
+  let space = nameSegments.value.find(segment => segment.otherSpace)
+  if (!space) { return }
+  return space.otherSpace
+})
+const otherSpaceUrl = computed(() => {
+  let segment = nameSegments.value.find(segment => segment.otherSpace)
+  return segment?.name
+})
+const spaceOrInviteUrl = computed(() => {
+  const link = state.formats.link
+  if (utils.urlIsSpace(link) || utils.urlIsInvite(link)) {
+    return link
+  } else {
+    return null
+  }
+})
+
+// space search
+
+const isInSearchResultsCards = computed(() => {
+  const results = store.state.searchResultsCards
+  if (!results.length) { return }
+  return Boolean(results.find(card => props.card.id === card.id))
+})
+const filterShowUsers = computed(() => store.state.currentUser.filterShowUsers)
+const filterShowDateUpdated = computed(() => store.state.currentUser.filterShowDateUpdated)
+
+// styles
+
+const articleStyle = computed(() => {
+  let z = props.card.z
+  let pointerEvents = 'auto'
+  if (currentCardDetailsIsVisible.value || currentCardIsBeingDragged.value) {
+    z = 2147483646 // max z
+  } else if (isLocked.value) {
+    z = 0
+    pointerEvents = 'none'
+  }
+  // console.log('🌍',props.card.width, width.value, props.card.height)
+  let styles = {
+    left: `${x.value}px`,
+    top: `${y.value}px`,
+    // width: `${width.value}px`,
+    // height: `${props.card.height}px`,
+    zIndex: z,
+    pointerEvents
+  }
+  if (!store.state.currentUserIsDraggingCard) {
+    styles.transform = `translate(${state.stickyTranslateX}, ${state.stickyTranslateY})`
+  }
+  styles = updateStylesWithWidth(styles)
+  return styles
+})
+const cardStyle = computed(() => {
+  if (!state.isVisibleInViewport) { return }
+  let backgroundColor, nameColor
+  backgroundColor = props.card.backgroundColor
+  if (nameIsColor.value) {
+    nameColor = props.card.name
+  }
+  let color = selectedColor.value || remoteCardDetailsVisibleColor.value || remoteSelectedColor.value || selectedColorUpload.value || remoteCardDraggingColor.value || remoteUploadDraggedOverCardColor.value || remoteUserResizingCardsColor.value || remoteUserTiltingCardsColor.value || nameColor || backgroundColor
+  let styles = {
+    background: color
+  }
+  if (isComment.value && !isSelected.value) {
+    color = color || state.defaultBackgroundColor
+    styles.background = color
+  }
+  if (props.card.tilt) {
+    styles.transform = `rotate(${props.card.tilt}deg)`
+  }
+  styles = updateStylesWithWidth(styles)
+  return styles
+})
+const cardContentStyles = computed(() => {
+  if (!state.isVisibleInViewport) { return }
+  let styles = {}
+  if (isLocked.value) {
+    styles = { marginRight: '2px' }
+  }
+  if (isAudioCard.value) {
+    styles.width = '100%'
+  }
+  return styles
+})
+const cardContentWrapStyles = computed(() => {
+  if (!state.isVisibleInViewport) { return }
+  let styles = {}
+  if (resizeWidth.value) {
+    styles.maxWidth = resizeWidth.value
+    styles.width = resizeWidth.value
+  }
+  styles.width = styles.width + 'px'
+  styles.maxWidth = styles.maxWidth + 'px'
+  return styles
+})
+const articleClasses = computed(() => {
+  if (!state.isVisibleInViewport) { return }
+  const classes = {
+    'is-resizing': store.state.currentUserIsResizingCard,
+    'is-tilting': store.state.currentUserIsTiltingCard,
+    'is-hidden-by-opacity': isCardHiddenByCommentFilter.value,
+    'jiggle': shouldJiggle.value
+  }
+  return classes
+})
+const cardClasses = computed(() => {
+  if (!state.isVisibleInViewport) { return }
+  const m = 100
+  const l = 150
+  const classes = {
+    'active': isConnectingTo.value || isConnectingFrom.value || state.isRemoteConnecting || currentCardIsBeingDragged.value || state.uploadIsDraggedOver,
+    'filtered': isFiltered.value,
+    'media-card': isVisualCard.value || pendingUploadDataUrl.value,
+    'audio-card': isAudioCard.value,
+    'is-playing-audio': state.isPlayingAudio,
+    'is-locked': isLocked.value,
+    'has-url-preview': cardUrlPreviewIsVisible.value,
+    'is-dark': backgroundColorIsDark.value,
+    's-width': width.value < m,
+    'm-width': utils.isBetween({ value: width.value, min: m, max: l }),
+    'l-width': width.value > l
+  }
+  return classes
+})
+const shouldJiggle = computed(() => {
+  if (!state.isVisibleInViewport) { return }
+  const max = 500
+  const cardIsTooBig = width.value > max || props.card.height > max
+  if (cardIsTooBig) { return }
+  const isMultipleItemsSelected = store.getters.isMultipleItemsSelected
+  const isShiftKeyDown = store.state.currentUserIsBoxSelecting
+  if (isMultipleItemsSelected || isShiftKeyDown) { return }
+  return isConnectingTo.value || isConnectingFrom.value || state.isRemoteConnecting || currentCardIsBeingDragged.value || isRemoteCardDragging.value
+})
+const updateStylesWithWidth = (styles) => {
+  const cardHasExtendedContent = cardUrlPreviewIsVisible.value || otherCardIsVisible.value || isVisualCard.value || isAudioCard.value
+  const cardHasUrlsOrMedia = cardHasMedia.value || cardHasUrls.value
+  if (cardHasUrlsOrMedia) {
+    styles.width = store.getters['currentCards/defaultCardMaxWidth']
+  }
+  if (resizeWidth.value) {
+    styles.maxWidth = resizeWidth.value
+    styles.width = resizeWidth.value
+  }
+  styles.width = styles.width + 'px'
+  styles.maxWidth = styles.maxWidth + 'px'
+  return styles
+}
+const updatePreviousResultItem = () => {
+  const search = store.state.search
+  const searchResultsCards = store.state.searchResultsCards
+  if (!search) { return }
+  if (!searchResultsCards.length) { return }
+  if (searchResultsCards.find(card => card.id === props.card.id)) {
+    store.commit('previousResultItem', props.card)
+  }
+}
+
+// position and dimensions
+
+const width = computed(() => {
+  if (isComment.value) { return }
+  if (currentCardDetailsIsVisible.value) { return }
+  const width = props.card.resizeWidth || props.card.width
+  if (!width) { return }
+  return width
+})
+const resizeWidth = computed(() => {
+  if (isComment.value) { return }
+  let resizeWidth = props.card.resizeWidth
+  if (urlEmbedIsVisible.value || isLoadingUrlPreview.value) {
+    resizeWidth = Math.max(resizeWidth, consts.minCardEmbedWidth)
+  }
+  if (!resizeWidth) { return }
+  return resizeWidth
+})
+const tiltDegres = computed(() => props.card.tilt)
+const isLocked = computed(() => {
+  if (!props.card) { return }
+  const isLocked = props.card.isLocked
+  return isLocked
+})
+const tiltResizeIsVisible = computed(() => {
+  if (isLocked.value) { return }
+  if (!canEditSpace.value) { return }
+  if (cardPendingUpload.value || remoteCardPendingUpload.value) { return }
+  return true
+})
+const x = computed(() => {
+  const x = props.card.x
+  if (x === undefined || x === null) {
+    return defaultCardPosition
+  } else {
+    return x
+  }
+})
+const y = computed(() => {
+  const y = props.card.y
+  if (y === undefined || y === null) {
+    return defaultCardPosition
+  } else {
+    return y
+  }
+})
+const remoteUserResizingCardsColor = computed(() => {
+  if (!store.state.remoteUserResizingCards.length) { return }
+  let user = store.state.remoteUserResizingCards.find(user => user.cardIds.includes(props.card.id))
+  if (user) {
+    user = store.getters['currentSpace/userById'](user.userId)
+    return user.color
+  } else {
+    return undefined
+  }
+})
+const remoteUserTiltingCardsColor = computed(() => {
+  if (!store.state.remoteUserTiltingCards.length) { return }
+  let user = store.state.remoteUserTiltingCards.find(user => user.cardIds.includes(props.card.id))
+  if (user) {
+    user = store.getters['currentSpace/userById'](user.userId)
+    return user.color
+  } else {
+    return undefined
+  }
+})
+const updateCardDimensions = () => {
+  let card = { id: props.card.id }
+  card = utils.updateCardDimensions(card)
+  if (!card) { return }
+  store.commit('currentCards/update', card)
+  store.dispatch('currentCards/updateTallestCardHeight', card)
+  store.dispatch('api/addToQueue', { name: 'updateCard', body: card })
+}
+
+// connections
+
+const connectionFromAnotherCardConnectedToCurrentCard = (anotherCardId) => {
+  const currentCardConnections = store.getters['currentConnections/byCardId'](props.card.id)
+  return currentCardConnections.find(connection => {
+    const isConnectedToStart = connection.startCardId === anotherCardId
+    const isConnectedToEnd = connection.endCardId === anotherCardId
+    return isConnectedToStart || isConnectedToEnd
+  })
+}
+const connectionsFromMultipleCardsConnectedToCurrentCard = (otherCardIds) => {
+  const currentCardConnections = store.getters['currentConnections/byCardId'](props.card.id)
+  let currentCardConnection
+  otherCardIds.find(anotherCardId => {
+    return currentCardConnections.find(connection => {
+      const isConnectedToStart = connection.startCardId === anotherCardId
+      const isConnectedToEnd = connection.endCardId === anotherCardId
+      if (isConnectedToStart || isConnectedToEnd) {
+        currentCardConnection = connection
+        return true
+      }
+    })
+  })
+  return currentCardConnection
+}
+const connectedConnectionTypes = computed(() => store.getters['currentConnections/typesByCardId'](props.card.id))
+const connectedConnectionTypeById = (typeId) => {
+  return connectedConnectionTypes.value.find(type => type.id === typeId)
+}
+const connectionTypeColorisDark = computed(() => {
+  const type = connectedConnectionTypes.value[connectedConnectionTypes.value.length - 1]
+  if (!type) { return }
+  return utils.colorIsDark(type.color)
+})
+const currentUserIsDraggingLabelConnectedToCard = computed(() => {
+  const connectionId = store.state.currentUserIsDraggingConnectionIdLabel
+  if (!connectionId) { return }
+  const connection = store.getters['currentConnections/byId'](connectionId)
+  if (!connection) { return }
+  const isConnected = connection.startCardId === props.card.id || connection.endCardId === props.card.id
+  return isConnected
+})
+const isConnectingTo = computed(() => {
+  const connectingToId = store.state.currentConnectionSuccess.id
+  if (connectingToId) {
+    postMessage.sendHaptics({ name: 'softImpact' })
+  }
+  return connectingToId === props.card.id
+})
+const isConnectingFrom = computed(() => {
+  return store.state.currentConnectionStartCardIds.find(cardId => cardId === props.card.id)
+})
+const hasConnections = computed(() => {
+  const connections = store.getters['currentConnections/byCardId'](props.card.id)
+  return Boolean(connections.length)
+})
+const currentConnectionColor = computed(() => store.state.currentConnectionColor)
+const correctPaths = async () => {
+  if (state.pathIsUpdated) { return }
+  await nextTick()
+  store.dispatch('currentConnections/updatePaths', { cardId: props.card.id, shouldUpdateApi: false })
+  state.pathIsUpdated = true
+}
+const createCurrentConnection = (event) => {
+  const cursor = utils.cursorPositionInViewport(event)
+  const multipleCardsSelectedIds = store.state.multipleCardsSelectedIds
+  let cardIds = [props.card.id]
+  if (multipleCardsSelectedIds.length) {
+    cardIds = multipleCardsSelectedIds
+  }
+  store.commit('currentConnectionStartCardIds', cardIds)
+  store.commit('currentConnectionCursorStart', cursor)
+}
+const addConnectionType = (event) => {
+  const shouldUseLastConnectionType = store.state.currentUser.shouldUseLastConnectionType
+  const shiftKey = event.shiftKey
+  const connectionType = store.getters['currentConnections/typeForNewConnections']
+  if (!connectionType) {
+    store.dispatch('currentConnections/addType')
+  }
+  if (shouldUseLastConnectionType && shiftKey) {
+    store.dispatch('currentConnections/addType')
+    return
+  }
+  if (shiftKey || shouldUseLastConnectionType) {
+    return
+  }
+  store.dispatch('currentConnections/addType')
+}
+const startConnecting = (event) => {
+  if (!canEditSpace.value) { return }
+  if (utils.isMultiTouch(event)) { return }
+  store.dispatch('closeAllDialogs')
+  store.commit('preventDraggedCardFromShowingDetails', true)
+  if (!store.state.currentUserIsDrawingConnection) {
+    addConnectionType(event)
+    createCurrentConnection(event)
+  }
+  store.commit('currentUserIsDrawingConnection', true)
+}
+
+// connector button
+
+const isConnectorDarkInLightTheme = computed(() => {
+  if (connectionTypeColorisDark.value) { return connectionTypeColorisDark.value }
+  return isDarkInLightTheme.value
+})
+const isConnectorLightInDarkTheme = computed(() => {
+  if (connectionTypeColorisDark.value) { return !connectionTypeColorisDark.value }
+  return isLightInDarkTheme.value
+})
+const connectorButtonBackground = computed(() => {
+  if (store.state.currentUserIsDraggingCard) { return }
+  if (hasConnections.value || isConnectingFrom.value || isConnectingTo.value) { return }
+  return currentBackgroundColor.value
+})
+const connectorIsVisible = computed(() => {
+  const spaceIsOpen = store.state.currentSpace.privacy === 'open' && store.getters['currentUser/isSignedIn']
+  let isVisible
+  if (state.isRemoteConnecting) {
+    isVisible = true
+  } else if (spaceIsOpen || canEditCard.value || connectedConnectionTypes.value.length) {
+    isVisible = true
+  }
+  return isVisible
+})
+const connectorGlowStyle = computed(() => {
+  if (!state.isVisibleInViewport) { return }
+  if (!utils.arrayHasItems(connectedConnectionTypes.value)) { return } // cards with no connections
+  const color = connectedToAnotherCardDetailsVisibleColor.value ||
+    connectedToAnotherCardBeingDraggedColor.value ||
+    connectedToConnectionDetailsIsVisibleColor.value ||
+    currentUserIsHoveringOverConnectionColor.value ||
+    currentUserIsMultipleSelectedConnectionColor.value ||
+    currentUserIsHoveringOverConnectedCardColor.value ||
+    currentUserIsMultipleSelectedCardColor.value ||
+    currentUserIsCreatingConnectionColor.value
+  return { background: color }
+})
+const connectionColor = (connection) => {
+  if (!connection) { return }
+  const connectionType = connectedConnectionTypeById(connection.connectionTypeId)
+  return connectionType?.color
+}
+// another card that is connected to this one is being edited
+const connectedToAnotherCardDetailsVisibleColor = computed(() => {
+  if (currentCardDetailsIsVisible.value) { return }
+  const anotherCardId = store.state.cardDetailsIsVisibleForCardId
+  if (!anotherCardId) { return }
+  const connection = connectionFromAnotherCardConnectedToCurrentCard(anotherCardId)
+  return connectionColor(connection)
+})
+// another card that is connected to this one is being dragged
+const connectedToAnotherCardBeingDraggedColor = computed(() => {
+  const isDraggingCard = store.state.currentUserIsDraggingCard
+  if (!isDraggingCard) { return }
+  const currentDraggingCardId = store.state.currentDraggingCardId
+  const connection = connectionFromAnotherCardConnectedToCurrentCard(currentDraggingCardId)
+  return connectionColor(connection)
+})
+// a connection that is connected to this card is being edited
+const connectedToConnectionDetailsIsVisibleColor = computed(() => {
+  const connectionDetailsVisibleId = store.state.connectionDetailsIsVisibleForConnectionId
+  if (!connectionDetailsVisibleId) { return }
+  const currentCardConnections = store.getters['currentConnections/byCardId'](props.card.id)
+  const connectionWithDetailsVisible = currentCardConnections.find(connection => connection.id === connectionDetailsVisibleId)
+  if (!connectionWithDetailsVisible) { return }
+  const connectionType = connectedConnectionTypeById(connectionWithDetailsVisible.connectionTypeId)
+  return connectionType?.color
+})
+// a connection that is connected to this card is being hovered over
+const currentUserIsHoveringOverConnectionColor = computed(() => {
+  const connectionId = store.state.currentUserIsHoveringOverConnectionId || store.state.currentUserIsDraggingConnectionIdLabel
+  const currentCardConnections = store.getters['currentConnections/byCardId'](props.card.id)
+  const connection = currentCardConnections.find(currentCardConnection => currentCardConnection.id === connectionId)
+  return connectionColor(connection)
+})
+// a connection that is connected to this card, is paint selected
+const currentUserIsMultipleSelectedConnectionColor = computed(() => {
+  const connectionIds = store.state.multipleConnectionsSelectedIds
+  const currentCardConnections = store.getters['currentConnections/byCardId'](props.card.id)
+  const connection = currentCardConnections.find(currentCardConnection => connectionIds.includes(currentCardConnection.id))
+  return connectionColor(connection)
+})
+// this card, or another card connected to this card, is being hovered over
+const currentUserIsHoveringOverConnectedCardColor = computed(() => {
+  const cardId = store.state.currentUserIsHoveringOverCardId
+  const connection = connectionFromAnotherCardConnectedToCurrentCard(cardId)
+  return connectionColor(connection)
+})
+// this card, or another card connected to this card, is paint selected
+const currentUserIsMultipleSelectedCardColor = computed(() => {
+  const cardIds = store.state.multipleCardsSelectedIds
+  const connection = connectionsFromMultipleCardsConnectedToCurrentCard(cardIds)
+  return connectionColor(connection)
+})
+// a current connection is being made by dragging from this card's connector
+const currentUserIsCreatingConnectionColor = computed(() => {
+  if (!store.state.currentUserIsDrawingConnection) { return }
+  const cardIds = store.state.currentConnectionStartCardIds
+  const isCurrentlyConnecting = cardIds.includes(props.card.id)
+  if (!isCurrentlyConnecting) { return }
+  return store.state.currentConnectionColor
+})
+
+// card buttons
+
+const isCardButtonsVisible = computed(() => {
+  return isLocked.value || (cardButtonUrl.value && !isComment.value) || connectorIsVisible.value
+})
+const cardButtonUrl = computed(() => {
+  const link = state.formats.link
+  const file = state.formats.file
+  if (utils.urlIsValidTld(link) || utils.urlIsSpace(link)) {
+    return link
+  } else if (utils.urlHasProtocol(file)) {
+    return file
+  } else {
+    return null
+  }
+})
+const webUrl = computed(() => {
+  const link = state.formats.link
+  if (utils.urlIsValidTld(link) && !utils.urlIsSpace(link)) {
+    return link
+  } else {
+    return null
+  }
+})
+const openUrl = async (event, url) => {
+  if (event) {
+    if (event.metaKey || event.ctrlKey) {
+      await nextTick()
+      store.dispatch('closeAllDialogs')
+      return
+    } else {
+      event.preventDefault()
+      event.stopPropagation()
+    }
+  }
+  store.dispatch('closeAllDialogs')
+  if (store.state.cardsWereDragged) {
+    return
+  }
+  if (utils.urlIsSpace(url)) {
+    changeSpace(url)
+  } else if (event.type === 'touchend') {
+    window.location = url
+  } else {
+    window.open(url) // opens url in new tab
+  }
+}
+
+// dates, card meta
+
+const updatedAt = computed(() => props.card.nameUpdatedAt || props.card.createdAt)
+const dateUpdatedAt = computed(() => {
+  const date = updatedAt.value
+  const showAbsoluteDate = store.state.currentUser.filterShowAbsoluteDates
+  if (date) {
+    if (showAbsoluteDate) {
+      return new Date(date).toLocaleString()
+    } else {
+      return utils.shortRelativeTime(date)
+    }
+  } else {
+    return 'Just now'
+  }
+})
+const toggleFilterShowAbsoluteDates = () => {
+  store.dispatch('currentCards/incrementZ', props.card.id)
+  store.dispatch('closeAllDialogs')
+  const value = !store.state.currentUser.filterShowAbsoluteDates
+  store.dispatch('currentUser/toggleFilterShowAbsoluteDates', value)
+}
+const updateRemoteConnections = () => {
+  const connection = store.state.remoteCurrentConnections.find(remoteConnection => {
+    const isConnectedToStart = remoteConnection.startCardId === props.card.id
+    const isConnectedToEnd = remoteConnection.endCardId === props.card.id
+    return isConnectedToStart || isConnectedToEnd
+  })
+  if (connection) {
+    state.isRemoteConnecting = true
+    state.remoteConnectionColor = connection.color
+  } else {
+    state.isRemoteConnecting = false
+  }
+}
+
+// upload
+
+const cardPendingUpload = computed(() => {
+  const pendingUploads = store.state.upload.pendingUploads
+  return pendingUploads.find(upload => upload.cardId === props.card.id)
+})
+const remoteCardPendingUpload = computed(() => {
+  return store.state.remotePendingUploads.find(upload => {
+    const inProgress = upload.percentComplete < 100
+    const isCard = upload.cardId === props.card.id
+    return inProgress && isCard
+  })
+})
+const pendingUploadDataUrl = computed(() => {
+  if (!cardPendingUpload.value || isComment.value) { return }
+  return cardPendingUpload.value.imageDataUrl
+})
+const selectedColorUpload = computed(() => {
+  const color = store.state.currentUser.color
+  if (state.uploadIsDraggedOver) {
+    return color
+  } else {
+    return undefined
+  }
+})
+const remoteUploadDraggedOverCardColor = computed(() => {
+  const draggedOverCard = store.state.remoteUploadDraggedOverCards.find(card => card.cardId === props.card.id)
+  if (draggedOverCard) {
+    const user = store.getters['currentSpace/userById'](draggedOverCard.userId)
+    return user.color
+  } else {
+    return undefined
+  }
+})
+const addFile = (file) => {
+  let name = props.card.name
+  const url = file.url
+  const urlType = utils.urlType(url)
+  const checkbox = utils.checkboxFromString(name)
+  const previousUrls = utils.urlsFromString(name, true) || []
+  let isReplaced
+  previousUrls.forEach(previousUrl => {
+    if (utils.urlType(previousUrl) === urlType) {
+      name = name.replace(previousUrl.trim(), url)
+      isReplaced = true
+    }
+  })
+  if (!isReplaced) {
+    // prepend url to name
+    name = utils.trim(name)
+    name = `${url}\n\n${name}`
+  }
+  // ensure checkbox is first
+  if (checkbox) {
+    name = name.replace(checkbox, '')
+    name = `${checkbox} ${name}`
+  }
+  // update name
+  store.dispatch('currentCards/update', {
+    id: props.card.id,
+    name: utils.trim(name)
+  })
+  store.commit('triggerUpdatePositionInVisualViewport')
+}
+const clearErrors = () => {
+  state.error.signUpToUpload = false
+  state.error.sizeLimit = false
+  state.error.unknownUploadError = false
+  state.error.spaceIsReadOnly = false
+}
+const checkIfUploadIsDraggedOver = (event) => {
+  if (event.dataTransfer.types[0] === 'Files' || event.dataTransfer.items[0].kind === 'file') {
+    state.uploadIsDraggedOver = true
+    const updates = {
+      cardId: props.card.id,
+      userId: store.state.currentUser.id
+    }
+    store.commit('broadcast/updateStore', { updates, type: 'addToRemoteUploadDraggedOverCards' })
+  }
+}
+const removeUploadIsDraggedOver = () => {
+  state.uploadIsDraggedOver = false
+  const userId = store.state.currentUser.id
+  store.commit('broadcast/updateStore', { updates: { userId }, type: 'clearRemoteUploadDraggedOverCards' })
+}
+const uploadFile = async (event) => {
+  removeUploadIsDraggedOver()
+  store.dispatch('currentCards/incrementZ', props.card.id)
+  // pre-upload errors
+  if (!store.getters['currentUser/isSignedIn']) {
+    state.error.signUpToUpload = true
+    store.commit('addNotification', { message: 'To upload files, you need to Sign Up or In', type: 'info' })
+    return
+  }
+  if (!canEditSpace.value) {
+    state.error.spaceIsReadOnly = true
+    store.commit('addNotification', { message: 'You can only upload files on spaces you can edit', type: 'info' })
+    return
+  }
+  const file = event.dataTransfer.files[0]
+  const cardId = props.card.id
+  // upload
+  try {
+    await store.dispatch('upload/uploadFile', { file, cardId })
+  } catch (error) {
+    console.warn('🚒', error)
+    if (error.type === 'sizeLimit') {
+      state.error.sizeLimit = true
+    } else {
+      state.error.unknownUploadError = true
+    }
+    store.commit('addNotification', { message: error.message, type: 'danger' })
+  }
+}
+
+// name
+
+const name = computed(() => {
+  updateMediaUrls()
+  return props.card.name
+})
+const hasTextSegments = computed(() => {
+  return nameSegments.value.find(segment => segment.isText && segment.content)
+})
+const normalizedName = computed(() => {
+  // name without urls and checkbox text
+  let newName = name.value
+  if (!newName) { return }
+  if (cardHasMedia.value) {
+    newName = newName.replace(state.formats.image, '')
+    newName = newName.replace(state.formats.video, '')
+    newName = newName.replace(state.formats.audio, '')
+  }
+  // link hiding
+  let link = state.formats.link
+  let isHidden
+  let markdownLinks = newName.match(utils.markdown().linkPattern)
+  if (markdownLinks) {
+    const linkIsMarkdown = markdownLinks.find(markdownLink => markdownLink.includes(link))
+    isHidden = !linkIsMarkdown
+  } else if (link.includes('hidden=true')) {
+    isHidden = true
+  }
+  if (isHidden) {
+    newName = newName.replace(link, '')
+    newName = newName.replace(utils.urlWithoutProtocol(link), '')
+  }
+  // checkboxes
+  const checkbox = utils.checkboxFromString(newName)
+  if (checkbox) {
+    newName = newName.replace(checkbox, '')
+  }
+  newName = removeCommentBrackets(newName)
+  return newName.trim()
+})
+const nameSegments = computed(() => {
+  let segments = utils.cardNameSegments(normalizedName.value)
+  segments = segments.map(segment => {
+    segment.isDark = backgroundColorIsDark.value
+    // tags
+    if (segment.isTag) {
+      let tag = store.getters['currentSpace/tagByName'](segment.name)
+      if (!tag) {
+        tag = utils.newTag({
+          name: segment.name,
+          defaultColor: store.state.currentUser.color,
+          cardId: props.card.id,
+          spaceId: store.state.currentSpace.id
+        })
+        console.warn('🦋 create missing tag', segment.name, tag, props.card)
+        store.dispatch('currentSpace/addTag', tag)
+      }
+      segment.color = tag.color
+      segment.id = tag.id
+    // invite
+    } else if (segment.isInviteLink) {
+      const { spaceId, collaboratorKey } = segment
+      segment.otherSpace = store.getters.otherSpaceById(spaceId)
+    // space or card
+    } else if (segment.isLink) {
+      const { spaceId, cardId } = utils.spaceAndCardIdFromUrl(segment.name)
+      segment.otherSpace = store.getters.otherSpaceById(spaceId)
+      segment.otherCard = store.getters.otherCardById(cardId)
+    // text
+    } else if (segment.isText) {
+      segment.markdown = utils.markdownSegments(segment.content)
+    }
+    return segment
+  })
+  return segments
+})
+
+// tags
+
+const tags = computed(() => {
+  return nameSegments.value.filter(segment => {
+    if (segment.isTag) {
+      return true
+    }
+  })
+})
+const dataTags = computed(() => {
+  let tags = utils.tagsFromStringWithoutBrackets(props.card.name)
+  if (!tags) { return }
+  tags = tags.map(tag => utils.normalizeString(tag))
+  tags = utils.arrayToString(tags)
+  return tags
+})
+const showTagDetailsIsVisible = ({ event, tag }) => {
+  if (isMultiTouch) { return }
+  if (!canEditCard.value) { store.commit('triggerReadOnlyJiggle') }
+  if (state.preventDraggedButtonBadgeFromShowingDetails) { return }
+  store.dispatch('currentCards/incrementZ', props.card.id)
+  store.dispatch('closeAllDialogs')
+  store.commit('currentUserIsDraggingCard', false)
+  const tagRect = event.target.getBoundingClientRect()
+  store.commit('tagDetailsPosition', {
+    x: window.scrollX + tagRect.x + 2,
+    y: window.scrollY + tagRect.y + tagRect.height - 2,
+    pageX: window.scrollX,
+    pageY: window.scrollY
+  })
+  tag.cardId = props.card.id
+  store.commit('currentSelectedTag', tag)
+  store.commit('tagDetailsIsVisible', true)
+  cancelLocking()
+  store.commit('currentUserIsDraggingCard', false)
+}
+
+// url preview
+
+const urls = computed(() => {
+  const normalizedName = utils.removeMarkdownCodeblocksFromString(name.value)
+  let urls = utils.urlsFromString(normalizedName)
+  if (urls) {
+    urls.reverse()
+  }
+  updateMediaUrls(urls)
+  return urls || []
+})
+const cardHasUrls = computed(() => {
+  if (!urls.value.length) {
+    return false
+  } else {
+    return true
+  }
+})
+const urlPreviewImageIsVisible = computed(() => {
+  return Boolean(cardUrlPreviewIsVisible.value && props.card.urlPreviewImage && !props.card.shouldHideUrlPreviewImage)
+})
+const cardUrlPreviewIsVisible = computed(() => {
+  if (!props.card) { return }
+  if (!props.card.name) { return }
+  let cardHasUrlPreviewInfo = Boolean(props.card.urlPreviewTitle || props.card.urlPreviewDescription || props.card.urlPreviewImage)
+  // TEMP experiment: remove card.urlPreviewErrorUrl checking to eliminate false positives. Observe if there's a downside irl and if this attribute should be removed entirely?
+  // const isErrorUrl = props.card.urlPreviewErrorUrl && (props.card.urlPreviewUrl === props.card.urlPreviewErrorUrl)
+  let url = props.card.urlPreviewUrl
+  url = utils.removeTrailingSlash(url)
+  cardHasUrlPreviewInfo = Boolean(cardHasUrlPreviewInfo && url)
+  const nameHasUrl = props.card.name?.includes(url)
+  return (props.card.urlPreviewIsVisible && cardHasUrlPreviewInfo && nameHasUrl) && !isComment.value
+  // return Boolean(props.card.urlPreviewIsVisible && props.card.urlPreviewUrl && cardHasUrlPreviewInfo) // && !isErrorUrl
+})
+const isLoadingUrlPreview = computed(() => {
+  let isLoading = store.state.urlPreviewLoadingForCardIds.find(cardId => cardId === props.card.id)
+  return Boolean(isLoading)
+  // if (!isLoading) { return }
+  // const isErrorUrl = props.card.urlPreviewErrorUrl && (props.card.urlPreviewUrl === props.card.urlPreviewErrorUrl)
+  // return isLoading && !isErrorUrl
+})
+const updateUrlPreviewOnload = async () => {
+  if (!props.card.shouldUpdateUrlPreview) { return }
+  updateMediaUrls()
+  const isUpdatedSuccess = await updateUrlPreview()
+  store.dispatch('currentCards/update', {
+    id: props.card.id,
+    shouldUpdateUrlPreview: false
+  })
+  if (isUpdatedSuccess) {
+    store.commit('triggerUpdateUrlPreviewComplete', props.card.id)
+  }
+}
+const preventUpdatePrevPreview = computed(() => {
+  if (props.card.shouldUpdateUrlPreview) { return }
+  const updateDelta = dayjs(updatedAt.value).diff(state.sessionStartDate, 'second')
+  return updateDelta < 0
+})
+const updateUrlPreview = () => {
+  const isOffline = !store.state.isOnline
+  if (preventUpdatePrevPreview.value) { return }
+  if (isOffline) {
+    store.dispatch('currentCards/update', {
+      id: props.card.id,
+      shouldUpdateUrlPreview: true
+    })
+  } else {
+    updateUrlPreviewOnline()
+  }
+}
+const updateUrlPreviewOnline = async () => {
+  store.commit('addUrlPreviewLoadingForCardIds', props.card.id)
+  const cardId = props.card.id
+  let url = webUrl.value
+  if (!url) {
+    store.commit('removeUrlPreviewLoadingForCardIds', cardId)
+    return
+  }
+  const shouldUpdate = shouldUpdateUrlPreview(url)
+  if (!shouldUpdate) {
+    store.commit('removeUrlPreviewLoadingForCardIds', cardId)
+    return
+  }
+  try {
+    url = utils.removeHiddenQueryStringFromURLs(url)
+    let response = await store.dispatch('api/urlPreview', url)
+    if (!response) { throw 'api/urlPreview' }
+    let { data, host } = response
+    const { links, meta } = data
+    console.log('🚗 link preview', url, data, links, meta)
+    if (!links) { throw 'link preview error' }
+    let html
+    if (links.player || links.reader) {
+      html = data.html
+    }
+    updateUrlPreviewSuccess({ links, meta, cardId, url, html })
+  } catch (error) {
+    console.warn('🚑', error, url)
+    updateUrlPreviewErrorUrl(url)
+  }
+}
+const retryUrlPreview = () => {
+  store.dispatch('currentCards/update', {
+    id: props.card.id,
+    shouldUpdateUrlPreview: true
+  })
+  updateUrlPreview()
+}
+const shouldUpdateUrlPreview = (url) => {
+  if (props.card.shouldUpdateUrlPreview) { return true }
+  const previewIsVisible = props.card.urlPreviewIsVisible
+  const isNotPreviewUrl = url !== props.card.urlPreviewUrl
+  const isNotErrorUrl = url !== props.card.urlPreviewErrorUrl
+  const isNotKinopioUrl = !url.startsWith('https://kinopio.club')
+  const isLocalhostUrl = url.match(utils.localhostUrlPattern())
+  return previewIsVisible && isNotPreviewUrl && isNotErrorUrl && isNotKinopioUrl && !isLocalhostUrl
+}
+const nameIncludesUrl = (url) => {
+  const name = props.card.name
+  const normalizedUrl = utils.removeTrailingSlash(url)
+  return name.includes(url) || name.includes(normalizedUrl) || normalizedUrl.includes(name)
+}
+const previewImage = ({ thumbnail }) => {
+  const minWidth = store.getters['currentCards/defaultCardMaxWidth']
+  if (!thumbnail) { return '' }
+  let image = thumbnail.find(item => {
+    let shouldSkipImage = false
+    if (item.media) {
+      if (item.media.width < minWidth) {
+        shouldSkipImage = true
+      }
+    }
+    return item.href && !shouldSkipImage
+  })
+  if (!image) { return '' }
+  return image.href || ''
+}
+const previewFavicon = ({ icon }) => {
+  if (!icon) { return '' }
+  let image = icon.find(item => item.href)
+  return image.href || ''
+}
+const updateUrlPreviewSuccess = ({ links, meta, cardId, url, html }) => {
+  if (!nameIncludesUrl(url)) { return }
+  cardId = cardId || props.card.id
+  if (!cardId) {
+    console.warn('🚑 could not updateUrlPreviewSuccess', cardId, props.card)
+    store.commit('removeUrlPreviewLoadingForCardIds', cardId)
+    return
+  }
+  const update = {
+    id: cardId,
+    name: utils.addHiddenQueryStringToURLs(props.card.name),
+    urlPreviewUrl: url,
+    urlPreviewTitle: utils.truncated(meta.title || meta.site),
+    urlPreviewDescription: utils.truncated(meta.description, 280),
+    urlPreviewImage: previewImage(links),
+    urlPreviewFavicon: previewFavicon(links),
+    urlPreviewEmbedHtml: html
+  }
+  store.dispatch('currentCards/update', update)
+  store.commit('removeUrlPreviewLoadingForCardIds', cardId)
+}
+const updateUrlPreviewErrorUrl = (url) => {
+  const cardId = props.card.id
+  store.commit('removeUrlPreviewLoadingForCardIds', cardId)
+  const name = utils.removeHiddenQueryStringFromURLs(props.card.name)
+  const update = {
+    id: cardId,
+    urlPreviewErrorUrl: url,
+    urlPreviewUrl: url,
+    name
+  }
+  store.dispatch('currentCards/update', update)
+}
+
+// drag cards
+
+const currentCardIsBeingDragged = computed(() => {
+  let isCardId
+  const currentDraggingCard = store.state.currentDraggingCardId
+  const isDraggingCard = store.state.currentUserIsDraggingCard
+  if (isSelected.value || currentDraggingCard === props.card.id) {
+    isCardId = true
+  }
+  return Boolean(isDraggingCard && isCardId)
+})
+const isRemoteCardDragging = computed(() => {
+  const isDragging = store.state.remoteCardsDragging.find(card => card.cardId === props.card.id)
+  return Boolean(isDragging)
+})
+const remoteCardDraggingColor = computed(() => {
+  const draggingCard = store.state.remoteCardsDragging.find(card => card.cardId === props.card.id)
+  if (draggingCard) {
+    const user = store.getters['currentSpace/userById'](draggingCard.userId)
+    return user.color
+  } else {
+    return undefined
+  }
+})
+const checkIfShouldDragMultipleCards = (event) => {
+  if (event.shiftKey) { return }
+  // if the current dragging card is not already selected then clear selection
+  const multipleCardsSelectedIds = store.state.multipleCardsSelectedIds
+  if (!multipleCardsSelectedIds.includes(props.card.id)) {
+    store.dispatch('clearMultipleSelected')
+  }
+}
+const startDraggingCard = (event) => {
+  isMultiTouch = false
+  if (event.ctrlKey) { return }
+  if (isLocked.value) { return }
+  if (store.state.currentUserIsPanningReady) { return }
+  if (!canEditCard.value) { return }
+  if (utils.isMultiTouch(event)) {
+    isMultiTouch = true
+    return
+  }
+  event.preventDefault()
+  if (store.state.currentUserIsDrawingConnection) { return }
+  store.dispatch('closeAllDialogs')
+  store.commit('currentUserIsDraggingCard', true)
+  store.commit('currentDraggingCardId', props.card.id)
+  postMessage.sendHaptics({ name: 'softImpact' })
+  const updates = {
+    cardId: props.card.id,
+    userId: store.state.currentUser.id
+  }
+  store.commit('broadcast/updateStore', { updates, type: 'addToRemoteCardsDragging' })
+  store.commit('parentCardId', props.card.id)
+  store.commit('childCardId', '')
+  checkIfShouldDragMultipleCards(event)
+}
+const notifyPressAndHoldToDrag = () => {
+  if (isLocked.value) { return }
+  const isDrawingConnection = store.state.currentUserIsDrawingConnection
+  if (isDrawingConnection) { return }
+  const hasNotified = store.state.hasNotifiedPressAndHoldToDrag
+  if (!hasNotified) {
+    store.commit('addNotification', { message: 'Press and hold to drag', icon: 'press-and-hold' })
+  }
+  store.commit('hasNotifiedPressAndHoldToDrag', true)
+}
+
+// touch locking to drag card
+
+const cancelLocking = () => {
+  shouldCancelLocking = true
+}
+const cancelLockingAnimationFrame = () => {
+  state.isLocking = false
+  state.lockingPercent = 0
+  state.lockingAlpha = 0
+  shouldCancelLocking = false
+}
+const startLocking = (event) => {
+  if (isLocked.value) { return }
+  updateTouchPosition(event)
+  updateCurrentTouchPosition(event)
+  if (isSelected.value) {
+    state.isLocking = false
+    startDraggingCard(event)
+    return
+  }
+  state.isLocking = true
+  shouldCancelLocking = false
+  setTimeout(() => {
+    if (!lockingAnimationTimer) {
+      lockingAnimationTimer = window.requestAnimationFrame(lockingAnimationFrame)
+    }
+  }, lockingPreDuration)
+}
+const lockingAnimationFrame = (timestamp) => {
+  if (!lockingStartTime) {
+    lockingStartTime = timestamp
+  }
+  const elaspedTime = timestamp - lockingStartTime
+  const percentComplete = (elaspedTime / lockingDuration) // between 0 and 1
+  if (!utils.cursorsAreClose(touchPosition, currentTouchPosition)) {
+    notifyPressAndHoldToDrag()
+    cancelLockingAnimationFrame()
+  }
+  if (shouldCancelLocking) {
+    cancelLockingAnimationFrame()
+  }
+  if (state.isLocking && percentComplete <= 1) {
+    // const minSize = circleRadius
+    const percentRemaining = Math.abs(percentComplete - 1)
+    state.lockingPercent = percentRemaining
+    const alpha = utils.easeOut(percentComplete, elaspedTime, lockingDuration)
+    state.lockingAlpha = alpha
+    window.requestAnimationFrame(lockingAnimationFrame)
+  } else if (state.isLocking && percentComplete > 1) {
+    console.log('🔒🐢 card lockingAnimationFrame locked')
+    lockingAnimationTimer = undefined
+    lockingStartTime = undefined
+    state.isLocking = false
+    startDraggingCard(initialTouchEvent)
+    store.commit('triggeredTouchCardDragPosition', touchPosition)
+  } else {
+    window.cancelAnimationFrame(lockingAnimationTimer)
+    lockingAnimationTimer = undefined
+    lockingStartTime = undefined
+    cancelLockingAnimationFrame()
+  }
+}
+const updateCurrentTouchPosition = (event) => {
+  currentTouchPosition = utils.cursorPositionInViewport(event)
+  if (currentCardIsBeingDragged.value || store.state.currentUserIsResizingCard || store.state.currentUserIsTiltingCard) {
+    event.preventDefault() // allows dragging cards without scrolling
+  }
+}
+const updateTouchPosition = (event) => {
+  initialTouchEvent = event
+  isMultiTouch = false
+  if (utils.isMultiTouch(event)) {
+    isMultiTouch = true
+    return
+  }
+  touchPosition = utils.cursorPositionInViewport(event)
+  const isDrawingConnection = store.state.currentUserIsDrawingConnection
+  if (isDrawingConnection) {
+    event.preventDefault() // allows swipe to scroll, before card locked
+  }
+}
+
+// select cards
+
+const isSelected = computed(() => {
+  const multipleCardsSelectedIds = store.state.multipleCardsSelectedIds
+  return multipleCardsSelectedIds.includes(props.card.id)
+})
+const selectedColor = computed(() => {
+  const color = store.state.currentUser.color
+  if (isSelected.value) {
+    return color
+  } else {
+    return undefined
+  }
+})
+const isRemoteSelected = computed(() => {
+  const selectedCard = store.state.remoteCardsSelected.find(card => card.cardId === props.card.id)
+  return Boolean(selectedCard)
+})
+const remoteSelectedColor = computed(() => {
+  const selectedCard = store.state.remoteCardsSelected.find(card => card.cardId === props.card.id)
+  if (selectedCard) {
+    const user = store.getters['currentSpace/userById'](selectedCard.userId)
+    return user.color
+  } else {
+    return undefined
+  }
+})
+const selectAllConnectedCards = (event) => {
+  const isMeta = event.metaKey || event.ctrlKey
+  if (!isMeta) { return }
+  if (!canEditSpace.value) { return }
+  store.dispatch('closeAllDialogs')
+  const connections = store.getters['currentConnections/all']
+  let selectedCards = [props.card.id]
+  let shouldSearch = true
+  while (shouldSearch) {
+    let cancelSearch = true
+    connections.forEach(connection => {
+      const startCard = connection.startCardId
+      const endCard = connection.endCardId
+      const startCardIsConnected = selectedCards.includes(startCard)
+      const endCardIsConnected = selectedCards.includes(endCard)
+      if (!startCardIsConnected && endCardIsConnected) {
+        selectedCards.push(startCard)
+        cancelSearch = false
+      }
+      if (startCardIsConnected && !endCardIsConnected) {
+        selectedCards.push(endCard)
+        cancelSearch = false
+      }
+    })
+    if (cancelSearch) {
+      shouldSearch = false
+    }
+  }
+  store.commit('multipleSelectedActionsIsVisible', false)
+  store.commit('multipleCardsSelectedIds', selectedCards)
+}
+
+// card details
+
+const currentCardDetailsIsVisible = computed(() => {
+  return props.card.id === store.state.cardDetailsIsVisibleForCardId
+})
+const isRemoteCardDetailsVisible = computed(() => {
+  const visibleCard = store.state.remoteCardDetailsVisible.find(card => card.cardId === props.card.id)
+  return Boolean(visibleCard)
+})
+const remoteCardDetailsVisibleColor = computed(() => {
+  const visibleCard = store.state.remoteCardDetailsVisible.find(card => card.cardId === props.card.id)
+  if (visibleCard) {
+    const user = store.getters['currentSpace/userById'](visibleCard.userId)
+    return user.color
+  } else {
+    return undefined
+  }
+})
+const showCardDetails = (event) => {
+  if (store.state.cardDetailsIsVisibleForCardId) { return }
+  if (isLocked.value) { return }
+  if (store.state.currentUserIsPainting) { return }
+  if (store.state.currentUserIsDraggingConnectionIdLabel) { return }
+  if (isMultiTouch) { return }
+  if (store.state.currentUserIsPanningReady || store.state.currentUserIsPanning) { return }
+  if (store.state.currentUserIsResizingBox || store.state.currentUserIsDraggingBox) { return }
+  if (!canEditCard.value) { store.commit('triggerReadOnlyJiggle') }
+  const shouldToggleSelected = event.shiftKey && !store.state.cardsWereDragged && !isConnectingTo.value
+  if (shouldToggleSelected) {
+    store.dispatch('toggleCardSelected', props.card.id)
+    event.stopPropagation()
+    store.commit('currentUserIsDraggingCard', false)
+    return
+  }
+  const userId = store.state.currentUser.id
+  store.commit('broadcast/updateStore', { updates: { userId }, type: 'clearRemoteCardsDragging' })
+  state.preventDraggedButtonBadgeFromShowingDetails = store.state.preventDraggedCardFromShowingDetails
+  if (store.state.preventDraggedCardFromShowingDetails) { return }
+  store.dispatch('closeAllDialogs')
+  store.dispatch('clearMultipleSelected')
+  const nodeName = event.target.nodeName
+  if (nodeName === 'LABEL') { return } // checkbox
+  if (nodeName === 'A' && event.touches) {
+    window.location = event.target.href
+    return
+  }
+  store.commit('cardDetailsIsVisibleForCardId', props.card.id)
+  store.commit('preventCardDetailsOpeningAnimation', true)
+  store.commit('parentCardId', props.card.id)
+  event.stopPropagation() // only stop propagation if cardDetailsIsVisible
+  store.commit('currentUserIsDraggingCard', false)
+  updatePreviousResultItem()
+  clearStickyPositionOffsets()
+}
+const showCardDetailsTouch = (event) => {
+  cancelLocking()
+  if (touchIsNearTouchPosition(event)) {
+    showCardDetails(event)
+  }
+  const userId = store.state.currentUser.id
+  store.commit('broadcast/updateStore', { updates: { userId }, type: 'clearRemoteCardsDragging' })
+}
+const touchIsNearTouchPosition = (event) => {
+  const currentPosition = utils.cursorPositionInViewport(event)
+  const touchBlur = 12
+  const isTouchX = utils.isBetween({
+    value: currentPosition.x,
+    min: touchPosition.x - touchBlur,
+    max: touchPosition.x + touchBlur
+  })
+  const isTouchY = utils.isBetween({
+    value: currentPosition.y,
+    min: touchPosition.y - touchBlur,
+    max: touchPosition.y + touchBlur
+  })
+  if (isTouchX && isTouchY) {
+    return true
+  }
+}
+
+// space filters
+
+const filtersIsActive = computed(() => {
+  return Boolean(store.getters['currentUser/totalCardFadingFiltersActive'])
+})
+const isCardFilteredByTags = computed(() => {
+  const tagNames = store.state.filteredTagNames
+  if (!tagNames.length) { return }
+  const hasTag = tags.value.find(tag => {
+    if (tagNames.includes(tag.name)) {
+      return true
+    }
+  })
+  return hasTag
+})
+const isConnectionFilteredByType = computed(() => {
+  const typeIds = store.state.filteredConnectionTypeIds
+  if (!typeIds) { return }
+  const filteredTypes = connectedConnectionTypes.value.filter(type => {
+    return typeIds.includes(type.id)
+  })
+  return Boolean(filteredTypes.length)
+})
+const isCardFilteredByFrame = computed(() => {
+  const frameIds = store.state.filteredFrameIds
+  if (!frameIds.length) { return }
+  const hasFrame = frameIds.includes(props.card.frameId)
+  return hasFrame
+})
+const isCardFilteredByUnchecked = computed(() => {
+  const filterUncheckedIsActive = store.state.currentUser.filterUnchecked
+  if (!filterUncheckedIsActive) { return }
+  return !isChecked.value && hasCheckbox.value
+})
+const isCardHiddenByCommentFilter = computed(() => {
+  const filterCommentsIsActive = store.state.currentUser.filterComments
+  if (!filterCommentsIsActive) { return }
+  return isComment.value
+})
+const isFiltered = computed(() => {
+  if (!filtersIsActive.value) { return }
+  const isInFilter = isCardFilteredByTags.value || isConnectionFilteredByType.value || isCardFilteredByFrame.value || isCardFilteredByUnchecked.value
+  return !isInFilter
+})
+
+// user
+
+const createdByUser = computed(() => {
+  // same as userDetailsWrap.cardCreatedByUser
+  const userId = props.card.userId
+  let user = store.getters['currentSpace/userById'](userId)
+  if (!user) {
+    user = {
+      name: '',
+      color: '#cdcdcd' // secondary-active-background
+    }
+  }
+  return user
+})
+const userDetailsIsUser = computed(() => {
+  if (!store.state.userDetailsIsVisible) { return }
+  const user = createdByUser.value
+  return user.id === store.state.userDetailsUser.id
+})
+
+// is visible in viewport
+
+const initIsVisibleInViewportObserver = () => {
+  try {
+    let callback = (entries, observer) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          state.isVisibleInViewport = true
+        } else {
+          state.isVisibleInViewport = false
+        }
+      })
+    }
+    const target = cardElement.value
+    const observer = new IntersectionObserver(callback, { rootMargin: '50%' })
+    observer.observe(target)
+  } catch (error) {
+    console.error('🚒 card initIsVisibleInViewportObserver', error)
+  }
+}
+
+// mouse handlers
+
+const handleMouseEnter = () => {
+  initStickToCursor()
+  store.commit('currentUserIsHoveringOverCardId', props.card.id)
+}
+const handleMouseLeave = () => {
+  unstickToCursor()
+  store.commit('currentUserIsHoveringOverCardId', '')
+}
+
+// sticky
+
+const shouldNotStick = computed(() => {
+  if (!store.state.currentUser.shouldUseStickyCards) { return true }
+  if (urlEmbedIsVisible.value) { return true }
+  if (store.state.codeLanguagePickerIsVisible) { return true }
+  if (store.state.currentUserIsDraggingConnectionIdLabel) { return true }
+  const userIsConnecting = store.state.currentConnectionStartCardIds.length
+  const currentUserIsPanning = store.state.currentUserIsPanningReady || store.state.currentUserIsPanning
+  return userIsConnecting || store.state.currentUserIsDraggingBox || store.state.currentUserIsResizingBox || currentUserIsPanning || currentCardDetailsIsVisible.value || isRemoteCardDetailsVisible.value || isRemoteCardDragging.value || currentCardIsBeingDragged.value || store.state.currentUserIsResizingCard || store.state.currentUserIsTiltingCard || isLocked.value
+})
+const initStickToCursor = () => {
+  preventSticking = false
+  if (shouldNotStick.value || consts.userPrefersReducedMotion()) {
+    preventSticking = true
+  }
+  stickyTimer = setTimeout(() => {
+    stickyTimerComplete = true
+  }, stickyTimerDuration)
+  updateStickyStretchResistance()
+}
+const clearStickyTimer = () => {
+  clearTimeout(stickyTimer)
+  stickyTimerComplete = false
+}
+const isValidStickySize = (width, height, min) => {
+  const isWidth = width > min
+  const isHeight = height > min
+  return isWidth || isHeight
+}
+const updateStickyStretchResistance = () => {
+  const zoom = store.state.spaceZoomDecimal
+  let { height, width } = props.card
+  height = height * zoom
+  width = width * zoom
+  let stretchResistance = 6 // higher resistance moves less
+  // larger sizes have higher resistance
+  const size = {
+    s: isValidStickySize(width, height, 250),
+    m: isValidStickySize(width, height, 500),
+    l: isValidStickySize(width, height, 1000),
+    xl: width > 1200 || height > 1000
+  }
+  if (size.xl) {
+    stretchResistance = 20
+  } else if (size.l) {
+    stretchResistance = 16
+  } else if (size.m) {
+    stretchResistance = 12
+  } else if (size.s) {
+    stretchResistance = 10
+  }
+  state.stickyStretchResistance = stretchResistance
+}
+const stickToCursor = (event) => {
+  if (state.isAnimationUnsticking) { return }
+  if (preventSticking) { return }
+  if (!stickyTimerComplete) { return }
+  const classes = ['checkbox-wrap', 'button-wrap', 'progress-wrap', 'inline-button', 'badge']
+  const elements = ['button', 'progress', 'iframe']
+  const isOverAction = classes.includes(event.target.className) || elements.includes(event.target.nodeName.toLowerCase())
+  const isOverTag = event.target.className.includes('button-badge')
+  if (shouldNotStick.value || isOverAction || isOverTag) {
+    clearStickyPositionOffsets()
+    preventSticking = true
+    return
+  }
+  const isButtonHover = event.target.closest('.inline-button-wrap') || event.target.closest('.button-wrap')
+  if (isButtonHover) {
+    clearStickyPositionOffsets()
+    return
+  }
+  const stretchResistance = state.stickyStretchResistance
+  const { height, width } = props.card
+  const halfWidth = width / 2
+  const halfHeight = height / 2
+  let centerX = x.value + halfWidth
+  let centerY = y.value + halfHeight
+  let position = utils.cursorPositionInSpace(event)
+  // position from card center
+  const xFromCenter = position.x - centerX
+  const yFromCenter = position.y - centerY
+  // percentage from center to card edge
+  const xPercent = (xFromCenter / halfWidth)
+  const yPercent = (yFromCenter / halfHeight)
+  // calc sticky offset
+  let xOffset = (xPercent * halfWidth) / stretchResistance
+  xOffset = Math.round(xOffset)
+  let yOffset = (yPercent * halfHeight) / stretchResistance
+  yOffset = Math.round(yOffset)
+  state.stickyTranslateX = xOffset + 'px'
+  state.stickyTranslateY = yOffset + 'px'
+}
+const unstickToCursor = () => {
+  clearStickyTimer()
+  state.isAnimationUnsticking = true
+  const xOffset = parseInt(state.stickyTranslateX)
+  const yOffset = parseInt(state.stickyTranslateY)
+  let timing = {
+    duration: 0, // sum of keyframe offsets
+    easing: 'cubic-bezier(0.45, 0, 0.55, 1)',
+    iterations: 1
+  }
+  const swings = [-0.9, 0.6, -0.4, 0.2, 0] // [-1, 0.75, -0.5, 0.25, 0]
+  let keyframes = [
+    { transform: `translate(${xOffset * swings[0]}px,   ${yOffset * swings[0]}px)`, offset: 50 },
+    { transform: `translate(${xOffset * swings[1]}px, ${yOffset * swings[1]}px)`, offset: 75 },
+    { transform: `translate(${xOffset * swings[2]}px, ${yOffset * swings[2]}px)`, offset: 50 },
+    { transform: `translate(${xOffset * swings[3]}px, ${yOffset * swings[3]}px)`, offset: 100 },
+    { transform: `translate(${xOffset * swings[4]}px,    ${yOffset * swings[4]}px)`, offset: 100 }
+  ]
+  keyframes.forEach(keyframe => {
+    timing.duration = timing.duration + keyframe.offset
+  })
+  let lastOffset = 0
+  keyframes = keyframes.map(keyframe => {
+    keyframe.offset = lastOffset + (keyframe.offset / timing.duration)
+    keyframe.offset = utils.roundFloat(keyframe.offset)
+    lastOffset = keyframe.offset
+    return keyframe
+  })
+  // play animation
+  const element = cardElement.value
+  if (!element) { return }
+  const animation = element.animate(keyframes, timing)
+  animation.onfinish = () => {
+    clearStickyPositionOffsets()
+    state.isAnimationUnsticking = false
+  }
+}
+const clearStickyPositionOffsets = () => {
+  state.stickyTranslateX = 0
+  state.stickyTranslateY = 0
+}
+
+// lock card position
+
+const unlockCard = (event) => {
+  if (store.state.currentUserIsDrawingConnection) {
+    return
+  }
+  event.stopPropagation()
+  if (!canEditCard.value) {
+    const position = utils.cursorPositionInSpace(event)
+    store.commit('addNotificationWithPosition', { message: 'Card is Read Only', position, type: 'info', layer: 'space', icon: 'cancel' })
+    return
+  }
+  store.commit('currentUserIsDraggingCard', false)
+  store.dispatch('currentCards/update', {
+    id: props.card.id,
+    isLocked: false
+  })
+}
+const lockingFrameStyle = computed(() => {
+  const initialPadding = 65 // matches initialLockCircleRadius in magicPaint
+  const initialBorderRadius = 50
+  const padding = initialPadding * state.lockingPercent
+  const userColor = store.state.currentUser.color
+  const borderRadius = Math.max((state.lockingPercent * initialBorderRadius), 5) + 'px'
+  const size = `calc(100% + ${padding}px)`
+  const position = -(padding / 2) + 'px'
+  return {
+    width: size,
+    height: size,
+    left: position,
+    top: position,
+    background: userColor,
+    opacity: state.lockingAlpha,
+    borderRadius: borderRadius
+  }
+})
+
+// other items
+
+const updateOtherItems = () => {
+  let url = spaceOrInviteUrl.value
+  const shouldRemoveLink = (props.card.linkToCardId || props.card.linkToSpaceId) && !url
+  if (shouldRemoveLink) {
+    const update = {
+      id: props.card.id,
+      linkToSpaceId: null,
+      linkToCardId: null
+    }
+    store.dispatch('currentCards/update', update)
+    return
+  }
+  if (!url) { return }
+  const urlIsSpace = utils.urlIsSpace(url)
+  const urlIsInvite = utils.urlIsInvite(url)
+  url = new URL(url)
+  if (urlIsInvite) {
+    updateOtherInviteItems(url)
+  } else if (urlIsSpace) {
+    updateOtherSpaceOrCardItems(url)
+  }
+}
+const updateOtherSpaceOrCardItems = (url) => {
+  const { spaceId, cardId } = utils.spaceAndCardIdFromPath(url.pathname)
+  const linkExists = spaceId === props.card.linkToSpaceId
+  if (linkExists) { return }
+  const update = {
+    id: props.card.id,
+    linkToSpaceId: spaceId,
+    linkToCardId: cardId,
+    linkToSpaceCollaboratorKey: null
+  }
+  store.dispatch('currentCards/update', update)
+  store.dispatch('currentSpace/updateOtherItems', { spaceId, cardId })
+}
+const updateOtherInviteItems = (url) => {
+  const { spaceId, collaboratorKey } = qs.decode(url.search)
+  const linkExists = spaceId === props.card.linkToSpaceId && collaboratorKey === props.card.linkToSpaceCollaboratorKey
+  if (linkExists) { return }
+  const update = {
+    id: props.card.id,
+    linkToSpaceId: spaceId,
+    linkToCardId: null,
+    linkToSpaceCollaboratorKey: collaboratorKey
+  }
+  store.dispatch('currentCards/update', update)
+  store.dispatch('currentSpace/updateOtherItems', { spaceId, collaboratorKey })
+}
+
+// utils
+
+const removeCard = () => {
+  if (isLocked.value) { return }
+  if (canEditCard.value) {
+    store.dispatch('currentCards/remove', props.card)
+  }
+}
+const closeAllDialogs = () => {
+  store.dispatch('closeAllDialogs')
+}
+
+// migration added june 2023
+
+const checkIfShouldUpdatePreviewHtml = () => {
+  const name = props.card.name
+  if (!name) { return }
+  const url = utils.urlFromString(name)
+  if (!url) { return }
+  const urlIsYoutube = utils.urlIsYoutube(url)
+  const urlIsSpotify = url.includes('open.spotify.com')
+  const shouldUpdate = urlIsYoutube || urlIsSpotify
+  if (shouldUpdate && !props.card.urlPreviewEmbedHtml) {
+    retryUrlPreview()
+  }
+}
+
+</script>
+
 <template lang="pug">
 article.card-wrap#card(
-  v-if="isVisibleInViewport"
   :style="articleStyle"
-  :data-card-id="id"
+  :data-card-id="card.id"
   :data-is-hidden-by-comment-filter="isCardHiddenByCommentFilter"
-  :data-is-visible-in-viewport="isVisibleInViewport"
+  :data-is-visible-in-viewport="state.isVisibleInViewport"
   :data-is-locked="isLocked"
   :data-resize-width="resizeWidth"
-  :data-tilt-degrees="tiltDegrees"
+  :data-tilt-degrees="card.tiltDegrees"
   :data-x="x"
   :data-y="y"
-  :key="id"
-  ref="card"
+  :key="card.id"
+  ref="cardElement"
   :class="articleClasses"
   :title="cardNameIfComment"
 )
@@ -32,7 +1899,7 @@ article.card-wrap#card(
 
     :class="cardClasses"
     :style="cardStyle"
-    :data-card-id="id"
+    :data-card-id="card.id"
     :data-card-x="x"
     :data-card-y="y"
     :data-name-updated-at="updatedAt"
@@ -53,11 +1920,11 @@ article.card-wrap#card(
     .selected-user-avatar(v-if="isRemoteSelected || isRemoteCardDetailsVisible" :style="{backgroundColor: remoteSelectedColor || remoteCardDetailsVisibleColor}")
       img(src="@/assets/anon-avatar.svg")
 
-    .locking-frame(v-if="isLocking" :style="lockingFrameStyle")
+    .locking-frame(v-if="state.isLocking" :style="lockingFrameStyle")
     Frames(:card="card")
 
     template(v-if="!isComment")
-      ImageOrVideo(:isSelectedOrDragging="isSelectedOrDragging" :pendingUploadDataUrl="pendingUploadDataUrl" :image="formats.image" :video="formats.video" @updateCardDimensions="updateCardDimensions")
+      ImageOrVideo(:isSelectedOrDragging="isSelectedOrDragging" :pendingUploadDataUrl="pendingUploadDataUrl" :image="state.formats.image" :video="state.formats.video" @updateCardDimensions="updateCardDimensions")
 
     TiltResize(:card="card" :visible="tiltResizeIsVisible")
 
@@ -78,15 +1945,15 @@ article.card-wrap#card(
       //- Not Comment
       .card-content(v-if="!isComment" :style="cardContentStyles")
         //- Audio
-        .audio-wrap(v-if="Boolean(formats.audio)")
-          Audio(:visible="Boolean(formats.audio)" :url="formats.audio" @isPlaying="updateIsPlayingAudio" :selectedColor="selectedColor" :normalizedName="normalizedName")
+        .audio-wrap(v-if="Boolean(state.formats.audio)")
+          Audio(:visible="Boolean(state.formats.audio)" :url="state.formats.audio" @isPlaying="updateIsPlayingAudio" :selectedColor="selectedColor" :normalizedName="normalizedName")
         .name-wrap
           //- [·]
           .checkbox-wrap(v-if="hasCheckbox" @mouseup.left="toggleCardChecked" @touchend.prevent="toggleCardChecked")
             label(:class="{active: isChecked, disabled: !canEditSpace}")
               input(type="checkbox" v-model="checkboxState")
           //- Name
-          p.name.name-segments(v-if="normalizedName" :style="{background: itemBackground}" :class="{'is-checked': isChecked, 'has-checkbox': hasCheckbox, 'badge badge-status': isImageCard && hasTextSegments}")
+          p.name.name-segments(v-if="normalizedName" :style="{background: currentBackgroundColor}" :class="{'is-checked': isChecked, 'has-checkbox': hasCheckbox, 'badge badge-status': isImageCard && hasTextSegments}")
             template(v-for="segment in nameSegments")
               NameSegment(:segment="segment" @showTagDetailsIsVisible="showTagDetailsIsVisible" :parentCardId="card.id")
             Loader(:visible="isLoadingUrlPreview")
@@ -97,19 +1964,19 @@ article.card-wrap#card(
         template(v-if="isLocked")
           //- based on CardUnlockButton.vue
           //- .connector maintains connection paths when card is locked
-          .lock-button-wrap.inline-button-wrap(@mouseup.left="unlockCard" @touchend="unlockCard" :data-card-id="id")
-            button.inline-button(tabindex="-1" :style="{background: itemBackground}")
+          .lock-button-wrap.inline-button-wrap(@mouseup.left="unlockCard" @touchend="unlockCard" :data-card-id="card.id")
+            button.inline-button(tabindex="-1" :style="{background: currentBackgroundColor}")
               img.icon.lock-icon(src="@/assets/lock.svg")
         template(v-else)
           //- Url →
           a.url-wrap(v-if="cardButtonUrl && !isComment" :href="cardButtonUrl" @mouseup.exact.prevent="closeAllDialogs" @click.stop="openUrl($event, cardButtonUrl)" @touchend.prevent="openUrl($event, cardButtonUrl)" :class="{'connector-is-visible': connectorIsVisible}" target="_blank")
             .url.inline-button-wrap
-              button.inline-button(:style="{background: itemBackground}" :class="{'is-light-in-dark-theme': isLightInDarkTheme, 'is-dark-in-light-theme': isDarkInLightTheme}" tabindex="-1")
+              button.inline-button(:style="{background: currentBackgroundColor}" :class="{'is-light-in-dark-theme': isLightInDarkTheme, 'is-dark-in-light-theme': isDarkInLightTheme}" tabindex="-1")
                 img.icon.visit.arrow-icon(src="@/assets/visit.svg")
           //- Connector
           .connector.inline-button-wrap(
             v-if="connectorIsVisible"
-            :data-card-id="id"
+            :data-card-id="card.id"
             @mousedown.left="startConnecting"
             @touchstart="startConnecting"
           )
@@ -117,9 +1984,9 @@ article.card-wrap#card(
             .connected-colors
               template(v-if="isConnectingTo || isConnectingFrom")
                 .color(:style="{ background: currentConnectionColor}")
-              template(v-else-if="isRemoteConnecting")
-                .color(:style="{ background: remoteConnectionColor }")
-              template(v-else v-for="type in connectionTypes")
+              template(v-else-if="state.isRemoteConnecting")
+                .color(:style="{ background: state.remoteConnectionColor }")
+              template(v-else v-for="type in connectedConnectionTypes")
                 .color(:style="{ background: type.color}")
 
             button.inline-button.connector-button(
@@ -173,19 +2040,19 @@ article.card-wrap#card(
         Loader(:visible="true")
         span {{remoteCardPendingUpload.percentComplete}}%
     //- Upload Errors
-    .error-container(v-if="error.sizeLimit" @animationend="clearErrors")
+    .error-container(v-if="state.error.sizeLimit" @animationend="clearErrors")
       span.badge.danger
         img.icon.cancel(src="@/assets/add.svg")
         span Too Big
-    .error-container(v-if="error.unknownUploadError" @animationend="clearErrors")
+    .error-container(v-if="state.error.unknownUploadError" @animationend="clearErrors")
       span.badge.danger
         img.icon.cancel(src="@/assets/add.svg")
         span Error
-    .error-container(v-if="error.signUpToUpload" @animationend="clearErrors")
+    .error-container(v-if="state.error.signUpToUpload" @animationend="clearErrors")
       span.badge.info
         img.icon.cancel(src="@/assets/add.svg")
         span Sign Up or In
-    .error-container(v-if="error.spaceIsReadOnly" @animationend="clearErrors")
+    .error-container(v-if="state.error.spaceIsReadOnly" @animationend="clearErrors")
       span.badge.info
         img.icon.cancel(src="@/assets/add.svg")
         span Space is Read Only
@@ -209,1988 +2076,6 @@ article.card-wrap#card(
       .name {{dateUpdatedAt}}
 
 </template>
-
-<script>
-import utils from '@/utils.js'
-import Frames from '@/components/Frames.vue'
-import Loader from '@/components/Loader.vue'
-import Audio from '@/components/Audio.vue'
-import ImageOrVideo from '@/components/ImageOrVideo.vue'
-import NameSegment from '@/components/NameSegment.vue'
-import UrlPreviewCard from '@/components/UrlPreviewCard.vue'
-import UserLabelInline from '@/components/UserLabelInline.vue'
-import OtherCardPreview from '@/components/OtherCardPreview.vue'
-import OtherSpacePreviewCard from '@/components/OtherSpacePreviewCard.vue'
-import CardCounter from '@/components/CardCounter.vue'
-import consts from '@/consts.js'
-import postMessage from '@/postMessage.js'
-import TiltResize from '@/components/TiltResize.vue'
-
-import dayjs from 'dayjs'
-import { mapState, mapGetters } from 'vuex'
-import qs from '@aguezz/qs-parse'
-import debounce from 'lodash-es/debounce'
-
-let isMultiTouch
-let initialTouchEvent = {}
-let touchPosition = {}
-let currentTouchPosition = {}
-const defaultCardPosition = 100
-
-// locking
-// long press to touch drag card
-const lockingPreDuration = 100 // ms
-const lockingDuration = 100 // ms
-let lockingAnimationTimer, lockingStartTime, shouldCancelLocking
-
-// sticky
-const stickyTimerDuration = 250
-let preventSticking = false
-let stickyTimerComplete = false
-let stickyTimer
-
-export default {
-  components: {
-    Frames,
-    Loader,
-    Audio,
-    ImageOrVideo,
-    NameSegment,
-    UrlPreviewCard,
-    OtherSpacePreviewCard,
-    UserLabelInline,
-    OtherCardPreview,
-    CardCounter,
-    TiltResize
-  },
-  props: {
-    card: Object
-  },
-  created () {
-    this.$store.subscribe((mutation, state) => {
-      const { type, payload } = mutation
-      if (type === 'updateRemoteCurrentConnection' || type === 'removeRemoteCurrentConnection') {
-        this.updateRemoteConnections()
-      } else if (type === 'triggerScrollCardIntoView') {
-        if (payload === this.card.id) {
-          const element = this.$refs.card
-          utils.scrollIntoView({ element })
-        }
-      } else if (type === 'triggerUploadComplete') {
-        let { cardId, url } = payload
-        if (cardId !== this.card.id) { return }
-        this.addFile({ url })
-      } else if (type === 'triggerUpdateUrlPreview') {
-        if (payload === this.card.id) {
-          this.updateMediaUrls()
-          this.updateUrlPreview()
-        }
-      } else if (type === 'triggerUpdateTheme') {
-        this.defaultColor = utils.cssVariable('secondary-background')
-      } else if (type === 'triggerCancelLocking') {
-        this.cancelLocking()
-      }
-    })
-  },
-  async mounted () {
-    this.defaultColor = utils.cssVariable('secondary-background')
-    const shouldShowDetails = this.loadSpaceShowDetailsForCardId === this.card.id
-    if (shouldShowDetails) {
-      // this.$store.dispatch('closeAllDialogs')
-      this.$store.commit('preventCardDetailsOpeningAnimation', false)
-      this.$store.dispatch('currentCards/showCardDetails', this.card.id)
-    }
-    await this.updateUrlPreviewOnload()
-    this.updateCardDimensions()
-    this.checkIfShouldUpdatePreviewHtml()
-    const defaultCardMaxWidth = this.$store.getters['currentCards/defaultCardMaxWidth'] + 'px'
-    utils.setCssVariable('card-width', defaultCardMaxWidth)
-    this.updateIsVisibleInViewport()
-    window.addEventListener('scroll', this.updateIsVisibleInViewport)
-  },
-  data () {
-    return {
-      sessionStartDate: new Date(),
-      isRemoteConnecting: false,
-      remoteConnectionColor: '',
-      uploadIsDraggedOver: false,
-      isPlayingAudio: false,
-      preventDraggedButtonBadgeFromShowingDetails: false,
-      error: {
-        sizeLimit: false,
-        unknownUploadError: false,
-        signUpToUpload: false,
-        spaceIsReadOnly: false
-      },
-      formats: {
-        image: '',
-        video: '',
-        audio: '',
-        link: '',
-        file: ''
-      },
-      linkToPreview: '',
-      prevNameLineMinWidth: 0,
-      isLocking: true,
-      lockingPercent: 0,
-      lockingAlpha: 0,
-      stickyTranslateX: 0,
-      stickyTranslateY: 0,
-      isAnimationUnsticking: false,
-      stickyStretchResistance: 6,
-      defaultColor: '#e3e3e3',
-      pathIsUpdated: false,
-      isVisibleInViewport: true
-    }
-  },
-  computed: {
-    ...mapState([
-      'currentSelectedTag',
-      'currentSelectedOtherItem',
-      'loadSpaceShowDetailsForCardId',
-      'currentUserIsResizingCard',
-      'currentUserIsTiltingCard',
-      'currentUserIsBoxSelecting',
-      'searchResultsCards',
-      'currentConnectionColor',
-      'currentUser',
-      'isLoadingSpace',
-      'currentSpace',
-      'multipleCardsSelectedIds',
-      'currentUserIsDrawingConnection',
-      'currentDraggingCardId',
-      'currentUserIsDraggingCard',
-      'connectionDetailsIsVisibleForConnectionId',
-      'cardDetailsIsVisibleForCardId',
-      'currentConnectionStartCardIds',
-      'currentConnectionSuccess',
-      'remoteCardsSelected',
-      'remoteCardDetailsVisible',
-      'remoteCardsDragging',
-      'remoteUserResizingCards',
-      'remoteUploadDraggedOverCards',
-      'filteredTagNames',
-      'filteredConnectionTypeIds',
-      'filteredFrameIds',
-      'urlPreviewLoadingForCardIds',
-      'userDetailsIsVisible',
-      'userDetailsUser',
-      'disableViewportOptimizations',
-      'currentDraggingConnectedCardIds',
-      'preventDraggedCardFromShowingDetails',
-      'currentUserIsPanning',
-      'currentUserIsPainting',
-      'currentUserIsDraggingBox',
-      'currentUserIsResizingBox',
-      'currentUserIsHoveringOverCardId',
-      'upload',
-      'remotePendingUploads',
-      'viewportHeight',
-      'remoteCurrentConnections',
-      'cardsWereDragged',
-      'search',
-      'hasNotifiedPressAndHoldToDrag',
-      'isPresentationMode',
-      'remoteUserTiltingCards'
-    ]),
-    ...mapGetters([
-      'spaceCounterZoomDecimal',
-      'currentUser/isSignedIn',
-      'currentUser/canEditCard',
-      'currentSpace/tagByName',
-      'currentConnections/byCardId',
-      'currentSpace/userById',
-      'currentConnections/byId',
-      'currentConnections/typeByTypeId',
-      'currentConnections/all',
-      'currentConnections/typeForNewConnections',
-      'currentUser/isSpaceMember',
-      'currentCards/cardIdsConnectedToCardId',
-      'currentUser/canEditSpace',
-      'currentConnections/typesByCardId',
-      'currentUser/totalCardFadingFiltersActive',
-      'spaceCounterZoomDecimal',
-      'spaceZoomDecimal'
-    ]),
-    cardNameIfComment () {
-      if (!this.isComment) { return }
-      return this.card.name
-    },
-    isThemeDark () { return this.$store.state.currentUser.theme === 'dark' },
-    hasTextSegments () {
-      return this.nameSegments.find(segment => segment.isText && segment.content)
-    },
-    isImageCard () { return Boolean(this.formats.image || this.formats.video) },
-    isDarkInLightTheme () { return this.backgroundColorIsDark && !this.isThemeDark },
-    isLightInDarkTheme () { return !this.backgroundColorIsDark && this.isThemeDark },
-    urlPreviewImageIsVisible () {
-      return Boolean(this.cardUrlPreviewIsVisible && this.card.urlPreviewImage && !this.card.shouldHideUrlPreviewImage)
-    },
-
-    // other card
-
-    otherCardIsVisible () { return Boolean(this.card.linkToCardId) },
-    otherCardUrl () { return utils.urlFromSpaceAndCard({ cardId: this.card.linkToCardId, spaceId: this.card.linkToSpaceId }) },
-    otherCard () {
-      const card = this.$store.getters.otherCardById(this.card.linkToCardId)
-      return card
-    },
-
-    // other space
-
-    otherSpaceIsVisible () { return Boolean(this.card.linkToSpaceId) },
-    otherSpace () {
-      let isInviteLink, collaboratorKey, readOnlyKey
-      let space = this.nameSegments.find(segment => segment.otherSpace)
-      if (!space) { return }
-      return space.otherSpace
-    },
-    otherSpaceUrl () {
-      let segment = this.nameSegments.find(segment => segment.otherSpace)
-      return segment?.name
-    },
-
-    isConnectorDarkInLightTheme () {
-      if (this.connectionTypeColorisDark) { return this.connectionTypeColorisDark }
-      return this.isDarkInLightTheme
-    },
-    isConnectorLightInDarkTheme () {
-      if (this.connectionTypeColorisDark) { return !this.connectionTypeColorisDark }
-      return this.isLightInDarkTheme
-    },
-    itemBackground () {
-      let background = 'transparent'
-      if (this.isImageCard) {
-        background = this.card.backgroundColor
-      }
-      return this.selectedColor || this.remoteSelectedColor || background
-    },
-    connectorButtonBackground () {
-      if (this.currentUserIsDraggingCard) { return }
-      if (this.hasConnections || this.isConnectingFrom || this.isConnectingTo) { return }
-      return this.itemBackground
-    },
-    dataTags () {
-      let tags = utils.tagsFromStringWithoutBrackets(this.card.name)
-      if (!tags) { return }
-      tags = tags.map(tag => utils.normalizeString(tag))
-      tags = utils.arrayToString(tags)
-      return tags
-    },
-    width () {
-      if (this.isComment) { return }
-      if (this.currentCardDetailsIsVisible) { return }
-      const width = this.card.resizeWidth || this.card.width
-      if (!width) { return }
-      return width
-    },
-    resizeWidth () {
-      if (this.isComment) { return }
-      let resizeWidth = this.card.resizeWidth
-      if (this.embedIsVisible || this.isLoadingUrlPreview) {
-        resizeWidth = Math.max(resizeWidth, consts.minCardEmbedWidth)
-      }
-      if (!resizeWidth) { return }
-      return resizeWidth
-    },
-    tiltDegrees () { return this.card.tilt },
-    isLocked () {
-      if (!this.card) { return }
-      const isLocked = this.card.isLocked
-      return isLocked
-    },
-    shouldJiggle () {
-      const max = 500
-      const cardIsTooBig = this.width > max || this.card.height > max
-      if (cardIsTooBig) { return }
-      const isMultipleItemsSelected = this.$store.getters.isMultipleItemsSelected
-      const isShiftKeyDown = this.currentUserIsBoxSelecting
-      if (isMultipleItemsSelected || isShiftKeyDown) { return }
-      return this.isConnectingTo || this.isConnectingFrom || this.isRemoteConnecting || this.isBeingDragged || this.isRemoteCardDragging
-    },
-    isSelectedOrDragging () {
-      return Boolean(this.isSelected || this.isRemoteSelected || this.isRemoteCardDetailsVisible || this.isRemoteCardDragging || this.uploadIsDraggedOver || this.remoteUploadDraggedOverCardColor || this.remoteUserResizingCardsColor || this.remoteUserTiltingCardsColor)
-    },
-    isInSearchResultsCards () {
-      const results = this.searchResultsCards
-      if (!results.length) { return }
-      return Boolean(results.find(card => this.card.id === card.id))
-    },
-    tiltResizeIsVisible () {
-      if (this.isLocked) { return }
-      if (!this.canEditSpace) { return }
-      if (this.cardPendingUpload || this.remoteCardPendingUpload) { return }
-      return true
-    },
-    canEditSpace () { return this['currentUser/canEditSpace']() },
-    id () { return this.card.id },
-    x () {
-      const x = this.card.x
-      if (x === undefined || x === null) {
-        return defaultCardPosition
-      } else {
-        return x
-      }
-    },
-    y () {
-      const y = this.card.y
-      if (y === undefined || y === null) {
-        return defaultCardPosition
-      } else {
-        return y
-      }
-    },
-    connectionTypes () { return this['currentConnections/typesByCardId'](this.id) },
-    connectionTypeColorisDark () {
-      const type = this.connectionTypes[this.connectionTypes.length - 1]
-      if (!type) { return }
-      return utils.colorIsDark(type.color)
-    },
-    name () {
-      this.updateMediaUrls()
-      return this.card.name
-    },
-    frameId () { return this.card.frameId },
-    filterShowUsers () { return this.currentUser.filterShowUsers },
-    filterShowDateUpdated () { return this.currentUser.filterShowDateUpdated },
-    createdByUser () {
-      // same as userDetailsWrap.cardCreatedByUser
-      const userId = this.card.userId
-      let user = this['currentSpace/userById'](userId)
-      if (!user) {
-        user = {
-          name: '',
-          color: '#cdcdcd' // secondary-active-background
-        }
-      }
-      return user
-    },
-    isCardButtonsVisible () {
-      return this.isLocked || (this.cardButtonUrl && !this.isComment) || this.connectorIsVisible
-    },
-    connectorIsVisible () {
-      const spaceIsOpen = this.currentSpace.privacy === 'open' && this['currentUser/isSignedIn']
-      let isVisible
-      if (this.isRemoteConnecting) {
-        isVisible = true
-      } else if (spaceIsOpen || this.canEditCard || this.connectionTypes.length) {
-        isVisible = true
-      }
-      return isVisible
-    },
-    cardButtonUrl () {
-      const link = this.formats.link
-      const file = this.formats.file
-      if (utils.urlIsValidTld(link) || utils.urlIsSpace(link)) {
-        return link
-      } else if (utils.urlHasProtocol(file)) {
-        return file
-      } else {
-        return null
-      }
-    },
-    webUrl () {
-      const link = this.formats.link
-      if (utils.urlIsValidTld(link) && !utils.urlIsSpace(link)) {
-        return link
-      } else {
-        return null
-      }
-    },
-    spaceOrInviteUrl () {
-      const link = this.formats.link
-      if (utils.urlIsSpace(link) || utils.urlIsInvite(link)) {
-        return link
-      } else {
-        return null
-      }
-    },
-    currentCardDetailsIsVisible () {
-      return this.id === this.cardDetailsIsVisibleForCardId
-    },
-    embedIsVisible () {
-      // youtube, spotify etc.
-      const embedIsVisibleForCardId = this.$store.state.embedIsVisibleForCardId
-      return this.card.id === embedIsVisibleForCardId
-    },
-    shouldNotStick () {
-      if (!this.currentUser.shouldUseStickyCards) { return true }
-      if (this.embedIsVisible) { return true }
-      if (this.$store.state.codeLanguagePickerIsVisible) { return true }
-      if (this.$store.state.currentUserIsDraggingConnectionIdLabel) { return true }
-      const userIsConnecting = this.currentConnectionStartCardIds.length
-      const currentUserIsPanning = this.currentUserIsPanningReady || this.currentUserIsPanning
-      return userIsConnecting || this.currentUserIsDraggingBox || this.currentUserIsResizingBox || currentUserIsPanning || this.currentCardDetailsIsVisible || this.isRemoteCardDetailsVisible || this.isRemoteCardDragging || this.isBeingDragged || this.currentUserIsResizingCard || this.currentUserIsTiltingCard || this.isLocked
-    },
-    articleClasses () {
-      const classes = {
-        'is-resizing': this.currentUserIsResizingCard,
-        'is-tilting': this.currentUserIsTiltingCard,
-        'is-hidden-by-opacity': this.isCardHiddenByCommentFilter,
-        'jiggle': this.shouldJiggle
-      }
-      return classes
-    },
-    cardClasses () {
-      const m = 100
-      const l = 150
-      const classes = {
-        'active': this.isConnectingTo || this.isConnectingFrom || this.isRemoteConnecting || this.isBeingDragged || this.uploadIsDraggedOver,
-        'filtered': this.isFiltered,
-        'media-card': this.isVisualCard || this.pendingUploadDataUrl,
-        'audio-card': this.isAudioCard,
-        'is-playing-audio': this.isPlayingAudio,
-        'is-locked': this.isLocked,
-        'has-url-preview': this.cardUrlPreviewIsVisible,
-        'is-dark': this.backgroundColorIsDark,
-        's-width': this.width < m,
-        'm-width': utils.isBetween({ value: this.width, min: m, max: l }),
-        'l-width': this.width > l
-      }
-      return classes
-    },
-    backgroundColor () {
-      let nameColor
-      if (this.nameIsColor) {
-        nameColor = this.card.name
-      }
-      let color = this.selectedColor || this.remoteCardDetailsVisibleColor || this.remoteSelectedColor || this.selectedColorUpload || this.remoteCardDraggingColor || this.remoteUploadDraggedOverCardColor || this.remoteUserResizingCardsColor || this.remoteUserTiltingCardsColor || nameColor || this.card.backgroundColor
-      return color
-    },
-    articleStyle () {
-      let z = this.card.z
-      let pointerEvents = 'auto'
-      if (this.currentCardDetailsIsVisible) {
-        z = 2147483646 // max z
-      } else if (this.isLocked) {
-        z = 0
-        pointerEvents = 'none'
-      }
-      let styles = {
-        left: `${this.x}px`,
-        top: `${this.y}px`,
-        zIndex: z,
-        pointerEvents
-      }
-      if (!this.currentUserIsDraggingCard) {
-        styles.transform = `translate(${this.stickyTranslateX}, ${this.stickyTranslateY})`
-      }
-      styles = this.updateStylesWithWidth(styles)
-      return styles
-    },
-    cardStyle () {
-      let backgroundColor, nameColor
-      backgroundColor = this.card.backgroundColor
-      if (this.nameIsColor) {
-        nameColor = this.card.name
-      }
-      let color = this.selectedColor || this.remoteCardDetailsVisibleColor || this.remoteSelectedColor || this.selectedColorUpload || this.remoteCardDraggingColor || this.remoteUploadDraggedOverCardColor || this.remoteUserResizingCardsColor || this.remoteUserTiltingCardsColor || nameColor || backgroundColor
-      let styles = {
-        background: color
-      }
-      if (this.isComment && !this.isSelected) {
-        color = color || this.defaultColor
-        styles.background = color
-      }
-      if (this.card.tilt) {
-        styles.transform = `rotate(${this.card.tilt}deg)`
-      }
-      styles = this.updateStylesWithWidth(styles)
-      return styles
-    },
-    cardContentStyles () {
-      let styles = {}
-      if (this.isLocked) {
-        styles = { marginRight: '2px' }
-      }
-      if (this.isAudioCard) {
-        styles.width = '100%'
-      }
-      return styles
-    },
-    cardContentWrapStyles () {
-      let styles = {}
-      if (this.resizeWidth) {
-        styles.maxWidth = this.resizeWidth
-        styles.width = this.resizeWidth
-      }
-      styles.width = styles.width + 'px'
-      styles.maxWidth = styles.maxWidth + 'px'
-      return styles
-    },
-    backgroundColorIsDark () {
-      const color = this.backgroundColor || this.defaultColor
-      return utils.colorIsDark(color)
-    },
-    currentUserIsDraggingLabelConnectedToCard () {
-      const connectionId = this.$store.state.currentUserIsDraggingConnectionIdLabel
-      if (!connectionId) { return }
-      const connection = this['currentConnections/byId'](connectionId)
-      if (!connection) { return }
-      const isConnected = connection.startCardId === this.id || connection.endCardId === this.id
-      return isConnected
-    },
-    connectorGlowStyle () {
-      if (this.currentUserIsDraggingCard) { return }
-      const color = this.connectedToCardDetailsVisibleColor || this.connectedToCardBeingDraggedColor || this.connectedToConnectionDetailsIsVisibleColor || this.currentUserIsHoveringOverCardIdColor || this.currentUserIsMultipleSelectedCardIdColor || this.currentUserIsHoveringOverConnectionIdColor || this.currentUserIsMultipleSelectedConnectionIdColor
-      if (!color) { return }
-      return { background: color }
-    },
-    connectedToConnectionDetailsIsVisibleColor () {
-      const connectionId = this.connectionDetailsIsVisibleForConnectionId
-      const connection = this['currentConnections/byId'](connectionId)
-      if (!connection) { return }
-      const isConnected = connection.startCardId === this.id || connection.endCardId === this.id
-      if (!isConnected) { return }
-      const connectionType = this['currentConnections/typeByTypeId'](connection.connectionTypeId)
-      if (!connectionType) {
-        const newType = this.updateTypeForConnection(connectionId)
-        return newType.color
-      }
-      return connectionType.color
-    },
-    connectedToCardBeingDraggedColor () {
-      const isDraggingCard = this.currentUserIsDraggingCard
-      if (!isDraggingCard) { return }
-      if (this.isBeingDragged) { return }
-      let connections = this['currentConnections/all']
-      connections = connections.filter(connection => this.connectionIsBeingDragged(connection))
-      const connection = connections.find(connection => connection.startCardId === this.id || connection.endCardId === this.id)
-      if (!connection) { return }
-      const connectionType = this['currentConnections/typeByTypeId'](connection.connectionTypeId)
-      if (!connectionType) {
-        const newType = this.updateTypeForConnection(connection.id)
-        return newType.color
-      }
-      return connectionType.color
-    },
-    connectedToCardDetailsVisibleColor () {
-      if (this.currentCardDetailsIsVisible) { return }
-      const visibleCardId = this.cardDetailsIsVisibleForCardId
-      let connections = this['currentConnections/all']
-      connections = connections.filter(connection => connection.startCardId === visibleCardId || connection.endCardId === visibleCardId)
-      connections = connections.filter(connection => connection.startCardId === this.id || connection.endCardId === this.id)
-      const connection = connections[0]
-      if (!connection) { return }
-      const connectionType = this['currentConnections/typeByTypeId'](connection.connectionTypeId)
-      if (!connectionType) {
-        const newType = this.updateTypeForConnection(connection.id)
-        return newType.color
-      }
-      return connectionType.color
-    },
-    currentUserIsHoveringOverCardIdColor () {
-      const cardId = this.currentUserIsHoveringOverCardId
-      return this.connectionColorForCardIds([cardId])
-    },
-    currentUserIsMultipleSelectedCardIdColor () {
-      const cardIds = this.multipleCardsSelectedIds
-      return this.connectionColorForCardIds(cardIds)
-    },
-    currentUserIsHoveringOverConnectionIdColor () {
-      const connectionId = this.$store.state.currentUserIsHoveringOverConnectionId || this.$store.state.currentUserIsDraggingConnectionIdLabel
-      return this.connectionColorForConnectionIds([connectionId])
-    },
-    currentUserIsMultipleSelectedConnectionIdColor () {
-      const connectionIds = this.$store.state.multipleConnectionsSelectedIds
-      return this.connectionColorForConnectionIds(connectionIds)
-    },
-    updatedAt () { return this.card.nameUpdatedAt || this.card.createdAt },
-    dateUpdatedAt () {
-      const date = this.updatedAt
-      const showAbsoluteDate = this.currentUser.filterShowAbsoluteDates
-      if (date) {
-        if (showAbsoluteDate) {
-          return new Date(date).toLocaleString()
-        } else {
-          return utils.shortRelativeTime(date)
-        }
-      } else {
-        return 'Just now'
-      }
-    },
-    cardPendingUpload () {
-      const pendingUploads = this.upload.pendingUploads
-      return pendingUploads.find(upload => upload.cardId === this.card.id)
-    },
-    remoteCardPendingUpload () {
-      return this.remotePendingUploads.find(upload => {
-        const inProgress = upload.percentComplete < 100
-        const isCard = upload.cardId === this.card.id
-        return inProgress && isCard
-      })
-    },
-    pendingUploadDataUrl () {
-      if (!this.cardPendingUpload || this.isComment) { return }
-      return this.cardPendingUpload.imageDataUrl
-    },
-    urls () {
-      const name = utils.removeMarkdownCodeblocksFromString(this.name)
-      let urls = utils.urlsFromString(name)
-      if (urls) {
-        urls.reverse()
-      }
-      this.updateMediaUrls(urls)
-      return urls || []
-    },
-    isComment () { return this.card.isComment || utils.isNameComment(this.name) },
-    isVisualCard () {
-      if (this.isComment) { return }
-      return this.formats.image || this.formats.video
-    },
-    isAudioCard () {
-      if (this.isComment) { return }
-      return this.formats.audio
-    },
-    cardHasMedia () { return this.formats.image || this.formats.video || this.formats.audio },
-    cardHasUrls () {
-      if (!this.urls.length) {
-        return false
-      } else {
-        return true
-      }
-    },
-    isChecked () { return utils.nameIsChecked(this.name) },
-    hasCheckbox () {
-      if (this.isLocked) { return }
-      return utils.checkboxFromString(this.name)
-    },
-    checkboxState: {
-      get () {
-        return this.isChecked
-      }
-    },
-    nameIsColor () {
-      return utils.colorNameIsValid(this.card.name)
-    },
-    canEditCard () { return this['currentUser/canEditCard'](this.card) },
-    normalizedName () {
-      // name without urls and checkbox text
-      let name = this.name
-      if (!name) { return }
-      if (this.cardHasMedia) {
-        name = name.replace(this.formats.image, '')
-        name = name.replace(this.formats.video, '')
-        name = name.replace(this.formats.audio, '')
-      }
-      // link hiding
-      let link = this.formats.link
-      let isHidden
-      let markdownLinks = name.match(utils.markdown().linkPattern)
-      if (markdownLinks) {
-        const linkIsMarkdown = markdownLinks.find(markdownLink => markdownLink.includes(link))
-        isHidden = !linkIsMarkdown
-      } else if (link.includes('hidden=true')) {
-        isHidden = true
-      }
-      if (isHidden) {
-        name = name.replace(link, '')
-        name = name.replace(utils.urlWithoutProtocol(link), '')
-      }
-      // checkboxes
-      const checkbox = utils.checkboxFromString(name)
-      if (checkbox) {
-        name = name.replace(checkbox, '')
-      }
-      name = this.removeCommentBrackets(name)
-      return name.trim()
-    },
-    nameSegments () {
-      let segments = utils.cardNameSegments(this.normalizedName)
-      segments = segments.map(segment => {
-        segment.isDark = this.backgroundColorIsDark
-        // tags
-        if (segment.isTag) {
-          let tag = this['currentSpace/tagByName'](segment.name)
-          if (!tag) {
-            tag = utils.newTag({
-              name: segment.name,
-              defaultColor: this.currentUser.color,
-              cardId: this.id,
-              spaceId: this.currentSpace.id
-            })
-            console.warn('🦋 create missing tag', segment.name, tag, this.card)
-            this.$store.dispatch('currentSpace/addTag', tag)
-          }
-          segment.color = tag.color
-          segment.id = tag.id
-        // invite
-        } else if (segment.isInviteLink) {
-          const { spaceId, collaboratorKey } = segment
-          segment.otherSpace = this.$store.getters.otherSpaceById(spaceId)
-        // space or card
-        } else if (segment.isLink) {
-          const { spaceId, cardId } = utils.spaceAndCardIdFromUrl(segment.name)
-          segment.otherSpace = this.$store.getters.otherSpaceById(spaceId)
-          segment.otherCard = this.$store.getters.otherCardById(cardId)
-        // text
-        } else if (segment.isText) {
-          segment.markdown = utils.markdownSegments(segment.content)
-        }
-        return segment
-      })
-      return segments
-    },
-    cardUrlPreviewIsVisible () {
-      if (!this.card) { return }
-      if (!this.card.name) { return }
-      let cardHasUrlPreviewInfo = Boolean(this.card.urlPreviewTitle || this.card.urlPreviewDescription || this.card.urlPreviewImage)
-      // TEMP experiment: remove card.urlPreviewErrorUrl checking to eliminate false positives. Observe if there's a downside irl and if this attribute should be removed entirely?
-      // const isErrorUrl = this.card.urlPreviewErrorUrl && (this.card.urlPreviewUrl === this.card.urlPreviewErrorUrl)
-      let url = this.card.urlPreviewUrl
-      url = utils.removeTrailingSlash(url)
-      cardHasUrlPreviewInfo = Boolean(cardHasUrlPreviewInfo && url)
-      const nameHasUrl = this.card.name?.includes(url)
-      return (this.card.urlPreviewIsVisible && cardHasUrlPreviewInfo && nameHasUrl) && !this.isComment
-      // return Boolean(this.card.urlPreviewIsVisible && this.card.urlPreviewUrl && cardHasUrlPreviewInfo) // && !isErrorUrl
-    },
-    tags () {
-      return this.nameSegments.filter(segment => {
-        if (segment.isTag) {
-          return true
-        }
-      })
-    },
-    isConnectingTo () {
-      const connectingToId = this.currentConnectionSuccess.id
-      if (connectingToId) {
-        postMessage.sendHaptics({ name: 'softImpact' })
-      }
-      return connectingToId === this.id
-    },
-    isConnectingFrom () {
-      return this.currentConnectionStartCardIds.find(cardId => cardId === this.id)
-    },
-    isBeingDragged () {
-      let isCardId
-      const currentDraggingCard = this.currentDraggingCardId
-      const isDraggingCard = this.currentUserIsDraggingCard
-      if (this.isSelected || currentDraggingCard === this.id) {
-        isCardId = true
-      }
-      return Boolean(isDraggingCard && isCardId)
-    },
-    isSelected () {
-      const multipleCardsSelectedIds = this.multipleCardsSelectedIds
-      return multipleCardsSelectedIds.includes(this.id)
-    },
-    selectedColor () {
-      const color = this.currentUser.color
-      if (this.isSelected) {
-        return color
-      } else {
-        return undefined
-      }
-    },
-    selectedColorUpload () {
-      const color = this.currentUser.color
-      if (this.uploadIsDraggedOver) {
-        return color
-      } else {
-        return undefined
-      }
-    },
-    hasConnections () {
-      const connections = this['currentConnections/byCardId'](this.id)
-      return Boolean(connections.length)
-    },
-
-    // Remote
-
-    isRemoteSelected () {
-      const selectedCard = this.remoteCardsSelected.find(card => card.cardId === this.id)
-      return Boolean(selectedCard)
-    },
-    isRemoteCardDetailsVisible () {
-      const visibleCard = this.remoteCardDetailsVisible.find(card => card.cardId === this.id)
-      return Boolean(visibleCard)
-    },
-    isRemoteCardDragging () {
-      const isDragging = this.remoteCardsDragging.find(card => card.cardId === this.id)
-      return Boolean(isDragging)
-    },
-    remoteCardDetailsVisibleColor () {
-      const visibleCard = this.remoteCardDetailsVisible.find(card => card.cardId === this.id)
-      if (visibleCard) {
-        const user = this['currentSpace/userById'](visibleCard.userId)
-        return user.color
-      } else {
-        return undefined
-      }
-    },
-    remoteSelectedColor () {
-      const selectedCard = this.remoteCardsSelected.find(card => card.cardId === this.id)
-      if (selectedCard) {
-        const user = this['currentSpace/userById'](selectedCard.userId)
-        return user.color
-      } else {
-        return undefined
-      }
-    },
-    remoteCardDraggingColor () {
-      const draggingCard = this.remoteCardsDragging.find(card => card.cardId === this.id)
-      if (draggingCard) {
-        const user = this['currentSpace/userById'](draggingCard.userId)
-        return user.color
-      } else {
-        return undefined
-      }
-    },
-    remoteUserResizingCardsColor () {
-      if (!this.remoteUserResizingCards.length) { return }
-      let user = this.remoteUserResizingCards.find(user => user.cardIds.includes(this.id))
-      if (user) {
-        user = this['currentSpace/userById'](user.userId)
-        return user.color
-      } else {
-        return undefined
-      }
-    },
-    remoteUserTiltingCardsColor () {
-      if (!this.remoteUserTiltingCards.length) { return }
-      let user = this.remoteUserTiltingCards.find(user => user.cardIds.includes(this.id))
-      if (user) {
-        user = this['currentSpace/userById'](user.userId)
-        return user.color
-      } else {
-        return undefined
-      }
-    },
-
-    remoteUploadDraggedOverCardColor () {
-      const draggedOverCard = this.remoteUploadDraggedOverCards.find(card => card.cardId === this.id)
-      if (draggedOverCard) {
-        const user = this['currentSpace/userById'](draggedOverCard.userId)
-        return user.color
-      } else {
-        return undefined
-      }
-    },
-
-    // Filters
-
-    filtersIsActive () {
-      return Boolean(this['currentUser/totalCardFadingFiltersActive'])
-    },
-    isCardFilteredByTags () {
-      const tagNames = this.filteredTagNames
-      if (!tagNames.length) { return }
-      const hasTag = this.tags.find(tag => {
-        if (tagNames.includes(tag.name)) {
-          return true
-        }
-      })
-      return hasTag
-    },
-    isConnectionFilteredByType () {
-      const typeIds = this.filteredConnectionTypeIds
-      if (!typeIds) { return }
-      const filteredTypes = this.connectionTypes.filter(type => {
-        return typeIds.includes(type.id)
-      })
-      return Boolean(filteredTypes.length)
-    },
-    isCardFilteredByFrame () {
-      const frameIds = this.filteredFrameIds
-      if (!frameIds.length) { return }
-      const hasFrame = frameIds.includes(this.frameId)
-      return hasFrame
-    },
-    isCardFilteredByUnchecked () {
-      const filterUncheckedIsActive = this.currentUser.filterUnchecked
-      if (!filterUncheckedIsActive) { return }
-      return !this.isChecked && this.hasCheckbox
-    },
-    isCardHiddenByCommentFilter () {
-      const filterCommentsIsActive = this.currentUser.filterComments
-      if (!filterCommentsIsActive) { return }
-      return this.isComment
-    },
-    isFiltered () {
-      if (!this.filtersIsActive) { return }
-      const isInFilter = this.isCardFilteredByTags || this.isConnectionFilteredByType || this.isCardFilteredByFrame || this.isCardFilteredByUnchecked
-      return !isInFilter
-    },
-    isLoadingUrlPreview () {
-      let isLoading = this.urlPreviewLoadingForCardIds.find(cardId => cardId === this.card.id)
-      return Boolean(isLoading)
-      // if (!isLoading) { return }
-      // const isErrorUrl = this.card.urlPreviewErrorUrl && (this.card.urlPreviewUrl === this.card.urlPreviewErrorUrl)
-      // return isLoading && !isErrorUrl
-    },
-    lockingFrameStyle () {
-      const initialPadding = 65 // matches initialLockCircleRadius in magicPaint
-      const initialBorderRadius = 50
-      const padding = initialPadding * this.lockingPercent
-      const userColor = this.currentUser.color
-      const borderRadius = Math.max((this.lockingPercent * initialBorderRadius), 5) + 'px'
-      const size = `calc(100% + ${padding}px)`
-      const position = -(padding / 2) + 'px'
-      return {
-        width: size,
-        height: size,
-        left: position,
-        top: position,
-        background: userColor,
-        opacity: this.lockingAlpha,
-        borderRadius: borderRadius
-      }
-    },
-    preventUpdatePrevPreview () {
-      if (this.card.shouldUpdateUrlPreview) { return }
-      const updateDelta = dayjs(this.updatedAt).diff(this.sessionStartDate, 'second')
-      return updateDelta < 0
-    },
-    userDetailsIsUser () {
-      if (!this.userDetailsIsVisible) { return }
-      const user = this.createdByUser
-      return user.id === this.userDetailsUser.id
-    }
-  },
-  methods: {
-    updateIsVisibleInViewport: debounce(async function () {
-      let isVisible
-      if (this.disableViewportOptimizations) { isVisible = true }
-      if (this.shouldJiggle) { isVisible = true }
-      if (this.currentDraggingConnectedCardIds.includes(this.card.id)) { isVisible = true }
-      if (this.isBeingDragged) { isVisible = true }
-      if (this.isPlayingAudio) { isVisible = true }
-      if (this.embedIsVisible) { isVisible = true }
-      const isTextOnlyCard = this.normalizedName === this.card.name
-      const threshold = 400 * this.spaceCounterZoomDecimal
-      const fallbackHeight = this.$store.getters['currentCards/defaultCardMaxWidth']
-      const offset = utils.outsideSpaceOffset().y
-      const windowScroll = { x: window.scrollX, y: window.scrollY }
-      const scroll = (windowScroll.y - offset) * this.spaceCounterZoomDecimal
-      const viewport = this.viewportHeight * this.spaceCounterZoomDecimal
-      const min = scroll - threshold
-      const max = scroll + viewport + threshold
-      // top
-      let y = this.y
-      const isTopVisible = utils.isBetween({ value: y, min, max })
-      let height = this.card.height || fallbackHeight
-      height = height * this.spaceZoomDecimal
-      // bottom
-      const isBottomVisible = utils.isBetween({ value: y + height, min, max })
-      const scrollIsAboveBottom = scroll < y + height
-      const scrollIsBelowTop = scroll > y
-      // middle
-      const middleIsVisible = scrollIsAboveBottom && scrollIsBelowTop
-      isVisible = isVisible || (isTopVisible || isBottomVisible || middleIsVisible)
-      this.isVisibleInViewport = isVisible
-      if (isVisible) {
-        this.$nextTick(() => {
-          this.updateCardDimensions()
-          this.correctPaths()
-        })
-      }
-    }, 50, { leading: true }),
-
-    updateCardDimensions () {
-      let card = { id: this.card.id }
-      card = utils.updateCardDimensions(card)
-      if (!card) { return }
-      this.$store.commit('currentCards/update', card)
-      this.$store.dispatch('currentCards/updateTallestCardHeight', card)
-      this.$store.dispatch('api/addToQueue', { name: 'updateCard', body: card })
-    },
-    correctPaths () {
-      if (this.pathIsUpdated) { return }
-      this.$nextTick(() => {
-        this.$store.dispatch('currentConnections/updatePaths', { cardId: this.card.id, shouldUpdateApi: false })
-        this.pathIsUpdated = true
-      })
-    },
-
-    // migration added june 2023
-
-    checkIfShouldUpdatePreviewHtml () {
-      const name = this.card.name
-      if (!name) { return }
-      const url = utils.urlFromString(name)
-      if (!url) { return }
-      const urlIsYoutube = utils.urlIsYoutube(url)
-      const urlIsSpotify = url.includes('open.spotify.com')
-      const shouldUpdate = urlIsYoutube || urlIsSpotify
-      if (shouldUpdate && !this.card.urlPreviewEmbedHtml) {
-        this.retryUrlPreview()
-      }
-    },
-
-    // mouse handlers
-
-    handleMouseEnter () {
-      this.initStickToCursor()
-      this.$store.commit('currentUserIsHoveringOverCardId', this.card.id)
-    },
-    handleMouseLeave () {
-      this.unstickToCursor()
-      this.$store.commit('currentUserIsHoveringOverCardId', '')
-    },
-
-    // connector glow
-
-    createNewTypeIfNeeded () {
-      const typeIds = this.$store.state.currentConnections.typeIds
-      if (!typeIds.length) {
-        this.$store.dispatch('currentConnections/addType')
-      }
-    },
-    connectionColorForCardIds (cardIds) {
-      if (!cardIds.length) { return }
-      let color
-      this.createNewTypeIfNeeded()
-      cardIds.find(cardId => {
-        let connections = this['currentConnections/all']
-        connections = connections.filter(connection => connection.startCardId === cardId || connection.endCardId === cardId)
-        connections = connections.filter(connection => connection.startCardId === this.id || connection.endCardId === this.id)
-        connections = this.$store.getters['currentConnections/connectionsWithValidCards'](connections)
-        const connection = connections[0]
-        if (!connection) { return }
-        const connectionType = this['currentConnections/typeByTypeId'](connection.connectionTypeId)
-        if (!connectionType) {
-          const newType = this.updateTypeForConnection(connection.id)
-          return newType.color
-        }
-        color = connectionType.color
-      })
-      return color
-    },
-    connectionColorForConnectionIds (connectionIds) {
-      if (!connectionIds.length) { return }
-      let color
-      connectionIds.find(connectionId => {
-        const connection = this['currentConnections/byId'](connectionId)
-        if (!connection) { return }
-        const isCardConnected = this.$store.getters['currentConnections/isCardConnected'](this.card, connection)
-        if (!isCardConnected) { return }
-        const connectionType = this['currentConnections/typeByTypeId'](connection.connectionTypeId)
-        color = connectionType.color
-      })
-      return color
-    },
-
-    // sticky
-
-    initStickToCursor () {
-      preventSticking = false
-      if (this.shouldNotStick || consts.userPrefersReducedMotion()) {
-        preventSticking = true
-      }
-      stickyTimer = setTimeout(() => {
-        stickyTimerComplete = true
-      }, stickyTimerDuration)
-      this.updateStickyStretchResistance()
-    },
-    clearStickyTimer () {
-      clearTimeout(stickyTimer)
-      stickyTimerComplete = false
-    },
-    isSize (width, height, min) {
-      const isWidth = width > min
-      const isHeight = height > min
-      return isWidth || isHeight
-    },
-    updateStickyStretchResistance () {
-      const zoom = this.spaceZoomDecimal
-      let { height, width } = this.card
-      height = height * zoom
-      width = width * zoom
-      let stretchResistance = 6 // higher resistance moves less
-      // larger sizes have higher resistance
-      const size = {
-        s: this.isSize(width, height, 250),
-        m: this.isSize(width, height, 500),
-        l: this.isSize(width, height, 1000),
-        xl: width > 1200 || height > 1000
-      }
-      if (size.xl) {
-        stretchResistance = 20
-      } else if (size.l) {
-        stretchResistance = 16
-      } else if (size.m) {
-        stretchResistance = 12
-      } else if (size.s) {
-        stretchResistance = 10
-      }
-      this.stickyStretchResistance = stretchResistance
-    },
-    stickToCursor (event) {
-      if (this.isAnimationUnsticking) { return }
-      if (preventSticking) { return }
-      if (!stickyTimerComplete) { return }
-      const classes = ['checkbox-wrap', 'button-wrap', 'progress-wrap', 'inline-button', 'badge']
-      const elements = ['button', 'progress', 'iframe']
-      const isOverAction = classes.includes(event.target.className) || elements.includes(event.target.nodeName.toLowerCase())
-      const isOverTag = event.target.className.includes('button-badge')
-      if (this.shouldNotStick || isOverAction || isOverTag) {
-        this.clearStickyPositionOffsets()
-        preventSticking = true
-        return
-      }
-      const isButtonHover = event.target.closest('.inline-button-wrap') || event.target.closest('.button-wrap')
-      if (isButtonHover) {
-        this.clearStickyPositionOffsets()
-        return
-      }
-      const stretchResistance = this.stickyStretchResistance
-      const { height, width } = this.card
-      const halfWidth = width / 2
-      const halfHeight = height / 2
-      let centerX = this.x + halfWidth
-      let centerY = this.y + halfHeight
-      let position = utils.cursorPositionInSpace(event)
-      // position from card center
-      const xFromCenter = position.x - centerX
-      const yFromCenter = position.y - centerY
-      // percentage from center to card edge
-      const xPercent = (xFromCenter / halfWidth)
-      const yPercent = (yFromCenter / halfHeight)
-      // calc sticky offset
-      let xOffset = (xPercent * halfWidth) / stretchResistance
-      xOffset = Math.round(xOffset)
-      let yOffset = (yPercent * halfHeight) / stretchResistance
-      yOffset = Math.round(yOffset)
-      this.stickyTranslateX = xOffset + 'px'
-      this.stickyTranslateY = yOffset + 'px'
-    },
-    unstickToCursor () {
-      this.clearStickyTimer()
-      this.isAnimationUnsticking = true
-      const xOffset = parseInt(this.stickyTranslateX)
-      const yOffset = parseInt(this.stickyTranslateY)
-      let timing = {
-        duration: 0, // sum of keyframe offsets
-        easing: 'cubic-bezier(0.45, 0, 0.55, 1)',
-        iterations: 1
-      }
-      const swings = [-0.9, 0.6, -0.4, 0.2, 0] // [-1, 0.75, -0.5, 0.25, 0]
-      let keyframes = [
-        { transform: `translate(${xOffset * swings[0]}px,   ${yOffset * swings[0]}px)`, offset: 50 },
-        { transform: `translate(${xOffset * swings[1]}px, ${yOffset * swings[1]}px)`, offset: 75 },
-        { transform: `translate(${xOffset * swings[2]}px, ${yOffset * swings[2]}px)`, offset: 50 },
-        { transform: `translate(${xOffset * swings[3]}px, ${yOffset * swings[3]}px)`, offset: 100 },
-        { transform: `translate(${xOffset * swings[4]}px,    ${yOffset * swings[4]}px)`, offset: 100 }
-      ]
-      keyframes.forEach(keyframe => {
-        timing.duration = timing.duration + keyframe.offset
-      })
-      let lastOffset = 0
-      keyframes = keyframes.map(keyframe => {
-        keyframe.offset = lastOffset + (keyframe.offset / timing.duration)
-        keyframe.offset = utils.roundFloat(keyframe.offset)
-        lastOffset = keyframe.offset
-        return keyframe
-      })
-      // play animation
-      const element = this.$refs.card
-      if (!element) { return }
-      const animation = element.animate(keyframes, timing)
-      animation.onfinish = () => {
-        this.clearStickyPositionOffsets()
-        this.isAnimationUnsticking = false
-      }
-    },
-    clearStickyPositionOffsets () {
-      this.stickyTranslateX = 0
-      this.stickyTranslateY = 0
-    },
-
-    updateTypeForConnection (connectionId) {
-      const newType = this['currentConnections/typeForNewConnections']
-      console.warn('🚑 connection was missing type', { cardId: this.id, connectionId, newType })
-      const connection = {
-        id: connectionId,
-        connectionTypeId: newType.id
-      }
-      this.$store.dispatch('currentConnections/update', connection)
-      return newType
-    },
-    addFile (file) {
-      let name = this.card.name
-      const url = file.url
-      const urlType = utils.urlType(url)
-      const checkbox = utils.checkboxFromString(name)
-      const previousUrls = utils.urlsFromString(name, true) || []
-      let isReplaced
-      previousUrls.forEach(previousUrl => {
-        if (utils.urlType(previousUrl) === urlType) {
-          name = name.replace(previousUrl.trim(), url)
-          isReplaced = true
-        }
-      })
-      if (!isReplaced) {
-        // prepend url to name
-        name = utils.trim(name)
-        name = `${url}\n\n${name}`
-      }
-      // ensure checkbox is first
-      if (checkbox) {
-        name = name.replace(checkbox, '')
-        name = `${checkbox} ${name}`
-      }
-      // update name
-      this.$store.dispatch('currentCards/update', {
-        id: this.card.id,
-        name: utils.trim(name)
-      })
-      this.$store.commit('triggerUpdatePositionInVisualViewport')
-    },
-    unlockCard (event) {
-      if (this.currentUserIsDrawingConnection) {
-        return
-      }
-      event.stopPropagation()
-      if (!this.canEditCard) {
-        const position = utils.cursorPositionInSpace(event)
-        this.$store.commit('addNotificationWithPosition', { message: 'Card is Read Only', position, type: 'info', layer: 'space', icon: 'cancel' })
-        return
-      }
-      this.$store.commit('currentUserIsDraggingCard', false)
-      this.$store.dispatch('currentCards/update', {
-        id: this.card.id,
-        isLocked: false
-      })
-    },
-    connectionIsBeingDragged (connection) {
-      const multipleCardsSelectedIds = this.multipleCardsSelectedIds
-      const currentDraggingCardId = this.currentDraggingCardId
-      const cardIdsBeingDragged = multipleCardsSelectedIds.concat(currentDraggingCardId)
-      return cardIdsBeingDragged.find(cardId => connection.startCardId === cardId || connection.endCardId === cardId)
-    },
-    checkIfShouldUpdateCardConnectionPaths (width) {
-      this.$nextTick(() => {
-        this.$nextTick(() => {
-          if (this.prevNameLineMinWidth !== width) {
-            this.$store.dispatch('currentConnections/updatePaths', { cardId: this.card.id, shouldUpdateApi: true })
-          }
-          this.prevNameLineMinWidth = width
-        })
-      })
-    },
-    selectAllConnectedCards (event) {
-      const isMeta = event.metaKey || event.ctrlKey
-      if (!isMeta) { return }
-      if (!this.canEditSpace) { return }
-      this.$store.dispatch('closeAllDialogs')
-      const connections = this['currentConnections/all']
-      let selectedCards = [this.card.id]
-      let shouldSearch = true
-      while (shouldSearch) {
-        let cancelSearch = true
-        connections.forEach(connection => {
-          const startCard = connection.startCardId
-          const endCard = connection.endCardId
-          const startCardIsConnected = selectedCards.includes(startCard)
-          const endCardIsConnected = selectedCards.includes(endCard)
-          if (!startCardIsConnected && endCardIsConnected) {
-            selectedCards.push(startCard)
-            cancelSearch = false
-          }
-          if (startCardIsConnected && !endCardIsConnected) {
-            selectedCards.push(endCard)
-            cancelSearch = false
-          }
-        })
-        if (cancelSearch) {
-          shouldSearch = false
-        }
-      }
-      this.$store.commit('multipleSelectedActionsIsVisible', false)
-      this.$store.commit('multipleCardsSelectedIds', selectedCards)
-    },
-    updateMediaUrls (urls) {
-      urls = urls || utils.urlsFromString(this.card.name)
-      this.formats.image = ''
-      this.formats.video = ''
-      this.formats.audio = ''
-      this.formats.link = ''
-      if (!urls) { return }
-      if (!urls.length) { return }
-      urls.forEach(url => {
-        if (utils.urlIsImage(url)) {
-          this.formats.image = url
-        } else if (utils.urlIsVideo(url)) {
-          this.formats.video = url
-        } else if (utils.urlIsAudio(url)) {
-          this.formats.audio = url
-        } else if (utils.urlIsFile(url)) {
-          this.formats.file = url
-        } else {
-          this.formats.link = url
-          this.linkToPreview = url
-        }
-      })
-    },
-    updateIsPlayingAudio (value) {
-      this.isPlayingAudio = value
-      this.cancelLocking()
-    },
-    clearErrors () {
-      this.error.signUpToUpload = false
-      this.error.sizeLimit = false
-      this.error.unknownUploadError = false
-      this.error.spaceIsReadOnly = false
-    },
-    checkIfUploadIsDraggedOver (event) {
-      if (event.dataTransfer.types[0] === 'Files' || event.dataTransfer.items[0].kind === 'file') {
-        this.uploadIsDraggedOver = true
-        const updates = {
-          cardId: this.card.id,
-          userId: this.currentUser.id
-        }
-        this.$store.commit('broadcast/updateStore', { updates, type: 'addToRemoteUploadDraggedOverCards' })
-      }
-    },
-    removeUploadIsDraggedOver () {
-      this.uploadIsDraggedOver = false
-      const userId = this.currentUser.id
-      this.$store.commit('broadcast/updateStore', { updates: { userId }, type: 'clearRemoteUploadDraggedOverCards' })
-    },
-    async uploadFile (event) {
-      this.removeUploadIsDraggedOver()
-      this.$store.dispatch('currentCards/incrementZ', this.id)
-      // pre-upload errors
-      if (!this['currentUser/isSignedIn']) {
-        this.error.signUpToUpload = true
-        this.$store.commit('addNotification', { message: 'To upload files, you need to Sign Up or In', type: 'info' })
-        return
-      }
-      if (!this.canEditSpace) {
-        this.error.spaceIsReadOnly = true
-        this.$store.commit('addNotification', { message: 'You can only upload files on spaces you can edit', type: 'info' })
-        return
-      }
-      const file = event.dataTransfer.files[0]
-      const cardId = this.card.id
-      // upload
-      try {
-        await this.$store.dispatch('upload/uploadFile', { file, cardId })
-      } catch (error) {
-        console.warn('🚒', error)
-        if (error.type === 'sizeLimit') {
-          this.error.sizeLimit = true
-        } else {
-          this.error.unknownUploadError = true
-        }
-        this.$store.commit('addNotification', { message: error.message, type: 'danger' })
-      }
-    },
-    toggleCardChecked () {
-      if (this.$store.state.currentUserIsDraggingConnectionIdLabel) { return }
-      if (this.preventDraggedCardFromShowingDetails) { return }
-      if (!this.canEditSpace) { return }
-      const value = !this.isChecked
-      this.$store.dispatch('closeAllDialogs')
-      this.$store.dispatch('currentCards/toggleChecked', { cardId: this.id, value })
-      postMessage.sendHaptics({ name: 'heavyImpact' })
-      this.cancelLocking()
-      this.$store.commit('currentUserIsDraggingCard', false)
-      const userId = this.currentUser.id
-      this.$store.commit('broadcast/updateStore', { updates: { userId }, type: 'clearRemoteCardsDragging' })
-      event.stopPropagation()
-    },
-    toggleFilterShowAbsoluteDates () {
-      this.$store.dispatch('currentCards/incrementZ', this.id)
-      this.$store.dispatch('closeAllDialogs')
-      const value = !this.currentUser.filterShowAbsoluteDates
-      this.$store.dispatch('currentUser/toggleFilterShowAbsoluteDates', value)
-    },
-    updateRemoteConnections () {
-      const connection = this.remoteCurrentConnections.find(remoteConnection => {
-        const isConnectedToStart = remoteConnection.startCardId === this.id
-        const isConnectedToEnd = remoteConnection.endCardId === this.id
-        return isConnectedToStart || isConnectedToEnd
-      })
-      if (connection) {
-        this.isRemoteConnecting = true
-        this.remoteConnectionColor = connection.color
-      } else {
-        this.isRemoteConnecting = false
-      }
-    },
-    longestNameLineLength () {
-      let name = ''
-      this.nameSegments.forEach(segment => {
-        if (segment.isTag) {
-          name += segment.name
-        }
-        if (segment.markdown) {
-          segment.markdown.forEach(markdown => {
-            if (markdown.type === 'link') {
-              name += markdown.result[1]
-            } else if (markdown.type === 'code') {
-              // truncate code characters to compensate for badge padding
-              name += markdown.content.substring(4, markdown.content.length)
-            } else {
-              name += markdown.content
-            }
-          })
-        }
-      })
-      name = name || '.'
-      const nameLines = name.match(/[^\n]+/g)
-      let longestLineLength = 0
-      if (!nameLines) { return longestLineLength }
-      nameLines.forEach(line => {
-        if (line.length > longestLineLength) {
-          longestLineLength = line.length
-        }
-      })
-      return longestLineLength
-    },
-    removeCard () {
-      if (this.isLocked) { return }
-      if (this.canEditCard) {
-        this.$store.dispatch('currentCards/remove', this.card)
-      }
-    },
-    closeAllDialogs () {
-      this.$store.dispatch('closeAllDialogs')
-    },
-    createCurrentConnection (event) {
-      const cursor = utils.cursorPositionInViewport(event)
-      const multipleCardsSelectedIds = this.multipleCardsSelectedIds
-      let cardIds = [this.id]
-      if (multipleCardsSelectedIds.length) {
-        cardIds = multipleCardsSelectedIds
-      }
-      this.$store.commit('currentConnectionStartCardIds', cardIds)
-      this.$store.commit('currentConnectionCursorStart', cursor)
-    },
-    addConnectionType (event) {
-      const shouldUseLastConnectionType = this.currentUser.shouldUseLastConnectionType
-      const shiftKey = event.shiftKey
-      const connectionType = this['currentConnections/typeForNewConnections']
-      if (!connectionType) {
-        this.$store.dispatch('currentConnections/addType')
-      }
-      if (shouldUseLastConnectionType && shiftKey) {
-        this.$store.dispatch('currentConnections/addType')
-        return
-      }
-      if (shiftKey || shouldUseLastConnectionType) {
-        return
-      }
-      this.$store.dispatch('currentConnections/addType')
-    },
-    startConnecting (event) {
-      if (!this.canEditSpace) { return }
-      if (utils.isMultiTouch(event)) { return }
-      this.$store.dispatch('closeAllDialogs')
-      this.$store.commit('preventDraggedCardFromShowingDetails', true)
-      if (!this.currentUserIsDrawingConnection) {
-        this.addConnectionType(event)
-        this.createCurrentConnection(event)
-      }
-      this.$store.commit('currentUserIsDrawingConnection', true)
-    },
-    updateStylesWithWidth (styles) {
-      const cardHasExtendedContent = this.cardUrlPreviewIsVisible || this.otherCardIsVisible || this.isVisualCard || this.isAudioCard
-      const cardHasUrls = this.cardHasMedia || this.cardHasUrls
-      if (this.width) {
-        styles.width = this.width
-      }
-      if (cardHasUrls) {
-        styles.width = this.$store.getters['currentCards/defaultCardMaxWidth']
-      }
-      if (this.resizeWidth) {
-        styles.maxWidth = this.resizeWidth
-        styles.width = this.resizeWidth
-      }
-      styles.width = styles.width + 'px'
-      styles.maxWidth = styles.maxWidth + 'px'
-      return styles
-    },
-    updateCardConnectionPathsIfOpenSpace () {
-      const spaceIsOpen = this.currentSpace.privacy === 'open'
-      const isSpaceMember = this['currentUser/isSpaceMember']()
-      if (spaceIsOpen && !isSpaceMember) {
-        this.updateCardConnectionPaths()
-      }
-    },
-    updateCardConnectionPaths () {
-      this.$nextTick(() => {
-        this.$nextTick(() => {
-          this.$store.dispatch('currentConnections/updatePaths', { cardId: this.id, shouldUpdateApi: true })
-        })
-      })
-    },
-    checkIfShouldDragMultipleCards (event) {
-      if (event.shiftKey) { return }
-      // if the current dragging card is not already selected then clear selection
-      const multipleCardsSelectedIds = this.multipleCardsSelectedIds
-      if (!multipleCardsSelectedIds.includes(this.id)) {
-        this.$store.dispatch('clearMultipleSelected')
-      }
-    },
-    startDraggingCard (event) {
-      isMultiTouch = false
-      if (event.ctrlKey) { return }
-      if (this.isLocked) { return }
-      if (this.currentUserIsPanningReady) { return }
-      if (!this.canEditCard) { return }
-      if (utils.isMultiTouch(event)) {
-        isMultiTouch = true
-        return
-      }
-      event.preventDefault()
-      if (this.currentUserIsDrawingConnection) { return }
-      this.$store.dispatch('closeAllDialogs')
-      let connectedCardIds = this['currentCards/cardIdsConnectedToCardId'](this.id)
-      this.$store.commit('currentDraggingConnectedCardIds', connectedCardIds)
-      this.$store.commit('currentUserIsDraggingCard', true)
-      this.$store.commit('currentDraggingCardId', this.id)
-      postMessage.sendHaptics({ name: 'softImpact' })
-      const updates = {
-        cardId: this.card.id,
-        userId: this.currentUser.id
-      }
-      this.$store.commit('broadcast/updateStore', { updates, type: 'addToRemoteCardsDragging' })
-      this.$store.commit('parentCardId', this.id)
-      this.$store.commit('childCardId', '')
-      this.checkIfShouldDragMultipleCards(event)
-      this.$store.dispatch('currentCards/incrementSelectedZs')
-    },
-    showCardDetails (event) {
-      this.$store.dispatch('currentCards/afterMove')
-      if (this.cardDetailsIsVisibleForCardId) { return }
-      if (this.isLocked) { return }
-      if (this.currentUserIsPainting) { return }
-      if (this.$store.state.currentUserIsDraggingConnectionIdLabel) { return }
-      if (isMultiTouch) { return }
-      if (this.currentUserIsPanningReady || this.currentUserIsPanning) { return }
-      if (this.currentUserIsResizingBox || this.currentUserIsDraggingBox) { return }
-      if (!this.canEditCard) { this.$store.commit('triggerReadOnlyJiggle') }
-      const shouldToggleSelected = event.shiftKey && !this.cardsWereDragged && !this.isConnectingTo
-      if (shouldToggleSelected) {
-        this.$store.dispatch('toggleCardSelected', this.id)
-        event.stopPropagation()
-        this.$store.commit('currentUserIsDraggingCard', false)
-        return
-      }
-      const userId = this.currentUser.id
-      this.$store.commit('broadcast/updateStore', { updates: { userId }, type: 'clearRemoteCardsDragging' })
-      this.preventDraggedButtonBadgeFromShowingDetails = this.preventDraggedCardFromShowingDetails
-      if (this.preventDraggedCardFromShowingDetails) { return }
-      this.$store.dispatch('closeAllDialogs')
-      this.$store.dispatch('clearMultipleSelected')
-      const nodeName = event.target.nodeName
-      if (nodeName === 'LABEL') { return } // checkbox
-      if (nodeName === 'A' && event.touches) {
-        window.location = event.target.href
-        return
-      }
-      this.$store.commit('cardDetailsIsVisibleForCardId', this.id)
-      this.$store.commit('preventCardDetailsOpeningAnimation', true)
-      this.$store.commit('parentCardId', this.id)
-      event.stopPropagation() // only stop propagation if cardDetailsIsVisible
-      this.$store.commit('currentUserIsDraggingCard', false)
-      this.updatePreviousResultItem()
-      this.clearStickyPositionOffsets()
-    },
-    updatePreviousResultItem () {
-      const search = this.search
-      const searchResultsCards = this.searchResultsCards
-      if (!search) { return }
-      if (!searchResultsCards.length) { return }
-      if (searchResultsCards.find(card => card.id === this.card.id)) {
-        this.$store.commit('previousResultItem', this.card)
-      }
-    },
-    showTagDetailsIsVisible ({ event, tag }) {
-      if (isMultiTouch) { return }
-      if (!this.canEditCard) { this.$store.commit('triggerReadOnlyJiggle') }
-      if (this.preventDraggedButtonBadgeFromShowingDetails) { return }
-      this.$store.dispatch('currentCards/incrementZ', this.id)
-      this.$store.dispatch('closeAllDialogs')
-      this.$store.commit('currentUserIsDraggingCard', false)
-      const tagRect = event.target.getBoundingClientRect()
-      this.$store.commit('tagDetailsPosition', {
-        x: window.scrollX + tagRect.x + 2,
-        y: window.scrollY + tagRect.y + tagRect.height - 2,
-        pageX: window.scrollX,
-        pageY: window.scrollY
-      })
-      tag.cardId = this.id
-      this.$store.commit('currentSelectedTag', tag)
-      this.$store.commit('tagDetailsIsVisible', true)
-      this.cancelLocking()
-      this.$store.commit('currentUserIsDraggingCard', false)
-    },
-    openUrl (event, url) {
-      if (event) {
-        if (event.metaKey || event.ctrlKey) {
-          this.$nextTick(() => {
-            this.$store.dispatch('closeAllDialogs')
-          })
-          return
-        } else {
-          event.preventDefault()
-          event.stopPropagation()
-        }
-      }
-      this.$store.dispatch('closeAllDialogs')
-      if (this.$store.state.cardsWereDragged) {
-        return
-      }
-      if (utils.urlIsSpace(url)) {
-        this.changeSpace(url)
-      } else if (event.type === 'touchend') {
-        window.location = url
-      } else {
-        window.open(url) // opens url in new tab
-      }
-    },
-    changeSpace (url) {
-      const { spaceId, spaceUrl, cardId } = utils.spaceAndCardIdFromUrl(url)
-      if (cardId) {
-        this.changeSpaceAndCard(spaceId, cardId)
-      } else {
-        const space = { id: spaceId }
-        this.$store.dispatch('currentSpace/changeSpace', space)
-      }
-      this.$store.dispatch('closeAllDialogs')
-    },
-    changeSpaceAndCard (spaceId, cardId) {
-      const currentSpaceId = this.$store.state.currentSpace.id
-      // space and card
-      if (currentSpaceId !== spaceId) {
-        this.$store.commit('loadSpaceShowDetailsForCardId', cardId)
-        const space = { id: spaceId }
-        this.$store.dispatch('currentSpace/changeSpace', space)
-      // card in current space
-      } else {
-        this.$nextTick(() => {
-          this.$store.dispatch('currentCards/showCardDetails', cardId)
-        })
-      }
-    },
-    removeCommentBrackets (name) {
-      if (!this.isComment) { return name }
-      if (this.card.isComment) { return name }
-      const commentPattern = utils.commentPattern()
-      const comments = name.match(commentPattern)
-      comments.forEach(comment => {
-        const content = comment.substring(2, comment.length - 2)
-        name = name.replace(comment, content)
-      })
-      return name
-    },
-
-    // Touch
-
-    notifyPressAndHoldToDrag () {
-      if (this.isLocked) { return }
-      const isDrawingConnection = this.currentUserIsDrawingConnection
-      if (isDrawingConnection) { return }
-      const hasNotified = this.hasNotifiedPressAndHoldToDrag
-      if (!hasNotified) {
-        this.$store.commit('addNotification', { message: 'Press and hold to drag', icon: 'press-and-hold' })
-      }
-      this.$store.commit('hasNotifiedPressAndHoldToDrag', true)
-    },
-    cancelLocking () {
-      shouldCancelLocking = true
-    },
-    cancelLockingAnimationFrame () {
-      this.isLocking = false
-      this.lockingPercent = 0
-      this.lockingAlpha = 0
-      shouldCancelLocking = false
-    },
-    startLocking (event) {
-      if (this.isLocked) { return }
-      this.updateTouchPosition(event)
-      this.updateCurrentTouchPosition(event)
-      if (this.isSelected) {
-        this.isLocking = false
-        this.startDraggingCard(event)
-        return
-      }
-      this.isLocking = true
-      shouldCancelLocking = false
-      setTimeout(() => {
-        if (!lockingAnimationTimer) {
-          lockingAnimationTimer = window.requestAnimationFrame(this.lockingAnimationFrame)
-        }
-      }, lockingPreDuration)
-    },
-    lockingAnimationFrame (timestamp) {
-      if (!lockingStartTime) {
-        lockingStartTime = timestamp
-      }
-      const elaspedTime = timestamp - lockingStartTime
-      const percentComplete = (elaspedTime / lockingDuration) // between 0 and 1
-      if (!utils.cursorsAreClose(touchPosition, currentTouchPosition)) {
-        this.notifyPressAndHoldToDrag()
-        this.cancelLockingAnimationFrame()
-      }
-      if (shouldCancelLocking) {
-        this.cancelLockingAnimationFrame()
-      }
-      if (this.isLocking && percentComplete <= 1) {
-        // const minSize = circleRadius
-        const percentRemaining = Math.abs(percentComplete - 1)
-        this.lockingPercent = percentRemaining
-        const alpha = utils.easeOut(percentComplete, elaspedTime, lockingDuration)
-        this.lockingAlpha = alpha
-        window.requestAnimationFrame(this.lockingAnimationFrame)
-      } else if (this.isLocking && percentComplete > 1) {
-        console.log('🔒🐢 card lockingAnimationFrame locked')
-        lockingAnimationTimer = undefined
-        lockingStartTime = undefined
-        this.isLocking = false
-        this.startDraggingCard(initialTouchEvent)
-        this.$store.commit('triggeredTouchCardDragPosition', touchPosition)
-      } else {
-        window.cancelAnimationFrame(lockingAnimationTimer)
-        lockingAnimationTimer = undefined
-        lockingStartTime = undefined
-        this.cancelLockingAnimationFrame()
-      }
-    },
-    updateCurrentTouchPosition (event) {
-      currentTouchPosition = utils.cursorPositionInViewport(event)
-      if (this.isBeingDragged || this.currentUserIsResizingCard || this.currentUserIsTiltingCard) {
-        event.preventDefault() // allows dragging cards without scrolling
-      }
-    },
-    updateTouchPosition (event) {
-      initialTouchEvent = event
-      isMultiTouch = false
-      if (utils.isMultiTouch(event)) {
-        isMultiTouch = true
-        return
-      }
-      touchPosition = utils.cursorPositionInViewport(event)
-      const isDrawingConnection = this.currentUserIsDrawingConnection
-      if (isDrawingConnection) {
-        event.preventDefault() // allows swipe to scroll, before card locked
-      }
-    },
-    touchIsNearTouchPosition (event) {
-      const currentPosition = utils.cursorPositionInViewport(event)
-      const touchBlur = 12
-      const isTouchX = utils.isBetween({
-        value: currentPosition.x,
-        min: touchPosition.x - touchBlur,
-        max: touchPosition.x + touchBlur
-      })
-      const isTouchY = utils.isBetween({
-        value: currentPosition.y,
-        min: touchPosition.y - touchBlur,
-        max: touchPosition.y + touchBlur
-      })
-      if (isTouchX && isTouchY) {
-        return true
-      }
-    },
-    showCardDetailsTouch (event) {
-      this.cancelLocking()
-      if (this.touchIsNearTouchPosition(event)) {
-        this.showCardDetails(event)
-      }
-      const userId = this.currentUser.id
-      this.$store.commit('broadcast/updateStore', { updates: { userId }, type: 'clearRemoteCardsDragging' })
-    },
-
-    updateUrlData () {
-      this.updateOtherItems()
-      if (this.isLoadingSpace) { return }
-      this.updateUrlPreview()
-    },
-
-    // other items
-
-    updateOtherItems () {
-      let url = this.spaceOrInviteUrl
-      const shouldRemoveLink = (this.card.linkToCardId || this.card.linkToSpaceId) && !url
-      if (shouldRemoveLink) {
-        const update = {
-          id: this.card.id,
-          linkToSpaceId: null,
-          linkToCardId: null
-        }
-        this.$store.dispatch('currentCards/update', update)
-        return
-      }
-      if (!url) { return }
-      const urlIsSpace = utils.urlIsSpace(url)
-      const urlIsInvite = utils.urlIsInvite(url)
-      url = new URL(url)
-      if (urlIsInvite) {
-        this.updateOtherInviteItems(url)
-      } else if (urlIsSpace) {
-        this.updateOtherSpaceOrCardItems(url)
-      }
-    },
-    updateOtherSpaceOrCardItems (url) {
-      const { spaceId, cardId } = utils.spaceAndCardIdFromPath(url.pathname)
-      const linkExists = spaceId === this.card.linkToSpaceId
-      if (linkExists) { return }
-      const update = {
-        id: this.card.id,
-        linkToSpaceId: spaceId,
-        linkToCardId: cardId,
-        linkToSpaceCollaboratorKey: null
-      }
-      this.$store.dispatch('currentCards/update', update)
-      this.$store.dispatch('currentSpace/updateOtherItems', { spaceId, cardId })
-    },
-    updateOtherInviteItems (url) {
-      const { spaceId, collaboratorKey } = qs.decode(url.search)
-      const linkExists = spaceId === this.card.linkToSpaceId && collaboratorKey === this.card.linkToSpaceCollaboratorKey
-      if (linkExists) { return }
-      const update = {
-        id: this.card.id,
-        linkToSpaceId: spaceId,
-        linkToCardId: null,
-        linkToSpaceCollaboratorKey: collaboratorKey
-      }
-      this.$store.dispatch('currentCards/update', update)
-      this.$store.dispatch('currentSpace/updateOtherItems', { spaceId, collaboratorKey })
-    },
-
-    // url preview
-
-    async updateUrlPreviewOnload () {
-      if (!this.card.shouldUpdateUrlPreview) { return }
-      this.updateMediaUrls()
-      const isUpdatedSuccess = await this.updateUrlPreview()
-      this.$store.dispatch('currentCards/update', {
-        id: this.card.id,
-        shouldUpdateUrlPreview: false
-      })
-      if (isUpdatedSuccess) {
-        this.$store.commit('triggerUpdateUrlPreviewComplete', this.card.id)
-      }
-    },
-    updateUrlPreview () {
-      const isOffline = !this.$store.state.isOnline
-      if (this.preventUpdatePrevPreview) { return }
-      if (isOffline) {
-        this.$store.dispatch('currentCards/update', {
-          id: this.card.id,
-          shouldUpdateUrlPreview: true
-        })
-      } else {
-        this.updateUrlPreviewOnline()
-      }
-    },
-    async updateUrlPreviewOnline () {
-      this.$store.commit('addUrlPreviewLoadingForCardIds', this.card.id)
-      const cardId = this.card.id
-      let url = this.webUrl
-      if (!url) {
-        this.$store.commit('removeUrlPreviewLoadingForCardIds', cardId)
-        return
-      }
-      const shouldUpdate = this.shouldUpdateUrlPreview(url)
-      if (!shouldUpdate) {
-        this.$store.commit('removeUrlPreviewLoadingForCardIds', cardId)
-        return
-      }
-      try {
-        url = utils.removeHiddenQueryStringFromURLs(url)
-        let response = await this.$store.dispatch('api/urlPreview', url)
-        if (!response) { throw 'api/urlPreview' }
-        let { data, host } = response
-        const { links, meta } = data
-        console.log('🚗 link preview', url, data, links, meta)
-        if (!links) { throw 'link preview error' }
-        let html
-        if (links.player || links.reader) {
-          html = data.html
-        }
-        this.updateUrlPreviewSuccess({ links, meta, cardId, url, html })
-      } catch (error) {
-        console.warn('🚑', error, url)
-        this.updateUrlPreviewErrorUrl(url)
-      }
-    },
-    retryUrlPreview () {
-      this.$store.dispatch('currentCards/update', {
-        id: this.card.id,
-        shouldUpdateUrlPreview: true
-      })
-      this.updateUrlPreview()
-    },
-    shouldUpdateUrlPreview (url) {
-      if (this.card.shouldUpdateUrlPreview) { return true }
-      const previewIsVisible = this.card.urlPreviewIsVisible
-      const isNotPreviewUrl = url !== this.card.urlPreviewUrl
-      const isNotErrorUrl = url !== this.card.urlPreviewErrorUrl
-      const isNotKinopioUrl = !url.startsWith('https://kinopio.club')
-      const isLocalhostUrl = url.match(utils.localhostUrlPattern())
-      return previewIsVisible && isNotPreviewUrl && isNotErrorUrl && isNotKinopioUrl && !isLocalhostUrl
-    },
-    nameIncludesUrl (url) {
-      const name = this.card.name
-      const normalizedUrl = utils.removeTrailingSlash(url)
-      return name.includes(url) || name.includes(normalizedUrl) || normalizedUrl.includes(name)
-    },
-    previewImage ({ thumbnail }) {
-      const minWidth = this.$store.getters['currentCards/defaultCardMaxWidth']
-      if (!thumbnail) { return '' }
-      let image = thumbnail.find(item => {
-        let shouldSkipImage = false
-        if (item.media) {
-          if (item.media.width < minWidth) {
-            shouldSkipImage = true
-          }
-        }
-        return item.href && !shouldSkipImage
-      })
-      if (!image) { return '' }
-      return image.href || ''
-    },
-    previewFavicon ({ icon }) {
-      if (!icon) { return '' }
-      let image = icon.find(item => item.href)
-      return image.href || ''
-    },
-    updateUrlPreviewSuccess ({ links, meta, cardId, url, html }) {
-      if (!this.nameIncludesUrl(url)) { return }
-      cardId = cardId || this.card.id
-      if (!cardId) {
-        console.warn('🚑 could not updateUrlPreviewSuccess', cardId, this.card)
-        this.$store.commit('removeUrlPreviewLoadingForCardIds', cardId)
-        return
-      }
-      const update = {
-        id: cardId,
-        name: utils.addHiddenQueryStringToURLs(this.card.name),
-        urlPreviewUrl: url,
-        urlPreviewTitle: utils.truncated(meta.title || meta.site),
-        urlPreviewDescription: utils.truncated(meta.description, 280),
-        urlPreviewImage: this.previewImage(links),
-        urlPreviewFavicon: this.previewFavicon(links),
-        urlPreviewEmbedHtml: html
-      }
-      this.$store.dispatch('currentCards/update', update)
-      this.$store.commit('removeUrlPreviewLoadingForCardIds', cardId)
-    },
-    updateUrlPreviewErrorUrl (url) {
-      const cardId = this.card.id
-      this.$store.commit('removeUrlPreviewLoadingForCardIds', cardId)
-      const name = utils.removeHiddenQueryStringFromURLs(this.card.name)
-      const update = {
-        id: cardId,
-        urlPreviewErrorUrl: url,
-        urlPreviewUrl: url,
-        name
-      }
-      this.$store.dispatch('currentCards/update', update)
-    }
-  },
-  watch: {
-    linkToPreview (value) {
-      this.updateUrlData()
-    }
-  }
-}
-</script>
 
 <style lang="stylus">
 article.card-wrap
@@ -2258,6 +2143,9 @@ article.card-wrap
       flex-shrink 0
       vertical-align -2px
       margin-left 3px
+
+    .checkbox-wrap
+      z-index 1
 
     .name-wrap,
     .card-comment
