@@ -663,7 +663,7 @@ const connectorIsVisible = computed(() => {
 })
 const connectorGlowStyle = computed(() => {
   if (!state.isVisibleInViewport) { return }
-  if (!utils.arrayHasItems(connectedConnectionTypes.value)) { return } // cards with no connections
+  if (!utils.arrayHasItems(connectedConnectionTypes.value) && !store.state.currentUserIsDrawingConnection) { return } // cards with no connections
   const color = connectedToAnotherCardDetailsVisibleColor.value ||
     connectedToAnotherCardBeingDraggedColor.value ||
     connectedToConnectionDetailsIsVisibleColor.value ||
