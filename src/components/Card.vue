@@ -487,6 +487,7 @@ const tiltResizeIsVisible = computed(() => {
   if (isLocked.value) { return }
   if (!canEditSpace.value) { return }
   if (cardPendingUpload.value || remoteCardPendingUpload.value) { return }
+  if (!state.isVisibleInViewport) { return }
   return true
 })
 const x = computed(() => {
