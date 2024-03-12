@@ -227,7 +227,8 @@ export default {
       const isMiddleClick = middleMouseButton === event.button
       const isPanScope = checkIsPanScope(event)
       const toolbarIsBox = this.$store.state.currentUserToolbar === 'box'
-      const shouldBoxSelect = event.shiftKey && isPanScope && !toolbarIsBox
+      const isNotConnecting = !this.$store.state.currentUserIsDrawingConnection
+      const shouldBoxSelect = event.shiftKey && isPanScope && !toolbarIsBox && isNotConnecting
       const userDisablePan = this.$store.state.currentUser.shouldDisableRightClickToPan
       const shouldPan = (isRightClick || isMiddleClick) && isPanScope && !userDisablePan
       const position = utils.cursorPositionInPage(event)
