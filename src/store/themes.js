@@ -32,7 +32,9 @@ const themes = {
       'code-keyword': '#00119e',
       // user badges
       'badge-donor': '#ff9dff',
-      'badge-upgraded': 'limegreen'
+      'badge-upgraded': 'springgreen',
+      'badge-moderator': 'bisque',
+      'badge-ambassador': 'aqua'
     }
   },
   dark: {
@@ -65,8 +67,10 @@ const themes = {
       'code-string': '#fddd88',
       'code-keyword': '#79e6d9',
       // user badges
-      'badge-donor': 'purple',
-      'badge-upgraded': 'forestgreen'
+      'badge-donor': 'blueviolet',
+      'badge-upgraded': 'green',
+      'badge-moderator': 'olive',
+      'badge-ambassador': '#0f9189'
     }
   }
 }
