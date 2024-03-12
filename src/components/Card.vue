@@ -1266,8 +1266,6 @@ const startDraggingCard = (event) => {
   event.preventDefault()
   if (store.state.currentUserIsDrawingConnection) { return }
   store.dispatch('closeAllDialogs')
-  let connectedCardIds = store.getters['currentCards/cardIdsConnectedToCardId'](props.card.id)
-  store.commit('currentDraggingConnectedCardIds', connectedCardIds)
   store.commit('currentUserIsDraggingCard', true)
   store.commit('currentDraggingCardId', props.card.id)
   postMessage.sendHaptics({ name: 'softImpact' })

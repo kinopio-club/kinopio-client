@@ -132,7 +132,6 @@ const store = createStore({
     remoteUserTiltingCards: [],
     // dragging cards
     currentDraggingCardId: '',
-    currentDraggingConnectedCardIds: [],
     remoteCardsDragging: [],
     remoteUploadDraggedOverCards: [],
     preventDraggedCardFromShowingDetails: false,
@@ -856,10 +855,6 @@ const store = createStore({
     currentDraggingCardId: (state, cardId) => {
       utils.typeCheck({ value: cardId, type: 'string' })
       state.currentDraggingCardId = cardId
-    },
-    currentDraggingConnectedCardIds: (state, cardIds) => {
-      utils.typeCheck({ value: cardIds, type: 'array' })
-      state.currentDraggingConnectedCardIds = cardIds
     },
     addToRemoteCardsDragging: (state, update) => {
       utils.typeCheck({ value: update, type: 'object' })

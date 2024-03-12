@@ -982,19 +982,6 @@ const currentCards = {
       colors = colors.filter(color => Boolean(color))
       return uniq(colors)
     },
-    cardIdsConnectedToCardId: (state, getters, rootState, rootGetters) => (id) => {
-      const connections = rootGetters['currentConnections/byCardId'](id)
-      let cardIds = []
-      connections.forEach(connection => {
-        if (connection.startCardId !== id) {
-          cardIds.push(connection.startCardId)
-        } else if (connection.endCardId !== id) {
-          cardIds.push(connection.endCardId)
-        }
-      })
-      cardIds = uniq(cardIds)
-      return cardIds
-    },
     nameSegments: (state, getters) => (card) => {
       card = utils.clone(card)
       let name = card.name
