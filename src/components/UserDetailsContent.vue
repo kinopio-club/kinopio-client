@@ -116,7 +116,7 @@ const userName = computed({
 })
 const userDescription = computed({
   get () {
-    return props.user.description.trim()
+    return props.user.description?.trim()
   },
   set (newValue) {
     updateUser({ description: newValue })
