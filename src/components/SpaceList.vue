@@ -85,7 +85,7 @@ const state = reactive({
   heightByIndex: {}
 })
 
-const isOnline = computed(() => state.isOnline)
+const isOnline = computed(() => store.state.isOnline)
 
 // scroll
 

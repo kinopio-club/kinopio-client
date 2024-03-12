@@ -47,7 +47,6 @@ const store = createStore({
     shouldPreventNextFocusOnName: false,
     isEmbedMode: false,
     isAddPage: false,
-    disableViewportOptimizations: false, // for urlbox
     isPresentationMode: false,
     pricingIsVisible: false,
     userSettingsIsVisible: false,
@@ -122,7 +121,7 @@ const store = createStore({
     multipleCardsSelectedIds: [],
     newTweetCards: [],
     prevNewTweetCards: [],
-    embedIsVisibleForCardId: '',
+    urlEmbedIsVisibleForCardId: '',
     // resizing card
     currentUserIsResizingCard: false,
     currentUserIsResizingCardIds: [],
@@ -133,7 +132,6 @@ const store = createStore({
     remoteUserTiltingCards: [],
     // dragging cards
     currentDraggingCardId: '',
-    currentDraggingConnectedCardIds: [],
     remoteCardsDragging: [],
     remoteUploadDraggedOverCards: [],
     preventDraggedCardFromShowingDetails: false,
@@ -441,10 +439,6 @@ const store = createStore({
       utils.typeCheck({ value, type: 'boolean' })
       state.isAddPage = value
     },
-    disableViewportOptimizations: (state, value) => {
-      utils.typeCheck({ value, type: 'boolean', allowUndefined: true })
-      state.disableViewportOptimizations = value
-    },
     isPresentationMode: (state, value) => {
       utils.typeCheck({ value, type: 'boolean' })
       state.isPresentationMode = value
@@ -627,9 +621,9 @@ const store = createStore({
       utils.typeCheck({ value, type: 'boolean' })
       state.preventCardDetailsOpeningAnimation = value
     },
-    embedIsVisibleForCardId: (state, cardId) => {
+    urlEmbedIsVisibleForCardId: (state, cardId) => {
       utils.typeCheck({ value: cardId, type: 'string' })
-      state.embedIsVisibleForCardId = cardId
+      state.urlEmbedIsVisibleForCardId = cardId
     },
 
     // Connections
@@ -861,10 +855,6 @@ const store = createStore({
     currentDraggingCardId: (state, cardId) => {
       utils.typeCheck({ value: cardId, type: 'string' })
       state.currentDraggingCardId = cardId
-    },
-    currentDraggingConnectedCardIds: (state, cardIds) => {
-      utils.typeCheck({ value: cardIds, type: 'array' })
-      state.currentDraggingConnectedCardIds = cardIds
     },
     addToRemoteCardsDragging: (state, update) => {
       utils.typeCheck({ value: update, type: 'object' })

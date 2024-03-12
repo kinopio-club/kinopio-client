@@ -79,6 +79,8 @@ let initialCircleCanvas, initialCircleContext, initialCirclesTimer
 const postScrollDuration = 300 // ms
 let postScrollAnimationTimer, postScrollStartTime, shouldCancelPostScroll
 
+let selectableCardsInViewport = []
+
 export default {
   name: 'MagicPaint',
   components: {
@@ -162,6 +164,10 @@ export default {
     toolbarIsBox () { return this.$store.state.currentUserToolbar === 'box' }
   },
   methods: {
+    updateSelectableCardsInViewport () {
+      this.$store.dispatch('currentCards/updateCanBeSelectedSortedByY')
+      selectableCardsInViewport = this.$store.getters['currentCards/isSelectableInViewport']()
+    },
     updateRemotePosition (position) {
       const zoom = this.spaceZoomDecimal
       const scroll = { x: window.scrollX, y: window.scrollY }
@@ -176,6 +182,10 @@ export default {
     userScroll () {
       if (postScrollAnimationTimer) {
         shouldCancelPostScroll = true
+      }
+      // update selectable cards during paint autoscroll at edges
+      if (this.$store.state.currentUserIsPainting) {
+        this.updateSelectableCardsInViewport()
       }
       this.scroll()
     },
@@ -390,6 +400,7 @@ export default {
     startPainting (event) {
       if (this.isPanning) { return }
       if (this.isBoxSelecting) { return }
+      this.updateSelectableCardsInViewport()
       startCursor = utils.cursorPositionInViewport(event)
       this.currentCursor = startCursor
       const multipleCardsIsSelected = Boolean(this.$store.state.multipleCardsSelectedIds.length)
@@ -487,7 +498,7 @@ export default {
     selectCards (position) {
       if (this.shouldPreventSelectionOnMobile()) { return }
       if (this.userCantEditSpace) { return }
-      const cards = this.$store.getters['currentCards/isSelectable'](position)
+      const cards = selectableCardsInViewport
       if (!cards) { return }
       cards.forEach(card => {
         const cardX = card.x

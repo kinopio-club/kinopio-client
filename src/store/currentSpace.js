@@ -186,8 +186,6 @@ const currentSpace = {
       const canEditSpace = context.rootGetters['currentUser/canEditSpace']()
       if (!canEditSpace) { return }
       try {
-        context.dispatch('currentCards/updateDimensions', {}, { root: true })
-        context.dispatch('currentBoxes/updateInfoDimensions', {}, { root: true })
         console.log('🙈 create space preview image')
         const response = await context.dispatch('api/createSpacePreviewImage', context.state.id, { root: true })
         console.log('🙈 updated space preview image', response.urls)
@@ -377,8 +375,6 @@ const currentSpace = {
         space.boxes = []
       } else {
         space.connectionTypes[0].color = randomColor({ luminosity: 'light' })
-        space.cards[1].x = space.cards[1].x + random(0, 20)
-        space.cards[1].y = space.cards[1].y + random(0, 20)
       }
       space = utils.updateSpaceCardsCreatedThroughPublicApi(space)
       space.userId = currentUser.id

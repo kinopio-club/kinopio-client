@@ -47,7 +47,7 @@ const squashQueue = (queue) => {
 }
 
 const shouldRequest = ({ shouldRequestRemote, apiKey, isOnline }) => {
-  if (utils.isUndefined(isOnline)) {
+  if (utils.isUndefinedOrNull(isOnline)) {
     isOnline = true
   }
   const currentUserIsSignedIn = Boolean(apiKey)

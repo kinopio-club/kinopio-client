@@ -221,6 +221,7 @@ export default {
       context.dispatch('broadcast/update', { updates: connection, type: 'updateConnectionTypeForConnection', handler: 'currentConnections/update' }, { root: true })
     },
     updatePaths: (context, { cardId, shouldUpdateApi, connections }) => {
+      const userCanEdit = context.rootGetters['currentUser/canEditSpace']()
       connections = utils.clone(connections || context.getters.byCardId(cardId))
       connections.map(connection => {
         connection.path = context.getters.connectionPathBetweenCards(connection.startCardId, connection.endCardId, connection.controlPoint)
@@ -228,7 +229,6 @@ export default {
         if (shouldUpdateApi) {
           context.dispatch('api/addToQueue', { name: 'updateConnection', body: connection }, { root: true })
         }
-        const userCanEdit = context.rootGetters['currentUser/canEditSpace']()
         if (userCanEdit) {
           context.dispatch('broadcast/update', { updates: connection, type: 'updateConnection', handler: 'currentConnections/update' }, { root: true })
           context.commit('update', connection)
@@ -236,6 +236,31 @@ export default {
           context.commit('updateReadOnly', connection)
         }
       })
+    },
+    updateMultplePaths: (context, cards) => {
+      const cardIds = cards.map(card => card.id)
+      const connections = utils.clone(context.getters.byMultipleCardIds(cardIds))
+      if (!connections.length) { return }
+      const userCanEdit = context.rootGetters['currentUser/canEditSpace']()
+      let newConnections = []
+      connections.forEach(connection => {
+        connection.path = context.getters.connectionPathBetweenCards(connection.startCardId, connection.endCardId, connection.controlPoint)
+        connection.spaceId = currentSpaceId
+        newConnections.push(connection)
+        if (userCanEdit) {
+          context.dispatch('broadcast/update', { updates: connection, type: 'updateConnection', handler: 'currentConnections/update' }, { root: true })
+          context.commit('update', connection)
+        } else {
+          context.commit('updateReadOnly', connection)
+        }
+      })
+      context.dispatch('api/addToQueue', {
+        name: 'updateMultipleConnections',
+        body: {
+          connections: newConnections,
+          spaceId: context.rootState.currentSpace.id
+        }
+      }, { root: true })
     },
     updatePathsWhileDragging: (context, { connections }) => {
       connections = connections.map(connection => {
@@ -267,10 +292,10 @@ export default {
     updateLabelPosition: (context, { connection, labelRelativePositionX, labelRelativePositionY }) => {
       const prevConnection = context.getters.byId(connection.id)
       // normalize
-      if (utils.isUndefined(labelRelativePositionX)) {
+      if (utils.isUndefinedOrNull(labelRelativePositionX)) {
         labelRelativePositionX = utils.roundFloat(prevConnection.labelRelativePositionX)
       }
-      if (utils.isUndefined(labelRelativePositionY)) {
+      if (utils.isUndefinedOrNull(labelRelativePositionY)) {
         labelRelativePositionY = utils.roundFloat(prevConnection.labelRelativePositionY)
       }
       // update
@@ -361,6 +386,15 @@ export default {
       connections = getters.connectionsWithValidCards(connections)
       return connections
     },
+    byMultipleCardIds: (state, getters, rootState, rootGetters) => (cardIds) => {
+      let connections = getters.all
+      connections = connections.filter(connection => {
+        let start = cardIds.includes(connection.startCardId)
+        let end = cardIds.includes(connection.endCardId)
+        return start || end
+      })
+      return connections
+    },
     typesByCardId: (state, getters, rootState, rootGetters) => (cardId) => {
       let connections = getters.byCardId(cardId)
       let types = getters.allTypes
@@ -370,6 +404,11 @@ export default {
       return types.filter(type => {
         return typeIds.includes(type.id)
       })
+    },
+    isSelected: (state, getters, rootState) => {
+      let connectionIds = rootState.multipleConnectionsSelectedIds
+      const connections = connectionIds.map(id => getters.byId(id))
+      return connections
     },
     connectionsWithValidCards: (state, getters, rootState, rootGetters) => (connections) => {
       connections = connections.filter(connection => {

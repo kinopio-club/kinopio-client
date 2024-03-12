@@ -26,7 +26,6 @@ const router = createRouter({
       component: Space,
       beforeEnter: (to, from, next) => {
         const urlParams = new URLSearchParams(window.location.search)
-        store.commit('disableViewportOptimizations', urlParams.get('disableViewportOptimizations'))
         next()
       }
     }, {
@@ -191,8 +190,6 @@ const router = createRouter({
         const isInvite = true
         pageMeta.space(spaceId, isInvite)
         store.dispatch('currentUser/init')
-        const disableViewportOptimizations = urlParams.get('disableViewportOptimizations')
-        store.commit('disableViewportOptimizations', disableViewportOptimizations)
         store.commit('isLoadingSpace', true)
         if (!spaceId) {
           store.commit('addNotification', { message: 'Invalid invite URL', type: 'danger' })
