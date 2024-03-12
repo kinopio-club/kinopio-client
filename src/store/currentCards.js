@@ -618,10 +618,12 @@ const currentCards = {
       // update connections
       const cardIds = cards.map(card => card.id)
       const connections = context.rootGetters['currentConnections/byMultipleCardIds'](cardIds)
-      context.dispatch('api/addToQueue', {
-        name: 'updateMultipleConnections',
-        body: { connections, spaceId }
-      }, { root: true })
+      if (connections.length) {
+        context.dispatch('api/addToQueue', {
+          name: 'updateMultipleConnections',
+          body: { connections, spaceId }
+        }, { root: true })
+      }
       // broadcast changes
       context.dispatch('broadcast/update', { updates: { cards }, type: 'moveCards', handler: 'currentCards/moveBroadcast' }, { root: true })
       context.commit('broadcast/updateStore', { updates: { userId: context.rootState.currentUser.id }, type: 'clearRemoteCardsDragging' }, { root: true })

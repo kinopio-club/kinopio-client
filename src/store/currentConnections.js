@@ -240,6 +240,7 @@ export default {
     updateMultplePaths: (context, cards) => {
       const cardIds = cards.map(card => card.id)
       const connections = utils.clone(context.getters.byMultipleCardIds(cardIds))
+      if (!connections.length) { return }
       const userCanEdit = context.rootGetters['currentUser/canEditSpace']()
       let newConnections = []
       connections.forEach(connection => {
