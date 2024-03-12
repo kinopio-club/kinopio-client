@@ -886,6 +886,23 @@ const currentCards = {
     canBeSelectedSortedByY: (state, getters) => {
       return canBeSelectedSortedByY
     },
+    isSelectableInViewport: (state, getters, rootState) => () => {
+      const height = utils.visualViewport().height
+      const viewportYTop = window.scrollY
+      const viewportYBottom = viewportYTop + height
+      let yIndex = canBeSelectedSortedByY.yIndex
+      let cards = canBeSelectedSortedByY.cards
+      const min = viewportYTop
+      const max = viewportYBottom
+      let minIndex = yIndex.findIndex(y => y >= min)
+      let maxIndex = yIndex.findIndex(y => y >= max)
+      if (minIndex === -1) { return }
+      if (maxIndex === -1) {
+        maxIndex = yIndex.length
+      }
+      cards = cards.slice(minIndex, maxIndex)
+      return cards
+    },
     isSelectable: (state, getters, rootState) => (position) => {
       const threshold = tallestCardHeight
       let yIndex = canBeSelectedSortedByY.yIndex
