@@ -58,17 +58,22 @@ dialog.about.narrow(v-if="visible" :open="visible" @click.left="closeDialogs" re
             img.icon.visit(src="@/assets/visit.svg")
     .row
       AboutMe
-    .row(v-if="!isSecureAppContextIOS")
-      .button-wrap
+    .row
+      .button-wrap(v-if="!isSecureAppContextIOS")
         button(@click.left.stop="triggerDonateIsVisible")
           img.icon(src="@/assets/heart-empty.svg")
           span Donate
-    .row
       .button-wrap
-        a(href="https://kinopio.club/social-media-plezJhK98WCzh52YOYSLR")
+        a(href="https://blog.kinopio.club")
           button
-            span Social Media{{' '}}
+            span Blog{{' '}}
             img.icon.visit(src="@/assets/visit.svg")
+    //- .row
+    //-   .button-wrap
+    //-     a(href="https://kinopio.club/social-media-plezJhK98WCzh52YOYSLR")
+    //-       button
+    //-         span Social Media{{' '}}
+    //-         img.icon.visit(src="@/assets/visit.svg")
 </template>
 
 <script>
