@@ -29,7 +29,10 @@ const themes = {
       'code-comment': '#898989',
       'code-punctuation': 'black',
       'code-string': '#a2162d',
-      'code-keyword': '#00119e'
+      'code-keyword': '#00119e',
+      // user badges
+      'badge-donor': '#ff9dff',
+      'badge-upgraded': 'limegreen'
     }
   },
   dark: {
@@ -60,7 +63,10 @@ const themes = {
       'code-comment': '#898989',
       'code-punctuation': 'white',
       'code-string': '#fddd88',
-      'code-keyword': '#79e6d9'
+      'code-keyword': '#79e6d9',
+      // user badges
+      'badge-donor': 'purple',
+      'badge-upgraded': 'forestgreen'
     }
   }
 }
