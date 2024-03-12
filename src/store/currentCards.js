@@ -308,7 +308,6 @@ const currentCards = {
       context.dispatch('history/add', { cards: [card] }, { root: true })
       context.commit('update', card)
       if (card.name) {
-        context.dispatch('updateDimensions', { cards: [card] })
         context.commit('updateCardNameInOtherItems', card, { root: true })
         context.commit('triggerUpdateOtherCard', card.id, { root: true })
       }
