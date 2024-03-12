@@ -65,6 +65,7 @@
     img.icon(src="@/assets/heart.svg")
     img.icon(src="@/assets/homescreen.svg")
     img.icon(src="@/assets/inbox.svg")
+    img.icon(src="@/assets/json-canvas.svg")
     img.icon(src="@/assets/leave.svg")
     img.icon(src="@/assets/light.svg")
     img.icon(src="@/assets/line-break.svg")

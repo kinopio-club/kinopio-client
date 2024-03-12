@@ -956,6 +956,9 @@ button
   height 10px
   vertical-align 1px
 
+.icon.json-canvas
+  width 12px
+
 label,
 li
   position relative
