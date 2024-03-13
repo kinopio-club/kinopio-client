@@ -63,8 +63,6 @@ const initialState = {
   AIImages: [],
   theme: null,
   themeIsSystem: false,
-  referredByUserId: '',
-  advocateReferrerName: '',
   weather: '',
   journalDailyPrompt: '',
   panSpeedIsFast: false,
@@ -371,14 +369,6 @@ export default {
       state.themeIsSystem = value
       cache.updateUser('themeIsSystem', value)
     },
-    referredByUserId: (state, value) => {
-      state.referredByUserId = value
-      cache.updateUser('referredByUserId', value)
-    },
-    advocateReferrerName: (state, value) => {
-      state.advocateReferrerName = value
-      cache.updateUser('advocateReferrerName', value)
-    },
     weather: (state, value) => {
       state.weather = value
     },
@@ -414,15 +404,6 @@ export default {
       context.commit('triggerUserIsLoaded', null, { root: true })
       context.dispatch('updateWeather')
       context.dispatch('updateJournalDailyPrompt')
-      // handle referrals
-      nextTick(() => {
-        nextTick(() => {
-          context.dispatch('validateUserReferralUserId')
-          context.dispatch('validateFromAdvocateReferralName')
-          context.dispatch('validateAdvocateReferralName')
-          context.dispatch('restoreUserFavorites')
-        })
-      })
     },
     updateWeather: async (context) => {
       const weather = await context.dispatch('api/weather', null, { root: true })
@@ -808,115 +789,6 @@ export default {
       } else {
         context.commit('addNotificationWithPosition', { message: 'Space is Read Only', position, type: 'info', layer: 'space', icon: 'cancel' }, { root: true })
       }
-    },
-
-    // referrals
-
-    validateUserReferralUserId: async (context) => {
-      const referrerUserId = context.rootState.validateUserReferralUserId
-      if (!referrerUserId) { return }
-      const referrerUser = await context.dispatch('api/getPublicUser', { id: referrerUserId }, { root: true })
-      if (!referrerUser) {
-        context.commit('addNotification', { message: 'Invalid referral, referring user not found', isPersistentItem: true, type: 'danger' }, { root: true })
-        return
-      }
-      // check if current user can be referred
-      const canBeReferred = context.getters.canBeReferred(referrerUserId)
-      if (canBeReferred) {
-        context.dispatch('addReferral', referrerUser)
-      } else {
-        context.commit('addNotification', { message: 'Invalid Referral. You can only be referred once', isPersistentItem: true, type: 'danger' }, { root: true })
-      }
-      // reset state
-      context.commit('validateUserReferralUserId', '', { root: true })
-    },
-    validateFromAdvocateReferralName: async (context) => {
-      try {
-        const name = context.rootState.validateFromAdvocateReferralName
-        // get referrer
-        if (!name) { return }
-        const advocateUser = await context.dispatch('api/getAdvocateUsedUser', name, { root: true })
-        if (!advocateUser) {
-          context.commit('addNotification', { message: 'Invalid referral, referring user not found', isPersistentItem: true, type: 'danger' }, { root: true })
-          return
-        }
-        // check if current user can be referred
-        const canBeReferred = context.getters.canBeReferred(advocateUser.id)
-        if (canBeReferred) {
-          context.dispatch('addReferral', advocateUser)
-        } else {
-          context.commit('addNotification', { message: 'Invalid Referral. You can only be referred once', isPersistentItem: true, type: 'danger' }, { root: true })
-        }
-        // reset state
-        context.commit('validateFromAdvocateReferralName', '', { root: true })
-      } catch (error) {
-        console.error('🚒 validateFromAdvocateReferralName', error)
-        context.commit('addNotification', { message: 'Invalid referral, valid referrer not found', type: 'danger', isPersistentItem: true }, { root: true })
-      }
-    },
-    validateAdvocateReferralName: async (context) => {
-      // handles /for/xyz
-      // grant free accounts to press, influencers, and ambassadors. advocateReferralNames can only be used once
-      try {
-        const name = context.rootState.validateAdvocateReferralName
-        if (!name) { return }
-        const isAdvocate = await context.dispatch('api/getAdvocateUnused', name, { root: true })
-        const isSignedIn = context.getters.isSignedIn
-        if (isSignedIn) {
-          context.commit('addNotification', { message: 'Only new users can be referred this way, please contact support to manually update your account', type: 'danger', isPersistentItem: true }, { root: true })
-        } else if (isAdvocate) {
-          context.commit('notifyReferralSuccessReferrerName', true, { root: true })
-          // user.advocateReferrerName will be validated and marked as used by the server on sign up
-          context.dispatch('update', { advocateReferrerName: name })
-        } else {
-          context.commit('addNotification', { message: 'Invalid referral, valid referrer not found', type: 'danger', isPersistentItem: true }, { root: true })
-        }
-        context.commit('validateAdvocateReferralName', '', { root: true })
-      } catch (error) {
-        console.error('🚒 validateAdvocateReferralName', error)
-        context.commit('addNotification', { message: 'Invalid referral, valid referrer not found', type: 'danger', isPersistentItem: true }, { root: true })
-      }
-    },
-    validateUserReferralFromSpaceInvite: async (context) => {
-      const isFromSpaceInvite = Boolean(context.rootState.shouldValidateUserReferralFromSpaceInvite)
-      if (!isFromSpaceInvite) { return }
-      // get referrer
-      const spaceMembers = context.rootGetters['currentSpace/members']()
-      if (!spaceMembers.length) { return }
-      const referrerId = spaceMembers[0].id
-      if (!referrerId) { return }
-      const referrer = await context.dispatch('api/getPublicUser', { id: referrerId }, { root: true })
-      if (!referrer) {
-        context.commit('addNotification', { message: 'Invalid referral, referring user not found', isPersistentItem: true, type: 'danger' }, { root: true })
-        return
-      }
-      // check if current user can be referred by space invite
-      const isSignedIn = context.getters.isSignedIn
-      const canBeReferred = context.getters.canBeReferred(referrerId) && !isSignedIn
-      if (canBeReferred) {
-        context.dispatch('addReferral', referrer)
-      }
-      // reset state
-      context.commit('shouldValidateUserReferralFromSpaceInvite', false, { root: true })
-    },
-    addReferral: async (context, referrer) => {
-      try {
-        const isSignedIn = context.getters.isSignedIn
-        context.dispatch('update', { referredByUserId: referrer.id })
-        if (isSignedIn) {
-          const referral = await context.dispatch('api/createReferral', {
-            userId: referrer.id,
-            referredUserId: context.state.id
-          }, { root: true })
-          console.log('🫧 referral created', referral)
-          context.commit('notifyEarnedCredits', true, { root: true })
-        } else {
-          context.commit('notifyReferralSuccessUser', referrer, { root: true })
-        }
-      } catch (error) {
-        console.error('🚒 addReferral', error)
-        context.commit('addNotification', { message: 'Invalid Referral. You can only be referred once', isPersistentItem: true, type: 'danger' }, { root: true })
-      }
     }
   },
   getters: {
@@ -1051,15 +923,6 @@ export default {
       const connections = rootState.filteredConnectionTypeIds
       const frames = rootState.filteredFrameIds
       return userFilters + tagNames.length + connections.length + frames.length
-    },
-    canBeReferred: (state, getters) => (referralUserId) => {
-      const isAlreadyReferred = state.referredByUserId
-      const isSameUser = referralUserId === state.id
-      console.log('🕵️‍♀️ canBeReferred check:', { referralUserId, referredByUserId: isAlreadyReferred, isSameUser, isUpgraded: state.isUpgraded })
-      if (isAlreadyReferred) { return }
-      if (isSameUser) { return }
-      if (state.isUpgraded) { return }
-      return true
     },
 
     // AI Images

@@ -10,7 +10,6 @@ export default {
   maxCodeBlockCardLength: 2000,
   maxInviteEmailsAllowedToSend: 15,
   defaultCardWidth: 76,
-  referralCreditAmount: 6,
   defaultTimeout: 40000,
   minCardEmbedWidth: 235,
   AIImageLimitUpgradedUser: 50,

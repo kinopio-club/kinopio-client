@@ -3,7 +3,6 @@ import { reactive, computed, onMounted, defineProps, defineEmits, watch, ref, ne
 import { useStore } from 'vuex'
 
 import consts from '@/consts.js'
-import EarnCredits from '@/components/dialogs/EarnCredits.vue'
 const store = useStore()
 
 const isSecureAppContextIOS = computed(() => consts.isSecureAppContextIOS)
@@ -17,18 +16,11 @@ onMounted(() => {
 })
 
 const state = reactive({
-  studentInfoIsVisible: false,
-  earnCreditsIsVisible: false
+  studentInfoIsVisible: false
 })
 
 const closeChildDialogs = () => {
   state.studentInfoIsVisible = false
-  state.earnCreditsIsVisible = false
-}
-const toggleEarnCreditsIsVisible = () => {
-  const value = !state.earnCreditsIsVisible
-  store.commit('triggerCloseChildDialogs')
-  state.earnCreditsIsVisible = value
 }
 const toggleStudentInfoIsVisible = () => {
   const value = !state.studentInfoIsVisible
@@ -39,10 +31,6 @@ const toggleStudentInfoIsVisible = () => {
 
 <template lang="pug">
 .row.discount-row(v-if="!isSecureAppContextIOS" @click.stop="closeChildDialogs")
-  .button-wrap
-    button(@click.stop="toggleEarnCreditsIsVisible" :class="{ active: state.earnCreditsIsVisible }")
-      span Earn Credits
-    EarnCredits(:visible="state.earnCreditsIsVisible")
   .button-wrap
     button(@click.stop="toggleStudentInfoIsVisible" :class="{ active: state.studentInfoIsVisible }")
       span Student Info
@@ -56,9 +44,4 @@ section.subsection(v-if="state.studentInfoIsVisible" @click.stop)
 .discount-row
   margin-top 10px
   display inline-block
-  dialog.earn-credits
-    left 0
-    max-height 320px
-    @media(max-height 650px)
-      max-height 300px
 </style>

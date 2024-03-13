@@ -2,7 +2,7 @@
 import { reactive, computed, onMounted, onUnmounted, defineProps, defineEmits, watch, ref, nextTick } from 'vue'
 import { useStore } from 'vuex'
 
-import UserBillingAndCreditsSettings from '@/components/dialogs/UserBillingAndCreditsSettings.vue'
+import UserBillingSettings from '@/components/dialogs/UserBillingSettings.vue'
 import UserAccountSettings from '@/components/dialogs/UserAccountSettings.vue'
 import NotificationSettings from '@/components/dialogs/NotificationSettings.vue'
 import ThemeAndColorsSettings from '@/components/dialogs/ThemeAndColorsSettings.vue'
@@ -32,7 +32,7 @@ const currentUser = computed(() => store.state.currentUser)
 const isSecureAppContextIOS = computed(() => consts.isSecureAppContextIOS)
 
 const state = reactive({
-  userBillingAndCreditsSettingsIsVisible: false,
+  userBillingSettingsIsVisible: false,
   userAccountSettingsIsVisible: false,
   deleteAllConfirmationVisible: false,
   loading: {
@@ -45,7 +45,7 @@ const state = reactive({
 // dialog
 
 const closeChildDialogs = () => {
-  state.userBillingAndCreditsSettingsIsVisible = false
+  state.userBillingSettingsIsVisible = false
   state.userAccountSettingsIsVisible = false
   state.notificationSettingsIsVisible = false
   state.themeAndColorsSettingsIsVisible = false
@@ -56,11 +56,11 @@ const closeChildDialogs = () => {
 const toggleDeleteAllConfirmationVisible = () => {
   state.deleteAllConfirmationVisible = !state.deleteAllConfirmationVisible
 }
-const toggleUserBillingAndCreditsSettingsIsVisible = () => {
-  const isVisible = state.userBillingAndCreditsSettingsIsVisible
+const toggleUserBillingSettingsIsVisible = () => {
+  const isVisible = state.userBillingSettingsIsVisible
   closeChildDialogs()
   state.deleteAllConfirmationVisible = false
-  state.userBillingAndCreditsSettingsIsVisible = !isVisible
+  state.userBillingSettingsIsVisible = !isVisible
 }
 const toggleUserAccountSettingsIsVisible = () => {
   const isVisible = state.userAccountSettingsIsVisible
@@ -126,10 +126,10 @@ const deleteUserPermanent = async () => {
         UserAccountSettings(:visible="state.userAccountSettingsIsVisible")
     .row
       .button-wrap
-        button(@click.left.stop="toggleUserBillingAndCreditsSettingsIsVisible" :class="{active: state.userBillingAndCreditsSettingsIsVisible}")
+        button(@click.left.stop="toggleUserBillingSettingsIsVisible" :class="{active: state.userBillingSettingsIsVisible}")
           span(v-if="isSecureAppContextIOS") Billing
-          span(v-else) Billing and Credits
-        UserBillingAndCreditsSettings(:visible="state.userBillingAndCreditsSettingsIsVisible")
+          span(v-else) Billing
+        UserBillingSettings(:visible="state.userBillingSettingsIsVisible")
   //- Delete Account
   section.delete-account
     .row
@@ -144,7 +144,7 @@ const deleteUserPermanent = async () => {
         section.subsection(v-if="isUpgraded")
           span Or cancel paid subscription
           .row.billing-cancel
-            button(@click.left.stop="toggleUserBillingAndCreditsSettingsIsVisible")
+            button(@click.left.stop="toggleUserBillingSettingsIsVisible")
               span Billing
 
         .segmented-buttons
