@@ -1,4 +1,5 @@
 import utils from '@/utils.js'
+import consts from '@/consts.js'
 import cache from '@/cache.js'
 
 import { nanoid } from 'nanoid'
@@ -480,7 +481,7 @@ export default {
     },
     curveControlPoint: (state, getters, rootState) => {
       // q defines a quadratic curve control point
-      let controlPoint = 'q90,40'
+      let controlPoint = consts.defaultConnectionPathCurveControlPoint
       return controlPoint
     },
     connectionPathBetweenCoords: (state, getters) => (start, end, controlPoint) => {
