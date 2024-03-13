@@ -957,7 +957,7 @@ button
   vertical-align 1px
 
 .icon.json-canvas
-  width 12px
+  width 10px
 
 label,
 li
