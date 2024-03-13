@@ -2,7 +2,6 @@
 import { reactive, computed, onMounted, defineProps, defineEmits, watch, ref, nextTick } from 'vue'
 import { useStore } from 'vuex'
 
-import ReferredNewUserCredits from '@/components/ReferredNewUserCredits.vue'
 import DiscountRow from '@/components/DiscountRow.vue'
 import UserLabelInline from '@/components/UserLabelInline.vue'
 import CardsCreatedProgress from '@/components/CardsCreatedProgress.vue'
@@ -92,7 +91,6 @@ dialog.pricing(v-if="visible" :open="visible" @click.left.stop="closeDialogs" re
           UpgradeFAQ(:visible="state.upgradeFAQIsVisible")
     p.badge.success(v-if="studentDiscountIsAvailable") Your account qualifies for a student discount
     DiscountRow
-    ReferredNewUserCredits
     table
       tbody
         tr.table-header

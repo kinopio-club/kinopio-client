@@ -8,7 +8,6 @@ dialog.narrow.sign-up-or-in(v-if="visible" :open="visible")
   //- Sign Up
   section(v-if="signUpVisible")
     p Create an account to share your spaces and access them anywhere
-    ReferredNewUserCredits
     form(@submit.prevent="signUp")
       input(ref="email" type="email" autocomplete="email" placeholder="Email" required v-model="email" @input="clearErrors")
       .badge.info(v-if="error.accountAlreadyExists") An account with this email already exists, Sign In instead
@@ -64,7 +63,6 @@ dialog.narrow.sign-up-or-in(v-if="visible" :open="visible")
 import utils from '@/utils.js'
 import Loader from '@/components/Loader.vue'
 import cache from '@/cache.js'
-import ReferredNewUserCredits from '@/components/ReferredNewUserCredits.vue'
 
 import { nanoid } from 'nanoid'
 
@@ -74,8 +72,7 @@ let sessionToken
 export default {
   name: 'SignUpOrIn',
   components: {
-    Loader,
-    ReferredNewUserCredits
+    Loader
   },
   props: {
     visible: Boolean
@@ -222,9 +219,6 @@ export default {
         const currentSpace = this.$store.state.currentSpace
         this.$store.commit('triggerUpdateWindowHistory')
         this.$store.dispatch('themes/restore')
-        this.clearNotifications()
-        this.checkIfShouldAddReferral()
-        this.checkIfShouldUpgradeReferral()
       } else {
         await this.handleErrors(newUser)
       }
@@ -270,25 +264,6 @@ export default {
       } else {
         await this.handleErrors(result)
       }
-    },
-
-    async checkIfShouldUpgradeReferral () {
-      const referrerName = this.$store.state.currentUser.advocateReferrerName
-      if (!referrerName) { return }
-      this.$store.commit('currentUser/isUpgraded', true, { root: true })
-      this.$store.commit('addNotification', { message: `Your account has been upgraded to free. Thanks for helping share Kinopio`, type: 'success', isPersistentItem: true })
-    },
-
-    async checkIfShouldAddReferral () {
-      const referredByUserId = this.$store.state.currentUser.referredByUserId
-      if (!referredByUserId) { return }
-      const body = {
-        userId: referredByUserId,
-        referredUserId: this.$store.state.currentUser.id
-      }
-      const referral = await this.$store.dispatch('api/createReferral', body)
-      console.log('🫧 referral created', referral)
-      this.$store.commit('notifyEarnedCredits', true)
     },
 
     updateLocalSpacesWithNewUserId () {
@@ -380,11 +355,6 @@ export default {
     createSessionToken () {
       sessionToken = nanoid()
       this.$store.dispatch('api/createSessionToken', sessionToken)
-    },
-
-    clearNotifications () {
-      this.$store.commit('notifyReferralSuccessUser', null)
-      this.$store.commit('notifyReferralSuccessReferrerName', false)
     },
 
     focusEmail () {

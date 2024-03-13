@@ -758,10 +758,6 @@ const currentSpace = {
             name: 'incrementVisits',
             body: { spaceId: space.id }
           }, { root: true })
-          // referral
-          nextTick(() => {
-            context.dispatch('currentUser/validateUserReferralFromSpaceInvite', null, { root: true })
-          })
         })
       })
       context.dispatch('checkIfIsLoadingSpace', isRemote)

@@ -843,49 +843,6 @@ const self = {
     //   }
     // },
 
-    // Referral
-
-    createReferral: async (context, body) => {
-      try {
-        const options = await context.dispatch('requestOptions', { body, method: 'POST', space: context.rootState.currentSpace })
-        const response = await fetch(`${host}/referral`, options)
-        return normalizeResponse(response)
-      } catch (error) {
-        console.error('🚒 createReferral', error)
-      }
-    },
-    getReferralsByUser: async (context, body) => {
-      try {
-        const options = await context.dispatch('requestOptions', { body, method: 'GET', space: context.rootState.currentSpace })
-        const response = await fetch(`${host}/referral`, options)
-        return normalizeResponse(response)
-      } catch (error) {
-        console.error('🚒 getReferralsByUser', error)
-      }
-    },
-
-    // Advocate Referrals
-
-    getAdvocateUnused: async (context, name) => {
-      try {
-        const options = await context.dispatch('requestOptions', { method: 'GET', space: context.rootState.currentSpace })
-        const response = await fetch(`${host}/advocate-referral/unused/${name}`, options)
-        // server throws return 404 if no match
-        return normalizeResponse(response)
-      } catch (error) {
-        console.error('🚒 getAdvocateUnused', error)
-      }
-    },
-    getAdvocateUsedUser: async (context, name) => {
-      try {
-        const options = await context.dispatch('requestOptions', { method: 'GET', space: context.rootState.currentSpace })
-        const response = await fetch(`${host}/advocate-referral/used/${name}`, options)
-        return normalizeResponse(response)
-      } catch (error) {
-        context.dispatch('handleServerError', { name: 'getPublicUser', error })
-      }
-    },
-
     // Billing Stripe
 
     checkoutUrl: async (context, body) => {

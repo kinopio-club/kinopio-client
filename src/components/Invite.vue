@@ -166,8 +166,6 @@ section.invite
     template(v-if="state.tipsIsVisible")
       .row
         p No account is needed to read spaces, but editing requires an account
-      .row
-        p.badge.success You'll both earn a $6 credit when someone you invite signs up for a Kinopio account
       .row(v-if="currentUserIsUpgraded")
         p.badge.success
           span Because your account is upgraded, others can create cards here for free
