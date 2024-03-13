@@ -49,7 +49,7 @@ const copyText = async (event) => {
     store.commit('addNotificationWithPosition', { message: 'Copy Error', position, type: 'danger', layer: 'app', icon: 'cancel' })
   }
 }
-const downloadLocalJSON = () => {
+const downloadLocalJson = () => {
   let space = utils.clone(currentSpace.value)
   delete space.clients
   const json = 'data:text/json;charset=utf-8,' + encodeURIComponent(JSON.stringify(space))
@@ -94,6 +94,25 @@ const togglePdfIsVisible = () => {
   state.pdfIsVisible = !isVisible
 }
 
+// json canvas
+// https://jsoncanvas.org/spec/1.0/
+
+const downloadLocalCanvas = () => {
+  let space = utils.clone(currentSpace.value)
+  delete space.clients
+  const canvas = convertToCanvas(space)
+
+  const json = 'data:text/json;charset=utf-8,' + encodeURIComponent(JSON.stringify(canvas))
+  const name = fileName()
+  const downloadAnchor = document.getElementById('export-downlaod-anchor')
+  downloadAnchor.setAttribute('href', json)
+  downloadAnchor.setAttribute('download', `${name}.canvas`)
+  downloadAnchor.click()
+}
+const convertToCanvas = (space) => {
+
+}
+
 </script>
 
 <template lang="pug">
@@ -116,11 +135,18 @@ template(v-if="visible")
     .row
       .button-wrap(v-if="currentUserIsSignedIn")
         button(@click.left.stop="togglePdfIsVisible" :class="{ active: state.pdfIsVisible }")
+          img.icon.file(src="@/assets/file.svg")
           span PDF
       .button-wrap
-        button(@click.left="downloadLocalJSON")
+        button(@click.left="downloadLocalJson")
+          img.icon.file(src="@/assets/file.svg")
           span JSON
     Pdf(:visible="state.pdfIsVisible")
+    .row
+      .button-wrap
+        button(@click.left="downloadLocalCanvas")
+          img.icon.json-canvas(src="@/assets/json-canvas.svg")
+          span Canvas
 
   section.export
     // anon user
