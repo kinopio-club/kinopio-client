@@ -205,12 +205,6 @@ const store = createStore({
     shouldResetDimensionsOnLoad: false,
     shouldShowExploreOnLoad: false,
 
-    // referral
-    validateUserReferralUserId: '',
-    shouldValidateUserReferralFromSpaceInvite: false,
-    validateAdvocateReferralName: '',
-    validateFromAdvocateReferralName: '',
-
     // notifications
     notifications: [],
     notifySpaceNotFound: false,
@@ -229,9 +223,6 @@ const store = createStore({
     notifySpaceIsHidden: false,
     notifyThanksForDonating: false,
     notifyThanksForUpgrading: false,
-    notifyReferralSuccessUser: null,
-    notifyEarnedCredits: false,
-    notifyReferralSuccessReferrerName: null,
 
     // notifications with position
     notificationsWithPosition: [],
@@ -346,22 +337,6 @@ const store = createStore({
     shouldShowExploreOnLoad: (state, value) => {
       utils.typeCheck({ value, type: 'boolean' })
       state.shouldShowExploreOnLoad = value
-    },
-    validateUserReferralUserId: (state, userId) => {
-      utils.typeCheck({ value: userId, type: 'string' })
-      state.validateUserReferralUserId = userId
-    },
-    shouldValidateUserReferralFromSpaceInvite: (state, value) => {
-      utils.typeCheck({ value, type: 'boolean' })
-      state.shouldValidateUserReferralFromSpaceInvite = value
-    },
-    validateAdvocateReferralName: (state, value) => {
-      utils.typeCheck({ value, type: 'string' })
-      state.validateAdvocateReferralName = value
-    },
-    validateFromAdvocateReferralName: (state, value) => {
-      utils.typeCheck({ value, type: 'string' })
-      state.validateFromAdvocateReferralName = value
     },
     addUrlPreviewLoadingForCardIds: (state, cardId) => {
       utils.typeCheck({ value: cardId, type: 'string' })
@@ -544,7 +519,6 @@ const store = createStore({
     triggerAddCard: (state, options) => {},
     triggerAddChildCard: (state, options) => {},
     triggerTemplatesIsVisible: () => {},
-    triggerEarnCreditsIsVisible: () => {},
     triggerImportIsVisible: () => {},
     triggerSelectAllItemsBelowCursor: (state, position) => {},
     triggerSplitCard: (state, cardId) => {},
@@ -1384,18 +1358,6 @@ const store = createStore({
     notifyThanksForUpgrading: (state, value) => {
       utils.typeCheck({ value, type: 'boolean' })
       state.notifyThanksForUpgrading = value
-    },
-    notifyReferralSuccessUser: (state, user) => {
-      utils.typeCheck({ value: user, type: 'object' })
-      state.notifyReferralSuccessUser = user
-    },
-    notifyEarnedCredits: (state, user) => {
-      utils.typeCheck({ value: user, type: 'boolean' })
-      state.notifyEarnedCredits = user
-    },
-    notifyReferralSuccessReferrerName: (state, user) => {
-      utils.typeCheck({ value: user, type: 'boolean' })
-      state.notifyReferralSuccessReferrerName = user
     },
 
     // Notifications with Position

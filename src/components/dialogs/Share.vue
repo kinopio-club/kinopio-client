@@ -176,10 +176,6 @@ const closeDialogs = () => {
 
 // toggles
 
-const triggerEarnCreditsIsVisible = () => {
-  store.dispatch('closeAllDialogs')
-  store.commit('triggerEarnCreditsIsVisible')
-}
 const isPresentationMode = () => {
   store.dispatch('closeAllDialogs')
   store.commit('isPresentationMode', true)
@@ -297,10 +293,6 @@ dialog.share.wide(v-if="props.visible" :open="props.visible" @click.left.stop="c
           span Embed
         Embed(:visible="state.embedIsVisible")
 
-  section(v-if='!isSecureAppContextIOS')
-    .button-wrap
-      button(@click="triggerEarnCreditsIsVisible")
-        span Earn Credits
 </template>
 
 <style lang="stylus">

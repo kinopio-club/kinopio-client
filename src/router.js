@@ -196,7 +196,6 @@ const router = createRouter({
           next()
           return
         }
-        store.commit('shouldValidateUserReferralFromSpaceInvite', true)
         store.commit('isPresentationMode', isPresentationMode)
         // edit
         if (collaboratorKey) {
@@ -210,12 +209,12 @@ const router = createRouter({
           next()
         }
       }
+
+    // legacy referral routes Mar 2024
     }, {
       path: '/refer/:userId',
       component: Space,
       beforeEnter: (to, from, next) => {
-        const userId = to.params.userId
-        store.commit('validateUserReferralUserId', userId)
         next()
       }
 
@@ -223,16 +222,12 @@ const router = createRouter({
       path: '/for/:name',
       component: Space,
       beforeEnter: (to, from, next) => {
-        const name = to.params.name
-        store.commit('validateAdvocateReferralName', name)
         next()
       }
     }, {
       path: '/from/:name',
       component: Space,
       beforeEnter: (to, from, next) => {
-        const name = to.params.name
-        store.commit('validateFromAdvocateReferralName', name)
         next()
       }
     }
