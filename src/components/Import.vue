@@ -75,7 +75,7 @@ const updateSpaces = () => {
   emit('closeDialog')
 }
 const isValidSpace = (space) => {
-  this.errors = []
+  state.errors = []
   const schema = {
     'name': 'string',
     'users': 'array',
@@ -88,10 +88,10 @@ const isValidSpace = (space) => {
     const isValidType = utils.typeCheck({ value: space[field], type: schema[field], origin: 'isValidSpace' })
     if (!isValidType) {
       let error = `Expected ${field} but didn't get a ${schema[field]}`
-      this.errors.push(error)
+      state.errors.push(error)
     }
   })
-  if (this.errors.length) {
+  if (state.errors.length) {
     return false
   } else {
     return true
