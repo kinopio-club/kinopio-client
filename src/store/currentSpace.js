@@ -454,10 +454,7 @@ const currentSpace = {
       context.dispatch('updateModulesSpaceId', space)
       context.commit('isLoadingSpace', false, { root: true })
     },
-    saveImportedSpace: async (context) => {
-      context.commit('isLoadingSpace', true, { root: true })
-      let space = utils.clone(context.state)
-      space = utils.clearSpaceMeta(space, 'copy')
+    saveSpace: async (context, space) => {
       const user = context.rootState.currentUser
       const currentUserIsSignedIn = context.rootGetters['currentUser/isSignedIn']
       cache.saveSpace(space)
@@ -467,10 +464,6 @@ const currentSpace = {
       context.commit('triggerUpdateWindowHistory', space, { root: true })
       context.commit('addUserToSpace', user)
       context.dispatch('updateModulesSpaceId', space)
-      nextTick(() => {
-        context.dispatch('currentCards/updateDimensions', {}, { root: true })
-        context.commit('isLoadingSpace', false, { root: true })
-      })
       context.dispatch('incrementCardsCreatedCountFromSpace', space)
     },
     duplicateSpace: (context) => {
@@ -776,12 +769,13 @@ const currentSpace = {
       space = utils.normalizeSpace(cachedSpace)
       context.dispatch('clearStateMeta')
       // load local space while fetching remote space
-      Promise.all([
-        context.dispatch('restoreSpaceLocal', space),
-        context.dispatch('getRemoteSpace', space)
-      ]).then((data) => {
+      try {
+        const [localData, remoteData] = await Promise.all([
+          context.dispatch('restoreSpaceLocal', space),
+          context.dispatch('getRemoteSpace', space)
+        ])
         // restore remote space
-        let remoteSpace = data[1]
+        let remoteSpace = remoteData
         console.log('🎑 remoteSpace', remoteSpace)
         if (!remoteSpace) { return }
         const spaceIsUnchanged = utils.spaceIsUnchanged(cachedSpace, remoteSpace)
@@ -793,9 +787,9 @@ const currentSpace = {
         context.dispatch('restoreSpaceRemote', remoteSpace)
         context.dispatch('saveCurrentSpaceToCache')
         context.dispatch('notifySpaceIsOpen')
-      }).catch(error => {
+      } catch (error) {
         console.error('🚒 Error fetching remoteSpace', error)
-      })
+      }
     },
     saveCurrentSpaceToCache: (context) => {
       const space = utils.clone(context.state)
@@ -832,6 +826,7 @@ const currentSpace = {
       context.dispatch('restoreSpaceInChunks', { space })
       console.log('🎑 local space', space)
       console.timeEnd('🎑⏱️ restoreSpaceLocal')
+      return space
     },
     restoreSpaceRemote: async (context, remoteSpace) => {
       console.time('🎑⏱️ restoreSpaceRemote')
