@@ -112,7 +112,7 @@ template(v-if="visible")
 
   section.export
     .row
-      p Download
+      p Download Space
     .row
       .button-wrap(v-if="currentUserIsSignedIn")
         button(@click.left.stop="togglePdfIsVisible" :class="{ active: state.pdfIsVisible }")
