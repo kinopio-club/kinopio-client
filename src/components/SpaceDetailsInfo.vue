@@ -411,9 +411,9 @@ export default {
   p
     white-space normal
 
-dialog.import-export
-  left initial
-  right 8px
+  dialog.import-export
+    left initial
+    right 8px
 
 .dialog-is-pinned
   dialog.import-export
