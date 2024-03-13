@@ -8,8 +8,7 @@ import SpaceRssFeed from '@/components/dialogs/SpaceRssFeed.vue'
 import Embed from '@/components/dialogs/Embed.vue'
 import UserList from '@/components/UserList.vue'
 import utils from '@/utils.js'
-import Export from '@/components/dialogs/Export.vue'
-import Import from '@/components/dialogs/Import.vue'
+import ImportExport from '@/components/dialogs/ImportExport.vue'
 import AddToExplore from '@/components/AddToExplore.vue'
 import AskToAddToExplore from '@/components/AskToAddToExplore.vue'
 import ReadOnlySpaceInfoBadges from '@/components/ReadOnlySpaceInfoBadges.vue'
@@ -48,8 +47,7 @@ const state = reactive({
   dialogHeight: null,
   spaceRssFeedIsVisible: false,
   embedIsVisible: false,
-  exportIsVisible: false,
-  importIsVisible: false,
+  importExportIsVisible: false,
   isShareInPresentationMode: false,
   emailInvitesIsVisible: false
 })
@@ -161,14 +159,13 @@ const updateDialogHeight = () => {
   })
 }
 const dialogIsVisible = computed(() => {
-  return state.privacyPickerIsVisible || state.spaceRssFeedIsVisible || state.embedIsVisible || state.exportIsVisible || state.importIsVisible || state.emailInvitesIsVisible
+  return state.privacyPickerIsVisible || state.spaceRssFeedIsVisible || state.embedIsVisible || state.importExportIsVisible || state.emailInvitesIsVisible
 })
 const closeDialogs = () => {
   state.privacyPickerIsVisible = false
   state.spaceRssFeedIsVisible = false
   state.embedIsVisible = false
-  state.exportIsVisible = false
-  state.importIsVisible = false
+  state.importExportIsVisible = false
   state.emailInvitesIsVisible = false
   store.commit('userDetailsIsVisible', false)
   store.commit('triggerCloseChildDialogs')
@@ -203,15 +200,10 @@ const toggleEmbedIsVisible = () => {
   closeDialogs()
   state.embedIsVisible = !isVisible
 }
-const toggleExportIsVisible = () => {
-  const isVisible = state.exportIsVisible
+const toggleImportExportIsVisible = () => {
+  const isVisible = state.importExportIsVisible
   closeDialogs()
-  state.exportIsVisible = !isVisible
-}
-const toggleImportIsVisible = () => {
-  const isVisible = state.importIsVisible
-  closeDialogs()
-  state.importIsVisible = !isVisible
+  state.importExportIsVisible = !isVisible
 }
 const toggleIsShareInPresentationMode = () => {
   closeDialogs()
@@ -285,12 +277,9 @@ dialog.share.wide(v-if="props.visible" :open="props.visible" @click.left.stop="c
   section.import-export-section
     .row
       .segmented-buttons(@click.stop)
-        button(@click.left.stop="toggleImportIsVisible" :class="{ active: state.importIsVisible }")
-          span Import
-          Import(:visible="state.importIsVisible" @closeDialog="closeDialogs")
-        button(@click.left.stop="toggleExportIsVisible" :class="{ active: state.exportIsVisible }")
-          span Export
-          Export(:visible="state.exportIsVisible")
+        button(@click.left.stop="toggleImportExportIsVisible" :class="{ active: state.importExportIsVisible }")
+          span Import or Export
+          ImportExport(:visible="state.importExportIsVisible")
       //- Embed
       .button-wrap
         button(@click.left.stop="toggleEmbedIsVisible" :class="{ active: state.embedIsVisible }")
@@ -326,7 +315,7 @@ dialog.share
   dialog.user-details
     left initial
     right calc(100% - 20px)
-  dialog.import
+  dialog.import-export
     top calc(100% - 8px)
     left initial
     right 8px
@@ -353,14 +342,12 @@ dialog.share
     border-top-right-radius 0
 
   @media(max-height 670px)
-    dialog.import,
-    dialog.export,
+    dialog.import-export,
     dialog.embed
       top -50px
 
   @media(max-height 500px)
-    dialog.import,
-    dialog.export,
+    dialog.import-export,
     dialog.embed
       top -200px
 

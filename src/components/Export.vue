@@ -7,15 +7,6 @@ import Loader from '@/components/Loader.vue'
 import utils from '@/utils.js'
 const store = useStore()
 
-onMounted(() => {
-  console.log(`🐴 the component is now mounted.`, store.state.currentSpace)
-  // store.subscribe((mutation, state) => {
-  //   if (mutation.type === 'triggerUpdateOtherCard') {
-  //     mutation.payload
-  //   }
-  // })
-})
-
 const emit = defineEmits(['updateSpaces'])
 
 const props = defineProps({
