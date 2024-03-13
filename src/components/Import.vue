@@ -2,7 +2,6 @@
 import { reactive, computed, onMounted, onUnmounted, defineProps, defineEmits, watch, ref, nextTick } from 'vue'
 import { useStore } from 'vuex'
 
-import ImportArenaChannel from '@/components/dialogs/ImportArenaChannel.vue'
 import Loader from '@/components/Loader.vue'
 import cache from '@/cache.js'
 import utils from '@/utils.js'
@@ -12,36 +11,19 @@ const inputElement = ref(null)
 
 const emit = defineEmits(['updateSpaces', 'closeDialog'])
 
-onMounted(() => {
-  store.subscribe((mutation, state) => {
-    if (mutation.type === 'triggerCloseChildDialogs') {
-      closeDialogs()
-    }
-  })
-})
-
 const props = defineProps({
   visible: Boolean
-})
-watch(() => props.visible, async (value, prevValue) => {
-  await nextTick()
-  if (value) {
-    closeDialogs()
-  }
 })
 
 const state = reactive({
   loading: false,
   errors: [],
-  unknownError: false,
-  importArenaChannelIsVisible: false
+  unknownError: false
 })
 
 const toggleImportArenaChannelIsVisible = () => {
-  state.importArenaChannelIsVisible = !state.importArenaChannelIsVisible
-}
-const closeDialogs = () => {
-  state.importArenaChannelIsVisible = false
+  store.commit('closeAllDialogs')
+  store.commit('importArenaChannelIsVisible', true)
 }
 const selectFile = () => {
   if (state.loading) { return }
@@ -90,7 +72,6 @@ const importSpace = async (space) => {
 }
 const updateSpaces = () => {
   emit('updateSpaces')
-  closeDialogs()
   emit('closeDialog')
 }
 const isValidSpace = (space) => {
@@ -141,10 +122,9 @@ template(v-if="visible")
   section.import
     .row
       .button-wrap(@click.stop)
-        button(@click.left.stop="toggleImportArenaChannelIsVisible" :class="{ active: state.importArenaChannelIsVisible}")
+        button(@click.left.stop="toggleImportArenaChannelIsVisible")
           img.icon.arena(src="@/assets/arena.svg")
           span Are.na Channel
-        ImportArenaChannel(:visible="state.importArenaChannelIsVisible" @updateSpaces="updateSpaces")
 </template>
 
 <style lang="stylus">

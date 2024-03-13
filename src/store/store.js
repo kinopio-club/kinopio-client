@@ -310,6 +310,7 @@ const store = createStore({
       state.pricingIsVisible = false
       state.codeLanguagePickerIsVisible = false
       state.offlineIsVisible = false
+      state.importArenaChannelIsVisible = false
     },
     isOnline: (state, value) => {
       utils.typeCheck({ value, type: 'boolean' })

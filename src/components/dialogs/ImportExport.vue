@@ -42,9 +42,9 @@ const updateDialogHeight = async () => {
   let element = dialogElement.value
   state.dialogHeight = utils.elementHeight(element)
 }
-const closeChildDialogs = () => {
-  store.commit('triggerCloseChildDialogs')
-}
+// const closeChildDialogs = () => {
+//   store.commit('triggerCloseChildDialogs')
+// }
 const init = () => {
   if (props.isExport) {
     state.isImport = false
@@ -66,7 +66,7 @@ const closeDialog = () => {
 </script>
 
 <template lang="pug">
-dialog.narrow.import-export(v-if="visible" :open="visible" @click.left.stop="closeChildDialogs" ref="dialogElement" :style="{'max-height': state.dialogHeight + 'px'}")
+dialog.narrow.import-export(v-if="visible" :open="visible" @click.left.stop ref="dialogElement" :style="{'max-height': state.dialogHeight + 'px'}")
   section
     .segmented-buttons
       button(:class="{active: state.isImport}" @click="updateIsImport(true)")
@@ -78,8 +78,9 @@ dialog.narrow.import-export(v-if="visible" :open="visible" @click.left.stop="clo
 </template>
 
 <style lang="stylus">
-.dialog-import-export
+dialog.import-export
   max-height calc(100vh - 140px)
+  overflow auto
   @media(max-width 350px)
     right -50px
 </style>

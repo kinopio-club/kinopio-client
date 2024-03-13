@@ -80,7 +80,7 @@ template(v-if="settingsIsVisible")
       .button-wrap(:class="{'dialog-is-pinned': dialogIsPinned}")
         button(@click.left.stop="toggleExportIsVisible" :class="{ active: exportIsVisible }")
           span Export
-        Export(:visible="exportIsVisible")
+        ImportExport(:visible="exportIsVisible" :isExport="true")
 
   //- member space settings
   section.subsection.space-settings(v-if="isSpaceMember")
@@ -96,7 +96,7 @@ template(v-if="settingsIsVisible")
       .button-wrap(:class="{'dialog-is-pinned': dialogIsPinned}")
         button(@click.left.stop="toggleExportIsVisible" :class="{ active: exportIsVisible }")
           span Export
-          Export(:visible="exportIsVisible")
+          ImportExport(:visible="exportIsVisible" :isExport="true")
     .row(v-if="currentSpaceIsUserTemplate")
       //- Duplicate
       .button-wrap
@@ -127,7 +127,7 @@ import BackgroundPreview from '@/components/BackgroundPreview.vue'
 import Loader from '@/components/Loader.vue'
 import PrivacyButton from '@/components/PrivacyButton.vue'
 import templates from '@/data/templates.js'
-import Export from '@/components/dialogs/Export.vue'
+import ImportExport from '@/components/dialogs/ImportExport.vue'
 import ReadOnlySpaceInfoBadges from '@/components/ReadOnlySpaceInfoBadges.vue'
 import AddToExplore from '@/components/AddToExplore.vue'
 import AskToAddToExplore from '@/components/AskToAddToExplore.vue'
@@ -141,10 +141,10 @@ export default {
     BackgroundPreview,
     Loader,
     PrivacyButton,
-    Export,
     ReadOnlySpaceInfoBadges,
     AskToAddToExplore,
-    AddToExplore
+    AddToExplore,
+    ImportExport
   },
   props: {
     shouldHidePin: Boolean,

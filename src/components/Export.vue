@@ -131,9 +131,9 @@ template(v-if="visible")
     // signed in user
     template(v-if="currentUserIsSignedIn")
       p
-        span Backup All
+        span Backup All (JSON and TXT)
       button(@click.left="downloadAllSpacesRemote" :class="{ active: state.isLoadingAllSpaces }")
-        span Download All Spaces (JSON and TXT)
+        span Download All Spaces
         Loader(:visible="state.isLoadingAllSpaces")
     a#export-downlaod-anchor.hidden
     .info-container(v-if="state.isLoadingAllSpaces")
@@ -144,6 +144,7 @@ template(v-if="visible")
 
 <style lang="stylus">
 section.export
+  max-width fill-available
   textarea
     background-color var(--secondary-background)
     border 0
