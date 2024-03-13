@@ -1348,6 +1348,7 @@ export default {
   spaceItemUsersToCurrentUser (space, userId) {
     const itemNames = ['boxes', 'cards', 'connections', 'connectionTypes']
     itemNames.forEach(itemName => {
+      if (!space[itemName]) { return }
       space[itemName] = space[itemName].map(item => {
         item.userId = userId
         return item

@@ -83,4 +83,6 @@ dialog.import-export
   overflow auto
   @media(max-width 350px)
     right -50px
+  .row
+    white-space initial
 </style>

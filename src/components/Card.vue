@@ -585,12 +585,6 @@ const hasConnections = computed(() => {
   return Boolean(connections.length)
 })
 const currentConnectionColor = computed(() => store.state.currentConnectionColor)
-const correctPaths = async () => {
-  if (state.pathIsUpdated) { return }
-  await nextTick()
-  store.dispatch('currentConnections/updatePaths', { cardId: props.card.id, shouldUpdateApi: false })
-  state.pathIsUpdated = true
-}
 const createCurrentConnection = (event) => {
   const cursor = utils.cursorPositionInViewport(event)
   const multipleCardsSelectedIds = store.state.multipleCardsSelectedIds
