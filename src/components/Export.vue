@@ -101,7 +101,7 @@ const downloadLocalCanvas = () => {
   let space = utils.clone(currentSpace.value)
   delete space.clients
   const canvas = convertToCanvas(space)
-
+  console.log('🧚 canvas to download', canvas)
   const json = 'data:text/json;charset=utf-8,' + encodeURIComponent(JSON.stringify(canvas))
   const name = fileName()
   const downloadAnchor = document.getElementById('export-downlaod-anchor')
@@ -110,7 +110,48 @@ const downloadLocalCanvas = () => {
   downloadAnchor.click()
 }
 const convertToCanvas = (space) => {
-
+  let canvas = {}
+  canvas.nodes = []
+  canvas.edges = []
+  try {
+    space.cards.forEach(card => {
+      const node = {
+        id: card.id,
+        type: 'text',
+        x: card.x,
+        y: card.y,
+        width: card.width,
+        height: card.height,
+        color: card.backgroundColor
+      }
+      canvas.nodes.push(node)
+    })
+    space.connections.forEach(connection => {
+      const type = store.getters['currentConnections/typeByConnection'](connection)
+      // direction
+      let toEnd = 'none'
+      if (connection.directionIsVisible) {
+        toEnd = 'arrow'
+      }
+      // label
+      let label
+      if (connection.labelIsVisible) {
+        label = type.name
+      }
+      const edge = {
+        id: connection.id,
+        fromNode: connection.startCardId,
+        toNode: connection.endCardId,
+        toEnd,
+        color: type.color,
+        label
+      }
+      canvas.edges.push(edge)
+    })
+    return canvas
+  } catch (error) {
+    console.error('🚒 convertToCanvas', error)
+  }
 }
 
 </script>
