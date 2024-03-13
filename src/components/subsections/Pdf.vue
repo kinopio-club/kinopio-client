@@ -2,11 +2,13 @@
 section.subsection.pdf(v-if="visible")
   a#pdf-downlaod-anchor.hidden
   template(v-if="isLoading")
-    Loader(:visible="true")
-    p Creating space PDF…
-  template(v-if="unknownServerError")
-    .badge.danger (シ_ _)シ Something went wrong, Please try again or contact support
-  template(v-if="!isLoading && !unknownServerError")
+    span
+      Loader(:visible="true")
+      span Creating space PDF…
+  .row(v-if="unknownServerError")
+    .badge.danger
+      span (シ_ _)シ Something went wrong, Please try again or contact support
+  .row(v-if="!isLoading && !unknownServerError")
     .badge.success Downloaded
     p {{fileName()}}.pdf
 </template>
@@ -79,13 +81,19 @@ export default {
 }
 </script>
 
-<style lang="stylus" scoped>
-.pdf
+<style lang="stylus">
+section.pdf
+  white-space initial
   margin-top 10px
   padding-bottom 4px
   .loader
     height 14px
     width 14px
     vertical-align 0px
+    margin 0
+    margin-right 6px
+  .badge
+    max-width fill-available
+    display block
     margin 0
 </style>

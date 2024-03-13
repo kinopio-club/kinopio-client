@@ -911,8 +911,8 @@ button
 
 .icon.templates
   padding 0
-  height 12px
-  vertical-align -1px
+  height 9px
+  vertical-align 1px
 
 .icon.minimap
   vertical-align -2px
@@ -955,6 +955,9 @@ button
 .icon.key
   height 10px
   vertical-align 1px
+
+.icon.json-canvas
+  width 12px
 
 label,
 li

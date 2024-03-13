@@ -149,7 +149,7 @@ aside.notifications(@click.left="closeAllDialogs")
           span Refresh
 
   .persistent-item.info(v-if="currentSpaceIsTemplate" ref="template" :class="{'notification-jiggle': readOnlyJiggle}")
-    button(@click.left="duplicateSpace")
+    button.button-only(@click.left="duplicateSpace")
       img.icon(src="@/assets/add.svg")
       span Duplicate to Edit
 
@@ -461,6 +461,8 @@ export default {
         margin-left 0
   button
     margin-left 6px
+  .button-only
+    margin 0
 
   button + button,
   button + label,

@@ -29,7 +29,7 @@ import SelectAllBelow from '@/components/SelectAllBelow.vue'
 import SpaceUsers from '@/components/SpaceUsers.vue'
 import Donate from '@/components/dialogs/Donate.vue'
 import Toolbar from '@/components/Toolbar.vue'
-import Import from '@/components/dialogs/Import.vue'
+import ImportExport from '@/components/dialogs/ImportExport.vue'
 import Pricing from '@/components/dialogs/Pricing.vue'
 import SpaceTodayJournalBadge from '@/components/SpaceTodayJournalBadge.vue'
 import Discovery from '@/components/Discovery.vue'
@@ -651,7 +651,7 @@ header(v-if="isVisible" :style="state.position" :class="{'fade-out': isFadingOut
             SpaceDetails(:visible="state.spaceDetailsIsVisible")
             ImportArenaChannel(:visible="importArenaChannelIsVisible")
             SpaceDetailsInfo(:visible="state.spaceDetailsInfoIsVisible")
-            Import(:visible="state.importIsVisible")
+            ImportExport(:visible="state.importIsVisible" :isImport="true")
             //- Read Only badge
             .label-badge.space-name-badge-wrap(v-if="!userCanEditSpace")
               span(:class="{'invisible': state.readOnlyJiggle}")
