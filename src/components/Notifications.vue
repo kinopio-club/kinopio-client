@@ -159,38 +159,6 @@ aside.notifications(@click.left="closeAllDialogs")
       a(:href="notifyMoveOrCopyToSpaceDetails.id")
         button(@click.left.prevent.stop="changeSpace(notifyMoveOrCopyToSpaceDetails.id)") {{notifyMoveOrCopyToSpaceDetails.name}} →
 
-  .persistent-item.success(v-if="notifyReferralSuccessUser")
-    p
-      span Because you were referred
-      span(v-if="notifyReferralSuccessUser.name") {{' '}}by {{notifyReferralSuccessUser.name}},
-      span {{' '}}you'll earn ${{referralCreditAmount}} in credits when you sign up
-    .row
-      button(@click.left.stop="triggerSignUpOrInIsVisible")
-        span Sign Up to Earn Credits
-      button(@click="resetNotifyReferralSuccess")
-        img.icon.cancel(src="@/assets/add.svg")
-
-  .persistent-item.success(v-if="notifyReferralSuccessReferrerName")
-    p welcome {{advocateReferrerName}}, once you sign up your account will be upgraded to free
-    .row
-      button(@click.left.stop="triggerSignUpOrInIsVisible")
-        span Sign Up for Your Free Account
-      button(@click="resetNotifyReferralSuccess")
-        img.icon.cancel(src="@/assets/add.svg")
-
-  .persistent-item.success(v-if="notifyEarnedCredits")
-    p You've earned ${{referralCreditAmount}} in referral credits,{{' '}}
-      template(v-if="currentUserIsUpgraded")
-        span which will be used on your next payment
-      template(v-else)
-        span which will be used when you upgrade
-    .row
-      button(v-if="!currentUserIsUpgraded" @click.left.stop="triggerUpgradeUserIsVisible")
-        span Upgrade
-      button(@click.left.stop="triggerEarnCreditsIsVisible")
-        span Earn More
-      button(@click.left="removeNotifyEarnedCredits")
-        img.icon.cancel(src="@/assets/add.svg")
   .persistent-item.danger(v-if="notifySpaceIsUnavailableOffline")
     OfflineBadge
     .row
@@ -283,10 +251,6 @@ export default {
     currentUserIsTiltingCard () { return this.$store.state.currentUserIsTiltingCard },
     currentUserIsPanning () { return this.$store.state.currentUserIsPanning },
     currentUserIsPanningReady () { return this.$store.state.currentUserIsPanningReady },
-    notifyReferralSuccessUser () { return this.$store.state.notifyReferralSuccessUser },
-    notifyReferralSuccessReferrerName () { return this.$store.state.notifyReferralSuccessReferrerName },
-    advocateReferrerName () { return this.$store.state.currentUser.advocateReferrerName },
-    notifyEarnedCredits () { return this.$store.state.notifyEarnedCredits },
     currentUserIsSignedIn () { return this.$store.getters['currentUser/isSignedIn'] },
     currentUserIsUpgraded () { return this.$store.state.currentUser.isUpgraded },
     isTouchDevice () { return this.$store.state.isTouchDevice },
@@ -306,8 +270,7 @@ export default {
       if (currentSpace.isTemplate) { return true }
       const templateSpaceIds = templates.spaces().map(space => space.id)
       return templateSpaceIds.includes(currentSpace.id)
-    },
-    referralCreditAmount () { return consts.referralCreditAmount }
+    }
   },
   methods: {
     notifificationClasses (item) {
@@ -369,7 +332,6 @@ export default {
     },
     triggerSignUpOrInIsVisible () {
       this.$store.commit('triggerSignUpOrInIsVisible')
-      this.resetNotifyReferralSuccess()
     },
     restoreSpace () {
       const space = this.$store.state.currentSpace
@@ -402,17 +364,9 @@ export default {
     resetNotifyCardsCreatedIsOverLimitJiggle () {
       this.notifyCardsCreatedIsOverLimitJiggle = false
     },
-    resetNotifyReferralSuccess () {
-      this.$store.commit('notifyReferralSuccessUser', null)
-      this.$store.commit('notifyReferralSuccessReferrerName', false)
-    },
     triggerUpgradeUserIsVisible () {
       this.closeAllDialogs()
       this.$store.commit('triggerUpgradeUserIsVisible')
-    },
-    triggerEarnCreditsIsVisible () {
-      this.closeAllDialogs()
-      this.$store.commit('triggerEarnCreditsIsVisible')
     },
     async checkIfShouldNotifySpaceOutOfSync () {
       console.log('☎️ checkIfShouldNotifySpaceOutOfSync…')
@@ -456,9 +410,6 @@ export default {
       const space = { id: spaceId }
       this.$store.dispatch('currentSpace/changeSpace', space)
       this.$store.dispatch('closeAllDialogs')
-    },
-    removeNotifyEarnedCredits () {
-      this.$store.commit('notifyEarnedCredits', false)
     },
     removeNotifyConnectionError () {
       this.$store.commit('notifyConnectionError', false)

@@ -31,7 +31,6 @@ import Donate from '@/components/dialogs/Donate.vue'
 import Toolbar from '@/components/Toolbar.vue'
 import ImportExport from '@/components/dialogs/ImportExport.vue'
 import Pricing from '@/components/dialogs/Pricing.vue'
-import EarnCredits from '@/components/dialogs/EarnCredits.vue'
 import SpaceTodayJournalBadge from '@/components/SpaceTodayJournalBadge.vue'
 import Discovery from '@/components/Discovery.vue'
 import UserSettings from '@/components/dialogs/UserSettings.vue'
@@ -92,8 +91,6 @@ onMounted(() => {
       hidden()
     } else if (mutation.type === 'triggerTemplatesIsVisible') {
       updateTemplatesIsVisible(true)
-    } else if (mutation.type === 'triggerEarnCreditsIsVisible') {
-      updateEarnCreditsIsVisible(true)
     } else if (mutation.type === 'triggerRemovedIsVisible' || mutation.type === 'triggerAIImagesIsVisible') {
       updateSidebarIsVisible(true)
     } else if (mutation.type === 'triggerImportIsVisible') {
@@ -154,8 +151,7 @@ const state = reactive({
   templatesIsVisible: false,
   sidebarIsVisible: false,
   donateIsVisible: false,
-  importIsVisible: false,
-  earnCreditsIsVisible: false
+  importIsVisible: false
 })
 
 const importArenaChannelIsVisible = computed(() => store.state.importArenaChannelIsVisible)
@@ -333,7 +329,6 @@ const closeAllDialogs = () => {
   state.notificationsIsVisible = false
   state.addSpaceIsVisible = false
   state.templatesIsVisible = false
-  state.earnCreditsIsVisible = false
   state.importIsVisible = false
   if (!store.state.spaceDetailsIsPinned) {
     state.spaceDetailsIsVisible = false
@@ -354,9 +349,6 @@ const updateDonateIsVisible = (value) => {
 }
 const updateTemplatesIsVisible = (value) => {
   state.templatesIsVisible = value
-}
-const updateEarnCreditsIsVisible = (value) => {
-  state.earnCreditsIsVisible = value
 }
 const updateImportIsVisible = (value) => {
   state.importIsVisible = value
@@ -690,7 +682,6 @@ header(v-if="isVisible" :style="state.position" :class="{'fade-out': isFadingOut
             button(@click.left.stop="toggleShareIsVisible" :class="{active: state.shareIsVisible, 'translucent-button': !shouldIncreaseUIContrast}")
               span Share
             Share(:visible="state.shareIsVisible")
-            EarnCredits(:visible="state.earnCreditsIsVisible")
           //- Notifications
           .button-wrap
             button(@click.left.stop="toggleNotificationsIsVisible" :class="{active: state.notificationsIsVisible, 'translucent-button': !shouldIncreaseUIContrast}")

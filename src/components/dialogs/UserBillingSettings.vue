@@ -3,8 +3,6 @@ import { reactive, computed, onMounted, defineProps, defineEmits, watch, ref, ne
 import { useStore } from 'vuex'
 
 import Loader from '@/components/Loader.vue'
-import UserCredits from '@/components/UserCredits.vue'
-import ReferredNewUserCredits from '@/components/ReferredNewUserCredits.vue'
 import utils from '@/utils.js'
 import consts from '@/consts.js'
 
@@ -83,8 +81,7 @@ const customerPortal = async () => {
 <template lang="pug">
 dialog.narrow.user-billing(v-if="visible" :open="visible" @click.left.stop ref="dialog" :style="{'max-height': state.dialogHeight + 'px'}")
   section
-    p(v-if="isSecureAppContextIOS") Billing
-    p(v-else) Billing and Credits
+    p Billing
 
   //- free
   section(v-if="subscriptionIsFree")
@@ -117,9 +114,6 @@ dialog.narrow.user-billing(v-if="visible" :open="visible" @click.left.stop ref="
   section(v-else)
     p After you upgrade your account you'll be able to manage your payment details here
     button(@click.left="triggerUpgradeUserIsVisible") Upgrade
-    ReferredNewUserCredits
-
-  UserCredits(:showEarnCreditsButton="true")
 </template>
 
 <style lang="stylus">

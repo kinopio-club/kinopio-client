@@ -33,7 +33,7 @@ dialog.narrow.upgrade-faq(v-if="visible" :open="visible" @click.left.stop ref="d
     details
       summary(@click="closeOtherDetails") How do I cancel my subscription?
       section.subsection
-        p You can downgrade to free anytime through User → Settings → Billing and Credits.
+        p You can downgrade to free anytime through User → Settings → Billing.
 
     details
       summary(@click="closeOtherDetails") What is the life plan?

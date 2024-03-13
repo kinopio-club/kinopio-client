@@ -11,7 +11,6 @@ const store = useStore()
 
 onMounted(() => {
   window.addEventListener('message', handleSubscriptionSuccess) // iOS IAP subscription sheet transaction completes
-  updateCredits()
 })
 
 const props = defineProps({
@@ -25,8 +24,7 @@ const state = reactive({
   },
   error: {
     unknownServerError: false
-  },
-  creditsEarned: 0
+  }
 })
 
 const user = computed(() => store.state.currentUser)
@@ -62,16 +60,6 @@ const subscribe = async () => {
   }
 }
 
-const updateCredits = async () => {
-  try {
-    const data = await store.dispatch('api/getReferralsByUser')
-    console.log('🫧', data)
-    state.creditsEarned = data.creditsEarned
-  } catch (error) {
-    console.error('🚒', error)
-  }
-}
-
 const handleSubscriptionSuccess = (event) => {
   if (!consts.isSecureAppContext) { return }
   const data = event.data
@@ -86,7 +74,6 @@ const handleSubscriptionSuccess = (event) => {
   store.commit('currentUser/isUpgraded', true)
   store.commit('currentUser/appleSubscriptionIsActive', true)
   store.commit('notifyCardsCreatedIsOverLimit', false)
-  store.commit('notifyEarnedCredits', false)
   if (!utils.dialogIsVisible()) {
     store.commit('addNotification', {
       message: 'Your account has been upgraded. Thank you for supporting independent, ad-free, sustainable software',
@@ -100,10 +87,6 @@ const handleSubscriptionSuccess = (event) => {
 
 <template lang="pug">
 .upgrade-user-apple(v-if="visible")
-  //- .row(v-if="state.creditsEarned")
-  //-   .badge.info
-  //-     span You have ${{state.creditsEarned}} in referral credits. To redeem credits you'll need to upgrade kinopio on the {{' '}}
-  //-     a(href="consts.kinopioDomain") web
   .row(v-if='!isUpgraded')
     button(@click.left="subscribe" :class="{active : state.loading.subscriptionIsBeingCreated}")
       User(:user="user" :isClickable="false" :hideYouLabel="true" :key="user.id")
