@@ -432,6 +432,7 @@ const shouldJiggle = computed(() => {
 const updateStylesWithWidth = (styles) => {
   const cardHasExtendedContent = cardUrlPreviewIsVisible.value || otherCardIsVisible.value || isVisualCard.value || isAudioCard.value
   const cardHasUrlsOrMedia = cardHasMedia.value || cardHasUrls.value
+  if (isComment.value) { return styles }
   if (cardHasUrlsOrMedia) {
     styles.width = consts.defaultCardMaxWidth
   }
