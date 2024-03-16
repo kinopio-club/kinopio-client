@@ -255,7 +255,6 @@ export default {
         this.$store.dispatch('currentUser/restoreUserFavorites')
         this.$store.commit('triggerUpdateNotifications')
         this.$store.dispatch('themes/restore')
-        this.clearNotifications()
         if (shouldLoadLastSpace) {
           this.$store.dispatch('currentSpace/loadLastSpace')
           this.$store.commit('triggerUpdateWindowHistory')
