@@ -78,7 +78,7 @@ onMounted(async () => {
   }
   await updateUrlPreviewOnload()
   checkIfShouldUpdatePreviewHtml()
-  const defaultCardMaxWidth = store.getters['currentCards/defaultCardMaxWidth'] + 'px'
+  const defaultCardMaxWidth = consts.defaultCardMaxWidth + 'px'
   utils.setCssVariable('card-width', defaultCardMaxWidth)
   initIsVisibleInViewportObserver()
 })
@@ -433,7 +433,7 @@ const updateStylesWithWidth = (styles) => {
   const cardHasExtendedContent = cardUrlPreviewIsVisible.value || otherCardIsVisible.value || isVisualCard.value || isAudioCard.value
   const cardHasUrlsOrMedia = cardHasMedia.value || cardHasUrls.value
   if (cardHasUrlsOrMedia) {
-    styles.width = store.getters['currentCards/defaultCardMaxWidth']
+    styles.width = consts.defaultCardMaxWidth
   }
   if (resizeWidth.value) {
     styles.maxWidth = resizeWidth.value
@@ -849,7 +849,7 @@ const addFile = (file) => {
   const url = file.url
   const urlType = utils.urlType(url)
   const checkbox = utils.checkboxFromString(name)
-  const previousUrls = utils.urlsFromString(name, true) || []
+  const previousUrls = utils.urlsFromString(name) || []
   let isReplaced
   previousUrls.forEach(previousUrl => {
     if (utils.urlType(previousUrl) === urlType) {
@@ -950,7 +950,7 @@ const normalizedName = computed(() => {
   if (markdownLinks) {
     const linkIsMarkdown = markdownLinks.find(markdownLink => markdownLink.includes(link))
     isHidden = !linkIsMarkdown
-  } else if (link.includes('hidden=true')) {
+  } else if (link?.includes('hidden=true')) {
     isHidden = true
   }
   if (isHidden) {
@@ -1048,6 +1048,7 @@ const urls = computed(() => {
     urls.reverse()
   }
   updateMediaUrls(urls)
+  urls = urls?.filter(url => Boolean(url))
   return urls || []
 })
 const cardHasUrls = computed(() => {
@@ -1162,7 +1163,7 @@ const nameIncludesUrl = (url) => {
   return name.includes(url) || name.includes(normalizedUrl) || normalizedUrl.includes(name)
 }
 const previewImage = ({ thumbnail }) => {
-  const minWidth = store.getters['currentCards/defaultCardMaxWidth']
+  const minWidth = consts.defaultCardMaxWidth
   if (!thumbnail) { return '' }
   let image = thumbnail.find(item => {
     let shouldSkipImage = false

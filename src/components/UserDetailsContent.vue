@@ -133,7 +133,7 @@ const userWebsite = computed({
 })
 const websiteUrl = computed(() => {
   if (!userWebsite.value) { return }
-  const urls = utils.urlsFromString(userWebsite.value)
+  const urls = utils.urlsFromString(userWebsite.value, true)
   if (!urls) { return }
   return urls[0]
 })

@@ -464,7 +464,7 @@ export default {
     url () { return utils.urlFromString(this.name) },
     urls () {
       const name = utils.removeMarkdownCodeblocksFromString(this.name)
-      const urls = utils.urlsFromString(name, true)
+      const urls = utils.urlsFromString(name)
       this.updateCardWidthForUrl(urls)
       return urls
     },
@@ -602,7 +602,7 @@ export default {
     updateCardWidthForUrl (urls) {
       if (!utils.arrayHasItems(urls)) { return }
       if (this.card.resizeWidth) { return }
-      const resizeWidth = this.$store.getters['currentCards/defaultCardMaxWidth']
+      const resizeWidth = consts.defaultCardMaxWidth
       this.$store.dispatch('currentCards/update', { id: this.card.id, resizeWidth })
     },
     broadcastShowCardDetails () {
@@ -695,7 +695,7 @@ export default {
       }
     },
     updateMediaUrls () {
-      const urls = utils.urlsFromString(this.card.name, true)
+      const urls = utils.urlsFromString(this.card.name)
       this.formats.image = ''
       this.formats.video = ''
       this.formats.audio = ''

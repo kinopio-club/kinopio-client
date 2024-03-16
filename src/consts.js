@@ -26,6 +26,7 @@ export default {
   cdnHost: 'https://cdn.kinopio.club',
   defaultSpaceBackground: 'https://bk.kinopio.club/grid-large-boxes-2x.png',
   moderatorUserId: 'euGhpBrR9eBcjKnK16C_g',
+  defaultCardMaxWidth: 200,
   kinopioDomain () {
     let domain = 'https://kinopio.club'
     if (this.isDevelopment) {

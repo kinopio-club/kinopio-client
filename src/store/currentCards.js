@@ -1033,10 +1033,6 @@ const currentCards = {
         return rootState.currentUser.color
       }
     },
-    defaultCardMaxWidth: (state, getters, rootState, rootGetters) => {
-      const maxWidth = rootState.currentSpace.defaultCardMaxWidth || 230
-      return maxWidth
-    },
     selectedCardsPositions: (state, getters) => () => {
       const cardIds = getters.isSelectedIds
       let cards = cardIds.map(id => {

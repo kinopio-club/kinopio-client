@@ -378,6 +378,7 @@ export default {
   arrayHasItems (array) { // !arrayIsEmpty, arrayExists
     this.typeCheck({ value: array, type: 'array', allowUndefined: true, origin: 'arrayHasItems' })
     if (array) {
+      array = array.filter(item => Boolean(item))
       if (array.length) {
         return true
       }
@@ -1645,6 +1646,7 @@ export default {
     }
   },
   urlIsValidTld (url) {
+    if (!url) { return }
     const isLocalhostUrl = url.match(this.localhostUrlPattern())
     const isDevelopmentUrl = url.includes(consts.kinopioDomain())
     if (isLocalhostUrl || isDevelopmentUrl) { return true }
@@ -1726,8 +1728,6 @@ export default {
       const hasProtocol = this.urlHasProtocol(url)
       if (isFile || hasProtocol) {
         return url
-      } else {
-        return `https://${url}`
       }
     })
     return urls
@@ -2181,7 +2181,7 @@ export default {
   cardNameSegments (name) {
     if (!name) { return [] }
     const tags = this.tagsFromString(name) || []
-    const urls = this.urlsFromString(name, true) || []
+    const urls = this.urlsFromString(name) || []
     const commands = this.commandsFromString(name) || []
     const markdownLinks = name.match(this.markdown().linkPattern) || []
     const links = urls.filter(url => {
