@@ -843,9 +843,7 @@ export default {
         nameUpdatedByUserId: userId
       }
       this.$store.dispatch('currentCards/update', card)
-      this.$nextTick(() => {
-        this.$store.dispatch('currentConnections/updatePaths', { cardId: this.card.id, shouldUpdateApi: true })
-      })
+      this.updatePaths()
       this.updateMediaUrls()
       this.updateTags()
       if (this.createdByUser.id !== this.currentUser.id) { return }
@@ -854,6 +852,11 @@ export default {
         this.$store.dispatch('userNotifications/addCardUpdated', { cardId: this.card.id, type: 'updateCard' })
         this.notifiedMembers = true
       }
+    },
+    updatePaths () {
+      this.$nextTick(() => {
+        this.$store.dispatch('currentConnections/updatePaths', { cardId: this.card.id, shouldUpdateApi: true })
+      })
     },
     updateDimensions (cardId) {
       this.$store.dispatch('currentCards/updateDimensions', { cardId })
