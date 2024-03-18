@@ -91,7 +91,8 @@ const currentCards = {
     remove: (state, cardToRemove) => {
       if (!cardToRemove) { return }
       const card = state.cards[cardToRemove.id]
-      state.ids = state.ids.filter(id => id !== card.id)
+      const idIndex = state.ids.indexOf(card.id)
+      state.ids.splice(idIndex, 1)
       delete state.cards[card.id]
       state.removedCards.unshift(card)
       cache.updateSpace('removedCards', state.removedCards, currentSpaceId)
@@ -104,7 +105,8 @@ const currentCards = {
       if (!cardToDelete) { return }
       const card = state.cards[cardToDelete.id]
       if (card) {
-        state.ids = state.ids.filter(id => id !== card.id)
+        const idIndex = state.ids.indexOf(card.id)
+        state.ids.splice(idIndex, 1)
         delete state.cards[card.id]
       }
       const shouldDelete = state.removedCards.find(removedCard => cardToDelete.id === removedCard.id)
