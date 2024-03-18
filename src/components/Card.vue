@@ -1884,6 +1884,7 @@ article.card-wrap#card(
   :title="cardNameIfComment"
 )
   .card(
+    v-if="state.isVisibleInViewport"
     @mousedown.left.prevent="startDraggingCard"
     @mouseup.left="showCardDetails"
 
