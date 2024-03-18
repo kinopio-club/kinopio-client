@@ -2094,6 +2094,9 @@ article.card-wrap
     &.is-dark
       .name
         color var(--primary-on-dark-background)
+    &:focus
+      outline 2px solid var(--primary-border)
+
     .card-comment
       > .badge
         margin 0
