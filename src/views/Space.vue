@@ -485,7 +485,7 @@ export default {
       }
       this.addInteractionBlur()
       if (event.touches) {
-        this.$store.commit('triggerUpdatePositionInVisualViewport')
+        this.$store.commit('triggerUpdateHeaderAndFooterPosition')
       }
       this.checkIfShouldHideFooter(event)
       this.checkIfShouldSnapBoxes()

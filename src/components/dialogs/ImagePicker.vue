@@ -102,7 +102,7 @@ const focusSearchInput = () => {
   const length = searchInputElement.value.length
   element.focus()
   element.setSelectionRange(length, length)
-  store.commit('triggerUpdatePositionInVisualViewport')
+  store.commit('triggerUpdateHeaderAndFooterPosition')
 }
 const clearSearch = () => {
   state.search = ''
@@ -325,7 +325,7 @@ const scrollIntoView = () => {
   const element = dialogElement.value
   if (!element) { return }
   utils.scrollIntoView({ element })
-  store.commit('triggerUpdatePositionInVisualViewport')
+  store.commit('triggerUpdateHeaderAndFooterPosition')
 }
 const updateDialogHeight = async () => {
   if (!props.visible) { return }

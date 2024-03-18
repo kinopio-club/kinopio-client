@@ -61,7 +61,7 @@ onMounted(() => {
       closeAllDialogs()
     } else if (mutation.type === 'triggerSpaceDetailsVisible') {
       updateSpaceDetailsIsVisible(true)
-    } else if (mutation.type === 'triggerUpdatePositionInVisualViewport') {
+    } else if (mutation.type === 'triggerUpdateHeaderAndFooterPosition') {
       updatePosition()
     } else if (mutation.type === 'triggerSpaceDetailsInfoIsVisible') {
       updateSpaceDetailsInfoIsVisible(true)

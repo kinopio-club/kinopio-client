@@ -112,7 +112,7 @@ const updatePinchCounterZoomDecimal = () => {
   store.commit('pinchCounterZoomDecimal', utils.pinchCounterZoomDecimal())
 }
 const blur = () => {
-  store.commit('triggerUpdatePositionInVisualViewport')
+  store.commit('triggerUpdateHeaderAndFooterPosition')
   store.dispatch('history/resume')
   const connectionType = utils.clone(currentConnectionType.value)
   store.dispatch('history/add', { connectionTypes: [connectionType], useSnapshot: true })

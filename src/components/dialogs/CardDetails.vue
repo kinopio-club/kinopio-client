@@ -25,7 +25,7 @@ dialog.card-details(v-if="visible" :open="visible" ref="dialog" @click.left="clo
         data-type="name"
         :maxlength="maxCardLength"
         @click.left="clickName"
-        @blur="triggerUpdatePositionInVisualViewport"
+        @blur="triggerUpdateHeaderAndFooterPosition"
         @paste="updatePastedName"
 
         @keyup.alt.enter.exact.stop
@@ -820,8 +820,8 @@ export default {
       this.wasPasted = true
       this.$store.dispatch('currentCards/updateURLQueryStrings', { cardId: this.card.id })
     },
-    triggerUpdatePositionInVisualViewport () {
-      this.$store.commit('triggerUpdatePositionInVisualViewport')
+    triggerUpdateHeaderAndFooterPosition () {
+      this.$store.commit('triggerUpdateHeaderAndFooterPosition')
     },
     addCheckbox () {
       const update = {
@@ -916,7 +916,7 @@ export default {
       this.$store.dispatch('history/resume')
       this.$store.dispatch('currentCards/remove', this.card)
       this.$store.commit('cardDetailsIsVisibleForCardId', '')
-      this.triggerUpdatePositionInVisualViewport()
+      this.triggerUpdateHeaderAndFooterPosition()
     },
     textareaSizes () {
       const element = this.$refs.dialog
@@ -953,7 +953,7 @@ export default {
     },
     focusName (position) {
       if (this.shouldPreventNextFocusOnName) {
-        this.triggerUpdatePositionInVisualViewport()
+        this.triggerUpdateHeaderAndFooterPosition()
         this.$store.commit('shouldPreventNextFocusOnName', false)
         return
       }
@@ -968,7 +968,7 @@ export default {
         if (length) {
           element.setSelectionRange(length, length)
         }
-        this.triggerUpdatePositionInVisualViewport()
+        this.triggerUpdateHeaderAndFooterPosition()
       })
     },
     scrollIntoView (behavior) {
@@ -991,12 +991,12 @@ export default {
         this.scrollIntoView(behavior)
         this.focusName()
         this.triggerUpdateMagicPaintPositionOffset()
-        this.triggerUpdatePositionInVisualViewport()
+        this.triggerUpdateHeaderAndFooterPosition()
       })
     },
     triggerUpdateMagicPaintPositionOffset () {
       this.$store.commit('triggerUpdateMagicPaintPositionOffset')
-      this.triggerUpdatePositionInVisualViewport()
+      this.triggerUpdateHeaderAndFooterPosition()
     },
     closeDialogs (shouldSkipGlobalDialogs) {
       this.$store.commit('triggerCloseChildDialogs')
@@ -1451,7 +1451,7 @@ export default {
       this.cancelOpening()
       this.$store.dispatch('currentSpace/removeUnusedTagsFromCard', cardId)
       this.$store.commit('updateCurrentCardConnections')
-      this.$store.commit('triggerUpdatePositionInVisualViewport')
+      this.$store.commit('triggerUpdateHeaderAndFooterPosition')
       this.$store.commit('shouldPreventNextEnterKey', false)
       if (!card) { return }
       const cardHasName = Boolean(card.name)
