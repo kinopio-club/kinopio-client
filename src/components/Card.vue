@@ -45,8 +45,6 @@ let preventSticking = false
 let stickyTimerComplete = false
 let stickyTimer
 
-let observer
-
 onMounted(async () => {
   store.subscribe((mutation, state) => {
     const { type, payload } = mutation
@@ -70,9 +68,6 @@ onMounted(async () => {
       updateDefaultBackgroundColor(utils.cssVariable('secondary-background'))
     } else if (type === 'triggerCancelLocking') {
       cancelLocking()
-    } else if (type === 'triggerResetCardObservers') {
-      observer = null
-      initIsVisibleInViewportObserver()
     }
   })
   updateDefaultBackgroundColor(utils.cssVariable('secondary-background'))
@@ -878,7 +873,7 @@ const addFile = (file) => {
     id: props.card.id,
     name: utils.trim(name)
   })
-  store.commit('triggerUpdateHeaderAndFooterPosition')
+  store.commit('triggerUpdatePositionInVisualViewport')
 }
 const clearErrors = () => {
   state.error.signUpToUpload = false
@@ -1579,7 +1574,6 @@ const userDetailsIsUser = computed(() => {
 // is visible in viewport
 
 const initIsVisibleInViewportObserver = () => {
-  if (observer) { return }
   try {
     let callback = (entries, observer) => {
       entries.forEach((entry) => {
