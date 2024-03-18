@@ -19,7 +19,7 @@ const unlockedCards = computed(() => store.getters['currentCards/isNotLocked'])
 <template lang="pug">
 .cards
   //- locked cards rendered in ItemsLocked
-  template(v-for="card in unlockedCards")
+  template(v-for="card in unlockedCards" :key="card.id")
     Card(:card="card")
 </template>
 

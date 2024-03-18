@@ -1,5 +1,5 @@
 <script setup>
-import { reactive, computed, onMounted, onUnmounted, defineProps, defineEmits, watch, ref, nextTick } from 'vue'
+import { reactive, computed, onMounted, onBeforeUnmount, onUnmounted, defineProps, defineEmits, watch, ref, nextTick } from 'vue'
 import { useStore, mapState, mapGetters } from 'vuex'
 
 import utils from '@/utils.js'
@@ -45,6 +45,8 @@ let preventSticking = false
 let stickyTimerComplete = false
 let stickyTimer
 
+let observer
+
 onMounted(async () => {
   store.subscribe((mutation, state) => {
     const { type, payload } = mutation
@@ -80,7 +82,11 @@ onMounted(async () => {
   checkIfShouldUpdatePreviewHtml()
   const defaultCardMaxWidth = consts.defaultCardMaxWidth + 'px'
   utils.setCssVariable('card-width', defaultCardMaxWidth)
-  initIsVisibleInViewportObserver()
+  initViewportObserver()
+})
+
+onBeforeUnmount(() => {
+  removeViewportObserver()
 })
 
 const props = defineProps({
@@ -118,7 +124,7 @@ const state = reactive({
   stickyStretchResistance: 6,
   defaultBackgroundColor: '#e3e3e3',
   pathIsUpdated: false,
-  isVisibleInViewport: true
+  isVisibleInViewport: false
 })
 watch(() => state.linkToPreview, (value, prevValue) => {
   updateUrlData()
@@ -1573,7 +1579,8 @@ const userDetailsIsUser = computed(() => {
 
 // is visible in viewport
 
-const initIsVisibleInViewportObserver = () => {
+const initViewportObserver = async () => {
+  await nextTick()
   try {
     let callback = (entries, observer) => {
       entries.forEach((entry) => {
@@ -1585,11 +1592,16 @@ const initIsVisibleInViewportObserver = () => {
       })
     }
     const target = cardElement.value
-    const observer = new IntersectionObserver(callback, { rootMargin: '50%' })
+    observer = new IntersectionObserver(callback, { rootMargin: '50%' })
     observer.observe(target)
   } catch (error) {
-    console.error('🚒 card initIsVisibleInViewportObserver', error)
+    console.error('🚒 card initViewportObserver', error)
   }
+}
+const removeViewportObserver = () => {
+  const target = cardElement.value
+  if (!observer) { return }
+  observer.unobserve(target)
 }
 
 // mouse handlers
