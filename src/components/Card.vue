@@ -873,7 +873,7 @@ const addFile = (file) => {
     id: props.card.id,
     name: utils.trim(name)
   })
-  store.commit('triggerUpdatePositionInVisualViewport')
+  store.commit('triggerUpdateHeaderAndFooterPosition')
 }
 const clearErrors = () => {
   state.error.signUpToUpload = false
