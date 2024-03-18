@@ -360,7 +360,6 @@ const articleStyle = computed(() => {
   return styles
 })
 const cardStyle = computed(() => {
-  if (!state.isVisibleInViewport) { return }
   let backgroundColor, nameColor
   backgroundColor = props.card.backgroundColor
   if (nameIsColor.value) {
@@ -381,7 +380,6 @@ const cardStyle = computed(() => {
   return styles
 })
 const cardContentStyles = computed(() => {
-  if (!state.isVisibleInViewport) { return }
   let styles = {}
   if (isLocked.value) {
     styles = { marginRight: '2px' }
@@ -392,7 +390,6 @@ const cardContentStyles = computed(() => {
   return styles
 })
 const cardContentWrapStyles = computed(() => {
-  if (!state.isVisibleInViewport) { return }
   let styles = {}
   if (resizeWidth.value) {
     styles.maxWidth = resizeWidth.value
@@ -403,7 +400,6 @@ const cardContentWrapStyles = computed(() => {
   return styles
 })
 const articleClasses = computed(() => {
-  if (!state.isVisibleInViewport) { return }
   const classes = {
     'is-resizing': store.state.currentUserIsResizingCard,
     'is-tilting': store.state.currentUserIsTiltingCard,
@@ -413,7 +409,6 @@ const articleClasses = computed(() => {
   return classes
 })
 const cardClasses = computed(() => {
-  if (!state.isVisibleInViewport) { return }
   const m = 100
   const l = 150
   const classes = {
@@ -662,7 +657,7 @@ const connectorIsVisible = computed(() => {
   return isVisible
 })
 const connectorGlowStyle = computed(() => {
-  if (!shouldRenderElements.value) { return }
+  if (!state.isVisibleInViewport) { return }
   if (!utils.arrayHasItems(connectedConnectionTypes.value) && !store.state.currentUserIsDrawingConnection) { return } // cards with no connections
   const color = connectedToAnotherCardDetailsVisibleColor.value ||
     connectedToAnotherCardBeingDraggedColor.value ||
@@ -1610,7 +1605,6 @@ const removeViewportObserver = () => {
   if (!observer) { return }
   observer.unobserve(target)
 }
-const shouldRenderElements = computed(() => isSelected.value || state.isVisibleInViewport)
 
 // mouse handlers
 
@@ -1881,7 +1875,6 @@ article.card-wrap#card(
   :data-card-id="card.id"
   :data-is-hidden-by-comment-filter="isCardHiddenByCommentFilter"
   :data-is-visible-in-viewport="state.isVisibleInViewport"
-  :data-should-render-elements="shouldRenderElements"
   :data-is-locked="isLocked"
   :data-resize-width="resizeWidth"
   :data-tilt-degrees="card.tiltDegrees"
@@ -1933,7 +1926,7 @@ article.card-wrap#card(
     .locking-frame(v-if="state.isLocking" :style="lockingFrameStyle")
     Frames(:card="card")
 
-    template(v-if="!isComment && shouldRenderElements")
+    template(v-if="!isComment")
       ImageOrVideo(:isSelectedOrDragging="isSelectedOrDragging" :pendingUploadDataUrl="pendingUploadDataUrl" :image="state.formats.image" :video="state.formats.video" @updateCardDimensions="updateCardDimensions")
 
     TiltResize(:card="card" :visible="tiltResizeIsVisible")
@@ -1953,7 +1946,7 @@ article.card-wrap#card(
           UserLabelInline(:user="createdByUser" :shouldHideName="true")
 
       //- Not Comment
-      .card-content(v-if="!isComment && shouldRenderElements" :style="cardContentStyles")
+      .card-content(v-if="!isComment" :style="cardContentStyles")
         //- Audio
         .audio-wrap(v-if="Boolean(state.formats.audio)")
           Audio(:visible="Boolean(state.formats.audio)" :url="state.formats.audio" @isPlaying="updateIsPlayingAudio" :selectedColor="selectedColor" :normalizedName="normalizedName")
