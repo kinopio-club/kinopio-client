@@ -360,6 +360,7 @@ const articleStyle = computed(() => {
   return styles
 })
 const cardStyle = computed(() => {
+  if (!state.isVisibleInViewport) { return }
   let backgroundColor, nameColor
   backgroundColor = props.card.backgroundColor
   if (nameIsColor.value) {
@@ -380,6 +381,7 @@ const cardStyle = computed(() => {
   return styles
 })
 const cardContentStyles = computed(() => {
+  if (!state.isVisibleInViewport) { return }
   let styles = {}
   if (isLocked.value) {
     styles = { marginRight: '2px' }
@@ -390,6 +392,7 @@ const cardContentStyles = computed(() => {
   return styles
 })
 const cardContentWrapStyles = computed(() => {
+  if (!state.isVisibleInViewport) { return }
   let styles = {}
   if (resizeWidth.value) {
     styles.maxWidth = resizeWidth.value
@@ -400,6 +403,7 @@ const cardContentWrapStyles = computed(() => {
   return styles
 })
 const articleClasses = computed(() => {
+  if (!state.isVisibleInViewport) { return }
   const classes = {
     'is-resizing': store.state.currentUserIsResizingCard,
     'is-tilting': store.state.currentUserIsTiltingCard,
@@ -409,6 +413,7 @@ const articleClasses = computed(() => {
   return classes
 })
 const cardClasses = computed(() => {
+  if (!state.isVisibleInViewport) { return }
   const m = 100
   const l = 150
   const classes = {
@@ -657,6 +662,7 @@ const connectorIsVisible = computed(() => {
   return isVisible
 })
 const connectorGlowStyle = computed(() => {
+  if (!shouldRenderElements.value) { return }
   if (!utils.arrayHasItems(connectedConnectionTypes.value) && !store.state.currentUserIsDrawingConnection) { return } // cards with no connections
   const color = connectedToAnotherCardDetailsVisibleColor.value ||
     connectedToAnotherCardBeingDraggedColor.value ||
