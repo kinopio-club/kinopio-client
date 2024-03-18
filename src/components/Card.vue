@@ -1604,6 +1604,7 @@ const removeViewportObserver = () => {
   if (!observer) { return }
   observer.unobserve(target)
 }
+const shouldRenderElements = computed(() => isSelected.value || state.isVisibleInViewport)
 
 // mouse handlers
 
@@ -1874,6 +1875,7 @@ article.card-wrap#card(
   :data-card-id="card.id"
   :data-is-hidden-by-comment-filter="isCardHiddenByCommentFilter"
   :data-is-visible-in-viewport="state.isVisibleInViewport"
+  :data-should-render-elements="shouldRenderElements"
   :data-is-locked="isLocked"
   :data-resize-width="resizeWidth"
   :data-tilt-degrees="card.tiltDegrees"
@@ -1925,7 +1927,7 @@ article.card-wrap#card(
     .locking-frame(v-if="state.isLocking" :style="lockingFrameStyle")
     Frames(:card="card")
 
-    template(v-if="!isComment")
+    template(v-if="!isComment && shouldRenderElements")
       ImageOrVideo(:isSelectedOrDragging="isSelectedOrDragging" :pendingUploadDataUrl="pendingUploadDataUrl" :image="state.formats.image" :video="state.formats.video" @updateCardDimensions="updateCardDimensions")
 
     TiltResize(:card="card" :visible="tiltResizeIsVisible")
@@ -1945,7 +1947,7 @@ article.card-wrap#card(
           UserLabelInline(:user="createdByUser" :shouldHideName="true")
 
       //- Not Comment
-      .card-content(v-if="!isComment && state.isVisibleInViewport" :style="cardContentStyles")
+      .card-content(v-if="!isComment && shouldRenderElements" :style="cardContentStyles")
         //- Audio
         .audio-wrap(v-if="Boolean(state.formats.audio)")
           Audio(:visible="Boolean(state.formats.audio)" :url="state.formats.audio" @isPlaying="updateIsPlayingAudio" :selectedColor="selectedColor" :normalizedName="normalizedName")
