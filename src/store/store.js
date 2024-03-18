@@ -549,6 +549,7 @@ const store = createStore({
     triggerUpdateWindowTitle: () => {},
     triggerRestoreSpaceRemoteComplete: () => {},
     triggerCheckIfShouldNotifySpaceOutOfSync: () => {},
+    triggerResetCardObservers: () => {},
 
     // Used by extensions only
 
