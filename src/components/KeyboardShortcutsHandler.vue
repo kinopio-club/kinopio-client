@@ -568,24 +568,12 @@ export default {
       this.$store.commit('clearNotificationsWithPosition')
       let position = currentCursorPosition || prevCursorPosition
       try {
+        this.notifyPasted(position)
         if (!navigator.clipboard.read) {
-          this.notifyPasted(position)
           return utils.clone(this.$store.state.clipboardDataPolyfill)
         }
         const text = await navigator.clipboard.readText()
-        const isData = utils.isStringJSON(text)
-        let data, isKinopioData
-
-        if (isData) {
-          data = JSON.parse(text)
-          isKinopioData = data?.isKinopioData
-        }
-        this.notifyPasted(position)
-        if (isKinopioData) {
-          return data
-        } else {
-          return { text }
-        }
+        return { text }
       } catch (error) {
         console.error('🚑 getClipboardData', error)
         this.$store.commit('addNotificationWithPosition', { message: `Could not paste`, position, type: 'danger', layer: 'app', icon: 'cut' })
@@ -708,8 +696,7 @@ export default {
       console.log('🎊 copyData', data, text)
       try {
         this.$store.commit('clipboardDataPolyfill', data)
-        data = JSON.stringify(data)
-        await navigator.clipboard.writeText(data)
+        await navigator.clipboard.writeText(text)
       } catch (error) {
         console.warn('🚑 writeSelectedToClipboard', error)
         throw { error }
