@@ -485,6 +485,7 @@ const isLocked = computed(() => {
   return isLocked
 })
 const tiltResizeIsVisible = computed(() => {
+  if (!state.isVisibleInViewport) { return }
   if (isLocked.value) { return }
   if (!canEditSpace.value) { return }
   if (cardPendingUpload.value || remoteCardPendingUpload.value) { return }
@@ -1884,7 +1885,6 @@ article.card-wrap#card(
   :title="cardNameIfComment"
 )
   .card(
-    v-if="state.isVisibleInViewport"
     @mousedown.left.prevent="startDraggingCard"
     @mouseup.left="showCardDetails"
 
@@ -1945,7 +1945,7 @@ article.card-wrap#card(
           UserLabelInline(:user="createdByUser" :shouldHideName="true")
 
       //- Not Comment
-      .card-content(v-if="!isComment" :style="cardContentStyles")
+      .card-content(v-if="!isComment && state.isVisibleInViewport" :style="cardContentStyles")
         //- Audio
         .audio-wrap(v-if="Boolean(state.formats.audio)")
           Audio(:visible="Boolean(state.formats.audio)" :url="state.formats.audio" @isPlaying="updateIsPlayingAudio" :selectedColor="selectedColor" :normalizedName="normalizedName")
@@ -2060,7 +2060,7 @@ article.card-wrap#card(
         span Space is Read Only
 
   //- Meta Info
-  .meta-container
+  .meta-container(v-if="state.isVisibleInViewport")
     //- Search result
     span.badge.search(v-if="isInSearchResultsCards")
       img.icon.search(src="@/assets/search.svg")
