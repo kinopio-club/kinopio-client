@@ -25,7 +25,6 @@ const initialState = {
   cardsCreatedCount: 0,
   isUpgraded: false,
   isModerator: false,
-  isGuideMaker: false,
   filterShowUsers: false,
   filterShowDateUpdated: false,
   filterShowAbsoluteDates: false,

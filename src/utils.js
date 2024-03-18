@@ -2019,7 +2019,6 @@ export default {
       isCollaborator,
       isUpgraded: user.isUpgraded,
       isModerator: user.isModerator,
-      isGuideMaker: user.isGuideMaker,
       isDonor: user.isDonor
     }
   },

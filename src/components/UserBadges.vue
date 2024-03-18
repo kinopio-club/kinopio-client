@@ -12,9 +12,6 @@
   //- Moderator
   .badge.button-badge.info.badge-moderator(v-if="user.isModerator" @click.stop="toggleDescription('Moderator')" :class="{active: name === 'Moderator'}")
     span Moderator
-  //- Guide Maker
-  .badge.button-badge.info.badge-guide-maker(v-if="user.isGuideMaker" @click.stop="toggleDescription('GuideMaker')" :class="{active: name === 'GuideMaker'}")
-    span Guide Maker
   //- Ambassador
   .badge.button-badge.success.badge-ambassador(v-if="user.isAmbassador" @click.stop="toggleDescription('Ambassador')" :class="{active: name === 'Ambassador'}")
     //- img.icon.heart(src="@/assets/heart.svg")
@@ -42,7 +39,7 @@ export default {
   },
   computed: {
     isBadges () {
-      const badges = ['isSpectator', 'isUpgraded', 'isModerator', 'isGuideMaker', 'isDonor', 'isAmbassador']
+      const badges = ['isSpectator', 'isUpgraded', 'isModerator', 'isDonor', 'isAmbassador']
       return badges.find(badge => this.user[badge])
     }
   },
