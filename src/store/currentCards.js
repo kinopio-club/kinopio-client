@@ -83,8 +83,10 @@ const currentCards = {
     },
     move: (state, { cards, spaceId }) => {
       cards.forEach(card => {
-        state.cards[card.id].x = card.x
-        state.cards[card.id].y = card.y
+        let newCard = utils.clone(state.cards[card.id])
+        newCard.x = card.x
+        newCard.y = card.y
+        state.cards[card.id] = newCard
       })
       cache.updateSpaceCardsDebounced(state.cards, currentSpaceId)
     },
