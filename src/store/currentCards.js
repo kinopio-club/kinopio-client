@@ -323,7 +323,6 @@ const currentCards = {
       }
       context.dispatch('api/addToQueue', { name: 'updateMultipleCards', body: updates }, { root: true })
       context.dispatch('history/add', { cards }, { root: true })
-      context.dispatch('updateDimensions', { cards })
       cards.forEach(card => {
         context.dispatch('broadcast/update', { updates: card, type: 'updateCard', handler: 'currentCards/update' }, { root: true })
         context.commit('update', card)
@@ -332,6 +331,9 @@ const currentCards = {
           context.commit('triggerUpdateOtherCard', card.id, { root: true })
         }
         cache.updateSpace('editedByUserId', context.rootState.currentUser.id, currentSpaceId)
+      })
+      nextTick(() => {
+        context.dispatch('currentConnections/updateMultplePaths', cards, { root: true })
       })
     },
     updateCounter: (context, card) => {
@@ -613,20 +615,12 @@ const currentCards = {
       }, { root: true })
       // update connections
       const cardIds = cards.map(card => card.id)
-      const connections = context.rootGetters['currentConnections/byMultipleCardIds'](cardIds)
-      if (connections.length) {
-        context.dispatch('api/addToQueue', {
-          name: 'updateMultipleConnections',
-          body: { connections, spaceId }
-        }, { root: true })
-      }
       // broadcast changes
       context.dispatch('broadcast/update', { updates: { cards }, type: 'moveCards', handler: 'currentCards/moveBroadcast' }, { root: true })
       context.commit('broadcast/updateStore', { updates: { userId: context.rootState.currentUser.id }, type: 'clearRemoteCardsDragging' }, { root: true })
       // ..
       nextTick(() => {
-        context.dispatch('currentConnections/updatePaths', { connections, shouldUpdateApi: true }, { root: true })
-        context.dispatch('broadcast/update', { updates: { connections }, type: 'updateConnectionPaths', handler: 'currentConnections/updatePathsBroadcast' }, { root: true })
+        context.dispatch('currentConnections/updateMultplePaths', cards, { root: true })
         context.dispatch('history/resume', null, { root: true })
         context.dispatch('history/add', { cards, useSnapshot: true }, { root: true })
         context.dispatch('checkIfItemShouldIncreasePageSize', currentDraggingCard, { root: true })
