@@ -107,21 +107,20 @@ const isTiltingCard = computed(() => store.state.currentUserIsTiltingCard)
 const isDraggingCard = computed(() => store.state.currentUserIsDraggingCard)
 const isResizingBox = computed(() => store.state.currentUserIsResizingBox)
 const isDraggingBox = computed(() => store.state.currentUserIsDraggingBox)
-const viewportHeight = computed(() => store.state.viewportHeight)
-const viewportWidth = computed(() => store.state.viewportWidth)
-const pageHeight = computed(() => store.state.pageHeight)
-const pageWidth = computed(() => store.state.pageWidth)
+
+// user
+
 const currentUser = computed(() => store.state.currentUser)
-const isInteracting = computed(() => {
-  if (isDraggingCard.value || isDrawingConnection.value || isResizingCard.value || isResizingBox.value || isDraggingBox.value) {
-    return true
-  } else { return false }
-})
 const users = computed(() => {
   const excludeCurrentUser = true
   return store.getters['currentSpace/allUsers'](excludeCurrentUser)
 })
+
+// styles
+
 const spaceZoomDecimal = computed(() => store.getters.spaceZoomDecimal)
+const pageHeight = computed(() => store.state.pageHeight)
+const pageWidth = computed(() => store.state.pageWidth)
 const styles = computed(() => {
   const zoom = 1 / spaceZoomDecimal.value
   return {
@@ -131,12 +130,8 @@ const styles = computed(() => {
   }
 })
 
-const correctCardConnectionPaths = () => {
-  const space = utils.clone(store.state.currentSpace)
-  const user = utils.clone(store.state.currentUser)
-  const currentSpaceIsRemote = store.getters['currentSpace/isRemote']
-  store.dispatch('currentConnections/correctPaths', { shouldUpdateApi: currentSpaceIsRemote })
-}
+// page history
+
 const loadSpaceOnBackOrForward = (event) => {
   const url = window.location.href
   if (!utils.urlIsSpace(url)) { return }
@@ -149,6 +144,9 @@ const unloadPage = () => {
   store.dispatch('currentSpace/removeEmptyCards')
   store.commit('triggerUnloadPage')
 }
+
+// page size
+
 const updatePageSizesDebounced = debounce(() => {
   updatePageSizes()
 }, 500)
@@ -156,66 +154,47 @@ const updatePageSizes = async () => {
   await nextTick()
   store.dispatch('updatePageSizes')
 }
-const addCardFromOutsideAppContext = (event) => {
-  if (!consts.isSecureAppContext) { return }
-  const currentSpace = store.state.currentSpace
-  const data = event.data
-  if (data.name !== 'addedCardFromAddPage') { return }
-  const card = data.value
-  if (card.spaceId !== currentSpace.id) { return }
-  store.commit('currentCards/create', { card, shouldPreventCache: true })
+
+// connections
+
+const correctCardConnectionPaths = () => {
+  const space = utils.clone(store.state.currentSpace)
+  const user = utils.clone(store.state.currentUser)
+  const currentSpaceIsRemote = store.getters['currentSpace/isRemote']
+  store.dispatch('currentConnections/correctPaths', { shouldUpdateApi: currentSpaceIsRemote })
 }
-const addInteractionBlur = () => {
-  if (!utils.isMobile()) { return }
-  const elements = document.querySelectorAll('button, li, label')
-  elements.forEach(element => element.addEventListener('click', blur))
-}
-const blur = (event) => {
-  event.target.blur()
-}
-const initInteractions = (event) => {
-  if (eventIsFromTextarea(event)) {
-    shouldCancel = true
-  } else {
-    shouldCancel = false
+
+// cards
+
+const addCard = (event) => {
+  let position = utils.cursorPositionInSpace(event)
+  const isParentCard = true
+  position = {
+    x: position.x,
+    y: position.y
   }
+  store.dispatch('currentUser/notifyReadOnly', position)
   if (spaceIsReadOnly.value) { return }
-  state.startCursor = utils.cursorPositionInViewport(event)
+  store.dispatch('currentCards/add', { position, isParentCard })
+  store.commit('childCardId', '')
 }
-const constrainCursorToAxis = (event) => {
-  if (store.state.currentUserIsDraggingBox) { return }
-  if (!event.shiftKey) { return }
-  const delta = {
-    x: Math.abs(endCursor.x - state.startCursor.x),
-    y: Math.abs(endCursor.y - state.startCursor.y)
+const addOrCloseCard = (event) => {
+  const sidebarIsVisible = window.document.querySelector('dialog#sidebar')
+  if (store.state.shouldAddCard) {
+    let position = utils.cursorPositionInSpace(event)
+    // prevent addCard if position is outside space
+    if (utils.isPositionOutsideOfSpace(position)) {
+      position = utils.cursorPositionInPage(event)
+      store.commit('addNotificationWithPosition', { message: 'Outside Space', position, type: 'info', icon: 'cancel', layer: 'app' })
+      return
+    }
+    // add card
+    addCard(event)
+  // close item details
+  } else if ((store.state.cardDetailsIsVisibleForCardId || store.state.boxDetailsIsVisibleForBoxId) && !sidebarIsVisible) {
+    store.dispatch('closeAllDialogs')
   }
-  if (delta.x > delta.y) {
-    endCursor.y = prevCursor.y
-  } else {
-    endCursor.x = prevCursor.x
-  }
 }
-
-// resize cards
-
-const resizeCards = () => {
-  if (!prevCursor) { return }
-  const cardIds = store.state.currentUserIsResizingCardIds
-  const deltaX = endCursor.x - prevCursor.x
-  store.dispatch('currentCards/resize', { cardIds, deltaX })
-}
-const stopResizingCards = () => {
-  if (!store.state.currentUserIsResizingCard) { return }
-  store.dispatch('history/resume')
-  const cardIds = store.state.currentUserIsResizingCardIds
-  const cards = cardIds.map(id => store.getters['currentCards/byId'](id))
-  store.dispatch('history/add', { cards, useSnapshot: true })
-  store.commit('currentUserIsResizingCard', false)
-  store.commit('broadcast/updateStore', { updates: { userId: currentUser.value.id }, type: 'removeRemoteUserResizingCards' })
-}
-
-// tilt cards
-
 const tiltCards = () => {
   if (!prevCursor) { return }
   const cardIds = store.state.currentUserIsTiltingCardIds
@@ -233,6 +212,30 @@ const stopTiltingCards = () => {
   cardIds.forEach(cardId => {
     store.dispatch('currentConnections/updatePaths', { cardId, shouldUpdateApi: true })
   })
+}
+const resizeCards = () => {
+  if (!prevCursor) { return }
+  const cardIds = store.state.currentUserIsResizingCardIds
+  const deltaX = endCursor.x - prevCursor.x
+  store.dispatch('currentCards/resize', { cardIds, deltaX })
+}
+const stopResizingCards = () => {
+  if (!store.state.currentUserIsResizingCard) { return }
+  store.dispatch('history/resume')
+  const cardIds = store.state.currentUserIsResizingCardIds
+  const cards = cardIds.map(id => store.getters['currentCards/byId'](id))
+  store.dispatch('history/add', { cards, useSnapshot: true })
+  store.commit('currentUserIsResizingCard', false)
+  store.commit('broadcast/updateStore', { updates: { userId: currentUser.value.id }, type: 'removeRemoteUserResizingCards' })
+}
+const addCardFromOutsideAppContext = (event) => {
+  if (!consts.isSecureAppContext) { return }
+  const currentSpace = store.state.currentSpace
+  const data = event.data
+  if (data.name !== 'addedCardFromAddPage') { return }
+  const card = data.value
+  if (card.spaceId !== currentSpace.id) { return }
+  store.commit('currentCards/create', { card, shouldPreventCache: true })
 }
 
 // boxes
@@ -262,12 +265,32 @@ const stopResizingBoxes = () => {
   store.commit('broadcast/updateStore', { updates: { userId: currentUser.value.id }, type: 'removeRemoteUserResizingBoxes' })
   store.dispatch('checkIfItemShouldIncreasePageSize', boxes[0])
 }
+const checkIfShouldSnapBoxes = () => {
+  if (!store.state.boxesWereDragged) { return }
+  const snapGuides = store.state.currentBoxes.snapGuides
+  if (!snapGuides.length) { return }
+  snapGuides.forEach(snapGuide => store.dispatch('currentBoxes/snap', snapGuide))
+}
+const unselectCardsInDraggedBox = () => {
+  if (!store.state.currentDraggingBoxId) { return }
+  if (store.state.multipleBoxesSelectedIds.length) { return }
+  store.dispatch('clearMultipleSelected')
+}
+const showBoxDetails = async (event) => {
+  if (!store.state.currentBoxIsNew) { return }
+  if (utils.isMobile()) { return }
+  const boxId = store.state.currentUserIsResizingBoxIds[0]
+  await nextTick()
+  await nextTick()
+  store.commit('boxDetailsIsVisibleForBoxId', boxId)
+}
+
+// drag items
 
 const dragItemsOnNextTick = async () => {
   await nextTick()
   dragItems()
 }
-
 const dragItems = () => {
   store.dispatch('history/pause')
   const prevCursor = cursor()
@@ -283,6 +306,79 @@ const dragItems = () => {
     endCursor,
     prevCursor: prevCursor
   })
+}
+
+// footer
+
+const footerDialogIsVisible = () => {
+  const activeFooterButton = document.querySelector('footer button.active')
+  return Boolean(activeFooterButton)
+}
+const checkIfShouldHideFooter = (event) => {
+  if (event.target.nodeType !== 1) { return } // firefox check
+  const isTouchDevice = store.state.isTouchDevice
+  if (!isTouchDevice) { return }
+  const node = event.target.nodeName
+  const isTextarea = node === 'TEXTAREA'
+  const isInput = node === 'INPUT'
+  if (footerDialogIsVisible()) {
+    store.commit('shouldHideFooter', false)
+  } else if (isTextarea || isInput) {
+    store.commit('shouldHideFooter', true)
+  } else {
+    store.commit('shouldHideFooter', false)
+  }
+}
+
+// multiple selected actions dialog
+
+const showMultipleSelectedActions = (event) => {
+  if (spaceIsReadOnly.value) { return }
+  if (store.state.preventMultipleSelectedActionsIsVisible) { return }
+  const isMultipleSelected = store.state.multipleCardsSelectedIds.length || store.state.multipleConnectionsSelectedIds.length || store.state.multipleBoxesSelectedIds.length
+  if (isMultipleSelected) {
+    const position = utils.cursorPositionInSpace(event)
+    store.commit('multipleSelectedActionsPosition', position)
+    store.commit('multipleSelectedActionsIsVisible', true)
+  }
+}
+
+// interactions
+
+const isInteracting = computed(() => {
+  if (isDraggingCard.value || isDrawingConnection.value || isResizingCard.value || isResizingBox.value || isDraggingBox.value) {
+    return true
+  } else { return false }
+})
+const addInteractionBlur = () => {
+  if (!utils.isMobile()) { return }
+  const elements = document.querySelectorAll('button, li, label')
+  elements.forEach(element => element.addEventListener('click', blur))
+}
+const blur = (event) => {
+  event.target.blur()
+}
+const initInteractions = (event) => {
+  if (eventIsFromTextarea(event)) {
+    shouldCancel = true
+  } else {
+    shouldCancel = false
+  }
+  if (spaceIsReadOnly.value) { return }
+  state.startCursor = utils.cursorPositionInViewport(event)
+}
+const constrainCursorToAxis = (event) => {
+  if (store.state.currentUserIsDraggingBox) { return }
+  if (!event.shiftKey) { return }
+  const delta = {
+    x: Math.abs(endCursor.x - state.startCursor.x),
+    y: Math.abs(endCursor.y - state.startCursor.y)
+  }
+  if (delta.x > delta.y) {
+    endCursor.y = prevCursor.y
+  } else {
+    endCursor.x = prevCursor.x
+  }
 }
 const interact = (event) => {
   endCursor = utils.cursorPositionInViewport(event)
@@ -324,18 +420,6 @@ const cursor = () => {
   }
   return cursor
 }
-const addCard = (event) => {
-  let position = utils.cursorPositionInSpace(event)
-  const isParentCard = true
-  position = {
-    x: position.x,
-    y: position.y
-  }
-  store.dispatch('currentUser/notifyReadOnly', position)
-  if (spaceIsReadOnly.value) { return }
-  store.dispatch('currentCards/add', { position, isParentCard })
-  store.commit('childCardId', '')
-}
 const eventIsFromTextarea = (event) => {
   if (event.target.nodeType !== 1) { return } // firefox check
   const node = event.target.nodeName
@@ -345,10 +429,6 @@ const eventIsFromTextarea = (event) => {
   if (isTextarea || isInput) {
     return true
   }
-}
-const footerDialogIsVisible = () => {
-  const activeFooterButton = document.querySelector('footer button.active')
-  return Boolean(activeFooterButton)
 }
 const shouldCancelInteraction = (event) => {
   if (shouldCancel) {
@@ -361,67 +441,6 @@ const shouldCancelInteraction = (event) => {
   const fromHeader = event.target.closest('header')
   const fromFooter = event.target.closest('footer')
   return Boolean(fromDialog || fromHeader || fromFooter)
-}
-const checkIfShouldHideFooter = (event) => {
-  if (event.target.nodeType !== 1) { return } // firefox check
-  const isTouchDevice = store.state.isTouchDevice
-  if (!isTouchDevice) { return }
-  const node = event.target.nodeName
-  const isTextarea = node === 'TEXTAREA'
-  const isInput = node === 'INPUT'
-  if (footerDialogIsVisible()) {
-    store.commit('shouldHideFooter', false)
-  } else if (isTextarea || isInput) {
-    store.commit('shouldHideFooter', true)
-  } else {
-    store.commit('shouldHideFooter', false)
-  }
-}
-const checkIfShouldSnapBoxes = () => {
-  if (!store.state.boxesWereDragged) { return }
-  const snapGuides = store.state.currentBoxes.snapGuides
-  if (!snapGuides.length) { return }
-  snapGuides.forEach(snapGuide => store.dispatch('currentBoxes/snap', snapGuide))
-}
-const showMultipleSelectedActions = (event) => {
-  if (spaceIsReadOnly.value) { return }
-  if (store.state.preventMultipleSelectedActionsIsVisible) { return }
-  const isMultipleSelected = store.state.multipleCardsSelectedIds.length || store.state.multipleConnectionsSelectedIds.length || store.state.multipleBoxesSelectedIds.length
-  if (isMultipleSelected) {
-    const position = utils.cursorPositionInSpace(event)
-    store.commit('multipleSelectedActionsPosition', position)
-    store.commit('multipleSelectedActionsIsVisible', true)
-  }
-}
-const addOrCloseCard = (event) => {
-  const sidebarIsVisible = window.document.querySelector('dialog#sidebar')
-  if (store.state.shouldAddCard) {
-    let position = utils.cursorPositionInSpace(event)
-    // prevent addCard if position is outside space
-    if (utils.isPositionOutsideOfSpace(position)) {
-      position = utils.cursorPositionInPage(event)
-      store.commit('addNotificationWithPosition', { message: 'Outside Space', position, type: 'info', icon: 'cancel', layer: 'app' })
-      return
-    }
-    // add card
-    addCard(event)
-  // close item details
-  } else if ((store.state.cardDetailsIsVisibleForCardId || store.state.boxDetailsIsVisibleForBoxId) && !sidebarIsVisible) {
-    store.dispatch('closeAllDialogs')
-  }
-}
-const unselectCardsInDraggedBox = () => {
-  if (!store.state.currentDraggingBoxId) { return }
-  if (store.state.multipleBoxesSelectedIds.length) { return }
-  store.dispatch('clearMultipleSelected')
-}
-const showBoxDetails = async (event) => {
-  if (!store.state.currentBoxIsNew) { return }
-  if (utils.isMobile()) { return }
-  const boxId = store.state.currentUserIsResizingBoxIds[0]
-  await nextTick()
-  await nextTick()
-  store.commit('boxDetailsIsVisibleForBoxId', boxId)
 }
 
 // 💣 stopInteractions and Space/stopPainting are run on all mouse and touch end events
