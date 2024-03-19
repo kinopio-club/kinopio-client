@@ -449,10 +449,10 @@ const stopInteractions = (event) => {
   console.log('💣 stopInteractions')
   const isCardsSelected = store.state.currentDraggingCardId || store.state.multipleCardsSelectedIds.length
   const isBoxesSelected = store.state.multipleBoxesSelectedIds
-  if (isCardsSelected) {
+  if (isCardsSelected && store.state.cardsWereDragged) {
     store.dispatch('currentCards/afterMove')
   }
-  if (isBoxesSelected) {
+  if (isBoxesSelected && store.state.boxesWereDragged) {
     store.dispatch('currentBoxes/afterMove')
   }
   addInteractionBlur()
@@ -479,6 +479,7 @@ const stopInteractions = (event) => {
   store.commit('currentUserIsDraggingCard', false)
   store.commit('currentUserIsDraggingBox', false)
   store.commit('boxesWereDragged', false)
+  store.commit('cardsWereDragged', false)
   updatePageSizes()
   store.commit('prevCursorPosition', utils.cursorPositionInPage(event))
   prevCursor = undefined
