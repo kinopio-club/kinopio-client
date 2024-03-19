@@ -211,7 +211,7 @@ template(v-if="visible")
 
 <style lang="stylus">
 section.export
-  max-width fill-available
+  max-width stretch
   textarea
     background-color var(--secondary-background)
     border 0

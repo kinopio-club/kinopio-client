@@ -93,7 +93,7 @@ section.pdf
     margin 0
     margin-right 6px
   .badge
-    max-width fill-available
+    max-width stretch
     display block
     margin 0
 </style>
