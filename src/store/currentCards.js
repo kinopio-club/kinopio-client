@@ -604,6 +604,7 @@ const currentCards = {
         card.y = card.y + prevMoveDelta.y
         return card
       })
+      context.dispatch('incrementSelectedZs')
       context.commit('move', { cards, spaceId })
       cards = cards.filter(card => card)
       context.dispatch('api/addToQueue', {
