@@ -1,5 +1,5 @@
 <script setup>
-import { reactive, computed, onMounted, onUnmounted, defineProps, defineEmits, watch, ref, nextTick } from 'vue'
+import { reactive, computed, onMounted, onBeforeUnmount, onUnmounted, defineProps, defineEmits, watch, ref, nextTick } from 'vue'
 import { useStore } from 'vuex'
 
 import utils from '@/utils.js'
@@ -10,6 +10,7 @@ let animationTimer, isMultiTouch, startCursor, currentCursor
 let observer
 
 const connectionElement = ref(null)
+const connectionPathElement = ref(null)
 
 onMounted(() => {
   store.subscribe((mutation, state) => {
@@ -28,8 +29,11 @@ onMounted(() => {
       }
     }
   })
-  window.addEventListener('scroll', initIsVisibleInViewportObserver)
-  initIsVisibleInViewportObserver()
+  initViewportObserver()
+})
+
+onBeforeUnmount(() => {
+  removeViewportObserver()
 })
 
 const props = defineProps({
@@ -60,6 +64,7 @@ const connectionStyles = computed(() => {
   return { pointerEvents: 'none' }
 })
 const connectionClasses = computed(() => {
+  if (!state.isVisibleInViewport) { return }
   return {
     active: isActive.value,
     filtered: isFiltered.value,
@@ -148,7 +153,7 @@ const showConnectionDetails = (event, isFromStore) => {
     if (!utils.cursorsAreClose(startCursor, currentCursor)) { return }
   }
   if (!props.connection.path) {
-    console.error('🚒 no connection path', props.connection.path)
+    console.error('🚒 missing connection path', props.connection.id, props.connection.path)
     return
   }
   store.dispatch('closeAllDialogs')
@@ -312,7 +317,7 @@ const animationFrame = () => {
   })
   const controlPoint = curveMatch[0]
   state.curvedPath = updatedPath(state.curvedPath, controlPoint, x, y)
-  const element = connectionElement.value
+  const element = connectionPathElement.value
   if (!element) { return }
   element.setAttribute('d', state.curvedPath)
   if (shouldAnimate.value) {
@@ -358,12 +363,19 @@ const startDraggingConnection = (event) => {
 // interaction handlers
 
 const isActive = computed(() => {
-  if (!isDraggingCurrentConnectionLabel.value) { return }
-  return isSelected.value || detailsIsVisible.value || remoteDetailsIsVisible.value || isRemoteSelected.value || isCurrentCardConnection.value || isConnectedToMultipleCardsSelected.value
+  return isSelected.value ||
+    detailsIsVisible.value ||
+    remoteDetailsIsVisible.value ||
+    isRemoteSelected.value ||
+    isCurrentCardConnection.value ||
+    isConnectedToMultipleCardsSelected.value ||
+    isDraggingCurrentConnectionLabel.value
 })
 const isHovered = computed(() => {
   if (store.state.currentUserIsDraggingCard) { return }
-  return props.connection.id === store.state.currentUserIsHoveringOverConnectionId || props.connection.id === store.state.currentUserIsDraggingConnectionIdLabel || isHoveredOverConnectedCard.value
+  return props.connection.id === store.state.currentUserIsHoveringOverConnectionId ||
+    props.connection.id === store.state.currentUserIsDraggingConnectionIdLabel ||
+    isHoveredOverConnectedCard.value
 })
 const handleMouseEnter = () => {
   store.commit('currentUserIsHoveringOverConnectionId', props.connection.id)
@@ -380,8 +392,8 @@ const checkIsMultiTouch = (event) => {
 
 // is visible in viewport
 
-const initIsVisibleInViewportObserver = () => {
-  if (observer) { return }
+const initViewportObserver = async () => {
+  await nextTick()
   try {
     let callback = (entries, observer) => {
       entries.forEach((entry) => {
@@ -397,13 +409,19 @@ const initIsVisibleInViewportObserver = () => {
     observer = new IntersectionObserver(callback, { rootMargin: '50%' })
     observer.observe(target)
   } catch (error) {
-    console.error('🚒 connection initIsVisibleInViewportObserver', error)
+    console.error('🚒 connection initViewportObserver', error)
   }
+}
+const removeViewportObserver = () => {
+  const target = connectionElement.value
+  if (!observer) { return }
+  observer.unobserve(target)
 }
 </script>
 
 <template lang="pug">
-g.connection(v-if="visible" :style="connectionStyles" :data-id="connection.id")
+g.connection(v-if="visible" :style="connectionStyles" :data-id="connection.id" :data-is-visible-in-viewport="state.isVisibleInViewport" ref="connectionElement")
+
   path.connection-path(
     fill="none"
     :stroke="typeColor"
@@ -415,7 +433,6 @@ g.connection(v-if="visible" :style="connectionStyles" :data-id="connection.id")
     :data-type-id="connection.connectionTypeId"
     :data-is-hidden-by-comment-filter="isHiddenByCommentFilter"
     :data-label-is-visible="connection.labelIsVisible"
-    :data-is-visible-in-viewport="state.isVisibleInViewport"
     :key="connection.id"
     :d="connection.path"
     @mousedown.left="startDraggingConnection"
@@ -425,7 +442,7 @@ g.connection(v-if="visible" :style="connectionStyles" :data-id="connection.id")
     @keyup.stop.backspace="removeConnection"
     @keyup.stop.enter="showConnectionDetailsOnKeyup"
     :class="connectionClasses"
-    ref="connectionElement"
+    ref="connectionPathElement"
     tabindex="0"
     @dragover.prevent
     @drop.prevent.stop="addCardsAndUploadFiles"

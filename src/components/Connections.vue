@@ -18,9 +18,9 @@ svg.connections
     CurrentConnection(:startCardId="startCardId")
   template(v-for="connection in remoteCurrentConnections")
     Connection(:connection="connection" :isRemote="true")
-  template(v-for="connection in connections")
+  template(v-for="connection in connections" :key="connection.id")
     Connection(:connection="connection")
-template(v-for="connection in connections")
+template(v-for="connection in connections" :key="connection.id")
   ConnectionLabel(:connection="connection")
 </template>
 

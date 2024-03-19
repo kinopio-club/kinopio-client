@@ -2,7 +2,7 @@
 .card-unlock-button.inline-button-wrap(:style="positionStyles" @mouseup.left="unlockCard" @touchend="unlockCard" :data-card-id="card.id")
   button.inline-button(tabindex="-1" :style="backgroundStyles" :class="{'is-light-in-dark-theme': isLightInDarkTheme, 'is-dark-in-light-theme': isDarkInLightTheme}")
     .connected-colors
-      template(v-for="type in connectionTypes")
+      template(v-for="type in connectionTypes" :key="type.id")
         .color(:style="{ background: type.color}")
     img.icon.lock-icon(src="@/assets/lock.svg")
 </template>

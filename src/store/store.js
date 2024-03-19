@@ -499,7 +499,7 @@ const store = createStore({
     triggerUpdateRemoteUserCursor: () => {},
     triggerUpdateRemoteDropGuideLine: () => {},
     triggerUpdateStopRemoteUserDropGuideLine: () => {},
-    triggerUpdatePositionInVisualViewport: () => {},
+    triggerUpdateHeaderAndFooterPosition: () => {},
     triggerHideTouchInterface: () => {},
     triggerUpgradeUserIsVisible: () => {},
     triggerDonateIsVisible: () => {},
@@ -1444,12 +1444,12 @@ const store = createStore({
       state.otherItems = otherItems
     },
     updateCardNameInOtherItems: (state, { id, name }) => {
-      state.otherItems.cards = state.otherItems.cards.map(card => {
-        if (card.id === id) {
-          card.name = name
-        }
-        return card
-      })
+      const cards = state.otherItems.cards
+      const index = cards.findIndex(card => card.id === id)
+      const card = cards[index]
+      if (card) {
+        card.name = name
+      }
     },
     otherTags: (state, remoteTags) => {
       remoteTags = uniqBy(remoteTags, 'name')

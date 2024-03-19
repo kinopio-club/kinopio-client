@@ -1,7 +1,7 @@
 <template lang="pug">
 span
   ul.results-list.card-list(ref="resultsList")
-    template(v-for="card in normalizedCards")
+    template(v-for="card in normalizedCards" :key="card.id")
       li(@click.stop="selectCard(card)" :data-card-id="card.id" :class="{active: cardIsActive(card), hover: cardIsFocused(card)}")
         //- date
         span.badge.status.inline-badge

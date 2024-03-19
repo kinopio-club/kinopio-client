@@ -170,10 +170,10 @@ const resetPinchCounterZoomDecimal = () => {
 }
 const blur = () => {
   emit('onBlur')
-  triggerUpdatePositionInVisualViewport()
+  triggerUpdateHeaderAndFooterPosition()
 }
-const triggerUpdatePositionInVisualViewport = () => {
-  store.commit('triggerUpdatePositionInVisualViewport')
+const triggerUpdateHeaderAndFooterPosition = () => {
+  store.commit('triggerUpdateHeaderAndFooterPosition')
 }
 const focusNextItem = () => {
   emit('focusNextItem')

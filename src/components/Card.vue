@@ -1,5 +1,5 @@
 <script setup>
-import { reactive, computed, onMounted, onUnmounted, defineProps, defineEmits, watch, ref, nextTick } from 'vue'
+import { reactive, computed, onMounted, onBeforeUnmount, onUnmounted, defineProps, defineEmits, watch, ref, nextTick } from 'vue'
 import { useStore, mapState, mapGetters } from 'vuex'
 
 import utils from '@/utils.js'
@@ -45,6 +45,8 @@ let preventSticking = false
 let stickyTimerComplete = false
 let stickyTimer
 
+let observer
+
 onMounted(async () => {
   store.subscribe((mutation, state) => {
     const { type, payload } = mutation
@@ -80,7 +82,11 @@ onMounted(async () => {
   checkIfShouldUpdatePreviewHtml()
   const defaultCardMaxWidth = consts.defaultCardMaxWidth + 'px'
   utils.setCssVariable('card-width', defaultCardMaxWidth)
-  initIsVisibleInViewportObserver()
+  initViewportObserver()
+})
+
+onBeforeUnmount(() => {
+  removeViewportObserver()
 })
 
 const props = defineProps({
@@ -118,7 +124,7 @@ const state = reactive({
   stickyStretchResistance: 6,
   defaultBackgroundColor: '#e3e3e3',
   pathIsUpdated: false,
-  isVisibleInViewport: true
+  isVisibleInViewport: false
 })
 watch(() => state.linkToPreview, (value, prevValue) => {
   updateUrlData()
@@ -479,6 +485,7 @@ const isLocked = computed(() => {
   return isLocked
 })
 const tiltResizeIsVisible = computed(() => {
+  if (!state.isVisibleInViewport) { return }
   if (isLocked.value) { return }
   if (!canEditSpace.value) { return }
   if (cardPendingUpload.value || remoteCardPendingUpload.value) { return }
@@ -650,6 +657,7 @@ const connectorIsVisible = computed(() => {
   return isVisible
 })
 const connectorGlowStyle = computed(() => {
+  if (!state.isVisibleInViewport) { return }
   if (!utils.arrayHasItems(connectedConnectionTypes.value) && !store.state.currentUserIsDrawingConnection) { return } // cards with no connections
   const color = connectedToAnotherCardDetailsVisibleColor.value ||
     connectedToAnotherCardBeingDraggedColor.value ||
@@ -873,7 +881,7 @@ const addFile = (file) => {
     id: props.card.id,
     name: utils.trim(name)
   })
-  store.commit('triggerUpdatePositionInVisualViewport')
+  store.commit('triggerUpdateHeaderAndFooterPosition')
 }
 const clearErrors = () => {
   state.error.signUpToUpload = false
@@ -1573,7 +1581,8 @@ const userDetailsIsUser = computed(() => {
 
 // is visible in viewport
 
-const initIsVisibleInViewportObserver = () => {
+const initViewportObserver = async () => {
+  await nextTick()
   try {
     let callback = (entries, observer) => {
       entries.forEach((entry) => {
@@ -1585,11 +1594,16 @@ const initIsVisibleInViewportObserver = () => {
       })
     }
     const target = cardElement.value
-    const observer = new IntersectionObserver(callback, { rootMargin: '50%' })
+    observer = new IntersectionObserver(callback, { rootMargin: '50%' })
     observer.observe(target)
   } catch (error) {
-    console.error('🚒 card initIsVisibleInViewportObserver', error)
+    console.error('🚒 card initViewportObserver', error)
   }
+}
+const removeViewportObserver = () => {
+  const target = cardElement.value
+  if (!observer) { return }
+  observer.unobserve(target)
 }
 
 // mouse handlers
@@ -2047,7 +2061,7 @@ article.card-wrap#card(
         span Space is Read Only
 
   //- Meta Info
-  .meta-container
+  .meta-container(v-if="state.isVisibleInViewport")
     //- Search result
     span.badge.search(v-if="isInSearchResultsCards")
       img.icon.search(src="@/assets/search.svg")

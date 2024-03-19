@@ -64,7 +64,7 @@ const focusPromptInput = () => {
   const length = element.value.length
   element.focus()
   element.setSelectionRange(length, length)
-  store.commit('triggerUpdatePositionInVisualViewport')
+  store.commit('triggerUpdateHeaderAndFooterPosition')
 }
 const textareaSize = () => {
   const textarea = textareaElement.value

@@ -231,7 +231,7 @@ export default {
       const maxIterations = 10
       const initialDelay = 1000 // 1 second
       const serverStatus = await this.$store.dispatch('api/getStatus')
-      console.log('☎️ server online status', serverStatus)
+      console.log('server online status', serverStatus)
       if (serverStatus) {
         this.$store.dispatch('isOnline', true)
         this.$store.dispatch('api/processQueueOperations')
@@ -246,7 +246,7 @@ export default {
         delay = Math.pow(2, statusRetryCount) * initialDelay
       }
       delay = delay || 15 * 60 * 1000 // 15 minutes
-      console.log(`☎️ Retrying status in ${delay / 1000} seconds...`)
+      console.log(`Retrying status in ${delay / 1000} seconds...`)
       setTimeout(this.updateServerIsOnline, delay)
     },
 

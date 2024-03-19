@@ -4,7 +4,7 @@ dialog.narrow.color-picker(v-if="visible" :open="visible" ref="dialog" @click.le
     .row
       .badge.full-width-color-badge(:style="{backgroundColor: currentColor}")
         //- Input
-        input(v-model="color" @focus="resetPinchCounterZoomDecimal" @blur="triggerUpdatePositionInVisualViewport" @keyup.stop.backspace :class="{ 'is-dark': isDark }")
+        input(v-model="color" @focus="resetPinchCounterZoomDecimal" @blur="triggerUpdateHeaderAndFooterPosition" @keyup.stop.backspace :class="{ 'is-dark': isDark }")
           //- Remove
         button.small-button.remove-button(v-if="removeIsVisible" title="remove" @click="removeColor")
           img.icon(src="@/assets/remove.svg")
@@ -196,8 +196,8 @@ export default {
     resetPinchCounterZoomDecimal () {
       this.$store.commit('pinchCounterZoomDecimal', 1)
     },
-    triggerUpdatePositionInVisualViewport () {
-      this.$store.commit('triggerUpdatePositionInVisualViewport')
+    triggerUpdateHeaderAndFooterPosition () {
+      this.$store.commit('triggerUpdateHeaderAndFooterPosition')
     },
     scrollIntoView () {
       this.$nextTick(() => {

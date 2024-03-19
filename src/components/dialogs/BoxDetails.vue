@@ -147,7 +147,7 @@ export default {
       this.$store.commit('currentBoxIsNew', false)
     },
     blur () {
-      this.$store.commit('triggerUpdatePositionInVisualViewport')
+      this.$store.commit('triggerUpdateHeaderAndFooterPosition')
     },
     scrollIntoView () {
       this.$nextTick(() => {

@@ -81,8 +81,10 @@ export default {
       state.connections[connection.id].spaceId = currentSpaceId
       cache.updateSpaceConnectionsDebounced(state.connections, currentSpaceId)
     },
-    updatePathWhileDragging: (state, { connection, path }) => {
-      state.connections[connection.id].path = path
+    updatePathsWhileDragging: (state, connections) => {
+      connections.forEach(connection => {
+        state.connections[connection.id].path = connection.path
+      })
     },
     updateType: (state, type) => {
       const keys = Object.keys(type)
@@ -264,13 +266,18 @@ export default {
       }, { root: true })
     },
     updatePathsWhileDragging: (context, { connections }) => {
-      connections = connections.map(connection => {
+      let newConnections = []
+      connections = connections.forEach(connection => {
         const path = context.getters.connectionPathBetweenCards(connection.startCardId, connection.endCardId, connection.controlPoint)
-        context.commit('updatePathWhileDragging', { connection, path })
-        connection.path = path
-        return connection
+        if (!path) { return }
+        const newConnection = {
+          id: connection.id,
+          path
+        }
+        newConnections.push(newConnection)
       })
-      context.dispatch('broadcast/update', { updates: { connections }, type: 'updateConnection', handler: 'currentConnections/updatePathsBroadcast' }, { root: true })
+      context.commit('updatePathsWhileDragging', newConnections)
+      context.dispatch('broadcast/update', { updates: { connections: newConnections }, type: 'updateConnection', handler: 'currentConnections/updatePathsBroadcast' }, { root: true })
     },
     correctPaths: (context, { shouldUpdateApi }) => {
       if (!context.rootState.webfontIsLoaded) { return }

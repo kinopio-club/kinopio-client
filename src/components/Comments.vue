@@ -2,7 +2,7 @@
 .comments(v-if="visible")
   section.results-section(v-if="comments.length" ref="results")
     ul.results-list
-      template(v-for="(card in comments")
+      template(v-for="card in comments" :key="card.id")
         li(@click="showCardDetails(card)")
           p
             UserLabelInline(:user="card.user")

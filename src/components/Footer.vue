@@ -19,7 +19,7 @@ onMounted(() => {
   window.addEventListener('resize', updatePosition)
   updatePosition()
   store.subscribe((mutation, state) => {
-    if (mutation.type === 'triggerUpdatePositionInVisualViewport') {
+    if (mutation.type === 'triggerUpdateHeaderAndFooterPosition') {
       updatePosition()
     } else if (mutation.type === 'triggerHideTouchInterface') {
       hideOnTouch()
