@@ -7,6 +7,9 @@ import dayjs from 'dayjs'
 import Explore from '@/components/dialogs/Explore.vue'
 import Live from '@/components/dialogs/Live.vue'
 import Favorites from '@/components/dialogs/Favorites.vue'
+
+import FavoriteSpaceButton from '@/components/FavoriteSpaceButton.vue'
+
 import utils from '@/utils.js'
 const store = useStore()
 
@@ -16,7 +19,7 @@ onMounted(() => {
   window.addEventListener('online', updateLiveSpaces)
   updateLiveSpaces()
   updateExploreSpaces()
-  updateFavorites()
+  // updateFavorites()
   store.subscribe((mutation, state) => {
     if (mutation.type === 'triggerExploreIsVisible') {
       toggleExploreIsVisible()
@@ -123,29 +126,33 @@ const liveSpacesCount = computed(() => {
 
 // Favorites
 
-const toggleFavoritesIsVisible = () => {
-  const isVisible = state.favoritesIsVisible
-  store.dispatch('closeAllDialogs')
-  state.favoritesIsVisible = !isVisible
-}
-const favoriteSpacesEditedCount = computed(() => {
-  const currentUser = store.state.currentUser
-  let favoriteSpaces = utils.clone(currentUser.favoriteSpaces)
-  favoriteSpaces = favoriteSpaces.filter(space => {
-    const isEditedByOtherUser = space.editedByUserId !== currentUser.id
-    const isEditedAndNotVisited = space.isEdited && space.userId !== currentUser.id
-    return isEditedByOtherUser && isEditedAndNotVisited
-  })
-  return favoriteSpaces.length
-})
-const updateFavorites = async () => {
-  await store.dispatch('currentUser/restoreUserFavorites')
-}
-const isFavoriteSpace = computed(() => store.getters['currentSpace/isFavorite'])
+// TOOD move this to sidebar
+
+// const toggleFavoritesIsVisible = () => {
+//   const isVisible = state.favoritesIsVisible
+//   store.dispatch('closeAllDialogs')
+//   state.favoritesIsVisible = !isVisible
+// }
+// const favoriteSpacesEditedCount = computed(() => {
+//   const currentUser = store.state.currentUser
+//   let favoriteSpaces = utils.clone(currentUser.favoriteSpaces)
+//   favoriteSpaces = favoriteSpaces.filter(space => {
+//     const isEditedByOtherUser = space.editedByUserId !== currentUser.id
+//     const isEditedAndNotVisited = space.isEdited && space.userId !== currentUser.id
+//     return isEditedByOtherUser && isEditedAndNotVisited
+//   })
+//   return favoriteSpaces.length
+// })
+// const updateFavorites = async () => {
+//   await store.dispatch('currentUser/restoreUserFavorites')
+// }
+// const isFavoriteSpace = computed(() => store.getters['currentSpace/isFavorite'])
 </script>
 
 <template lang="pug">
 .explore-row.button-wrap(v-if="isOnline")
+  FavoriteSpaceButton
+
   .segmented-buttons.space-functions-row
     //- Explore
     .button-wrap
@@ -157,15 +164,17 @@ const isFavoriteSpace = computed(() => store.getters['currentSpace/isFavorite'])
       button(@click.left="toggleLiveIsVisible" :class="{ active: state.liveIsVisible, 'translucent-button': !shouldIncreaseUIContrast }")
         img.icon.camera(src="@/assets/camera.svg")
         span(v-if="liveSpacesCount") {{ liveSpacesCount }}
+
     //- Favorites
-    .button-wrap
-      button(@click.left="toggleFavoritesIsVisible" :class="{ active: state.favoritesIsVisible, 'translucent-button': !shouldIncreaseUIContrast }")
-        img.icon(v-if="isFavoriteSpace" src="@/assets/heart.svg")
-        img.icon(v-else src="@/assets/heart-empty.svg")
-        span(v-if="favoriteSpacesEditedCount") {{ favoriteSpacesEditedCount }}
+    //- .button-wrap
+    //-   button(@click.left="toggleFavoritesIsVisible" :class="{ active: state.favoritesIsVisible, 'translucent-button': !shouldIncreaseUIContrast }")
+    //-     //- img.icon(v-if="isFavoriteSpace" src="@/assets/heart.svg")
+    //-     //- img.icon(v-else src="@/assets/heart-empty.svg")
+    //-     span(v-if="favoriteSpacesEditedCount") {{ favoriteSpacesEditedCount }}
 
   Explore(:visible="state.exploreIsVisible" @preloadedSpaces="state.exploreSpaces")
   Live(:visible="state.liveIsVisible" :spaces="state.liveSpaces" :loading="state.isLoadingLiveSpaces")
+
   Favorites(:visible="state.favoritesIsVisible")
 </template>
 

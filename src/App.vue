@@ -662,6 +662,13 @@ p
     display inline
     vertical-align middle
 
+.segmented-buttons + .segmented-buttons,
+.button-wrap + .button-wrap
+  margin-left 6px
+.segmented-buttons
+  > .button-wrap + .button-wrap
+    margin-left 0
+
 dialog
   width 250px
   left 8px
@@ -689,11 +696,12 @@ dialog
     width 230px
   &.wide
     width 280px
+  .segmented-buttons + .segmented-buttons
+    margin-left 0
   button + button,
   button + input,
   button + label,
   label + button,
-  .button-wrap + .button-wrap,
   button + .button-wrap,
   .button-wrap + button,
   label + label,

@@ -114,17 +114,17 @@ const parentDialog = computed(() => 'favorites')
 
 // favorite space
 
-const isFavoriteSpace = computed(() => store.getters['currentSpace/isFavorite'])
-const toggleIsFavoriteSpace = () => {
-  const currentSpace = store.state.currentSpace
-  if (isFavoriteSpace.value) {
-    store.dispatch('currentUser/removeFavorite', { type: 'space', item: currentSpace })
-  } else {
-    store.dispatch('currentUser/addFavorite', { type: 'space', item: currentSpace })
-    checkIfShouldShowCurrentUserSpaces(currentSpace)
-  }
-}
-const currentSpaceName = computed(() => utils.truncated(store.state.currentSpace.name))
+// const isFavoriteSpace = computed(() => store.getters['currentSpace/isFavorite'])
+// const toggleIsFavoriteSpace = () => {
+//   const currentSpace = store.state.currentSpace
+//   if (isFavoriteSpace.value) {
+//     store.dispatch('currentUser/removeFavorite', { type: 'space', item: currentSpace })
+//   } else {
+//     store.dispatch('currentUser/addFavorite', { type: 'space', item: currentSpace })
+//     checkIfShouldShowCurrentUserSpaces(currentSpace)
+//   }
+// }
+// const currentSpaceName = computed(() => utils.truncated(store.state.currentSpace.name))
 
 // user
 
@@ -196,11 +196,11 @@ dialog.narrow.favorites(v-if="visible" :open="visible" @click.left.stop="closeDi
       Loader(:visible="loading" :isSmall="true")
   section.actions
     //- fav space
-    .row
-      button(:class="{active: isFavoriteSpace}" @click.left.prevent="toggleIsFavoriteSpace" @keydown.stop.enter="toggleIsFavoriteSpace" title="Favorite Current Space")
-        img.icon(v-if="isFavoriteSpace" src="@/assets/heart.svg")
-        img.icon(v-else src="@/assets/heart-empty.svg")
-        span {{currentSpaceName}}
+    //- .row
+    //-   button(:class="{active: isFavoriteSpace}" @click.left.prevent="toggleIsFavoriteSpace" @keydown.stop.enter="toggleIsFavoriteSpace" title="Favorite Current Space")
+    //-     img.icon(v-if="isFavoriteSpace" src="@/assets/heart.svg")
+    //-     img.icon(v-else src="@/assets/heart-empty.svg")
+    //-     span {{currentSpaceName}}
     //- fav user
     .row(v-if="spaceUser")
       button.toggle-favorite-user(@click="toggleIsFavoriteUser")
