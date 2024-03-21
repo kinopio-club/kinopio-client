@@ -234,4 +234,7 @@ dialog.narrow.more-or-copy-cards(v-if="visible" :open="visible" ref="dialogEleme
   cursor initial
   .error-card-limit
     margin-top 10px
+  dialog.space-picker
+    .results-section
+      max-height 250px
 </style>
