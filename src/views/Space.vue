@@ -436,7 +436,7 @@ const shouldCancelInteraction = (event) => {
     return true
   }
   if (eventIsFromTextarea(event)) { return true }
-  if (event.target.nodeType === 9) { return true } // type 9 is Document
+  if (!event.target.closest) { return } // event is outside window
   const fromDialog = event.target.closest('dialog')
   const fromHeader = event.target.closest('header')
   const fromFooter = event.target.closest('footer')
