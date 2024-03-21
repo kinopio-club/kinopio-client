@@ -114,7 +114,7 @@ const addCard = async (card, index) => {
   if (!card) {
     card = null
   }
-  const newCardId = nanoid()
+  const newCardId = window.crypto.randomUUID()
   store.commit('shouldPreventNextFocusOnName', true)
   store.commit('shouldPreventNextEnterKey', false)
   store.commit('triggerAddCard', { id: newCardId })
@@ -128,7 +128,7 @@ const addCard = async (card, index) => {
 }
 const addChildCard = async (card, index) => {
   if (!card.name) { return }
-  const newCardId = nanoid()
+  const newCardId = window.crypto.randomUUID()
   store.commit('parentCardId', card.id)
   store.commit('shouldPreventNextFocusOnName', true)
   store.commit('shouldPreventNextEnterKey', false)

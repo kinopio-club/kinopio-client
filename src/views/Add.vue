@@ -200,7 +200,7 @@ const addCard = async () => {
   const url = utils.urlFromString(newName)
   // create card
   let card = {
-    id: nanoid(),
+    id: window.crypto.randomUUID(),
     name: newName,
     z: 1
   }

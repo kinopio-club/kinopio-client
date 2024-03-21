@@ -179,7 +179,7 @@ export default {
       if (isExistingPath) { return }
       if (connection.startCardId === connection.endCardId) { return }
       type = type || context.getters.typeForNewConnections
-      connection.id = connection.id || nanoid()
+      connection.id = connection.id || window.crypto.randomUUID()
       connection.spaceId = currentSpaceId
       connection.userId = context.rootState.currentUser.id
       connection.connectionTypeId = type.id
@@ -197,7 +197,7 @@ export default {
         color = randomColor({ luminosity: 'dark' })
       }
       let connectionType = {
-        id: nanoid(),
+        id: window.crypto.randomUUID(),
         name: `Connection Type ${context.state.typeIds.length + 1}`,
         color,
         spaceId: context.state.id

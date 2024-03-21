@@ -199,7 +199,7 @@ const currentCards = {
       const highestCardZ = utils.highestCardZ(cards)
       const defaultBackgroundColor = context.rootState.currentUser.defaultCardBackgroundColor
       let card = {
-        id: id || nanoid(),
+        id: id || window.crypto.randomUUID(),
         x: x || position.x,
         y: y || position.y,
         z: highestCardZ + 1,
@@ -237,7 +237,7 @@ const currentCards = {
           y += offset
         }
         return {
-          id: card.id || nanoid(),
+          id: card.id || window.crypto.randomUUID(),
           x,
           y,
           z: card.z || context.state.ids.length + 1,
@@ -267,7 +267,7 @@ const currentCards = {
     },
     paste: (context, { card, cardId }) => {
       utils.typeCheck({ value: card, type: 'object' })
-      card.id = cardId || nanoid()
+      card.id = cardId || window.crypto.randomUUID()
       card.spaceId = currentSpaceId
       card.isCreatedThroughPublicApi = false
       const prevCards = context.getters.all
@@ -854,7 +854,7 @@ const currentCards = {
         const startCardId = cards[index - 1].id
         const endCardId = cards[index].id
         connections.push({
-          id: nanoid(),
+          id: window.crypto.randomUUID(),
           startCardId,
           endCardId,
           path: this.$store.getters['currentConnections/connectionPathBetweenCards'](startCardId, endCardId)

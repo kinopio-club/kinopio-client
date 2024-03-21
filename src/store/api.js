@@ -164,7 +164,7 @@ const self = {
         cache.clearQueue()
       }
       body = body.map(item => {
-        item.operationId = nanoid()
+        item.operationId = window.crypto.randomUUID()
         return item
       })
       try {

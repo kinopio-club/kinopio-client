@@ -165,7 +165,7 @@ const refreshGradients = () => {
   let gradients = []
   times(numberOfGradients, (index) => {
     let gradient = utils.backgroundGradientLayers()
-    gradient.id = nanoid()
+    gradient.id = window.crypto.randomUUID()
     gradients.push(gradient)
   })
   if (currentSpace.value.backgroundGradient) {

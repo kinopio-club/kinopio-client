@@ -133,7 +133,7 @@ export default {
       } else {
         // create card
         const startCard = this.$store.getters['currentCards/byId'](startCardIds[0])
-        endCardId = nanoid()
+        endCardId = window.crypto.randomUUID()
         this.$store.dispatch('currentCards/add', { position, id: endCardId, isParentCard: true, backgroundColor: startCard.backgroundColor })
         this.$store.commit('childCardId', '')
       }

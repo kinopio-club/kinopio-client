@@ -419,7 +419,7 @@ const currentSpace = {
       space.editedAt = new Date()
       space.userId = context.rootState.currentUser.id
       space.cards = space.cards.map(card => {
-        card.id = nanoid()
+        card.id = window.crypto.randomUUID()
         card.userId = context.rootState.currentUser.id
         return card
       })

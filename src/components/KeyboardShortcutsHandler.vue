@@ -626,7 +626,7 @@ export default {
       // add card(s)
       let cards = cardNames.map(name => {
         return {
-          id: nanoid(),
+          id: window.crypto.randomUUID(),
           name,
           x: position.x,
           y: position.y

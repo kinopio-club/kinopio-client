@@ -64,7 +64,7 @@ export default {
       })
     },
     uploadFile: async (context, { file, cardId, spaceId }) => {
-      const uploadId = nanoid()
+      const uploadId = window.crypto.randomUUID()
       const fileName = utils.normalizeFileUrl(file.name)
       let key = `${cardId || spaceId}/${fileName}`
       const userIsUpgraded = context.rootState.currentUser.isUpgraded
@@ -161,7 +161,7 @@ export default {
       let filesPostData = []
       for (const [index, file] of files.entries()) {
         const positionOffset = 20
-        const cardId = nanoid()
+        const cardId = window.crypto.randomUUID()
         cardIds.push(cardId)
         context.dispatch('currentCards/add', {
           position: {

@@ -68,7 +68,7 @@ const hideUserDetails = () => {
 
 const createSessionToken = () => {
   if (!currentUserIsUpgraded.value) { return }
-  sessionToken = nanoid()
+  sessionToken = window.crypto.randomUUID()
   store.dispatch('api/createSessionToken', sessionToken)
 }
 

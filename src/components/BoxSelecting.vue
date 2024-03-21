@@ -35,7 +35,7 @@ export default {
         // before start selection
         if (isSelecting) {
           shouldSelect = true
-          currentBoxSelectId = nanoid()
+          currentBoxSelectId = window.crypto.randomUUID()
           this.updatePreviouslySelectedItems()
         // end selection
         } else {

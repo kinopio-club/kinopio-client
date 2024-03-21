@@ -7,7 +7,7 @@ import randomColor from 'randomcolor'
 import { nanoid } from 'nanoid'
 import { nextTick } from 'vue'
 import dayjs from 'dayjs'
-import { v4 as uuidv4 } from 'uuid' // polyfill for self.crypto.randomUUID(), for legacy todesktop support
+import { v4 as uuidv4 } from 'uuid' // polyfill for window.crypto.randomUUID(), for legacy todesktop support
 
 const initialState = {
   id: nanoid(),
@@ -447,7 +447,7 @@ export default {
         { name: 'What do I have to do today?' }
       ]
       prompts = prompts.map(prompt => {
-        prompt.id = nanoid()
+        prompt.id = window.crypto.randomUUID()
         prompt.userId = context.state.id
         return prompt
       })

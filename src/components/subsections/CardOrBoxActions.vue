@@ -398,7 +398,7 @@ export default {
       // add box margins
       const margin = 20
       box = {
-        id: nanoid(),
+        id: window.crypto.randomUUID(),
         x: box.x - margin,
         resizeWidth: box.width + (margin * 2),
         y: box.y - (margin * 2.5),

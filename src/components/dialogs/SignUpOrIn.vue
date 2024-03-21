@@ -352,7 +352,7 @@ export default {
     },
 
     createSessionToken () {
-      sessionToken = nanoid()
+      sessionToken = window.crypto.randomUUID()
       this.$store.dispatch('api/createSessionToken', sessionToken)
     },
 

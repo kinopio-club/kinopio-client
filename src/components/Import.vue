@@ -158,7 +158,7 @@ const convertFromCanvas = (space) => {
       newSpace.cards.push(newCard)
     })
     space.edges.forEach((edge, index) => {
-      const typeId = nanoid()
+      const typeId = window.crypto.randomUUID()
       const newConnection = {
         id: edge.id,
         startCardId: edge.fromNode,

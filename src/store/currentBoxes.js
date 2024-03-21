@@ -140,7 +140,7 @@ export default {
         color = randomColor({ luminosity: 'dark' })
       }
       box = {
-        id: box.id || nanoid(),
+        id: box.id || window.crypto.randomUUID(),
         spaceId: currentSpaceId,
         userId: context.rootState.currentUser.id,
         x: box.x,

@@ -11,7 +11,7 @@ import utils from '@/utils.js'
 import consts from '@/consts.js'
 
 let websocket, currentSpaceRoom, currentUserIsConnected
-const clientId = nanoid()
+const clientId = window.crypto.randomUUID()
 
 console.log('🌳 websocket clientId', clientId)
 let showDebugMessages = false

@@ -180,7 +180,7 @@ export default {
       this.urlIsCopied = false
     },
     addCustomPrompt () {
-      const emptyPrompt = { id: nanoid(), name: '', userId: this.currentUserId }
+      const emptyPrompt = { id: window.crypto.randomUUID(), name: '', userId: this.currentUserId }
       this.$store.dispatch('currentUser/addJournalPrompt', emptyPrompt)
       this.$nextTick(() => {
         const textareas = document.querySelectorAll('.add-space textarea')

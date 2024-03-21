@@ -744,7 +744,7 @@ export default {
         const indentAmount = 50
         const indentLevel = utils.numberOfLeadingTabs(cardName) || utils.numberOfLeadingDoubleSpaces(cardName)
         const indentX = indentLevel * indentAmount
-        let id = nanoid()
+        let id = window.crypto.randomUUID()
         if (index === 0) {
           id = this.card.id
         }

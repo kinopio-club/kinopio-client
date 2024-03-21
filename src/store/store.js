@@ -1257,7 +1257,7 @@ const store = createStore({
 
     addNotification: (state, notification) => {
       state.notifications = state.notifications.filter(item => item.message !== notification.message)
-      notification.id = nanoid()
+      notification.id = window.crypto.randomUUID()
       state.notifications.push(notification)
     },
     removeNotificationByMessage: (state, message) => {
@@ -1368,7 +1368,7 @@ const store = createStore({
         console.error('🚒 addNotificationWithPosition missing param layer')
         return
       }
-      notification.id = nanoid()
+      notification.id = window.crypto.randomUUID()
       state.notificationsWithPosition.push(notification)
     },
     removeNotificationWithPosition: (state) => {

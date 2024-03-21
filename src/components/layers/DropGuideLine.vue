@@ -218,7 +218,7 @@ export default {
       this.$store.commit('broadcast/update', { updates, type: 'updateRemoteUserCursor', handler: 'triggerUpdateRemoteUserCursor' })
       updates.startPoint = startPoint
       updates.color = color
-      updates.frameId = nanoid()
+      updates.frameId = window.crypto.randomUUID()
       this.$store.commit('broadcast/update', { updates, type: 'updateRemoteUserDropGuideLine', handler: 'triggerUpdateRemoteDropGuideLine' })
     },
     broadcastStopPaintingGuide () {

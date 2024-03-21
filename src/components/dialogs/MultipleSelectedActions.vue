@@ -369,7 +369,7 @@ export default {
       // create merged cards
       newNames.forEach((newName, index) => {
         let newCard = {
-          id: nanoid(),
+          id: window.crypto.randomUUID(),
           name: newName,
           x: position.x,
           y: position.y,
@@ -492,7 +492,7 @@ export default {
           const startCardId = cardId
           const endCardId = cardIds[index + 1]
           if (this.connectionAlreadyExists(startCardId, endCardId)) { return }
-          const id = nanoid()
+          const id = window.crypto.randomUUID()
           const path = this.$store.getters['currentConnections/connectionPathBetweenCards'](startCardId, endCardId)
           return {
             id, startCardId, endCardId, path

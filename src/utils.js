@@ -1289,7 +1289,7 @@ export default {
     boxes = boxes || []
     cards = cards.map(card => {
       const userId = this.itemUserId(user, card, nullItemUsers)
-      const newId = nanoid()
+      const newId = window.crypto.randomUUID()
       cardIdDeltas.push({
         prevId: card.id,
         newId
@@ -1300,7 +1300,7 @@ export default {
     })
     connectionTypes = connectionTypes.map(type => {
       const userId = this.itemUserId(user, type, nullItemUsers)
-      const newId = nanoid()
+      const newId = window.crypto.randomUUID()
       connectionTypeIdDeltas.push({
         prevId: type.id,
         newId
@@ -1311,7 +1311,7 @@ export default {
     })
     connections = connections.map(connection => {
       const userId = this.itemUserId(user, connection, nullItemUsers)
-      connection.id = nanoid()
+      connection.id = window.crypto.randomUUID()
       connection.connectionTypeId = this.updateAllIds(connection, 'connectionTypeId', connectionTypeIdDeltas)
       connection.startCardId = this.updateAllIds(connection, 'startCardId', cardIdDeltas)
       connection.endCardId = this.updateAllIds(connection, 'endCardId', cardIdDeltas)
@@ -1320,12 +1320,12 @@ export default {
     })
     boxes = boxes.map(box => {
       const userId = this.itemUserId(user, box, nullItemUsers)
-      box.id = nanoid()
+      box.id = window.crypto.randomUUID()
       box.userId = userId
       return box
     })
     tags = tags.map(tag => {
-      tag.id = nanoid()
+      tag.id = window.crypto.randomUUID()
       tag.cardId = this.updateAllIds(tag, 'cardId', cardIdDeltas)
       return tag
     })
@@ -1477,10 +1477,10 @@ export default {
     space = this.newSpaceBackground(space, currentUser)
     space.background = space.background || consts.defaultSpaceBackground
     // summary
-    space.cards.push({ id: nanoid(), name: summary, x: 80, y: 110, frameId: 0 })
+    space.cards.push({ id: window.crypto.randomUUID(), name: summary, x: 80, y: 110, frameId: 0 })
     // daily prompt
     if (dailyPrompt) {
-      let card = { id: nanoid() }
+      let card = { id: window.crypto.randomUUID() }
       card.name = dailyPrompt
       const position = this.promptCardPosition(space.cards, card.name)
       card.x = position.x + 10
@@ -1494,7 +1494,7 @@ export default {
     const userPrompts = currentUser.journalPrompts
     userPrompts.forEach(prompt => {
       if (!prompt.name) { return }
-      let card = { id: nanoid() }
+      let card = { id: window.crypto.randomUUID() }
       card.name = prompt.name
       const position = this.promptCardPosition(space.cards, card.name)
       card.x = position.x
@@ -2095,7 +2095,7 @@ export default {
     }
     return {
       name,
-      id: nanoid(),
+      id: window.crypto.randomUUID(),
       color: color || defaultColor,
       cardId: cardId,
       spaceId: spaceId

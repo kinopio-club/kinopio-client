@@ -196,7 +196,7 @@ export default {
       }
     },
     createCard (block, position) {
-      let card = { id: nanoid() }
+      let card = { id: window.crypto.randomUUID() }
       const type = block.class
       const title = block.title
       console.log('**', block, type)

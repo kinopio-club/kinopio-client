@@ -103,7 +103,7 @@ const selectCard = async (card) => {
   updateCardIsLoading(card)
   const scroll = store.getters.windowScrollWithSpaceOffset()
   let newCard = utils.clone(card)
-  newCard.id = nanoid()
+  newCard.id = window.crypto.randomUUID()
   newCard.spaceId = store.state.currentSpace.id
   newCard.x = scroll.x + 100 // matches KeyboardShortcutsHandler.addCard
   newCard.y = scroll.y + 120 // matches KeyboardShortcutsHandler.addCard
