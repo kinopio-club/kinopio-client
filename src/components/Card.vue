@@ -391,13 +391,7 @@ const cardContentStyles = computed(() => {
 })
 const cardContentWrapStyles = computed(() => {
   let styles = {}
-  if (resizeWidth.value) {
-    styles.maxWidth = resizeWidth.value
-    styles.width = resizeWidth.value
-  }
-  styles.width = styles.width + 'px'
-  styles.maxWidth = styles.maxWidth + 'px'
-  return styles
+  return updateStylesWithWidth(styles)
 })
 const articleClasses = computed(() => {
   const classes = {
@@ -446,8 +440,12 @@ const updateStylesWithWidth = (styles) => {
     styles.maxWidth = resizeWidth.value
     styles.width = resizeWidth.value
   }
-  styles.width = styles.width + 'px'
-  styles.maxWidth = styles.maxWidth + 'px'
+  if (styles.width) {
+    styles.width = styles.width + 'px'
+  }
+  if (styles.maxWidth) {
+    styles.maxWidth = styles.maxWidth + 'px'
+  }
   return styles
 }
 const updatePreviousResultItem = () => {
@@ -1877,7 +1875,7 @@ article.card-wrap#card(
   :data-is-visible-in-viewport="state.isVisibleInViewport"
   :data-is-locked="isLocked"
   :data-resize-width="resizeWidth"
-  :data-tilt-degrees="card.tiltDegrees"
+  :data-tilt-degrees="card.tilt"
   :data-x="x"
   :data-y="y"
   :key="card.id"
@@ -2284,10 +2282,6 @@ article.card-wrap
       top -1px
       width 9.5px
 
-    .resize-icon
-      position absolute
-      left 5px
-      top 5.5px
     .lock-icon
       position absolute
       left 5.5px

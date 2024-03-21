@@ -686,25 +686,15 @@ export default {
       top 2px
       height 10px
 
+  // resize
   .bottom-button-wrap
-    pointer-events all
-    position absolute
-    right 0px
-    bottom 0px
-    display flex
     .inline-button-wrap
-      transform translate(10px, 13px)
-      z-index 1
       cursor nwse-resize
       button
         cursor nwse-resize
-    img
-      -webkit-user-drag none
-
-  .resize-icon
-    position absolute
-    left 5px
-    top 5.5px
+      .resize-icon
+        top 0
+        left 0
 
   .background
     position absolute

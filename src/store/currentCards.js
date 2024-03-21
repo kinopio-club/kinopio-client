@@ -480,9 +480,12 @@ const currentCards = {
         const body = { id: cardId, resizeWidth: null, width: null }
         updates.push(body)
         utils.removeAllCardDimensions({ id: cardId })
-        context.dispatch('updateDimensions', { cardId })
       })
       context.dispatch('updateMultiple', updates)
+      const cards = cardIds.map(cardId => {
+        return { id: cardId }
+      })
+      context.dispatch('updateDimensions', { cards })
     },
 
     // tilt
