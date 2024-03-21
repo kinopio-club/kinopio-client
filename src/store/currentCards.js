@@ -607,8 +607,8 @@ const currentCards = {
       })
       cards = cards.filter(card => Boolean(card))
       cards = cards.map(card => {
-        card.x = card.x + prevMoveDelta.x
-        card.y = card.y + prevMoveDelta.y
+        card.x = Math.max(card.x + prevMoveDelta.x, 0)
+        card.y = Math.max(card.y + prevMoveDelta.y, 0)
         return card
       })
       context.dispatch('incrementSelectedZs')
