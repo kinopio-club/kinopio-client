@@ -924,6 +924,7 @@ const currentCards = {
       // │Viewport                         │
       // └─────────────────────────────────┘
       // cards within y range
+      if (!yIndex) { return [] }
       yIndex = yIndex.map(y => parseInt(y))
       const min = Math.max(position.y - threshold, 0)
       const max = min + threshold
