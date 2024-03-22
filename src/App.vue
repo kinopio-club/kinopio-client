@@ -246,7 +246,6 @@ export default {
         delay = Math.pow(2, statusRetryCount) * initialDelay
       }
       delay = delay || 15 * 60 * 1000 // 15 minutes
-      console.log(`Retrying status in ${delay / 1000} seconds...`)
       setTimeout(this.updateServerIsOnline, delay)
     },
 
