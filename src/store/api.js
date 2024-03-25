@@ -186,6 +186,7 @@ const self = {
       } catch (error) {
         console.error('🚒 processQueueOperations', error, body)
         context.commit('notifyServerCouldNotSave', true, { root: true })
+        cache.clearQueueBuffer()
       }
     },
 
