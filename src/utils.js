@@ -1269,6 +1269,8 @@ export default {
       connection.userId = userId
       return connection
     })
+    space.userId = userId
+    space.editedByUserId = userId
     return space
   },
   itemUserId (user, item, nullItemUsers) {
@@ -1346,12 +1348,22 @@ export default {
       return connection
     })
   },
-  spaceItemUsersToCurrentUser (space, userId) {
+  updateSpacesUserId (userId, spaces) {
+    spaces = spaces.map(space => {
+      space = this.updateSpaceItemsUser(space, userId)
+      space = this.updateSpaceUserId(space, userId)
+      delete space.users
+      return space
+    })
+    return spaces
+  },
+  updateSpaceItemsUser (space, userId) {
     const itemNames = ['boxes', 'cards', 'connections', 'connectionTypes']
     itemNames.forEach(itemName => {
       if (!space[itemName]) { return }
       space[itemName] = space[itemName].map(item => {
         item.userId = userId
+        item.nameUpdatedByUserId = userId
         return item
       })
     })
@@ -1378,7 +1390,7 @@ export default {
     deleteKeys.forEach(key => {
       delete space[key]
     })
-    this.spaceItemUsersToCurrentUser(space, userId)
+    this.updateSpaceItemsUser(space, userId)
     space.userId = userId
     return space
   },

@@ -192,7 +192,7 @@ const importSpace = async (space) => {
       space = convertFromCanvas(space)
     }
     space = utils.clearSpaceMeta(space, 'import')
-    space = utils.spaceItemUsersToCurrentUser(space, currentUserId)
+    space = utils.updateSpaceItemsUser(space, currentUserId)
     space.userId = currentUserId
     const uniqueNewSpace = cache.updateIdsInSpace(space)
     console.log('🧚 space to import', uniqueNewSpace)
