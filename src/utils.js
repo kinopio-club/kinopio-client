@@ -439,6 +439,9 @@ export default {
       return user
     })
   },
+  userIsUpgraded (user) {
+    return Boolean(user.stripeSubscriptionId || user.stripePlanIsPurchased || user.downgradeAt || user.appleSubscriptionIsActive)
+  },
   mergeArrays ({ previous, updated, key }) {
     const updatedKeys = updated.map(item => item[key])
     const base = previous.filter(item => !updatedKeys.includes(item[key]))

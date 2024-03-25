@@ -162,6 +162,9 @@ export default {
         if (user[item]) {
           state[item] = user[item]
         }
+        if (utils.userIsUpgraded(user)) {
+          state.isUpgraded = true
+        }
         if (user.apiKey) {
           postMessage.send({ name: 'setApiKey', value: user.apiKey })
         }
@@ -495,7 +498,7 @@ export default {
       remoteUser.updatedAt = utils.normalizeToUnixTime(remoteUser.updatedAt)
       console.log('🌸 Restore user from remote', remoteUser)
       context.commit('updateUser', remoteUser)
-      if (remoteUser.stripeSubscriptionId || remoteUser.stripePlanIsPurchased || remoteUser.downgradeAt || remoteUser.appleSubscriptionIsActive) {
+      if (utils.userIsUpgraded(remoteUser)) {
         context.commit('isUpgraded', true)
       } else {
         context.commit('isUpgraded', false)
