@@ -531,6 +531,7 @@ const updateCardDimensions = () => {
   if (!card) { return }
   store.commit('currentCards/update', card)
   store.dispatch('currentCards/updateTallestCardHeight', card)
+  if (!canEditSpace.value) { return }
   store.dispatch('api/addToQueue', { name: 'updateCard', body: card })
 }
 
