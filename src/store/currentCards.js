@@ -398,6 +398,7 @@ const currentCards = {
     // dimensions
 
     updateDimensions: (context, { cards, cardId }) => {
+      const canEditSpace = context.rootGetters['currentUser/canEditSpace']()
       nextTick(() => {
         let newCards = []
         let updates = {
@@ -436,7 +437,9 @@ const currentCards = {
           context.dispatch('broadcast/update', { updates: body, type: 'updateCard', handler: 'currentCards/update' }, { root: true })
           updates.cards.push(body)
         })
-        context.dispatch('api/addToQueue', { name: 'updateMultipleCards', body: updates }, { root: true })
+        if (canEditSpace) {
+          context.dispatch('api/addToQueue', { name: 'updateMultipleCards', body: updates }, { root: true })
+        }
         context.dispatch('currentConnections/updateMultplePaths', updates.cards, { root: true })
       })
     },
