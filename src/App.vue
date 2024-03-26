@@ -234,7 +234,6 @@ export default {
       console.log('server online status', serverStatus)
       if (serverStatus) {
         this.$store.dispatch('isOnline', true)
-        this.$store.dispatch('api/processQueueOperations')
       // error offline
       } else {
         this.$store.dispatch('isOnline', false)
