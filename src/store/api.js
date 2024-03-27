@@ -208,6 +208,7 @@ const self = {
       } catch (error) {
         console.error('🚒 sendQueue', error, body)
         context.commit('notifyServerCouldNotSave', true, { root: true })
+        cache.clearSendingInProgressQueue() // temp
       }
     },
 
