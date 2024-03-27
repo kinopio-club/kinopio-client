@@ -432,8 +432,7 @@ export default {
       if (shouldDecrement) {
         delta = -delta
       }
-      console.log('delta', delta)
-
+      // console.log('delta', delta)
       if (context.getters.shouldPreventCardsCreatedCountUpdate) { return }
       const count = context.state.cardsCreatedCount + delta
       context.dispatch('api/addToQueue', { name: 'updateUserCardsCreatedCount', body: { delta } }, { root: true })
