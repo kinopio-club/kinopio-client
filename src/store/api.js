@@ -43,6 +43,16 @@ const squashQueue = (queue) => {
     reduced.name = request.name
     squashed.push(reduced)
   })
+  // sort create connectiontype operations first
+  let createConnectionTypes = []
+  squashed = squashed.filter(request => {
+    if (request.name === 'createConnectionType') {
+      createConnectionTypes.push(request)
+    } else {
+      return true
+    }
+  })
+  squashed = createConnectionTypes.concat(squashed)
   // sort createCard operations first
   let createCards = []
   squashed = squashed.filter(request => {
