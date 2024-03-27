@@ -63,7 +63,7 @@ onMounted(() => {
   // ⏰ scheduled tasks
   // retry failed sync operations
   processQueueIntervalTimer = setInterval(() => {
-    store.dispatch('api/processQueueOperations')
+    store.dispatch('api/sendQueue')
   }, 5000) // every 5 seconds
   // update journal daily prompt
   updateJournalDailyPromptTimer = setInterval(() => {
