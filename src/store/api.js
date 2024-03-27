@@ -130,12 +130,14 @@ const self = {
       body = utils.clone(body)
       body.spaceId = spaceId || context.rootState.currentSpace.id
       const isSignedIn = context.rootGetters['currentUser/isSignedIn']
+      const canEditSpace = context.rootGetters['currentUser/canEditSpace']()
       if (!isSignedIn) { return }
       let queue = cache.queue()
       const request = {
         name,
         body
       }
+      if (name === 'updateMultipleCards' && !canEditSpace) { return }
       if (name === 'updateUserCardsCreatedCount') {
         queue = squashCardsCreatedCount(queue, request)
       } else {
