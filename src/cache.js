@@ -346,6 +346,7 @@ export default {
 
   // API Sending in Progress Queue
   // queue items are moved here at api.sendQueue
+
   sendingInProgressQueue () {
     return this.getLocal('sendingInProgressQueue') || []
   },
