@@ -208,7 +208,6 @@ const self = {
       } catch (error) {
         console.error('🚒 sendQueue', error, body)
         context.commit('notifyServerCouldNotSave', true, { root: true })
-        // cache.clearSendingInProgressQueue() // TODO what to do with items in the queue buffer that fail? prob reprocess them, or split and reprocess them
       }
     },
 
