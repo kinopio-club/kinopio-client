@@ -43,6 +43,16 @@ const squashQueue = (queue) => {
     reduced.name = request.name
     squashed.push(reduced)
   })
+  // sort createCard operations first
+  let createCards = []
+  squashed = squashed.filter(request => {
+    if (request.name === 'createCard') {
+      createCards.push(request)
+    } else {
+      return true
+    }
+  })
+  squashed = createCards.concat(squashed)
   return squashed
 }
 
