@@ -344,17 +344,16 @@ export default {
     this.storeLocal('queue', [])
   },
 
-  // API Queue Buffer
-  // queue items are moved here at api.processQueueOperations
-
-  queueBuffer () {
-    return this.getLocal('queueBuffer') || []
+  // API Sending in Progress Queue
+  // queue items are moved here at api.sendQueue
+  sendingInProgressQueue () {
+    return this.getLocal('sendingInProgressQueue') || []
   },
-  saveQueueBuffer (queue) {
-    this.storeLocal('queueBuffer', queue)
+  saveSendingInProgressQueue (queue) {
+    this.storeLocal('sendingInProgressQueue', queue)
   },
-  clearQueueBuffer () {
-    this.storeLocal('queueBuffer', [])
+  clearSendingInProgressQueue () {
+    this.storeLocal('sendingInProgressQueue', [])
   },
 
   // Invited Spaces

@@ -154,25 +154,25 @@ const self = {
         queue.push(request)
       }
       cache.saveQueue(queue)
-      context.dispatch('debouncedProcessQueueOperations')
+      context.dispatch('debouncedSendQueue')
     },
 
-    debouncedProcessQueueOperations: debounce(({ dispatch }) => {
-      dispatch('processQueueOperations')
+    debouncedSendQueue: debounce(({ dispatch }) => {
+      dispatch('sendQueue')
     }, 500),
 
-    processQueueOperations: async (context) => {
+    sendQueue: async (context) => {
       let body
       const apiKey = context.rootState.currentUser.apiKey
       const isOnline = context.rootState.isOnline
       const queue = cache.queue()
-      const queueBuffer = cache.queueBuffer()
+      const sendingInProgressQueue = cache.sendingInProgressQueue()
       if (!shouldRequest({ apiKey, isOnline }) || !queue.length) { return }
-      if (queueBuffer.length) {
-        body = queueBuffer
+      if (sendingInProgressQueue.length) {
+        body = sendingInProgressQueue
       } else {
         body = squashQueue(queue)
-        cache.saveQueueBuffer(body)
+        cache.saveSendingInProgressQueue(body)
         cache.clearQueue()
       }
       body = body.map(item => {
@@ -187,7 +187,7 @@ const self = {
         const response = await fetch(`${host}/operations`, options)
         if (response.ok) {
           console.log('🛬 operations ok')
-          cache.clearQueueBuffer()
+          cache.clearSendingInProgressQueue()
         } else {
           throw Error(response.statusText)
         }
@@ -196,9 +196,9 @@ const self = {
           context.commit('addNotification', { message: 'Reconnected to server', type: 'success' }, { root: true })
         }
       } catch (error) {
-        console.error('🚒 processQueueOperations', error, body)
+        console.error('🚒 sendQueue', error, body)
         context.commit('notifyServerCouldNotSave', true, { root: true })
-        cache.clearQueueBuffer()
+        // cache.clearSendingInProgressQueue() // TODO what to do with items in the queue buffer that fail? prob reprocess them, or split and reprocess them
       }
     },
 
