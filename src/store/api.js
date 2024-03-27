@@ -146,9 +146,31 @@ const self = {
 
     // Queue
 
+    handleServerOperationsError: async (context, { error, response }) => {
+      const data = await response.json()
+      const operations = data.operations
+      console.warn('🚑 serverOperationsError', data)
+      const nonErrorStatusCodes = [400, 401, 404, 422]
+      operations.forEach(operation => {
+        const error = operation.error
+        if (!error) { return }
+        const isCritical = !nonErrorStatusCodes.includes(error.status)
+        if (isCritical) {
+          // notify user on failed critical operation, and retry later
+          console.error('🚒 critical serverOperationsError operation', operation)
+          context.commit('notifyServerCouldNotSave', true, { root: true })
+        } else {
+          // do not retry non-critical operations
+          console.warn('🚑 non-critical serverOperationsError operation', operation)
+          cache.removeSendingInProgressQueueOperationById(operation.body.operationId)
+        }
+      })
+    },
+
     addToQueue: (context, { name, body, spaceId }) => {
       body = utils.clone(body)
       body.spaceId = spaceId || context.rootState.currentSpace.id
+      body.operationId = nanoid()
       const isSignedIn = context.rootGetters['currentUser/isSignedIn']
       const canEditSpace = context.rootGetters['currentUser/canEditSpace']()
       if (!isSignedIn) { return }
@@ -185,16 +207,13 @@ const self = {
         cache.saveSendingInProgressQueue(body)
         cache.clearQueue()
       }
-      body = body.map(item => {
-        item.operationId = nanoid()
-        return item
-      })
+      let response
       try {
         console.log(`🛫 sending operations`, body)
         const space = context.rootState.currentSpace
         if (!space.id) { throw 'operation missing spaceId' }
         const options = await context.dispatch('requestOptions', { body, method: 'POST', space })
-        const response = await fetch(`${host}/operations`, options)
+        response = await fetch(`${host}/operations`, options)
         if (response.ok) {
           console.log('🛬 operations ok')
           cache.clearSendingInProgressQueue()
@@ -206,9 +225,7 @@ const self = {
           context.commit('addNotification', { message: 'Reconnected to server', type: 'success' }, { root: true })
         }
       } catch (error) {
-        console.error('🚒 sendQueue', error, body)
-        context.commit('notifyServerCouldNotSave', true, { root: true })
-        cache.clearSendingInProgressQueue() // temp
+        context.dispatch('handleServerOperationsError', { error, response })
       }
     },
 

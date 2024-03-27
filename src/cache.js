@@ -356,6 +356,13 @@ export default {
   clearSendingInProgressQueue () {
     this.storeLocal('sendingInProgressQueue', [])
   },
+  removeSendingInProgressQueueOperationById (operationId) {
+    let operations = this.sendingInProgressQueue()
+    const prevOperationsLength = operations.length
+    const queue = operations.filter(operation => operation.body.operationId !== operationId)
+    if (queue.length === prevOperationsLength) { return }
+    this.saveSendingInProgressQueue(queue)
+  },
 
   // Invited Spaces
 
