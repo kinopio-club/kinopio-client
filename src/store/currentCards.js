@@ -688,15 +688,15 @@ const currentCards = {
         context.dispatch('clearAllZs')
         highestCardZ = 1
       }
-      const userCanEdit = context.rootGetters['currentUser/canEditSpace']()
+      const canEditSpace = context.rootGetters['currentUser/canEditSpace']()
       const body = { id, z: highestCardZ + 1 }
       context.commit('update', body)
-      if (!userCanEdit) { return }
+      if (!canEditSpace) { return }
       context.dispatch('api/addToQueue', { name: 'updateCard', body }, { root: true })
       context.dispatch('broadcast/update', { updates: body, type: 'updateCard', handler: 'currentCards/update' }, { root: true })
     },
     incrementSelectedZs: (context) => {
-      const userCanEdit = context.rootGetters['currentUser/canEditSpace']()
+      const canEditSpace = context.rootGetters['currentUser/canEditSpace']()
       const multipleCardsSelectedIds = context.rootState.multipleCardsSelectedIds
       const currentDraggingCardId = context.rootState.currentDraggingCardId
       if (multipleCardsSelectedIds.length) {
@@ -726,7 +726,7 @@ const currentCards = {
         // broadcast
         multipleCardsSelectedIds.forEach(id => {
           const body = { id, z: newHighestCardZ }
-          if (!userCanEdit) { return }
+          if (!canEditSpace) { return }
           context.dispatch('broadcast/update', { updates: body, type: 'updateCard', handler: 'currentCards/update' }, { root: true })
         })
       } else {
