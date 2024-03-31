@@ -27,6 +27,30 @@ const squashCardsCreatedCount = (queue, request) => {
   return queue
 }
 
+const sortQueueItems = (queue) => {
+  // sort create connectiontype operations first
+  let createConnectionTypes = []
+  queue = queue.filter(request => {
+    if (request.name === 'createConnectionType') {
+      createConnectionTypes.push(request)
+    } else {
+      return true
+    }
+  })
+  queue = createConnectionTypes.concat(queue)
+  // sort createCard operations first
+  let createCards = []
+  queue = queue.filter(request => {
+    if (request.name === 'createCard') {
+      createCards.push(request)
+    } else {
+      return true
+    }
+  })
+  queue = createCards.concat(queue)
+  return queue
+}
+
 const squashQueue = (queue) => {
   let squashed = []
   queue.forEach(request => {
@@ -43,26 +67,8 @@ const squashQueue = (queue) => {
     reduced.name = request.name
     squashed.push(reduced)
   })
-  // sort create connectiontype operations first
-  let createConnectionTypes = []
-  squashed = squashed.filter(request => {
-    if (request.name === 'createConnectionType') {
-      createConnectionTypes.push(request)
-    } else {
-      return true
-    }
-  })
-  squashed = createConnectionTypes.concat(squashed)
-  // sort createCard operations first
-  let createCards = []
-  squashed = squashed.filter(request => {
-    if (request.name === 'createCard') {
-      createCards.push(request)
-    } else {
-      return true
-    }
-  })
-  squashed = createCards.concat(squashed)
+  squashed = sortQueueItems(squashed)
+  console.log(squashed)
   return squashed
 }
 
@@ -202,6 +208,8 @@ const self = {
       if (!shouldRequest({ apiKey, isOnline }) || !queue.length) { return }
       if (sendingInProgressQueue.length) {
         body = sendingInProgressQueue
+        body = sortQueueItems(body)
+        console.log('🛃 sending operations from sendingInProgressQueue', body)
       } else {
         body = squashQueue(queue)
         cache.saveSendingInProgressQueue(body)
