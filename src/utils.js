@@ -193,6 +193,7 @@ export default {
     return { x, y }
   },
   cursorPositionInPage (event) {
+    if (!event) { return }
     let x, y
     if (event.touches) {
       const touch = this.mobileTouchPosition(event, 'page')
