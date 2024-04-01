@@ -170,6 +170,7 @@ const self = {
           console.warn('🚑 non-critical serverOperationsError operation', operation)
           cache.removeSendingInProgressQueueOperationById(operation.body.operationId)
         }
+        cache.removeSendingInProgressQueueOperationById(operation.body.operationId) // temp
       })
     },
 
