@@ -149,22 +149,26 @@ const isFavoriteSpace = computed(() => store.getters['currentSpace/isFavorite'])
 .explore-row.button-wrap(v-if="isOnline")
   .segmented-buttons.space-functions-row
     //- Explore
-    .button-wrap
-      button.explore-button(@click.left="toggleExploreIsVisible" :class="{ active: state.exploreIsVisible, 'translucent-button': !shouldIncreaseUIContrast }")
-        img.icon.sunglasses(src="@/assets/sunglasses.svg")
-        span.explore-button-label(v-if="unreadExploreSpacesCount") &nbsp;{{ unreadExploreSpacesCount }}
-    //- Live
-    .button-wrap
-      button(@click.left="toggleLiveIsVisible" :class="{ active: state.liveIsVisible, 'translucent-button': !shouldIncreaseUIContrast }")
-        img.icon.camera(src="@/assets/camera.svg")
-        span(v-if="liveSpacesCount") {{ liveSpacesCount }}
-    //- Favorites
-    .button-wrap
-      button(@click.left="toggleFavoritesIsVisible" :class="{ active: state.favoritesIsVisible, 'translucent-button': !shouldIncreaseUIContrast }")
-        img.icon(v-if="isFavoriteSpace" src="@/assets/heart.svg")
-        img.icon(v-else src="@/assets/heart-empty.svg")
-        span(v-if="favoriteSpacesEditedCount") {{ favoriteSpacesEditedCount }}
+    //- .button-wrap
+    //-   button.explore-button(@click.left="toggleExploreIsVisible" :class="{ active: state.exploreIsVisible, 'translucent-button': !shouldIncreaseUIContrast }")
+    //-     img.icon.sunglasses(src="@/assets/sunglasses.svg")
+    //-     span.explore-button-label(v-if="unreadExploreSpacesCount") &nbsp;{{ unreadExploreSpacesCount }}
+    //- //- Live
+    //- .button-wrap
+    //-   button(@click.left="toggleLiveIsVisible" :class="{ active: state.liveIsVisible, 'translucent-button': !shouldIncreaseUIContrast }")
+    //-     img.icon.camera(src="@/assets/camera.svg")
+    //-     span(v-if="liveSpacesCount") {{ liveSpacesCount }}
+    //- //- Favorites
+    //- .button-wrap
+    //-   button(@click.left="toggleFavoritesIsVisible" :class="{ active: state.favoritesIsVisible, 'translucent-button': !shouldIncreaseUIContrast }")
+    //-     img.icon(v-if="isFavoriteSpace" src="@/assets/heart.svg")
+    //-     img.icon(v-else src="@/assets/heart-empty.svg")
+    //-     span(v-if="favoriteSpacesEditedCount") {{ favoriteSpacesEditedCount }}
 
+  .button-wrap
+    button(:class="{'translucent-button': !shouldIncreaseUIContrast}")
+      img.icon.sunglasses(src="@/assets/sunglasses.svg")
+      span Explore
   FavoriteSpaceButton
 
   Explore(:visible="state.exploreIsVisible" @preloadedSpaces="state.exploreSpaces")
