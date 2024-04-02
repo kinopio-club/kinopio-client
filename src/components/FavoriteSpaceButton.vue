@@ -20,9 +20,12 @@ const toggleIsFavoriteSpace = () => {
 <template lang="pug">
 .button-wrap.favorite-space-button
   button(v-if="isOnline" :class="{active: isFavoriteSpace, 'translucent-button': !shouldIncreaseUIContrast}" @click.left.prevent="toggleIsFavoriteSpace" title="Favorite Space")
-    img.icon(v-if="isFavoriteSpace" src="@/assets/heart.svg")
-    img.icon(v-else src="@/assets/heart-empty.svg")
+    img.icon(v-show="isFavoriteSpace" src="@/assets/heart.svg")
+    img.icon(v-show="!isFavoriteSpace" src="@/assets/heart-empty.svg")
 </template>
 
 <style lang="stylus">
+.favorite-space-button
+  .icon
+    margin 0
 </style>

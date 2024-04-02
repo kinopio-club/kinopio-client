@@ -33,7 +33,6 @@ import ImportExport from '@/components/dialogs/ImportExport.vue'
 import Pricing from '@/components/dialogs/Pricing.vue'
 import SpaceTodayJournalBadge from '@/components/SpaceTodayJournalBadge.vue'
 import Discovery from '@/components/Discovery.vue'
-import FavoriteSpaceButton from '@/components/FavoriteSpaceButton.vue'
 import UserSettings from '@/components/dialogs/UserSettings.vue'
 import consts from '@/consts.js'
 
@@ -692,10 +691,8 @@ header(v-if="isVisible" :style="state.position" :class="{'fade-out': isFadingOut
               button(@click.left.stop="toggleOfflineIsVisible" :class="{ active: offlineIsVisible, 'translucent-button': !shouldIncreaseUIContrast}")
                 img.icon.offline(src="@/assets/offline.svg")
               Offline(:visible="offlineIsVisible")
-          //- FavoriteSpaceButton
       .right
-        FavoriteSpaceButton
-        //- Discovery
+        Discovery
         //- Sidebar
         .button-wrap
           button(@click.left.stop="toggleSidebarIsVisible" :class="{active: state.sidebarIsVisible, 'translucent-button': !shouldIncreaseUIContrast}")

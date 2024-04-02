@@ -7,6 +7,7 @@ import dayjs from 'dayjs'
 import Explore from '@/components/dialogs/Explore.vue'
 import Live from '@/components/dialogs/Live.vue'
 import Favorites from '@/components/dialogs/Favorites.vue'
+
 import FavoriteSpaceButton from '@/components/FavoriteSpaceButton.vue'
 import utils from '@/utils.js'
 const store = useStore()
@@ -148,45 +149,51 @@ const liveSpacesCount = computed(() => {
 </script>
 
 <template lang="pug">
-.explore-row.button-wrap(v-if="isOnline")
-  FavoriteSpaceButton
+  //- .row.discovery-row
 
-  .segmented-buttons.space-functions-row
-    //- Explore
-    .button-wrap
-      button.explore-button(@click.left="toggleExploreIsVisible" :class="{ active: state.exploreIsVisible, 'translucent-button': !shouldIncreaseUIContrast }")
-        img.icon.sunglasses(src="@/assets/sunglasses.svg")
-        span.explore-button-label(v-if="unreadExploreSpacesCount") &nbsp;{{ unreadExploreSpacesCount }}
-    //- Live
-    .button-wrap
-      button(@click.left="toggleLiveIsVisible" :class="{ active: state.liveIsVisible, 'translucent-button': !shouldIncreaseUIContrast }")
-        img.icon.camera(src="@/assets/camera.svg")
-        span(v-if="liveSpacesCount") {{ liveSpacesCount }}
+  .button-wrap(v-if="isOnline")
+    button(:class="{'translucent-button': !shouldIncreaseUIContrast}")
+      img.icon.sunglasses(src="@/assets/sunglasses.svg")
+      span Explore
 
-    //- Favorites
-    //- .button-wrap
-    //-   button(@click.left="toggleFavoritesIsVisible" :class="{ active: state.favoritesIsVisible, 'translucent-button': !shouldIncreaseUIContrast }")
-    //-     //- img.icon(v-if="isFavoriteSpace" src="@/assets/heart.svg")
-    //-     //- img.icon(v-else src="@/assets/heart-empty.svg")
-    //-     span(v-if="favoriteSpacesEditedCount") {{ favoriteSpacesEditedCount }}
-
-  FavoriteSpaceButton
+  FavoriteSpaceButton(v-if="isOnline")
 
   Explore(:visible="state.exploreIsVisible" @preloadedSpaces="state.exploreSpaces")
   Live(:visible="state.liveIsVisible" :spaces="state.liveSpaces" :loading="state.isLoadingLiveSpaces")
-
   Favorites(:visible="state.favoritesIsVisible")
+
+  //- FavoriteSpaceButton
+
+  //- .segmented-buttons.space-functions-row
+  //-   //- Explore
+  //-   .button-wrap
+  //-     button.explore-button(@click.left="toggleExploreIsVisible" :class="{ active: state.exploreIsVisible, 'translucent-button': !shouldIncreaseUIContrast }")
+  //-       img.icon.sunglasses(src="@/assets/sunglasses.svg")
+  //-       span.explore-button-label(v-if="unreadExploreSpacesCount") &nbsp;{{ unreadExploreSpacesCount }}
+  //-   //- Live
+  //-   .button-wrap
+  //-     button(@click.left="toggleLiveIsVisible" :class="{ active: state.liveIsVisible, 'translucent-button': !shouldIncreaseUIContrast }")
+  //-       img.icon.camera(src="@/assets/camera.svg")
+  //-       span(v-if="liveSpacesCount") {{ liveSpacesCount }}
+
+  //- Favorites
+  //- .button-wrap
+  //-   button(@click.left="toggleFavoritesIsVisible" :class="{ active: state.favoritesIsVisible, 'translucent-button': !shouldIncreaseUIContrast }")
+  //-     //- img.icon(v-if="isFavoriteSpace" src="@/assets/heart.svg")
+  //-     //- img.icon(v-else src="@/assets/heart-empty.svg")
+  //-     span(v-if="favoriteSpacesEditedCount") {{ favoriteSpacesEditedCount }}
+
 </template>
 
 <style lang="stylus">
-.explore-row
+.discovery-row
   position relative
-  .explore-button
-    .explore-button-label
-      margin-left 0
-  .space-functions-row
-    margin-bottom 0
-    > .button-wrap
-      margin-left 0 !important
+  // .explore-button
+  //   .explore-button-label
+  //     margin-left 0
+  // .space-functions-row
+  //   margin-bottom 0
+  //   > .button-wrap
+  //     margin-left 0 !important
 
 </style>
