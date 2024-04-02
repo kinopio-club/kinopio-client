@@ -7,6 +7,7 @@ import dayjs from 'dayjs'
 import Explore from '@/components/dialogs/Explore.vue'
 import Live from '@/components/dialogs/Live.vue'
 import Favorites from '@/components/dialogs/Favorites.vue'
+import FavoriteSpaceButton from '@/components/FavoriteSpaceButton.vue'
 import utils from '@/utils.js'
 const store = useStore()
 
@@ -163,6 +164,8 @@ const isFavoriteSpace = computed(() => store.getters['currentSpace/isFavorite'])
         img.icon(v-if="isFavoriteSpace" src="@/assets/heart.svg")
         img.icon(v-else src="@/assets/heart-empty.svg")
         span(v-if="favoriteSpacesEditedCount") {{ favoriteSpacesEditedCount }}
+
+  FavoriteSpaceButton
 
   Explore(:visible="state.exploreIsVisible" @preloadedSpaces="state.exploreSpaces")
   Live(:visible="state.liveIsVisible" :spaces="state.liveSpaces" :loading="state.isLoadingLiveSpaces")
