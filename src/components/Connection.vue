@@ -46,7 +46,7 @@ const state = reactive({
   frameCount: 0,
   isVisibleInViewport: true
 })
-watch(() => props.connection.connectionPath, (value, prevValue) => {
+watch(() => props.connection.path, (value, prevValue) => {
   state.curvedPath = value
 })
 

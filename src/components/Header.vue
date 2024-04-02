@@ -544,6 +544,7 @@ const markAsRead = (notificationId) => {
   updateNotificationsIsRead([notificationId])
 }
 const updateNotificationsIsRead = (notificationIds) => {
+  if (!notificationIds.length) { return }
   state.notifications = state.notifications.map(notification => {
     if (notificationIds.includes(notification.id)) {
       notification.isRead = true

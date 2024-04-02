@@ -27,6 +27,30 @@ const squashCardsCreatedCount = (queue, request) => {
   return queue
 }
 
+const sortQueueItems = (queue) => {
+  // sort create connectiontype operations first
+  let createConnectionTypes = []
+  queue = queue.filter(request => {
+    if (request.name === 'createConnectionType') {
+      createConnectionTypes.push(request)
+    } else {
+      return true
+    }
+  })
+  queue = createConnectionTypes.concat(queue)
+  // sort createCard operations first
+  let createCards = []
+  queue = queue.filter(request => {
+    if (request.name === 'createCard') {
+      createCards.push(request)
+    } else {
+      return true
+    }
+  })
+  queue = createCards.concat(queue)
+  return queue
+}
+
 const squashQueue = (queue) => {
   let squashed = []
   queue.forEach(request => {
@@ -43,6 +67,8 @@ const squashQueue = (queue) => {
     reduced.name = request.name
     squashed.push(reduced)
   })
+  squashed = sortQueueItems(squashed)
+  console.log(squashed)
   return squashed
 }
 
@@ -126,56 +152,80 @@ const self = {
 
     // Queue
 
+    handleServerOperationsError: async (context, { error, response }) => {
+      const data = await response.json()
+      const operations = data.operations
+      console.warn('🚑 serverOperationsError', data)
+      const nonErrorStatusCodes = [400, 401, 404, 422]
+      operations.forEach(operation => {
+        const error = operation.error
+        if (!error) { return }
+        const isCritical = !nonErrorStatusCodes.includes(error.status)
+        if (isCritical) {
+          // notify user on failed critical operation, and retry later
+          console.error('🚒 critical serverOperationsError operation', operation)
+          context.commit('notifyServerCouldNotSave', true, { root: true })
+        } else {
+          // do not retry non-critical operations
+          console.warn('🚑 non-critical serverOperationsError operation', operation)
+          cache.removeSendingInProgressQueueOperationById(operation.body.operationId)
+        }
+        cache.removeSendingInProgressQueueOperationById(operation.body.operationId) // temp
+      })
+    },
+
     addToQueue: (context, { name, body, spaceId }) => {
       body = utils.clone(body)
       body.spaceId = spaceId || context.rootState.currentSpace.id
-      const currentUserIsSignedIn = context.rootGetters['currentUser/isSignedIn']
-      if (!currentUserIsSignedIn) { return }
+      body.operationId = nanoid()
+      const isSignedIn = context.rootGetters['currentUser/isSignedIn']
+      const canEditSpace = context.rootGetters['currentUser/canEditSpace']()
+      if (!isSignedIn) { return }
       let queue = cache.queue()
       const request = {
         name,
         body
       }
+      if (name === 'updateMultipleCards' && !canEditSpace) { return }
       if (name === 'updateUserCardsCreatedCount') {
         queue = squashCardsCreatedCount(queue, request)
       } else {
         queue.push(request)
       }
       cache.saveQueue(queue)
-      context.dispatch('debouncedProcessQueueOperations')
+      context.dispatch('debouncedSendQueue')
     },
 
-    debouncedProcessQueueOperations: debounce(({ dispatch }) => {
-      dispatch('processQueueOperations')
+    debouncedSendQueue: debounce(({ dispatch }) => {
+      dispatch('sendQueue')
     }, 500),
 
-    processQueueOperations: async (context) => {
+    sendQueue: async (context) => {
       let body
       const apiKey = context.rootState.currentUser.apiKey
       const isOnline = context.rootState.isOnline
       const queue = cache.queue()
-      const queueBuffer = cache.queueBuffer()
+      const sendingInProgressQueue = cache.sendingInProgressQueue()
       if (!shouldRequest({ apiKey, isOnline }) || !queue.length) { return }
-      if (queueBuffer.length) {
-        body = queueBuffer
+      if (sendingInProgressQueue.length) {
+        body = sendingInProgressQueue
+        body = sortQueueItems(body)
+        console.log('🛃 sending operations from sendingInProgressQueue', body)
       } else {
         body = squashQueue(queue)
-        cache.saveQueueBuffer(body)
+        cache.saveSendingInProgressQueue(body)
         cache.clearQueue()
       }
-      body = body.map(item => {
-        item.operationId = nanoid()
-        return item
-      })
+      let response
       try {
         console.log(`🛫 sending operations`, body)
         const space = context.rootState.currentSpace
         if (!space.id) { throw 'operation missing spaceId' }
         const options = await context.dispatch('requestOptions', { body, method: 'POST', space })
-        const response = await fetch(`${host}/operations`, options)
+        response = await fetch(`${host}/operations`, options)
         if (response.ok) {
           console.log('🛬 operations ok')
-          cache.clearQueueBuffer()
+          cache.clearSendingInProgressQueue()
         } else {
           throw Error(response.statusText)
         }
@@ -184,8 +234,7 @@ const self = {
           context.commit('addNotification', { message: 'Reconnected to server', type: 'success' }, { root: true })
         }
       } catch (error) {
-        console.error('🚒 processQueueOperations', error, body)
-        context.commit('notifyServerCouldNotSave', true, { root: true })
+        context.dispatch('handleServerOperationsError', { error, response })
       }
     },
 

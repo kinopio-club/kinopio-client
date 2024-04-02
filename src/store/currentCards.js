@@ -398,6 +398,7 @@ const currentCards = {
     // dimensions
 
     updateDimensions: (context, { cards, cardId }) => {
+      const canEditSpace = context.rootGetters['currentUser/canEditSpace']()
       nextTick(() => {
         let newCards = []
         let updates = {
@@ -436,7 +437,9 @@ const currentCards = {
           context.dispatch('broadcast/update', { updates: body, type: 'updateCard', handler: 'currentCards/update' }, { root: true })
           updates.cards.push(body)
         })
-        context.dispatch('api/addToQueue', { name: 'updateMultipleCards', body: updates }, { root: true })
+        if (canEditSpace) {
+          context.dispatch('api/addToQueue', { name: 'updateMultipleCards', body: updates }, { root: true })
+        }
         context.dispatch('currentConnections/updateMultplePaths', updates.cards, { root: true })
       })
     },
@@ -480,9 +483,12 @@ const currentCards = {
         const body = { id: cardId, resizeWidth: null, width: null }
         updates.push(body)
         utils.removeAllCardDimensions({ id: cardId })
-        context.dispatch('updateDimensions', { cardId })
       })
       context.dispatch('updateMultiple', updates)
+      const cards = cardIds.map(cardId => {
+        return { id: cardId }
+      })
+      context.dispatch('updateDimensions', { cards })
     },
 
     // tilt
@@ -604,8 +610,8 @@ const currentCards = {
       })
       cards = cards.filter(card => Boolean(card))
       cards = cards.map(card => {
-        card.x = card.x + prevMoveDelta.x
-        card.y = card.y + prevMoveDelta.y
+        card.x = Math.max(card.x + prevMoveDelta.x, 0)
+        card.y = Math.max(card.y + prevMoveDelta.y, 0)
         return card
       })
       context.dispatch('incrementSelectedZs')
@@ -682,15 +688,15 @@ const currentCards = {
         context.dispatch('clearAllZs')
         highestCardZ = 1
       }
-      const userCanEdit = context.rootGetters['currentUser/canEditSpace']()
+      const canEditSpace = context.rootGetters['currentUser/canEditSpace']()
       const body = { id, z: highestCardZ + 1 }
       context.commit('update', body)
-      if (!userCanEdit) { return }
+      if (!canEditSpace) { return }
       context.dispatch('api/addToQueue', { name: 'updateCard', body }, { root: true })
       context.dispatch('broadcast/update', { updates: body, type: 'updateCard', handler: 'currentCards/update' }, { root: true })
     },
     incrementSelectedZs: (context) => {
-      const userCanEdit = context.rootGetters['currentUser/canEditSpace']()
+      const canEditSpace = context.rootGetters['currentUser/canEditSpace']()
       const multipleCardsSelectedIds = context.rootState.multipleCardsSelectedIds
       const currentDraggingCardId = context.rootState.currentDraggingCardId
       if (multipleCardsSelectedIds.length) {
@@ -720,7 +726,7 @@ const currentCards = {
         // broadcast
         multipleCardsSelectedIds.forEach(id => {
           const body = { id, z: newHighestCardZ }
-          if (!userCanEdit) { return }
+          if (!canEditSpace) { return }
           context.dispatch('broadcast/update', { updates: body, type: 'updateCard', handler: 'currentCards/update' }, { root: true })
         })
       } else {
@@ -921,6 +927,7 @@ const currentCards = {
       // │Viewport                         │
       // └─────────────────────────────────┘
       // cards within y range
+      if (!yIndex) { return [] }
       yIndex = yIndex.map(y => parseInt(y))
       const min = Math.max(position.y - threshold, 0)
       const max = min + threshold

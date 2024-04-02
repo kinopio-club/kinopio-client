@@ -100,6 +100,11 @@ const showCurrentUserSpaces = computed({
     state.currentUserSpacesIsVisible = !state.currentUserSpacesIsVisible
   }
 })
+const currentUserSpacesFilterIsVisible = computed(() => {
+  let spaces = favoriteSpacesOrderedByEdited.value
+  const spacesIncludeCurrentUserSpace = spaces.find(space => space.userId === currentUser.value.id)
+  return state.spacesIsVisible && spacesIncludeCurrentUserSpace
+})
 const checkIfShouldShowCurrentUserSpaces = (space) => {
   const isSpaceMember = store.getters['currentUser/isSpaceMember'](space)
   if (isSpaceMember) {
@@ -114,17 +119,14 @@ const parentDialog = computed(() => 'favorites')
 
 // favorite space
 
-// const isFavoriteSpace = computed(() => store.getters['currentSpace/isFavorite'])
-// const toggleIsFavoriteSpace = () => {
-//   const currentSpace = store.state.currentSpace
-//   if (isFavoriteSpace.value) {
-//     store.dispatch('currentUser/removeFavorite', { type: 'space', item: currentSpace })
-//   } else {
-//     store.dispatch('currentUser/addFavorite', { type: 'space', item: currentSpace })
-//     checkIfShouldShowCurrentUserSpaces(currentSpace)
-//   }
-// }
-// const currentSpaceName = computed(() => utils.truncated(store.state.currentSpace.name))
+const isFavoriteSpace = computed(() => store.getters['currentSpace/isFavorite'])
+const updateFavoriteSpace = () => {
+  const space = store.state.currentSpace
+  const value = !isFavoriteSpace.value
+  store.dispatch('currentUser/updateFavoriteSpace', { space, value })
+  checkIfShouldShowCurrentUserSpaces(space)
+}
+const currentSpaceName = computed(() => utils.truncated(store.state.currentSpace.name))
 
 // user
 
@@ -179,12 +181,11 @@ const isFavoriteUser = computed(() => {
   }))
   return isUser
 })
-const toggleIsFavoriteUser = () => {
-  if (isFavoriteUser.value) {
-    store.dispatch('currentUser/removeFavorite', { type: 'user', item: spaceUser.value })
-  } else {
-    store.dispatch('currentUser/addFavorite', { type: 'user', item: spaceUser.value })
-  }
+
+const updateFavoriteUser = () => {
+  const user = spaceUser.value
+  const value = !isFavoriteUser.value
+  store.dispatch('currentUser/updateFavoriteUser', { user, value })
 }
 </script>
 
@@ -196,20 +197,20 @@ dialog.narrow.favorites(v-if="visible" :open="visible" @click.left.stop="closeDi
       Loader(:visible="loading" :isSmall="true")
   section.actions
     //- fav space
-    //- .row
-    //-   button(:class="{active: isFavoriteSpace}" @click.left.prevent="toggleIsFavoriteSpace" @keydown.stop.enter="toggleIsFavoriteSpace" title="Favorite Current Space")
-    //-     img.icon(v-if="isFavoriteSpace" src="@/assets/heart.svg")
-    //-     img.icon(v-else src="@/assets/heart-empty.svg")
-    //-     span {{currentSpaceName}}
+    .row
+      button(:class="{active: isFavoriteSpace}" @click.left.prevent="updateFavoriteSpace" @keydown.stop.enter="updateFavoriteSpace" title="Favorite Current Space")
+        img.icon(v-if="isFavoriteSpace" src="@/assets/heart.svg")
+        img.icon(v-else src="@/assets/heart-empty.svg")
+        span {{currentSpaceName}}
     //- fav user
     .row(v-if="spaceUser")
-      button.toggle-favorite-user(@click="toggleIsFavoriteUser")
+      button.toggle-favorite-user(@click="updateFavoriteUser")
         img.icon(v-if="isFavoriteUser" src="@/assets/heart.svg")
         img.icon(v-else src="@/assets/heart-empty.svg")
         UserLabelInline(:user="spaceUser")
 
   section
-    .row
+    .row.title-row
       .button-wrap
         .segmented-buttons
           button(@click.left.stop="showSpaces" :class="{ active: state.spacesIsVisible }")
@@ -217,7 +218,7 @@ dialog.narrow.favorites(v-if="visible" :open="visible" @click.left.stop="closeDi
           button(@click.left.stop="hideSpaces" :class="{ active: !state.spacesIsVisible }")
             span People
       .button-wrap
-        label.user-filter(v-if="state.spacesIsVisible" :class="{active: state.currentUserSpacesIsVisible}")
+        label.user-filter-button(v-if="currentUserSpacesFilterIsVisible" :class="{active: state.currentUserSpacesIsVisible}")
           input(type="checkbox" v-model="showCurrentUserSpaces")
           User(:user="currentUser"  :isClickable="false" :key="currentUser.id" :isSmall="true" :hideYouLabel="true")
 
@@ -252,7 +253,7 @@ dialog.favorites
   overflow auto
   left initial
   right 8px
-  .user-filter
+  .user-filter-button
     .user
       vertical-align -3px
   .loader

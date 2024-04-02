@@ -224,7 +224,7 @@ export default {
       context.dispatch('broadcast/update', { updates: connection, type: 'updateConnectionTypeForConnection', handler: 'currentConnections/update' }, { root: true })
     },
     updatePaths: (context, { cardId, shouldUpdateApi, connections }) => {
-      const userCanEdit = context.rootGetters['currentUser/canEditSpace']()
+      const canEditSpace = context.rootGetters['currentUser/canEditSpace']()
       connections = utils.clone(connections || context.getters.byCardId(cardId))
       connections.map(connection => {
         connection.path = context.getters.connectionPathBetweenCards(connection.startCardId, connection.endCardId, connection.controlPoint)
@@ -232,7 +232,7 @@ export default {
         if (shouldUpdateApi) {
           context.dispatch('api/addToQueue', { name: 'updateConnection', body: connection }, { root: true })
         }
-        if (userCanEdit) {
+        if (canEditSpace) {
           context.dispatch('broadcast/update', { updates: connection, type: 'updateConnection', handler: 'currentConnections/update' }, { root: true })
           context.commit('update', connection)
         } else {
@@ -241,29 +241,33 @@ export default {
       })
     },
     updateMultplePaths: (context, cards) => {
+      const canEditSpace = context.rootGetters['currentUser/canEditSpace']()
       const cardIds = cards.map(card => card.id)
       const connections = utils.clone(context.getters.byMultipleCardIds(cardIds))
       if (!connections.length) { return }
-      const userCanEdit = context.rootGetters['currentUser/canEditSpace']()
       let newConnections = []
+      // update state
       connections.forEach(connection => {
         connection.path = context.getters.connectionPathBetweenCards(connection.startCardId, connection.endCardId, connection.controlPoint)
         connection.spaceId = currentSpaceId
         newConnections.push(connection)
-        if (userCanEdit) {
+        if (canEditSpace) {
           context.dispatch('broadcast/update', { updates: connection, type: 'updateConnection', handler: 'currentConnections/update' }, { root: true })
           context.commit('update', connection)
         } else {
           context.commit('updateReadOnly', connection)
         }
       })
-      context.dispatch('api/addToQueue', {
-        name: 'updateMultipleConnections',
-        body: {
-          connections: newConnections,
-          spaceId: context.rootState.currentSpace.id
-        }
-      }, { root: true })
+      // update api
+      if (canEditSpace) {
+        context.dispatch('api/addToQueue', {
+          name: 'updateMultipleConnections',
+          body: {
+            connections: newConnections,
+            spaceId: context.rootState.currentSpace.id
+          }
+        }, { root: true })
+      }
     },
     updatePathsWhileDragging: (context, { connections }) => {
       let newConnections = []

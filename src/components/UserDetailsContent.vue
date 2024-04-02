@@ -179,12 +179,10 @@ const clearUserSpaces = () => {
 const updateUser = (update) => {
   store.dispatch('currentUser/update', update)
 }
-const toggleIsFavoriteUser = () => {
-  if (isFavoriteUser.value) {
-    store.dispatch('currentUser/removeFavorite', { type: 'user', item: props.user })
-  } else {
-    store.dispatch('currentUser/addFavorite', { type: 'user', item: props.user })
-  }
+const updateFavoriteUser = () => {
+  const user = props.user
+  const value = !isFavoriteUser.value
+  store.dispatch('currentUser/updateFavoriteUser', { user, value })
 }
 const updateUserColor = (newValue) => {
   updateUser({ color: newValue })
@@ -262,7 +260,7 @@ const updateExploreSpaces = async () => {
         Loader(:visible="state.loading.userSpaces")
       SpacePicker(:visible="state.spacePickerIsVisible" :loading="state.loading.userSpaces" :user="user" :userSpaces="state.userSpaces" @selectSpace="changeSpace")
     .button-wrap
-      button(:class="{active: isFavoriteUser}" @click.left.prevent="toggleIsFavoriteUser" @keydown.stop.enter="toggleIsFavoriteUser")
+      button(:class="{active: isFavoriteUser}" @click.left.prevent="updateFavoriteUser" @keydown.stop.enter="updateFavoriteUser")
         img.icon(v-if="isFavoriteUser" src="@/assets/heart.svg")
         img.icon(v-else src="@/assets/heart-empty.svg")
         span Follow

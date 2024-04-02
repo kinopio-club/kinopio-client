@@ -59,8 +59,8 @@ dialog.narrow.color-picker(v-if="visible" :open="visible" ref="dialog" @click.le
   //- Favorite Colors
   section.favorite-colors
     button.toggle-favorite-color(@click="toggleFavoriteColor")
-      img.icon(v-if="!currentColorIsUserColor" src="@/assets/heart-empty.svg")
-      img.icon(v-if="currentColorIsUserColor" src="@/assets/heart.svg")
+      img.icon(v-if="!currentColorIsFavorite" src="@/assets/heart-empty.svg")
+      img.icon(v-if="currentColorIsFavorite" src="@/assets/heart.svg")
       span.current-color(:style="{ background: currentColor }")
     template(v-for="color in favoriteColors")
       button.color(:style="{backgroundColor: color}" :class="{active: colorIsCurrent(color)}" @click.left="select(color, 'isFavorite')")
@@ -118,7 +118,7 @@ export default {
     hueIsGreen () { return this.currentHue === 'green' },
     hueIsBlue () { return this.currentHue === 'blue' },
     favoriteColors () { return this.$store.state.currentUser.favoriteColors || [] },
-    currentColorIsUserColor () { return this.favoriteColors.includes(this.currentColor) },
+    currentColorIsFavorite () { return this.favoriteColors.includes(this.currentColor) },
     isTransparent () {
       const isLabelled = this.currentColor === 'transparent'
       const isOpacity = this.opacity === 0
@@ -138,11 +138,8 @@ export default {
     },
     toggleFavoriteColor () {
       const color = { color: this.currentColor }
-      if (this.currentColorIsUserColor) {
-        this.$store.dispatch('currentUser/removeFavorite', { type: 'color', item: color })
-      } else {
-        this.$store.dispatch('currentUser/addFavorite', { type: 'color', item: color })
-      }
+      const value = !this.currentColorIsFavorite
+      this.$store.dispatch('currentUser/updateFavoriteColor', { color, value })
     },
     updateLuminosity (value) {
       if (this.luminosity === value) { return }

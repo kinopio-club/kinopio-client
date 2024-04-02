@@ -162,6 +162,9 @@ export default {
         if (user[item]) {
           state[item] = user[item]
         }
+        if (utils.userIsUpgraded(user)) {
+          state.isUpgraded = true
+        }
         if (user.apiKey) {
           postMessage.send({ name: 'setApiKey', value: user.apiKey })
         }
@@ -429,8 +432,7 @@ export default {
       if (shouldDecrement) {
         delta = -delta
       }
-      console.log('delta', delta)
-
+      // console.log('delta', delta)
       if (context.getters.shouldPreventCardsCreatedCountUpdate) { return }
       const count = context.state.cardsCreatedCount + delta
       context.dispatch('api/addToQueue', { name: 'updateUserCardsCreatedCount', body: { delta } }, { root: true })
@@ -495,7 +497,7 @@ export default {
       remoteUser.updatedAt = utils.normalizeToUnixTime(remoteUser.updatedAt)
       console.log('🌸 Restore user from remote', remoteUser)
       context.commit('updateUser', remoteUser)
-      if (remoteUser.stripeSubscriptionId || remoteUser.stripePlanIsPurchased || remoteUser.downgradeAt || remoteUser.appleSubscriptionIsActive) {
+      if (utils.userIsUpgraded(remoteUser)) {
         context.commit('isUpgraded', true)
       } else {
         context.commit('isUpgraded', false)
@@ -520,79 +522,52 @@ export default {
       context.commit('favoriteColors', favorites.favoriteColors)
       context.commit('isLoadingFavorites', false, { root: true })
     },
-    addFavorite: (context, { type, item }) => {
-      let color, notification
-      // user
-      if (type === 'user') {
-        let favoriteUsers = utils.clone(context.state.favoriteUsers)
-        let user = {
-          id: item.id,
-          name: item.name,
-          color: item.color
-        }
-        favoriteUsers.push(user)
-        context.commit('favoriteUsers', favoriteUsers)
-        context.dispatch('userNotifications/addFavoriteUser', user, { root: true })
-      // space
-      } else if (type === 'space') {
-        let favoriteSpaces = utils.clone(context.state.favoriteSpaces)
-        let space = {
-          id: item.id,
-          name: item.name,
-          privacy: item.privacy,
-          showInExplore: item.showInExplore,
-          users: item.users
-        }
+    updateFavoriteSpace: (context, { space, value }) => {
+      let favoriteSpaces = utils.clone(context.state.favoriteSpaces)
+      // add space
+      if (value) {
         favoriteSpaces.push(space)
-        context.commit('favoriteSpaces', favoriteSpaces)
-        context.dispatch('userNotifications/addFavoriteSpace', space, { root: true })
-      // color
-      } else if (type === 'color') {
-        color = item.color
-        let favoriteColors = utils.clone(context.state.favoriteColors)
-        favoriteColors.push(color)
-        context.commit('favoriteColors', favoriteColors)
+      // remove space
+      } else {
+        favoriteSpaces = favoriteSpaces.filter(favoriteSpace => {
+          return favoriteSpace.id !== space.id
+        })
+        context.dispatch('userNotifications/removeFavoriteSpace', space, { root: true })
       }
-      // update api
-      let body = { type, id: item.id }
-      if (color) {
-        body.color = color
-      }
-      context.dispatch('api/addToQueue', { name: 'addOrRemoveFavorite', body }, { root: true })
+      context.commit('favoriteSpaces', favoriteSpaces)
+      const body = { spaceId: space.id, value }
+      context.dispatch('api/addToQueue', { name: 'updateFavoriteSpace', body }, { root: true })
     },
-    removeFavorite: (context, { type, item }) => {
-      let color
-      // user
-      if (type === 'user') {
-        let favoriteUsers = utils.clone(context.state.favoriteUsers)
-        favoriteUsers = favoriteUsers.filter(favorite => {
-          return favorite.id !== item.id
+    updateFavoriteUser: (context, { user, value }) => {
+      let favoriteUsers = utils.clone(context.state.favoriteUsers)
+      // add user
+      if (value) {
+        favoriteUsers.push(user)
+        context.dispatch('userNotifications/addFavoriteUser', user, { root: true })
+      // remove user
+      } else {
+        favoriteUsers = favoriteUsers.filter(favoriteUser => {
+          return favoriteUser.id !== user.id
         })
-        context.commit('favoriteUsers', favoriteUsers)
-        context.dispatch('userNotifications/removeFavoriteUser', item, { root: true })
-      // space
-      } else if (type === 'space') {
-        let favoriteSpaces = utils.clone(context.state.favoriteSpaces)
-        favoriteSpaces = favoriteSpaces.filter(space => {
-          return space.id !== item.id
-        })
-        context.commit('favoriteSpaces', favoriteSpaces)
-        context.dispatch('userNotifications/removeFavoriteSpace', item, { root: true })
-      // color
-      } else if (type === 'color') {
-        color = item.color
-        let favoriteColors = utils.clone(context.state.favoriteColors)
+        context.dispatch('userNotifications/removeFavoriteUser', user, { root: true })
+      }
+      context.commit('favoriteUsers', favoriteUsers)
+      const body = { favoriteUserId: user.id, value }
+      context.dispatch('api/addToQueue', { name: 'updateFavoriteUser', body }, { root: true })
+    },
+    updateFavoriteColor: (context, { color, value }) => {
+      color = color.color
+      let favoriteColors = utils.clone(context.state.favoriteColors)
+      if (value) {
+        favoriteColors.push(color)
+      } else {
         favoriteColors = favoriteColors.filter(favoriteColor => {
           return favoriteColor !== color
         })
-        context.commit('favoriteColors', favoriteColors)
       }
-      // update api
-      let body = { type, id: item.id }
-      if (color) {
-        body.color = color
-      }
-      context.dispatch('api/addToQueue', { name: 'addOrRemoveFavorite', body }, { root: true })
+      context.commit('favoriteColors', favoriteColors)
+      const body = { color, value }
+      context.dispatch('api/addToQueue', { name: 'updateFavoriteColor', body }, { root: true })
     },
     confirmEmail: (context) => {
       context.dispatch('api/addToQueue', { name: 'updateUser',

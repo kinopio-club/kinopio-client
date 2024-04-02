@@ -211,7 +211,7 @@ export default {
       if (this.isSuccess(response)) {
         this.$store.commit('clearAllNotifications', false)
         this.$store.commit('currentUser/replaceState', newUser)
-        this.updateLocalSpacesWithNewUserId()
+        this.updateSpacesUserId()
         this.updateCurrentSpaceWithNewUserId(currentUser, newUser)
         await this.$store.dispatch('api/createSpaces')
         this.notifySignedIn()
@@ -239,9 +239,9 @@ export default {
         // update user to remote user
         this.$store.commit('currentUser/updateUser', result)
         // update local spaces to remote user
+        this.updateSpacesUserId()
         this.checkIfShouldRemoveSpace('Hello Kinopio')
         this.checkIfShouldRemoveSpace('Inbox')
-        this.updateLocalSpacesWithNewUserId()
         await this.$store.dispatch('api/createSpaces')
         this.notifySignedIn()
         // add new spaces from remote
@@ -265,17 +265,12 @@ export default {
       }
     },
 
-    updateLocalSpacesWithNewUserId () {
+    updateSpacesUserId () {
       const userId = this.$store.state.currentUser.id
       const spaces = cache.getAllSpaces()
-      spaces.forEach(space => {
-        space = utils.updateSpaceUserId(space, userId)
-        cache.updateSpace('userId', userId, space.id)
-        cache.updateSpace('cards', space.cards, space.id)
-        cache.updateSpace('connectionTypes', space.connectionTypes, space.id)
-        cache.updateSpace('connections', space.connections, space.id)
-        cache.updateSpace('boxes', space.boxes, space.id)
-        cache.updateSpace('users', [{ id: userId }], space.id)
+      const newSpaces = utils.updateSpacesUserId(userId, spaces)
+      newSpaces.forEach(space => {
+        cache.saveSpace(space)
       })
     },
 

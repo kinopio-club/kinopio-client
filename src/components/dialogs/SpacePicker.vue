@@ -263,7 +263,7 @@ export default {
 </script>
 
 <style lang="stylus">
-.space-picker
+dialog.space-picker
   overflow auto
   .results-section
     padding-top 4px

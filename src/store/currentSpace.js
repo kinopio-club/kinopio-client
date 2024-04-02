@@ -183,7 +183,9 @@ const currentSpace = {
       context.dispatch('checkIfShouldShowExploreOnLoad')
     },
     createSpacePreviewImage: debounce(async function (context) {
+      const currentUserIsSignedIn = context.rootGetters['currentUser/isSignedIn']
       const canEditSpace = context.rootGetters['currentUser/canEditSpace']()
+      if (!currentUserIsSignedIn) { return }
       if (!canEditSpace) { return }
       try {
         console.log('🙈 create space preview image')
