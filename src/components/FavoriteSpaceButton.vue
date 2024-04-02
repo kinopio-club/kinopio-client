@@ -3,22 +3,22 @@ import { reactive, computed, onMounted, onBeforeUnmount, onUnmounted, defineProp
 import { useStore } from 'vuex'
 const store = useStore()
 
+const emit = defineEmits(['updateLocalSpaces'])
+
 const shouldIncreaseUIContrast = computed(() => store.state.currentUser.shouldIncreaseUIContrast)
 const isOnline = computed(() => store.state.isOnline)
 
 const isFavoriteSpace = computed(() => store.getters['currentSpace/isFavorite'])
 const toggleIsFavoriteSpace = () => {
-  const currentSpace = store.state.currentSpace
-  if (isFavoriteSpace.value) {
-    store.dispatch('currentUser/removeFavorite', { type: 'space', item: currentSpace })
-  } else {
-    store.dispatch('currentUser/addFavorite', { type: 'space', item: currentSpace })
-  }
+  const space = store.state.currentSpace
+  const value = !isFavoriteSpace.value
+  store.dispatch('currentUser/updateFavoriteSpace', { space, value })
+  emit('updateLocalSpaces')
 }
 </script>
 
 <template lang="pug">
-.button-wrap
+.button-wrap.favorite-space-button
   button(v-if="isOnline" :class="{active: isFavoriteSpace, 'translucent-button': !shouldIncreaseUIContrast}" @click.left.prevent="toggleIsFavoriteSpace" title="Favorite Space")
     img.icon(v-if="isFavoriteSpace" src="@/assets/heart.svg")
     img.icon(v-else src="@/assets/heart-empty.svg")
