@@ -30,6 +30,7 @@ const handleMouseWheelEvents = (event) => {
     shouldZoomOut = deltaY < 0
   }
   let speed = Math.max(Math.abs(deltaY), 1)
+  console.warn('🏎️', speed, event.deltaY, event, event.deltaMode)
   updateZoomOrigin(event)
   store.dispatch('zoomSpace', { shouldZoomIn, shouldZoomOut, speed })
 }
