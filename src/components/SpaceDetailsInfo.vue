@@ -242,12 +242,9 @@ export default {
       this.updateLocalSpaces()
     },
     toggleIsFavoriteSpace () {
-      const currentSpace = this.$store.state.currentSpace
-      if (this.isFavoriteSpace) {
-        this.$store.dispatch('currentUser/removeFavorite', { type: 'space', item: currentSpace })
-      } else {
-        this.$store.dispatch('currentUser/addFavorite', { type: 'space', item: currentSpace })
-      }
+      const space = this.$store.state.currentSpace
+      const value = !this.isFavoriteSpace
+      this.$store.dispatch('currentUser/updateFavoriteSpace', { space, value })
       this.updateLocalSpaces()
     },
     duplicateSpace () {
