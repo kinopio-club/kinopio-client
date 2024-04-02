@@ -92,14 +92,14 @@ const filteredSapces = computed(() => {
   }
   return spaces
 })
-const currentUserSpacesFilterIsVisible = computed(() => {
-  let spaces = favoriteSpacesOrderedByEdited.value
-  const spacesIncludeCurrentUserSpace = spaces.find(space => space.userId === currentUser.value.id)
-  return state.spacesIsVisible && spacesIncludeCurrentUserSpace
+const showCurrentUserSpaces = computed({
+  get () {
+    return state.currentUserSpacesIsVisible
+  },
+  set (newValue) {
+    state.currentUserSpacesIsVisible = !state.currentUserSpacesIsVisible
+  }
 })
-const toggleCurrentUserSpaces = () => {
-  state.currentUserSpacesIsVisible = !state.currentUserSpacesIsVisible
-}
 const checkIfShouldShowCurrentUserSpaces = (space) => {
   const isSpaceMember = store.getters['currentUser/isSpaceMember'](space)
   if (isSpaceMember) {
@@ -217,8 +217,8 @@ dialog.narrow.favorites(v-if="visible" :open="visible" @click.left.stop="closeDi
           button(@click.left.stop="hideSpaces" :class="{ active: !state.spacesIsVisible }")
             span People
       .button-wrap
-        button.user-filter-button(v-if="currentUserSpacesFilterIsVisible" @click="toggleCurrentUserSpaces" :class="{active: state.currentUserSpacesIsVisible}" title="Filter Your Spaces Only")
-          img.icon(src="@/assets/filter.svg")
+        label.user-filter(v-if="state.spacesIsVisible" :class="{active: state.currentUserSpacesIsVisible}")
+          input(type="checkbox" v-model="showCurrentUserSpaces")
           User(:user="currentUser"  :isClickable="false" :key="currentUser.id" :isSmall="true" :hideYouLabel="true")
 
   section.results-section(v-if="!isEmpty")
@@ -252,12 +252,9 @@ dialog.favorites
   overflow auto
   left initial
   right 8px
-  .user-filter-button
+  .user-filter
     .user
-      margin-right 0
-      margin-left 3px
-      .anon-avatar
-        top 3.5px
+      vertical-align -3px
   .loader
     margin-left 5px
     vertical-align -2px
