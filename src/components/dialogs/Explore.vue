@@ -5,7 +5,12 @@ import { useStore } from 'vuex'
 import SpaceList from '@/components/SpaceList.vue'
 import ExploreRssFeeds from '@/components/dialogs/ExploreRssFeeds.vue'
 import Loader from '@/components/Loader.vue'
+import User from '@/components/User.vue'
 import utils from '@/utils.js'
+
+import { nanoid } from 'nanoid'
+import randomColor from 'randomcolor'
+
 const store = useStore()
 
 const dialogElement = ref(null)
@@ -46,7 +51,8 @@ const state = reactive({
   newSpaces: [],
   userShowInExploreDate: null,
   exploreRssFeedsIsVisible: false,
-  filteredSpaces: undefined
+  filteredSpaces: undefined,
+  currentList: 'explore' // 'explore', 'following', 'everyone'
 })
 watch(() => state.loading, (value, prevValue) => {
   updateDialogHeight()
@@ -98,6 +104,21 @@ const updateUserShowInExploreUpdatedAt = async () => {
   store.dispatch('currentUser/showInExploreUpdatedAt', serverDate)
 }
 
+// following user spaces
+
+const randomUser = () => {
+  const isThemeDark = store.state.currentUser.theme === 'dark'
+  let luminosity = 'light'
+  if (isThemeDark) {
+    luminosity = 'dark'
+  }
+  const color = randomColor({ luminosity })
+  return {
+    id: nanoid(),
+    color: color
+  }
+}
+
 // rss
 
 const toggleExploreRssFeedsIsVisible = () => {
@@ -107,27 +128,30 @@ const toggleExploreRssFeedsIsVisible = () => {
 
 <template lang="pug">
 dialog.explore.wide(v-if="visible" :open="visible" ref="dialogElement" :style="{'max-height': state.dialogHeight + 'px'}")
-  section.community(v-if="visible" :open="visible" @click.left.stop='closeDialogs')
+  section(v-if="visible" :open="visible" @click.left.stop='closeDialogs')
     .row.title-row
       .segmented-buttons
         button.active
           span Explore
         button
           span Following
-        button
-          span Everyone
+        button.everyone(title="Everyone")
+          //- span Everyone
+          User(:user="randomUser()" :isClickable="false" :hideYouLabel="true")
+          User(:user="randomUser()" :isClickable="false" :hideYouLabel="true")
+          User(:user="randomUser()" :isClickable="false" :hideYouLabel="true")
 
+  section
     .row.title-row
       div
         Loader(:isSmall="true" :visible="state.loading")
-        span Explore Community Spaces
-        //- updated by people you follow
-        //- new public spaces
-
+        span Shared With the Community
+        //- if following: new by people you follow
+        //- if everyone: new public spaces
       //- rss
       .button-wrap.rss-button-wrap
         button.small-button(@click.stop="toggleExploreRssFeedsIsVisible" :class="{active: state.exploreRssFeedsIsVisible}" title="RSS Feeds")
-          img.icon(src="@/assets/rss.svg")
+          span RSS
         ExploreRssFeeds(:visible="state.exploreRssFeedsIsVisible")
 
   section.results-section(ref="resultsElement" :style="{'max-height': state.resultsSectionHeight + 'px'}")
@@ -147,14 +171,27 @@ dialog.explore
   left initial
   right -35px
   overflow auto
-  .community
-    .badge
-      display flex
-    button + a
-      margin-left 6px
-    .title
-      color var(--primary)
+  // .community
+  //   .badge
+  //     display flex
+  //   button + a
+  //     margin-left 6px
+  //   .title
+  //     color var(--primary)
   .loader
     margin-right 5px
     vertical-align -2px
+  .everyone
+    .user
+      &:last-child
+        margin 0
+      // &:first-child
+      //   .user-avatar
+      //     border-top-right-radius 0
+      //     border-bottom-right-radius 0
+      // &:last-child
+      //   .user-avatar
+      //     border-top-left-radius 0
+      //     border-bottom-left-radius 0
+
 </style>

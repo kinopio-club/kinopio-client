@@ -221,7 +221,7 @@ dialog.share.wide(v-if="props.visible" :open="props.visible" @click.left.stop="c
           span Present
         .button-wrap(v-if="spaceIsRemote")
           button.small-button(@click.left.stop="toggleSpaceRssFeedIsVisible" :class="{ active: state.spaceRssFeedIsVisible }" title="Space RSS Feed")
-            img.icon(src="@/assets/rss.svg")
+            span RSS
           SpaceRssFeed(:visible="state.spaceRssFeedIsVisible")
 
   section(v-if="spaceIsRemote")

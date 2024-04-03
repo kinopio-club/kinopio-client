@@ -42,7 +42,7 @@ dialog.narrow.explore-rss-feed(v-if="visible" :open="visible" @click.left.stop)
     p Explore RSS Feeds
   section
     .row
-      p Subscribe to new spaces added to Highlights
+      p Subscribe to new spaces added to Explore
     .row
       button(@click.left="copyUrl")
         img.icon.copy(src="@/assets/copy.svg")

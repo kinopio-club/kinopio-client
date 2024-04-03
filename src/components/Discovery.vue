@@ -128,7 +128,7 @@ const liveSpacesCount = computed(() => {
 
 // Favorites
 
-// TOOD move this to sidebar
+// TOOD move fav-ed spaces this to sidebar
 
 // const toggleFavoritesIsVisible = () => {
 //   const isVisible = state.favoritesIsVisible
