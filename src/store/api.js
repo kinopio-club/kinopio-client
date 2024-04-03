@@ -162,15 +162,12 @@ const self = {
         if (!error) { return }
         const isCritical = !nonErrorStatusCodes.includes(error.status)
         if (isCritical) {
-          // notify user on failed critical operation, and retry later
           console.error('🚒 critical serverOperationsError operation', operation)
           context.commit('notifyServerCouldNotSave', true, { root: true })
         } else {
-          // do not retry non-critical operations
           console.warn('🚑 non-critical serverOperationsError operation', operation)
-          cache.removeSendingInProgressQueueOperationById(operation.body.operationId)
         }
-        cache.removeSendingInProgressQueueOperationById(operation.body.operationId) // temp
+        cache.removeSendingInProgressQueueOperationById(operation.body.operationId)
       })
     },
 
