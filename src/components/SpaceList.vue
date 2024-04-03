@@ -97,7 +97,8 @@ watch(() => props.isLoading, async (value, prevValue) => {
   await nextTick()
   updateScroll()
 })
-const updateScroll = () => {
+const updateScroll = async () => {
+  await nextTick()
   let element = spaceListElement.value
   if (!element) { return }
   element = element.closest('section')

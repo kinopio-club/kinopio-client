@@ -38,7 +38,8 @@ const state = reactive({
   favoritesIsVisible: false,
   liveIsVisible: false,
   liveSpaces: [],
-  exploreSpaces: []
+  exploreSpaces: [],
+  everyoneSpaces: []
 })
 
 const closeDialogs = () => {
@@ -74,6 +75,8 @@ const updateExploreSpaces = async () => {
     console.warn('🚑 updateExploreSpaces', error)
   }
 }
+
+// Everyone
 
 // Live
 
@@ -150,29 +153,31 @@ const liveSpacesCount = computed(() => {
 
 <template lang="pug">
 .button-wrap(v-if="isOnline")
-  button(:class="{active: state.exploreIsVisible, 'translucent-button': !shouldIncreaseUIContrast}" @click="toggleExploreIsVisible")
-    img.icon.sunglasses(src="@/assets/sunglasses.svg")
-    span.explore-label Explore
-  Explore(:visible="state.exploreIsVisible" @preloadedSpaces="state.exploreSpaces")
+  //- button(:class="{active: state.exploreIsVisible, 'translucent-button': !shouldIncreaseUIContrast}" @click="toggleExploreIsVisible")
+  //-   img.icon.sunglasses(src="@/assets/sunglasses.svg")
+  //-   //- span.explore-label Explore
+  //- Explore(:visible="state.exploreIsVisible" @preloadedHighlights="state.exploreSpaces" @preloadedEveryone="state.everyoneSpaces")
+
+  .segmented-buttons.space-functions-row
+    //- Explore
+    .button-wrap
+      button(:class="{active: state.exploreIsVisible, 'translucent-button': !shouldIncreaseUIContrast}" @click="toggleExploreIsVisible")
+        img.icon.sunglasses(src="@/assets/sunglasses.svg")
+        //- span.explore-label Explore
+      Explore(:visible="state.exploreIsVisible" @exploreSpaces="state.exploreSpaces" @everyoneSpaces="state.everyoneSpaces")
+    //- Live
+    .button-wrap
+      button(@click.left="toggleLiveIsVisible" :class="{ active: state.liveIsVisible, 'translucent-button': !shouldIncreaseUIContrast }")
+        img.icon.camera(src="@/assets/camera.svg")
+
+        span(v-if="liveSpacesCount") {{ liveSpacesCount }}
+      Live(:visible="state.liveIsVisible" :spaces="state.liveSpaces" :loading="state.isLoadingLiveSpaces")
 
 FavoriteSpaceButton(v-if="isOnline")
 
-  //- Live(:visible="state.liveIsVisible" :spaces="state.liveSpaces" :loading="state.isLoadingLiveSpaces")
   //- Favorites(:visible="state.favoritesIsVisible")
 
   //- FavoriteSpaceButton
-
-  //- .segmented-buttons.space-functions-row
-  //-   //- Explore
-  //-   .button-wrap
-  //-     button.explore-button(@click.left="toggleExploreIsVisible" :class="{ active: state.exploreIsVisible, 'translucent-button': !shouldIncreaseUIContrast }")
-  //-       img.icon.sunglasses(src="@/assets/sunglasses.svg")
-  //-       span.explore-button-label(v-if="unreadExploreSpacesCount") &nbsp;{{ unreadExploreSpacesCount }}
-  //-   //- Live
-  //-   .button-wrap
-  //-     button(@click.left="toggleLiveIsVisible" :class="{ active: state.liveIsVisible, 'translucent-button': !shouldIncreaseUIContrast }")
-  //-       img.icon.camera(src="@/assets/camera.svg")
-  //-       span(v-if="liveSpacesCount") {{ liveSpacesCount }}
 
   //- Favorites
   //- .button-wrap
@@ -184,9 +189,9 @@ FavoriteSpaceButton(v-if="isOnline")
 </template>
 
 <style lang="stylus" scoped>
-@media(max-width 400px)
-  .explore-label
-    display none
+// @media(max-width 400px)
+//   .explore-label
+//     display none
   // .explore-button
   //   .explore-button-label
   //     margin-left 0
