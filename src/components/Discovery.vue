@@ -149,15 +149,13 @@ const liveSpacesCount = computed(() => {
 </script>
 
 <template lang="pug">
-  //- .row.discovery-row
+.button-wrap(v-if="isOnline")
+  button(:class="{active: state.exploreIsVisible, 'translucent-button': !shouldIncreaseUIContrast}" @click="toggleExploreIsVisible")
+    img.icon.sunglasses(src="@/assets/sunglasses.svg")
+    span.explore-label Explore
+  Explore(:visible="state.exploreIsVisible" @preloadedSpaces="state.exploreSpaces")
 
-  .button-wrap(v-if="isOnline")
-    button(:class="{'translucent-button': !shouldIncreaseUIContrast}" @click="toggleExploreIsVisible")
-      img.icon.sunglasses(src="@/assets/sunglasses.svg")
-      span Explore
-    Explore(:visible="state.exploreIsVisible" @preloadedSpaces="state.exploreSpaces")
-
-  FavoriteSpaceButton(v-if="isOnline")
+FavoriteSpaceButton(v-if="isOnline")
 
   //- Live(:visible="state.liveIsVisible" :spaces="state.liveSpaces" :loading="state.isLoadingLiveSpaces")
   //- Favorites(:visible="state.favoritesIsVisible")
@@ -185,9 +183,10 @@ const liveSpacesCount = computed(() => {
 
 </template>
 
-<style lang="stylus">
-.discovery-row
-  position relative
+<style lang="stylus" scoped>
+@media(max-width 400px)
+  .explore-label
+    display none
   // .explore-button
   //   .explore-button-label
   //     margin-left 0

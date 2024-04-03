@@ -27,5 +27,5 @@ const toggleIsFavoriteSpace = () => {
 <style lang="stylus">
 .favorite-space-button
   .icon
-    margin 0
+    margin 0 !important
 </style>

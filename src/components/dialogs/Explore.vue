@@ -1,12 +1,19 @@
 <template lang="pug">
-dialog.explore(v-if="visible" :open="visible" ref="dialog" :style="{'max-height': dialogHeight + 'px'}")
+dialog.explore.wide(v-if="visible" :open="visible" ref="dialog" :style="{'max-height': dialogHeight + 'px'}")
   section.community(v-if="visible" :open="visible" @click.left.stop='closeDialogs')
     .row.title-row
-      span.title Explore Community Spaces
+      .segmented-buttons
+        button.active
+          span Highlights
+        button
+          span Following
+        button
+          span Everyone
+
       .button-wrap
-        button.small-button(@click.stop="toggleExploreRssFeedIsVisible" :class="{active: exploreRssFeedIsVisible}")
+        button.small-button(@click.stop="toggleExploreRssFeedsIsVisible" :class="{active: exploreRssFeedsIsVisible}")
           span RSS
-        ExploreRssFeed(:visible="exploreRssFeedIsVisible")
+        ExploreRssFeeds(:visible="exploreRssFeedsIsVisible")
     p(v-if="loading")
       Loader(:visible="loading")
   section.results-section(ref="results" :style="{'max-height': resultsSectionHeight + 'px'}")
@@ -23,7 +30,7 @@ dialog.explore(v-if="visible" :open="visible" ref="dialog" :style="{'max-height'
 
 <script>
 import SpaceList from '@/components/SpaceList.vue'
-import ExploreRssFeed from '@/components/dialogs/ExploreRssFeed.vue'
+import ExploreRssFeeds from '@/components/dialogs/ExploreRssFeeds.vue'
 import Loader from '@/components/Loader.vue'
 import utils from '@/utils.js'
 
@@ -32,7 +39,7 @@ export default {
   components: {
     Loader,
     SpaceList,
-    ExploreRssFeed
+    ExploreRssFeeds
   },
   props: {
     visible: Boolean,
@@ -54,7 +61,7 @@ export default {
       spaces: [],
       newSpaces: [],
       userShowInExploreDate: null,
-      exploreRssFeedIsVisible: false,
+      exploreRssFeedsIsVisible: false,
       filteredSpaces: undefined
     }
   },
@@ -109,13 +116,13 @@ export default {
       this.filteredSpaces = spaces
     },
     closeDialogs () {
-      this.exploreRssFeedIsVisible = false
+      this.exploreRssFeedsIsVisible = false
     },
     changeSpace (space) {
       this.$store.dispatch('currentSpace/changeSpace', space)
     },
-    toggleExploreRssFeedIsVisible () {
-      this.exploreRssFeedIsVisible = !this.exploreRssFeedIsVisible
+    toggleExploreRssFeedsIsVisible () {
+      this.exploreRssFeedsIsVisible = !this.exploreRssFeedsIsVisible
     }
   },
   watch: {
@@ -128,7 +135,7 @@ export default {
         this.updateUserShowInExploreUpdatedAt()
         this.$store.commit('shouldExplicitlyHideFooter', true)
       } else {
-        this.exploreRssFeedIsVisible = false
+        this.exploreRssFeedsIsVisible = false
         this.$store.commit('shouldExplicitlyHideFooter', false)
       }
     },
@@ -142,8 +149,10 @@ export default {
 
 <style lang="stylus">
 dialog.explore
+  &.wide
+    width 320px
   left initial
-  right 8px
+  right -35px
   overflow auto
   .community
     .badge

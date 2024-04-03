@@ -4,15 +4,14 @@ dialog.narrow.space-rss-feed(v-if="visible" :open="visible" @click.left.stop)
     p Space RSS Feed
 
   section
-    p Subscribe to cards recently created or updated
-    p.badge.danger(v-if="spaceIsPrivate")
-      img.icon(src="@/assets/lock.svg")
-      span RSS Feeds are only available on public spaces
+    .row
+      p Subscribe to cards recently created or updated
+    .row
+      p.badge.danger(v-if="spaceIsPrivate")
+        img.icon(src="@/assets/lock.svg")
+        span RSS Feeds are only available on public spaces
 
     template(v-if="!spaceIsPrivate")
-      p.row
-        .url-textarea.single-line
-          span {{url}}
       .row
         button(@click.left="copyUrl")
           img.icon.copy(src="@/assets/copy.svg")
