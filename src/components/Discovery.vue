@@ -152,15 +152,15 @@ const liveSpacesCount = computed(() => {
   //- .row.discovery-row
 
   .button-wrap(v-if="isOnline")
-    button(:class="{'translucent-button': !shouldIncreaseUIContrast}")
+    button(:class="{'translucent-button': !shouldIncreaseUIContrast}" @click="toggleExploreIsVisible")
       img.icon.sunglasses(src="@/assets/sunglasses.svg")
       span Explore
+    Explore(:visible="state.exploreIsVisible" @preloadedSpaces="state.exploreSpaces")
 
   FavoriteSpaceButton(v-if="isOnline")
 
-  Explore(:visible="state.exploreIsVisible" @preloadedSpaces="state.exploreSpaces")
-  Live(:visible="state.liveIsVisible" :spaces="state.liveSpaces" :loading="state.isLoadingLiveSpaces")
-  Favorites(:visible="state.favoritesIsVisible")
+  //- Live(:visible="state.liveIsVisible" :spaces="state.liveSpaces" :loading="state.isLoadingLiveSpaces")
+  //- Favorites(:visible="state.favoritesIsVisible")
 
   //- FavoriteSpaceButton
 
