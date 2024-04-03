@@ -117,10 +117,16 @@ dialog.explore.wide(v-if="visible" :open="visible" ref="dialogElement" :style="{
         button
           span Everyone
 
-      Loader(:isSmall="true" :visible="state.loading")
+    .row.title-row
+      div
+        Loader(:isSmall="true" :visible="state.loading")
+        span Explore Community Spaces
+        //- updated by people you follow
+        //- new public spaces
+
       //- rss
-      .button-wrap.rss-button-wrap(v-if="!state.loading")
-        button.small-button(@click.stop="toggleExploreRssFeedsIsVisible" :class="{active: state.exploreRssFeedsIsVisible}")
+      .button-wrap.rss-button-wrap
+        button.small-button(@click.stop="toggleExploreRssFeedsIsVisible" :class="{active: state.exploreRssFeedsIsVisible}" title="RSS Feeds")
           img.icon(src="@/assets/rss.svg")
         ExploreRssFeeds(:visible="state.exploreRssFeedsIsVisible")
 
@@ -148,4 +154,7 @@ dialog.explore
       margin-left 6px
     .title
       color var(--primary)
+  .loader
+    margin-right 5px
+    vertical-align -2px
 </style>
