@@ -121,7 +121,7 @@ const validateSchema = (space, schema) => {
 // https://jsoncanvas.org
 
 const convertFromCanvas = (space) => {
-  const yThreshold = 150
+  const minPositionValue = 150
   let newSpace = {}
   try {
     newSpace.name = `Canvas ${utils.journalSpaceName({})}`
@@ -130,7 +130,27 @@ const convertFromCanvas = (space) => {
     newSpace.cards = []
     newSpace.connections = []
     newSpace.connectionTypes = []
-    const shouldNudgeCardsY = space.nodes.filter(node => node.y <= yThreshold)
+    // emsure node positions are positive 0,0
+    let negativePositionOffset = {
+      x: 0,
+      y: 0
+    }
+    space.nodes.forEach(node => {
+      if (node.x < negativePositionOffset.x) {
+        negativePositionOffset.x = node.x
+      }
+      if (node.y < negativePositionOffset.y) {
+        negativePositionOffset.y = node.y
+      }
+    })
+    space.nodes = space.nodes.map(node => {
+      node.x = node.x + Math.abs(negativePositionOffset.x)
+      node.y = node.y + Math.abs(negativePositionOffset.y)
+      return node
+    })
+    // nodes → cards
+    const shouldNudgeCardsY = Boolean(space.nodes.find(node => node.y <= minPositionValue))
+    const shouldNudgeCardsX = Boolean(space.nodes.find(node => node.x <= minPositionValue))
     space.nodes.forEach(node => {
       // url
       let shouldUpdateUrlPreview
@@ -140,7 +160,12 @@ const convertFromCanvas = (space) => {
       // y
       let y = node.y
       if (shouldNudgeCardsY) {
-        y += yThreshold
+        y += minPositionValue
+      }
+      // x
+      let x = node.x
+      if (shouldNudgeCardsX) {
+        x += minPositionValue
       }
       // name
       let name = node.text || node.url || node.label
@@ -149,7 +174,7 @@ const convertFromCanvas = (space) => {
       }
       const newCard = {
         id: node.id,
-        x: node.x,
+        x,
         y,
         backgroundColor: node.canvasColor || node.color,
         name,
@@ -157,6 +182,7 @@ const convertFromCanvas = (space) => {
       }
       newSpace.cards.push(newCard)
     })
+    // edges → connections
     space.edges.forEach((edge, index) => {
       const typeId = nanoid()
       const newConnection = {
