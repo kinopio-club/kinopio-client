@@ -364,6 +364,7 @@ export default {
     },
     removeUnusedTypes: (context) => {
       const connections = context.getters.all
+      if (!utils.arrayHasItems(connections)) { return }
       let usedTypes = connections.map(connection => connection.connectionTypeId)
       let types = context.getters.allTypes
       types = types.filter(type => Boolean(type))
