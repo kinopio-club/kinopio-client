@@ -1649,7 +1649,7 @@ const isValidStickySize = (width, height, min) => {
   return isWidth || isHeight
 }
 const updateStickyStretchResistance = () => {
-  const zoom = store.state.spaceZoomDecimal
+  const zoom = store.getters.spaceZoomDecimal
   let { height, width } = props.card
   height = height * zoom
   width = width * zoom
@@ -1879,6 +1879,7 @@ article.card-wrap#card(
   :data-is-locked="isLocked"
   :data-resize-width="resizeWidth"
   :data-tilt-degrees="card.tilt"
+  :data-sticky-stretch-resistance="state.stickyStretchResistance"
   :data-x="x"
   :data-y="y"
   :key="card.id"
