@@ -224,8 +224,6 @@ const importSpace = async (space) => {
     console.log('🧚 space to import', uniqueNewSpace)
     await store.dispatch('currentSpace/saveSpace', uniqueNewSpace)
     await store.dispatch('currentSpace/loadSpace', { space: uniqueNewSpace })
-    store.dispatch('currentCards/updateDimensions', { cards: uniqueNewSpace.cards })
-    store.dispatch('currentConnections/correctPaths', { shouldUpdateApi: true })
     updateSpaces()
     store.commit('triggerFocusSpaceDetailsName')
   } catch (error) {
@@ -244,7 +242,8 @@ const updateSpaces = () => {
 <template lang="pug">
 template(v-if="visible")
   section.import
-    input.hidden(type="file" ref="inputElement" accept=".json, .canvas" @change="readFile")
+    //- iOS does not support '.canvas' in input accept
+    input.hidden(type="file" ref="inputElement" accept="" @change="readFile")
     .row
       button(@click.left="selectFile('json')" :class="{active: isLoadingJson}")
         img.icon.file(src="@/assets/file.svg")

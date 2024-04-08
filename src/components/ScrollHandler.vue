@@ -18,6 +18,7 @@ onUnmounted(() => {
 const handleMouseWheelEvents = (event) => {
   const min = consts.spaceZoom.min
   const max = consts.spaceZoom.max
+  const maxSpeed = 10 // windows deltaY fix
   const isMeta = event.metaKey || event.ctrlKey // event.ctrlKey is true for trackpad pinch
   if (!isMeta) { return }
   event.preventDefault()
@@ -30,6 +31,7 @@ const handleMouseWheelEvents = (event) => {
     shouldZoomOut = deltaY < 0
   }
   let speed = Math.max(Math.abs(deltaY), 1)
+  speed = Math.min(maxSpeed, speed)
   updateZoomOrigin(event)
   store.dispatch('zoomSpace', { shouldZoomIn, shouldZoomOut, speed })
 }

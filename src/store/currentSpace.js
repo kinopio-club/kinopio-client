@@ -756,7 +756,7 @@ const currentSpace = {
       if (!isRemote) { return }
       context.dispatch('createSpacePreviewImage')
     },
-    loadSpace: async (context, { space, isLocalSpaceOnly }) => {
+    loadSpace: async (context, { space }) => {
       if (!context.rootState.isEmbedMode) {
         context.commit('triggerSpaceZoomReset', null, { root: true })
       }
