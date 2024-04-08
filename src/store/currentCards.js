@@ -430,7 +430,8 @@ const currentCards = {
           const body = {
             id: card.id,
             width: card.width,
-            height: card.height
+            height: card.height,
+            userId: context.rootState.currentUser.id
           }
           context.commit('update', body)
           context.dispatch('updateTallestCardHeight', card)
@@ -612,6 +613,7 @@ const currentCards = {
       cards = cards.map(card => {
         card.x = Math.max(card.x + prevMoveDelta.x, 0)
         card.y = Math.max(card.y + prevMoveDelta.y, 0)
+        card.userId = context.rootState.currentUser.id
         return card
       })
       context.dispatch('incrementSelectedZs')
