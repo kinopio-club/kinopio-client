@@ -487,9 +487,23 @@ const self = {
       if (!shouldRequest({ shouldRequestRemote: true, isOnline })) { return }
       if (!isSpacePage) { return }
       try {
-        console.log('🛬 getting new spaces')
+        console.log('🛬 getting explore spaces')
         const options = await context.dispatch('requestOptions', { method: 'GET', space: context.rootState.currentSpace })
         const response = await utils.timeout(consts.defaultTimeout, fetch(`${host}/space/explore-spaces`, options))
+        return normalizeResponse(response)
+      } catch (error) {
+        context.dispatch('handleServerError', { name: 'getExploreSpaces', error })
+      }
+    },
+    getEveryoneSpaces: async (context) => {
+      const isSpacePage = context.rootGetters.isSpacePage
+      const isOnline = context.rootState.isOnline
+      if (!shouldRequest({ shouldRequestRemote: true, isOnline })) { return }
+      if (!isSpacePage) { return }
+      try {
+        console.log('🛬 getting everyone spaces')
+        const options = await context.dispatch('requestOptions', { method: 'GET', space: context.rootState.currentSpace })
+        const response = await utils.timeout(consts.defaultTimeout, fetch(`${host}/space/everyone-spaces`, options))
         return normalizeResponse(response)
       } catch (error) {
         context.dispatch('handleServerError', { name: 'getExploreSpaces', error })

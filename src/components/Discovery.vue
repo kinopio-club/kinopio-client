@@ -39,6 +39,7 @@ const state = reactive({
   liveIsVisible: false,
   liveSpaces: [],
   exploreSpaces: [],
+  followingSpaces: [],
   everyoneSpaces: []
 })
 
@@ -73,12 +74,12 @@ const updateSpaces = async () => {
     state.loading = true
 
     const [exploreSpaces, followingSpaces, everyoneSpaces] = await Promise.all([
-      store.dispatch('api/getExploreSpaces')
-      // TODO get followingSpaces
-      // TODO get everyoneSpaces
+      store.dispatch('api/getExploreSpaces'),
+      store.dispatch('api/getExploreSpaces'), // TODO get followingSpaces
+      store.dispatch('api/getEveryoneSpaces')
     ])
-
     state.exploreSpaces = exploreSpaces
+    state.everyoneSpaces = everyoneSpaces
   } catch (error) {
     console.warn('🚑 updateSpaces', error)
   }
@@ -173,7 +174,7 @@ const liveSpacesCount = computed(() => {
       button(:class="{active: state.exploreIsVisible, 'translucent-button': !shouldIncreaseUIContrast}" @click="toggleExploreIsVisible")
         img.icon.sunglasses(src="@/assets/sunglasses.svg")
         //- span.explore-label Explore
-      Explore(:visible="state.exploreIsVisible" :exploreSpaces="state.exploreSpaces" :everyoneSpaces="state.everyoneSpaces" :loading="state.loading")
+      Explore(:visible="state.exploreIsVisible" :exploreSpaces="state.exploreSpaces" :followingSpaces="state.followingSpaces" :everyoneSpaces="state.everyoneSpaces" :loading="state.loading")
     //- Live
     .button-wrap
       button(@click.left="toggleLiveIsVisible" :class="{ active: state.liveIsVisible, 'translucent-button': !shouldIncreaseUIContrast }")

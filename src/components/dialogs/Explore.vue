@@ -24,6 +24,7 @@ onMounted(() => {
 
 const props = defineProps({
   visible: Boolean,
+  spaces: Object,
   exploreSpaces: Object,
   followingSpaces: Object,
   everyoneSpaces: Object,
@@ -91,7 +92,17 @@ const updateCurrentSection = (value) => {
 const currentSectionIsExplore = computed(() => state.currentSection === 'explore')
 const currentSectionIsFollowing = computed(() => state.currentSection === 'following')
 const currentSectionIsEveryone = computed(() => state.currentSection === 'everyone')
-const currentSpaces = computed(() => props.exploreSpaces || [])
+const currentSpaces = computed(() => {
+  let spaces
+  if (currentSectionIsExplore.value) {
+    spaces = props.exploreSpaces
+  } else if (currentSectionIsFollowing.value) {
+    spaces = props.followingSpaces
+  } else if (currentSectionIsEveryone.value) {
+    spaces = props.everyoneSpaces
+  }
+  return spaces || []
+})
 
 // explore spaces
 
@@ -155,6 +166,7 @@ dialog.explore.wide(v-if="visible" :open="visible" ref="dialogElement" :style="{
       :userShowInExploreDate="state.userShowInExploreDate"
       :resultsSectionHeight="state.resultsSectionHeight"
       :parentDialog="parentDialog"
+      :hideFilter="true"
     )
 </template>
 
