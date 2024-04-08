@@ -2,7 +2,7 @@
 import { reactive, computed, onMounted, onBeforeUnmount, onUnmounted, defineProps, defineEmits, watch, ref, nextTick } from 'vue'
 import { useStore } from 'vuex'
 
-import SpaceList from '@/components/SpaceList.vue'
+import SpaceListGrid from '@/components/SpaceListGrid.vue'
 import ExploreRssFeeds from '@/components/dialogs/ExploreRssFeeds.vue'
 import Loader from '@/components/Loader.vue'
 import User from '@/components/User.vue'
@@ -123,6 +123,7 @@ dialog.explore.wide(v-if="visible" :open="visible" ref="dialogElement" :style="{
     .row.title-row
       .segmented-buttons
         button(:class="{active: currentSectionIsExplore}" @click="updateCurrentSection('explore')")
+          img.icon.sunglasses(src="@/assets/sunglasses.svg")
           span Explore
         button(:class="{active: currentSectionIsFollowing}" @click="updateCurrentSection('following')")
           span Following
@@ -144,15 +145,13 @@ dialog.explore.wide(v-if="visible" :open="visible" ref="dialogElement" :style="{
         ExploreRssFeeds(:visible="state.exploreRssFeedsIsVisible")
 
   section.results-section(ref="resultsElement" :style="{'max-height': state.resultsSectionHeight + 'px'}")
-    SpaceList(
+    SpaceListGrid(
       :spaces="currentSpaces"
       :showUser="true"
-      :hideExploreBadge="true"
       @selectSpace="changeSpace"
       :userShowInExploreDate="state.userShowInExploreDate"
       :resultsSectionHeight="state.resultsSectionHeight"
       :parentDialog="parentDialog"
-      :hideFilter="true"
     )
 </template>
 

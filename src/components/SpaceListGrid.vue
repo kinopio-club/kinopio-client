@@ -3,13 +3,13 @@ import { reactive, computed, onMounted, onBeforeUnmount, onUnmounted, defineProp
 import { useStore } from 'vuex'
 
 import templates from '@/data/templates.js'
-import ResultsFilter from '@/components/ResultsFilter.vue'
 import MoonPhase from '@/components/MoonPhase.vue'
 import PrivacyIcon from '@/components/PrivacyIcon.vue'
 import Loader from '@/components/Loader.vue'
 import User from '@/components/User.vue'
-import NameMatch from '@/components/NameMatch.vue'
-import OfflineBadge from '@/components/OfflineBadge.vue'
+import UserLabelInline from '@/components/UserLabelInline.vue'
+// import NameMatch from '@/components/NameMatch.vue'
+// import OfflineBadge from '@/components/OfflineBadge.vue'
 import SpaceTodayJournalBadge from '@/components/SpaceTodayJournalBadge.vue'
 import utils from '@/utils.js'
 import cache from '@/cache.js'
@@ -19,66 +19,53 @@ import last from 'lodash-es/last'
 
 const store = useStore()
 
-let unsubscribe, shouldPreventSelectSpace
+// let unsubscribe, shouldPreventSelectSpace
 
 const spaceListElement = ref(null)
 
 onMounted(() => {
-  unsubscribe = store.subscribe((mutation) => {
-    if (mutation.type === 'triggerPickerNavigationKey') {
-      const key = mutation.payload
-      const spaces = props.spaces
-      let currentIndex = spaces.findIndex(space => space.id === state.focusOnId)
-      if (!utils.arrayHasItems(spaces)) {
-        closeDialog()
-      } else if (key === 'ArrowUp') {
-        focusPreviousItem(currentIndex)
-      } else if (key === 'ArrowDown') {
-        focusNextItem(currentIndex)
-      }
-    }
-    if (mutation.type === 'triggerPickerSelect') {
-      const spaces = props.spaces
-      const currentSpace = spaces.find(space => space.id === state.focusOnId)
-      selectSpace(null, currentSpace)
-      store.commit('shouldPreventNextEnterKey', true)
-    }
-  })
+  // unsubscribe = store.subscribe((mutation) => {
+  //   if (mutation.type === 'triggerPickerNavigationKey') {
+  //     const key = mutation.payload
+  //     const spaces = props.spaces
+  //     let currentIndex = spaces.findIndex(space => space.id === state.focusOnId)
+  //     if (!utils.arrayHasItems(spaces)) {
+  //       closeDialog()
+  //     } else if (key === 'ArrowUp') {
+  //       focusPreviousItem(currentIndex)
+  //     } else if (key === 'ArrowDown') {
+  //       focusNextItem(currentIndex)
+  //     }
+  //   }
+  //   if (mutation.type === 'triggerPickerSelect') {
+  //     const spaces = props.spaces
+  //     const currentSpace = spaces.find(space => space.id === state.focusOnId)
+  //     selectSpace(null, currentSpace)
+  //     store.commit('shouldPreventNextEnterKey', true)
+  //   }
+  // })
   updateScroll()
   spaceListElement.value.closest('section').addEventListener('scroll', updateScroll)
 })
 
 onBeforeUnmount(() => {
-  unsubscribe()
+  // unsubscribe()
   spaceListElement.value.closest('section').removeEventListener('scroll', updateScroll)
 })
 
-const emit = defineEmits(['focusBeforeFirstItem', 'closeDialog', 'selectSpace', 'checkmarkSpace'])
+const emit = defineEmits(['selectSpace'])
 
 const props = defineProps({
   spaces: Array,
   selectedSpace: Object,
-  showCategory: Boolean,
-  showUser: Boolean,
-  showOtherUsers: Boolean,
-  showUserIfCurrentUserIsCollaborator: Boolean,
-  hideExploreBadge: Boolean,
-  hideFilter: Boolean,
   isLoading: Boolean,
-  parentIsSpaceDetails: Boolean,
-  parentIsPinned: Boolean,
-  showCheckmarkSpace: Boolean,
   userShowInExploreDate: String,
-  showCreateNewSpaceFromSearch: Boolean,
-  resultsSectionHeight: Number,
-  disableListOptimizations: Boolean,
-  search: String,
-  parentDialog: String
+  disableListOptimizations: Boolean
 })
 
 const state = reactive({
-  filter: '',
-  filteredSpaces: [],
+  // filter: '',
+  // filteredSpaces: [],
   focusOnId: '',
   scrollY: 0,
   scrollHeight: null,
@@ -113,23 +100,6 @@ const currentUser = computed(() => store.state.currentUser)
 
 // spaces
 
-watch(() => props.spaces, (spaces) => {
-  const cardDetailsIsVisible = store.state.cardDetailsIsVisibleForCardId
-  if (spaces && cardDetailsIsVisible) {
-    state.focusOnId = props.spaces[0].id
-  }
-}, { deep: true })
-
-const spacesFiltered = computed(() => {
-  if (state.filter) {
-    return state.filteredSpaces
-  } else {
-    return props.spaces
-  }
-})
-const isNotCached = (spaceId) => {
-  return store.getters['spaceIsNotCached'](spaceId)
-}
 const duplicateSpace = () => {
   store.dispatch('currentSpace/duplicateSpace')
   store.dispatch('closeAllDialogs')
@@ -176,11 +146,11 @@ const spaceIsTemplate = (space) => {
   const templateSpaceIds = templates.spaces().map(template => template.id)
   return templateSpaceIds.includes(space.id)
 }
-const showInExplore = (space) => {
-  if (props.hideExploreBadge) { return }
-  if (space.privacy === 'private') { return }
-  return space.showInExplore
-}
+// const showInExplore = (space) => {
+//   if (props.hideExploreBadge) { return }
+//   if (space.privacy === 'private') { return }
+//   return space.showInExplore
+// }
 const user = (space) => {
   let users = []
   if (utils.arrayHasItems(space.users)) {
@@ -196,10 +166,6 @@ const selectSpace = (event, space) => {
       event.preventDefault()
       event.stopPropagation()
     }
-  }
-  if (shouldPreventSelectSpace) {
-    shouldPreventSelectSpace = false
-    return
   }
   if (!space) { return }
   emit('selectSpace', space)
@@ -250,130 +216,12 @@ const updateItemHeight = (index) => {
   state.heightByIndex[index] = height
 }
 
-// results filter
-
-const placeholder = computed(() => {
-  if (!props.parentIsSpaceDetails) { return }
-  let placeholder = 'Search Spaces'
-  if (!utils.isMobile()) {
-    placeholder = placeholder + ` (${utils.metaKey()}-K)`
-  }
-  return placeholder
-})
-const updateFilteredSpaces = (spaces) => {
-  state.filteredSpaces = spaces
-}
-const parentDialog = computed(() => {
-  const cardDetailsIsVisible = store.state.cardDetailsIsVisibleForCardId
-  let parentDialog = props.parentDialog
-  if (cardDetailsIsVisible) {
-    parentDialog = 'cardDetails'
-  }
-  return parentDialog
-})
-const updateFilter = async (filter, isClearFilter) => {
-  const parentIsNew = parentDialog.value !== store.state.spaceListFilterInfo.parentDialog
-  if (parentIsNew) {
-    filter = ''
-  }
-  state.filter = filter
-  if (!isClearFilter) {
-    store.commit('spaceListFilterInfo', {
-      filter,
-      parentDialog: parentDialog.value,
-      updatedAt: new Date().getTime()
-    })
-  }
-  const spaces = spacesFiltered.value || props.spaces
-  if (!spaces.length) { return }
-  if (!filter) {
-    state.focusOnId = ''
-    await nextTick()
-    updateScroll()
-    return
-  }
-  state.focusOnId = spaces[0].id
-}
-
-// keyboard focus
-
-const focusPreviousItem = (currentIndex) => {
-  const spaces = spacesFiltered.value
-  const focusedSpaceName = props.spaces.find(space => space.id === state.focusOnId)
-  const firstItemIsFocused = props.search === focusedSpaceName
-  const firstItem = spaces[0]
-  const previousItem = spaces[currentIndex - 1]
-  if (firstItemIsFocused) {
-    closeDialog()
-  } else
-  if (previousItem) {
-    state.focusOnId = previousItem.id
-  } else {
-    state.focusOnId = firstItem.id
-    emit('focusBeforeFirstItem')
-  }
-}
-const focusNextItem = (currentIndex) => {
-  const spaces = spacesFiltered.value
-  const lastItem = last(spaces)
-  const lastItemIsFocused = lastItem.name === state.focusOnId
-  const nextItem = spaces[currentIndex + 1]
-
-  if (lastItemIsFocused) {
-    closeDialog()
-  } else if (nextItem) {
-    state.focusOnId = nextItem.id
-  } else {
-    state.focusOnId = lastItem.id
-  }
-}
-const closeDialog = () => {
-  emit('closeDialog')
-}
-const focusNextItemFromFilter = () => {
-  const spaces = spacesFiltered.value
-  const currentIndex = spaces.findIndex(space => space.id === state.focusOnId)
-  focusNextItem(currentIndex)
-}
-const focusPreviousItemFromFilter = () => {
-  const spaces = spacesFiltered.value
-  const currentIndex = spaces.findIndex(space => space.id === state.focusOnId)
-  focusPreviousItem(currentIndex)
-}
-const selectItemFromFilter = () => {
-  if (shouldPreventSelectSpace) {
-    shouldPreventSelectSpace = false
-    return
-  }
-  const spaces = spacesFiltered.value
-  const space = spaces.find(space => space.id === state.focusOnId)
-  store.commit('shouldPreventNextEnterKey', true)
-  selectSpace(null, space)
-}
-const checkmarkSpace = (space) => {
-  shouldPreventSelectSpace = true
-  emit('checkmarkSpace', space)
-}
 </script>
 
 <template lang="pug">
 span.space-list-wrap
-  ResultsFilter(
-    :hideFilter="hideFilter"
-    :items="spaces"
-    :placeholder="placeholder"
-    :isLoading="isLoading"
-    :parentIsPinned="parentIsPinned"
-    :showCreateNewSpaceFromSearch="showCreateNewSpaceFromSearch"
-    :isInitialValueFromSpaceListFilterInfo="true"
-    @updateFilter="updateFilter"
-    @updateFilteredItems="updateFilteredSpaces"
-    @focusNextItem="focusNextItemFromFilter"
-    @focusPreviousItem="focusPreviousItemFromFilter"
-    @selectItem="selectItemFromFilter"
-  )
   ul.results-list.space-list(ref="spaceListElement")
-    template(v-for="(space, index) in spacesFiltered" :key="space.id")
+    template(v-for="(space, index) in props.spaces" :key="space.id")
       .space-wrap(:data-item-is-visible="itemIsVisible(index)" :data-space-id="space.id" :style="{height: state.heightByIndex[index] + 'px'}")
         a(:href="space.url")
           li(
@@ -382,52 +230,48 @@ span.space-list-wrap
             tabindex="0"
             @keyup.enter="selectSpace(null, space)"
           )
-            template(v-if="itemIsVisible(index)")
-              Loader(:visible="isLoadingSpace(space)")
               //- user(s)
-              template(v-if="showOtherUsers")
-                .users(:class="{'multiple-users': space.otherUsers.length > 1}")
-                  User(:user="user(space)" :isClickable="false" :key="user(space).id" :isMedium="true")
-                  template(v-for="otherUser in space.otherUsers" :key="otherUser.id")
-                    User(:user="otherUser" :isClickable="false" :isMedium="true")
-              template(v-else-if="showUser")
-                User(:user="user(space)" :isClickable="false" :key="user(space).id" :isMedium="true")
-              template(v-else-if="showCollaborator(space)")
-                User(:user="user(space)" :isClickable="false" :key="user(space).id" :isMedium="true")
+              //- template(v-else-if="showUser")
+              .row
+                UserLabelInline(:user="user(space)" :key="user(space).id")
+                template(v-if="itemIsVisible(index)")
+                  Loader(:visible="isLoadingSpace(space)")
+                  //- Loader(:visible="true")
+
+              //- template(v-if="showOtherUsers")
+              //-   .users(:class="{'multiple-users': space.otherUsers.length > 1}")
+              //-     User(:user="user(space)" :isClickable="false" :key="user(space).id" :isMedium="true")
+              //-     template(v-for="otherUser in space.otherUsers" :key="otherUser.id")
+              //-       User(:user="otherUser" :isClickable="false" :isMedium="true")
+              //- template(v-else-if="showCollaborator(space)")
+              //-   User(:user="user(space)" :isClickable="false" :key="user(space).id" :isMedium="true")
+
               //- preview image
-              .preview-thumbnail-image-wrap(v-if="space.previewThumbnailImage && isOnline")
-                img.preview-thumbnail-image(:src="space.previewThumbnailImage")
+              .row.preview-image-wrap(v-if="space.previewImage && isOnline")
+                img(:src="space.previewImage")
+              .row
                 //- new
                 .badge.info.inline-badge.new-unread-badge(v-if="isNew(space)")
-              //- offline
-              span(v-if="isNotCached(space.id)")
-                OfflineBadge(:isInline="true" :isDanger="true")
-              //- template category
-              .badge.info.inline-badge(v-if="showCategory && space.category" :class="categoryClassName(space)") {{space.category}}
-              //- tweet space
-              span(v-if="space.isFromTweet" title="Tweet space")
-                img.icon.tweet(src="@/assets/twitter.svg")
-              //- space meta
-              span(v-if="space.isFavorite")
-                img.icon.favorite-icon(src="@/assets/heart.svg")
-              span(v-if="space.name === 'Inbox'")
-                img.icon.inbox-icon(src="@/assets/inbox.svg")
-              SpaceTodayJournalBadge(:space="space")
-              //- journal or template
-              MoonPhase(v-if="space.moonPhase" :moonPhase="space.moonPhase")
-              span(v-if="space.isTemplate")
-                img.icon.templates(src="@/assets/templates.svg" title="Template")
-              //- space details
-              .name
-                span(v-if="state.filter")
-                  NameMatch(:name="space.name" :indexes="space.matchIndexes")
-                span(v-else)
+                //- template category
+                .badge.info.inline-badge(v-if="showCategory && space.category" :class="categoryClassName(space)") {{space.category}}
+                //- space meta
+                span(v-if="space.isFavorite")
+                  img.icon.favorite-icon(src="@/assets/heart.svg")
+                span(v-if="space.name === 'Inbox'")
+                  img.icon.inbox-icon(src="@/assets/inbox.svg")
+                SpaceTodayJournalBadge(:space="space")
+                //- journal or template
+                MoonPhase(v-if="space.moonPhase" :moonPhase="space.moonPhase")
+                span(v-if="space.isTemplate")
+                  img.icon.templates(src="@/assets/templates.svg" title="Template")
+                //- space details
+                .name
                   span {{space.name}}
-                template(v-if='space.privacy')
-                  PrivacyIcon(:privacy="space.privacy" :closedIsNotVisible="true")
-                img.icon.sunglasses(src="@/assets/sunglasses.svg" v-if="showInExplore(space)" title="Shown in Explore")
-              button.button-checkmark(v-if="showCheckmarkSpace" @mousedown.left.stop="checkmarkSpace(space)" @touchstart.stop="checkmarkSpace(space)")
-                img.icon.checkmark(src="@/assets/checkmark.svg")
+                  template(v-if='space.privacy')
+                    PrivacyIcon(:privacy="space.privacy" :closedIsNotVisible="true")
+                  //- img.icon.sunglasses(src="@/assets/sunglasses.svg" v-if="showInExplore(space)" title="Shown in Explore")
+                //- button.button-checkmark(v-if="showCheckmarkSpace" @mousedown.left.stop="checkmarkSpace(space)" @touchstart.stop="checkmarkSpace(space)")
+                //-   img.icon.checkmark(src="@/assets/checkmark.svg")
 </template>
 
 <style lang="stylus">
@@ -435,6 +279,9 @@ span.space-list-wrap
   position relative
 
 .space-list
+  display flex
+  width 100%
+  flex-wrap: wrap;
   .inline-badge
     margin-left 0
     flex none
@@ -511,17 +358,24 @@ span.space-list-wrap
     position relative
     width 100%
     min-height 30px
+    flex-direction column
     .loader
       position absolute
       width 13px
       height 13px
-      top 10px
+      top 4px
+      left 4px
       z-index 1
     .icon.templates
       margin-right 10px
       vertical-align 0px
+    .row
+      margin-bottom 5px
 
   .space-wrap
+    display flex
+    flex-shrink 0
+    width 50%
     position relative
     button.inline-favorite
       cursor pointer
@@ -541,10 +395,14 @@ span.space-list-wrap
     margin-top 4px
     margin-right 4px
 
-  .preview-thumbnail-image-wrap
+  .preview-image-wrap
     position relative
     flex-shrink 0
-    margin-right 6px
-    width 24px
-    height 22px
+    img
+      border-radius var(--entity-radius)
+    // margin-right 6px
+    // img
+    //   width 100%
+    // width 24px
+    // height 22px
 </style>
