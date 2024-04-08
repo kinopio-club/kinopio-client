@@ -11,28 +11,21 @@ const props = defineProps({
 })
 watch(() => props.visible, (value, prevValue) => {
   store.commit('clearNotificationsWithPosition')
-  if (value) {
-    updateUrl()
-  }
 })
 
-const state = reactive({
-  url: ''
-})
+const exploreUrl = computed(() => `${consts.apiHost()}/space/explore-spaces/feed.json`)
+const everyoneUrl = computed(() => `${consts.apiHost()}/space/everyone-spaces/feed.json`)
 
-const copyUrl = async (event) => {
+const copyUrl = async (event, url) => {
   store.commit('clearNotificationsWithPosition')
   const position = utils.cursorPositionInPage(event)
   try {
-    await navigator.clipboard.writeText(state.url)
+    await navigator.clipboard.writeText(url)
     store.commit('addNotificationWithPosition', { message: 'Copied', position, type: 'success', layer: 'app', icon: 'checkmark' })
   } catch (error) {
     console.warn('🚑 copyText', error)
     store.commit('addNotificationWithPosition', { message: 'Copy Error', position, type: 'danger', layer: 'app', icon: 'cancel' })
   }
-}
-const updateUrl = () => {
-  state.url = `${consts.apiHost(true)}/space/explore-spaces/feed.json`
 }
 </script>
 
@@ -42,11 +35,15 @@ dialog.narrow.explore-rss-feed(v-if="visible" :open="visible" @click.left.stop)
     p Explore RSS Feeds
   section
     .row
-      p Subscribe to new spaces added to Explore
+      p Subscribe to new spaces
     .row
-      button(@click.left="copyUrl")
+      button(@click.left="copyUrl($event, exploreUrl)")
         img.icon.copy(src="@/assets/copy.svg")
-        span Copy Feed URL
+        span Copy Explore Feed URL
+    .row
+      button(@click.left="copyUrl($event, everyoneUrl)")
+        img.icon.copy(src="@/assets/copy.svg")
+        span Copy Everyone Feed URL
 </template>
 
 <style lang="stylus" scoped>
