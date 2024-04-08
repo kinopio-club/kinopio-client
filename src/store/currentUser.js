@@ -517,6 +517,7 @@ export default {
         favoriteColors: []
       }
       favorites = await context.dispatch('api/getUserFavorites', null, { root: true }) || favorites
+      // TODO replace w promiseall get user/favorite-spaces, user/favorite-users, user/favorite-colors
       context.commit('favoriteUsers', favorites.favoriteUsers)
       context.commit('favoriteSpaces', favorites.favoriteSpaces)
       context.commit('favoriteColors', favorites.favoriteColors)
