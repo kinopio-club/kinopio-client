@@ -24,6 +24,8 @@ onMounted(() => {
       toggleExploreIsVisible()
     } else if (mutation.type === 'closeAllDialogs') {
       closeDialogs()
+    } else if (mutation.type === 'triggerUserIsLoaded') {
+      updateSpaces()
     }
   })
 })
@@ -75,13 +77,14 @@ const updateSpaces = async () => {
 
     const [exploreSpaces, followingSpaces, everyoneSpaces] = await Promise.all([
       store.dispatch('api/getExploreSpaces'),
-      store.dispatch('api/getExploreSpaces'), // TODO get followingSpaces
+      store.dispatch('api/getFollowingUsersSpaces'),
       store.dispatch('api/getEveryoneSpaces')
     ])
     state.exploreSpaces = exploreSpaces
+    state.followingSpaces = followingSpaces
     state.everyoneSpaces = everyoneSpaces
   } catch (error) {
-    console.warn('🚑 updateSpaces', error)
+    console.error('🚑 updateSpaces', error)
   }
   state.loading = false
 }

@@ -511,16 +511,14 @@ export default {
         context.commit('isLoadingFavorites', false, { root: true })
         return
       }
-      let favorites = {
-        favoriteUsers: [],
-        favoriteSpaces: [],
-        favoriteColors: []
-      }
-      favorites = await context.dispatch('api/getUserFavorites', null, { root: true }) || favorites
-      // TODO replace w promiseall get user/favorite-spaces, user/favorite-users, user/favorite-colors
-      context.commit('favoriteUsers', favorites.favoriteUsers)
-      context.commit('favoriteSpaces', favorites.favoriteSpaces)
-      context.commit('favoriteColors', favorites.favoriteColors)
+      const [favoriteSpaces, favoriteUsers, favoriteColors] = await Promise.all([
+        context.dispatch('api/getUserFavoriteSpaces', null, { root: true }),
+        context.dispatch('api/getUserFavoriteUsers', null, { root: true }),
+        context.dispatch('api/getUserFavoriteColors', null, { root: true })
+      ])
+      context.commit('favoriteUsers', favoriteUsers)
+      context.commit('favoriteSpaces', favoriteSpaces)
+      context.commit('favoriteColors', favoriteColors)
       context.commit('isLoadingFavorites', false, { root: true })
     },
     updateFavoriteSpace: (context, { space, value }) => {

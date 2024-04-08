@@ -16,8 +16,7 @@ const resultsElement = ref(null)
 onMounted(() => {
   store.subscribe((mutation, state) => {
     if (mutation.type === 'updatePageSizes') {
-      updateDialogHeight()
-      updateResultsSectionHeight()
+      updateHeights()
     }
   })
 })
@@ -33,9 +32,7 @@ const props = defineProps({
 watch(() => props.visible, (value, prevValue) => {
   store.commit('clearNotificationsWithPosition')
   if (value) {
-    // updateSpaces()
-    updateDialogHeight()
-    updateResultsSectionHeight()
+    updateHeights()
     updateUserShowInExploreUpdatedAt()
     store.commit('shouldExplicitlyHideFooter', true)
   } else {
@@ -47,18 +44,11 @@ watch(() => props.visible, (value, prevValue) => {
 const state = reactive({
   dialogHeight: null,
   resultsSectionHeight: null,
-  // loading: false,
-  // spaces: [],
-  // newSpaces: [],
   userShowInExploreDate: null,
   exploreRssFeedsIsVisible: false,
   filteredSpaces: undefined,
   currentSection: 'explore' // 'explore', 'following', 'everyone'
 })
-// watch(() => state.loading, (value, prevValue) => {
-//   updateDialogHeight()
-//   updateResultsSectionHeight()
-// })
 
 const currentSpace = computed(() => store.state.currentSpace)
 const changeSpace = (space) => {
@@ -71,6 +61,11 @@ const closeDialogs = () => {
 // update height
 
 const parentDialog = computed(() => 'explore')
+const updateHeights = async () => {
+  await nextTick()
+  updateDialogHeight()
+  updateResultsSectionHeight()
+}
 const updateDialogHeight = async () => {
   if (!props.visible) { return }
   await nextTick()
@@ -88,6 +83,7 @@ const updateResultsSectionHeight = async () => {
 
 const updateCurrentSection = (value) => {
   state.currentSection = value
+  updateHeights()
 }
 const currentSectionIsExplore = computed(() => state.currentSection === 'explore')
 const currentSectionIsFollowing = computed(() => state.currentSection === 'following')
@@ -107,16 +103,6 @@ const currentSpaces = computed(() => {
 // explore spaces
 
 const currentSpaceInExplore = computed(() => currentSpace.value.showInExplore)
-// const updateSpaces = async () => {
-//   if (state.loading) { return }
-//   state.loading = true
-//   if (!state.spaces.length) {
-//     state.spaces = props.exploreSpaces || []
-//   }
-//   state.spaces = await store.dispatch('api/getExploreSpaces')
-//   state.newSpaces = state.spaces
-//   state.loading = false
-// }
 const updateUserShowInExploreUpdatedAt = async () => {
   state.userShowInExploreDate = store.state.currentUser.showInExploreUpdatedAt
   let serverDate = await store.dispatch('api/getDate')
