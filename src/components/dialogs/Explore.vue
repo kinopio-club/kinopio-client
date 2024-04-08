@@ -24,12 +24,15 @@ onMounted(() => {
 
 const props = defineProps({
   visible: Boolean,
-  exploreSpaces: Object
+  exploreSpaces: Object,
+  followingSpaces: Object,
+  everyoneSpaces: Object,
+  loading: Boolean
 })
 watch(() => props.visible, (value, prevValue) => {
   store.commit('clearNotificationsWithPosition')
   if (value) {
-    updateSpaces()
+    // updateSpaces()
     updateDialogHeight()
     updateResultsSectionHeight()
     updateUserShowInExploreUpdatedAt()
@@ -43,18 +46,18 @@ watch(() => props.visible, (value, prevValue) => {
 const state = reactive({
   dialogHeight: null,
   resultsSectionHeight: null,
-  loading: false,
-  spaces: [],
-  newSpaces: [],
+  // loading: false,
+  // spaces: [],
+  // newSpaces: [],
   userShowInExploreDate: null,
   exploreRssFeedsIsVisible: false,
   filteredSpaces: undefined,
   currentSection: 'explore' // 'explore', 'following', 'everyone'
 })
-watch(() => state.loading, (value, prevValue) => {
-  updateDialogHeight()
-  updateResultsSectionHeight()
-})
+// watch(() => state.loading, (value, prevValue) => {
+//   updateDialogHeight()
+//   updateResultsSectionHeight()
+// })
 
 const currentSpace = computed(() => store.state.currentSpace)
 const changeSpace = (space) => {
@@ -88,21 +91,21 @@ const updateCurrentSection = (value) => {
 const currentSectionIsExplore = computed(() => state.currentSection === 'explore')
 const currentSectionIsFollowing = computed(() => state.currentSection === 'following')
 const currentSectionIsEveryone = computed(() => state.currentSection === 'everyone')
+const currentSpaces = computed(() => props.exploreSpaces || [])
 
 // explore spaces
 
 const currentSpaceInExplore = computed(() => currentSpace.value.showInExplore)
-const exploreSpaces = computed(() => state.spaces)
-const updateSpaces = async () => {
-  if (state.loading) { return }
-  state.loading = true
-  if (!state.spaces.length) {
-    state.spaces = props.exploreSpaces || []
-  }
-  state.spaces = await store.dispatch('api/getExploreSpaces')
-  state.newSpaces = state.spaces
-  state.loading = false
-}
+// const updateSpaces = async () => {
+//   if (state.loading) { return }
+//   state.loading = true
+//   if (!state.spaces.length) {
+//     state.spaces = props.exploreSpaces || []
+//   }
+//   state.spaces = await store.dispatch('api/getExploreSpaces')
+//   state.newSpaces = state.spaces
+//   state.loading = false
+// }
 const updateUserShowInExploreUpdatedAt = async () => {
   state.userShowInExploreDate = store.state.currentUser.showInExploreUpdatedAt
   let serverDate = await store.dispatch('api/getDate')
@@ -132,7 +135,7 @@ dialog.explore.wide(v-if="visible" :open="visible" ref="dialogElement" :style="{
   section
     .row.title-row
       div
-        Loader(:isSmall="true" :visible="state.loading")
+        Loader(:isSmall="true" :visible="props.loading")
         span(v-if="currentSectionIsExplore") Curated with the community
         span(v-else-if="currentSectionIsFollowing") Spaces by people you follow
         span(v-else-if="currentSectionIsEveryone") New public spaces
@@ -145,7 +148,7 @@ dialog.explore.wide(v-if="visible" :open="visible" ref="dialogElement" :style="{
 
   section.results-section(ref="resultsElement" :style="{'max-height': state.resultsSectionHeight + 'px'}")
     SpaceList(
-      :spaces="exploreSpaces"
+      :spaces="currentSpaces"
       :showUser="true"
       :hideExploreBadge="true"
       @selectSpace="changeSpace"

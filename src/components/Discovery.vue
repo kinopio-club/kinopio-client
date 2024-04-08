@@ -17,7 +17,7 @@ let updateLiveSpacesIntervalTimer
 onMounted(() => {
   window.addEventListener('online', updateLiveSpaces)
   updateLiveSpaces()
-  updateExploreSpaces()
+  updateSpaces()
   // updateFavorites()
   store.subscribe((mutation, state) => {
     if (mutation.type === 'triggerExploreIsVisible') {
@@ -68,12 +68,21 @@ const unreadExploreSpacesCount = computed(() => {
   })
   return unreadSpaces.length
 })
-const updateExploreSpaces = async () => {
+const updateSpaces = async () => {
   try {
-    state.exploreSpaces = await store.dispatch('api/getExploreSpaces')
+    state.loading = true
+
+    const [exploreSpaces, followingSpaces, everyoneSpaces] = await Promise.all([
+      store.dispatch('api/getExploreSpaces')
+      // TODO get followingSpaces
+      // TODO get everyoneSpaces
+    ])
+
+    state.exploreSpaces = exploreSpaces
   } catch (error) {
-    console.warn('🚑 updateExploreSpaces', error)
+    console.warn('🚑 updateSpaces', error)
   }
+  state.loading = false
 }
 
 // Everyone
@@ -164,7 +173,7 @@ const liveSpacesCount = computed(() => {
       button(:class="{active: state.exploreIsVisible, 'translucent-button': !shouldIncreaseUIContrast}" @click="toggleExploreIsVisible")
         img.icon.sunglasses(src="@/assets/sunglasses.svg")
         //- span.explore-label Explore
-      Explore(:visible="state.exploreIsVisible" @exploreSpaces="state.exploreSpaces" @everyoneSpaces="state.everyoneSpaces")
+      Explore(:visible="state.exploreIsVisible" :exploreSpaces="state.exploreSpaces" :everyoneSpaces="state.everyoneSpaces" :loading="state.loading")
     //- Live
     .button-wrap
       button(@click.left="toggleLiveIsVisible" :class="{ active: state.liveIsVisible, 'translucent-button': !shouldIncreaseUIContrast }")
