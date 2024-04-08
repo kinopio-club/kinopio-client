@@ -8,9 +8,6 @@ import Loader from '@/components/Loader.vue'
 import User from '@/components/User.vue'
 import utils from '@/utils.js'
 
-import { nanoid } from 'nanoid'
-import randomColor from 'randomcolor'
-
 const store = useStore()
 
 const dialogElement = ref(null)
@@ -52,7 +49,7 @@ const state = reactive({
   userShowInExploreDate: null,
   exploreRssFeedsIsVisible: false,
   filteredSpaces: undefined,
-  currentList: 'explore' // 'explore', 'following', 'everyone'
+  currentSection: 'explore' // 'explore', 'following', 'everyone'
 })
 watch(() => state.loading, (value, prevValue) => {
   updateDialogHeight()
@@ -83,6 +80,15 @@ const updateResultsSectionHeight = async () => {
   state.resultsSectionHeight = utils.elementHeight(element, true)
 }
 
+// current section
+
+const updateCurrentSection = (value) => {
+  state.currentSection = value
+}
+const currentSectionIsExplore = computed(() => state.currentSection === 'explore')
+const currentSectionIsFollowing = computed(() => state.currentSection === 'following')
+const currentSectionIsEveryone = computed(() => state.currentSection === 'everyone')
+
 // explore spaces
 
 const currentSpaceInExplore = computed(() => currentSpace.value.showInExplore)
@@ -104,21 +110,6 @@ const updateUserShowInExploreUpdatedAt = async () => {
   store.dispatch('currentUser/showInExploreUpdatedAt', serverDate)
 }
 
-// following user spaces
-
-const randomUser = () => {
-  const isThemeDark = store.state.currentUser.theme === 'dark'
-  let luminosity = 'light'
-  if (isThemeDark) {
-    luminosity = 'dark'
-  }
-  const color = randomColor({ luminosity })
-  return {
-    id: nanoid(),
-    color: color
-  }
-}
-
 // rss
 
 const toggleExploreRssFeedsIsVisible = () => {
@@ -131,23 +122,21 @@ dialog.explore.wide(v-if="visible" :open="visible" ref="dialogElement" :style="{
   section(v-if="visible" :open="visible" @click.left.stop='closeDialogs')
     .row.title-row
       .segmented-buttons
-        button.active
+        button(:class="{active: currentSectionIsExplore}" @click="updateCurrentSection('explore')")
           span Explore
-        button
+        button(:class="{active: currentSectionIsFollowing}" @click="updateCurrentSection('following')")
           span Following
-        button.everyone(title="Everyone")
-          //- span Everyone
-          User(:user="randomUser()" :isClickable="false" :hideYouLabel="true")
-          User(:user="randomUser()" :isClickable="false" :hideYouLabel="true")
-          User(:user="randomUser()" :isClickable="false" :hideYouLabel="true")
+        button(:class="{active: currentSectionIsEveryone}" @click="updateCurrentSection('everyone')")
+          span Everyone
 
   section
     .row.title-row
       div
         Loader(:isSmall="true" :visible="state.loading")
-        span Shared With the Community
-        //- if following: new by people you follow
-        //- if everyone: new public spaces
+        span(v-if="currentSectionIsExplore") Curated with the community
+        span(v-else-if="currentSectionIsFollowing") Spaces by people you follow
+        span(v-else-if="currentSectionIsEveryone") New public spaces
+
       //- rss
       .button-wrap.rss-button-wrap
         button.small-button(@click.stop="toggleExploreRssFeedsIsVisible" :class="{active: state.exploreRssFeedsIsVisible}" title="RSS Feeds")
@@ -171,27 +160,8 @@ dialog.explore
   left initial
   right -35px
   overflow auto
-  // .community
-  //   .badge
-  //     display flex
-  //   button + a
-  //     margin-left 6px
-  //   .title
-  //     color var(--primary)
   .loader
     margin-right 5px
     vertical-align -2px
-  .everyone
-    .user
-      &:last-child
-        margin 0
-      // &:first-child
-      //   .user-avatar
-      //     border-top-right-radius 0
-      //     border-bottom-right-radius 0
-      // &:last-child
-      //   .user-avatar
-      //     border-top-left-radius 0
-      //     border-bottom-left-radius 0
 
 </style>
