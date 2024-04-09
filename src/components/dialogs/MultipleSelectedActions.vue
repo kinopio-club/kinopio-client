@@ -17,19 +17,23 @@ dialog.narrow.multiple-selected-actions(
         label(v-if="!cardsHaveCheckboxes" @click.left.prevent="addCheckboxToCards" @keydown.stop.enter="addCheckboxToCards" tabindex="0")
           input.add(type="checkbox" tabindex="-1")
       //- Connect
-      button(v-if="multipleCardsIsSelected" :class="{active: cardsIsConnected}" @click.left.prevent="toggleConnectCards" @keydown.stop.enter="toggleConnectCards" :disabled="!canEditAll.cards")
-        img.icon.connector-icon(v-if="cardsIsConnected" src="@/assets/connector-closed.svg")
-        img.icon.connector-icon(v-else src="@/assets/connector-open.svg")
-        span Connect
+      button(v-if="multipleCardsIsSelected" :class="{active: cardsIsConnected}" @click.left.prevent="toggleConnectCards" @keydown.stop.enter="toggleConnectCards" :disabled="!canEditAll.cards" title="Connect Cards")
+        img.icon.connect-cards(src="@/assets/connect-cards.svg")
       //- Share Card
       .button-wrap(v-if="oneCardIsSelected" @click.left.stop="toggleShareCardIsVisible")
         button(:class="{active: shareCardIsVisible}")
           span Share
         ShareCard(:visible="shareCardIsVisible" :card="cards[0]")
 
-      //- More Options
-      .button-wrap
+      //- CARD Options
+      .button-wrap.more-options-button
         button(:disabled="!canEditAll.cards && !canEditAll.boxes" @click.left.stop="toggleShouldShowMultipleSelectedItemActions" :class="{active : shouldShowMultipleSelectedItemActions}")
+          span.subsection-label CARD
+          img.icon.down-arrow.button-down-arrow(src="@/assets/down-arrow.svg")
+      //- LINE Options
+      .button-wrap.more-options-button
+        button(:disabled="!canEditAll.cards && !canEditAll.boxes" @click.left.stop="toggleShouldShowMultipleSelectedItemActions" :class="{active : shouldShowMultipleSelectedItemActions}")
+          span.subsection-label LINE
           img.icon.down-arrow.button-down-arrow(src="@/assets/down-arrow.svg")
 
     CardOrBoxActions(:visible="shouldShowMultipleSelectedItemActions && (cardsIsSelected || boxesIsSelected)" :cards="cards" :boxes="boxes" @closeDialogs="closeDialogs" :class="{ 'last-row': !connectionsIsSelected }" :backgroundColor="userColor" :labelIsVisible="true")
@@ -566,8 +570,8 @@ export default {
   .cards-checkboxes
     input
       margin 0
-  .connector-icon
-    width 11px
+  .connect-cards
+    vertical-align 1px
   .align-and-distribute + .move-or-copy-wrap
     margin-left 4px
   .more-options
@@ -591,4 +595,17 @@ export default {
   .style-actions + .connection-actions
     border-top 1px solid var(--primary-border)
 
+  .subsection-label
+    position absolute
+    top 3px
+    left 0
+    width 100%
+    text-align center
+    font-size 11px
+  .more-options-button
+    button
+      position relative
+      padding 5px 14px
+    .button-down-arrow
+      vertical-align -3px
 </style>

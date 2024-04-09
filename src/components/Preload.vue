@@ -42,6 +42,7 @@
     img.icon(src="@/assets/checkmark.svg")
     img.icon(src="@/assets/clover.svg")
     img.icon(src="@/assets/comment.svg")
+    img.icon(src="@/assets/connect-cards.svg")
     img.icon(src="@/assets/connection-clear.svg")
     img.icon(src="@/assets/connection-path-straight.svg")
     img.icon(src="@/assets/connection-path.svg")
