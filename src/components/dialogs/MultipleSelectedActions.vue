@@ -607,5 +607,5 @@ export default {
       position relative
       padding 5px 14px
     .button-down-arrow
-    transform translateY(6px)
+      transform translateY(6px)
 </style>
