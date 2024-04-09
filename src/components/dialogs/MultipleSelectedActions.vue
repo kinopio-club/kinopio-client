@@ -597,7 +597,7 @@ export default {
 
   .subsection-label
     position absolute
-    top 3px
+    top 5px
     left 0
     width 100%
     text-align center
@@ -607,5 +607,5 @@ export default {
       position relative
       padding 5px 14px
     .button-down-arrow
-      vertical-align -3px
+    transform translateY(6px)
 </style>
