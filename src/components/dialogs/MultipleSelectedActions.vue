@@ -26,12 +26,12 @@ dialog.narrow.multiple-selected-actions(
         ShareCard(:visible="shareCardIsVisible" :card="cards[0]")
 
       //- CARD Options
-      .button-wrap.more-options-button
+      .button-wrap.more-options-button(v-if="cardsIsSelected")
         button(:disabled="!canEditAll.cards && !canEditAll.boxes" @click.left.stop="toggleShouldShowMultipleSelectedItemActions" :class="{active : shouldShowMultipleSelectedItemActions}")
           span.subsection-label CARD
           img.icon.down-arrow.button-down-arrow(src="@/assets/down-arrow.svg")
       //- LINE Options
-      .button-wrap.more-options-button
+      .button-wrap.more-options-button(v-if="connectionsIsSelected")
         button(:disabled="!canEditAll.cards && !canEditAll.boxes" @click.left.stop="toggleShouldShowMultipleSelectedItemActions" :class="{active : shouldShowMultipleSelectedItemActions}")
           span.subsection-label LINE
           img.icon.down-arrow.button-down-arrow(src="@/assets/down-arrow.svg")
