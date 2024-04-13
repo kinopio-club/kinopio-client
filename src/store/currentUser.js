@@ -39,7 +39,8 @@ const initialState = {
   shouldShowMoreAlignOptions: false,
   shouldUseLastConnectionType: true,
   shouldShowItemActions: false,
-  shouldShowMultipleSelectedItemActions: false,
+  shouldShowMultipleSelectedCardActions: false,
+  shouldShowMultipleSelectedLineActions: false,
   shouldDisableRightClickToPan: false,
   shouldShowCurrentSpaceTags: false,
   showInExploreUpdatedAt: null, // date
@@ -258,9 +259,13 @@ export default {
       state.shouldShowItemActions = value
       cache.updateUser('shouldShowItemActions', value)
     },
-    shouldShowMultipleSelectedItemActions: (state, value) => {
-      state.shouldShowMultipleSelectedItemActions = value
-      cache.updateUser('shouldShowMultipleSelectedItemActions', value)
+    shouldShowMultipleSelectedCardActions: (state, value) => {
+      state.shouldShowMultipleSelectedCardActions = value
+      cache.updateUser('shouldShowMultipleSelectedCardActions', value)
+    },
+    shouldShowMultipleSelectedLineActions: (state, value) => {
+      state.shouldShowMultipleSelectedLineActions = value
+      cache.updateUser('shouldShowMultipleSelectedLineActions', value)
     },
     showInExploreUpdatedAt: (state, value) => {
       state.showInExploreUpdatedAt = value
@@ -710,12 +715,20 @@ export default {
           shouldShowItemActions: value
         } }, { root: true })
     },
-    shouldShowMultipleSelectedItemActions: (context, value) => {
+    shouldShowMultipleSelectedCardActions: (context, value) => {
       utils.typeCheck({ value, type: 'boolean' })
-      context.commit('shouldShowMultipleSelectedItemActions', value)
+      context.commit('shouldShowMultipleSelectedCardActions', value)
       context.dispatch('api/addToQueue', { name: 'updateUser',
         body: {
-          shouldShowMultipleSelectedItemActions: value
+          shouldShowMultipleSelectedCardActions: value
+        } }, { root: true })
+    },
+    shouldShowMultipleSelectedLineActions: (context, value) => {
+      utils.typeCheck({ value, type: 'boolean' })
+      context.commit('shouldShowMultipleSelectedLineActions', value)
+      context.dispatch('api/addToQueue', { name: 'updateUser',
+        body: {
+          shouldShowMultipleSelectedLineActions: value
         } }, { root: true })
     },
     showInExploreUpdatedAt: (context, value) => {
