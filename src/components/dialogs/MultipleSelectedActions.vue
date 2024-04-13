@@ -71,6 +71,14 @@ const oneCardOrMultipleBoxesIsSelected = computed(() => cards.value.length || bo
 
 // cards
 
+const moreCardOptionsLabel = computed(() => {
+  if (multipleCardsSelectedIds.value.length > 1) {
+    return 'CARDS'
+  } else {
+    return 'CARD'
+  }
+})
+
 const cardCanBeSplit = computed(() => {
   if (!oneCardIsSelected.value) { return }
   if (!cards.value.length) { return }
@@ -118,6 +126,14 @@ const cardCheckboxes = computed({
 
 // connections
 
+const moreLineOptionsLabel = computed(() => {
+  console.log(multipleConnectionsSelectedIds.value)
+  if (multipleConnectionsSelectedIds.value.length > 1) {
+    return 'LINES'
+  } else {
+    return 'LINE'
+  }
+})
 const connectionsIsSelected = computed(() => Boolean(multipleConnectionsSelectedIds.value.length))
 const connections = computed(() => {
   let connections = multipleConnectionsSelectedIds.value.map(id => {
@@ -508,16 +524,16 @@ dialog.narrow.multiple-selected-actions(
       //- CARD Options
       .button-wrap.more-options-button(v-if="cardsIsSelected")
         button(:disabled="!canEditAll.cards && !canEditAll.boxes" @click.left.stop="toggleShouldShowMultipleSelectedCardActions" :class="{active : shouldShowMultipleSelectedItemActions}")
-          span.subsection-label CARD
+          span.subsection-label {{moreCardOptionsLabel}}
           img.icon.down-arrow.button-down-arrow(src="@/assets/down-arrow.svg")
       //- LINE Options
       .button-wrap.more-options-button(v-if="connectionsIsSelected")
         button(:disabled="!canEditAll.cards && !canEditAll.boxes" @click.left.stop="toggleShouldShowMultipleSelectedLineActions" :class="{active : shouldShowMultipleSelectedItemActions}")
-          span.subsection-label LINE
+          span.subsection-label {{moreLineOptionsLabel}}
           img.icon.down-arrow.button-down-arrow(src="@/assets/down-arrow.svg")
 
     CardOrBoxActions(:visible="shouldShowMultipleSelectedItemActions && (cardsIsSelected || boxesIsSelected)" :cards="cards" :boxes="boxes" @closeDialogs="closeDialogs" :class="{ 'last-row': !connectionsIsSelected }" :backgroundColor="userColor" :labelIsVisible="true")
-    ConnectionActions(:visible="shouldShowMultipleSelectedItemActions && connectionsIsSelected" :connections="editableConnections" @closeDialogs="closeDialogs" :canEditAll="canEditAll" :backgroundColor="userColor")
+    ConnectionActions(:visible="shouldShowMultipleSelectedItemActions && connectionsIsSelected" :connections="editableConnections" @closeDialogs="closeDialogs" :canEditAll="canEditAll" :backgroundColor="userColor" :label="moreLineOptionsLabel")
 
   section
     template(v-if="oneCardOrMultipleBoxesIsSelected")
@@ -608,7 +624,7 @@ dialog.narrow.multiple-selected-actions(
   .more-options-button
     button
       position relative
-      padding 5px 14px
+      padding 5px 20px
     .button-down-arrow
       transform translateY(6px)
 </style>

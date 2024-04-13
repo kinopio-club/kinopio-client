@@ -33,9 +33,9 @@ section.subsection.style-actions(v-if="visible" @click.left.stop="closeDialogs")
       )
     //- Box Fill
     .segmented-buttons(v-if="isBoxes")
-      button(:class="{active: boxFillIsFilled}" @click="updateBoxFill('filled')" title="Solid Fill")
+      button(:class="{active: boxFillIsFilled}" @click="updateBoxFill('filled')" title="Solid Fill Box")
         img.icon.box-icon(src="@/assets/box-filled.svg")
-      button(:class="{active: boxFillIsEmpty}" @click="updateBoxFill('empty')" title="No Fill")
+      button(:class="{active: boxFillIsEmpty}" @click="updateBoxFill('empty')" title="No Fill Box")
         img.icon.box-icon(src="@/assets/box-empty.svg")
 
     //- Lock
@@ -124,15 +124,25 @@ export default {
       return this.tagsInCard.map(tag => tag.name)
     },
     label () {
-      let label
+      let label, cardLabel, boxLabel
+      const isMultipleCards = this.cards.length > 1
+      const isMultipleBoxes = this.boxes.length > 1
       if (this.isCards) {
-        label = 'card'
+        cardLabel = 'card'
+      }
+      if (isMultipleCards) {
+        cardLabel = 'cards'
       }
       if (this.isBoxes) {
-        label = 'box'
+        boxLabel = 'box'
       }
-      if (this.isCards && this.isBoxes) {
-        label = 'card + box'
+      if (isMultipleBoxes) {
+        boxLabel = 'boxes'
+      }
+      if (cardLabel && boxLabel) {
+        label = `${cardLabel} + ${boxLabel}`
+      } else {
+        label = cardLabel || boxLabel
       }
       return label.toUpperCase()
     },
