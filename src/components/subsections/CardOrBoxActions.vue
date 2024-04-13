@@ -21,10 +21,10 @@ onMounted(() => {
     } else if (type === 'triggerSelectedCardsContainInBox') {
       containItemsInNewBox()
     } else if (type === 'triggerUpdateTheme') {
-      state.defaultColor = utils.cssVariable('secondary-background')
+      updateDefaultColor(utils.cssVariable('secondary-background'))
     }
   })
-  state.defaultColor = utils.cssVariable('secondary-background')
+  updateDefaultColor(utils.cssVariable('secondary-background'))
 })
 
 const emit = defineEmits(['closeDialogs'])
@@ -65,6 +65,9 @@ const canEditAll = computed(() => {
   const canEditBoxes = editableBoxes.length === props.boxes.length
   return canEditCards && canEditBoxes
 })
+const updateDefaultColor = (color) => {
+  state.defaultColor = color
+}
 const closeDialogs = (shouldPreventEmit) => {
   state.framePickerIsVisible = false
   state.tagPickerIsVisible = false

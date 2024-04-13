@@ -75,7 +75,8 @@ const spaceCounterZoomDecimal = computed(() => store.getters.spaceCounterZoomDec
 const pinchCounterZoomDecimal = computed(() => store.state.pinchCounterZoomDecimal)
 const spaceZoomDecimal = computed(() => store.getters.spaceZoomDecimal)
 
-const shouldShowMultipleSelectedItemActions = computed(() => store.state.currentUser.shouldShowMultipleSelectedItemActions)
+const shouldShowMultipleSelectedCardActions = computed(() => store.state.currentUser.shouldShowMultipleSelectedCardActions)
+const shouldShowMultipleSelectedLineActions = computed(() => store.state.currentUser.shouldShowMultipleSelectedLineActions)
 const moreOptionsIsVisible = computed(() => store.state.currentUser.shouldShowMoreAlignOptions)
 
 const oneCardOrMultipleBoxesIsSelected = computed(() => cards.value.length || boxes.value.length > 1)
@@ -479,16 +480,16 @@ const toggleShareCardIsVisible = () => {
 
 const toggleShouldShowMultipleSelectedCardActions = () => {
   closeDialogs()
-  const isVisible = !shouldShowMultipleSelectedItemActions.value
-  store.dispatch('currentUser/shouldShowMultipleSelectedItemActions', isVisible)
+  const isVisible = !shouldShowMultipleSelectedCardActions.value
+  store.dispatch('currentUser/shouldShowMultipleSelectedCardActions', isVisible)
   nextTick(() => {
     scrollIntoView()
   })
 }
 const toggleShouldShowMultipleSelectedLineActions = () => {
   closeDialogs()
-  const isVisible = !shouldShowMultipleSelectedItemActions.value
-  store.dispatch('currentUser/shouldShowMultipleSelectedItemActions', isVisible)
+  const isVisible = !shouldShowMultipleSelectedLineActions.value
+  store.dispatch('currentUser/shouldShowMultipleSelectedLineActions', isVisible)
   nextTick(() => {
     scrollIntoView()
   })
@@ -522,13 +523,13 @@ dialog.narrow.multiple-selected-actions(
     //- Edit Cards
     .row
       //- [·]
-      .button-wrap.cards-checkboxes(v-if="cardsIsSelected" :class="{ disabled: !canEditAll.cards }")
+      .button-wrap.cards-checkboxes(v-if="cardsIsSelected" :class="{ disabled: !canEditAll.cards }" title="Card Checkboxes")
         label(v-if="state.cardsHaveCheckboxes" :class="{active: state.cardsCheckboxIsChecked}" tabindex="0")
           input(type="checkbox" v-model="cardCheckboxes" tabindex="-1")
         label(v-if="!state.cardsHaveCheckboxes" @click.left.prevent="addCheckboxToCards" @keydown.stop.enter="addCheckboxToCards" tabindex="0")
           input.add(type="checkbox" tabindex="-1")
       //- Connect
-      button(v-if="multipleCardsIsSelected" :class="{active: state.cardsIsConnected}" @click.left.prevent="toggleConnectCards" @keydown.stop.enter="toggleConnectCards" :disabled="!canEditAll.cards" title="Connect Cards")
+      button(v-if="multipleCardsIsSelected" :class="{active: state.cardsIsConnected}" @click.left.prevent="toggleConnectCards" @keydown.stop.enter="toggleConnectCards" :disabled="!canEditAll.cards" title="Connect/Disconnect Cards")
         img.icon.connect-cards(src="@/assets/connect-cards.svg")
       //- Share Card
       .button-wrap(v-if="oneCardIsSelected" @click.left.stop="toggleShareCardIsVisible")
@@ -538,17 +539,17 @@ dialog.narrow.multiple-selected-actions(
 
       //- CARD Options
       .button-wrap.more-options-button(v-if="cardsIsSelected")
-        button(:disabled="!canEditAll.cards && !canEditAll.boxes" @click.left.stop="toggleShouldShowMultipleSelectedCardActions" :class="{active : shouldShowMultipleSelectedItemActions}")
+        button(:disabled="!canEditAll.cards && !canEditAll.boxes" @click.left.stop="toggleShouldShowMultipleSelectedCardActions" :class="{active : shouldShowMultipleSelectedCardActions}" title="More Card Options")
           span.subsection-label {{moreCardOptionsLabel}}
           img.icon.down-arrow.button-down-arrow(src="@/assets/down-arrow.svg")
       //- LINE Options
       .button-wrap.more-options-button(v-if="connectionsIsSelected")
-        button(:disabled="!canEditAll.cards && !canEditAll.boxes" @click.left.stop="toggleShouldShowMultipleSelectedLineActions" :class="{active : shouldShowMultipleSelectedItemActions}")
+        button(:disabled="!canEditAll.cards && !canEditAll.boxes" @click.left.stop="toggleShouldShowMultipleSelectedLineActions" :class="{active : shouldShowMultipleSelectedLineActions}" title="More Line Options")
           span.subsection-label {{moreLineOptionsLabel}}
           img.icon.down-arrow.button-down-arrow(src="@/assets/down-arrow.svg")
 
-    CardOrBoxActions(:visible="shouldShowMultipleSelectedItemActions && (cardsIsSelected || boxesIsSelected)" :cards="cards" :boxes="boxes" @closeDialogs="closeDialogs" :class="{ 'last-row': !connectionsIsSelected }" :backgroundColor="userColor" :labelIsVisible="true")
-    ConnectionActions(:visible="shouldShowMultipleSelectedItemActions && connectionsIsSelected" :connections="editableConnections" @closeDialogs="closeDialogs" :canEditAll="canEditAll" :backgroundColor="userColor" :label="moreLineOptionsLabel")
+    CardOrBoxActions(:visible="shouldShowMultipleSelectedCardActions && (cardsIsSelected || boxesIsSelected)" :cards="cards" :boxes="boxes" @closeDialogs="closeDialogs" :class="{ 'last-row': !connectionsIsSelected }" :backgroundColor="userColor" :labelIsVisible="true")
+    ConnectionActions(:visible="shouldShowMultipleSelectedLineActions && connectionsIsSelected" :connections="editableConnections" @closeDialogs="closeDialogs" :canEditAll="canEditAll" :backgroundColor="userColor" :label="moreLineOptionsLabel")
 
   section
     template(v-if="oneCardOrMultipleBoxesIsSelected")
