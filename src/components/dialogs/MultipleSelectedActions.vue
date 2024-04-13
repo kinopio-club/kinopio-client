@@ -28,6 +28,12 @@ const state = reactive({
   shareCardIsVisible: false
 })
 
+const closeDialogs = () => {
+  state.copyCardsIsVisible = false
+  state.moveCardsIsVisible = false
+  state.shareCardIsVisible = false
+  store.commit('triggerCloseChildDialogs')
+}
 const multipleConnectionsSelectedIds = computed(() => store.state.multipleConnectionsSelectedIds)
 const multipleCardsSelectedIds = computed(() => store.state.multipleCardsSelectedIds)
 const multipleBoxesSelectedIds = computed(() => store.state.multipleBoxesSelectedIds)
@@ -41,7 +47,7 @@ watch(() => visible.value, async (value, prevValue) => {
     checkCardsHaveCheckboxes()
     checkCardsCheckboxIsChecked()
     await nextTick()
-    updatePinchCounterZoomDecimal()
+    store.commit('pinchCounterZoomDecimal', utils.pinchCounterZoomDecimal())
     checkIsCardsConnected()
     store.dispatch('currentConnections/removeUnusedTypes')
     scrollIntoView()
@@ -52,6 +58,11 @@ watch(() => visible.value, async (value, prevValue) => {
     store.dispatch('history/add', { cards: prevCards, boxes: prevBoxes, useSnapshot: true })
   }
 })
+
+const scrollIntoView = () => {
+  const element = dialogElement.value
+  utils.scrollIntoView({ element })
+}
 
 const isThemeDarkAndUserColorLight = computed(() => {
   const isThemeDark = store.state.currentUser.theme === 'dark'
@@ -68,6 +79,75 @@ const shouldShowMultipleSelectedItemActions = computed(() => store.state.current
 const moreOptionsIsVisible = computed(() => store.state.currentUser.shouldShowMoreAlignOptions)
 
 const oneCardOrMultipleBoxesIsSelected = computed(() => cards.value.length || boxes.value.length > 1)
+
+// items
+
+const isSpaceMember = computed(() => store.getters['currentUser/isSpaceMember']())
+const canEditAsNonMember = computed(() => {
+  const spaceIsOpen = store.state.currentSpace.privacy === 'open'
+  const isSpaceMember = store.getters['currentUser/isSpaceMember']()
+  return spaceIsOpen && !isSpaceMember
+})
+const canEditAll = computed(() => {
+  if (isSpaceMember.value) { return { cards: true, connections: true, all: true } }
+  const cards = multipleCardsSelectedIds.value.length === numberOfSelectedItemsCreatedByCurrentUser.value.cards
+  const connections = multipleConnectionsSelectedIds.value.length === numberOfSelectedItemsCreatedByCurrentUser.value.connections
+  const boxes = multipleBoxesSelectedIds.value.length === numberOfSelectedItemsCreatedByCurrentUser.value.boxes
+  const all = cards && connections && boxes
+  return { cards, connections, boxes, all }
+})
+const multipleCardOrBoxesIsSelected = computed(() => {
+  const cards = multipleCardsIsSelected.value
+  const boxes = multipleBoxesSelectedIds.value.length > 1
+  return cards || boxes
+})
+const selectedItemsIsCreatedByCurrentUser = computed(() => {
+  const { cards, connections, boxes } = numberOfSelectedItemsCreatedByCurrentUser.value
+  const cardsByCurrentUser = cards === cards.value.length
+  const connectionsByCurrentUser = connections === connections.value.length
+  const boxesByCurrentUser = boxes === boxes.value.length
+  if (cardsByCurrentUser && connectionsByCurrentUser && boxesByCurrentUser) {
+    return true
+  } else {
+    return false
+  }
+})
+const numberOfSelectedItemsCreatedByCurrentUser = computed(() => {
+  const connectionsCreatedByCurrentUser = connections.value.filter(connection => {
+    if (connection) { return }
+    return store.getters['currentUser/connectionIsCreatedByCurrentUser'](connection)
+  })
+  const cardsCreatedByCurrentUser = cards.value.filter(card => {
+    if (!card) { return }
+    return store.getters['currentUser/cardIsCreatedByCurrentUser'](card)
+  })
+  const boxesCreatedByCurrentUser = boxes.value.filter(box => {
+    if (!box) { return }
+    return store.getters['currentUser/boxIsCreatedByCurrentUser'](box)
+  })
+  return {
+    connections: connectionsCreatedByCurrentUser.length,
+    cards: cardsCreatedByCurrentUser.length,
+    boxes: boxesCreatedByCurrentUser.length
+  }
+})
+const multipleItemsSelected = computed(() => {
+  const total = multipleConnectionsSelectedIds.value.length + multipleCardsSelectedIds.value.length
+  return Boolean(total > 1)
+})
+const styles = computed(() => {
+  const position = store.state.multipleSelectedActionsPosition
+  let zoom = spaceCounterZoomDecimal.value
+  if (store.state.isTouchDevice) {
+    zoom = 1 / utils.visualViewport().scale
+  }
+  return {
+    backgroundColor: userColor.value,
+    left: position.x + 'px',
+    top: position.y + 'px',
+    transform: `scale(${zoom})`
+  }
+})
 
 // cards
 
@@ -105,6 +185,9 @@ const editableCards = computed(() => {
     })
   }
 })
+
+// card checkboxes
+
 const cardCheckboxes = computed({
   get () {
     return state.cardsCheckboxIsChecked
@@ -123,6 +206,87 @@ const cardCheckboxes = computed({
     checkCardsCheckboxIsChecked()
   }
 })
+const checkCardsHaveCheckboxes = () => {
+  const cardsWithCheckboxes = cards.value.filter(card => {
+    if (!card) { return }
+    return utils.checkboxFromString(card.name)
+  })
+  state.cardsHaveCheckboxes = cardsWithCheckboxes.length === cards.value.length
+}
+const checkCardsCheckboxIsChecked = () => {
+  const cardsChecked = cards.value.filter(card => utils.nameIsChecked(card.name))
+  state.cardsCheckboxIsChecked = cardsChecked.length === cards.value.length
+}
+const addCheckboxToCards = () => {
+  let updatedCards = []
+  cards.value.forEach(card => {
+    if (!utils.checkboxFromString(card.name)) {
+      const update = {
+        id: card.id,
+        name: `[] ${card.name}`
+      }
+      updatedCards.push(update)
+    }
+  })
+  store.dispatch('currentCards/updateMultiple', updatedCards)
+  state.cardsHaveCheckboxes = true
+}
+
+// connect cards
+
+const checkIsCardsConnected = () => {
+  const selectedCards = multipleCardsSelectedIds.value
+  const connections = selectedCards.filter((cardId, index) => {
+    const startCardId = selectedCards[index - 1]
+    const endCardId = cardId
+    const connectionExists = connectionAlreadyExists(startCardId, endCardId)
+    const connectionExistsReverse = connectionAlreadyExists(endCardId, startCardId)
+    if (connectionExists || connectionExistsReverse) { return true }
+  })
+  if (connections.length === selectedCards.length - 1) {
+    state.cardsIsConnected = true
+  } else {
+    state.cardsIsConnected = false
+  }
+}
+const toggleConnectCards = (event) => {
+  store.dispatch('history/resume')
+  if (state.cardsIsConnected) {
+    disconnectCards()
+  } else {
+    connectCards(event)
+  }
+  checkIsCardsConnected()
+  store.dispatch('history/pause')
+}
+const connectCards = (event) => {
+  const cardIds = multipleCardsSelectedIds.value
+  let connections = cardIds.map((cardId, index) => {
+    if (index + 1 < cardIds.length) { // create connections for middle cards
+      const startCardId = cardId
+      const endCardId = cardIds[index + 1]
+      if (connectionAlreadyExists(startCardId, endCardId)) { return }
+      const id = nanoid()
+      const path = store.getters['currentConnections/connectionPathBetweenCards'](startCardId, endCardId)
+      return {
+        id, startCardId, endCardId, path
+      }
+    }
+  })
+  connections = connections.filter(Boolean)
+  const type = connectionType(event)
+  connections.forEach(connection => {
+    store.dispatch('currentConnections/add', { connection, type })
+    store.dispatch('addToMultipleConnectionsSelected', connection.id)
+  })
+}
+const disconnectCards = () => {
+  const cardIds = multipleCardsSelectedIds.value
+  cardIds.forEach(cardId => {
+    store.dispatch('currentConnections/removeFromSelectedCard', cardId)
+  })
+  store.dispatch('currentConnections/removeUnusedTypes')
+}
 
 // connections
 
@@ -151,6 +315,26 @@ const editableConnections = computed(() => {
     })
   }
 })
+const connectionType = (event) => {
+  let connectionType = last(store.getters['currentConnections/allTypes'])
+  const shouldUseLastConnectionType = store.state.currentUser.shouldUseLastConnectionType
+  const shiftKey = event.shiftKey
+  const shouldAddType = !connectionType || (shouldUseLastConnectionType && shiftKey) || (!shouldUseLastConnectionType && !shiftKey)
+  if (shouldAddType) {
+    store.dispatch('currentConnections/addType')
+  }
+  connectionType = last(store.getters['currentConnections/allTypes'])
+  return connectionType
+}
+const connectionAlreadyExists = (startCardId, endCardId) => {
+  const connections = store.getters['currentConnections/all']
+  const existingConnection = connections.find(connection => {
+    const isStart = connection.startCardId === startCardId
+    const isEnd = connection.endCardId === endCardId
+    return isStart && isEnd
+  })
+  return Boolean(existingConnection)
+}
 
 // boxes
 
@@ -173,77 +357,7 @@ const editableBoxes = computed(() => {
   }
 })
 
-// all
-
-const multipleCardOrBoxesIsSelected = computed(() => {
-  const cards = multipleCardsIsSelected.value
-  const boxes = multipleBoxesSelectedIds.value.length > 1
-  return cards || boxes
-})
-const canEditAsNonMember = computed(() => {
-  const spaceIsOpen = store.state.currentSpace.privacy === 'open'
-  const isSpaceMember = store.getters['currentUser/isSpaceMember']()
-  return spaceIsOpen && !isSpaceMember
-})
-const selectedItemsIsCreatedByCurrentUser = computed(() => {
-  const { cards, connections, boxes } = numberOfSelectedItemsCreatedByCurrentUser.value
-  const cardsByCurrentUser = cards === cards.value.length
-  const connectionsByCurrentUser = connections === connections.value.length
-  const boxesByCurrentUser = boxes === boxes.value.length
-  if (cardsByCurrentUser && connectionsByCurrentUser && boxesByCurrentUser) {
-    return true
-  } else {
-    return false
-  }
-})
-const numberOfSelectedItemsCreatedByCurrentUser = computed(() => {
-  // const connections = connections.value.filter(Boolean)
-  // const cards = cards.value.filter(Boolean)
-  // const boxes = boxes.value.filter(Boolean)
-  const connectionsCreatedByCurrentUser = connections.value.filter(connection => {
-    if (connection) { return }
-    return store.getters['currentUser/connectionIsCreatedByCurrentUser'](connection)
-  })
-  const cardsCreatedByCurrentUser = cards.value.filter(card => {
-    if (!card) { return }
-    return store.getters['currentUser/cardIsCreatedByCurrentUser'](card)
-  })
-  const boxesCreatedByCurrentUser = boxes.value.filter(box => {
-    if (!box) { return }
-    return store.getters['currentUser/boxIsCreatedByCurrentUser'](box)
-  })
-  return {
-    connections: connectionsCreatedByCurrentUser.length,
-    cards: cardsCreatedByCurrentUser.length,
-    boxes: boxesCreatedByCurrentUser.length
-  }
-})
-const isSpaceMember = computed(() => store.getters['currentUser/isSpaceMember']())
-const canEditAll = computed(() => {
-  if (isSpaceMember.value) { return { cards: true, connections: true, all: true } }
-  const cards = multipleCardsSelectedIds.value.length === numberOfSelectedItemsCreatedByCurrentUser.value.cards
-  const connections = multipleConnectionsSelectedIds.value.length === numberOfSelectedItemsCreatedByCurrentUser.value.connections
-  const boxes = multipleBoxesSelectedIds.value.length === numberOfSelectedItemsCreatedByCurrentUser.value.boxes
-  const all = cards && connections && boxes
-  return { cards, connections, boxes, all }
-})
-const multipleItemsSelected = computed(() => {
-  const total = multipleConnectionsSelectedIds.value.length + multipleCardsSelectedIds.value.length
-  return Boolean(total > 1)
-})
-const styles = computed(() => {
-  const position = store.state.multipleSelectedActionsPosition
-  let zoom = spaceCounterZoomDecimal.value
-  if (store.state.isTouchDevice) {
-    zoom = 1 / utils.visualViewport().scale
-  }
-  return {
-    backgroundColor: userColor.value,
-    left: position.x + 'px',
-    top: position.y + 'px',
-    transform: `scale(${zoom})`
-  }
-})
+// split and merge
 
 const splitCard = () => {
   // open card details and trigger the split from there
@@ -339,6 +453,9 @@ const mergeSelectedCards = () => {
   prevCards = newCards // for history
   positionNewCards(newCards)
 }
+
+// copy and move
+
 const toggleCopyCardsIsVisible = () => {
   const isVisible = state.copyCardsIsVisible
   closeDialogs()
@@ -349,11 +466,17 @@ const toggleMoveCardsIsVisible = () => {
   closeDialogs()
   state.moveCardsIsVisible = !isVisible
 }
+
+// share
+
 const toggleShareCardIsVisible = () => {
   const isVisible = state.shareCardIsVisible
   closeDialogs()
   state.shareCardIsVisible = !isVisible
 }
+
+// more options
+
 const toggleShouldShowMultipleSelectedCardActions = () => {
   closeDialogs()
   const isVisible = !shouldShowMultipleSelectedItemActions.value
@@ -370,110 +493,9 @@ const toggleShouldShowMultipleSelectedLineActions = () => {
     scrollIntoView()
   })
 }
-const closeDialogs = () => {
-  state.copyCardsIsVisible = false
-  state.moveCardsIsVisible = false
-  state.shareCardIsVisible = false
-  store.commit('triggerCloseChildDialogs')
-}
-const connectionType = (event) => {
-  let connectionType = last(store.getters['currentConnections/allTypes'])
-  const shouldUseLastConnectionType = store.state.currentUser.shouldUseLastConnectionType
-  const shiftKey = event.shiftKey
-  const shouldAddType = !connectionType || (shouldUseLastConnectionType && shiftKey) || (!shouldUseLastConnectionType && !shiftKey)
-  if (shouldAddType) {
-    store.dispatch('currentConnections/addType')
-  }
-  connectionType = last(store.getters['currentConnections/allTypes'])
-  return connectionType
-}
-const connectionAlreadyExists = (startCardId, endCardId) => {
-  const connections = store.getters['currentConnections/all']
-  const existingConnection = connections.find(connection => {
-    const isStart = connection.startCardId === startCardId
-    const isEnd = connection.endCardId === endCardId
-    return isStart && isEnd
-  })
-  return Boolean(existingConnection)
-}
-const checkCardsHaveCheckboxes = () => {
-  const cardsWithCheckboxes = cards.value.filter(card => {
-    if (!card) { return }
-    return utils.checkboxFromString(card.name)
-  })
-  state.cardsHaveCheckboxes = cardsWithCheckboxes.length === cards.value.length
-}
-const checkCardsCheckboxIsChecked = () => {
-  const cardsChecked = cards.value.filter(card => utils.nameIsChecked(card.name))
-  state.cardsCheckboxIsChecked = cardsChecked.length === cards.value.length
-}
-const addCheckboxToCards = () => {
-  let updatedCards = []
-  cards.value.forEach(card => {
-    if (!utils.checkboxFromString(card.name)) {
-      const update = {
-        id: card.id,
-        name: `[] ${card.name}`
-      }
-      updatedCards.push(update)
-    }
-  })
-  store.dispatch('currentCards/updateMultiple', updatedCards)
-  state.cardsHaveCheckboxes = true
-}
-const checkIsCardsConnected = () => {
-  const selectedCards = multipleCardsSelectedIds.value
-  const connections = selectedCards.filter((cardId, index) => {
-    const startCardId = selectedCards[index - 1]
-    const endCardId = cardId
-    const connectionExists = connectionAlreadyExists(startCardId, endCardId)
-    const connectionExistsReverse = connectionAlreadyExists(endCardId, startCardId)
-    if (connectionExists || connectionExistsReverse) { return true }
-  })
-  if (connections.length === selectedCards.length - 1) {
-    state.cardsIsConnected = true
-  } else {
-    state.cardsIsConnected = false
-  }
-}
-const toggleConnectCards = (event) => {
-  store.dispatch('history/resume')
-  if (state.cardsIsConnected) {
-    disconnectCards()
-  } else {
-    connectCards(event)
-  }
-  checkIsCardsConnected()
-  store.dispatch('history/pause')
-}
-const connectCards = (event) => {
-  const cardIds = multipleCardsSelectedIds.value
-  let connections = cardIds.map((cardId, index) => {
-    if (index + 1 < cardIds.length) { // create connections for middle cards
-      const startCardId = cardId
-      const endCardId = cardIds[index + 1]
-      if (connectionAlreadyExists(startCardId, endCardId)) { return }
-      const id = nanoid()
-      const path = store.getters['currentConnections/connectionPathBetweenCards'](startCardId, endCardId)
-      return {
-        id, startCardId, endCardId, path
-      }
-    }
-  })
-  connections = connections.filter(Boolean)
-  const type = connectionType(event)
-  connections.forEach(connection => {
-    store.dispatch('currentConnections/add', { connection, type })
-    store.dispatch('addToMultipleConnectionsSelected', connection.id)
-  })
-}
-const disconnectCards = () => {
-  const cardIds = multipleCardsSelectedIds.value
-  cardIds.forEach(cardId => {
-    store.dispatch('currentConnections/removeFromSelectedCard', cardId)
-  })
-  store.dispatch('currentConnections/removeUnusedTypes')
-}
+
+// remove
+
 const remove = ({ shouldRemoveCardsOnly }) => {
   store.dispatch('history/resume')
   editableConnections.value.forEach(connection => store.dispatch('currentConnections/remove', connection))
@@ -483,13 +505,6 @@ const remove = ({ shouldRemoveCardsOnly }) => {
   }
   store.dispatch('closeAllDialogs')
   store.dispatch('clearMultipleSelected')
-}
-const scrollIntoView = () => {
-  const element = dialogElement.value
-  utils.scrollIntoView({ element })
-}
-const updatePinchCounterZoomDecimal = () => {
-  store.commit('pinchCounterZoomDecimal', utils.pinchCounterZoomDecimal())
 }
 
 </script>
