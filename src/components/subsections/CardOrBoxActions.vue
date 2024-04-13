@@ -55,6 +55,27 @@ const state = reactive({
   defaultColor: '#e3e3e3'
 })
 
+const canEditSpace = computed(() => store.getters['currentUser/canEditSpace']())
+const isSpaceMember = computed(() => store.getters['currentUser/isSpaceMember']())
+const canEditAll = computed(() => {
+  if (isSpaceMember.value) { return true }
+  const editableCards = props.cards.filter(card => store.getters['currentUser/canEditCard'](card))
+  const canEditCards = editableCards.length === props.cards.length
+  const editableBoxes = props.boxes.filter(box => store.getters['currentUser/canEditBox'](box))
+  const canEditBoxes = editableBoxes.length === props.boxes.length
+  return canEditCards && canEditBoxes
+})
+const closeDialogs = (shouldPreventEmit) => {
+  state.framePickerIsVisible = false
+  state.tagPickerIsVisible = false
+  state.colorPickerIsVisible = false
+  store.commit('userDetailsIsVisible', false)
+  if (shouldPreventEmit === true) { return }
+  emit('closeDialogs')
+}
+
+// items
+
 const isCards = computed(() => Boolean(props.cards.length))
 const isSingleCard = computed(() => props.cards.length === 1 && !isBoxes.value)
 const isBoxes = computed(() => Boolean(props.boxes.length))
@@ -70,11 +91,6 @@ const items = computed(() => {
     return box
   })
   return cards.concat(boxes)
-})
-
-const tagNamesInCard = computed(() => {
-  if (!props.tagsInCard) { return }
-  return props.tagsInCard.map(tag => tag.name)
 })
 const label = computed(() => {
   let label, cardLabel, boxLabel
@@ -100,87 +116,8 @@ const label = computed(() => {
   return label.toUpperCase()
 })
 
-const boxFillIsEmpty = computed(() => {
-  const numberOfBoxes = props.boxes.length
-  const boxes = props.boxes.filter(box => box.fill === 'empty')
-  return boxes.length === numberOfBoxes
-})
-const boxFillIsFilled = computed(() => {
-  const numberOfBoxes = props.boxes.length
-  const boxes = props.boxes.filter(box => box.fill === 'filled')
-  return boxes.length === numberOfBoxes
-})
-const color = computed(() => {
-  let colors = items.value.map(item => item.backgroundColor || item.color)
-  colors = colors.filter(color => Boolean(color))
-  const itemsHaveColors = colors.length === items.value.length
-  const colorsAreEqual = uniq(colors).length === 1
-  if (itemsHaveColors && colorsAreEqual) {
-    return colors[0]
-  } else {
-    return state.defaultColor
-  }
-})
-const background = computed(() => {
-  return props.backgroundColor || color.value
-})
-const canEditSpace = computed(() => store.getters['currentUser/canEditSpace']())
-const isSpaceMember = computed(() => store.getters['currentUser/isSpaceMember']())
-const itemColors = computed(() => store.getters['currentSpace/itemColors'])
-const canEditAll = computed(() => {
-  if (isSpaceMember.value) { return true }
-  const editableCards = props.cards.filter(card => store.getters['currentUser/canEditCard'](card))
-  const canEditCards = editableCards.length === props.cards.length
-  const editableBoxes = props.boxes.filter(box => store.getters['currentUser/canEditBox'](box))
-  const canEditBoxes = editableBoxes.length === props.boxes.length
-  return canEditCards && canEditBoxes
-})
-const isFrames = computed(() => {
-  const cards = props.cards.filter(card => card.frameId)
-  return Boolean(cards.length === props.cards.length)
-})
-const isH1 = computed(() => {
-  const pattern = 'h1Pattern'
-  const matches = itemsWithPattern(pattern)
-  return Boolean(matches.length === items.value.length)
-})
-const isH2 = computed(() => {
-  const pattern = 'h2Pattern'
-  const matches = itemsWithPattern(pattern)
-  return Boolean(matches.length === items.value.length)
-})
-const isLocked = computed(() => {
-  const matches = items.value.filter(item => item.isLocked)
-  return Boolean(matches.length === items.value.length)
-})
-const isComment = computed(() => {
-  const cards = props.cards.filter(card => card.isComment)
-  return Boolean(cards.length === props.cards.length)
-})
-const countersIsVisible = computed(() => {
-  const cards = props.cards.filter(card => card.counterIsVisible)
-  return Boolean(cards.length === props.cards.length)
-})
+// update name
 
-const updateColor = (color) => {
-  items.value.forEach(item => {
-    const currentColor = item.backgroundColor || item.color
-    if (currentColor === color) { return }
-    if (item.isCard) {
-      updateCard(item, { backgroundColor: color })
-    } else if (item.isBox) {
-      if (color === 'transparent') { return }
-      updateBox(item, { color })
-    }
-  })
-}
-const removeColor = () => {
-  items.value.forEach(item => {
-    if (item.isCard) {
-      updateCard(item, { backgroundColor: null })
-    }
-  })
-}
 const itemsWithPattern = (pattern) => {
   return items.value.filter(item => {
     const name = normalizedName(item.name)
@@ -217,29 +154,6 @@ const markdown = (pattern) => {
     return '## '
   }
 }
-const toggleHeader = (pattern) => {
-  updateCardDimensions()
-  let matches = itemsWithPattern(pattern)
-  const shouldPrepend = matches.length < items.value.length
-  if (shouldPrepend) {
-    const removeHeaderPattern = removePattern(pattern)
-    removeFromItemNames(removeHeaderPattern)
-    prependToItemNames(pattern)
-  } else {
-    removeFromItemNames(pattern)
-  }
-}
-const toggleIsLocked = () => {
-  const value = !isLocked.value
-  items.value.forEach(item => {
-    if (item.isCard) {
-      updateCard(item, { isLocked: value })
-    }
-    if (item.isBox) {
-      updateBox(item, { isLocked: value })
-    }
-  })
-}
 const prependToName = ({ pattern, item, nameSegment }) => {
   const md = markdown(pattern)
   let index = item.name.indexOf(nameSegment)
@@ -275,61 +189,21 @@ const removeFromItemNames = (pattern) => {
     updateName(item, newName)
   })
 }
-const toggleColorPickerIsVisible = () => {
-  const isVisible = state.colorPickerIsVisible
-  closeDialogs()
-  state.colorPickerIsVisible = !isVisible
-}
-const closeDialogs = (shouldPreventEmit) => {
-  state.framePickerIsVisible = false
-  state.tagPickerIsVisible = false
-  state.colorPickerIsVisible = false
-  store.commit('userDetailsIsVisible', false)
-  if (shouldPreventEmit === true) { return }
-  emit('closeDialogs')
-}
 
-// cards only
+// tag
 
-const updateCardDimensions = () => {
-  const cards = utils.clone(props.cards)
-  const cardIds = cards.map(card => card.id)
-  store.dispatch('currentCards/removeResize', { cardIds })
-}
-const updateCard = (card, updates) => {
-  const keys = Object.keys(updates)
-  card = { id: card.id }
-  keys.forEach(key => {
-    card[key] = updates[key]
-  })
-  store.dispatch('currentCards/update', card)
-}
-const toggleFramePickerIsVisible = () => {
-  const isVisible = state.framePickerIsVisible
-  closeDialogs()
-  state.framePickerIsVisible = !isVisible
-}
+const tagNamesInCard = computed(() => {
+  if (!props.tagsInCard) { return }
+  return props.tagsInCard.map(tag => tag.name)
+})
 const toggleTagPickerIsVisible = () => {
   const isVisible = state.tagPickerIsVisible
   closeDialogs()
   state.tagPickerIsVisible = !isVisible
 }
-const toggleIsComment = () => {
-  updateCardDimensions()
-  const value = !isComment.value
-  props.cards.forEach(card => {
-    card = {
-      id: card.id,
-      name: utils.nameWithoutCommentPattern(card.name),
-      isComment: value
-    }
-    if (!card.name) {
-      delete card.name
-    }
-    store.dispatch('currentCards/update', card)
-    store.dispatch('currentCards/updateDimensions', { cards: [card] })
-  })
-}
+
+// contain items in box
+
 const containItemsInNewBox = async () => {
   let box = utils.boundaryRectFromItems(items.value)
   // add box margins
@@ -347,6 +221,151 @@ const containItemsInNewBox = async () => {
   await nextTick()
   store.commit('boxDetailsIsVisibleForBoxId', box.id)
 }
+
+// box fill
+
+const boxFillIsEmpty = computed(() => {
+  const numberOfBoxes = props.boxes.length
+  const boxes = props.boxes.filter(box => box.fill === 'empty')
+  return boxes.length === numberOfBoxes
+})
+const boxFillIsFilled = computed(() => {
+  const numberOfBoxes = props.boxes.length
+  const boxes = props.boxes.filter(box => box.fill === 'filled')
+  return boxes.length === numberOfBoxes
+})
+const updateBoxFill = (fill) => {
+  props.boxes.forEach(box => {
+    updateBox(box, { fill })
+  })
+}
+
+// color
+
+const color = computed(() => {
+  let colors = items.value.map(item => item.backgroundColor || item.color)
+  colors = colors.filter(color => Boolean(color))
+  const itemsHaveColors = colors.length === items.value.length
+  const colorsAreEqual = uniq(colors).length === 1
+  if (itemsHaveColors && colorsAreEqual) {
+    return colors[0]
+  } else {
+    return state.defaultColor
+  }
+})
+const background = computed(() => {
+  return props.backgroundColor || color.value
+})
+const itemColors = computed(() => store.getters['currentSpace/itemColors'])
+const updateColor = (color) => {
+  items.value.forEach(item => {
+    const currentColor = item.backgroundColor || item.color
+    if (currentColor === color) { return }
+    if (item.isCard) {
+      updateCard(item, { backgroundColor: color })
+    } else if (item.isBox) {
+      if (color === 'transparent') { return }
+      updateBox(item, { color })
+    }
+  })
+}
+const removeColor = () => {
+  items.value.forEach(item => {
+    if (item.isCard) {
+      updateCard(item, { backgroundColor: null })
+    }
+  })
+}
+const toggleColorPickerIsVisible = () => {
+  const isVisible = state.colorPickerIsVisible
+  closeDialogs()
+  state.colorPickerIsVisible = !isVisible
+}
+
+// frames
+
+const isFrames = computed(() => {
+  const cards = props.cards.filter(card => card.frameId)
+  return Boolean(cards.length === props.cards.length)
+})
+const toggleFramePickerIsVisible = () => {
+  const isVisible = state.framePickerIsVisible
+  closeDialogs()
+  state.framePickerIsVisible = !isVisible
+}
+
+// header h1 h2
+
+const isH1 = computed(() => {
+  const pattern = 'h1Pattern'
+  const matches = itemsWithPattern(pattern)
+  return Boolean(matches.length === items.value.length)
+})
+const isH2 = computed(() => {
+  const pattern = 'h2Pattern'
+  const matches = itemsWithPattern(pattern)
+  return Boolean(matches.length === items.value.length)
+})
+const toggleHeader = (pattern) => {
+  updateCardDimensions()
+  let matches = itemsWithPattern(pattern)
+  const shouldPrepend = matches.length < items.value.length
+  if (shouldPrepend) {
+    const removeHeaderPattern = removePattern(pattern)
+    removeFromItemNames(removeHeaderPattern)
+    prependToItemNames(pattern)
+  } else {
+    removeFromItemNames(pattern)
+  }
+}
+
+// lock
+
+const isLocked = computed(() => {
+  const matches = items.value.filter(item => item.isLocked)
+  return Boolean(matches.length === items.value.length)
+})
+const toggleIsLocked = () => {
+  const value = !isLocked.value
+  items.value.forEach(item => {
+    if (item.isCard) {
+      updateCard(item, { isLocked: value })
+    }
+    if (item.isBox) {
+      updateBox(item, { isLocked: value })
+    }
+  })
+}
+
+// comment
+
+const isComment = computed(() => {
+  const cards = props.cards.filter(card => card.isComment)
+  return Boolean(cards.length === props.cards.length)
+})
+const toggleIsComment = () => {
+  updateCardDimensions()
+  const value = !isComment.value
+  props.cards.forEach(card => {
+    card = {
+      id: card.id,
+      name: utils.nameWithoutCommentPattern(card.name),
+      isComment: value
+    }
+    if (!card.name) {
+      delete card.name
+    }
+    store.dispatch('currentCards/update', card)
+    store.dispatch('currentCards/updateDimensions', { cards: [card] })
+  })
+}
+
+// vote counter
+
+const countersIsVisible = computed(() => {
+  const cards = props.cards.filter(card => card.counterIsVisible)
+  return Boolean(cards.length === props.cards.length)
+})
 const toggleCounterIsVisible = () => {
   let counterIsVisible = true
   if (countersIsVisible.value) {
@@ -361,7 +380,23 @@ const toggleCounterIsVisible = () => {
   })
 }
 
-// boxes only
+// card
+
+const updateCardDimensions = () => {
+  const cards = utils.clone(props.cards)
+  const cardIds = cards.map(card => card.id)
+  store.dispatch('currentCards/removeResize', { cardIds })
+}
+const updateCard = (card, updates) => {
+  const keys = Object.keys(updates)
+  card = { id: card.id }
+  keys.forEach(key => {
+    card[key] = updates[key]
+  })
+  store.dispatch('currentCards/update', card)
+}
+
+// box
 
 const updateBox = (box, updates) => {
   const keys = Object.keys(updates)
@@ -371,12 +406,6 @@ const updateBox = (box, updates) => {
   })
   store.dispatch('currentBoxes/update', box)
 }
-const updateBoxFill = (fill) => {
-  props.boxes.forEach(box => {
-    updateBox(box, { fill })
-  })
-}
-
 </script>
 
 <template lang="pug">
