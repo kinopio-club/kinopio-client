@@ -393,19 +393,26 @@ const cardContentWrapStyles = computed(() => {
   let styles = {}
   return updateStylesWithWidth(styles)
 })
+const addSizeClasses = (classes) => {
+  const m = 100
+  const l = 150
+  classes['s-width'] = width.value < m
+  classes['m-width'] = utils.isBetween({ value: width.value, min: m, max: l })
+  classes['l-width'] = width.value > l
+  return classes
+}
 const articleClasses = computed(() => {
-  const classes = {
+  let classes = {
     'is-resizing': store.state.currentUserIsResizingCard,
     'is-tilting': store.state.currentUserIsTiltingCard,
     'is-hidden-by-opacity': isCardHiddenByCommentFilter.value,
     'jiggle': shouldJiggle.value
   }
+  classes = addSizeClasses(classes)
   return classes
 })
 const cardClasses = computed(() => {
-  const m = 100
-  const l = 150
-  const classes = {
+  let classes = {
     'active': isConnectingTo.value || isConnectingFrom.value || state.isRemoteConnecting || currentCardIsBeingDragged.value || state.uploadIsDraggedOver,
     'filtered': isFiltered.value,
     'media-card': isVisualCard.value || pendingUploadDataUrl.value,
@@ -413,11 +420,9 @@ const cardClasses = computed(() => {
     'is-playing-audio': state.isPlayingAudio,
     'is-locked': isLocked.value,
     'has-url-preview': cardUrlPreviewIsVisible.value,
-    'is-dark': backgroundColorIsDark.value,
-    's-width': width.value < m,
-    'm-width': utils.isBetween({ value: width.value, min: m, max: l }),
-    'l-width': width.value > l
+    'is-dark': backgroundColorIsDark.value
   }
+  classes = addSizeClasses(classes)
   return classes
 })
 const shouldJiggle = computed(() => {
@@ -2468,6 +2473,9 @@ article.card-wrap
 
 .jiggle
   animation jiggle 0.5s infinite ease-out forwards
+  &.l-width
+    animation-name jiggle-small
+
 @media (prefers-reduced-motion)
   .jiggle
     animation none
@@ -2476,12 +2484,23 @@ article.card-wrap
   0%
     transform rotate(0deg)
   25%
-    transform rotate(-3deg)
+    transform rotate(-2deg)
   50%
-    transform rotate(3deg)
+    transform rotate(2deg)
   75%
-    transform rotate(-3deg)
+    transform rotate(-2deg)
   100%
     transform rotate(0deg)
 
+@keyframes jiggle-small
+  0%
+    transform rotate(0deg)
+  25%
+    transform rotate(-1deg)
+  50%
+    transform rotate(1deg)
+  75%
+    transform rotate(-1deg)
+  100%
+    transform rotate(0deg)
 </style>

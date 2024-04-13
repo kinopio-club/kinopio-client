@@ -122,7 +122,8 @@ const convertToCanvas = (space) => {
         y: card.y,
         width: card.width,
         height: card.height,
-        color: card.backgroundColor
+        color: card.backgroundColor,
+        text: card.name
       }
       canvas.nodes.push(node)
     })

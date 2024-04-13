@@ -888,14 +888,20 @@ const currentSpace = {
     },
     loadPrevSpaceInSession: async (context) => {
       const prevSpaceIdInSession = context.rootState.prevSpaceIdInSession
+      const prevSpacePosition = context.rootState.prevSpaceIdInSessionPagePosition
       if (!prevSpaceIdInSession) { return }
       let space = cache.space(prevSpaceIdInSession)
       if (space.id) {
-        context.dispatch('loadSpace', { space })
+        await context.dispatch('loadSpace', { space })
       } else if (prevSpaceIdInSession) {
         space = { id: prevSpaceIdInSession }
-        context.dispatch('loadSpace', { space })
+        await context.dispatch('loadSpace', { space })
       }
+      window.scroll({
+        left: prevSpacePosition.x,
+        top: prevSpacePosition.y,
+        behavior: 'instant'
+      })
     },
     updateSpace: async (context, updates) => {
       const space = utils.clone(context.state)
@@ -912,7 +918,7 @@ const currentSpace = {
       }, { root: true })
     },
     changeSpace: async (context, space) => {
-      context.commit('prevSpaceIdInSession', context.state.id, { root: true })
+      context.dispatch('prevSpaceIdInSession', context.state.id, { root: true })
       console.log('🚟 Change space', space)
       context.commit('isLoadingSpace', true, { root: true })
       context.commit('notifySpaceNotFound', false, { root: true })

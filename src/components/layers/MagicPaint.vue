@@ -166,7 +166,9 @@ export default {
   methods: {
     updateSelectableCardsInViewport () {
       this.$store.dispatch('currentCards/updateCanBeSelectedSortedByY')
-      selectableCardsInViewport = utils.clone(this.$store.getters['currentCards/isSelectableInViewport']())
+      const selectableCards = this.$store.getters['currentCards/isSelectableInViewport']()
+      if (!selectableCards) { return }
+      selectableCardsInViewport = utils.clone(selectableCards)
     },
     updateRemotePosition (position) {
       const zoom = this.spaceZoomDecimal

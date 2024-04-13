@@ -85,7 +85,7 @@ const copy = async (event) => {
   const position = utils.cursorPositionInPage(event)
   try {
     await navigator.clipboard.writeText(props.content)
-    store.commit('addNotificationWithPosition', { message: 'Copied', position, type: 'success', layer: 'app', icon: 'checkmark' })
+    store.commit('addNotificationWithPosition', { message: 'Copied Code', position, type: 'success', layer: 'app', icon: 'checkmark' })
   } catch (error) {
     console.warn('🚑 copyText', error)
     store.commit('addNotificationWithPosition', { message: 'Copy Error', position, type: 'danger', layer: 'app', icon: 'cancel' })

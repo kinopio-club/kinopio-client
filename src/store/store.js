@@ -53,6 +53,7 @@ const store = createStore({
     offlineIsVisible: false,
     isFadingOutDuringTouch: false,
     prevSpaceIdInSession: '',
+    prevSpaceIdInSessionPagePosition: {},
     outsideSpaceBackgroundColor: '',
 
     // zoom and scroll
@@ -441,6 +442,10 @@ const store = createStore({
       } else {
         state.prevSpaceIdInSession = value
       }
+    },
+    prevSpaceIdInSessionPagePosition: (state, value) => {
+      utils.typeCheck({ value, type: 'object' })
+      state.prevSpaceIdInSessionPagePosition = value
     },
     outsideSpaceBackgroundColor: (state, value) => {
       utils.typeCheck({ value, type: 'string' })
@@ -1474,6 +1479,15 @@ const store = createStore({
   },
 
   actions: {
+    prevSpaceIdInSession: (context, id) => {
+      utils.typeCheck({ value: id, type: 'string' })
+      const position = {
+        x: window.scrollX,
+        y: window.scrollY
+      }
+      context.commit('prevSpaceIdInSession', id)
+      context.commit('prevSpaceIdInSessionPagePosition', position)
+    },
     isOnline: (context, isOnline) => {
       utils.typeCheck({ value: isOnline, type: 'boolean' })
       const prevIsOnline = context.state.isOnline
