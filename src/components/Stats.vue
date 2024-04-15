@@ -1,6 +1,6 @@
 <template lang="pug">
 
-section.stats(v-if="visible" @click.stop="clear")
+section.stats(v-if="visible")
   p Stats for {{currentSpace.name}}
 
   p(v-if="isLoadingSpace")
@@ -19,7 +19,7 @@ section.stats(v-if="visible" @click.stop="clear")
       tbody
         tr.table-header
           td Cards
-          td Connections
+          td Lines
           td Boxes
           td Tags
         tr
@@ -106,6 +106,7 @@ export default {
 
 <style lang="stylus">
 // .stats
+//   overflow auto
 //   table
 //     margin-top 10px
 //     border-collapse collapse
