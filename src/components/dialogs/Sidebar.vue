@@ -3,15 +3,16 @@ import { reactive, computed, onMounted, onBeforeUnmount, onUnmounted, defineProp
 import { useStore } from 'vuex'
 
 import utils from '@/utils.js'
-import Links from '@/components/Links.vue'
-import Tags from '@/components/Tags.vue'
-import Comments from '@/components/Comments.vue'
-import Removed from '@/components/Removed.vue'
-import AIImages from '@/components/AIImages.vue'
-import Stats from '@/components/Stats.vue'
-import Text from '@/components/Text.vue'
-import Inbox from '@/components/Inbox.vue'
-import Favorites from '@/components/Favorites.vue'
+
+import Links from '@/components/sidebar/Links.vue'
+import Tags from '@/components/sidebar/Tags.vue'
+import Comments from '@/components/sidebar/Comments.vue'
+import Removed from '@/components/sidebar/Removed.vue'
+import AIImages from '@/components/sidebar/AIImages.vue'
+import Stats from '@/components/sidebar/Stats.vue'
+import Text from '@/components/sidebar/Text.vue'
+import Inbox from '@/components/sidebar/Inbox.vue'
+import Favorites from '@/components/sidebar/Favorites.vue'
 
 const store = useStore()
 
