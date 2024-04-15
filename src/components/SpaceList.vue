@@ -61,6 +61,7 @@ const props = defineProps({
   showCategory: Boolean,
   showUser: Boolean,
   showOtherUsers: Boolean,
+  showCollaborators: Boolean,
   showUserIfCurrentUserIsCollaborator: Boolean,
   hideExploreBadge: Boolean,
   hideFilter: Boolean,
@@ -73,7 +74,8 @@ const props = defineProps({
   resultsSectionHeight: Number,
   disableListOptimizations: Boolean,
   search: String,
-  parentDialog: String
+  parentDialog: String,
+  previewImageIsWide: Boolean
 })
 
 const state = reactive({
@@ -187,6 +189,10 @@ const user = (space) => {
     users = space.users
   }
   return space.user || users[0]
+}
+const users = (space) => {
+  const spaceUser = user(space)
+  return [spaceUser].concat(space.collaborators)
 }
 const selectSpace = (event, space) => {
   if (event) {
@@ -390,12 +396,16 @@ span.space-list-wrap
                   User(:user="user(space)" :isClickable="false" :key="user(space).id" :isMedium="true")
                   template(v-for="otherUser in space.otherUsers" :key="otherUser.id")
                     User(:user="otherUser" :isClickable="false" :isMedium="true")
+              template(v-else-if="showCollaborators")
+                .users(:class="{'multiple-users': users(space).length > 1}")
+                  template(v-for="user in users(space)" :key="user.id")
+                    User(:user="user" :isClickable="false" :isMedium="true")
               template(v-else-if="showUser")
                 User(:user="user(space)" :isClickable="false" :key="user(space).id" :isMedium="true")
               template(v-else-if="showCollaborator(space)")
                 User(:user="user(space)" :isClickable="false" :key="user(space).id" :isMedium="true")
               //- preview image
-              .preview-thumbnail-image-wrap(v-if="space.previewThumbnailImage && isOnline")
+              .preview-thumbnail-image-wrap(v-if="space.previewThumbnailImage && isOnline" :class="{wide: previewImageIsWide}")
                 img.preview-thumbnail-image(:src="space.previewThumbnailImage")
                 //- new
                 .badge.info.inline-badge.new-unread-badge(v-if="isNew(space)")
@@ -483,9 +493,9 @@ span.space-list-wrap
     margin-right 6px
     display flex
     flex-wrap wrap
-    justify-content flex-end
     align-content flex-start
     flex-shrink 0
+    max-width 66px // 3 users
     .user
       margin-right 0
 
@@ -545,6 +555,10 @@ span.space-list-wrap
     position relative
     flex-shrink 0
     margin-right 6px
-    width 24px
-    height 22px
+    &.wide
+      width 40px
+      height 30px
+      .preview-thumbnail-image
+        width 100%
+        height 100%
 </style>

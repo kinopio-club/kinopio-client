@@ -2,7 +2,7 @@
 import { reactive, computed, onMounted, onBeforeUnmount, onUnmounted, defineProps, defineEmits, watch, ref, nextTick } from 'vue'
 import { useStore } from 'vuex'
 
-import SpaceListGrid from '@/components/SpaceListGrid.vue'
+import SpaceList from '@/components/SpaceList.vue'
 import ExploreRssFeeds from '@/components/dialogs/ExploreRssFeeds.vue'
 import Loader from '@/components/Loader.vue'
 import User from '@/components/User.vue'
@@ -52,6 +52,7 @@ const state = reactive({
 
 const currentSpace = computed(() => store.state.currentSpace)
 const changeSpace = (space) => {
+  closeDialogs()
   store.dispatch('currentSpace/changeSpace', space)
 }
 const closeDialogs = () => {
@@ -118,8 +119,8 @@ const toggleExploreRssFeedsIsVisible = () => {
 </script>
 
 <template lang="pug">
-dialog.explore.wide(v-if="visible" :open="visible" ref="dialogElement" :style="{'max-height': state.dialogHeight + 'px'}")
-  section(v-if="visible" :open="visible" @click.left.stop='closeDialogs')
+dialog.explore.wide(v-if="visible" :open="visible" ref="dialogElement" :style="{'max-height': state.dialogHeight + 'px'}" @click.left.stop='closeDialogs')
+  section(v-if="visible" :open="visible")
     .row.title-row
       .segmented-buttons
         button(:class="{active: currentSectionIsExplore}" @click="updateCurrentSection('explore')")
@@ -145,13 +146,16 @@ dialog.explore.wide(v-if="visible" :open="visible" ref="dialogElement" :style="{
         ExploreRssFeeds(:visible="state.exploreRssFeedsIsVisible")
 
   section.results-section(ref="resultsElement" :style="{'max-height': state.resultsSectionHeight + 'px'}")
-    SpaceListGrid(
+    SpaceList(
       :spaces="currentSpaces"
       :showUser="true"
       @selectSpace="changeSpace"
       :userShowInExploreDate="state.userShowInExploreDate"
       :resultsSectionHeight="state.resultsSectionHeight"
       :parentDialog="parentDialog"
+      :showCollaborators="true"
+      :previewImageIsWide="true"
+      :hideFilter="true"
     )
 </template>
 
