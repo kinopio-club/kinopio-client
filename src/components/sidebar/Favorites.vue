@@ -7,31 +7,15 @@ import SpaceList from '@/components/SpaceList.vue'
 import UserList from '@/components/UserList.vue'
 import utils from '@/utils.js'
 import User from '@/components/User.vue'
-import UserLabelInline from '@/components/UserLabelInline.vue'
 
 const store = useStore()
-
-// const dialogElement = ref(null)
-
-// onMounted(() => {
-//   store.subscribe((mutation, state) => {
-//     if (mutation.type === 'updatePageSizes') {
-//       updateDialogHeight()
-//     }
-//   })
-// })
 
 const props = defineProps({
   visible: Boolean
 })
 watch(() => props.visible, (value, prevValue) => {
-  if (value) {
-    // closeDialogs()
-    // updateDialogHeight()
-    // store.commit('shouldExplicitlyHideFooter', true)
-  } else {
+  if (!value) {
     updateFavoriteSpaceIsEdited()
-    // store.commit('shouldExplicitlyHideFooter', false)
   }
 })
 
@@ -40,13 +24,6 @@ const state = reactive({
   userDetailsPosition: {},
   currentUserSpacesIsVisible: false
 })
-
-// const updateDialogHeight = async () => {
-//   if (!props.visible) { return }
-//   await nextTick()
-//   let element = dialogElement.value
-//   state.dialogHeight = utils.elementHeight(element)
-// }
 
 const currentUser = computed(() => store.state.currentUser)
 const favoriteUsers = computed(() => store.state.currentUser.favoriteUsers)
@@ -61,12 +38,10 @@ const isEmpty = computed(() => {
 const showSpaces = () => {
   state.spacesIsVisible = true
   closeDialogs()
-  // updateDialogHeight()
 }
 const hideSpaces = () => {
   state.spacesIsVisible = false
   closeDialogs()
-  // updateDialogHeight()
 }
 
 // spaces
@@ -117,17 +92,6 @@ const changeSpace = (space) => {
 }
 const parentDialog = computed(() => 'favorites')
 
-// favorite space
-
-const isFavoriteSpace = computed(() => store.getters['currentSpace/isFavorite'])
-const updateFavoriteSpace = () => {
-  const space = store.state.currentSpace
-  const value = !isFavoriteSpace.value
-  store.dispatch('currentUser/updateFavoriteSpace', { space, value })
-  checkIfShouldShowCurrentUserSpaces(space)
-}
-const currentSpaceName = computed(() => utils.truncated(store.state.currentSpace.name))
-
 // user
 
 const userDetailsIsVisible = computed(() => store.state.userDetailsIsVisible)
@@ -165,56 +129,14 @@ const updateFavoriteSpaceIsEdited = () => {
   })
 }
 
-// favorite user
-
-const spaceUser = computed(() => {
-  const members = store.getters['currentSpace/members'](true)
-  if (members.length) {
-    return members[0]
-  } else {
-    return null
-  }
-})
-const isFavoriteUser = computed(() => {
-  const isUser = Boolean(favoriteUsers.value.find(favoriteUser => {
-    return favoriteUser.id === spaceUser.value.id
-  }))
-  return isUser
-})
-
-const updateFavoriteUser = () => {
-  const user = spaceUser.value
-  const value = !isFavoriteUser.value
-  store.dispatch('currentUser/updateFavoriteUser', { user, value })
-}
 </script>
 
 <template lang="pug">
-//- dialog.narrow.favorites(v-if="visible" :open="visible" @click.left.stop="closeDialogs" ref="dialogElement" :style="{'max-height': state.dialogHeight + 'px'}")
 template(v-if="visible")
   section.favorites
     p
       span Favorites
       Loader(:visible="loading" :isSmall="true")
-
-    //- section
-    //-   p
-    //-     span Favorites
-    //- section.actions
-    //-   //- fav space
-    //-   .row
-    //-     button(:class="{active: isFavoriteSpace}" @click.left.prevent="updateFavoriteSpace" @keydown.stop.enter="updateFavoriteSpace" title="Favorite Current Space")
-    //-       img.icon(v-if="isFavoriteSpace" src="@/assets/heart.svg")
-    //-       img.icon(v-else src="@/assets/heart-empty.svg")
-    //-       span {{currentSpaceName}}
-    //-   //- fav user
-    //-   .row(v-if="spaceUser")
-    //-     button.toggle-favorite-user(@click="updateFavoriteUser")
-    //-       img.icon(v-if="isFavoriteUser" src="@/assets/heart.svg")
-    //-       img.icon(v-else src="@/assets/heart-empty.svg")
-    //-       UserLabelInline(:user="spaceUser")
-
-    //- section
     .row.title-row
       .button-wrap
         .segmented-buttons
