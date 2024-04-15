@@ -385,7 +385,6 @@ const self = {
       const apiKey = context.rootState.currentUser.apiKey
       const isSpacePage = context.rootGetters.isSpacePage
       const isOnline = context.rootState.isOnline
-      console.log('🍓🍓🍓🍓🍓🍓🍓🍓🍓🍓🍓🍓🍓', apiKey)
       if (!shouldRequest({ apiKey, isOnline })) { return }
       if (!isSpacePage) { return }
       try {

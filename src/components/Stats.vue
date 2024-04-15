@@ -6,6 +6,7 @@ import Loader from '@/components/Loader.vue'
 import utils from '@/utils.js'
 
 import dayjs from 'dayjs'
+
 const store = useStore()
 
 const props = defineProps({

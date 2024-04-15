@@ -1,57 +1,7 @@
-<template lang="pug">
-dialog#sidebar.sidebar.is-pinnable(v-if="visible" :open="visible" @click.left.stop="closeDialogs" ref="dialogElement" :style="{'max-height': dialogHeight + 'px'}" :data-is-pinned="dialogIsPinned" :class="{'is-pinned': dialogIsPinned}")
-  section
-    .row.title-row-flex
-      .button-wrap.segmented-buttons-wrap
-        //- first row
-        .segmented-buttons
-          //- Text
-          button(@click.left="toggleTextIsVisible" :class="{active: textIsVisible}")
-            span Text
-          //- Tags
-          button(@click.left="toggleTagsIsVisible" :class="{ active: tagsIsVisible}")
-            span Tags
-          //- Comments
-          button(@click.left="toggleCommentsIsVisible" :class="{ active: commentsIsVisible}")
-            img.icon.comment-icon(src="@/assets/comment.svg")
-          //- Links
-          button(@click.left="toggleLinksIsVisible" :class="{ active: linksIsVisible}")
-            span Links
-        //- second row
-        .segmented-buttons
-          //- Inbox
-          button(@click.left="toggleInboxIsVisible" :class="{ active: inboxIsVisible}")
-            img.icon(src="@/assets/inbox.svg")
-          //- AI Images
-          button(@click.left="toggleAIImagesIsVisible" :class="{ active: AIImagesIsVisible}")
-            img.icon.flower(src="@/assets/flower.svg")
-            span AI
-          //- Stats
-          button(@click.left="toggleStatsIsVisible" :class="{active: statsIsVisible}")
-            img.icon.stats(src="@/assets/stats.svg")
-          //- Removed
-          button(@click.left="toggleRemovedIsVisible" :class="{ active: removedIsVisible}")
-            img.icon(src="@/assets/remove.svg")
-            img.icon.remove-undo(src="@/assets/undo.svg")
+<script setup>
+import { reactive, computed, onMounted, onBeforeUnmount, onUnmounted, defineProps, defineEmits, watch, ref, nextTick } from 'vue'
+import { useStore } from 'vuex'
 
-      //- Pin
-      .title-row
-        .button-wrap(@click.left="toggleDialogIsPinned" title="Pin dialog")
-          button.small-button(:class="{active: dialogIsPinned}")
-            img.icon.pin.right-pin(src="@/assets/pin.svg")
-
-  Tags(:visible="tagsIsVisible" :parentIsPinned="dialogIsPinned")
-  Links(:visible="linksIsVisible" :parentIsPinned="dialogIsPinned")
-  Comments(:visible="commentsIsVisible")
-  Removed(:visible="removedIsVisible")
-  AIImages(:visible="AIImagesIsVisible")
-  Stats(:visible="statsIsVisible")
-  Text(:visible="textIsVisible")
-  Inbox(:visible="inboxIsVisible")
-
-</template>
-
-<script>
 import utils from '@/utils.js'
 import Links from '@/components/Links.vue'
 import Tags from '@/components/Tags.vue'
@@ -62,149 +12,203 @@ import Stats from '@/components/Stats.vue'
 import Text from '@/components/Text.vue'
 import Inbox from '@/components/Inbox.vue'
 
-export default {
-  name: 'Sidebar',
-  components: {
-    Links,
-    Tags,
-    Comments,
-    Removed,
-    AIImages,
-    Stats,
-    Text,
-    Inbox
-  },
-  props: {
-    visible: Boolean
-  },
-  data () {
-    return {
-      dialogHeight: null,
-      tagsIsVisible: false,
-      linksIsVisible: false,
-      commentsIsVisible: false,
-      removedIsVisible: false,
-      AIImagesIsVisible: false,
-      inboxIsVisible: false,
-      statsIsVisible: false,
-      favoritesIsVisible: false,
-      textIsVisible: false
+const store = useStore()
+
+const dialogElement = ref(null)
+
+onMounted(() => {
+  store.subscribe((mutation, state) => {
+    if (mutation.type === 'updatePageSizes') {
+      updateDialogHeight()
+    } else if (mutation.type === 'triggerRemovedIsVisible') {
+      triggerRemovedIsVisible()
+    } else if (mutation.type === 'triggerAIImagesIsVisible') {
+      triggerAIImagesIsVisible()
     }
-  },
-  created () {
-    this.$store.subscribe((mutation, state) => {
-      if (mutation.type === 'updatePageSizes') {
-        this.updateDialogHeight()
-      } else if (mutation.type === 'triggerRemovedIsVisible') {
-        this.$nextTick(() => {
-          this.clearVisible()
-          this.removedIsVisible = true
-        })
-      } else if (mutation.type === 'triggerAIImagesIsVisible') {
-        this.$nextTick(() => {
-          this.clearVisible()
-          this.AIImagesIsVisible = true
-        })
-      }
-    })
-  },
-  computed: {
-    dialogIsPinned () { return this.$store.state.sidebarIsPinned }
-  },
-  methods: {
-    toggleDialogIsPinned () {
-      const isPinned = !this.dialogIsPinned
-      this.$store.dispatch('sidebarIsPinned', isPinned)
-    },
-    closeDialogs () {
-      this.$store.commit('tagDetailsIsVisible', false)
-      this.$store.commit('triggerCloseChildDialogs')
-    },
-    clearVisible () {
-      this.linksIsVisible = false
-      this.tagsIsVisible = false
-      this.commentsIsVisible = false
-      this.removedIsVisible = false
-      this.AIImagesIsVisible = false
-      this.inboxIsVisible = false
-      this.statsIsVisible = false
-      this.textIsVisible = false
-    },
-    toggleTagsIsVisible () {
-      this.clearVisible()
-      this.tagsIsVisible = true
-      this.updateUserLastSidebarSection('tags')
-    },
-    toggleLinksIsVisible () {
-      this.clearVisible()
-      this.linksIsVisible = true
-      this.updateUserLastSidebarSection('links')
-    },
-    toggleCommentsIsVisible () {
-      this.clearVisible()
-      this.commentsIsVisible = true
-      this.updateUserLastSidebarSection('comments')
-    },
-    toggleRemovedIsVisible () {
-      this.clearVisible()
-      this.removedIsVisible = true
-      this.updateUserLastSidebarSection('removed')
-    },
-    toggleInboxIsVisible () {
-      this.clearVisible()
-      this.inboxIsVisible = true
-      this.updateUserLastSidebarSection('inbox')
-    },
-    toggleAIImagesIsVisible () {
-      this.clearVisible()
-      this.AIImagesIsVisible = true
-      this.updateUserLastSidebarSection('AIImages')
-    },
-    toggleStatsIsVisible () {
-      this.clearVisible()
-      this.statsIsVisible = true
-      this.updateUserLastSidebarSection('stats')
-    },
-    toggleTextIsVisible () {
-      this.clearVisible()
-      this.textIsVisible = true
-      this.updateUserLastSidebarSection('text')
-    },
-    updateDialogHeight () {
-      if (!this.visible) { return }
-      this.$nextTick(() => {
-        let element = this.$refs.dialogElement
-        this.dialogHeight = utils.elementHeight(element)
-      })
-    },
-    restoreUserLastSidebarSection () {
-      this.clearVisible()
-      const section = this.$store.state.currentUser.lastSidebarSection
-      const values = ['text', 'stats', 'AIImages', 'inbox', 'removed', 'comments', 'links', 'tags'] // listed in api docs
-      const isValid = values.includes(section)
-      if (section && isValid) {
-        this[section + 'IsVisible'] = true
-      } else {
-        this.textIsVisible = true
-      }
-    },
-    updateUserLastSidebarSection (name) {
-      this.$store.dispatch('currentUser/update', { lastSidebarSection: name })
-    }
-  },
-  watch: {
-    visible (visible) {
-      if (visible) {
-        this.restoreUserLastSidebarSection()
-        this.updateDialogHeight()
-        this.$store.commit('shouldExplicitlyHideFooter', true)
-      } else {
-        this.$store.commit('shouldExplicitlyHideFooter', false)
-      }
-    }
+  })
+})
+
+const props = defineProps({
+  visible: Boolean
+})
+watch(() => props.visible, (value, prevValue) => {
+  if (value) {
+    restoreUserLastSidebarSection()
+    updateDialogHeight()
+    store.commit('shouldExplicitlyHideFooter', true)
+  } else {
+    store.commit('shouldExplicitlyHideFooter', false)
+  }
+})
+
+const state = reactive({
+  dialogHeight: null,
+  tagsIsVisible: false,
+  linksIsVisible: false,
+  commentsIsVisible: false,
+  removedIsVisible: false,
+  AIImagesIsVisible: false,
+  inboxIsVisible: false,
+  statsIsVisible: false,
+  textIsVisible: false,
+  favoritesIsVisible: false
+})
+
+const clearVisible = () => {
+  state.linksIsVisible = false
+  state.tagsIsVisible = false
+  state.commentsIsVisible = false
+  state.removedIsVisible = false
+  state.AIImagesIsVisible = false
+  state.inboxIsVisible = false
+  state.statsIsVisible = false
+  state.textIsVisible = false
+  state.favoritesIsVisible = false
+}
+
+const updateDialogHeight = async () => {
+  if (!props.visible) { return }
+  await nextTick()
+  let element = dialogElement.value
+  state.dialogHeight = utils.elementHeight(element)
+}
+
+// pin dialog
+
+const dialogIsPinned = computed(() => store.state.sidebarIsPinned)
+const toggleDialogIsPinned = () => {
+  const isPinned = !dialogIsPinned.value
+  store.dispatch('sidebarIsPinned', isPinned)
+}
+const closeDialogs = () => {
+  store.commit('tagDetailsIsVisible', false)
+  store.commit('triggerCloseChildDialogs')
+}
+
+// current section
+
+const triggerRemovedIsVisible = async () => {
+  await nextTick()
+  clearVisible()
+  state.removedIsVisible = true
+}
+const triggerAIImagesIsVisible = async () => {
+  await nextTick()
+  clearVisible()
+  state.AIImagesIsVisible = true
+}
+const toggleTagsIsVisible = () => {
+  clearVisible()
+  state.tagsIsVisible = true
+  updateUserLastSidebarSection('tags')
+}
+const toggleLinksIsVisible = () => {
+  clearVisible()
+  state.linksIsVisible = true
+  updateUserLastSidebarSection('links')
+}
+const toggleCommentsIsVisible = () => {
+  clearVisible()
+  state.commentsIsVisible = true
+  updateUserLastSidebarSection('comments')
+}
+const toggleRemovedIsVisible = () => {
+  clearVisible()
+  state.removedIsVisible = true
+  updateUserLastSidebarSection('removed')
+}
+const toggleInboxIsVisible = () => {
+  clearVisible()
+  state.inboxIsVisible = true
+  updateUserLastSidebarSection('inbox')
+}
+const toggleAIImagesIsVisible = () => {
+  clearVisible()
+  state.AIImagesIsVisible = true
+  updateUserLastSidebarSection('AIImages')
+}
+const toggleStatsIsVisible = () => {
+  clearVisible()
+  state.statsIsVisible = true
+  updateUserLastSidebarSection('stats')
+}
+const toggleTextIsVisible = () => {
+  clearVisible()
+  state.textIsVisible = true
+  updateUserLastSidebarSection('text')
+}
+
+// last sidebar section
+
+const restoreUserLastSidebarSection = () => {
+  clearVisible()
+  const section = store.state.currentUser.lastSidebarSection
+  const values = ['text', 'stats', 'AIImages', 'inbox', 'removed', 'comments', 'links', 'tags'] // listed in api docs
+  const isValid = values.includes(section)
+  if (section && isValid) {
+    state[section + 'IsVisible'] = true
+  } else {
+    state.textIsVisible = true
   }
 }
+const updateUserLastSidebarSection = (name) => {
+  store.dispatch('currentUser/update', { lastSidebarSection: name })
+}
+
 </script>
+
+<template lang="pug">
+dialog#sidebar.sidebar.is-pinnable(v-if="visible" :open="visible" @click.left.stop="closeDialogs" ref="dialogElement" :style="{'max-height': state.dialogHeight + 'px'}" :data-is-pinned="dialogIsPinned" :class="{'is-pinned': dialogIsPinned}")
+  section
+    .row.title-row-flex
+      .button-wrap.segmented-buttons-wrap
+        //- first row
+        .segmented-buttons
+          //- Text
+          button(@click.left="toggleTextIsVisible" :class="{active: state.textIsVisible}")
+            span Text
+          //- Tags
+          button(@click.left="toggleTagsIsVisible" :class="{ active: state.tagsIsVisible}")
+            span Tags
+          //- Comments
+          button(@click.left="toggleCommentsIsVisible" :class="{ active: state.commentsIsVisible}")
+            img.icon.comment-icon(src="@/assets/comment.svg")
+          //- Links
+          button(@click.left="toggleLinksIsVisible" :class="{ active: state.linksIsVisible}")
+            span Links
+        //- second row
+        .segmented-buttons
+          //- Inbox
+          button(@click.left="toggleInboxIsVisible" :class="{ active: state.inboxIsVisible}")
+            img.icon(src="@/assets/inbox.svg")
+          //- AI Images
+          button(@click.left="toggleAIImagesIsVisible" :class="{ active: state.AIImagesIsVisible}")
+            img.icon.flower(src="@/assets/flower.svg")
+            span AI
+          //- Stats
+          button(@click.left="toggleStatsIsVisible" :class="{active: state.statsIsVisible}")
+            img.icon.stats(src="@/assets/stats.svg")
+          //- Removed
+          button(@click.left="toggleRemovedIsVisible" :class="{ active: state.removedIsVisible}")
+            img.icon(src="@/assets/remove.svg")
+            img.icon.remove-undo(src="@/assets/undo.svg")
+
+      //- Pin
+      .title-row
+        .button-wrap(@click.left="toggleDialogIsPinned" title="Pin dialog")
+          button.small-button(:class="{active: dialogIsPinned}")
+            img.icon.pin.right-pin(src="@/assets/pin.svg")
+
+  Tags(:visible="state.tagsIsVisible" :parentIsPinned="dialogIsPinned")
+  Links(:visible="state.linksIsVisible" :parentIsPinned="dialogIsPinned")
+  Comments(:visible="state.commentsIsVisible")
+  Removed(:visible="state.removedIsVisible")
+  AIImages(:visible="state.AIImagesIsVisible")
+  Stats(:visible="state.statsIsVisible")
+  Text(:visible="state.textIsVisible")
+  Inbox(:visible="state.inboxIsVisible")
+
+</template>
 
 <style lang="stylus">
 .sidebar
