@@ -22,7 +22,7 @@ watch(() => props.visible, (value, prevValue) => {
 const state = reactive({
   spacesIsVisible: true,
   userDetailsPosition: {},
-  currentUserSpacesIsVisible: false
+  currentUserSpacesIsVisible: true
 })
 
 const currentUser = computed(() => store.state.currentUser)
