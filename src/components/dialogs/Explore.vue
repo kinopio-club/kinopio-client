@@ -119,7 +119,7 @@ const toggleExploreRssFeedsIsVisible = () => {
 
 // space list
 
-const showCollaborators = computed(() => currentSpaceInExplore.value || currentSectionIsEveryone.value)
+const showCollaborators = computed(() => currentSectionIsExplore.value || currentSectionIsEveryone.value)
 const showUserLabelInline = computed(() => currentSectionIsFollowing.value)
 </script>
 
