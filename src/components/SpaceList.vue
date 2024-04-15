@@ -192,7 +192,11 @@ const user = (space) => {
 }
 const users = (space) => {
   const spaceUser = user(space)
-  return [spaceUser].concat(space.collaborators)
+  let spaceUsers = [spaceUser]
+  if (space.collaborators) {
+    spaceUsers = spaceUsers.concat(space.collaborators)
+  }
+  return spaceUsers
 }
 const selectSpace = (event, space) => {
   if (event) {
