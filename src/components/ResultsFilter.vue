@@ -29,7 +29,7 @@ onMounted(() => {
       clearFilter()
     }
     if (mutation.type === 'triggerFocusResultsFilter') {
-      state.forceShowFilter = true
+      forceShowFilterState()
       await nextTick()
       focusFilterInput()
     }
@@ -66,6 +66,10 @@ const state = reactive({
   filter: '',
   forceShowFilter: false
 })
+
+const forceShowFilterState = () => {
+  state.forceShowFilter = true
+}
 
 // items
 
