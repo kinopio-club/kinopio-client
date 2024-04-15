@@ -6,7 +6,6 @@ import dayjs from 'dayjs'
 
 import Explore from '@/components/dialogs/Explore.vue'
 import Live from '@/components/dialogs/Live.vue'
-import Favorites from '@/components/dialogs/Favorites.vue'
 
 import FavoriteSpaceButton from '@/components/FavoriteSpaceButton.vue'
 import utils from '@/utils.js'

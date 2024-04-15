@@ -61,7 +61,7 @@ const wordCount = computed(() => {
 
 <template lang="pug">
 section.stats(v-if="visible")
-  p Stats for {{currentSpace.name}}
+  p Space Stats
   p(v-if="isLoadingSpace")
     Loader(:visible="true")
   template(v-if="!isLoadingSpace")

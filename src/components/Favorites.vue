@@ -11,27 +11,27 @@ import UserLabelInline from '@/components/UserLabelInline.vue'
 
 const store = useStore()
 
-const dialogElement = ref(null)
+// const dialogElement = ref(null)
 
-onMounted(() => {
-  store.subscribe((mutation, state) => {
-    if (mutation.type === 'updatePageSizes') {
-      updateDialogHeight()
-    }
-  })
-})
+// onMounted(() => {
+//   store.subscribe((mutation, state) => {
+//     if (mutation.type === 'updatePageSizes') {
+//       updateDialogHeight()
+//     }
+//   })
+// })
 
 const props = defineProps({
   visible: Boolean
 })
 watch(() => props.visible, (value, prevValue) => {
   if (value) {
-    closeDialogs()
-    updateDialogHeight()
-    store.commit('shouldExplicitlyHideFooter', true)
+    // closeDialogs()
+    // updateDialogHeight()
+    // store.commit('shouldExplicitlyHideFooter', true)
   } else {
     updateFavoriteSpaceIsEdited()
-    store.commit('shouldExplicitlyHideFooter', false)
+    // store.commit('shouldExplicitlyHideFooter', false)
   }
 })
 
@@ -41,12 +41,12 @@ const state = reactive({
   currentUserSpacesIsVisible: false
 })
 
-const updateDialogHeight = async () => {
-  if (!props.visible) { return }
-  await nextTick()
-  let element = dialogElement.value
-  state.dialogHeight = utils.elementHeight(element)
-}
+// const updateDialogHeight = async () => {
+//   if (!props.visible) { return }
+//   await nextTick()
+//   let element = dialogElement.value
+//   state.dialogHeight = utils.elementHeight(element)
+// }
 
 const currentUser = computed(() => store.state.currentUser)
 const favoriteUsers = computed(() => store.state.currentUser.favoriteUsers)
@@ -61,12 +61,12 @@ const isEmpty = computed(() => {
 const showSpaces = () => {
   state.spacesIsVisible = true
   closeDialogs()
-  updateDialogHeight()
+  // updateDialogHeight()
 }
 const hideSpaces = () => {
   state.spacesIsVisible = false
   closeDialogs()
-  updateDialogHeight()
+  // updateDialogHeight()
 }
 
 // spaces
@@ -190,26 +190,31 @@ const updateFavoriteUser = () => {
 </script>
 
 <template lang="pug">
-dialog.narrow.favorites(v-if="visible" :open="visible" @click.left.stop="closeDialogs" ref="dialogElement" :style="{'max-height': state.dialogHeight + 'px'}")
-  section
+//- dialog.narrow.favorites(v-if="visible" :open="visible" @click.left.stop="closeDialogs" ref="dialogElement" :style="{'max-height': state.dialogHeight + 'px'}")
+template(v-if="visible")
+  section.favorites
     p
       span Favorites
       Loader(:visible="loading" :isSmall="true")
-  section.actions
-    //- fav space
-    .row
-      button(:class="{active: isFavoriteSpace}" @click.left.prevent="updateFavoriteSpace" @keydown.stop.enter="updateFavoriteSpace" title="Favorite Current Space")
-        img.icon(v-if="isFavoriteSpace" src="@/assets/heart.svg")
-        img.icon(v-else src="@/assets/heart-empty.svg")
-        span {{currentSpaceName}}
-    //- fav user
-    .row(v-if="spaceUser")
-      button.toggle-favorite-user(@click="updateFavoriteUser")
-        img.icon(v-if="isFavoriteUser" src="@/assets/heart.svg")
-        img.icon(v-else src="@/assets/heart-empty.svg")
-        UserLabelInline(:user="spaceUser")
 
-  section
+    //- section
+    //-   p
+    //-     span Favorites
+    //- section.actions
+    //-   //- fav space
+    //-   .row
+    //-     button(:class="{active: isFavoriteSpace}" @click.left.prevent="updateFavoriteSpace" @keydown.stop.enter="updateFavoriteSpace" title="Favorite Current Space")
+    //-       img.icon(v-if="isFavoriteSpace" src="@/assets/heart.svg")
+    //-       img.icon(v-else src="@/assets/heart-empty.svg")
+    //-       span {{currentSpaceName}}
+    //-   //- fav user
+    //-   .row(v-if="spaceUser")
+    //-     button.toggle-favorite-user(@click="updateFavoriteUser")
+    //-       img.icon(v-if="isFavoriteUser" src="@/assets/heart.svg")
+    //-       img.icon(v-else src="@/assets/heart-empty.svg")
+    //-       UserLabelInline(:user="spaceUser")
+
+    //- section
     .row.title-row
       .button-wrap
         .segmented-buttons
@@ -236,20 +241,19 @@ dialog.narrow.favorites(v-if="visible" :open="visible" @click.left.stop="closeDi
     template(v-if="!state.spacesIsVisible")
       UserList(:users="favoriteUsers" :selectedUser="userDetailsSelectedUser" @selectUser="toggleUserDetails" :isClickable="true")
 
-  //- empty state
-  section.extra(v-if="isEmpty && !loading")
+  //- blank state
+  section.favorites.blank-section(v-if="isEmpty && !loading")
     section.subsection
       p(v-if="state.spacesIsVisible")
         img.icon(src="@/assets/heart.svg")
         span Spaces to know when they've been updated
       p(v-if="!state.spacesIsVisible")
-        img.icon(src="@/assets/heart.svg")
-        span People to follow them
+        span Follow people to see them here
 
 </template>
 
 <style lang="stylus">
-dialog.favorites
+.favorites
   overflow auto
   left initial
   right 8px
@@ -259,9 +263,9 @@ dialog.favorites
   .loader
     margin-left 5px
     vertical-align -2px
-  section.extra
-    border-top none
-    padding-top 4px
+  &.blank-section
+    border none
+    padding-top 0
   section.actions
     button
       .user-label-inline

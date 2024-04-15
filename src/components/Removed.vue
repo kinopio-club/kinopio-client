@@ -1,6 +1,9 @@
 <template lang="pug">
 .removed(v-if="visible")
   section
+    p
+      span Restore Removed Items
+      Loader(:visible="isLoading" :isSmall="true")
     .segmented-buttons
       button(@click.left="showCards" :class="{active: cardsVisible}")
         img.icon(src="@/assets/remove.svg")
@@ -9,22 +12,20 @@
         img.icon(src="@/assets/remove.svg")
         span Spaces
 
-  section(v-if="!items.length")
-    .row(v-if="isLoading")
-      Loader(:visible="loading.cards || loading.spaces")
+  section.blank-section(v-if="!items.length")
     template(v-if="cardsVisible")
-      p Removed cards from {{currentSpaceName}} can be restored here
-      p(v-if="!currentUserCanEditSpace")
-        span.badge.info
-          PrivacyIcon(:privacy="currentSpace.privacy" :closedIsNotVisible="true")
-          span You need to be a collaborator
+      section.subsection
+        p Removed cards from this space can be restored here
+        p(v-if="!currentUserCanEditSpace")
+          span.badge.info
+            PrivacyIcon(:privacy="currentSpace.privacy" :closedIsNotVisible="true")
+            span You need to be a collaborator
     template(v-if="!cardsVisible")
-      p Removed spaces can be restored here
+      section.subsection
+        p Removed spaces can be restored here
 
   section.results-section(v-if="items.length" ref="results" :style="{'max-height': resultsSectionHeight + 'px'}")
     section.results-actions
-      .row(v-if="isLoading")
-        Loader(:visible="loading.cards || loading.spaces")
       button(@click="toggleDeleteAllConfirmationIsVisible" v-if="!deleteAllConfirmationIsVisible")
         img.icon(src="@/assets/remove.svg")
         span Delete All
@@ -318,4 +319,11 @@ export default {
     padding-top 0
   .undo
     vertical-align 1px
+  .loader
+    margin-left 5px
+  .blank-section
+    padding-top 0
+    border none
+    section.subsection
+      border-radius var(--entity-radius) !important
 </style>

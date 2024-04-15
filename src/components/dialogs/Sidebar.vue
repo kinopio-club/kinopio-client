@@ -11,6 +11,7 @@ import AIImages from '@/components/AIImages.vue'
 import Stats from '@/components/Stats.vue'
 import Text from '@/components/Text.vue'
 import Inbox from '@/components/Inbox.vue'
+import Favorites from '@/components/Favorites.vue'
 
 const store = useStore()
 
@@ -137,6 +138,11 @@ const toggleTextIsVisible = () => {
   state.textIsVisible = true
   updateUserLastSidebarSection('text')
 }
+const toggleFavoritesIsVisible = () => {
+  clearVisible()
+  state.favoritesIsVisible = true
+  updateUserLastSidebarSection('favorites')
+}
 
 // last sidebar section
 
@@ -181,13 +187,16 @@ dialog#sidebar.sidebar.is-pinnable(v-if="visible" :open="visible" @click.left.st
           //- Inbox
           button(@click.left="toggleInboxIsVisible" :class="{ active: state.inboxIsVisible}")
             img.icon(src="@/assets/inbox.svg")
+          //- Favorites
+          button(@click.left="toggleFavoritesIsVisible" :class="{ active: state.favoritesIsVisible}")
+            img.icon(src="@/assets/heart-empty.svg")
+          //- Stats
+          button(@click.left="toggleStatsIsVisible" :class="{active: state.statsIsVisible}")
+            img.icon.stats(src="@/assets/stats.svg")
           //- AI Images
           button(@click.left="toggleAIImagesIsVisible" :class="{ active: state.AIImagesIsVisible}")
             img.icon.flower(src="@/assets/flower.svg")
             span AI
-          //- Stats
-          button(@click.left="toggleStatsIsVisible" :class="{active: state.statsIsVisible}")
-            img.icon.stats(src="@/assets/stats.svg")
           //- Removed
           button(@click.left="toggleRemovedIsVisible" :class="{ active: state.removedIsVisible}")
             img.icon(src="@/assets/remove.svg")
@@ -207,6 +216,7 @@ dialog#sidebar.sidebar.is-pinnable(v-if="visible" :open="visible" @click.left.st
   Stats(:visible="state.statsIsVisible")
   Text(:visible="state.textIsVisible")
   Inbox(:visible="state.inboxIsVisible")
+  Favorites(:visible="state.favoritesIsVisible")
 
 </template>
 
@@ -225,11 +235,7 @@ dialog#sidebar.sidebar.is-pinnable(v-if="visible" :open="visible" @click.left.st
       vertical-align -2px
   .right-pin
     transform rotate(180deg)
-  // section.no-border
-  //   border none
   .tags,
-  .links,
-  .comments,
   .removed
     section
       &:first-child
@@ -238,5 +244,20 @@ dialog#sidebar.sidebar.is-pinnable(v-if="visible" :open="visible" @click.left.st
   .icon.flower
     vertical-align -1px
     height 11px
+
+  .segmented-buttons-wrap
+    .segmented-buttons
+      &:first-child
+        button,
+        label
+          &:last-child
+            border-bottom-right-radius 0
+      &:last-child
+        button,
+        label
+          &:first-child
+            border-top-left-radius 0
+          &:last-child
+            border-top-right-radius var(--entity-radius)
 
 </style>
