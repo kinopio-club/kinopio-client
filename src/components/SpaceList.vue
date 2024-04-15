@@ -8,6 +8,7 @@ import MoonPhase from '@/components/MoonPhase.vue'
 import PrivacyIcon from '@/components/PrivacyIcon.vue'
 import Loader from '@/components/Loader.vue'
 import User from '@/components/User.vue'
+import UserLabelInline from '@/components/UserLabelInline.vue'
 import NameMatch from '@/components/NameMatch.vue'
 import OfflineBadge from '@/components/OfflineBadge.vue'
 import SpaceTodayJournalBadge from '@/components/SpaceTodayJournalBadge.vue'
@@ -62,6 +63,7 @@ const props = defineProps({
   showUser: Boolean,
   showOtherUsers: Boolean,
   showCollaborators: Boolean,
+  showUserLabelInline: Boolean,
   showUserIfCurrentUserIsCollaborator: Boolean,
   hideExploreBadge: Boolean,
   hideFilter: Boolean,
@@ -400,6 +402,8 @@ span.space-list-wrap
                   User(:user="user(space)" :isClickable="false" :key="user(space).id" :isMedium="true")
                   template(v-for="otherUser in space.otherUsers" :key="otherUser.id")
                     User(:user="otherUser" :isClickable="false" :isMedium="true")
+              template(v-else-if="showUserLabelInline")
+                UserLabelInline(:user="user(space)" :isClickable="false" :key="user(space).id" :isMedium="true")
               template(v-else-if="showCollaborators")
                 .users(:class="{'multiple-users': users(space).length > 1}")
                   template(v-for="user in users(space)" :key="user.id")
@@ -492,7 +496,8 @@ span.space-list-wrap
   .user
     margin-right 6px
     vertical-align middle
-
+  .user-label-inline
+    flex-shrink 0
   .users
     margin-right 6px
     display flex
@@ -502,7 +507,6 @@ span.space-list-wrap
     max-width 66px // 3 users
     .user
       margin-right 0
-
   a
     color var(--primary)
     text-decoration none

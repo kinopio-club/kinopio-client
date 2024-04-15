@@ -116,6 +116,11 @@ const updateUserShowInExploreUpdatedAt = async () => {
 const toggleExploreRssFeedsIsVisible = () => {
   state.exploreRssFeedsIsVisible = !state.exploreRssFeedsIsVisible
 }
+
+// space list
+
+const showCollaborators = computed(() => currentSpaceInExplore.value || currentSectionIsEveryone.value)
+const showUserLabelInline = computed(() => currentSectionIsFollowing.value)
 </script>
 
 <template lang="pug">
@@ -135,9 +140,9 @@ dialog.explore.wide(v-if="visible" :open="visible" ref="dialogElement" :style="{
     .row.title-row
       div
         Loader(:isSmall="true" :visible="props.loading")
-        span(v-if="currentSectionIsExplore") Curated with the community
-        span(v-else-if="currentSectionIsFollowing") Spaces by people you follow
-        span(v-else-if="currentSectionIsEveryone") New public spaces
+        span(v-if="currentSectionIsExplore") Shared with the community
+        span(v-else-if="currentSectionIsFollowing") Updated by people you follow
+        span(v-else-if="currentSectionIsEveryone") All new public spaces
 
       //- rss
       .button-wrap.rss-button-wrap
@@ -153,9 +158,10 @@ dialog.explore.wide(v-if="visible" :open="visible" ref="dialogElement" :style="{
       :userShowInExploreDate="state.userShowInExploreDate"
       :resultsSectionHeight="state.resultsSectionHeight"
       :parentDialog="parentDialog"
-      :showCollaborators="true"
       :previewImageIsWide="true"
       :hideFilter="true"
+      :showCollaborators="showCollaborators"
+      :showUserLabelInline="showUserLabelInline"
     )
 </template>
 
