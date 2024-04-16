@@ -116,6 +116,7 @@ const updateUserShowInExploreUpdatedAt = async () => {
 const toggleExploreRssFeedsIsVisible = () => {
   state.exploreRssFeedsIsVisible = !state.exploreRssFeedsIsVisible
 }
+const rssButtonIsVisible = computed(() => !currentSectionIsFollowing.value)
 
 // space list
 
@@ -145,7 +146,7 @@ dialog.explore.wide(v-if="visible" :open="visible" ref="dialogElement" :style="{
         span(v-else-if="currentSectionIsEveryone") All new public spaces
 
       //- rss
-      .button-wrap.rss-button-wrap
+      .button-wrap.rss-button-wrap(v-if="rssButtonIsVisible")
         button.small-button(@click.stop="toggleExploreRssFeedsIsVisible" :class="{active: state.exploreRssFeedsIsVisible}" title="RSS Feeds")
           span RSS
         ExploreRssFeeds(:visible="state.exploreRssFeedsIsVisible")
