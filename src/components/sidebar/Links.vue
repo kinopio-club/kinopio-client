@@ -2,7 +2,7 @@
 .links(v-if="visible")
   section
     p Backlinks
-    Loader(:visible="loading")
+    Loader(:visible="loading" :isSmall="true")
       //- .button-wrap(v-if="userSpacesToggleShouldBeVisible" @click.left.prevent="toggleCurrentUserSpacesIsVisibleOnly" @keydown.stop.enter="toggleCurrentUserSpacesIsVisibleOnly")
       //-   label(:class="{ active: currentUserSpacesIsVisibleOnly }")
       //-     input(type="checkbox" v-model="currentUserSpacesIsVisibleOnly")
@@ -16,7 +16,7 @@
       :resultsSectionHeight="resultsSectionHeight"
       :parentDialog="parentDialog"
     )
-  section.blank-section(v-else)
+  section.tips-section(v-else)
     section.subsection
       p Other spaces with cards that link to this space can be found here.
       p Type
@@ -145,7 +145,7 @@ export default {
   border-top 1px solid var(--primary-border)
   .button-wrap
     margin 0
-  .blank-section
+  .tips-section
     border 0
     padding-top 0
   .subsection

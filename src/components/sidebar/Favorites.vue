@@ -164,7 +164,7 @@ template(v-if="visible")
       UserList(:users="favoriteUsers" :selectedUser="userDetailsSelectedUser" @selectUser="toggleUserDetails" :isClickable="true")
 
   //- blank state
-  section.favorites.blank-section(v-if="isEmpty && !loading")
+  section.favorites.tips-section(v-if="isEmpty && !loading")
     section.subsection
       p(v-if="state.spacesIsVisible")
         img.icon(src="@/assets/heart.svg")
@@ -185,7 +185,7 @@ template(v-if="visible")
   .loader
     margin-left 5px
     vertical-align -2px
-  &.blank-section
+  &.tips-section
     border none
     padding-top 0
   section.actions

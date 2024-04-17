@@ -12,7 +12,7 @@
         img.icon(src="@/assets/remove.svg")
         span Spaces
 
-  section.blank-section(v-if="!items.length")
+  section.tips-section(v-if="!items.length")
     template(v-if="cardsVisible")
       section.subsection
         p Removed cards from this space can be restored here
@@ -321,7 +321,7 @@ export default {
     vertical-align 1px
   .loader
     margin-left 5px
-  .blank-section
+  .tips-section
     padding-top 0
     border none
     section.subsection

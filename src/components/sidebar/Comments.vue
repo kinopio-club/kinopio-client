@@ -14,7 +14,7 @@ section.results-section.comments(v-if="visible")
           template(v-for="segment in card.nameSegments")
             img.card-image(v-if="segment.isImage" :src="segment.url")
             NameSegment(:segment="segment")
-  section.subsection.no-comments-section(v-if="!comments.length")
+  section.subsection.tips-section(v-if="!comments.length")
     p No comment cards in this space yet
     p
       span.badge.secondary Card →{{' '}}
@@ -83,7 +83,7 @@ section.comments
   .comment-icon
     vertical-align -3px
 
-section.no-comments-section
+section.tips-section
   margin 4px
   margin-top 0
   .comment-icon
