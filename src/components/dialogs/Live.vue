@@ -92,8 +92,8 @@ export default {
   left initial
   right 8px
   max-height calc(100vh - 100px)
-  .camera
-    vertical-align baseline
+  .icon.camera
+    vertical-align 1px
   section.empty
     border-top 0
     padding-top 4px
