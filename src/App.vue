@@ -1349,10 +1349,10 @@ progress::-moz-progress-bar
   background-color var(--primary)
   border-radius 2px
 
-.pulse
-  // https://easings.net/#easeOutQuad
-  animation fadeIn 1.2s cubic-bezier(0.5, 1, 0.89, 1) infinite
-  animation-direction alternate-reverse
+// .pulse
+//   // https://easings.net/#easeOutQuad
+//   animation fadeIn 1.2s cubic-bezier(0.5, 1, 0.89, 1) infinite
+//   animation-direction alternate-reverse
 .fadeIn-enter-active
   animation fadeIn 0.5s ease-out
 @keyframes fadeIn
