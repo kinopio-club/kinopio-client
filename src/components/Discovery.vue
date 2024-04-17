@@ -77,7 +77,7 @@ const unreadSpaces = (spaces, type) => {
     if (spaceIsCurrentSpace(space)) { return }
     const spaceDate = utils.spaceReadDate(space, type)
     const delta = readDate.diff(spaceDate, 'second')
-    return delta < 0
+    return delta < -10 * 1000 // older than 10 seconds
   })
   return unreadSpaces || []
 }
