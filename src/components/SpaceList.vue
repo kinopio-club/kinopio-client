@@ -503,6 +503,7 @@ span.space-list-wrap
   .user-label-inline
     flex-shrink 0
     max-width 120px
+    pointer-events none
   .users
     margin-right 6px
     display flex
