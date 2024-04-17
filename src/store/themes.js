@@ -21,7 +21,7 @@ const themes = {
       'info-background': '#90ffff',
       'success-background': '#67ffbb',
       'search-background': 'yellow',
-      'new-unread-background': '#007bff',
+      'new-unread-background': '#007aff',
       'secondary-active-background-dark': '#cdcdcd',
       'light-shadow': 'rgba(0,0,0,0.20)',
       'heavy-shadow': 'rgba(0,0,0,0.25)',
@@ -57,8 +57,7 @@ const themes = {
       'info-background': '#085353',
       'success-background': '#183f24',
       'search-background': '#6f6d01',
-      'new-unread-background': '#2f6fb5',
-      // TODO update unread color ^
+      'new-unread-background': '#0584ff',
       'secondary-active-background-dark': '#444',
       'light-shadow': 'rgba(0,0,0,0.25)',
       'heavy-shadow': 'rgba(0,0,0,0.55)',
