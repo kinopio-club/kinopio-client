@@ -63,7 +63,6 @@ const props = defineProps({
   showUser: Boolean,
   showOtherUsers: Boolean,
   showCollaborators: Boolean,
-  showUserLabelInline: Boolean,
   showUserIfCurrentUserIsCollaborator: Boolean,
   hideExploreBadge: Boolean,
   hideFilter: Boolean,
@@ -154,10 +153,6 @@ const isNew = (space) => {
     return false
   }
 }
-const showCollaborator = (space) => {
-  const isUser = Boolean(user(space))
-  return props.showUserIfCurrentUserIsCollaborator && space.currentUserIsCollaborator && isUser
-}
 const categoryClassName = (space) => {
   const className = utils.normalizeString(space.category)
   return className
@@ -201,6 +196,14 @@ const users = (space) => {
     spaceUsers = spaceUsers.concat(space.collaborators)
   }
   return spaceUsers
+}
+const isMultipleUsers = (space) => {
+  console.log(users(space).length > 1, users(space), space.name)
+  return users(space).length > 1
+}
+const showUserIfCurrentUserIsCollaborator = (space) => {
+  const isUser = Boolean(user(space))
+  return props.showUserIfCurrentUserIsCollaborator && space.currentUserIsCollaborator && isUser
 }
 const selectSpace = (event, space) => {
   if (event) {
@@ -398,22 +401,28 @@ span.space-list-wrap
           )
             template(v-if="itemIsVisible(index)")
               Loader(:visible="isLoadingSpace(space)")
-              //- user(s)
+
+              //- Users
+              //- show spectators
               template(v-if="showOtherUsers")
                 .users(:class="{'multiple-users': space.otherUsers.length > 1}")
                   User(:user="user(space)" :isClickable="false" :key="user(space).id" :isMedium="true")
                   template(v-for="otherUser in space.otherUsers" :key="otherUser.id")
                     User(:user="otherUser" :isClickable="false" :isMedium="true")
-              template(v-else-if="showUserLabelInline")
-                UserLabelInline(:user="user(space)" :isClickable="false" :key="user(space).id" :isMedium="true")
-              template(v-else-if="showCollaborators")
-                .users(:class="{'multiple-users': users(space).length > 1}")
+              //- show collaborators
+              template(v-else-if="showCollaborators && isMultipleUsers(space)")
+                .users.multiple-users
                   template(v-for="user in users(space)" :key="user.id")
                     User(:user="user" :isClickable="false" :isMedium="true")
+              template(v-else-if="showCollaborators")
+                UserLabelInline(:user="user(space)" :isClickable="false" :key="user(space).id" :isMedium="true")
+              //- show user badge only
               template(v-else-if="showUser")
                 User(:user="user(space)" :isClickable="false" :key="user(space).id" :isMedium="true")
-              template(v-else-if="showCollaborator(space)")
+              //- show user when current user is collaborator
+              template(v-else-if="showUserIfCurrentUserIsCollaborator(space)")
                 User(:user="user(space)" :isClickable="false" :key="user(space).id" :isMedium="true")
+
               //- preview image
               .preview-thumbnail-image-wrap(v-if="space.previewThumbnailImage && isOnline" :class="{wide: previewImageIsWide}")
                 img.preview-thumbnail-image(:src="space.previewThumbnailImage")
@@ -499,7 +508,7 @@ span.space-list-wrap
     flex-wrap wrap
     align-content flex-start
     flex-shrink 0
-    max-width 44px // 2 users across
+    max-width 66px // 3 users across
     .user
       margin-right 0
   a

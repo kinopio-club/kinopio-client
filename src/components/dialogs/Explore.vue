@@ -136,10 +136,6 @@ const toggleExploreRssFeedsIsVisible = () => {
 const rssButtonIsVisible = computed(() => !currentSectionIsFollowing.value)
 // TODO const followingIsVisible ':)heart' small btn
 
-// space list
-
-const showCollaborators = computed(() => currentSectionIsExplore.value || currentSectionIsEveryone.value)
-const showUserLabelInline = computed(() => currentSectionIsFollowing.value)
 </script>
 
 <template lang="pug">
@@ -186,8 +182,7 @@ dialog.explore.wide(v-if="visible" :open="visible" ref="dialogElement" :style="{
       :parentDialog="parentDialog"
       :previewImageIsWide="true"
       :hideFilter="true"
-      :showCollaborators="showCollaborators"
-      :showUserLabelInline="showUserLabelInline"
+      :showCollaborators="true"
     )
 </template>
 
