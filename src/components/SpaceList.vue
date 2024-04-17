@@ -502,6 +502,7 @@ span.space-list-wrap
     vertical-align middle
   .user-label-inline
     flex-shrink 0
+    max-width 120px
   .users
     margin-right 6px
     display flex
