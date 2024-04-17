@@ -52,32 +52,7 @@ const state = reactive({
   userShowInExploreDate: null,
   exploreRssFeedsIsVisible: false,
   filteredSpaces: undefined,
-  currentSection: 'explore', // 'explore', 'following', 'everyone'
-  isReadSections: [] // 'explore', 'following', 'everyone'
-})
-
-// unread sections
-
-watch(() => state.currentSection, (value, prevValue) => {
-  state.isReadSections.push(prevValue)
-})
-const isUnreadExplore = computed(() => {
-  if (state.isReadSections.includes('explore')) {
-    return false
-  }
-  return Boolean(props.unreadExploreSpacesCount)
-})
-const isUnreadFollowing = computed(() => {
-  if (state.isReadSections.includes('following')) {
-    return false
-  }
-  return Boolean(props.unreadFollowingSpacesCount)
-})
-const isUnreadEveryone = computed(() => {
-  if (state.isReadSections.includes('everyone')) {
-    return false
-  }
-  return Boolean(props.unreadEveryoneSpacesCount)
+  currentSection: 'explore' // 'explore', 'following', 'everyone'
 })
 
 const currentSpace = computed(() => store.state.currentSpace)
@@ -173,18 +148,12 @@ dialog.explore.wide(v-if="visible" :open="visible" ref="dialogElement" :style="{
     .row.title-row
       .segmented-buttons
         button(:class="{active: currentSectionIsExplore}" @click="updateCurrentSection('explore')")
-          .label-wrap
-            img.icon.sunglasses(src="@/assets/sunglasses.svg")
-            span Explore
-            .badge.new-unread-badge.notification-button-badge(v-if="isUnreadExplore")
+          img.icon.sunglasses(src="@/assets/sunglasses.svg")
+          span Explore
         button(:class="{active: currentSectionIsFollowing}" @click="updateCurrentSection('following')")
-          .label-wrap
-            span Following
-            .badge.new-unread-badge.notification-button-badge(v-if="isUnreadFollowing")
+          span Following
         button(:class="{active: currentSectionIsEveryone}" @click="updateCurrentSection('everyone')")
-          .label-wrap
-            span Everyone
-            .badge.new-unread-badge.notification-button-badge(v-if="isUnreadEveryone")
+          span Everyone
     //- follow users blank slate
     section.subsection(v-if="followUsersInfoIsVisible")
       p Follow other people to see their latest updates here
@@ -231,10 +200,6 @@ dialog.explore
     margin-right 5px
     vertical-align -2px
   .segmented-buttons
-    .label-wrap
+    button
       position relative
-  .notification-button-badge
-    left -6px
-    top -2px
-
 </style>

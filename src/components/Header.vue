@@ -642,9 +642,8 @@ header(v-if="isVisible" :style="state.position" :class="{'fade-out': isFadingOut
         //- Notifications
         .button-wrap
           button(@click.left.stop="toggleNotificationsIsVisible" :class="{active: state.notificationsIsVisible, 'translucent-button': !shouldIncreaseUIContrast}")
-            .label-wrap
-              span {{notificationsUnreadCount}}
-              .badge.new-unread-badge.notification-button-badge(v-if="notificationsUnreadCount")
+            span {{notificationsUnreadCount}}
+            .badge.new-unread-badge.notification-button-badge(v-if="notificationsUnreadCount")
           UserNotifications(:visible="state.notificationsIsVisible" :loading="state.notificationsIsLoading" :notifications="state.notifications" :unreadCount="notificationsUnreadCount" @markAllAsRead="markAllAsRead" @markAsRead="markAsRead")
 
     .row
@@ -921,13 +920,6 @@ header
     min-height initial
     min-width initial
     display block
-
-  .label-wrap
-    position relative
-
-  .notification-button-badge
-    left -6px !important
-    top -2px !important
 
 .badge-jiggle
   animation-name notificationJiggle

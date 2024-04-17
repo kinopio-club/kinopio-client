@@ -1115,16 +1115,20 @@ code
     margin 0
   &.new-unread-badge
     border-radius 100px
+    position absolute
     min-width initial
     min-height initial
-    width 6px
-    height 6px
-    padding 0
-    background var(--new-unread-background)
-    position absolute
-    left 4px
+    width 8px
+    height 8px
+    right 4px
     top 4px
     margin 0
+    padding 0
+    z-index 10
+    background var(--new-unread-background)
+    &.notification-button-badge
+      right -3px
+      top -3px
 
   input
     margin 0

@@ -499,7 +499,7 @@ span.space-list-wrap
     flex-wrap wrap
     align-content flex-start
     flex-shrink 0
-    max-width 66px // 3 users
+    max-width 44px // 2 users across
     .user
       margin-right 0
   a
