@@ -27,7 +27,10 @@ const props = defineProps({
   exploreSpaces: Object,
   followingSpaces: Object,
   everyoneSpaces: Object,
-  loading: Boolean
+  loading: Boolean,
+  unreadExploreSpacesCount: Number,
+  unreadFollowingSpacesCount: Number,
+  unreadEveryoneSpacesCount: Number
 })
 watch(() => props.visible, (value, prevValue) => {
   store.commit('clearNotificationsWithPosition')
@@ -49,6 +52,7 @@ const state = reactive({
   filteredSpaces: undefined,
   currentSection: 'explore' // 'explore', 'following', 'everyone'
 })
+// TODO watch currentSection , log prevvalue to remove unread badges from btnx
 
 const currentSpace = computed(() => store.state.currentSpace)
 const changeSpace = (space) => {
@@ -117,6 +121,7 @@ const toggleExploreRssFeedsIsVisible = () => {
   state.exploreRssFeedsIsVisible = !state.exploreRssFeedsIsVisible
 }
 const rssButtonIsVisible = computed(() => !currentSectionIsFollowing.value)
+// TODO const followingIsVisible ':)heart' small btn
 
 // space list
 
@@ -164,6 +169,7 @@ dialog.explore.wide(v-if="visible" :open="visible" ref="dialogElement" :style="{
       :showCollaborators="showCollaborators"
       :showUserLabelInline="showUserLabelInline"
     )
+    //- TODO manually pass in exploreSpaceDateKey 'string' // showInExploreUpdatedAt(explore) updatedAt(following) createdAt(everyone)
 </template>
 
 <style lang="stylus">

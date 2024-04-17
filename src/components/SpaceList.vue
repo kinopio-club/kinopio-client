@@ -141,7 +141,8 @@ const duplicateSpace = () => {
 const isNew = (space) => {
   if (props.userShowInExploreDate) {
     const readDate = dayjs(props.userShowInExploreDate)
-    const spaceDate = dayjs(space.showInExploreUpdatedAt)
+    // TODO spaceDate = space[props.exploreSpaceDateKey]
+    const spaceDate = dayjs(space.showInExploreUpdatedAt || space.updatedAt)
     const delta = readDate.diff(spaceDate, 'second')
     return delta < 0
   }

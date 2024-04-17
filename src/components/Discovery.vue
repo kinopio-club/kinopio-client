@@ -101,7 +101,7 @@ const updateUnreadSpacesCounts = () => {
   state.unreadExploreSpacesCount = unreadSpaces(state.exploreSpaces).length
   state.unreadFollowingSpacesCount = unreadSpaces(state.followingSpaces).length
   state.unreadEveryoneSpacesCount = unreadSpaces(state.everyoneSpaces).length
-  console.log(state.unreadEveryoneSpacesCount, state.unreadExploreSpacesCount, state.unreadFollowingSpacesCount)
+  console.log('🎡🎡🎡🎡', state.unreadEveryoneSpacesCount, state.unreadExploreSpacesCount, state.unreadFollowingSpacesCount)
 }
 const unreadSpacesCount = computed(() => {
   let readDate = store.state.currentUser.showInExploreUpdatedAt
