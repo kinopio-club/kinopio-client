@@ -134,7 +134,6 @@ const toggleExploreRssFeedsIsVisible = () => {
   state.exploreRssFeedsIsVisible = !state.exploreRssFeedsIsVisible
 }
 const rssButtonIsVisible = computed(() => !currentSectionIsFollowing.value)
-// TODO const followingIsVisible ':)heart' small btn
 
 </script>
 
