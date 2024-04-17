@@ -342,5 +342,5 @@ const updateExploreSpaces = async () => {
     margin-bottom -8px
     padding-bottom 8px
   .explore-spaces-section
-    max-height 100px
+    max-height 120px
 </style>
