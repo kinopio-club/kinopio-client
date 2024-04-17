@@ -77,7 +77,6 @@ const unreadSpaces = (spaces, type) => {
     if (spaceIsCurrentSpace(space)) { return }
     const spaceDate = utils.spaceReadDate(space, type)
     const delta = readDate.diff(spaceDate, 'second')
-    console.log('🏎️🏎️', type, delta)
     return delta < 0
   })
   return unreadSpaces || []
@@ -88,14 +87,11 @@ const updateUnreadSpacesCounts = () => {
   state.unreadExploreSpacesCount = unreadSpaces(state.exploreSpaces, 'explore').length
   state.unreadFollowingSpacesCount = unreadSpaces(state.followingSpaces, 'following').length
   state.unreadEveryoneSpacesCount = unreadSpaces(state.everyoneSpaces, 'everyone').length
-  console.log('🎡🎡🎡🎡', state.unreadEveryoneSpacesCount, state.unreadExploreSpacesCount, state.unreadFollowingSpacesCount)
   const count = state.unreadExploreSpacesCount + state.unreadFollowingSpacesCount
-  console.log('♥️♥️♥️', count)
   state.unreadSpacesCount = normalizeCount(count)
 }
 watch(() => state.exploreIsVisible, (value, prevValue) => {
   if (!value) {
-    console.log('🌷🌷🌷🌷🌷🌷')
     clearUnreadSpacesCounts()
   }
 })

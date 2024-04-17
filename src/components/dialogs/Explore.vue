@@ -177,7 +177,7 @@ dialog.explore.wide(v-if="visible" :open="visible" ref="dialogElement" :style="{
       div
         Loader(:isSmall="true" :visible="props.loading")
         span(v-if="currentSectionIsExplore") Shared with the community
-        span(v-else-if="currentSectionIsFollowing") Updated by people you follow
+        span(v-else-if="currentSectionIsFollowing") Recently updated by people you follow
         span(v-else-if="currentSectionIsEveryone") All new public spaces
 
       //- rss
