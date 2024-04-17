@@ -5,8 +5,10 @@ import { useStore } from 'vuex'
 import SpaceList from '@/components/SpaceList.vue'
 import ExploreRssFeeds from '@/components/dialogs/ExploreRssFeeds.vue'
 import Loader from '@/components/Loader.vue'
-import User from '@/components/User.vue'
+import UserLabelInline from '@/components/UserLabelInline.vue'
 import utils from '@/utils.js'
+
+import randomColor from 'randomcolor'
 
 const store = useStore()
 
@@ -139,6 +141,18 @@ const updateUserShowInExploreUpdatedAt = async () => {
   store.dispatch('currentUser/showInExploreUpdatedAt', serverDate)
 }
 
+// blank slate info
+
+const followUsersInfoIsVisible = computed(() => {
+  const isFavoriteUsers = Boolean(store.state.currentUser.favoriteUsers.length)
+  return !props.loading && !isFavoriteUsers && currentSectionIsFollowing.value
+})
+const randomUser = computed(() => {
+  const luminosity = store.state.currentUser.theme
+  const color = randomColor({ luminosity })
+  return { color, id: '123' }
+})
+
 // rss
 
 const toggleExploreRssFeedsIsVisible = () => {
@@ -171,15 +185,21 @@ dialog.explore.wide(v-if="visible" :open="visible" ref="dialogElement" :style="{
           .label-wrap
             span Everyone
             .badge.new-unread-badge.notification-button-badge(v-if="isUnreadEveryone")
+    //- follow users blank slate
+    section.subsection(v-if="followUsersInfoIsVisible")
+      p Follow other people to see their latest updates here
+      p.badge.secondary
+        UserLabelInline(:user="randomUser" :isClickable="false" :key="randomUser.id" :isSmall="true" :hideYouLabel="true")
+        span → Follow
 
   section
     .row.title-row
+      //- current section descriptions
       div
         Loader(:isSmall="true" :visible="props.loading")
         span(v-if="currentSectionIsExplore") Shared with the community
         span(v-else-if="currentSectionIsFollowing") Recently updated by people you follow
         span(v-else-if="currentSectionIsEveryone") All new public spaces
-
       //- rss
       .button-wrap.rss-button-wrap(v-if="rssButtonIsVisible")
         button.small-button(@click.stop="toggleExploreRssFeedsIsVisible" :class="{active: state.exploreRssFeedsIsVisible}" title="RSS Feeds")
