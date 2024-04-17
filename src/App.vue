@@ -1117,11 +1117,15 @@ code
     border-radius 100px
     min-width initial
     min-height initial
-    width 8px
-    height 8px
+    width 6px
+    height 6px
     padding 0
-    vertical-align 2px
     background var(--new-unread-background)
+    position absolute
+    left 4px
+    top 4px
+    margin 0
+
   input
     margin 0
   .user
@@ -1345,12 +1349,16 @@ progress::-moz-progress-bar
   background-color var(--primary)
   border-radius 2px
 
-.fadeIn-enter-active {
+.pulse
+  // https://easings.net/#easeOutQuad
+  animation fadeIn 1.2s cubic-bezier(0.5, 1, 0.89, 1) infinite
+  animation-direction alternate-reverse
+.fadeIn-enter-active
   animation fadeIn 0.5s ease-out
-}
 @keyframes fadeIn
   0%
     opacity 0
   100%
     opacity 1
+
 </style>

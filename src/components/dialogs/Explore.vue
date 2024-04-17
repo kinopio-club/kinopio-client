@@ -135,12 +135,18 @@ dialog.explore.wide(v-if="visible" :open="visible" ref="dialogElement" :style="{
     .row.title-row
       .segmented-buttons
         button(:class="{active: currentSectionIsExplore}" @click="updateCurrentSection('explore')")
-          img.icon.sunglasses(src="@/assets/sunglasses.svg")
-          span Explore
+          .label-wrap
+            img.icon.sunglasses(src="@/assets/sunglasses.svg")
+            span Explore
+            .badge.new-unread-badge.notification-button-badge
         button(:class="{active: currentSectionIsFollowing}" @click="updateCurrentSection('following')")
-          span Following
+          .label-wrap
+            span Following
+            .badge.new-unread-badge.notification-button-badge
         button(:class="{active: currentSectionIsEveryone}" @click="updateCurrentSection('everyone')")
-          span Everyone
+          .label-wrap
+            span Everyone
+            .badge.new-unread-badge.notification-button-badge
 
   section
     .row.title-row
@@ -180,5 +186,11 @@ dialog.explore
   .loader
     margin-right 5px
     vertical-align -2px
+  .segmented-buttons
+    .label-wrap
+      position relative
+  .notification-button-badge
+    left -6px
+    top -2px
 
 </style>

@@ -416,8 +416,6 @@ span.space-list-wrap
               //- preview image
               .preview-thumbnail-image-wrap(v-if="space.previewThumbnailImage && isOnline" :class="{wide: previewImageIsWide}")
                 img.preview-thumbnail-image(:src="space.previewThumbnailImage")
-                //- new
-                .badge.info.inline-badge.new-unread-badge(v-if="isNew(space)")
               //- offline
               span(v-if="isNotCached(space.id)")
                 OfflineBadge(:isInline="true" :isDanger="true")
@@ -447,6 +445,8 @@ span.space-list-wrap
                 img.icon.sunglasses(src="@/assets/sunglasses.svg" v-if="showInExplore(space)" title="Shown in Explore")
               button.button-checkmark(v-if="showCheckmarkSpace" @mousedown.left.stop="checkmarkSpace(space)" @touchstart.stop="checkmarkSpace(space)")
                 img.icon.checkmark(src="@/assets/checkmark.svg")
+            //- new
+            .badge.info.inline-badge.new-unread-badge(v-if="isNew(space)")
 </template>
 
 <style lang="stylus">
@@ -457,13 +457,6 @@ span.space-list-wrap
   .inline-badge
     margin-left 0
     flex none
-
-  .new-unread-badge
-    position absolute
-    top -2px
-    right -2px
-    left initial
-    margin 0
 
   .badge
     margin-left 0
