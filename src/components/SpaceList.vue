@@ -440,10 +440,10 @@ span.space-list-wrap
               span(v-if="space.name === 'Inbox'")
                 img.icon.inbox-icon(src="@/assets/inbox.svg")
               SpaceTodayJournalBadge(:space="space")
-              //- journal or template
+              //- journal
               MoonPhase(v-if="space.moonPhase" :moonPhase="space.moonPhase")
-              span(v-if="space.isTemplate")
-                img.icon.templates(src="@/assets/templates.svg" title="Template")
+              //- template
+              img.icon.templates(v-if="space.isTemplate" src="@/assets/templates.svg" title="Template")
               //- space details
               .name
                 span(v-if="state.filter")
