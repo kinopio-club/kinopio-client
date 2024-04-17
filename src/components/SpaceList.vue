@@ -192,13 +192,14 @@ const user = (space) => {
 const users = (space) => {
   const spaceUser = user(space)
   let spaceUsers = [spaceUser]
-  if (space.collaborators) {
+  if (space.otherUsers) {
+    spaceUsers = spaceUsers.concat(space.otherUsers)
+  } else if (space.collaborators) {
     spaceUsers = spaceUsers.concat(space.collaborators)
   }
   return spaceUsers
 }
 const isMultipleUsers = (space) => {
-  console.log(users(space).length > 1, users(space), space.name)
   return users(space).length > 1
 }
 const showUserIfCurrentUserIsCollaborator = (space) => {
@@ -404,11 +405,12 @@ span.space-list-wrap
 
               //- Users
               //- show spectators
-              template(v-if="showOtherUsers")
-                .users(:class="{'multiple-users': space.otherUsers.length > 1}")
-                  User(:user="user(space)" :isClickable="false" :key="user(space).id" :isMedium="true")
-                  template(v-for="otherUser in space.otherUsers" :key="otherUser.id")
-                    User(:user="otherUser" :isClickable="false" :isMedium="true")
+              template(v-if="showOtherUsers && isMultipleUsers(space)")
+                .users.multiple-users
+                  template(v-for="user in users(space)" :key="user.id")
+                    User(:user="user" :isClickable="false" :isMedium="true")
+              template(v-else-if="showOtherUsers")
+                UserLabelInline(:user="user(space)" :isClickable="false" :key="user(space).id" :isMedium="true")
               //- show collaborators
               template(v-else-if="showCollaborators && isMultipleUsers(space)")
                 .users.multiple-users
