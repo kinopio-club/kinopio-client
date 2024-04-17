@@ -12,7 +12,7 @@ import utils from '@/utils.js'
 const store = useStore()
 
 let updateLiveSpacesIntervalTimer
-const maxUnreadCountCharacter = '☀︎'
+const maxUnreadCountCharacter = '+'
 
 onMounted(() => {
   window.addEventListener('online', updateLiveSpaces)
