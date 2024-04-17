@@ -1,10 +1,13 @@
 <template lang="pug">
 .links(v-if="visible")
+  section
+    p Backlinks
+    Loader(:visible="loading" :isSmall="true")
+      //- .button-wrap(v-if="userSpacesToggleShouldBeVisible" @click.left.prevent="toggleCurrentUserSpacesIsVisibleOnly" @keydown.stop.enter="toggleCurrentUserSpacesIsVisibleOnly")
+      //-   label(:class="{ active: currentUserSpacesIsVisibleOnly }")
+      //-     input(type="checkbox" v-model="currentUserSpacesIsVisibleOnly")
+      //-     User(:user="currentUser" :isClickable="false" :hideYouLabel="true" :isSmall="true")
   section.results-section(v-if="shouldShowSpaces" ref="results" :style="{'max-height': resultsSectionHeight + 'px'}")
-    .button-wrap(v-if="userSpacesToggleShouldBeVisible" @click.left.prevent="toggleCurrentUserSpacesIsVisibleOnly" @keydown.stop.enter="toggleCurrentUserSpacesIsVisibleOnly")
-      label(:class="{ active: currentUserSpacesIsVisibleOnly }")
-        input(type="checkbox" v-model="currentUserSpacesIsVisibleOnly")
-        User(:user="currentUser" :isClickable="false" :hideYouLabel="true" :isSmall="true")
     SpaceList(
       :spaces="filteredSpaces"
       :showUser="true"
@@ -13,15 +16,13 @@
       :resultsSectionHeight="resultsSectionHeight"
       :parentDialog="parentDialog"
     )
-
-  section(v-else-if="loading")
-    Loader(:visible="loading")
-  section(v-else)
-    p Spaces with cards that link to this space (backlinks) can be found here.
-    p Type
-      span {{' '}}
-      span.badge.secondary /
-      span when editing a card to create links
+  section.tips-section(v-else)
+    section.subsection
+      p Other spaces with cards that link to this space can be found here.
+      p Type
+        span {{' '}}
+        span.badge.info /
+        span when editing a card to create links
 </template>
 
 <script>
@@ -141,17 +142,20 @@ export default {
 
 <style lang="stylus">
 .links
-  section
-    border-top 1px solid var(--primary-border)
-  .results-section
-    padding-top 4px
+  border-top 1px solid var(--primary-border)
   .button-wrap
+    margin 0
+  .tips-section
+    border 0
+    padding-top 0
+  .subsection
     padding 4px
+    border-radius var(--entity-radius)
   label
     .user
-      vertical-align -5px
+      vertical-align -3px
       transform translateY(-1px)
-      margin-right 5px
+      margin-right 0
       .user-avatar
         width 17px
         height 16px

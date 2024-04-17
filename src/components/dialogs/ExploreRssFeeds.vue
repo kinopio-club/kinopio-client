@@ -11,56 +11,51 @@ const props = defineProps({
 })
 watch(() => props.visible, (value, prevValue) => {
   store.commit('clearNotificationsWithPosition')
-  if (value) {
-    updateUrl()
-  }
 })
 
-const state = reactive({
-  urlIsCopied: false,
-  url: ''
-})
+const exploreUrl = computed(() => `${consts.apiHost()}/space/explore-spaces/feed.json`)
+const everyoneUrl = computed(() => `${consts.apiHost()}/space/everyone-spaces/feed.json`)
 
-const spaceIsPrivate = computed(() => store.state.currentSpace.privacy === 'private')
-const copyUrl = async (event) => {
+const copyUrl = async (event, url) => {
   store.commit('clearNotificationsWithPosition')
   const position = utils.cursorPositionInPage(event)
   try {
-    await navigator.clipboard.writeText(state.url)
+    await navigator.clipboard.writeText(url)
     store.commit('addNotificationWithPosition', { message: 'Copied', position, type: 'success', layer: 'app', icon: 'checkmark' })
   } catch (error) {
     console.warn('🚑 copyText', error)
     store.commit('addNotificationWithPosition', { message: 'Copy Error', position, type: 'danger', layer: 'app', icon: 'cancel' })
   }
 }
-const updateUrl = () => {
-  const spaceId = store.state.currentSpace.id
-  state.url = `${consts.apiHost()}/space/${spaceId}/feed.json`
-}
 </script>
 
 <template lang="pug">
-dialog.narrow.space-rss-feed(v-if="visible" :open="visible" @click.left.stop)
+dialog.narrow.explore-rss-feed(v-if="visible" :open="visible" @click.left.stop)
   section
-    p Space RSS Feed
+    p Explore RSS Feeds
   section
     .row
-      p Subscribe to cards recently created or updated
+      p Subscribe to new spaces
     .row
-      p.badge.danger(v-if="spaceIsPrivate")
-        img.icon(src="@/assets/lock.svg")
-        span RSS Feeds are only available on public spaces
-    template(v-if="!spaceIsPrivate")
-      .row
-        button(@click.left="copyUrl")
-          img.icon.copy(src="@/assets/copy.svg")
-          span Copy Feed URL
+      button(@click.left="copyUrl($event, exploreUrl)")
+        img.icon.copy(src="@/assets/copy.svg")
+        span Copy Explore Feed URL
+    .row
+      button(@click.left="copyUrl($event, everyoneUrl)")
+        img.icon.copy(src="@/assets/copy.svg")
+        span Copy Everyone Feed URL
 </template>
 
-<style lang="stylus">
-dialog.space-rss-feed
+<style lang="stylus" scoped>
+.explore-rss-feed
   left initial
-  right 4px
+  right 10px
+  top calc(100% - 12px) !important
+  bottom initial !important
+  @media(max-width 400px)
+    left -40px
+  @media(max-width 350px)
+    left -90px
   .badge
-    margin-right 0
+    display inline
 </style>

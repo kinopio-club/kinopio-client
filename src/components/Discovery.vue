@@ -6,22 +6,25 @@ import dayjs from 'dayjs'
 
 import Explore from '@/components/dialogs/Explore.vue'
 import Live from '@/components/dialogs/Live.vue'
-import Favorites from '@/components/dialogs/Favorites.vue'
+
+import FavoriteSpaceButton from '@/components/FavoriteSpaceButton.vue'
 import utils from '@/utils.js'
 const store = useStore()
 
 let updateLiveSpacesIntervalTimer
+const maxUnreadCountCharacter = '+'
 
 onMounted(() => {
   window.addEventListener('online', updateLiveSpaces)
   updateLiveSpaces()
-  updateExploreSpaces()
-  updateFavorites()
+  updateSpaces()
   store.subscribe((mutation, state) => {
     if (mutation.type === 'triggerExploreIsVisible') {
       toggleExploreIsVisible()
     } else if (mutation.type === 'closeAllDialogs') {
       closeDialogs()
+    } else if (mutation.type === 'triggerUserIsLoaded') {
+      updateSpaces()
     }
   })
 })
@@ -36,7 +39,13 @@ const state = reactive({
   favoritesIsVisible: false,
   liveIsVisible: false,
   liveSpaces: [],
-  exploreSpaces: []
+  exploreSpaces: [],
+  followingSpaces: [],
+  everyoneSpaces: [],
+  unreadExploreSpacesCount: 0,
+  unreadFollowingSpacesCount: 0,
+  unreadEveryoneSpacesCount: 0,
+  unreadSpacesCount: 0
 })
 
 const closeDialogs = () => {
@@ -47,6 +56,52 @@ const closeDialogs = () => {
 const shouldIncreaseUIContrast = computed(() => store.state.currentUser.shouldIncreaseUIContrast)
 const isOnline = computed(() => store.state.isOnline)
 
+const normalizeCount = (count) => {
+  if (count > 9) {
+    return maxUnreadCountCharacter
+  } else {
+    return count
+  }
+}
+
+// Unread Counts
+
+const spaceIsCurrentSpace = (space) => {
+  const currentSpace = store.state.currentSpace
+  return space.id === currentSpace.id
+}
+const unreadSpaces = (spaces, type) => {
+  let readDate = store.state.currentUser.showInExploreUpdatedAt
+  readDate = dayjs(readDate)
+  const unreadSpaces = spaces?.filter(space => {
+    if (spaceIsCurrentSpace(space)) { return }
+    const spaceDate = utils.spaceReadDate(space, type)
+    const delta = readDate.diff(spaceDate, 'second')
+    return delta < -10 * 1000 // older than 10 seconds
+  })
+  return unreadSpaces || []
+}
+const updateUnreadSpacesCounts = () => {
+  let readDate = store.state.currentUser.showInExploreUpdatedAt
+  if (!readDate) { return maxUnreadCountCharacter }
+  state.unreadExploreSpacesCount = unreadSpaces(state.exploreSpaces, 'explore').length
+  state.unreadFollowingSpacesCount = unreadSpaces(state.followingSpaces, 'following').length
+  state.unreadEveryoneSpacesCount = unreadSpaces(state.everyoneSpaces, 'everyone').length
+  const count = state.unreadExploreSpacesCount + state.unreadFollowingSpacesCount
+  state.unreadSpacesCount = normalizeCount(count)
+}
+watch(() => state.exploreIsVisible, (value, prevValue) => {
+  if (!value) {
+    clearUnreadSpacesCounts()
+  }
+})
+const clearUnreadSpacesCounts = () => {
+  state.unreadExploreSpacesCount = 0
+  state.unreadFollowingSpacesCount = 0
+  state.unreadEveryoneSpacesCount = 0
+  state.unreadSpacesCount = 0
+}
+
 // Explore
 
 const toggleExploreIsVisible = () => {
@@ -54,23 +109,23 @@ const toggleExploreIsVisible = () => {
   store.dispatch('closeAllDialogs')
   state.exploreIsVisible = !isVisible
 }
-const unreadExploreSpacesCount = computed(() => {
-  let readDate = store.state.currentUser.showInExploreUpdatedAt
-  if (!readDate) { return }
-  readDate = dayjs(readDate)
-  const unreadSpaces = state.exploreSpaces?.filter(space => {
-    const spaceDate = dayjs(space.showInExploreUpdatedAt)
-    const delta = readDate.diff(spaceDate, 'second')
-    return delta < 0
-  })
-  return unreadSpaces.length
-})
-const updateExploreSpaces = async () => {
+const updateSpaces = async () => {
   try {
-    state.exploreSpaces = await store.dispatch('api/getExploreSpaces')
+    state.loading = true
+
+    const [exploreSpaces, followingSpaces, everyoneSpaces] = await Promise.all([
+      store.dispatch('api/getExploreSpaces'),
+      store.dispatch('api/getFollowingUsersSpaces'),
+      store.dispatch('api/getEveryoneSpaces')
+    ])
+    state.exploreSpaces = exploreSpaces
+    state.followingSpaces = followingSpaces
+    state.everyoneSpaces = everyoneSpaces
+    updateUnreadSpacesCounts()
   } catch (error) {
-    console.warn('🚑 updateExploreSpaces', error)
+    console.error('🚑 updateSpaces', error)
   }
+  state.loading = false
 }
 
 // Live
@@ -118,66 +173,40 @@ const normalizeLiveSpaces = (spaces) => {
   return normalizedSpaces
 }
 const liveSpacesCount = computed(() => {
-  return state.liveSpaces.length
+  let count = state.liveSpaces.length
+  return normalizeCount(count)
 })
 
-// Favorites
-
-const toggleFavoritesIsVisible = () => {
-  const isVisible = state.favoritesIsVisible
-  store.dispatch('closeAllDialogs')
-  state.favoritesIsVisible = !isVisible
-}
-const favoriteSpacesEditedCount = computed(() => {
-  const currentUser = store.state.currentUser
-  let favoriteSpaces = utils.clone(currentUser.favoriteSpaces)
-  favoriteSpaces = favoriteSpaces.filter(space => {
-    const isEditedByOtherUser = space.editedByUserId !== currentUser.id
-    const isEditedAndNotVisited = space.isEdited && space.userId !== currentUser.id
-    return isEditedByOtherUser && isEditedAndNotVisited
-  })
-  return favoriteSpaces.length
-})
-const updateFavorites = async () => {
-  await store.dispatch('currentUser/restoreUserFavorites')
-}
-const isFavoriteSpace = computed(() => store.getters['currentSpace/isFavorite'])
 </script>
 
 <template lang="pug">
-.explore-row.button-wrap(v-if="isOnline")
+.button-wrap(v-if="isOnline")
   .segmented-buttons.space-functions-row
     //- Explore
     .button-wrap
-      button.explore-button(@click.left="toggleExploreIsVisible" :class="{ active: state.exploreIsVisible, 'translucent-button': !shouldIncreaseUIContrast }")
+      button(:class="{active: state.exploreIsVisible, 'translucent-button': !shouldIncreaseUIContrast}" @click="toggleExploreIsVisible")
         img.icon.sunglasses(src="@/assets/sunglasses.svg")
-        span.explore-button-label(v-if="unreadExploreSpacesCount") &nbsp;{{ unreadExploreSpacesCount }}
+        span(v-if="state.unreadSpacesCount") {{state.unreadSpacesCount}}
+      Explore(
+        :visible="state.exploreIsVisible"
+        :exploreSpaces="state.exploreSpaces"
+        :followingSpaces="state.followingSpaces"
+        :everyoneSpaces="state.everyoneSpaces"
+        :loading="state.loading"
+        :unreadExploreSpacesCount="state.unreadExploreSpacesCount"
+        :unreadFollowingSpacesCount="state.unreadFollowingSpacesCount"
+        :unreadEveryoneSpacesCount="state.unreadEveryoneSpacesCount"
+      )
     //- Live
     .button-wrap
       button(@click.left="toggleLiveIsVisible" :class="{ active: state.liveIsVisible, 'translucent-button': !shouldIncreaseUIContrast }")
         img.icon.camera(src="@/assets/camera.svg")
         span(v-if="liveSpacesCount") {{ liveSpacesCount }}
-    //- Favorites
-    .button-wrap
-      button(@click.left="toggleFavoritesIsVisible" :class="{ active: state.favoritesIsVisible, 'translucent-button': !shouldIncreaseUIContrast }")
-        img.icon(v-if="isFavoriteSpace" src="@/assets/heart.svg")
-        img.icon(v-else src="@/assets/heart-empty.svg")
-        span(v-if="favoriteSpacesEditedCount") {{ favoriteSpacesEditedCount }}
+      Live(:visible="state.liveIsVisible" :spaces="state.liveSpaces" :loading="state.isLoadingLiveSpaces")
 
-  Explore(:visible="state.exploreIsVisible" @preloadedSpaces="state.exploreSpaces")
-  Live(:visible="state.liveIsVisible" :spaces="state.liveSpaces" :loading="state.isLoadingLiveSpaces")
-  Favorites(:visible="state.favoritesIsVisible")
+FavoriteSpaceButton(v-if="isOnline")
+
 </template>
 
 <style lang="stylus">
-.explore-row
-  position relative
-  .explore-button
-    .explore-button-label
-      margin-left 0
-  .space-functions-row
-    margin-bottom 0
-    > .button-wrap
-      margin-left 0 !important
-
 </style>

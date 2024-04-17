@@ -68,7 +68,6 @@ const squashQueue = (queue) => {
     squashed.push(reduced)
   })
   squashed = sortQueueItems(squashed)
-  console.log(squashed)
   return squashed
 }
 
@@ -162,15 +161,12 @@ const self = {
         if (!error) { return }
         const isCritical = !nonErrorStatusCodes.includes(error.status)
         if (isCritical) {
-          // notify user on failed critical operation, and retry later
           console.error('🚒 critical serverOperationsError operation', operation)
           context.commit('notifyServerCouldNotSave', true, { root: true })
         } else {
-          // do not retry non-critical operations
           console.warn('🚑 non-critical serverOperationsError operation', operation)
-          cache.removeSendingInProgressQueueOperationById(operation.body.operationId)
         }
-        cache.removeSendingInProgressQueueOperationById(operation.body.operationId) // temp
+        cache.removeSendingInProgressQueueOperationById(operation.body.operationId)
       })
     },
 
@@ -349,16 +345,55 @@ const self = {
         context.dispatch('handleServerError', { name: 'getUserAIImages', error })
       }
     },
-    getUserFavorites: async (context) => {
+    getUserFavoriteSpaces: async (context) => {
       const apiKey = context.rootState.currentUser.apiKey
       const isOnline = context.rootState.isOnline
       if (!shouldRequest({ apiKey, isOnline })) { return }
       try {
         const options = await context.dispatch('requestOptions', { method: 'GET', space: context.rootState.currentSpace })
-        const response = await fetch(`${host}/user/favorites`, options)
+        const response = await fetch(`${host}/user/favorite-spaces`, options)
         return normalizeResponse(response)
       } catch (error) {
-        context.dispatch('handleServerError', { name: 'getUserFavorites', error })
+        context.dispatch('handleServerError', { name: 'getUserFavoriteSpaces', error })
+      }
+    },
+    getUserFavoriteUsers: async (context) => {
+      const apiKey = context.rootState.currentUser.apiKey
+      const isOnline = context.rootState.isOnline
+      if (!shouldRequest({ apiKey, isOnline })) { return }
+      try {
+        const options = await context.dispatch('requestOptions', { method: 'GET', space: context.rootState.currentSpace })
+        const response = await fetch(`${host}/user/favorite-users`, options)
+        return normalizeResponse(response)
+      } catch (error) {
+        context.dispatch('handleServerError', { name: 'getUserFavoriteUsers', error })
+      }
+    },
+    getUserFavoriteColors: async (context) => {
+      const apiKey = context.rootState.currentUser.apiKey
+      const isOnline = context.rootState.isOnline
+      if (!shouldRequest({ apiKey, isOnline })) { return }
+      try {
+        const options = await context.dispatch('requestOptions', { method: 'GET', space: context.rootState.currentSpace })
+        const response = await fetch(`${host}/user/favorite-colors`, options)
+        return normalizeResponse(response)
+      } catch (error) {
+        context.dispatch('handleServerError', { name: 'getUserFavoriteUsers', error })
+      }
+    },
+    getFollowingUsersSpaces: async (context) => {
+      const apiKey = context.rootState.currentUser.apiKey
+      const isSpacePage = context.rootGetters.isSpacePage
+      const isOnline = context.rootState.isOnline
+      if (!shouldRequest({ apiKey, isOnline })) { return }
+      if (!isSpacePage) { return }
+      try {
+        console.log('🛬 getting following users spaces')
+        const options = await context.dispatch('requestOptions', { method: 'GET', space: context.rootState.currentSpace })
+        const response = await fetch(`${host}/user/favorite-users-spaces`, options)
+        return normalizeResponse(response)
+      } catch (error) {
+        context.dispatch('handleServerError', { name: 'getFollowingUsersSpaces', error })
       }
     },
     getUserSpaces: async (context) => {
@@ -490,12 +525,27 @@ const self = {
       if (!shouldRequest({ shouldRequestRemote: true, isOnline })) { return }
       if (!isSpacePage) { return }
       try {
-        console.log('🛬 getting new spaces')
+        console.log('🛬 getting explore spaces')
         const options = await context.dispatch('requestOptions', { method: 'GET', space: context.rootState.currentSpace })
         const response = await utils.timeout(consts.defaultTimeout, fetch(`${host}/space/explore-spaces`, options))
         return normalizeResponse(response)
       } catch (error) {
         context.dispatch('handleServerError', { name: 'getExploreSpaces', error })
+      }
+    },
+
+    getEveryoneSpaces: async (context) => {
+      const isSpacePage = context.rootGetters.isSpacePage
+      const isOnline = context.rootState.isOnline
+      if (!shouldRequest({ shouldRequestRemote: true, isOnline })) { return }
+      if (!isSpacePage) { return }
+      try {
+        console.log('🛬 getting everyone spaces')
+        const options = await context.dispatch('requestOptions', { method: 'GET', space: context.rootState.currentSpace })
+        const response = await utils.timeout(consts.defaultTimeout, fetch(`${host}/space/everyone-spaces`, options))
+        return normalizeResponse(response)
+      } catch (error) {
+        context.dispatch('handleServerError', { name: 'getEveryoneSpaces', error })
       }
     },
     getLiveSpaces: async (context) => {

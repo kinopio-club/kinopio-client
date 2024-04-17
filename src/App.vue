@@ -660,6 +660,13 @@ p
     display inline
     vertical-align middle
 
+.segmented-buttons + .segmented-buttons,
+.button-wrap + .button-wrap
+  margin-left 6px
+.segmented-buttons
+  > .button-wrap + .button-wrap
+    margin-left 0
+
 dialog
   width 250px
   left 8px
@@ -687,11 +694,12 @@ dialog
     width 230px
   &.wide
     width 280px
+  .segmented-buttons + .segmented-buttons
+    margin-left 0
   button + button,
   button + input,
   button + label,
   label + button,
-  .button-wrap + .button-wrap,
   button + .button-wrap,
   .button-wrap + button,
   label + label,
@@ -1107,13 +1115,21 @@ code
     margin 0
   &.new-unread-badge
     border-radius 100px
+    position absolute
     min-width initial
     min-height initial
     width 8px
     height 8px
+    right 4px
+    top 4px
+    margin 0
     padding 0
-    vertical-align 2px
+    z-index 10
     background var(--new-unread-background)
+    &.notification-button-badge
+      right -3px
+      top -3px
+
   input
     margin 0
   .user
@@ -1337,12 +1353,16 @@ progress::-moz-progress-bar
   background-color var(--primary)
   border-radius 2px
 
-.fadeIn-enter-active {
+// .pulse
+//   // https://easings.net/#easeOutQuad
+//   animation fadeIn 1.2s cubic-bezier(0.5, 1, 0.89, 1) infinite
+//   animation-direction alternate-reverse
+.fadeIn-enter-active
   animation fadeIn 0.5s ease-out
-}
 @keyframes fadeIn
   0%
     opacity 0
   100%
     opacity 1
+
 </style>

@@ -13,6 +13,8 @@ dialog.live(v-if="visible" :open="visible" ref="dialog" :style="{'max-height': d
       @selectSpace="changeSpace"
       :resultsSectionHeight="resultsSectionHeight"
       :parentDialog="parentDialog"
+      :previewImageIsWide="true"
+      :hideFilter="true"
     )
   section.empty(v-if="!spaces.length")
     p No public spaces are currently being edited, check back soon

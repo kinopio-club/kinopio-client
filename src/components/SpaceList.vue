@@ -8,6 +8,7 @@ import MoonPhase from '@/components/MoonPhase.vue'
 import PrivacyIcon from '@/components/PrivacyIcon.vue'
 import Loader from '@/components/Loader.vue'
 import User from '@/components/User.vue'
+import UserLabelInline from '@/components/UserLabelInline.vue'
 import NameMatch from '@/components/NameMatch.vue'
 import OfflineBadge from '@/components/OfflineBadge.vue'
 import SpaceTodayJournalBadge from '@/components/SpaceTodayJournalBadge.vue'
@@ -61,6 +62,8 @@ const props = defineProps({
   showCategory: Boolean,
   showUser: Boolean,
   showOtherUsers: Boolean,
+  showCollaborators: Boolean,
+  showUserLabelInline: Boolean,
   showUserIfCurrentUserIsCollaborator: Boolean,
   hideExploreBadge: Boolean,
   hideFilter: Boolean,
@@ -69,11 +72,13 @@ const props = defineProps({
   parentIsPinned: Boolean,
   showCheckmarkSpace: Boolean,
   userShowInExploreDate: String,
+  spaceReadDateType: String,
   showCreateNewSpaceFromSearch: Boolean,
   resultsSectionHeight: Number,
   disableListOptimizations: Boolean,
   search: String,
-  parentDialog: String
+  parentDialog: String,
+  previewImageIsWide: Boolean
 })
 
 const state = reactive({
@@ -97,7 +102,8 @@ watch(() => props.isLoading, async (value, prevValue) => {
   await nextTick()
   updateScroll()
 })
-const updateScroll = () => {
+const updateScroll = async () => {
+  await nextTick()
   let element = spaceListElement.value
   if (!element) { return }
   element = element.closest('section')
@@ -135,8 +141,9 @@ const duplicateSpace = () => {
 }
 const isNew = (space) => {
   if (props.userShowInExploreDate) {
+    if (spaceIsCurrentSpace(space)) { return }
     const readDate = dayjs(props.userShowInExploreDate)
-    const spaceDate = dayjs(space.showInExploreUpdatedAt)
+    const spaceDate = utils.spaceReadDate(space, props.spaceReadDateType)
     const delta = readDate.diff(spaceDate, 'second')
     return delta < 0
   }
@@ -186,6 +193,14 @@ const user = (space) => {
     users = space.users
   }
   return space.user || users[0]
+}
+const users = (space) => {
+  const spaceUser = user(space)
+  let spaceUsers = [spaceUser]
+  if (space.collaborators) {
+    spaceUsers = spaceUsers.concat(space.collaborators)
+  }
+  return spaceUsers
 }
 const selectSpace = (event, space) => {
   if (event) {
@@ -389,15 +404,19 @@ span.space-list-wrap
                   User(:user="user(space)" :isClickable="false" :key="user(space).id" :isMedium="true")
                   template(v-for="otherUser in space.otherUsers" :key="otherUser.id")
                     User(:user="otherUser" :isClickable="false" :isMedium="true")
+              template(v-else-if="showUserLabelInline")
+                UserLabelInline(:user="user(space)" :isClickable="false" :key="user(space).id" :isMedium="true")
+              template(v-else-if="showCollaborators")
+                .users(:class="{'multiple-users': users(space).length > 1}")
+                  template(v-for="user in users(space)" :key="user.id")
+                    User(:user="user" :isClickable="false" :isMedium="true")
               template(v-else-if="showUser")
                 User(:user="user(space)" :isClickable="false" :key="user(space).id" :isMedium="true")
               template(v-else-if="showCollaborator(space)")
                 User(:user="user(space)" :isClickable="false" :key="user(space).id" :isMedium="true")
               //- preview image
-              .preview-thumbnail-image-wrap(v-if="space.previewThumbnailImage && isOnline")
+              .preview-thumbnail-image-wrap(v-if="space.previewThumbnailImage && isOnline" :class="{wide: previewImageIsWide}")
                 img.preview-thumbnail-image(:src="space.previewThumbnailImage")
-                //- new
-                .badge.info.inline-badge.new-unread-badge(v-if="isNew(space)")
               //- offline
               span(v-if="isNotCached(space.id)")
                 OfflineBadge(:isInline="true" :isDanger="true")
@@ -427,6 +446,8 @@ span.space-list-wrap
                 img.icon.sunglasses(src="@/assets/sunglasses.svg" v-if="showInExplore(space)" title="Shown in Explore")
               button.button-checkmark(v-if="showCheckmarkSpace" @mousedown.left.stop="checkmarkSpace(space)" @touchstart.stop="checkmarkSpace(space)")
                 img.icon.checkmark(src="@/assets/checkmark.svg")
+            //- new
+            .badge.info.inline-badge.new-unread-badge(v-if="isNew(space)")
 </template>
 
 <style lang="stylus">
@@ -437,13 +458,6 @@ span.space-list-wrap
   .inline-badge
     margin-left 0
     flex none
-
-  .new-unread-badge
-    position absolute
-    top -2px
-    right -2px
-    left initial
-    margin 0
 
   .badge
     margin-left 0
@@ -477,17 +491,17 @@ span.space-list-wrap
   .user
     margin-right 6px
     vertical-align middle
-
+  .user-label-inline
+    flex-shrink 0
   .users
     margin-right 6px
     display flex
     flex-wrap wrap
-    justify-content flex-end
     align-content flex-start
     flex-shrink 0
+    max-width 44px // 2 users across
     .user
       margin-right 0
-
   a
     color var(--primary)
     text-decoration none
@@ -544,6 +558,10 @@ span.space-list-wrap
     position relative
     flex-shrink 0
     margin-right 6px
-    width 24px
-    height 22px
+    &.wide
+      width 40px
+      height 30px
+      .preview-thumbnail-image
+        width 100%
+        height 100%
 </style>

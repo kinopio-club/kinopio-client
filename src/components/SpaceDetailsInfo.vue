@@ -42,11 +42,7 @@ ReadOnlySpaceInfoBadges
 .row(v-if="isSpaceMember")
   //- Privacy
   PrivacyButton(:privacyPickerIsVisible="privacyPickerIsVisible" :showShortName="true" @togglePrivacyPickerIsVisible="togglePrivacyPickerIsVisible" @closeDialogs="closeDialogs" @updateLocalSpaces="updateLocalSpaces")
-  //- Pin Favorite
-  .button-wrap
-    button(:class="{active: isFavoriteSpace}" @click.left.prevent="toggleIsFavoriteSpace" @keydown.stop.enter="toggleIsFavoriteSpace" title="Favorite Current Space")
-      img.icon(v-if="isFavoriteSpace" src="@/assets/heart.svg")
-      img.icon(v-else src="@/assets/heart-empty.svg")
+  FavoriteSpaceButton(@updateLocalSpaces="updateLocalSpaces")
   //- Settings
   .button-wrap
     button(@click="toggleSettingsIsVisible" :class="{active: settingsIsVisible}")
@@ -55,10 +51,7 @@ ReadOnlySpaceInfoBadges
 
 //- read only options
 .row(v-if="!isSpaceMember")
-  //- Favorite
-  button(:class="{active: isFavoriteSpace}" @click.left.prevent="toggleIsFavoriteSpace" @keydown.stop.enter="toggleIsFavoriteSpace" title="Favorite Current Space")
-    img.icon(v-if="isFavoriteSpace" src="@/assets/heart.svg")
-    img.icon(v-else src="@/assets/heart-empty.svg")
+  FavoriteSpaceButton(@updateLocalSpaces="updateLocalSpaces")
   .button-wrap
     button(@click="toggleSettingsIsVisible" :class="{active: settingsIsVisible}")
       img.icon.settings(src="@/assets/settings.svg")
@@ -131,6 +124,7 @@ import ImportExport from '@/components/dialogs/ImportExport.vue'
 import ReadOnlySpaceInfoBadges from '@/components/ReadOnlySpaceInfoBadges.vue'
 import AddToExplore from '@/components/AddToExplore.vue'
 import AskToAddToExplore from '@/components/AskToAddToExplore.vue'
+import FavoriteSpaceButton from '@/components/FavoriteSpaceButton.vue'
 import cache from '@/cache.js'
 
 export default {
@@ -144,7 +138,8 @@ export default {
     ReadOnlySpaceInfoBadges,
     AskToAddToExplore,
     AddToExplore,
-    ImportExport
+    ImportExport,
+    FavoriteSpaceButton
   },
   props: {
     shouldHidePin: Boolean,
@@ -231,20 +226,13 @@ export default {
       })
     },
     dialogIsPinned () { return this.$store.state.spaceDetailsIsPinned },
-    currentUserIsSpaceCollaborator () { return this.$store.getters['currentUser/isSpaceCollaborator']() },
-    isFavoriteSpace () { return this.$store.getters['currentSpace/isFavorite'] }
+    currentUserIsSpaceCollaborator () { return this.$store.getters['currentUser/isSpaceCollaborator']() }
 
   },
   methods: {
     toggleCurrentSpaceIsUserTemplate () {
       const value = !this.currentSpaceIsUserTemplate
       this.$store.dispatch('currentSpace/updateSpace', { isTemplate: value })
-      this.updateLocalSpaces()
-    },
-    toggleIsFavoriteSpace () {
-      const space = this.$store.state.currentSpace
-      const value = !this.isFavoriteSpace
-      this.$store.dispatch('currentUser/updateFavoriteSpace', { space, value })
       this.updateLocalSpaces()
     },
     duplicateSpace () {

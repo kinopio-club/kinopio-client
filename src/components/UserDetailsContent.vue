@@ -261,8 +261,6 @@ const updateExploreSpaces = async () => {
       SpacePicker(:visible="state.spacePickerIsVisible" :loading="state.loading.userSpaces" :user="user" :userSpaces="state.userSpaces" @selectSpace="changeSpace")
     .button-wrap
       button(:class="{active: isFavoriteUser}" @click.left.prevent="updateFavoriteUser" @keydown.stop.enter="updateFavoriteUser")
-        img.icon(v-if="isFavoriteUser" src="@/assets/heart.svg")
-        img.icon(v-else src="@/assets/heart-empty.svg")
         span Follow
         Loader(:visible="isLoadingFavorites")
     .badge.danger.error-message(v-if="state.error.unknownServerError") (シ_ _)シ Something went wrong, Please try again or contact support
