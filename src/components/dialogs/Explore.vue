@@ -50,9 +50,33 @@ const state = reactive({
   userShowInExploreDate: null,
   exploreRssFeedsIsVisible: false,
   filteredSpaces: undefined,
-  currentSection: 'explore' // 'explore', 'following', 'everyone'
+  currentSection: 'explore', // 'explore', 'following', 'everyone'
+  isReadSections: [] // 'explore', 'following', 'everyone'
 })
-// TODO watch currentSection , log prevvalue to remove unread badges from btnx
+
+// unread sections
+
+watch(() => state.currentSection, (value, prevValue) => {
+  state.isReadSections.push(prevValue)
+})
+const isUnreadExplore = computed(() => {
+  if (state.isReadSections.includes('explore')) {
+    return false
+  }
+  return Boolean(props.unreadExploreSpacesCount)
+})
+const isUnreadFollowing = computed(() => {
+  if (state.isReadSections.includes('following')) {
+    return false
+  }
+  return Boolean(props.unreadFollowingSpacesCount)
+})
+const isUnreadEveryone = computed(() => {
+  if (state.isReadSections.includes('everyone')) {
+    return false
+  }
+  return Boolean(props.unreadEveryoneSpacesCount)
+})
 
 const currentSpace = computed(() => store.state.currentSpace)
 const changeSpace = (space) => {
@@ -138,15 +162,15 @@ dialog.explore.wide(v-if="visible" :open="visible" ref="dialogElement" :style="{
           .label-wrap
             img.icon.sunglasses(src="@/assets/sunglasses.svg")
             span Explore
-            .badge.new-unread-badge.notification-button-badge
+            .badge.new-unread-badge.notification-button-badge(v-if="isUnreadExplore")
         button(:class="{active: currentSectionIsFollowing}" @click="updateCurrentSection('following')")
           .label-wrap
             span Following
-            .badge.new-unread-badge.notification-button-badge
+            .badge.new-unread-badge.notification-button-badge(v-if="isUnreadFollowing")
         button(:class="{active: currentSectionIsEveryone}" @click="updateCurrentSection('everyone')")
           .label-wrap
             span Everyone
-            .badge.new-unread-badge.notification-button-badge
+            .badge.new-unread-badge.notification-button-badge(v-if="isUnreadEveryone")
 
   section
     .row.title-row
@@ -168,6 +192,7 @@ dialog.explore.wide(v-if="visible" :open="visible" ref="dialogElement" :style="{
       :showUser="true"
       @selectSpace="changeSpace"
       :userShowInExploreDate="state.userShowInExploreDate"
+      :spaceReadDateType="state.currentSection"
       :resultsSectionHeight="state.resultsSectionHeight"
       :parentDialog="parentDialog"
       :previewImageIsWide="true"
@@ -175,7 +200,6 @@ dialog.explore.wide(v-if="visible" :open="visible" ref="dialogElement" :style="{
       :showCollaborators="showCollaborators"
       :showUserLabelInline="showUserLabelInline"
     )
-    //- TODO manually pass in exploreSpaceDateKey 'string' // showInExploreUpdatedAt(explore) updatedAt(following) createdAt(everyone)
 </template>
 
 <style lang="stylus">

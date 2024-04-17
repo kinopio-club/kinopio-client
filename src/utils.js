@@ -1462,6 +1462,19 @@ export default {
     })
     return space
   },
+  spaceReadDate (space, type) {
+    this.typeCheck({ value: space, type: 'object' })
+    this.typeCheck({ value: type, type: 'string' }) // 'explore', 'following', 'everyone'
+    let date
+    if (type === 'explore') {
+      date = space.showInExploreUpdatedAt
+    } else if (type === 'following') {
+      date = space.updatedAt
+    } else if (type === 'everyone') {
+      date = space.createdAt
+    }
+    return dayjs(date)
+  },
 
   // Journal Space 🌚
 

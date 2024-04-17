@@ -44,7 +44,8 @@ const state = reactive({
   everyoneSpaces: [],
   unreadExploreSpacesCount: 0,
   unreadFollowingSpacesCount: 0,
-  unreadEveryoneSpacesCount: 0
+  unreadEveryoneSpacesCount: 0,
+  unreadSpacesCount: 0
 })
 
 const closeDialogs = () => {
@@ -61,6 +62,48 @@ const normalizeCount = (count) => {
   } else {
     return count
   }
+}
+
+// Unread Counts
+
+const spaceIsCurrentSpace = (space) => {
+  const currentSpace = store.state.currentSpace
+  return space.id === currentSpace.id
+}
+const unreadSpaces = (spaces, type) => {
+  let readDate = store.state.currentUser.showInExploreUpdatedAt
+  readDate = dayjs(readDate)
+  const unreadSpaces = spaces?.filter(space => {
+    if (spaceIsCurrentSpace(space)) { return }
+    const spaceDate = utils.spaceReadDate(space, type)
+    const delta = readDate.diff(spaceDate, 'second')
+    console.log('🏎️🏎️', type, delta)
+    return delta < 0
+  })
+  return unreadSpaces || []
+}
+const updateUnreadSpacesCounts = () => {
+  let readDate = store.state.currentUser.showInExploreUpdatedAt
+  if (!readDate) { return maxUnreadCountCharacter }
+  state.unreadExploreSpacesCount = unreadSpaces(state.exploreSpaces, 'explore').length
+  state.unreadFollowingSpacesCount = unreadSpaces(state.followingSpaces, 'following').length
+  state.unreadEveryoneSpacesCount = unreadSpaces(state.everyoneSpaces, 'everyone').length
+  console.log('🎡🎡🎡🎡', state.unreadEveryoneSpacesCount, state.unreadExploreSpacesCount, state.unreadFollowingSpacesCount)
+  const count = state.unreadExploreSpacesCount + state.unreadFollowingSpacesCount
+  console.log('♥️♥️♥️', count)
+  state.unreadSpacesCount = normalizeCount(count)
+}
+watch(() => state.exploreIsVisible, (value, prevValue) => {
+  if (!value) {
+    console.log('🌷🌷🌷🌷🌷🌷')
+    clearUnreadSpacesCounts()
+  }
+})
+const clearUnreadSpacesCounts = () => {
+  state.unreadExploreSpacesCount = 0
+  state.unreadFollowingSpacesCount = 0
+  state.unreadEveryoneSpacesCount = 0
+  state.unreadSpacesCount = 0
 }
 
 // Explore
@@ -82,34 +125,12 @@ const updateSpaces = async () => {
     state.exploreSpaces = exploreSpaces
     state.followingSpaces = followingSpaces
     state.everyoneSpaces = everyoneSpaces
+    updateUnreadSpacesCounts()
   } catch (error) {
     console.error('🚑 updateSpaces', error)
   }
   state.loading = false
 }
-const unreadSpaces = (spaces) => {
-  let readDate = store.state.currentUser.showInExploreUpdatedAt
-  readDate = dayjs(readDate)
-  const unreadSpaces = spaces?.filter(space => {
-    const spaceDate = dayjs(space.showInExploreUpdatedAt)
-    const delta = readDate.diff(spaceDate, 'second')
-    return delta < 0
-  })
-  return unreadSpaces || []
-}
-const updateUnreadSpacesCounts = () => {
-  state.unreadExploreSpacesCount = unreadSpaces(state.exploreSpaces).length
-  state.unreadFollowingSpacesCount = unreadSpaces(state.followingSpaces).length
-  state.unreadEveryoneSpacesCount = unreadSpaces(state.everyoneSpaces).length
-  console.log('🎡🎡🎡🎡', state.unreadEveryoneSpacesCount, state.unreadExploreSpacesCount, state.unreadFollowingSpacesCount)
-}
-const unreadSpacesCount = computed(() => {
-  let readDate = store.state.currentUser.showInExploreUpdatedAt
-  if (!readDate) { return maxUnreadCountCharacter }
-  updateUnreadSpacesCounts()
-  const count = state.unreadExploreSpacesCount + state.unreadFollowingSpacesCount
-  return normalizeCount(count)
-})
 
 // Live
 
@@ -169,7 +190,7 @@ const liveSpacesCount = computed(() => {
     .button-wrap
       button(:class="{active: state.exploreIsVisible, 'translucent-button': !shouldIncreaseUIContrast}" @click="toggleExploreIsVisible")
         img.icon.sunglasses(src="@/assets/sunglasses.svg")
-        span(v-if="unreadSpacesCount") {{unreadSpacesCount}}
+        span(v-if="state.unreadSpacesCount") {{state.unreadSpacesCount}}
       Explore(
         :visible="state.exploreIsVisible"
         :exploreSpaces="state.exploreSpaces"

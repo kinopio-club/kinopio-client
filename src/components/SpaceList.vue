@@ -72,6 +72,7 @@ const props = defineProps({
   parentIsPinned: Boolean,
   showCheckmarkSpace: Boolean,
   userShowInExploreDate: String,
+  spaceReadDateType: String,
   showCreateNewSpaceFromSearch: Boolean,
   resultsSectionHeight: Number,
   disableListOptimizations: Boolean,
@@ -140,9 +141,9 @@ const duplicateSpace = () => {
 }
 const isNew = (space) => {
   if (props.userShowInExploreDate) {
+    if (spaceIsCurrentSpace(space)) { return }
     const readDate = dayjs(props.userShowInExploreDate)
-    // TODO spaceDate = space[props.exploreSpaceDateKey]
-    const spaceDate = dayjs(space.showInExploreUpdatedAt || space.updatedAt)
+    const spaceDate = utils.spaceReadDate(space, props.spaceReadDateType)
     const delta = readDate.diff(spaceDate, 'second')
     return delta < 0
   }
