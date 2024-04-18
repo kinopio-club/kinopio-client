@@ -30,10 +30,10 @@ onMounted(() => {
   updateLiveSpaces()
   updateLiveSpacesIntervalTimer = setInterval(() => {
     updateLiveSpaces()
-  }, 1000 * 60 * 10) // 10 minutes
+  }, 1000 * 60 * 5) // 5 minutes
   updateSpacesIntervalTimer = setInterval(() => {
     updateSpaces()
-  }, 1000 * 60 * 20) // 20 minutes
+  }, 1000 * 60 * 10) // 10 minutes
 })
 onUnmounted(() => {
   window.removeEventListener('online', updateLiveSpaces)
