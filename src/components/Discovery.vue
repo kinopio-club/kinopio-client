@@ -36,6 +36,7 @@ onUnmounted(() => {
 const state = reactive({
   exploreIsVisible: false,
   isLoadingLiveSpaces: true,
+  isLoadingSpaces: true,
   favoritesIsVisible: false,
   liveIsVisible: false,
   liveSpaces: [],
@@ -46,6 +47,15 @@ const state = reactive({
   unreadFollowingSpacesCount: 0,
   unreadEveryoneSpacesCount: 0,
   unreadSpacesCount: 0
+})
+
+watch(() => state.exploreIsVisible, (value, prevValue) => {
+  if (value && !state.isLoadingSpaces) {
+    updateSpaces()
+  }
+  if (!value) {
+    clearUnreadSpacesCounts()
+  }
 })
 
 const closeDialogs = () => {
@@ -90,11 +100,6 @@ const updateUnreadSpacesCounts = () => {
   const count = state.unreadExploreSpacesCount + state.unreadFollowingSpacesCount
   state.unreadSpacesCount = normalizeCount(count)
 }
-watch(() => state.exploreIsVisible, (value, prevValue) => {
-  if (!value) {
-    clearUnreadSpacesCounts()
-  }
-})
 const clearUnreadSpacesCounts = () => {
   state.unreadExploreSpacesCount = 0
   state.unreadFollowingSpacesCount = 0
@@ -111,8 +116,7 @@ const toggleExploreIsVisible = () => {
 }
 const updateSpaces = async () => {
   try {
-    state.loading = true
-
+    state.isLoadingSpaces = true
     const [exploreSpaces, followingSpaces, everyoneSpaces] = await Promise.all([
       store.dispatch('api/getExploreSpaces'),
       store.dispatch('api/getFollowingUsersSpaces'),
@@ -125,7 +129,7 @@ const updateSpaces = async () => {
   } catch (error) {
     console.error('🚑 updateSpaces', error)
   }
-  state.loading = false
+  state.isLoadingSpaces = false
 }
 
 // Live
@@ -192,7 +196,7 @@ const liveSpacesCount = computed(() => {
         :exploreSpaces="state.exploreSpaces"
         :followingSpaces="state.followingSpaces"
         :everyoneSpaces="state.everyoneSpaces"
-        :loading="state.loading"
+        :loading="state.isLoadingSpaces"
         :unreadExploreSpacesCount="state.unreadExploreSpacesCount"
         :unreadFollowingSpacesCount="state.unreadFollowingSpacesCount"
         :unreadEveryoneSpacesCount="state.unreadEveryoneSpacesCount"
