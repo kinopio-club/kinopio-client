@@ -11,13 +11,10 @@ import FavoriteSpaceButton from '@/components/FavoriteSpaceButton.vue'
 import utils from '@/utils.js'
 const store = useStore()
 
-let updateLiveSpacesIntervalTimer
+let updateLiveSpacesIntervalTimer, updateSpacesIntervalTimer
 const maxUnreadCountCharacter = '+'
 
 onMounted(() => {
-  window.addEventListener('online', updateLiveSpaces)
-  updateLiveSpaces()
-  updateSpaces()
   store.subscribe((mutation, state) => {
     if (mutation.type === 'triggerExploreIsVisible') {
       toggleExploreIsVisible()
@@ -27,10 +24,21 @@ onMounted(() => {
       updateSpaces()
     }
   })
+  // update spaces
+  window.addEventListener('online', updateLiveSpaces)
+  window.addEventListener('online', updateSpaces)
+  updateLiveSpaces()
+  updateLiveSpacesIntervalTimer = setInterval(() => {
+    updateLiveSpaces()
+  }, 1000 * 60 * 10) // 10 minutes
+  updateSpacesIntervalTimer = setInterval(() => {
+    updateSpaces()
+  }, 1000 * 60 * 20) // 20 minutes
 })
 onUnmounted(() => {
   window.removeEventListener('online', updateLiveSpaces)
   clearInterval(updateLiveSpacesIntervalTimer)
+  clearInterval(updateSpacesIntervalTimer)
 })
 
 const state = reactive({
@@ -107,7 +115,7 @@ const clearUnreadSpacesCounts = () => {
   state.unreadSpacesCount = 0
 }
 
-// Explore
+// Explore, Community spaces
 
 const toggleExploreIsVisible = () => {
   const isVisible = state.exploreIsVisible
