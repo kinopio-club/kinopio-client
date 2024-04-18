@@ -150,7 +150,7 @@ const toggleFavoritesIsVisible = () => {
 const restoreUserLastSidebarSection = () => {
   clearVisible()
   const section = store.state.currentUser.lastSidebarSection
-  const values = ['text', 'stats', 'AIImages', 'inbox', 'removed', 'comments', 'links', 'tags'] // listed in api docs
+  const values = ['text', 'stats', 'AIImages', 'inbox', 'removed', 'comments', 'links', 'tags', 'favorites'] // listed in api docs
   const isValid = values.includes(section)
   if (section && isValid) {
     state[section + 'IsVisible'] = true
