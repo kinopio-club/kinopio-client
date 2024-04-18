@@ -544,7 +544,7 @@ span.space-list-wrap
       top 10px
       z-index 1
     .icon.templates
-      margin-right 10px
+      margin-right 5px
       vertical-align 0px
 
   .space-wrap
