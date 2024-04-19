@@ -1237,7 +1237,6 @@ const updateUrlPreviewSuccess = ({ links, meta, cardId, url, html }) => {
 const updateUrlPreviewErrorUrl = (url) => {
   const cardId = props.card.id
   store.commit('removeUrlPreviewLoadingForCardIds', cardId)
-  const name = utils.removeHiddenQueryStringFromURLs(props.card.name)
   const update = {
     id: cardId,
     urlPreviewErrorUrl: url,
