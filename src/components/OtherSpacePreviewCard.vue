@@ -60,7 +60,7 @@ const previewImageIsVisible = computed(() => shouldShowPreviewImage.value && pre
     template(v-if="props.otherSpace")
       template(v-if="props.otherSpace.users")
         UserLabelInline(:user="props.otherSpace.users[0]" :shouldHideName="true")
-      span {{otherSpaceName}}
+      span.space-name {{otherSpaceName}}
       img.icon.private(v-if="otherSpaceIsPrivate" src="@/assets/lock.svg")
     template(v-else)
       Loader(:visible="true" :isSmall="true" :isStatic="!isLoadingOtherItems")
@@ -100,4 +100,7 @@ const previewImageIsVisible = computed(() => shouldShowPreviewImage.value && pre
     border-bottom-right-radius 0
     &.selected
       mix-blend-mode color-burn
+  .space-name
+    overflow-wrap break-word
+
 </style>
