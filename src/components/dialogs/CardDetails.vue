@@ -1057,7 +1057,7 @@ export default {
 
     // Comment
 
-    triggerCommentAddClosingBrackets () {
+    addCommentClosingBrackets () {
       const cursorPosition = this.selectionStartPosition()
       const previousCharacter = this.name[cursorPosition - 1]
       if (previousCharacter === '(') {
@@ -1082,8 +1082,8 @@ export default {
       const isCursorInsideTagBrackets = this.isCursorInsideTagBrackets()
       const isCursorInsideSlashCommand = this.isCursorInsideSlashCommand()
       if (keyIsArrowUpOrDown) { return }
-      if (key === '(' && !event.shiftKey) {
-        this.triggerCommentAddClosingBrackets()
+      if (key === '(') {
+        this.addCommentClosingBrackets()
       }
       if (utils.hasBlankCharacters(key)) {
         this.hideSpacePicker()
@@ -1095,7 +1095,7 @@ export default {
         this.showSpacePicker()
       } else if (key === '[' && previousCharacter === '[') {
         this.showTagPicker()
-        this.addClosingBrackets()
+        this.addTagClosingBrackets()
       } else if (keyIsLettterOrNumber && isCursorInsideTagBrackets) {
         this.showTagPicker()
       }
@@ -1278,7 +1278,7 @@ export default {
         this.hideTagPicker()
       }
     },
-    addClosingBrackets () {
+    addTagClosingBrackets () {
       const cursorPosition = this.selectionStartPosition()
       const name = this.name
       const newName = `${name.substring(0, cursorPosition)}]]${name.substring(cursorPosition)}`
