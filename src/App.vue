@@ -1046,7 +1046,7 @@ ul.results-list
   padding 0
   li
     display flex
-    padding 7px 7px
+    padding 7px
     align-items flex-start
     border-radius var(--entity-radius)
     user-select none

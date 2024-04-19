@@ -465,116 +465,117 @@ span.space-list-wrap
 .space-list-wrap
   position relative
 
-.space-list
-  .inline-badge
-    margin-left 0
-    flex none
+  .space-list
+    .inline-badge
+      margin-left 0
+      flex none
 
-  .badge
-    margin-left 0
+    .badge
+      margin-left 0
 
-  .sunglasses
-    width 16px
+    .sunglasses
+      width 16px
 
-  .icon.tweet
-    min-width 12px
-    margin-right 4px
-    vertical-align -1px
+    .icon.tweet
+      min-width 12px
+      margin-right 4px
+      vertical-align -1px
 
-  .name
-    margin 0
-    margin-top 1px
-    white-space wrap
-    width 100%
-    .icon
-      margin-left 6px
+    .name
+      margin 0
+      margin-top 1px
+      white-space wrap
+      width 100%
+      .icon
+        margin-left 6px
 
-  .privacy-icon
-    height 12px
-    vertical-align -1px
+    .privacy-icon
+      height 12px
+      vertical-align -1px
 
-  .favorite-icon,
-  .inbox-icon
-    margin-right 5px
-    width 12px
-    min-width 12px
-
-  .user
-    margin-right 6px
-    vertical-align middle
-  .user-label-inline
-    flex-shrink 0
-    max-width 120px
-    pointer-events none
-  .users
-    margin-right 6px
-    display flex
-    flex-wrap wrap
-    align-content flex-start
-    flex-shrink 0
-    max-width 66px // 3 users across
-    .user
-      margin-right 0
-  a
-    color var(--primary)
-    text-decoration none
-
-  .color-only-badge
-    width 16px
-    height 16px
-    padding 0
-    min-width initial
-    min-height initial
-
-  .button-checkmark
-    margin-left auto
-
-  .checkmark
-    vertical-align 1px
-    width 10px
-
-  li
-    position relative
-    width 100%
-    min-height 30px
-    .loader
-      position absolute
-      width 13px
-      height 13px
-      top 10px
-      z-index 1
-    .icon.templates
+    .favorite-icon,
+    .inbox-icon
       margin-right 5px
-      vertical-align 0px
+      width 12px
+      min-width 12px
 
-  .space-wrap
-    position relative
-    button.inline-favorite
-      cursor pointer
-      z-index 1
+    .user
+      margin-right 6px
+      vertical-align middle
+    .user-label-inline
+      flex-shrink 0
+      max-width 120px
+      pointer-events none
+    .users
+      margin-right 6px
+      display flex
+      flex-wrap wrap
+      align-content flex-start
+      flex-shrink 0
+      max-width 66px // 3 users across
+      .user
+        margin-right 0
+    a
+      color var(--primary)
+      text-decoration none
+
+    .color-only-badge
+      width 16px
+      height 16px
       padding 0
-      padding-left 6px
-      padding-right 2px
-  .inline-favorite-wrap
-    cursor pointer
-    position absolute
-    right 4px
-    top 3px
-    padding 6px
-    padding-right 0
+      min-width initial
+      min-height initial
 
-  .moon-phase
-    margin-top 4px
-    margin-right 4px
+    .button-checkmark
+      margin-left auto
 
-  .preview-thumbnail-image-wrap
-    position relative
-    flex-shrink 0
-    margin-right 6px
-    &.wide
-      width 40px
-      height 30px
-      .preview-thumbnail-image
-        width 100%
-        height 100%
+    .checkmark
+      vertical-align 1px
+      width 10px
+
+    li
+      position relative
+      width 100%
+      min-height 30px
+      padding-bottom 5px
+      .loader
+        position absolute
+        width 13px
+        height 13px
+        top 10px
+        z-index 1
+      .icon.templates
+        margin-right 5px
+        vertical-align 0px
+
+    .space-wrap
+      position relative
+      button.inline-favorite
+        cursor pointer
+        z-index 1
+        padding 0
+        padding-left 6px
+        padding-right 2px
+    .inline-favorite-wrap
+      cursor pointer
+      position absolute
+      right 4px
+      top 3px
+      padding 6px
+      padding-right 0
+
+    .moon-phase
+      margin-top 4px
+      margin-right 4px
+
+    .preview-thumbnail-image-wrap
+      position relative
+      flex-shrink 0
+      margin-right 6px
+      &.wide
+        width 40px
+        height 30px
+        .preview-thumbnail-image
+          width 100%
+          height 100%
 </style>
