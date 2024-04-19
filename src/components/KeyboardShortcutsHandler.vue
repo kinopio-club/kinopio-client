@@ -80,7 +80,7 @@ export default {
   methods: {
     // on key up
     handleShortcuts (event) {
-      const key = event.key
+      const key = event.key.lowercase()
       // console.warn('🎹', key)
       // const isFromCard = event.target.classList[0] === 'card'
       const isSpaceScope = checkIsSpaceScope(event)
@@ -99,10 +99,10 @@ export default {
         this.$store.dispatch('themes/toggle')
         this.$store.dispatch('themes/isSystem', false)
       // Backspace, Clear, Delete
-      } else if ((key === 'Backspace' || key === 'Clear' || key === 'Delete') && isSpaceScope) {
+      } else if ((key === 'backspace' || key === 'clear' || key === 'delete') && isSpaceScope) {
         this.remove()
       // Escape
-      } else if (key === 'Escape') {
+      } else if (key === 'escape') {
         this.$store.dispatch('closeAllDialogs')
         this.$store.commit('currentUserToolbar', 'card')
       } else if (key === '1' && isSpaceScope) {
@@ -135,7 +135,7 @@ export default {
     },
     // on key down
     handleMetaKeyShortcuts (event) {
-      const key = event.key
+      const key = event.key.lowercase()
       const isMeta = event.metaKey || event.ctrlKey
       const isCardScope = checkIsCardScope(event)
       const isSpaceScope = checkIsSpaceScope(event)
@@ -143,10 +143,10 @@ export default {
       console.log('🐸🐸', key, isMeta, event.shiftKey, event)
 
       // Add Child Card
-      if (event.shiftKey && key === 'Enter' && (isSpaceScope || isCardScope)) {
+      if (event.shiftKey && key === 'enter' && (isSpaceScope || isCardScope)) {
         this.addChildCard()
       // Add Card
-      } else if (key === 'Enter' && isSpaceScope) {
+      } else if (key === 'enter' && isSpaceScope) {
         this.addCard()
       // Redo
       } else if (event.shiftKey && isMeta && key === 'z' && !isFromInput) {
