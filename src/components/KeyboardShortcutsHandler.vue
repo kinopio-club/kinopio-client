@@ -170,7 +170,6 @@ export default {
         this.focusOnSpaceDetailsFilter()
       // Search/Jump-to Card
       } else if (isMeta && key === 'f') {
-        console.log('🐸🐸search test🐸🐸🐸🐸', event, isMeta, event.shiftKey)
         event.preventDefault()
         this.focusOnSearchCardFilter(event)
       // Show previous search card
