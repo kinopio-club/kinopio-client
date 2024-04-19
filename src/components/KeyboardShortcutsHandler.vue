@@ -80,7 +80,7 @@ export default {
   methods: {
     // on key up
     handleShortcuts (event) {
-      const key = event.key.lowercase()
+      const key = event.key.toLowerCase()
       // console.warn('🎹', key)
       // const isFromCard = event.target.classList[0] === 'card'
       const isSpaceScope = checkIsSpaceScope(event)
@@ -135,7 +135,7 @@ export default {
     },
     // on key down
     handleMetaKeyShortcuts (event) {
-      const key = event.key.lowercase()
+      const key = event.key.toLowerCase()
       const isMeta = event.metaKey || event.ctrlKey
       const isCardScope = checkIsCardScope(event)
       const isSpaceScope = checkIsSpaceScope(event)
