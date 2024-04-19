@@ -778,6 +778,7 @@ export default {
     focusOnSearchCardFilter (event) {
       this.$store.dispatch('closeAllDialogs')
       this.$store.commit('searchIsVisible', true)
+      console.log('🍇🍇🍇', event.shiftKey, event)
       if (event.shiftKey) {
         this.$store.commit('triggerSearchScopeIsRemote')
       } else {
