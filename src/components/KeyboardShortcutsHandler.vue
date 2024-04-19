@@ -20,7 +20,9 @@ const checkIsSpaceScope = (event) => {
   if (isFromInput) { return }
   const isBody = tagName === 'BODY'
   const isMain = tagName === 'MAIN'
-  const isFocusedCard = event.target.className === 'card'
+  const nodeList = event.target.classList
+  const classes = [ ...nodeList ]
+  const isFocusedCard = classes.includes('card')
   return isBody || isMain || isFocusedCard
 }
 
