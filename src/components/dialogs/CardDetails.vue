@@ -129,7 +129,7 @@ dialog.card-details(v-if="visible" :open="visible" ref="dialog" @click.left="clo
 
     MediaPreview(:visible="cardHasMedia" :card="card" :formats="formats")
     UrlPreview(
-      :visible="Boolean(card.urlPreviewUrl) || isLoadingUrlPreview"
+      :visible="urlPreviewIsVisible"
       :loading="isLoadingUrlPreview"
       :card="card"
       :urlsIsVisibleInName="urlsIsVisible"
@@ -571,6 +571,15 @@ export default {
       const isErrorUrl = this.card.urlPreviewErrorUrl && this.card.urlPreviewUrl === this.card.urlPreviewErrorUrl
       const hasPreview = this.url && (this.isLoadingUrlPreview || this.card.urlPreviewUrl)
       return Boolean(this.card.urlPreviewIsVisible && hasPreview && !isErrorUrl)
+    },
+    urlPreviewIsVisible () {
+      if (this.isLoadingUrlPreview) { return true }
+      if (!this.card.urlPreviewUrl) { return }
+      const urls = utils.urlsFromString(this.card.name) || []
+      const value = urls.find((url) => {
+        return url?.includes(this.card.urlPreviewUrl)
+      })
+      return Boolean(value)
     },
     isLoadingUrlPreview () {
       const isLoading = this.urlPreviewLoadingForCardIds.find(cardId => cardId === this.card.id)
@@ -1403,14 +1412,6 @@ export default {
       this.$store.dispatch('currentCards/update', update)
       this.$store.dispatch('currentConnections/updatePaths', { cardId: this.card.id, shouldUpdateApi: true })
       this.$store.dispatch('currentCards/updateDimensions', { cards: [this.card] })
-    },
-    toggleUrlPreviewIsVisible () {
-      const value = !this.card.urlPreviewIsVisible
-      const update = {
-        id: this.card.id,
-        urlPreviewIsVisible: value
-      }
-      this.$store.dispatch('currentCards/update', update)
     },
     resetPinchCounterZoomDecimal () {
       this.$store.commit('pinchCounterZoomDecimal', 1)

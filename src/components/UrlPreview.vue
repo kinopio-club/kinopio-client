@@ -177,9 +177,10 @@ const showNone = async () => {
         //- text
         div
           .row.info-row
-            img.favicon(v-if="card.urlPreviewFavicon" :src="card.urlPreviewFavicon")
-            img.icon.favicon.open(v-else src="@/assets/open.svg")
-            .title {{filteredTitle}}
+            a(:href="card.urlPreviewUrl")
+              img.favicon(v-if="card.urlPreviewFavicon" :src="card.urlPreviewFavicon")
+              img.icon.favicon.open(v-else src="@/assets/open.svg")
+              .title {{filteredTitle}}
           .description(v-if="description") {{description}}
 </template>
 
@@ -217,6 +218,11 @@ const showNone = async () => {
     pointer-events none
     -webkit-touch-callout none // prevents safari mobile press-and-hold from interrupting
 
+  a
+    color var(--primary)
+    text-decoration none
+    &:hover
+      text-decoration underline
   a.preview-image-wrap
     max-height 120px
     overflow hidden
@@ -252,13 +258,12 @@ const showNone = async () => {
   .favicon
     border-radius var(--small-entity-radius)
     width 14px
-    vertical-align -3px
+    vertical-align -2px
     display inline
     margin-right 5px
-    margin-top 3px
     &.open
       width 12px
-      vertical-align -2px
+      vertical-align 0
   .title
     display inline
   .description
