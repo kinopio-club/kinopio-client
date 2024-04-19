@@ -140,6 +140,8 @@ export default {
       const isCardScope = checkIsCardScope(event)
       const isSpaceScope = checkIsSpaceScope(event)
       const isFromInput = event.target.closest('input') || event.target.closest('textarea')
+      console.log('🐸🐸', key, isMeta, event.shiftKey, event)
+
       // Add Child Card
       if (event.shiftKey && key === 'Enter' && (isSpaceScope || isCardScope)) {
         this.addChildCard()
