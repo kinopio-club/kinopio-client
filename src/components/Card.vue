@@ -294,16 +294,23 @@ const updateIsPlayingAudio = (value) => {
 
 // other card
 
-const otherCardIsVisible = computed(() => Boolean(props.card.linkToCardId))
 const otherCardUrl = computed(() => utils.urlFromSpaceAndCard({ cardId: props.card.linkToCardId, spaceId: props.card.linkToSpaceId }))
 const otherCard = computed(() => {
   const card = store.getters.otherCardById(props.card.linkToCardId)
   return card
 })
+const otherCardIsVisible = computed(() => {
+  if (!props.card.linkToCardId) { return }
+  const name = props.card.name
+  const urls = utils.urlsFromString(name) || []
+  const value = urls.find((url) => {
+    return url?.includes(props.card.linkToCardId)
+  })
+  return Boolean(value)
+})
 
 // other space
 
-const otherSpaceIsVisible = computed(() => Boolean(props.card.linkToSpaceId))
 const otherSpace = computed(() => {
   let isInviteLink, collaboratorKey, readOnlyKey
   let space = nameSegments.value.find(segment => segment.otherSpace)
@@ -321,6 +328,15 @@ const spaceOrInviteUrl = computed(() => {
   } else {
     return null
   }
+})
+const otherSpaceIsVisible = computed(() => {
+  if (!props.card.linkToSpaceId) { return }
+  const name = props.card.name
+  const urls = utils.urlsFromString(name) || []
+  const value = urls.find((url) => {
+    return url?.includes(props.card.linkToSpaceId)
+  })
+  return Boolean(value)
 })
 
 // space search
