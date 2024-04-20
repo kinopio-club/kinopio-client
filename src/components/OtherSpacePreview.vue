@@ -15,7 +15,8 @@ const props = defineProps({
 })
 
 const state = reactive({
-  moreOptionsIsVisible: false
+  moreOptionsIsVisible: false,
+  previewImageIsHover: false
 })
 
 const cardIsCreatedByCurrentUser = computed(() => store.getters['currentUser/cardIsCreatedByCurrentUser'](props.card))
@@ -64,6 +65,9 @@ const togglePreviewImageIsVisible = (value) => {
     shouldShowOtherSpacePreviewImage: value
   })
 }
+const previewImageHover = (value) => {
+  state.previewImageIsHover = value
+}
 </script>
 
 <template lang="pug">
@@ -82,20 +86,21 @@ const togglePreviewImageIsVisible = (value) => {
             span All
           button(@click="togglePreviewImageIsVisible(false)" :class="{active : !previewImageIsVisible}")
             span Text
-    a.preview-image-wrap.side-image(v-if="previewImageIsVisible" :href="url" @click.stop.prevent="changeSpace")
+    a.preview-image-wrap.side-image(v-if="previewImageIsVisible" :href="url" @click.stop.prevent="changeSpace" @mouseover="previewImageHover(true)" @mouseleave="previewImageHover(false)")
       img.preview-image.clickable-item(:src="otherSpace?.previewImage")
     div
       template(v-if="!isLoadingOtherItems || !otherSpace")
-        //- badges
-        .badge.info.inline-badge(v-if="isInvite")
-          span Invite
-        .badge.danger.inline-badge(v-if="isRemoved")
-          img.icon(src="@/assets/remove.svg")
-        //- space info
-        template(v-if="otherSpace?.users")
-          UserLabelInline(:user="otherSpace?.users[0]" :shouldHideName="true")
-        span {{otherSpace?.name}}
-          img.icon.private(v-if="otherSpaceIsPrivate" src="@/assets/lock.svg")
+        a(:href="url" :class="{ hover: state.previewImageIsHover }")
+          //- badges
+          .badge.info.inline-badge(v-if="isInvite")
+            span Invite
+          .badge.danger.inline-badge(v-if="isRemoved")
+            img.icon(src="@/assets/remove.svg")
+          //- space info
+          template(v-if="otherSpace?.users")
+            UserLabelInline(:user="otherSpace?.users[0]" :shouldHideName="true")
+          span {{otherSpace?.name}}
+            img.icon.private(v-if="otherSpaceIsPrivate" src="@/assets/lock.svg")
       template(v-else)
         Loader(:visible="true" :isSmall="true" :isStatic="!isLoadingOtherItems")
         span Space
@@ -132,6 +137,13 @@ const togglePreviewImageIsVisible = (value) => {
     background var(--primary-background)
     pointer-events none
     -webkit-touch-callout none // prevents safari mobile press-and-hold from interrupting
+
+  a
+    color var(--primary)
+    text-decoration none
+    &:hover,
+    &.hover
+      text-decoration underline
 
   a.preview-image-wrap
     max-height 120px

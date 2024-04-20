@@ -31,7 +31,8 @@ const props = defineProps({
 })
 const state = reactive({
   imageCanLoad: false,
-  moreOptionsIsVisible: false
+  moreOptionsIsVisible: false,
+  previewImageIsHover: false
 })
 
 const isSpaceMember = computed(() => store.getters['currentUser/isSpaceMember']())
@@ -74,6 +75,9 @@ const updateImageCanLoad = () => {
 }
 const updateDimensions = () => {
   store.dispatch('currentCards/updateDimensions', { cards: [props.card] })
+}
+const previewImageHover = (value) => {
+  state.previewImageIsHover = value
 }
 
 // show options
@@ -171,13 +175,13 @@ const showNone = async () => {
               span None
       //- image
       img.hidden(v-if="card.urlPreviewImage" :src="card.urlPreviewImage" @load="updateImageCanLoad")
-      a.preview-image-wrap(v-if="!shouldHideImage && card.urlPreviewImage" :href="card.urlPreviewUrl" :class="{'side-image': !shouldHideInfo, transparent: isShowNone}")
+      a.preview-image-wrap(v-if="!shouldHideImage && card.urlPreviewImage" :href="card.urlPreviewUrl" :class="{'side-image': !shouldHideInfo, transparent: isShowNone}" @mouseover="previewImageHover(true)" @mouseleave="previewImageHover(false)")
         img.preview-image.clickable-item(:src="card.urlPreviewImage" @load="updateDimensions")
       .text.badge(v-if="!shouldHideInfo" :class="{'side-text': shouldLoadUrlPreviewImage, 'text-with-image': card.urlPreviewImage && !shouldHideImage, transparent: isShowNone, 'text-only': isTextOnly }" :style="{background: selectedColor}")
         //- text
         div
           .row.info-row
-            a(:href="card.urlPreviewUrl")
+            a(:href="card.urlPreviewUrl" :class="{ hover: state.previewImageIsHover }")
               img.favicon(v-if="card.urlPreviewFavicon" :src="card.urlPreviewFavicon")
               img.icon.favicon.open(v-else src="@/assets/open.svg")
               .title {{filteredTitle}}
@@ -221,7 +225,8 @@ const showNone = async () => {
   a
     color var(--primary)
     text-decoration none
-    &:hover
+    &:hover,
+    &.hover
       text-decoration underline
   a.preview-image-wrap
     max-height 120px
