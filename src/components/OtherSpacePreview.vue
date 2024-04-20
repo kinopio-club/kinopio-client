@@ -141,6 +141,7 @@ const previewImageHover = (value) => {
   a
     color var(--primary)
     text-decoration none
+    pointer-events all
     &:hover,
     &.hover
       text-decoration underline
