@@ -10,7 +10,7 @@ span
         //- user
         UserLabelInline(v-if="userIsNotCurrentUser(card.user.id)" :user="card.user")
         //- name
-        span.card-info(:class="{ badge: card.backgroundColor, 'is-dark': colorIsDark }" :style="styles(card)")
+        span.card-info(:class="{ badge: card.backgroundColor, 'is-dark': colorIsDark(card) }" :style="styles(card)")
           template(v-for="segment in card.nameSegments")
             img.card-image(v-if="segment.isImage" :src="segment.url")
             img.card-image(v-if="urlPreviewImage(card)" :src="urlPreviewImage(card)")
@@ -111,7 +111,7 @@ export default {
     },
     colorIsDark (card) {
       if (!card.backgroundColor) { return }
-      utils.colorIsDark(card.backgroundColor)
+      return utils.colorIsDark(card.backgroundColor)
     },
     styles (card) {
       return {
