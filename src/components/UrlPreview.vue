@@ -175,13 +175,13 @@ const showNone = async () => {
               span None
       //- image
       img.hidden(v-if="card.urlPreviewImage" :src="card.urlPreviewImage" @load="updateImageCanLoad")
-      a.preview-image-wrap(v-if="!shouldHideImage && card.urlPreviewImage" :href="card.urlPreviewUrl" :class="{'side-image': !shouldHideInfo, transparent: isShowNone}" @mouseover="previewImageHover(true)" @mouseleave="previewImageHover(false)")
+      a.preview-image-wrap(v-if="!shouldHideImage && card.urlPreviewImage" :href="card.urlPreviewUrl" :class="{'side-image': !shouldHideInfo, transparent: isShowNone}" @mouseover="previewImageHover(true)" @mouseleave="previewImageHover(false)" target="_blank")
         img.preview-image.clickable-item(:src="card.urlPreviewImage" @load="updateDimensions")
       .text.badge(v-if="!shouldHideInfo" :class="{'side-text': shouldLoadUrlPreviewImage, 'text-with-image': card.urlPreviewImage && !shouldHideImage, transparent: isShowNone, 'text-only': isTextOnly }" :style="{background: selectedColor}")
         //- text
         div
           .row.info-row
-            a(:href="card.urlPreviewUrl" :class="{ hover: state.previewImageIsHover }")
+            a(:href="card.urlPreviewUrl" :class="{ hover: state.previewImageIsHover }" target="_blank")
               img.favicon(v-if="card.urlPreviewFavicon" :src="card.urlPreviewFavicon")
               img.icon.favicon.open(v-else src="@/assets/open.svg")
               .title {{filteredTitle}}
