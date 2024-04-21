@@ -298,7 +298,7 @@ export default {
       if (!space) { return }
       const isEdited = space.editedByUserId
       if (!isEdited) {
-        cache.removeSpace(space)
+        cache.deleteSpace(space)
         shouldLoadLastSpace = true
       }
     },
