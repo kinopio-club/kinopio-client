@@ -239,9 +239,9 @@ export default {
         // update user to remote user
         this.$store.commit('currentUser/updateUser', result)
         // update local spaces to remote user
+        this.removeUneditedSpace('Hello Kinopio')
+        this.removeUneditedSpace('Inbox')
         this.updateSpacesUserId()
-        this.checkIfShouldRemoveSpace('Hello Kinopio')
-        this.checkIfShouldRemoveSpace('Inbox')
         await this.$store.dispatch('api/createSpaces')
         this.notifySignedIn()
         // add new spaces from remote
@@ -293,7 +293,7 @@ export default {
       }
     },
 
-    checkIfShouldRemoveSpace (spaceName) {
+    removeUneditedSpace (spaceName) {
       let space = cache.getSpaceByName(spaceName)
       if (!space) { return }
       const isEdited = space.editedByUserId
