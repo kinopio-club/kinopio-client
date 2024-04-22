@@ -124,8 +124,8 @@ export default {
         context.dispatch('addImageDataUrl', { file, cardId, spaceId })
       })
     },
-    addCardsAndUploadFiles: async (context, { files, event }) => {
-      let position = utils.cursorPositionInSpace(event)
+    addCardsAndUploadFiles: async (context, { files, event, position }) => {
+      position = position || utils.cursorPositionInSpace(event)
       context.dispatch('currentUser/notifyReadOnly', position, { root: true })
       const userIsUpgraded = context.rootState.currentUser.isUpgraded
       const spaceUserIsUpgraded = context.rootGetters['currentSpace/spaceUserIsUpgraded']
