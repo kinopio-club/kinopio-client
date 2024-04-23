@@ -1,6 +1,6 @@
 <template lang="pug">
 .audio(v-if="visible" :class="{'card-has-no-name': !normalizedName}")
-  audio.hidden(ref="audio" controls="controls" :src="url" type="audio/mpeg" preload="metadata")
+  audio.hidden(ref="audioElement" controls="controls" :src="url" type="audio/mpeg" preload="metadata")
   //- use controls to playback <audio>
   .controls(
     @keyup.prevent="cancelClick"
@@ -74,8 +74,7 @@ export default {
     })
   },
   mounted () {
-    const audio = this.$refs.audio
-    if (!audio) { return }
+    const audio = this.$refs.audioElement
     audio.addEventListener('loadedmetadata', this.getTotalTime)
   },
   beforeUnmount () {
@@ -155,7 +154,7 @@ export default {
       }
     },
     playAudio () {
-      const audio = this.$refs.audio
+      const audio = this.$refs.audioElement
       if (this.progressPercent >= 98) {
         this.progressPercent = 0
         audio.currentTime = 0
@@ -171,7 +170,7 @@ export default {
       this.$emit('isPlaying', true)
     },
     pauseAudio () {
-      const audio = this.$refs.audio
+      const audio = this.$refs.audioElement
       audio.pause()
       this.isPlaying = false
       audio.removeEventListener('timeupdate', this.getCurrentTime)
@@ -180,14 +179,14 @@ export default {
       this.$emit('isPlaying', false)
     },
     getTotalTime () {
-      const audio = this.$refs.audio
+      const audio = this.$refs.audioElement
       if (!audio) { return }
       const seconds = Math.floor(audio.duration)
       const time = this.duration(seconds)
       this.totalTime = this.formatTime(time)
     },
     getCurrentTime () {
-      const audio = this.$refs.audio
+      const audio = this.$refs.audioElement
       const seconds = Math.floor(audio.currentTime)
       const time = this.duration(seconds)
       time.format = this.timeFormat
@@ -211,7 +210,7 @@ export default {
       this.updateCurrentTime()
     },
     updateCurrentTime () {
-      const audio = this.$refs.audio
+      const audio = this.$refs.audioElement
       audio.currentTime = Math.floor(audio.duration * this.progressPercent / 100)
       const time = this.duration(audio.currentTime)
       time.format = this.timeFormat
