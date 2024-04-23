@@ -7,7 +7,7 @@ export default {
   },
   spaceBetweenCards: 12,
   maxCardLength: 300,
-  maxCodeBlockCardLength: 2000,
+  maxCodeBlockCardLength: 4000,
   maxInviteEmailsAllowedToSend: 15,
   defaultCardWidth: 76,
   defaultConnectionPathCurveControlPoint: 'q90,40',
