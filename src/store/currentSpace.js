@@ -892,10 +892,10 @@ const currentSpace = {
       if (!prevSpaceIdInSession) { return }
       let space = cache.space(prevSpaceIdInSession)
       if (space.id) {
-        await context.dispatch('loadSpace', { space })
+        await context.dispatch('changeSpace', space)
       } else if (prevSpaceIdInSession) {
         space = { id: prevSpaceIdInSession }
-        await context.dispatch('loadSpace', { space })
+        await context.dispatch('changeSpace', space)
       }
       window.scroll({
         left: prevSpacePosition.x,
