@@ -472,8 +472,8 @@ export default {
       if (!this.urls) { return [] }
       return this.urls.filter(url => {
         const isLink = utils.urlType(url) === 'link'
-        const isValidTld = utils.urlIsValidTld(url)
-        return isLink && isValidTld
+        const isValidUrl = utils.urlIsValidTld(url) || utils.urlIsValidLocalhost(url)
+        return isLink && isValidUrl
       })
     },
     validWebUrls () {

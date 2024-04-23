@@ -1674,6 +1674,15 @@ export default {
       return true
     }
   },
+  urlIsValidLocalhost (url) {
+    // https://regexr.com/7vc0o
+    // matches ':' then numbers
+    // then ends or continues with '/' or '?'
+    const portPattern = new RegExp(/(:[0-9]+)(\?|\/(\w+|\d+)| |$)/igm)
+    if (url.match(portPattern)) {
+      return true
+    }
+  },
   urlIsValidTld (url) {
     if (!url) { return }
     const isLocalhostUrl = url.match(this.localhostUrlPattern())
@@ -1716,7 +1725,7 @@ export default {
     // https://stackoverflow.com/a/42408099
     return string.match(/([a-zA-Z0-9._-]+@[a-zA-Z0-9._-]+\.[a-zA-Z0-9_-]+)/gim) || []
   },
-  urlsFromString (string, skipProtocolCheck) {
+  urlsFromString (string) {
     if (!string) { return [] }
     // remove markdown links
     const markdownLinks = string.match(this.markdown().linkPattern)
@@ -1728,13 +1737,13 @@ export default {
     string = this.removeMarkdownCodeblocksFromString(string)
     // https://regexr.com/59m5t
     // start, newline, or space
-    // optionally starts with http/s protocol
+    // starts with http/s protocol
     // followed by alphanumerics
-    // then '.'
+    // then '.', or ':' + portnumbers
     // followed by alphanumerics
     // then trailing '/' or '-'
     // matches multiple urls and returns [urls]
-    const urlPattern = new RegExp(/(^|\n| )(http[s]?:\/\/)?[^\s(["<>]{2,}\.[^\s."><]+[\w=]\/?-?/igm)
+    const urlPattern = new RegExp(/(^|\n| )(http[s]?:\/\/)[^\s(["<>]{2,}(\.|(:[0-9]+))[^\s."><]+[\w=]\/?-?/igm)
     let localhostUrls = string.match(this.localhostUrlPattern()) || []
     let urls = string.match(urlPattern) || []
     urls = urls.concat(localhostUrls)
@@ -1750,10 +1759,9 @@ export default {
         return true
       }
     })
-    if (skipProtocolCheck) { return urls }
     // ensure url has protocol
     urls = urls.map(url => {
-      const isFile = this.urlIsFile(url, true)
+      const isFile = this.urlIsFile(url)
       const hasProtocol = this.urlHasProtocol(url)
       if (isFile || hasProtocol) {
         return url
@@ -1814,12 +1822,8 @@ export default {
     const isAudio = url.match(audioUrlPattern)
     return Boolean(isAudio)
   },
-  urlIsFile (url, skipProtocolCheck) {
+  urlIsFile (url) {
     if (!url) { return }
-    if (!skipProtocolCheck) {
-      const hasProtocol = this.urlHasProtocol(url)
-      if (!hasProtocol) { return }
-    }
     url = url + ' '
     const fileUrlPattern = new RegExp(/(?:\.txt|\.md|\.markdown|\.pdf|\.ppt|\.pptx|\.doc|\.docx|\.csv|\.xsl|\.xslx|\.rtf|\.zip|\.tar|\.xml|\.psd|\.ai|\.ind|\.sketch|\.mov|\.heic|\.7z|\.woff|\.woff2|\.otf|\.ttf|\.wav|\.flac)(?:\n| |\?|&)/igm)
     const isFile = url.toLowerCase().match(fileUrlPattern)
