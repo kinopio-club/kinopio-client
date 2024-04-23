@@ -12,10 +12,10 @@ dialog.narrow.color-picker(v-if="visible" :open="visible" ref="dialog" @click.le
     //- Colors
     .recent-colors(v-if="recentColors")
       template(v-for="color in recentColors")
-        button.color(:style="{backgroundColor: color}" :class="{active: colorIsCurrent(color)}" @click.left="select(color)")
+        button.color(:style="{backgroundColor: color}" :class="{active: colorIsCurrent(color)}" @click.left="select(color)" :title="color")
     .colors
       template(v-for="color in colors")
-        button.color(:style="{backgroundColor: color}" :class="{active: colorIsCurrent(color)}" @click.left="select(color)")
+        button.color(:style="{backgroundColor: color}" :class="{active: colorIsCurrent(color)}" @click.left="select(color)" :title="color")
 
     //- Current Color Modifiers
 
@@ -63,7 +63,7 @@ dialog.narrow.color-picker(v-if="visible" :open="visible" ref="dialog" @click.le
       img.icon(v-if="currentColorIsFavorite" src="@/assets/heart.svg")
       span.current-color(:style="{ background: currentColor }")
     template(v-for="color in favoriteColors")
-      button.color(:style="{backgroundColor: color}" :class="{active: colorIsCurrent(color)}" @click.left="select(color, 'isFavorite')")
+      button.color(:style="{backgroundColor: color}" :class="{active: colorIsCurrent(color)}" @click.left="select(color, 'isFavorite')" :title="color")
 
 </template>
 
@@ -159,9 +159,9 @@ export default {
       this.colors.unshift(this.currentColor)
     },
     select (color, isFavorite) {
-      if (!isFavorite) {
-        color = colord(color).alpha(this.opacity / 100).toRgbString()
-      }
+      const alpha = colord(color).alpha()
+      const opacity = alpha * 100
+      this.opacity = Math.round(opacity)
       this.$emit('selectedColor', color)
     },
     updateColorFromInput (color) {
@@ -212,7 +212,8 @@ export default {
     },
     updateOpacity (value) {
       this.opacity = Math.round(value)
-      this.select(this.color)
+      const color = colord(this.currentColor).alpha(this.opacity / 100).toRgbString()
+      this.$emit('selectedColor', color)
     },
     resetOpacity () {
       this.updateOpacity(100)
