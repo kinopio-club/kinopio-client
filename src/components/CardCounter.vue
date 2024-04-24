@@ -16,7 +16,7 @@ const increment = () => {
     id: props.card.id,
     counterValue: count
   }
-  store.dispatch('currentCards/updateCounter', card)
+  store.dispatch('currentCards/updateCounter', { card, shouldIncrement: true })
 }
 const decrement = () => {
   let count = counterValue.value - 1
@@ -25,7 +25,7 @@ const decrement = () => {
     id: props.card.id,
     counterValue: count
   }
-  store.dispatch('currentCards/updateCounter', card)
+  store.dispatch('currentCards/updateCounter', { card, shouldDecrement: true })
 }
 </script>
 
