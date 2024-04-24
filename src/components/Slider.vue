@@ -10,6 +10,11 @@
   @touchend="endMovePlayhead"
   :class="{'is-dragging': playheadIsBeingDragged, 'jiggle-right': animateJiggleRight, 'jiggle-left': animateJiggleLeft}"
   @animationend="removeAnimations"
+
+  :data-value="value"
+  :data-slider-value="sliderValue"
+  :data-max="maxValue"
+  :data-min="minValue"
 )
   span.badge.info.zoom-percent-badge(
     ref="badge"
@@ -159,6 +164,11 @@ export default {
     },
     removeAnimations () {
       this.$emit('removeAnimations')
+    }
+  },
+  watch: {
+    value (value) {
+      this.updateButtonPosition()
     }
   }
 }

@@ -213,7 +213,7 @@ const showNone = async () => {
     &.no-padding
       padding 0
     &.is-no-info
-      min-height 40px !important
+      min-height 38px !important
   .preview-image
     display block
     width 100%

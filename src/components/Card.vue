@@ -765,7 +765,7 @@ const isCardButtonsVisible = computed(() => {
 const cardButtonUrl = computed(() => {
   const link = state.formats.link
   const file = state.formats.file
-  if (utils.urlIsValidTld(link) || utils.urlIsSpace(link)) {
+  if (utils.urlIsValidTld(link) || utils.urlIsSpace(link) || utils.urlIsValidLocalhost(link)) {
     return link
   } else if (utils.urlHasProtocol(file)) {
     return file
@@ -775,7 +775,9 @@ const cardButtonUrl = computed(() => {
 })
 const webUrl = computed(() => {
   const link = state.formats.link
-  if (utils.urlIsValidTld(link) && !utils.urlIsSpace(link)) {
+  const isValidUrl = utils.urlIsValidTld(link) || utils.urlIsValidLocalhost(link)
+  const isNotSpaceUrl = !utils.urlIsSpace(link)
+  if (isValidUrl && isNotSpaceUrl) {
     return link
   } else {
     return null
@@ -1241,7 +1243,7 @@ const updateUrlPreviewErrorUrl = (url) => {
     id: cardId,
     urlPreviewErrorUrl: url,
     urlPreviewUrl: url,
-    name
+    name: props.card.name
   }
   store.dispatch('currentCards/update', update)
 }
