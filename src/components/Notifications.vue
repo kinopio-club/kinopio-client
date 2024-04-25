@@ -217,12 +217,14 @@ export default {
   },
   mounted () {
     window.addEventListener('visibilitychange', this.updatePageVisibilityChange)
+    window.addEventListener('focus', this.updatePageVisibilityChange)
     checkIfShouldNotifySpaceOutOfSyncIntervalTimer = setInterval(() => {
       this.checkIfShouldNotifySpaceOutOfSync()
-    }, 1000 * 60 * 60 * 1) // 1 hour
+    }, 1000 * 60 * 60 * 1) // check every hour
   },
   beforeUnmount () {
     window.removeEventListener('visibilitychange', this.updatePageVisibilityChange)
+    window.removeEventListener('focus', this.updatePageVisibilityChange)
     clearInterval(checkIfShouldNotifySpaceOutOfSyncIntervalTimer)
   },
   computed: {
@@ -292,9 +294,7 @@ export default {
       return Boolean(!isHidden)
     },
     updatePageVisibilityChange (event) {
-      if (document.visibilityState === 'visible') {
-        this.checkIfShouldNotifySpaceOutOfSync()
-      }
+      this.checkIfShouldNotifySpaceOutOfSync()
     },
     closeAllDialogs () {
       this.$store.dispatch('closeAllDialogs')
@@ -369,28 +369,25 @@ export default {
       this.$store.commit('triggerUpgradeUserIsVisible')
     },
     async checkIfShouldNotifySpaceOutOfSync () {
+      if (this.notifySpaceOutOfSync) { return }
       console.log('☎️ checkIfShouldNotifySpaceOutOfSync…')
       try {
-        const space = utils.clone(this.$store.state.currentSpace)
-        const canEditSpace = this.$store.getters['currentUser/canEditSpace'](space)
+        let space = utils.clone(this.$store.state.currentSpace)
         if (!this.currentUserIsSignedIn) { return }
-        // use
-        let remoteSpace
-        if (canEditSpace) {
-          remoteSpace = await this.$store.dispatch('api/getSpace', { space })
-        } else {
-          remoteSpace = await this.$store.dispatch('api/getSpaceAnonymously', space)
-        }
+        this.$store.commit('isLoadingSpace', true)
+        const remoteSpace = await this.$store.dispatch('api/getSpaceUpdatedAt', space)
+        this.$store.commit('isLoadingSpace', false)
         if (!remoteSpace) { return }
+        space = this.$store.state.currentSpace
         const spaceUpdatedAt = dayjs(space.updatedAt)
         const remoteSpaceUpdatedAt = dayjs(remoteSpace.updatedAt)
-        const hoursDelta = spaceUpdatedAt.diff(remoteSpaceUpdatedAt, 'hour') // hourDelta
-        const updatedAtIsChanged = hoursDelta >= 1
+        const deltaMinutes = spaceUpdatedAt.diff(remoteSpaceUpdatedAt, 'minute')
+        const updatedAtIsChanged = deltaMinutes >= 1
         console.log('☎️ checkIfShouldNotifySpaceOutOfSync result', {
-          hoursDelta,
           updatedAtIsChanged,
-          spaceUpdatedAt: space.updatedAt,
-          remoteSpaceUpdatedAt: remoteSpace.updatedAt
+          spaceUpdatedAt: spaceUpdatedAt.fromNow(),
+          remoteSpaceUpdatedAt: remoteSpaceUpdatedAt.fromNow(),
+          deltaMinutes
         })
         if (updatedAtIsChanged) {
           this.notifySpaceOutOfSync = true
@@ -398,6 +395,7 @@ export default {
       } catch (error) {
         console.error('🚒 checkIfShouldNotifySpaceOutOfSync', error)
         this.notifySpaceOutOfSync = true
+        this.$store.commit('isLoadingSpace', false)
       }
     },
     refreshBrowser () {
