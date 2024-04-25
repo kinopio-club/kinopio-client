@@ -537,6 +537,7 @@ const currentSpace = {
           context.dispatch('removeLocalSpaceIfUserIsRemoved', space)
           context.dispatch('loadLastSpace')
           cache.removeInvitedSpace(space)
+          context.dispatch('currentUser/updateFavoriteSpace', { space, value: false }, { root: true })
         }
         if (error.status === 500) {
           context.commit('notifyConnectionError', true, { root: true })
