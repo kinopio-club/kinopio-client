@@ -503,13 +503,13 @@ const currentCards = {
 
     // tilt
 
-    tilt: (context, { cardIds, deltaX }) => {
-      const maxDegrees = 30
-      deltaX = -deltaX
+    tilt: (context, { cardIds, delta }) => {
+      const maxDegrees = 25
       cardIds.forEach(cardId => {
         const card = context.getters.byId(cardId)
         let tilt = card.tilt || 0
-        tilt = tilt + deltaX
+        console.log(tilt, delta)
+        tilt = tilt + delta
         tilt = Math.min(maxDegrees, tilt)
         tilt = Math.max(-maxDegrees, tilt)
         const updates = { id: cardId, tilt }
