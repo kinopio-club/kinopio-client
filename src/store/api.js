@@ -841,6 +841,15 @@ const self = {
         context.dispatch('handleServerError', { name: 'search', error })
       }
     },
+    updateCardCounter: async (context, body) => {
+      try {
+        const options = await context.dispatch('requestOptions', { body, method: 'PATCH', space: context.rootState.currentSpace })
+        const response = await fetch(`${host}/card/update-counter`, options)
+        return normalizeResponse(response)
+      } catch (error) {
+        context.dispatch('handleServerError', { name: 'update-counter', error })
+      }
+    },
 
     // ConnectionType
 

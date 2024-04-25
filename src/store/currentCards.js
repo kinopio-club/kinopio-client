@@ -338,10 +338,19 @@ const currentCards = {
         context.dispatch('currentConnections/updateMultplePaths', cards, { root: true })
       })
     },
-    updateCounter: (context, card) => {
+    updateCounter: (context, { card, shouldIncrement, shouldDecrement }) => {
+      const isSignedIn = context.rootGetters['currentUser/isSignedIn']
       context.commit('update', card)
       context.dispatch('api/addToQueue', { name: 'updateCardCounter', body: card }, { root: true })
       context.dispatch('broadcast/update', { updates: card, type: 'updateCard', handler: 'currentCards/update' }, { root: true })
+      if (!isSignedIn) {
+        const body = {
+          cardId: card.id,
+          shouldIncrement,
+          shouldDecrement
+        }
+        context.dispatch('api/updateCardCounter', body, { root: true })
+      }
     },
     updateName (context, { card, newName }) {
       const canEditCard = context.rootGetters['currentUser/canEditCard'](card)
