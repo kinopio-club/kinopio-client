@@ -59,6 +59,7 @@ const initialState = {
   shouldUseStickyCards: true,
   shouldIncreaseUIContrast: false,
   shouldPauseConnectionDirections: false,
+  shouldInvertZoom: false,
   lastUsedImagePickerService: '',
   AIImages: [],
   theme: null,
@@ -358,6 +359,10 @@ export default {
     shouldPauseConnectionDirections: (state, value) => {
       state.shouldPauseConnectionDirections = value
       cache.updateUser('shouldPauseConnectionDirections', value)
+    },
+    shouldInvertZoom: (state, value) => {
+      state.shouldInvertZoom = value
+      cache.updateUser('shouldInvertZoom', value)
     },
     lastUsedImagePickerService: (state, value) => {
       state.lastUsedImagePickerService = value

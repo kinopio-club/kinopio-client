@@ -17,9 +17,9 @@ const state = reactive({
   outsideSpaceColorTipsIsVisible: false
 })
 
-const currentSpace = computed(() => { return store.state.currentSpace })
-const isMobile = computed(() => { return utils.isMobile() })
-const deviceSupportsHapticFeedback = computed(() => { return consts.isSecureAppContext && isMobile.value })
+const currentSpace = computed(() => store.state.currentSpace)
+const isMobile = computed(() => utils.isMobile())
+const deviceSupportsHapticFeedback = computed(() => consts.isSecureAppContext && isMobile.value)
 
 // haptic feedback
 
@@ -39,8 +39,8 @@ const toggleNewSpacesAreBlank = () => {
 
 // panning
 
-const shouldDisableRightClickToPan = computed(() => { return store.state.currentUser.shouldDisableRightClickToPan })
-const panSpeedIsFast = computed(() => { return store.state.currentUser.panSpeedIsFast })
+const shouldDisableRightClickToPan = computed(() => store.state.currentUser.shouldDisableRightClickToPan)
+const panSpeedIsFast = computed(() => store.state.currentUser.panSpeedIsFast)
 const updatePanSpeedIsFast = (value) => {
   store.dispatch('currentUser/update', { panSpeedIsFast: value })
 }
@@ -54,9 +54,17 @@ const togglePanningTipsIsVisible = () => {
   state.panningTipsIsVisible = value
 }
 
+// zoom
+
+const shouldInvertZoom = computed(() => store.state.currentUser.shouldInvertZoom)
+const toggleShouldInvertZoom = () => {
+  const value = !shouldInvertZoom.value
+  store.commit('currentUser/shouldInvertZoom', value)
+}
+
 // disable sticky cards
 
-const shouldDisableStickyCards = computed(() => { return !store.state.currentUser.shouldUseStickyCards })
+const shouldDisableStickyCards = computed(() => !store.state.currentUser.shouldUseStickyCards)
 const toggleShouldUseStickyCards = () => {
   let value = store.state.currentUser.shouldUseStickyCards
   value = !value
@@ -65,7 +73,7 @@ const toggleShouldUseStickyCards = () => {
 
 // pause connection directions
 
-const shouldPauseConnectionDirections = computed(() => { return store.state.currentUser.shouldPauseConnectionDirections })
+const shouldPauseConnectionDirections = computed(() => store.state.currentUser.shouldPauseConnectionDirections)
 const toggleShouldPauseConnectionDirections = () => {
   const value = !shouldPauseConnectionDirections.value
   store.dispatch('currentUser/update', { shouldPauseConnectionDirections: value })
@@ -74,7 +82,7 @@ const toggleShouldPauseConnectionDirections = () => {
 
 // increase UI Contrast
 
-const shouldIncreaseUIContrast = computed(() => { return store.state.currentUser.shouldIncreaseUIContrast })
+const shouldIncreaseUIContrast = computed(() => store.state.currentUser.shouldIncreaseUIContrast)
 const toggleShouldIncreaseUIContrast = () => {
   const value = !shouldIncreaseUIContrast.value
   store.dispatch('currentUser/update', { shouldIncreaseUIContrast: value })
@@ -85,7 +93,7 @@ const toggleShouldIncreaseUIContrast = () => {
 const updateOutsideSpaceBackgroundIsStatic = (value) => {
   store.dispatch('currentUser/update', { outsideSpaceBackgroundIsStatic: value })
 }
-const outsideSpaceBackgroundIsStatic = computed(() => { return store.state.currentUser.outsideSpaceBackgroundIsStatic })
+const outsideSpaceBackgroundIsStatic = computed(() => store.state.currentUser.outsideSpaceBackgroundIsStatic)
 const outsideSpaceStyles = computed(() => {
   return {
     backgroundColor: store.state.outsideSpaceBackgroundColor
@@ -155,7 +163,7 @@ const clearTips = () => {
 
   section
     .row.title-row
-      p Panning
+      p Panning and Zoom
       .button-wrap
         button.small-button(@click="togglePanningTipsIsVisible" :class="{ active: state.panningTipsIsVisible }")
           span ?
@@ -173,6 +181,11 @@ const clearTips = () => {
       label(:class="{ active: shouldDisableRightClickToPan }" @click.left.prevent="toggleShouldDisableRightClickToPan" @keydown.stop.enter="toggleShouldDisableRightClickToPan")
         input(type="checkbox" v-model="shouldDisableRightClickToPan")
         span Disable Right/Middle Click to Pan
+    .row
+      label(:class="{ active: shouldInvertZoom }" @click.left.prevent="toggleShouldInvertZoom" @keydown.stop.enter="toggleShouldInvertZoom")
+        input(type="checkbox" v-model="shouldInvertZoom")
+        span Invert Zoom Direction
+
 </template>
 
 <style lang="stylus">

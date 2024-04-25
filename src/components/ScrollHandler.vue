@@ -25,7 +25,10 @@ const handleMouseWheelEvents = (event) => {
   const deltaY = event.deltaY
   let shouldZoomIn = deltaY < 0
   let shouldZoomOut = deltaY > 0
-  const invertZoom = event.webkitDirectionInvertedFromDevice
+  let invertZoom = event.webkitDirectionInvertedFromDevice
+  if (store.state.currentUser.shouldInvertZoom) {
+    invertZoom = !invertZoom
+  }
   if (invertZoom) {
     shouldZoomIn = deltaY > 0
     shouldZoomOut = deltaY < 0
