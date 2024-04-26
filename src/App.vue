@@ -380,7 +380,7 @@ export default {
   -webkit-overflow-scrolling touch
   -webkit-tap-highlight-color transparent
   box-sizing border-box
-  font-family "Helvetica Neue", Helvetica, Arial, sans-serif
+  font-family "Noto Sans", "Helvetica Neue", Helvetica, Arial, sans-serif // 'noto sans' for linux bug
   font-size 15px
   line-height 1.2
 
