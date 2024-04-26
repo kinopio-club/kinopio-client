@@ -297,7 +297,9 @@ export default {
       let space = cache.getSpaceByName(spaceName)
       if (!space) { return }
       const isEdited = space.editedByUserId
+      console.log('🛃 signIn → removeUneditedSpace:', spaceName, isEdited, space) // temp debugging log
       if (!isEdited) {
+        console.log('🛃🛃 removeUneditedSpace: remove space', spaceName) // temp debugging log
         cache.deleteSpace(space)
         shouldLoadLastSpace = true
       }
