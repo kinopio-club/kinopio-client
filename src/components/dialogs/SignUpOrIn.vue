@@ -64,6 +64,9 @@ import utils from '@/utils.js'
 import Loader from '@/components/Loader.vue'
 import cache from '@/cache.js'
 
+import inboxSpace from '@/data/inbox.json'
+import helloSpace from '@/data/hello.json'
+
 import { nanoid } from 'nanoid'
 
 let shouldLoadLastSpace
@@ -294,13 +297,24 @@ export default {
     },
 
     removeUneditedSpace (spaceName) {
-      let space = cache.getSpaceByName(spaceName)
-      if (!space) { return }
-      const isEdited = space.editedByUserId
-      console.log('🛃 signIn → removeUneditedSpace:', spaceName, isEdited, space) // temp debugging log
-      if (!isEdited) {
-        console.log('🛃🛃 removeUneditedSpace: remove space', spaceName) // temp debugging log
-        cache.deleteSpace(space)
+      let currentSpace = cache.getSpaceByName(spaceName)
+      let space
+      if (spaceName === 'Hello Kinopio') {
+        space = helloSpace
+      } else if (spaceName === 'Inbox') {
+        space = inboxSpace
+      }
+      const cardNames = space.cards.map(card => card.name)
+      let spaceIsEdited
+      currentSpace.cards.forEach(card => {
+        const cardIsNew = !cardNames.includes(card.name)
+        if (cardIsNew) {
+          spaceIsEdited = true
+        }
+      })
+      if (!spaceIsEdited) {
+        console.log('signIn removeUneditedSpace', spaceName)
+        cache.deleteSpace(currentSpace)
         shouldLoadLastSpace = true
       }
     },

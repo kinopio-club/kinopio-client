@@ -315,7 +315,6 @@ const currentCards = {
         context.commit('updateCardNameInOtherItems', card, { root: true })
         context.commit('triggerUpdateOtherCard', card.id, { root: true })
       }
-      console.warn('🛃 update: space editedByUserId') // temp debugging log
       cache.updateSpace('editedByUserId', context.rootState.currentUser.id, currentSpaceId)
     },
     updateMultiple: (context, cards) => {
@@ -333,7 +332,6 @@ const currentCards = {
           context.commit('updateCardNameInOtherItems', card, { root: true })
           context.commit('triggerUpdateOtherCard', card.id, { root: true })
         }
-        console.warn('🛃 updateMultiple: space editedByUserId') // temp debugging log
         cache.updateSpace('editedByUserId', context.rootState.currentUser.id, currentSpaceId)
       })
       nextTick(() => {
