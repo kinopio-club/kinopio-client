@@ -7,6 +7,7 @@ import themes from '@/store/themes.js'
 import api from '@/store/api.js'
 import broadcast from '@/store/broadcast.js'
 import history from '@/store/history.js'
+import journalCalendar from '@/store/journalCalendar.js'
 import currentUser from '@/store/currentUser.js'
 import currentSpace from '@/store/currentSpace.js'
 import currentCards from '@/store/currentCards.js'
@@ -1814,6 +1815,7 @@ const store = createStore({
     api,
     broadcast,
     history,
+    journalCalendar,
     currentUser,
     currentSpace,
     currentCards,

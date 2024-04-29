@@ -758,6 +758,7 @@ const currentSpace = {
       context.dispatch('createSpacePreviewImage')
     },
     loadSpace: async (context, { space }) => {
+      context.dispatch('journalCalendar/create', null, { root: true }) // TEMP dev
       if (!context.rootState.isEmbedMode) {
         context.commit('triggerSpaceZoomReset', null, { root: true })
       }
