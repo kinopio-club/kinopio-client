@@ -1506,7 +1506,7 @@ export default {
       name: `${journalDailyDateImage} ${date.format('dddd, MMM D')}`,
       x: 86,
       y: 157,
-      resizeWidth: 250,
+      resizeWidth: 260,
       frameId: 0
     }
     space.cards.push(dateCard)
