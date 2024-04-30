@@ -46,7 +46,7 @@ const remove = (action) => {
     cardIds = store.state.multipleCardsSelectedIds
   }
   if (action === 'resize') {
-    store.dispatch('currentCards/removeResize', { cardIds })
+    store.dispatch('currentCards/removeResize', { cardIds, shouldRemoveResizeWidth: true })
   } else if (action === 'tilt') {
     store.dispatch('currentCards/removeTilt', { cardIds })
   }
