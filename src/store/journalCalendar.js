@@ -5,6 +5,32 @@ import dayjs from 'dayjs'
 
 const size = 400
 
+// move to being generated server (upload to dailyJournal/day.png)
+// server route: daily journal prompt + daily journal img url
+// ? sent to discord each day
+
+const createCalendar = (panelsBlob) => {
+  const padding = 20
+  const canvas = document.createElement('canvas')
+  canvas.width = size
+  canvas.height = size
+  const context = canvas.getContext('2d')
+}
+
+const createPanelsBlob = (context) => {
+  const panels = shuffle([
+    'one',
+    'two',
+    'three',
+    'four',
+    'five',
+    'six'
+  ])
+  // draw calendar panels onto canvas element
+  for (let panel of panels) {
+    canvasPanels[panel](context)
+  }
+}
 const sharedPanelAttributes = (context) => {
   context.miterLimit = 4
   context.fillStyle = randomColor()
@@ -188,22 +214,17 @@ const self = {
         canvas.width = size
         canvas.height = size
         const context = canvas.getContext('2d')
-        const panels = shuffle([
-          'one',
-          'two',
-          'three',
-          'four',
-          'five',
-          'six'
-        ])
-        // draw calendar panels onto canvas element
-        for (let panel of panels) {
-          canvasPanels[panel](context)
-        }
+        const panelsBlob = createPanelsBlob(context)
+
+        const calendar = await createCalendar(panelsBlob)
+
+        // createImageBitmap()
+
         // convert canvas toBlob
         canvas.toBlob((blob) => {
           const newImg = document.createElement('img')
           const url = URL.createObjectURL(blob)
+
           newImg.onload = () => {
             // no longer need to read the blob so it's revoked
             URL.revokeObjectURL(url)
