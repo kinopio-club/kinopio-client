@@ -9,15 +9,7 @@ const size = 400
 // server route: daily journal prompt + daily journal img url
 // ? sent to discord each day
 
-const createCalendar = (panelsBlob) => {
-  const padding = 20
-  const canvas = document.createElement('canvas')
-  canvas.width = size
-  canvas.height = size
-  const context = canvas.getContext('2d')
-}
-
-const createPanelsBlob = (context) => {
+const drawPanels = (context) => {
   const panels = shuffle([
     'one',
     'two',
@@ -205,21 +197,15 @@ const canvasPanels = {
 const self = {
   namespaced: true,
   actions: {
-    create: async (context, date) => {
+    // timer: every morning
+    create: async (context) => {
       try {
         // init canvas
-        date = date || new Date()
-        date = dayjs(date)
         const canvas = document.createElement('canvas')
         canvas.width = size
         canvas.height = size
         const context = canvas.getContext('2d')
-        const panelsBlob = createPanelsBlob(context)
-
-        const calendar = await createCalendar(panelsBlob)
-
-        // createImageBitmap()
-
+        const blob = drawPanels(context)
         // convert canvas toBlob
         canvas.toBlob((blob) => {
           const newImg = document.createElement('img')
@@ -231,6 +217,10 @@ const self = {
           }
           newImg.src = url
           document.body.appendChild(newImg)
+          // todo upload to unique url
+          // then discord
+          // file name: daily perpetual image
+          // ?? journalspaces get spaceDailyPerpetualImageUrl
         })
       } catch (error) {
         console.error('🚒 journalCalendar create', error)
