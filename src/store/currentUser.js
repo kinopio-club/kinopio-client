@@ -66,6 +66,7 @@ const initialState = {
   themeIsSystem: false,
   weather: '',
   journalDailyPrompt: '',
+  journalDailyDateImage: '',
   panSpeedIsFast: false,
   outsideSpaceBackgroundIsStatic: false,
   shouldDisableHapticFeedback: false,
@@ -344,9 +345,13 @@ export default {
       state.weatherUnitIsCelcius = value
       cache.updateUser('weatherUnitIsCelcius', value)
     },
-    journalDailyPrompt: (state, value) => {
-      state.journalDailyPrompt = value
-      cache.updateUser('journalDailyPrompt', value)
+    journalDailyPrompt: (state, data) => {
+      utils.typeCheck({ value: data, type: 'object' })
+      const { name, dateImage } = data
+      state.journalDailyPrompt = name
+      cache.updateUser('journalDailyPrompt', name)
+      state.journalDailyDateImage = dateImage
+      cache.updateUser('journalDailyDateImage', dateImage)
     },
     shouldUseStickyCards: (state, value) => {
       state.shouldUseStickyCards = value
@@ -423,9 +428,9 @@ export default {
       context.commit('weather', weather)
     },
     updateJournalDailyPrompt: async (context) => {
-      const prompt = await context.dispatch('api/journalDailyPrompt', null, { root: true })
-      if (!prompt) { return }
-      context.commit('journalDailyPrompt', prompt)
+      const data = await context.dispatch('api/journalDailyPrompt', null, { root: true })
+      if (!data) { return }
+      context.commit('journalDailyPrompt', data)
     },
     update: (context, updates) => {
       const keys = Object.keys(updates)

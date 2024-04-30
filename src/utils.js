@@ -1478,18 +1478,13 @@ export default {
 
   // Journal Space 🌚
 
-  journalSpace ({ currentUser, isTomorrow, weather, dailyPrompt }) {
-    // name
+  journalSpace ({ currentUser, isTomorrow, weather, journalDailyPrompt, journalDailyDateImage }) {
     let date = dayjs(new Date())
     if (isTomorrow) {
       date = date.add(1, 'day')
     }
     const moonPhase = moonphase(date)
-    let summary = `${moonPhase.emoji} ${date.format('dddd')}` // 🌘 Tuesday
-    if (weather) {
-      summary = summary + weather
-    }
-    // meta
+    // space
     const spaceId = nanoid()
     let space = this.emptySpace(spaceId)
     space.name = this.journalSpaceName({ isTomorrow })
@@ -1505,15 +1500,23 @@ export default {
     space.collaboratorKey = nanoid()
     space = this.newSpaceBackground(space, currentUser)
     space.background = space.background || consts.defaultSpaceBackground
-    // summary
-    space.cards.push({ id: nanoid(), name: summary, x: 80, y: 110, frameId: 0 })
+    // date
+    const dateCard = {
+      id: nanoid(),
+      name: `${journalDailyDateImage} ${date.format('dddd, MMM D')}`,
+      x: 86,
+      y: 157,
+      resizeWidth: 260,
+      frameId: 0
+    }
+    space.cards.push(dateCard)
     // daily prompt
-    if (dailyPrompt) {
+    if (journalDailyPrompt) {
       let card = { id: nanoid() }
-      card.name = dailyPrompt
+      card.name = journalDailyPrompt
       const position = this.promptCardPosition(space.cards, card.name)
-      card.x = position.x + 10
-      card.y = position.y
+      card.x = position.x
+      card.y = 467
       card.z = 0
       card.spaceId = spaceId
       card.frameId = 5

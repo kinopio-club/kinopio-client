@@ -487,10 +487,13 @@ const currentCards = {
         context.dispatch('updateDimensions', { cards: [card] })
       })
     },
-    removeResize: (context, { cardIds }) => {
+    removeResize: (context, { cardIds, shouldRemoveResizeWidth }) => {
       let updates = []
       cardIds.forEach(cardId => {
-        const body = { id: cardId, resizeWidth: null, width: null }
+        let body = { id: cardId, width: null }
+        if (shouldRemoveResizeWidth) {
+          body.resizeWidth = null
+        }
         updates.push(body)
         utils.removeAllCardDimensions({ id: cardId })
       })

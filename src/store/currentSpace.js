@@ -402,16 +402,17 @@ const currentSpace = {
       }
       // daily prompt
       let options = { currentUser, isTomorrow, weather }
+      options.journalDailyDateImage = currentUser.journalDailyDateImage
       if (currentUser.shouldCreateJournalsWithDailyPrompt) {
-        options.dailyPrompt = currentUser.journalDailyPrompt
+        options.journalDailyPrompt = currentUser.journalDailyPrompt
       }
       // create space
       let space = utils.journalSpace(options)
       space = utils.updateSpaceCardsCreatedThroughPublicApi(space)
       context.commit('clearSearch', null, { root: true })
       context.commit('shouldResetDimensionsOnLoad', true, { root: true })
-      isLoadingRemoteSpace = false
       // load space
+      isLoadingRemoteSpace = false
       context.dispatch('restoreSpaceInChunks', { space })
     },
     createNewInboxSpace: (context, shouldCreateWithoutLoading) => {

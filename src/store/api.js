@@ -1136,8 +1136,7 @@ const self = {
         const options = await context.dispatch('requestOptions', { method: 'GET', space: context.rootState.currentSpace })
         const response = await fetch(`${host}/journal-daily-prompt`, options)
         const data = await normalizeResponse(response)
-        let name = data.name
-        return name
+        return data
       } catch (error) {
         console.error('🚒 journalDailyPrompt', error)
       }
