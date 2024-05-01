@@ -140,7 +140,7 @@ const duplicateSpace = () => {
   store.dispatch('closeAllDialogs')
 }
 const isNew = (space) => {
-  if (props.readSpaceIds.includes(space.id)) { return }
+  if (props.readSpaceIds?.includes(space.id)) { return }
   if (props.userShowInExploreDate) {
     if (spaceIsCurrentSpace(space)) { return }
     const readDate = dayjs(props.userShowInExploreDate)
