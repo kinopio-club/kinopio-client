@@ -58,9 +58,6 @@ const state = reactive({
 })
 
 watch(() => state.exploreIsVisible, (value, prevValue) => {
-  if (value && !state.isLoadingSpaces) {
-    updateSpaces()
-  }
   if (!value) {
     clearUnreadSpacesCounts()
   }

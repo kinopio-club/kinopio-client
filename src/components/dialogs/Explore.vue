@@ -52,7 +52,8 @@ const state = reactive({
   userShowInExploreDate: null,
   exploreRssFeedsIsVisible: false,
   filteredSpaces: undefined,
-  currentSection: 'explore' // 'explore', 'following', 'everyone'
+  currentSection: 'explore', // 'explore', 'following', 'everyone'
+  isReadSections: [] // 'explore', 'following', 'everyone'
 })
 
 const currentSpace = computed(() => store.state.currentSpace)
@@ -84,6 +85,30 @@ const updateResultsSectionHeight = async () => {
   let element = resultsElement.value
   state.resultsSectionHeight = utils.elementHeight(element, true)
 }
+
+// unread sections
+
+watch(() => state.currentSection, (value, prevValue) => {
+  state.isReadSections.push(prevValue)
+})
+const isUnreadExplore = computed(() => {
+  if (state.isReadSections.includes('explore')) {
+    return false
+  }
+  return Boolean(props.unreadExploreSpacesCount)
+})
+const isUnreadFollowing = computed(() => {
+  if (state.isReadSections.includes('following')) {
+    return false
+  }
+  return Boolean(props.unreadFollowingSpacesCount)
+})
+const isUnreadEveryone = computed(() => {
+  if (state.isReadSections.includes('everyone')) {
+    return false
+  }
+  return Boolean(props.unreadEveryoneSpacesCount)
+})
 
 // current section
 
@@ -145,10 +170,14 @@ dialog.explore.wide(v-if="visible" :open="visible" ref="dialogElement" :style="{
         button(:class="{active: currentSectionIsExplore}" @click="updateCurrentSection('explore')")
           img.icon.sunglasses(src="@/assets/sunglasses.svg")
           span Explore
+          .badge.new-unread-badge.notification-button-badge(v-if="isUnreadExplore")
         button(:class="{active: currentSectionIsFollowing}" @click="updateCurrentSection('following')")
           span Following
+          .badge.new-unread-badge.notification-button-badge(v-if="isUnreadFollowing")
         button(:class="{active: currentSectionIsEveryone}" @click="updateCurrentSection('everyone')")
           span Everyone
+          .badge.new-unread-badge.notification-button-badge(v-if="isUnreadEveryone")
+
     //- follow users blank slate
     section.subsection(v-if="followUsersInfoIsVisible")
       p Follow other people to see their latest updates here
