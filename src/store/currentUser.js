@@ -550,7 +550,7 @@ export default {
       }
       context.commit('favoriteSpaces', favoriteSpaces)
       const body = { spaceId: space.id, value }
-      context.dispatch('api/addToQueue', { name: 'updateFavoriteSpace', body }, { root: true })
+      context.dispatch('api/addToQueue', { name: 'updateFavoriteSpace', body, spaceId: space.id }, { root: true })
     },
     updateFavoriteUser: (context, { user, value }) => {
       let favoriteUsers = utils.clone(context.state.favoriteUsers)
