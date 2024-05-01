@@ -71,6 +71,7 @@ const props = defineProps({
   parentIsPinned: Boolean,
   showCheckmarkSpace: Boolean,
   userShowInExploreDate: String,
+  readSpaceIds: Array,
   spaceReadDateType: String,
   showCreateNewSpaceFromSearch: Boolean,
   resultsSectionHeight: Number,
@@ -139,6 +140,7 @@ const duplicateSpace = () => {
   store.dispatch('closeAllDialogs')
 }
 const isNew = (space) => {
+  if (props.readSpaceIds.includes(space.id)) { return }
   if (props.userShowInExploreDate) {
     if (spaceIsCurrentSpace(space)) { return }
     const readDate = dayjs(props.userShowInExploreDate)

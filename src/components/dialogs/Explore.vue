@@ -53,13 +53,15 @@ const state = reactive({
   exploreRssFeedsIsVisible: false,
   filteredSpaces: undefined,
   currentSection: 'explore', // 'explore', 'following', 'everyone'
-  isReadSections: [] // 'explore', 'following', 'everyone'
+  isReadSections: [], // 'explore', 'following', 'everyone'
+  readSpaceIds: []
 })
 
 const currentSpace = computed(() => store.state.currentSpace)
 const changeSpace = (space) => {
   closeDialogs()
   store.dispatch('currentSpace/changeSpace', space)
+  state.readSpaceIds.push(space.id)
 }
 const closeDialogs = () => {
   state.exploreRssFeedsIsVisible = false
@@ -205,6 +207,7 @@ dialog.explore.wide(v-if="visible" :open="visible" ref="dialogElement" :style="{
       :showUser="true"
       @selectSpace="changeSpace"
       :userShowInExploreDate="state.userShowInExploreDate"
+      :readSpaceIds="state.readSpaceIds"
       :spaceReadDateType="state.currentSection"
       :resultsSectionHeight="state.resultsSectionHeight"
       :parentDialog="parentDialog"
