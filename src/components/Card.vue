@@ -200,6 +200,10 @@ const backgroundColorIsDark = computed(() => {
 const nameIsColor = computed(() => {
   return utils.colorNameIsValid(props.card.name)
 })
+const currentBackgroundColorIsDark = computed(() => {
+  const color = backgroundColor.value || props.card.backgroundColor || state.defaultBackgroundColor
+  return utils.colorIsDark(color)
+})
 
 // comment
 
@@ -1982,7 +1986,7 @@ article.card-wrap#card(
           //- Name
           p.name.name-segments(v-if="normalizedName" :style="{background: currentBackgroundColor}" :class="{'is-checked': isChecked, 'has-checkbox': hasCheckbox, 'badge badge-status': isImageCard && hasTextSegments}")
             template(v-for="segment in nameSegments")
-              NameSegment(:segment="segment" @showTagDetailsIsVisible="showTagDetailsIsVisible" :parentCardId="card.id")
+              NameSegment(:segment="segment" @showTagDetailsIsVisible="showTagDetailsIsVisible" :parentCardId="card.id" :backgroundColorIsDark="currentBackgroundColorIsDark")
             Loader(:visible="isLoadingUrlPreview")
 
       //- Right buttons
