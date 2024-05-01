@@ -737,7 +737,6 @@ const currentSpace = {
         context.dispatch('checkIfShouldNotifySpaceIsRemoved', space)
       }
       context.commit('broadcast/joinSpaceRoom', null, { root: true })
-      context.commit('currentUser/updateFavoriteSpaceIsEdited', space.id, { root: true })
       nextTick(() => {
         context.dispatch('scrollCardsIntoView')
         // deferrable async tasks
@@ -1209,8 +1208,9 @@ const currentSpace = {
     },
     isFavorite: (state, getters, rootState) => {
       const favoriteSpaces = rootState.currentUser.favoriteSpaces
-      const isFavoriteSpace = favoriteSpaces.filter(space => space.id === state.id)
-      return Boolean(isFavoriteSpace.length)
+      let isFavoriteSpace = favoriteSpaces.find(space => space.id === state.id)
+      isFavoriteSpace = Boolean(isFavoriteSpace)
+      return isFavoriteSpace
     },
     url: (state) => {
       const domain = consts.kinopioDomain()
