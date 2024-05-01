@@ -75,6 +75,9 @@ export default {
         this.updateThemeFromSystem()
       }
     })
+    if (utils.isLinux()) {
+      utils.setCssVariable('sans-serif-font', '"Noto Sans", "Helvetica Neue", Helvetica, Arial, sans-serif')
+    }
   },
   mounted () {
     // use timer to prevent being fired from page reload scroll
@@ -354,6 +357,7 @@ export default {
   --small-entity-radius 3px
   --subsection-padding 5px
   --button-fixed-height 30px
+  --sans-serif-font "Helvetica Neue", Helvetica, Arial, sans-serif
   --serif-font recoleta, georgia, serif
   --mono-font Menlo, Monaco, monospace
   --glyphs-font GoodGlyphs, wingdings
@@ -380,7 +384,7 @@ export default {
   -webkit-overflow-scrolling touch
   -webkit-tap-highlight-color transparent
   box-sizing border-box
-  font-family "Noto Sans", "Helvetica Neue", Helvetica, Arial, sans-serif // 'noto sans' for linux bug
+  font-family  var(--sans-serif-font)
   font-size 15px
   line-height 1.2
 

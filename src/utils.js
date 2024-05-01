@@ -504,6 +504,9 @@ export default {
   isFirefox () {
     return navigator.userAgent && /Firefox/.test(navigator.userAgent)
   },
+  isLinux () {
+    return navigator.platform.includes('Linux')
+  },
   isMultiTouch (event) {
     if (event.touches) {
       return event.touches.length > 1
