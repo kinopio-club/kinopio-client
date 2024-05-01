@@ -39,7 +39,6 @@ const initialState = {
   shouldShowMoreAlignOptions: false,
   shouldUseLastConnectionType: true,
   shouldShowItemActions: false,
-  shouldShowMultipleSelectedCardActions: false,
   shouldShowMultipleSelectedLineActions: false,
   shouldDisableRightClickToPan: false,
   shouldShowCurrentSpaceTags: false,
@@ -260,10 +259,6 @@ export default {
     shouldShowItemActions: (state, value) => {
       state.shouldShowItemActions = value
       cache.updateUser('shouldShowItemActions', value)
-    },
-    shouldShowMultipleSelectedCardActions: (state, value) => {
-      state.shouldShowMultipleSelectedCardActions = value
-      cache.updateUser('shouldShowMultipleSelectedCardActions', value)
     },
     shouldShowMultipleSelectedLineActions: (state, value) => {
       state.shouldShowMultipleSelectedLineActions = value
@@ -722,14 +717,6 @@ export default {
       context.dispatch('api/addToQueue', { name: 'updateUser',
         body: {
           shouldShowItemActions: value
-        } }, { root: true })
-    },
-    shouldShowMultipleSelectedCardActions: (context, value) => {
-      utils.typeCheck({ value, type: 'boolean' })
-      context.commit('shouldShowMultipleSelectedCardActions', value)
-      context.dispatch('api/addToQueue', { name: 'updateUser',
-        body: {
-          shouldShowMultipleSelectedCardActions: value
         } }, { root: true })
     },
     shouldShowMultipleSelectedLineActions: (context, value) => {
