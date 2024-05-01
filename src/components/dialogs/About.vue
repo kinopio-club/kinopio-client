@@ -27,11 +27,10 @@ dialog.about.narrow(v-if="visible" :open="visible" @click.left="closeDialogs" re
     //-       span Pop Up Shop{{' '}}
               //- img.icon.visit(src="@/assets/visit.svg")
   section(v-if="!isAddPage")
-    //- .row
-    //-   a(href="https://help.kinopio.club/posts/extensions/")
-    //-     button
-    //-       span Browser Extensions{{' '}}
-    //-       img.icon.visit(src="@/assets/visit.svg")
+    .row
+      .button-wrap
+        button(@click.left.stop="changeSpaceToRoadmap")
+          span Roadmap
     .row
       .button-wrap
         button(@click.left.stop="toggleAppsAndExtensionsIsVisible" :class="{active: appsAndExtensionsIsVisible}")
@@ -147,6 +146,11 @@ export default {
     isSecureAppContextIOS () { return consts.isSecureAppContextIOS }
   },
   methods: {
+    changeSpaceToRoadmap () {
+      const space = { id: consts.roadmapSpaceId() }
+      this.$store.dispatch('currentSpace/changeSpace', space)
+      this.$store.dispatch('closeAllDialogs')
+    },
     triggerDonateIsVisible () {
       this.$store.dispatch('closeAllDialogs')
       this.$store.commit('triggerDonateIsVisible')

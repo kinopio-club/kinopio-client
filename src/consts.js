@@ -27,6 +27,13 @@ export default {
   defaultSpaceBackground: 'https://bk.kinopio.club/grid-large-boxes-2x.png',
   moderatorUserId: 'euGhpBrR9eBcjKnK16C_g',
   defaultCardMaxWidth: 200,
+  roadmapSpaceId () {
+    if (this.isDevelopment) {
+      return 'FiM7akGos18Sfx4yKrwjF'
+    } else {
+      return '6TRE21gchHI7alHLuwzd5'
+    }
+  },
   kinopioDomain () {
     let domain = 'https://kinopio.club'
     if (this.isDevelopment) {
