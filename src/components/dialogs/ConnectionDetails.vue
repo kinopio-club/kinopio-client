@@ -72,10 +72,9 @@ const updateResultsSectionMaxHeight = () => {
   const pinchZoom = utils.visualViewport().scale
   const position = store.state.connectionDetailsPosition
   if (!infoSectionElement.value) { return }
-  if (!resultsActionsElement.value) { return }
   const infoSection = infoSectionElement.value.getBoundingClientRect()
-  const resultsActions = resultsActionsElement.value.getBoundingClientRect()
-  const dialogInfoHeight = infoSection.height + resultsActions.height
+  const resultsActions = resultsActionsElement.value?.getBoundingClientRect()
+  const dialogInfoHeight = infoSection.height + (resultsActions?.height || 0)
   const maxHeight = (store.state.viewportHeight - position.y - dialogInfoHeight) * pinchZoom
   const minHeight = 300
   let height = Math.max(minHeight, maxHeight)
@@ -320,7 +319,7 @@ dialog.connection-details.narrow(v-if="visible" :open="visible" :style="styles" 
         .badge.badge-in-button(:style="{backgroundColor: state.nextConnectionTypeColor}")
         span Type
   section.results-section(ref="resultsSectionElement" :style="{'max-height': state.resultsSectionMaxHeight}")
-    ConnectionTypeList(:connections="[currentConnection]" :connectionTypes="connectionTypesByUpdatedAt" :resultsFilterIsVisible="true" @select="changeConnectionType" :canEditConnection="canEditConnection" @updateTypeColor="updateTypeColor")
+    ConnectionTypeList(:connections="[currentConnection]" :connectionTypes="connectionTypesByUpdatedAt" @select="changeConnectionType" :canEditConnection="canEditConnection" @updateTypeColor="updateTypeColor" :resultsFilterIsVisible="canEditConnection")
 </template>
 
 <style lang="stylus">
