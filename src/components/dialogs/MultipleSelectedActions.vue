@@ -104,9 +104,9 @@ const multipleCardOrBoxesIsSelected = computed(() => {
 })
 const selectedItemsIsCreatedByCurrentUser = computed(() => {
   const { cards, connections, boxes } = numberOfSelectedItemsCreatedByCurrentUser.value
-  const cardsByCurrentUser = cards === cards.value.length
-  const connectionsByCurrentUser = connections === connections.value.length
-  const boxesByCurrentUser = boxes === boxes.value.length
+  const cardsByCurrentUser = cards === cards.value?.length
+  const connectionsByCurrentUser = connections === connections.value?.length
+  const boxesByCurrentUser = boxes === boxes.value?.length
   if (cardsByCurrentUser && connectionsByCurrentUser && boxesByCurrentUser) {
     return true
   } else {
@@ -114,15 +114,15 @@ const selectedItemsIsCreatedByCurrentUser = computed(() => {
   }
 })
 const numberOfSelectedItemsCreatedByCurrentUser = computed(() => {
-  const connectionsCreatedByCurrentUser = connections.value.filter(connection => {
+  const connectionsCreatedByCurrentUser = connections.value?.filter(connection => {
     if (connection) { return }
     return store.getters['currentUser/connectionIsCreatedByCurrentUser'](connection)
   })
-  const cardsCreatedByCurrentUser = cards.value.filter(card => {
+  const cardsCreatedByCurrentUser = cards.value?.filter(card => {
     if (!card) { return }
     return store.getters['currentUser/cardIsCreatedByCurrentUser'](card)
   })
-  const boxesCreatedByCurrentUser = boxes.value.filter(box => {
+  const boxesCreatedByCurrentUser = boxes.value?.filter(box => {
     if (!box) { return }
     return store.getters['currentUser/boxIsCreatedByCurrentUser'](box)
   })
