@@ -906,10 +906,14 @@ const currentCards = {
     canBeSelectedSortedByY: (state, getters) => {
       return canBeSelectedSortedByY
     },
-    isSelectableInViewport: (state, getters, rootState) => () => {
+    isSelectableInViewport: (state, getters, rootState, rootGetters) => () => {
+      const zoom = rootGetters.spaceCounterZoomDecimal
+      const yOffset = utils.outsideSpaceOffset().y
       const height = utils.visualViewport().height
-      const viewportYTop = window.scrollY
-      const viewportYBottom = viewportYTop + height
+      let viewportYTop = (window.scrollY - yOffset) * zoom
+      let viewportYBottom = (viewportYTop + height) * zoom
+      viewportYTop = Math.ceil(viewportYTop)
+      viewportYBottom = Math.ceil(viewportYBottom)
       let yIndex = canBeSelectedSortedByY.yIndex
       let cards = canBeSelectedSortedByY.cards
       const min = viewportYTop
