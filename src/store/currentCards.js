@@ -909,9 +909,9 @@ const currentCards = {
     isSelectableInViewport: (state, getters, rootState, rootGetters) => () => {
       const zoom = rootGetters.spaceCounterZoomDecimal
       const yOffset = utils.outsideSpaceOffset().y
-      const height = utils.visualViewport().height
+      const height = utils.visualViewport().height * zoom
       let viewportYTop = (window.scrollY - yOffset) * zoom
-      let viewportYBottom = (viewportYTop + height) * zoom
+      let viewportYBottom = (viewportYTop + height)
       viewportYTop = Math.ceil(viewportYTop)
       viewportYBottom = Math.ceil(viewportYBottom)
       let yIndex = canBeSelectedSortedByY.yIndex
