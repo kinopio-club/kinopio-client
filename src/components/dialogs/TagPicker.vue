@@ -23,37 +23,10 @@ onMounted(() => {
     } else if (mutation.type === 'triggerPickerNavigationKey') {
       if (!props.visible) { return }
       const key = mutation.payload
-      const searchTag = [{
-        name: props.search,
-        color: searchTagColor.value
-      }]
-      const tags = searchTag.concat(filteredTags.value)
-      const currentIndex = tags.findIndex(tag => tag.name === state.focusOnName)
-      if (key === 'ArrowUp') {
-        focusPreviousItem(tags, currentIndex)
-      } else if (key === 'ArrowDown') {
-        focusNextItem(tags, currentIndex)
-      }
+      triggerPickerNavigationKey(key)
     } else if (mutation.type === 'triggerPickerSelect') {
       if (!props.visible) { return }
-      let tags = filteredTags.value
-      if (props.search) {
-        const searchTag = [{
-          name: props.search,
-          color: searchTagColor.value
-        }]
-        tags = searchTag.concat(filteredTags.value)
-      }
-      const currentIndex = tags.findIndex(tag => tag.name === state.focusOnName)
-      const currentTag = tags[currentIndex]
-      console.log('🎹 triggerPickerSelect', {
-        search: props.search,
-        focusOnName: state.focusOnName,
-        currentTag,
-        tags,
-        currentIndex
-      })
-      selectTag(currentTag)
+      triggerPickerSelect()
     }
   })
 })
@@ -185,6 +158,41 @@ const selectTag = (tag, shouldCloseDialog) => {
 const scrollIntoView = () => {
   let element = dialogElement.value
   utils.scrollIntoView({ element })
+}
+
+const triggerPickerNavigationKey = (key) => {
+  const searchTag = [{
+    name: props.search,
+    color: searchTagColor.value
+  }]
+  let tags = searchTag.concat(filteredTags.value)
+  const currentIndex = tags.findIndex(tag => tag.name === state.focusOnName)
+  if (key === 'ArrowUp') {
+    focusPreviousItem(tags, currentIndex)
+  } else if (key === 'ArrowDown') {
+    focusNextItem(tags, currentIndex)
+  }
+}
+
+const triggerPickerSelect = () => {
+  let tags = filteredTags.value
+  if (props.search) {
+    const searchTag = [{
+      name: props.search,
+      color: searchTagColor.value
+    }]
+    tags = searchTag.concat(filteredTags.value)
+  }
+  const currentIndex = tags.findIndex(tag => tag.name === state.focusOnName)
+  const currentTag = tags[currentIndex]
+  console.log('🎹 triggerPickerSelect', {
+    search: props.search,
+    focusOnName: state.focusOnName,
+    currentTag,
+    tags,
+    currentIndex
+  })
+  selectTag(currentTag)
 }
 
 const focusPreviousItem = (tags, currentIndex) => {
