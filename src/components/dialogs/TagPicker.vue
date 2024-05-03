@@ -137,13 +137,16 @@ export default {
         return 'New Tag'
       }
     },
-    updateTags () {
+    async updateTags () {
       const spaceTags = this.$store.getters['currentSpace/spaceTags']
       this.tags = spaceTags || []
       const cachedTags = cache.allTags()
       const mergedTags = utils.mergeArrays({ previous: spaceTags, updated: cachedTags, key: 'name' })
       this.tags = mergedTags
-      this.updateRemoteTags()
+      await this.updateRemoteTags()
+      this.$nextTick(() => {
+        this.scrollIntoView()
+      })
     },
     async updateRemoteTags () {
       if (!this.currentUserIsSignedIn) { return }
@@ -215,9 +218,6 @@ export default {
       if (visible) {
         this.randomColor = this.color()
         this.updateTags()
-        this.$nextTick(() => {
-          this.scrollIntoView()
-        })
       }
     },
     search (newSearch) {
