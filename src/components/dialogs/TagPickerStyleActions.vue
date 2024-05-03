@@ -26,13 +26,6 @@ const props = defineProps({
   cards: Array,
   tagNamesInCard: Array
 })
-const state = reactive({
-  resultsSectionHeight: null,
-  dialogHeight: null,
-  tags: [],
-  loading: false
-})
-
 watch(() => props.visible, (value, prevValue) => {
   if (value) {
     updateHeights()
@@ -41,73 +34,26 @@ watch(() => props.visible, (value, prevValue) => {
   }
 })
 
-// const themeName = computed(() => store.state.currentUser.theme)
-// const incrementBy = () => {
-//   state.count = state.count + 1
-//   emit('updateCount', state.count)
-//   // store.dispatch('themes/isSystem', false)
-// }
-
-const currentTags = computed(() => {
-  return props.tagNamesInCard || store.getters['currentSpace/tags'] || []
+const state = reactive({
+  resultsSectionHeight: null,
+  dialogHeight: null,
+  tags: [],
+  loading: false
 })
+
 const isThemeDark = computed(() => store.state.currentUser.theme === 'dark')
 const currentUserIsSignedIn = computed(() => store.getters['currentUser/isSignedIn'])
-
 const scrollIntoView = async () => {
   await nextTick()
   const element = dialogElement.value
   utils.scrollIntoView({ element })
 }
 
-const newTagColor = () => {
-  if (isThemeDark.value) {
-    return randomColor({ luminosity: 'dark' })
-  } else {
-    return randomColor({ luminosity: 'light' })
-  }
-}
-const selectTag = (tag) => {
-  const tagString = `[[${tag.name}]]`
-  const cardsWithTag = state.cards.filter(card => card.name.includes(tagString))
-  const shouldRemove = state.cards.length === cardsWithTag.length
-  removeFromCards(tagString)
-  if (shouldRemove) { return }
-  addToCards(tagString)
-}
-const removeFromCards = (tagString) => {
-  state.cards.forEach(card => {
-    const newName = card.name.replace(tagString, '').trim()
-    if (newName === card.name) { return }
-    store.dispatch('currentCards/updateName', { card, newName })
-  })
-  updateCardDimensions()
-}
-const addToCards = (tagString) => {
-  state.cards.forEach(card => {
-    const newName = card.name + ' ' + tagString
-    if (newName === card.name) { return }
-    store.dispatch('currentCards/updateName', { card, newName })
-  })
-  updateCardDimensions()
-}
-const updateCardDimensions = () => {
-  const cards = utils.clone(state.cards)
-  const cardIds = cards.map(card => card.id)
-  store.dispatch('currentCards/removeResize', { cardIds })
-}
+// tags list
 
-const addTag = (name) => {
-  let tag = state.tags.find(item => item.name === name)
-  const color = newTagColor()
-  tag = { name, color }
-  store.dispatch('currentSpace/addTag', tag)
-  state.tags.unshift(tag)
-  selectTag(tag)
-}
-
-// same as TagPicker
-
+const currentTags = computed(() => {
+  return props.tagNamesInCard || store.getters['currentSpace/tags'] || []
+})
 const updateTags = async () => {
   const spaceTags = store.getters['currentSpace/spaceTags']
   state.tags = spaceTags || []
@@ -133,6 +79,53 @@ const updateRemoteTags = async () => {
   }
   const mergedTags = utils.mergeArrays({ previous: state.tags, updated: remoteTags, key: 'name' })
   state.tags = mergedTags
+}
+
+// select tag
+
+const newTagColor = () => {
+  if (isThemeDark.value) {
+    return randomColor({ luminosity: 'dark' })
+  } else {
+    return randomColor({ luminosity: 'light' })
+  }
+}
+const selectTag = (tag) => {
+  const tagString = `[[${tag.name}]]`
+  const cardsWithTag = props.cards.filter(card => card.name.includes(tagString))
+  const shouldRemove = props.cards.length === cardsWithTag.length
+  removeFromCards(tagString)
+  if (shouldRemove) { return }
+  addToCards(tagString)
+}
+const removeFromCards = (tagString) => {
+  props.cards.forEach(card => {
+    const newName = card.name.replace(tagString, '').trim()
+    if (newName === card.name) { return }
+    store.dispatch('currentCards/updateName', { card, newName })
+  })
+  updateCardDimensions()
+}
+const addToCards = (tagString) => {
+  props.cards.forEach(card => {
+    const newName = card.name + ' ' + tagString
+    if (newName === card.name) { return }
+    store.dispatch('currentCards/updateName', { card, newName })
+  })
+  updateCardDimensions()
+}
+const updateCardDimensions = () => {
+  const cards = utils.clone(props.cards)
+  const cardIds = cards.map(card => card.id)
+  store.dispatch('currentCards/removeResize', { cardIds })
+}
+const addTag = (name) => {
+  let tag = state.tags.find(item => item.name === name)
+  const color = newTagColor()
+  tag = { name, color }
+  store.dispatch('currentSpace/addTag', tag)
+  state.tags.unshift(tag)
+  selectTag(tag)
 }
 
 // update dialog height
