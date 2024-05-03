@@ -69,6 +69,16 @@ watch(() => state.randomColor, (value, prevValue) => {
 })
 
 const currentUserIsSignedIn = computed(() => store.getters['currentUser/isSignedIn'])
+const closeDialog = () => {
+  emit('closeDialog')
+}
+const scrollIntoView = () => {
+  let element = dialogElement.value
+  utils.scrollIntoView({ element })
+}
+
+// tags list
+
 const filteredTags = computed(() => {
   let tags = state.tags.filter(tag => {
     return tag.name !== props.search
@@ -85,36 +95,6 @@ const filteredTags = computed(() => {
   tags = filtered.map(item => item.original)
   return tags.slice(0, 5)
 })
-const searchTagMatch = computed(() => {
-  let tag = state.tags.find(tag => {
-    return tag.name === props.search
-  })
-  if (tag) {
-    return tag
-  } else {
-    return null
-  }
-})
-const searchTagColor = computed(() => {
-  let tag = searchTagMatch.value
-  if (tag) {
-    return tag.color
-  } else {
-    return state.randomColor
-  }
-})
-const searchTag = computed(() => {
-  return {
-    name: props.search,
-    color: searchTagColor.value
-  }
-})
-
-const tagBadgeLabel = () => {
-  if (!searchTagMatch.value) {
-    return 'New Tag'
-  }
-}
 const updateTags = async () => {
   const spaceTags = store.getters['currentSpace/spaceTags']
   state.tags = spaceTags || []
@@ -141,24 +121,61 @@ const updateRemoteTags = async () => {
   const mergedTags = utils.mergeArrays({ previous: state.tags, updated: remoteTags, key: 'name' })
   state.tags = mergedTags
 }
+
+// search tags matching
+
+const searchTagMatch = computed(() => {
+  let tag = state.tags.find(tag => {
+    return tag.name === props.search
+  })
+  if (tag) {
+    return tag
+  } else {
+    return null
+  }
+})
+const searchTagColor = computed(() => {
+  let tag = searchTagMatch.value
+  if (tag) {
+    return tag.color
+  } else {
+    return state.randomColor
+  }
+})
+const searchTag = computed(() => {
+  return {
+    name: props.search,
+    color: searchTagColor.value
+  }
+})
+
+// select tag
+
+const color = () => {
+  const isThemeDark = store.state.currentUser.theme === 'dark'
+  let newColor = randomColor({ luminosity: 'light' })
+  if (isThemeDark) {
+    newColor = randomColor({ luminosity: 'dark' })
+  }
+  return newColor
+}
+const tagBadgeLabel = () => {
+  if (!searchTagMatch.value) {
+    return 'New Tag'
+  }
+}
 const clickTag = (event, tag) => {
   selectTag(tag, true)
 }
 const selectTag = (tag, shouldCloseDialog) => {
-  // const searchTag = {
-  //   name: props.search,
-  //   color: searchTagColor.value
-  // }
   tag = tag || searchTag.value
   emit('selectTag', tag)
   if (shouldCloseDialog) {
     closeDialog()
   }
 }
-const scrollIntoView = () => {
-  let element = dialogElement.value
-  utils.scrollIntoView({ element })
-}
+
+// keyboard handling
 
 const triggerPickerNavigationKey = (key) => {
   const searchTag = [{
@@ -173,7 +190,6 @@ const triggerPickerNavigationKey = (key) => {
     focusNextItem(tags, currentIndex)
   }
 }
-
 const triggerPickerSelect = () => {
   let tags = filteredTags.value
   if (props.search) {
@@ -194,7 +210,6 @@ const triggerPickerSelect = () => {
   })
   selectTag(currentTag)
 }
-
 const focusPreviousItem = (tags, currentIndex) => {
   const firstItem = tags[0]
   const previousItem = tags[currentIndex - 1]
@@ -213,19 +228,8 @@ const focusNextItem = (tags, currentIndex) => {
     state.focusOnName = lastItem.name
   }
 }
-const closeDialog = () => {
-  emit('closeDialog')
-}
-const color = () => {
-  const isThemeDark = store.state.currentUser.theme === 'dark'
-  let newColor = randomColor({ luminosity: 'light' })
-  if (isThemeDark) {
-    newColor = randomColor({ luminosity: 'dark' })
-  }
-  return newColor
-}
 
-// update height
+// update dialog height
 
 const updateHeights = async () => {
   await nextTick()
@@ -244,7 +248,6 @@ const updateResultsSectionHeight = async () => {
   let element = resultsElement.value
   state.resultsSectionHeight = utils.elementHeight(element, true)
 }
-
 </script>
 
 <template lang="pug">
@@ -253,6 +256,7 @@ dialog.narrow.tag-picker(v-if="visible" :open="visible" @click.left.stop ref="di
     p
       img.icon.search(src="@/assets/search.svg")
       span Type to add or search tags
+
   section.results-section(ref="resultsElement" :style="{'max-height': state.resultsSectionHeight + 'px'}")
     ul.results-list
       li(v-if="search" @click="selectTag(null, true)" @touchend.stop :class="{hover: state.focusOnName === search}")
@@ -264,14 +268,15 @@ dialog.narrow.tag-picker(v-if="visible" :open="visible" @click.left.stop ref="di
 
 <style lang="stylus">
 dialog.tag-picker
-  min-height 150px
+  min-height 200px
   overflow auto
   .loader
     margin-left 6px
   .info-section
     padding-bottom 4px
   .results-section
-    min-height 150px
+    min-height 200px
+    overflow scroll
     &:first-child
       padding-top 4px
   .label-badge
