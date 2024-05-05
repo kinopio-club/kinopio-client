@@ -802,7 +802,8 @@ const openUrl = async (event, url) => {
   if (store.state.cardsWereDragged) {
     return
   }
-  if (utils.urlIsSpace(url)) {
+  const isSpaceUrl = utils.urlIsSpace(url) && !utils.urlIsInvite(url)
+  if (isSpaceUrl) {
     changeSpace(url)
   } else if (event.type === 'touchend') {
     window.location = url
