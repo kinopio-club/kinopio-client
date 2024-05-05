@@ -67,7 +67,6 @@ export default {
     Preload
   },
   created () {
-    console.log('🐢 kinopio-client build', import.meta.env.MODE, this.scriptUrl)
     this.$store.subscribe((mutation, state) => {
       if (mutation.type === 'broadcast/joinSpaceRoom') {
         this.updateMetaRSSFeed()
@@ -80,6 +79,8 @@ export default {
     }
   },
   mounted () {
+    console.log('🐢 kinopio-client build', import.meta.env.MODE)
+
     // use timer to prevent being fired from page reload scroll
     // https://stackoverflow.com/questions/34095038/on-scroll-fires-automatically-on-page-refresh
     setTimeout(() => {
@@ -117,13 +118,6 @@ export default {
       return this.$store.getters['themes/isThemeDark']
     },
     spaceName () { return this.$store.state.currentSpace.name },
-    isDevelopment () {
-      if (import.meta.env.MODE === 'development') {
-        return true
-      } else {
-        return false
-      }
-    },
     isSpacePage () { return this.$store.getters.isSpacePage },
     pageWidth () {
       if (!this.isSpacePage) { return }
@@ -138,7 +132,7 @@ export default {
     scriptUrl () {
       const scripts = Array.from(document.querySelectorAll('script'))
       const url = scripts.find(script => {
-        if (this.isDevelopment) {
+        if (consts.isDevelopment) {
           return script.src.includes('main.js')
         } else {
           return script.src.includes('index-')
@@ -162,7 +156,7 @@ export default {
     spaceZoomDecimal () { return this.$store.getters.spaceZoomDecimal },
     isDevelpmentBadgeVisible () {
       if (this.$store.state.isPresentationMode) { return }
-      return this.isDevelopment
+      return consts.isDevelopment
     }
   },
   methods: {
