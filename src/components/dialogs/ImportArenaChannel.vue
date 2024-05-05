@@ -49,7 +49,7 @@ import { nanoid } from 'nanoid'
 
 let arena = {}
 // arena apps registered to hi@kinopio.club
-if (import.meta.env.MODE === 'development') {
+if (consts.isDevelopment) {
   arena = {
     clientId: '19f13b17093a5f1c9b227426cbb50571c18ffe50855a7e5f98dafb71f10d71f8',
     redirectUri: 'urn:ietf:wg:oauth:2.0:oob'
