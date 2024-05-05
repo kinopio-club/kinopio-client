@@ -65,7 +65,7 @@ const readOnlyUrl = computed(() => {
   const spaceId = currentSpace.id
   const readOnlyKey = currentSpace.readOnlyKey
   const url = utils.inviteUrl({ spaceId, spaceName: spaceName.value, readOnlyKey })
-  console.log('🍇 invite read only url', url)
+  console.log('🍇 invite read only url', url, 'readOnlyKey:', readOnlyKey)
   return url
 })
 
@@ -105,7 +105,7 @@ const webShareInvite = () => {
   if (inviteTypeIsEdit.value) {
     title = 'Invite to Edit'
   } else if (inviteTypeIsReadOnly.value) {
-    title = 'Invite to Edit Only'
+    title = 'Invite to Read Only'
   }
   const data = {
     title,
@@ -141,7 +141,7 @@ section.invite
     button.small-button.extra-options-button(@click="toggleTipsIsVisible" :class="{active: state.tipsIsVisible}")
       span ?
 
-  .row.invite-url-segmented-buttons(v-if="spaceIsPrivate")
+  .row.invite-url-segmented-buttons
     .segmented-buttons
       button(@click="toggleInviteType('edit')" :class="{active: inviteTypeIsEdit}")
         span Can Edit

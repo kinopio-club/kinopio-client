@@ -1041,9 +1041,11 @@ const currentSpace = {
       const spaceIsOpen = space.privacy === 'open'
       const currentUserIsSignedIn = context.rootGetters['currentUser/isSignedIn']
       const currentUserIsInvitedButCannotEditSpace = context.rootGetters['currentUser/isInvitedButCannotEditSpace'](space)
+      const currentUserIsReadOnlyInvitedToSpace = context.rootGetters['currentUser/isReadOnlyInvitedToSpace'](space)
+      const currentUserIsInvitedToEdit = currentUserIsInvitedButCannotEditSpace && !currentUserIsSignedIn && !currentUserIsReadOnlyInvitedToSpace
       if (spaceIsOpen && !currentUserIsSignedIn) {
         context.commit('notifySignUpToEditSpace', true, { root: true })
-      } else if (currentUserIsInvitedButCannotEditSpace && !currentUserIsSignedIn) {
+      } else if (currentUserIsInvitedToEdit) {
         context.commit('notifySignUpToEditSpace', true, { root: true })
       } else {
         context.commit('notifySignUpToEditSpace', false, { root: true })
