@@ -3,7 +3,12 @@
   button(:class="{active: showInExplore}" @click.left.prevent="toggleShowInExplore" @keydown.stop.enter="toggleShowInExplore")
     span(v-if="!showInExplore")
     img.icon.sunglasses(src="@/assets/sunglasses.svg")
-    span(v-if="!showInExplore") Add Current Space to Explore
+    span(v-if="!showInExplore")
+      span Add Current Space to Explore
+      span.badge.info.badge-privacy-info(v-if="currentSpaceIsPrivate")
+        img.icon.lock-icon(src="@/assets/unlock.svg")
+        span Will Make Public
+
     span(v-if="showInExplore") Current Space In Explore
 
   template(v-if="error.userNeedsToSignUpOrIn")
@@ -59,14 +64,12 @@ export default {
       return utils.clone(space)
     },
     showInExplore () {
-      const space = this.currentSpace
-      const showInExplore = space.showInExplore
-      const isNotPrivate = space.privacy !== 'private'
-      return showInExplore && isNotPrivate
+      return this.currentSpace.showInExplore
     },
     currentUserIsSignedIn () { return this.$store.getters['currentUser/isSignedIn'] },
     spaceIsHelloKinopio () { return this.$store.getters['currentSpace/isHelloKinopio'] },
-    spaceCardsCount () { return this.$store.getters['currentCards/all'].length }
+    spaceCardsCount () { return this.$store.getters['currentCards/all'].length },
+    currentSpaceIsPrivate () { return this.currentSpace.privacy === 'private' }
   },
   methods: {
     checkIfShouldPrevent (event) {
@@ -84,10 +87,6 @@ export default {
         this.error.spaceCardsMinimum = true
         shouldPrevent = true
       }
-      // if (shouldPrevent) {
-      //   const position = utils.cursorPositionInPage(event)
-      //   this.$store.commit('addNotificationWithPosition', { message: 'Could Not Add', position, type: 'danger', layer: 'app', icon: 'cancel' })
-      // }
       return shouldPrevent
     },
     toggleShowInExplore (event) {
@@ -99,9 +98,8 @@ export default {
       this.$store.dispatch('currentSpace/createSpacePreviewImage')
     },
     notifyShowInExplore (event) {
-      const shouldShow = this.showInExplore
       const position = utils.cursorPositionInPage(event)
-      if (shouldShow) {
+      if (this.showInExplore) {
         this.$store.commit('addNotificationWithPosition', { message: 'Added to Explore', position, type: 'success', layer: 'app', icon: 'checkmark' })
       } else {
         this.$store.commit('addNotificationWithPosition', { message: 'Removed from Explore', position, type: 'success', layer: 'app', icon: 'checkmark' })
@@ -109,7 +107,6 @@ export default {
     },
     updateShowInExplore () {
       this.updateSpacePrivacy()
-      // TODO show danger alert notification, or show it on the btn before clicking
       let space = this.currentSpace
       space.showInExplore = !space.showInExplore
       this.$store.dispatch('currentSpace/updateSpace', { showInExplore: space.showInExplore })
@@ -117,17 +114,16 @@ export default {
       this.$emit('updateAddToExplore', space)
     },
     updateSpacePrivacy () {
-      const shouldShow = !this.showInExplore
-      const currentPrivacy = this.$store.state.currentSpace.privacy
-      if (shouldShow) {
-        prevPrivacy = currentPrivacy
-        if (currentPrivacy === 'private') {
-          this.$store.dispatch('currentSpace/updateSpace', { privacy: 'closed' })
-        }
-      } else {
-        prevPrivacy = prevPrivacy || 'closed'
-        this.$store.dispatch('currentSpace/updateSpace', { privacy: prevPrivacy })
+      // if (!this.showInExplore) { return }
+      // const currentPrivacy = this.$store.state.currentSpace.privacy
+      // prevPrivacy = currentPrivacy
+      if (this.currentSpaceIsPrivate) {
+        this.$store.dispatch('currentSpace/updateSpace', { privacy: 'closed' })
       }
+      // else {
+      //   prevPrivacy = prevPrivacy || 'closed'
+      //   this.$store.dispatch('currentSpace/updateSpace', { privacy: prevPrivacy })
+      // }
     },
     triggerSignUpOrInIsVisible () {
       this.$store.dispatch('closeAllDialogs')
@@ -157,5 +153,8 @@ export default {
     margin-top 10px
   button
     white-space initial !important
+  .badge-privacy-info
+    margin-top 4px
+    display inline-block
 
 </style>
