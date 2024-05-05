@@ -3,7 +3,6 @@ import { reactive, computed, onMounted, onBeforeUnmount, onUnmounted, defineProp
 import { useStore } from 'vuex'
 
 import SpaceList from '@/components/SpaceList.vue'
-import ExploreRssFeeds from '@/components/dialogs/ExploreRssFeeds.vue'
 import Loader from '@/components/Loader.vue'
 import UserLabelInline from '@/components/UserLabelInline.vue'
 import utils from '@/utils.js'
@@ -41,7 +40,6 @@ watch(() => props.visible, (value, prevValue) => {
     updateUserShowInExploreUpdatedAt()
     store.commit('shouldExplicitlyHideFooter', true)
   } else {
-    state.exploreRssFeedsIsVisible = false
     store.commit('shouldExplicitlyHideFooter', false)
   }
 })
@@ -50,7 +48,6 @@ const state = reactive({
   dialogHeight: null,
   resultsSectionHeight: null,
   userShowInExploreDate: null,
-  exploreRssFeedsIsVisible: false,
   filteredSpaces: undefined,
   currentSection: 'explore', // 'explore', 'following', 'everyone'
   isReadSections: [], // 'explore', 'following', 'everyone'
@@ -64,7 +61,7 @@ const changeSpace = (space) => {
   state.readSpaceIds.push(space.id)
 }
 const closeDialogs = () => {
-  state.exploreRssFeedsIsVisible = false
+  // state.exploreRssFeedsIsVisible = false
 }
 
 // update height
@@ -155,13 +152,6 @@ const randomUser = computed(() => {
   return { color, id: '123' }
 })
 
-// rss
-
-const toggleExploreRssFeedsIsVisible = () => {
-  state.exploreRssFeedsIsVisible = !state.exploreRssFeedsIsVisible
-}
-const rssButtonIsVisible = computed(() => !currentSectionIsFollowing.value)
-
 </script>
 
 <template lang="pug">
@@ -179,6 +169,8 @@ dialog.explore.wide(v-if="visible" :open="visible" ref="dialogElement" :style="{
         button(:class="{active: currentSectionIsEveryone}" @click="updateCurrentSection('everyone')")
           span Everyone
           .badge.new-unread-badge.notification-button-badge(v-if="isUnreadEveryone")
+    .row(v-if="props.loading")
+      Loader(:isSmall="true" :visible="props.loading")
 
     //- follow users blank slate
     section.subsection(v-if="followUsersInfoIsVisible")
@@ -187,19 +179,7 @@ dialog.explore.wide(v-if="visible" :open="visible" ref="dialogElement" :style="{
         UserLabelInline(:user="randomUser" :isClickable="false" :key="randomUser.id" :isSmall="true" :hideYouLabel="true")
         span → Follow
 
-  section
-    .row.title-row
-      //- current section descriptions
-      div
-        Loader(:isSmall="true" :visible="props.loading")
-        span(v-if="currentSectionIsExplore") Shared with the community
-        span(v-else-if="currentSectionIsFollowing") Recently updated by people you follow
-        span(v-else-if="currentSectionIsEveryone") All new public spaces
-      //- rss
-      .button-wrap.rss-button-wrap(v-if="rssButtonIsVisible")
-        button.small-button(@click.stop="toggleExploreRssFeedsIsVisible" :class="{active: state.exploreRssFeedsIsVisible}" title="RSS Feeds")
-          span RSS
-        ExploreRssFeeds(:visible="state.exploreRssFeedsIsVisible")
+  hr
 
   section.results-section(ref="resultsElement" :style="{'max-height': state.resultsSectionHeight + 'px'}")
     SpaceList(
@@ -222,10 +202,14 @@ dialog.explore
   left initial
   right -35px
   overflow auto
+  // &.wide
+  //   width 330px
   .loader
     margin-right 5px
     vertical-align -2px
   .segmented-buttons
     button
       position relative
+  hr
+    margin-top 0
 </style>

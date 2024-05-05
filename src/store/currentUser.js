@@ -869,11 +869,14 @@ export default {
         return 'spectator'
       }
     },
+    isReadOnlyInvitedToSpace: (state, getters, rootState) => (space) => {
+      return rootState.spaceReadOnlyKey.spaceId === space.id
+    },
     isInvitedButCannotEditSpace: (state, getters, rootState) => (space) => {
       space = space || rootState.currentSpace
       const currentUserIsSignedIn = getters.isSignedIn
       const isInvitedToSpace = Boolean(cache.invitedSpaces().find(invitedSpace => invitedSpace.id === space.id))
-      const isReadOnlyInvitedToSpace = rootState.spaceReadOnlyKey.spaceId === space.id
+      const isReadOnlyInvitedToSpace = getters.isReadOnlyInvitedToSpace(space)
       const inviteRequiresSignIn = !currentUserIsSignedIn && isInvitedToSpace
       return isReadOnlyInvitedToSpace || inviteRequiresSignIn
     },

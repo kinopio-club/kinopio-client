@@ -1,163 +1,165 @@
-<template lang="pug">
-dialog.narrow.tag-picker-style-actions(v-if="visible" :open="visible" ref="dialog" @click.stop :style="{'max-height': dialogHeight + 'px'}")
-  section.results-section(v-if="tags.length" ref="results")
-    TagList(:tags="tags" :isLoading="loading" :canAddTag="true" :shouldEmitSelectTag="true" :currentTags="currentTags" @selectTag="selectTag" @addTag="addTag")
-</template>
+<script setup>
+import { reactive, computed, onMounted, onBeforeUnmount, onUnmounted, defineProps, defineEmits, watch, ref, nextTick } from 'vue'
+import { useStore } from 'vuex'
 
-<script>
 import TagList from '@/components/TagList.vue'
 import cache from '@/cache.js'
 import utils from '@/utils.js'
 
 import randomColor from 'randomcolor'
 
-export default {
-  name: 'TagPickerStyleActions',
-  components: {
-    TagList
-  },
-  props: {
-    visible: Boolean,
-    cards: Array,
-    tagNamesInCard: Array
-  },
-  created () {
-    this.$store.subscribe((mutation, state) => {
-      if (mutation.type === 'updatePageSizes') {
-        this.updateDialogHeight()
-        this.updateResultsSectionHeight()
-      }
-    })
-  },
-  data () {
-    return {
-      resultsSectionHeight: null,
-      dialogHeight: null,
-      tags: [],
-      loading: false
+const store = useStore()
+
+const dialogElement = ref(null)
+const resultsElement = ref(null)
+
+onMounted(() => {
+  store.subscribe((mutation, state) => {
+    if (mutation.type === 'updatePageSizes') {
+      updateHeights()
     }
-  },
-  computed: {
-    currentTags () {
-      return this.tagNamesInCard || this.$store.getters['currentSpace/tags'] || []
-    },
-    isThemeDark () { return this.$store.state.currentUser.theme === 'dark' }
-  },
-  methods: {
-    newTagColor () {
-      if (this.isThemeDark) {
-        return randomColor({ luminosity: 'dark' })
-      } else {
-        return randomColor({ luminosity: 'light' })
-      }
-    },
-    scrollIntoView () {
-      this.$nextTick(() => {
-        const element = this.$refs.dialog
-        utils.scrollIntoView({ element })
-      })
-    },
-    selectTag (tag) {
-      const tagString = `[[${tag.name}]]`
-      const cardsWithTag = this.cards.filter(card => card.name.includes(tagString))
-      const shouldRemove = this.cards.length === cardsWithTag.length
-      this.removeFromCards(tagString)
-      if (shouldRemove) { return }
-      this.addToCards(tagString)
-    },
-    removeFromCards (tagString) {
-      this.cards.forEach(card => {
-        const newName = card.name.replace(tagString, '').trim()
-        if (newName === card.name) { return }
-        this.$store.dispatch('currentCards/updateName', { card, newName })
-      })
-      this.updateCardDimensions()
-    },
-    addToCards (tagString) {
-      this.cards.forEach(card => {
-        const newName = card.name + ' ' + tagString
-        if (newName === card.name) { return }
-        this.$store.dispatch('currentCards/updateName', { card, newName })
-      })
-      this.updateCardDimensions()
-    },
-    updateCardDimensions () {
-      const cards = utils.clone(this.cards)
-      const cardIds = cards.map(card => card.id)
-      this.$store.dispatch('currentCards/removeResize', { cardIds })
-    },
+  })
+})
 
-    addTag (name) {
-      let tag = this.tags.find(item => item.name === name)
-      const color = this.newTagColor()
-      tag = { name, color }
-      this.$store.dispatch('currentSpace/addTag', tag)
-      this.tags.unshift(tag)
-      this.selectTag(tag)
-    },
+const props = defineProps({
+  visible: Boolean,
+  cards: Array,
+  tagNamesInCard: Array
+})
+watch(() => props.visible, (value, prevValue) => {
+  if (value) {
+    updateHeights()
+    updateTags()
+    updateResultsSectionHeight()
+  }
+})
 
-    // same as Tags
+const state = reactive({
+  resultsSectionHeight: null,
+  dialogHeight: null,
+  tags: [],
+  loading: false
+})
 
-    updateDialogHeight () {
-      if (!this.visible) { return }
-      this.$nextTick(() => {
-        let element = this.$refs.dialog
-        this.dialogHeight = utils.elementHeight(element)
-      })
-    },
-    updateResultsSectionHeight () {
-      if (!this.visible) { return }
-      this.$nextTick(() => {
-        let element = this.$refs.results
-        this.resultsSectionHeight = utils.elementHeight(element, true)
-      })
-    },
+const isThemeDark = computed(() => store.state.currentUser.theme === 'dark')
+const currentUserIsSignedIn = computed(() => store.getters['currentUser/isSignedIn'])
+const scrollIntoView = async () => {
+  await nextTick()
+  const element = dialogElement.value
+  utils.scrollIntoView({ element })
+}
 
-    // same as TagPicker
+// tags list
 
-    updateTags () {
-      const spaceTags = this.$store.getters['currentSpace/spaceTags']
-      this.tags = spaceTags || []
-      const cachedTags = cache.allTags()
-      const mergedTags = utils.mergeArrays({ previous: spaceTags, updated: cachedTags, key: 'name' })
-      this.tags = mergedTags
-      this.updateRemoteTags()
-    },
-    async updateRemoteTags () {
-      if (!this.currentUserIsSignedIn) { return }
-      const remoteTagsIsFetched = this.$store.state.remoteTagsIsFetched
-      let remoteTags
-      if (remoteTagsIsFetched) {
-        remoteTags = this.$store.state.remoteTags
-      } else {
-        this.loading = true
-        remoteTags = await this.$store.dispatch('api/getUserTags') || []
-        this.$store.commit('remoteTags', remoteTags)
-        this.$store.commit('remoteTagsIsFetched', true)
-        this.loading = false
-      }
-      const mergedTags = utils.mergeArrays({ previous: this.tags, updated: remoteTags, key: 'name' })
-      this.tags = mergedTags
-      this.scrollIntoView()
-    }
-  },
-  watch: {
-    visible (visible) {
-      if (visible) {
-        this.updateDialogHeight()
-        this.updateTags()
-        this.updateResultsSectionHeight()
-        this.scrollIntoView()
-      }
-    }
+const currentTags = computed(() => {
+  return props.tagNamesInCard || store.getters['currentSpace/tags'] || []
+})
+const updateTags = async () => {
+  const spaceTags = store.getters['currentSpace/spaceTags']
+  state.tags = spaceTags || []
+  const cachedTags = cache.allTags()
+  const mergedTags = utils.mergeArrays({ previous: spaceTags, updated: cachedTags, key: 'name' })
+  state.tags = mergedTags
+  await updateRemoteTags()
+  updateHeights()
+  scrollIntoView()
+}
+const updateRemoteTags = async () => {
+  if (!currentUserIsSignedIn.value) { return }
+  const remoteTagsIsFetched = store.state.remoteTagsIsFetched
+  let remoteTags
+  if (remoteTagsIsFetched) {
+    remoteTags = store.state.remoteTags
+  } else {
+    state.loading = true
+    remoteTags = await store.dispatch('api/getUserTags') || []
+    store.commit('remoteTags', remoteTags)
+    store.commit('remoteTagsIsFetched', true)
+    state.loading = false
+  }
+  const mergedTags = utils.mergeArrays({ previous: state.tags, updated: remoteTags, key: 'name' })
+  state.tags = mergedTags
+}
+
+// select tag
+
+const newTagColor = () => {
+  if (isThemeDark.value) {
+    return randomColor({ luminosity: 'dark' })
+  } else {
+    return randomColor({ luminosity: 'light' })
   }
 }
+const selectTag = (tag) => {
+  const tagString = `[[${tag.name}]]`
+  const cardsWithTag = props.cards.filter(card => card.name.includes(tagString))
+  const shouldRemove = props.cards.length === cardsWithTag.length
+  removeFromCards(tagString)
+  if (shouldRemove) { return }
+  addToCards(tagString)
+}
+const removeFromCards = (tagString) => {
+  props.cards.forEach(card => {
+    const newName = card.name.replace(tagString, '').trim()
+    if (newName === card.name) { return }
+    store.dispatch('currentCards/updateName', { card, newName })
+  })
+  updateCardDimensions()
+}
+const addToCards = (tagString) => {
+  props.cards.forEach(card => {
+    const newName = card.name + ' ' + tagString
+    if (newName === card.name) { return }
+    store.dispatch('currentCards/updateName', { card, newName })
+  })
+  updateCardDimensions()
+}
+const updateCardDimensions = () => {
+  const cards = utils.clone(props.cards)
+  const cardIds = cards.map(card => card.id)
+  store.dispatch('currentCards/removeResize', { cardIds })
+}
+const addTag = (name) => {
+  let tag = state.tags.find(item => item.name === name)
+  const color = newTagColor()
+  tag = { name, color }
+  store.dispatch('currentSpace/addTag', tag)
+  state.tags.unshift(tag)
+  selectTag(tag)
+}
+
+// update dialog height
+
+const updateHeights = async () => {
+  await nextTick()
+  updateDialogHeight()
+  updateResultsSectionHeight()
+}
+const updateDialogHeight = async () => {
+  if (!props.visible) { return }
+  await nextTick()
+  let element = dialogElement.value
+  state.dialogHeight = utils.elementHeight(element)
+}
+const updateResultsSectionHeight = async () => {
+  if (!props.visible) { return }
+  await nextTick()
+  let element = resultsElement.value
+  state.resultsSectionHeight = utils.elementHeight(element, true)
+}
+
 </script>
 
+<template lang="pug">
+dialog.narrow.tag-picker-style-actions(v-if="visible" :open="visible" ref="dialogElement" @click.stop :style="{'max-height': state.dialogHeight + 'px'}")
+  section.results-section(v-if="state.tags.length" ref="resultsElement" :style="{'max-height': state.resultsSectionHeight + 'px'}")
+    TagList(:tags="state.tags" :isLoading="state.loading" :canAddTag="true" :shouldEmitSelectTag="true" :currentTags="currentTags" @selectTag="selectTag" @addTag="addTag")
+</template>
+
 <style lang="stylus">
-.tag-picker-style-actions
+dialog.tag-picker-style-actions
   min-height 200px
   overflow auto
   .results-section
-    min-height 158px
+    min-height 200px
 </style>
