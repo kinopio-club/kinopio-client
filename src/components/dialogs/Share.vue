@@ -45,7 +45,7 @@ const state = reactive({
   urlIsCopied: false,
   privacyPickerIsVisible: false,
   dialogHeight: null,
-  rssFeedsFeedIsVisible: false,
+  rssFeedsIsVisible: false,
   embedIsVisible: false,
   importExportIsVisible: false,
   isShareInPresentationMode: false,
@@ -159,11 +159,11 @@ const updateDialogHeight = () => {
   })
 }
 const dialogIsVisible = computed(() => {
-  return state.privacyPickerIsVisible || state.rssFeedsFeedIsVisible || state.embedIsVisible || state.importExportIsVisible || state.emailInvitesIsVisible
+  return state.privacyPickerIsVisible || state.rssFeedsIsVisible || state.embedIsVisible || state.importExportIsVisible || state.emailInvitesIsVisible
 })
 const closeDialogs = () => {
   state.privacyPickerIsVisible = false
-  state.rssFeedsFeedIsVisible = false
+  state.rssFeedsIsVisible = false
   state.embedIsVisible = false
   state.importExportIsVisible = false
   state.emailInvitesIsVisible = false
@@ -187,9 +187,9 @@ const togglePrivacyPickerIsVisible = () => {
   state.privacyPickerIsVisible = !isVisible
 }
 const toggleRssFeedsIsVisible = () => {
-  const isVisible = state.rssFeedsFeedIsVisible
+  const isVisible = state.rssFeedsIsVisible
   closeDialogs()
-  state.rssFeedsFeedIsVisible = !isVisible
+  state.rssFeedsIsVisible = !isVisible
 }
 const toggleEmbedIsVisible = () => {
   const isVisible = state.embedIsVisible
@@ -220,9 +220,9 @@ dialog.share.wide(v-if="props.visible" :open="props.visible" @click.left.stop="c
           img.icon(src="@/assets/presentation.svg")
           span Present
         .button-wrap(v-if="spaceIsRemote")
-          button.small-button(@click.left.stop="toggleRssFeedsIsVisible" :class="{ active: state.rssFeedsFeedIsVisible }" title="Space RSS Feed")
+          button.small-button(@click.left.stop="toggleRssFeedsIsVisible" :class="{ active: state.rssFeedsIsVisible }" title="RSS Feeds")
             span RSS
-          RssFeeds(:visible="state.rssFeedsFeedIsVisible")
+          RssFeeds(:visible="state.rssFeedsIsVisible")
 
   section(v-if="spaceIsRemote")
     ReadOnlySpaceInfoBadges
