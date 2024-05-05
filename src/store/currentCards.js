@@ -66,6 +66,7 @@ const currentCards = {
         console.warn('🚑 could not update card', card)
         return
       }
+      delete card.userId
       if (card.x) {
         card.x = Math.round(card.x)
       }
