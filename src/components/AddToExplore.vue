@@ -1,3 +1,115 @@
+<script setup>
+import { reactive, computed, onMounted, onBeforeUnmount, onUnmounted, defineProps, defineEmits, watch, ref, nextTick } from 'vue'
+import { useStore } from 'vuex'
+
+import utils from '@/utils.js'
+const store = useStore()
+
+onMounted(() => {
+  store.subscribe((mutation, state) => {
+    if (mutation.type === 'currentSpace/restoreSpace') {
+      clearErrors()
+    }
+  })
+})
+
+const emit = defineEmits(['updateLocalSpaces', 'updateAddToExplore'])
+
+const props = defineProps({
+  visible: Boolean
+})
+watch(() => props.visible, (value, prevValue) => {
+  if (value) {
+    clearErrors()
+  }
+})
+
+const state = reactive({
+  error: {
+    userNeedsToSignUpOrIn: false,
+    spaceMustBeEdited: false,
+    spaceCardsMinimum: false
+  }
+})
+
+const spaceName = computed(() => store.state.currentSpace.name)
+const currentSpace = computed(() => {
+  const space = store.state.currentSpace
+  return utils.clone(space)
+})
+const currentSpaceIsPrivate = computed(() => currentSpace.value.privacy === 'private')
+const showInExplore = computed(() => currentSpace.value.showInExplore)
+const isVisible = computed(() => {
+  return props.visible || store.getters['currentUser/isSpaceMember']()
+})
+
+// errors
+
+const currentUserIsSignedIn = computed(() => store.getters['currentUser/isSignedIn'])
+const spaceIsHelloKinopio = computed(() => store.getters['currentSpace/isHelloKinopio'])
+const spaceCardsCount = computed(() => store.getters['currentCards/all'].length)
+
+const checkIfShouldPrevent = (event) => {
+  let shouldPrevent
+  if (showInExplore.value) { return }
+  if (!currentUserIsSignedIn.value) {
+    state.error.userNeedsToSignUpOrIn = true
+    shouldPrevent = true
+  }
+  if (spaceIsHelloKinopio.value) {
+    state.error.spaceMustBeEdited = true
+    shouldPrevent = true
+  }
+  if (spaceCardsCount.value < 10) {
+    state.error.spaceCardsMinimum = true
+    shouldPrevent = true
+  }
+  return shouldPrevent
+}
+const triggerSignUpOrInIsVisible = () => {
+  store.dispatch('closeAllDialogs')
+  store.commit('triggerSignUpOrInIsVisible')
+}
+const clearErrors = () => {
+  state.error.userNeedsToSignUpOrIn = false
+  state.error.spaceMustBeEdited = false
+  state.error.spaceCardsMinimum = false
+}
+
+// toggle show in explore
+
+const toggleShowInExplore = (event) => {
+  store.commit('clearNotificationsWithPosition')
+  const shouldPrevent = checkIfShouldPrevent(event)
+  if (shouldPrevent) { return }
+  updateShowInExplore()
+  notifyShowInExplore(event)
+  store.dispatch('currentSpace/createSpacePreviewImage')
+}
+const notifyShowInExplore = (event) => {
+  const position = utils.cursorPositionInPage(event)
+  if (showInExplore.value) {
+    store.commit('addNotificationWithPosition', { message: 'Added to Explore', position, type: 'success', layer: 'app', icon: 'checkmark' })
+  } else {
+    store.commit('addNotificationWithPosition', { message: 'Removed from Explore', position, type: 'success', layer: 'app', icon: 'checkmark' })
+  }
+}
+const updateShowInExplore = () => {
+  updateSpacePrivacy()
+  let space = currentSpace.value
+  space.showInExplore = !space.showInExplore
+  store.dispatch('currentSpace/updateSpace', { showInExplore: space.showInExplore })
+  emit('updateAddToExplore', space)
+}
+const updateSpacePrivacy = () => {
+  if (!showInExplore.value) { return }
+  if (currentSpaceIsPrivate.value) {
+    store.dispatch('currentSpace/updateSpace', { privacy: 'closed' })
+  }
+}
+
+</script>
+
 <template lang="pug">
 .button-wrap.add-to-explore(@click.stop v-if="isVisible")
   button(:class="{active: showInExplore}" @click.left.prevent="toggleShowInExplore" @keydown.stop.enter="toggleShowInExplore")
@@ -11,137 +123,20 @@
 
     span(v-if="showInExplore") Current Space In Explore
 
-  template(v-if="error.userNeedsToSignUpOrIn")
+  template(v-if="state.error.userNeedsToSignUpOrIn")
     .badge.info
       span Sign Up or In for your spaces to be accessible to others
     button(@click.left="triggerSignUpOrInIsVisible") Sign Up or In
 
-  template(v-else-if="error.spaceMustBeEdited")
+  template(v-else-if="state.error.spaceMustBeEdited")
     .badge.info
       span Edit and rename this space to add to Explore
 
-  template(v-else-if="error.spaceCardsMinimum")
+  template(v-else-if="state.error.spaceCardsMinimum")
     .badge.info
       span Space needs more than 10 cards to add to Explore
 
 </template>
-
-<script>
-import utils from '@/utils.js'
-
-let prevPrivacy = ''
-
-export default {
-  name: 'ShowInExploreButton',
-  emits: ['updateLocalSpaces', 'updateAddToExplore'],
-  created () {
-    this.$store.subscribe((mutation, state) => {
-      if (mutation.type === 'currentSpace/restoreSpace') {
-        this.clearErrors()
-      }
-    })
-  },
-  props: {
-    space: Object,
-    visible: Boolean
-  },
-  data () {
-    return {
-      error: {
-        userNeedsToSignUpOrIn: false,
-        spaceMustBeEdited: false,
-        spaceCardsMinimum: false
-      }
-    }
-  },
-  computed: {
-    spaceName () { return this.$store.state.currentSpace.name },
-    isVisible () {
-      return this.visible || this.$store.getters['currentUser/isSpaceMember']()
-    },
-    currentSpace () {
-      const space = this.space || this.$store.state.currentSpace
-      return utils.clone(space)
-    },
-    showInExplore () {
-      return this.currentSpace.showInExplore
-    },
-    currentUserIsSignedIn () { return this.$store.getters['currentUser/isSignedIn'] },
-    spaceIsHelloKinopio () { return this.$store.getters['currentSpace/isHelloKinopio'] },
-    spaceCardsCount () { return this.$store.getters['currentCards/all'].length },
-    currentSpaceIsPrivate () { return this.currentSpace.privacy === 'private' }
-  },
-  methods: {
-    checkIfShouldPrevent (event) {
-      let shouldPrevent
-      if (this.showInExplore) { return }
-      if (!this.currentUserIsSignedIn) {
-        this.error.userNeedsToSignUpOrIn = true
-        shouldPrevent = true
-      }
-      if (this.spaceIsHelloKinopio) {
-        this.error.spaceMustBeEdited = true
-        shouldPrevent = true
-      }
-      if (this.spaceCardsCount < 10) {
-        this.error.spaceCardsMinimum = true
-        shouldPrevent = true
-      }
-      return shouldPrevent
-    },
-    toggleShowInExplore (event) {
-      this.$store.commit('clearNotificationsWithPosition')
-      const shouldPrevent = this.checkIfShouldPrevent(event)
-      if (shouldPrevent) { return }
-      this.updateShowInExplore()
-      this.notifyShowInExplore(event)
-      this.$store.dispatch('currentSpace/createSpacePreviewImage')
-    },
-    notifyShowInExplore (event) {
-      const position = utils.cursorPositionInPage(event)
-      if (this.showInExplore) {
-        this.$store.commit('addNotificationWithPosition', { message: 'Added to Explore', position, type: 'success', layer: 'app', icon: 'checkmark' })
-      } else {
-        this.$store.commit('addNotificationWithPosition', { message: 'Removed from Explore', position, type: 'success', layer: 'app', icon: 'checkmark' })
-      }
-    },
-    updateShowInExplore () {
-      this.updateSpacePrivacy()
-      let space = this.currentSpace
-      space.showInExplore = !space.showInExplore
-      this.$store.dispatch('currentSpace/updateSpace', { showInExplore: space.showInExplore })
-      this.$emit('updateLocalSpaces') // TODO unused
-      this.$emit('updateAddToExplore', space)
-    },
-    updateSpacePrivacy () {
-      // if (!this.showInExplore) { return }
-      // const currentPrivacy = this.$store.state.currentSpace.privacy
-      // prevPrivacy = currentPrivacy
-      if (this.currentSpaceIsPrivate) {
-        this.$store.dispatch('currentSpace/updateSpace', { privacy: 'closed' })
-      }
-      // else {
-      //   prevPrivacy = prevPrivacy || 'closed'
-      //   this.$store.dispatch('currentSpace/updateSpace', { privacy: prevPrivacy })
-      // }
-    },
-    triggerSignUpOrInIsVisible () {
-      this.$store.dispatch('closeAllDialogs')
-      this.$store.commit('triggerSignUpOrInIsVisible')
-    },
-    clearErrors () {
-      this.error.userNeedsToSignUpOrIn = false
-      this.error.spaceMustBeEdited = false
-      this.error.spaceCardsMinimum = false
-    }
-  },
-  watch: {
-    visible (visible) {
-      this.clearErrors()
-    }
-  }
-}
-</script>
 
 <style lang="stylus">
 .add-to-explore
