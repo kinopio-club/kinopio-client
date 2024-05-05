@@ -4,7 +4,7 @@ import { useStore } from 'vuex'
 
 import PrivacyButton from '@/components/PrivacyButton.vue'
 import Invite from '@/components/Invite.vue'
-import SpaceRssFeed from '@/components/dialogs/SpaceRssFeed.vue'
+import RssFeeds from '@/components/dialogs/RssFeeds.vue'
 import Embed from '@/components/dialogs/Embed.vue'
 import UserList from '@/components/UserList.vue'
 import utils from '@/utils.js'
@@ -45,7 +45,7 @@ const state = reactive({
   urlIsCopied: false,
   privacyPickerIsVisible: false,
   dialogHeight: null,
-  spaceRssFeedIsVisible: false,
+  rssFeedsFeedIsVisible: false,
   embedIsVisible: false,
   importExportIsVisible: false,
   isShareInPresentationMode: false,
@@ -159,11 +159,11 @@ const updateDialogHeight = () => {
   })
 }
 const dialogIsVisible = computed(() => {
-  return state.privacyPickerIsVisible || state.spaceRssFeedIsVisible || state.embedIsVisible || state.importExportIsVisible || state.emailInvitesIsVisible
+  return state.privacyPickerIsVisible || state.rssFeedsFeedIsVisible || state.embedIsVisible || state.importExportIsVisible || state.emailInvitesIsVisible
 })
 const closeDialogs = () => {
   state.privacyPickerIsVisible = false
-  state.spaceRssFeedIsVisible = false
+  state.rssFeedsFeedIsVisible = false
   state.embedIsVisible = false
   state.importExportIsVisible = false
   state.emailInvitesIsVisible = false
@@ -186,10 +186,10 @@ const togglePrivacyPickerIsVisible = () => {
   closeDialogs()
   state.privacyPickerIsVisible = !isVisible
 }
-const toggleSpaceRssFeedIsVisible = () => {
-  const isVisible = state.spaceRssFeedIsVisible
+const toggleRssFeedsIsVisible = () => {
+  const isVisible = state.rssFeedsFeedIsVisible
   closeDialogs()
-  state.spaceRssFeedIsVisible = !isVisible
+  state.rssFeedsFeedIsVisible = !isVisible
 }
 const toggleEmbedIsVisible = () => {
   const isVisible = state.embedIsVisible
@@ -220,9 +220,9 @@ dialog.share.wide(v-if="props.visible" :open="props.visible" @click.left.stop="c
           img.icon(src="@/assets/presentation.svg")
           span Present
         .button-wrap(v-if="spaceIsRemote")
-          button.small-button(@click.left.stop="toggleSpaceRssFeedIsVisible" :class="{ active: state.spaceRssFeedIsVisible }" title="Space RSS Feed")
+          button.small-button(@click.left.stop="toggleRssFeedsIsVisible" :class="{ active: state.rssFeedsFeedIsVisible }" title="Space RSS Feed")
             span RSS
-          SpaceRssFeed(:visible="state.spaceRssFeedIsVisible")
+          RssFeeds(:visible="state.rssFeedsFeedIsVisible")
 
   section(v-if="spaceIsRemote")
     ReadOnlySpaceInfoBadges
