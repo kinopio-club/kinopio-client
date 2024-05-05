@@ -209,14 +209,11 @@ dialog.explore.wide(v-if="visible" :open="visible" ref="dialogElement" :style="{
         span(v-else-if="currentSectionIsEveryone") All new public spaces
 
     //- add to explore
-    section.subsection
+    .row.add-to-explore-row
       template(v-if="isSpaceMember")
         AddToExplore(@updateAddToExplore="updateAddToExplore")
       template(v-else-if="!isSpaceMember")
         AskToAddToExplore
-      template(v-else)
-        img.icon.sunglasses(src="@/assets/sunglasses.svg")
-        span In Explore
 
       //- rss
       .button-wrap.rss-button-wrap
@@ -253,8 +250,15 @@ dialog.explore
   .segmented-buttons
     button
       position relative
-  .subsection
+  .add-to-explore-row
     position relative
+    display flex
+    width fit-content
+    .button-wrap + .button-wrap
+      margin-left 6px
+  .rss-button-wrap
+    margin auto
+    margin-right 0
   hr
     margin-top 0
 </style>

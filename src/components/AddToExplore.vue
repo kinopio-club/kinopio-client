@@ -16,8 +16,7 @@ onMounted(() => {
 const emit = defineEmits(['updateLocalSpaces', 'updateAddToExplore'])
 
 const props = defineProps({
-  visible: Boolean,
-  disabled: Boolean
+  visible: Boolean
 })
 watch(() => props.visible, (value, prevValue) => {
   if (value) {

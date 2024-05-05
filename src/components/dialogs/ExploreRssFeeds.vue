@@ -46,14 +46,5 @@ dialog.narrow.explore-rss-feed(v-if="visible" :open="visible" @click.left.stop)
 
 <style lang="stylus" scoped>
 .explore-rss-feed
-  left initial
-  right 10px
-  top calc(100% - 12px) !important
-  bottom initial !important
-  @media(max-width 400px)
-    left -40px
-  @media(max-width 350px)
-    left -90px
-  .badge
-    display inline
+  top calc(100% - 4px) !important
 </style>
