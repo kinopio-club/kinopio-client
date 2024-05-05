@@ -96,6 +96,7 @@ const updateResultsSectionHeight = async () => {
 
 watch(() => state.currentSection, (value, prevValue) => {
   state.isReadSections.push(prevValue)
+  store.commit('clearNotificationsWithPosition')
 })
 const isUnreadExplore = computed(() => {
   if (state.isReadSections.includes('explore')) {

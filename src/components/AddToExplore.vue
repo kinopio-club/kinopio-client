@@ -83,7 +83,16 @@ const toggleShowInExplore = (event) => {
   const shouldPrevent = checkIfShouldPrevent(event)
   if (shouldPrevent) { return }
   updateShowInExplore()
+  notifyShowInExplore(event)
   store.dispatch('currentSpace/createSpacePreviewImage')
+}
+const notifyShowInExplore = (event) => {
+  const position = utils.cursorPositionInPage(event)
+  if (showInExplore.value) {
+    store.commit('addNotificationWithPosition', { message: 'Added to Explore', position, type: 'success', layer: 'app', icon: 'checkmark' })
+  } else {
+    store.commit('addNotificationWithPosition', { message: 'Removed from Explore', position, type: 'success', layer: 'app', icon: 'checkmark' })
+  }
 }
 const updateShowInExplore = () => {
   updateSpacePrivacy()
