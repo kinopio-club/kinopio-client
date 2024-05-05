@@ -3,8 +3,8 @@
   button(:class="{active: showInExplore}" @click.left.prevent="toggleShowInExplore" @keydown.stop.enter="toggleShowInExplore")
     span(v-if="!showInExplore")
     img.icon.sunglasses(src="@/assets/sunglasses.svg")
-    span(v-if="!showInExplore") Add to Explore
-    span(v-if="showInExplore") In Explore
+    span(v-if="!showInExplore") Add Current Space to Explore
+    span(v-if="showInExplore") Current Space In Explore
 
   template(v-if="error.userNeedsToSignUpOrIn")
     .badge.info
@@ -50,11 +50,16 @@ export default {
     }
   },
   computed: {
+    spaceName () { return this.$store.state.currentSpace.name },
     isVisible () {
       return this.visible || this.$store.getters['currentUser/isSpaceMember']()
     },
-    showInExplore () {
+    currentSpace () {
       const space = this.space || this.$store.state.currentSpace
+      return utils.clone(space)
+    },
+    showInExplore () {
+      const space = this.currentSpace
       const showInExplore = space.showInExplore
       const isNotPrivate = space.privacy !== 'private'
       return showInExplore && isNotPrivate
@@ -65,7 +70,6 @@ export default {
   },
   methods: {
     checkIfShouldPrevent (event) {
-      if (this.space) { return }
       let shouldPrevent
       if (this.showInExplore) { return }
       if (!this.currentUserIsSignedIn) {
@@ -90,11 +94,7 @@ export default {
       this.$store.commit('clearNotificationsWithPosition')
       const shouldPrevent = this.checkIfShouldPrevent(event)
       if (shouldPrevent) { return }
-      if (this.space) {
-        this.emitUpdateShowInExplore()
-      } else {
-        this.updateShowInExplore()
-      }
+      this.updateShowInExplore()
       this.notifyShowInExplore(event)
       this.$store.dispatch('currentSpace/createSpacePreviewImage')
     },
@@ -107,16 +107,14 @@ export default {
         this.$store.commit('addNotificationWithPosition', { message: 'Removed from Explore', position, type: 'success', layer: 'app', icon: 'checkmark' })
       }
     },
-    emitUpdateShowInExplore () {
-      let space = this.space
-      space.showInExplore = !space.showInExplore
-      this.$emit('updateAddToExplore', space)
-    },
     updateShowInExplore () {
       this.updateSpacePrivacy()
-      const shouldShow = !this.showInExplore
-      this.$store.dispatch('currentSpace/updateSpace', { showInExplore: shouldShow })
-      this.$emit('updateLocalSpaces')
+      // TODO show danger alert notification, or show it on the btn before clicking
+      let space = this.currentSpace
+      space.showInExplore = !space.showInExplore
+      this.$store.dispatch('currentSpace/updateSpace', { showInExplore: space.showInExplore })
+      this.$emit('updateLocalSpaces') // TODO unused
+      this.$emit('updateAddToExplore', space)
     },
     updateSpacePrivacy () {
       const shouldShow = !this.showInExplore

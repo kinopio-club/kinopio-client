@@ -7,6 +7,8 @@ import ExploreRssFeeds from '@/components/dialogs/ExploreRssFeeds.vue'
 import Loader from '@/components/Loader.vue'
 import UserLabelInline from '@/components/UserLabelInline.vue'
 import utils from '@/utils.js'
+import AddToExplore from '@/components/AddToExplore.vue'
+import AskToAddToExplore from '@/components/AskToAddToExplore.vue'
 
 import randomColor from 'randomcolor'
 
@@ -22,6 +24,8 @@ onMounted(() => {
     }
   })
 })
+
+const emit = defineEmits(['updateAddToExplore'])
 
 const props = defineProps({
   visible: Boolean,
@@ -162,6 +166,12 @@ const toggleExploreRssFeedsIsVisible = () => {
 }
 const rssButtonIsVisible = computed(() => !currentSectionIsFollowing.value)
 
+// add to explore button
+
+const isSpaceMember = computed(() => store.getters['currentUser/isSpaceMember'](currentSpace.value))
+const updateAddToExplore = (space) => {
+  emit('updateAddToExplore', space)
+}
 </script>
 
 <template lang="pug">
@@ -200,6 +210,11 @@ dialog.explore.wide(v-if="visible" :open="visible" ref="dialogElement" :style="{
         button.small-button(@click.stop="toggleExploreRssFeedsIsVisible" :class="{active: state.exploreRssFeedsIsVisible}" title="RSS Feeds")
           span RSS
         ExploreRssFeeds(:visible="state.exploreRssFeedsIsVisible")
+    .row(v-if="currentSectionIsExplore")
+      template(v-if="isSpaceMember")
+        AddToExplore(@updateAddToExplore="updateAddToExplore")
+      template(v-if="!isSpaceMember")
+        AskToAddToExplore
 
   section.results-section(ref="resultsElement" :style="{'max-height': state.resultsSectionHeight + 'px'}")
     SpaceList(

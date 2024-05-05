@@ -186,6 +186,18 @@ const liveSpacesCount = computed(() => {
   return normalizeCount(count)
 })
 
+// add to explore
+
+const updateAddToExplore = (space) => {
+  if (space.showInExplore) {
+    // prepend explore list
+    state.exploreSpaces.unshift(space)
+  } else {
+    // remove from explore list
+    state.exploreSpaces = state.exploreSpaces.filter(exploreSpace => exploreSpace.id !== space.id)
+  }
+}
+
 </script>
 
 <template lang="pug">
@@ -205,6 +217,7 @@ const liveSpacesCount = computed(() => {
         :unreadExploreSpacesCount="state.unreadExploreSpacesCount"
         :unreadFollowingSpacesCount="state.unreadFollowingSpacesCount"
         :unreadEveryoneSpacesCount="state.unreadEveryoneSpacesCount"
+        @updateAddToExplore="updateAddToExplore"
       )
     //- Live
     .button-wrap
