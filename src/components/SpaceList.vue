@@ -236,30 +236,29 @@ const isFavorite = (space) => {
 // list render optimization
 
 const itemIsVisible = (index) => {
+  if (props.disableListOptimizations) { return true }
+  if (!state.scrollY) {
+    updateScroll()
+  }
+  let threshold = 0
+  if (state.scrollY) {
+    threshold = state.scrollHeight / 2
+  }
+  const defaultHeight = 33
+  let yStart = index * defaultHeight
+  const prevHeight = state.heightByIndex[index - 1]
+  if (prevHeight) {
+    let yStart = 0
+    for (let i = 0; i - 1 < index; i++) {
+      yStart = yStart + state.heightByIndex[i]
+    }
+  }
+  const yEnd = yStart + defaultHeight
+  const isAboveScroll = (yEnd + threshold) < state.scrollY
+  const isBelowScroll = (yStart - threshold) > (state.scrollHeight + state.scrollY)
+  if (isAboveScroll || isBelowScroll) { return }
+  updateItemHeight(index)
   return true
-  // if (props.disableListOptimizations) { return true }
-  // if (!state.scrollY) {
-  //   updateScroll()
-  // }
-  // let threshold = 0
-  // if (state.scrollY) {
-  //   threshold = state.scrollHeight / 2
-  // }
-  // const defaultHeight = 33
-  // let yStart = index * defaultHeight
-  // const prevHeight = state.heightByIndex[index - 1]
-  // if (prevHeight) {
-  //   let yStart = 0
-  //   for (let i = 0; i - 1 < index; i++) {
-  //     yStart = yStart + state.heightByIndex[i]
-  //   }
-  // }
-  // const yEnd = yStart + defaultHeight
-  // const isAboveScroll = (yEnd + threshold) < state.scrollY
-  // const isBelowScroll = (yStart - threshold) > (state.scrollHeight + state.scrollY)
-  // if (isAboveScroll || isBelowScroll) { return }
-  // updateItemHeight(index)
-  // return true
 }
 const updateItemHeight = (index) => {
   let element = spaceListElement.value
