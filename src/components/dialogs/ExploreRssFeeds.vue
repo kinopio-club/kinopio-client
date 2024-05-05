@@ -32,10 +32,8 @@ const copyUrl = async (event, url) => {
 <template lang="pug">
 dialog.narrow.explore-rss-feed(v-if="visible" :open="visible" @click.left.stop)
   section
-    p Explore RSS Feeds
+    p Subscribe to RSS Feeds
   section
-    .row
-      p Subscribe to new spaces
     .row
       button(@click.left="copyUrl($event, exploreUrl)")
         img.icon.copy(src="@/assets/copy.svg")

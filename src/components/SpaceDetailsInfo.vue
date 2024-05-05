@@ -61,8 +61,6 @@ ReadOnlySpaceInfoBadges
 template(v-if="settingsIsVisible")
   //- read only space settings
   section.subsection.space-settings(v-if="!isSpaceMember")
-    .row(v-if="!showInExplore")
-      AskToAddToExplore
     .row
       //- Duplicate
       .button-wrap
@@ -77,8 +75,6 @@ template(v-if="settingsIsVisible")
 
   //- member space settings
   section.subsection.space-settings(v-if="isSpaceMember")
-    .row
-      AddToExplore
     .row
       //- Template
       .button-wrap(@click.left.prevent="toggleCurrentSpaceIsUserTemplate" @keydown.stop.enter="toggleCurrentSpaceIsUserTemplate")
@@ -122,8 +118,6 @@ import PrivacyButton from '@/components/PrivacyButton.vue'
 import templates from '@/data/templates.js'
 import ImportExport from '@/components/dialogs/ImportExport.vue'
 import ReadOnlySpaceInfoBadges from '@/components/ReadOnlySpaceInfoBadges.vue'
-import AddToExplore from '@/components/AddToExplore.vue'
-import AskToAddToExplore from '@/components/AskToAddToExplore.vue'
 import FavoriteSpaceButton from '@/components/FavoriteSpaceButton.vue'
 import cache from '@/cache.js'
 
@@ -136,8 +130,6 @@ export default {
     Loader,
     PrivacyButton,
     ReadOnlySpaceInfoBadges,
-    AskToAddToExplore,
-    AddToExplore,
     ImportExport,
     FavoriteSpaceButton
   },

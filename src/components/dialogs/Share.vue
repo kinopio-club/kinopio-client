@@ -9,8 +9,6 @@ import Embed from '@/components/dialogs/Embed.vue'
 import UserList from '@/components/UserList.vue'
 import utils from '@/utils.js'
 import ImportExport from '@/components/dialogs/ImportExport.vue'
-import AddToExplore from '@/components/AddToExplore.vue'
-import AskToAddToExplore from '@/components/AskToAddToExplore.vue'
 import ReadOnlySpaceInfoBadges from '@/components/ReadOnlySpaceInfoBadges.vue'
 import consts from '@/consts.js'
 const store = useStore()
@@ -58,14 +56,6 @@ const isSpaceMember = computed(() => store.getters['currentUser/isSpaceMember'](
 const spaceIsRemote = computed(() => store.getters['currentSpace/isRemote'])
 const spaceIsPublic = computed(() => store.state.currentSpace.privacy !== 'private')
 const spaceIsPrivate = computed(() => store.state.currentSpace.privacy === 'private')
-
-// add to explore
-
-const exploreSectionIsVisible = computed(() => {
-  const showInExplore = store.state.currentSpace.showInExplore
-  const shouldShowAskToAddToExplore = !isSpaceMember.value && !showInExplore
-  return spaceIsPublic.value && (isSpaceMember.value || shouldShowAskToAddToExplore)
-})
 
 // collaborators
 
@@ -243,13 +233,6 @@ dialog.share.wide(v-if="props.visible" :open="props.visible" @click.left.stop="c
         label.label.small-button.extra-options-button.inline-button(title="Share in Presentation Mode" @mouseup.left="toggleIsShareInPresentationMode" @touchend.prevent="toggleIsShareInPresentationMode" :class="{active: state.isShareInPresentationMode}")
           input(type="checkbox" :value="state.isShareInPresentationMode")
           img.icon(src="@/assets/presentation.svg")
-      //- Explore
-      template(v-if="exploreSectionIsVisible")
-        .row
-          p Share with the Community
-        .row
-          AddToExplore
-          AskToAddToExplore
 
   //- Invite
   Invite(v-if="isSpaceMember && currentUserIsSignedIn" @closeDialogs="closeDialogs" @emailInvitesIsVisible="emailInvitesIsVisible")

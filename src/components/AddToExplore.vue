@@ -16,7 +16,8 @@ onMounted(() => {
 const emit = defineEmits(['updateLocalSpaces', 'updateAddToExplore'])
 
 const props = defineProps({
-  visible: Boolean
+  visible: Boolean,
+  disabled: Boolean
 })
 watch(() => props.visible, (value, prevValue) => {
   if (value) {
@@ -83,16 +84,7 @@ const toggleShowInExplore = (event) => {
   const shouldPrevent = checkIfShouldPrevent(event)
   if (shouldPrevent) { return }
   updateShowInExplore()
-  notifyShowInExplore(event)
   store.dispatch('currentSpace/createSpacePreviewImage')
-}
-const notifyShowInExplore = (event) => {
-  const position = utils.cursorPositionInPage(event)
-  if (showInExplore.value) {
-    store.commit('addNotificationWithPosition', { message: 'Added to Explore', position, type: 'success', layer: 'app', icon: 'checkmark' })
-  } else {
-    store.commit('addNotificationWithPosition', { message: 'Removed from Explore', position, type: 'success', layer: 'app', icon: 'checkmark' })
-  }
 }
 const updateShowInExplore = () => {
   updateSpacePrivacy()
@@ -112,16 +104,17 @@ const updateSpacePrivacy = () => {
 
 <template lang="pug">
 .button-wrap.add-to-explore(@click.stop v-if="isVisible")
-  button(:class="{active: showInExplore}" @click.left.prevent="toggleShowInExplore" @keydown.stop.enter="toggleShowInExplore")
-    span(v-if="!showInExplore")
+  button.small-button(:class="{active: showInExplore}" @click.left.prevent="toggleShowInExplore" @keydown.stop.enter="toggleShowInExplore" :disabled="disabled")
     img.icon.sunglasses(src="@/assets/sunglasses.svg")
     span(v-if="!showInExplore")
-      span Add Current Space to Explore
-      span.badge.info.badge-privacy-info(v-if="currentSpaceIsPrivate")
+      span Add to Explore
+    template(v-if="showInExplore")
+      span In Explore
+    //- privacy warning
+    template(v-if="!showInExplore && currentSpaceIsPrivate")
+      .label-badge.space-name-badge-wrap.public-space-warning-badge
         img.icon.lock-icon(src="@/assets/unlock.svg")
         span Will Make Public
-
-    span(v-if="showInExplore") Current Space In Explore
 
   template(v-if="state.error.userNeedsToSignUpOrIn")
     .badge.info
@@ -148,8 +141,11 @@ const updateSpacePrivacy = () => {
     margin-top 10px
   button
     white-space initial !important
-  .badge-privacy-info
-    margin-top 4px
-    display inline-block
-
+  .public-space-warning-badge
+    min-width 100px
+    background-color var(--danger-background)
+    bottom -12px
+    .lock-icon
+      width 6px
+      margin-left 2px
 </style>

@@ -164,14 +164,16 @@ const randomUser = computed(() => {
 const toggleExploreRssFeedsIsVisible = () => {
   state.exploreRssFeedsIsVisible = !state.exploreRssFeedsIsVisible
 }
-const rssButtonIsVisible = computed(() => !currentSectionIsFollowing.value)
-
 // add to explore button
 
+const isLoadingSpace = computed(() => store.state.isLoadingSpace)
 const isSpaceMember = computed(() => store.getters['currentUser/isSpaceMember'](currentSpace.value))
 const updateAddToExplore = (space) => {
   emit('updateAddToExplore', space)
 }
+const isReadOnlyInExplore = computed(() => {
+  return !isSpaceMember.value && currentSpaceInExplore.value
+})
 </script>
 
 <template lang="pug">
@@ -202,19 +204,27 @@ dialog.explore.wide(v-if="visible" :open="visible" ref="dialogElement" :style="{
       //- current section descriptions
       div
         Loader(:isSmall="true" :visible="props.loading")
-        span(v-if="currentSectionIsExplore") Shared with the community
+        span(v-if="currentSectionIsExplore") Explore community highlights
         span(v-else-if="currentSectionIsFollowing") Recently updated by people you follow
         span(v-else-if="currentSectionIsEveryone") All new public spaces
-      //- rss
-      .button-wrap.rss-button-wrap(v-if="rssButtonIsVisible")
-        button.small-button(@click.stop="toggleExploreRssFeedsIsVisible" :class="{active: state.exploreRssFeedsIsVisible}" title="RSS Feeds")
-          span RSS
-        ExploreRssFeeds(:visible="state.exploreRssFeedsIsVisible")
-    .row(v-if="currentSectionIsExplore")
+
+    //- add to explore
+    section.subsection
       template(v-if="isSpaceMember")
         AddToExplore(@updateAddToExplore="updateAddToExplore")
-      template(v-if="!isSpaceMember")
+      template(v-else-if="!isSpaceMember")
         AskToAddToExplore
+      template(v-else)
+        img.icon.sunglasses(src="@/assets/sunglasses.svg")
+        span In Explore
+
+      //- rss
+      .button-wrap.rss-button-wrap
+        button.small-button(@click.stop="toggleExploreRssFeedsIsVisible" :class="{active: state.exploreRssFeedsIsVisible}" title="RSS Feeds")
+          span RSS
+      ExploreRssFeeds(:visible="state.exploreRssFeedsIsVisible")
+
+  hr
 
   section.results-section(ref="resultsElement" :style="{'max-height': state.resultsSectionHeight + 'px'}")
     SpaceList(
@@ -243,4 +253,8 @@ dialog.explore
   .segmented-buttons
     button
       position relative
+  .subsection
+    position relative
+  hr
+    margin-top 0
 </style>

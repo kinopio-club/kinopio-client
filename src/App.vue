@@ -526,6 +526,12 @@ label // used for checkbox buttons
       width 10px
       height 10px
       vertical-align 0
+    .icon.sunglasses
+      height 10px
+      vertical-align 0px
+      margin-left 1px
+      + span
+        margin-left 4px
   &.fixed-height
     height var(--button-fixed-height)
 .unselectable

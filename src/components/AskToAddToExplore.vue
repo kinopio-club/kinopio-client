@@ -1,6 +1,7 @@
 <script setup>
 import { reactive, computed, onMounted, onBeforeUnmount, onUnmounted, defineProps, defineEmits, watch, ref, nextTick } from 'vue'
 import { useStore } from 'vuex'
+
 const store = useStore()
 
 const emit = defineEmits(['updateDialogHeight'])
@@ -43,7 +44,7 @@ const askToAddToExplore = () => {
 <template lang="pug">
 .button-wrap.ask-to-add-to-explore(v-if="isVisible")
   template(v-if="!state.isAsked")
-    button(@click.left.prevent="askToAddToExplore" @keydown.stop.enter="askToAddToExplore")
+    button.small-button(@click.left.prevent="askToAddToExplore" @keydown.stop.enter="askToAddToExplore")
       img.icon.sunglasses(src="@/assets/sunglasses.svg")
       span Ask to Add to Explore
     template(v-if="state.error.userNeedsToSignUpOrIn")
@@ -63,4 +64,7 @@ const askToAddToExplore = () => {
     margin-right 4px
   .badge
     display inline-block !important
+.ask-to-add-in-explore
+  margin-top 6px
+  margin-left 4px
 </style>
