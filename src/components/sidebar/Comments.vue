@@ -82,6 +82,9 @@ section.comments
       display block
   .comment-icon
     vertical-align -3px
+  .user
+    flex-shrink 0
+    max-width 44%
 
 section.tips-section
   margin 4px
