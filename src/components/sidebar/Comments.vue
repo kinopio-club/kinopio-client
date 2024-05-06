@@ -9,6 +9,10 @@ section.results-section.comments(v-if="visible")
       li(@click="showCardDetails(card)")
         p.user
           UserLabelInline(:user="card.user")
+          br
+          span.badge.status.inline-badge
+            img.icon.time(src="@/assets/time.svg")
+            span {{ relativeDate(card) }}
         .comment-name
           img.icon.comment-icon(src="@/assets/comment.svg")
           template(v-for="segment in card.nameSegments")
@@ -68,6 +72,9 @@ export default {
     },
     userById (userId) {
       return this.$store.getters['currentSpace/userById'](userId)
+    },
+    relativeDate (card) {
+      return utils.shortRelativeTime(card.nameUpdatedAt || card.updatedAt)
     }
   }
 }
