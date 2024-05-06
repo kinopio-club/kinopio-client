@@ -54,9 +54,10 @@ dialog.donate.narrow(v-if="visible" :open="visible" @click.left.stop ref="dialog
 <script>
 import User from '@/components/User.vue'
 import Loader from '@/components/Loader.vue'
+import consts from '@/consts.js'
 
 let productId
-if (import.meta.env.MODE === 'development') {
+if (consts.isDevelopment) {
   productId = 'prod_LtXVNnexfHyKZA'
 } else {
   productId = 'prod_LuJoVy0tM7PiBI'

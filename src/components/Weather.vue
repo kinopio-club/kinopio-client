@@ -18,6 +18,7 @@
 
 <script>
 import utils from '@/utils.js'
+import consts from '@/consts.js'
 
 export default {
   name: 'Weather',
@@ -50,7 +51,7 @@ export default {
       this.$store.dispatch('currentUser/update', { showWeather: false, weatherLocation: null })
     },
     location () {
-      if (import.meta.env.MODE === 'development') {
+      if (consts.isDevelopment) {
         // 🐪 somewhere in the Sahara
         const position = {
           coords: {
