@@ -13,9 +13,12 @@ const props = defineProps({
 })
 
 const styles = computed(() => {
+  const zoom = store.getters.spaceCounterZoomDecimal
+  const offset = 6
   return {
-    left: props.card.x + 'px',
-    top: props.card.y + 'px'
+    left: `${props.card.x + offset}px`,
+    top: `${props.card.y + offset}px`,
+    transform: `scale(${zoom})`
   }
 })
 const truncatedName = computed(() => utils.truncated(props.card.name))
@@ -47,12 +50,10 @@ const relativeDate = computed(() => utils.shortRelativeTime(props.card.nameUpdat
 
 <style lang="stylus">
 .card-comment-preview
+  transform-origin top left
   position absolute
   max-width 180px
-  background teal
   background var(--secondary-hover-background)
-  margin-left 6px
-  margin-top 6px
   padding 4px
   z-index var(--max-z)
   border-radius var(--entity-radius)
