@@ -57,7 +57,6 @@ const relativeDate = computed(() => utils.shortRelativeTime(props.card.nameUpdat
   z-index var(--max-z)
   border-radius var(--entity-radius)
   pointer-events none
-  // ?? shadow//
   .row
     margin-top 1px
     margin-bottom 6px
