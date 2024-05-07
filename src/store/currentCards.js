@@ -336,7 +336,7 @@ const currentCards = {
         cache.updateSpace('editedByUserId', context.rootState.currentUser.id, currentSpaceId)
       })
       nextTick(() => {
-        context.dispatch('currentConnections/updateMultplePaths', cards, { root: true })
+        context.dispatch('updateDimensions', { cards })
       })
     },
     updateCounter: (context, { card, shouldIncrement, shouldDecrement }) => {
@@ -389,6 +389,9 @@ const currentCards = {
         id: cardId,
         name,
         nameUpdatedAt: new Date()
+      })
+      nextTick(() => {
+        context.dispatch('updateDimensions', { cards: [card] })
       })
     },
     updateURLQueryStrings: (context, { cardId }) => {
