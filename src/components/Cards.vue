@@ -33,6 +33,7 @@ const currentHoveredCardIsComment = computed(() => {
   return isComment
 })
 const cardCommentPreviewIsVisible = computed(() => {
+  if (store.state.currentUserIsHoveringOverConnectorCardId) { return }
   const cardId = store.state.currentUserIsHoveringOverCardId
   const cardDetailsIsVisible = cardId === store.state.cardDetailsIsVisibleForCardId
   if (cardDetailsIsVisible) { return }

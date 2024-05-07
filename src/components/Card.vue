@@ -1630,7 +1630,7 @@ const removeViewportObserver = () => {
   observer.unobserve(target)
 }
 
-// mouse handlers
+// mouse hover handlers
 
 const handleMouseEnter = () => {
   initStickToCursor()
@@ -1639,6 +1639,12 @@ const handleMouseEnter = () => {
 const handleMouseLeave = () => {
   unstickToCursor()
   store.commit('currentUserIsHoveringOverCardId', '')
+}
+const handleMouseEnterConnector = (event) => {
+  store.commit('currentUserIsHoveringOverConnectorCardId', props.card.id)
+}
+const handleMouseLeaveConnector = () => {
+  store.commit('currentUserIsHoveringOverConnectorCardId', '')
 }
 
 // sticky
@@ -2006,6 +2012,9 @@ article.card-wrap#card(
             :data-card-id="card.id"
             @mousedown.left="startConnecting"
             @touchstart="startConnecting"
+            @mouseenter="handleMouseEnterConnector"
+            @mouseleave="handleMouseLeaveConnector"
+
           )
             .connector-glow(:style="connectorGlowStyle" tabindex="-1")
             .connected-colors
