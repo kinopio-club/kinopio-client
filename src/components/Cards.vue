@@ -29,7 +29,7 @@ const currentHoveredCard = computed(() => {
 const currentHoveredCardIsComment = computed(() => {
   const card = currentHoveredCard.value
   if (!card) { return }
-  const isComment = card.isComment || utils.isNameComment(card.name)
+  const isComment = store.getters['currentCards/isComment'](card)
   return isComment
 })
 const cardCommentPreviewIsVisible = computed(() => {

@@ -60,12 +60,12 @@ const isResizing = computed(() => {
   const cardIds = store.state.currentUserIsResizingCardIds
   return cardIds.includes(props.card.id)
 })
-
+const isComment = computed(() => store.getters['currentCards/isComment'](props.card))
 </script>
 
 <template lang="pug">
 //- resize
-.right-resize.bottom-button-wrap(v-if="visible")
+.right-resize.bottom-button-wrap(v-if="visible && !isComment")
   .inline-button-wrap(
     @mousedown.left.stop="start($event, 'resize')"
     @touchstart.stop="start($event, 'resize')"

@@ -207,7 +207,7 @@ const currentBackgroundColorIsDark = computed(() => {
 
 // comment
 
-const isComment = computed(() => props.card.isComment || utils.isNameComment(name.value))
+const isComment = computed(() => store.getters['currentCards/isComment'](props.card))
 const removeCommentBrackets = (name) => {
   if (!isComment.value) { return name }
   if (props.card.isComment) { return name }

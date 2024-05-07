@@ -899,6 +899,9 @@ const currentCards = {
       const cards = getters.all
       return cards.filter(card => card.isLocked)
     },
+    isComment: (state, getters) => (card) => {
+      return card.isComment || utils.isNameComment(card.name)
+    },
     isBelowY: (state, getters) => (y, zoom) => {
       zoom = zoom || 1
       const cards = getters.all
