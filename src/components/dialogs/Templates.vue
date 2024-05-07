@@ -12,7 +12,7 @@ dialog.templates.narrow(
   section.add-to-templates
   section.results-section(:style="{'max-height': resultsSectionHeight + 'px'}")
     SpaceList(
-      :spaces="templates"
+      :spaces="templatesList"
       :showCategory="true"
       @selectSpace="changeSpace"
       :isLoading="isLoadingRemoteSpaces"
@@ -50,7 +50,7 @@ export default {
     return {
       dialogHeight: null,
       resultsSectionHeight: null,
-      userSpaces: [],
+      localSpaces: [],
       spaces: [],
       isLoadingRemoteSpaces: false
     }
@@ -69,8 +69,8 @@ export default {
         return space
       })
     },
-    templates () {
-      const templates = this.userSpaces.concat(this.spaces)
+    templatesList () {
+      const templates = this.localSpaces.concat(this.systemTemplates)
       return templates.map(template => {
         template.previewThumbnailImage = `https://us-east-1.linodeobjects.com/kinopio-uploads/${template.id}/preview-image-thumbnail-${template.id}.jpg`
         return template
@@ -80,16 +80,16 @@ export default {
   },
   methods: {
     init () {
-      this.spaces = this.systemTemplates
-      this.userSpaces = this.localSpaces().concat(this.userSpaces)
+      this.updateWithLocalSpaces()
       this.updateWithRemoteSpaces()
     },
-    localSpaces () {
+    updateWithLocalSpaces () {
       let localSpaces = cache.getAllSpaces().filter(space => {
         return space.isTemplate
       })
       localSpaces = this.sortSpacesByEditedAt(localSpaces)
-      return localSpaces || []
+      this.localSpaces = localSpaces || []
+      this.updateHeight()
     },
     async updateWithRemoteSpaces () {
       const currentUserIsSignedIn = this.$store.getters['currentUser/isSignedIn']
@@ -139,6 +139,9 @@ export default {
   watch: {
     visible (visible) {
       this.updateHeight()
+      if (visible) {
+        this.init()
+      }
     }
   }
 }
