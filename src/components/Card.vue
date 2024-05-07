@@ -208,10 +208,6 @@ const currentBackgroundColorIsDark = computed(() => {
 // comment
 
 const isComment = computed(() => props.card.isComment || utils.isNameComment(name.value))
-const cardNameIfComment = computed(() => {
-  if (!isComment.value) { return }
-  return props.card.name
-})
 const removeCommentBrackets = (name) => {
   if (!isComment.value) { return name }
   if (props.card.isComment) { return name }
@@ -1912,7 +1908,6 @@ article.card-wrap#card(
   :key="card.id"
   ref="cardElement"
   :class="articleClasses"
-  :title="cardNameIfComment"
 )
   .card(
     @mousedown.left.prevent="startDraggingCard"

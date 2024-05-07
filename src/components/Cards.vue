@@ -18,28 +18,35 @@ onMounted(() => {
 
 const unlockedCards = computed(() => store.getters['currentCards/isNotLocked'])
 
+// card comment preview
+
 const currentHoveredCard = computed(() => {
   const cardId = store.state.currentUserIsHoveringOverCardId
   if (!cardId) { return }
   const card = store.getters['currentCards/byId'](cardId)
-  const isComment = card.isComment || utils.isNameComment(name.value)
-  console.log('🌷🌷🌷', isComment, cardId)
+  return card
+})
+const currentHoveredCardIsComment = computed(() => {
+  const card = currentHoveredCard.value
+  if (!card) { return }
+  const isComment = card.isComment || utils.isNameComment(card.name)
   return isComment
 })
-
-// const cardCommentPreviewIsVisible = computed(() => currentUserIsHoveringOverCardId)
-
+const cardCommentPreviewIsVisible = computed(() => {
+  const cardId = store.state.currentUserIsHoveringOverCardId
+  const cardDetailsIsVisible = cardId === store.state.cardDetailsIsVisibleForCardId
+  if (cardDetailsIsVisible) { return }
+  return currentHoveredCardIsComment.value
+})
 </script>
 
 <template lang="pug">
+
 .cards
   //- locked cards rendered in ItemsLocked
   template(v-for="card in unlockedCards" :key="card.id")
     Card(:card="card")
-  p {{currentHoveredCard}}
-  //- CardCommentPreview(:visible="isHoveredCardComment" :card="card" :user="createdByUser" :position="")
-  //- cardCommentPreviewIsVisible = isComment and is hovering
-
+  CardCommentPreview(:visible="cardCommentPreviewIsVisible" :card="currentHoveredCard")
 </template>
 
 <style lang="stylus">
