@@ -36,12 +36,12 @@ const relativeDate = computed(() => utils.shortRelativeTime(props.card.nameUpdat
 
 <template lang="pug">
 .card-comment-preview(v-if="visible" :style="styles")
-  .row
-    span {{ truncatedName }}
-  span.badge.status.inline-badge
-    img.icon.time(src="@/assets/time.svg")
-    span {{ relativeDate }}
   UserLabelInline(:user="createdByUser")
+  .row
+    span.badge.status.inline-badge
+      img.icon.time(src="@/assets/time.svg")
+      span {{ relativeDate }}
+  p {{ truncatedName }}
 
 </template>
 
@@ -59,5 +59,6 @@ const relativeDate = computed(() => utils.shortRelativeTime(props.card.nameUpdat
   pointer-events none
   // ?? shadow//
   .row
+    margin-top 1px
     margin-bottom 6px
 </style>
