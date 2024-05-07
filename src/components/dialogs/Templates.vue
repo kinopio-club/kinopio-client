@@ -146,6 +146,9 @@ export default {
 
 <style lang="stylus">
 dialog.templates
+  overflow auto
+  .icon
+    display inline-block
   .results-section
     .inline-badge
       &.learning
