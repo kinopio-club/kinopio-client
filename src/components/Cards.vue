@@ -33,11 +33,16 @@ const currentHoveredCardIsComment = computed(() => {
   return isComment
 })
 const cardCommentPreviewIsVisible = computed(() => {
-  if (store.state.currentUserIsHoveringOverConnectorCardId) { return }
+  if (shouldPrevent.value) { return }
   const cardId = store.state.currentUserIsHoveringOverCardId
   const cardDetailsIsVisible = cardId === store.state.cardDetailsIsVisibleForCardId
   if (cardDetailsIsVisible) { return }
   return currentHoveredCardIsComment.value
+})
+const shouldPrevent = computed(() => {
+  const isHoveringOverConnector = store.state.currentUserIsHoveringOverConnectorCardId
+  const isInteractingWithItem = store.getters.isInteractingWithItem
+  return isInteractingWithItem || isHoveringOverConnector
 })
 </script>
 

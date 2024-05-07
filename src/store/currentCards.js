@@ -513,7 +513,6 @@ const currentCards = {
       cardIds.forEach(cardId => {
         const card = context.getters.byId(cardId)
         let tilt = card.tilt || 0
-        console.log(tilt, delta)
         tilt = tilt + delta
         tilt = Math.min(maxDegrees, tilt)
         tilt = Math.max(-maxDegrees, tilt)
