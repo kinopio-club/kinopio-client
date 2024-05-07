@@ -377,7 +377,8 @@ const toggleCounterIsVisible = () => {
   props.cards.forEach(card => {
     card = {
       id: card.id,
-      counterIsVisible
+      counterIsVisible,
+      counterValue: card.counterValue || 1
     }
     store.dispatch('currentCards/update', card)
   })
