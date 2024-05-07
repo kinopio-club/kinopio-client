@@ -207,11 +207,7 @@ const currentBackgroundColorIsDark = computed(() => {
 
 // comment
 
-const isComment = computed(() => props.card.isComment || utils.isNameComment(name.value))
-const cardNameIfComment = computed(() => {
-  if (!isComment.value) { return }
-  return props.card.name
-})
+const isComment = computed(() => store.getters['currentCards/isComment'](props.card))
 const removeCommentBrackets = (name) => {
   if (!isComment.value) { return name }
   if (props.card.isComment) { return name }
@@ -1634,7 +1630,7 @@ const removeViewportObserver = () => {
   observer.unobserve(target)
 }
 
-// mouse handlers
+// mouse hover handlers
 
 const handleMouseEnter = () => {
   initStickToCursor()
@@ -1643,6 +1639,12 @@ const handleMouseEnter = () => {
 const handleMouseLeave = () => {
   unstickToCursor()
   store.commit('currentUserIsHoveringOverCardId', '')
+}
+const handleMouseEnterConnector = (event) => {
+  store.commit('currentUserIsHoveringOverConnectorCardId', props.card.id)
+}
+const handleMouseLeaveConnector = () => {
+  store.commit('currentUserIsHoveringOverConnectorCardId', '')
 }
 
 // sticky
@@ -1912,7 +1914,6 @@ article.card-wrap#card(
   :key="card.id"
   ref="cardElement"
   :class="articleClasses"
-  :title="cardNameIfComment"
 )
   .card(
     @mousedown.left.prevent="startDraggingCard"
@@ -2011,6 +2012,9 @@ article.card-wrap#card(
             :data-card-id="card.id"
             @mousedown.left="startConnecting"
             @touchstart="startConnecting"
+            @mouseenter="handleMouseEnterConnector"
+            @mouseleave="handleMouseLeaveConnector"
+
           )
             .connector-glow(:style="connectorGlowStyle" tabindex="-1")
             .connected-colors

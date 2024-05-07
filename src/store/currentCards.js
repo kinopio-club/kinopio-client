@@ -336,7 +336,7 @@ const currentCards = {
         cache.updateSpace('editedByUserId', context.rootState.currentUser.id, currentSpaceId)
       })
       nextTick(() => {
-        context.dispatch('currentConnections/updateMultplePaths', cards, { root: true })
+        context.dispatch('updateDimensions', { cards })
       })
     },
     updateCounter: (context, { card, shouldIncrement, shouldDecrement }) => {
@@ -389,6 +389,9 @@ const currentCards = {
         id: cardId,
         name,
         nameUpdatedAt: new Date()
+      })
+      nextTick(() => {
+        context.dispatch('updateDimensions', { cards: [card] })
       })
     },
     updateURLQueryStrings: (context, { cardId }) => {
@@ -513,7 +516,6 @@ const currentCards = {
       cardIds.forEach(cardId => {
         const card = context.getters.byId(cardId)
         let tilt = card.tilt || 0
-        console.log(tilt, delta)
         tilt = tilt + delta
         tilt = Math.min(maxDegrees, tilt)
         tilt = Math.max(-maxDegrees, tilt)
@@ -899,6 +901,9 @@ const currentCards = {
     isLocked: (state, getters) => {
       const cards = getters.all
       return cards.filter(card => card.isLocked)
+    },
+    isComment: (state, getters) => (card) => {
+      return card.isComment || utils.isNameComment(card.name)
     },
     isBelowY: (state, getters) => (y, zoom) => {
       zoom = zoom || 1

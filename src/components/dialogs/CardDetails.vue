@@ -563,8 +563,9 @@ export default {
         zoom = 1
       }
       const transform = `scale(${zoom})`
-      const left = `${this.card.x + 8}px`
-      const top = `${this.card.y + 8}px`
+      const offset = 8
+      const left = `${this.card.x + offset}px`
+      const top = `${this.card.y + offset}px`
       return { transform, left, top }
     },
     cardUrlPreviewIsVisible () {
