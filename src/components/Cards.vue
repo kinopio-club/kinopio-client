@@ -47,7 +47,6 @@ const shouldPrevent = computed(() => {
 </script>
 
 <template lang="pug">
-
 .cards
   //- locked cards rendered in ItemsLocked
   template(v-for="card in unlockedCards" :key="card.id")

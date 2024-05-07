@@ -2014,7 +2014,6 @@ article.card-wrap#card(
             @touchstart="startConnecting"
             @mouseenter="handleMouseEnterConnector"
             @mouseleave="handleMouseLeaveConnector"
-
           )
             .connector-glow(:style="connectorGlowStyle" tabindex="-1")
             .connected-colors
