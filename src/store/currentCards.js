@@ -398,6 +398,7 @@ const currentCards = {
         if (!urls) { return }
         let name = card.name
         name = utils.removeTrackingQueryStringsFromURLs(name)
+        name = utils.removeTrailingSlash(name)
         context.dispatch('update', {
           id: cardId,
           name
