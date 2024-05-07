@@ -15,7 +15,7 @@ const dialogElement = ref(null)
 const resultsSectionElement = ref(null)
 
 onMounted(() => {
-  init()
+  initUserTemplates()
   store.subscribe((mutation, state) => {
     if (mutation.type === 'updatePageSizes') {
       updateDialogHeight()
@@ -29,7 +29,7 @@ const props = defineProps({
 watch(() => props.visible, (value, prevValue) => {
   updateHeight()
   if (value) {
-    init()
+    initUserTemplates()
   }
 })
 
@@ -41,6 +41,27 @@ const state = reactive({
   isLoadingRemoteSpaces: false
 })
 
+const parentDialog = computed(() => 'templates')
+const changeSpace = (space) => {
+  store.dispatch('currentSpace/changeSpace', space)
+}
+
+// templates
+
+const templatesList = computed(() => {
+  const templates = state.localSpaces.concat(systemTemplates.value)
+  return templates.map(template => {
+    template.previewThumbnailImage = `https://us-east-1.linodeobjects.com/kinopio-uploads/${template.id}/preview-image-thumbnail-${template.id}.jpg`
+    return template
+  })
+})
+const initUserTemplates = () => {
+  updateWithLocalSpaces()
+  updateWithRemoteSpaces()
+}
+
+// system templates
+
 const systemTemplates = computed(() => {
   let spaces = templates.spaces()
   return spaces.map(space => {
@@ -51,19 +72,9 @@ const systemTemplates = computed(() => {
     return space
   })
 })
-const templatesList = computed(() => {
-  const templates = state.localSpaces.concat(systemTemplates.value)
-  return templates.map(template => {
-    template.previewThumbnailImage = `https://us-east-1.linodeobjects.com/kinopio-uploads/${template.id}/preview-image-thumbnail-${template.id}.jpg`
-    return template
-  })
-})
-const parentDialog = computed(() => 'templates')
 
-const init = () => {
-  updateWithLocalSpaces()
-  updateWithRemoteSpaces()
-}
+// user templates
+
 const updateWithLocalSpaces = () => {
   let localSpaces = cache.getAllSpaces().filter(space => {
     return space.isTemplate
@@ -82,9 +93,6 @@ const updateWithRemoteSpaces = async () => {
   state.localSpaces = remoteSpaces
   state.isLoadingRemoteSpaces = false
   updateHeight()
-}
-const changeSpace = (space) => {
-  store.dispatch('currentSpace/changeSpace', space)
 }
 // copied from SpaceDetails.vue
 const sortSpacesByEditedAt = (spaces) => {
