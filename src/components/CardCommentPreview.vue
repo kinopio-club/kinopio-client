@@ -53,7 +53,7 @@ const relativeDate = computed(() => utils.shortRelativeTime(props.card.nameUpdat
   background var(--secondary-hover-background)
   margin-left 6px
   margin-top 6px
-  padding 6px
+  padding 4px
   z-index var(--max-z)
   border-radius var(--entity-radius)
   pointer-events none
