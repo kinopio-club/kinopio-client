@@ -167,7 +167,7 @@ const deleteUserPermanent = async () => {
     .subsection
       margin-top 10px
       margin-bottom 10px
-  section
+  section:not(.subsection)
     border-top 1px solid var(--primary-border)
     border-radius 0 !important
 </style>

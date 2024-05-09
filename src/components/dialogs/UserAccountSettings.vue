@@ -8,29 +8,6 @@ dialog.narrow.update-email(v-if="visible" :open="visible" @click.left.stop ref="
       button(@click.left="triggerSignUpOrInIsVisible") Sign Up or In
   template(v-else)
     section
-      .row
-        .button-wrap
-          button(@click.left.stop="toggleApiKeyIsVisible" :class="{active: apiKeyIsVisible}")
-            img.icon.key(src="@/assets/key.svg")
-            span Get API Key
-      template(v-if="apiKeyIsVisible")
-        p.badge.danger Be careful with sharing your API Key
-        p Anyone with your key can read, edit, and remove your cards and spaces
-        p.row
-          .url-textarea.single-line
-            span {{key}}
-        .row
-          .button-wrap
-            button(@click.left="copyKey")
-              img.icon.copy(src="@/assets/copy.svg")
-              span Copy Key
-          .button-wrap
-            a(href="https://help.kinopio.club/api")
-              button
-                span Docs{{' '}}
-                img.icon.visit(src="@/assets/visit.svg")
-
-    section
       form(@submit.prevent="updateEmail")
         input(type="text" placeholder="Email" required autocomplete="email" v-model="email")
         button(type="submit" :class="{active : loading}")
@@ -43,6 +20,37 @@ dialog.narrow.update-email(v-if="visible" :open="visible" @click.left.stop ref="
       p.badge.danger(v-else-if="error.accountAlreadyExists")
         span An account with this email already exists
     UpdatePassword
+
+    section
+      //- developer info
+      section.subsection
+        .row
+          .button-wrap
+            button(@click.left.stop="toggleApiKeyIsVisible" :class="{active: apiKeyIsVisible}")
+              img.icon.key(src="@/assets/key.svg")
+              span Developer Info
+        template(v-if="apiKeyIsVisible")
+          //- copy api key
+          p.badge.danger.copy-api-keys
+            .button-wrap
+              button(@click.left="copy($event, 'apiKey')")
+                img.icon.copy(src="@/assets/copy.svg")
+                span Copy API Key
+            p Keep your API key secret. Anyone with your key can read, edit, and remove your cards and spaces
+          //- copy user id
+          .row
+            .button-wrap
+              button(@click.left="copy($event, 'userId')")
+                img.icon.copy(src="@/assets/copy.svg")
+                span Copy UserId
+          //- api docs
+          .row
+            .button-wrap
+              a(href="https://help.kinopio.club/api")
+                button
+                  span API Docs{{' '}}
+                  img.icon.visit(src="@/assets/visit.svg")
+
 </template>
 
 <script>
@@ -82,7 +90,8 @@ export default {
   },
   computed: {
     currentUserIsSignedIn () { return this.$store.getters['currentUser/isSignedIn'] },
-    key () { return cache.user().apiKey }
+    userId () { return this.$store.state.currentUser.id },
+    apiKey () { return cache.user().apiKey }
   },
   methods: {
     updateDialogHeight () {
@@ -137,14 +146,19 @@ export default {
       this.apiKeyIsVisible = !isVisible
       this.updateDialogHeight()
     },
-    async copyKey (event) {
+    async copy (event, type) {
       this.$store.commit('clearNotificationsWithPosition')
       const position = utils.cursorPositionInPage(event)
+      let text = this.userId
+      if (type === 'apiKey') {
+        text = this.apiKey
+      }
       try {
-        await navigator.clipboard.writeText(this.key)
+        await navigator.clipboard.writeText(text)
         this.$store.commit('addNotificationWithPosition', { message: 'Copied', position, type: 'success', layer: 'app', icon: 'checkmark' })
+        console.log(`🍇 copied ${type}`)
       } catch (error) {
-        console.warn('🚑 copyKey', error)
+        console.warn('🚑 copyText', error)
         this.$store.commit('addNotificationWithPosition', { message: 'Copy Error', position, type: 'danger', layer: 'app', icon: 'cancel' })
       }
     }
@@ -166,5 +180,7 @@ export default {
   overflow auto
   @media(max-height 650px)
     top -100px !important
-
+  .copy-api-keys
+    padding-top 4px
+    padding-bottom 4px
 </style>
