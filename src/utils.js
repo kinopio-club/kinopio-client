@@ -2066,7 +2066,8 @@ export default {
       id: space.id,
       name: space.name,
       privacy: space.privacy,
-      previewThumbnailImage: space.previewThumbnailImage
+      previewThumbnailImage: space.previewThumbnailImage,
+      showInExplore: space.showInExplore
     }
   },
   normalizeBroadcastUpdates (updates) {
