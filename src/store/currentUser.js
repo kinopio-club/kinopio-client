@@ -73,7 +73,8 @@ const initialState = {
   appleSubscriptionIsActive: null,
   studentDiscountIsAvailable: false,
   lastSidebarSection: '',
-  prevInviteEmails: ''
+  prevInviteEmails: '',
+  lastUsedCardHeaderFontId: 0
 }
 
 export default {
