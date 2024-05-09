@@ -187,14 +187,6 @@ const updateName = (item, newName) => {
     store.dispatch('currentBoxes/updateName', { box, newName })
   }
 }
-const removeFromItemNames = (pattern) => {
-  const md = markdown(pattern)
-  items.value.forEach(item => {
-    const newName = item.name.replace(md, '')
-    if (newName === item.name) { return }
-    updateName(item, newName)
-  })
-}
 
 // tag
 
@@ -312,16 +304,27 @@ const isH2 = computed(() => {
   const matches = itemsWithPattern(pattern)
   return Boolean(matches.length === items.value.length)
 })
-const toggleHeader = (pattern) => {
+const removeHeaderFromItemNames = () => {
+  // https://regexr.com/804qh
+  // matches # or ## + space, from beginning of string
+  const headerPattern = new RegExp(/^[# ]+/gm)
+  items.value.forEach(item => {
+    let match = item.name.match(headerPattern)
+    if (!match) { return }
+    match = match[0]
+    const newName = item.name.replace(match, '')
+    if (newName === item.name) { return }
+    updateName(item, newName)
+  })
+}
+const toggleHeader = async (pattern) => {
   updateCardDimensions()
   let matches = itemsWithPattern(pattern)
   const shouldPrepend = matches.length < items.value.length
+  removeHeaderFromItemNames()
   if (shouldPrepend) {
-    const removeHeaderPattern = removePattern(pattern)
-    removeFromItemNames(removeHeaderPattern)
+    await nextTick()
     prependToItemNames(pattern)
-  } else {
-    removeFromItemNames(pattern)
   }
 }
 const toggleFontPickerIsVisible = () => {
