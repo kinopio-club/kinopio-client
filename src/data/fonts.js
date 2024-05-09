@@ -13,4 +13,4 @@ const fonts = [
   }
 ]
 
-export default frames
+export default fonts

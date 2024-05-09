@@ -16,11 +16,12 @@ onMounted(() => {
   })
 })
 
-const emit = defineEmits(['updateCount'])
+const emit = defineEmits(['selectFont'])
 
 const props = defineProps({
   visible: Boolean,
-  cards: Array
+  cards: Array,
+  boxes: Array
 })
 const state = reactive({
   dialogHeight: null
@@ -48,19 +49,14 @@ const scrollIntoView = () => {
 
 // fonts
 
-const changeCardFont = (font) => {
-  props.cards.forEach(card => {
-    card = {
-      fontId: font.id,
-      fontName: font.name,
-      id: card.id
-    }
-    store.dispatch('currentCards/update', card)
-  })
+const selectFont = (font) => {
+  emit('selectFont', font)
 }
 const fontIsSelected = (font) => {
-  const cardFontIds = props.cards.map(card => card.fontId)
-  return cardFontIds.includes(font.id)
+  // const cardFontIds = props.cards.map(card => card.fontId)
+  // return cardFontIds.includes(font.id)
+  // and check box
+  // high light all matches
 }
 </script>
 
@@ -69,7 +65,7 @@ dialog.narrow.font-picker(v-if="visible" :open="visible" ref="dialogElement" @cl
   section.results-section
     ul.results-list
       template(v-for="font in fonts" :key="font.id")
-        li(:class="{active: fontIsSelected(font)}" @click.left="changeCardFont(font)" tabindex="0" v-on:keyup.enter="changeCardFont(font)")
+        li(:class="{active: fontIsSelected(font)}" @click.left="selectFont(font)" tabindex="0" v-on:keyup.enter="selectFont(font)")
           //- img previewImage
           //- TODO dark mode = invert
           .name {{font.name}}
@@ -77,7 +73,7 @@ dialog.narrow.font-picker(v-if="visible" :open="visible" ref="dialogElement" @cl
 
 <style lang="stylus">
 .font-picker
-  min-height 300px
+  min-height 200px
   overflow auto
   section
     padding-top 4px

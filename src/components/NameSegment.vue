@@ -163,19 +163,19 @@ span.name-segment(:data-segment-types="dataMarkdownType" :data-tag-color="dataTa
       margin-right 0
       vertical-align 0
     h1
-      font-family var(--header-font)
+      font-family var(--default-header-font)
       font-size 22px
       font-weight bold
       margin 0
       display inline-block
     h2
-      font-family var(--header-font)
+      font-family var(--default-header-font)
       font-weight normal
       font-size 20px
       margin 0
       display inline-block
     h3
-      font-family var(--header-font)
+      font-family var(--default-header-font)
       font-weight normal
       font-size 16px
       margin 0

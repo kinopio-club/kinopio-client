@@ -124,7 +124,7 @@ export default {
       margin-bottom 10px
 
   h1
-    font-family var(--header-font)
+    font-family var(--default-header-font)
     font-size 16px
     font-weight normal
     text-decoration none

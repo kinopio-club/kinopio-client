@@ -352,7 +352,7 @@ export default {
   --subsection-padding 5px
   --button-fixed-height 30px
   --sans-serif-font "Helvetica Neue", Helvetica, Arial, sans-serif
-  --serif-font recoleta, georgia, serif
+  --default-header-font recoleta, georgia, serif
   --mono-font Menlo, Monaco, monospace
   --glyphs-font GoodGlyphs, wingdings
 
