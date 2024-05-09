@@ -52,11 +52,17 @@ const scrollIntoView = () => {
 const selectFont = (font) => {
   emit('selectFont', font)
 }
+const items = computed(() => {
+  let array = props.cards.concat(props.boxes)
+  array = array.filter(item => Boolean(item))
+  console.log(array, props.cards, props.boxes)
+  return array
+})
 const fontIsSelected = (font) => {
-  // const cardFontIds = props.cards.map(card => card.fontId)
-  // return cardFontIds.includes(font.id)
-  // and check box
-  // high light all matches
+  return items.value.find(item => {
+    const currentFontId = item.headerFontId || 0
+    return currentFontId === font.id
+  })
 }
 </script>
 
@@ -72,9 +78,10 @@ dialog.narrow.font-picker(v-if="visible" :open="visible" ref="dialogElement" @cl
 </template>
 
 <style lang="stylus">
-.font-picker
+dialog.font-picker
   min-height 200px
   overflow auto
+  width 160px
   section
     padding-top 4px
   .badge
