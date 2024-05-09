@@ -117,7 +117,8 @@ const removeBackground = () => {
 <template lang="pug">
 dialog.narrow.theme-and-colors-settings(v-if="visible" :open="visible" @click.left.stop="closeChildDialogs" ref="dialogElement")
   section
-    p Theme
+    p Theme and Colors
+  section
     .button-wrap
       label(:class="{active: themeIsSystem}" @click.left.prevent="toggleThemeIsSystem" @keydown.stop.enter="toggleThemeIsSystem")
         input(type="checkbox" v-model="themeIsSystem")
