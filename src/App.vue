@@ -67,7 +67,6 @@ export default {
     Preload
   },
   created () {
-    console.log('🐢 kinopio-client build', import.meta.env.MODE, this.scriptUrl)
     this.$store.subscribe((mutation, state) => {
       if (mutation.type === 'broadcast/joinSpaceRoom') {
         this.updateMetaRSSFeed()
@@ -75,8 +74,13 @@ export default {
         this.updateThemeFromSystem()
       }
     })
+    if (utils.isLinux()) {
+      utils.setCssVariable('sans-serif-font', '"Noto Sans", "Helvetica Neue", Helvetica, Arial, sans-serif')
+    }
   },
   mounted () {
+    console.log('🐢 kinopio-client build', import.meta.env.MODE)
+
     // use timer to prevent being fired from page reload scroll
     // https://stackoverflow.com/questions/34095038/on-scroll-fires-automatically-on-page-refresh
     setTimeout(() => {
@@ -114,13 +118,6 @@ export default {
       return this.$store.getters['themes/isThemeDark']
     },
     spaceName () { return this.$store.state.currentSpace.name },
-    isDevelopment () {
-      if (import.meta.env.MODE === 'development') {
-        return true
-      } else {
-        return false
-      }
-    },
     isSpacePage () { return this.$store.getters.isSpacePage },
     pageWidth () {
       if (!this.isSpacePage) { return }
@@ -135,7 +132,7 @@ export default {
     scriptUrl () {
       const scripts = Array.from(document.querySelectorAll('script'))
       const url = scripts.find(script => {
-        if (this.isDevelopment) {
+        if (consts.isDevelopment) {
           return script.src.includes('main.js')
         } else {
           return script.src.includes('index-')
@@ -159,7 +156,7 @@ export default {
     spaceZoomDecimal () { return this.$store.getters.spaceZoomDecimal },
     isDevelpmentBadgeVisible () {
       if (this.$store.state.isPresentationMode) { return }
-      return this.isDevelopment
+      return consts.isDevelopment
     }
   },
   methods: {
@@ -231,10 +228,9 @@ export default {
       const maxIterations = 10
       const initialDelay = 1000 // 1 second
       const serverStatus = await this.$store.dispatch('api/getStatus')
-      console.log('☎️ server online status', serverStatus)
+      console.log('server online status', serverStatus)
       if (serverStatus) {
         this.$store.dispatch('isOnline', true)
-        this.$store.dispatch('api/processQueueOperations')
       // error offline
       } else {
         this.$store.dispatch('isOnline', false)
@@ -246,7 +242,6 @@ export default {
         delay = Math.pow(2, statusRetryCount) * initialDelay
       }
       delay = delay || 15 * 60 * 1000 // 15 minutes
-      console.log(`☎️ Retrying status in ${delay / 1000} seconds...`)
       setTimeout(this.updateServerIsOnline, delay)
     },
 
@@ -356,8 +351,9 @@ export default {
   --small-entity-radius 3px
   --subsection-padding 5px
   --button-fixed-height 30px
-  --header-font recoleta, georgia, serif
-  --code-font Menlo, Monaco, monospace
+  --sans-serif-font "Helvetica Neue", Helvetica, Arial, sans-serif
+  --serif-font recoleta, georgia, serif
+  --mono-font Menlo, Monaco, monospace
   --glyphs-font GoodGlyphs, wingdings
 
 @font-face
@@ -382,7 +378,7 @@ export default {
   -webkit-overflow-scrolling touch
   -webkit-tap-highlight-color transparent
   box-sizing border-box
-  font-family "Helvetica Neue", Helvetica, Arial, sans-serif
+  font-family  var(--sans-serif-font)
   font-size 15px
   line-height 1.2
 
@@ -662,6 +658,13 @@ p
     display inline
     vertical-align middle
 
+.segmented-buttons + .segmented-buttons,
+.button-wrap + .button-wrap
+  margin-left 6px
+.segmented-buttons
+  > .button-wrap + .button-wrap
+    margin-left 0
+
 dialog
   width 250px
   left 8px
@@ -689,11 +692,12 @@ dialog
     width 230px
   &.wide
     width 280px
+  .segmented-buttons + .segmented-buttons
+    margin-left 0
   button + button,
   button + input,
   button + label,
   label + button,
-  .button-wrap + .button-wrap,
   button + .button-wrap,
   .button-wrap + button,
   label + label,
@@ -911,8 +915,8 @@ button
 
 .icon.templates
   padding 0
-  height 12px
-  vertical-align -1px
+  height 9px
+  vertical-align 1px
 
 .icon.minimap
   vertical-align -2px
@@ -955,6 +959,9 @@ button
 .icon.key
   height 10px
   vertical-align 1px
+
+.icon.json-canvas
+  width 10px
 
 label,
 li
@@ -1037,7 +1044,7 @@ ul.results-list
   padding 0
   li
     display flex
-    padding 7px 7px
+    padding 7px
     align-items flex-start
     border-radius var(--entity-radius)
     user-select none
@@ -1106,13 +1113,21 @@ code
     margin 0
   &.new-unread-badge
     border-radius 100px
+    position absolute
     min-width initial
     min-height initial
     width 8px
     height 8px
+    right 4px
+    top 4px
+    margin 0
     padding 0
-    vertical-align 2px
+    z-index 10
     background var(--new-unread-background)
+    &.notification-button-badge
+      right -3px
+      top -3px
+
   input
     margin 0
   .user
@@ -1336,12 +1351,16 @@ progress::-moz-progress-bar
   background-color var(--primary)
   border-radius 2px
 
-.fadeIn-enter-active {
+// .pulse
+//   // https://easings.net/#easeOutQuad
+//   animation fadeIn 1.2s cubic-bezier(0.5, 1, 0.89, 1) infinite
+//   animation-direction alternate-reverse
+.fadeIn-enter-active
   animation fadeIn 0.5s ease-out
-}
 @keyframes fadeIn
   0%
     opacity 0
   100%
     opacity 1
+
 </style>

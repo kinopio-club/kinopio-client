@@ -13,7 +13,8 @@ const props = defineProps({
   visible: Boolean,
   connections: Array,
   canEditAll: Object,
-  backgroundColor: String
+  backgroundColor: String,
+  label: String
 })
 const emit = defineEmits(['closeDialogs'])
 const state = reactive({
@@ -69,7 +70,7 @@ const closeDialogs = () => {
 <template lang="pug">
 section.subsection.connection-actions(v-if="visible")
   p.subsection-vertical-label(:style="{ background: backgroundColor }")
-    span LINE
+    span {{label}}
 
   //- Edit Connections
   .row.edit-connection-types

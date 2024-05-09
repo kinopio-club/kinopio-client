@@ -29,9 +29,8 @@ import SelectAllBelow from '@/components/SelectAllBelow.vue'
 import SpaceUsers from '@/components/SpaceUsers.vue'
 import Donate from '@/components/dialogs/Donate.vue'
 import Toolbar from '@/components/Toolbar.vue'
-import Import from '@/components/dialogs/Import.vue'
+import ImportExport from '@/components/dialogs/ImportExport.vue'
 import Pricing from '@/components/dialogs/Pricing.vue'
-import EarnCredits from '@/components/dialogs/EarnCredits.vue'
 import SpaceTodayJournalBadge from '@/components/SpaceTodayJournalBadge.vue'
 import Discovery from '@/components/Discovery.vue'
 import UserSettings from '@/components/dialogs/UserSettings.vue'
@@ -62,7 +61,7 @@ onMounted(() => {
       closeAllDialogs()
     } else if (mutation.type === 'triggerSpaceDetailsVisible') {
       updateSpaceDetailsIsVisible(true)
-    } else if (mutation.type === 'triggerUpdatePositionInVisualViewport') {
+    } else if (mutation.type === 'triggerUpdateHeaderAndFooterPosition') {
       updatePosition()
     } else if (mutation.type === 'triggerSpaceDetailsInfoIsVisible') {
       updateSpaceDetailsInfoIsVisible(true)
@@ -92,8 +91,6 @@ onMounted(() => {
       hidden()
     } else if (mutation.type === 'triggerTemplatesIsVisible') {
       updateTemplatesIsVisible(true)
-    } else if (mutation.type === 'triggerEarnCreditsIsVisible') {
-      updateEarnCreditsIsVisible(true)
     } else if (mutation.type === 'triggerRemovedIsVisible' || mutation.type === 'triggerAIImagesIsVisible') {
       updateSidebarIsVisible(true)
     } else if (mutation.type === 'triggerImportIsVisible') {
@@ -154,8 +151,7 @@ const state = reactive({
   templatesIsVisible: false,
   sidebarIsVisible: false,
   donateIsVisible: false,
-  importIsVisible: false,
-  earnCreditsIsVisible: false
+  importIsVisible: false
 })
 
 const importArenaChannelIsVisible = computed(() => store.state.importArenaChannelIsVisible)
@@ -333,7 +329,6 @@ const closeAllDialogs = () => {
   state.notificationsIsVisible = false
   state.addSpaceIsVisible = false
   state.templatesIsVisible = false
-  state.earnCreditsIsVisible = false
   state.importIsVisible = false
   if (!store.state.spaceDetailsIsPinned) {
     state.spaceDetailsIsVisible = false
@@ -354,9 +349,6 @@ const updateDonateIsVisible = (value) => {
 }
 const updateTemplatesIsVisible = (value) => {
   state.templatesIsVisible = value
-}
-const updateEarnCreditsIsVisible = (value) => {
-  state.earnCreditsIsVisible = value
 }
 const updateImportIsVisible = (value) => {
   state.importIsVisible = value
@@ -551,6 +543,7 @@ const markAsRead = (notificationId) => {
   updateNotificationsIsRead([notificationId])
 }
 const updateNotificationsIsRead = (notificationIds) => {
+  if (!notificationIds.length) { return }
   state.notifications = state.notifications.map(notification => {
     if (notificationIds.includes(notification.id)) {
       notification.isRead = true
@@ -592,135 +585,139 @@ header(v-if="isVisible" :style="state.position" :class="{'fade-out': isFadingOut
 
   //- standard
   nav(v-if="!isEmbedMode")
-    .left
-      //- About
-      .logo-about
+    .row
+      .left
+        //- About
+        .logo-about
+          .button-wrap
+            .logo(alt="kinopio logo" @click.left.stop="toggleAboutIsVisible" @touchend.stop @mouseup.left.stop :class="{active: state.aboutIsVisible}" tabindex="0")
+              .logo-image
+                .label-badge.small-badge(v-if="shouldShowNewStuffIsUpdated")
+                  span NEW
+              img.down-arrow(src="@/assets/down-arrow.svg")
+            About(:visible="state.aboutIsVisible")
+            KeyboardShortcuts(:visible="state.keyboardShortcutsIsVisible")
+            Donate(:visible="state.donateIsVisible")
+            AppsAndExtensions(:visible="state.appsAndExtensionsIsVisible")
+        .space-meta-rows
+          .space-functions-row
+            .segmented-buttons
+              //- Add Space
+              .button-wrap
+                button.success(@click.left.stop="toggleAddSpaceIsVisible" :class="{ active: state.addSpaceIsVisible }")
+                  img.icon.add(src="@/assets/add.svg")
+                  span New
+                AddSpace(:visible="state.addSpaceIsVisible" :shouldAddSpaceDirectly="true")
+                Templates(:visible="state.templatesIsVisible")
+            //- Search
+            .segmented-buttons
+              .button-wrap
+                button.search-button(@click.stop="toggleSearchIsVisible" :class="{ active: searchIsVisible || totalFiltersActive || searchResultsCount, 'translucent-button': !shouldIncreaseUIContrast }")
+                  template(v-if="!searchResultsCount")
+                    img.icon.search(src="@/assets/search.svg")
+                  .badge.search.search-count-badge(v-if="searchResultsCount")
+                    img.icon.search(src="@/assets/search.svg")
+                    span {{searchResultsCount}}
+                  span.badge.info(v-if="totalFiltersActive")
+                    img.icon(src="@/assets/filter.svg")
+                    span {{totalFiltersActive}}
+                Search(:visible="searchIsVisible")
+              template(v-if="!isMobile")
+                button(@click="showPreviousSearchCard" v-if="searchResultsCount" :class="{ 'translucent-button': !shouldIncreaseUIContrast }")
+                  img.icon.left-arrow(src="@/assets/down-arrow.svg")
+                button(@click="showNextSearchCard" v-if="searchResultsCount" :class="{ 'translucent-button': !shouldIncreaseUIContrast }")
+                  img.icon.right-arrow(src="@/assets/down-arrow.svg")
+              button(@click="clearSearchAndFilters" v-if="searchResultsOrFilters" :class="{ 'translucent-button': !shouldIncreaseUIContrast }")
+                img.icon.cancel(src="@/assets/add.svg")
+      .right
+        //- Users
+        SpaceUsers(:userDetailsIsInline="true")
+        UserSettings
+        UpdatePassword
+        //- Share
         .button-wrap
-          .logo(alt="kinopio logo" @click.left.stop="toggleAboutIsVisible" @touchend.stop @mouseup.left.stop :class="{active: state.aboutIsVisible}" tabindex="0")
-            .logo-image
-              .label-badge.small-badge(v-if="shouldShowNewStuffIsUpdated")
-                span NEW
-            img.down-arrow(src="@/assets/down-arrow.svg")
-          About(:visible="state.aboutIsVisible")
-          KeyboardShortcuts(:visible="state.keyboardShortcutsIsVisible")
-          Donate(:visible="state.donateIsVisible")
-          AppsAndExtensions(:visible="state.appsAndExtensionsIsVisible")
-      .space-meta-rows
-        .space-functions-row
-          .segmented-buttons.add-space-functions
-            //- Add Space
-            .button-wrap
-              button.success(@click.left.stop="toggleAddSpaceIsVisible" :class="{ active: state.addSpaceIsVisible }")
-                img.icon.add(src="@/assets/add.svg")
-                span New
-              AddSpace(:visible="state.addSpaceIsVisible" :shouldAddSpaceDirectly="true")
-              Templates(:visible="state.templatesIsVisible")
-          //- Search
+          button(@click.left.stop="toggleShareIsVisible" :class="{active: state.shareIsVisible, 'translucent-button': !shouldIncreaseUIContrast}")
+            span Share
+          Share(:visible="state.shareIsVisible")
+        //- Notifications
+        .button-wrap
+          button(@click.left.stop="toggleNotificationsIsVisible" :class="{active: state.notificationsIsVisible, 'translucent-button': !shouldIncreaseUIContrast}")
+            span {{notificationsUnreadCount}}
+            .badge.new-unread-badge.notification-button-badge(v-if="notificationsUnreadCount")
+          UserNotifications(:visible="state.notificationsIsVisible" :loading="state.notificationsIsLoading" :notifications="state.notifications" :unreadCount="notificationsUnreadCount" @markAllAsRead="markAllAsRead" @markAsRead="markAsRead")
+
+    .row
+      //- Current Space
+      .left
+        .space-details-row
           .segmented-buttons
-            .button-wrap
-              button.search-button(@click.stop="toggleSearchIsVisible" :class="{ active: searchIsVisible || totalFiltersActive || searchResultsCount, 'translucent-button': !shouldIncreaseUIContrast }")
-                template(v-if="!searchResultsCount")
-                  img.icon.search(src="@/assets/search.svg")
-                .badge.search.search-count-badge(v-if="searchResultsCount")
-                  img.icon.search(src="@/assets/search.svg")
-                  span {{searchResultsCount}}
-                span.badge.info(v-if="totalFiltersActive")
-                  img.icon(src="@/assets/filter.svg")
-                  span {{totalFiltersActive}}
-              Search(:visible="searchIsVisible")
-            template(v-if="!isMobile")
-              button(@click="showPreviousSearchCard" v-if="searchResultsCount")
+            //- Back
+            .button-wrap(v-if="backButtonIsVisible" title="Go Back" @click.stop="changeToPrevSpace")
+              button(:class="{ 'translucent-button': !shouldIncreaseUIContrast }")
                 img.icon.left-arrow(src="@/assets/down-arrow.svg")
-              button(@click="showNextSearchCard" v-if="searchResultsCount")
-                img.icon.right-arrow(src="@/assets/down-arrow.svg")
-            button(@click="clearSearchAndFilters" v-if="searchResultsOrFilters" :class="{ 'translucent-button': !shouldIncreaseUIContrast }")
-              img.icon.cancel(src="@/assets/add.svg")
+            //- Current Space Name and Info
+            .button-wrap.space-name-button-wrap
+              button.space-name-button(@click.left.stop="toggleSpaceDetailsIsVisible" :class="{ active: state.spaceDetailsIsVisible, 'translucent-button': !shouldIncreaseUIContrast }")
+                span(v-if="currentSpaceIsInbox")
+                  img.icon.inbox-icon(src="@/assets/inbox.svg")
+                span(v-show="currentSpaceIsTemplate")
+                  img.icon.templates(src="@/assets/templates.svg")
+                span(v-if="currentSpaceIsFromTweet")
+                  img.icon.tweet(src="@/assets/twitter.svg")
+                SpaceTodayJournalBadge(:space="currentSpace")
+                MoonPhase(v-if="currentSpace.moonPhase" :moonPhase="currentSpace.moonPhase")
+                span {{currentSpaceName}}
+                  PrivacyIcon(:privacy="currentSpace.privacy" :closedIsNotVisible="true")
+                img.icon.sunglasses.explore(src="@/assets/sunglasses.svg" v-if="shouldShowInExplore" title="Shown in Explore")
+                img.icon.view-hidden(v-if="currentSpaceIsHidden" src="@/assets/view-hidden.svg")
+              SpaceDetails(:visible="state.spaceDetailsIsVisible")
+              ImportArenaChannel(:visible="importArenaChannelIsVisible")
+              SpaceDetailsInfo(:visible="state.spaceDetailsInfoIsVisible")
+              ImportExport(:visible="state.importIsVisible" :isImport="true")
+              //- Read Only badge
+              .label-badge.space-name-badge-wrap(v-if="!userCanEditSpace")
+                span(:class="{'invisible': state.readOnlyJiggle}")
+                  span Read Only
+                span.invisible-badge(ref="readOnlyElement" :class="{'badge-jiggle': state.readOnlyJiggle, 'invisible': !state.readOnlyJiggle}")
+                  span Read Only
+              //- Loading State
+              .button-wrap.space-status-button-wrap(v-if="spaceHasStatusAndStatusDialogIsNotVisible")
+                button.small-button(@click.left.stop="toggleSpaceStatusIsVisible" :class="{active: state.spaceStatusIsVisible, 'translucent-button': !shouldIncreaseUIContrast}")
+                  Loader(:visible="spaceHasStatus")
+                  .badge.success.space-status-success(v-if="!spaceHasStatus")
+                SpaceStatus(:visible="state.spaceStatusIsVisible")
+            //- Offline
+            .button-wrap(v-if="!isOnline")
+              button(@click.left.stop="toggleOfflineIsVisible" :class="{ active: offlineIsVisible, 'translucent-button': !shouldIncreaseUIContrast}")
+                img.icon.offline(src="@/assets/offline.svg")
+              Offline(:visible="offlineIsVisible")
+      .right
+        Discovery
+        //- Sidebar
+        .button-wrap
+          button(@click.left.stop="toggleSidebarIsVisible" :class="{active: state.sidebarIsVisible, 'translucent-button': !shouldIncreaseUIContrast}")
+            img.icon.sidebar(src="@/assets/sidebar.svg")
+          Sidebar(:visible="state.sidebarIsVisible")
 
-        .space-details-row.segmented-buttons
-          //- Back
-          .button-wrap(v-if="backButtonIsVisible" title="Go Back" @click.stop="changeToPrevSpace")
-            button(:class="{ 'translucent-button': !shouldIncreaseUIContrast }")
-              img.icon.left-arrow(src="@/assets/down-arrow.svg")
-          //- Current Space
-          .button-wrap.space-name-button-wrap
-            button.space-name-button(@click.left.stop="toggleSpaceDetailsIsVisible" :class="{ active: state.spaceDetailsIsVisible, 'translucent-button': !shouldIncreaseUIContrast }")
-              span(v-if="currentSpaceIsInbox")
-                img.icon.inbox-icon(src="@/assets/inbox.svg")
-              span(v-show="currentSpaceIsTemplate")
-                img.icon.templates(src="@/assets/templates.svg")
-              span(v-if="currentSpaceIsFromTweet")
-                img.icon.tweet(src="@/assets/twitter.svg")
-              SpaceTodayJournalBadge(:space="currentSpace")
-              MoonPhase(v-if="currentSpace.moonPhase" :moonPhase="currentSpace.moonPhase")
-              span {{currentSpaceName}}
-                PrivacyIcon(:privacy="currentSpace.privacy" :closedIsNotVisible="true")
-              img.icon.sunglasses.explore(src="@/assets/sunglasses.svg" v-if="shouldShowInExplore" title="Shown in Explore")
-              img.icon.view-hidden(v-if="currentSpaceIsHidden" src="@/assets/view-hidden.svg")
-            SpaceDetails(:visible="state.spaceDetailsIsVisible")
-            ImportArenaChannel(:visible="importArenaChannelIsVisible")
-            SpaceDetailsInfo(:visible="state.spaceDetailsInfoIsVisible")
-            Import(:visible="state.importIsVisible")
-            //- Read Only badge
-            .label-badge.space-name-badge-wrap(v-if="!userCanEditSpace")
-              span(:class="{'invisible': state.readOnlyJiggle}")
-                span Read Only
-              span.invisible-badge(ref="readOnlyElement" :class="{'badge-jiggle': state.readOnlyJiggle, 'invisible': !state.readOnlyJiggle}")
-                span Read Only
-            //- State
-            .button-wrap.space-status-button-wrap(v-if="spaceHasStatusAndStatusDialogIsNotVisible")
-              button.small-button(@click.left.stop="toggleSpaceStatusIsVisible" :class="{active: state.spaceStatusIsVisible, 'translucent-button': !shouldIncreaseUIContrast}")
-                Loader(:visible="spaceHasStatus")
-                .badge.success.space-status-success(v-if="!spaceHasStatus")
-              SpaceStatus(:visible="state.spaceStatusIsVisible")
-
-          //- Offline
-          .button-wrap(v-if="!isOnline")
-            button(@click.left.stop="toggleOfflineIsVisible" :class="{ active: offlineIsVisible, 'translucent-button': !shouldIncreaseUIContrast}")
-              img.icon.offline(src="@/assets/offline.svg")
-            Offline(:visible="offlineIsVisible")
-
-    .right
-      .controls(v-if="isSpace")
-        .top-controls
-          SpaceUsers(:userDetailsIsInline="true")
-          UserSettings
-          UpdatePassword
-          //- Share
-          .button-wrap
-            button(@click.left.stop="toggleShareIsVisible" :class="{active: state.shareIsVisible, 'translucent-button': !shouldIncreaseUIContrast}")
-              span Share
-            Share(:visible="state.shareIsVisible")
-            EarnCredits(:visible="state.earnCreditsIsVisible")
-          //- Notifications
-          .button-wrap
-            button(@click.left.stop="toggleNotificationsIsVisible" :class="{active: state.notificationsIsVisible, 'translucent-button': !shouldIncreaseUIContrast}")
-              span {{notificationsUnreadCount}}
-              .badge.new-unread-badge.notification-button-badge(v-if="notificationsUnreadCount")
-            UserNotifications(:visible="state.notificationsIsVisible" :loading="state.notificationsIsLoading" :notifications="state.notifications" :unreadCount="notificationsUnreadCount" @markAllAsRead="markAllAsRead" @markAsRead="markAsRead")
-        .bottom-controls
-          Discovery
-          //- Sidebar
-          .button-wrap
-            button(@click.left.stop="toggleSidebarIsVisible" :class="{active: state.sidebarIsVisible, 'translucent-button': !shouldIncreaseUIContrast}")
-              img.icon.sidebar(src="@/assets/sidebar.svg")
-            Sidebar(:visible="state.sidebarIsVisible")
-        .row.bottom-controls
-          //- Pricing
-          .button-wrap(v-if="!userIsUpgraded")
-            button(@click.left.stop="togglePricingIsVisible" :class="{active: pricingIsVisible, 'translucent-button': !shouldIncreaseUIContrast}")
-              span Pricing
-            Pricing(:visible="pricingIsVisible")
-          //- Sign Up or In
-          .button-wrap(v-if="!currentUserIsSignedIn && isOnline")
-            button(@click.left.stop="toggleSignUpOrInIsVisible" :class="{active: state.signUpOrInIsVisible, 'translucent-button': !shouldIncreaseUIContrast}")
-              span Sign Up or In
-              Loader(:visible="state.loadingSignUpOrIn")
-            SignUpOrIn(:visible="state.signUpOrInIsVisible" @loading="setLoadingSignUpOrIn")
-          //- Upgrade
-          .button-wrap(v-if="!userIsUpgraded && isOnline && currentUserIsSignedIn")
-            button(@click.left.stop="toggleUpgradeUserIsVisible" :class="{active: state.upgradeUserIsVisible, 'translucent-button': !shouldIncreaseUIContrast}")
-              span Upgrade
-            UpgradeUser(:visible="state.upgradeUserIsVisible" @closeDialog="closeAllDialogs")
+    .row
+      .left
+      .right
+        //- Pricing
+        .button-wrap.pricing-button-wrap(v-if="!userIsUpgraded")
+          button(@click.left.stop="togglePricingIsVisible" :class="{active: pricingIsVisible, 'translucent-button': !shouldIncreaseUIContrast}")
+            span Pricing
+          Pricing(:visible="pricingIsVisible")
+        //- Sign Up or In
+        .button-wrap(v-if="!currentUserIsSignedIn && isOnline")
+          button(@click.left.stop="toggleSignUpOrInIsVisible" :class="{active: state.signUpOrInIsVisible, 'translucent-button': !shouldIncreaseUIContrast}")
+            span Sign Up or In
+            Loader(:visible="state.loadingSignUpOrIn")
+          SignUpOrIn(:visible="state.signUpOrInIsVisible" @loading="setLoadingSignUpOrIn")
+        //- Upgrade
+        .button-wrap(v-if="!userIsUpgraded && isOnline && currentUserIsSignedIn")
+          button(@click.left.stop="toggleUpgradeUserIsVisible" :class="{active: state.upgradeUserIsVisible, 'translucent-button': !shouldIncreaseUIContrast}")
+            span Upgrade
+          UpgradeUser(:visible="state.upgradeUserIsVisible" @closeDialog="closeAllDialogs")
 
   Toolbar(:visible="isSpace")
   SelectAllBelow
@@ -744,16 +741,41 @@ header
     pointer-events none
     position relative
     display -webkit-box
-    > *
+    button
       pointer-events all
+    > .row
+      width 100%
+      display flex
+      justify-content space-between
+      // 2nd row onwards
+      margin-top 6px
+      margin-left 52px
+      // 1st row
+      &:first-child
+        margin-top 0
+        margin-left 0
+      .left
+        display flex
+        flex-shrink 0
+        @media(max-width 414px)
+          max-width calc(100% - 100px)
+      .right
+        display flex
+        justify-content flex-end
+        flex-shrink 0
+
   nav
     display flex
     justify-content space-between
+    flex-wrap wrap
     width 100%
+
   .logo-about
+    pointer-events all
     position relative
     display inline-block
     margin-right 6px
+    margin-bottom -6px
   .logo
     cursor pointer
     display flex
@@ -842,54 +864,10 @@ header
             border-bottom-right-radius var(--entity-radius)
             border-right 1px solid var(--primary-border)
 
-  .left,
-  .right
-    pointer-events none
-    button,
-    .logo-about,
-    .user
-      pointer-events auto
-
   .space-functions-row
-    margin-bottom 6px
     position relative
     .search-count-badge
       margin 0
-
-  .add-space-functions
-    display inline-block
-    margin-right 6px
-
-  aside
-    display flex
-    flex-direction column
-  .left
-    display flex
-    flex-shrink 0
-
-    @media(max-width 414px)
-      max-width calc(100% - 100px)
-
-  .right
-    display flex
-    flex-shrink 0
-
-  .controls
-    display inline-table
-    .button-wrap + .button-wrap
-      margin-left 6px
-
-  .top-controls
-    display flex
-    justify-content flex-end
-
-  .bottom-controls
-    margin-top 6px
-    display flex
-    justify-content flex-end
-    > .button-wrap
-      display inline-block
-      margin-left -2em
 
   button
     .explore
@@ -942,15 +920,6 @@ header
     min-height initial
     min-width initial
     display block
-
-  .badge.notification-button-badge
-    margin 0
-    position absolute
-    top -2px
-    right -2px
-
-  .no-padding
-    padding 0 !important
 
 .badge-jiggle
   animation-name notificationJiggle

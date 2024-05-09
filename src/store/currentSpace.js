@@ -183,11 +183,11 @@ const currentSpace = {
       context.dispatch('checkIfShouldShowExploreOnLoad')
     },
     createSpacePreviewImage: debounce(async function (context) {
+      const currentUserIsSignedIn = context.rootGetters['currentUser/isSignedIn']
       const canEditSpace = context.rootGetters['currentUser/canEditSpace']()
+      if (!currentUserIsSignedIn) { return }
       if (!canEditSpace) { return }
       try {
-        context.dispatch('currentCards/updateDimensions', {}, { root: true })
-        context.dispatch('currentBoxes/updateInfoDimensions', {}, { root: true })
         console.log('🙈 create space preview image')
         const response = await context.dispatch('api/createSpacePreviewImage', context.state.id, { root: true })
         console.log('🙈 updated space preview image', response.urls)
@@ -377,8 +377,6 @@ const currentSpace = {
         space.boxes = []
       } else {
         space.connectionTypes[0].color = randomColor({ luminosity: 'light' })
-        space.cards[1].x = space.cards[1].x + random(0, 20)
-        space.cards[1].y = space.cards[1].y + random(0, 20)
       }
       space = utils.updateSpaceCardsCreatedThroughPublicApi(space)
       space.userId = currentUser.id
@@ -404,16 +402,17 @@ const currentSpace = {
       }
       // daily prompt
       let options = { currentUser, isTomorrow, weather }
+      options.journalDailyDateImage = currentUser.journalDailyDateImage
       if (currentUser.shouldCreateJournalsWithDailyPrompt) {
-        options.dailyPrompt = currentUser.journalDailyPrompt
+        options.journalDailyPrompt = currentUser.journalDailyPrompt
       }
       // create space
       let space = utils.journalSpace(options)
       space = utils.updateSpaceCardsCreatedThroughPublicApi(space)
       context.commit('clearSearch', null, { root: true })
       context.commit('shouldResetDimensionsOnLoad', true, { root: true })
-      isLoadingRemoteSpace = false
       // load space
+      isLoadingRemoteSpace = false
       context.dispatch('restoreSpaceInChunks', { space })
     },
     createNewInboxSpace: (context, shouldCreateWithoutLoading) => {
@@ -458,10 +457,7 @@ const currentSpace = {
       context.dispatch('updateModulesSpaceId', space)
       context.commit('isLoadingSpace', false, { root: true })
     },
-    saveImportedSpace: async (context) => {
-      context.commit('isLoadingSpace', true, { root: true })
-      let space = utils.clone(context.state)
-      space = utils.clearSpaceMeta(space, 'copy')
+    saveSpace: async (context, space) => {
       const user = context.rootState.currentUser
       const currentUserIsSignedIn = context.rootGetters['currentUser/isSignedIn']
       cache.saveSpace(space)
@@ -471,10 +467,6 @@ const currentSpace = {
       context.commit('triggerUpdateWindowHistory', space, { root: true })
       context.commit('addUserToSpace', user)
       context.dispatch('updateModulesSpaceId', space)
-      nextTick(() => {
-        context.dispatch('currentCards/updateDimensions', {}, { root: true })
-        context.commit('isLoadingSpace', false, { root: true })
-      })
       context.dispatch('incrementCardsCreatedCountFromSpace', space)
     },
     duplicateSpace: (context) => {
@@ -494,10 +486,6 @@ const currentSpace = {
       const user = context.rootState.currentUser
       context.commit('broadcast/leaveSpaceRoom', { user, type: 'userLeftRoom' }, { root: true })
       context.dispatch('createNewSpace', space)
-      const cards = context.rootGetters['currentCards/all']
-      if (cards.length) {
-        context.dispatch('currentConnections/updatePaths', { cardId: cards[1].id, connections: context.rootGetters['currentConnections/all'] }, { root: true })
-      }
       context.dispatch('saveNewSpace')
       context.dispatch('updateUserLastSpaceId')
       context.commit('notifySignUpToEditSpace', false, { root: true })
@@ -550,6 +538,7 @@ const currentSpace = {
           context.dispatch('removeLocalSpaceIfUserIsRemoved', space)
           context.dispatch('loadLastSpace')
           cache.removeInvitedSpace(space)
+          context.dispatch('currentUser/updateFavoriteSpace', { space, value: false }, { root: true })
         }
         if (error.status === 500) {
           context.commit('notifyConnectionError', true, { root: true })
@@ -748,7 +737,6 @@ const currentSpace = {
         context.dispatch('checkIfShouldNotifySpaceIsRemoved', space)
       }
       context.commit('broadcast/joinSpaceRoom', null, { root: true })
-      context.commit('currentUser/updateFavoriteSpaceIsEdited', space.id, { root: true })
       nextTick(() => {
         context.dispatch('scrollCardsIntoView')
         // deferrable async tasks
@@ -762,10 +750,6 @@ const currentSpace = {
             name: 'incrementVisits',
             body: { spaceId: space.id }
           }, { root: true })
-          // referral
-          nextTick(() => {
-            context.dispatch('currentUser/validateUserReferralFromSpaceInvite', null, { root: true })
-          })
         })
       })
       context.dispatch('checkIfIsLoadingSpace', isRemote)
@@ -773,7 +757,7 @@ const currentSpace = {
       if (!isRemote) { return }
       context.dispatch('createSpacePreviewImage')
     },
-    loadSpace: async (context, { space, isLocalSpaceOnly }) => {
+    loadSpace: async (context, { space }) => {
       if (!context.rootState.isEmbedMode) {
         context.commit('triggerSpaceZoomReset', null, { root: true })
       }
@@ -784,12 +768,13 @@ const currentSpace = {
       space = utils.normalizeSpace(cachedSpace)
       context.dispatch('clearStateMeta')
       // load local space while fetching remote space
-      Promise.all([
-        context.dispatch('restoreSpaceLocal', space),
-        context.dispatch('getRemoteSpace', space)
-      ]).then((data) => {
+      try {
+        const [localData, remoteData] = await Promise.all([
+          context.dispatch('restoreSpaceLocal', space),
+          context.dispatch('getRemoteSpace', space)
+        ])
         // restore remote space
-        let remoteSpace = data[1]
+        let remoteSpace = remoteData
         console.log('🎑 remoteSpace', remoteSpace)
         if (!remoteSpace) { return }
         const spaceIsUnchanged = utils.spaceIsUnchanged(cachedSpace, remoteSpace)
@@ -801,9 +786,9 @@ const currentSpace = {
         context.dispatch('restoreSpaceRemote', remoteSpace)
         context.dispatch('saveCurrentSpaceToCache')
         context.dispatch('notifySpaceIsOpen')
-      }).catch(error => {
+      } catch (error) {
         console.error('🚒 Error fetching remoteSpace', error)
-      })
+      }
     },
     saveCurrentSpaceToCache: (context) => {
       const space = utils.clone(context.state)
@@ -840,6 +825,7 @@ const currentSpace = {
       context.dispatch('restoreSpaceInChunks', { space })
       console.log('🎑 local space', space)
       console.timeEnd('🎑⏱️ restoreSpaceLocal')
+      return space
     },
     restoreSpaceRemote: async (context, remoteSpace) => {
       console.time('🎑⏱️ restoreSpaceRemote')
@@ -882,6 +868,9 @@ const currentSpace = {
         addBoxes: boxResults.addItems
       })
       context.commit('triggerRestoreSpaceRemoteComplete', null, { root: true })
+      nextTick(() => {
+        context.dispatch('currentCards/updateDimensions', {}, { root: true })
+      })
       console.timeEnd('🎑⏱️ restoreSpaceRemote')
     },
     loadLastSpace: async (context) => {
@@ -900,14 +889,20 @@ const currentSpace = {
     },
     loadPrevSpaceInSession: async (context) => {
       const prevSpaceIdInSession = context.rootState.prevSpaceIdInSession
+      const prevSpacePosition = context.rootState.prevSpaceIdInSessionPagePosition
       if (!prevSpaceIdInSession) { return }
       let space = cache.space(prevSpaceIdInSession)
       if (space.id) {
-        context.dispatch('loadSpace', { space })
+        await context.dispatch('changeSpace', space)
       } else if (prevSpaceIdInSession) {
         space = { id: prevSpaceIdInSession }
-        context.dispatch('loadSpace', { space })
+        await context.dispatch('changeSpace', space)
       }
+      window.scroll({
+        left: prevSpacePosition.x,
+        top: prevSpacePosition.y,
+        behavior: 'instant'
+      })
     },
     updateSpace: async (context, updates) => {
       const space = utils.clone(context.state)
@@ -924,7 +919,7 @@ const currentSpace = {
       }, { root: true })
     },
     changeSpace: async (context, space) => {
-      context.commit('prevSpaceIdInSession', context.state.id, { root: true })
+      context.dispatch('prevSpaceIdInSession', context.state.id, { root: true })
       console.log('🚟 Change space', space)
       context.commit('isLoadingSpace', true, { root: true })
       context.commit('notifySpaceNotFound', false, { root: true })
@@ -1046,9 +1041,11 @@ const currentSpace = {
       const spaceIsOpen = space.privacy === 'open'
       const currentUserIsSignedIn = context.rootGetters['currentUser/isSignedIn']
       const currentUserIsInvitedButCannotEditSpace = context.rootGetters['currentUser/isInvitedButCannotEditSpace'](space)
+      const currentUserIsReadOnlyInvitedToSpace = context.rootGetters['currentUser/isReadOnlyInvitedToSpace'](space)
+      const currentUserIsInvitedToEdit = currentUserIsInvitedButCannotEditSpace && !currentUserIsSignedIn && !currentUserIsReadOnlyInvitedToSpace
       if (spaceIsOpen && !currentUserIsSignedIn) {
         context.commit('notifySignUpToEditSpace', true, { root: true })
-      } else if (currentUserIsInvitedButCannotEditSpace && !currentUserIsSignedIn) {
+      } else if (currentUserIsInvitedToEdit) {
         context.commit('notifySignUpToEditSpace', true, { root: true })
       } else {
         context.commit('notifySignUpToEditSpace', false, { root: true })
@@ -1213,8 +1210,9 @@ const currentSpace = {
     },
     isFavorite: (state, getters, rootState) => {
       const favoriteSpaces = rootState.currentUser.favoriteSpaces
-      const isFavoriteSpace = favoriteSpaces.filter(space => space.id === state.id)
-      return Boolean(isFavoriteSpace.length)
+      let isFavoriteSpace = favoriteSpaces.find(space => space.id === state.id)
+      isFavoriteSpace = Boolean(isFavoriteSpace)
+      return isFavoriteSpace
     },
     url: (state) => {
       const domain = consts.kinopioDomain()
@@ -1322,6 +1320,37 @@ const currentSpace = {
       } else {
         return null
       }
+    },
+
+    // copy, paste
+
+    selectedItems: (state, getters, rootState, rootGetters) => {
+      const cards = rootState.multipleCardsSelectedIds.map(cardId => {
+        return rootGetters['currentCards/byId'](cardId)
+      })
+      const boxes = rootState.multipleBoxesSelectedIds.map(boxId => {
+        return rootGetters['currentBoxes/byId'](boxId)
+      })
+      const connections = rootGetters['currentConnections/all'].filter(connection => {
+        const isStartCardMatch = rootState.multipleCardsSelectedIds.includes(connection.startCardId)
+        const isEndCardMatch = rootState.multipleCardsSelectedIds.includes(connection.endCardId)
+        return isStartCardMatch && isEndCardMatch
+      })
+      const connectionTypeIds = connections.map(connection => connection.connectionTypeId)
+      const connectionTypes = connectionTypeIds.map(id => rootGetters['currentConnections/typeByTypeId'](id))
+      return { cards, connectionTypes, connections, boxes }
+    },
+    newItems: (state, getters) => ({ items, spaceId }) => {
+      items = items || getters.selectedItems
+      spaceId = spaceId || state.id
+      let newItems = utils.uniqueSpaceItems(utils.clone(items))
+      let { cards, connectionTypes, connections, boxes } = newItems
+      cards = utils.updateItemsSpaceId(cards, spaceId)
+      connectionTypes = utils.updateItemsSpaceId(connectionTypes, spaceId)
+      connections = utils.updateItemsSpaceId(connections, spaceId)
+      boxes = utils.updateItemsSpaceId(boxes, spaceId)
+      newItems = { cards, connectionTypes, connections, boxes }
+      return newItems
     }
   }
 }

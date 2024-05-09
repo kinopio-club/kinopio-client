@@ -31,7 +31,8 @@ const props = defineProps({
 })
 const state = reactive({
   imageCanLoad: false,
-  moreOptionsIsVisible: false
+  moreOptionsIsVisible: false,
+  previewImageIsHover: false
 })
 
 const isSpaceMember = computed(() => store.getters['currentUser/isSpaceMember']())
@@ -74,6 +75,9 @@ const updateImageCanLoad = () => {
 }
 const updateDimensions = () => {
   store.dispatch('currentCards/updateDimensions', { cards: [props.card] })
+}
+const previewImageHover = (value) => {
+  state.previewImageIsHover = value
 }
 
 // show options
@@ -171,15 +175,16 @@ const showNone = async () => {
               span None
       //- image
       img.hidden(v-if="card.urlPreviewImage" :src="card.urlPreviewImage" @load="updateImageCanLoad")
-      a.preview-image-wrap(v-if="!shouldHideImage && card.urlPreviewImage" :href="card.urlPreviewUrl" :class="{'side-image': !shouldHideInfo, transparent: isShowNone}")
+      a.preview-image-wrap(v-if="!shouldHideImage && card.urlPreviewImage" :href="card.urlPreviewUrl" :class="{'side-image': !shouldHideInfo, transparent: isShowNone}" @mouseover="previewImageHover(true)" @mouseleave="previewImageHover(false)" target="_blank")
         img.preview-image.clickable-item(:src="card.urlPreviewImage" @load="updateDimensions")
       .text.badge(v-if="!shouldHideInfo" :class="{'side-text': shouldLoadUrlPreviewImage, 'text-with-image': card.urlPreviewImage && !shouldHideImage, transparent: isShowNone, 'text-only': isTextOnly }" :style="{background: selectedColor}")
         //- text
         div
           .row.info-row
-            img.favicon(v-if="card.urlPreviewFavicon" :src="card.urlPreviewFavicon")
-            img.icon.favicon.open(v-else src="@/assets/open.svg")
-            .title {{filteredTitle}}
+            a(:href="card.urlPreviewUrl" :class="{ hover: state.previewImageIsHover }" target="_blank")
+              img.favicon(v-if="card.urlPreviewFavicon" :src="card.urlPreviewFavicon")
+              img.icon.favicon.open(v-else src="@/assets/open.svg")
+              .title {{filteredTitle}}
           .description(v-if="description") {{description}}
 </template>
 
@@ -208,7 +213,7 @@ const showNone = async () => {
     &.no-padding
       padding 0
     &.is-no-info
-      min-height 40px !important
+      min-height 38px !important
   .preview-image
     display block
     width 100%
@@ -217,6 +222,12 @@ const showNone = async () => {
     pointer-events none
     -webkit-touch-callout none // prevents safari mobile press-and-hold from interrupting
 
+  a
+    color var(--primary)
+    text-decoration none
+    &:hover,
+    &.hover
+      text-decoration underline
   a.preview-image-wrap
     max-height 120px
     overflow hidden
@@ -252,13 +263,12 @@ const showNone = async () => {
   .favicon
     border-radius var(--small-entity-radius)
     width 14px
-    vertical-align -3px
+    vertical-align -2px
     display inline
     margin-right 5px
-    margin-top 3px
     &.open
       width 12px
-      vertical-align -2px
+      vertical-align 0
   .title
     display inline
   .description

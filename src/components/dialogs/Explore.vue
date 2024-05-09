@@ -1,156 +1,215 @@
-<template lang="pug">
-dialog.explore(v-if="visible" :open="visible" ref="dialog" :style="{'max-height': dialogHeight + 'px'}")
-  section.community(v-if="visible" :open="visible" @click.left.stop='closeDialogs')
-    .row.title-row
-      span.title Explore Community Spaces
-      .button-wrap
-        button.small-button(@click.stop="toggleExploreRssFeedIsVisible" :class="{active: exploreRssFeedIsVisible}")
-          span RSS
-        ExploreRssFeed(:visible="exploreRssFeedIsVisible")
-    p(v-if="loading")
-      Loader(:visible="loading")
-  section.results-section(ref="results" :style="{'max-height': resultsSectionHeight + 'px'}")
-    SpaceList(
-      :spaces="exploreSpaces"
-      :showUser="true"
-      :hideExploreBadge="true"
-      @selectSpace="changeSpace"
-      :userShowInExploreDate="userShowInExploreDate"
-      :resultsSectionHeight="resultsSectionHeight"
-      :parentDialog="parentDialog"
-    )
-</template>
+<script setup>
+import { reactive, computed, onMounted, onBeforeUnmount, onUnmounted, defineProps, defineEmits, watch, ref, nextTick } from 'vue'
+import { useStore } from 'vuex'
 
-<script>
 import SpaceList from '@/components/SpaceList.vue'
-import ExploreRssFeed from '@/components/dialogs/ExploreRssFeed.vue'
 import Loader from '@/components/Loader.vue'
+import UserLabelInline from '@/components/UserLabelInline.vue'
 import utils from '@/utils.js'
 
-export default {
-  name: 'Explore',
-  components: {
-    Loader,
-    SpaceList,
-    ExploreRssFeed
-  },
-  props: {
-    visible: Boolean,
-    preloadedSpaces: Object
-  },
-  created () {
-    this.$store.subscribe((mutation, state) => {
-      if (mutation.type === 'updatePageSizes') {
-        this.updateDialogHeight()
-        this.updateResultsSectionHeight()
-      }
-    })
-  },
-  data () {
-    return {
-      dialogHeight: null,
-      resultsSectionHeight: null,
-      loading: false,
-      spaces: [],
-      newSpaces: [],
-      userShowInExploreDate: null,
-      exploreRssFeedIsVisible: false,
-      filteredSpaces: undefined
+import randomColor from 'randomcolor'
+
+const store = useStore()
+
+const dialogElement = ref(null)
+const resultsElement = ref(null)
+
+onMounted(() => {
+  store.subscribe((mutation, state) => {
+    if (mutation.type === 'updatePageSizes') {
+      updateHeights()
     }
-  },
-  computed: {
-    currentSpace () { return this.$store.state.currentSpace },
-    currentSpaceInExplore () { return this.currentSpace.showInExplore },
-    exploreSpaces () { return this.filteredSpaces || this.spaces },
-    parentDialog () { return 'explore' }
-  },
-  methods: {
-    async updateSpaces () {
-      if (this.loading) { return }
-      this.loading = true
-      if (!this.spaces.length) {
-        this.spaces = this.preloadedSpaces || []
-      }
-      this.spaces = await this.$store.dispatch('api/getExploreSpaces')
-      this.newSpaces = this.spaces
-      this.loading = false
-    },
-    updateDialogHeight () {
-      if (!this.visible) { return }
-      this.$nextTick(() => {
-        let element = this.$refs.dialog
-        this.dialogHeight = utils.elementHeight(element)
-      })
-    },
-    updateResultsSectionHeight () {
-      if (!this.visible) { return }
-      this.$nextTick(() => {
-        let element = this.$refs.results
-        this.resultsSectionHeight = utils.elementHeight(element, true)
-      })
-    },
-    async updateUserShowInExploreUpdatedAt () {
-      this.userShowInExploreDate = this.$store.state.currentUser.showInExploreUpdatedAt
-      let serverDate = await this.$store.dispatch('api/getDate')
-      serverDate = serverDate.date
-      this.$store.dispatch('currentUser/showInExploreUpdatedAt', serverDate)
-    },
-    updateLocalSpaces () {
-      if (this.currentSpaceInExplore) {
-        this.removeCurrentSpaceFromFilteredSpaces()
-        this.filteredSpaces.unshift(this.currentSpace)
-      } else {
-        this.removeCurrentSpaceFromFilteredSpaces()
-      }
-    },
-    removeCurrentSpaceFromFilteredSpaces () {
-      let spaces = this.exploreSpaces
-      spaces = spaces.filter(space => space.id !== this.currentSpace.id)
-      this.filteredSpaces = spaces
-    },
-    closeDialogs () {
-      this.exploreRssFeedIsVisible = false
-    },
-    changeSpace (space) {
-      this.$store.dispatch('currentSpace/changeSpace', space)
-    },
-    toggleExploreRssFeedIsVisible () {
-      this.exploreRssFeedIsVisible = !this.exploreRssFeedIsVisible
-    }
-  },
-  watch: {
-    visible (visible) {
-      this.$store.commit('clearNotificationsWithPosition')
-      if (visible) {
-        this.updateSpaces()
-        this.updateDialogHeight()
-        this.updateResultsSectionHeight()
-        this.updateUserShowInExploreUpdatedAt()
-        this.$store.commit('shouldExplicitlyHideFooter', true)
-      } else {
-        this.exploreRssFeedIsVisible = false
-        this.$store.commit('shouldExplicitlyHideFooter', false)
-      }
-    },
-    loading (value) {
-      this.updateDialogHeight()
-      this.updateResultsSectionHeight()
-    }
+  })
+})
+
+const props = defineProps({
+  visible: Boolean,
+  spaces: Object,
+  exploreSpaces: Object,
+  followingSpaces: Object,
+  everyoneSpaces: Object,
+  loading: Boolean,
+  unreadExploreSpacesCount: Number,
+  unreadFollowingSpacesCount: Number,
+  unreadEveryoneSpacesCount: Number
+})
+watch(() => props.visible, (value, prevValue) => {
+  store.commit('clearNotificationsWithPosition')
+  if (value) {
+    updateHeights()
+    updateUserShowInExploreUpdatedAt()
+    store.commit('shouldExplicitlyHideFooter', true)
+  } else {
+    store.commit('shouldExplicitlyHideFooter', false)
   }
+})
+
+const state = reactive({
+  dialogHeight: null,
+  resultsSectionHeight: null,
+  userShowInExploreDate: null,
+  filteredSpaces: undefined,
+  currentSection: 'explore', // 'explore', 'following', 'everyone'
+  isReadSections: [], // 'explore', 'following', 'everyone'
+  readSpaceIds: []
+})
+
+const currentSpace = computed(() => store.state.currentSpace)
+const changeSpace = (space) => {
+  closeDialogs()
+  store.dispatch('currentSpace/changeSpace', space)
+  state.readSpaceIds.push(space.id)
 }
+const closeDialogs = () => {
+  // state.exploreRssFeedsIsVisible = false
+}
+
+// update height
+
+const parentDialog = computed(() => 'explore')
+const updateHeights = async () => {
+  await nextTick()
+  updateDialogHeight()
+  updateResultsSectionHeight()
+}
+const updateDialogHeight = async () => {
+  if (!props.visible) { return }
+  await nextTick()
+  let element = dialogElement.value
+  state.dialogHeight = utils.elementHeight(element)
+}
+const updateResultsSectionHeight = async () => {
+  if (!props.visible) { return }
+  await nextTick()
+  let element = resultsElement.value
+  state.resultsSectionHeight = utils.elementHeight(element, true)
+}
+
+// unread sections
+
+watch(() => state.currentSection, (value, prevValue) => {
+  state.isReadSections.push(prevValue)
+})
+const isUnreadExplore = computed(() => {
+  if (state.isReadSections.includes('explore')) {
+    return false
+  }
+  return Boolean(props.unreadExploreSpacesCount)
+})
+const isUnreadFollowing = computed(() => {
+  if (state.isReadSections.includes('following')) {
+    return false
+  }
+  return Boolean(props.unreadFollowingSpacesCount)
+})
+const isUnreadEveryone = computed(() => {
+  if (state.isReadSections.includes('everyone')) {
+    return false
+  }
+  return Boolean(props.unreadEveryoneSpacesCount)
+})
+
+// current section
+
+const updateCurrentSection = (value) => {
+  state.currentSection = value
+  updateHeights()
+}
+const currentSectionIsExplore = computed(() => state.currentSection === 'explore')
+const currentSectionIsFollowing = computed(() => state.currentSection === 'following')
+const currentSectionIsEveryone = computed(() => state.currentSection === 'everyone')
+const currentSpaces = computed(() => {
+  let spaces
+  if (currentSectionIsExplore.value) {
+    spaces = props.exploreSpaces
+  } else if (currentSectionIsFollowing.value) {
+    spaces = props.followingSpaces
+  } else if (currentSectionIsEveryone.value) {
+    spaces = props.everyoneSpaces
+  }
+  return spaces || []
+})
+
+// explore spaces
+
+const currentSpaceInExplore = computed(() => currentSpace.value.showInExplore)
+const updateUserShowInExploreUpdatedAt = async () => {
+  state.userShowInExploreDate = store.state.currentUser.showInExploreUpdatedAt
+  let serverDate = await store.dispatch('api/getDate')
+  serverDate = serverDate.date
+  store.dispatch('currentUser/showInExploreUpdatedAt', serverDate)
+}
+
+// blank slate info
+
+const followUsersInfoIsVisible = computed(() => {
+  const isFavoriteUsers = Boolean(store.state.currentUser.favoriteUsers.length)
+  return !props.loading && !isFavoriteUsers && currentSectionIsFollowing.value
+})
+const randomUser = computed(() => {
+  const luminosity = store.state.currentUser.theme
+  const color = randomColor({ luminosity })
+  return { color, id: '123' }
+})
+
 </script>
+
+<template lang="pug">
+dialog.explore.wide(v-if="visible" :open="visible" ref="dialogElement" :style="{'max-height': state.dialogHeight + 'px'}" @click.left.stop='closeDialogs')
+  section(v-if="visible" :open="visible")
+    .row.title-row
+      .segmented-buttons
+        button(:class="{active: currentSectionIsExplore}" @click="updateCurrentSection('explore')")
+          img.icon.sunglasses(src="@/assets/sunglasses.svg")
+          span Explore
+          .badge.new-unread-badge.notification-button-badge(v-if="isUnreadExplore")
+        button(:class="{active: currentSectionIsFollowing}" @click="updateCurrentSection('following')")
+          span Following
+          .badge.new-unread-badge.notification-button-badge(v-if="isUnreadFollowing")
+        button(:class="{active: currentSectionIsEveryone}" @click="updateCurrentSection('everyone')")
+          span Everyone
+          .badge.new-unread-badge.notification-button-badge(v-if="isUnreadEveryone")
+    .row(v-if="props.loading")
+      Loader(:isSmall="true" :visible="props.loading")
+
+    //- follow users blank slate
+    section.subsection(v-if="followUsersInfoIsVisible")
+      p Follow other people to see their latest updates here
+      p.badge.secondary
+        UserLabelInline(:user="randomUser" :isClickable="false" :key="randomUser.id" :isSmall="true" :hideYouLabel="true")
+        span → Follow
+
+  hr
+
+  section.results-section(ref="resultsElement" :style="{'max-height': state.resultsSectionHeight + 'px'}")
+    SpaceList(
+      :spaces="currentSpaces"
+      :showUser="true"
+      @selectSpace="changeSpace"
+      :userShowInExploreDate="state.userShowInExploreDate"
+      :readSpaceIds="state.readSpaceIds"
+      :spaceReadDateType="state.currentSection"
+      :resultsSectionHeight="state.resultsSectionHeight"
+      :parentDialog="parentDialog"
+      :previewImageIsWide="true"
+      :hideFilter="true"
+      :showCollaborators="true"
+    )
+</template>
 
 <style lang="stylus">
 dialog.explore
   left initial
-  right 8px
+  right -35px
   overflow auto
-  .community
-    .badge
-      display flex
-    button + a
-      margin-left 6px
-    .title
-      color var(--primary)
-
+  // &.wide
+  //   width 330px
+  .loader
+    margin-right 5px
+    vertical-align -2px
+  .segmented-buttons
+    button
+      position relative
+  hr
+    margin-top 0
 </style>

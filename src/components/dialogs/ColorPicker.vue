@@ -4,7 +4,7 @@ dialog.narrow.color-picker(v-if="visible" :open="visible" ref="dialog" @click.le
     .row
       .badge.full-width-color-badge(:style="{backgroundColor: currentColor}")
         //- Input
-        input(v-model="color" @focus="resetPinchCounterZoomDecimal" @blur="triggerUpdatePositionInVisualViewport" @keyup.stop.backspace :class="{ 'is-dark': isDark }")
+        input(v-model="color" @focus="resetPinchCounterZoomDecimal" @blur="triggerUpdateHeaderAndFooterPosition" @keyup.stop.backspace :class="{ 'is-dark': isDark }")
           //- Remove
         button.small-button.remove-button(v-if="removeIsVisible" title="remove" @click="removeColor")
           img.icon(src="@/assets/remove.svg")
@@ -12,10 +12,10 @@ dialog.narrow.color-picker(v-if="visible" :open="visible" ref="dialog" @click.le
     //- Colors
     .recent-colors(v-if="recentColors")
       template(v-for="color in recentColors")
-        button.color(:style="{backgroundColor: color}" :class="{active: colorIsCurrent(color)}" @click.left="select(color)")
+        button.color(:style="{backgroundColor: color}" :class="{active: colorIsCurrent(color)}" @click.left="select(color)" :title="color")
     .colors
       template(v-for="color in colors")
-        button.color(:style="{backgroundColor: color}" :class="{active: colorIsCurrent(color)}" @click.left="select(color)")
+        button.color(:style="{backgroundColor: color}" :class="{active: colorIsCurrent(color)}" @click.left="select(color)" :title="color")
 
     //- Current Color Modifiers
 
@@ -59,11 +59,11 @@ dialog.narrow.color-picker(v-if="visible" :open="visible" ref="dialog" @click.le
   //- Favorite Colors
   section.favorite-colors
     button.toggle-favorite-color(@click="toggleFavoriteColor")
-      img.icon(v-if="!currentColorIsUserColor" src="@/assets/heart-empty.svg")
-      img.icon(v-if="currentColorIsUserColor" src="@/assets/heart.svg")
+      img.icon(v-if="!currentColorIsFavorite" src="@/assets/heart-empty.svg")
+      img.icon(v-if="currentColorIsFavorite" src="@/assets/heart.svg")
       span.current-color(:style="{ background: currentColor }")
     template(v-for="color in favoriteColors")
-      button.color(:style="{backgroundColor: color}" :class="{active: colorIsCurrent(color)}" @click.left="select(color, 'isFavorite')")
+      button.color(:style="{backgroundColor: color}" :class="{active: colorIsCurrent(color)}" @click.left="select(color, 'isFavorite')" :title="color")
 
 </template>
 
@@ -118,7 +118,7 @@ export default {
     hueIsGreen () { return this.currentHue === 'green' },
     hueIsBlue () { return this.currentHue === 'blue' },
     favoriteColors () { return this.$store.state.currentUser.favoriteColors || [] },
-    currentColorIsUserColor () { return this.favoriteColors.includes(this.currentColor) },
+    currentColorIsFavorite () { return this.favoriteColors.includes(this.currentColor) },
     isTransparent () {
       const isLabelled = this.currentColor === 'transparent'
       const isOpacity = this.opacity === 0
@@ -138,11 +138,8 @@ export default {
     },
     toggleFavoriteColor () {
       const color = { color: this.currentColor }
-      if (this.currentColorIsUserColor) {
-        this.$store.dispatch('currentUser/removeFavorite', { type: 'color', item: color })
-      } else {
-        this.$store.dispatch('currentUser/addFavorite', { type: 'color', item: color })
-      }
+      const value = !this.currentColorIsFavorite
+      this.$store.dispatch('currentUser/updateFavoriteColor', { color, value })
     },
     updateLuminosity (value) {
       if (this.luminosity === value) { return }
@@ -162,9 +159,9 @@ export default {
       this.colors.unshift(this.currentColor)
     },
     select (color, isFavorite) {
-      if (!isFavorite) {
-        color = colord(color).alpha(this.opacity / 100).toRgbString()
-      }
+      const alpha = colord(color).alpha()
+      const opacity = alpha * 100
+      this.opacity = Math.round(opacity)
       this.$emit('selectedColor', color)
     },
     updateColorFromInput (color) {
@@ -196,8 +193,8 @@ export default {
     resetPinchCounterZoomDecimal () {
       this.$store.commit('pinchCounterZoomDecimal', 1)
     },
-    triggerUpdatePositionInVisualViewport () {
-      this.$store.commit('triggerUpdatePositionInVisualViewport')
+    triggerUpdateHeaderAndFooterPosition () {
+      this.$store.commit('triggerUpdateHeaderAndFooterPosition')
     },
     scrollIntoView () {
       this.$nextTick(() => {
@@ -215,7 +212,8 @@ export default {
     },
     updateOpacity (value) {
       this.opacity = Math.round(value)
-      this.select(this.color)
+      const color = colord(this.currentColor).alpha(this.opacity / 100).toRgbString()
+      this.$emit('selectedColor', color)
     },
     resetOpacity () {
       this.updateOpacity(100)

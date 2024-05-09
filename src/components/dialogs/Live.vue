@@ -13,6 +13,8 @@ dialog.live(v-if="visible" :open="visible" ref="dialog" :style="{'max-height': d
       @selectSpace="changeSpace"
       :resultsSectionHeight="resultsSectionHeight"
       :parentDialog="parentDialog"
+      :previewImageIsWide="true"
+      :hideFilter="true"
     )
   section.empty(v-if="!spaces.length")
     p No public spaces are currently being edited, check back soon
@@ -90,8 +92,8 @@ export default {
   left initial
   right 8px
   max-height calc(100vh - 100px)
-  .camera
-    vertical-align baseline
+  .icon.camera
+    vertical-align 1px
   section.empty
     border-top 0
     padding-top 4px

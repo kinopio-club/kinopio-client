@@ -25,7 +25,6 @@ const initialState = {
   cardsCreatedCount: 0,
   isUpgraded: false,
   isModerator: false,
-  isGuideMaker: false,
   filterShowUsers: false,
   filterShowDateUpdated: false,
   filterShowAbsoluteDates: false,
@@ -40,7 +39,7 @@ const initialState = {
   shouldShowMoreAlignOptions: false,
   shouldUseLastConnectionType: true,
   shouldShowItemActions: false,
-  shouldShowMultipleSelectedItemActions: false,
+  shouldShowMultipleSelectedLineActions: false,
   shouldDisableRightClickToPan: false,
   shouldShowCurrentSpaceTags: false,
   showInExploreUpdatedAt: null, // date
@@ -59,14 +58,14 @@ const initialState = {
   shouldUseStickyCards: true,
   shouldIncreaseUIContrast: false,
   shouldPauseConnectionDirections: false,
+  shouldInvertZoom: false,
   lastUsedImagePickerService: '',
   AIImages: [],
   theme: null,
   themeIsSystem: false,
-  referredByUserId: '',
-  advocateReferrerName: '',
   weather: '',
   journalDailyPrompt: '',
+  journalDailyDateImage: '',
   panSpeedIsFast: false,
   outsideSpaceBackgroundIsStatic: false,
   shouldDisableHapticFeedback: false,
@@ -165,6 +164,9 @@ export default {
         if (user[item]) {
           state[item] = user[item]
         }
+        if (utils.userIsUpgraded(user)) {
+          state.isUpgraded = true
+        }
         if (user.apiKey) {
           postMessage.send({ name: 'setApiKey', value: user.apiKey })
         }
@@ -258,9 +260,9 @@ export default {
       state.shouldShowItemActions = value
       cache.updateUser('shouldShowItemActions', value)
     },
-    shouldShowMultipleSelectedItemActions: (state, value) => {
-      state.shouldShowMultipleSelectedItemActions = value
-      cache.updateUser('shouldShowMultipleSelectedItemActions', value)
+    shouldShowMultipleSelectedLineActions: (state, value) => {
+      state.shouldShowMultipleSelectedLineActions = value
+      cache.updateUser('shouldShowMultipleSelectedLineActions', value)
     },
     showInExploreUpdatedAt: (state, value) => {
       state.showInExploreUpdatedAt = value
@@ -338,9 +340,13 @@ export default {
       state.weatherUnitIsCelcius = value
       cache.updateUser('weatherUnitIsCelcius', value)
     },
-    journalDailyPrompt: (state, value) => {
-      state.journalDailyPrompt = value
-      cache.updateUser('journalDailyPrompt', value)
+    journalDailyPrompt: (state, data) => {
+      utils.typeCheck({ value: data, type: 'object' })
+      const { name, dateImage } = data
+      state.journalDailyPrompt = name
+      cache.updateUser('journalDailyPrompt', name)
+      state.journalDailyDateImage = dateImage
+      cache.updateUser('journalDailyDateImage', dateImage)
     },
     shouldUseStickyCards: (state, value) => {
       state.shouldUseStickyCards = value
@@ -353,6 +359,10 @@ export default {
     shouldPauseConnectionDirections: (state, value) => {
       state.shouldPauseConnectionDirections = value
       cache.updateUser('shouldPauseConnectionDirections', value)
+    },
+    shouldInvertZoom: (state, value) => {
+      state.shouldInvertZoom = value
+      cache.updateUser('shouldInvertZoom', value)
     },
     lastUsedImagePickerService: (state, value) => {
       state.lastUsedImagePickerService = value
@@ -370,14 +380,6 @@ export default {
       utils.typeCheck({ value, type: 'boolean' })
       state.themeIsSystem = value
       cache.updateUser('themeIsSystem', value)
-    },
-    referredByUserId: (state, value) => {
-      state.referredByUserId = value
-      cache.updateUser('referredByUserId', value)
-    },
-    advocateReferrerName: (state, value) => {
-      state.advocateReferrerName = value
-      cache.updateUser('advocateReferrerName', value)
     },
     weather: (state, value) => {
       state.weather = value
@@ -414,15 +416,6 @@ export default {
       context.commit('triggerUserIsLoaded', null, { root: true })
       context.dispatch('updateWeather')
       context.dispatch('updateJournalDailyPrompt')
-      // handle referrals
-      nextTick(() => {
-        nextTick(() => {
-          context.dispatch('validateUserReferralUserId')
-          context.dispatch('validateFromAdvocateReferralName')
-          context.dispatch('validateAdvocateReferralName')
-          context.dispatch('restoreUserFavorites')
-        })
-      })
     },
     updateWeather: async (context) => {
       const weather = await context.dispatch('api/weather', null, { root: true })
@@ -430,9 +423,9 @@ export default {
       context.commit('weather', weather)
     },
     updateJournalDailyPrompt: async (context) => {
-      const prompt = await context.dispatch('api/journalDailyPrompt', null, { root: true })
-      if (!prompt) { return }
-      context.commit('journalDailyPrompt', prompt)
+      const data = await context.dispatch('api/journalDailyPrompt', null, { root: true })
+      if (!data) { return }
+      context.commit('journalDailyPrompt', data)
     },
     update: (context, updates) => {
       const keys = Object.keys(updates)
@@ -449,8 +442,7 @@ export default {
       if (shouldDecrement) {
         delta = -delta
       }
-      console.log('delta', delta)
-
+      // console.log('delta', delta)
       if (context.getters.shouldPreventCardsCreatedCountUpdate) { return }
       const count = context.state.cardsCreatedCount + delta
       context.dispatch('api/addToQueue', { name: 'updateUserCardsCreatedCount', body: { delta } }, { root: true })
@@ -515,7 +507,7 @@ export default {
       remoteUser.updatedAt = utils.normalizeToUnixTime(remoteUser.updatedAt)
       console.log('🌸 Restore user from remote', remoteUser)
       context.commit('updateUser', remoteUser)
-      if (remoteUser.stripeSubscriptionId || remoteUser.stripePlanIsPurchased || remoteUser.downgradeAt || remoteUser.appleSubscriptionIsActive) {
+      if (utils.userIsUpgraded(remoteUser)) {
         context.commit('isUpgraded', true)
       } else {
         context.commit('isUpgraded', false)
@@ -529,90 +521,62 @@ export default {
         context.commit('isLoadingFavorites', false, { root: true })
         return
       }
-      let favorites = {
-        favoriteUsers: [],
-        favoriteSpaces: [],
-        favoriteColors: []
-      }
-      favorites = await context.dispatch('api/getUserFavorites', null, { root: true }) || favorites
-      context.commit('favoriteUsers', favorites.favoriteUsers)
-      context.commit('favoriteSpaces', favorites.favoriteSpaces)
-      context.commit('favoriteColors', favorites.favoriteColors)
+      const [favoriteSpaces, favoriteUsers, favoriteColors] = await Promise.all([
+        context.dispatch('api/getUserFavoriteSpaces', null, { root: true }),
+        context.dispatch('api/getUserFavoriteUsers', null, { root: true }),
+        context.dispatch('api/getUserFavoriteColors', null, { root: true })
+      ])
+      context.commit('favoriteUsers', favoriteUsers)
+      context.commit('favoriteSpaces', favoriteSpaces)
+      context.commit('favoriteColors', favoriteColors)
       context.commit('isLoadingFavorites', false, { root: true })
     },
-    addFavorite: (context, { type, item }) => {
-      let color, notification
-      // user
-      if (type === 'user') {
-        let favoriteUsers = utils.clone(context.state.favoriteUsers)
-        let user = {
-          id: item.id,
-          name: item.name,
-          color: item.color
-        }
-        favoriteUsers.push(user)
-        context.commit('favoriteUsers', favoriteUsers)
-        context.dispatch('userNotifications/addFavoriteUser', user, { root: true })
-      // space
-      } else if (type === 'space') {
-        let favoriteSpaces = utils.clone(context.state.favoriteSpaces)
-        let space = {
-          id: item.id,
-          name: item.name,
-          privacy: item.privacy,
-          showInExplore: item.showInExplore,
-          users: item.users
-        }
+    updateFavoriteSpace: (context, { space, value }) => {
+      let favoriteSpaces = utils.clone(context.state.favoriteSpaces)
+      // add space
+      if (value) {
         favoriteSpaces.push(space)
-        context.commit('favoriteSpaces', favoriteSpaces)
-        context.dispatch('userNotifications/addFavoriteSpace', space, { root: true })
-      // color
-      } else if (type === 'color') {
-        color = item.color
-        let favoriteColors = utils.clone(context.state.favoriteColors)
-        favoriteColors.push(color)
-        context.commit('favoriteColors', favoriteColors)
+      // remove space
+      } else {
+        favoriteSpaces = favoriteSpaces.filter(favoriteSpace => {
+          return favoriteSpace.id !== space.id
+        })
+        context.dispatch('userNotifications/removeFavoriteSpace', space, { root: true })
       }
-      // update api
-      let body = { type, id: item.id }
-      if (color) {
-        body.color = color
-      }
-      context.dispatch('api/addToQueue', { name: 'addOrRemoveFavorite', body }, { root: true })
+      context.commit('favoriteSpaces', favoriteSpaces)
+      const body = { spaceId: space.id, value }
+      context.dispatch('api/addToQueue', { name: 'updateFavoriteSpace', body, spaceId: space.id }, { root: true })
     },
-    removeFavorite: (context, { type, item }) => {
-      let color
-      // user
-      if (type === 'user') {
-        let favoriteUsers = utils.clone(context.state.favoriteUsers)
-        favoriteUsers = favoriteUsers.filter(favorite => {
-          return favorite.id !== item.id
+    updateFavoriteUser: (context, { user, value }) => {
+      let favoriteUsers = utils.clone(context.state.favoriteUsers)
+      // add user
+      if (value) {
+        favoriteUsers.push(user)
+        context.dispatch('userNotifications/addFavoriteUser', user, { root: true })
+      // remove user
+      } else {
+        favoriteUsers = favoriteUsers.filter(favoriteUser => {
+          return favoriteUser.id !== user.id
         })
-        context.commit('favoriteUsers', favoriteUsers)
-        context.dispatch('userNotifications/removeFavoriteUser', item, { root: true })
-      // space
-      } else if (type === 'space') {
-        let favoriteSpaces = utils.clone(context.state.favoriteSpaces)
-        favoriteSpaces = favoriteSpaces.filter(space => {
-          return space.id !== item.id
-        })
-        context.commit('favoriteSpaces', favoriteSpaces)
-        context.dispatch('userNotifications/removeFavoriteSpace', item, { root: true })
-      // color
-      } else if (type === 'color') {
-        color = item.color
-        let favoriteColors = utils.clone(context.state.favoriteColors)
+        context.dispatch('userNotifications/removeFavoriteUser', user, { root: true })
+      }
+      context.commit('favoriteUsers', favoriteUsers)
+      const body = { favoriteUserId: user.id, value }
+      context.dispatch('api/addToQueue', { name: 'updateFavoriteUser', body }, { root: true })
+    },
+    updateFavoriteColor: (context, { color, value }) => {
+      color = color.color
+      let favoriteColors = utils.clone(context.state.favoriteColors)
+      if (value) {
+        favoriteColors.push(color)
+      } else {
         favoriteColors = favoriteColors.filter(favoriteColor => {
           return favoriteColor !== color
         })
-        context.commit('favoriteColors', favoriteColors)
       }
-      // update api
-      let body = { type, id: item.id }
-      if (color) {
-        body.color = color
-      }
-      context.dispatch('api/addToQueue', { name: 'addOrRemoveFavorite', body }, { root: true })
+      context.commit('favoriteColors', favoriteColors)
+      const body = { color, value }
+      context.dispatch('api/addToQueue', { name: 'updateFavoriteColor', body }, { root: true })
     },
     confirmEmail: (context) => {
       context.dispatch('api/addToQueue', { name: 'updateUser',
@@ -755,12 +719,12 @@ export default {
           shouldShowItemActions: value
         } }, { root: true })
     },
-    shouldShowMultipleSelectedItemActions: (context, value) => {
+    shouldShowMultipleSelectedLineActions: (context, value) => {
       utils.typeCheck({ value, type: 'boolean' })
-      context.commit('shouldShowMultipleSelectedItemActions', value)
+      context.commit('shouldShowMultipleSelectedLineActions', value)
       context.dispatch('api/addToQueue', { name: 'updateUser',
         body: {
-          shouldShowMultipleSelectedItemActions: value
+          shouldShowMultipleSelectedLineActions: value
         } }, { root: true })
     },
     showInExploreUpdatedAt: (context, value) => {
@@ -807,115 +771,6 @@ export default {
         context.commit('addNotificationWithPosition', { message: 'Sign in to Edit', position, type: 'info', layer: 'space', icon: 'cancel' }, { root: true })
       } else {
         context.commit('addNotificationWithPosition', { message: 'Space is Read Only', position, type: 'info', layer: 'space', icon: 'cancel' }, { root: true })
-      }
-    },
-
-    // referrals
-
-    validateUserReferralUserId: async (context) => {
-      const referrerUserId = context.rootState.validateUserReferralUserId
-      if (!referrerUserId) { return }
-      const referrerUser = await context.dispatch('api/getPublicUser', { id: referrerUserId }, { root: true })
-      if (!referrerUser) {
-        context.commit('addNotification', { message: 'Invalid referral, referring user not found', isPersistentItem: true, type: 'danger' }, { root: true })
-        return
-      }
-      // check if current user can be referred
-      const canBeReferred = context.getters.canBeReferred(referrerUserId)
-      if (canBeReferred) {
-        context.dispatch('addReferral', referrerUser)
-      } else {
-        context.commit('addNotification', { message: 'Invalid Referral. You can only be referred once', isPersistentItem: true, type: 'danger' }, { root: true })
-      }
-      // reset state
-      context.commit('validateUserReferralUserId', '', { root: true })
-    },
-    validateFromAdvocateReferralName: async (context) => {
-      try {
-        const name = context.rootState.validateFromAdvocateReferralName
-        // get referrer
-        if (!name) { return }
-        const advocateUser = await context.dispatch('api/getAdvocateUsedUser', name, { root: true })
-        if (!advocateUser) {
-          context.commit('addNotification', { message: 'Invalid referral, referring user not found', isPersistentItem: true, type: 'danger' }, { root: true })
-          return
-        }
-        // check if current user can be referred
-        const canBeReferred = context.getters.canBeReferred(advocateUser.id)
-        if (canBeReferred) {
-          context.dispatch('addReferral', advocateUser)
-        } else {
-          context.commit('addNotification', { message: 'Invalid Referral. You can only be referred once', isPersistentItem: true, type: 'danger' }, { root: true })
-        }
-        // reset state
-        context.commit('validateFromAdvocateReferralName', '', { root: true })
-      } catch (error) {
-        console.error('🚒 validateFromAdvocateReferralName', error)
-        context.commit('addNotification', { message: 'Invalid referral, valid referrer not found', type: 'danger', isPersistentItem: true }, { root: true })
-      }
-    },
-    validateAdvocateReferralName: async (context) => {
-      // handles /for/xyz
-      // grant free accounts to press, influencers, and ambassadors. advocateReferralNames can only be used once
-      try {
-        const name = context.rootState.validateAdvocateReferralName
-        if (!name) { return }
-        const isAdvocate = await context.dispatch('api/getAdvocateUnused', name, { root: true })
-        const isSignedIn = context.getters.isSignedIn
-        if (isSignedIn) {
-          context.commit('addNotification', { message: 'Only new users can be referred this way, please contact support to manually update your account', type: 'danger', isPersistentItem: true }, { root: true })
-        } else if (isAdvocate) {
-          context.commit('notifyReferralSuccessReferrerName', true, { root: true })
-          // user.advocateReferrerName will be validated and marked as used by the server on sign up
-          context.dispatch('update', { advocateReferrerName: name })
-        } else {
-          context.commit('addNotification', { message: 'Invalid referral, valid referrer not found', type: 'danger', isPersistentItem: true }, { root: true })
-        }
-        context.commit('validateAdvocateReferralName', '', { root: true })
-      } catch (error) {
-        console.error('🚒 validateAdvocateReferralName', error)
-        context.commit('addNotification', { message: 'Invalid referral, valid referrer not found', type: 'danger', isPersistentItem: true }, { root: true })
-      }
-    },
-    validateUserReferralFromSpaceInvite: async (context) => {
-      const isFromSpaceInvite = Boolean(context.rootState.shouldValidateUserReferralFromSpaceInvite)
-      if (!isFromSpaceInvite) { return }
-      // get referrer
-      const spaceMembers = context.rootGetters['currentSpace/members']()
-      if (!spaceMembers.length) { return }
-      const referrerId = spaceMembers[0].id
-      if (!referrerId) { return }
-      const referrer = await context.dispatch('api/getPublicUser', { id: referrerId }, { root: true })
-      if (!referrer) {
-        context.commit('addNotification', { message: 'Invalid referral, referring user not found', isPersistentItem: true, type: 'danger' }, { root: true })
-        return
-      }
-      // check if current user can be referred by space invite
-      const isSignedIn = context.getters.isSignedIn
-      const canBeReferred = context.getters.canBeReferred(referrerId) && !isSignedIn
-      if (canBeReferred) {
-        context.dispatch('addReferral', referrer)
-      }
-      // reset state
-      context.commit('shouldValidateUserReferralFromSpaceInvite', false, { root: true })
-    },
-    addReferral: async (context, referrer) => {
-      try {
-        const isSignedIn = context.getters.isSignedIn
-        context.dispatch('update', { referredByUserId: referrer.id })
-        if (isSignedIn) {
-          const referral = await context.dispatch('api/createReferral', {
-            userId: referrer.id,
-            referredUserId: context.state.id
-          }, { root: true })
-          console.log('🫧 referral created', referral)
-          context.commit('notifyEarnedCredits', true, { root: true })
-        } else {
-          context.commit('notifyReferralSuccessUser', referrer, { root: true })
-        }
-      } catch (error) {
-        console.error('🚒 addReferral', error)
-        context.commit('addNotification', { message: 'Invalid Referral. You can only be referred once', isPersistentItem: true, type: 'danger' }, { root: true })
       }
     }
   },
@@ -1014,11 +869,14 @@ export default {
         return 'spectator'
       }
     },
+    isReadOnlyInvitedToSpace: (state, getters, rootState) => (space) => {
+      return rootState.spaceReadOnlyKey.spaceId === space.id
+    },
     isInvitedButCannotEditSpace: (state, getters, rootState) => (space) => {
       space = space || rootState.currentSpace
       const currentUserIsSignedIn = getters.isSignedIn
       const isInvitedToSpace = Boolean(cache.invitedSpaces().find(invitedSpace => invitedSpace.id === space.id))
-      const isReadOnlyInvitedToSpace = rootState.spaceReadOnlyKey.spaceId === space.id
+      const isReadOnlyInvitedToSpace = getters.isReadOnlyInvitedToSpace(space)
       const inviteRequiresSignIn = !currentUserIsSignedIn && isInvitedToSpace
       return isReadOnlyInvitedToSpace || inviteRequiresSignIn
     },
@@ -1051,15 +909,6 @@ export default {
       const connections = rootState.filteredConnectionTypeIds
       const frames = rootState.filteredFrameIds
       return userFilters + tagNames.length + connections.length + frames.length
-    },
-    canBeReferred: (state, getters) => (referralUserId) => {
-      const isAlreadyReferred = state.referredByUserId
-      const isSameUser = referralUserId === state.id
-      console.log('🕵️‍♀️ canBeReferred check:', { referralUserId, referredByUserId: isAlreadyReferred, isSameUser, isUpgraded: state.isUpgraded })
-      if (isAlreadyReferred) { return }
-      if (isSameUser) { return }
-      if (state.isUpgraded) { return }
-      return true
     },
 
     // AI Images

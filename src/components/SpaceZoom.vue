@@ -59,7 +59,7 @@ const updateSpaceZoomPercent = (percent) => {
   store.commit('spaceZoomPercent', percent)
 }
 const centerZoomOrigin = () => {
-  const scroll = store.state.windowScroll
+  const scroll = { x: window.scrollX, y: window.scrollY }
   const origin = {
     x: scroll.x + (store.state.viewportWidth / 6),
     y: scroll.y + (store.state.viewportHeight / 6)

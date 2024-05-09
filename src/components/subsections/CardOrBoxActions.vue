@@ -1,37 +1,457 @@
+<script setup>
+import { reactive, computed, onMounted, onBeforeUnmount, onUnmounted, defineProps, defineEmits, watch, ref, nextTick } from 'vue'
+import { useStore } from 'vuex'
+
+import FramePicker from '@/components/dialogs/FramePicker.vue'
+import TagPickerStyleActions from '@/components/dialogs/TagPickerStyleActions.vue'
+import ColorPicker from '@/components/dialogs/ColorPicker.vue'
+import FontPicker from '@/components/dialogs/FontPicker.vue'
+import utils from '@/utils.js'
+
+import uniq from 'lodash-es/uniq'
+import { nanoid } from 'nanoid'
+
+const store = useStore()
+
+onMounted(() => {
+  store.subscribe((mutation, state) => {
+    const { type } = mutation
+    if (type === 'triggerCloseChildDialogs' && props.visible) {
+      const shouldPreventEmit = true
+      closeDialogs(shouldPreventEmit)
+    } else if (type === 'triggerSelectedCardsContainInBox') {
+      containItemsInNewBox()
+    } else if (type === 'triggerUpdateTheme') {
+      updateDefaultColor(utils.cssVariable('secondary-background'))
+    }
+  })
+  updateDefaultColor(utils.cssVariable('secondary-background'))
+})
+
+const emit = defineEmits(['closeDialogs'])
+
+const props = defineProps({
+  visible: Boolean,
+  colorIsHidden: Boolean,
+  labelIsVisible: Boolean,
+  tagsInCard: Array,
+  backgroundColor: String,
+  cards: {
+    type: Array,
+    default (value) {
+      return []
+    }
+  },
+  boxes: {
+    type: Array,
+    default (value) {
+      return []
+    }
+  }
+})
+const state = reactive({
+  framePickerIsVisible: false,
+  tagPickerIsVisible: false,
+  colorPickerIsVisible: false,
+  fontPickerIsVisible: false,
+  defaultColor: '#e3e3e3'
+})
+
+const canEditSpace = computed(() => store.getters['currentUser/canEditSpace']())
+const isSpaceMember = computed(() => store.getters['currentUser/isSpaceMember']())
+const canEditAll = computed(() => {
+  if (isSpaceMember.value) { return true }
+  const editableCards = props.cards.filter(card => store.getters['currentUser/canEditCard'](card))
+  const canEditCards = editableCards.length === props.cards.length
+  const editableBoxes = props.boxes.filter(box => store.getters['currentUser/canEditBox'](box))
+  const canEditBoxes = editableBoxes.length === props.boxes.length
+  return canEditCards && canEditBoxes
+})
+const updateDefaultColor = (color) => {
+  state.defaultColor = color
+}
+const closeDialogs = (shouldPreventEmit) => {
+  state.framePickerIsVisible = false
+  state.tagPickerIsVisible = false
+  state.colorPickerIsVisible = false
+  store.commit('userDetailsIsVisible', false)
+  if (shouldPreventEmit === true) { return }
+  emit('closeDialogs')
+}
+
+// items
+
+const isCards = computed(() => Boolean(props.cards.length))
+const isSingleCard = computed(() => props.cards.length === 1 && !isBoxes.value)
+const isBoxes = computed(() => Boolean(props.boxes.length))
+const items = computed(() => {
+  let cards = utils.clone(props.cards)
+  let boxes = utils.clone(props.boxes)
+  cards = cards.map(card => {
+    card.isCard = true
+    return card
+  })
+  boxes = boxes.map(box => {
+    box.isBox = true
+    return box
+  })
+  return cards.concat(boxes)
+})
+const label = computed(() => {
+  let label, cardLabel, boxLabel
+  const isMultipleCards = props.cards.length > 1
+  const isMultipleBoxes = props.boxes.length > 1
+  if (isCards.value) {
+    cardLabel = 'card'
+  }
+  if (isMultipleCards) {
+    cardLabel = 'cards'
+  }
+  if (isBoxes.value) {
+    boxLabel = 'box'
+  }
+  if (isMultipleBoxes) {
+    boxLabel = 'boxes'
+  }
+  if (cardLabel && boxLabel) {
+    label = `${cardLabel} + ${boxLabel}`
+  } else {
+    label = cardLabel || boxLabel
+  }
+  return label.toUpperCase()
+})
+
+// update name
+
+const itemsWithPattern = (pattern) => {
+  return items.value.filter(item => {
+    const name = normalizedName(item.name)
+    const result = utils.markdown()[pattern].exec(name)
+    return Boolean(result)
+  })
+}
+const normalizedName = (name) => {
+  name = utils.removeMarkdownCodeblocksFromString(name) || ''
+  const urls = utils.urlsFromString(name) || []
+  urls.forEach(url => {
+    name = name.replace(url, '')
+  })
+  const tags = utils.tagsFromString(name) || []
+  tags.forEach(tag => {
+    name = name.replace(tag, '')
+  })
+  const checkbox = utils.checkboxFromString(name) || ''
+  name = name.replace(checkbox, '')
+  name = name.trim()
+  return name
+}
+const removePattern = (pattern) => {
+  if (pattern === 'h1Pattern') {
+    return 'h2Pattern'
+  } else if (pattern === 'h2Pattern') {
+    return 'h1Pattern'
+  }
+}
+const markdown = (pattern) => {
+  if (pattern === 'h1Pattern') {
+    return '# '
+  } else if (pattern === 'h2Pattern') {
+    return '## '
+  }
+}
+const prependToName = ({ pattern, item, nameSegment }) => {
+  const md = markdown(pattern)
+  let index = item.name.indexOf(nameSegment)
+  if (index < 0) { index = 0 }
+  const newName = utils.insertStringAtIndex(item.name, md, index)
+  updateName(item, newName)
+}
+const prependToItemNames = (pattern) => {
+  items.value.forEach(item => {
+    const name = normalizedName(item.name) || ''
+    let patternExists = utils.markdown()[pattern].exec(name)
+    if (patternExists) {
+      return // skip
+    }
+    prependToName({ pattern, item, nameSegment: name })
+  })
+}
+const updateName = (item, newName) => {
+  if (item.isCard) {
+    const card = store.getters['currentCards/byId'](item.id)
+    store.dispatch('currentCards/updateName', { card, newName })
+  }
+  if (item.isBox) {
+    const box = store.getters['currentBoxes/byId'](item.id)
+    store.dispatch('currentBoxes/updateName', { box, newName })
+  }
+}
+const removeFromItemNames = (pattern) => {
+  const md = markdown(pattern)
+  items.value.forEach(item => {
+    const newName = item.name.replace(md, '')
+    if (newName === item.name) { return }
+    updateName(item, newName)
+  })
+}
+
+// tag
+
+const tagNamesInCard = computed(() => {
+  if (!props.tagsInCard) { return }
+  return props.tagsInCard.map(tag => tag.name)
+})
+const toggleTagPickerIsVisible = () => {
+  const isVisible = state.tagPickerIsVisible
+  closeDialogs()
+  state.tagPickerIsVisible = !isVisible
+}
+
+// contain items in box
+
+const containItemsInNewBox = async () => {
+  let box = utils.boundaryRectFromItems(items.value)
+  // add box margins
+  const margin = 20
+  box = {
+    id: nanoid(),
+    x: box.x - margin,
+    resizeWidth: box.width + (margin * 2),
+    y: box.y - (margin * 2.5),
+    resizeHeight: box.height + (margin * 3.5)
+  }
+  store.dispatch('currentBoxes/add', { box })
+  store.dispatch('closeAllDialogs')
+  await nextTick()
+  await nextTick()
+  store.commit('boxDetailsIsVisibleForBoxId', box.id)
+}
+
+// box fill
+
+const boxFillIsEmpty = computed(() => {
+  const numberOfBoxes = props.boxes.length
+  const boxes = props.boxes.filter(box => box.fill === 'empty')
+  return boxes.length === numberOfBoxes
+})
+const boxFillIsFilled = computed(() => {
+  const numberOfBoxes = props.boxes.length
+  const boxes = props.boxes.filter(box => box.fill === 'filled')
+  return boxes.length === numberOfBoxes
+})
+const updateBoxFill = (fill) => {
+  props.boxes.forEach(box => {
+    updateBox(box, { fill })
+  })
+}
+
+// color
+
+const color = computed(() => {
+  let colors = items.value.map(item => item.backgroundColor || item.color)
+  colors = colors.filter(color => Boolean(color))
+  const itemsHaveColors = colors.length === items.value.length
+  const colorsAreEqual = uniq(colors).length === 1
+  if (itemsHaveColors && colorsAreEqual) {
+    return colors[0]
+  } else {
+    return state.defaultColor
+  }
+})
+const background = computed(() => {
+  return props.backgroundColor || color.value
+})
+const itemColors = computed(() => store.getters['currentSpace/itemColors'])
+const updateColor = (color) => {
+  items.value.forEach(item => {
+    const currentColor = item.backgroundColor || item.color
+    if (currentColor === color) { return }
+    if (item.isCard) {
+      updateCard(item, { backgroundColor: color })
+    } else if (item.isBox) {
+      if (color === 'transparent') { return }
+      updateBox(item, { color })
+    }
+  })
+}
+const removeColor = () => {
+  items.value.forEach(item => {
+    if (item.isCard) {
+      updateCard(item, { backgroundColor: null })
+    }
+  })
+}
+const toggleColorPickerIsVisible = () => {
+  const isVisible = state.colorPickerIsVisible
+  closeDialogs()
+  state.colorPickerIsVisible = !isVisible
+}
+
+// frames
+
+const isFrames = computed(() => {
+  const cards = props.cards.filter(card => card.frameId)
+  return Boolean(cards.length === props.cards.length)
+})
+const toggleFramePickerIsVisible = () => {
+  const isVisible = state.framePickerIsVisible
+  closeDialogs()
+  state.framePickerIsVisible = !isVisible
+}
+
+// header h1 h2
+
+const isH1 = computed(() => {
+  const pattern = 'h1Pattern'
+  const matches = itemsWithPattern(pattern)
+  return Boolean(matches.length === items.value.length)
+})
+const isH2 = computed(() => {
+  const pattern = 'h2Pattern'
+  const matches = itemsWithPattern(pattern)
+  return Boolean(matches.length === items.value.length)
+})
+const toggleHeader = (pattern) => {
+  updateCardDimensions()
+  let matches = itemsWithPattern(pattern)
+  const shouldPrepend = matches.length < items.value.length
+  if (shouldPrepend) {
+    const removeHeaderPattern = removePattern(pattern)
+    removeFromItemNames(removeHeaderPattern)
+    prependToItemNames(pattern)
+  } else {
+    removeFromItemNames(pattern)
+  }
+}
+const toggleFontPickerIsVisible = () => {
+    const isVisible = state.fontPickerIsVisible
+    closeDialogs()
+    state.fontPickerIsVisible = !isVisible
+}
+
+// lock
+
+const isLocked = computed(() => {
+  const matches = items.value.filter(item => item.isLocked)
+  return Boolean(matches.length === items.value.length)
+})
+const toggleIsLocked = () => {
+  const value = !isLocked.value
+  items.value.forEach(item => {
+    if (item.isCard) {
+      updateCard(item, { isLocked: value })
+    }
+    if (item.isBox) {
+      updateBox(item, { isLocked: value })
+    }
+  })
+}
+
+// comment
+
+const isComment = computed(() => {
+  const cards = props.cards.filter(card => card.isComment)
+  return Boolean(cards.length === props.cards.length)
+})
+const toggleIsComment = () => {
+  updateCardDimensions()
+  const value = !isComment.value
+  props.cards.forEach(card => {
+    card = {
+      id: card.id,
+      name: utils.nameWithoutCommentPattern(card.name),
+      isComment: value
+    }
+    if (!card.name) {
+      delete card.name
+    }
+    store.dispatch('currentCards/update', card)
+    store.dispatch('currentCards/updateDimensions', { cards: [card] })
+  })
+}
+
+// vote counter
+
+const countersIsVisible = computed(() => {
+  const cards = props.cards.filter(card => card.counterIsVisible)
+  return Boolean(cards.length === props.cards.length)
+})
+const toggleCounterIsVisible = () => {
+  let counterIsVisible = true
+  if (countersIsVisible.value) {
+    counterIsVisible = false
+  }
+  props.cards.forEach(card => {
+    card = {
+      id: card.id,
+      counterIsVisible,
+      counterValue: card.counterValue || 1
+    }
+    store.dispatch('currentCards/update', card)
+  })
+}
+
+// card
+
+const updateCardDimensions = () => {
+  const cards = utils.clone(props.cards)
+  const cardIds = cards.map(card => card.id)
+  store.dispatch('currentCards/removeResize', { cardIds })
+}
+const updateCard = (card, updates) => {
+  const keys = Object.keys(updates)
+  card = { id: card.id }
+  keys.forEach(key => {
+    card[key] = updates[key]
+  })
+  store.dispatch('currentCards/update', card)
+}
+
+// box
+
+const updateBox = (box, updates) => {
+  const keys = Object.keys(updates)
+  box = { id: box.id }
+  keys.forEach(key => {
+    box[key] = updates[key]
+  })
+  store.dispatch('currentBoxes/update', box)
+}
+</script>
+
 <template lang="pug">
 section.subsection.style-actions(v-if="visible" @click.left.stop="closeDialogs")
   p.subsection-vertical-label(v-if="labelIsVisible" :style="{ background: background }")
     span {{label}}
   .row
+    //- h1/h2
     .button-wrap.header-buttons-wrap(:class="{ 'header-is-active': isH1 || isH2 }")
-      //- h1/h2
       .segmented-buttons
         button(:disabled="!canEditAll" @click="toggleHeader('h1Pattern')" :class="{ active: isH1 }" title="Header 1")
           span h1
         button(:disabled="!canEditAll" @click="toggleHeader('h2Pattern')" :class="{ active: isH2 }" title="Header 2")
           span h2
       //- Fonts
-      button.toggle-fonts-button.small-button(v-if="isH1 || isH2" @click.stop="toggleFontPickerIsVisible" :class="{ active: fontPickerIsVisible }")
+      button.toggle-fonts-button.small-button(v-if="isH1 || isH2" @click.stop="toggleFontPickerIsVisible" :class="{ active: state.fontPickerIsVisible }")
         span Fonts
-      FontPicker(:visible="fontPickerIsVisible" :cards="cards")
-
+      FontPicker(:visible="state.fontPickerIsVisible" :cards="cards")
     //- Tag
     .button-wrap(v-if="isCards")
-      button(:disabled="!canEditAll" @click.left.stop="toggleTagPickerIsVisible" :class="{ active: tagPickerIsVisible }")
+      button(:disabled="!canEditAll" @click.left.stop="toggleTagPickerIsVisible" :class="{ active: state.tagPickerIsVisible }")
         span Tag
-      TagPickerStyleActions(:visible="tagPickerIsVisible" :cards="cards" :tagNamesInCard="tagNamesInCard")
+      TagPickerStyleActions(:visible="state.tagPickerIsVisible" :cards="cards" :tagNamesInCard="tagNamesInCard")
     //- Frame
     .button-wrap(v-if="isCards")
-      button(:disabled="!canEditAll" @click.left.stop="toggleFramePickerIsVisible" :class="{ active : framePickerIsVisible || isFrames }")
+      button(:disabled="!canEditAll" @click.left.stop="toggleFramePickerIsVisible" :class="{ active : state.framePickerIsVisible || isFrames }")
         span Frame
-      FramePicker(:visible="framePickerIsVisible" :cards="cards")
+      FramePicker(:visible="state.framePickerIsVisible" :cards="cards")
     //- Color
     .button-wrap(v-if="!colorIsHidden" @click.left.stop="toggleColorPickerIsVisible")
-      button.change-color(:disabled="!canEditAll" :class="{active: colorPickerIsVisible}" title="Color")
+      button.change-color(:disabled="!canEditAll" :class="{active: state.colorPickerIsVisible}" title="Color")
         .current-color(:style="{ background: color }")
       ColorPicker(
         :currentColor="color"
-        :visible="colorPickerIsVisible"
+        :visible="state.colorPickerIsVisible"
         :removeIsVisible="isCards"
         :recentColors="itemColors"
         @selectedColor="updateColor"
@@ -39,9 +459,9 @@ section.subsection.style-actions(v-if="visible" @click.left.stop="closeDialogs")
       )
     //- Box Fill
     .segmented-buttons(v-if="isBoxes")
-      button(:class="{active: boxFillIsFilled}" @click="updateBoxFill('filled')" title="Solid Fill")
+      button(:class="{active: boxFillIsFilled}" @click="updateBoxFill('filled')" title="Solid Fill Box")
         img.icon.box-icon(src="@/assets/box-filled.svg")
-      button(:class="{active: boxFillIsEmpty}" @click="updateBoxFill('empty')" title="No Fill")
+      button(:class="{active: boxFillIsEmpty}" @click="updateBoxFill('empty')" title="No Fill Box")
         img.icon.box-icon(src="@/assets/box-empty.svg")
 
     //- Lock
@@ -62,403 +482,7 @@ section.subsection.style-actions(v-if="visible" @click.left.stop="closeDialogs")
     .button-wrap(v-if="isCards")
       button(:class="{active: countersIsVisible}" :disabled="!canEditSpace" @click="toggleCounterIsVisible" title="Counter")
         span Vote
-
 </template>
-
-<script>
-import FramePicker from '@/components/dialogs/FramePicker.vue'
-import TagPickerStyleActions from '@/components/dialogs/TagPickerStyleActions.vue'
-import FontPicker from '@/components/dialogs/FontPicker.vue'
-import ColorPicker from '@/components/dialogs/ColorPicker.vue'
-import utils from '@/utils.js'
-
-import uniq from 'lodash-es/uniq'
-import { nanoid } from 'nanoid'
-
-export default {
-  name: 'StyleActions',
-  components: {
-    FramePicker,
-    TagPickerStyleActions,
-    ColorPicker,
-    FontPicker
-  },
-  props: {
-    visible: Boolean,
-    colorIsHidden: Boolean,
-    labelIsVisible: Boolean,
-    tagsInCard: Array,
-    backgroundColor: String,
-    cards: {
-      type: Array,
-      default (value) {
-        return []
-      }
-    },
-    boxes: {
-      type: Array,
-      default (value) {
-        return []
-      }
-    }
-  },
-  created () {
-    this.$store.subscribe((mutation, state) => {
-      const { type } = mutation
-      if (type === 'triggerCloseChildDialogs' && this.visible) {
-        const shouldPreventEmit = true
-        this.closeDialogs(shouldPreventEmit)
-      } else if (type === 'triggerSelectedCardsContainInBox') {
-        this.containItemsInNewBox()
-      } else if (type === 'triggerUpdateTheme') {
-        this.defaultColor = utils.cssVariable('secondary-background')
-      }
-    })
-  },
-  mounted () {
-    this.defaultColor = utils.cssVariable('secondary-background')
-  },
-  data () {
-    return {
-      framePickerIsVisible: false,
-      tagPickerIsVisible: false,
-      colorPickerIsVisible: false,
-      fontPickerIsVisible: false,
-      defaultColor: '#e3e3e3'
-    }
-  },
-  computed: {
-    tagNamesInCard () {
-      if (!this.tagsInCard) { return }
-      return this.tagsInCard.map(tag => tag.name)
-    },
-    label () {
-      let label
-      if (this.isCards) {
-        label = 'card'
-      }
-      if (this.isBoxes) {
-        label = 'box'
-      }
-      if (this.isCards && this.isBoxes) {
-        label = 'card + box'
-      }
-      return label.toUpperCase()
-    },
-    isCards () { return Boolean(this.cards.length) },
-    isSingleCard () { return this.cards.length === 1 && !this.isBoxes },
-    isBoxes () { return Boolean(this.boxes.length) },
-    items () {
-      let cards = utils.clone(this.cards)
-      let boxes = utils.clone(this.boxes)
-      cards = cards.map(card => {
-        card.isCard = true
-        return card
-      })
-      boxes = boxes.map(box => {
-        box.isBox = true
-        return box
-      })
-      return cards.concat(boxes)
-    },
-    boxFillIsEmpty () {
-      const numberOfBoxes = this.boxes.length
-      const boxes = this.boxes.filter(box => box.fill === 'empty')
-      return boxes.length === numberOfBoxes
-    },
-    boxFillIsFilled () {
-      const numberOfBoxes = this.boxes.length
-      const boxes = this.boxes.filter(box => box.fill === 'filled')
-      return boxes.length === numberOfBoxes
-    },
-    color () {
-      let colors = this.items.map(item => item.backgroundColor || item.color)
-      colors = colors.filter(color => Boolean(color))
-      const itemsHaveColors = colors.length === this.items.length
-      const colorsAreEqual = uniq(colors).length === 1
-      if (itemsHaveColors && colorsAreEqual) {
-        return colors[0]
-      } else {
-        return this.defaultColor
-      }
-    },
-    background () {
-      return this.backgroundColor || this.color
-    },
-    canEditSpace () { return this.$store.getters['currentUser/canEditSpace']() },
-    isSpaceMember () { return this.$store.getters['currentUser/isSpaceMember']() },
-    itemColors () { return this.$store.getters['currentSpace/itemColors'] },
-    canEditAll () {
-      if (this.isSpaceMember) { return true }
-      const editableCards = this.cards.filter(card => this.$store.getters['currentUser/canEditCard'](card))
-      const canEditCards = editableCards.length === this.cards.length
-      const editableBoxes = this.boxes.filter(box => this.$store.getters['currentUser/canEditBox'](box))
-      const canEditBoxes = editableBoxes.length === this.boxes.length
-      return canEditCards && canEditBoxes
-    },
-    isFrames () {
-      const cards = this.cards.filter(card => card.frameId)
-      return Boolean(cards.length === this.cards.length)
-    },
-    isH1 () {
-      const pattern = 'h1Pattern'
-      const items = this.itemsWithPattern(pattern)
-      return Boolean(items.length === this.items.length)
-    },
-    isH2 () {
-      const pattern = 'h2Pattern'
-      const items = this.itemsWithPattern(pattern)
-      return Boolean(items.length === this.items.length)
-    },
-    isLocked () {
-      const items = this.items.filter(item => item.isLocked)
-      return Boolean(items.length === this.items.length)
-    },
-    isComment () {
-      const cards = this.cards.filter(card => card.isComment)
-      return Boolean(cards.length === this.cards.length)
-    },
-    countersIsVisible () {
-      const cards = this.cards.filter(card => card.counterIsVisible)
-      return Boolean(cards.length === this.cards.length)
-    }
-  },
-  methods: {
-
-    // items
-
-    updateColor (color) {
-      this.items.forEach(item => {
-        const currentColor = item.backgroundColor || item.color
-        if (currentColor === color) { return }
-        if (item.isCard) {
-          this.updateCard(item, { backgroundColor: color })
-        } else if (item.isBox) {
-          if (color === 'transparent') { return }
-          this.updateBox(item, { color })
-        }
-      })
-    },
-    removeColor () {
-      this.items.forEach(item => {
-        if (item.isCard) {
-          this.updateCard(item, { backgroundColor: null })
-        }
-      })
-    },
-    itemsWithPattern (pattern) {
-      const items = this.items.filter(item => {
-        const name = this.normalizedName(item.name)
-        const result = utils.markdown()[pattern].exec(name)
-        return Boolean(result)
-      })
-      return items
-    },
-    normalizedName (name) {
-      name = utils.removeMarkdownCodeblocksFromString(name) || ''
-      const urls = utils.urlsFromString(name) || []
-      urls.forEach(url => {
-        name = name.replace(url, '')
-      })
-      const tags = utils.tagsFromString(name) || []
-      tags.forEach(tag => {
-        name = name.replace(tag, '')
-      })
-      const checkbox = utils.checkboxFromString(name) || ''
-      name = name.replace(checkbox, '')
-      name = name.trim()
-      return name
-    },
-    removePattern (pattern) {
-      if (pattern === 'h1Pattern') {
-        return 'h2Pattern'
-      } else if (pattern === 'h2Pattern') {
-        return 'h1Pattern'
-      }
-    },
-    markdown (pattern) {
-      if (pattern === 'h1Pattern') {
-        return '# '
-      } else if (pattern === 'h2Pattern') {
-        return '## '
-      }
-    },
-    toggleHeader (pattern) {
-      this.updateCardDimensions()
-      let items = this.itemsWithPattern(pattern)
-      const shouldPrepend = items.length < this.items.length
-      if (shouldPrepend) {
-        const removePattern = this.removePattern(pattern)
-        this.removeFromItemNames(removePattern)
-        this.prependToItemNames(pattern)
-      } else {
-        this.removeFromItemNames(pattern)
-      }
-    },
-    toggleIsLocked () {
-      let isLocked = true
-      if (this.isLocked) {
-        isLocked = false
-      }
-      this.items.forEach(item => {
-        if (item.isCard) {
-          this.updateCard(item, { isLocked })
-        }
-        if (item.isBox) {
-          this.updateBox(item, { isLocked })
-        }
-      })
-    },
-    prependToName ({ pattern, item, nameSegment }) {
-      const markdown = this.markdown(pattern)
-      let index = item.name.indexOf(nameSegment)
-      if (index < 0) { index = 0 }
-      const newName = utils.insertStringAtIndex(item.name, markdown, index)
-      this.updateName(item, newName)
-    },
-    prependToItemNames (pattern) {
-      this.items.forEach(item => {
-        const name = this.normalizedName(item.name) || ''
-        let patternExists = utils.markdown()[pattern].exec(name)
-        if (patternExists) {
-          return // skip
-        }
-        this.prependToName({ pattern, item, nameSegment: name })
-      })
-    },
-    updateName (item, newName) {
-      if (item.isCard) {
-        const card = this.$store.getters['currentCards/byId'](item.id)
-        this.$store.dispatch('currentCards/updateName', { card, newName })
-      }
-      if (item.isBox) {
-        const box = this.$store.getters['currentBoxes/byId'](item.id)
-        this.$store.dispatch('currentBoxes/updateName', { box, newName })
-      }
-    },
-    removeFromItemNames (pattern) {
-      const markdown = this.markdown(pattern)
-      this.items.forEach(item => {
-        const newName = item.name.replace(markdown, '')
-        if (newName === item.name) { return }
-        this.updateName(item, newName)
-      })
-    },
-    toggleColorPickerIsVisible () {
-      const isVisible = this.colorPickerIsVisible
-      this.closeDialogs()
-      this.colorPickerIsVisible = !isVisible
-    },
-    closeDialogs (shouldPreventEmit) {
-      this.framePickerIsVisible = false
-      this.tagPickerIsVisible = false
-      this.colorPickerIsVisible = false
-      this.fontPickerIsVisible = false
-      this.$store.commit('userDetailsIsVisible', false)
-      if (shouldPreventEmit === true) { return }
-      this.$emit('closeDialogs')
-    },
-
-    // cards only
-
-    updateCardDimensions () {
-      const cards = utils.clone(this.cards)
-      const cardIds = cards.map(card => card.id)
-      this.$store.dispatch('currentCards/removeResize', { cardIds })
-    },
-    updateCard (card, updates) {
-      const keys = Object.keys(updates)
-      card = { id: card.id }
-      keys.forEach(key => {
-        card[key] = updates[key]
-      })
-      this.$store.dispatch('currentCards/update', card)
-    },
-    toggleFramePickerIsVisible () {
-      const isVisible = this.framePickerIsVisible
-      this.closeDialogs()
-      this.framePickerIsVisible = !isVisible
-    },
-    toggleTagPickerIsVisible () {
-      const isVisible = this.tagPickerIsVisible
-      this.closeDialogs()
-      this.tagPickerIsVisible = !isVisible
-    },
-    toggleIsComment () {
-      this.updateCardDimensions()
-      let isComment = true
-      if (this.isComment) {
-        isComment = false
-      }
-      this.cards.forEach(card => {
-        card = {
-          id: card.id,
-          name: utils.nameWithoutCommentPattern(card.name),
-          isComment
-        }
-        if (!card.name) {
-          delete card.name
-        }
-        this.$store.dispatch('currentCards/update', card)
-        this.$store.dispatch('currentCards/updateDimensions', { cards: [card] })
-      })
-    },
-    containItemsInNewBox () {
-      let box = utils.boundaryRectFromItems(this.items)
-      // add box margins
-      const margin = 20
-      box = {
-        id: nanoid(),
-        x: box.x - margin,
-        resizeWidth: box.width + (margin * 2),
-        y: box.y - (margin * 2.5),
-        resizeHeight: box.height + (margin * 3.5)
-      }
-      this.$store.dispatch('currentBoxes/add', { box })
-      this.$store.dispatch('closeAllDialogs')
-      this.$nextTick(() => {
-        this.$nextTick(() => {
-          this.$store.commit('boxDetailsIsVisibleForBoxId', box.id)
-        })
-      })
-    },
-    toggleCounterIsVisible () {
-      let counterIsVisible = true
-      if (this.countersIsVisible) {
-        counterIsVisible = false
-      }
-      this.cards.forEach(card => {
-        card = {
-          id: card.id,
-          counterIsVisible
-        }
-        this.$store.dispatch('currentCards/update', card)
-      })
-    },
-    toggleFontPickerIsVisible () {
-      const isVisible = this.fontPickerIsVisible
-      this.closeDialogs()
-      this.fontPickerIsVisible = !isVisible
-    },
-
-    // boxes only
-
-    updateBox (box, updates) {
-      const keys = Object.keys(updates)
-      box = { id: box.id }
-      keys.forEach(key => {
-        box[key] = updates[key]
-      })
-      this.$store.dispatch('currentBoxes/update', box)
-    },
-    updateBoxFill (fill) {
-      this.boxes.forEach(box => {
-        this.updateBox(box, { fill })
-      })
-    }
-  }
-}
-</script>
 
 <style lang="stylus" scoped>
 .style-actions
@@ -491,7 +515,6 @@ export default {
         button
           border-bottom-left-radius 0
           border-bottom-right-radius 0
-
   .toggle-fonts-button
     position absolute
     bottom -9px

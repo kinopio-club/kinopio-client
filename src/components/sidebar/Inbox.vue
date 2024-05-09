@@ -101,7 +101,7 @@ const selectCard = async (card) => {
     return
   }
   updateCardIsLoading(card)
-  const scroll = store.getters.windowScrollWithSpaceOffset
+  const scroll = store.getters.windowScrollWithSpaceOffset()
   let newCard = utils.clone(card)
   newCard.id = nanoid()
   newCard.spaceId = store.state.currentSpace.id
@@ -132,9 +132,12 @@ section.inbox(v-if="visible")
         img.icon(src="@/assets/inbox.svg")
         span Inbox
   OfflineBadge
-section.results-section(v-if="visible && isOnline")
-  ul.results-list
+
+section.results-section.inbox(v-if="visible && isOnline")
+  ul.results-list(v-if="state.cards.length")
     CardList(:cards="state.cards" @selectCard="selectCard" :cardsShowRemoveButton="true" @removeCard="removeCard")
+  section.subsection(v-else)
+    p Cards added to your inbox can be moved into this space
 </template>
 
 <style lang="stylus">
@@ -142,4 +145,7 @@ section.inbox
   .loader
     margin-left 6px
     vertical-align -2px
+  .subsection
+    margin 4px
+    margin-top 0
 </style>

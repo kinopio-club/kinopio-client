@@ -102,7 +102,7 @@ const focusSearchInput = () => {
   const length = searchInputElement.value.length
   element.focus()
   element.setSelectionRange(length, length)
-  store.commit('triggerUpdatePositionInVisualViewport')
+  store.commit('triggerUpdateHeaderAndFooterPosition')
 }
 const clearSearch = () => {
   state.search = ''
@@ -298,12 +298,31 @@ const selectFile = (event) => {
   const input = inputElement.value
   input.click()
 }
-const uploadFile = async () => {
-  const cardId = props.cardId
-  const input = inputElement.value
-  const file = input.files[0]
+
+// upload files
+
+const uploadOtherSelectedFiles = (otherSelectedFiles) => {
+  if (!otherSelectedFiles.length) { return }
   try {
-    await store.dispatch('upload/uploadFile', { file, cardId })
+    const cardId = props.cardId
+    const card = store.getters['currentCards/byId'](cardId)
+    const positionOffset = 20
+    const position = {
+      x: card.x + positionOffset,
+      y: card.y + positionOffset
+    }
+    store.dispatch('upload/addCardsAndUploadFiles', {
+      files: otherSelectedFiles,
+      position
+    })
+  } catch (error) {
+    console.warn('🚒', error)
+  }
+}
+const uploadSelectedFile = async (selectedFile) => {
+  const cardId = props.cardId
+  try {
+    await store.dispatch('upload/uploadFile', { file: selectedFile, cardId })
   } catch (error) {
     console.warn('🚒', error)
     if (error.type === 'sizeLimit') {
@@ -312,6 +331,14 @@ const uploadFile = async () => {
       state.error.unknownUploadError = true
     }
   }
+}
+const uploadFiles = async () => {
+  const input = inputElement.value
+  const files = Array.from(input.files)
+  const selectedFile = files[0]
+  const otherSelectedFiles = files.slice(1)
+  uploadOtherSelectedFiles(otherSelectedFiles)
+  uploadSelectedFile(selectedFile)
 }
 
 // styles
@@ -325,7 +352,7 @@ const scrollIntoView = () => {
   const element = dialogElement.value
   if (!element) { return }
   utils.scrollIntoView({ element })
-  store.commit('triggerUpdatePositionInVisualViewport')
+  store.commit('triggerUpdateHeaderAndFooterPosition')
 }
 const updateDialogHeight = async () => {
   if (!props.visible) { return }
@@ -361,7 +388,7 @@ dialog.image-picker(v-if="visible" :open="visible" @click.left.stop ref="dialogE
           span GIF
       .button-wrap
         button(@click.left.stop="selectFile") Upload
-        input.hidden(type="file" ref="inputElement" @change="uploadFile")
+        input.hidden(type="file" ref="inputElement" @change="uploadFiles" multiple="true")
 
     //- upload progress
     .uploading-container(v-if="cardPendingUpload")

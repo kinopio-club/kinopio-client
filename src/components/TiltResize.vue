@@ -42,70 +42,94 @@ const start = (event, action) => {
 
 const remove = (action) => {
   let cardIds = [props.card.id]
-  const multipleCardsSelectedIds = store.state.multipleCardsSelectedIds
-  if (multipleCardsSelectedIds.length) {
-    cardIds = multipleCardsSelectedIds
+  if (store.state.multipleCardsSelectedIds.length) {
+    cardIds = store.state.multipleCardsSelectedIds
   }
   if (action === 'resize') {
-    store.dispatch('currentCards/removeResize', { cardIds })
+    store.dispatch('currentCards/removeResize', { cardIds, shouldRemoveResizeWidth: true })
   } else if (action === 'tilt') {
     store.dispatch('currentCards/removeTilt', { cardIds })
   }
 }
 
+const isTilting = computed(() => {
+  const cardIds = store.state.currentUserIsTiltingCardIds
+  return cardIds.includes(props.card.id)
+})
+const isResizing = computed(() => {
+  const cardIds = store.state.currentUserIsResizingCardIds
+  return cardIds.includes(props.card.id)
+})
+const isComment = computed(() => store.getters['currentCards/isComment'](props.card))
 </script>
 
 <template lang="pug">
 //- resize
-.bottom-button-wrap(v-if="visible")
+.right-resize.bottom-button-wrap(v-if="visible && !isComment")
   .inline-button-wrap(
     @mousedown.left.stop="start($event, 'resize')"
     @touchstart.stop="start($event, 'resize')"
     @dblclick="remove('resize')"
     title="Drag to Resize"
   )
-    button.inline-button(tabindex="-1" :class="{hidden: isPresentationMode}")
-      img.resize-icon.icon(src="@/assets/resize-corner.svg")
+    button.inline-button(tabindex="-1" :class="{hidden: isPresentationMode, active: isResizing}")
+      img.icon(src="@/assets/resize-corner.svg")
 //- tilt
-.left-bottom-button-wrap.bottom-button-wrap(v-if="visible")
+.left-tilt.bottom-button-wrap(v-if="visible")
   .inline-button-wrap(
     @mousedown.left.stop="start($event, 'tilt')"
     @touchstart.stop="start($event, 'tilt')"
     @dblclick="remove('tilt')"
     title="Drag to Tilt"
   )
-    button.inline-button
-      img.resize-icon.icon(src="@/assets/resize-corner.svg")
+    button.inline-button(tabindex="-1" :class="{hidden: isPresentationMode, active: isTilting}")
+      img.icon(src="@/assets/resize-corner.svg")
 </template>
 
 <style lang="stylus">
 .bottom-button-wrap
+  pointer-events all
   position absolute
-  right 0px
-  bottom 0px
+  right -5px
+  bottom 2px
   display flex
   .inline-button-wrap
+    // background teal
+    padding-top 0
+    padding-bottom 0
     z-index 1
     cursor ew-resize
     button
       cursor ew-resize
-  img
+      box-shadow none
+    &:hover
+      button
+        box-shadow none
+        background var(--light-shadow) !important
+    &.active,
+    &:active
+      button
+        box-shadow none
+        background var(--heavy-shadow) !important
+  .icon
     -webkit-user-drag none
+    position absolute
+    left 0
+    top 0
 
   // tilt
-  &.left-bottom-button-wrap
+  &.left-tilt
     right initial
-    left 0px
-    bottom 0px
+    left -5px
     .inline-button-wrap
-      // background pink
-      padding-top 0
       padding-right 0
       transform translate(-8px, 13px)
       cursor col-resize
       button
         cursor col-resize
         transform scaleX(-1)
-    img
-      -webkit-user-drag none
+  // resize
+  &.right-resize
+    .inline-button-wrap
+      padding-left 0
 </style>

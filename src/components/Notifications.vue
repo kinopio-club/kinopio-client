@@ -13,6 +13,7 @@ aside.notifications(@click.left="closeAllDialogs")
         img.icon(v-else-if="item.icon === 'brush-y'" src="@/assets/brush-y.svg" class="brush-y")
         img.icon(v-else-if="item.icon === 'minimap'" src="@/assets/minimap.svg" class="minimap")
         img.icon(v-else-if="item.icon === 'offline'" src="@/assets/offline.svg" class="offline")
+        img.icon(v-else-if="item.icon === 'mail'" src="@/assets/mail.svg" class="mail")
       span {{item.message}}
     .row(v-if="item.isPersistentItem")
       button(@click="removeById(item)")
@@ -148,7 +149,7 @@ aside.notifications(@click.left="closeAllDialogs")
           span Refresh
 
   .persistent-item.info(v-if="currentSpaceIsTemplate" ref="template" :class="{'notification-jiggle': readOnlyJiggle}")
-    button(@click.left="duplicateSpace")
+    button.button-only(@click.left="duplicateSpace")
       img.icon(src="@/assets/add.svg")
       span Duplicate to Edit
 
@@ -158,38 +159,6 @@ aside.notifications(@click.left="closeAllDialogs")
       a(:href="notifyMoveOrCopyToSpaceDetails.id")
         button(@click.left.prevent.stop="changeSpace(notifyMoveOrCopyToSpaceDetails.id)") {{notifyMoveOrCopyToSpaceDetails.name}} →
 
-  .persistent-item.success(v-if="notifyReferralSuccessUser")
-    p
-      span Because you were referred
-      span(v-if="notifyReferralSuccessUser.name") {{' '}}by {{notifyReferralSuccessUser.name}},
-      span {{' '}}you'll earn ${{referralCreditAmount}} in credits when you sign up
-    .row
-      button(@click.left.stop="triggerSignUpOrInIsVisible")
-        span Sign Up to Earn Credits
-      button(@click="resetNotifyReferralSuccess")
-        img.icon.cancel(src="@/assets/add.svg")
-
-  .persistent-item.success(v-if="notifyReferralSuccessReferrerName")
-    p welcome {{advocateReferrerName}}, once you sign up your account will be upgraded to free
-    .row
-      button(@click.left.stop="triggerSignUpOrInIsVisible")
-        span Sign Up for Your Free Account
-      button(@click="resetNotifyReferralSuccess")
-        img.icon.cancel(src="@/assets/add.svg")
-
-  .persistent-item.success(v-if="notifyEarnedCredits")
-    p You've earned ${{referralCreditAmount}} in referral credits,{{' '}}
-      template(v-if="currentUserIsUpgraded")
-        span which will be used on your next payment
-      template(v-else)
-        span which will be used when you upgrade
-    .row
-      button(v-if="!currentUserIsUpgraded" @click.left.stop="triggerUpgradeUserIsVisible")
-        span Upgrade
-      button(@click.left.stop="triggerEarnCreditsIsVisible")
-        span Earn More
-      button(@click.left="removeNotifyEarnedCredits")
-        img.icon.cancel(src="@/assets/add.svg")
   .persistent-item.danger(v-if="notifySpaceIsUnavailableOffline")
     OfflineBadge
     .row
@@ -248,12 +217,14 @@ export default {
   },
   mounted () {
     window.addEventListener('visibilitychange', this.updatePageVisibilityChange)
+    window.addEventListener('focus', this.updatePageVisibilityChange)
     checkIfShouldNotifySpaceOutOfSyncIntervalTimer = setInterval(() => {
       this.checkIfShouldNotifySpaceOutOfSync()
-    }, 1000 * 60 * 60 * 1) // 1 hour
+    }, 1000 * 60 * 60 * 1) // check every hour
   },
   beforeUnmount () {
     window.removeEventListener('visibilitychange', this.updatePageVisibilityChange)
+    window.removeEventListener('focus', this.updatePageVisibilityChange)
     clearInterval(checkIfShouldNotifySpaceOutOfSyncIntervalTimer)
   },
   computed: {
@@ -282,10 +253,6 @@ export default {
     currentUserIsTiltingCard () { return this.$store.state.currentUserIsTiltingCard },
     currentUserIsPanning () { return this.$store.state.currentUserIsPanning },
     currentUserIsPanningReady () { return this.$store.state.currentUserIsPanningReady },
-    notifyReferralSuccessUser () { return this.$store.state.notifyReferralSuccessUser },
-    notifyReferralSuccessReferrerName () { return this.$store.state.notifyReferralSuccessReferrerName },
-    advocateReferrerName () { return this.$store.state.currentUser.advocateReferrerName },
-    notifyEarnedCredits () { return this.$store.state.notifyEarnedCredits },
     currentUserIsSignedIn () { return this.$store.getters['currentUser/isSignedIn'] },
     currentUserIsUpgraded () { return this.$store.state.currentUser.isUpgraded },
     isTouchDevice () { return this.$store.state.isTouchDevice },
@@ -305,8 +272,7 @@ export default {
       if (currentSpace.isTemplate) { return true }
       const templateSpaceIds = templates.spaces().map(space => space.id)
       return templateSpaceIds.includes(currentSpace.id)
-    },
-    referralCreditAmount () { return consts.referralCreditAmount }
+    }
   },
   methods: {
     notifificationClasses (item) {
@@ -328,9 +294,7 @@ export default {
       return Boolean(!isHidden)
     },
     updatePageVisibilityChange (event) {
-      if (document.visibilityState === 'visible') {
-        this.checkIfShouldNotifySpaceOutOfSync()
-      }
+      this.checkIfShouldNotifySpaceOutOfSync()
     },
     closeAllDialogs () {
       this.$store.dispatch('closeAllDialogs')
@@ -368,7 +332,6 @@ export default {
     },
     triggerSignUpOrInIsVisible () {
       this.$store.commit('triggerSignUpOrInIsVisible')
-      this.resetNotifyReferralSuccess()
     },
     restoreSpace () {
       const space = this.$store.state.currentSpace
@@ -401,41 +364,30 @@ export default {
     resetNotifyCardsCreatedIsOverLimitJiggle () {
       this.notifyCardsCreatedIsOverLimitJiggle = false
     },
-    resetNotifyReferralSuccess () {
-      this.$store.commit('notifyReferralSuccessUser', null)
-      this.$store.commit('notifyReferralSuccessReferrerName', false)
-    },
     triggerUpgradeUserIsVisible () {
       this.closeAllDialogs()
       this.$store.commit('triggerUpgradeUserIsVisible')
     },
-    triggerEarnCreditsIsVisible () {
-      this.closeAllDialogs()
-      this.$store.commit('triggerEarnCreditsIsVisible')
-    },
     async checkIfShouldNotifySpaceOutOfSync () {
+      if (this.notifySpaceOutOfSync) { return }
       console.log('☎️ checkIfShouldNotifySpaceOutOfSync…')
       try {
-        const space = utils.clone(this.$store.state.currentSpace)
-        const canEditSpace = this.$store.getters['currentUser/canEditSpace'](space)
+        let space = utils.clone(this.$store.state.currentSpace)
         if (!this.currentUserIsSignedIn) { return }
-        // use
-        let remoteSpace
-        if (canEditSpace) {
-          remoteSpace = await this.$store.dispatch('api/getSpace', { space })
-        } else {
-          remoteSpace = await this.$store.dispatch('api/getSpaceAnonymously', space)
-        }
+        this.$store.commit('isLoadingSpace', true)
+        const remoteSpace = await this.$store.dispatch('api/getSpaceUpdatedAt', space)
+        this.$store.commit('isLoadingSpace', false)
         if (!remoteSpace) { return }
+        space = this.$store.state.currentSpace
         const spaceUpdatedAt = dayjs(space.updatedAt)
         const remoteSpaceUpdatedAt = dayjs(remoteSpace.updatedAt)
-        const hoursDelta = spaceUpdatedAt.diff(remoteSpaceUpdatedAt, 'hour') // hourDelta
-        const updatedAtIsChanged = hoursDelta >= 1
+        const deltaMinutes = spaceUpdatedAt.diff(remoteSpaceUpdatedAt, 'minute')
+        const updatedAtIsChanged = deltaMinutes >= 1
         console.log('☎️ checkIfShouldNotifySpaceOutOfSync result', {
-          hoursDelta,
           updatedAtIsChanged,
-          spaceUpdatedAt: space.updatedAt,
-          remoteSpaceUpdatedAt: remoteSpace.updatedAt
+          spaceUpdatedAt: spaceUpdatedAt.fromNow(),
+          remoteSpaceUpdatedAt: remoteSpaceUpdatedAt.fromNow(),
+          deltaMinutes
         })
         if (updatedAtIsChanged) {
           this.notifySpaceOutOfSync = true
@@ -443,6 +395,7 @@ export default {
       } catch (error) {
         console.error('🚒 checkIfShouldNotifySpaceOutOfSync', error)
         this.notifySpaceOutOfSync = true
+        this.$store.commit('isLoadingSpace', false)
       }
     },
     refreshBrowser () {
@@ -455,9 +408,6 @@ export default {
       const space = { id: spaceId }
       this.$store.dispatch('currentSpace/changeSpace', space)
       this.$store.dispatch('closeAllDialogs')
-    },
-    removeNotifyEarnedCredits () {
-      this.$store.commit('notifyEarnedCredits', false)
     },
     removeNotifyConnectionError () {
       this.$store.commit('notifyConnectionError', false)
@@ -509,6 +459,8 @@ export default {
         margin-left 0
   button
     margin-left 6px
+  .button-only
+    margin 0
 
   button + button,
   button + label,

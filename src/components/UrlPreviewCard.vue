@@ -32,31 +32,31 @@ const selectedColor = computed(() => {
 })
 const isInteractingWithItem = computed(() => store.getters.isInteractingWithItem)
 
-// embed
+// url embed (spotify, youtube, etc.)
 
-const toggleShouldDisplayEmbed = () => {
+const toggleShouldDisplayUrlEmbed = () => {
   if (isTwitterUrl.value) { return }
   store.dispatch('closeAllDialogs')
   store.dispatch('currentCards/incrementZ', props.card.id)
-  const embedIsVisibleForCardId = store.state.embedIsVisibleForCardId
+  const urlEmbedIsVisibleForCardId = store.state.urlEmbedIsVisibleForCardId
   let value
-  if (props.card.id === embedIsVisibleForCardId) {
+  if (props.card.id === urlEmbedIsVisibleForCardId) {
     value = true
   }
   value = !value
   if (value) {
-    store.commit('embedIsVisibleForCardId', props.card.id)
+    store.commit('urlEmbedIsVisibleForCardId', props.card.id)
     addAutoplay()
   } else {
     removeAutoplay()
-    store.commit('embedIsVisibleForCardId', '')
+    store.commit('urlEmbedIsVisibleForCardId', '')
   }
 }
-const shouldDisplayEmbed = computed(() => {
-  const embedIsVisibleForCardId = store.state.embedIsVisibleForCardId
-  return props.card.id === embedIsVisibleForCardId
+const shouldDisplayUrlEmbed = computed(() => {
+  const urlEmbedIsVisibleForCardId = store.state.urlEmbedIsVisibleForCardId
+  return props.card.id === urlEmbedIsVisibleForCardId
 })
-const embedIsIframeDoc = computed(() => {
+const urlEmbedIsIframeDoc = computed(() => {
   const embed = props.card.urlPreviewEmbedHtml
   if (!embed) { return }
   const isScript = embed.includes('<script')
@@ -152,21 +152,21 @@ const description = computed(() => {
 //- image
 .url-preview-card(v-if="visible" :style="{background: props.backgroundColor}" :class="{'is-image-card': props.isImageCard}")
   //- image
-  template(v-if="!shouldDisplayEmbed")
+  template(v-if="!shouldDisplayUrlEmbed")
     .preview-image-wrap(v-if="card.urlPreviewImage && !shouldHideImage")
       img.preview-image(:src="card.urlPreviewImage" :class="{selected: isSelected, 'border-bottom-radius': !shouldHideInfo}" @load="updateDimensions" ref="image" @error="handleImageError")
 
   //- embed
-  template(v-if="shouldDisplayEmbed")
-    .embed.iframe-embed(v-if="embedIsIframeDoc")
+  template(v-if="shouldDisplayUrlEmbed")
+    .embed.iframe-embed(v-if="urlEmbedIsIframeDoc")
       iframe(:srcdoc="card.urlPreviewEmbedHtml" :class="{ ignore: isInteractingWithItem }" :style="{ height: iframeHeight + 'px' }")
     .embed(v-else v-html="card.urlPreviewEmbedHtml")
 
   .row.info.badge.status.embed-info(v-if="!shouldHideInfo" :style="{background: props.backgroundColor}")
     //- play
-    .button-wrap.embed-button-wrap(v-if="card.urlPreviewEmbedHtml" @mousedown.stop @touchstart.stop @click.stop="toggleShouldDisplayEmbed" @touchend.stop="toggleShouldDisplayEmbed")
+    .button-wrap.embed-button-wrap(v-if="card.urlPreviewEmbedHtml" @mousedown.stop @touchstart.stop @click.stop="toggleShouldDisplayUrlEmbed" @touchend.stop="toggleShouldDisplayUrlEmbed")
       button.small-button(v-if="!isTwitterUrl")
-        img.icon.stop(v-if="shouldDisplayEmbed" src="@/assets/box-filled.svg")
+        img.icon.stop(v-if="shouldDisplayUrlEmbed" src="@/assets/box-filled.svg")
         img.icon.play(v-else src="@/assets/play.svg")
       img.favicon(v-if="card.urlPreviewFavicon" :src="card.urlPreviewFavicon")
 

@@ -27,7 +27,7 @@ const state = reactive({
   errorMaxCardLength: false
 })
 const otherCard = computed(() => store.state.currentSelectedOtherItem)
-const url = computed(() => `${consts.kinopioDomain()}/${otherCard.value.spaceId}/${otherCard.value.id}`)
+const url = computed(() => utils.urlFromSpaceAndCard({ spaceId: otherSpace.value.id, cardId: otherCard.value.id }))
 const canEdit = computed(() => store.getters['currentUser/cardIsCreatedByCurrentUser'](otherCard.value))
 const isLoadingOtherItems = computed(() => store.state.isLoadingOtherItems)
 const otherSpace = computed(() => store.getters.otherSpaceById(otherCard.value.spaceId))
@@ -147,7 +147,7 @@ dialog.narrow.other-card-details(v-if="visible" :open="visible" :style="styles" 
     template(v-if="otherCard.id")
       //- space
       .row
-        OtherSpacePreview(:otherSpace="otherSpace" :isStatic="true")
+        OtherSpacePreview(:otherSpace="otherSpace" :isStatic="true" :url="url")
       //- edit
       template(v-if="canEdit")
         section.subsection.textarea-wrap

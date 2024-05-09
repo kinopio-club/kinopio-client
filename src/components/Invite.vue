@@ -65,7 +65,7 @@ const readOnlyUrl = computed(() => {
   const spaceId = currentSpace.id
   const readOnlyKey = currentSpace.readOnlyKey
   const url = utils.inviteUrl({ spaceId, spaceName: spaceName.value, readOnlyKey })
-  console.log('🍇 invite read only url', url)
+  console.log('🍇 invite read only url', url, 'readOnlyKey:', readOnlyKey)
   return url
 })
 
@@ -105,7 +105,7 @@ const webShareInvite = () => {
   if (inviteTypeIsEdit.value) {
     title = 'Invite to Edit'
   } else if (inviteTypeIsReadOnly.value) {
-    title = 'Invite to Edit Only'
+    title = 'Invite to Read Only'
   }
   const data = {
     title,
@@ -141,7 +141,7 @@ section.invite
     button.small-button.extra-options-button(@click="toggleTipsIsVisible" :class="{active: state.tipsIsVisible}")
       span ?
 
-  .row.invite-url-segmented-buttons(v-if="spaceIsPrivate")
+  .row.invite-url-segmented-buttons
     .segmented-buttons
       button(@click="toggleInviteType('edit')" :class="{active: inviteTypeIsEdit}")
         span Can Edit
@@ -161,17 +161,15 @@ section.invite
       .button-wrap
         button(@click.stop="toggleEmailInvitesIsVisible" :class="{ active: state.emailInvitesIsVisible }")
           img.icon.mail(src="@/assets/mail.svg")
-          span Email
-      EmailInvites(:visible="state.emailInvitesIsVisible")
+          span Email Invites
     //- Tips
     template(v-if="state.tipsIsVisible")
       .row
         p No account is needed to read spaces, but editing requires an account
-      .row
-        p.badge.success You'll both earn a $6 credit when someone you invite signs up for a Kinopio account
       .row(v-if="currentUserIsUpgraded")
         p.badge.success
           span Because your account is upgraded, others can create cards here for free
+EmailInvites(:visible="state.emailInvitesIsVisible")
 
 </template>
 

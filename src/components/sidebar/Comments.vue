@@ -1,18 +1,24 @@
 <template lang="pug">
-.comments(v-if="visible")
-  section.results-section(v-if="comments.length" ref="results")
-    ul.results-list
-      template(v-for="(card in comments")
-        li(@click="showCardDetails(card)")
-          p
-            UserLabelInline(:user="card.user")
-          .comment-name
-            img.icon.comment-icon(src="@/assets/comment.svg")
-            template(v-for="segment in card.nameSegments")
-              img.card-image(v-if="segment.isImage" :src="segment.url")
-              NameSegment(:segment="segment")
 
-  section.no-comments-section(v-if="!comments.length")
+section(v-if="visible")
+  p Comments
+
+section.results-section.comments(v-if="visible")
+  ul.results-list(v-if="comments.length")
+    template(v-for="card in comments" :key="card.id")
+      li(@click="showCardDetails(card)")
+        p.user
+          UserLabelInline(:user="card.user")
+          br
+          span.badge.status.inline-badge
+            img.icon.time(src="@/assets/time.svg")
+            span {{ relativeDate(card) }}
+        .comment-name
+          img.icon.comment-icon(src="@/assets/comment.svg")
+          template(v-for="segment in card.nameSegments")
+            img.card-image(v-if="segment.isImage" :src="segment.url")
+            NameSegment(:segment="segment")
+  section.subsection.tips-section(v-if="!comments.length")
     p No comment cards in this space yet
     p
       span.badge.secondary Card →{{' '}}
@@ -66,35 +72,33 @@ export default {
     },
     userById (userId) {
       return this.$store.getters['currentSpace/userById'](userId)
+    },
+    relativeDate (card) {
+      return utils.shortRelativeTime(card.nameUpdatedAt || card.updatedAt)
     }
   }
 }
 </script>
 
 <style lang="stylus">
-.comments
-  @media(max-width 414px)
-    left -40px
-  @media(max-width 350px)
-    left -90px
+section.comments
   .results-section
     border-top 1px solid var(--primary-border)
     padding-top 4px
     li
       display block
-  .button-wrap
-    padding 4px
-  .comment-name
-    margin-top 4px
-  &.is-pinned
-    left -186px
   .comment-icon
     vertical-align -3px
+  .user
+    flex-shrink 0
+    max-width 44%
 
-  .no-comments-section
-    .comment-icon
-      margin-left 4px
-      vertical-align -2px
+section.tips-section
+  margin 4px
+  margin-top 0
+  .comment-icon
+    margin-left 4px
+    vertical-align -2px
   .down-arrow-inline
     vertical-align 2px
 </style>

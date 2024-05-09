@@ -1,11 +1,11 @@
 <template lang="pug">
 //- boxes
 .locked-boxes(:style="positionStyles")
-  template(v-for="box in lockedBoxes")
+  template(v-for="box in lockedBoxes" :key="box.id")
     Box(:box="box")
 //- cards
 .locked-cards(:style="positionStyles")
-  template(v-for="card in lockedCards")
+  template(v-for="card in lockedCards" :key="card.id")
     Card(:card="card")
 </template>
 

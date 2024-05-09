@@ -26,7 +26,6 @@ const router = createRouter({
       component: Space,
       beforeEnter: (to, from, next) => {
         const urlParams = new URLSearchParams(window.location.search)
-        store.commit('disableViewportOptimizations', urlParams.get('disableViewportOptimizations'))
         next()
       }
     }, {
@@ -191,15 +190,12 @@ const router = createRouter({
         const isInvite = true
         pageMeta.space(spaceId, isInvite)
         store.dispatch('currentUser/init')
-        const disableViewportOptimizations = urlParams.get('disableViewportOptimizations')
-        store.commit('disableViewportOptimizations', disableViewportOptimizations)
         store.commit('isLoadingSpace', true)
         if (!spaceId) {
           store.commit('addNotification', { message: 'Invalid invite URL', type: 'danger' })
           next()
           return
         }
-        store.commit('shouldValidateUserReferralFromSpaceInvite', true)
         store.commit('isPresentationMode', isPresentationMode)
         // edit
         if (collaboratorKey) {
@@ -213,12 +209,12 @@ const router = createRouter({
           next()
         }
       }
+
+    // legacy referral routes Mar 2024
     }, {
       path: '/refer/:userId',
       component: Space,
       beforeEnter: (to, from, next) => {
-        const userId = to.params.userId
-        store.commit('validateUserReferralUserId', userId)
         next()
       }
 
@@ -226,16 +222,12 @@ const router = createRouter({
       path: '/for/:name',
       component: Space,
       beforeEnter: (to, from, next) => {
-        const name = to.params.name
-        store.commit('validateAdvocateReferralName', name)
         next()
       }
     }, {
       path: '/from/:name',
       component: Space,
       beforeEnter: (to, from, next) => {
-        const name = to.params.name
-        store.commit('validateFromAdvocateReferralName', name)
         next()
       }
     }

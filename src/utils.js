@@ -193,6 +193,7 @@ export default {
     return { x, y }
   },
   cursorPositionInPage (event) {
+    if (!event) { return }
     let x, y
     if (event.touches) {
       const touch = this.mobileTouchPosition(event, 'page')
@@ -335,11 +336,11 @@ export default {
     cloned = JSON.parse(cloned)
     return cloned
   },
-  isUndefined (value) {
+  isUndefinedOrNull (value) {
     return value === undefined || value === null
   },
   typeCheck ({ value, type, allowUndefined, origin }) {
-    if (allowUndefined && this.isUndefined(value)) {
+    if (allowUndefined && this.isUndefinedOrNull(value)) {
       return true
     }
     if (type === 'array' && Array.isArray(value)) {
@@ -378,6 +379,7 @@ export default {
   arrayHasItems (array) { // !arrayIsEmpty, arrayExists
     this.typeCheck({ value: array, type: 'array', allowUndefined: true, origin: 'arrayHasItems' })
     if (array) {
+      array = array.filter(item => Boolean(item))
       if (array.length) {
         return true
       }
@@ -437,6 +439,9 @@ export default {
       }
       return user
     })
+  },
+  userIsUpgraded (user) {
+    return Boolean(user.stripeSubscriptionId || user.stripePlanIsPurchased || user.downgradeAt || user.appleSubscriptionIsActive)
   },
   mergeArrays ({ previous, updated, key }) {
     const updatedKeys = updated.map(item => item[key])
@@ -498,6 +503,9 @@ export default {
   },
   isFirefox () {
     return navigator.userAgent && /Firefox/.test(navigator.userAgent)
+  },
+  isLinux () {
+    return navigator.platform.includes('Linux')
   },
   isMultiTouch (event) {
     if (event.touches) {
@@ -918,13 +926,13 @@ export default {
     })
     return xIsInside && yIsInside
   },
-  itemsPositionsShifted (item, position) {
-    const origin = this.topLeftItem(item)
+  itemsPositionsShifted (items, position) {
+    const origin = this.topLeftItem(items)
     const delta = {
       x: position.x - origin.x,
       y: position.y - origin.y
     }
-    return item.map(item => {
+    return items.map(item => {
       item.x = item.x + delta.x
       item.y = item.y + delta.y
       return item
@@ -1268,6 +1276,8 @@ export default {
       connection.userId = userId
       return connection
     })
+    space.userId = userId
+    space.editedByUserId = userId
     return space
   },
   itemUserId (user, item, nullItemUsers) {
@@ -1331,6 +1341,12 @@ export default {
     items = { cards, connections, connectionTypes, boxes, tags }
     return items
   },
+  updateItemsSpaceId (items, spaceId) {
+    return items.map(item => {
+      item.spaceId = spaceId
+      return item
+    })
+  },
   updateConnectionsType ({ connections, prevTypeId, newTypeId }) {
     return connections.map(connection => {
       if (connection.connectionTypeId === prevTypeId) {
@@ -1339,11 +1355,22 @@ export default {
       return connection
     })
   },
-  spaceItemUsersToCurrentUser (space, userId) {
+  updateSpacesUserId (userId, spaces) {
+    spaces = spaces.map(space => {
+      space = this.updateSpaceItemsUser(space, userId)
+      space = this.updateSpaceUserId(space, userId)
+      delete space.users
+      return space
+    })
+    return spaces
+  },
+  updateSpaceItemsUser (space, userId) {
     const itemNames = ['boxes', 'cards', 'connections', 'connectionTypes']
     itemNames.forEach(itemName => {
+      if (!space[itemName]) { return }
       space[itemName] = space[itemName].map(item => {
         item.userId = userId
+        item.nameUpdatedByUserId = userId
         return item
       })
     })
@@ -1370,7 +1397,7 @@ export default {
     deleteKeys.forEach(key => {
       delete space[key]
     })
-    this.spaceItemUsersToCurrentUser(space, userId)
+    this.updateSpaceItemsUser(space, userId)
     space.userId = userId
     return space
   },
@@ -1438,21 +1465,29 @@ export default {
     })
     return space
   },
+  spaceReadDate (space, type) {
+    this.typeCheck({ value: space, type: 'object' })
+    this.typeCheck({ value: type, type: 'string' }) // 'explore', 'following', 'everyone'
+    let date
+    if (type === 'explore') {
+      date = space.showInExploreUpdatedAt
+    } else if (type === 'following') {
+      date = space.updatedAt
+    } else if (type === 'everyone') {
+      date = space.createdAt
+    }
+    return dayjs(date)
+  },
 
   // Journal Space 🌚
 
-  journalSpace ({ currentUser, isTomorrow, weather, dailyPrompt }) {
-    // name
+  journalSpace ({ currentUser, isTomorrow, weather, journalDailyPrompt, journalDailyDateImage }) {
     let date = dayjs(new Date())
     if (isTomorrow) {
       date = date.add(1, 'day')
     }
     const moonPhase = moonphase(date)
-    let summary = `${moonPhase.emoji} ${date.format('dddd')}` // 🌘 Tuesday
-    if (weather) {
-      summary = summary + weather
-    }
-    // meta
+    // space
     const spaceId = nanoid()
     let space = this.emptySpace(spaceId)
     space.name = this.journalSpaceName({ isTomorrow })
@@ -1468,15 +1503,23 @@ export default {
     space.collaboratorKey = nanoid()
     space = this.newSpaceBackground(space, currentUser)
     space.background = space.background || consts.defaultSpaceBackground
-    // summary
-    space.cards.push({ id: nanoid(), name: summary, x: 80, y: 110, frameId: 0 })
+    // date
+    const dateCard = {
+      id: nanoid(),
+      name: `${journalDailyDateImage} ${date.format('dddd, MMM D')}`,
+      x: 86,
+      y: 157,
+      resizeWidth: 260,
+      frameId: 0
+    }
+    space.cards.push(dateCard)
     // daily prompt
-    if (dailyPrompt) {
+    if (journalDailyPrompt) {
       let card = { id: nanoid() }
-      card.name = dailyPrompt
+      card.name = journalDailyPrompt
       const position = this.promptCardPosition(space.cards, card.name)
-      card.x = position.x + 10
-      card.y = position.y
+      card.x = position.x
+      card.y = 467
       card.z = 0
       card.spaceId = spaceId
       card.frameId = 5
@@ -1637,7 +1680,17 @@ export default {
       return true
     }
   },
+  urlIsValidLocalhost (url) {
+    // https://regexr.com/7vc0o
+    // matches ':' then numbers
+    // then ends or continues with '/' or '?'
+    const portPattern = new RegExp(/(:[0-9]+)(\?|\/(\w+|\d+)| |$)/igm)
+    if (url.match(portPattern)) {
+      return true
+    }
+  },
   urlIsValidTld (url) {
+    if (!url) { return }
     const isLocalhostUrl = url.match(this.localhostUrlPattern())
     const isDevelopmentUrl = url.includes(consts.kinopioDomain())
     if (isLocalhostUrl || isDevelopmentUrl) { return true }
@@ -1678,7 +1731,7 @@ export default {
     // https://stackoverflow.com/a/42408099
     return string.match(/([a-zA-Z0-9._-]+@[a-zA-Z0-9._-]+\.[a-zA-Z0-9_-]+)/gim) || []
   },
-  urlsFromString (string, skipProtocolCheck) {
+  urlsFromString (string) {
     if (!string) { return [] }
     // remove markdown links
     const markdownLinks = string.match(this.markdown().linkPattern)
@@ -1690,13 +1743,13 @@ export default {
     string = this.removeMarkdownCodeblocksFromString(string)
     // https://regexr.com/59m5t
     // start, newline, or space
-    // optionally starts with http/s protocol
+    // starts with http/s protocol
     // followed by alphanumerics
-    // then '.'
+    // then '.', or ':' + portnumbers
     // followed by alphanumerics
     // then trailing '/' or '-'
     // matches multiple urls and returns [urls]
-    const urlPattern = new RegExp(/(^|\n| )(http[s]?:\/\/)?[^\s(["<>]{2,}\.[^\s."><]+[\w=]\/?-?/igm)
+    const urlPattern = new RegExp(/(^|\n| )(http[s]?:\/\/)[^\s(["<>]{2,}(\.|(:[0-9]+))[^\s."><]+[\w=]\/?-?/igm)
     let localhostUrls = string.match(this.localhostUrlPattern()) || []
     let urls = string.match(urlPattern) || []
     urls = urls.concat(localhostUrls)
@@ -1712,15 +1765,12 @@ export default {
         return true
       }
     })
-    if (skipProtocolCheck) { return urls }
     // ensure url has protocol
     urls = urls.map(url => {
-      const isFile = this.urlIsFile(url, true)
+      const isFile = this.urlIsFile(url)
       const hasProtocol = this.urlHasProtocol(url)
       if (isFile || hasProtocol) {
         return url
-      } else {
-        return `https://${url}`
       }
     })
     return urls
@@ -1778,12 +1828,8 @@ export default {
     const isAudio = url.match(audioUrlPattern)
     return Boolean(isAudio)
   },
-  urlIsFile (url, skipProtocolCheck) {
+  urlIsFile (url) {
     if (!url) { return }
-    if (!skipProtocolCheck) {
-      const hasProtocol = this.urlHasProtocol(url)
-      if (!hasProtocol) { return }
-    }
     url = url + ' '
     const fileUrlPattern = new RegExp(/(?:\.txt|\.md|\.markdown|\.pdf|\.ppt|\.pptx|\.doc|\.docx|\.csv|\.xsl|\.xslx|\.rtf|\.zip|\.tar|\.xml|\.psd|\.ai|\.ind|\.sketch|\.mov|\.heic|\.7z|\.woff|\.woff2|\.otf|\.ttf|\.wav|\.flac)(?:\n| |\?|&)/igm)
     const isFile = url.toLowerCase().match(fileUrlPattern)
@@ -1803,7 +1849,7 @@ export default {
     if (!url) { return }
     if (this.urlIsInvite(url)) { return true }
     let spaceUrlPattern
-    if (import.meta.env.MODE === 'development') {
+    if (consts.isDevelopment) {
       // https://regexr.com/5hjc2
       spaceUrlPattern = new RegExp(/(?:kinopio\.local:.*\/)(.*)\b/gi)
     } else {
@@ -2012,7 +2058,6 @@ export default {
       isCollaborator,
       isUpgraded: user.isUpgraded,
       isModerator: user.isModerator,
-      isGuideMaker: user.isGuideMaker,
       isDonor: user.isDonor
     }
   },
@@ -2021,7 +2066,8 @@ export default {
       id: space.id,
       name: space.name,
       privacy: space.privacy,
-      previewThumbnailImage: space.previewThumbnailImage
+      previewThumbnailImage: space.previewThumbnailImage,
+      showInExplore: space.showInExplore
     }
   },
   normalizeBroadcastUpdates (updates) {
@@ -2174,7 +2220,7 @@ export default {
   cardNameSegments (name) {
     if (!name) { return [] }
     const tags = this.tagsFromString(name) || []
-    const urls = this.urlsFromString(name, true) || []
+    const urls = this.urlsFromString(name) || []
     const commands = this.commandsFromString(name) || []
     const markdownLinks = name.match(this.markdown().linkPattern) || []
     const links = urls.filter(url => {

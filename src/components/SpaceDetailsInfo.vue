@@ -42,11 +42,7 @@ ReadOnlySpaceInfoBadges
 .row(v-if="isSpaceMember")
   //- Privacy
   PrivacyButton(:privacyPickerIsVisible="privacyPickerIsVisible" :showShortName="true" @togglePrivacyPickerIsVisible="togglePrivacyPickerIsVisible" @closeDialogs="closeDialogs" @updateLocalSpaces="updateLocalSpaces")
-  //- Pin Favorite
-  .button-wrap
-    button(:class="{active: isFavoriteSpace}" @click.left.prevent="toggleIsFavoriteSpace" @keydown.stop.enter="toggleIsFavoriteSpace" title="Favorite Current Space")
-      img.icon(v-if="isFavoriteSpace" src="@/assets/heart.svg")
-      img.icon(v-else src="@/assets/heart-empty.svg")
+  FavoriteSpaceButton(@updateLocalSpaces="updateLocalSpaces")
   //- Settings
   .button-wrap
     button(@click="toggleSettingsIsVisible" :class="{active: settingsIsVisible}")
@@ -55,10 +51,7 @@ ReadOnlySpaceInfoBadges
 
 //- read only options
 .row(v-if="!isSpaceMember")
-  //- Favorite
-  button(:class="{active: isFavoriteSpace}" @click.left.prevent="toggleIsFavoriteSpace" @keydown.stop.enter="toggleIsFavoriteSpace" title="Favorite Current Space")
-    img.icon(v-if="isFavoriteSpace" src="@/assets/heart.svg")
-    img.icon(v-else src="@/assets/heart-empty.svg")
+  FavoriteSpaceButton(@updateLocalSpaces="updateLocalSpaces")
   .button-wrap
     button(@click="toggleSettingsIsVisible" :class="{active: settingsIsVisible}")
       img.icon.settings(src="@/assets/settings.svg")
@@ -80,7 +73,7 @@ template(v-if="settingsIsVisible")
       .button-wrap(:class="{'dialog-is-pinned': dialogIsPinned}")
         button(@click.left.stop="toggleExportIsVisible" :class="{ active: exportIsVisible }")
           span Export
-        Export(:visible="exportIsVisible")
+        ImportExport(:visible="exportIsVisible" :isExport="true")
 
   //- member space settings
   section.subsection.space-settings(v-if="isSpaceMember")
@@ -96,7 +89,7 @@ template(v-if="settingsIsVisible")
       .button-wrap(:class="{'dialog-is-pinned': dialogIsPinned}")
         button(@click.left.stop="toggleExportIsVisible" :class="{ active: exportIsVisible }")
           span Export
-          Export(:visible="exportIsVisible")
+          ImportExport(:visible="exportIsVisible" :isExport="true")
     .row(v-if="currentSpaceIsUserTemplate")
       //- Duplicate
       .button-wrap
@@ -127,10 +120,11 @@ import BackgroundPreview from '@/components/BackgroundPreview.vue'
 import Loader from '@/components/Loader.vue'
 import PrivacyButton from '@/components/PrivacyButton.vue'
 import templates from '@/data/templates.js'
-import Export from '@/components/dialogs/Export.vue'
+import ImportExport from '@/components/dialogs/ImportExport.vue'
 import ReadOnlySpaceInfoBadges from '@/components/ReadOnlySpaceInfoBadges.vue'
 import AddToExplore from '@/components/AddToExplore.vue'
 import AskToAddToExplore from '@/components/AskToAddToExplore.vue'
+import FavoriteSpaceButton from '@/components/FavoriteSpaceButton.vue'
 import cache from '@/cache.js'
 
 export default {
@@ -141,10 +135,11 @@ export default {
     BackgroundPreview,
     Loader,
     PrivacyButton,
-    Export,
     ReadOnlySpaceInfoBadges,
     AskToAddToExplore,
-    AddToExplore
+    AddToExplore,
+    ImportExport,
+    FavoriteSpaceButton
   },
   props: {
     shouldHidePin: Boolean,
@@ -231,23 +226,13 @@ export default {
       })
     },
     dialogIsPinned () { return this.$store.state.spaceDetailsIsPinned },
-    currentUserIsSpaceCollaborator () { return this.$store.getters['currentUser/isSpaceCollaborator']() },
-    isFavoriteSpace () { return this.$store.getters['currentSpace/isFavorite'] }
+    currentUserIsSpaceCollaborator () { return this.$store.getters['currentUser/isSpaceCollaborator']() }
 
   },
   methods: {
     toggleCurrentSpaceIsUserTemplate () {
       const value = !this.currentSpaceIsUserTemplate
       this.$store.dispatch('currentSpace/updateSpace', { isTemplate: value })
-      this.updateLocalSpaces()
-    },
-    toggleIsFavoriteSpace () {
-      const currentSpace = this.$store.state.currentSpace
-      if (this.isFavoriteSpace) {
-        this.$store.dispatch('currentUser/removeFavorite', { type: 'space', item: currentSpace })
-      } else {
-        this.$store.dispatch('currentUser/addFavorite', { type: 'space', item: currentSpace })
-      }
       this.updateLocalSpaces()
     },
     duplicateSpace () {
@@ -411,8 +396,12 @@ export default {
   p
     white-space normal
 
+  dialog.import-export
+    left initial
+    right 8px
+
 .dialog-is-pinned
-  dialog.export
+  dialog.import-export
     right -50px
 
 </style>

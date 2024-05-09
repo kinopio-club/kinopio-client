@@ -44,12 +44,12 @@ const AIImages = computed(() => {
   AIImages = utils.clone(AIImages)
   return AIImages.reverse()
 })
-const copy = async (event, text) => {
+const copy = async (event, text, successMessage) => {
   let position = utils.cursorPositionInPage(event)
   position.x = position.x - 60
   try {
     await navigator.clipboard.writeText(text)
-    store.commit('addNotificationWithPosition', { message: 'Copied', position, type: 'success', layer: 'app', icon: 'checkmark' })
+    store.commit('addNotificationWithPosition', { message: successMessage, position, type: 'success', layer: 'app', icon: 'checkmark' })
   } catch (error) {
     console.warn('🚑 copyText', error)
     store.commit('addNotificationWithPosition', { message: 'Copy Error', position, type: 'danger', layer: 'app', icon: 'cancel' })
@@ -71,10 +71,12 @@ const toggleSelectedImage = (image) => {
 
 <template lang="pug">
 .ai-images(v-if="visible" @click.stop="clear")
-  section(v-if="!AIImages.length")
-    p AI Images you generate from cards can be found here.
-    p
-      .badge.secondary Card →{{' '}}
+  section
+    p AI Images
+    section.subsection(v-if="!AIImages.length")
+      p AI Images you generate from cards can be found here.
+      p
+        span Card →{{' '}}
         img.icon.flower(src="@/assets/flower.svg")
         span → AI
   AIImagesProgress
@@ -89,11 +91,11 @@ const toggleSelectedImage = (image) => {
               img.icon.openai(src="@/assets/openai.svg")
               span {{image.prompt}}
               //- copy prompt
-              .input-button-wrap.copy-prompt(@click.stop="copy($event, image.prompt)")
+              .input-button-wrap.copy-prompt(@click.stop="copy($event, image.prompt, 'Copied Prompt')")
                 button.small-button
                   img.icon.copy(src="@/assets/copy.svg")
           //- copy url
-          .input-button-wrap.copy-image-url(@click.stop="copy($event, image.url)")
+          .input-button-wrap.copy-image-url(@click.stop="copy($event, image.url, 'Copied URL')")
             button.small-button
               img.icon.copy(src="@/assets/copy.svg")
 </template>
@@ -129,4 +131,10 @@ const toggleSelectedImage = (image) => {
         min-height initial
   .flower
     vertical-align -2px
+  section
+    padding-bottom 0
+    border none
+  .subsection
+    margin-top 10px
+
 </style>

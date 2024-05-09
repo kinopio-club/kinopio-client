@@ -4,12 +4,11 @@ import { useStore } from 'vuex'
 
 import PrivacyButton from '@/components/PrivacyButton.vue'
 import Invite from '@/components/Invite.vue'
-import SpaceRssFeed from '@/components/dialogs/SpaceRssFeed.vue'
+import RssFeeds from '@/components/dialogs/RssFeeds.vue'
 import Embed from '@/components/dialogs/Embed.vue'
 import UserList from '@/components/UserList.vue'
 import utils from '@/utils.js'
-import Export from '@/components/dialogs/Export.vue'
-import Import from '@/components/dialogs/Import.vue'
+import ImportExport from '@/components/dialogs/ImportExport.vue'
 import AddToExplore from '@/components/AddToExplore.vue'
 import AskToAddToExplore from '@/components/AskToAddToExplore.vue'
 import ReadOnlySpaceInfoBadges from '@/components/ReadOnlySpaceInfoBadges.vue'
@@ -46,10 +45,9 @@ const state = reactive({
   urlIsCopied: false,
   privacyPickerIsVisible: false,
   dialogHeight: null,
-  spaceRssFeedIsVisible: false,
+  rssFeedsIsVisible: false,
   embedIsVisible: false,
-  exportIsVisible: false,
-  importIsVisible: false,
+  importExportIsVisible: false,
   isShareInPresentationMode: false,
   emailInvitesIsVisible: false
 })
@@ -161,14 +159,13 @@ const updateDialogHeight = () => {
   })
 }
 const dialogIsVisible = computed(() => {
-  return state.privacyPickerIsVisible || state.spaceRssFeedIsVisible || state.embedIsVisible || state.exportIsVisible || state.importIsVisible || state.emailInvitesIsVisible
+  return state.privacyPickerIsVisible || state.rssFeedsIsVisible || state.embedIsVisible || state.importExportIsVisible || state.emailInvitesIsVisible
 })
 const closeDialogs = () => {
   state.privacyPickerIsVisible = false
-  state.spaceRssFeedIsVisible = false
+  state.rssFeedsIsVisible = false
   state.embedIsVisible = false
-  state.exportIsVisible = false
-  state.importIsVisible = false
+  state.importExportIsVisible = false
   state.emailInvitesIsVisible = false
   store.commit('userDetailsIsVisible', false)
   store.commit('triggerCloseChildDialogs')
@@ -176,10 +173,6 @@ const closeDialogs = () => {
 
 // toggles
 
-const triggerEarnCreditsIsVisible = () => {
-  store.dispatch('closeAllDialogs')
-  store.commit('triggerEarnCreditsIsVisible')
-}
 const isPresentationMode = () => {
   store.dispatch('closeAllDialogs')
   store.commit('isPresentationMode', true)
@@ -193,25 +186,20 @@ const togglePrivacyPickerIsVisible = () => {
   closeDialogs()
   state.privacyPickerIsVisible = !isVisible
 }
-const toggleSpaceRssFeedIsVisible = () => {
-  const isVisible = state.spaceRssFeedIsVisible
+const toggleRssFeedsIsVisible = () => {
+  const isVisible = state.rssFeedsIsVisible
   closeDialogs()
-  state.spaceRssFeedIsVisible = !isVisible
+  state.rssFeedsIsVisible = !isVisible
 }
 const toggleEmbedIsVisible = () => {
   const isVisible = state.embedIsVisible
   closeDialogs()
   state.embedIsVisible = !isVisible
 }
-const toggleExportIsVisible = () => {
-  const isVisible = state.exportIsVisible
+const toggleImportExportIsVisible = () => {
+  const isVisible = state.importExportIsVisible
   closeDialogs()
-  state.exportIsVisible = !isVisible
-}
-const toggleImportIsVisible = () => {
-  const isVisible = state.importIsVisible
-  closeDialogs()
-  state.importIsVisible = !isVisible
+  state.importExportIsVisible = !isVisible
 }
 const toggleIsShareInPresentationMode = () => {
   closeDialogs()
@@ -232,9 +220,9 @@ dialog.share.wide(v-if="props.visible" :open="props.visible" @click.left.stop="c
           img.icon(src="@/assets/presentation.svg")
           span Present
         .button-wrap(v-if="spaceIsRemote")
-          button.small-button(@click.left.stop="toggleSpaceRssFeedIsVisible" :class="{ active: state.spaceRssFeedIsVisible }" title="Space RSS Feed")
+          button.small-button(@click.left.stop="toggleRssFeedsIsVisible" :class="{ active: state.rssFeedsIsVisible }" title="RSS Feeds")
             span RSS
-          SpaceRssFeed(:visible="state.spaceRssFeedIsVisible")
+          RssFeeds(:visible="state.rssFeedsIsVisible")
 
   section(v-if="spaceIsRemote")
     ReadOnlySpaceInfoBadges
@@ -281,26 +269,19 @@ dialog.share.wide(v-if="props.visible" :open="props.visible" @click.left.stop="c
       span for your spaces to be synced and accessible anywhere.
     button(@click.left="triggerSignUpOrInIsVisible") Sign Up or In
 
-  section
+  //- Import, Export, Embed
+  section.import-export-section
     .row
-      //- Import, Export
       .segmented-buttons(@click.stop)
-        button(@click.left.stop="toggleImportIsVisible" :class="{ active: state.importIsVisible }")
-          span Import
-          Import(:visible="state.importIsVisible" @closeDialog="closeDialogs")
-        button(@click.left.stop="toggleExportIsVisible" :class="{ active: state.exportIsVisible }")
-          span Export
-          Export(:visible="state.exportIsVisible")
+        button(@click.left.stop="toggleImportExportIsVisible" :class="{ active: state.importExportIsVisible }")
+          span Import or Export
+          ImportExport(:visible="state.importExportIsVisible")
       //- Embed
       .button-wrap
         button(@click.left.stop="toggleEmbedIsVisible" :class="{ active: state.embedIsVisible }")
           span Embed
         Embed(:visible="state.embedIsVisible")
 
-  section(v-if='!isSecureAppContextIOS')
-    .button-wrap
-      button(@click="triggerEarnCreditsIsVisible")
-        span Earn Credits
 </template>
 
 <style lang="stylus">
@@ -326,7 +307,7 @@ dialog.share
   dialog.user-details
     left initial
     right calc(100% - 20px)
-  dialog.import
+  dialog.import-export
     top calc(100% - 8px)
     left initial
     right 8px
@@ -353,18 +334,13 @@ dialog.share
     border-top-right-radius 0
 
   @media(max-height 670px)
-    dialog.import,
-    dialog.export,
+    dialog.import-export,
     dialog.embed
       top -50px
-    dialog.email-invites
-      top -100px
 
   @media(max-height 500px)
-    dialog.import,
-    dialog.export,
-    dialog.embed,
-    dialog.email-invites
+    dialog.import-export,
+    dialog.embed
       top -200px
 
   .segmented-buttons
@@ -394,4 +370,7 @@ dialog.share
   .title-row
     p + .row
       margin-top 0
+
+  .import-export-section
+    border-top 1px solid var(--primary-border)
 </style>

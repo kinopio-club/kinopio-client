@@ -8,7 +8,7 @@ import uniq from 'lodash-es/uniq'
 import { nanoid } from 'nanoid'
 
 let host = 'https://api.kinopio.club'
-if (import.meta.env.MODE === 'development') {
+if (consts.isDevelopment) {
   host = 'https://kinopio.local:3000'
 }
 
@@ -24,6 +24,30 @@ const squashCardsCreatedCount = (queue, request) => {
   if (!isSquashed) {
     queue.push(request)
   }
+  return queue
+}
+
+const sortQueueItems = (queue) => {
+  // sort create connectiontype operations first
+  let createConnectionTypes = []
+  queue = queue.filter(request => {
+    if (request.name === 'createConnectionType') {
+      createConnectionTypes.push(request)
+    } else {
+      return true
+    }
+  })
+  queue = createConnectionTypes.concat(queue)
+  // sort createCard operations first
+  let createCards = []
+  queue = queue.filter(request => {
+    if (request.name === 'createCard') {
+      createCards.push(request)
+    } else {
+      return true
+    }
+  })
+  queue = createCards.concat(queue)
   return queue
 }
 
@@ -43,11 +67,12 @@ const squashQueue = (queue) => {
     reduced.name = request.name
     squashed.push(reduced)
   })
+  squashed = sortQueueItems(squashed)
   return squashed
 }
 
 const shouldRequest = ({ shouldRequestRemote, apiKey, isOnline }) => {
-  if (utils.isUndefined(isOnline)) {
+  if (utils.isUndefinedOrNull(isOnline)) {
     isOnline = true
   }
   const currentUserIsSignedIn = Boolean(apiKey)
@@ -126,56 +151,77 @@ const self = {
 
     // Queue
 
+    handleServerOperationsError: async (context, { error, response }) => {
+      const data = await response.json()
+      const operations = data.operations
+      console.warn('🚑 serverOperationsError', data)
+      const nonErrorStatusCodes = [400, 401, 404, 422]
+      operations.forEach(operation => {
+        const error = operation.error
+        if (!error) { return }
+        const isCritical = !nonErrorStatusCodes.includes(error.status)
+        if (isCritical) {
+          console.error('🚒 critical serverOperationsError operation', operation)
+          context.commit('notifyServerCouldNotSave', true, { root: true })
+        } else {
+          console.warn('🚑 non-critical serverOperationsError operation', operation)
+        }
+        cache.removeSendingInProgressQueueOperationById(operation.body.operationId)
+      })
+    },
+
     addToQueue: (context, { name, body, spaceId }) => {
       body = utils.clone(body)
       body.spaceId = spaceId || context.rootState.currentSpace.id
-      const currentUserIsSignedIn = context.rootGetters['currentUser/isSignedIn']
-      if (!currentUserIsSignedIn) { return }
+      body.operationId = nanoid()
+      const isSignedIn = context.rootGetters['currentUser/isSignedIn']
+      const canEditSpace = context.rootGetters['currentUser/canEditSpace']()
+      if (!isSignedIn) { return }
       let queue = cache.queue()
       const request = {
         name,
         body
       }
+      if (name === 'updateMultipleCards' && !canEditSpace) { return }
       if (name === 'updateUserCardsCreatedCount') {
         queue = squashCardsCreatedCount(queue, request)
       } else {
         queue.push(request)
       }
       cache.saveQueue(queue)
-      context.dispatch('debouncedProcessQueueOperations')
+      context.dispatch('debouncedSendQueue')
     },
 
-    debouncedProcessQueueOperations: debounce(({ dispatch }) => {
-      dispatch('processQueueOperations')
+    debouncedSendQueue: debounce(({ dispatch }) => {
+      dispatch('sendQueue')
     }, 500),
 
-    processQueueOperations: async (context) => {
+    sendQueue: async (context) => {
       let body
       const apiKey = context.rootState.currentUser.apiKey
       const isOnline = context.rootState.isOnline
       const queue = cache.queue()
-      const queueBuffer = cache.queueBuffer()
+      const sendingInProgressQueue = cache.sendingInProgressQueue()
       if (!shouldRequest({ apiKey, isOnline }) || !queue.length) { return }
-      if (queueBuffer.length) {
-        body = queueBuffer
+      if (sendingInProgressQueue.length) {
+        body = sendingInProgressQueue
+        body = sortQueueItems(body)
+        console.log('🛃 sending operations from sendingInProgressQueue', body)
       } else {
         body = squashQueue(queue)
-        cache.saveQueueBuffer(body)
+        cache.saveSendingInProgressQueue(body)
         cache.clearQueue()
       }
-      body = body.map(item => {
-        item.operationId = nanoid()
-        return item
-      })
+      let response
       try {
         console.log(`🛫 sending operations`, body)
         const space = context.rootState.currentSpace
         if (!space.id) { throw 'operation missing spaceId' }
         const options = await context.dispatch('requestOptions', { body, method: 'POST', space })
-        const response = await fetch(`${host}/operations`, options)
+        response = await fetch(`${host}/operations`, options)
         if (response.ok) {
           console.log('🛬 operations ok')
-          cache.clearQueueBuffer()
+          cache.clearSendingInProgressQueue()
         } else {
           throw Error(response.statusText)
         }
@@ -184,8 +230,7 @@ const self = {
           context.commit('addNotification', { message: 'Reconnected to server', type: 'success' }, { root: true })
         }
       } catch (error) {
-        console.error('🚒 processQueueOperations', error, body)
-        context.commit('notifyServerCouldNotSave', true, { root: true })
+        context.dispatch('handleServerOperationsError', { error, response })
       }
     },
 
@@ -300,16 +345,55 @@ const self = {
         context.dispatch('handleServerError', { name: 'getUserAIImages', error })
       }
     },
-    getUserFavorites: async (context) => {
+    getUserFavoriteSpaces: async (context) => {
       const apiKey = context.rootState.currentUser.apiKey
       const isOnline = context.rootState.isOnline
       if (!shouldRequest({ apiKey, isOnline })) { return }
       try {
         const options = await context.dispatch('requestOptions', { method: 'GET', space: context.rootState.currentSpace })
-        const response = await fetch(`${host}/user/favorites`, options)
+        const response = await fetch(`${host}/user/favorite-spaces`, options)
         return normalizeResponse(response)
       } catch (error) {
-        context.dispatch('handleServerError', { name: 'getUserFavorites', error })
+        context.dispatch('handleServerError', { name: 'getUserFavoriteSpaces', error })
+      }
+    },
+    getUserFavoriteUsers: async (context) => {
+      const apiKey = context.rootState.currentUser.apiKey
+      const isOnline = context.rootState.isOnline
+      if (!shouldRequest({ apiKey, isOnline })) { return }
+      try {
+        const options = await context.dispatch('requestOptions', { method: 'GET', space: context.rootState.currentSpace })
+        const response = await fetch(`${host}/user/favorite-users`, options)
+        return normalizeResponse(response)
+      } catch (error) {
+        context.dispatch('handleServerError', { name: 'getUserFavoriteUsers', error })
+      }
+    },
+    getUserFavoriteColors: async (context) => {
+      const apiKey = context.rootState.currentUser.apiKey
+      const isOnline = context.rootState.isOnline
+      if (!shouldRequest({ apiKey, isOnline })) { return }
+      try {
+        const options = await context.dispatch('requestOptions', { method: 'GET', space: context.rootState.currentSpace })
+        const response = await fetch(`${host}/user/favorite-colors`, options)
+        return normalizeResponse(response)
+      } catch (error) {
+        context.dispatch('handleServerError', { name: 'getUserFavoriteUsers', error })
+      }
+    },
+    getFollowingUsersSpaces: async (context) => {
+      const apiKey = context.rootState.currentUser.apiKey
+      const isSpacePage = context.rootGetters.isSpacePage
+      const isOnline = context.rootState.isOnline
+      if (!shouldRequest({ apiKey, isOnline })) { return }
+      if (!isSpacePage) { return }
+      try {
+        console.log('🛬 getting following users spaces')
+        const options = await context.dispatch('requestOptions', { method: 'GET', space: context.rootState.currentSpace })
+        const response = await fetch(`${host}/user/favorite-users-spaces`, options)
+        return normalizeResponse(response)
+      } catch (error) {
+        context.dispatch('handleServerError', { name: 'getFollowingUsersSpaces', error })
       }
     },
     getUserSpaces: async (context) => {
@@ -441,12 +525,27 @@ const self = {
       if (!shouldRequest({ shouldRequestRemote: true, isOnline })) { return }
       if (!isSpacePage) { return }
       try {
-        console.log('🛬 getting new spaces')
+        console.log('🛬 getting explore spaces')
         const options = await context.dispatch('requestOptions', { method: 'GET', space: context.rootState.currentSpace })
         const response = await utils.timeout(consts.defaultTimeout, fetch(`${host}/space/explore-spaces`, options))
         return normalizeResponse(response)
       } catch (error) {
         context.dispatch('handleServerError', { name: 'getExploreSpaces', error })
+      }
+    },
+
+    getEveryoneSpaces: async (context) => {
+      const isSpacePage = context.rootGetters.isSpacePage
+      const isOnline = context.rootState.isOnline
+      if (!shouldRequest({ shouldRequestRemote: true, isOnline })) { return }
+      if (!isSpacePage) { return }
+      try {
+        console.log('🛬 getting everyone spaces')
+        const options = await context.dispatch('requestOptions', { method: 'GET', space: context.rootState.currentSpace })
+        const response = await utils.timeout(consts.defaultTimeout, fetch(`${host}/space/everyone-spaces`, options))
+        return normalizeResponse(response)
+      } catch (error) {
+        context.dispatch('handleServerError', { name: 'getEveryoneSpaces', error })
       }
     },
     getLiveSpaces: async (context) => {
@@ -472,6 +571,18 @@ const self = {
         console.log('🛬 getting remote space', space.id)
         const options = await context.dispatch('requestOptions', { method: 'GET', space: context.rootState.currentSpace, spaceReadOnlyKey })
         const response = await utils.timeout(consts.defaultTimeout, fetch(`${host}/space/${space.id}`, options))
+        return normalizeResponse(response)
+      } catch (error) {
+        context.dispatch('handleServerError', { name: 'getSpace', error })
+      }
+    },
+    getSpaceUpdatedAt: async (context, space) => {
+      try {
+        const isOnline = context.rootState.isOnline
+        if (!isOnline) { return }
+        console.log('🛬 getting remote space updatedAt', space.id)
+        const options = await context.dispatch('requestOptions', { method: 'GET', space: context.rootState.currentSpace })
+        const response = await utils.timeout(consts.defaultTimeout, fetch(`${host}/space/updated-at/${space.id}`, options))
         return normalizeResponse(response)
       } catch (error) {
         context.dispatch('handleServerError', { name: 'getSpace', error })
@@ -670,19 +781,6 @@ const self = {
         context.dispatch('handleServerError', { name: 'getCardsWithLinkToSpaceId', error })
       }
     },
-    updateCardsWithLinkToCardIds: async (context, body) => {
-      if (!body.prevCards.length) { return }
-      const apiKey = context.rootState.currentUser.apiKey
-      const isOnline = context.rootState.isOnline
-      if (!shouldRequest({ apiKey, isOnline })) { return }
-      try {
-        const options = await context.dispatch('requestOptions', { body, method: 'PATCH', space: context.rootState.currentSpace })
-        const response = await fetch(`${host}/card/link-to-card-ids`, options)
-        return normalizeResponse(response)
-      } catch (error) {
-        context.dispatch('handleServerError', { name: 'updateCardsWithLinkToCardIds', error })
-      }
-    },
     updateCards: async (context, body) => {
       const apiKey = context.rootState.currentUser.apiKey
       const isOnline = context.rootState.isOnline
@@ -741,6 +839,15 @@ const self = {
         return normalizeResponse(response)
       } catch (error) {
         context.dispatch('handleServerError', { name: 'search', error })
+      }
+    },
+    updateCardCounter: async (context, body) => {
+      try {
+        const options = await context.dispatch('requestOptions', { body, method: 'PATCH', space: context.rootState.currentSpace })
+        const response = await fetch(`${host}/card/update-counter`, options)
+        return normalizeResponse(response)
+      } catch (error) {
+        context.dispatch('handleServerError', { name: 'update-counter', error })
       }
     },
 
@@ -855,49 +962,6 @@ const self = {
     //     console.error('🚒 updateUserTagsColor', error)
     //   }
     // },
-
-    // Referral
-
-    createReferral: async (context, body) => {
-      try {
-        const options = await context.dispatch('requestOptions', { body, method: 'POST', space: context.rootState.currentSpace })
-        const response = await fetch(`${host}/referral`, options)
-        return normalizeResponse(response)
-      } catch (error) {
-        console.error('🚒 createReferral', error)
-      }
-    },
-    getReferralsByUser: async (context, body) => {
-      try {
-        const options = await context.dispatch('requestOptions', { body, method: 'GET', space: context.rootState.currentSpace })
-        const response = await fetch(`${host}/referral`, options)
-        return normalizeResponse(response)
-      } catch (error) {
-        console.error('🚒 getReferralsByUser', error)
-      }
-    },
-
-    // Advocate Referrals
-
-    getAdvocateUnused: async (context, name) => {
-      try {
-        const options = await context.dispatch('requestOptions', { method: 'GET', space: context.rootState.currentSpace })
-        const response = await fetch(`${host}/advocate-referral/unused/${name}`, options)
-        // server throws return 404 if no match
-        return normalizeResponse(response)
-      } catch (error) {
-        console.error('🚒 getAdvocateUnused', error)
-      }
-    },
-    getAdvocateUsedUser: async (context, name) => {
-      try {
-        const options = await context.dispatch('requestOptions', { method: 'GET', space: context.rootState.currentSpace })
-        const response = await fetch(`${host}/advocate-referral/used/${name}`, options)
-        return normalizeResponse(response)
-      } catch (error) {
-        context.dispatch('handleServerError', { name: 'getPublicUser', error })
-      }
-    },
 
     // Billing Stripe
 
@@ -1072,8 +1136,7 @@ const self = {
         const options = await context.dispatch('requestOptions', { method: 'GET', space: context.rootState.currentSpace })
         const response = await fetch(`${host}/journal-daily-prompt`, options)
         const data = await normalizeResponse(response)
-        let name = data.name
-        return name
+        return data
       } catch (error) {
         console.error('🚒 journalDailyPrompt', error)
       }

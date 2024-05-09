@@ -20,7 +20,9 @@ const checkIsSpaceScope = (event) => {
   if (isFromInput) { return }
   const isBody = tagName === 'BODY'
   const isMain = tagName === 'MAIN'
-  const isFocusedCard = event.target.className === 'card'
+  const nodeList = event.target.classList
+  const classes = [ ...nodeList ]
+  const isFocusedCard = classes.includes('card')
   return isBody || isMain || isFocusedCard
 }
 
@@ -80,7 +82,7 @@ export default {
   methods: {
     // on key up
     handleShortcuts (event) {
-      const key = event.key
+      const key = event.key.toLowerCase()
       // console.warn('🎹', key)
       // const isFromCard = event.target.classList[0] === 'card'
       const isSpaceScope = checkIsSpaceScope(event)
@@ -99,10 +101,10 @@ export default {
         this.$store.dispatch('themes/toggle')
         this.$store.dispatch('themes/isSystem', false)
       // Backspace, Clear, Delete
-      } else if ((key === 'Backspace' || key === 'Clear' || key === 'Delete') && isSpaceScope) {
+      } else if ((key === 'backspace' || key === 'clear' || key === 'delete') && isSpaceScope) {
         this.remove()
       // Escape
-      } else if (key === 'Escape') {
+      } else if (key === 'escape') {
         this.$store.dispatch('closeAllDialogs')
         this.$store.commit('currentUserToolbar', 'card')
       } else if (key === '1' && isSpaceScope) {
@@ -135,16 +137,16 @@ export default {
     },
     // on key down
     handleMetaKeyShortcuts (event) {
-      const key = event.key
+      const key = event.key.toLowerCase()
       const isMeta = event.metaKey || event.ctrlKey
       const isCardScope = checkIsCardScope(event)
       const isSpaceScope = checkIsSpaceScope(event)
       const isFromInput = event.target.closest('input') || event.target.closest('textarea')
       // Add Child Card
-      if (event.shiftKey && key === 'Enter' && (isSpaceScope || isCardScope)) {
+      if (event.shiftKey && key === 'enter' && (isSpaceScope || isCardScope)) {
         this.addChildCard()
       // Add Card
-      } else if (key === 'Enter' && isSpaceScope) {
+      } else if (key === 'enter' && isSpaceScope) {
         this.addCard()
       // Redo
       } else if (event.shiftKey && isMeta && key === 'z' && !isFromInput) {
@@ -227,7 +229,8 @@ export default {
       const isMiddleClick = middleMouseButton === event.button
       const isPanScope = checkIsPanScope(event)
       const toolbarIsBox = this.$store.state.currentUserToolbar === 'box'
-      const shouldBoxSelect = event.shiftKey && isPanScope && !toolbarIsBox
+      const isNotConnecting = !this.$store.state.currentUserIsDrawingConnection
+      const shouldBoxSelect = event.shiftKey && isPanScope && !toolbarIsBox && isNotConnecting
       const userDisablePan = this.$store.state.currentUser.shouldDisableRightClickToPan
       const shouldPan = (isRightClick || isMiddleClick) && isPanScope && !userDisablePan
       const position = utils.cursorPositionInPage(event)
@@ -335,7 +338,7 @@ export default {
       let childCard = document.querySelector(`.card[data-card-id="${childCardId}"]`)
       const childCardData = this.$store.getters['currentCards/byId'](childCardId)
       const shouldOutdentChildToParent = childCard && !childCardData
-      const scroll = this.$store.getters.windowScrollWithSpaceOffset
+      const scroll = this.$store.getters.windowScrollWithSpaceOffset()
       const spaceBetweenCards = utils.spaceBetweenCards()
       let position = {}
       let isParentCard = true
@@ -387,7 +390,7 @@ export default {
       options = options || {}
       useSiblingConnectionType = false
       const spaceBetweenCards = utils.spaceBetweenCards()
-      const scroll = this.$store.getters.windowScrollWithSpaceOffset
+      const scroll = this.$store.getters.windowScrollWithSpaceOffset()
       const parentCardId = this.$store.state.parentCardId
       const childCardId = this.$store.state.childCardId
       let parentCard = document.querySelector(`.card[data-card-id="${parentCardId}"]`)
@@ -488,7 +491,7 @@ export default {
     clearAllSelectedCards () {
       this.$store.dispatch('clearMultipleSelected')
       this.$store.commit('cardDetailsIsVisibleForCardId', '')
-      this.$store.commit('triggerUpdatePositionInVisualViewport')
+      this.$store.commit('triggerUpdateHeaderAndFooterPosition')
     },
 
     canEditCardById (cardId) {
@@ -559,112 +562,54 @@ export default {
 
     // Paste
 
+    notifyPasted (position) {
+      this.$store.commit('addNotificationWithPosition', { message: 'Pasted', position, type: 'success', layer: 'app', icon: 'cut' })
+    },
+
     async getClipboardData () {
       this.$store.commit('clearNotificationsWithPosition')
-      const position = currentCursorPosition || prevCursorPosition
+      let position = currentCursorPosition || prevCursorPosition
       try {
-        let clipboardItems
-        // TODO add fallback for firefox
+        this.notifyPasted(position)
         if (!navigator.clipboard.read) {
-          const message = 'Pasting cards is not supported by this browser'
-          this.$store.commit('addNotification', { message, icon: 'cut', type: 'danger' })
-          return
+          return utils.clone(this.$store.state.clipboardDataPolyfill)
         }
-        clipboardItems = await navigator.clipboard.read()
-        for (const item of clipboardItems) {
-          const hasImage = item.types.includes('image/png')
-          const hasHTML = item.types.includes('text/html')
-          const hasText = item.types.includes('text/plain')
-          if (hasImage) {
-          // TODO return { blob }
-          // https://developer.mozilla.org/en-US/docs/Web/API/Clipboard/read
-          // kinopio data, or html text
-          } else if (hasHTML) {
-            const index = item.types.indexOf('text/html')
-            const type = item.types[index]
-            const blob = await item.getType(type)
-            let text = await blob.text()
-            text = utils.innerHTMLText(text)
-            const isJSON = utils.isStringJSON(text)
-            if (!isJSON) {
-              this.$store.commit('addNotificationWithPosition', { message: 'Pasted', position, type: 'success', layer: 'app', icon: 'cut' })
-              return { text }
-            }
-            const data = JSON.parse(text)
-            if (data.isKinopioData) {
-              this.$store.commit('addNotificationWithPosition', { message: 'Pasted', position, type: 'success', layer: 'app', icon: 'cut' })
-              return data
-            }
-          // plain text
-          } else if (hasText) {
-            const index = item.types.indexOf('text/plain')
-            const type = item.types[index]
-            const blob = await item.getType(type)
-            let text = await blob.text()
-            text = utils.trim(text)
-            this.$store.commit('addNotificationWithPosition', { message: 'Pasted', position, type: 'success', layer: 'app', icon: 'cut' })
-            return { text }
-          }
-        }
+        const text = await navigator.clipboard.readText()
+        return { text }
       } catch (error) {
         console.error('🚑 getClipboardData', error)
         this.$store.commit('addNotificationWithPosition', { message: `Could not paste`, position, type: 'danger', layer: 'app', icon: 'cut' })
       }
     },
 
-    shouldAddConnection (connection) {
-      const startCard = this.$store.getters['currentCards/byId'](connection.startCardId)
-      const endCard = this.$store.getters['currentCards/byId'](connection.endCardId)
-      return Boolean(startCard && endCard)
+    normalizePasteData (data) {
+      data.cards = data.cards.map(card => {
+        card.name = utils.decodeEntitiesFromHTML(card.name)
+        return card
+      })
+      data.boxes = data.boxes.map(box => {
+        box.name = utils.decodeEntitiesFromHTML(box.name)
+        return box
+      })
+      return data
     },
 
     handlePasteKinopioData (data, position) {
-      data = utils.uniqueSpaceItems(data)
+      if (!data.cards) { return }
+      this.$store.dispatch('history/pause')
+      this.normalizePasteData(data)
+      data = this.$store.getters['currentSpace/newItems']({ items: data })
       let { cards, connectionTypes, connections, boxes } = data
-      // relative card and box positions
-      cards = cards.map(card => {
-        card.isCard = true
-        return card
-      })
-      boxes = boxes.map(box => {
-        box.isBox = true
-        return box
-      })
-      let items = cards.concat(boxes)
-      items = utils.itemsPositionsShifted(items, position)
-      cards = items.filter(item => item.isCard)
-      boxes = items.filter(item => item.isBox)
-      // add cards
-      this.$store.dispatch('currentCards/addMultiple', cards)
-      // add new types
-      connectionTypes = connectionTypes.map(type => {
-        const existingType = this.$store.getters['currentConnections/existingTypeByData'](type)
-        if (existingType) {
-          connections = utils.updateConnectionsType({ connections, prevTypeId: type.id, newTypeId: existingType.id })
-          return existingType
-        } else {
-          return type
-        }
-      })
-      connectionTypes.forEach(type => {
-        this.$store.dispatch('currentConnections/addType', type)
-      })
-      // add connections
-      setTimeout(() => {
-        connections = connections.filter(connection => this.shouldAddConnection(connection))
-        connections.forEach(connection => {
-          const type = { id: connection.connectionTypeId }
-          this.$store.dispatch('currentConnections/add', { connection, type, shouldNotRecordHistory: true })
-        })
-        connections.forEach(connection => {
-          this.$store.dispatch('currentConnections/updatePaths', { connections, cards })
-        })
-      }, 20)
-      // add boxes
-      boxes.forEach(box => {
-        this.$store.dispatch('currentBoxes/add', { box })
-      })
-      // select
+      // update positions
+      cards = utils.itemsPositionsShifted(cards, position)
+      boxes = utils.itemsPositionsShifted(boxes, position)
+      // add items
+      this.$store.dispatch('currentCards/addMultiple', { cards })
+      connectionTypes.forEach(connectionType => this.$store.dispatch('currentConnections/addType', connectionType))
+      connections.forEach(connection => this.$store.dispatch('currentConnections/add', { connection, type: { id: connection.connectionTypeId } }))
+      boxes.forEach(box => this.$store.dispatch('currentBoxes/add', { box }))
+      this.$store.dispatch('currentConnections/updatePaths', { connections: connections, shouldUpdateApi: true })
+      // select new items
       const cardIds = cards.map(card => card.id)
       const connectionIds = connections.map(connection => connection.id)
       const boxIds = boxes.map(box => box.id)
@@ -678,6 +623,7 @@ export default {
     },
 
     handlePastePlainText (data, position) {
+      this.$store.dispatch('history/pause')
       const cardNames = utils.splitCardNameByParagraphAndSentence(data.text)
       // add card(s)
       let cards = cardNames.map(name => {
@@ -688,7 +634,7 @@ export default {
           y: position.y
         }
       })
-      this.$store.dispatch('currentCards/addMultiple', cards)
+      this.$store.dispatch('currentCards/addMultiple', { cards })
       this.$store.dispatch('currentCards/distributeVertically', cards)
       this.$nextTick(() => {
         // select
@@ -734,18 +680,10 @@ export default {
       if (!data) { return }
       this.$store.commit('closeAllDialogs')
       this.$store.commit('clearMultipleSelected')
-      // add items
-      this.$store.dispatch('history/pause')
+      // add data items
       if (data.isKinopioData) {
-        data.cards = data.cards.map(card => {
-          card.name = utils.decodeEntitiesFromHTML(card.name)
-          return card
-        })
-        data.boxes = data.boxes.map(box => {
-          box.name = utils.decodeEntitiesFromHTML(box.name)
-          return box
-        })
         this.handlePasteKinopioData(data, position)
+      // add plain text cards
       } else {
         data.text = utils.decodeEntitiesFromHTML(data.text)
         this.handlePastePlainText(data, position)
@@ -753,37 +691,14 @@ export default {
     },
 
     async writeSelectedToClipboard () {
-      const cardIds = this.selectedCardIds()
-      const cards = cardIds.map(cardId => {
-        return this.$store.getters['currentCards/byId'](cardId)
-      })
-      const connectionIds = this.$store.state.multipleConnectionsSelectedIds
-      const connections = connectionIds.map(connectionId => {
-        return this.$store.getters['currentConnections/byId'](connectionId)
-      })
-      const connectionTypes = connections.map(connection => {
-        return this.$store.getters['currentConnections/typeByConnection'](connection)
-      })
-      const boxes = this.$store.getters['currentBoxes/isSelected']
-      if (!cards.length && !connections.length && !boxes.length) {
-        throw { message: 'No content selected' }
-      }
+      const selectedItems = this.$store.getters['currentSpace/selectedItems']
+      const { cards, connectionTypes, connections, boxes } = selectedItems
       let data = { isKinopioData: true, cards, connections, connectionTypes, boxes }
-      data = JSON.stringify(data)
-      data = `<kinopio>${data}</kinopio>`
       const text = utils.textFromCardNames(cards)
-      console.log('🎊 copyData', { cards, connections, connectionTypes, boxes }, text)
+      console.log('🎊 copyData', data, text)
       try {
-        if (navigator.clipboard.write) {
-          await navigator.clipboard.write([
-            new ClipboardItem({ // eslint-disable-line no-undef
-              'text/plain': new Blob([text], { type: 'text/plain' }),
-              'text/html': new Blob([data], { type: 'text/html' })
-            })
-          ])
-        } else {
-          await navigator.clipboard.writeText(utils.textFromCardNames(cards))
-        }
+        this.$store.commit('clipboardDataPolyfill', data)
+        await navigator.clipboard.writeText(text)
       } catch (error) {
         console.warn('🚑 writeSelectedToClipboard', error)
         throw { error }
@@ -803,8 +718,7 @@ export default {
         zoom = this.$store.getters.spaceZoomDecimal
       }
       // cards
-      let cards = utils.clone(this.$store.getters['currentCards/all'])
-      cards = cards.filter(card => (card.y * zoom) > position.y)
+      const cards = this.$store.getters['currentCards/isBelowY'](position.y, zoom)
       const cardIds = cards.map(card => card.id)
       // boxes
       let boxes = utils.clone(this.$store.getters['currentBoxes/all'])

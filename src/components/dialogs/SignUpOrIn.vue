@@ -8,7 +8,6 @@ dialog.narrow.sign-up-or-in(v-if="visible" :open="visible")
   //- Sign Up
   section(v-if="signUpVisible")
     p Create an account to share your spaces and access them anywhere
-    ReferredNewUserCredits
     form(@submit.prevent="signUp")
       input(ref="email" type="email" autocomplete="email" placeholder="Email" required v-model="email" @input="clearErrors")
       .badge.info(v-if="error.accountAlreadyExists") An account with this email already exists, Sign In instead
@@ -64,7 +63,9 @@ dialog.narrow.sign-up-or-in(v-if="visible" :open="visible")
 import utils from '@/utils.js'
 import Loader from '@/components/Loader.vue'
 import cache from '@/cache.js'
-import ReferredNewUserCredits from '@/components/ReferredNewUserCredits.vue'
+
+import inboxSpace from '@/data/inbox.json'
+import helloSpace from '@/data/hello.json'
 
 import { nanoid } from 'nanoid'
 
@@ -74,8 +75,7 @@ let sessionToken
 export default {
   name: 'SignUpOrIn',
   components: {
-    Loader,
-    ReferredNewUserCredits
+    Loader
   },
   props: {
     visible: Boolean
@@ -214,7 +214,7 @@ export default {
       if (this.isSuccess(response)) {
         this.$store.commit('clearAllNotifications', false)
         this.$store.commit('currentUser/replaceState', newUser)
-        this.updateLocalSpacesWithNewUserId()
+        this.updateSpacesUserId()
         this.updateCurrentSpaceWithNewUserId(currentUser, newUser)
         await this.$store.dispatch('api/createSpaces')
         this.notifySignedIn()
@@ -222,9 +222,6 @@ export default {
         const currentSpace = this.$store.state.currentSpace
         this.$store.commit('triggerUpdateWindowHistory')
         this.$store.dispatch('themes/restore')
-        this.clearNotifications()
-        this.checkIfShouldAddReferral()
-        this.checkIfShouldUpgradeReferral()
       } else {
         await this.handleErrors(newUser)
       }
@@ -245,9 +242,9 @@ export default {
         // update user to remote user
         this.$store.commit('currentUser/updateUser', result)
         // update local spaces to remote user
-        this.checkIfShouldRemoveSpace('Hello Kinopio')
-        this.checkIfShouldRemoveSpace('Inbox')
-        this.updateLocalSpacesWithNewUserId()
+        this.removeUneditedSpace('Hello Kinopio')
+        this.removeUneditedSpace('Inbox')
+        this.updateSpacesUserId()
         await this.$store.dispatch('api/createSpaces')
         this.notifySignedIn()
         // add new spaces from remote
@@ -261,7 +258,6 @@ export default {
         this.$store.dispatch('currentUser/restoreUserFavorites')
         this.$store.commit('triggerUpdateNotifications')
         this.$store.dispatch('themes/restore')
-        this.clearNotifications()
         if (shouldLoadLastSpace) {
           this.$store.dispatch('currentSpace/loadLastSpace')
           this.$store.commit('triggerUpdateWindowHistory')
@@ -272,36 +268,12 @@ export default {
       }
     },
 
-    async checkIfShouldUpgradeReferral () {
-      const referrerName = this.$store.state.currentUser.advocateReferrerName
-      if (!referrerName) { return }
-      this.$store.commit('currentUser/isUpgraded', true, { root: true })
-      this.$store.commit('addNotification', { message: `Your account has been upgraded to free. Thanks for helping share Kinopio`, type: 'success', isPersistentItem: true })
-    },
-
-    async checkIfShouldAddReferral () {
-      const referredByUserId = this.$store.state.currentUser.referredByUserId
-      if (!referredByUserId) { return }
-      const body = {
-        userId: referredByUserId,
-        referredUserId: this.$store.state.currentUser.id
-      }
-      const referral = await this.$store.dispatch('api/createReferral', body)
-      console.log('🫧 referral created', referral)
-      this.$store.commit('notifyEarnedCredits', true)
-    },
-
-    updateLocalSpacesWithNewUserId () {
+    updateSpacesUserId () {
       const userId = this.$store.state.currentUser.id
       const spaces = cache.getAllSpaces()
-      spaces.forEach(space => {
-        space = utils.updateSpaceUserId(space, userId)
-        cache.updateSpace('userId', userId, space.id)
-        cache.updateSpace('cards', space.cards, space.id)
-        cache.updateSpace('connectionTypes', space.connectionTypes, space.id)
-        cache.updateSpace('connections', space.connections, space.id)
-        cache.updateSpace('boxes', space.boxes, space.id)
-        cache.updateSpace('users', [{ id: userId }], space.id)
+      const newSpaces = utils.updateSpacesUserId(userId, spaces)
+      newSpaces.forEach(space => {
+        cache.saveSpace(space)
       })
     },
 
@@ -324,12 +296,25 @@ export default {
       }
     },
 
-    checkIfShouldRemoveSpace (spaceName) {
-      let space = cache.getSpaceByName(spaceName)
-      if (!space) { return }
-      const isEdited = space.editedByUserId
-      if (!isEdited) {
-        cache.removeSpace(space)
+    removeUneditedSpace (spaceName) {
+      let currentSpace = cache.getSpaceByName(spaceName)
+      let space
+      if (spaceName === 'Hello Kinopio') {
+        space = helloSpace
+      } else if (spaceName === 'Inbox') {
+        space = inboxSpace
+      }
+      const cardNames = space.cards.map(card => card.name)
+      let spaceIsEdited
+      currentSpace.cards.forEach(card => {
+        const cardIsNew = !cardNames.includes(card.name)
+        if (cardIsNew) {
+          spaceIsEdited = true
+        }
+      })
+      if (!spaceIsEdited) {
+        console.log('signIn removeUneditedSpace', spaceName)
+        cache.deleteSpace(currentSpace)
         shouldLoadLastSpace = true
       }
     },
@@ -380,11 +365,6 @@ export default {
     createSessionToken () {
       sessionToken = nanoid()
       this.$store.dispatch('api/createSessionToken', sessionToken)
-    },
-
-    clearNotifications () {
-      this.$store.commit('notifyReferralSuccessUser', null)
-      this.$store.commit('notifyReferralSuccessReferrerName', false)
     },
 
     focusEmail () {

@@ -25,7 +25,7 @@ dialog.card-details(v-if="visible" :open="visible" ref="dialog" @click.left="clo
         data-type="name"
         :maxlength="maxCardLength"
         @click.left="clickName"
-        @blur="triggerUpdatePositionInVisualViewport"
+        @blur="triggerUpdateHeaderAndFooterPosition"
         @paste="updatePastedName"
 
         @keyup.alt.enter.exact.stop
@@ -129,7 +129,7 @@ dialog.card-details(v-if="visible" :open="visible" ref="dialog" @click.left="clo
 
     MediaPreview(:visible="cardHasMedia" :card="card" :formats="formats")
     UrlPreview(
-      :visible="Boolean(card.urlPreviewUrl) || isLoadingUrlPreview"
+      :visible="urlPreviewIsVisible"
       :loading="isLoadingUrlPreview"
       :card="card"
       :urlsIsVisibleInName="urlsIsVisible"
@@ -464,7 +464,7 @@ export default {
     url () { return utils.urlFromString(this.name) },
     urls () {
       const name = utils.removeMarkdownCodeblocksFromString(this.name)
-      const urls = utils.urlsFromString(name, true)
+      const urls = utils.urlsFromString(name)
       this.updateCardWidthForUrl(urls)
       return urls
     },
@@ -472,8 +472,8 @@ export default {
       if (!this.urls) { return [] }
       return this.urls.filter(url => {
         const isLink = utils.urlType(url) === 'link'
-        const isValidTld = utils.urlIsValidTld(url)
-        return isLink && isValidTld
+        const isValidUrl = utils.urlIsValidTld(url) || utils.urlIsValidLocalhost(url)
+        return isLink && isValidUrl
       })
     },
     validWebUrls () {
@@ -563,14 +563,24 @@ export default {
         zoom = 1
       }
       const transform = `scale(${zoom})`
-      const left = `${this.card.x + 8}px`
-      const top = `${this.card.y + 8}px`
+      const offset = 8
+      const left = `${this.card.x + offset}px`
+      const top = `${this.card.y + offset}px`
       return { transform, left, top }
     },
     cardUrlPreviewIsVisible () {
       const isErrorUrl = this.card.urlPreviewErrorUrl && this.card.urlPreviewUrl === this.card.urlPreviewErrorUrl
       const hasPreview = this.url && (this.isLoadingUrlPreview || this.card.urlPreviewUrl)
       return Boolean(this.card.urlPreviewIsVisible && hasPreview && !isErrorUrl)
+    },
+    urlPreviewIsVisible () {
+      if (this.isLoadingUrlPreview) { return true }
+      if (!this.card.urlPreviewUrl) { return }
+      const urls = utils.urlsFromString(this.card.name) || []
+      const value = urls.find((url) => {
+        return url?.includes(this.card.urlPreviewUrl)
+      })
+      return Boolean(value)
     },
     isLoadingUrlPreview () {
       const isLoading = this.urlPreviewLoadingForCardIds.find(cardId => cardId === this.card.id)
@@ -602,7 +612,7 @@ export default {
     updateCardWidthForUrl (urls) {
       if (!utils.arrayHasItems(urls)) { return }
       if (this.card.resizeWidth) { return }
-      const resizeWidth = this.$store.getters['currentCards/defaultCardMaxWidth']
+      const resizeWidth = consts.defaultCardMaxWidth
       this.$store.dispatch('currentCards/update', { id: this.card.id, resizeWidth })
     },
     broadcastShowCardDetails () {
@@ -695,7 +705,7 @@ export default {
       }
     },
     updateMediaUrls () {
-      const urls = utils.urlsFromString(this.card.name, true)
+      const urls = utils.urlsFromString(this.card.name)
       this.formats.image = ''
       this.formats.video = ''
       this.formats.audio = ''
@@ -769,7 +779,7 @@ export default {
     addSplitCards (newCards) {
       const spaceBetweenCards = 12
       let prevCard = utils.clone(this.card)
-      this.$store.dispatch('currentCards/addMultiple', newCards)
+      this.$store.dispatch('currentCards/addMultiple', { cards: newCards })
       this.$nextTick(() => {
         newCards = newCards.map(card => {
           const element = document.querySelector(`article [data-card-id="${prevCard.id}"]`)
@@ -820,8 +830,8 @@ export default {
       this.wasPasted = true
       this.$store.dispatch('currentCards/updateURLQueryStrings', { cardId: this.card.id })
     },
-    triggerUpdatePositionInVisualViewport () {
-      this.$store.commit('triggerUpdatePositionInVisualViewport')
+    triggerUpdateHeaderAndFooterPosition () {
+      this.$store.commit('triggerUpdateHeaderAndFooterPosition')
     },
     addCheckbox () {
       const update = {
@@ -843,9 +853,7 @@ export default {
         nameUpdatedByUserId: userId
       }
       this.$store.dispatch('currentCards/update', card)
-      this.$nextTick(() => {
-        this.$store.dispatch('currentConnections/updatePaths', { cardId: this.card.id, shouldUpdateApi: true })
-      })
+      this.updatePaths()
       this.updateMediaUrls()
       this.updateTags()
       if (this.createdByUser.id !== this.currentUser.id) { return }
@@ -854,6 +862,11 @@ export default {
         this.$store.dispatch('userNotifications/addCardUpdated', { cardId: this.card.id, type: 'updateCard' })
         this.notifiedMembers = true
       }
+    },
+    updatePaths () {
+      this.$nextTick(() => {
+        this.$store.dispatch('currentConnections/updatePaths', { cardId: this.card.id, shouldUpdateApi: true })
+      })
     },
     updateDimensions (cardId) {
       this.$store.dispatch('currentCards/updateDimensions', { cardId })
@@ -916,7 +929,7 @@ export default {
       this.$store.dispatch('history/resume')
       this.$store.dispatch('currentCards/remove', this.card)
       this.$store.commit('cardDetailsIsVisibleForCardId', '')
-      this.triggerUpdatePositionInVisualViewport()
+      this.triggerUpdateHeaderAndFooterPosition()
     },
     textareaSizes () {
       const element = this.$refs.dialog
@@ -953,7 +966,7 @@ export default {
     },
     focusName (position) {
       if (this.shouldPreventNextFocusOnName) {
-        this.triggerUpdatePositionInVisualViewport()
+        this.triggerUpdateHeaderAndFooterPosition()
         this.$store.commit('shouldPreventNextFocusOnName', false)
         return
       }
@@ -968,7 +981,7 @@ export default {
         if (length) {
           element.setSelectionRange(length, length)
         }
-        this.triggerUpdatePositionInVisualViewport()
+        this.triggerUpdateHeaderAndFooterPosition()
       })
     },
     scrollIntoView (behavior) {
@@ -991,12 +1004,12 @@ export default {
         this.scrollIntoView(behavior)
         this.focusName()
         this.triggerUpdateMagicPaintPositionOffset()
-        this.triggerUpdatePositionInVisualViewport()
+        this.triggerUpdateHeaderAndFooterPosition()
       })
     },
     triggerUpdateMagicPaintPositionOffset () {
       this.$store.commit('triggerUpdateMagicPaintPositionOffset')
-      this.triggerUpdatePositionInVisualViewport()
+      this.triggerUpdateHeaderAndFooterPosition()
     },
     closeDialogs (shouldSkipGlobalDialogs) {
       this.$store.commit('triggerCloseChildDialogs')
@@ -1054,7 +1067,7 @@ export default {
 
     // Comment
 
-    triggerCommentAddClosingBrackets () {
+    addCommentClosingBrackets () {
       const cursorPosition = this.selectionStartPosition()
       const previousCharacter = this.name[cursorPosition - 1]
       if (previousCharacter === '(') {
@@ -1079,8 +1092,8 @@ export default {
       const isCursorInsideTagBrackets = this.isCursorInsideTagBrackets()
       const isCursorInsideSlashCommand = this.isCursorInsideSlashCommand()
       if (keyIsArrowUpOrDown) { return }
-      if (key === '(' && !event.shiftKey) {
-        this.triggerCommentAddClosingBrackets()
+      if (key === '(') {
+        this.addCommentClosingBrackets()
       }
       if (utils.hasBlankCharacters(key)) {
         this.hideSpacePicker()
@@ -1092,7 +1105,7 @@ export default {
         this.showSpacePicker()
       } else if (key === '[' && previousCharacter === '[') {
         this.showTagPicker()
-        this.addClosingBrackets()
+        this.addTagClosingBrackets()
       } else if (keyIsLettterOrNumber && isCursorInsideTagBrackets) {
         this.showTagPicker()
       }
@@ -1275,7 +1288,7 @@ export default {
         this.hideTagPicker()
       }
     },
-    addClosingBrackets () {
+    addTagClosingBrackets () {
       const cursorPosition = this.selectionStartPosition()
       const name = this.name
       const newName = `${name.substring(0, cursorPosition)}]]${name.substring(cursorPosition)}`
@@ -1401,14 +1414,6 @@ export default {
       this.$store.dispatch('currentConnections/updatePaths', { cardId: this.card.id, shouldUpdateApi: true })
       this.$store.dispatch('currentCards/updateDimensions', { cards: [this.card] })
     },
-    toggleUrlPreviewIsVisible () {
-      const value = !this.card.urlPreviewIsVisible
-      const update = {
-        id: this.card.id,
-        urlPreviewIsVisible: value
-      }
-      this.$store.dispatch('currentCards/update', update)
-    },
     resetPinchCounterZoomDecimal () {
       this.$store.commit('pinchCounterZoomDecimal', 1)
     },
@@ -1451,7 +1456,7 @@ export default {
       this.cancelOpening()
       this.$store.dispatch('currentSpace/removeUnusedTagsFromCard', cardId)
       this.$store.commit('updateCurrentCardConnections')
-      this.$store.commit('triggerUpdatePositionInVisualViewport')
+      this.$store.commit('triggerUpdateHeaderAndFooterPosition')
       this.$store.commit('shouldPreventNextEnterKey', false)
       if (!card) { return }
       const cardHasName = Boolean(card.name)

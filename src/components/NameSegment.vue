@@ -17,7 +17,8 @@ const props = defineProps({
   segment: Object,
   search: String,
   isStrikeThrough: Boolean,
-  parentCardId: String
+  parentCardId: String,
+  backgroundColorIsDark: Boolean
 })
 const emit = defineEmits(['showTagDetailsIsVisible'])
 
@@ -98,7 +99,7 @@ const showTagDetailsIsVisible = (event, tag) => {
 span.name-segment(:data-segment-types="dataMarkdownType" :data-tag-color="dataTagColor" :data-tag-name="dataTagName")
   template(v-if="props.segment.isText && props.segment.content")
     //- Name markdown
-    span.markdown(v-if="props.segment.markdown")
+    span.markdown(v-if="props.segment.markdown" :class="{ 'is-background-dark': backgroundColorIsDark, 'is-background-light': !backgroundColorIsDark }")
       template(v-for="markdown in props.segment.markdown")
         template(v-if="markdown.type === 'text'")
           span {{markdown.content}}
@@ -183,6 +184,26 @@ span.name-segment(:data-segment-types="dataMarkdownType" :data-tag-color="dataTa
       font-family var(--glyphs-font)
       font-size 44px
       margin 0
+    &.is-background-light
+      span,
+      a,
+      h1,
+      h2,
+      h3,
+      h4,
+      em,
+      strong
+       color var(--primary-on-light-background)
+    &.is-background-dark
+      span,
+      a,
+      h1,
+      h2,
+      h3,
+      h4,
+      em,
+      strong
+       color var(--primary-on-dark-background)
 
   .strikethrough
     text-decoration line-through

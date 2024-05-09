@@ -4,20 +4,17 @@
   .badge.button-badge.status(v-if="user.isSpectator" @click.stop="toggleDescription('Spectators')" :class="{active: name === 'Spectators'}")
     span Spectator
   //- Upgraded
-  .badge.button-badge.success(v-if="user.isUpgraded" @click.stop="toggleDescription('Upgraded')" :class="{active: name === 'Upgraded'}")
+  .badge.button-badge.success.badge-upgraded(v-if="user.isUpgraded" @click.stop="toggleDescription('Upgraded')" :class="{active: name === 'Upgraded'}")
     span Upgraded
   //- Donor
-  .badge.button-badge.success(v-if="user.isDonor" @click.stop="toggleDescription('Donor')" :class="{active: name === 'Donor'}")
+  .badge.button-badge.success.badge-donor(v-if="user.isDonor" @click.stop="toggleDescription('Donor')" :class="{active: name === 'Donor'}")
     span Donor
   //- Moderator
-  .badge.button-badge.info(v-if="user.isModerator" @click.stop="toggleDescription('Moderator')" :class="{active: name === 'Moderator'}")
+  .badge.button-badge.info.badge-moderator(v-if="user.isModerator" @click.stop="toggleDescription('Moderator')" :class="{active: name === 'Moderator'}")
     span Moderator
-  //- Guide Maker
-  .badge.button-badge.info(v-if="user.isGuideMaker" @click.stop="toggleDescription('GuideMaker')" :class="{active: name === 'GuideMaker'}")
-    span Guide Maker
   //- Ambassador
-  .badge.button-badge.success(v-if="user.isAmbassador" @click.stop="toggleDescription('Ambassador')" :class="{active: name === 'Ambassador'}")
-    img.icon.heart(src="@/assets/heart.svg")
+  .badge.button-badge.success.badge-ambassador(v-if="user.isAmbassador" @click.stop="toggleDescription('Ambassador')" :class="{active: name === 'Ambassador'}")
+    //- img.icon.heart(src="@/assets/heart.svg")
     span Ambassador
 
 .row(v-if="description")
@@ -42,7 +39,7 @@ export default {
   },
   computed: {
     isBadges () {
-      const badges = ['isSpectator', 'isUpgraded', 'isModerator', 'isGuideMaker', 'isDonor', 'isAmbassador']
+      const badges = ['isSpectator', 'isUpgraded', 'isModerator', 'isDonor', 'isAmbassador']
       return badges.find(badge => this.user[badge])
     }
   },
@@ -71,4 +68,12 @@ export default {
 .status
   span
     color var(--primary)
+.badge-donor
+  background var(--badge-donor) !important
+.badge-upgraded
+  background var(--badge-upgraded) !important
+.badge-moderator
+  background var(--badge-moderator) !important
+.badge-ambassador
+  background var(--badge-ambassador) !important
 </style>

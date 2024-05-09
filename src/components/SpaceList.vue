@@ -8,6 +8,7 @@ import MoonPhase from '@/components/MoonPhase.vue'
 import PrivacyIcon from '@/components/PrivacyIcon.vue'
 import Loader from '@/components/Loader.vue'
 import User from '@/components/User.vue'
+import UserLabelInline from '@/components/UserLabelInline.vue'
 import NameMatch from '@/components/NameMatch.vue'
 import OfflineBadge from '@/components/OfflineBadge.vue'
 import SpaceTodayJournalBadge from '@/components/SpaceTodayJournalBadge.vue'
@@ -61,6 +62,7 @@ const props = defineProps({
   showCategory: Boolean,
   showUser: Boolean,
   showOtherUsers: Boolean,
+  showCollaborators: Boolean,
   showUserIfCurrentUserIsCollaborator: Boolean,
   hideExploreBadge: Boolean,
   hideFilter: Boolean,
@@ -69,11 +71,14 @@ const props = defineProps({
   parentIsPinned: Boolean,
   showCheckmarkSpace: Boolean,
   userShowInExploreDate: String,
+  readSpaceIds: Array,
+  spaceReadDateType: String,
   showCreateNewSpaceFromSearch: Boolean,
   resultsSectionHeight: Number,
   disableListOptimizations: Boolean,
   search: String,
-  parentDialog: String
+  parentDialog: String,
+  previewImageIsWide: Boolean
 })
 
 const state = reactive({
@@ -85,7 +90,7 @@ const state = reactive({
   heightByIndex: {}
 })
 
-const isOffline = computed(() => !state.isOnline)
+const isOnline = computed(() => store.state.isOnline)
 
 // scroll
 
@@ -97,7 +102,8 @@ watch(() => props.isLoading, async (value, prevValue) => {
   await nextTick()
   updateScroll()
 })
-const updateScroll = () => {
+const updateScroll = async () => {
+  await nextTick()
   let element = spaceListElement.value
   if (!element) { return }
   element = element.closest('section')
@@ -134,9 +140,11 @@ const duplicateSpace = () => {
   store.dispatch('closeAllDialogs')
 }
 const isNew = (space) => {
+  if (props.readSpaceIds?.includes(space.id)) { return }
   if (props.userShowInExploreDate) {
+    if (spaceIsCurrentSpace(space)) { return }
     const readDate = dayjs(props.userShowInExploreDate)
-    const spaceDate = dayjs(space.showInExploreUpdatedAt)
+    const spaceDate = utils.spaceReadDate(space, props.spaceReadDateType)
     const delta = readDate.diff(spaceDate, 'second')
     return delta < 0
   }
@@ -146,10 +154,6 @@ const isNew = (space) => {
   } else {
     return false
   }
-}
-const showCollaborator = (space) => {
-  const isUser = Boolean(user(space))
-  return props.showUserIfCurrentUserIsCollaborator && space.currentUserIsCollaborator && isUser
 }
 const categoryClassName = (space) => {
   const className = utils.normalizeString(space.category)
@@ -186,6 +190,23 @@ const user = (space) => {
     users = space.users
   }
   return space.user || users[0]
+}
+const users = (space) => {
+  const spaceUser = user(space)
+  let spaceUsers = [spaceUser]
+  if (space.otherUsers) {
+    spaceUsers = spaceUsers.concat(space.otherUsers)
+  } else if (space.collaborators) {
+    spaceUsers = spaceUsers.concat(space.collaborators)
+  }
+  return spaceUsers
+}
+const isMultipleUsers = (space) => {
+  return users(space).length > 1
+}
+const showUserIfCurrentUserIsCollaborator = (space) => {
+  const isUser = Boolean(user(space))
+  return props.showUserIfCurrentUserIsCollaborator && space.currentUserIsCollaborator && isUser
 }
 const selectSpace = (event, space) => {
   if (event) {
@@ -373,7 +394,7 @@ span.space-list-wrap
   )
   ul.results-list.space-list(ref="spaceListElement")
     template(v-for="(space, index) in spacesFiltered" :key="space.id")
-      .space-wrap(:data-item-is-visible="itemIsVisible(index)" :style="{height: state.heightByIndex[index] + 'px'}")
+      .space-wrap(:data-item-is-visible="itemIsVisible(index)" :data-space-id="space.id" :style="{height: state.heightByIndex[index] + 'px'}")
         a(:href="space.url")
           li(
             @click.left="selectSpace($event, space)"
@@ -383,24 +404,36 @@ span.space-list-wrap
           )
             template(v-if="itemIsVisible(index)")
               Loader(:visible="isLoadingSpace(space)")
-              //- user(s)
-              template(v-if="showOtherUsers")
-                .users(:class="{'multiple-users': space.otherUsers.length > 1}")
-                  User(:user="user(space)" :isClickable="false" :key="user(space).id" :isMedium="true")
-                  template(v-for="otherUser in space.otherUsers" :key="otherUser.id")
-                    User(:user="otherUser" :isClickable="false" :isMedium="true")
+
+              //- Users
+              //- show spectators
+              template(v-if="showOtherUsers && isMultipleUsers(space)")
+                .users.multiple-users
+                  template(v-for="user in users(space)" :key="user.id")
+                    User(:user="user" :isClickable="false" :isMedium="true")
+              template(v-else-if="showOtherUsers")
+                UserLabelInline(:user="user(space)" :isClickable="false" :key="user(space).id" :isMedium="true")
+              //- show collaborators
+              template(v-else-if="showCollaborators && isMultipleUsers(space)")
+                .users.multiple-users
+                  template(v-for="user in users(space)" :key="user.id")
+                    User(:user="user" :isClickable="false" :isMedium="true")
+              template(v-else-if="showCollaborators")
+                UserLabelInline(:user="user(space)" :isClickable="false" :key="user(space).id" :isMedium="true")
+              //- show user badge only
               template(v-else-if="showUser")
                 User(:user="user(space)" :isClickable="false" :key="user(space).id" :isMedium="true")
-              template(v-else-if="showCollaborator(space)")
+              //- show user when current user is collaborator
+              template(v-else-if="showUserIfCurrentUserIsCollaborator(space)")
                 User(:user="user(space)" :isClickable="false" :key="user(space).id" :isMedium="true")
+
               //- preview image
-              .preview-thumbnail-image-wrap(v-if="space.previewThumbnailImage && isOffline")
+              .preview-thumbnail-image-wrap(v-if="space.previewThumbnailImage && isOnline" :class="{wide: previewImageIsWide}")
                 img.preview-thumbnail-image(:src="space.previewThumbnailImage")
-                //- new
-                .badge.info.inline-badge.new-unread-badge(v-if="isNew(space)")
               //- offline
               span(v-if="isNotCached(space.id)")
                 OfflineBadge(:isInline="true" :isDanger="true")
+              //- template category
               .badge.info.inline-badge(v-if="showCategory && space.category" :class="categoryClassName(space)") {{space.category}}
               //- tweet space
               span(v-if="space.isFromTweet" title="Tweet space")
@@ -411,10 +444,10 @@ span.space-list-wrap
               span(v-if="space.name === 'Inbox'")
                 img.icon.inbox-icon(src="@/assets/inbox.svg")
               SpaceTodayJournalBadge(:space="space")
-              //- journal or template
+              //- journal
               MoonPhase(v-if="space.moonPhase" :moonPhase="space.moonPhase")
-              span(v-if="space.isTemplate")
-                img.icon.templates(src="@/assets/templates.svg" title="Template")
+              //- template
+              img.icon.templates(v-if="space.isTemplate" src="@/assets/templates.svg" title="Template")
               //- space details
               .name
                 span(v-if="state.filter")
@@ -426,123 +459,125 @@ span.space-list-wrap
                 img.icon.sunglasses(src="@/assets/sunglasses.svg" v-if="showInExplore(space)" title="Shown in Explore")
               button.button-checkmark(v-if="showCheckmarkSpace" @mousedown.left.stop="checkmarkSpace(space)" @touchstart.stop="checkmarkSpace(space)")
                 img.icon.checkmark(src="@/assets/checkmark.svg")
+            //- new
+            .badge.info.inline-badge.new-unread-badge(v-if="isNew(space)")
 </template>
 
 <style lang="stylus">
 .space-list-wrap
   position relative
 
-.space-list
-  .inline-badge
-    margin-left 0
-    flex none
+  .space-list
+    .inline-badge
+      margin-left 0
+      flex none
 
-  .new-unread-badge
-    position absolute
-    top -2px
-    right -2px
-    left initial
-    margin 0
+    .badge
+      margin-left 0
 
-  .badge
-    margin-left 0
+    .sunglasses
+      width 16px
 
-  .sunglasses
-    width 16px
+    .icon.tweet
+      min-width 12px
+      margin-right 4px
+      vertical-align -1px
 
-  .icon.tweet
-    min-width 12px
-    margin-right 4px
-    vertical-align -1px
+    .name
+      margin 0
+      margin-top 1px
+      white-space wrap
+      width 100%
+      .icon
+        margin-left 6px
 
-  .name
-    margin 0
-    margin-top 1px
-    white-space wrap
-    width 100%
-    .icon
-      margin-left 6px
+    .privacy-icon
+      height 12px
+      vertical-align -1px
 
-  .privacy-icon
-    height 12px
-    vertical-align -1px
+    .favorite-icon,
+    .inbox-icon
+      margin-right 5px
+      width 12px
+      min-width 12px
 
-  .favorite-icon,
-  .inbox-icon
-    margin-right 5px
-    width 12px
-    min-width 12px
-
-  .user
-    margin-right 6px
-    vertical-align middle
-
-  .users
-    margin-right 6px
-    display flex
-    flex-wrap wrap
-    justify-content flex-end
-    align-content flex-start
-    flex-shrink 0
     .user
-      margin-right 0
+      margin-right 6px
+      vertical-align middle
+    .user-label-inline
+      flex-shrink 0
+      max-width 100px
+      pointer-events none
+    .users
+      margin-right 6px
+      display flex
+      flex-wrap wrap
+      align-content flex-start
+      flex-shrink 0
+      max-width 66px // 3 users across
+      .user
+        margin-right 0
+    a
+      color var(--primary)
+      text-decoration none
 
-  a
-    color var(--primary)
-    text-decoration none
-
-  .color-only-badge
-    width 16px
-    height 16px
-    padding 0
-    min-width initial
-    min-height initial
-
-  .button-checkmark
-    margin-left auto
-
-  .checkmark
-    vertical-align 1px
-    width 10px
-
-  li
-    position relative
-    width 100%
-    min-height 30px
-    .loader
-      position absolute
-      width 13px
-      height 13px
-      top 10px
-      z-index 1
-    .icon.templates
-      margin-right 10px
-      vertical-align -2px
-
-  .space-wrap
-    position relative
-    button.inline-favorite
-      cursor pointer
-      z-index 1
+    .color-only-badge
+      width 16px
+      height 16px
       padding 0
-      padding-left 6px
-      padding-right 2px
-  .inline-favorite-wrap
-    cursor pointer
-    position absolute
-    right 4px
-    top 3px
-    padding 6px
-    padding-right 0
+      min-width initial
+      min-height initial
 
-  .moon-phase
-    margin-top 4px
-    margin-right 4px
+    .button-checkmark
+      margin-left auto
 
-  .preview-thumbnail-image-wrap
-    position relative
-    flex-shrink 0
-    margin-right 6px
-    width 24px
-    height 22px
+    .checkmark
+      vertical-align 1px
+      width 10px
+
+    li
+      position relative
+      width 100%
+      min-height 30px
+      padding-bottom 5px
+      .loader
+        position absolute
+        width 13px
+        height 13px
+        top 10px
+        z-index 1
+      .icon.templates
+        margin-right 5px
+        margin-top 5px
+
+    .space-wrap
+      position relative
+      button.inline-favorite
+        cursor pointer
+        z-index 1
+        padding 0
+        padding-left 6px
+        padding-right 2px
+    .inline-favorite-wrap
+      cursor pointer
+      position absolute
+      right 4px
+      top 3px
+      padding 6px
+      padding-right 0
+
+    .moon-phase
+      margin-top 4px
+      margin-right 4px
+
+    .preview-thumbnail-image-wrap
+      position relative
+      flex-shrink 0
+      margin-right 6px
+      &.wide
+        width 40px
+        height 30px
+        .preview-thumbnail-image
+          width 100%
+          height 100%
 </style>

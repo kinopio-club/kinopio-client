@@ -23,7 +23,7 @@ import uniqBy from 'lodash-es/uniqBy'
 import last from 'lodash-es/last'
 
 const store = createStore({
-  strict: import.meta.env.MODE !== 'production',
+  strict: consts.isDevelopment,
   state: {
     pageHeight: 0,
     pageWidth: 0,
@@ -47,19 +47,18 @@ const store = createStore({
     shouldPreventNextFocusOnName: false,
     isEmbedMode: false,
     isAddPage: false,
-    disableViewportOptimizations: false, // for urlbox
     isPresentationMode: false,
     pricingIsVisible: false,
     userSettingsIsVisible: false,
     offlineIsVisible: false,
     isFadingOutDuringTouch: false,
     prevSpaceIdInSession: '',
+    prevSpaceIdInSessionPagePosition: {},
     outsideSpaceBackgroundColor: '',
 
     // zoom and scroll
     spaceZoomPercent: 100,
     pinchCounterZoomDecimal: 1,
-    windowScroll: {},
     zoomOrigin: { x: 0, y: 0 },
 
     // search
@@ -83,10 +82,12 @@ const store = createStore({
     currentUserIsDraggingCard: false,
     currentUserIsHoveringOverConnectionId: '',
     currentUserIsHoveringOverCardId: '',
+    currentUserIsHoveringOverConnectorCardId: '',
     currentUserIsPanningReady: false,
     currentUserIsPanning: false,
     currentUserToolbar: 'card', // card, box
     currentUserIsDraggingConnectionIdLabel: '',
+    clipboardDataPolyfill: {}, // for firefox pasting
 
     // box-selecting
     currentUserIsBoxSelecting: false,
@@ -122,7 +123,7 @@ const store = createStore({
     multipleCardsSelectedIds: [],
     newTweetCards: [],
     prevNewTweetCards: [],
-    embedIsVisibleForCardId: '',
+    urlEmbedIsVisibleForCardId: '',
     // resizing card
     currentUserIsResizingCard: false,
     currentUserIsResizingCardIds: [],
@@ -133,7 +134,6 @@ const store = createStore({
     remoteUserTiltingCards: [],
     // dragging cards
     currentDraggingCardId: '',
-    currentDraggingConnectedCardIds: [],
     remoteCardsDragging: [],
     remoteUploadDraggedOverCards: [],
     preventDraggedCardFromShowingDetails: false,
@@ -207,12 +207,6 @@ const store = createStore({
     shouldResetDimensionsOnLoad: false,
     shouldShowExploreOnLoad: false,
 
-    // referral
-    validateUserReferralUserId: '',
-    shouldValidateUserReferralFromSpaceInvite: false,
-    validateAdvocateReferralName: '',
-    validateFromAdvocateReferralName: '',
-
     // notifications
     notifications: [],
     notifySpaceNotFound: false,
@@ -231,9 +225,6 @@ const store = createStore({
     notifySpaceIsHidden: false,
     notifyThanksForDonating: false,
     notifyThanksForUpgrading: false,
-    notifyReferralSuccessUser: null,
-    notifyEarnedCredits: false,
-    notifyReferralSuccessReferrerName: null,
 
     // notifications with position
     notificationsWithPosition: [],
@@ -250,7 +241,6 @@ const store = createStore({
     otherTags: [],
 
     // codeblocks
-
     codeLanguagePickerIsVisible: false,
     codeLanguagePickerPosition: {}, // x, y
     codeLanguagePickerCardId: ''
@@ -313,6 +303,7 @@ const store = createStore({
       state.pricingIsVisible = false
       state.codeLanguagePickerIsVisible = false
       state.offlineIsVisible = false
+      state.importArenaChannelIsVisible = false
     },
     isOnline: (state, value) => {
       utils.typeCheck({ value, type: 'boolean' })
@@ -349,22 +340,6 @@ const store = createStore({
     shouldShowExploreOnLoad: (state, value) => {
       utils.typeCheck({ value, type: 'boolean' })
       state.shouldShowExploreOnLoad = value
-    },
-    validateUserReferralUserId: (state, userId) => {
-      utils.typeCheck({ value: userId, type: 'string' })
-      state.validateUserReferralUserId = userId
-    },
-    shouldValidateUserReferralFromSpaceInvite: (state, value) => {
-      utils.typeCheck({ value, type: 'boolean' })
-      state.shouldValidateUserReferralFromSpaceInvite = value
-    },
-    validateAdvocateReferralName: (state, value) => {
-      utils.typeCheck({ value, type: 'string' })
-      state.validateAdvocateReferralName = value
-    },
-    validateFromAdvocateReferralName: (state, value) => {
-      utils.typeCheck({ value, type: 'string' })
-      state.validateFromAdvocateReferralName = value
     },
     addUrlPreviewLoadingForCardIds: (state, cardId) => {
       utils.typeCheck({ value: cardId, type: 'string' })
@@ -411,10 +386,6 @@ const store = createStore({
       utils.typeCheck({ value, type: 'number' })
       state.pinchCounterZoomDecimal = value
     },
-    windowScroll: (state, value) => {
-      utils.typeCheck({ value, type: 'object' })
-      state.windowScroll = value
-    },
     zoomOrigin: (state, value) => {
       state.zoomOrigin = value
     },
@@ -446,10 +417,6 @@ const store = createStore({
       utils.typeCheck({ value, type: 'boolean' })
       state.isAddPage = value
     },
-    disableViewportOptimizations: (state, value) => {
-      utils.typeCheck({ value, type: 'boolean', allowUndefined: true })
-      state.disableViewportOptimizations = value
-    },
     isPresentationMode: (state, value) => {
       utils.typeCheck({ value, type: 'boolean' })
       state.isPresentationMode = value
@@ -476,6 +443,10 @@ const store = createStore({
       } else {
         state.prevSpaceIdInSession = value
       }
+    },
+    prevSpaceIdInSessionPagePosition: (state, value) => {
+      utils.typeCheck({ value, type: 'object' })
+      state.prevSpaceIdInSessionPagePosition = value
     },
     outsideSpaceBackgroundColor: (state, value) => {
       utils.typeCheck({ value, type: 'string' })
@@ -534,7 +505,7 @@ const store = createStore({
     triggerUpdateRemoteUserCursor: () => {},
     triggerUpdateRemoteDropGuideLine: () => {},
     triggerUpdateStopRemoteUserDropGuideLine: () => {},
-    triggerUpdatePositionInVisualViewport: () => {},
+    triggerUpdateHeaderAndFooterPosition: () => {},
     triggerHideTouchInterface: () => {},
     triggerUpgradeUserIsVisible: () => {},
     triggerDonateIsVisible: () => {},
@@ -555,7 +526,6 @@ const store = createStore({
     triggerAddCard: (state, options) => {},
     triggerAddChildCard: (state, options) => {},
     triggerTemplatesIsVisible: () => {},
-    triggerEarnCreditsIsVisible: () => {},
     triggerImportIsVisible: () => {},
     triggerSelectAllItemsBelowCursor: (state, position) => {},
     triggerSplitCard: (state, cardId) => {},
@@ -601,6 +571,10 @@ const store = createStore({
       utils.typeCheck({ value: cardId, type: 'string' })
       state.currentUserIsHoveringOverCardId = cardId
     },
+    currentUserIsHoveringOverConnectorCardId: (state, cardId) => {
+      utils.typeCheck({ value: cardId, type: 'string' })
+      state.currentUserIsHoveringOverConnectorCardId = cardId
+    },
     cardDetailsIsVisibleForCardId: (state, cardId) => {
       utils.typeCheck({ value: cardId, type: 'string' })
       state.cardDetailsIsVisibleForCardId = cardId
@@ -632,9 +606,9 @@ const store = createStore({
       utils.typeCheck({ value, type: 'boolean' })
       state.preventCardDetailsOpeningAnimation = value
     },
-    embedIsVisibleForCardId: (state, cardId) => {
+    urlEmbedIsVisibleForCardId: (state, cardId) => {
       utils.typeCheck({ value: cardId, type: 'string' })
-      state.embedIsVisibleForCardId = cardId
+      state.urlEmbedIsVisibleForCardId = cardId
     },
 
     // Connections
@@ -841,6 +815,10 @@ const store = createStore({
       utils.typeCheck({ value, type: 'string' })
       state.currentUserIsDraggingConnectionIdLabel = value
     },
+    clipboardDataPolyfill: (state, data) => {
+      utils.typeCheck({ value: data, type: 'object' })
+      state.clipboardDataPolyfill = data
+    },
 
     // Dragging Cards
 
@@ -862,10 +840,6 @@ const store = createStore({
     currentDraggingCardId: (state, cardId) => {
       utils.typeCheck({ value: cardId, type: 'string' })
       state.currentDraggingCardId = cardId
-    },
-    currentDraggingConnectedCardIds: (state, cardIds) => {
-      utils.typeCheck({ value: cardIds, type: 'array' })
-      state.currentDraggingConnectedCardIds = cardIds
     },
     addToRemoteCardsDragging: (state, update) => {
       utils.typeCheck({ value: update, type: 'object' })
@@ -1396,18 +1370,6 @@ const store = createStore({
       utils.typeCheck({ value, type: 'boolean' })
       state.notifyThanksForUpgrading = value
     },
-    notifyReferralSuccessUser: (state, user) => {
-      utils.typeCheck({ value: user, type: 'object' })
-      state.notifyReferralSuccessUser = user
-    },
-    notifyEarnedCredits: (state, user) => {
-      utils.typeCheck({ value: user, type: 'boolean' })
-      state.notifyEarnedCredits = user
-    },
-    notifyReferralSuccessReferrerName: (state, user) => {
-      utils.typeCheck({ value: user, type: 'boolean' })
-      state.notifyReferralSuccessReferrerName = user
-    },
 
     // Notifications with Position
 
@@ -1492,12 +1454,12 @@ const store = createStore({
       state.otherItems = otherItems
     },
     updateCardNameInOtherItems: (state, { id, name }) => {
-      state.otherItems.cards = state.otherItems.cards.map(card => {
-        if (card.id === id) {
-          card.name = name
-        }
-        return card
-      })
+      const cards = state.otherItems.cards
+      const index = cards.findIndex(card => card.id === id)
+      const card = cards[index]
+      if (card) {
+        card.name = name
+      }
     },
     otherTags: (state, remoteTags) => {
       remoteTags = uniqBy(remoteTags, 'name')
@@ -1522,6 +1484,15 @@ const store = createStore({
   },
 
   actions: {
+    prevSpaceIdInSession: (context, id) => {
+      utils.typeCheck({ value: id, type: 'string' })
+      const position = {
+        x: window.scrollX,
+        y: window.scrollY
+      }
+      context.commit('prevSpaceIdInSession', id)
+      context.commit('prevSpaceIdInSessionPagePosition', position)
+    },
     isOnline: (context, isOnline) => {
       utils.typeCheck({ value: isOnline, type: 'boolean' })
       const prevIsOnline = context.state.isOnline
@@ -1738,9 +1709,6 @@ const store = createStore({
 
     // scrolling and zoom
 
-    updateWindowScroll: (context) => {
-      context.commit('windowScroll', { x: window.scrollX, y: window.scrollY })
-    },
     zoomOrigin: (context, origin) => {
       utils.typeCheck({ value: origin, type: 'object' })
       const prevOrigin = context.state.zoomOrigin
@@ -1829,8 +1797,8 @@ const store = createStore({
       const transform = `translate(${origin.x}px, ${origin.y}px) scale(${zoom}) translate(-${origin.x}px, -${origin.y}px)`
       return transform
     },
-    windowScrollWithSpaceOffset: (state) => {
-      let scroll = state.windowScroll
+    windowScrollWithSpaceOffset: (state) => () => {
+      let scroll = { x: window.scrollX, y: window.scrollY }
       return utils.updatePositionWithSpaceOffset(scroll)
     },
     isInteractingWithItem: (state) => {

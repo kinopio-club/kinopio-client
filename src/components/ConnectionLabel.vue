@@ -23,22 +23,30 @@ let touchPosition = {}
 let currentTouchPosition = {}
 
 onMounted(() => {
-  window.addEventListener('scroll', updateConnectionIsVisible)
   window.addEventListener('mouseup', stopDragging)
   window.addEventListener('pointermove', drag)
-  updateConnectionRect()
-  updateConnectionIsVisible()
-})
-onUnmounted(() => {
-  window.removeEventListener('scroll', updateConnectionIsVisible)
+  // wait for connection element to be in dom
+  setTimeout(() => {
+    state.connectionIsVisible = true
+    updateConnectionRect()
+  }, 50)
 })
 
 const props = defineProps({
   connection: Object
 })
+watch(() => props.connection.labelIsVisible, (value, prevValue) => {
+  if (value) {
+    updateConnectionRect()
+    state.connectionIsVisible = true
+  } else {
+    store.dispatch('currentConnections/clearLabelPosition', props.connection)
+  }
+})
+
 const state = reactive({
   hover: false,
-  connectionIsVisible: true,
+  connectionIsVisible: false,
   outOfBounds: {},
   isDragging: false,
   connectionRect: null,
@@ -94,24 +102,6 @@ const toggleConnectionDetails = (event) => {
 
 const visible = computed(() => {
   return state.connectionIsVisible && props.connection.labelIsVisible
-})
-const updateConnectionIsVisible = () => {
-  if (!props.connection.labelIsVisible) { return }
-  const connection = document.querySelector(`.connection-path[data-id="${id.value}"]`)
-  if (connection) {
-    updateConnectionRect()
-    state.connectionIsVisible = true
-  } else {
-    state.connectionIsVisible = false
-  }
-}
-watch(() => props.connection.labelIsVisible, (value, prevValue) => {
-  if (value) {
-    updateConnectionRect()
-    state.connectionIsVisible = true
-  } else {
-    store.dispatch('currentConnections/clearLabelPosition', props.connection)
-  }
 })
 
 // filter

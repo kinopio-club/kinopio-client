@@ -92,4 +92,6 @@ export default {
         box-shadow none
         background-color transparent
         outline none
+    .user-label-inline
+      pointer-events none
 </style>

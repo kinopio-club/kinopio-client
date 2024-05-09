@@ -1,7 +1,7 @@
 <template lang="pug">
 span
   ul.results-list.card-list(ref="resultsList")
-    template(v-for="card in normalizedCards")
+    template(v-for="card in normalizedCards" :key="card.id")
       li(@click.stop="selectCard(card)" :data-card-id="card.id" :class="{active: cardIsActive(card), hover: cardIsFocused(card)}")
         //- date
         span.badge.status.inline-badge
@@ -10,7 +10,7 @@ span
         //- user
         UserLabelInline(v-if="userIsNotCurrentUser(card.user.id)" :user="card.user")
         //- name
-        span.card-info(:class="{badge: card.backgroundColor}" :style="{backgroundColor: card.backgroundColor}")
+        span.card-info(:class="{ badge: card.backgroundColor, 'is-dark': colorIsDark(card) }" :style="styles(card)")
           template(v-for="segment in card.nameSegments")
             img.card-image(v-if="segment.isImage" :src="segment.url")
             img.card-image(v-if="urlPreviewImage(card)" :src="urlPreviewImage(card)")
@@ -108,6 +108,15 @@ export default {
     },
     isStrikeThrough (card) {
       return card.name.startsWith('[x]')
+    },
+    colorIsDark (card) {
+      if (!card.backgroundColor) { return }
+      return utils.colorIsDark(card.backgroundColor)
+    },
+    styles (card) {
+      return {
+        backgroundColor: card.backgroundColor
+      }
     }
   }
 }
@@ -145,6 +154,9 @@ export default {
     position absolute
     top 6px
     left 8px
-  .card-info.badge
-    position initial
+  .card-info
+    &.badge
+      position initial
+      &.is-dark
+        color var(--primary-on-dark-background)
 </style>
