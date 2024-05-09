@@ -74,6 +74,7 @@ const closeDialogs = (shouldPreventEmit) => {
   state.framePickerIsVisible = false
   state.tagPickerIsVisible = false
   state.colorPickerIsVisible = false
+  state.fontPickerIsVisible = false
   store.commit('userDetailsIsVisible', false)
   if (shouldPreventEmit === true) { return }
   emit('closeDialogs')
