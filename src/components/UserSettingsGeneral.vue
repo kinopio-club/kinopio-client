@@ -106,6 +106,7 @@ const deleteUserPermanent = async () => {
     .row
       .button-wrap
         button(@click.left.stop="toggleNotificationSettingsIsVisible" :class="{active: state.notificationSettingsIsVisible}")
+          img.icon.mail(src="@/assets/mail.svg")
           span Notifications
         NotificationSettings(:visible="state.notificationSettingsIsVisible")
     //- Theme and Colors
