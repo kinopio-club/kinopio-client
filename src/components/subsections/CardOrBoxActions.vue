@@ -324,6 +324,7 @@ const toggleHeader = async (pattern) => {
   removeHeaderFromItemNames()
   if (shouldPrepend) {
     await nextTick()
+    // TODO update card font to user.lastUsedCardHeaderFontId (if diff than current card font)
     prependToItemNames(pattern)
   }
 }
@@ -341,6 +342,8 @@ const updateHeaderFont = (font) => {
   //   store.dispatch('currentCards/update', card)
   // })
   // props.boxes.forEach
+
+  // TODO update user.lastUsedCardHeaderFontId (font.id)
 }
 
 // lock

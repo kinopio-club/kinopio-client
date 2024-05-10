@@ -55,7 +55,6 @@ const selectFont = (font) => {
 const items = computed(() => {
   let array = props.cards.concat(props.boxes)
   array = array.filter(item => Boolean(item))
-  console.log(array, props.cards, props.boxes)
   return array
 })
 const fontIsSelected = (font) => {
