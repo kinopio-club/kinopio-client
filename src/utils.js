@@ -2106,10 +2106,13 @@ export default {
     const items = await navigator.clipboard.read()
     console.log('🍇 clipboard paste', items)
     for (const item of items) {
-      const imageType = item.types.find(type => type.includes('image/'))
+      const imageMatch = 'image/'
+      const imageType = item.types.find(type => type.includes(imageMatch))
       if (imageType) {
         const blob = await item.getType(imageType)
-        const extension = imageType.replace('image/', '')
+        let index = imageType.indexOf(imageMatch)
+        index = index + imageMatch.length
+        const extension = imageType.substring(index)
         file = new File([blob], `pasted.${extension}`)
       } else {
         text = await navigator.clipboard.readText()
