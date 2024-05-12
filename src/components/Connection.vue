@@ -119,8 +119,8 @@ const isCurrentCardConnection = computed(() => {
 const addCardsAndUploadFiles = (event) => {
   let files = event.dataTransfer.files
   files = Array.from(files)
-  const currentCursor = utils.cursorPositionInViewport(event)
-  store.dispatch('upload/addCardsAndUploadFiles', { files, currentCursor })
+  const position = utils.cursorPositionInViewport(event)
+  store.dispatch('upload/addCardsAndUploadFiles', { files, position })
 }
 
 // selected

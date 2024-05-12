@@ -2101,6 +2101,22 @@ export default {
       return true
     }
   },
+  async dataFromClipboard () {
+    let text, file
+    const items = await navigator.clipboard.read()
+    console.log('🍇 clipboard paste', items)
+    for (const item of items) {
+      const imageType = item.types.find(type => type.includes('image/'))
+      if (imageType) {
+        const blob = await item.getType(imageType)
+        const extension = imageType.replace('image/', '')
+        file = new File([blob], `pasted.${extension}`)
+      } else {
+        text = await navigator.clipboard.readText()
+      }
+    }
+    return { text, file }
+  },
 
   // Tags 🦋
 

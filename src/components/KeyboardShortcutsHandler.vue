@@ -566,22 +566,6 @@ export default {
       this.$store.commit('addNotificationWithPosition', { message: 'Pasted', position, type: 'success', layer: 'app', icon: 'cut' })
     },
 
-    async getClipboardData () {
-      this.$store.commit('clearNotificationsWithPosition')
-      let position = currentCursorPosition || prevCursorPosition
-      try {
-        this.notifyPasted(position)
-        if (!navigator.clipboard.read) {
-          return utils.clone(this.$store.state.clipboardDataPolyfill)
-        }
-        const text = await navigator.clipboard.readText()
-        return { text }
-      } catch (error) {
-        console.error('🚑 getClipboardData', error)
-        this.$store.commit('addNotificationWithPosition', { message: `Could not paste`, position, type: 'danger', layer: 'app', icon: 'cut' })
-      }
-    },
-
     normalizePasteData (data) {
       data.cards = data.cards.map(card => {
         card.name = utils.decodeEntitiesFromHTML(card.name)
@@ -592,34 +576,6 @@ export default {
         return box
       })
       return data
-    },
-
-    handlePasteKinopioData (data, position) {
-      if (!data.cards) { return }
-      this.$store.dispatch('history/pause')
-      this.normalizePasteData(data)
-      data = this.$store.getters['currentSpace/newItems']({ items: data })
-      let { cards, connectionTypes, connections, boxes } = data
-      // update positions
-      cards = utils.itemsPositionsShifted(cards, position)
-      boxes = utils.itemsPositionsShifted(boxes, position)
-      // add items
-      this.$store.dispatch('currentCards/addMultiple', { cards })
-      connectionTypes.forEach(connectionType => this.$store.dispatch('currentConnections/addType', connectionType))
-      connections.forEach(connection => this.$store.dispatch('currentConnections/add', { connection, type: { id: connection.connectionTypeId } }))
-      boxes.forEach(box => this.$store.dispatch('currentBoxes/add', { box }))
-      this.$store.dispatch('currentConnections/updatePaths', { connections: connections, shouldUpdateApi: true })
-      // select new items
-      const cardIds = cards.map(card => card.id)
-      const connectionIds = connections.map(connection => connection.id)
-      const boxIds = boxes.map(box => box.id)
-      this.$store.commit('multipleCardsSelectedIds', cardIds)
-      this.$store.commit('multipleConnectionsSelectedIds', connectionIds)
-      this.$store.commit('multipleBoxesSelectedIds', boxIds)
-      // ⏺ history
-      this.$store.dispatch('history/resume')
-      this.$store.dispatch('history/add', { cards, connectionTypes, connections, boxes, useSnapshot: true })
-      this.afterPaste({ cards, boxes })
     },
 
     handlePastePlainText (data, position) {
@@ -661,6 +617,21 @@ export default {
       })
     },
 
+    async getClipboardData () {
+      this.$store.commit('clearNotificationsWithPosition')
+      let position = currentCursorPosition || prevCursorPosition
+      try {
+        this.notifyPasted(position)
+        if (!navigator.clipboard.read) { // firefox
+          return utils.clone(this.$store.state.clipboardDataPolyfill)
+        }
+        return utils.dataFromClipboard()
+      } catch (error) {
+        console.error('🚑 getClipboardData', error)
+        this.$store.commit('addNotificationWithPosition', { message: `Could not paste`, position, type: 'danger', layer: 'app', icon: 'cut' })
+      }
+    },
+
     async handlePasteEvent (event) {
       const isSpaceScope = checkIsSpaceScope(event)
       if (!isSpaceScope) { return }
@@ -681,8 +652,8 @@ export default {
       this.$store.commit('closeAllDialogs')
       this.$store.commit('clearMultipleSelected')
       // add data items
-      if (data.isKinopioData) {
-        this.handlePasteKinopioData(data, position)
+      if (data.file) {
+        this.$store.dispatch('upload/addCardsAndUploadFiles', { files: [data.file], position })
       // add plain text cards
       } else {
         data.text = utils.decodeEntitiesFromHTML(data.text)
