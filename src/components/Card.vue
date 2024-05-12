@@ -1822,7 +1822,7 @@ const lockingFrameStyle = computed(() => {
 // other items
 
 const updateOtherItems = () => {
-  let url = spaceOrInviteUrl.value
+  let url = state.linkToPreview
   const shouldRemoveLink = (props.card.linkToCardId || props.card.linkToSpaceId) && !url
   if (shouldRemoveLink) {
     const update = {
@@ -1845,8 +1845,6 @@ const updateOtherItems = () => {
 }
 const updateOtherSpaceOrCardItems = (url) => {
   const { spaceId, cardId } = utils.spaceAndCardIdFromPath(url.pathname)
-  const linkExists = spaceId === props.card.linkToSpaceId
-  if (linkExists) { return }
   const update = {
     id: props.card.id,
     linkToSpaceId: spaceId,
