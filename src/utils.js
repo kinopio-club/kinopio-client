@@ -944,6 +944,7 @@ export default {
     return join(data, '\n\n')
   },
   trim (string) {
+    if (!string) { return '' }
     // https://regexr.com/59m7a
     // unlike string.trim(), this removes line breaks too
     return string.replace(/^(\n|\\n|\s)+|(\n|\\n|\s)+$/g, '')
@@ -2107,7 +2108,10 @@ export default {
     console.log('🍇 clipboard paste', items)
     for (const item of items) {
       const imageMatch = 'image/'
-      const imageType = item.types.find(type => type.includes(imageMatch))
+      const imageType = item.types.find(type => {
+        if (!type) { return }
+        return type.includes(imageMatch)
+      })
       if (imageType) {
         const blob = await item.getType(imageType)
         let index = imageType.indexOf(imageMatch)
