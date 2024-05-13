@@ -39,8 +39,12 @@ const isActive = computed(() => {
 })
 const styles = computed(() => {
   if (!props.otherCard) { return }
+  const isThemeDark = store.getters['themes/isThemeDark']
   const background = props.selectedColor || props.otherCard.backgroundColor
   let color = utils.cssVariable('primary-on-light-background')
+  if (isThemeDark) {
+    color = utils.cssVariable('primary-on-dark-background')
+  }
   if (utils.colorIsDark(background)) {
     color = utils.cssVariable('primary-on-dark-background')
   }

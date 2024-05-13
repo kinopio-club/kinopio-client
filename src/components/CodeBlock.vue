@@ -181,7 +181,7 @@ const copy = async (event) => {
   .macrolight-comment
     color var(--code-comment)
   .macrolight-punctuation
-    color var(--code-punctuation)
+    color var(--code-punctuation) !important
   .macrolight-string
     color var(--code-string)
   .macrolight-keyword
