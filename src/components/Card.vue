@@ -1216,6 +1216,13 @@ const previewFavicon = ({ icon }) => {
   let image = icon.find(item => item.href)
   return image.href || ''
 }
+const updateUrlPreviewImage = (update) => {
+  if (!update.urlPreviewImage) { return }
+  update.cardId = update.id
+  update.spaceId = store.state.currentSpace.id
+  delete update.id
+  store.dispatch('api/updateUrlPreviewImage', update)
+}
 const updateUrlPreviewSuccess = ({ links, meta, cardId, url, html }) => {
   if (!nameIncludesUrl(url)) { return }
   cardId = cardId || props.card.id
@@ -1236,6 +1243,7 @@ const updateUrlPreviewSuccess = ({ links, meta, cardId, url, html }) => {
   }
   store.dispatch('currentCards/update', update)
   store.commit('removeUrlPreviewLoadingForCardIds', cardId)
+  updateUrlPreviewImage(update)
 }
 const updateUrlPreviewErrorUrl = (url) => {
   const cardId = props.card.id

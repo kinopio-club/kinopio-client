@@ -850,6 +850,15 @@ const self = {
         context.dispatch('handleServerError', { name: 'update-counter', error })
       }
     },
+    updateUrlPreviewImage: async (context, body) => {
+      try {
+        const options = await context.dispatch('requestOptions', { body, method: 'PATCH', space: context.rootState.currentSpace })
+        const response = await fetch(`${host}/card/update-url-preview-image`, options)
+        return normalizeResponse(response)
+      } catch (error) {
+        context.dispatch('handleServerError', { name: 'update-counter', error })
+      }
+    },
 
     // ConnectionType
 
