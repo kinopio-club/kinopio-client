@@ -143,6 +143,8 @@ const copy = async (event) => {
         &.active
           box-shadow var(--button-active-inset-shadow)
           background-color var(--secondary-active-background)
+        span
+          color var(--primary)
   pre
     width 100%
     max-height 300px
