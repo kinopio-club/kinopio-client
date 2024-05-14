@@ -139,6 +139,7 @@ const canEditCard = computed(() => store.getters['currentUser/canEditCard'](prop
 const isSelectedOrDragging = computed(() => {
   return Boolean(isSelected.value || isRemoteSelected.value || isRemoteCardDetailsVisible.value || isRemoteCardDragging.value || state.uploadIsDraggedOver || remoteUploadDraggedOverCardColor.value || remoteUserResizingCardsColor.value || remoteUserTiltingCardsColor.value)
 })
+const currentUserIsSignedIn = computed(() => store.getters['currentUser/isSignedIn'])
 
 // current space
 
@@ -669,7 +670,7 @@ const connectorButtonBackground = computed(() => {
   return currentBackgroundColor.value
 })
 const connectorIsVisible = computed(() => {
-  const spaceIsOpen = store.state.currentSpace.privacy === 'open' && store.getters['currentUser/isSignedIn']
+  const spaceIsOpen = store.state.currentSpace.privacy === 'open' && currentUserIsSignedIn.value
   let isVisible
   if (state.isRemoteConnecting) {
     isVisible = true
@@ -933,7 +934,7 @@ const uploadFile = async (event) => {
   removeUploadIsDraggedOver()
   store.dispatch('currentCards/incrementZ', props.card.id)
   // pre-upload errors
-  if (!store.getters['currentUser/isSignedIn']) {
+  if (!currentUserIsSignedIn.value) {
     state.error.signUpToUpload = true
     store.commit('addNotification', { message: 'To upload files, you need to Sign Up or In', type: 'info' })
     return
@@ -1217,6 +1218,7 @@ const previewFavicon = ({ icon }) => {
   return image.href || ''
 }
 const updateUrlPreviewImage = (update) => {
+  if (!currentUserIsSignedIn.value) { return }
   if (!update.urlPreviewImage) { return }
   update.cardId = update.id
   update.spaceId = store.state.currentSpace.id
@@ -1243,7 +1245,7 @@ const updateUrlPreviewSuccess = ({ links, meta, cardId, url, html }) => {
   }
   store.dispatch('currentCards/update', update)
   store.commit('removeUrlPreviewLoadingForCardIds', cardId)
-  updateUrlPreviewImage(update)
+  store.dispatch('api/addToQueue', { name: 'updateUrlPreviewImage', body: update })
 }
 const updateUrlPreviewErrorUrl = (url) => {
   const cardId = props.card.id
