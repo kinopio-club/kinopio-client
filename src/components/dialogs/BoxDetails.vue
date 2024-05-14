@@ -1,14 +1,170 @@
+<script setup>
+import { reactive, computed, onMounted, onBeforeUnmount, onUnmounted, defineProps, defineEmits, watch, ref, nextTick } from 'vue'
+import { useStore } from 'vuex'
+
+import ColorPicker from '@/components/dialogs/ColorPicker.vue'
+import CardOrBoxActions from '@/components/subsections/CardOrBoxActions.vue'
+import utils from '@/utils.js'
+const store = useStore()
+
+const dialogElement = ref(null)
+const nameElement = ref(null)
+
+let prevBoxId
+
+const state = reactive({
+  colorPickerIsVisible: false,
+  isUpdated: false
+})
+
+const currentBox = computed(() => {
+  const id = store.state.boxDetailsIsVisibleForBoxId
+  return store.getters['currentBoxes/byId'](id) || {}
+})
+watch(() => currentBox.value, async (value, prevValue) => {
+  await nextTick()
+  // open
+  if (visible.value) {
+    store.dispatch('history/pause')
+    prevBoxId = value.id
+    closeDialogs()
+    broadcastShowBoxDetails()
+    scrollIntoViewAndFocus()
+    textareaSizes()
+  // close
+  } else {
+    store.dispatch('history/resume')
+    if (!state.isUpdated) { return }
+    state.isUpdated = false
+    const box = store.getters['currentBoxes/byId'](prevBoxId)
+    store.dispatch('currentBoxes/updateInfoDimensions', {})
+    if (!box) { return }
+    store.dispatch('history/add', { boxes: [box], useSnapshot: true })
+  }
+})
+
+const visible = computed(() => utils.objectHasKeys(currentBox.value))
+const spaceCounterZoomDecimal = computed(() => store.getters.spaceCounterZoomDecimal)
+const styles = computed(() => {
+  let zoom = spaceCounterZoomDecimal.value
+  if (store.state.isTouchDevice) {
+    zoom = utils.pinchCounterZoomDecimal()
+  }
+  const styles = {
+    transform: `scale(${zoom})`,
+    left: `${currentBox.value.x + 8}px`,
+    top: `${currentBox.value.y + 8}px`,
+    backgroundColor: currentBox.value.color
+  }
+  return styles
+})
+const name = computed({
+  get () {
+    return currentBox.value.name
+  },
+  set (name) {
+    update({ name })
+    textareaSizes()
+  }
+})
+const canEditBox = computed(() => store.getters['currentUser/canEditBox'](currentBox.value))
+const itemColors = computed(() => store.getters['currentSpace/itemColors'])
+const colorisDark = computed(() => {
+  const color = currentBox.value.color
+  return utils.colorIsDark(color)
+})
+
+const broadcastShowBoxDetails = () => {
+  const updates = {
+    boxId: currentBox.value.id,
+    userId: store.state.currentUser.id
+  }
+  store.commit('broadcast/updateStore', { updates, type: 'updateRemoteBoxDetailsVisible' })
+}
+const removeBox = () => {
+  store.dispatch('history/resume')
+  store.dispatch('currentBoxes/remove', currentBox.value)
+}
+const toggleColorPicker = () => {
+  state.colorPickerIsVisible = !state.colorPickerIsVisible
+}
+const update = (updates) => {
+  const keys = Object.keys(updates)
+  let box = { id: currentBox.value.id }
+  keys.forEach(key => {
+    box[key] = updates[key]
+  })
+  store.dispatch('currentBoxes/update', box)
+  state.isUpdated = true
+}
+const updateColor = (color) => {
+  update({ color })
+}
+const closeDialogs = () => {
+  state.colorPickerIsVisible = false
+}
+const closeAllDialogs = () => {
+  store.dispatch('closeAllDialogs')
+}
+const focusName = async () => {
+  await nextTick()
+  const element = nameElement.value
+  if (!element) { return }
+  element.focus()
+}
+const selectName = () => {
+  // select all in new boxes, else put cursor at end (like cards)
+  const currentBoxIsNew = store.state.currentBoxIsNew
+  const element = nameElement.value
+  const length = name.value.length
+  let start = length
+  if (currentBoxIsNew) {
+    start = 0
+  }
+  if (length && element) {
+    element.setSelectionRange(start, length)
+  }
+  store.commit('currentBoxIsNew', false)
+}
+const blur = () => {
+  store.commit('triggerUpdateHeaderAndFooterPosition')
+}
+const scrollIntoView = async () => {
+  await nextTick()
+  const element = dialogElement.value
+  await nextTick()
+  utils.scrollIntoView({ element })
+}
+const scrollIntoViewAndFocus = async () => {
+  scrollIntoView()
+  if (utils.isMobile()) { return }
+  await nextTick()
+  focusName()
+  selectName()
+}
+const textareaSizes = () => {
+  const element = dialogElement.value
+  let textarea = element.querySelector('textarea')
+  let modifier = 0
+  if (canEditBox.value) {
+    modifier = 1
+  }
+  textarea.style.height = textarea.scrollHeight + modifier + 'px'
+}
+
+</script>
+
 <template lang="pug">
-dialog.narrow.box-details(v-if="visible" :open="visible" @click.left.stop="closeDialogs" ref="dialog" :style="styles" :data-box-id="box.id")
+dialog.narrow.box-details(v-if="visible" :open="visible" @click.left.stop="closeDialogs" ref="dialogElement" :style="styles" :data-box-id="currentBox.id")
   section
     .row.info-row
       //- color
       .button-wrap
-        button.change-color(:disabled="!canEditBox" @click.left.stop="toggleColorPicker" :class="{active: colorPickerIsVisible}")
-          .current-color(:style="{backgroundColor: box.color}")
+        button.change-color(:disabled="!canEditBox" @click.left.stop="toggleColorPicker" :class="{active: state.colorPickerIsVisible}")
+          .current-color(:style="{backgroundColor: currentBox.color}")
         ColorPicker(
-          :currentColor="box.color"
-          :visible="colorPickerIsVisible"
+          :currentColor="currentBox.color"
+          :visible="state.colorPickerIsVisible"
           :recentColors="itemColors"
           @selectedColor="updateColor"
         )
@@ -16,7 +172,7 @@ dialog.narrow.box-details(v-if="visible" :open="visible" @click.left.stop="close
       .textarea-wrap
         textarea.name(
           :disabled="!canEditBox"
-          ref="name"
+          ref="nameElement"
           rows="1"
           placeholder="Box Name"
           v-model="name"
@@ -24,7 +180,7 @@ dialog.narrow.box-details(v-if="visible" :open="visible" @click.left.stop="close
           maxLength="600"
           :class="{'is-dark': colorisDark}"
         )
-    CardOrBoxActions(:visible="canEditBox" :boxes="[box]" @closeDialogs="closeDialogs" :colorIsHidden="true")
+    CardOrBoxActions(:visible="canEditBox" :boxes="[currentBox]" @closeDialogs="closeDialogs" :colorIsHidden="true")
     .row(v-if="canEditBox")
       //- remove
       .button-wrap
@@ -34,173 +190,7 @@ dialog.narrow.box-details(v-if="visible" :open="visible" @click.left.stop="close
       span.badge.info
         img.icon(src="@/assets/unlock.svg")
         span Read Only
-
 </template>
-
-<script>
-import ColorPicker from '@/components/dialogs/ColorPicker.vue'
-import CardOrBoxActions from '@/components/subsections/CardOrBoxActions.vue'
-import utils from '@/utils.js'
-
-let prevBoxId
-
-export default {
-  name: 'BoxDetails',
-  components: {
-    ColorPicker,
-    CardOrBoxActions
-  },
-  data () {
-    return {
-      colorPickerIsVisible: false,
-      isUpdated: false
-    }
-  },
-  computed: {
-    box () {
-      const id = this.$store.state.boxDetailsIsVisibleForBoxId
-      return this.$store.getters['currentBoxes/byId'](id) || {}
-    },
-    visible () { return utils.objectHasKeys(this.box) },
-    spaceCounterZoomDecimal () { return this.$store.getters.spaceCounterZoomDecimal },
-    styles () {
-      let zoom = this.spaceCounterZoomDecimal
-      if (this.$store.state.isTouchDevice) {
-        zoom = utils.pinchCounterZoomDecimal()
-      }
-      const styles = {
-        transform: `scale(${zoom})`,
-        left: `${this.box.x + 8}px`,
-        top: `${this.box.y + 8}px`,
-        backgroundColor: this.box.color
-      }
-      return styles
-    },
-    name: {
-      get () {
-        return this.box.name
-      },
-      set (name) {
-        this.update({ name })
-        this.textareaSizes()
-      }
-    },
-    canEditBox () { return this.$store.getters['currentUser/canEditBox'](this.box) },
-    itemColors () { return this.$store.getters['currentSpace/itemColors'] },
-    colorisDark () {
-      const color = this.box.color
-      return utils.colorIsDark(color)
-    }
-  },
-  methods: {
-    broadcastShowBoxDetails () {
-      const updates = {
-        boxId: this.box.id,
-        userId: this.$store.state.currentUser.id
-      }
-      this.$store.commit('broadcast/updateStore', { updates, type: 'updateRemoteBoxDetailsVisible' })
-    },
-    removeBox () {
-      this.$store.dispatch('history/resume')
-      this.$store.dispatch('currentBoxes/remove', this.box)
-    },
-    toggleColorPicker () {
-      this.colorPickerIsVisible = !this.colorPickerIsVisible
-    },
-    update (updates) {
-      const keys = Object.keys(updates)
-      let box = { id: this.box.id }
-      keys.forEach(key => {
-        box[key] = updates[key]
-      })
-      this.$store.dispatch('currentBoxes/update', box)
-      this.isUpdated = true
-    },
-    updateColor (color) {
-      this.update({ color })
-    },
-    closeDialogs () {
-      this.colorPickerIsVisible = false
-    },
-    closeAllDialogs () {
-      this.$store.dispatch('closeAllDialogs')
-    },
-    focusName () {
-      this.$nextTick(() => {
-        const element = this.$refs.name
-        if (!element) { return }
-        element.focus()
-      })
-    },
-    selectName () {
-      // select all in new boxes, else put cursor at end (like cards)
-      const currentBoxIsNew = this.$store.state.currentBoxIsNew
-      const element = this.$refs.name
-      const length = this.name.length
-      let start = length
-      if (currentBoxIsNew) {
-        start = 0
-      }
-      if (length && element) {
-        element.setSelectionRange(start, length)
-      }
-      this.$store.commit('currentBoxIsNew', false)
-    },
-    blur () {
-      this.$store.commit('triggerUpdateHeaderAndFooterPosition')
-    },
-    scrollIntoView () {
-      this.$nextTick(() => {
-        const element = this.$refs.dialog
-        this.$nextTick(() => {
-          utils.scrollIntoView({ element })
-        })
-      })
-    },
-    scrollIntoViewAndFocus () {
-      this.scrollIntoView()
-      if (utils.isMobile()) { return }
-      this.$nextTick(() => {
-        this.focusName()
-        this.selectName()
-      })
-    },
-    textareaSizes () {
-      const element = this.$refs.dialog
-      let textarea = element.querySelector('textarea')
-      let modifier = 0
-      if (this.canEditBox) {
-        modifier = 1
-      }
-      textarea.style.height = textarea.scrollHeight + modifier + 'px'
-    }
-  },
-  watch: {
-    box (current) {
-      this.$nextTick(() => {
-        // open
-        if (this.visible) {
-          this.$store.dispatch('history/pause')
-          prevBoxId = current.id
-          this.closeDialogs()
-          this.broadcastShowBoxDetails()
-          this.scrollIntoViewAndFocus()
-          this.textareaSizes()
-        // close
-        } else {
-          this.$store.dispatch('history/resume')
-          if (!this.isUpdated) { return }
-          this.isUpdated = false
-          const box = this.$store.getters['currentBoxes/byId'](prevBoxId)
-          this.$store.dispatch('currentBoxes/updateInfoDimensions', {})
-          if (!box) { return }
-          this.$store.dispatch('history/add', { boxes: [box], useSnapshot: true })
-        }
-      })
-    }
-  }
-}
-</script>
 
 <style lang="stylus">
 .box-details
