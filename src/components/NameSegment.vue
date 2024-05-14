@@ -18,7 +18,8 @@ const props = defineProps({
   search: String,
   isStrikeThrough: Boolean,
   parentCardId: String,
-  backgroundColorIsDark: Boolean
+  backgroundColorIsDark: Boolean,
+  headerFontId: Number
 })
 const emit = defineEmits(['showTagDetailsIsVisible'])
 
@@ -26,6 +27,14 @@ const emit = defineEmits(['showTagDetailsIsVisible'])
 
 const currentSelectedTag = computed(() => { return store.state.currentSelectedTag })
 const currentSelectedOtherItem = computed(() => { return store.state.currentSelectedOtherItem })
+
+// styling
+
+const classes = computed(() => {
+  const fontId = props.headerFontId || 0
+  // return `header-font-1`
+  return `header-font-${fontId}`
+})
 
 // segment data
 
@@ -96,7 +105,7 @@ const showTagDetailsIsVisible = (event, tag) => {
 </script>
 
 <template lang="pug">
-span.name-segment(:data-segment-types="dataMarkdownType" :data-tag-color="dataTagColor" :data-tag-name="dataTagName")
+span.name-segment(:data-segment-types="dataMarkdownType" :data-tag-color="dataTagColor" :data-tag-name="dataTagName" :class="classes")
   template(v-if="props.segment.isText && props.segment.content")
     //- Name markdown
     span.markdown(v-if="props.segment.markdown" :class="{ 'is-background-dark': backgroundColorIsDark, 'is-background-light': !backgroundColorIsDark }")
@@ -142,6 +151,12 @@ span.name-segment(:data-segment-types="dataMarkdownType" :data-tag-color="dataTa
 
 <style lang="stylus">
 .name-segment
+  --header-font var(--header-font-0)
+  &.header-font-1
+    --header-font var(--header-font-1)
+  // &.header-font-2
+  //   --header-font var(--mono-font)
+
   > .button-badge
     vertical-align 1px
   .markdown
@@ -163,19 +178,19 @@ span.name-segment(:data-segment-types="dataMarkdownType" :data-tag-color="dataTa
       margin-right 0
       vertical-align 0
     h1
-      font-family var(--default-header-font)
+      font-family var(--header-font)
       font-size 22px
       font-weight bold
       margin 0
       display inline-block
     h2
-      font-family var(--default-header-font)
+      font-family var(--header-font)
       font-weight normal
       font-size 20px
       margin 0
       display inline-block
     h3
-      font-family var(--default-header-font)
+      font-family var(--header-font)
       font-weight normal
       font-size 16px
       margin 0

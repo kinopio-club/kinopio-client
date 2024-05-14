@@ -334,16 +334,14 @@ const toggleFontPickerIsVisible = () => {
   state.fontPickerIsVisible = !isVisible
 }
 const updateHeaderFont = (font) => {
-  // props.cards.forEach(card => {
-  //   card = {
-  //     id: card.id,
-  //     headerFontId: font.id,
-  //   }
-  //   store.dispatch('currentCards/update', card)
-  // })
-  // props.boxes.forEach
-
+  props.cards.forEach(card => {
+    updateCard(card, { headerFontId: font.id })
+  })
+  props.boxes.forEach(box => {
+    updateBox(box, { headerFontId: font.id })
+  })
   // TODO update user.lastUsedCardHeaderFontId (font.id)
+  // TODO in addcard set default headerFontId to match user pref
 }
 
 // lock

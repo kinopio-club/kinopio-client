@@ -352,27 +352,43 @@ export default {
   --subsection-padding 5px
   --button-fixed-height 30px
   --sans-serif-font "Helvetica Neue", Helvetica, Arial, sans-serif
-  --default-header-font recoleta, georgia, serif
   --mono-font Menlo, Monaco, monospace
   --glyphs-font GoodGlyphs, wingdings
-
-@font-face
-  font-family 'Recoleta'
-  src url("assets/fonts/recoleta/Recoleta-Regular.woff2") format("woff2")
-  font-weight normal
-  font-style normal
-
-@font-face
-  font-family 'Recoleta'
-  src url("assets/fonts/recoleta/Recoleta-Bold.woff2") format("woff2")
-  font-weight bold
-  font-style normal
+  // header fonts
+  --default-header-font recoleta, georgia, serif
+  --header-font-0 var(--default-header-font)
+  --header-font-1 grenette, georgia, serif
 
 @font-face
   font-family 'GoodGlyphs'
   src url("assets/fonts/GoodGlyphs-No1.woff2") format("woff2")
   font-weight normal
   font-style normal
+
+// header-font-0
+@font-face
+  font-family 'recoleta'
+  src url("assets/fonts/recoleta/Recoleta-Regular.woff2") format("woff2")
+  font-weight normal
+  font-style normal
+@font-face
+  font-family 'recoleta'
+  src url("assets/fonts/recoleta/Recoleta-Bold.woff2") format("woff2")
+  font-weight bold
+  font-style normal
+// header-font-1
+@font-face
+  font-family 'grenette'
+  src url("assets/fonts/grenette/grenette-regular-trial.woff2") format("woff2")
+  font-weight normal
+  font-style normal
+@font-face
+  font-family 'grenette'
+  src url("assets/fonts/grenette/grenette-bold-trial.woff2") format("woff2")
+  font-weight bold
+  font-style normal
+// header-font-2
+// ..
 
 *
   -webkit-overflow-scrolling touch

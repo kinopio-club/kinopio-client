@@ -1996,7 +1996,7 @@ article.card-wrap#card(
           //- Name
           p.name.name-segments(v-if="normalizedName" :style="{background: currentBackgroundColor}" :class="{'is-checked': isChecked, 'has-checkbox': hasCheckbox, 'badge badge-status': isImageCard && hasTextSegments}")
             template(v-for="segment in nameSegments")
-              NameSegment(:segment="segment" @showTagDetailsIsVisible="showTagDetailsIsVisible" :parentCardId="card.id" :backgroundColorIsDark="currentBackgroundColorIsDark")
+              NameSegment(:segment="segment" @showTagDetailsIsVisible="showTagDetailsIsVisible" :parentCardId="card.id" :backgroundColorIsDark="currentBackgroundColorIsDark" :headerFontId="card.headerFontId")
             Loader(:visible="isLoadingUrlPreview")
 
       //- Right buttons
