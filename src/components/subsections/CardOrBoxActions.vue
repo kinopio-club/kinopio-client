@@ -121,6 +121,7 @@ const label = computed(() => {
   }
   return label.toUpperCase()
 })
+const isBoxDetails = computed(() => Boolean(store.state.boxDetailsIsVisibleForBoxId))
 
 // update name
 
@@ -440,7 +441,7 @@ section.subsection.style-actions(v-if="visible" @click.left.stop="closeDialogs")
     span {{label}}
   .row
     //- h1/h2
-    .button-wrap.header-buttons-wrap(:class="{ 'header-is-active': isH1 || isH2 }")
+    .button-wrap.header-buttons-wrap(:class="{ 'header-is-active': isH1 || isH2, 'is-box-details': isBoxDetails }")
       .segmented-buttons
         button(:disabled="!canEditAll" @click="toggleHeader('h1Pattern')" :class="{ active: isH1 }" title="Header 1")
           span h1
@@ -526,6 +527,8 @@ section.subsection.style-actions(v-if="visible" @click.left.stop="closeDialogs")
     margin 0
     &.header-is-active
       margin-bottom 12px
+      &.is-box-details
+        margin-bottom 20px
       .segmented-buttons
         button
           border-bottom-left-radius 0
