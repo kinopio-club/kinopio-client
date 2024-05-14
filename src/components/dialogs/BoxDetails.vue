@@ -17,6 +17,12 @@ const state = reactive({
   isUpdated: false
 })
 
+const visible = computed(() => utils.objectHasKeys(currentBox.value))
+const spaceCounterZoomDecimal = computed(() => store.getters.spaceCounterZoomDecimal)
+const canEditBox = computed(() => store.getters['currentUser/canEditBox'](currentBox.value))
+
+// box state
+
 const currentBox = computed(() => {
   const id = store.state.boxDetailsIsVisibleForBoxId
   return store.getters['currentBoxes/byId'](id) || {}
@@ -42,9 +48,25 @@ watch(() => currentBox.value, async (value, prevValue) => {
     store.dispatch('history/add', { boxes: [box], useSnapshot: true })
   }
 })
+const broadcastShowBoxDetails = () => {
+  const updates = {
+    boxId: currentBox.value.id,
+    userId: store.state.currentUser.id
+  }
+  store.commit('broadcast/updateStore', { updates, type: 'updateRemoteBoxDetailsVisible' })
+}
+const update = (updates) => {
+  const keys = Object.keys(updates)
+  let box = { id: currentBox.value.id }
+  keys.forEach(key => {
+    box[key] = updates[key]
+  })
+  store.dispatch('currentBoxes/update', box)
+  state.isUpdated = true
+}
 
-const visible = computed(() => utils.objectHasKeys(currentBox.value))
-const spaceCounterZoomDecimal = computed(() => store.getters.spaceCounterZoomDecimal)
+// styles
+
 const styles = computed(() => {
   let zoom = spaceCounterZoomDecimal.value
   if (store.state.isTouchDevice) {
@@ -58,6 +80,9 @@ const styles = computed(() => {
   }
   return styles
 })
+
+// name
+
 const name = computed({
   get () {
     return currentBox.value.name
@@ -67,45 +92,6 @@ const name = computed({
     textareaSizes()
   }
 })
-const canEditBox = computed(() => store.getters['currentUser/canEditBox'](currentBox.value))
-const itemColors = computed(() => store.getters['currentSpace/itemColors'])
-const colorisDark = computed(() => {
-  const color = currentBox.value.color
-  return utils.colorIsDark(color)
-})
-
-const broadcastShowBoxDetails = () => {
-  const updates = {
-    boxId: currentBox.value.id,
-    userId: store.state.currentUser.id
-  }
-  store.commit('broadcast/updateStore', { updates, type: 'updateRemoteBoxDetailsVisible' })
-}
-const removeBox = () => {
-  store.dispatch('history/resume')
-  store.dispatch('currentBoxes/remove', currentBox.value)
-}
-const toggleColorPicker = () => {
-  state.colorPickerIsVisible = !state.colorPickerIsVisible
-}
-const update = (updates) => {
-  const keys = Object.keys(updates)
-  let box = { id: currentBox.value.id }
-  keys.forEach(key => {
-    box[key] = updates[key]
-  })
-  store.dispatch('currentBoxes/update', box)
-  state.isUpdated = true
-}
-const updateColor = (color) => {
-  update({ color })
-}
-const closeDialogs = () => {
-  state.colorPickerIsVisible = false
-}
-const closeAllDialogs = () => {
-  store.dispatch('closeAllDialogs')
-}
 const focusName = async () => {
   await nextTick()
   const element = nameElement.value
@@ -126,6 +112,45 @@ const selectName = () => {
   }
   store.commit('currentBoxIsNew', false)
 }
+const textareaSizes = () => {
+  const element = dialogElement.value
+  let textarea = element.querySelector('textarea')
+  let modifier = 0
+  if (canEditBox.value) {
+    modifier = 1
+  }
+  textarea.style.height = textarea.scrollHeight + modifier + 'px'
+}
+
+// colors
+
+const itemColors = computed(() => store.getters['currentSpace/itemColors'])
+const colorisDark = computed(() => {
+  const color = currentBox.value.color
+  return utils.colorIsDark(color)
+})
+const toggleColorPicker = () => {
+  state.colorPickerIsVisible = !state.colorPickerIsVisible
+}
+const updateColor = (color) => {
+  update({ color })
+}
+
+// remove
+
+const removeBox = () => {
+  store.dispatch('history/resume')
+  store.dispatch('currentBoxes/remove', currentBox.value)
+}
+
+// dialog state
+
+const closeDialogs = () => {
+  state.colorPickerIsVisible = false
+}
+const closeAllDialogs = () => {
+  store.dispatch('closeAllDialogs')
+}
 const blur = () => {
   store.commit('triggerUpdateHeaderAndFooterPosition')
 }
@@ -142,16 +167,6 @@ const scrollIntoViewAndFocus = async () => {
   focusName()
   selectName()
 }
-const textareaSizes = () => {
-  const element = dialogElement.value
-  let textarea = element.querySelector('textarea')
-  let modifier = 0
-  if (canEditBox.value) {
-    modifier = 1
-  }
-  textarea.style.height = textarea.scrollHeight + modifier + 'px'
-}
-
 </script>
 
 <template lang="pug">
