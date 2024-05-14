@@ -48,6 +48,13 @@ export default {
     }
     return host
   },
+  blogHost () {
+    let host = 'https://blog.kinopio.club'
+    if (this.isDevelopment) {
+      host = 'http://localhost:8082'
+    }
+    return host
+  },
   websocketHost () {
     let host = 'wss://api.kinopio.club'
     if (this.isDevelopment) {

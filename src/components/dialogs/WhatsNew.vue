@@ -23,10 +23,10 @@ dialog.whats-new(v-if="visible" :open="visible" @click.left.stop ref="dialog" :s
         article.badge.button-badge(:style="{ backgroundColor: item._meta.color }")
           //- media
           template(v-if="item._meta.image && isOnline")
-            img(:src="item._meta.image")
+            img(:src="assetUrl(item._meta.image)")
           template(v-else-if="item._meta.video")
             video(autoplay loop muted playsinline)
-              source(:src="item._meta.video")
+              source(:src="assetUrl(item._meta.video)")
           //- title
           h1 {{item.title}}
           //- summary
@@ -41,6 +41,7 @@ dialog.whats-new(v-if="visible" :open="visible" @click.left.stop ref="dialog" :s
 <script>
 import Loader from '@/components/Loader.vue'
 import utils from '@/utils.js'
+import consts from '@/consts.js'
 
 export default {
   name: 'WhatsNew',
@@ -81,6 +82,15 @@ export default {
         let element = this.$refs.dialog
         this.dialogHeight = utils.elementHeight(element)
       })
+    },
+    assetUrl (string) {
+      const url = utils.urlFromString(string)
+      if (url) {
+        return url
+      } else {
+        // /assets/posts/xyz.jpg
+        return `${consts.blogHost()}${string}`
+      }
     }
   },
   watch: {
