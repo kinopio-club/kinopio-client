@@ -143,6 +143,8 @@ const copy = async (event) => {
         &.active
           box-shadow var(--button-active-inset-shadow)
           background-color var(--secondary-active-background)
+        span
+          color var(--primary)
   pre
     width 100%
     max-height 300px
@@ -179,7 +181,7 @@ const copy = async (event) => {
   .macrolight-comment
     color var(--code-comment)
   .macrolight-punctuation
-    color var(--code-punctuation)
+    color var(--code-punctuation) !important
   .macrolight-string
     color var(--code-string)
   .macrolight-keyword

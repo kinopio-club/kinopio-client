@@ -115,7 +115,7 @@ const deleteUserPermanent = async () => {
         .segmented-buttons
           ThemeToggle
           button(@click.left.stop="toggleThemeAndColorsSettingsIsVisible" :class="{active: state.themeAndColorsSettingsIsVisible}")
-            img.icon.down-arrow.button-down-arrow(src="@/assets/down-arrow.svg")
+            span Colors
         ThemeAndColorsSettings(:visible="state.themeAndColorsSettingsIsVisible")
   //- Account Settings
   section

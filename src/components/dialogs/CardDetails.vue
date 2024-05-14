@@ -376,7 +376,7 @@ export default {
     },
     isInvitedButCannotEditSpace () { return this['currentUser/isInvitedButCannotEditSpace']() },
     maxCardLength () {
-      const isCodeblock = this.card.name.includes('```')
+      const isCodeblock = this.card.name?.includes('```')
       if (isCodeblock) {
         return consts.maxCodeBlockCardLength
       } else {
@@ -824,9 +824,10 @@ export default {
       const files = event.clipboardData.files
       if (files.length) {
         this.uploadFile(files[0])
+      } else {
+        const text = event.clipboardData.getData('text')
+        this.pastedName = text
       }
-      const text = event.clipboardData.getData('text')
-      this.pastedName = text
       this.wasPasted = true
       this.$store.dispatch('currentCards/updateURLQueryStrings', { cardId: this.card.id })
     },
