@@ -58,10 +58,12 @@ const state = reactive({
   isTouchScrolling: false
 })
 
-const outsideSpaceBackgroundColor = computed(() => store.state.outsideSpaceBackgroundColor)
-const isThemeDark = computed(() => store.getters['themes/isThemeDark'])
 const spaceName = computed(() => store.state.currentSpace.name)
 const isSpacePage = computed(() => store.getters.isSpacePage)
+
+// styles and position
+
+const outsideSpaceBackgroundColor = computed(() => store.state.outsideSpaceBackgroundColor)
 const pageWidth = computed(() => {
   if (!isSpacePage.value) { return }
   const size = Math.max(store.state.pageWidth, store.state.viewportWidth)
@@ -71,17 +73,6 @@ const pageHeight = computed(() => {
   if (!isSpacePage.value) { return }
   const size = Math.max(store.state.pageHeight, store.state.viewportHeight)
   return size + 'px'
-})
-const scriptUrl = computed(() => {
-  const scripts = Array.from(document.querySelectorAll('script'))
-  const url = scripts.find(script => {
-    if (consts.isDevelopment) {
-      return script.src.includes('main.js')
-    } else {
-      return script.src.includes('index-')
-    }
-  })
-  return url.src
 })
 const pageCursor = computed(() => {
   const isPanning = store.state.currentUserIsPanning
@@ -101,6 +92,8 @@ const isDevelpmentBadgeVisible = computed(() => {
   if (store.state.isPresentationMode) { return }
   return consts.isDevelopment
 })
+
+// touch actions
 
 const touchStart = (event) => {
   shouldCancelUndo = false
@@ -153,6 +146,31 @@ const cancelTouch = () => {
   state.isPinchZooming = false
   state.isTouchScrolling = false
 }
+const toggleIsPinchZooming = (event) => {
+  if (utils.shouldIgnoreTouchInteraction(event)) { return }
+  state.isPinchZooming = true
+}
+const checkIfInertiaScrollEnd = () => {
+  if (!utils.isAndroid) { return }
+  if (inertiaScrollEndIntervalTimer) { return }
+  prevPosition = null
+  inertiaScrollEndIntervalTimer = setInterval(() => {
+    const viewport = utils.visualViewport()
+    const current = {
+      left: viewport.offsetLeft,
+      top: viewport.offsetTop
+    }
+    if (!prevPosition) {
+      prevPosition = current
+    } else if (prevPosition.left === current.left && prevPosition.top === current.top) {
+      clearInterval(inertiaScrollEndIntervalTimer)
+      inertiaScrollEndIntervalTimer = null
+      state.isTouchScrolling = false
+    } else {
+      prevPosition = current
+    }
+  }, 250)
+}
 
 // online
 
@@ -185,8 +203,9 @@ const updateServerIsOnline = async () => {
   setTimeout(updateServerIsOnline, delay)
 }
 
-//
+// theme
 
+const isThemeDark = computed(() => store.getters['themes/isThemeDark'])
 const themeFromSystem = () => {
   const themeIsSystem = store.state.currentUser.themeIsSystem
   if (!themeIsSystem) { return }
@@ -208,31 +227,9 @@ const updateThemeFromSystem = () => {
   if (!themeName) { return }
   store.dispatch('themes/update', themeName)
 }
-const toggleIsPinchZooming = (event) => {
-  if (utils.shouldIgnoreTouchInteraction(event)) { return }
-  state.isPinchZooming = true
-}
-const checkIfInertiaScrollEnd = () => {
-  if (!utils.isAndroid) { return }
-  if (inertiaScrollEndIntervalTimer) { return }
-  prevPosition = null
-  inertiaScrollEndIntervalTimer = setInterval(() => {
-    const viewport = utils.visualViewport()
-    const current = {
-      left: viewport.offsetLeft,
-      top: viewport.offsetTop
-    }
-    if (!prevPosition) {
-      prevPosition = current
-    } else if (prevPosition.left === current.left && prevPosition.top === current.top) {
-      clearInterval(inertiaScrollEndIntervalTimer)
-      inertiaScrollEndIntervalTimer = null
-      state.isTouchScrolling = false
-    } else {
-      prevPosition = current
-    }
-  }, 250)
-}
+
+// remote
+
 const broadcastUserCursor = (event) => {
   if (!store.getters.isSpacePage) { return }
   let updates = utils.cursorPositionInSpace(event)
