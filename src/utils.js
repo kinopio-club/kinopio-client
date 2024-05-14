@@ -2011,7 +2011,6 @@ export default {
   checkboxFromString (name) {
     if (!name) { return }
     let match
-    // same as taskPatterns ^^
     const doing = new RegExp(/^(\[(\ )?\]\ )/g) // eslint-disable-line no-useless-escape
     match = name.match(doing)
     if (match) { return match[0] }

@@ -307,12 +307,15 @@ const isH2 = computed(() => {
 })
 const removeHeaderFromItemNames = () => {
   // https://regexr.com/804qh
-  // matches # or ## + space, from beginning of string
-  const headerPattern = new RegExp(/^[# ]+/gm)
+  // ignores [] or [x] + space at beginning of string
+  // matches # or ## + space
+  const headerPattern = new RegExp(/^(?:\[x?\])?[# ]+/gm)
   items.value.forEach(item => {
     let match = item.name.match(headerPattern)
     if (!match) { return }
     match = match[0]
+    match = match.replace('[] ', '')
+    match = match.replace('[x] ', '')
     const newName = item.name.replace(match, '')
     if (newName === item.name) { return }
     updateName(item, newName)
