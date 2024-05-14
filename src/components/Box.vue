@@ -20,11 +20,6 @@ let initialTouchEvent = {}
 let touchPosition = {}
 let currentTouchPosition = {}
 
-onMounted(() => {
-  // const element = document.querySelector(`.box-info[data-box-id="${props.box.id}"]`)
-  // const DOMRect = element.getBoundingClientRect()
-})
-
 const props = defineProps({
   box: Object
 })
@@ -35,6 +30,63 @@ const state = reactive({
   lockingAlpha: 0
 })
 
+const spaceCounterZoomDecimal = computed(() => store.getters.spaceCounterZoomDecimal)
+const canEditBox = computed(() => store.getters['currentUser/canEditBox'](props.box))
+
+// normalize
+
+const normalizedBox = computed(() => {
+  return normalizeBox(props.box)
+})
+const normalizeBox = (box) => {
+  const init = 200
+  box = utils.clone(box)
+  box.resizeWidth = box.resizeWidth || init
+  box.resizeHeight = box.resizeHeight || init
+  box.width = box.resizeWidth
+  box.height = box.resizeHeight
+  box.color = box.color || randomColor({ luminosity: 'light' })
+  box.fill = box.fill || 'filled'
+  return box
+}
+
+// styles
+
+const styles = computed(() => {
+  let { x, y, resizeWidth, resizeHeight } = normalizedBox.value
+  const width = resizeWidth
+  const height = resizeHeight
+  let styles = {
+    left: x + 'px',
+    top: y + 'px',
+    width: width + 'px',
+    height: height + 'px',
+    border: `${borderWidth}px solid ${color.value}`
+  }
+  styles = updateBoxBorderRadiusStyles(styles, otherBoxes.value)
+  return styles
+})
+const userColor = computed(() => store.state.currentUser.color)
+const color = computed(() => {
+  const remoteColor = remoteBoxDetailsVisibleColor.value || remoteSelectedColor.value || remoteUserResizingBoxesColor.value || remoteBoxDraggingColor.value
+  if (remoteColor) {
+    return remoteColor
+  } else if (isSelected.value) {
+    return userColor.value
+  } else {
+    return normalizedBox.value.color
+  }
+})
+const colorIsDark = computed(() => utils.colorIsDark(color.value))
+const fill = computed(() => normalizedBox.value.fill)
+const hasFill = computed(() => fill.value !== 'empty')
+
+// edge snapping
+
+const otherBoxes = computed(() => {
+  const boxes = store.getters['currentBoxes/all']
+  return boxes.filter(box => box.id !== props.box.id)
+})
 const snapGuideStyles = computed(() => {
   if (isDragging.value) {
     return { background: userColor.value }
@@ -60,168 +112,6 @@ const snapGuideSide = computed(() => {
     return null
   }
 })
-const normalizedBox = computed(() => {
-  return normalizeBox(props.box)
-})
-const styles = computed(() => {
-  let { x, y, resizeWidth, resizeHeight } = normalizedBox.value
-  const width = resizeWidth
-  const height = resizeHeight
-  let styles = {
-    left: x + 'px',
-    top: y + 'px',
-    width: width + 'px',
-    height: height + 'px',
-    border: `${borderWidth}px solid ${color.value}`
-  }
-  styles = updateBoxBorderRadiusStyles(styles, otherBoxes.value)
-  return styles
-})
-const otherBoxes = computed(() => {
-  const boxes = store.getters['currentBoxes/all']
-  return boxes.filter(box => box.id !== props.box.id)
-})
-const isSelected = computed(() => {
-  const selectedIds = store.state.multipleBoxesSelectedIds
-  return selectedIds.includes(props.box.id)
-})
-const resizeIsVisible = computed(() => {
-  if (isLocked.value) { return }
-  if (!canEditSpace.value) { return }
-  return true
-})
-const isLocked = computed(() => props.box.isLocked)
-const userColor = computed(() => store.state.currentUser.color)
-const color = computed(() => {
-  const remoteColor = remoteBoxDetailsVisibleColor.value || remoteSelectedColor.value || remoteUserResizingBoxesColor.value || remoteBoxDraggingColor.value
-  if (remoteColor) {
-    return remoteColor
-  } else if (isSelected.value) {
-    return userColor.value
-  } else {
-    return normalizedBox.value.color
-  }
-})
-const colorIsDark = computed(() => utils.colorIsDark(color.value))
-const fill = computed(() => normalizedBox.value.fill)
-const hasFill = computed(() => fill.value !== 'empty')
-const labelStyles = computed(() => {
-  return {
-    backgroundColor: color.value
-  }
-})
-const isPainting = computed(() => store.state.currentUserIsPainting)
-const canEditSpace = computed(() => store.getters['currentUser/canEditSpace']())
-const shouldJiggle = computed(() => {
-  const isMultipleItemsSelected = store.getters.isMultipleItemsSelected
-  if (isMultipleItemsSelected) { return }
-  return isDragging.value
-})
-const isDragging = computed(() => {
-  const isDragging = store.state.currentUserIsDraggingBox
-  const isCurrent = store.state.currentDraggingBoxId === props.box.id
-  return isDragging && (isCurrent || isSelected.value)
-})
-const isResizing = computed(() => {
-  const isResizing = store.state.currentUserIsResizingBox
-  const isCurrent = store.state.currentUserIsResizingBoxIds.includes(props.box.id)
-  return isResizing && isCurrent
-})
-const spaceCounterZoomDecimal = computed(() => store.getters.spaceCounterZoomDecimal)
-const isH1 = computed(() => {
-  const pattern = 'h1Pattern'
-  return nameHasPattern(pattern)
-})
-const isH2 = computed(() => {
-  const pattern = 'h2Pattern'
-  return nameHasPattern(pattern)
-})
-const h1Name = computed(() => props.box.name.replace('# ', ''))
-const h2Name = computed(() => props.box.name.replace('## ', ''))
-const canEditBox = computed(() => store.getters['currentUser/canEditBox'](props.box))
-const lockingFrameStyle = computed(() => {
-  const initialPadding = 65 // matches initialLockCircleRadius in magicPaint
-  const initialBorderRadius = 50
-  const padding = initialPadding * state.lockingPercent
-  const borderRadius = Math.max((state.lockingPercent * initialBorderRadius), 5) + 'px'
-  const size = `calc(100% + ${padding}px)`
-  const position = -(padding / 2) + 'px'
-  return {
-    width: size,
-    height: size,
-    left: position,
-    top: position,
-    background: userColor.value,
-    opacity: state.lockingAlpha,
-    borderRadius: borderRadius
-  }
-})
-const multipleBoxesIsSelected = computed(() => Boolean(store.state.multipleBoxesSelectedIds.length))
-const currentBoxIsSelected = computed(() => {
-  const selected = store.state.multipleBoxesSelectedIds
-  return selected.find(id => props.box.id === id)
-})
-const selectedBoxes = computed(() => store.getters['currentBoxes/isSelected'])
-
-// Remote
-
-const isRemoteSelected = computed(() => {
-  const remoteBoxesSelected = store.state.remoteBoxesSelected
-  const selectedBox = remoteBoxesSelected.find(box => box.boxId === props.box.id)
-  return Boolean(selectedBox)
-})
-const isRemoteBoxDetailsVisible = computed(() => {
-  const remoteBoxDetailsVisible = store.state.remoteBoxDetailsVisible
-  const visibleBox = remoteBoxDetailsVisible.find(box => box.boxId === props.box.id)
-  return Boolean(visibleBox)
-})
-const remoteBoxDetailsVisibleColor = computed(() => {
-  const remoteBoxDetailsVisible = store.state.remoteBoxDetailsVisible
-  const visibleBox = remoteBoxDetailsVisible.find(box => box.boxId === props.box.id)
-  if (visibleBox) {
-    const user = store.getters['currentSpace/userById'](visibleBox.userId)
-    return user.color
-  } else {
-    return undefined
-  }
-})
-const isRemoteBoxDragging = computed(() => {
-  const remoteBoxesDragging = store.state.remoteBoxesDragging
-  const isDragging = remoteBoxesDragging.find(box => box.boxId === props.box.id)
-  return Boolean(isDragging)
-})
-const remoteSelectedColor = computed(() => {
-  const remoteBoxesSelected = store.state.remoteBoxesSelected
-  const selectedBox = remoteBoxesSelected.find(box => box.boxId === props.box.id)
-  if (selectedBox) {
-    const user = store.getters['currentSpace/userById'](selectedBox.userId)
-    return user.color
-  } else {
-    return undefined
-  }
-})
-const remoteUserResizingBoxesColor = computed(() => {
-  const remoteUserResizingBoxes = store.state.remoteUserResizingBoxes
-  if (!remoteUserResizingBoxes.length) { return }
-  let user = remoteUserResizingBoxes.find(user => user.boxIds.includes(props.box.id))
-  if (user) {
-    user = store.getters['currentSpace/userById'](user.userId)
-    return user.color
-  } else {
-    return undefined
-  }
-})
-const remoteBoxDraggingColor = computed(() => {
-  const remoteBoxesDragging = store.state.remoteBoxesDragging
-  const draggingBox = remoteBoxesDragging.find(box => box.boxId === props.box.id)
-  if (draggingBox) {
-    const user = store.getters['currentSpace/userById'](draggingBox.userId)
-    return user.color
-  } else {
-    return undefined
-  }
-})
-
 const oppositeSide = (side) => {
   if (side === 'left') {
     return 'right'
@@ -286,17 +176,14 @@ const updateBoxBorderRadiusStyles = (styles, otherBoxes) => {
   })
   return styles
 }
-const normalizeBox = (box) => {
-  const init = 200
-  box = utils.clone(box)
-  box.resizeWidth = box.resizeWidth || init
-  box.resizeHeight = box.resizeHeight || init
-  box.width = box.resizeWidth
-  box.height = box.resizeHeight
-  box.color = box.color || randomColor({ luminosity: 'light' })
-  box.fill = box.fill || 'filled'
-  return box
-}
+
+// tilt resize
+
+const resizeIsVisible = computed(() => {
+  if (isLocked.value) { return }
+  if (!canEditSpace.value) { return }
+  return true
+})
 const startResizing = (event) => {
   if (!canEditSpace.value) { return }
   if (utils.isMultiTouch(event)) { return }
@@ -317,6 +204,38 @@ const startResizing = (event) => {
   store.commit('broadcast/updateStore', { updates, type: 'updateRemoteUserResizingBoxes' })
   event.preventDefault() // allows resizing box without scrolling on mobile
 }
+
+// locked to background
+
+const isLocked = computed(() => props.box.isLocked)
+
+// label
+
+const labelStyles = computed(() => {
+  return {
+    backgroundColor: color.value
+  }
+})
+
+// interacting
+
+const isPainting = computed(() => store.state.currentUserIsPainting)
+const canEditSpace = computed(() => store.getters['currentUser/canEditSpace']())
+const shouldJiggle = computed(() => {
+  const isMultipleItemsSelected = store.getters.isMultipleItemsSelected
+  if (isMultipleItemsSelected) { return }
+  return isDragging.value
+})
+const isDragging = computed(() => {
+  const isDragging = store.state.currentUserIsDraggingBox
+  const isCurrent = store.state.currentDraggingBoxId === props.box.id
+  return isDragging && (isCurrent || isSelected.value)
+})
+const isResizing = computed(() => {
+  const isResizing = store.state.currentUserIsResizingBox
+  const isCurrent = store.state.currentUserIsResizingBoxIds.includes(props.box.id)
+  return isResizing && isCurrent
+})
 const startBoxInfoInteraction = (event) => {
   if (!currentBoxIsSelected.value) {
     store.dispatch('clearMultipleSelected')
@@ -334,6 +253,47 @@ const startBoxInfoInteraction = (event) => {
   selectContainedCards()
   selectContainedBoxes()
 }
+const updateIsHover = (value) => {
+  if (isDragging.value) { return }
+  if (isPainting.value) { return }
+  state.isHover = value
+}
+const endBoxInfoInteraction = (event) => {
+  const isMeta = event.metaKey || event.ctrlKey
+  const userId = store.state.currentUser.id
+  store.dispatch('currentBoxes/afterMove')
+  store.dispatch('currentCards/afterMove')
+  if (store.state.currentUserIsPainting) { return }
+  if (isMultiTouch) { return }
+  if (store.state.currentUserIsPanningReady || store.state.currentUserIsPanning) { return }
+  if (!canEditBox.value) { store.commit('triggerReadOnlyJiggle') }
+  store.commit('broadcast/updateStore', { updates: { userId }, type: 'clearRemoteBoxesDragging' })
+  store.dispatch('closeAllDialogs')
+  if (isMeta) {
+    store.dispatch('multipleBoxesSelectedIds', [])
+  } else {
+    store.dispatch('clearMultipleSelected')
+  }
+  if (!store.state.boxesWereDragged && !isMeta) {
+    store.commit('boxDetailsIsVisibleForBoxId', props.box.id)
+    event.stopPropagation() // prevent stopInteractions() from closing boxDetails
+    store.commit('currentUserIsDraggingBox', false)
+    store.commit('boxesWereDragged', false)
+  }
+}
+
+// select
+
+const isSelected = computed(() => {
+  const selectedIds = store.state.multipleBoxesSelectedIds
+  return selectedIds.includes(props.box.id)
+})
+const multipleBoxesIsSelected = computed(() => Boolean(store.state.multipleBoxesSelectedIds.length))
+const currentBoxIsSelected = computed(() => {
+  const selected = store.state.multipleBoxesSelectedIds
+  return selected.find(id => props.box.id === id)
+})
+const selectedBoxes = computed(() => store.getters['currentBoxes/isSelected'])
 const selectContainedBoxes = () => {
   let boxes = store.getters['currentBoxes/all']
   boxes = utils.clone(boxes)
@@ -413,37 +373,78 @@ const isItemInSelectedBoxes = (item, type) => {
   })
   return isInside
 }
-const updateIsHover = (value) => {
-  if (isDragging.value) { return }
-  if (isPainting.value) { return }
-  state.isHover = value
-}
-const endBoxInfoInteraction = (event) => {
-  const isMeta = event.metaKey || event.ctrlKey
-  const userId = store.state.currentUser.id
-  store.dispatch('currentBoxes/afterMove')
-  store.dispatch('currentCards/afterMove')
-  if (store.state.currentUserIsPainting) { return }
-  if (isMultiTouch) { return }
-  if (store.state.currentUserIsPanningReady || store.state.currentUserIsPanning) { return }
-  if (!canEditBox.value) { store.commit('triggerReadOnlyJiggle') }
-  store.commit('broadcast/updateStore', { updates: { userId }, type: 'clearRemoteBoxesDragging' })
-  store.dispatch('closeAllDialogs')
-  if (isMeta) {
-    store.dispatch('multipleBoxesSelectedIds', [])
+
+// Remote
+
+const isRemoteSelected = computed(() => {
+  const remoteBoxesSelected = store.state.remoteBoxesSelected
+  const selectedBox = remoteBoxesSelected.find(box => box.boxId === props.box.id)
+  return Boolean(selectedBox)
+})
+const isRemoteBoxDetailsVisible = computed(() => {
+  const remoteBoxDetailsVisible = store.state.remoteBoxDetailsVisible
+  const visibleBox = remoteBoxDetailsVisible.find(box => box.boxId === props.box.id)
+  return Boolean(visibleBox)
+})
+const remoteBoxDetailsVisibleColor = computed(() => {
+  const remoteBoxDetailsVisible = store.state.remoteBoxDetailsVisible
+  const visibleBox = remoteBoxDetailsVisible.find(box => box.boxId === props.box.id)
+  if (visibleBox) {
+    const user = store.getters['currentSpace/userById'](visibleBox.userId)
+    return user.color
   } else {
-    store.dispatch('clearMultipleSelected')
+    return undefined
   }
-  if (!store.state.boxesWereDragged && !isMeta) {
-    store.commit('boxDetailsIsVisibleForBoxId', props.box.id)
-    event.stopPropagation() // prevent stopInteractions() from closing boxDetails
-    store.commit('currentUserIsDraggingBox', false)
-    store.commit('boxesWereDragged', false)
+})
+const isRemoteBoxDragging = computed(() => {
+  const remoteBoxesDragging = store.state.remoteBoxesDragging
+  const isDragging = remoteBoxesDragging.find(box => box.boxId === props.box.id)
+  return Boolean(isDragging)
+})
+const remoteSelectedColor = computed(() => {
+  const remoteBoxesSelected = store.state.remoteBoxesSelected
+  const selectedBox = remoteBoxesSelected.find(box => box.boxId === props.box.id)
+  if (selectedBox) {
+    const user = store.getters['currentSpace/userById'](selectedBox.userId)
+    return user.color
+  } else {
+    return undefined
   }
-}
+})
+const remoteUserResizingBoxesColor = computed(() => {
+  const remoteUserResizingBoxes = store.state.remoteUserResizingBoxes
+  if (!remoteUserResizingBoxes.length) { return }
+  let user = remoteUserResizingBoxes.find(user => user.boxIds.includes(props.box.id))
+  if (user) {
+    user = store.getters['currentSpace/userById'](user.userId)
+    return user.color
+  } else {
+    return undefined
+  }
+})
+const remoteBoxDraggingColor = computed(() => {
+  const remoteBoxesDragging = store.state.remoteBoxesDragging
+  const draggingBox = remoteBoxesDragging.find(box => box.boxId === props.box.id)
+  if (draggingBox) {
+    const user = store.getters['currentSpace/userById'](draggingBox.userId)
+    return user.color
+  } else {
+    return undefined
+  }
+})
 
-// h1, h2
+// header fonts
 
+const isH1 = computed(() => {
+  const pattern = 'h1Pattern'
+  return nameHasPattern(pattern)
+})
+const isH2 = computed(() => {
+  const pattern = 'h2Pattern'
+  return nameHasPattern(pattern)
+})
+const h1Name = computed(() => props.box.name.replace('# ', ''))
+const h2Name = computed(() => props.box.name.replace('## ', ''))
 const nameHasPattern = (pattern) => {
   const result = utils.markdown()[pattern].exec(props.box.name)
   return Boolean(result)
@@ -451,6 +452,23 @@ const nameHasPattern = (pattern) => {
 
 // touch locking
 
+const lockingFrameStyle = computed(() => {
+  const initialPadding = 65 // matches initialLockCircleRadius in magicPaint
+  const initialBorderRadius = 50
+  const padding = initialPadding * state.lockingPercent
+  const borderRadius = Math.max((state.lockingPercent * initialBorderRadius), 5) + 'px'
+  const size = `calc(100% + ${padding}px)`
+  const position = -(padding / 2) + 'px'
+  return {
+    width: size,
+    height: size,
+    left: position,
+    top: position,
+    background: userColor.value,
+    opacity: state.lockingAlpha,
+    borderRadius: borderRadius
+  }
+})
 const cancelLocking = () => {
   shouldCancelLocking = true
 }
@@ -549,7 +567,6 @@ const endBoxInfoInteractionTouch = (event) => {
     endBoxInfoInteraction(event)
   }
 }
-
 </script>
 
 <template lang="pug">
@@ -614,7 +631,6 @@ const endBoxInfoInteractionTouch = (event) => {
   .snap-guide.left(v-if="snapGuideSide === 'left'" :style="snapGuideStyles")
   .snap-guide.top(v-if="snapGuideSide === 'top'" :style="snapGuideStyles")
   .snap-guide.bottom(v-if="snapGuideSide === 'bottom'" :style="snapGuideStyles")
-
 </template>
 
 <style lang="stylus">
