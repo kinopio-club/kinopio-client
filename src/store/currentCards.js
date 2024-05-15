@@ -213,7 +213,8 @@ const currentCards = {
         isLocked: false,
         backgroundColor: backgroundColor || defaultBackgroundColor,
         isRemoved: false,
-        shouldUpdateUrlPreview
+        shouldUpdateUrlPreview,
+        headerFontId: context.rootState.currentUser.prevHeaderFontId || 0
       }
       context.commit('cardDetailsIsVisibleForCardId', card.id, { root: true })
       card.spaceId = currentSpaceId

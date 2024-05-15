@@ -74,7 +74,7 @@ const initialState = {
   studentDiscountIsAvailable: false,
   lastSidebarSection: '',
   prevInviteEmails: '',
-  lastUsedCardHeaderFontId: 0
+  prevHeaderFontId: 0
 }
 
 export default {
@@ -399,6 +399,9 @@ export default {
     },
     prevInviteEmails: (state, value) => {
       state.prevInviteEmails = value
+    },
+    prevHeaderFontId: (state, value) => {
+      state.prevHeaderFontId = value
     }
   },
   actions: {
