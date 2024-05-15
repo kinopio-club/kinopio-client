@@ -80,6 +80,18 @@ const color = computed(() => {
 const colorIsDark = computed(() => utils.colorIsDark(color.value))
 const fill = computed(() => normalizedBox.value.fill)
 const hasFill = computed(() => fill.value !== 'empty')
+const infoClasses = computed(() => {
+  let string = ''
+  if (isPainting.value) {
+    string += ' unselectable'
+  }
+  if (colorIsDark.value) {
+    string += ' is-dark'
+  }
+  const fontId = props.box.headerFontId || 0
+  string += ` header-font-${fontId}`
+  return string
+})
 
 // edge snapping
 
@@ -582,7 +594,7 @@ const endBoxInfoInteractionTouch = (event) => {
   .box-info(
     :data-box-id="box.id"
     :style="labelStyles"
-    :class="{unselectable: isPainting, 'is-dark': colorIsDark}"
+    :class="infoClasses"
     tabindex="0"
 
     @mouseover="updateIsHover(true)"
@@ -648,20 +660,27 @@ const endBoxInfoInteractionTouch = (event) => {
   &.is-resizing
     box-shadow var(--active-shadow)
 
-  h1
-    font-family var(--header-font-0)
-    font-size 20px
-    font-weight bold
-    margin 0
-    display inline-block
-  h2
-    font-family var(--header-font-0)
-    font-weight normal
-    font-size 20px
-    margin 0
-    display inline-block
-
   .box-info
+    --header-font var(--header-font-0)
+    &.header-font-1
+      --header-font var(--header-font-1)
+    &.header-font-2
+      --header-font var(--header-font-2)
+    &.header-font-3
+      --header-font var(--header-font-3)
+    &.header-font-4
+      --header-font var(--header-font-4)
+    &.header-font-5
+      --header-font var(--header-font-5)
+    &.header-font-6
+      --header-font var(--header-font-6)
+    &.header-font-7
+      --header-font var(--header-font-7)
+    &.header-font-8
+      --header-font var(--header-font-8)
+    &.header-font-9
+      --header-font var(--header-font-9)
+
     pointer-events all
     position absolute
     cursor pointer
@@ -676,6 +695,20 @@ const endBoxInfoInteractionTouch = (event) => {
       box-shadow var(--active-shadow)
     &.is-dark
       color var(--primary-on-dark-background)
+
+  h1
+    font-family var(--header-font)
+    font-size 20px
+    font-weight bold
+    margin 0
+    display inline-block
+    line-height 2px
+  h2
+    font-family var(--header-font)
+    font-weight normal
+    font-size 20px
+    margin 0
+    display inline-block
 
   .lock-button-wrap
     pointer-events all

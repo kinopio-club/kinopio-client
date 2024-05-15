@@ -32,7 +32,6 @@ const currentSelectedOtherItem = computed(() => { return store.state.currentSele
 
 const classes = computed(() => {
   const fontId = props.headerFontId || 0
-  // return `header-font-1`
   return `header-font-${fontId}`
 })
 

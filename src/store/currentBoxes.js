@@ -151,7 +151,8 @@ export default {
         fill: box.fill || 'filled', // empty, filled
         name: box.name || `Box ${count}`,
         infoHeight: 57,
-        infoWidth: 34
+        infoWidth: 34,
+        headerFontId: context.rootState.currentUser.prevHeaderFontId || 0
       }
       context.dispatch('history/add', { boxes: [box] }, { root: true })
       context.commit('create', box)

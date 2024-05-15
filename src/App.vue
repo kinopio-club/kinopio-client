@@ -341,7 +341,7 @@ const updateMetaRSSFeed = () => {
   font-weight normal
   font-style normal
 
-// header-font-1 XXXX
+// header-font-1 XXXX https://www.schick-toikka.com/items-standard items mono
 :root
   --header-font-1 shinka-mono, var(--mono-font)
 @font-face
@@ -355,7 +355,7 @@ const updateMetaRSSFeed = () => {
   font-weight normal
   font-style normal
 
-// header-font-2 XXX
+// header-font-2 ???
 :root
   --header-font-2 jeanluc, var(--mono-font)
 @font-face
@@ -409,7 +409,8 @@ const updateMetaRSSFeed = () => {
   src url("assets/fonts/grotesk-remix/GroteskRemix-trial-regular.woff2") format("woff2")
   font-weight normal
   font-style normal
-// header-font-6
+
+// header-font-6 XXX https://www.schick-toikka.com/lateral-extended
 :root
   --header-font-6 microgramma, var(--sans-serif-font)
 @font-face
@@ -422,7 +423,8 @@ const updateMetaRSSFeed = () => {
   src url("assets/fonts/microgramma/MicrogrammaMediumExtendedD.woff2") format("woff2")
   font-weight normal
   font-style normal
-// header-font-7
+
+// header-font-7 ???
 :root
   --header-font-7 tme, var(--sans-serif-font)
 @font-face
