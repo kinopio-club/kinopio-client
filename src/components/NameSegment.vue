@@ -154,8 +154,22 @@ span.name-segment(:data-segment-types="dataMarkdownType" :data-tag-color="dataTa
   --header-font var(--header-font-0)
   &.header-font-1
     --header-font var(--header-font-1)
-  // &.header-font-2
-  //   --header-font var(--mono-font)
+  &.header-font-2
+    --header-font var(--header-font-2)
+  &.header-font-3
+    --header-font var(--header-font-3)
+  &.header-font-4
+    --header-font var(--header-font-4)
+  &.header-font-5
+    --header-font var(--header-font-5)
+  &.header-font-6
+    --header-font var(--header-font-6)
+  &.header-font-7
+    --header-font var(--header-font-7)
+  &.header-font-8
+    --header-font var(--header-font-8)
+  &.header-font-9
+    --header-font var(--header-font-9)
 
   > .button-badge
     vertical-align 1px

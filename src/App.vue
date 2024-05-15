@@ -318,11 +318,8 @@ const updateMetaRSSFeed = () => {
   --button-fixed-height 30px
   --sans-serif-font "Helvetica Neue", Helvetica, Arial, sans-serif
   --mono-font Menlo, Monaco, monospace
+  --serif-font georgia, serif
   --glyphs-font GoodGlyphs, wingdings
-  // header fonts
-  --default-header-font recoleta, georgia, serif
-  --header-font-0 var(--default-header-font)
-  --header-font-1 grenette, georgia, serif
 
 @font-face
   font-family 'GoodGlyphs'
@@ -331,29 +328,115 @@ const updateMetaRSSFeed = () => {
   font-style normal
 
 // header-font-0
-@font-face
-  font-family 'recoleta'
-  src url("assets/fonts/recoleta/Recoleta-Regular.woff2") format("woff2")
-  font-weight normal
-  font-style normal
+:root
+  --header-font-0 recoleta, var(--serif-font)
 @font-face
   font-family 'recoleta'
   src url("assets/fonts/recoleta/Recoleta-Bold.woff2") format("woff2")
   font-weight bold
   font-style normal
-// header-font-1
 @font-face
-  font-family 'grenette'
-  src url("assets/fonts/grenette/grenette-regular-trial.woff2") format("woff2")
+  font-family 'recoleta'
+  src url("assets/fonts/recoleta/Recoleta-Regular.woff2") format("woff2")
   font-weight normal
   font-style normal
+
+// header-font-1 XXXX
+:root
+  --header-font-1 shinka-mono, var(--mono-font)
 @font-face
-  font-family 'grenette'
-  src url("assets/fonts/grenette/grenette-bold-trial.woff2") format("woff2")
+  font-family 'shinka-mono'
+  src url("assets/fonts/shinka-mono/ShinkaMonoUnlicensed-Bold.woff2") format("woff2")
   font-weight bold
   font-style normal
-// header-font-2
-// ..
+@font-face
+  font-family 'shinka-mono'
+  src url("assets/fonts/shinka-mono/ShinkaMonoUnlicensed-Regular.woff2") format("woff2")
+  font-weight normal
+  font-style normal
+
+// header-font-2 XXX
+:root
+  --header-font-2 jeanluc, var(--mono-font)
+@font-face
+  font-family 'jeanluc'
+  src url("assets/fonts/jeanluc/JeanLuc-Bold.woff2") format("woff2")
+  font-weight bold
+  font-style normal
+@font-face
+  font-family 'jeanluc'
+  src url("assets/fonts/jeanluc/JeanLuc-Thin.woff2") format("woff2")
+  font-weight normal
+  font-style normal
+// header-font-3
+:root
+  --header-font-3 clarel, var(--serif-font)
+@font-face
+  font-family 'clarel'
+  src url("assets/fonts/clarel/ClarelSerifTRIAL-Black.woff2") format("woff2")
+  font-weight bold
+  font-style normal
+@font-face
+  font-family 'clarel'
+  src url("assets/fonts/clarel/ClarelSerifTRIAL-Regular.woff2") format("woff2")
+  font-weight normal
+  font-style normal
+
+// header-font-4 XXXX APRIS
+:root
+  --header-font-4 reforma-slanted, var(--sans-serif-font)
+@font-face
+  font-family 'reforma-slanted'
+  src url("assets/fonts/reforma-slanted/ReformaSansTRIAL-60o.woff2") format("woff2")
+  font-weight bold
+  font-style normal
+@font-face
+  font-family 'reforma-slanted'
+  src url("assets/fonts/reforma-slanted/ReformaSansTRIAL--30o.woff2") format("woff2")
+  font-weight normal
+  font-style normal
+
+// header-font-5
+:root
+  --header-font-5 grotesk-remix, var(--sans-serif-font)
+@font-face
+  font-family 'grotesk-remix'
+  src url("assets/fonts/grotesk-remix/GroteskRemix-trial-bold.woff2") format("woff2")
+  font-weight bold
+  font-style normal
+@font-face
+  font-family 'grotesk-remix'
+  src url("assets/fonts/grotesk-remix/GroteskRemix-trial-regular.woff2") format("woff2")
+  font-weight normal
+  font-style normal
+// header-font-6
+:root
+  --header-font-6 microgramma, var(--sans-serif-font)
+@font-face
+  font-family 'microgramma'
+  src url("assets/fonts/microgramma/MicrogrammaBoldExtendedD.woff2") format("woff2")
+  font-weight bold
+  font-style normal
+@font-face
+  font-family 'microgramma'
+  src url("assets/fonts/microgramma/MicrogrammaMediumExtendedD.woff2") format("woff2")
+  font-weight normal
+  font-style normal
+// header-font-7
+:root
+  --header-font-7 tme, var(--sans-serif-font)
+@font-face
+  font-family 'tme'
+  src url("assets/fonts/tme/Tme-trial-Bold.woff2") format("woff2")
+  font-weight bold
+  font-style normal
+@font-face
+  font-family 'tme'
+  src url("assets/fonts/tme/Tme-trial-Regular.woff2") format("woff2")
+  font-weight normal
+  font-style normal
+
+// coolvetica (multiweight?)
 
 *
   -webkit-overflow-scrolling touch
