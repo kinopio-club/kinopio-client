@@ -14,7 +14,6 @@ const fonts = [
   {
     id: 6,
     name: 'grotesk-remix',
-    size: 's',
     previewImage: 'https://updates.kinopio.club/font-preview/grotesk-remix.webp'
   },
   {
