@@ -516,25 +516,30 @@ export default {
       context.commit('otherTags', remoteTags, { root: true })
     },
     restoreUserFavorites: async (context) => {
-      context.commit('isLoadingFavorites', true, { root: true })
-      if (!context.getters.isSignedIn) {
+      try {
+        context.commit('isLoadingFavorites', true, { root: true })
+        if (!context.getters.isSignedIn) {
+          context.commit('isLoadingFavorites', false, { root: true })
+          return
+        }
+        const [favoriteSpaces, favoriteUsers, favoriteColors] = await Promise.all([
+          context.dispatch('api/getUserFavoriteSpaces', null, { root: true }),
+          context.dispatch('api/getUserFavoriteUsers', null, { root: true }),
+          context.dispatch('api/getUserFavoriteColors', null, { root: true })
+        ])
+        context.commit('favoriteUsers', favoriteUsers)
+        context.commit('favoriteSpaces', favoriteSpaces)
+        context.commit('favoriteColors', favoriteColors)
         context.commit('isLoadingFavorites', false, { root: true })
-        return
+      } catch (error) {
+        console.error('🚒 restoreUserFavorites', error)
       }
-      const [favoriteSpaces, favoriteUsers, favoriteColors] = await Promise.all([
-        context.dispatch('api/getUserFavoriteSpaces', null, { root: true }),
-        context.dispatch('api/getUserFavoriteUsers', null, { root: true }),
-        context.dispatch('api/getUserFavoriteColors', null, { root: true })
-      ])
-      context.commit('favoriteUsers', favoriteUsers)
-      context.commit('favoriteSpaces', favoriteSpaces)
-      context.commit('favoriteColors', favoriteColors)
-      context.commit('isLoadingFavorites', false, { root: true })
     },
     updateFavoriteSpace: (context, { space, value }) => {
       let favoriteSpaces = utils.clone(context.state.favoriteSpaces)
       // add space
       if (value) {
+        space = utils.clone(space)
         favoriteSpaces.push(space)
       // remove space
       } else {
