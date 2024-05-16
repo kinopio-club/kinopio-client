@@ -340,10 +340,48 @@ const updateMetaRSSFeed = () => {
   src url("assets/fonts/recoleta/Recoleta-Regular.woff2") format("woff2")
   font-weight normal
   font-style normal
-
-// header-font-1 XXXX https://www.schick-toikka.com/items-standard items mono
+// header-font-1
 :root
-  --header-font-1 shinka-mono, var(--mono-font)
+  --header-font-1 apris, var(--mono-font)
+@font-face
+  font-family 'apris'
+  src url("assets/fonts/apris/AprisDemo-BoldItalic.woff2") format("woff2")
+  font-weight bold
+  font-style normal
+@font-face
+  font-family 'apris'
+  src url("assets/fonts/apris/AprisDemo-Regular.woff2") format("woff2")
+  font-weight normal
+  font-style normal
+// header-font-2
+:root
+  --header-font-2 gaya, var(--serif-font)
+@font-face
+  font-family 'gaya'
+  src url("assets/fonts/gaya/GayaTrial-Regular.woff2") format("woff2")
+  font-weight bold
+  font-style normal
+@font-face
+  font-family 'gaya'
+  src url("assets/fonts/gaya/GayaTrial-Italic.woff2") format("woff2")
+  font-weight normal
+  font-style normal
+// header-font-3
+:root
+  --header-font-3 gt-america, var(--sans-serif-font)
+@font-face
+  font-family 'gt-america'
+  src url("assets/fonts/gt-america/GT-America-Standard-Bold.woff2") format("woff2")
+  font-weight bold
+  font-style normal
+@font-face
+  font-family 'gt-america'
+  src url("assets/fonts/gt-america/GT-America-Standard-Regular.woff2") format("woff2")
+  font-weight normal
+  font-style normal
+// header-font-4
+:root
+  --header-font-4 shinka-mono, var(--sans-serif-font)
 @font-face
   font-family 'shinka-mono'
   src url("assets/fonts/shinka-mono/ShinkaMonoUnlicensed-Bold.woff2") format("woff2")
@@ -354,65 +392,9 @@ const updateMetaRSSFeed = () => {
   src url("assets/fonts/shinka-mono/ShinkaMonoUnlicensed-Regular.woff2") format("woff2")
   font-weight normal
   font-style normal
-
-// header-font-2 ???
-:root
-  --header-font-2 jeanluc, var(--mono-font)
-@font-face
-  font-family 'jeanluc'
-  src url("assets/fonts/jeanluc/JeanLuc-Bold.woff2") format("woff2")
-  font-weight bold
-  font-style normal
-@font-face
-  font-family 'jeanluc'
-  src url("assets/fonts/jeanluc/JeanLuc-Thin.woff2") format("woff2")
-  font-weight normal
-  font-style normal
-// header-font-3
-:root
-  --header-font-3 clarel, var(--serif-font)
-@font-face
-  font-family 'clarel'
-  src url("assets/fonts/clarel/ClarelSerifTRIAL-Black.woff2") format("woff2")
-  font-weight bold
-  font-style normal
-@font-face
-  font-family 'clarel'
-  src url("assets/fonts/clarel/ClarelSerifTRIAL-Regular.woff2") format("woff2")
-  font-weight normal
-  font-style normal
-
-// header-font-4 XXXX APRIS
-:root
-  --header-font-4 reforma-slanted, var(--sans-serif-font)
-@font-face
-  font-family 'reforma-slanted'
-  src url("assets/fonts/reforma-slanted/ReformaSansTRIAL-60o.woff2") format("woff2")
-  font-weight bold
-  font-style normal
-@font-face
-  font-family 'reforma-slanted'
-  src url("assets/fonts/reforma-slanted/ReformaSansTRIAL--30o.woff2") format("woff2")
-  font-weight normal
-  font-style normal
-
 // header-font-5
 :root
-  --header-font-5 grotesk-remix, var(--sans-serif-font)
-@font-face
-  font-family 'grotesk-remix'
-  src url("assets/fonts/grotesk-remix/GroteskRemix-trial-bold.woff2") format("woff2")
-  font-weight bold
-  font-style normal
-@font-face
-  font-family 'grotesk-remix'
-  src url("assets/fonts/grotesk-remix/GroteskRemix-trial-regular.woff2") format("woff2")
-  font-weight normal
-  font-style normal
-
-// header-font-6 XXX https://www.schick-toikka.com/lateral-extended
-:root
-  --header-font-6 microgramma, var(--sans-serif-font)
+  --header-font-5 microgramma, var(--sans-serif-font)
 @font-face
   font-family 'microgramma'
   src url("assets/fonts/microgramma/MicrogrammaBoldExtendedD.woff2") format("woff2")
@@ -423,22 +405,19 @@ const updateMetaRSSFeed = () => {
   src url("assets/fonts/microgramma/MicrogrammaMediumExtendedD.woff2") format("woff2")
   font-weight normal
   font-style normal
-
-// header-font-7 ???
+// header-font-6
 :root
-  --header-font-7 tme, var(--sans-serif-font)
+  --header-font-6 grotesk-remix, var(--sans-serif-font)
 @font-face
-  font-family 'tme'
-  src url("assets/fonts/tme/Tme-trial-Bold.woff2") format("woff2")
+  font-family 'grotesk-remix'
+  src url("assets/fonts/grotesk-remix/GroteskRemix-trial-bold.woff2") format("woff2")
   font-weight bold
   font-style normal
 @font-face
-  font-family 'tme'
-  src url("assets/fonts/tme/Tme-trial-Regular.woff2") format("woff2")
+  font-family 'grotesk-remix'
+  src url("assets/fonts/grotesk-remix/GroteskRemix-trial-regular.woff2") format("woff2")
   font-weight normal
   font-style normal
-
-// coolvetica (multiweight?)
 
 *
   -webkit-overflow-scrolling touch

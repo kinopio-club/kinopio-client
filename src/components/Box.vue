@@ -3,6 +3,7 @@ import { reactive, computed, onMounted, onBeforeUnmount, onUnmounted, defineProp
 import { useStore } from 'vuex'
 
 import utils from '@/utils.js'
+import fonts from '@/data/fonts.js'
 
 import randomColor from 'randomcolor'
 const store = useStore()
@@ -90,6 +91,11 @@ const infoClasses = computed(() => {
   }
   const fontId = props.box.headerFontId || 0
   string += ` header-font-${fontId}`
+  const font = fonts.find(item => item.id === fontId)
+  const fontSize = font?.size || ''
+  if (fontSize) {
+    string += ` header-font-size-${fontSize}`
+  }
   return string
 })
 
@@ -680,6 +686,11 @@ const endBoxInfoInteractionTouch = (event) => {
       --header-font var(--header-font-8)
     &.header-font-9
       --header-font var(--header-font-9)
+    &.header-font-size-s
+      h1
+        font-size 18px
+      h2
+        font-size 16px
 
     pointer-events all
     position absolute
@@ -702,7 +713,6 @@ const endBoxInfoInteractionTouch = (event) => {
     font-weight bold
     margin 0
     display inline-block
-    line-height 2px
   h2
     font-family var(--header-font)
     font-weight normal

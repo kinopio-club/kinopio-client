@@ -7,6 +7,7 @@ import Tag from '@/components/Tag.vue'
 import SystemCommand from '@/components/SystemCommand.vue'
 import CodeBlock from '@/components/CodeBlock.vue'
 import utils from '@/utils.js'
+import fonts from '@/data/fonts.js'
 
 import fuzzy from '@/libs/fuzzy.js'
 const store = useStore()
@@ -32,7 +33,12 @@ const currentSelectedOtherItem = computed(() => { return store.state.currentSele
 
 const classes = computed(() => {
   const fontId = props.headerFontId || 0
-  return `header-font-${fontId}`
+  const font = fonts.find(item => item.id === fontId)
+  const fontSize = font?.size || ''
+  return [
+    `header-font-${fontId}`,
+    `header-font-size-${fontSize}`
+  ]
 })
 
 // segment data
@@ -169,6 +175,12 @@ span.name-segment(:data-segment-types="dataMarkdownType" :data-tag-color="dataTa
     --header-font var(--header-font-8)
   &.header-font-9
     --header-font var(--header-font-9)
+  &.header-font-size-s
+    .markdown
+      h1
+        font-size 20px
+      h2
+        font-size 18px
 
   > .button-badge
     vertical-align 1px

@@ -451,7 +451,7 @@ section.subsection.style-actions(v-if="visible" @click.left.stop="closeDialogs")
       //- Fonts
       button.toggle-fonts-button.small-button(v-if="isH1 || isH2" @click.stop="toggleFontPickerIsVisible" :class="{ active: state.fontPickerIsVisible }")
         span Fonts
-      FontPicker(:visible="state.fontPickerIsVisible" :cards="cards" @selectFont="updateHeaderFont")
+      FontPicker(:visible="state.fontPickerIsVisible" :cards="cards" :boxes="boxes" @selectFont="updateHeaderFont")
     //- Tag
     .button-wrap(v-if="isCards")
       button(:disabled="!canEditAll" @click.left.stop="toggleTagPickerIsVisible" :class="{ active: state.tagPickerIsVisible }")
