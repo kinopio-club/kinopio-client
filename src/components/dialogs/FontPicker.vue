@@ -46,6 +46,7 @@ const scrollIntoView = () => {
   const element = dialogElement.value
   utils.scrollIntoView({ element })
 }
+const isThemeDark = computed(() => store.getters['themes/isThemeDark'])
 
 // fonts
 
@@ -68,12 +69,10 @@ const fontIsSelected = (font) => {
 <template lang="pug">
 dialog.narrow.font-picker(v-if="visible" :open="visible" ref="dialogElement" @click.left.stop :style="{'max-height': state.dialogHeight + 'px'}")
   section.results-section
-    ul.results-list
+    ul.results-list(:class="{'is-dark-theme': isThemeDark}")
       template(v-for="font in fonts" :key="font.id")
         li(:class="{active: fontIsSelected(font)}" @click.left="selectFont(font)" tabindex="0" v-on:keyup.enter="selectFont(font)")
-          //- img previewImage
-          //- TODO dark mode = invert
-          .name {{font.name}}
+          img(:src="font.previewImage" :title="font.name")
 </template>
 
 <style lang="stylus">
@@ -91,4 +90,8 @@ dialog.font-picker
     img
       width 100%
       vertical-align -5px
+  .is-dark-theme
+    img
+      filter invert()
+
 </style>

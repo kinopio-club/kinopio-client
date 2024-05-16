@@ -4,40 +4,40 @@ const fonts = [
   {
     id: 1,
     name: 'apris',
-    previewImage: 'https://assets.fontsinuse.com/static/samples/13/12948/880/1/65c608f2/shinka-mono.png'
+    previewImage: 'https://updates.kinopio.club/font-preview/apris.webp'
   },
   {
     id: 2,
     name: 'gaya',
-    previewImage: 'https://assets.fontsinuse.com/static/renders/4/3424/800/1/6629fa69/eurostile.png'
+    previewImage: 'https://updates.kinopio.club/font-preview/gaya.webp'
   },
   {
     id: 6,
     name: 'grotesk-remix',
     size: 's',
-    previewImage: 'https://assets.fontsinuse.com/static/renders/4/3424/800/1/6629fa69/eurostile.png'
+    previewImage: 'https://updates.kinopio.club/font-preview/grotesk-remix.webp'
   },
   {
     id: 3,
     name: 'gt-america',
-    previewImage: 'https://assets.fontsinuse.com/static/renders/4/3424/800/1/6629fa69/eurostile.png'
+    previewImage: 'https://updates.kinopio.club/font-preview/gt-america.webp'
   },
   {
     id: 5,
     name: 'microgramma',
-    previewImage: 'https://assets.fontsinuse.com/static/renders/4/3424/800/1/6629fa69/eurostile.png',
+    previewImage: 'https://updates.kinopio.club/font-preview/microgramma.webp',
     size: 's'
   },
   {
     id: 0,
     name: 'recoleta',
-    previewImage: 'fonts/recoleta/preview.png'
+    previewImage: 'https://updates.kinopio.club/font-preview/recoleta.webp'
   },
   {
     id: 4,
     name: 'shinka-mono',
     size: 's',
-    previewImage: 'https://assets.fontsinuse.com/static/renders/4/3424/800/1/6629fa69/eurostile.png'
+    previewImage: 'https://updates.kinopio.club/font-preview/shinka-mono.webp'
   }
 ]
 
