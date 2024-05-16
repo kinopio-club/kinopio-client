@@ -2,11 +2,6 @@
 
 const fonts = [
   {
-    id: 0,
-    name: 'recoleta',
-    previewImage: 'fonts/recoleta/preview.png'
-  },
-  {
     id: 1,
     name: 'apris',
     previewImage: 'https://assets.fontsinuse.com/static/samples/13/12948/880/1/65c608f2/shinka-mono.png'
@@ -32,6 +27,11 @@ const fonts = [
     name: 'microgramma',
     previewImage: 'https://assets.fontsinuse.com/static/renders/4/3424/800/1/6629fa69/eurostile.png',
     size: 's'
+  },
+  {
+    id: 0,
+    name: 'recoleta',
+    previewImage: 'fonts/recoleta/preview.png'
   },
   {
     id: 4,
