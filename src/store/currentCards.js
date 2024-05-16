@@ -75,6 +75,7 @@ const currentCards = {
       }
       const keys = Object.keys(card)
       const prevCard = state.cards[card.id]
+      if (!prevCard) { return }
       let updatedCard = utils.clone(prevCard)
       keys.forEach(key => {
         updatedCard[key] = card[key]
@@ -330,6 +331,7 @@ const currentCards = {
       cards.forEach(card => {
         context.dispatch('broadcast/update', { updates: card, type: 'updateCard', handler: 'currentCards/update' }, { root: true })
         context.commit('update', card)
+
         if (card.name) {
           context.commit('updateCardNameInOtherItems', card, { root: true })
           context.commit('triggerUpdateOtherCard', card.id, { root: true })
