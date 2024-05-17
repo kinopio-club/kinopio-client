@@ -358,12 +358,12 @@ const updateMetaRSSFeed = () => {
   --header-font-2 gaya, var(--serif-font)
 @font-face
   font-family 'gaya'
-  src url("assets/fonts/gaya/GayaTrial-Regular.woff2") format("woff2")
+  src url("assets/fonts/gaya/Gaya.woff2") format("woff2")
   font-weight bold
   font-style normal
 @font-face
   font-family 'gaya'
-  src url("assets/fonts/gaya/GayaTrial-Italic.woff2") format("woff2")
+  src url("assets/fonts/gaya/Gaya-Italic.woff2") format("woff2")
   font-weight normal
   font-style normal
 // header-font-3
