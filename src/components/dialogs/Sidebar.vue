@@ -246,6 +246,9 @@ dialog#sidebar.sidebar.is-pinnable(v-if="visible" :open="visible" @click.left.st
     vertical-align -1px
     height 11px
 
+  .segmented-buttons + .segmented-buttons
+    margin-left 0
+
   .segmented-buttons-wrap
     .segmented-buttons
       &:first-child
