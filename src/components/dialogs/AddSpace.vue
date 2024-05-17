@@ -52,28 +52,19 @@ const state = reactive({
   hasInboxSpace: true
 })
 
+const currentUserId = computed(() => store.state.currentUser.id)
+const closeAll = () => {
+  state.editPromptsIsVisible = false
+  state.urlIsCopied = false
+}
+
+// styles
+
 const updateDialogHeight = async () => {
   if (!props.visible) { return }
   await nextTick()
   let element = dialogElement.value
   state.dialogHeight = utils.elementHeight(element)
-}
-
-const userPrompts = computed(() => {
-  let prompts = store.state.currentUser.journalPrompts
-  return prompts
-})
-const currentUserId = computed(() => store.state.currentUser.id)
-const shouldCreateJournalsWithDailyPrompt = computed(() => {
-  return store.state.currentUser.shouldCreateJournalsWithDailyPrompt
-})
-const dailyPrompt = computed(() => {
-  return store.state.currentUser.journalDailyPrompt
-})
-
-const toggleShouldCreateJournalsWithDailyPrompt = () => {
-  const value = !shouldCreateJournalsWithDailyPrompt.value
-  store.dispatch('currentUser/update', { shouldCreateJournalsWithDailyPrompt: value })
 }
 const showScreenIsShort = (value) => {
   state.screenIsShort = true
@@ -83,17 +74,9 @@ const showScreenIsShort = (value) => {
 const shouldHideFooter = (value) => {
   store.commit('shouldExplicitlyHideFooter', value)
 }
-const addJournalSpace = () => {
-  store.commit('isLoadingSpace', true)
-  emit('closeDialogs')
-  window.scrollTo(0, 0)
-  emit('addJournalSpace')
-  if (props.shouldAddSpaceDirectly) {
-    store.dispatch('closeAllDialogs')
-    store.dispatch('currentSpace/loadJournalSpace')
-    store.commit('triggerSpaceDetailsInfoIsVisible')
-  }
-}
+
+// space
+
 const addSpace = () => {
   store.commit('isLoadingSpace', true)
   const noUserSpaces = !cache.getAllSpaces().length
@@ -116,16 +99,41 @@ const addInboxSpace = () => {
   window.scrollTo(0, 0)
   store.dispatch('currentSpace/addInboxSpace')
 }
+
+// journal
+
+const addJournalSpace = () => {
+  store.commit('isLoadingSpace', true)
+  emit('closeDialogs')
+  window.scrollTo(0, 0)
+  emit('addJournalSpace')
+  if (props.shouldAddSpaceDirectly) {
+    store.dispatch('closeAllDialogs')
+    store.dispatch('currentSpace/loadJournalSpace')
+    store.commit('triggerSpaceDetailsInfoIsVisible')
+  }
+}
+const shouldCreateJournalsWithDailyPrompt = computed(() => {
+  return store.state.currentUser.shouldCreateJournalsWithDailyPrompt
+})
+const dailyPrompt = computed(() => {
+  return store.state.currentUser.journalDailyPrompt
+})
+
+const toggleShouldCreateJournalsWithDailyPrompt = () => {
+  const value = !shouldCreateJournalsWithDailyPrompt.value
+  store.dispatch('currentUser/update', { shouldCreateJournalsWithDailyPrompt: value })
+}
 const toggleEditPromptsIsVisible = () => {
   const value = !state.editPromptsIsVisible
   closeAll()
   state.editPromptsIsVisible = value
   updateDialogHeight()
 }
-const closeAll = () => {
-  state.editPromptsIsVisible = false
-  state.urlIsCopied = false
-}
+const userPrompts = computed(() => {
+  let prompts = store.state.currentUser.journalPrompts
+  return prompts
+})
 const addCustomPrompt = async () => {
   const emptyPrompt = { id: nanoid(), name: '', userId: currentUserId.value }
   store.dispatch('currentUser/addJournalPrompt', emptyPrompt)
@@ -133,6 +141,16 @@ const addCustomPrompt = async () => {
   const textareas = document.querySelectorAll('.add-space textarea')
   last(textareas).focus()
 }
+
+// inbox space
+
+const checkIfUserHasInboxSpace = async () => {
+  const inboxSpace = await store.dispatch('currentUser/inboxSpace')
+  state.hasInboxSpace = Boolean(inboxSpace)
+}
+
+// templates, import
+
 const triggerTemplatesIsVisible = () => {
   closeAll()
   store.dispatch('closeAllDialogs')
@@ -142,10 +160,6 @@ const triggerImportIsVisible = () => {
   closeAll()
   store.dispatch('closeAllDialogs')
   store.commit('triggerImportIsVisible')
-}
-const checkIfUserHasInboxSpace = async () => {
-  const inboxSpace = await store.dispatch('currentUser/inboxSpace')
-  state.hasInboxSpace = Boolean(inboxSpace)
 }
 
 </script>
