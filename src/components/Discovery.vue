@@ -54,7 +54,10 @@ const state = reactive({
   unreadExploreSpacesCount: 0,
   unreadFollowingSpacesCount: 0,
   unreadEveryoneSpacesCount: 0,
-  unreadSpacesCount: 0
+  unreadSpacesCount: 0,
+  error: {
+    isLoading: false
+  }
 })
 
 watch(() => state.exploreIsVisible, (value, prevValue) => {
@@ -133,6 +136,7 @@ const updateSpaces = async () => {
     updateUnreadSpacesCounts()
   } catch (error) {
     console.error('🚑 updateSpaces', error)
+    state.error.isLoading = true
   }
   state.isLoadingSpaces = false
 }
@@ -205,6 +209,7 @@ const liveSpacesCount = computed(() => {
         :unreadExploreSpacesCount="state.unreadExploreSpacesCount"
         :unreadFollowingSpacesCount="state.unreadFollowingSpacesCount"
         :unreadEveryoneSpacesCount="state.unreadEveryoneSpacesCount"
+        :errorIsLoading="state.error.isLoading"
       )
     //- Live
     .button-wrap
