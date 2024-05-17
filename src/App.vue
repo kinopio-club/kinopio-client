@@ -692,8 +692,6 @@ dialog
     width 230px
   &.wide
     width 280px
-  .segmented-buttons + .segmented-buttons
-    margin-left 0
   button + button,
   button + input,
   button + label,
