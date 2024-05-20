@@ -621,4 +621,7 @@ dialog.narrow.multiple-selected-actions(
 
   .down-arrow
     vertical-align 2px
+
+  .segmented-buttons + .segmented-buttons
+    margin-left 0
 </style>
