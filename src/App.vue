@@ -345,12 +345,12 @@ const updateMetaRSSFeed = () => {
   --header-font-1 apris, var(--mono-font)
 @font-face
   font-family 'apris'
-  src url("assets/fonts/apris/AprisDemo-BoldItalic.woff2") format("woff2")
+  src url("assets/fonts/apris/Apris-BoldItalic.woff2") format("woff2")
   font-weight bold
   font-style normal
 @font-face
   font-family 'apris'
-  src url("assets/fonts/apris/AprisDemo-Regular.woff2") format("woff2")
+  src url("assets/fonts/apris/Apris-Regular.woff2") format("woff2")
   font-weight normal
   font-style normal
 // header-font-2
