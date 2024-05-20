@@ -384,12 +384,12 @@ const updateMetaRSSFeed = () => {
   --header-font-4 shinka-mono, var(--sans-serif-font)
 @font-face
   font-family 'shinka-mono'
-  src url("assets/fonts/shinka-mono/ShinkaMonoUnlicensed-Bold.woff2") format("woff2")
+  src url("assets/fonts/shinka-mono/ShinkaMono-Bold.woff2") format("woff2")
   font-weight bold
   font-style normal
 @font-face
   font-family 'shinka-mono'
-  src url("assets/fonts/shinka-mono/ShinkaMonoUnlicensed-Regular.woff2") format("woff2")
+  src url("assets/fonts/shinka-mono/ShinkaMono-Regular.woff2") format("woff2")
   font-weight normal
   font-style normal
 // header-font-5
