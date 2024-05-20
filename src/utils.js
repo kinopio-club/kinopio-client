@@ -1505,13 +1505,16 @@ export default {
     space = this.newSpaceBackground(space, currentUser)
     space.background = space.background || consts.defaultSpaceBackground
     // date
-    const dateCard = {
+    let dateCard = {
       id: nanoid(),
       name: `${journalDailyDateImage} ${date.format('dddd, MMM D')}`,
       x: 86,
       y: 157,
       resizeWidth: 260,
       frameId: 0
+    }
+    if (weather) {
+      dateCard.name += weather
     }
     space.cards.push(dateCard)
     // daily prompt

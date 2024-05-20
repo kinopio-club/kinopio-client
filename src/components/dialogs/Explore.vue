@@ -6,6 +6,7 @@ import SpaceList from '@/components/SpaceList.vue'
 import Loader from '@/components/Loader.vue'
 import UserLabelInline from '@/components/UserLabelInline.vue'
 import utils from '@/utils.js'
+import OfflineBadge from '@/components/OfflineBadge.vue'
 
 import randomColor from 'randomcolor'
 
@@ -31,7 +32,8 @@ const props = defineProps({
   loading: Boolean,
   unreadExploreSpacesCount: Number,
   unreadFollowingSpacesCount: Number,
-  unreadEveryoneSpacesCount: Number
+  unreadEveryoneSpacesCount: Number,
+  errorIsLoading: Boolean
 })
 watch(() => props.visible, (value, prevValue) => {
   store.commit('clearNotificationsWithPosition')
@@ -62,6 +64,9 @@ const changeSpace = (space) => {
 }
 const closeDialogs = () => {
   // state.exploreRssFeedsIsVisible = false
+}
+const refreshBrowser = () => {
+  window.location.reload()
 }
 
 // update height
@@ -169,8 +174,16 @@ dialog.explore.wide(v-if="visible" :open="visible" ref="dialogElement" :style="{
         button(:class="{active: currentSectionIsEveryone}" @click="updateCurrentSection('everyone')")
           span Everyone
           .badge.new-unread-badge.notification-button-badge(v-if="isUnreadEveryone")
+    OfflineBadge
     .row(v-if="props.loading")
       Loader(:isSmall="true" :visible="props.loading")
+    .row(v-if="props.errorIsLoading")
+      .badge.danger
+        p (シ_ _)シ Something went wrong, Please try again or contact support
+        .button-wrap
+          button(@click.left="refreshBrowser")
+            img.refresh.icon(src="@/assets/refresh.svg")
+            span Refresh
 
     //- follow users blank slate
     section.subsection(v-if="followUsersInfoIsVisible")
@@ -212,4 +225,7 @@ dialog.explore
       position relative
   hr
     margin-top 0
+  .badge
+    .button-wrap:last-child
+      margin-bottom 4px
 </style>

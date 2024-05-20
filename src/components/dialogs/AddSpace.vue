@@ -1,12 +1,178 @@
+<script setup>
+import { reactive, computed, onMounted, onBeforeUnmount, onUnmounted, defineProps, defineEmits, watch, ref, nextTick } from 'vue'
+import { useStore } from 'vuex'
+
+import JournalPrompt from '@/components/JournalPrompt.vue'
+import moonphase from '@/moonphase.js'
+import MoonPhase from '@/components/MoonPhase.vue'
+import Weather from '@/components/Weather.vue'
+import utils from '@/utils.js'
+import cache from '@/cache.js'
+
+import last from 'lodash-es/last'
+import { nanoid } from 'nanoid'
+
+const store = useStore()
+
+const dialogElement = ref(null)
+
+onMounted(() => {
+  store.subscribe((mutation, state) => {
+    if (mutation.type === 'updatePageSizes') {
+      updateDialogHeight()
+    }
+  })
+})
+
+const emit = defineEmits(['closeDialogs', 'addJournalSpace', 'addSpace'])
+
+const props = defineProps({
+  visible: Boolean,
+  shouldAddSpaceDirectly: Boolean
+})
+watch(() => props.visible, (value, prevValue) => {
+  closeAll()
+  shouldHideFooter(false)
+  if (value) {
+    state.moonPhase = moonphase()
+    checkIfUserHasInboxSpace()
+    store.commit('shouldExplicitlyHideFooter', true)
+    updateDialogHeight()
+  } else {
+    store.commit('shouldExplicitlyHideFooter', false)
+  }
+})
+
+const state = reactive({
+  moonPhase: {},
+  editPromptsIsVisible: false,
+  urlIsCopied: false,
+  screenIsShort: false,
+  dialogHeight: null,
+  hasInboxSpace: true
+})
+
+const currentUserId = computed(() => store.state.currentUser.id)
+const closeAll = () => {
+  state.editPromptsIsVisible = false
+  state.urlIsCopied = false
+}
+
+// styles
+
+const updateDialogHeight = async () => {
+  if (!props.visible) { return }
+  await nextTick()
+  let element = dialogElement.value
+  state.dialogHeight = utils.elementHeight(element)
+}
+const showScreenIsShort = (value) => {
+  state.screenIsShort = true
+  shouldHideFooter(true)
+  updateDialogHeight()
+}
+const shouldHideFooter = (value) => {
+  store.commit('shouldExplicitlyHideFooter', value)
+}
+
+// space
+
+const addSpace = () => {
+  store.commit('isLoadingSpace', true)
+  const noUserSpaces = !cache.getAllSpaces().length
+  window.scrollTo(0, 0)
+  if (noUserSpaces) {
+    window.location.href = '/'
+  } else {
+    emit('closeDialogs')
+    emit('addSpace')
+  }
+  if (props.shouldAddSpaceDirectly) {
+    store.dispatch('closeAllDialogs')
+    store.dispatch('currentSpace/addSpace')
+    store.commit('triggerSpaceDetailsInfoIsVisible')
+  }
+}
+const addInboxSpace = () => {
+  store.commit('isLoadingSpace', true)
+  store.dispatch('closeAllDialogs')
+  window.scrollTo(0, 0)
+  store.dispatch('currentSpace/addInboxSpace')
+}
+
+// journal
+
+const addJournalSpace = () => {
+  store.commit('isLoadingSpace', true)
+  emit('closeDialogs')
+  window.scrollTo(0, 0)
+  emit('addJournalSpace')
+  if (props.shouldAddSpaceDirectly) {
+    store.dispatch('closeAllDialogs')
+    store.dispatch('currentSpace/loadJournalSpace')
+    store.commit('triggerSpaceDetailsInfoIsVisible')
+  }
+}
+const shouldCreateJournalsWithDailyPrompt = computed(() => {
+  return store.state.currentUser.shouldCreateJournalsWithDailyPrompt
+})
+const dailyPrompt = computed(() => {
+  return store.state.currentUser.journalDailyPrompt
+})
+
+const toggleShouldCreateJournalsWithDailyPrompt = () => {
+  const value = !shouldCreateJournalsWithDailyPrompt.value
+  store.dispatch('currentUser/update', { shouldCreateJournalsWithDailyPrompt: value })
+}
+const toggleEditPromptsIsVisible = () => {
+  const value = !state.editPromptsIsVisible
+  closeAll()
+  state.editPromptsIsVisible = value
+  updateDialogHeight()
+}
+const userPrompts = computed(() => {
+  let prompts = store.state.currentUser.journalPrompts
+  return prompts
+})
+const addCustomPrompt = async () => {
+  const emptyPrompt = { id: nanoid(), name: '', userId: currentUserId.value }
+  store.dispatch('currentUser/addJournalPrompt', emptyPrompt)
+  await nextTick()
+  const textareas = document.querySelectorAll('.add-space textarea')
+  last(textareas).focus()
+}
+
+// inbox space
+
+const checkIfUserHasInboxSpace = async () => {
+  const inboxSpace = await store.dispatch('currentUser/inboxSpace')
+  state.hasInboxSpace = Boolean(inboxSpace)
+}
+
+// templates, import
+
+const triggerTemplatesIsVisible = () => {
+  closeAll()
+  store.dispatch('closeAllDialogs')
+  store.commit('triggerTemplatesIsVisible')
+}
+const triggerImportIsVisible = () => {
+  closeAll()
+  store.dispatch('closeAllDialogs')
+  store.commit('triggerImportIsVisible')
+}
+
+</script>
+
 <template lang="pug">
 dialog.add-space.narrow(
   v-if="visible"
   :open="visible"
   @touchend.stop
   @click.left.stop
-  :class="{'short': screenIsShort}"
+  :class="{'short': state.screenIsShort}"
   ref="dialog"
-  :style="{'max-height': dialogHeight + 'px'}"
+  :style="{'max-height': state.dialogHeight + 'px'}"
 )
   section
     .row
@@ -21,13 +187,13 @@ dialog.add-space.narrow(
       .segmented-buttons
         button(@click="addJournalSpace")
           img.icon(src="@/assets/add.svg")
-          MoonPhase(:moonPhase="moonPhase.name")
+          MoonPhase(:moonPhase="state.moonPhase.name")
           span Journal
-        button(@click.left.stop="toggleEditPromptsIsVisible" :class="{ active: editPromptsIsVisible }")
+        button(@click.left.stop="toggleEditPromptsIsVisible" :class="{ active: state.editPromptsIsVisible }")
           img.icon.down-arrow.button-down-arrow(src="@/assets/down-arrow.svg")
 
     //- Journal Settings
-    template(v-if="editPromptsIsVisible")
+    template(v-if="state.editPromptsIsVisible")
       //- weather
       section.subsection
         Weather
@@ -50,7 +216,7 @@ dialog.add-space.narrow(
             span Prompt
 
   //- Inbox
-  section(v-if="!hasInboxSpace")
+  section(v-if="!state.hasInboxSpace")
     button(@click="addInboxSpace")
       img.icon(src="@/assets/add.svg")
       img.icon.inbox-icon(src="@/assets/inbox.svg")
@@ -67,164 +233,6 @@ dialog.add-space.narrow(
       .button-wrap
         button(@click="triggerImportIsVisible") Import
 </template>
-
-<script>
-import JournalPrompt from '@/components/JournalPrompt.vue'
-import moonphase from '@/moonphase.js'
-import MoonPhase from '@/components/MoonPhase.vue'
-import Weather from '@/components/Weather.vue'
-import utils from '@/utils.js'
-import cache from '@/cache.js'
-
-import last from 'lodash-es/last'
-import { nanoid } from 'nanoid'
-
-export default {
-  name: 'AddSpace',
-  components: {
-    JournalPrompt,
-    MoonPhase,
-    Weather
-  },
-  props: {
-    visible: Boolean,
-    shouldAddSpaceDirectly: Boolean
-  },
-  created () {
-    this.$store.subscribe((mutation, state) => {
-      if (mutation.type === 'updatePageSizes') {
-        this.updateDialogHeight()
-      }
-    })
-  },
-  mounted () {
-    this.moonPhase = moonphase()
-  },
-  data () {
-    return {
-      moonPhase: {},
-      editPromptsIsVisible: false,
-      urlIsCopied: false,
-      screenIsShort: false,
-      dialogHeight: null,
-      hasInboxSpace: true
-    }
-  },
-  computed: {
-    userPrompts () {
-      let prompts = this.$store.state.currentUser.journalPrompts
-      return prompts
-    },
-    currentUserId () { return this.$store.state.currentUser.id },
-    shouldCreateJournalsWithDailyPrompt () {
-      return this.$store.state.currentUser.shouldCreateJournalsWithDailyPrompt
-    },
-    dailyPrompt () {
-      return this.$store.state.currentUser.journalDailyPrompt
-    }
-  },
-  methods: {
-    toggleShouldCreateJournalsWithDailyPrompt () {
-      const value = !this.shouldCreateJournalsWithDailyPrompt
-      this.$store.dispatch('currentUser/update', { shouldCreateJournalsWithDailyPrompt: value })
-    },
-    showScreenIsShort (value) {
-      this.screenIsShort = true
-      this.shouldHideFooter(true)
-      this.updateDialogHeight()
-    },
-    shouldHideFooter (value) {
-      this.$store.commit('shouldExplicitlyHideFooter', value)
-    },
-    addJournalSpace () {
-      this.$store.commit('isLoadingSpace', true)
-      this.$emit('closeDialogs')
-      window.scrollTo(0, 0)
-      this.$emit('addJournalSpace')
-      if (this.shouldAddSpaceDirectly) {
-        this.$store.dispatch('closeAllDialogs')
-        this.$store.dispatch('currentSpace/loadJournalSpace')
-        this.$store.commit('triggerSpaceDetailsInfoIsVisible')
-      }
-    },
-    addSpace () {
-      this.$store.commit('isLoadingSpace', true)
-      const noUserSpaces = !cache.getAllSpaces().length
-      window.scrollTo(0, 0)
-      if (noUserSpaces) {
-        window.location.href = '/'
-      } else {
-        this.$emit('closeDialogs')
-        this.$emit('addSpace')
-      }
-      if (this.shouldAddSpaceDirectly) {
-        this.$store.dispatch('closeAllDialogs')
-        this.$store.dispatch('currentSpace/addSpace')
-        this.$store.commit('triggerSpaceDetailsInfoIsVisible')
-      }
-    },
-    addInboxSpace () {
-      this.$store.commit('isLoadingSpace', true)
-      this.$store.dispatch('closeAllDialogs')
-      window.scrollTo(0, 0)
-      this.$store.dispatch('currentSpace/addInboxSpace')
-    },
-    toggleEditPromptsIsVisible () {
-      const value = !this.editPromptsIsVisible
-      this.closeAll()
-      this.editPromptsIsVisible = value
-      this.updateDialogHeight()
-    },
-    closeAll () {
-      this.editPromptsIsVisible = false
-      this.urlIsCopied = false
-    },
-    addCustomPrompt () {
-      const emptyPrompt = { id: nanoid(), name: '', userId: this.currentUserId }
-      this.$store.dispatch('currentUser/addJournalPrompt', emptyPrompt)
-      this.$nextTick(() => {
-        const textareas = document.querySelectorAll('.add-space textarea')
-        last(textareas).focus()
-      })
-    },
-    updateDialogHeight () {
-      if (!this.visible) { return }
-      this.$nextTick(() => {
-        let element = this.$refs.dialog
-        this.dialogHeight = utils.elementHeight(element)
-      })
-    },
-    triggerTemplatesIsVisible () {
-      this.closeAll()
-      this.$store.dispatch('closeAllDialogs')
-      this.$store.commit('triggerTemplatesIsVisible')
-    },
-    triggerImportIsVisible () {
-      this.closeAll()
-      this.$store.dispatch('closeAllDialogs')
-      this.$store.commit('triggerImportIsVisible')
-    },
-    async checkIfUserHasInboxSpace () {
-      const inboxSpace = await this.$store.dispatch('currentUser/inboxSpace')
-      this.hasInboxSpace = Boolean(inboxSpace)
-    }
-  },
-  watch: {
-    visible (visible) {
-      this.closeAll()
-      this.shouldHideFooter(false)
-      this.updateDialogHeight()
-      if (visible) {
-        this.checkIfUserHasInboxSpace()
-        this.$store.commit('shouldExplicitlyHideFooter', true)
-      } else {
-        this.$store.commit('shouldExplicitlyHideFooter', false)
-      }
-    }
-  }
-}
-</script>
-
 <style lang="stylus">
 .add-space
   overflow auto
