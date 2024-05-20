@@ -418,6 +418,19 @@ const updateMetaRSSFeed = () => {
   src url("assets/fonts/grotesk-remix/GroteskRemix-trial-regular.woff2") format("woff2")
   font-weight normal
   font-style normal
+// header-font-7
+:root
+  --header-font-7 migra, var(--sans-serif-font)
+@font-face
+  font-family 'migra'
+  src url("assets/fonts/migra/PPMigra-Bold.woff2") format("woff2")
+  font-weight bold
+  font-style normal
+@font-face
+  font-family 'migra'
+  src url("assets/fonts/migra/PPMigra-Regular.woff2") format("woff2")
+  font-weight normal
+  font-style normal
 
 *
   -webkit-overflow-scrolling touch

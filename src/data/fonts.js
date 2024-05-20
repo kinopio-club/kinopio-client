@@ -28,6 +28,11 @@ const fonts = [
     size: 's'
   },
   {
+    id: 7,
+    name: 'migra',
+    previewImage: 'https://updates.kinopio.club/font-preview/migra.webp'
+  },
+  {
     id: 0,
     name: 'recoleta',
     previewImage: 'https://updates.kinopio.club/font-preview/recoleta.webp'
