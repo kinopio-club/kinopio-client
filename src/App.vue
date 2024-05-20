@@ -410,12 +410,12 @@ const updateMetaRSSFeed = () => {
   --header-font-6 grotesk-remix, var(--sans-serif-font)
 @font-face
   font-family 'grotesk-remix'
-  src url("assets/fonts/grotesk-remix/GroteskRemix-trial-bold.woff2") format("woff2")
+  src url("assets/fonts/grotesk-remix/GroteskRemix-bold.woff2") format("woff2")
   font-weight bold
   font-style normal
 @font-face
   font-family 'grotesk-remix'
-  src url("assets/fonts/grotesk-remix/GroteskRemix-trial-regular.woff2") format("woff2")
+  src url("assets/fonts/grotesk-remix/GroteskRemix-regular.woff2") format("woff2")
   font-weight normal
   font-style normal
 // header-font-7
@@ -448,6 +448,7 @@ body
   margin 0
   color var(--primary)
   -webkit-user-select none
+  user-select none
   overflow auto // enables window.scrollBy support
 
 .app

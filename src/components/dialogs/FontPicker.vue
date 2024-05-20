@@ -87,9 +87,12 @@ dialog.font-picker
     height 19px
     display block
     padding 0
-    img
-      width 100%
-      vertical-align -5px
+  img
+    width 100%
+    vertical-align -5px
+    user-select none
+    -webkit-user-drag none
+    user-drag none
   .is-dark-theme
     img
       filter invert()
