@@ -305,6 +305,15 @@ const isH2 = computed(() => {
   const matches = itemsWithPattern(pattern)
   return Boolean(matches.length === items.value.length)
 })
+const isH1OrH2Selected = computed(() => {
+  let pattern = 'h1Pattern'
+  let h1IsSelected = itemsWithPattern(pattern)
+  h1IsSelected = Boolean(h1IsSelected.length)
+  pattern = 'h2Pattern'
+  let h2IsSelected = itemsWithPattern(pattern)
+  h2IsSelected = Boolean(h2IsSelected.length)
+  return h1IsSelected || h2IsSelected
+})
 const removeHeaderFromItemNames = () => {
   // https://regexr.com/804qh
   // ignores [] or [x] + space at beginning of string
@@ -442,14 +451,14 @@ section.subsection.style-actions(v-if="visible" @click.left.stop="closeDialogs")
     span {{label}}
   .row
     //- h1/h2
-    .button-wrap.header-buttons-wrap(:class="{ 'header-is-active': isH1 || isH2, 'is-box-details': isBoxDetails }")
+    .button-wrap.header-buttons-wrap(:class="{ 'header-is-active': isH1OrH2Selected, 'is-box-details': isBoxDetails }")
       .segmented-buttons
         button(:disabled="!canEditAll" @click="toggleHeader('h1Pattern')" :class="{ active: isH1 }" title="Header 1")
           span h1
         button(:disabled="!canEditAll" @click="toggleHeader('h2Pattern')" :class="{ active: isH2 }" title="Header 2")
           span h2
       //- Fonts
-      button.toggle-fonts-button.small-button(v-if="isH1 || isH2" @click.stop="toggleFontPickerIsVisible" :class="{ active: state.fontPickerIsVisible }")
+      button.toggle-fonts-button.small-button(v-if="isH1OrH2Selected" @click.stop="toggleFontPickerIsVisible" :class="{ active: state.fontPickerIsVisible }")
         span Fonts
       FontPicker(:visible="state.fontPickerIsVisible" :cards="cards" :boxes="boxes" @selectFont="updateHeaderFont")
     //- Tag
