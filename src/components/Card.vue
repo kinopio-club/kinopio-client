@@ -1640,9 +1640,11 @@ const removeViewportObserver = () => {
   observer.unobserve(target)
 }
 const shouldRender = computed(() => {
-  if (store.state.isLoadingSpace) { return true }
+  // if (store.state.isLoadingSpace) { return true }
   const isConnectingFrom = store.state.currentConnectionStartCardIds.includes(props.card.id)
+  const shouldExplitlyRender = store.state.shouldExplicitlyRenderCardIds.includes(props.card.id)
   if (isConnectingFrom) { return true }
+  if (shouldExplitlyRender) { return true }
   if (connectedToAnotherCardBeingDraggedColor.value) { return true }
   if (isSelectedOrDragging.value) { return true }
   return state.isVisibleInViewport

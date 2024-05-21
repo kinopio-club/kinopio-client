@@ -313,8 +313,8 @@ const currentSpace = {
           })
           if (!linkedCard) { return }
           nextTick(() => {
-            context.dispatch('currentConnections/updatePaths', { cardId: linkedCard.id, shouldUpdateApi: canEditSpace }, { root: true })
-            context.dispatch('currentCards/updateDimensions', { cardId: linkedCard.id }, { root: true })
+            // context.dispatch('currentConnections/updatePaths', { cardId: linkedCard.id, shouldUpdateApi: canEditSpace }, { root: true })
+            // context.dispatch('currentCards/updateDimensions', { cardId: linkedCard.id }, { root: true })
             context.commit('isLoadingOtherItems', false, { root: true })
           })
         })
@@ -869,9 +869,9 @@ const currentSpace = {
         addBoxes: boxResults.addItems
       })
       context.commit('triggerRestoreSpaceRemoteComplete', null, { root: true })
-      nextTick(() => {
-        context.dispatch('currentCards/updateDimensions', {}, { root: true })
-      })
+      // nextTick(() => {
+      //   context.dispatch('currentCards/updateDimensions', {}, { root: true })
+      // })
       console.timeEnd('🎑⏱️ restoreSpaceRemote')
     },
     loadLastSpace: async (context) => {

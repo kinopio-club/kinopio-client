@@ -114,6 +114,7 @@ const store = createStore({
     preventDraggedBoxFromShowingDetails: false,
 
     // cards
+    shouldExplicitlyRenderCardIds: [],
     shouldAddCard: false,
     cardDetailsIsVisibleForCardId: '',
     parentCardId: '',
@@ -563,6 +564,14 @@ const store = createStore({
 
     // Cards
 
+    addToShouldExplicitlyRenderCardIds: (state, cardIds) => {
+      utils.typeCheck({ value: cardIds, type: 'array' })
+      state.shouldExplicitlyRenderCardIds = state.shouldExplicitlyRenderCardIds.concat(cardIds)
+    },
+    clearShouldExplicitlyRenderCardIds: (state) => {
+      if (state.isLoadingSpace) { return }
+      state.shouldExplicitlyRenderCardIds = []
+    },
     shouldAddCard: (state, value) => {
       utils.typeCheck({ value, type: 'boolean' })
       state.shouldAddCard = value

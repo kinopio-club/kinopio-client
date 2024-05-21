@@ -376,6 +376,9 @@ export default {
     // returns 1.23
     return Math.round(number * 100) / 100
   },
+  pointIsEmpty (point) {
+    if (point.x === 0 && point.y === 0) { return true }
+  },
   arrayHasItems (array) { // !arrayIsEmpty, arrayExists
     this.typeCheck({ value: array, type: 'array', allowUndefined: true, origin: 'arrayHasItems' })
     if (array) {
