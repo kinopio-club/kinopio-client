@@ -1964,7 +1964,7 @@ article.card-wrap#card(
     .locking-frame(v-if="state.isLocking" :style="lockingFrameStyle")
     Frames(:card="card")
 
-    template(v-if="!isComment && state.isVisibleInViewport")
+    template(v-if="!isComment")
       ImageOrVideo(:isSelectedOrDragging="isSelectedOrDragging" :pendingUploadDataUrl="pendingUploadDataUrl" :image="state.formats.image" :video="state.formats.video" @updateCardDimensions="updateCardDimensions")
 
     TiltResize(:card="card" :visible="tiltResizeIsVisible")
@@ -1995,7 +1995,7 @@ article.card-wrap#card(
               input(type="checkbox" v-model="checkboxState")
           //- Name
           p.name.name-segments(v-if="normalizedName" :style="{background: currentBackgroundColor}" :class="{'is-checked': isChecked, 'has-checkbox': hasCheckbox, 'badge badge-status': isImageCard && hasTextSegments}")
-            template(v-if="state.isVisibleInViewport" v-for="segment in nameSegments")
+            template(v-for="segment in nameSegments")
               NameSegment(:segment="segment" @showTagDetailsIsVisible="showTagDetailsIsVisible" :parentCardId="card.id" :backgroundColorIsDark="currentBackgroundColorIsDark" :headerFontId="card.headerFontId")
             Loader(:visible="isLoadingUrlPreview")
 
