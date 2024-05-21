@@ -423,6 +423,7 @@ const removeViewportObserver = () => {
 g.connection(v-if="visible" :style="connectionStyles" :data-id="connection.id" :data-is-visible-in-viewport="state.isVisibleInViewport" ref="connectionElement")
 
   path.connection-path(
+    v-show="state.isVisibleInViewport"
     fill="none"
     :stroke="typeColor"
     stroke-width="5"
