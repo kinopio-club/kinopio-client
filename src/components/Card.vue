@@ -2042,7 +2042,7 @@ article.card-wrap#card(
                 img.connector-icon(src="@/assets/connector-closed-in-card.svg")
               //- template(v-else)
               //-   img.connector-icon(src="@/assets/connector-open-in-card.svg")
-    .url-preview-wrap(v-if="cardUrlPreviewIsVisible || otherCardIsVisible || otherSpaceIsVisible" :class="{'is-image-card': isImageCard}")
+    .url-preview-wrap(v-if="(cardUrlPreviewIsVisible || otherCardIsVisible || otherSpaceIsVisible) && state.isVisibleInViewport" :class="{'is-image-card': isImageCard}")
       template(v-if="cardUrlPreviewIsVisible")
         UrlPreviewCard(
           :visible="true"
