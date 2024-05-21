@@ -296,23 +296,17 @@ const toggleFramePickerIsVisible = () => {
 // header h1 h2
 
 const isH1 = computed(() => {
-  const pattern = 'h1Pattern'
-  const matches = itemsWithPattern(pattern)
-  return Boolean(matches.length === items.value.length)
+  let pattern = 'h1Pattern'
+  let matches = itemsWithPattern(pattern)
+  return Boolean(matches.length)
 })
 const isH2 = computed(() => {
-  const pattern = 'h2Pattern'
-  const matches = itemsWithPattern(pattern)
-  return Boolean(matches.length === items.value.length)
+  let pattern = 'h2Pattern'
+  let matches = itemsWithPattern(pattern)
+  return Boolean(matches.length)
 })
 const isH1OrH2Selected = computed(() => {
-  let pattern = 'h1Pattern'
-  let h1IsSelected = itemsWithPattern(pattern)
-  h1IsSelected = Boolean(h1IsSelected.length)
-  pattern = 'h2Pattern'
-  let h2IsSelected = itemsWithPattern(pattern)
-  h2IsSelected = Boolean(h2IsSelected.length)
-  return h1IsSelected || h2IsSelected
+  return isH1.value || isH2.value
 })
 const removeHeaderFromItemNames = () => {
   // https://regexr.com/804qh
