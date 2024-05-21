@@ -1641,7 +1641,9 @@ const removeViewportObserver = () => {
 }
 const shouldRender = computed(() => {
   const isConnectingFrom = store.state.currentConnectionStartCardIds.includes(props.card.id)
-  if (isConnectingFrom || connectedToAnotherCardBeingDraggedColor.value) { return true }
+  if (isConnectingFrom) { return true }
+  if (connectedToAnotherCardBeingDraggedColor.value) { return true }
+  if (isSelectedOrDragging.value) { return true }
   return state.isVisibleInViewport
 })
 
