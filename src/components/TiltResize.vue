@@ -10,11 +10,9 @@ const props = defineProps({
   card: Object
 })
 
-const canEditSpace = computed(() => store.getters['currentUser/canEditSpace']())
 const isPresentationMode = computed(() => store.state.isPresentationMode)
 
 const start = (event, action) => {
-  if (!canEditSpace.value) { return }
   if (utils.isMultiTouch(event)) { return }
   store.dispatch('history/pause')
   store.dispatch('closeAllDialogs')
