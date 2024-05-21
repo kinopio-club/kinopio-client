@@ -1,3 +1,274 @@
+<script setup>
+import { reactive, computed, onMounted, onBeforeUnmount, onUnmounted, defineProps, defineEmits, watch, ref, nextTick } from 'vue'
+import { useStore } from 'vuex'
+
+import Header from '@/components/Header.vue'
+import MagicPaint from '@/components/layers/MagicPaint.vue'
+import Footer from '@/components/Footer.vue'
+import WindowHistoryHandler from '@/components/WindowHistoryHandler.vue'
+import KeyboardShortcutsHandler from '@/components/KeyboardShortcutsHandler.vue'
+import ScrollHandler from '@/components/ScrollHandler.vue'
+import TagDetails from '@/components/dialogs/TagDetails.vue'
+import ItemsLocked from '@/components/ItemsLocked.vue'
+import UserDetails from '@/components/dialogs/UserDetails.vue'
+import NotificationsWithPosition from '@/components/NotificationsWithPosition.vue'
+import SpaceBackground from '@/components/SpaceBackground.vue'
+import OutsideSpaceBackground from '@/components/OutsideSpaceBackground.vue'
+import Preload from '@/components/Preload.vue'
+import utils from '@/utils.js'
+import consts from '@/consts.js'
+const store = useStore()
+
+let multiTouchAction, shouldCancelUndo
+
+let inertiaScrollEndIntervalTimer, prevPosition
+
+let statusRetryCount = 0
+
+onMounted(() => {
+  console.log('🐢 kinopio-client build', import.meta.env.MODE)
+  store.subscribe((mutation, state) => {
+    if (mutation.type === 'broadcast/joinSpaceRoom') {
+      updateMetaRSSFeed()
+    } else if (mutation.type === 'triggerUserIsLoaded') {
+      updateThemeFromSystem()
+    }
+  })
+  if (utils.isLinux()) {
+    utils.setCssVariable('sans-serif-font', '"Noto Sans", "Helvetica Neue", Helvetica, Arial, sans-serif')
+  }
+  // use timer to prevent being fired from page reload scroll
+  // https://stackoverflow.com/questions/34095038/on-scroll-fires-automatically-on-page-refresh
+  setTimeout(() => {
+    window.addEventListener('scroll', scroll)
+  }, 100)
+  window.addEventListener('touchstart', touchStart)
+  window.addEventListener('touchmove', touchMove)
+  window.addEventListener('touchend', touchEnd)
+  window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', logMatchMediaChange)
+  window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', updateThemeFromSystem)
+  window.addEventListener('visibilitychange', cancelTouch)
+  updateIsOnline()
+  window.addEventListener('online', updateIsOnline)
+  window.addEventListener('offline', updateIsOnline)
+})
+
+const state = reactive({
+  isPinchZooming: false,
+  isTouchScrolling: false
+})
+
+const spaceName = computed(() => store.state.currentSpace.name)
+const isSpacePage = computed(() => store.getters.isSpacePage)
+
+// styles and position
+
+const outsideSpaceBackgroundColor = computed(() => store.state.outsideSpaceBackgroundColor)
+const pageWidth = computed(() => {
+  if (!isSpacePage.value) { return }
+  const size = Math.max(store.state.pageWidth, store.state.viewportWidth)
+  return size + 'px'
+})
+const pageHeight = computed(() => {
+  if (!isSpacePage.value) { return }
+  const size = Math.max(store.state.pageHeight, store.state.viewportHeight)
+  return size + 'px'
+})
+const pageCursor = computed(() => {
+  const isPanning = store.state.currentUserIsPanning
+  const isPanningReady = store.state.currentUserIsPanningReady
+  const toolbarIsBox = store.state.currentUserToolbar === 'box'
+  if (isPanning) {
+    return 'grabbing'
+  } else if (isPanningReady) {
+    return 'grab'
+  } else if (toolbarIsBox) {
+    return 'crosshair'
+  }
+  return undefined
+})
+const spaceZoomDecimal = computed(() => store.getters.spaceZoomDecimal)
+const isDevelpmentBadgeVisible = computed(() => {
+  if (store.state.isPresentationMode) { return }
+  return consts.isDevelopment
+})
+
+// touch actions
+
+const touchStart = (event) => {
+  shouldCancelUndo = false
+  if (!utils.isMultiTouch(event)) {
+    multiTouchAction = null
+    return
+  }
+  store.commit('shouldAddCard', false)
+  const touches = event.touches.length
+  if (touches >= 2) {
+    toggleIsPinchZooming(event)
+  }
+  // undo/redo
+  if (touches === 2) {
+    multiTouchAction = 'undo'
+  } else if (touches === 3) {
+    multiTouchAction = 'redo'
+  }
+}
+const touchMove = (event) => {
+  const isFromDialog = event.target.closest('dialog')
+  if (isFromDialog) { return }
+  shouldCancelUndo = true
+  state.isTouchScrolling = true
+}
+const touchEnd = () => {
+  if (!isSpacePage.value) { return }
+  state.isPinchZooming = false
+  checkIfInertiaScrollEnd()
+  if (shouldCancelUndo) {
+    shouldCancelUndo = false
+    multiTouchAction = ''
+    return
+  }
+  if (!multiTouchAction) { return }
+  if (multiTouchAction === 'undo') {
+    store.dispatch('history/undo')
+    store.commit('addNotification', { message: 'Undo', icon: 'undo' })
+  } else if (multiTouchAction === 'redo') {
+    store.dispatch('history/redo')
+    store.commit('addNotification', { message: 'Redo', icon: 'redo' })
+  }
+  multiTouchAction = null
+}
+const scroll = () => {
+  if (store.state.userHasScrolled) { return }
+  store.commit('userHasScrolled', true)
+}
+const cancelTouch = () => {
+  state.isPinchZooming = false
+  state.isTouchScrolling = false
+}
+const toggleIsPinchZooming = (event) => {
+  if (utils.shouldIgnoreTouchInteraction(event)) { return }
+  state.isPinchZooming = true
+}
+const checkIfInertiaScrollEnd = () => {
+  if (!utils.isAndroid) { return }
+  if (inertiaScrollEndIntervalTimer) { return }
+  prevPosition = null
+  inertiaScrollEndIntervalTimer = setInterval(() => {
+    const viewport = utils.visualViewport()
+    const current = {
+      left: viewport.offsetLeft,
+      top: viewport.offsetTop
+    }
+    if (!prevPosition) {
+      prevPosition = current
+    } else if (prevPosition.left === current.left && prevPosition.top === current.top) {
+      clearInterval(inertiaScrollEndIntervalTimer)
+      inertiaScrollEndIntervalTimer = null
+      state.isTouchScrolling = false
+    } else {
+      prevPosition = current
+    }
+  }, 250)
+}
+
+// online
+
+const updateIsOnline = () => {
+  let clientStatus = window.navigator.onLine
+  if (!clientStatus) {
+    store.dispatch('isOnline', false)
+    return
+  }
+  updateServerIsOnline()
+}
+const updateServerIsOnline = async () => {
+  const maxIterations = 10
+  const initialDelay = 1000 // 1 second
+  const serverStatus = await store.dispatch('api/getStatus')
+  console.log('server online status', serverStatus)
+  if (serverStatus) {
+    store.dispatch('isOnline', true)
+  // error offline
+  } else {
+    store.dispatch('isOnline', false)
+  }
+  // retry
+  let delay // delay increases up to ~15 minutes
+  if (statusRetryCount < maxIterations) {
+    statusRetryCount++
+    delay = Math.pow(2, statusRetryCount) * initialDelay
+  }
+  delay = delay || 15 * 60 * 1000 // 15 minutes
+  setTimeout(updateServerIsOnline, delay)
+}
+
+// theme
+
+const isThemeDark = computed(() => store.getters['themes/isThemeDark'])
+const themeFromSystem = () => {
+  const themeIsSystem = store.state.currentUser.themeIsSystem
+  if (!themeIsSystem) { return }
+  let theme = window.matchMedia('(prefers-color-scheme: dark)')
+  let themeName
+  if (theme.matches) {
+    themeName = 'dark'
+  } else {
+    themeName = 'light'
+  }
+  return themeName
+}
+const logMatchMediaChange = (event) => {
+  const themeIsSystem = store.state.currentUser.themeIsSystem
+  console.warn('🌓 logMatchMediaChange', window.matchMedia('(prefers-color-scheme: dark)'), event, { themeIsSystem })
+}
+const updateThemeFromSystem = () => {
+  const themeName = themeFromSystem()
+  if (!themeName) { return }
+  store.dispatch('themes/update', themeName)
+}
+
+// remote
+
+const broadcastUserCursor = (event) => {
+  if (!store.getters.isSpacePage) { return }
+  let updates = utils.cursorPositionInSpace(event)
+  if (!updates) { return }
+  updates.userId = store.state.currentUser.id
+  updates.zoom = spaceZoomDecimal.value
+  store.commit('broadcast/update', { updates, type: 'updateRemoteUserCursor', handler: 'triggerUpdateRemoteUserCursor' })
+}
+const isTouchDevice = () => {
+  store.commit('isTouchDevice', true)
+}
+
+// rss
+
+const clearMetaRSSFeed = () => {
+  let link = document.querySelector("link[type='application/rss+xml']")
+  if (link) {
+    link.remove()
+  }
+}
+const updateMetaRSSFeed = () => {
+  const spaceIsPrivate = store.state.currentSpace.privacy === 'private'
+  const spaceIsRemote = store.getters['currentSpace/isRemote']
+  clearMetaRSSFeed()
+  if (!spaceIsRemote) { return }
+  if (spaceIsPrivate) { return }
+  const head = document.querySelector('head')
+  const spaceId = store.state.currentSpace.id
+  const url = `${consts.apiHost()}/space/${spaceId}/feed.json`
+  let link = document.createElement('link')
+  link.rel = 'alternative'
+  link.type = 'application/rss+xml'
+  link.title = 'JSON Feed'
+  link.href = url
+  head.appendChild(link)
+}
+
+</script>
+
 <template lang='pug'>
 .app(
   @pointermove="broadcastUserCursor"
@@ -14,8 +285,8 @@
   //- router-view is Space or Add
   router-view
   template(v-if="isSpacePage")
-    Header(:isPinchZooming="isPinchZooming" :isTouchScrolling="isTouchScrolling")
-    Footer(:isPinchZooming="isPinchZooming" :isTouchScrolling="isTouchScrolling")
+    Header(:isPinchZooming="state.isPinchZooming" :isTouchScrolling="state.isTouchScrolling")
+    Footer(:isPinchZooming="state.isPinchZooming" :isTouchScrolling="state.isTouchScrolling")
     TagDetails
     UserDetails
     WindowHistoryHandler
@@ -26,312 +297,6 @@
     .badge.label-badge.development-badge(v-if="isDevelpmentBadgeVisible")
       span DEV
 </template>
-
-<script>
-import Header from '@/components/Header.vue'
-import MagicPaint from '@/components/layers/MagicPaint.vue'
-import Footer from '@/components/Footer.vue'
-import WindowHistoryHandler from '@/components/WindowHistoryHandler.vue'
-import KeyboardShortcutsHandler from '@/components/KeyboardShortcutsHandler.vue'
-import ScrollHandler from '@/components/ScrollHandler.vue'
-import TagDetails from '@/components/dialogs/TagDetails.vue'
-import ItemsLocked from '@/components/ItemsLocked.vue'
-import UserDetails from '@/components/dialogs/UserDetails.vue'
-import NotificationsWithPosition from '@/components/NotificationsWithPosition.vue'
-import SpaceBackground from '@/components/SpaceBackground.vue'
-import OutsideSpaceBackground from '@/components/OutsideSpaceBackground.vue'
-import Preload from '@/components/Preload.vue'
-import utils from '@/utils.js'
-import consts from '@/consts.js'
-
-let multiTouchAction, shouldCancelUndo
-
-let inertiaScrollEndIntervalTimer, prevPosition
-
-let statusRetryCount = 0
-
-export default {
-  components: {
-    Header,
-    MagicPaint,
-    Footer,
-    KeyboardShortcutsHandler,
-    ScrollHandler,
-    WindowHistoryHandler,
-    TagDetails,
-    ItemsLocked,
-    UserDetails,
-    NotificationsWithPosition,
-    SpaceBackground,
-    OutsideSpaceBackground,
-    Preload
-  },
-  created () {
-    this.$store.subscribe((mutation, state) => {
-      if (mutation.type === 'broadcast/joinSpaceRoom') {
-        this.updateMetaRSSFeed()
-      } else if (mutation.type === 'triggerUserIsLoaded') {
-        this.updateThemeFromSystem()
-      }
-    })
-    if (utils.isLinux()) {
-      utils.setCssVariable('sans-serif-font', '"Noto Sans", "Helvetica Neue", Helvetica, Arial, sans-serif')
-    }
-  },
-  mounted () {
-    console.log('🐢 kinopio-client build', import.meta.env.MODE)
-
-    // use timer to prevent being fired from page reload scroll
-    // https://stackoverflow.com/questions/34095038/on-scroll-fires-automatically-on-page-refresh
-    setTimeout(() => {
-      window.addEventListener('scroll', this.scroll)
-    }, 100)
-    window.addEventListener('touchstart', this.touchStart)
-    window.addEventListener('touchmove', this.touchMove)
-    window.addEventListener('touchend', this.touchEnd)
-    window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', this.logMatchMediaChange)
-    window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', this.updateThemeFromSystem)
-    window.addEventListener('visibilitychange', this.cancelTouch)
-
-    this.updateIsOnline()
-    window.addEventListener('online', this.updateIsOnline)
-    window.addEventListener('offline', this.updateIsOnline)
-  },
-  beforeUnmount () {
-    window.removeEventListener('scroll', this.scroll)
-    window.removeEventListener('touchstart', this.touchStart)
-    window.removeEventListener('touchmove', this.touchMove)
-    window.removeEventListener('touchend', this.touchEnd)
-    window.removeEventListener('visibilitychange', this.cancelTouch)
-    window.removeEventListener('online', this.updateIsOnline)
-    window.removeEventListener('offline', this.updateIsOnline)
-  },
-  data () {
-    return {
-      isPinchZooming: false,
-      isTouchScrolling: false
-    }
-  },
-  computed: {
-    outsideSpaceBackgroundColor () { return this.$store.state.outsideSpaceBackgroundColor },
-    isThemeDark () {
-      return this.$store.getters['themes/isThemeDark']
-    },
-    spaceName () { return this.$store.state.currentSpace.name },
-    isSpacePage () { return this.$store.getters.isSpacePage },
-    pageWidth () {
-      if (!this.isSpacePage) { return }
-      const size = Math.max(this.$store.state.pageWidth, this.$store.state.viewportWidth)
-      return size + 'px'
-    },
-    pageHeight () {
-      if (!this.isSpacePage) { return }
-      const size = Math.max(this.$store.state.pageHeight, this.$store.state.viewportHeight)
-      return size + 'px'
-    },
-    scriptUrl () {
-      const scripts = Array.from(document.querySelectorAll('script'))
-      const url = scripts.find(script => {
-        if (consts.isDevelopment) {
-          return script.src.includes('main.js')
-        } else {
-          return script.src.includes('index-')
-        }
-      })
-      return url.src
-    },
-    pageCursor () {
-      const isPanning = this.$store.state.currentUserIsPanning
-      const isPanningReady = this.$store.state.currentUserIsPanningReady
-      const toolbarIsBox = this.$store.state.currentUserToolbar === 'box'
-      if (isPanning) {
-        return 'grabbing'
-      } else if (isPanningReady) {
-        return 'grab'
-      } else if (toolbarIsBox) {
-        return 'crosshair'
-      }
-      return undefined
-    },
-    spaceZoomDecimal () { return this.$store.getters.spaceZoomDecimal },
-    isDevelpmentBadgeVisible () {
-      if (this.$store.state.isPresentationMode) { return }
-      return consts.isDevelopment
-    }
-  },
-  methods: {
-    // events
-
-    touchStart (event) {
-      shouldCancelUndo = false
-      if (!utils.isMultiTouch(event)) {
-        multiTouchAction = null
-        return
-      }
-      this.$store.commit('shouldAddCard', false)
-      const touches = event.touches.length
-      if (touches >= 2) {
-        this.toggleIsPinchZooming(event)
-      }
-      // undo/redo
-      if (touches === 2) {
-        multiTouchAction = 'undo'
-      } else if (touches === 3) {
-        multiTouchAction = 'redo'
-      }
-    },
-    touchMove (event) {
-      const isFromDialog = event.target.closest('dialog')
-      if (isFromDialog) { return }
-      shouldCancelUndo = true
-      this.isTouchScrolling = true
-    },
-    touchEnd () {
-      if (!this.isSpacePage) { return }
-      this.isPinchZooming = false
-      this.checkIfInertiaScrollEnd()
-      if (shouldCancelUndo) {
-        shouldCancelUndo = false
-        multiTouchAction = ''
-        return
-      }
-      if (!multiTouchAction) { return }
-      if (multiTouchAction === 'undo') {
-        this.$store.dispatch('history/undo')
-        this.$store.commit('addNotification', { message: 'Undo', icon: 'undo' })
-      } else if (multiTouchAction === 'redo') {
-        this.$store.dispatch('history/redo')
-        this.$store.commit('addNotification', { message: 'Redo', icon: 'redo' })
-      }
-      multiTouchAction = null
-    },
-    scroll () {
-      if (this.$store.state.userHasScrolled) { return }
-      this.$store.commit('userHasScrolled', true)
-    },
-    cancelTouch () {
-      this.isPinchZooming = false
-      this.isTouchScrolling = false
-    },
-
-    // online
-
-    updateIsOnline () {
-      let clientStatus = window.navigator.onLine
-      if (!clientStatus) {
-        this.$store.dispatch('isOnline', false)
-        return
-      }
-      this.updateServerIsOnline()
-    },
-    async updateServerIsOnline () {
-      const maxIterations = 10
-      const initialDelay = 1000 // 1 second
-      const serverStatus = await this.$store.dispatch('api/getStatus')
-      console.log('server online status', serverStatus)
-      if (serverStatus) {
-        this.$store.dispatch('isOnline', true)
-      // error offline
-      } else {
-        this.$store.dispatch('isOnline', false)
-      }
-      // retry
-      let delay // delay increases up to ~15 minutes
-      if (statusRetryCount < maxIterations) {
-        statusRetryCount++
-        delay = Math.pow(2, statusRetryCount) * initialDelay
-      }
-      delay = delay || 15 * 60 * 1000 // 15 minutes
-      setTimeout(this.updateServerIsOnline, delay)
-    },
-
-    //
-
-    themeFromSystem () {
-      const themeIsSystem = this.$store.state.currentUser.themeIsSystem
-      if (!themeIsSystem) { return }
-      let theme = window.matchMedia('(prefers-color-scheme: dark)')
-      let themeName
-      if (theme.matches) {
-        themeName = 'dark'
-      } else {
-        themeName = 'light'
-      }
-      return themeName
-    },
-    logMatchMediaChange (event) {
-      const themeIsSystem = this.$store.state.currentUser.themeIsSystem
-      console.warn('🌓 logMatchMediaChange', window.matchMedia('(prefers-color-scheme: dark)'), event, { themeIsSystem })
-    },
-    updateThemeFromSystem () {
-      const themeName = this.themeFromSystem()
-      if (!themeName) { return }
-      this.$store.dispatch('themes/update', themeName)
-    },
-    toggleIsPinchZooming (event) {
-      if (utils.shouldIgnoreTouchInteraction(event)) { return }
-      this.isPinchZooming = true
-    },
-    checkIfInertiaScrollEnd () {
-      if (!utils.isAndroid) { return }
-      if (inertiaScrollEndIntervalTimer) { return }
-      prevPosition = null
-      inertiaScrollEndIntervalTimer = setInterval(() => {
-        const viewport = utils.visualViewport()
-        const current = {
-          left: viewport.offsetLeft,
-          top: viewport.offsetTop
-        }
-        if (!prevPosition) {
-          prevPosition = current
-        } else if (prevPosition.left === current.left && prevPosition.top === current.top) {
-          clearInterval(inertiaScrollEndIntervalTimer)
-          inertiaScrollEndIntervalTimer = null
-          this.isTouchScrolling = false
-        } else {
-          prevPosition = current
-        }
-      }, 250)
-    },
-    broadcastUserCursor (event) {
-      if (!this.$store.getters.isSpacePage) { return }
-      let updates = utils.cursorPositionInSpace(event)
-      if (!updates) { return }
-      updates.userId = this.$store.state.currentUser.id
-      updates.zoom = this.spaceZoomDecimal
-      this.$store.commit('broadcast/update', { updates, type: 'updateRemoteUserCursor', handler: 'triggerUpdateRemoteUserCursor' })
-    },
-    isTouchDevice () {
-      this.$store.commit('isTouchDevice', true)
-    },
-
-    // rss
-
-    clearMetaRSSFeed () {
-      let link = document.querySelector("link[type='application/rss+xml']")
-      if (link) {
-        link.remove()
-      }
-    },
-    updateMetaRSSFeed () {
-      const spaceIsPrivate = this.$store.state.currentSpace.privacy === 'private'
-      const spaceIsRemote = this.$store.getters['currentSpace/isRemote']
-      this.clearMetaRSSFeed()
-      if (!spaceIsRemote) { return }
-      if (spaceIsPrivate) { return }
-      const head = document.querySelector('head')
-      const spaceId = this.$store.state.currentSpace.id
-      const url = `${consts.apiHost()}/space/${spaceId}/feed.json`
-      let link = document.createElement('link')
-      link.rel = 'alternative'
-      link.type = 'application/rss+xml'
-      link.title = 'JSON Feed'
-      link.href = url
-      head.appendChild(link)
-    }
-  }
-}
-</script>
 
 <style lang="stylus">
 :root
@@ -352,25 +317,118 @@ export default {
   --subsection-padding 5px
   --button-fixed-height 30px
   --sans-serif-font "Helvetica Neue", Helvetica, Arial, sans-serif
-  --serif-font recoleta, georgia, serif
   --mono-font Menlo, Monaco, monospace
+  --serif-font georgia, serif
   --glyphs-font GoodGlyphs, wingdings
-
-@font-face
-  font-family 'Recoleta'
-  src url("assets/fonts/Recoleta-Regular.woff2") format("woff2")
-  font-weight normal
-  font-style normal
-
-@font-face
-  font-family 'Recoleta'
-  src url("assets/fonts/Recoleta-Bold.woff2") format("woff2")
-  font-weight bold
-  font-style normal
 
 @font-face
   font-family 'GoodGlyphs'
   src url("assets/fonts/GoodGlyphs-No1.woff2") format("woff2")
+  font-weight normal
+  font-style normal
+
+// header-font-0
+:root
+  --header-font-0 recoleta, var(--serif-font)
+@font-face
+  font-family 'recoleta'
+  src url("assets/fonts/recoleta/Recoleta-Bold.woff2") format("woff2")
+  font-weight bold
+  font-style normal
+@font-face
+  font-family 'recoleta'
+  src url("assets/fonts/recoleta/Recoleta-Regular.woff2") format("woff2")
+  font-weight normal
+  font-style normal
+// header-font-1
+:root
+  --header-font-1 apris, var(--mono-font)
+@font-face
+  font-family 'apris'
+  src url("assets/fonts/apris/Apris-BoldItalic.woff2") format("woff2")
+  font-weight bold
+  font-style normal
+@font-face
+  font-family 'apris'
+  src url("assets/fonts/apris/Apris-Regular.woff2") format("woff2")
+  font-weight normal
+  font-style normal
+// header-font-2
+:root
+  --header-font-2 gaya, var(--serif-font)
+@font-face
+  font-family 'gaya'
+  src url("assets/fonts/gaya/Gaya.woff2") format("woff2")
+  font-weight bold
+  font-style normal
+@font-face
+  font-family 'gaya'
+  src url("assets/fonts/gaya/Gaya-Italic.woff2") format("woff2")
+  font-weight normal
+  font-style normal
+// header-font-3
+:root
+  --header-font-3 gt-america, var(--sans-serif-font)
+@font-face
+  font-family 'gt-america'
+  src url("assets/fonts/gt-america/GT-America-Standard-Bold.woff2") format("woff2")
+  font-weight bold
+  font-style normal
+@font-face
+  font-family 'gt-america'
+  src url("assets/fonts/gt-america/GT-America-Standard-Regular.woff2") format("woff2")
+  font-weight normal
+  font-style normal
+// header-font-4
+:root
+  --header-font-4 shinka-mono, var(--sans-serif-font)
+@font-face
+  font-family 'shinka-mono'
+  src url("assets/fonts/shinka-mono/ShinkaMono-Bold.woff2") format("woff2")
+  font-weight bold
+  font-style normal
+@font-face
+  font-family 'shinka-mono'
+  src url("assets/fonts/shinka-mono/ShinkaMono-Regular.woff2") format("woff2")
+  font-weight normal
+  font-style normal
+// header-font-5
+:root
+  --header-font-5 microgramma, var(--sans-serif-font)
+@font-face
+  font-family 'microgramma'
+  src url("assets/fonts/microgramma/MicrogrammaBoldExtendedD.woff2") format("woff2")
+  font-weight bold
+  font-style normal
+@font-face
+  font-family 'microgramma'
+  src url("assets/fonts/microgramma/MicrogrammaMediumExtendedD.woff2") format("woff2")
+  font-weight normal
+  font-style normal
+// header-font-6
+:root
+  --header-font-6 grotesk-remix, var(--sans-serif-font)
+@font-face
+  font-family 'grotesk-remix'
+  src url("assets/fonts/grotesk-remix/GroteskRemix-bold.woff2") format("woff2")
+  font-weight bold
+  font-style normal
+@font-face
+  font-family 'grotesk-remix'
+  src url("assets/fonts/grotesk-remix/GroteskRemix-regular.woff2") format("woff2")
+  font-weight normal
+  font-style normal
+// header-font-7
+:root
+  --header-font-7 migra, var(--sans-serif-font)
+@font-face
+  font-family 'migra'
+  src url("assets/fonts/migra/PPMigra-Bold.woff2") format("woff2")
+  font-weight bold
+  font-style normal
+@font-face
+  font-family 'migra'
+  src url("assets/fonts/migra/PPMigra-Regular.woff2") format("woff2")
   font-weight normal
   font-style normal
 
@@ -390,6 +448,7 @@ body
   margin 0
   color var(--primary)
   -webkit-user-select none
+  user-select none
   overflow auto // enables window.scrollBy support
 
 .app
@@ -645,7 +704,7 @@ hr
 
 code,
 pre
-  font-family var(--mono-font)
+  font-family var(--code-font)
   font-size 13px
 
 p,

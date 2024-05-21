@@ -73,7 +73,8 @@ const initialState = {
   appleSubscriptionIsActive: null,
   studentDiscountIsAvailable: false,
   lastSidebarSection: '',
-  prevInviteEmails: ''
+  prevInviteEmails: '',
+  prevHeaderFontId: 0
 }
 
 export default {
@@ -398,6 +399,9 @@ export default {
     },
     prevInviteEmails: (state, value) => {
       state.prevInviteEmails = value
+    },
+    prevHeaderFontId: (state, value) => {
+      state.prevHeaderFontId = value
     }
   },
   actions: {

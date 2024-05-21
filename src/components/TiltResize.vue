@@ -113,6 +113,7 @@ const isComment = computed(() => store.getters['currentCards/isComment'](props.c
         background var(--heavy-shadow) !important
   .icon
     -webkit-user-drag none
+    user-drag none
     position absolute
     left 0
     top 0

@@ -64,4 +64,6 @@ const relativeDate = computed(() => utils.shortRelativeTime(props.card.nameUpdat
   p
     padding 2px
     padding-top 0
+    word-wrap break-word
+    overflow-wrap break-word
 </style>

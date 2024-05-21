@@ -5,6 +5,7 @@ import { useStore } from 'vuex'
 import FramePicker from '@/components/dialogs/FramePicker.vue'
 import TagPickerStyleActions from '@/components/dialogs/TagPickerStyleActions.vue'
 import ColorPicker from '@/components/dialogs/ColorPicker.vue'
+import FontPicker from '@/components/dialogs/FontPicker.vue'
 import utils from '@/utils.js'
 
 import uniq from 'lodash-es/uniq'
@@ -52,6 +53,7 @@ const state = reactive({
   framePickerIsVisible: false,
   tagPickerIsVisible: false,
   colorPickerIsVisible: false,
+  fontPickerIsVisible: false,
   defaultColor: '#e3e3e3'
 })
 
@@ -72,6 +74,7 @@ const closeDialogs = (shouldPreventEmit) => {
   state.framePickerIsVisible = false
   state.tagPickerIsVisible = false
   state.colorPickerIsVisible = false
+  state.fontPickerIsVisible = false
   store.commit('userDetailsIsVisible', false)
   if (shouldPreventEmit === true) { return }
   emit('closeDialogs')
@@ -118,6 +121,7 @@ const label = computed(() => {
   }
   return label.toUpperCase()
 })
+const isBoxDetails = computed(() => Boolean(store.state.boxDetailsIsVisibleForBoxId))
 
 // update name
 
@@ -183,14 +187,6 @@ const updateName = (item, newName) => {
     const box = store.getters['currentBoxes/byId'](item.id)
     store.dispatch('currentBoxes/updateName', { box, newName })
   }
-}
-const removeFromItemNames = (pattern) => {
-  const md = markdown(pattern)
-  items.value.forEach(item => {
-    const newName = item.name.replace(md, '')
-    if (newName === item.name) { return }
-    updateName(item, newName)
-  })
 }
 
 // tag
@@ -309,17 +305,54 @@ const isH2 = computed(() => {
   const matches = itemsWithPattern(pattern)
   return Boolean(matches.length === items.value.length)
 })
-const toggleHeader = (pattern) => {
+const isH1OrH2Selected = computed(() => {
+  let pattern = 'h1Pattern'
+  let h1IsSelected = itemsWithPattern(pattern)
+  h1IsSelected = Boolean(h1IsSelected.length)
+  pattern = 'h2Pattern'
+  let h2IsSelected = itemsWithPattern(pattern)
+  h2IsSelected = Boolean(h2IsSelected.length)
+  return h1IsSelected || h2IsSelected
+})
+const removeHeaderFromItemNames = () => {
+  // https://regexr.com/804qh
+  // ignores [] or [x] + space at beginning of string
+  // matches # or ## + space
+  const headerPattern = new RegExp(/^(?:\[x?\])?[# ]+/gm)
+  items.value.forEach(item => {
+    let match = item.name.match(headerPattern)
+    if (!match) { return }
+    match = match[0]
+    match = match.replace('[] ', '')
+    match = match.replace('[x] ', '')
+    const newName = item.name.replace(match, '')
+    if (newName === item.name) { return }
+    updateName(item, newName)
+  })
+}
+const toggleHeader = async (pattern) => {
   updateCardDimensions()
   let matches = itemsWithPattern(pattern)
   const shouldPrepend = matches.length < items.value.length
+  removeHeaderFromItemNames()
   if (shouldPrepend) {
-    const removeHeaderPattern = removePattern(pattern)
-    removeFromItemNames(removeHeaderPattern)
+    await nextTick()
     prependToItemNames(pattern)
-  } else {
-    removeFromItemNames(pattern)
   }
+}
+const toggleFontPickerIsVisible = () => {
+  const isVisible = state.fontPickerIsVisible
+  closeDialogs()
+  state.fontPickerIsVisible = !isVisible
+}
+const updateHeaderFont = (font) => {
+  props.cards.forEach(card => {
+    updateCard(card, { headerFontId: font.id })
+  })
+  props.boxes.forEach(box => {
+    updateBox(box, { headerFontId: font.id })
+  })
+  store.dispatch('currentUser/update', { prevHeaderFontId: font.id })
 }
 
 // lock
@@ -418,11 +451,16 @@ section.subsection.style-actions(v-if="visible" @click.left.stop="closeDialogs")
     span {{label}}
   .row
     //- h1/h2
-    .segmented-buttons
-      button(:disabled="!canEditAll" @click="toggleHeader('h1Pattern')" :class="{ active: isH1 }" title="Header 1")
-        span h1
-      button(:disabled="!canEditAll" @click="toggleHeader('h2Pattern')" :class="{ active: isH2 }" title="Header 2")
-        span h2
+    .button-wrap.header-buttons-wrap(:class="{ 'header-is-active': isH1OrH2Selected, 'is-box-details': isBoxDetails }")
+      .segmented-buttons
+        button(:disabled="!canEditAll" @click="toggleHeader('h1Pattern')" :class="{ active: isH1 }" title="Header 1")
+          span h1
+        button(:disabled="!canEditAll" @click="toggleHeader('h2Pattern')" :class="{ active: isH2 }" title="Header 2")
+          span h2
+      //- Fonts
+      button.toggle-fonts-button.small-button(v-if="isH1OrH2Selected" @click.stop="toggleFontPickerIsVisible" :class="{ active: state.fontPickerIsVisible }")
+        span Fonts
+      FontPicker(:visible="state.fontPickerIsVisible" :cards="cards" :boxes="boxes" @selectFont="updateHeaderFont")
     //- Tag
     .button-wrap(v-if="isCards")
       button(:disabled="!canEditAll" @click.left.stop="toggleTagPickerIsVisible" :class="{ active: state.tagPickerIsVisible }")
@@ -491,8 +529,26 @@ section.subsection.style-actions(v-if="visible" @click.left.stop="closeDialogs")
   .segmented-buttons
     margin-left 0
     margin-right 4px
-    vertical-align middle
+    vertical-align top
     margin-bottom 10px
   .segmented-buttons
     display inline-flex
+  .header-buttons-wrap
+    margin 0
+    &.header-is-active
+      margin-bottom 12px
+      &.is-box-details
+        margin-bottom 20px
+      .segmented-buttons
+        button
+          border-bottom-left-radius 0
+          border-bottom-right-radius 0
+  .toggle-fonts-button
+    position absolute
+    bottom -9px
+    left 0
+    border-top-left-radius 0
+    border-top-right-radius 0
+    width calc(100% - 4px)
+    text-align center
 </style>

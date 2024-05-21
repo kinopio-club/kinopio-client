@@ -2,8 +2,7 @@
 import { reactive, computed, onMounted, onUnmounted, defineProps, defineEmits, watch, ref, nextTick } from 'vue'
 import { useStore } from 'vuex'
 
-import frames from '@/data/frames.js'
-import FrameBadge from '@/components/FrameBadge.vue'
+import fonts from '@/data/fonts.js'
 import utils from '@/utils.js'
 const store = useStore()
 
@@ -17,11 +16,12 @@ onMounted(() => {
   })
 })
 
-const emit = defineEmits(['updateCount'])
+const emit = defineEmits(['selectFont'])
 
 const props = defineProps({
   visible: Boolean,
-  cards: Array
+  cards: Array,
+  boxes: Array
 })
 const state = reactive({
   dialogHeight: null
@@ -46,39 +46,40 @@ const scrollIntoView = () => {
   const element = dialogElement.value
   utils.scrollIntoView({ element })
 }
+const isThemeDark = computed(() => store.getters['themes/isThemeDark'])
 
-// frames
+// fonts
 
-const changeCardFrame = (frame) => {
-  props.cards.forEach(card => {
-    card = {
-      frameId: frame.id,
-      frameName: frame.name,
-      id: card.id
-    }
-    store.dispatch('currentCards/update', card)
-  })
+const selectFont = (font) => {
+  emit('selectFont', font)
 }
-const frameIsSelected = (frame) => {
-  const cardFrameIds = props.cards.map(card => card.frameId)
-  return cardFrameIds.includes(frame.id)
+const items = computed(() => {
+  let array = props.cards.concat(props.boxes)
+  array = array.filter(item => Boolean(item))
+  return array
+})
+const fontIsSelected = (font) => {
+  return items.value.find(item => {
+    const currentFontId = item.headerFontId || 0
+    return currentFontId === font.id
+  })
 }
 </script>
 
 <template lang="pug">
-dialog.narrow.frame-picker(v-if="visible" :open="visible" ref="dialogElement" @click.left.stop :style="{'max-height': state.dialogHeight + 'px'}")
+dialog.narrow.font-picker(v-if="visible" :open="visible" ref="dialogElement" @click.left.stop :style="{'max-height': state.dialogHeight + 'px'}")
   section.results-section
-    ul.results-list
-      template(v-for="frame in frames" :key="frame.id")
-        li(:class="{active: frameIsSelected(frame)}" @click.left="changeCardFrame(frame)" tabindex="0" v-on:keyup.enter="changeCardFrame(frame)")
-          FrameBadge(:frame="frame")
-          .name {{frame.name}}
+    ul.results-list(:class="{'is-dark-theme': isThemeDark}")
+      template(v-for="font in fonts" :key="font.id")
+        li(:class="{active: fontIsSelected(font)}" @click.left="selectFont(font)" tabindex="0" v-on:keyup.enter="selectFont(font)")
+          img(:src="font.previewImage" :title="font.name")
 </template>
 
 <style lang="stylus">
-.frame-picker
+dialog.font-picker
   min-height 200px
   overflow auto
+  width 160px
   section
     padding-top 4px
   .badge
@@ -86,7 +87,14 @@ dialog.narrow.frame-picker(v-if="visible" :open="visible" ref="dialogElement" @c
     height 19px
     display block
     padding 0
+  img
+    width 100%
+    vertical-align -5px
+    user-select none
+    -webkit-user-drag none
+    user-drag none
+  .is-dark-theme
     img
-      width 100%
-      vertical-align -5px
+      filter invert()
+
 </style>
