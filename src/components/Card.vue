@@ -1921,6 +1921,7 @@ article.card-wrap#card(
   :data-card-id="card.id"
   :data-is-hidden-by-comment-filter="isCardHiddenByCommentFilter"
   :data-is-visible-in-viewport="state.isVisibleInViewport"
+  :date-should-render="shouldRender"
   :data-is-locked="isLocked"
   :data-resize-width="resizeWidth"
   :data-tilt-degrees="card.tilt"
