@@ -1613,7 +1613,7 @@ const userDetailsIsUser = computed(() => {
   return user.id === store.state.userDetailsUser.id
 })
 
-// is visible in viewport
+// is visible in viewport, perf, should render
 
 const initViewportObserver = async () => {
   await nextTick()
@@ -1639,6 +1639,11 @@ const removeViewportObserver = () => {
   if (!observer) { return }
   observer.unobserve(target)
 }
+const shouldRender = computed(() => {
+  const isConnectingFrom = store.state.currentConnectionStartCardIds.includes(props.card.id)
+  if (isConnectingFrom || connectedToAnotherCardBeingDraggedColor.value) { return true }
+  return state.isVisibleInViewport
+})
 
 // mouse hover handlers
 
@@ -1924,7 +1929,7 @@ article.card-wrap#card(
   :class="articleClasses"
 )
   .card(
-    v-show="state.isVisibleInViewport"
+    v-show="shouldRender"
     @mousedown.left.prevent="startDraggingCard"
     @mouseup.left="showCardDetails"
 
