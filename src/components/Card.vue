@@ -1924,6 +1924,7 @@ article.card-wrap#card(
   :class="articleClasses"
 )
   .card(
+    v-show="state.isVisibleInViewport"
     @mousedown.left.prevent="startDraggingCard"
     @mouseup.left="showCardDetails"
 

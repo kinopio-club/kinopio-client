@@ -52,10 +52,12 @@ const remove = (action) => {
 
 const isTilting = computed(() => {
   const cardIds = store.state.currentUserIsTiltingCardIds
+  if (!cardIds.length) { return }
   return cardIds.includes(props.card.id)
 })
 const isResizing = computed(() => {
   const cardIds = store.state.currentUserIsResizingCardIds
+  if (!cardIds.length) { return }
   return cardIds.includes(props.card.id)
 })
 const isComment = computed(() => store.getters['currentCards/isComment'](props.card))
