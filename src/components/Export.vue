@@ -182,7 +182,7 @@ template(v-if="visible")
       .button-wrap
         button(@click.left="downloadLocalJson")
           img.icon.file(src="@/assets/file.svg")
-          span JSON
+          span Kinopio JSON
     Pdf(:visible="state.pdfIsVisible")
     .row
       .button-wrap
