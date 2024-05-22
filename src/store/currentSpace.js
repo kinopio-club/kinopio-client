@@ -869,9 +869,6 @@ const currentSpace = {
         addConnections: connectionResults.addItems,
         addBoxes: boxResults.addItems
       })
-      nextTick(() => {
-        context.dispatch('currentCards/updateDimensions', {}, { root: true })
-      })
       context.commit('triggerRestoreSpaceRemoteComplete', null, { root: true })
       console.timeEnd('🎑⏱️ restoreSpaceRemote')
     },
