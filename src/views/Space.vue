@@ -16,7 +16,7 @@ import BoxSelecting from '@/components/BoxSelecting.vue'
 import Boxes from '@/components/Boxes.vue'
 import Cards from '@/components/Cards.vue'
 import Connections from '@/components/Connections.vue'
-import LockedItemButtons from '@/components/LockedItemButtons.vue'
+import ItemUnlockButtons from '@/components/ItemUnlockButtons.vue'
 import utils from '@/utils.js'
 import consts from '@/consts.js'
 
@@ -506,7 +506,7 @@ main#space.space(
   Connections
   Boxes
   Cards
-  LockedItemButtons
+  ItemUnlockButtons
   //- Presence
   template(v-for="user in users")
     UserLabelCursor(:user="user")
