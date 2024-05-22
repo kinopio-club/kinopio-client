@@ -6,11 +6,14 @@ import utils from '@/utils.js'
 const store = useStore()
 
 onMounted(() => {
-  store.subscribe((mutation, state) => {
+  store.subscribe(async (mutation, state) => {
     const { type, payload } = mutation
     if (type === 'triggerUpdateTheme') {
       state.defaultColor = utils.cssVariable('secondary-background')
     } else if (type === 'triggerUpdateLockedItemButtonPositionCardId' && payload === props.card.id) {
+      updatePosition()
+    } else if (type === 'spaceZoomPercent' || type === 'zoomOrigin') {
+      await nextTick()
       updatePosition()
     }
   })

@@ -81,7 +81,7 @@ const updateSpaceZoom = (percent) => {
   centerZoomOrigin()
   updateSpaceZoomPercent(percent)
 }
-const resetZoomOrigin = () => {
+const resetZoom = () => {
   store.commit('zoomOrigin', { x: 0, y: 0 })
 }
 const removeAnimations = () => {
@@ -94,7 +94,7 @@ const removeAnimations = () => {
 .space-zoom(v-if="!isMobileOrTouch")
   Slider(
     @updatePlayhead="updateSpaceZoom"
-    @resetPlayhead="resetZoomOrigin"
+    @resetPlayhead="resetZoom"
     :minValue="min"
     :value="spaceZoomPercent"
     :maxValue="max"

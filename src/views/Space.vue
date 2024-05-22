@@ -489,6 +489,7 @@ const stopInteractions = async (event) => {
   store.commit('clearDraggingItems')
   await nextTick()
   await nextTick()
+  console.log(store.state.shouldExplicitlyRenderCardIds)
   store.commit('clearShouldExplicitlyRenderCardIds')
 }
 
