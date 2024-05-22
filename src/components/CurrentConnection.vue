@@ -112,13 +112,14 @@ const addConnections = async (event) => {
     endCardId = currentConnectionSuccess.id
   } else {
     // create new card
+    const zoom = store.getters.spaceCounterZoomDecimal
     const startCard = store.getters['currentCards/byId'](startCardIds[0])
     endCardId = nanoid()
     store.dispatch('currentCards/add', { position, id: endCardId, isParentCard: true, backgroundColor: startCard.backgroundColor })
     store.commit('childCardId', '')
     estimatedEndCardPosition = {
-      x: position.x + 45,
-      y: position.y + 15
+      x: position.x + (45 * zoom),
+      y: position.y + (15 * zoom)
     }
   }
   // create connections to endCardId

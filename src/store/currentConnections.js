@@ -491,7 +491,7 @@ export default {
       if (!start || !end) { return }
       if (utils.pointIsEmpty(start) || utils.pointIsEmpty(end)) { return }
       start = utils.cursorPositionInSpace(null, start)
-      end = utils.cursorPositionInSpace(null, end)
+      end = estimatedEndCardPosition || utils.cursorPositionInSpace(null, end)
       return getters.connectionPathBetweenCoords(start, end, controlPoint)
     },
     curveControlPoint: (state, getters, rootState) => {
