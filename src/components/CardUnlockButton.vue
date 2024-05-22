@@ -26,6 +26,33 @@ const state = reactive({
   position: null
 })
 
+const canEditCard = computed(() => store.getters['currentUser/canEditCard'](props.card))
+const canEditSpace = computed(() => store.getters['currentUser/canEditSpace']())
+const connectionTypes = computed(() => store.getters['currentConnections/typesByCardId'](props.card.id))
+
+// theme
+
+const backgroundColorIsDark = computed(() => {
+  const color = props.card.backgroundColor || state.defaultColor
+  return utils.colorIsDark(color)
+})
+const isThemeDark = computed(() => store.state.currentUser.theme === 'dark')
+const isDarkInLightTheme = computed(() => backgroundColorIsDark.value && !isThemeDark.value)
+const isLightInDarkTheme = computed(() => !backgroundColorIsDark.value && isThemeDark.value)
+
+// styles
+
+const updatePosition = () => {
+  let cardElement = document.querySelector(`article[data-card-id="${props.card.id}"]`)
+  if (!cardElement) { return }
+  if (!cardElement.dataset.shouldRender) {
+    return
+  }
+  const element = cardElement.querySelector('.lock-button-wrap')
+  if (!element) { return }
+  const rect = element.getBoundingClientRect()
+  state.position = rect
+}
 const positionStyles = computed(() => {
   const pointIsEmpty = utils.pointIsEmpty(state.position)
   if (!state.position || pointIsEmpty) {
@@ -43,29 +70,9 @@ const positionStyles = computed(() => {
 const backgroundStyles = computed(() => {
   return { backgroundColor: 'transparent' }
 })
-const canEditCard = computed(() => store.getters['currentUser/canEditCard'](props.card))
-const canEditSpace = computed(() => store.getters['currentUser/canEditSpace']())
-const connectionTypes = computed(() => store.getters['currentConnections/typesByCardId'](props.card.id))
-// theme
-const backgroundColorIsDark = computed(() => {
-  const color = props.card.backgroundColor || state.defaultColor
-  return utils.colorIsDark(color)
-})
-const isThemeDark = computed(() => store.state.currentUser.theme === 'dark')
-const isDarkInLightTheme = computed(() => backgroundColorIsDark.value && !isThemeDark.value)
-const isLightInDarkTheme = computed(() => !backgroundColorIsDark.value && isThemeDark.value)
 
-const updatePosition = () => {
-  let cardElement = document.querySelector(`article[data-card-id="${props.card.id}"]`)
-  if (!cardElement) { return }
-  if (!cardElement.dataset.shouldRender) {
-    return
-  }
-  const element = cardElement.querySelector('.lock-button-wrap')
-  if (!element) { return }
-  const rect = element.getBoundingClientRect()
-  state.position = rect
-}
+// unlock
+
 const unlockCard = (event) => {
   if (store.state.currentUserIsDrawingConnection) {
     return
