@@ -42,13 +42,14 @@ const state = reactive({
   currentConnectionColor: undefined
 })
 
-const isDrawingConnection = computed(() => store.state.currentUserIsDrawingConnection)
+// drawing
 
 const interact = (event) => {
   if (isDrawingConnection.value) {
     drawCurrentConnection(event)
   }
 }
+const isDrawingConnection = computed(() => store.state.currentUserIsDrawingConnection)
 const drawCurrentConnection = (event) => {
   let end = utils.cursorPositionInSpace(event)
   let start = utils.connectorCoords(props.startCardId) // TODO get real pos
@@ -70,6 +71,9 @@ const drawCurrentConnection = (event) => {
   }
   store.commit('broadcast/updateStore', { updates, type: 'updateRemoteCurrentConnection' })
 }
+
+// connect to card
+
 const checkCurrentConnectionSuccess = (event) => {
   if (!event) { return }
   const position = utils.cursorPositionInViewport(event)
@@ -96,7 +100,6 @@ const checkCurrentConnectionSuccess = (event) => {
     store.commit('currentConnectionSuccess', {})
   }
 }
-
 const addConnections = async (event) => {
   const currentConnectionSuccess = store.state.currentConnectionSuccess
   const startCardIds = store.state.currentConnectionStartCardIds
@@ -131,6 +134,8 @@ const addConnections = async (event) => {
     store.dispatch('currentConnections/add', { connection, type: prevType })
   })
 }
+
+// stop drawing
 
 const stopInteractions = (event) => {
   if (isDrawingConnection.value) {
