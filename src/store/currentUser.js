@@ -653,7 +653,6 @@ export default {
       nextTick(() => {
         nextTick(() => {
           context.dispatch('currentConnections/correctPaths', {}, { root: true })
-          context.commit('triggerUpdateLockedItemButtonsPositions', null, { root: true })
         })
       })
     },

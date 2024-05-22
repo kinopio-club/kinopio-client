@@ -595,7 +595,6 @@ const currentCards = {
       })
       // update
       context.commit('moveWhileDragging', { cards })
-      context.commit('triggerUpdateLockedItemButtonsPositions', null, { root: true })
       connections = uniqBy(connections, 'id')
       context.commit('cardsWereDragged', true, { root: true })
       context.dispatch('currentConnections/updatePathsWhileDragging', { connections }, { root: true })
@@ -648,7 +647,6 @@ const currentCards = {
         context.dispatch('history/resume', null, { root: true })
         context.dispatch('history/add', { cards, useSnapshot: true }, { root: true })
         context.dispatch('checkIfItemShouldIncreasePageSize', currentDraggingCard, { root: true })
-        context.commit('triggerUpdateLockedItemButtonsPositions', null, { root: true })
         prevMoveDelta = { x: 0, y: 0 }
       })
     },

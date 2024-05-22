@@ -536,7 +536,6 @@ const store = createStore({
     triggerAIImagesIsVisible: () => {},
     triggerClearAllSpaceFilters: () => {},
     triggerScrollUserDetailsIntoView: () => {},
-    triggerUpdateLockedItemButtonsPositions: () => {},
     triggerUpdateLockedItemButtonPositionCardId: (state, cardId) => {},
     triggerCenterZoomOrigin: () => {},
     triggerRemoveCardFromCardList: (state, card) => {},
