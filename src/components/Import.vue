@@ -245,15 +245,15 @@ template(v-if="visible")
     //- iOS does not support '.canvas' in input accept
     input.hidden(type="file" ref="inputElement" accept="" @change="readFile")
     .row
-      button(@click.left="selectFile('json')" :class="{active: isLoadingJson}")
-        img.icon.file(src="@/assets/file.svg")
-        span Kinopio JSON File
-        Loader(:visible="isLoadingJson")
-    .row
       button(@click.left="selectFile('canvas')" :class="{active: isLoadingCanvas}")
         img.icon.json-canvas(src="@/assets/json-canvas.svg")
         span CANVAS File
         Loader(:visible="isLoadingCanvas")
+    .row
+      button(@click.left="selectFile('json')" :class="{active: isLoadingJson}")
+        img.icon.file(src="@/assets/file.svg")
+        span Kinopio JSON File
+        Loader(:visible="isLoadingJson")
 
     .row(v-if="state.unknownError")
       .badge.danger (シ_ _)シ Something went wrong parsing your file

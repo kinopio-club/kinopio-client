@@ -180,15 +180,16 @@ template(v-if="visible")
           img.icon.file(src="@/assets/file.svg")
           span PDF
       .button-wrap
-        button(@click.left="downloadLocalJson")
-          img.icon.file(src="@/assets/file.svg")
-          span Kinopio JSON
-    Pdf(:visible="state.pdfIsVisible")
-    .row
-      .button-wrap
         button(@click.left="downloadLocalCanvas")
           img.icon.json-canvas(src="@/assets/json-canvas.svg")
           span Canvas
+
+    Pdf(:visible="state.pdfIsVisible")
+    .row
+      .button-wrap
+        button(@click.left="downloadLocalJson")
+          img.icon.file(src="@/assets/file.svg")
+          span Kinopio JSON
 
   section.export
     // anon user
