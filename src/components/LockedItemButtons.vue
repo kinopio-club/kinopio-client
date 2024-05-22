@@ -14,18 +14,12 @@ const props = defineProps({
 const lockedBoxes = computed(() => store.getters['currentBoxes/isLocked'])
 const lockedCards = computed(() => store.getters['currentCards/isLocked'])
 const isThemeDark = computed(() => store.state.currentUser.theme === 'dark')
-const boxButtonPosition = (box) => {
-  const element = document.querySelector(`.box[data-box-id="${box.id}"] .lock-button-wrap`)
-  if (!element) { return }
-  const rect = element.getBoundingClientRect()
-  return rect
-}
 </script>
 
 <template lang="pug">
 //- boxes
 template(v-for="box in lockedBoxes")
-  BoxUnlockButton(:box="box" :position="boxButtonPosition(box)")
+  BoxUnlockButton(:box="box")
 //- cards
 template(v-for="card in lockedCards")
   CardUnlockButton(:card="card")

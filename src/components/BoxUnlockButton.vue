@@ -5,17 +5,37 @@ import { useStore } from 'vuex'
 import utils from '@/utils.js'
 const store = useStore()
 
-const props = defineProps({
-  box: Object,
-  position: Object
+onMounted(() => {
+  store.subscribe(async (mutation, state) => {
+    const { type, payload } = mutation
+    if (type === 'spaceZoomPercent' || type === 'zoomOrigin') {
+      await nextTick()
+      updatePosition()
+    }
+  })
+  updatePosition()
 })
-// const state = reactive({
-//   count: 0
-// })
 
+const props = defineProps({
+  box: Object
+})
+const state = reactive({
+  position: null
+})
+
+const canEditBox = computed(() => store.getters['currentUser/canEditBox'](props.box))
+
+// styles
+
+const updatePosition = () => {
+  const element = document.querySelector(`.box[data-box-id="${props.box.id}"] .lock-button-wrap`)
+  if (!element) { return }
+  const rect = element.getBoundingClientRect()
+  state.position = rect
+}
 const positionStyles = computed(() => {
-  if (!props.position) { return }
-  const position = utils.updatePositionWithSpaceOffset(props.position)
+  if (!state.position) { return }
+  const position = utils.updatePositionWithSpaceOffset(state.position)
   const x = (position.x + window.scrollX) * store.getters.spaceCounterZoomDecimal
   const y = (position.y + window.scrollY) * store.getters.spaceCounterZoomDecimal
   return {
@@ -26,9 +46,9 @@ const positionStyles = computed(() => {
 const backgroundStyles = computed(() => {
   return { backgroundColor: 'transparent' }
 })
-const canEditBox = computed(() => store.getters['currentUser/canEditBox'](props.box))
-const connectionTypes = computed(() => store.getters['currentConnections/typesByBoxId'](props.box.id))
-// theme
+
+// theme colors
+
 const backgroundColorIsDark = computed(() => {
   const color = props.box.color
   return utils.colorIsDark(color)
@@ -36,6 +56,8 @@ const backgroundColorIsDark = computed(() => {
 const isThemeDark = computed(() => store.state.currentUser.theme === 'dark')
 const isDarkInLightTheme = computed(() => backgroundColorIsDark.value && !isThemeDark.value)
 const isLightInDarkTheme = computed(() => !backgroundColorIsDark.value && isThemeDark.value)
+
+// unlock
 
 const unlockBox = (event) => {
   if (store.state.currentUserIsDrawingConnection) { return }
