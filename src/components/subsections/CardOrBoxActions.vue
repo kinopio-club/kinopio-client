@@ -360,6 +360,7 @@ const toggleIsLocked = () => {
   items.value.forEach(item => {
     if (item.isCard) {
       updateCard(item, { isLocked: value })
+      store.commit('triggerUpdateLockedItemButtonsPositions', item.id)
     }
     if (item.isBox) {
       updateBox(item, { isLocked: value })

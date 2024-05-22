@@ -17,14 +17,15 @@ export default {
   components: {
   },
   props: {
-    card: Object,
-    position: Object
+    card: Object
   },
   created () {
     this.$store.subscribe((mutation, state) => {
       const { type, payload } = mutation
       if (type === 'triggerUpdateTheme') {
         this.defaultColor = utils.cssVariable('secondary-background')
+      } else if (type === 'triggerUpdateLockedItemButtonPositionCardId' && payload === this.card.id) {
+        this.updatePosition()
       }
     })
   },
@@ -33,26 +34,24 @@ export default {
   },
   data () {
     return {
-      defaultColor: '#e3e3e3'
+      defaultColor: '#e3e3e3',
+      position: null
     }
   },
   computed: {
-    ...mapState([
-    ]),
-    ...mapGetters([
-      'spaceCounterZoomDecimal'
-    ]),
     positionStyles () {
-      if (!this.position) {
+      const pointIsEmpty = utils.pointIsEmpty(this.position)
+      if (!this.position || pointIsEmpty) {
         return { display: 'none' }
       }
-      const position = utils.updatePositionWithSpaceOffset(this.position)
-      const x = (position.x + window.scrollX) * this.spaceCounterZoomDecimal
-      const y = (position.y + window.scrollY) * this.spaceCounterZoomDecimal
-      return {
+      let position = utils.updatePositionWithSpaceOffset(this.position)
+      const x = (position.x + window.scrollX) * this.$store.getters.spaceCounterZoomDecimal
+      const y = (position.y + window.scrollY) * this.$store.getters.spaceCounterZoomDecimal
+      position = {
         left: x + 'px',
         top: y + 'px'
       }
+      return position
     },
     backgroundStyles () {
       return { backgroundColor: 'transparent' }
@@ -70,6 +69,17 @@ export default {
     isLightInDarkTheme () { return !this.backgroundColorIsDark && this.isThemeDark }
   },
   methods: {
+    updatePosition () {
+      let cardElement = document.querySelector(`article[data-card-id="${this.card.id}"]`)
+      if (!cardElement) { return }
+      if (!cardElement.dataset.shouldRender) {
+        return
+      }
+      const element = cardElement.querySelector('.lock-button-wrap')
+      if (!element) { return }
+      const rect = element.getBoundingClientRect()
+      this.position = rect
+    },
     unlockCard (event) {
       if (this.$store.state.currentUserIsDrawingConnection) {
         return

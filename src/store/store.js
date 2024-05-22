@@ -537,6 +537,7 @@ const store = createStore({
     triggerClearAllSpaceFilters: () => {},
     triggerScrollUserDetailsIntoView: () => {},
     triggerUpdateLockedItemButtonsPositions: () => {},
+    triggerUpdateLockedItemButtonPositionCardId: (state, cardId) => {},
     triggerCenterZoomOrigin: () => {},
     triggerRemoveCardFromCardList: (state, card) => {},
     triggerUpdateTheme: () => {},
@@ -567,6 +568,10 @@ const store = createStore({
     addToShouldExplicitlyRenderCardIds: (state, cardIds) => {
       utils.typeCheck({ value: cardIds, type: 'array' })
       state.shouldExplicitlyRenderCardIds = state.shouldExplicitlyRenderCardIds.concat(cardIds)
+    },
+    removeFromShouldExplicitlyRenderCardIds: (state, cardId) => {
+      utils.typeCheck({ value: cardId, type: 'string' })
+      state.shouldExplicitlyRenderCardIds = state.shouldExplicitlyRenderCardIds.filter(id => id !== cardId)
     },
     clearShouldExplicitlyRenderCardIds: (state) => {
       if (state.isLoadingSpace) { return }

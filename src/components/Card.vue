@@ -1646,8 +1646,17 @@ const shouldRender = computed(() => {
   if (shouldExplitlyRender) { return true }
   if (connectedToAnotherCardBeingDraggedColor.value) { return true }
   if (isSelectedOrDragging.value) { return true }
+  if (state.isVisibleInViewport) {
+    updateLockedItemButtonPosition()
+  }
   return state.isVisibleInViewport
 })
+
+const updateLockedItemButtonPosition = async () => {
+  if (!props.card.isLocked) { return }
+  await nextTick()
+  store.commit('triggerUpdateLockedItemButtonPositionCardId', props.card.id)
+}
 
 // mouse hover handlers
 
@@ -1922,7 +1931,7 @@ article.card-wrap#card(
   :data-card-id="card.id"
   :data-is-hidden-by-comment-filter="isCardHiddenByCommentFilter"
   :data-is-visible-in-viewport="state.isVisibleInViewport"
-  :date-should-render="shouldRender"
+  :data-should-render="shouldRender"
   :data-is-locked="isLocked"
   :data-resize-width="resizeWidth"
   :data-tilt-degrees="card.tilt"

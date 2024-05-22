@@ -377,6 +377,7 @@ export default {
     return Math.round(number * 100) / 100
   },
   pointIsEmpty (point) {
+    if (!point) { return }
     if (point.x === 0 && point.y === 0) { return true }
   },
   arrayHasItems (array) { // !arrayIsEmpty, arrayExists

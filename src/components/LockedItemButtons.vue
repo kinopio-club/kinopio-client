@@ -2,9 +2,9 @@
 //- boxes
 template(v-for="box in lockedBoxes")
   BoxUnlockButton(:box="box" :position="boxButtonPosition(box)")
-//- boxes
+//- cards
 template(v-for="card in lockedCards")
-  CardUnlockButton(:card="card" :position="cardButtonPosition(card)")
+  CardUnlockButton(:card="card")
 
 </template>
 
@@ -37,12 +37,6 @@ export default {
   methods: {
     boxButtonPosition (box) {
       const element = document.querySelector(`.box[data-box-id="${box.id}"] .lock-button-wrap`)
-      if (!element) { return }
-      const rect = element.getBoundingClientRect()
-      return rect
-    },
-    cardButtonPosition (card) {
-      const element = document.querySelector(`article[data-card-id="${card.id}"] .lock-button-wrap`)
       if (!element) { return }
       const rect = element.getBoundingClientRect()
       return rect
