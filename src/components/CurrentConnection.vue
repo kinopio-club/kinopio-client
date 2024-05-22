@@ -1,170 +1,162 @@
+<script setup>
+import { reactive, computed, onMounted, onBeforeUnmount, onUnmounted, defineProps, defineEmits, watch, ref, nextTick } from 'vue'
+import { useStore } from 'vuex'
+
+import utils from '@/utils.js'
+
+import { nanoid } from 'nanoid'
+const store = useStore()
+
+let prevType
+
+onMounted(() => {
+  store.subscribe((mutation, state) => {
+    if (mutation.type === 'triggerDrawConnectionFrame') {
+      const event = mutation.payload
+      drawCurrentConnection(event)
+    } else if (mutation.type === 'closeAllDialogs') {
+      if (isDrawingConnection.value) {
+        store.commit('currentUserIsDrawingConnection', false)
+        store.dispatch('currentConnections/removeUnusedTypes')
+      }
+    }
+  })
+  window.addEventListener('mousemove', interact)
+  window.addEventListener('touchmove', interact)
+  window.addEventListener('mouseup', stopInteractions)
+  window.addEventListener('touchend', stopInteractions)
+})
+
+onBeforeUnmount(() => {
+  window.removeEventListener('mousemove', interact)
+  window.removeEventListener('touchmove', interact)
+  window.removeEventListener('mouseup', stopInteractions)
+  window.removeEventListener('touchend', stopInteractions)
+})
+
+const props = defineProps({
+  startCardId: String
+})
+const state = reactive({
+  currentConnectionPath: undefined,
+  currentConnectionColor: undefined
+})
+
+const isDrawingConnection = computed(() => store.state.currentUserIsDrawingConnection)
+// const connections = computed(() => store.getters['currentConnections/all'] )
+// const remoteCurrentConnections = computed(() => store.state.remoteCurrentConnections )
+// const spaceZoomDecimal = computed(() => store.getters.spaceZoomDecimal)
+
+const interact = (event) => {
+  if (isDrawingConnection.value) {
+    drawCurrentConnection(event)
+  }
+}
+const drawCurrentConnection = (event) => {
+  let end = utils.cursorPositionInSpace(event)
+  let start = utils.connectorCoords(props.startCardId) // TODO get real pos
+  start = utils.cursorPositionInSpace(null, start)
+  const controlPoint = store.state.currentUser.defaultConnectionControlPoint
+  const path = store.getters['currentConnections/connectionPathBetweenCoords'](start, end, controlPoint)
+  checkCurrentConnectionSuccess(event)
+  state.currentConnectionPath = path
+  const connectionType = store.getters['currentConnections/typeForNewConnections']
+  prevType = connectionType
+  state.currentConnectionColor = connectionType.color
+  store.commit('currentConnectionColor', connectionType.color)
+  const updates = {
+    userId: store.state.currentUser.id,
+    connectionTypeId: connectionType.id,
+    color: connectionType.color,
+    startCardId: props.startCardId,
+    path
+  }
+  store.commit('broadcast/updateStore', { updates, type: 'updateRemoteCurrentConnection' })
+}
+const checkCurrentConnectionSuccess = (event) => {
+  if (!event) { return }
+  const position = utils.cursorPositionInViewport(event)
+  const cardElement = utils.cardElementFromPosition(position.x, position.y)
+  let updates = { userId: store.state.currentUser.id }
+  let isCurrentConnectionConnected
+  if (cardElement) {
+    isCurrentConnectionConnected = props.startCardId !== cardElement.dataset.cardId
+  }
+  if (!cardElement) {
+    store.commit('currentConnectionSuccess', {})
+    updates.endCardId = null
+    store.commit('broadcast/updateStore', { updates, type: 'updateRemoteCurrentConnection' })
+  } else if (isCurrentConnectionConnected) {
+    const card = store.getters['currentCards/byId'](cardElement.dataset.cardId)
+    if (card.isLocked) {
+      store.commit('currentConnectionSuccess', {})
+      return
+    }
+    store.commit('currentConnectionSuccess', card)
+    updates.endCardId = card.id
+    store.commit('broadcast/updateStore', { updates, type: 'updateRemoteCurrentConnection' })
+  } else {
+    store.commit('currentConnectionSuccess', {})
+  }
+}
+
+const addConnections = async (event) => {
+  const currentConnectionSuccess = store.state.currentConnectionSuccess
+  const startCardIds = store.state.currentConnectionStartCardIds
+  let endCardId
+  let position = utils.cursorPositionInSpace(event)
+  const shouldPreventCreate = utils.isPositionOutsideOfSpace(position)
+  if (shouldPreventCreate) {
+    position = utils.cursorPositionInPage(event)
+    store.commit('addNotificationWithPosition', { message: 'Outside Space', position, type: 'info', icon: 'cancel', layer: 'app' })
+    return
+  }
+  if (currentConnectionSuccess.id) {
+    endCardId = currentConnectionSuccess.id
+  } else {
+    // create card
+    const startCard = store.getters['currentCards/byId'](startCardIds[0])
+    endCardId = nanoid()
+    store.dispatch('currentCards/add', { position, id: endCardId, isParentCard: true, backgroundColor: startCard.backgroundColor })
+    store.commit('childCardId', '')
+  }
+  // create connections to endCardId
+  await nextTick()
+  startCardIds.forEach(startCardId => {
+    const controlPoint = store.state.currentUser.defaultConnectionControlPoint
+    const path = store.getters['currentConnections/connectionPathBetweenCards'](startCardId, endCardId, controlPoint)
+    const connection = { startCardId, endCardId, path, controlPoint }
+    store.dispatch('currentConnections/add', { connection, type: prevType })
+  })
+}
+
+const stopInteractions = (event) => {
+  if (isDrawingConnection.value) {
+    store.dispatch('clearMultipleSelected')
+    addConnections(event)
+  }
+  store.commit('currentConnectionSuccess', {})
+  const isCurrentConnection = store.state.currentConnectionStartCardIds.length
+  if (isCurrentConnection) {
+    store.commit('currentConnectionStartCardIds', [])
+    const updates = { userId: store.state.currentUser.id }
+    store.commit('broadcast/updateStore', { updates, type: 'removeRemoteCurrentConnection' })
+  }
+  store.commit('currentUserIsDrawingConnection', false)
+  state.currentConnectionPath = undefined
+}
+
+</script>
+
 <template lang="pug">
 path.current-connection(
   v-if="isDrawingConnection"
   fill="none"
   stroke-width="5"
-  :stroke="currentConnectionColor"
-  :d="currentConnectionPath"
+  :stroke="state.currentConnectionColor"
+  :d="state.currentConnectionPath"
 )
-
 </template>
-
-<script>
-import utils from '@/utils.js'
-
-import { nanoid } from 'nanoid'
-
-let prevType
-
-export default {
-  name: 'CurrentConnection',
-  props: {
-    startCardId: String
-  },
-  created () {
-    this.$store.subscribe((mutation, state) => {
-      if (mutation.type === 'triggerDrawConnectionFrame') {
-        const event = mutation.payload
-        this.drawCurrentConnection(event)
-      }
-    })
-  },
-
-  mounted () {
-    // bind events to window to receive events when mouse is outside window
-    window.addEventListener('mousemove', this.interact)
-    window.addEventListener('touchmove', this.interact)
-    window.addEventListener('mouseup', this.stopInteractions)
-    window.addEventListener('touchend', this.stopInteractions)
-    this.$store.subscribe((mutation, state) => {
-      if (mutation.type === 'closeAllDialogs') {
-        if (this.isDrawingConnection) {
-          this.$store.commit('currentUserIsDrawingConnection', false)
-          this.$store.dispatch('currentConnections/removeUnusedTypes')
-        }
-      }
-    })
-  },
-  beforeUnmount () {
-    window.removeEventListener('mousemove', this.interact)
-    window.removeEventListener('touchmove', this.interact)
-    window.removeEventListener('mouseup', this.stopInteractions)
-    window.removeEventListener('touchend', this.stopInteractions)
-  },
-  data () {
-    return {
-      currentConnectionPath: undefined,
-      currentConnectionColor: undefined
-    }
-  },
-  computed: {
-    isDrawingConnection () { return this.$store.state.currentUserIsDrawingConnection },
-    connections () { return this.$store.getters['currentConnections/all'] },
-    remoteCurrentConnections () { return this.$store.state.remoteCurrentConnections },
-    spaceZoomDecimal () { return this.$store.getters.spaceZoomDecimal }
-  },
-  methods: {
-    interact (event) {
-      if (this.isDrawingConnection) {
-        this.drawCurrentConnection(event)
-      }
-    },
-    drawCurrentConnection (event) {
-      let end = utils.cursorPositionInSpace(event)
-      const startCardId = this.startCardId
-      let start = utils.connectorCoords(startCardId) // TODO get real pos
-      start = utils.cursorPositionInSpace(null, start)
-      const controlPoint = this.$store.state.currentUser.defaultConnectionControlPoint
-      const path = this.$store.getters['currentConnections/connectionPathBetweenCoords'](start, end, controlPoint)
-      this.checkCurrentConnectionSuccess(event)
-      this.currentConnectionPath = path
-      const connectionType = this.$store.getters['currentConnections/typeForNewConnections']
-      prevType = connectionType
-      this.currentConnectionColor = connectionType.color
-      this.$store.commit('currentConnectionColor', connectionType.color)
-      const updates = {
-        userId: this.$store.state.currentUser.id,
-        connectionTypeId: connectionType.id,
-        color: connectionType.color,
-        startCardId,
-        path
-      }
-      this.$store.commit('broadcast/updateStore', { updates, type: 'updateRemoteCurrentConnection' })
-    },
-    checkCurrentConnectionSuccess (event) {
-      if (!event) { return }
-      const position = utils.cursorPositionInViewport(event)
-      const cardElement = utils.cardElementFromPosition(position.x, position.y)
-      let updates = { userId: this.$store.state.currentUser.id }
-      let isCurrentConnectionConnected
-      if (cardElement) {
-        isCurrentConnectionConnected = this.startCardId !== cardElement.dataset.cardId
-      }
-      if (!cardElement) {
-        this.$store.commit('currentConnectionSuccess', {})
-        updates.endCardId = null
-        this.$store.commit('broadcast/updateStore', { updates, type: 'updateRemoteCurrentConnection' })
-      } else if (isCurrentConnectionConnected) {
-        const card = this.$store.getters['currentCards/byId'](cardElement.dataset.cardId)
-        if (card.isLocked) {
-          this.$store.commit('currentConnectionSuccess', {})
-          return
-        }
-        this.$store.commit('currentConnectionSuccess', card)
-        updates.endCardId = card.id
-        this.$store.commit('broadcast/updateStore', { updates, type: 'updateRemoteCurrentConnection' })
-      } else {
-        this.$store.commit('currentConnectionSuccess', {})
-      }
-    },
-    addConnections (event) {
-      const currentConnectionSuccess = this.$store.state.currentConnectionSuccess
-      const startCardIds = this.$store.state.currentConnectionStartCardIds
-      let endCardId
-      let position = utils.cursorPositionInSpace(event)
-      const shouldPreventCreate = utils.isPositionOutsideOfSpace(position)
-      if (shouldPreventCreate) {
-        position = utils.cursorPositionInPage(event)
-        this.$store.commit('addNotificationWithPosition', { message: 'Outside Space', position, type: 'info', icon: 'cancel', layer: 'app' })
-        return
-      }
-      if (currentConnectionSuccess.id) {
-        endCardId = currentConnectionSuccess.id
-      } else {
-        // create card
-        const startCard = this.$store.getters['currentCards/byId'](startCardIds[0])
-        endCardId = nanoid()
-        this.$store.dispatch('currentCards/add', { position, id: endCardId, isParentCard: true, backgroundColor: startCard.backgroundColor })
-        this.$store.commit('childCardId', '')
-      }
-      // create connections to endCardId
-      this.$nextTick(() => {
-        startCardIds.forEach(startCardId => {
-          const controlPoint = this.$store.state.currentUser.defaultConnectionControlPoint
-          const path = this.$store.getters['currentConnections/connectionPathBetweenCards'](startCardId, endCardId, controlPoint)
-          const connection = { startCardId, endCardId, path, controlPoint }
-          this.$store.dispatch('currentConnections/add', { connection, type: prevType })
-        })
-      })
-    },
-    stopInteractions (event) {
-      if (this.isDrawingConnection) {
-        this.$store.dispatch('clearMultipleSelected')
-        this.addConnections(event)
-      }
-      this.$store.commit('currentConnectionSuccess', {})
-      const isCurrentConnection = this.$store.state.currentConnectionStartCardIds.length
-      if (isCurrentConnection) {
-        this.$store.commit('currentConnectionStartCardIds', [])
-        const updates = { userId: this.$store.state.currentUser.id }
-        this.$store.commit('broadcast/updateStore', { updates, type: 'removeRemoteCurrentConnection' })
-      }
-      this.$store.commit('currentUserIsDrawingConnection', false)
-      this.currentConnectionPath = undefined
-    }
-  }
-}
-</script>
 
 <style lang="stylus">
 .current-connection
