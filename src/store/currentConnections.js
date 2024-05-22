@@ -1,6 +1,7 @@
 import utils from '@/utils.js'
 import consts from '@/consts.js'
 import cache from '@/cache.js'
+import store from '@/store/store.js'
 
 import { nanoid } from 'nanoid'
 import randomColor from 'randomcolor'
@@ -483,12 +484,14 @@ export default {
       })
       return Boolean(existing.length)
     },
-    connectionPathBetweenCards: (state, getters) => (startCardId, endCardId, controlPoint) => {
+    connectionPathBetweenCards: (state, getters, rootState) => (startCardId, endCardId, controlPoint, estimatedEndCardPosition) => {
+      store.commit('addToShouldExplicitlyRenderCardIds', [startCardId, endCardId], { root: true })
       let start = utils.connectorCoords(startCardId)
-      let end = utils.connectorCoords(endCardId)
+      let end = estimatedEndCardPosition || utils.connectorCoords(endCardId)
       if (!start || !end) { return }
+      if (utils.pointIsEmpty(start) || utils.pointIsEmpty(end)) { return }
       start = utils.cursorPositionInSpace(null, start)
-      end = utils.cursorPositionInSpace(null, end)
+      end = estimatedEndCardPosition || utils.cursorPositionInSpace(null, end)
       return getters.connectionPathBetweenCoords(start, end, controlPoint)
     },
     curveControlPoint: (state, getters, rootState) => {

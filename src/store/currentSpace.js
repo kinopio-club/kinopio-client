@@ -314,7 +314,8 @@ const currentSpace = {
           if (!linkedCard) { return }
           nextTick(() => {
             context.dispatch('currentConnections/updatePaths', { cardId: linkedCard.id, shouldUpdateApi: canEditSpace }, { root: true })
-            context.dispatch('currentCards/updateDimensions', { cardId: linkedCard.id }, { root: true })
+            const card = { cardId: linkedCard.id }
+            context.dispatch('currentCards/updateDimensions', { cards: [card] }, { root: true })
             context.commit('isLoadingOtherItems', false, { root: true })
           })
         })
@@ -621,6 +622,7 @@ const currentSpace = {
     restoreSpaceInChunks: (context, { space, isRemote, addCards, addConnections, addConnectionTypes, addBoxes }) => {
       if (!utils.objectHasKeys(space)) { return }
       console.log('🌱 Restoring space', space, { 'isRemote': isRemote, addCards, addConnections, addConnectionTypes, addBoxes })
+      context.commit('isLoadingSpace', true, { root: true })
       const chunkSize = 50
       const timeStart = utils.normalizeToUnixTime(new Date())
       const origin = { x: window.scrollX, y: window.scrollY }
@@ -867,10 +869,10 @@ const currentSpace = {
         addConnections: connectionResults.addItems,
         addBoxes: boxResults.addItems
       })
-      context.commit('triggerRestoreSpaceRemoteComplete', null, { root: true })
       nextTick(() => {
         context.dispatch('currentCards/updateDimensions', {}, { root: true })
       })
+      context.commit('triggerRestoreSpaceRemoteComplete', null, { root: true })
       console.timeEnd('🎑⏱️ restoreSpaceRemote')
     },
     loadLastSpace: async (context) => {

@@ -10,11 +10,9 @@ const props = defineProps({
   card: Object
 })
 
-const canEditSpace = computed(() => store.getters['currentUser/canEditSpace']())
 const isPresentationMode = computed(() => store.state.isPresentationMode)
 
 const start = (event, action) => {
-  if (!canEditSpace.value) { return }
   if (utils.isMultiTouch(event)) { return }
   store.dispatch('history/pause')
   store.dispatch('closeAllDialogs')
@@ -54,10 +52,12 @@ const remove = (action) => {
 
 const isTilting = computed(() => {
   const cardIds = store.state.currentUserIsTiltingCardIds
+  if (!cardIds.length) { return }
   return cardIds.includes(props.card.id)
 })
 const isResizing = computed(() => {
   const cardIds = store.state.currentUserIsResizingCardIds
+  if (!cardIds.length) { return }
   return cardIds.includes(props.card.id)
 })
 const isComment = computed(() => store.getters['currentCards/isComment'](props.card))

@@ -1613,7 +1613,7 @@ const userDetailsIsUser = computed(() => {
   return user.id === store.state.userDetailsUser.id
 })
 
-// is visible in viewport
+// is visible in viewport, perf, should render
 
 const initViewportObserver = async () => {
   await nextTick()
@@ -1639,6 +1639,15 @@ const removeViewportObserver = () => {
   if (!observer) { return }
   observer.unobserve(target)
 }
+const shouldRender = computed(() => {
+  const isConnectingFrom = store.state.currentConnectionStartCardIds.includes(props.card.id)
+  const shouldExplitlyRender = store.state.shouldExplicitlyRenderCardIds.includes(props.card.id)
+  if (isConnectingFrom) { return true }
+  if (shouldExplitlyRender) { return true }
+  if (connectedToAnotherCardBeingDraggedColor.value) { return true }
+  if (isSelectedOrDragging.value) { return true }
+  return state.isVisibleInViewport
+})
 
 // mouse hover handlers
 
@@ -1913,6 +1922,7 @@ article.card-wrap#card(
   :data-card-id="card.id"
   :data-is-hidden-by-comment-filter="isCardHiddenByCommentFilter"
   :data-is-visible-in-viewport="state.isVisibleInViewport"
+  :date-should-render="shouldRender"
   :data-is-locked="isLocked"
   :data-resize-width="resizeWidth"
   :data-tilt-degrees="card.tilt"
@@ -1924,6 +1934,7 @@ article.card-wrap#card(
   :class="articleClasses"
 )
   .card(
+    v-show="shouldRender"
     @mousedown.left.prevent="startDraggingCard"
     @mouseup.left="showCardDetails"
 
@@ -1964,7 +1975,7 @@ article.card-wrap#card(
     .locking-frame(v-if="state.isLocking" :style="lockingFrameStyle")
     Frames(:card="card")
 
-    template(v-if="!isComment && state.isVisibleInViewport")
+    template(v-if="!isComment")
       ImageOrVideo(:isSelectedOrDragging="isSelectedOrDragging" :pendingUploadDataUrl="pendingUploadDataUrl" :image="state.formats.image" :video="state.formats.video" @updateCardDimensions="updateCardDimensions")
 
     TiltResize(:card="card" :visible="tiltResizeIsVisible")
@@ -1995,7 +2006,7 @@ article.card-wrap#card(
               input(type="checkbox" v-model="checkboxState")
           //- Name
           p.name.name-segments(v-if="normalizedName" :style="{background: currentBackgroundColor}" :class="{'is-checked': isChecked, 'has-checkbox': hasCheckbox, 'badge badge-status': isImageCard && hasTextSegments}")
-            template(v-if="state.isVisibleInViewport" v-for="segment in nameSegments")
+            template(v-for="segment in nameSegments")
               NameSegment(:segment="segment" @showTagDetailsIsVisible="showTagDetailsIsVisible" :parentCardId="card.id" :backgroundColorIsDark="currentBackgroundColorIsDark" :headerFontId="card.headerFontId")
             Loader(:visible="isLoadingUrlPreview")
 
@@ -2042,7 +2053,7 @@ article.card-wrap#card(
                 img.connector-icon(src="@/assets/connector-closed-in-card.svg")
               //- template(v-else)
               //-   img.connector-icon(src="@/assets/connector-open-in-card.svg")
-    .url-preview-wrap(v-if="(cardUrlPreviewIsVisible || otherCardIsVisible || otherSpaceIsVisible) && state.isVisibleInViewport" :class="{'is-image-card': isImageCard}")
+    .url-preview-wrap(v-if="cardUrlPreviewIsVisible || otherCardIsVisible || otherSpaceIsVisible" :class="{'is-image-card': isImageCard}")
       template(v-if="cardUrlPreviewIsVisible")
         UrlPreviewCard(
           :visible="true"

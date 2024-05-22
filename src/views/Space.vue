@@ -448,7 +448,7 @@ const shouldCancelInteraction = (event) => {
 
 // 💣 stopInteractions and Space/stopPainting are run on all mouse and touch end events
 
-const stopInteractions = (event) => {
+const stopInteractions = async (event) => {
   console.log('💣 stopInteractions')
   const isCardsSelected = store.state.currentDraggingCardId || store.state.multipleCardsSelectedIds.length
   const isBoxesSelected = store.state.multipleBoxesSelectedIds
@@ -487,6 +487,9 @@ const stopInteractions = (event) => {
   store.commit('prevCursorPosition', utils.cursorPositionInPage(event))
   prevCursor = undefined
   store.commit('clearDraggingItems')
+  await nextTick()
+  await nextTick()
+  store.commit('clearShouldExplicitlyRenderCardIds')
 }
 
 </script>

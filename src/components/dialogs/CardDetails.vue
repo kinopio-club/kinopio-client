@@ -870,7 +870,8 @@ export default {
       })
     },
     updateDimensions (cardId) {
-      this.$store.dispatch('currentCards/updateDimensions', { cardId })
+      const card = { id: cardId }
+      this.$store.dispatch('currentCards/updateDimensions', { cards: [card] })
     },
     checkIfIsInsertLineBreak (event) {
       const lineBreakInserted = event.ctrlKey || event.altKey

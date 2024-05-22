@@ -414,28 +414,21 @@ const currentCards = {
 
     // dimensions
 
-    updateDimensions: (context, { cards, cardId }) => {
+    updateDimensions: (context, { cards }) => {
       const canEditSpace = context.rootGetters['currentUser/canEditSpace']()
+      if (!cards) {
+        cards = context.getters.all
+      }
       nextTick(() => {
-        let newCards = []
         let updates = {
           cards: [],
           spaceId: context.rootState.currentSpace.id
         }
-        if (cards) {
-          utils.typeCheck({ value: cards, type: 'array' })
-          newCards = cards
-        } else if (cardId) {
-          utils.typeCheck({ value: cardId, type: 'string' })
-          const card = context.getters.byId(cardId)
-          if (!card) { return }
-          newCards.push(card)
-        } else {
-          newCards = context.getters.all
-        }
-        newCards = utils.clone(newCards)
-        newCards = newCards.filter(card => Boolean(card))
-        newCards.forEach(card => {
+        const cardIds = cards.map(newCard => newCard.id)
+        context.commit('addToShouldExplicitlyRenderCardIds', cardIds, { root: true })
+        cards = utils.clone(cards)
+        cards = cards.filter(card => Boolean(card))
+        cards.forEach(card => {
           const prevDimensions = {
             width: card.width,
             height: card.height
@@ -455,6 +448,7 @@ const currentCards = {
           context.dispatch('broadcast/update', { updates: body, type: 'updateCard', handler: 'currentCards/update' }, { root: true })
           updates.cards.push(body)
         })
+        context.commit('clearShouldExplicitlyRenderCardIds', null, { root: true })
         if (canEditSpace) {
           context.dispatch('api/addToQueue', { name: 'updateMultipleCards', body: updates }, { root: true })
         }
@@ -535,7 +529,8 @@ const currentCards = {
         const body = { id: cardId, tilt: 0 }
         context.dispatch('update', body)
         utils.removeAllCardDimensions({ id: cardId })
-        context.dispatch('updateDimensions', { cardId })
+        const cards = [{ id: cardId }]
+        context.dispatch('updateDimensions', { cards })
       })
     },
 
