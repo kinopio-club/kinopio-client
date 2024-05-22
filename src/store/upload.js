@@ -112,7 +112,8 @@ export default {
             resolve(request.response)
             nextTick(() => {
               nextTick(() => {
-                context.dispatch('currentCards/updateDimensions', { cardId }, { root: true })
+                const card = { id: cardId }
+                context.dispatch('currentCards/updateDimensions', { cards: [card] }, { root: true })
               })
             })
           }

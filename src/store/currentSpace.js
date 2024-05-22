@@ -314,7 +314,8 @@ const currentSpace = {
           if (!linkedCard) { return }
           nextTick(() => {
             context.dispatch('currentConnections/updatePaths', { cardId: linkedCard.id, shouldUpdateApi: canEditSpace }, { root: true })
-            context.dispatch('currentCards/updateDimensions', { cardId: linkedCard.id }, { root: true })
+            const card = { cardId: linkedCard.id }
+            context.dispatch('currentCards/updateDimensions', { cards: [card] }, { root: true })
             context.commit('isLoadingOtherItems', false, { root: true })
           })
         })
@@ -867,6 +868,9 @@ const currentSpace = {
         addConnectionTypes: connectionTypeReults.addItems,
         addConnections: connectionResults.addItems,
         addBoxes: boxResults.addItems
+      })
+      nextTick(() => {
+        context.dispatch('currentCards/updateDimensions', {}, { root: true })
       })
       context.commit('triggerRestoreSpaceRemoteComplete', null, { root: true })
       console.timeEnd('🎑⏱️ restoreSpaceRemote')
