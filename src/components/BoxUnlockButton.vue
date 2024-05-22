@@ -1,72 +1,65 @@
+<script setup>
+import { reactive, computed, onMounted, onBeforeUnmount, onUnmounted, defineProps, defineEmits, watch, ref, nextTick } from 'vue'
+import { useStore } from 'vuex'
+
+import utils from '@/utils.js'
+const store = useStore()
+
+const props = defineProps({
+  box: Object,
+  position: Object
+})
+// const state = reactive({
+//   count: 0
+// })
+
+const positionStyles = computed(() => {
+  if (!props.position) { return }
+  const position = utils.updatePositionWithSpaceOffset(props.position)
+  const x = (position.x + window.scrollX) * store.getters.spaceCounterZoomDecimal
+  const y = (position.y + window.scrollY) * store.getters.spaceCounterZoomDecimal
+  return {
+    left: x + 'px',
+    top: y + 'px'
+  }
+})
+const backgroundStyles = computed(() => {
+  return { backgroundColor: 'transparent' }
+})
+const canEditBox = computed(() => store.getters['currentUser/canEditBox'](props.box))
+const connectionTypes = computed(() => store.getters['currentConnections/typesByBoxId'](props.box.id))
+// theme
+const backgroundColorIsDark = computed(() => {
+  const color = props.box.color
+  return utils.colorIsDark(color)
+})
+const isThemeDark = computed(() => store.state.currentUser.theme === 'dark')
+const isDarkInLightTheme = computed(() => backgroundColorIsDark.value && !isThemeDark.value)
+const isLightInDarkTheme = computed(() => !backgroundColorIsDark.value && isThemeDark.value)
+
+const unlockBox = (event) => {
+  if (store.state.currentUserIsDrawingConnection) { return }
+  event.stopPropagation()
+  // notify read only if user cannot edit
+  if (!canEditBox.value) {
+    const position = utils.cursorPositionInPage(event)
+    store.commit('addNotificationWithPosition', { message: 'Box is Read Only', position, type: 'info', layer: 'space', icon: 'cancel' })
+    return
+  }
+  store.commit('currentUserIsDraggingBox', false)
+  store.dispatch('currentBoxes/update', {
+    id: props.box.id,
+    isLocked: false
+  })
+}
+
+</script>
+
 <template lang="pug">
 .box-unlock-button.inline-button-wrap(:style="positionStyles" @mouseup.left="unlockBox" @touchend="unlockBox")
   button.inline-button(tabindex="-1" :style="backgroundStyles" :class="{'is-light-in-dark-theme': isLightInDarkTheme, 'is-dark-in-light-theme': isDarkInLightTheme}")
     img.icon.lock-icon(src="@/assets/lock.svg")
 </template>
-
-<script>
-import utils from '@/utils.js'
-
-import { mapState, mapGetters } from 'vuex'
-
-export default {
-  name: 'BoxUnlockButton',
-  components: {
-  },
-  props: {
-    box: Object,
-    position: Object
-  },
-  computed: {
-    ...mapState([
-    ]),
-    ...mapGetters([
-      'spaceCounterZoomDecimal'
-    ]),
-    positionStyles () {
-      if (!this.position) { return }
-      const position = utils.updatePositionWithSpaceOffset(this.position)
-      const x = (position.x + window.scrollX) * this.spaceCounterZoomDecimal
-      const y = (position.y + window.scrollY) * this.spaceCounterZoomDecimal
-      return {
-        left: x + 'px',
-        top: y + 'px'
-      }
-    },
-    backgroundStyles () {
-      return { backgroundColor: 'transparent' }
-    },
-    canEditBox () { return this.$store.getters['currentUser/canEditBox'](this.box) },
-    connectionTypes () { return this.$store.getters['currentConnections/typesByBoxId'](this.box.id) },
-    // theme
-    backgroundColorIsDark () {
-      const color = this.box.color
-      return utils.colorIsDark(color)
-    },
-    isThemeDark () { return this.$store.state.currentUser.theme === 'dark' },
-    isDarkInLightTheme () { return this.backgroundColorIsDark && !this.isThemeDark },
-    isLightInDarkTheme () { return !this.backgroundColorIsDark && this.isThemeDark }
-
-  },
-  methods: {
-    unlockBox (event) {
-      if (this.$store.state.currentUserIsDrawingConnection) { return }
-      event.stopPropagation()
-      // notify read only if user cannot edit
-      if (!this.canEditBox) {
-        const position = utils.cursorPositionInPage(event)
-        this.$store.commit('addNotificationWithPosition', { message: 'Box is Read Only', position, type: 'info', layer: 'space', icon: 'cancel' })
-        return
-      }
-      this.$store.commit('currentUserIsDraggingBox', false)
-      this.$store.dispatch('currentBoxes/update', {
-        id: this.box.id,
-        isLocked: false
-      })
-    }
-  }
-}
-</script>
 
 <style lang="stylus">
 .box-unlock-button
