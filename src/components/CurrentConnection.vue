@@ -43,9 +43,6 @@ const state = reactive({
 })
 
 const isDrawingConnection = computed(() => store.state.currentUserIsDrawingConnection)
-// const connections = computed(() => store.getters['currentConnections/all'] )
-// const remoteCurrentConnections = computed(() => store.state.remoteCurrentConnections )
-// const spaceZoomDecimal = computed(() => store.getters.spaceZoomDecimal)
 
 const interact = (event) => {
   if (isDrawingConnection.value) {
@@ -103,7 +100,7 @@ const checkCurrentConnectionSuccess = (event) => {
 const addConnections = async (event) => {
   const currentConnectionSuccess = store.state.currentConnectionSuccess
   const startCardIds = store.state.currentConnectionStartCardIds
-  let endCardId
+  let endCardId, estimatedEndCardPosition
   let position = utils.cursorPositionInSpace(event)
   const shouldPreventCreate = utils.isPositionOutsideOfSpace(position)
   if (shouldPreventCreate) {
@@ -114,17 +111,21 @@ const addConnections = async (event) => {
   if (currentConnectionSuccess.id) {
     endCardId = currentConnectionSuccess.id
   } else {
-    // create card
+    // create new card
     const startCard = store.getters['currentCards/byId'](startCardIds[0])
     endCardId = nanoid()
     store.dispatch('currentCards/add', { position, id: endCardId, isParentCard: true, backgroundColor: startCard.backgroundColor })
     store.commit('childCardId', '')
+    estimatedEndCardPosition = {
+      x: position.x + 45,
+      y: position.y + 15
+    }
   }
   // create connections to endCardId
   await nextTick()
   startCardIds.forEach(startCardId => {
     const controlPoint = store.state.currentUser.defaultConnectionControlPoint
-    const path = store.getters['currentConnections/connectionPathBetweenCards'](startCardId, endCardId, controlPoint)
+    const path = store.getters['currentConnections/connectionPathBetweenCards'](startCardId, endCardId, controlPoint, estimatedEndCardPosition)
     const connection = { startCardId, endCardId, path, controlPoint }
     store.dispatch('currentConnections/add', { connection, type: prevType })
   })

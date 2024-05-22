@@ -484,10 +484,10 @@ export default {
       })
       return Boolean(existing.length)
     },
-    connectionPathBetweenCards: (state, getters, rootState) => (startCardId, endCardId, controlPoint) => {
+    connectionPathBetweenCards: (state, getters, rootState) => (startCardId, endCardId, controlPoint, estimatedEndCardPosition) => {
       store.commit('addToShouldExplicitlyRenderCardIds', [startCardId, endCardId], { root: true })
       let start = utils.connectorCoords(startCardId)
-      let end = utils.connectorCoords(endCardId)
+      let end = estimatedEndCardPosition || utils.connectorCoords(endCardId)
       if (!start || !end) { return }
       if (utils.pointIsEmpty(start) || utils.pointIsEmpty(end)) { return }
       start = utils.cursorPositionInSpace(null, start)
