@@ -1641,7 +1641,7 @@ const removeViewportObserver = () => {
 }
 const shouldRender = computed(() => {
   const isConnectingFrom = store.state.currentConnectionStartCardIds.includes(props.card.id)
-  const shouldExplitlyRender = store.state.shouldExplicitlyRenderCardIds.includes(props.card.id)
+  const shouldExplitlyRender = store.state.shouldExplicitlyRenderCardIds[props.card.id]
   if (isConnectingFrom) { return true }
   if (shouldExplitlyRender) { return true }
   if (connectedToAnotherCardBeingDraggedColor.value) { return true }

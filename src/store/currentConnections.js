@@ -242,7 +242,7 @@ export default {
           context.commit('updateReadOnly', connection)
         }
       })
-      context.commit('shouldExplicitlyRenderCardIds', [], { root: true })
+      context.commit('clearShouldExplicitlyRenderCardIds', null, { root: true })
     },
     updateMultplePaths: (context, cards) => {
       const canEditSpace = context.rootGetters['currentUser/canEditSpace']()
@@ -273,7 +273,7 @@ export default {
           }
         }, { root: true })
       }
-      context.commit('shouldExplicitlyRenderCardIds', [], { root: true })
+      context.commit('clearShouldExplicitlyRenderCardIds', null, { root: true })
     },
     updatePathsWhileDragging: (context, { connections }) => {
       let newConnections = []

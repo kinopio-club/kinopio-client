@@ -114,7 +114,7 @@ const store = createStore({
     preventDraggedBoxFromShowingDetails: false,
 
     // cards
-    shouldExplicitlyRenderCardIds: [],
+    shouldExplicitlyRenderCardIds: {},
     shouldAddCard: false,
     cardDetailsIsVisibleForCardId: '',
     parentCardId: '',
@@ -566,7 +566,14 @@ const store = createStore({
 
     shouldExplicitlyRenderCardIds: (state, cardIds) => {
       utils.typeCheck({ value: cardIds, type: 'array' })
-      state.shouldExplicitlyRenderCardIds = cardIds
+      const object = {}
+      cardIds.forEach(cardId => {
+        object[cardId] = true
+      })
+      state.shouldExplicitlyRenderCardIds = object
+    },
+    clearShouldExplicitlyRenderCardIds: (state) => {
+      state.shouldExplicitlyRenderCardIds = {}
     },
     shouldAddCard: (state, value) => {
       utils.typeCheck({ value, type: 'boolean' })
