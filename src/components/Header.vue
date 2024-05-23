@@ -656,7 +656,7 @@ header(v-if="isVisible" :style="state.position" :class="{'fade-out': isFadingOut
               button(:class="{ 'translucent-button': !shouldIncreaseUIContrast }")
                 img.icon.left-arrow(src="@/assets/down-arrow.svg")
             //- Current Space Name and Info
-            .button-wrap.space-name-button-wrap
+            .button-wrap.space-name-button-wrap(:class="{ 'back-button-is-visible': backButtonIsVisible }")
               button.space-name-button(@click.left.stop="toggleSpaceDetailsIsVisible" :class="{ active: state.spaceDetailsIsVisible, 'translucent-button': !shouldIncreaseUIContrast }")
                 span(v-if="currentSpaceIsInbox")
                   img.icon.inbox-icon(src="@/assets/inbox.svg")
@@ -830,13 +830,12 @@ header
     dialog
       max-width initial
     .space-name-button-wrap
-      max-width 58vw
+      max-width 58dvw
       @media(max-width 550px)
-        max-width 31vw
-      // @media(max-width 414px)
-      //   max-width 26vw
-      // @media(max-width 380px)
-      //   max-width 21vw
+        max-width 40dvw
+      &.back-button-is-visible
+        @media(max-width 550px)
+          max-width 31dvw
       > button
         .privacy-icon
           margin-left 6px
