@@ -743,7 +743,6 @@ const currentSpace = {
         context.dispatch('scrollCardsIntoView')
         // deferrable async tasks
         context.dispatch('updateOtherUsers')
-        context.dispatch('updateOtherItems')
         context.dispatch('checkIfShouldResetDimensions')
         nextTick(() => {
           context.dispatch('checkIfShouldPauseConnectionDirections')
