@@ -831,6 +831,7 @@ export default {
     if (!card) { return }
     const element = document.querySelector(`article#card[data-card-id="${card.id}"]`)
     if (!element) { return }
+    if (!element.dataset.shouldRender) { return }
     this.removeCardDimensions(card)
     const rect = element.getBoundingClientRect()
     const zoom = this.spaceCounterZoomDecimal()
@@ -1031,6 +1032,8 @@ export default {
     const cardUnlockButton = document.querySelector(`.card-unlock-button[data-card-id="${cardId}"] button`)
     const element = cardConnector || cardUnlockButton
     if (!element) { return }
+    const cardElement = document.querySelector(`article#card[data-card-id="${cardId}"]`)
+    if (!cardElement.dataset.shouldRender) { return }
     let rect = element.getBoundingClientRect()
     rect.x = rect.x + window.scrollX
     rect.y = rect.y + window.scrollY

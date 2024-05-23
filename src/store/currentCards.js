@@ -425,7 +425,6 @@ const currentCards = {
           spaceId: context.rootState.currentSpace.id
         }
         const cardIds = cards.map(newCard => newCard.id)
-        context.commit('addToShouldExplicitlyRenderCardIds', cardIds, { root: true })
         cards = utils.clone(cards)
         cards = cards.filter(card => Boolean(card))
         cards.forEach(card => {
@@ -448,7 +447,6 @@ const currentCards = {
           context.dispatch('broadcast/update', { updates: body, type: 'updateCard', handler: 'currentCards/update' }, { root: true })
           updates.cards.push(body)
         })
-        context.commit('clearShouldExplicitlyRenderCardIds', null, { root: true })
         if (canEditSpace) {
           context.dispatch('api/addToQueue', { name: 'updateMultipleCards', body: updates }, { root: true })
         }

@@ -763,7 +763,6 @@ const currentSpace = {
       if (!context.rootState.isEmbedMode) {
         context.commit('triggerSpaceZoomReset', null, { root: true })
       }
-      context.commit('isLoadingSpace', true, { root: true })
       context.commit('isAddPage', false, { root: true })
       const cachedSpace = cache.space(space.id) || space
       cachedSpace.id = cachedSpace.id || space.id
