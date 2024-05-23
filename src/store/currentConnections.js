@@ -84,7 +84,9 @@ export default {
     },
     updatePathsWhileDragging: (state, connections) => {
       connections.forEach(connection => {
-        state.connections[connection.id].path = connection.path
+        const connectionElement = document.querySelector(`g.connection[data-id="${connection.id}"]`)
+        const pathElement = connectionElement.querySelector('path')
+        pathElement.setAttribute('d', connection.path)
       })
     },
     updateType: (state, type) => {
