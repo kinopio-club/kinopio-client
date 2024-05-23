@@ -9,7 +9,7 @@ onMounted(() => {
   store.subscribe(async (mutation, state) => {
     const { type, payload } = mutation
     if (type === 'triggerUpdateTheme') {
-      state.defaultColor = utils.cssVariable('secondary-background')
+      updateDefaultColor()
     } else if (type === 'triggerUpdateLockedItemButtonPositionCardId' && payload === props.card.id) {
       updatePosition()
     } else if (type === 'spaceZoomPercent' || type === 'zoomOrigin') {
@@ -17,7 +17,7 @@ onMounted(() => {
       updatePosition()
     }
   })
-  state.defaultColor = utils.cssVariable('secondary-background')
+  updateDefaultColor()
 })
 
 const props = defineProps({
@@ -35,6 +35,9 @@ const connectionTypes = computed(() => store.getters['currentConnections/typesBy
 
 // theme
 
+const updateDefaultColor = () => {
+  state.defaultColor = utils.cssVariable('secondary-background')
+}
 const backgroundColorIsDark = computed(() => {
   const color = props.card.backgroundColor || state.defaultColor
   return utils.colorIsDark(color)
