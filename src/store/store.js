@@ -566,7 +566,7 @@ const store = createStore({
 
     shouldExplicitlyRenderCardIds: (state, cardIds) => {
       utils.typeCheck({ value: cardIds, type: 'array' })
-      state.shouldExplicitlyRenderCardIds = state.shouldExplicitlyRenderCardIds.concat(cardIds)
+      state.shouldExplicitlyRenderCardIds = cardIds
     },
     shouldAddCard: (state, value) => {
       utils.typeCheck({ value, type: 'boolean' })

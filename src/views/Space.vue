@@ -479,6 +479,7 @@ const stopInteractions = async (event) => {
   store.commit('clearDraggingItems')
   await nextTick()
   await nextTick()
+  store.commit('shouldExplicitlyRenderCardIds', [], { root: true })
 }
 
 </script>

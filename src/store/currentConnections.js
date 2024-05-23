@@ -242,6 +242,7 @@ export default {
           context.commit('updateReadOnly', connection)
         }
       })
+      context.commit('shouldExplicitlyRenderCardIds', [], { root: true })
     },
     updateMultplePaths: (context, cards) => {
       const canEditSpace = context.rootGetters['currentUser/canEditSpace']()
@@ -272,6 +273,7 @@ export default {
           }
         }, { root: true })
       }
+      context.commit('shouldExplicitlyRenderCardIds', [], { root: true })
     },
     updatePathsWhileDragging: (context, { connections }) => {
       let newConnections = []
@@ -495,7 +497,6 @@ export default {
       if (utils.pointIsEmpty(start) || utils.pointIsEmpty(end)) { return }
       start = utils.cursorPositionInSpace(null, start)
       end = estimatedEndCardPosition || utils.cursorPositionInSpace(null, end)
-      store.commit('shouldExplicitlyRenderCardIds', [], { root: true })
       return getters.connectionPathBetweenCoords(start, end, controlPoint)
     },
     curveControlPoint: (state, getters, rootState) => {
