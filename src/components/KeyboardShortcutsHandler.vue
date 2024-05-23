@@ -393,30 +393,32 @@ export default {
       const scroll = this.$store.getters.windowScrollWithSpaceOffset()
       const parentCardId = this.$store.state.parentCardId
       const childCardId = this.$store.state.childCardId
-      let parentCard = document.querySelector(`.card[data-card-id="${parentCardId}"]`)
-      const childCard = document.querySelector(`.card[data-card-id="${childCardId}"]`)
-      let baseCard, baseCardId
-      if (childCard) {
-        baseCard = childCard
+      let parentCardElement = document.querySelector(`.card[data-card-id="${parentCardId}"]`)
+      const childCardElement = document.querySelector(`.card[data-card-id="${childCardId}"]`)
+      let baseCardElement, baseCardId
+      if (childCardElement) {
+        baseCardElement = childCardElement
         baseCardId = childCardId
-      } else if (parentCard) {
-        baseCard = parentCard
+      } else if (parentCardElement) {
+        baseCardElement = parentCardElement
+        baseCardId = parentCardId
       } else {
         this.addCard(options)
         return
       }
-      const rect = baseCard.getBoundingClientRect()
+      const rect = baseCardElement.getBoundingClientRect()
       let initialPosition = {
         x: scroll.x + rect.x + rect.width + spaceBetweenCards,
         y: scroll.y + rect.y + rect.height + spaceBetweenCards
       }
       initialPosition = this.updateWithZoom(initialPosition)
       const position = this.nonOverlappingCardPosition(initialPosition)
-      parentCard = this.$store.getters['currentCards/byId'](parentCardId)
-      this.$store.dispatch('currentCards/add', { position, backgroundColor: parentCard.backgroundColor, id: options.id })
+      const parentCard = this.$store.getters['currentCards/byId'](parentCardId)
+      const newChildCardId = options.id || nanoid()
+      this.$store.dispatch('currentCards/add', { position, backgroundColor: parentCard.backgroundColor, id: newChildCardId })
       this.$store.commit('childCardId', this.$store.state.cardDetailsIsVisibleForCardId)
       this.$nextTick(() => {
-        this.addConnection(baseCardId)
+        this.addConnection(baseCardId, position)
       })
     },
 
@@ -454,27 +456,27 @@ export default {
       useSiblingConnectionType = true
     },
 
-    addConnection (cardId) {
-      const currentCardId = this.$store.state.cardDetailsIsVisibleForCardId
-      let baseCardId
-      if (cardId) {
-        baseCardId = cardId
-        this.$store.commit('parentCardId', cardId) // update the parent for sibling children
+    addConnection (baseCardId, position) {
+      const endCurrentCardId = this.$store.state.cardDetailsIsVisibleForCardId
+      if (baseCardId) {
+        this.$store.commit('parentCardId', baseCardId) // update the parent for sibling children
       } else {
         baseCardId = this.$store.state.parentCardId
       }
       const baseCard = document.querySelector(`.card[data-card-id="${baseCardId}"]`)
       if (!baseCard) { return }
       const controlPoint = this.$store.state.currentUser.defaultConnectionControlPoint
+      const estimatedEndCardConnectorPosition = utils.estimatedNewCardConnectorPosition(position)
       let connection = {
         startCardId: baseCardId,
-        endCardId: currentCardId,
-        path: this.$store.getters['currentConnections/connectionPathBetweenCards'](baseCardId, currentCardId, controlPoint),
+        endCardId: endCurrentCardId,
+        path: this.$store.getters['currentConnections/connectionPathBetweenCards'](baseCardId, endCurrentCardId, controlPoint, estimatedEndCardConnectorPosition),
         controlPoint
       }
       this.addConnectionType()
       const type = this.$store.getters['currentConnections/typeForNewConnections']
       this.$store.dispatch('currentConnections/add', { connection, type })
+      // })
     },
 
     selectedCardIds () {

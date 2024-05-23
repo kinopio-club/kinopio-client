@@ -1017,6 +1017,14 @@ export default {
     const height = y + defaultSize
     return { width, height }
   },
+  estimatedNewCardConnectorPosition (position) {
+    if (!position) { return }
+    const zoom = this.spaceCounterZoomDecimal()
+    return {
+      x: position.x + (45 * zoom),
+      y: position.y + (15 * zoom)
+    }
+  },
 
   // Connection Path Utils 🐙
 
