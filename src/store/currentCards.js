@@ -454,7 +454,6 @@ const currentCards = {
           context.dispatch('api/addToQueue', { name: 'updateMultipleCards', body: updates }, { root: true })
         }
       })
-      context.commit('shouldExplicitlyRenderCardIds', [], { root: true })
     },
     resetDimensions: (context, { cardIds, cardId }) => {
       if (cardId) {

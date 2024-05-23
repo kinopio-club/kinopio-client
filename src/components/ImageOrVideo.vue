@@ -17,7 +17,7 @@ export default {
     image: String,
     video: String
   },
-  emits: ['updateCardDimensions', 'imageLoadSuccess', 'imageLoadError'],
+  emits: ['updateCardDimensions'],
   data () {
     return {
       imageUrl: null
@@ -44,11 +44,11 @@ export default {
       element.play()
     },
     handleSuccess (event) {
-      this.$emit('imageLoadSuccess')
+      if (this.$store.state.isLoadingSpace) { return }
       this.updateDimensions()
     },
     handleError (event) {
-      this.$emit('imageLoadError')
+      if (this.$store.state.isLoadingSpace) { return }
       this.updateDimensions()
     }
   },

@@ -473,7 +473,6 @@ const stopInteractions = async (event) => {
   store.commit('currentUserIsDraggingBox', false)
   store.commit('boxesWereDragged', false)
   store.commit('cardsWereDragged', false)
-  updatePageSizes()
   store.commit('prevCursorPosition', utils.cursorPositionInPage(event))
   prevCursor = undefined
   store.commit('clearDraggingItems')

@@ -552,6 +552,7 @@ const updateCardDimensions = () => {
   let card = { id: props.card.id }
   card = utils.updateCardDimensions(card)
   if (!card) { return }
+  if (utils.isMissingDimensions(card)) { return }
   store.commit('currentCards/update', card)
   store.dispatch('currentCards/updateTallestCardHeight', card)
   if (!canEditSpace.value) { return }
@@ -1930,11 +1931,13 @@ article.card-wrap#card(
   :data-is-visible-in-viewport="state.isVisibleInViewport"
   :data-should-render="shouldRender"
   :data-is-locked="isLocked"
-  :data-resize-width="resizeWidth"
   :data-tilt-degrees="card.tilt"
   :data-sticky-stretch-resistance="state.stickyStretchResistance"
   :data-x="x"
   :data-y="y"
+  :data-resize-width="resizeWidth"
+  :data-width="card.width"
+  :data-height="card.height"
   :key="card.id"
   ref="cardElement"
   :class="articleClasses"

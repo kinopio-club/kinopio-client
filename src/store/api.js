@@ -214,7 +214,7 @@ const self = {
       }
       let response
       try {
-        console.log(`🛫 sending operations`, body)
+        console.warn(`🛫 sending operations`, body)
         const space = context.rootState.currentSpace
         if (!space.id) { throw 'operation missing spaceId' }
         const options = await context.dispatch('requestOptions', { body, method: 'POST', space })

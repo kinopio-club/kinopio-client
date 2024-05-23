@@ -516,7 +516,7 @@ export default {
       if (!cards) { return }
       cards.forEach(card => {
         // update selectableCardsInViewport with missing dimensions
-        const isMissingDimensions = !card.width || !card.height
+        const isMissingDimensions = utils.isMissingDimensions(card)
         if (isMissingDimensions) {
           this.$store.dispatch('currentCards/updateDimensions', { cards: [card] })
           card = this.$store.getters['currentCards/byId'](card.id)

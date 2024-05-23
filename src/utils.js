@@ -869,6 +869,9 @@ export default {
     }
     articleElement.style.maxWidth = null
   },
+  isMissingDimensions (item) {
+    return !item.width || !item.height
+  },
   topLeftItem (items) {
     items = this.clone(items)
     let shortestDistanceItem = {}
