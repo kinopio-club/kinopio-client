@@ -424,7 +424,7 @@ export default {
     nonOverlappingCardPosition (position) {
       const spaceBetweenCards = utils.spaceBetweenCards()
       const cards = this.$store.getters['currentCards/isSelectable'](position)
-      if (!cards) { return position }
+      if (!utils.arrayHasItems(cards)) { return position }
       const overlappingCard = cards.find(card => {
         const isBetweenX = utils.isBetween({
           value: position.x,

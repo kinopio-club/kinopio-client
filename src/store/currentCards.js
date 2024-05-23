@@ -135,7 +135,7 @@ const currentCards = {
       cards.forEach(card => {
         const element = document.querySelector(`article[data-card-id="${card.id}"]`)
         if (!element) { return }
-        if (!element.dataset.isVisibleInViewport) { return }
+        if (element.dataset.isVisibleInViewport === 'false') { return }
         element.style.left = card.x + 'px'
         element.style.top = card.y + 'px'
       })
@@ -910,24 +910,13 @@ const currentCards = {
       return canBeSelectedSortedByY
     },
     isSelectableInViewport: (state, getters, rootState, rootGetters) => () => {
-      const zoom = rootGetters.spaceCounterZoomDecimal
-      const yOffset = utils.outsideSpaceOffset().y
-      const height = utils.visualViewport().height * zoom
-      let viewportYTop = (window.scrollY - yOffset) * zoom
-      let viewportYBottom = (viewportYTop + height)
-      viewportYTop = Math.ceil(viewportYTop)
-      viewportYBottom = Math.ceil(viewportYBottom)
-      let yIndex = canBeSelectedSortedByY.yIndex
-      let cards = canBeSelectedSortedByY.cards
-      const min = viewportYTop
-      const max = viewportYBottom
-      let minIndex = yIndex.findIndex(y => y >= min)
-      let maxIndex = yIndex.findIndex(y => y >= max)
-      if (minIndex === -1) { return }
-      if (maxIndex === -1) {
-        maxIndex = yIndex.length
-      }
-      cards = cards.slice(minIndex, maxIndex)
+      const elements = document.querySelectorAll(`article#card`)
+      let cards = []
+      elements.forEach(element => {
+        if (element.dataset.isVisibleInViewport === 'false') { return }
+        const card = getters.byId(element.dataset.cardId)
+        cards.push(card)
+      })
       return cards
     },
     isSelectable: (state, getters, rootState) => (position) => {

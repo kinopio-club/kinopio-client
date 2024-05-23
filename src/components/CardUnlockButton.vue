@@ -51,7 +51,7 @@ const isLightInDarkTheme = computed(() => !backgroundColorIsDark.value && isThem
 const updatePosition = () => {
   let cardElement = document.querySelector(`article[data-card-id="${props.card.id}"]`)
   if (!cardElement) { return }
-  if (!cardElement.dataset.shouldRender) {
+  if (cardElement.dataset.shouldRender === 'false') {
     return
   }
   const element = cardElement.querySelector('.lock-button-wrap')

@@ -165,7 +165,6 @@ export default {
   },
   methods: {
     updateSelectableCardsInViewport () {
-      this.$store.dispatch('currentCards/updateCanBeSelectedSortedByY')
       const selectableCards = this.$store.getters['currentCards/isSelectableInViewport']()
       if (!selectableCards) { return }
       selectableCardsInViewport = utils.clone(selectableCards)
@@ -503,11 +502,19 @@ export default {
       const cards = selectableCardsInViewport
       if (!cards) { return }
       cards.forEach(card => {
+        // update selectableCardsInViewport with missing dimensions
         const isMissingDimensions = !card.width || !card.height
         if (isMissingDimensions) {
           this.$store.dispatch('currentCards/updateDimensions', { cards: [card] })
           card = utils.updateCardDimensions(card)
+          selectableCardsInViewport = selectableCardsInViewport.map(selectableCard => {
+            if (selectableCard.id === card.id) {
+              selectableCard = card
+            }
+            return selectableCard
+          })
         }
+        // select card
         const cardX = card.x
         const cardY = card.y
         const x = {
