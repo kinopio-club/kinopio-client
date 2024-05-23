@@ -1644,7 +1644,6 @@ const shouldRender = computed(() => {
   if (isConnectingFrom) { return true }
   if (shouldExplitlyRender) { return true }
   if (connectedToAnotherCardBeingDraggedColor.value) { return true }
-  if (isSelectedOrDragging.value) { return true }
   if (state.isVisibleInViewport) {
     updateLockedItemButtonPosition()
   }
