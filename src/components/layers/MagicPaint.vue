@@ -519,7 +519,7 @@ export default {
         const isMissingDimensions = !card.width || !card.height
         if (isMissingDimensions) {
           this.$store.dispatch('currentCards/updateDimensions', { cards: [card] })
-          card = utils.updateCardDimensions(card)
+          card = this.$store.getters['currentCards/byId'](card.id)
           selectableCardsInViewport = selectableCardsInViewport.map(selectableCard => {
             if (selectableCard.id === card.id) {
               selectableCard = card
