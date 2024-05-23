@@ -433,6 +433,7 @@ g.connection(v-if="visible" :style="connectionStyles" :data-id="connection.id" :
     :data-type-id="connection.connectionTypeId"
     :data-is-hidden-by-comment-filter="isHiddenByCommentFilter"
     :data-label-is-visible="connection.labelIsVisible"
+    :data-is-visible-in-viewport="state.isVisibleInViewport"
     :key="connection.id"
     :d="connection.path"
     @mousedown.left="startDraggingConnection"

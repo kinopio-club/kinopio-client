@@ -80,6 +80,7 @@ const postScrollDuration = 300 // ms
 let postScrollAnimationTimer, postScrollStartTime, shouldCancelPostScroll
 
 let selectableCardsInViewport = []
+let selectableConnectionsInViewport = []
 
 export default {
   name: 'MagicPaint',
@@ -169,6 +170,16 @@ export default {
       if (!selectableCards) { return }
       selectableCardsInViewport = utils.clone(selectableCards)
     },
+    updateSelectableConnectionsInViewport () {
+      let paths = []
+      const pathElements = document.querySelectorAll('svg .connection-path')
+      pathElements.forEach(path => {
+        // if (path.dataset.isVisibleInViewport === 'false') { return }
+        if (path.dataset.isHiddenByCommentFilter === 'true') { return }
+        paths.push(path)
+      })
+      selectableConnectionsInViewport = paths
+    },
     updateRemotePosition (position) {
       const zoom = this.spaceZoomDecimal
       const scroll = { x: window.scrollX, y: window.scrollY }
@@ -187,6 +198,7 @@ export default {
       // update selectable cards during paint autoscroll at edges
       if (this.$store.state.currentUserIsPainting) {
         this.updateSelectableCardsInViewport()
+        this.updateSelectableConnectionsInViewport()
       }
       this.scroll()
     },
@@ -402,6 +414,7 @@ export default {
       if (this.isPanning) { return }
       if (this.isBoxSelecting) { return }
       this.updateSelectableCardsInViewport()
+      this.updateSelectableConnectionsInViewport()
       startCursor = utils.cursorPositionInViewport(event)
       this.currentCursor = startCursor
       const multipleCardsIsSelected = Boolean(this.$store.state.multipleCardsSelectedIds.length)
@@ -535,14 +548,13 @@ export default {
       })
     },
     selectConnectionPaths (position) {
-      const paths = document.querySelectorAll('svg .connection-path')
-      paths.forEach(path => {
-        if (path.dataset['is-hidden-by-comment-filter'] === 'true') { return }
+      const svg = document.querySelector('svg.connections')
+      let svgPoint = svg.createSVGPoint()
+      svgPoint.x = position.x
+      svgPoint.y = position.y
+
+      selectableConnectionsInViewport.forEach(path => {
         const pathId = path.dataset.id
-        const svg = document.querySelector('svg.connections')
-        let svgPoint = svg.createSVGPoint()
-        svgPoint.x = position.x
-        svgPoint.y = position.y
         const isSelected = path.isPointInStroke(svgPoint)
         if (isSelected) {
           this.$store.dispatch('addToMultipleConnectionsSelected', pathId)
