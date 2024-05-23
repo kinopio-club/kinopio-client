@@ -617,7 +617,6 @@ export default {
         body: {
           filterShowUsers: value
         } }, { root: true })
-      context.dispatch('updatePathsAndPositions')
     },
     toggleFilterShowDateUpdated: (context, value) => {
       context.commit('filterShowDateUpdated', value)
@@ -625,7 +624,6 @@ export default {
         body: {
           filterShowDateUpdated: value
         } }, { root: true })
-      context.dispatch('updatePathsAndPositions')
     },
     toggleFilterShowAbsoluteDates: (context, value) => {
       context.commit('filterShowAbsoluteDates', value)
@@ -633,7 +631,6 @@ export default {
         body: {
           filterShowAbsoluteDates: value
         } }, { root: true })
-      context.dispatch('updatePathsAndPositions')
     },
     toggleFilterUnchecked: (context, value) => {
       context.commit('filterUnchecked', value)
@@ -649,20 +646,12 @@ export default {
           filterComments: value
         } }, { root: true })
     },
-    updatePathsAndPositions: (context) => {
-      nextTick(() => {
-        nextTick(() => {
-          context.dispatch('currentConnections/correctPaths', {}, { root: true })
-        })
-      })
-    },
     clearUserFilters: (context) => {
       context.dispatch('toggleFilterShowUsers', false)
       context.dispatch('toggleFilterShowDateUpdated', false)
       context.dispatch('toggleFilterShowAbsoluteDates', false)
       context.dispatch('toggleFilterUnchecked', false)
       context.dispatch('toggleFilterComments', false)
-      context.dispatch('updatePathsAndPositions')
     },
     addJournalPrompt: (context, prompt) => {
       utils.typeCheck({ value: prompt, type: 'object' })
