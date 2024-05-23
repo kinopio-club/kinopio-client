@@ -1621,8 +1621,6 @@ const initViewportObserver = async () => {
       entries.forEach((entry) => {
         if (entry.isIntersecting) {
           state.isVisibleInViewport = true
-          updateConnectedConnectionPaths()
-          updateDimensions()
         } else {
           state.isVisibleInViewport = false
         }
@@ -1643,8 +1641,6 @@ const removeViewportObserver = () => {
 const shouldRender = computed(() => {
   const isConnectingFrom = store.state.currentConnectionStartCardIds.includes(props.card.id)
   if (isConnectingFrom) { return true }
-  const shouldExplicitlyRender = store.state.shouldExplicitlyRenderCardIds.includes(props.card.id)
-  if (shouldExplicitlyRender) { return true }
   if (connectedToAnotherCardBeingDraggedColor.value) { return true }
   if (isSelectedOrDragging.value) { return true }
   if (state.isVisibleInViewport) {
@@ -1652,16 +1648,6 @@ const shouldRender = computed(() => {
   }
   return state.isVisibleInViewport
 })
-const updateConnectedConnectionPaths = () => {
-  store.dispatch('currentConnections/updatePaths', { cardId: props.card.id })
-}
-const updateDimensions = () => {
-  const isMissingDimensions = !props.card.width || !props.card.height
-  if (isMissingDimensions) {
-    store.dispatch('currentCards/updateDimensions', { cards: [props.card] })
-  }
-}
-
 const updateLockedItemButtonPosition = async () => {
   if (!props.card.isLocked) { return }
   await nextTick()
