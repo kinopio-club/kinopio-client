@@ -623,10 +623,15 @@ export default {
       this.$store.commit('clearNotificationsWithPosition')
       let position = currentCursorPosition || prevCursorPosition
       try {
-        this.notifyPasted(position)
         if (!navigator.clipboard.read) { // firefox
-          return utils.clone(this.$store.state.clipboardDataPolyfill)
+          const data = utils.clone(this.$store.state.clipboardDataPolyfill)
+          const emptyData = utils.objectHasKeys(data)
+          if (!emptyData) {
+            throw new Error('Firefox does not support paste')
+          }
+          return data
         }
+        this.notifyPasted(position)
         return utils.dataFromClipboard()
       } catch (error) {
         console.error('🚑 getClipboardData', error)
