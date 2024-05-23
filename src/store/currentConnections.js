@@ -485,12 +485,14 @@ export default {
       return Boolean(existing.length)
     },
     connectionPathBetweenCards: (state, getters, rootState) => (startCardId, endCardId, controlPoint, estimatedEndCardPosition) => {
+      store.commit('shouldExplicitlyRenderCardIds', [startCardId, endCardId], { root: true })
       let start = utils.connectorCoords(startCardId)
       let end = estimatedEndCardPosition || utils.connectorCoords(endCardId)
       if (!start || !end) { return }
       if (utils.pointIsEmpty(start) || utils.pointIsEmpty(end)) { return }
       start = utils.cursorPositionInSpace(null, start)
       end = estimatedEndCardPosition || utils.cursorPositionInSpace(null, end)
+      store.commit('shouldExplicitlyRenderCardIds', [], { root: true })
       return getters.connectionPathBetweenCoords(start, end, controlPoint)
     },
     curveControlPoint: (state, getters, rootState) => {
