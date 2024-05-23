@@ -5,6 +5,7 @@ import { useStore } from 'vuex'
 import BoxUnlockButton from '@/components/BoxUnlockButton.vue'
 import CardUnlockButton from '@/components/CardUnlockButton.vue'
 import utils from '@/utils.js'
+
 const store = useStore()
 
 const props = defineProps({
