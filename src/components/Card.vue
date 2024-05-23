@@ -124,7 +124,8 @@ const state = reactive({
   stickyStretchResistance: 6,
   defaultBackgroundColor: '#e3e3e3',
   pathIsUpdated: false,
-  isVisibleInViewport: false
+  isVisibleInViewport: false,
+  currentCardConnections: []
 })
 watch(() => state.linkToPreview, (value, prevValue) => {
   updateUrlData()
@@ -562,18 +563,16 @@ const updateCardDimensions = () => {
 // connections
 
 const connectionFromAnotherCardConnectedToCurrentCard = (anotherCardId) => {
-  const currentCardConnections = store.getters['currentConnections/byCardId'](props.card.id)
-  return currentCardConnections.find(connection => {
+  return state.currentCardConnections.find(connection => {
     const isConnectedToStart = connection.startCardId === anotherCardId
     const isConnectedToEnd = connection.endCardId === anotherCardId
     return isConnectedToStart || isConnectedToEnd
   })
 }
 const connectionsFromMultipleCardsConnectedToCurrentCard = (otherCardIds) => {
-  const currentCardConnections = store.getters['currentConnections/byCardId'](props.card.id)
   let currentCardConnection
   otherCardIds.find(anotherCardId => {
-    return currentCardConnections.find(connection => {
+    return state.currentCardConnections.find(connection => {
       const isConnectedToStart = connection.startCardId === anotherCardId
       const isConnectedToEnd = connection.endCardId === anotherCardId
       if (isConnectedToStart || isConnectedToEnd) {
@@ -717,8 +716,7 @@ const connectedToAnotherCardBeingDraggedColor = computed(() => {
 const connectedToConnectionDetailsIsVisibleColor = computed(() => {
   const connectionDetailsVisibleId = store.state.connectionDetailsIsVisibleForConnectionId
   if (!connectionDetailsVisibleId) { return }
-  const currentCardConnections = store.getters['currentConnections/byCardId'](props.card.id)
-  const connectionWithDetailsVisible = currentCardConnections.find(connection => connection.id === connectionDetailsVisibleId)
+  const connectionWithDetailsVisible = state.currentCardConnections.find(connection => connection.id === connectionDetailsVisibleId)
   if (!connectionWithDetailsVisible) { return }
   const connectionType = connectedConnectionTypeById(connectionWithDetailsVisible.connectionTypeId)
   return connectionType?.color
@@ -726,15 +724,13 @@ const connectedToConnectionDetailsIsVisibleColor = computed(() => {
 // a connection that is connected to this card is being hovered over
 const currentUserIsHoveringOverConnectionColor = computed(() => {
   const connectionId = store.state.currentUserIsHoveringOverConnectionId || store.state.currentUserIsDraggingConnectionIdLabel
-  const currentCardConnections = store.getters['currentConnections/byCardId'](props.card.id)
-  const connection = currentCardConnections.find(currentCardConnection => currentCardConnection.id === connectionId)
+  const connection = state.currentCardConnections.find(currentCardConnection => currentCardConnection.id === connectionId)
   return connectionColor(connection)
 })
 // a connection that is connected to this card, is paint selected
 const currentUserIsMultipleSelectedConnectionColor = computed(() => {
   const connectionIds = store.state.multipleConnectionsSelectedIds
-  const currentCardConnections = store.getters['currentConnections/byCardId'](props.card.id)
-  const connection = currentCardConnections.find(currentCardConnection => connectionIds.includes(currentCardConnection.id))
+  const connection = state.currentCardConnections.find(currentCardConnection => connectionIds.includes(currentCardConnection.id))
   return connectionColor(connection)
 })
 // this card, or another card connected to this card, is being hovered over
@@ -1661,6 +1657,8 @@ const updateLockedItemButtonPosition = async () => {
 const handleMouseEnter = () => {
   initStickToCursor()
   store.commit('currentUserIsHoveringOverCardId', props.card.id)
+  updateCurrentCardConnections()
+  updateShouldExplicityRenderCards()
 }
 const handleMouseLeave = () => {
   unstickToCursor()
@@ -1671,6 +1669,17 @@ const handleMouseEnterConnector = (event) => {
 }
 const handleMouseLeaveConnector = () => {
   store.commit('currentUserIsHoveringOverConnectorCardId', '')
+}
+const updateCurrentCardConnections = () => {
+  state.currentCardConnections = store.getters['currentConnections/byCardId'](props.card.id)
+}
+const updateShouldExplicityRenderCards = () => {
+  const cardIds = []
+  state.currentCardConnections.forEach(connection => {
+    cardIds.push(connection.startCardId)
+    cardIds.push(connection.endCardId)
+  })
+  store.commit('addToShouldExplitlyRenderCardIds', cardIds)
 }
 
 // sticky
