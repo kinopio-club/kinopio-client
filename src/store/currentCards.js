@@ -914,6 +914,7 @@ const currentCards = {
       let cards = []
       elements.forEach(element => {
         if (element.dataset.isVisibleInViewport === 'false') { return }
+        if (element.dataset.isLocked === 'true') { return }
         const card = getters.byId(element.dataset.cardId)
         cards.push(card)
       })
