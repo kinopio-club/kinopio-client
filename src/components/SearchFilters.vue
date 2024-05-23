@@ -155,4 +155,6 @@ export default {
       margin 0
   .more-filters-button-wrap
     margin-top 5px !important
+  .segmented-buttons + .segmented-buttons
+    margin-left 0
 </style>
