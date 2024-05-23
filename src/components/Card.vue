@@ -361,7 +361,6 @@ const articleStyle = computed(() => {
     z = 0
     pointerEvents = 'none'
   }
-  // console.log('🌍',props.card.width, width.value, props.card.height)
   let styles = {
     left: `${x.value}px`,
     top: `${y.value}px`,
@@ -1623,6 +1622,7 @@ const initViewportObserver = async () => {
         if (entry.isIntersecting) {
           state.isVisibleInViewport = true
           updateConnectedConnectionPaths()
+          updateDimensions()
         } else {
           state.isVisibleInViewport = false
         }
@@ -1654,6 +1654,12 @@ const shouldRender = computed(() => {
 })
 const updateConnectedConnectionPaths = () => {
   store.dispatch('currentConnections/updatePaths', { cardId: props.card.id })
+}
+const updateDimensions = () => {
+  const isMissingDimensions = !props.card.width || !props.card.height
+  if (isMissingDimensions) {
+    store.dispatch('currentCards/updateDimensions', { cards: [props.card] })
+  }
 }
 
 const updateLockedItemButtonPosition = async () => {
