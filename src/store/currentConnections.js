@@ -250,6 +250,7 @@ export default {
       // update state
       connections.forEach(connection => {
         connection.path = context.getters.connectionPathBetweenCards(connection.startCardId, connection.endCardId, connection.controlPoint)
+        if (!connection.path) { return }
         connection.spaceId = currentSpaceId
         newConnections.push(connection)
         if (canEditSpace) {

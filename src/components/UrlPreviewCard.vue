@@ -24,6 +24,7 @@ const shouldHideImage = computed(() => props.card.shouldHideUrlPreviewImage)
 const shouldHideInfo = computed(() => props.card.shouldHideUrlPreviewInfo)
 const isImageCard = computed(() => props.isImageCard || props.urlPreviewImageIsVisible)
 const updateDimensions = (event) => {
+  if (store.state.isLoadingSpace) { return }
   store.dispatch('currentCards/updateDimensions', { cards: [props.card] })
 }
 const selectedColor = computed(() => {

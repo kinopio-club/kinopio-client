@@ -306,7 +306,7 @@ const animationFrame = () => {
   // "q90,40" from "m747,148 q90,40 -85,75"
   // "q-90,-40" from "m747,148 q-90,-40 -85,75" (negative)
   // "q-200,-0" from "m217,409 q200,1 492,-78" (variable length)
-  const curveMatch = state.curvedPath.match(curvePattern)
+  const curveMatch = state.curvedPath?.match(curvePattern)
   const points = curveMatch[0].substring(1, curveMatch[0].length).split(',')
   // ["90", "40"] from "q90,40"
   // ["90", "-40"] from "q-90,-40" (negative)
