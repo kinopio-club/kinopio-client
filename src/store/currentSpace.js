@@ -305,20 +305,6 @@ const currentSpace = {
         }
         // update items
         context.commit('updateOtherItems', data, { root: true })
-        // update card dimensions
-        const cardsInCurrentSpace = context.rootGetters['currentCards/all']
-        data.spaces.forEach(space => {
-          const linkedCard = cardsInCurrentSpace.find(card => {
-            return card.linkToSpaceId === space.id
-          })
-          if (!linkedCard) { return }
-          nextTick(() => {
-            context.dispatch('currentConnections/updatePaths', { cardId: linkedCard.id, shouldUpdateApi: canEditSpace }, { root: true })
-            const card = { cardId: linkedCard.id }
-            context.dispatch('currentCards/updateDimensions', { cards: [card] }, { root: true })
-            context.commit('isLoadingOtherItems', false, { root: true })
-          })
-        })
       } catch (error) {
         console.error('🚒 updateOtherItems', error, { spaceIds, cardIds, invites })
         context.commit('isLoadingOtherItems', false, { root: true })
@@ -740,7 +726,6 @@ const currentSpace = {
       }
       context.commit('broadcast/joinSpaceRoom', null, { root: true })
       nextTick(() => {
-        context.dispatch('currentConnections/updatePaths', {}, { root: true })
         context.dispatch('scrollCardsIntoView')
         // deferrable async tasks
         context.dispatch('updateOtherUsers')

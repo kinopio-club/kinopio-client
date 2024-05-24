@@ -338,9 +338,6 @@ const currentCards = {
         }
         cache.updateSpace('editedByUserId', context.rootState.currentUser.id, currentSpaceId)
       })
-      nextTick(() => {
-        context.dispatch('updateDimensions', { cards })
-      })
     },
     updateCounter: (context, { card, shouldIncrement, shouldDecrement }) => {
       const isSignedIn = context.rootGetters['currentUser/isSignedIn']

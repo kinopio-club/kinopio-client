@@ -81,7 +81,6 @@ const updateNameSegments = () => {
     return segment
   })
   state.nameSegments = card.nameSegments
-  store.dispatch('currentCards/updateDimensions', { cards: [{ id: props.parentCardId }] })
 }
 
 // dialog

@@ -15,10 +15,6 @@ const props = defineProps({
   selectedColor: String
 })
 
-const updateDimensions = () => {
-  store.dispatch('currentCards/updateDimensions', { cards: [props.card] })
-}
-
 // space info
 
 const otherSpaceIsPrivate = computed(() => {
@@ -49,7 +45,7 @@ const previewImageIsVisible = computed(() => shouldShowPreviewImage.value && pre
 .other-space-preview-card
   //- preview image
   .preview-image-wrap(v-if="previewImageIsVisible")
-    img.preview-image(:src="previewImage" :class="{selected: props.isSelected}" @load="updateDimensions" ref="image")
+    img.preview-image(:src="previewImage" :class="{selected: props.isSelected}" ref="image")
   .badge.link-badge(:class="{ 'preview-image-is-visible': previewImageIsVisible }" :style="{ background: props.selectedColor }")
     //- badges
     .badge.info.inline-badge(v-if="urlIsInvite")
