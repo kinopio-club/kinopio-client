@@ -45,6 +45,8 @@ let preventSticking = false
 let stickyTimerComplete = false
 let stickyTimer
 
+let prevIsLoadingUrlPreview
+
 let observer
 
 onMounted(async () => {
@@ -1107,7 +1109,13 @@ const cardUrlPreviewIsVisible = computed(() => {
 })
 const isLoadingUrlPreview = computed(() => {
   let isLoading = store.state.urlPreviewLoadingForCardIds.find(cardId => cardId === props.card.id)
-  return Boolean(isLoading)
+  isLoading = Boolean(isLoading)
+  if (isLoading) {
+    prevIsLoadingUrlPreview = true
+  } else if (prevIsLoadingUrlPreview) {
+    store.dispatch('currentConnections/updatePaths', { cardId: props.card.id, shouldUpdateApi: true })
+  }
+  return isLoading
   // if (!isLoading) { return }
   // const isErrorUrl = props.card.urlPreviewErrorUrl && (props.card.urlPreviewUrl === props.card.urlPreviewErrorUrl)
   // return isLoading && !isErrorUrl
