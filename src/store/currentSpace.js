@@ -196,13 +196,14 @@ const currentSpace = {
       }
     }, 2000), // 2 seconds
     updateInboxCache: async (context) => {
+      const currentSpaceIsInbox = context.state.name === 'Inbox'
       const currentUserIsSignedIn = context.rootGetters['currentUser/isSignedIn']
       const isOffline = !context.rootState.isOnline
-      if (context.state.name === 'inbox') { return }
+      if (currentSpaceIsInbox) { return }
       if (!currentUserIsSignedIn) { return }
       if (isOffline) { return }
-      console.log('🌍 updateInboxCache')
       const inbox = await context.dispatch('api/getUserInboxSpace', null, { root: true })
+      console.log('🌍 updateInboxCache')
       cache.saveSpace(inbox)
     },
 
