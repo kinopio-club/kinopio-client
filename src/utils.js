@@ -843,37 +843,39 @@ export default {
     if (!card) { return }
     const element = document.querySelector(`article#card[data-card-id="${card.id}"]`)
     if (!element) { return }
-    const isCardRenderedInDOM = element.dataset.shouldRender
+    const isCardRenderedInDOM = element.dataset.shouldRender === 'true'
     const zoom = this.spaceCounterZoomDecimal()
+    const cardId = card.id
     if (isCardRenderedInDOM) {
       const rect = element.getBoundingClientRect()
-      const cardId = card.id
       card = this.rectDimensions(rect)
-      card.id = cardId
     } else {
-      this.removeCardDimensions(card)
+      // this.removeCardDimensions(card)
       card.x = parseInt(element.dataset.x)
       card.y = parseInt(element.dataset.y)
-      card.width = Math.ceil(element.dataset.width * zoom) // Math.ceil(rect.width * zoom)
-      card.height = Math.ceil(element.dataset.height * zoom) //
+      const width = parseInt(element.dataset.width)
+      const height = parseInt(element.dataset.height)
+      card.width = Math.ceil(width * zoom)
+      card.height = Math.ceil(height * zoom)
     }
+    card.id = cardId
     return card
   },
-  removeCardDimensions (card) {
-    const articleElement = document.querySelector(`article#card[data-card-id="${card.id}"]`)
-    const cardElement = document.querySelector(`.card[data-card-id="${card.id}"]`)
-    const contentWrapElement = articleElement.querySelector(`.card-content-wrap`)
-    const cardMediaElement = articleElement.querySelector(`.media-card`)
-    let width = 'initial'
-    if (articleElement.dataset.resizeWidth) {
-      width = articleElement.dataset.resizeWidth + 'px'
-    }
-    articleElement.style.width = width
-    articleElement.style.height = 'initial'
-    cardElement.style.width = width
-    contentWrapElement.style.width = width
-    contentWrapElement.style.height = 'initial'
-  },
+  // removeCardDimensions (card) {
+  //   const articleElement = document.querySelector(`article#card[data-card-id="${card.id}"]`)
+  //   const cardElement = document.querySelector(`.card[data-card-id="${card.id}"]`)
+  //   const contentWrapElement = articleElement.querySelector(`.card-content-wrap`)
+  //   const cardMediaElement = articleElement.querySelector(`.media-card`)
+  //   let width = 'initial'
+  //   if (articleElement.dataset.resizeWidth) {
+  //     width = articleElement.dataset.resizeWidth + 'px'
+  //   }
+  //   articleElement.style.width = width
+  //   articleElement.style.height = 'initial'
+  //   cardElement.style.width = width
+  //   contentWrapElement.style.width = width
+  //   contentWrapElement.style.height = 'initial'
+  // },
   removeAllCardDimensions (card) {
     const articleElement = document.querySelector(`article#card[data-card-id="${card.id}"]`)
     const cardElement = document.querySelector(`.card[data-card-id="${card.id}"]`)
