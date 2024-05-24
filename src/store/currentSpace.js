@@ -309,6 +309,7 @@ const currentSpace = {
         console.error('🚒 updateOtherItems', error, { spaceIds, cardIds, invites })
         context.commit('isLoadingOtherItems', false, { root: true })
       }
+      context.commit('isLoadingOtherItems', false, { root: true })
     },
 
     // Space
