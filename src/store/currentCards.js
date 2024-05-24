@@ -734,7 +734,6 @@ const currentCards = {
           name: 'updateMultipleCards',
           body: { cards, spaceId }
         }, { root: true })
-        context.dispatch('updateMultiple', cards)
         // broadcast
         multipleCardsSelectedIds.forEach(id => {
           const body = { id, z: newHighestCardZ }
