@@ -9,7 +9,7 @@ export default {
   maxCardLength: 300,
   maxCodeBlockCardLength: 4000,
   maxInviteEmailsAllowedToSend: 15,
-  defaultCardWidth: 76,
+  defaultCardWidth: 58,
   defaultConnectionPathCurveControlPoint: 'q90,40',
   defaultTimeout: 40000,
   minCardEmbedWidth: 235,

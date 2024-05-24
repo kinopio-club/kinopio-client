@@ -740,6 +740,7 @@ const currentSpace = {
       }
       context.commit('broadcast/joinSpaceRoom', null, { root: true })
       nextTick(() => {
+        context.dispatch('currentConnections/updatePaths', {}, { root: true })
         context.dispatch('scrollCardsIntoView')
         // deferrable async tasks
         context.dispatch('updateOtherUsers')

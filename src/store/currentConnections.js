@@ -1,7 +1,6 @@
 import utils from '@/utils.js'
 import consts from '@/consts.js'
 import cache from '@/cache.js'
-import store from '@/store/store.js'
 
 import { nanoid } from 'nanoid'
 import randomColor from 'randomcolor'
@@ -230,9 +229,11 @@ export default {
       const canEditSpace = context.rootGetters['currentUser/canEditSpace']()
       connections = utils.clone(connections || context.getters.byCardId(cardId))
       connections.map(connection => {
+        const startCard = utils.updateCardDimensions({ id: connection.startCardId })
+        const endCard = utils.updateCardDimensions({ id: connection.endCardId })
         connection.path = context.getters.connectionPathBetweenCards({
-          startCardId: connection.startCardId,
-          endCardId: connection.endCardId,
+          startCard,
+          endCard,
           controlPoint: connection.controlPoint
         })
         connection.spaceId = currentSpaceId
@@ -256,9 +257,11 @@ export default {
       let newConnections = []
       // update state
       connections.forEach(connection => {
+        const startCard = utils.updateCardDimensions({ id: connection.startCardId })
+        const endCard = utils.updateCardDimensions({ id: connection.endCardId })
         connection.path = context.getters.connectionPathBetweenCards({
-          startCardId: connection.startCardId,
-          endCardId: connection.endCardId,
+          startCard,
+          endCard,
           controlPoint: connection.controlPoint
         })
         if (!connection.path) { return }
@@ -286,9 +289,11 @@ export default {
     updatePathsWhileDragging: (context, { connections }) => {
       let newConnections = []
       connections = connections.forEach(connection => {
+        const startCard = utils.updateCardDimensions({ id: connection.startCardId })
+        const endCard = utils.updateCardDimensions({ id: connection.endCardId })
         const path = context.getters.connectionPathBetweenCards({
-          startCardId: connection.startCardId,
-          endCardId: connection.endCardId,
+          startCard,
+          endCard,
           controlPoint: connection.controlPoint
         })
         if (!path) { return }
@@ -505,14 +510,14 @@ export default {
       })
       return Boolean(existing.length)
     },
-    connectionPathBetweenCards: (state, getters, rootState) => ({ startCardId, endCardId, controlPoint, estimatedEndCardConnectorPosition }) => {
-      let start = utils.connectorCoords(startCardId)
-      let end = estimatedEndCardConnectorPosition || utils.connectorCoords(endCardId)
-      if (!start || !end) { return }
-      if (utils.pointIsEmpty(start) || utils.pointIsEmpty(end)) { return }
-      start = utils.cursorPositionInSpace(null, start)
-      end = estimatedEndCardConnectorPosition || utils.cursorPositionInSpace(null, end)
-      return getters.connectionPathBetweenCoords(start, end, controlPoint)
+    connectionPathBetweenCards: (state, getters, rootState, rootGetters) => ({ startCard, endCard, startCardId, endCardId, controlPoint, estimatedEndCardConnectorPosition }) => {
+      startCard = startCard || rootGetters['currentCards/byId'](startCardId)
+      endCard = endCard || rootGetters['currentCards/byId'](endCardId)
+      if (!startCard || !endCard) { return }
+      const start = utils.estimatedCardConnectorPosition(startCard)
+      const end = estimatedEndCardConnectorPosition || utils.estimatedCardConnectorPosition(endCard)
+      const path = getters.connectionPathBetweenCoords(start, end, controlPoint)
+      return path
     },
     curveControlPoint: (state, getters, rootState) => {
       // q defines a quadratic curve control point

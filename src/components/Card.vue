@@ -518,7 +518,7 @@ const x = computed(() => {
   if (x === undefined || x === null) {
     return defaultCardPosition
   } else {
-    return x
+    return Math.round(x)
   }
 })
 const y = computed(() => {
@@ -526,7 +526,7 @@ const y = computed(() => {
   if (y === undefined || y === null) {
     return defaultCardPosition
   } else {
-    return y
+    return Math.round(y)
   }
 })
 const remoteUserResizingCardsColor = computed(() => {
@@ -1658,7 +1658,6 @@ const handleMouseEnter = () => {
   initStickToCursor()
   store.commit('currentUserIsHoveringOverCardId', props.card.id)
   updateCurrentCardConnections()
-  updateShouldExplicityRenderCards()
 }
 const handleMouseLeave = () => {
   unstickToCursor()
@@ -1672,14 +1671,6 @@ const handleMouseLeaveConnector = () => {
 }
 const updateCurrentCardConnections = () => {
   state.currentCardConnections = store.getters['currentConnections/byCardId'](props.card.id)
-}
-const updateShouldExplicityRenderCards = () => {
-  const cardIds = []
-  state.currentCardConnections.forEach(connection => {
-    cardIds.push(connection.startCardId)
-    cardIds.push(connection.endCardId)
-  })
-  store.commit('addToShouldExplitlyRenderCardIds', cardIds)
 }
 
 // sticky
