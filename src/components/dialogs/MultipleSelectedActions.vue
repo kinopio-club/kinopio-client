@@ -268,7 +268,7 @@ const connectCards = (event) => {
       const endCardId = cardIds[index + 1]
       if (connectionAlreadyExists(startCardId, endCardId)) { return }
       const id = nanoid()
-      const path = store.getters['currentConnections/connectionPathBetweenCards'](startCardId, endCardId)
+      const path = store.getters['currentConnections/connectionPathBetweenCards']({ startCardId, endCardId })
       return {
         id, startCardId, endCardId, path
       }

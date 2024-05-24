@@ -230,7 +230,11 @@ export default {
       const canEditSpace = context.rootGetters['currentUser/canEditSpace']()
       connections = utils.clone(connections || context.getters.byCardId(cardId))
       connections.map(connection => {
-        connection.path = context.getters.connectionPathBetweenCards(connection.startCardId, connection.endCardId, connection.controlPoint)
+        connection.path = context.getters.connectionPathBetweenCards({
+          startCardId: connection.startCardId,
+          endCardId: connection.endCardId,
+          controlPoint: connection.controlPoint
+        })
         connection.spaceId = currentSpaceId
         if (shouldUpdateApi) {
           context.dispatch('api/addToQueue', { name: 'updateConnection', body: connection }, { root: true })
@@ -252,7 +256,11 @@ export default {
       let newConnections = []
       // update state
       connections.forEach(connection => {
-        connection.path = context.getters.connectionPathBetweenCards(connection.startCardId, connection.endCardId, connection.controlPoint)
+        connection.path = context.getters.connectionPathBetweenCards({
+          startCardId: connection.startCardId,
+          endCardId: connection.endCardId,
+          controlPoint: connection.controlPoint
+        })
         if (!connection.path) { return }
         connection.spaceId = currentSpaceId
         newConnections.push(connection)
@@ -278,7 +286,11 @@ export default {
     updatePathsWhileDragging: (context, { connections }) => {
       let newConnections = []
       connections = connections.forEach(connection => {
-        const path = context.getters.connectionPathBetweenCards(connection.startCardId, connection.endCardId, connection.controlPoint)
+        const path = context.getters.connectionPathBetweenCards({
+          startCardId: connection.startCardId,
+          endCardId: connection.endCardId,
+          controlPoint: connection.controlPoint
+        })
         if (!path) { return }
         const newConnection = {
           id: connection.id,
@@ -294,7 +306,11 @@ export default {
       if (!context.getters.all.length) { return }
       let connections = []
       context.getters.all.forEach(connection => {
-        const path = context.getters.connectionPathBetweenCards(connection.startCardId, connection.endCardId, connection.controlPoint)
+        const path = context.getters.connectionPathBetweenCards({
+          startCardId: connection.startCardId,
+          endCardId: connection.endCardId,
+          controlPoint: connection.controlPoint
+        })
         if (!path) { return }
         if (path === connection.path) { return }
         connections.push(connection)
@@ -489,13 +505,13 @@ export default {
       })
       return Boolean(existing.length)
     },
-    connectionPathBetweenCards: (state, getters, rootState) => (startCardId, endCardId, controlPoint, estimatedEndCardPosition) => {
+    connectionPathBetweenCards: (state, getters, rootState) => ({ startCardId, endCardId, controlPoint, estimatedEndCardConnectorPosition }) => {
       let start = utils.connectorCoords(startCardId)
-      let end = estimatedEndCardPosition || utils.connectorCoords(endCardId)
+      let end = estimatedEndCardConnectorPosition || utils.connectorCoords(endCardId)
       if (!start || !end) { return }
       if (utils.pointIsEmpty(start) || utils.pointIsEmpty(end)) { return }
       start = utils.cursorPositionInSpace(null, start)
-      end = estimatedEndCardPosition || utils.cursorPositionInSpace(null, end)
+      end = estimatedEndCardConnectorPosition || utils.cursorPositionInSpace(null, end)
       return getters.connectionPathBetweenCoords(start, end, controlPoint)
     },
     curveControlPoint: (state, getters, rootState) => {

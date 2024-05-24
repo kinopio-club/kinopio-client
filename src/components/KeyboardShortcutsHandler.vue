@@ -470,7 +470,12 @@ export default {
       let connection = {
         startCardId: baseCardId,
         endCardId: endCurrentCardId,
-        path: this.$store.getters['currentConnections/connectionPathBetweenCards'](baseCardId, endCurrentCardId, controlPoint, estimatedEndCardConnectorPosition),
+        path: this.$store.getters['currentConnections/connectionPathBetweenCards']({
+          baseCardId,
+          endCardId: endCurrentCardId,
+          controlPoint,
+          estimatedEndCardConnectorPosition
+        }),
         controlPoint
       }
       this.addConnectionType()

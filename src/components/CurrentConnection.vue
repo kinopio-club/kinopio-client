@@ -125,7 +125,12 @@ const addConnections = async (event) => {
   await nextTick()
   startCardIds.forEach(startCardId => {
     const controlPoint = store.state.currentUser.defaultConnectionControlPoint
-    const path = store.getters['currentConnections/connectionPathBetweenCards'](startCardId, endCardId, controlPoint, estimatedEndCardConnectorPosition)
+    const path = store.getters['currentConnections/connectionPathBetweenCards']({
+      startCardId,
+      endCardId,
+      controlPoint,
+      estimatedEndCardConnectorPosition
+    })
     const connection = { startCardId, endCardId, path, controlPoint }
     store.dispatch('currentConnections/add', { connection, type: prevType })
   })
