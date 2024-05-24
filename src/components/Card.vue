@@ -2157,6 +2157,7 @@ article.card-wrap
     max-width var(--card-width)
     cursor pointer
     touch-action manipulation
+    transform-origin top left
     .name
       color var(--primary-on-light-background)
     &:hover,
