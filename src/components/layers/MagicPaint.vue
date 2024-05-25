@@ -346,7 +346,7 @@ const painting = (event) => {
     event.preventDefault() // prevents touch swipe viewport scrolling
   }
   if (!paintingCirclesTimer) {
-    paintingCirclesTimer = window.requestAnimationFrame(paintCirclesAnimationFrame.value)
+    paintingCirclesTimer = window.requestAnimationFrame(paintCirclesAnimationFrame)
   }
   if (event.getCoalescedEvents) {
     const events = event.getCoalescedEvents()
@@ -434,7 +434,7 @@ const paintCirclesAnimationFrame = () => {
     drawCircle(circle, paintingContext)
   })
   if (paintingCircles.length > 0) {
-    window.requestAnimationFrame(paintCirclesAnimationFrame.value)
+    window.requestAnimationFrame(paintCirclesAnimationFrame)
   } else {
     setTimeout(() => {
       window.cancelAnimationFrame(paintingCirclesTimer)
