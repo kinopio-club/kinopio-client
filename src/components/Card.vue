@@ -1622,7 +1622,7 @@ const initViewportObserver = async () => {
       })
     }
     const target = cardElement.value
-    observer = new IntersectionObserver(callback, { rootMargin: '100%' })
+    observer = new IntersectionObserver(callback, { rootMargin: '50%' })
     observer.observe(target)
   } catch (error) {
     console.error('🚒 card initViewportObserver', error)
