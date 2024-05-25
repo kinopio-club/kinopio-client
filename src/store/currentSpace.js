@@ -196,13 +196,14 @@ const currentSpace = {
       }
     }, 2000), // 2 seconds
     updateInboxCache: async (context) => {
+      const currentSpaceIsInbox = context.state.name === 'Inbox'
       const currentUserIsSignedIn = context.rootGetters['currentUser/isSignedIn']
       const isOffline = !context.rootState.isOnline
-      if (context.state.name === 'inbox') { return }
+      if (currentSpaceIsInbox) { return }
       if (!currentUserIsSignedIn) { return }
       if (isOffline) { return }
-      console.log('🌍 updateInboxCache')
       const inbox = await context.dispatch('api/getUserInboxSpace', null, { root: true })
+      console.log('🌍 updateInboxCache')
       cache.saveSpace(inbox)
     },
 
@@ -305,24 +306,11 @@ const currentSpace = {
         }
         // update items
         context.commit('updateOtherItems', data, { root: true })
-        // update card dimensions
-        const cardsInCurrentSpace = context.rootGetters['currentCards/all']
-        data.spaces.forEach(space => {
-          const linkedCard = cardsInCurrentSpace.find(card => {
-            return card.linkToSpaceId === space.id
-          })
-          if (!linkedCard) { return }
-          nextTick(() => {
-            context.dispatch('currentConnections/updatePaths', { cardId: linkedCard.id, shouldUpdateApi: canEditSpace }, { root: true })
-            const card = { cardId: linkedCard.id }
-            context.dispatch('currentCards/updateDimensions', { cards: [card] }, { root: true })
-            context.commit('isLoadingOtherItems', false, { root: true })
-          })
-        })
       } catch (error) {
         console.error('🚒 updateOtherItems', error, { spaceIds, cardIds, invites })
         context.commit('isLoadingOtherItems', false, { root: true })
       }
+      context.commit('isLoadingOtherItems', false, { root: true })
     },
 
     // Space
@@ -743,7 +731,6 @@ const currentSpace = {
         context.dispatch('scrollCardsIntoView')
         // deferrable async tasks
         context.dispatch('updateOtherUsers')
-        context.dispatch('updateOtherItems')
         context.dispatch('checkIfShouldResetDimensions')
         nextTick(() => {
           context.dispatch('checkIfShouldPauseConnectionDirections')

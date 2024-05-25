@@ -169,17 +169,8 @@ const updateConnectionRect = () => {
   if (!props.connection.labelIsVisible) { return }
   let element = document.querySelector(`.connection-path[data-id="${id.value}"]`)
   if (!element) { return }
-  const zoom = utils.spaceCounterZoomDecimal() || 1
   let rect = element.getBoundingClientRect()
-  rect.x = rect.x + window.scrollX
-  rect.y = rect.y + window.scrollY
-  const rectPosition = utils.updatePositionWithSpaceOffset(rect)
-  state.connectionRect = {
-    x: Math.round(rectPosition.x * zoom),
-    y: Math.round(rectPosition.y * zoom),
-    width: Math.round(rect.width * zoom),
-    height: Math.round(rect.height * zoom)
-  }
+  state.connectionRect = utils.rectDimensions(rect)
 }
 const connectionLabelWrapStyles = computed(() => {
   if (!state.connectionRect) { return }

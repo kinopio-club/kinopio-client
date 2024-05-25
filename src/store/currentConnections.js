@@ -1,7 +1,6 @@
 import utils from '@/utils.js'
 import consts from '@/consts.js'
 import cache from '@/cache.js'
-import store from '@/store/store.js'
 
 import { nanoid } from 'nanoid'
 import randomColor from 'randomcolor'
@@ -84,7 +83,9 @@ export default {
     },
     updatePathsWhileDragging: (state, connections) => {
       connections.forEach(connection => {
-        state.connections[connection.id].path = connection.path
+        const connectionElement = document.querySelector(`g.connection[data-id="${connection.id}"]`)
+        const pathElement = connectionElement.querySelector('path')
+        pathElement.setAttribute('d', connection.path)
       })
     },
     updateType: (state, type) => {
@@ -228,7 +229,13 @@ export default {
       const canEditSpace = context.rootGetters['currentUser/canEditSpace']()
       connections = utils.clone(connections || context.getters.byCardId(cardId))
       connections.map(connection => {
-        connection.path = context.getters.connectionPathBetweenCards(connection.startCardId, connection.endCardId, connection.controlPoint)
+        const startCard = utils.updateCardDimensions({ id: connection.startCardId })
+        const endCard = utils.updateCardDimensions({ id: connection.endCardId })
+        connection.path = context.getters.connectionPathBetweenCards({
+          startCard,
+          endCard,
+          controlPoint: connection.controlPoint
+        })
         connection.spaceId = currentSpaceId
         if (shouldUpdateApi) {
           context.dispatch('api/addToQueue', { name: 'updateConnection', body: connection }, { root: true })
@@ -240,6 +247,7 @@ export default {
           context.commit('updateReadOnly', connection)
         }
       })
+      context.commit('clearShouldExplicitlyRenderCardIds', null, { root: true })
     },
     updateMultplePaths: (context, cards) => {
       const canEditSpace = context.rootGetters['currentUser/canEditSpace']()
@@ -249,7 +257,14 @@ export default {
       let newConnections = []
       // update state
       connections.forEach(connection => {
-        connection.path = context.getters.connectionPathBetweenCards(connection.startCardId, connection.endCardId, connection.controlPoint)
+        const startCard = utils.updateCardDimensions({ id: connection.startCardId })
+        const endCard = utils.updateCardDimensions({ id: connection.endCardId })
+        connection.path = context.getters.connectionPathBetweenCards({
+          startCard,
+          endCard,
+          controlPoint: connection.controlPoint
+        })
+        if (!connection.path) { return }
         connection.spaceId = currentSpaceId
         newConnections.push(connection)
         if (canEditSpace) {
@@ -269,11 +284,18 @@ export default {
           }
         }, { root: true })
       }
+      context.commit('clearShouldExplicitlyRenderCardIds', null, { root: true })
     },
     updatePathsWhileDragging: (context, { connections }) => {
       let newConnections = []
       connections = connections.forEach(connection => {
-        const path = context.getters.connectionPathBetweenCards(connection.startCardId, connection.endCardId, connection.controlPoint)
+        const startCard = utils.updateCardDimensions({ id: connection.startCardId })
+        const endCard = utils.updateCardDimensions({ id: connection.endCardId })
+        const path = context.getters.connectionPathBetweenCards({
+          startCard,
+          endCard,
+          controlPoint: connection.controlPoint
+        })
         if (!path) { return }
         const newConnection = {
           id: connection.id,
@@ -289,7 +311,11 @@ export default {
       if (!context.getters.all.length) { return }
       let connections = []
       context.getters.all.forEach(connection => {
-        const path = context.getters.connectionPathBetweenCards(connection.startCardId, connection.endCardId, connection.controlPoint)
+        const path = context.getters.connectionPathBetweenCards({
+          startCardId: connection.startCardId,
+          endCardId: connection.endCardId,
+          controlPoint: connection.controlPoint
+        })
         if (!path) { return }
         if (path === connection.path) { return }
         connections.push(connection)
@@ -484,16 +510,14 @@ export default {
       })
       return Boolean(existing.length)
     },
-    connectionPathBetweenCards: (state, getters, rootState) => (startCardId, endCardId, controlPoint, estimatedEndCardPosition) => {
-      store.commit('shouldExplicitlyRenderCardIds', [startCardId, endCardId], { root: true })
-      let start = utils.connectorCoords(startCardId)
-      let end = estimatedEndCardPosition || utils.connectorCoords(endCardId)
-      if (!start || !end) { return }
-      if (utils.pointIsEmpty(start) || utils.pointIsEmpty(end)) { return }
-      start = utils.cursorPositionInSpace(null, start)
-      end = estimatedEndCardPosition || utils.cursorPositionInSpace(null, end)
-      store.commit('shouldExplicitlyRenderCardIds', [], { root: true })
-      return getters.connectionPathBetweenCoords(start, end, controlPoint)
+    connectionPathBetweenCards: (state, getters, rootState, rootGetters) => ({ startCard, endCard, startCardId, endCardId, controlPoint, estimatedEndCardConnectorPosition }) => {
+      startCard = startCard || rootGetters['currentCards/byId'](startCardId)
+      endCard = endCard || rootGetters['currentCards/byId'](endCardId)
+      if (!startCard || !endCard) { return }
+      const start = utils.estimatedCardConnectorPosition(startCard)
+      const end = estimatedEndCardConnectorPosition || utils.estimatedCardConnectorPosition(endCard)
+      const path = getters.connectionPathBetweenCoords(start, end, controlPoint)
+      return path
     },
     curveControlPoint: (state, getters, rootState) => {
       // q defines a quadratic curve control point

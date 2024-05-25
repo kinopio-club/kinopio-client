@@ -234,6 +234,18 @@ export default {
     }
     return position
   },
+  rectDimensions (rect) {
+    const zoom = this.spaceCounterZoomDecimal() || 1
+    rect.x = rect.x + window.scrollX
+    rect.y = rect.y + window.scrollY
+    const rectPosition = this.updatePositionWithSpaceOffset(rect)
+    return {
+      x: Math.round(rectPosition.x * zoom),
+      y: Math.round(rectPosition.y * zoom),
+      width: Math.round(rect.width * zoom),
+      height: Math.round(rect.height * zoom)
+    }
+  },
   isPositionOutsideOfSpace (position) {
     const isOutsideX = position.x < 0
     const isOutsideY = position.y < 0
@@ -831,29 +843,39 @@ export default {
     if (!card) { return }
     const element = document.querySelector(`article#card[data-card-id="${card.id}"]`)
     if (!element) { return }
-    if (!element.dataset.shouldRender) { return }
-    this.removeCardDimensions(card)
-    const rect = element.getBoundingClientRect()
+    const isCardRenderedInDOM = element.dataset.shouldRender === 'true'
     const zoom = this.spaceCounterZoomDecimal()
-    card.width = Math.ceil(rect.width * zoom)
-    card.height = Math.ceil(rect.height * zoom)
+    const cardId = card.id
+    if (isCardRenderedInDOM) {
+      const rect = element.getBoundingClientRect()
+      card = this.rectDimensions(rect)
+    } else {
+      // this.removeCardDimensions(card)
+      card.x = parseInt(element.dataset.x)
+      card.y = parseInt(element.dataset.y)
+      const width = parseInt(element.dataset.width)
+      const height = parseInt(element.dataset.height)
+      card.width = Math.ceil(width * zoom)
+      card.height = Math.ceil(height * zoom)
+    }
+    card.id = cardId
     return card
   },
-  removeCardDimensions (card) {
-    const articleElement = document.querySelector(`article#card[data-card-id="${card.id}"]`)
-    const cardElement = document.querySelector(`.card[data-card-id="${card.id}"]`)
-    const contentWrapElement = articleElement.querySelector(`.card-content-wrap`)
-    const cardMediaElement = articleElement.querySelector(`.media-card`)
-    let width = 'initial'
-    if (articleElement.dataset.resizeWidth) {
-      width = articleElement.dataset.resizeWidth + 'px'
-    }
-    articleElement.style.width = width
-    articleElement.style.height = 'initial'
-    cardElement.style.width = width
-    contentWrapElement.style.width = width
-    contentWrapElement.style.height = 'initial'
-  },
+  // removeCardDimensions (card) {
+  //   const articleElement = document.querySelector(`article#card[data-card-id="${card.id}"]`)
+  //   const cardElement = document.querySelector(`.card[data-card-id="${card.id}"]`)
+  //   const contentWrapElement = articleElement.querySelector(`.card-content-wrap`)
+  //   const cardMediaElement = articleElement.querySelector(`.media-card`)
+  //   let width = 'initial'
+  //   if (articleElement.dataset.resizeWidth) {
+  //     width = articleElement.dataset.resizeWidth + 'px'
+  //   }
+  //   articleElement.style.width = width
+  //   articleElement.style.height = 'initial'
+  //   cardElement.style.width = width
+  //   contentWrapElement.style.width = width
+  //   contentWrapElement.style.height = 'initial'
+  // },
   removeAllCardDimensions (card) {
     const articleElement = document.querySelector(`article#card[data-card-id="${card.id}"]`)
     const cardElement = document.querySelector(`.card[data-card-id="${card.id}"]`)
@@ -868,6 +890,9 @@ export default {
       cardMediaElement.style.width = null
     }
     articleElement.style.maxWidth = null
+  },
+  isMissingDimensions (item) {
+    return !item.width || !item.height
   },
   topLeftItem (items) {
     items = this.clone(items)
@@ -1016,6 +1041,31 @@ export default {
     const width = x + defaultSize
     const height = y + defaultSize
     return { width, height }
+  },
+
+  // estimated card connector positions
+
+  estimatedNewCardConnectorPosition (position) {
+    if (!position) { return }
+    const zoom = this.spaceCounterZoomDecimal()
+    const offset = 15 * zoom
+    return {
+      x: position.x + consts.defaultCardWidth - offset,
+      y: position.y + offset
+    }
+  },
+  estimatedCardConnectorPosition (card) {
+    const offset = 15
+    let rightSide = card.x + card.width
+    let x = rightSide
+    x = x - offset
+    let y = card.y
+    y = y + offset
+    const position = {
+      x: Math.round(x),
+      y: Math.round(y)
+    }
+    return position
   },
 
   // Connection Path Utils 🐙

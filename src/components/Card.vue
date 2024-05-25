@@ -45,6 +45,8 @@ let preventSticking = false
 let stickyTimerComplete = false
 let stickyTimer
 
+let prevIsLoadingUrlPreview
+
 let observer
 
 onMounted(async () => {
@@ -124,7 +126,8 @@ const state = reactive({
   stickyStretchResistance: 6,
   defaultBackgroundColor: '#e3e3e3',
   pathIsUpdated: false,
-  isVisibleInViewport: false
+  isVisibleInViewport: false,
+  currentCardConnections: []
 })
 watch(() => state.linkToPreview, (value, prevValue) => {
   updateUrlData()
@@ -517,7 +520,7 @@ const x = computed(() => {
   if (x === undefined || x === null) {
     return defaultCardPosition
   } else {
-    return x
+    return Math.round(x)
   }
 })
 const y = computed(() => {
@@ -525,7 +528,7 @@ const y = computed(() => {
   if (y === undefined || y === null) {
     return defaultCardPosition
   } else {
-    return y
+    return Math.round(y)
   }
 })
 const remoteUserResizingCardsColor = computed(() => {
@@ -548,31 +551,20 @@ const remoteUserTiltingCardsColor = computed(() => {
     return undefined
   }
 })
-const updateCardDimensions = () => {
-  let card = { id: props.card.id }
-  card = utils.updateCardDimensions(card)
-  if (!card) { return }
-  store.commit('currentCards/update', card)
-  store.dispatch('currentCards/updateTallestCardHeight', card)
-  if (!canEditSpace.value) { return }
-  store.dispatch('api/addToQueue', { name: 'updateCard', body: card })
-}
 
 // connections
 
 const connectionFromAnotherCardConnectedToCurrentCard = (anotherCardId) => {
-  const currentCardConnections = store.getters['currentConnections/byCardId'](props.card.id)
-  return currentCardConnections.find(connection => {
+  return state.currentCardConnections.find(connection => {
     const isConnectedToStart = connection.startCardId === anotherCardId
     const isConnectedToEnd = connection.endCardId === anotherCardId
     return isConnectedToStart || isConnectedToEnd
   })
 }
 const connectionsFromMultipleCardsConnectedToCurrentCard = (otherCardIds) => {
-  const currentCardConnections = store.getters['currentConnections/byCardId'](props.card.id)
   let currentCardConnection
   otherCardIds.find(anotherCardId => {
-    return currentCardConnections.find(connection => {
+    return state.currentCardConnections.find(connection => {
       const isConnectedToStart = connection.startCardId === anotherCardId
       const isConnectedToEnd = connection.endCardId === anotherCardId
       if (isConnectedToStart || isConnectedToEnd) {
@@ -716,8 +708,7 @@ const connectedToAnotherCardBeingDraggedColor = computed(() => {
 const connectedToConnectionDetailsIsVisibleColor = computed(() => {
   const connectionDetailsVisibleId = store.state.connectionDetailsIsVisibleForConnectionId
   if (!connectionDetailsVisibleId) { return }
-  const currentCardConnections = store.getters['currentConnections/byCardId'](props.card.id)
-  const connectionWithDetailsVisible = currentCardConnections.find(connection => connection.id === connectionDetailsVisibleId)
+  const connectionWithDetailsVisible = state.currentCardConnections.find(connection => connection.id === connectionDetailsVisibleId)
   if (!connectionWithDetailsVisible) { return }
   const connectionType = connectedConnectionTypeById(connectionWithDetailsVisible.connectionTypeId)
   return connectionType?.color
@@ -725,15 +716,13 @@ const connectedToConnectionDetailsIsVisibleColor = computed(() => {
 // a connection that is connected to this card is being hovered over
 const currentUserIsHoveringOverConnectionColor = computed(() => {
   const connectionId = store.state.currentUserIsHoveringOverConnectionId || store.state.currentUserIsDraggingConnectionIdLabel
-  const currentCardConnections = store.getters['currentConnections/byCardId'](props.card.id)
-  const connection = currentCardConnections.find(currentCardConnection => currentCardConnection.id === connectionId)
+  const connection = state.currentCardConnections.find(currentCardConnection => currentCardConnection.id === connectionId)
   return connectionColor(connection)
 })
 // a connection that is connected to this card, is paint selected
 const currentUserIsMultipleSelectedConnectionColor = computed(() => {
   const connectionIds = store.state.multipleConnectionsSelectedIds
-  const currentCardConnections = store.getters['currentConnections/byCardId'](props.card.id)
-  const connection = currentCardConnections.find(currentCardConnection => connectionIds.includes(currentCardConnection.id))
+  const connection = state.currentCardConnections.find(currentCardConnection => connectionIds.includes(currentCardConnection.id))
   return connectionColor(connection)
 })
 // this card, or another card connected to this card, is being hovered over
@@ -1110,7 +1099,13 @@ const cardUrlPreviewIsVisible = computed(() => {
 })
 const isLoadingUrlPreview = computed(() => {
   let isLoading = store.state.urlPreviewLoadingForCardIds.find(cardId => cardId === props.card.id)
-  return Boolean(isLoading)
+  isLoading = Boolean(isLoading)
+  if (isLoading) {
+    prevIsLoadingUrlPreview = true
+  } else if (prevIsLoadingUrlPreview) {
+    store.dispatch('currentConnections/updatePaths', { cardId: props.card.id, shouldUpdateApi: true })
+  }
+  return isLoading
   // if (!isLoading) { return }
   // const isErrorUrl = props.card.urlPreviewErrorUrl && (props.card.urlPreviewUrl === props.card.urlPreviewErrorUrl)
   // return isLoading && !isErrorUrl
@@ -1621,15 +1616,13 @@ const initViewportObserver = async () => {
       entries.forEach((entry) => {
         if (entry.isIntersecting) {
           state.isVisibleInViewport = true
-          updateConnectedConnectionPaths()
-          updateDimensions()
         } else {
           state.isVisibleInViewport = false
         }
       })
     }
     const target = cardElement.value
-    observer = new IntersectionObserver(callback, { rootMargin: '50%' })
+    observer = new IntersectionObserver(callback, { rootMargin: '100%' })
     observer.observe(target)
   } catch (error) {
     console.error('🚒 card initViewportObserver', error)
@@ -1642,26 +1635,15 @@ const removeViewportObserver = () => {
 }
 const shouldRender = computed(() => {
   const isConnectingFrom = store.state.currentConnectionStartCardIds.includes(props.card.id)
+  const shouldExplitlyRender = store.state.shouldExplicitlyRenderCardIds[props.card.id]
   if (isConnectingFrom) { return true }
-  const shouldExplicitlyRender = store.state.shouldExplicitlyRenderCardIds.includes(props.card.id)
-  if (shouldExplicitlyRender) { return true }
+  if (shouldExplitlyRender) { return true }
   if (connectedToAnotherCardBeingDraggedColor.value) { return true }
-  if (isSelectedOrDragging.value) { return true }
   if (state.isVisibleInViewport) {
     updateLockedItemButtonPosition()
   }
   return state.isVisibleInViewport
 })
-const updateConnectedConnectionPaths = () => {
-  store.dispatch('currentConnections/updatePaths', { cardId: props.card.id })
-}
-const updateDimensions = () => {
-  const isMissingDimensions = !props.card.width || !props.card.height
-  if (isMissingDimensions) {
-    store.dispatch('currentCards/updateDimensions', { cards: [props.card] })
-  }
-}
-
 const updateLockedItemButtonPosition = async () => {
   if (!props.card.isLocked) { return }
   await nextTick()
@@ -1673,6 +1655,7 @@ const updateLockedItemButtonPosition = async () => {
 const handleMouseEnter = () => {
   initStickToCursor()
   store.commit('currentUserIsHoveringOverCardId', props.card.id)
+  updateCurrentCardConnections()
 }
 const handleMouseLeave = () => {
   unstickToCursor()
@@ -1683,6 +1666,9 @@ const handleMouseEnterConnector = (event) => {
 }
 const handleMouseLeaveConnector = () => {
   store.commit('currentUserIsHoveringOverConnectorCardId', '')
+}
+const updateCurrentCardConnections = () => {
+  state.currentCardConnections = store.getters['currentConnections/byCardId'](props.card.id)
 }
 
 // sticky
@@ -1943,11 +1929,13 @@ article.card-wrap#card(
   :data-is-visible-in-viewport="state.isVisibleInViewport"
   :data-should-render="shouldRender"
   :data-is-locked="isLocked"
-  :data-resize-width="resizeWidth"
   :data-tilt-degrees="card.tilt"
   :data-sticky-stretch-resistance="state.stickyStretchResistance"
   :data-x="x"
   :data-y="y"
+  :data-resize-width="resizeWidth"
+  :data-width="card.width"
+  :data-height="card.height"
   :key="card.id"
   ref="cardElement"
   :class="articleClasses"
@@ -1995,7 +1983,7 @@ article.card-wrap#card(
     Frames(:card="card")
 
     template(v-if="!isComment")
-      ImageOrVideo(:isSelectedOrDragging="isSelectedOrDragging" :pendingUploadDataUrl="pendingUploadDataUrl" :image="state.formats.image" :video="state.formats.video" @updateCardDimensions="updateCardDimensions")
+      ImageOrVideo(:isSelectedOrDragging="isSelectedOrDragging" :pendingUploadDataUrl="pendingUploadDataUrl" :image="state.formats.image" :video="state.formats.video")
 
     TiltResize(:card="card" :visible="tiltResizeIsVisible")
 
@@ -2167,6 +2155,7 @@ article.card-wrap
     max-width var(--card-width)
     cursor pointer
     touch-action manipulation
+    transform-origin top left
     .name
       color var(--primary-on-light-background)
     &:hover,

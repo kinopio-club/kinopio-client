@@ -85,10 +85,8 @@ const currentCards = {
     },
     move: (state, { cards, spaceId }) => {
       cards.forEach(card => {
-        let newCard = utils.clone(state.cards[card.id])
-        newCard.x = card.x
-        newCard.y = card.y
-        state.cards[card.id] = newCard
+        state.cards[card.id].x = card.x
+        state.cards[card.id].y = card.y
       })
       cache.updateSpaceCardsDebounced(state.cards, currentSpaceId)
     },
@@ -338,9 +336,6 @@ const currentCards = {
         }
         cache.updateSpace('editedByUserId', context.rootState.currentUser.id, currentSpaceId)
       })
-      nextTick(() => {
-        context.dispatch('updateDimensions', { cards })
-      })
     },
     updateCounter: (context, { card, shouldIncrement, shouldDecrement }) => {
       const isSignedIn = context.rootGetters['currentUser/isSignedIn']
@@ -425,6 +420,7 @@ const currentCards = {
           spaceId: context.rootState.currentSpace.id
         }
         const cardIds = cards.map(newCard => newCard.id)
+        context.commit('shouldExplicitlyRenderCardIds', cardIds, { root: true })
         cards = utils.clone(cards)
         cards = cards.filter(card => Boolean(card))
         cards.forEach(card => {
@@ -435,7 +431,9 @@ const currentCards = {
           card = utils.updateCardDimensions(card)
           if (!card) { return }
           const dimensionsChanged = card.width !== prevDimensions.width || card.height !== prevDimensions.height
+          const isMissingDimensions = utils.isMissingDimensions(card)
           if (!dimensionsChanged) { return }
+          if (isMissingDimensions) { return }
           const body = {
             id: card.id,
             width: card.width,
@@ -450,7 +448,6 @@ const currentCards = {
         if (canEditSpace) {
           context.dispatch('api/addToQueue', { name: 'updateMultipleCards', body: updates }, { root: true })
         }
-        context.dispatch('currentConnections/updateMultplePaths', updates.cards, { root: true })
       })
     },
     resetDimensions: (context, { cardIds, cardId }) => {
@@ -485,6 +482,7 @@ const currentCards = {
         context.dispatch('update', updates)
         context.dispatch('broadcast/update', { updates, type: 'resizeCard', handler: 'currentCards/update' }, { root: true })
         context.dispatch('updateDimensions', { cards: [card] })
+        context.dispatch('currentConnections/updateMultplePaths', [card], { root: true })
       })
     },
     removeResize: (context, { cardIds, shouldRemoveResizeWidth }) => {
@@ -734,7 +732,6 @@ const currentCards = {
           name: 'updateMultipleCards',
           body: { cards, spaceId }
         }, { root: true })
-        context.dispatch('updateMultiple', cards)
         // broadcast
         multipleCardsSelectedIds.forEach(id => {
           const body = { id, z: newHighestCardZ }
@@ -872,7 +869,7 @@ const currentCards = {
           id: nanoid(),
           startCardId,
           endCardId,
-          path: this.$store.getters['currentConnections/connectionPathBetweenCards'](startCardId, endCardId)
+          path: this.$store.getters['currentConnections/connectionPathBetweenCards']({ startCardId, endCardId })
         })
       })
       connections.forEach(connection => {

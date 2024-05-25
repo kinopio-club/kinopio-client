@@ -52,7 +52,6 @@ onMounted(() => {
   window.addEventListener('popstate', loadSpaceOnBackOrForward)
   document.fonts.ready.then(event => {
     store.commit('webfontIsLoaded', true)
-    correctCardConnectionPaths()
   })
   store.dispatch('currentUser/restoreUserFavorites')
   store.subscribe((mutation, state) => {
@@ -153,15 +152,6 @@ const updatePageSizesDebounced = debounce(() => {
 const updatePageSizes = async () => {
   await nextTick()
   store.dispatch('updatePageSizes')
-}
-
-// connections
-
-const correctCardConnectionPaths = () => {
-  const space = utils.clone(store.state.currentSpace)
-  const user = utils.clone(store.state.currentUser)
-  const currentSpaceIsRemote = store.getters['currentSpace/isRemote']
-  store.dispatch('currentConnections/correctPaths', { shouldUpdateApi: currentSpaceIsRemote })
 }
 
 // cards
@@ -483,12 +473,12 @@ const stopInteractions = async (event) => {
   store.commit('currentUserIsDraggingBox', false)
   store.commit('boxesWereDragged', false)
   store.commit('cardsWereDragged', false)
-  updatePageSizes()
   store.commit('prevCursorPosition', utils.cursorPositionInPage(event))
   prevCursor = undefined
   store.commit('clearDraggingItems')
   await nextTick()
   await nextTick()
+  store.commit('clearShouldExplicitlyRenderCardIds', null, { root: true })
 }
 
 </script>

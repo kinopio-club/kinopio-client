@@ -23,9 +23,6 @@ const props = defineProps({
 const shouldHideImage = computed(() => props.card.shouldHideUrlPreviewImage)
 const shouldHideInfo = computed(() => props.card.shouldHideUrlPreviewInfo)
 const isImageCard = computed(() => props.isImageCard || props.urlPreviewImageIsVisible)
-const updateDimensions = (event) => {
-  store.dispatch('currentCards/updateDimensions', { cards: [props.card] })
-}
 const selectedColor = computed(() => {
   if (!props.isSelected) { return }
   return props.user.color
@@ -154,7 +151,7 @@ const description = computed(() => {
   //- image
   template(v-if="!shouldDisplayUrlEmbed")
     .preview-image-wrap(v-if="card.urlPreviewImage && !shouldHideImage")
-      img.preview-image(:src="card.urlPreviewImage" :class="{selected: isSelected, 'border-bottom-radius': !shouldHideInfo}" @load="updateDimensions" ref="image" @error="handleImageError")
+      img.preview-image(:src="card.urlPreviewImage" :class="{selected: isSelected, 'border-bottom-radius': !shouldHideInfo}" ref="image" @error="handleImageError")
 
   //- embed
   template(v-if="shouldDisplayUrlEmbed")

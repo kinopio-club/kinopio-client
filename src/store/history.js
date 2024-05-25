@@ -291,10 +291,10 @@ const self = {
           case 'cardUpdated':
             card = item.new
             context.dispatch('currentCards/update', card, { root: true })
-            nextTick(() => {
-              context.dispatch('currentCards/resetDimensions', { cardId: card.id }, { root: true })
-              context.dispatch('currentConnections/updatePaths', { cardId: card.id }, { root: true })
-            })
+            // nextTick(() => {
+            //   context.dispatch('currentCards/resetDimensions', { cardId: card.id }, { root: true })
+            //   context.dispatch('currentConnections/updatePaths', { cardId: card.id }, { root: true })
+            // })
             break
           case 'cardCreated':
             card = item.new
