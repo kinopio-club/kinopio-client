@@ -17,7 +17,6 @@ export default {
     image: String,
     video: String
   },
-  emits: ['updateCardDimensions'],
   data () {
     return {
       imageUrl: null
@@ -30,9 +29,6 @@ export default {
     isInteractingWithItem () { return this.$store.getters.isInteractingWithItem }
   },
   methods: {
-    updateDimensions () {
-      this.$emit('updateCardDimensions')
-    },
     pause () {
       if (!this.video) { return }
       const element = this.$refs.video
@@ -44,12 +40,8 @@ export default {
       element.play()
     },
     handleSuccess (event) {
-      if (this.$store.state.isLoadingSpace) { return }
-      this.updateDimensions()
     },
     handleError (event) {
-      if (this.$store.state.isLoadingSpace) { return }
-      this.updateDimensions()
     }
   },
   watch: {

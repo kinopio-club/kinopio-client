@@ -551,16 +551,6 @@ const remoteUserTiltingCardsColor = computed(() => {
     return undefined
   }
 })
-const updateCardDimensions = () => {
-  let card = { id: props.card.id }
-  card = utils.updateCardDimensions(card)
-  if (!card) { return }
-  if (utils.isMissingDimensions(card)) { return }
-  store.commit('currentCards/update', card)
-  store.dispatch('currentCards/updateTallestCardHeight', card)
-  if (!canEditSpace.value) { return }
-  store.dispatch('api/addToQueue', { name: 'updateCard', body: card })
-}
 
 // connections
 
@@ -1993,7 +1983,7 @@ article.card-wrap#card(
     Frames(:card="card")
 
     template(v-if="!isComment")
-      ImageOrVideo(:isSelectedOrDragging="isSelectedOrDragging" :pendingUploadDataUrl="pendingUploadDataUrl" :image="state.formats.image" :video="state.formats.video" @updateCardDimensions="updateCardDimensions")
+      ImageOrVideo(:isSelectedOrDragging="isSelectedOrDragging" :pendingUploadDataUrl="pendingUploadDataUrl" :image="state.formats.image" :video="state.formats.video")
 
     TiltResize(:card="card" :visible="tiltResizeIsVisible")
 
