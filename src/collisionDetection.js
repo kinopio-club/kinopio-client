@@ -46,5 +46,30 @@ export default {
       }
     }
     return Array.from(matchingRects)
+  },
+
+  checkPointsInsidePaths (points, paths, svg) {
+    // Convert points to SVG points
+    // const svg = document.querySelector('svg.connections')
+    const svgPoints = Array.from(points).map(point => {
+      let svgPoint = svg.createSVGPoint()
+      svgPoint.x = point.x
+      svgPoint.y = point.y
+
+      return svgPoint
+    })
+    // Iterate through each SVG path in the DOM
+    const pathsInsidePoints = []
+    paths.forEach(path => {
+      // Check if each point is inside the SVG path
+      svgPoints.forEach(svgPoint => {
+        if (path.isPointInStroke(svgPoint)) {
+          const pathData = path.dataset
+          pathsInsidePoints.push(pathData)
+        }
+      })
+    })
+    return pathsInsidePoints
   }
+
 }

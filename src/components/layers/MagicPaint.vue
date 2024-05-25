@@ -495,6 +495,10 @@ const selectItemsBetweenCurrentAndPrevPosition = (position) => {
 
   // select connections
 
+  const svg = document.querySelector('svg.connections')
+  matches = collisionDetection.checkPointsInsidePaths(points, selectableConnectionsInViewport, svg)
+  console.log('☎️connections', matches)
+
   prevPosition = position
 }
 
