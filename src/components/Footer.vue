@@ -129,6 +129,7 @@ const cancelHidden = () => {
 // position
 
 const updatePosition = async () => {
+  if (!store.state.isTouchScrolling) { return }
   await nextTick()
   updatePositionIteration = 0
   if (updatePositionTimer) { return }
