@@ -1061,6 +1061,10 @@ const store = createStore({
       postMessage.sendHaptics({ name: 'selection' })
       state.multipleCardsSelectedIds.push(cardId)
     },
+    addMultipleToMultipleCardsSelected: (state, cardIds) => {
+      postMessage.sendHaptics({ name: 'selection' })
+      state.multipleCardsSelectedIds = cardIds
+    },
     removeFromMultipleCardsSelected: (state, cardId) => {
       utils.typeCheck({ value: cardId, type: 'string' })
       state.multipleCardsSelectedIds = state.multipleCardsSelectedIds.filter(id => {
@@ -1173,6 +1177,10 @@ const store = createStore({
       utils.typeCheck({ value: boxId, type: 'string' })
       postMessage.sendHaptics({ name: 'selection' })
       state.multipleBoxesSelectedIds.push(boxId)
+    },
+    addMultipleToMultipleBoxesSelected: (state, boxIds) => {
+      postMessage.sendHaptics({ name: 'selection' })
+      state.multipleBoxesSelectedIds = boxIds
     },
     removeFromMultipleBoxesSelected: (state, boxId) => {
       utils.typeCheck({ value: boxId, type: 'string' })
@@ -1606,6 +1614,21 @@ const store = createStore({
       }
       context.commit('broadcast/updateStore', { updates, type: 'removeFromRemoteCardsSelected' }, { root: true })
     },
+    addMultipleToMultipleCardsSelected: (context, cardIds) => {
+      utils.typeCheck({ value: cardIds, type: 'array' })
+      const set1 = new Set(cardIds)
+      const set2 = new Set(context.state.multipleCardsSelectedIds)
+      // Combine sets
+      const combinedSet = new Set([...set1, ...set2])
+      // Convert back to array
+      cardIds = [...combinedSet]
+      context.commit('multipleCardsSelectedIds', cardIds)
+      const updates = {
+        userId: context.rootState.currentUser.id,
+        cardIds
+      }
+      context.commit('broadcast/updateStore', { updates, type: 'updateRemoteCardsSelected' }, { root: true })
+    },
     multipleCardsSelectedIds: (context, cardIds) => {
       utils.typeCheck({ value: cardIds, type: 'array' })
       context.commit('multipleCardsSelectedIds', cardIds)
@@ -1688,6 +1711,21 @@ const store = createStore({
         boxId
       }
       context.commit('broadcast/updateStore', { updates, type: 'addToRemoteBoxesSelected' }, { root: true })
+    },
+    addMultipleToMultipleBoxesSelected: (context, boxIds) => {
+      utils.typeCheck({ value: boxIds, type: 'array' })
+      const set1 = new Set(boxIds)
+      const set2 = new Set(context.state.multipleBoxesSelectedIds)
+      // Combine sets
+      const combinedSet = new Set([...set1, ...set2])
+      // Convert back to array
+      boxIds = [...combinedSet]
+      context.commit('multipleBoxesSelectedIds', boxIds)
+      const updates = {
+        userId: context.rootState.currentUser.id,
+        boxIds
+      }
+      context.commit('broadcast/updateStore', { updates, type: 'updateRemoteBoxesSelected' }, { root: true })
     },
     removeFromMultipleBoxesSelected: (context, boxId) => {
       utils.typeCheck({ value: boxId, type: 'string' })

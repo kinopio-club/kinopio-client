@@ -3,6 +3,7 @@ import { reactive, computed, onMounted, onBeforeUnmount, onUnmounted, defineProp
 import { useStore } from 'vuex'
 
 import utils from '@/utils.js'
+import collisionDetection from '@/collisionDetection.js'
 import postMessage from '@/postMessage.js'
 import DropGuideLine from '@/components/layers/DropGuideLine.vue'
 const store = useStore()
@@ -482,56 +483,20 @@ const selectItemsBetweenCurrentAndPrevPosition = (position) => {
     prevPosition = position
     return
   }
+  // select cards
   const points = utils.pointsBetweenTwoPoints(prevPosition, position)
-  console.log('🌷🌷🌷points', points, selectableCardsInViewport)
+  let matches = collisionDetection.checkPointsInRects(points, selectableCardsInViewport)
+  const cardIds = matches.map(match => match.id)
+  store.dispatch('addMultipleToMultipleCardsSelected', cardIds)
+  // select boxes
+  matches = collisionDetection.checkPointsInRects(points, selectableBoxes)
+  const boxIds = matches.map(match => match.id)
+  store.dispatch('addMultipleToMultipleBoxesSelected', boxIds)
 
-  // selectItemsIn
+  // select connections
 
-  // points.forEach(point => {
-  //   selectItems(point)
-  // })
   prevPosition = position
 }
-
-// selectCards (position) {
-//   if (shouldPreventSelectionOnMobile()) { return }
-//   if (userCantEditSpace) { return }
-//   const cards = selectableCardsInViewport
-//   if (!cards) { return }
-//   console.time(1)
-//   cards.forEach(card => {
-//     // update selectableCardsInViewport with missing dimensions
-//     const isMissingDimensions = utils.isMissingDimensions(card)
-//     if (isMissingDimensions) {
-//       store.dispatch('currentCards/updateDimensions', { cards: [card] })
-//       card = store.getters['currentCards/byId'](card.id)
-//       selectableCardsInViewport = selectableCardsInViewport.map(selectableCard => {
-//         if (selectableCard.id === card.id) {
-//           selectableCard = card
-//         }
-//         return selectableCard
-//       })
-//     }
-//     // select card
-//     const cardX = card.x
-//     const cardY = card.y
-//     const x = {
-//       value: position.x,
-//       min: cardX - circleSelectionRadius,
-//       max: cardX + card.width + circleSelectionRadius
-//     }
-//     const y = {
-//       value: position.y,
-//       min: cardY - circleSelectionRadius,
-//       max: cardY + card.height + circleSelectionRadius
-//     }
-//     const isBetweenX = utils.isBetween(x)
-//     const isBetweenY = utils.isBetween(y)
-//     if (isBetweenX && isBetweenY) {
-//       store.dispatch('addToMultipleCardsSelected', card.id)
-//     }
-//   })
-//         console.timeEnd(1)
 
 // },
 // selectConnectionPaths (position) {
@@ -545,37 +510,6 @@ const selectItemsBetweenCurrentAndPrevPosition = (position) => {
 //     const isSelected = path.isPointInStroke(svgPoint)
 //     if (isSelected) {
 //       store.dispatch('addToMultipleConnectionsSelected', pathId)
-//     }
-//   })
-// },
-
-// selectBoxes (position) {
-//   const boxes = store.getters['currentBoxes/isNotLocked']
-//   boxes.forEach(box => {
-//     const element = document.querySelector(`.box-info[data-box-id="${box.id}"]`)
-//     const rect = element.getBoundingClientRect()
-//     box = {
-//       id: box.id,
-//       name: box.name,
-//       x: box.x,
-//       y: box.y,
-//       width: rect.width,
-//       height: rect.height
-//     }
-//     const x = {
-//       value: position.x,
-//       min: box.x - circleSelectionRadius,
-//       max: box.x + box.width + circleSelectionRadius
-//     }
-//     const y = {
-//       value: position.y,
-//       min: box.y - circleSelectionRadius,
-//       max: box.y + box.height + circleSelectionRadius
-//     }
-//     const isBetweenX = utils.isBetween(x)
-//     const isBetweenY = utils.isBetween(y)
-//     if (isBetweenX && isBetweenY) {
-//       store.dispatch('addToMultipleBoxesSelected', box.id)
 //     }
 //   })
 // },
