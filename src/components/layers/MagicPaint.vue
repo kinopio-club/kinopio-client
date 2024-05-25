@@ -1,49 +1,11 @@
-<template lang="pug">
-aside
-  //- Magic painting is ephemeral brush strokes that select items
-  canvas#magic-painting(
-    @mousedown.left="startPainting"
-    @touchstart="startPainting"
-    @mousemove="painting"
-    @touchmove="painting"
-    :width="viewportWidth"
-    :height="viewportHeight"
-    :style="canvasStyles"
-    @dragenter="checkIfUploadIsDraggedOver"
-    @dragover.prevent="checkIfUploadIsDraggedOver"
-    @dragleave="removeUploadIsDraggedOver"
-    @dragend="removeUploadIsDraggedOver"
-    @drop.prevent.stop="addCardsAndUploadFiles"
-  )
-  canvas#remote-painting.remote-painting(
-    :width="viewportWidth"
-    :height="viewportHeight"
-    :style="canvasStyles"
-    :data-should-decay-slow="true"
-  )
-  canvas#locking.locking(
-    :width="viewportWidth"
-    :height="viewportHeight"
-    :style="canvasStyles"
-    :data-should-decay-slow="true"
-  )
-  canvas#initial-circle.initial-circle(
-    :width="viewportWidth"
-    :height="viewportHeight"
-    :style="canvasStyles"
-    :data-should-decay-slow="true"
-  )
-  DropGuideLine(
-    :currentCursor="currentCursor"
-    :currentCursorInSpace="currentCursorInSpace"
-    :uploadIsDraggedOver="uploadIsDraggedOver"
-  )
-</template>
+<script setup>
+import { reactive, computed, onMounted, onBeforeUnmount, onUnmounted, defineProps, defineEmits, watch, ref, nextTick } from 'vue'
+import { useStore } from 'vuex'
 
-<script>
 import utils from '@/utils.js'
 import postMessage from '@/postMessage.js'
 import DropGuideLine from '@/components/layers/DropGuideLine.vue'
+const store = useStore()
 
 const circleRadius = 20
 const circleSelectionRadius = circleRadius - 10 // magnitude of sensitivity
@@ -80,700 +42,767 @@ const postScrollDuration = 300 // ms
 let postScrollAnimationTimer, postScrollStartTime, shouldCancelPostScroll
 
 let selectableCardsInViewport = []
+let selectableBoxes = []
 let selectableConnectionsInViewport = []
 
-export default {
-  name: 'MagicPaint',
-  components: {
-    DropGuideLine
-  },
-  created () {
-    this.$store.subscribe((mutation, state) => {
-      if (mutation.type === 'triggerPaintFramePosition') {
-        const event = mutation.payload
-        const position = utils.cursorPositionInSpace(event)
-        this.createPaintingCircle(event)
-        this.selectItems(position)
-      } else if (mutation.type === 'triggerUpdateMagicPaintPositionOffset') {
-        this.updateCirclesWithScroll()
-      } else if (mutation.type === 'triggerAddRemotePaintingCircle') {
-        let circle = mutation.payload
-        delete circle.type
-        const position = this.updateRemotePosition(circle)
-        circle.x = position.x
-        circle.y = position.y
-        this.createRemotePaintingCircle(circle)
-        this.remotePainting()
-      }
-    })
-  },
-  mounted () {
-    paintingCanvas = document.getElementById('magic-painting')
-    paintingContext = paintingCanvas.getContext('2d')
-    paintingContext.scale(window.devicePixelRatio, window.devicePixelRatio)
-    remotePaintingCanvas = document.getElementById('remote-painting')
-    remotePaintingContext = remotePaintingCanvas.getContext('2d')
-    remotePaintingContext.scale(window.devicePixelRatio, window.devicePixelRatio)
-    lockingCanvas = document.getElementById('locking')
-    lockingContext = lockingCanvas.getContext('2d')
-    lockingContext.scale(window.devicePixelRatio, window.devicePixelRatio)
-    initialCircleCanvas = document.getElementById('initial-circle')
-    initialCircleContext = initialCircleCanvas.getContext('2d')
-    initialCircleContext.scale(window.devicePixelRatio, window.devicePixelRatio)
-    // trigger stopPainting even if mouse is outside window
-    window.addEventListener('mouseup', this.stopPainting)
-    window.addEventListener('touchend', this.stopPainting)
-    // shift circle positions with scroll to simulate full size canvas
-    this.updatePrevScrollPosition()
-    window.addEventListener('scroll', this.userScroll)
-    window.addEventListener('touchmove', this.userScroll) // android fix
-    window.addEventListener('load', this.clearCircles)
-    this.startPostScroll()
-  },
-  beforeUnmount () {
-    window.removeEventListener('mouseup', this.stopPainting)
-    window.removeEventListener('touchend', this.stopPainting)
-    window.removeEventListener('scroll', this.userScroll)
-    window.removeEventListener('touchmove', this.userScroll)
-    window.removeEventListener('load', this.clearCircles)
-  },
-  data () {
-    return {
-      pinchZoomOffsetTop: 0,
-      pinchZoomOffsetLeft: 0,
-      currentCursor: {},
-      currentCursorInSpace: {},
-      uploadIsDraggedOver: false
-    }
-  },
-  computed: {
-    currentUserColor () { return this.$store.state.currentUser.color },
-    userCannotEditSpace () { return !this.$store.getters['currentUser/canEditSpace']() },
-    // keep canvases updated to viewport size so you can draw on newly created areas
-    pageHeight () { return this.$store.state.pageHeight },
-    pageWidth () { return this.$store.state.pageWidth },
-    viewportHeight () { return this.$store.state.viewportHeight },
-    viewportWidth () { return this.$store.state.viewportWidth },
-    spaceCounterZoomDecimal () { return this.$store.getters.spaceCounterZoomDecimal },
-    spaceZoomDecimal () { return this.$store.getters.spaceZoomDecimal },
-    isPanning () { return this.$store.state.currentUserIsPanningReady },
-    isBoxSelecting () { return this.$store.state.currentUserIsBoxSelecting },
-    canvasStyles () {
-      return { top: this.pinchZoomOffsetTop + 'px', left: this.pinchZoomOffsetLeft + 'px' }
-    },
-    toolbarIsCard () { return this.$store.state.currentUserToolbar === 'card' },
-    toolbarIsBox () { return this.$store.state.currentUserToolbar === 'box' }
-  },
-  methods: {
-    updateSelectableCardsInViewport () {
-      const selectableCards = this.$store.getters['currentCards/isSelectableInViewport']()
-      if (!selectableCards) { return }
-      selectableCardsInViewport = utils.clone(selectableCards)
-    },
-    updateSelectableConnectionsInViewport () {
-      let paths = []
-      const pathElements = document.querySelectorAll('svg .connection-path')
-      pathElements.forEach(path => {
-        // if (path.dataset.isVisibleInViewport === 'false') { return }
-        if (path.dataset.isHiddenByCommentFilter === 'true') { return }
-        paths.push(path)
-      })
-      selectableConnectionsInViewport = paths
-    },
-    updateRemotePosition (position) {
-      const zoom = this.spaceZoomDecimal
-      const scroll = { x: window.scrollX, y: window.scrollY }
-      const space = document.getElementById('space')
-      const rect = space.getBoundingClientRect()
-      position = {
-        x: (position.x * zoom) + rect.x + scroll.x,
-        y: (position.y * zoom) + rect.y + scroll.y
-      }
-      return position
-    },
-    userScroll () {
-      if (postScrollAnimationTimer) {
-        shouldCancelPostScroll = true
-      }
-      // update selectable cards during paint autoscroll at edges
-      if (this.$store.state.currentUserIsPainting) {
-        this.updateSelectableCardsInViewport()
-        this.updateSelectableConnectionsInViewport()
-      }
-      this.scroll()
-    },
-    scroll () {
-      this.updateCirclesWithScroll()
-      this.cancelLocking()
-    },
-    clearCircles () {
-      initialCircles = []
-      paintingCircles = []
-      remotePaintingCircles = []
-    },
-    updatePrevScrollPosition () {
-      prevScroll = {
-        x: window.scrollX,
-        y: window.scrollY
-      }
-    },
-    updateCirclePositions (circles, scrollDelta) {
-      return circles.map(circle => {
-        circle.x = circle.x - scrollDelta.x
-        circle.y = circle.y - scrollDelta.y
-        return circle
-      })
-    },
-    updateCirclesWithScroll () {
-      const scrollDelta = {
-        x: window.scrollX - prevScroll.x,
-        y: window.scrollY - prevScroll.y
-      }
-      if (initialCircles.length) {
-        initialCircles = this.updateCirclePositions(initialCircles, scrollDelta) // covers locking circles of varialbe radius/
-      }
-      if (paintingCircles.length) {
-        paintingCircles = this.updateCirclePositions(paintingCircles, scrollDelta)
-      }
-      this.updatePrevScrollPosition()
-    },
-    updateCircleForAndroid (circle) {
-      if (!utils.isAndroid()) { return circle }
-      circle.x = circle.x - window.visualViewport.offsetLeft
-      circle.y = circle.y - window.visualViewport.offsetTop
-      return circle
-    },
-    isCircleVisible (circle) {
-      let { x, y, radius } = circle
-      radius = radius || circleRadius
-      let isBetween = {
-        value: x + radius,
-        min: 0,
-        max: this.viewportWidth
-      }
-      const isCircleVisibleX = utils.isBetween(isBetween)
-      isBetween = {
-        value: y + radius,
-        min: 0,
-        max: this.viewportHeight
-      }
-      const isCircleVisibleY = utils.isBetween(isBetween)
-      return Boolean(isCircleVisibleX && isCircleVisibleY)
-    },
-    offscreenCircle (circle) {
-      if (circle.x > this.viewportWidth) {
-        circle.x = this.viewportWidth
-      } else if (circle.x < 0) {
-        circle.x = 0
-      }
-      if (circle.y > this.viewportHeight) {
-        circle.y = this.viewportHeight
-      } else if (circle.y < 0) {
-        circle.y = 0
-      }
-      return circle
-    },
-    drawCircle (circle, context, shouldDrawOffscreen) {
-      circle = this.updateCircleForAndroid(circle)
-      const isCircleVisible = this.isCircleVisible(circle)
-      if (!isCircleVisible && !shouldDrawOffscreen) { return }
-      if (!isCircleVisible && shouldDrawOffscreen) { circle = this.offscreenCircle(circle) }
-      let { x, y, color, iteration, radius, alpha } = circle
-      radius = radius || circleRadius
-      let decay = rateOfIterationDecay
-      const isSlow = context.canvas.dataset.shouldDecaySlow
-      if (isSlow) {
-        decay = rateOfIterationDecaySlow
-      }
-      alpha = alpha || utils.exponentialDecay(iteration, decay)
-      context.beginPath()
-      context.arc(x, y, radius, 0, 2 * Math.PI)
-      context.closePath()
-      context.globalAlpha = alpha
-      context.fillStyle = color
-      context.fill()
-    },
-    shouldCancel (event) {
-      let shouldCancelOutsideOfBrowser = !(event.target instanceof Element)
-      if (shouldCancelOutsideOfBrowser) {
-        return false
-      }
-      const fromDialog = event.target.closest('dialog')
-      const fromHeader = event.target.closest('header')
-      const fromFooter = event.target.closest('footer')
-      return fromDialog || fromHeader || fromFooter
-    },
-    stopPainting (event) {
-      if (this.$store.state.isAddPage) { return }
-      if (this.shouldCancel(event)) { return }
-      startCursor = startCursor || {}
-      const endCursor = utils.cursorPositionInViewport(event)
-      const shouldAddCard = this.$store.state.shouldAddCard
-      currentUserIsLocking = false
-      window.cancelAnimationFrame(lockingAnimationTimer)
-      lockingAnimationTimer = undefined
-      lockingContext.clearRect(0, 0, this.pageWidth, this.pageHeight)
-      this.$store.commit('currentUserIsPaintingLocked', false)
-      this.$store.commit('currentUserIsPainting', false)
-      if (utils.cursorsAreClose(startCursor, endCursor) && shouldAddCard && event.cancelable) {
-        this.$store.commit('shouldAddCard', true)
-        event.preventDefault()
-      } else {
-        this.$store.commit('shouldAddCard', false)
-      }
-      // prevent mouse events from firing after touch events on touch device
-      if (event.cancelable) { event.preventDefault() }
-      this.startPostScroll()
-    },
-
-    // Post Scrolling (for android)
-
-    startPostScroll () {
-      shouldCancelPostScroll = false
-      if (!postScrollAnimationTimer) {
-        postScrollAnimationTimer = window.requestAnimationFrame(this.postScrollFrame)
-      }
-    },
-    postScrollFrame (timestamp) {
-      if (!postScrollStartTime) {
-        postScrollStartTime = timestamp
-      }
-      const elaspedTime = timestamp - postScrollStartTime
-      const percentComplete = (elaspedTime / postScrollDuration) // between 0 and 1
-      if (shouldCancelPostScroll) {
-        this.endPostScroll()
-      } else if (percentComplete <= 1) {
-        this.scroll()
-        window.requestAnimationFrame(this.postScrollFrame)
-      } else {
-        this.endPostScroll()
-      }
-    },
-    endPostScroll () {
-      shouldCancelPostScroll = false
-      window.cancelAnimationFrame(postScrollAnimationTimer)
-      postScrollAnimationTimer = undefined
-      postScrollStartTime = undefined
-    },
-
-    // Painting
-
-    painting (event) {
-      const isPainting = this.$store.state.currentUserIsPainting
-      if (this.isPanning) { return }
-      if (this.isBoxSelecting) { return }
-      if (!this.toolbarIsCard) { return }
-      if (!isPainting) { return }
-      if (this.$store.getters.shouldScrollAtEdges(event) && event.cancelable) {
-        event.preventDefault() // prevents touch swipe viewport scrolling
-      }
-      if (!paintingCirclesTimer) {
-        paintingCirclesTimer = window.requestAnimationFrame(this.paintCirclesAnimationFrame)
-      }
-      if (event.getCoalescedEvents) {
-        const events = event.getCoalescedEvents()
-        events.forEach(event => this.createPaintingCircle(event))
-      } else {
-        this.createPaintingCircle(event)
-      }
-      this.triggerHideTouchInterface()
-    },
-    triggerHideTouchInterface () {
-      if (!this.$store.state.currentUserIsPaintingLocked) { return }
-      this.$store.commit('triggerHideTouchInterface')
-    },
-    createPaintingCircle (event) {
-      const isTouch = Boolean(event.touches)
-      const isPaintingLocked = this.$store.state.currentUserIsPaintingLocked
-      if (isTouch && !isPaintingLocked) { return }
-      if (this.isBoxSelecting) { return }
-      const currentUserIsPaintingLocked = this.$store.state.currentUserIsPaintingLocked
-      if (isTouch && !currentUserIsPaintingLocked) { return }
-      this.createPaintingCircles(event)
+onMounted(() => {
+  store.subscribe((mutation, state) => {
+    if (mutation.type === 'triggerPaintFramePosition') {
+      const event = mutation.payload
       const position = utils.cursorPositionInSpace(event)
-      this.selectItems(position)
-      this.selectItemsBetweenCurrentAndPrevPosition(position)
-    },
-    createPaintingCircles (event) {
-      this.currentCursor = utils.cursorPositionInViewport(event)
-      if (!prevCursor) {
-        prevCursor = this.currentCursor
-        return
-      }
-      const color = this.$store.state.currentUser.color
-      const points = utils.pointsBetweenTwoPoints(prevCursor, this.currentCursor)
-      points.forEach(point => {
-        const circle = { x: point.x, y: point.y, color, iteration: 0 }
-        paintingCircles.push(circle)
-      })
-      const circle = { x: this.currentCursor.x, y: this.currentCursor.y, color, iteration: 0 }
-      this.broadcastCircle(event, circle)
-      prevCursor = this.currentCursor
-    },
-    startPainting (event) {
-      if (this.isPanning) { return }
-      if (this.isBoxSelecting) { return }
-      this.updateSelectableCardsInViewport()
-      this.updateSelectableConnectionsInViewport()
-      startCursor = utils.cursorPositionInViewport(event)
-      this.currentCursor = startCursor
-      const multipleCardsIsSelected = Boolean(this.$store.state.multipleCardsSelectedIds.length)
-      this.$store.dispatch('currentCards/updateCanBeSelectedSortedByY')
-      if (utils.isMultiTouch(event)) { return }
-      this.startLocking()
-      if (event.touches) {
-        this.$store.commit('currentUserIsPainting', false)
-      } else {
-        this.$store.commit('currentUserIsPainting', true)
-        this.createInitialCircle()
-      }
-      const shouldAdd = !multipleCardsIsSelected && !utils.unpinnedDialogIsVisible()
-      // add card
-      if (shouldAdd && this.toolbarIsCard) {
-        this.$store.commit('shouldAddCard', true)
-      // add box
-      } else if (shouldAdd && this.toolbarIsBox) {
-        this.addBox(event)
-        return
-      }
-      // clear selected
-      if (!event.shiftKey) {
-        this.$store.dispatch('clearMultipleSelected')
-      }
-      prevPosition = null
-      prevCursor = null
-      this.$store.commit('previousMultipleCardsSelectedIds', utils.clone(this.$store.state.multipleCardsSelectedIds))
-      this.$store.commit('previousMultipleConnectionsSelectedIds', utils.clone(this.$store.state.multipleConnectionsSelectedIds))
-      this.$store.dispatch('closeAllDialogs')
-    },
-    paintCirclesAnimationFrame () {
-      paintingCircles = utils.filterCircles(paintingCircles, maxIterations)
-      paintingContext.clearRect(0, 0, this.pageWidth, this.pageHeight)
-      paintingCircles.forEach(item => {
-        item.iteration++
-        let circle = JSON.parse(JSON.stringify(item))
-        this.drawCircle(circle, paintingContext)
-      })
-      if (paintingCircles.length > 0) {
-        window.requestAnimationFrame(this.paintCirclesAnimationFrame)
-      } else {
-        setTimeout(() => {
-          window.cancelAnimationFrame(paintingCirclesTimer)
-          paintingCirclesTimer = undefined
-        }, 0)
-      }
-    },
-
-    // Boxes
-
-    addBox (event) {
-      let position = utils.cursorPositionInSpace(event)
-      if (utils.isPositionOutsideOfSpace(position)) {
-        position = utils.cursorPositionInPage(event)
-        this.$store.commit('addNotificationWithPosition', { message: 'Outside Space', position, type: 'info', icon: 'cancel', layer: 'app' })
-        return
-      }
-      this.$store.dispatch('currentUser/notifyReadOnly', position)
-      const shouldPrevent = !this.$store.getters['currentUser/canEditSpace']()
-      if (shouldPrevent) {
-        this.$store.commit('currentUserToolbar', 'card')
-        return
-      }
-      this.$store.dispatch('currentBoxes/add', { box: position, shouldResize: true })
-      this.$store.commit('currentBoxIsNew', true)
-      event.preventDefault() // allows dragging boxes without scrolling on touch
-    },
-
-    // Selecting
-
-    shouldPreventSelectionOnMobile () {
-      const isMobile = utils.isMobile()
-      const isPaintingLocked = this.$store.state.currentUserIsPaintingLocked
-      return isMobile && !isPaintingLocked
-    },
-    selectItems (position) {
-      if (this.shouldPreventSelectionOnMobile()) { return }
-      if (this.userCannotEditSpace) { return }
-      this.selectCards(position)
-      this.selectConnectionPaths(position)
-      this.selectBoxes(position)
-    },
-    selectItemsBetweenCurrentAndPrevPosition (position) {
-      if (!prevPosition) {
-        prevPosition = position
-        return
-      }
-      const points = utils.pointsBetweenTwoPoints(prevPosition, position)
-      points.forEach(point => {
-        this.selectItems(point)
-      })
-      prevPosition = position
-    },
-    selectCards (position) {
-      if (this.shouldPreventSelectionOnMobile()) { return }
-      if (this.userCantEditSpace) { return }
-      const cards = selectableCardsInViewport
-      if (!cards) { return }
-      cards.forEach(card => {
-        // update selectableCardsInViewport with missing dimensions
-        const isMissingDimensions = utils.isMissingDimensions(card)
-        if (isMissingDimensions) {
-          this.$store.dispatch('currentCards/updateDimensions', { cards: [card] })
-          card = this.$store.getters['currentCards/byId'](card.id)
-          selectableCardsInViewport = selectableCardsInViewport.map(selectableCard => {
-            if (selectableCard.id === card.id) {
-              selectableCard = card
-            }
-            return selectableCard
-          })
-        }
-        // select card
-        const cardX = card.x
-        const cardY = card.y
-        const x = {
-          value: position.x,
-          min: cardX - circleSelectionRadius,
-          max: cardX + card.width + circleSelectionRadius
-        }
-        const y = {
-          value: position.y,
-          min: cardY - circleSelectionRadius,
-          max: cardY + card.height + circleSelectionRadius
-        }
-        const isBetweenX = utils.isBetween(x)
-        const isBetweenY = utils.isBetween(y)
-        if (isBetweenX && isBetweenY) {
-          this.$store.dispatch('addToMultipleCardsSelected', card.id)
-        }
-      })
-    },
-    selectConnectionPaths (position) {
-      const svg = document.querySelector('svg.connections')
-      let svgPoint = svg.createSVGPoint()
-      svgPoint.x = position.x
-      svgPoint.y = position.y
-
-      selectableConnectionsInViewport.forEach(path => {
-        const pathId = path.dataset.id
-        const isSelected = path.isPointInStroke(svgPoint)
-        if (isSelected) {
-          this.$store.dispatch('addToMultipleConnectionsSelected', pathId)
-        }
-      })
-    },
-    selectBoxes (position) {
-      const boxes = this.$store.getters['currentBoxes/isNotLocked']
-      boxes.forEach(box => {
-        const element = document.querySelector(`.box-info[data-box-id="${box.id}"]`)
-        const rect = element.getBoundingClientRect()
-        box = {
-          id: box.id,
-          name: box.name,
-          x: box.x,
-          y: box.y,
-          width: rect.width,
-          height: rect.height
-        }
-        const x = {
-          value: position.x,
-          min: box.x - circleSelectionRadius,
-          max: box.x + box.width + circleSelectionRadius
-        }
-        const y = {
-          value: position.y,
-          min: box.y - circleSelectionRadius,
-          max: box.y + box.height + circleSelectionRadius
-        }
-        const isBetweenX = utils.isBetween(x)
-        const isBetweenY = utils.isBetween(y)
-        if (isBetweenX && isBetweenY) {
-          this.$store.dispatch('addToMultipleBoxesSelected', box.id)
-        }
-      })
-    },
-
-    // Remote Painting
-
-    broadcastCircle (event, circle) {
-      const position = utils.cursorPositionInSpace(event)
-      this.$store.commit('broadcast/update', {
-        updates: {
-          userId: this.$store.state.currentUser.id,
-          x: position.x,
-          y: position.y,
-          color: circle.color,
-          iteration: circle.iteration,
-          zoom: this.spaceZoomDecimal
-        },
-        type: 'addRemotePaintingCircle',
-        handler: 'triggerAddRemotePaintingCircle'
-      })
-    },
-    createRemotePaintingCircle (circle) {
-      const { color, zoom } = circle
-      const prevCircle = remotePaintingCircles.findLast(item => item.userId === circle.userId)
-      if (prevCircle) {
-        const points = utils.pointsBetweenTwoPoints(prevCircle, circle)
-        points.forEach(point => {
-          point = { x: point.x, y: point.y, color, zoom, iteration: 0 }
-          remotePaintingCircles.push(point)
-        })
-        remotePaintingCircles.push(circle)
-      } else {
-        remotePaintingCircles.push(circle)
-      }
-    },
-    remotePainting () {
-      if (!remotePaintingCirclesTimer) {
-        remotePaintingCirclesTimer = window.requestAnimationFrame(this.remotePaintCirclesAnimationFrame)
-      }
-    },
-    remotePaintCirclesAnimationFrame () {
-      remotePaintingCircles = utils.filterCircles(remotePaintingCircles, maxIterations)
-      remotePaintingContext.clearRect(0, 0, this.pageWidth, this.pageHeight)
-      remotePaintingCircles.forEach(item => {
-        item.iteration++
-        let circle = JSON.parse(JSON.stringify(item))
-        circle.x = circle.x - window.scrollX
-        circle.y = circle.y - window.scrollY
-        const shouldDrawOffscreen = true
-        this.drawCircle(circle, remotePaintingContext, shouldDrawOffscreen)
-      })
-      if (remotePaintingCircles.length > 0) {
-        window.requestAnimationFrame(this.remotePaintCirclesAnimationFrame)
-      } else {
-        setTimeout(() => {
-          window.cancelAnimationFrame(remotePaintingCirclesTimer)
-          remotePaintingCirclesTimer = undefined
-        }, 0)
-      }
-    },
-
-    // Locking
-
-    cancelLocking () {
-      shouldCancelLocking = true
-    },
-    startLocking () {
-      if (this.toolbarIsBox) { return }
-      currentUserIsLocking = true
-      shouldCancelLocking = false
-      setTimeout(() => {
-        if (!lockingAnimationTimer) {
-          lockingAnimationTimer = window.requestAnimationFrame(this.lockingAnimationFrame)
-        }
-      }, lockingPreDuration)
-    },
-    lockingAnimationFrame (timestamp) {
-      if (!lockingStartTime) {
-        lockingStartTime = timestamp
-      }
-      const elaspedTime = timestamp - lockingStartTime
-      const percentComplete = (elaspedTime / lockingDuration) // between 0 and 1
-      if (!utils.cursorsAreClose(startCursor, this.currentCursor)) {
-        currentUserIsLocking = false
-      }
-      if (shouldCancelLocking) {
-        currentUserIsLocking = false
-        shouldCancelLocking = false
-      }
-      if (currentUserIsLocking && percentComplete <= 1) {
-        const minSize = circleRadius
-        const percentRemaining = Math.abs(percentComplete - 1)
-        const circleRadiusDelta = initialLockCircleRadius - minSize
-        const radius = (circleRadiusDelta * percentRemaining) + minSize
-        const alpha = utils.easeOut(percentComplete, elaspedTime, lockingDuration)
-        const circle = {
-          x: startCursor.x,
-          y: startCursor.y,
-          color: this.currentUserColor,
-          radius,
-          alpha: alpha || 0.01, // to ensure truthyness
-          iteration: 1
-        }
-        lockingContext.clearRect(0, 0, this.pageWidth, this.pageHeight)
-        this.drawCircle(circle, lockingContext)
-        window.requestAnimationFrame(this.lockingAnimationFrame)
-      } else {
-        window.cancelAnimationFrame(lockingAnimationTimer)
-        lockingContext.clearRect(0, 0, this.pageWidth, this.pageHeight)
-        lockingAnimationTimer = undefined
-        lockingStartTime = undefined
-      }
-      if (currentUserIsLocking && percentComplete > 1) {
-        this.$store.commit('currentUserIsPainting', true)
-        this.$store.commit('currentUserIsPaintingLocked', true)
-        console.log('🔒 lockingAnimationFrame locked')
-        postMessage.sendHaptics({ name: 'softImpact' })
-        lockingStartTime = undefined
-      }
-    },
-
-    // Initial Circles
-
-    startInitialCircles () {
-      initialCircles.map(circle => {
-        circle.persistent = false
-      })
-      if (!initialCirclesTimer) {
-        initialCirclesTimer = window.requestAnimationFrame(this.initialCirclesAnimationFrame)
-      }
-    },
-    createInitialCircle () {
-      if (this.toolbarIsBox) { return }
-      const initialCircle = {
-        x: startCursor.x,
-        y: startCursor.y,
-        color: this.currentUserColor,
-        iteration: 1,
-        persistent: true
-      }
-      initialCircles.push(initialCircle)
-      this.drawCircle(initialCircle, initialCircleContext)
-      this.startInitialCircles()
-    },
-    initialCirclesAnimationFrame () {
-      initialCircles = utils.filterCircles(initialCircles, maxIterations)
-      initialCircleContext.clearRect(0, 0, this.pageWidth, this.pageHeight)
-      initialCircles.forEach(item => {
-        if (!item.persistent) {
-          item.iteration++
-        }
-        let circle = JSON.parse(JSON.stringify(item))
-        this.drawCircle(circle, initialCircleContext)
-      })
-      if (initialCircles.length) {
-        window.requestAnimationFrame(this.initialCirclesAnimationFrame)
-      } else {
-        window.cancelAnimationFrame(initialCirclesTimer)
-        initialCirclesTimer = undefined
-      }
-    },
-
-    // Upload Files
-
-    checkIfUploadIsDraggedOver (event) {
-      const uploadIsFiles = event.dataTransfer.types.find(type => type === 'Files')
-      if (!uploadIsFiles) { return }
-      this.currentCursor = utils.cursorPositionInViewport(event)
-      this.currentCursorInSpace = utils.cursorPositionInSpace(event)
-      this.uploadIsDraggedOver = true
-    },
-    removeUploadIsDraggedOver () {
-      this.uploadIsDraggedOver = false
-    },
-    addCardsAndUploadFiles (event) {
-      let files = event.dataTransfer.files
-      files = Array.from(files)
-      this.removeUploadIsDraggedOver()
-      this.$store.dispatch('upload/addCardsAndUploadFiles', {
-        files,
-        event
-      })
+      createPaintingCircle(event)
+      // selectItems(position)
+    } else if (mutation.type === 'triggerUpdateMagicPaintPositionOffset') {
+      updateCirclesWithScroll()
+    } else if (mutation.type === 'triggerAddRemotePaintingCircle') {
+      let circle = mutation.payload
+      delete circle.type
+      const position = updateRemotePosition(circle)
+      circle.x = position.x
+      circle.y = position.y
+      createRemotePaintingCircle(circle)
+      remotePainting()
     }
+  })
+  paintingCanvas = document.getElementById('magic-painting')
+  paintingContext = paintingCanvas.getContext('2d')
+  paintingContext.scale(window.devicePixelRatio, window.devicePixelRatio)
+  remotePaintingCanvas = document.getElementById('remote-painting')
+  remotePaintingContext = remotePaintingCanvas.getContext('2d')
+  remotePaintingContext.scale(window.devicePixelRatio, window.devicePixelRatio)
+  lockingCanvas = document.getElementById('locking')
+  lockingContext = lockingCanvas.getContext('2d')
+  lockingContext.scale(window.devicePixelRatio, window.devicePixelRatio)
+  initialCircleCanvas = document.getElementById('initial-circle')
+  initialCircleContext = initialCircleCanvas.getContext('2d')
+  initialCircleContext.scale(window.devicePixelRatio, window.devicePixelRatio)
+  // trigger stopPainting even if mouse is outside window
+  window.addEventListener('mouseup', stopPainting)
+  window.addEventListener('touchend', stopPainting)
+  // shift circle positions with scroll to simulate full size canvas
+  updatePrevScrollPosition()
+  window.addEventListener('scroll', userScroll)
+  window.addEventListener('touchmove', userScroll) // android fix
+  window.addEventListener('load', clearCircles)
+  startPostScroll()
+})
+
+onBeforeUnmount(() => {
+  window.removeEventListener('mouseup', stopPainting)
+  window.removeEventListener('touchend', stopPainting)
+  window.removeEventListener('scroll', userScroll)
+  window.removeEventListener('touchmove', userScroll)
+  window.removeEventListener('load', clearCircles)
+})
+
+const state = reactive({
+  pinchZoomOffsetTop: 0,
+  pinchZoomOffsetLeft: 0,
+  currentCursor: {},
+  currentCursorInSpace: {},
+  uploadIsDraggedOver: false
+})
+
+// current user
+
+const currentUserColor = computed(() => store.state.currentUser.color)
+const userCannotEditSpace = computed(() => !store.getters['currentUser/canEditSpace']())
+const isPanning = computed(() => store.state.currentUserIsPanningReady)
+const isBoxSelecting = computed(() => store.state.currentUserIsBoxSelecting)
+const toolbarIsCard = computed(() => store.state.currentUserToolbar === 'card')
+const toolbarIsBox = computed(() => store.state.currentUserToolbar === 'box')
+
+// page size
+// keep canvases updated to viewport size so you can draw on newly created areas
+
+const pageHeight = computed(() => store.state.pageHeight)
+const pageWidth = computed(() => store.state.pageWidth)
+const viewportHeight = computed(() => store.state.viewportHeight)
+const viewportWidth = computed(() => store.state.viewportWidth)
+const spaceCounterZoomDecimal = computed(() => store.getters.spaceCounterZoomDecimal)
+const spaceZoomDecimal = computed(() => store.getters.spaceZoomDecimal)
+const canvasStyles = computed(() => {
+  return { top: state.pinchZoomOffsetTop + 'px', left: state.pinchZoomOffsetLeft + 'px' }
+})
+
+const updateSelectableCardsInViewport = () => {
+  const selectableCards = store.getters['currentCards/isSelectableInViewport']()
+  if (!selectableCards) { return }
+  selectableCardsInViewport = utils.clone(selectableCards)
+}
+const updateSelectableBoxes = () => {
+  const boxes = store.getters['currentBoxes/isNotLocked']
+  let array = []
+  boxes.forEach(box => {
+    const element = document.querySelector(`.box-info[data-box-id="${box.id}"]`)
+    const rect = element.getBoundingClientRect()
+    box = {
+      id: box.id,
+      name: box.name,
+      x: box.x,
+      y: box.y,
+      width: rect.width,
+      height: rect.height
+    }
+    array.push(box)
+  })
+  selectableBoxes = array
+}
+const updateSelectableConnectionsInViewport = () => {
+  let paths = []
+  const pathElements = document.querySelectorAll('svg .connection-path')
+  pathElements.forEach(path => {
+    // if (path.dataset.isVisibleInViewport === 'false') { return }
+    if (path.dataset.isHiddenByCommentFilter === 'true') { return }
+    paths.push(path)
+  })
+  selectableConnectionsInViewport = paths
+}
+const updateRemotePosition = (position) => {
+  const zoom = spaceZoomDecimal.value
+  const scroll = { x: window.scrollX, y: window.scrollY }
+  const space = document.getElementById('space')
+  const rect = space.getBoundingClientRect()
+  position = {
+    x: (position.x * zoom) + rect.x + scroll.x,
+    y: (position.y * zoom) + rect.y + scroll.y
+  }
+  return position
+}
+const userScroll = () => {
+  if (postScrollAnimationTimer) {
+    shouldCancelPostScroll = true
+  }
+  // update selectable cards during paint autoscroll at edges
+  if (store.state.currentUserIsPainting) {
+    updateSelectableCardsInViewport()
+    updateSelectableConnectionsInViewport()
+  }
+  scroll()
+}
+const scroll = () => {
+  updateCirclesWithScroll()
+  cancelLocking()
+}
+const clearCircles = () => {
+  initialCircles = []
+  paintingCircles = []
+  remotePaintingCircles = []
+}
+const updatePrevScrollPosition = () => {
+  prevScroll = {
+    x: window.scrollX,
+    y: window.scrollY
   }
 }
+const updateCirclePositions = (circles, scrollDelta) => {
+  return circles.map(circle => {
+    circle.x = circle.x - scrollDelta.x
+    circle.y = circle.y - scrollDelta.y
+    return circle
+  })
+}
+const updateCirclesWithScroll = () => {
+  const scrollDelta = {
+    x: window.scrollX - prevScroll.x,
+    y: window.scrollY - prevScroll.y
+  }
+  if (initialCircles.length) {
+    initialCircles = updateCirclePositions(initialCircles, scrollDelta) // covers locking circles of varialbe radius/
+  }
+  if (paintingCircles.length) {
+    paintingCircles = updateCirclePositions(paintingCircles, scrollDelta)
+  }
+  updatePrevScrollPosition()
+}
+const updateCircleForAndroid = (circle) => {
+  if (!utils.isAndroid()) { return circle }
+  circle.x = circle.x - window.visualViewport.offsetLeft
+  circle.y = circle.y - window.visualViewport.offsetTop
+  return circle
+}
+const checkIsCircleVisible = (circle) => {
+  let { x, y, radius } = circle
+  radius = radius || circleRadius
+  let isBetween = {
+    value: x + radius,
+    min: 0,
+    max: viewportWidth.value
+  }
+  const isCircleVisibleX = utils.isBetween(isBetween)
+  isBetween = {
+    value: y + radius,
+    min: 0,
+    max: viewportHeight.value
+  }
+  const isCircleVisibleY = utils.isBetween(isBetween)
+  return Boolean(isCircleVisibleX && isCircleVisibleY)
+}
+const offscreenCircle = (circle) => {
+  if (circle.x > viewportWidth.value) {
+    circle.x = viewportWidth.value
+  } else if (circle.x < 0) {
+    circle.x = 0
+  }
+  if (circle.y > viewportHeight.value) {
+    circle.y = viewportHeight.value
+  } else if (circle.y < 0) {
+    circle.y = 0
+  }
+  return circle
+}
+const drawCircle = (circle, context, shouldDrawOffscreen) => {
+  circle = updateCircleForAndroid(circle)
+  const isCircleVisible = checkIsCircleVisible(circle)
+  if (!isCircleVisible && !shouldDrawOffscreen) { return }
+  if (!isCircleVisible && shouldDrawOffscreen) { circle = offscreenCircle(circle) }
+  let { x, y, color, iteration, radius, alpha } = circle
+  radius = radius || circleRadius
+  let decay = rateOfIterationDecay
+  const isSlow = context.canvas.dataset.shouldDecaySlow
+  if (isSlow) {
+    decay = rateOfIterationDecaySlow
+  }
+  alpha = alpha || utils.exponentialDecay(iteration, decay)
+  context.beginPath()
+  context.arc(x, y, radius, 0, 2 * Math.PI)
+  context.closePath()
+  context.globalAlpha = alpha
+  context.fillStyle = color
+  context.fill()
+}
+const shouldCancel = (event) => {
+  let shouldCancelOutsideOfBrowser = !(event.target instanceof Element)
+  if (shouldCancelOutsideOfBrowser) {
+    return false
+  }
+  const fromDialog = event.target.closest('dialog')
+  const fromHeader = event.target.closest('header')
+  const fromFooter = event.target.closest('footer')
+  return fromDialog || fromHeader || fromFooter
+}
+const stopPainting = (event) => {
+  if (store.state.isAddPage) { return }
+  if (shouldCancel(event)) { return }
+  startCursor = startCursor || {}
+  const endCursor = utils.cursorPositionInViewport(event)
+  const shouldAddCard = store.state.shouldAddCard
+  currentUserIsLocking = false
+  window.cancelAnimationFrame(lockingAnimationTimer)
+  lockingAnimationTimer = undefined
+  lockingContext.clearRect(0, 0, pageWidth.value, pageHeight.value)
+  store.commit('currentUserIsPaintingLocked', false)
+  store.commit('currentUserIsPainting', false)
+  if (utils.cursorsAreClose(startCursor, endCursor) && shouldAddCard && event.cancelable) {
+    store.commit('shouldAddCard', true)
+    event.preventDefault()
+  } else {
+    store.commit('shouldAddCard', false)
+  }
+  // prevent mouse events from firing after touch events on touch device
+  if (event.cancelable) { event.preventDefault() }
+  startPostScroll()
+}
+
+// Post Scrolling (for android)
+
+const startPostScroll = () => {
+  shouldCancelPostScroll = false
+  if (!postScrollAnimationTimer) {
+    postScrollAnimationTimer = window.requestAnimationFrame(postScrollFrame)
+  }
+}
+const postScrollFrame = (timestamp) => {
+  if (!postScrollStartTime) {
+    postScrollStartTime = timestamp
+  }
+  const elaspedTime = timestamp - postScrollStartTime
+  const percentComplete = (elaspedTime / postScrollDuration) // between 0 and 1
+  if (shouldCancelPostScroll) {
+    endPostScroll()
+  } else if (percentComplete <= 1) {
+    scroll()
+    window.requestAnimationFrame(postScrollFrame)
+  } else {
+    endPostScroll()
+  }
+}
+const endPostScroll = () => {
+  shouldCancelPostScroll = false
+  window.cancelAnimationFrame(postScrollAnimationTimer)
+  postScrollAnimationTimer = undefined
+  postScrollStartTime = undefined
+}
+
+// Painting
+
+const painting = (event) => {
+  const isPainting = store.state.currentUserIsPainting
+  if (isPanning.value) { return }
+  if (isBoxSelecting.value) { return }
+  if (!toolbarIsCard.value) { return }
+  if (!isPainting) { return }
+  if (store.getters.shouldScrollAtEdges(event) && event.cancelable) {
+    event.preventDefault() // prevents touch swipe viewport scrolling
+  }
+  if (!paintingCirclesTimer) {
+    paintingCirclesTimer = window.requestAnimationFrame(paintCirclesAnimationFrame.value)
+  }
+  if (event.getCoalescedEvents) {
+    const events = event.getCoalescedEvents()
+    events.forEach(event => createPaintingCircle(event))
+  } else {
+    createPaintingCircle(event)
+  }
+  triggerHideTouchInterface()
+}
+const triggerHideTouchInterface = () => {
+  if (!store.state.currentUserIsPaintingLocked) { return }
+  store.commit('triggerHideTouchInterface')
+}
+const createPaintingCircle = (event) => {
+  const isTouch = Boolean(event.touches)
+  const isPaintingLocked = store.state.currentUserIsPaintingLocked
+  if (isTouch && !isPaintingLocked) { return }
+  if (isBoxSelecting.value) { return }
+  const currentUserIsPaintingLocked = store.state.currentUserIsPaintingLocked
+  if (isTouch && !currentUserIsPaintingLocked) { return }
+  createPaintingCircles(event)
+  const position = utils.cursorPositionInSpace(event)
+  // selectItems(position)
+  selectItemsBetweenCurrentAndPrevPosition(position)
+}
+const createPaintingCircles = (event) => {
+  state.currentCursor = utils.cursorPositionInViewport(event)
+  if (!prevCursor) {
+    prevCursor = state.currentCursor
+    return
+  }
+  const color = store.state.currentUser.color
+  const points = utils.pointsBetweenTwoPoints(prevCursor, state.currentCursor)
+  points.forEach(point => {
+    const circle = { x: point.x, y: point.y, color, iteration: 0 }
+    paintingCircles.push(circle)
+  })
+  const circle = { x: state.currentCursor.x, y: state.currentCursor.y, color, iteration: 0 }
+  broadcastCircle(event, circle)
+  prevCursor = state.currentCursor
+}
+const startPainting = (event) => {
+  if (isPanning.value) { return }
+  if (isBoxSelecting.value) { return }
+  updateSelectableCardsInViewport()
+  updateSelectableBoxes()
+  updateSelectableConnectionsInViewport()
+  startCursor = utils.cursorPositionInViewport(event)
+  state.currentCursor = startCursor
+  const multipleCardsIsSelected = Boolean(store.state.multipleCardsSelectedIds.length)
+  store.dispatch('currentCards/updateCanBeSelectedSortedByY')
+  if (utils.isMultiTouch(event)) { return }
+  startLocking()
+  if (event.touches) {
+    store.commit('currentUserIsPainting', false)
+  } else {
+    store.commit('currentUserIsPainting', true)
+    createInitialCircle()
+  }
+  const shouldAdd = !multipleCardsIsSelected && !utils.unpinnedDialogIsVisible()
+  // add card
+  if (shouldAdd && toolbarIsCard.value) {
+    store.commit('shouldAddCard', true)
+  // add box
+  } else if (shouldAdd && toolbarIsBox.value) {
+    addBox(event)
+    return
+  }
+  // clear selected
+  if (!event.shiftKey) {
+    store.dispatch('clearMultipleSelected')
+  }
+  prevPosition = null
+  prevCursor = null
+  store.commit('previousMultipleCardsSelectedIds', utils.clone(store.state.multipleCardsSelectedIds))
+  store.commit('previousMultipleConnectionsSelectedIds', utils.clone(store.state.multipleConnectionsSelectedIds))
+  store.dispatch('closeAllDialogs')
+}
+const paintCirclesAnimationFrame = () => {
+  paintingCircles = utils.filterCircles(paintingCircles, maxIterations)
+  paintingContext.clearRect(0, 0, pageWidth.value, pageHeight.value)
+  paintingCircles.forEach(item => {
+    item.iteration++
+    let circle = JSON.parse(JSON.stringify(item))
+    drawCircle(circle, paintingContext)
+  })
+  if (paintingCircles.length > 0) {
+    window.requestAnimationFrame(paintCirclesAnimationFrame.value)
+  } else {
+    setTimeout(() => {
+      window.cancelAnimationFrame(paintingCirclesTimer)
+      paintingCirclesTimer = undefined
+    }, 0)
+  }
+}
+
+// Boxes
+
+const addBox = (event) => {
+  let position = utils.cursorPositionInSpace(event)
+  if (utils.isPositionOutsideOfSpace(position)) {
+    position = utils.cursorPositionInPage(event)
+    store.commit('addNotificationWithPosition', { message: 'Outside Space', position, type: 'info', icon: 'cancel', layer: 'app' })
+    return
+  }
+  store.dispatch('currentUser/notifyReadOnly', position)
+  const shouldPrevent = !store.getters['currentUser/canEditSpace']()
+  if (shouldPrevent) {
+    store.commit('currentUserToolbar', 'card')
+    return
+  }
+  store.dispatch('currentBoxes/add', { box: position, shouldResize: true })
+  store.commit('currentBoxIsNew', true)
+  event.preventDefault() // allows dragging boxes without scrolling on touch
+}
+
+// Selecting
+
+const shouldPreventSelectionOnMobile = () => {
+  const isMobile = utils.isMobile()
+  const isPaintingLocked = store.state.currentUserIsPaintingLocked
+  return isMobile && !isPaintingLocked
+}
+// selectItems (position) {
+//   if (shouldPreventSelectionOnMobile()) { return }
+//   if (userCannotEditSpace) { return }
+//   selectCards(position)
+//   selectConnectionPaths(position)
+//   selectBoxes(position)
+// },
+const selectItemsBetweenCurrentAndPrevPosition = (position) => {
+  if (!prevPosition) {
+    prevPosition = position
+    return
+  }
+  const points = utils.pointsBetweenTwoPoints(prevPosition, position)
+  console.log('🌷🌷🌷points', points, selectableCardsInViewport)
+
+  // selectItemsIn
+
+  // points.forEach(point => {
+  //   selectItems(point)
+  // })
+  prevPosition = position
+}
+
+// selectCards (position) {
+//   if (shouldPreventSelectionOnMobile()) { return }
+//   if (userCantEditSpace) { return }
+//   const cards = selectableCardsInViewport
+//   if (!cards) { return }
+//   console.time(1)
+//   cards.forEach(card => {
+//     // update selectableCardsInViewport with missing dimensions
+//     const isMissingDimensions = utils.isMissingDimensions(card)
+//     if (isMissingDimensions) {
+//       store.dispatch('currentCards/updateDimensions', { cards: [card] })
+//       card = store.getters['currentCards/byId'](card.id)
+//       selectableCardsInViewport = selectableCardsInViewport.map(selectableCard => {
+//         if (selectableCard.id === card.id) {
+//           selectableCard = card
+//         }
+//         return selectableCard
+//       })
+//     }
+//     // select card
+//     const cardX = card.x
+//     const cardY = card.y
+//     const x = {
+//       value: position.x,
+//       min: cardX - circleSelectionRadius,
+//       max: cardX + card.width + circleSelectionRadius
+//     }
+//     const y = {
+//       value: position.y,
+//       min: cardY - circleSelectionRadius,
+//       max: cardY + card.height + circleSelectionRadius
+//     }
+//     const isBetweenX = utils.isBetween(x)
+//     const isBetweenY = utils.isBetween(y)
+//     if (isBetweenX && isBetweenY) {
+//       store.dispatch('addToMultipleCardsSelected', card.id)
+//     }
+//   })
+//         console.timeEnd(1)
+
+// },
+// selectConnectionPaths (position) {
+//   const svg = document.querySelector('svg.connections')
+//   let svgPoint = svg.createSVGPoint()
+//   svgPoint.x = position.x
+//   svgPoint.y = position.y
+
+//   selectableConnectionsInViewport.forEach(path => {
+//     const pathId = path.dataset.id
+//     const isSelected = path.isPointInStroke(svgPoint)
+//     if (isSelected) {
+//       store.dispatch('addToMultipleConnectionsSelected', pathId)
+//     }
+//   })
+// },
+
+// selectBoxes (position) {
+//   const boxes = store.getters['currentBoxes/isNotLocked']
+//   boxes.forEach(box => {
+//     const element = document.querySelector(`.box-info[data-box-id="${box.id}"]`)
+//     const rect = element.getBoundingClientRect()
+//     box = {
+//       id: box.id,
+//       name: box.name,
+//       x: box.x,
+//       y: box.y,
+//       width: rect.width,
+//       height: rect.height
+//     }
+//     const x = {
+//       value: position.x,
+//       min: box.x - circleSelectionRadius,
+//       max: box.x + box.width + circleSelectionRadius
+//     }
+//     const y = {
+//       value: position.y,
+//       min: box.y - circleSelectionRadius,
+//       max: box.y + box.height + circleSelectionRadius
+//     }
+//     const isBetweenX = utils.isBetween(x)
+//     const isBetweenY = utils.isBetween(y)
+//     if (isBetweenX && isBetweenY) {
+//       store.dispatch('addToMultipleBoxesSelected', box.id)
+//     }
+//   })
+// },
+
+// Remote Painting
+
+const broadcastCircle = (event, circle) => {
+  const position = utils.cursorPositionInSpace(event)
+  store.commit('broadcast/update', {
+    updates: {
+      userId: store.state.currentUser.id,
+      x: position.x,
+      y: position.y,
+      color: circle.color,
+      iteration: circle.iteration,
+      zoom: spaceZoomDecimal.value
+    },
+    type: 'addRemotePaintingCircle',
+    handler: 'triggerAddRemotePaintingCircle'
+  })
+}
+const createRemotePaintingCircle = (circle) => {
+  const { color, zoom } = circle
+  const prevCircle = remotePaintingCircles.findLast(item => item.userId === circle.userId)
+  if (prevCircle) {
+    const points = utils.pointsBetweenTwoPoints(prevCircle, circle)
+    points.forEach(point => {
+      point = { x: point.x, y: point.y, color, zoom, iteration: 0 }
+      remotePaintingCircles.push(point)
+    })
+    remotePaintingCircles.push(circle)
+  } else {
+    remotePaintingCircles.push(circle)
+  }
+}
+const remotePainting = () => {
+  if (!remotePaintingCirclesTimer) {
+    remotePaintingCirclesTimer = window.requestAnimationFrame(remotePaintCirclesAnimationFrame)
+  }
+}
+const remotePaintCirclesAnimationFrame = () => {
+  remotePaintingCircles = utils.filterCircles(remotePaintingCircles, maxIterations)
+  remotePaintingContext.clearRect(0, 0, pageWidth.value, pageHeight.value)
+  remotePaintingCircles.forEach(item => {
+    item.iteration++
+    let circle = JSON.parse(JSON.stringify(item))
+    circle.x = circle.x - window.scrollX
+    circle.y = circle.y - window.scrollY
+    const shouldDrawOffscreen = true
+    drawCircle(circle, remotePaintingContext, shouldDrawOffscreen)
+  })
+  if (remotePaintingCircles.length > 0) {
+    window.requestAnimationFrame(remotePaintCirclesAnimationFrame)
+  } else {
+    setTimeout(() => {
+      window.cancelAnimationFrame(remotePaintingCirclesTimer)
+      remotePaintingCirclesTimer = undefined
+    }, 0)
+  }
+}
+
+// Locking
+
+const cancelLocking = () => {
+  shouldCancelLocking = true
+}
+const startLocking = () => {
+  if (toolbarIsBox.value) { return }
+  currentUserIsLocking = true
+  shouldCancelLocking = false
+  setTimeout(() => {
+    if (!lockingAnimationTimer) {
+      lockingAnimationTimer = window.requestAnimationFrame(lockingAnimationFrame)
+    }
+  }, lockingPreDuration)
+}
+const lockingAnimationFrame = (timestamp) => {
+  if (!lockingStartTime) {
+    lockingStartTime = timestamp
+  }
+  const elaspedTime = timestamp - lockingStartTime
+  const percentComplete = (elaspedTime / lockingDuration) // between 0 and 1
+  if (!utils.cursorsAreClose(startCursor, state.currentCursor)) {
+    currentUserIsLocking = false
+  }
+  if (shouldCancelLocking) {
+    currentUserIsLocking = false
+    shouldCancelLocking = false
+  }
+  if (currentUserIsLocking && percentComplete <= 1) {
+    const minSize = circleRadius
+    const percentRemaining = Math.abs(percentComplete - 1)
+    const circleRadiusDelta = initialLockCircleRadius - minSize
+    const radius = (circleRadiusDelta * percentRemaining) + minSize
+    const alpha = utils.easeOut(percentComplete, elaspedTime, lockingDuration)
+    const circle = {
+      x: startCursor.x,
+      y: startCursor.y,
+      color: currentUserColor.value,
+      radius,
+      alpha: alpha || 0.01, // to ensure truthyness
+      iteration: 1
+    }
+    lockingContext.clearRect(0, 0, pageWidth.value, pageHeight.value)
+    drawCircle(circle, lockingContext)
+    window.requestAnimationFrame(lockingAnimationFrame)
+  } else {
+    window.cancelAnimationFrame(lockingAnimationTimer)
+    lockingContext.clearRect(0, 0, pageWidth.value, pageHeight.value)
+    lockingAnimationTimer = undefined
+    lockingStartTime = undefined
+  }
+  if (currentUserIsLocking && percentComplete > 1) {
+    store.commit('currentUserIsPainting', true)
+    store.commit('currentUserIsPaintingLocked', true)
+    console.log('🔒 lockingAnimationFrame locked')
+    postMessage.sendHaptics({ name: 'softImpact' })
+    lockingStartTime = undefined
+  }
+}
+
+// Initial Circles
+
+const startInitialCircles = () => {
+  initialCircles.map(circle => {
+    circle.persistent = false
+  })
+  if (!initialCirclesTimer) {
+    initialCirclesTimer = window.requestAnimationFrame(initialCirclesAnimationFrame)
+  }
+}
+const createInitialCircle = () => {
+  if (toolbarIsBox.value) { return }
+  const initialCircle = {
+    x: startCursor.x,
+    y: startCursor.y,
+    color: currentUserColor.value,
+    iteration: 1,
+    persistent: true
+  }
+  initialCircles.push(initialCircle)
+  drawCircle(initialCircle, initialCircleContext)
+  startInitialCircles()
+}
+const initialCirclesAnimationFrame = () => {
+  initialCircles = utils.filterCircles(initialCircles, maxIterations)
+  initialCircleContext.clearRect(0, 0, pageWidth.value, pageHeight.value)
+  initialCircles.forEach(item => {
+    if (!item.persistent) {
+      item.iteration++
+    }
+    let circle = JSON.parse(JSON.stringify(item))
+    drawCircle(circle, initialCircleContext)
+  })
+  if (initialCircles.length) {
+    window.requestAnimationFrame(initialCirclesAnimationFrame)
+  } else {
+    window.cancelAnimationFrame(initialCirclesTimer)
+    initialCirclesTimer = undefined
+  }
+}
+
+// Upload Files
+
+const checkIfUploadIsDraggedOver = (event) => {
+  const uploadIsFiles = event.dataTransfer.types.find(type => type === 'Files')
+  if (!uploadIsFiles) { return }
+  state.currentCursor = utils.cursorPositionInViewport(event)
+  state.currentCursorInSpace = utils.cursorPositionInSpace(event)
+  state.uploadIsDraggedOver = true
+}
+const removeUploadIsDraggedOver = () => {
+  state.uploadIsDraggedOver = false
+}
+const addCardsAndUploadFiles = (event) => {
+  let files = event.dataTransfer.files
+  files = Array.from(files)
+  removeUploadIsDraggedOver()
+  store.dispatch('upload/addCardsAndUploadFiles', {
+    files,
+    event
+  })
+}
+
 </script>
+
+<template lang="pug">
+aside
+  //- Magic painting is ephemeral brush strokes that select items
+  canvas#magic-painting(
+    @mousedown.left="startPainting"
+    @touchstart="startPainting"
+    @mousemove="painting"
+    @touchmove="painting"
+    :width="viewportWidth"
+    :height="viewportHeight"
+    :style="canvasStyles"
+    @dragenter="checkIfUploadIsDraggedOver"
+    @dragover.prevent="checkIfUploadIsDraggedOver"
+    @dragleave="removeUploadIsDraggedOver"
+    @dragend="removeUploadIsDraggedOver"
+    @drop.prevent.stop="addCardsAndUploadFiles"
+  )
+  canvas#remote-painting.remote-painting(
+    :width="viewportWidth"
+    :height="viewportHeight"
+    :style="canvasStyles"
+    :data-should-decay-slow="true"
+  )
+  canvas#locking.locking(
+    :width="viewportWidth"
+    :height="viewportHeight"
+    :style="canvasStyles"
+    :data-should-decay-slow="true"
+  )
+  canvas#initial-circle.initial-circle(
+    :width="viewportWidth"
+    :height="viewportHeight"
+    :style="canvasStyles"
+    :data-should-decay-slow="true"
+  )
+  DropGuideLine(
+    :currentCursor="state.currentCursor"
+    :currentCursorInSpace="state.currentCursorInSpace"
+    :uploadIsDraggedOver="state.uploadIsDraggedOver"
+  )
+</template>
 
 <style lang="stylus" scoped>
 canvas
