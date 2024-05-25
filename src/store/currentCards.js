@@ -431,7 +431,7 @@ const currentCards = {
           card = utils.updateCardDimensions(card)
           if (!card) { return }
           const dimensionsChanged = card.width !== prevDimensions.width || card.height !== prevDimensions.height
-          const isMissingDimensions = card.width === 0 || card.height === 0
+          const isMissingDimensions = utils.isMissingDimensions(card)
           if (!dimensionsChanged) { return }
           if (isMissingDimensions) { return }
           const body = {
