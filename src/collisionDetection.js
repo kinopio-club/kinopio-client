@@ -10,7 +10,7 @@ export default {
 
   isPointInsideRect (point, rect) {
     return (rect.x <= point.x && point.x <= rect.x + rect.width &&
-            rect.y <= point.y && point.y <= rect.y + rect.height)
+      rect.y <= point.y && point.y <= rect.y + rect.height)
   },
 
   createGrid (rects) {
