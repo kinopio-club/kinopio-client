@@ -1612,6 +1612,7 @@ const store = createStore({
     },
     addMultipleToMultipleCardsSelected: (context, cardIds) => {
       utils.typeCheck({ value: cardIds, type: 'array' })
+      if (!cardIds.length) { return }
       const set1 = new Set(cardIds)
       const set2 = new Set(context.state.multipleCardsSelectedIds)
       // Combine sets
@@ -1692,6 +1693,7 @@ const store = createStore({
     },
     addMultipleToMultipleConnectionsSelected: (context, connectionIds) => {
       utils.typeCheck({ value: connectionIds, type: 'array' })
+      if (!connectionIds.length) { return }
       const set1 = new Set(connectionIds)
       const set2 = new Set(context.state.multipleConnectionsSelectedIds)
       // Combine sets
@@ -1725,6 +1727,7 @@ const store = createStore({
     },
     addMultipleToMultipleBoxesSelected: (context, boxIds) => {
       utils.typeCheck({ value: boxIds, type: 'array' })
+      if (!boxIds.length) { return }
       const set1 = new Set(boxIds)
       const set2 = new Set(context.state.multipleBoxesSelectedIds)
       // Combine sets
