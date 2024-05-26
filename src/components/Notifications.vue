@@ -50,42 +50,18 @@ onBeforeUnmount(() => {
   clearInterval(checkIfShouldNotifySpaceOutOfSyncIntervalTimer)
 })
 
-const props = defineProps({
-  visible: Boolean
-})
 const state = reactive({
   readOnlyJiggle: false,
   notifyCardsCreatedIsOverLimitJiggle: false,
   notifySpaceOutOfSync: false
 })
 
-const toggleNotifyCardsCreatedIsOverLimit = (value) => {
-  state.notifyCardsCreatedIsOverLimitJiggle = true
-}
-const toggleNotifySpaceOutOfSync = (value) => {
-  state.notifySpaceOutOfSync = value
+const closeAllDialogs = () => {
+  store.dispatch('closeAllDialogs')
 }
 
-const items = computed(() => store.state.notifications)
-const notifySpaceNotFound = computed(() => store.state.notifySpaceNotFound)
-const notifyConnectionError = computed(() => store.state.notifyConnectionError)
-const notifyConnectionErrorName = computed(() => store.state.notifyConnectionErrorName)
-const notifyServerCouldNotSave = computed(() => {
-  const isOffline = !store.state.isOnline
-  if (isOffline) { return }
-  return store.state.notifyServerCouldNotSave
-})
-const notifySpaceIsRemoved = computed(() => store.state.notifySpaceIsRemoved)
-const notifySignUpToEditSpace = computed(() => store.state.notifySignUpToEditSpace)
-const notifyCardsCreatedIsNearLimit = computed(() => store.state.notifyCardsCreatedIsNearLimit)
-const notifyCardsCreatedIsOverLimit = computed(() => store.state.notifyCardsCreatedIsOverLimit)
-const notifyKinopioUpdatesAreAvailable = computed(() => store.state.notifyKinopioUpdatesAreAvailable)
-const notifyMoveOrCopyToSpace = computed(() => store.state.notifyMoveOrCopyToSpace)
-const notifyMoveOrCopyToSpaceDetails = computed(() => store.state.notifyMoveOrCopyToSpaceDetails)
-const notifySpaceIsHidden = computed(() => store.state.notifySpaceIsHidden)
-const notifyCurrentSpaceIsNowRemoved = computed(() => store.state.notifyCurrentSpaceIsNowRemoved)
-const notifyThanksForDonating = computed(() => store.state.notifyThanksForDonating)
-const notifyThanksForUpgrading = computed(() => store.state.notifyThanksForUpgrading)
+// user
+
 const currentUserIsPaintingLocked = computed(() => store.state.currentUserIsPaintingLocked)
 const currentUserIsResizingCard = computed(() => store.state.currentUserIsResizingCard)
 const currentUserIsTiltingCard = computed(() => store.state.currentUserIsTiltingCard)
@@ -94,7 +70,9 @@ const currentUserIsPanningReady = computed(() => store.state.currentUserIsPannin
 const currentUserIsSignedIn = computed(() => store.getters['currentUser/isSignedIn'])
 const currentUserIsUpgraded = computed(() => store.state.currentUser.isUpgraded)
 const isTouchDevice = computed(() => store.state.isTouchDevice)
-const notifySpaceIsUnavailableOffline = computed(() => store.getters['currentSpace/isUnavailableOffline'])
+
+// space
+
 const privacyState = computed(() => {
   return privacy.states().find(state => {
     return state.name === store.state.currentSpace.privacy
@@ -112,97 +90,13 @@ const currentSpaceIsTemplate = computed(() => {
   return templateSpaceIds.includes(currentSpace.id)
 })
 
-const notifificationClasses = (item) => {
-  let classes = {
-    'danger': item.type === 'danger',
-    'success': item.type === 'success',
-    'info': item.type === 'info',
-    'persistent-item': item.isPersistentItem
-  }
-  return classes
-}
-const removeNotifyThanks = () => {
-  store.commit('notifyThanksForDonating', false)
-  store.commit('notifyThanksForUpgrading', false)
-}
-const cacheErrorIsVisible = () => {
-  const element = document.getElementById('notify-cache-is-full')
-  const isHidden = element.className.includes('hidden')
-  return Boolean(!isHidden)
-}
+// space out of sync
+
 const updatePageVisibilityChange = (event) => {
   checkIfShouldNotifySpaceOutOfSync()
 }
-const closeAllDialogs = () => {
-  store.dispatch('closeAllDialogs')
-}
-const update = async () => {
-  await nextTick()
-  const notifications = store.state.notifications
-  notifications.forEach(item => {
-    const element = document.querySelector(`.notifications .item[data-notification-id="${item.id}"]`)
-    if (element.dataset.isPersistentItem) { return }
-    element.addEventListener('animationend', removePrevious, false)
-  })
-}
-const removePrevious = () => {
-  store.commit('removePreviousNotification')
-}
-const removeById = (item) => {
-  store.commit('removeNotificationById', item.id)
-}
-const addReadOnlyJiggle = () => {
-  const element = readOnlyElement.value || templateElement.value
-  if (!element) { return }
-  state.readOnlyJiggle = true
-  element.addEventListener('animationend', removeReadOnlyJiggle, false)
-}
-const removeReadOnlyJiggle = () => {
-  state.readOnlyJiggle = false
-}
-const removeNotifySpaceNotFound = () => {
-  store.commit('notifySpaceNotFound', false)
-}
-const triggerSpaceDetailsVisible = () => {
-  store.commit('triggerSpaceDetailsVisible')
-}
-const triggerSignUpOrInIsVisible = () => {
-  store.commit('triggerSignUpOrInIsVisible')
-}
-const restoreSpace = () => {
-  const space = store.state.currentSpace
-  store.dispatch('currentSpace/restoreRemovedSpace', space)
-  store.commit('notifySpaceIsRemoved', false)
-}
-const deleteSpace = () => {
-  const space = store.state.currentSpace
-  store.dispatch('currentSpace/deleteSpace', space)
-  store.commit('notifySpaceIsRemoved', false)
-  const firstSpace = cache.getAllSpaces()[0]
-  store.dispatch('currentSpace/loadSpace', { space: firstSpace })
-}
-const resetNotifySpaceIsHidden = () => {
-  store.commit('notifySpaceIsHidden', false)
-}
-const resetNotifyCurrentSpaceIsNowRemoved = () => {
-  store.commit('notifyCurrentSpaceIsNowRemoved', false)
-}
-const showRemoved = () => {
-  resetNotifyCurrentSpaceIsNowRemoved()
-  store.commit('triggerRemovedIsVisible')
-}
-const resetNotifyCardsCreatedIsNearLimit = () => {
-  store.commit('notifyCardsCreatedIsNearLimit', false)
-}
-const resetNotifyMoveOrCopyToSpace = () => {
-  store.commit('notifyMoveOrCopyToSpace', false)
-}
-const resetNotifyCardsCreatedIsOverLimitJiggle = () => {
-  state.notifyCardsCreatedIsOverLimitJiggle = false
-}
-const triggerUpgradeUserIsVisible = () => {
-  closeAllDialogs()
-  store.commit('triggerUpgradeUserIsVisible')
+const toggleNotifySpaceOutOfSync = (value) => {
+  state.notifySpaceOutOfSync = value
 }
 const checkIfShouldNotifySpaceOutOfSync = async () => {
   if (state.notifySpaceOutOfSync) { return }
@@ -233,6 +127,119 @@ const checkIfShouldNotifySpaceOutOfSync = async () => {
     store.commit('isLoadingSpace', false)
   }
 }
+
+// notifications
+
+const items = computed(() => store.state.notifications)
+const notifySpaceNotFound = computed(() => store.state.notifySpaceNotFound)
+const notifyConnectionError = computed(() => store.state.notifyConnectionError)
+const notifyConnectionErrorName = computed(() => store.state.notifyConnectionErrorName)
+const notifyServerCouldNotSave = computed(() => {
+  const isOffline = !store.state.isOnline
+  if (isOffline) { return }
+  return store.state.notifyServerCouldNotSave
+})
+const notifySpaceIsRemoved = computed(() => store.state.notifySpaceIsRemoved)
+const notifySignUpToEditSpace = computed(() => store.state.notifySignUpToEditSpace)
+const notifyCardsCreatedIsNearLimit = computed(() => store.state.notifyCardsCreatedIsNearLimit)
+const notifyCardsCreatedIsOverLimit = computed(() => store.state.notifyCardsCreatedIsOverLimit)
+const notifyKinopioUpdatesAreAvailable = computed(() => store.state.notifyKinopioUpdatesAreAvailable)
+const notifyMoveOrCopyToSpace = computed(() => store.state.notifyMoveOrCopyToSpace)
+const notifyMoveOrCopyToSpaceDetails = computed(() => store.state.notifyMoveOrCopyToSpaceDetails)
+const notifySpaceIsHidden = computed(() => store.state.notifySpaceIsHidden)
+const notifyCurrentSpaceIsNowRemoved = computed(() => store.state.notifyCurrentSpaceIsNowRemoved)
+const notifyThanksForDonating = computed(() => store.state.notifyThanksForDonating)
+const notifyThanksForUpgrading = computed(() => store.state.notifyThanksForUpgrading)
+const notifySpaceIsUnavailableOffline = computed(() => store.getters['currentSpace/isUnavailableOffline'])
+const notifificationClasses = (item) => {
+  let classes = {
+    'danger': item.type === 'danger',
+    'success': item.type === 'success',
+    'info': item.type === 'info',
+    'persistent-item': item.isPersistentItem
+  }
+  return classes
+}
+const removePrevious = () => {
+  store.commit('removePreviousNotification')
+}
+const removeById = (item) => {
+  store.commit('removeNotificationById', item.id)
+}
+
+// toggle notifications
+
+const toggleNotifyCardsCreatedIsOverLimit = (value) => {
+  state.notifyCardsCreatedIsOverLimitJiggle = true
+}
+const removeNotifyThanks = () => {
+  store.commit('notifyThanksForDonating', false)
+  store.commit('notifyThanksForUpgrading', false)
+}
+const cacheErrorIsVisible = () => {
+  const element = document.getElementById('notify-cache-is-full')
+  const isHidden = element.className.includes('hidden')
+  return Boolean(!isHidden)
+}
+const update = async () => {
+  await nextTick()
+  const notifications = store.state.notifications
+  notifications.forEach(item => {
+    const element = document.querySelector(`.notifications .item[data-notification-id="${item.id}"]`)
+    if (element.dataset.isPersistentItem) { return }
+    element.addEventListener('animationend', removePrevious, false)
+  })
+}
+const removeNotifySpaceNotFound = () => {
+  store.commit('notifySpaceNotFound', false)
+}
+const removeNotifyConnectionError = () => {
+  store.commit('notifyConnectionError', false)
+}
+
+// buttons
+
+const restoreSpace = () => {
+  const space = store.state.currentSpace
+  store.dispatch('currentSpace/restoreRemovedSpace', space)
+  store.commit('notifySpaceIsRemoved', false)
+}
+const deleteSpace = () => {
+  const space = store.state.currentSpace
+  store.dispatch('currentSpace/deleteSpace', space)
+  store.commit('notifySpaceIsRemoved', false)
+  const firstSpace = cache.getAllSpaces()[0]
+  store.dispatch('currentSpace/loadSpace', { space: firstSpace })
+}
+const resetNotifySpaceIsHidden = () => {
+  store.commit('notifySpaceIsHidden', false)
+}
+const resetNotifyCurrentSpaceIsNowRemoved = () => {
+  store.commit('notifyCurrentSpaceIsNowRemoved', false)
+}
+const triggerSpaceDetailsVisible = () => {
+  store.commit('triggerSpaceDetailsVisible')
+}
+const triggerSignUpOrInIsVisible = () => {
+  store.commit('triggerSignUpOrInIsVisible')
+}
+const showRemoved = () => {
+  resetNotifyCurrentSpaceIsNowRemoved()
+  store.commit('triggerRemovedIsVisible')
+}
+const resetNotifyCardsCreatedIsNearLimit = () => {
+  store.commit('notifyCardsCreatedIsNearLimit', false)
+}
+const resetNotifyMoveOrCopyToSpace = () => {
+  store.commit('notifyMoveOrCopyToSpace', false)
+}
+const resetNotifyCardsCreatedIsOverLimitJiggle = () => {
+  state.notifyCardsCreatedIsOverLimitJiggle = false
+}
+const triggerUpgradeUserIsVisible = () => {
+  closeAllDialogs()
+  store.commit('triggerUpgradeUserIsVisible')
+}
 const refreshBrowser = () => {
   window.location.reload()
 }
@@ -244,10 +251,18 @@ const changeSpace = (spaceId) => {
   store.dispatch('currentSpace/changeSpace', space)
   store.dispatch('closeAllDialogs')
 }
-const removeNotifyConnectionError = () => {
-  store.commit('notifyConnectionError', false)
-}
 
+// read-only jiggle
+
+const addReadOnlyJiggle = () => {
+  const element = readOnlyElement.value || templateElement.value
+  if (!element) { return }
+  state.readOnlyJiggle = true
+  element.addEventListener('animationend', removeReadOnlyJiggle, false)
+}
+const removeReadOnlyJiggle = () => {
+  state.readOnlyJiggle = false
+}
 </script>
 
 <template lang="pug">
