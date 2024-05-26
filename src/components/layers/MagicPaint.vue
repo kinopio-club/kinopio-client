@@ -45,6 +45,7 @@ let postScrollAnimationTimer, postScrollStartTime, shouldCancelPostScroll
 let selectableCardsInViewport = []
 let selectableBoxes = []
 let selectableConnectionsInViewport = []
+let selectableCardsGrid
 
 onMounted(() => {
   store.subscribe((mutation, state) => {
@@ -130,6 +131,7 @@ const updateSelectableCardsInViewport = () => {
   const selectableCards = store.getters['currentCards/isSelectableInViewport']()
   if (!selectableCards) { return }
   selectableCardsInViewport = selectableCards
+  selectableCardsGrid = collisionDetection.createGrid(selectableCards)
 }
 const updateSelectableBoxes = () => {
   const boxes = store.getters['currentBoxes/isNotLocked']
@@ -487,7 +489,7 @@ const selectItems = (points) => {
   selectConnections(points)
 }
 const selectCards = (points) => {
-  const matches = collisionDetection.checkPointsInRects(points, selectableCardsInViewport)
+  const matches = collisionDetection.checkPointsInRects(points, selectableCardsInViewport, selectableCardsGrid)
   const cardIds = matches.map(match => match.id)
   store.dispatch('addMultipleToMultipleCardsSelected', cardIds)
 }

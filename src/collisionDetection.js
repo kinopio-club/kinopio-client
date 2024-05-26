@@ -31,8 +31,8 @@ export default {
     return grid
   },
 
-  checkPointsInRects (points, rects) {
-    const grid = this.createGrid(rects, gridSize)
+  checkPointsInRects (points, rects, grid) {
+    grid = grid || this.createGrid(rects, gridSize)
     const matchingRects = new Set()
     for (let point of points) {
       const cell = this.getGridCell(point.x, point.y, gridSize)
