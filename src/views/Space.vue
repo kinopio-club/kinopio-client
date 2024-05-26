@@ -48,7 +48,7 @@ onMounted(() => {
   window.addEventListener('message', addCardFromOutsideAppContext)
   // load space tasks
   addInteractionBlur()
-  window.addEventListener('unload', unloadPage)
+  window.addEventListener('beforeunload', unloadPage)
   window.addEventListener('popstate', loadSpaceOnBackOrForward)
   document.fonts.ready.then(event => {
     store.commit('webfontIsLoaded', true)

@@ -2000,7 +2000,7 @@ article.card-wrap#card(
         //- [·]
         .checkbox-wrap(v-if="hasCheckbox" @mouseup.left="toggleCardChecked" @touchend.prevent="toggleCardChecked")
           label(:class="{active: isChecked, disabled: !canEditSpace}")
-            input(type="checkbox" v-model="checkboxState")
+            input(name="checkbox" type="checkbox" v-model="checkboxState")
         //- Name
         .badge.comment-badge
           img.icon.view(src="@/assets/comment.svg")
@@ -2016,7 +2016,7 @@ article.card-wrap#card(
           //- [·]
           .checkbox-wrap(v-if="hasCheckbox" @mouseup.left="toggleCardChecked" @touchend.prevent="toggleCardChecked")
             label(:class="{active: isChecked, disabled: !canEditSpace}")
-              input(type="checkbox" v-model="checkboxState")
+              input(name="checkbox" type="checkbox" v-model="checkboxState")
           //- Name
           p.name.name-segments(v-if="normalizedName" :style="{background: currentBackgroundColor}" :class="{'is-checked': isChecked, 'has-checkbox': hasCheckbox, 'badge badge-status': isImageCard && hasTextSegments}")
             template(v-for="segment in nameSegments")

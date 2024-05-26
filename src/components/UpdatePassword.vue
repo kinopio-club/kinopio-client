@@ -95,8 +95,8 @@ const updatePassword = async (event) => {
 <template lang="pug">
 section
   form(@submit.prevent="updatePassword")
-    input(type="password" placeholder="New Password" required @input="clearErrors" v-model="state.password")
-    input(type="password" placeholder="Confirm New Password" required @input="clearErrors")
+    input(name="password" type="password" placeholder="New Password" required @input="clearErrors" v-model="state.password")
+    input(name="confirm password" type="password" placeholder="Confirm New Password" required @input="clearErrors")
     .row(v-if="state.error.passwordMatch")
       .badge.danger Passwords can't match
     .row(v-if="state.error.passwordTooShort")
