@@ -27,7 +27,6 @@ export default {
   computed: {
     items () {
       let itemsInLayer = this.$store.state.notificationsWithPosition.filter(item => item.layer === this.layer)
-      itemsInLayer = utils.clone(itemsInLayer)
       itemsInLayer = itemsInLayer.map(item => {
         const isReadOnlyMessage = item.message === 'Space is Read Only'
         if (this.currentSpaceIsUnavailableOffline && isReadOnlyMessage) {

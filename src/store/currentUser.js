@@ -483,7 +483,7 @@ export default {
       const type = `update${spaceUserPermission}`
       const userId = context.state.id
       context.commit('broadcast/updateUser', { id: space.id, updates, type, userId }, { root: true })
-      let user = utils.clone(context.state)
+      let user = context.state
       user.userId = user.id
       context.commit('currentSpace/updateUser', user, { root: true })
       context.commit('currentSpace/updateCollaborator', user, { root: true })
