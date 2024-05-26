@@ -1021,7 +1021,6 @@ export default {
   pageSizeFromItems (items) {
     const padding = 250
     const defaultSize = 500
-    items = this.clone(items)
     items = items.filter(item => item.x && item.y)
     if (!items.length) {
       return { width: 0, height: 0 }
