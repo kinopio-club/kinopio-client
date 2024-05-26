@@ -421,9 +421,8 @@ const currentCards = {
         }
         const cardIds = cards.map(newCard => newCard.id)
         context.commit('shouldExplicitlyRenderCardIds', cardIds, { root: true })
-        cards = utils.clone(cards)
-        cards = cards.filter(card => Boolean(card))
-        cards.forEach(card => {
+        const updatedCards = cards.filter(card => Boolean(card))
+        updatedCards.forEach(card => {
           const prevDimensions = {
             width: card.width,
             height: card.height

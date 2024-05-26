@@ -890,12 +890,7 @@ const currentSpace = {
       })
     },
     updateSpace: async (context, updates) => {
-      const space = utils.clone(context.state)
-      updates.id = space.id
-      if (updates.name) {
-        const updatedSpace = utils.clone(space)
-        updatedSpace.name = updates.name
-      }
+      updates.id = context.state.id
       context.commit('updateSpace', updates)
       context.dispatch('broadcast/update', { updates, type: 'updateSpace' }, { root: true })
       context.dispatch('api/addToQueue', {

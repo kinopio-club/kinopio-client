@@ -19,8 +19,8 @@ let showDebugMessages = false
 const joinSpaceRoom = (store, mutation) => {
   console.log('🌙 joining', websocket)
   if (!websocket) { return }
-  const space = utils.clone(store.state.currentSpace)
-  const user = utils.clone(store.state.currentUser)
+  const space = store.state.currentSpace
+  const user = store.state.currentUser
   const currentSpaceIsRemote = store.getters['currentSpace/isRemote']
   if (!currentSpaceIsRemote) {
     store.commit('isJoiningSpace', false)

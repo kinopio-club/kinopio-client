@@ -372,13 +372,12 @@ export default {
       if (this.notifySpaceOutOfSync) { return }
       console.log('☎️ checkIfShouldNotifySpaceOutOfSync…')
       try {
-        let space = utils.clone(this.$store.state.currentSpace)
         if (!this.currentUserIsSignedIn) { return }
         this.$store.commit('isLoadingSpace', true)
-        const remoteSpace = await this.$store.dispatch('api/getSpaceUpdatedAt', space)
+        const remoteSpace = await this.$store.dispatch('api/getSpaceUpdatedAt', { id: this.$store.state.currentSpace.id })
         this.$store.commit('isLoadingSpace', false)
         if (!remoteSpace) { return }
-        space = this.$store.state.currentSpace
+        const space = this.$store.state.currentSpace
         const spaceUpdatedAt = dayjs(space.updatedAt)
         const remoteSpaceUpdatedAt = dayjs(remoteSpace.updatedAt)
         const deltaMinutes = spaceUpdatedAt.diff(remoteSpaceUpdatedAt, 'minute')

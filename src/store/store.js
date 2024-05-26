@@ -1573,8 +1573,8 @@ const store = createStore({
     closeAllDialogs: (context, origin) => {
       origin = origin || 'Store.closeAllDialogs'
       context.commit('closeAllDialogs', origin)
-      const space = utils.clone(context.rootState.currentSpace)
-      const user = utils.clone(context.rootState.currentUser)
+      const space = context.rootState.currentSpace
+      const user = context.rootState.currentUser
       context.commit('broadcast/updateUser', { user: utils.userMeta(user, space), type: 'updateUserPresence' }, { root: true })
       context.commit('broadcast/updateStore', { updates: { userId: user.id }, type: 'clearRemoteCardDetailsVisible' })
       context.commit('broadcast/updateStore', { updates: { userId: user.id }, type: 'clearRemoteConnectionDetailsVisible' })
