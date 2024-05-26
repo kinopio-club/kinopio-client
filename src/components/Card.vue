@@ -1934,7 +1934,7 @@ article.card-wrap#card(
   :data-x="x"
   :data-y="y"
   :data-resize-width="resizeWidth"
-  :data-width="card.width"
+  :data-width="resizeWidth || card.width"
   :data-height="card.height"
   :key="card.id"
   ref="cardElement"

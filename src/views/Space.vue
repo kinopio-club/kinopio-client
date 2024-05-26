@@ -199,12 +199,10 @@ const stopTiltingCards = () => {
   store.dispatch('history/resume')
   const cardIds = store.state.currentUserIsTiltingCardIds
   const cards = cardIds.map(id => store.getters['currentCards/byId'](id))
+  store.dispatch('currentCards/updateDimensions', { cards: [cards] })
   store.dispatch('history/add', { cards, useSnapshot: true })
   store.commit('currentUserIsTiltingCard', false)
   store.commit('broadcast/updateStore', { updates: { userId: currentUser.value.id }, type: 'removeRemoteUserTiltingCards' })
-  cardIds.forEach(cardId => {
-    store.dispatch('currentConnections/updatePaths', { cardId, shouldUpdateApi: true })
-  })
 }
 const resizeCards = () => {
   if (!prevCursor) { return }
@@ -219,6 +217,7 @@ const stopResizingCards = () => {
   const cards = cardIds.map(id => store.getters['currentCards/byId'](id))
   store.dispatch('history/add', { cards, useSnapshot: true })
   store.commit('currentUserIsResizingCard', false)
+  store.dispatch('currentCards/updateDimensions', { cards: [cards] })
   store.commit('broadcast/updateStore', { updates: { userId: currentUser.value.id }, type: 'removeRemoteUserResizingCards' })
 }
 const addCardFromOutsideAppContext = (event) => {
