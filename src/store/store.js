@@ -1178,10 +1178,6 @@ const store = createStore({
       postMessage.sendHaptics({ name: 'selection' })
       state.multipleBoxesSelectedIds.push(boxId)
     },
-    addMultipleToMultipleBoxesSelected: (state, boxIds) => {
-      postMessage.sendHaptics({ name: 'selection' })
-      state.multipleBoxesSelectedIds = boxIds
-    },
     removeFromMultipleBoxesSelected: (state, boxId) => {
       utils.typeCheck({ value: boxId, type: 'string' })
       state.multipleBoxesSelectedIds = state.multipleBoxesSelectedIds.filter(id => {
@@ -1687,6 +1683,21 @@ const store = createStore({
     },
     multipleConnectionsSelectedIds: (context, connectionIds) => {
       utils.typeCheck({ value: connectionIds, type: 'array' })
+      context.commit('multipleConnectionsSelectedIds', connectionIds)
+      const updates = {
+        userId: context.rootState.currentUser.id,
+        connectionIds
+      }
+      context.commit('broadcast/updateStore', { updates, type: 'updateRemoteConnectionsSelected' }, { root: true })
+    },
+    addMultipleToMultipleConnectionsSelected: (context, connectionIds) => {
+      utils.typeCheck({ value: connectionIds, type: 'array' })
+      const set1 = new Set(connectionIds)
+      const set2 = new Set(context.state.multipleConnectionsSelectedIds)
+      // Combine sets
+      const combinedSet = new Set([...set1, ...set2])
+      // Convert back to array
+      connectionIds = [...combinedSet]
       context.commit('multipleConnectionsSelectedIds', connectionIds)
       const updates = {
         userId: context.rootState.currentUser.id,

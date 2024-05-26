@@ -52,7 +52,7 @@ onMounted(() => {
       const event = mutation.payload
       const position = utils.cursorPositionInSpace(event)
       createPaintingCircle(event)
-      // selectItems(position)
+      selectItems([position])
     } else if (mutation.type === 'triggerUpdateMagicPaintPositionOffset') {
       updateCirclesWithScroll()
     } else if (mutation.type === 'triggerAddRemotePaintingCircle') {
@@ -370,7 +370,6 @@ const createPaintingCircle = (event) => {
   if (isTouch && !currentUserIsPaintingLocked) { return }
   createPaintingCircles(event)
   const position = utils.cursorPositionInSpace(event)
-  // selectItems(position)
   selectItemsBetweenCurrentAndPrevPosition(position)
 }
 const createPaintingCircles = (event) => {
@@ -471,52 +470,38 @@ const shouldPreventSelectionOnMobile = () => {
   const isPaintingLocked = store.state.currentUserIsPaintingLocked
   return isMobile && !isPaintingLocked
 }
-// selectItems (position) {
-//   if (shouldPreventSelectionOnMobile()) { return }
-//   if (userCannotEditSpace) { return }
-//   selectCards(position)
-//   selectConnectionPaths(position)
-//   selectBoxes(position)
-// },
 const selectItemsBetweenCurrentAndPrevPosition = (position) => {
   if (!prevPosition) {
     prevPosition = position
     return
   }
-  // select cards
   const points = utils.pointsBetweenTwoPoints(prevPosition, position)
-  let matches = collisionDetection.checkPointsInRects(points, selectableCardsInViewport)
-  const cardIds = matches.map(match => match.id)
-  store.dispatch('addMultipleToMultipleCardsSelected', cardIds)
-  // select boxes
-  matches = collisionDetection.checkPointsInRects(points, selectableBoxes)
-  const boxIds = matches.map(match => match.id)
-  store.dispatch('addMultipleToMultipleBoxesSelected', boxIds)
-
-  // select connections
-
-  const svg = document.querySelector('svg.connections')
-  matches = collisionDetection.checkPointsInsidePaths(points, selectableConnectionsInViewport, svg)
-  console.log('☎️connections', matches)
-
+  selectItems(points)
   prevPosition = position
 }
-
-// },
-// selectConnectionPaths (position) {
-//   const svg = document.querySelector('svg.connections')
-//   let svgPoint = svg.createSVGPoint()
-//   svgPoint.x = position.x
-//   svgPoint.y = position.y
-
-//   selectableConnectionsInViewport.forEach(path => {
-//     const pathId = path.dataset.id
-//     const isSelected = path.isPointInStroke(svgPoint)
-//     if (isSelected) {
-//       store.dispatch('addToMultipleConnectionsSelected', pathId)
-//     }
-//   })
-// },
+const selectItems = (points) => {
+  if (shouldPreventSelectionOnMobile()) { return }
+  if (userCannotEditSpace.value) { return }
+  selectCards(points)
+  selectBoxes(points)
+  selectConnections(points)
+}
+const selectCards = (points) => {
+  const matches = collisionDetection.checkPointsInRects(points, selectableCardsInViewport)
+  const cardIds = matches.map(match => match.id)
+  store.dispatch('addMultipleToMultipleCardsSelected', cardIds)
+}
+const selectBoxes = (points) => {
+  const matches = collisionDetection.checkPointsInRects(points, selectableBoxes)
+  const boxIds = matches.map(match => match.id)
+  store.dispatch('addMultipleToMultipleBoxesSelected', boxIds)
+}
+const selectConnections = (points) => {
+  const svg = document.querySelector('svg.connections')
+  const matches = collisionDetection.checkPointsInsidePaths(points, selectableConnectionsInViewport, svg)
+  const connectionIds = matches.map(match => match.id)
+  store.dispatch('addMultipleToMultipleConnectionsSelected', connectionIds)
+}
 
 // Remote Painting
 

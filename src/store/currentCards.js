@@ -481,7 +481,6 @@ const currentCards = {
         const updates = { id: cardId, resizeWidth: width }
         context.dispatch('update', updates)
         context.dispatch('broadcast/update', { updates, type: 'resizeCard', handler: 'currentCards/update' }, { root: true })
-        context.dispatch('updateDimensions', { cards: [card] })
         context.dispatch('currentConnections/updateMultplePaths', [card], { root: true })
       })
     },
@@ -515,7 +514,6 @@ const currentCards = {
         const updates = { id: cardId, tilt }
         context.dispatch('update', updates)
         context.dispatch('broadcast/update', { updates, type: 'tiltCard', handler: 'currentCards/update' }, { root: true })
-        context.dispatch('updateDimensions', { cards: [card] })
         const connections = context.rootGetters['currentConnections/byCardId'](cardId)
         context.dispatch('currentConnections/updatePathsWhileDragging', { connections }, { root: true })
       })
