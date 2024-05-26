@@ -212,6 +212,7 @@ const convertFromCanvas = (space) => {
 
 const importSpace = async (space) => {
   try {
+    store.commit('isLoadingSpace', true)
     const currentUserId = store.state.currentUser.id
     validate(space)
     if (state.format === 'canvas') {
