@@ -484,6 +484,11 @@ const updatePreviousResultItem = () => {
 
 // position and dimensions
 
+const checkIfShouldUpdateDimensions = () => {
+  if (utils.isMissingDimensions(props.card)) {
+    store.dispatch('currentCards/updateDimensions', { cards: [props.card] })
+  }
+}
 const width = computed(() => {
   if (isComment.value) { return }
   if (currentCardDetailsIsVisible.value) { return }
@@ -1616,6 +1621,7 @@ const initViewportObserver = async () => {
       entries.forEach((entry) => {
         if (entry.isIntersecting) {
           state.isVisibleInViewport = true
+          checkIfShouldUpdateDimensions()
         } else {
           state.isVisibleInViewport = false
         }
