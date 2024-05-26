@@ -1010,7 +1010,6 @@ const currentCards = {
       return uniq(colors)
     },
     nameSegments: (state, getters) => (card) => {
-      card = utils.clone(card)
       let name = card.name
       let url = utils.urlFromString(name)
       let imageUrl

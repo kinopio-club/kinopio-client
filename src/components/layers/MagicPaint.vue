@@ -129,7 +129,7 @@ const canvasStyles = computed(() => {
 const updateSelectableCardsInViewport = () => {
   const selectableCards = store.getters['currentCards/isSelectableInViewport']()
   if (!selectableCards) { return }
-  selectableCardsInViewport = utils.clone(selectableCards)
+  selectableCardsInViewport = selectableCards
 }
 const updateSelectableBoxes = () => {
   const boxes = store.getters['currentBoxes/isNotLocked']
@@ -421,8 +421,8 @@ const startPainting = (event) => {
   }
   prevPosition = null
   prevCursor = null
-  store.commit('previousMultipleCardsSelectedIds', utils.clone(store.state.multipleCardsSelectedIds))
-  store.commit('previousMultipleConnectionsSelectedIds', utils.clone(store.state.multipleConnectionsSelectedIds))
+  store.commit('previousMultipleCardsSelectedIds', store.state.multipleCardsSelectedIds)
+  store.commit('previousMultipleConnectionsSelectedIds', store.state.multipleConnectionsSelectedIds)
   store.dispatch('closeAllDialogs')
 }
 const paintCirclesAnimationFrame = () => {

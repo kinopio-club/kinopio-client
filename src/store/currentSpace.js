@@ -1156,10 +1156,10 @@ const currentSpace = {
   getters: {
     all: (state, getters, rootState, rootGetters) => {
       let space = utils.clone(state)
-      space.cards = utils.clone(rootGetters['currentCards/all'])
-      space.connections = utils.clone(rootGetters['currentConnections/all'])
-      space.connectionTypes = utils.clone(rootGetters['currentConnections/allTypes'])
-      space.boxes = utils.clone(rootGetters['currentBoxes/all'])
+      space.cards = rootGetters['currentCards/all']
+      space.connections = rootGetters['currentConnections/all']
+      space.connectionTypes = rootGetters['currentConnections/allTypes']
+      space.boxes = rootGetters['currentBoxes/all']
       return space
     },
 
