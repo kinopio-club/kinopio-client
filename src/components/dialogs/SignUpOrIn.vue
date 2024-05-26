@@ -9,16 +9,16 @@ dialog.narrow.sign-up-or-in(v-if="visible" :open="visible")
   section(v-if="signUpVisible")
     p Create an account to share your spaces and access them anywhere
     form(@submit.prevent="signUp")
-      input(ref="email" type="email" autocomplete="email" placeholder="Email" required v-model="email" @input="clearErrors")
+      input(ref="email" name="email" type="email" autocomplete="email" placeholder="Email" required v-model="email" @input="clearErrors")
       .badge.info(v-if="error.accountAlreadyExists") An account with this email already exists, Sign In instead
-      input(type="password" placeholder="Password" required @input="clearErrors" v-model="password")
-      input(type="password" placeholder="Confirm Password" required @input="clearErrors")
+      input(type="password" name="password" placeholder="Password" required @input="clearErrors" v-model="password")
+      input(type="password" name="password" placeholder="Confirm Password" required @input="clearErrors")
       .badge.danger(v-if="error.passwordMatch") Passwords must match
       .badge.danger(v-if="error.passwordMatchesEmail") Password can't be from your email
       .badge.danger(v-if="error.passwordTooShort") Password must be longer than 4 characters
       .badge.danger(v-if="error.tooManyAttempts") Too many attempts, try again in 10 minutes
       .badge.danger(v-if="error.unknownServerError") (シ_ _)シ Something went wrong, Please try again or contact support
-      button(type="submit" :class="{active : loading.signUpOrIn}" tabindex="0")
+      button(name="signUp" type="submit" :class="{active : loading.signUpOrIn}" tabindex="0")
         span Sign Up
         Loader(:visible="loading.signUpOrIn")
 
@@ -26,12 +26,12 @@ dialog.narrow.sign-up-or-in(v-if="visible" :open="visible")
   section(v-else)
     p Welcome back
     form(@submit.prevent="signIn")
-      input.email(ref="email" type="email" autocomplete="email" placeholder="Email" required v-model="email" @input="clearErrors")
-      input(type="password" placeholder="Password" required v-model="password" @input="clearErrors")
+      input.email(ref="email" name="email" type="email" autocomplete="email" placeholder="Email" required v-model="email" @input="clearErrors")
+      input(type="password" name="password" placeholder="Password" required v-model="password" @input="clearErrors")
       .badge.danger(v-if="error.unknownServerError") (シ_ _)シ Something went wrong, Please try again or contact support
       .badge.danger(v-if="error.signInCredentials") Incorrect email or password
       .badge.danger(v-if="error.tooManyAttempts") Too many attempts, try again in 10 minutes
-      button(type="submit" :class="{active : loading.signUpOrIn}" tabindex="0")
+      button(name="signIn" type="submit" :class="{active : loading.signUpOrIn}" tabindex="0")
         span Sign In
         Loader(:visible="loading.signUpOrIn")
 
@@ -306,7 +306,7 @@ export default {
       }
       const cardNames = space.cards.map(card => card.name)
       let spaceIsEdited
-      currentSpace.cards.forEach(card => {
+      currentSpace?.cards.forEach(card => {
         const cardIsNew = !cardNames.includes(card.name)
         if (cardIsNew) {
           spaceIsEdited = true
@@ -320,10 +320,10 @@ export default {
     },
 
     addCollaboratorToCurrentSpace () {
-      const invitedSpaceIds = cache.invitedSpaces().map(space => space.id)
+      const invitedSpaceIds = cache.invitedSpaces().map(space => space?.id)
       const currentSpace = this.$store.state.currentSpace
       const currentUser = this.$store.state.currentUser
-      if (invitedSpaceIds.includes(currentSpace.id)) {
+      if (invitedSpaceIds.includes(currentSpace?.id)) {
         this.$store.commit('currentSpace/addCollaboratorToSpace', currentUser)
         this.$store.commit('broadcast/close')
         this.$store.commit('broadcast/joinSpaceRoom')
