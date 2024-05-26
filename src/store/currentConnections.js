@@ -259,14 +259,18 @@ export default {
       connections.forEach(connection => {
         const startCard = utils.updateCardDimensions({ id: connection.startCardId })
         const endCard = utils.updateCardDimensions({ id: connection.endCardId })
-        connection.path = context.getters.connectionPathBetweenCards({
+        const path = context.getters.connectionPathBetweenCards({
           startCard,
           endCard,
           controlPoint: connection.controlPoint
         })
-        if (!connection.path) { return }
-        connection.spaceId = currentSpaceId
-        newConnections.push(connection)
+        if (!path) { return }
+        const newConnection = {
+          id: connection.id,
+          spaceId: currentSpaceId,
+          path
+        }
+        newConnections.push(newConnection)
         if (canEditSpace) {
           context.dispatch('broadcast/update', { updates: connection, type: 'updateConnection', handler: 'currentConnections/update' }, { root: true })
           context.commit('update', connection)
