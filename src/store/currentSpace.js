@@ -727,6 +727,7 @@ const currentSpace = {
         context.dispatch('checkIfShouldNotifySpaceIsRemoved', space)
       }
       context.commit('broadcast/joinSpaceRoom', null, { root: true })
+      context.commit('notifySpaceNotFound', false, { root: true })
       nextTick(() => {
         context.dispatch('scrollCardsIntoView')
         // deferrable async tasks
