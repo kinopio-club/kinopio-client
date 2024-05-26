@@ -544,7 +544,7 @@ const currentSpace = {
     removeLocalSpaceIfUserIsRemoved: (context, space) => {
       const cachedSpace = cache.space(space.id)
       const currentUserIsRemovedFromSpace = utils.objectHasKeys(cachedSpace)
-      context.dispatch('currentUser/removeFavorite', { type: 'space', item: space }, { root: true })
+      context.dispatch('currentUser/updateFavoriteSpace', { space, value: false }, { root: true })
       if (currentUserIsRemovedFromSpace) {
         context.commit('currentUser/resetLastSpaceId', null, { root: true })
         cache.deleteSpace(space)

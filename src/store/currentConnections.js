@@ -268,7 +268,9 @@ export default {
         const newConnection = {
           id: connection.id,
           spaceId: currentSpaceId,
-          path
+          path,
+          startCardId: connection.startCardId,
+          endCardId: connection.endCardId
         }
         newConnections.push(newConnection)
         if (canEditSpace) {
