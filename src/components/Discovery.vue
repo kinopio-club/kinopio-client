@@ -1,5 +1,5 @@
 <script setup>
-import { reactive, computed, onMounted, onUnmounted, defineProps, defineEmits, watch, ref } from 'vue'
+import { reactive, computed, onMounted, onUnmounted, onBeforeUnmount, defineProps, defineEmits, watch, ref } from 'vue'
 import { useStore } from 'vuex'
 
 import dayjs from 'dayjs'
@@ -35,7 +35,7 @@ onMounted(() => {
     updateSpaces()
   }, 1000 * 60 * 10) // 10 minutes
 })
-onUnmounted(() => {
+onBeforeUnmount(() => {
   window.removeEventListener('online', updateLiveSpaces)
   clearInterval(updateLiveSpacesIntervalTimer)
   clearInterval(updateSpacesIntervalTimer)
