@@ -205,6 +205,7 @@ const cardCheckboxes = computed({
     }
     checkCardsHaveCheckboxes()
     checkCardsCheckboxIsChecked()
+    store.dispatch('currentConnections/updateMultplePaths', cards)
   }
 })
 const checkCardsHaveCheckboxes = () => {

@@ -386,7 +386,7 @@ const toggleIsComment = () => {
       delete card.name
     }
     store.dispatch('currentCards/update', card)
-    store.dispatch('currentCards/updateDimensions', { cards: [card] })
+    store.dispatch('currentConnections/updatePaths', { cardId: card.id, shouldUpdateApi: true })
   })
 }
 
