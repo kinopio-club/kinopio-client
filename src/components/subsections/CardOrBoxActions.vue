@@ -375,7 +375,7 @@ const isComment = computed(() => {
   const cards = props.cards.filter(card => card.isComment)
   return Boolean(cards.length === props.cards.length)
 })
-const toggleIsComment = () => {
+const toggleIsComment = async () => {
   updateCardDimensions()
   const value = !isComment.value
   props.cards.forEach(card => {
@@ -388,8 +388,9 @@ const toggleIsComment = () => {
       delete card.name
     }
     store.dispatch('currentCards/update', card)
-    store.dispatch('currentConnections/updatePaths', { cardId: card.id, shouldUpdateApi: true })
   })
+  await nextTick()
+  store.dispatch('currentConnections/updateMultiplePaths', props.cards)
 }
 
 // vote counter
