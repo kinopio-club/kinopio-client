@@ -178,7 +178,7 @@ const updateRemotePosition = (position) => {
 const updateSelectableDebounced = debounce(() => {
   updateSelectableCardsInViewport()
   updateSelectableConnectionsInViewport()
-}, 200)
+}, 400)
 
 const userScroll = () => {
   if (postScrollAnimationTimer) {
