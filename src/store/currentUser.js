@@ -484,9 +484,9 @@ export default {
       const userId = context.state.id
       context.commit('broadcast/updateUser', { id: space.id, updates, type, userId }, { root: true })
       let user = context.state
-      user.userId = user.id
-      context.commit('currentSpace/updateUser', user, { root: true })
-      context.commit('currentSpace/updateCollaborator', user, { root: true })
+      updates.userId = context.state.id
+      context.commit('currentSpace/updateUser', updates, { root: true })
+      context.commit('currentSpace/updateCollaborator', updates, { root: true })
     },
     lastSpaceId: (context, spaceId) => {
       context.commit('lastSpaceId', spaceId)
