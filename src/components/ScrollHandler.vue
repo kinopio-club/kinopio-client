@@ -1,5 +1,5 @@
 <script setup>
-import { reactive, computed, onMounted, onUnmounted, defineProps, defineEmits, watch, ref, nextTick } from 'vue'
+import { reactive, computed, onMounted, onUnmounted, onBeforeUnmount, defineProps, defineEmits, watch, ref, nextTick } from 'vue'
 import { useStore } from 'vuex'
 
 import utils from '@/utils.js'
@@ -9,7 +9,7 @@ const store = useStore()
 onMounted(() => {
   window.addEventListener('wheel', handleMouseWheelEvents, { passive: false })
 })
-onUnmounted(() => {
+onBeforeUnmount(() => {
   window.removeEventListener('wheel', handleMouseWheelEvents, { passive: false })
 })
 

@@ -1,5 +1,5 @@
 <script setup>
-import { reactive, computed, onMounted, onUnmounted, defineProps, defineEmits, watch, ref, nextTick } from 'vue'
+import { reactive, computed, onMounted, onBeforeUnmount, defineProps, defineEmits, watch, ref, nextTick } from 'vue'
 import { useStore } from 'vuex'
 
 import Notifications from '@/components/Notifications.vue'
@@ -30,7 +30,7 @@ onMounted(() => {
     }
   })
 })
-onUnmounted(() => {
+onBeforeUnmount(() => {
   window.removeEventListener('scroll', updatePosition)
 })
 
@@ -129,6 +129,10 @@ const cancelHidden = () => {
 // position
 
 const updatePosition = async () => {
+  if (!store.state.isTouchScrolling) {
+    updatePositionFrame()
+    return
+  }
   await nextTick()
   updatePositionIteration = 0
   if (updatePositionTimer) { return }

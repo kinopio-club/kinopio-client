@@ -1,5 +1,5 @@
 <script setup>
-import { reactive, computed, onMounted, onUnmounted, defineProps, defineEmits, watch, ref, nextTick } from 'vue'
+import { reactive, computed, onMounted, onUnmounted, onBeforeUnmount, defineProps, defineEmits, watch, ref, nextTick } from 'vue'
 import { useStore } from 'vuex'
 
 import About from '@/components/dialogs/About.vue'
@@ -100,7 +100,7 @@ onMounted(() => {
     }
   })
 })
-onUnmounted(() => {
+onBeforeUnmount(() => {
   window.removeEventListener('scroll', updatePosition)
   clearInterval(updateNotificationsIntervalTimer)
 })

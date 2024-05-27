@@ -421,9 +421,8 @@ const currentCards = {
         }
         const cardIds = cards.map(newCard => newCard.id)
         context.commit('shouldExplicitlyRenderCardIds', cardIds, { root: true })
-        cards = utils.clone(cards)
-        cards = cards.filter(card => Boolean(card))
-        cards.forEach(card => {
+        const updatedCards = cards.filter(card => Boolean(card))
+        updatedCards.forEach(card => {
           const prevDimensions = {
             width: card.width,
             height: card.height
@@ -481,7 +480,6 @@ const currentCards = {
         const updates = { id: cardId, resizeWidth: width }
         context.dispatch('update', updates)
         context.dispatch('broadcast/update', { updates, type: 'resizeCard', handler: 'currentCards/update' }, { root: true })
-        context.dispatch('updateDimensions', { cards: [card] })
         context.dispatch('currentConnections/updateMultplePaths', [card], { root: true })
       })
     },
@@ -515,7 +513,6 @@ const currentCards = {
         const updates = { id: cardId, tilt }
         context.dispatch('update', updates)
         context.dispatch('broadcast/update', { updates, type: 'tiltCard', handler: 'currentCards/update' }, { root: true })
-        context.dispatch('updateDimensions', { cards: [card] })
         const connections = context.rootGetters['currentConnections/byCardId'](cardId)
         context.dispatch('currentConnections/updatePathsWhileDragging', { connections }, { root: true })
       })
@@ -1013,7 +1010,6 @@ const currentCards = {
       return uniq(colors)
     },
     nameSegments: (state, getters) => (card) => {
-      card = utils.clone(card)
       let name = card.name
       let url = utils.urlFromString(name)
       let imageUrl

@@ -544,7 +544,7 @@ const currentSpace = {
     removeLocalSpaceIfUserIsRemoved: (context, space) => {
       const cachedSpace = cache.space(space.id)
       const currentUserIsRemovedFromSpace = utils.objectHasKeys(cachedSpace)
-      context.dispatch('currentUser/removeFavorite', { type: 'space', item: space }, { root: true })
+      context.dispatch('currentUser/updateFavoriteSpace', { space, value: false }, { root: true })
       if (currentUserIsRemovedFromSpace) {
         context.commit('currentUser/resetLastSpaceId', null, { root: true })
         cache.deleteSpace(space)
@@ -727,6 +727,7 @@ const currentSpace = {
         context.dispatch('checkIfShouldNotifySpaceIsRemoved', space)
       }
       context.commit('broadcast/joinSpaceRoom', null, { root: true })
+      context.commit('notifySpaceNotFound', false, { root: true })
       nextTick(() => {
         context.dispatch('scrollCardsIntoView')
         // deferrable async tasks
@@ -890,12 +891,7 @@ const currentSpace = {
       })
     },
     updateSpace: async (context, updates) => {
-      const space = utils.clone(context.state)
-      updates.id = space.id
-      if (updates.name) {
-        const updatedSpace = utils.clone(space)
-        updatedSpace.name = updates.name
-      }
+      updates.id = context.state.id
       context.commit('updateSpace', updates)
       context.dispatch('broadcast/update', { updates, type: 'updateSpace' }, { root: true })
       context.dispatch('api/addToQueue', {
@@ -1161,10 +1157,10 @@ const currentSpace = {
   getters: {
     all: (state, getters, rootState, rootGetters) => {
       let space = utils.clone(state)
-      space.cards = utils.clone(rootGetters['currentCards/all'])
-      space.connections = utils.clone(rootGetters['currentConnections/all'])
-      space.connectionTypes = utils.clone(rootGetters['currentConnections/allTypes'])
-      space.boxes = utils.clone(rootGetters['currentBoxes/all'])
+      space.cards = rootGetters['currentCards/all']
+      space.connections = rootGetters['currentConnections/all']
+      space.connectionTypes = rootGetters['currentConnections/allTypes']
+      space.boxes = rootGetters['currentBoxes/all']
       return space
     },
 

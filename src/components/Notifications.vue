@@ -1,3 +1,270 @@
+<script setup>
+import { reactive, computed, onMounted, onBeforeUnmount, defineProps, defineEmits, watch, ref, nextTick } from 'vue'
+import { useStore } from 'vuex'
+
+import cache from '@/cache.js'
+import consts from '@/consts.js'
+import privacy from '@/data/privacy.js'
+import utils from '@/utils.js'
+import templates from '@/data/templates.js'
+import PrivacyIcon from '@/components/PrivacyIcon.vue'
+import OfflineBadge from '@/components/OfflineBadge.vue'
+
+import dayjs from 'dayjs'
+const store = useStore()
+
+let checkIfShouldNotifySpaceOutOfSyncIntervalTimer
+
+const cardsOverLimitElement = ref(null)
+const readOnlyElement = ref(null)
+const templateElement = ref(null)
+
+onMounted(() => {
+  update()
+  store.subscribe((mutation, state) => {
+    if (mutation.type === 'addNotification') {
+      update()
+    } else if (mutation.type === 'currentUserIsPainting') {
+      if (state.currentUserIsPainting) {
+        addReadOnlyJiggle()
+      }
+    } else if (mutation.type === 'triggerReadOnlyJiggle') {
+      addReadOnlyJiggle()
+    } else if (mutation.type === 'notifyCardsCreatedIsOverLimit') {
+      toggleNotifyCardsCreatedIsOverLimit(true)
+    } else if (mutation.type === 'currentSpace/restoreSpace') {
+      toggleNotifySpaceOutOfSync(false)
+    } else if (mutation.type === 'triggerCheckIfShouldNotifySpaceOutOfSync') {
+      checkIfShouldNotifySpaceOutOfSync()
+    }
+  })
+  window.addEventListener('visibilitychange', updatePageVisibilityChange)
+  window.addEventListener('focus', updatePageVisibilityChange)
+  checkIfShouldNotifySpaceOutOfSyncIntervalTimer = setInterval(() => {
+    checkIfShouldNotifySpaceOutOfSync()
+  }, 1000 * 60 * 60 * 1) // check every hour
+})
+onBeforeUnmount(() => {
+  window.removeEventListener('visibilitychange', updatePageVisibilityChange)
+  window.removeEventListener('focus', updatePageVisibilityChange)
+  clearInterval(checkIfShouldNotifySpaceOutOfSyncIntervalTimer)
+})
+
+const state = reactive({
+  readOnlyJiggle: false,
+  notifyCardsCreatedIsOverLimitJiggle: false,
+  notifySpaceOutOfSync: false
+})
+
+const closeAllDialogs = () => {
+  store.dispatch('closeAllDialogs')
+}
+
+// user
+
+const currentUserIsPaintingLocked = computed(() => store.state.currentUserIsPaintingLocked)
+const currentUserIsResizingCard = computed(() => store.state.currentUserIsResizingCard)
+const currentUserIsTiltingCard = computed(() => store.state.currentUserIsTiltingCard)
+const currentUserIsPanning = computed(() => store.state.currentUserIsPanning)
+const currentUserIsPanningReady = computed(() => store.state.currentUserIsPanningReady)
+const currentUserIsSignedIn = computed(() => store.getters['currentUser/isSignedIn'])
+const currentUserIsUpgraded = computed(() => store.state.currentUser.isUpgraded)
+const isTouchDevice = computed(() => store.state.isTouchDevice)
+
+// space
+
+const privacyState = computed(() => {
+  return privacy.states().find(state => {
+    return state.name === store.state.currentSpace.privacy
+  })
+})
+const cardsCreatedCountFromLimit = computed(() => {
+  const cardsCreatedLimit = store.state.cardsCreatedLimit
+  const cardsCreatedCount = store.state.currentUser.cardsCreatedCount
+  return Math.max(cardsCreatedLimit - cardsCreatedCount, 0)
+})
+const currentSpaceIsTemplate = computed(() => {
+  const currentSpace = store.state.currentSpace
+  if (currentSpace.isTemplate) { return true }
+  const templateSpaceIds = templates.spaces().map(space => space.id)
+  return templateSpaceIds.includes(currentSpace.id)
+})
+
+// space out of sync
+
+const updatePageVisibilityChange = (event) => {
+  checkIfShouldNotifySpaceOutOfSync()
+}
+const toggleNotifySpaceOutOfSync = (value) => {
+  state.notifySpaceOutOfSync = value
+}
+const checkIfShouldNotifySpaceOutOfSync = async () => {
+  if (state.notifySpaceOutOfSync) { return }
+  console.log('☎️ checkIfShouldNotifySpaceOutOfSync…')
+  try {
+    if (!currentUserIsSignedIn.value) { return }
+    store.commit('isLoadingSpace', true)
+    const remoteSpace = await store.dispatch('api/getSpaceUpdatedAt', { id: store.state.currentSpace.id })
+    store.commit('isLoadingSpace', false)
+    if (!remoteSpace) { return }
+    const space = store.state.currentSpace
+    const spaceUpdatedAt = dayjs(space.updatedAt)
+    const remoteSpaceUpdatedAt = dayjs(remoteSpace.updatedAt)
+    const deltaMinutes = spaceUpdatedAt.diff(remoteSpaceUpdatedAt, 'minute')
+    const updatedAtIsChanged = deltaMinutes >= 1
+    console.log('☎️ checkIfShouldNotifySpaceOutOfSync result', {
+      updatedAtIsChanged,
+      spaceUpdatedAt: spaceUpdatedAt.fromNow(),
+      remoteSpaceUpdatedAt: remoteSpaceUpdatedAt.fromNow(),
+      deltaMinutes
+    })
+    if (updatedAtIsChanged) {
+      state.notifySpaceOutOfSync = true
+    }
+  } catch (error) {
+    console.error('🚒 checkIfShouldNotifySpaceOutOfSync', error)
+    state.notifySpaceOutOfSync = true
+    store.commit('isLoadingSpace', false)
+  }
+}
+
+// notifications
+
+const items = computed(() => store.state.notifications)
+const notifySpaceNotFound = computed(() => store.state.notifySpaceNotFound)
+const notifyConnectionError = computed(() => store.state.notifyConnectionError)
+const notifyConnectionErrorName = computed(() => store.state.notifyConnectionErrorName)
+const notifyServerCouldNotSave = computed(() => {
+  const isOffline = !store.state.isOnline
+  if (isOffline) { return }
+  return store.state.notifyServerCouldNotSave
+})
+const notifySpaceIsRemoved = computed(() => store.state.notifySpaceIsRemoved)
+const notifySignUpToEditSpace = computed(() => store.state.notifySignUpToEditSpace)
+const notifyCardsCreatedIsNearLimit = computed(() => store.state.notifyCardsCreatedIsNearLimit)
+const notifyCardsCreatedIsOverLimit = computed(() => store.state.notifyCardsCreatedIsOverLimit)
+const notifyKinopioUpdatesAreAvailable = computed(() => store.state.notifyKinopioUpdatesAreAvailable)
+const notifyMoveOrCopyToSpace = computed(() => store.state.notifyMoveOrCopyToSpace)
+const notifyMoveOrCopyToSpaceDetails = computed(() => store.state.notifyMoveOrCopyToSpaceDetails)
+const notifySpaceIsHidden = computed(() => store.state.notifySpaceIsHidden)
+const notifyCurrentSpaceIsNowRemoved = computed(() => store.state.notifyCurrentSpaceIsNowRemoved)
+const notifyThanksForDonating = computed(() => store.state.notifyThanksForDonating)
+const notifyThanksForUpgrading = computed(() => store.state.notifyThanksForUpgrading)
+const notifySpaceIsUnavailableOffline = computed(() => store.getters['currentSpace/isUnavailableOffline'])
+const notifificationClasses = (item) => {
+  let classes = {
+    'danger': item.type === 'danger',
+    'success': item.type === 'success',
+    'info': item.type === 'info',
+    'persistent-item': item.isPersistentItem
+  }
+  return classes
+}
+const removePrevious = () => {
+  store.commit('removePreviousNotification')
+}
+const removeById = (item) => {
+  store.commit('removeNotificationById', item.id)
+}
+
+// toggle notifications
+
+const toggleNotifyCardsCreatedIsOverLimit = (value) => {
+  state.notifyCardsCreatedIsOverLimitJiggle = true
+}
+const removeNotifyThanks = () => {
+  store.commit('notifyThanksForDonating', false)
+  store.commit('notifyThanksForUpgrading', false)
+}
+const cacheErrorIsVisible = () => {
+  const element = document.getElementById('notify-cache-is-full')
+  const isHidden = element.className.includes('hidden')
+  return Boolean(!isHidden)
+}
+const update = async () => {
+  await nextTick()
+  const notifications = store.state.notifications
+  notifications.forEach(item => {
+    const element = document.querySelector(`.notifications .item[data-notification-id="${item.id}"]`)
+    if (element.dataset.isPersistentItem) { return }
+    element.addEventListener('animationend', removePrevious, false)
+  })
+}
+const removeNotifySpaceNotFound = () => {
+  store.commit('notifySpaceNotFound', false)
+}
+const removeNotifyConnectionError = () => {
+  store.commit('notifyConnectionError', false)
+}
+
+// buttons
+
+const restoreSpace = () => {
+  const space = store.state.currentSpace
+  store.dispatch('currentSpace/restoreRemovedSpace', space)
+  store.commit('notifySpaceIsRemoved', false)
+}
+const deleteSpace = () => {
+  const space = store.state.currentSpace
+  store.dispatch('currentSpace/deleteSpace', space)
+  store.commit('notifySpaceIsRemoved', false)
+  const firstSpace = cache.getAllSpaces()[0]
+  store.dispatch('currentSpace/loadSpace', { space: firstSpace })
+}
+const resetNotifySpaceIsHidden = () => {
+  store.commit('notifySpaceIsHidden', false)
+}
+const resetNotifyCurrentSpaceIsNowRemoved = () => {
+  store.commit('notifyCurrentSpaceIsNowRemoved', false)
+}
+const triggerSpaceDetailsVisible = () => {
+  store.commit('triggerSpaceDetailsVisible')
+}
+const triggerSignUpOrInIsVisible = () => {
+  store.commit('triggerSignUpOrInIsVisible')
+}
+const showRemoved = () => {
+  resetNotifyCurrentSpaceIsNowRemoved()
+  store.commit('triggerRemovedIsVisible')
+}
+const resetNotifyCardsCreatedIsNearLimit = () => {
+  store.commit('notifyCardsCreatedIsNearLimit', false)
+}
+const resetNotifyMoveOrCopyToSpace = () => {
+  store.commit('notifyMoveOrCopyToSpace', false)
+}
+const resetNotifyCardsCreatedIsOverLimitJiggle = () => {
+  state.notifyCardsCreatedIsOverLimitJiggle = false
+}
+const triggerUpgradeUserIsVisible = () => {
+  closeAllDialogs()
+  store.commit('triggerUpgradeUserIsVisible')
+}
+const refreshBrowser = () => {
+  window.location.reload()
+}
+const duplicateSpace = () => {
+  store.dispatch('currentSpace/duplicateSpace')
+}
+const changeSpace = (spaceId) => {
+  const space = { id: spaceId }
+  store.dispatch('currentSpace/changeSpace', space)
+  store.dispatch('closeAllDialogs')
+}
+
+// read-only jiggle
+
+const addReadOnlyJiggle = () => {
+  const element = readOnlyElement.value || templateElement.value
+  if (!element) { return }
+  state.readOnlyJiggle = true
+  element.addEventListener('animationend', removeReadOnlyJiggle, false)
+}
+const removeReadOnlyJiggle = () => {
+  state.readOnlyJiggle = false
+}
+</script>
+
 <template lang="pug">
 aside.notifications(@click.left="closeAllDialogs")
   .item(v-for="item in items" v-bind:key="item.id" :data-notification-id="item.id" :data-is-persistent-item="item.isPersistentItem" :class="notifificationClasses(item)")
@@ -76,12 +343,12 @@ aside.notifications(@click.left="closeAllDialogs")
     .row
       button(@click.left.stop="triggerUpgradeUserIsVisible") Upgrade for Unlimited
 
-  .persistent-item.danger(v-if="notifyCardsCreatedIsOverLimit" ref="cardsOverLimit" :class="{'notification-jiggle': notifyCardsCreatedIsOverLimitJiggle}" @animationend="resetNotifyCardsCreatedIsOverLimitJiggle")
+  .persistent-item.danger(v-if="notifyCardsCreatedIsOverLimit" ref="cardsOverLimitElement" :class="{'notification-jiggle': state.notifyCardsCreatedIsOverLimitJiggle}" @animationend="resetNotifyCardsCreatedIsOverLimitJiggle")
     p To add more cards, you'll need to upgrade
     .row
       button(@click.left.stop="triggerUpgradeUserIsVisible") Upgrade for Unlimited
 
-  .persistent-item.success(v-if="notifySignUpToEditSpace" ref="readOnly" :class="{'notification-jiggle': readOnlyJiggle}")
+  .persistent-item.success(v-if="notifySignUpToEditSpace" ref="readOnlyElement" :class="{'notification-jiggle': state.readOnlyJiggle}")
     p
       PrivacyIcon(:privacy="privacyState.name")
       button(@click.left.stop="triggerSignUpOrInIsVisible") Sign Up or In to Edit
@@ -140,7 +407,7 @@ aside.notifications(@click.left="closeAllDialogs")
           img.refresh.icon(src="@/assets/refresh.svg")
           span Refresh
 
-  .persistent-item.danger(v-if="notifySpaceOutOfSync")
+  .persistent-item.danger(v-if="state.notifySpaceOutOfSync")
     p Space is out of sync, please refresh
     .row
       .button-wrap
@@ -148,7 +415,7 @@ aside.notifications(@click.left="closeAllDialogs")
           img.refresh.icon(src="@/assets/refresh.svg")
           span Refresh
 
-  .persistent-item.info(v-if="currentSpaceIsTemplate" ref="template" :class="{'notification-jiggle': readOnlyJiggle}")
+  .persistent-item.info(v-if="currentSpaceIsTemplate" ref="templateElement" :class="{'notification-jiggle': state.readOnlyJiggle}")
     button.button-only(@click.left="duplicateSpace")
       img.icon(src="@/assets/add.svg")
       span Duplicate to Edit
@@ -166,255 +433,7 @@ aside.notifications(@click.left="closeAllDialogs")
         span Space is unavailable offline.
     .row
       p Only spaces that you're a member of, and have visited recently, are available offline
-
 </template>
-
-<script>
-import cache from '@/cache.js'
-import consts from '@/consts.js'
-import privacy from '@/data/privacy.js'
-import utils from '@/utils.js'
-import templates from '@/data/templates.js'
-import PrivacyIcon from '@/components/PrivacyIcon.vue'
-import OfflineBadge from '@/components/OfflineBadge.vue'
-
-import dayjs from 'dayjs'
-
-let checkIfShouldNotifySpaceOutOfSyncIntervalTimer
-
-export default {
-  name: 'Notifications',
-  components: {
-    PrivacyIcon,
-    OfflineBadge
-  },
-  data () {
-    return {
-      readOnlyJiggle: false,
-      notifyCardsCreatedIsOverLimitJiggle: false,
-      notifySpaceOutOfSync: false
-    }
-  },
-  created () {
-    this.update()
-    this.$store.subscribe((mutation, state) => {
-      if (mutation.type === 'addNotification') {
-        this.update()
-      } else if (mutation.type === 'currentUserIsPainting') {
-        if (state.currentUserIsPainting) {
-          this.addReadOnlyJiggle()
-        }
-      } else if (mutation.type === 'triggerReadOnlyJiggle') {
-        this.addReadOnlyJiggle()
-      } else if (mutation.type === 'notifyCardsCreatedIsOverLimit') {
-        this.notifyCardsCreatedIsOverLimitJiggle = true
-      } else if (mutation.type === 'currentSpace/restoreSpace') {
-        this.notifySpaceOutOfSync = false
-      } else if (mutation.type === 'triggerCheckIfShouldNotifySpaceOutOfSync') {
-        this.checkIfShouldNotifySpaceOutOfSync()
-      }
-    })
-  },
-  mounted () {
-    window.addEventListener('visibilitychange', this.updatePageVisibilityChange)
-    window.addEventListener('focus', this.updatePageVisibilityChange)
-    checkIfShouldNotifySpaceOutOfSyncIntervalTimer = setInterval(() => {
-      this.checkIfShouldNotifySpaceOutOfSync()
-    }, 1000 * 60 * 60 * 1) // check every hour
-  },
-  beforeUnmount () {
-    window.removeEventListener('visibilitychange', this.updatePageVisibilityChange)
-    window.removeEventListener('focus', this.updatePageVisibilityChange)
-    clearInterval(checkIfShouldNotifySpaceOutOfSyncIntervalTimer)
-  },
-  computed: {
-    items () { return this.$store.state.notifications },
-    notifySpaceNotFound () { return this.$store.state.notifySpaceNotFound },
-    notifyConnectionError () { return this.$store.state.notifyConnectionError },
-    notifyConnectionErrorName () { return this.$store.state.notifyConnectionErrorName },
-    notifyServerCouldNotSave () {
-      const isOffline = !this.$store.state.isOnline
-      if (isOffline) { return }
-      return this.$store.state.notifyServerCouldNotSave
-    },
-    notifySpaceIsRemoved () { return this.$store.state.notifySpaceIsRemoved },
-    notifySignUpToEditSpace () { return this.$store.state.notifySignUpToEditSpace },
-    notifyCardsCreatedIsNearLimit () { return this.$store.state.notifyCardsCreatedIsNearLimit },
-    notifyCardsCreatedIsOverLimit () { return this.$store.state.notifyCardsCreatedIsOverLimit },
-    notifyKinopioUpdatesAreAvailable () { return this.$store.state.notifyKinopioUpdatesAreAvailable },
-    notifyMoveOrCopyToSpace () { return this.$store.state.notifyMoveOrCopyToSpace },
-    notifyMoveOrCopyToSpaceDetails () { return this.$store.state.notifyMoveOrCopyToSpaceDetails },
-    notifySpaceIsHidden () { return this.$store.state.notifySpaceIsHidden },
-    notifyCurrentSpaceIsNowRemoved () { return this.$store.state.notifyCurrentSpaceIsNowRemoved },
-    notifyThanksForDonating () { return this.$store.state.notifyThanksForDonating },
-    notifyThanksForUpgrading () { return this.$store.state.notifyThanksForUpgrading },
-    currentUserIsPaintingLocked () { return this.$store.state.currentUserIsPaintingLocked },
-    currentUserIsResizingCard () { return this.$store.state.currentUserIsResizingCard },
-    currentUserIsTiltingCard () { return this.$store.state.currentUserIsTiltingCard },
-    currentUserIsPanning () { return this.$store.state.currentUserIsPanning },
-    currentUserIsPanningReady () { return this.$store.state.currentUserIsPanningReady },
-    currentUserIsSignedIn () { return this.$store.getters['currentUser/isSignedIn'] },
-    currentUserIsUpgraded () { return this.$store.state.currentUser.isUpgraded },
-    isTouchDevice () { return this.$store.state.isTouchDevice },
-    notifySpaceIsUnavailableOffline () { return this.$store.getters['currentSpace/isUnavailableOffline'] },
-    privacyState () {
-      return privacy.states().find(state => {
-        return state.name === this.$store.state.currentSpace.privacy
-      })
-    },
-    cardsCreatedCountFromLimit () {
-      const cardsCreatedLimit = this.$store.state.cardsCreatedLimit
-      const cardsCreatedCount = this.$store.state.currentUser.cardsCreatedCount
-      return Math.max(cardsCreatedLimit - cardsCreatedCount, 0)
-    },
-    currentSpaceIsTemplate () {
-      const currentSpace = this.$store.state.currentSpace
-      if (currentSpace.isTemplate) { return true }
-      const templateSpaceIds = templates.spaces().map(space => space.id)
-      return templateSpaceIds.includes(currentSpace.id)
-    }
-  },
-  methods: {
-    notifificationClasses (item) {
-      let classes = {
-        'danger': item.type === 'danger',
-        'success': item.type === 'success',
-        'info': item.type === 'info',
-        'persistent-item': item.isPersistentItem
-      }
-      return classes
-    },
-    removeNotifyThanks () {
-      this.$store.commit('notifyThanksForDonating', false)
-      this.$store.commit('notifyThanksForUpgrading', false)
-    },
-    cacheErrorIsVisible () {
-      const element = document.getElementById('notify-cache-is-full')
-      const isHidden = element.className.includes('hidden')
-      return Boolean(!isHidden)
-    },
-    updatePageVisibilityChange (event) {
-      this.checkIfShouldNotifySpaceOutOfSync()
-    },
-    closeAllDialogs () {
-      this.$store.dispatch('closeAllDialogs')
-    },
-    update () {
-      const notifications = this.$store.state.notifications
-      notifications.forEach(item => {
-        this.$nextTick(() => {
-          const element = document.querySelector(`.notifications .item[data-notification-id="${item.id}"]`)
-          if (element.dataset.isPersistentItem) { return }
-          element.addEventListener('animationend', this.removePrevious, false)
-        })
-      })
-    },
-    removePrevious () {
-      this.$store.commit('removePreviousNotification')
-    },
-    removeById (item) {
-      this.$store.commit('removeNotificationById', item.id)
-    },
-    addReadOnlyJiggle () {
-      const element = this.$refs.readOnly || this.$refs.template
-      if (!element) { return }
-      this.readOnlyJiggle = true
-      element.addEventListener('animationend', this.removeReadOnlyJiggle, false)
-    },
-    removeReadOnlyJiggle () {
-      this.readOnlyJiggle = false
-    },
-    removeNotifySpaceNotFound () {
-      this.$store.commit('notifySpaceNotFound', false)
-    },
-    triggerSpaceDetailsVisible () {
-      this.$store.commit('triggerSpaceDetailsVisible')
-    },
-    triggerSignUpOrInIsVisible () {
-      this.$store.commit('triggerSignUpOrInIsVisible')
-    },
-    restoreSpace () {
-      const space = this.$store.state.currentSpace
-      this.$store.dispatch('currentSpace/restoreRemovedSpace', space)
-      this.$store.commit('notifySpaceIsRemoved', false)
-    },
-    deleteSpace () {
-      const space = this.$store.state.currentSpace
-      this.$store.dispatch('currentSpace/deleteSpace', space)
-      this.$store.commit('notifySpaceIsRemoved', false)
-      const firstSpace = cache.getAllSpaces()[0]
-      this.$store.dispatch('currentSpace/loadSpace', { space: firstSpace })
-    },
-    resetNotifySpaceIsHidden () {
-      this.$store.commit('notifySpaceIsHidden', false)
-    },
-    resetNotifyCurrentSpaceIsNowRemoved () {
-      this.$store.commit('notifyCurrentSpaceIsNowRemoved', false)
-    },
-    showRemoved () {
-      this.resetNotifyCurrentSpaceIsNowRemoved()
-      this.$store.commit('triggerRemovedIsVisible')
-    },
-    resetNotifyCardsCreatedIsNearLimit () {
-      this.$store.commit('notifyCardsCreatedIsNearLimit', false)
-    },
-    resetNotifyMoveOrCopyToSpace () {
-      this.$store.commit('notifyMoveOrCopyToSpace', false)
-    },
-    resetNotifyCardsCreatedIsOverLimitJiggle () {
-      this.notifyCardsCreatedIsOverLimitJiggle = false
-    },
-    triggerUpgradeUserIsVisible () {
-      this.closeAllDialogs()
-      this.$store.commit('triggerUpgradeUserIsVisible')
-    },
-    async checkIfShouldNotifySpaceOutOfSync () {
-      if (this.notifySpaceOutOfSync) { return }
-      console.log('☎️ checkIfShouldNotifySpaceOutOfSync…')
-      try {
-        let space = utils.clone(this.$store.state.currentSpace)
-        if (!this.currentUserIsSignedIn) { return }
-        this.$store.commit('isLoadingSpace', true)
-        const remoteSpace = await this.$store.dispatch('api/getSpaceUpdatedAt', space)
-        this.$store.commit('isLoadingSpace', false)
-        if (!remoteSpace) { return }
-        space = this.$store.state.currentSpace
-        const spaceUpdatedAt = dayjs(space.updatedAt)
-        const remoteSpaceUpdatedAt = dayjs(remoteSpace.updatedAt)
-        const deltaMinutes = spaceUpdatedAt.diff(remoteSpaceUpdatedAt, 'minute')
-        const updatedAtIsChanged = deltaMinutes >= 1
-        console.log('☎️ checkIfShouldNotifySpaceOutOfSync result', {
-          updatedAtIsChanged,
-          spaceUpdatedAt: spaceUpdatedAt.fromNow(),
-          remoteSpaceUpdatedAt: remoteSpaceUpdatedAt.fromNow(),
-          deltaMinutes
-        })
-        if (updatedAtIsChanged) {
-          this.notifySpaceOutOfSync = true
-        }
-      } catch (error) {
-        console.error('🚒 checkIfShouldNotifySpaceOutOfSync', error)
-        this.notifySpaceOutOfSync = true
-        this.$store.commit('isLoadingSpace', false)
-      }
-    },
-    refreshBrowser () {
-      window.location.reload()
-    },
-    duplicateSpace () {
-      this.$store.dispatch('currentSpace/duplicateSpace')
-    },
-    changeSpace (spaceId) {
-      const space = { id: spaceId }
-      this.$store.dispatch('currentSpace/changeSpace', space)
-      this.$store.dispatch('closeAllDialogs')
-    },
-    removeNotifyConnectionError () {
-      this.$store.commit('notifyConnectionError', false)
-    }
-  }
-}
-</script>
 
 <style lang="stylus">
 .notifications

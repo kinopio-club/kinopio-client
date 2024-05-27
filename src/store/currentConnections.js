@@ -227,7 +227,7 @@ export default {
     },
     updatePaths: (context, { cardId, shouldUpdateApi, connections }) => {
       const canEditSpace = context.rootGetters['currentUser/canEditSpace']()
-      connections = utils.clone(connections || context.getters.byCardId(cardId))
+      connections = connections || context.getters.byCardId(cardId)
       connections.map(connection => {
         const startCard = utils.updateCardDimensions({ id: connection.startCardId })
         const endCard = utils.updateCardDimensions({ id: connection.endCardId })
@@ -252,21 +252,27 @@ export default {
     updateMultplePaths: (context, cards) => {
       const canEditSpace = context.rootGetters['currentUser/canEditSpace']()
       const cardIds = cards.map(card => card.id)
-      const connections = utils.clone(context.getters.byMultipleCardIds(cardIds))
+      const connections = context.getters.byMultipleCardIds(cardIds)
       if (!connections.length) { return }
       let newConnections = []
       // update state
       connections.forEach(connection => {
         const startCard = utils.updateCardDimensions({ id: connection.startCardId })
         const endCard = utils.updateCardDimensions({ id: connection.endCardId })
-        connection.path = context.getters.connectionPathBetweenCards({
+        const path = context.getters.connectionPathBetweenCards({
           startCard,
           endCard,
           controlPoint: connection.controlPoint
         })
-        if (!connection.path) { return }
-        connection.spaceId = currentSpaceId
-        newConnections.push(connection)
+        if (!path) { return }
+        const newConnection = {
+          id: connection.id,
+          spaceId: currentSpaceId,
+          path,
+          startCardId: connection.startCardId,
+          endCardId: connection.endCardId
+        }
+        newConnections.push(newConnection)
         if (canEditSpace) {
           context.dispatch('broadcast/update', { updates: connection, type: 'updateConnection', handler: 'currentConnections/update' }, { root: true })
           context.commit('update', connection)
