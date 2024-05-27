@@ -480,7 +480,7 @@ const currentCards = {
         const updates = { id: cardId, resizeWidth: width }
         context.dispatch('update', updates)
         context.dispatch('broadcast/update', { updates, type: 'resizeCard', handler: 'currentCards/update' }, { root: true })
-        context.dispatch('currentConnections/updateMultplePaths', [card], { root: true })
+        context.dispatch('currentConnections/updateMultiplePaths', [card], { root: true })
       })
     },
     removeResize: (context, { cardIds, shouldRemoveResizeWidth }) => {
@@ -636,7 +636,7 @@ const currentCards = {
       context.commit('broadcast/updateStore', { updates: { userId: context.rootState.currentUser.id }, type: 'clearRemoteCardsDragging' }, { root: true })
       // ..
       nextTick(() => {
-        context.dispatch('currentConnections/updateMultplePaths', cards, { root: true })
+        context.dispatch('currentConnections/updateMultiplePaths', cards, { root: true })
         context.dispatch('history/resume', null, { root: true })
         context.dispatch('history/add', { cards, useSnapshot: true }, { root: true })
         context.dispatch('checkIfItemShouldIncreasePageSize', currentDraggingCard, { root: true })

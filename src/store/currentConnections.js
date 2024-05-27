@@ -231,25 +231,28 @@ export default {
       connections.map(connection => {
         const startCard = utils.updateCardDimensions({ id: connection.startCardId })
         const endCard = utils.updateCardDimensions({ id: connection.endCardId })
-        connection.path = context.getters.connectionPathBetweenCards({
+        const path = context.getters.connectionPathBetweenCards({
           startCard,
           endCard,
           controlPoint: connection.controlPoint
         })
-        connection.spaceId = currentSpaceId
+        const newConnection = {
+          id: connection.id,
+          path
+        }
         if (shouldUpdateApi) {
-          context.dispatch('api/addToQueue', { name: 'updateConnection', body: connection }, { root: true })
+          context.dispatch('api/addToQueue', { name: 'updateConnection', body: newConnection }, { root: true })
         }
         if (canEditSpace) {
-          context.dispatch('broadcast/update', { updates: connection, type: 'updateConnection', handler: 'currentConnections/update' }, { root: true })
-          context.commit('update', connection)
+          context.dispatch('broadcast/update', { updates: newConnection, type: 'updateConnection', handler: 'currentConnections/update' }, { root: true })
+          context.commit('update', newConnection)
         } else {
-          context.commit('updateReadOnly', connection)
+          context.commit('updateReadOnly', newConnection)
         }
       })
       context.commit('clearShouldExplicitlyRenderCardIds', null, { root: true })
     },
-    updateMultplePaths: (context, cards) => {
+    updateMultiplePaths: (context, cards) => {
       const canEditSpace = context.rootGetters['currentUser/canEditSpace']()
       const cardIds = cards.map(card => card.id)
       const connections = context.getters.byMultipleCardIds(cardIds)
@@ -267,17 +270,14 @@ export default {
         if (!path) { return }
         const newConnection = {
           id: connection.id,
-          spaceId: currentSpaceId,
-          path,
-          startCardId: connection.startCardId,
-          endCardId: connection.endCardId
+          path
         }
         newConnections.push(newConnection)
         if (canEditSpace) {
           context.dispatch('broadcast/update', { updates: connection, type: 'updateConnection', handler: 'currentConnections/update' }, { root: true })
-          context.commit('update', connection)
+          context.commit('update', newConnection)
         } else {
-          context.commit('updateReadOnly', connection)
+          context.commit('updateReadOnly', newConnection)
         }
       })
       // update api

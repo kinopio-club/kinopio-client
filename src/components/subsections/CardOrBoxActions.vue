@@ -339,7 +339,7 @@ const toggleFontPickerIsVisible = () => {
   closeDialogs()
   state.fontPickerIsVisible = !isVisible
 }
-const updateHeaderFont = (font) => {
+const updateHeaderFont = async (font) => {
   props.cards.forEach(card => {
     updateCard(card, { headerFontId: font.id })
   })
@@ -347,6 +347,8 @@ const updateHeaderFont = (font) => {
     updateBox(box, { headerFontId: font.id })
   })
   store.dispatch('currentUser/update', { prevHeaderFontId: font.id })
+  await nextTick()
+  store.dispatch('currentConnections/updateMultiplePaths', props.cards)
 }
 
 // lock
