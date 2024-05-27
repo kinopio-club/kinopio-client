@@ -6,6 +6,9 @@ import utils from '@/utils.js'
 import collisionDetection from '@/collisionDetection.js'
 import postMessage from '@/postMessage.js'
 import DropGuideLine from '@/components/layers/DropGuideLine.vue'
+
+import debounce from 'lodash-es/debounce'
+
 const store = useStore()
 
 const circleRadius = 20
@@ -172,14 +175,18 @@ const updateRemotePosition = (position) => {
   }
   return position
 }
+const updateSelectableDebounced = debounce(() => {
+  updateSelectableCardsInViewport()
+  updateSelectableConnectionsInViewport()
+}, 200)
+
 const userScroll = () => {
   if (postScrollAnimationTimer) {
     shouldCancelPostScroll = true
   }
   // update selectable cards during paint autoscroll at edges
   if (store.state.currentUserIsPainting) {
-    updateSelectableCardsInViewport()
-    updateSelectableConnectionsInViewport()
+    updateSelectableDebounced()
   }
   scroll()
 }
