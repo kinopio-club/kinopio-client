@@ -10,6 +10,8 @@ import utils from '@/utils.js'
 import fonts from '@/data/fonts.js'
 
 import fuzzy from '@/libs/fuzzy.js'
+import smartquotes from 'smartquotes'
+
 const store = useStore()
 
 let shouldCancel = false
@@ -40,6 +42,9 @@ const classes = computed(() => {
     `header-font-size-${fontSize}`
   ]
 })
+const smartQuotes = (string) => {
+  return smartquotes(string)
+}
 
 // segment data
 
@@ -116,23 +121,23 @@ span.name-segment(:data-segment-types="dataMarkdownType" :data-tag-color="dataTa
     span.markdown(v-if="props.segment.markdown" :class="{ 'is-background-dark': backgroundColorIsDark, 'is-background-light': !backgroundColorIsDark }")
       template(v-for="markdown in props.segment.markdown")
         template(v-if="markdown.type === 'text'")
-          span {{markdown.content}}
+          span {{smartQuotes(markdown.content)}}
         template(v-else-if="markdown.type === 'link'")
           a(@mouseup="updateShouldCancel" @click="openUrl($event, escapedUrl(markdown.result[2]))" :href="escapedUrl(markdown.result[2])") {{markdown.result[1]}}
         template(v-else-if="markdown.type === 'bold'")
-          strong {{markdown.content}}
+          strong {{smartQuotes(markdown.content)}}
         template(v-else-if="markdown.type === 'h1'")
-          h1 {{markdown.content}}
+          h1 {{smartQuotes(markdown.content)}}
         template(v-else-if="markdown.type === 'h2'")
-          h2 {{markdown.content}}
+          h2 {{smartQuotes(markdown.content)}}
         template(v-else-if="markdown.type === 'h3'")
-          h3 {{markdown.content}}
+          h3 {{smartQuotes(markdown.content)}}
         template(v-else-if="markdown.type === 'h4'")
           h4 {{markdown.content}}
         template(v-else-if="markdown.type === 'emphasis'")
-          em {{markdown.content}}
+          em {{smartQuotes(markdown.content)}}
         template(v-else-if="markdown.type === 'strikethrough'")
-          del {{markdown.content}}
+          del {{smartQuotes(markdown.content)}}
         template(v-else-if="markdown.type === 'codeBlock'")
           CodeBlock(:content="markdown.content" :parentCardId="props.parentCardId")
         template(v-else-if="markdown.type === 'code'")
