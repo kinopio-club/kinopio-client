@@ -48,6 +48,7 @@ const remove = (action) => {
   } else if (action === 'tilt') {
     store.dispatch('currentCards/removeTilt', { cardIds })
   }
+  store.dispatch('currentConnections/updatePaths', { cardId: props.card.id, shouldUpdateApi: true })
 }
 
 const isTilting = computed(() => {
