@@ -4,7 +4,7 @@ dialog.card-tips.narrow(v-if="visible" @click.stop :open="visible" ref="dialog")
     p Tips
   section
     article
-      p Card character limit is {{maxCardLength}}
+      p Card character limit is {{maxCardCharacterLimit}}
     article
       .row
         p
@@ -82,7 +82,7 @@ export default {
     }
   },
   computed: {
-    maxCardLength () { return consts.maxCardLength }
+    maxCardCharacterLimit () { return consts.maxCardCharacterLimit }
   },
   methods: {
     scrollIntoView () {
