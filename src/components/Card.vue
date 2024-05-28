@@ -365,8 +365,6 @@ const articleStyle = computed(() => {
   let styles = {
     left: `${x.value}px`,
     top: `${y.value}px`,
-    // width: `${width.value}px`,
-    // height: `${props.card.height}px`,
     zIndex: z,
     pointerEvents
   }
@@ -423,8 +421,7 @@ const articleClasses = computed(() => {
     'is-resizing': store.state.currentUserIsResizingCard,
     'is-tilting': store.state.currentUserIsTiltingCard,
     'is-hidden-by-opacity': isCardHiddenByCommentFilter.value,
-    'jiggle': shouldJiggle.value,
-    'is-wide': props.card.maxWidthIsWide
+    'jiggle': shouldJiggle.value
   }
   classes = addSizeClasses(classes)
   return classes
@@ -455,20 +452,20 @@ const shouldJiggle = computed(() => {
 const updateStylesWithWidth = (styles) => {
   const cardHasExtendedContent = cardUrlPreviewIsVisible.value || otherCardIsVisible.value || isVisualCard.value || isAudioCard.value
   const cardHasUrlsOrMedia = cardHasMedia.value || cardHasUrls.value
-  if (isComment.value) { return styles }
-  if (cardHasUrlsOrMedia) {
-    styles.width = consts.defaultCardMaxWidth
+  let maxWidth
+  if (props.card.maxWidthIsWide) {
+    maxWidth = consts.wideCardMaxWidth
+  } else {
+    maxWidth = consts.defaultCardMaxWidth
   }
+  styles.maxWidth = resizeWidth.value || maxWidth
+  if (isComment.value) { return styles }
   if (resizeWidth.value) {
     styles.maxWidth = resizeWidth.value
     styles.width = resizeWidth.value
   }
-  if (styles.width) {
-    styles.width = styles.width + 'px'
-  }
-  if (styles.maxWidth) {
-    styles.maxWidth = styles.maxWidth + 'px'
-  }
+  styles.width = styles.width + 'px'
+  styles.maxWidth = styles.maxWidth + 'px'
   return styles
 }
 const updatePreviousResultItem = () => {
@@ -2145,8 +2142,6 @@ article.card-wrap#card(
 
 <style lang="stylus">
 article.card-wrap
-  &.is-wide
-    --card-width 390px // consts.wideCardMaxWidth
   --card-width 200px // consts.defaultCardMaxWidth
   pointer-events all
   position absolute
@@ -2391,11 +2386,7 @@ article.card-wrap
       top 6px
       left 6px
 
-    &.has-url-preview
-      width var(--card-width)
-
     &.media-card
-      width var(--card-width)
       background-color transparent
       &:hover,
       &.hover
@@ -2419,7 +2410,6 @@ article.card-wrap
           background-color var(--secondary-background)
 
     &.audio-card
-      width var(--card-width)
       .card-content-wrap
         width 100%
         align-items initial
