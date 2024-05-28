@@ -14,14 +14,14 @@ const props = defineProps({
 const defaultCharacterLimit = computed(() => store.state.currentUser.cardSettingsDefaultCharacterLimit)
 const limitIsDefault = computed(() => !defaultCharacterLimit.value || defaultCharacterLimit.value === consts.maxCardCharacterLimit)
 const limitIsMax = computed(() => defaultCharacterLimit.value === consts.maxCodeBlockCharacterLimit)
-const updateDefaultCharaterLimit = (value) => {
+const updateLimit = (value) => {
   store.dispatch('currentUser/update', { cardSettingsDefaultCharacterLimit: value })
 }
 
 // shift-enter
 
 const shiftEnterShouldAddChildCard = computed(() => store.state.currentUser.cardSettingsShiftEnterShouldAddChildCard)
-const updateShiftEnterShouldAddChildCard = (value) => {
+const updateShiftEnter = (value) => {
   store.dispatch('currentUser/update', { cardSettingsShiftEnterShouldAddChildCard: value })
 }
 
@@ -29,7 +29,7 @@ const updateShiftEnterShouldAddChildCard = (value) => {
 
 const maxCardWidth = computed(() => store.state.currentUser.cardSettingsMaxCardWidth)
 const maxCardWidthIsDefault = computed(() => !maxCardWidth.value || maxCardWidth.value === consts.defaultCardMaxWidth)
-const maxCardWidthIsWide = computed(() => maxCardWidth.value === 350)
+const maxCardWidthIsWide = computed(() => maxCardWidth.value === consts.wideCardMaxWidth)
 const updateMaxCardWidth = (value) => {
   store.dispatch('currentUser/update', { cardSettingsMaxCardWidth: value })
 }
@@ -40,24 +40,24 @@ const updateMaxCardWidth = (value) => {
   section
     p Character Limit
     .segmented-buttons
-      button(:class="{ active: limitIsDefault }")
+      button(@click="updateLimit(consts.maxCardCharacterLimit)" :class="{ active: limitIsDefault }")
         span {{consts.maxCardCharacterLimit}}
-      button(:class="{ active: limitIsMax }")
+      button(@click="updateLimit(consts.maxCodeBlockCharacterLimit)" :class="{ active: limitIsMax }")
         span {{consts.maxCodeBlockCharacterLimit}}
   section
     p Shift-Enter
     .segmented-buttons
-      button(:class="{ active: shiftEnterShouldAddChildCard }")
+      button(@click="updateShiftEnter(true)" :class="{ active: shiftEnterShouldAddChildCard }")
         span Child Card
-      button(:class="{ active: !shiftEnterShouldAddChildCard }")
+      button(@click="updateShiftEnter(falsez)" :class="{ active: !shiftEnterShouldAddChildCard }")
         span Line Break
   section
     p Max Card Width
     .segmented-buttons
-      button(:class="{ active: maxCardWidthIsDefault }")
+      button(@click="updateMaxCardWidth(consts.defaultCardMaxWidth)" :class="{ active: maxCardWidthIsDefault }")
         span {{consts.defaultCardMaxWidth}}
-      button(:class="{ active: maxCardWidthIsWide }")
-        span 350
+      button(@click="updateMaxCardWidth(consts.wideCardMaxWidth)" :class="{ active: maxCardWidthIsWide }")
+        span consts.wideCardMaxWidth
 </template>
 
 <style lang="stylus">
