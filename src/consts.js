@@ -6,10 +6,11 @@ export default {
     min: 20
   },
   spaceBetweenCards: 12,
-  maxCardLength: 300,
-  maxCodeBlockCardLength: 4000,
+  maxCardCharacterLimit: 300,
+  maxCodeBlockCharacterLimit: 4000,
   maxInviteEmailsAllowedToSend: 15,
   defaultCardWidth: 58,
+  defaultCardMaxWidth: 200,
   defaultConnectionPathCurveControlPoint: 'q90,40',
   defaultTimeout: 40000,
   minCardEmbedWidth: 235,
@@ -26,7 +27,6 @@ export default {
   cdnHost: 'https://cdn.kinopio.club',
   defaultSpaceBackground: 'https://bk.kinopio.club/grid-large-boxes-2x.png',
   moderatorUserId: 'euGhpBrR9eBcjKnK16C_g',
-  defaultCardMaxWidth: 200,
   roadmapSpaceId () {
     if (this.isDevelopment) {
       return 'FiM7akGos18Sfx4yKrwjF'

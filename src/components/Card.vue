@@ -82,8 +82,10 @@ onMounted(async () => {
   }
   await updateUrlPreviewOnload()
   checkIfShouldUpdatePreviewHtml()
-  const defaultCardMaxWidth = consts.defaultCardMaxWidth + 'px'
-  utils.setCssVariable('card-width', defaultCardMaxWidth)
+  const userSetting = store.state.currentUser.lineWrapWidth
+  let value = props.card.maxCardWidth || userSetting || consts.defaultCardMaxWidth
+  value = value + 'px'
+  utils.setCssVariable('card-width', value)
   initViewportObserver()
 })
 

@@ -223,7 +223,7 @@ const focusTextarea = async (card, index) => {
 }
 const isMaxLength = (card) => {
   const isActive = store.state.cardDetailsIsVisibleForCardId === card.id
-  const isMax = card.name.length >= consts.maxCardLength
+  const isMax = card.name.length >= consts.maxCardCharacterLimit
   return isActive && isMax
 }
 
@@ -309,7 +309,7 @@ template(v-if="visible")
             rows="1"
             :disabled="!canEditCard(card)"
             :value="card.name"
-            :maxlength="consts.maxCardLength"
+            :maxlength="consts.maxCardCharacterLimit"
             @input="updateName($event, card)"
             :style="textareaStyles(card)"
           )

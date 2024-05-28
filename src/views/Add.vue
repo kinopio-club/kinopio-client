@@ -61,7 +61,7 @@ const isOffline = computed(() => !store.state.isOnline)
 const currentUserIsSignedIn = computed(() => store.getters['currentUser/isSignedIn'])
 const kinopioDomain = computed(() => consts.kinopioDomain())
 const cardsCreatedIsOverLimit = computed(() => store.getters['currentUser/cardsCreatedIsOverLimit'])
-const maxCardLength = computed(() => consts.maxCardLength)
+const maxCardCharacterLimit = computed(() => consts.maxCardCharacterLimit)
 const currentUser = computed(() => store.state.currentUser)
 const isAddPage = computed(() => store.state.isAddPage)
 const inboxUrl = computed(() => `${consts.kinopioDomain()}/inbox`)
@@ -256,7 +256,7 @@ const clearErrorsAndSuccess = () => {
   state.success = false
 }
 const updateMaxLengthError = () => {
-  if (state.newName.length >= consts.maxCardLength - 1) {
+  if (state.newName.length >= consts.maxCardCharacterLimit - 1) {
     state.error.maxLength = true
   } else {
     state.error.maxLength = false
@@ -328,7 +328,7 @@ main.add-page
             rows="1"
             :placeholder="textareaPlaceholder"
             v-model="name"
-            :maxlength="maxCardLength"
+            :maxlength="maxCardCharacterLimit"
             @keydown.enter.exact.prevent="addCard"
             @focusin="updateKeyboardShortcutTipIsVisible(true)"
             @focusout="updateKeyboardShortcutTipIsVisible(false)"

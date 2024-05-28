@@ -75,9 +75,9 @@ const initialState = {
   lastSidebarSection: '',
   prevInviteEmails: '',
   prevHeaderFontId: 0,
-  cardSettingsDefaultCharacterLimit: consts.maxCardLength,
-  cardSettingsShiftEnterShouldAddChildCard: false,
-  cardSettingsLineWrapWidth: consts.defaultCardMaxWidth
+  cardSettingsDefaultCharacterLimit: consts.maxCardCharacterLimit,
+  cardSettingsShiftEnterShouldAddChildCard: true,
+  cardSettingsMaxCardWidth: consts.defaultCardMaxWidth
 }
 
 export default {
@@ -414,9 +414,9 @@ export default {
       utils.typeCheck({ value, type: 'boolean' })
       state.cardSettingsShiftEnterShouldAddChildCard = value
     },
-    cardSettingsLineWrapWidth: (state, value) => {
+    cardSettingsMaxCardWidth: (state, value) => {
       utils.typeCheck({ value, type: 'number' })
-      state.cardSettingsLineWrapWidth = value
+      state.cardSettingsMaxCardWidth = value
     }
   },
   actions: {

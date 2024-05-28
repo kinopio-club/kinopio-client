@@ -160,7 +160,7 @@ export default {
       }
     },
     trimName (name) {
-      return name.substring(0, consts.maxCardLength)
+      return name.substring(0, consts.maxCardCharacterLimit)
     },
     async createSpace (channel) {
       let space = utils.emptySpace(nanoid())

@@ -213,7 +213,8 @@ const currentCards = {
         backgroundColor: backgroundColor || defaultBackgroundColor,
         isRemoved: false,
         shouldUpdateUrlPreview,
-        headerFontId: context.rootState.currentUser.prevHeaderFontId || 0
+        headerFontId: context.rootState.currentUser.prevHeaderFontId || 0,
+        maxWidth: context.rootState.currentUser.cardSettingsMaxCardWidth
       }
       context.commit('cardDetailsIsVisibleForCardId', card.id, { root: true })
       card.spaceId = currentSpaceId

@@ -23,7 +23,7 @@ dialog.card-details(v-if="visible" :open="visible" ref="dialog" @click.left="clo
         @keydown.stop.right="checkIfShouldHidePicker"
 
         data-type="name"
-        :maxlength="maxCardLength"
+        :maxlength="maxCardCharacterLimit"
         @click.left="clickName"
         @blur="triggerUpdateHeaderAndFooterPosition"
         @paste="updatePastedName"
@@ -167,15 +167,15 @@ dialog.card-details(v-if="visible" :open="visible" ref="dialog" @click.left="clo
     template(v-if="showCurrentCardLength")
       .row
         span.badge.secondary-on-dark-background
-          span {{currentCardLength}} / {{maxCardLength}}
+          span {{currentCardLength}} / {{maxCardCharacterLimit}}
 
     //- Errors
-    template(v-if="errorMaxCardLength")
+    template(v-if="errormaxCardCharacterLimit")
       .row
         span.badge.danger
           img.icon.cancel(src="@/assets/add.svg")
           span Max Length
-      p To fit small screens, cards can't be longer than {{maxCardLength}} characters
+      p To fit small screens, cards can't be longer than {{maxCardCharacterLimit}} characters
     template(v-if="error.signUpToUpload")
       p
         span To upload files,
@@ -375,13 +375,13 @@ export default {
       return false
     },
     isInvitedButCannotEditSpace () { return this['currentUser/isInvitedButCannotEditSpace']() },
-    maxCardLength () {
+    maxCardCharacterLimit () {
+      let value = this.$store.state.currentUser.cardSettingsDefaultCharacterLimit || consts.maxCardCharacterLimit
       const isCodeblock = this.card.name?.includes('```')
       if (isCodeblock) {
-        return consts.maxCodeBlockCardLength
-      } else {
-        return consts.maxCardLength
+        value = consts.maxCodeBlockCharacterLimit
       }
+      return value
     },
     currentCardLength () {
       if (!this.card.name) { return 0 }
@@ -389,11 +389,11 @@ export default {
     },
     showCurrentCardLength () {
       const threshold = 50
-      if (this.errorMaxCardLength) { return }
-      return this.currentCardLength >= this.maxCardLength - threshold
+      if (this.errormaxCardCharacterLimit) { return }
+      return this.currentCardLength >= this.maxCardCharacterLimit - threshold
     },
-    errorMaxCardLength () {
-      if (this.currentCardLength >= this.maxCardLength) {
+    errormaxCardCharacterLimit () {
+      if (this.currentCardLength >= this.maxCardCharacterLimit) {
         return true
       } else {
         return false
