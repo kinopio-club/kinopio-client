@@ -452,7 +452,7 @@ const shouldJiggle = computed(() => {
 const updateStylesWithWidth = (styles) => {
   const cardHasExtendedContent = cardUrlPreviewIsVisible.value || otherCardIsVisible.value || isVisualCard.value || isAudioCard.value
   const cardHasUrlsOrMedia = cardHasMedia.value || cardHasUrls.value
-  const maxWidth = props.card.maxWidth || consts.defaultCardMaxWidth
+  const maxWidth = props.card.maxWidth || consts.normalCardMaxWidth
   styles.maxWidth = resizeWidth.value || maxWidth
   if (isComment.value) { return styles }
   if (resizeWidth.value) {
@@ -1188,7 +1188,7 @@ const nameIncludesUrl = (url) => {
   return name.includes(url) || name.includes(normalizedUrl) || normalizedUrl.includes(name)
 }
 const previewImage = ({ thumbnail }) => {
-  const minWidth = consts.defaultCardMaxWidth
+  const minWidth = consts.normalCardMaxWidth
   if (!thumbnail) { return '' }
   let image = thumbnail.find(item => {
     let shouldSkipImage = false
@@ -2137,7 +2137,7 @@ article.card-wrap#card(
 
 <style lang="stylus">
 article.card-wrap
-  --card-width 200px // consts.defaultCardMaxWidth
+  --card-width 200px // consts.normalCardMaxWidth
   pointer-events all
   position absolute
   max-width var(--card-width)

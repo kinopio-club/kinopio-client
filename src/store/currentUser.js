@@ -77,7 +77,7 @@ const initialState = {
   prevHeaderFontId: 0,
   cardSettingsDefaultCharacterLimit: consts.maxCardCharacterLimit,
   cardSettingsShiftEnterShouldAddChildCard: true,
-  cardSettingsMaxCardWidth: consts.defaultCardMaxWidth,
+  cardSettingsMaxCardWidth: consts.normalCardMaxWidth,
   prevSettingsSection: null
 }
 
