@@ -1,5 +1,66 @@
+<script setup>
+import { reactive, computed, onMounted, onBeforeUnmount, defineProps, defineEmits, watch, ref, nextTick } from 'vue'
+import { useStore } from 'vuex'
+
+import utils from '@/utils.js'
+import consts from '@/consts.js'
+
+const store = useStore()
+
+const dialogElement = ref(null)
+
+const props = defineProps({
+  visible: Boolean,
+  preventScrollIntoView: Boolean,
+  shouldHideAdvanced: Boolean
+})
+const state = reactive({
+  markdownInfoIsVisible: false
+})
+
+watch(() => props.visible, (value, prevValue) => {
+  if (value) {
+    scrollIntoView()
+    updateDialogHeight()
+  }
+})
+
+const maxCardCharacterLimit = computed(() => store.state.currentUser.cardSettingsDefaultCharacterLimit || consts.maxCardCharacterLimit)
+const shiftEnterShouldAddChildCard = computed(() => store.state.currentUser.cardSettingsShiftEnterShouldAddChildCard)
+
+// buttons
+
+const toggleMarkdownInfoIsVisible = () => {
+  state.markdownInfoIsVisible = !state.markdownInfoIsVisible
+  if (state.markdownInfoIsVisible) {
+    scrollIntoView()
+  }
+}
+const showCardSettings = () => {
+  store.dispatch('currentUser/update', { prevSettingsSection: 'cards' })
+  // store.dispatch('closeAllDialogs')
+  store.commit('userSettingsIsVisible', true)
+}
+
+// dialog position
+
+const scrollIntoView = async () => {
+  if (props.preventScrollIntoView) { return }
+  if (utils.isMobile()) { return }
+  await nextTick()
+  const element = dialogElement.value
+  utils.scrollIntoView({ element })
+}
+const updateDialogHeight = async () => {
+  if (!props.visible) { return }
+  await nextTick()
+  let element = dialogElement.value
+  state.dialogHeight = utils.elementHeight(element)
+}
+</script>
+
 <template lang="pug">
-dialog.card-tips.narrow(v-if="visible" @click.stop :open="visible" ref="dialog")
+dialog.card-tips.narrow(v-if="visible" @click.stop :open="visible" ref="dialogElement")
   section
     .row.title-row
       span Tips
@@ -14,7 +75,7 @@ dialog.card-tips.narrow(v-if="visible" @click.stop :open="visible" ref="dialog")
           img.icon(src="@/assets/add.svg")
           span Add Card
         span.badge.keyboard-shortcut Enter
-    article
+    article(v-if="shiftEnterShouldAddChildCard")
       .row
         p
           img.icon(src="@/assets/add.svg")
@@ -25,7 +86,9 @@ dialog.card-tips.narrow(v-if="visible" @click.stop :open="visible" ref="dialog")
         p
           img.icon(src="@/assets/line-break.svg")
           span Line Break
-        span.badge.keyboard-shortcut Ctrl-Enter
+        span.badge.keyboard-shortcut
+          span(v-if="!shiftEnterShouldAddChildCard") Shift-Enter or{{' '}}
+          span Ctrl-Enter
     template(v-if="!shouldHideAdvanced")
       article
         .row
@@ -40,16 +103,16 @@ dialog.card-tips.narrow(v-if="visible" @click.stop :open="visible" ref="dialog")
       //- article
       //-   .row
       //-     span Comment Card
-      //-     span.badge.keyboard-shortcut ((
+      //-     span.badge.keyboard-shortcut ((…))
 
     //- Markdown
     article
       .row
-        button(@click.left.stop="toggleMarkdownInfoIsVisible" :class="{ active: markdownInfoIsVisible }")
-          img.icon.view(v-if="markdownInfoIsVisible" src="@/assets/view-hidden.svg")
+        button(@click.left.stop="toggleMarkdownInfoIsVisible" :class="{ active: state.markdownInfoIsVisible }")
+          img.icon.view(v-if="state.markdownInfoIsVisible" src="@/assets/view-hidden.svg")
           img.icon.view(v-else src="@/assets/view.svg")
           span Markdown
-      div(v-if="markdownInfoIsVisible")
+      div(v-if="state.markdownInfoIsVisible")
         p
           span.badge.keyboard-shortcut # heading 1
         p
@@ -67,56 +130,6 @@ dialog.card-tips.narrow(v-if="visible" @click.stop :open="visible" ref="dialog")
         p
           span.badge.keyboard-shortcut ``` code block ```
 </template>
-
-<script>
-import utils from '@/utils.js'
-import consts from '@/consts.js'
-
-export default {
-  name: 'CardTips',
-  props: {
-    visible: Boolean,
-    preventScrollIntoView: Boolean,
-    shouldHideAdvanced: Boolean
-  },
-  data () {
-    return {
-      markdownInfoIsVisible: false
-    }
-  },
-  computed: {
-    maxCardCharacterLimit () { return consts.maxCardCharacterLimit }
-  },
-  methods: {
-    scrollIntoView () {
-      if (this.preventScrollIntoView) { return }
-      if (utils.isMobile()) { return }
-      this.$nextTick(() => {
-        const element = this.$refs.dialog
-        utils.scrollIntoView({ element })
-      })
-    },
-    toggleMarkdownInfoIsVisible () {
-      this.markdownInfoIsVisible = !this.markdownInfoIsVisible
-      if (this.markdownInfoIsVisible) {
-        this.scrollIntoView()
-      }
-    },
-    showCardSettings () {
-      this.$store.dispatch('currentUser/update', { prevSettingsSection: 'cards' })
-      this.$store.dispatch('closeAllDialogs')
-      this.$store.commit('userSettingsIsVisible', true)
-    }
-  },
-  watch: {
-    visible (visible) {
-      if (visible) {
-        this.scrollIntoView()
-      }
-    }
-  }
-}
-</script>
 
 <style lang="stylus">
 dialog.card-tips
