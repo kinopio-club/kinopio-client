@@ -2146,7 +2146,7 @@ article.card-wrap#card(
 <style lang="stylus">
 article.card-wrap
   &.is-wide
-    --card-width 500px // consts.wideCardMaxWidth
+    --card-width 390px // consts.wideCardMaxWidth
   --card-width 200px // consts.defaultCardMaxWidth
   pointer-events all
   position absolute
