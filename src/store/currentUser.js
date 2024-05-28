@@ -77,7 +77,8 @@ const initialState = {
   prevHeaderFontId: 0,
   cardSettingsDefaultCharacterLimit: consts.maxCardCharacterLimit,
   cardSettingsShiftEnterShouldAddChildCard: true,
-  cardSettingsMaxCardWidthIsWide: false
+  cardSettingsMaxCardWidthIsWide: false,
+  prevSettingsSection: null
 }
 
 export default {
@@ -417,6 +418,10 @@ export default {
     cardSettingsMaxCardWidthIsWide: (state, value) => {
       utils.typeCheck({ value, type: 'boolean' })
       state.cardSettingsMaxCardWidthIsWide = value
+    },
+    prevSettingsSection: (state, value) => {
+      utils.typeCheck({ value, type: 'string' })
+      state.prevSettingsSection = value
     }
   },
   actions: {

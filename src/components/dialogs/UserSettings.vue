@@ -24,6 +24,7 @@ watch(() => visible.value, (value, prevValue) => {
   if (value) {
     closeChildDialogs()
     updateDialogHeight()
+    restoreUserPrevSettingsSection()
   }
 })
 const closeChildDialogs = () => {
@@ -50,6 +51,17 @@ const updateCurrentSettings = async (value) => {
   state.currentSettings = value
   await nextTick()
   updateDialogHeight()
+  store.dispatch('currentUser/update', { prevSettingsSection: value })
+}
+const restoreUserPrevSettingsSection = () => {
+  const section = store.state.currentUser.prevSettingsSection
+  const values = ['general', 'controls', 'cards'] // listed in api docs
+  const isValid = values.includes(section)
+  if (section && isValid) {
+    state.currentSettings = section
+  } else {
+    state.currentSettings = 'general'
+  }
 }
 
 // pin
