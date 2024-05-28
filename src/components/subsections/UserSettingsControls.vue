@@ -12,7 +12,6 @@ const props = defineProps({
 })
 
 const state = reactive({
-  dialogHeight: null,
   panningTipsIsVisible: false,
   outsideSpaceColorTipsIsVisible: false
 })

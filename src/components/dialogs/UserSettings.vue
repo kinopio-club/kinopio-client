@@ -2,8 +2,9 @@
 import { reactive, computed, onMounted, onUnmounted, defineProps, defineEmits, watch, ref, nextTick } from 'vue'
 import { useStore } from 'vuex'
 
-import UserSettingsGeneral from '@/components/UserSettingsGeneral.vue'
-import UserSettingsControls from '@/components/UserSettingsControls.vue'
+import UserSettingsGeneral from '@/components/subsections/UserSettingsGeneral.vue'
+import UserSettingsControls from '@/components/subsections/UserSettingsControls.vue'
+import UserSettingsCards from '@/components/subsections/UserSettingsCards.vue'
 import utils from '@/utils.js'
 
 const store = useStore()
@@ -44,6 +45,7 @@ const updateDialogHeight = async () => {
 
 const currentSettingsIsGeneral = computed(() => state.currentSettings === 'general')
 const currentSettingsIsControls = computed(() => state.currentSettings === 'controls')
+const currentSettingsIsCards = computed(() => state.currentSettings === 'cards')
 const updateCurrentSettings = async (value) => {
   state.currentSettings = value
   await nextTick()
@@ -76,8 +78,12 @@ dialog.user-settings.narrow.is-pinnable(v-if="visible" :open="visible" ref="dial
         span General
       button(@click="updateCurrentSettings('controls')" :class="{ active: currentSettingsIsControls }")
         span Controls
+      button(@click="updateCurrentSettings('cards')" :class="{ active: currentSettingsIsCards }")
+        span Cards
+
   UserSettingsGeneral(:visible="currentSettingsIsGeneral")
   UserSettingsControls(:visible="currentSettingsIsControls")
+  UserSettingsCards(:visible="currentSettingsIsCards")
 </template>
 
 <style lang="stylus">
