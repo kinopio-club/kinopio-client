@@ -471,7 +471,7 @@ export default {
         startCardId: baseCardId,
         endCardId: endCurrentCardId,
         path: this.$store.getters['currentConnections/connectionPathBetweenCards']({
-          baseCardId,
+          startCardId: baseCardId,
           endCardId: endCurrentCardId,
           controlPoint,
           estimatedEndCardConnectorPosition
