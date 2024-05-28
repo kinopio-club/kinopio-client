@@ -32,6 +32,7 @@ dialog.card-details(v-if="visible" :open="visible" ref="dialog" @click.left="clo
         @keyup.ctrl.enter.exact.stop
         @keydown.alt.enter.exact.stop="insertLineBreak"
         @keydown.ctrl.enter.exact.stop="insertLineBreak"
+        @keydown.shift.enter.exact="conditionalInsertLineBreak"
 
         @keyup="updatePickerSearch(null)"
 
@@ -878,6 +879,11 @@ export default {
       if (!lineBreakInserted) {
         this.insertedLineBreak = false
       }
+    },
+    conditionalInsertLineBreak (event) {
+      const shouldAddChildCard = this.$store.state.currentUser.cardSettingsShiftEnterShouldAddChildCard
+      if (shouldAddChildCard) { return }
+      this.insertLineBreak(event)
     },
     insertLineBreak (event) {
       const position = this.$refs.name.selectionEnd

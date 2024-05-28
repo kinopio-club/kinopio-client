@@ -40,7 +40,7 @@ const updateMaxCardWidthIsWide = (value) => {
     .segmented-buttons
       button(@click="updateShiftEnter(true)" :class="{ active: shiftEnterShouldAddChildCard }")
         span Child Card
-      button(@click="updateShiftEnter(falsez)" :class="{ active: !shiftEnterShouldAddChildCard }")
+      button(@click="updateShiftEnter(false)" :class="{ active: !shiftEnterShouldAddChildCard }")
         span Line Break
   section
     p Character Limit

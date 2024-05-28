@@ -144,6 +144,8 @@ export default {
       const isFromInput = event.target.closest('input') || event.target.closest('textarea')
       // Add Child Card
       if (event.shiftKey && key === 'enter' && (isSpaceScope || isCardScope)) {
+        const shouldAddChildCard = this.$store.state.currentUser.cardSettingsShiftEnterShouldAddChildCard
+        if (!shouldAddChildCard) { return }
         this.addChildCard()
       // Add Card
       } else if (key === 'enter' && isSpaceScope) {
