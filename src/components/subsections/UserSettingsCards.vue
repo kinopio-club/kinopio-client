@@ -27,9 +27,15 @@ const updateShiftEnter = (value) => {
 
 //  max card width
 
-const maxCardWidthIsWide = computed(() => store.state.currentUser.cardSettingsMaxCardWidthIsWide)
-const updateMaxCardWidthIsWide = (value) => {
-  store.dispatch('currentUser/update', { cardSettingsMaxCardWidthIsWide: value })
+const maxCardWidth = computed(() => store.state.currentUser.cardSettingsMaxCardWidth)
+const maxCardWidthIsNormal = computed(() => maxCardWidth.value === consts.defaultCardMaxWidth)
+const maxCardWidthIsWide = computed(() => maxCardWidth.value === consts.wideCardMaxWidth)
+const updateMaxCardWidthIsWide = (isWide) => {
+  let value = consts.defaultCardMaxWidth
+  if (isWide) {
+    value = consts.wideCardMaxWidth
+  }
+  store.dispatch('currentUser/update', { cardSettingsMaxCardWidth: value })
 }
 </script>
 
