@@ -1,7 +1,10 @@
 <template lang="pug">
 dialog.card-tips.narrow(v-if="visible" @click.stop :open="visible" ref="dialog")
   section
-    p Tips
+    .row.title-row
+      span Tips
+      button.small-button(@click="showCardSettings")
+        img.settings.icon(src="@/assets/settings.svg")
   section
     article
       p Card character limit is {{maxCardCharacterLimit}}
@@ -98,6 +101,11 @@ export default {
       if (this.markdownInfoIsVisible) {
         this.scrollIntoView()
       }
+    },
+    showCardSettings () {
+      this.$store.dispatch('currentUser/update', { prevSettingsSection: 'cards' })
+      this.$store.dispatch('closeAllDialogs')
+      this.$store.commit('userSettingsIsVisible', true)
     }
   },
   watch: {
