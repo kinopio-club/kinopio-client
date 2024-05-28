@@ -9,9 +9,9 @@ dialog.keyboard-shortcuts(v-if="visible" :open="visible" @click.left.stop ref="d
         .badge.secondary.button-badge(:class="{ active: categoryButtonIsVisible(category.name) }" :style="{ 'background-color': category.color }" @click="updateSelectedCategory(category.name)") {{category.name}}
   section
     //- General
-    template(v-if="categoryIsVisible('general')")
+    template(v-if="categoryIsVisible('General')")
       .section-title
-        .badge.info(:style="{ 'background-color': categoryColor('general') }") General
+        .badge.info(:style="{ 'background-color': categoryColor('General') }") General
       article
         .row
           .badge.title
@@ -32,9 +32,9 @@ dialog.keyboard-shortcuts(v-if="visible" :open="visible" @click.left.stop ref="d
           .badge.keyboard-shortcut Escape
 
     //- General
-    template(v-if="categoryIsVisible('toolbar')")
+    template(v-if="categoryIsVisible('Toolbar')")
       .section-title
-        .badge.info(:style="{ 'background-color': categoryColor('toolbar') }") Toolbar
+        .badge.info(:style="{ 'background-color': categoryColor('Toolbar') }") Toolbar
       article
         .row
           .badge.title
@@ -43,9 +43,9 @@ dialog.keyboard-shortcuts(v-if="visible" :open="visible" @click.left.stop ref="d
           .badge.keyboard-shortcut B
 
     //- Navigate
-    template(v-if="categoryIsVisible('navigate')")
+    template(v-if="categoryIsVisible('Navigate')")
       .section-title
-        .badge.info(:style="{ 'background-color': categoryColor('navigate') }") Navigate
+        .badge.info(:style="{ 'background-color': categoryColor('Navigate') }") Navigate
       article
         .row
           .badge.title
@@ -72,9 +72,9 @@ dialog.keyboard-shortcuts(v-if="visible" :open="visible" @click.left.stop ref="d
           .badge.keyboard-shortcut Z
 
     //- Edit
-    template(v-if="categoryIsVisible('edit')")
+    template(v-if="categoryIsVisible('Edit')")
       .section-title
-        .badge.info(:style="{ 'background-color': categoryColor('edit') }") Edit
+        .badge.info(:style="{ 'background-color': categoryColor('Edit') }") Edit
       article
         .row.multiple-items
           .badge.title
@@ -120,9 +120,9 @@ dialog.keyboard-shortcuts(v-if="visible" :open="visible" @click.left.stop ref="d
           .badge.keyboard-shortcut {{meta}}-Z/{{meta}}-Shift-Z
 
     //- Select
-    template(v-if="categoryIsVisible('select')")
+    template(v-if="categoryIsVisible('Select')")
       .section-title
-        .badge.info(:style="{ 'background-color': categoryColor('select') }") Select
+        .badge.info(:style="{ 'background-color': categoryColor('Select') }") Select
       article
         .row
           .badge.title
@@ -174,9 +174,9 @@ dialog.keyboard-shortcuts(v-if="visible" :open="visible" @click.left.stop ref="d
           .badge.keyboard-shortcut Delete
 
     //- Filter
-    template(v-if="categoryIsVisible('filter')")
+    template(v-if="categoryIsVisible('Filter')")
       .section-title
-        .badge.info(:style="{ 'background-color': categoryColor('filter') }") Filter
+        .badge.info(:style="{ 'background-color': categoryColor('Filter') }") Filter
       article
         .row
           .badge.title
@@ -203,9 +203,9 @@ dialog.keyboard-shortcuts(v-if="visible" :open="visible" @click.left.stop ref="d
           .badge.keyboard-shortcut 4
 
     //- Connect
-    template(v-if="categoryIsVisible('connect')")
+    template(v-if="categoryIsVisible('Connect')")
       .section-title
-        .badge.info(:style="{ 'background-color': categoryColor('connect') }") Connect
+        .badge.info(:style="{ 'background-color': categoryColor('Connect') }") Connect
       article
         .row
           .badge.title
@@ -220,9 +220,9 @@ dialog.keyboard-shortcuts(v-if="visible" :open="visible" @click.left.stop ref="d
           span 'Connect' button to use {{lastOrNewConnectionTypeControlSetting}} connection type
 
     //- Search and Jump
-    template(v-if="categoryIsVisible('search-and-jump')")
+    template(v-if="categoryIsVisible('Search and Jump')")
       .section-title
-        .badge.info(:style="{ 'background-color': categoryColor('search-and-jump') }") Search and Jump
+        .badge.info(:style="{ 'background-color': categoryColor('Search and Jump') }") Search and Jump
       article
         .row
           .badge.title
@@ -277,27 +277,20 @@ export default {
     }
   },
   methods: {
-    updateSelectedCategory (categoryName) {
-      const name = utils.normalizeString(categoryName)
+    updateSelectedCategory (name) {
       this.selectedCategory = name
     },
-    categoryButtonIsVisible (categoryName) {
-      const name = utils.normalizeString(categoryName)
+    categoryButtonIsVisible (name) {
       return this.selectedCategory === name
     },
-    categoryIsVisible (categoryName) {
-      const name = utils.normalizeString(categoryName)
+    categoryIsVisible (name) {
       return this.selectedCategory === 'all' || this.selectedCategory === name
     },
-    categoryByName (categoryName) {
-      const categories = this.categories.map(category => {
-        category.name = utils.normalizeString(category.name)
-        return category
-      })
-      return categories.filter(category => category.name === categoryName)[0]
+    categoryByName (name) {
+      return this.categories.find(category => category.name === name)
     },
-    categoryColor (categoryName) {
-      const color = this.categoryByName(categoryName).color
+    categoryColor (name) {
+      const color = this.categoryByName(name).color
       return color
     },
     closeDialogs () {
