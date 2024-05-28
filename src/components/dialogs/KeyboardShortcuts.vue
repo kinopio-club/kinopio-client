@@ -1,5 +1,72 @@
+<script setup>
+import { reactive, computed, onMounted, onBeforeUnmount, defineProps, defineEmits, watch, ref, nextTick } from 'vue'
+import { useStore } from 'vuex'
+
+import UserLabelInline from '@/components/UserLabelInline.vue'
+import keyboardShortcutsCategories from '@/data/keyboardShortcutsCategories.js'
+import utils from '@/utils.js'
+
+const store = useStore()
+
+const dialogElement = ref(null)
+
+const props = defineProps({
+  visible: Boolean
+})
+const state = reactive({
+  selectedCategory: 'all'
+})
+
+watch(() => props.visible, (value, prevValue) => {
+  if (value) {
+    state.selectedCategory = 'all'
+  }
+})
+
+const updateDialogHeight = async () => {
+  if (!props.visible) { return }
+  await nextTick()
+  let element = dialogElement.value
+  state.dialogHeight = utils.elementHeight(element)
+}
+
+const categories = computed(() => keyboardShortcutsCategories)
+const meta = computed(() => utils.metaKey())
+const currentUser = computed(() => store.state.currentUser)
+const isMobile = computed(() => utils.isMobile())
+const shouldUseLastConnectionType = computed(() => store.state.currentUser.shouldUseLastConnectionType)
+const lastOrNewConnectionTypeControlSetting = computed(() => {
+  if (shouldUseLastConnectionType.value) {
+    return 'New'
+  } else {
+    return 'Last'
+  }
+})
+
+const updateSelectedCategory = (name) => {
+  this.selectedCategory = name
+}
+const categoryButtonIsVisible = (name) => {
+  return this.selectedCategory === name
+}
+const categoryIsVisible = (name) => {
+  return this.selectedCategory === 'all' || this.selectedCategory === name
+}
+const categoryByName = (name) => {
+  return this.categories.find(category => category.name === name)
+}
+const categoryColor = (name) => {
+  const color = this.categoryByName(name).color
+  return color
+}
+const closeDialogs = () => {
+  // this.keyboardShortcutsCategoriesIsVisible = false
+}
+
+</script>
+
 <template lang="pug">
-dialog.keyboard-shortcuts(v-if="visible" :open="visible" @click.left.stop ref="dialog" @click="closeDialogs")
+dialog.keyboard-shortcuts(v-if="visible" :open="visible" @click.left.stop ref="dialogElement" @click="closeDialogs" :style="{'max-height': state.dialogHeight + 'px'}")
   section
     .row
       p Keyboard Shortcuts
@@ -243,69 +310,6 @@ dialog.keyboard-shortcuts(v-if="visible" :open="visible" @click.left.stop ref="d
           .badge.keyboard-shortcut {{meta}}–Shift–F
 
 </template>
-
-<script>
-import UserLabelInline from '@/components/UserLabelInline.vue'
-import keyboardShortcutsCategories from '@/data/keyboardShortcutsCategories.js'
-import utils from '@/utils.js'
-
-export default {
-  name: 'KeyboardShortcuts',
-  props: {
-    visible: Boolean
-  },
-  components: {
-    UserLabelInline
-  },
-  data () {
-    return {
-      selectedCategory: 'all'
-    }
-  },
-  computed: {
-    categories () { return keyboardShortcutsCategories },
-    meta () { return utils.metaKey() },
-    currentUser () { return this.$store.state.currentUser },
-    isMobile () { return utils.isMobile() },
-    shouldUseLastConnectionType () { return this.$store.state.currentUser.shouldUseLastConnectionType },
-    lastOrNewConnectionTypeControlSetting () {
-      if (this.shouldUseLastConnectionType) {
-        return 'New'
-      } else {
-        return 'Last'
-      }
-    }
-  },
-  methods: {
-    updateSelectedCategory (name) {
-      this.selectedCategory = name
-    },
-    categoryButtonIsVisible (name) {
-      return this.selectedCategory === name
-    },
-    categoryIsVisible (name) {
-      return this.selectedCategory === 'all' || this.selectedCategory === name
-    },
-    categoryByName (name) {
-      return this.categories.find(category => category.name === name)
-    },
-    categoryColor (name) {
-      const color = this.categoryByName(name).color
-      return color
-    },
-    closeDialogs () {
-      // this.keyboardShortcutsCategoriesIsVisible = false
-    }
-  },
-  watch: {
-    visible (visible) {
-      if (visible) {
-        this.selectedCategory = 'all'
-      }
-    }
-  }
-}
-</script>
 
 <style lang="stylus">
 .keyboard-shortcuts
