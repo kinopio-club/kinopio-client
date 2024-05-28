@@ -36,19 +36,19 @@ const updateMaxCardWidthIsWide = (value) => {
 <template lang="pug">
 .cards-settings(v-if="visible")
   section
-    p Character Limit
-    .segmented-buttons
-      button(@click="updateLimit(consts.maxCardCharacterLimit)" :class="{ active: limitIsDefault }")
-        span {{consts.maxCardCharacterLimit}}
-      button(@click="updateLimit(consts.maxCodeBlockCharacterLimit)" :class="{ active: limitIsMax }")
-        span {{consts.maxCodeBlockCharacterLimit}}
-  section
     p Shift-Enter
     .segmented-buttons
       button(@click="updateShiftEnter(true)" :class="{ active: shiftEnterShouldAddChildCard }")
         span Child Card
       button(@click="updateShiftEnter(falsez)" :class="{ active: !shiftEnterShouldAddChildCard }")
         span Line Break
+  section
+    p Character Limit
+    .segmented-buttons
+      button(@click="updateLimit(consts.maxCardCharacterLimit)" :class="{ active: limitIsDefault }")
+        span {{consts.maxCardCharacterLimit}}
+      button(@click="updateLimit(consts.maxCodeBlockCharacterLimit)" :class="{ active: limitIsMax }")
+        span {{consts.maxCodeBlockCharacterLimit}}
   section
     p Max Card Width
     .segmented-buttons
