@@ -82,10 +82,6 @@ onMounted(async () => {
   }
   await updateUrlPreviewOnload()
   checkIfShouldUpdatePreviewHtml()
-  const userSetting = store.state.currentUser.lineWrapWidth
-  let value = props.card.maxCardWidth || userSetting || consts.defaultCardMaxWidth
-  value = value + 'px'
-  utils.setCssVariable('card-width', value)
   initViewportObserver()
 })
 
@@ -427,7 +423,8 @@ const articleClasses = computed(() => {
     'is-resizing': store.state.currentUserIsResizingCard,
     'is-tilting': store.state.currentUserIsTiltingCard,
     'is-hidden-by-opacity': isCardHiddenByCommentFilter.value,
-    'jiggle': shouldJiggle.value
+    'jiggle': shouldJiggle.value,
+    'is-wide': props.card.maxWidthIsWide
   }
   classes = addSizeClasses(classes)
   return classes
@@ -2148,6 +2145,9 @@ article.card-wrap#card(
 
 <style lang="stylus">
 article.card-wrap
+  &.is-wide
+    --card-width 500px // consts.wideCardMaxWidth
+  --card-width 200px // consts.defaultCardMaxWidth
   pointer-events all
   position absolute
   max-width var(--card-width)

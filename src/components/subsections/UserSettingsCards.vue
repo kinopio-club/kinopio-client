@@ -27,11 +27,9 @@ const updateShiftEnter = (value) => {
 
 //  max card width
 
-const maxCardWidth = computed(() => store.state.currentUser.cardSettingsMaxCardWidth)
-const maxCardWidthIsDefault = computed(() => !maxCardWidth.value || maxCardWidth.value === consts.defaultCardMaxWidth)
-const maxCardWidthIsWide = computed(() => maxCardWidth.value === consts.wideCardMaxWidth)
-const updateMaxCardWidth = (value) => {
-  store.dispatch('currentUser/update', { cardSettingsMaxCardWidth: value })
+const maxCardWidthIsWide = computed(() => store.state.currentUser.cardSettingsMaxCardWidthIsWide)
+const updateMaxCardWidthIsWide = (value) => {
+  store.dispatch('currentUser/update', { cardSettingsMaxCardWidthIsWide: value })
 }
 </script>
 
@@ -54,10 +52,10 @@ const updateMaxCardWidth = (value) => {
   section
     p Max Card Width
     .segmented-buttons
-      button(@click="updateMaxCardWidth(consts.defaultCardMaxWidth)" :class="{ active: maxCardWidthIsDefault }")
-        span {{consts.defaultCardMaxWidth}}
-      button(@click="updateMaxCardWidth(consts.wideCardMaxWidth)" :class="{ active: maxCardWidthIsWide }")
-        span consts.wideCardMaxWidth
+      button(@click="updateMaxCardWidthIsWide(false)" :class="{ active: !maxCardWidthIsWide }")
+        span Normal
+      button(@click="updateMaxCardWidthIsWide(true)" :class="{ active: maxCardWidthIsWide }")
+        span Wide
 </template>
 
 <style lang="stylus">

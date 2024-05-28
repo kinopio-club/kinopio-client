@@ -11,7 +11,7 @@ export default {
   maxInviteEmailsAllowedToSend: 15,
   defaultCardWidth: 58,
   defaultCardMaxWidth: 200,
-  wideCardMaxWidth: 375,
+  wideCardMaxWidth: 500,
   defaultConnectionPathCurveControlPoint: 'q90,40',
   defaultTimeout: 40000,
   minCardEmbedWidth: 235,
