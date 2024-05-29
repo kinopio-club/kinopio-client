@@ -165,13 +165,13 @@ dialog.card-details(v-if="visible" :open="visible" ref="dialog" @click.left="clo
             span Read Only
 
     //- Info
-    template(v-if="showCurrentCardLength")
+    template(v-if="showCharacterCount")
       .row
         span.badge.secondary-on-dark-background
           span {{currentCardLength}} / {{maxCardCharacterLimit}}
 
     //- Errors
-    template(v-if="errormaxCardCharacterLimit")
+    template(v-if="errorMaxCharacterLimit")
       .row
         span.badge.danger
           img.icon.cancel(src="@/assets/add.svg")
@@ -388,12 +388,12 @@ export default {
       if (!this.card.name) { return 0 }
       return this.card.name.length
     },
-    showCurrentCardLength () {
+    showCharacterCount () {
       const threshold = 50
-      if (this.errormaxCardCharacterLimit) { return }
+      if (this.errorMaxCharacterLimit) { return }
       return this.currentCardLength >= this.maxCardCharacterLimit - threshold
     },
-    errormaxCardCharacterLimit () {
+    errorMaxCharacterLimit () {
       if (this.currentCardLength >= this.maxCardCharacterLimit) {
         return true
       } else {
