@@ -67,7 +67,7 @@ const removeBackground = () => {
 </script>
 
 <template lang="pug">
-dialog.narrow.theme-and-colors-settings(v-if="visible" :open="visible" ref="dialogElement")
+dialog.narrow.theme-and-colors-settings(v-if="visible" :open="visible" ref="dialogElement" @click.stop)
   section
     p Theme Settings
   section

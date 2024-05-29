@@ -142,5 +142,4 @@ const initDefaultColor = () => {
     border-radius var(--small-entity-radius)
     display inline-block
     vertical-align -3px
-
 </style>
