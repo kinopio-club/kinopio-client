@@ -42,7 +42,7 @@ ReadOnlySpaceInfoBadges
 .row(v-if="isSpaceMember")
   //- Privacy
   PrivacyButton(:privacyPickerIsVisible="privacyPickerIsVisible" :showShortName="true" @togglePrivacyPickerIsVisible="togglePrivacyPickerIsVisible" @closeDialogs="closeDialogs" @updateLocalSpaces="updateLocalSpaces")
-  FavoriteSpaceButton(@updateLocalSpaces="updateLocalSpaces")
+  FavoriteSpaceButton(@updateLocalSpaces="updateLocalSpaces" :parentIsDialog="true")
   //- Settings
   .button-wrap
     button(@click="toggleSettingsIsVisible" :class="{active: settingsIsVisible}")

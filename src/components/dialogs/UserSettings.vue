@@ -77,7 +77,7 @@ const toggleUserSettingsIsPinned = () => {
 
 <template lang="pug">
 dialog.user-settings.narrow.is-pinnable(v-if="visible" :open="visible" ref="dialogElement" @click.left.stop="closeChildDialogs" :style="{'max-height': state.dialogHeight + 'px'}" :data-is-pinned="userSettingsIsPinned" :class="{ 'is-pinned': userSettingsIsPinned, 'is-settings-controls': currentSettingsIsControls }")
-  section
+  section.title-section
     .row.title-row
       p
         //- img.icon.settings(src="@/assets/settings.svg")

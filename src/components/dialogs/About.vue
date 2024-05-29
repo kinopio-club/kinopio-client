@@ -175,7 +175,7 @@ const toggleHelpIsVisible = () => {
 
 <template lang="pug">
 dialog.about.narrow(v-if="visible" :open="visible" @click.left="closeDialogs" ref="dialogElement" :style="{'max-height': state.dialogHeight + 'px'}" :class="{ overflow: !childDialogIsVisible }")
-  section
+  section.title-section
     .row.title-row
       p About Kinopio
       span

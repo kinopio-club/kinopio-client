@@ -420,7 +420,7 @@ const searchService = debounce(searchPexels, 350)
 
 <template lang="pug">
 dialog.background-picker.wide(v-if="visible" :open="visible" @click.left.stop="closeDialogs")
-  section
+  section.title-section
     .row.title-row
       div
         BackgroundPreview(:space="currentSpace")

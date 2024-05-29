@@ -763,6 +763,10 @@ dialog
   .segmented-buttons + .button-wrap,
   .button-wrap + .segmented-buttons
     margin-left 6px
+  .title-section
+    background-color var(--secondary-background)
+    section.subsection
+      background-color var(--secondary-active-background)
   .title-row
     display flex
     justify-content space-between

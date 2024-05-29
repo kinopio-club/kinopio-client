@@ -92,7 +92,7 @@ const updateDialogHeight = async () => {
 
 <template lang="pug">
 dialog.apps.narrow(v-if="visible" @click.stop :open="visible" ref="dialog" :style="{'max-height': state.dialogHeight + 'px'}")
-  section
+  section.title-section
     .segmented-buttons
       button(:class="{active: state.isDesktop}" @click="toggleIsDesktop(true)")
         span Desktop

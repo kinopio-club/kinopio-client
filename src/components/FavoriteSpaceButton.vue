@@ -3,9 +3,13 @@ import { reactive, computed, onMounted, onBeforeUnmount, onUnmounted, defineProp
 import { useStore } from 'vuex'
 const store = useStore()
 
+const props = defineProps({
+  parentIsDialog: Boolean
+})
+
 const emit = defineEmits(['updateLocalSpaces'])
 
-const shouldIncreaseUIContrast = computed(() => store.state.currentUser.shouldIncreaseUIContrast)
+const shouldIncreaseUIContrast = computed(() => store.state.currentUser.shouldIncreaseUIContrast || props.parentIsDialog)
 const isOnline = computed(() => store.state.isOnline)
 
 const isFavoriteSpace = computed(() => store.getters['currentSpace/isFavorite'])
