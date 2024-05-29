@@ -354,7 +354,7 @@ aside.notifications(@click.left="closeAllDialogs")
       button(@click.left.stop="triggerSignUpOrInIsVisible") Sign Up or In to Edit
 
   .persistent-item.danger(v-if="notifySpaceNotFound")
-    p Space could not be found, or is private
+    p The space you tried to visit could not be found, or is private
     .row
       button(@click.left.stop="triggerSpaceDetailsVisible") Spaces
       button(v-if="!currentUserIsSignedIn" @click.left.stop="triggerSignUpOrInIsVisible") Sign Up or In

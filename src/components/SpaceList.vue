@@ -222,6 +222,7 @@ const selectSpace = (event, space) => {
     return
   }
   if (!space) { return }
+  store.commit('notifySpaceNotFound', false)
   emit('selectSpace', space)
 }
 
