@@ -1,5 +1,7 @@
 // vars referenced by multiple components
 
+const forceIsProduction = false
+
 export default {
   spaceZoom: {
     max: 100,
@@ -22,7 +24,7 @@ export default {
   rootUserId: 'euGhpBrR9eBcjKnK16C_g',
   sidebarWidth: 250,
   systemCommands: { explore: 'Explore', newSpace: 'New Space', templates: 'Templates', apps: 'Apps and Extensions' },
-  isDevelopment: import.meta.env.MODE === 'development',
+  isDevelopment: (import.meta.env.MODE === 'development' && !forceIsProduction),
   isSecureAppContextIOS: navigator.isSecureAppContextIOS, // true = iOS app
   isSecureAppContext: navigator.isSecureAppContext, // true = iOS app
   cdnHost: 'https://cdn.kinopio.club',

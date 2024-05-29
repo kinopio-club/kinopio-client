@@ -24,7 +24,7 @@ $ npm run serve
 $ https://kinopio.local:8080
 ```
 
-> If you're not running `kinopio-server` locally, change `consts.isDevelopment` to `false` to connect to the prod api (don't commit this though)
+> If you're not running `kinopio-server` locally, `forceIsProduction` in `consts.js` to connect to the prod api (don't commit this though)
 
 ## Debugging
 
