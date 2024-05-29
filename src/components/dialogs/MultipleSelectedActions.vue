@@ -69,7 +69,7 @@ const isThemeDarkAndUserColorLight = computed(() => {
   const userColorIsLight = !utils.colorIsDark(userColor.value)
   return isThemeDark && userColorIsLight
 })
-const maxCardLength = computed(() => consts.maxCardLength)
+const maxCardCharacterLimit = computed(() => consts.defaultCharacterLimit)
 const userColor = computed(() => store.state.currentUser.color)
 const spaceCounterZoomDecimal = computed(() => store.getters.spaceCounterZoomDecimal)
 const pinchCounterZoomDecimal = computed(() => store.state.pinchCounterZoomDecimal)
@@ -414,18 +414,18 @@ const mergeSelectedCards = () => {
   })
   name = name.trim()
   let newNames = []
-  // split names while > maxCardLength
+  // split names while > maxCardCharacterLimit
   do {
-    let newName = name.substring(0, maxCardLength.value)
+    let newName = name.substring(0, maxCardCharacterLimit.value)
     const lastSpace = newName.lastIndexOf(' ')
     const lastLineBreak = newName.lastIndexOf('\n')
     const shouldSplitByMaxLength = lastSpace === -1 && lastLineBreak === -1
-    if (name.length < maxCardLength.value) {
+    if (name.length < maxCardCharacterLimit.value) {
       newName = name
       name = ''
     } else if (shouldSplitByMaxLength) {
       // newName = newName
-      name = name.substring(maxCardLength.value)
+      name = name.substring(maxCardCharacterLimit.value)
     } else if (lastSpace >= lastLineBreak) {
       newName = name.substring(0, lastSpace)
       name = name.substring(lastSpace)
@@ -434,7 +434,7 @@ const mergeSelectedCards = () => {
       name = name.substring(lastLineBreak)
     }
     newNames.push(newName)
-  } while (name.length > maxCardLength.value)
+  } while (name.length > maxCardCharacterLimit.value)
 
   newNames.push(name)
   newNames = newNames.filter(name => Boolean(name))

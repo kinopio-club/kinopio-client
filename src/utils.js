@@ -163,7 +163,7 @@ export default {
     if (!element) { return }
     const sidebarIsVisible = document.querySelector('dialog#sidebar')
     const viewportWidth = this.visualViewport().width
-    const isViewportNarrow = viewportWidth < (consts.maxCardLength * 2)
+    const isViewportNarrow = viewportWidth < (consts.defaultCharacterLimit * 2)
     let horizontal = 'nearest'
     let vertical = 'nearest'
     if (sidebarIsVisible) {
@@ -539,11 +539,11 @@ export default {
     }
   },
   splitCardNameByParagraphAndSentence (prevName) {
-    const maxCardLength = consts.maxCardLength
+    const maxCardCharacterLimit = consts.defaultCharacterLimit
     const paragraphs = this.splitByParagraphs(prevName) || []
     let cardNames = paragraphs.map(paragraph => {
       let sentences
-      if (paragraph.length > maxCardLength) {
+      if (paragraph.length > maxCardCharacterLimit) {
         sentences = this.splitBySentences(paragraph)
       }
       return sentences || paragraph
@@ -557,9 +557,9 @@ export default {
       do {
         shouldSplit = false
         nameToSplit = nameToSplit || name
-        results.push(nameToSplit.substring(0, maxCardLength))
-        const otherSplit = nameToSplit.substring(maxCardLength)
-        if (otherSplit <= maxCardLength) {
+        results.push(nameToSplit.substring(0, maxCardCharacterLimit))
+        const otherSplit = nameToSplit.substring(maxCardCharacterLimit)
+        if (otherSplit <= maxCardCharacterLimit) {
           results.push(otherSplit)
         } else {
           nameToSplit = otherSplit

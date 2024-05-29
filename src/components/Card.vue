@@ -82,8 +82,6 @@ onMounted(async () => {
   }
   await updateUrlPreviewOnload()
   checkIfShouldUpdatePreviewHtml()
-  const defaultCardMaxWidth = consts.defaultCardMaxWidth + 'px'
-  utils.setCssVariable('card-width', defaultCardMaxWidth)
   initViewportObserver()
 })
 
@@ -367,8 +365,6 @@ const articleStyle = computed(() => {
   let styles = {
     left: `${x.value}px`,
     top: `${y.value}px`,
-    // width: `${width.value}px`,
-    // height: `${props.card.height}px`,
     zIndex: z,
     pointerEvents
   }
@@ -456,20 +452,15 @@ const shouldJiggle = computed(() => {
 const updateStylesWithWidth = (styles) => {
   const cardHasExtendedContent = cardUrlPreviewIsVisible.value || otherCardIsVisible.value || isVisualCard.value || isAudioCard.value
   const cardHasUrlsOrMedia = cardHasMedia.value || cardHasUrls.value
+  const maxWidth = props.card.maxWidth || consts.normalCardMaxWidth
+  styles.maxWidth = resizeWidth.value || maxWidth
   if (isComment.value) { return styles }
-  if (cardHasUrlsOrMedia) {
-    styles.width = consts.defaultCardMaxWidth
-  }
   if (resizeWidth.value) {
     styles.maxWidth = resizeWidth.value
     styles.width = resizeWidth.value
   }
-  if (styles.width) {
-    styles.width = styles.width + 'px'
-  }
-  if (styles.maxWidth) {
-    styles.maxWidth = styles.maxWidth + 'px'
-  }
+  styles.width = styles.width + 'px'
+  styles.maxWidth = styles.maxWidth + 'px'
   return styles
 }
 const updatePreviousResultItem = () => {
@@ -1197,7 +1188,7 @@ const nameIncludesUrl = (url) => {
   return name.includes(url) || name.includes(normalizedUrl) || normalizedUrl.includes(name)
 }
 const previewImage = ({ thumbnail }) => {
-  const minWidth = consts.defaultCardMaxWidth
+  const minWidth = consts.normalCardMaxWidth
   if (!thumbnail) { return '' }
   let image = thumbnail.find(item => {
     let shouldSkipImage = false
@@ -2146,6 +2137,7 @@ article.card-wrap#card(
 
 <style lang="stylus">
 article.card-wrap
+  --card-width 200px // consts.normalCardMaxWidth
   pointer-events all
   position absolute
   max-width var(--card-width)
@@ -2389,11 +2381,7 @@ article.card-wrap
       top 6px
       left 6px
 
-    &.has-url-preview
-      width var(--card-width)
-
     &.media-card
-      width var(--card-width)
       background-color transparent
       &:hover,
       &.hover
@@ -2417,7 +2405,6 @@ article.card-wrap
           background-color var(--secondary-background)
 
     &.audio-card
-      width var(--card-width)
       .card-content-wrap
         width 100%
         align-items initial

@@ -1,5 +1,72 @@
+<script setup>
+import { reactive, computed, onMounted, onBeforeUnmount, defineProps, defineEmits, watch, ref, nextTick } from 'vue'
+import { useStore } from 'vuex'
+
+import UserLabelInline from '@/components/UserLabelInline.vue'
+import keyboardShortcutsCategories from '@/data/keyboardShortcutsCategories.js'
+import utils from '@/utils.js'
+
+const store = useStore()
+
+const dialogElement = ref(null)
+
+const props = defineProps({
+  visible: Boolean
+})
+const state = reactive({
+  selectedCategory: 'All'
+})
+
+watch(() => props.visible, (value, prevValue) => {
+  if (value) {
+    state.selectedCategory = 'All'
+  }
+})
+
+const updateDialogHeight = async () => {
+  if (!props.visible) { return }
+  await nextTick()
+  let element = dialogElement.value
+  state.dialogHeight = utils.elementHeight(element)
+}
+
+const categories = computed(() => keyboardShortcutsCategories)
+const meta = computed(() => utils.metaKey())
+const currentUser = computed(() => store.state.currentUser)
+const isMobile = computed(() => utils.isMobile())
+const shouldUseLastConnectionType = computed(() => store.state.currentUser.shouldUseLastConnectionType)
+const lastOrNewConnectionTypeControlSetting = computed(() => {
+  if (shouldUseLastConnectionType.value) {
+    return 'New'
+  } else {
+    return 'Last'
+  }
+})
+
+const updateSelectedCategory = (name) => {
+  state.selectedCategory = name
+}
+const categoryButtonIsVisible = (name) => {
+  return state.selectedCategory === name
+}
+const categoryIsVisible = (name) => {
+  return state.selectedCategory === 'All' || state.selectedCategory === name
+}
+const categoryByName = (name) => {
+  return categories.value.find(category => category.name === name)
+}
+const categoryColor = (name) => {
+  const color = categoryByName(name).color
+  return color
+}
+const closeDialogs = () => {
+  // this.keyboardShortcutsCategoriesIsVisible = false
+}
+
+</script>
+
 <template lang="pug">
-dialog.keyboard-shortcuts(v-if="visible" :open="visible" @click.left.stop ref="dialog" @click="closeDialogs")
+dialog.keyboard-shortcuts(v-if="visible" :open="visible" @click.left.stop ref="dialogElement" @click="closeDialogs" :style="{'max-height': state.dialogHeight + 'px'}")
   section
     .row
       p Keyboard Shortcuts
@@ -9,9 +76,9 @@ dialog.keyboard-shortcuts(v-if="visible" :open="visible" @click.left.stop ref="d
         .badge.secondary.button-badge(:class="{ active: categoryButtonIsVisible(category.name) }" :style="{ 'background-color': category.color }" @click="updateSelectedCategory(category.name)") {{category.name}}
   section
     //- General
-    template(v-if="categoryIsVisible('general')")
+    template(v-if="categoryIsVisible('General')")
       .section-title
-        .badge.info(:style="{ 'background-color': categoryColor('general') }") General
+        .badge.info(:style="{ 'background-color': categoryColor('General') }") General
       article
         .row
           .badge.title
@@ -32,9 +99,9 @@ dialog.keyboard-shortcuts(v-if="visible" :open="visible" @click.left.stop ref="d
           .badge.keyboard-shortcut Escape
 
     //- General
-    template(v-if="categoryIsVisible('toolbar')")
+    template(v-if="categoryIsVisible('Toolbar')")
       .section-title
-        .badge.info(:style="{ 'background-color': categoryColor('toolbar') }") Toolbar
+        .badge.info(:style="{ 'background-color': categoryColor('Toolbar') }") Toolbar
       article
         .row
           .badge.title
@@ -43,9 +110,9 @@ dialog.keyboard-shortcuts(v-if="visible" :open="visible" @click.left.stop ref="d
           .badge.keyboard-shortcut B
 
     //- Navigate
-    template(v-if="categoryIsVisible('navigate')")
+    template(v-if="categoryIsVisible('Navigate')")
       .section-title
-        .badge.info(:style="{ 'background-color': categoryColor('navigate') }") Navigate
+        .badge.info(:style="{ 'background-color': categoryColor('Navigate') }") Navigate
       article
         .row
           .badge.title
@@ -72,9 +139,9 @@ dialog.keyboard-shortcuts(v-if="visible" :open="visible" @click.left.stop ref="d
           .badge.keyboard-shortcut Z
 
     //- Edit
-    template(v-if="categoryIsVisible('edit')")
+    template(v-if="categoryIsVisible('Edit')")
       .section-title
-        .badge.info(:style="{ 'background-color': categoryColor('edit') }") Edit
+        .badge.info(:style="{ 'background-color': categoryColor('Edit') }") Edit
       article
         .row.multiple-items
           .badge.title
@@ -120,9 +187,9 @@ dialog.keyboard-shortcuts(v-if="visible" :open="visible" @click.left.stop ref="d
           .badge.keyboard-shortcut {{meta}}-Z/{{meta}}-Shift-Z
 
     //- Select
-    template(v-if="categoryIsVisible('select')")
+    template(v-if="categoryIsVisible('Select')")
       .section-title
-        .badge.info(:style="{ 'background-color': categoryColor('select') }") Select
+        .badge.info(:style="{ 'background-color': categoryColor('Select') }") Select
       article
         .row
           .badge.title
@@ -174,9 +241,9 @@ dialog.keyboard-shortcuts(v-if="visible" :open="visible" @click.left.stop ref="d
           .badge.keyboard-shortcut Delete
 
     //- Filter
-    template(v-if="categoryIsVisible('filter')")
+    template(v-if="categoryIsVisible('Filter')")
       .section-title
-        .badge.info(:style="{ 'background-color': categoryColor('filter') }") Filter
+        .badge.info(:style="{ 'background-color': categoryColor('Filter') }") Filter
       article
         .row
           .badge.title
@@ -203,9 +270,9 @@ dialog.keyboard-shortcuts(v-if="visible" :open="visible" @click.left.stop ref="d
           .badge.keyboard-shortcut 4
 
     //- Connect
-    template(v-if="categoryIsVisible('connect')")
+    template(v-if="categoryIsVisible('Connect')")
       .section-title
-        .badge.info(:style="{ 'background-color': categoryColor('connect') }") Connect
+        .badge.info(:style="{ 'background-color': categoryColor('Connect') }") Connect
       article
         .row
           .badge.title
@@ -220,9 +287,9 @@ dialog.keyboard-shortcuts(v-if="visible" :open="visible" @click.left.stop ref="d
           span 'Connect' button to use {{lastOrNewConnectionTypeControlSetting}} connection type
 
     //- Search and Jump
-    template(v-if="categoryIsVisible('search-and-jump')")
+    template(v-if="categoryIsVisible('Search and Jump')")
       .section-title
-        .badge.info(:style="{ 'background-color': categoryColor('search-and-jump') }") Search and Jump
+        .badge.info(:style="{ 'background-color': categoryColor('Search and Jump') }") Search and Jump
       article
         .row
           .badge.title
@@ -243,76 +310,6 @@ dialog.keyboard-shortcuts(v-if="visible" :open="visible" @click.left.stop ref="d
           .badge.keyboard-shortcut {{meta}}–Shift–F
 
 </template>
-
-<script>
-import UserLabelInline from '@/components/UserLabelInline.vue'
-import keyboardShortcutsCategories from '@/data/keyboardShortcutsCategories.js'
-import utils from '@/utils.js'
-
-export default {
-  name: 'KeyboardShortcuts',
-  props: {
-    visible: Boolean
-  },
-  components: {
-    UserLabelInline
-  },
-  data () {
-    return {
-      selectedCategory: 'all'
-    }
-  },
-  computed: {
-    categories () { return keyboardShortcutsCategories },
-    meta () { return utils.metaKey() },
-    currentUser () { return this.$store.state.currentUser },
-    isMobile () { return utils.isMobile() },
-    shouldUseLastConnectionType () { return this.$store.state.currentUser.shouldUseLastConnectionType },
-    lastOrNewConnectionTypeControlSetting () {
-      if (this.shouldUseLastConnectionType) {
-        return 'New'
-      } else {
-        return 'Last'
-      }
-    }
-  },
-  methods: {
-    updateSelectedCategory (categoryName) {
-      const name = utils.normalizeString(categoryName)
-      this.selectedCategory = name
-    },
-    categoryButtonIsVisible (categoryName) {
-      const name = utils.normalizeString(categoryName)
-      return this.selectedCategory === name
-    },
-    categoryIsVisible (categoryName) {
-      const name = utils.normalizeString(categoryName)
-      return this.selectedCategory === 'all' || this.selectedCategory === name
-    },
-    categoryByName (categoryName) {
-      const categories = this.categories.map(category => {
-        category.name = utils.normalizeString(category.name)
-        return category
-      })
-      return categories.filter(category => category.name === categoryName)[0]
-    },
-    categoryColor (categoryName) {
-      const color = this.categoryByName(categoryName).color
-      return color
-    },
-    closeDialogs () {
-      // this.keyboardShortcutsCategoriesIsVisible = false
-    }
-  },
-  watch: {
-    visible (visible) {
-      if (visible) {
-        this.selectedCategory = 'all'
-      }
-    }
-  }
-}
-</script>
 
 <style lang="stylus">
 .keyboard-shortcuts

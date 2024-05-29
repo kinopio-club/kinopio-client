@@ -23,7 +23,7 @@ dialog.card-details(v-if="visible" :open="visible" ref="dialog" @click.left="clo
         @keydown.stop.right="checkIfShouldHidePicker"
 
         data-type="name"
-        :maxlength="maxCardLength"
+        :maxlength="maxCardCharacterLimit"
         @click.left="clickName"
         @blur="triggerUpdateHeaderAndFooterPosition"
         @paste="updatePastedName"
@@ -32,6 +32,7 @@ dialog.card-details(v-if="visible" :open="visible" ref="dialog" @click.left="clo
         @keyup.ctrl.enter.exact.stop
         @keydown.alt.enter.exact.stop="insertLineBreak"
         @keydown.ctrl.enter.exact.stop="insertLineBreak"
+        @keydown.shift.enter.exact="conditionalInsertLineBreak"
 
         @keyup="updatePickerSearch(null)"
 
@@ -164,18 +165,18 @@ dialog.card-details(v-if="visible" :open="visible" ref="dialog" @click.left="clo
             span Read Only
 
     //- Info
-    template(v-if="showCurrentCardLength")
+    template(v-if="showCharacterCount")
       .row
         span.badge.secondary-on-dark-background
-          span {{currentCardLength}} / {{maxCardLength}}
+          span {{currentCardLength}} / {{maxCardCharacterLimit}}
 
     //- Errors
-    template(v-if="errorMaxCardLength")
+    template(v-if="errorMaxCharacterLimit")
       .row
         span.badge.danger
           img.icon.cancel(src="@/assets/add.svg")
           span Max Length
-      p To fit small screens, cards can't be longer than {{maxCardLength}} characters
+      p To fit small screens, cards can't be longer than {{maxCardCharacterLimit}} characters
     template(v-if="error.signUpToUpload")
       p
         span To upload files,
@@ -375,25 +376,25 @@ export default {
       return false
     },
     isInvitedButCannotEditSpace () { return this['currentUser/isInvitedButCannotEditSpace']() },
-    maxCardLength () {
+    maxCardCharacterLimit () {
+      let value = this.$store.state.currentUser.cardSettingsDefaultCharacterLimit || consts.defaultCharacterLimit
       const isCodeblock = this.card.name?.includes('```')
       if (isCodeblock) {
-        return consts.maxCodeBlockCardLength
-      } else {
-        return consts.maxCardLength
+        value = consts.highCharacterLimit
       }
+      return value
     },
     currentCardLength () {
       if (!this.card.name) { return 0 }
       return this.card.name.length
     },
-    showCurrentCardLength () {
+    showCharacterCount () {
       const threshold = 50
-      if (this.errorMaxCardLength) { return }
-      return this.currentCardLength >= this.maxCardLength - threshold
+      if (this.errorMaxCharacterLimit) { return }
+      return this.currentCardLength >= this.maxCardCharacterLimit - threshold
     },
-    errorMaxCardLength () {
-      if (this.currentCardLength >= this.maxCardLength) {
+    errorMaxCharacterLimit () {
+      if (this.currentCardLength >= this.maxCardCharacterLimit) {
         return true
       } else {
         return false
@@ -465,7 +466,6 @@ export default {
     urls () {
       const name = utils.removeMarkdownCodeblocksFromString(this.name)
       const urls = utils.urlsFromString(name)
-      this.updateCardWidthForUrl(urls)
       return urls
     },
     validUrls () {
@@ -609,12 +609,6 @@ export default {
     shouldShowItemActions () { return this.currentUser.shouldShowItemActions }
   },
   methods: {
-    updateCardWidthForUrl (urls) {
-      if (!utils.arrayHasItems(urls)) { return }
-      if (this.card.resizeWidth) { return }
-      const resizeWidth = consts.defaultCardMaxWidth
-      this.$store.dispatch('currentCards/update', { id: this.card.id, resizeWidth })
-    },
     broadcastShowCardDetails () {
       const updates = {
         cardId: this.card.id,
@@ -878,6 +872,11 @@ export default {
       if (!lineBreakInserted) {
         this.insertedLineBreak = false
       }
+    },
+    conditionalInsertLineBreak (event) {
+      const shouldAddChildCard = this.$store.state.currentUser.cardSettingsShiftEnterShouldAddChildCard
+      if (shouldAddChildCard) { return }
+      this.insertLineBreak(event)
     },
     insertLineBreak (event) {
       const position = this.$refs.name.selectionEnd

@@ -12,7 +12,6 @@ const props = defineProps({
 })
 
 const state = reactive({
-  dialogHeight: null,
   panningTipsIsVisible: false,
   outsideSpaceColorTipsIsVisible: false
 })
@@ -215,7 +214,7 @@ const clearTips = () => {
         width 18px
         height 18px
         border-radius var(--small-entity-radius)
-  section
+  section:not(.subsection)
     border-top 1px solid var(--primary-border)
     border-radius 0 !important
 </style>

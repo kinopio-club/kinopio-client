@@ -74,7 +74,11 @@ const initialState = {
   studentDiscountIsAvailable: false,
   lastSidebarSection: '',
   prevInviteEmails: '',
-  prevHeaderFontId: 0
+  prevHeaderFontId: 0,
+  cardSettingsDefaultCharacterLimit: consts.defaultCharacterLimit,
+  cardSettingsShiftEnterShouldAddChildCard: true,
+  cardSettingsMaxCardWidth: consts.normalCardMaxWidth,
+  prevSettingsSection: null
 }
 
 export default {
@@ -402,6 +406,22 @@ export default {
     },
     prevHeaderFontId: (state, value) => {
       state.prevHeaderFontId = value
+    },
+    cardSettingsDefaultCharacterLimit: (state, value) => {
+      utils.typeCheck({ value, type: 'number' })
+      state.cardSettingsDefaultCharacterLimit = value
+    },
+    cardSettingsShiftEnterShouldAddChildCard: (state, value) => {
+      utils.typeCheck({ value, type: 'boolean' })
+      state.cardSettingsShiftEnterShouldAddChildCard = value
+    },
+    cardSettingsMaxCardWidth: (state, value) => {
+      utils.typeCheck({ value, type: 'number' })
+      state.cardSettingsMaxCardWidth = value
+    },
+    prevSettingsSection: (state, value) => {
+      utils.typeCheck({ value, type: 'string' })
+      state.prevSettingsSection = value
     }
   },
   actions: {

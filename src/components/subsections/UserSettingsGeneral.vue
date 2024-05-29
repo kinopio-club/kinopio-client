@@ -5,7 +5,7 @@ import { useStore } from 'vuex'
 import UserBillingSettings from '@/components/dialogs/UserBillingSettings.vue'
 import UserAccountSettings from '@/components/dialogs/UserAccountSettings.vue'
 import NotificationSettings from '@/components/dialogs/NotificationSettings.vue'
-import ThemeAndColorsSettings from '@/components/dialogs/ThemeAndColorsSettings.vue'
+import ThemeSettings from '@/components/dialogs/ThemeSettings.vue'
 import ThemeToggle from '@/components/ThemeToggle.vue'
 import Loader from '@/components/Loader.vue'
 import cache from '@/cache.js'
@@ -39,7 +39,7 @@ const state = reactive({
     deleteUserPermanent: false
   },
   notificationSettingsIsVisible: false,
-  themeAndColorsSettingsIsVisible: false
+  themeSettingsIsVisible: false
 })
 
 // dialog
@@ -48,7 +48,7 @@ const closeChildDialogs = () => {
   state.userBillingSettingsIsVisible = false
   state.userAccountSettingsIsVisible = false
   state.notificationSettingsIsVisible = false
-  state.themeAndColorsSettingsIsVisible = false
+  state.themeSettingsIsVisible = false
 }
 
 // child dialog state
@@ -74,11 +74,11 @@ const toggleNotificationSettingsIsVisible = () => {
   state.deleteAllConfirmationVisible = false
   state.notificationSettingsIsVisible = !isVisible
 }
-const toggleThemeAndColorsSettingsIsVisible = () => {
-  const isVisible = state.themeAndColorsSettingsIsVisible
+const toggleThemeSettingsIsVisible = () => {
+  const isVisible = state.themeSettingsIsVisible
   closeChildDialogs()
   state.deleteAllConfirmationVisible = false
-  state.themeAndColorsSettingsIsVisible = !isVisible
+  state.themeSettingsIsVisible = !isVisible
 }
 
 // delete user
@@ -114,9 +114,9 @@ const deleteUserPermanent = async () => {
       .button-wrap
         .segmented-buttons
           ThemeToggle
-          button(@click.left.stop="toggleThemeAndColorsSettingsIsVisible" :class="{active: state.themeAndColorsSettingsIsVisible}")
-            span Colors
-        ThemeAndColorsSettings(:visible="state.themeAndColorsSettingsIsVisible")
+          button(@click.left.stop="toggleThemeSettingsIsVisible" :class="{active: state.themeSettingsIsVisible}")
+            span Theme Settings
+        ThemeSettings(:visible="state.themeSettingsIsVisible")
   //- Account Settings
   section
     .row
