@@ -44,19 +44,19 @@ const lastOrNewConnectionTypeControlSetting = computed(() => {
 })
 
 const updateSelectedCategory = (name) => {
-  this.selectedCategory = name
+  state.selectedCategory = name
 }
 const categoryButtonIsVisible = (name) => {
-  return this.selectedCategory === name
+  return state.selectedCategory === name
 }
 const categoryIsVisible = (name) => {
-  return this.selectedCategory === 'all' || this.selectedCategory === name
+  return state.selectedCategory === 'all' || state.selectedCategory === name
 }
 const categoryByName = (name) => {
-  return this.categories.find(category => category.name === name)
+  return categories.value.find(category => category.name === name)
 }
 const categoryColor = (name) => {
-  const color = this.categoryByName(name).color
+  const color = categoryByName(name).color
   return color
 }
 const closeDialogs = () => {
