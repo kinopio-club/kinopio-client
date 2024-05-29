@@ -2,12 +2,33 @@
 import { reactive, computed, onMounted, onBeforeUnmount, defineProps, defineEmits, watch, ref, nextTick } from 'vue'
 import { useStore } from 'vuex'
 
+import ColorPicker from '@/components/dialogs/ColorPicker.vue'
 import consts from '@/consts.js'
+import utils from '@/utils.js'
+
 const store = useStore()
+
+onMounted(() => {
+  initDefaultColor()
+  store.subscribe((mutation, state) => {
+    if (mutation.type === 'triggerUpdateTheme') {
+      initDefaultColor()
+    }
+  })
+})
 
 const props = defineProps({
   visible: Boolean
 })
+const state = reactive({
+  colorPickerIsVisible: false,
+  defaultColor: '#e3e3e3'
+})
+const initDefaultColor = () => {
+  state.defaultColor = utils.cssVariable('secondary-background')
+}
+
+const currentUser = computed(() => store.state.currentUser)
 
 // character limit
 
@@ -37,10 +58,50 @@ const updateMaxCardWidthIsWide = (isWide) => {
   }
   store.dispatch('currentUser/update', { cardSettingsMaxCardWidth: value })
 }
+
+// card color
+
+const updateDefaultCardColor = (color) => {
+  store.dispatch('currentUser/update', { defaultCardBackgroundColor: color })
+}
+const removeDefaultCardColor = () => {
+  updateDefaultCardColor(null)
+  closeChildDialogs()
+}
+const toggleColorPicker = () => {
+  const value = !state.colorPickerIsVisible
+  closeChildDialogs()
+  state.colorPickerIsVisible = value
+}
+const closeChildDialogs = () => {
+  state.colorPickerIsVisible = false
+}
+const defaultCardColor = computed(() => {
+  const userDefault = currentUser.value.defaultCardBackgroundColor
+  return userDefault || state.defaultColor
+})
+const userHasDefaultCardColor = computed(() => {
+  const systemDefaultColor = utils.cssVariable('secondary-background')
+  const userDefaultColor = currentUser.value.defaultCardBackgroundColor
+  const defaultColorIsNotSystem = userDefaultColor !== systemDefaultColor
+  return userDefaultColor && defaultColorIsNotSystem
+})
+
 </script>
 
 <template lang="pug">
-.cards-settings(v-if="visible")
+.cards-settings(v-if="visible" @click.left.stop="closeChildDialogs")
+  section
+    .row
+      p New Card Color
+    .row
+      .button-wrap
+        .segmented-buttons
+          button(@click.left.stop="toggleColorPicker" :class="{active: state.colorPickerIsVisible || userHasDefaultCardColor}")
+            .current-color(:style="{ 'background-color': defaultCardColor }")
+          button(@click.left.stop="removeDefaultCardColor")
+            img.icon.cancel(src="@/assets/add.svg")
+        ColorPicker(:currentColor="defaultCardColor" :visible="state.colorPickerIsVisible" @selectedColor="updateDefaultCardColor")
   section
     p Shift-Enter
     .segmented-buttons
@@ -66,8 +127,16 @@ const updateMaxCardWidthIsWide = (isWide) => {
 
 <style lang="stylus">
 .cards-settings
-  overflow auto
+  // overflow auto
   section:not(.subsection)
     border-top 1px solid var(--primary-border)
     border-radius 0 !important
+  .current-color
+    height 14px
+    width 14px
+    margin-bottom 1px
+    border-radius var(--small-entity-radius)
+    display inline-block
+    vertical-align -3px
+
 </style>
