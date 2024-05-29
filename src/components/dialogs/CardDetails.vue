@@ -466,7 +466,6 @@ export default {
     urls () {
       const name = utils.removeMarkdownCodeblocksFromString(this.name)
       const urls = utils.urlsFromString(name)
-      this.updateCardWidthForUrl(urls)
       return urls
     },
     validUrls () {
@@ -610,9 +609,6 @@ export default {
     shouldShowItemActions () { return this.currentUser.shouldShowItemActions }
   },
   methods: {
-    updateCardWidthForUrl (urls) {
-      if (!utils.arrayHasItems(urls)) { }
-    },
     broadcastShowCardDetails () {
       const updates = {
         cardId: this.card.id,
