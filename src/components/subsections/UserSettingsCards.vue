@@ -101,7 +101,7 @@ const initDefaultColor = () => {
     .row
       .button-wrap
         .segmented-buttons
-          button(@click.left.stop="toggleColorPicker" :class="{active: state.colorPickerIsVisible || userHasDefaultCardColor}")
+          button(@click.left.stop="toggleColorPicker" :class="{active: state.colorPickerIsVisible}")
             .current-color(:style="{ 'background-color': defaultCardColor }")
           button(@click.left.stop="removeDefaultCardColor")
             img.icon.cancel(src="@/assets/add.svg")
