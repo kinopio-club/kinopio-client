@@ -226,7 +226,7 @@ const self = {
           throw Error(response.statusText)
         }
         if (context.rootState.notifyServerCouldNotSave) {
-          // context.commit('notifyServerCouldNotSave', false, { root: true })
+          context.commit('notifyServerCouldNotSave', false, { root: true })
           context.commit('addNotification', { message: 'Reconnected to server', type: 'success' }, { root: true })
         }
       } catch (error) {
