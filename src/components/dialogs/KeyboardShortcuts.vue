@@ -14,12 +14,12 @@ const props = defineProps({
   visible: Boolean
 })
 const state = reactive({
-  selectedCategory: 'all'
+  selectedCategory: 'All'
 })
 
 watch(() => props.visible, (value, prevValue) => {
   if (value) {
-    state.selectedCategory = 'all'
+    state.selectedCategory = 'All'
   }
 })
 
@@ -50,7 +50,7 @@ const categoryButtonIsVisible = (name) => {
   return state.selectedCategory === name
 }
 const categoryIsVisible = (name) => {
-  return state.selectedCategory === 'all' || state.selectedCategory === name
+  return state.selectedCategory === 'All' || state.selectedCategory === name
 }
 const categoryByName = (name) => {
   return categories.value.find(category => category.name === name)
