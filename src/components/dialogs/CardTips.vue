@@ -25,7 +25,7 @@ watch(() => props.visible, (value, prevValue) => {
   }
 })
 
-const maxCardCharacterLimit = computed(() => store.state.currentUser.cardSettingsDefaultCharacterLimit || consts.maxCardCharacterLimit)
+const maxCardCharacterLimit = computed(() => store.state.currentUser.cardSettingsDefaultCharacterLimit || consts.defaultCharacterLimit)
 const shiftEnterShouldAddChildCard = computed(() => store.state.currentUser.cardSettingsShiftEnterShouldAddChildCard)
 
 // buttons

@@ -75,7 +75,7 @@ const initialState = {
   lastSidebarSection: '',
   prevInviteEmails: '',
   prevHeaderFontId: 0,
-  cardSettingsDefaultCharacterLimit: consts.maxCardCharacterLimit,
+  cardSettingsDefaultCharacterLimit: consts.defaultCharacterLimit,
   cardSettingsShiftEnterShouldAddChildCard: true,
   cardSettingsMaxCardWidth: consts.normalCardMaxWidth,
   prevSettingsSection: null

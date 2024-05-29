@@ -377,10 +377,10 @@ export default {
     },
     isInvitedButCannotEditSpace () { return this['currentUser/isInvitedButCannotEditSpace']() },
     maxCardCharacterLimit () {
-      let value = this.$store.state.currentUser.cardSettingsDefaultCharacterLimit || consts.maxCardCharacterLimit
+      let value = this.$store.state.currentUser.cardSettingsDefaultCharacterLimit || consts.defaultCharacterLimit
       const isCodeblock = this.card.name?.includes('```')
       if (isCodeblock) {
-        value = consts.maxCodeBlockCharacterLimit
+        value = consts.highCharacterLimit
       }
       return value
     },

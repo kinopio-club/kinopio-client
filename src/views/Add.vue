@@ -61,7 +61,7 @@ const isOffline = computed(() => !store.state.isOnline)
 const currentUserIsSignedIn = computed(() => store.getters['currentUser/isSignedIn'])
 const kinopioDomain = computed(() => consts.kinopioDomain())
 const cardsCreatedIsOverLimit = computed(() => store.getters['currentUser/cardsCreatedIsOverLimit'])
-const maxCardCharacterLimit = computed(() => consts.maxCardCharacterLimit)
+const maxCardCharacterLimit = computed(() => consts.defaultCharacterLimit)
 const currentUser = computed(() => store.state.currentUser)
 const isAddPage = computed(() => store.state.isAddPage)
 const inboxUrl = computed(() => `${consts.kinopioDomain()}/inbox`)
@@ -256,7 +256,7 @@ const clearErrorsAndSuccess = () => {
   state.success = false
 }
 const updateMaxLengthError = () => {
-  if (state.newName.length >= consts.maxCardCharacterLimit - 1) {
+  if (state.newName.length >= consts.defaultCharacterLimit - 1) {
     state.error.maxLength = true
   } else {
     state.error.maxLength = false

@@ -68,7 +68,7 @@ const safeHtmlStringWithMatches = computed(() => {
 
 // max length
 
-const maxLength = computed(() => props.maxLength || consts.maxCardCharacterLimit)
+const maxLength = computed(() => props.maxLength || consts.defaultCharacterLimit)
 const isMaxLength = computed(() => state.newName?.length >= (maxLength.value - 1))
 
 // focus

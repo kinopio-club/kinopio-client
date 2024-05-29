@@ -69,7 +69,7 @@ const isThemeDarkAndUserColorLight = computed(() => {
   const userColorIsLight = !utils.colorIsDark(userColor.value)
   return isThemeDark && userColorIsLight
 })
-const maxCardCharacterLimit = computed(() => consts.maxCardCharacterLimit)
+const maxCardCharacterLimit = computed(() => consts.defaultCharacterLimit)
 const userColor = computed(() => store.state.currentUser.color)
 const spaceCounterZoomDecimal = computed(() => store.getters.spaceCounterZoomDecimal)
 const pinchCounterZoomDecimal = computed(() => store.state.pinchCounterZoomDecimal)

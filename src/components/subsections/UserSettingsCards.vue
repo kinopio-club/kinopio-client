@@ -12,8 +12,8 @@ const props = defineProps({
 // character limit
 
 const defaultCharacterLimit = computed(() => store.state.currentUser.cardSettingsDefaultCharacterLimit)
-const limitIsDefault = computed(() => !defaultCharacterLimit.value || defaultCharacterLimit.value === consts.maxCardCharacterLimit)
-const limitIsMax = computed(() => defaultCharacterLimit.value === consts.maxCodeBlockCharacterLimit)
+const limitIsDefault = computed(() => !defaultCharacterLimit.value || defaultCharacterLimit.value === consts.defaultCharacterLimit)
+const limitIsMax = computed(() => defaultCharacterLimit.value === consts.highCharacterLimit)
 const updateLimit = (value) => {
   store.dispatch('currentUser/update', { cardSettingsDefaultCharacterLimit: value })
 }
@@ -51,10 +51,10 @@ const updateMaxCardWidthIsWide = (isWide) => {
   section
     p Character Limit
     .segmented-buttons
-      button(@click="updateLimit(consts.maxCardCharacterLimit)" :class="{ active: limitIsDefault }")
-        span {{consts.maxCardCharacterLimit}}
-      button(@click="updateLimit(consts.maxCodeBlockCharacterLimit)" :class="{ active: limitIsMax }")
-        span {{consts.maxCodeBlockCharacterLimit}}
+      button(@click="updateLimit(consts.defaultCharacterLimit)" :class="{ active: limitIsDefault }")
+        span {{consts.defaultCharacterLimit}}
+      button(@click="updateLimit(consts.highCharacterLimit)" :class="{ active: limitIsMax }")
+        span {{consts.highCharacterLimit}}
   section
     p Max Card Width
     .segmented-buttons

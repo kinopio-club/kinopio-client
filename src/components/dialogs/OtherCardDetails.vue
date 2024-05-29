@@ -24,7 +24,7 @@ onMounted(() => {
 
 // state
 const state = reactive({
-  errormaxCardCharacterLimit: false
+  errorMaxCharacterLimit: false
 })
 const otherCard = computed(() => store.state.currentSelectedOtherItem)
 const url = computed(() => utils.urlFromSpaceAndCard({ spaceId: otherSpace.value.id, cardId: otherCard.value.id }))
@@ -39,7 +39,7 @@ const visible = computed(() => {
   if (isVisible) {
     textareaStyles()
     focusTextarea()
-    updateErrormaxCardCharacterLimit()
+    updateErrorMaxCharacterLimit()
     scrollIntoView()
   }
   return isVisible
@@ -88,7 +88,7 @@ const showCardDetails = () => {
 
 // edit card
 
-const maxCardCharacterLimit = () => { return consts.maxCardCharacterLimit }
+const maxCardCharacterLimit = () => { return consts.defaultCharacterLimit }
 const updateName = (newName) => {
   const spaceId = otherCard.value.spaceId
   const card = { id: otherCard.value.id, name: newName }
@@ -100,7 +100,7 @@ const updateName = (newName) => {
   store.dispatch('api/addToQueue', { name: 'updateCard', body: card, spaceId })
   // update input
   textareaStyles()
-  updateErrormaxCardCharacterLimit(newName)
+  updateErrorMaxCharacterLimit(newName)
   store.dispatch('currentCards/updateDimensions', { cards: [card] })
 }
 const updateOtherNameInCurrentSpace = ({ card, spaceId }) => {
@@ -108,10 +108,10 @@ const updateOtherNameInCurrentSpace = ({ card, spaceId }) => {
   if (currentSpaceId !== spaceId) { return }
   store.commit('currentCards/update', card)
 }
-const updateErrormaxCardCharacterLimit = (newName) => {
+const updateErrorMaxCharacterLimit = (newName) => {
   const name = newName || otherCard.value.name
   if (!name) { return }
-  state.errormaxCardCharacterLimit = name.length >= maxCardCharacterLimit()
+  state.errorMaxCharacterLimit = name.length >= maxCardCharacterLimit()
 }
 
 // select card
@@ -159,7 +159,7 @@ dialog.narrow.other-card-details(v-if="visible" :open="visible" :style="styles" 
             :maxlength="maxCardCharacterLimit()"
             placeholder="Type here, or paste a URL"
           )
-        .row(v-if="state.errormaxCardCharacterLimit")
+        .row(v-if="state.errorMaxCharacterLimit")
           .badge.danger
             img.icon.cancel(src="@/assets/add.svg")
             span Max Length
