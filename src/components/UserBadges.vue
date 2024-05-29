@@ -17,9 +17,17 @@
     //- img.icon.heart(src="@/assets/heart.svg")
     span Ambassador
 
+//- badge description
 .row(v-if="description")
   section.subsection
     span(v-html="description")
+
+//- card count
+.row
+  .badge.secondary
+    img.icon.card(src="@/assets/card.svg")
+    span {{user.cardsCreatedCount}} Cards Created
+
 </template>
 
 <script>

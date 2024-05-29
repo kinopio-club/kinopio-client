@@ -225,15 +225,19 @@ const updateExploreSpaces = async () => {
   //- Current User
   template(v-if="isCurrentUser")
     section.current-user
+      //- color and name
       .row
         .button-wrap
           button.change-color(@click.left.stop="toggleColorPicker" :class="{active: state.colorPickerIsVisible}")
             .current-color(:style="{ background: userColor }")
           ColorPicker(:currentColor="userColor" :visible="state.colorPickerIsVisible" @selectedColor="updateUserColor")
         input.name.user-details-name(placeholder="What's your name?" v-model="userName" name="Name" maxlength=100)
+      //- badges
       UserBadges(:user="user")
+      //- description
       .row
         textarea(ref="descriptionElement" placeholder="Tell us about yourself" v-model="userDescription" name="Description" maxlength=220 rows="1")
+      //- website
       .row
         input(ref="website" placeholder="Website" v-model="userWebsite" name="Website" maxlength=200 rows="1")
         a(:href="websiteUrl" v-if="websiteUrl")
