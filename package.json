@@ -1,15 +1,18 @@
 {
   "name": "kinopio-client",
+  "type": "module",
   "version": "1.0.0",
   "private": true,
-  "scripts": {
+  "scripts":
+  {
     "dev": "vite",
     "serve": "vite --host",
     "build": "vite build",
     "preview": "vite preview",
     "lint": "eslint . --ext .js,.vue"
   },
-  "dependencies": {
+  "dependencies":
+  {
     "@aguezz/qs-parse": "^2.0.0",
     "adaptive-quadratic-curve": "^1.0.2",
     "colord": "^2.9.3",
@@ -27,7 +30,8 @@
     "vue-router": "^4.0.11",
     "vuex": "^4.0.2"
   },
-  "devDependencies": {
+  "devDependencies":
+  {
     "@types/lodash-es": "^4.17.3",
     "@vitejs/plugin-vue": "^5.0.0",
     "@vue/compiler-sfc": "^3.2.6",
@@ -45,40 +49,41 @@
     "vite-plugin-pwa": "^0.17.4",
     "yorkie": "^2.0.0"
   },
-  "eslintConfig": {
+  "eslintConfig":
+  {
     "root": true,
-    "env": {
+    "env":
+    {
       "node": true
     },
-    "extends": [
-      "plugin:vue/essential",
-      "@vue/standard"
-    ],
-    "rules": {
+    "extends": ["plugin:vue/essential","@vue/standard"],
+    "rules":
+    {
       "no-throw-literal": "off",
       "no-unused-vars": "off",
       "vue/multi-word-component-names": "off",
       "vue/no-reserved-component-names": "off"
     },
-    "parserOptions": {
+    "parserOptions":
+    {
       "parser": "babel-eslint"
     }
   },
-  "postcss": {
-    "plugins": {
-      "autoprefixer": {}
+  "postcss":
+  {
+    "plugins":
+    {
+      "autoprefixer":
+      {}
     }
   },
-  "browserslist": [
-    "> 1%",
-    "last 2 versions"
-  ],
-  "gitHooks": {
+  "browserslist": ["> 1%","last 2 versions"],
+  "gitHooks":
+  {
     "pre-commit": "lint-staged"
   },
-  "lint-staged": {
-    "*.{js,vue}": [
-      "eslint --fix"
-    ]
+  "lint-staged":
+  {
+    "*.{js,vue}": ["eslint --fix"]
   }
 }
