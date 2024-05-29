@@ -20,15 +20,19 @@ onMounted(() => {
 const props = defineProps({
   visible: Boolean
 })
+watch(() => props.visible, (value, prevValue) => {
+  closeChildDialogs()
+})
+
 const state = reactive({
   colorPickerIsVisible: false,
   defaultColor: '#e3e3e3'
 })
-const initDefaultColor = () => {
-  state.defaultColor = utils.cssVariable('secondary-background')
-}
 
 const currentUser = computed(() => store.state.currentUser)
+const closeChildDialogs = () => {
+  state.colorPickerIsVisible = false
+}
 
 // character limit
 
@@ -73,9 +77,6 @@ const toggleColorPicker = () => {
   closeChildDialogs()
   state.colorPickerIsVisible = value
 }
-const closeChildDialogs = () => {
-  state.colorPickerIsVisible = false
-}
 const defaultCardColor = computed(() => {
   const userDefault = currentUser.value.defaultCardBackgroundColor
   return userDefault || state.defaultColor
@@ -86,6 +87,9 @@ const userHasDefaultCardColor = computed(() => {
   const defaultColorIsNotSystem = userDefaultColor !== systemDefaultColor
   return userDefaultColor && defaultColorIsNotSystem
 })
+const initDefaultColor = () => {
+  state.defaultColor = utils.cssVariable('secondary-background')
+}
 
 </script>
 
