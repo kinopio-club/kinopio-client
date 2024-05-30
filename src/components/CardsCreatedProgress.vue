@@ -44,7 +44,9 @@ const closeChildDialogs = () => {
 <template lang="pug">
 section.subsection.cards-created-progress(@click="closeChildDialogs")
   .row
-    p {{cardsCreatedCount}}/{{cardsCreatedLimit}} free cards created
+    p
+      img.icon.card(src="@/assets/card.svg")
+      span {{cardsCreatedCount}}/{{cardsCreatedLimit}} free cards created
     .button-wrap
       button.small-button(@click.stop="toggleFreeLimitFAQIsVisible" :class="{active: state.freeLimitFAQIsVisible}")
         span ?

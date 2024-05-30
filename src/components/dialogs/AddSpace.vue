@@ -171,7 +171,7 @@ dialog.add-space.narrow(
   @touchend.stop
   @click.left.stop
   :class="{'short': state.screenIsShort}"
-  ref="dialog"
+  ref="dialogElement"
   :style="{'max-height': state.dialogHeight + 'px'}"
 )
   section
