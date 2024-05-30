@@ -22,6 +22,8 @@ const store = useStore()
 
 let unsubscribe, shouldPreventSelectSpace
 
+const itemsPerPage = 60
+
 const spaceListElement = ref(null)
 
 onMounted(() => {
@@ -47,6 +49,9 @@ onMounted(() => {
   })
   updateScroll()
   spaceListElement.value.closest('section').addEventListener('scroll', updateScroll)
+  if (props.disableListOptimizations) {
+    state.currentPage = totalPages.value
+  }
 })
 
 onBeforeUnmount(() => {
@@ -86,34 +91,11 @@ const state = reactive({
   filteredSpaces: [],
   focusOnId: '',
   scrollY: 0,
-  scrollHeight: null,
-  heightByIndex: {}
+  currentPage: 1,
+  prevScrollAreaHeight: 0
 })
 
 const isOnline = computed(() => store.state.isOnline)
-
-// scroll
-
-watch(() => props.resultsSectionHeight, async (value, prevValue) => {
-  await nextTick()
-  updateScroll()
-})
-watch(() => props.isLoading, async (value, prevValue) => {
-  await nextTick()
-  updateScroll()
-})
-const updateScroll = async () => {
-  await nextTick()
-  let element = spaceListElement.value
-  if (!element) { return }
-  element = element.closest('section')
-  if (!element) {
-    console.error('scroll element not found', element)
-  }
-  state.scrollY = element.scrollTop
-  state.scrollHeight = element.getBoundingClientRect().height
-}
-
 const currentUser = computed(() => store.state.currentUser)
 
 // spaces
@@ -234,42 +216,55 @@ const isFavorite = (space) => {
   return Boolean(isFavorite)
 }
 
-// list render optimization
+// scroll
 
-const itemIsVisible = (index) => {
-  if (props.disableListOptimizations) { return true }
-  if (!state.scrollY) {
-    updateScroll()
-  }
-  let threshold = 0
-  if (state.scrollY) {
-    threshold = state.scrollHeight / 2
-  }
-  const defaultHeight = 33
-  let yStart = index * defaultHeight
-  const prevHeight = state.heightByIndex[index - 1]
-  if (prevHeight) {
-    let yStart = 0
-    for (let i = 0; i - 1 < index; i++) {
-      yStart = yStart + state.heightByIndex[i]
-    }
-  }
-  const yEnd = yStart + defaultHeight
-  const isAboveScroll = (yEnd + threshold) < state.scrollY
-  const isBelowScroll = (yStart - threshold) > (state.scrollHeight + state.scrollY)
-  if (isAboveScroll || isBelowScroll) { return }
-  updateItemHeight(index)
-  return true
-}
-const updateItemHeight = (index) => {
+watch(() => props.resultsSectionHeight, async (value, prevValue) => {
+  await nextTick()
+  updateScroll()
+})
+watch(() => props.isLoading, async (value, prevValue) => {
+  await nextTick()
+  updateScroll()
+})
+const updateScroll = async () => {
+  await nextTick()
   let element = spaceListElement.value
   if (!element) { return }
-  const elements = element.getElementsByClassName('.space-wrap')
-  if (!elements.length) { return }
-  const offset = 3
-  let height = elements[index].getBoundingClientRect().height
-  state.heightByIndex[index] = height
+  element = element.closest('section')
+  if (!element) {
+    console.error('scroll element not found', element)
+  }
+  state.scrollY = element.scrollTop
+  const scrollHeight = element.getBoundingClientRect().height
+  let minItemHeight = 37.5
+  if (props.previewImageIsWide) {
+    minItemHeight = 42
+  }
+  state.pageHeight = itemsPerPage * minItemHeight * state.currentPage
+  updateCurrentPage()
 }
+
+// list render optimization
+
+const updateCurrentPage = () => {
+  const zoom = utils.pinchCounterZoomDecimal()
+  const threshold = 200
+  const nearBottomY = state.pageHeight - (threshold * state.currentPage)
+  if ((state.scrollY * zoom) > nearBottomY) {
+    state.currentPage = Math.min(state.currentPage + 1, totalPages.value)
+  }
+}
+const totalPages = computed(() => {
+  const spaces = spacesFiltered.value
+  const total = Math.ceil(spaces.length / itemsPerPage)
+  return total
+})
+const spacesRendered = computed(() => {
+  let spaces = spacesFiltered.value
+  const max = state.currentPage * itemsPerPage
+  spaces = spaces.slice(0, max)
+  return spaces
+})
 
 // results filter
 
@@ -394,8 +389,9 @@ span.space-list-wrap
     @selectItem="selectItemFromFilter"
   )
   ul.results-list.space-list(ref="spaceListElement")
-    template(v-for="(space, index) in spacesFiltered" :key="space.id")
-      .space-wrap(:data-item-is-visible="itemIsVisible(index)" :data-space-id="space.id" :style="{height: state.heightByIndex[index] + 'px'}")
+    .prev-scroll-area-height(:style="{height: state.prevScrollAreaHeight + 'px'}")
+    template(v-for="(space, index) in spacesRendered" :key="space.id")
+      .space-wrap(:data-space-id="space.id")
         a(:href="space.url")
           li(
             @click.left="selectSpace($event, space)"
@@ -403,63 +399,61 @@ span.space-list-wrap
             tabindex="0"
             @keyup.enter="selectSpace(null, space)"
           )
-            template(v-if="itemIsVisible(index)")
-              Loader(:visible="isLoadingSpace(space)")
+            Loader(:visible="isLoadingSpace(space)")
+            //- Users
+            //- show spectators
+            template(v-if="showOtherUsers && isMultipleUsers(space)")
+              .users.multiple-users
+                template(v-for="user in users(space)" :key="user.id")
+                  User(:user="user" :isClickable="false" :isMedium="true")
+            template(v-else-if="showOtherUsers")
+              UserLabelInline(:user="user(space)" :isClickable="false" :key="user(space).id" :isMedium="true")
+            //- show collaborators
+            template(v-else-if="showCollaborators && isMultipleUsers(space)")
+              .users.multiple-users
+                template(v-for="user in users(space)" :key="user.id")
+                  User(:user="user" :isClickable="false" :isMedium="true")
+            template(v-else-if="showCollaborators")
+              UserLabelInline(:user="user(space)" :isClickable="false" :key="user(space).id" :isMedium="true")
+            //- show user badge only
+            template(v-else-if="showUser")
+              User(:user="user(space)" :isClickable="false" :key="user(space).id" :isMedium="true")
+            //- show user when current user is collaborator
+            template(v-else-if="showUserIfCurrentUserIsCollaborator(space)")
+              User(:user="user(space)" :isClickable="false" :key="user(space).id" :isMedium="true")
 
-              //- Users
-              //- show spectators
-              template(v-if="showOtherUsers && isMultipleUsers(space)")
-                .users.multiple-users
-                  template(v-for="user in users(space)" :key="user.id")
-                    User(:user="user" :isClickable="false" :isMedium="true")
-              template(v-else-if="showOtherUsers")
-                UserLabelInline(:user="user(space)" :isClickable="false" :key="user(space).id" :isMedium="true")
-              //- show collaborators
-              template(v-else-if="showCollaborators && isMultipleUsers(space)")
-                .users.multiple-users
-                  template(v-for="user in users(space)" :key="user.id")
-                    User(:user="user" :isClickable="false" :isMedium="true")
-              template(v-else-if="showCollaborators")
-                UserLabelInline(:user="user(space)" :isClickable="false" :key="user(space).id" :isMedium="true")
-              //- show user badge only
-              template(v-else-if="showUser")
-                User(:user="user(space)" :isClickable="false" :key="user(space).id" :isMedium="true")
-              //- show user when current user is collaborator
-              template(v-else-if="showUserIfCurrentUserIsCollaborator(space)")
-                User(:user="user(space)" :isClickable="false" :key="user(space).id" :isMedium="true")
-
-              //- preview image
-              .preview-thumbnail-image-wrap(v-if="space.previewThumbnailImage && isOnline" :class="{wide: previewImageIsWide}")
-                img.preview-thumbnail-image(:src="space.previewThumbnailImage")
-              //- offline
-              span(v-if="isNotCached(space.id)")
-                OfflineBadge(:isInline="true" :isDanger="true")
-              //- template category
-              .badge.info.inline-badge(v-if="showCategory && space.category" :class="categoryClassName(space)") {{space.category}}
-              //- tweet space
-              span(v-if="space.isFromTweet" title="Tweet space")
-                img.icon.tweet(src="@/assets/twitter.svg")
-              //- space meta
-              span(v-if="space.isFavorite")
-                img.icon.favorite-icon(src="@/assets/heart.svg")
-              span(v-if="space.name === 'Inbox'")
-                img.icon.inbox-icon(src="@/assets/inbox.svg")
-              SpaceTodayJournalBadge(:space="space")
-              //- journal
-              MoonPhase(v-if="space.moonPhase" :moonPhase="space.moonPhase")
-              //- template
-              img.icon.templates(v-if="space.isTemplate" src="@/assets/templates.svg" title="Template")
-              //- space details
-              .name
-                span(v-if="state.filter")
-                  NameMatch(:name="space.name" :indexes="space.matchIndexes")
-                span(v-else)
-                  span {{space.name}}
-                template(v-if='space.privacy')
-                  PrivacyIcon(:privacy="space.privacy" :closedIsNotVisible="true")
-                img.icon.sunglasses(src="@/assets/sunglasses.svg" v-if="showInExplore(space)" title="Shown in Explore")
-              button.button-checkmark(v-if="showCheckmarkSpace" @mousedown.left.stop="checkmarkSpace(space)" @touchstart.stop="checkmarkSpace(space)")
-                img.icon.checkmark(src="@/assets/checkmark.svg")
+            //- preview image
+            .preview-thumbnail-image-wrap(v-if="space.previewThumbnailImage && isOnline" :class="{wide: previewImageIsWide}")
+              img.preview-thumbnail-image(:src="space.previewThumbnailImage")
+            //- offline
+            span(v-if="isNotCached(space.id)")
+              OfflineBadge(:isInline="true" :isDanger="true")
+            //- template category
+            .badge.info.inline-badge(v-if="showCategory && space.category" :class="categoryClassName(space)") {{space.category}}
+            //- tweet space
+            span(v-if="space.isFromTweet" title="Tweet space")
+              img.icon.tweet(src="@/assets/twitter.svg")
+            //- space meta
+            span(v-if="space.isFavorite")
+              img.icon.favorite-icon(src="@/assets/heart.svg")
+            span(v-if="space.name === 'Inbox'")
+              img.icon.inbox-icon(src="@/assets/inbox.svg")
+            SpaceTodayJournalBadge(:space="space")
+            //- journal
+            MoonPhase(v-if="space.moonPhase" :moonPhase="space.moonPhase")
+            //- template
+            img.icon.templates(v-if="space.isTemplate" src="@/assets/templates.svg" title="Template")
+            //- space details
+            .name
+              span(v-if="state.filter")
+                NameMatch(:name="space.name" :indexes="space.matchIndexes")
+              span(v-else)
+                span {{space.name}}
+              template(v-if='space.privacy')
+                PrivacyIcon(:privacy="space.privacy" :closedIsNotVisible="true")
+              img.icon.sunglasses(src="@/assets/sunglasses.svg" v-if="showInExplore(space)" title="Shown in Explore")
+            button.button-checkmark.small-button(v-if="showCheckmarkSpace" @mousedown.left.stop="checkmarkSpace(space)" @touchstart.stop="checkmarkSpace(space)")
+              img.icon.checkmark(src="@/assets/checkmark.svg")
             //- new
             .badge.info.inline-badge.new-unread-badge(v-if="isNew(space)")
 </template>
@@ -533,8 +527,8 @@ span.space-list-wrap
       margin-left auto
 
     .checkmark
-      vertical-align 1px
-      width 10px
+      vertical-align 3px
+      width 12px
 
     li
       position relative

@@ -157,6 +157,7 @@ template(v-if="visible")
         :showUser="true"
         @selectSpace="changeSpace"
         :parentDialog="parentDialog"
+        :disableListOptimizations="true"
       )
 
     //- People

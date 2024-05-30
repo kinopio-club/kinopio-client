@@ -15,6 +15,7 @@
       :parentIsPinned="parentIsPinned"
       :resultsSectionHeight="resultsSectionHeight"
       :parentDialog="parentDialog"
+      :disableListOptimizations="true"
     )
   section.tips-section(v-else)
     section.subsection
