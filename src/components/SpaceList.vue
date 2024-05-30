@@ -250,7 +250,7 @@ const updateCurrentPage = () => {
   const zoom = utils.spaceCounterZoomDecimal()
   const threshold = 200
   const nearBottomY = (state.pageHeight * zoom) - (threshold * state.currentPage)
-  console.log('♥️♥️♥️', zoom, state.scrollY, nearBottomY, state.pageHeight, threshold, state.currentPage)
+  console.log('♥️♥️', zoom, state.scrollY, nearBottomY, state.pageHeight, threshold, state.currentPage)
   if ((state.scrollY * zoom) > nearBottomY) {
     state.currentPage = Math.min(state.currentPage + 1, totalPages.value)
   }
