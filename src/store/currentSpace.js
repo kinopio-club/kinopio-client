@@ -727,7 +727,6 @@ const currentSpace = {
         context.dispatch('checkIfShouldNotifySpaceIsRemoved', space)
       }
       context.commit('broadcast/joinSpaceRoom', null, { root: true })
-      context.commit('notifySpaceNotFound', false, { root: true })
       nextTick(() => {
         context.dispatch('scrollCardsIntoView')
         // deferrable async tasks
@@ -863,14 +862,22 @@ const currentSpace = {
       let space
       const user = context.rootState.currentUser
       let spaceToRestore = cache.space(user.lastSpaceId)
+      const cachedHelloSpace = cache.getSpaceByName('Hello Kinopio')
+      const cachedSpace = cache.getAllSpaces()[0]
+      const newUserSpace = cachedHelloSpace || cachedSpace
       if (spaceToRestore.id) {
         space = spaceToRestore
       } else if (user.lastSpaceId) {
         space = { id: user.lastSpaceId }
+      } else if (newUserSpace) {
+        space = { id: newUserSpace.id }
       }
+      // load space
       if (space) {
         context.dispatch('loadSpace', { space })
         context.dispatch('updateUserLastSpaceId')
+      } else {
+        context.dispatch('init')
       }
     },
     loadPrevSpaceInSession: async (context) => {
@@ -903,7 +910,6 @@ const currentSpace = {
       context.dispatch('prevSpaceIdInSession', context.state.id, { root: true })
       console.log('🚟 Change space', space)
       context.commit('isLoadingSpace', true, { root: true })
-      context.commit('notifySpaceNotFound', false, { root: true })
       context.commit('notifySpaceIsRemoved', false, { root: true })
       space = utils.clone(space)
       space = utils.migrationEnsureRemovedCards(space)

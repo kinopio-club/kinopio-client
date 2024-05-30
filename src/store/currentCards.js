@@ -908,7 +908,15 @@ const currentCards = {
       elements.forEach(element => {
         if (element.dataset.isVisibleInViewport === 'false') { return }
         if (element.dataset.isLocked === 'true') { return }
-        const card = getters.byId(element.dataset.cardId)
+        const cardData = getters.byId(element.dataset.cardId)
+        const rect = element.getBoundingClientRect()
+        const card = {
+          id: cardData.id,
+          x: cardData.x,
+          y: cardData.y,
+          width: rect.width || cardData.width,
+          height: rect.height || cardData.height
+        }
         cards.push(card)
       })
       return cards
