@@ -120,6 +120,10 @@ const initDefaultColor = () => {
         span {{consts.defaultCharacterLimit}}
       button(@click="updateLimit(consts.highCharacterLimit)" :class="{ active: limitIsMax }")
         span {{consts.highCharacterLimit}}
+    p.badge.secondary
+      span(v-if="limitIsDefault") For ideas and thoughts
+      span(v-if="!limitIsDefault") For long-form writing and documenting
+
   section
     p Max Card Width
     .segmented-buttons
@@ -127,9 +131,6 @@ const initDefaultColor = () => {
         span Normal
       button(@click="updateMaxCardWidthIsWide(true)" :class="{ active: maxCardWidthIsWide }")
         span Wide
-    p.badge.secondary
-      span(v-if="!maxCardWidthIsWide") For ideas and thoughts
-      span(v-if="maxCardWidthIsWide") For long-form writing and documenting
 </template>
 
 <style lang="stylus">
