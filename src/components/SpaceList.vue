@@ -247,8 +247,10 @@ const updateScroll = async () => {
 // list render optimization
 
 const updateCurrentPage = () => {
-  const threshold = 200
+  const zoom = store.getters.spaceCounterZoomDecimal
+  const threshold = 200 * zoom
   const nearBottomY = state.pageHeight - (threshold * state.currentPage)
+  console.log('♥️♥️♥️', zoom, state.scrollY, nearBottomY, state.pageHeight, threshold, state.currentPage)
   if (state.scrollY > nearBottomY) {
     state.currentPage = Math.min(state.currentPage + 1, totalPages.value)
   }
