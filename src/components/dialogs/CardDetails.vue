@@ -1,11 +1,1266 @@
+<script setup>
+import { reactive, computed, onMounted, onUpdated, onBeforeUnmount, defineProps, defineEmits, watch, ref, nextTick } from 'vue'
+import { useStore, mapState, mapGetters } from 'vuex'
+
+import CardOrBoxActions from '@/components/subsections/CardOrBoxActions.vue'
+import ImagePicker from '@/components/dialogs/ImagePicker.vue'
+import CardTips from '@/components/dialogs/CardTips.vue'
+import TagPicker from '@/components/dialogs/TagPicker.vue'
+import Tag from '@/components/Tag.vue'
+import SpacePicker from '@/components/dialogs/SpacePicker.vue'
+import UserLabelInline from '@/components/UserLabelInline.vue'
+import Loader from '@/components/Loader.vue'
+import UrlPreview from '@/components/UrlPreview.vue'
+import MediaPreview from '@/components/MediaPreview.vue'
+import CardCollaborationInfo from '@/components/CardCollaborationInfo.vue'
+import ShareCard from '@/components/dialogs/ShareCard.vue'
+import OtherCardPreview from '@/components/OtherCardPreview.vue'
+import OtherSpacePreview from '@/components/OtherSpacePreview.vue'
+import utils from '@/utils.js'
+import consts from '@/consts.js'
+
+import qs from '@aguezz/qs-parse'
+import { nanoid } from 'nanoid'
+
+let prevCardId, prevCardName
+let previousTags = []
+let compositionEventEndTime = 0
+
+const openingPreDuration = 250 // ms
+const openingDuration = 250 // ms
+let openingAnimationTimer, openingStartTime, shouldCancelOpening
+
+const store = useStore()
+
+const dialogElement = ref(null)
+const nameElement = ref(null)
+
+onMounted(() => {
+  store.subscribe((mutation, state) => {
+    if (mutation.type === 'triggerUnloadPage' && props.visible) {
+      closeCard()
+    } else if (mutation.type === 'triggerSplitCard' && props.visible) {
+      const cardId = mutation.payload
+      if (cardId !== card.value.id) { return }
+      splitCards()
+    } else if (mutation.type === 'cardDetailsIsVisibleForCardId') {
+      const cardId = mutation.payload
+      if (prevCardId) {
+        updateDimensions(prevCardId)
+      }
+      if (!cardId) { return }
+      prevCardId = cardId
+      showCard(cardId)
+    } else if (mutation.type === 'triggerUpdateCardDetailsCardName') {
+      const { cardId, name } = mutation.payload
+      if (cardId !== card.value.id) { return }
+      cancelOpening()
+      updateCardName(name)
+    }
+  })
+})
+
+const props = defineProps({
+  visible: Boolean
+})
+watch(() => props.visible, (value, prevValue) => {
+  if (!value) {
+    closeCard()
+  }
+})
+
+const state = reactive({
+  lastSelectionStartPosition: 0,
+  imagePickerIsVisible: false,
+  cardTipsIsVisible: false,
+  initialSearch: '',
+  pastedName: '',
+  wasPasted: false,
+  cursorPosition: 0,
+  shouldCancelBracketRight: false,
+  insertedLineBreak: false,
+  error: {
+    signUpToUpload: false,
+    sizeLimit: false,
+    unknownUploadError: false
+  },
+  tag: {
+    pickerIsVisible: false,
+    pickerPosition: {},
+    pickerSearch: ''
+  },
+  space: {
+    pickerIsVisible: false,
+    pickerPosition: {},
+    pickerSearch: ''
+  },
+  notifiedMembers: false,
+  formats: {
+    image: '',
+    video: '',
+    audio: '',
+    link: '',
+    file: ''
+  },
+  nameSplitIntoCardsCount: 0,
+  isOpening: false,
+  openingPercent: 0,
+  openingAlpha: 0,
+  previousSelectedTag: {},
+  currentSearchTag: {},
+  newTagColor: '',
+  shareCardIsVisible: false
+})
+
+const updateDialogHeight = async () => {
+  if (!props.visible) { return }
+  await nextTick()
+  let element = dialogElement.value
+  state.dialogHeight = utils.elementHeight(element)
+}
+
+const currentSelectedTag = computed(() => store.state.currentSelectedTag)
+
+const rowIsBelowItemActions = computed(() => nameMetaRowIsVisible.value || badgesRowIsVisible.value || shouldShowItemActions.value || cardHasMedia.value || cardUrlPreviewIsVisible.value)
+const nameMetaRowIsVisible = computed(() => state.nameSplitIntoCardsCount)
+const badgesRowIsVisible = computed(() => tagsInCard.value.length || nameIsComment.value || isInSearchResultsCards.value)
+const parentElement = computed(() => dialogElement.value)
+const card = computed(() => {
+  const cardId = store.state.cardDetailsIsVisibleForCardId
+  return store.getters['currentCards/byId'](cardId) || {}
+})
+const visible = computed(() => utils.objectHasKeys(card.value))
+
+const isSpaceMember = computed(() => store.getters['currentUser/isSpaceMember']())
+const cardIsCreatedByCurrentUser = computed(() => store.getters['currentUser/cardIsCreatedByCurrentUser'](card.value))
+const spacePrivacyIsOpen = computed(() => store.state.currentSpace.privacy === 'open')
+const spacePrivacyIsClosed = computed(() => store.state.currentSpace.privacy === 'closed')
+const isInSearchResultsCards = computed(() => {
+  const results = store.state.searchResultsCards
+  if (!results.length) { return }
+  return Boolean(results.find(card => card.value.id === card.id))
+})
+const showCardTips = computed(() => {
+  if (name.value) { return }
+  return true
+})
+const nameIsComment = computed(() => utils.isNameComment(name.value))
+const canEditSpace = computed(() => store.getters['currentUser/canEditSpace']())
+const canEditCard = computed(() => {
+  if (isSpaceMember.value) { return true }
+  if (canEditSpace.value && cardIsCreatedByCurrentUser.value) { return true }
+  return false
+})
+const isInvitedButCannotEditSpace = computed(() => store.getters['currentUser/isInvitedButCannotEditSpace']())
+const maxCardCharacterLimit = computed(() => {
+  let value = store.state.currentUser.cardSettingsDefaultCharacterLimit || consts.defaultCharacterLimit
+  const isCodeblock = card.value.name?.includes('```')
+  if (isCodeblock) {
+    value = consts.highCharacterLimit
+  }
+  return value
+})
+const currentCardLength = computed(() => {
+  if (!card.value.name) { return 0 }
+  return card.value.name.length
+})
+const showCharacterCount = computed(() => {
+  const threshold = 50
+  if (errorMaxCharacterLimit.value) { return }
+  return currentCardLength.value >= maxCardCharacterLimit.value - threshold
+})
+const errorMaxCharacterLimit = computed(() => {
+  if (currentCardLength.value >= maxCardCharacterLimit.value) {
+    return true
+  } else {
+    return false
+  }
+})
+const tagsInCard = computed(() => {
+  const tagNames = utils.tagsFromStringWithoutBrackets(name.value)
+  if (!tagNames) { return [] }
+  let tags = []
+  tagNames.forEach(name => {
+    const tag = store.getters['currentSpace/tagByName'](name)
+    tags.push(tag)
+  })
+  return tags
+})
+
+// other card
+
+const otherCardIsVisible = computed(() => {
+  const isCardLink = Boolean(card.value.linkToCardId)
+  return isCardLink && hasUrls.value
+})
+const otherCard = computed(() => {
+  const item = store.getters.otherCardById(card.value.linkToCardId)
+  return item
+})
+const otherCardUrl = computed(() => utils.urlFromSpaceAndCard({ cardId: card.value.linkToCardId, spaceId: card.value.linkToSpaceId }))
+
+// other space
+
+const otherSpaceIsVisible = computed(() => {
+  const isCardLink = Boolean(card.value.linkToSpaceId)
+  return isCardLink && hasUrls.value
+})
+const otherSpace = computed(() => {
+  const space = store.getters.otherSpaceById(card.value.linkToSpaceId)
+  return space
+})
+const otherSpaceUrl = computed(() => {
+  return utils.spaceUrl({
+    spaceId: otherSpace.value?.id,
+    spaceName: otherSpace.value?.name,
+    collaboratorKey: card.value.linkToSpaceCollaboratorKey
+  })
+})
+
+const currentUserIsSpaceMember = computed(() => store.getters['currentUser/isSpaceMember']())
+const isFavoriteSpace = computed(() => store.getters['currentSpace/isFavorite'])
+
+const name = computed({
+  get () {
+    return card.value.name || ''
+  },
+  set (newName) {
+    if (store.state.shouldPreventNextEnterKey) {
+      store.commit('shouldPreventNextEnterKey', false)
+      updateCardName(newName.trim())
+    } else {
+      updateCardName(newName)
+    }
+    if (state.wasPasted) {
+      state.wasPasted = false
+    } else {
+      state.pastedName = ''
+    }
+    updateNameSplitIntoCardsCount()
+    textareaSizes()
+  }
+})
+
+const url = computed(() => utils.urlFromString(name.value))
+const urls = computed(() => {
+  const newName = utils.removeMarkdownCodeblocksFromString(name.value)
+  const urls = utils.urlsFromString(newName)
+  return urls
+})
+const validUrls = computed(() => {
+  if (!urls.value) { return [] }
+  return urls.value.filter(url => {
+    const isLink = utils.urlType(url) === 'link'
+    const isValidUrl = utils.urlIsValidTld(url) || utils.urlIsValidLocalhost(url)
+    return isLink && isValidUrl
+  })
+})
+const validWebUrls = computed(() => {
+  const urls = validUrls.value.filter(url => {
+    const urlHasProtocol = utils.urlHasProtocol(url)
+    const isUpload = url.includes('us-east-1.linodeobjects.com') || url.includes('cdn.kinopio.club')
+    const isSpace = utils.urlIsSpace(url)
+    return urlHasProtocol && !isUpload && !isSpace
+  })
+  if (!urls.length && card.value.urlPreviewUrl) {
+    removeUrlPreview()
+  }
+  return urls
+})
+const hasUrls = computed(() => {
+  return Boolean(validUrls.value.length)
+})
+const urlsIsVisible = computed(() => {
+  const urlsVisible = validUrls.value.filter(url => {
+    const queryString = utils.queryString(url)
+    if (queryString) {
+      const queryObject = qs.decode(queryString)
+      return queryObject.hidden || queryObject.kinopio
+    } else {
+      return false
+    }
+  })
+  return urlsVisible.length === validUrls.value.length
+})
+const urlIsAudio = computed(() => utils.urlIsAudio(url.value))
+const normalizedName = computed(() => {
+  let newName = name.value
+  if (url.value) {
+    newName = newName.replace(url.value, '')
+  }
+  newName = newName.replace(utils.checkboxFromString(newName), '')
+  return newName.trim()
+})
+
+const checkbox = computed(() => Boolean(utils.checkboxFromString(name.value)))
+
+const checkboxIsChecked = computed({
+  get () {
+    return utils.nameIsChecked(name.value)
+  },
+  set (value) {
+    if (utils.nameIsChecked(name.value)) {
+      store.dispatch('currentCards/removeChecked', card.value.id)
+    } else {
+      store.dispatch('currentCards/toggleChecked', { cardId: card.value.id, value })
+    }
+  }
+})
+const cardPendingUpload = computed(() => {
+  const pendingUploads = store.state.upload.pendingUploads
+  return pendingUploads.find(upload => upload.cardId === card.value.id)
+})
+const currentUserIsSignedIn = computed(() => store.getters['currentUser/isSignedIn'])
+const createdByUser = computed(() => {
+  const userId = card.value.userId
+  let user = store.getters['currentSpace/userById'](userId)
+  if (user) {
+    return user
+  } else {
+    return {
+      name: '',
+      color: '#cdcdcd' // secondary-active-background
+    }
+  }
+})
+const updatedByUser = computed(() => {
+  const userId = card.value.nameUpdatedByUserId || card.value.userId
+  let user = store.getters['currentSpace/userById'](userId)
+  if (user) {
+    return user
+  } else {
+    return {
+      name: '',
+      color: '#cdcdcd' // secondary-active-background
+    }
+  }
+})
+const styles = computed(() => {
+  let zoom = store.getters.spaceCounterZoomDecimal
+  if (utils.isAndroid()) {
+    zoom = utils.visualViewport().scale
+  } else if (store.state.isTouchDevice) {
+    // on iOS, keyboard focus zooms
+    zoom = 1
+  }
+  const transform = `scale(${zoom})`
+  const offset = 8
+  const left = `${card.value.x + offset}px`
+  const top = `${card.value.y + offset}px`
+  return { transform, left, top }
+})
+const cardUrlPreviewIsVisible = computed(() => {
+  const isErrorUrl = card.value.urlPreviewErrorUrl && card.value.urlPreviewUrl === card.value.urlPreviewErrorUrl
+  const hasPreview = url.value && (isLoadingUrlPreview.value || card.value.urlPreviewUrl)
+  return Boolean(card.value.urlPreviewIsVisible && hasPreview && !isErrorUrl)
+})
+const urlPreviewIsVisible = computed(() => {
+  if (isLoadingUrlPreview.value) { return true }
+  if (!card.value.urlPreviewUrl) { return }
+  const urls = utils.urlsFromString(card.value.name) || []
+  const value = urls.find((url) => {
+    return url?.includes(card.value.urlPreviewUrl)
+  })
+  return Boolean(value)
+})
+const isLoadingUrlPreview = computed(() => {
+  const isLoading = store.state.urlPreviewLoadingForCardIds.find(cardId => cardId === card.value.id)
+  return Boolean(isLoading)
+})
+const cardHasMedia = computed(() => Boolean(state.formats.image || state.formats.video || state.formats.audio))
+const openingFrameStyle = computed(() => {
+  const initialPadding = 200
+  const initialBorderRadius = 60
+  const padding = initialPadding * state.openingPercent
+  const userColor = store.state.currentUser.color
+  const borderRadius = Math.max((state.openingPercent * initialBorderRadius), 5) + 'px'
+  const size = `calc(100% + ${padding}px)`
+  const position = -(padding / 2) + 'px'
+  return {
+    width: size,
+    height: size,
+    left: position,
+    top: position,
+    background: userColor,
+    opacity: state.openingAlpha,
+    borderRadius: borderRadius
+  }
+})
+const isName = computed(() => Boolean(name.value))
+const shouldShowItemActions = computed(() => store.state.currentUser.shouldShowItemActions)
+
+const broadcastShowCardDetails = () => {
+  const updates = {
+    cardId: card.value.id,
+    userId: store.state.currentUser.id
+  }
+  store.commit('broadcast/updateStore', { updates, type: 'updateRemoteCardDetailsVisible' })
+}
+const addImageOrFile = async (file) => {
+  const cardId = card.value.id
+  const spaceId = store.state.currentSpace.id
+  // remove existing image url
+  const prevImageOrFile = state.formats.image || state.formats.video || state.formats.file
+  if (prevImageOrFile) {
+    const newName = name.value.replace(prevImageOrFile, '')
+    updateCardName(newName)
+  }
+  // add new image or file url
+  store.commit('triggerUploadComplete', {
+    cardId,
+    spaceId,
+    url: file.url
+  })
+  await nextTick()
+  updateMediaUrls()
+}
+const selectionStartPosition = () => {
+  let startPosition = state.lastSelectionStartPosition
+  if (nameElement.value) {
+    const position = nameElement.value.selectionStart
+    state.lastSelectionStartPosition = position
+    startPosition = position
+  }
+  return startPosition
+}
+const setSelectionRange = (start, end) => {
+  if (nameElement.value) {
+    nameElement.value.setSelectionRange(start, end)
+  }
+}
+const cancelOpening = () => {
+  shouldCancelOpening = true
+}
+const cancelOpeningAnimationFrame = () => {
+  state.isOpening = false
+  state.openingPercent = 0
+  state.openingAlpha = 0
+  shouldCancelOpening = false
+}
+const startOpening = () => {
+  if (store.state.preventCardDetailsOpeningAnimation || !card.value.name) {
+    store.commit('preventCardDetailsOpeningAnimation', false)
+    return
+  }
+  shouldCancelOpening = false
+  setTimeout(() => {
+    if (!openingAnimationTimer) {
+      state.isOpening = true
+      openingAnimationTimer = window.requestAnimationFrame(openingAnimationFrame.value)
+    }
+  }, openingPreDuration)
+}
+const openingAnimationFrame = (timestamp) => {
+  if (!openingStartTime) {
+    openingStartTime = timestamp
+  }
+  const elaspedTime = timestamp - openingStartTime
+  const percentComplete = (elaspedTime / openingDuration) // between 0 and 1
+  if (shouldCancelOpening) {
+    cancelOpeningAnimationFrame()
+  }
+  if (state.isOpening && percentComplete <= 1) {
+    const percentRemaining = Math.abs(percentComplete - 1)
+    state.openingPercent = percentRemaining
+    const alpha = utils.easeOut(percentComplete, elaspedTime, openingDuration)
+    state.openingAlpha = alpha
+    window.requestAnimationFrame(openingAnimationFrame.value)
+  } else if (state.isOpening && percentComplete > 1) {
+    console.log('🐢 cardDetails openingAnimationFrame complete')
+    openingAnimationTimer = undefined
+    openingStartTime = undefined
+    state.isOpening = false
+  } else {
+    window.cancelAnimationFrame(openingAnimationTimer)
+    openingAnimationTimer = undefined
+    openingStartTime = undefined
+    cancelOpeningAnimationFrame()
+  }
+}
+const updateMediaUrls = () => {
+  const urls = utils.urlsFromString(card.value.name)
+  state.formats.image = ''
+  state.formats.video = ''
+  state.formats.audio = ''
+  state.formats.link = ''
+  if (!urls) { return }
+  if (!urls.length) { return }
+  urls.forEach(url => {
+    if (utils.urlIsImage(url)) {
+      state.formats.image = url
+    } else if (utils.urlIsVideo(url)) {
+      state.formats.video = url
+    } else if (utils.urlIsAudio(url)) {
+      state.formats.audio = url
+    } else if (utils.urlIsFile(url)) {
+      state.formats.file = url
+    } else {
+      state.formats.link = url
+    }
+  })
+}
+const toggleUrlsIsVisible = () => {
+  const isVisible = !urlsIsVisible.value
+  let newName
+  if (isVisible) {
+    newName = utils.addHiddenQueryStringToURLs(name.value)
+  } else {
+    newName = utils.removeHiddenQueryStringFromURLs(name.value)
+  }
+  updateCardName(newName)
+}
+const updateNameSplitIntoCardsCount = () => {
+  const isPreview = true
+  const newCards = splitCards(null, isPreview)
+  const count = newCards.length
+  if (count > 1) {
+    state.nameSplitIntoCardsCount = count
+  } else {
+    state.nameSplitIntoCardsCount = 0
+  }
+}
+const splitCards = (event, isPreview) => {
+  const prevName = (state.pastedName || name.value).trim()
+  const cardNames = utils.splitCardNameByParagraphAndSentence(prevName)
+  const user = store.state.currentUser
+  // create new split cards
+  let newCards = cardNames.map((cardName, index) => {
+    const indentAmount = 50
+    const indentLevel = utils.numberOfLeadingTabs(cardName) || utils.numberOfLeadingDoubleSpaces(cardName)
+    const indentX = indentLevel * indentAmount
+    let id = nanoid()
+    if (index === 0) {
+      id = card.value.id
+    }
+    const newCard = {
+      id,
+      name: cardName.trim(),
+      x: card.value.x + indentX,
+      y: card.value.y,
+      frameId: card.value.frameId,
+      backgroundColor: card.value.backgroundColor,
+      maxWidth: user.cardSettingsMaxCardWidth
+    }
+    return newCard
+  })
+  if (isPreview) { return newCards }
+  state.pastedName = ''
+  updateCardName(newCards[0].name)
+  store.dispatch('history/resume')
+  store.dispatch('history/add', { cards: newCards, useSnapshot: true })
+  store.dispatch('history/pause')
+  newCards.shift()
+  addSplitCards(newCards)
+}
+const addSplitCards = async (newCards) => {
+  const spaceBetweenCards = 12
+  let prevCard = utils.clone(card.value)
+  store.dispatch('currentCards/addMultiple', { cards: newCards })
+  // return
+  await nextTick()
+
+  // update y position
+  newCards = newCards.forEach(card => {
+    const element = document.querySelector(`article [data-card-id="${prevCard.id}"]`)
+    const prevCardRect = element.getBoundingClientRect()
+    card.y = prevCard.y + (prevCardRect.height * store.getters.spaceCounterZoomDecimal) + spaceBetweenCards
+    console.log('🫐🫐', prevCard.name, prevCard.y, '🍌', (prevCardRect.height * store.getters.spaceCounterZoomDecimal), card.y, card.id)
+    // debugger
+    // card = {
+    //   id: card.id,
+    //   y: card.y,
+    // }
+    store.dispatch('currentCards/update', card)
+    store.commit('triggerUpdateUrlPreview', card.id)
+
+    // return card
+    prevCard = card
+
+    // newCards.forEach(card => {
+    //   // card = utils.updateCardDimensions(card)
+    //   console.log('🏎️🏎️🏎️',card.name, card)
+    //   card = {
+    //     name: card.name,
+    //     id: card.id,
+    //     y: card.y,
+    //     width: card.width,
+    //     height: card.height,
+    //     urlPreviewIsVisible: true
+    //   }
+    //   store.dispatch('currentCards/update', card)
+    //   store.commit('triggerUpdateUrlPreview', card.id)
+    // })
+    store.dispatch('closeAllDialogs')
+  })
+}
+const uploadFile = async (file) => {
+  if (!store.state.currentUserIsSignedIn) {
+    state.error.signUpToUpload = true
+    return
+  }
+  try {
+    await store.dispatch('upload/uploadFile', { file, cardId: card.value.id })
+  } catch (error) {
+    console.warn('🚒', error)
+    if (error.type === 'sizeLimit') {
+      state.error.sizeLimit = true
+    } else {
+      state.error.unknownUploadError = true
+    }
+  }
+}
+const updatePastedName = (event) => {
+  const files = event.clipboardData.files
+  if (files.length) {
+    uploadFile(files[0])
+  } else {
+    const text = event.clipboardData.getData('text')
+    state.pastedName = text
+  }
+  state.wasPasted = true
+  store.dispatch('currentCards/updateURLQueryStrings', { cardId: card.value.id })
+}
+const triggerUpdateHeaderAndFooterPosition = () => {
+  store.commit('triggerUpdateHeaderAndFooterPosition')
+}
+const addCheckbox = () => {
+  const update = {
+    id: card.value.id,
+    name: `[] ${card.value.name}`
+  }
+  store.dispatch('currentCards/update', update)
+}
+const updateCardName = (newName) => {
+  const cardId = store.state.cardDetailsIsVisibleForCardId
+  if (card.value.id !== cardId) {
+    return
+  }
+  const userId = store.state.currentUser.id
+  const item = {
+    name: newName,
+    id: card.value.id,
+    nameUpdatedAt: new Date(),
+    nameUpdatedByUserId: userId
+  }
+  store.dispatch('currentCards/update', item)
+  updatePaths()
+  updateMediaUrls()
+  updateTags()
+  if (createdByUser.value.id !== store.state.currentUser.id) { return }
+  if (state.notifiedMembers) { return } // send card update notifications only once per card, per session
+  if (item.name) {
+    store.dispatch('userNotifications/addCardUpdated', { cardId: card.value.id, type: 'updateCard' })
+    state.notifiedMembers = true
+  }
+}
+const updatePaths = async () => {
+  await nextTick()
+  store.dispatch('currentConnections/updatePaths', { cardId: card.value.id, shouldUpdateApi: true })
+}
+const updateDimensions = (cardId) => {
+  const item = { id: cardId }
+  store.dispatch('currentCards/updateDimensions', { cards: [item] })
+}
+const checkIfIsInsertLineBreak = (event) => {
+  const lineBreakInserted = event.ctrlKey || event.altKey
+  if (!lineBreakInserted) {
+    state.insertedLineBreak = false
+  }
+}
+const conditionalInsertLineBreak = (event) => {
+  const shouldAddChildCard = store.state.currentUser.cardSettingsShiftEnterShouldAddChildCard
+  if (shouldAddChildCard) { return }
+  insertLineBreak(event)
+}
+const insertLineBreak = (event) => {
+  const position = nameElement.value.selectionEnd
+  let newName = card.value.name
+  newName = newName.substring(0, position) + '\n' + name.value.substring(position)
+  setTimeout(() => {
+    setSelectionRange(position + 1, position + 1)
+  })
+  state.insertedLineBreak = true
+  updateCardName(newName)
+}
+const updateCompositionEventEndTime = (event) => {
+  // for non-latin input
+  // https://stackoverflow.com/questions/51226598/what-is-javascripts-compositionevent-please-give-examples
+  compositionEventEndTime = event.timeStamp
+}
+const handleEnterKey = (event) => {
+  const isCompositionEvent = event.timeStamp && Math.abs(event.timeStamp - compositionEventEndTime) < 1000
+  const pickersIsVisible = state.tag.pickerIsVisible || state.space.pickerIsVisible
+  console.log('🎹 enter', {
+    shouldPreventNextEnterKey: store.state.shouldPreventNextEnterKey,
+    pickersIsVisible
+  })
+  if (store.state.shouldPreventNextEnterKey) {
+    store.commit('shouldPreventNextEnterKey', false)
+  } else if (pickersIsVisible) {
+    triggerPickerSelectItem(event)
+    hidePickers()
+  } else if (state.insertedLineBreak) {
+    state.insertedLineBreak = false
+  } else if (isCompositionEvent) {
+
+  } else {
+    closeCard()
+    store.dispatch('closeAllDialogs')
+    store.commit('shouldPreventNextEnterKey', false)
+    store.commit('triggerAddCard')
+  }
+}
+const closeCardAndFocus = (event) => {
+  const pickersIsVisible = state.tag.pickerIsVisible || state.space.pickerIsVisible
+  if (pickersIsVisible) {
+    hidePickers()
+    return
+  }
+  store.dispatch('closeAllDialogs')
+  document.querySelector(`.card[data-card-id="${prevCardId}"]`).focus()
+}
+const removeCard = () => {
+  if (!canEditCard.value) { return }
+  store.dispatch('history/resume')
+  store.dispatch('currentCards/remove', card.value)
+  store.commit('cardDetailsIsVisibleForCardId', '')
+  triggerUpdateHeaderAndFooterPosition()
+}
+const textareaSizes = () => {
+  const element = dialogElement.value
+  let textarea = element.querySelector('textarea')
+  let modifier = 0
+  if (canEditCard.value) {
+    modifier = 1
+  }
+  textarea.style.height = textarea.scrollHeight + modifier + 'px'
+}
+const toggleCardTipsIsVisible = () => {
+  const isVisible = state.cardTipsIsVisible
+  closeDialogs()
+  state.cardTipsIsVisible = !isVisible
+}
+const toggleImagePickerIsVisible = () => {
+  const isVisible = state.imagePickerIsVisible
+  closeDialogs()
+  state.imagePickerIsVisible = !isVisible
+  state.initialSearch = normalizedName.value
+}
+const toggleShouldShowItemActions = async () => {
+  closeDialogs()
+  const isVisible = !shouldShowItemActions.value
+  store.dispatch('currentUser/shouldShowItemActions', isVisible)
+  await nextTick()
+  scrollIntoView()
+}
+const toggleShareCardIsVisible = () => {
+  const isVisible = state.shareCardIsVisible
+  closeDialogs()
+  state.shareCardIsVisible = !isVisible
+}
+const focusName = async (position) => {
+  if (store.state.shouldPreventNextFocusOnName) {
+    triggerUpdateHeaderAndFooterPosition()
+    store.commit('shouldPreventNextFocusOnName', false)
+    return
+  }
+  await nextTick()
+  const element = nameElement.value
+  const length = name.value.length
+  if (!element) { return }
+  element.focus()
+  if (position) {
+    element.setSelectionRange(position, position)
+  }
+  if (length) {
+    element.setSelectionRange(length, length)
+  }
+  triggerUpdateHeaderAndFooterPosition()
+}
+const scrollIntoView = async (behavior) => {
+  // wait for element to be rendered before getting position
+  await nextTick()
+  await nextTick()
+  await nextTick()
+  const element = dialogElement.value
+  utils.scrollIntoView({ element, behavior })
+}
+const scrollIntoViewAndFocus = async () => {
+  let behavior
+  if (utils.isIPhone()) {
+    behavior = 'auto'
+  }
+  await nextTick()
+  scrollIntoView(behavior)
+  focusName()
+  triggerUpdateMagicPaintPositionOffset()
+  triggerUpdateHeaderAndFooterPosition()
+}
+const triggerUpdateMagicPaintPositionOffset = () => {
+  store.commit('triggerUpdateMagicPaintPositionOffset')
+  triggerUpdateHeaderAndFooterPosition()
+}
+const closeDialogs = (shouldSkipGlobalDialogs) => {
+  store.commit('triggerCloseChildDialogs')
+  state.imagePickerIsVisible = false
+  state.cardTipsIsVisible = false
+  state.shareCardIsVisible = false
+  hidePickers()
+  if (shouldSkipGlobalDialogs === true) { return }
+  hideTagDetailsIsVisible()
+  hideOtherItemDetailsIsVisible()
+}
+const clickName = (event) => {
+  triggerUpdateMagicPaintPositionOffset()
+  store.commit('searchIsVisible', false)
+  if (isCursorInsideTagBrackets()) {
+    showTagPicker()
+    event.stopPropagation()
+  } else if (isCursorInsideSlashCommand()) {
+    showSpacePicker()
+    updateSpacePickerSearch()
+    event.stopPropagation()
+  }
+}
+const hidePickers = () => {
+  hideTagPicker()
+  hideSpacePicker()
+}
+const hideTagPicker = () => {
+  state.tag.pickerIsVisible = false
+  store.dispatch('currentSpace/removeUnusedTagsFromCard', card.value.id)
+}
+const hideSpacePicker = () => {
+  state.space.pickerSearch = ''
+  state.space.pickerIsVisible = false
+}
+const triggerSignUpOrInIsVisible = () => {
+  store.commit('triggerSignUpOrInIsVisible')
+}
+const triggerUpgradeUserIsVisible = () => {
+  store.commit('triggerUpgradeUserIsVisible')
+}
+const clearErrors = () => {
+  state.error.signUpToUpload = false
+  state.error.sizeLimit = false
+  state.error.unknownUploadError = false
+}
+const checkIfShouldShowPicker = () => {
+  checkIfShouldShowTagPicker()
+  checkIfShouldShowSpacePicker()
+}
+const checkIfShouldHidePicker = () => {
+  checkIfShouldHideTagPicker()
+  checkIfShouldHideSpacePicker()
+}
+
+// Comment
+
+const addCommentClosingBrackets = async () => {
+  const cursorStart = selectionStartPosition()
+  const previousCharacter = name.value[cursorStart - 1]
+  if (previousCharacter === '(') {
+    const newName = `${name.value.substring(0, cursorStart)}))${name.value.substring(cursorStart)}`
+    updateCardName(newName)
+    await nextTick()
+    setSelectionRange(cursorStart, cursorStart)
+  }
+}
+
+// Pickers
+
+const updatePicker = (event) => {
+  const cursorStart = selectionStartPosition()
+  const previousCharacter = name.value[cursorStart - 1]
+  const previousCharacterIsBlank = utils.hasBlankCharacters(previousCharacter)
+  const key = event.key
+  const keyIsArrowUpOrDown = key === 'ArrowDown' || key === 'ArrowUp'
+  const keyIsLettterOrNumber = key.length === 1
+  const isInsideTagBrackets = isCursorInsideTagBrackets()
+  const isInsideSlashCommand = isCursorInsideSlashCommand()
+  if (keyIsArrowUpOrDown) { return }
+  if (key === '(') {
+    addCommentClosingBrackets()
+  }
+  if (utils.hasBlankCharacters(key)) {
+    hideSpacePicker()
+  } else if (key === '/' && previousCharacterIsBlank) {
+    showSpacePicker()
+  } else if (cursorStart === 0) {
+    return
+  } else if (keyIsLettterOrNumber && isInsideSlashCommand) {
+    showSpacePicker()
+  } else if (key === '[' && previousCharacter === '[') {
+    showTagPicker()
+    addTagClosingBrackets()
+  } else if (keyIsLettterOrNumber && isInsideTagBrackets) {
+    showTagPicker()
+  }
+  checkIfIsInsertLineBreak(event)
+}
+const triggerPickerNavigation = (event) => {
+  const modifierKey = event.altKey || event.shiftKey || event.ctrlKey || event.metaKey
+  const pickerIsVisible = state.tag.pickerIsVisible || state.space.pickerIsVisible
+  const shouldTrigger = pickerIsVisible && !modifierKey
+  if (shouldTrigger) {
+    store.commit('triggerPickerNavigationKey', event.key)
+    event.preventDefault()
+  }
+}
+const triggerPickerSelectItem = (event) => {
+  const modifierKey = event.altKey || event.shiftKey || event.ctrlKey || event.metaKey
+  const pickerIsVisible = state.tag.pickerIsVisible || state.space.pickerIsVisible
+  const shouldTrigger = pickerIsVisible && !modifierKey
+  if (shouldTrigger) {
+    store.commit('triggerPickerSelect')
+    event.preventDefault()
+  }
+  // prevent trailing ]
+  if (event.key === ']' && state.tag.pickerIsVisible) {
+    state.shouldCancelBracketRight = true
+    setTimeout(() => {
+      state.shouldCancelBracketRight = false
+    }, 250)
+  }
+  if (event.key === ']' && state.shouldCancelBracketRight) {
+    event.preventDefault()
+  }
+  // prevents Enter from creating new card
+  if (event.key !== 'Enter') {
+    hidePickers()
+  }
+}
+const updatePickerSearch = () => {
+  if (state.tag.pickerIsVisible) {
+    updateTagPickerSearch()
+  } else if (state.space.pickerIsVisible) {
+    updateSpacePickerSearch()
+  }
+}
+
+// /Space-Links, slash command text
+
+const showSpacePicker = () => {
+  closeDialogs()
+  const nameRect = nameElement.value.getBoundingClientRect()
+  state.space.pickerPosition = {
+    top: nameRect.height - 2
+  }
+  state.space.pickerIsVisible = true
+}
+const slashText = () => {
+  const cursorStart = selectionStartPosition()
+  const start = slashTextToCursor() // /txt|
+  let end = name.value.substring(cursorStart, name.value.length) // |abc xyz
+  end = utils.splitByBlankCharacters(end)[0]
+  return start + end
+}
+const slashTextToCursor = () => {
+  const cursorStart = selectionStartPosition()
+  const textPosition = slashTextPosition()
+  const text = name.value.substring(textPosition, cursorStart)
+  return text
+}
+const slashTextPosition = () => {
+  const cursorStart = selectionStartPosition()
+  let text = name.value.substring(0, cursorStart)
+  const textPosition = text.lastIndexOf('/')
+  if (textPosition === -1) { return }
+  return textPosition
+}
+const updateSpacePickerSearch = () => {
+  if (!state.space.pickerIsVisible) { return }
+  const text = slashText()
+  state.space.pickerSearch = text.substring(1, text.length)
+}
+const checkIfShouldHideSpacePicker = () => {
+  if (!state.space.pickerIsVisible) { return }
+  if (!isCursorInsideSlashCommand()) {
+    hideSpacePicker()
+  }
+}
+const checkIfShouldShowSpacePicker = () => {
+  if (isCursorInsideSlashCommand()) {
+    showSpacePicker()
+  } else {
+    hideSpacePicker()
+  }
+}
+const isCursorInsideSlashCommand = () => {
+  const text = slashTextToCursor()
+  if (utils.hasBlankCharacters(text)) { return }
+  const characterBeforeSlash = name.value.charAt(slashTextPosition() - 1)
+  if (text && !characterBeforeSlash) { return true }
+  const characterBeforeSlashIsBlank = utils.hasBlankCharacters(characterBeforeSlash)
+  const textIsValid = !utils.hasBlankCharacters(text)
+  return textIsValid && characterBeforeSlashIsBlank
+}
+const replaceSlashCommandWithSpaceUrl = async (space) => {
+  let newName = card.value.name
+  let position = slashTextPosition()
+  const spaceUrl = consts.kinopioDomain() + '/' + space.url + ' '
+  const start = newName.substring(0, position)
+  const end = newName.substring(position + slashText().length, newName.length)
+  newName = start + spaceUrl + end
+  updateCardName(newName)
+  position = position + spaceUrl.length + 1
+  hideSpacePicker()
+  await nextTick()
+  focusName(position)
+  store.commit('shouldPreventNextEnterKey', false)
+  store.dispatch('currentCards/update', {
+    id: card.value.id,
+    shouldShowOtherSpacePreviewImage: true
+  })
+}
+
+// [[Tags]]
+
+const showTagPicker = () => {
+  state.tag.pickerSearch = ''
+  closeDialogs()
+  const nameRect = nameElement.value.getBoundingClientRect()
+  state.tag.pickerPosition = {
+    top: nameRect.height - 2
+  }
+  state.tag.pickerIsVisible = true
+  updateTagPickerSearch()
+}
+const tagStartText = () => {
+  // ...[[abc
+  const cursorStart = selectionStartPosition()
+  const start = name.value.substring(0, cursorStart)
+  let startPosition = start.lastIndexOf('[[')
+  if (startPosition === -1) { return }
+  startPosition = startPosition + 2
+  return start.substring(startPosition)
+}
+const tagEndText = () => {
+  // xyz]]...
+  const cursorStart = selectionStartPosition()
+  const end = name.value.substring(cursorStart)
+  const endPosition = end.indexOf(']]')
+  if (endPosition === -1) { return }
+  return end.substring(0, endPosition)
+}
+const updateTagPickerSearch = () => {
+  if (!state.tag.pickerIsVisible) { return }
+  const start = tagStartText() || ''
+  const end = tagEndText() || ''
+  state.tag.pickerSearch = start + end
+}
+const isCursorInsideTagBrackets = () => {
+  const cursorStart = selectionStartPosition() // for template
+  const start = tagStartText()
+  const end = tagEndText()
+  if (start === undefined || end === undefined) { return }
+  if (!start.includes(']]') && !end.includes('[[')) {
+    return true
+  }
+}
+const checkIfShouldShowTagPicker = () => {
+  const tagPickerIsVisible = state.tag.pickerIsVisible
+  const isInsideTagBrackets = isCursorInsideTagBrackets()
+  if (isInsideTagBrackets && !tagPickerIsVisible) {
+    showTagPicker()
+  } else if (!isInsideTagBrackets && tagPickerIsVisible) {
+    hideTagPicker()
+  }
+}
+const checkIfShouldHideTagPicker = () => {
+  const tagPickerIsVisible = state.tag.pickerIsVisible
+  const isInsideTagBrackets = isCursorInsideTagBrackets()
+  if (!isInsideTagBrackets && tagPickerIsVisible) {
+    hideTagPicker()
+  }
+}
+const addTagClosingBrackets = async () => {
+  const cursorStart = selectionStartPosition()
+  const newName = `${name.value.substring(0, cursorStart)}]]${name.value.substring(cursorStart)}`
+  updateCardName(newName)
+  await nextTick()
+  setSelectionRange(cursorStart, cursorStart)
+}
+const moveCursorPastTagEnd = async () => {
+  const cursorStart = selectionStartPosition()
+  let endText = name.value.substring(cursorStart)
+  let newCursorPosition = endText.indexOf(']]')
+  newCursorPosition = cursorStart + newCursorPosition + 2
+  setSelectionRange(newCursorPosition, newCursorPosition)
+}
+const updatePreviousTags = () => {
+  if (!card.value.name) {
+    previousTags = []
+    return
+  }
+  previousTags = utils.tagsFromStringWithoutBrackets(card.value.name) || []
+  previousTags = previousTags.map(tagName => {
+    let tag
+    if (state.previousSelectedTag.name === tagName) {
+      tag = state.previousSelectedTag
+    } else if (state.currentSearchTag.name === tagName) {
+      tag = state.currentSearchTag
+    } else {
+      tag = store.getters['currentSpace/tagByName'](tagName)
+      tag = utils.clone(tag)
+      tag.color = state.previousSelectedTag.color || tag.color
+    }
+    return tag
+  })
+}
+const updateNewTagColor = (color) => {
+  state.newTagColor = color
+}
+const addNewTags = (newTagNames) => {
+  const previousTagNames = previousTags.map(tag => tag.name)
+  const addTagsNames = newTagNames.filter(newTagName => !previousTagNames.includes(newTagName))
+  addTagsNames.forEach(tagName => {
+    let tag
+    tag = utils.newTag({
+      name: tagName,
+      defaultColor: state.newTagColor || store.state.currentUser.color,
+      cardId: card.value.id,
+      spaceId: store.state.currentSpace.id
+    })
+    if (state.previousSelectedTag.name === tagName) {
+      tag.color = state.previousSelectedTag.color
+    } else if (state.currentSearchTag.name === tagName) {
+      tag.color = state.currentSearchTag.color
+    }
+    store.dispatch('currentSpace/addTag', tag)
+  })
+}
+const updateTags = () => {
+  if (!card.value.name) { return }
+  const newTagNames = utils.tagsFromStringWithoutBrackets(card.value.name) || []
+  addNewTags(newTagNames)
+  updatePreviousTags()
+}
+const hideTagDetailsIsVisible = () => {
+  store.commit('currentSelectedTag', {})
+  store.commit('tagDetailsIsVisible', false)
+}
+const hideOtherItemDetailsIsVisible = () => {
+  store.commit('otherCardDetailsIsVisible', false)
+}
+const showTagDetailsIsVisible = (event, tag) => {
+  closeDialogs()
+  const element = event.target.closest('.tag')
+  const tagRect = element.getBoundingClientRect()
+  store.commit('tagDetailsPosition', {
+    x: window.scrollX + tagRect.x + 2,
+    y: window.scrollY + tagRect.y + tagRect.height - 2,
+    pageX: window.scrollX,
+    pageY: window.scrollY
+  })
+  store.commit('currentSelectedTag', tag)
+  store.commit('tagDetailsIsVisible', true)
+}
+const updateCurrentSearchTag = (tag) => {
+  state.currentSearchTag = tag
+  updatePreviousTags()
+}
+const updateTagBracketsWithTag = (tag) => {
+  state.previousSelectedTag = tag
+  updatePreviousTags()
+  const cursorStart = selectionStartPosition()
+  const text = tagStartText() + tagEndText()
+  let newName
+  if (text.length) {
+    newName = name.value.replace(`[[${text}]]`, `[[${tag.name}]]`)
+  } else {
+    const startText = name.value.substring(0, cursorStart)
+    const endText = name.value.substring(cursorStart)
+    newName = startText + tag.name + endText
+  }
+  updateCardName(newName)
+  moveCursorPastTagEnd()
+  store.commit('shouldPreventNextEnterKey', false)
+}
+const removeUrlPreview = () => {
+  const cardId = card.value.id || prevCardId
+  const update = {
+    id: cardId,
+    urlPreviewUrl: '',
+    urlPreviewImage: '',
+    urlPreviewTitle: '',
+    urlPreviewDescription: '',
+    urlPreviewEmbedHtml: ''
+  }
+  store.commit('removeUrlPreviewLoadingForCardIds', cardId)
+  store.dispatch('currentCards/update', update)
+  store.dispatch('currentConnections/updatePaths', { cardId: card.value.id, shouldUpdateApi: true })
+  store.dispatch('currentCards/updateDimensions', { cards: [card.value] })
+}
+const resetPinchCounterZoomDecimal = () => {
+  store.commit('pinchCounterZoomDecimal', 1)
+}
+const updatePinchCounterZoomDecimal = () => {
+  store.commit('pinchCounterZoomDecimal', utils.pinchCounterZoomDecimal())
+}
+const resetTextareaHeight = () => {
+  if (!props.visible) { return }
+  nameElement.value.style.height = 'initial'
+}
+const showCard = async (cardId) => {
+  await nextTick()
+  broadcastShowCardDetails()
+  clearErrors()
+  updatePinchCounterZoomDecimal()
+  scrollIntoViewAndFocus()
+  updatePreviousTags()
+  updateNameSplitIntoCardsCount()
+  resetTextareaHeight()
+  await nextTick()
+  startOpening()
+  const item = store.getters['currentCards/byId'](cardId)
+  store.dispatch('checkIfItemShouldIncreasePageSize', item)
+  state.previousSelectedTag = {}
+  updateMediaUrls()
+  const connections = store.getters['currentConnections/byCardId'](cardId)
+  store.commit('updateCurrentCardConnections', connections)
+  prevCardName = card.value.name
+  store.dispatch('history/pause')
+  textareaSizes()
+}
+const closeCard = async () => {
+  const element = nameElement.value
+  element.blur()
+  store.commit('triggerHideTouchInterface')
+  const cardId = prevCardId
+  const item = store.getters['currentCards/byId'](cardId)
+  closeDialogs(true)
+  cancelOpening()
+  store.dispatch('currentSpace/removeUnusedTagsFromCard', cardId)
+  store.commit('updateCurrentCardConnections')
+  store.commit('triggerUpdateHeaderAndFooterPosition')
+  store.commit('shouldPreventNextEnterKey', false)
+  if (!item) { return }
+  const cardHasName = Boolean(item.name)
+  const cardHasPendingUpload = store.getters['upload/hasPendingUploadForCardId'](cardId)
+  if (!cardHasName && !cardHasPendingUpload) {
+    store.dispatch('currentCards/remove', { id: cardId })
+  }
+  store.dispatch('updatePageSizes')
+  await nextTick()
+  updateDimensions(cardId)
+  store.dispatch('checkIfItemShouldIncreasePageSize', item)
+  store.dispatch('history/resume')
+  if (item.name || prevCardName) {
+    store.dispatch('history/add', { cards: [item], useSnapshot: true })
+  }
+}
+
+</script>
+
 <template lang="pug">
-dialog.card-details(v-if="visible" :open="visible" ref="dialog" @click.left="closeDialogs" @keyup.stop.backspace="removeCard" :style="styles" :data-card-id="card.id")
-  .opening-frame(v-if="isOpening" :style="openingFrameStyle")
+dialog.card-details(v-if="visible" :open="visible" ref="dialogElement" @click.left="closeDialogs" @keyup.stop.backspace="removeCard" :style="styles" :data-card-id="card.id")
+  .opening-frame(v-if="state.isOpening" :style="openingFrameStyle")
   section
     .textarea-wrap
       textarea.name(
         :disabled="!canEditCard"
-        ref="name"
+        ref="nameElement"
         rows="1"
         placeholder="Type here, or paste a URL"
         v-model="name"
@@ -46,30 +1301,30 @@ dialog.card-details(v-if="visible" :open="visible" ref="dialog" @click.left="clo
       )
 
       TagPicker(
-        :visible="tag.pickerIsVisible"
-        :cursorPosition="cursorPosition"
-        :position="tag.pickerPosition"
-        :search="tag.pickerSearch"
+        :visible="state.tag.pickerIsVisible"
+        :cursorPosition="state.cursorPosition"
+        :position="state.tag.pickerPosition"
+        :search="state.tag.pickerSearch"
         @closeDialog="hideTagPicker"
         @selectTag="updateTagBracketsWithTag"
         @currentTag="updateCurrentSearchTag"
         @newTagColor="updateNewTagColor"
       )
       SpacePicker(
-        :visible="space.pickerIsVisible"
+        :visible="state.space.pickerIsVisible"
         :parentIsCardDetails="true"
-        :cursorPosition="cursorPosition"
-        :position="space.pickerPosition"
-        :search="space.pickerSearch"
+        :cursorPosition="state.cursorPosition"
+        :position="state.space.pickerPosition"
+        :search="state.space.pickerSearch"
         :shouldExcludeCurrentSpace="true"
         :shouldShowNewSpace="true"
         @closeDialog="hideSpacePicker"
         @selectSpace="replaceSlashCommandWithSpaceUrl"
       )
-      .inline-button-wrap(v-if="showCardTips" @click.left.stop="toggleCardTipsIsVisible" :class="{ active: cardTipsIsVisible }")
-        button.inline-button(tabindex="-1" :class="{ active: cardTipsIsVisible }")
+      .inline-button-wrap(v-if="showCardTips" @click.left.stop="toggleCardTipsIsVisible" :class="{ active: state.cardTipsIsVisible }")
+        button.inline-button(tabindex="-1" :class="{ active: state.cardTipsIsVisible }")
           span ?
-      CardTips(:visible="cardTipsIsVisible")
+      CardTips(:visible="state.cardTipsIsVisible")
 
     .row(v-if="cardPendingUpload")
       .badge.info
@@ -91,28 +1346,28 @@ dialog.card-details(v-if="visible" :open="visible" ref="dialog" @click.left="clo
             input.add(type="checkbox" tabindex="-1")
         //- Image
         .button-wrap
-          button(@click.left.stop="toggleImagePickerIsVisible" :class="{active : imagePickerIsVisible}" title="Image")
+          button(@click.left.stop="toggleImagePickerIsVisible" :class="{active : state.imagePickerIsVisible}" title="Image")
             img.icon.flower(src="@/assets/flower.svg")
-          ImagePicker(:visible="imagePickerIsVisible" :initialSearch="initialSearch" :cardUrl="url" :cardId="card.id" @selectImage="addImageOrFile")
+          ImagePicker(:visible="state.imagePickerIsVisible" :initialSearch="state.initialSearch" :cardUrl="url" :cardId="card.id" @selectImage="addImageOrFile")
         //- Toggle Style Actions
         .button-wrap
           button(@click.left.stop="toggleShouldShowItemActions" :class="{active : shouldShowItemActions}" title="More Options")
             img.icon.down-arrow.button-down-arrow(src="@/assets/down-arrow.svg")
       //- Share
       .button-wrap.share-button-wrap(v-if="isName" @click.left.stop="toggleShareCardIsVisible" )
-        button(:class="{active: shareCardIsVisible}")
+        button(:class="{active: state.shareCardIsVisible}")
           span Share
-        ShareCard(:visible="shareCardIsVisible" :card="card" :isReadOnly="!canEditCard")
+        ShareCard(:visible="state.shareCardIsVisible" :card="card" :isReadOnly="!canEditCard")
 
     CardOrBoxActions(:visible="shouldShowItemActions && canEditCard" :cards="[card]" @closeDialogs="closeDialogs" :class="{ 'last-row': !rowIsBelowItemActions }" :tagsInCard="tagsInCard")
     CardCollaborationInfo(:visible="shouldShowItemActions" :createdByUser="createdByUser" :updatedByUser="updatedByUser" :card="card" :parentElement="parentElement" @closeDialogs="closeDialogs")
 
     .row(v-if="nameMetaRowIsVisible")
       //- Split by Line Breaks
-      .button-wrap(v-if="nameSplitIntoCardsCount && canEditCard")
+      .button-wrap(v-if="state.nameSplitIntoCardsCount && canEditCard")
         button(:disabled="!canEditCard" @click.left.stop="splitCards")
           img.icon(src="@/assets/split.svg")
-          span Split Card ({{nameSplitIntoCardsCount}})
+          span Split Card ({{state.nameSplitIntoCardsCount}})
 
     .row.badges-row(v-if="badgesRowIsVisible")
       //- Search result
@@ -128,7 +1383,7 @@ dialog.card-details(v-if="visible" :open="visible" ref="dialog" @click.left="clo
     .row.badges-row.other-items-row(v-if="otherCardIsVisible")
       OtherCardPreview(:otherCard="otherCard" :url="otherCardUrl" :parentCardId="card.id" :shouldTruncateName="true")
 
-    MediaPreview(:visible="cardHasMedia" :card="card" :formats="formats")
+    MediaPreview(:visible="cardHasMedia" :card="card" :formats="state.formats")
     UrlPreview(
       :visible="urlPreviewIsVisible"
       :loading="isLoadingUrlPreview"
@@ -177,12 +1432,12 @@ dialog.card-details(v-if="visible" :open="visible" ref="dialog" @click.left="clo
           img.icon.cancel(src="@/assets/add.svg")
           span Max Length
       p To fit small screens, cards can't be longer than {{maxCardCharacterLimit}} characters
-    template(v-if="error.signUpToUpload")
+    template(v-if="state.error.signUpToUpload")
       p
         span To upload files,
         span.badge.info you need to Sign Up or In
       button(@click.left="triggerSignUpOrInIsVisible") Sign Up or In
-    template(v-if="error.sizeLimit")
+    template(v-if="state.error.sizeLimit")
       p
         span.badge.danger
           img.icon.cancel(src="@/assets/add.svg")
@@ -191,1303 +1446,9 @@ dialog.card-details(v-if="visible" :open="visible" ref="dialog" @click.left="clo
         span To upload files over 5mb,
         span.badge.info upgrade for unlimited
       button(@click.left="triggerUpgradeUserIsVisible") Upgrade for Unlimited
-    template(v-if="error.unknownUploadError")
+    template(v-if="state.error.unknownUploadError")
       .badge.danger (シ_ _)シ Something went wrong, Please try again or contact support
 </template>
-
-<script>
-import CardOrBoxActions from '@/components/subsections/CardOrBoxActions.vue'
-import ImagePicker from '@/components/dialogs/ImagePicker.vue'
-import CardTips from '@/components/dialogs/CardTips.vue'
-import TagPicker from '@/components/dialogs/TagPicker.vue'
-import Tag from '@/components/Tag.vue'
-import SpacePicker from '@/components/dialogs/SpacePicker.vue'
-import UserLabelInline from '@/components/UserLabelInline.vue'
-import Loader from '@/components/Loader.vue'
-import UrlPreview from '@/components/UrlPreview.vue'
-import MediaPreview from '@/components/MediaPreview.vue'
-import CardCollaborationInfo from '@/components/CardCollaborationInfo.vue'
-import ShareCard from '@/components/dialogs/ShareCard.vue'
-import OtherCardPreview from '@/components/OtherCardPreview.vue'
-import OtherSpacePreview from '@/components/OtherSpacePreview.vue'
-import utils from '@/utils.js'
-import consts from '@/consts.js'
-
-import qs from '@aguezz/qs-parse'
-import { nanoid } from 'nanoid'
-import { mapState, mapGetters } from 'vuex'
-
-let prevCardId, prevCardName
-let previousTags = []
-let compositionEventEndTime = 0
-
-const openingPreDuration = 250 // ms
-const openingDuration = 250 // ms
-let openingAnimationTimer, openingStartTime, shouldCancelOpening
-
-export default {
-  name: 'CardDetails',
-  components: {
-    CardOrBoxActions,
-    ImagePicker,
-    CardTips,
-    TagPicker,
-    Tag,
-    SpacePicker,
-    Loader,
-    UrlPreview,
-    MediaPreview,
-    UserLabelInline,
-    CardCollaborationInfo,
-    ShareCard,
-    OtherCardPreview,
-    OtherSpacePreview
-  },
-  data () {
-    return {
-      lastSelectionStartPosition: 0,
-      imagePickerIsVisible: false,
-      cardTipsIsVisible: false,
-      initialSearch: '',
-      pastedName: '',
-      wasPasted: false,
-      cursorPosition: 0,
-      shouldCancelBracketRight: false,
-      insertedLineBreak: false,
-      error: {
-        signUpToUpload: false,
-        sizeLimit: false,
-        unknownUploadError: false
-      },
-      tag: {
-        pickerIsVisible: false,
-        pickerPosition: {},
-        pickerSearch: ''
-      },
-      space: {
-        pickerIsVisible: false,
-        pickerPosition: {},
-        pickerSearch: ''
-      },
-      notifiedMembers: false,
-      formats: {
-        image: '',
-        video: '',
-        audio: '',
-        link: '',
-        file: ''
-      },
-      nameSplitIntoCardsCount: 0,
-      isOpening: false,
-      openingPercent: 0,
-      openingAlpha: 0,
-      previousSelectedTag: {},
-      currentSearchTag: {},
-      newTagColor: '',
-      shareCardIsVisible: false
-    }
-  },
-  created () {
-    this.$store.subscribe((mutation, state) => {
-      if (mutation.type === 'triggerUnloadPage' && this.visible) {
-        this.closeCard()
-      } else if (mutation.type === 'triggerSplitCard' && this.visible) {
-        const cardId = mutation.payload
-        if (cardId !== this.card.id) { return }
-        this.splitCards()
-      } else if (mutation.type === 'cardDetailsIsVisibleForCardId') {
-        const cardId = mutation.payload
-        if (prevCardId) {
-          this.updateDimensions(prevCardId)
-        }
-        if (!cardId) { return }
-        prevCardId = cardId
-        this.showCard(cardId)
-      } else if (mutation.type === 'triggerUpdateCardDetailsCardName') {
-        const { cardId, name } = mutation.payload
-        if (cardId !== this.card.id) { return }
-        this.cancelOpening()
-        this.updateCardName(name)
-      }
-    })
-  },
-  updated () {
-    this.$nextTick(() => {
-      if (this.visible) {
-        this.textareaSizes()
-      }
-    })
-  },
-  computed: {
-    ...mapState([
-      'cardDetailsIsVisibleForCardId',
-      'currentUser',
-      'currentSpace',
-      'searchResultsCards',
-      'currentSelectedTag',
-      'currentSelectedOtherItem',
-      'shouldPreventNextEnterKey',
-      'upload',
-      'pinchCounterZoomDecimal',
-      'urlPreviewLoadingForCardIds',
-      'preventCardDetailsOpeningAnimation',
-      'shouldPreventNextFocusOnName'
-    ]),
-    ...mapGetters([
-      'spaceCounterZoomDecimal',
-      'currentCards/byId',
-      'currentUser/isSignedIn',
-      'currentSpace/userById',
-      'currentSpace/tagByName',
-      'currentConnections/byCardId',
-      'currentUser/isSpaceMember',
-      'currentSpace/isFavorite',
-      'currentUser/cardIsCreatedByCurrentUser',
-      'currentUser/canEditSpace',
-      'currentUser/isInvitedButCannotEditSpace'
-    ]),
-    rowIsBelowItemActions () { return this.nameMetaRowIsVisible || this.badgesRowIsVisible || this.shouldShowItemActions || this.cardHasMedia || this.cardUrlPreviewIsVisible },
-    nameMetaRowIsVisible () { return this.nameSplitIntoCardsCount },
-    badgesRowIsVisible () { return this.tagsInCard.length || this.nameIsComment || this.isInSearchResultsCards },
-    parentElement () { return this.$refs.dialog },
-    card () {
-      const cardId = this.cardDetailsIsVisibleForCardId
-      return this['currentCards/byId'](cardId) || {}
-    },
-    visible () { return utils.objectHasKeys(this.card) },
-    isSpaceMember () { return this['currentUser/isSpaceMember']() },
-    cardIsCreatedByCurrentUser () { return this['currentUser/cardIsCreatedByCurrentUser'](this.card) },
-    spacePrivacyIsOpen () { return this.currentSpace.privacy === 'open' },
-    spacePrivacyIsClosed () { return this.currentSpace.privacy === 'closed' },
-    isInSearchResultsCards () {
-      const results = this.searchResultsCards
-      if (!results.length) { return }
-      return Boolean(results.find(card => this.card.id === card.id))
-    },
-    showCardTips () {
-      if (this.name) { return }
-      return true
-    },
-    nameIsComment () { return utils.isNameComment(this.name) },
-    canEditSpace () { return this['currentUser/canEditSpace']() },
-    canEditCard () {
-      if (this.isSpaceMember) { return true }
-      if (this.canEditSpace && this.cardIsCreatedByCurrentUser) { return true }
-      return false
-    },
-    isInvitedButCannotEditSpace () { return this['currentUser/isInvitedButCannotEditSpace']() },
-    maxCardCharacterLimit () {
-      let value = this.$store.state.currentUser.cardSettingsDefaultCharacterLimit || consts.defaultCharacterLimit
-      const isCodeblock = this.card.name?.includes('```')
-      if (isCodeblock) {
-        value = consts.highCharacterLimit
-      }
-      return value
-    },
-    currentCardLength () {
-      if (!this.card.name) { return 0 }
-      return this.card.name.length
-    },
-    showCharacterCount () {
-      const threshold = 50
-      if (this.errorMaxCharacterLimit) { return }
-      return this.currentCardLength >= this.maxCardCharacterLimit - threshold
-    },
-    errorMaxCharacterLimit () {
-      if (this.currentCardLength >= this.maxCardCharacterLimit) {
-        return true
-      } else {
-        return false
-      }
-    },
-    tagsInCard () {
-      const tagNames = utils.tagsFromStringWithoutBrackets(this.name)
-      if (!tagNames) { return [] }
-      let tags = []
-      tagNames.forEach(name => {
-        const tag = this['currentSpace/tagByName'](name)
-        tags.push(tag)
-      })
-      return tags
-    },
-
-    // other card
-
-    otherCardIsVisible () {
-      const isCardLink = Boolean(this.card.linkToCardId)
-      return isCardLink && this.hasUrls
-    },
-    otherCard () {
-      const card = this.$store.getters.otherCardById(this.card.linkToCardId)
-      return card
-    },
-    otherCardUrl () { return utils.urlFromSpaceAndCard({ cardId: this.card.linkToCardId, spaceId: this.card.linkToSpaceId }) },
-
-    // other space
-
-    otherSpaceIsVisible () {
-      const isCardLink = Boolean(this.card.linkToSpaceId)
-      return isCardLink && this.hasUrls
-    },
-    otherSpace () {
-      const space = this.$store.getters.otherSpaceById(this.card.linkToSpaceId)
-      return space
-    },
-    otherSpaceUrl () {
-      return utils.spaceUrl({
-        spaceId: this.otherSpace?.id,
-        spaceName: this.otherSpace?.name,
-        collaboratorKey: this.card.linkToSpaceCollaboratorKey
-      })
-    },
-
-    currentUserIsSpaceMember () { return this['currentUser/isSpaceMember']() },
-    isFavoriteSpace () { return this['currentSpace/isFavorite'] },
-    name: {
-      get () {
-        return this.card.name || ''
-      },
-      set (newName) {
-        if (this.shouldPreventNextEnterKey) {
-          this.$store.commit('shouldPreventNextEnterKey', false)
-          this.updateCardName(newName.trim())
-        } else {
-          this.updateCardName(newName)
-        }
-        if (this.wasPasted) {
-          this.wasPasted = false
-        } else {
-          this.pastedName = ''
-        }
-        this.updateNameSplitIntoCardsCount()
-      }
-    },
-    url () { return utils.urlFromString(this.name) },
-    urls () {
-      const name = utils.removeMarkdownCodeblocksFromString(this.name)
-      const urls = utils.urlsFromString(name)
-      return urls
-    },
-    validUrls () {
-      if (!this.urls) { return [] }
-      return this.urls.filter(url => {
-        const isLink = utils.urlType(url) === 'link'
-        const isValidUrl = utils.urlIsValidTld(url) || utils.urlIsValidLocalhost(url)
-        return isLink && isValidUrl
-      })
-    },
-    validWebUrls () {
-      const urls = this.validUrls.filter(url => {
-        const urlHasProtocol = utils.urlHasProtocol(url)
-        const isUpload = url.includes('us-east-1.linodeobjects.com') || url.includes('cdn.kinopio.club')
-        const isSpace = utils.urlIsSpace(url)
-        return urlHasProtocol && !isUpload && !isSpace
-      })
-      if (!urls.length && this.card.urlPreviewUrl) {
-        this.removeUrlPreview()
-      }
-      return urls
-    },
-    hasUrls () {
-      return Boolean(this.validUrls.length)
-    },
-    urlsIsVisible () {
-      const urlsVisible = this.validUrls.filter(url => {
-        const queryString = utils.queryString(url)
-        if (queryString) {
-          const queryObject = qs.decode(queryString)
-          return queryObject.hidden || queryObject.kinopio
-        } else {
-          return false
-        }
-      })
-      return urlsVisible.length === this.validUrls.length
-    },
-    urlIsAudio () { return utils.urlIsAudio(this.url) },
-    normalizedName () {
-      let name = this.name
-      if (this.url) {
-        name = name.replace(this.url, '')
-      }
-      name = name.replace(utils.checkboxFromString(name), '')
-      return name.trim()
-    },
-    checkbox () { return Boolean(utils.checkboxFromString(this.name)) },
-    checkboxIsChecked: {
-      get () {
-        return utils.nameIsChecked(this.name)
-      },
-      set (value) {
-        if (utils.nameIsChecked(this.name)) {
-          this.$store.dispatch('currentCards/removeChecked', this.card.id)
-        } else {
-          this.$store.dispatch('currentCards/toggleChecked', { cardId: this.card.id, value })
-        }
-      }
-    },
-    cardPendingUpload () {
-      const pendingUploads = this.upload.pendingUploads
-      return pendingUploads.find(upload => upload.cardId === this.card.id)
-    },
-    currentUserIsSignedIn () { return this['currentUser/isSignedIn'] },
-    createdByUser () {
-      const userId = this.card.userId
-      let user = this['currentSpace/userById'](userId)
-      if (user) {
-        return user
-      } else {
-        return {
-          name: '',
-          color: '#cdcdcd' // secondary-active-background
-        }
-      }
-    },
-    updatedByUser () {
-      const userId = this.card.nameUpdatedByUserId || this.card.userId
-      let user = this['currentSpace/userById'](userId)
-      if (user) {
-        return user
-      } else {
-        return {
-          name: '',
-          color: '#cdcdcd' // secondary-active-background
-        }
-      }
-    },
-    styles () {
-      let zoom = this.spaceCounterZoomDecimal
-      if (utils.isAndroid()) {
-        zoom = utils.visualViewport().scale
-      } else if (this.$store.state.isTouchDevice) {
-        // on iOS, keyboard focus zooms
-        zoom = 1
-      }
-      const transform = `scale(${zoom})`
-      const offset = 8
-      const left = `${this.card.x + offset}px`
-      const top = `${this.card.y + offset}px`
-      return { transform, left, top }
-    },
-    cardUrlPreviewIsVisible () {
-      const isErrorUrl = this.card.urlPreviewErrorUrl && this.card.urlPreviewUrl === this.card.urlPreviewErrorUrl
-      const hasPreview = this.url && (this.isLoadingUrlPreview || this.card.urlPreviewUrl)
-      return Boolean(this.card.urlPreviewIsVisible && hasPreview && !isErrorUrl)
-    },
-    urlPreviewIsVisible () {
-      if (this.isLoadingUrlPreview) { return true }
-      if (!this.card.urlPreviewUrl) { return }
-      const urls = utils.urlsFromString(this.card.name) || []
-      const value = urls.find((url) => {
-        return url?.includes(this.card.urlPreviewUrl)
-      })
-      return Boolean(value)
-    },
-    isLoadingUrlPreview () {
-      const isLoading = this.urlPreviewLoadingForCardIds.find(cardId => cardId === this.card.id)
-      return Boolean(isLoading)
-    },
-    cardHasMedia () { return Boolean(this.formats.image || this.formats.video || this.formats.audio) },
-    openingFrameStyle () {
-      const initialPadding = 200
-      const initialBorderRadius = 60
-      const padding = initialPadding * this.openingPercent
-      const userColor = this.currentUser.color
-      const borderRadius = Math.max((this.openingPercent * initialBorderRadius), 5) + 'px'
-      const size = `calc(100% + ${padding}px)`
-      const position = -(padding / 2) + 'px'
-      return {
-        width: size,
-        height: size,
-        left: position,
-        top: position,
-        background: userColor,
-        opacity: this.openingAlpha,
-        borderRadius: borderRadius
-      }
-    },
-    isName () { return Boolean(this.name) },
-    shouldShowItemActions () { return this.currentUser.shouldShowItemActions }
-  },
-  methods: {
-    broadcastShowCardDetails () {
-      const updates = {
-        cardId: this.card.id,
-        userId: this.currentUser.id
-      }
-      this.$store.commit('broadcast/updateStore', { updates, type: 'updateRemoteCardDetailsVisible' })
-    },
-    addImageOrFile (file) {
-      const cardId = this.card.id
-      const spaceId = this.currentSpace.id
-      // remove existing image url
-      const prevImageOrFile = this.formats.image || this.formats.video || this.formats.file
-      if (prevImageOrFile) {
-        const newName = this.name.replace(prevImageOrFile, '')
-        this.updateCardName(newName)
-      }
-      // add new image or file url
-      this.$store.commit('triggerUploadComplete', {
-        cardId,
-        spaceId,
-        url: file.url
-      })
-      this.$nextTick(() => {
-        this.updateMediaUrls()
-      })
-    },
-    selectionStartPosition () {
-      let startPosition = this.lastSelectionStartPosition
-      if (this.$refs.name) {
-        const position = this.$refs.name.selectionStart
-        this.lastSelectionStartPosition = position
-        startPosition = position
-      }
-      return startPosition
-    },
-    setSelectionRange (start, end) {
-      if (this.$refs.name) {
-        this.$refs.name.setSelectionRange(start, end)
-      }
-    },
-    cancelOpening () {
-      shouldCancelOpening = true
-    },
-    cancelOpeningAnimationFrame () {
-      this.isOpening = false
-      this.openingPercent = 0
-      this.openingAlpha = 0
-      shouldCancelOpening = false
-    },
-    startOpening () {
-      if (this.preventCardDetailsOpeningAnimation || !this.card.name) {
-        this.$store.commit('preventCardDetailsOpeningAnimation', false)
-        return
-      }
-      shouldCancelOpening = false
-      setTimeout(() => {
-        if (!openingAnimationTimer) {
-          this.isOpening = true
-          openingAnimationTimer = window.requestAnimationFrame(this.openingAnimationFrame)
-        }
-      }, openingPreDuration)
-    },
-    openingAnimationFrame (timestamp) {
-      if (!openingStartTime) {
-        openingStartTime = timestamp
-      }
-      const elaspedTime = timestamp - openingStartTime
-      const percentComplete = (elaspedTime / openingDuration) // between 0 and 1
-      if (shouldCancelOpening) {
-        this.cancelOpeningAnimationFrame()
-      }
-      if (this.isOpening && percentComplete <= 1) {
-        const percentRemaining = Math.abs(percentComplete - 1)
-        this.openingPercent = percentRemaining
-        const alpha = utils.easeOut(percentComplete, elaspedTime, openingDuration)
-        this.openingAlpha = alpha
-        window.requestAnimationFrame(this.openingAnimationFrame)
-      } else if (this.isOpening && percentComplete > 1) {
-        console.log('🐢 cardDetails openingAnimationFrame complete')
-        openingAnimationTimer = undefined
-        openingStartTime = undefined
-        this.isOpening = false
-      } else {
-        window.cancelAnimationFrame(openingAnimationTimer)
-        openingAnimationTimer = undefined
-        openingStartTime = undefined
-        this.cancelOpeningAnimationFrame()
-      }
-    },
-    updateMediaUrls () {
-      const urls = utils.urlsFromString(this.card.name)
-      this.formats.image = ''
-      this.formats.video = ''
-      this.formats.audio = ''
-      this.formats.link = ''
-      if (!urls) { return }
-      if (!urls.length) { return }
-      urls.forEach(url => {
-        if (utils.urlIsImage(url)) {
-          this.formats.image = url
-        } else if (utils.urlIsVideo(url)) {
-          this.formats.video = url
-        } else if (utils.urlIsAudio(url)) {
-          this.formats.audio = url
-        } else if (utils.urlIsFile(url)) {
-          this.formats.file = url
-        } else {
-          this.formats.link = url
-        }
-      })
-    },
-    toggleUrlsIsVisible () {
-      const isVisible = !this.urlsIsVisible
-      let newName
-      if (isVisible) {
-        newName = utils.addHiddenQueryStringToURLs(this.name)
-      } else {
-        newName = utils.removeHiddenQueryStringFromURLs(this.name)
-      }
-      this.updateCardName(newName)
-    },
-    updateNameSplitIntoCardsCount () {
-      const isPreview = true
-      const newCards = this.splitCards(null, isPreview)
-      const count = newCards.length
-      if (count > 1) {
-        this.nameSplitIntoCardsCount = count
-      } else {
-        this.nameSplitIntoCardsCount = 0
-      }
-    },
-    splitCards (event, isPreview) {
-      const prevName = (this.pastedName || this.name).trim()
-      const cardNames = utils.splitCardNameByParagraphAndSentence(prevName)
-      const user = this.$store.state.currentUser
-      // create new split cards
-      let newCards = cardNames.map((cardName, index) => {
-        const indentAmount = 50
-        const indentLevel = utils.numberOfLeadingTabs(cardName) || utils.numberOfLeadingDoubleSpaces(cardName)
-        const indentX = indentLevel * indentAmount
-        let id = nanoid()
-        if (index === 0) {
-          id = this.card.id
-        }
-        const newCard = {
-          id,
-          name: cardName.trim(),
-          x: this.card.x + indentX,
-          y: this.card.y,
-          frameId: this.card.frameId,
-          backgroundColor: this.card.backgroundColor,
-          maxWidth: user.cardSettingsMaxCardWidth
-        }
-        return newCard
-      })
-      if (isPreview) { return newCards }
-      this.pastedName = ''
-      this.updateCardName(newCards[0].name)
-      this.$store.dispatch('history/resume')
-      this.$store.dispatch('history/add', { cards: newCards, useSnapshot: true })
-      this.$store.dispatch('history/pause')
-      newCards.shift()
-      this.addSplitCards(newCards)
-    },
-    addSplitCards (newCards) {
-      const spaceBetweenCards = 12
-      let prevCard = utils.clone(this.card)
-      this.$store.dispatch('currentCards/addMultiple', { cards: newCards })
-      this.$nextTick(() => {
-        newCards = newCards.map(card => {
-          const element = document.querySelector(`article [data-card-id="${prevCard.id}"]`)
-          const prevCardRect = element.getBoundingClientRect()
-          card.y = prevCard.y + (prevCardRect.height * this.spaceCounterZoomDecimal) + spaceBetweenCards
-          prevCard = card
-          return card
-        })
-        newCards.forEach(card => {
-          card = utils.updateCardDimensions(card)
-          card = {
-            name: card.name,
-            id: card.id,
-            y: card.y,
-            width: card.width,
-            height: card.height,
-            urlPreviewIsVisible: true
-          }
-          this.$store.dispatch('currentCards/update', card)
-          this.$store.commit('triggerUpdateUrlPreview', card.id)
-        })
-        this.$store.dispatch('closeAllDialogs')
-      })
-    },
-    async uploadFile (file) {
-      if (!this.currentUserIsSignedIn) {
-        this.error.signUpToUpload = true
-        return
-      }
-      try {
-        await this.$store.dispatch('upload/uploadFile', { file, cardId: this.card.id })
-      } catch (error) {
-        console.warn('🚒', error)
-        if (error.type === 'sizeLimit') {
-          this.error.sizeLimit = true
-        } else {
-          this.error.unknownUploadError = true
-        }
-      }
-    },
-    updatePastedName (event) {
-      const files = event.clipboardData.files
-      if (files.length) {
-        this.uploadFile(files[0])
-      } else {
-        const text = event.clipboardData.getData('text')
-        this.pastedName = text
-      }
-      this.wasPasted = true
-      this.$store.dispatch('currentCards/updateURLQueryStrings', { cardId: this.card.id })
-    },
-    triggerUpdateHeaderAndFooterPosition () {
-      this.$store.commit('triggerUpdateHeaderAndFooterPosition')
-    },
-    addCheckbox () {
-      const update = {
-        id: this.card.id,
-        name: `[] ${this.card.name}`
-      }
-      this.$store.dispatch('currentCards/update', update)
-    },
-    updateCardName (newName) {
-      const cardId = this.cardDetailsIsVisibleForCardId
-      if (this.card.id !== cardId) {
-        return
-      }
-      const userId = this.currentUser.id
-      const card = {
-        name: newName,
-        id: this.card.id,
-        nameUpdatedAt: new Date(),
-        nameUpdatedByUserId: userId
-      }
-      this.$store.dispatch('currentCards/update', card)
-      this.updatePaths()
-      this.updateMediaUrls()
-      this.updateTags()
-      if (this.createdByUser.id !== this.currentUser.id) { return }
-      if (this.notifiedMembers) { return } // send card update notifications only once per card, per session
-      if (card.name) {
-        this.$store.dispatch('userNotifications/addCardUpdated', { cardId: this.card.id, type: 'updateCard' })
-        this.notifiedMembers = true
-      }
-    },
-    updatePaths () {
-      this.$nextTick(() => {
-        this.$store.dispatch('currentConnections/updatePaths', { cardId: this.card.id, shouldUpdateApi: true })
-      })
-    },
-    updateDimensions (cardId) {
-      const card = { id: cardId }
-      this.$store.dispatch('currentCards/updateDimensions', { cards: [card] })
-    },
-    checkIfIsInsertLineBreak (event) {
-      const lineBreakInserted = event.ctrlKey || event.altKey
-      if (!lineBreakInserted) {
-        this.insertedLineBreak = false
-      }
-    },
-    conditionalInsertLineBreak (event) {
-      const shouldAddChildCard = this.$store.state.currentUser.cardSettingsShiftEnterShouldAddChildCard
-      if (shouldAddChildCard) { return }
-      this.insertLineBreak(event)
-    },
-    insertLineBreak (event) {
-      const position = this.$refs.name.selectionEnd
-      const name = this.card.name
-      const newName = name.substring(0, position) + '\n' + name.substring(position)
-      setTimeout(() => {
-        this.setSelectionRange(position + 1, position + 1)
-      })
-      this.insertedLineBreak = true
-      this.updateCardName(newName)
-    },
-    updateCompositionEventEndTime (event) {
-      // for non-latin input
-      // https://stackoverflow.com/questions/51226598/what-is-javascripts-compositionevent-please-give-examples
-      compositionEventEndTime = event.timeStamp
-    },
-    handleEnterKey (event) {
-      const isCompositionEvent = event.timeStamp && Math.abs(event.timeStamp - compositionEventEndTime) < 1000
-      const pickersIsVisible = this.tag.pickerIsVisible || this.space.pickerIsVisible
-      console.log('🎹 enter', {
-        shouldPreventNextEnterKey: this.shouldPreventNextEnterKey,
-        pickersIsVisible
-      })
-      if (this.shouldPreventNextEnterKey) {
-        this.$store.commit('shouldPreventNextEnterKey', false)
-      } else if (pickersIsVisible) {
-        this.triggerPickerSelectItem(event)
-        this.hidePickers()
-      } else if (this.insertedLineBreak) {
-        this.insertedLineBreak = false
-      } else if (isCompositionEvent) {
-
-      } else {
-        this.closeCard()
-        this.$store.dispatch('closeAllDialogs')
-        this.$store.commit('shouldPreventNextEnterKey', false)
-        this.$store.commit('triggerAddCard')
-      }
-    },
-    closeCardAndFocus (event) {
-      const pickersIsVisible = this.tag.pickerIsVisible || this.space.pickerIsVisible
-      if (pickersIsVisible) {
-        this.hidePickers()
-        return
-      }
-      this.$store.dispatch('closeAllDialogs')
-      document.querySelector(`.card[data-card-id="${prevCardId}"]`).focus()
-    },
-    removeCard () {
-      if (!this.canEditCard) { return }
-      this.$store.dispatch('history/resume')
-      this.$store.dispatch('currentCards/remove', this.card)
-      this.$store.commit('cardDetailsIsVisibleForCardId', '')
-      this.triggerUpdateHeaderAndFooterPosition()
-    },
-    textareaSizes () {
-      const element = this.$refs.dialog
-      let textarea = element.querySelector('textarea')
-      let modifier = 0
-      if (this.canEditCard) {
-        modifier = 1
-      }
-      textarea.style.height = textarea.scrollHeight + modifier + 'px'
-    },
-    toggleCardTipsIsVisible () {
-      const isVisible = this.cardTipsIsVisible
-      this.closeDialogs()
-      this.cardTipsIsVisible = !isVisible
-    },
-    toggleImagePickerIsVisible () {
-      const isVisible = this.imagePickerIsVisible
-      this.closeDialogs()
-      this.imagePickerIsVisible = !isVisible
-      this.initialSearch = this.normalizedName
-    },
-    toggleShouldShowItemActions () {
-      this.closeDialogs()
-      const isVisible = !this.shouldShowItemActions
-      this.$store.dispatch('currentUser/shouldShowItemActions', isVisible)
-      this.$nextTick(() => {
-        this.scrollIntoView()
-      })
-    },
-    toggleShareCardIsVisible () {
-      const isVisible = this.shareCardIsVisible
-      this.closeDialogs()
-      this.shareCardIsVisible = !isVisible
-    },
-    focusName (position) {
-      if (this.shouldPreventNextFocusOnName) {
-        this.triggerUpdateHeaderAndFooterPosition()
-        this.$store.commit('shouldPreventNextFocusOnName', false)
-        return
-      }
-      this.$nextTick(() => {
-        const element = this.$refs.name
-        const length = this.name.length
-        if (!element) { return }
-        element.focus()
-        if (position) {
-          element.setSelectionRange(position, position)
-        }
-        if (length) {
-          element.setSelectionRange(length, length)
-        }
-        this.triggerUpdateHeaderAndFooterPosition()
-      })
-    },
-    scrollIntoView (behavior) {
-      // wait for element to be rendered before getting position
-      this.$nextTick(() => {
-        this.$nextTick(() => {
-          this.$nextTick(() => {
-            const element = this.$refs.dialog
-            utils.scrollIntoView({ element, behavior })
-          })
-        })
-      })
-    },
-    scrollIntoViewAndFocus () {
-      let behavior
-      if (utils.isIPhone()) {
-        behavior = 'auto'
-      }
-      this.$nextTick(() => {
-        this.scrollIntoView(behavior)
-        this.focusName()
-        this.triggerUpdateMagicPaintPositionOffset()
-        this.triggerUpdateHeaderAndFooterPosition()
-      })
-    },
-    triggerUpdateMagicPaintPositionOffset () {
-      this.$store.commit('triggerUpdateMagicPaintPositionOffset')
-      this.triggerUpdateHeaderAndFooterPosition()
-    },
-    closeDialogs (shouldSkipGlobalDialogs) {
-      this.$store.commit('triggerCloseChildDialogs')
-      this.imagePickerIsVisible = false
-      this.cardTipsIsVisible = false
-      this.shareCardIsVisible = false
-      this.hidePickers()
-      if (shouldSkipGlobalDialogs === true) { return }
-      this.hideTagDetailsIsVisible()
-      this.hideOtherItemDetailsIsVisible()
-    },
-    clickName (event) {
-      this.triggerUpdateMagicPaintPositionOffset()
-      this.$store.commit('searchIsVisible', false)
-      if (this.isCursorInsideTagBrackets()) {
-        this.showTagPicker()
-        event.stopPropagation()
-      } else if (this.isCursorInsideSlashCommand()) {
-        this.showSpacePicker()
-        this.updateSpacePickerSearch()
-        event.stopPropagation()
-      }
-    },
-    hidePickers () {
-      this.hideTagPicker()
-      this.hideSpacePicker()
-    },
-    hideTagPicker () {
-      this.tag.pickerIsVisible = false
-      this.$store.dispatch('currentSpace/removeUnusedTagsFromCard', this.card.id)
-    },
-    hideSpacePicker () {
-      this.space.pickerSearch = ''
-      this.space.pickerIsVisible = false
-    },
-    triggerSignUpOrInIsVisible () {
-      this.$store.commit('triggerSignUpOrInIsVisible')
-    },
-    triggerUpgradeUserIsVisible () {
-      this.$store.commit('triggerUpgradeUserIsVisible')
-    },
-    clearErrors () {
-      this.error.signUpToUpload = false
-      this.error.sizeLimit = false
-      this.error.unknownUploadError = false
-    },
-    checkIfShouldShowPicker () {
-      this.checkIfShouldShowTagPicker()
-      this.checkIfShouldShowSpacePicker()
-    },
-    checkIfShouldHidePicker () {
-      this.checkIfShouldHideTagPicker()
-      this.checkIfShouldHideSpacePicker()
-    },
-
-    // Comment
-
-    addCommentClosingBrackets () {
-      const cursorPosition = this.selectionStartPosition()
-      const previousCharacter = this.name[cursorPosition - 1]
-      if (previousCharacter === '(') {
-        const name = this.name
-        const newName = `${name.substring(0, cursorPosition)}))${name.substring(cursorPosition)}`
-        this.updateCardName(newName)
-        this.$nextTick(() => {
-          this.setSelectionRange(cursorPosition, cursorPosition)
-        })
-      }
-    },
-
-    // Pickers
-
-    updatePicker (event) {
-      const cursorPosition = this.selectionStartPosition()
-      const previousCharacter = this.name[cursorPosition - 1]
-      const previousCharacterIsBlank = utils.hasBlankCharacters(previousCharacter)
-      const key = event.key
-      const keyIsArrowUpOrDown = key === 'ArrowDown' || key === 'ArrowUp'
-      const keyIsLettterOrNumber = key.length === 1
-      const isCursorInsideTagBrackets = this.isCursorInsideTagBrackets()
-      const isCursorInsideSlashCommand = this.isCursorInsideSlashCommand()
-      if (keyIsArrowUpOrDown) { return }
-      if (key === '(') {
-        this.addCommentClosingBrackets()
-      }
-      if (utils.hasBlankCharacters(key)) {
-        this.hideSpacePicker()
-      } else if (key === '/' && previousCharacterIsBlank) {
-        this.showSpacePicker()
-      } else if (cursorPosition === 0) {
-        return
-      } else if (keyIsLettterOrNumber && isCursorInsideSlashCommand) {
-        this.showSpacePicker()
-      } else if (key === '[' && previousCharacter === '[') {
-        this.showTagPicker()
-        this.addTagClosingBrackets()
-      } else if (keyIsLettterOrNumber && isCursorInsideTagBrackets) {
-        this.showTagPicker()
-      }
-      this.checkIfIsInsertLineBreak(event)
-    },
-    triggerPickerNavigation (event) {
-      const modifierKey = event.altKey || event.shiftKey || event.ctrlKey || event.metaKey
-      const pickerIsVisible = this.tag.pickerIsVisible || this.space.pickerIsVisible
-      const shouldTrigger = pickerIsVisible && !modifierKey
-      if (shouldTrigger) {
-        this.$store.commit('triggerPickerNavigationKey', event.key)
-        event.preventDefault()
-      }
-    },
-    triggerPickerSelectItem (event) {
-      const modifierKey = event.altKey || event.shiftKey || event.ctrlKey || event.metaKey
-      const pickerIsVisible = this.tag.pickerIsVisible || this.space.pickerIsVisible
-      const shouldTrigger = pickerIsVisible && !modifierKey
-      if (shouldTrigger) {
-        this.$store.commit('triggerPickerSelect')
-        event.preventDefault()
-      }
-      // prevent trailing ]
-      if (event.key === ']' && this.tag.pickerIsVisible) {
-        this.shouldCancelBracketRight = true
-        setTimeout(() => {
-          this.shouldCancelBracketRight = false
-        }, 250)
-      }
-      if (event.key === ']' && this.shouldCancelBracketRight) {
-        event.preventDefault()
-      }
-      // prevents Enter from creating new card
-      if (event.key !== 'Enter') {
-        this.hidePickers()
-      }
-    },
-    updatePickerSearch () {
-      if (this.tag.pickerIsVisible) {
-        this.updateTagPickerSearch()
-      } else if (this.space.pickerIsVisible) {
-        this.updateSpacePickerSearch()
-      }
-    },
-
-    // /Space-Links, slash command text
-
-    showSpacePicker () {
-      this.closeDialogs()
-      const nameRect = this.$refs.name.getBoundingClientRect()
-      this.space.pickerPosition = {
-        top: nameRect.height - 2
-      }
-      this.space.pickerIsVisible = true
-    },
-    slashText () {
-      const cursorPosition = this.selectionStartPosition()
-      const start = this.slashTextToCursor() // /txt|
-      let end = this.name.substring(cursorPosition, this.name.length) // |abc xyz
-      end = utils.splitByBlankCharacters(end)[0]
-      return start + end
-    },
-    slashTextToCursor () {
-      const cursorPosition = this.selectionStartPosition()
-      const textPosition = this.slashTextPosition()
-      const text = this.name.substring(textPosition, cursorPosition)
-      return text
-    },
-    slashTextPosition () {
-      const cursorPosition = this.selectionStartPosition()
-      let text = this.name.substring(0, cursorPosition)
-      const textPosition = text.lastIndexOf('/')
-      if (textPosition === -1) { return }
-      return textPosition
-    },
-    updateSpacePickerSearch () {
-      if (!this.space.pickerIsVisible) { return }
-      const text = this.slashText()
-      this.space.pickerSearch = text.substring(1, text.length)
-    },
-    checkIfShouldHideSpacePicker () {
-      if (!this.space.pickerIsVisible) { return }
-      if (!this.isCursorInsideSlashCommand()) {
-        this.hideSpacePicker()
-      }
-    },
-    checkIfShouldShowSpacePicker () {
-      if (this.isCursorInsideSlashCommand()) {
-        this.showSpacePicker()
-      } else {
-        this.hideSpacePicker()
-      }
-    },
-    isCursorInsideSlashCommand () {
-      const text = this.slashTextToCursor()
-      if (utils.hasBlankCharacters(text)) { return }
-      const characterBeforeSlash = this.name.charAt(this.slashTextPosition() - 1)
-      if (text && !characterBeforeSlash) { return true }
-      const characterBeforeSlashIsBlank = utils.hasBlankCharacters(characterBeforeSlash)
-      const textIsValid = !utils.hasBlankCharacters(text)
-      return textIsValid && characterBeforeSlashIsBlank
-    },
-    replaceSlashCommandWithSpaceUrl (space) {
-      let name = this.card.name
-      let position = this.slashTextPosition()
-      const spaceUrl = consts.kinopioDomain() + '/' + space.url + ' '
-      const start = name.substring(0, position)
-      const end = name.substring(position + this.slashText().length, name.length)
-      const newName = start + spaceUrl + end
-      this.updateCardName(newName)
-      position = position + spaceUrl.length + 1
-      this.hideSpacePicker()
-      this.$nextTick(() => {
-        this.focusName(position)
-        this.$store.commit('shouldPreventNextEnterKey', false)
-      })
-      this.$store.dispatch('currentCards/update', {
-        id: this.card.id,
-        shouldShowOtherSpacePreviewImage: true
-      })
-    },
-
-    // [[Tags]]
-
-    showTagPicker () {
-      this.tag.pickerSearch = ''
-      this.closeDialogs()
-      const nameRect = this.$refs.name.getBoundingClientRect()
-      this.tag.pickerPosition = {
-        top: nameRect.height - 2
-      }
-      this.tag.pickerIsVisible = true
-      this.updateTagPickerSearch()
-    },
-    tagStartText () {
-      // ...[[abc
-      const cursorPosition = this.selectionStartPosition()
-      const start = this.name.substring(0, cursorPosition)
-      let startPosition = start.lastIndexOf('[[')
-      if (startPosition === -1) { return }
-      startPosition = startPosition + 2
-      return start.substring(startPosition)
-    },
-    tagEndText () {
-      // xyz]]...
-      const cursorPosition = this.selectionStartPosition()
-      const end = this.name.substring(cursorPosition)
-      const endPosition = end.indexOf(']]')
-      if (endPosition === -1) { return }
-      return end.substring(0, endPosition)
-    },
-    updateTagPickerSearch () {
-      if (!this.tag.pickerIsVisible) { return }
-      const start = this.tagStartText() || ''
-      const end = this.tagEndText() || ''
-      this.tag.pickerSearch = start + end
-    },
-    isCursorInsideTagBrackets () {
-      this.cursorPosition = this.selectionStartPosition() // for template
-      const start = this.tagStartText()
-      const end = this.tagEndText()
-      if (start === undefined || end === undefined) { return }
-      if (!start.includes(']]') && !end.includes('[[')) {
-        return true
-      }
-    },
-    checkIfShouldShowTagPicker () {
-      const tagPickerIsVisible = this.tag.pickerIsVisible
-      const isCursorInsideTagBrackets = this.isCursorInsideTagBrackets()
-      if (isCursorInsideTagBrackets && !tagPickerIsVisible) {
-        this.showTagPicker()
-      } else if (!isCursorInsideTagBrackets && tagPickerIsVisible) {
-        this.hideTagPicker()
-      }
-    },
-    checkIfShouldHideTagPicker () {
-      const tagPickerIsVisible = this.tag.pickerIsVisible
-      const isCursorInsideTagBrackets = this.isCursorInsideTagBrackets()
-      if (!isCursorInsideTagBrackets && tagPickerIsVisible) {
-        this.hideTagPicker()
-      }
-    },
-    addTagClosingBrackets () {
-      const cursorPosition = this.selectionStartPosition()
-      const name = this.name
-      const newName = `${name.substring(0, cursorPosition)}]]${name.substring(cursorPosition)}`
-      this.updateCardName(newName)
-      this.$nextTick(() => {
-        this.setSelectionRange(cursorPosition, cursorPosition)
-      })
-    },
-    moveCursorPastTagEnd () {
-      const cursorPosition = this.selectionStartPosition()
-      let endText = this.name.substring(cursorPosition)
-      let newCursorPosition = endText.indexOf(']]')
-      newCursorPosition = cursorPosition + newCursorPosition + 2
-      this.$nextTick(() => {
-        this.setSelectionRange(newCursorPosition, newCursorPosition)
-      })
-    },
-    updatePreviousTags () {
-      const name = this.card.name
-      if (!name) {
-        previousTags = []
-        return
-      }
-      previousTags = utils.tagsFromStringWithoutBrackets(name) || []
-      previousTags = previousTags.map(tagName => {
-        let tag
-        if (this.previousSelectedTag.name === tagName) {
-          tag = this.previousSelectedTag
-        } else if (this.currentSearchTag.name === tagName) {
-          tag = this.currentSearchTag
-        } else {
-          tag = this['currentSpace/tagByName'](tagName)
-          tag = utils.clone(tag)
-          tag.color = this.previousSelectedTag.color || tag.color
-        }
-        return tag
-      })
-    },
-    updateNewTagColor (color) {
-      this.newTagColor = color
-    },
-    addNewTags (newTagNames) {
-      const previousTagNames = previousTags.map(tag => tag.name)
-      const addTagsNames = newTagNames.filter(newTagName => !previousTagNames.includes(newTagName))
-      addTagsNames.forEach(tagName => {
-        let tag
-        tag = utils.newTag({
-          name: tagName,
-          defaultColor: this.newTagColor || this.currentUser.color,
-          cardId: this.card.id,
-          spaceId: this.currentSpace.id
-        })
-        if (this.previousSelectedTag.name === tagName) {
-          tag.color = this.previousSelectedTag.color
-        } else if (this.currentSearchTag.name === tagName) {
-          tag.color = this.currentSearchTag.color
-        }
-        this.$store.dispatch('currentSpace/addTag', tag)
-      })
-    },
-    updateTags () {
-      const name = this.card.name
-      if (!name) { return }
-      const newTagNames = utils.tagsFromStringWithoutBrackets(name) || []
-      this.addNewTags(newTagNames)
-      this.updatePreviousTags()
-    },
-    hideTagDetailsIsVisible () {
-      this.$store.commit('currentSelectedTag', {})
-      this.$store.commit('tagDetailsIsVisible', false)
-    },
-    hideOtherItemDetailsIsVisible () {
-      this.$store.commit('otherCardDetailsIsVisible', false)
-    },
-    showTagDetailsIsVisible (event, tag) {
-      this.closeDialogs()
-      const element = event.target.closest('.tag')
-      const tagRect = element.getBoundingClientRect()
-      this.$store.commit('tagDetailsPosition', {
-        x: window.scrollX + tagRect.x + 2,
-        y: window.scrollY + tagRect.y + tagRect.height - 2,
-        pageX: window.scrollX,
-        pageY: window.scrollY
-      })
-      this.$store.commit('currentSelectedTag', tag)
-      this.$store.commit('tagDetailsIsVisible', true)
-    },
-    updateCurrentSearchTag (tag) {
-      this.currentSearchTag = tag
-      this.updatePreviousTags()
-    },
-    updateTagBracketsWithTag (tag) {
-      this.previousSelectedTag = tag
-      this.updatePreviousTags()
-      const cursorPosition = this.selectionStartPosition()
-      const tagStartText = this.tagStartText()
-      const tagEndText = this.tagEndText()
-      const text = tagStartText + tagEndText
-      let newName
-      if (text.length) {
-        newName = this.name.replace(`[[${text}]]`, `[[${tag.name}]]`)
-      } else {
-        const startText = this.name.substring(0, cursorPosition)
-        const endText = this.name.substring(cursorPosition)
-        newName = startText + tag.name + endText
-      }
-      this.updateCardName(newName)
-      this.moveCursorPastTagEnd()
-      this.$store.commit('shouldPreventNextEnterKey', false)
-    },
-    removeUrlPreview () {
-      const cardId = this.card.id || prevCardId
-      const update = {
-        id: cardId,
-        urlPreviewUrl: '',
-        urlPreviewImage: '',
-        urlPreviewTitle: '',
-        urlPreviewDescription: '',
-        urlPreviewEmbedHtml: ''
-      }
-      this.$store.commit('removeUrlPreviewLoadingForCardIds', cardId)
-      this.$store.dispatch('currentCards/update', update)
-      this.$store.dispatch('currentConnections/updatePaths', { cardId: this.card.id, shouldUpdateApi: true })
-      this.$store.dispatch('currentCards/updateDimensions', { cards: [this.card] })
-    },
-    resetPinchCounterZoomDecimal () {
-      this.$store.commit('pinchCounterZoomDecimal', 1)
-    },
-    updatePinchCounterZoomDecimal () {
-      this.$store.commit('pinchCounterZoomDecimal', utils.pinchCounterZoomDecimal())
-    },
-    resetTextareaHeight () {
-      if (!this.visible) { return }
-      this.$refs.name.style.height = 'initial'
-    },
-    showCard (cardId) {
-      this.$nextTick(() => {
-        this.broadcastShowCardDetails()
-        this.clearErrors()
-        this.updatePinchCounterZoomDecimal()
-        this.scrollIntoViewAndFocus()
-        this.updatePreviousTags()
-        this.updateNameSplitIntoCardsCount()
-        this.resetTextareaHeight()
-        this.$nextTick(() => {
-          this.startOpening()
-          const card = this['currentCards/byId'](cardId)
-          this.$store.dispatch('checkIfItemShouldIncreasePageSize', card)
-        })
-      })
-      this.previousSelectedTag = {}
-      this.updateMediaUrls()
-      const connections = this['currentConnections/byCardId'](cardId)
-      this.$store.commit('updateCurrentCardConnections', connections)
-      prevCardName = this.card.name
-      this.$store.dispatch('history/pause')
-    },
-    closeCard () {
-      const element = this.$refs.name
-      element.blur()
-      this.$store.commit('triggerHideTouchInterface')
-      const cardId = prevCardId
-      const card = this['currentCards/byId'](cardId)
-      this.closeDialogs(true)
-      this.cancelOpening()
-      this.$store.dispatch('currentSpace/removeUnusedTagsFromCard', cardId)
-      this.$store.commit('updateCurrentCardConnections')
-      this.$store.commit('triggerUpdateHeaderAndFooterPosition')
-      this.$store.commit('shouldPreventNextEnterKey', false)
-      if (!card) { return }
-      const cardHasName = Boolean(card.name)
-      const cardHasPendingUpload = this.$store.getters['upload/hasPendingUploadForCardId'](cardId)
-      if (!cardHasName && !cardHasPendingUpload) {
-        this.$store.dispatch('currentCards/remove', { id: cardId })
-      }
-      this.$store.dispatch('updatePageSizes')
-      this.$nextTick(() => {
-        this.updateDimensions(cardId)
-        this.$store.dispatch('checkIfItemShouldIncreasePageSize', card)
-      })
-      this.$store.dispatch('history/resume')
-      if (card.name || prevCardName) {
-        this.$store.dispatch('history/add', { cards: [card], useSnapshot: true })
-      }
-    }
-  },
-  watch: {
-    visible (visible) {
-      if (!visible) {
-        this.closeCard()
-      }
-    }
-  }
-}
-</script>
 
 <style lang="stylus">
 .card-details
