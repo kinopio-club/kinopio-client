@@ -743,6 +743,7 @@ export default {
     splitCards (event, isPreview) {
       const prevName = (this.pastedName || this.name).trim()
       const cardNames = utils.splitCardNameByParagraphAndSentence(prevName)
+      const user = this.$store.state.currentUser
       // create new split cards
       let newCards = cardNames.map((cardName, index) => {
         const indentAmount = 50
@@ -752,14 +753,16 @@ export default {
         if (index === 0) {
           id = this.card.id
         }
-        return {
+        const newCard = {
           id,
           name: cardName.trim(),
           x: this.card.x + indentX,
           y: this.card.y,
           frameId: this.card.frameId,
-          backgroundColor: this.card.backgroundColor
+          backgroundColor: this.card.backgroundColor,
+          maxWidth: user.cardSettingsMaxCardWidth
         }
+        return newCard
       })
       if (isPreview) { return newCards }
       this.pastedName = ''

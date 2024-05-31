@@ -255,7 +255,8 @@ const currentCards = {
           urlPreviewFavicon: card.urlPreviewFavicon,
           urlPreviewImage: card.urlPreviewImage,
           urlPreviewTitle: card.urlPreviewTitle,
-          urlPreviewUrl: card.urlPreviewUrl
+          urlPreviewUrl: card.urlPreviewUrl,
+          maxWidth: card.maxWidth || context.rootState.currentUser.cardSettingsMaxCardWidth
         }
       })
       cards.forEach(card => {
