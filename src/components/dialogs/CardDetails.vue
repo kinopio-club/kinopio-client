@@ -112,27 +112,106 @@ const state = reactive({
   shareCardIsVisible: false
 })
 
+const parentElement = computed(() => dialogElement.value)
+const visible = computed(() => utils.objectHasKeys(card.value))
+const closeCardAndFocus = (event) => {
+  const pickersIsVisible = state.tag.pickerIsVisible || state.space.pickerIsVisible
+  if (pickersIsVisible) {
+    hidePickers()
+    return
+  }
+  store.dispatch('closeAllDialogs')
+  document.querySelector(`.card[data-card-id="${prevCardId}"]`).focus()
+}
+const closeDialogs = (shouldSkipGlobalDialogs) => {
+  store.commit('triggerCloseChildDialogs')
+  state.imagePickerIsVisible = false
+  state.cardTipsIsVisible = false
+  state.shareCardIsVisible = false
+  hidePickers()
+  if (shouldSkipGlobalDialogs === true) { return }
+  hideTagDetailsIsVisible()
+  hideOtherItemDetailsIsVisible()
+}
+const triggerSignUpOrInIsVisible = () => {
+  store.commit('triggerSignUpOrInIsVisible')
+}
+const triggerUpgradeUserIsVisible = () => {
+  store.commit('triggerUpgradeUserIsVisible')
+}
+const clearErrors = () => {
+  state.error.signUpToUpload = false
+  state.error.sizeLimit = false
+  state.error.unknownUploadError = false
+}
+const hideOtherItemDetailsIsVisible = () => {
+  store.commit('otherCardDetailsIsVisible', false)
+}
+const showTagDetailsIsVisible = (event, tag) => {
+  closeDialogs()
+  const element = event.target.closest('.tag')
+  const tagRect = element.getBoundingClientRect()
+  store.commit('tagDetailsPosition', {
+    x: window.scrollX + tagRect.x + 2,
+    y: window.scrollY + tagRect.y + tagRect.height - 2,
+    pageX: window.scrollX,
+    pageY: window.scrollY
+  })
+  store.commit('currentSelectedTag', tag)
+  store.commit('tagDetailsIsVisible', true)
+}
+
+// styles
+
+const styles = computed(() => {
+  let zoom = store.getters.spaceCounterZoomDecimal
+  if (utils.isAndroid()) {
+    zoom = utils.visualViewport().scale
+  } else if (store.state.isTouchDevice) {
+    // on iOS, keyboard focus zooms
+    zoom = 1
+  }
+  const transform = `scale(${zoom})`
+  const offset = 8
+  const left = `${card.value.x + offset}px`
+  const top = `${card.value.y + offset}px`
+  return { transform, left, top }
+})
 const updateDialogHeight = async () => {
   if (!props.visible) { return }
   await nextTick()
   let element = dialogElement.value
   state.dialogHeight = utils.elementHeight(element)
 }
-
-const currentSelectedTag = computed(() => store.state.currentSelectedTag)
-
+const shouldShowItemActions = computed(() => store.state.currentUser.shouldShowItemActions)
 const rowIsBelowItemActions = computed(() => nameMetaRowIsVisible.value || badgesRowIsVisible.value || shouldShowItemActions.value || cardHasMedia.value || cardUrlPreviewIsVisible.value)
 const nameMetaRowIsVisible = computed(() => state.nameSplitIntoCardsCount)
 const badgesRowIsVisible = computed(() => tagsInCard.value.length || nameIsComment.value || isInSearchResultsCards.value)
-const parentElement = computed(() => dialogElement.value)
-const card = computed(() => {
-  const cardId = store.state.cardDetailsIsVisibleForCardId
-  return store.getters['currentCards/byId'](cardId) || {}
-})
-const visible = computed(() => utils.objectHasKeys(card.value))
+const triggerUpdateHeaderAndFooterPosition = () => {
+  store.commit('triggerUpdateHeaderAndFooterPosition')
+}
+const updateDimensions = (cardId) => {
+  const item = { id: cardId }
+  store.dispatch('currentCards/updateDimensions', { cards: [item] })
+}
+const scrollIntoViewAndFocus = async () => {
+  let behavior
+  if (utils.isIPhone()) {
+    behavior = 'auto'
+  }
+  await nextTick()
+  scrollIntoView(behavior)
+  focusName()
+  triggerUpdateMagicPaintPositionOffset()
+  triggerUpdateHeaderAndFooterPosition()
+}
+const triggerUpdateMagicPaintPositionOffset = () => {
+  store.commit('triggerUpdateMagicPaintPositionOffset')
+  triggerUpdateHeaderAndFooterPosition()
+}
 
-const isSpaceMember = computed(() => store.getters['currentUser/isSpaceMember']())
-const cardIsCreatedByCurrentUser = computed(() => store.getters['currentUser/cardIsCreatedByCurrentUser'](card.value))
+// space
+
 const spacePrivacyIsOpen = computed(() => store.state.currentSpace.privacy === 'open')
 const spacePrivacyIsClosed = computed(() => store.state.currentSpace.privacy === 'closed')
 const isInSearchResultsCards = computed(() => {
@@ -140,175 +219,18 @@ const isInSearchResultsCards = computed(() => {
   if (!results.length) { return }
   return Boolean(results.find(card => card.value.id === card.id))
 })
-const showCardTips = computed(() => {
-  if (name.value) { return }
-  return true
-})
-const nameIsComment = computed(() => utils.isNameComment(name.value))
 const canEditSpace = computed(() => store.getters['currentUser/canEditSpace']())
+const isInvitedButCannotEditSpace = computed(() => store.getters['currentUser/isInvitedButCannotEditSpace']())
+
+// user
+
+const isSpaceMember = computed(() => store.getters['currentUser/isSpaceMember']())
+const cardIsCreatedByCurrentUser = computed(() => store.getters['currentUser/cardIsCreatedByCurrentUser'](card.value))
+const isFavoriteSpace = computed(() => store.getters['currentSpace/isFavorite'])
 const canEditCard = computed(() => {
   if (isSpaceMember.value) { return true }
   if (canEditSpace.value && cardIsCreatedByCurrentUser.value) { return true }
   return false
-})
-const isInvitedButCannotEditSpace = computed(() => store.getters['currentUser/isInvitedButCannotEditSpace']())
-const maxCardCharacterLimit = computed(() => {
-  let value = store.state.currentUser.cardSettingsDefaultCharacterLimit || consts.defaultCharacterLimit
-  const isCodeblock = card.value.name?.includes('```')
-  if (isCodeblock) {
-    value = consts.highCharacterLimit
-  }
-  return value
-})
-const currentCardLength = computed(() => {
-  if (!card.value.name) { return 0 }
-  return card.value.name.length
-})
-const showCharacterCount = computed(() => {
-  const threshold = 50
-  if (errorMaxCharacterLimit.value) { return }
-  return currentCardLength.value >= maxCardCharacterLimit.value - threshold
-})
-const errorMaxCharacterLimit = computed(() => {
-  if (currentCardLength.value >= maxCardCharacterLimit.value) {
-    return true
-  } else {
-    return false
-  }
-})
-const tagsInCard = computed(() => {
-  const tagNames = utils.tagsFromStringWithoutBrackets(name.value)
-  if (!tagNames) { return [] }
-  let tags = []
-  tagNames.forEach(name => {
-    const tag = store.getters['currentSpace/tagByName'](name)
-    tags.push(tag)
-  })
-  return tags
-})
-
-// other card
-
-const otherCardIsVisible = computed(() => {
-  const isCardLink = Boolean(card.value.linkToCardId)
-  return isCardLink && hasUrls.value
-})
-const otherCard = computed(() => {
-  const item = store.getters.otherCardById(card.value.linkToCardId)
-  return item
-})
-const otherCardUrl = computed(() => utils.urlFromSpaceAndCard({ cardId: card.value.linkToCardId, spaceId: card.value.linkToSpaceId }))
-
-// other space
-
-const otherSpaceIsVisible = computed(() => {
-  const isCardLink = Boolean(card.value.linkToSpaceId)
-  return isCardLink && hasUrls.value
-})
-const otherSpace = computed(() => {
-  const space = store.getters.otherSpaceById(card.value.linkToSpaceId)
-  return space
-})
-const otherSpaceUrl = computed(() => {
-  return utils.spaceUrl({
-    spaceId: otherSpace.value?.id,
-    spaceName: otherSpace.value?.name,
-    collaboratorKey: card.value.linkToSpaceCollaboratorKey
-  })
-})
-
-const currentUserIsSpaceMember = computed(() => store.getters['currentUser/isSpaceMember']())
-const isFavoriteSpace = computed(() => store.getters['currentSpace/isFavorite'])
-
-const name = computed({
-  get () {
-    return card.value.name || ''
-  },
-  set (newName) {
-    if (store.state.shouldPreventNextEnterKey) {
-      store.commit('shouldPreventNextEnterKey', false)
-      updateCardName(newName.trim())
-    } else {
-      updateCardName(newName)
-    }
-    if (state.wasPasted) {
-      state.wasPasted = false
-    } else {
-      state.pastedName = ''
-    }
-    updateNameSplitIntoCardsCount()
-    textareaSizes()
-  }
-})
-
-const url = computed(() => utils.urlFromString(name.value))
-const urls = computed(() => {
-  const newName = utils.removeMarkdownCodeblocksFromString(name.value)
-  const urls = utils.urlsFromString(newName)
-  return urls
-})
-const validUrls = computed(() => {
-  if (!urls.value) { return [] }
-  return urls.value.filter(url => {
-    const isLink = utils.urlType(url) === 'link'
-    const isValidUrl = utils.urlIsValidTld(url) || utils.urlIsValidLocalhost(url)
-    return isLink && isValidUrl
-  })
-})
-const validWebUrls = computed(() => {
-  const urls = validUrls.value.filter(url => {
-    const urlHasProtocol = utils.urlHasProtocol(url)
-    const isUpload = url.includes('us-east-1.linodeobjects.com') || url.includes('cdn.kinopio.club')
-    const isSpace = utils.urlIsSpace(url)
-    return urlHasProtocol && !isUpload && !isSpace
-  })
-  if (!urls.length && card.value.urlPreviewUrl) {
-    removeUrlPreview()
-  }
-  return urls
-})
-const hasUrls = computed(() => {
-  return Boolean(validUrls.value.length)
-})
-const urlsIsVisible = computed(() => {
-  const urlsVisible = validUrls.value.filter(url => {
-    const queryString = utils.queryString(url)
-    if (queryString) {
-      const queryObject = qs.decode(queryString)
-      return queryObject.hidden || queryObject.kinopio
-    } else {
-      return false
-    }
-  })
-  return urlsVisible.length === validUrls.value.length
-})
-const urlIsAudio = computed(() => utils.urlIsAudio(url.value))
-const normalizedName = computed(() => {
-  let newName = name.value
-  if (url.value) {
-    newName = newName.replace(url.value, '')
-  }
-  newName = newName.replace(utils.checkboxFromString(newName), '')
-  return newName.trim()
-})
-
-const checkbox = computed(() => Boolean(utils.checkboxFromString(name.value)))
-
-const checkboxIsChecked = computed({
-  get () {
-    return utils.nameIsChecked(name.value)
-  },
-  set (value) {
-    if (utils.nameIsChecked(name.value)) {
-      store.dispatch('currentCards/removeChecked', card.value.id)
-    } else {
-      store.dispatch('currentCards/toggleChecked', { cardId: card.value.id, value })
-    }
-  }
-})
-const cardPendingUpload = computed(() => {
-  const pendingUploads = store.state.upload.pendingUploads
-  return pendingUploads.find(upload => upload.cardId === card.value.id)
 })
 const currentUserIsSignedIn = computed(() => store.getters['currentUser/isSignedIn'])
 const createdByUser = computed(() => {
@@ -335,39 +257,274 @@ const updatedByUser = computed(() => {
     }
   }
 })
-const styles = computed(() => {
-  let zoom = store.getters.spaceCounterZoomDecimal
-  if (utils.isAndroid()) {
-    zoom = utils.visualViewport().scale
-  } else if (store.state.isTouchDevice) {
-    // on iOS, keyboard focus zooms
-    zoom = 1
+const broadcastShowCardDetails = () => {
+  const updates = {
+    cardId: card.value.id,
+    userId: store.state.currentUser.id
   }
-  const transform = `scale(${zoom})`
-  const offset = 8
-  const left = `${card.value.x + offset}px`
-  const top = `${card.value.y + offset}px`
-  return { transform, left, top }
+  store.commit('broadcast/updateStore', { updates, type: 'updateRemoteCardDetailsVisible' })
+}
+
+// card
+
+const card = computed(() => {
+  const cardId = store.state.cardDetailsIsVisibleForCardId
+  return store.getters['currentCards/byId'](cardId) || {}
 })
-const cardUrlPreviewIsVisible = computed(() => {
-  const isErrorUrl = card.value.urlPreviewErrorUrl && card.value.urlPreviewUrl === card.value.urlPreviewErrorUrl
-  const hasPreview = url.value && (isLoadingUrlPreview.value || card.value.urlPreviewUrl)
-  return Boolean(card.value.urlPreviewIsVisible && hasPreview && !isErrorUrl)
-})
-const urlPreviewIsVisible = computed(() => {
-  if (isLoadingUrlPreview.value) { return true }
-  if (!card.value.urlPreviewUrl) { return }
-  const urls = utils.urlsFromString(card.value.name) || []
-  const value = urls.find((url) => {
-    return url?.includes(card.value.urlPreviewUrl)
+const updateCompositionEventEndTime = (event) => {
+  // for non-latin input
+  // https://stackoverflow.com/questions/51226598/what-is-javascripts-compositionevent-please-give-examples
+  compositionEventEndTime = event.timeStamp
+}
+const handleEnterKey = (event) => {
+  const isCompositionEvent = event.timeStamp && Math.abs(event.timeStamp - compositionEventEndTime) < 1000
+  const pickersIsVisible = state.tag.pickerIsVisible || state.space.pickerIsVisible
+  console.log('🎹 enter', {
+    shouldPreventNextEnterKey: store.state.shouldPreventNextEnterKey,
+    pickersIsVisible
   })
-  return Boolean(value)
+  if (store.state.shouldPreventNextEnterKey) {
+    store.commit('shouldPreventNextEnterKey', false)
+  } else if (pickersIsVisible) {
+    triggerPickerSelectItem(event)
+    hidePickers()
+  } else if (state.insertedLineBreak) {
+    state.insertedLineBreak = false
+  } else if (isCompositionEvent) {
+
+  } else {
+    closeCard()
+    store.dispatch('closeAllDialogs')
+    store.commit('shouldPreventNextEnterKey', false)
+    store.commit('triggerAddCard')
+  }
+}
+const removeCard = () => {
+  if (!canEditCard.value) { return }
+  store.dispatch('history/resume')
+  store.dispatch('currentCards/remove', card.value)
+  store.commit('cardDetailsIsVisibleForCardId', '')
+  triggerUpdateHeaderAndFooterPosition()
+}
+const toggleShouldShowItemActions = async () => {
+  closeDialogs()
+  const isVisible = !shouldShowItemActions.value
+  store.dispatch('currentUser/shouldShowItemActions', isVisible)
+  await nextTick()
+  scrollIntoView()
+}
+const toggleShareCardIsVisible = () => {
+  const isVisible = state.shareCardIsVisible
+  closeDialogs()
+  state.shareCardIsVisible = !isVisible
+}
+const scrollIntoView = async (behavior) => {
+  // wait for element to be rendered before getting position
+  await nextTick()
+  await nextTick()
+  await nextTick()
+  const element = dialogElement.value
+  utils.scrollIntoView({ element, behavior })
+}
+const showCard = async (cardId) => {
+  await nextTick()
+  broadcastShowCardDetails()
+  clearErrors()
+  updatePinchCounterZoomDecimal()
+  scrollIntoViewAndFocus()
+  updatePreviousTags()
+  updateNameSplitIntoCardsCount()
+  resetTextareaHeight()
+  await nextTick()
+  startOpening()
+  const item = store.getters['currentCards/byId'](cardId)
+  store.dispatch('checkIfItemShouldIncreasePageSize', item)
+  state.previousSelectedTag = {}
+  updateMediaUrls()
+  const connections = store.getters['currentConnections/byCardId'](cardId)
+  store.commit('updateCurrentCardConnections', connections)
+  prevCardName = card.value.name
+  store.dispatch('history/pause')
+  textareaSizes()
+}
+const closeCard = async () => {
+  const element = nameElement.value
+  element.blur()
+  store.commit('triggerHideTouchInterface')
+  const cardId = prevCardId
+  const item = store.getters['currentCards/byId'](cardId)
+  closeDialogs(true)
+  cancelOpening()
+  store.dispatch('currentSpace/removeUnusedTagsFromCard', cardId)
+  store.commit('updateCurrentCardConnections')
+  store.commit('triggerUpdateHeaderAndFooterPosition')
+  store.commit('shouldPreventNextEnterKey', false)
+  if (!item) { return }
+  const cardHasName = Boolean(item.name)
+  const cardHasPendingUpload = store.getters['upload/hasPendingUploadForCardId'](cardId)
+  if (!cardHasName && !cardHasPendingUpload) {
+    store.dispatch('currentCards/remove', { id: cardId })
+  }
+  store.dispatch('updatePageSizes')
+  await nextTick()
+  updateDimensions(cardId)
+  store.dispatch('checkIfItemShouldIncreasePageSize', item)
+  store.dispatch('history/resume')
+  if (item.name || prevCardName) {
+    store.dispatch('history/add', { cards: [item], useSnapshot: true })
+  }
+}
+
+// name
+
+const textareaSizes = () => {
+  const element = dialogElement.value
+  let textarea = element.querySelector('textarea')
+  let modifier = 0
+  if (canEditCard.value) {
+    modifier = 1
+  }
+  textarea.style.height = textarea.scrollHeight + modifier + 'px'
+}
+const resetTextareaHeight = () => {
+  if (!props.visible) { return }
+  nameElement.value.style.height = 'initial'
+}
+const focusName = async (position) => {
+  if (store.state.shouldPreventNextFocusOnName) {
+    triggerUpdateHeaderAndFooterPosition()
+    store.commit('shouldPreventNextFocusOnName', false)
+    return
+  }
+  await nextTick()
+  const element = nameElement.value
+  const length = name.value.length
+  if (!element) { return }
+  element.focus()
+  if (position) {
+    element.setSelectionRange(position, position)
+  }
+  if (length) {
+    element.setSelectionRange(length, length)
+  }
+  triggerUpdateHeaderAndFooterPosition()
+}
+const name = computed({
+  get () {
+    return card.value.name || ''
+  },
+  set (newName) {
+    if (store.state.shouldPreventNextEnterKey) {
+      store.commit('shouldPreventNextEnterKey', false)
+      updateCardName(newName.trim())
+    } else {
+      updateCardName(newName)
+    }
+    if (state.wasPasted) {
+      state.wasPasted = false
+    } else {
+      state.pastedName = ''
+    }
+    updateNameSplitIntoCardsCount()
+    textareaSizes()
+  }
 })
-const isLoadingUrlPreview = computed(() => {
-  const isLoading = store.state.urlPreviewLoadingForCardIds.find(cardId => cardId === card.value.id)
-  return Boolean(isLoading)
+const updateCardName = (newName) => {
+  const cardId = store.state.cardDetailsIsVisibleForCardId
+  if (card.value.id !== cardId) {
+    return
+  }
+  const userId = store.state.currentUser.id
+  const item = {
+    name: newName,
+    id: card.value.id,
+    nameUpdatedAt: new Date(),
+    nameUpdatedByUserId: userId
+  }
+  store.dispatch('currentCards/update', item)
+  updatePaths()
+  updateMediaUrls()
+  updateTags()
+  if (createdByUser.value.id !== store.state.currentUser.id) { return }
+  if (state.notifiedMembers) { return } // send card update notifications only once per card, per session
+  if (item.name) {
+    store.dispatch('userNotifications/addCardUpdated', { cardId: card.value.id, type: 'updateCard' })
+    state.notifiedMembers = true
+  }
+}
+const normalizedName = computed(() => {
+  let newName = name.value
+  if (url.value) {
+    newName = newName.replace(url.value, '')
+  }
+  newName = newName.replace(utils.checkboxFromString(newName), '')
+  return newName.trim()
 })
-const cardHasMedia = computed(() => Boolean(state.formats.image || state.formats.video || state.formats.audio))
+const clickName = (event) => {
+  triggerUpdateMagicPaintPositionOffset()
+  store.commit('searchIsVisible', false)
+  if (isCursorInsideTagBrackets()) {
+    showTagPicker()
+    event.stopPropagation()
+  } else if (isCursorInsideSlashCommand()) {
+    showSpacePicker()
+    updateSpacePickerSearch()
+    event.stopPropagation()
+  }
+}
+
+// checkbox
+
+const checkbox = computed(() => Boolean(utils.checkboxFromString(name.value)))
+const checkboxIsChecked = computed({
+  get () {
+    return utils.nameIsChecked(name.value)
+  },
+  set (value) {
+    if (utils.nameIsChecked(name.value)) {
+      store.dispatch('currentCards/removeChecked', card.value.id)
+    } else {
+      store.dispatch('currentCards/toggleChecked', { cardId: card.value.id, value })
+    }
+  }
+})
+const addCheckbox = () => {
+  const update = {
+    id: card.value.id,
+    name: `[] ${card.value.name}`
+  }
+  store.dispatch('currentCards/update', update)
+}
+
+// character limit
+
+const maxCardCharacterLimit = computed(() => {
+  let value = store.state.currentUser.cardSettingsDefaultCharacterLimit || consts.defaultCharacterLimit
+  const isCodeblock = card.value.name?.includes('```')
+  if (isCodeblock) {
+    value = consts.highCharacterLimit
+  }
+  return value
+})
+const currentCardLength = computed(() => {
+  if (!card.value.name) { return 0 }
+  return card.value.name.length
+})
+const showCharacterCount = computed(() => {
+  const threshold = 50
+  if (errorMaxCharacterLimit.value) { return }
+  return currentCardLength.value >= maxCardCharacterLimit.value - threshold
+})
+const errorMaxCharacterLimit = computed(() => {
+  if (currentCardLength.value >= maxCardCharacterLimit.value) {
+    return true
+  } else {
+    return false
+  }
+})
+
+// opening animation
+
 const openingFrameStyle = computed(() => {
   const initialPadding = 200
   const initialBorderRadius = 60
@@ -386,48 +543,6 @@ const openingFrameStyle = computed(() => {
     borderRadius: borderRadius
   }
 })
-const isName = computed(() => Boolean(name.value))
-const shouldShowItemActions = computed(() => store.state.currentUser.shouldShowItemActions)
-
-const broadcastShowCardDetails = () => {
-  const updates = {
-    cardId: card.value.id,
-    userId: store.state.currentUser.id
-  }
-  store.commit('broadcast/updateStore', { updates, type: 'updateRemoteCardDetailsVisible' })
-}
-const addImageOrFile = async (file) => {
-  const cardId = card.value.id
-  const spaceId = store.state.currentSpace.id
-  // remove existing image url
-  const prevImageOrFile = state.formats.image || state.formats.video || state.formats.file
-  if (prevImageOrFile) {
-    const newName = name.value.replace(prevImageOrFile, '')
-    updateCardName(newName)
-  }
-  // add new image or file url
-  store.commit('triggerUploadComplete', {
-    cardId,
-    spaceId,
-    url: file.url
-  })
-  await nextTick()
-  updateMediaUrls()
-}
-const selectionStartPosition = () => {
-  let startPosition = state.lastSelectionStartPosition
-  if (nameElement.value) {
-    const position = nameElement.value.selectionStart
-    state.lastSelectionStartPosition = position
-    startPosition = position
-  }
-  return startPosition
-}
-const setSelectionRange = (start, end) => {
-  if (nameElement.value) {
-    nameElement.value.setSelectionRange(start, end)
-  }
-}
 const cancelOpening = () => {
   shouldCancelOpening = true
 }
@@ -477,544 +592,10 @@ const openingAnimationFrame = (timestamp) => {
     cancelOpeningAnimationFrame()
   }
 }
-const updateMediaUrls = () => {
-  const urls = utils.urlsFromString(card.value.name)
-  state.formats.image = ''
-  state.formats.video = ''
-  state.formats.audio = ''
-  state.formats.link = ''
-  if (!urls) { return }
-  if (!urls.length) { return }
-  urls.forEach(url => {
-    if (utils.urlIsImage(url)) {
-      state.formats.image = url
-    } else if (utils.urlIsVideo(url)) {
-      state.formats.video = url
-    } else if (utils.urlIsAudio(url)) {
-      state.formats.audio = url
-    } else if (utils.urlIsFile(url)) {
-      state.formats.file = url
-    } else {
-      state.formats.link = url
-    }
-  })
-}
-const toggleUrlsIsVisible = () => {
-  const isVisible = !urlsIsVisible.value
-  let newName
-  if (isVisible) {
-    newName = utils.addHiddenQueryStringToURLs(name.value)
-  } else {
-    newName = utils.removeHiddenQueryStringFromURLs(name.value)
-  }
-  updateCardName(newName)
-}
-const updateNameSplitIntoCardsCount = () => {
-  const isPreview = true
-  const newCards = splitCards(null, isPreview)
-  const count = newCards.length
-  if (count > 1) {
-    state.nameSplitIntoCardsCount = count
-  } else {
-    state.nameSplitIntoCardsCount = 0
-  }
-}
-const splitCards = (event, isPreview) => {
-  const prevName = (state.pastedName || name.value).trim()
-  const cardNames = utils.splitCardNameByParagraphAndSentence(prevName)
-  const user = store.state.currentUser
-  // create new split cards
-  let newCards = cardNames.map((cardName, index) => {
-    const indentAmount = 50
-    const indentLevel = utils.numberOfLeadingTabs(cardName) || utils.numberOfLeadingDoubleSpaces(cardName)
-    const indentX = indentLevel * indentAmount
-    let id = nanoid()
-    if (index === 0) {
-      id = card.value.id
-    }
-    const newCard = {
-      id,
-      name: cardName.trim(),
-      x: card.value.x + indentX,
-      y: card.value.y,
-      frameId: card.value.frameId,
-      backgroundColor: card.value.backgroundColor,
-      maxWidth: user.cardSettingsMaxCardWidth
-    }
-    return newCard
-  })
-  if (isPreview) { return newCards }
-  state.pastedName = ''
-  updateCardName(newCards[0].name)
-  store.dispatch('history/resume')
-  store.dispatch('history/add', { cards: newCards, useSnapshot: true })
-  store.dispatch('history/pause')
-  newCards.shift()
-  addSplitCards(newCards)
-}
-const addSplitCards = async (newCards) => {
-  const spaceBetweenCards = 12
-  let prevCard = utils.clone(card.value)
-  store.dispatch('currentCards/addMultiple', { cards: newCards })
-  // return
-  await nextTick()
 
-  // update y position
-  newCards = newCards.forEach(card => {
-    const element = document.querySelector(`article [data-card-id="${prevCard.id}"]`)
-    const prevCardRect = element.getBoundingClientRect()
-    card.y = prevCard.y + (prevCardRect.height * store.getters.spaceCounterZoomDecimal) + spaceBetweenCards
-    console.log('🫐🫐', prevCard.name, prevCard.y, '🍌', (prevCardRect.height * store.getters.spaceCounterZoomDecimal), card.y, card.id)
-    // debugger
-    // card = {
-    //   id: card.id,
-    //   y: card.y,
-    // }
-    store.dispatch('currentCards/update', card)
-    store.commit('triggerUpdateUrlPreview', card.id)
+// tags
 
-    // return card
-    prevCard = card
-
-    // newCards.forEach(card => {
-    //   // card = utils.updateCardDimensions(card)
-    //   console.log('🏎️🏎️🏎️',card.name, card)
-    //   card = {
-    //     name: card.name,
-    //     id: card.id,
-    //     y: card.y,
-    //     width: card.width,
-    //     height: card.height,
-    //     urlPreviewIsVisible: true
-    //   }
-    //   store.dispatch('currentCards/update', card)
-    //   store.commit('triggerUpdateUrlPreview', card.id)
-    // })
-    store.dispatch('closeAllDialogs')
-  })
-}
-const uploadFile = async (file) => {
-  if (!store.state.currentUserIsSignedIn) {
-    state.error.signUpToUpload = true
-    return
-  }
-  try {
-    await store.dispatch('upload/uploadFile', { file, cardId: card.value.id })
-  } catch (error) {
-    console.warn('🚒', error)
-    if (error.type === 'sizeLimit') {
-      state.error.sizeLimit = true
-    } else {
-      state.error.unknownUploadError = true
-    }
-  }
-}
-const updatePastedName = (event) => {
-  const files = event.clipboardData.files
-  if (files.length) {
-    uploadFile(files[0])
-  } else {
-    const text = event.clipboardData.getData('text')
-    state.pastedName = text
-  }
-  state.wasPasted = true
-  store.dispatch('currentCards/updateURLQueryStrings', { cardId: card.value.id })
-}
-const triggerUpdateHeaderAndFooterPosition = () => {
-  store.commit('triggerUpdateHeaderAndFooterPosition')
-}
-const addCheckbox = () => {
-  const update = {
-    id: card.value.id,
-    name: `[] ${card.value.name}`
-  }
-  store.dispatch('currentCards/update', update)
-}
-const updateCardName = (newName) => {
-  const cardId = store.state.cardDetailsIsVisibleForCardId
-  if (card.value.id !== cardId) {
-    return
-  }
-  const userId = store.state.currentUser.id
-  const item = {
-    name: newName,
-    id: card.value.id,
-    nameUpdatedAt: new Date(),
-    nameUpdatedByUserId: userId
-  }
-  store.dispatch('currentCards/update', item)
-  updatePaths()
-  updateMediaUrls()
-  updateTags()
-  if (createdByUser.value.id !== store.state.currentUser.id) { return }
-  if (state.notifiedMembers) { return } // send card update notifications only once per card, per session
-  if (item.name) {
-    store.dispatch('userNotifications/addCardUpdated', { cardId: card.value.id, type: 'updateCard' })
-    state.notifiedMembers = true
-  }
-}
-const updatePaths = async () => {
-  await nextTick()
-  store.dispatch('currentConnections/updatePaths', { cardId: card.value.id, shouldUpdateApi: true })
-}
-const updateDimensions = (cardId) => {
-  const item = { id: cardId }
-  store.dispatch('currentCards/updateDimensions', { cards: [item] })
-}
-const checkIfIsInsertLineBreak = (event) => {
-  const lineBreakInserted = event.ctrlKey || event.altKey
-  if (!lineBreakInserted) {
-    state.insertedLineBreak = false
-  }
-}
-const conditionalInsertLineBreak = (event) => {
-  const shouldAddChildCard = store.state.currentUser.cardSettingsShiftEnterShouldAddChildCard
-  if (shouldAddChildCard) { return }
-  insertLineBreak(event)
-}
-const insertLineBreak = (event) => {
-  const position = nameElement.value.selectionEnd
-  let newName = card.value.name
-  newName = newName.substring(0, position) + '\n' + name.value.substring(position)
-  setTimeout(() => {
-    setSelectionRange(position + 1, position + 1)
-  })
-  state.insertedLineBreak = true
-  updateCardName(newName)
-}
-const updateCompositionEventEndTime = (event) => {
-  // for non-latin input
-  // https://stackoverflow.com/questions/51226598/what-is-javascripts-compositionevent-please-give-examples
-  compositionEventEndTime = event.timeStamp
-}
-const handleEnterKey = (event) => {
-  const isCompositionEvent = event.timeStamp && Math.abs(event.timeStamp - compositionEventEndTime) < 1000
-  const pickersIsVisible = state.tag.pickerIsVisible || state.space.pickerIsVisible
-  console.log('🎹 enter', {
-    shouldPreventNextEnterKey: store.state.shouldPreventNextEnterKey,
-    pickersIsVisible
-  })
-  if (store.state.shouldPreventNextEnterKey) {
-    store.commit('shouldPreventNextEnterKey', false)
-  } else if (pickersIsVisible) {
-    triggerPickerSelectItem(event)
-    hidePickers()
-  } else if (state.insertedLineBreak) {
-    state.insertedLineBreak = false
-  } else if (isCompositionEvent) {
-
-  } else {
-    closeCard()
-    store.dispatch('closeAllDialogs')
-    store.commit('shouldPreventNextEnterKey', false)
-    store.commit('triggerAddCard')
-  }
-}
-const closeCardAndFocus = (event) => {
-  const pickersIsVisible = state.tag.pickerIsVisible || state.space.pickerIsVisible
-  if (pickersIsVisible) {
-    hidePickers()
-    return
-  }
-  store.dispatch('closeAllDialogs')
-  document.querySelector(`.card[data-card-id="${prevCardId}"]`).focus()
-}
-const removeCard = () => {
-  if (!canEditCard.value) { return }
-  store.dispatch('history/resume')
-  store.dispatch('currentCards/remove', card.value)
-  store.commit('cardDetailsIsVisibleForCardId', '')
-  triggerUpdateHeaderAndFooterPosition()
-}
-const textareaSizes = () => {
-  const element = dialogElement.value
-  let textarea = element.querySelector('textarea')
-  let modifier = 0
-  if (canEditCard.value) {
-    modifier = 1
-  }
-  textarea.style.height = textarea.scrollHeight + modifier + 'px'
-}
-const toggleCardTipsIsVisible = () => {
-  const isVisible = state.cardTipsIsVisible
-  closeDialogs()
-  state.cardTipsIsVisible = !isVisible
-}
-const toggleImagePickerIsVisible = () => {
-  const isVisible = state.imagePickerIsVisible
-  closeDialogs()
-  state.imagePickerIsVisible = !isVisible
-  state.initialSearch = normalizedName.value
-}
-const toggleShouldShowItemActions = async () => {
-  closeDialogs()
-  const isVisible = !shouldShowItemActions.value
-  store.dispatch('currentUser/shouldShowItemActions', isVisible)
-  await nextTick()
-  scrollIntoView()
-}
-const toggleShareCardIsVisible = () => {
-  const isVisible = state.shareCardIsVisible
-  closeDialogs()
-  state.shareCardIsVisible = !isVisible
-}
-const focusName = async (position) => {
-  if (store.state.shouldPreventNextFocusOnName) {
-    triggerUpdateHeaderAndFooterPosition()
-    store.commit('shouldPreventNextFocusOnName', false)
-    return
-  }
-  await nextTick()
-  const element = nameElement.value
-  const length = name.value.length
-  if (!element) { return }
-  element.focus()
-  if (position) {
-    element.setSelectionRange(position, position)
-  }
-  if (length) {
-    element.setSelectionRange(length, length)
-  }
-  triggerUpdateHeaderAndFooterPosition()
-}
-const scrollIntoView = async (behavior) => {
-  // wait for element to be rendered before getting position
-  await nextTick()
-  await nextTick()
-  await nextTick()
-  const element = dialogElement.value
-  utils.scrollIntoView({ element, behavior })
-}
-const scrollIntoViewAndFocus = async () => {
-  let behavior
-  if (utils.isIPhone()) {
-    behavior = 'auto'
-  }
-  await nextTick()
-  scrollIntoView(behavior)
-  focusName()
-  triggerUpdateMagicPaintPositionOffset()
-  triggerUpdateHeaderAndFooterPosition()
-}
-const triggerUpdateMagicPaintPositionOffset = () => {
-  store.commit('triggerUpdateMagicPaintPositionOffset')
-  triggerUpdateHeaderAndFooterPosition()
-}
-const closeDialogs = (shouldSkipGlobalDialogs) => {
-  store.commit('triggerCloseChildDialogs')
-  state.imagePickerIsVisible = false
-  state.cardTipsIsVisible = false
-  state.shareCardIsVisible = false
-  hidePickers()
-  if (shouldSkipGlobalDialogs === true) { return }
-  hideTagDetailsIsVisible()
-  hideOtherItemDetailsIsVisible()
-}
-const clickName = (event) => {
-  triggerUpdateMagicPaintPositionOffset()
-  store.commit('searchIsVisible', false)
-  if (isCursorInsideTagBrackets()) {
-    showTagPicker()
-    event.stopPropagation()
-  } else if (isCursorInsideSlashCommand()) {
-    showSpacePicker()
-    updateSpacePickerSearch()
-    event.stopPropagation()
-  }
-}
-const hidePickers = () => {
-  hideTagPicker()
-  hideSpacePicker()
-}
-const hideTagPicker = () => {
-  state.tag.pickerIsVisible = false
-  store.dispatch('currentSpace/removeUnusedTagsFromCard', card.value.id)
-}
-const hideSpacePicker = () => {
-  state.space.pickerSearch = ''
-  state.space.pickerIsVisible = false
-}
-const triggerSignUpOrInIsVisible = () => {
-  store.commit('triggerSignUpOrInIsVisible')
-}
-const triggerUpgradeUserIsVisible = () => {
-  store.commit('triggerUpgradeUserIsVisible')
-}
-const clearErrors = () => {
-  state.error.signUpToUpload = false
-  state.error.sizeLimit = false
-  state.error.unknownUploadError = false
-}
-const checkIfShouldShowPicker = () => {
-  checkIfShouldShowTagPicker()
-  checkIfShouldShowSpacePicker()
-}
-const checkIfShouldHidePicker = () => {
-  checkIfShouldHideTagPicker()
-  checkIfShouldHideSpacePicker()
-}
-
-// Comment
-
-const addCommentClosingBrackets = async () => {
-  const cursorStart = selectionStartPosition()
-  const previousCharacter = name.value[cursorStart - 1]
-  if (previousCharacter === '(') {
-    const newName = `${name.value.substring(0, cursorStart)}))${name.value.substring(cursorStart)}`
-    updateCardName(newName)
-    await nextTick()
-    setSelectionRange(cursorStart, cursorStart)
-  }
-}
-
-// Pickers
-
-const updatePicker = (event) => {
-  const cursorStart = selectionStartPosition()
-  const previousCharacter = name.value[cursorStart - 1]
-  const previousCharacterIsBlank = utils.hasBlankCharacters(previousCharacter)
-  const key = event.key
-  const keyIsArrowUpOrDown = key === 'ArrowDown' || key === 'ArrowUp'
-  const keyIsLettterOrNumber = key.length === 1
-  const isInsideTagBrackets = isCursorInsideTagBrackets()
-  const isInsideSlashCommand = isCursorInsideSlashCommand()
-  if (keyIsArrowUpOrDown) { return }
-  if (key === '(') {
-    addCommentClosingBrackets()
-  }
-  if (utils.hasBlankCharacters(key)) {
-    hideSpacePicker()
-  } else if (key === '/' && previousCharacterIsBlank) {
-    showSpacePicker()
-  } else if (cursorStart === 0) {
-    return
-  } else if (keyIsLettterOrNumber && isInsideSlashCommand) {
-    showSpacePicker()
-  } else if (key === '[' && previousCharacter === '[') {
-    showTagPicker()
-    addTagClosingBrackets()
-  } else if (keyIsLettterOrNumber && isInsideTagBrackets) {
-    showTagPicker()
-  }
-  checkIfIsInsertLineBreak(event)
-}
-const triggerPickerNavigation = (event) => {
-  const modifierKey = event.altKey || event.shiftKey || event.ctrlKey || event.metaKey
-  const pickerIsVisible = state.tag.pickerIsVisible || state.space.pickerIsVisible
-  const shouldTrigger = pickerIsVisible && !modifierKey
-  if (shouldTrigger) {
-    store.commit('triggerPickerNavigationKey', event.key)
-    event.preventDefault()
-  }
-}
-const triggerPickerSelectItem = (event) => {
-  const modifierKey = event.altKey || event.shiftKey || event.ctrlKey || event.metaKey
-  const pickerIsVisible = state.tag.pickerIsVisible || state.space.pickerIsVisible
-  const shouldTrigger = pickerIsVisible && !modifierKey
-  if (shouldTrigger) {
-    store.commit('triggerPickerSelect')
-    event.preventDefault()
-  }
-  // prevent trailing ]
-  if (event.key === ']' && state.tag.pickerIsVisible) {
-    state.shouldCancelBracketRight = true
-    setTimeout(() => {
-      state.shouldCancelBracketRight = false
-    }, 250)
-  }
-  if (event.key === ']' && state.shouldCancelBracketRight) {
-    event.preventDefault()
-  }
-  // prevents Enter from creating new card
-  if (event.key !== 'Enter') {
-    hidePickers()
-  }
-}
-const updatePickerSearch = () => {
-  if (state.tag.pickerIsVisible) {
-    updateTagPickerSearch()
-  } else if (state.space.pickerIsVisible) {
-    updateSpacePickerSearch()
-  }
-}
-
-// /Space-Links, slash command text
-
-const showSpacePicker = () => {
-  closeDialogs()
-  const nameRect = nameElement.value.getBoundingClientRect()
-  state.space.pickerPosition = {
-    top: nameRect.height - 2
-  }
-  state.space.pickerIsVisible = true
-}
-const slashText = () => {
-  const cursorStart = selectionStartPosition()
-  const start = slashTextToCursor() // /txt|
-  let end = name.value.substring(cursorStart, name.value.length) // |abc xyz
-  end = utils.splitByBlankCharacters(end)[0]
-  return start + end
-}
-const slashTextToCursor = () => {
-  const cursorStart = selectionStartPosition()
-  const textPosition = slashTextPosition()
-  const text = name.value.substring(textPosition, cursorStart)
-  return text
-}
-const slashTextPosition = () => {
-  const cursorStart = selectionStartPosition()
-  let text = name.value.substring(0, cursorStart)
-  const textPosition = text.lastIndexOf('/')
-  if (textPosition === -1) { return }
-  return textPosition
-}
-const updateSpacePickerSearch = () => {
-  if (!state.space.pickerIsVisible) { return }
-  const text = slashText()
-  state.space.pickerSearch = text.substring(1, text.length)
-}
-const checkIfShouldHideSpacePicker = () => {
-  if (!state.space.pickerIsVisible) { return }
-  if (!isCursorInsideSlashCommand()) {
-    hideSpacePicker()
-  }
-}
-const checkIfShouldShowSpacePicker = () => {
-  if (isCursorInsideSlashCommand()) {
-    showSpacePicker()
-  } else {
-    hideSpacePicker()
-  }
-}
-const isCursorInsideSlashCommand = () => {
-  const text = slashTextToCursor()
-  if (utils.hasBlankCharacters(text)) { return }
-  const characterBeforeSlash = name.value.charAt(slashTextPosition() - 1)
-  if (text && !characterBeforeSlash) { return true }
-  const characterBeforeSlashIsBlank = utils.hasBlankCharacters(characterBeforeSlash)
-  const textIsValid = !utils.hasBlankCharacters(text)
-  return textIsValid && characterBeforeSlashIsBlank
-}
-const replaceSlashCommandWithSpaceUrl = async (space) => {
-  let newName = card.value.name
-  let position = slashTextPosition()
-  const spaceUrl = consts.kinopioDomain() + '/' + space.url + ' '
-  const start = newName.substring(0, position)
-  const end = newName.substring(position + slashText().length, newName.length)
-  newName = start + spaceUrl + end
-  updateCardName(newName)
-  position = position + spaceUrl.length + 1
-  hideSpacePicker()
-  await nextTick()
-  focusName(position)
-  store.commit('shouldPreventNextEnterKey', false)
-  store.dispatch('currentCards/update', {
-    id: card.value.id,
-    shouldShowOtherSpacePreviewImage: true
-  })
-}
-
-// [[Tags]]
+const currentSelectedTag = computed(() => store.state.currentSelectedTag)
 
 const showTagPicker = () => {
   state.tag.pickerSearch = ''
@@ -1140,22 +721,6 @@ const hideTagDetailsIsVisible = () => {
   store.commit('currentSelectedTag', {})
   store.commit('tagDetailsIsVisible', false)
 }
-const hideOtherItemDetailsIsVisible = () => {
-  store.commit('otherCardDetailsIsVisible', false)
-}
-const showTagDetailsIsVisible = (event, tag) => {
-  closeDialogs()
-  const element = event.target.closest('.tag')
-  const tagRect = element.getBoundingClientRect()
-  store.commit('tagDetailsPosition', {
-    x: window.scrollX + tagRect.x + 2,
-    y: window.scrollY + tagRect.y + tagRect.height - 2,
-    pageX: window.scrollX,
-    pageY: window.scrollY
-  })
-  store.commit('currentSelectedTag', tag)
-  store.commit('tagDetailsIsVisible', true)
-}
 const updateCurrentSearchTag = (tag) => {
   state.currentSearchTag = tag
   updatePreviousTags()
@@ -1177,6 +742,211 @@ const updateTagBracketsWithTag = (tag) => {
   moveCursorPastTagEnd()
   store.commit('shouldPreventNextEnterKey', false)
 }
+
+// pickers
+
+const selectionStartPosition = () => {
+  let startPosition = state.lastSelectionStartPosition
+  if (nameElement.value) {
+    const position = nameElement.value.selectionStart
+    state.lastSelectionStartPosition = position
+    startPosition = position
+  }
+  return startPosition
+}
+const setSelectionRange = (start, end) => {
+  if (nameElement.value) {
+    nameElement.value.setSelectionRange(start, end)
+  }
+}
+const hidePickers = () => {
+  hideTagPicker()
+  hideSpacePicker()
+}
+const hideTagPicker = () => {
+  state.tag.pickerIsVisible = false
+  store.dispatch('currentSpace/removeUnusedTagsFromCard', card.value.id)
+}
+const hideSpacePicker = () => {
+  state.space.pickerSearch = ''
+  state.space.pickerIsVisible = false
+}
+const checkIfShouldShowPicker = () => {
+  checkIfShouldShowTagPicker()
+  checkIfShouldShowSpacePicker()
+}
+const checkIfShouldHidePicker = () => {
+  checkIfShouldHideTagPicker()
+  checkIfShouldHideSpacePicker()
+}
+const triggerPickerNavigation = (event) => {
+  const modifierKey = event.altKey || event.shiftKey || event.ctrlKey || event.metaKey
+  const pickerIsVisible = state.tag.pickerIsVisible || state.space.pickerIsVisible
+  const shouldTrigger = pickerIsVisible && !modifierKey
+  if (shouldTrigger) {
+    store.commit('triggerPickerNavigationKey', event.key)
+    event.preventDefault()
+  }
+}
+const triggerPickerSelectItem = (event) => {
+  const modifierKey = event.altKey || event.shiftKey || event.ctrlKey || event.metaKey
+  const pickerIsVisible = state.tag.pickerIsVisible || state.space.pickerIsVisible
+  const shouldTrigger = pickerIsVisible && !modifierKey
+  if (shouldTrigger) {
+    store.commit('triggerPickerSelect')
+    event.preventDefault()
+  }
+  // prevent trailing ]
+  if (event.key === ']' && state.tag.pickerIsVisible) {
+    state.shouldCancelBracketRight = true
+    setTimeout(() => {
+      state.shouldCancelBracketRight = false
+    }, 250)
+  }
+  if (event.key === ']' && state.shouldCancelBracketRight) {
+    event.preventDefault()
+  }
+  // prevents Enter from creating new card
+  if (event.key !== 'Enter') {
+    hidePickers()
+  }
+}
+const updatePickerSearch = () => {
+  if (state.tag.pickerIsVisible) {
+    updateTagPickerSearch()
+  } else if (state.space.pickerIsVisible) {
+    updateSpacePickerSearch()
+  }
+}
+
+// card tips
+
+const showCardTips = computed(() => {
+  if (name.value) { return }
+  return true
+})
+const toggleCardTipsIsVisible = () => {
+  const isVisible = state.cardTipsIsVisible
+  closeDialogs()
+  state.cardTipsIsVisible = !isVisible
+}
+
+// comment
+
+const nameIsComment = computed(() => utils.isNameComment(name.value))
+
+const tagsInCard = computed(() => {
+  const tagNames = utils.tagsFromStringWithoutBrackets(name.value)
+  if (!tagNames) { return [] }
+  let tags = []
+  tagNames.forEach(name => {
+    const tag = store.getters['currentSpace/tagByName'](name)
+    tags.push(tag)
+  })
+  return tags
+})
+
+// other card
+
+const otherCardIsVisible = computed(() => {
+  const isCardLink = Boolean(card.value.linkToCardId)
+  return isCardLink && hasUrls.value
+})
+const otherCard = computed(() => {
+  const item = store.getters.otherCardById(card.value.linkToCardId)
+  return item
+})
+const otherCardUrl = computed(() => utils.urlFromSpaceAndCard({ cardId: card.value.linkToCardId, spaceId: card.value.linkToSpaceId }))
+
+// other space
+
+const otherSpaceIsVisible = computed(() => {
+  const isCardLink = Boolean(card.value.linkToSpaceId)
+  return isCardLink && hasUrls.value
+})
+const otherSpace = computed(() => {
+  const space = store.getters.otherSpaceById(card.value.linkToSpaceId)
+  return space
+})
+const otherSpaceUrl = computed(() => {
+  return utils.spaceUrl({
+    spaceId: otherSpace.value?.id,
+    spaceName: otherSpace.value?.name,
+    collaboratorKey: card.value.linkToSpaceCollaboratorKey
+  })
+})
+
+// url preview
+
+const url = computed(() => utils.urlFromString(name.value))
+const urls = computed(() => {
+  const newName = utils.removeMarkdownCodeblocksFromString(name.value)
+  const urls = utils.urlsFromString(newName)
+  return urls
+})
+const validUrls = computed(() => {
+  if (!urls.value) { return [] }
+  return urls.value.filter(url => {
+    const isLink = utils.urlType(url) === 'link'
+    const isValidUrl = utils.urlIsValidTld(url) || utils.urlIsValidLocalhost(url)
+    return isLink && isValidUrl
+  })
+})
+const validWebUrls = computed(() => {
+  const urls = validUrls.value.filter(url => {
+    const urlHasProtocol = utils.urlHasProtocol(url)
+    const isUpload = url.includes('us-east-1.linodeobjects.com') || url.includes('cdn.kinopio.club')
+    const isSpace = utils.urlIsSpace(url)
+    return urlHasProtocol && !isUpload && !isSpace
+  })
+  if (!urls.length && card.value.urlPreviewUrl) {
+    removeUrlPreview()
+  }
+  return urls
+})
+const hasUrls = computed(() => {
+  return Boolean(validUrls.value.length)
+})
+const urlsIsVisible = computed(() => {
+  const urlsVisible = validUrls.value.filter(url => {
+    const queryString = utils.queryString(url)
+    if (queryString) {
+      const queryObject = qs.decode(queryString)
+      return queryObject.hidden || queryObject.kinopio
+    } else {
+      return false
+    }
+  })
+  return urlsVisible.length === validUrls.value.length
+})
+const cardUrlPreviewIsVisible = computed(() => {
+  const isErrorUrl = card.value.urlPreviewErrorUrl && card.value.urlPreviewUrl === card.value.urlPreviewErrorUrl
+  const hasPreview = url.value && (isLoadingUrlPreview.value || card.value.urlPreviewUrl)
+  return Boolean(card.value.urlPreviewIsVisible && hasPreview && !isErrorUrl)
+})
+const urlPreviewIsVisible = computed(() => {
+  if (isLoadingUrlPreview.value) { return true }
+  if (!card.value.urlPreviewUrl) { return }
+  const urls = utils.urlsFromString(card.value.name) || []
+  const value = urls.find((url) => {
+    return url?.includes(card.value.urlPreviewUrl)
+  })
+  return Boolean(value)
+})
+const isLoadingUrlPreview = computed(() => {
+  const isLoading = store.state.urlPreviewLoadingForCardIds.find(cardId => cardId === card.value.id)
+  return Boolean(isLoading)
+})
+const toggleUrlsIsVisible = () => {
+  const isVisible = !urlsIsVisible.value
+  let newName
+  if (isVisible) {
+    newName = utils.addHiddenQueryStringToURLs(name.value)
+  } else {
+    newName = utils.removeHiddenQueryStringFromURLs(name.value)
+  }
+  updateCardName(newName)
+}
 const removeUrlPreview = () => {
   const cardId = card.value.id || prevCardId
   const update = {
@@ -1192,65 +962,342 @@ const removeUrlPreview = () => {
   store.dispatch('currentConnections/updatePaths', { cardId: card.value.id, shouldUpdateApi: true })
   store.dispatch('currentCards/updateDimensions', { cards: [card.value] })
 }
+
+// media
+
+const urlIsAudio = computed(() => utils.urlIsAudio(url.value))
+const cardHasMedia = computed(() => Boolean(state.formats.image || state.formats.video || state.formats.audio))
+const addImageOrFile = async (file) => {
+  const cardId = card.value.id
+  const spaceId = store.state.currentSpace.id
+  // remove existing image url
+  const prevImageOrFile = state.formats.image || state.formats.video || state.formats.file
+  if (prevImageOrFile) {
+    const newName = name.value.replace(prevImageOrFile, '')
+    updateCardName(newName)
+  }
+  // add new image or file url
+  store.commit('triggerUploadComplete', {
+    cardId,
+    spaceId,
+    url: file.url
+  })
+  await nextTick()
+  updateMediaUrls()
+}
+const updateMediaUrls = () => {
+  const urls = utils.urlsFromString(card.value.name)
+  state.formats.image = ''
+  state.formats.video = ''
+  state.formats.audio = ''
+  state.formats.link = ''
+  if (!urls) { return }
+  if (!urls.length) { return }
+  urls.forEach(url => {
+    if (utils.urlIsImage(url)) {
+      state.formats.image = url
+    } else if (utils.urlIsVideo(url)) {
+      state.formats.video = url
+    } else if (utils.urlIsAudio(url)) {
+      state.formats.audio = url
+    } else if (utils.urlIsFile(url)) {
+      state.formats.file = url
+    } else {
+      state.formats.link = url
+    }
+  })
+}
+const toggleImagePickerIsVisible = () => {
+  const isVisible = state.imagePickerIsVisible
+  closeDialogs()
+  state.imagePickerIsVisible = !isVisible
+  state.initialSearch = normalizedName.value
+}
+
+// upload
+
+const cardPendingUpload = computed(() => {
+  const pendingUploads = store.state.upload.pendingUploads
+  return pendingUploads.find(upload => upload.cardId === card.value.id)
+})
+const uploadFile = async (file) => {
+  if (!currentUserIsSignedIn.value) {
+    state.error.signUpToUpload = true
+    return
+  }
+  try {
+    await store.dispatch('upload/uploadFile', { file, cardId: card.value.id })
+  } catch (error) {
+    console.warn('🚒', error)
+    if (error.type === 'sizeLimit') {
+      state.error.sizeLimit = true
+    } else {
+      state.error.unknownUploadError = true
+    }
+  }
+}
+
+// merge split
+
+const updateNameSplitIntoCardsCount = () => {
+  const isPreview = true
+  const newCards = splitCards(null, isPreview)
+  const count = newCards.length
+  if (count > 1) {
+    state.nameSplitIntoCardsCount = count
+  } else {
+    state.nameSplitIntoCardsCount = 0
+  }
+}
+const splitCards = (event, isPreview) => {
+  const prevName = (state.pastedName || name.value).trim()
+  const cardNames = utils.splitCardNameByParagraphAndSentence(prevName)
+  const user = store.state.currentUser
+  // create new split cards
+  let newCards = cardNames.map((cardName, index) => {
+    const indentAmount = 50
+    const indentLevel = utils.numberOfLeadingTabs(cardName) || utils.numberOfLeadingDoubleSpaces(cardName)
+    const indentX = indentLevel * indentAmount
+    let id = nanoid()
+    if (index === 0) {
+      id = card.value.id
+    }
+    const newCard = {
+      id,
+      name: cardName.trim(),
+      x: card.value.x + indentX,
+      y: card.value.y,
+      frameId: card.value.frameId,
+      backgroundColor: card.value.backgroundColor,
+      maxWidth: user.cardSettingsMaxCardWidth
+    }
+    return newCard
+  })
+  if (isPreview) { return newCards }
+  state.pastedName = ''
+  updateCardName(newCards[0].name)
+  store.dispatch('history/resume')
+  store.dispatch('history/add', { cards: newCards, useSnapshot: true })
+  store.dispatch('history/pause')
+  newCards.shift()
+  addSplitCards(newCards)
+}
+const addSplitCards = async (newCards) => {
+  const spaceBetweenCards = 12
+  let prevCard = utils.clone(card.value)
+  store.dispatch('currentCards/addMultiple', { cards: newCards })
+  // return
+  await nextTick()
+
+  // update y position
+  newCards = newCards.forEach(card => {
+    const element = document.querySelector(`article [data-card-id="${prevCard.id}"]`)
+    const prevCardRect = element.getBoundingClientRect()
+    card.y = prevCard.y + (prevCardRect.height * store.getters.spaceCounterZoomDecimal) + spaceBetweenCards
+    console.log('🫐🫐', prevCard.name, prevCard.y, '🍌', (prevCardRect.height * store.getters.spaceCounterZoomDecimal), card.y, card.id)
+    // debugger
+    // card = {
+    //   id: card.id,
+    //   y: card.y,
+    // }
+    store.dispatch('currentCards/update', card)
+    store.commit('triggerUpdateUrlPreview', card.id)
+
+    // return card
+    prevCard = card
+
+    // newCards.forEach(card => {
+    //   // card = utils.updateCardDimensions(card)
+    //   console.log('🏎️🏎️🏎️',card.name, card)
+    //   card = {
+    //     name: card.name,
+    //     id: card.id,
+    //     y: card.y,
+    //     width: card.width,
+    //     height: card.height,
+    //     urlPreviewIsVisible: true
+    //   }
+    //   store.dispatch('currentCards/update', card)
+    //   store.commit('triggerUpdateUrlPreview', card.id)
+    // })
+    store.dispatch('closeAllDialogs')
+  })
+}
+
+// copy paste
+
+const updatePastedName = (event) => {
+  const files = event.clipboardData.files
+  if (files.length) {
+    uploadFile(files[0])
+  } else {
+    const text = event.clipboardData.getData('text')
+    state.pastedName = text
+  }
+  state.wasPasted = true
+  store.dispatch('currentCards/updateURLQueryStrings', { cardId: card.value.id })
+}
+
+// connections
+
+const updatePaths = async () => {
+  await nextTick()
+  store.dispatch('currentConnections/updatePaths', { cardId: card.value.id, shouldUpdateApi: true })
+}
+
+// line break
+
+const checkIfIsInsertLineBreak = (event) => {
+  const lineBreakInserted = event.ctrlKey || event.altKey
+  if (!lineBreakInserted) {
+    state.insertedLineBreak = false
+  }
+}
+const conditionalInsertLineBreak = (event) => {
+  const shouldAddChildCard = store.state.currentUser.cardSettingsShiftEnterShouldAddChildCard
+  if (shouldAddChildCard) { return }
+  insertLineBreak(event)
+}
+const insertLineBreak = (event) => {
+  const position = nameElement.value.selectionEnd
+  let newName = card.value.name
+  newName = newName.substring(0, position) + '\n' + name.value.substring(position)
+  setTimeout(() => {
+    setSelectionRange(position + 1, position + 1)
+  })
+  state.insertedLineBreak = true
+  updateCardName(newName)
+}
+
+// Comment
+
+const addCommentClosingBrackets = async () => {
+  const cursorStart = selectionStartPosition()
+  const previousCharacter = name.value[cursorStart - 1]
+  if (previousCharacter === '(') {
+    const newName = `${name.value.substring(0, cursorStart)}))${name.value.substring(cursorStart)}`
+    updateCardName(newName)
+    await nextTick()
+    setSelectionRange(cursorStart, cursorStart)
+  }
+}
+
+// Pickers
+
+const updatePicker = (event) => {
+  const cursorStart = selectionStartPosition()
+  const previousCharacter = name.value[cursorStart - 1]
+  const previousCharacterIsBlank = utils.hasBlankCharacters(previousCharacter)
+  const key = event.key
+  const keyIsArrowUpOrDown = key === 'ArrowDown' || key === 'ArrowUp'
+  const keyIsLettterOrNumber = key.length === 1
+  const isInsideTagBrackets = isCursorInsideTagBrackets()
+  const isInsideSlashCommand = isCursorInsideSlashCommand()
+  if (keyIsArrowUpOrDown) { return }
+  if (key === '(') {
+    addCommentClosingBrackets()
+  }
+  if (utils.hasBlankCharacters(key)) {
+    hideSpacePicker()
+  } else if (key === '/' && previousCharacterIsBlank) {
+    showSpacePicker()
+  } else if (cursorStart === 0) {
+    return
+  } else if (keyIsLettterOrNumber && isInsideSlashCommand) {
+    showSpacePicker()
+  } else if (key === '[' && previousCharacter === '[') {
+    showTagPicker()
+    addTagClosingBrackets()
+  } else if (keyIsLettterOrNumber && isInsideTagBrackets) {
+    showTagPicker()
+  }
+  checkIfIsInsertLineBreak(event)
+}
+const isCursorInsideSlashCommand = () => {
+  const text = slashTextToCursor()
+  if (utils.hasBlankCharacters(text)) { return }
+  const characterBeforeSlash = name.value.charAt(slashTextPosition() - 1)
+  if (text && !characterBeforeSlash) { return true }
+  const characterBeforeSlashIsBlank = utils.hasBlankCharacters(characterBeforeSlash)
+  const textIsValid = !utils.hasBlankCharacters(text)
+  return textIsValid && characterBeforeSlashIsBlank
+}
+const replaceSlashCommandWithSpaceUrl = async (space) => {
+  let newName = card.value.name
+  let position = slashTextPosition()
+  const spaceUrl = consts.kinopioDomain() + '/' + space.url + ' '
+  const start = newName.substring(0, position)
+  const end = newName.substring(position + slashText().length, newName.length)
+  newName = start + spaceUrl + end
+  updateCardName(newName)
+  position = position + spaceUrl.length + 1
+  hideSpacePicker()
+  await nextTick()
+  focusName(position)
+  store.commit('shouldPreventNextEnterKey', false)
+  store.dispatch('currentCards/update', {
+    id: card.value.id,
+    shouldShowOtherSpacePreviewImage: true
+  })
+}
+
+// space picker
+
+const showSpacePicker = () => {
+  closeDialogs()
+  const nameRect = nameElement.value.getBoundingClientRect()
+  state.space.pickerPosition = {
+    top: nameRect.height - 2
+  }
+  state.space.pickerIsVisible = true
+}
+const slashText = () => {
+  const cursorStart = selectionStartPosition()
+  const start = slashTextToCursor() // /txt|
+  let end = name.value.substring(cursorStart, name.value.length) // |abc xyz
+  end = utils.splitByBlankCharacters(end)[0]
+  return start + end
+}
+const slashTextToCursor = () => {
+  const cursorStart = selectionStartPosition()
+  const textPosition = slashTextPosition()
+  const text = name.value.substring(textPosition, cursorStart)
+  return text
+}
+const slashTextPosition = () => {
+  const cursorStart = selectionStartPosition()
+  let text = name.value.substring(0, cursorStart)
+  const textPosition = text.lastIndexOf('/')
+  if (textPosition === -1) { return }
+  return textPosition
+}
+const updateSpacePickerSearch = () => {
+  if (!state.space.pickerIsVisible) { return }
+  const text = slashText()
+  state.space.pickerSearch = text.substring(1, text.length)
+}
+const checkIfShouldHideSpacePicker = () => {
+  if (!state.space.pickerIsVisible) { return }
+  if (!isCursorInsideSlashCommand()) {
+    hideSpacePicker()
+  }
+}
+const checkIfShouldShowSpacePicker = () => {
+  if (isCursorInsideSlashCommand()) {
+    showSpacePicker()
+  } else {
+    hideSpacePicker()
+  }
+}
+
+// touch mobile
+
 const resetPinchCounterZoomDecimal = () => {
   store.commit('pinchCounterZoomDecimal', 1)
 }
 const updatePinchCounterZoomDecimal = () => {
   store.commit('pinchCounterZoomDecimal', utils.pinchCounterZoomDecimal())
 }
-const resetTextareaHeight = () => {
-  if (!props.visible) { return }
-  nameElement.value.style.height = 'initial'
-}
-const showCard = async (cardId) => {
-  await nextTick()
-  broadcastShowCardDetails()
-  clearErrors()
-  updatePinchCounterZoomDecimal()
-  scrollIntoViewAndFocus()
-  updatePreviousTags()
-  updateNameSplitIntoCardsCount()
-  resetTextareaHeight()
-  await nextTick()
-  startOpening()
-  const item = store.getters['currentCards/byId'](cardId)
-  store.dispatch('checkIfItemShouldIncreasePageSize', item)
-  state.previousSelectedTag = {}
-  updateMediaUrls()
-  const connections = store.getters['currentConnections/byCardId'](cardId)
-  store.commit('updateCurrentCardConnections', connections)
-  prevCardName = card.value.name
-  store.dispatch('history/pause')
-  textareaSizes()
-}
-const closeCard = async () => {
-  const element = nameElement.value
-  element.blur()
-  store.commit('triggerHideTouchInterface')
-  const cardId = prevCardId
-  const item = store.getters['currentCards/byId'](cardId)
-  closeDialogs(true)
-  cancelOpening()
-  store.dispatch('currentSpace/removeUnusedTagsFromCard', cardId)
-  store.commit('updateCurrentCardConnections')
-  store.commit('triggerUpdateHeaderAndFooterPosition')
-  store.commit('shouldPreventNextEnterKey', false)
-  if (!item) { return }
-  const cardHasName = Boolean(item.name)
-  const cardHasPendingUpload = store.getters['upload/hasPendingUploadForCardId'](cardId)
-  if (!cardHasName && !cardHasPendingUpload) {
-    store.dispatch('currentCards/remove', { id: cardId })
-  }
-  store.dispatch('updatePageSizes')
-  await nextTick()
-  updateDimensions(cardId)
-  store.dispatch('checkIfItemShouldIncreasePageSize', item)
-  store.dispatch('history/resume')
-  if (item.name || prevCardName) {
-    store.dispatch('history/add', { cards: [item], useSnapshot: true })
-  }
-}
-
 </script>
 
 <template lang="pug">
@@ -1354,7 +1401,7 @@ dialog.card-details(v-if="visible" :open="visible" ref="dialogElement" @click.le
           button(@click.left.stop="toggleShouldShowItemActions" :class="{active : shouldShowItemActions}" title="More Options")
             img.icon.down-arrow.button-down-arrow(src="@/assets/down-arrow.svg")
       //- Share
-      .button-wrap.share-button-wrap(v-if="isName" @click.left.stop="toggleShareCardIsVisible" )
+      .button-wrap.share-button-wrap(v-if="name" @click.left.stop="toggleShareCardIsVisible" )
         button(:class="{active: state.shareCardIsVisible}")
           span Share
         ShareCard(:visible="state.shareCardIsVisible" :card="card" :isReadOnly="!canEditCard")
