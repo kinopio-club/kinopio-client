@@ -193,7 +193,7 @@ span.name-segment(:data-segment-types="dataMarkdownType" :data-tag-color="dataTa
     word-break break-word
     white-space pre-wrap
     a
-      color var(--text-link)
+      color var(--text-link) !important
       text-decoration underline
       text-decoration-thickness 1px // for firefox
       -webkit-touch-callout none // for ios
