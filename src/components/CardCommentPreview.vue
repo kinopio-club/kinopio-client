@@ -98,5 +98,5 @@ const urlPreviewImage = computed(() => {
     background linear-gradient(transparent, var(--secondary-hover-background))
     height 8px
   .card-image
-    border-radius var(--small-entity-radius)
+    border-radius var(--entity-radius)
 </style>
