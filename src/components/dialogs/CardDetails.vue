@@ -1086,42 +1086,19 @@ const addSplitCards = async (newCards) => {
   const spaceBetweenCards = 12
   let prevCard = utils.clone(card.value)
   store.dispatch('currentCards/addMultiple', { cards: newCards })
-  // return
-  await nextTick()
-
-  // update y position
-  newCards = newCards.forEach(card => {
-    const element = document.querySelector(`article [data-card-id="${prevCard.id}"]`)
-    const prevCardRect = element.getBoundingClientRect()
-    card.y = prevCard.y + (prevCardRect.height * store.getters.spaceCounterZoomDecimal) + spaceBetweenCards
-    console.log('🫐🫐', prevCard.name, prevCard.y, '🍌', (prevCardRect.height * store.getters.spaceCounterZoomDecimal), card.y, card.id)
-    // debugger
-    // card = {
-    //   id: card.id,
-    //   y: card.y,
-    // }
-    store.dispatch('currentCards/update', card)
-    store.commit('triggerUpdateUrlPreview', card.id)
-
-    // return card
-    prevCard = card
-
-    // newCards.forEach(card => {
-    //   // card = utils.updateCardDimensions(card)
-    //   console.log('🏎️🏎️🏎️',card.name, card)
-    //   card = {
-    //     name: card.name,
-    //     id: card.id,
-    //     y: card.y,
-    //     width: card.width,
-    //     height: card.height,
-    //     urlPreviewIsVisible: true
-    //   }
-    //   store.dispatch('currentCards/update', card)
-    //   store.commit('triggerUpdateUrlPreview', card.id)
-    // })
-    store.dispatch('closeAllDialogs')
-  })
+  store.dispatch('closeAllDialogs')
+  // update y positions
+  // wait for cards to be added to dom
+  setTimeout(() => {
+    for (let newCard of newCards) {
+      const element = document.querySelector(`article [data-card-id="${prevCard.id}"]`)
+      const prevCardRect = element.getBoundingClientRect()
+      newCard.y = prevCard.y + (prevCardRect.height * store.getters.spaceCounterZoomDecimal) + spaceBetweenCards
+      store.dispatch('currentCards/update', newCard)
+      store.commit('triggerUpdateUrlPreview', newCard.id)
+      prevCard = newCard
+    }
+  }, 150)
 }
 
 // copy paste
