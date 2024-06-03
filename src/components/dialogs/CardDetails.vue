@@ -374,7 +374,10 @@ const closeCard = async () => {
 
 // name
 
-const textareaSizes = () => {
+const textareaSizes = async () => {
+  await nextTick()
+  await nextTick()
+  await nextTick()
   const element = dialogElement.value
   let textarea = element.querySelector('textarea')
   let modifier = 0
