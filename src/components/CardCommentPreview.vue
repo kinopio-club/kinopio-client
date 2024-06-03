@@ -3,6 +3,7 @@ import { reactive, computed, onMounted, onBeforeUnmount, onUnmounted, defineProp
 import { useStore } from 'vuex'
 
 import UserLabelInline from '@/components/UserLabelInline.vue'
+import NameSegment from '@/components/NameSegment.vue'
 import utils from '@/utils.js'
 
 const store = useStore()
@@ -21,7 +22,7 @@ const styles = computed(() => {
     transform: `scale(${zoom})`
   }
 })
-const truncatedName = computed(() => utils.truncated(props.card.name))
+
 const createdByUser = computed(() => {
   // same as userDetailsWrap.cardCreatedByUser
   const userId = props.card.userId
@@ -35,6 +36,21 @@ const createdByUser = computed(() => {
   return user
 })
 const relativeDate = computed(() => utils.shortRelativeTime(props.card.nameUpdatedAt || props.card.updatedAt))
+
+// name
+
+const normalizedCard = computed(() => {
+  let card = utils.clone(props.card)
+  card = store.getters['currentCards/nameSegments'](card)
+  return card
+})
+const isStrikeThrough = computed(() => {
+  return props.card.name.startsWith('[x]')
+})
+const urlPreviewImage = computed(() => {
+  if (!props.card.urlPreviewIsVisible) { return }
+  return props.card.urlPreviewImage
+})
 </script>
 
 <template lang="pug">
@@ -44,8 +60,11 @@ const relativeDate = computed(() => utils.shortRelativeTime(props.card.nameUpdat
     span.badge.status.inline-badge
       img.icon.time(src="@/assets/time.svg")
       span {{ relativeDate }}
-  p {{ truncatedName }}
-
+  template(v-for="segment in normalizedCard.nameSegments")
+    img.card-image(v-if="segment.isImage" :src="segment.url")
+    img.card-image(v-if="urlPreviewImage" :src="urlPreviewImage")
+    NameSegment(:segment="segment" :isStrikeThrough="isStrikeThrough")
+  .bottom-gradient
 </template>
 
 <style lang="stylus">
@@ -58,6 +77,8 @@ const relativeDate = computed(() => utils.shortRelativeTime(props.card.nameUpdat
   z-index var(--max-z)
   border-radius var(--entity-radius)
   pointer-events none
+  max-height 125px
+  overflow hidden
   .row
     margin-top 1px
     margin-bottom 6px
@@ -66,4 +87,16 @@ const relativeDate = computed(() => utils.shortRelativeTime(props.card.nameUpdat
     padding-top 0
     word-wrap break-word
     overflow-wrap break-word
+  .tag
+    display inline-block
+    margin 0
+  .bottom-gradient
+    position absolute
+    width 100%
+    left 0
+    bottom 0
+    background linear-gradient(transparent, var(--secondary-hover-background))
+    height 8px
+  .card-image
+    border-radius var(--small-entity-radius)
 </style>
