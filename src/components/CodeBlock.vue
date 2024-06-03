@@ -162,10 +162,10 @@ const copy = async (event) => {
     vertical-align 0
     word-wrap none
     font-size 12px
-    font-family var(--code-font)
+    font-family var(--mono-font)
     span
       font-size 12px
-      font-family var(--code-font)
+      font-family var(--mono-font)
   .loader
     width 12px !important
     height 12px !important

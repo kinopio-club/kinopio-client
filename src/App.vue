@@ -704,7 +704,7 @@ hr
 
 code,
 pre
-  font-family var(--code-font)
+  font-family var(--mono-font)
   font-size 13px
 
 p,
