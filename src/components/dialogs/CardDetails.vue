@@ -37,9 +37,9 @@ const nameElement = ref(null)
 
 onMounted(() => {
   store.subscribe((mutation, state) => {
-    if (mutation.type === 'triggerUnloadPage' && props.visible) {
+    if (mutation.type === 'triggerUnloadPage' && visible.value) {
       closeCard()
-    } else if (mutation.type === 'triggerSplitCard' && props.visible) {
+    } else if (mutation.type === 'triggerSplitCard' && visible.value) {
       const cardId = mutation.payload
       if (cardId !== card.value.id) { return }
       splitCards()
@@ -58,15 +58,6 @@ onMounted(() => {
       updateCardName(name)
     }
   })
-})
-
-const props = defineProps({
-  visible: Boolean
-})
-watch(() => props.visible, (value, prevValue) => {
-  if (!value) {
-    closeCard()
-  }
 })
 
 const state = reactive({
@@ -112,8 +103,18 @@ const state = reactive({
   shareCardIsVisible: false
 })
 
-const parentElement = computed(() => dialogElement.value)
+const card = computed(() => {
+  const cardId = store.state.cardDetailsIsVisibleForCardId
+  return store.getters['currentCards/byId'](cardId) || {}
+})
 const visible = computed(() => utils.objectHasKeys(card.value))
+watch(() => visible.value, (value, prevValue) => {
+  if (!value) {
+    closeCard()
+  }
+})
+
+const parentElement = computed(() => dialogElement.value)
 const closeCardAndFocus = (event) => {
   const pickersIsVisible = state.tag.pickerIsVisible || state.space.pickerIsVisible
   if (pickersIsVisible) {
@@ -178,7 +179,7 @@ const styles = computed(() => {
   return { transform, left, top }
 })
 const updateDialogHeight = async () => {
-  if (!props.visible) { return }
+  if (!visible.value) { return }
   await nextTick()
   let element = dialogElement.value
   state.dialogHeight = utils.elementHeight(element)
@@ -267,10 +268,6 @@ const broadcastShowCardDetails = () => {
 
 // card
 
-const card = computed(() => {
-  const cardId = store.state.cardDetailsIsVisibleForCardId
-  return store.getters['currentCards/byId'](cardId) || {}
-})
 const updateCompositionEventEndTime = (event) => {
   // for non-latin input
   // https://stackoverflow.com/questions/51226598/what-is-javascripts-compositionevent-please-give-examples
@@ -377,7 +374,10 @@ const closeCard = async () => {
 
 // name
 
-const textareaSizes = () => {
+const textareaSizes = async () => {
+  await nextTick()
+  await nextTick()
+  await nextTick()
   const element = dialogElement.value
   let textarea = element.querySelector('textarea')
   let modifier = 0
@@ -387,7 +387,7 @@ const textareaSizes = () => {
   textarea.style.height = textarea.scrollHeight + modifier + 'px'
 }
 const resetTextareaHeight = () => {
-  if (!props.visible) { return }
+  if (!visible.value) { return }
   nameElement.value.style.height = 'initial'
 }
 const focusName = async (position) => {
