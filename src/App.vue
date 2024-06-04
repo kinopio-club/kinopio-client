@@ -278,7 +278,7 @@ const updateMetaRSSFeed = () => {
 )
   base(v-if="!isSpacePage" target="_blank")
   template(v-if="isSpacePage")
-    OutsideSpaceBackground
+    //- OutsideSpaceBackground
     SpaceBackground
     ItemsLocked
     MagicPaint
