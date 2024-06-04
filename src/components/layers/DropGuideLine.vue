@@ -33,14 +33,11 @@ onMounted(() => {
   remoteCanvas = document.getElementById('remote-drop-guide-line')
   context = canvas.getContext('2d')
   remoteContext = remoteCanvas.getContext('2d')
-  updateCanvasSize()
-  window.addEventListener('load', updateCanvasSize)
-  window.addEventListener('resize', updateCanvasSize)
 })
 
-onBeforeUnmount(() => {
-  window.removeEventListener('load', updateCanvasSize)
-  window.removeEventListener('resize', updateCanvasSize)
+const state = reactive({
+  pinchZoomOffsetTop: 0,
+  pinchZoomOffsetLeft: 0
 })
 
 const props = defineProps({
@@ -49,11 +46,18 @@ const props = defineProps({
   uploadIsDraggedOver: Boolean
 })
 
-// init painting
+// styles
 
-const viewportWidth = computed(() => store.state.viewportWidth)
-const viewportHeight = computed(() => store.state.viewportHeight)
 const currentUserColor = computed(() => store.state.currentUser.color)
+const pageHeight = computed(() => store.state.pageHeight)
+const pageWidth = computed(() => store.state.pageWidth)
+const viewportHeight = computed(() => store.state.viewportHeight)
+const viewportWidth = computed(() => store.state.viewportWidth)
+const spaceCounterZoomDecimal = computed(() => store.getters.spaceCounterZoomDecimal)
+const spaceZoomDecimal = computed(() => store.getters.spaceZoomDecimal)
+const canvasStyles = computed(() => {
+  return { top: state.pinchZoomOffsetTop + 'px', left: state.pinchZoomOffsetLeft + 'px' }
+})
 
 // curve
 
@@ -197,18 +201,6 @@ const stopPaintingGuides = () => {
   context.clearRect(0, 0, canvas.width, canvas.height)
   broadcastStopPaintingGuide()
 }
-const updateCanvasSize = () => {
-  canvas.width = viewportWidth.value * window.devicePixelRatio
-  canvas.height = viewportHeight.value * window.devicePixelRatio
-  canvas.style.width = viewportWidth.value + 'px'
-  canvas.style.height = viewportHeight.value + 'px'
-  context.scale(window.devicePixelRatio, window.devicePixelRatio)
-  remoteCanvas.width = viewportWidth.value * window.devicePixelRatio
-  remoteCanvas.height = viewportHeight.value * window.devicePixelRatio
-  remoteCanvas.style.width = viewportWidth.value + 'px'
-  remoteCanvas.style.height = viewportHeight.value + 'px'
-  remoteContext.scale(window.devicePixelRatio, window.devicePixelRatio)
-}
 const broadcastCursorAndCurve = ({ startPoint, color }) => {
   const canEditSpace = store.getters['currentUser/canEditSpace']()
   if (!canEditSpace) { return }
@@ -232,8 +224,16 @@ const broadcastStopPaintingGuide = () => {
 
 <template lang="pug">
 aside
-  canvas#drop-guide-line.drop-guide-line
-  canvas#remote-drop-guide-line.remote-drop-guide-line
+  canvas#drop-guide-line.drop-guide-line(
+    :width="viewportWidth"
+    :height="viewportHeight"
+    :style="canvasStyles"
+  )
+  canvas#remote-drop-guide-line.remote-drop-guide-line(
+    :width="viewportWidth"
+    :height="viewportHeight"
+    :style="canvasStyles"
+  )
 </template>
 
 <style lang="stylus" scoped>
