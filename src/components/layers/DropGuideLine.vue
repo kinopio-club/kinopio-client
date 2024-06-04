@@ -48,28 +48,15 @@ const props = defineProps({
   currentCursorInSpace: Object,
   uploadIsDraggedOver: Boolean
 })
-watch(() => props.uploadIsDraggedOver, (value, prevValue) => {
-  if (value) {
-    startPaintingGuides()
-  } else {
-    stopPaintingGuides()
-  }
-})
+
+// init painting
 
 const viewportWidth = computed(() => store.state.viewportWidth)
 const viewportHeight = computed(() => store.state.viewportHeight)
 const currentUserColor = computed(() => store.state.currentUser.color)
 
-const updateRemotePosition = (position) => {
-  const zoom = store.getters.spaceZoomDecimal
-  const space = document.getElementById('space')
-  const rect = space.getBoundingClientRect()
-  position = {
-    x: (position.x * zoom) + rect.x,
-    y: (position.y * zoom) + rect.y
-  }
-  return position
-}
+// curve
+
 const createCurve = (startPoint) => {
   const numberOfControlPoints = 4
   const lineSegmentLength = lineWidth / numberOfControlPoints
@@ -118,6 +105,16 @@ const paintCurve = (context, curve) => {
 
 // Remote Painting
 
+const updateRemotePosition = (position) => {
+  const zoom = store.getters.spaceZoomDecimal
+  const space = document.getElementById('space')
+  const rect = space.getBoundingClientRect()
+  position = {
+    x: (position.x * zoom) + rect.x,
+    y: (position.y * zoom) + rect.y
+  }
+  return position
+}
 const addRemoteCurve = (curve) => {
   remoteDropGuideLines.push(curve)
 }
@@ -157,6 +154,13 @@ const remotePaintGuidesFrame = () => {
 
 // Painting
 
+watch(() => props.uploadIsDraggedOver, (value, prevValue) => {
+  if (value) {
+    startPaintingGuides()
+  } else {
+    stopPaintingGuides()
+  }
+})
 const paintGuides = () => {
   context.clearRect(0, 0, canvas.width, canvas.height)
   context.strokeStyle = currentUserColor.value
