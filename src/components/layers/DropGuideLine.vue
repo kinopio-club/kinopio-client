@@ -43,21 +43,14 @@ const state = reactive({
 const props = defineProps({
   currentCursor: Object,
   currentCursorInSpace: Object,
-  uploadIsDraggedOver: Boolean
-})
+  uploadIsDraggedOver: Boolean,
+  viewportWidth: Number,
+  viewportHeight: Number,
+  canvasStyles: Object
 
-// styles
+})
 
 const currentUserColor = computed(() => store.state.currentUser.color)
-const pageHeight = computed(() => store.state.pageHeight)
-const pageWidth = computed(() => store.state.pageWidth)
-const viewportHeight = computed(() => store.state.viewportHeight)
-const viewportWidth = computed(() => store.state.viewportWidth)
-const spaceCounterZoomDecimal = computed(() => store.getters.spaceCounterZoomDecimal)
-const spaceZoomDecimal = computed(() => store.getters.spaceZoomDecimal)
-const canvasStyles = computed(() => {
-  return { top: state.pinchZoomOffsetTop + 'px', left: state.pinchZoomOffsetLeft + 'px' }
-})
 
 // curve
 
@@ -225,14 +218,14 @@ const broadcastStopPaintingGuide = () => {
 <template lang="pug">
 aside
   canvas#drop-guide-line.drop-guide-line(
-    :width="viewportWidth"
-    :height="viewportHeight"
-    :style="canvasStyles"
+    :width="props.viewportWidth"
+    :height="props.viewportHeight"
+    :style="props.canvasStyles"
   )
   canvas#remote-drop-guide-line.remote-drop-guide-line(
-    :width="viewportWidth"
-    :height="viewportHeight"
-    :style="canvasStyles"
+    :width="props.viewportWidth"
+    :height="props.viewportHeight"
+    :style="props.canvasStyles"
   )
 </template>
 

@@ -726,6 +726,9 @@ aside
     :currentCursor="state.currentCursor"
     :currentCursorInSpace="state.currentCursorInSpace"
     :uploadIsDraggedOver="state.uploadIsDraggedOver"
+    :viewportWidth="viewportWidth"
+    :viewportHeight="viewportHeight"
+    :canvasStyles="canvasStyles"
   )
 </template>
 
