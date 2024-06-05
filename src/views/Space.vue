@@ -42,7 +42,7 @@ onMounted(() => {
   window.addEventListener('mousemove', interact)
   window.addEventListener('touchmove', interact)
   window.addEventListener('mouseup', stopInteractions)
-  window.addEventListener('touchend', stopInteractions)
+  window.addEventListener('touchend', handleTouchEnd)
   window.addEventListener('resize', updatePageSizesDebounced)
   // when a card is added through Add.vue in a sharesheet with the space open behind it
   window.addEventListener('message', addCardFromOutsideAppContext)
@@ -81,7 +81,7 @@ onBeforeUnmount(() => {
   window.removeEventListener('mousemove', interact)
   window.removeEventListener('touchmove', interact)
   window.removeEventListener('mouseup', stopInteractions)
-  window.removeEventListener('touchend', stopInteractions)
+  window.removeEventListener('touchend', handleTouchEnd)
   window.removeEventListener('resize', updatePageSizesDebounced)
   window.removeEventListener('unload', unloadPage)
   window.removeEventListener('message', addCardFromOutsideAppContext)
@@ -146,7 +146,8 @@ const unloadPage = () => {
 
 // page size
 
-const updatePageSizesDebounced = debounce(() => {
+const updatePageSizesDebounced = debounce((event) => {
+  if (utils.isMultiTouch(event)) { return }
   updatePageSizes()
 }, 500)
 const updatePageSizes = async () => {
@@ -435,8 +436,12 @@ const shouldCancelInteraction = (event) => {
   return Boolean(fromDialog || fromHeader || fromFooter)
 }
 
-// 💣 stopInteractions and Space/stopPainting are run on all mouse and touch end events
+// 💣 stopInteractions and Space/stopPainting are run after all mouse and touch end events
 
+const handleTouchEnd = (event) => {
+  updatePageSizes()
+  stopInteractions(event)
+}
 const stopInteractions = async (event) => {
   console.log('💣 stopInteractions')
   const isCardsSelected = store.state.currentDraggingCardId || store.state.multipleCardsSelectedIds.length
