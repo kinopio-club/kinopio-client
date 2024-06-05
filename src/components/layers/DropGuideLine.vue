@@ -35,11 +35,6 @@ onMounted(() => {
   remoteContext = remoteCanvas.getContext('2d')
 })
 
-const state = reactive({
-  pinchZoomOffsetTop: 0,
-  pinchZoomOffsetLeft: 0
-})
-
 const props = defineProps({
   currentCursor: Object,
   currentCursorInSpace: Object,
