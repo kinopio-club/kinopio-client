@@ -53,11 +53,6 @@ onMounted(() => {
   window.addEventListener('offline', updateIsOnline)
 })
 
-const state = reactive({
-  isPinchZooming: false,
-  isTouchScrolling: false
-})
-
 const spaceName = computed(() => store.state.currentSpace.name)
 const isSpacePage = computed(() => store.getters.isSpacePage)
 
@@ -117,11 +112,11 @@ const touchMove = (event) => {
   const isFromDialog = event.target.closest('dialog')
   if (isFromDialog) { return }
   shouldCancelUndo = true
-  state.isTouchScrolling = true
+  store.commit('isTouchScrolling', true)
 }
 const touchEnd = () => {
   if (!isSpacePage.value) { return }
-  state.isPinchZooming = false
+  store.commit('isPinchZooming', false)
   checkIfInertiaScrollEnd()
   if (shouldCancelUndo) {
     shouldCancelUndo = false
@@ -143,12 +138,12 @@ const scroll = () => {
   store.commit('userHasScrolled', true)
 }
 const cancelTouch = () => {
-  state.isPinchZooming = false
-  state.isTouchScrolling = false
+  store.commit('isPinchZooming', false)
+  store.commit('isTouchScrolling', false)
 }
 const toggleIsPinchZooming = (event) => {
   if (utils.shouldIgnoreTouchInteraction(event)) { return }
-  state.isPinchZooming = true
+  store.commit('isPinchZooming', true)
 }
 const checkIfInertiaScrollEnd = () => {
   if (!utils.isAndroid) { return }
@@ -165,7 +160,7 @@ const checkIfInertiaScrollEnd = () => {
     } else if (prevPosition.left === current.left && prevPosition.top === current.top) {
       clearInterval(inertiaScrollEndIntervalTimer)
       inertiaScrollEndIntervalTimer = null
-      state.isTouchScrolling = false
+      store.commit('isTouchScrolling', false)
     } else {
       prevPosition = current
     }
@@ -285,8 +280,8 @@ const updateMetaRSSFeed = () => {
   //- router-view is Space or Add
   router-view
   template(v-if="isSpacePage")
-    Header(:isPinchZooming="state.isPinchZooming" :isTouchScrolling="state.isTouchScrolling")
-    Footer(:isPinchZooming="state.isPinchZooming" :isTouchScrolling="state.isTouchScrolling")
+    Header
+    Footer
     TagDetails
     UserDetails
     WindowHistoryHandler

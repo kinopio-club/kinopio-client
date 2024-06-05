@@ -105,31 +105,6 @@ onBeforeUnmount(() => {
   clearInterval(updateNotificationsIntervalTimer)
 })
 
-const props = defineProps({
-  isPinchZooming: Boolean,
-  isTouchScrolling: Boolean
-})
-const emit = defineEmits(['updateCount'])
-
-watch(() => props.isPinchZooming, (value, prevValue) => {
-  if (value) {
-    fadeOut()
-    updatePosition()
-  } else {
-    shouldCancelFadeOut = true
-    cancelFadeOut()
-  }
-})
-watch(() => props.isTouchScrolling, (value, prevValue) => {
-  if (value) {
-    fadeOut()
-    updatePosition()
-  } else {
-    shouldCancelFadeOut = true
-    cancelFadeOut()
-  }
-})
-
 const state = reactive({
   aboutIsVisible: false,
   spaceDetailsIsVisible: false,
@@ -152,6 +127,27 @@ const state = reactive({
   sidebarIsVisible: false,
   donateIsVisible: false,
   importIsVisible: false
+})
+
+const isPinchZooming = computed(() => store.state.isPinchZooming)
+watch(() => isPinchZooming.value, (value, prevValue) => {
+  if (value) {
+    fadeOut()
+    updatePosition()
+  } else {
+    shouldCancelFadeOut = true
+    cancelFadeOut()
+  }
+})
+const isTouchScrolling = computed(() => store.state.isTouchScrolling)
+watch(() => isTouchScrolling.value, (value, prevValue) => {
+  if (value) {
+    fadeOut()
+    updatePosition()
+  } else {
+    shouldCancelFadeOut = true
+    cancelFadeOut()
+  }
 })
 
 const importArenaChannelIsVisible = computed(() => store.state.importArenaChannelIsVisible)
