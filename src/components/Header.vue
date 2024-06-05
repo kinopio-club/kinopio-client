@@ -753,12 +753,10 @@ header
       .left
         display flex
         flex-shrink 0
-        @media(max-width 414px)
-          max-width calc(100% - 100px)
       .right
         display flex
         justify-content flex-end
-        flex-shrink 0
+        max-width 100%
 
   nav
     display flex

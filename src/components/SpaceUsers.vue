@@ -63,9 +63,9 @@ const spectators = computed(() => {
 <style lang="stylus">
 .space-users
   display flex
+  width 100%
   > .users
     padding-right 6px
-    max-width 40vw
     display flex
     flex-wrap wrap
     justify-content flex-end
