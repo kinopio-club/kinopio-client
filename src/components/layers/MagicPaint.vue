@@ -87,6 +87,7 @@ onMounted(() => {
   window.addEventListener('touchmove', userScroll) // android fix
   window.addEventListener('load', clearCircles)
   startPostScroll()
+  state.dropGuideLineIsVisible = !utils.isMobile()
 })
 
 onBeforeUnmount(() => {
@@ -263,6 +264,7 @@ const drawCircle = (circle, context, shouldDrawOffscreen) => {
     decay = rateOfIterationDecaySlow
   }
   alpha = alpha || utils.exponentialDecay(iteration, decay)
+  if (alpha < 0.05) { return }
   context.beginPath()
   context.arc(x, y, radius, 0, 2 * Math.PI)
   context.closePath()
@@ -714,13 +716,14 @@ aside
     :height="viewportHeight"
     :data-should-decay-slow="true"
   )
-  DropGuideLine(
-    :currentCursor="state.currentCursor"
-    :currentCursorInSpace="state.currentCursorInSpace"
-    :uploadIsDraggedOver="state.uploadIsDraggedOver"
-    :viewportWidth="viewportWidth"
-    :viewportHeight="viewportHeight"
-  )
+  template(v-if="state.dropGuideLineIsVisible")
+    DropGuideLine(
+      :currentCursor="state.currentCursor"
+      :currentCursorInSpace="state.currentCursorInSpace"
+      :uploadIsDraggedOver="state.uploadIsDraggedOver"
+      :viewportWidth="viewportWidth"
+      :viewportHeight="viewportHeight"
+    )
 </template>
 
 <style lang="stylus" scoped>
