@@ -29,16 +29,22 @@ let ri = Math.floor(Math.random() * 4)
 let gi = Math.floor(Math.random() * 4)
 let bi = Math.floor(Math.random() * 4)
 
+// start, stop
+
 onMounted(() => {
   start()
 })
 onBeforeUnmount(() => {
   cancel()
 })
-
-const spaceZoomDecimal = computed(() => store.getters.spaceZoomDecimal)
-const outsideSpaceBackgroundIsStatic = computed(() => store.state.currentUser.outsideSpaceBackgroundIsStatic)
-
+const isTouching = computed(() => store.state.isPinchZooming || store.state.isTouchScrolling)
+watch(() => isTouching.value, (value, prevValue) => {
+  if (value) {
+    cancel()
+  } else {
+    start()
+  }
+})
 const start = () => {
   updateBackgroundColor()
   colorCycleIteration = 0
@@ -52,6 +58,8 @@ const cancel = () => {
   updateMetaThemeColor(color)
 }
 
+const spaceZoomDecimal = computed(() => store.getters.spaceZoomDecimal)
+const outsideSpaceBackgroundIsStatic = computed(() => store.state.currentUser.outsideSpaceBackgroundIsStatic)
 const styles = computed(() => {
   return {
     backgroundColor: store.state.outsideSpaceBackgroundColor
