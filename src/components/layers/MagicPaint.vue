@@ -343,6 +343,7 @@ const painting = (event) => {
   if (isBoxSelecting.value) { return }
   if (!toolbarIsCard.value) { return }
   if (!isPainting) { return }
+  if (store.state.isPinchZooming) { return }
   if (store.getters.shouldScrollAtEdges(event) && event.cancelable) {
     event.preventDefault() // prevents touch swipe viewport scrolling
   }
@@ -391,6 +392,7 @@ const createPaintingCircles = (event) => {
 const startPainting = (event) => {
   if (isPanning.value) { return }
   if (isBoxSelecting.value) { return }
+  if (store.state.isPinchZooming) { return }
   updateSelectableCardsInViewport()
   updateSelectableBoxes()
   updateSelectableConnectionsInViewport()
