@@ -123,10 +123,6 @@ const viewportHeight = computed(() => store.state.viewportHeight)
 const viewportWidth = computed(() => store.state.viewportWidth)
 const spaceCounterZoomDecimal = computed(() => store.getters.spaceCounterZoomDecimal)
 const spaceZoomDecimal = computed(() => store.getters.spaceZoomDecimal)
-const canvasStyles = computed(() => {
-  return { top: state.pinchZoomOffsetTop + 'px', left: state.pinchZoomOffsetLeft + 'px' }
-})
-
 const updateSelectableCardsInViewport = () => {
   const selectableCards = store.getters['currentCards/isSelectableInViewport']()
   if (!selectableCards) { return }
@@ -697,7 +693,6 @@ aside
     @touchmove="painting"
     :width="viewportWidth"
     :height="viewportHeight"
-    :style="canvasStyles"
     @dragenter="checkIfUploadIsDraggedOver"
     @dragover.prevent="checkIfUploadIsDraggedOver"
     @dragleave="removeUploadIsDraggedOver"
@@ -707,19 +702,16 @@ aside
   canvas#remote-painting.remote-painting(
     :width="viewportWidth"
     :height="viewportHeight"
-    :style="canvasStyles"
     :data-should-decay-slow="true"
   )
   canvas#locking.locking(
     :width="viewportWidth"
     :height="viewportHeight"
-    :style="canvasStyles"
     :data-should-decay-slow="true"
   )
   canvas#initial-circle.initial-circle(
     :width="viewportWidth"
     :height="viewportHeight"
-    :style="canvasStyles"
     :data-should-decay-slow="true"
   )
   DropGuideLine(
@@ -728,7 +720,6 @@ aside
     :uploadIsDraggedOver="state.uploadIsDraggedOver"
     :viewportWidth="viewportWidth"
     :viewportHeight="viewportHeight"
-    :canvasStyles="canvasStyles"
   )
 </template>
 

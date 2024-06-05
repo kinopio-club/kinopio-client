@@ -40,9 +40,7 @@ const props = defineProps({
   currentCursorInSpace: Object,
   uploadIsDraggedOver: Boolean,
   viewportWidth: Number,
-  viewportHeight: Number,
-  canvasStyles: Object
-
+  viewportHeight: Number
 })
 
 const currentUserColor = computed(() => store.state.currentUser.color)
@@ -215,12 +213,10 @@ aside
   canvas#drop-guide-line.drop-guide-line(
     :width="props.viewportWidth"
     :height="props.viewportHeight"
-    :style="props.canvasStyles"
   )
   canvas#remote-drop-guide-line.remote-drop-guide-line(
     :width="props.viewportWidth"
     :height="props.viewportHeight"
-    :style="props.canvasStyles"
   )
 </template>
 
