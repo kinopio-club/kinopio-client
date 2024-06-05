@@ -151,7 +151,6 @@ watch(() => isTouchScrolling.value, (value, prevValue) => {
 })
 
 const importArenaChannelIsVisible = computed(() => store.state.importArenaChannelIsVisible)
-const isPresentationMode = computed(() => store.state.isPresentationMode)
 const kinopioDomain = computed(() => consts.kinopioDomain())
 const userSettingsIsVisible = computed(() => store.state.userSettingsIsVisible)
 const isSpace = computed(() => {
@@ -417,6 +416,7 @@ const toggleOfflineIsVisible = () => {
   store.dispatch('closeAllDialogs')
   store.commit('offlineIsVisible', !isVisible)
 }
+const searchAndFilterTitle = computed(() => `Search and Filter (${utils.metaKey()}-F)`)
 const searchIsVisible = computed(() => store.state.searchIsVisible)
 const toggleSearchIsVisible = () => {
   const isVisible = searchIsVisible.value
@@ -555,6 +555,15 @@ const disablePresentationMode = () => {
   store.commit('isPresentationMode', false)
 }
 
+// presentation mode
+
+const PresentationModeTitle = computed(() => `Presentation Mode (P)`)
+const isPresentationMode = computed(() => store.state.isPresentationMode)
+const togglePresentaitonMode = () => {
+  const value = !isPresentationMode.value
+  store.commit('isPresentationMode', value)
+}
+
 </script>
 
 <template lang="pug">
@@ -608,7 +617,7 @@ header(v-if="isVisible" :style="state.position" :class="{'fade-out': isFadingOut
             //- Search
             .segmented-buttons
               .button-wrap
-                button.search-button(@click.stop="toggleSearchIsVisible" :class="{ active: searchIsVisible || totalFiltersActive || searchResultsCount, 'translucent-button': !shouldIncreaseUIContrast }")
+                button.search-button(@click.stop="toggleSearchIsVisible" :class="{ active: searchIsVisible || totalFiltersActive || searchResultsCount, 'translucent-button': !shouldIncreaseUIContrast }" :title="searchAndFilterTitle")
                   template(v-if="!searchResultsCount")
                     img.icon.search(src="@/assets/search.svg")
                   .badge.search.search-count-badge(v-if="searchResultsCount")
@@ -637,7 +646,7 @@ header(v-if="isVisible" :style="state.position" :class="{'fade-out': isFadingOut
           Share(:visible="state.shareIsVisible")
         //- Notifications
         .button-wrap
-          button(@click.left.stop="toggleNotificationsIsVisible" :class="{active: state.notificationsIsVisible, 'translucent-button': !shouldIncreaseUIContrast}")
+          button(@click.left.stop="toggleNotificationsIsVisible" :class="{active: state.notificationsIsVisible, 'translucent-button': !shouldIncreaseUIContrast}" title="Notifications")
             span {{notificationsUnreadCount}}
             .badge.new-unread-badge.notification-button-badge(v-if="notificationsUnreadCount")
           UserNotifications(:visible="state.notificationsIsVisible" :loading="state.notificationsIsLoading" :notifications="state.notifications" :unreadCount="notificationsUnreadCount" @markAllAsRead="markAllAsRead" @markAsRead="markAsRead")
@@ -691,7 +700,7 @@ header(v-if="isVisible" :style="state.position" :class="{'fade-out': isFadingOut
         Discovery
         //- Sidebar
         .button-wrap
-          button(@click.left.stop="toggleSidebarIsVisible" :class="{active: state.sidebarIsVisible, 'translucent-button': !shouldIncreaseUIContrast}")
+          button(@click.left.stop="toggleSidebarIsVisible" :class="{active: state.sidebarIsVisible, 'translucent-button': !shouldIncreaseUIContrast}" title="Sidebar")
             img.icon.sidebar(src="@/assets/sidebar.svg")
           Sidebar(:visible="state.sidebarIsVisible")
 
@@ -714,6 +723,10 @@ header(v-if="isVisible" :style="state.position" :class="{'fade-out': isFadingOut
           button(@click.left.stop="toggleUpgradeUserIsVisible" :class="{active: state.upgradeUserIsVisible, 'translucent-button': !shouldIncreaseUIContrast}")
             span Upgrade
           UpgradeUser(:visible="state.upgradeUserIsVisible" @closeDialog="closeAllDialogs")
+        //- presentation mode
+        .button-wrap
+          button(:class="{active: isPresentationMode}" @click="togglePresentaitonMode" :title="PresentationModeTitle")
+            img.icon(src="@/assets/presentation.svg")
 
   Toolbar(:visible="isSpace")
   SelectAllBelow

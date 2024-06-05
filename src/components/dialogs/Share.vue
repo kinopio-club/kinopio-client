@@ -173,10 +173,6 @@ const closeDialogs = () => {
 
 // toggles
 
-const isPresentationMode = () => {
-  store.dispatch('closeAllDialogs')
-  store.commit('isPresentationMode', true)
-}
 const triggerSignUpOrInIsVisible = () => {
   store.dispatch('closeAllDialogs')
   store.commit('triggerSignUpOrInIsVisible')
@@ -216,9 +212,6 @@ dialog.share.wide(v-if="props.visible" :open="props.visible" @click.left.stop="c
     .row.title-row
       p Share
       .row
-        button.small-button(@click.left.stop="isPresentationMode" title="Presentation Mode")
-          img.icon(src="@/assets/presentation.svg")
-          span Present
         .button-wrap(v-if="spaceIsRemote")
           button.small-button(@click.left.stop="toggleRssFeedsIsVisible" :class="{ active: state.rssFeedsIsVisible }" title="RSS Feeds")
             span RSS
