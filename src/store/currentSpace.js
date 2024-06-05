@@ -334,6 +334,7 @@ const currentSpace = {
       if (shouldLoadNewHelloSpace) {
         space = cache.updateIdsInSpace(space)
         context.commit('clearSearch', null, { root: true })
+        context.commit('resetPageSizes', null, { root: true })
         context.dispatch('restoreSpaceInChunks', { space })
         context.commit('addUserToSpace', user)
         context.dispatch('updateOtherUsers')
@@ -377,6 +378,7 @@ const currentSpace = {
       const uniqueNewSpace = cache.updateIdsInSpace(space, nullCardUsers)
       context.commit('clearSearch', null, { root: true })
       isLoadingRemoteSpace = false
+      context.commit('resetPageSizes', null, { root: true })
       context.dispatch('restoreSpaceInChunks', { space: uniqueNewSpace })
     },
     createNewJournalSpace: async (context) => {
@@ -402,6 +404,7 @@ const currentSpace = {
       context.commit('shouldResetDimensionsOnLoad', true, { root: true })
       // load space
       isLoadingRemoteSpace = false
+      context.commit('resetPageSizes', null, { root: true })
       context.dispatch('restoreSpaceInChunks', { space })
     },
     createNewInboxSpace: (context, shouldCreateWithoutLoading) => {
@@ -424,6 +427,7 @@ const currentSpace = {
         context.commit('isLoadingSpace', true, { root: true })
         context.commit('clearSearch', null, { root: true })
         isLoadingRemoteSpace = false
+        context.commit('resetPageSizes', null, { root: true })
         context.dispatch('restoreSpaceInChunks', { space })
         nextTick(() => {
           context.dispatch('currentCards/updateDimensions', {}, { root: true })
@@ -467,6 +471,7 @@ const currentSpace = {
       uniqueNewSpace = cache.updateIdsInSpace(space)
       context.commit('clearSearch', null, { root: true })
       isLoadingRemoteSpace = false
+      context.commit('resetPageSizes', null, { root: true })
       context.dispatch('restoreSpaceInChunks', { space: uniqueNewSpace })
       context.dispatch('saveNewSpace')
       context.commit('addNotification', { message: `Space duplicated`, type: 'success' }, { root: true })
@@ -755,6 +760,7 @@ const currentSpace = {
       cachedSpace.id = cachedSpace.id || space.id
       space = utils.normalizeSpace(cachedSpace)
       context.dispatch('clearStateMeta')
+      context.commit('resetPageSizes', null, { root: true })
       // load local space while fetching remote space
       try {
         const [localData, remoteData] = await Promise.all([

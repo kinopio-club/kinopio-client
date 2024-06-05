@@ -1539,7 +1539,6 @@ const store = createStore({
         x: 0, y: 0, width: 500, height: 500
       })
       let itemsRect = utils.pageSizeFromItems(items)
-      context.commit('resetPageSizes')
       context.commit('updatePageSizes', itemsRect)
     },
     checkIfItemShouldIncreasePageSize: (context, item) => {
