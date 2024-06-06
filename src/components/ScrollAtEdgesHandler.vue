@@ -42,17 +42,7 @@ onBeforeUnmount(() => {
   window.removeEventListener('touchend', stopInteractions)
 })
 
-const viewportHeight = computed(() => store.state.viewportHeight)
-const viewportWidth = computed(() => store.state.viewportWidth)
-const pageHeight = computed(() => store.state.pageHeight)
-const pageWidth = computed(() => store.state.pageWidth)
-const currentUserIsPainting = computed(() => store.state.currentUserIsPainting)
-const isDraggingCard = computed(() => store.state.currentUserIsDraggingCard)
-const isDrawingConnection = computed(() => store.state.currentUserIsDrawingConnection)
-const isResizingCard = computed(() => store.state.currentUserIsResizingCard)
-const spaceCounterZoomDecimal = computed(() => store.getters.spaceCounterZoomDecimal)
-const spaceZoomDecimal = computed(() => store.getters.spaceZoomDecimal)
-const shouldPreventResize = computed(() => currentUserIsPainting.value || isDrawingConnection.value || isResizingCard.value)
+// interacting
 
 const initInteractions = (event) => {
   currentEvent = event
@@ -77,6 +67,41 @@ const interact = (event) => {
   prevCursor = utils.cursorPositionInViewport(event)
   prevCursorPage = utils.cursorPositionInPage(event)
 }
+const stopScrollTimer = () => {
+  window.cancelAnimationFrame(scrollTimer)
+  scrollTimer = undefined
+  prevCursor = undefined
+  movementDirection = {}
+}
+const stopInteractions = () => {
+  stopScrollTimer()
+}
+
+// user
+
+const currentUserIsPainting = computed(() => store.state.currentUserIsPainting)
+const isDraggingCard = computed(() => store.state.currentUserIsDraggingCard)
+const isDrawingConnection = computed(() => store.state.currentUserIsDrawingConnection)
+const isResizingCard = computed(() => store.state.currentUserIsResizingCard)
+
+// position
+
+const cursor = () => {
+  if (utils.objectHasKeys(prevCursor)) {
+    return prevCursor
+  } else {
+    return startCursor
+  }
+}
+const viewportHeight = computed(() => store.state.viewportHeight)
+const viewportWidth = computed(() => store.state.viewportWidth)
+const pageHeight = computed(() => store.state.pageHeight)
+const pageWidth = computed(() => store.state.pageWidth)
+const spaceCounterZoomDecimal = computed(() => store.getters.spaceCounterZoomDecimal)
+const spaceZoomDecimal = computed(() => store.getters.spaceZoomDecimal)
+const shouldPreventResize = computed(() => currentUserIsPainting.value || isDrawingConnection.value || isResizingCard.value)
+
+// scroll
 
 const scrollFrame = () => {
   let delta, currentSpeed
@@ -88,14 +113,14 @@ const scrollFrame = () => {
   const shouldScrollUp = Boolean(cursorIsTopSide && window.scrollY)
   // Y movement
   if (movementDirection.y === 'up' && shouldScrollUp) {
-    currentSpeed = speed(currentCursor, 'up')
+    currentSpeed = scrollSpeed(currentCursor, 'up')
     delta = {
       x: 0,
       y: -currentSpeed
     }
     scrollBy(delta)
   } else if (movementDirection.y === 'down' && cursorIsBottomSide && shouldScrollDown()) {
-    currentSpeed = speed(currentCursor, 'down')
+    currentSpeed = scrollSpeed(currentCursor, 'down')
     delta = {
       x: 0,
       y: currentSpeed
@@ -105,14 +130,14 @@ const scrollFrame = () => {
   }
   // X movement
   if (movementDirection.x === 'left' && cursorIsLeftSide && window.scrollX) {
-    currentSpeed = speed(currentCursor, 'left')
+    currentSpeed = scrollSpeed(currentCursor, 'left')
     delta = {
       x: -currentSpeed,
       y: 0
     }
     scrollBy(delta)
   } else if (movementDirection.x === 'right' && cursorIsRightSide && shouldScrollRight()) {
-    currentSpeed = speed(currentCursor, 'right')
+    currentSpeed = scrollSpeed(currentCursor, 'right')
     delta = {
       x: currentSpeed,
       y: 0
@@ -122,14 +147,6 @@ const scrollFrame = () => {
   }
   if (scrollTimer) {
     window.requestAnimationFrame(scrollFrame)
-  }
-}
-
-const cursor = () => {
-  if (utils.objectHasKeys(prevCursor)) {
-    return prevCursor
-  } else {
-    return startCursor
   }
 }
 const updateMovementDirection = () => {
@@ -147,22 +164,6 @@ const updateMovementDirection = () => {
     movementDirection.x = 'right'
   }
 }
-const increasePageWidth = (delta) => {
-  if (shouldPreventResize.value) { return }
-  const cursorIsRightSideOfPage = (pageWidth.value - prevCursorPage.x) < scrollArea
-  if (cursorIsRightSideOfPage) {
-    const width = pageWidth.value + delta.x
-    store.commit('pageWidth', width)
-  }
-}
-const increasePageHeight = (delta) => {
-  if (shouldPreventResize.value) { return }
-  const cursorIsBottomSideOfPage = (pageHeight.value - prevCursorPage.y) < scrollArea
-  if (cursorIsBottomSideOfPage) {
-    const height = pageHeight.value + delta.y
-    store.commit('pageHeight', height)
-  }
-}
 const shouldScrollRight = () => {
   updatePageSizes()
   const scrolledTooFarRight = (window.scrollX + viewportWidth.value) > maxWidth
@@ -172,6 +173,40 @@ const shouldScrollDown = () => {
   updatePageSizes()
   const scrolledTooFarDown = (window.scrollY + viewportHeight.value) > maxHeight
   return !scrolledTooFarDown
+}
+const scrollSpeed = (cursor, direction) => {
+  const minSpeed = 10
+  const maxSpeed = 20
+  const maxSpeedOutsideWindow = 50
+  // viewportSize based on direction
+  const directionIsY = direction === 'up' || direction === 'down'
+  const directionIsX = direction === 'left' || direction === 'right'
+  let viewportSize
+  if (directionIsX) {
+    cursor = cursor.x
+    viewportSize = viewportWidth.value
+  } else if (directionIsY) {
+    cursor = cursor.y
+    viewportSize = viewportHeight.value
+  }
+  // calc percent over scrollArea
+  let amount
+  if (direction === 'up' || direction === 'left') {
+    amount = Math.abs(cursor - scrollArea)
+  }
+  if (direction === 'down' || direction === 'right') {
+    amount = Math.abs(cursor - (viewportSize - scrollArea))
+  }
+  let percent = utils.roundFloat(amount / scrollArea)
+  // speed
+  let speed = percent * scrollArea
+  speed = Math.max(speed, minSpeed)
+  if (percent > 1) {
+    speed = Math.min(speed, maxSpeedOutsideWindow)
+  } else {
+    speed = Math.min(speed, maxSpeed)
+  }
+  return speed
 }
 const scrollBy = (delta) => {
   if (utils.isAndroid()) { return }
@@ -208,51 +243,27 @@ const scrollBy = (delta) => {
   }
   window.scrollBy(delta)
 }
-const speed = (cursor, direction) => {
-  const minSpeed = 10
-  const maxSpeed = 20
-  const maxSpeedOutsideWindow = 50
-  // viewportSize based on direction
-  const directionIsY = direction === 'up' || direction === 'down'
-  const directionIsX = direction === 'left' || direction === 'right'
-  let viewportSize
-  if (directionIsX) {
-    cursor = cursor.x
-    viewportSize = viewportWidth.value
-  } else if (directionIsY) {
-    cursor = cursor.y
-    viewportSize = viewportHeight.value
+
+// page size
+
+const increasePageWidth = (delta) => {
+  if (shouldPreventResize.value) { return }
+  const cursorIsRightSideOfPage = (pageWidth.value - prevCursorPage.x) < scrollArea
+  if (cursorIsRightSideOfPage) {
+    const width = pageWidth.value + delta.x
+    store.commit('pageWidth', width)
   }
-  // calc percent over scrollArea
-  let amount
-  if (direction === 'up' || direction === 'left') {
-    amount = Math.abs(cursor - scrollArea)
+}
+const increasePageHeight = (delta) => {
+  if (shouldPreventResize.value) { return }
+  const cursorIsBottomSideOfPage = (pageHeight.value - prevCursorPage.y) < scrollArea
+  if (cursorIsBottomSideOfPage) {
+    const height = pageHeight.value + delta.y
+    store.commit('pageHeight', height)
   }
-  if (direction === 'down' || direction === 'right') {
-    amount = Math.abs(cursor - (viewportSize - scrollArea))
-  }
-  let percent = utils.roundFloat(amount / scrollArea)
-  // speed
-  let speed = percent * scrollArea
-  speed = Math.max(speed, minSpeed)
-  if (percent > 1) {
-    speed = Math.min(speed, maxSpeedOutsideWindow)
-  } else {
-    speed = Math.min(speed, maxSpeed)
-  }
-  return speed
 }
 const updatePageSizes = () => {
   store.dispatch('updatePageSizes')
-}
-const stopScrollTimer = () => {
-  window.cancelAnimationFrame(scrollTimer)
-  scrollTimer = undefined
-  prevCursor = undefined
-  movementDirection = {}
-}
-const stopInteractions = () => {
-  stopScrollTimer()
 }
 
 </script>
