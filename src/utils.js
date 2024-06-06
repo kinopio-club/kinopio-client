@@ -956,6 +956,28 @@ export default {
     })
     return xIsInside && yIsInside
   },
+  isRectInsideViewport (rect) {
+    const viewport = this.visualViewport()
+    const viewportRect = {
+      x: window.scrollX,
+      y: window.scrollY,
+      width: viewport.width,
+      height: viewport.height
+    }
+    return this.isRectAInsideRectB(rect, viewportRect)
+  },
+  isRectAInsideRectB (rectA, rectB) {
+    // udpate rects to support space zoom
+    rectA = this.rectDimensions(rectA)
+    rectB = this.rectDimensions(rectB)
+    // Check if any part of rectA intersects with rectB
+    return (
+      rectA.x < rectB.x + rectB.width &&
+      rectA.x + rectA.width > rectB.x &&
+      rectA.y < rectB.y + rectB.height &&
+      rectA.y + rectA.height > rectB.y
+    )
+  },
   itemsPositionsShifted (items, position) {
     const origin = this.topLeftItem(items)
     const delta = {
@@ -1108,6 +1130,21 @@ export default {
       y: coords[2]
     }
     return this.integerCoords(coords)
+  },
+  boundingBoxFromPath (d) {
+    // from https://stackoverflow.com/a/77749799
+    // create temporary and hidden svg
+    let ns = 'http://www.w3.org/2000/svg'
+    let svg = document.createElementNS(ns, 'svg')
+    let path = document.createElementNS(ns, 'path')
+    svg.setAttribute('style', 'width:0!important; height:0!important; position:fixed!important; overflow:hidden!important; visibility:hidden!important; opacity:0!important')
+    path.setAttribute('d', d)
+    svg.append(path)
+    document.body.append(svg)
+    let bb = path.getBBox()
+    // remove temporary svg
+    svg.remove()
+    return bb
   },
   startCoordsFromConnectionPath (path) {
     // https://regexr.com/66idp

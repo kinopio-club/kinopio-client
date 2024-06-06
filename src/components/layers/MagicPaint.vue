@@ -152,6 +152,11 @@ const updateSelectableConnectionsInViewport = () => {
   let paths = []
   const pathElements = document.querySelectorAll('svg .connection-path')
   pathElements.forEach(path => {
+    const d = path.getAttribute('d')
+    const rect = utils.boundingBoxFromPath(d)
+    const isRectInsideViewport = utils.isRectInsideViewport(rect)
+    console.log(isRectInsideViewport)
+    if (!isRectInsideViewport) { return }
     // if (path.dataset.isVisibleInViewport === 'false') { return }
     if (path.dataset.isHiddenByCommentFilter === 'true') { return }
     paths.push(path)
