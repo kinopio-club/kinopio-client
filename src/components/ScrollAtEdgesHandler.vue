@@ -89,8 +89,9 @@ export default {
       const cursorIsBottomSide = cursor.y >= (viewportHeight - scrollArea)
       const cursorIsLeftSide = cursor.x <= scrollArea
       const cursorIsRightSide = cursor.x >= (viewportWidth - scrollArea)
+      const shouldScrollUp = Boolean(cursorIsTopSide && window.scrollY)
       // Y movement
-      if (movementDirection.y === 'up' && cursorIsTopSide && window.scrollY) {
+      if (movementDirection.y === 'up' && shouldScrollUp) {
         speed = this.speed(cursor, 'up')
         delta = {
           x: 0,

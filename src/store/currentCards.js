@@ -577,7 +577,7 @@ const currentCards = {
         if (isNoY) {
           delete card.y
         } else {
-          card.y = Math.max(0, card.y + prevMoveDelta.y)
+          card.y = Math.max(consts.defaultCardHeight, card.y + prevMoveDelta.y)
           card.y = Math.round(card.y)
         }
         card = {
