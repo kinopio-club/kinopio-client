@@ -26,7 +26,8 @@ let inertiaScrollEndIntervalTimer, prevPosition
 let statusRetryCount = 0
 
 onMounted(() => {
-  console.log('🐢 kinopio-client build', import.meta.env.MODE)
+  console.log('🐢 kinopio-client build mode', import.meta.env.MODE)
+  console.log('🐸 kinopio-server URL', consts.apiHost())
   store.subscribe((mutation, state) => {
     if (mutation.type === 'broadcast/joinSpaceRoom') {
       updateMetaRSSFeed()
