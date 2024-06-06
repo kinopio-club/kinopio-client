@@ -1020,7 +1020,7 @@ export default {
   },
   pageSizeFromItems (items) {
     const padding = 250
-    const defaultSize = 500
+    const defaultSize = 200
     items = this.clone(items)
     items = items.filter(item => item.x && item.y)
     if (!items.length) {
@@ -1032,14 +1032,14 @@ export default {
       const width = item.resizeWidth || item.width || defaultSize
       const height = item.resizeHeight || item.height
       if (item.x > x) {
-        x = item.x + width + padding + window.scrollX
+        x = item.x + width + padding
       }
       if (item.y > y) {
-        y = item.y + height + padding + window.scrollY
+        y = item.y + height + padding
       }
     })
-    const width = x + defaultSize
-    const height = y + defaultSize
+    const width = x
+    const height = y
     return { width, height }
   },
 
