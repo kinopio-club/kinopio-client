@@ -1026,20 +1026,20 @@ export default {
     if (!items.length) {
       return { width: 0, height: 0 }
     }
-    let x = 0
-    let y = 0
+    let width = 0
+    let height = 0
     items.forEach(item => {
-      const width = item.resizeWidth || item.width || defaultSize
-      const height = item.resizeHeight || item.height
-      if (item.x > x) {
-        x = item.x + width + padding
+      let itemWidth = item.resizeWidth || item.width || defaultSize
+      let itemHeight = item.resizeHeight || item.height || defaultSize
+      itemWidth = item.x + itemWidth + padding
+      itemHeight = item.y + itemHeight + padding
+      if (itemWidth > width) {
+        width = itemWidth
       }
-      if (item.y > y) {
-        y = item.y + height + padding
+      if (itemHeight > height) {
+        height = itemHeight
       }
     })
-    const width = x
-    const height = y
     return { width, height }
   },
 
