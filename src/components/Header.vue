@@ -725,7 +725,7 @@ header(v-if="isVisible" :style="state.position" :class="{'fade-out': isFadingOut
           UpgradeUser(:visible="state.upgradeUserIsVisible" @closeDialog="closeAllDialogs")
         //- presentation mode
         .button-wrap
-          button(:class="{active: isPresentationMode}" @click="togglePresentaitonMode" :title="PresentationModeTitle")
+          button(:class="{ 'translucent-button': !shouldIncreaseUIContrast }" @click="togglePresentaitonMode" :title="PresentationModeTitle")
             img.icon(src="@/assets/presentation.svg")
 
   Toolbar(:visible="isSpace")
