@@ -12,10 +12,14 @@ if (consts.isDevelopment) {
   host = 'https://kinopio.local:3000'
 }
 
-const squashCardsCreatedCount = (queue, request) => {
+const squashCardsCreatedCount = (queue, request, isRaw) => {
   let isSquashed
+  let name = 'updateUserCardsCreatedCount'
+  if (isRaw) {
+    name = 'updateUserCardsCreatedCountRaw'
+  }
   queue = queue.map(queueItem => {
-    if (queueItem.name === 'updateUserCardsCreatedCount') {
+    if (queueItem.name === name) {
       queueItem.body.delta += request.body.delta
       isSquashed = true
     }
@@ -185,6 +189,8 @@ const self = {
       if (name === 'updateMultipleCards' && !canEditSpace) { return }
       if (name === 'updateUserCardsCreatedCount') {
         queue = squashCardsCreatedCount(queue, request)
+      } else if (name === 'updateUserCardsCreatedCountRaw') {
+        queue = squashCardsCreatedCount(queue, request, true)
       } else {
         queue.push(request)
       }

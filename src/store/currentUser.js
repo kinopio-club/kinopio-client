@@ -23,6 +23,7 @@ const initialState = {
   favoriteSpaces: [],
   favoriteColors: [],
   cardsCreatedCount: 0,
+  cardsCreatedCountRaw: 0,
   isUpgraded: false,
   isModerator: false,
   filterShowUsers: false,
@@ -186,6 +187,11 @@ export default {
       utils.typeCheck({ value: count, type: 'number' })
       state.cardsCreatedCount = count
       cache.updateUser('cardsCreatedCount', count)
+    },
+    cardsCreatedCountRaw: (state, count) => {
+      utils.typeCheck({ value: count, type: 'number' })
+      state.cardsCreatedCountRaw = count
+      cache.updateUser('cardsCreatedCountRaw', count)
     },
     isUpgraded: (state, value) => {
       utils.typeCheck({ value, type: 'boolean' })
@@ -466,9 +472,12 @@ export default {
       if (shouldDecrement) {
         delta = -delta
       }
-      // console.log('delta', delta)
-      if (context.getters.shouldPreventCardsCreatedCountUpdate) { return }
       const count = context.state.cardsCreatedCount + delta
+      // update raw vanity count
+      context.dispatch('api/addToQueue', { name: 'updateUserCardsCreatedCountRaw', body: { delta } }, { root: true })
+      context.commit('cardsCreatedCountRaw', count)
+      // update count
+      if (context.getters.shouldPreventCardsCreatedCountUpdate) { return }
       context.dispatch('api/addToQueue', { name: 'updateUserCardsCreatedCount', body: { delta } }, { root: true })
       context.commit('cardsCreatedCount', count)
     },

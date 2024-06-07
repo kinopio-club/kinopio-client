@@ -6,7 +6,8 @@ import userBadges from '@/data/userBadges.json'
 const store = useStore()
 
 const props = defineProps({
-  user: Object
+  user: Object,
+  isCurrentUser: Boolean
 })
 const state = reactive({
   name: '',
@@ -28,6 +29,14 @@ const toggleDescription = (name) => {
   state.name = badge.name
   state.description = badge.description
 }
+
+const cardsCreatedCount = computed(() => {
+  if (props.isCurrentUser) {
+    return props.user.cardsCreatedCount
+  } else {
+    return props.user.cardsCreatedCountRaw
+  }
+})
 </script>
 
 <template lang="pug">
@@ -58,7 +67,7 @@ const toggleDescription = (name) => {
 .row
   .badge.secondary
     img.icon.card(src="@/assets/card.svg")
-    span {{user.cardsCreatedCount}} Cards Created
+    span {{cardsCreatedCount}} Cards Created
 
 </template>
 

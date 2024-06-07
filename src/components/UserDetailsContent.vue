@@ -214,7 +214,7 @@ const updateExploreSpaces = async () => {
         User(:user="user" :isClickable="false" :detailsOnRight="false" :key="user.id")
         p.name.user-details-name {{user.name}}
       .other-user-info
-        UserBadges(:user="user")
+        UserBadges(:user="user" :isCurrentUser="isCurrentUser")
         .row(v-if="userDescription")
           p {{userDescription}}
         .row.website(v-if="user.website")
@@ -233,7 +233,7 @@ const updateExploreSpaces = async () => {
           ColorPicker(:currentColor="userColor" :visible="state.colorPickerIsVisible" @selectedColor="updateUserColor")
         input.name.user-details-name(placeholder="What's your name?" v-model="userName" name="Name" maxlength=100)
       //- badges
-      UserBadges(:user="user")
+      UserBadges(:user="user" :isCurrentUser="isCurrentUser")
       //- description
       .row
         textarea(ref="descriptionElement" placeholder="Tell us about yourself" v-model="userDescription" name="Description" maxlength=220 rows="1")
