@@ -54,8 +54,6 @@ const start = () => {
 const cancel = () => {
   window.cancelAnimationFrame(colorCycleTimer)
   colorCycleTimer = undefined
-  const color = store.state.currentSpace.backgroundTint || null
-  updateMetaThemeColor(color)
 }
 
 const spaceZoomDecimal = computed(() => store.getters.spaceZoomDecimal)
