@@ -570,19 +570,19 @@ const currentCards = {
           delete card.x
         } else {
           card.x = Math.max(0, card.x + prevMoveDelta.x)
-          card.x = Math.round(card.x)
+          context.dispatch('checkIfShouldIncreasePageWidthWhileDragging', card)
         }
         // y
         const isNoY = card.y === undefined || card.y === null
         if (isNoY) {
           delete card.y
         } else {
-          card.y = Math.max(0, card.y + prevMoveDelta.y)
-          card.y = Math.round(card.y)
+          card.y = Math.max(consts.defaultCardHeight, card.y + prevMoveDelta.y)
+          context.dispatch('checkIfShouldIncreasePageHeightWhileDragging', card)
         }
         card = {
-          x: card.x,
-          y: card.y,
+          x: Math.round(card.x),
+          y: Math.round(card.y),
           z: card.z,
           id: card.id
         }
@@ -594,6 +594,18 @@ const currentCards = {
       context.commit('cardsWereDragged', true, { root: true })
       context.dispatch('currentConnections/updatePathsWhileDragging', { connections }, { root: true })
       context.dispatch('broadcast/update', { updates: { cards }, type: 'moveCards', handler: 'currentCards/moveWhileDragging' }, { root: true })
+    },
+    checkIfShouldIncreasePageWidthWhileDragging: (context, card) => {
+      const cardEnd = card.x + card.width
+      if (cardEnd >= context.rootState.pageWidth) {
+        context.commit('pageWidth', cardEnd, { root: true })
+      }
+    },
+    checkIfShouldIncreasePageHeightWhileDragging: (context, card) => {
+      const cardEnd = card.y + card.height
+      if (cardEnd >= context.rootState.pageHeight) {
+        context.commit('pageHeight', cardEnd, { root: true })
+      }
     },
     afterMove: (context) => {
       const spaceId = context.rootState.currentSpace.id
@@ -620,7 +632,9 @@ const currentCards = {
       cards = cards.filter(card => Boolean(card))
       cards = cards.map(card => {
         card.x = Math.max(card.x + prevMoveDelta.x, 0)
+        card.x = Math.round(card.x)
         card.y = Math.max(card.y + prevMoveDelta.y, 0)
+        card.y = Math.round(card.y)
         card.userId = context.rootState.currentUser.id
         return card
       })
@@ -641,7 +655,7 @@ const currentCards = {
         context.dispatch('currentConnections/updateMultiplePaths', cards, { root: true })
         context.dispatch('history/resume', null, { root: true })
         context.dispatch('history/add', { cards, useSnapshot: true }, { root: true })
-        context.dispatch('checkIfItemShouldIncreasePageSize', currentDraggingCard, { root: true })
+        context.dispatch('updatePageSizes', null, { root: true })
         prevMoveDelta = { x: 0, y: 0 }
       })
     },

@@ -60,6 +60,8 @@ const store = createStore({
     spaceZoomPercent: 100,
     pinchCounterZoomDecimal: 1,
     zoomOrigin: { x: 0, y: 0 },
+    isPinchZooming: false,
+    isTouchScrolling: false,
 
     // search
     searchIsVisible: false,
@@ -389,6 +391,12 @@ const store = createStore({
     },
     zoomOrigin: (state, value) => {
       state.zoomOrigin = value
+    },
+    isPinchZooming: (state, value) => {
+      state.isPinchZooming = value
+    },
+    isTouchScrolling: (state, value) => {
+      state.isTouchScrolling = value
     },
     currentSpacePath: (state, value) => {
       utils.typeCheck({ value, type: 'string' })
@@ -1539,7 +1547,6 @@ const store = createStore({
         x: 0, y: 0, width: 500, height: 500
       })
       let itemsRect = utils.pageSizeFromItems(items)
-      context.commit('resetPageSizes')
       context.commit('updatePageSizes', itemsRect)
     },
     checkIfItemShouldIncreasePageSize: (context, item) => {

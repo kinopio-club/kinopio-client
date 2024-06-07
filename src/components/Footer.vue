@@ -34,27 +34,25 @@ onBeforeUnmount(() => {
   window.removeEventListener('scroll', updatePosition)
 })
 
-const props = defineProps({
-  isPinchZooming: Boolean,
-  isTouchScrolling: Boolean
+const state = reactive({
+  position: {},
+  isHiddenOnTouch: false
 })
-watch(() => props.isPinchZooming, (value, prevValue) => {
+
+const isPinchZooming = computed(() => store.state.isPinchZooming)
+watch(() => isPinchZooming.value, (value, prevValue) => {
   if (value) {
     updatePosition()
   }
 })
-watch(() => props.isTouchScrolling, (value, prevValue) => {
+const isTouchScrolling = computed(() => store.state.isTouchScrolling)
+watch(() => isTouchScrolling.value, (value, prevValue) => {
   if (value) {
     if (!utils.isAndroid()) { return }
     if (value) {
       updatePosition()
     }
   }
-})
-
-const state = reactive({
-  position: {},
-  isHiddenOnTouch: false
 })
 
 const isAddPage = computed(() => store.state.isAddPage)

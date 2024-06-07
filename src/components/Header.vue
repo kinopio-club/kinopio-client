@@ -105,31 +105,6 @@ onBeforeUnmount(() => {
   clearInterval(updateNotificationsIntervalTimer)
 })
 
-const props = defineProps({
-  isPinchZooming: Boolean,
-  isTouchScrolling: Boolean
-})
-const emit = defineEmits(['updateCount'])
-
-watch(() => props.isPinchZooming, (value, prevValue) => {
-  if (value) {
-    fadeOut()
-    updatePosition()
-  } else {
-    shouldCancelFadeOut = true
-    cancelFadeOut()
-  }
-})
-watch(() => props.isTouchScrolling, (value, prevValue) => {
-  if (value) {
-    fadeOut()
-    updatePosition()
-  } else {
-    shouldCancelFadeOut = true
-    cancelFadeOut()
-  }
-})
-
 const state = reactive({
   aboutIsVisible: false,
   spaceDetailsIsVisible: false,
@@ -154,8 +129,28 @@ const state = reactive({
   importIsVisible: false
 })
 
+const isPinchZooming = computed(() => store.state.isPinchZooming)
+watch(() => isPinchZooming.value, (value, prevValue) => {
+  if (value) {
+    fadeOut()
+    updatePosition()
+  } else {
+    shouldCancelFadeOut = true
+    cancelFadeOut()
+  }
+})
+const isTouchScrolling = computed(() => store.state.isTouchScrolling)
+watch(() => isTouchScrolling.value, (value, prevValue) => {
+  if (value) {
+    fadeOut()
+    updatePosition()
+  } else {
+    shouldCancelFadeOut = true
+    cancelFadeOut()
+  }
+})
+
 const importArenaChannelIsVisible = computed(() => store.state.importArenaChannelIsVisible)
-const isPresentationMode = computed(() => store.state.isPresentationMode)
 const kinopioDomain = computed(() => consts.kinopioDomain())
 const userSettingsIsVisible = computed(() => store.state.userSettingsIsVisible)
 const isSpace = computed(() => {
@@ -421,6 +416,7 @@ const toggleOfflineIsVisible = () => {
   store.dispatch('closeAllDialogs')
   store.commit('offlineIsVisible', !isVisible)
 }
+const searchAndFilterTitle = computed(() => `Search and Filter (${utils.metaKey()}-F)`)
 const searchIsVisible = computed(() => store.state.searchIsVisible)
 const toggleSearchIsVisible = () => {
   const isVisible = searchIsVisible.value
@@ -559,6 +555,15 @@ const disablePresentationMode = () => {
   store.commit('isPresentationMode', false)
 }
 
+// presentation mode
+
+const PresentationModeTitle = computed(() => `Presentation Mode (P)`)
+const isPresentationMode = computed(() => store.state.isPresentationMode)
+const togglePresentaitonMode = () => {
+  const value = !isPresentationMode.value
+  store.commit('isPresentationMode', value)
+}
+
 </script>
 
 <template lang="pug">
@@ -612,7 +617,7 @@ header(v-if="isVisible" :style="state.position" :class="{'fade-out': isFadingOut
             //- Search
             .segmented-buttons
               .button-wrap
-                button.search-button(@click.stop="toggleSearchIsVisible" :class="{ active: searchIsVisible || totalFiltersActive || searchResultsCount, 'translucent-button': !shouldIncreaseUIContrast }")
+                button.search-button(@click.stop="toggleSearchIsVisible" :class="{ active: searchIsVisible || totalFiltersActive || searchResultsCount, 'translucent-button': !shouldIncreaseUIContrast }" :title="searchAndFilterTitle")
                   template(v-if="!searchResultsCount")
                     img.icon.search(src="@/assets/search.svg")
                   .badge.search.search-count-badge(v-if="searchResultsCount")
@@ -641,7 +646,7 @@ header(v-if="isVisible" :style="state.position" :class="{'fade-out': isFadingOut
           Share(:visible="state.shareIsVisible")
         //- Notifications
         .button-wrap
-          button(@click.left.stop="toggleNotificationsIsVisible" :class="{active: state.notificationsIsVisible, 'translucent-button': !shouldIncreaseUIContrast}")
+          button(@click.left.stop="toggleNotificationsIsVisible" :class="{active: state.notificationsIsVisible, 'translucent-button': !shouldIncreaseUIContrast}" title="Notifications")
             span {{notificationsUnreadCount}}
             .badge.new-unread-badge.notification-button-badge(v-if="notificationsUnreadCount")
           UserNotifications(:visible="state.notificationsIsVisible" :loading="state.notificationsIsLoading" :notifications="state.notifications" :unreadCount="notificationsUnreadCount" @markAllAsRead="markAllAsRead" @markAsRead="markAsRead")
@@ -695,7 +700,7 @@ header(v-if="isVisible" :style="state.position" :class="{'fade-out': isFadingOut
         Discovery
         //- Sidebar
         .button-wrap
-          button(@click.left.stop="toggleSidebarIsVisible" :class="{active: state.sidebarIsVisible, 'translucent-button': !shouldIncreaseUIContrast}")
+          button(@click.left.stop="toggleSidebarIsVisible" :class="{active: state.sidebarIsVisible, 'translucent-button': !shouldIncreaseUIContrast}" title="Sidebar")
             img.icon.sidebar(src="@/assets/sidebar.svg")
           Sidebar(:visible="state.sidebarIsVisible")
 
@@ -718,6 +723,10 @@ header(v-if="isVisible" :style="state.position" :class="{'fade-out': isFadingOut
           button(@click.left.stop="toggleUpgradeUserIsVisible" :class="{active: state.upgradeUserIsVisible, 'translucent-button': !shouldIncreaseUIContrast}")
             span Upgrade
           UpgradeUser(:visible="state.upgradeUserIsVisible" @closeDialog="closeAllDialogs")
+        //- presentation mode
+        .button-wrap
+          button(:class="{ 'translucent-button': !shouldIncreaseUIContrast }" @click="togglePresentaitonMode" :title="PresentationModeTitle")
+            img.icon(src="@/assets/presentation.svg")
 
   Toolbar(:visible="isSpace")
   SelectAllBelow
@@ -757,12 +766,10 @@ header
       .left
         display flex
         flex-shrink 0
-        @media(max-width 414px)
-          max-width calc(100% - 100px)
       .right
         display flex
         justify-content flex-end
-        flex-shrink 0
+        max-width 100%
 
   nav
     display flex

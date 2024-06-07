@@ -956,6 +956,28 @@ export default {
     })
     return xIsInside && yIsInside
   },
+  isRectInsideViewport (rect) {
+    const viewport = this.visualViewport()
+    const viewportRect = {
+      x: window.scrollX,
+      y: window.scrollY,
+      width: viewport.width,
+      height: viewport.height
+    }
+    return this.isRectAInsideRectB(rect, viewportRect)
+  },
+  isRectAInsideRectB (rectA, rectB) {
+    // udpate rects to support space zoom
+    rectA = this.rectDimensions(rectA)
+    rectB = this.rectDimensions(rectB)
+    // Check if any part of rectA intersects with rectB
+    return (
+      rectA.x < rectB.x + rectB.width &&
+      rectA.x + rectA.width > rectB.x &&
+      rectA.y < rectB.y + rectB.height &&
+      rectA.y + rectA.height > rectB.y
+    )
+  },
   itemsPositionsShifted (items, position) {
     const origin = this.topLeftItem(items)
     const delta = {
@@ -1020,26 +1042,26 @@ export default {
   },
   pageSizeFromItems (items) {
     const padding = 250
-    const defaultSize = 500
+    const defaultSize = 200
     items = this.clone(items)
     items = items.filter(item => item.x && item.y)
     if (!items.length) {
       return { width: 0, height: 0 }
     }
-    let x = 0
-    let y = 0
+    let width = 0
+    let height = 0
     items.forEach(item => {
-      const width = item.resizeWidth || item.width || defaultSize
-      const height = item.resizeHeight || item.height
-      if (item.x > x) {
-        x = item.x + width + padding + window.scrollX
+      let itemWidth = item.resizeWidth || item.width || defaultSize
+      let itemHeight = item.resizeHeight || item.height || defaultSize
+      itemWidth = item.x + itemWidth + padding
+      itemHeight = item.y + itemHeight + padding
+      if (itemWidth > width) {
+        width = itemWidth
       }
-      if (item.y > y) {
-        y = item.y + height + padding + window.scrollY
+      if (itemHeight > height) {
+        height = itemHeight
       }
     })
-    const width = x + defaultSize
-    const height = y + defaultSize
     return { width, height }
   },
 
@@ -1109,6 +1131,21 @@ export default {
     }
     return this.integerCoords(coords)
   },
+  boundingBoxFromPath (d) {
+    // from https://stackoverflow.com/a/77749799
+    // create temporary and hidden svg
+    let ns = 'http://www.w3.org/2000/svg'
+    let svg = document.createElementNS(ns, 'svg')
+    let path = document.createElementNS(ns, 'path')
+    svg.setAttribute('style', 'width:0!important; height:0!important; position:fixed!important; overflow:hidden!important; visibility:hidden!important; opacity:0!important')
+    path.setAttribute('d', d)
+    svg.append(path)
+    document.body.append(svg)
+    let bb = path.getBBox()
+    // remove temporary svg
+    svg.remove()
+    return bb
+  },
   startCoordsFromConnectionPath (path) {
     // https://regexr.com/66idp
     // matches first 2 digit groups in path: m295,284 q90,40 87,57 → [295, 284]
@@ -1169,13 +1206,14 @@ export default {
   exponentialDecay (iteration, rateOfIterationDecay) {
     return Math.exp(-(rateOfIterationDecay * iteration))
   },
-  filterCircles (circles, maxIterationsToPaint) {
-    const max = 300
+  filterCircles (circles, max) {
+    max = max || 300
     const startIndex = circles.length - max
     if (startIndex > 0) {
       circles = circles.slice(startIndex, circles.length)
     }
-    return circles.filter(circle => circle.iteration < maxIterationsToPaint)
+    circles = circles.filter(circle => circle.iteration < max)
+    return circles
   },
   easeOut (percentComplete, elaspedTime, duration) {
     const startValue = 0

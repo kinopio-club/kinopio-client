@@ -87,6 +87,7 @@ onMounted(() => {
   window.addEventListener('touchmove', userScroll) // android fix
   window.addEventListener('load', clearCircles)
   startPostScroll()
+  state.dropGuideLineIsVisible = !utils.isMobile()
 })
 
 onBeforeUnmount(() => {
@@ -123,10 +124,6 @@ const viewportHeight = computed(() => store.state.viewportHeight)
 const viewportWidth = computed(() => store.state.viewportWidth)
 const spaceCounterZoomDecimal = computed(() => store.getters.spaceCounterZoomDecimal)
 const spaceZoomDecimal = computed(() => store.getters.spaceZoomDecimal)
-const canvasStyles = computed(() => {
-  return { top: state.pinchZoomOffsetTop + 'px', left: state.pinchZoomOffsetLeft + 'px' }
-})
-
 const updateSelectableCardsInViewport = () => {
   const selectableCards = store.getters['currentCards/isSelectableInViewport']()
   if (!selectableCards) { return }
@@ -155,6 +152,10 @@ const updateSelectableConnectionsInViewport = () => {
   let paths = []
   const pathElements = document.querySelectorAll('svg .connection-path')
   pathElements.forEach(path => {
+    const d = path.getAttribute('d')
+    const rect = utils.boundingBoxFromPath(d)
+    const isRectInsideViewport = utils.isRectInsideViewport(rect)
+    if (!isRectInsideViewport) { return }
     // if (path.dataset.isVisibleInViewport === 'false') { return }
     if (path.dataset.isHiddenByCommentFilter === 'true') { return }
     paths.push(path)
@@ -267,6 +268,7 @@ const drawCircle = (circle, context, shouldDrawOffscreen) => {
     decay = rateOfIterationDecaySlow
   }
   alpha = alpha || utils.exponentialDecay(iteration, decay)
+  if (alpha < 0.05) { return }
   context.beginPath()
   context.arc(x, y, radius, 0, 2 * Math.PI)
   context.closePath()
@@ -345,6 +347,7 @@ const painting = (event) => {
   if (isBoxSelecting.value) { return }
   if (!toolbarIsCard.value) { return }
   if (!isPainting) { return }
+  if (store.state.isPinchZooming) { return }
   if (store.getters.shouldScrollAtEdges(event) && event.cancelable) {
     event.preventDefault() // prevents touch swipe viewport scrolling
   }
@@ -393,6 +396,7 @@ const createPaintingCircles = (event) => {
 const startPainting = (event) => {
   if (isPanning.value) { return }
   if (isBoxSelecting.value) { return }
+  if (store.state.isPinchZooming) { return }
   updateSelectableCardsInViewport()
   updateSelectableBoxes()
   updateSelectableConnectionsInViewport()
@@ -697,7 +701,6 @@ aside
     @touchmove="painting"
     :width="viewportWidth"
     :height="viewportHeight"
-    :style="canvasStyles"
     @dragenter="checkIfUploadIsDraggedOver"
     @dragover.prevent="checkIfUploadIsDraggedOver"
     @dragleave="removeUploadIsDraggedOver"
@@ -707,26 +710,26 @@ aside
   canvas#remote-painting.remote-painting(
     :width="viewportWidth"
     :height="viewportHeight"
-    :style="canvasStyles"
     :data-should-decay-slow="true"
   )
   canvas#locking.locking(
     :width="viewportWidth"
     :height="viewportHeight"
-    :style="canvasStyles"
     :data-should-decay-slow="true"
   )
   canvas#initial-circle.initial-circle(
     :width="viewportWidth"
     :height="viewportHeight"
-    :style="canvasStyles"
     :data-should-decay-slow="true"
   )
-  DropGuideLine(
-    :currentCursor="state.currentCursor"
-    :currentCursorInSpace="state.currentCursorInSpace"
-    :uploadIsDraggedOver="state.uploadIsDraggedOver"
-  )
+  template(v-if="state.dropGuideLineIsVisible")
+    DropGuideLine(
+      :currentCursor="state.currentCursor"
+      :currentCursorInSpace="state.currentCursorInSpace"
+      :uploadIsDraggedOver="state.uploadIsDraggedOver"
+      :viewportWidth="viewportWidth"
+      :viewportHeight="viewportHeight"
+    )
 </template>
 
 <style lang="stylus" scoped>
