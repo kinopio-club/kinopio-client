@@ -55,71 +55,21 @@ watch(() => props.visible, (value, prevValue) => {
     store.commit('shouldExplicitlyHideFooter', false)
   }
 })
-
-const noResults = computed(() => state.hasSearched && !state.cardsBySpace.length)
-const dialogIsPinned = computed(() => store.state.searchIsPinned)
-const placeholder = computed(() => {
-  let placeholder = 'Search Cards'
-  let shift = ''
-  if (!utils.isMobile()) {
-    if (!state.scopeIsLocal) {
-      shift = 'Shift-'
-    }
-    placeholder = placeholder + ` (${utils.metaKey()}-${shift}F)`
-  }
-  return placeholder
-})
-const search = computed(() => store.state.search)
-const searchResultsCards = computed(() => store.state.searchResultsCards)
-const previousResultItem = computed(() => store.state.previousResultItem)
-const cards = computed(() => {
-  let cards
-  if (search.value) {
-    return searchResultsCards.value
-  } else {
-    return cardsToSearch.value
-  }
-})
-const cardsToSearch = computed(() => {
-  if (state.scopeIsLocal) {
-    return recentlyUpdatedCards.value
-  } else {
-    return searchResultsCards.value
-  }
-})
-const itemsToFocus = computed(() => {
-  if (state.scopeIsLocal) {
-    return cards.value
-  } else {
-    return state.cardsBySpaceFlattened
-  }
-})
-const recentlyUpdatedCards = computed(() => {
-  let cards = utils.clone(store.getters['currentCards/all'])
-  cards = cards.filter(card => card.name)
-  cards = cards.map(card => {
-    const date = card.nameUpdatedAt || card.createdAt
-    card.date = dayjs(date)
-    return card
-  })
-  cards = orderBy(cards, (a) => new Date(a.date), ['desc'])
-  return cards
-})
-const currentUser = computed(() => store.state.currentUser)
-const currentUserIsSignedIn = computed(() => store.getters['currentUser/isSignedIn'])
-
 const triggerFocusResultsFilter = async () => {
   await nextTick()
   store.commit('triggerFocusResultsFilter')
 }
+const currentUser = computed(() => store.state.currentUser)
+const currentUserIsSignedIn = computed(() => store.getters['currentUser/isSignedIn'])
 
+// search
+
+const search = computed(() => store.state.search)
+const noResults = computed(() => state.hasSearched && !state.cardsBySpace.length)
 const updateScopeIsLocal = (value) => {
   state.scopeIsLocal = value
   updateSearch(search.value)
 }
-
-// search
-
 const updateSearch = async (search) => {
   store.commit('search', search)
   if (!search) {
@@ -181,6 +131,34 @@ const clearSearch = async () => {
   store.commit('clearSearch')
   state.hasSearched = false
 }
+const searchResultsCards = computed(() => store.state.searchResultsCards)
+const previousResultItem = computed(() => store.state.previousResultItem)
+const cards = computed(() => {
+  let cards
+  if (search.value) {
+    return searchResultsCards.value
+  } else {
+    return cardsToSearch.value
+  }
+})
+const cardsToSearch = computed(() => {
+  if (state.scopeIsLocal) {
+    return recentlyUpdatedCards.value
+  } else {
+    return searchResultsCards.value
+  }
+})
+const recentlyUpdatedCards = computed(() => {
+  let cards = utils.clone(store.getters['currentCards/all'])
+  cards = cards.filter(card => card.name)
+  cards = cards.map(card => {
+    const date = card.nameUpdatedAt || card.createdAt
+    card.date = dayjs(date)
+    return card
+  })
+  cards = orderBy(cards, (a) => new Date(a.date), ['desc'])
+  return cards
+})
 
 // select items
 
@@ -255,9 +233,28 @@ const focusFirstItem = () => {
 const focusItem = (item) => {
   store.commit('previousResultItem', item)
 }
+const itemsToFocus = computed(() => {
+  if (state.scopeIsLocal) {
+    return cards.value
+  } else {
+    return state.cardsBySpaceFlattened
+  }
+})
 
 // dialog
 
+const dialogIsPinned = computed(() => store.state.searchIsPinned)
+const placeholder = computed(() => {
+  let text = 'Search Cards'
+  let shift = ''
+  if (!utils.isMobile()) {
+    if (!state.scopeIsLocal) {
+      shift = 'Shift-'
+    }
+    text = text + ` (${utils.metaKey()}-${shift}F)`
+  }
+  return text
+})
 const closeDialogs = () => {
   store.commit('triggerMoreFiltersIsNotVisible')
 }
