@@ -33,9 +33,15 @@ export default {
   isDevelopment () {
     console.log(env.VITE_PROD_SERVER, env, env.MODE)
     if (env.VITE_PROD_SERVER === 'true') {
+      console.log('🍓')
       return false
-    } else {
-      return (env.MODE === 'development')
+    } else if (env.MODE === 'development') {
+      console.log('🍓🍓')
+
+      return true
+    } else if (env.MODE === 'production') {
+      console.log('🍓🍓🍓')
+      return false
     }
   },
   roadmapSpaceId () {
