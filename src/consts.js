@@ -1,5 +1,7 @@
 // vars referenced by multiple components
 
+const env = import.meta.env
+
 export default {
   spaceZoom: {
     max: 100,
@@ -29,11 +31,11 @@ export default {
   defaultSpaceBackground: 'https://bk.kinopio.club/grid-large-boxes-2x.png',
   moderatorUserId: 'euGhpBrR9eBcjKnK16C_g',
   isDevelopment () {
-    console.log(import.meta.env.VITE_PROD_SERVER, import.meta.env, import.meta.env.MODE)
-    if (import.meta.env.VITE_PROD_SERVER === 'true') {
+    console.log(env.VITE_PROD_SERVER, env, env.MODE)
+    if (env.VITE_PROD_SERVER === 'true') {
       return false
     } else {
-      return import.meta.env.MODE === 'development'
+      return (env.MODE === 'development')
     }
   },
   roadmapSpaceId () {
