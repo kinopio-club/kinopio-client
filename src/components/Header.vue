@@ -557,7 +557,7 @@ const disablePresentationMode = () => {
 
 // presentation mode
 
-const PresentationModeTitle = computed(() => `Presentation Mode (P)`)
+const PresentationModeTitle = computed(() => `Focus/Presentation Mode (P)`)
 const isPresentationMode = computed(() => store.state.isPresentationMode)
 const togglePresentaitonMode = () => {
   const value = !isPresentationMode.value
