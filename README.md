@@ -28,7 +28,7 @@ $ https://kinopio.local:8080
 
 You can force the local app to use the prod API by editing `.env.local` so that `VITE_PROD_SERVER=true`. Create `env.local` by duplicating and renaming `.env.local.sample`.
 
-When the app starts up, the `🐸 kinopio-server URL` will be displayed in the logs.
+When the app starts up, the `🐸 kinopio-server URL` will be displayed in the browser logs.
 
 ## Debugging
 
