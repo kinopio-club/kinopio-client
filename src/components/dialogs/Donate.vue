@@ -57,7 +57,7 @@ import Loader from '@/components/Loader.vue'
 import consts from '@/consts.js'
 
 let productId
-if (consts.isDevelopment) {
+if (consts.isDevelopment()) {
   productId = 'prod_LtXVNnexfHyKZA'
 } else {
   productId = 'prod_LuJoVy0tM7PiBI'

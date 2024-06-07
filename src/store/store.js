@@ -23,7 +23,7 @@ import uniqBy from 'lodash-es/uniqBy'
 import last from 'lodash-es/last'
 
 const store = createStore({
-  strict: consts.isDevelopment,
+  strict: consts.isDevelopment(),
   state: {
     pageHeight: 0,
     pageWidth: 0,

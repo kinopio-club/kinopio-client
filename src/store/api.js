@@ -8,7 +8,7 @@ import uniq from 'lodash-es/uniq'
 import { nanoid } from 'nanoid'
 
 let host = 'https://api.kinopio.club'
-if (consts.isDevelopment) {
+if (consts.isDevelopment()) {
   host = 'https://kinopio.local:3000'
 }
 

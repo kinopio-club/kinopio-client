@@ -51,7 +51,7 @@ export default {
       this.$store.dispatch('currentUser/update', { showWeather: false, weatherLocation: null })
     },
     location () {
-      if (consts.isDevelopment) {
+      if (consts.isDevelopment()) {
         // 🐪 somewhere in the Sahara
         const position = {
           coords: {

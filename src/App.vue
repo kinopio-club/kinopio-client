@@ -86,7 +86,7 @@ const pageCursor = computed(() => {
 const spaceZoomDecimal = computed(() => store.getters.spaceZoomDecimal)
 const isDevelpmentBadgeVisible = computed(() => {
   if (store.state.isPresentationMode) { return }
-  return consts.isDevelopment
+  return consts.isDevelopment()
 })
 
 // touch actions

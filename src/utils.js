@@ -1948,7 +1948,7 @@ export default {
     if (!url) { return }
     if (this.urlIsInvite(url)) { return true }
     let spaceUrlPattern
-    if (consts.isDevelopment) {
+    if (consts.isDevelopment()) {
       // https://regexr.com/5hjc2
       spaceUrlPattern = new RegExp(/(?:kinopio\.local:.*\/)(.*)\b/gi)
     } else {
