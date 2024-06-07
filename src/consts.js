@@ -31,17 +31,10 @@ export default {
   defaultSpaceBackground: 'https://bk.kinopio.club/grid-large-boxes-2x.png',
   moderatorUserId: 'euGhpBrR9eBcjKnK16C_g',
   isDevelopment () {
-    console.log(env.VITE_PROD_SERVER, env, env.MODE)
     if (env.VITE_PROD_SERVER === 'true') {
-      console.log('🍓')
       return false
-    } else if (env.MODE === 'development') {
-      console.log('🍓🍓')
-
-      return true
-    } else if (env.MODE === 'production') {
-      console.log('🍓🍓🍓')
-      return false
+    } else {
+      return (env.MODE === 'development')
     }
   },
   roadmapSpaceId () {
