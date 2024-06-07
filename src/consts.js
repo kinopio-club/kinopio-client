@@ -1,5 +1,7 @@
 // vars referenced by multiple components
 
+const env = import.meta.env
+
 export default {
   spaceZoom: {
     max: 100,
@@ -23,14 +25,21 @@ export default {
   rootUserId: 'euGhpBrR9eBcjKnK16C_g',
   sidebarWidth: 250,
   systemCommands: { explore: 'Explore', newSpace: 'New Space', templates: 'Templates', apps: 'Apps and Extensions' },
-  isDevelopment: (import.meta.env.MODE === 'development' && !import.meta.env.VITE_PROD_SERVER),
   isSecureAppContextIOS: navigator.isSecureAppContextIOS, // true = iOS app
   isSecureAppContext: navigator.isSecureAppContext, // true = iOS app
   cdnHost: 'https://cdn.kinopio.club',
   defaultSpaceBackground: 'https://bk.kinopio.club/grid-large-boxes-2x.png',
   moderatorUserId: 'euGhpBrR9eBcjKnK16C_g',
+  isDevelopment () {
+    console.log(env.VITE_PROD_SERVER, env, env.MODE)
+    if (env.VITE_PROD_SERVER === 'true') {
+      return false
+    } else {
+      return (env.MODE === 'development')
+    }
+  },
   roadmapSpaceId () {
-    if (this.isDevelopment) {
+    if (this.isDevelopment()) {
       return 'FiM7akGos18Sfx4yKrwjF'
     } else {
       return '6TRE21gchHI7alHLuwzd5'
@@ -38,28 +47,28 @@ export default {
   },
   kinopioDomain () {
     let domain = 'https://kinopio.club'
-    if (this.isDevelopment) {
+    if (this.isDevelopment()) {
       domain = 'https://kinopio.local:8080'
     }
     return domain
   },
   apiHost () {
     let host = 'https://api.kinopio.club'
-    if (this.isDevelopment) {
+    if (this.isDevelopment()) {
       host = 'https://kinopio.local:3000'
     }
     return host
   },
   blogHost () {
     let host = 'https://blog.kinopio.club'
-    if (this.isDevelopment) {
+    if (this.isDevelopment()) {
       host = 'http://localhost:8082'
     }
     return host
   },
   websocketHost () {
     let host = 'wss://api.kinopio.club'
-    if (this.isDevelopment) {
+    if (this.isDevelopment()) {
       host = 'wss://kinopio.local:3000'
     }
     return host
@@ -91,7 +100,7 @@ export default {
       stripePriceId: 'price_1L2GvBDFIr5ywhwobbE35dhA',
       applePriceId: 'apple_monthly_2023'
     }
-    if (this.isDevelopment) {
+    if (this.isDevelopment()) {
       price.stripePriceId = 'price_1L7200DFIr5ywhwoAJGkA7yK'
     }
     if (this.isSecureAppContextIOS) {
@@ -113,7 +122,7 @@ export default {
       stripePriceId: 'price_1L2ErWDFIr5ywhwodsKxEEAq',
       applePriceId: 'apple_yearly_2023'
     }
-    if (this.isDevelopment) {
+    if (this.isDevelopment()) {
       price.stripePriceId = 'price_1L720NDFIr5ywhwo0wS5PWAv'
     }
     if (this.isSecureAppContextIOS) {
@@ -130,7 +139,7 @@ export default {
       period: 'year',
       stripePriceId: 'price_1NidyHDFIr5ywhwoVSx6JSpP'
     }
-    if (this.isDevelopment) {
+    if (this.isDevelopment()) {
       price.stripePriceId = 'price_1Nie0DDFIr5ywhwoesLtHpVu'
     }
     return price
@@ -141,7 +150,7 @@ export default {
       period: 'life',
       stripePriceId: 'price_1O6k3UDFIr5ywhwoeCdzdlAM'
     }
-    if (this.isDevelopment) {
+    if (this.isDevelopment()) {
       price.stripePriceId = 'price_1O6k10DFIr5ywhwoXF87uKcl'
     }
     return price
