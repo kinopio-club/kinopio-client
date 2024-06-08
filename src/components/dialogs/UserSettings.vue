@@ -76,7 +76,7 @@ const toggleUserSettingsIsPinned = () => {
 </script>
 
 <template lang="pug">
-dialog.user-settings.narrow.is-pinnable(v-if="visible" :open="visible" ref="dialogElement" @click.left.stop="closeChildDialogs" :style="{'max-height': state.dialogHeight + 'px'}" :data-is-pinned="userSettingsIsPinned" :class="{ 'is-pinned': userSettingsIsPinned, 'is-settings-controls': currentSettingsIsControls }")
+dialog.user-settings.narrow.is-pinnable(v-if="visible" :open="visible" ref="dialogElement" @click.left.stop="closeChildDialogs" :style="{'max-height': state.dialogHeight + 'px'}" :data-is-pinned="userSettingsIsPinned" :class="{ 'is-pinned': userSettingsIsPinned, 'is-settings-overflow-auto': currentSettingsIsControls || currentSettingsIsCards }")
   section
     .row.title-row
       p
@@ -102,7 +102,7 @@ dialog.user-settings.narrow.is-pinnable(v-if="visible" :open="visible" ref="dial
 dialog.user-settings
   left initial
   right 16px
-  &.is-settings-controls
+  &.is-settings-overflow-auto
     overflow auto
   &.is-pinned
     left initial
