@@ -5,7 +5,7 @@ import { useStore } from 'vuex'
 import Loader from '@/components/Loader.vue'
 import utils from '@/utils.js'
 
-import fuzzy from '@/libs/fuzzy.js'
+import createFuzzySearch from '@nozbe/microfuzz'
 import dayjs from 'dayjs'
 
 const store = useStore()
@@ -128,19 +128,21 @@ const autoFocus = async () => {
 const updateFilter = (newValue) => {
   state.filter = newValue
   emit('updateFilter', state.filter)
-  const options = {
-    pre: '',
-    post: '',
-    extract: (item) => {
-      let name = item.name || ''
-      return name
-    }
-  }
-  const filtered = fuzzy.filter(state.filter, props.items, options)
-  const items = filtered.map(item => {
-    let result = utils.clone(item.original)
-    result.matchIndexes = item.indices
-    return result
+  const fuzzySearch = createFuzzySearch(props.items, {
+    key: 'name'
+  })
+  let results = fuzzySearch(state.filter)
+  const items = results.map(result => {
+    let matchIndexes = []
+    result.matches.forEach(match => {
+      match.forEach(matchRange => {
+        // match = [0, 2]
+        const range = utils.generateRange(matchRange[0], matchRange[1]) // [0,1,2]
+        matchIndexes = matchIndexes.concat(range)
+      })
+    })
+    result.item.matchIndexes = matchIndexes
+    return result.item
   })
   emit('updateFilteredItems', items)
 }

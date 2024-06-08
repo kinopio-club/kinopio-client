@@ -689,6 +689,15 @@ export default {
     array = array.filter(item => Boolean(item))
     return array
   },
+  generateRange (start, end) {
+    // converts 0,2 to [0,1,2]
+    let rangeArray = []
+    for (let i = start; i <= end; i++) {
+      rangeArray.push(i)
+    }
+    console.log(start, end, rangeArray)
+    return rangeArray
+  },
   normalizeToUnixTime (date) {
     return new Date(date).getTime()
   },
