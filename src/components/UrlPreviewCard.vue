@@ -180,7 +180,7 @@ const description = computed(() => {
       iframe(:srcdoc="card.urlPreviewEmbedHtml" :class="{ ignore: isInteractingWithItem }" :style="{ height: iframeHeight + 'px' }")
     .embed(v-else v-html="card.urlPreviewEmbedHtml")
 
-  .row.info.badge.status.embed-info(v-if="!shouldHideInfo" :style="{background: background}")
+  .row.info.badge.status(v-if="!shouldHideInfo" :class="{ 'embed-info': card.urlPreviewEmbedHtml }" :style="{background: background}")
     //- play
     .button-wrap.embed-button-wrap(v-if="card.urlPreviewEmbedHtml" @mousedown.stop @touchstart.stop @click.stop="toggleShouldDisplayUrlEmbed" @touchend.stop="toggleShouldDisplayUrlEmbed")
       button.small-button(v-if="!isTwitterUrl")
