@@ -9,7 +9,7 @@ import CodeBlock from '@/components/CodeBlock.vue'
 import utils from '@/utils.js'
 import fonts from '@/data/fonts.js'
 
-import fuzzy from '@/libs/fuzzy.js'
+import createFuzzySearch from '@nozbe/microfuzz'
 import smartquotes from 'smartquotes'
 
 const store = useStore()
@@ -83,16 +83,24 @@ const escapedUrl = (url) => {
 
 const matchIndexes = (name) => {
   if (!name) { return [] }
-  const options = {
-    pre: '',
-    post: ''
-  }
-  const filtered = fuzzy.filter(props.search, [name], options)
-  if (filtered.length) {
-    return filtered[0].indices
-  } else {
-    return []
-  }
+  const nameObject = [ { name } ]
+  const fuzzySearch = createFuzzySearch(nameObject, {
+    getText: (item) => [item.name, item.urlPreviewTitle, item.urlPreviewDescription]
+  })
+  let results = fuzzySearch(props.search)
+  console.log(results)
+  let matchIndexes = []
+  results.forEach(result => {
+    result.matches = result.matches.filter(match => Boolean(match))
+    result.matches.forEach(match => {
+      match.forEach(matchRange => {
+        // match = [0, 2]
+        const range = utils.generateRange(matchRange[0], matchRange[1]) // [0,1,2]
+        matchIndexes = matchIndexes.concat(range)
+      })
+    })
+  })
+  return matchIndexes || []
 }
 
 // click

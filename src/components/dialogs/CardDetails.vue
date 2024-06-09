@@ -218,7 +218,7 @@ const spacePrivacyIsClosed = computed(() => store.state.currentSpace.privacy ===
 const isInSearchResultsCards = computed(() => {
   const results = store.state.searchResultsCards
   if (!results.length) { return }
-  return Boolean(results.find(card => card.value.id === card.id))
+  return Boolean(results.find(cardResult => card.value.id === cardResult.id))
 })
 const canEditSpace = computed(() => store.getters['currentUser/canEditSpace']())
 const isInvitedButCannotEditSpace = computed(() => store.getters['currentUser/isInvitedButCannotEditSpace']())

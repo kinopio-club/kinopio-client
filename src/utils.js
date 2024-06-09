@@ -689,6 +689,14 @@ export default {
     array = array.filter(item => Boolean(item))
     return array
   },
+  generateRange (start, end) {
+    // converts 0,2 to [0,1,2]
+    let rangeArray = []
+    for (let i = start; i <= end; i++) {
+      rangeArray.push(i)
+    }
+    return rangeArray
+  },
   normalizeToUnixTime (date) {
     return new Date(date).getTime()
   },
@@ -804,6 +812,16 @@ export default {
   setCssVariable (key, value) {
     document.documentElement.style.setProperty(`--${key}`, value)
   },
+  colorsAreEqual (color1, color2) {
+    color1 = this.colorToRGB(color1)
+    color2 = this.colorToRGB(color2)
+    return color1 === color2
+  },
+  colorToRGB (color) {
+    const { r, g, b } = colord(color).toRgb()
+    return `rgba(${r}, ${g}, ${b})`
+  },
+
   // colorToRGBA (color, opacity) {
   //   opacity = opacity || '1'
   //   const { r, g, b } = colord(color).toRgb()

@@ -24,9 +24,9 @@ onMounted(() => {
     if (mutation.type === 'updatePageSizes') {
       updateHeights()
     } else if (mutation.type === 'triggerSearchScopeIsRemote') {
-      updateScopeIsLocal(false)
-    } else if (mutation.type === 'triggerSearchScopeIsLocal') {
-      updateScopeIsLocal(true)
+      updateScopeIsCurrentSpace(false)
+    } else if (mutation.type === 'triggerSearchScopeIsCurrentSpace') {
+      updateScopeIsCurrentSpace(true)
     }
   })
 })
@@ -40,7 +40,7 @@ const state = reactive({
   isLoading: false,
   cardsBySpace: [],
   cardsBySpaceFlattened: [],
-  scopeIsLocal: true,
+  scopeIsCurrentSpace: true,
   hasSearched: false
 })
 
@@ -66,8 +66,8 @@ const currentUserIsSignedIn = computed(() => store.getters['currentUser/isSigned
 
 const search = computed(() => store.state.search)
 const noResults = computed(() => state.hasSearched && !state.cardsBySpace.length)
-const updateScopeIsLocal = (value) => {
-  state.scopeIsLocal = value
+const updateScopeIsCurrentSpace = (value) => {
+  state.scopeIsCurrentSpace = value
   updateSearch(search.value)
 }
 const updateSearch = async (search) => {
@@ -75,7 +75,7 @@ const updateSearch = async (search) => {
   if (!search) {
     clearSearch()
   }
-  if (search && !state.scopeIsLocal) {
+  if (search && !state.scopeIsCurrentSpace) {
     await searchRemoteCards(search)
   }
   await nextTick()
@@ -142,7 +142,7 @@ const cards = computed(() => {
   }
 })
 const cardsToSearch = computed(() => {
-  if (state.scopeIsLocal) {
+  if (state.scopeIsCurrentSpace) {
     return recentlyUpdatedCards.value
   } else {
     return searchResultsCards.value
@@ -190,7 +190,7 @@ const selectSpaceCard = (card) => {
 const selectCurrentFocusedItem = (event) => {
   store.commit('shouldPreventNextEnterKey', true)
   store.dispatch('closeAllDialogs')
-  if (state.scopeIsLocal) {
+  if (state.scopeIsCurrentSpace) {
     selectCard(previousResultItem.value)
   } else {
     if (previousResultItem.value.isSpace) {
@@ -234,7 +234,7 @@ const focusItem = (item) => {
   store.commit('previousResultItem', item)
 }
 const itemsToFocus = computed(() => {
-  if (state.scopeIsLocal) {
+  if (state.scopeIsCurrentSpace) {
     return cards.value
   } else {
     return state.cardsBySpaceFlattened
@@ -248,7 +248,7 @@ const placeholder = computed(() => {
   let text = 'Search Cards'
   let shift = ''
   if (!utils.isMobile()) {
-    if (!state.scopeIsLocal) {
+    if (!state.scopeIsCurrentSpace) {
       shift = 'Shift-'
     }
     text = text + ` (${utils.metaKey()}-${shift}F)`
@@ -318,12 +318,12 @@ dialog.search.is-pinnable(@click="closeDialogs" v-if="visible" :open="visible" r
       @selectItem="selectCurrentFocusedItem"
     )
     .segmented-buttons
-      button(@click="updateScopeIsLocal(true)" :class="{ active: state.scopeIsLocal }")
+      button(@click="updateScopeIsCurrentSpace(true)" :class="{ active: state.scopeIsCurrentSpace }")
         span Current Space
-      button(@click="updateScopeIsLocal(false)" :class="{ active: !state.scopeIsLocal }")
+      button(@click="updateScopeIsCurrentSpace(false)" :class="{ active: !state.scopeIsCurrentSpace }")
         span All Spaces
 
-    template(v-if="state.scopeIsLocal")
+    template(v-if="state.scopeIsCurrentSpace")
       CardList(:cards="cards" :search="search" @selectCard="selectCard")
     template(v-else)
       SpaceCardList(:groupedItems="state.cardsBySpace" :search="search" :state.isLoading="state.isLoading" @selectSpace="changeSpace" @selectCard="selectSpaceCard")

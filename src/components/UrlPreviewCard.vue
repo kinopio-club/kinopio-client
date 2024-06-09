@@ -1,10 +1,13 @@
 <script setup>
+import { reactive, computed, onMounted, defineProps, defineEmits, watch, ref, nextTick } from 'vue'
+import { useStore } from 'vuex'
+
 import Loader from '@/components/Loader.vue'
 import utils from '@/utils.js'
 import consts from '@/consts.js'
 
-import { reactive, computed, onMounted, defineProps, defineEmits, watch, ref, nextTick } from 'vue'
-import { useStore } from 'vuex'
+import { colord, extend } from 'colord'
+
 const store = useStore()
 
 let hasRetried
@@ -28,6 +31,24 @@ const selectedColor = computed(() => {
   return props.user.color
 })
 const isInteractingWithItem = computed(() => store.getters.isInteractingWithItem)
+
+// background color
+
+const isThemeDark = computed(() => store.getters['themes/isThemeDark'])
+const background = computed(() => {
+  const colorDelta = 0.05
+  let color = props.backgroundColor
+  const defaultColor = utils.cssVariable('secondary-background')
+  const colorIsDefaultColor = utils.colorsAreEqual(color, defaultColor)
+  if (colorIsDefaultColor || !color) { return }
+  // adapt background color to custom card background color
+  if (isThemeDark.value) {
+    color = colord(color).lighten(colorDelta).toHex()
+  } else {
+    color = colord(color).darken(colorDelta).toHex()
+  }
+  return color
+})
 
 // url embed (spotify, youtube, etc.)
 
@@ -147,7 +168,7 @@ const description = computed(() => {
 
 <template lang="pug">
 //- image
-.url-preview-card(v-if="visible" :style="{background: props.backgroundColor}" :class="{'is-image-card': props.isImageCard}")
+.url-preview-card(v-if="visible" :style="{background: background}" :class="{'is-image-card': props.isImageCard}")
   //- image
   template(v-if="!shouldDisplayUrlEmbed")
     .preview-image-wrap(v-if="card.urlPreviewImage && !shouldHideImage")
@@ -159,7 +180,7 @@ const description = computed(() => {
       iframe(:srcdoc="card.urlPreviewEmbedHtml" :class="{ ignore: isInteractingWithItem }" :style="{ height: iframeHeight + 'px' }")
     .embed(v-else v-html="card.urlPreviewEmbedHtml")
 
-  .row.info.badge.status.embed-info(v-if="!shouldHideInfo" :style="{background: props.backgroundColor}")
+  .row.info.badge.status(v-if="!shouldHideInfo" :class="{ 'embed-info': card.urlPreviewEmbedHtml }" :style="{background: background}")
     //- play
     .button-wrap.embed-button-wrap(v-if="card.urlPreviewEmbedHtml" @mousedown.stop @touchstart.stop @click.stop="toggleShouldDisplayUrlEmbed" @touchend.stop="toggleShouldDisplayUrlEmbed")
       button.small-button(v-if="!isTwitterUrl")

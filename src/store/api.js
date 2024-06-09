@@ -1085,13 +1085,13 @@ const self = {
     urlPreview: async (context, url) => {
       try {
         const apiKey = consts.iframelyApiKey
-        const host = 'https://iframe.ly/api/iframely'
-        const response = await fetch(`${consts.apiHost()}/?url=${encodeURIComponent(url)}&api_key=${apiKey}&autoplay=1`)
+        const iframely = 'https://iframe.ly/api/iframely'
+        const response = await fetch(`${iframely}/?url=${encodeURIComponent(url)}&api_key=${apiKey}&autoplay=1`)
         if (response.status !== 200) {
           throw new Error(response.status)
         }
         const data = await normalizeResponse(response)
-        return { url, data, response, host }
+        return { url, data, response, host: iframely }
       } catch (error) {
         context.dispatch('handleServerError', { name: 'urlPreview', error })
       }
