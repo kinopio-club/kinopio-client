@@ -36,7 +36,7 @@ const isInteractingWithItem = computed(() => store.getters.isInteractingWithItem
 
 const isThemeDark = computed(() => store.getters['themes/isThemeDark'])
 const background = computed(() => {
-  const colorDelta = 0.05
+  const colorDelta = 0.1
   let color = props.backgroundColor
   const defaultColor = utils.cssVariable('secondary-background')
   const colorIsDefaultColor = utils.colorsAreEqual(color, defaultColor)
