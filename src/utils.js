@@ -695,7 +695,6 @@ export default {
     for (let i = start; i <= end; i++) {
       rangeArray.push(i)
     }
-    console.log(start, end, rangeArray)
     return rangeArray
   },
   normalizeToUnixTime (date) {
