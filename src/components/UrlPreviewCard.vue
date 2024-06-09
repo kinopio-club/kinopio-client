@@ -29,6 +29,14 @@ const selectedColor = computed(() => {
 })
 const isInteractingWithItem = computed(() => store.getters.isInteractingWithItem)
 
+const background = computed(() => {
+  const color = props.backgroundColor
+  const defaultColor = utils.cssVariable('secondary-background')
+  const colorIsDefaultColor = utils.colorsAreEqual(color, defaultColor)
+  if (colorIsDefaultColor) { return }
+  return color
+})
+
 // url embed (spotify, youtube, etc.)
 
 const toggleShouldDisplayUrlEmbed = () => {
@@ -147,7 +155,7 @@ const description = computed(() => {
 
 <template lang="pug">
 //- image
-.url-preview-card(v-if="visible" :style="{background: props.backgroundColor}" :class="{'is-image-card': props.isImageCard}")
+.url-preview-card(v-if="visible" :style="{background: background}" :class="{'is-image-card': props.isImageCard}")
   //- image
   template(v-if="!shouldDisplayUrlEmbed")
     .preview-image-wrap(v-if="card.urlPreviewImage && !shouldHideImage")
@@ -159,7 +167,7 @@ const description = computed(() => {
       iframe(:srcdoc="card.urlPreviewEmbedHtml" :class="{ ignore: isInteractingWithItem }" :style="{ height: iframeHeight + 'px' }")
     .embed(v-else v-html="card.urlPreviewEmbedHtml")
 
-  .row.info.badge.status.embed-info(v-if="!shouldHideInfo" :style="{background: props.backgroundColor}")
+  .row.info.badge.status.embed-info(v-if="!shouldHideInfo" :style="{background: background}")
     //- play
     .button-wrap.embed-button-wrap(v-if="card.urlPreviewEmbedHtml" @mousedown.stop @touchstart.stop @click.stop="toggleShouldDisplayUrlEmbed" @touchend.stop="toggleShouldDisplayUrlEmbed")
       button.small-button(v-if="!isTwitterUrl")
