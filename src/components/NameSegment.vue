@@ -85,11 +85,13 @@ const matchIndexes = (name) => {
   if (!name) { return [] }
   const nameObject = [ { name } ]
   const fuzzySearch = createFuzzySearch(nameObject, {
-    key: 'name'
+    getText: (item) => [item.name, item.urlPreviewTitle, item.urlPreviewDescription]
   })
   let results = fuzzySearch(props.search)
+  console.log(results)
   let matchIndexes = []
   results.forEach(result => {
+    result.matches = result.matches.filter(match => Boolean(match))
     result.matches.forEach(match => {
       match.forEach(matchRange => {
         // match = [0, 2]

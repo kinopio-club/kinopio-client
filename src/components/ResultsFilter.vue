@@ -129,11 +129,12 @@ const updateFilter = (newValue) => {
   state.filter = newValue
   emit('updateFilter', state.filter)
   const fuzzySearch = createFuzzySearch(props.items, {
-    key: 'name'
+    getText: (item) => [item.name, item.urlPreviewTitle, item.urlPreviewDescription]
   })
   let results = fuzzySearch(state.filter)
   const items = results.map(result => {
     let matchIndexes = []
+    result.matches = result.matches.filter(match => Boolean(match))
     result.matches.forEach(match => {
       match.forEach(matchRange => {
         // match = [0, 2]
