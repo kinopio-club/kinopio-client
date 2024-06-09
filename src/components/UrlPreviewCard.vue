@@ -1,10 +1,13 @@
 <script setup>
+import { reactive, computed, onMounted, defineProps, defineEmits, watch, ref, nextTick } from 'vue'
+import { useStore } from 'vuex'
+
 import Loader from '@/components/Loader.vue'
 import utils from '@/utils.js'
 import consts from '@/consts.js'
 
-import { reactive, computed, onMounted, defineProps, defineEmits, watch, ref, nextTick } from 'vue'
-import { useStore } from 'vuex'
+import { colord, extend } from 'colord'
+
 const store = useStore()
 
 let hasRetried
@@ -29,11 +32,21 @@ const selectedColor = computed(() => {
 })
 const isInteractingWithItem = computed(() => store.getters.isInteractingWithItem)
 
+// background color
+
+const isThemeDark = computed(() => store.getters['themes/isThemeDark'])
 const background = computed(() => {
-  const color = props.backgroundColor
+  const colorDelta = 0.05
+  let color = props.backgroundColor
   const defaultColor = utils.cssVariable('secondary-background')
   const colorIsDefaultColor = utils.colorsAreEqual(color, defaultColor)
-  if (colorIsDefaultColor) { return }
+  if (colorIsDefaultColor || !color) { return }
+  // adapt background color to custom card background color
+  if (isThemeDark.value) {
+    color = colord(color).lighten(colorDelta).toHex()
+  } else {
+    color = colord(color).darken(colorDelta).toHex()
+  }
   return color
 })
 
