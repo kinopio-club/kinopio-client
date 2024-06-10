@@ -20,8 +20,10 @@ const start = (event, action) => {
   store.dispatch('currentCards/incrementZ', props.card.id)
   let cardIds = [props.card.id]
   const multipleCardsSelectedIds = store.state.multipleCardsSelectedIds
-  if (multipleCardsSelectedIds.length) {
+  if (multipleCardsSelectedIds.includes(props.card.id)) {
     cardIds = multipleCardsSelectedIds
+  } else {
+    store.commit('clearMultipleSelected')
   }
   const updates = {
     userId: store.state.currentUser.id,
