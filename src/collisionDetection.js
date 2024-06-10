@@ -1,22 +1,34 @@
 const gridSize = 5
 
 export default {
+
+  // handle rects with tilt
+
+  degreesToRadians (degrees) {
+    return degrees * (Math.PI / 180)
+  },
+  rotatePoint (point, rect, angle) {
+    const pivotOrigin = {
+      x: rect.x + rect.width,
+      y: rect.y
+    }
+    const xDiff = point.x - pivotOrigin.x
+    const yDiff = point.y - pivotOrigin.y
+    const cosAngle = Math.cos(angle)
+    const sinAngle = Math.sin(angle)
+    const x = pivotOrigin.x + (xDiff * cosAngle - yDiff * sinAngle)
+    const y = pivotOrigin.y + (xDiff * sinAngle + yDiff * cosAngle)
+    return { x, y }
+  },
+
+  // check rects
+
   getGridCell (x, y) {
     return {
       col: Math.floor(x / gridSize),
       row: Math.floor(y / gridSize)
     }
   },
-
-  isPointInsideRect (point, rect) {
-    return (
-      point.x >= rect.x &&
-      point.x <= rect.x + rect.width &&
-      point.y >= rect.y &&
-      point.y <= rect.y + rect.height
-    )
-  },
-
   createGrid (rects) {
     const grid = new Map()
     rects.forEach(rect => {
@@ -34,7 +46,6 @@ export default {
     })
     return grid
   },
-
   checkPointsInRects (points, rects, grid) {
     grid = grid || this.createGrid(rects, gridSize)
     const matchingRects = new Set()
@@ -43,14 +54,34 @@ export default {
       const cellKey = `${cell.row},${cell.col}`
       if (grid.has(cellKey)) {
         for (let rect of grid.get(cellKey)) {
-          if (this.isPointInsideRect(point, rect)) {
-            matchingRects.add(rect)
+          // rotated rect
+          if (rect.tilt) {
+            const angleRad = this.degreesToRadians(rect.tilt)
+            const rotatedPoint = this.rotatePoint(point, rect, -angleRad)
+            if (this.isPointInsideRect(rotatedPoint, rect)) {
+              matchingRects.add(rect)
+            }
+          // rect
+          } else {
+            if (this.isPointInsideRect(point, rect)) {
+              matchingRects.add(rect)
+            }
           }
         }
       }
     }
     return Array.from(matchingRects)
   },
+  isPointInsideRect (point, rect) {
+    return (
+      point.x >= rect.x &&
+      point.x <= rect.x + rect.width &&
+      point.y >= rect.y &&
+      point.y <= rect.y + rect.height
+    )
+  },
+
+  // check paths
 
   checkPointsInsidePaths (points, paths, svg) {
     // Convert points to SVG points
@@ -59,7 +90,6 @@ export default {
       let svgPoint = svg.createSVGPoint()
       svgPoint.x = point.x
       svgPoint.y = point.y
-
       return svgPoint
     })
     // Iterate through each SVG path in the DOM
