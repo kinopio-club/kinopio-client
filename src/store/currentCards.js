@@ -929,8 +929,9 @@ const currentCards = {
           id: cardData.id,
           x: cardData.x,
           y: cardData.y,
-          width: rect.width || cardData.width,
-          height: rect.height || cardData.height
+          width: Math.round(rect.width || cardData.width),
+          height: Math.round(rect.height || cardData.height),
+          tilt: cardData.tilt
         }
         cards.push(card)
       })
