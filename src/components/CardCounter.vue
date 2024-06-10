@@ -46,6 +46,7 @@ const decrement = () => {
 .card-counter
   display flex
   min-width 68px
+  width max-content
   .counter-buttons
     margin-right 5px
     button
