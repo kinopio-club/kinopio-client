@@ -489,7 +489,7 @@ section.subsection.style-actions(v-if="visible" @click.left.stop="closeDialogs")
 
     //- Lock
     .button-wrap
-      button(:disabled="!canEditAll" @click="toggleIsLocked" :class="{active: isLocked}" title="Lock Card to Background")
+      button(:disabled="!canEditAll" @click="toggleIsLocked" :class="{active: isLocked}" title="Lock to Background")
         img.icon(src="@/assets/lock.svg")
     //- Comment
     .button-wrap(v-if="isCards")

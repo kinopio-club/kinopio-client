@@ -18,12 +18,8 @@ const isThemeDark = computed(() => store.state.currentUser.theme === 'dark')
 </script>
 
 <template lang="pug">
-//- boxes
-template(v-for="box in lockedBoxes")
-  BoxUnlockButton(:box="box")
-//- cards
-template(v-for="card in lockedCards")
-  CardUnlockButton(:card="card")
+BoxUnlockButton(v-for="box in lockedBoxes" :box="box" :key="box.id")
+CardUnlockButton(v-for="card in lockedCards" :card="card" :key="card.id")
 </template>
 
 <style lang="stylus">
