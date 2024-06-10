@@ -85,6 +85,7 @@ const store = createStore({
     currentUserIsHoveringOverConnectionId: '',
     currentUserIsHoveringOverCardId: '',
     currentUserIsHoveringOverConnectorCardId: '',
+    currentUserIsHoveringOverCheckboxCardId: '',
     currentUserIsPanningReady: false,
     currentUserIsPanning: false,
     currentUserToolbar: 'card', // card, box
@@ -594,6 +595,10 @@ const store = createStore({
     currentUserIsHoveringOverConnectorCardId: (state, cardId) => {
       utils.typeCheck({ value: cardId, type: 'string' })
       state.currentUserIsHoveringOverConnectorCardId = cardId
+    },
+    currentUserIsHoveringOverCheckboxCardId: (state, cardId) => {
+      utils.typeCheck({ value: cardId, type: 'string' })
+      state.currentUserIsHoveringOverCheckboxCardId = cardId
     },
     cardDetailsIsVisibleForCardId: (state, cardId) => {
       utils.typeCheck({ value: cardId, type: 'string' })

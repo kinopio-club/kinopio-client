@@ -1664,6 +1664,12 @@ const handleMouseEnterConnector = (event) => {
 const handleMouseLeaveConnector = () => {
   store.commit('currentUserIsHoveringOverConnectorCardId', '')
 }
+const handleMouseEnterCheckbox = () => {
+  store.commit('currentUserIsHoveringOverCheckboxCardId', props.card.id)
+}
+const handleMouseLeaveCheckbox = () => {
+  store.commit('currentUserIsHoveringOverCheckboxCardId', '')
+}
 const updateCurrentCardConnections = () => {
   state.currentCardConnections = store.getters['currentConnections/byCardId'](props.card.id)
 }
@@ -1989,7 +1995,7 @@ article.card-wrap#card(
       //- Comment
       .card-comment(v-if="isComment")
         //- [·]
-        .checkbox-wrap(v-if="hasCheckbox" @mouseup.left="toggleCardChecked" @touchend.prevent="toggleCardChecked")
+        .checkbox-wrap(v-if="hasCheckbox" @mouseup.left="toggleCardChecked" @touchend.prevent="toggleCardChecked" @mouseenter="handleMouseEnterCheckbox" @mouseleave="handleMouseLeaveCheckbox")
           label(:class="{active: isChecked, disabled: !canEditSpace}")
             input(name="checkbox" type="checkbox" v-model="checkboxState")
         //- Name
