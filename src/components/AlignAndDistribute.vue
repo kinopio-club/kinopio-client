@@ -259,11 +259,11 @@ export default {
     spaceCounterZoomDecimal () { return this.$store.getters.spaceCounterZoomDecimal },
     spaceZoomDecimal () { return this.$store.getters.spaceZoomDecimal },
     sortedByX () {
-      const editableCards = this.editableCards
+      const editableCards = utils.clone(this.editableCards)
       const cards = editableCards.sort((a, b) => {
         return a.x - b.x
       })
-      const editableBoxes = this.editableBoxes
+      const editableBoxes = utils.clone(this.editableBoxes)
       let boxes = this.normalizeBoxes(editableBoxes)
       boxes = boxes.sort((a, b) => {
         return a.x - b.x
@@ -272,11 +272,11 @@ export default {
       return { cards, boxes, all }
     },
     sortedByY () {
-      const editableCards = this.editableCards
+      const editableCards = utils.clone(this.editableCards)
       const cards = editableCards.sort((a, b) => {
         return a.y - b.y
       })
-      const editableBoxes = this.editableBoxes
+      const editableBoxes = utils.clone(this.editableBoxes)
       let boxes = this.normalizeBoxes(editableBoxes)
       boxes = boxes.sort((a, b) => {
         return a.y - b.y
@@ -285,11 +285,11 @@ export default {
       return { cards, boxes, all }
     },
     sortedByXWidth () {
-      const editableCards = this.editableCards
+      const editableCards = utils.clone(this.editableCards)
       const cards = editableCards.sort((a, b) => {
         return (b.x + b.width) - (a.x + a.width)
       })
-      const editableBoxes = this.editableBoxes
+      const editableBoxes = utils.clone(this.editableBoxes)
       let boxes = this.normalizeBoxes(editableBoxes)
       boxes = boxes.sort((a, b) => {
         return (b.x + b.width) - (a.x + a.width)
@@ -298,11 +298,11 @@ export default {
       return { cards, boxes, all }
     },
     sortedByYHeight () {
-      const editableCards = this.editableCards
+      const editableCards = utils.clone(this.editableCards)
       const cards = editableCards.sort((a, b) => {
         return (b.y + b.height) - (a.y + a.height)
       })
-      const editableBoxes = this.editableBoxes
+      const editableBoxes = utils.clone(this.editableBoxes)
       let boxes = this.normalizeBoxes(editableBoxes)
       boxes = boxes.sort((a, b) => {
         return (b.y + b.height) - (a.y + a.height)
