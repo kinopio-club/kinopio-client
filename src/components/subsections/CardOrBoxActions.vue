@@ -350,6 +350,16 @@ const updateHeaderFont = async (font) => {
   await nextTick()
   store.dispatch('currentConnections/updateMultiplePaths', props.cards)
 }
+const udpateHeaderFontSize = async (size) => {
+  props.cards.forEach(card => {
+    updateCard(card, { headerFontSize: size })
+  })
+  props.boxes.forEach(box => {
+    updateBox(box, { headerFontSize: size })
+  })
+  await nextTick()
+  store.dispatch('currentConnections/updateMultiplePaths', props.cards)
+}
 
 // lock
 
@@ -457,7 +467,7 @@ section.subsection.style-actions(v-if="visible" @click.left.stop="closeDialogs")
       //- Fonts
       button.toggle-fonts-button.small-button(v-if="isH1OrH2Selected" @click.stop="toggleFontPickerIsVisible" :class="{ active: state.fontPickerIsVisible }")
         span Fonts
-      FontPicker(:visible="state.fontPickerIsVisible" :cards="cards" :boxes="boxes" @selectFont="updateHeaderFont")
+      FontPicker(:visible="state.fontPickerIsVisible" :cards="cards" :boxes="boxes" @selectFont="updateHeaderFont" @selectFontSize="udpateHeaderFontSize")
     //- Tag
     .button-wrap(v-if="isCards")
       button(:disabled="!canEditAll" @click.left.stop="toggleTagPickerIsVisible" :class="{ active: state.tagPickerIsVisible }")

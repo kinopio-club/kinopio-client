@@ -16,7 +16,7 @@ onMounted(() => {
   })
 })
 
-const emit = defineEmits(['selectFont'])
+const emit = defineEmits(['selectFont', 'selectFontSize'])
 
 const props = defineProps({
   visible: Boolean,
@@ -48,27 +48,47 @@ const scrollIntoView = () => {
 }
 const isThemeDark = computed(() => store.getters['themes/isThemeDark'])
 
-// fonts
-
-const selectFont = (font) => {
-  emit('selectFont', font)
-}
 const items = computed(() => {
   let array = props.cards.concat(props.boxes)
   array = array.filter(item => Boolean(item))
   return array
 })
+
+// fonts
+
 const fontIsSelected = (font) => {
   return items.value.find(item => {
     const currentFontId = item.headerFontId || 0
     return currentFontId === font.id
   })
 }
+const selectFont = (font) => {
+  emit('selectFont', font)
+}
+
+// font size
+
+const isFontSize = (size) => {
+  return items.value.find(item => {
+    const currentFontId = item.headerFontSize || 's'
+    return currentFontId === size
+  })
+}
+const selectFontSize = (size) => {
+  emit('selectFontSize', size)
+}
 </script>
 
 <template lang="pug">
 dialog.narrow.font-picker(v-if="visible" :open="visible" ref="dialogElement" @click.left.stop :style="{'max-height': state.dialogHeight + 'px'}")
   section.results-section
+    .segmented-buttons.font-size-buttons
+      button.small-button(:class="{active: isFontSize('s')}" @click="selectFontSize('s')")
+        span S
+      button.small-button(:class="{active: isFontSize('m')}" @click="selectFontSize('m')")
+        span M
+      button.small-button(:class="{active: isFontSize('l')}" @click="selectFontSize('l')")
+        span L
     ul.results-list(:class="{'is-dark-theme': isThemeDark}")
       template(v-for="font in fonts" :key="font.id")
         li(:class="{active: fontIsSelected(font)}" @click.left="selectFont(font)" tabindex="0" v-on:keyup.enter="selectFont(font)")
@@ -96,5 +116,8 @@ dialog.font-picker
   .is-dark-theme
     img
       filter invert()
+  .font-size-buttons
+    .small-button
+      padding 0 5px
 
 </style>

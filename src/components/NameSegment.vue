@@ -22,7 +22,8 @@ const props = defineProps({
   isStrikeThrough: Boolean,
   parentCardId: String,
   backgroundColorIsDark: Boolean,
-  headerFontId: Number
+  headerFontId: Number,
+  headerFontSize: String
 })
 const emit = defineEmits(['showTagDetailsIsVisible'])
 
@@ -33,14 +34,19 @@ const currentSelectedOtherItem = computed(() => { return store.state.currentSele
 
 // styling
 
-const classes = computed(() => {
+const nameSegmentClasses = computed(() => {
   const fontId = props.headerFontId || 0
-  const font = fonts.find(item => item.id === fontId)
-  const fontSize = font?.size || ''
-  return [
+  const fontSize = props.headerFontSize || 's'
+  let classes = [
     `header-font-${fontId}`,
     `header-font-size-${fontSize}`
   ]
+  const font = fonts.find(item => item.id === fontId)
+  const fontSizeModifier = font?.size || ''
+  if (fontSizeModifier) {
+    classes.push(`header-font-size-modifier-${fontSizeModifier}`)
+  }
+  return classes
 })
 const smartQuotes = (string) => {
   return smartquotes(string)
@@ -123,7 +129,7 @@ const showTagDetailsIsVisible = (event, tag) => {
 </script>
 
 <template lang="pug">
-span.name-segment(:data-segment-types="dataMarkdownType" :data-tag-color="dataTagColor" :data-tag-name="dataTagName" :class="classes")
+span.name-segment(:data-segment-types="dataMarkdownType" :data-tag-color="dataTagColor" :data-tag-name="dataTagName" :class="nameSegmentClasses")
   template(v-if="props.segment.isText && props.segment.content")
     //- Name markdown
     span.markdown(v-if="props.segment.markdown" :class="{ 'is-background-dark': backgroundColorIsDark, 'is-background-light': !backgroundColorIsDark }")
@@ -188,12 +194,24 @@ span.name-segment(:data-segment-types="dataMarkdownType" :data-tag-color="dataTa
     --header-font var(--header-font-8)
   &.header-font-9
     --header-font var(--header-font-9)
-  &.header-font-size-s
+  &.header-font-size-modifier-s
     .markdown
       h1
         font-size 20px
       h2
         font-size 18px
+  &.header-font-size-m
+    .markdown
+      h1
+        font-size 44px
+      h2
+        font-size 36px
+  &.header-font-size-l
+    .markdown
+      h1
+        font-size 66px
+      h2
+        font-size 52px
 
   > .button-badge
     vertical-align 1px
