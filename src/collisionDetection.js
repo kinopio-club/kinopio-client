@@ -1,4 +1,7 @@
-const gridSize = 5
+import utils from '@/utils.js'
+
+const gridSize = 10
+let zoom
 
 export default {
 
@@ -30,10 +33,11 @@ export default {
     }
   },
   createGrid (rects) {
+    zoom = utils.spaceCounterZoomDecimal()
     const grid = new Map()
     rects.forEach(rect => {
       const topLeft = this.getGridCell(rect.x, rect.y, gridSize)
-      const bottomRight = this.getGridCell(rect.x + rect.width, rect.y + rect.height, gridSize)
+      const bottomRight = this.getGridCell(rect.x + (rect.width * zoom), rect.y + (rect.height * zoom), gridSize)
       for (let row = topLeft.row; row <= bottomRight.row; row++) {
         for (let col = topLeft.col; col <= bottomRight.col; col++) {
           const cellKey = `${row},${col}`
@@ -75,9 +79,9 @@ export default {
   isPointInsideRect (point, rect) {
     return (
       point.x >= rect.x &&
-      point.x <= rect.x + rect.width &&
+      point.x <= rect.x + (rect.width * zoom) &&
       point.y >= rect.y &&
-      point.y <= rect.y + rect.height
+      point.y <= rect.y + (rect.height * zoom)
     )
   },
 
