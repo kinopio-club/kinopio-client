@@ -518,6 +518,7 @@ export default {
     },
     connectionPathBetweenCards: (state, getters, rootState, rootGetters) => ({ startCard, endCard, startCardId, endCardId, controlPoint, estimatedEndCardConnectorPosition }) => {
       startCard = startCard || rootGetters['currentCards/byId'](startCardId)
+      startCard = utils.updateCardDimensions(startCard)
       endCard = endCard || rootGetters['currentCards/byId'](endCardId)
       if (!startCard || !endCard) { return }
       const start = utils.estimatedCardConnectorPosition(startCard)
