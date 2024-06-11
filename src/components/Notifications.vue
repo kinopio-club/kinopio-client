@@ -336,7 +336,7 @@ aside.notifications(@click.left="closeAllDialogs")
       button(@click.stop="showRemoved")
         img.icon(src="@/assets/remove.svg")
         img.icon.remove-undo(src="@/assets/undo.svg")
-        span Restore or Permanently Delete
+        span Undo
 
   .item(v-if="notifyCardsCreatedIsNearLimit" @animationend="resetNotifyCardsCreatedIsNearLimit")
     p You can add {{cardsCreatedCountFromLimit}} more cards before you'll need to upgrade
