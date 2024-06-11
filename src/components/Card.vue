@@ -1999,7 +1999,7 @@ article.card-wrap#card(
           label(:class="{active: isChecked, disabled: !canEditSpace}")
             input(name="checkbox" type="checkbox" v-model="checkboxState")
         //- Name
-        .badge.comment-badge
+        .badge.comment-badge(:class="{'is-light-in-dark-theme': isLightInDarkTheme, 'is-dark-in-light-theme': isDarkInLightTheme}")
           img.icon.view(src="@/assets/comment.svg")
           //- User
           UserLabelInline(:user="createdByUser" :shouldHideName="true")
