@@ -520,7 +520,7 @@ export default {
       startCard = startCard || rootGetters['currentCards/byId'](startCardId)
       endCard = endCard || rootGetters['currentCards/byId'](endCardId)
       if (!startCard || !endCard) { return }
-      const start = utils.connectorCoords(startCard.id)
+      const start = utils.estimatedCardConnectorPosition(startCard)
       const end = estimatedEndCardConnectorPosition || utils.estimatedCardConnectorPosition(endCard)
       const path = getters.connectionPathBetweenCoords(start, end, controlPoint)
       return path
