@@ -53,13 +53,34 @@ const state = reactive({
   opacity: 100
 })
 
+// styles
+
 const updateDialogHeight = async () => {
   if (!props.visible) { return }
   await nextTick()
   let element = dialogElement.value
   state.dialogHeight = utils.elementHeight(element)
 }
+const scrollIntoView = async () => {
+  await nextTick()
+  const element = dialogElement.value
+  utils.scrollIntoView({ element })
+}
+const resetPinchCounterZoomDecimal = () => {
+  store.commit('pinchCounterZoomDecimal', 1)
+}
+const triggerUpdateHeaderAndFooterPosition = () => {
+  store.commit('triggerUpdateHeaderAndFooterPosition')
+}
 
+// colors
+
+const colorIsCurrent = (color) => {
+  return color === props.currentColor
+}
+const removeColor = () => {
+  emit('removeColor')
+}
 const color = computed({
   get () {
     return props.currentColor
@@ -72,40 +93,11 @@ const color = computed({
     }
   }
 })
-const hueIsAll = computed(() => state.currentHue === null)
-const hueIsRed = computed(() => state.currentHue === 'red')
-const hueIsGreen = computed(() => state.currentHue === 'green')
-const hueIsBlue = computed(() => state.currentHue === 'blue')
-const favoriteColors = computed(() => store.state.currentUser.favoriteColors || [])
-const currentColorIsFavorite = computed(() => favoriteColors.value.includes(props.currentColor))
-const isTransparent = computed(() => {
-  const isLabelled = props.currentColor === 'transparent'
-  const isOpacity = state.opacity === 0
-  return isLabelled || isOpacity
-})
-const isDark = computed(() => {
-  const isThemeDark = store.state.currentUser.theme === 'dark'
-  if (isTransparent.value && isThemeDark) {
-    return utils.cssVariable('primary')
-  }
-  return utils.colorIsDark(props.currentColor)
-})
-
-const colorIsCurrent = (color) => {
-  return color === props.currentColor
-}
-const toggleFavoriteColor = () => {
-  const color = { color: props.currentColor }
-  const value = !currentColorIsFavorite.value
-  store.dispatch('currentUser/updateFavoriteColor', { color, value })
-}
-const updateLuminosity = (value) => {
-  if (state.luminosity === value) { return }
-  state.luminosity = value
-  shuffleColors()
-}
-const removeColor = () => {
-  emit('removeColor')
+const select = (color, isFavorite) => {
+  const alpha = colord(color).alpha()
+  const opacity = alpha * 100
+  state.opacity = Math.round(opacity)
+  emit('selectedColor', color)
 }
 const shuffleColors = () => {
   const luminosity = state.luminosity
@@ -116,17 +108,41 @@ const shuffleColors = () => {
   }
   state.colors.unshift(props.currentColor)
 }
-const select = (color, isFavorite) => {
-  const alpha = colord(color).alpha()
-  const opacity = alpha * 100
-  state.opacity = Math.round(opacity)
-  emit('selectedColor', color)
-}
 const updateColorFromInput = (color) => {
   select(color)
   state.colors.pop()
   state.colors.unshift(color)
 }
+
+// luminosity
+
+const updateLuminosity = (value) => {
+  if (state.luminosity === value) { return }
+  state.luminosity = value
+  shuffleColors()
+}
+const updateLuminosityFromTheme = () => {
+  const isThemeDark = store.state.currentUser.theme === 'dark'
+  if (isThemeDark) {
+    updateLuminosity('dark')
+  } else {
+    updateLuminosity('light')
+  }
+}
+
+// rgb hue
+
+const hueIsAll = computed(() => state.currentHue === null)
+const hueIsRed = computed(() => state.currentHue === 'red')
+const hueIsGreen = computed(() => state.currentHue === 'green')
+const hueIsBlue = computed(() => state.currentHue === 'blue')
+const isDark = computed(() => {
+  const isThemeDark = store.state.currentUser.theme === 'dark'
+  if (isTransparent.value && isThemeDark) {
+    return utils.cssVariable('primary')
+  }
+  return utils.colorIsDark(props.currentColor)
+})
 const resetHue = () => {
   const shouldShuffle = state.currentHue !== null
   state.currentHue = null
@@ -148,25 +164,24 @@ const updateButtonHues = () => {
     state.buttonHues[hue] = randomColor({ luminosity, count: 2, hue })
   })
 }
-const resetPinchCounterZoomDecimal = () => {
-  store.commit('pinchCounterZoomDecimal', 1)
+
+// favorites
+
+const favoriteColors = computed(() => store.state.currentUser.favoriteColors || [])
+const currentColorIsFavorite = computed(() => favoriteColors.value.includes(props.currentColor))
+const toggleFavoriteColor = () => {
+  const color = { color: props.currentColor }
+  const value = !currentColorIsFavorite.value
+  store.dispatch('currentUser/updateFavoriteColor', { color, value })
 }
-const triggerUpdateHeaderAndFooterPosition = () => {
-  store.commit('triggerUpdateHeaderAndFooterPosition')
-}
-const scrollIntoView = async () => {
-  await nextTick()
-  const element = dialogElement.value
-  utils.scrollIntoView({ element })
-}
-const updateLuminosityFromTheme = () => {
-  const isThemeDark = store.state.currentUser.theme === 'dark'
-  if (isThemeDark) {
-    updateLuminosity('dark')
-  } else {
-    updateLuminosity('light')
-  }
-}
+
+// opacity
+
+const isTransparent = computed(() => {
+  const isLabelled = props.currentColor === 'transparent'
+  const isOpacity = state.opacity === 0
+  return isLabelled || isOpacity
+})
 const updateOpacity = (value) => {
   state.opacity = Math.round(value)
   const color = colord(props.currentColor).alpha(state.opacity / 100).toRgbString()
@@ -180,7 +195,6 @@ const updateOpacityFromCurrentColor = () => {
   const opacity = alpha * 100
   updateOpacity(opacity)
 }
-
 const toggleOpacity = () => {
   if (state.opacity === 0) {
     updateOpacity(100)
@@ -188,7 +202,6 @@ const toggleOpacity = () => {
     updateOpacity(0)
   }
 }
-
 </script>
 
 <template lang="pug">
@@ -209,9 +222,6 @@ dialog.narrow.color-picker(v-if="visible" :open="visible" ref="dialogElement" @c
     .colors
       template(v-for="color in state.colors")
         button.color(:style="{backgroundColor: color}" :class="{active: colorIsCurrent(color)}" @click.left="select(color)" :title="color")
-
-    //- Current Color Modifiers
-
     //- Opacity
     .row
       img.icon.transparent(src="@/assets/transparent.svg" @click="toggleOpacity")
@@ -247,7 +257,6 @@ dialog.narrow.color-picker(v-if="visible" :open="visible" ref="dialogElement" @c
       .button-wrap
         input(type="color" v-model="color")
         img.spectrum.icon(src="@/assets/spectrum.png")
-
   //- Favorite Colors
   section.favorite-colors
     button.toggle-favorite-color(@click="toggleFavoriteColor")
