@@ -82,23 +82,23 @@ const colorIsDark = computed(() => utils.colorIsDark(color.value))
 const fill = computed(() => normalizedBox.value.fill)
 const hasFill = computed(() => fill.value !== 'empty')
 const infoClasses = computed(() => {
-  let string = ''
+  const classes = []
   if (isPainting.value) {
-    string += ' unselectable'
+    classes.push('unselectable')
   }
   if (colorIsDark.value) {
-    string += ' is-dark'
+    classes.push('is-dark')
   }
   const fontId = props.box.headerFontId || 0
-  string += ` header-font-${fontId}`
+  classes.push(`header-font-${fontId}`)
   const fontSize = props.headerFontSize || 's'
-  string += `${string} header-font-size-${fontSize}`
+  classes.push(`header-font-size-${fontSize}`)
   const font = fonts.find(item => item.id === fontId)
   const fontSizeModifier = font?.size || ''
   if (fontSizeModifier) {
-    string += ` header-font-size-modifier-${fontSizeModifier}`
+    classes.push(`header-font-size-modifier-${fontSizeModifier}`)
   }
-  return string
+  return classes
 })
 
 // edge snapping
