@@ -91,10 +91,6 @@ const isDark = computed(() => {
   return utils.colorIsDark(props.currentColor)
 })
 
-const toggleOpacity = () => {
-  // if opacity=0 then goto max
-  // else goto min
-}
 const colorIsCurrent = (color) => {
   return color === props.currentColor
 }
@@ -183,6 +179,14 @@ const updateOpacityFromCurrentColor = () => {
   const alpha = colord(props.currentColor).alpha()
   const opacity = alpha * 100
   updateOpacity(opacity)
+}
+
+const toggleOpacity = () => {
+  if (state.opacity === 0) {
+    updateOpacity(100)
+  } else {
+    updateOpacity(0)
+  }
 }
 
 </script>
@@ -326,6 +330,8 @@ dialog.narrow.color-picker(v-if="visible" :open="visible" ref="dialogElement" @c
   .icon.transparent
     margin-right 6px
     margin-top -1px
+    cursor pointer
+    pointer-events all
   .slider
     transform translateY(-10px)
     padding-bottom 0
