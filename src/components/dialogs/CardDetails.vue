@@ -278,7 +278,9 @@ const handleEnterKey = (event) => {
   const pickersIsVisible = state.tag.pickerIsVisible || state.space.pickerIsVisible
   console.log('🎹 enter', {
     shouldPreventNextEnterKey: store.state.shouldPreventNextEnterKey,
-    pickersIsVisible
+    pickersIsVisible,
+    isCompositionEvent,
+    event
   })
   if (store.state.shouldPreventNextEnterKey) {
     store.commit('shouldPreventNextEnterKey', false)
