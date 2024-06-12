@@ -91,7 +91,7 @@ const infoClasses = computed(() => {
   }
   const fontId = props.box.headerFontId || 0
   classes.push(`header-font-${fontId}`)
-  const fontSize = props.headerFontSize || 's'
+  const fontSize = props.box.headerFontSize || 's'
   classes.push(`header-font-size-${fontSize}`)
   const font = fonts.find(item => item.id === fontId)
   const fontSizeModifier = font?.size || ''
@@ -695,12 +695,12 @@ const endBoxInfoInteractionTouch = (event) => {
         font-size 16px
     &.header-font-size-m
       h1
-        font-size 40px
+        font-size 44px
       h2
         font-size 36px
     &.header-font-size-l
       h1
-        font-size 60px
+        font-size 66px
       h2
         font-size 52px
 
