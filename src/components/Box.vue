@@ -698,12 +698,15 @@ const endBoxInfoInteractionTouch = (event) => {
         font-size 44px
       h2
         font-size 36px
+      h3
+        font-size 24px
     &.header-font-size-l
       h1
         font-size 66px
       h2
         font-size 52px
-
+      h3
+        font-size 36px
     pointer-events all
     position absolute
     cursor pointer
