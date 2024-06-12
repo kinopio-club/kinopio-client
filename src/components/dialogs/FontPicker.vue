@@ -82,17 +82,19 @@ const selectFontSize = (size) => {
 <template lang="pug">
 dialog.narrow.font-picker(v-if="visible" :open="visible" ref="dialogElement" @click.left.stop :style="{'max-height': state.dialogHeight + 'px'}")
   section.results-section
+    //- size
     .segmented-buttons.font-size-buttons
-      button.small-button(:class="{active: isFontSize('s')}" @click="selectFontSize('s')")
-        span S
-      button.small-button(:class="{active: isFontSize('m')}" @click="selectFontSize('m')")
-        span M
-      button.small-button(:class="{active: isFontSize('l')}" @click="selectFontSize('l')")
-        span L
+      button.small-button(title="Small" :class="{active: isFontSize('s')}" @click="selectFontSize('s')")
+        img.icon.size-small(src="@/assets/size-small.svg")
+      button.small-button(title="Medium" :class="{active: isFontSize('m')}" @click="selectFontSize('m')")
+        img.icon.size-medium(src="@/assets/size-medium.svg")
+      button.small-button(title="Large" :class="{active: isFontSize('l')}" @click="selectFontSize('l')")
+        img.icon.size-large(src="@/assets/size-large.svg")
+    //- font
     ul.results-list(:class="{'is-dark-theme': isThemeDark}")
       template(v-for="font in fonts" :key="font.id")
         li(:class="{active: fontIsSelected(font)}" @click.left="selectFont(font)" tabindex="0" v-on:keyup.enter="selectFont(font)")
-          img(:src="font.previewImage" :title="font.name")
+          img.preview-image(:src="font.previewImage" :title="font.name")
 </template>
 
 <style lang="stylus">
@@ -100,6 +102,11 @@ dialog.font-picker
   min-height 200px
   overflow auto
   width 160px
+  .font-size-buttons
+    .small-button
+      padding 0 5px
+    .icon.size-medium
+      vertical-align -1px
   section
     padding-top 4px
   .badge
@@ -107,17 +114,14 @@ dialog.font-picker
     height 19px
     display block
     padding 0
-  img
+  .preview-image
     width 100%
     vertical-align -5px
     user-select none
     -webkit-user-drag none
     user-drag none
   .is-dark-theme
-    img
+    .preview-image
       filter invert()
-  .font-size-buttons
-    .small-button
-      padding 0 5px
 
 </style>
