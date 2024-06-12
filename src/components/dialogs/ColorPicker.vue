@@ -1,5 +1,211 @@
+<script setup>
+import { reactive, computed, onMounted, onBeforeUnmount, defineProps, defineEmits, watch, ref, nextTick } from 'vue'
+import { useStore } from 'vuex'
+
+import Slider from '@/components/Slider.vue'
+import utils from '@/utils.js'
+
+import randomColor from 'randomcolor'
+import shader from 'shader'
+import { colord } from 'colord'
+
+const store = useStore()
+
+const dialogElement = ref(null)
+
+onMounted(() => {
+  store.subscribe((mutation, state) => {
+    if (mutation.type === 'updatePageSizes') {
+      updateDialogHeight()
+    }
+  })
+})
+
+const emit = defineEmits(['removeColor', 'selectedColor'])
+
+const props = defineProps({
+  currentColor: String,
+  visible: Boolean,
+  removeIsVisible: Boolean,
+  shouldLightenColors: Boolean,
+  recentColors: Array
+})
+watch(() => props.visible, (value, prevValue) => {
+  if (value) {
+    updateLuminosityFromTheme()
+    shuffleColors()
+    updateButtonHues()
+    scrollIntoView()
+    updateOpacityFromCurrentColor()
+    // updateDialogHeight()
+  }
+})
+
+const state = reactive({
+  colors: [],
+  currentHue: null,
+  buttonHues: {
+    red: [],
+    green: [],
+    blue: []
+  },
+  luminosity: 'light',
+  opacity: 100
+})
+
+// styles
+
+const updateDialogHeight = async () => {
+  if (!props.visible) { return }
+  await nextTick()
+  let element = dialogElement.value
+  state.dialogHeight = utils.elementHeight(element)
+}
+const scrollIntoView = async () => {
+  await nextTick()
+  const element = dialogElement.value
+  utils.scrollIntoView({ element })
+}
+const resetPinchCounterZoomDecimal = () => {
+  store.commit('pinchCounterZoomDecimal', 1)
+}
+const triggerUpdateHeaderAndFooterPosition = () => {
+  store.commit('triggerUpdateHeaderAndFooterPosition')
+}
+
+// colors
+
+const colorIsCurrent = (color) => {
+  return color === props.currentColor
+}
+const removeColor = () => {
+  emit('removeColor')
+}
+const color = computed({
+  get () {
+    return props.currentColor
+  },
+  set (color) {
+    if (utils.colorIsValid(color)) {
+      updateColorFromInput(color)
+    } else if (utils.colorIsValid(`#${color}`)) {
+      updateColorFromInput('#' + color)
+    }
+  }
+})
+const select = (color, isFavorite) => {
+  const alpha = colord(color).alpha()
+  const opacity = alpha * 100
+  state.opacity = Math.round(opacity)
+  emit('selectedColor', color)
+}
+const shuffleColors = () => {
+  const luminosity = state.luminosity
+  const isDark = luminosity === 'dark'
+  state.colors = randomColor({ luminosity, count: 14, hue: state.currentHue })
+  if (props.shouldLightenColors && !isDark) {
+    state.colors = state.colors.map(color => shader(color, 0.4))
+  }
+  state.colors.unshift(props.currentColor)
+}
+const updateColorFromInput = (color) => {
+  select(color)
+  state.colors.pop()
+  state.colors.unshift(color)
+}
+
+// luminosity
+
+const updateLuminosity = (value) => {
+  if (state.luminosity === value) { return }
+  state.luminosity = value
+  shuffleColors()
+}
+const updateLuminosityFromTheme = () => {
+  const isThemeDark = store.state.currentUser.theme === 'dark'
+  if (isThemeDark) {
+    updateLuminosity('dark')
+  } else {
+    updateLuminosity('light')
+  }
+}
+
+// rgb hue
+
+const hueIsAll = computed(() => state.currentHue === null)
+const hueIsRed = computed(() => state.currentHue === 'red')
+const hueIsGreen = computed(() => state.currentHue === 'green')
+const hueIsBlue = computed(() => state.currentHue === 'blue')
+const isDark = computed(() => {
+  const isThemeDark = store.state.currentUser.theme === 'dark'
+  if (isTransparent.value && isThemeDark) {
+    return utils.cssVariable('primary')
+  }
+  return utils.colorIsDark(props.currentColor)
+})
+const resetHue = () => {
+  const shouldShuffle = state.currentHue !== null
+  state.currentHue = null
+  if (shouldShuffle) {
+    shuffleColors()
+  }
+}
+const updateHue = (hue) => {
+  const shouldShuffle = state.currentHue !== hue
+  state.currentHue = hue
+  if (shouldShuffle) {
+    shuffleColors()
+  }
+}
+const updateButtonHues = () => {
+  const hues = ['red', 'green', 'blue']
+  const luminosity = state.luminosity
+  hues.forEach(hue => {
+    state.buttonHues[hue] = randomColor({ luminosity, count: 2, hue })
+  })
+}
+
+// favorites
+
+const favoriteColors = computed(() => store.state.currentUser.favoriteColors || [])
+const currentColorIsFavorite = computed(() => favoriteColors.value.includes(props.currentColor))
+const toggleFavoriteColor = () => {
+  const color = { color: props.currentColor }
+  const value = !currentColorIsFavorite.value
+  store.dispatch('currentUser/updateFavoriteColor', { color, value })
+}
+
+// opacity
+
+const isTransparent = computed(() => {
+  const isLabelled = props.currentColor === 'transparent'
+  const isOpacity = state.opacity === 0
+  return isLabelled || isOpacity
+})
+const updateOpacity = (value) => {
+  state.opacity = Math.round(value)
+  const color = colord(props.currentColor).alpha(state.opacity / 100).toRgbString()
+  emit('selectedColor', color)
+}
+const resetOpacity = () => {
+  updateOpacity(100)
+}
+const updateOpacityFromCurrentColor = () => {
+  const alpha = colord(props.currentColor).alpha()
+  const opacity = alpha * 100
+  updateOpacity(opacity)
+}
+const toggleOpacity = () => {
+  if (state.opacity === 0) {
+    updateOpacity(100)
+  } else {
+    updateOpacity(0)
+  }
+}
+</script>
+
 <template lang="pug">
-dialog.narrow.color-picker(v-if="visible" :open="visible" ref="dialog" @click.left.stop)
+dialog.narrow.color-picker(v-if="visible" :open="visible" ref="dialogElement" @click.left.stop :style="{'max-height': state.dialogHeight + 'px'}")
   section
     .row
       .badge.full-width-color-badge(:style="{backgroundColor: currentColor}")
@@ -14,31 +220,27 @@ dialog.narrow.color-picker(v-if="visible" :open="visible" ref="dialog" @click.le
       template(v-for="color in recentColors")
         button.color(:style="{backgroundColor: color}" :class="{active: colorIsCurrent(color)}" @click.left="select(color)" :title="color")
     .colors
-      template(v-for="color in colors")
+      template(v-for="color in state.colors")
         button.color(:style="{backgroundColor: color}" :class="{active: colorIsCurrent(color)}" @click.left="select(color)" :title="color")
-
-    //- Current Color Modifiers
-
     //- Opacity
     .row
-      img.icon.transparent(src="@/assets/transparent.svg")
+      img.icon.transparent(src="@/assets/transparent.svg" @click="toggleOpacity")
       Slider(
         @updatePlayhead="updateOpacity"
         @resetPlayhead="resetOpacity"
         :minValue="0"
-        :value="opacity"
+        :value="state.opacity"
         :maxValue="100"
       )
-
     .row
       //- shuffle
       button(title="shuffle colors" @click.left="shuffleColors")
         img.refresh.icon(src="@/assets/refresh.svg")
       //- luminosity
       .segmented-buttons.luminosity-picker
-        button(title="light colors" :class="{active: luminosity === 'light'}" @click="updateLuminosity('light')")
+        button(title="light colors" :class="{active: state.luminosity === 'light'}" @click="updateLuminosity('light')")
           img.icon(src="@/assets/light.svg")
-        button(title="dark colors" :class="{active: luminosity === 'dark'}" @click="updateLuminosity('dark')")
+        button(title="dark colors" :class="{active: state.luminosity === 'dark'}" @click="updateLuminosity('dark')")
           img.icon(src="@/assets/dark.svg")
     .row
       //- hue
@@ -55,7 +257,6 @@ dialog.narrow.color-picker(v-if="visible" :open="visible" ref="dialog" @click.le
       .button-wrap
         input(type="color" v-model="color")
         img.spectrum.icon(src="@/assets/spectrum.png")
-
   //- Favorite Colors
   section.favorite-colors
     button.toggle-favorite-color(@click="toggleFavoriteColor")
@@ -64,180 +265,11 @@ dialog.narrow.color-picker(v-if="visible" :open="visible" ref="dialog" @click.le
       span.current-color(:style="{ background: currentColor }")
     template(v-for="color in favoriteColors")
       button.color(:style="{backgroundColor: color}" :class="{active: colorIsCurrent(color)}" @click.left="select(color, 'isFavorite')" :title="color")
-
 </template>
-
-<script>
-import Slider from '@/components/Slider.vue'
-import utils from '@/utils.js'
-
-import randomColor from 'randomcolor'
-import shader from 'shader'
-import { colord } from 'colord'
-
-export default {
-  name: 'ColorPicker',
-  components: {
-    Slider
-  },
-  props: {
-    currentColor: String,
-    visible: Boolean,
-    removeIsVisible: Boolean,
-    shouldLightenColors: Boolean,
-    recentColors: Array
-  },
-  data () {
-    return {
-      colors: [],
-      currentHue: null,
-      buttonHues: {
-        red: [],
-        green: [],
-        blue: []
-      },
-      luminosity: 'light',
-      opacity: 100
-    }
-  },
-  computed: {
-    color: {
-      get () {
-        return this.currentColor
-      },
-      set (color) {
-        if (utils.colorIsValid(color)) {
-          this.updateColorFromInput(color)
-        } else if (utils.colorIsValid(`#${color}`)) {
-          this.updateColorFromInput('#' + color)
-        }
-      }
-    },
-    hueIsAll () { return this.currentHue === null },
-    hueIsRed () { return this.currentHue === 'red' },
-    hueIsGreen () { return this.currentHue === 'green' },
-    hueIsBlue () { return this.currentHue === 'blue' },
-    favoriteColors () { return this.$store.state.currentUser.favoriteColors || [] },
-    currentColorIsFavorite () { return this.favoriteColors.includes(this.currentColor) },
-    isTransparent () {
-      const isLabelled = this.currentColor === 'transparent'
-      const isOpacity = this.opacity === 0
-      return isLabelled || isOpacity
-    },
-    isDark () {
-      const isThemeDark = this.$store.state.currentUser.theme === 'dark'
-      if (this.isTransparent && isThemeDark) {
-        return utils.cssVariable('primary')
-      }
-      return utils.colorIsDark(this.currentColor)
-    }
-  },
-  methods: {
-    colorIsCurrent (color) {
-      return color === this.currentColor
-    },
-    toggleFavoriteColor () {
-      const color = { color: this.currentColor }
-      const value = !this.currentColorIsFavorite
-      this.$store.dispatch('currentUser/updateFavoriteColor', { color, value })
-    },
-    updateLuminosity (value) {
-      if (this.luminosity === value) { return }
-      this.luminosity = value
-      this.shuffleColors()
-    },
-    removeColor () {
-      this.$emit('removeColor')
-    },
-    shuffleColors () {
-      const luminosity = this.luminosity
-      const isDark = luminosity === 'dark'
-      this.colors = randomColor({ luminosity, count: 14, hue: this.currentHue })
-      if (this.shouldLightenColors && !isDark) {
-        this.colors = this.colors.map(color => shader(color, 0.4))
-      }
-      this.colors.unshift(this.currentColor)
-    },
-    select (color, isFavorite) {
-      const alpha = colord(color).alpha()
-      const opacity = alpha * 100
-      this.opacity = Math.round(opacity)
-      this.$emit('selectedColor', color)
-    },
-    updateColorFromInput (color) {
-      this.select(color)
-      this.colors.pop()
-      this.colors.unshift(color)
-    },
-    resetHue () {
-      const shouldShuffle = this.currentHue !== null
-      this.currentHue = null
-      if (shouldShuffle) {
-        this.shuffleColors()
-      }
-    },
-    updateHue (hue) {
-      const shouldShuffle = this.currentHue !== hue
-      this.currentHue = hue
-      if (shouldShuffle) {
-        this.shuffleColors()
-      }
-    },
-    updateButtonHues () {
-      const hues = ['red', 'green', 'blue']
-      const luminosity = this.luminosity
-      hues.forEach(hue => {
-        this.buttonHues[hue] = randomColor({ luminosity, count: 2, hue })
-      })
-    },
-    resetPinchCounterZoomDecimal () {
-      this.$store.commit('pinchCounterZoomDecimal', 1)
-    },
-    triggerUpdateHeaderAndFooterPosition () {
-      this.$store.commit('triggerUpdateHeaderAndFooterPosition')
-    },
-    scrollIntoView () {
-      this.$nextTick(() => {
-        const element = this.$refs.dialog
-        utils.scrollIntoView({ element })
-      })
-    },
-    updateLuminosityFromTheme () {
-      const isThemeDark = this.$store.state.currentUser.theme === 'dark'
-      if (isThemeDark) {
-        this.updateLuminosity('dark')
-      } else {
-        this.updateLuminosity('light')
-      }
-    },
-    updateOpacity (value) {
-      this.opacity = Math.round(value)
-      const color = colord(this.currentColor).alpha(this.opacity / 100).toRgbString()
-      this.$emit('selectedColor', color)
-    },
-    resetOpacity () {
-      this.updateOpacity(100)
-    },
-    updateOpacityFromCurrentColor () {
-      const alpha = colord(this.currentColor).alpha()
-      const opacity = alpha * 100
-      this.updateOpacity(opacity)
-    }
-  },
-  watch: {
-    visible (visible) {
-      this.updateLuminosityFromTheme()
-      this.shuffleColors()
-      this.updateButtonHues()
-      this.scrollIntoView()
-      this.updateOpacityFromCurrentColor()
-    }
-  }
-}
-</script>
 
 <style lang="stylus">
 .color-picker
+  // overflow auto
   width 200px !important
   .colors
     display flex
@@ -307,6 +339,8 @@ export default {
   .icon.transparent
     margin-right 6px
     margin-top -1px
+    cursor pointer
+    pointer-events all
   .slider
     transform translateY(-10px)
     padding-bottom 0

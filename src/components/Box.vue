@@ -82,21 +82,23 @@ const colorIsDark = computed(() => utils.colorIsDark(color.value))
 const fill = computed(() => normalizedBox.value.fill)
 const hasFill = computed(() => fill.value !== 'empty')
 const infoClasses = computed(() => {
-  let string = ''
+  const classes = []
   if (isPainting.value) {
-    string += ' unselectable'
+    classes.push('unselectable')
   }
   if (colorIsDark.value) {
-    string += ' is-dark'
+    classes.push('is-dark')
   }
   const fontId = props.box.headerFontId || 0
-  string += ` header-font-${fontId}`
+  classes.push(`header-font-${fontId}`)
+  const fontSize = props.box.headerFontSize || 's'
+  classes.push(`header-font-size-${fontSize}`)
   const font = fonts.find(item => item.id === fontId)
-  const fontSize = font?.size || ''
-  if (fontSize) {
-    string += ` header-font-size-${fontSize}`
+  const fontSizeModifier = font?.size || ''
+  if (fontSizeModifier) {
+    classes.push(`header-font-size-modifier-${fontSizeModifier}`)
   }
-  return string
+  return classes
 })
 
 // edge snapping
@@ -686,12 +688,25 @@ const endBoxInfoInteractionTouch = (event) => {
       --header-font var(--header-font-8)
     &.header-font-9
       --header-font var(--header-font-9)
-    &.header-font-size-s
+    &.header-font-size-modifier-s
       h1
         font-size 18px
       h2
         font-size 16px
-
+    &.header-font-size-m
+      h1
+        font-size 44px
+      h2
+        font-size 36px
+      h3
+        font-size 24px
+    &.header-font-size-l
+      h1
+        font-size 66px
+      h2
+        font-size 52px
+      h3
+        font-size 36px
     pointer-events all
     position absolute
     cursor pointer

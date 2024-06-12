@@ -305,8 +305,13 @@ const isH2 = computed(() => {
   let matches = itemsWithPattern(pattern)
   return Boolean(matches.length)
 })
-const isH1OrH2Selected = computed(() => {
-  return isH1.value || isH2.value
+const isH3 = computed(() => {
+  let pattern = 'h3Pattern'
+  let matches = itemsWithPattern(pattern)
+  return Boolean(matches.length)
+})
+const isHeaderSelected = computed(() => {
+  return isH1.value || isH2.value || isH3.value
 })
 const removeHeaderFromItemNames = () => {
   // https://regexr.com/804qh
@@ -347,6 +352,16 @@ const updateHeaderFont = async (font) => {
     updateBox(box, { headerFontId: font.id })
   })
   store.dispatch('currentUser/update', { prevHeaderFontId: font.id })
+  await nextTick()
+  store.dispatch('currentConnections/updateMultiplePaths', props.cards)
+}
+const udpateHeaderFontSize = async (size) => {
+  props.cards.forEach(card => {
+    updateCard(card, { headerFontSize: size })
+  })
+  props.boxes.forEach(box => {
+    updateBox(box, { headerFontSize: size })
+  })
   await nextTick()
   store.dispatch('currentConnections/updateMultiplePaths', props.cards)
 }
@@ -448,16 +463,16 @@ section.subsection.style-actions(v-if="visible" @click.left.stop="closeDialogs")
     span {{label}}
   .row
     //- h1/h2
-    .button-wrap.header-buttons-wrap(:class="{ 'header-is-active': isH1OrH2Selected, 'is-box-details': isBoxDetails }")
+    .button-wrap.header-buttons-wrap(:class="{ 'header-is-active': isHeaderSelected, 'is-box-details': isBoxDetails }")
       .segmented-buttons
         button(:disabled="!canEditAll" @click="toggleHeader('h1Pattern')" :class="{ active: isH1 }" title="Header 1")
           span h1
         button(:disabled="!canEditAll" @click="toggleHeader('h2Pattern')" :class="{ active: isH2 }" title="Header 2")
           span h2
       //- Fonts
-      button.toggle-fonts-button.small-button(v-if="isH1OrH2Selected" @click.stop="toggleFontPickerIsVisible" :class="{ active: state.fontPickerIsVisible }")
+      button.toggle-fonts-button.small-button(v-if="isHeaderSelected" @click.stop="toggleFontPickerIsVisible" :class="{ active: state.fontPickerIsVisible }")
         span Fonts
-      FontPicker(:visible="state.fontPickerIsVisible" :cards="cards" :boxes="boxes" @selectFont="updateHeaderFont")
+      FontPicker(:visible="state.fontPickerIsVisible" :cards="cards" :boxes="boxes" @selectFont="updateHeaderFont" @selectFontSize="udpateHeaderFontSize")
     //- Tag
     .button-wrap(v-if="isCards")
       button(:disabled="!canEditAll" @click.left.stop="toggleTagPickerIsVisible" :class="{ active: state.tagPickerIsVisible }")
