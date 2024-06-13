@@ -99,8 +99,6 @@ onBeforeUnmount(() => {
 })
 
 const state = reactive({
-  pinchZoomOffsetTop: 0,
-  pinchZoomOffsetLeft: 0,
   currentCursor: {},
   currentCursorInSpace: {},
   uploadIsDraggedOver: false
@@ -122,8 +120,10 @@ const pageHeight = computed(() => store.state.pageHeight)
 const pageWidth = computed(() => store.state.pageWidth)
 const viewportHeight = computed(() => store.state.viewportHeight)
 const viewportWidth = computed(() => store.state.viewportWidth)
-const spaceCounterZoomDecimal = computed(() => store.getters.spaceCounterZoomDecimal)
 const spaceZoomDecimal = computed(() => store.getters.spaceZoomDecimal)
+
+// selectable items
+
 const updateSelectableCardsInViewport = () => {
   const selectableCards = store.getters['currentCards/isSelectableInViewport']()
   if (!selectableCards) { return }
@@ -162,6 +162,9 @@ const updateSelectableConnectionsInViewport = () => {
   })
   selectableConnectionsInViewport = paths
 }
+
+// position
+
 const updateRemotePosition = (position) => {
   const zoom = spaceZoomDecimal.value
   const scroll = { x: window.scrollX, y: window.scrollY }
