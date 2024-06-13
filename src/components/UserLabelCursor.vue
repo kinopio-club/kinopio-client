@@ -41,21 +41,25 @@ const state = reactive({
   isOffscreenY: false
 })
 
+// user
+
 const userHasName = computed(() => Boolean(props.user.name))
-const position = computed(() => {
-  return {
-    left: state.x + 'px',
-    top: state.y + 'px'
-  }
-})
 const backgroundColor = computed(() => {
   return {
     background: props.user.color
   }
 })
 const colorIsDark = computed(() => utils.colorIsDark(props.user.color))
-const scroll = computed(() => store.getters.windowScrollWithSpaceOffset())
 
+// position
+
+const position = computed(() => {
+  return {
+    left: state.x + 'px',
+    top: state.y + 'px'
+  }
+})
+const scroll = computed(() => store.getters.windowScrollWithSpaceOffset())
 const updatePositionWithZoom = (cursor) => {
   let scale = 1
   if (props.scale) {
@@ -84,6 +88,32 @@ const checkIsOnscreen = () => {
   state.isOffscreenY = !isBetweenY
   state.isOnscreen = isBetweenX && isBetweenY
 }
+const offscreenLabelPosition = () => {
+  if (state.isOnscreen) { return }
+  const minX = scroll.value.x
+  const maxX = scroll.value.x + store.state.viewportWidth
+  const minY = scroll.value.y
+  const maxY = scroll.value.y + store.state.viewportHeight
+  // left side
+  if (state.isOffscreenX && state.x < minX) {
+    state.x = minX - 4
+  }
+  // right side
+  if (state.isOffscreenX && state.x > maxX) {
+    state.x = maxX - 22
+  }
+  // top side
+  if (state.isOffscreenY && state.y < minY) {
+    state.y = minY - 2
+  }
+  // bottom side
+  if (state.isOffscreenY && state.y > maxY) {
+    state.y = maxY - 16
+  }
+}
+
+// visible
+
 const userLabelVisibleTimer = () => {
   state.visible = true
   if (!visibleTimer) {
@@ -103,34 +133,6 @@ const userLabelVisibleFrame = () => {
     }, 0)
   }
 }
-const offscreenLabelPosition = () => {
-  if (state.isOnscreen) { return }
-  const minX = scroll.value.x
-  const maxX = scroll.value.x + store.state.viewportWidth
-  const minY = scroll.value.y
-  const maxY = scroll.value.y + store.state.viewportHeight
-
-  if (state.isOffscreenX && state.x < minX) {
-    console.log(1)
-    state.x = minX - 4
-  }
-  if (state.isOffscreenX && state.x > maxX) {
-    console.log(2)
-
-    state.x = maxX - 22
-  }
-  if (state.isOffscreenY && state.y < minY) {
-    console.log(3)
-
-    state.y = minY - 2
-  }
-  if (state.isOffscreenY && state.y > maxY) {
-    console.log(4)
-
-    state.y = maxY - 16
-  }
-}
-
 </script>
 
 <template lang="pug">
