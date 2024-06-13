@@ -24,6 +24,7 @@ onMounted(() => {
 
 const viewportHeight = computed(() => store.state.viewportHeight)
 const viewportWidth = computed(() => store.state.viewportWidth)
+const isDarkTheme = computed(() => store.getters['themes/isThemeDark'])
 
 const createRipples = (card) => {
   const rippleCount = 4
@@ -31,6 +32,13 @@ const createRipples = (card) => {
   const user = store.getters['currentSpace/userById'](userId)
   let color = user.color
   color = colord(color).toHsl() // { h: 240, s: 100, l: 50, a: 0.5 }
+  const shadowColorDelta = 0.2
+  let shadowColor
+  if (isDarkTheme.value) {
+    shadowColor = colord(user.color).lighten(shadowColorDelta).toHsl()
+  } else {
+    shadowColor = colord(user.color).darken(shadowColorDelta).toHsl()
+  }
   // create initial ripples
   for (var i = 1; i < rippleCount + 1; i++) {
     const decay = Math.pow(0.65, i)
@@ -38,6 +46,7 @@ const createRipples = (card) => {
       x,
       y,
       color,
+      shadowColor,
       radius: 1,
       shadowRadius: 0,
       speed: 10,
@@ -52,20 +61,26 @@ const createRipples = (card) => {
 }
 
 const drawRipples = () => {
+  context.clearRect(0, 0, viewportWidth.value, viewportHeight.value)
   ripples.forEach(ripple => {
-    const { x, y, lineWidth, shadowRadius, radius, color, opacity } = ripple
-    // ripple?
+    let { x, y, lineWidth, shadowRadius, radius, color, shadowColor, opacity } = ripple
+
+    // TODO offset position
+    // console.log(utils.updatePositionWithSpaceOffset({x,y}))
+    // x = Math.min(window.scrollX, x)
+    // x = Math.min(viewportWidth.value, x)
+
+    // shadow
     context.beginPath()
     context.lineWidth = lineWidth + 2
-    context.strokeStyle = `hsla(${color.h}, ${color.s}%, ${color.l}%, ${opacity})`
+    context.strokeStyle = `hsla(${shadowColor.h}, ${shadowColor.s}%, ${shadowColor.l}%, ${opacity / 2})`
     context.arc(x, y, shadowRadius, 0, 2 * Math.PI)
     context.stroke()
     context.closePath()
-    // shadow?
+    // ripple
     context.beginPath()
     context.lineWidth = lineWidth
-    context.strokeStyle = `hsla(255, 255%, 255%, ${opacity})`
-    // TODO context.strokeStyle = `hsla(${color.h}, ${color.s}%, ${color.l}%, ${opacity})` // or from shadowColor (lighter or darker hsl based on theme)
+    context.strokeStyle = `hsla(${color.h}, ${color.s}%, ${color.l}%, ${opacity})`
     context.arc(x, y, radius, 0, 2 * Math.PI)
     context.stroke()
     context.closePath()
@@ -73,7 +88,7 @@ const drawRipples = () => {
 }
 
 const destroyRipples = () => {
-  ripples = ripples.filter(ripple => !ripples.shouldDestroy)
+  ripples = ripples.filter(ripple => !ripple.shouldDestroy)
 }
 const updateRipples = () => {
   ripples = ripples.map(ripple => {
