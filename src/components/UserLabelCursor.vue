@@ -1,140 +1,149 @@
-<template lang="pug">
-.user-label.user-label-cursor(v-if="visible" :data-id="user.id" :style="position")
-  .pointer(v-if="isOnscreen")
-    svg(width="13px" height="14px" viewBox="0 0 13 14" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink")
-      g(stroke="none" stroke-width="1" fill="none" fill-rule="evenodd")
-        path(:fill="color" d="M4.3472708,-1.34216658 L10.8472708,10.3578334 C7.96172333,8.79783342 5.79505666,8.01783342 4.3472708,8.01783342 C2.89948494,8.01783342 0.732818273,8.79783342 -2.1527292,10.3578334 L4.3472708,-1.34216658 Z" transform="translate(4.347271, 4.507833) rotate(-42.000000) translate(-4.347271, -4.507833) ")
-  .badge(:style="backgroundColor" :class="{'is-off-screen': !isOnscreen}")
-    .user-avatar
-      img.anon-avatar(src="@/assets/anon-avatar.svg" :class="{ 'is-dark': colorIsDark }")
-    span.user-name(v-if="isOnscreen && userHasName" :class="{ 'is-dark': colorIsDark }") {{ user.name }}
-</template>
+<script setup>
+import { reactive, computed, onMounted, onBeforeUnmount, defineProps, defineEmits, watch, ref, nextTick } from 'vue'
+import { useStore } from 'vuex'
 
-<script>
 import utils from '@/utils.js'
+
+const store = useStore()
 
 const maxIterations = 200 // 👀 MagicPaint maxIterations
 let visibleTimer, currentIteration
 
-export default {
-  name: 'UserLabelCursor',
-  props: {
-    user: Object,
-    scale: Number
-  },
-  mounted () {
-    this.$store.subscribe((mutation, state) => {
-      if (mutation.type === 'triggerUpdateRemoteUserCursor') {
-        const cursor = mutation.payload
-        if (cursor.userId !== this.user.id) { return }
-        this.x = cursor.x
-        this.y = cursor.y
-        this.color = this.user.color
-        currentIteration = 0
-        this.updatePositionWithZoom(cursor)
-        this.userLabelVisibleTimer()
-        this.checkIsOnscreen()
-        this.offscreenLabelPosition()
-      }
-    })
-  },
-  data () {
-    return {
-      x: 0,
-      y: 0,
-      color: '',
-      visible: false,
-      isOnscreen: true,
-      isOffscreenX: false,
-      isOffscreenY: false
+onMounted(() => {
+  store.subscribe((mutation) => {
+    if (mutation.type === 'triggerUpdateRemoteUserCursor') {
+      const cursor = mutation.payload
+      if (cursor.userId !== props.user.id) { return }
+      state.x = cursor.x
+      state.y = cursor.y
+      state.color = props.user.color
+      currentIteration = 0
+      updatePositionWithZoom(cursor)
+      userLabelVisibleTimer()
+      checkIsOnscreen()
+      offscreenLabelPosition()
     }
-  },
-  computed: {
-    userHasName () { return Boolean(this.user.name) },
-    position () {
-      return {
-        left: this.x + 'px',
-        top: this.y + 'px'
-      }
-    },
-    backgroundColor () {
-      return {
-        background: this.user.color
-      }
-    },
-    colorIsDark () { return utils.colorIsDark(this.user.color) },
-    scroll () { return this.$store.getters.windowScrollWithSpaceOffset() }
-  },
-  methods: {
-    updatePositionWithZoom (cursor) {
-      let scale = 1
-      if (this.scale) {
-        scale = this.scale
-      } else {
-        scale = 1
-      }
-      this.x = this.x * scale
-      this.y = this.y * scale
-    },
-    checkIsOnscreen () {
-      const zoom = this.$store.getters.spaceCounterZoomDecimal
-      const viewportWidth = this.$store.state.viewportWidth * zoom
-      const viewportHeight = this.$store.state.viewportHeight * zoom
-      const isBetweenX = utils.isBetween({
-        value: this.x,
-        min: this.scroll.x,
-        max: this.scroll.x + viewportWidth
-      })
-      const isBetweenY = utils.isBetween({
-        value: this.y,
-        min: this.scroll.y,
-        max: this.scroll.y + viewportHeight
-      })
-      this.isOffscreenX = !isBetweenX
-      this.isOffscreenY = !isBetweenY
-      this.isOnscreen = isBetweenX && isBetweenY
-    },
-    userLabelVisibleTimer () {
-      this.visible = true
-      if (!visibleTimer) {
-        currentIteration = 0
-        visibleTimer = window.requestAnimationFrame(this.userLabelVisibleFrame)
-      }
-    },
-    userLabelVisibleFrame () {
-      currentIteration++
-      if (currentIteration < maxIterations) {
-        window.requestAnimationFrame(this.userLabelVisibleFrame)
-      } else {
-        setTimeout(() => {
-          window.cancelAnimationFrame(visibleTimer)
-          visibleTimer = undefined
-          this.visible = false
-        }, 0)
-      }
-    },
-    offscreenLabelPosition () {
-      if (this.isOnscreen) { return }
-      const minX = this.scroll.x
-      const maxX = this.scroll.x + this.$store.state.viewportWidth
-      const minY = this.scroll.y
-      const maxY = this.scroll.y + this.$store.state.viewportHeight
-      if (this.isOffscreenX && this.x < minX) {
-        this.x = minX - 4
-      }
-      if (this.isOffscreenX && this.x > maxX) {
-        this.x = maxX - 22
-      }
-      if (this.isOffscreenY && this.y < minY) {
-        this.y = minY - 2
-      }
-      if (this.isOffscreenY && this.y > maxY) {
-        this.y = maxY - 16
-      }
-    }
+  })
+})
+
+const props = defineProps({
+  user: Object,
+  scale: Number
+})
+
+const state = reactive({
+  x: 0,
+  y: 0,
+  color: '',
+  visible: false,
+  isOnscreen: true,
+  isOffscreenX: false,
+  isOffscreenY: false
+})
+
+const userHasName = computed(() => Boolean(props.user.name))
+const position = computed(() => {
+  return {
+    left: state.x + 'px',
+    top: state.y + 'px'
+  }
+})
+const backgroundColor = computed(() => {
+  return {
+    background: props.user.color
+  }
+})
+const colorIsDark = computed(() => utils.colorIsDark(props.user.color))
+const scroll = computed(() => store.getters.windowScrollWithSpaceOffset())
+
+const updatePositionWithZoom = (cursor) => {
+  let scale = 1
+  if (props.scale) {
+    scale = props.scale
+  } else {
+    scale = 1
+  }
+  state.x = state.x * scale
+  state.y = state.y * scale
+}
+const checkIsOnscreen = () => {
+  const zoom = store.getters.spaceCounterZoomDecimal
+  const viewportWidth = store.state.viewportWidth * zoom
+  const viewportHeight = store.state.viewportHeight * zoom
+  const isBetweenX = utils.isBetween({
+    value: state.x,
+    min: scroll.value.x,
+    max: scroll.value.x + viewportWidth
+  })
+  const isBetweenY = utils.isBetween({
+    value: state.y,
+    min: scroll.value.y,
+    max: scroll.value.y + viewportHeight
+  })
+  state.isOffscreenX = !isBetweenX
+  state.isOffscreenY = !isBetweenY
+  state.isOnscreen = isBetweenX && isBetweenY
+}
+const userLabelVisibleTimer = () => {
+  state.visible = true
+  if (!visibleTimer) {
+    currentIteration = 0
+    visibleTimer = window.requestAnimationFrame(userLabelVisibleFrame)
   }
 }
+const userLabelVisibleFrame = () => {
+  currentIteration++
+  if (currentIteration < maxIterations) {
+    window.requestAnimationFrame(userLabelVisibleFrame)
+  } else {
+    setTimeout(() => {
+      window.cancelAnimationFrame(visibleTimer)
+      visibleTimer = undefined
+      state.visible = false
+    }, 0)
+  }
+}
+const offscreenLabelPosition = () => {
+  if (state.isOnscreen) { return }
+  const minX = scroll.value.x
+  const maxX = scroll.value.x + store.state.viewportWidth
+  const minY = scroll.value.y
+  const maxY = scroll.value.y + store.state.viewportHeight
+
+  if (state.isOffscreenX && state.x < minX) {
+    console.log(1)
+    state.x = minX - 4
+  }
+  if (state.isOffscreenX && state.x > maxX) {
+    console.log(2)
+
+    state.x = maxX - 22
+  }
+  if (state.isOffscreenY && state.y < minY) {
+    console.log(3)
+
+    state.y = minY - 2
+  }
+  if (state.isOffscreenY && state.y > maxY) {
+    console.log(4)
+
+    state.y = maxY - 16
+  }
+}
+
 </script>
+
+<template lang="pug">
+.user-label.user-label-cursor(v-if="state.visible" :data-id="user.id" :style="position")
+  .pointer(v-if="state.isOnscreen")
+    svg(width="13px" height="14px" viewBox="0 0 13 14" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink")
+      g(stroke="none" stroke-width="1" fill="none" fill-rule="evenodd")
+        path(:fill="state.color" d="M4.3472708,-1.34216658 L10.8472708,10.3578334 C7.96172333,8.79783342 5.79505666,8.01783342 4.3472708,8.01783342 C2.89948494,8.01783342 0.732818273,8.79783342 -2.1527292,10.3578334 L4.3472708,-1.34216658 Z" transform="translate(4.347271, 4.507833) rotate(-42.000000) translate(-4.347271, -4.507833) ")
+  .badge(:style="backgroundColor" :class="{'is-off-screen': !state.isOnscreen}")
+    .user-avatar
+      img.anon-avatar(src="@/assets/anon-avatar.svg" :class="{ 'is-dark': colorIsDark }")
+    span.user-name(v-if="state.isOnscreen && userHasName" :class="{ 'is-dark': colorIsDark }") {{ user.name }}
+</template>
 
 <style lang="stylus">
 .user-label
