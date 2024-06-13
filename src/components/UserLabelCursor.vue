@@ -18,7 +18,6 @@ onMounted(() => {
       state.y = cursor.y
       state.color = props.user.color
       currentIteration = 0
-      updatePositionWithZoom(cursor)
       userLabelVisibleTimer()
       checkIsOnscreen()
       offscreenLabelPosition()
@@ -27,8 +26,7 @@ onMounted(() => {
 })
 
 const props = defineProps({
-  user: Object,
-  scale: Number
+  user: Object
 })
 
 const state = reactive({
@@ -60,16 +58,6 @@ const position = computed(() => {
   }
 })
 const scroll = computed(() => store.getters.windowScrollWithSpaceOffset())
-const updatePositionWithZoom = (cursor) => {
-  let scale = 1
-  if (props.scale) {
-    scale = props.scale
-  } else {
-    scale = 1
-  }
-  state.x = state.x * scale
-  state.y = state.y * scale
-}
 const checkIsOnscreen = () => {
   const zoom = store.getters.spaceCounterZoomDecimal
   const viewportWidth = store.state.viewportWidth * zoom
