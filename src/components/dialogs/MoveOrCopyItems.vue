@@ -70,7 +70,7 @@ const multipleCardsIsSelected = computed(() => {
   const numberOfCards = multipleCardsSelectedIds.value.length
   return Boolean(numberOfCards > 1)
 })
-const cardsCount = computed(() => multipleCardsSelectedIds.value.length)
+const itemsCount = computed(() => multipleCardsSelectedIds.value.length + multipleBoxesSelectedIds.value.length)
 const selectedItems = computed(() => store.getters['currentSpace/selectedItems'])
 const names = computed(() => selectedItems.value.cards.map(card => card.name))
 const text = computed(() => utils.textFromCardNames(selectedItems.value.cards))
@@ -114,7 +114,7 @@ const copyText = async () => {
 const copyToSelectedSpace = (items) => {
   state.loading = true
   const selectedSpaceId = state.selectedSpace.id
-  const isCurrentSpace = selectedSpaceId === store.state.currentSpace.id
+  const selectedSpaceisCurrentSpace = selectedSpaceId === store.state.currentSpace.id
   const newItems = store.getters['currentSpace/newItems']({ items, selectedSpaceId })
   // update cache
   const spaceIsCached = Boolean(cache.space(selectedSpaceId).cards)
@@ -123,7 +123,7 @@ const copyToSelectedSpace = (items) => {
   }
   cache.addToSpace(newItems, selectedSpaceId)
   // update current space
-  if (isCurrentSpace) {
+  if (selectedSpaceisCurrentSpace) {
     store.dispatch('currentCards/addMultiple', { cards: newItems.cards, shouldOffsetPosition: true })
     newItems.connectionTypes.forEach(connectionType => store.dispatch('currentConnections/addType', connectionType))
     newItems.connections.forEach(connection => store.dispatch('currentConnections/add', { connection, type: { id: connection.connectionTypeId } }))
@@ -188,13 +188,13 @@ const isCardsCreatedIsOverLimit = () => {
 
 const notifySuccess = () => {
   const action = utils.pastTense(actionLabel.value)
-  const message = `${cardsCount.value} ${pluralItem.value} ${action} to ${state.selectedSpace.name}` // 3 cards copied to SpacePalace
+  const message = `${itemsCount.value} ${pluralItem.value} ${action} to ${state.selectedSpace.name}` // 3 cards copied to SpacePalace
   store.commit('notifyMoveOrCopyToSpaceDetails', { id: state.selectedSpace.id, name: state.selectedSpace.name, message })
   store.commit('notifyMoveOrCopyToSpace', true)
 }
 const notifyNewSpaceSuccess = (newSpace) => {
   const action = utils.pastTense(actionLabel.value)
-  const message = `${newSpace.name} added with ${cardsCount.value} ${pluralItem.value} ${action} ` // SpacePalace added with 3 cards copied
+  const message = `${newSpace.name} added with ${itemsCount.value} ${pluralItem.value} ${action} ` // SpacePalace added with 3 cards copied
   store.commit('notifyMoveOrCopyToSpaceDetails', { id: newSpace.id, name: newSpace.name, message })
   store.commit('notifyMoveOrCopyToSpace', true)
 }

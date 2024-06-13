@@ -178,17 +178,23 @@ export default {
     space.cacheDate = Date.now()
     this.storeLocal(`space-${spaceId}`, space)
   }, 200),
-  addToSpace ({ cards, connections, connectionTypes }, spaceId) {
+  addToSpace ({ cards, connections, connectionTypes, boxes }, spaceId) {
+    // space items
     let space = this.space(spaceId)
     space.cards = space.cards || []
     space.connections = space.connections || []
     space.connectionTypes = space.connectionTypes || []
+    space.boxes = space.boxes || []
+    // new items
     cards = cards || []
     connections = connections || []
     connectionTypes = connectionTypes || []
+    boxes = boxes || []
+    // add new items
     cards.forEach(card => space.cards.push(card))
     connections.forEach(connection => space.connections.push(connection))
     connectionTypes.forEach(connectionType => space.connectionTypes.push(connectionType))
+    boxes.forEach(box => space.boxes.push(box))
     this.storeLocal(`space-${spaceId}`, space)
   },
   saveSpace (space) {

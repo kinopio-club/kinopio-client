@@ -20,8 +20,8 @@ const dialogElement = ref(null)
 let prevCards, prevBoxes
 
 const state = reactive({
-  copyCardsIsVisible: false,
-  moveCardsIsVisible: false,
+  copyItemsIsVisible: false,
+  moveItemsIsVisible: false,
   cardsIsConnected: false,
   cardsHaveCheckboxes: false,
   cardsCheckboxIsChecked: false,
@@ -29,8 +29,8 @@ const state = reactive({
 })
 
 const closeDialogs = () => {
-  state.copyCardsIsVisible = false
-  state.moveCardsIsVisible = false
+  state.copyItemsIsVisible = false
+  state.moveItemsIsVisible = false
   state.shareCardIsVisible = false
   store.commit('triggerCloseChildDialogs')
 }
@@ -79,7 +79,7 @@ const shouldShowMultipleSelectedCardActions = computed(() => store.state.current
 const shouldShowMultipleSelectedLineActions = computed(() => store.state.currentUser.shouldShowMultipleSelectedLineActions)
 const moreOptionsIsVisible = computed(() => store.state.currentUser.shouldShowMoreAlignOptions)
 
-const oneCardOrMultipleBoxesIsSelected = computed(() => cards.value.length || boxes.value.length > 1)
+const cardOrBoxIsSelected = computed(() => cards.value.length || boxes.value.length)
 
 // items
 
@@ -459,15 +459,15 @@ const mergeSelectedCards = () => {
 
 // copy and move
 
-const toggleCopyCardsIsVisible = () => {
-  const isVisible = state.copyCardsIsVisible
+const toggleCopyItemsIsVisible = () => {
+  const isVisible = state.copyItemsIsVisible
   closeDialogs()
-  state.copyCardsIsVisible = !isVisible
+  state.copyItemsIsVisible = !isVisible
 }
-const toggleMoveCardsIsVisible = () => {
-  const isVisible = state.moveCardsIsVisible
+const toggleMoveItemsIsVisible = () => {
+  const isVisible = state.moveItemsIsVisible
   closeDialogs()
-  state.moveCardsIsVisible = !isVisible
+  state.moveItemsIsVisible = !isVisible
 }
 
 // share
@@ -515,9 +515,9 @@ dialog.narrow.multiple-selected-actions(
   .dark-theme-background-layer(v-if="isThemeDarkAndUserColorLight")
   section
     //- Edit Cards
-    .row
+    .row(v-if="cardsIsSelected")
       //- [·]
-      .button-wrap.cards-checkboxes(v-if="cardsIsSelected" :class="{ disabled: !canEditAll.cards }" title="Card Checkboxes")
+      .button-wrap.cards-checkboxes(:class="{ disabled: !canEditAll.cards }" title="Card Checkboxes")
         label.fixed-height(v-if="state.cardsHaveCheckboxes" :class="{active: state.cardsCheckboxIsChecked}" tabindex="0")
           input(type="checkbox" v-model="cardCheckboxes" tabindex="-1")
         label(v-if="!state.cardsHaveCheckboxes" @click.left.prevent="addCheckboxToCards" @keydown.stop.enter="addCheckboxToCards" tabindex="0")
@@ -543,18 +543,18 @@ dialog.narrow.multiple-selected-actions(
     ConnectionActions(:visible="(shouldShowMultipleSelectedLineActions || onlyConnectionsIsSelected) && connectionsIsSelected" :connections="editableConnections" @closeDialogs="closeDialogs" :canEditAll="canEditAll" :backgroundColor="userColor" :label="moreLineOptionsLabel")
 
   section
-    template(v-if="oneCardOrMultipleBoxesIsSelected")
+    template(v-if="cardOrBoxIsSelected")
       .row
         //- Align And Distribute
         AlignAndDistribute(:visible="multipleCardOrBoxesIsSelected" :shouldHideMoreOptions="true" :shouldDistributeWithAlign="true" :numberOfSelectedItemsCreatedByCurrentUser="numberOfSelectedItemsCreatedByCurrentUser" :canEditAll="canEditAll" :cards="cards" :editableCards="cards" :connections="connections" :boxes="boxes" :editableBoxes="editableBoxes")
         //- Move/Copy
-        .segmented-buttons.move-or-copy-wrap(v-if="cardsIsSelected")
-          button(@click.left.stop="toggleCopyCardsIsVisible" :class="{ active: state.copyCardsIsVisible }")
+        .segmented-buttons.move-or-copy-wrap
+          button(@click.left.stop="toggleCopyItemsIsVisible" :class="{ active: state.copyItemsIsVisible }")
             span Copy
-            MoveOrCopyItems(:visible="state.copyCardsIsVisible" :actionIsMove="false")
-          button(@click.left.stop="toggleMoveCardsIsVisible" :class="{ active: state.moveCardsIsVisible }" :disabled="!canEditAll.cards")
+            MoveOrCopyItems(:visible="state.copyItemsIsVisible" :actionIsMove="false")
+          button(@click.left.stop="toggleMoveItemsIsVisible" :class="{ active: state.moveItemsIsVisible }" :disabled="!canEditAll.cards")
             span Move
-            MoveOrCopyItems(:visible="state.moveCardsIsVisible" :actionIsMove="true")
+            MoveOrCopyItems(:visible="state.moveItemsIsVisible" :actionIsMove="true")
       //- More Options
       AlignAndDistribute(:visible="multipleCardOrBoxesIsSelected && moreOptionsIsVisible" :numberOfSelectedItemsCreatedByCurrentUser="numberOfSelectedItemsCreatedByCurrentUser" :canEditAll="canEditAll" :cards="cards" :editableCards="cards" :connections="connections" :boxes="boxes" :editableBoxes="editableBoxes")
 
