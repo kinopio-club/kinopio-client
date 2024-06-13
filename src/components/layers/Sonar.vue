@@ -2,14 +2,13 @@
 import { reactive, computed, onMounted, onBeforeUnmount, defineProps, defineEmits, watch, ref, nextTick } from 'vue'
 import { useStore } from 'vuex'
 
-// import { nanoid } from 'nanoid'
 import { colord } from 'colord'
 
 const store = useStore()
 
-// const maxRadius = 150
-
+// adapted from https://codepen.io/pillowmermaid/details/xrwVPQ
 let canvas, context
+let ripples = [] // { x, y, color, radius, shadowRadius, speed, decay, lineWidth, shouldDestroy, opacity }
 
 onMounted(() => {
   store.subscribe(mutation => {
@@ -23,25 +22,8 @@ onMounted(() => {
   window.requestAnimationFrame(rippleFrame)
 })
 
-// adapted from https://codepen.io/pillowmermaid/details/xrwVPQ
-
-const state = reactive({
-  ripples: [] // { x, y, color, radius, shadowRadius, speed, decay, lineWidth, shouldDestroy, opacity }
-
-  // waves: [] // [ { id, {wave} }, ... ]
-
-  // color, opacity, ripples, speed, rippleCount
-
-  // wave = color, [ripples]
-  // ripples
-})
-
 const viewportHeight = computed(() => store.state.viewportHeight)
 const viewportWidth = computed(() => store.state.viewportWidth)
-// const init = () => {
-//   if (rippleTimer) { return }
-//   rippleTimer = window.requestAnimationFrame(rippleFrame)
-// }
 
 const createRipples = (card) => {
   const rippleCount = 4
@@ -64,16 +46,27 @@ const createRipples = (card) => {
       shouldDestroy: false,
       opacity: 1
     }
-    state.ripples.push(ripple)
+    ripples.push(ripple)
   }
+  console.log('🚛🚛🚛createRipples', ripples)
+}
 
-  console.log('🚛🚛🚛', state.ripples)
+const destroyRipples = () => {
+  ripples = ripples.filter(ripple => !ripples.shouldDestroy)
+}
+
+const drawRipples = () => {
+  ripples.forEach(ripple => {
+
+  })
+  destroyRipples()
 }
 
 const rippleFrame = () => {
-  if (state.ripples.length) {
+  // console.log('✝️ rippleFrame', ripples.length)
+  if (ripples.length) {
+    drawRipples()
   }
-  // console.log('✝️ rippleFrame', state.ripples.length)
   requestAnimationFrame(rippleFrame)
 }
 
