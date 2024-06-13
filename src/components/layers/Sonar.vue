@@ -51,13 +51,46 @@ const createRipples = (card) => {
   console.log('🚛🚛🚛createRipples', ripples)
 }
 
+const drawRipples = () => {
+  ripples.forEach(ripple => {
+    const { x, y, lineWidth, shadowRadius, radius, color, opacity } = ripple
+    // ripple?
+    context.beginPath()
+    context.lineWidth = lineWidth + 2
+    context.strokeStyle = `hsla(${color.h}, ${color.s}%, ${color.l}%, ${opacity})`
+    context.arc(x, y, shadowRadius, 0, 2 * Math.PI)
+    context.stroke()
+    context.closePath()
+    // shadow?
+    context.beginPath()
+    context.lineWidth = lineWidth
+    context.strokeStyle = `hsla(255, 255%, 255%, ${opacity})`
+    // TODO context.strokeStyle = `hsla(${color.h}, ${color.s}%, ${color.l}%, ${opacity})` // or from shadowColor (lighter or darker hsl based on theme)
+    context.arc(x, y, radius, 0, 2 * Math.PI)
+    context.stroke()
+    context.closePath()
+  })
+}
+
 const destroyRipples = () => {
   ripples = ripples.filter(ripple => !ripples.shouldDestroy)
 }
-
-const drawRipples = () => {
-  ripples.forEach(ripple => {
-
+const updateRipples = () => {
+  ripples = ripples.map(ripple => {
+    const radiusDelta = ripple.speed * ripple.decay
+    ripple.radius += radiusDelta
+    ripple.shadowRadius += radiusDelta
+    // TODO threshold vars
+    if (ripple.lineWidth > 1) {
+      ripple.lineWidth -= 0.35 * ripple.decay
+    }
+    if (ripple.radius > 250 && ripple.opacity > 0) {
+      ripple.opacity -= 0.1
+    }
+    if (ripple.radius > 400) {
+      ripple.shouldDestroy = true
+    }
+    return ripple
   })
   destroyRipples()
 }
@@ -66,6 +99,7 @@ const rippleFrame = () => {
   // console.log('✝️ rippleFrame', ripples.length)
   if (ripples.length) {
     drawRipples()
+    updateRipples()
   }
   requestAnimationFrame(rippleFrame)
 }
@@ -82,7 +116,7 @@ aside
 
 <style lang="stylus" scoped>
 canvas
-  background-color pink
+  background-color teal
   pointer-events none
   position fixed
   top 0
