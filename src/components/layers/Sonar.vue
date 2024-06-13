@@ -3,25 +3,41 @@ import { reactive, computed, onMounted, onBeforeUnmount, defineProps, defineEmit
 import { useStore } from 'vuex'
 const store = useStore()
 
+const maxRadius = 150
+
 // import utils from '@/utils.js'
 
 // adapted from https://codepen.io/pillowmermaid/details/xrwVPQ
 
+let canvas, context
+
 onMounted(() => {
   store.subscribe(mutation => {
-    // trigger sonar pos
-    // if (mutation.type === 'triggerUpdateOtherCard') {
-    //   mutation.payload
-    // }
+    if (mutation.type === 'triggerSonar') {
+      const card = mutation.payload
+      createWave(card)
+    }
   })
+  canvas = document.getElementById('sonar')
+  context = canvas.getContext('2d')
 })
 
-// const state = reactive({
-//   count: 0
-// })
+const state = reactive({
+  // a wave is a group of ripple circles
+  waves: [] // { hue, saturation, luminance, opacity, iterations, ripples, rippleSpeed, rippleCount }
+})
 
 const viewportHeight = computed(() => store.state.viewportHeight)
 const viewportWidth = computed(() => store.state.viewportWidth)
+
+const createWave = (card) => {
+  const { x, y, userId } = card
+  const user = store.getters['currentSpace/userById'](userId)
+  let color = user.color
+  console.log('🚛🚛🚛', x, y, userId, card, user, color)
+// { hue, saturation, luminance, opacity, iterations, ripples, rippleSpeed, rippleCount }
+  // ripples
+}
 
 </script>
 
@@ -36,7 +52,7 @@ aside
 <style lang="stylus" scoped>
 canvas
   background-color pink
-  // pointer-events none
+  pointer-events none
   position fixed
   top 0
 </style>
