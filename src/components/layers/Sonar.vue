@@ -24,6 +24,7 @@ onMounted(() => {
 
 const viewportHeight = computed(() => store.state.viewportHeight)
 const viewportWidth = computed(() => store.state.viewportWidth)
+const spaceZoomDecimal = computed(() => store.getters.spaceZoomDecimal)
 const isDarkTheme = computed(() => store.getters['themes/isThemeDark'])
 
 const createRipples = (card) => {
@@ -60,11 +61,25 @@ const createRipples = (card) => {
   console.log('🚛🚛🚛createRipples', ripples)
 }
 
+const updateRemotePosition = (position) => {
+  // same as MagicPaint
+  const zoom = spaceZoomDecimal.value
+  const scroll = { x: window.scrollX, y: window.scrollY }
+  const space = document.getElementById('space')
+  const rect = space.getBoundingClientRect()
+  position = {
+    x: (position.x * zoom) + rect.x + scroll.x,
+    y: (position.y * zoom) + rect.y + scroll.y
+  }
+  return position
+}
 const drawRipples = () => {
   context.clearRect(0, 0, viewportWidth.value, viewportHeight.value)
   ripples.forEach(ripple => {
     let { x, y, lineWidth, shadowRadius, radius, color, shadowColor, opacity } = ripple
-
+    const position = updateRemotePosition({ x, y })
+    x = position.x
+    y = position.y
     // TODO offset position
     // console.log(utils.updatePositionWithSpaceOffset({x,y}))
     // x = Math.min(window.scrollX, x)
