@@ -8,7 +8,7 @@ const store = useStore()
 const dialogElement = ref(null)
 
 onMounted(() => {
-  store.subscribe((mutation, state) => {
+  store.subscribe(mutation => {
     if (mutation.type === 'updatePageSizes') {
       updateDialogHeight()
     }
