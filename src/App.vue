@@ -4,7 +4,6 @@ import { useStore } from 'vuex'
 
 import Header from '@/components/Header.vue'
 import MagicPaint from '@/components/layers/MagicPaint.vue'
-import Sonar from '@/components/layers/Sonar.vue'
 import Footer from '@/components/Footer.vue'
 import WindowHistoryHandler from '@/components/WindowHistoryHandler.vue'
 import KeyboardShortcutsHandler from '@/components/KeyboardShortcutsHandler.vue'
@@ -279,7 +278,6 @@ const updateMetaRSSFeed = () => {
     SpaceBackground
     ItemsLocked
     MagicPaint
-    Sonar
   //- router-view is Space or Add
   router-view
   template(v-if="isSpacePage")

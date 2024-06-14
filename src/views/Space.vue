@@ -17,6 +17,7 @@ import Boxes from '@/components/Boxes.vue'
 import Cards from '@/components/Cards.vue'
 import Connections from '@/components/Connections.vue'
 import ItemUnlockButtons from '@/components/ItemUnlockButtons.vue'
+import Sonar from '@/components/layers/Sonar.vue'
 import utils from '@/utils.js'
 import consts from '@/consts.js'
 
@@ -495,6 +496,7 @@ main#space.space(
   :style="styles"
   :data-zoom="spaceZoomDecimal"
 )
+  Sonar
   Connections
   Boxes
   Cards

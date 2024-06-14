@@ -2,6 +2,8 @@
 import { reactive, computed, onMounted, onBeforeUnmount, defineProps, defineEmits, watch, ref, nextTick } from 'vue'
 import { useStore } from 'vuex'
 
+import utils from '@/utils.js'
+
 import { colord } from 'colord'
 
 const store = useStore()
@@ -15,21 +17,41 @@ onMounted(() => {
     if (mutation.type === 'triggerSonar') {
       const card = mutation.payload
       createRipples(card)
+    } else if (mutation.type === 'spaceZoomPercent') {
+      updateScroll()
     }
   })
+  updateScroll()
   canvas = document.getElementById('sonar')
   context = canvas.getContext('2d')
   window.requestAnimationFrame(rippleFrame)
+  window.addEventListener('scroll', updateScroll)
+  window.addEventListener('resize', updateScroll)
 })
 
-const viewportHeight = computed(() => store.state.viewportHeight)
-const viewportWidth = computed(() => store.state.viewportWidth)
-const spaceZoomDecimal = computed(() => store.getters.spaceZoomDecimal)
+const state = reactive({
+  scroll: { x: 0, y: 0 }
+})
+
+const updateScroll = () => {
+  state.scroll = store.getters.windowScrollWithSpaceOffset()
+}
+
+const spaceCounterZoomDecimal = computed(() => store.getters.spaceCounterZoomDecimal)
+const viewportHeight = computed(() => store.state.viewportHeight * spaceCounterZoomDecimal.value)
+const viewportWidth = computed(() => store.state.viewportWidth * spaceCounterZoomDecimal.value)
 const isDarkTheme = computed(() => store.getters['themes/isThemeDark'])
+
+const styles = computed(() => {
+  return {
+    left: state.scroll.x + 'px',
+    top: state.scroll.y + 'px'
+  }
+})
 
 const createRipples = (card) => {
   const rippleCount = 4
-  const { x, y, userId } = card
+  const { userId, x, y } = card
   const user = store.getters['currentSpace/userById'](userId)
   let color = user.color
   color = colord(color).toHsl() // { h: 240, s: 100, l: 50, a: 0.5 }
@@ -61,30 +83,12 @@ const createRipples = (card) => {
   console.log('🚛🚛🚛createRipples', ripples)
 }
 
-const updateRemotePosition = (position) => {
-  // same as MagicPaint
-  const zoom = spaceZoomDecimal.value
-  const scroll = { x: window.scrollX, y: window.scrollY }
-  const space = document.getElementById('space')
-  const rect = space.getBoundingClientRect()
-  position = {
-    x: (position.x * zoom) + rect.x + scroll.x,
-    y: (position.y * zoom) + rect.y + scroll.y
-  }
-  return position
-}
 const drawRipples = () => {
   context.clearRect(0, 0, viewportWidth.value, viewportHeight.value)
   ripples.forEach(ripple => {
     let { x, y, lineWidth, shadowRadius, radius, color, shadowColor, opacity } = ripple
-    const position = updateRemotePosition({ x, y })
-    x = position.x
-    y = position.y
-    // TODO offset position
-    // console.log(utils.updatePositionWithSpaceOffset({x,y}))
-    // x = Math.min(window.scrollX, x)
-    // x = Math.min(viewportWidth.value, x)
-
+    x = x - state.scroll.x
+    y = y - state.scroll.y
     // shadow
     context.beginPath()
     context.lineWidth = lineWidth + 2
@@ -126,7 +130,6 @@ const updateRipples = () => {
 }
 
 const rippleFrame = () => {
-  // console.log('✝️ rippleFrame', ripples.length)
   if (ripples.length) {
     drawRipples()
     updateRipples()
@@ -141,13 +144,15 @@ aside
   canvas#sonar(
     :width="viewportWidth"
     :height="viewportHeight"
+    :style="styles"
   )
 </template>
 
 <style lang="stylus" scoped>
 canvas
-  background-color teal
+  background-color rgba(0,128,128, 0.5) //temp
   pointer-events none
   position fixed
   top 0
+  left 0
 </style>
