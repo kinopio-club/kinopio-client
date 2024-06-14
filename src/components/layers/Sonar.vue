@@ -110,18 +110,19 @@ const destroyRipples = () => {
   ripples = ripples.filter(ripple => !ripple.shouldDestroy)
 }
 const updateRipples = () => {
+  const fadeRadius = 250
+  const destroyRadius = 400
   ripples = ripples.map(ripple => {
     const radiusDelta = ripple.speed * ripple.decay
     ripple.radius += radiusDelta
     ripple.shadowRadius += radiusDelta
-    // TODO threshold vars
     if (ripple.lineWidth > 1) {
       ripple.lineWidth -= 0.35 * ripple.decay
     }
-    if (ripple.radius > 250 && ripple.opacity > 0) {
+    if (ripple.radius > fadeRadius && ripple.opacity > 0) {
       ripple.opacity -= 0.1
     }
-    if (ripple.radius > 400) {
+    if (ripple.radius > destroyRadius) {
       ripple.shouldDestroy = true
     }
     return ripple
