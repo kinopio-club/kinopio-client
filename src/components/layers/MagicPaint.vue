@@ -78,7 +78,6 @@ onMounted(() => {
         x: position.x,
         y: position.y,
         color,
-        zoom: card.zoom,
         shouldDrawOffscreen: true
       }
       if (checkIsCircleVisible(circle)) { return }
