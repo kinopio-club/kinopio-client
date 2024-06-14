@@ -252,6 +252,7 @@ const updateCircleForAndroid = (circle) => {
 }
 const checkIsCircleVisible = (circle) => {
   let { x, y, radius } = circle
+  radius = radius || circleRadius
   const diameter = radius * 2
   x = x - (radius / 2)
   y = y - (radius / 2)
