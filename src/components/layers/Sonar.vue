@@ -14,7 +14,7 @@ let ripples = [] // { x, y, color, radius, shadowRadius, speed, decay, lineWidth
 
 onMounted(() => {
   store.subscribe(mutation => {
-    if (mutation.type === 'triggerSonar') {
+    if (mutation.type === 'triggerNotifyOffscreenCardCreated') {
       const card = mutation.payload
       createRipples(card)
     } else if (mutation.type === 'spaceZoomPercent') {

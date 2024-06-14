@@ -64,6 +64,26 @@ onMounted(() => {
       circle.y = position.y
       createRemotePaintingCircle(circle)
       remotePainting()
+    } else if (mutation.type === 'triggerNotifyOffscreenCardCreated') {
+      const card = mutation.payload
+      const user = store.getters['currentSpace/userById'](card.userId)
+      const color = user.color
+      const position = updateRemotePosition(card)
+      let circle = {
+        x: position.x,
+        y: position.y,
+        color,
+        iteration: 0,
+        zoom: card.zoom
+      }
+      if (checkIsCircleVisible(circle)) { return }
+      const edgeOffset = Math.round(initialLockCircleRadius / 2)
+      circle.x = circle.x - edgeOffset
+      circle.y = circle.y - edgeOffset
+
+      console.log('🍆', card, circle, edgeOffset)
+
+      createRemotePaintingCircle(circle, remotePaintingContext, true)
     }
   })
   paintingCanvas = document.getElementById('magic-painting')

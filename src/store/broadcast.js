@@ -4,6 +4,14 @@ let reconnectAttempts = 0
 let reconnectTime
 const maxTime = 30 * 1000 // 30 seconds
 
+const updateCreateCard = (update, context) => {
+  if (update.type === 'createCard') {
+    const zoom = context.rootGetters.spaceZoomDecimal
+    update.updates.card.zoom = zoom
+  }
+  return update
+}
+
 const self = {
   namespaced: true,
   // triggers websocket
@@ -26,6 +34,7 @@ const self = {
       }, Math.min(reconnectTime, maxTime))
     },
     update: (context, update) => {
+      update = updateCreateCard(update, context)
       context.commit('update', update)
     }
   }

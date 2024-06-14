@@ -81,9 +81,9 @@ const checkIfShouldUpdateLinkToItem = (store, { message, updates }) => {
   if (!options) { return }
   store.dispatch('currentSpace/updateOtherItems', options)
 }
-const checkIfShouldSonar = (store, data) => {
+const checkIfShouldNotifyOffscreenCardCreated = (store, data) => {
   if (data.message === 'createCard') {
-    store.commit('triggerSonar', data.updates.card)
+    store.commit('triggerNotifyOffscreenCardCreated', data.updates.card)
   }
 }
 const closeWebsocket = (store) => {
@@ -133,7 +133,7 @@ export default function createWebSocketPlugin () {
           } else if (handler) {
             store.commit(handler, updates)
             checkIfShouldUpdateLinkToItem(store, data)
-            checkIfShouldSonar(store, data)
+            checkIfShouldNotifyOffscreenCardCreated(store, data)
           // users
           } else if (message === 'userJoinedRoom') {
             store.dispatch('currentSpace/addUserToJoinedSpace', user)
