@@ -82,12 +82,6 @@ onMounted(() => {
         shouldDrawOffscreen: true
       }
       if (checkIsCircleVisible(circle)) { return }
-
-      // tODO left-side, top-side (+edgeOffset)
-      const edgeOffset = Math.round(initialLockCircleRadius / 2)
-      circle.x = circle.x - edgeOffset // right-side
-      circle.y = circle.y - edgeOffset // bottom-side
-
       createNotifyOffscreenCircle(circle)
     }
   })
@@ -259,20 +253,10 @@ const updateCircleForAndroid = (circle) => {
 }
 const checkIsCircleVisible = (circle) => {
   let { x, y, radius } = circle
-  radius = radius || circleRadius
-  let isBetween = {
-    value: x + radius,
-    min: 0,
-    max: viewportWidth.value
-  }
-  const isCircleVisibleX = utils.isBetween(isBetween)
-  isBetween = {
-    value: y + radius,
-    min: 0,
-    max: viewportHeight.value
-  }
-  const isCircleVisibleY = utils.isBetween(isBetween)
-  return Boolean(isCircleVisibleX && isCircleVisibleY)
+  const diameter = radius * 2
+  x = x - (radius / 2)
+  y = y - (radius / 2)
+  return utils.isRectInsideViewport({ x, y, width: diameter, height: diameter })
 }
 const offscreenCircle = (circle) => {
   if (circle.x > viewportWidth.value) {
@@ -571,7 +555,6 @@ const createRemotePaintingCircle = (circle) => {
   } else {
     remotePaintingCircles.push(circle)
   }
-  console.log('🫐 remotePaintingCircles', remotePaintingCircles)
 }
 const remotePainting = () => {
   if (!remotePaintingCirclesTimer) {
@@ -662,6 +645,8 @@ const lockingAnimationFrame = (timestamp) => {
 // Notify Offscreen Circles
 
 const createNotifyOffscreenCircle = (circle) => {
+  circle.x = circle.x - window.scrollX
+  circle.y = circle.y - window.scrollY
   const notifyOffscreenCircle = {
     x: circle.x,
     y: circle.y,
