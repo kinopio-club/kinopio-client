@@ -821,6 +821,15 @@ export default {
     const { r, g, b } = colord(color).toRgb()
     return `rgba(${r}, ${g}, ${b})`
   },
+  alternateColor (color, isThemeDark, colorDelta) {
+    colorDelta = colorDelta || 0.1
+    if (isThemeDark.value) {
+      color = colord(color).lighten(colorDelta).toHex()
+    } else {
+      color = colord(color).darken(colorDelta).toHex()
+    }
+    return color
+  },
 
   // colorToRGBA (color, opacity) {
   //   opacity = opacity || '1'

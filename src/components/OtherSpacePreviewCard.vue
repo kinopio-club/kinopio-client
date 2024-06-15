@@ -33,6 +33,17 @@ const isRemoved = computed(() => {
 })
 const urlIsInvite = computed(() => utils.urlIsInvite(props.url))
 
+// colors
+
+const isThemeDark = computed(() => store.getters['themes/isThemeDark'])
+const background = computed(() => {
+  let color = props.selectedColor || props.card.backgroundColor
+  const defaultColor = utils.cssVariable('secondary-background')
+  const colorIsDefaultColor = utils.colorsAreEqual(color, defaultColor)
+  if (colorIsDefaultColor || !color) { return }
+  return utils.alternateColor(color, isThemeDark.value)
+})
+
 // preivew image
 
 const shouldShowPreviewImage = computed(() => props.card.shouldShowOtherSpacePreviewImage)
@@ -46,7 +57,7 @@ const previewImageIsVisible = computed(() => shouldShowPreviewImage.value && pre
   //- preview image
   .preview-image-wrap(v-if="previewImageIsVisible")
     img.preview-image(:src="previewImage" :class="{selected: props.isSelected}" ref="image")
-  .badge.link-badge(:class="{ 'preview-image-is-visible': previewImageIsVisible }" :style="{ background: props.selectedColor }")
+  .badge.link-badge(:class="{ 'preview-image-is-visible': previewImageIsVisible }" :style="{ background: background }")
     //- badges
     .badge.info.inline-badge(v-if="urlIsInvite")
       span Invite

@@ -6,8 +6,6 @@ import Loader from '@/components/Loader.vue'
 import utils from '@/utils.js'
 import consts from '@/consts.js'
 
-import { colord, extend } from 'colord'
-
 const store = useStore()
 
 let hasRetried
@@ -36,18 +34,11 @@ const isInteractingWithItem = computed(() => store.getters.isInteractingWithItem
 
 const isThemeDark = computed(() => store.getters['themes/isThemeDark'])
 const background = computed(() => {
-  const colorDelta = 0.1
   let color = props.backgroundColor
   const defaultColor = utils.cssVariable('secondary-background')
   const colorIsDefaultColor = utils.colorsAreEqual(color, defaultColor)
   if (colorIsDefaultColor || !color) { return }
-  // adapt background color to custom card background color
-  if (isThemeDark.value) {
-    color = colord(color).lighten(colorDelta).toHex()
-  } else {
-    color = colord(color).darken(colorDelta).toHex()
-  }
-  return color
+  return utils.alternateColor(color, isThemeDark.value)
 })
 
 // url embed (spotify, youtube, etc.)
