@@ -30,7 +30,7 @@ const selectedColor = computed(() => {
 })
 const isInteractingWithItem = computed(() => store.getters.isInteractingWithItem)
 
-// background color
+// colors
 
 const isThemeDark = computed(() => store.getters['themes/isThemeDark'])
 const background = computed(() => {
@@ -39,6 +39,10 @@ const background = computed(() => {
   const colorIsDefaultColor = utils.colorsAreEqual(color, defaultColor)
   if (colorIsDefaultColor || !color) { return }
   return utils.alternateColor(color, isThemeDark.value)
+})
+const backgroundColorIsDark = computed(() => utils.colorIsDark(background.value))
+const textColorClasses = computed(() => {
+  return utils.textColorClasses(background.value)
 })
 
 // url embed (spotify, youtube, etc.)
@@ -185,8 +189,10 @@ const description = computed(() => {
         template(v-if="!card.urlPreviewEmbedHtml")
           img.favicon(v-if="card.urlPreviewFavicon" :src="card.urlPreviewFavicon")
           img.icon.favicon.open(v-else src="@/assets/open.svg")
-        .title {{title}}
-      .description(v-if="description") {{description}}
+        .title(:class="textColorClasses")
+          span {{title}}
+      .description(v-if="description" :class="textColorClasses")
+        span {{description}}
 
 </template>
 
@@ -238,6 +244,14 @@ const description = computed(() => {
   .description
     margin-top 10px
     word-wrap anywhere
+  .title,
+  .description
+    &.is-background-light
+      span
+       color var(--primary-on-light-background)
+    &.is-background-dark
+      span
+        color var(--primary-on-dark-background)
 
   .embed
     width 100%

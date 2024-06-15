@@ -830,12 +830,16 @@ export default {
     }
     return color
   },
-
-  // colorToRGBA (color, opacity) {
-  //   opacity = opacity || '1'
-  //   const { r, g, b } = colord(color).toRgb()
-  //   return `rgba(${r}, ${g}, ${b}, ${opacity})`
-  // },
+  textColorClasses (backgroundColor) {
+    const backgroundColorIsDark = this.colorIsDark(backgroundColor)
+    let classes = []
+    if (backgroundColorIsDark) {
+      classes.push('is-background-dark')
+    } else {
+      classes.push('is-background-light')
+    }
+    return classes
+  },
 
   // normalize items
 

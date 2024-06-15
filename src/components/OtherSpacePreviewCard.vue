@@ -43,6 +43,9 @@ const background = computed(() => {
   if (colorIsDefaultColor || !color) { return }
   return utils.alternateColor(color, isThemeDark.value)
 })
+const textColorClasses = computed(() => {
+  return utils.textColorClasses(background.value)
+})
 
 // preivew image
 
@@ -67,7 +70,8 @@ const previewImageIsVisible = computed(() => shouldShowPreviewImage.value && pre
     template(v-if="props.otherSpace")
       template(v-if="props.otherSpace.users")
         UserLabelInline(:user="props.otherSpace.users[0]" :shouldHideName="true")
-      span.space-name {{otherSpaceName}}
+      span.space-name(:class="textColorClasses")
+        span {{otherSpaceName}}
       img.icon.private(v-if="otherSpaceIsPrivate" src="@/assets/lock.svg")
     template(v-else)
       Loader(:visible="true" :isSmall="true" :isStatic="!isLoadingOtherItems")
@@ -109,5 +113,11 @@ const previewImageIsVisible = computed(() => shouldShowPreviewImage.value && pre
       mix-blend-mode color-burn
   .space-name
     overflow-wrap break-word
+    &.is-background-light
+      span
+        color var(--primary-on-light-background)
+    &.is-background-dark
+      span
+        color var(--primary-on-dark-background)
 
 </style>
