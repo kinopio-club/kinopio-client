@@ -12,10 +12,11 @@ let visibleTimer, currentIteration
 onMounted(() => {
   store.subscribe((mutation) => {
     if (mutation.type === 'triggerUpdateRemoteUserCursor') {
-      const cursor = mutation.payload
+      let cursor = mutation.payload
       if (cursor.userId !== props.user.id) { return }
-      state.x = cursor.x
-      state.y = cursor.y
+      cursor = updateRemotePosition(cursor)
+      state.x = Math.round(cursor.x)
+      state.y = Math.round(cursor.y)
       state.color = props.user.color
       currentIteration = 0
       userLabelVisibleTimer()
@@ -29,14 +30,13 @@ const props = defineProps({
   user: Object
 })
 
+// TODO replace state w global vars
 const state = reactive({
   x: 0,
   y: 0,
   color: '',
   visible: false,
-  isOnscreen: true,
-  isOffscreenX: false,
-  isOffscreenY: false
+  isOnscreen: true
 })
 
 // user
@@ -51,53 +51,95 @@ const colorIsDark = computed(() => utils.colorIsDark(props.user.color))
 
 // position
 
+const spaceZoomDecimal = computed(() => store.getters.spaceZoomDecimal)
+const updateRemotePosition = (position) => {
+  const zoom = spaceZoomDecimal.value
+  const scroll = { x: window.scrollX, y: window.scrollY }
+  const space = document.getElementById('space')
+  const rect = space.getBoundingClientRect()
+  position = {
+    x: (position.x * zoom) + rect.x + scroll.x,
+    y: (position.y * zoom) + rect.y + scroll.y
+  }
+  return position
+}
 const position = computed(() => {
   return {
     left: state.x + 'px',
     top: state.y + 'px'
   }
 })
-const scroll = computed(() => store.getters.windowScrollWithSpaceOffset())
+
+// offscreen position
+
+const spaceCounterZoomDecimal = computed(() => store.getters.spaceCounterZoomDecimal)
 const checkIsOnscreen = () => {
-  const zoom = store.getters.spaceCounterZoomDecimal
-  const viewportWidth = store.state.viewportWidth * zoom
-  const viewportHeight = store.state.viewportHeight * zoom
-  const isBetweenX = utils.isBetween({
-    value: state.x,
-    min: scroll.value.x,
-    max: scroll.value.x + viewportWidth
+  state.isOnscreen = utils.isRectInsideViewport({
+    x: state.x,
+    y: state.y,
+    width: 1,
+    height: 1
   })
-  const isBetweenY = utils.isBetween({
-    value: state.y,
-    min: scroll.value.y,
-    max: scroll.value.y + viewportHeight
-  })
-  state.isOffscreenX = !isBetweenX
-  state.isOffscreenY = !isBetweenY
-  state.isOnscreen = isBetweenX && isBetweenY
+  // const zoom = store.getters.spaceCounterZoomDecimal
+  // const viewportWidth = store.state.viewportWidth * zoom
+  // const viewportHeight = store.state.viewportHeight * zoom
+  // const isBetweenX = utils.isBetween({
+  //   value: state.x,
+  //   min: scroll.value.x,
+  //   max: scroll.value.x + viewportWidth
+  // })
+  // const isBetweenY = utils.isBetween({
+  //   value: state.y,
+  //   min: scroll.value.y,
+  //   max: scroll.value.y + viewportHeight
+  // })
+  // state.isOffscreenX = !isBetweenX
+  // state.isOffscreenY = !isBetweenY
+  // state.isOnscreen = isBetweenX && isBetweenY
 }
 const offscreenLabelPosition = () => {
   if (state.isOnscreen) { return }
-  const minX = scroll.value.x
-  const maxX = scroll.value.x + store.state.viewportWidth
-  const minY = scroll.value.y
-  const maxY = scroll.value.y + store.state.viewportHeight
-  // left side
-  if (state.isOffscreenX && state.x < minX) {
-    state.x = minX - 4
+  // const scroll = store.getters.windowScrollWithSpaceOffset()
+
+  const viewport = utils.visualViewport()
+  const viewportRect = {
+    x: window.scrollX,
+    y: window.scrollY,
+    width: viewport.width,
+    height: viewport.height
   }
-  // right side
-  if (state.isOffscreenX && state.x > maxX) {
-    state.x = maxX - 22
-  }
-  // top side
-  if (state.isOffscreenY && state.y < minY) {
-    state.y = minY - 2
-  }
-  // bottom side
-  if (state.isOffscreenY && state.y > maxY) {
-    state.y = maxY - 16
-  }
+
+  // TODO firugreout offscreenLabelPosition
+  // const space = document.getElementById('space')
+  // const rect = space.getBoundingClientRect()
+  // const zoom = spaceCounterZoomDecimal.value
+
+  const minX = viewportRect.x
+  const maxX = viewportRect.x + viewportRect.width
+  const minY = viewportRect.y
+  const maxY = viewportRect.y + viewportRect.height
+
+  // const min = utils.cursorPositionInSpace({ x: minX, y: minY })
+  // const max = utils.cursorPositionInSpace({ x: maxX, y: maxY })
+
+  console.log('♥️', state.x, state.y, viewportRect, minY, maxY)
+
+  // // left side
+  // if (state.isOffscreenX && state.x < minX) {
+  //   state.x = minX - 4
+  // }
+  // // right side
+  // if (state.isOffscreenX && state.x > maxX) {
+  //   state.x = maxX - 22
+  // }
+  // // top side
+  // if (state.isOffscreenY && state.y < minY) {
+  //   state.y = minY - 2
+  // }
+  // // bottom side
+  // if (state.isOffscreenY && state.y > maxY) {
+  //   state.y = maxY - 16
+  // }
 }
 
 // visible

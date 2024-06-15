@@ -6,7 +6,6 @@ import Card from '@/components/Card.vue'
 import CardDetails from '@/components/dialogs/CardDetails.vue'
 import OtherCardDetails from '@/components/dialogs/OtherCardDetails.vue'
 import BoxDetails from '@/components/dialogs/BoxDetails.vue'
-import UserLabelCursor from '@/components/UserLabelCursor.vue'
 import ConnectionDetails from '@/components/dialogs/ConnectionDetails.vue'
 import CodeLanguagePicker from '@/components/dialogs/CodeLanguagePicker.vue'
 import MultipleSelectedActions from '@/components/dialogs/MultipleSelectedActions.vue'
@@ -110,10 +109,6 @@ const isDraggingBox = computed(() => store.state.currentUserIsDraggingBox)
 // user
 
 const currentUser = computed(() => store.state.currentUser)
-const users = computed(() => {
-  const excludeCurrentUser = true
-  return store.getters['currentSpace/allUsers'](excludeCurrentUser)
-})
 
 // styles
 
@@ -499,9 +494,6 @@ main#space.space(
   Boxes
   Cards
   ItemUnlockButtons
-  //- Presence
-  template(v-for="user in users")
-    UserLabelCursor(:user="user")
   BoxDetails
   CardDetails
   OtherCardDetails
