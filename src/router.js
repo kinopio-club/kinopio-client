@@ -26,6 +26,7 @@ const router = createRouter({
       component: Space,
       beforeEnter: (to, from, next) => {
         const urlParams = new URLSearchParams(window.location.search)
+        store.commit('disableViewportOptimizations', urlParams.get('disableViewportOptimizations'))
         next()
       }
     }, {
