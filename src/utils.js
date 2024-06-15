@@ -830,8 +830,8 @@ export default {
     }
     return color
   },
-  textColorClasses (backgroundColor) {
-    const backgroundColorIsDark = this.colorIsDark(backgroundColor)
+  textColorClasses ({ backgroundColor, backgroundColorIsDark }) {
+    backgroundColorIsDark = backgroundColorIsDark || this.colorIsDark(backgroundColor)
     let classes = []
     if (backgroundColorIsDark) {
       classes.push('is-background-dark')

@@ -44,7 +44,7 @@ const background = computed(() => {
   return utils.alternateColor(color, isThemeDark.value)
 })
 const textColorClasses = computed(() => {
-  return utils.textColorClasses(background.value)
+  return utils.textColorClasses({ backgroundColor: background.value })
 })
 
 // preivew image

@@ -42,7 +42,7 @@ const background = computed(() => {
 })
 const backgroundColorIsDark = computed(() => utils.colorIsDark(background.value))
 const textColorClasses = computed(() => {
-  return utils.textColorClasses(background.value)
+  return utils.textColorClasses({ backgroundColor: background.value })
 })
 
 // url embed (spotify, youtube, etc.)
