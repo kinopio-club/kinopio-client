@@ -20,8 +20,8 @@ onMounted(() => {
       state.color = props.user.color
       currentIteration = 0
       userLabelVisibleTimer()
-      checkIsOnscreen()
-      offscreenLabelPosition()
+      updateIsOnscreen()
+      updateOffscreenLabelPosition()
     }
   })
 })
@@ -73,73 +73,41 @@ const position = computed(() => {
 // offscreen position
 
 const spaceCounterZoomDecimal = computed(() => store.getters.spaceCounterZoomDecimal)
-const checkIsOnscreen = () => {
+const updateIsOnscreen = () => {
   state.isOnscreen = utils.isRectInsideViewport({
     x: state.x,
     y: state.y,
     width: 1,
     height: 1
   })
-  // const zoom = store.getters.spaceCounterZoomDecimal
-  // const viewportWidth = store.state.viewportWidth * zoom
-  // const viewportHeight = store.state.viewportHeight * zoom
-  // const isBetweenX = utils.isBetween({
-  //   value: state.x,
-  //   min: scroll.value.x,
-  //   max: scroll.value.x + viewportWidth
-  // })
-  // const isBetweenY = utils.isBetween({
-  //   value: state.y,
-  //   min: scroll.value.y,
-  //   max: scroll.value.y + viewportHeight
-  // })
-  // state.isOffscreenX = !isBetweenX
-  // state.isOffscreenY = !isBetweenY
-  // state.isOnscreen = isBetweenX && isBetweenY
 }
-const offscreenLabelPosition = () => {
+const updateOffscreenLabelPosition = () => {
   if (state.isOnscreen) { return }
-  // const scroll = store.getters.windowScrollWithSpaceOffset()
-
-  const viewport = utils.visualViewport()
-  const viewportRect = {
+  let viewport = utils.visualViewport()
+  viewport = {
     x: window.scrollX,
     y: window.scrollY,
     width: viewport.width,
     height: viewport.height
   }
-
-  // TODO firugreout offscreenLabelPosition
-  // const space = document.getElementById('space')
-  // const rect = space.getBoundingClientRect()
-  // const zoom = spaceCounterZoomDecimal.value
-
-  const minX = viewportRect.x
-  const maxX = viewportRect.x + viewportRect.width
-  const minY = viewportRect.y
-  const maxY = viewportRect.y + viewportRect.height
-
-  // const min = utils.cursorPositionInSpace({ x: minX, y: minY })
-  // const max = utils.cursorPositionInSpace({ x: maxX, y: maxY })
-
-  console.log('♥️', state.x, state.y, viewportRect, minY, maxY)
-
-  // // left side
-  // if (state.isOffscreenX && state.x < minX) {
-  //   state.x = minX - 4
-  // }
-  // // right side
-  // if (state.isOffscreenX && state.x > maxX) {
-  //   state.x = maxX - 22
-  // }
-  // // top side
-  // if (state.isOffscreenY && state.y < minY) {
-  //   state.y = minY - 2
-  // }
-  // // bottom side
-  // if (state.isOffscreenY && state.y > maxY) {
-  //   state.y = maxY - 16
-  // }
+  const minX = viewport.x
+  const maxX = viewport.x + viewport.width
+  const minY = viewport.y
+  const maxY = viewport.y + viewport.height
+  // left side
+  if (state.x < minX) {
+    state.x = minX - 4
+  // right side
+  } else if (state.x > maxX) {
+    state.x = maxX - 22
+  }
+  // top side
+  if (state.y < minY) {
+    state.y = minY - 2
+  // bottom side
+  } else if (state.y > maxY) {
+    state.y = maxY - 16
+  }
 }
 
 // visible
