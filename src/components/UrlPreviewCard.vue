@@ -6,8 +6,6 @@ import Loader from '@/components/Loader.vue'
 import utils from '@/utils.js'
 import consts from '@/consts.js'
 
-import { colord, extend } from 'colord'
-
 const store = useStore()
 
 let hasRetried
@@ -32,22 +30,19 @@ const selectedColor = computed(() => {
 })
 const isInteractingWithItem = computed(() => store.getters.isInteractingWithItem)
 
-// background color
+// colors
 
 const isThemeDark = computed(() => store.getters['themes/isThemeDark'])
 const background = computed(() => {
-  const colorDelta = 0.1
   let color = props.backgroundColor
   const defaultColor = utils.cssVariable('secondary-background')
   const colorIsDefaultColor = utils.colorsAreEqual(color, defaultColor)
   if (colorIsDefaultColor || !color) { return }
-  // adapt background color to custom card background color
-  if (isThemeDark.value) {
-    color = colord(color).lighten(colorDelta).toHex()
-  } else {
-    color = colord(color).darken(colorDelta).toHex()
-  }
-  return color
+  return utils.alternateColor(color, isThemeDark.value)
+})
+const backgroundColorIsDark = computed(() => utils.colorIsDark(background.value))
+const textColorClasses = computed(() => {
+  return utils.textColorClasses({ backgroundColor: background.value })
 })
 
 // url embed (spotify, youtube, etc.)
@@ -194,8 +189,10 @@ const description = computed(() => {
         template(v-if="!card.urlPreviewEmbedHtml")
           img.favicon(v-if="card.urlPreviewFavicon" :src="card.urlPreviewFavicon")
           img.icon.favicon.open(v-else src="@/assets/open.svg")
-        .title {{title}}
-      .description(v-if="description") {{description}}
+        .title(:class="textColorClasses")
+          span {{title}}
+      .description(v-if="description" :class="textColorClasses")
+        span {{description}}
 
 </template>
 
@@ -247,6 +244,14 @@ const description = computed(() => {
   .description
     margin-top 10px
     word-wrap anywhere
+  .title,
+  .description
+    &.is-background-light
+      span
+       color var(--primary-on-light-background)
+    &.is-background-dark
+      span
+        color var(--primary-on-dark-background)
 
   .embed
     width 100%

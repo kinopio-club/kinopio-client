@@ -821,12 +821,25 @@ export default {
     const { r, g, b } = colord(color).toRgb()
     return `rgba(${r}, ${g}, ${b})`
   },
-
-  // colorToRGBA (color, opacity) {
-  //   opacity = opacity || '1'
-  //   const { r, g, b } = colord(color).toRgb()
-  //   return `rgba(${r}, ${g}, ${b}, ${opacity})`
-  // },
+  alternateColor (color, isThemeDark, colorDelta) {
+    colorDelta = colorDelta || 0.1
+    if (isThemeDark.value) {
+      color = colord(color).lighten(colorDelta).toHex()
+    } else {
+      color = colord(color).darken(colorDelta).toHex()
+    }
+    return color
+  },
+  textColorClasses ({ backgroundColor, backgroundColorIsDark }) {
+    backgroundColorIsDark = backgroundColorIsDark || this.colorIsDark(backgroundColor)
+    let classes = []
+    if (backgroundColorIsDark) {
+      classes.push('is-background-dark')
+    } else {
+      classes.push('is-background-light')
+    }
+    return classes
+  },
 
   // normalize items
 

@@ -1637,6 +1637,7 @@ const shouldRender = computed(() => {
   if (isConnectingFrom) { return true }
   if (shouldExplitlyRender) { return true }
   if (connectedToAnotherCardBeingDraggedColor.value) { return true }
+  if (store.state.disableViewportOptimizations) { return true }
   if (state.isVisibleInViewport) {
     updateLockedItemButtonPosition()
   }

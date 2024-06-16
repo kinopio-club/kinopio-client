@@ -33,6 +33,20 @@ const isRemoved = computed(() => {
 })
 const urlIsInvite = computed(() => utils.urlIsInvite(props.url))
 
+// colors
+
+const isThemeDark = computed(() => store.getters['themes/isThemeDark'])
+const background = computed(() => {
+  let color = props.selectedColor || props.card.backgroundColor
+  const defaultColor = utils.cssVariable('secondary-background')
+  const colorIsDefaultColor = utils.colorsAreEqual(color, defaultColor)
+  if (colorIsDefaultColor || !color) { return }
+  return utils.alternateColor(color, isThemeDark.value)
+})
+const textColorClasses = computed(() => {
+  return utils.textColorClasses({ backgroundColor: background.value })
+})
+
 // preivew image
 
 const shouldShowPreviewImage = computed(() => props.card.shouldShowOtherSpacePreviewImage)
@@ -46,7 +60,7 @@ const previewImageIsVisible = computed(() => shouldShowPreviewImage.value && pre
   //- preview image
   .preview-image-wrap(v-if="previewImageIsVisible")
     img.preview-image(:src="previewImage" :class="{selected: props.isSelected}" ref="image")
-  .badge.link-badge(:class="{ 'preview-image-is-visible': previewImageIsVisible }" :style="{ background: props.selectedColor }")
+  .badge.link-badge(:class="{ 'preview-image-is-visible': previewImageIsVisible }" :style="{ background: background }")
     //- badges
     .badge.info.inline-badge(v-if="urlIsInvite")
       span Invite
@@ -56,7 +70,8 @@ const previewImageIsVisible = computed(() => shouldShowPreviewImage.value && pre
     template(v-if="props.otherSpace")
       template(v-if="props.otherSpace.users")
         UserLabelInline(:user="props.otherSpace.users[0]" :shouldHideName="true")
-      span.space-name {{otherSpaceName}}
+      span.space-name(:class="textColorClasses")
+        span {{otherSpaceName}}
       img.icon.private(v-if="otherSpaceIsPrivate" src="@/assets/lock.svg")
     template(v-else)
       Loader(:visible="true" :isSmall="true" :isStatic="!isLoadingOtherItems")
@@ -98,5 +113,11 @@ const previewImageIsVisible = computed(() => shouldShowPreviewImage.value && pre
       mix-blend-mode color-burn
   .space-name
     overflow-wrap break-word
+    &.is-background-light
+      span
+        color var(--primary-on-light-background)
+    &.is-background-dark
+      span
+        color var(--primary-on-dark-background)
 
 </style>

@@ -48,6 +48,7 @@ const store = createStore({
     isEmbedMode: false,
     isAddPage: false,
     isPresentationMode: false,
+    disableViewportOptimizations: false,
     pricingIsVisible: false,
     userSettingsIsVisible: false,
     offlineIsVisible: false,
@@ -438,6 +439,10 @@ const store = createStore({
     userSettingsIsVisible: (state, value) => {
       utils.typeCheck({ value, type: 'boolean' })
       state.userSettingsIsVisible = value
+    },
+    disableViewportOptimizations: (state, value) => {
+      utils.typeCheck({ value, type: 'boolean', allowUndefined: true })
+      state.disableViewportOptimizations = value
     },
     offlineIsVisible: (state, value) => {
       utils.typeCheck({ value, type: 'boolean' })

@@ -26,6 +26,7 @@ const router = createRouter({
       component: Space,
       beforeEnter: (to, from, next) => {
         const urlParams = new URLSearchParams(window.location.search)
+        store.commit('disableViewportOptimizations', urlParams.get('disableViewportOptimizations'))
         next()
       }
     }, {
@@ -188,6 +189,7 @@ const router = createRouter({
         const readOnlyKey = urlParams.get('readOnlyKey')
         const isPresentationMode = urlParams.get('present') || false
         const isInvite = true
+        store.commit('disableViewportOptimizations', urlParams.get('disableViewportOptimizations'))
         pageMeta.space(spaceId, isInvite)
         store.dispatch('currentUser/init')
         store.commit('isLoadingSpace', true)
