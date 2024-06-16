@@ -14,10 +14,11 @@ let ripples = [] // { x, y, color, radius, shadowRadius, speed, decay, lineWidth
 
 onMounted(() => {
   store.subscribe(mutation => {
-    if (mutation.type === 'triggerNotifyOffscreenCardCreated') {
-      const card = mutation.payload
-      createRipples(card)
-    } else if (mutation.type === 'spaceZoomPercent') {
+    // if (mutation.type === 'triggerSonarPing') {
+    //   const card = mutation.payload
+    //   createRipples(card)
+    // } else
+    if (mutation.type === 'spaceZoomPercent') {
       updateScroll()
     }
   })
@@ -27,6 +28,12 @@ onMounted(() => {
   window.requestAnimationFrame(rippleFrame)
   window.addEventListener('scroll', updateScroll)
   window.addEventListener('resize', updateScroll)
+  window.addEventListener('mousedown', checkIfShouldPing)
+})
+onBeforeUnmount(() => {
+  window.removeEventListener('scroll', updateScroll)
+  window.removeEventListener('resize', updateScroll)
+  window.removeEventListener('mousedown', checkIfShouldPing)
 })
 
 const state = reactive({
@@ -49,18 +56,28 @@ const styles = computed(() => {
   }
 })
 
-const createRipples = (card) => {
+const checkIfShouldPing = (event) => {
+  const rightMouseButton = 2
+  const isRightClick = rightMouseButton === event.button
+  if (!isRightClick) { return }
+  // broadcast
+  let ping = utils.cursorPositionInSpace(event)
+  ping.color = store.state.currentUser.color
+  createRipples(ping)
+}
+
+const createRipples = (ping) => {
   const rippleCount = 4
-  const { userId, x, y } = card
-  const user = store.getters['currentSpace/userById'](userId)
-  let color = user.color
-  color = colord(color).toHsl() // { h: 240, s: 100, l: 50, a: 0.5 }
+  let { x, y } = ping
+  // const user = store.getters['currentSpace/userById'](userId)
+  // let color = user.color
+  const color = colord(ping.color).toHsl() // { h: 240, s: 100, l: 50, a: 0.5 }
   const shadowColorDelta = 0.2
   let shadowColor
   if (isDarkTheme.value) {
-    shadowColor = colord(user.color).lighten(shadowColorDelta).toHsl()
+    shadowColor = colord(ping.color).lighten(shadowColorDelta).toHsl()
   } else {
-    shadowColor = colord(user.color).darken(shadowColorDelta).toHsl()
+    shadowColor = colord(ping.color).darken(shadowColorDelta).toHsl()
   }
   // create initial ripples
   for (var i = 1; i < rippleCount + 1; i++) {
