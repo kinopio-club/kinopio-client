@@ -253,10 +253,19 @@ const updateCircleForAndroid = (circle) => {
 const checkIsCircleVisible = (circle) => {
   let { x, y, radius } = circle
   radius = radius || circleRadius
-  const diameter = radius * 2
-  x = x - (radius / 2)
-  y = y - (radius / 2)
-  return utils.isRectInsideViewport({ x, y, width: diameter, height: diameter })
+  let isBetween = {
+    value: x + radius,
+    min: 0,
+    max: viewportWidth.value
+  }
+  const isCircleVisibleX = utils.isBetween(isBetween)
+  isBetween = {
+    value: y + radius,
+    min: 0,
+    max: viewportHeight.value
+  }
+  const isCircleVisibleY = utils.isBetween(isBetween)
+  return Boolean(isCircleVisibleX && isCircleVisibleY)
 }
 const offscreenCircle = (circle) => {
   if (circle.x > viewportWidth.value) {
