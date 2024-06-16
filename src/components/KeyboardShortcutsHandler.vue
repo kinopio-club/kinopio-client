@@ -247,10 +247,12 @@ export default {
         event.preventDefault()
         this.$store.commit('currentUserIsPanning', true)
         disableContextMenu = true
-        return false
       } else if (this.$store.state.currentUserIsPanningReady) {
         event.preventDefault()
         this.$store.commit('currentUserIsPanning', true)
+      }
+      if (isRightClick) {
+        this.$store.dispatch('triggerSonarPing', event)
       }
     },
     // on mouse move
