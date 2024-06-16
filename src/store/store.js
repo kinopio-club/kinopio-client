@@ -571,6 +571,7 @@ const store = createStore({
     triggerRestoreSpaceRemoteComplete: () => {},
     triggerCheckIfShouldNotifySpaceOutOfSync: () => {},
     triggerNotifyOffscreenCardCreated: (state, card) => {},
+    triggerSonarPing: (state, event) => {},
 
     // Used by extensions only
 
@@ -1768,6 +1769,12 @@ const store = createStore({
         boxId
       }
       context.commit('broadcast/updateStore', { updates, type: 'removeFromRemoteBoxesSelected' })
+    },
+    triggerSonarPing: (context, event) => {
+      let ping = utils.cursorPositionInSpace(event)
+      ping.color = store.state.currentUser.color
+      context.commit('triggerSonarPing', ping)
+      context.commit('broadcast/updateStore', { updates: ping, type: 'triggerSonarPing' })
     },
 
     // Pinned Dialogs

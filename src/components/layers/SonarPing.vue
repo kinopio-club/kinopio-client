@@ -14,11 +14,10 @@ let ripples = [] // { x, y, color, radius, shadowRadius, speed, decay, lineWidth
 
 onMounted(() => {
   store.subscribe(mutation => {
-    // if (mutation.type === 'triggerSonarPing') {
-    //   const card = mutation.payload
-    //   createRipples(card)
-    // } else
-    if (mutation.type === 'spaceZoomPercent') {
+    if (mutation.type === 'triggerSonarPing') {
+      const ping = mutation.payload
+      createRipples(ping)
+    } else if (mutation.type === 'spaceZoomPercent') {
       updateScroll()
     }
   })
@@ -28,12 +27,10 @@ onMounted(() => {
   window.requestAnimationFrame(rippleFrame)
   window.addEventListener('scroll', updateScroll)
   window.addEventListener('resize', updateScroll)
-  window.addEventListener('mousedown', checkIfShouldPing)
 })
 onBeforeUnmount(() => {
   window.removeEventListener('scroll', updateScroll)
   window.removeEventListener('resize', updateScroll)
-  window.removeEventListener('mousedown', checkIfShouldPing)
 })
 
 const state = reactive({
@@ -55,16 +52,6 @@ const styles = computed(() => {
     top: state.scroll.y + 'px'
   }
 })
-
-const checkIfShouldPing = (event) => {
-  const rightMouseButton = 2
-  const isRightClick = rightMouseButton === event.button
-  if (!isRightClick) { return }
-  // broadcast
-  let ping = utils.cursorPositionInSpace(event)
-  ping.color = store.state.currentUser.color
-  createRipples(ping)
-}
 
 const createRipples = (ping) => {
   const rippleCount = 4
