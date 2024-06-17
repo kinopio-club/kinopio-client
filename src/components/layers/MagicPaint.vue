@@ -813,4 +813,6 @@ canvas
 .remote-painting,
 .notify-offscreen-circle
   pointer-events none
+.notify-offscreen-circle
+  z-index 1
 </style>
