@@ -251,7 +251,7 @@ export default {
         event.preventDefault()
         this.$store.commit('currentUserIsPanning', true)
       }
-      if (isRightClick) {
+      if (isRightClick && userDisablePan) {
         this.$store.dispatch('triggerSonarPing', event)
       }
     },
@@ -283,6 +283,11 @@ export default {
     // on mouse up
     // right clicks don't trigger mouse up
     handleMouseUpEvents (event) {
+      const shouldPan = this.$store.state.currentUserIsPanning
+      const cursorsAreClose = utils.cursorsAreClose(prevRightClickPosition, utils.cursorPositionInPage(event))
+      if (shouldPan && cursorsAreClose) {
+        this.$store.dispatch('triggerSonarPing', event)
+      }
       const isFromOutsideWindow = event.target.nodeType === Node.DOCUMENT_NODE
       let isFromCard
       if (!isFromOutsideWindow) {
