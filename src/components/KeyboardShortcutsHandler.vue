@@ -281,36 +281,27 @@ export default {
       }
     },
     // on mouse up
+    // right clicks don't trigger mouse up
     handleMouseUpEvents (event) {
-      const rightMouseButton = 2
-      const isRightClick = rightMouseButton === event.button
       const isFromOutsideWindow = event.target.nodeType === Node.DOCUMENT_NODE
       let isFromCard
       if (!isFromOutsideWindow) {
         isFromCard = event.target.closest('article#card')
       }
       const position = utils.cursorPositionInPage(event)
-      let isNearPrevRightClickPosition
-      if (isRightClick && prevRightClickPosition) {
-        isNearPrevRightClickPosition = utils.distanceBetweenTwoPoints(prevRightClickPosition, position) <= 5
-      }
       prevCursorPosition = undefined
       this.$store.commit('currentUserIsPanning', false)
       this.$store.commit('currentUserIsBoxSelecting', false)
-      if (isRightClick && isFromCard && isNearPrevRightClickPosition) {
-        console.log('🐁 is right click on card') // temp
-      }
     },
     // on scroll
     handleScrollEvents (event) {
       prevCursorPosition = undefined
     },
-    // on native context menu
+    // on native right-click context menu
     handleContextMenuEvents (event) {
       if (disableContextMenu) {
         disableContextMenu = false
         event.preventDefault()
-        return false
       }
     },
 
