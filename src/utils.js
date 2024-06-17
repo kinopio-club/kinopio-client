@@ -252,9 +252,16 @@ export default {
     return isOutsideX || isOutsideY
   },
   outsideSpaceOffset () {
+    const zoom = this.spaceCounterZoomDecimal() || 1
     const space = document.getElementById('space')
     if (!space) { return }
-    const spaceRect = space.getBoundingClientRect()
+    let spaceRect = space.getBoundingClientRect()
+    spaceRect = {
+      x: Math.round(spaceRect.x * zoom),
+      y: Math.round(spaceRect.y * zoom),
+      width: Math.round(spaceRect.width),
+      height: Math.round(spaceRect.height)
+    }
     const app = document.getElementById('app')
     const appRect = app.getBoundingClientRect()
     return {

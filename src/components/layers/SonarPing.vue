@@ -168,8 +168,8 @@ aside
   )
 </template>
 
-<style lang="stylus" scoped>
-canvas
+<style lang="stylus">
+canvas#sonar
   background-color rgba(0,128,128, 0.5) //temp
   pointer-events none
   position fixed
