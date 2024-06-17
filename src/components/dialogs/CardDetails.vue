@@ -561,7 +561,7 @@ const startOpening = () => {
   setTimeout(() => {
     if (!openingAnimationTimer) {
       state.isOpening = true
-      openingAnimationTimer = window.requestAnimationFrame(openingAnimationFrame.value)
+      openingAnimationTimer = window.requestAnimationFrame(openingAnimationFrame)
     }
   }, openingPreDuration)
 }
@@ -579,7 +579,7 @@ const openingAnimationFrame = (timestamp) => {
     state.openingPercent = percentRemaining
     const alpha = utils.easeOut(percentComplete, elaspedTime, openingDuration)
     state.openingAlpha = alpha
-    window.requestAnimationFrame(openingAnimationFrame.value)
+    window.requestAnimationFrame(openingAnimationFrame)
   } else if (state.isOpening && percentComplete > 1) {
     console.log('🐢 cardDetails openingAnimationFrame complete')
     openingAnimationTimer = undefined

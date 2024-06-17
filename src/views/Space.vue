@@ -6,7 +6,6 @@ import Card from '@/components/Card.vue'
 import CardDetails from '@/components/dialogs/CardDetails.vue'
 import OtherCardDetails from '@/components/dialogs/OtherCardDetails.vue'
 import BoxDetails from '@/components/dialogs/BoxDetails.vue'
-import UserLabelCursor from '@/components/UserLabelCursor.vue'
 import ConnectionDetails from '@/components/dialogs/ConnectionDetails.vue'
 import CodeLanguagePicker from '@/components/dialogs/CodeLanguagePicker.vue'
 import MultipleSelectedActions from '@/components/dialogs/MultipleSelectedActions.vue'
@@ -17,6 +16,7 @@ import Boxes from '@/components/Boxes.vue'
 import Cards from '@/components/Cards.vue'
 import Connections from '@/components/Connections.vue'
 import ItemUnlockButtons from '@/components/ItemUnlockButtons.vue'
+import SonarPing from '@/components/layers/SonarPing.vue'
 import utils from '@/utils.js'
 import consts from '@/consts.js'
 
@@ -43,6 +43,7 @@ onMounted(() => {
   window.addEventListener('touchmove', interact)
   window.addEventListener('mouseup', stopInteractions)
   window.addEventListener('touchend', handleTouchEnd)
+  window.addEventListener('visibilitychange', handleTouchEnd)
   window.addEventListener('resize', updatePageSizesDebounced)
   // when a card is added through Add.vue in a sharesheet with the space open behind it
   window.addEventListener('message', addCardFromOutsideAppContext)
@@ -82,6 +83,7 @@ onBeforeUnmount(() => {
   window.removeEventListener('touchmove', interact)
   window.removeEventListener('mouseup', stopInteractions)
   window.removeEventListener('touchend', handleTouchEnd)
+  window.removeEventListener('visibilitychange', handleTouchEnd)
   window.removeEventListener('resize', updatePageSizesDebounced)
   window.removeEventListener('unload', unloadPage)
   window.removeEventListener('message', addCardFromOutsideAppContext)
@@ -110,10 +112,6 @@ const isDraggingBox = computed(() => store.state.currentUserIsDraggingBox)
 // user
 
 const currentUser = computed(() => store.state.currentUser)
-const users = computed(() => {
-  const excludeCurrentUser = true
-  return store.getters['currentSpace/allUsers'](excludeCurrentUser)
-})
 
 // styles
 
@@ -439,6 +437,8 @@ const shouldCancelInteraction = (event) => {
 // 💣 stopInteractions and Space/stopPainting are run after all mouse and touch end events
 
 const handleTouchEnd = (event) => {
+  store.commit('isPinchZooming', false)
+  store.commit('isTouchScrolling', false)
   updatePageSizes()
   stopInteractions(event)
 }
@@ -495,13 +495,11 @@ main#space.space(
   :style="styles"
   :data-zoom="spaceZoomDecimal"
 )
+  SonarPing
   Connections
   Boxes
   Cards
   ItemUnlockButtons
-  //- Presence
-  template(v-for="user in users")
-    UserLabelCursor(:user="user")
   BoxDetails
   CardDetails
   OtherCardDetails

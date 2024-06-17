@@ -506,7 +506,7 @@ const startLocking = (event) => {
   shouldCancelLocking = false
   setTimeout(() => {
     if (!lockingAnimationTimer) {
-      lockingAnimationTimer = window.requestAnimationFrame(lockingAnimationFrame.value)
+      lockingAnimationTimer = window.requestAnimationFrame(lockingAnimationFrame)
     }
   }, lockingPreDuration)
 }
@@ -528,7 +528,7 @@ const lockingAnimationFrame = (timestamp) => {
     state.lockingPercent = percentRemaining
     const alpha = utils.easeOut(percentComplete, elaspedTime, lockingDuration)
     state.lockingAlpha = alpha
-    window.requestAnimationFrame(lockingAnimationFrame.value)
+    window.requestAnimationFrame(lockingAnimationFrame)
   } else if (state.isLocking && percentComplete > 1) {
     console.log('🔒🐢 box lockingAnimationFrame locked')
     lockingAnimationTimer = undefined

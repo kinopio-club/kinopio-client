@@ -70,7 +70,6 @@ const sendEvent = (store, mutation, type) => {
     type
   }))
 }
-
 const checkIfShouldUpdateLinkToItem = (store, { message, updates }) => {
   if (message !== 'updateCard') { return }
   let options
@@ -82,7 +81,11 @@ const checkIfShouldUpdateLinkToItem = (store, { message, updates }) => {
   if (!options) { return }
   store.dispatch('currentSpace/updateOtherItems', options)
 }
-
+const checkIfShouldNotifyOffscreenCardCreated = (store, data) => {
+  if (data.message === 'createCard') {
+    store.commit('triggerNotifyOffscreenCardCreated', data.updates.card)
+  }
+}
 const closeWebsocket = (store) => {
   if (!websocket) { return }
   store.commit('isJoiningSpace', true)
@@ -130,6 +133,7 @@ export default function createWebSocketPlugin () {
           } else if (handler) {
             store.commit(handler, updates)
             checkIfShouldUpdateLinkToItem(store, data)
+            checkIfShouldNotifyOffscreenCardCreated(store, data)
           // users
           } else if (message === 'userJoinedRoom') {
             store.dispatch('currentSpace/addUserToJoinedSpace', user)

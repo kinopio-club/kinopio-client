@@ -37,6 +37,11 @@ let lockingCanvas, lockingContext, lockingAnimationTimer, currentUserIsLocking, 
 let initialCircles = []
 let initialCircleCanvas, initialCircleContext, initialCirclesTimer
 
+// notify offscreen cards
+// similar to initial circle feedback
+let notifyOffscreenCircles = []
+let notifyOffscreenCircleCanvas, notifyOffscreenCircleContext, notifyOffscreenCirclesTimer
+
 // post scroll timer
 // runs scroll events after scrollend to compensate for android inertia scrolling
 const postScrollDuration = 300 // ms
@@ -64,8 +69,22 @@ onMounted(() => {
       circle.y = position.y
       createRemotePaintingCircle(circle)
       remotePainting()
+    } else if (mutation.type === 'triggerNotifyOffscreenCardCreated') {
+      const card = mutation.payload
+      const user = store.getters['currentSpace/userById'](card.userId)
+      const color = user.color
+      const position = updateRemotePosition(card)
+      let circle = {
+        x: position.x,
+        y: position.y,
+        color,
+        shouldDrawOffscreen: true
+      }
+      if (checkIsCircleVisible(circle)) { return }
+      createNotifyOffscreenCircle(circle)
     }
   })
+  // init canvases
   paintingCanvas = document.getElementById('magic-painting')
   paintingContext = paintingCanvas.getContext('2d')
   paintingContext.scale(window.devicePixelRatio, window.devicePixelRatio)
@@ -78,6 +97,9 @@ onMounted(() => {
   initialCircleCanvas = document.getElementById('initial-circle')
   initialCircleContext = initialCircleCanvas.getContext('2d')
   initialCircleContext.scale(window.devicePixelRatio, window.devicePixelRatio)
+  notifyOffscreenCircleCanvas = document.getElementById('notify-offscreen-circle')
+  notifyOffscreenCircleContext = notifyOffscreenCircleCanvas.getContext('2d')
+  notifyOffscreenCircleContext.scale(window.devicePixelRatio, window.devicePixelRatio)
   // trigger stopPainting even if mouse is outside window
   window.addEventListener('mouseup', stopPainting)
   window.addEventListener('touchend', stopPainting)
@@ -629,17 +651,51 @@ const lockingAnimationFrame = (timestamp) => {
   }
 }
 
-// Initial Circles
+// Notify Offscreen Circles
 
-const startInitialCircles = () => {
-  initialCircles.map(circle => {
+const createNotifyOffscreenCircle = (circle) => {
+  circle.x = circle.x - window.scrollX
+  circle.y = circle.y - window.scrollY
+  const notifyOffscreenCircle = {
+    x: circle.x,
+    y: circle.y,
+    color: circle.color,
+    iteration: 1,
+    persistent: true
+  }
+  notifyOffscreenCircles.push(notifyOffscreenCircle)
+  drawCircle(notifyOffscreenCircle, notifyOffscreenCircleContext, true)
+  startNotifyOffscreenCircles()
+}
+const startNotifyOffscreenCircles = () => {
+  notifyOffscreenCircles.map(circle => {
     circle.persistent = false
   })
-  if (!initialCirclesTimer) {
-    initialCirclesTimer = window.requestAnimationFrame(initialCirclesAnimationFrame)
+  if (!notifyOffscreenCirclesTimer) {
+    notifyOffscreenCirclesTimer = window.requestAnimationFrame(notifyOffscreenCirclesAnimationFrame)
   }
 }
-const createInitialCircle = () => {
+const notifyOffscreenCirclesAnimationFrame = () => {
+  notifyOffscreenCircles = utils.filterCircles(notifyOffscreenCircles, maxIterations)
+  notifyOffscreenCircleContext.clearRect(0, 0, pageWidth.value, pageHeight.value)
+  notifyOffscreenCircles.forEach(item => {
+    if (!item.persistent) {
+      item.iteration++
+    }
+    let circle = JSON.parse(JSON.stringify(item))
+    drawCircle(circle, notifyOffscreenCircleContext, true)
+  })
+  if (notifyOffscreenCircles.length) {
+    window.requestAnimationFrame(notifyOffscreenCirclesAnimationFrame)
+  } else {
+    window.cancelAnimationFrame(notifyOffscreenCirclesTimer)
+    notifyOffscreenCirclesTimer = undefined
+  }
+}
+
+// Initial Circles
+
+const createInitialCircle = (circle) => {
   if (toolbarIsBox.value) { return }
   const initialCircle = {
     x: startCursor.x,
@@ -651,6 +707,14 @@ const createInitialCircle = () => {
   initialCircles.push(initialCircle)
   drawCircle(initialCircle, initialCircleContext)
   startInitialCircles()
+}
+const startInitialCircles = () => {
+  initialCircles.map(circle => {
+    circle.persistent = false
+  })
+  if (!initialCirclesTimer) {
+    initialCirclesTimer = window.requestAnimationFrame(initialCirclesAnimationFrame)
+  }
 }
 const initialCirclesAnimationFrame = () => {
   initialCircles = utils.filterCircles(initialCircles, maxIterations)
@@ -725,6 +789,11 @@ aside
     :height="viewportHeight"
     :data-should-decay-slow="true"
   )
+  canvas#notify-offscreen-circle.notify-offscreen-circle(
+    :width="viewportWidth"
+    :height="viewportHeight"
+    :data-should-decay-slow="true"
+  )
   template(v-if="state.dropGuideLineIsVisible")
     DropGuideLine(
       :currentCursor="state.currentCursor"
@@ -741,6 +810,9 @@ canvas
   top 0
 .locking,
 .initial-circle,
-.remote-painting
+.remote-painting,
+.notify-offscreen-circle
   pointer-events none
+.notify-offscreen-circle
+  z-index 1
 </style>

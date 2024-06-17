@@ -31,6 +31,11 @@
     "thumbnailUrl": "https://bk.kinopio.club/grid-thumbnail-5.svg"
   },
   {
+    "url": "https://bk.kinopio.club/circular-2x.webp",
+    "previewUrl": "https://bk.kinopio.club/circular-thumbnail.webp",
+    "thumbnailUrl": "https://bk.kinopio.club/circular-thumbnail.webp"
+  },
+  {
     "url": "https://bk.kinopio.club/grid-inverse-2x.png",
     "previewUrl": "https://bk.kinopio.club/grid-inverse-preview.svg",
     "thumbnailUrl": "https://bk.kinopio.club/grid-inverse-thumbnail-2.svg",

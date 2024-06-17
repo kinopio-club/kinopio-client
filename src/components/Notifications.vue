@@ -39,14 +39,14 @@ onMounted(() => {
     }
   })
   window.addEventListener('visibilitychange', updatePageVisibilityChange)
-  window.addEventListener('focus', updatePageVisibilityChange)
+  window.addEventListener('focus', updatePageVisibilityChangeOnFocus)
   checkIfShouldNotifySpaceOutOfSyncIntervalTimer = setInterval(() => {
     checkIfShouldNotifySpaceOutOfSync()
   }, 1000 * 60 * 60 * 1) // check every hour
 })
 onBeforeUnmount(() => {
   window.removeEventListener('visibilitychange', updatePageVisibilityChange)
-  window.removeEventListener('focus', updatePageVisibilityChange)
+  window.removeEventListener('focus', updatePageVisibilityChangeOnFocus)
   clearInterval(checkIfShouldNotifySpaceOutOfSyncIntervalTimer)
 })
 
@@ -92,6 +92,10 @@ const currentSpaceIsTemplate = computed(() => {
 
 // space out of sync
 
+const updatePageVisibilityChangeOnFocus = async (event) => {
+  await nextTick()
+  updatePageVisibilityChange()
+}
 const updatePageVisibilityChange = (event) => {
   checkIfShouldNotifySpaceOutOfSync()
 }
@@ -99,7 +103,9 @@ const toggleNotifySpaceOutOfSync = (value) => {
   state.notifySpaceOutOfSync = value
 }
 const checkIfShouldNotifySpaceOutOfSync = async () => {
+  if (document.visibilityState !== 'visible') { return }
   if (state.notifySpaceOutOfSync) { return }
+  if (store.state.isLoadingSpace) { return }
   console.log('☎️ checkIfShouldNotifySpaceOutOfSync…')
   try {
     if (!currentUserIsSignedIn.value) { return }
@@ -112,12 +118,12 @@ const checkIfShouldNotifySpaceOutOfSync = async () => {
     const remoteSpaceUpdatedAt = dayjs(remoteSpace.updatedAt)
     const deltaMinutes = spaceUpdatedAt.diff(remoteSpaceUpdatedAt, 'minute')
     const updatedAtIsChanged = deltaMinutes >= 1
-    console.log('☎️ checkIfShouldNotifySpaceOutOfSync result', {
-      updatedAtIsChanged,
-      spaceUpdatedAt: spaceUpdatedAt.fromNow(),
-      remoteSpaceUpdatedAt: remoteSpaceUpdatedAt.fromNow(),
-      deltaMinutes
-    })
+    // console.log('☎️ checkIfShouldNotifySpaceOutOfSync result', {
+    //   updatedAtIsChanged,
+    //   spaceUpdatedAt: spaceUpdatedAt.fromNow(),
+    //   remoteSpaceUpdatedAt: remoteSpaceUpdatedAt.fromNow(),
+    //   deltaMinutes
+    // })
     if (updatedAtIsChanged) {
       state.notifySpaceOutOfSync = true
     }
