@@ -281,7 +281,7 @@ const handleMouseMoveEvents = (event) => {
 const handleMouseUpEvents = (event) => {
   const shouldPan = store.state.currentUserIsPanning
   const cursorsAreClose = utils.cursorsAreClose(prevRightClickPosition, utils.cursorPositionInPage(event))
-  if (shouldPan && cursorsAreClose) {
+  if (shouldPan && cursorsAreClose && !store.state.multipleSelectedActionsIsVisible) {
     store.dispatch('triggerSonarPing', event)
   }
   const isFromOutsideWindow = event.target.nodeType === Node.DOCUMENT_NODE
