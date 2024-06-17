@@ -43,6 +43,7 @@ onMounted(() => {
   window.addEventListener('touchmove', interact)
   window.addEventListener('mouseup', stopInteractions)
   window.addEventListener('touchend', handleTouchEnd)
+  window.addEventListener('visibilitychange', handleTouchEnd)
   window.addEventListener('resize', updatePageSizesDebounced)
   // when a card is added through Add.vue in a sharesheet with the space open behind it
   window.addEventListener('message', addCardFromOutsideAppContext)
@@ -82,6 +83,7 @@ onBeforeUnmount(() => {
   window.removeEventListener('touchmove', interact)
   window.removeEventListener('mouseup', stopInteractions)
   window.removeEventListener('touchend', handleTouchEnd)
+  window.removeEventListener('visibilitychange', handleTouchEnd)
   window.removeEventListener('resize', updatePageSizesDebounced)
   window.removeEventListener('unload', unloadPage)
   window.removeEventListener('message', addCardFromOutsideAppContext)
@@ -435,6 +437,8 @@ const shouldCancelInteraction = (event) => {
 // 💣 stopInteractions and Space/stopPainting are run after all mouse and touch end events
 
 const handleTouchEnd = (event) => {
+  store.commit('isPinchZooming', false)
+  store.commit('isTouchScrolling', false)
   updatePageSizes()
   stopInteractions(event)
 }

@@ -49,7 +49,6 @@ onMounted(() => {
   window.addEventListener('touchend', touchEnd)
   window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', logMatchMediaChange)
   window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', updateThemeFromSystem)
-  window.addEventListener('visibilitychange', cancelTouch)
   updateIsOnline()
   window.addEventListener('online', updateIsOnline)
   window.addEventListener('offline', updateIsOnline)
@@ -145,10 +144,6 @@ const touchEnd = () => {
 const scroll = () => {
   if (store.state.userHasScrolled) { return }
   store.commit('userHasScrolled', true)
-}
-const cancelTouch = () => {
-  store.commit('isPinchZooming', false)
-  store.commit('isTouchScrolling', false)
 }
 const toggleIsPinchZooming = (event) => {
   if (utils.shouldIgnoreTouchInteraction(event)) { return }
