@@ -45,7 +45,6 @@ const spaceCounterZoomDecimal = computed(() => store.getters.spaceCounterZoomDec
 const viewportHeight = computed(() => store.state.viewportHeight * spaceCounterZoomDecimal.value)
 const viewportWidth = computed(() => store.state.viewportWidth * spaceCounterZoomDecimal.value)
 const isDarkTheme = computed(() => store.getters['themes/isThemeDark'])
-
 const styles = computed(() => {
   return {
     left: state.scroll.x + 'px',
@@ -53,11 +52,11 @@ const styles = computed(() => {
   }
 })
 
+// init and draw
+
 const createRipples = (ping) => {
   const rippleCount = 4
   let { x, y } = ping
-  // const user = store.getters['currentSpace/userById'](userId)
-  // let color = user.color
   const color = colord(ping.color).toHsl() // { h: 240, s: 100, l: 50, a: 0.5 }
   const shadowColorDelta = 0.2
   let shadowColor
@@ -84,23 +83,39 @@ const createRipples = (ping) => {
     }
     ripples.push(ripple)
   }
-  console.log('🚛🚛🚛createRipples', ripples)
 }
-
+const updateRippleOrigin = ({ x, y }) => {
+  x = x - state.scroll.x
+  y = y - state.scroll.y
+  // left side
+  if (x < 0) {
+    x = 0
+  // right side
+  } else if (x > viewportWidth.value) {
+    x = viewportWidth.value
+  }
+  // top side
+  if (y < 0) {
+    y = 0
+  // bottom side
+  } else if (y > viewportHeight.value) {
+    y = viewportHeight.value
+  }
+  return { x, y }
+}
 const drawRipples = () => {
   context.clearRect(0, 0, viewportWidth.value, viewportHeight.value)
   ripples.forEach(ripple => {
-    let { x, y, lineWidth, shadowRadius, radius, color, shadowColor, opacity } = ripple
-    x = x - state.scroll.x
-    y = y - state.scroll.y
-    // shadow
+    let { lineWidth, shadowRadius, radius, color, shadowColor, opacity } = ripple
+    let { x, y } = updateRippleOrigin(ripple)
+    // draw shadow
     context.beginPath()
     context.lineWidth = lineWidth + 2
     context.strokeStyle = `hsla(${shadowColor.h}, ${shadowColor.s}%, ${shadowColor.l}%, ${opacity / 2})`
     context.arc(x, y, shadowRadius, 0, 2 * Math.PI)
     context.stroke()
     context.closePath()
-    // ripple
+    // draw ripple
     context.beginPath()
     context.lineWidth = lineWidth
     context.strokeStyle = `hsla(${color.h}, ${color.s}%, ${color.l}%, ${opacity})`
@@ -110,9 +125,8 @@ const drawRipples = () => {
   })
 }
 
-const destroyRipples = () => {
-  ripples = ripples.filter(ripple => !ripple.shouldDestroy)
-}
+// frames
+
 const updateRipples = () => {
   const fadeRadius = 250
   const destroyRadius = 400
@@ -133,7 +147,6 @@ const updateRipples = () => {
   })
   destroyRipples()
 }
-
 const rippleFrame = () => {
   if (ripples.length) {
     drawRipples()
@@ -141,7 +154,9 @@ const rippleFrame = () => {
   }
   requestAnimationFrame(rippleFrame)
 }
-
+const destroyRipples = () => {
+  ripples = ripples.filter(ripple => !ripple.shouldDestroy)
+}
 </script>
 
 <template lang="pug">
