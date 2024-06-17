@@ -272,6 +272,7 @@ dialog.narrow.space-picker(v-if="visible" :open="visible" @click.left.stop ref="
 
 <style lang="stylus">
 dialog.space-picker
+  min-height 150px
   overflow auto
   .results-section
     padding-top 4px
