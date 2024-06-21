@@ -1886,7 +1886,7 @@ export default {
     // followed by alphanumerics
     // then trailing '/' or '-'
     // matches multiple urls and returns [urls]
-    const urlPattern = new RegExp(/(^|\n| )(http[s]?:\/\/)[^\s(["<>]{2,}(\.|(:[0-9]+))[^\s."><]+[\w=]\/?-?/igm)
+    const urlPattern = new RegExp(/(^|\n| )(http[s]?:\/\/)[^\s(["<>]{1,}(\.|(:[0-9]+))[^\s."><]+[\w=]\/?-?/igm)
     let localhostUrls = string.match(this.localhostUrlPattern()) || []
     let urls = string.match(urlPattern) || []
     urls = urls.concat(localhostUrls)
