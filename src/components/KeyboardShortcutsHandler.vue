@@ -238,7 +238,6 @@ const handleMouseDownEvents = (event) => {
     store.commit('currentUserBoxSelectEnd', position)
     store.commit('currentUserBoxSelectStart', position)
   } else if (shouldPan) {
-    if (consts.isDevelopment()) { return }
     prevRightClickPosition = utils.cursorPositionInPage(event)
     event.preventDefault()
     store.commit('currentUserIsPanning', true)
