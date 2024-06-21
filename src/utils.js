@@ -881,39 +881,25 @@ export default {
     if (!card) { return }
     const element = document.querySelector(`article#card[data-card-id="${card.id}"]`)
     if (!element) { return }
-    const isCardRenderedInDOM = element.dataset.shouldRender === 'true'
-    const zoom = this.spaceCounterZoomDecimal()
     const cardId = card.id
-    if (isCardRenderedInDOM) {
-      const rect = element.getBoundingClientRect()
-      card = this.rectDimensions(rect)
-    } else {
-      // this.removeCardDimensions(card)
-      card.x = parseInt(element.dataset.x)
-      card.y = parseInt(element.dataset.y)
-      const width = parseInt(element.dataset.width)
-      const height = parseInt(element.dataset.height)
-      card.width = Math.ceil(width * zoom)
-      card.height = Math.ceil(height * zoom)
-    }
+    card.x = parseInt(element.dataset.x)
+    card.y = parseInt(element.dataset.y)
+    const width = parseInt(element.dataset.width)
+    const height = parseInt(element.dataset.height)
+    card.width = Math.ceil(width)
+    card.height = Math.ceil(height)
     card.id = cardId
     return card
   },
-  // removeCardDimensions (card) {
-  //   const articleElement = document.querySelector(`article#card[data-card-id="${card.id}"]`)
-  //   const cardElement = document.querySelector(`.card[data-card-id="${card.id}"]`)
-  //   const contentWrapElement = articleElement.querySelector(`.card-content-wrap`)
-  //   const cardMediaElement = articleElement.querySelector(`.media-card`)
-  //   let width = 'initial'
-  //   if (articleElement.dataset.resizeWidth) {
-  //     width = articleElement.dataset.resizeWidth + 'px'
-  //   }
-  //   articleElement.style.width = width
-  //   articleElement.style.height = 'initial'
-  //   cardElement.style.width = width
-  //   contentWrapElement.style.width = width
-  //   contentWrapElement.style.height = 'initial'
-  // },
+  updateCardDimensionsDataWhileDragging (card) {
+    if (!card) { return }
+    const element = document.querySelector(`article#card[data-card-id="${card.id}"]`)
+    if (!element) { return }
+    element.dataset.x = card.x
+    element.dataset.y = card.y
+    element.dataset.width = card.width
+    element.dataset.height = card.height
+  },
   removeAllCardDimensions (card) {
     const articleElement = document.querySelector(`article#card[data-card-id="${card.id}"]`)
     const cardElement = document.querySelector(`.card[data-card-id="${card.id}"]`)

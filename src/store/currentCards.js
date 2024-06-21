@@ -584,8 +584,11 @@ const currentCards = {
           x: Math.round(card.x),
           y: Math.round(card.y),
           z: card.z,
-          id: card.id
+          id: card.id,
+          width: card.width,
+          height: card.height
         }
+        utils.updateCardDimensionsDataWhileDragging(card)
         return card
       })
       // update
