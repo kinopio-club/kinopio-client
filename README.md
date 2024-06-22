@@ -96,7 +96,7 @@ use Ngrok to pipe your localhost through an external https server
 [login](http://ngrok.com), install ngrok, then connect ngrok to the kinopio ngrok account
 
     $ brew install ngrok/ngrok/ngrok
-    $ ngrok authtoken 1e2pCpJsJMwkEkqbDKF0p5eMArQ_5Ztb7NE8fqyftCnuizdab
+    $ ngrok authtoken NGROK_TOKEN
 
 ### Run Ngrok
 
