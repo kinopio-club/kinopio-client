@@ -21,7 +21,6 @@ export default {
   AIImageLimitUpgradedUser: 50,
   AIImageLimitFreeUser: 10,
   pexelsApiKey: '4kZOQl4a0OjcWLrMHzj6sEJMarmlZzJiP6P67lqZpOrxbtITfwpKyC4j',
-  iframelyApiKey: '0788beaa34f65adc0fe7ac',
   rootUserId: 'euGhpBrR9eBcjKnK16C_g',
   sidebarWidth: 250,
   systemCommands: { explore: 'Explore', newSpace: 'New Space', templates: 'Templates', apps: 'Apps and Extensions' },

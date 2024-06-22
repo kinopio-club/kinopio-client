@@ -1084,14 +1084,14 @@ const self = {
     },
     urlPreview: async (context, url) => {
       try {
-        const apiKey = consts.iframelyApiKey
-        const iframely = 'https://iframe.ly/api/iframely'
-        const response = await fetch(`${iframely}/?url=${encodeURIComponent(url)}&api_key=${apiKey}&autoplay=1`)
+        const body = { url }
+        const options = await context.dispatch('requestOptions', { body, method: 'POST', space: context.rootState.currentSpace })
+        const response = await fetch(`${consts.apiHost()}/services/url-preview`, options)
         if (response.status !== 200) {
           throw new Error(response.status)
         }
         const data = await normalizeResponse(response)
-        return { url, data, response, host: iframely }
+        return { url, data, response }
       } catch (error) {
         context.dispatch('handleServerError', { name: 'urlPreview', error })
       }

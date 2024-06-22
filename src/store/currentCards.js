@@ -430,6 +430,7 @@ const currentCards = {
             height: card.height
           }
           const element = document.querySelector(`article#card[data-card-id="${card.id}"]`)
+          if (!element) { return }
           const isCardRenderedInDOM = element.dataset.shouldRender === 'true'
           if (isCardRenderedInDOM) {
             const rect = element.getBoundingClientRect()
