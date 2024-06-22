@@ -33,7 +33,8 @@
   {
     "url": "https://bk.kinopio.club/circular-2x.webp",
     "previewUrl": "https://bk.kinopio.club/circular-thumbnail.webp",
-    "thumbnailUrl": "https://bk.kinopio.club/circular-thumbnail.webp"
+    "thumbnailUrl": "https://bk.kinopio.club/circular-thumbnail.webp",
+    "isArchived": true
   },
   {
     "url": "https://bk.kinopio.club/grid-inverse-2x.png",
