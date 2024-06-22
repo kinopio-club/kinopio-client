@@ -192,6 +192,7 @@ const triggerUpdateHeaderAndFooterPosition = () => {
   store.commit('triggerUpdateHeaderAndFooterPosition')
 }
 const updateDimensions = (cardId) => {
+  cardId = cardId || card.value.id
   const item = { id: cardId }
   store.dispatch('currentCards/updateDimensions', { cards: [item] })
 }
@@ -445,6 +446,7 @@ const updateCardName = (newName) => {
   updatePaths()
   updateMediaUrls()
   updateTags()
+  updateDimensions()
   if (createdByUser.value.id !== store.state.currentUser.id) { return }
   if (state.notifiedMembers) { return } // send card update notifications only once per card, per session
   if (item.name) {

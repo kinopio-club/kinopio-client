@@ -429,7 +429,15 @@ const currentCards = {
             width: card.width,
             height: card.height
           }
-          card = utils.updateCardDimensions(card)
+          const element = document.querySelector(`article#card[data-card-id="${card.id}"]`)
+          const isCardRenderedInDOM = element.dataset.shouldRender === 'true'
+          if (isCardRenderedInDOM) {
+            const rect = element.getBoundingClientRect()
+            card.width = Math.round(rect.width)
+            card.height = Math.round(rect.height)
+          } else {
+            card = utils.updateCardDimensions(card)
+          }
           if (!card) { return }
           const dimensionsChanged = card.width !== prevDimensions.width || card.height !== prevDimensions.height
           const isMissingDimensions = utils.isMissingDimensions(card)
