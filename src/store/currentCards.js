@@ -434,8 +434,11 @@ const currentCards = {
           const isCardRenderedInDOM = element.dataset.shouldRender === 'true'
           if (isCardRenderedInDOM) {
             const rect = element.getBoundingClientRect()
-            card.width = Math.round(rect.width)
-            card.height = Math.round(rect.height)
+            card = {
+              id: card.id,
+              width: Math.round(rect.width),
+              height: Math.round(rect.height)
+            }
           } else {
             card = utils.updateCardDimensions(card)
           }
