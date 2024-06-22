@@ -12,8 +12,6 @@ import debounce from 'lodash-es/debounce'
 import sample from 'lodash-es/sample'
 const store = useStore()
 
-const numberOfImages = 25
-
 const dialogElement = ref(null)
 const searchInputElement = ref(null)
 const inputElement = ref(null)
@@ -184,19 +182,9 @@ const searchGiphy = async (isStickers) => {
   if (state.search) {
     endpoint = 'search'
   }
-  let url = new URL(`https://api.giphy.com/v1/${resource}/${endpoint}`)
-  let params = {
-    api_key: 'pK3Etx5Jj8IAzUx9Z7H7dUcjD4PazKq7',
-    limit: numberOfImages,
-    rating: 'g'
-  }
-  if (state.search) {
-    params.q = state.search
-  }
-  url.search = new URLSearchParams(params).toString()
-  const response = await fetch(url)
-  const data = await response.json()
-  normalizeResults(data.data, 'giphy')
+  const body = { search: state.search, endpoint, resource }
+  const data = await store.dispatch('api/gifImageSearch', body)
+  normalizeResults(data, 'giphy')
 }
 const searchService = debounce(async () => {
   clearErrors()
