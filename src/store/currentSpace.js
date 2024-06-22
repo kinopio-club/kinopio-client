@@ -390,6 +390,7 @@ const currentSpace = {
       let weather = context.rootState.currentUser.weather || ''
       if (!weather && isOnline) {
         weather = await context.dispatch('api/weather', null, { root: true })
+        weather = `\n\n${weather}`
       }
       // daily prompt
       let options = { currentUser, isTomorrow, weather }

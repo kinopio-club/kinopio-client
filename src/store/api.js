@@ -1120,45 +1120,12 @@ const self = {
 
     weather: async (context) => {
       const showWeather = context.rootState.currentUser.showWeather
-      const weatherLocation = context.rootState.currentUser.weatherLocation
-      const weatherUnitIsCelcius = context.rootState.currentUser.weatherUnitIsCelcius
       if (!showWeather) { return }
       try {
-        // http://docs.pirateweather.net/en/latest/API
-        const apiKey = 'qM8rme33sr7AtpNB8l0xLa8itqjRk5Bi9HeQcecH'
-        let url = `https://api.pirateweather.net/forecast/${apiKey}/${weatherLocation}?exclude=daily,minutely,alerts`
-        if (weatherUnitIsCelcius) {
-          url = url + '&units=ca'
-        }
-        const response = await fetch(url)
-        const data = await response.json()
-        let { currently, hourly } = data
-        hourly = hourly.data.slice(0, 12)
-        const emojis = {
-          'clear-day': '🌻',
-          'clear-night': '🌌',
-          'rain': '☔️',
-          'snow': '☃️',
-          'sleet': '☃️',
-          'wind': '🌻',
-          'fog': '🌻',
-          'cloudy': '🌻',
-          'partly-cloudy-day': '🌻',
-          'partly-cloudy-night': '🌌'
-        }
-        const emoji = emojis[currently.icon]
-        let isRainToday
-        hourly.forEach(hour => {
-          if (hour.icon === 'rain') {
-            isRainToday = true
-          }
-        })
-        const temperature = Math.round(currently.apparentTemperature)
-        let weather = `\n\n${emoji} ${currently.summary} ${temperature}°`
-        if (isRainToday) {
-          weather = weather + '\n\n☔️ Rain today'
-        }
-        return weather
+        const options = await context.dispatch('requestOptions', { method: 'GET', space: context.rootState.currentSpace })
+        const response = await fetch(`${consts.apiHost()}/services/weather`, options)
+        const data = await normalizeResponse(response)
+        return data.weather
       } catch (error) {
         context.dispatch('handleServerError', { name: 'weather', error })
       }
