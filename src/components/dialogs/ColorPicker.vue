@@ -271,6 +271,8 @@ dialog.narrow.color-picker(v-if="visible" :open="visible" ref="dialogElement" @c
 .color-picker
   // overflow auto
   width 200px !important
+  min-height 200px
+  overflow auto
   .colors
     display flex
     flex-wrap wrap
