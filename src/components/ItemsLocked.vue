@@ -1,36 +1,31 @@
+<script setup>
+import { reactive, computed, onMounted, onBeforeUnmount, defineProps, defineEmits, watch, ref, nextTick } from 'vue'
+import { useStore } from 'vuex'
+
+import Card from '@/components/Card.vue'
+import Box from '@/components/Box.vue'
+const store = useStore()
+
+const spaceZoomDecimal = computed(() => store.getters.spaceZoomDecimal)
+const lockedCards = computed(() => store.getters['currentCards/isLocked'])
+const lockedBoxes = computed(() => store.getters['currentBoxes/isLocked'])
+const positionStyles = computed(() => {
+  return {
+    transform: store.getters.zoomTransform
+  }
+})
+</script>
+
 <template lang="pug">
 //- boxes
-.locked-boxes(:style="positionStyles")
+#locked-boxes.locked-boxes(:style="positionStyles")
   template(v-for="box in lockedBoxes" :key="box.id")
     Box(:box="box")
 //- cards
-.locked-cards(:style="positionStyles")
+#locked-cards.locked-cards(:style="positionStyles")
   template(v-for="card in lockedCards" :key="card.id")
     Card(:card="card")
 </template>
-
-<script>
-import Card from '@/components/Card.vue'
-import Box from '@/components/Box.vue'
-
-export default {
-  name: 'ItemsLocked',
-  components: {
-    Card,
-    Box
-  },
-  computed: {
-    spaceZoomDecimal () { return this.$store.getters.spaceZoomDecimal },
-    lockedCards () { return this.$store.getters['currentCards/isLocked'] },
-    lockedBoxes () { return this.$store.getters['currentBoxes/isLocked'] },
-    positionStyles () {
-      return {
-        transform: this.$store.getters.zoomTransform
-      }
-    }
-  }
-}
-</script>
 
 <style lang="stylus">
 .locked-boxes,
