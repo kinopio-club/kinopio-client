@@ -29,6 +29,8 @@ let ri = Math.floor(Math.random() * 4)
 let gi = Math.floor(Math.random() * 4)
 let bi = Math.floor(Math.random() * 4)
 
+let shouldNotUpdate
+
 // start, stop
 
 onMounted(() => {
@@ -40,9 +42,9 @@ onBeforeUnmount(() => {
 const isTouching = computed(() => store.state.isPinchZooming || store.state.isTouchScrolling)
 watch(() => isTouching.value, (value, prevValue) => {
   if (value) {
-    cancel()
+    shouldNotUpdate = true
   } else {
-    start()
+    shouldNotUpdate = false
   }
 })
 const start = () => {
@@ -87,6 +89,7 @@ const updateBackgroundColor = () => {
   updateMetaThemeColor(backgroundColor)
 }
 const shouldUpdate = () => {
+  if (shouldNotUpdate) { return }
   const result = colorCycleIteration / colorCycleDuration
   return result === parseInt(result)
 }
