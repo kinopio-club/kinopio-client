@@ -388,16 +388,10 @@ const searchPexels = async () => {
   state.error.isNoSearchResults = false
   state.error.unknownServerError = false
   try {
-    let url = new URL('https://api.pexels.com/v1/search')
-    const headers = new Headers({
-      'Authorization': consts.pexelsApiKey
-    })
     const defaultSearches = [ 'animals', 'flowers', 'forest', 'ocean' ]
     const defaultSearch = sample(defaultSearches)
-    let params = { query: state.search || defaultSearch }
-    url.search = new URLSearchParams(params).toString()
-    const response = await fetch(url, { method: 'GET', headers })
-    const data = await response.json()
+    const search = state.search || defaultSearch
+    const data = await store.dispatch('api/imageSearch', search)
     state.images = data.photos.map(image => {
       return {
         id: image.id,

@@ -1096,6 +1096,17 @@ const self = {
         context.dispatch('handleServerError', { name: 'urlPreview', error })
       }
     },
+    imageSearch: async (context, search) => {
+      try {
+        const body = { search }
+        const options = await context.dispatch('requestOptions', { body, method: 'POST', space: context.rootState.currentSpace })
+        const response = await fetch(`${consts.apiHost()}/services/image-search`, options)
+        const data = await normalizeResponse(response)
+        return data
+      } catch (error) {
+        context.dispatch('handleServerError', { name: 'imageSearch', error })
+      }
+    },
     weather: async (context) => {
       const showWeather = context.rootState.currentUser.showWeather
       const weatherLocation = context.rootState.currentUser.weatherLocation
