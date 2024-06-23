@@ -26,8 +26,8 @@ hostile set localhost kinopio.local
 ## Run
 
 ```
-$ npm run serve
-$ https://kinopio.local:8080
+npm run serve
+https://kinopio.local:8080
 ```
 
 ## Run with Production API Server
@@ -103,12 +103,12 @@ Use Ngrok to pipe your localhost through an external https server. Helpful for d
 
 [login](http://ngrok.com), install ngrok, then connect ngrok to the kinopio ngrok account
 
-    $ brew install ngrok/ngrok/ngrok
-    $ ngrok authtoken NGROK_TOKEN
+    brew install ngrok/ngrok/ngrok
+    ngrok authtoken NGROK_TOKEN
 
 ### Run Ngrok
 
-    $ ngrok http https://localhost:8080
+    ngrok http https://localhost:8080
 
 ## See Also
 
