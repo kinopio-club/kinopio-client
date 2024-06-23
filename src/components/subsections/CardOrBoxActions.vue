@@ -432,8 +432,6 @@ const toggleCounterIsVisible = () => {
 // card
 
 const updateCardDimensions = async () => {
-  const cards = utils.clone(props.cards)
-  const cardIds = cards.map(card => card.id)
   await nextTick()
   store.dispatch('currentCards/updateDimensions', { cards: props.cards })
   await nextTick()

@@ -291,8 +291,15 @@ const updateItem = (item, type) => {
   if (type === 'cards') { store.dispatch('currentCards/update', item) }
   if (type === 'boxes') { store.dispatch('currentBoxes/update', item) }
 }
+const updateCardDimensions = async () => {
+  await nextTick()
+  store.dispatch('currentCards/updateDimensions', { cards: props.cards })
+  await nextTick()
+  await nextTick()
+}
 const updateConnectionPaths = async () => {
   await nextTick()
+  await updateCardDimensions()
   let connections = []
   const cardIds = utils.clone(multipleCardsSelectedIds.value)
   const connectionIds = utils.clone(multipleConnectionsSelectedIds.value)
