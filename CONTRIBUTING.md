@@ -22,7 +22,7 @@ To create a pull request:
 
 1. [Fork](https://docs.github.com/en/github/getting-started-with-github/fork-a-repo) and [clone](https://docs.github.com/en/github/creating-cloning-and-archiving-repositories/cloning-a-repository) this repo
 2. [Create a separate branch](https://docs.github.com/en/desktop/contributing-and-collaborating-using-github-desktop/managing-branches) for your changes
-3. Make your changes
+3. Run the app with the production API server using instructions in `README.md`, and make your changes
 4. Push your branch and open a PR
 
 Your PR will be reviewed and merged in as soon as possible if everything looks good.

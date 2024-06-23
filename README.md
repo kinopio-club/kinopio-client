@@ -4,7 +4,9 @@
 
 <img src="./src/assets/logo-base.png" alt="logo" width="200">
 
-The place for people to tap, drag, and smile.
+Kinopio is a spatial thinking canvas for your new ideas and hard problems. `kinopio-client` is the client web app at the heart of Kinopio. It's what users use to read and update cards, connections, and other data which is saved to localStorage, and to the `kinopio-server` via API requests, queued API operations, and websocket broadcasts.
+
+[[Kinopio Architecture and Costs]](https://kinopio.club/JOGXFJ0FEMpS3crbh6U9k)
 
 ## Install
 
@@ -87,7 +89,7 @@ To work with code that only works on https (e.g. clipboard copy and paste), [mkc
 
 ## Ngrok tunnelling
 
-use Ngrok to pipe your localhost through an external https server
+Use Ngrok to pipe your localhost through an external https server. Helpful for debugging on mobile.
 
 (Note that dev kinopio-server connections won't work through Ngrok)
 
