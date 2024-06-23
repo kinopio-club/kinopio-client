@@ -388,9 +388,13 @@ const currentSpace = {
       context.commit('isLoadingSpace', true, { root: true })
       // weather
       let weather = context.rootState.currentUser.weather || ''
-      if (!weather && isOnline) {
+      const shouldUpdateWeather = !weather && isOnline
+      if (shouldUpdateWeather) {
         weather = await context.dispatch('api/weather', null, { root: true })
         weather = `\n\n${weather}`
+      }
+      if (!weather) {
+        weather = ''
       }
       // daily prompt
       let options = { currentUser, isTomorrow, weather }

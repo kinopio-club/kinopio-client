@@ -1121,8 +1121,9 @@ const self = {
     weather: async (context) => {
       const showWeather = context.rootState.currentUser.showWeather
       if (!showWeather) { return }
+      const body = { weatherLocation: context.rootState.currentUser.weatherLocation }
       try {
-        const options = await context.dispatch('requestOptions', { method: 'GET', space: context.rootState.currentSpace })
+        const options = await context.dispatch('requestOptions', { body, method: 'POST', space: context.rootState.currentSpace })
         const response = await fetch(`${consts.apiHost()}/services/weather`, options)
         const data = await normalizeResponse(response)
         return data.weather
