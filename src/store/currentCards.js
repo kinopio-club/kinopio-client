@@ -331,7 +331,6 @@ const currentCards = {
       cards.forEach(card => {
         context.dispatch('broadcast/update', { updates: card, type: 'updateCard', handler: 'currentCards/update' }, { root: true })
         context.commit('update', card)
-
         if (card.name) {
           context.commit('updateCardNameInOtherItems', card, { root: true })
           context.commit('triggerUpdateOtherCard', card.id, { root: true })
@@ -440,7 +439,7 @@ const currentCards = {
               height: Math.round(rect.height)
             }
           } else {
-            card = utils.updateCardDimensions(card)
+            card = utils.cardElementDimensions(card)
           }
           if (!card) { return }
           const dimensionsChanged = card.width !== prevDimensions.width || card.height !== prevDimensions.height
@@ -473,7 +472,7 @@ const currentCards = {
     updateTallestCardHeight: (context, card) => {
       nextTick(() => {
         if (!card.height) {
-          card = utils.updateCardDimensions(card)
+          card = utils.cardElementDimensions(card)
         }
         const height = card.height
         if (height > tallestCardHeight) {
@@ -692,7 +691,7 @@ const currentCards = {
             card.y = prevCard.y + (prevCardRect.height * zoom) + spaceBetweenCards
             prevCard = card
           }
-          card = utils.updateCardDimensions(card)
+          card = utils.cardElementDimensions(card)
           context.dispatch('update', {
             name: card.name,
             id: card.id,

@@ -330,7 +330,7 @@ const removeHeaderFromItemNames = () => {
   })
 }
 const toggleHeader = async (pattern) => {
-  updateCardDimensions()
+  await updateCardDimensions()
   let matches = itemsWithPattern(pattern)
   const shouldPrepend = matches.length < items.value.length
   removeHeaderFromItemNames()
@@ -391,7 +391,6 @@ const isComment = computed(() => {
   return Boolean(cards.length === props.cards.length)
 })
 const toggleIsComment = async () => {
-  updateCardDimensions()
   const value = !isComment.value
   props.cards.forEach(card => {
     card = {
@@ -405,6 +404,7 @@ const toggleIsComment = async () => {
     store.dispatch('currentCards/update', card)
   })
   await nextTick()
+  await updateCardDimensions()
   store.dispatch('currentConnections/updateMultiplePaths', props.cards)
 }
 
@@ -431,10 +431,13 @@ const toggleCounterIsVisible = () => {
 
 // card
 
-const updateCardDimensions = () => {
+const updateCardDimensions = async () => {
   const cards = utils.clone(props.cards)
   const cardIds = cards.map(card => card.id)
-  store.dispatch('currentCards/removeResize', { cardIds })
+  await nextTick()
+  store.dispatch('currentCards/updateDimensions', { cards: props.cards })
+  await nextTick()
+  await nextTick()
 }
 const updateCard = (card, updates) => {
   const keys = Object.keys(updates)

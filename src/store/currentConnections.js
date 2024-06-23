@@ -229,8 +229,8 @@ export default {
       const canEditSpace = context.rootGetters['currentUser/canEditSpace']()
       connections = connections || context.getters.byCardId(cardId)
       connections.map(connection => {
-        const startCard = utils.updateCardDimensions({ id: connection.startCardId })
-        const endCard = utils.updateCardDimensions({ id: connection.endCardId })
+        const startCard = utils.cardElementDimensions({ id: connection.startCardId })
+        const endCard = utils.cardElementDimensions({ id: connection.endCardId })
         const path = context.getters.connectionPathBetweenCards({
           startCard,
           endCard,
@@ -260,8 +260,8 @@ export default {
       let newConnections = []
       // update state
       connections.forEach(connection => {
-        const startCard = utils.updateCardDimensions({ id: connection.startCardId })
-        const endCard = utils.updateCardDimensions({ id: connection.endCardId })
+        const startCard = utils.cardElementDimensions({ id: connection.startCardId })
+        const endCard = utils.cardElementDimensions({ id: connection.endCardId })
         const path = context.getters.connectionPathBetweenCards({
           startCard,
           endCard,
@@ -295,8 +295,8 @@ export default {
     updatePathsWhileDragging: (context, { connections }) => {
       let newConnections = []
       connections = connections.forEach(connection => {
-        const startCard = utils.updateCardDimensions({ id: connection.startCardId })
-        const endCard = utils.updateCardDimensions({ id: connection.endCardId })
+        const startCard = utils.cardElementDimensions({ id: connection.startCardId })
+        const endCard = utils.cardElementDimensions({ id: connection.endCardId })
         const path = context.getters.connectionPathBetweenCards({
           startCard,
           endCard,

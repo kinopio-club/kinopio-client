@@ -877,7 +877,7 @@ export default {
     let spaceBetween = 12
     return this.spaceZoomDecimal() * spaceBetween
   },
-  updateCardDimensions (card) {
+  cardElementDimensions (card) {
     if (!card) { return }
     const element = document.querySelector(`article#card[data-card-id="${card.id}"]`)
     if (!element) { return }
