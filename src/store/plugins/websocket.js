@@ -86,10 +86,10 @@ const checkIfShouldNotifyOffscreenCardCreated = (store, data) => {
     store.commit('triggerNotifyOffscreenCardCreated', data.updates.card)
   }
 }
-// const checkIfShouldPreventBroadcast = (store) => {
-//   const spaceIsRemote = store.getters['currentSpace/isRemote']
-//   return !spaceIsRemote
-// }
+const checkIfShouldPreventBroadcast = (store) => {
+  const spaceIsRemote = store.getters['currentSpace/isRemote']
+  return !spaceIsRemote
+}
 const closeWebsocket = (store) => {
   if (!websocket) { return }
   store.commit('isJoiningSpace', true)
@@ -100,8 +100,6 @@ export default function createWebSocketPlugin () {
   return store => {
     store.subscribe((mutation, state) => {
       if (mutation.type === 'broadcast/connect') {
-        // const shouldPrevent = checkIfShouldPreventBroadcast(store)
-        // if (shouldPrevent) { return }
         store.commit('isJoiningSpace', true)
         const host = consts.websocketHost()
         websocket = new WebSocket(host)
@@ -118,7 +116,9 @@ export default function createWebSocketPlugin () {
           store.dispatch('broadcast/reconnect')
         }
         websocket.onerror = (event) => {
-          console.warn('🌌', event)
+          const shouldPrevent = checkIfShouldPreventBroadcast(store)
+          console.warn('🌌', event, shouldPrevent)
+          if (shouldPrevent) { return }
           store.commit('isReconnectingToBroadcast', true)
         }
 
