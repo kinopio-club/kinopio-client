@@ -4,9 +4,13 @@
 
 <img src="./src/assets/logo-base.png" alt="logo" width="200">
 
-Kinopio is a spatial thinking canvas for your new ideas and hard problems. `kinopio-client` is the client web app at the heart of Kinopio. It's what users use to read and update cards, connections, and other data which is saved to localStorage, and to the `kinopio-server` via API requests, queued API operations, and websocket broadcasts.
+Kinopio is a spatial thinking canvas for your new ideas and hard problems.
 
-[[Kinopio Architecture and Costs]](https://kinopio.club/JOGXFJ0FEMpS3crbh6U9k)
+The `kinopio-client` is the client web app that users use to read and update spaces, cards, connections, etc. – which is saved to localStorage and to the `kinopio-server` via API requests, queued API operations, and websocket broadcasts.
+
+- [Kinopio Architecture and Costs](https://kinopio.club/JOGXFJ0FEMpS3crbh6U9k)
+- [How Kinopio is Made](https://pketh.org/how-kinopio-is-made.html)
+
 
 ## Install
 
