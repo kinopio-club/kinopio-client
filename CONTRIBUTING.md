@@ -4,13 +4,13 @@ Thanks for your interest in improving [Kinopio](https://kinopio.club), I'm grate
 
 ## Discuss Changes Before Building
 
-Because the kinopio-client app has a really opinionated interface, it's **strongly recommended** that you create a [support forum topic](https://club.kinopio.club), or a github issue, to discuss your proposed changes beforehand. A little conversation beforehand saves hours down the road.
+Because the kinopio-client app has a really opinionated interface, it's **strongly recommended** that you create a [forum topic](https://club.kinopio.club), or a github issue, to discuss your proposed changes beforehand. A little conversation beforehand saves hours down the road.
 
-New features should be proposed in the [forums](https://club.kinopio.club) first in order to get feedback from non-dev users too.
+New features should be proposed in the forums first in order to get feedback from non-dev users too.
 
-The [forums](https://club.kinopio.club) also have [bug reports](https://club.kinopio.club/c/support/6) which may be the easiest way to contribute and learn the codebase.
+The forums also have [bug reports](https://club.kinopio.club/c/support/6) which may be the easiest way to contribute and learn the codebase.
 
-If using github issues, you should check and reference related bug reports or feature request/design discussions from the [forums](https://club.kinopio.club) to add context.
+If using github issues, you should check and reference related bug reports or feature request/design discussions from the forums to add context.
 
 Oh and do let me know if you have any questions about the code. Some parts are way messier than others.
 
