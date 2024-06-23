@@ -9,6 +9,13 @@
     button(@click="toggleWeatherUnitIsCelcius(true)" :class="{ active: weatherUnitIsCelcius }")
       span C°
   p(v-if="!weatherLocation") Requires location access
+
+template(v-if="showSignUpOrIn")
+  p
+    span.badge.info Sign Up or In
+    span to add weather to journals
+  button(@click.left="triggerSignUpOrInIsVisible") Sign Up or In
+
 .row(v-if="error.location")
   .badge.danger Could not get your location.
     br
@@ -28,17 +35,23 @@ export default {
     return {
       error: {
         location: false
-      }
+      },
+      showSignUpOrIn: false
     }
   },
   computed: {
     showWeather () { return this.$store.state.currentUser.showWeather },
     weatherLocation () { return this.$store.state.currentUser.weatherLocation },
-    weatherUnitIsCelcius () { return this.$store.state.currentUser.weatherUnitIsCelcius }
+    weatherUnitIsCelcius () { return this.$store.state.currentUser.weatherUnitIsCelcius },
+    currentUserIsSignedIn () { return this.$store.getters['currentUser/isSignedIn'] }
   },
   methods: {
     toggleShowWeather () {
       this.error.location = false
+      if (!this.currentUserIsSignedIn) {
+        this.showSignUpOrIn = true
+        return
+      }
       const value = !this.showWeather
       if (value) {
         this.location()
@@ -78,6 +91,10 @@ export default {
     },
     toggleWeatherUnitIsCelcius (value) {
       this.$store.dispatch('currentUser/update', { weatherUnitIsCelcius: value })
+    },
+    triggerSignUpOrInIsVisible () {
+      this.$store.dispatch('closeAllDialogs')
+      this.$store.commit('triggerSignUpOrInIsVisible')
     }
   }
 }
