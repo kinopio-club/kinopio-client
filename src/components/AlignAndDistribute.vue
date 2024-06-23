@@ -31,7 +31,6 @@ const props = defineProps({
 })
 
 const spaceCounterZoomDecimal = computed(() => store.getters.spaceCounterZoomDecimal)
-
 const moreOptionsIsVisible = computed(() => store.state.currentUser.shouldShowMoreAlignOptions)
 const multipleCardsSelectedIds = computed(() => store.state.multipleCardsSelectedIds)
 const multipleConnectionsSelectedIds = computed(() => store.state.multipleConnectionsSelectedIds)
@@ -54,6 +53,10 @@ const items = computed(() => {
   const boxes = normalizeBoxes(props.boxes)
   return props.cards.concat(boxes)
 })
+const toggleMoreOptionsIsVisible = () => {
+  const value = !moreOptionsIsVisible.value
+  store.dispatch('currentUser/shouldShowMoreAlignOptions', value)
+}
 
 // verify positioning
 
@@ -217,7 +220,9 @@ const isDistributedVertically = computed(() => {
   })
   return distanceIsEqual
 })
-const spaceZoomDecimal = computed(() => store.getters.spaceZoomDecimal)
+
+// sort items
+
 const sortedByX = computed(() => {
   const editableCards = utils.clone(props.editableCards)
   const cards = editableCards.sort((a, b) => {
@@ -270,7 +275,6 @@ const sortedByYHeight = computed(() => {
   const all = cards.concat(boxes)
   return { cards, boxes, all }
 })
-
 const normalizeBoxes = (boxes) => {
   boxes = utils.clone(boxes)
   boxes = boxes.map(box => {
@@ -280,14 +284,31 @@ const normalizeBoxes = (boxes) => {
   })
   return boxes
 }
-const toggleMoreOptionsIsVisible = () => {
-  const value = !moreOptionsIsVisible.value
-  store.dispatch('currentUser/shouldShowMoreAlignOptions', value)
-}
+
+// update items
+
 const updateItem = (item, type) => {
   if (type === 'cards') { store.dispatch('currentCards/update', item) }
   if (type === 'boxes') { store.dispatch('currentBoxes/update', item) }
 }
+const updateConnectionPaths = async () => {
+  await nextTick()
+  let connections = []
+  const cardIds = utils.clone(multipleCardsSelectedIds.value)
+  const connectionIds = utils.clone(multipleConnectionsSelectedIds.value)
+  // store.commit('clearMultipleSelected')
+  if (!cardIds.length) { return }
+  cardIds.forEach(cardId => {
+    connections = connections.concat(store.getters['currentConnections/byCardId'](cardId))
+  })
+  store.commit('multipleCardsSelectedIds', cardIds)
+  store.commit('multipleConnectionsSelectedIds', connectionIds)
+  // updates
+  connections = uniqBy(connections, 'id')
+  store.dispatch('currentConnections/updatePaths', { connections, shouldUpdateApi: true })
+}
+
+// update positions
 
 // ⎺o
 const alignTop = () => {
@@ -482,7 +503,7 @@ const distributeVerticallyItems = (items, type) => {
   if (type === 'cards') { updateConnectionPaths() }
 }
 
-// utils
+// distances between
 
 const xDistancesBetween = (items) => {
   let xDistances = []
@@ -508,23 +529,6 @@ const yDistancesBetween = (items) => {
   })
   return yDistances
 }
-const updateConnectionPaths = async () => {
-  await nextTick()
-  let connections = []
-  const cardIds = utils.clone(multipleCardsSelectedIds.value)
-  const connectionIds = utils.clone(multipleConnectionsSelectedIds.value)
-  // store.commit('clearMultipleSelected')
-  if (!cardIds.length) { return }
-  cardIds.forEach(cardId => {
-    connections = connections.concat(store.getters['currentConnections/byCardId'](cardId))
-  })
-  store.commit('multipleCardsSelectedIds', cardIds)
-  store.commit('multipleConnectionsSelectedIds', connectionIds)
-  // updates
-  connections = uniqBy(connections, 'id')
-  store.dispatch('currentConnections/updatePaths', { connections, shouldUpdateApi: true })
-}
-
 </script>
 
 <template lang="pug">
