@@ -32,10 +32,7 @@ let processQueueIntervalTimer, updateJournalDailyPromptTimer, updateInboxCache
 // init user and space app state
 store.dispatch('currentUser/init')
 store.dispatch('currentSpace/init')
-const currentUserIsSignedIn = store.getters['currentUser/isSignedIn']
-if (currentUserIsSignedIn) {
-  store.commit('broadcast/connect')
-}
+store.commit('broadcast/connect')
 
 onMounted(() => {
   // bind events to window to receive events when mouse is outside window
