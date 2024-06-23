@@ -6,9 +6,7 @@ Thanks for your interest in improving [Kinopio](https://kinopio.club), I'm grate
 
 Because the kinopio-client app has a really opinionated interface, it's **strongly recommended** that you create a [forum topic](https://club.kinopio.club), or a github issue, to discuss your proposed changes beforehand. A little conversation beforehand saves hours down the road.
 
-New features should be proposed in the forums first in order to get feedback from non-dev users too.
-
-The forums also have [bug reports](https://club.kinopio.club/c/support/6) which may be the easiest way to contribute and learn the codebase.
+New features should be proposed in the forum in order to get feedback from non-dev users too. [Bug reports](https://club.kinopio.club/c/support/6) there may be the easiest way to contribute and learn the codebase.
 
 If using github issues, you should check and reference related bug reports or feature request/design discussions from the forums to add context.
 
