@@ -1,3 +1,532 @@
+<script setup>
+import { reactive, computed, onMounted, onBeforeUnmount, defineProps, defineEmits, watch, ref, nextTick } from 'vue'
+import { useStore } from 'vuex'
+
+import utils from '@/utils.js'
+import consts from '@/consts.js'
+
+import uniqBy from 'lodash-es/uniqBy'
+
+const store = useStore()
+
+onMounted(() => {
+  store.subscribe(mutation => {
+    if (mutation.type === 'triggerSelectedItemsAlignLeft') {
+      alignLeft()
+    }
+  })
+})
+
+const props = defineProps({
+  visible: Boolean,
+  numberOfSelectedItemsCreatedByCurrentUser: Object,
+  shouldHideMoreOptions: Boolean,
+  shouldDistributeWithAlign: Boolean,
+  canEditAll: Object,
+  cards: Object,
+  editableCards: Object,
+  connections: Object,
+  boxes: Object,
+  editableBoxes: Object
+})
+
+const spaceCounterZoomDecimal = computed(() => store.getters.spaceCounterZoomDecimal)
+
+const moreOptionsIsVisible = computed(() => store.state.currentUser.shouldShowMoreAlignOptions)
+const multipleCardsSelectedIds = computed(() => store.state.multipleCardsSelectedIds)
+const multipleConnectionsSelectedIds = computed(() => store.state.multipleConnectionsSelectedIds)
+const multipleBoxesSelectedIds = computed(() => store.state.multipleBoxesSelectedIds)
+const isSpaceMember = computed(() => store.getters['currentUser/isSpaceMember']())
+const spaceBetween = computed(() => consts.spaceBetweenCards * spaceCounterZoomDecimal.value)
+const canDistribute = computed(() => {
+  const minimumRequiredToDistribute = 3
+  let cards, boxes
+  if (isSpaceMember.value) {
+    cards = multipleCardsSelectedIds.value.length >= minimumRequiredToDistribute
+    boxes = multipleBoxesSelectedIds.value.length >= minimumRequiredToDistribute
+  } else {
+    cards = props.numberOfSelectedItemsCreatedByCurrentUser.cards >= minimumRequiredToDistribute
+    boxes = props.numberOfSelectedItemsCreatedByCurrentUser.boxes >= minimumRequiredToDistribute
+  }
+  return Boolean(cards) || Boolean(boxes)
+})
+const items = computed(() => {
+  const boxes = normalizeBoxes(props.boxes)
+  return props.cards.concat(boxes)
+})
+
+// verify positioning
+
+const yIsDistributed = computed(() => {
+  const cards = sortedByY.value.cards
+  const zoom = spaceCounterZoomDecimal.value
+  let isDistributed = true
+  if (props.shouldDistributeWithAlign) {
+    cards.forEach((card, index) => {
+      if (index > 0) {
+        const previousItem = cards[index - 1]
+        const rect = utils.cardRectFromId(previousItem.id) || utils.boxRectFromId(previousItem.id) || previousItem
+        const previousItemHeight = rect.height * zoom
+        const previousBottomSide = previousItem.y + previousItemHeight
+        const yDelta = card.y - previousBottomSide
+        const isNotEquallyDistributed = !utils.isBetween({
+          value: Math.abs(yDelta),
+          min: consts.spaceBetweenCards - 1,
+          max: consts.spaceBetweenCards + 1
+        })
+        if (isNotEquallyDistributed) {
+          isDistributed = false
+        }
+      }
+    })
+  }
+  return isDistributed
+})
+const xIsDistributed = computed(() => {
+  const cards = sortedByX.value.cards
+  const zoom = spaceCounterZoomDecimal.value
+  let xIsDistributed = true
+  if (props.shouldDistributeWithAlign) {
+    cards.forEach((card, index) => {
+      if (index > 0) {
+        const previousItem = cards[index - 1]
+        const rect = utils.cardRectFromId(previousItem.id) || utils.boxRectFromId(previousItem.id) || previousItem
+        const previousItemWidth = rect.width * zoom
+        const previousRightSide = previousItem.x + previousItemWidth
+        const xDelta = card.x - previousRightSide
+        const isNotEquallyDistributed = !utils.isBetween({
+          value: Math.abs(xDelta),
+          min: consts.spaceBetweenCards - 1,
+          max: consts.spaceBetweenCards + 1
+        })
+        if (isNotEquallyDistributed) {
+          xIsDistributed = false
+        }
+      }
+    })
+  }
+  return xIsDistributed
+})
+const isLeftAligned = computed(() => {
+  const xValues = items.value.map(item => item.x)
+  const xIsAligned = xValues.every(x => x === xValues[0])
+  return xIsAligned && yIsDistributed.value
+})
+const isCenteredHorizontally = computed(() => {
+  const cards = sortedByX.value.cards
+  if (!cards.length) { return }
+  const origin = cards[0]
+  const cardsCenterX = origin.x + (origin.width / 2)
+  let centerIsEqual = true
+  cards.forEach(card => {
+    const roundedCenterIsEqual = utils.isBetween({
+      value: card.x + (card.width / 2),
+      min: cardsCenterX - 1,
+      max: cardsCenterX + 1
+    })
+    if (!roundedCenterIsEqual) {
+      centerIsEqual = false
+    }
+  })
+  return centerIsEqual
+})
+const isRightAligned = computed(() => {
+  const zoom = spaceCounterZoomDecimal.value
+  const origin = items.value[0]
+  const xRight = origin.x + origin.width
+  const xIsAligned = items.value.every(item => {
+    return utils.isBetween({
+      value: item.x + item.width,
+      min: xRight - 1,
+      max: xRight + 1
+    })
+  })
+  return xIsAligned
+})
+const isDistributedHorizontally = computed(() => {
+  if (items.value.length < 3) { return }
+  const sortedItems = sortedByX.value.all
+  const distances = xDistancesBetween(sortedItems)
+  const distanceBetweenCards = Math.abs(distances[0])
+  let distanceIsEqual = true
+  distances.forEach((distance, index) => {
+    distance = Math.abs(distance)
+    const roundedDistanceIsEqual = utils.isBetween({
+      value: distance,
+      min: distanceBetweenCards - 1,
+      max: distanceBetweenCards + 1
+    })
+    if (!roundedDistanceIsEqual) {
+      distanceIsEqual = false
+    }
+  })
+  return distanceIsEqual
+})
+const isTopAligned = computed(() => {
+  const yValues = items.value.map(item => item.y)
+  const yIsAligned = yValues.every(y => y === yValues[0])
+  return yIsAligned && xIsDistributed.value
+})
+const isCenteredVertically = computed(() => {
+  const cards = sortedByY.value.cards
+  if (!cards.length) { return }
+  const origin = cards[0]
+  const cardsCenterY = origin.y + (origin.height / 2)
+  let centerIsEqual = true
+  cards.forEach(card => {
+    const roundedCenterIsEqual = utils.isBetween({
+      value: card.y + (card.height / 2),
+      min: cardsCenterY - 1,
+      max: cardsCenterY + 1
+    })
+    if (!roundedCenterIsEqual) {
+      centerIsEqual = false
+    }
+  })
+  return centerIsEqual
+})
+const isBottomAligned = computed(() => {
+  const origin = items.value[0]
+  const yBottom = origin.y + origin.height
+  const yIsAligned = items.value.every(item => {
+    const bottomIsEqual = utils.isBetween({
+      value: item.y + item.height,
+      min: yBottom - 1,
+      max: yBottom + 1
+    })
+    return bottomIsEqual
+  })
+  return yIsAligned
+})
+const isDistributedVertically = computed(() => {
+  if (props.cards.length < 3) { return }
+  const cards = sortedByY.value.cards
+  const distancesBetween = yDistancesBetween(cards)
+  const distanceBetweenCards = distancesBetween[0]
+  let distanceIsEqual = true
+  distancesBetween.forEach((distance, index) => {
+    distance = Math.abs(distance)
+    const roundedDistanceIsEqual = utils.isBetween({
+      value: distance,
+      min: distanceBetweenCards - 1,
+      max: distanceBetweenCards + 1
+    })
+    if (!roundedDistanceIsEqual) {
+      distanceIsEqual = false
+    }
+  })
+  return distanceIsEqual
+})
+const spaceZoomDecimal = computed(() => store.getters.spaceZoomDecimal)
+const sortedByX = computed(() => {
+  const editableCards = utils.clone(props.editableCards)
+  const cards = editableCards.sort((a, b) => {
+    return a.x - b.x
+  })
+  const editableBoxes = utils.clone(props.editableBoxes)
+  let boxes = normalizeBoxes(editableBoxes)
+  boxes = boxes.sort((a, b) => {
+    return a.x - b.x
+  })
+  const all = cards.concat(boxes)
+  return { cards, boxes, all }
+})
+const sortedByY = computed(() => {
+  const editableCards = utils.clone(props.editableCards)
+  const cards = editableCards.sort((a, b) => {
+    return a.y - b.y
+  })
+  const editableBoxes = utils.clone(props.editableBoxes)
+  let boxes = normalizeBoxes(editableBoxes)
+  boxes = boxes.sort((a, b) => {
+    return a.y - b.y
+  })
+  const all = cards.concat(boxes)
+  return { cards, boxes, all }
+})
+const sortedByXWidth = computed(() => {
+  const editableCards = utils.clone(props.editableCards)
+  const cards = editableCards.sort((a, b) => {
+    return (b.x + b.width) - (a.x + a.width)
+  })
+  const editableBoxes = utils.clone(props.editableBoxes)
+  let boxes = normalizeBoxes(editableBoxes)
+  boxes = boxes.sort((a, b) => {
+    return (b.x + b.width) - (a.x + a.width)
+  })
+  const all = cards.concat(boxes)
+  return { cards, boxes, all }
+})
+const sortedByYHeight = computed(() => {
+  const editableCards = utils.clone(props.editableCards)
+  const cards = editableCards.sort((a, b) => {
+    return (b.y + b.height) - (a.y + a.height)
+  })
+  const editableBoxes = utils.clone(props.editableBoxes)
+  let boxes = normalizeBoxes(editableBoxes)
+  boxes = boxes.sort((a, b) => {
+    return (b.y + b.height) - (a.y + a.height)
+  })
+  const all = cards.concat(boxes)
+  return { cards, boxes, all }
+})
+
+const normalizeBoxes = (boxes) => {
+  boxes = utils.clone(boxes)
+  boxes = boxes.map(box => {
+    box.width = box.resizeWidth
+    box.height = box.resizeHeight
+    return box
+  })
+  return boxes
+}
+const toggleMoreOptionsIsVisible = () => {
+  const value = !moreOptionsIsVisible.value
+  store.dispatch('currentUser/shouldShowMoreAlignOptions', value)
+}
+const updateItem = (item, type) => {
+  if (type === 'cards') { store.dispatch('currentCards/update', item) }
+  if (type === 'boxes') { store.dispatch('currentBoxes/update', item) }
+}
+
+// ⎺o
+const alignTop = () => {
+  const cards = sortedByX.value.cards
+  const boxes = sortedByX.value.boxes
+  alignTopItems(cards, 'cards')
+  alignTopItems(boxes, 'boxes')
+}
+const alignTopItems = (items, type) => {
+  const zoom = spaceCounterZoomDecimal.value
+  let newItems = []
+  const origin = items[0]
+  items.forEach((item, index) => {
+    if (index > 0) {
+      item = utils.clone(item)
+      item.y = origin.y
+      if (props.shouldDistributeWithAlign) {
+        const previousItem = newItems[index - 1]
+        const rect = utils.cardRectFromId(previousItem.id) || utils.boxRectFromId(previousItem.id) || previousItem
+        const previousRightSide = previousItem.x + (rect.width * zoom)
+        item.x = previousRightSide + consts.spaceBetweenCards
+      }
+      updateItem(item, type)
+    }
+    newItems.push(item)
+  })
+  if (type === 'cards') { updateConnectionPaths() }
+}
+// o|o
+const centerHorizontally = () => {
+  const cards = sortedByX.value.cards
+  const boxes = sortedByX.value.boxes
+  centerHorizontallyItems(cards, 'cards')
+  centerHorizontallyItems(boxes, 'boxes')
+}
+const centerHorizontallyItems = (items, type) => {
+  const origin = items[0]
+  items.forEach((item, index) => {
+    if (index > 0) {
+      const previousItem = items[index - 1]
+      const previousBottomSide = previousItem.y + previousItem.height
+      item = utils.clone(item)
+      item.x = origin.x + (origin.width / 2) - (item.width / 2)
+      if (props.shouldDistributeWithAlign) {
+        item.y = previousBottomSide + spaceBetween.value
+      }
+      updateItem(item, type)
+    }
+  })
+  if (type === 'cards') { updateConnectionPaths() }
+}
+// o|
+const alignRight = () => {
+  const cards = sortedByXWidth.value.cards
+  const boxes = sortedByXWidth.value.boxes
+  alignRightItems(cards, 'cards')
+  alignRightItems(boxes, 'boxes')
+}
+const alignRightItems = (items, type) => {
+  const zoom = spaceCounterZoomDecimal.value
+  const origin = items[0]
+  if (!origin) { return }
+  let rect = utils.cardRectFromId(origin.id) || utils.boxRectFromId(origin.id) || origin
+  const originWidth = rect.width * zoom
+  items.forEach((item, index) => {
+    if (index > 0) {
+      item = utils.clone(item)
+      rect = utils.cardRectFromId(item.id) || utils.boxRectFromId(item.id) || item
+      const itemWidth = rect.width * zoom
+      item.x = origin.x + originWidth - itemWidth
+      updateItem(item, type)
+    }
+  })
+  if (type === 'cards') { updateConnectionPaths() }
+}
+// | o |
+const distributeHorizontally = () => {
+  const cards = sortedByX.value.cards
+  const boxes = sortedByX.value.boxes
+  distributeHorizontallyItems(cards, 'cards')
+  distributeHorizontallyItems(boxes, 'boxes')
+}
+const distributeHorizontallyItems = (items, type) => {
+  if (!items.length) { return }
+  const distances = xDistancesBetween(items)
+  const distance = utils.averageOfNumbers(distances)
+  let previousItem = items[0]
+  items.forEach((item, index) => {
+    if (index > 0) {
+      item = utils.clone(item)
+      item.x = previousItem.x + previousItem.width + distance
+      previousItem = item
+      updateItem(item, type)
+    }
+  })
+  if (type === 'cards') { updateConnectionPaths() }
+}
+// |o
+const alignLeft = () => {
+  const cards = sortedByY.value.cards
+  const boxes = sortedByY.value.boxes
+  alignLeftItems(cards, 'cards')
+  alignLeftItems(boxes, 'boxes')
+}
+const alignLeftItems = (items, type) => {
+  const zoom = spaceCounterZoomDecimal.value
+  let newItems = []
+  const origin = items[0]
+  items.forEach((item, index) => {
+    if (index > 0) {
+      item = utils.clone(item)
+      item.x = origin.x
+      if (props.shouldDistributeWithAlign) {
+        const previousItem = newItems[index - 1]
+        const rect = utils.cardRectFromId(previousItem.id) || utils.boxRectFromId(previousItem.id) || previousItem
+        const previousItemHeight = rect.height * zoom
+        const previousBottomSide = previousItem.y + previousItemHeight
+        item.y = previousBottomSide + consts.spaceBetweenCards
+      }
+      updateItem(item, type)
+    }
+    newItems.push(item)
+  })
+  if (type === 'cards') { updateConnectionPaths() }
+}
+// o-o
+const centerVertically = () => {
+  const cards = sortedByX.value.cards
+  const boxes = sortedByX.value.boxes
+  centerVerticallyItems(cards, 'cards')
+  centerVerticallyItems(boxes, 'boxes')
+}
+const centerVerticallyItems = (items, type) => {
+  const origin = items[0]
+  items.forEach((item, index) => {
+    if (index > 0) {
+      item = utils.clone(item)
+      if (props.shouldDistributeWithAlign) {
+        const previousItem = items[index - 1]
+        const previousRightSide = previousItem.x + previousItem.width
+        item.x = previousRightSide + spaceBetween.value
+      }
+      item.y = origin.y + (origin.height / 2) - (item.height / 2)
+      updateItem(item, type)
+    }
+  })
+  if (type === 'cards') { updateConnectionPaths() }
+}
+// _o
+const alignBottom = () => {
+  const cards = sortedByYHeight.value.cards
+  const boxes = sortedByYHeight.value.boxes
+  alignBottomItems(cards, 'cards')
+  alignBottomItems(boxes, 'boxes')
+}
+const alignBottomItems = (items, type) => {
+  const origin = items[0]
+  items.forEach((item, index) => {
+    if (index > 0) {
+      item = utils.clone(item)
+      item.y = origin.y + origin.height - item.height
+      if (props.shouldDistributeWithAlign) {
+        const previousItem = items[index - 1]
+        const previousRightSide = previousItem.x + previousItem.width
+        item.x = previousRightSide + spaceBetween.value
+      }
+      updateItem(item, type)
+    }
+  })
+  if (type === 'cards') { updateConnectionPaths() }
+}
+// ⎺ o _
+const distributeVertically = () => {
+  const cards = sortedByY.value.cards
+  const boxes = sortedByY.value.boxes
+  distributeVerticallyItems(cards, 'cards')
+  distributeVerticallyItems(boxes, 'boxes')
+}
+const distributeVerticallyItems = (items, type) => {
+  if (!items.length) { return }
+  const distances = yDistancesBetween(items)
+  const distance = Math.round(utils.averageOfNumbers(distances))
+  let previousItem = items[0]
+  items.forEach((item, index) => {
+    if (index > 0) {
+      item = utils.clone(item)
+      item.y = previousItem.y + previousItem.height + distance
+      previousItem = item
+      updateItem(item, type)
+    }
+  })
+  if (type === 'cards') { updateConnectionPaths() }
+}
+
+// utils
+
+const xDistancesBetween = (items) => {
+  let xDistances = []
+  items.forEach((item, index) => {
+    if (index > 0) {
+      const previousItem = items[index - 1]
+      const previousRightSide = previousItem.x + previousItem.width
+      const leftSide = item.x
+      xDistances.push(leftSide - previousRightSide)
+    }
+  })
+  return xDistances
+}
+const yDistancesBetween = (items) => {
+  let yDistances = []
+  items.forEach((item, index) => {
+    if (index > 0) {
+      const previousItem = items[index - 1]
+      const previousBottomSide = previousItem.y + previousItem.height
+      const topSide = item.y
+      yDistances.push(topSide - previousBottomSide)
+    }
+  })
+  return yDistances
+}
+const updateConnectionPaths = async () => {
+  await nextTick()
+  let connections = []
+  const cardIds = utils.clone(multipleCardsSelectedIds.value)
+  const connectionIds = utils.clone(multipleConnectionsSelectedIds.value)
+  // store.commit('clearMultipleSelected')
+  if (!cardIds.length) { return }
+  cardIds.forEach(cardId => {
+    connections = connections.concat(store.getters['currentConnections/byCardId'](cardId))
+  })
+  store.commit('multipleCardsSelectedIds', cardIds)
+  store.commit('multipleConnectionsSelectedIds', connectionIds)
+  // updates
+  connections = uniqBy(connections, 'id')
+  store.dispatch('currentConnections/updatePaths', { connections, shouldUpdateApi: true })
+}
+
+</script>
+
 <template lang="pug">
 .align-and-distribute(v-if="visible")
   .segmented-buttons(v-if="shouldHideMoreOptions")
@@ -39,537 +568,6 @@
       button(title="Distribute Vertically" :disabled="!canDistribute" @click.left="distributeVertically" :class="{active: isDistributedVertically}")
         img.icon.distribute-vertically(src="@/assets/distribute-horizontally.svg")
 </template>
-
-<script>
-import utils from '@/utils.js'
-import consts from '@/consts.js'
-
-import uniqBy from 'lodash-es/uniqBy'
-
-export default {
-  name: 'AlignAndDistribute',
-  props: {
-    visible: Boolean,
-    numberOfSelectedItemsCreatedByCurrentUser: Object,
-    shouldHideMoreOptions: Boolean,
-    shouldDistributeWithAlign: Boolean,
-    canEditAll: Object,
-    cards: Object,
-    editableCards: Object,
-    connections: Object,
-    boxes: Object,
-    editableBoxes: Object
-  },
-  created () {
-    this.$store.subscribe((mutation, state) => {
-      const { type } = mutation
-      if (type === 'triggerSelectedItemsAlignLeft') {
-        this.alignLeft()
-      }
-    })
-  },
-  computed: {
-    moreOptionsIsVisible () { return this.$store.state.currentUser.shouldShowMoreAlignOptions },
-    multipleCardsSelectedIds () { return this.$store.state.multipleCardsSelectedIds },
-    multipleConnectionsSelectedIds () { return this.$store.state.multipleConnectionsSelectedIds },
-    multipleBoxesSelectedIds () { return this.$store.state.multipleBoxesSelectedIds },
-    isSpaceMember () { return this.$store.getters['currentUser/isSpaceMember']() },
-    spaceBetween () { return consts.spaceBetweenCards * this.spaceCounterZoomDecimal },
-    canDistribute () {
-      const minimumRequiredToDistribute = 3
-      let cards, boxes
-      if (this.isSpaceMember) {
-        cards = this.multipleCardsSelectedIds.length >= minimumRequiredToDistribute
-        boxes = this.multipleBoxesSelectedIds.length >= minimumRequiredToDistribute
-      } else {
-        cards = this.numberOfSelectedItemsCreatedByCurrentUser.cards >= minimumRequiredToDistribute
-        boxes = this.numberOfSelectedItemsCreatedByCurrentUser.boxes >= minimumRequiredToDistribute
-      }
-      return Boolean(cards) || Boolean(boxes)
-    },
-    items () {
-      const boxes = this.normalizeBoxes(this.boxes)
-      return this.cards.concat(boxes)
-    },
-
-    // verify positioning
-
-    yIsDistributed () {
-      const cards = this.sortedByY.cards
-      const zoom = this.spaceCounterZoomDecimal
-      let yIsDistributed = true
-      if (this.shouldDistributeWithAlign) {
-        cards.forEach((card, index) => {
-          if (index > 0) {
-            const previousItem = cards[index - 1]
-            const rect = utils.cardRectFromId(previousItem.id) || utils.boxRectFromId(previousItem.id) || previousItem
-            const previousItemHeight = rect.height * zoom
-            const previousBottomSide = previousItem.y + previousItemHeight
-            const yDelta = card.y - previousBottomSide
-            const isNotEquallyDistributed = !utils.isBetween({
-              value: Math.abs(yDelta),
-              min: consts.spaceBetweenCards - 1,
-              max: consts.spaceBetweenCards + 1
-            })
-            if (isNotEquallyDistributed) {
-              yIsDistributed = false
-            }
-          }
-        })
-      }
-      return yIsDistributed
-    },
-    xIsDistributed () {
-      const cards = this.sortedByX.cards
-      const zoom = this.spaceCounterZoomDecimal
-      let xIsDistributed = true
-      if (this.shouldDistributeWithAlign) {
-        cards.forEach((card, index) => {
-          if (index > 0) {
-            const previousItem = cards[index - 1]
-            const rect = utils.cardRectFromId(previousItem.id) || utils.boxRectFromId(previousItem.id) || previousItem
-            const previousItemWidth = rect.width * zoom
-            const previousRightSide = previousItem.x + previousItemWidth
-            const xDelta = card.x - previousRightSide
-            const isNotEquallyDistributed = !utils.isBetween({
-              value: Math.abs(xDelta),
-              min: consts.spaceBetweenCards - 1,
-              max: consts.spaceBetweenCards + 1
-            })
-            if (isNotEquallyDistributed) {
-              xIsDistributed = false
-            }
-          }
-        })
-      }
-      return xIsDistributed
-    },
-    isLeftAligned () {
-      const xValues = this.items.map(item => item.x)
-      const xIsAligned = xValues.every(x => x === xValues[0])
-      const yIsDistributed = this.yIsDistributed
-      return xIsAligned && yIsDistributed
-    },
-    isCenteredHorizontally () {
-      const cards = this.sortedByX.cards
-      if (!cards.length) { return }
-      const origin = cards[0]
-      const cardsCenterX = origin.x + (origin.width / 2)
-      let centerIsEqual = true
-      cards.forEach(card => {
-        const roundedCenterIsEqual = utils.isBetween({
-          value: card.x + (card.width / 2),
-          min: cardsCenterX - 1,
-          max: cardsCenterX + 1
-        })
-        if (!roundedCenterIsEqual) {
-          centerIsEqual = false
-        }
-      })
-      return centerIsEqual
-    },
-    isRightAligned () {
-      const zoom = this.spaceCounterZoomDecimal
-      const origin = this.items[0]
-      const xRight = origin.x + origin.width
-      const xIsAligned = this.items.every(item => {
-        return utils.isBetween({
-          value: item.x + item.width,
-          min: xRight - 1,
-          max: xRight + 1
-        })
-      })
-      return xIsAligned
-    },
-    isDistributedHorizontally () {
-      if (this.items.length < 3) { return }
-      const items = this.sortedByX.all
-      const xDistancesBetween = this.xDistancesBetween(items)
-      const distanceBetweenCards = Math.abs(xDistancesBetween[0])
-      let distanceIsEqual = true
-      xDistancesBetween.forEach((distance, index) => {
-        distance = Math.abs(distance)
-        const roundedDistanceIsEqual = utils.isBetween({
-          value: distance,
-          min: distanceBetweenCards - 1,
-          max: distanceBetweenCards + 1
-        })
-        if (!roundedDistanceIsEqual) {
-          distanceIsEqual = false
-        }
-      })
-      return distanceIsEqual
-    },
-    isTopAligned () {
-      const yValues = this.items.map(item => item.y)
-      const yIsAligned = yValues.every(y => y === yValues[0])
-      const xIsDistributed = this.xIsDistributed
-      return yIsAligned && xIsDistributed
-    },
-    isCenteredVertically () {
-      const cards = this.sortedByY.cards
-      if (!cards.length) { return }
-      const origin = cards[0]
-      const cardsCenterY = origin.y + (origin.height / 2)
-      let centerIsEqual = true
-      cards.forEach(card => {
-        const roundedCenterIsEqual = utils.isBetween({
-          value: card.y + (card.height / 2),
-          min: cardsCenterY - 1,
-          max: cardsCenterY + 1
-        })
-        if (!roundedCenterIsEqual) {
-          centerIsEqual = false
-        }
-      })
-      return centerIsEqual
-    },
-    isBottomAligned () {
-      const origin = this.items[0]
-      const yBottom = origin.y + origin.height
-      const yIsAligned = this.items.every(item => {
-        const bottomIsEqual = utils.isBetween({
-          value: item.y + item.height,
-          min: yBottom - 1,
-          max: yBottom + 1
-        })
-        return bottomIsEqual
-      })
-      return yIsAligned
-    },
-    isDistributedVertically () {
-      if (this.cards.length < 3) { return }
-      const cards = this.sortedByY.cards
-      const yDistancesBetween = this.yDistancesBetween(cards)
-      const distanceBetweenCards = yDistancesBetween[0]
-      let distanceIsEqual = true
-      yDistancesBetween.forEach((distance, index) => {
-        distance = Math.abs(distance)
-        const roundedDistanceIsEqual = utils.isBetween({
-          value: distance,
-          min: distanceBetweenCards - 1,
-          max: distanceBetweenCards + 1
-        })
-        if (!roundedDistanceIsEqual) {
-          distanceIsEqual = false
-        }
-      })
-      return distanceIsEqual
-    },
-    spaceCounterZoomDecimal () { return this.$store.getters.spaceCounterZoomDecimal },
-    spaceZoomDecimal () { return this.$store.getters.spaceZoomDecimal },
-    sortedByX () {
-      const editableCards = utils.clone(this.editableCards)
-      const cards = editableCards.sort((a, b) => {
-        return a.x - b.x
-      })
-      const editableBoxes = utils.clone(this.editableBoxes)
-      let boxes = this.normalizeBoxes(editableBoxes)
-      boxes = boxes.sort((a, b) => {
-        return a.x - b.x
-      })
-      const all = cards.concat(boxes)
-      return { cards, boxes, all }
-    },
-    sortedByY () {
-      const editableCards = utils.clone(this.editableCards)
-      const cards = editableCards.sort((a, b) => {
-        return a.y - b.y
-      })
-      const editableBoxes = utils.clone(this.editableBoxes)
-      let boxes = this.normalizeBoxes(editableBoxes)
-      boxes = boxes.sort((a, b) => {
-        return a.y - b.y
-      })
-      const all = cards.concat(boxes)
-      return { cards, boxes, all }
-    },
-    sortedByXWidth () {
-      const editableCards = utils.clone(this.editableCards)
-      const cards = editableCards.sort((a, b) => {
-        return (b.x + b.width) - (a.x + a.width)
-      })
-      const editableBoxes = utils.clone(this.editableBoxes)
-      let boxes = this.normalizeBoxes(editableBoxes)
-      boxes = boxes.sort((a, b) => {
-        return (b.x + b.width) - (a.x + a.width)
-      })
-      const all = cards.concat(boxes)
-      return { cards, boxes, all }
-    },
-    sortedByYHeight () {
-      const editableCards = utils.clone(this.editableCards)
-      const cards = editableCards.sort((a, b) => {
-        return (b.y + b.height) - (a.y + a.height)
-      })
-      const editableBoxes = utils.clone(this.editableBoxes)
-      let boxes = this.normalizeBoxes(editableBoxes)
-      boxes = boxes.sort((a, b) => {
-        return (b.y + b.height) - (a.y + a.height)
-      })
-      const all = cards.concat(boxes)
-      return { cards, boxes, all }
-    }
-
-  },
-  methods: {
-    normalizeBoxes (boxes) {
-      boxes = utils.clone(boxes)
-      boxes = boxes.map(box => {
-        box.width = box.resizeWidth
-        box.height = box.resizeHeight
-        return box
-      })
-      return boxes
-    },
-    toggleMoreOptionsIsVisible () {
-      const value = !this.moreOptionsIsVisible
-      this.$store.dispatch('currentUser/shouldShowMoreAlignOptions', value)
-    },
-    updateItem (item, type) {
-      if (type === 'cards') { this.$store.dispatch('currentCards/update', item) }
-      if (type === 'boxes') { this.$store.dispatch('currentBoxes/update', item) }
-    },
-
-    // ⎺o
-    alignTop () {
-      const cards = this.sortedByX.cards
-      const boxes = this.sortedByX.boxes
-      this.alignTopItems(cards, 'cards')
-      this.alignTopItems(boxes, 'boxes')
-    },
-    alignTopItems (items, type) {
-      const zoom = this.spaceCounterZoomDecimal
-      let newItems = []
-      const origin = items[0]
-      items.forEach((item, index) => {
-        if (index > 0) {
-          item = utils.clone(item)
-          item.y = origin.y
-          if (this.shouldDistributeWithAlign) {
-            const previousItem = newItems[index - 1]
-            const rect = utils.cardRectFromId(previousItem.id) || utils.boxRectFromId(previousItem.id) || previousItem
-            const previousRightSide = previousItem.x + (rect.width * zoom)
-            item.x = previousRightSide + consts.spaceBetweenCards
-          }
-          this.updateItem(item, type)
-        }
-        newItems.push(item)
-      })
-      if (type === 'cards') { this.updateConnectionPaths() }
-    },
-    // o|o
-    centerHorizontally () {
-      const cards = this.sortedByX.cards
-      const boxes = this.sortedByX.boxes
-      this.centerHorizontallyItems(cards, 'cards')
-      this.centerHorizontallyItems(boxes, 'boxes')
-    },
-    centerHorizontallyItems (items, type) {
-      const origin = items[0]
-      items.forEach((item, index) => {
-        if (index > 0) {
-          const previousItem = items[index - 1]
-          const previousBottomSide = previousItem.y + previousItem.height
-          item = utils.clone(item)
-          item.x = origin.x + (origin.width / 2) - (item.width / 2)
-          if (this.shouldDistributeWithAlign) {
-            item.y = previousBottomSide + this.spaceBetween
-          }
-          this.updateItem(item, type)
-        }
-      })
-      if (type === 'cards') { this.updateConnectionPaths() }
-    },
-    // o|
-    alignRight () {
-      const cards = this.sortedByXWidth.cards
-      const boxes = this.sortedByXWidth.boxes
-      this.alignRightItems(cards, 'cards')
-      this.alignRightItems(boxes, 'boxes')
-    },
-    alignRightItems (items, type) {
-      const zoom = this.spaceCounterZoomDecimal
-      const origin = items[0]
-      if (!origin) { return }
-      let rect = utils.cardRectFromId(origin.id) || utils.boxRectFromId(origin.id) || origin
-      const originWidth = rect.width * zoom
-      items.forEach((item, index) => {
-        if (index > 0) {
-          item = utils.clone(item)
-          rect = utils.cardRectFromId(item.id) || utils.boxRectFromId(item.id) || item
-          const itemWidth = rect.width * zoom
-          item.x = origin.x + originWidth - itemWidth
-          this.updateItem(item, type)
-        }
-      })
-      if (type === 'cards') { this.updateConnectionPaths() }
-    },
-    // | o |
-    distributeHorizontally () {
-      const cards = this.sortedByX.cards
-      const boxes = this.sortedByX.boxes
-      this.distributeHorizontallyItems(cards, 'cards')
-      this.distributeHorizontallyItems(boxes, 'boxes')
-    },
-    distributeHorizontallyItems (items, type) {
-      if (!items.length) { return }
-      const xDistancesBetween = this.xDistancesBetween(items)
-      const distance = utils.averageOfNumbers(xDistancesBetween)
-      let previousItem = items[0]
-      items.forEach((item, index) => {
-        if (index > 0) {
-          item = utils.clone(item)
-          item.x = previousItem.x + previousItem.width + distance
-          previousItem = item
-          this.updateItem(item, type)
-        }
-      })
-      if (type === 'cards') { this.updateConnectionPaths() }
-    },
-    // |o
-    alignLeft () {
-      const cards = this.sortedByY.cards
-      const boxes = this.sortedByY.boxes
-      this.alignLeftItems(cards, 'cards')
-      this.alignLeftItems(boxes, 'boxes')
-    },
-    alignLeftItems (items, type) {
-      const zoom = this.spaceCounterZoomDecimal
-      let newItems = []
-      const origin = items[0]
-      items.forEach((item, index) => {
-        if (index > 0) {
-          item = utils.clone(item)
-          item.x = origin.x
-          if (this.shouldDistributeWithAlign) {
-            const previousItem = newItems[index - 1]
-            const rect = utils.cardRectFromId(previousItem.id) || utils.boxRectFromId(previousItem.id) || previousItem
-            const previousItemHeight = rect.height * zoom
-            const previousBottomSide = previousItem.y + previousItemHeight
-            item.y = previousBottomSide + consts.spaceBetweenCards
-          }
-          this.updateItem(item, type)
-        }
-        newItems.push(item)
-      })
-      if (type === 'cards') { this.updateConnectionPaths() }
-    },
-    // o-o
-    centerVertically () {
-      const cards = this.sortedByX.cards
-      const boxes = this.sortedByX.boxes
-      this.centerVerticallyItems(cards, 'cards')
-      this.centerVerticallyItems(boxes, 'boxes')
-    },
-    centerVerticallyItems (items, type) {
-      const origin = items[0]
-      items.forEach((item, index) => {
-        if (index > 0) {
-          item = utils.clone(item)
-          if (this.shouldDistributeWithAlign) {
-            const previousItem = items[index - 1]
-            const previousRightSide = previousItem.x + previousItem.width
-            item.x = previousRightSide + this.spaceBetween
-          }
-          item.y = origin.y + (origin.height / 2) - (item.height / 2)
-          this.updateItem(item, type)
-        }
-      })
-      if (type === 'cards') { this.updateConnectionPaths() }
-    },
-    // _o
-    alignBottom () {
-      const cards = this.sortedByYHeight.cards
-      const boxes = this.sortedByYHeight.boxes
-      this.alignBottomItems(cards, 'cards')
-      this.alignBottomItems(boxes, 'boxes')
-    },
-    alignBottomItems (items, type) {
-      const origin = items[0]
-      items.forEach((item, index) => {
-        if (index > 0) {
-          item = utils.clone(item)
-          item.y = origin.y + origin.height - item.height
-          if (this.shouldDistributeWithAlign) {
-            const previousItem = items[index - 1]
-            const previousRightSide = previousItem.x + previousItem.width
-            item.x = previousRightSide + this.spaceBetween
-          }
-          this.updateItem(item, type)
-        }
-      })
-      if (type === 'cards') { this.updateConnectionPaths() }
-    },
-    // ⎺ o _
-    distributeVertically () {
-      const cards = this.sortedByY.cards
-      const boxes = this.sortedByY.boxes
-      this.distributeVerticallyItems(cards, 'cards')
-      this.distributeVerticallyItems(boxes, 'boxes')
-    },
-    distributeVerticallyItems (items, type) {
-      if (!items.length) { return }
-      const yDistancesBetween = this.yDistancesBetween(items)
-      const distance = Math.round(utils.averageOfNumbers(yDistancesBetween))
-      let previousItem = items[0]
-      items.forEach((item, index) => {
-        if (index > 0) {
-          item = utils.clone(item)
-          item.y = previousItem.y + previousItem.height + distance
-          previousItem = item
-          this.updateItem(item, type)
-        }
-      })
-      if (type === 'cards') { this.updateConnectionPaths() }
-    },
-
-    // utils
-
-    xDistancesBetween (items) {
-      let xDistances = []
-      items.forEach((item, index) => {
-        if (index > 0) {
-          const previousItem = items[index - 1]
-          const previousRightSide = previousItem.x + previousItem.width
-          const leftSide = item.x
-          xDistances.push(leftSide - previousRightSide)
-        }
-      })
-      return xDistances
-    },
-    yDistancesBetween (items) {
-      let yDistances = []
-      items.forEach((item, index) => {
-        if (index > 0) {
-          const previousItem = items[index - 1]
-          const previousBottomSide = previousItem.y + previousItem.height
-          const topSide = item.y
-          yDistances.push(topSide - previousBottomSide)
-        }
-      })
-      return yDistances
-    },
-    updateConnectionPaths () {
-      this.$nextTick(() => {
-        let connections = []
-        const multipleCardsSelectedIds = utils.clone(this.multipleCardsSelectedIds)
-        const multipleConnectionsSelectedIds = utils.clone(this.multipleConnectionsSelectedIds)
-        // this.$store.commit('clearMultipleSelected')
-        if (!multipleCardsSelectedIds.length) { return }
-        multipleCardsSelectedIds.forEach(cardId => {
-          connections = connections.concat(this.$store.getters['currentConnections/byCardId'](cardId))
-        })
-        this.$store.commit('multipleCardsSelectedIds', multipleCardsSelectedIds)
-        this.$store.commit('multipleConnectionsSelectedIds', multipleConnectionsSelectedIds)
-        // updates
-        connections = uniqBy(connections, 'id')
-        this.$store.dispatch('currentConnections/updatePaths', { connections, shouldUpdateApi: true })
-      })
-    }
-  }
-}
-</script>
 
 <style lang="stylus">
 .align-and-distribute
