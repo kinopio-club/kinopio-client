@@ -1101,6 +1101,7 @@ const addSplitCards = async (newCards) => {
       store.commit('triggerUpdateUrlPreview', newCard.id)
       prevCard = newCard
     }
+    store.dispatch('updatePageSizes')
   }, 150)
 }
 
