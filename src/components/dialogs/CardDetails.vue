@@ -191,10 +191,13 @@ const badgesRowIsVisible = computed(() => tagsInCard.value.length || nameIsComme
 const triggerUpdateHeaderAndFooterPosition = () => {
   store.commit('triggerUpdateHeaderAndFooterPosition')
 }
-const updateDimensions = (cardId) => {
+const updateDimensions = async (cardId) => {
   cardId = cardId || card.value.id
   const item = { id: cardId }
+  await nextTick()
   store.dispatch('currentCards/updateDimensions', { cards: [item] })
+  await nextTick()
+  await nextTick()
 }
 const scrollIntoViewAndFocus = async () => {
   let behavior
@@ -365,7 +368,7 @@ const closeCard = async () => {
   }
   store.dispatch('updatePageSizes')
   await nextTick()
-  updateDimensions(cardId)
+  await updateDimensions(cardId)
   store.dispatch('checkIfItemShouldIncreasePageSize', item)
   store.dispatch('history/resume')
   if (item.name || prevCardName) {
@@ -430,7 +433,7 @@ const name = computed({
     textareaSizes()
   }
 })
-const updateCardName = (newName) => {
+const updateCardName = async (newName) => {
   const cardId = store.state.cardDetailsIsVisibleForCardId
   if (card.value.id !== cardId) {
     return
@@ -443,10 +446,10 @@ const updateCardName = (newName) => {
     nameUpdatedByUserId: userId
   }
   store.dispatch('currentCards/update', item)
-  updatePaths()
   updateMediaUrls()
   updateTags()
-  updateDimensions()
+  await updateDimensions()
+  updatePaths()
   if (createdByUser.value.id !== store.state.currentUser.id) { return }
   if (state.notifiedMembers) { return } // send card update notifications only once per card, per session
   if (item.name) {
@@ -949,7 +952,7 @@ const toggleUrlsIsVisible = () => {
   }
   updateCardName(newName)
 }
-const removeUrlPreview = () => {
+const removeUrlPreview = async () => {
   const cardId = card.value.id || prevCardId
   const update = {
     id: cardId,
@@ -961,8 +964,8 @@ const removeUrlPreview = () => {
   }
   store.commit('removeUrlPreviewLoadingForCardIds', cardId)
   store.dispatch('currentCards/update', update)
-  store.dispatch('currentConnections/updatePaths', { cardId: card.value.id, shouldUpdateApi: true })
-  store.dispatch('currentCards/updateDimensions', { cards: [card.value] })
+  await updateDimensions()
+  updatePaths()
 }
 
 // media
