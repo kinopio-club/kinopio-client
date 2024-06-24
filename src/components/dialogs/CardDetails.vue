@@ -349,8 +349,6 @@ const showCard = async (cardId) => {
   textareaSizes()
 }
 const closeCard = async () => {
-  const element = nameElement.value
-  element.blur()
   store.commit('triggerHideTouchInterface')
   const cardId = prevCardId
   const item = store.getters['currentCards/byId'](cardId)
@@ -382,13 +380,13 @@ const textareaSizes = async () => {
   await nextTick()
   await nextTick()
   await nextTick()
-  const element = dialogElement.value
-  let textarea = element.querySelector('textarea')
+  const element = nameElement.value
+  if (!element) { return }
   let modifier = 0
   if (canEditCard.value) {
     modifier = 1
   }
-  textarea.style.height = textarea.scrollHeight + modifier + 'px'
+  element.style.height = element.scrollHeight + modifier + 'px'
 }
 const resetTextareaHeight = () => {
   if (!visible.value) { return }
@@ -1221,6 +1219,7 @@ const replaceSlashCommandWithSpaceUrl = async (space) => {
     id: card.value.id,
     shouldShowOtherSpacePreviewImage: true
   })
+  textareaSizes()
 }
 
 // space picker
