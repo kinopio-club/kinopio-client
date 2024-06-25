@@ -1,3 +1,223 @@
+<script setup>
+import { reactive, computed, onMounted, onBeforeUnmount, defineProps, defineEmits, watch, ref, nextTick } from 'vue'
+import { useStore } from 'vuex'
+
+import merge from 'lodash-es/merge'
+
+import cache from '@/cache.js'
+import Loader from '@/components/Loader.vue'
+import PrivacyIcon from '@/components/PrivacyIcon.vue'
+import utils from '@/utils.js'
+const store = useStore()
+
+const resultsElement = ref(null)
+
+onMounted(() => {
+  store.subscribe(mutation => {
+    if (mutation.type === 'updatePageSizes') {
+      updateResultsSectionHeight()
+    }
+  })
+  init()
+})
+
+const props = defineProps({
+  visible: Boolean
+})
+watch(() => props.visible, (value, prevValue) => {
+  if (value) {
+    init()
+  }
+})
+
+const state = reactive({
+  removeConfirmationVisibleForId: '',
+  cardsVisible: true,
+  removedSpaces: [],
+  removedCards: [],
+  loading: {
+    cards: false,
+    spaces: false
+  },
+  resultsSectionHeight: null,
+  deleteAllConfirmationIsVisible: false
+})
+
+const isLoading = computed(() => {
+  return state.loading.cards || state.loading.spaces
+})
+const removedCardsWithName = computed(() => {
+  return state.removedCards.filter(card => card.name)
+})
+const cardsOrSpacesLabel = computed(() => {
+  if (state.cardsVisible) {
+    return 'cards'
+  } else {
+    return 'spaces'
+  }
+})
+const items = computed(() => {
+  let items = []
+  if (state.cardsVisible && !currentUserCanEditSpace.value) {
+    items = []
+  } else if (state.cardsVisible) {
+    items = removedCardsWithName.value
+  } else {
+    items = state.removedSpaces
+  }
+  items = items.filter(item => Boolean(item))
+  return items
+})
+const currentSpace = computed(() => store.state.currentSpace)
+const currentSpaceName = computed(() => currentSpace.value.name)
+const currentUserCanEditSpace = computed(() => {
+  return store.getters['currentUser/canEditSpace']()
+})
+
+const init = async () => {
+  state.deleteAllConfirmationIsVisible = false
+  await updateRemovedCards()
+  await updateRemovedSpaces()
+  updateResultsSectionHeight()
+}
+const toggleDeleteAllConfirmationIsVisible = () => {
+  state.deleteAllConfirmationIsVisible = !state.deleteAllConfirmationIsVisible
+}
+const scrollIntoView = (card) => {
+  const element = document.querySelector(`article [data-card-id="${card.id}"]`)
+  utils.scrollIntoView({ element })
+}
+const restore = (item) => {
+  if (state.cardsVisible) {
+    restoreCard(item)
+  } else {
+    restoreSpace(item)
+  }
+}
+const isRemoveConfirmationVisible = (item) => {
+  return Boolean(state.removeConfirmationVisibleForId === item.id)
+}
+const showRemoveConfirmation = (item) => {
+  state.removeConfirmationVisibleForId = item.id
+}
+const hideRemoveConfirmation = () => {
+  state.removeConfirmationVisibleForId = ''
+}
+const deleteItem = (item) => {
+  if (state.cardsVisible) {
+    deleteCard(item)
+  } else {
+    deleteSpace(item)
+  }
+}
+const deleteAll = () => {
+  if (state.cardsVisible) {
+    deleteAllCards()
+  } else {
+    deleteAllSpaces()
+  }
+}
+const updateResultsSectionHeight = async () => {
+  if (!props.visible) { return }
+  await nextTick()
+  let element = resultsElement.value
+  state.resultsSectionHeight = utils.elementHeight(element)
+}
+
+// Cards
+
+const showCards = () => {
+  state.cardsVisible = true
+  state.deleteAllConfirmationIsVisible = false
+  updateRemovedCards()
+}
+const updateLocalRemovedCards = () => {
+  state.removedCards = store.state.currentCards.removedCards
+}
+const updateRemovedCards = async () => {
+  updateLocalRemovedCards()
+  await loadRemoteRemovedCards()
+}
+const removeRemovedCard = (card) => {
+  state.removedCards = state.removedCards.filter(removedCard => removedCard.id !== card.id)
+}
+const loadRemoteRemovedCards = async () => {
+  if (!currentUserCanEditSpace.value) { return }
+  state.loading.cards = true
+  const space = store.state.currentSpace
+  const remoteCards = await store.dispatch('api/getSpaceRemovedCards', space)
+  state.loading.cards = false
+  if (!utils.arrayHasItems(remoteCards)) { return }
+  state.removedCards = remoteCards
+  store.commit('currentCards/removedCards', remoteCards)
+}
+const restoreCard = async (card) => {
+  store.dispatch('currentCards/restoreRemoved', card)
+  await nextTick()
+  scrollIntoView(card)
+  removeRemovedCard(card)
+}
+const deleteCard = (card) => {
+  store.dispatch('currentCards/deleteCard', card)
+  removeRemovedCard(card)
+}
+const deleteAllCards = () => {
+  store.dispatch('currentCards/deleteAllRemoved')
+  state.removedCards = []
+}
+
+// Spaces
+
+const showSpaces = async () => {
+  state.cardsVisible = false
+  state.deleteAllConfirmationIsVisible = false
+  await updateRemovedSpaces()
+}
+const updateLocalRemovedSpaces = () => {
+  state.removedSpaces = cache.getAllRemovedSpaces()
+}
+const updateRemovedSpaces = async () => {
+  updateLocalRemovedSpaces()
+  await loadRemoteRemovedSpaces()
+}
+const removeRemovedSpace = (space) => {
+  state.removedSpaces = state.removedSpaces.filter(removedSpace => removedSpace.id !== space.id)
+}
+const loadRemoteRemovedSpaces = async () => {
+  let removedSpaces
+  state.loading.spaces = true
+  removedSpaces = await store.dispatch('api/getUserRemovedSpaces')
+  state.loading.spaces = false
+  if (!removedSpaces) { return }
+  removedSpaces = removedSpaces.map(remote => {
+    const localSpace = state.removedSpaces.find(local => {
+      if (local) {
+        return local.id === remote.id
+      }
+    })
+    if (localSpace) {
+      return merge(remote, localSpace)
+    } else {
+      return remote
+    }
+  })
+  state.removedSpaces = removedSpaces
+}
+const restoreSpace = (space) => {
+  store.dispatch('currentSpace/restoreRemovedSpace', space)
+  removeRemovedSpace(space)
+}
+const deleteSpace = (space) => {
+  store.dispatch('currentSpace/deleteSpace', space)
+  removeRemovedSpace(space)
+}
+const deleteAllSpaces = () => {
+  store.dispatch('currentSpace/deleteAllRemovedSpaces')
+  state.removedSpaces = []
+}
+
+</script>
+
 <template lang="pug">
 .removed(v-if="visible")
   section
@@ -5,31 +225,31 @@
       span Restore Removed Items
       Loader(:visible="isLoading" :isSmall="true")
     .segmented-buttons
-      button(@click.left="showCards" :class="{active: cardsVisible}")
+      button(@click.left="showCards" :class="{active: state.cardsVisible}")
         img.icon(src="@/assets/remove.svg")
         span Cards in Space
-      button(@click.left="showSpaces" :class="{active: !cardsVisible}")
+      button(@click.left="showSpaces" :class="{active: !state.cardsVisible}")
         img.icon(src="@/assets/remove.svg")
         span Spaces
 
   section.tips-section(v-if="!items.length")
-    template(v-if="cardsVisible")
+    template(v-if="state.cardsVisible")
       section.subsection
         p Removed cards from this space can be restored here
         p(v-if="!currentUserCanEditSpace")
           span.badge.info
             PrivacyIcon(:privacy="currentSpace.privacy" :closedIsNotVisible="true")
             span You need to be a collaborator
-    template(v-if="!cardsVisible")
+    template(v-if="!state.cardsVisible")
       section.subsection
         p Removed spaces can be restored here
 
-  section.results-section(v-if="items.length" ref="results" :style="{'max-height': resultsSectionHeight + 'px'}")
+  section.results-section(v-if="items.length" ref="resultsElement" :style="{'max-height': state.resultsSectionHeight + 'px'}")
     section.results-actions
-      button(@click="toggleDeleteAllConfirmationIsVisible" v-if="!deleteAllConfirmationIsVisible")
+      button(@click="toggleDeleteAllConfirmationIsVisible" v-if="!state.deleteAllConfirmationIsVisible")
         img.icon(src="@/assets/remove.svg")
         span Delete All
-      template(v-if="deleteAllConfirmationIsVisible")
+      template(v-if="state.deleteAllConfirmationIsVisible")
         p
           span Permanently delete all removed {{cardsOrSpacesLabel}} and uploads?
         .segmented-buttons
@@ -58,234 +278,6 @@
                 img.icon(src="@/assets/remove.svg")
                 span Delete
 </template>
-
-<script>
-import merge from 'lodash-es/merge'
-
-import cache from '@/cache.js'
-import Loader from '@/components/Loader.vue'
-import PrivacyIcon from '@/components/PrivacyIcon.vue'
-import utils from '@/utils.js'
-
-export default {
-  name: 'Removed',
-  components: {
-    Loader,
-    PrivacyIcon
-  },
-  props: {
-    visible: Boolean
-  },
-  created () {
-    this.$store.subscribe((mutation, state) => {
-      if (mutation.type === 'updatePageSizes') {
-        this.updateResultsSectionHeight()
-      }
-    })
-  },
-  mounted () {
-    this.init()
-  },
-  data () {
-    return {
-      removeConfirmationVisibleForId: '',
-      cardsVisible: true,
-      removedSpaces: [],
-      removedCards: [],
-      loading: {
-        cards: false,
-        spaces: false
-      },
-      resultsSectionHeight: null,
-      deleteAllConfirmationIsVisible: false
-    }
-  },
-  computed: {
-    isLoading () {
-      return this.loading.cards || this.loading.spaces
-    },
-    removedCardsWithName () {
-      return this.removedCards.filter(card => card.name)
-    },
-    cardsOrSpacesLabel () {
-      if (this.cardsVisible) {
-        return 'cards'
-      } else {
-        return 'spaces'
-      }
-    },
-    items () {
-      let items = []
-      if (this.cardsVisible && !this.currentUserCanEditSpace) {
-        items = []
-      } else if (this.cardsVisible) {
-        items = this.removedCardsWithName
-      } else {
-        items = this.removedSpaces
-      }
-      items = items.filter(item => Boolean(item))
-      return items
-    },
-    currentSpace () { return this.$store.state.currentSpace },
-    currentSpaceName () { return this.currentSpace.name },
-    currentUserCanEditSpace () {
-      return this.$store.getters['currentUser/canEditSpace']()
-    }
-  },
-  methods: {
-    init () {
-      this.deleteAllConfirmationIsVisible = false
-      this.updateRemovedCards()
-      this.updateRemovedSpaces()
-      this.updateResultsSectionHeight()
-    },
-    toggleDeleteAllConfirmationIsVisible () {
-      this.deleteAllConfirmationIsVisible = !this.deleteAllConfirmationIsVisible
-    },
-    scrollIntoView (card) {
-      const element = document.querySelector(`article [data-card-id="${card.id}"]`)
-      utils.scrollIntoView({ element })
-    },
-    restore (item) {
-      if (this.cardsVisible) {
-        this.restoreCard(item)
-      } else {
-        this.restoreSpace(item)
-      }
-    },
-    isRemoveConfirmationVisible (item) {
-      return Boolean(this.removeConfirmationVisibleForId === item.id)
-    },
-    showRemoveConfirmation (item) {
-      this.removeConfirmationVisibleForId = item.id
-    },
-    hideRemoveConfirmation () {
-      this.removeConfirmationVisibleForId = ''
-    },
-    deleteItem (item) {
-      if (this.cardsVisible) {
-        this.deleteCard(item)
-      } else {
-        this.deleteSpace(item)
-      }
-    },
-    deleteAll () {
-      if (this.cardsVisible) {
-        this.deleteAllCards()
-      } else {
-        this.deleteAllSpaces()
-      }
-    },
-    updateResultsSectionHeight () {
-      if (!this.visible) { return }
-      this.$nextTick(() => {
-        let element = this.$refs.results
-        this.resultsSectionHeight = utils.elementHeight(element, true)
-      })
-    },
-
-    // Cards
-
-    showCards () {
-      this.cardsVisible = true
-      this.deleteAllConfirmationIsVisible = false
-      this.updateRemovedCards()
-    },
-    updateLocalRemovedCards () {
-      this.removedCards = this.$store.state.currentCards.removedCards
-    },
-    updateRemovedCards () {
-      this.updateLocalRemovedCards()
-      this.loadRemoteRemovedCards()
-    },
-    removeRemovedCard (card) {
-      this.removedCards = this.removedCards.filter(removedCard => removedCard.id !== card.id)
-    },
-    async loadRemoteRemovedCards () {
-      if (!this.currentUserCanEditSpace) { return }
-      this.loading.cards = true
-      const space = this.$store.state.currentSpace
-      const remoteCards = await this.$store.dispatch('api/getSpaceRemovedCards', space)
-      this.loading.cards = false
-      if (!utils.arrayHasItems(remoteCards)) { return }
-      this.removedCards = remoteCards
-      this.$store.commit('currentCards/removedCards', remoteCards)
-    },
-    restoreCard (card) {
-      this.$store.dispatch('currentCards/restoreRemoved', card)
-      this.$nextTick(() => {
-        this.scrollIntoView(card)
-      })
-      this.removeRemovedCard(card)
-    },
-    deleteCard (card) {
-      this.$store.dispatch('currentCards/deleteCard', card)
-      this.removeRemovedCard(card)
-    },
-    deleteAllCards () {
-      this.$store.dispatch('currentCards/deleteAllRemoved')
-      this.removedCards = []
-    },
-
-    // Spaces
-
-    showSpaces () {
-      this.cardsVisible = false
-      this.deleteAllConfirmationIsVisible = false
-      this.updateRemovedSpaces()
-    },
-    updateLocalRemovedSpaces () {
-      this.removedSpaces = cache.getAllRemovedSpaces()
-    },
-    updateRemovedSpaces () {
-      this.updateLocalRemovedSpaces()
-      this.loadRemoteRemovedSpaces()
-    },
-    removeRemovedSpace (space) {
-      this.removedSpaces = this.removedSpaces.filter(removedSpace => removedSpace.id !== space.id)
-    },
-    async loadRemoteRemovedSpaces () {
-      let removedSpaces
-      this.loading.spaces = true
-      removedSpaces = await this.$store.dispatch('api/getUserRemovedSpaces')
-      this.loading.spaces = false
-      if (!removedSpaces) { return }
-      removedSpaces = removedSpaces.map(remote => {
-        const localSpace = this.removedSpaces.find(local => {
-          if (local) {
-            return local.id === remote.id
-          }
-        })
-        if (localSpace) {
-          return merge(remote, localSpace)
-        } else {
-          return remote
-        }
-      })
-      this.removedSpaces = removedSpaces
-    },
-    restoreSpace (space) {
-      this.$store.dispatch('currentSpace/restoreRemovedSpace', space)
-      this.removeRemovedSpace(space)
-    },
-    deleteSpace (space) {
-      this.$store.dispatch('currentSpace/deleteSpace', space)
-      this.removeRemovedSpace(space)
-    },
-    deleteAllSpaces () {
-      this.$store.dispatch('currentSpace/deleteAllRemovedSpaces')
-      this.removedSpaces = []
-    }
-  },
-  watch: {
-    visible (visible) {
-      if (visible) {
-        this.init()
-      }
-    }
-  }
-}
-</script>
 
 <style lang="stylus">
 .removed
