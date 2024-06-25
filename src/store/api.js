@@ -1082,9 +1082,9 @@ const self = {
         context.commit('isAuthenticatingWithArena', false, { root: true })
       }
     },
-    urlPreview: async (context, url) => {
+    urlPreview: async (context, { url, card }) => {
       try {
-        const body = { url }
+        const body = { url, card }
         const options = await context.dispatch('requestOptions', { body, method: 'POST', space: context.rootState.currentSpace })
         const response = await fetch(`${consts.apiHost()}/services/url-preview`, options)
         if (response.status !== 200) {

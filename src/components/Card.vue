@@ -1150,21 +1150,47 @@ const updateUrlPreviewOnline = async () => {
   }
   try {
     url = utils.removeHiddenQueryStringFromURLs(url)
-    let response = await store.dispatch('api/urlPreview', url)
-    if (!response) { throw 'api/urlPreview' }
+    let response = await store.dispatch('api/urlPreview', { url, card: props.card })
+    if (!response) { throw 'api/urlPreview request failed' }
+
     let { data, host } = response
-    const { links, meta } = data
-    console.log('🚗 link preview', url, data, links, meta)
-    if (!links) { throw 'link preview error' }
-    let html
-    if (links.player || links.reader) {
-      html = data.html
-    }
-    updateUrlPreviewSuccess({ links, meta, cardId, url, html })
+    console.log('🍇🍇🍇🍇🍇🍇🍇🍇', data, host, response)
+    // const { links, meta } = data
+
+    // const { links, meta, cardId, url, html } = data
+
+    console.log('🚗 link preview', url, data)
+
+    updateUrlPreviewSuccess(url, data)
   } catch (error) {
     console.warn('🚑', error, url)
     updateUrlPreviewErrorUrl(url)
   }
+}
+const updateUrlPreviewSuccess = (url, data) => {
+  if (!nameIncludesUrl(url)) { return }
+  const cardId = data.id || props.card.id
+  if (!cardId) {
+    console.warn('🚑 could not updateUrlPreviewSuccess', cardId, props.card)
+    store.commit('removeUrlPreviewLoadingForCardIds', cardId)
+    return
+  }
+  data.name = utils.addHiddenQueryStringToURLs(data.name)
+  // const data = {
+  //   id: cardId,
+  //   name: utils.addHiddenQueryStringToURLs(props.card.name),
+  //   urlPreviewUrl: url,
+  //   urlPreviewTitle: utils.truncated(meta.title || meta.site),
+  //   urlPreviewDescription: utils.truncated(meta.description, 280),
+  //   urlPreviewImage: previewImage(links),
+  //   urlPreviewFavicon: previewFavicon(links),
+  //   urlPreviewEmbedHtml: html
+  // }
+  console.log('♥️♥️♥️♥️♥️', data)
+
+  store.dispatch('currentCards/update', data)
+  store.commit('removeUrlPreviewLoadingForCardIds', cardId)
+  store.dispatch('api/addToQueue', { name: 'updateUrlPreviewImage', body: data })
 }
 const retryUrlPreview = () => {
   store.dispatch('currentCards/update', {
@@ -1187,26 +1213,6 @@ const nameIncludesUrl = (url) => {
   const normalizedUrl = utils.removeTrailingSlash(url)
   return name.includes(url) || name.includes(normalizedUrl) || normalizedUrl.includes(name)
 }
-const previewImage = ({ thumbnail }) => {
-  const minWidth = consts.normalCardMaxWidth
-  if (!thumbnail) { return '' }
-  let image = thumbnail.find(item => {
-    let shouldSkipImage = false
-    if (item.media) {
-      if (item.media.width < minWidth) {
-        shouldSkipImage = true
-      }
-    }
-    return item.href && !shouldSkipImage
-  })
-  if (!image) { return '' }
-  return image.href || ''
-}
-const previewFavicon = ({ icon }) => {
-  if (!icon) { return '' }
-  let image = icon.find(item => item.href)
-  return image.href || ''
-}
 const updateUrlPreviewImage = (update) => {
   if (!currentUserIsSignedIn.value) { return }
   if (!update.urlPreviewImage) { return }
@@ -1214,28 +1220,6 @@ const updateUrlPreviewImage = (update) => {
   update.spaceId = store.state.currentSpace.id
   delete update.id
   store.dispatch('api/updateUrlPreviewImage', update)
-}
-const updateUrlPreviewSuccess = ({ links, meta, cardId, url, html }) => {
-  if (!nameIncludesUrl(url)) { return }
-  cardId = cardId || props.card.id
-  if (!cardId) {
-    console.warn('🚑 could not updateUrlPreviewSuccess', cardId, props.card)
-    store.commit('removeUrlPreviewLoadingForCardIds', cardId)
-    return
-  }
-  const update = {
-    id: cardId,
-    name: utils.addHiddenQueryStringToURLs(props.card.name),
-    urlPreviewUrl: url,
-    urlPreviewTitle: utils.truncated(meta.title || meta.site),
-    urlPreviewDescription: utils.truncated(meta.description, 280),
-    urlPreviewImage: previewImage(links),
-    urlPreviewFavicon: previewFavicon(links),
-    urlPreviewEmbedHtml: html
-  }
-  store.dispatch('currentCards/update', update)
-  store.commit('removeUrlPreviewLoadingForCardIds', cardId)
-  store.dispatch('api/addToQueue', { name: 'updateUrlPreviewImage', body: update })
 }
 const updateUrlPreviewErrorUrl = (url) => {
   const cardId = props.card.id
