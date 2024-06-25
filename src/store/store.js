@@ -18,6 +18,7 @@ import userNotifications from '@/store/userNotifications.js'
 import websocket from '@/store/plugins/websocket.js'
 
 import { createStore } from 'vuex'
+import { nextTick } from 'vue'
 import { nanoid } from 'nanoid'
 import uniqBy from 'lodash-es/uniqBy'
 import last from 'lodash-es/last'
@@ -280,6 +281,38 @@ const store = createStore({
       utils.typeCheck({ value: width, type: 'number' })
       state.pageWidth = width
     },
+    scrollElementIntoView (state, { element, behavior }) {
+      behavior = behavior || 'smooth'
+      if (!element) { return }
+      const sidebarIsVisible = document.querySelector('dialog#sidebar')
+      const isViewportNarrow = state.viewportWidth < (consts.defaultCharacterLimit * 2)
+      let horizontal = 'nearest'
+      let vertical = 'nearest'
+      if (sidebarIsVisible) {
+        horizontal = 'center'
+        vertical = 'center'
+      }
+      if (sidebarIsVisible && isViewportNarrow) {
+        horizontal = 'start'
+      }
+      // increase page size by amount to scroll beyond page size
+      const rect = element.getBoundingClientRect()
+      if (window.scrollX + rect.x + rect.width > state.pageWidth) {
+        state.pageWidth += rect.width
+      }
+      if (window.scrollY + rect.y + rect.height > state.pageHeight) {
+        state.pageHeight += rect.height
+      }
+      // scroll page
+      nextTick(() => {
+        element.scrollIntoView({
+          behavior,
+          block: vertical,
+          inline: horizontal
+        })
+      })
+    },
+
     closeAllDialogs: (state) => {
       let dialogs = document.querySelectorAll('dialog')
       const dialogIsVisible = Boolean(dialogs.length)
