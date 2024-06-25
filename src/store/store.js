@@ -128,7 +128,7 @@ const store = createStore({
     multipleCardsSelectedIds: [],
     newTweetCards: [],
     prevNewTweetCards: [],
-    urlEmbedIsVisibleForCardId: '',
+    iframeIsVisibleForCardId: '',
     // resizing card
     currentUserIsResizingCard: false,
     currentUserIsResizingCardIds: [],
@@ -638,9 +638,9 @@ const store = createStore({
       utils.typeCheck({ value, type: 'boolean' })
       state.preventCardDetailsOpeningAnimation = value
     },
-    urlEmbedIsVisibleForCardId: (state, cardId) => {
+    iframeIsVisibleForCardId: (state, cardId) => {
       utils.typeCheck({ value: cardId, type: 'string' })
-      state.urlEmbedIsVisibleForCardId = cardId
+      state.iframeIsVisibleForCardId = cardId
     },
 
     // Connections

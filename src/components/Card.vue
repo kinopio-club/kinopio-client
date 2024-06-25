@@ -81,7 +81,7 @@ onMounted(async () => {
     store.dispatch('currentCards/showCardDetails', props.card.id)
   }
   await updateUrlPreviewOnload()
-  checkIfShouldUpdatePreviewHtml()
+  checkIfShouldUpdateIframeUrl()
   initViewportObserver()
 })
 
@@ -252,10 +252,10 @@ const toggleCardChecked = () => {
 // media
 
 const isImageCard = computed(() => Boolean(state.formats.image || state.formats.video))
-const urlEmbedIsVisible = computed(() => {
+const iframeIsVisible = computed(() => {
   // youtube, spotify etc.
-  const urlEmbedIsVisibleForCardId = store.state.urlEmbedIsVisibleForCardId
-  return props.card.id === urlEmbedIsVisibleForCardId
+  const iframeIsVisibleForCardId = store.state.iframeIsVisibleForCardId
+  return props.card.id === iframeIsVisibleForCardId
 })
 const isVisualCard = computed(() => {
   if (isComment.value) { return }
@@ -490,8 +490,8 @@ const width = computed(() => {
 const resizeWidth = computed(() => {
   if (isComment.value) { return }
   let resizeWidth = props.card.resizeWidth
-  if (urlEmbedIsVisible.value || isLoadingUrlPreview.value) {
-    resizeWidth = Math.max(resizeWidth, consts.minCardEmbedWidth)
+  if (iframeIsVisible.value || isLoadingUrlPreview.value) {
+    resizeWidth = Math.max(resizeWidth, consts.minCardIframeWidth)
   }
   if (!resizeWidth) { return }
   return resizeWidth
@@ -1184,7 +1184,7 @@ const updateUrlPreviewSuccess = (url, data) => {
   //   urlPreviewDescription: utils.truncated(meta.description, 280),
   //   urlPreviewImage: previewImage(links),
   //   urlPreviewFavicon: previewFavicon(links),
-  //   urlPreviewEmbedHtml: html
+  //   urlPreviewIframeUrl: html
   // }
   console.log('♥️♥️♥️♥️♥️', data)
 
@@ -1664,7 +1664,7 @@ const updateCurrentCardConnections = () => {
 
 const shouldNotStick = computed(() => {
   if (!store.state.currentUser.shouldUseStickyCards) { return true }
-  if (urlEmbedIsVisible.value) { return true }
+  if (iframeIsVisible.value) { return true }
   if (store.state.codeLanguagePickerIsVisible) { return true }
   if (store.state.currentUserIsDraggingConnectionIdLabel) { return true }
   const userIsConnecting = store.state.currentConnectionStartCardIds.length
@@ -1893,17 +1893,10 @@ const closeAllDialogs = () => {
   store.dispatch('closeAllDialogs')
 }
 
-// migration added june 2023
+// migration added July 2024
 
-const checkIfShouldUpdatePreviewHtml = () => {
-  const name = props.card.name
-  if (!name) { return }
-  const url = utils.urlFromString(name)
-  if (!url) { return }
-  const urlIsYoutube = utils.urlIsYoutube(url)
-  const urlIsSpotify = url.includes('open.spotify.com')
-  const shouldUpdate = urlIsYoutube || urlIsSpotify
-  if (shouldUpdate && !props.card.urlPreviewEmbedHtml) {
+const checkIfShouldUpdateIframeUrl = () => {
+  if (props.card.urlPreviewEmbedHtml && !props.card.urlPreviewIframeUrl) {
     retryUrlPreview()
   }
 }

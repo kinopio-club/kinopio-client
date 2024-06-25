@@ -14,7 +14,7 @@ export default {
   defaultCardHeight: 70,
   normalCardMaxWidth: 200,
   wideCardMaxWidth: 390,
-  minCardEmbedWidth: 235,
+  minCardIframeWidth: 260,
   maxInviteEmailsAllowedToSend: 15,
   defaultConnectionPathCurveControlPoint: 'q90,40',
   defaultTimeout: 40000,

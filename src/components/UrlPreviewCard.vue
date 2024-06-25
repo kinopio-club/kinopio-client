@@ -47,38 +47,32 @@ const textColorClasses = computed(() => {
 
 // url embed (spotify, youtube, etc.)
 
-const toggleShouldDisplayUrlEmbed = () => {
+const toggleShouldDisplayIframe = () => {
   if (isTwitterUrl.value) { return }
   store.dispatch('closeAllDialogs')
   store.dispatch('currentCards/incrementZ', props.card.id)
-  const urlEmbedIsVisibleForCardId = store.state.urlEmbedIsVisibleForCardId
+  const iframeIsVisibleForCardId = store.state.iframeIsVisibleForCardId
   let value
-  if (props.card.id === urlEmbedIsVisibleForCardId) {
+  if (props.card.id === iframeIsVisibleForCardId) {
     value = true
   }
   value = !value
   if (value) {
-    store.commit('urlEmbedIsVisibleForCardId', props.card.id)
-    addAutoplay()
+    store.commit('iframeIsVisibleForCardId', props.card.id)
+    // addAutoplay()
   } else {
-    removeAutoplay()
-    store.commit('urlEmbedIsVisibleForCardId', '')
+    // removeAutoplay()
+    store.commit('iframeIsVisibleForCardId', '')
   }
 }
-const shouldDisplayUrlEmbed = computed(() => {
-  const urlEmbedIsVisibleForCardId = store.state.urlEmbedIsVisibleForCardId
-  return props.card.id === urlEmbedIsVisibleForCardId
-})
-const urlEmbedIsIframeDoc = computed(() => {
-  const embed = props.card.urlPreviewEmbedHtml
-  if (!embed) { return }
-  const isScript = embed.includes('<script')
-  return isScript
+const shouldDisplayIframe = computed(() => {
+  const iframeIsVisibleForCardId = store.state.iframeIsVisibleForCardId
+  return props.card.id === iframeIsVisibleForCardId
 })
 const iframeHeight = computed(() => {
   const url = props.card.urlPreviewUrl
   let width = props.card.resizeWidth || props.card.width
-  width = Math.max(width, consts.minCardEmbedWidth)
+  width = Math.max(width, consts.minCardIframeWidth)
   let aspectRatio = 2 / 3
   if (utils.urlIsYoutube(url)) {
     aspectRatio = 9 / 15
@@ -89,20 +83,20 @@ const iframeHeight = computed(() => {
 
 // autoplay
 
-const addAutoplay = async () => {
-  await nextTick()
-  document.querySelector('.embed iframe').addEventListener('load', autoplay)
-}
-const removeAutoplay = () => {
-  document.querySelector('.embed iframe').removeEventListener('load', autoplay)
-}
-const autoplay = async () => {
-  await nextTick()
-  // spotify
-  setTimeout(() => {
-    document.querySelector('.embed iframe').contentWindow.postMessage({ command: 'play' }, '*')
-  }, '200')
-}
+// const addAutoplay = async () => {
+//   await nextTick()
+//   document.querySelector('.url-preview-card iframe').addEventListener('load', autoplay)
+// }
+// const removeAutoplay = () => {
+//   document.querySelector('.url-preview-card iframe').removeEventListener('load', autoplay)
+// }
+// const autoplay = async (event) => {
+//   await nextTick()
+//   // spotify
+//   setTimeout(() => {
+//     document.querySelector('.url-preview-card iframe').contentWindow.postMessage({ command: 'play' }, '*')
+//   }, '300')
+// }
 
 // twitter
 
@@ -165,28 +159,26 @@ const description = computed(() => {
 //- image
 .url-preview-card(v-if="visible" :style="{background: background}" :class="{'is-image-card': props.isImageCard}")
   //- image
-  template(v-if="!shouldDisplayUrlEmbed")
+  template(v-if="!shouldDisplayIframe")
     .preview-image-wrap(v-if="card.urlPreviewImage && !shouldHideImage")
       img.preview-image(:src="card.urlPreviewImage" :class="{selected: isSelected, 'border-bottom-radius': !shouldHideInfo}" ref="image" @error="handleImageError")
 
   //- embed
-  template(v-if="shouldDisplayUrlEmbed")
-    .embed.iframe-embed(v-if="urlEmbedIsIframeDoc")
-      iframe(:srcdoc="card.urlPreviewEmbedHtml" :class="{ ignore: isInteractingWithItem }" :style="{ height: iframeHeight + 'px' }")
-    .embed(v-else v-html="card.urlPreviewEmbedHtml")
+  template(v-if="shouldDisplayIframe")
+    iframe(:src="card.urlPreviewIframeUrl" :class="{ ignore: isInteractingWithItem }" :style="{ height: iframeHeight + 'px' }" sandbox="allow-same-origin allow-scripts allow-forms")
 
-  .row.info.badge.status(v-if="!shouldHideInfo" :class="{ 'embed-info': card.urlPreviewEmbedHtml }" :style="{background: background}")
+  .row.info.badge.status(v-if="!shouldHideInfo" :class="{ 'iframe-info': card.urlPreviewIframeUrl }" :style="{background: background}")
     //- play
-    .button-wrap.embed-button-wrap(v-if="card.urlPreviewEmbedHtml" @mousedown.stop @touchstart.stop @click.stop="toggleShouldDisplayUrlEmbed" @touchend.stop="toggleShouldDisplayUrlEmbed")
+    .button-wrap.play-button-wrap(v-if="card.urlPreviewIframeUrl" @mousedown.stop @touchstart.stop @click.stop="toggleShouldDisplayIframe" @touchend.stop="toggleShouldDisplayIframe")
       button.small-button(v-if="!isTwitterUrl")
-        img.icon.stop(v-if="shouldDisplayUrlEmbed" src="@/assets/box-filled.svg")
+        img.icon.stop(v-if="shouldDisplayIframe" src="@/assets/box-filled.svg")
         img.icon.play(v-else src="@/assets/play.svg")
       img.favicon(v-if="card.urlPreviewFavicon" :src="card.urlPreviewFavicon")
 
     //- text
     .text(v-if="!shouldHideInfo")
       .row
-        template(v-if="!card.urlPreviewEmbedHtml")
+        template(v-if="!card.urlPreviewIframeUrl")
           img.favicon(v-if="card.urlPreviewFavicon" :src="card.urlPreviewFavicon")
           img.icon.favicon.open(v-else src="@/assets/open.svg")
         .title(:class="textColorClasses")
@@ -253,29 +245,22 @@ const description = computed(() => {
       span
         color var(--primary-on-dark-background)
 
-  .embed
+  iframe
+    border none
+    border-radius var(--entity-radius)
+    border-bottom-left-radius 0
+    border-bottom-right-radius 0
+    max-width 100%
     width 100%
-    &.iframe-embed
-      width calc(100% + 16px)
-      margin-left -8px
-      margin-bottom -20px
+    height 100%
+    &.ignore
+      pointer-events none
 
-    iframe
-      border none
-      border-radius var(--entity-radius)
-      border-bottom-left-radius 0
-      border-bottom-right-radius 0
-      max-width 100%
-      width 100%
-      height 100%
-      &.ignore
-        pointer-events none
-
-  .embed-info
+  .iframe-info
     border-top-left-radius 0
     border-top-right-radius 0
 
-  .embed-button-wrap
+  .play-button-wrap
     flex-shrink 0
     padding-right 4px
     button
