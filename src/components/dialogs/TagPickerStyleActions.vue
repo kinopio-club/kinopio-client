@@ -46,7 +46,7 @@ const currentUserIsSignedIn = computed(() => store.getters['currentUser/isSigned
 const scrollIntoView = async () => {
   await nextTick()
   const element = dialogElement.value
-  utils.scrollIntoView({ element })
+  store.commit('scrollElementIntoView', { element })
 }
 
 // tags list

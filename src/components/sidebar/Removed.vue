@@ -157,7 +157,7 @@ const deleteAllCards = () => {
 }
 const scrollIntoView = (card) => {
   const element = document.querySelector(`article [data-card-id="${card.id}"]`)
-  utils.scrollIntoView({ element })
+  store.commit('scrollElementIntoView', { element })
 }
 
 // Spaces

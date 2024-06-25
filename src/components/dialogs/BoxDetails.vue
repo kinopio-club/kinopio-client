@@ -158,7 +158,7 @@ const scrollIntoView = async () => {
   await nextTick()
   const element = dialogElement.value
   await nextTick()
-  utils.scrollIntoView({ element })
+  store.commit('scrollElementIntoView', { element })
 }
 const scrollIntoViewAndFocus = async () => {
   scrollIntoView()

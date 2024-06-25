@@ -32,7 +32,7 @@ watch(() => props.visible, async (value, prevValue) => {
 })
 const scrollIntoView = () => {
   const element = dialogElement.value
-  utils.scrollIntoView({ element })
+  store.commit('scrollElementIntoView', { element })
 }
 
 // types

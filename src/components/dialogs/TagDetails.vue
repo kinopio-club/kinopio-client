@@ -131,7 +131,7 @@ const scrollIntoView = async () => {
   await nextTick()
   const element = dialogElement.value
   if (!element) { return }
-  utils.scrollIntoView({ element })
+  store.commit('scrollElementIntoView', { element })
 }
 const updateResultsSectionHeight = async () => {
   if (!visible.value) { return }

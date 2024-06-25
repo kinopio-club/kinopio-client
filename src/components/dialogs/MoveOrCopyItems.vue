@@ -35,7 +35,7 @@ watch(() => props.visible, async (value, prevValue) => {
 
 const scrollIntoView = () => {
   const element = dialogElement.value
-  utils.scrollIntoView({ element })
+  store.commit('scrollElementIntoView', { element })
 }
 const closeDialogs = () => {
   state.spacePickerIsVisible = false

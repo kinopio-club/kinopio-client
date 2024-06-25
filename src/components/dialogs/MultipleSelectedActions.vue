@@ -61,7 +61,7 @@ watch(() => visible.value, async (value, prevValue) => {
 
 const scrollIntoView = () => {
   const element = dialogElement.value
-  utils.scrollIntoView({ element })
+  store.commit('scrollElementIntoView', { element })
 }
 
 const isThemeDarkAndUserColorLight = computed(() => {

@@ -307,7 +307,7 @@ const handleContextMenuEvents = (event) => {
 
 const scrollIntoView = (card) => {
   const element = document.querySelector(`article [data-card-id="${card.id}"]`)
-  utils.scrollIntoView({ element })
+  store.commit('scrollElementIntoView', { element })
 }
 
 // Add Parent and Child Cards

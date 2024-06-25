@@ -333,7 +333,7 @@ const scrollIntoView = () => {
   if (!props.visible) { return }
   const element = dialogElement.value
   if (!element) { return }
-  utils.scrollIntoView({ element })
+  store.commit('scrollElementIntoView', { element })
   store.commit('triggerUpdateHeaderAndFooterPosition')
 }
 const updateDialogHeight = async () => {

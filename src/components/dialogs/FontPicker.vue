@@ -44,7 +44,7 @@ const updateDialogHeight = async () => {
 }
 const scrollIntoView = () => {
   const element = dialogElement.value
-  utils.scrollIntoView({ element })
+  store.commit('scrollElementIntoView', { element })
 }
 const isThemeDark = computed(() => store.getters['themes/isThemeDark'])
 
