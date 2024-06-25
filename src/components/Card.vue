@@ -1154,13 +1154,7 @@ const updateUrlPreviewOnline = async () => {
     if (!response) { throw 'api/urlPreview request failed' }
 
     let { data, host } = response
-    console.log('🍇🍇🍇🍇🍇🍇🍇🍇', data, host, response)
-    // const { links, meta } = data
-
-    // const { links, meta, cardId, url, html } = data
-
     console.log('🚗 link preview', url, data)
-
     updateUrlPreviewSuccess(url, data)
   } catch (error) {
     console.warn('🚑', error, url)
@@ -1176,18 +1170,6 @@ const updateUrlPreviewSuccess = (url, data) => {
     return
   }
   data.name = utils.addHiddenQueryStringToURLs(data.name)
-  // const data = {
-  //   id: cardId,
-  //   name: utils.addHiddenQueryStringToURLs(props.card.name),
-  //   urlPreviewUrl: url,
-  //   urlPreviewTitle: utils.truncated(meta.title || meta.site),
-  //   urlPreviewDescription: utils.truncated(meta.description, 280),
-  //   urlPreviewImage: previewImage(links),
-  //   urlPreviewFavicon: previewFavicon(links),
-  //   urlPreviewIframeUrl: html
-  // }
-  console.log('♥️♥️♥️♥️♥️', data)
-
   store.dispatch('currentCards/update', data)
   store.commit('removeUrlPreviewLoadingForCardIds', cardId)
   store.dispatch('api/addToQueue', { name: 'updateUrlPreviewImage', body: data })
