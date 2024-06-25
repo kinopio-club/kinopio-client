@@ -352,6 +352,7 @@ const closeCard = async () => {
   store.commit('triggerHideTouchInterface')
   const cardId = prevCardId
   const item = store.getters['currentCards/byId'](cardId)
+  nameElement.value.blur() // safari scroll fix
   closeDialogs(true)
   cancelOpening()
   store.dispatch('currentSpace/removeUnusedTagsFromCard', cardId)
