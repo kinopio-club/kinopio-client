@@ -64,7 +64,7 @@ const updateDialogHeight = async () => {
 const scrollIntoView = async () => {
   await nextTick()
   const element = dialogElement.value
-  utils.scrollIntoView({ element })
+  store.commit('scrollElementIntoView', { element })
 }
 const resetPinchCounterZoomDecimal = () => {
   store.commit('pinchCounterZoomDecimal', 1)

@@ -74,7 +74,7 @@ const closeDialog = () => {
 }
 const scrollIntoView = () => {
   let element = dialogElement.value
-  utils.scrollIntoView({ element })
+  store.commit('scrollElementIntoView', { element })
 }
 
 // tags list

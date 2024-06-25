@@ -60,7 +60,7 @@ const styles = computed(() => {
 const scrollIntoView = async () => {
   await nextTick()
   const dialog = document.querySelector('dialog.other-card-details')
-  utils.scrollIntoView({ element: dialog })
+  store.commit('scrollElementIntoView', { element: dialog })
 }
 
 // textarea styles

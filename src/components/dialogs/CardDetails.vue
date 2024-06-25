@@ -325,7 +325,7 @@ const scrollIntoView = async (behavior) => {
   await nextTick()
   await nextTick()
   const element = dialogElement.value
-  utils.scrollIntoView({ element, behavior })
+  store.commit('scrollElementIntoView', { element, behavior })
 }
 const showCard = async (cardId) => {
   await nextTick()

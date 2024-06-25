@@ -17,7 +17,6 @@ import { colord, extend } from 'colord'
 import qs from '@aguezz/qs-parse'
 import namesPlugin from 'colord/plugins/names'
 import getCurvePoints from '@/libs/curve_calc.js'
-import scrollIntoViewIfNeeded from 'scroll-into-view-if-needed'
 import random from 'lodash-es/random'
 import randomColor from 'randomcolor'
 // https://data.iana.org/TLD/tlds-alpha-by-domain.txt
@@ -157,28 +156,6 @@ export default {
       const viewport = document.querySelector('head meta[name=viewport]')
       viewport.setAttribute('content', 'width=device-width, initial-scale=1') // index.html default
     }
-  },
-  scrollIntoView ({ element, behavior }) {
-    behavior = behavior || 'smooth'
-    if (!element) { return }
-    const sidebarIsVisible = document.querySelector('dialog#sidebar')
-    const viewportWidth = this.visualViewport().width
-    const isViewportNarrow = viewportWidth < (consts.defaultCharacterLimit * 2)
-    let horizontal = 'nearest'
-    let vertical = 'nearest'
-    if (sidebarIsVisible) {
-      horizontal = 'center'
-      vertical = 'center'
-    }
-    if (sidebarIsVisible && isViewportNarrow) {
-      horizontal = 'start'
-    }
-    scrollIntoViewIfNeeded(element, {
-      behavior,
-      scrollMode: 'if-needed',
-      block: vertical,
-      inline: horizontal
-    })
   },
   cursorPositionInViewport (event) {
     let x, y

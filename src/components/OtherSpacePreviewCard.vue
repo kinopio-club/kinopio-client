@@ -43,8 +43,15 @@ const background = computed(() => {
   if (colorIsDefaultColor || !color) { return }
   return utils.alternateColor(color, isThemeDark.value)
 })
+
 const textColorClasses = computed(() => {
-  return utils.textColorClasses({ backgroundColor: background.value })
+  const defaultColor = utils.cssVariable('secondary-background')
+  let color
+  color = background.value || defaultColor
+  if (isThemeDark.value) {
+    color = background.value || defaultColor
+  }
+  return utils.textColorClasses({ backgroundColor: color })
 })
 
 // preivew image
@@ -56,7 +63,7 @@ const previewImageIsVisible = computed(() => shouldShowPreviewImage.value && pre
 </script>
 
 <template lang="pug">
-.other-space-preview-card
+.other-space-preview-card(:class="textColorClasses")
   //- preview image
   .preview-image-wrap(v-if="previewImageIsVisible")
     img.preview-image(:src="previewImage" :class="{selected: props.isSelected}" ref="image")
@@ -70,7 +77,7 @@ const previewImageIsVisible = computed(() => shouldShowPreviewImage.value && pre
     template(v-if="props.otherSpace")
       template(v-if="props.otherSpace.users")
         UserLabelInline(:user="props.otherSpace.users[0]" :shouldHideName="true")
-      span.space-name(:class="textColorClasses")
+      span.space-name
         span {{otherSpaceName}}
       img.icon.private(v-if="otherSpaceIsPrivate" src="@/assets/lock.svg")
     template(v-else)
@@ -113,11 +120,16 @@ const previewImageIsVisible = computed(() => shouldShowPreviewImage.value && pre
       mix-blend-mode color-burn
   .space-name
     overflow-wrap break-word
-    &.is-background-light
-      span
-        color var(--primary-on-light-background)
-    &.is-background-dark
-      span
-        color var(--primary-on-dark-background)
+
+  &.is-background-light
+    .space-name span
+      color var(--primary-on-light-background)
+    .icon
+      filter none
+  &.is-background-dark
+    .space-name span
+      color var(--primary-on-dark-background)
+    .icon
+      filter invert()
 
 </style>

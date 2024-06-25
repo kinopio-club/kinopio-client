@@ -46,7 +46,7 @@ const closeDialogs = () => {
 const scrollParentIntoView = () => {
   const element = props.parentElement
   if (!element) { return }
-  utils.scrollIntoView({ element })
+  store.commit('scrollElementIntoView', { element })
 }
 
 // date

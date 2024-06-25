@@ -49,7 +49,7 @@ const scrollIntoView = async () => {
   if (utils.isMobile()) { return }
   await nextTick()
   const element = dialogElement.value
-  utils.scrollIntoView({ element })
+  store.commit('scrollElementIntoView', { element })
 }
 const updateDialogHeight = async () => {
   if (!props.visible) { return }
