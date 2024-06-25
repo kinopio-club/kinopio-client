@@ -46,9 +46,6 @@ const state = reactive({
 const isLoading = computed(() => {
   return state.loading.cards || state.loading.spaces
 })
-const removedCardsWithName = computed(() => {
-  return state.removedCards.filter(card => card.name)
-})
 const cardsOrSpacesLabel = computed(() => {
   if (state.cardsVisible) {
     return 'cards'
@@ -56,37 +53,27 @@ const cardsOrSpacesLabel = computed(() => {
     return 'spaces'
   }
 })
-const items = computed(() => {
-  let items = []
-  if (state.cardsVisible && !currentUserCanEditSpace.value) {
-    items = []
-  } else if (state.cardsVisible) {
-    items = removedCardsWithName.value
-  } else {
-    items = state.removedSpaces
-  }
-  items = items.filter(item => Boolean(item))
-  return items
-})
 const currentSpace = computed(() => store.state.currentSpace)
 const currentSpaceName = computed(() => currentSpace.value.name)
 const currentUserCanEditSpace = computed(() => {
   return store.getters['currentUser/canEditSpace']()
 })
 
+const updateResultsSectionHeight = async () => {
+  if (!props.visible) { return }
+  await nextTick()
+  let element = resultsElement.value
+  state.resultsSectionHeight = utils.elementHeight(element)
+}
 const init = async () => {
   state.deleteAllConfirmationIsVisible = false
   await updateRemovedCards()
   await updateRemovedSpaces()
   updateResultsSectionHeight()
 }
-const toggleDeleteAllConfirmationIsVisible = () => {
-  state.deleteAllConfirmationIsVisible = !state.deleteAllConfirmationIsVisible
-}
-const scrollIntoView = (card) => {
-  const element = document.querySelector(`article [data-card-id="${card.id}"]`)
-  utils.scrollIntoView({ element })
-}
+
+// restore
+
 const restore = (item) => {
   if (state.cardsVisible) {
     restoreCard(item)
@@ -94,6 +81,9 @@ const restore = (item) => {
     restoreSpace(item)
   }
 }
+
+// remove
+
 const isRemoveConfirmationVisible = (item) => {
   return Boolean(state.removeConfirmationVisibleForId === item.id)
 }
@@ -117,15 +107,15 @@ const deleteAll = () => {
     deleteAllSpaces()
   }
 }
-const updateResultsSectionHeight = async () => {
-  if (!props.visible) { return }
-  await nextTick()
-  let element = resultsElement.value
-  state.resultsSectionHeight = utils.elementHeight(element)
+const toggleDeleteAllConfirmationIsVisible = () => {
+  state.deleteAllConfirmationIsVisible = !state.deleteAllConfirmationIsVisible
 }
 
 // Cards
 
+const removedCardsWithName = computed(() => {
+  return state.removedCards.filter(card => card.name)
+})
 const showCards = () => {
   state.cardsVisible = true
   state.deleteAllConfirmationIsVisible = false
@@ -164,6 +154,10 @@ const deleteCard = (card) => {
 const deleteAllCards = () => {
   store.dispatch('currentCards/deleteAllRemoved')
   state.removedCards = []
+}
+const scrollIntoView = (card) => {
+  const element = document.querySelector(`article [data-card-id="${card.id}"]`)
+  utils.scrollIntoView({ element })
 }
 
 // Spaces
@@ -215,6 +209,21 @@ const deleteAllSpaces = () => {
   store.dispatch('currentSpace/deleteAllRemovedSpaces')
   state.removedSpaces = []
 }
+
+// items
+
+const items = computed(() => {
+  let items = []
+  if (state.cardsVisible && !currentUserCanEditSpace.value) {
+    items = []
+  } else if (state.cardsVisible) {
+    items = removedCardsWithName.value
+  } else {
+    items = state.removedSpaces
+  }
+  items = items.filter(item => Boolean(item))
+  return items
+})
 
 </script>
 
