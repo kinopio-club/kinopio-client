@@ -55,7 +55,7 @@ const normalizeUpdates = ({ item, itemType, previous, isRemoved }) => {
   } else {
     const action = `${itemType}Updated`
     let keys = Object.keys(item)
-    const ignoreKeys = ['nameUpdatedAt', 'height', 'width', 'z', 'urlPreviewDescription', 'urlPreviewFavicon', 'urlPreviewImage', 'urlPreviewTitle', 'urlPreviewUrl', 'urlPreviewEmbedHtml', 'shouldUpdateUrlPreview']
+    const ignoreKeys = ['nameUpdatedAt', 'height', 'width', 'z', 'urlPreviewDescription', 'urlPreviewFavicon', 'urlPreviewImage', 'urlPreviewTitle', 'urlPreviewUrl', 'urlPreviewIframeUrl', 'shouldUpdateUrlPreview']
     let updatedKeys = keys.filter(key => item[key] !== previous[key] && !ignoreKeys.includes(key))
     if (!updatedKeys.length) { return }
     updatedKeys.unshift('id')

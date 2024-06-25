@@ -958,7 +958,7 @@ const removeUrlPreview = async () => {
     urlPreviewImage: '',
     urlPreviewTitle: '',
     urlPreviewDescription: '',
-    urlPreviewEmbedHtml: ''
+    urlPreviewIframeUrl: ''
   }
   store.commit('removeUrlPreviewLoadingForCardIds', cardId)
   store.dispatch('currentCards/update', update)

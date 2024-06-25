@@ -81,7 +81,7 @@ onMounted(async () => {
     store.dispatch('currentCards/showCardDetails', props.card.id)
   }
   await updateUrlPreviewOnload()
-  checkIfShouldUpdatePreviewHtml()
+  checkIfShouldUpdateIframeUrl()
   initViewportObserver()
 })
 
@@ -252,10 +252,10 @@ const toggleCardChecked = () => {
 // media
 
 const isImageCard = computed(() => Boolean(state.formats.image || state.formats.video))
-const urlEmbedIsVisible = computed(() => {
+const iframeIsVisible = computed(() => {
   // youtube, spotify etc.
-  const urlEmbedIsVisibleForCardId = store.state.urlEmbedIsVisibleForCardId
-  return props.card.id === urlEmbedIsVisibleForCardId
+  const iframeIsVisibleForCardId = store.state.iframeIsVisibleForCardId
+  return props.card.id === iframeIsVisibleForCardId
 })
 const isVisualCard = computed(() => {
   if (isComment.value) { return }
@@ -490,8 +490,8 @@ const width = computed(() => {
 const resizeWidth = computed(() => {
   if (isComment.value) { return }
   let resizeWidth = props.card.resizeWidth
-  if (urlEmbedIsVisible.value || isLoadingUrlPreview.value) {
-    resizeWidth = Math.max(resizeWidth, consts.minCardEmbedWidth)
+  if (iframeIsVisible.value || isLoadingUrlPreview.value) {
+    resizeWidth = Math.max(resizeWidth, consts.minCardIframeWidth)
   }
   if (!resizeWidth) { return }
   return resizeWidth
@@ -1150,21 +1150,29 @@ const updateUrlPreviewOnline = async () => {
   }
   try {
     url = utils.removeHiddenQueryStringFromURLs(url)
-    let response = await store.dispatch('api/urlPreview', url)
-    if (!response) { throw 'api/urlPreview' }
+    let response = await store.dispatch('api/urlPreview', { url, card: props.card })
+    if (!response) { throw 'api/urlPreview request failed' }
+
     let { data, host } = response
-    const { links, meta } = data
-    console.log('🚗 link preview', url, data, links, meta)
-    if (!links) { throw 'link preview error' }
-    let html
-    if (links.player || links.reader) {
-      html = data.html
-    }
-    updateUrlPreviewSuccess({ links, meta, cardId, url, html })
+    console.log('🚗 link preview', url, data)
+    updateUrlPreviewSuccess(url, data)
   } catch (error) {
     console.warn('🚑', error, url)
     updateUrlPreviewErrorUrl(url)
   }
+}
+const updateUrlPreviewSuccess = (url, data) => {
+  if (!nameIncludesUrl(url)) { return }
+  const cardId = data.id || props.card.id
+  if (!cardId) {
+    console.warn('🚑 could not updateUrlPreviewSuccess', cardId, props.card)
+    store.commit('removeUrlPreviewLoadingForCardIds', cardId)
+    return
+  }
+  data.name = utils.addHiddenQueryStringToURLs(data.name)
+  store.dispatch('currentCards/update', data)
+  store.commit('removeUrlPreviewLoadingForCardIds', cardId)
+  store.dispatch('api/addToQueue', { name: 'updateUrlPreviewImage', body: data })
 }
 const retryUrlPreview = () => {
   store.dispatch('currentCards/update', {
@@ -1187,26 +1195,6 @@ const nameIncludesUrl = (url) => {
   const normalizedUrl = utils.removeTrailingSlash(url)
   return name.includes(url) || name.includes(normalizedUrl) || normalizedUrl.includes(name)
 }
-const previewImage = ({ thumbnail }) => {
-  const minWidth = consts.normalCardMaxWidth
-  if (!thumbnail) { return '' }
-  let image = thumbnail.find(item => {
-    let shouldSkipImage = false
-    if (item.media) {
-      if (item.media.width < minWidth) {
-        shouldSkipImage = true
-      }
-    }
-    return item.href && !shouldSkipImage
-  })
-  if (!image) { return '' }
-  return image.href || ''
-}
-const previewFavicon = ({ icon }) => {
-  if (!icon) { return '' }
-  let image = icon.find(item => item.href)
-  return image.href || ''
-}
 const updateUrlPreviewImage = (update) => {
   if (!currentUserIsSignedIn.value) { return }
   if (!update.urlPreviewImage) { return }
@@ -1214,28 +1202,6 @@ const updateUrlPreviewImage = (update) => {
   update.spaceId = store.state.currentSpace.id
   delete update.id
   store.dispatch('api/updateUrlPreviewImage', update)
-}
-const updateUrlPreviewSuccess = ({ links, meta, cardId, url, html }) => {
-  if (!nameIncludesUrl(url)) { return }
-  cardId = cardId || props.card.id
-  if (!cardId) {
-    console.warn('🚑 could not updateUrlPreviewSuccess', cardId, props.card)
-    store.commit('removeUrlPreviewLoadingForCardIds', cardId)
-    return
-  }
-  const update = {
-    id: cardId,
-    name: utils.addHiddenQueryStringToURLs(props.card.name),
-    urlPreviewUrl: url,
-    urlPreviewTitle: utils.truncated(meta.title || meta.site),
-    urlPreviewDescription: utils.truncated(meta.description, 280),
-    urlPreviewImage: previewImage(links),
-    urlPreviewFavicon: previewFavicon(links),
-    urlPreviewEmbedHtml: html
-  }
-  store.dispatch('currentCards/update', update)
-  store.commit('removeUrlPreviewLoadingForCardIds', cardId)
-  store.dispatch('api/addToQueue', { name: 'updateUrlPreviewImage', body: update })
 }
 const updateUrlPreviewErrorUrl = (url) => {
   const cardId = props.card.id
@@ -1680,7 +1646,7 @@ const updateCurrentCardConnections = () => {
 
 const shouldNotStick = computed(() => {
   if (!store.state.currentUser.shouldUseStickyCards) { return true }
-  if (urlEmbedIsVisible.value) { return true }
+  if (iframeIsVisible.value) { return true }
   if (store.state.codeLanguagePickerIsVisible) { return true }
   if (store.state.currentUserIsDraggingConnectionIdLabel) { return true }
   const userIsConnecting = store.state.currentConnectionStartCardIds.length
@@ -1909,17 +1875,10 @@ const closeAllDialogs = () => {
   store.dispatch('closeAllDialogs')
 }
 
-// migration added june 2023
+// migration added July 2024
 
-const checkIfShouldUpdatePreviewHtml = () => {
-  const name = props.card.name
-  if (!name) { return }
-  const url = utils.urlFromString(name)
-  if (!url) { return }
-  const urlIsYoutube = utils.urlIsYoutube(url)
-  const urlIsSpotify = url.includes('open.spotify.com')
-  const shouldUpdate = urlIsYoutube || urlIsSpotify
-  if (shouldUpdate && !props.card.urlPreviewEmbedHtml) {
+const checkIfShouldUpdateIframeUrl = () => {
+  if (props.card.urlPreviewEmbedHtml && !props.card.urlPreviewIframeUrl) {
     retryUrlPreview()
   }
 }
