@@ -2,11 +2,11 @@
 .media-preview.row(v-if="visible")
   //- Image
   .image-preview.row(v-if="formats.image")
-    a(:href="formats.image")
+    a(:href="formats.image" target="_blank")
       img.image.clickable-item(:src="formats.image" draggable="false")
   //- Video
   .video-preview.row(v-if="formats.video")
-    a(:href="formats.video")
+    a(:href="formats.video" target="_blank")
       video.video.clickable-item(autoplay loop muted playsinline draggable="false")
         source(:src="formats.video")
   //- Audio
@@ -14,7 +14,7 @@
     Audio(:visible="Boolean(formats.audio)" :url="formats.audio" :normalizedName="this.card.name" :parentIsCardDetails="true")
     .content-buttons
       .button-wrap
-        a(:href="formats.audio")
+        a(:href="formats.audio" target="_blank")
           button.small-button
             img.icon.visit(src="@/assets/visit.svg")
 </template>
