@@ -112,7 +112,9 @@ Use Ngrok to pipe your localhost through an external https server. Helpful for d
 
 ## See Also
 
-- [are.na/kinopio](https://www.are.na/kinopio)
+- [are.na/kinopio/kinopio-design](https://www.are.na/kinopio/kinopio-design)
 - [github.com/kinopio-club](https://github.com/kinopio-club)
+- [User Forums](https://club.kinopio.club)
+- [Discord](https://discord.gg/h2sR45Nby8)
 - [How Kinopio is Made](https://pketh.org/how-kinopio-is-made.html)
 - [Kinopio Architecture and Costs](https://kinopio.club/kinopio-architecture-and-costs-JOGXFJ0FEMpS3crbh6U9k)
