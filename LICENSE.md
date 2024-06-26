@@ -4,7 +4,7 @@ This License governs use of the accompanying Software, and your use of the Softw
 
 You may use this Software for any non-commercial purpose, subject to the restrictions in this license. Some purposes which can be non- commercial are teaching, academic research, and personal experimentation.
 
-You may not use or distribute this Software or any derivative works in any form for commercial purposes. Examples of commercial purposes would be running business operations, licensing, leasing, or selling the Software, distributing the Software for use with commercial products or for internal products within commercial entities, or otherwise using the Software in any way that provides you with a commercial benefit.
+You may not use or distribute this Software or any derivative works in any form for commercial purposes. Examples of commercial purposes would be running business operations, licensing, leasing, or selling the Software, distributing the Software for use with commercial products or for internal products within commercial entities, or otherwise using the Software in any way that provides you with a commercial benefit. You may not connect a derivative work to the production Kinopio server with the intent to circumvent free user limits.
 
 To purchase an alternative license for commercial use, contact hi@kinopio.club.
 
