@@ -2218,7 +2218,8 @@ export default {
         file = new File([blob], `pasted.${extension}`)
       } else {
         if (item.types.includes('text/plain')) {
-          text = await (await item.getType('text/plain')).text()
+          const blob = await item.getType('text/plain')
+          text = await blob.text()
         }
       }
     }
