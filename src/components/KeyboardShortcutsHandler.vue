@@ -626,8 +626,11 @@ const getClipboardData = async () => {
       }
       return data
     }
-    notifyPasted(position)
-    return utils.dataFromClipboard()
+    const data = await utils.dataFromClipboard()
+    if (data.text || data.file) {
+      notifyPasted(position)
+      return data
+    }
   } catch (error) {
     console.error('🚑 getClipboardData', error)
     store.commit('addNotificationWithPosition', { message: `Could not paste`, position, type: 'danger', layer: 'app', icon: 'cut' })

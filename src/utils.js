@@ -2217,8 +2217,14 @@ export default {
         const extension = imageType.substring(index)
         file = new File([blob], `pasted.${extension}`)
       } else {
-        text = await navigator.clipboard.readText()
+        if (item.types.includes('text/plain')) {
+          const blob = await item.getType('text/plain')
+          text = await blob.text()
+        }
       }
+    }
+    if (text == null && file == null) {
+      text = await navigator.clipboard.readText()
     }
     return { text, file }
   },
