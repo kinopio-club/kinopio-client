@@ -77,7 +77,7 @@ const urlPreviewImage = computed(() => {
   z-index var(--max-z)
   border-radius var(--entity-radius)
   pointer-events none
-  max-height 125px
+  max-height 400px
   overflow hidden
   .row
     margin-top 1px
