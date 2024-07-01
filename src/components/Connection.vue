@@ -77,7 +77,6 @@ const normalizedConnectionPathRect = () => {
   const path = state.pathWhileDragging || props.connection.path
   const pathStart = utils.startCoordsFromConnectionPath(path)
   const pathEndRelative = utils.endCoordsFromConnectionPath(path)
-
   const rect = utils.rectFromConnectionPathCoords(pathStart, pathEndRelative)
   return rect
 }
@@ -380,6 +379,22 @@ watch(() => shouldAnimate.value, (value, prevValue) => {
     animationTimer = window.requestAnimationFrame(animationFrame)
   }
 })
+const relativePath = computed(() => {
+  if (!directionIsVisible.value) { return }
+  const path = state.pathWhileDragging || props.connection.path
+  const pathStart = utils.startCoordsFromConnectionPath(path)
+  const pathEndRelative = utils.endCoordsFromConnectionPath(path)
+  const controlPoint = utils.curveControlPointFromPath(path)
+  let origin = { x: 0, y: 0 }
+  if (pathEndRelative.x < 0) {
+    origin.x = Math.abs(pathEndRelative.x)
+  }
+  if (pathEndRelative.y < 0) {
+    origin.y = Math.abs(pathEndRelative.y)
+  }
+  let relativePath = `m${origin.x},${origin.y} q${controlPoint.x},${controlPoint.y} ${pathEndRelative.x},${pathEndRelative.y}`
+  return relativePath
+})
 
 // utils
 
@@ -461,7 +476,13 @@ const removeViewportObserver = () => {
 </script>
 
 <template lang="pug">
-svg.connection(:style="connectionStyles" :data-id="connection.id" :data-is-visible-in-viewport="state.isVisibleInViewport" ref="connectionElement")
+svg.connection(
+  :style="connectionStyles"
+  :data-id="connection.id"
+  :data-is-visible-in-viewport="state.isVisibleInViewport"
+  :data-direction-is-visible="directionIsVisible"
+  ref="connectionElement"
+)
   path.connection-path(
     v-if="visible"
     fill="none"
@@ -497,13 +518,20 @@ svg.connection(:style="connectionStyles" :data-id="connection.id" :data-is-visib
   )
   //- path d also udpated by currentConnections/updatePathsWhileDragging
 
-defs(v-if="state.isVisibleInViewport")
-  linearGradient(:id="gradientId")
-    stop(offset="0%" :stop-color="typeColor" stop-opacity="0" fill-opacity="0")
-    stop(offset="90%" :stop-color="typeColor")
+  defs(v-if="state.isVisibleInViewport")
+    linearGradient(:id="gradientId")
+      stop(offset="0%" :stop-color="typeColor" stop-opacity="0" fill-opacity="0")
+      stop(offset="90%" :stop-color="typeColor")
 
-circle(v-if="directionIsVisible && !isUpdatingPath" r="7" :fill="gradientIdReference" :class="{filtered: isFiltered}" :data-id="connection.id")
-  animateMotion(dur="3s" repeatCount="indefinite" :path="connection.path" rotate="auto")
+  circle(
+    v-if="directionIsVisible"
+    r="7"
+    :fill="gradientIdReference"
+    :class="{filtered: isFiltered}"
+    :data-id="connection.id"
+    :data-relative-path="relativePath"
+  )
+    animateMotion(dur="3s" repeatCount="indefinite" :path="relativePath" rotate="auto")
 </template>
 
 <style lang="stylus">
