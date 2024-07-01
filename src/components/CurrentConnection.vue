@@ -155,19 +155,56 @@ const stopInteractions = (event) => {
   state.currentConnectionPath = undefined
 }
 
+// styles and position
+
+const normalizedConnectionPathRect = () => {
+  const path = state.currentConnectionPath
+  if (!path) { return }
+  const pathStart = utils.startCoordsFromConnectionPath(path)
+  const pathEndRelative = utils.endCoordsFromConnectionPath(path)
+  const rect = utils.rectFromConnectionPathCoords(pathStart, pathEndRelative)
+  return rect
+}
+const connectionStyles = computed(() => {
+  const rect = normalizedConnectionPathRect()
+  if (!rect) { return }
+  let styles = {
+    left: rect.x + 'px',
+    top: rect.y + 'px',
+    width: rect.width + 'px',
+    height: rect.height + 'px'
+  }
+  if (store.state.currentUserIsDraggingCard) {
+    styles.pointerEvents = 'none'
+  }
+  return styles
+})
+const connectionPathStyles = computed(() => {
+  const rect = normalizedConnectionPathRect()
+  if (!rect) { return }
+  const styles = {
+    transform: `translate(${-rect.x}px,${-rect.y}px)`
+  }
+  return styles
+})
+
 </script>
 
 <template lang="pug">
-path.current-connection(
-  v-if="isDrawingConnection"
-  fill="none"
-  stroke-width="5"
-  :stroke="state.currentConnectionColor"
-  :d="state.currentConnectionPath"
-)
+svg.current-connection(:style="connectionStyles")
+  path.current-connection-path(
+    v-if="isDrawingConnection"
+    fill="none"
+    stroke-width="5"
+    :stroke="state.currentConnectionColor"
+    :d="state.currentConnectionPath"
+    :style="connectionPathStyles"
+  )
 </template>
 
 <style lang="stylus">
-.current-connection
-  pointer-events none
+svg.current-connection
+  position absolute
+  path.current-connection-path
+    pointer-events none
 </style>

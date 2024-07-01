@@ -57,25 +57,13 @@ const visible = computed(() => {
 const isSpaceMember = computed(() => store.getters['currentUser/isSpaceMember']())
 const canEditSpace = computed(() => store.getters['currentUser/canEditSpace']())
 
-// styles
+// styles and position
 
 const normalizedConnectionPathRect = () => {
   const pathStart = utils.startCoordsFromConnectionPath(props.connection.path)
   const pathEndRelative = utils.endCoordsFromConnectionPath(props.connection.path)
-  let rect = {
-    x: pathStart.x,
-    y: pathStart.y,
-    width: pathStart.x + pathEndRelative.x,
-    height: pathStart.y + pathEndRelative.y
-  }
-  if (pathEndRelative.x < 0) {
-    rect.x = pathStart.x + pathEndRelative.x
-    rect.width = rect.x + Math.abs(pathEndRelative.x)
-  }
-  if (pathEndRelative.y < 0) {
-    rect.y = pathStart.y + pathEndRelative.y
-    rect.height = rect.y + Math.abs(pathEndRelative.y)
-  }
+
+  const rect = utils.rectFromConnectionPathCoords(pathStart, pathEndRelative)
   return rect
 }
 const connectionStyles = computed(() => {
@@ -91,7 +79,6 @@ const connectionStyles = computed(() => {
   }
   return styles
 })
-
 const connectionPathStyles = computed(() => {
   const rect = normalizedConnectionPathRect()
   const styles = {
@@ -99,7 +86,6 @@ const connectionPathStyles = computed(() => {
   }
   return styles
 })
-
 const connectionPathClasses = computed(() => {
   let styles = {
     active: isActive.value,

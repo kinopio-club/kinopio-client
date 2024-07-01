@@ -1175,6 +1175,23 @@ export default {
     }
     return this.integerCoords(coords)
   },
+  rectFromConnectionPathCoords (pathStart, pathEndRelative) {
+    let rect = {
+      x: pathStart.x,
+      y: pathStart.y,
+      width: pathStart.x + pathEndRelative.x,
+      height: pathStart.y + pathEndRelative.y
+    }
+    if (pathEndRelative.x < 0) {
+      rect.x = pathStart.x + pathEndRelative.x
+      rect.width = rect.x + Math.abs(pathEndRelative.x)
+    }
+    if (pathEndRelative.y < 0) {
+      rect.y = pathStart.y + pathEndRelative.y
+      rect.height = rect.y + Math.abs(pathEndRelative.y)
+    }
+    return rect
+  },
   integerCoords (coords) {
     return {
       x: parseInt(coords.x),
