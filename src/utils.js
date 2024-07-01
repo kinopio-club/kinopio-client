@@ -1179,17 +1179,20 @@ export default {
     let rect = {
       x: pathStart.x,
       y: pathStart.y,
-      width: pathStart.x + pathEndRelative.x,
-      height: pathStart.y + pathEndRelative.y
+      width: pathEndRelative.x,
+      height: pathEndRelative.y
     }
     if (pathEndRelative.x < 0) {
       rect.x = pathStart.x + pathEndRelative.x
-      rect.width = rect.x + Math.abs(pathEndRelative.x)
+      rect.width = Math.abs(pathEndRelative.x)
     }
     if (pathEndRelative.y < 0) {
       rect.y = pathStart.y + pathEndRelative.y
-      rect.height = rect.y + Math.abs(pathEndRelative.y)
+      rect.height = Math.abs(pathEndRelative.y)
     }
+    const padding = 40
+    rect.width = rect.width + padding
+    rect.height = rect.height + padding
     return rect
   },
   integerCoords (coords) {
