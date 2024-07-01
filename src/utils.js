@@ -1190,7 +1190,7 @@ export default {
       rect.y = pathStart.y + pathEndRelative.y
       rect.height = Math.abs(pathEndRelative.y)
     }
-    const padding = 40
+    const padding = 90 // control point max
     rect.width = rect.width + padding
     rect.height = rect.height + padding
     return rect
