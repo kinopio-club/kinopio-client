@@ -605,6 +605,7 @@ const store = createStore({
     triggerCheckIfShouldNotifySpaceOutOfSync: () => {},
     triggerNotifyOffscreenCardCreated: (state, card) => {},
     triggerSonarPing: (state, event) => {},
+    triggerUpdatePathWhileDragging: (state, connections) => {},
 
     // Used by extensions only
 

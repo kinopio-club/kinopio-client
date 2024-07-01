@@ -310,6 +310,7 @@ export default {
         newConnections.push(newConnection)
       })
       context.commit('updatePathsWhileDragging', newConnections)
+      context.commit('triggerUpdatePathWhileDragging', newConnections, { root: true })
       context.dispatch('broadcast/update', { updates: { connections: newConnections }, type: 'updateConnection', handler: 'currentConnections/updatePathsBroadcast' }, { root: true })
     },
     correctPaths: (context, { shouldUpdateApi }) => {

@@ -27,6 +27,15 @@ onMounted(() => {
         const isFromStore = true
         showConnectionDetails(mutation.payload.event, isFromStore)
       }
+    } else if (mutation.type === 'triggerUpdatePathWhileDragging') {
+      const connections = mutation.payload
+      if (!visible.value) { return }
+      connections.forEach(connection => {
+        if (connection.id !== props.connection.id) { return }
+        updatePathWhileDragging(connection.path)
+      })
+    } else if (mutation.type === 'closeAllDialogs') {
+      updatePathWhileDragging(null)
     }
   })
   initViewportObserver()
@@ -42,12 +51,13 @@ const props = defineProps({
 })
 
 const state = reactive({
-  curvedPath: '',
+  path: '',
+  pathWhileDragging: '',
   frameCount: 0,
   isVisibleInViewport: true
 })
 watch(() => props.connection.path, (value, prevValue) => {
-  state.curvedPath = value
+  state.path = value
 })
 
 const visible = computed(() => {
@@ -60,9 +70,13 @@ const canEditSpace = computed(() => store.getters['currentUser/canEditSpace']())
 
 // styles and position
 
+const updatePathWhileDragging = (value) => {
+  state.pathWhileDragging = value
+}
 const normalizedConnectionPathRect = () => {
-  const pathStart = utils.startCoordsFromConnectionPath(props.connection.path)
-  const pathEndRelative = utils.endCoordsFromConnectionPath(props.connection.path)
+  const path = state.pathWhileDragging || props.connection.path
+  const pathStart = utils.startCoordsFromConnectionPath(path)
+  const pathEndRelative = utils.endCoordsFromConnectionPath(path)
 
   const rect = utils.rectFromConnectionPathCoords(pathStart, pathEndRelative)
   return rect
@@ -324,14 +338,14 @@ const controlPointPosition = ({ x, y }) => {
 // line jiggling animation
 const animationFrame = () => {
   if (state.frameCount === 0) {
-    state.curvedPath = props.connection.path
+    state.path = props.connection.path
   }
   state.frameCount++
   const curvePattern = new RegExp(/(q[-0-9]*),([-0-9]*)\w+/)
   // "q90,40" from "m747,148 q90,40 -85,75"
   // "q-90,-40" from "m747,148 q-90,-40 -85,75" (negative)
   // "q-200,-0" from "m217,409 q200,1 492,-78" (variable length)
-  const curveMatch = state.curvedPath?.match(curvePattern)
+  const curveMatch = state.path?.match(curvePattern)
   if (!curveMatch) { return }
   const points = curveMatch[0].substring(1, curveMatch[0].length).split(',')
   // ["90", "40"] from "q90,40"
@@ -342,10 +356,10 @@ const animationFrame = () => {
     y: parseInt(points[1])
   })
   const controlPoint = curveMatch[0]
-  state.curvedPath = updatedPath(state.curvedPath, controlPoint, x, y)
+  state.path = updatedPath(state.path, controlPoint, x, y)
   const element = connectionPathElement.value
   if (!element) { return }
-  element.setAttribute('d', state.curvedPath)
+  element.setAttribute('d', state.path)
   if (shouldAnimate.value) {
     window.requestAnimationFrame(animationFrame)
   }
@@ -353,7 +367,7 @@ const animationFrame = () => {
 const cancelAnimation = () => {
   window.cancelAnimationFrame(animationTimer)
   animationTimer = undefined
-  state.curvedPath = undefined
+  state.path = undefined
   state.frameCount = 0
 }
 const shouldAnimate = computed(() => {
@@ -480,6 +494,7 @@ svg.connection(:style="connectionStyles" :data-id="connection.id" :data-is-visib
     @mouseenter="handleMouseEnter"
     @mouseleave="handleMouseLeave"
   )
+  //- path d also udpated by currentConnections/updatePathsWhileDragging
 
 defs(v-if="state.isVisibleInViewport")
   linearGradient(:id="gradientId")
