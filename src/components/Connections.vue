@@ -13,19 +13,22 @@ const connections = computed(() => store.getters['currentConnections/all'])
 </script>
 
 <template lang="pug">
-svg.connections
+svg.current-connection
+  //- TODO refactor to not be page size svg (dynamic svg rect)
   template(v-for="startCardId in currentConnectionStartCardIds")
     CurrentConnection(:startCardId="startCardId")
+.connections
   template(v-for="connection in remoteCurrentConnections")
     Connection(:connection="connection" :isRemote="true")
   template(v-for="connection in connections" :key="connection.id")
     Connection(:connection="connection")
-template(v-for="connection in connections" :key="connection.id")
-  ConnectionLabel(:connection="connection")
+.labels
+  template(v-for="connection in connections" :key="connection.id")
+    ConnectionLabel(:connection="connection")
 </template>
 
 <style lang="stylus">
-svg.connections,
+svg.current-connection,
 .connection-labels
   position absolute
   top 0

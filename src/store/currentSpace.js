@@ -1027,13 +1027,18 @@ const currentSpace = {
       context.commit('newTweetCards', cards, { root: true })
     },
     pauseConnectionDirections: (context, space) => {
-      const svg = document.querySelector('svg.connections')
-      svg.pauseAnimations()
-      svg.setCurrentTime(1.5)
+      const svgs = document.querySelectorAll('svg.connection')
+      svgs.forEach(svg => {
+        svg.pauseAnimations()
+        svg.setCurrentTime(1.5)
+      })
     },
     unpauseConnectionDirections: (context, space) => {
-      const svg = document.querySelector('svg.connections')
-      svg.unpauseAnimations()
+      // TODO only unpause/animate if connection is visible in viewport
+      const svgs = document.querySelectorAll('svg.connection')
+      svgs.forEach(svg => {
+        svg.unpauseAnimations()
+      })
     },
     checkIfShouldNotifySignUpToEditSpace: (context, space) => {
       const spaceIsOpen = space.privacy === 'open'

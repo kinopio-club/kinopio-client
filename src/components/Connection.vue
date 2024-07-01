@@ -59,13 +59,49 @@ const canEditSpace = computed(() => store.getters['currentUser/canEditSpace']())
 
 // styles
 
+const normalizedConnectionPathRect = () => {
+  const pathStart = utils.startCoordsFromConnectionPath(props.connection.path)
+  const pathEndRelative = utils.endCoordsFromConnectionPath(props.connection.path)
+  let rect = {
+    x: pathStart.x,
+    y: pathStart.y,
+    width: pathStart.x + pathEndRelative.x,
+    height: pathStart.y + pathEndRelative.y
+  }
+  if (pathEndRelative.x < 0) {
+    rect.x = pathStart.x + pathEndRelative.x
+    rect.width = rect.x + Math.abs(pathEndRelative.x)
+  }
+  if (pathEndRelative.y < 0) {
+    rect.y = pathStart.y + pathEndRelative.y
+    rect.height = rect.y + Math.abs(pathEndRelative.y)
+  }
+  return rect
+}
 const connectionStyles = computed(() => {
-  if (!store.state.currentUserIsDraggingCard) { return }
-  return { pointerEvents: 'none' }
+  const rect = normalizedConnectionPathRect()
+  let styles = {
+    left: rect.x + 'px',
+    top: rect.y + 'px',
+    width: rect.width + 'px',
+    height: rect.height + 'px'
+  }
+  if (store.state.currentUserIsDraggingCard) {
+    styles.pointerEvents = 'none'
+  }
+  return styles
 })
-const connectionClasses = computed(() => {
-  if (!state.isVisibleInViewport) { return }
-  return {
+
+const connectionPathStyles = computed(() => {
+  const rect = normalizedConnectionPathRect()
+  const styles = {
+    transform: `translate(${-rect.x}px,${-rect.y}px)`
+  }
+  return styles
+})
+
+const connectionPathClasses = computed(() => {
+  let styles = {
     active: isActive.value,
     filtered: isFiltered.value,
     hover: isHovered.value,
@@ -73,6 +109,8 @@ const connectionClasses = computed(() => {
     'is-hidden-by-opacity': isHiddenByCommentFilter.value,
     'is-connected-to-comment': isConnectedToCommentCard.value
   }
+  if (!state.isVisibleInViewport) { return }
+  return styles
 })
 
 // connection type
@@ -421,9 +459,9 @@ const removeViewportObserver = () => {
 </script>
 
 <template lang="pug">
-g.connection(v-if="visible" :style="connectionStyles" :data-id="connection.id" :data-is-visible-in-viewport="state.isVisibleInViewport" ref="connectionElement")
-
+svg.connection(:style="connectionStyles" :data-id="connection.id" :data-is-visible-in-viewport="state.isVisibleInViewport" ref="connectionElement")
   path.connection-path(
+    v-if="visible"
     fill="none"
     :stroke="typeColor"
     stroke-width="5"
@@ -444,11 +482,13 @@ g.connection(v-if="visible" :style="connectionStyles" :data-id="connection.id" :
     @touchend.stop="showConnectionDetails"
     @keyup.stop.backspace="removeConnection"
     @keyup.stop.enter="showConnectionDetailsOnKeyup"
-    :class="connectionClasses"
     ref="connectionPathElement"
     tabindex="0"
     @dragover.prevent
     @drop.prevent.stop="addCardsAndUploadFiles"
+
+    :class="connectionPathClasses"
+    :style="connectionPathStyles"
 
     @mouseenter="handleMouseEnter"
     @mouseleave="handleMouseLeave"
@@ -464,15 +504,19 @@ circle(v-if="directionIsVisible && !isUpdatingPath && state.isVisibleInViewport"
 </template>
 
 <style lang="stylus">
-.connection-path
-  touch-action manipulation
-  &:hover,
-  &.hover,
-  &.active,
-  &:focus
-    stroke-width 7
-  &.hide-connection-outline
-    outline none
-  &.is-connected-to-comment
-    opacity 0.5
+svg.connection
+  position absolute
+  path.connection-path
+    pointer-events all
+    cursor pointer
+    touch-action manipulation
+    &:hover,
+    &.hover,
+    &.active,
+    &:focus
+      stroke-width 7
+    &.hide-connection-outline
+      outline none
+    &.is-connected-to-comment
+      opacity 0.5
 </style>

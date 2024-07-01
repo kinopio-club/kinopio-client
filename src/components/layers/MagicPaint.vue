@@ -528,10 +528,13 @@ const selectBoxes = (points) => {
   store.dispatch('addMultipleToMultipleBoxesSelected', boxIds)
 }
 const selectConnections = (points) => {
-  const svg = document.querySelector('svg.connections')
-  const matches = collisionDetection.checkPointsInsidePaths(points, selectableConnectionsInViewport, svg)
-  const connectionIds = matches.map(match => match.id)
-  store.dispatch('addMultipleToMultipleConnectionsSelected', connectionIds)
+  const svgs = document.querySelectorAll('svg.connection')
+  svgs.forEach(svg => {
+    // TODO filter out non visible in viewport connections
+    const matches = collisionDetection.checkPointsInsidePaths(points, selectableConnectionsInViewport, svg)
+    const connectionIds = matches.map(match => match.id)
+    store.dispatch('addMultipleToMultipleConnectionsSelected', connectionIds)
+  })
 }
 
 // Remote Painting
