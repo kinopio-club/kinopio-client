@@ -171,18 +171,9 @@ const updateSelectableBoxes = () => {
   selectableBoxes = array
 }
 const updateSelectableConnectionsInViewport = () => {
-  let paths = []
-  const pathElements = document.querySelectorAll('svg .connection-path')
-  pathElements.forEach(path => {
-    const d = path.getAttribute('d')
-    const rect = utils.boundingBoxFromPath(d)
-    const isRectInsideViewport = utils.isRectInsideViewport(rect)
-    if (!isRectInsideViewport) { return }
-    // if (path.dataset.isVisibleInViewport === 'false') { return }
-    if (path.dataset.isHiddenByCommentFilter === 'true') { return }
-    paths.push(path)
-  })
-  selectableConnectionsInViewport = paths
+  const selectableConnections = store.getters['currentConnections/isSelectableInViewport']()
+  if (!selectableConnections) { return }
+  selectableConnectionsInViewport = selectableConnections
 }
 
 // position

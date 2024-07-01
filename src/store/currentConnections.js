@@ -456,6 +456,16 @@ export default {
       const connections = connectionIds.map(id => getters.byId(id))
       return connections
     },
+    isSelectableInViewport: (state, getters) => () => {
+      const elements = document.querySelectorAll('svg.connection path.connection-path')
+      let paths = []
+      elements.forEach(path => {
+        if (path.dataset.isVisibleInViewport === 'false') { return }
+        if (path.dataset.isHiddenByCommentFilter === 'true') { return }
+        paths.push(path)
+      })
+      return paths
+    },
     connectionsWithValidCards: (state, getters, rootState, rootGetters) => (connections) => {
       connections = connections.filter(connection => {
         const startCard = rootGetters['currentCards/byId'](connection.startCardId)
