@@ -268,6 +268,7 @@ const gradientId = computed(() => `gradient-${props.connection.id}`)
 const gradientIdReference = computed(() => `url('#${gradientId.value}')`)
 const directionIsVisible = computed(() => {
   checkIfShouldPauseConnectionDirections()
+  if (!visible.value) { return }
   return props.connection.directionIsVisible
 })
 const checkIfShouldPauseConnectionDirections = async () => {
@@ -501,7 +502,7 @@ defs(v-if="state.isVisibleInViewport")
     stop(offset="0%" :stop-color="typeColor" stop-opacity="0" fill-opacity="0")
     stop(offset="90%" :stop-color="typeColor")
 
-circle(v-if="directionIsVisible && !isUpdatingPath && state.isVisibleInViewport" r="7" :fill="gradientIdReference" :class="{filtered: isFiltered}" :data-id="connection.id")
+circle(v-if="directionIsVisible && !isUpdatingPath" r="7" :fill="gradientIdReference" :class="{filtered: isFiltered}" :data-id="connection.id")
   animateMotion(dur="3s" repeatCount="indefinite" :path="connection.path" rotate="auto")
 </template>
 

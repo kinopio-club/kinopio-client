@@ -1034,7 +1034,6 @@ const currentSpace = {
       })
     },
     unpauseConnectionDirections: (context, space) => {
-      // TODO only unpause/animate if connection is visible in viewport
       const svgs = document.querySelectorAll('svg.connection')
       svgs.forEach(svg => {
         svg.unpauseAnimations()
