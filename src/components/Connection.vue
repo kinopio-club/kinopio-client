@@ -52,6 +52,7 @@ watch(() => props.connection.path, (value, prevValue) => {
 
 const visible = computed(() => {
   if (props.isRemote) { return true }
+  if (!state.isVisibleInViewport) { return }
   return cards.value.startCard && cards.value.endCard
 })
 const isSpaceMember = computed(() => store.getters['currentUser/isSpaceMember']())
