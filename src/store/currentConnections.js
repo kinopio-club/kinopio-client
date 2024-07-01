@@ -85,6 +85,7 @@ export default {
       connections.forEach(connection => {
         const connectionElement = document.querySelector(`svg.connection[data-id="${connection.id}"]`)
         const pathElement = connectionElement.querySelector('path')
+        if (!pathElement) { return }
         pathElement.setAttribute('d', connection.path)
       })
     },
