@@ -152,11 +152,13 @@ const updateSelectableCardsInViewport = () => {
   selectableCardsInViewport = selectableCards
   selectableCardsGrid = collisionDetection.createGrid(selectableCards)
 }
-const updateSelectableBoxes = () => {
+const updateSelectableBoxesInViewport = () => {
   const boxes = store.getters['currentBoxes/isNotLocked']
   let array = []
   boxes.forEach(box => {
     const element = document.querySelector(`.box-info[data-box-id="${box.id}"]`)
+    if (!element) { return }
+    if (element.dataset.isVisibleInViewport === 'false') { return }
     const rect = element.getBoundingClientRect()
     box = {
       id: box.id,
@@ -196,6 +198,7 @@ const userScroll = () => {
   // update selectable cards during paint autoscroll at edges
   if (store.state.currentUserIsPainting) {
     updateSelectableCardsInViewport()
+    updateSelectableBoxesInViewport()
     updateSelectableConnectionsInViewport()
   }
   scroll()
@@ -414,7 +417,7 @@ const startPainting = (event) => {
   if (isBoxSelecting.value) { return }
   if (store.state.isPinchZooming) { return }
   updateSelectableCardsInViewport()
-  updateSelectableBoxes()
+  updateSelectableBoxesInViewport()
   updateSelectableConnectionsInViewport()
   startCursor = utils.cursorPositionInViewport(event)
   state.currentCursor = startCursor

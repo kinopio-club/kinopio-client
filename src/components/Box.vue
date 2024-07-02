@@ -643,6 +643,7 @@ const endBoxInfoInteractionTouch = (event) => {
   .box-info(
     v-if="state.isVisibleInViewport"
     :data-box-id="box.id"
+    :data-is-visible-in-viewport="state.isVisibleInViewport"
     :style="labelStyles"
     :class="infoClasses"
     tabindex="0"
