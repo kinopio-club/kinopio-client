@@ -420,7 +420,9 @@ const currentCards = {
           cards: [],
           spaceId: context.rootState.currentSpace.id
         }
-        const cardIds = cards.map(newCard => newCard.id)
+        let cardIds = cards.map(newCard => newCard.id)
+        cardIds = cardIds.filter(cardId => Boolean(cardId))
+        if (!cardIds) { return }
         context.commit('shouldExplicitlyRenderCardIds', cardIds, { root: true })
         const updatedCards = cards.filter(card => Boolean(card))
         updatedCards.forEach(card => {
