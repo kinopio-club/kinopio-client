@@ -205,7 +205,7 @@ dialog.about.narrow(v-if="visible" :open="visible" @click.left="closeDialogs" re
     .row
       .button-wrap
         button(@click.left.stop="changeSpaceToRoadmap")
-          span Roadmap
+          span 💐 Roadmap
     .row
       .button-wrap
         button(@click.left.stop="toggleAppsAndExtensionsIsVisible" :class="{active: state.appsAndExtensionsIsVisible}")
