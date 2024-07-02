@@ -22,8 +22,8 @@
       "y": 140,
       "z": 0,
       "name": "Get your thoughts, ideas and feelings out",
-      "width": 235,
-      "height": 49
+      "width": 200,
+      "height": 51
     },
     {
       "id": "wQ9-NzxQyWoIGGKEgHRMF",
@@ -31,8 +31,8 @@
       "y": 220,
       "name": "Connect them together\n\n[Help and Tutorials](https://help.kinopio.club)",
       "z": 3,
-      "width": 184,
-      "height": 65
+      "width": 193,
+      "height": 69
     }
   ],
   "connections": [
