@@ -534,6 +534,7 @@ svg.connection(
 <style lang="stylus">
 svg.connection
   position absolute
+  overflow visible
   path.connection-path
     pointer-events all
     cursor pointer
