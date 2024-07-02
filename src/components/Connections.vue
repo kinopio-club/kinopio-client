@@ -4,6 +4,7 @@ import { useStore } from 'vuex'
 
 import Connection from '@/components/Connection.vue'
 import CurrentConnection from '@/components/CurrentConnection.vue'
+import ConnectionLabel from '@/components/ConnectionLabel.vue'
 const store = useStore()
 
 const currentConnectionStartCardIds = computed(() => store.state.currentConnectionStartCardIds)
@@ -19,6 +20,9 @@ template(v-for="startCardId in currentConnectionStartCardIds")
     Connection(:connection="connection" :isRemote="true")
   template(v-for="connection in connections" :key="connection.id")
     Connection(:connection="connection")
+.labels
+  template(v-for="connection in connections" :key="connection.id")
+    ConnectionLabel(:connection="connection")
 </template>
 
 <style lang="stylus">

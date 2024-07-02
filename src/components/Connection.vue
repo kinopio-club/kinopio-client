@@ -2,9 +2,7 @@
 import { reactive, computed, onMounted, onBeforeUnmount, onUnmounted, defineProps, defineEmits, watch, ref, nextTick } from 'vue'
 import { useStore } from 'vuex'
 
-import ConnectionLabel from '@/components/ConnectionLabel.vue'
 import utils from '@/utils.js'
-
 const store = useStore()
 
 let animationTimer, isMultiTouch, startCursor, currentCursor
@@ -532,8 +530,6 @@ svg.connection(
     :data-relative-path="relativePath"
   )
     animateMotion(dur="3s" repeatCount="indefinite" :path="relativePath" rotate="auto")
-
-  ConnectionLabel(:connection="connection")
 </template>
 
 <style lang="stylus">
