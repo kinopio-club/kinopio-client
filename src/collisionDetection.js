@@ -95,6 +95,18 @@ export default {
       svgPoint.y = point.y
       return svgPoint
     })
+    // check points inside svg rect first
+    const data = svg.dataset
+    const rect = {
+      x: parseInt(data.rectX),
+      y: parseInt(data.rectY),
+      width: parseInt(data.rectWidth),
+      height: parseInt(data.rectHeight)
+    }
+    let pointsInsideRect = points.find(point => {
+      return this.isPointInsideRect(point, rect)
+    })
+    if (!pointsInsideRect) { return [] }
     // Iterate through each SVG path in the DOM
     const pathsInsidePoints = []
     // Check if each point is inside the SVG path
