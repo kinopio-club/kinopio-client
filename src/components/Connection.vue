@@ -72,13 +72,13 @@ const canEditSpace = computed(() => store.getters['currentUser/canEditSpace']())
 const updatePathWhileDragging = (value) => {
   state.pathWhileDragging = value
 }
-const normalizedConnectionPathRect = () => {
+const normalizedConnectionPathRect = computed(() => {
   const path = state.pathWhileDragging || props.connection.path
   const rect = utils.rectFromConnectionPath(path)
   return rect
-}
+})
 const connectionStyles = computed(() => {
-  const rect = normalizedConnectionPathRect()
+  const rect = normalizedConnectionPathRect.value
   let styles = {
     left: rect.x + 'px',
     top: rect.y + 'px',
@@ -91,7 +91,7 @@ const connectionStyles = computed(() => {
   return styles
 })
 const connectionPathStyles = computed(() => {
-  const rect = normalizedConnectionPathRect()
+  const rect = normalizedConnectionPathRect.value
   const styles = {
     transform: `translate(${-rect.x}px,${-rect.y}px)`
   }
@@ -478,6 +478,11 @@ svg.connection(
   :data-id="connection.id"
   :data-is-visible-in-viewport="state.isVisibleInViewport"
   :data-direction-is-visible="directionIsVisible"
+  :data-is-hidden-by-comment-filter="isHiddenByCommentFilter"
+  :data-rect-x="normalizedConnectionPathRect.x"
+  :data-rect-y="normalizedConnectionPathRect.y"
+  :data-rect-width="normalizedConnectionPathRect.width"
+  :data-rect-height="normalizedConnectionPathRect.height"
   ref="connectionElement"
 )
   path.connection-path(
@@ -485,6 +490,14 @@ svg.connection(
     fill="none"
     :stroke="typeColor"
     stroke-width="5"
+    ref="connectionPathElement"
+    tabindex="0"
+    :key="connection.id"
+    :d="connection.path"
+
+    :class="connectionPathClasses"
+    :style="connectionPathStyles"
+
     :data-start-card="connection.startCardId"
     :data-end-card="connection.endCardId"
     :data-id="connection.id"
@@ -494,26 +507,19 @@ svg.connection(
     :data-label-is-visible="connection.labelIsVisible"
     :data-is-visible-in-viewport="state.isVisibleInViewport"
     :data-d="connection.path"
-    :key="connection.id"
-    :d="connection.path"
+
     @mousedown.left="startDraggingConnection"
     @touchstart="startDraggingConnection"
     @mouseup.left="showConnectionDetails"
     @touchend.stop="showConnectionDetails"
     @keyup.stop.backspace="removeConnection"
     @keyup.stop.enter="showConnectionDetailsOnKeyup"
-    ref="connectionPathElement"
-    tabindex="0"
     @dragover.prevent
     @drop.prevent.stop="addCardsAndUploadFiles"
-
-    :class="connectionPathClasses"
-    :style="connectionPathStyles"
-
     @mouseenter="handleMouseEnter"
     @mouseleave="handleMouseLeave"
   )
-  //- path d also udpated by currentConnections/updatePathsWhileDragging
+  //- path d updated while dragging by currentConnections/updatePathsWhileDragging
 
   defs(v-if="state.isVisibleInViewport")
     linearGradient(:id="gradientId")

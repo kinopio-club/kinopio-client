@@ -87,7 +87,7 @@ export default {
 
   // check paths
 
-  checkPointsInsidePaths (points, paths, svg) {
+  checkPointsInsidePath (points, svg, path) {
     // Convert points to SVG points
     const svgPoints = Array.from(points).map(point => {
       let svgPoint = svg.createSVGPoint()
@@ -97,16 +97,13 @@ export default {
     })
     // Iterate through each SVG path in the DOM
     const pathsInsidePoints = []
-    paths.forEach(path => {
-      // Check if each point is inside the SVG path
-      svgPoints.forEach(svgPoint => {
-        if (path.isPointInStroke(svgPoint)) {
-          const pathData = path.dataset
-          pathsInsidePoints.push(pathData)
-        }
-      })
+    // Check if each point is inside the SVG path
+    svgPoints.forEach(svgPoint => {
+      if (path.isPointInStroke(svgPoint)) {
+        const pathData = path.dataset
+        pathsInsidePoints.push(pathData)
+      }
     })
     return pathsInsidePoints
   }
-
 }

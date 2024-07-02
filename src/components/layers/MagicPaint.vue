@@ -522,10 +522,10 @@ const selectBoxes = (points) => {
   store.dispatch('addMultipleToMultipleBoxesSelected', boxIds)
 }
 const selectConnections = (points) => {
-  const svgs = document.querySelectorAll('svg.connection')
-  svgs.forEach(svg => {
+  selectableConnectionsInViewport.forEach(svg => {
     if (svg.dataset.isVisibleInViewport === 'false') { return }
-    const matches = collisionDetection.checkPointsInsidePaths(points, selectableConnectionsInViewport, svg)
+    const path = svg.querySelector('path.connection-path')
+    const matches = collisionDetection.checkPointsInsidePath(points, svg, path)
     const connectionIds = matches.map(match => match.id)
     store.dispatch('addMultipleToMultipleConnectionsSelected', connectionIds)
   })

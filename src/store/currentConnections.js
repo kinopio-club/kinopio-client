@@ -459,7 +459,7 @@ export default {
       return connections
     },
     isSelectableInViewport: (state, getters) => () => {
-      const elements = document.querySelectorAll('svg.connection path.connection-path')
+      const elements = document.querySelectorAll('svg.connection')
       let paths = []
       elements.forEach(path => {
         if (path.dataset.isVisibleInViewport === 'false') { return }
