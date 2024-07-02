@@ -19,6 +19,7 @@ import OtherSpacePreview from '@/components/OtherSpacePreview.vue'
 import utils from '@/utils.js'
 import consts from '@/consts.js'
 
+import debounce from 'lodash-es/debounce'
 import qs from '@aguezz/qs-parse'
 import { nanoid } from 'nanoid'
 
@@ -199,6 +200,10 @@ const updateDimensions = async (cardId) => {
   await nextTick()
   await nextTick()
 }
+const updateDimensionsAndPathsDebounced = debounce(async () => {
+  await updateDimensions()
+  updatePaths()
+}, 200)
 const scrollIntoViewAndFocus = async () => {
   let behavior
   if (utils.isIPhone()) {
@@ -366,8 +371,7 @@ const closeCard = async () => {
     store.dispatch('currentCards/remove', { id: cardId })
   }
   store.dispatch('updatePageSizes')
-  await nextTick()
-  await updateDimensions(cardId)
+  updateDimensionsAndPathsDebounced()
   store.dispatch('checkIfItemShouldIncreasePageSize', item)
   store.dispatch('history/resume')
   if (item.name || prevCardName) {
@@ -447,8 +451,7 @@ const updateCardName = async (newName) => {
   store.dispatch('currentCards/update', item)
   updateMediaUrls()
   updateTags()
-  await updateDimensions()
-  updatePaths()
+  updateDimensionsAndPathsDebounced()
   if (createdByUser.value.id !== store.state.currentUser.id) { return }
   if (state.notifiedMembers) { return } // send card update notifications only once per card, per session
   if (item.name) {
@@ -963,8 +966,7 @@ const removeUrlPreview = async () => {
   }
   store.commit('removeUrlPreviewLoadingForCardIds', cardId)
   store.dispatch('currentCards/update', update)
-  await updateDimensions()
-  updatePaths()
+  updateDimensionsAndPathsDebounced()
 }
 
 // media
