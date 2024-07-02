@@ -1193,8 +1193,8 @@ export default {
       rect.height = Math.abs(pathEndRelative.y)
     }
     let controlPointMax = this.curveControlPointFromPath(path)
-    rect.width = rect.width + Math.max(controlPointMax.x || 10)
-    rect.height = rect.height + Math.max(controlPointMax.y || 10)
+    rect.width = rect.width + controlPointMax.x
+    rect.height = rect.height + controlPointMax.y
     return rect
   },
   integerCoords (coords) {
