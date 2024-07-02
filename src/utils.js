@@ -1175,7 +1175,9 @@ export default {
     }
     return this.integerCoords(coords)
   },
-  rectFromConnectionPathCoords (pathStart, pathEndRelative) {
+  rectFromConnectionPath (path) {
+    const pathStart = this.startCoordsFromConnectionPath(path)
+    const pathEndRelative = this.endCoordsFromConnectionPath(path)
     let rect = {
       x: pathStart.x,
       y: pathStart.y,
@@ -1190,10 +1192,9 @@ export default {
       rect.y = pathStart.y + pathEndRelative.y
       rect.height = Math.abs(pathEndRelative.y)
     }
-    const controlPointMaxX = 90 // q90,40
-    const controlPointMaxY = 40
-    rect.width = rect.width + controlPointMaxX
-    rect.height = rect.height + controlPointMaxY
+    let controlPointMax = this.curveControlPointFromPath(path)
+    rect.width = rect.width + controlPointMax.x
+    rect.height = rect.height + controlPointMax.y
     return rect
   },
   integerCoords (coords) {

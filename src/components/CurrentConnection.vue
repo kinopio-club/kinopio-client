@@ -160,9 +160,7 @@ const stopInteractions = (event) => {
 const normalizedConnectionPathRect = () => {
   const path = state.currentConnectionPath
   if (!path) { return }
-  const pathStart = utils.startCoordsFromConnectionPath(path)
-  const pathEndRelative = utils.endCoordsFromConnectionPath(path)
-  const rect = utils.rectFromConnectionPathCoords(pathStart, pathEndRelative)
+  const rect = utils.rectFromConnectionPath(path)
   return rect
 }
 const connectionStyles = computed(() => {

@@ -75,9 +75,7 @@ const updatePathWhileDragging = (value) => {
 }
 const normalizedConnectionPathRect = () => {
   const path = state.pathWhileDragging || props.connection.path
-  const pathStart = utils.startCoordsFromConnectionPath(path)
-  const pathEndRelative = utils.endCoordsFromConnectionPath(path)
-  const rect = utils.rectFromConnectionPathCoords(pathStart, pathEndRelative)
+  const rect = utils.rectFromConnectionPath(path)
   return rect
 }
 const connectionStyles = computed(() => {
