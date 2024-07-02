@@ -27,11 +27,19 @@ onMounted(() => {
         const isFromStore = true
         showConnectionDetails(mutation.payload.event, isFromStore)
       }
+    } else if (mutation.type === 'triggerUpdatePathWhileDragging') {
+      const connections = mutation.payload
+      if (!visible.value) { return }
+      connections.forEach(connection => {
+        if (connection.id !== props.connection.id) { return }
+        updatePathWhileDragging(connection.path)
+      })
+    } else if (mutation.type === 'closeAllDialogs') {
+      updatePathWhileDragging(null)
     }
   })
   initViewportObserver()
 })
-
 onBeforeUnmount(() => {
   removeViewportObserver()
 })
@@ -42,30 +50,55 @@ const props = defineProps({
 })
 
 const state = reactive({
-  curvedPath: '',
+  path: '',
+  pathWhileDragging: '',
   frameCount: 0,
   isVisibleInViewport: true
 })
 watch(() => props.connection.path, (value, prevValue) => {
-  state.curvedPath = value
+  state.path = value
 })
 
 const visible = computed(() => {
   if (props.isRemote) { return true }
+  if (!state.isVisibleInViewport) { return }
   return cards.value.startCard && cards.value.endCard
 })
 const isSpaceMember = computed(() => store.getters['currentUser/isSpaceMember']())
 const canEditSpace = computed(() => store.getters['currentUser/canEditSpace']())
 
-// styles
+// styles and position
 
+const updatePathWhileDragging = (value) => {
+  state.pathWhileDragging = value
+}
+const normalizedConnectionPathRect = () => {
+  const path = state.pathWhileDragging || props.connection.path
+  const rect = utils.rectFromConnectionPath(path)
+  return rect
+}
 const connectionStyles = computed(() => {
-  if (!store.state.currentUserIsDraggingCard) { return }
-  return { pointerEvents: 'none' }
+  const rect = normalizedConnectionPathRect()
+  let styles = {
+    left: rect.x + 'px',
+    top: rect.y + 'px',
+    width: rect.width + 'px',
+    height: rect.height + 'px'
+  }
+  if (store.state.currentUserIsDraggingCard) {
+    styles.pointerEvents = 'none'
+  }
+  return styles
 })
-const connectionClasses = computed(() => {
-  if (!state.isVisibleInViewport) { return }
-  return {
+const connectionPathStyles = computed(() => {
+  const rect = normalizedConnectionPathRect()
+  const styles = {
+    transform: `translate(${-rect.x}px,${-rect.y}px)`
+  }
+  return styles
+})
+const connectionPathClasses = computed(() => {
+  let styles = {
     active: isActive.value,
     filtered: isFiltered.value,
     hover: isHovered.value,
@@ -73,6 +106,8 @@ const connectionClasses = computed(() => {
     'is-hidden-by-opacity': isHiddenByCommentFilter.value,
     'is-connected-to-comment': isConnectedToCommentCard.value
   }
+  if (!state.isVisibleInViewport) { return }
+  return styles
 })
 
 // connection type
@@ -229,6 +264,7 @@ const gradientId = computed(() => `gradient-${props.connection.id}`)
 const gradientIdReference = computed(() => `url('#${gradientId.value}')`)
 const directionIsVisible = computed(() => {
   checkIfShouldPauseConnectionDirections()
+  if (!visible.value) { return }
   return props.connection.directionIsVisible
 })
 const checkIfShouldPauseConnectionDirections = async () => {
@@ -299,14 +335,14 @@ const controlPointPosition = ({ x, y }) => {
 // line jiggling animation
 const animationFrame = () => {
   if (state.frameCount === 0) {
-    state.curvedPath = props.connection.path
+    state.path = props.connection.path
   }
   state.frameCount++
   const curvePattern = new RegExp(/(q[-0-9]*),([-0-9]*)\w+/)
   // "q90,40" from "m747,148 q90,40 -85,75"
   // "q-90,-40" from "m747,148 q-90,-40 -85,75" (negative)
   // "q-200,-0" from "m217,409 q200,1 492,-78" (variable length)
-  const curveMatch = state.curvedPath?.match(curvePattern)
+  const curveMatch = state.path?.match(curvePattern)
   if (!curveMatch) { return }
   const points = curveMatch[0].substring(1, curveMatch[0].length).split(',')
   // ["90", "40"] from "q90,40"
@@ -317,10 +353,10 @@ const animationFrame = () => {
     y: parseInt(points[1])
   })
   const controlPoint = curveMatch[0]
-  state.curvedPath = updatedPath(state.curvedPath, controlPoint, x, y)
+  state.path = updatedPath(state.path, controlPoint, x, y)
   const element = connectionPathElement.value
   if (!element) { return }
-  element.setAttribute('d', state.curvedPath)
+  element.setAttribute('d', state.path)
   if (shouldAnimate.value) {
     window.requestAnimationFrame(animationFrame)
   }
@@ -328,7 +364,7 @@ const animationFrame = () => {
 const cancelAnimation = () => {
   window.cancelAnimationFrame(animationTimer)
   animationTimer = undefined
-  state.curvedPath = undefined
+  state.path = undefined
   state.frameCount = 0
 }
 const shouldAnimate = computed(() => {
@@ -339,6 +375,22 @@ watch(() => shouldAnimate.value, (value, prevValue) => {
   if (value) {
     animationTimer = window.requestAnimationFrame(animationFrame)
   }
+})
+const relativePath = computed(() => {
+  if (!directionIsVisible.value) { return }
+  const path = state.pathWhileDragging || props.connection.path
+  const pathStart = utils.startCoordsFromConnectionPath(path)
+  const pathEndRelative = utils.endCoordsFromConnectionPath(path)
+  const controlPoint = utils.curveControlPointFromPath(path)
+  let origin = { x: 0, y: 0 }
+  if (pathEndRelative.x < 0) {
+    origin.x = Math.abs(pathEndRelative.x)
+  }
+  if (pathEndRelative.y < 0) {
+    origin.y = Math.abs(pathEndRelative.y)
+  }
+  let relativePath = `m${origin.x},${origin.y} q${controlPoint.x},${controlPoint.y} ${pathEndRelative.x},${pathEndRelative.y}`
+  return relativePath
 })
 
 // utils
@@ -421,9 +473,15 @@ const removeViewportObserver = () => {
 </script>
 
 <template lang="pug">
-g.connection(v-if="visible" :style="connectionStyles" :data-id="connection.id" :data-is-visible-in-viewport="state.isVisibleInViewport" ref="connectionElement")
-
+svg.connection(
+  :style="connectionStyles"
+  :data-id="connection.id"
+  :data-is-visible-in-viewport="state.isVisibleInViewport"
+  :data-direction-is-visible="directionIsVisible"
+  ref="connectionElement"
+)
   path.connection-path(
+    v-if="visible"
     fill="none"
     :stroke="typeColor"
     stroke-width="5"
@@ -444,35 +502,49 @@ g.connection(v-if="visible" :style="connectionStyles" :data-id="connection.id" :
     @touchend.stop="showConnectionDetails"
     @keyup.stop.backspace="removeConnection"
     @keyup.stop.enter="showConnectionDetailsOnKeyup"
-    :class="connectionClasses"
     ref="connectionPathElement"
     tabindex="0"
     @dragover.prevent
     @drop.prevent.stop="addCardsAndUploadFiles"
 
+    :class="connectionPathClasses"
+    :style="connectionPathStyles"
+
     @mouseenter="handleMouseEnter"
     @mouseleave="handleMouseLeave"
   )
+  //- path d also udpated by currentConnections/updatePathsWhileDragging
 
-defs(v-if="state.isVisibleInViewport")
-  linearGradient(:id="gradientId")
-    stop(offset="0%" :stop-color="typeColor" stop-opacity="0" fill-opacity="0")
-    stop(offset="90%" :stop-color="typeColor")
+  defs(v-if="state.isVisibleInViewport")
+    linearGradient(:id="gradientId")
+      stop(offset="0%" :stop-color="typeColor" stop-opacity="0" fill-opacity="0")
+      stop(offset="90%" :stop-color="typeColor")
 
-circle(v-if="directionIsVisible && !isUpdatingPath && state.isVisibleInViewport" r="7" :fill="gradientIdReference" :class="{filtered: isFiltered}" :data-id="connection.id")
-  animateMotion(dur="3s" repeatCount="indefinite" :path="connection.path" rotate="auto")
+  circle(
+    v-if="directionIsVisible"
+    r="7"
+    :fill="gradientIdReference"
+    :class="{filtered: isFiltered}"
+    :data-id="connection.id"
+    :data-relative-path="relativePath"
+  )
+    animateMotion(dur="3s" repeatCount="indefinite" :path="relativePath" rotate="auto")
 </template>
 
 <style lang="stylus">
-.connection-path
-  touch-action manipulation
-  &:hover,
-  &.hover,
-  &.active,
-  &:focus
-    stroke-width 7
-  &.hide-connection-outline
-    outline none
-  &.is-connected-to-comment
-    opacity 0.5
+svg.connection
+  position absolute
+  path.connection-path
+    pointer-events all
+    cursor pointer
+    touch-action manipulation
+    &:hover,
+    &.hover,
+    &.active,
+    &:focus
+      stroke-width 7
+    &.hide-connection-outline
+      outline none
+    &.is-connected-to-comment
+      opacity 0.5
 </style>

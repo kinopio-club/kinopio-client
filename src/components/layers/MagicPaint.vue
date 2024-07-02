@@ -152,11 +152,13 @@ const updateSelectableCardsInViewport = () => {
   selectableCardsInViewport = selectableCards
   selectableCardsGrid = collisionDetection.createGrid(selectableCards)
 }
-const updateSelectableBoxes = () => {
+const updateSelectableBoxesInViewport = () => {
   const boxes = store.getters['currentBoxes/isNotLocked']
   let array = []
   boxes.forEach(box => {
     const element = document.querySelector(`.box-info[data-box-id="${box.id}"]`)
+    if (!element) { return }
+    if (element.dataset.isVisibleInViewport === 'false') { return }
     const rect = element.getBoundingClientRect()
     box = {
       id: box.id,
@@ -171,18 +173,9 @@ const updateSelectableBoxes = () => {
   selectableBoxes = array
 }
 const updateSelectableConnectionsInViewport = () => {
-  let paths = []
-  const pathElements = document.querySelectorAll('svg .connection-path')
-  pathElements.forEach(path => {
-    const d = path.getAttribute('d')
-    const rect = utils.boundingBoxFromPath(d)
-    const isRectInsideViewport = utils.isRectInsideViewport(rect)
-    if (!isRectInsideViewport) { return }
-    // if (path.dataset.isVisibleInViewport === 'false') { return }
-    if (path.dataset.isHiddenByCommentFilter === 'true') { return }
-    paths.push(path)
-  })
-  selectableConnectionsInViewport = paths
+  const selectableConnections = store.getters['currentConnections/isSelectableInViewport']()
+  if (!selectableConnections) { return }
+  selectableConnectionsInViewport = selectableConnections
 }
 
 // position
@@ -205,6 +198,7 @@ const userScroll = () => {
   // update selectable cards during paint autoscroll at edges
   if (store.state.currentUserIsPainting) {
     updateSelectableCardsInViewport()
+    updateSelectableBoxesInViewport()
     updateSelectableConnectionsInViewport()
   }
   scroll()
@@ -423,7 +417,7 @@ const startPainting = (event) => {
   if (isBoxSelecting.value) { return }
   if (store.state.isPinchZooming) { return }
   updateSelectableCardsInViewport()
-  updateSelectableBoxes()
+  updateSelectableBoxesInViewport()
   updateSelectableConnectionsInViewport()
   startCursor = utils.cursorPositionInViewport(event)
   state.currentCursor = startCursor
@@ -528,10 +522,13 @@ const selectBoxes = (points) => {
   store.dispatch('addMultipleToMultipleBoxesSelected', boxIds)
 }
 const selectConnections = (points) => {
-  const svg = document.querySelector('svg.connections')
-  const matches = collisionDetection.checkPointsInsidePaths(points, selectableConnectionsInViewport, svg)
-  const connectionIds = matches.map(match => match.id)
-  store.dispatch('addMultipleToMultipleConnectionsSelected', connectionIds)
+  const svgs = document.querySelectorAll('svg.connection')
+  svgs.forEach(svg => {
+    if (svg.dataset.isVisibleInViewport === 'false') { return }
+    const matches = collisionDetection.checkPointsInsidePaths(points, selectableConnectionsInViewport, svg)
+    const connectionIds = matches.map(match => match.id)
+    store.dispatch('addMultipleToMultipleConnectionsSelected', connectionIds)
+  })
 }
 
 // Remote Painting

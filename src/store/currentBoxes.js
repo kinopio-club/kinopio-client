@@ -500,6 +500,16 @@ export default {
     all: (state) => {
       return state.ids.map(id => state.boxes[id])
     },
+    isSelectableInViewport: (state, getters) => {
+      const elements = document.querySelectorAll('.box')
+      let boxes = []
+      elements.forEach(box => {
+        if (box.dataset.isVisibleInViewport === 'false') { return }
+        boxes.push(box)
+      })
+      boxes = boxes.map(box => getters.byId(box.dataset.boxId))
+      return boxes
+    },
     isSelectedIds: (state, getters, rootState, rootGetters) => {
       const currentDraggingId = rootState.currentDraggingBoxId
       const multipleSelectedIds = rootState.multipleBoxesSelectedIds

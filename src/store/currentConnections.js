@@ -83,8 +83,9 @@ export default {
     },
     updatePathsWhileDragging: (state, connections) => {
       connections.forEach(connection => {
-        const connectionElement = document.querySelector(`g.connection[data-id="${connection.id}"]`)
+        const connectionElement = document.querySelector(`svg.connection[data-id="${connection.id}"]`)
         const pathElement = connectionElement.querySelector('path')
+        if (!pathElement) { return }
         pathElement.setAttribute('d', connection.path)
       })
     },
@@ -310,6 +311,7 @@ export default {
         newConnections.push(newConnection)
       })
       context.commit('updatePathsWhileDragging', newConnections)
+      context.commit('triggerUpdatePathWhileDragging', newConnections, { root: true })
       context.dispatch('broadcast/update', { updates: { connections: newConnections }, type: 'updateConnection', handler: 'currentConnections/updatePathsBroadcast' }, { root: true })
     },
     correctPaths: (context, { shouldUpdateApi }) => {
@@ -455,6 +457,16 @@ export default {
       let connectionIds = rootState.multipleConnectionsSelectedIds
       const connections = connectionIds.map(id => getters.byId(id))
       return connections
+    },
+    isSelectableInViewport: (state, getters) => () => {
+      const elements = document.querySelectorAll('svg.connection path.connection-path')
+      let paths = []
+      elements.forEach(path => {
+        if (path.dataset.isVisibleInViewport === 'false') { return }
+        if (path.dataset.isHiddenByCommentFilter === 'true') { return }
+        paths.push(path)
+      })
+      return paths
     },
     connectionsWithValidCards: (state, getters, rootState, rootGetters) => (connections) => {
       connections = connections.filter(connection => {

@@ -89,7 +89,6 @@ export default {
 
   checkPointsInsidePaths (points, paths, svg) {
     // Convert points to SVG points
-    // const svg = document.querySelector('svg.connections')
     const svgPoints = Array.from(points).map(point => {
       let svgPoint = svg.createSVGPoint()
       svgPoint.x = point.x

@@ -1175,6 +1175,28 @@ export default {
     }
     return this.integerCoords(coords)
   },
+  rectFromConnectionPath (path) {
+    const pathStart = this.startCoordsFromConnectionPath(path)
+    const pathEndRelative = this.endCoordsFromConnectionPath(path)
+    let rect = {
+      x: pathStart.x,
+      y: pathStart.y,
+      width: pathEndRelative.x,
+      height: pathEndRelative.y
+    }
+    if (pathEndRelative.x < 0) {
+      rect.x = pathStart.x + pathEndRelative.x
+      rect.width = Math.abs(pathEndRelative.x)
+    }
+    if (pathEndRelative.y < 0) {
+      rect.y = pathStart.y + pathEndRelative.y
+      rect.height = Math.abs(pathEndRelative.y)
+    }
+    let controlPointMax = this.curveControlPointFromPath(path)
+    rect.width = rect.width + controlPointMax.x
+    rect.height = rect.height + controlPointMax.y
+    return rect
+  },
   integerCoords (coords) {
     return {
       x: parseInt(coords.x),

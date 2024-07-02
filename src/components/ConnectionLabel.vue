@@ -23,6 +23,16 @@ let touchPosition = {}
 let currentTouchPosition = {}
 
 onMounted(() => {
+  store.subscribe((mutation, state) => {
+    if (mutation.type === 'triggerUpdatePathWhileDragging') {
+      const connections = mutation.payload
+      if (!visible.value) { return }
+      connections.forEach(connection => {
+        if (connection.id !== props.connection.id) { return }
+        updateConnectionRect()
+      })
+    }
+  })
   window.addEventListener('mouseup', stopDragging)
   window.addEventListener('pointermove', drag)
   // wait for connection element to be in dom
