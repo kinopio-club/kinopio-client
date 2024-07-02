@@ -40,7 +40,6 @@ onMounted(() => {
   })
   initViewportObserver()
 })
-
 onBeforeUnmount(() => {
   removeViewportObserver()
 })

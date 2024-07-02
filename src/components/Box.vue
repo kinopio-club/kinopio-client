@@ -9,7 +9,6 @@ import randomColor from 'randomcolor'
 const store = useStore()
 
 const borderWidth = 2
-// let prevCursor
 
 // locking
 // long press to touch drag
@@ -21,6 +20,17 @@ let initialTouchEvent = {}
 let touchPosition = {}
 let currentTouchPosition = {}
 
+let observer
+
+const boxElement = ref(null)
+
+onMounted(() => {
+  initViewportObserver()
+})
+onBeforeUnmount(() => {
+  removeViewportObserver()
+})
+
 const props = defineProps({
   box: Object
 })
@@ -28,7 +38,8 @@ const state = reactive({
   isHover: false,
   isLocking: false,
   lockingPercent: 0,
-  lockingAlpha: 0
+  lockingAlpha: 0,
+  isVisibleInViewport: false
 })
 
 const spaceCounterZoomDecimal = computed(() => store.getters.spaceCounterZoomDecimal)
@@ -49,6 +60,34 @@ const normalizeBox = (box) => {
   box.color = box.color || randomColor({ luminosity: 'light' })
   box.fill = box.fill || 'filled'
   return box
+}
+
+// is visible in viewport
+
+const initViewportObserver = async () => {
+  await nextTick()
+  try {
+    let callback = (entries, observer) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          state.isVisibleInViewport = true
+        } else {
+          state.isVisibleInViewport = false
+        }
+      })
+    }
+    const target = boxElement.value
+    if (!target) { return }
+    observer = new IntersectionObserver(callback, { rootMargin: '50%' })
+    observer.observe(target)
+  } catch (error) {
+    console.error('🚒 boxElement initViewportObserver', error)
+  }
+}
+const removeViewportObserver = () => {
+  const target = boxElement.value
+  if (!observer) { return }
+  observer.unobserve(target)
 }
 
 // styles
@@ -594,12 +633,15 @@ const endBoxInfoInteractionTouch = (event) => {
   :key="box.id"
   :data-box-id="box.id"
   :data-is-locked="isLocked"
+  :data-is-visible-in-viewport="state.isVisibleInViewport"
   :style="styles"
   :class="{hover: state.isHover, active: isDragging, 'box-jiggle': shouldJiggle, 'is-resizing': isResizing}"
+  ref="boxElement"
 )
 
   //- name
   .box-info(
+    v-if="state.isVisibleInViewport"
     :data-box-id="box.id"
     :style="labelStyles"
     :class="infoClasses"
