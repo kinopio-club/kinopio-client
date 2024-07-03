@@ -39,18 +39,18 @@ const spectators = computed(() => {
 
 <template lang="pug">
 //- Add Page
-.space-users(v-if="isAddPage")
+.space-users.add-page-user(v-if="isAddPage")
   .users
     User(:user="currentUser" :isClickable="true" :detailsOnRight="true" :key="currentUser.id" :shouldCloseAllDialogs="true" tabindex="0" :userDetailsIsInline="userDetailsIsInline")
 //- Embed
-.space-users(v-else-if="isEmbedMode")
+.space-users.embed-users(v-else-if="isEmbedMode")
   .users
     User(v-for="user in members" :user="user" :isClickable="true" :detailsOnRight="true" :key="user.id" :shouldCloseAllDialogs="true" tabindex="0" :userDetailsIsInline="userDetailsIsInline")
 
 //- Space
 .space-users(v-else)
   //- spectators
-  .users.spectators(v-if="spectators.length")
+  .users.spectators(v-if="spectators.length || !currentUserIsSpaceMember")
     User(v-for="user in spectators" :user="user" :isClickable="true" :detailsOnRight="true" :key="user.id" :shouldCloseAllDialogs="true" tabindex="0" :userDetailsIsInline="userDetailsIsInline")
     User(v-if="!currentUserIsSpaceMember" :user="currentUser" :isClickable="true" :detailsOnRight="true" :key="currentUser.id" :shouldCloseAllDialogs="true" tabindex="0" :userDetailsIsInline="userDetailsIsInline")
   //- collaborators, members, you
