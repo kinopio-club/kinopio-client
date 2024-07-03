@@ -6,7 +6,7 @@ import PrivacyButton from '@/components/PrivacyButton.vue'
 import Invite from '@/components/Invite.vue'
 import RssFeeds from '@/components/dialogs/RssFeeds.vue'
 import Embed from '@/components/dialogs/Embed.vue'
-import UserList from '@/components/UserList.vue'
+import SpaceUsersButton from '@/components/SpaceUsersButton.vue'
 import utils from '@/utils.js'
 import ImportExport from '@/components/dialogs/ImportExport.vue'
 import AddToExplore from '@/components/AddToExplore.vue'
@@ -67,56 +67,6 @@ const exploreSectionIsVisible = computed(() => {
   return spaceIsPublic.value && (isSpaceMember.value || shouldShowAskToAddToExplore)
 })
 
-// collaborators
-
-const selectedUser = computed(() => {
-  const userDetailsIsVisible = store.state.userDetailsIsVisible
-  if (!userDetailsIsVisible) { return }
-  return store.state.userDetailsUser
-})
-const spaceCollaborators = computed(() => store.state.currentSpace.collaborators)
-const spaceHasCollaborators = computed(() => {
-  const collaborators = store.state.currentSpace.collaborators
-  return Boolean(collaborators.length)
-})
-const spaceOtherCardUsers = computed(() => {
-  const currentUserId = store.state.currentUser.id
-  const collaborators = store.state.currentSpace.collaborators
-  let users = store.getters['currentCards/users']
-  users = users.filter(user => Boolean(user))
-  // remove currentUser
-  users = users.filter(user => user.id !== currentUserId)
-  // remove collaborators
-  users = users.filter(user => {
-    const isCollaborator = spaceCollaborators.value.find(collaborator => {
-      return collaborator.id === user.id
-    })
-    return !isCollaborator
-  })
-  return users
-})
-const spaceHasOtherCardUsers = computed(() => Boolean(spaceOtherCardUsers.value.length))
-const toggleUserDetails = (event, user) => {
-  closeDialogs()
-  showUserDetails(event, user)
-}
-const showUserDetails = (event, user) => {
-  let element = event.target
-  let options = { element, offsetX: 25, shouldIgnoreZoom: true }
-  let position = utils.childDialogPositionFromParent(options)
-  store.commit('userDetailsUser', user)
-  store.commit('userDetailsPosition', position)
-  store.commit('userDetailsIsVisible', true)
-}
-const removeCollaborator = async (user) => {
-  store.dispatch('currentSpace/removeCollaboratorFromSpace', user)
-  const isCurrentUser = store.state.currentUser.id === user.id
-  if (isCurrentUser) {
-    store.dispatch('closeAllDialogs')
-  }
-  closeDialogs()
-}
-
 // copy url
 
 const spaceUrl = computed(() => {
@@ -167,7 +117,6 @@ const closeDialogs = () => {
   state.embedIsVisible = false
   state.importExportIsVisible = false
   state.emailInvitesIsVisible = false
-  store.commit('userDetailsIsVisible', false)
   store.commit('triggerCloseChildDialogs')
 }
 
@@ -246,14 +195,10 @@ dialog.share.wide(v-if="props.visible" :open="props.visible" @click.left.stop="c
 
   //- Invite
   Invite(v-if="isSpaceMember && currentUserIsSignedIn" @closeDialogs="closeDialogs" @emailInvitesIsVisible="emailInvitesIsVisible")
-  //- Collaborators
-  section.results-section.collaborators(v-if="spaceHasCollaborators || spaceHasOtherCardUsers")
-    //- collaborators
-    template(v-if="spaceHasCollaborators")
-      UserList(:users="spaceCollaborators" :selectedUser="selectedUser" @selectUser="toggleUserDetails" :showRemoveUser="isSpaceMember" @removeUser="removeCollaborator" :isClickable="true")
-    //- card users
-    template(v-if="spaceHasOtherCardUsers")
-      UserList(:users="spaceOtherCardUsers" :selectedUser="selectedUser" @selectUser="toggleUserDetails" :isClickable="true")
+
+  //- space users, collaborators
+  section
+    SpaceUsersButton(:showLabel="true")
 
   section(v-if="!spaceIsRemote")
     p
@@ -304,9 +249,6 @@ dialog.share
     top calc(100% - 8px)
     left initial
     right 8px
-
-  .collaborators
-    max-height calc(100vh - 200px)
   .share-private
     margin-top 10px
   .privacy-button + input
@@ -314,8 +256,6 @@ dialog.share
   .privacy-button
     > button
       padding-top 8px
-  .user
-    vertical-align -3px
   .button-tip-badge
     top -12px
     pointer-events none

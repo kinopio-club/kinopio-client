@@ -182,6 +182,8 @@ section.invite
     vertical-align 0
   .users
     margin-right 5px
+    .user
+      vertical-align -3px
   .invite-url-segmented-buttons
     margin-bottom 0
     button

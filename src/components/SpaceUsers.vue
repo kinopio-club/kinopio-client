@@ -6,6 +6,7 @@ import utils from '@/utils.js'
 
 import uniqBy from 'lodash-es/uniqBy'
 import User from '@/components/User.vue'
+import SpaceUsersButton from '@/components/SpaceUsersButton.vue'
 
 const store = useStore()
 
@@ -34,6 +35,15 @@ const spectators = computed(() => {
   spectators = uniqBy(spectators, 'id')
   return spectators
 })
+
+// spectators / collaborators / users / currentuser
+// avatarWidth = 28
+
+// numberOfUsers * avatarWidth)/pageWidth
+const shouldShowSpaceUsersButton = computed(() => {
+  const pageWidth = store.state.pageWidth
+  return true
+})
 </script>
 
 <template lang="pug">
@@ -57,6 +67,8 @@ const spectators = computed(() => {
     User(v-for="user in collaborators" :user="user" :isClickable="true" :detailsOnRight="true" :key="user.id" :shouldCloseAllDialogs="true" tabindex="0" :userDetailsIsInline="userDetailsIsInline")
     User(v-for="user in users" :user="user" :isClickable="true" :detailsOnRight="true" :key="user.id" :shouldCloseAllDialogs="true" tabindex="0" :userDetailsIsInline="userDetailsIsInline")
     User(v-if="currentUserIsSpaceMember" :user="currentUser" :isClickable="true" :detailsOnRight="true" :key="currentUser.id" :shouldCloseAllDialogs="true" tabindex="0" :userDetailsIsInline="userDetailsIsInline")
+    //- TODO v-if shouldShowSpaceUsersButton
+    SpaceUsersButton
 </template>
 
 <style lang="stylus">
