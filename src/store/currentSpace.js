@@ -453,6 +453,7 @@ const currentSpace = {
         context.dispatch('currentCards/updateDimensions', {}, { root: true })
       })
       context.dispatch('updateModulesSpaceId', space)
+      context.dispatch('incrementCardsCreatedCountFromSpace', space)
       context.commit('isLoadingSpace', false, { root: true })
     },
     saveSpace: async (context, space) => {
