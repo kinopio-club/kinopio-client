@@ -5,9 +5,8 @@ import { useStore } from 'vuex'
 import utils from '@/utils.js'
 
 import uniqBy from 'lodash-es/uniqBy'
-const User = defineAsyncComponent({
-  loader: () => import('@/components/User.vue')
-})
+import User from '@/components/User.vue'
+
 const store = useStore()
 
 const props = defineProps({
@@ -64,6 +63,8 @@ const spectators = computed(() => {
 .space-users
   display flex
   width 100%
+  flex-shrink 1
+  margin-left 6px
   > .users
     padding-right 6px
     display flex
