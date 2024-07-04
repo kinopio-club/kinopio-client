@@ -36,11 +36,11 @@ const member = computed(() => {
   return last(users)
 })
 
-const spaceUsersListIsVisible = computed(() => store.state.spaceUsersListIsVisible)
-const toggleSpaceUsersListIsVisible = () => {
-  const value = spaceUsersListIsVisible.value
+const spaceUsersDetailsIsVisible = computed(() => store.state.spaceUsersDetailsIsVisible)
+const toggleSpaceUsersDetailsIsVisible = () => {
+  const value = spaceUsersDetailsIsVisible.value
   store.commit('closeAllDialogs')
-  store.commit('spaceUsersListIsVisible', !value)
+  store.commit('spaceUsersDetailsIsVisible', !value)
 }
 
 // const selectedUser = computed(() => {
@@ -91,8 +91,6 @@ const toggleSpaceUsersListIsVisible = () => {
 //   closeDialogs()
 // }
 
-// TODO on triggerCloseChildDialogs , close dialogs, spaceUsersListIsVisible= false
-
 // closedialogs()
 //   // TODO move to
 //   store.commit('userDetailsIsVisible', false)
@@ -100,7 +98,7 @@ const toggleSpaceUsersListIsVisible = () => {
 </script>
 
 <template lang="pug">
-button.space-users-button(@click.stop="toggleSpaceUsersListIsVisible" :class="{ 'sibling-button': props.isSiblingButton, active: spaceUsersListIsVisible }")
+button.space-users-button(@click.stop="toggleSpaceUsersDetailsIsVisible" :class="{ 'sibling-button': props.isSiblingButton, active: spaceUsersDetailsIsVisible }")
   User(:user="member" :isClickable="false" :hideYouLabel="true" :isSmall="true")
   span 6
   span(v-if="props.showLabel") {{' '}}Collaborators

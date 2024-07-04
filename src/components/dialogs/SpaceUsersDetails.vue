@@ -25,7 +25,7 @@ const state = reactive({
   dialogHeight: null
 })
 
-const visible = computed(() => store.state.spaceUsersListIsVisible)
+const visible = computed(() => store.state.spaceUsersDetailsIsVisible)
 watch(() => visible.value, (value, prevValue) => {
   if (value) {
     updateDialogHeight()

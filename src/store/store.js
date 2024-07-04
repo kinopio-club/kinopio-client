@@ -53,7 +53,7 @@ const store = createStore({
     pricingIsVisible: false,
     userSettingsIsVisible: false,
     offlineIsVisible: false,
-    spaceUsersListIsVisible: false,
+    spaceUsersDetailsIsVisible: false,
     isFadingOutDuringTouch: false,
     prevSpaceIdInSession: '',
     prevSpaceIdInSessionPagePosition: {},
@@ -342,7 +342,7 @@ const store = createStore({
       state.pricingIsVisible = false
       state.codeLanguagePickerIsVisible = false
       state.offlineIsVisible = false
-      state.spaceUsersListIsVisible = false
+      state.spaceUsersDetailsIsVisible = false
       state.importArenaChannelIsVisible = false
     },
     isOnline: (state, value) => {
@@ -483,9 +483,9 @@ const store = createStore({
       utils.typeCheck({ value, type: 'boolean' })
       state.offlineIsVisible = value
     },
-    spaceUsersListIsVisible: (state, value) => {
+    spaceUsersDetailsIsVisible: (state, value) => {
       utils.typeCheck({ value, type: 'boolean' })
-      state.spaceUsersListIsVisible = value
+      state.spaceUsersDetailsIsVisible = value
     },
     isFadingOutDuringTouch: (state, value) => {
       utils.typeCheck({ value, type: 'boolean' })
