@@ -5,6 +5,8 @@ import { useStore } from 'vuex'
 import User from '@/components/User.vue'
 import utils from '@/utils.js'
 
+import last from 'lodash-es/last'
+
 const store = useStore()
 
 onMounted(() => {
@@ -17,7 +19,8 @@ onMounted(() => {
 })
 
 const props = defineProps({
-  showLabel: Boolean
+  showLabel: Boolean,
+  isSiblingButton: Boolean
 })
 
 const state = reactive({
@@ -28,11 +31,10 @@ const state = reactive({
 const updateSecondaryBackgroundColor = () => {
   state.secondaryBackgroundColor = utils.cssVariable('secondary-background')
 }
-const anonUser = computed(() => {
-  return {
-    id: '',
-    color: state.secondaryBackgroundColor
-  }
+const member = computed(() => {
+  const currentSpace = store.state.currentSpace
+  const users = currentSpace.users.concat(currentSpace.collaborators)
+  return last(users)
 })
 
 // const selectedUser = computed(() => {
@@ -92,8 +94,8 @@ const anonUser = computed(() => {
 </script>
 
 <template lang="pug">
-button.space-users-button
-  User(:user="anonUser" :isClickable="false")
+button.space-users-button(:class="{ 'sibling-button': props.isSiblingButton }")
+  User(:user="member" :isClickable="false" :hideYouLabel="true" :isSmall="true")
   span 6
   span(v-if="props.showLabel") {{' '}}Collaborators
 
@@ -111,7 +113,12 @@ button.space-users-button
 <style lang="stylus">
 .space-users
   .space-users-button
-    border-top-left-radius 0
-    border-bottom-left-radius 0
     padding 4px 8px
+    &.sibling-button
+      border-top-left-radius 0
+      border-bottom-left-radius 0
+.space-users-button
+  > .user.is-small
+    .anon-avatar
+      top 4px
 </style>

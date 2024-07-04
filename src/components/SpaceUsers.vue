@@ -15,17 +15,17 @@ const spaceUsersElement = ref(null)
 const avatarWidth = 28
 
 onMounted(() => {
-  window.addEventListener('resize', updateMembersShouldShowUsersButton)
+  window.addEventListener('resize', updateShouldShowUsersButton)
 })
 onBeforeUnmount(() => {
-  window.removeEventListener('resize', updateMembersShouldShowUsersButton)
+  window.removeEventListener('resize', updateShouldShowUsersButton)
 })
 
 const props = defineProps({
   userDetailsIsInline: Boolean
 })
 const state = reactive({
-  embersShouldShowUsersButton: false
+  shouldShowUsersButton: false
 })
 
 const isEmbedMode = computed(() => store.state.isEmbedMode)
@@ -46,10 +46,10 @@ const collaborators = computed(() => {
   return collaborators.filter(user => user.id !== currentUser.value.id)
 })
 watch(() => users.value, (value, prevValue) => {
-  updateMembersShouldShowUsersButton()
+  updateShouldShowUsersButton()
 })
 watch(() => collaborators.value, (value, prevValue) => {
-  updateMembersShouldShowUsersButton()
+  updateShouldShowUsersButton()
 })
 
 // non-members
@@ -61,10 +61,10 @@ const spectators = computed(() => {
   return spectators
 })
 
-// const membersLength = computed(() => {
-//   const items = members.value.concat(collaborators.value)
-//   return items.length
-// })
+const membersLength = computed(() => {
+  const items = members.value.concat(collaborators.value)
+  return items.length
+})
 // const spectatorsLength = computed(() => {
 //   const items = spectators.value
 //   let length = items.length
@@ -79,22 +79,26 @@ const spectators = computed(() => {
 // handle too many users
 
 // numberOfUsers * avatarWidth)/pageWidth
-const updateMembersShouldShowUsersButton = () => {
+const updateShouldShowUsersButton = () => {
+  if (membersLength.value > 5) {
+    state.shouldShowUsersButton = true
+    return
+  }
   // const viewportWidth = store.state.viewportWidth
   const viewportWidth = utils.visualViewport().width
-  // const element = spaceUsersElement.value
-  // const usersWidth = element.getBoundingClientRect().width
+  const element = spaceUsersElement.value
+  const usersWidth = element.getBoundingClientRect().width
   const rightElementWrap = document.querySelector('header nav .right')
-  const rightSideWidth = rightElementWrap.getBoundingClientRect().width
+  let rightSideWidth = rightElementWrap.getBoundingClientRect().width
+  rightSideWidth = rightSideWidth - usersWidth + (membersLength.value * avatarWidth)
   const leftElementWrap = document.querySelector('header nav .left')
   const leftSideWidth = leftElementWrap.getBoundingClientRect().width
   const availableWidth = viewportWidth - leftSideWidth - rightSideWidth
-  const minAvailableWidth = viewportWidth / 4
+  const minAvailableWidth = viewportWidth / 6
   if (availableWidth < minAvailableWidth) {
-    state.embersShouldShowUsersButton = true
-    console.error(viewportWidth, availableWidth, minAvailableWidth, state.embersShouldShowUsersButton)
+    state.shouldShowUsersButton = true
   } else {
-    state.embersShouldShowUsersButton = false
+    state.shouldShowUsersButton = false
   }
 }
 // const shouldShowSpaceUsersButton = computed(() => {
@@ -121,11 +125,11 @@ const updateMembersShouldShowUsersButton = () => {
     User(v-if="!currentUserIsSpaceMember" :user="currentUser" :isClickable="true" :detailsOnRight="true" :key="currentUser.id" :shouldCloseAllDialogs="true" tabindex="0" :userDetailsIsInline="userDetailsIsInline")
   //- collaborators, members, you
   .users
-    User(v-for="user in collaborators" :user="user" :isClickable="true" :detailsOnRight="true" :key="user.id" :shouldCloseAllDialogs="true" tabindex="0" :userDetailsIsInline="userDetailsIsInline")
-    User(v-for="user in users" :user="user" :isClickable="true" :detailsOnRight="true" :key="user.id" :shouldCloseAllDialogs="true" tabindex="0" :userDetailsIsInline="userDetailsIsInline")
+    template(v-if="!state.shouldShowUsersButton")
+      User(v-for="user in collaborators" :user="user" :isClickable="true" :detailsOnRight="true" :key="user.id" :shouldCloseAllDialogs="true" tabindex="0" :userDetailsIsInline="userDetailsIsInline")
+      User(v-for="user in users" :user="user" :isClickable="true" :detailsOnRight="true" :key="user.id" :shouldCloseAllDialogs="true" tabindex="0" :userDetailsIsInline="userDetailsIsInline")
     User(v-if="currentUserIsSpaceMember" :user="currentUser" :isClickable="true" :detailsOnRight="true" :key="currentUser.id" :shouldCloseAllDialogs="true" tabindex="0" :userDetailsIsInline="userDetailsIsInline")
-    //- TODO v-if shouldShowSpaceUsersButton
-    SpaceUsersButton
+    SpaceUsersButton(v-if="state.shouldShowUsersButton" :isSiblingButton="currentUserIsSpaceMember")
 </template>
 
 <style lang="stylus">

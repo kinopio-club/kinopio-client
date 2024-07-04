@@ -837,7 +837,7 @@ header
     dialog
       max-width initial
     .space-name-button-wrap
-      max-width 58dvw
+      max-width 55dvw
       @media(max-width 550px)
         max-width 40dvw
       &.back-button-is-visible
