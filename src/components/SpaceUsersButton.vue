@@ -25,7 +25,6 @@ const props = defineProps({
 
 const state = reactive({
   secondaryBackgroundColor: ''
-  // spaceUsersListDialogIsVisible: false
 })
 
 const updateSecondaryBackgroundColor = () => {
@@ -36,6 +35,13 @@ const member = computed(() => {
   const users = currentSpace.users.concat(currentSpace.collaborators)
   return last(users)
 })
+
+const spaceUsersListIsVisible = computed(() => store.state.spaceUsersListIsVisible)
+const toggleSpaceUsersListIsVisible = () => {
+  const value = spaceUsersListIsVisible.value
+  store.commit('closeAllDialogs')
+  store.commit('spaceUsersListIsVisible', !value)
+}
 
 // const selectedUser = computed(() => {
 //   const userDetailsIsVisible = store.state.userDetailsIsVisible
@@ -85,7 +91,7 @@ const member = computed(() => {
 //   closeDialogs()
 // }
 
-// TODO on triggerCloseChildDialogs , close dialogs, spaceUsersListDialogIsVisible= false
+// TODO on triggerCloseChildDialogs , close dialogs, spaceUsersListIsVisible= false
 
 // closedialogs()
 //   // TODO move to
@@ -94,7 +100,7 @@ const member = computed(() => {
 </script>
 
 <template lang="pug">
-button.space-users-button(:class="{ 'sibling-button': props.isSiblingButton }")
+button.space-users-button(@click.stop="toggleSpaceUsersListIsVisible" :class="{ 'sibling-button': props.isSiblingButton, active: spaceUsersListIsVisible }")
   User(:user="member" :isClickable="false" :hideYouLabel="true" :isSmall="true")
   span 6
   span(v-if="props.showLabel") {{' '}}Collaborators

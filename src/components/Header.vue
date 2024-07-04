@@ -34,6 +34,7 @@ import Pricing from '@/components/dialogs/Pricing.vue'
 import SpaceTodayJournalBadge from '@/components/SpaceTodayJournalBadge.vue'
 import Discovery from '@/components/Discovery.vue'
 import UserSettings from '@/components/dialogs/UserSettings.vue'
+import SpaceUsersList from '@/components/dialogs/SpaceUsersList.vue'
 import consts from '@/consts.js'
 
 import sortBy from 'lodash-es/sortBy'
@@ -639,6 +640,7 @@ header(v-if="isVisible" :style="state.position" :class="{'fade-out': isFadingOut
         SpaceUsers(:userDetailsIsInline="true")
         UserSettings
         UpdatePassword
+        SpaceUsersList
         //- Share
         .button-wrap
           button(@click.left.stop="toggleShareIsVisible" :class="{active: state.shareIsVisible, 'translucent-button': !shouldIncreaseUIContrast}")
