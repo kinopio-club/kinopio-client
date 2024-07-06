@@ -20,7 +20,8 @@ onMounted(() => {
 
 const props = defineProps({
   showLabel: Boolean,
-  isSiblingButton: Boolean
+  isSiblingButton: Boolean,
+  isSpectators: Boolean
 })
 
 const state = reactive({
