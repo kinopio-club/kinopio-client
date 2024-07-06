@@ -19,8 +19,16 @@ const props = defineProps({
 })
 
 const spaceUserListIsVisible = computed(() => store.state.spaceUserListIsVisible)
+const dialogIsVisible = computed(() => {
+  const isVisible = spaceUserListIsVisible.value
+  if (props.isSpectators) {
+    return isVisible && store.state.spaceUserListIsSpectators
+  } else {
+    return isVisible && !store.state.spaceUserListIsSpectators
+  }
+})
 const toggleSpaceUserListIsVisible = () => {
-  const value = spaceUserListIsVisible.value
+  const value = dialogIsVisible.value
   store.commit('closeAllDialogs')
   store.commit('spaceUserListIsVisible', !value)
   store.commit('spaceUserListUsers', users.value)
