@@ -13,7 +13,7 @@ const store = useStore()
 
 const spaceUsersElement = ref(null)
 
-const avatarWidth = 28
+const avatarWidth = 30
 const maxMembersCount = 3
 const maxSpecatorsCount = 1
 
