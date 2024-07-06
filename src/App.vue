@@ -317,6 +317,7 @@ const updateMetaRSSFeed = () => {
   --max-z 2147483646
   --entity-radius 6px
   --small-entity-radius 3px
+  --small-user-avatar-radius 5px
   --subsection-padding 5px
   --button-fixed-height 30px
   --sans-serif-font "Helvetica Neue", Helvetica, Arial, sans-serif
@@ -1318,6 +1319,15 @@ code
       > .user-avatar
         border-top-right-radius var(--entity-radius)
         border-bottom-right-radius var(--entity-radius)
+    &.is-small
+      &:first-child
+        > .user-avatar
+          border-top-left-radius var(--small-user-avatar-radius)
+          border-bottom-left-radius var(--small-user-avatar-radius)
+      &:last-child
+        > .user-avatar
+          border-top-right-radius var(--small-user-avatar-radius)
+          border-bottom-right-radius var(--small-user-avatar-radius)
 
 .filtered
   opacity 0.3

@@ -148,7 +148,6 @@ button.space-users-button(v-if="users.length" @click.stop="toggleSpaceUsersDetai
 <style lang="stylus">
 .space-users
   .space-users-button
-    padding 4px 8px
     &.sibling-button
       border-top-left-radius 0
       border-bottom-left-radius 0

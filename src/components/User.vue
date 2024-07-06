@@ -124,8 +124,8 @@ const closeChildDialogs = () => {
   &.active
     outline none
   .user-avatar
-    width 28px
-    height 28px
+    width 30px
+    height 30px
     border-radius var(--entity-radius)
     pointer-events none
     background-color var(--secondary-active-background)
@@ -138,13 +138,16 @@ const closeChildDialogs = () => {
     &.clickable
       cursor pointer
       pointer-events all
+    .anon-avatar
+      left 7px
   &.is-small
     .user-avatar
       width 17px
-      height 16px
+      height 17px
+      border-radius var(--small-user-avatar-radius)
       .anon-avatar
         left 3px
-        top 5px
+        top 6px
         width 10.5px
   &.is-medium
     .user-avatar
@@ -166,7 +169,7 @@ button
     margin 0
     margin-right 6px
     vertical-align middle
-    border-radius var(--small-entity-radius)
+    border-radius var(--small-user-avatar-radius)
     .user-avatar
       width 15px
       height 14px
