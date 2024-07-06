@@ -25,10 +25,10 @@ const state = reactive({
   dialogHeight: null
 })
 
-const visible = computed(() => store.state.spaceUsersDetailsIsVisible)
+const visible = computed(() => store.state.spaceUserListIsVisible)
 watch(() => visible.value, (value, prevValue) => {
   if (value) {
-    console.log('🌺🌺🌺', store.state.spaceUsersDetailsUsers, store.state.spaceUsersDetailsIsSpectators)
+    console.log('🌺🌺🌺', store.state.spaceUserListUsers, store.state.spaceUserListIsSpectators)
     updateDialogHeight()
   }
 })
@@ -49,7 +49,7 @@ const incrementBy = () => {
 </script>
 
 <template lang="pug">
-dialog.narrow.space-users-list(v-if="visible" :open="visible" @click.left.stop ref="dialogElement" :style="{'max-height': state.dialogHeight + 'px'}")
+dialog.narrow.space-user-list(v-if="visible" :open="visible" @click.left.stop ref="dialogElement" :style="{'max-height': state.dialogHeight + 'px'}")
   section
     p blank dialog, please duplicate
   section
@@ -59,7 +59,7 @@ dialog.narrow.space-users-list(v-if="visible" :open="visible" @click.left.stop r
 </template>
 
 <style lang="stylus">
-.space-users-list
+.space-user-list
   left initial
   right 16px
   top 20px

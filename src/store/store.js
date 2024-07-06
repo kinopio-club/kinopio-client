@@ -53,9 +53,9 @@ const store = createStore({
     pricingIsVisible: false,
     userSettingsIsVisible: false,
     offlineIsVisible: false,
-    spaceUsersDetailsIsVisible: false,
-    spaceUsersDetailsUsers: [],
-    spaceUsersDetailsIsSpectators: false,
+    spaceUserListIsVisible: false,
+    spaceUserListUsers: [],
+    spaceUserListIsSpectators: false,
     isFadingOutDuringTouch: false,
     prevSpaceIdInSession: '',
     prevSpaceIdInSessionPagePosition: {},
@@ -344,7 +344,7 @@ const store = createStore({
       state.pricingIsVisible = false
       state.codeLanguagePickerIsVisible = false
       state.offlineIsVisible = false
-      state.spaceUsersDetailsIsVisible = false
+      state.spaceUserListIsVisible = false
       state.importArenaChannelIsVisible = false
     },
     isOnline: (state, value) => {
@@ -485,17 +485,17 @@ const store = createStore({
       utils.typeCheck({ value, type: 'boolean' })
       state.offlineIsVisible = value
     },
-    spaceUsersDetailsIsVisible: (state, value) => {
+    spaceUserListIsVisible: (state, value) => {
       utils.typeCheck({ value, type: 'boolean' })
-      state.spaceUsersDetailsIsVisible = value
+      state.spaceUserListIsVisible = value
     },
-    spaceUsersDetailsUsers: (state, value) => {
+    spaceUserListUsers: (state, value) => {
       utils.typeCheck({ value, type: 'array' })
-      state.spaceUsersDetailsUsers = value
+      state.spaceUserListUsers = value
     },
-    spaceUsersDetailsIsSpectators: (state, value) => {
+    spaceUserListIsSpectators: (state, value) => {
       utils.typeCheck({ value, type: 'boolean' })
-      state.spaceUsersDetailsIsSpectators = value
+      state.spaceUserListIsSpectators = value
     },
     isFadingOutDuringTouch: (state, value) => {
       utils.typeCheck({ value, type: 'boolean' })

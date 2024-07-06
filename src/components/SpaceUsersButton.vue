@@ -16,11 +16,11 @@ const props = defineProps({
   users: Array
 })
 
-const spaceUsersDetailsIsVisible = computed(() => store.state.spaceUsersDetailsIsVisible)
-const toggleSpaceUsersDetailsIsVisible = () => {
-  const value = spaceUsersDetailsIsVisible.value
+const spaceUserListIsVisible = computed(() => store.state.spaceUserListIsVisible)
+const toggleSpaceUserListIsVisible = () => {
+  const value = spaceUserListIsVisible.value
   store.commit('closeAllDialogs')
-  store.commit('spaceUsersDetailsIsVisible', !value)
+  store.commit('spaceUserListIsVisible', !value)
 }
 
 // users
@@ -37,10 +37,9 @@ const users = computed(() => {
     items = utils.clone(currentSpace.value.users)
     items = items.concat(currentSpace.value.collaborators)
   }
-  // TODO add other card users
   items = items.filter(user => user.id !== currentUser.id)
-  store.commit('spaceUsersDetailsUsers', items)
-  store.commit('spaceUsersDetailsIsSpectators', props.isSpectators)
+  store.commit('spaceUserListUsers', items)
+  store.commit('spaceUserListIsSpectators', props.isSpectators)
   return items
 })
 // watch(() => users.value, (value, prevValue) => {
@@ -127,7 +126,7 @@ const label = computed(() => utils.pluralize('Collaborator', users.value.length)
 </script>
 
 <template lang="pug">
-button.space-users-button(v-if="users.length" @click.stop="toggleSpaceUsersDetailsIsVisible" :class="{ 'sibling-button': props.isSiblingButton, active: spaceUsersDetailsIsVisible }")
+button.space-users-button(v-if="users.length" @click.stop="toggleSpaceUserListIsVisible" :class="{ 'sibling-button': props.isSiblingButton, active: spaceUserListIsVisible }")
   User(:user="recentUser" :isClickable="false" :hideYouLabel="true" :isSmall="true")
   span {{ users.length }}
   span(v-if="props.showLabel") {{' '}}{{ label }}
