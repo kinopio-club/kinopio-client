@@ -862,6 +862,7 @@ export default {
       return state.id === connection.userId
     },
     isSpaceMember: (state, getters, rootState) => (space) => {
+      // a member is a user or collaborator
       space = space || rootState.currentSpace
       const isSpaceUser = getters.isSpaceUser(space)
       const isSpaceCollaborator = getters.isSpaceCollaborator(space)
