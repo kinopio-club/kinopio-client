@@ -14,6 +14,8 @@ const store = useStore()
 const spaceUsersElement = ref(null)
 
 const avatarWidth = 28
+const maxUsersCount = 3
+const maxSpecatorsCount = 1
 
 onMounted(() => {
   window.addEventListener('resize', updateShouldShowUsersButton)
@@ -73,8 +75,9 @@ const spectators = computed(() => {
   let items = currentSpace.value.spectators
   if (currentUserIsSpaceMember.value) { // currentUser cannot be both member and specatator
     items = items.filter(user => user.id !== currentUser.value.id)
+  } else {
+    items = appendCurrentUser(items)
   }
-  items = appendCurrentUser(items)
   return items
 })
 watch(() => spectators.value, (value, prevValue) => {
@@ -86,23 +89,25 @@ const spectatorsDisplay = computed(() => {
 
 // space users button
 
+const isMaxUsersCount = computed(() => users.value.length > maxUsersCount)
+const isMaxSpectatorsCount = computed(() => spectators.value.length > maxSpecatorsCount)
 const allUsersLength = computed(() => {
   const items = users.value.concat(spectators.value)
   return items.length
 })
 const updateShouldShowUsersButton = () => {
-  // too many users
+  // users count
   let value
-  if (users.value.length > 3) {
+  if (isMaxUsersCount.value) {
     value = true
-  } else if (spectators.value > 1) {
+  } else if (isMaxSpectatorsCount.value) {
     value = true
   }
   if (value) {
     state.shouldShowUsersButton = true
     return
   }
-  // not enough available width
+  // available width
   const viewportWidth = utils.visualViewport().width
   const element = spaceUsersElement.value
   const usersWidth = element.getBoundingClientRect().width
@@ -130,18 +135,18 @@ const updateShouldShowUsersButton = () => {
 .space-users.embed-users(v-else-if="isEmbedMode")
   .users
     User(v-for="user in usersDisplay" :user="user" :isClickable="true" :detailsOnRight="true" :key="user.id" :shouldCloseAllDialogs="true" tabindex="0" :userDetailsIsInline="props.userDetailsIsInline")
-    SpaceUsersButton(v-if="state.shouldShowUsersButton" :isSiblingButton="currentUserIsSpaceMember")
+    SpaceUsersButton(v-if="state.shouldShowUsersButton" :isSiblingButton="currentUserIsSpaceMember" :users="users")
 
 //- Space
 .space-users(v-else ref="spaceUsersElement")
   //- spectators
   .users.spectators(v-if="spectators.length || !currentUserIsSpaceMember")
     User(v-for="user in spectatorsDisplay" :user="user" :isClickable="true" :detailsOnRight="true" :key="user.id" :shouldCloseAllDialogs="true" tabindex="0" :userDetailsIsInline="props.userDetailsIsInline")
-    SpaceUsersButton(v-if="state.shouldShowUsersButton" :isSiblingButton="currentUserIsSpaceMember" :isSpectators="true")
+    SpaceUsersButton(v-if="state.shouldShowUsersButton && isMaxSpectatorsCount" :isSiblingButton="currentUserIsSpaceMember" :isSpectators="true" :users="spectators")
   //- users
   .users
     User(v-for="user in usersDisplay" :user="user" :isClickable="true" :detailsOnRight="true" :key="user.id" :shouldCloseAllDialogs="true" tabindex="0" :userDetailsIsInline="props.userDetailsIsInline")
-    SpaceUsersButton(v-if="state.shouldShowUsersButton" :isSiblingButton="currentUserIsSpaceMember")
+    SpaceUsersButton(v-if="state.shouldShowUsersButton && isMaxUsersCount" :isSiblingButton="currentUserIsSpaceMember" :users="users")
 </template>
 
 <style lang="stylus">

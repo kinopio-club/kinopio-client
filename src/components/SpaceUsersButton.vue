@@ -9,32 +9,11 @@ import last from 'lodash-es/last'
 
 const store = useStore()
 
-onMounted(() => {
-  store.subscribe(mutation => {
-    if (mutation.type === 'triggerUpdateTheme') {
-      updateSecondaryBackgroundColor()
-    }
-  })
-  updateSecondaryBackgroundColor()
-})
-
 const props = defineProps({
   showLabel: Boolean,
   isSiblingButton: Boolean,
-  isSpectators: Boolean
-})
-
-const state = reactive({
-  secondaryBackgroundColor: ''
-})
-
-const updateSecondaryBackgroundColor = () => {
-  state.secondaryBackgroundColor = utils.cssVariable('secondary-background')
-}
-const member = computed(() => {
-  const currentSpace = store.state.currentSpace
-  const users = currentSpace.users.concat(currentSpace.collaborators)
-  return last(users)
+  isSpectators: Boolean,
+  users: Array
 })
 
 const spaceUsersDetailsIsVisible = computed(() => store.state.spaceUsersDetailsIsVisible)
@@ -42,7 +21,51 @@ const toggleSpaceUsersDetailsIsVisible = () => {
   const value = spaceUsersDetailsIsVisible.value
   store.commit('closeAllDialogs')
   store.commit('spaceUsersDetailsIsVisible', !value)
+  if (value) {
+    store.commit('spaceUsersDetailsUsers', users.value)
+    store.commit('spaceUsersDetailsIsSpectators', props.isSpectators)
+  }
 }
+
+// users
+
+const currentSpace = computed(() => store.state.currentSpace)
+const currentUserIsSpaceMember = computed(() => store.getters['currentUser/isSpaceMember']())
+
+const users = computed(() => {
+  let items
+  const currentUser = store.state.currentUser
+  if (props.users) {
+    items = props.users
+  } else {
+    items = utils.clone(currentSpace.value.users)
+    items = items.concat(currentSpace.value.collaborators)
+  }
+  // TODO add other card users
+  items = items.filter(user => user.id !== currentUser.id)
+  return items
+})
+// watch(() => users.value, (value, prevValue) => {
+//   const currentUser = store.state.currentUser
+//   state.users = props.users.filter(user => user.id !== currentUser.id)
+
+// })
+
+// const users = computed(() => {
+//   let items
+//   // specatators
+//   if (props.isSpectators) {
+//     items = currentSpace.value.spectators
+//     if (currentUserIsSpaceMember.value) {
+//       items = items.filter(user => user.id !== currentUser.value.id)
+//     }
+//   // users
+//   } else {
+//     items = utils.clone(currentSpace.value.users)
+//     items = items.concat(currentSpace.value.collaborators)
+//   }
+//   return items
+// })
 
 // const selectedUser = computed(() => {
 //   const userDetailsIsVisible = store.state.userDetailsIsVisible
@@ -96,13 +119,20 @@ const toggleSpaceUsersDetailsIsVisible = () => {
 //   // TODO move to
 //   store.commit('userDetailsIsVisible', false)
 
+// button
+
+const recentUser = computed(() => {
+  return last(users.value)
+})
+const label = computed(() => utils.pluralize('Collaborator', users.value.length))
+
 </script>
 
 <template lang="pug">
-button.space-users-button(@click.stop="toggleSpaceUsersDetailsIsVisible" :class="{ 'sibling-button': props.isSiblingButton, active: spaceUsersDetailsIsVisible }")
-  User(:user="member" :isClickable="false" :hideYouLabel="true" :isSmall="true")
-  span 6
-  span(v-if="props.showLabel") {{' '}}Collaborators
+button.space-users-button(v-if="users.length" @click.stop="toggleSpaceUsersDetailsIsVisible" :class="{ 'sibling-button': props.isSiblingButton, active: spaceUsersDetailsIsVisible }")
+  User(:user="recentUser" :isClickable="false" :hideYouLabel="true" :isSmall="true")
+  span {{ users.length }}
+  span(v-if="props.showLabel") {{' '}}{{ label }}
 
   //- //- Collaborators
   //- section.results-section(v-if="spaceHasCollaborators || spaceHasOtherCardUsers")
