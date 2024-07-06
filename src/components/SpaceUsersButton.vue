@@ -21,10 +21,6 @@ const toggleSpaceUsersDetailsIsVisible = () => {
   const value = spaceUsersDetailsIsVisible.value
   store.commit('closeAllDialogs')
   store.commit('spaceUsersDetailsIsVisible', !value)
-  if (value) {
-    store.commit('spaceUsersDetailsUsers', users.value)
-    store.commit('spaceUsersDetailsIsSpectators', props.isSpectators)
-  }
 }
 
 // users
@@ -43,6 +39,8 @@ const users = computed(() => {
   }
   // TODO add other card users
   items = items.filter(user => user.id !== currentUser.id)
+  store.commit('spaceUsersDetailsUsers', items)
+  store.commit('spaceUsersDetailsIsSpectators', props.isSpectators)
   return items
 })
 // watch(() => users.value, (value, prevValue) => {

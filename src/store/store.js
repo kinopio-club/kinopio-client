@@ -54,6 +54,8 @@ const store = createStore({
     userSettingsIsVisible: false,
     offlineIsVisible: false,
     spaceUsersDetailsIsVisible: false,
+    spaceUsersDetailsUsers: [],
+    spaceUsersDetailsIsSpectators: false,
     isFadingOutDuringTouch: false,
     prevSpaceIdInSession: '',
     prevSpaceIdInSessionPagePosition: {},
@@ -486,6 +488,14 @@ const store = createStore({
     spaceUsersDetailsIsVisible: (state, value) => {
       utils.typeCheck({ value, type: 'boolean' })
       state.spaceUsersDetailsIsVisible = value
+    },
+    spaceUsersDetailsUsers: (state, value) => {
+      utils.typeCheck({ value, type: 'array' })
+      state.spaceUsersDetailsUsers = value
+    },
+    spaceUsersDetailsIsSpectators: (state, value) => {
+      utils.typeCheck({ value, type: 'boolean' })
+      state.spaceUsersDetailsIsSpectators = value
     },
     isFadingOutDuringTouch: (state, value) => {
       utils.typeCheck({ value, type: 'boolean' })

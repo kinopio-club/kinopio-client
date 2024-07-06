@@ -28,6 +28,7 @@ const state = reactive({
 const visible = computed(() => store.state.spaceUsersDetailsIsVisible)
 watch(() => visible.value, (value, prevValue) => {
   if (value) {
+    console.log('🌺🌺🌺', store.state.spaceUsersDetailsUsers, store.state.spaceUsersDetailsIsSpectators)
     updateDialogHeight()
   }
 })
