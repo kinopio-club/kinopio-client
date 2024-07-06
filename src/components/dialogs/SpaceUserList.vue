@@ -15,23 +15,19 @@ onMounted(() => {
   })
 })
 
-const emit = defineEmits(['updateCount'])
-
-// const props = defineProps({
-//   visible: Boolean
-// })
 const state = reactive({
-  count: 0,
   dialogHeight: null
 })
 
 const visible = computed(() => store.state.spaceUserListIsVisible)
 watch(() => visible.value, (value, prevValue) => {
   if (value) {
-    console.log('🌺🌺🌺', store.state.spaceUserListUsers, store.state.spaceUserListIsSpectators)
+    console.log('🌺🌺🌺', store.state.spaceUserListUsers, isSpectators.value)
     updateDialogHeight()
   }
 })
+
+const isSpectators = computed(() => store.state.spaceUserListIsSpectators)
 
 const updateDialogHeight = async () => {
   if (!visible.value) { return }
@@ -40,22 +36,17 @@ const updateDialogHeight = async () => {
   state.dialogHeight = utils.elementHeight(element)
 }
 
-const themeName = computed(() => store.state.currentUser.theme)
-const incrementBy = () => {
-  state.count = state.count + 1
-  emit('updateCount', state.count)
-  // store.dispatch('themes/isSystem', false)
-}
 </script>
 
 <template lang="pug">
 dialog.narrow.space-user-list(v-if="visible" :open="visible" @click.left.stop ref="dialogElement" :style="{'max-height': state.dialogHeight + 'px'}")
   section
-    p blank dialog, please duplicate
+    p(v-if="isSpectators") Spectators
+    p(v-if="!isSpectators") Collaborators
   section
-    button(@click="incrementBy")
-      span Count is: {{ state.count }}
-    p Current theme is: {{ themeName }}
+    p asdf
+  section
+    p Other Cards Added By
 </template>
 
 <style lang="stylus">
@@ -63,5 +54,4 @@ dialog.narrow.space-user-list(v-if="visible" :open="visible" @click.left.stop re
   left initial
   right 16px
   top 20px
-
 </style>

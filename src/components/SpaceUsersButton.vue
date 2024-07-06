@@ -9,6 +9,8 @@ import last from 'lodash-es/last'
 
 const store = useStore()
 
+const buttonElement = ref(null)
+
 const props = defineProps({
   showLabel: Boolean,
   isSiblingButton: Boolean,
@@ -21,7 +23,17 @@ const toggleSpaceUserListIsVisible = () => {
   const value = spaceUserListIsVisible.value
   store.commit('closeAllDialogs')
   store.commit('spaceUserListIsVisible', !value)
+  store.commit('spaceUserListUsers', users.value)
+  store.commit('spaceUserListIsSpectators', props.isSpectators)
 }
+const isActive = computed(() => {
+  const isVisible = spaceUserListIsVisible.value
+  if (props.isSpectators) {
+    return isVisible && store.state.spaceUserListIsSpectators
+  } else {
+    return isVisible && !store.state.spaceUserListIsSpectators
+  }
+})
 
 // users
 
@@ -38,8 +50,6 @@ const users = computed(() => {
     items = items.concat(currentSpace.value.collaborators)
   }
   items = items.filter(user => user.id !== currentUser.id)
-  store.commit('spaceUserListUsers', items)
-  store.commit('spaceUserListIsSpectators', props.isSpectators)
   return items
 })
 // watch(() => users.value, (value, prevValue) => {
@@ -126,7 +136,7 @@ const label = computed(() => utils.pluralize('Collaborator', users.value.length)
 </script>
 
 <template lang="pug">
-button.space-users-button(v-if="users.length" @click.stop="toggleSpaceUserListIsVisible" :class="{ 'sibling-button': props.isSiblingButton, active: spaceUserListIsVisible }")
+button.space-users-button(v-if="users.length" @click.stop="toggleSpaceUserListIsVisible" :class="{ 'sibling-button': props.isSiblingButton, active: isActive }" ref="buttonElement")
   User(:user="recentUser" :isClickable="false" :hideYouLabel="true" :isSmall="true")
   span {{ users.length }}
   span(v-if="props.showLabel") {{' '}}{{ label }}
