@@ -1,75 +1,76 @@
-<template lang="pug">
-span
-  ResultsFilter(:items="users" @updateFilter="updateFilter" @updateFilteredItems="updateFilteredUsers")
-  ul.results-list.user-list
-    template(v-for="user in usersFiltered" :key="user.id")
-      li(@click.left.stop="selectUser($event, user)" :tabindex="tabIndex" v-on:keyup.stop.enter="selectUser($event, user)" :class="{ active: userIsSelected(user), 'is-not-clickable': !isClickable }")
-        UserLabelInline(:user="user")
-        button.remove-user.small-button(v-if="showRemoveUser" @click.left.stop="removeUser(user)" title="Remove from space")
-          img.icon.cancel(src="@/assets/add.svg")
-</template>
+<script setup>
+import { reactive, computed, onMounted, onBeforeUnmount, defineProps, defineEmits, watch, ref, nextTick } from 'vue'
+import { useStore } from 'vuex'
 
-<script>
 import ResultsFilter from '@/components/ResultsFilter.vue'
 import UserLabelInline from '@/components/UserLabelInline.vue'
+const store = useStore()
 
-export default {
-  name: 'UserList',
-  components: {
-    ResultsFilter,
-    UserLabelInline
-  },
-  props: {
-    isClickable: Boolean,
-    users: Array,
-    selectedUser: Object,
-    showRemoveUser: Boolean
-  },
-  data () {
-    return {
-      filter: '',
-      filteredUsers: []
-    }
-  },
-  computed: {
-    usersFiltered () {
-      if (this.filter) {
-        return this.filteredUsers
-      } else {
-        return this.users
-      }
-    },
-    tabIndex () {
-      if (this.isClickable) {
-        return '0'
-      } else {
-        return '-1'
-      }
-    }
-  },
-  methods: {
-    updateFilteredUsers (users) {
-      this.filteredUsers = users
-    },
-    updateFilter (filter) {
-      this.filter = filter
-    },
-    selectUser (event, user) {
-      if (!this.isClickable) { return }
-      this.$emit('selectUser', event, user)
-    },
-    userIsSelected (user) {
-      if (!this.isClickable) { return }
-      if (!this.selectedUser) { return }
-      return this.selectedUser.id === user.id
-    },
-    removeUser (user) {
-      if (!this.isClickable) { return }
-      this.$emit('removeUser', user)
-    }
+const emit = defineEmits(['selectUser', 'removeUser'])
+
+const props = defineProps({
+  isClickable: Boolean,
+  users: Array,
+  selectedUser: Object,
+  showRemoveUser: Boolean,
+  showIsOnline: Boolean
+})
+const state = reactive({
+  filter: '',
+  filteredUsers: []
+})
+
+const tabIndex = computed(() => {
+  if (props.isClickable) {
+    return '0'
+  } else {
+    return '-1'
   }
+})
+
+// users
+
+const updateFilteredUsers = (users) => {
+  state.filteredUsers = users
+}
+const updateFilter = (filter) => {
+  state.filter = filter
+}
+const usersFiltered = computed(() => {
+  if (state.filter) {
+    return state.filteredUsers
+  } else {
+    return props.users
+  }
+})
+
+// user
+
+const selectUser = (event, user) => {
+  if (!props.isClickable) { return }
+  emit('selectUser', event, user)
+}
+const userIsSelected = (user) => {
+  if (!props.isClickable) { return }
+  if (!props.selectedUser) { return }
+  return props.selectedUser.id === user.id
+}
+const removeUser = (user) => {
+  if (!props.isClickable) { return }
+  emit('removeUser', user)
 }
 </script>
+
+<template lang="pug">
+span
+  ResultsFilter(:items="props.users" @updateFilter="updateFilter" @updateFilteredItems="updateFilteredUsers")
+  ul.results-list.user-list
+    template(v-for="user in usersFiltered" :key="user.id")
+      li(@click.left.stop="selectUser($event, user)" :tabindex="tabIndex" v-on:keyup.stop.enter="selectUser($event, user)" :class="{ active: userIsSelected(user), 'is-not-clickable': !props.isClickable }")
+        UserLabelInline(:user="user")
+        button.remove-user.small-button(v-if="props.showRemoveUser" @click.left.stop="removeUser(user)" title="Remove from space")
+          img.icon.cancel(src="@/assets/add.svg")
+</template>
 
 <style lang="stylus">
 .user-list
