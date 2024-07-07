@@ -98,8 +98,6 @@ span
     .name
       margin-right 0
       display inline-block
-    .narrow-badge
-      max-width calc(100% - 32px)
     &.is-not-clickable
       cursor auto
       padding-left 0

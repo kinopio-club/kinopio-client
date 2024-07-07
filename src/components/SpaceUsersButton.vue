@@ -60,79 +60,6 @@ const users = computed(() => {
   items = items.filter(user => user.id !== currentUser.id)
   return items
 })
-// watch(() => users.value, (value, prevValue) => {
-//   const currentUser = store.state.currentUser
-//   state.users = props.users.filter(user => user.id !== currentUser.id)
-
-// })
-
-// const users = computed(() => {
-//   let items
-//   // specatators
-//   if (props.isSpectators) {
-//     items = currentSpace.value.spectators
-//     if (currentUserIsSpaceMember.value) {
-//       items = items.filter(user => user.id !== currentUser.value.id)
-//     }
-//   // users
-//   } else {
-//     items = utils.clone(currentSpace.value.users)
-//     items = items.concat(currentSpace.value.collaborators)
-//   }
-//   return items
-// })
-
-// const selectedUser = computed(() => {
-//   const userDetailsIsVisible = store.state.userDetailsIsVisible
-//   if (!userDetailsIsVisible) { return }
-//   return store.state.userDetailsUser
-// })
-// const spaceCollaborators = computed(() => store.state.currentSpace.collaborators)
-// const spaceHasCollaborators = computed(() => {
-//   const collaborators = store.state.currentSpace.collaborators
-//   return Boolean(collaborators.length)
-// })
-// const spaceOtherCardUsers = computed(() => {
-//   const currentUserId = store.state.currentUser.id
-//   const collaborators = store.state.currentSpace.collaborators
-//   let users = store.getters['currentCards/users']
-//   users = users.filter(user => Boolean(user))
-//   // remove currentUser
-//   users = users.filter(user => user.id !== currentUserId)
-//   // remove collaborators
-//   users = users.filter(user => {
-//     const isCollaborator = spaceCollaborators.value.find(collaborator => {
-//       return collaborator.id === user.id
-//     })
-//     return !isCollaborator
-//   })
-//   return users
-// })
-// const spaceHasOtherCardUsers = computed(() => Boolean(spaceOtherCardUsers.value.length))
-// const toggleUserDetails = (event, user) => {
-//   closeDialogs()
-//   showUserDetails(event, user)
-// }
-// const showUserDetails = (event, user) => {
-//   let element = event.target
-//   let options = { element, offsetX: 25, shouldIgnoreZoom: true }
-//   let position = utils.childDialogPositionFromParent(options)
-//   store.commit('userDetailsUser', user)
-//   store.commit('userDetailsPosition', position)
-//   store.commit('userDetailsIsVisible', true)
-// }
-// const removeCollaborator = async (user) => {
-//   store.dispatch('currentSpace/removeCollaboratorFromSpace', user)
-//   const isCurrentUser = store.state.currentUser.id === user.id
-//   if (isCurrentUser) {
-//     store.dispatch('closeAllDialogs')
-//   }
-//   closeDialogs()
-// }
-
-// closedialogs()
-//   // TODO move to
-//   store.commit('userDetailsIsVisible', false)
 
 // button
 
@@ -148,26 +75,17 @@ button.space-users-button(v-if="users.length" @click.stop="toggleSpaceUserListIs
   User(:user="recentUser" :isClickable="false" :hideYouLabel="true" :isSmall="true" :shouldBounceIn="props.isParentSpaceUsers")
   span {{ users.length }}
   span(v-if="props.showLabel") {{' '}}{{ label }}
-
-  //- //- Collaborators
-  //- section.results-section(v-if="spaceHasCollaborators || spaceHasOtherCardUsers")
-  //-   //- collaborators / members
-  //-   template(v-if="spaceHasCollaborators")
-  //-     UserList(:users="spaceCollaborators" :selectedUser="selectedUser" @selectUser="toggleUserDetails" :showRemoveUser="isSpaceMember" @removeUser="removeCollaborator" :isClickable="true")
-  //-   //- other/card users. has created a card but isnt a collaborator
-  //-   template(v-if="spaceHasOtherCardUsers")
-  //-     UserList(:users="spaceOtherCardUsers" :selectedUser="selectedUser" @selectUser="toggleUserDetails" :isClickable="true")
-
 </template>
 
 <style lang="stylus">
-.space-users
-  .space-users-button
-    &.header-button
-      border-top-left-radius 0
-      border-bottom-left-radius 0
 .space-users-button
   > .user.is-small
+    .user-avatar
+      margin-top -3px
     .anon-avatar
-      top 4px
+      top 3px
+  &.header-button
+    border-top-left-radius 0
+    border-bottom-left-radius 0
+
 </style>

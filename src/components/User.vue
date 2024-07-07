@@ -186,5 +186,5 @@ button
   0%
     transform translateY(0)
   100%
-    transform translateY(4px)
+    transform translateY(3px)
 </style>
