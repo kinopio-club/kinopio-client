@@ -846,7 +846,7 @@ header
     .space-name-button-wrap
       max-width 55dvw
       @media(max-width 550px)
-        max-width 40dvw
+        max-width 35dvw
       &.back-button-is-visible
         @media(max-width 550px)
           max-width 31dvw
