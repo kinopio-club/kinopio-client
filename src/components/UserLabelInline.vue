@@ -54,19 +54,19 @@ const showUserDetails = () => {
 
 <template lang="pug">
 .user-label-inline.badge(
-  :key="user.id"
-  :data-id="user.id"
-  :style="{ background: user.color }"
-  :class="{ 'button-badge': isClickable }"
+  :key="props.user.id"
+  :data-id="props.user.id"
+  :style="{ background: props.user.color }"
+  :class="{ 'button-badge': props.isClickable }"
   @mouseup="toggleUserDetailsIsVisible"
   @touchend="toggleUserDetailsIsVisible"
   ref="labelElement"
-  :title="title"
+  :title="props.title"
   @click.stop
 )
-  .user-avatar-inline(:class="{ 'is-on-dark-background': isOnDarkBackground }")
+  .user-avatar-inline(:class="{ 'is-on-dark-background': props.isOnDarkBackground }")
     img.anon-avatar(src="@/assets/anon-avatar.svg" :class="{ 'is-dark': colorIsDark }")
-  span.user-name(v-if="userHasName && !shouldHideName" :class="{ 'is-dark': colorIsDark }") {{ user.name }}
+  span.user-name(v-if="userHasName && !shouldHideName" :class="{ 'is-dark': colorIsDark }") {{ props.user.name }}
 </template>
 
 <style lang="stylus">
