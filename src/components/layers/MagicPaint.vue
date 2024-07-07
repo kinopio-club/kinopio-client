@@ -804,6 +804,7 @@ aside
 <style lang="stylus" scoped>
 canvas
   position fixed
+  background transparent
   top 0
 .locking,
 .initial-circle,
