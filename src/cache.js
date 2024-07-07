@@ -94,7 +94,9 @@ export default {
   // Space
 
   space (spaceId) {
-    return this.getLocal(`space-${spaceId}`) || {}
+    const space = this.getLocal(`space-${spaceId}`) || {}
+    space.clients = []
+    return space
   },
   getInboxSpace () {
     const keys = Object.keys(window.localStorage)
@@ -110,7 +112,9 @@ export default {
     const spaces = spaceKeys.map(key => {
       return this.getLocal(key)
     })
-    return spaces.find(space => space.name === name)
+    const space = spaces.find(space => space.name === name)
+    space.clients = []
+    return space
   },
   getAllSpaces () {
     const keys = Object.keys(window.localStorage)
@@ -140,6 +144,7 @@ export default {
       value = utils.denormalizeItems(value)
     }
     space[key] = value
+    space.clients = []
     space.cacheDate = Date.now()
     this.storeLocal(`space-${spaceId}`, space)
   },
