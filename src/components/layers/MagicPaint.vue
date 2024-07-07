@@ -806,6 +806,7 @@ canvas
   position fixed
   background transparent
   top 0
+  opacity 1
 .locking,
 .initial-circle,
 .remote-painting,
