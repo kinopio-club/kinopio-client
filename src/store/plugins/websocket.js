@@ -14,7 +14,7 @@ let websocket, currentSpaceRoom, currentUserIsConnected
 const clientId = nanoid()
 
 console.log('🌳 websocket clientId', clientId)
-let showDebugMessages = true
+let showDebugMessages = false
 
 const joinSpaceRoom = (store, mutation) => {
   console.log('🌙 joining', websocket)
