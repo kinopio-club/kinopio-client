@@ -131,12 +131,8 @@ const updateShouldShowUsersButton = () => {
 </script>
 
 <template lang="pug">
-//- Add Page
-.space-users.add-page-user(v-if="isAddPage")
-  .users
-    User(:user="currentUser" :isClickable="true" :detailsOnRight="true" :key="currentUser.id" :shouldCloseAllDialogs="true" tabindex="0" :userDetailsIsInline="props.userDetailsIsInline")
 //- Embed
-.space-users.embed-users(v-else-if="isEmbedMode")
+.space-users.embed-users(v-if="isEmbedMode")
   .users
     User(v-for="user in membersDisplay" :user="user" :isClickable="true" :detailsOnRight="true" :key="user.id" :shouldCloseAllDialogs="true" tabindex="0" :userDetailsIsInline="props.userDetailsIsInline" :shouldBounceIn="true")
     SpaceUsersButton(v-if="state.shouldShowUsersButton" :isParentSpaceUsers="currentUserIsSpaceMember" :users="members")
