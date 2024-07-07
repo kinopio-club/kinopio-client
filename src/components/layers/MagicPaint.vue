@@ -129,7 +129,6 @@ const state = reactive({
 })
 
 const clearRects = () => {
-  console.log('🅰️ clear rects on visibilitychange')
   paintingContext.clearRect(0, 0, pageWidth.value, pageHeight.value)
   remotePaintingContext.clearRect(0, 0, pageWidth.value, pageHeight.value)
   lockingContext.clearRect(0, 0, pageWidth.value, pageHeight.value)
