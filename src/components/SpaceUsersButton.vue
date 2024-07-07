@@ -13,7 +13,7 @@ const buttonElement = ref(null)
 
 const props = defineProps({
   showLabel: Boolean,
-  isSiblingButton: Boolean,
+  isParentSpaceUsers: Boolean,
   isSpectators: Boolean,
   users: Array
 })
@@ -144,8 +144,8 @@ const label = computed(() => utils.pluralize('Collaborator', users.value.length)
 </script>
 
 <template lang="pug">
-button.space-users-button(v-if="users.length" @click.stop="toggleSpaceUserListIsVisible" :class="{ 'sibling-button': props.isSiblingButton, active: isActive }" ref="buttonElement")
-  User(:user="recentUser" :isClickable="false" :hideYouLabel="true" :isSmall="true")
+button.space-users-button(v-if="users.length" @click.stop="toggleSpaceUserListIsVisible" :class="{ 'header-button': props.isParentSpaceUsers, active: isActive, 'translucent-button': props.isParentSpaceUsers }" ref="buttonElement")
+  User(:user="recentUser" :isClickable="false" :hideYouLabel="true" :isSmall="true" :shouldBounceIn="props.isParentSpaceUsers")
   span {{ users.length }}
   span(v-if="props.showLabel") {{' '}}{{ label }}
 
@@ -163,7 +163,7 @@ button.space-users-button(v-if="users.length" @click.stop="toggleSpaceUserListIs
 <style lang="stylus">
 .space-users
   .space-users-button
-    &.sibling-button
+    &.header-button
       border-top-left-radius 0
       border-bottom-left-radius 0
 .space-users-button

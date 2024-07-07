@@ -138,19 +138,19 @@ const updateShouldShowUsersButton = () => {
 //- Embed
 .space-users.embed-users(v-else-if="isEmbedMode")
   .users
-    User(v-for="user in membersDisplay" :user="user" :isClickable="true" :detailsOnRight="true" :key="user.id" :shouldCloseAllDialogs="true" tabindex="0" :userDetailsIsInline="props.userDetailsIsInline")
-    SpaceUsersButton(v-if="state.shouldShowUsersButton" :isSiblingButton="currentUserIsSpaceMember" :users="members")
+    User(v-for="user in membersDisplay" :user="user" :isClickable="true" :detailsOnRight="true" :key="user.id" :shouldCloseAllDialogs="true" tabindex="0" :userDetailsIsInline="props.userDetailsIsInline" :shouldBounceIn="true")
+    SpaceUsersButton(v-if="state.shouldShowUsersButton" :isParentSpaceUsers="currentUserIsSpaceMember" :users="members")
 
 //- Space
 .space-users(v-else ref="spaceUsersElement")
   //- spectators
   .users.spectators(v-if="spectators.length || !currentUserIsSpaceMember")
-    User(v-for="user in spectatorsDisplay" :user="user" :isClickable="true" :detailsOnRight="true" :key="user.id" :shouldCloseAllDialogs="true" tabindex="0" :userDetailsIsInline="props.userDetailsIsInline")
-    SpaceUsersButton(v-if="state.shouldShowUsersButton && isMaxSpectatorsCount" :isSiblingButton="true" :isSpectators="true" :users="spectators")
+    User(v-for="user in spectatorsDisplay" :user="user" :isClickable="true" :detailsOnRight="true" :key="user.id" :shouldCloseAllDialogs="true" tabindex="0" :userDetailsIsInline="props.userDetailsIsInline" :shouldBounceIn="true")
+    SpaceUsersButton(v-if="state.shouldShowUsersButton && isMaxSpectatorsCount" :isParentSpaceUsers="true" :isSpectators="true" :users="spectators")
   //- users
   .users
-    User(v-for="user in membersDisplay" :user="user" :isClickable="true" :detailsOnRight="true" :key="user.id" :shouldCloseAllDialogs="true" tabindex="0" :userDetailsIsInline="props.userDetailsIsInline")
-    SpaceUsersButton(v-if="state.shouldShowUsersButton && isMaxMembersCount" :isSiblingButton="true" :users="members")
+    User(v-for="user in membersDisplay" :user="user" :isClickable="true" :detailsOnRight="true" :key="user.id" :shouldCloseAllDialogs="true" tabindex="0" :userDetailsIsInline="props.userDetailsIsInline" :shouldBounceIn="true")
+    SpaceUsersButton(v-if="state.shouldShowUsersButton && isMaxMembersCount" :isParentSpaceUsers="true" :users="members")
 </template>
 
 <style lang="stylus">

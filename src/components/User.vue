@@ -25,7 +25,8 @@ const props = defineProps({
   hideYouLabel: Boolean,
   isSmall: Boolean,
   isMedium: Boolean,
-  userDetailsIsInline: Boolean
+  userDetailsIsInline: Boolean,
+  shouldBounceIn: Boolean
 })
 
 const state = reactive({
@@ -107,7 +108,7 @@ const closeChildDialogs = () => {
     :class="{ clickable: isClickable }"
     :style="{backgroundColor: userColor}"
   )
-    img.anon-avatar(src="@/assets/anon-avatar.svg" :class="{ 'is-dark': colorIsDark }")
+    img.anon-avatar(src="@/assets/anon-avatar.svg" :class="{ 'is-dark': colorIsDark, 'bounce-in': shouldBounceIn }")
   .label-badge.you-badge.small-badge(v-if="isCurrentUser && !hideYouLabel")
     span YOU
   template(v-if="state.userDetailsInlineIsVisible && user")
@@ -179,4 +180,11 @@ button
         top 3px
         width 10.5px
 
+.bounce-in
+  animation bounce 0.5s ease-out
+@keyframes bounce
+  0%
+    transform translateY(0)
+  100%
+    transform translateY(4px)
 </style>
