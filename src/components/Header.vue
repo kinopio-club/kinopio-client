@@ -216,6 +216,7 @@ const backButtonIsVisible = computed(() => {
   return spaceId && spaceId !== currentSpace.value.id
 })
 const changeToPrevSpace = () => {
+  store.dispatch('closeAllDialogs')
   const id = currentSpace.value.id
   store.dispatch('currentSpace/loadPrevSpaceInSession')
   store.commit('prevSpaceIdInSession', id)

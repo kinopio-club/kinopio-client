@@ -3,6 +3,8 @@ import { reactive, computed, onMounted, onUnmounted, defineProps, defineEmits, w
 import { useStore } from 'vuex'
 
 import utils from '@/utils.js'
+import consts from '@/consts.js'
+
 const store = useStore()
 
 const labelElement = ref(null)
@@ -19,6 +21,10 @@ const props = defineProps({
 
 const userHasName = computed(() => Boolean(props.user.name))
 const colorIsDark = computed(() => utils.colorIsDark(props.user.color))
+const shouldBounce = computed(() => {
+  if (consts.userPrefersReducedMotion()) { return }
+  return props.user.isOnline
+})
 
 // user details
 
@@ -57,7 +63,7 @@ const showUserDetails = () => {
   :key="props.user.id"
   :data-id="props.user.id"
   :style="{ background: props.user.color }"
-  :class="{ 'button-badge': props.isClickable, 'bounce-up-down': props.user.isOnline }"
+  :class="{ 'button-badge': props.isClickable, 'bounce-up-down': shouldBounce }"
   @mouseup="toggleUserDetailsIsVisible"
   @touchend="toggleUserDetailsIsVisible"
   ref="labelElement"

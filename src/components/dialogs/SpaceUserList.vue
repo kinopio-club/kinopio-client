@@ -69,6 +69,7 @@ const showUserDetails = (event, user) => {
   const shouldHideUserDetails = user.id === store.state.userDetailsUser.id
   if (shouldHideUserDetails) {
     closeDialogs()
+    store.commit('userDetailsUser', {})
     return
   }
   let element = event.target
@@ -78,17 +79,38 @@ const showUserDetails = (event, user) => {
   store.commit('userDetailsPosition', position)
   store.commit('userDetailsIsVisible', true)
 }
-
 const closeDialogs = () => {
   store.commit('userDetailsIsVisible', false)
 }
+
+// other card users
+
+const isOtherCardUsers = computed(() => Boolean(otherCardUsers.value.length))
+const otherCardUsers = computed(() => {
+  const currentUserId = store.state.currentUser.id
+  const collaborators = store.state.currentSpace.collaborators
+  let items = store.getters['currentCards/users']
+  items = items.filter(user => Boolean(user))
+  // remove currentUser
+  items = items.filter(user => user.id !== currentUserId)
+  // remove users
+  items = items.filter(item => {
+    const member = users.value.find(user => {
+      return user.id === item.id
+    })
+    return !member
+  })
+  // items = utils.clone(items)
+  return items
+})
+
 </script>
 
 <template lang="pug">
 dialog.narrow.space-user-list(
   v-if="visible"
   :open="visible"
-  @click.left.stop
+  @click.left.stop="closeDialogs"
   ref="dialogElement"
   :style="{'max-height': state.dialogHeight + 'px'}"
 )
@@ -105,9 +127,16 @@ dialog.narrow.space-user-list(
       :isClickable="true"
       :showIsOnline="true"
     )
-
-  //- section
-  //-   p [open icon] Other Cards Added By
+  template(v-if="isCollaborators && isOtherCardUsers")
+    section.other-users-section
+    section.results-section
+      UserList(
+        :users="otherCardUsers"
+        :selectedUser="selectedUser"
+        @selectUser="toggleUserDetails"
+        :isClickable="true"
+        :showIsOnline="true"
+      )
 </template>
 
 <style lang="stylus">
@@ -115,4 +144,7 @@ dialog.narrow.space-user-list(
   left initial
   right 16px
   top 20px
+  .other-users-section
+    padding-top 0
+    padding-bottom 0
 </style>
