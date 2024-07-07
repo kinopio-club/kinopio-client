@@ -22,7 +22,6 @@ const state = reactive({
 const visible = computed(() => store.state.spaceUserListIsVisible)
 watch(() => visible.value, (value, prevValue) => {
   if (value) {
-    console.log('🌺🌺🌺', users.value, isSpectators.value)
     updateDialogHeight()
   }
 })
@@ -86,12 +85,26 @@ const closeDialogs = () => {
 </script>
 
 <template lang="pug">
-dialog.narrow.space-user-list(v-if="visible" :open="visible" @click.left.stop ref="dialogElement" :style="{'max-height': state.dialogHeight + 'px'}")
+dialog.narrow.space-user-list(
+  v-if="visible"
+  :open="visible"
+  @click.left.stop
+  ref="dialogElement"
+  :style="{'max-height': state.dialogHeight + 'px'}"
+)
   section
     p(v-if="isSpectators") Spectators
     p(v-if="isCollaborators") Collaborators
   section.results-section
-    UserList(:users="users" :selectedUser="selectedUser" @selectUser="toggleUserDetails" :showRemoveUser="showRemoveUser" @removeUser="removeCollaborator" :isClickable="true")
+    UserList(
+      :users="users"
+      :selectedUser="selectedUser"
+      @selectUser="toggleUserDetails"
+      :showRemoveUser="showRemoveUser"
+      @removeUser="removeCollaborator"
+      :isClickable="true"
+      :showIsOnline="true"
+    )
 
   //- section
   //-   p [open icon] Other Cards Added By

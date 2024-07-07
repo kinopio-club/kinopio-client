@@ -30,6 +30,18 @@ const tabIndex = computed(() => {
 
 // users
 
+const users = computed(() => {
+  const onlineUsers = store.state.currentSpace.clients
+  let items = props.users
+  items = items.map(user => {
+    const isOnline = onlineUsers.find(onlineUser => onlineUser.id === user.id)
+    if (isOnline) {
+      user.isOnline = true
+    }
+    return user
+  })
+  return items
+})
 const updateFilteredUsers = (users) => {
   state.filteredUsers = users
 }
@@ -37,11 +49,13 @@ const updateFilter = (filter) => {
   state.filter = filter
 }
 const usersFiltered = computed(() => {
+  let items
   if (state.filter) {
-    return state.filteredUsers
+    items = state.filteredUsers
   } else {
-    return props.users
+    items = users.value
   }
+  return items
 })
 
 // user
@@ -67,6 +81,8 @@ span
   ul.results-list.user-list
     template(v-for="user in usersFiltered" :key="user.id")
       li(@click.left.stop="selectUser($event, user)" :tabindex="tabIndex" v-on:keyup.stop.enter="selectUser($event, user)" :class="{ active: userIsSelected(user), 'is-not-clickable': !props.isClickable }")
+        .badge.success(v-if="user.isOnline")
+          img.icon.camera(src="@/assets/camera.svg" title="Online")
         UserLabelInline(:user="user")
         button.remove-user.small-button(v-if="props.showRemoveUser" @click.left.stop="removeUser(user)" title="Remove from space")
           img.icon.cancel(src="@/assets/add.svg")
