@@ -65,7 +65,10 @@ const showUserDetails = () => {
   @click.stop
 )
   .user-avatar-inline(:class="{ 'is-on-dark-background': props.isOnDarkBackground }")
-    img.anon-avatar(src="@/assets/anon-avatar.svg" :class="{ 'is-dark': colorIsDark }")
+    template(v-if="props.user.isOnline")
+      img.camera.anon-avatar(src="@/assets/camera.svg" title="Online")
+    template(v-else)
+      img.anon-avatar(src="@/assets/anon-avatar.svg" :class="{ 'is-dark': colorIsDark }")
   span.user-name(v-if="userHasName && !shouldHideName" :class="{ 'is-dark': colorIsDark }") {{ props.user.name }}
 </template>
 
@@ -85,6 +88,9 @@ const showUserDetails = () => {
       left 4px
       top 8px
       width 10.5px
+    .camera
+      top 7px
+      width 11px
   .user-name
     margin-left 6px
     color var(--primary-on-light-background)

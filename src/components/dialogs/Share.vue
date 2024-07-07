@@ -197,7 +197,7 @@ dialog.share.wide(v-if="props.visible" :open="props.visible" @click.left.stop="c
   Invite(v-if="isSpaceMember && currentUserIsSignedIn" @closeDialogs="closeDialogs" @emailInvitesIsVisible="emailInvitesIsVisible")
 
   //- space users, collaborators
-  section
+  section(v-if="spaceIsRemote")
     SpaceUsersButton(:showLabel="true")
 
   section(v-if="!spaceIsRemote")
