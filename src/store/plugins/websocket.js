@@ -147,7 +147,7 @@ export default function createWebSocketPlugin () {
             store.dispatch('currentSpace/updateUserPresence', updates)
             store.commit('updateOtherUsers', updates.user, { root: true })
           } else if (message === 'userLeftRoom') {
-            store.commit('currentSpace/removeSpectatorFromSpace', user || updates.user)
+            store.commit('currentSpace/removeIdleClientFromSpace', user || updates.user)
             store.commit('clearRemoteMultipleSelected', data)
           } else if (message === 'userLeftSpace') {
             store.commit('currentSpace/removeCollaboratorFromSpace', updates.user)

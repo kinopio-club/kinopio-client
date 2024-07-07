@@ -166,17 +166,15 @@ export default {
       })
     },
     updateUser: (state, user) => {
-      Object.keys(state).forEach(item => {
-        if (user[item]) {
-          state[item] = user[item]
-        }
-        if (utils.userIsUpgraded(user)) {
-          state.isUpgraded = true
-        }
-        if (user.apiKey) {
-          postMessage.send({ name: 'setApiKey', value: user.apiKey })
-        }
+      Object.keys(user).forEach(key => {
+        state[key] = user[key]
       })
+      if (utils.userIsUpgraded(user)) {
+        state.isUpgraded = true
+      }
+      if (user.apiKey) {
+        postMessage.send({ name: 'setApiKey', value: user.apiKey })
+      }
       cache.saveUser(user)
     },
     arenaAccessToken: (state, token) => {
@@ -862,6 +860,7 @@ export default {
       return state.id === connection.userId
     },
     isSpaceMember: (state, getters, rootState) => (space) => {
+      // a member is a user or collaborator
       space = space || rootState.currentSpace
       const isSpaceUser = getters.isSpaceUser(space)
       const isSpaceCollaborator = getters.isSpaceCollaborator(space)

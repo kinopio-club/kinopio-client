@@ -17,7 +17,7 @@ import sortBy from 'lodash-es/sortBy'
 import defer from 'lodash-es/defer'
 import debounce from 'lodash-es/debounce'
 
-let spectatorIdleTimers = []
+let idleClientTimers = []
 let isLoadingRemoteSpace, shouldLoadNewHelloSpace
 
 const currentSpace = {
@@ -59,10 +59,14 @@ const currentSpace = {
     removeClientsFromSpace: (state) => {
       state.clients = []
     },
-    removeSpectatorFromSpace: (state, oldUser) => {
+    removeIdleClientFromSpace: (state, oldUser) => {
       utils.typeCheck({ value: oldUser, type: 'object' })
-      if (!state.spectators) { return }
-      state.spectators = state.spectators.filter(user => {
+      let spectators = state.spectators || []
+      let clients = state.clients || []
+      state.spectators = spectators.filter(user => {
+        return user.id !== oldUser.id
+      })
+      state.clients = clients.filter(user => {
         return user.id !== oldUser.id
       })
     },
@@ -217,19 +221,21 @@ const currentSpace = {
         context.commit('updateSpaceClients', [newUser])
       } else {
         context.commit('addSpectatorToSpace', newUser)
-        clearTimeout(spectatorIdleTimers[newUser.id])
-        const removeIdleSpectator = (newUser) => {
-          context.commit('removeSpectatorFromSpace', newUser)
-        }
-        spectatorIdleTimers[newUser.id] = setTimeout(() => {
-          removeIdleSpectator(newUser)
-        }, 60 * 1000) // 60 seconds
       }
+      // ping idle client timer
+      const idleClientTime = 60 * 1000 // 60 seconds
+      clearTimeout(idleClientTimers[newUser.id])
+      const removeIdleClient = (newUser) => {
+        context.commit('removeIdleClientFromSpace', newUser)
+      }
+      idleClientTimers[newUser.id] = setTimeout(() => {
+        removeIdleClient(newUser)
+      }, 60 * 1000) // 60 seconds
     },
     addUserToJoinedSpace: (context, newUser) => {
       if (newUser.isCollaborator) {
         context.commit('addCollaboratorToSpace', newUser)
-        context.commit('removeSpectatorFromSpace', newUser)
+        context.commit('removeIdleClientFromSpace', newUser)
       } else {
         context.dispatch('updateUserPresence', newUser)
       }
@@ -470,7 +476,7 @@ const currentSpace = {
     },
     duplicateSpace: (context) => {
       let space = utils.clone(context.state)
-      const user = context.rootState.currentUser
+      const user = { id: context.rootState.currentUser.id }
       context.commit('broadcast/leaveSpaceRoom', { user, type: 'userLeftRoom' }, { root: true })
       let uniqueNewSpace = utils.clearSpaceMeta(space, 'copy')
       uniqueNewSpace.originSpaceId = space.id
@@ -483,7 +489,7 @@ const currentSpace = {
       context.commit('addNotification', { message: `Space duplicated`, type: 'success' }, { root: true })
     },
     addSpace: (context, space) => {
-      const user = context.rootState.currentUser
+      const user = { id: context.rootState.currentUser.id }
       context.commit('broadcast/leaveSpaceRoom', { user, type: 'userLeftRoom' }, { root: true })
       context.dispatch('createNewSpace', space)
       context.dispatch('saveNewSpace')
@@ -492,7 +498,7 @@ const currentSpace = {
       context.commit('triggerUpdateWindowHistory', null, { root: true })
     },
     addJournalSpace: async (context) => {
-      const user = context.rootState.currentUser
+      const user = { id: context.rootState.currentUser.id }
       context.commit('broadcast/leaveSpaceRoom', { user, type: 'userLeftRoom' }, { root: true })
       await context.dispatch('createNewJournalSpace')
       context.dispatch('saveNewSpace')
@@ -502,7 +508,7 @@ const currentSpace = {
     },
 
     addInboxSpace: (context) => {
-      const user = context.rootState.currentUser
+      const user = { id: context.rootState.currentUser.id }
       context.commit('broadcast/leaveSpaceRoom', { user, type: 'userLeftRoom' }, { root: true })
       context.dispatch('createNewInboxSpace')
       context.dispatch('saveNewSpace')
@@ -513,7 +519,6 @@ const currentSpace = {
     getRemoteSpace: async (context, space) => {
       const collaboratorKey = context.rootState.spaceCollaboratorKeys.find(key => key.spaceId === space.id)
       const currentUserIsSignedIn = context.rootGetters['currentUser/isSignedIn']
-      const user = context.rootState.currentUser
       const currentSpaceIsRemote = context.rootGetters['currentSpace/isRemote']
       let remoteSpace
       try {

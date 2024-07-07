@@ -110,6 +110,7 @@ onMounted(() => {
   window.addEventListener('load', clearCircles)
   startPostScroll()
   state.dropGuideLineIsVisible = !utils.isMobile()
+  window.addEventListener('visibilitychange', clearRects)
 })
 
 onBeforeUnmount(() => {
@@ -118,6 +119,7 @@ onBeforeUnmount(() => {
   window.removeEventListener('scroll', userScroll)
   window.removeEventListener('touchmove', userScroll)
   window.removeEventListener('load', clearCircles)
+  window.removeEventListener('visibilitychange', clearRects)
 })
 
 const state = reactive({
@@ -125,6 +127,14 @@ const state = reactive({
   currentCursorInSpace: {},
   uploadIsDraggedOver: false
 })
+
+const clearRects = () => {
+  paintingContext.clearRect(0, 0, pageWidth.value, pageHeight.value)
+  remotePaintingContext.clearRect(0, 0, pageWidth.value, pageHeight.value)
+  lockingContext.clearRect(0, 0, pageWidth.value, pageHeight.value)
+  initialCircleContext.clearRect(0, 0, pageWidth.value, pageHeight.value)
+  notifyOffscreenCircleContext.clearRect(0, 0, pageWidth.value, pageHeight.value)
+}
 
 // current user
 

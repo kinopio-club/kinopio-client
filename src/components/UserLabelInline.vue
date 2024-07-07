@@ -3,6 +3,8 @@ import { reactive, computed, onMounted, onUnmounted, defineProps, defineEmits, w
 import { useStore } from 'vuex'
 
 import utils from '@/utils.js'
+import consts from '@/consts.js'
+
 const store = useStore()
 
 const labelElement = ref(null)
@@ -19,6 +21,10 @@ const props = defineProps({
 
 const userHasName = computed(() => Boolean(props.user.name))
 const colorIsDark = computed(() => utils.colorIsDark(props.user.color))
+const shouldBounce = computed(() => {
+  if (consts.userPrefersReducedMotion()) { return }
+  return props.user.isOnline
+})
 
 // user details
 
@@ -54,19 +60,22 @@ const showUserDetails = () => {
 
 <template lang="pug">
 .user-label-inline.badge(
-  :key="user.id"
-  :data-id="user.id"
-  :style="{ background: user.color }"
-  :class="{ 'button-badge': isClickable }"
+  :key="props.user.id"
+  :data-id="props.user.id"
+  :style="{ background: props.user.color }"
+  :class="{ 'button-badge': props.isClickable, 'bounce-up-down': shouldBounce }"
   @mouseup="toggleUserDetailsIsVisible"
   @touchend="toggleUserDetailsIsVisible"
   ref="labelElement"
-  :title="title"
+  :title="props.title"
   @click.stop
 )
-  .user-avatar-inline(:class="{ 'is-on-dark-background': isOnDarkBackground }")
-    img.anon-avatar(src="@/assets/anon-avatar.svg" :class="{ 'is-dark': colorIsDark }")
-  span.user-name(v-if="userHasName && !shouldHideName" :class="{ 'is-dark': colorIsDark }") {{ user.name }}
+  .user-avatar-inline(:class="{ 'is-on-dark-background': props.isOnDarkBackground }")
+    template(v-if="props.user.isOnline")
+      img.camera.anon-avatar(src="@/assets/camera.svg" title="Online")
+    template(v-else)
+      img.anon-avatar(src="@/assets/anon-avatar.svg" :class="{ 'is-dark': colorIsDark }")
+  span.user-name(v-if="userHasName && !shouldHideName" :class="{ 'is-dark': colorIsDark }") {{ props.user.name }}
 </template>
 
 <style lang="stylus">
@@ -85,6 +94,9 @@ const showUserDetails = () => {
       left 4px
       top 8px
       width 10.5px
+    .camera
+      top 7px
+      width 11px
   .user-name
     margin-left 6px
     color var(--primary-on-light-background)
@@ -96,4 +108,13 @@ const showUserDetails = () => {
     padding-bottom 0
     .anon-avatar
       top 6px
+
+.bounce-up-down
+  animation bounce-up-down 0.5s infinite ease-out alternate
+@keyframes bounce-up-down
+  0%
+    transform translateY(-2px)
+  100%
+    transform translateY(2px)
+
 </style>

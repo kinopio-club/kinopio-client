@@ -31,11 +31,14 @@ const toggleDescription = (name) => {
 }
 
 const cardsCreatedCount = computed(() => {
+  let count
   if (props.isCurrentUser) {
-    return props.user.cardsCreatedCount
+    count = props.user.cardsCreatedCount
   } else {
-    return props.user.cardsCreatedCountRaw
+    count = props.user.cardsCreatedCountRaw
   }
+  count = Math.max(0, count || 0)
+  return count
 })
 </script>
 

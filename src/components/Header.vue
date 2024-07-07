@@ -34,6 +34,7 @@ import Pricing from '@/components/dialogs/Pricing.vue'
 import SpaceTodayJournalBadge from '@/components/SpaceTodayJournalBadge.vue'
 import Discovery from '@/components/Discovery.vue'
 import UserSettings from '@/components/dialogs/UserSettings.vue'
+import SpaceUserList from '@/components/dialogs/SpaceUserList.vue'
 import consts from '@/consts.js'
 
 import sortBy from 'lodash-es/sortBy'
@@ -215,6 +216,7 @@ const backButtonIsVisible = computed(() => {
   return spaceId && spaceId !== currentSpace.value.id
 })
 const changeToPrevSpace = () => {
+  store.dispatch('closeAllDialogs')
   const id = currentSpace.value.id
   store.dispatch('currentSpace/loadPrevSpaceInSession')
   store.commit('prevSpaceIdInSession', id)
@@ -639,6 +641,7 @@ header(v-if="isVisible" :style="state.position" :class="{'fade-out': isFadingOut
         SpaceUsers(:userDetailsIsInline="true")
         UserSettings
         UpdatePassword
+        SpaceUserList
         //- Share
         .button-wrap
           button(@click.left.stop="toggleShareIsVisible" :class="{active: state.shareIsVisible, 'translucent-button': !shouldIncreaseUIContrast}")
@@ -759,6 +762,8 @@ header
       // 2nd row onwards
       margin-top 6px
       margin-left 52px
+      @media(max-width 550px)
+        margin-left 42px
       // 1st row
       &:first-child
         margin-top 0
@@ -793,6 +798,8 @@ header
     .down-arrow
       padding-left 2px
       opacity 0.5
+      @media(max-width 550px)
+        display none
     .label-badge
       transform translateY(10px)
     &:active,
@@ -837,7 +844,7 @@ header
     dialog
       max-width initial
     .space-name-button-wrap
-      max-width 58dvw
+      max-width 55dvw
       @media(max-width 550px)
         max-width 35dvw
       &.back-button-is-visible
