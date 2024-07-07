@@ -31,6 +31,9 @@ const tabIndex = computed(() => {
 // users
 
 const users = computed(() => {
+  if (!props.showIsOnline) {
+    return props.users
+  }
   const onlineUsers = store.state.currentSpace.clients
   let items = props.users
   items = items.map(user => {

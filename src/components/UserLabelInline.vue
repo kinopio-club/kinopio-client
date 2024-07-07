@@ -57,7 +57,7 @@ const showUserDetails = () => {
   :key="props.user.id"
   :data-id="props.user.id"
   :style="{ background: props.user.color }"
-  :class="{ 'button-badge': props.isClickable }"
+  :class="{ 'button-badge': props.isClickable, 'bounce-up-down': props.user.isOnline }"
   @mouseup="toggleUserDetailsIsVisible"
   @touchend="toggleUserDetailsIsVisible"
   ref="labelElement"
@@ -96,4 +96,13 @@ const showUserDetails = () => {
     padding-bottom 0
     .anon-avatar
       top 6px
+
+.bounce-up-down
+  animation bounce-up-down 0.5s infinite ease-out alternate
+@keyframes bounce-up-down
+  0%
+    transform translateY(-2px)
+  100%
+    transform translateY(2px)
+
 </style>
