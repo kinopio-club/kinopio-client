@@ -57,6 +57,11 @@ const toggleUserDetails = (event, user) => {
   closeDialogs()
   showUserDetails(event, user)
 }
+const removeUserFromSpaceUserListUsers = (prevUser) => {
+  const newUsers = users.value.filter(user => user.id !== prevUser.id)
+  console.log(users.value, newUsers)
+  store.commit('spaceUserListUsers', newUsers)
+}
 const removeCollaborator = async (user) => {
   store.dispatch('currentSpace/removeCollaboratorFromSpace', user)
   const isCurrentUserRemove = store.state.currentUser.id === user.id
@@ -64,6 +69,7 @@ const removeCollaborator = async (user) => {
     store.dispatch('closeAllDialogs')
   }
   closeDialogs()
+  removeUserFromSpaceUserListUsers(user)
 }
 const showUserDetails = (event, user) => {
   const shouldHideUserDetails = user.id === store.state.userDetailsUser.id
