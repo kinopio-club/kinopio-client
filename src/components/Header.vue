@@ -762,6 +762,8 @@ header
       // 2nd row onwards
       margin-top 6px
       margin-left 52px
+      @media(max-width 550px)
+        margin-left 42px
       // 1st row
       &:first-child
         margin-top 0
@@ -796,6 +798,8 @@ header
     .down-arrow
       padding-left 2px
       opacity 0.5
+      @media(max-width 550px)
+        display none
     .label-badge
       transform translateY(10px)
     &:active,
