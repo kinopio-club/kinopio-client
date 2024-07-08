@@ -160,7 +160,7 @@ const closeChildDialogs = () => {
         width 14px
 
   .label-badge
-    bottom -7px
+    bottom -5px
     width initial
   .you-badge
     width max-content
