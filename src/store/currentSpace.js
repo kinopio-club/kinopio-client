@@ -396,7 +396,7 @@ const currentSpace = {
       let weather = context.rootState.currentUser.weather || ''
       const shouldUpdateWeather = !weather && isOnline
       if (shouldUpdateWeather) {
-        weather = await context.dispatch('api/weather', null, { root: true })
+        weather = await context.dispatch('api/weather', null, { root: true }) || ''
         weather = `${weather}`
       }
       if (!weather) {
