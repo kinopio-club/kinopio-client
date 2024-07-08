@@ -397,7 +397,7 @@ const currentSpace = {
       const shouldUpdateWeather = !weather && isOnline
       if (shouldUpdateWeather) {
         weather = await context.dispatch('api/weather', null, { root: true })
-        weather = `\n\n${weather}`
+        weather = `${weather}`
       }
       if (!weather) {
         weather = ''

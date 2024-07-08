@@ -1335,7 +1335,9 @@ export default {
       spectators: [],
       clients: [],
       isHidden: false,
-      visits: 0
+      visits: 0,
+      showInExplore: false,
+      proposedShowInExplore: false
     }
   },
   clearSpaceMeta (space, type) {
