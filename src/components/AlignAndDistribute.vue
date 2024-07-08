@@ -312,7 +312,7 @@ const updateConnectionPaths = async () => {
   store.commit('multipleConnectionsSelectedIds', connectionIds)
   // updates
   connections = uniqBy(connections, 'id')
-  store.dispatch('currentConnections/updatePaths', { connections, shouldUpdateApi: true })
+  store.dispatch('currentConnections/updatePaths', { connections })
 }
 
 // update positions

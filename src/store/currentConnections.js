@@ -226,7 +226,7 @@ export default {
       context.dispatch('api/addToQueue', { name: 'updateConnection', body: connection }, { root: true })
       context.dispatch('broadcast/update', { updates: connection, type: 'updateConnectionTypeForConnection', handler: 'currentConnections/update' }, { root: true })
     },
-    updatePaths: (context, { cardId, shouldUpdateApi, connections }) => {
+    updatePaths: (context, { cardId, connections }) => {
       const canEditSpace = context.rootGetters['currentUser/canEditSpace']()
       connections = connections || context.getters.byCardId(cardId)
       connections.map(connection => {
@@ -241,9 +241,7 @@ export default {
           id: connection.id,
           path
         }
-        if (shouldUpdateApi) {
-          context.dispatch('api/addToQueue', { name: 'updateConnection', body: newConnection }, { root: true })
-        }
+        context.dispatch('api/addToQueue', { name: 'updateConnection', body: newConnection }, { root: true })
         if (canEditSpace) {
           context.dispatch('broadcast/update', { updates: newConnection, type: 'updateConnection', handler: 'currentConnections/update' }, { root: true })
           context.commit('update', newConnection)
@@ -314,7 +312,7 @@ export default {
       context.commit('triggerUpdatePathWhileDragging', newConnections, { root: true })
       context.dispatch('broadcast/update', { updates: { connections: newConnections }, type: 'updateConnection', handler: 'currentConnections/updatePathsBroadcast' }, { root: true })
     },
-    correctPaths: (context, { shouldUpdateApi }) => {
+    correctPaths: (context) => {
       if (!context.rootState.webfontIsLoaded) { return }
       if (!context.getters.all.length) { return }
       let connections = []
@@ -328,7 +326,7 @@ export default {
         if (path === connection.path) { return }
         connections.push(connection)
       })
-      context.dispatch('updatePaths', { connections, shouldUpdateApi })
+      context.dispatch('updatePaths', { connections })
     },
     updateType: (context, type) => {
       context.dispatch('history/add', { connectionTypes: [type] }, { root: true })

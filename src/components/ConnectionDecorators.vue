@@ -119,7 +119,7 @@ export default {
           endCardId
         })
       })
-      this.$store.dispatch('currentConnections/updatePaths', { connections: this.connections, shouldUpdateApi: true })
+      this.$store.dispatch('currentConnections/updatePaths', { connections: this.connections })
     },
     togglePathIsStraight (isStraight) {
       let controlPoint = null
@@ -132,7 +132,7 @@ export default {
           controlPoint
         })
       })
-      this.$store.dispatch('currentConnections/updatePaths', { connections: this.connections, shouldUpdateApi: true })
+      this.$store.dispatch('currentConnections/updatePaths', { connections: this.connections })
       this.$store.dispatch('currentUser/update', { defaultConnectionControlPoint: controlPoint })
     }
 

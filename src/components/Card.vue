@@ -1099,7 +1099,7 @@ const isLoadingUrlPreview = computed(() => {
   if (isLoading) {
     prevIsLoadingUrlPreview = true
   } else if (prevIsLoadingUrlPreview) {
-    store.dispatch('currentConnections/updatePaths', { cardId: props.card.id, shouldUpdateApi: true })
+    store.dispatch('currentConnections/updatePaths', { cardId: props.card.id })
   }
   return isLoading
   // if (!isLoading) { return }
