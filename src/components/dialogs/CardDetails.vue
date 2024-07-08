@@ -1151,6 +1151,7 @@ const insertLineBreak = (event) => {
   })
   state.insertedLineBreak = true
   updateCardName(newName)
+  textareaSizes()
 }
 
 // Comment
