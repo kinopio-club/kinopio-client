@@ -178,10 +178,13 @@ const prependToItemNames = (pattern) => {
     prependToName({ pattern, item, nameSegment: name })
   })
 }
-const updateName = (item, newName) => {
+const updateName = async (item, newName) => {
   if (item.isCard) {
     const card = store.getters['currentCards/byId'](item.id)
     store.dispatch('currentCards/updateName', { card, newName })
+    await nextTick()
+    await nextTick()
+    store.dispatch('currentConnections/updatePaths', { cardId: card.id })
   }
   if (item.isBox) {
     const box = store.getters['currentBoxes/byId'](item.id)
@@ -437,13 +440,15 @@ const updateCardDimensions = async () => {
   await nextTick()
   await nextTick()
 }
-const updateCard = (card, updates) => {
+const updateCard = async (card, updates) => {
   const keys = Object.keys(updates)
   card = { id: card.id }
   keys.forEach(key => {
     card[key] = updates[key]
   })
   store.dispatch('currentCards/update', card)
+  await updateCardDimensions()
+  store.dispatch('currentConnections/updatePaths', { cardId: card.id })
 }
 
 // box
