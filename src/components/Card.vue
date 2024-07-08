@@ -490,7 +490,8 @@ const width = computed(() => {
 const resizeWidth = computed(() => {
   if (isComment.value) { return }
   let resizeWidth = props.card.resizeWidth
-  if (iframeIsVisible.value || isLoadingUrlPreview.value) {
+  if (iframeIsVisible.value) {
+    resizeWidth = resizeWidth || consts.minCardIframeWidth
     resizeWidth = Math.max(resizeWidth, consts.minCardIframeWidth)
   }
   if (!resizeWidth) { return }
