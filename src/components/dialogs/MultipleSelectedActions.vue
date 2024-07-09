@@ -186,6 +186,12 @@ const editableCards = computed(() => {
     })
   }
 })
+const updateDimensionsAndPaths = async () => {
+  store.dispatch('currentCards/updateDimensions', { cards: cards.value })
+  await nextTick()
+  await nextTick()
+  store.dispatch('currentConnections/updateMultiplePaths', cards.value)
+}
 
 // card checkboxes
 
@@ -205,7 +211,7 @@ const cardCheckboxes = computed({
     }
     checkCardsHaveCheckboxes()
     checkCardsCheckboxIsChecked()
-    store.dispatch('currentConnections/updateMultiplePaths', cards)
+    updateDimensionsAndPaths()
   }
 })
 const checkCardsHaveCheckboxes = () => {
@@ -219,7 +225,7 @@ const checkCardsCheckboxIsChecked = () => {
   const cardsChecked = cards.value.filter(card => utils.nameIsChecked(card.name))
   state.cardsCheckboxIsChecked = cardsChecked.length === cards.value.length
 }
-const addCheckboxToCards = () => {
+const addCheckboxToCards = async () => {
   let updatedCards = []
   cards.value.forEach(card => {
     if (!utils.checkboxFromString(card.name)) {
@@ -232,6 +238,7 @@ const addCheckboxToCards = () => {
   })
   store.dispatch('currentCards/updateMultiple', updatedCards)
   state.cardsHaveCheckboxes = true
+  updateDimensionsAndPaths()
 }
 
 // connect cards
