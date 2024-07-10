@@ -310,6 +310,7 @@ const currentCards = {
           delete card.y
         }
       }
+      delete card.userId
       context.dispatch('api/addToQueue', { name: 'updateCard', body: card }, { root: true })
       context.dispatch('broadcast/update', { updates: card, type: 'updateCard', handler: 'currentCards/update' }, { root: true })
       context.dispatch('history/add', { cards: [card] }, { root: true })
