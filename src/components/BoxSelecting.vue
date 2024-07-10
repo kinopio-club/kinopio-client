@@ -212,11 +212,14 @@ export default {
       boxes = boxes.map(box => {
         box.isBox = true
         const element = document.querySelector(`.box-info[data-box-id="${box.id}"]`)
+        if (!element) { return }
+        if (element.dataset.isVisibleInViewport === 'false') { return }
         const rect = element.getBoundingClientRect()
         box.width = rect.width
         box.height = rect.height
         return box
       })
+      boxes = boxes.filter(box => Boolean(box))
       const items = cards.concat(boxes)
       selectableItems = this.selectableItems(items)
     },
