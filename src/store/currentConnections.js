@@ -273,7 +273,7 @@ export default {
         }
         newConnections.push(newConnection)
         if (canEditSpace) {
-          context.dispatch('broadcast/update', { updates: connection, type: 'updateConnection', handler: 'currentConnections/update' }, { root: true })
+          context.dispatch('broadcast/update', { updates: newConnection, type: 'updateConnection', handler: 'currentConnections/update' }, { root: true })
           context.commit('update', newConnection)
         } else {
           context.commit('updateReadOnly', newConnection)
