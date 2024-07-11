@@ -43,12 +43,16 @@ const updateDialogHeight = async () => {
   state.dialogHeight = utils.elementHeight(element)
 }
 
-const blogUrl = computed(() => consts.blogUrl())
-
 const updateUserLastRead = () => {
   if (!props.blogPosts.length) { return }
   const lastReadBlogPostId = props.blogPosts[0].id
   store.dispatch('currentUser/lastReadBlogPostId', lastReadBlogPostId)
+}
+
+const isUnread = (post) => {
+  let lastReadBlogPostId = store.state.currentUser.lastReadBlogPostId
+  lastReadBlogPostId = parseInt(lastReadBlogPostId)
+  return post.id > lastReadBlogPostId
 }
 
 // blog posts
@@ -59,13 +63,10 @@ const relativeDate = (post) => {
 </script>
 
 <template lang="pug">
-dialog.whats-new(v-if="visible" :open="visible" @click.left.stop ref="dialogElement" :style="{'max-height': state.dialogHeight + 'px'}")
+dialog.whats-new.narrow(v-if="visible" :open="visible" @click.left.stop ref="dialogElement" :style="{'max-height': state.dialogHeight + 'px'}")
   section.section-title
     .row.title-row
       span What's New
-      a(:href="blogUrl")
-        button.small-button(@click.left.stop="changeSpaceToBlog")
-          span 🏎️ Blog
 
   section(v-if="!props.blogPosts.length")
     Loader(:visible="true")
@@ -75,15 +76,18 @@ dialog.whats-new(v-if="visible" :open="visible" @click.left.stop ref="dialogElem
       template(v-for="post in props.blogPosts" :key="post.id")
         a(:href="post.cardUrl" target="_blank")
           li
+            .badge.info.new-unread-badge(v-if="isUnread(post)")
             .row
-              //- date
-              span.badge.status.inline-badge
-                img.icon.time(src="@/assets/time.svg")
-                span {{ relativeDate(post) }}
               //- title
               span.badge.info {{post.title}}
             .row
-              p {{post.description}}
+              p
+                //- date
+                span.badge.status.inline-badge
+                  img.icon.time(src="@/assets/time.svg")
+                  span {{ relativeDate(post) }}
+                //- description
+                span {{post.description}}
 </template>
 
 <style lang="stylus">
@@ -98,8 +102,7 @@ dialog.whats-new
     .status
       flex-shrink 0
     .row
-      margin-bottom 0
-      align-items flex-start
+      margin 0
   a
     text-decoration none
 </style>
