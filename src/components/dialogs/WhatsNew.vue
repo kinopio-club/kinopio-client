@@ -1,5 +1,68 @@
+<script setup>
+import { reactive, computed, onMounted, onBeforeUnmount, defineProps, defineEmits, watch, ref, nextTick } from 'vue'
+import { useStore } from 'vuex'
+
+import Loader from '@/components/Loader.vue'
+import utils from '@/utils.js'
+import consts from '@/consts.js'
+
+const store = useStore()
+
+const dialogElement = ref(null)
+
+onMounted(() => {
+  store.subscribe(mutation => {
+    if (mutation.type === 'updatePageSizes') {
+      updateDialogHeight()
+    } else if (mutation.type === 'closeAllDialogs' && props.visible) {
+      updateUserLastRead()
+    }
+  })
+})
+
+const props = defineProps({
+  visible: Boolean,
+  newStuff: Array
+})
+watch(() => props.visible, (value, prevValue) => {
+  if (value) {
+    updateDialogHeight()
+  } else {
+    updateUserLastRead()
+  }
+})
+
+const state = reactive({
+  dialogHeight: null
+})
+
+const updateDialogHeight = async () => {
+  if (!props.visible) { return }
+  await nextTick()
+  let element = dialogElement.value
+  state.dialogHeight = utils.elementHeight(element)
+}
+
+const isOnline = computed(() => store.state.isOnline)
+
+const updateUserLastRead = () => {
+  if (!props.newStuff.length) { return }
+  const lastReadNewStuffId = props.newStuff[0].id
+  store.dispatch('currentUser/lastReadNewStuffId', lastReadNewStuffId)
+}
+const assetUrl = (string) => {
+  const url = utils.urlFromString(string)
+  if (url) {
+    return url
+  } else {
+    // /assets/posts/xyz.jpg
+    return `${consts.blogHost()}${string}`
+  }
+}
+</script>
+
 <template lang="pug">
-dialog.whats-new(v-if="visible" :open="visible" @click.left.stop ref="dialog" :style="{'max-height': dialogHeight + 'px'}")
+dialog.whats-new(v-if="visible" :open="visible" @click.left.stop ref="dialogElement" :style="{'max-height': state.dialogHeight + 'px'}")
   section
     p What's New
     .button-wrap
@@ -14,11 +77,11 @@ dialog.whats-new(v-if="visible" :open="visible" @click.left.stop ref="dialog" :s
           span Blog{{' '}}
           img.icon.visit(src="@/assets/visit.svg")
 
-  section(v-if="!newStuff.length")
+  section(v-if="!props.newStuff.length")
     Loader(:visible="true")
 
   section
-    template(v-for="item in newStuff" :key="item.id")
+    template(v-for="item in props.newStuff" :key="item.id")
       a(:href="item.url" target="_blank")
         article.badge.button-badge(:style="{ backgroundColor: item._meta.color }")
           //- media
@@ -37,74 +100,6 @@ dialog.whats-new(v-if="visible" :open="visible" @click.left.stop ref="dialog" :s
           span Read All{{' '}}
           img.icon.visit(src="@/assets/visit.svg")
 </template>
-
-<script>
-import Loader from '@/components/Loader.vue'
-import utils from '@/utils.js'
-import consts from '@/consts.js'
-
-export default {
-  name: 'WhatsNew',
-  components: {
-    Loader
-  },
-  props: {
-    visible: Boolean,
-    newStuff: Array
-  },
-  created () {
-    this.$store.subscribe((mutation, state) => {
-      if (mutation.type === 'updatePageSizes') {
-        this.updateDialogHeight()
-      }
-      if (mutation.type === 'closeAllDialogs' && this.visible) {
-        this.updateUserLastRead()
-      }
-    })
-  },
-  data () {
-    return {
-      dialogHeight: null
-    }
-  },
-  computed: {
-    isOnline () { return this.$store.state.isOnline }
-  },
-  methods: {
-    updateUserLastRead () {
-      if (!this.newStuff.length) { return }
-      const lastReadNewStuffId = this.newStuff[0].id
-      this.$store.dispatch('currentUser/lastReadNewStuffId', lastReadNewStuffId)
-    },
-    updateDialogHeight () {
-      if (!this.visible) { return }
-      this.$nextTick(() => {
-        let element = this.$refs.dialog
-        this.dialogHeight = utils.elementHeight(element)
-      })
-    },
-    assetUrl (string) {
-      const url = utils.urlFromString(string)
-      if (url) {
-        return url
-      } else {
-        // /assets/posts/xyz.jpg
-        return `${consts.blogHost()}${string}`
-      }
-    }
-  },
-  watch: {
-    visible (visible) {
-      if (visible) {
-        this.updateDialogHeight()
-      }
-      if (!visible) {
-        this.updateUserLastRead()
-      }
-    }
-  }
-}
-</script>
 
 <style lang="stylus">
 .whats-new
