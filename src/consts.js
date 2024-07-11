@@ -36,13 +36,6 @@ export default {
       return (env.MODE === 'development')
     }
   },
-  roadmapSpaceId () {
-    if (this.isDevelopment()) {
-      return 'FiM7akGos18Sfx4yKrwjF'
-    } else {
-      return '6TRE21gchHI7alHLuwzd5'
-    }
-  },
   kinopioDomain () {
     let domain = 'https://kinopio.club'
     if (this.isDevelopment()) {
@@ -57,13 +50,12 @@ export default {
     }
     return host
   },
-
-  blogHost () {
-    let host = 'https://blog.kinopio.club'
+  roadmapSpaceId () {
     if (this.isDevelopment()) {
-      host = 'http://localhost:8082'
+      return 'FiM7akGos18Sfx4yKrwjF'
+    } else {
+      return '6TRE21gchHI7alHLuwzd5'
     }
-    return host
   },
   blogSpaceId () {
     if (this.isDevelopment()) {
@@ -71,6 +63,18 @@ export default {
     } else {
       return '6lsytK8ZfOtMl2oqG05Rj'
     }
+  },
+  blogUrl () {
+    const host = this.kinopioDomain()
+    const spaceName = 'kinopio-blog'
+    const spaceId = this.blogSpaceId()
+    return `${host}/${spaceName}-${spaceId}`
+  },
+  roadmapUrl () {
+    const host = this.kinopioDomain()
+    const spaceName = 'kinopio-roadmap'
+    const spaceId = this.roadmapSpaceId()
+    return `${host}/${spaceName}-${spaceId}`
   },
   websocketHost () {
     let host = 'wss://api.kinopio.club'

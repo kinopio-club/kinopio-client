@@ -28,15 +28,15 @@ onMounted(() => {
   })
   const isOffline = !store.state.isOnline
   if (isOffline) { return }
-  initUpdateNewStuff()
+  initBlogPosts()
 })
 
 const props = defineProps({
   visible: Boolean
 })
 watch(() => props.visible, (value, prevValue) => {
-  if (value && state.newStuff.length) {
-    checkNewStuffIsUpdated(state.newStuff[0].id)
+  if (value && state.blogPosts.length) {
+    checkBlogPostsIsUpdated(state.blogPosts[0].id)
   }
   if (value) {
     closeDialogs()
@@ -51,11 +51,10 @@ const state = reactive({
   whatsNewIsVisible: false,
   appsAndExtensionsIsVisible: false,
   helpIsVisible: false,
-  newStuff: [],
+  blogPosts: [],
   dialogHeight: null
 })
 
-const isAddPage = computed(() => store.state.isAddPage)
 const childDialogIsVisible = computed(() => {
   return state.whatsNewIsVisible || state.appsAndExtensionsIsVisible || state.helpIsVisible
 })
@@ -77,58 +76,44 @@ const updateDialogHeight = async () => {
 
 // new stuff
 
-const initUpdateNewStuff = async () => {
-  await updateNewStuff()
-  if (!utils.arrayHasItems(state.newStuff)) { return }
-  checkNewStuffIsUpdated(state.newStuff[0].id)
+const initBlogPosts = async () => {
+  await updateBlogPosts()
+  if (!utils.arrayHasItems(state.blogPosts)) { return }
+  checkBlogPostsIsUpdated(state.blogPosts[0].id)
   checkKinopioUpdatesIntervalTimer = setInterval(() => {
     checkIfKinopioUpdatesAreAvailable()
   }, 1000 * 60 * 60 * 1) // 1 hour
 }
-const newStuffIsUpdated = computed(() => store.state.newStuffIsUpdated)
-const updateNewStuff = async () => {
-  // try {
-
-  // let data = await store.dispatch('api/getNewStuff')
-  // if (!data) { return }
-  // data = data.items.slice(0, 20)
-  // data = data.map(item => {
-  //   item.summary = utils.convertHTMLEntities(item.summary)
-  //   return item
-  // })
-  // if (isSecureAppContextIOS.value) {
-  //   data = data.filter(item => {
-  //     return !item.title.includes('Lifetime Plan')
-  //   })
-  // }
-  // state.newStuff = data
-  // } catch (error) {
-  //   console.error('🚒 updateNewStuff', error)
-  // }
+const blogPostsIsUpdated = computed(() => store.state.blogPostsIsUpdated)
+const updateBlogPosts = async () => {
+  try {
+    let posts = await store.dispatch('api/getBlogPosts')
+    if (!posts) { return }
+    posts = posts.slice(0, 20)
+    if (isSecureAppContextIOS.value) {
+      posts = posts.filter(post => {
+        return !post.title.includes('Lifetime Plan')
+      })
+    }
+    state.blogPosts = posts
+  } catch (error) {
+    console.error('🚒 updateBlogPosts', error)
+  }
 }
-const checkNewStuffIsUpdated = (latestUpdateId) => {
-  if (isAddPage.value) { return }
-  const userlastReadId = store.state.currentUser.lastReadNewStuffId
-  const newStuffIsUpdated = userlastReadId !== latestUpdateId
-  store.commit('newStuffIsUpdated', newStuffIsUpdated)
+const checkBlogPostsIsUpdated = (latestBlogPostId) => {
+  const userlastReadId = store.state.currentUser.lastReadBlogPostId
+  const blogPostsIsUpdated = userlastReadId !== latestBlogPostId
+  store.commit('blogPostsIsUpdated', blogPostsIsUpdated)
 }
 const checkIfKinopioUpdatesAreAvailable = async () => {
-  await updateNewStuff()
-  if (!state.newStuff.length) { return }
-  let newest = state.newStuff[0]
+  await updateBlogPosts()
+  if (!state.blogPosts.length) { return }
+  let newest = state.blogPosts[0]
   newest = dayjs(newest.date_published)
   const timeSinceNewest = initTime.diff(newest, 'minute')
   if (timeSinceNewest < 0) {
     store.commit('notifyKinopioUpdatesAreAvailable', true)
   }
-}
-
-// roadmap
-
-const changeSpaceToRoadmap = () => {
-  const space = { id: consts.roadmapSpaceId() }
-  store.dispatch('currentSpace/changeSpace', space)
-  store.dispatch('closeAllDialogs')
 }
 
 // donate
@@ -146,7 +131,7 @@ const toggleWhatsNewIsVisible = () => {
   const isVisible = state.whatsNewIsVisible
   closeDialogs()
   state.whatsNewIsVisible = !isVisible
-  store.commit('newStuffIsUpdated', false)
+  store.commit('blogPostsIsUpdated', false)
 }
 
 // keyboard shortcuts
@@ -174,7 +159,17 @@ const toggleHelpIsVisible = () => {
 
 // links
 
+const changeSpaceToRoadmap = () => {
+  const space = { id: consts.roadmapSpaceId() }
+  store.dispatch('currentSpace/changeSpace', space)
+}
+const changeSpaceToBlog = () => {
+  const space = { id: consts.blogSpaceId() }
+  store.dispatch('currentSpace/changeSpace', space)
+}
 const discordUrl = computed(() => consts.discordUrl)
+const roadmapUrl = computed(() => consts.roadmapUrl())
+const blogUrl = computed(() => consts.blogUrl())
 
 </script>
 
@@ -196,21 +191,26 @@ dialog.about.narrow(v-if="visible" :open="visible" @click.left="closeDialogs" re
           span Help
         Help(:visible="state.helpIsVisible")
       .button-wrap
-        button(@click.left.stop="toggleWhatsNewIsVisible" :class="{active: state.whatsNewIsVisible}")
-          span What's New
-          img.updated.icon(src="@/assets/updated.gif" v-if="newStuffIsUpdated")
-        WhatsNew(:visible="state.whatsNewIsVisible" :newStuff="state.newStuff")
+        a(:href="roadmapUrl")
+          button(@click.left.stop="changeSpaceToRoadmap")
+            span 💐 Roadmap
+    .row
+      .button-wrap
+        .segmented-buttons
+          button(@click.left.stop="changeSpaceToBlog")
+            span Blog
+          button(@click.left.stop="toggleWhatsNewIsVisible" :class="{active: state.whatsNewIsVisible}")
+            span What's New
+            img.updated.icon(src="@/assets/updated.gif" v-if="blogPostsIsUpdated")
+        WhatsNew(:visible="state.whatsNewIsVisible" :blogPosts="state.blogPosts")
+
     //- .row
     //-   a(href="https://kinopio.club/pop-up-shop-u9XxpuIzz2_LvQUAayl65")
     //-     button
     //-       img.icon(src="@/assets/sticker.svg")
     //-       span Pop Up Shop{{' '}}
               //- img.icon.visit(src="@/assets/visit.svg")
-  section(v-if="!isAddPage")
-    .row
-      .button-wrap
-        button(@click.left.stop="changeSpaceToRoadmap")
-          span 💐 Roadmap
+  section
     .row
       .button-wrap
         button(@click.left.stop="toggleAppsAndExtensionsIsVisible" :class="{active: state.appsAndExtensionsIsVisible}")
@@ -238,11 +238,6 @@ dialog.about.narrow(v-if="visible" :open="visible" @click.left="closeDialogs" re
             span Forum{{' '}}
             img.icon.visit(src="@/assets/visit.svg")
     .row
-      .button-wrap
-        a(href="https://blog.kinopio.club")
-          button
-            span Blog{{' '}}
-            img.icon.visit(src="@/assets/visit.svg")
       .button-wrap(v-if="!isSecureAppContextIOS")
         button(@click.left.stop="triggerDonateIsVisible")
           img.icon(src="@/assets/heart-empty.svg")
