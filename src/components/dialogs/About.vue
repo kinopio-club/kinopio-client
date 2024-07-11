@@ -28,15 +28,15 @@ onMounted(() => {
   })
   const isOffline = !store.state.isOnline
   if (isOffline) { return }
-  initUpdateNewStuff()
+  initBlogPosts()
 })
 
 const props = defineProps({
   visible: Boolean
 })
 watch(() => props.visible, (value, prevValue) => {
-  if (value && state.newStuff.length) {
-    checkNewStuffIsUpdated(state.newStuff[0].id)
+  if (value && state.blogPosts.length) {
+    checkBlogPostsIsUpdated(state.blogPosts[0].id)
   }
   if (value) {
     closeDialogs()
@@ -51,7 +51,7 @@ const state = reactive({
   whatsNewIsVisible: false,
   appsAndExtensionsIsVisible: false,
   helpIsVisible: false,
-  newStuff: [],
+  blogPosts: [],
   dialogHeight: null
 })
 
@@ -77,44 +77,40 @@ const updateDialogHeight = async () => {
 
 // new stuff
 
-const initUpdateNewStuff = async () => {
-  await updateNewStuff()
-  if (!utils.arrayHasItems(state.newStuff)) { return }
-  checkNewStuffIsUpdated(state.newStuff[0].id)
+const initBlogPosts = async () => {
+  await updateBlogPosts()
+  if (!utils.arrayHasItems(state.blogPosts)) { return }
+  checkBlogPostsIsUpdated(state.blogPosts[0].id)
   checkKinopioUpdatesIntervalTimer = setInterval(() => {
     checkIfKinopioUpdatesAreAvailable()
   }, 1000 * 60 * 60 * 1) // 1 hour
 }
-const newStuffIsUpdated = computed(() => store.state.newStuffIsUpdated)
-const updateNewStuff = async () => {
+const blogPostsIsUpdated = computed(() => store.state.blogPostsIsUpdated)
+const updateBlogPosts = async () => {
   try {
-    let data = await store.dispatch('api/getNewStuff')
-    if (!data) { return }
-    data = data.items.slice(0, 20)
-    data = data.map(item => {
-      item.summary = utils.convertHTMLEntities(item.summary)
-      return item
-    })
+    let posts = await store.dispatch('api/getBlogPosts')
+    if (!posts) { return }
+    posts = posts.slice(0, 20)
     if (isSecureAppContextIOS.value) {
-      data = data.filter(item => {
-        return !item.title.includes('Lifetime Plan')
+      posts = posts.filter(post => {
+        return !post.title.includes('Lifetime Plan')
       })
     }
-    state.newStuff = data
+    state.blogPosts = posts
   } catch (error) {
-    console.error('🚒 updateNewStuff', error)
+    console.error('🚒 updateBlogPosts', error)
   }
 }
-const checkNewStuffIsUpdated = (latestUpdateId) => {
+const checkBlogPostsIsUpdated = (latestUpdateId) => {
   if (isAddPage.value) { return }
-  const userlastReadId = store.state.currentUser.lastReadNewStuffId
-  const newStuffIsUpdated = userlastReadId !== latestUpdateId
-  store.commit('newStuffIsUpdated', newStuffIsUpdated)
+  const userlastReadId = store.state.currentUser.lastReadBlogPostsId
+  const blogPostsIsUpdated = userlastReadId !== latestUpdateId
+  store.commit('blogPostsIsUpdated', blogPostsIsUpdated)
 }
 const checkIfKinopioUpdatesAreAvailable = async () => {
-  await updateNewStuff()
-  if (!state.newStuff.length) { return }
-  let newest = state.newStuff[0]
+  await updateBlogPosts()
+  if (!state.blogPosts.length) { return }
+  let newest = state.blogPosts[0]
   newest = dayjs(newest.date_published)
   const timeSinceNewest = initTime.diff(newest, 'minute')
   if (timeSinceNewest < 0) {
@@ -145,7 +141,7 @@ const toggleWhatsNewIsVisible = () => {
   const isVisible = state.whatsNewIsVisible
   closeDialogs()
   state.whatsNewIsVisible = !isVisible
-  store.commit('newStuffIsUpdated', false)
+  store.commit('blogPostsIsUpdated', false)
 }
 
 // keyboard shortcuts
@@ -197,8 +193,8 @@ dialog.about.narrow(v-if="visible" :open="visible" @click.left="closeDialogs" re
       .button-wrap
         button(@click.left.stop="toggleWhatsNewIsVisible" :class="{active: state.whatsNewIsVisible}")
           span What's New
-          img.updated.icon(src="@/assets/updated.gif" v-if="newStuffIsUpdated")
-        WhatsNew(:visible="state.whatsNewIsVisible" :newStuff="state.newStuff")
+          img.updated.icon(src="@/assets/updated.gif" v-if="blogPostsIsUpdated")
+        WhatsNew(:visible="state.whatsNewIsVisible" :blogPosts="state.blogPosts")
     //- .row
     //-   a(href="https://kinopio.club/pop-up-shop-u9XxpuIzz2_LvQUAayl65")
     //-     button

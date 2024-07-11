@@ -262,16 +262,16 @@ const self = {
         context.dispatch('handleServerError', { name: 'getCountries', error })
       }
     },
-    getNewStuff: async (context) => {
+    getBlogPosts: async (context) => {
       const isOnline = context.rootState.isOnline
       if (!shouldRequest({ shouldRequestRemote: true, isOnline })) { return }
       const isSpacePage = context.rootGetters.isSpacePage
       if (!isSpacePage) { return }
       try {
-        const response = await fetch(`${consts.apiHost()}/meta/new-stuff`)
+        const response = await fetch(`${consts.apiHost()}/meta/blog`)
         return normalizeResponse(response)
       } catch (error) {
-        context.dispatch('handleServerError', { name: 'getNewStuff', error })
+        context.dispatch('handleServerError', { name: 'getBlogPosts', error })
       }
     },
 
