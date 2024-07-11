@@ -87,23 +87,24 @@ const initUpdateNewStuff = async () => {
 }
 const newStuffIsUpdated = computed(() => store.state.newStuffIsUpdated)
 const updateNewStuff = async () => {
-  try {
-    let data = await store.dispatch('api/getNewStuff')
-    if (!data) { return }
-    data = data.items.slice(0, 20)
-    data = data.map(item => {
-      item.summary = utils.convertHTMLEntities(item.summary)
-      return item
-    })
-    if (isSecureAppContextIOS.value) {
-      data = data.filter(item => {
-        return !item.title.includes('Lifetime Plan')
-      })
-    }
-    state.newStuff = data
-  } catch (error) {
-    console.error('🚒 updateNewStuff', error)
-  }
+  // try {
+
+  // let data = await store.dispatch('api/getNewStuff')
+  // if (!data) { return }
+  // data = data.items.slice(0, 20)
+  // data = data.map(item => {
+  //   item.summary = utils.convertHTMLEntities(item.summary)
+  //   return item
+  // })
+  // if (isSecureAppContextIOS.value) {
+  //   data = data.filter(item => {
+  //     return !item.title.includes('Lifetime Plan')
+  //   })
+  // }
+  // state.newStuff = data
+  // } catch (error) {
+  //   console.error('🚒 updateNewStuff', error)
+  // }
 }
 const checkNewStuffIsUpdated = (latestUpdateId) => {
   if (isAddPage.value) { return }
