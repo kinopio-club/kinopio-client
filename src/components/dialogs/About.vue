@@ -100,10 +100,10 @@ const updateBlogPosts = async () => {
     console.error('🚒 updateBlogPosts', error)
   }
 }
-const checkBlogPostsIsUpdated = (latestBlogPostId) => {
-  const userlastReadId = store.state.currentUser.lastReadBlogPostId
-  const blogPostsIsUpdated = userlastReadId !== latestBlogPostId
-  store.commit('blogPostsIsUpdated', blogPostsIsUpdated)
+const checkBlogPostsIsUpdated = (newId) => {
+  const prevId = store.state.currentUser.lastReadBlogPostId
+  const isUpdated = parseInt(prevId) < parseInt(newId)
+  store.commit('blogPostsIsUpdated', isUpdated)
 }
 const checkIfKinopioUpdatesAreAvailable = async () => {
   await updateBlogPosts()
