@@ -49,6 +49,7 @@ const store = createStore({
     isEmbedMode: false,
     isAddPage: false,
     isPresentationMode: false,
+    isCommentMode: false,
     disableViewportOptimizations: false,
     pricingIsVisible: false,
     userSettingsIsVisible: false,
@@ -473,6 +474,10 @@ const store = createStore({
     isPresentationMode: (state, value) => {
       utils.typeCheck({ value, type: 'boolean' })
       state.isPresentationMode = value
+    },
+    isCommentMode: (state, value) => {
+      utils.typeCheck({ value, type: 'boolean' })
+      state.isCommentMode = value
     },
     pricingIsVisible: (state, value) => {
       utils.typeCheck({ value, type: 'boolean' })

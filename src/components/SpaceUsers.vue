@@ -18,6 +18,7 @@ const maxMembersCount = 3
 const maxSpecatorsCount = 1
 
 onMounted(() => {
+  updateShouldShowUsersButton()
   window.addEventListener('resize', updateShouldShowUsersButton)
 })
 onBeforeUnmount(() => {

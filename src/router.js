@@ -139,6 +139,9 @@ const router = createRouter({
         if (urlParams.get('present')) {
           store.commit('isPresentationMode', true)
         }
+        if (urlParams.get('comment')) {
+          store.commit('isCommentMode', true)
+        }
         store.dispatch('updateSpaceAndCardUrlToLoad', path)
         next()
       }

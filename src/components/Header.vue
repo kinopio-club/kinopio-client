@@ -559,11 +559,18 @@ const disablePresentationMode = () => {
 
 // presentation mode
 
-const PresentationModeTitle = computed(() => `Focus/Presentation Mode (P)`)
 const isPresentationMode = computed(() => store.state.isPresentationMode)
-const togglePresentaitonMode = () => {
+const togglePresentationMode = () => {
   const value = !isPresentationMode.value
   store.commit('isPresentationMode', value)
+}
+
+// comment mode
+
+const isCommentMode = computed(() => store.state.isCommentMode)
+const toggleCommentMode = () => {
+  const value = !isCommentMode.value
+  store.commit('isCommentMode', value)
 }
 
 </script>
@@ -726,9 +733,15 @@ header(v-if="isVisible" :style="state.position" :class="{'fade-out': isFadingOut
           button(@click.left.stop="toggleUpgradeUserIsVisible" :class="{active: state.upgradeUserIsVisible, 'translucent-button': !shouldIncreaseUIContrast}")
             span Upgrade
           UpgradeUser(:visible="state.upgradeUserIsVisible" @closeDialog="closeAllDialogs")
+        //- comment mode
+        .button-wrap
+          button(:class="{ 'translucent-button': !shouldIncreaseUIContrast, active: isCommentMode }" @click="toggleCommentMode" title="Comment Mode")
+            img.icon(src="@/assets/comment.svg")
+          .label-badge.comment-mode-badge-wrap(v-if="isCommentMode")
+            span Comment Mode
         //- presentation mode
         .button-wrap
-          button(:class="{ 'translucent-button': !shouldIncreaseUIContrast }" @click="togglePresentaitonMode" :title="PresentationModeTitle")
+          button(:class="{ 'translucent-button': !shouldIncreaseUIContrast }" @click="togglePresentationMode" title="Focus/Presentation Mode (P)")
             img.icon(src="@/assets/presentation.svg")
 
   Toolbar(:visible="isSpace")
@@ -933,6 +946,19 @@ header
     min-height initial
     min-width initial
     display block
+
+  .comment-mode-badge-wrap
+    pointer-events none
+    position absolute
+    background-color var(--info-background)
+    bottom -8px
+    left initial
+    right 5px
+    z-index 1
+    width 95px
+    span
+      width 100%
+      color var(--primary)
 
 .badge-jiggle
   animation-name notificationJiggle
