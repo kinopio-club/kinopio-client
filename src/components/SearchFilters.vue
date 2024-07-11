@@ -5,20 +5,20 @@ section.filters
       //- first row
       .segmented-buttons
         //- Users
-        label.show-users(:class="{active: filterShowUsers}" @click.left.prevent="toggleFilterShowUsers" @keydown.stop.enter="toggleFilterShowUsers")
+        label.show-users(title="Toggle Card User Filter (1)" :class="{active: filterShowUsers}" @click.left.prevent="toggleFilterShowUsers" @keydown.stop.enter="toggleFilterShowUsers")
           input(type="checkbox" v-model="filterShowUsers")
           UserLabelInline(:user="currentUser" :shouldHideName="true")
         //- Time
-        label(:class="{active: filterShowDateUpdated}" @click.left.prevent="toggleFilterShowDateUpdated" @keydown.stop.enter="toggleFilterShowDateUpdated")
+        label(title="Toggle Card Date Filter (2)" :class="{active: filterShowDateUpdated}" @click.left.prevent="toggleFilterShowDateUpdated" @keydown.stop.enter="toggleFilterShowDateUpdated")
           input(type="checkbox" v-model="filterShowDateUpdated")
           img.icon.time(src="@/assets/time.svg")
         //- Todo
-        label(:class="{active: filterUnchecked}" @click.left.prevent="toggleFilterUnchecked" @keydown.stop.enter="toggleFilterUnchecked")
+        label(title="Toggle Checkbox Card Filter (3)" :class="{active: filterUnchecked}" @click.left.prevent="toggleFilterUnchecked" @keydown.stop.enter="toggleFilterUnchecked")
           input(type="checkbox" v-model="filterUnchecked")
           span Todo
       .segmented-buttons
         //- Comments Hide
-        label(:class="{active: filterComments}" @click.left.prevent="toggleFilterComments" @keydown.stop.enter="toggleFilterComments")
+        label(title="Toggle Hide Comment Cards (4)" :class="{active: filterComments}" @click.left.prevent="toggleFilterComments" @keydown.stop.enter="toggleFilterComments")
           input(type="checkbox" v-model="filterComments")
           img.icon.comment-icon(src="@/assets/comment.svg")
           span Hide
