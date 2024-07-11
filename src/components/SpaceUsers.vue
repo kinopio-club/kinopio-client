@@ -51,7 +51,7 @@ const normalizeDisplayItems = (items, shouldShowUsersButton) => {
   const isCurrentUser = Boolean(items.find(user => user.id === currentUser.value.id))
   if (shouldShowUsersButton && !isCurrentUser) {
     return [items[0]]
-  } else if (state.shouldShowUsersButtonMembers) {
+  } else if (shouldShowUsersButton) {
     return [last(items)]
   } else {
     return items
