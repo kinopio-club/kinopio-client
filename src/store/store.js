@@ -213,6 +213,7 @@ const store = createStore({
     loadNewSpace: false,
     urlPreviewLoadingForCardIds: [],
     loadInboxSpace: false,
+    loadBlogSpace: false,
     shouldResetDimensionsOnLoad: false,
     shouldShowExploreOnLoad: false,
 
@@ -374,6 +375,10 @@ const store = createStore({
     loadInboxSpace: (state, value) => {
       utils.typeCheck({ value, type: 'boolean' })
       state.loadInboxSpace = value
+    },
+    loadBlogSpace: (state, value) => {
+      utils.typeCheck({ value, type: 'boolean' })
+      state.loadBlogSpace = value
     },
     shouldResetDimensionsOnLoad: (state, value) => {
       utils.typeCheck({ value, type: 'boolean' })

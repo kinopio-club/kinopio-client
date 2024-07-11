@@ -151,6 +151,7 @@ const currentSpace = {
       const spaceUrl = context.rootState.spaceUrlToLoad
       const loadJournalSpace = context.rootState.loadJournalSpace
       const loadInboxSpace = context.rootState.loadInboxSpace
+      const loadBlogSpace = context.rootState.loadBlogSpace
       const loadNewSpace = context.rootState.loadNewSpace
       const user = context.rootState.currentUser
       // restore from url
@@ -167,6 +168,10 @@ const currentSpace = {
       } else if (loadInboxSpace) {
         console.log('🚃 Restore inbox space')
         await context.dispatch('loadInboxSpace')
+      // load blog space
+      } else if (loadBlogSpace) {
+        console.log('🚃 Load blog space')
+        await context.dispatch('loadBlogSpace')
       // create new space
       } else if (loadNewSpace) {
         console.log('🚃 Create new space')
@@ -615,6 +620,10 @@ const currentSpace = {
         context.dispatch('loadLastSpace')
       }
       context.commit('loadInboxSpace', false, { root: true })
+    },
+    loadBlogSpace: (context) => {
+      const space = { id: consts.blogSpaceId() }
+      context.dispatch('changeSpace', space)
     },
     updateModulesSpaceId: (context, space) => {
       space = space || context.state
