@@ -155,8 +155,8 @@ section.invite
         button(@click.left="copyInviteUrl")
           img.icon.copy(src="@/assets/copy.svg")
           span {{inviteButtonLabel}}
-        button(v-if="webShareIsSupported" @click="webShareInvite")
-          img.icon.share(src="@/assets/share.svg")
+        //- button(v-if="webShareIsSupported" @click="webShareInvite")
+        //-   img.icon.share(src="@/assets/share.svg")
     .row(v-if="inviteTypeIsEdit")
       .button-wrap
         button(@click.stop="toggleEmailInvitesIsVisible" :class="{ active: state.emailInvitesIsVisible }")

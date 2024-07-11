@@ -66,6 +66,8 @@ export default {
 
 <style lang="stylus">
 .privacy-button
+  width 100%
   button
     height initial
+    width 100%
 </style>

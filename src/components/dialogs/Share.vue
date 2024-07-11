@@ -49,6 +49,7 @@ const state = reactive({
   embedIsVisible: false,
   importExportIsVisible: false,
   isShareInPresentationMode: false,
+  isShareInCommentMode: false,
   emailInvitesIsVisible: false
 })
 
@@ -74,6 +75,9 @@ const spaceUrl = computed(() => {
   url = new URL(url)
   if (state.isShareInPresentationMode) {
     url.searchParams.set('present', true)
+  }
+  if (state.isShareInCommentMode) {
+    url.searchParams.set('comment', true)
   }
   return url.href
 })
@@ -150,6 +154,10 @@ const toggleIsShareInPresentationMode = () => {
   closeDialogs()
   state.isShareInPresentationMode = !state.isShareInPresentationMode
 }
+const toggleIsShareInCommentMode = () => {
+  closeDialogs()
+  state.isShareInCommentMode = !state.isShareInCommentMode
+}
 const emailInvitesIsVisible = (value) => {
   state.emailInvitesIsVisible = value
 }
@@ -172,19 +180,26 @@ dialog.share.wide(v-if="props.visible" :open="props.visible" @click.left.stop="c
 
     //- Copy URL
     section.subsection(:class="{'share-url-subsection-member': isSpaceMember}")
-      .row
+      .row.title-row
         .segmented-buttons
           button(@click.left="copySpaceUrl")
             img.icon.copy(src="@/assets/copy.svg")
-            .badge.badge-in-button.danger.private-copy-badge(v-if="spaceIsPrivate")
+            .badge.badge-in-button.danger.private-copy-badge(v-if="spaceIsPrivate" title="Private spaces can only be viewed by collaborators")
               img.icon.lock(src="@/assets/lock.svg")
             span Copy URL
-          button(v-if="webShareIsSupported" @click="webShare")
-            img.icon.share(src="@/assets/share.svg")
+          //- button(v-if="webShareIsSupported" @click="webShare")
+          //-   img.icon.share(src="@/assets/share.svg")
 
-        label.label.small-button.extra-options-button.inline-button(title="Share in Presentation Mode" @mouseup.left="toggleIsShareInPresentationMode" @touchend.prevent="toggleIsShareInPresentationMode" :class="{active: state.isShareInPresentationMode}")
-          input(type="checkbox" :value="state.isShareInPresentationMode")
-          img.icon(src="@/assets/presentation.svg")
+        .row
+          //- comment mode
+          label.label.small-button.extra-options-button.inline-button(title="Share in Comment Mode" @mouseup.prevent.stop.left="toggleIsShareInCommentMode" @touchend.prevent.stop="toggleIsShareInCommentMode" :class="{active: state.isShareInCommentMode}")
+            input(type="checkbox" :value="state.isShareInCommentMode")
+            img.icon.comment(src="@/assets/comment.svg")
+          //- presentation mode
+          label.label.small-button.extra-options-button.inline-button(title="Share in Presentation Mode" @mouseup.prevent.stop.left="toggleIsShareInPresentationMode" @touchend.prevent.stop="toggleIsShareInPresentationMode" :class="{active: state.isShareInPresentationMode}")
+            input(type="checkbox" :value="state.isShareInPresentationMode")
+            img.icon(src="@/assets/presentation.svg")
+
       //- Explore
       template(v-if="exploreSectionIsVisible")
         .row
@@ -303,6 +318,8 @@ dialog.share
   .title-row
     p + .row
       margin-top 0
+    label + label
+      margin-left 6px
 
   .import-export-section
     border-top 1px solid var(--primary-border)
