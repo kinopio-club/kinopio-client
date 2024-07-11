@@ -50,7 +50,7 @@ const updateUserLastRead = () => {
 }
 
 const isUnread = (post) => {
-  let lastReadBlogPostId = store.state.currentUser.lastReadBlogPostId
+  let lastReadBlogPostId = store.state.currentUser.lastReadBlogPostId || 1
   lastReadBlogPostId = parseInt(lastReadBlogPostId)
   return post.id > lastReadBlogPostId
 }
