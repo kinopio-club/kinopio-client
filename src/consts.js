@@ -28,6 +28,7 @@ export default {
   cdnHost: 'https://cdn.kinopio.club',
   defaultSpaceBackground: 'https://bk.kinopio.club/grid-large-boxes-2x.png',
   moderatorUserId: 'euGhpBrR9eBcjKnK16C_g',
+  discordUrl: 'https://discord.gg/h2sR45Nby8',
   isDevelopment () {
     if (env.VITE_PROD_SERVER === 'true') {
       return false
