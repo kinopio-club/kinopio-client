@@ -184,6 +184,8 @@ section.invite
     margin-right 5px
     .user
       vertical-align -3px
+      .anon-avatar
+        top 6px
   .invite-url-segmented-buttons
     margin-bottom 0
     button

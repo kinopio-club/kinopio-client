@@ -66,8 +66,11 @@ export default {
 
 <style lang="stylus">
 .privacy-button
-  width 100%
   button
     height initial
+dialog.share
+  .privacy-button
     width 100%
+    button
+      width 100%
 </style>
