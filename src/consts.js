@@ -28,6 +28,7 @@ export default {
   cdnHost: 'https://cdn.kinopio.club',
   defaultSpaceBackground: 'https://bk.kinopio.club/grid-large-boxes-2x.png',
   moderatorUserId: 'euGhpBrR9eBcjKnK16C_g',
+  discordUrl: 'https://discord.gg/h2sR45Nby8',
   isDevelopment () {
     if (env.VITE_PROD_SERVER === 'true') {
       return false
@@ -56,12 +57,20 @@ export default {
     }
     return host
   },
+
   blogHost () {
     let host = 'https://blog.kinopio.club'
     if (this.isDevelopment()) {
       host = 'http://localhost:8082'
     }
     return host
+  },
+  blogSpaceId () {
+    if (this.isDevelopment()) {
+      return 'ezP9B9r2U0CUYR8g-Mn9N'
+    } else {
+      return '6lsytK8ZfOtMl2oqG05Rj'
+    }
   },
   websocketHost () {
     let host = 'wss://api.kinopio.club'

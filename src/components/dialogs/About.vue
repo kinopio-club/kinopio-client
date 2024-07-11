@@ -171,6 +171,10 @@ const toggleHelpIsVisible = () => {
   state.helpIsVisible = !isVisible
 }
 
+// links
+
+const discordUrl = computed(() => consts.discordUrl)
+
 </script>
 
 <template lang="pug">
@@ -223,7 +227,7 @@ dialog.about.narrow(v-if="visible" :open="visible" @click.left="closeDialogs" re
       AboutMe
     .row
       .button-wrap
-        a(href="https://discord.gg/h2sR45Nby8")
+        a(:href="discordUrl")
           button
             span Discord{{' '}}
             img.icon.visit(src="@/assets/visit.svg")
