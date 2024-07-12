@@ -36,6 +36,7 @@ import DiscoveryButtons from '@/components/DiscoveryButtons.vue'
 import UserSettings from '@/components/dialogs/UserSettings.vue'
 import SpaceUserList from '@/components/dialogs/SpaceUserList.vue'
 import CommentButtons from '@/components/CommentButtons.vue'
+import FavoriteSpaceButton from '@/components/FavoriteSpaceButton.vue'
 import consts from '@/consts.js'
 
 import sortBy from 'lodash-es/sortBy'
@@ -700,6 +701,8 @@ header(v-if="isVisible" :style="state.position" :class="{'fade-out': isFadingOut
                   Loader(:visible="spaceHasStatus")
                   .badge.success.space-status-success(v-if="!spaceHasStatus")
                 SpaceStatus(:visible="state.spaceStatusIsVisible")
+            //- favorite
+            FavoriteSpaceButton(v-if="isOnline")
             //- Offline
             .button-wrap(v-if="!isOnline")
               button(@click.left.stop="toggleOfflineIsVisible" :class="{ active: offlineIsVisible, 'translucent-button': !shouldIncreaseUIContrast}")
