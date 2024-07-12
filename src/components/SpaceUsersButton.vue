@@ -66,15 +66,28 @@ const users = computed(() => {
 const recentUser = computed(() => {
   return last(users.value)
 })
-const label = computed(() => utils.pluralize('Collaborator', users.value.length))
+const isOtherCardUsers = computed(() => Boolean(otherCardUsers.value.length))
+const otherCardUsers = computed(() => store.getters['currentCards/otherContributors'])
+const label = computed(() => {
+  let condition = users.value.length !== 1
+  const CollaboratorsString = utils.pluralize('Collaborator', condition)
+  let string = `${users.value.length} ${CollaboratorsString}`
+  if (isOtherCardUsers.value) {
+    condition = otherCardUsers.value.length !== 1
+    const othersString = utils.pluralize('Other', condition)
+    string = string + `, ${otherCardUsers.value.length} ${othersString}`
+  }
+  return string
+})
 
 </script>
 
 <template lang="pug">
 button.space-users-button(v-if="users.length" @click.stop="toggleSpaceUserListIsVisible" :class="{ 'header-button': props.isParentSpaceUsers, active: isActive, 'translucent-button': props.isParentSpaceUsers }" ref="buttonElement")
   User(:user="recentUser" :isClickable="false" :hideYouLabel="true" :isSmall="true" :shouldBounceIn="props.isParentSpaceUsers")
-  span {{ users.length }}
-  span(v-if="props.showLabel") {{' '}}{{ label }}
+  span(v-if="props.showLabel") {{ label }}
+  span(v-else) {{ users.length }}
+
 </template>
 
 <style lang="stylus">

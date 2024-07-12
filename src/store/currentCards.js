@@ -1047,6 +1047,22 @@ const currentCards = {
     users: (state, getters, rootState, rootGetters) => {
       return getters.userIds.map(id => rootGetters['currentSpace/userById'](id))
     },
+    otherContributors: (state, getters, rootState, rootGetters) => {
+      const currentUserId = state.id
+      let items = getters.users
+      items = items.filter(user => Boolean(user))
+      // remove currentUser
+      items = items.filter(user => user.id !== currentUserId)
+      // remove collaborators
+      const members = rootGetters['currentSpace/members']()
+      items = items.filter(item => {
+        const member = members.find(user => {
+          return user.id === item.id
+        })
+        return !member
+      })
+      return items
+    },
     colors: (state, getters) => {
       const cards = getters.all
       let colors = cards.map(card => card.backgroundColor)
