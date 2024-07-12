@@ -1,5 +1,49 @@
-<template lang="pug">
+<script setup>
+import { reactive, computed, onMounted, onBeforeUnmount, defineProps, defineEmits, watch, ref, nextTick } from 'vue'
+import { useStore } from 'vuex'
 
+import UserLabelInline from '@/components/UserLabelInline.vue'
+import NameSegment from '@/components/NameSegment.vue'
+import utils from '@/utils.js'
+
+import sortBy from 'lodash-es/sortBy'
+import dayjs from 'dayjs'
+
+const store = useStore()
+
+const comments = computed(() => {
+  let cards = store.getters['currentCards/all']
+  cards = utils.clone(cards)
+  cards = cards.filter(card => {
+    if (card.isComment) { return true }
+    return utils.isNameComment(card.name)
+  })
+  cards = cards.map(card => {
+    card.user = userById(card.userId)
+    card.nameSegments = utils.cardNameSegments(card.name)
+    return card
+  })
+  cards = sortBy(cards, card => dayjs(card.nameUpdatedAt || card.updatedAt).valueOf())
+  cards.reverse()
+  return cards
+})
+
+const showCardDetails = (card) => {
+  const filterComments = store.state.currentUser.filterComments
+  if (filterComments) {
+    store.dispatch('currentUser/toggleFilterComments', false)
+  }
+  store.dispatch('currentCards/showCardDetails', card.id)
+}
+const userById = (userId) => {
+  return store.getters['currentSpace/userById'](userId)
+}
+const relativeDate = (card) => {
+  return utils.shortRelativeTime(card.nameUpdatedAt || card.updatedAt)
+}
+</script>
+
+<template lang="pug">
 section.results-section.comments
   ul.results-list(v-if="comments.length")
     template(v-for="card in comments" :key="card.id")
@@ -23,56 +67,6 @@ section.results-section.comments
         span →
         img.icon.comment-icon(src="@/assets/comment.svg")
 </template>
-
-<script>
-import UserLabelInline from '@/components/UserLabelInline.vue'
-import NameSegment from '@/components/NameSegment.vue'
-import utils from '@/utils.js'
-
-import sortBy from 'lodash-es/sortBy'
-import dayjs from 'dayjs'
-
-export default {
-  name: 'Comments',
-  components: {
-    NameSegment,
-    UserLabelInline
-  },
-  computed: {
-    comments () {
-      let cards = this.$store.getters['currentCards/all']
-      cards = utils.clone(cards)
-      cards = cards.filter(card => {
-        if (card.isComment) { return true }
-        return utils.isNameComment(card.name)
-      })
-      cards = cards.map(card => {
-        card.user = this.userById(card.userId)
-        card.nameSegments = utils.cardNameSegments(card.name)
-        return card
-      })
-      cards = sortBy(cards, card => dayjs(card.nameUpdatedAt || card.updatedAt).valueOf())
-      cards.reverse()
-      return cards
-    }
-  },
-  methods: {
-    showCardDetails (card) {
-      const filterComments = this.$store.state.currentUser.filterComments
-      if (filterComments) {
-        this.$store.dispatch('currentUser/toggleFilterComments', false)
-      }
-      this.$store.dispatch('currentCards/showCardDetails', card.id)
-    },
-    userById (userId) {
-      return this.$store.getters['currentSpace/userById'](userId)
-    },
-    relativeDate (card) {
-      return utils.shortRelativeTime(card.nameUpdatedAt || card.updatedAt)
-    }
-  }
-}
-</script>
 
 <style lang="stylus">
 section.comments
