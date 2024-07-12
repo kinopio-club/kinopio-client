@@ -237,17 +237,17 @@ dialog#sidebar.sidebar.is-pinnable(v-if="visible" :open="visible" @click.left.st
 
   .segmented-buttons-wrap
     .segmented-buttons
-      &:first-child
-        button,
-        label
-          &:last-child
-            border-bottom-right-radius 0
+      // &:first-child
+      //   button,
+      //   label
+      //     &:last-child
+      //       border-bottom-right-radius 0
       &:last-child
         button,
         label
           &:first-child
             border-top-left-radius 0
-          &:last-child
-            border-top-right-radius var(--entity-radius)
+          // &:last-child
+          //   border-top-right-radius var(--entity-radius)
 
 </style>

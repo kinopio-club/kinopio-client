@@ -89,7 +89,7 @@ const handleSubscriptionSuccess = (event) => {
 .upgrade-user-apple(v-if="visible")
   .row(v-if='!isUpgraded')
     button(@click.left="subscribe" :class="{active : state.loading.subscriptionIsBeingCreated}")
-      User(:user="user" :isClickable="false" :hideYouLabel="true" :key="user.id")
+      User(:user="user" :isClickable="false" :hideYouLabel="true" :key="user.id" :isSmall="true")
       span Upgrade for ${{price.amount}}/{{price.period}}
       Loader(:visible="state.loading.subscriptionIsBeingCreated")
   .badge.danger(v-if="state.error.unknownServerError")
@@ -103,8 +103,6 @@ const handleSubscriptionSuccess = (event) => {
 
 <style lang="stylus">
 .upgrade-user-apple
-  .user
-    margin-right 6px
   a
     color var(--primary)
 </style>

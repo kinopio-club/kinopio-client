@@ -21,6 +21,7 @@ const state = reactive({
   commentsIsVisible: false
 })
 
+const currentUserIsSignedIn = computed(() => store.getters['currentUser/isSignedIn'])
 const shouldIncreaseUIContrast = computed(() => store.state.currentUser.shouldIncreaseUIContrast)
 const blurButtons = () => {
   let element = commentModeElement.value
@@ -31,12 +32,20 @@ const blurButtons = () => {
 
 // comment mode
 
+const canOnlyComment = computed(() => store.getters['currentUser/canOnlyComment']())
 const isCommentMode = computed(() => store.state.isCommentMode)
 const toggleCommentMode = () => {
   const value = !isCommentMode.value
   store.commit('isCommentMode', value)
   blurButtons()
 }
+const commentTitle = computed(() => {
+  if (canOnlyComment.value) {
+    return 'Only collaborators can toggle comment mode'
+  } else {
+    return 'Comment Mode'
+  }
+})
 
 // comments dialog
 
@@ -49,12 +58,17 @@ const toggleCommentsIsVisible = () => {
 </script>
 
 <template lang="pug">
-.segmented-buttons.space-functions-row.comment-buttons
-  .button-wrap
-    button(:class="{ 'translucent-button': !shouldIncreaseUIContrast, active: isCommentMode }" @click="toggleCommentMode" title="Comment Mode" ref='commentModeElement')
+.segmented-buttons.space-functions-row.comment-buttons(v-if="currentUserIsSignedIn")
+  .button-wrap(:title="commentTitle")
+    button(
+      :class="{ 'translucent-button': !shouldIncreaseUIContrast, active: isCommentMode }"
+      @click="toggleCommentMode"
+      ref='commentModeElement'
+      :disabled="canOnlyComment"
+    )
       img.icon.comment(src="@/assets/comment.svg")
-      .label-badge.comment-mode-badge-wrap(v-if="isCommentMode")
-        span Comment Mode
+    .label-badge.comment-mode-badge-wrap(v-if="isCommentMode")
+      span Comment Mode
   .button-wrap
     button(:class="{ 'translucent-button': !shouldIncreaseUIContrast, active: state.commentsIsVisible }" @click="toggleCommentsIsVisible" ref="toggleCommentElement")
       img.icon.button-down-arrow(src="@/assets/down-arrow.svg")
@@ -63,5 +77,6 @@ const toggleCommentsIsVisible = () => {
 
 <style lang="stylus">
 .comment-buttons
+  margin-left 6px
   margin-right 6px
 </style>

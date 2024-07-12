@@ -391,7 +391,7 @@ const toggleIsLocked = () => {
 
 const canOnlyComment = computed(() => store.getters['currentUser/canOnlyComment']())
 const toggleCommentIsDisabled = computed(() => {
-  if (canOnlyComment.value) { return }
+  if (canOnlyComment.value) { return true }
   return !canEditAll.value
 })
 const isComment = computed(() => {
@@ -526,8 +526,8 @@ section.subsection.style-actions(v-if="visible" @click.left.stop="closeDialogs")
       button(:disabled="!canEditAll" @click="toggleIsLocked" :class="{active: isLocked}" title="Lock to Background")
         img.icon(src="@/assets/lock.svg")
     //- Comment
-    .button-wrap(v-if="isCards")
-      button(:disabled="toggleCommentIsDisabled" @click="toggleIsComment" :class="{active: isComment}" :title="commentTitle")
+    .button-wrap(v-if="isCards" :title="commentTitle")
+      button(:disabled="toggleCommentIsDisabled" @click="toggleIsComment" :class="{active: isComment}")
         img.icon.comment(src="@/assets/comment.svg")
 
     //- Surround with Box

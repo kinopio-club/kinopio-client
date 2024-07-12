@@ -81,7 +81,7 @@ const subscribe = async () => {
   //- button
   .row
     button(@click.left="subscribe" :class="{active : state.loading.subscribe}")
-      User(:user="currentUser" :isClickable="false" :hideYouLabel="true" :key="currentUser.id")
+      User(:user="currentUser" :isClickable="false" :hideYouLabel="true" :key="currentUser.id" :isSmall="true")
       span Upgrade for ${{price.amount}}/{{price.period}}
       Loader(:visible="state.loading.subscribe")
   .badge.danger(v-if="state.error.unknownServerError")

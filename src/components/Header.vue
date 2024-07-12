@@ -161,6 +161,7 @@ const isSpace = computed(() => {
   return isSpace
 })
 const userCanEditSpace = computed(() => store.getters['currentUser/canEditSpace']())
+const userCanOnlyComment = computed(() => store.getters['currentUser/canOnlyComment']())
 const userIsUpgraded = computed(() => store.state.currentUser.isUpgraded)
 const isOnline = computed(() => store.state.isOnline)
 const currentUserIsSignedIn = computed(() => store.getters['currentUser/isSignedIn'])
@@ -681,12 +682,18 @@ header(v-if="isVisible" :style="state.position" :class="{'fade-out': isFadingOut
               ImportArenaChannel(:visible="importArenaChannelIsVisible")
               SpaceDetailsInfo(:visible="state.spaceDetailsInfoIsVisible")
               ImportExport(:visible="state.importIsVisible" :isImport="true")
-              //- Read Only badge
+
+              //- read only badge
               .label-badge.space-name-badge-wrap(v-if="!userCanEditSpace")
                 span(:class="{'invisible': state.readOnlyJiggle}")
                   span Read Only
                 span.invisible-badge(ref="readOnlyElement" :class="{'badge-jiggle': state.readOnlyJiggle, 'invisible': !state.readOnlyJiggle}")
                   span Read Only
+              //- comment only badge
+              .label-badge.space-name-badge-wrap(v-else-if="userCanOnlyComment")
+                span(:class="{'invisible': state.readOnlyJiggle}")
+                  span Comment Only
+
               //- Loading State
               .button-wrap.space-status-button-wrap(v-if="spaceHasStatusAndStatusDialogIsNotVisible")
                 button.small-button(@click.left.stop="toggleSpaceStatusIsVisible" :class="{active: state.spaceStatusIsVisible, 'translucent-button': !shouldIncreaseUIContrast}")
