@@ -202,6 +202,12 @@ const router = createRouter({
       component: Space,
       beforeEnter: (to, from, next) => {
         const urlParams = new URLSearchParams(window.location.search)
+        if (urlParams.get('present')) {
+          store.commit('isPresentationMode', true)
+        }
+        if (urlParams.get('comment')) {
+          store.commit('isCommentMode', true)
+        }
         const spaceId = urlParams.get('spaceId')
         const collaboratorKey = urlParams.get('collaboratorKey')
         const readOnlyKey = urlParams.get('readOnlyKey')
