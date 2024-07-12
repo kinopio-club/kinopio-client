@@ -4,7 +4,7 @@ export default {
     return [
       {
         name: 'open',
-        friendlyName: 'Open to All',
+        friendlyName: 'Open to Comments',
         description: 'Anyone can view and add comments, only collaborators can edit',
         color: 'success',
         icon: 'open'
