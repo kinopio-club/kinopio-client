@@ -49,7 +49,6 @@ const state = reactive({
   embedIsVisible: false,
   importExportIsVisible: false,
   isShareInPresentationMode: false,
-  isShareInCommentMode: false,
   emailInvitesIsVisible: false
 })
 
@@ -75,9 +74,6 @@ const spaceUrl = computed(() => {
   url = new URL(url)
   if (state.isShareInPresentationMode) {
     url.searchParams.set('present', true)
-  }
-  if (state.isShareInCommentMode) {
-    url.searchParams.set('comment', true)
   }
   return url.href
 })
@@ -154,13 +150,21 @@ const toggleIsShareInPresentationMode = () => {
   closeDialogs()
   state.isShareInPresentationMode = !state.isShareInPresentationMode
 }
-const toggleIsShareInCommentMode = () => {
-  closeDialogs()
-  state.isShareInCommentMode = !state.isShareInCommentMode
-}
 const emailInvitesIsVisible = (value) => {
   state.emailInvitesIsVisible = value
 }
+
+// users
+
+const users = computed(() => {
+  let items = utils.clone(store.state.currentSpace.users)
+  items = items.concat(store.state.currentSpace.collaborators)
+  return items
+})
+const spaceUsersButtonIsVisible = computed(() => {
+  return spaceIsRemote.value && users.value.length > 1
+})
+
 </script>
 
 <template lang="pug">
@@ -191,10 +195,6 @@ dialog.share.wide(v-if="props.visible" :open="props.visible" @click.left.stop="c
           //-   img.icon.share(src="@/assets/share.svg")
 
         .row
-          //- comment mode
-          label.label.small-button.extra-options-button.inline-button(title="Share in Comment Mode" @mouseup.prevent.stop.left="toggleIsShareInCommentMode" @touchend.prevent.stop="toggleIsShareInCommentMode" :class="{active: state.isShareInCommentMode}")
-            input(type="checkbox" :value="state.isShareInCommentMode")
-            img.icon.comment(src="@/assets/comment.svg")
           //- presentation mode
           label.label.small-button.extra-options-button.inline-button(title="Share in Presentation Mode" @mouseup.prevent.stop.left="toggleIsShareInPresentationMode" @touchend.prevent.stop="toggleIsShareInPresentationMode" :class="{active: state.isShareInPresentationMode}")
             input(type="checkbox" :value="state.isShareInPresentationMode")
@@ -212,8 +212,8 @@ dialog.share.wide(v-if="props.visible" :open="props.visible" @click.left.stop="c
   Invite(v-if="isSpaceMember && currentUserIsSignedIn" @closeDialogs="closeDialogs" @emailInvitesIsVisible="emailInvitesIsVisible")
 
   //- space users, collaborators
-  section(v-if="spaceIsRemote")
-    SpaceUsersButton(:showLabel="true")
+  section(v-if="spaceUsersButtonIsVisible")
+    SpaceUsersButton(:showLabel="true" :users="users")
 
   section(v-if="!spaceIsRemote")
     p

@@ -25,6 +25,7 @@ const emit = defineEmits(['closeDialogs', 'emailInvitesIsVisible'])
 const state = reactive({
   tipsIsVisible: false,
   emailInvitesIsVisible: false,
+  isShareInCommentMode: false,
   inviteType: 'edit' // 'edit', 'readOnly'
 })
 
@@ -97,23 +98,30 @@ const inviteButtonLabel = computed(() => {
   }
 })
 
+// comment mode
+
+const toggleIsShareInCommentMode = () => {
+  emit('closeDialogs')
+  state.isShareInCommentMode = !state.isShareInCommentMode
+}
+
 // native web share
 
-const webShareIsSupported = computed(() => navigator.share)
-const webShareInvite = () => {
-  let title
-  if (inviteTypeIsEdit.value) {
-    title = 'Invite to Edit'
-  } else if (inviteTypeIsReadOnly.value) {
-    title = 'Invite to Read Only'
-  }
-  const data = {
-    title,
-    text: spaceName.value,
-    url: editUrl.value
-  }
-  navigator.share(data)
-}
+// const webShareIsSupported = computed(() => navigator.share)
+// const webShareInvite = () => {
+//   let title
+//   if (inviteTypeIsEdit.value) {
+//     title = 'Invite to Edit'
+//   } else if (inviteTypeIsReadOnly.value) {
+//     title = 'Invite to Read Only'
+//   }
+//   const data = {
+//     title,
+//     text: spaceName.value,
+//     url: editUrl.value
+//   }
+//   navigator.share(data)
+// }
 
 // email invites
 
@@ -157,6 +165,11 @@ section.invite
           span {{inviteButtonLabel}}
         //- button(v-if="webShareIsSupported" @click="webShareInvite")
         //-   img.icon.share(src="@/assets/share.svg")
+      //- comment mode
+      label.label.small-button.extra-options-button.inline-button(v-if="inviteTypeIsEdit" title="Share in Comment Mode" @mouseup.prevent.stop.left="toggleIsShareInCommentMode" @touchend.prevent.stop="toggleIsShareInCommentMode" :class="{active: state.isShareInCommentMode}")
+        input(type="checkbox" :value="state.isShareInCommentMode")
+        img.icon.comment(src="@/assets/comment.svg")
+
     .row(v-if="inviteTypeIsEdit")
       .button-wrap
         button(@click.stop="toggleEmailInvitesIsVisible" :class="{ active: state.emailInvitesIsVisible }")
