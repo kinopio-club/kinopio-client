@@ -27,6 +27,9 @@ const state = reactive({
 watch(() => props.visible, (value, prevValue) => {
   if (value) {
     updateDialogHeight()
+    store.commit('shouldExplicitlyHideFooter', true)
+  } else {
+    store.commit('shouldExplicitlyHideFooter', false)
   }
 })
 
@@ -44,15 +47,36 @@ const toggleFilterComments = () => {
   store.dispatch('currentUser/toggleFilterComments', value)
 }
 
+// comment mode
+
+const isCommentMode = computed(() => store.state.isCommentMode)
+const toggleCommentMode = (event) => {
+  const value = !isCommentMode.value
+  store.commit('isCommentMode', value)
+}
+
 </script>
 
 <template lang="pug">
 dialog.narrow.comments(v-if="visible" :open="visible" @click.left.stop ref="dialogElement" :style="{'max-height': state.dialogHeight + 'px'}")
   section
-    label(title="Toggle Hide Comment Cards (4)" :class="{active: filterComments}" @click.left.prevent.stop="toggleFilterComments" @keydown.stop.enter="toggleFilterComments")
-      input(type="checkbox" v-model="filterComments")
-      img.icon.comment(src="@/assets/comment.svg")
-      span Hide Comment Cards
+    .row
+      .button-wrap
+        button(
+          :class="{ active: isCommentMode }"
+          @click="toggleCommentMode"
+          ref='commentModeElement'
+          title="Comment Mode"
+        )
+          img.icon.comment(src="@/assets/comment.svg")
+          span Comment Mode
+    .row(v-if="isCommentMode")
+      .badge.info New Cards will be Comments
+    .row
+      label(title="Toggle Hide Comment Cards (4)" :class="{active: filterComments}" @click.left.prevent.stop="toggleFilterComments" @keydown.stop.enter="toggleFilterComments")
+        input(type="checkbox" v-model="filterComments")
+        img.icon.comment(src="@/assets/comment.svg")
+        span Hide
   CommentList
 </template>
 
@@ -60,4 +84,5 @@ dialog.narrow.comments(v-if="visible" :open="visible" @click.left.stop ref="dial
 dialog.comments
   left initial
   right 6px
+  overflow auto
 </style>

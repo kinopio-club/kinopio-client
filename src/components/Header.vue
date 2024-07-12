@@ -35,7 +35,7 @@ import SpaceTodayJournalBadge from '@/components/SpaceTodayJournalBadge.vue'
 import DiscoveryButtons from '@/components/DiscoveryButtons.vue'
 import UserSettings from '@/components/dialogs/UserSettings.vue'
 import SpaceUserList from '@/components/dialogs/SpaceUserList.vue'
-import CommentButtons from '@/components/CommentButtons.vue'
+import CommentButton from '@/components/CommentButton.vue'
 import FavoriteSpaceButton from '@/components/FavoriteSpaceButton.vue'
 import consts from '@/consts.js'
 
@@ -736,7 +736,7 @@ header(v-if="isVisible" :style="state.position" :class="{'fade-out': isFadingOut
             span Upgrade
           UpgradeUser(:visible="state.upgradeUserIsVisible" @closeDialog="closeAllDialogs")
         //- comments
-        CommentButtons
+        CommentButton
         //- presentation mode
         .button-wrap
           button(:class="{ 'translucent-button': !shouldIncreaseUIContrast }" @click="togglePresentationMode" title="Focus/Presentation Mode (P)")
