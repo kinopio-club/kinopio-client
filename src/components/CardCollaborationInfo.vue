@@ -26,7 +26,8 @@ const props = defineProps({
   createdByUser: Object,
   updatedByUser: Object,
   card: Object,
-  parentElement: Object
+  parentElement: Object,
+  isComment: Boolean
 })
 
 watch(() => props.visible, async (value, prevValue) => {
@@ -36,6 +37,7 @@ watch(() => props.visible, async (value, prevValue) => {
   }
 })
 
+const shouldShowItemActions = computed(() => store.state.currentUser.shouldShowItemActions)
 const closeDialogsFromParent = () => {
   store.commit('userDetailsIsVisible', false)
 }
@@ -83,10 +85,14 @@ const userDetailsIsUser = (user) => {
 
 <template lang="pug">
 .row.collaboration-info(v-if="visible" @click.left.stop="closeDialogs")
-  .badge.status.button-badge(@click.left.prevent.stop="toggleFilterShowAbsoluteDates" @touchend.prevent.stop="toggleFilterShowAbsoluteDates")
+  //- comment
+  .badge.info.is-comment-badge(v-if="isComment")
+    img.icon.comment(src="@/assets/comment.svg")
+  //- date
+  .badge.status.button-badge(v-if="shouldShowItemActions" @click.left.prevent.stop="toggleFilterShowAbsoluteDates" @touchend.prevent.stop="toggleFilterShowAbsoluteDates")
     img.icon.time(src="@/assets/time.svg")
     span.name {{dateUpdatedAt}}
-  .users
+  .users(v-if="shouldShowItemActions")
     //- created by
     template(v-if="createdByUserIsNotEmpty")
       UserLabelInline(:user="createdByUser" :isClickable="true" :title="'Created by'" :isOnDarkBackground="true")
@@ -109,4 +115,6 @@ const userDetailsIsUser = (user) => {
     margin-top 1px
   .name
     color var(--primary)
+  .is-comment-badge
+    flex-shrink 0
 </style>
