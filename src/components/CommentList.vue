@@ -2,8 +2,7 @@
 import { reactive, computed, onMounted, onBeforeUnmount, defineProps, defineEmits, watch, ref, nextTick } from 'vue'
 import { useStore } from 'vuex'
 
-import UserLabelInline from '@/components/UserLabelInline.vue'
-import NameSegment from '@/components/NameSegment.vue'
+import CardList from '@/components/CardList.vue'
 import utils from '@/utils.js'
 
 import sortBy from 'lodash-es/sortBy'
@@ -45,20 +44,7 @@ const relativeDate = (card) => {
 
 <template lang="pug">
 section.results-section.comments
-  ul.results-list(v-if="comments.length")
-    template(v-for="card in comments" :key="card.id")
-      li(@click="showCardDetails(card)")
-        p.user
-          UserLabelInline(:user="card.user")
-          br
-          span.badge.status.inline-badge
-            img.icon.time(src="@/assets/time.svg")
-            span {{ relativeDate(card) }}
-        .comment-name
-          img.icon.comment-icon(src="@/assets/comment.svg")
-          template(v-for="segment in card.nameSegments")
-            img.card-image(v-if="segment.isImage" :src="segment.url")
-            NameSegment(:segment="segment")
+  CardList(:cards="comments" @selectCard="showCardDetails")
   section.subsection.tips-section(v-if="!comments.length")
     p No comment cards in this space yet
     p
@@ -70,23 +56,12 @@ section.results-section.comments
 
 <style lang="stylus">
 section.comments
-  .results-section
-    border-top 1px solid var(--primary-border)
-    padding-top 4px
-    li
-      display block
-  .comment-icon
-    vertical-align -3px
-  .user
-    flex-shrink 0
-    max-width 44%
-
-section.tips-section
-  margin 4px
-  margin-top 0
-  .comment-icon
-    margin-left 4px
-    vertical-align -2px
-  .down-arrow-inline
-    vertical-align 2px
+  section.tips-section
+    margin 4px
+    margin-top 0
+    .comment-icon
+      margin-left 4px
+      vertical-align -2px
+    .down-arrow-inline
+      vertical-align 2px
 </style>
