@@ -35,6 +35,7 @@ import SpaceTodayJournalBadge from '@/components/SpaceTodayJournalBadge.vue'
 import DiscoveryButtons from '@/components/DiscoveryButtons.vue'
 import UserSettings from '@/components/dialogs/UserSettings.vue'
 import SpaceUserList from '@/components/dialogs/SpaceUserList.vue'
+import CommentButtons from '@/components/CommentButtons.vue'
 import consts from '@/consts.js'
 
 import sortBy from 'lodash-es/sortBy'
@@ -564,15 +565,6 @@ const togglePresentationMode = () => {
   const value = !isPresentationMode.value
   store.commit('isPresentationMode', value)
 }
-
-// comment mode
-
-const isCommentMode = computed(() => store.state.isCommentMode)
-const toggleCommentMode = () => {
-  const value = !isCommentMode.value
-  store.commit('isCommentMode', value)
-}
-
 </script>
 
 <template lang="pug">
@@ -733,12 +725,8 @@ header(v-if="isVisible" :style="state.position" :class="{'fade-out': isFadingOut
           button(@click.left.stop="toggleUpgradeUserIsVisible" :class="{active: state.upgradeUserIsVisible, 'translucent-button': !shouldIncreaseUIContrast}")
             span Upgrade
           UpgradeUser(:visible="state.upgradeUserIsVisible" @closeDialog="closeAllDialogs")
-        //- comment mode
-        .button-wrap
-          button(:class="{ 'translucent-button': !shouldIncreaseUIContrast, active: isCommentMode }" @click="toggleCommentMode" title="Comment Mode")
-            img.icon(src="@/assets/comment.svg")
-          .label-badge.comment-mode-badge-wrap(v-if="isCommentMode")
-            span Comment Mode
+        //- comments
+        CommentButtons
         //- presentation mode
         .button-wrap
           button(:class="{ 'translucent-button': !shouldIncreaseUIContrast }" @click="togglePresentationMode" title="Focus/Presentation Mode (P)")
