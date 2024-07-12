@@ -389,11 +389,17 @@ const toggleIsLocked = () => {
 
 // comment
 
+const canOnlyComment = computed(() => store.getters['currentUser/canOnlyComment']())
+const toggleCommentIsDisabled = computed(() => {
+  if (canOnlyComment.value) { return }
+  return !canEditAll.value
+})
 const isComment = computed(() => {
   const cards = props.cards.filter(card => card.isComment)
   return Boolean(cards.length === props.cards.length)
 })
 const toggleIsComment = async () => {
+  if (toggleCommentIsDisabled.value) { return }
   const value = !isComment.value
   props.cards.forEach(card => {
     card = {
@@ -410,6 +416,13 @@ const toggleIsComment = async () => {
   await updateCardDimensions()
   store.dispatch('currentConnections/updateMultiplePaths', props.cards)
 }
+const commentTitle = computed(() => {
+  if (toggleCommentIsDisabled.value) {
+    return 'Only collaborators can toggle comments'
+  } else {
+    return 'Turn into Comment'
+  }
+})
 
 // vote counter
 
@@ -514,7 +527,7 @@ section.subsection.style-actions(v-if="visible" @click.left.stop="closeDialogs")
         img.icon(src="@/assets/lock.svg")
     //- Comment
     .button-wrap(v-if="isCards")
-      button(:disabled="!canEditAll" @click="toggleIsComment" :class="{active: isComment}" title="Turn into Comment")
+      button(:disabled="toggleCommentIsDisabled" @click="toggleIsComment" :class="{active: isComment}" :title="commentTitle")
         img.icon.comment(src="@/assets/comment.svg")
 
     //- Surround with Box
