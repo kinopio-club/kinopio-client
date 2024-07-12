@@ -3,6 +3,8 @@ import { reactive, computed, onMounted, onBeforeUnmount, defineProps, defineEmit
 import { useStore } from 'vuex'
 
 import utils from '@/utils.js'
+import CommentList from '@/components/CommentList.vue'
+
 const store = useStore()
 
 const dialogElement = ref(null)
@@ -47,13 +49,11 @@ const toggleFilterComments = () => {
 <template lang="pug">
 dialog.narrow.comments(v-if="visible" :open="visible" @click.left.stop ref="dialogElement" :style="{'max-height': state.dialogHeight + 'px'}")
   section
-    //- Comments Hide
     label(title="Toggle Hide Comment Cards (4)" :class="{active: filterComments}" @click.left.prevent.stop="toggleFilterComments" @keydown.stop.enter="toggleFilterComments")
       input(type="checkbox" v-model="filterComments")
       img.icon.comment(src="@/assets/comment.svg")
       span Hide Comment Cards
-  section
-    p TODO list comments out (move from sidebar)
+  CommentList
 </template>
 
 <style lang="stylus">

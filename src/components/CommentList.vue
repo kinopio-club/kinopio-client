@@ -1,9 +1,6 @@
 <template lang="pug">
 
-section(v-if="visible")
-  p Comments
-
-section.results-section.comments(v-if="visible")
+section.results-section.comments
   ul.results-list(v-if="comments.length")
     template(v-for="card in comments" :key="card.id")
       li(@click="showCardDetails(card)")
@@ -40,9 +37,6 @@ export default {
   components: {
     NameSegment,
     UserLabelInline
-  },
-  props: {
-    visible: Boolean
   },
   computed: {
     comments () {
