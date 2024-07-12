@@ -35,12 +35,23 @@ const updateDialogHeight = async () => {
   state.dialogHeight = utils.elementHeight(element)
 }
 
+const currentUser = computed(() => store.state.currentUser)
+const filterComments = computed(() => currentUser.value.filterComments)
+const toggleFilterComments = () => {
+  const value = !filterComments.value
+  store.dispatch('currentUser/toggleFilterComments', value)
+}
+
 </script>
 
 <template lang="pug">
 dialog.narrow.comments(v-if="visible" :open="visible" @click.left.stop ref="dialogElement" :style="{'max-height': state.dialogHeight + 'px'}")
   section
-    p TODO button to [] toggle hide comments (same as search filter)
+    //- Comments Hide
+    label(title="Toggle Hide Comment Cards (4)" :class="{active: filterComments}" @click.left.prevent.stop="toggleFilterComments" @keydown.stop.enter="toggleFilterComments")
+      input(type="checkbox" v-model="filterComments")
+      img.icon.comment(src="@/assets/comment.svg")
+      span Hide Comment Cards
   section
     p TODO list comments out (move from sidebar)
 </template>
