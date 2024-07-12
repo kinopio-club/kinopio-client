@@ -57,7 +57,7 @@ const toggleInviteType = (type) => {
 const editUrl = computed(() => {
   const currentSpace = store.state.currentSpace
   const spaceId = currentSpace.id
-  const url = utils.inviteUrl({ spaceId, spaceName: spaceName.value, collaboratorKey: collaboratorKey.value })
+  const url = utils.inviteUrl({ spaceId, spaceName: spaceName.value, collaboratorKey: collaboratorKey.value, isCommentMode: state.isShareInCommentMode })
   console.log('🍇 invite edit url', url)
   return url
 })
