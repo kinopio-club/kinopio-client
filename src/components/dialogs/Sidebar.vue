@@ -6,7 +6,6 @@ import utils from '@/utils.js'
 
 import Links from '@/components/sidebar/Links.vue'
 import Tags from '@/components/sidebar/Tags.vue'
-import Comments from '@/components/sidebar/Comments.vue'
 import Removed from '@/components/sidebar/Removed.vue'
 import AIImages from '@/components/sidebar/AIImages.vue'
 import Stats from '@/components/sidebar/Stats.vue'
@@ -47,7 +46,6 @@ const state = reactive({
   dialogHeight: null,
   tagsIsVisible: false,
   linksIsVisible: false,
-  commentsIsVisible: false,
   removedIsVisible: false,
   AIImagesIsVisible: false,
   inboxIsVisible: false,
@@ -59,7 +57,6 @@ const state = reactive({
 const clearVisible = () => {
   state.linksIsVisible = false
   state.tagsIsVisible = false
-  state.commentsIsVisible = false
   state.removedIsVisible = false
   state.AIImagesIsVisible = false
   state.inboxIsVisible = false
@@ -109,11 +106,6 @@ const toggleLinksIsVisible = () => {
   state.linksIsVisible = true
   updateUserLastSidebarSection('links')
 }
-const toggleCommentsIsVisible = () => {
-  clearVisible()
-  state.commentsIsVisible = true
-  updateUserLastSidebarSection('comments')
-}
 const toggleRemovedIsVisible = () => {
   clearVisible()
   state.removedIsVisible = true
@@ -150,12 +142,12 @@ const toggleFavoritesIsVisible = () => {
 const restoreUserLastSidebarSection = () => {
   clearVisible()
   const section = store.state.currentUser.lastSidebarSection
-  const values = ['text', 'stats', 'AIImages', 'inbox', 'removed', 'comments', 'links', 'tags', 'favorites'] // listed in api docs
+  const values = ['text', 'stats', 'AIImages', 'inbox', 'removed', 'links', 'tags', 'favorites'] // listed in api docs
   const isValid = values.includes(section)
   if (section && isValid) {
     state[section + 'IsVisible'] = true
   } else {
-    state.textIsVisible = true
+    state.inboxIsVisible = true
   }
 }
 const updateUserLastSidebarSection = (name) => {
@@ -171,23 +163,20 @@ dialog#sidebar.sidebar.is-pinnable(v-if="visible" :open="visible" @click.left.st
       .button-wrap.segmented-buttons-wrap
         //- first row
         .segmented-buttons
+          //- Inbox
+          button(@click.left="toggleInboxIsVisible" :class="{ active: state.inboxIsVisible}")
+            img.icon(src="@/assets/inbox.svg")
           //- Text
           button(@click.left="toggleTextIsVisible" :class="{active: state.textIsVisible}")
             span Text
           //- Tags
           button(@click.left="toggleTagsIsVisible" :class="{ active: state.tagsIsVisible}")
             span Tags
-          //- Comments
-          button(@click.left="toggleCommentsIsVisible" :class="{ active: state.commentsIsVisible}")
-            img.icon.comment-icon(src="@/assets/comment.svg")
           //- Links
           button(@click.left="toggleLinksIsVisible" :class="{ active: state.linksIsVisible}")
             span Links
         //- second row
         .segmented-buttons
-          //- Inbox
-          button(@click.left="toggleInboxIsVisible" :class="{ active: state.inboxIsVisible}")
-            img.icon(src="@/assets/inbox.svg")
           //- Favorites
           button(@click.left="toggleFavoritesIsVisible" :class="{ active: state.favoritesIsVisible}")
             img.icon(src="@/assets/heart-empty.svg")
@@ -211,7 +200,6 @@ dialog#sidebar.sidebar.is-pinnable(v-if="visible" :open="visible" @click.left.st
 
   Tags(:visible="state.tagsIsVisible" :parentIsPinned="dialogIsPinned")
   Links(:visible="state.linksIsVisible" :parentIsPinned="dialogIsPinned")
-  Comments(:visible="state.commentsIsVisible")
   Removed(:visible="state.removedIsVisible")
   AIImages(:visible="state.AIImagesIsVisible")
   Stats(:visible="state.statsIsVisible")
@@ -232,8 +220,6 @@ dialog#sidebar.sidebar.is-pinnable(v-if="visible" :open="visible" @click.left.st
     top -13px
   .title-row-flex
     align-items flex-start
-    .comment-icon
-      vertical-align -2px
   .right-pin
     transform rotate(180deg)
   .tags,
