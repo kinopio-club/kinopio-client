@@ -816,7 +816,7 @@ const currentSpace = {
       const canEditSpace = context.rootGetters['currentUser/canEditSpace'](context.state)
       if (context.state.isRemoved) { return }
       if (!isSpaceMember && canEditSpace) {
-        context.commit('addNotification', { message: 'This space is open, which means you can add to it too', icon: 'open', type: 'success' }, { root: true })
+        context.commit('addNotification', { message: 'This space is open, which means you can add comments', icon: 'open', type: 'success' }, { root: true })
       }
     },
     clearStateMeta: (context) => {
