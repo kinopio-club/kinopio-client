@@ -848,6 +848,11 @@ export default {
       if (canEditSpace && cardIsCreatedByCurrentUser) { return true }
       return false
     },
+    canOnlyComment: (state, getters, rootState) => () => {
+      const canEditSpace = getters.canEditSpace
+      const isSpaceMember = getters.isSpaceMember(rootState.currentSpace)
+      return canEditSpace && !isSpaceMember
+    },
     canEditBox: (state, getters, rootState, rootGetters) => (box) => {
       const isSpaceMember = getters.isSpaceMember()
       if (isSpaceMember) { return true }
