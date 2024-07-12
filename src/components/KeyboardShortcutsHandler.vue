@@ -102,7 +102,7 @@ const handleShortcuts = (event) => {
   // Escape
   } else if (key === 'escape') {
     store.dispatch('closeAllDialogs')
-    store.commit('currentUserToolbar', 'card')
+    store.dispatch('currentUserToolbar', 'card')
   } else if (key === '1' && isSpaceScope) {
     let value = store.state.currentUser.filterShowUsers
     value = !value
@@ -126,9 +126,9 @@ const handleShortcuts = (event) => {
     store.commit('currentUserIsPanningReady', false)
     spaceKeyIsDown = false
   } else if (key === 'b' && isSpaceScope) {
-    store.commit('currentUserToolbar', 'box')
+    store.dispatch('currentUserToolbar', 'box')
   } else if (key === 'c' && isSpaceScope) {
-    store.commit('currentUserToolbar', 'card')
+    store.dispatch('currentUserToolbar', 'card')
   }
 }
 // on key down

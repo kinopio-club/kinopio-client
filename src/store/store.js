@@ -1882,6 +1882,11 @@ const store = createStore({
       percent = Math.max(percent, consts.spaceZoom.min)
       percent = Math.min(percent, consts.spaceZoom.max)
       context.commit('spaceZoomPercent', percent)
+    },
+    currentUserToolbar: (context, value) => {
+      const canOnlyComment = context.getters['currentUser/canOnlyComment']()
+      if (canOnlyComment) { return }
+      context.commit('currentUserToolbar', value)
     }
   },
   getters: {
