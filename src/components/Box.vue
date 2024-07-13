@@ -1,5 +1,5 @@
 <script setup>
-import { reactive, computed, onMounted, onBeforeUnmount, onUnmounted, defineProps, defineEmits, watch, ref, nextTick } from 'vue'
+import { reactive, computed, onMounted, onBeforeUnmount, onUpdated, onUnmounted, defineProps, defineEmits, watch, ref, nextTick } from 'vue'
 import { useStore } from 'vuex'
 
 import utils from '@/utils.js'
@@ -25,6 +25,9 @@ let observer
 const boxElement = ref(null)
 
 onMounted(() => {
+  initViewportObserver()
+})
+onUpdated(() => {
   initViewportObserver()
 })
 onBeforeUnmount(() => {
@@ -65,6 +68,7 @@ const normalizeBox = (box) => {
 // is visible in viewport
 
 const initViewportObserver = async () => {
+  removeViewportObserver()
   await nextTick()
   try {
     let callback = (entries, observer) => {

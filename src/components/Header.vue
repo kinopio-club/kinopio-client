@@ -168,9 +168,9 @@ const isMobile = computed(() => utils.isMobile())
 
 // new stuff
 
-const shouldShowNewStuffIsUpdated = computed(() => {
+const shouldShowBlogPostsIsUpdated = computed(() => {
   const isNotDefaultSpace = !store.getters['currentSpace/isHelloKinopio']
-  return store.state.newStuffIsUpdated && isNotDefaultSpace && userCanEditSpace.value
+  return store.state.blogPostsIsUpdated && isNotDefaultSpace && userCanEditSpace.value
 })
 
 // current space
@@ -599,7 +599,7 @@ header(v-if="isVisible" :style="state.position" :class="{'fade-out': isFadingOut
           .button-wrap
             .logo(alt="kinopio logo" @click.left.stop="toggleAboutIsVisible" @touchend.stop @mouseup.left.stop :class="{active: state.aboutIsVisible}" tabindex="0")
               .logo-image
-                .label-badge.small-badge(v-if="shouldShowNewStuffIsUpdated")
+                .label-badge.small-badge(v-if="shouldShowBlogPostsIsUpdated")
                   span NEW
               img.down-arrow(src="@/assets/down-arrow.svg")
             About(:visible="state.aboutIsVisible")

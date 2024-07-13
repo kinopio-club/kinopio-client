@@ -28,18 +28,12 @@ export default {
   cdnHost: 'https://cdn.kinopio.club',
   defaultSpaceBackground: 'https://bk.kinopio.club/grid-large-boxes-2x.png',
   moderatorUserId: 'euGhpBrR9eBcjKnK16C_g',
+  discordUrl: 'https://discord.gg/h2sR45Nby8',
   isDevelopment () {
     if (env.VITE_PROD_SERVER === 'true') {
       return false
     } else {
       return (env.MODE === 'development')
-    }
-  },
-  roadmapSpaceId () {
-    if (this.isDevelopment()) {
-      return 'FiM7akGos18Sfx4yKrwjF'
-    } else {
-      return '6TRE21gchHI7alHLuwzd5'
     }
   },
   kinopioDomain () {
@@ -56,12 +50,31 @@ export default {
     }
     return host
   },
-  blogHost () {
-    let host = 'https://blog.kinopio.club'
+  roadmapSpaceId () {
     if (this.isDevelopment()) {
-      host = 'http://localhost:8082'
+      return 'FiM7akGos18Sfx4yKrwjF'
+    } else {
+      return '6TRE21gchHI7alHLuwzd5'
     }
-    return host
+  },
+  blogSpaceId () {
+    if (this.isDevelopment()) {
+      return 'ezP9B9r2U0CUYR8g-Mn9N'
+    } else {
+      return '6lsytK8ZfOtMl2oqG05Rj'
+    }
+  },
+  blogUrl () {
+    const host = this.kinopioDomain()
+    const spaceName = 'kinopio-blog'
+    const spaceId = this.blogSpaceId()
+    return `${host}/${spaceName}-${spaceId}`
+  },
+  roadmapUrl () {
+    const host = this.kinopioDomain()
+    const spaceName = 'kinopio-roadmap'
+    const spaceId = this.roadmapSpaceId()
+    return `${host}/${spaceName}-${spaceId}`
   },
   websocketHost () {
     let host = 'wss://api.kinopio.club'

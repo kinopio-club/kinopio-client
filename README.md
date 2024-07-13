@@ -83,6 +83,10 @@ The hello space serves as the entry point and marketing page for new users. It's
 
 To update it, create the space and export its json. Replace the contents of`hello.json` with the new json file.
 
+## How to update the Blog and "What's New"
+
+[Instructions here](https://kinopio.club/-kinopio-team-how-to-update-blog-oi4jZTSI_eAEvov9XbjJM)
+
 ## HTTPS Signing
 
 > You shouldn't need to run this or update the cert until 2025, but just in case

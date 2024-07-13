@@ -2,6 +2,8 @@ import Space from '@/views/Space.vue'
 import store from '@/store/store.js'
 import pageMeta from '@/pageMeta.js'
 
+import consts from './consts.js'
+
 import { createRouter, createWebHistory } from 'vue-router'
 
 const router = createRouter({
@@ -109,11 +111,24 @@ const router = createRouter({
         next()
       }
     }, {
+      path: '/blog',
+      component: Space,
+      beforeEnter: (to, from, next) => {
+        store.commit('loadBlogSpace', true)
+        next()
+      }
+    }, {
       path: '/inbox',
       component: Space,
       beforeEnter: (to, from, next) => {
         store.commit('loadInboxSpace', true)
         next()
+      }
+    }, {
+      path: '/discord',
+      component: Space,
+      beforeEnter: (to, from, next) => {
+        window.location.href = consts.discordUrl
       }
     }, {
       path: '/:space/:card',

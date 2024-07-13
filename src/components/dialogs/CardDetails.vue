@@ -493,6 +493,7 @@ const checkboxIsChecked = computed({
     } else {
       store.dispatch('currentCards/toggleChecked', { cardId: card.value.id, value })
     }
+    updateDimensionsAndPathsDebounced()
   }
 })
 const addCheckbox = () => {
@@ -501,6 +502,7 @@ const addCheckbox = () => {
     name: `[] ${card.value.name}`
   }
   store.dispatch('currentCards/update', update)
+  updateDimensionsAndPathsDebounced()
 }
 
 // character limit
