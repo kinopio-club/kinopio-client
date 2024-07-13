@@ -852,7 +852,7 @@ export default {
   },
   spaceBetweenCards () {
     let spaceBetween = 12
-    return this.spaceZoomDecimal() * spaceBetween
+    return this.spaceCounterZoomDecimal() * spaceBetween
   },
   cardElementDimensions (card) {
     if (!card) { return }
@@ -861,7 +861,7 @@ export default {
     const cardId = card.id
     card.x = parseInt(element.dataset.x)
     card.y = parseInt(element.dataset.y)
-    const width = parseInt(element.dataset.width)
+    const width = parseInt(element.dataset.resizeWidth || element.dataset.width)
     const height = parseInt(element.dataset.height)
     card.width = Math.ceil(width)
     card.height = Math.ceil(height)
