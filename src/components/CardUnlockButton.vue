@@ -10,11 +10,6 @@ onMounted(() => {
     const { type, payload } = mutation
     if (type === 'triggerUpdateTheme') {
       updateDefaultColor()
-    } else if (type === 'triggerUpdateLockedItemButtonPositionCardId' && payload === props.card.id) {
-      updatePosition()
-    } else if (type === 'spaceZoomPercent' || type === 'zoomOrigin') {
-      await nextTick()
-      updatePosition()
     }
   })
   updateDefaultColor()
@@ -48,30 +43,14 @@ const isLightInDarkTheme = computed(() => !backgroundColorIsDark.value && isThem
 
 // styles
 
-const updatePosition = () => {
-  let cardElement = document.querySelector(`article[data-card-id="${props.card.id}"]`)
-  if (!cardElement) { return }
-  if (cardElement.dataset.shouldRender === 'false') {
-    return
-  }
-  const element = cardElement.querySelector('.lock-button-wrap')
-  if (!element) { return }
-  const rect = element.getBoundingClientRect()
-  state.position = rect
-}
 const positionStyles = computed(() => {
-  const pointIsEmpty = utils.pointIsEmpty(state.position)
-  if (!state.position || pointIsEmpty) {
-    return { display: 'none' }
-  }
-  let position = utils.updatePositionWithSpaceOffset(state.position)
-  const x = (position.x + window.scrollX) * store.getters.spaceCounterZoomDecimal
-  const y = (position.y + window.scrollY) * store.getters.spaceCounterZoomDecimal
-  position = {
+  const buttonWidth = 36
+  const width = props.card.width || props.card.resizeWidth
+  const x = props.card.x + width - buttonWidth
+  return {
     left: x + 'px',
-    top: y + 'px'
+    top: props.card.y + 'px'
   }
-  return position
 })
 const backgroundStyles = computed(() => {
   return { backgroundColor: 'transparent' }
