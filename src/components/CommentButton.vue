@@ -32,12 +32,7 @@ const blur = () => {
   element.blur()
 }
 
-// comment mode
-
 const isCommentMode = computed(() => store.state.isCommentMode)
-
-// comments dialog
-
 const toggleCommentsIsVisible = () => {
   const value = !state.commentsIsVisible
   store.dispatch('closeAllDialogs')
@@ -47,30 +42,13 @@ const toggleCommentsIsVisible = () => {
 </script>
 
 <template lang="pug">
-//- .segmented-buttons.space-functions-row
-  //- .button-wrap
-  //-   button(
-  //-     :class="{ 'translucent-button': !shouldIncreaseUIContrast, active: isCommentMode }"
-  //-     @click="toggleCommentMode"
-  //-     ref='commentModeElement'
-  //-     title="Comment Mode"
-  //-   )
-  //-     img.icon.comment(src="@/assets/comment.svg")
-
 .button-wrap.comment-button(v-if="isVisible")
   button(:class="{ 'translucent-button': !shouldIncreaseUIContrast, active: state.commentsIsVisible }" @click="toggleCommentsIsVisible" ref="buttonElement")
     img.icon.comment(src="@/assets/comment.svg")
   Comments(:visible="state.commentsIsVisible")
   .label-badge.comment-mode-badge-wrap(v-if="isCommentMode")
     span Comment Mode
-
 </template>
 
 <style lang="stylus">
-// .comment-buttons
-//   margin-left 6px
-//   margin-right 6px
-  // .comment-mode-badge-wrap
-  //   right initial
-  //   left 5px
 </style>
