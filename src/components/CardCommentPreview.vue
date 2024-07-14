@@ -99,4 +99,6 @@ const urlPreviewImage = computed(() => {
     height 8px
   .card-image
     border-radius var(--entity-radius)
+  .name-segment
+    white-space pre-wrap
 </style>

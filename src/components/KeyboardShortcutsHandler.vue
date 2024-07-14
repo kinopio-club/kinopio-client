@@ -312,13 +312,6 @@ const scrollIntoView = (card) => {
 
 // Add Parent and Child Cards
 
-const updateWithZoom = (object) => {
-  const zoom = store.getters.spaceCounterZoomDecimal
-  object.x = Math.round(object.x * zoom)
-  object.y = Math.round(object.y * zoom)
-  return object
-}
-
 const addCard = async (options) => {
   options = options || {}
   if (store.state.shouldPreventNextEnterKey) {
@@ -333,38 +326,36 @@ const addCard = async (options) => {
   let childCard = document.querySelector(`.card[data-card-id="${childCardId}"]`)
   const childCardData = store.getters['currentCards/byId'](childCardId)
   const shouldOutdentChildToParent = childCard && !childCardData
-  const scroll = store.getters.windowScrollWithSpaceOffset()
   const spaceBetweenCards = utils.spaceBetweenCards()
   let position = {}
   let isParentCard = true
   if (shouldOutdentChildToParent) {
-    const rect = childCard.getBoundingClientRect()
-    const parentRect = parentCard.getBoundingClientRect()
+    const rect = utils.cardElementDimensions({ id: childCardId })
+    const parentRect = utils.cardElementDimensions({ id: parentCardId })
     position = {
-      x: scroll.x + parentRect.x,
-      y: scroll.y + rect.y
+      x: parentRect.x,
+      y: rect.y
     }
     childCard = false
   } else if (childCard) {
     isParentCard = false
-    const rect = childCard.getBoundingClientRect()
+    const rect = utils.cardElementDimensions({ id: childCardId })
     position = {
-      x: scroll.x + rect.x,
-      y: scroll.y + rect.y + rect.height + spaceBetweenCards
+      x: rect.x,
+      y: rect.y + rect.height + spaceBetweenCards
     }
   } else if (parentCard) {
-    const rect = parentCard.getBoundingClientRect()
+    const rect = utils.cardElementDimensions({ id: parentCardId })
     position = {
-      x: scroll.x + rect.x,
-      y: scroll.y + rect.y + rect.height + spaceBetweenCards
+      x: rect.x,
+      y: rect.y + rect.height + spaceBetweenCards
     }
   } else {
     position = {
-      x: scroll.x + 100,
-      y: scroll.y + 120
+      x: 100,
+      y: 120
     }
   }
-  position = updateWithZoom(position)
   position = nonOverlappingCardPosition(position)
   parentCard = store.getters['currentCards/byId'](parentCardId)
   let backgroundColor
@@ -384,7 +375,6 @@ const addChildCard = async (options) => {
   options = options || {}
   useSiblingConnectionType = false
   const spaceBetweenCards = utils.spaceBetweenCards()
-  const scroll = store.getters.windowScrollWithSpaceOffset()
   const parentCardId = store.state.parentCardId
   const childCardId = store.state.childCardId
   let parentCardElement = document.querySelector(`.card[data-card-id="${parentCardId}"]`)
@@ -400,12 +390,11 @@ const addChildCard = async (options) => {
     addCard(options)
     return
   }
-  const rect = baseCardElement.getBoundingClientRect()
+  const rect = utils.cardElementDimensions({ id: baseCardId }) // baseCardElement.getBoundingClientRect()
   let initialPosition = {
-    x: scroll.x + rect.x + rect.width + spaceBetweenCards,
-    y: scroll.y + rect.y + rect.height + spaceBetweenCards
+    x: rect.x + rect.width + spaceBetweenCards,
+    y: rect.y + rect.height + spaceBetweenCards
   }
-  initialPosition = updateWithZoom(initialPosition)
   const position = nonOverlappingCardPosition(initialPosition)
   const parentCard = store.getters['currentCards/byId'](parentCardId)
   const newChildCardId = options.id || nanoid()
@@ -642,7 +631,7 @@ const handlePasteEvent = async (event) => {
   if (!isSpaceScope) { return }
   event.preventDefault()
   let position = currentCursorPosition || prevCursorPosition
-  position = updateWithZoom(position)
+  position = utils.cursorPositionInSpace(null, position)
   // check card limits
   if (store.getters['currentSpace/shouldPreventAddCard']) {
     store.commit('notifyCardsCreatedIsOverLimit', true)

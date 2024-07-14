@@ -5,17 +5,6 @@ import { useStore } from 'vuex'
 import utils from '@/utils.js'
 const store = useStore()
 
-onMounted(() => {
-  store.subscribe(async (mutation, state) => {
-    const { type, payload } = mutation
-    if (type === 'spaceZoomPercent' || type === 'zoomOrigin') {
-      await nextTick()
-      updatePosition()
-    }
-  })
-  updatePosition()
-})
-
 const props = defineProps({
   box: Object
 })
@@ -27,20 +16,13 @@ const canEditBox = computed(() => store.getters['currentUser/canEditBox'](props.
 
 // styles
 
-const updatePosition = () => {
-  const element = document.querySelector(`.box[data-box-id="${props.box.id}"] .lock-button-wrap`)
-  if (!element) { return }
-  const rect = element.getBoundingClientRect()
-  state.position = rect
-}
 const positionStyles = computed(() => {
-  if (!state.position) { return }
-  const position = utils.updatePositionWithSpaceOffset(state.position)
-  const x = (position.x + window.scrollX) * store.getters.spaceCounterZoomDecimal
-  const y = (position.y + window.scrollY) * store.getters.spaceCounterZoomDecimal
+  const buttonWidth = 36
+  const width = props.box.resizeWidth
+  const x = props.box.x + width - buttonWidth
   return {
     left: x + 'px',
-    top: y + 'px'
+    top: props.box.y + 'px'
   }
 })
 const backgroundStyles = computed(() => {
