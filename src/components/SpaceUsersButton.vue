@@ -74,8 +74,8 @@ const label = computed(() => {
   let string = `${users.value.length} ${CollaboratorsString}`
   if (isOtherCardUsers.value) {
     condition = otherCardUsers.value.length !== 1
-    const othersString = utils.pluralize('Other', condition)
-    string = string + `, ${otherCardUsers.value.length} ${othersString}`
+    const commentersString = utils.pluralize('Commenter', condition)
+    string = string + `, ${otherCardUsers.value.length} ${commentersString}`
   }
   return string
 })
