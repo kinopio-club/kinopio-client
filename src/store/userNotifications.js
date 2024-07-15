@@ -36,6 +36,8 @@ export default {
     addFavoriteSpace: (context, favoriteSpace) => {
       const userId = context.rootState.currentUser.id
       const recipientUserIds = context.getters.recipientUserIds
+      const isCurrentUserSpace = recipientUserIds.includes(userId)
+      if (isCurrentUserSpace) { return }
       const notification = {
         type: 'addFavoriteSpace',
         userId,
