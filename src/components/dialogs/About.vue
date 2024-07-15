@@ -109,7 +109,7 @@ const checkIfKinopioUpdatesAreAvailable = async () => {
   await updateBlogPosts()
   if (!state.blogPosts.length) { return }
   let newest = state.blogPosts[0]
-  newest = dayjs(newest.date_published)
+  newest = dayjs(newest.createdAt)
   const timeSinceNewest = initTime.diff(newest, 'minute')
   if (timeSinceNewest < 0) {
     store.commit('notifyKinopioUpdatesAreAvailable', true)
