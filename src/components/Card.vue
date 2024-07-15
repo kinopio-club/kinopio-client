@@ -21,7 +21,6 @@ import ImageOrVideo from '@/components/ImageOrVideo.vue'
 
 import dayjs from 'dayjs'
 import qs from '@aguezz/qs-parse'
-import debounce from 'lodash-es/debounce'
 
 const store = useStore()
 
