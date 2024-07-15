@@ -1,3 +1,94 @@
+<script setup>
+import { reactive, computed, onMounted, onBeforeUnmount, defineProps, defineEmits, watch, ref, nextTick } from 'vue'
+import { useStore } from 'vuex'
+
+import UserLabelInline from '@/components/UserLabelInline.vue'
+import NameSegment from '@/components/NameSegment.vue'
+import Loader from '@/components/Loader.vue'
+import utils from '@/utils.js'
+import cache from '@/cache.js'
+
+const store = useStore()
+
+onMounted(() => {
+  store.subscribe(mutation => {
+    if (mutation.type === 'triggerRemoveCardFromCardList') {
+      const card = mutation.payload
+      state.removedCardIds.push(card.id)
+    }
+  })
+})
+
+const emit = defineEmits(['selectCard', 'removeCard'])
+
+const props = defineProps({
+  cards: Array,
+  search: String,
+  cardsShowRemoveButton: Boolean,
+  dateIsCreatedAt: Boolean
+})
+
+const state = reactive({
+  removedCardIds: []
+})
+
+const normalizedCards = computed(() => {
+  let items = utils.clone(props.cards)
+  items = items.filter(card => !state.removedCardIds.includes(card.id))
+  return items.map(card => {
+    card = store.getters['currentCards/nameSegments'](card)
+    card.user = store.getters['currentSpace/userById'](card.userId)
+    if (!card.user) {
+      card.user = {
+        id: '',
+        name: '',
+        color: undefined
+      }
+    }
+    return card
+  })
+})
+
+const urlPreviewImage = (card) => {
+  if (!card.urlPreviewIsVisible) { return }
+  return card.urlPreviewImage
+}
+const selectCard = (card) => {
+  emit('selectCard', card)
+}
+const removeCard = (card) => {
+  emit('removeCard', card)
+}
+const cardIsActive = (card) => {
+  const isCardDetailsVisible = store.state.cardDetailsIsVisibleForCardId === card.id
+  return isCardDetailsVisible || card.isLoading
+}
+const cardIsFocused = (card) => {
+  return store.state.previousResultItem.id === card.id
+}
+const relativeDate = (card) => {
+  if (props.dateIsCreatedAt) {
+    return utils.shortRelativeTime(card.createdAt)
+  }
+  return utils.shortRelativeTime(card.nameUpdatedAt || card.updatedAt)
+}
+const userIsNotCurrentUser = (userId) => {
+  return store.state.currentUser.id !== userId
+}
+const isStrikeThrough = (card) => {
+  return card.name.startsWith('[x]')
+}
+const colorIsDark = (card) => {
+  if (!card.backgroundColor) { return }
+  return utils.colorIsDark(card.backgroundColor)
+}
+const styles = (card) => {
+  return {
+    backgroundColor: card.backgroundColor
+  }
+}
+</script>
+
 <template lang="pug">
 span
   ul.results-list.card-list(ref="resultsList")
@@ -14,113 +105,13 @@ span
           template(v-for="segment in card.nameSegments")
             img.card-image(v-if="segment.isImage" :src="segment.url")
             img.card-image(v-if="urlPreviewImage(card)" :src="urlPreviewImage(card)")
-            NameSegment(:segment="segment" :search="search" :isStrikeThrough="isStrikeThrough(card)")
+            NameSegment(:segment="segment" :search="props.search" :isStrikeThrough="isStrikeThrough(card)")
           //- remove
-          button.small-button.remove-button.danger(v-if="cardsShowRemoveButton" @click.left.stop="removeCard(card)")
+          button.small-button.remove-button.danger(v-if="props.cardsShowRemoveButton" @click.left.stop="removeCard(card)")
             img.icon(src="@/assets/remove.svg")
           //- loading
           Loader(:visible="card.isLoading")
-
 </template>
-
-<script>
-import UserLabelInline from '@/components/UserLabelInline.vue'
-import NameSegment from '@/components/NameSegment.vue'
-import Loader from '@/components/Loader.vue'
-import utils from '@/utils.js'
-import cache from '@/cache.js'
-
-import { mapState, mapGetters } from 'vuex'
-
-export default {
-  name: 'ComponentName',
-  components: {
-    UserLabelInline,
-    NameSegment,
-    Loader
-  },
-  props: {
-    cards: Array,
-    search: String,
-    cardsShowRemoveButton: Boolean
-  },
-  created () {
-    this.$store.subscribe((mutation, state) => {
-      if (mutation.type === 'triggerRemoveCardFromCardList') {
-        const card = mutation.payload
-        this.removedCardIds.push(card.id)
-      }
-    })
-  },
-  data () {
-    return {
-      removedCardIds: []
-    }
-  },
-  computed: {
-    ...mapState([
-      'cardDetailsIsVisibleForCardId',
-      'previousResultItem',
-      'currentUser'
-    ]),
-    ...mapGetters([
-    ]),
-    normalizedCards () {
-      let cards = utils.clone(this.cards)
-      cards = cards.filter(card => !this.removedCardIds.includes(card.id))
-      return cards.map(card => {
-        card = this.$store.getters['currentCards/nameSegments'](card)
-        card.user = this.$store.getters['currentSpace/userById'](card.userId)
-        if (!card.user) {
-          card.user = {
-            id: '',
-            name: '',
-            color: undefined
-          }
-        }
-        return card
-      })
-    }
-  },
-  methods: {
-    urlPreviewImage (card) {
-      if (!card.urlPreviewIsVisible) { return }
-      return card.urlPreviewImage
-    },
-    selectCard (card) {
-      this.$emit('selectCard', card)
-    },
-    removeCard (card) {
-      this.$emit('removeCard', card)
-    },
-    cardIsActive (card) {
-      const isCardDetailsVisible = this.cardDetailsIsVisibleForCardId === card.id
-      return isCardDetailsVisible || card.isLoading
-    },
-    cardIsFocused (card) {
-      return this.previousResultItem.id === card.id
-    },
-    relativeDate (card) {
-      return utils.shortRelativeTime(card.nameUpdatedAt || card.updatedAt)
-    },
-    userIsNotCurrentUser (userId) {
-      return this.currentUser.id !== userId
-    },
-    isStrikeThrough (card) {
-      return card.name.startsWith('[x]')
-    },
-    colorIsDark (card) {
-      if (!card.backgroundColor) { return }
-      return utils.colorIsDark(card.backgroundColor)
-    },
-    styles (card) {
-      return {
-        backgroundColor: card.backgroundColor
-      }
-    }
-  }
-}
-</script>
 
 <style lang="stylus">
 .card-list

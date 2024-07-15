@@ -37,14 +37,11 @@ const showCardDetails = (card) => {
 const userById = (userId) => {
   return store.getters['currentSpace/userById'](userId)
 }
-const relativeDate = (card) => {
-  return utils.shortRelativeTime(card.nameUpdatedAt || card.updatedAt)
-}
 </script>
 
 <template lang="pug">
 section.results-section.comments
-  CardList(:cards="comments" @selectCard="showCardDetails")
+  CardList(:cards="comments" @selectCard="showCardDetails" :dateIsCreatedAt="true")
   section.subsection.tips-section(v-if="!comments.length")
     p No comment cards in this space yet
     p
