@@ -572,6 +572,7 @@ export default {
       if (value) {
         space = utils.clone(space)
         favoriteSpaces.push(space)
+        context.dispatch('userNotifications/addFavoriteSpace', space, { root: true })
       // remove space
       } else {
         favoriteSpaces = favoriteSpaces.filter(favoriteSpace => {
