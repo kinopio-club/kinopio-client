@@ -5,6 +5,9 @@ import { useStore } from 'vuex'
 import ColorPicker from '@/components/dialogs/ColorPicker.vue'
 import CardOrBoxActions from '@/components/subsections/CardOrBoxActions.vue'
 import utils from '@/utils.js'
+
+import { colord, extend } from 'colord'
+
 const store = useStore()
 
 const dialogElement = ref(null)
@@ -72,11 +75,12 @@ const styles = computed(() => {
   if (store.state.isTouchDevice) {
     zoom = utils.pinchCounterZoomDecimal()
   }
+  const backgroundColor = colord(currentBox.value.color).alpha(1).toRgbString()
   const styles = {
     transform: `scale(${zoom})`,
     left: `${currentBox.value.x + 8}px`,
     top: `${currentBox.value.y + 8}px`,
-    backgroundColor: currentBox.value.color
+    backgroundColor
   }
   return styles
 })

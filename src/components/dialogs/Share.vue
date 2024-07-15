@@ -153,6 +153,18 @@ const toggleIsShareInPresentationMode = () => {
 const emailInvitesIsVisible = (value) => {
   state.emailInvitesIsVisible = value
 }
+
+// users
+
+const users = computed(() => {
+  let items = utils.clone(store.state.currentSpace.users)
+  items = items.concat(store.state.currentSpace.collaborators)
+  return items
+})
+const spaceUsersButtonIsVisible = computed(() => {
+  return spaceIsRemote.value && users.value.length > 1
+})
+
 </script>
 
 <template lang="pug">
@@ -172,19 +184,22 @@ dialog.share.wide(v-if="props.visible" :open="props.visible" @click.left.stop="c
 
     //- Copy URL
     section.subsection(:class="{'share-url-subsection-member': isSpaceMember}")
-      .row
+      .row.title-row
         .segmented-buttons
           button(@click.left="copySpaceUrl")
             img.icon.copy(src="@/assets/copy.svg")
-            .badge.badge-in-button.danger.private-copy-badge(v-if="spaceIsPrivate")
+            .badge.badge-in-button.danger.private-copy-badge(v-if="spaceIsPrivate" title="Private spaces can only be viewed by collaborators")
               img.icon.lock(src="@/assets/lock.svg")
             span Copy URL
-          button(v-if="webShareIsSupported" @click="webShare")
-            img.icon.share(src="@/assets/share.svg")
+          //- button(v-if="webShareIsSupported" @click="webShare")
+          //-   img.icon.share(src="@/assets/share.svg")
 
-        label.label.small-button.extra-options-button.inline-button(title="Share in Presentation Mode" @mouseup.left="toggleIsShareInPresentationMode" @touchend.prevent="toggleIsShareInPresentationMode" :class="{active: state.isShareInPresentationMode}")
-          input(type="checkbox" :value="state.isShareInPresentationMode")
-          img.icon(src="@/assets/presentation.svg")
+        .row
+          //- presentation mode
+          label.label.small-button.extra-options-button.inline-button(title="Share in Presentation Mode" @mouseup.prevent.stop.left="toggleIsShareInPresentationMode" @touchend.prevent.stop="toggleIsShareInPresentationMode" :class="{active: state.isShareInPresentationMode}")
+            input(type="checkbox" :value="state.isShareInPresentationMode")
+            img.icon(src="@/assets/presentation.svg")
+
       //- Explore
       template(v-if="exploreSectionIsVisible")
         .row
@@ -197,8 +212,8 @@ dialog.share.wide(v-if="props.visible" :open="props.visible" @click.left.stop="c
   Invite(v-if="isSpaceMember && currentUserIsSignedIn" @closeDialogs="closeDialogs" @emailInvitesIsVisible="emailInvitesIsVisible")
 
   //- space users, collaborators
-  section(v-if="spaceIsRemote")
-    SpaceUsersButton(:showLabel="true")
+  section(v-if="spaceUsersButtonIsVisible")
+    SpaceUsersButton(:showLabel="true" :users="users")
 
   section(v-if="!spaceIsRemote")
     p
@@ -303,6 +318,8 @@ dialog.share
   .title-row
     p + .row
       margin-top 0
+    label + label
+      margin-left 6px
 
   .import-export-section
     border-top 1px solid var(--primary-border)

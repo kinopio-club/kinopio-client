@@ -490,7 +490,7 @@ const addBox = (event) => {
   store.dispatch('currentUser/notifyReadOnly', position)
   const shouldPrevent = !store.getters['currentUser/canEditSpace']()
   if (shouldPrevent) {
-    store.commit('currentUserToolbar', 'card')
+    store.dispatch('currentUserToolbar', 'card')
     return
   }
   store.dispatch('currentBoxes/add', { box: position, shouldResize: true })

@@ -4,8 +4,8 @@ export default {
     return [
       {
         name: 'open',
-        friendlyName: 'Open to All',
-        description: 'Anyone can view and add cards',
+        friendlyName: 'Open to Comments',
+        description: 'Anyone can view and add comments, only collaborators can edit',
         color: 'success',
         icon: 'open'
       },
@@ -13,13 +13,13 @@ export default {
         name: 'closed',
         shortName: 'public',
         friendlyName: 'Public Read Only',
-        description: 'Anyone can view, only you and collaborators can edit',
+        description: 'Anyone can view, only collaborators can edit',
         color: 'info',
         icon: 'unlock'
       },
       {
         name: 'private',
-        description: 'only you and collaborators can view and edit',
+        description: 'Only collaborators can view and edit',
         color: 'danger',
         icon: 'lock'
       }

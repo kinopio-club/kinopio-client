@@ -92,23 +92,7 @@ const closeDialogs = () => {
 // other card users
 
 const isOtherCardUsers = computed(() => Boolean(otherCardUsers.value.length))
-const otherCardUsers = computed(() => {
-  const currentUserId = store.state.currentUser.id
-  const collaborators = store.state.currentSpace.collaborators
-  let items = store.getters['currentCards/users']
-  items = items.filter(user => Boolean(user))
-  // remove currentUser
-  items = items.filter(user => user.id !== currentUserId)
-  // remove users
-  items = items.filter(item => {
-    const member = users.value.find(user => {
-      return user.id === item.id
-    })
-    return !member
-  })
-  // items = utils.clone(items)
-  return items
-})
+const otherCardUsers = computed(() => store.getters['currentCards/otherContributors'])
 
 </script>
 

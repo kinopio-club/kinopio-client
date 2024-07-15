@@ -249,7 +249,7 @@ const stopResizingBoxes = () => {
   const boxes = boxIds.map(id => store.getters['currentBoxes/byId'](id))
   store.dispatch('history/add', { boxes, useSnapshot: true })
   store.commit('currentUserIsResizingBox', false)
-  store.commit('currentUserToolbar', 'card')
+  store.dispatch('currentUserToolbar', 'card')
   store.commit('broadcast/updateStore', { updates: { userId: currentUser.value.id }, type: 'removeRemoteUserResizingBoxes' })
   store.dispatch('checkIfItemShouldIncreasePageSize', boxes[0])
 }

@@ -7,7 +7,6 @@ import dayjs from 'dayjs'
 import Explore from '@/components/dialogs/Explore.vue'
 import Live from '@/components/dialogs/Live.vue'
 
-import FavoriteSpaceButton from '@/components/FavoriteSpaceButton.vue'
 import utils from '@/utils.js'
 const store = useStore()
 
@@ -217,9 +216,6 @@ const liveSpacesCount = computed(() => {
         img.icon.camera(src="@/assets/camera.svg")
         span(v-if="liveSpacesCount") {{ liveSpacesCount }}
       Live(:visible="state.liveIsVisible" :spaces="state.liveSpaces" :loading="state.isLoadingLiveSpaces")
-
-FavoriteSpaceButton(v-if="isOnline")
-
 </template>
 
 <style lang="stylus">

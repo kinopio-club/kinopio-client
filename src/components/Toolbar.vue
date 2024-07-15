@@ -8,6 +8,7 @@ const props = defineProps({
 })
 
 const canEditSpace = computed(() => store.getters['currentUser/canEditSpace']())
+const canOnlyComment = computed(() => store.getters['currentUser/canOnlyComment']())
 const isTouchDevice = computed(() => store.state.isTouchDevice)
 
 const currentUserToolbar = computed(() => store.state.currentUserToolbar)
@@ -23,6 +24,9 @@ const currentUserToolbarIsBox = computed(() => {
   return currentUserToolbar.value === 'box'
 })
 const boxBadgeLabel = computed(() => {
+  if (canOnlyComment.value) {
+    return 'Only collaborators can add boxes'
+  }
   let label = 'Draw Box'
   if (!isTouchDevice.value) {
     label = label + ' (B)'
@@ -33,9 +37,9 @@ const toggleToolbar = (value) => {
   const initialValue = 'card'
   const shouldToggleOffBox = value === 'box' && currentUserToolbarIsBox.value
   if (shouldToggleOffBox) {
-    store.commit('currentUserToolbar', initialValue)
+    store.dispatch('currentUserToolbar', initialValue)
   } else {
-    store.commit('currentUserToolbar', value)
+    store.dispatch('currentUserToolbar', value)
   }
 }
 const shouldIncreaseUIContrast = computed(() => store.state.currentUser.shouldIncreaseUIContrast)
@@ -45,10 +49,16 @@ const shouldIncreaseUIContrast = computed(() => store.state.currentUser.shouldIn
 nav.toolbar(v-if="visible")
   //- Box
   .segmented-buttons
-    button(v-if="canEditSpace" :class="{ active: currentUserToolbarIsBox, 'translucent-button': !shouldIncreaseUIContrast }" @click="toggleToolbar('box')" :title="boxBadgeLabel")
-      img.icon.box-icon(src="@/assets/box.svg")
-      .label-badge.toolbar-badge-wrap.jiggle(v-if="currentUserToolbarIsBox")
-        span {{boxBadgeLabel}}
+    .button-wrap(:title="boxBadgeLabel")
+      button(
+        v-if="canEditSpace"
+        :class="{ active: currentUserToolbarIsBox, 'translucent-button': !shouldIncreaseUIContrast }"
+        @click="toggleToolbar('box')"
+        :disabled="canOnlyComment"
+      )
+        img.icon.box-icon(src="@/assets/box.svg")
+        .label-badge.toolbar-badge-wrap.jiggle(v-if="currentUserToolbarIsBox")
+          span {{boxBadgeLabel}}
 </template>
 
 <style lang="stylus">

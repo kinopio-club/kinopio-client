@@ -188,7 +188,7 @@ const updateDialogHeight = async () => {
 const shouldShowItemActions = computed(() => store.state.currentUser.shouldShowItemActions)
 const rowIsBelowItemActions = computed(() => nameMetaRowIsVisible.value || badgesRowIsVisible.value || shouldShowItemActions.value || cardHasMedia.value || cardUrlPreviewIsVisible.value)
 const nameMetaRowIsVisible = computed(() => state.nameSplitIntoCardsCount)
-const badgesRowIsVisible = computed(() => tagsInCard.value.length || nameIsComment.value || isInSearchResultsCards.value)
+const badgesRowIsVisible = computed(() => tagsInCard.value.length || isInSearchResultsCards.value)
 const triggerUpdateHeaderAndFooterPosition = () => {
   store.commit('triggerUpdateHeaderAndFooterPosition')
 }
@@ -843,6 +843,7 @@ const toggleCardTipsIsVisible = () => {
 // comment
 
 const nameIsComment = computed(() => utils.isNameComment(name.value))
+const isComment = computed(() => card.value.isComment || nameIsComment.value)
 
 const tagsInCard = computed(() => {
   const tagNames = utils.tagsFromStringWithoutBrackets(name.value)
@@ -1395,7 +1396,7 @@ dialog.card-details(v-if="visible" :open="visible" ref="dialogElement" @click.le
         ShareCard(:visible="state.shareCardIsVisible" :card="card" :isReadOnly="!canEditCard")
 
     CardOrBoxActions(:visible="shouldShowItemActions && canEditCard" :cards="[card]" @closeDialogs="closeDialogs" :class="{ 'last-row': !rowIsBelowItemActions }" :tagsInCard="tagsInCard")
-    CardCollaborationInfo(:visible="shouldShowItemActions" :createdByUser="createdByUser" :updatedByUser="updatedByUser" :card="card" :parentElement="parentElement" @closeDialogs="closeDialogs")
+    CardCollaborationInfo(:visible="shouldShowItemActions || isComment" :createdByUser="createdByUser" :updatedByUser="updatedByUser" :card="card" :parentElement="parentElement" @closeDialogs="closeDialogs" :isComment="isComment")
 
     .row(v-if="nameMetaRowIsVisible")
       //- Split by Line Breaks
@@ -1411,9 +1412,6 @@ dialog.card-details(v-if="visible" :open="visible" ref="dialogElement" @click.le
       //- Tags
       template(v-for="tag in tagsInCard")
         Tag(:tag="tag" :isClickable="true" :isActive="currentSelectedTag.name === tag.name" @clickTag="showTagDetailsIsVisible")
-      //- ((Comment))
-      .badge.info(v-if="nameIsComment")
-        span ((comment))
 
     .row.badges-row.other-items-row(v-if="otherCardIsVisible")
       OtherCardPreview(:otherCard="otherCard" :url="otherCardUrl" :parentCardId="card.id" :shouldTruncateName="true")

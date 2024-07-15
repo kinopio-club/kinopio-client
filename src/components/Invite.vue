@@ -25,6 +25,7 @@ const emit = defineEmits(['closeDialogs', 'emailInvitesIsVisible'])
 const state = reactive({
   tipsIsVisible: false,
   emailInvitesIsVisible: false,
+  isShareInCommentMode: false,
   inviteType: 'edit' // 'edit', 'readOnly'
 })
 
@@ -56,7 +57,7 @@ const toggleInviteType = (type) => {
 const editUrl = computed(() => {
   const currentSpace = store.state.currentSpace
   const spaceId = currentSpace.id
-  const url = utils.inviteUrl({ spaceId, spaceName: spaceName.value, collaboratorKey: collaboratorKey.value })
+  const url = utils.inviteUrl({ spaceId, spaceName: spaceName.value, collaboratorKey: collaboratorKey.value, isCommentMode: state.isShareInCommentMode })
   console.log('🍇 invite edit url', url)
   return url
 })
@@ -97,23 +98,30 @@ const inviteButtonLabel = computed(() => {
   }
 })
 
+// comment mode
+
+const toggleIsShareInCommentMode = () => {
+  emit('closeDialogs')
+  state.isShareInCommentMode = !state.isShareInCommentMode
+}
+
 // native web share
 
-const webShareIsSupported = computed(() => navigator.share)
-const webShareInvite = () => {
-  let title
-  if (inviteTypeIsEdit.value) {
-    title = 'Invite to Edit'
-  } else if (inviteTypeIsReadOnly.value) {
-    title = 'Invite to Read Only'
-  }
-  const data = {
-    title,
-    text: spaceName.value,
-    url: editUrl.value
-  }
-  navigator.share(data)
-}
+// const webShareIsSupported = computed(() => navigator.share)
+// const webShareInvite = () => {
+//   let title
+//   if (inviteTypeIsEdit.value) {
+//     title = 'Invite to Edit'
+//   } else if (inviteTypeIsReadOnly.value) {
+//     title = 'Invite to Read Only'
+//   }
+//   const data = {
+//     title,
+//     text: spaceName.value,
+//     url: editUrl.value
+//   }
+//   navigator.share(data)
+// }
 
 // email invites
 
@@ -155,8 +163,13 @@ section.invite
         button(@click.left="copyInviteUrl")
           img.icon.copy(src="@/assets/copy.svg")
           span {{inviteButtonLabel}}
-        button(v-if="webShareIsSupported" @click="webShareInvite")
-          img.icon.share(src="@/assets/share.svg")
+        //- button(v-if="webShareIsSupported" @click="webShareInvite")
+        //-   img.icon.share(src="@/assets/share.svg")
+      //- comment mode
+      label.label.small-button.extra-options-button.inline-button(v-if="inviteTypeIsEdit" title="Share in Comment Mode" @mouseup.prevent.stop.left="toggleIsShareInCommentMode" @touchend.prevent.stop="toggleIsShareInCommentMode" :class="{active: state.isShareInCommentMode}")
+        input(type="checkbox" :value="state.isShareInCommentMode")
+        img.icon.comment(src="@/assets/comment.svg")
+
     .row(v-if="inviteTypeIsEdit")
       .button-wrap
         button(@click.stop="toggleEmailInvitesIsVisible" :class="{ active: state.emailInvitesIsVisible }")
@@ -184,6 +197,8 @@ section.invite
     margin-right 5px
     .user
       vertical-align -3px
+      .anon-avatar
+        top 6px
   .invite-url-segmented-buttons
     margin-bottom 0
     button

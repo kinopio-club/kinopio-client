@@ -32,9 +32,11 @@ import Toolbar from '@/components/Toolbar.vue'
 import ImportExport from '@/components/dialogs/ImportExport.vue'
 import Pricing from '@/components/dialogs/Pricing.vue'
 import SpaceTodayJournalBadge from '@/components/SpaceTodayJournalBadge.vue'
-import Discovery from '@/components/Discovery.vue'
+import DiscoveryButtons from '@/components/DiscoveryButtons.vue'
 import UserSettings from '@/components/dialogs/UserSettings.vue'
 import SpaceUserList from '@/components/dialogs/SpaceUserList.vue'
+import CommentButton from '@/components/CommentButton.vue'
+import FavoriteSpaceButton from '@/components/FavoriteSpaceButton.vue'
 import consts from '@/consts.js'
 
 import sortBy from 'lodash-es/sortBy'
@@ -160,6 +162,7 @@ const isSpace = computed(() => {
   return isSpace
 })
 const userCanEditSpace = computed(() => store.getters['currentUser/canEditSpace']())
+const userCanOnlyComment = computed(() => store.getters['currentUser/canOnlyComment']())
 const userIsUpgraded = computed(() => store.state.currentUser.isUpgraded)
 const isOnline = computed(() => store.state.isOnline)
 const currentUserIsSignedIn = computed(() => store.getters['currentUser/isSignedIn'])
@@ -559,13 +562,11 @@ const disablePresentationMode = () => {
 
 // presentation mode
 
-const PresentationModeTitle = computed(() => `Focus/Presentation Mode (P)`)
 const isPresentationMode = computed(() => store.state.isPresentationMode)
-const togglePresentaitonMode = () => {
+const togglePresentationMode = () => {
   const value = !isPresentationMode.value
   store.commit('isPresentationMode', value)
 }
-
 </script>
 
 <template lang="pug">
@@ -682,25 +683,33 @@ header(v-if="isVisible" :style="state.position" :class="{'fade-out': isFadingOut
               ImportArenaChannel(:visible="importArenaChannelIsVisible")
               SpaceDetailsInfo(:visible="state.spaceDetailsInfoIsVisible")
               ImportExport(:visible="state.importIsVisible" :isImport="true")
-              //- Read Only badge
+
+              //- read only badge
               .label-badge.space-name-badge-wrap(v-if="!userCanEditSpace")
                 span(:class="{'invisible': state.readOnlyJiggle}")
                   span Read Only
                 span.invisible-badge(ref="readOnlyElement" :class="{'badge-jiggle': state.readOnlyJiggle, 'invisible': !state.readOnlyJiggle}")
                   span Read Only
+              //- comment only badge
+              .label-badge.space-name-badge-wrap(v-else-if="userCanOnlyComment")
+                span(:class="{'invisible': state.readOnlyJiggle}")
+                  span Comment Only
+
               //- Loading State
               .button-wrap.space-status-button-wrap(v-if="spaceHasStatusAndStatusDialogIsNotVisible")
                 button.small-button(@click.left.stop="toggleSpaceStatusIsVisible" :class="{active: state.spaceStatusIsVisible, 'translucent-button': !shouldIncreaseUIContrast}")
                   Loader(:visible="spaceHasStatus")
                   .badge.success.space-status-success(v-if="!spaceHasStatus")
                 SpaceStatus(:visible="state.spaceStatusIsVisible")
+            //- favorite
+            FavoriteSpaceButton(v-if="isOnline")
             //- Offline
             .button-wrap(v-if="!isOnline")
               button(@click.left.stop="toggleOfflineIsVisible" :class="{ active: offlineIsVisible, 'translucent-button': !shouldIncreaseUIContrast}")
                 img.icon.offline(src="@/assets/offline.svg")
               Offline(:visible="offlineIsVisible")
       .right
-        Discovery
+        DiscoveryButtons
         //- Sidebar
         .button-wrap
           button(@click.left.stop="toggleSidebarIsVisible" :class="{active: state.sidebarIsVisible, 'translucent-button': !shouldIncreaseUIContrast}" title="Sidebar")
@@ -726,9 +735,11 @@ header(v-if="isVisible" :style="state.position" :class="{'fade-out': isFadingOut
           button(@click.left.stop="toggleUpgradeUserIsVisible" :class="{active: state.upgradeUserIsVisible, 'translucent-button': !shouldIncreaseUIContrast}")
             span Upgrade
           UpgradeUser(:visible="state.upgradeUserIsVisible" @closeDialog="closeAllDialogs")
+        //- comments
+        CommentButton
         //- presentation mode
         .button-wrap
-          button(:class="{ 'translucent-button': !shouldIncreaseUIContrast }" @click="togglePresentaitonMode" :title="PresentationModeTitle")
+          button(:class="{ 'translucent-button': !shouldIncreaseUIContrast }" @click="togglePresentationMode" title="Focus/Presentation Mode (P)")
             img.icon(src="@/assets/presentation.svg")
 
   Toolbar(:visible="isSpace")
@@ -933,6 +944,19 @@ header
     min-height initial
     min-width initial
     display block
+
+  .comment-mode-badge-wrap
+    pointer-events none
+    position absolute
+    background-color var(--info-background)
+    bottom -8px
+    left initial
+    right 5px
+    z-index 1
+    width 95px
+    span
+      width 100%
+      color var(--primary)
 
 .badge-jiggle
   animation-name notificationJiggle

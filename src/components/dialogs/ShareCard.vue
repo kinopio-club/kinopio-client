@@ -81,8 +81,8 @@ dialog.narrow.share-card(v-if="visible" :open="visible" @click.left.stop ref="di
           button(@click.left="copyUrl")
             img.icon.copy(src="@/assets/copy.svg")
             span Copy Card URL
-          button(v-if="webShareIsSupported" @click="webShare")
-            img.icon.share(src="@/assets/share.svg")
+          //- button(v-if="webShareIsSupported" @click="webShare")
+          //-   img.icon.share(src="@/assets/share.svg")
       .row(v-if="canShare && spaceIsPrivate")
         .badge.danger
           img.icon.lock-icon(src="@/assets/lock.svg")

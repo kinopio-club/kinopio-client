@@ -207,6 +207,7 @@ const toggleTagPickerIsVisible = () => {
 // contain items in box
 
 const containItemsInNewBox = async () => {
+  if (isNotCollaborator.value) { return }
   let box = utils.boundaryRectFromItems(items.value)
   // add box margins
   const margin = 20
@@ -223,6 +224,13 @@ const containItemsInNewBox = async () => {
   await nextTick()
   store.commit('boxDetailsIsVisibleForBoxId', box.id)
 }
+const boxSurroundTitle = computed(() => {
+  if (isNotCollaborator.value) {
+    return 'Only collaborators can add boxes'
+  } else {
+    return 'Surround with Box'
+  }
+})
 
 // box fill
 
@@ -389,11 +397,17 @@ const toggleIsLocked = () => {
 
 // comment
 
+const canOnlyComment = computed(() => store.getters['currentUser/canOnlyComment']())
+const isNotCollaborator = computed(() => {
+  if (canOnlyComment.value) { return true }
+  return !canEditAll.value
+})
 const isComment = computed(() => {
   const cards = props.cards.filter(card => card.isComment)
   return Boolean(cards.length === props.cards.length)
 })
 const toggleIsComment = async () => {
+  if (isNotCollaborator.value) { return }
   const value = !isComment.value
   props.cards.forEach(card => {
     card = {
@@ -410,6 +424,13 @@ const toggleIsComment = async () => {
   await updateCardDimensions()
   store.dispatch('currentConnections/updateMultiplePaths', props.cards)
 }
+const commentTitle = computed(() => {
+  if (isNotCollaborator.value) {
+    return 'Only collaborators can toggle comments'
+  } else {
+    return 'Turn into Comment'
+  }
+})
 
 // vote counter
 
@@ -513,13 +534,12 @@ section.subsection.style-actions(v-if="visible" @click.left.stop="closeDialogs")
       button(:disabled="!canEditAll" @click="toggleIsLocked" :class="{active: isLocked}" title="Lock to Background")
         img.icon(src="@/assets/lock.svg")
     //- Comment
-    .button-wrap(v-if="isCards")
-      button(:disabled="!canEditAll" @click="toggleIsComment" :class="{active: isComment}" title="Turn into Comment")
+    .button-wrap(v-if="isCards" :title="commentTitle")
+      button(:disabled="isNotCollaborator" @click="toggleIsComment" :class="{active: isComment}")
         img.icon.comment(src="@/assets/comment.svg")
-
     //- Surround with Box
-    .button-wrap(v-if="isCards")
-      button(:disabled="!canEditSpace" @click="containItemsInNewBox" title="Surround with Box")
+    .button-wrap(v-if="isCards" :title="boxSurroundTitle")
+      button(:disabled="isNotCollaborator" @click="containItemsInNewBox")
         img.icon.box-icon(src="@/assets/box.svg")
 
     //- Counter

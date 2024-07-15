@@ -198,6 +198,7 @@ const currentCards = {
       let cards = context.getters.all
       const highestCardZ = utils.highestCardZ(cards)
       const defaultBackgroundColor = context.rootState.currentUser.defaultCardBackgroundColor
+      const isComment = context.rootState.isCommentMode || context.rootGetters['currentUser/canOnlyComment']()
       let card = {
         id: id || nanoid(),
         x: x || position.x,
@@ -214,7 +215,8 @@ const currentCards = {
         isRemoved: false,
         shouldUpdateUrlPreview,
         headerFontId: context.rootState.currentUser.prevHeaderFontId || 0,
-        maxWidth: context.rootState.currentUser.cardSettingsMaxCardWidth
+        maxWidth: context.rootState.currentUser.cardSettingsMaxCardWidth,
+        isComment
       }
       context.commit('cardDetailsIsVisibleForCardId', card.id, { root: true })
       card.spaceId = currentSpaceId
@@ -1044,6 +1046,22 @@ const currentCards = {
     },
     users: (state, getters, rootState, rootGetters) => {
       return getters.userIds.map(id => rootGetters['currentSpace/userById'](id))
+    },
+    otherContributors: (state, getters, rootState, rootGetters) => {
+      const currentUserId = state.id
+      let items = getters.users
+      items = items.filter(user => Boolean(user))
+      // remove currentUser
+      items = items.filter(user => user.id !== currentUserId)
+      // remove collaborators
+      const members = rootGetters['currentSpace/members']()
+      items = items.filter(item => {
+        const member = members.find(user => {
+          return user.id === item.id
+        })
+        return !member
+      })
+      return items
     },
     colors: (state, getters) => {
       const cards = getters.all
