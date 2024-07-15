@@ -165,6 +165,8 @@ const store = createStore({
     remoteBoxesSelected: [], // [{ boxId, userId }, …]
     multipleConnectionsSelectedIds: [],
     previousMultipleBoxesSelectedIds: [],
+    isSelectingX: false,
+    isSelectingY: false,
 
     // connections
     currentConnectionStartCardIds: [],
@@ -602,6 +604,7 @@ const store = createStore({
     triggerTemplatesIsVisible: () => {},
     triggerImportIsVisible: () => {},
     triggerSelectAllItemsBelowCursor: (state, position) => {},
+    triggerSelectAllItemsRightOfCursor: (state, position) => {},
     triggerSplitCard: (state, cardId) => {},
     triggerUpdateUrlPreview: (state, cardId) => {},
     triggerUpdateUrlPreviewComplete: (state, cardId) => {},
@@ -1298,6 +1301,17 @@ const store = createStore({
         }
       })
       state.remoteBoxesSelected = state.remoteBoxesSelected.concat(updates)
+    },
+
+    // selecting
+
+    isSelectingX: (state, value) => {
+      utils.typeCheck({ value, type: 'boolean' })
+      state.isSelectingX = value
+    },
+    isSelectingY: (state, value) => {
+      utils.typeCheck({ value, type: 'boolean' })
+      state.isSelectingY = value
     },
 
     // Loading
