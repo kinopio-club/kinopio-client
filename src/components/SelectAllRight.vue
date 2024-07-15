@@ -60,13 +60,14 @@ const handleMouseMove = (event) => {
   if (store.state.currentUserIsDraggingBox) { return }
   if (store.state.isEmbedMode) { return }
   const edgeThreshold = 30
+  const xCenterOffset = 12
   const position = utils.cursorPositionInViewport(event)
   const isInThreshold = position.y <= edgeThreshold
   const isInPosition = isInThreshold && isBetweenControls(event)
   const isCancelledByHover = Boolean(event.target.closest('button') || event.target.closest('article'))
   const shouldShow = isInPosition && !isCancelledByHover
   if (shouldShow || isSelectingX.value) {
-    state.positionX = position.x - 10
+    state.positionX = position.x - xCenterOffset
     state.isVisible = true
   } else {
     state.isVisible = false
@@ -98,7 +99,7 @@ const debouncedSelectAllRight = debounce((event) => {
 const selectAllRight = (event) => {
   let position = utils.cursorPositionInSpace(event)
   store.commit('preventMultipleSelectedActionsIsVisible', true)
-  // store.commit('triggerSelectAllItemsBelowCursor', position)
+  store.commit('triggerSelectAllItemsRightOfCursor', position)
 }
 </script>
 

@@ -599,6 +599,7 @@ const store = createStore({
     triggerTemplatesIsVisible: () => {},
     triggerImportIsVisible: () => {},
     triggerSelectAllItemsBelowCursor: (state, position) => {},
+    triggerSelectAllItemsRightOfCursor: (state, position) => {},
     triggerSplitCard: (state, cardId) => {},
     triggerUpdateUrlPreview: (state, cardId) => {},
     triggerUpdateUrlPreviewComplete: (state, cardId) => {},

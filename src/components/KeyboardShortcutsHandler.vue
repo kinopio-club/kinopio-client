@@ -27,6 +27,9 @@ onMounted(() => {
     } else if (mutation.type === 'triggerSelectAllItemsBelowCursor') {
       const position = mutation.payload
       selectAllItemsBelowCursor(position)
+    } else if (mutation.type === 'triggerSelectAllItemsRightOfCursor') {
+      const position = mutation.payload
+      selectAllItemsRightOfCursor(position)
     }
   })
   window.addEventListener('keyup', handleShortcuts)
@@ -688,6 +691,41 @@ const selectAllItemsBelowCursor = (position) => {
   // boxes
   let boxes = utils.clone(store.getters['currentBoxes/all'])
   boxes = boxes.filter(boxes => (boxes.y * zoom) > position.y)
+  const boxIds = boxes.map(boxes => boxes.id)
+  // select
+  if (cardIds.length && preventMultipleSelectedActionsIsVisible) {
+    store.commit('multipleCardsSelectedIds', cardIds)
+    store.commit('multipleBoxesSelectedIds', boxIds)
+  } else if (cardIds.length) {
+    store.commit('multipleSelectedActionsPosition', position)
+    store.commit('multipleSelectedActionsIsVisible', true)
+    store.commit('multipleCardsSelectedIds', cardIds)
+    store.commit('multipleBoxesSelectedIds', boxIds)
+  } else {
+    store.commit('multipleSelectedActionsIsVisible', false)
+    store.commit('multipleCardsSelectedIds', [])
+    store.commit('multipleBoxesSelectedIds', [])
+  }
+}
+
+// Select All Cards Right Of Cursor
+
+const selectAllItemsRightOfCursor = (position) => {
+  const preventMultipleSelectedActionsIsVisible = store.state.preventMultipleSelectedActionsIsVisible
+  let zoom
+  if (position) {
+    zoom = 1
+  } else {
+    // is from keyboard shortcut
+    position = currentCursorPosition
+    zoom = store.getters.spaceZoomDecimal
+  }
+  // cards
+  const cards = store.getters['currentCards/isRightOfX'](position.x, zoom)
+  const cardIds = cards.map(card => card.id)
+  // boxes
+  let boxes = utils.clone(store.getters['currentBoxes/all'])
+  boxes = boxes.filter(boxes => (boxes.x * zoom) > position.x)
   const boxIds = boxes.map(boxes => boxes.id)
   // select
   if (cardIds.length && preventMultipleSelectedActionsIsVisible) {
