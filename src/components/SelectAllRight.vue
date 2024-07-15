@@ -8,6 +8,8 @@ import debounce from 'lodash-es/debounce'
 
 const store = useStore()
 
+const xCenterOffset = 12
+
 onMounted(() => {
   window.addEventListener('mousemove', handleMouseMove)
   window.addEventListener('mouseup', handleMouseUp)
@@ -42,7 +44,7 @@ const isBetweenControls = (event) => {
   const position = utils.cursorPositionInViewport(event)
   const viewportWidth = utils.visualViewport().width
   const leftElementWrap = document.querySelector('header nav .left')
-  const leftSideWidth = leftElementWrap.getBoundingClientRect().width
+  const leftSideWidth = leftElementWrap.getBoundingClientRect().width + xCenterOffset
   const rightElementWrap = document.querySelector('header nav .right')
   let rightSideWidth = rightElementWrap.getBoundingClientRect().width
   const isBetween = utils.isBetween({
@@ -60,7 +62,6 @@ const handleMouseMove = (event) => {
   if (store.state.currentUserIsDraggingBox) { return }
   if (store.state.isEmbedMode) { return }
   const edgeThreshold = 30
-  const xCenterOffset = 12
   const position = utils.cursorPositionInViewport(event)
   const isInThreshold = position.y <= edgeThreshold
   const isInPosition = isInThreshold && isBetweenControls(event)
