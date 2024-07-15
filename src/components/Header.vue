@@ -26,6 +26,7 @@ import Sidebar from '@/components/dialogs/Sidebar.vue'
 import PrivacyIcon from '@/components/PrivacyIcon.vue'
 import utils from '@/utils.js'
 import SelectAllBelow from '@/components/SelectAllBelow.vue'
+import SelectAllRight from '@/components/SelectAllRight.vue'
 import SpaceUsers from '@/components/SpaceUsers.vue'
 import Donate from '@/components/dialogs/Donate.vue'
 import Toolbar from '@/components/Toolbar.vue'
@@ -573,6 +574,7 @@ header.presentation-header(v-if="isPresentationMode" :style="state.position" :cl
   button.active(@click="disablePresentationMode" :class="{ 'translucent-button': !shouldIncreaseUIContrast }")
     img.icon(src="@/assets/presentation.svg")
   SelectAllBelow
+  SelectAllRight
 
 header(v-if="isVisible" :style="state.position" :class="{'fade-out': isFadingOut, 'hidden': state.isHidden}")
   //- embed
@@ -733,6 +735,7 @@ header(v-if="isVisible" :style="state.position" :class="{'fade-out': isFadingOut
 
   Toolbar(:visible="isSpace")
   SelectAllBelow
+  SelectAllRight
 </template>
 
 <style lang="stylus">

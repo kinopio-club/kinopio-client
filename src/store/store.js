@@ -164,6 +164,8 @@ const store = createStore({
     remoteBoxesSelected: [], // [{ boxId, userId }, …]
     multipleConnectionsSelectedIds: [],
     previousMultipleBoxesSelectedIds: [],
+    isSelectingX: false,
+    isSelectingY: false,
 
     // connections
     currentConnectionStartCardIds: [],
@@ -1293,6 +1295,17 @@ const store = createStore({
         }
       })
       state.remoteBoxesSelected = state.remoteBoxesSelected.concat(updates)
+    },
+
+    // selecting
+
+    isSelectingX: (state, value) => {
+      utils.typeCheck({ value, type: 'boolean' })
+      state.isSelectingX = value
+    },
+    isSelectingY: (state, value) => {
+      utils.typeCheck({ value, type: 'boolean' })
+      state.isSelectingY = value
     },
 
     // Loading
