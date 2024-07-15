@@ -3,14 +3,34 @@ import { reactive, computed, onMounted, onBeforeUnmount, onUnmounted, defineProp
 import { useStore } from 'vuex'
 
 import Loader from '@/components/Loader.vue'
+import UserList from '@/components/UserList.vue'
 import utils from '@/utils.js'
 
 import dayjs from 'dayjs'
 
 const store = useStore()
 
+onMounted(() => {
+  store.subscribe(mutation => {
+    if (mutation.type === 'triggerCloseChildDialogs') {
+      closeDialogs()
+    }
+  })
+  loadFavoriteUsers()
+})
+
 const props = defineProps({
   visible: Boolean
+})
+watch(() => props.visible, (value, prevValue) => {
+  if (value) {
+    loadFavoriteUsers()
+  }
+})
+
+const state = reactive({
+  isLoadingFavorites: false,
+  favoriteUsers: []
 })
 
 const currentSpace = computed(() => store.state.currentSpace)
@@ -57,6 +77,42 @@ const wordCount = computed(() => {
   const wordCount = words.split(' ').length
   return wordCount
 })
+
+// favorite users
+
+const loadFavoriteUsers = async () => {
+  if (state.isLoadingFavorites) { return }
+  try {
+    state.isLoadingFavorites = true
+    state.favoriteUsers = await store.dispatch('api/getSpaceFavorites')
+  } catch (error) {
+    console.error('🚒 loadFavoriteUsers', error)
+  }
+  state.isLoadingFavorites = false
+}
+const userDetailsIsVisible = computed(() => store.state.userDetailsIsVisible)
+const userDetailsSelectedUser = computed(() => {
+  if (!userDetailsIsVisible.value) { return }
+  return store.state.userDetailsUser
+})
+const toggleUserDetails = (event, user) => {
+  const shouldShow = !store.state.userDetailsIsVisible
+  closeDialogs()
+  if (shouldShow) {
+    showUserDetails(event, user)
+  }
+}
+const closeDialogs = () => {
+  store.commit('userDetailsIsVisible', false)
+}
+const showUserDetails = async (event, user) => {
+  let element = event.target
+  let options = { element, shouldIgnoreZoom: true, offsetY: -300 }
+  let position = utils.childDialogPositionFromParent(options)
+  store.commit('userDetailsUser', user)
+  store.commit('userDetailsPosition', position)
+  store.commit('userDetailsIsVisible', true)
+}
 </script>
 
 <template lang="pug">
@@ -102,6 +158,20 @@ section.stats(v-if="visible")
           td Word Count
         tr
           td {{wordCount}}
+
+section
+  p
+    img.icon(src="@/assets/heart.svg")
+    span(v-if="!state.isLoadingFavorites") {{state.favoriteUsers.length}}{{' '}}
+    span Favorites{{' '}}
+    Loader(:visible="state.isLoadingFavorites" :isSmall="true")
+
+section.results-section(v-if="!state.isLoadingFavorites")
+  template(v-if="state.favoriteUsers.length")
+    UserList(:users="state.favoriteUsers" :selectedUser="userDetailsSelectedUser" @selectUser="toggleUserDetails" :isClickable="true")
+  template(v-else)
+    .badge.secondary
+      span Try sharing the public url, or adding this space to explore.
 </template>
 
 <style lang="stylus">

@@ -589,6 +589,19 @@ const self = {
         context.dispatch('handleServerError', { name: 'getSpace', error })
       }
     },
+    getSpaceFavorites: async (context) => {
+      try {
+        const isOnline = context.rootState.isOnline
+        if (!isOnline) { return }
+        const spaceId = context.rootState.currentSpace.id
+        console.log('🛬 getting remote space favorites', spaceId)
+        const options = await context.dispatch('requestOptions', { method: 'GET', space: context.rootState.currentSpace })
+        const response = await utils.timeout(consts.defaultTimeout, fetch(`${consts.apiHost()}/space/${spaceId}/favorites`, options))
+        return normalizeResponse(response)
+      } catch (error) {
+        context.dispatch('handleServerError', { name: 'getSpaceFavorites', error })
+      }
+    },
     getOtherItems: async (context, { cardIds, spaceIds, invites }) => {
       const max = 60
       try {

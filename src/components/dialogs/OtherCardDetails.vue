@@ -4,7 +4,6 @@ import { useStore } from 'vuex'
 
 import utils from '@/utils.js'
 import Loader from '@/components/Loader.vue'
-import UserList from '@/components/UserList.vue'
 import consts from '@/consts.js'
 import OtherSpacePreview from '@/components/OtherSpacePreview.vue'
 const store = useStore()
