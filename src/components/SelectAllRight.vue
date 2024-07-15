@@ -38,6 +38,20 @@ const isVisible = computed(() => {
 
 // position
 
+const isBetweenControls = (event) => {
+  const position = utils.cursorPositionInViewport(event)
+  const viewportWidth = utils.visualViewport().width
+  const leftElementWrap = document.querySelector('header nav .left')
+  const leftSideWidth = leftElementWrap.getBoundingClientRect().width
+  const rightElementWrap = document.querySelector('header nav .right')
+  let rightSideWidth = rightElementWrap.getBoundingClientRect().width
+  const isBetween = utils.isBetween({
+    value: position.x,
+    min: leftSideWidth,
+    max: viewportWidth - rightSideWidth
+  })
+  return isBetween
+}
 const handleMouseMove = (event) => {
   if (!event.target.closest) { return }
   if (!canEditSpace.value) { return }
@@ -46,22 +60,9 @@ const handleMouseMove = (event) => {
   if (store.state.currentUserIsDraggingBox) { return }
   if (store.state.isEmbedMode) { return }
   const edgeThreshold = 30
-  // let header = document.querySelector('header').getBoundingClientRect().height
-  // let footer = document.querySelector('.footer-wrap footer')
-  // if (footer) {
-  //   footer = footer.getBoundingClientRect().height + 20
-  // } else {
-  //   footer = 0
-  // }
   const position = utils.cursorPositionInViewport(event)
-  const viewport = utils.visualViewport()
   const isInThreshold = position.y <= edgeThreshold
-  // const isBetweenControls = utils.isBetween({
-  //   value: position.x,
-  //   min: header,
-  //   max: viewport.height - footer
-  // })
-  const isInPosition = isInThreshold // && isBetweenControls
+  const isInPosition = isInThreshold && isBetweenControls(event)
   const isCancelledByHover = Boolean(event.target.closest('button') || event.target.closest('article'))
   const shouldShow = isInPosition && !isCancelledByHover
   if (shouldShow || isSelectingX.value) {
