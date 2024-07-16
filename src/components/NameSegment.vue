@@ -54,6 +54,11 @@ const smartQuotes = (string) => {
 const textColorClasses = computed(() => {
   return utils.textColorClasses({ backgroundColorIsDark: props.backgroundColorIsDark })
 })
+const textClasses = computed(() => {
+  let classes = textColorClasses.value
+  classes.strikethrough = props.isStrikeThrough
+  return classes
+})
 
 // segment data
 
@@ -161,9 +166,10 @@ span.name-segment(:data-segment-types="dataMarkdownType" :data-tag-color="dataTa
           code {{markdown.content}}
     //- Name results list
     template(v-if="!props.segment.markdown")
-      span(v-if="props.search")
+      span.markdown(v-if="props.search" :class="textClasses")
         NameMatch(:name="props.segment.content" :indexes="matchIndexes(props.segment.content)")
-      span(v-else :class="{ strikethrough: props.isStrikeThrough }") {{props.segment.content}}
+      span.markdown(v-else :class="textClasses")
+        span {{props.segment.content}}
   //- Tags
   template(v-if="props.segment.isTag")
     Tag(:tag="props.segment" :isClickable="true" :isActive="currentSelectedTag.name === props.segment.name" @clickTag="showTagDetailsIsVisible")

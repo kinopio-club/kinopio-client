@@ -78,8 +78,11 @@ const userIsNotCurrentUser = (userId) => {
 const isStrikeThrough = (card) => {
   return card.name.startsWith('[x]')
 }
+const isThemeDark = computed(() => store.getters['themes/isThemeDark'])
 const colorIsDark = (card) => {
-  if (!card.backgroundColor) { return }
+  if (!card.backgroundColor) {
+    return isThemeDark.value
+  }
   return utils.colorIsDark(card.backgroundColor)
 }
 const styles = (card) => {
@@ -105,7 +108,7 @@ span
           template(v-for="segment in card.nameSegments")
             img.card-image(v-if="segment.isImage" :src="segment.url")
             img.card-image(v-if="urlPreviewImage(card)" :src="urlPreviewImage(card)")
-            NameSegment(:segment="segment" :search="props.search" :isStrikeThrough="isStrikeThrough(card)")
+            NameSegment(:segment="segment" :search="props.search" :isStrikeThrough="isStrikeThrough(card)" :backgroundColorIsDark="colorIsDark(card)")
           //- remove
           button.small-button.remove-button.danger(v-if="props.cardsShowRemoveButton" @click.left.stop="removeCard(card)")
             img.icon(src="@/assets/remove.svg")
