@@ -44,9 +44,13 @@ const isBetweenControls = (event) => {
   const position = utils.cursorPositionInViewport(event)
   const viewportWidth = utils.visualViewport().width
   const leftElementWrap = document.querySelector('header nav .left')
-  const leftSideWidth = leftElementWrap.getBoundingClientRect().width + xCenterOffset
   const rightElementWrap = document.querySelector('header nav .right')
-  let rightSideWidth = rightElementWrap.getBoundingClientRect().width
+  let leftSideWidth = 0
+  let rightSideWidth = 0
+  if (leftElementWrap && rightElementWrap) {
+    leftSideWidth = leftElementWrap.getBoundingClientRect().width + xCenterOffset
+    rightSideWidth = rightElementWrap.getBoundingClientRect().width
+  }
   const isBetween = utils.isBetween({
     value: position.x,
     min: leftSideWidth,
