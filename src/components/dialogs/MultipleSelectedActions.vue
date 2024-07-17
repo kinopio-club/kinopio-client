@@ -102,12 +102,11 @@ const multipleCardOrBoxesIsSelected = computed(() => {
   const boxes = multipleBoxesSelectedIds.value.length > 1
   return cards || boxes
 })
-const selectedItemsIsCreatedByCurrentUser = computed(() => {
-  const { cards, connections, boxes } = numberOfSelectedItemsCreatedByCurrentUser.value
-  const cardsByCurrentUser = cards === cards.value?.length
-  const connectionsByCurrentUser = connections === connections.value?.length
-  const boxesByCurrentUser = boxes === boxes.value?.length
-  if (cardsByCurrentUser && connectionsByCurrentUser && boxesByCurrentUser) {
+const selectedItemsIsEditableByCurrentUser = computed(() => {
+  const isCards = editableCards.value.length === cards.value.length
+  const isConnections = editableConnections.value.length === connections.value.length
+  const isBoxes = editableBoxes.value.length === boxes.value.length
+  if (isCards && isConnections && isBoxes) {
     return true
   } else {
     return false
@@ -115,7 +114,7 @@ const selectedItemsIsCreatedByCurrentUser = computed(() => {
 })
 const numberOfSelectedItemsCreatedByCurrentUser = computed(() => {
   const connectionsCreatedByCurrentUser = connections.value?.filter(connection => {
-    if (connection) { return }
+    if (!connection) { return }
     return store.getters['currentUser/connectionIsCreatedByCurrentUser'](connection)
   })
   const cardsCreatedByCurrentUser = cards.value?.filter(card => {
@@ -578,7 +577,7 @@ dialog.narrow.multiple-selected-actions(
         img.icon(src="@/assets/split.svg")
         span Split
 
-    p.badge.info(v-if="canEditAsNonMember && !selectedItemsIsCreatedByCurrentUser")
+    p.badge.info(v-if="canEditAsNonMember && !selectedItemsIsEditableByCurrentUser")
       img.icon.open(src="@/assets/open.svg")
       span In open spaces, you can only edit items you created
 </template>
