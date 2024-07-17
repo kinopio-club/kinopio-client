@@ -13,7 +13,9 @@ const props = defineProps({
 const isSpaceMember = computed(() => store.getters['currentUser/isSpaceMember']())
 const canEditAll = computed(() => {
   if (isSpaceMember.value) { return true }
+  if (!props.connections.length) { return }
   const connectionsCreatedByCurrentUser = props.connections.filter(connection => {
+    if (!connection) { return }
     return store.getters['currentUser/connectionIsCreatedByCurrentUser'](connection)
   })
   return connectionsCreatedByCurrentUser.length === props.connections.length
@@ -71,6 +73,7 @@ const reverseConnections = () => {
 // curve or straight
 
 const allPathsIsCurved = computed(() => {
+  if (!props.connections.length) { return }
   const curvedConnections = props.connections.filter(connection => {
     if (!connection) { return }
     if (!connection.path) { return }
@@ -81,6 +84,7 @@ const allPathsIsCurved = computed(() => {
   return curvedConnections.length === props.connections.length
 })
 const allPathsIsStraight = computed(() => {
+  if (!props.connections.length) { return }
   const curvedConnections = props.connections.filter(connection => {
     if (!connection) { return }
     if (!connection.path) { return }
@@ -132,9 +136,9 @@ const togglePathIsStraight = (isStraight) => {
 //- Curved or Straight
 .button-wrap.path-curve-options
   .segmented-buttons
-    button(:class="{active: allPathsIsCurved}" @click="togglePathIsStraight(false)" title="Curve")
+    button(:class="{active: allPathsIsCurved}" @click="togglePathIsStraight(false)" title="Curve" :disabled="!canEditAll")
       img.icon.connection-path(src="@/assets/connection-path.svg")
-    button(:class="{active: allPathsIsStraight}" @click="togglePathIsStraight(true)" title="Straight")
+    button(:class="{active: allPathsIsStraight}" @click="togglePathIsStraight(true)" title="Straight" :disabled="!canEditAll")
       img.icon.connection-path(src="@/assets/connection-path-straight.svg")
 
 </template>
