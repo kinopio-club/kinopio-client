@@ -71,13 +71,10 @@ const closeDialogs = () => {
 section.subsection.connection-actions(v-if="visible")
   p.subsection-vertical-label(:style="{ background: backgroundColor }")
     span {{label}}
-
-  //- Edit Connections
   .row.edit-connection-types
     //- Type Color
     .button-wrap
       button.change-color(:disabled="!canEditAll.connections" @click.left.stop="toggleMultipleConnectionsPickerVisible" :class="{active: state.multipleConnectionsPickerVisible}")
-        //- img.icon.connection-path(src="@/assets/connection-path.svg")
         .segmented-colors.icon
           template(v-for="type in connectionTypes")
             .current-color(:style="{ background: type.color }")

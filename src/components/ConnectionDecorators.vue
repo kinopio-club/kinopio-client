@@ -1,9 +1,117 @@
+<script setup>
+import { reactive, computed, onMounted, onBeforeUnmount, defineProps, defineEmits, watch, ref, nextTick } from 'vue'
+import { useStore } from 'vuex'
+
+import utils from '@/utils.js'
+
+const store = useStore()
+
+const props = defineProps({
+  connections: Array
+})
+
+const isSpaceMember = computed(() => store.getters['currentUser/isSpaceMember']())
+const canEditAll = computed(() => {
+  if (isSpaceMember.value) { return true }
+  const connectionsCreatedByCurrentUser = props.connections.filter(connection => {
+    return store.getters['currentUser/connectionIsCreatedByCurrentUser'](connection)
+  })
+  return connectionsCreatedByCurrentUser.length === props.connections.length
+})
+
+// direction
+
+const path = computed(() => 'M0 0 L20 0')
+const gradientIdReference = computed(() => `url('#gradient')`)
+const isSomeDirectionsIsVisible = computed(() => {
+  const connections = props.connections.filter(connection => connection.directionIsVisible)
+  return connections.length
+})
+const showDirectionsIsVisible = () => {
+  const value = !isSomeDirectionsIsVisible.value
+  props.connections.forEach(connection => {
+    store.dispatch('currentConnections/update', {
+      id: connection.id,
+      directionIsVisible: value
+    })
+  })
+}
+
+// label
+
+const isSomeLabelsVisible = computed(() => {
+  const connections = props.connections.filter(connection => connection.labelIsVisible)
+  return connections.length
+})
+const showLabelsIsVisible = () => {
+  const value = !isSomeLabelsVisible.value
+  props.connections.forEach(connection => {
+    store.dispatch('currentConnections/update', {
+      id: connection.id,
+      labelIsVisible: value
+    })
+  })
+}
+
+// reverse
+
+const reverseConnections = () => {
+  props.connections.forEach(connection => {
+    const startCardId = connection.endCardId
+    const endCardId = connection.startCardId
+    store.dispatch('currentConnections/update', {
+      id: connection.id,
+      startCardId,
+      endCardId
+    })
+  })
+  store.dispatch('currentConnections/updatePaths', { connections: props.connections })
+}
+
+// curve or straight
+
+const allPathsIsCurved = computed(() => {
+  const curvedConnections = props.connections.filter(connection => {
+    if (!connection) { return }
+    if (!connection.path) { return }
+    const controlPoint = utils.curveControlPointFromPath(connection.path)
+    const isCurved = controlPoint.x && controlPoint.y
+    return isCurved
+  })
+  return curvedConnections.length === props.connections.length
+})
+const allPathsIsStraight = computed(() => {
+  const curvedConnections = props.connections.filter(connection => {
+    if (!connection) { return }
+    if (!connection.path) { return }
+    const controlPoint = utils.curveControlPointFromPath(connection.path)
+    const isCurved = !controlPoint.x && !controlPoint.y
+    return isCurved
+  })
+  return curvedConnections.length === props.connections.length
+})
+const togglePathIsStraight = (isStraight) => {
+  let controlPoint = null
+  if (isStraight) {
+    controlPoint = `q00,00`
+  }
+  props.connections.forEach(connection => {
+    store.dispatch('currentConnections/update', {
+      id: connection.id,
+      controlPoint
+    })
+  })
+  store.dispatch('currentConnections/updatePaths', { connections: props.connections })
+  store.dispatch('currentUser/update', { defaultConnectionControlPoint: controlPoint })
+}
+</script>
+
 <template lang="pug">
 //- Label
 .button-wrap
   button(@click.left="showLabelsIsVisible" :class="{ active: isSomeLabelsVisible }" :disabled="!canEditAll")
     span Label
-//- Arrow
+//- Direction
 .button-wrap
   button(@click.left="showDirectionsIsVisible" :class="{ active: isSomeDirectionsIsVisible }" :disabled="!canEditAll" title="Direction")
     svg.icon.arrow(width="20px" height="12px" viewBox="0 0 20 2")
@@ -30,115 +138,6 @@
       img.icon.connection-path(src="@/assets/connection-path-straight.svg")
 
 </template>
-
-<script>
-import utils from '@/utils.js'
-
-export default {
-  name: 'ConnectionDecorators',
-  components: {
-  },
-  props: {
-    connections: Array
-  },
-  computed: {
-    path () { return 'M0 0 L20 0' },
-    gradientIdReference () { return `url('#gradient')` },
-    isSomeConnectionsClear () {
-      const connections = this.connections.filter(connection => {
-        const { directionIsVisible, labelIsVisible } = connection
-        if (directionIsVisible || labelIsVisible) {
-          return true
-        }
-      })
-      return connections.length < this.connections.length
-    },
-    isSomeDirectionsIsVisible () {
-      const connections = this.connections.filter(connection => connection.directionIsVisible)
-      return connections.length
-    },
-    isSomeLabelsVisible () {
-      const connections = this.connections.filter(connection => connection.labelIsVisible)
-      return connections.length
-    },
-    canEditAll () {
-      if (this.isSpaceMember) { return true }
-      const connectionsCreatedByCurrentUser = this.connections.filter(connection => {
-        return this.$store.getters['currentUser/connectionIsCreatedByCurrentUser'](connection)
-      })
-      return connectionsCreatedByCurrentUser.length === this.connections.length
-    },
-    isSpaceMember () { return this.$store.getters['currentUser/isSpaceMember']() },
-    allPathsIsCurved () {
-      const curvedConnections = this.connections.filter(connection => {
-        if (!connection) { return }
-        if (!connection.path) { return }
-        const controlPoint = utils.curveControlPointFromPath(connection.path)
-        const isCurved = controlPoint.x && controlPoint.y
-        return isCurved
-      })
-      return curvedConnections.length === this.connections.length
-    },
-    allPathsIsStraight () {
-      const curvedConnections = this.connections.filter(connection => {
-        if (!connection) { return }
-        if (!connection.path) { return }
-        const controlPoint = utils.curveControlPointFromPath(connection.path)
-        const isCurved = !controlPoint.x && !controlPoint.y
-        return isCurved
-      })
-      return curvedConnections.length === this.connections.length
-    }
-  },
-  methods: {
-    showDirectionsIsVisible () {
-      const value = !this.isSomeDirectionsIsVisible
-      this.connections.forEach(connection => {
-        this.$store.dispatch('currentConnections/update', {
-          id: connection.id,
-          directionIsVisible: value
-        })
-      })
-    },
-    showLabelsIsVisible () {
-      const value = !this.isSomeLabelsVisible
-      this.connections.forEach(connection => {
-        this.$store.dispatch('currentConnections/update', {
-          id: connection.id,
-          labelIsVisible: value
-        })
-      })
-    },
-    reverseConnections () {
-      this.connections.forEach(connection => {
-        const startCardId = connection.endCardId
-        const endCardId = connection.startCardId
-        this.$store.dispatch('currentConnections/update', {
-          id: connection.id,
-          startCardId,
-          endCardId
-        })
-      })
-      this.$store.dispatch('currentConnections/updatePaths', { connections: this.connections })
-    },
-    togglePathIsStraight (isStraight) {
-      let controlPoint = null
-      if (isStraight) {
-        controlPoint = `q00,00`
-      }
-      this.connections.forEach(connection => {
-        this.$store.dispatch('currentConnections/update', {
-          id: connection.id,
-          controlPoint
-        })
-      })
-      this.$store.dispatch('currentConnections/updatePaths', { connections: this.connections })
-      this.$store.dispatch('currentUser/update', { defaultConnectionControlPoint: controlPoint })
-    }
-
-  }
-}
-</script>
 
 <style lang="stylus" scoped>
 button
