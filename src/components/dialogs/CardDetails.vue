@@ -377,6 +377,7 @@ const closeCard = async () => {
   if (item.name || prevCardName) {
     store.dispatch('history/add', { cards: [item], useSnapshot: true })
   }
+  updateDimensionsAndPathsDebounced()
 }
 
 // name
