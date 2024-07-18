@@ -9,6 +9,7 @@ import Audio from '@/components/Audio.vue'
 import NameSegment from '@/components/NameSegment.vue'
 import UserLabelInline from '@/components/UserLabelInline.vue'
 import OtherCardPreview from '@/components/OtherCardPreview.vue'
+import ConnectorButton from '@/components/ConnectorButton.vue'
 import consts from '@/consts.js'
 import postMessage from '@/postMessage.js'
 
@@ -124,7 +125,8 @@ const state = reactive({
   defaultBackgroundColor: '#e3e3e3',
   pathIsUpdated: false,
   isVisibleInViewport: false,
-  currentCardConnections: []
+  currentCardConnections: [],
+  shouldRenderParent: false
 })
 watch(() => state.linkToPreview, (value, prevValue) => {
   updateUrlData()
@@ -550,44 +552,6 @@ const remoteUserTiltingCardsColor = computed(() => {
 
 // connections
 
-const connectionFromAnotherCardConnectedToCurrentCard = (anotherCardId) => {
-  return state.currentCardConnections.find(connection => {
-    const isConnectedToStart = connection.startCardId === anotherCardId
-    const isConnectedToEnd = connection.endCardId === anotherCardId
-    return isConnectedToStart || isConnectedToEnd
-  })
-}
-const connectionsFromMultipleCardsConnectedToCurrentCard = (otherCardIds) => {
-  let currentCardConnection
-  otherCardIds.find(anotherCardId => {
-    return state.currentCardConnections.find(connection => {
-      const isConnectedToStart = connection.startCardId === anotherCardId
-      const isConnectedToEnd = connection.endCardId === anotherCardId
-      if (isConnectedToStart || isConnectedToEnd) {
-        currentCardConnection = connection
-        return true
-      }
-    })
-  })
-  return currentCardConnection
-}
-const connectedConnectionTypes = computed(() => store.getters['currentConnections/typesByCardId'](props.card.id))
-const connectedConnectionTypeById = (typeId) => {
-  return connectedConnectionTypes.value.find(type => type.id === typeId)
-}
-const connectionTypeColorisDark = computed(() => {
-  const type = connectedConnectionTypes.value[connectedConnectionTypes.value.length - 1]
-  if (!type) { return }
-  return utils.colorIsDark(type.color)
-})
-const currentUserIsDraggingLabelConnectedToCard = computed(() => {
-  const connectionId = store.state.currentUserIsDraggingConnectionIdLabel
-  if (!connectionId) { return }
-  const connection = store.getters['currentConnections/byId'](connectionId)
-  if (!connection) { return }
-  const isConnected = connection.startCardId === props.card.id || connection.endCardId === props.card.id
-  return isConnected
-})
 const isConnectingTo = computed(() => {
   const connectingToId = store.state.currentConnectionSuccess.id
   if (connectingToId) {
@@ -596,66 +560,12 @@ const isConnectingTo = computed(() => {
   return connectingToId === props.card.id
 })
 const isConnectingFrom = computed(() => {
-  return store.state.currentConnectionStartCardIds.find(cardId => cardId === props.card.id)
+  return store.state.currentConnectionStartCardIds.includes(props.card.id)
 })
-const hasConnections = computed(() => {
-  const connections = store.getters['currentConnections/byCardId'](props.card.id)
-  return Boolean(connections.length)
-})
-const currentConnectionColor = computed(() => store.state.currentConnectionColor)
-const createCurrentConnection = (event) => {
-  const cursor = utils.cursorPositionInViewport(event)
-  const multipleCardsSelectedIds = store.state.multipleCardsSelectedIds
-  let cardIds = [props.card.id]
-  if (multipleCardsSelectedIds.length) {
-    cardIds = multipleCardsSelectedIds
-  }
-  store.commit('currentConnectionStartCardIds', cardIds)
-  store.commit('currentConnectionCursorStart', cursor)
-}
-const addConnectionType = (event) => {
-  const shouldUseLastConnectionType = store.state.currentUser.shouldUseLastConnectionType
-  const shiftKey = event.shiftKey
-  const connectionType = store.getters['currentConnections/typeForNewConnections']
-  if (!connectionType) {
-    store.dispatch('currentConnections/addType')
-  }
-  if (shouldUseLastConnectionType && shiftKey) {
-    store.dispatch('currentConnections/addType')
-    return
-  }
-  if (shiftKey || shouldUseLastConnectionType) {
-    return
-  }
-  store.dispatch('currentConnections/addType')
-}
-const startConnecting = (event) => {
-  if (!canEditSpace.value) { return }
-  if (utils.isMultiTouch(event)) { return }
-  store.dispatch('closeAllDialogs')
-  store.commit('preventDraggedCardFromShowingDetails', true)
-  if (!store.state.currentUserIsDrawingConnection) {
-    addConnectionType(event)
-    createCurrentConnection(event)
-  }
-  store.commit('currentUserIsDrawingConnection', true)
-}
+const connectedConnectionTypes = computed(() => store.getters['currentConnections/typesByCardId'](props.card.id))
 
-// connector button
+// card buttons
 
-const isConnectorDarkInLightTheme = computed(() => {
-  if (connectionTypeColorisDark.value) { return connectionTypeColorisDark.value }
-  return isDarkInLightTheme.value
-})
-const isConnectorLightInDarkTheme = computed(() => {
-  if (connectionTypeColorisDark.value) { return !connectionTypeColorisDark.value }
-  return isLightInDarkTheme.value
-})
-const connectorButtonBackground = computed(() => {
-  if (store.state.currentUserIsDraggingCard) { return }
-  if (hasConnections.value || isConnectingFrom.value || isConnectingTo.value) { return }
-  return currentBackgroundColor.value
-})
 const connectorIsVisible = computed(() => {
   const spaceIsOpen = store.state.currentSpace.privacy === 'open' && currentUserIsSignedIn.value
   let isVisible
@@ -666,84 +576,6 @@ const connectorIsVisible = computed(() => {
   }
   return isVisible
 })
-const connectorGlowStyle = computed(() => {
-  if (!state.isVisibleInViewport) { return }
-  if (!utils.arrayHasItems(connectedConnectionTypes.value) && !store.state.currentUserIsDrawingConnection) { return } // cards with no connections
-  const color = connectedToAnotherCardDetailsVisibleColor.value ||
-    connectedToAnotherCardBeingDraggedColor.value ||
-    connectedToConnectionDetailsIsVisibleColor.value ||
-    currentUserIsHoveringOverConnectionColor.value ||
-    currentUserIsMultipleSelectedConnectionColor.value ||
-    currentUserIsHoveringOverConnectedCardColor.value ||
-    currentUserIsMultipleSelectedCardColor.value ||
-    currentUserIsCreatingConnectionColor.value
-  return { background: color }
-})
-const connectionColor = (connection) => {
-  if (!connection) { return }
-  const connectionType = connectedConnectionTypeById(connection.connectionTypeId)
-  return connectionType?.color
-}
-// another card that is connected to this one is being edited
-const connectedToAnotherCardDetailsVisibleColor = computed(() => {
-  if (currentCardDetailsIsVisible.value) { return }
-  const anotherCardId = store.state.cardDetailsIsVisibleForCardId
-  if (!anotherCardId) { return }
-  const connection = connectionFromAnotherCardConnectedToCurrentCard(anotherCardId)
-  return connectionColor(connection)
-})
-// another card that is connected to this one is being dragged
-const connectedToAnotherCardBeingDraggedColor = computed(() => {
-  const isDraggingCard = store.state.currentUserIsDraggingCard
-  if (!isDraggingCard) { return }
-  const currentDraggingCardId = store.state.currentDraggingCardId
-  const connection = connectionFromAnotherCardConnectedToCurrentCard(currentDraggingCardId)
-  return connectionColor(connection)
-})
-// a connection that is connected to this card is being edited
-const connectedToConnectionDetailsIsVisibleColor = computed(() => {
-  const connectionDetailsVisibleId = store.state.connectionDetailsIsVisibleForConnectionId
-  if (!connectionDetailsVisibleId) { return }
-  const connectionWithDetailsVisible = state.currentCardConnections.find(connection => connection.id === connectionDetailsVisibleId)
-  if (!connectionWithDetailsVisible) { return }
-  const connectionType = connectedConnectionTypeById(connectionWithDetailsVisible.connectionTypeId)
-  return connectionType?.color
-})
-// a connection that is connected to this card is being hovered over
-const currentUserIsHoveringOverConnectionColor = computed(() => {
-  const connectionId = store.state.currentUserIsHoveringOverConnectionId || store.state.currentUserIsDraggingConnectionIdLabel
-  const connection = state.currentCardConnections.find(currentCardConnection => currentCardConnection.id === connectionId)
-  return connectionColor(connection)
-})
-// a connection that is connected to this card, is paint selected
-const currentUserIsMultipleSelectedConnectionColor = computed(() => {
-  const connectionIds = store.state.multipleConnectionsSelectedIds
-  const connection = state.currentCardConnections.find(currentCardConnection => connectionIds.includes(currentCardConnection.id))
-  return connectionColor(connection)
-})
-// this card, or another card connected to this card, is being hovered over
-const currentUserIsHoveringOverConnectedCardColor = computed(() => {
-  const cardId = store.state.currentUserIsHoveringOverCardId
-  const connection = connectionFromAnotherCardConnectedToCurrentCard(cardId)
-  return connectionColor(connection)
-})
-// this card, or another card connected to this card, is paint selected
-const currentUserIsMultipleSelectedCardColor = computed(() => {
-  const cardIds = store.state.multipleCardsSelectedIds
-  const connection = connectionsFromMultipleCardsConnectedToCurrentCard(cardIds)
-  return connectionColor(connection)
-})
-// a current connection is being made by dragging from this card's connector
-const currentUserIsCreatingConnectionColor = computed(() => {
-  if (!store.state.currentUserIsDrawingConnection) { return }
-  const cardIds = store.state.currentConnectionStartCardIds
-  const isCurrentlyConnecting = cardIds.includes(props.card.id)
-  if (!isCurrentlyConnecting) { return }
-  return store.state.currentConnectionColor
-})
-
-// card buttons
-
 const isCardButtonsVisible = computed(() => {
   return isLocked.value || (cardButtonUrl.value && !isComment.value) || connectorIsVisible.value
 })
@@ -1598,17 +1430,19 @@ const removeViewportObserver = () => {
   observer.unobserve(target)
 }
 const shouldRender = computed(() => {
-  const isConnectingFrom = store.state.currentConnectionStartCardIds.includes(props.card.id)
   const shouldExplitlyRender = store.state.shouldExplicitlyRenderCardIds[props.card.id]
-  if (isConnectingFrom) { return true }
+  if (isConnectingFrom.value) { return true }
   if (shouldExplitlyRender) { return true }
-  if (connectedToAnotherCardBeingDraggedColor.value) { return true }
+  if (state.shouldRenderParent) { return true }
   if (store.state.disableViewportOptimizations) { return true }
   if (state.isVisibleInViewport) {
     updateLockedItemButtonPosition()
   }
   return state.isVisibleInViewport
 })
+const updateShouldRenderParent = (value) => {
+  state.shouldRenderParent = value
+}
 const updateLockedItemButtonPosition = async () => {
   if (!props.card.isLocked) { return }
   await nextTick()
@@ -1625,12 +1459,6 @@ const handleMouseEnter = () => {
 const handleMouseLeave = () => {
   unstickToCursor()
   store.commit('currentUserIsHoveringOverCardId', '')
-}
-const handleMouseEnterConnector = (event) => {
-  store.commit('currentUserIsHoveringOverConnectorCardId', props.card.id)
-}
-const handleMouseLeaveConnector = () => {
-  store.commit('currentUserIsHoveringOverConnectorCardId', '')
 }
 const handleMouseEnterCheckbox = () => {
   store.commit('currentUserIsHoveringOverCheckboxCardId', props.card.id)
@@ -1996,34 +1824,21 @@ article.card-wrap#card(
             .url.inline-button-wrap
               button.inline-button(:style="{background: currentBackgroundColor}" :class="{'is-light-in-dark-theme': isLightInDarkTheme, 'is-dark-in-light-theme': isDarkInLightTheme}" tabindex="-1")
                 img.icon.visit.arrow-icon(src="@/assets/visit.svg")
-          //- Connector
-          .connector.inline-button-wrap(
-            v-if="connectorIsVisible"
-            :data-card-id="card.id"
-            @mousedown.left="startConnecting"
-            @touchstart="startConnecting"
-            @mouseenter="handleMouseEnterConnector"
-            @mouseleave="handleMouseLeaveConnector"
+          //- connector
+          ConnectorButton(
+            :visible="connectorIsVisible"
+            :card="card"
+            :currentCardConnections="state.currentCardConnections"
+            :isConnectingTo="isConnectingTo"
+            :isConnectingFrom="isConnectingFrom"
+            :isVisibleInViewport="state.isVisibleInViewport"
+            :isRemoteConnecting="state.isRemoteConnecting"
+            :remoteConnectionColor="state.remoteConnectionColor"
+            :defaultBackgroundColor="state.defaultBackgroundColor"
+            :currentBackgroundColor="currentBackgroundColor"
+            :parentDetailsIsVisible="currentCardDetailsIsVisible"
+            @shouldRenderParent="updateShouldRenderParent"
           )
-            .connector-glow(:style="connectorGlowStyle" tabindex="-1")
-            .connected-colors
-              template(v-if="isConnectingTo || isConnectingFrom")
-                .color(:style="{ background: currentConnectionColor}")
-              template(v-else-if="state.isRemoteConnecting")
-                .color(:style="{ background: state.remoteConnectionColor }")
-              template(v-else v-for="type in connectedConnectionTypes")
-                .color(:style="{ background: type.color}")
-
-            button.inline-button.connector-button(
-              :class="{ active: isConnectingTo || isConnectingFrom, 'is-light-in-dark-theme': isConnectorLightInDarkTheme, 'is-dark-in-light-theme': isConnectorDarkInLightTheme}"
-              :style="{background: connectorButtonBackground }"
-              tabindex="-1"
-              @keyup.stop.enter="showCardDetails"
-            )
-              template(v-if="hasConnections || isConnectingFrom || isConnectingTo")
-                img.connector-icon(src="@/assets/connector-closed-in-card.svg")
-              //- template(v-else)
-              //-   img.connector-icon(src="@/assets/connector-open-in-card.svg")
     .url-preview-wrap(v-if="cardUrlPreviewIsVisible || otherCardIsVisible || otherSpaceIsVisible" :class="{'is-image-card': isImageCard}")
       template(v-if="cardUrlPreviewIsVisible")
         UrlPreviewCard(
@@ -2219,36 +2034,6 @@ article.card-wrap
           .audio
             width 132px
 
-    .connector
-      position relative
-      height 32px
-      padding-top 9px !important
-      z-index 2
-      &.invisible
-        height 32px
-        width 36px
-        padding 0
-        position absolute
-        left 0
-        top 0
-        background transparent
-        pointer-events none
-        button
-          width 0
-          height 0
-          min-width 0
-          padding 0
-          border none
-          border-color var(--primary-border)
-      .connector-glow
-        position absolute
-        width 32px
-        height 32px
-        top 0px
-        left -1px
-        border-radius 100px
-        pointer-events none
-
     .connector,
     .url
       padding 8px
@@ -2286,27 +2071,6 @@ article.card-wrap
       border-radius 100px
       .color
         width 100%
-    .connector-button
-      background-color transparent
-      border-radius 100px
-      width 14px
-      height 14px
-      padding 0
-      &:hover,
-      &:active
-        background-color transparent
-    .inline-button-wrap
-      &:hover,
-      &:active
-        .connector-button
-          background-color transparent
-    .connector-button
-      border 1px solid var(--primary-border)
-    .connector-icon
-      position absolute
-      left -1px
-      top -1px
-      width 9.5px
 
     .lock-icon
       position absolute
