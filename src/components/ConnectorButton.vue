@@ -11,7 +11,7 @@ const emit = defineEmits(['shouldRenderParent'])
 const props = defineProps({
   visible: Boolean,
   card: Object,
-  currentCardConnections: Array,
+  currentItemConnections: Array,
   isConnectingTo: Boolean,
   isConnectingFrom: Boolean,
   isVisibleInViewport: Boolean,
@@ -38,7 +38,7 @@ const isLightInDarkTheme = computed(() => !backgroundColorIsDark.value && isThem
 
 const currentConnectionColor = computed(() => store.state.currentConnectionColor)
 const connectionFromAnotherCardConnectedToCurrentCard = (anotherCardId) => {
-  return props.currentCardConnections.find(connection => {
+  return props.currentItemConnections.find(connection => {
     const isConnectedToStart = connection.startCardId === anotherCardId
     const isConnectedToEnd = connection.endCardId === anotherCardId
     return isConnectedToStart || isConnectedToEnd
@@ -47,7 +47,7 @@ const connectionFromAnotherCardConnectedToCurrentCard = (anotherCardId) => {
 const connectionsFromMultipleCardsConnectedToCurrentCard = (otherCardIds) => {
   let currentCardConnection
   otherCardIds.find(anotherCardId => {
-    return props.currentCardConnections.find(connection => {
+    return props.currentItemConnections.find(connection => {
       const isConnectedToStart = connection.startCardId === anotherCardId
       const isConnectedToEnd = connection.endCardId === anotherCardId
       if (isConnectedToStart || isConnectedToEnd) {
@@ -165,7 +165,7 @@ const connectedToAnotherCardBeingDraggedColor = computed(() => {
 const connectedToConnectionDetailsIsVisibleColor = computed(() => {
   const connectionDetailsVisibleId = store.state.connectionDetailsIsVisibleForConnectionId
   if (!connectionDetailsVisibleId) { return }
-  const connectionWithDetailsVisible = props.currentCardConnections.find(connection => connection.id === connectionDetailsVisibleId)
+  const connectionWithDetailsVisible = props.currentItemConnections.find(connection => connection.id === connectionDetailsVisibleId)
   if (!connectionWithDetailsVisible) { return }
   const connectionType = connectedConnectionTypeById(connectionWithDetailsVisible.connectionTypeId)
   return connectionType?.color
@@ -173,13 +173,13 @@ const connectedToConnectionDetailsIsVisibleColor = computed(() => {
 // a connection that is connected to this card is being hovered over
 const currentUserIsHoveringOverConnectionColor = computed(() => {
   const connectionId = store.state.currentUserIsHoveringOverConnectionId || store.state.currentUserIsDraggingConnectionIdLabel
-  const connection = props.currentCardConnections.find(currentCardConnection => currentCardConnection.id === connectionId)
+  const connection = props.currentItemConnections.find(currentCardConnection => currentCardConnection.id === connectionId)
   return connectionColor(connection)
 })
 // a connection that is connected to this card, is paint selected
 const currentUserIsMultipleSelectedConnectionColor = computed(() => {
   const connectionIds = store.state.multipleConnectionsSelectedIds
-  const connection = props.currentCardConnections.find(currentCardConnection => connectionIds.includes(currentCardConnection.id))
+  const connection = props.currentItemConnections.find(currentCardConnection => connectionIds.includes(currentCardConnection.id))
   return connectionColor(connection)
 })
 // this card, or another card connected to this card, is being hovered over

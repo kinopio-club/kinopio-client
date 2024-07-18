@@ -1828,7 +1828,7 @@ article.card-wrap#card(
           ConnectorButton(
             :visible="connectorIsVisible"
             :card="card"
-            :currentCardConnections="state.currentCardConnections"
+            :currentItemConnections="state.currentCardConnections"
             :isConnectingTo="isConnectingTo"
             :isConnectingFrom="isConnectingFrom"
             :isVisibleInViewport="state.isVisibleInViewport"
