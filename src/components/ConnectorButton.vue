@@ -226,10 +226,10 @@ const handleMouseLeaveConnector = () => {
 </script>
 
 <template lang="pug">
-
-.connector.inline-button-wrap(
+.connector(
   v-if="props.visible"
   :data-card-id="props.card.id"
+  :key="props.card.id"
   @mousedown.left="startConnecting"
   @touchstart="startConnecting"
   @mouseenter="handleMouseEnterConnector"
@@ -301,20 +301,9 @@ const handleMouseLeaveConnector = () => {
     height 14px
     padding 0
     border 1px solid var(--primary-border)
-    &:hover,
-    &:active
-      background-color transparent
-
   .connector-icon
     position absolute
     left -1px
     top -1px
     width 9.5px
-
-  .inline-button-wrap
-    &:hover,
-    &:active
-      .connector-button
-        background-color transparent
-
 </style>
