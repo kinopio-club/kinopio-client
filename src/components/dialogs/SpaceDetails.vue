@@ -21,7 +21,7 @@ dialog.space-details.is-pinnable.wide(v-if="visible" :open="visible" @click.left
               img.icon(src="@/assets/filter.svg")
         // filters active
         template(v-if="spaceFiltersIsActive")
-          .segmented-buttons
+          .segmented-buttons.title-row-small-button-wrap.section-top
             button.small-button(@click.left.stop="toggleSpaceFiltersIsVisible" :class="{ active: spaceFiltersIsVisible || spaceFiltersIsActive }")
               img.icon(src="@/assets/filter.svg")
               .badge.info.filter-is-active
