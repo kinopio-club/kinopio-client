@@ -15,12 +15,22 @@ dialog.narrow.space-filters(v-if="visible" :open="visible" @click.left.stop ref=
           img.icon(v-if="showHiddenSpace" src="@/assets/view-hidden.svg")
           span Hidden Spaces
 
-    .segmented-buttons
-      button(@click="showAllSpaces" :class="{active: allIsActive}") All
-      button(@click="showSpacesOnly" :class="{active: spacesIsActive}") Normal
-      button(@click="showJournalsOnly" :class="{active: journalsIsActive}")
-        MoonPhase(:moonPhase="moonPhase.name")
-        span Journals
+    .row
+      .segmented-buttons
+        button.active
+          img.icon.time(src="@/assets/time.svg")
+          span Updated
+        button
+          img.icon.time(src="@/assets/time.svg")
+          span Created
+
+    .row
+      .segmented-buttons
+        button(@click="showAllSpaces" :class="{active: allIsActive}") All
+        button(@click="showSpacesOnly" :class="{active: spacesIsActive}") Normal
+        button(@click="showJournalsOnly" :class="{active: journalsIsActive}")
+          MoonPhase(:moonPhase="moonPhase.name")
+          span Journals
 
   section.results-section.collaborators
     UserList(:users="spaceUsers" :isClickable="true" @selectUser="filterByUser" :selectedUser="dialogSpaceFilterByUser")
