@@ -140,8 +140,6 @@ const showNone = async () => {
   }
   store.dispatch('currentCards/update', { card })
   store.commit('removeUrlPreviewLoadingForCardIds', props.card.id)
-  await nextTick()
-  store.dispatch('currentConnections/updatePaths', { cardId: props.card.id })
 }
 </script>
 
