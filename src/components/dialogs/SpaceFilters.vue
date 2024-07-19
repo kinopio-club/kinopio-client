@@ -53,6 +53,7 @@ const dialogSpaceFilterByUser = computed(() => store.state.currentUser.dialogSpa
 const clearAllFilters = () => {
   showAllSpaces()
   updateUserFilter({})
+  updateSortBy(null)
   store.dispatch('currentUser/update', { dialogSpaceFilterShowHidden: false })
 }
 // show hidden
