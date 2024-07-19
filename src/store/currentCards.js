@@ -300,7 +300,7 @@ const currentCards = {
 
     // update
 
-    update: (context, card) => {
+    update: (context, { card }) => {
       if (!card) { return }
       // prevent null position
       const keys = Object.keys(card)
@@ -358,10 +358,11 @@ const currentCards = {
     updateName (context, { card, newName }) {
       const canEditCard = context.rootGetters['currentUser/canEditCard'](card)
       if (!canEditCard) { return }
-      context.dispatch('update', {
+      const update = {
         id: card.id,
         name: newName
-      })
+      }
+      context.dispatch('update', { card: update })
       context.dispatch('updateDimensions', { cards: [card] })
     },
     toggleChecked (context, { cardId, value }) {
@@ -376,22 +377,24 @@ const currentCards = {
       } else {
         name = `[] ${name}`
       }
-      context.dispatch('update', {
+      const update = {
         id: cardId,
         name,
         nameUpdatedAt: new Date()
-      })
+      }
+      context.dispatch('update', { card: update })
     },
     removeChecked: (context, cardId) => {
       utils.typeCheck({ value: cardId, type: 'string' })
       const card = context.getters.byId(cardId)
       let name = card.name
       name = name.replace('[x]', '').trim()
-      context.dispatch('update', {
+      const update = {
         id: cardId,
         name,
         nameUpdatedAt: new Date()
-      })
+      }
+      context.dispatch('update', { card })
       nextTick(() => {
         context.dispatch('updateDimensions', { cards: [card] })
       })
@@ -404,10 +407,11 @@ const currentCards = {
         let name = card.name
         name = utils.removeTrackingQueryStringsFromURLs(name)
         name = utils.removeTrailingSlash(name)
-        context.dispatch('update', {
+        const update = {
           id: cardId,
           name
-        })
+        }
+        context.dispatch('update', { card: update })
       }, 100)
     },
 
@@ -496,7 +500,7 @@ const currentCards = {
         width = width + deltaX
         width = Math.max(minImageWidth, width)
         const updates = { id: cardId, resizeWidth: width }
-        context.dispatch('update', updates)
+        context.dispatch('update', { card: updates })
         context.dispatch('broadcast/update', { updates, type: 'resizeCard', handler: 'currentCards/update' }, { root: true })
         context.dispatch('currentConnections/updateMultiplePaths', [card], { root: true })
       })
@@ -529,7 +533,7 @@ const currentCards = {
         tilt = Math.min(maxDegrees, tilt)
         tilt = Math.max(-maxDegrees, tilt)
         const updates = { id: cardId, tilt }
-        context.dispatch('update', updates)
+        context.dispatch('update', { card: updates })
         context.dispatch('broadcast/update', { updates, type: 'tiltCard', handler: 'currentCards/update' }, { root: true })
         const connections = context.rootGetters['currentConnections/byCardId'](cardId)
         context.dispatch('currentConnections/updatePathsWhileDragging', { connections }, { root: true })
@@ -538,7 +542,7 @@ const currentCards = {
     removeTilt: (context, { cardIds }) => {
       cardIds.forEach(cardId => {
         const body = { id: cardId, tilt: 0 }
-        context.dispatch('update', body)
+        context.dispatch('update', { card: body })
         utils.removeAllCardDimensions({ id: cardId })
         const cards = [{ id: cardId }]
         context.dispatch('updateDimensions', { cards })
@@ -697,13 +701,14 @@ const currentCards = {
             prevCard = card
           }
           card = utils.cardElementDimensions(card)
-          context.dispatch('update', {
+          card = {
             name: card.name,
             id: card.id,
             y: card.y,
             width: card.width,
             height: card.height
-          })
+          }
+          context.dispatch('update', { card })
         })
       })
     },

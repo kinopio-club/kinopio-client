@@ -448,7 +448,7 @@ const updateCardName = async (newName) => {
     nameUpdatedAt: new Date(),
     nameUpdatedByUserId: userId
   }
-  store.dispatch('currentCards/update', item)
+  store.dispatch('currentCards/update', { card: item })
   updateMediaUrls()
   updateTags()
   updateDimensionsAndPathsDebounced()
@@ -501,7 +501,7 @@ const addCheckbox = () => {
     id: card.value.id,
     name: `[] ${card.value.name}`
   }
-  store.dispatch('currentCards/update', update)
+  store.dispatch('currentCards/update', { card: update })
   updateDimensionsAndPathsDebounced()
 }
 
@@ -968,7 +968,7 @@ const removeUrlPreview = async () => {
     urlPreviewIframeUrl: ''
   }
   store.commit('removeUrlPreviewLoadingForCardIds', cardId)
-  store.dispatch('currentCards/update', update)
+  store.dispatch('currentCards/update', { card: update })
   updateDimensionsAndPathsDebounced()
 }
 
@@ -1103,7 +1103,7 @@ const addSplitCards = async (newCards) => {
       const element = document.querySelector(`article [data-card-id="${prevCard.id}"]`)
       const prevCardRect = element.getBoundingClientRect()
       newCard.y = prevCard.y + (prevCardRect.height * store.getters.spaceCounterZoomDecimal) + spaceBetweenCards
-      store.dispatch('currentCards/update', newCard)
+      store.dispatch('currentCards/update', { card: newCard })
       store.commit('triggerUpdateUrlPreview', newCard.id)
       prevCard = newCard
     }
@@ -1223,10 +1223,11 @@ const replaceSlashCommandWithSpaceUrl = async (space) => {
   await nextTick()
   focusName(position)
   store.commit('shouldPreventNextEnterKey', false)
-  store.dispatch('currentCards/update', {
+  const update = {
     id: card.value.id,
     shouldShowOtherSpacePreviewImage: true
-  })
+  }
+  store.dispatch('currentCards/update', { card: update })
   textareaSizes()
 }
 

@@ -127,7 +127,7 @@ const handleImageError = (event) => {
       id: props.card.id,
       shouldHideUrlPreviewImage: true
     }
-    store.commit('currentCards/update', card)
+    store.commit('currentCards/update', { card })
     return
   }
   // instagram url signature expiry

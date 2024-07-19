@@ -56,7 +56,7 @@ const changeCardFrame = (frame) => {
       frameName: frame.name,
       id: card.id
     }
-    store.dispatch('currentCards/update', card)
+    store.dispatch('currentCards/update', { card })
   })
 }
 const frameIsSelected = (frame) => {

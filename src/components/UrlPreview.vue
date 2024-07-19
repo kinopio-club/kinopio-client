@@ -111,7 +111,7 @@ const showAll = () => {
     shouldHideUrlPreviewInfo: false,
     shouldHideUrlPreviewImage: false
   }
-  store.dispatch('currentCards/update', card)
+  store.dispatch('currentCards/update', { card })
 }
 
 // toggle show
@@ -131,7 +131,7 @@ const showImage = () => {
     shouldHideUrlPreviewInfo: true,
     shouldHideUrlPreviewImage: false
   }
-  store.dispatch('currentCards/update', card)
+  store.dispatch('currentCards/update', { card })
   updatePaths()
 }
 const showInfo = () => {
@@ -141,7 +141,7 @@ const showInfo = () => {
     shouldHideUrlPreviewInfo: false,
     shouldHideUrlPreviewImage: true
   }
-  store.dispatch('currentCards/update', card)
+  store.dispatch('currentCards/update', { card })
   updatePaths()
 }
 const showNone = async () => {
@@ -151,7 +151,7 @@ const showNone = async () => {
     shouldHideUrlPreviewInfo: false,
     shouldHideUrlPreviewImage: false
   }
-  store.dispatch('currentCards/update', card)
+  store.dispatch('currentCards/update', { card })
   store.commit('removeUrlPreviewLoadingForCardIds', props.card.id)
   updatePaths()
 }

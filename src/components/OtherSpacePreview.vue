@@ -60,10 +60,11 @@ const toggleMoreOptionsIsVisible = () => {
   state.moreOptionsIsVisible = value
 }
 const togglePreviewImageIsVisible = (value) => {
-  store.dispatch('currentCards/update', {
+  const update = {
     id: props.card.id,
     shouldShowOtherSpacePreviewImage: value
-  })
+  }
+  store.dispatch('currentCards/update', { card: update })
 }
 const previewImageHover = (value) => {
   state.previewImageIsHover = value

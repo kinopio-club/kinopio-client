@@ -288,7 +288,7 @@ const normalizeBoxes = (boxes) => {
 // update items
 
 const updateItem = (item, type) => {
-  if (type === 'cards') { store.dispatch('currentCards/update', item) }
+  if (type === 'cards') { store.dispatch('currentCards/update', { card: item }) }
   if (type === 'boxes') { store.dispatch('currentBoxes/update', item) }
 }
 const updateCardDimensions = async () => {
