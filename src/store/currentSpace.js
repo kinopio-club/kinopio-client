@@ -385,6 +385,8 @@ const currentSpace = {
       space.background = space.background || consts.defaultSpaceBackground
       space.isTemplate = false
       space.isHidden = false
+      space.previewImage = null
+      space.previewThumbnailImage = null
       const nullCardUsers = true
       const uniqueNewSpace = cache.updateIdsInSpace(space, nullCardUsers)
       context.commit('clearSearch', null, { root: true })

@@ -113,7 +113,9 @@ export default {
       return this.getLocal(key)
     })
     const space = spaces.find(space => space.name === name)
-    space.clients = []
+    if (space) {
+      space.clients = []
+    }
     return space
   },
   getAllSpaces () {

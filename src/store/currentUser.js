@@ -47,6 +47,7 @@ const initialState = {
   dialogSpaceFilters: null, // null, journals, spaces
   dialogSpaceFilterByUser: {},
   dialogSpaceFilterShowHidden: false,
+  dialogSpaceFiltersSortBy: null, // null, updatedAt, createdAt
   defaultSpaceBackground: undefined,
   defaultSpaceBackgroundGradient: undefined,
   defaultSpaceBackgroundTint: undefined,
@@ -300,6 +301,10 @@ export default {
     dialogSpaceFilterShowHidden: (state, value) => {
       state.dialogSpaceFilterShowHidden = value
       cache.updateUser('dialogSpaceFilterShowHidden', value)
+    },
+    dialogSpaceFiltersSortBy: (state, value) => {
+      state.dialogSpaceFiltersSortBy = value
+      cache.updateUser('dialogSpaceFiltersSortBy', value)
     },
     defaultSpaceBackground: (state, value) => {
       state.defaultSpaceBackground = value

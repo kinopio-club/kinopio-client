@@ -200,10 +200,11 @@ export default {
         const cardId = cardIds[index]
         let card = context.rootGetters['currentCards/byId'](cardId)
         const name = card.name.replace(placeholder, '')
-        context.dispatch('currentCards/update', {
+        const update = {
           id: cardId,
           name
-        }, { root: true })
+        }
+        context.dispatch('currentCards/update', { card: update }, { root: true })
       })
     }
   }

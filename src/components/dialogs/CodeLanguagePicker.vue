@@ -44,10 +44,11 @@ const languageIsFocused = (language) => {
 }
 const selectLanguage = (language) => {
   if (!language) { return }
-  store.dispatch('currentCards/update', {
+  const card = {
     id: cardId.value,
     codeBlockLanguage: language.name
-  })
+  }
+  store.dispatch('currentCards/update', { card })
   store.dispatch('closeAllDialogs')
 }
 

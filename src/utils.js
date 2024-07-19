@@ -868,6 +868,18 @@ export default {
     card.id = cardId
     return card
   },
+  boxElementDimensions (box) {
+    if (!box) { return }
+    const element = this.boxElementFromId(box.id)
+    if (!element) { return }
+    box.x = parseInt(element.dataset.x)
+    box.y = parseInt(element.dataset.y)
+    box.resizeWidth = parseInt(element.dataset.resizeWidth)
+    box.resizeHeight = parseInt(element.dataset.resizeHeight)
+    box.width = parseInt(element.dataset.resizeWidth)
+    box.height = parseInt(element.dataset.resizeHeight)
+    return box
+  },
   updateCardDimensionsDataWhileDragging (card) {
     if (!card) { return }
     const element = document.querySelector(`article#card[data-card-id="${card.id}"]`)
@@ -1353,6 +1365,8 @@ export default {
     space.isTemplate = false
     space.isHidden = false
     space.collaboratorKey = nanoid()
+    space.previewImage = null
+    space.previewThumbnailImage = null
     space.cards = space.cards.map(card => {
       card.userId = null
       if (card.nameUpdatedByUserId) {
