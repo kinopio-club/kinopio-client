@@ -1353,6 +1353,8 @@ export default {
     space.isTemplate = false
     space.isHidden = false
     space.collaboratorKey = nanoid()
+    space.previewImage = null
+    space.previewThumbnailImage = null
     space.cards = space.cards.map(card => {
       card.userId = null
       if (card.nameUpdatedByUserId) {
