@@ -112,12 +112,10 @@ export default {
     const spaces = spaceKeys.map(key => {
       return this.getLocal(key)
     })
-    console.error('🍇🍇 temp logging getSpaceByName', name, spaceKeys, spaces)
     const space = spaces.find(space => space.name === name)
     if (space) {
       space.clients = []
     }
-    console.error('🍇🍇 spaces', space)
     return space
   },
   getAllSpaces () {
