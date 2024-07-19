@@ -135,16 +135,16 @@ const spaceFilterShowHiddenIsActive = computed(() => store.state.currentUser.dia
 const dialogSpaceFilters = computed(() => store.state.currentUser.dialogSpaceFilters)
 const dialogSpaceFilterByUser = computed(() => store.state.currentUser.dialogSpaceFilterByUser)
 const spaceFiltersIsActive = computed(() => {
-  return Boolean(spaceFilterShowHiddenIsActive.value || dialogSpaceFilters.value || utils.objectHasKeys(dialogSpaceFilterByUser.value))
+  return Boolean(spaceFilterShowHiddenIsActive.value || dialogSpaceFilters.value || utils.objectHasKeys(dialogSpaceFilterByUser.value) || dialogSpaceFiltersSortByIsActive.value)
 })
 const filteredSpaces = computed(() => {
   let spaces
   // filter by space type
   if (dialogSpaceFilters.value === 'journals') {
-    updateJournalSpaces()
+    filterJournalSpacesOnly()
     spaces = state.journalSpaces
   } else if (dialogSpaceFilters.value === 'spaces') {
-    updateNormalSpaces()
+    filterNormalSpacesOnly()
     spaces = state.normalSpaces
   } else {
     spaces = state.spaces
@@ -159,6 +159,8 @@ const filteredSpaces = computed(() => {
   if (utils.objectHasKeys(dialogSpaceFilterByUser.value)) {
     spaces = spaces.filter(space => space.userId === dialogSpaceFilterByUser.value.id)
   }
+  // sort
+  spaces = sort(spaces)
   return spaces
 })
 const shouldShowInExplore = computed(() => {
@@ -181,11 +183,11 @@ const clearAllFilters = () => {
   closeDialogs()
   store.commit('triggerClearAllSpaceFilters')
 }
-const updateJournalSpaces = () => {
+const filterJournalSpacesOnly = () => {
   const journalSpaces = state.spaces.filter(space => space.moonPhase)
   state.journalSpaces = journalSpaces
 }
-const updateNormalSpaces = () => {
+const filterNormalSpacesOnly = () => {
   let normalSpaces = state.spaces.filter(space => !space.moonPhase)
   state.normalSpaces = normalSpaces
 }
@@ -193,6 +195,71 @@ const toggleSpaceFiltersIsVisible = () => {
   const isVisible = state.spaceFiltersIsVisible
   closeDialogs()
   state.spaceFiltersIsVisible = !isVisible
+}
+
+// sort
+
+const dialogSpaceFiltersSortBy = computed(() => store.state.currentUser.dialogSpaceFiltersSortBy)
+const dialogSpaceFiltersSortByIsActive = computed(() => dialogSpaceFiltersSortBy.value === 'createdAt')
+const isSortByCreatedAt = computed(() => {
+  const value = dialogSpaceFiltersSortBy.value
+  return value === 'createdAt'
+})
+const prependFavoriteSpaces = (spaces) => {
+  let favoriteSpaces = []
+  const userFavoriteSpaces = store.state.currentUser.favoriteSpaces
+  const favoriteSpaceIds = userFavoriteSpaces.map(space => space.id)
+  spaces = spaces.map(space => {
+    if (favoriteSpaceIds.includes(space.id)) {
+      space.isFavorite = true
+    }
+    return space
+  })
+  spaces = spaces.filter(space => {
+    if (space.isFavorite) {
+      favoriteSpaces.push(space)
+    } else {
+      return space
+    }
+  })
+  return favoriteSpaces.concat(spaces)
+}
+const prependInboxSpace = (spaces) => {
+  const inboxSpaces = spaces.filter(space => space.name === 'Inbox')
+  if (!inboxSpaces.length) { return spaces }
+  spaces = spaces.filter(space => space.name !== 'Inbox')
+  spaces = inboxSpaces.concat(spaces)
+  return spaces
+}
+const sortByCreatedAt = (spaces) => {
+  const sortedSpaces = spaces.sort((a, b) => {
+    const bCreatedAt = dayjs(b.createdAt).unix()
+    const aCreatedAt = dayjs(a.createdAt).unix()
+    return bCreatedAt - aCreatedAt
+  })
+  return sortedSpaces
+}
+const sortByUpdatedAt = (spaces) => {
+  spaces = spaces.map(space => {
+    space.editedAt = space.editedAt || space.createdAt
+    return space
+  })
+  const sortedSpaces = spaces.sort((a, b) => {
+    const bEditedAt = dayjs(b.editedAt).unix()
+    const aEditedAt = dayjs(a.editedAt).unix()
+    return bEditedAt - aEditedAt
+  })
+  return sortedSpaces
+}
+const sort = (spaces) => {
+  if (isSortByCreatedAt.value) {
+    spaces = sortByCreatedAt(spaces)
+  } else {
+    spaces = sortByUpdatedAt(spaces)
+  }
+  spaces = prependFavoriteSpaces(spaces)
+  spaces = prependInboxSpace(spaces)
+  return spaces
 }
 
 // add space
@@ -232,32 +299,6 @@ const removeSpaceFromSpaces = (spaceId) => {
 
 // list spaces
 
-const prependFavoriteSpaces = (spaces) => {
-  let favoriteSpaces = []
-  const userFavoriteSpaces = store.state.currentUser.favoriteSpaces
-  const favoriteSpaceIds = userFavoriteSpaces.map(space => space.id)
-  spaces = spaces.map(space => {
-    if (favoriteSpaceIds.includes(space.id)) {
-      space.isFavorite = true
-    }
-    return space
-  })
-  spaces = spaces.filter(space => {
-    if (space.isFavorite) {
-      favoriteSpaces.push(space)
-    } else {
-      return space
-    }
-  })
-  return favoriteSpaces.concat(spaces)
-}
-const prependInboxSpace = (spaces) => {
-  const inboxSpaces = spaces.filter(space => space.name === 'Inbox')
-  if (!inboxSpaces.length) { return spaces }
-  spaces = spaces.filter(space => space.name !== 'Inbox')
-  spaces = inboxSpaces.concat(spaces)
-  return spaces
-}
 const updateLocalSpaces = () => {
   if (!props.visible) { return }
   debouncedUpdateLocalSpaces()
@@ -268,9 +309,6 @@ const debouncedUpdateLocalSpaces = debounce(async () => {
     return store.getters['currentUser/canEditSpace'](space)
   })
   let spaces = updateWithExistingRemoteSpaces(cacheSpaces)
-  spaces = sortSpacesByEditedOrCreatedAt(spaces)
-  spaces = prependFavoriteSpaces(spaces)
-  spaces = prependInboxSpace(spaces)
   spaces = utils.clone(spaces)
   state.spaces = utils.AddCurrentUserIsCollaboratorToSpaces(spaces, store.state.currentUser)
 }, 350, { leading: true })
@@ -294,28 +332,13 @@ const updateWithExistingRemoteSpaces = (cacheSpaces) => {
   updateCachedSpaces()
   return spaces
 }
-const sortSpacesByEditedOrCreatedAt = (spaces) => {
-  spaces = spaces.map(space => {
-    space.editedAt = space.editedAt || space.createdAt
-    return space
-  })
-  const sortedSpaces = spaces.sort((a, b) => {
-    const bEditedAt = dayjs(b.editedAt).unix()
-    const aEditedAt = dayjs(a.editedAt).unix()
-    return bEditedAt - aEditedAt
-  })
-  return sortedSpaces
-}
 const updateWithRemoteSpaces = async () => {
   state.isLoadingRemoteSpaces = true
   state.remoteSpaces = await store.dispatch('api/getUserSpaces')
   state.isLoadingRemoteSpaces = false
   if (!state.remoteSpaces) { return }
   removeRemovedCachedSpaces(state.remoteSpaces)
-  sortSpacesByEditedOrCreatedAt(state.remoteSpaces)
-  let spaces = prependFavoriteSpaces(state.remoteSpaces)
-  spaces = prependInboxSpace(spaces)
-  state.spaces = spaces
+  state.spaces = state.remoteSpaces
   updateCachedSpaces()
 }
 const updateCachedSpaces = () => {
