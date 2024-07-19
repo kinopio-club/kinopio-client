@@ -474,6 +474,10 @@ const updatePreviousResultItem = () => {
 
 // position and dimensions
 
+const updateDimensionsAndPaths = () => {
+  if (store.state.isLoadingSpace) { return }
+  store.commit('triggerUpdateCardDimensionsAndPaths', props.card.id)
+}
 const checkIfShouldUpdateDimensions = () => {
   if (utils.isMissingDimensions(props.card)) {
     store.dispatch('currentCards/updateDimensions', { cards: [props.card] })
@@ -1952,7 +1956,7 @@ article.card-wrap#card(
     Frames(:card="card")
 
     template(v-if="!isComment")
-      ImageOrVideo(:isSelectedOrDragging="isSelectedOrDragging" :pendingUploadDataUrl="pendingUploadDataUrl" :image="state.formats.image" :video="state.formats.video")
+      ImageOrVideo(:isSelectedOrDragging="isSelectedOrDragging" :pendingUploadDataUrl="pendingUploadDataUrl" :image="state.formats.image" :video="state.formats.video" @loadSuccess="updateDimensionsAndPaths")
 
     TiltResize(:card="card" :visible="tiltResizeIsVisible")
 
