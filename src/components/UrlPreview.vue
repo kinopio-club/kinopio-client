@@ -111,18 +111,7 @@ const showAll = () => {
     shouldHideUrlPreviewInfo: false,
     shouldHideUrlPreviewImage: false
   }
-  store.dispatch('currentCards/update', card)
-}
-
-// toggle show
-
-const updatePaths = async () => {
-  // similar to CardDetails.updateDimensionsAndPathsDebounced
-  await nextTick()
-  store.dispatch('currentCards/updateDimensions', { cards: [props.card] })
-  await nextTick()
-  await nextTick()
-  store.dispatch('currentConnections/updatePaths', { cardId: props.card.id })
+  store.dispatch('currentCards/update', { card })
 }
 const showImage = () => {
   const card = {
@@ -131,8 +120,7 @@ const showImage = () => {
     shouldHideUrlPreviewInfo: true,
     shouldHideUrlPreviewImage: false
   }
-  store.dispatch('currentCards/update', card)
-  updatePaths()
+  store.dispatch('currentCards/update', { card })
 }
 const showInfo = () => {
   const card = {
@@ -141,8 +129,7 @@ const showInfo = () => {
     shouldHideUrlPreviewInfo: false,
     shouldHideUrlPreviewImage: true
   }
-  store.dispatch('currentCards/update', card)
-  updatePaths()
+  store.dispatch('currentCards/update', { card })
 }
 const showNone = async () => {
   const card = {
@@ -151,9 +138,8 @@ const showNone = async () => {
     shouldHideUrlPreviewInfo: false,
     shouldHideUrlPreviewImage: false
   }
-  store.dispatch('currentCards/update', card)
+  store.dispatch('currentCards/update', { card })
   store.commit('removeUrlPreviewLoadingForCardIds', props.card.id)
-  updatePaths()
 }
 </script>
 

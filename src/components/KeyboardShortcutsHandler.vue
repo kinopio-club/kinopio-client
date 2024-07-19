@@ -808,7 +808,8 @@ const toggleLockCards = () => {
   const lockedCards = cards.filter(card => card.isLocked)
   const shouldLock = cards.length !== lockedCards.length
   cards.forEach(card => {
-    store.dispatch('currentCards/update', { id: card.id, isLocked: shouldLock })
+    const update = { id: card.id, isLocked: shouldLock }
+    store.dispatch('currentCards/update', { card: update })
   })
 }
 </script>

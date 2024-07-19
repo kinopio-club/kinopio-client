@@ -69,10 +69,11 @@ const unlockCard = (event) => {
     return
   }
   store.commit('currentUserIsDraggingCard', false)
-  store.dispatch('currentCards/update', {
+  const update = {
     id: props.card.id,
     isLocked: false
-  })
+  }
+  store.dispatch('currentCards/update', { card: update })
 }
 
 </script>

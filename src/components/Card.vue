@@ -474,6 +474,10 @@ const updatePreviousResultItem = () => {
 
 // position and dimensions
 
+const updateDimensionsAndPaths = () => {
+  if (store.state.isLoadingSpace) { return }
+  store.commit('triggerUpdateCardDimensionsAndPaths', props.card.id)
+}
 const checkIfShouldUpdateDimensions = () => {
   if (utils.isMissingDimensions(props.card)) {
     store.dispatch('currentCards/updateDimensions', { cards: [props.card] })
@@ -887,10 +891,11 @@ const addFile = (file) => {
     name = `${checkbox} ${name}`
   }
   // update name
-  store.dispatch('currentCards/update', {
+  const update = {
     id: props.card.id,
     name: utils.trim(name)
-  })
+  }
+  store.dispatch('currentCards/update', { card: update })
   store.commit('triggerUpdateHeaderAndFooterPosition')
 }
 const clearErrors = () => {
@@ -1110,10 +1115,11 @@ const updateUrlPreviewOnload = async () => {
   if (!props.card.shouldUpdateUrlPreview) { return }
   updateMediaUrls()
   const isUpdatedSuccess = await updateUrlPreview()
-  store.dispatch('currentCards/update', {
+  const update = {
     id: props.card.id,
     shouldUpdateUrlPreview: false
-  })
+  }
+  store.dispatch('currentCards/update', { card: update })
   if (isUpdatedSuccess) {
     store.commit('triggerUpdateUrlPreviewComplete', props.card.id)
   }
@@ -1127,10 +1133,11 @@ const updateUrlPreview = () => {
   const isOffline = !store.state.isOnline
   if (preventUpdatePrevPreview.value) { return }
   if (isOffline) {
-    store.dispatch('currentCards/update', {
+    const update = {
       id: props.card.id,
       shouldUpdateUrlPreview: true
-    })
+    }
+    store.dispatch('currentCards/update', { card: update })
   } else {
     updateUrlPreviewOnline()
   }
@@ -1170,15 +1177,16 @@ const updateUrlPreviewSuccess = (url, data) => {
     return
   }
   data.name = utils.addHiddenQueryStringToURLs(data.name)
-  store.dispatch('currentCards/update', data)
+  store.dispatch('currentCards/update', { card: data })
   store.commit('removeUrlPreviewLoadingForCardIds', cardId)
   store.dispatch('api/addToQueue', { name: 'updateUrlPreviewImage', body: data })
 }
 const retryUrlPreview = () => {
-  store.dispatch('currentCards/update', {
+  const update = {
     id: props.card.id,
     shouldUpdateUrlPreview: true
-  })
+  }
+  store.dispatch('currentCards/update', { card: update })
   updateUrlPreview()
 }
 const shouldUpdateUrlPreview = (url) => {
@@ -1212,7 +1220,7 @@ const updateUrlPreviewErrorUrl = (url) => {
     urlPreviewUrl: url,
     name: props.card.name
   }
-  store.dispatch('currentCards/update', update)
+  store.dispatch('currentCards/update', { card: update })
 }
 
 // drag cards
@@ -1790,10 +1798,11 @@ const unlockCard = (event) => {
     return
   }
   store.commit('currentUserIsDraggingCard', false)
-  store.dispatch('currentCards/update', {
+  const update = {
     id: props.card.id,
     isLocked: false
-  })
+  }
+  store.dispatch('currentCards/update', { card: update })
 }
 const lockingFrameStyle = computed(() => {
   const initialPadding = 65 // matches initialLockCircleRadius in magicPaint
@@ -1825,7 +1834,7 @@ const updateOtherItems = () => {
       linkToSpaceId: null,
       linkToCardId: null
     }
-    store.dispatch('currentCards/update', update)
+    store.dispatch('currentCards/update', { card: update })
     return
   }
   if (!url) { return }
@@ -1846,7 +1855,7 @@ const updateOtherSpaceOrCardItems = (url) => {
     linkToCardId: cardId,
     linkToSpaceCollaboratorKey: null
   }
-  store.dispatch('currentCards/update', update)
+  store.dispatch('currentCards/update', { card: update })
   store.dispatch('currentSpace/updateOtherItems', { spaceId, cardId })
 }
 const updateOtherInviteItems = (url) => {
@@ -1859,7 +1868,7 @@ const updateOtherInviteItems = (url) => {
     linkToCardId: null,
     linkToSpaceCollaboratorKey: collaboratorKey
   }
-  store.dispatch('currentCards/update', update)
+  store.dispatch('currentCards/update', { card: update })
   store.dispatch('currentSpace/updateOtherItems', { spaceId, collaboratorKey })
 }
 
@@ -1947,7 +1956,7 @@ article.card-wrap#card(
     Frames(:card="card")
 
     template(v-if="!isComment")
-      ImageOrVideo(:isSelectedOrDragging="isSelectedOrDragging" :pendingUploadDataUrl="pendingUploadDataUrl" :image="state.formats.image" :video="state.formats.video")
+      ImageOrVideo(:isSelectedOrDragging="isSelectedOrDragging" :pendingUploadDataUrl="pendingUploadDataUrl" :image="state.formats.image" :video="state.formats.video" @loadSuccess="updateDimensionsAndPaths")
 
     TiltResize(:card="card" :visible="tiltResizeIsVisible")
 

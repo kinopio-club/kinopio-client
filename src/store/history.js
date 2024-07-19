@@ -220,7 +220,7 @@ const self = {
         switch (action) {
           case 'cardUpdated':
             card = item.prev
-            context.dispatch('currentCards/update', card, { root: true })
+            context.dispatch('currentCards/update', { card }, { root: true })
             nextTick(() => {
               context.dispatch('currentCards/resetDimensions', { cardId: card.id }, { root: true })
               context.dispatch('currentConnections/updatePaths', { cardId: card.id }, { root: true })
@@ -290,7 +290,7 @@ const self = {
         switch (action) {
           case 'cardUpdated':
             card = item.new
-            context.dispatch('currentCards/update', card, { root: true })
+            context.dispatch('currentCards/update', { card }, { root: true })
             // nextTick(() => {
             //   context.dispatch('currentCards/resetDimensions', { cardId: card.id }, { root: true })
             //   context.dispatch('currentConnections/updatePaths', { cardId: card.id }, { root: true })

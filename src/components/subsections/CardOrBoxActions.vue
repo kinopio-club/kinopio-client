@@ -418,7 +418,7 @@ const toggleIsComment = async () => {
     if (!card.name) {
       delete card.name
     }
-    store.dispatch('currentCards/update', card)
+    store.dispatch('currentCards/update', { card })
   })
   await nextTick()
   await updateCardDimensions()
@@ -449,7 +449,7 @@ const toggleCounterIsVisible = () => {
       counterIsVisible,
       counterValue: card.counterValue || 1
     }
-    store.dispatch('currentCards/update', card)
+    store.dispatch('currentCards/update', { card })
   })
 }
 
@@ -467,7 +467,7 @@ const updateCard = async (card, updates) => {
   keys.forEach(key => {
     card[key] = updates[key]
   })
-  store.dispatch('currentCards/update', card)
+  store.dispatch('currentCards/update', { card })
   await updateCardDimensions()
   store.dispatch('currentConnections/updatePaths', { cardId: card.id })
 }

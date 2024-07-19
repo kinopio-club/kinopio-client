@@ -636,8 +636,13 @@ const endBoxInfoInteractionTouch = (event) => {
 .box(
   :key="box.id"
   :data-box-id="box.id"
+  :data-x="normalizedBox.x"
+  :data-y="normalizedBox.y"
+  :data-resize-width="normalizedBox.resizeWidth"
+  :data-resize-height="normalizedBox.resizeHeight"
   :data-is-locked="isLocked"
   :data-is-visible-in-viewport="state.isVisibleInViewport"
+
   :style="styles"
   :class="{hover: state.isHover, active: isDragging, 'box-jiggle': shouldJiggle, 'is-resizing': isResizing}"
   ref="boxElement"

@@ -37,7 +37,7 @@ const dialogElement = ref(null)
 const nameElement = ref(null)
 
 onMounted(() => {
-  store.subscribe((mutation, state) => {
+  store.subscribe(async (mutation, state) => {
     if (mutation.type === 'triggerUnloadPage' && visible.value) {
       closeCard()
     } else if (mutation.type === 'triggerSplitCard' && visible.value) {
@@ -57,6 +57,10 @@ onMounted(() => {
       if (cardId !== card.value.id) { return }
       cancelOpening()
       updateCardName(name)
+    } else if (mutation.type === 'triggerUpdateCardDimensionsAndPaths') {
+      const cardId = mutation.payload
+      if (cardId !== card.value.id) { return }
+      await updateDimensionsAndPaths()
     }
   })
 })
@@ -192,18 +196,6 @@ const badgesRowIsVisible = computed(() => tagsInCard.value.length || isInSearchR
 const triggerUpdateHeaderAndFooterPosition = () => {
   store.commit('triggerUpdateHeaderAndFooterPosition')
 }
-const updateDimensions = async (cardId) => {
-  cardId = cardId || card.value.id
-  const item = { id: cardId }
-  await nextTick()
-  store.dispatch('currentCards/updateDimensions', { cards: [item] })
-  await nextTick()
-  await nextTick()
-}
-const updateDimensionsAndPathsDebounced = debounce(async () => {
-  await updateDimensions()
-  updatePaths()
-}, 200)
 const scrollIntoViewAndFocus = async () => {
   let behavior
   if (utils.isIPhone()) {
@@ -218,6 +210,24 @@ const scrollIntoViewAndFocus = async () => {
 const triggerUpdateMagicPaintPositionOffset = () => {
   store.commit('triggerUpdateMagicPaintPositionOffset')
   triggerUpdateHeaderAndFooterPosition()
+}
+
+// dimensions and connection paths
+
+const updateDimensions = async (cardId) => {
+  cardId = cardId || card.value.id
+  const item = { id: cardId }
+  await nextTick()
+  store.dispatch('currentCards/updateDimensions', { cards: [item] })
+  await nextTick()
+  await nextTick()
+}
+const updateDimensionsAndPathsDebounced = debounce(async () => {
+  await updateDimensionsAndPaths()
+}, 200)
+const updateDimensionsAndPaths = async () => {
+  await updateDimensions()
+  updatePaths()
 }
 
 // space
@@ -448,7 +458,7 @@ const updateCardName = async (newName) => {
     nameUpdatedAt: new Date(),
     nameUpdatedByUserId: userId
   }
-  store.dispatch('currentCards/update', item)
+  store.dispatch('currentCards/update', { card: item, shouldPreventUpdateDimensionsAndPaths: true })
   updateMediaUrls()
   updateTags()
   updateDimensionsAndPathsDebounced()
@@ -493,7 +503,6 @@ const checkboxIsChecked = computed({
     } else {
       store.dispatch('currentCards/toggleChecked', { cardId: card.value.id, value })
     }
-    updateDimensionsAndPathsDebounced()
   }
 })
 const addCheckbox = () => {
@@ -501,8 +510,7 @@ const addCheckbox = () => {
     id: card.value.id,
     name: `[] ${card.value.name}`
   }
-  store.dispatch('currentCards/update', update)
-  updateDimensionsAndPathsDebounced()
+  store.dispatch('currentCards/update', { card: update })
 }
 
 // character limit
@@ -968,8 +976,7 @@ const removeUrlPreview = async () => {
     urlPreviewIframeUrl: ''
   }
   store.commit('removeUrlPreviewLoadingForCardIds', cardId)
-  store.dispatch('currentCards/update', update)
-  updateDimensionsAndPathsDebounced()
+  store.dispatch('currentCards/update', { card: update })
 }
 
 // media
@@ -1103,7 +1110,7 @@ const addSplitCards = async (newCards) => {
       const element = document.querySelector(`article [data-card-id="${prevCard.id}"]`)
       const prevCardRect = element.getBoundingClientRect()
       newCard.y = prevCard.y + (prevCardRect.height * store.getters.spaceCounterZoomDecimal) + spaceBetweenCards
-      store.dispatch('currentCards/update', newCard)
+      store.dispatch('currentCards/update', { card: newCard })
       store.commit('triggerUpdateUrlPreview', newCard.id)
       prevCard = newCard
     }
@@ -1223,10 +1230,11 @@ const replaceSlashCommandWithSpaceUrl = async (space) => {
   await nextTick()
   focusName(position)
   store.commit('shouldPreventNextEnterKey', false)
-  store.dispatch('currentCards/update', {
+  const update = {
     id: card.value.id,
     shouldShowOtherSpacePreviewImage: true
-  })
+  }
+  store.dispatch('currentCards/update', { card: update })
   textareaSizes()
 }
 
