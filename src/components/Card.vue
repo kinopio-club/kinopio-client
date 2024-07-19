@@ -9,7 +9,7 @@ import Audio from '@/components/Audio.vue'
 import NameSegment from '@/components/NameSegment.vue'
 import UserLabelInline from '@/components/UserLabelInline.vue'
 import OtherCardPreview from '@/components/OtherCardPreview.vue'
-import ConnectorButton from '@/components/ConnectorButton.vue'
+import ItemConnectorButton from '@/components/ItemConnectorButton.vue'
 import consts from '@/consts.js'
 import postMessage from '@/postMessage.js'
 
@@ -1834,7 +1834,7 @@ article.card-wrap#card(
               button.inline-button(:style="{background: currentBackgroundColor}" :class="{'is-light-in-dark-theme': isLightInDarkTheme, 'is-dark-in-light-theme': isDarkInLightTheme}" tabindex="-1")
                 img.icon.visit.arrow-icon(src="@/assets/visit.svg")
           //- connector
-          ConnectorButton(
+          ItemConnectorButton(
             :visible="connectorIsVisible"
             :card="card"
             :currentItemConnections="state.currentCardConnections"
