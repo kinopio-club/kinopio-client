@@ -137,6 +137,7 @@ const updateSpaces = async () => {
     console.error('🚑 updateSpaces', error)
     state.error.isLoading = true
   }
+  console.log('👿 discovery spaces', state.exploreSpaces, state.followingSpaces, state.everyoneSpaces, state.error.isLoading, state.isLoadingSpaces)
   state.isLoadingSpaces = false
 }
 
