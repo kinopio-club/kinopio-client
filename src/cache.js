@@ -114,7 +114,7 @@ export default {
     })
     console.error('🍇🍇 temp logging getSpaceByName', name, spaceKeys, spaces)
     const space = spaces.find(space => space.name === name)
-    console.error('🍇🍇 spaces', spaces)
+    console.error('🍇🍇 spaces', space)
     space.clients = []
     return space
   },
