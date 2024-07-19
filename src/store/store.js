@@ -635,6 +635,7 @@ const store = createStore({
     triggerNotifyOffscreenCardCreated: (state, card) => {},
     triggerSonarPing: (state, event) => {},
     triggerUpdatePathWhileDragging: (state, connections) => {},
+    triggerUpdateCardDimensionsAndPaths: (state, cardId) => {},
 
     // Used by extensions only
 

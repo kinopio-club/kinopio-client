@@ -300,7 +300,7 @@ const currentCards = {
 
     // update
 
-    update: (context, { card }) => {
+    update: (context, { card, shouldPreventUpdateDimensionsAndPaths }) => {
       if (!card) { return }
       // prevent null position
       const keys = Object.keys(card)
@@ -322,6 +322,8 @@ const currentCards = {
         context.commit('triggerUpdateOtherCard', card.id, { root: true })
       }
       cache.updateSpace('editedByUserId', context.rootState.currentUser.id, currentSpaceId)
+      if (shouldPreventUpdateDimensionsAndPaths) { return }
+      context.commit('triggerUpdateCardDimensionsAndPaths', card.id, { root: true })
     },
     updateMultiple: (context, cards) => {
       const spaceId = context.rootState.currentSpace.id
@@ -394,7 +396,7 @@ const currentCards = {
         name,
         nameUpdatedAt: new Date()
       }
-      context.dispatch('update', { card })
+      context.dispatch('update', { card: update })
       nextTick(() => {
         context.dispatch('updateDimensions', { cards: [card] })
       })

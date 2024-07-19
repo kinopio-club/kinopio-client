@@ -37,7 +37,7 @@ const dialogElement = ref(null)
 const nameElement = ref(null)
 
 onMounted(() => {
-  store.subscribe((mutation, state) => {
+  store.subscribe(async (mutation, state) => {
     if (mutation.type === 'triggerUnloadPage' && visible.value) {
       closeCard()
     } else if (mutation.type === 'triggerSplitCard' && visible.value) {
@@ -57,6 +57,10 @@ onMounted(() => {
       if (cardId !== card.value.id) { return }
       cancelOpening()
       updateCardName(name)
+    } else if (mutation.type === 'triggerUpdateCardDimensionsAndPaths') {
+      const cardId = mutation.payload
+      if (cardId !== card.value.id) { return }
+      await updateDimensionsAndPaths()
     }
   })
 })
@@ -192,18 +196,6 @@ const badgesRowIsVisible = computed(() => tagsInCard.value.length || isInSearchR
 const triggerUpdateHeaderAndFooterPosition = () => {
   store.commit('triggerUpdateHeaderAndFooterPosition')
 }
-const updateDimensions = async (cardId) => {
-  cardId = cardId || card.value.id
-  const item = { id: cardId }
-  await nextTick()
-  store.dispatch('currentCards/updateDimensions', { cards: [item] })
-  await nextTick()
-  await nextTick()
-}
-const updateDimensionsAndPathsDebounced = debounce(async () => {
-  await updateDimensions()
-  updatePaths()
-}, 200)
 const scrollIntoViewAndFocus = async () => {
   let behavior
   if (utils.isIPhone()) {
@@ -218,6 +210,24 @@ const scrollIntoViewAndFocus = async () => {
 const triggerUpdateMagicPaintPositionOffset = () => {
   store.commit('triggerUpdateMagicPaintPositionOffset')
   triggerUpdateHeaderAndFooterPosition()
+}
+
+// dimensions and connection paths
+
+const updateDimensions = async (cardId) => {
+  cardId = cardId || card.value.id
+  const item = { id: cardId }
+  await nextTick()
+  store.dispatch('currentCards/updateDimensions', { cards: [item] })
+  await nextTick()
+  await nextTick()
+}
+const updateDimensionsAndPathsDebounced = debounce(async () => {
+  await updateDimensionsAndPaths()
+}, 200)
+const updateDimensionsAndPaths = async () => {
+  await updateDimensions()
+  updatePaths()
 }
 
 // space
@@ -448,7 +458,7 @@ const updateCardName = async (newName) => {
     nameUpdatedAt: new Date(),
     nameUpdatedByUserId: userId
   }
-  store.dispatch('currentCards/update', { card: item })
+  store.dispatch('currentCards/update', { card: item, shouldPreventUpdateDimensionsAndPaths: true })
   updateMediaUrls()
   updateTags()
   updateDimensionsAndPathsDebounced()
@@ -493,7 +503,6 @@ const checkboxIsChecked = computed({
     } else {
       store.dispatch('currentCards/toggleChecked', { cardId: card.value.id, value })
     }
-    updateDimensionsAndPathsDebounced()
   }
 })
 const addCheckbox = () => {
@@ -502,7 +511,6 @@ const addCheckbox = () => {
     name: `[] ${card.value.name}`
   }
   store.dispatch('currentCards/update', { card: update })
-  updateDimensionsAndPathsDebounced()
 }
 
 // character limit
@@ -969,7 +977,6 @@ const removeUrlPreview = async () => {
   }
   store.commit('removeUrlPreviewLoadingForCardIds', cardId)
   store.dispatch('currentCards/update', { card: update })
-  updateDimensionsAndPathsDebounced()
 }
 
 // media
