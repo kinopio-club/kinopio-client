@@ -86,9 +86,26 @@ const showAllSpaces = () => {
 }
 const updateFilter = (value) => {
   store.dispatch('currentUser/update', { dialogSpaceFilters: value })
+  if (value === 'journals') {
+    updateSortBy('createdAt')
+  } else {
+    updateSortBy('updatedAt')
+  }
 }
-const updateUserFilter = (value) => {
-  store.dispatch('currentUser/update', { dialogSpaceFilterByUser: value })
+
+// sort by
+
+const dialogSpaceFiltersSortBy = computed(() => store.state.currentUser.dialogSpaceFiltersSortBy)
+const isSortByUpdatedAt = computed(() => {
+  const value = dialogSpaceFiltersSortBy.value
+  return !value || value === 'updatedAt'
+})
+const isSortByCreatedAt = computed(() => {
+  const value = dialogSpaceFiltersSortBy.value
+  return value === 'createdAt'
+})
+const updateSortBy = (value) => {
+  store.dispatch('currentUser/update', { dialogSpaceFiltersSortBy: value })
 }
 
 // collaborators
@@ -101,6 +118,9 @@ const spaceUsers = computed(() => {
   users = uniqBy(users, 'id')
   return users
 })
+const updateUserFilter = (value) => {
+  store.dispatch('currentUser/update', { dialogSpaceFilterByUser: value })
+}
 const filterByUser = (event, user) => {
   if (user.id === dialogSpaceFilterByUser.value.id) {
     updateUserFilter({})
@@ -127,15 +147,6 @@ dialog.narrow.space-filters(v-if="props.visible" :open="props.visible" @click.le
           img.icon(v-if="!showHiddenSpace" src="@/assets/view.svg")
           img.icon(v-if="showHiddenSpace" src="@/assets/view-hidden.svg")
           span Hidden Spaces
-    //- sort by
-    .row
-      .segmented-buttons
-        button.active
-          img.icon.time(src="@/assets/time.svg")
-          span Updated
-        button
-          img.icon.time(src="@/assets/time.svg")
-          span Created
     //- types visibile
     .row
       .segmented-buttons
@@ -144,6 +155,15 @@ dialog.narrow.space-filters(v-if="props.visible" :open="props.visible" @click.le
         button(@click="showJournalsOnly" :class="{active: journalsIsActive}")
           MoonPhase(:moonPhase="state.moonPhase.name")
           span Journals
+    //- sort by
+    .row
+      .segmented-buttons
+        button(:class="{active: isSortByUpdatedAt}" @click="updateSortBy('updatedAt')")
+          img.icon.time(src="@/assets/time.svg")
+          span Updated
+        button(:class="{active: isSortByCreatedAt}" @click="updateSortBy('createdAt')")
+          img.icon.time(src="@/assets/time.svg")
+          span Created
   //- collaborators
   section.results-section.collaborators
     UserList(:users="spaceUsers" :isClickable="true" @selectUser="filterByUser" :selectedUser="dialogSpaceFilterByUser")
