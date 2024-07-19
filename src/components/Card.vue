@@ -359,6 +359,7 @@ const articleStyle = computed(() => {
   let pointerEvents = 'auto'
   if (currentCardDetailsIsVisible.value || currentCardIsBeingDragged.value) {
     z = 2147483646 // max z
+    pointerEvents = 'none'
   } else if (isLocked.value) {
     z = 0
     pointerEvents = 'none'
