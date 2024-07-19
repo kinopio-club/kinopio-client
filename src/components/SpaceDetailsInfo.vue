@@ -1,11 +1,232 @@
+<script setup>
+import { reactive, computed, onMounted, onBeforeUnmount, defineProps, defineEmits, watch, ref, nextTick } from 'vue'
+import { useStore } from 'vuex'
+
+import BackgroundPicker from '@/components/dialogs/BackgroundPicker.vue'
+import BackgroundPreview from '@/components/BackgroundPreview.vue'
+import Loader from '@/components/Loader.vue'
+import PrivacyButton from '@/components/PrivacyButton.vue'
+import templates from '@/data/templates.js'
+import ImportExport from '@/components/dialogs/ImportExport.vue'
+import ReadOnlySpaceInfoBadges from '@/components/ReadOnlySpaceInfoBadges.vue'
+import AddToExplore from '@/components/AddToExplore.vue'
+import AskToAddToExplore from '@/components/AskToAddToExplore.vue'
+import FavoriteSpaceButton from '@/components/FavoriteSpaceButton.vue'
+import cache from '@/cache.js'
+
+const store = useStore()
+
+const nameElement = ref(null)
+
+onMounted(() => {
+  store.subscribe(async (mutation) => {
+    if (mutation.type === 'triggerCloseChildDialogs') {
+      closeDialogs()
+    } else if (mutation.type === 'triggerFocusSpaceDetailsName') {
+      await nextTick()
+      await nextTick()
+      const element = nameElement.value
+      if (!element) { return }
+      element.focus()
+      element.setSelectionRange(0, element.value.length)
+    } else if (mutation.type === 'currentSpace/restoreSpace') {
+      // reset and update textareaSize
+      if (!dialogIsPinned.value) { return }
+      const element = nameElement.value
+      if (!element) { return }
+      element.style.height = 0
+      await nextTick()
+      textareaSize()
+    }
+  })
+  textareaSize()
+})
+
+const emit = defineEmits(['updateLocalSpaces', 'closeDialogs', 'updateDialogHeight', 'addSpace', 'removeSpaceId'])
+
+const props = defineProps({
+  shouldHidePin: Boolean,
+  currentSpaceIsHidden: Boolean
+})
+
+const state = reactive({
+  backgroundIsVisible: false,
+  privacyPickerIsVisible: false,
+  settingsIsVisible: false,
+  exportIsVisible: false
+})
+
+// user
+
+const currentUser = computed(() => store.state.currentUser)
+const currentUserIsSpaceCollaborator = computed(() => store.getters['currentUser/isSpaceCollaborator']())
+const isSpaceMember = computed(() => {
+  const currentSpace = store.state.currentSpace
+  return store.getters['currentUser/isSpaceMember'](currentSpace)
+})
+
+// current space
+
+const updateLocalSpaces = () => {
+  emit('updateLocalSpaces')
+}
+const currentSpace = computed(() => store.state.currentSpace)
+const isLoadingSpace = computed(() => store.state.isLoadingSpace)
+const currentSpaceIsTemplate = computed(() => {
+  const id = currentSpace.value.id
+  const templateSpaceIds = templates.spaces().map(space => space.id)
+  return templateSpaceIds.includes(id)
+})
+const currentSpaceIsUserTemplate = computed(() => currentSpace.value.isTemplate)
+const pendingUpload = computed(() => {
+  const currentSpace = store.state.currentSpace
+  const pendingUploads = store.state.upload.pendingUploads
+  return pendingUploads.find(upload => {
+    const isCurrentSpace = upload.spaceId === currentSpace.id
+    const isInProgress = upload.percentComplete < 100
+    return isCurrentSpace && isInProgress
+  })
+})
+const remotePendingUpload = computed(() => {
+  const currentSpace = store.state.currentSpace
+  let remotePendingUploads = store.state.remotePendingUploads
+  return remotePendingUploads.find(upload => {
+    const inProgress = upload.percentComplete < 100
+    const isSpace = upload.spaceId === currentSpace.id
+    return inProgress && isSpace
+  })
+})
+
+// space name
+
+const spaceName = computed({
+  get () {
+    return store.state.currentSpace.name
+  },
+  set (newName) {
+    textareaSize()
+    store.dispatch('currentSpace/updateSpace', { name: newName })
+    updateLocalSpaces()
+    store.commit('triggerUpdateWindowTitle')
+  }
+})
+const textareaSize = () => {
+  const element = nameElement.value
+  const modifier = 1
+  element.style.height = element.scrollHeight + modifier + 'px'
+}
+
+// show in explore
+
+const showInExplore = computed(() => store.state.currentSpace.showInExplore)
+const dialogIsPinned = computed(() => store.state.spaceDetailsIsPinned)
+
+// template
+
+const toggleCurrentSpaceIsUserTemplate = () => {
+  const value = !currentSpaceIsUserTemplate.value
+  store.dispatch('currentSpace/updateSpace', { isTemplate: value })
+  updateLocalSpaces()
+}
+
+// duplicate
+
+const duplicateSpace = () => {
+  store.dispatch('currentSpace/duplicateSpace')
+  updateLocalSpaces()
+}
+
+// hide
+
+const toggleHideSpace = () => {
+  const value = !props.currentSpaceIsHidden
+  store.dispatch('currentSpace/updateSpace', { isHidden: value })
+  updateLocalSpaces()
+  store.commit('notifySpaceIsHidden', value)
+}
+
+// remove
+
+const removeCurrentSpace = async () => {
+  const currentSpaceId = store.state.currentSpace.id
+  const currentUserIsSpaceCollaborator = store.getters['currentUser/isSpaceCollaborator']()
+  if (currentUserIsSpaceCollaborator) {
+    store.dispatch('currentSpace/removeCollaboratorFromSpace', store.state.currentUser)
+  } else {
+    store.dispatch('currentSpace/removeCurrentSpace')
+    store.commit('notifyCurrentSpaceIsNowRemoved', true)
+  }
+  emit('removeSpaceId', currentSpaceId)
+  changeToPrevSpace()
+  await nextTick()
+  updateLocalSpaces()
+}
+const changeToPrevSpace = () => {
+  let spaces = cache.getAllSpaces().filter(space => {
+    return store.getters['currentUser/canEditSpace'](space)
+  })
+  spaces = spaces.filter(space => space.id !== currentSpace.value.id)
+  const recentSpace = spaces[0]
+  if (store.state.prevSpaceIdInSession) {
+    store.dispatch('currentSpace/loadPrevSpaceInSession')
+  } else if (recentSpace) {
+    store.dispatch('currentSpace/changeSpace', recentSpace)
+  } else {
+    emit('addSpace')
+  }
+}
+
+// dialog
+
+const updateDialogHeight = () => {
+  emit('updateDialogHeight')
+}
+const toggleDialogIsPinned = () => {
+  const isPinned = !dialogIsPinned.value
+  store.dispatch('spaceDetailsIsPinned', isPinned)
+}
+const toggleBackgroundIsVisible = () => {
+  const isVisible = state.backgroundIsVisible
+  closeDialogsAndEmit()
+  state.backgroundIsVisible = !isVisible
+}
+const togglePrivacyPickerIsVisible = () => {
+  const isVisible = state.privacyPickerIsVisible
+  closeDialogsAndEmit()
+  state.privacyPickerIsVisible = !isVisible
+}
+const toggleSettingsIsVisible = () => {
+  const isVisible = state.settingsIsVisible
+  closeDialogsAndEmit()
+  state.settingsIsVisible = !isVisible
+  emit('updateDialogHeight')
+}
+const toggleExportIsVisible = () => {
+  const isVisible = state.exportIsVisible
+  closeDialogsAndEmit()
+  state.exportIsVisible = !isVisible
+  emit('updateDialogHeight')
+}
+const closeDialogs = () => {
+  state.backgroundIsVisible = false
+  state.privacyPickerIsVisible = false
+  state.exportIsVisible = false
+}
+const closeDialogsAndEmit = () => {
+  closeDialogs()
+  emit('closeDialogs')
+}
+const closeAllDialogs = () => {
+  store.dispatch('closeAllDialogs')
+}
+</script>
+
 <template lang="pug">
 .row.space-details-info(@click.left="closeDialogsAndEmit")
-
   //- Space Meta
-
   .row.space-info-wrap
     .button-wrap.background-preview-wrap(@click.left.stop="toggleBackgroundIsVisible")
-      BackgroundPreview(:space="currentSpace" :isButton="true" :buttonIsActive="backgroundIsVisible")
+      BackgroundPreview(:space="currentSpace" :isButton="true" :buttonIsActive="state.backgroundIsVisible")
       //- Background Upload Progress
       .uploading-container-footer(v-if="pendingUpload")
         .badge.info(:class="{absolute : pendingUpload.imageDataUrl}")
@@ -16,12 +237,12 @@
         .badge.info
           Loader(:visible="true")
           span {{remotePendingUpload.percentComplete}}%
-      BackgroundPicker(:visible="backgroundIsVisible" @updateLocalSpaces="updateLocalSpaces")
+      BackgroundPicker(:visible="state.backgroundIsVisible" @updateLocalSpaces="updateLocalSpaces")
     //- Name
-    .textarea-wrap(:class="{'full-width': shouldHidePin}")
+    .textarea-wrap(:class="{'full-width': props.shouldHidePin}")
       textarea.name(
         :readonly="!isSpaceMember"
-        ref="name"
+        ref="nameElement"
         rows="1"
         placeholder="name"
         v-model="spaceName"
@@ -31,7 +252,7 @@
         Loader(:visible="true")
 
   //- Pin Dialog
-  .title-row(v-if="!shouldHidePin")
+  .title-row(v-if="!props.shouldHidePin")
     .button-wrap.title-row-small-button-wrap(@click.left="toggleDialogIsPinned" title="Pin dialog")
       button.small-button(:class="{active: dialogIsPinned}")
         img.icon.pin(src="@/assets/pin.svg")
@@ -41,11 +262,11 @@ ReadOnlySpaceInfoBadges
 //- member options
 .row(v-if="isSpaceMember")
   //- Privacy
-  PrivacyButton(:privacyPickerIsVisible="privacyPickerIsVisible" :showShortName="true" @togglePrivacyPickerIsVisible="togglePrivacyPickerIsVisible" @closeDialogs="closeDialogs" @updateLocalSpaces="updateLocalSpaces")
+  PrivacyButton(:privacyPickerIsVisible="state.privacyPickerIsVisible" :showShortName="true" @togglePrivacyPickerIsVisible="togglePrivacyPickerIsVisible" @closeDialogs="closeDialogs" @updateLocalSpaces="updateLocalSpaces")
   FavoriteSpaceButton(@updateLocalSpaces="updateLocalSpaces")
   //- Settings
   .button-wrap
-    button(@click="toggleSettingsIsVisible" :class="{active: settingsIsVisible}")
+    button(@click="toggleSettingsIsVisible" :class="{active: state.settingsIsVisible}")
       img.icon.settings(src="@/assets/settings.svg")
       span Settings
 
@@ -53,12 +274,12 @@ ReadOnlySpaceInfoBadges
 .row(v-if="!isSpaceMember")
   FavoriteSpaceButton(@updateLocalSpaces="updateLocalSpaces")
   .button-wrap
-    button(@click="toggleSettingsIsVisible" :class="{active: settingsIsVisible}")
+    button(@click="toggleSettingsIsVisible" :class="{active: state.settingsIsVisible}")
       img.icon.settings(src="@/assets/settings.svg")
       span Settings
 
 //- Space Settings
-template(v-if="settingsIsVisible")
+template(v-if="state.settingsIsVisible")
   //- read only space settings
   section.subsection.space-settings(v-if="!isSpaceMember")
     .row(v-if="!showInExplore")
@@ -71,9 +292,9 @@ template(v-if="settingsIsVisible")
           span Duplicate
       //- Export
       .button-wrap(:class="{'dialog-is-pinned': dialogIsPinned}")
-        button(@click.left.stop="toggleExportIsVisible" :class="{ active: exportIsVisible }")
+        button(@click.left.stop="toggleExportIsVisible" :class="{ active: state.exportIsVisible }")
           span Export
-        ImportExport(:visible="exportIsVisible" :isExport="true")
+        ImportExport(:visible="state.exportIsVisible" :isExport="true")
 
   //- member space settings
   section.subsection.space-settings(v-if="isSpaceMember")
@@ -87,9 +308,9 @@ template(v-if="settingsIsVisible")
           span Mark as Template
       //- Export
       .button-wrap(:class="{'dialog-is-pinned': dialogIsPinned}")
-        button(@click.left.stop="toggleExportIsVisible" :class="{ active: exportIsVisible }")
+        button(@click.left.stop="toggleExportIsVisible" :class="{ active: state.exportIsVisible }")
           span Export
-          ImportExport(:visible="exportIsVisible" :isExport="true")
+          ImportExport(:visible="state.exportIsVisible" :isExport="true")
     .row(v-if="currentSpaceIsUserTemplate")
       //- Duplicate
       .button-wrap
@@ -108,224 +329,11 @@ template(v-if="settingsIsVisible")
               img.icon.remove(src="@/assets/remove.svg")
               span Remove
           //- Hide
-          button(@click.stop="toggleHideSpace" :class="{ active: currentSpaceIsHidden }")
-            img.icon(v-if="!currentSpaceIsHidden" src="@/assets/view.svg")
-            img.icon(v-if="currentSpaceIsHidden" src="@/assets/view-hidden.svg")
+          button(@click.stop="toggleHideSpace" :class="{ active: props.currentSpaceIsHidden }")
+            img.icon(v-if="!props.currentSpaceIsHidden" src="@/assets/view.svg")
+            img.icon(v-if="props.currentSpaceIsHidden" src="@/assets/view-hidden.svg")
             span Hide
 </template>
-
-<script>
-import BackgroundPicker from '@/components/dialogs/BackgroundPicker.vue'
-import BackgroundPreview from '@/components/BackgroundPreview.vue'
-import Loader from '@/components/Loader.vue'
-import PrivacyButton from '@/components/PrivacyButton.vue'
-import templates from '@/data/templates.js'
-import ImportExport from '@/components/dialogs/ImportExport.vue'
-import ReadOnlySpaceInfoBadges from '@/components/ReadOnlySpaceInfoBadges.vue'
-import AddToExplore from '@/components/AddToExplore.vue'
-import AskToAddToExplore from '@/components/AskToAddToExplore.vue'
-import FavoriteSpaceButton from '@/components/FavoriteSpaceButton.vue'
-import cache from '@/cache.js'
-
-export default {
-  name: 'SpaceDetailsInfo',
-  emits: ['updateLocalSpaces', 'closeDialogs', 'updateDialogHeight', 'addSpace', 'removeSpaceId'],
-  components: {
-    BackgroundPicker,
-    BackgroundPreview,
-    Loader,
-    PrivacyButton,
-    ReadOnlySpaceInfoBadges,
-    AskToAddToExplore,
-    AddToExplore,
-    ImportExport,
-    FavoriteSpaceButton
-  },
-  props: {
-    shouldHidePin: Boolean,
-    currentSpaceIsHidden: Boolean
-  },
-  mounted () {
-    this.textareaSize()
-  },
-  created () {
-    this.$store.subscribe((mutation, state) => {
-      if (mutation.type === 'triggerCloseChildDialogs') {
-        this.closeDialogs()
-      } else if (mutation.type === 'triggerFocusSpaceDetailsName') {
-        this.$nextTick(() => {
-          this.$nextTick(() => {
-            const element = this.$refs.name
-            if (!element) { return }
-            element.focus()
-            element.setSelectionRange(0, element.value.length)
-          })
-        })
-      } else if (mutation.type === 'currentSpace/restoreSpace') {
-        // reset and update textareaSize
-        if (!this.dialogIsPinned) { return }
-        const element = this.$refs.name
-        if (!element) { return }
-        element.style.height = 0
-        this.$nextTick(() => {
-          this.textareaSize()
-        })
-      }
-    })
-  },
-  data () {
-    return {
-      backgroundIsVisible: false,
-      privacyPickerIsVisible: false,
-      settingsIsVisible: false,
-      exportIsVisible: false
-    }
-  },
-  computed: {
-    isLoadingSpace () { return this.$store.state.isLoadingSpace },
-    currentSpaceIsTemplate () {
-      const id = this.currentSpace.id
-      const templateSpaceIds = templates.spaces().map(space => space.id)
-      return templateSpaceIds.includes(id)
-    },
-    currentSpaceIsUserTemplate () { return this.currentSpace.isTemplate },
-    showInExplore () { return this.$store.state.currentSpace.showInExplore },
-    spaceName: {
-      get () {
-        return this.$store.state.currentSpace.name
-      },
-      set (newName) {
-        this.textareaSize()
-        this.$store.dispatch('currentSpace/updateSpace', { name: newName })
-        this.updateLocalSpaces()
-        this.$store.commit('triggerUpdateWindowTitle')
-      }
-    },
-    currentSpace () { return this.$store.state.currentSpace },
-    currentUser () { return this.$store.state.currentUser },
-    isSpaceMember () {
-      const currentSpace = this.$store.state.currentSpace
-      return this.$store.getters['currentUser/isSpaceMember'](currentSpace)
-    },
-    pendingUpload () {
-      const currentSpace = this.$store.state.currentSpace
-      const pendingUploads = this.$store.state.upload.pendingUploads
-      return pendingUploads.find(upload => {
-        const isCurrentSpace = upload.spaceId === currentSpace.id
-        const isInProgress = upload.percentComplete < 100
-        return isCurrentSpace && isInProgress
-      })
-    },
-    remotePendingUpload () {
-      const currentSpace = this.$store.state.currentSpace
-      let remotePendingUploads = this.$store.state.remotePendingUploads
-      return remotePendingUploads.find(upload => {
-        const inProgress = upload.percentComplete < 100
-        const isSpace = upload.spaceId === currentSpace.id
-        return inProgress && isSpace
-      })
-    },
-    dialogIsPinned () { return this.$store.state.spaceDetailsIsPinned },
-    currentUserIsSpaceCollaborator () { return this.$store.getters['currentUser/isSpaceCollaborator']() }
-
-  },
-  methods: {
-    toggleCurrentSpaceIsUserTemplate () {
-      const value = !this.currentSpaceIsUserTemplate
-      this.$store.dispatch('currentSpace/updateSpace', { isTemplate: value })
-      this.updateLocalSpaces()
-    },
-    duplicateSpace () {
-      this.$store.dispatch('currentSpace/duplicateSpace')
-      this.updateLocalSpaces()
-    },
-    updateDialogHeight () {
-      this.$emit('updateDialogHeight')
-    },
-    toggleHideSpace () {
-      const value = !this.currentSpaceIsHidden
-      this.$store.dispatch('currentSpace/updateSpace', { isHidden: value })
-      this.updateLocalSpaces()
-      this.$store.commit('notifySpaceIsHidden', value)
-    },
-    removeCurrentSpace () {
-      const currentSpaceId = this.$store.state.currentSpace.id
-      const currentUserIsSpaceCollaborator = this.$store.getters['currentUser/isSpaceCollaborator']()
-      if (currentUserIsSpaceCollaborator) {
-        this.$store.dispatch('currentSpace/removeCollaboratorFromSpace', this.$store.state.currentUser)
-      } else {
-        this.$store.dispatch('currentSpace/removeCurrentSpace')
-        this.$store.commit('notifyCurrentSpaceIsNowRemoved', true)
-      }
-      this.$emit('removeSpaceId', currentSpaceId)
-      this.changeToPrevSpace()
-      this.$nextTick(() => {
-        this.updateLocalSpaces()
-      })
-    },
-    changeToPrevSpace () {
-      let spaces = cache.getAllSpaces().filter(space => {
-        return this.$store.getters['currentUser/canEditSpace'](space)
-      })
-      spaces = spaces.filter(space => space.id !== this.currentSpace.id)
-      const recentSpace = spaces[0]
-      if (this.$store.state.prevSpaceIdInSession) {
-        this.$store.dispatch('currentSpace/loadPrevSpaceInSession')
-      } else if (recentSpace) {
-        this.$store.dispatch('currentSpace/changeSpace', recentSpace)
-      } else {
-        this.$emit('addSpace')
-      }
-    },
-    textareaSize () {
-      const element = this.$refs.name
-      const modifier = 1
-      element.style.height = element.scrollHeight + modifier + 'px'
-    },
-    toggleDialogIsPinned () {
-      const isPinned = !this.dialogIsPinned
-      this.$store.dispatch('spaceDetailsIsPinned', isPinned)
-    },
-    toggleBackgroundIsVisible () {
-      const isVisible = this.backgroundIsVisible
-      this.closeDialogsAndEmit()
-      this.backgroundIsVisible = !isVisible
-    },
-    togglePrivacyPickerIsVisible () {
-      const isVisible = this.privacyPickerIsVisible
-      this.closeDialogsAndEmit()
-      this.privacyPickerIsVisible = !isVisible
-    },
-    toggleSettingsIsVisible () {
-      const isVisible = this.settingsIsVisible
-      this.closeDialogsAndEmit()
-      this.settingsIsVisible = !isVisible
-      this.$emit('updateDialogHeight')
-    },
-    toggleExportIsVisible () {
-      const isVisible = this.exportIsVisible
-      this.closeDialogsAndEmit()
-      this.exportIsVisible = !isVisible
-      this.$emit('updateDialogHeight')
-    },
-    closeDialogs () {
-      this.backgroundIsVisible = false
-      this.privacyPickerIsVisible = false
-      this.exportIsVisible = false
-    },
-    closeDialogsAndEmit () {
-      this.closeDialogs()
-      this.$emit('closeDialogs')
-    },
-    updateLocalSpaces () {
-      this.$emit('updateLocalSpaces')
-    },
-    closeAllDialogs () {
-      this.$store.dispatch('closeAllDialogs')
-    }
-  }
-}
-</script>
 
 <style lang="stylus">
 .space-details-info
@@ -403,5 +411,4 @@ export default {
 .dialog-is-pinned
   dialog.import-export
     right -50px
-
 </style>
