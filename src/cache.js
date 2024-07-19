@@ -109,11 +109,12 @@ export default {
   getSpaceByName (name) {
     const keys = Object.keys(window.localStorage)
     const spaceKeys = keys.filter(key => key.startsWith('space-'))
-    console.error('🍇🍇 temp logging getSpaceByName', name, spaceKeys)
     const spaces = spaceKeys.map(key => {
       return this.getLocal(key)
     })
+    console.error('🍇🍇 temp logging getSpaceByName', name, spaceKeys, spaces)
     const space = spaces.find(space => space.name === name)
+    console.error('🍇🍇 spaces', spaces)
     space.clients = []
     return space
   },
