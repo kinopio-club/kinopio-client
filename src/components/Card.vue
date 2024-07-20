@@ -83,6 +83,7 @@ onMounted(async () => {
   await updateUrlPreviewOnload()
   checkIfShouldUpdateIframeUrl()
   initViewportObserver()
+  updateCurrentCardConnections()
 })
 
 onBeforeUnmount(() => {
