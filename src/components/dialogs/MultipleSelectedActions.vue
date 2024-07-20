@@ -49,7 +49,6 @@ watch(() => visible.value, async (value, prevValue) => {
     await nextTick()
     store.commit('pinchCounterZoomDecimal', utils.pinchCounterZoomDecimal())
     checkIsCardsConnected()
-    store.dispatch('currentConnections/removeUnusedTypes')
     scrollIntoView()
     closeDialogs()
     store.dispatch('history/snapshots')
