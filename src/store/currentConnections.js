@@ -203,7 +203,7 @@ export default {
         id: nanoid(),
         name: `Connection Type ${context.state.typeIds.length + 1}`,
         color,
-        spaceId: context.state.id
+        spaceId: context.rootState.currentSpace.id
       }
       if (type) {
         const keys = Object.keys(type)
