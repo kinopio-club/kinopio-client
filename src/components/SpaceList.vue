@@ -398,6 +398,8 @@ span.space-list-wrap
             :class="{ active: spaceIsActive(space), hover: state.focusOnId === space.id }"
             tabindex="0"
             @keyup.enter="selectSpace(null, space)"
+            :data-created-at="space.createdAt"
+            :data-updated-at="space.updatedAt"
           )
             Loader(:visible="isLoadingSpace(space)")
             //- Users
