@@ -1460,6 +1460,7 @@ const updateLockedItemButtonPosition = async () => {
 // mouse hover handlers
 
 const handleMouseEnter = () => {
+  if (currentCardIsBeingDragged.value) { return }
   initStickToCursor()
   store.commit('currentUserIsHoveringOverCardId', props.card.id)
   updateCurrentCardConnections()
