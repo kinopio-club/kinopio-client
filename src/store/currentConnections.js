@@ -433,7 +433,7 @@ export default {
         let end = connection.endItemId === cardId
         return start || end
       })
-      connections = getters.connectionsWithValidCards(connections)
+      connections = getters.connectionsWithValidItems(connections)
       return connections
     },
     // TODO byItemId
@@ -451,7 +451,7 @@ export default {
       let connections = getters.byCardId(cardId)
       let types = getters.allTypes
       types = types.filter(type => Boolean(type))
-      connections = getters.connectionsWithValidCards(connections)
+      connections = getters.connectionsWithValidItems(connections)
       const typeIds = connections.map(connection => connection.connectionTypeId)
       return types.filter(type => {
         return typeIds.includes(type.id)
@@ -472,11 +472,11 @@ export default {
       })
       return paths
     },
-    connectionsWithValidCards: (state, getters, rootState, rootGetters) => (connections) => {
+    connectionsWithValidItems: (state, getters, rootState, rootGetters) => (connections) => {
       connections = connections.filter(connection => {
-        const startCard = rootGetters['currentCards/byId'](connection.startItemId)
-        const endCard = rootGetters['currentCards/byId'](connection.endItemId)
-        return startCard && endCard
+        const startItem = rootGetters['currentCards/byId'](connection.startItemId) || rootGetters['currentBoxes/byId'](connection.startItemId)
+        const endItem = rootGetters['currentCards/byId'](connection.endItemId) || rootGetters['currentBoxes/byId'](connection.endItemId)
+        return startItem && endItem
       })
       return connections
     },
