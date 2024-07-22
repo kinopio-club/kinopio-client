@@ -943,14 +943,6 @@ const updateRemoteConnections = () => {
     pointer-events all
     button
       z-index 1
-  .is-light-in-dark-theme
-    border-color var(--primary-on-light-background)
-    .connector-icon
-      filter none
-  .is-dark-in-light-theme
-    border-color var(--primary-on-dark-background)
-    .connector-icon
-      filter invert()
 
   .snap-guide
     --snap-guide-width 6px

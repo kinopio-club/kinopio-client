@@ -2105,13 +2105,11 @@ article.card-wrap
 
     .is-light-in-dark-theme
       border-color var(--primary-on-light-background)
-      .icon,
-      .connector-icon
+      .icon
         filter none
     .is-dark-in-light-theme
       border-color var(--primary-on-dark-background)
-      .icon,
-      .connector-icon
+      .icon
         filter invert()
 
     .uploading-container

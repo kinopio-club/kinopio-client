@@ -299,9 +299,19 @@ const handleMouseLeaveConnector = () => {
     height 14px
     padding 0
     border 1px solid var(--primary-border)
+
   .connector-icon
     position absolute
     left -1px
     top -1px
     width 9.5px
+
+  .is-light-in-dark-theme
+    border-color var(--primary-on-light-background)
+    .connector-icon
+      filter none
+  .is-dark-in-light-theme
+    border-color var(--primary-on-dark-background)
+    .connector-icon
+      filter invert()
 </style>
