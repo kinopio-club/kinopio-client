@@ -79,7 +79,7 @@ const unlockCard = (event) => {
 </script>
 
 <template lang="pug">
-.card-unlock-button.inline-button-wrap(:style="positionStyles" @mouseup.left="unlockCard" @touchend="unlockCard" :data-card-id="card.id")
+.card-unlock-button.inline-button-wrap.item-unlock-button(:style="positionStyles" @mouseup.left="unlockCard" @touchend="unlockCard" :data-item-id="card.id")
   button.inline-button(tabindex="-1" :style="backgroundStyles" :class="{'is-light-in-dark-theme': isLightInDarkTheme, 'is-dark-in-light-theme': isDarkInLightTheme}")
     .connected-colors
       template(v-for="type in connectionTypes" :key="type.id")

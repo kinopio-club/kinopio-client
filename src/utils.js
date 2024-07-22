@@ -1141,11 +1141,11 @@ export default {
   },
   connectorCoords (itemId) {
     const itemConnector = document.querySelector(`.connector[data-item-id="${itemId}"] button`)
-    const cardUnlockButton = document.querySelector(`.card-unlock-button[data-card-id="${itemId}"] button`)
-    const element = itemConnector || cardUnlockButton
+    const itemUnlockButton = document.querySelector(`.item-unlock-button[data-item-id="${itemId}"] button`)
+    const element = itemConnector || itemUnlockButton
     if (!element) { return }
-    const cardElement = document.querySelector(`article#card[data-card-id="${itemId}"]`)
-    if (!cardElement.dataset.shouldRender) { return }
+    const itemElement = this.itemElementDimensions({ id: itemId })
+    if (!itemElement.shouldRender) { return }
     let rect = element.getBoundingClientRect()
     rect.x = rect.x + window.scrollX
     rect.y = rect.y + window.scrollY
