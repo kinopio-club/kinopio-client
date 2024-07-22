@@ -76,7 +76,7 @@ const hasConnections = computed(() => {
 })
 const createCurrentConnection = (event) => {
   const cursor = utils.cursorPositionInViewport(event)
-  const multipleItemsSelectedIds = store.state.multipleCardsSelectedIds // TODO concat multipleBoxesSelectedIds
+  const multipleItemsSelectedIds = store.state.multipleCardsSelectedIds.concat(store.state.multipleBoxesSelectedIds)
   let itemIds = [item.value.id]
   if (multipleItemsSelectedIds.length) {
     itemIds = multipleItemsSelectedIds
