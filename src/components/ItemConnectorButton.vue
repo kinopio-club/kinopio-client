@@ -134,11 +134,10 @@ const connectionColor = (connection) => {
   const connectionType = connectedConnectionTypeById(connection.connectionTypeId)
   return connectionType?.color
 }
-// another card that is connected to this one is being edited
+// another item that is connected to this one is being edited
 const connectedToAnotherItemDetailsVisibleColor = computed(() => {
   if (props.parentDetailsIsVisible) { return }
-  const anotherItemId = store.state.cardDetailsIsVisibleForCardId
-  // TODO boxDetailsIsVisibleForBoxId
+  const anotherItemId = store.state.cardDetailsIsVisibleForCardId || store.state.boxDetailsIsVisibleForBoxId
   if (!anotherItemId) { return }
   const connection = connectionFromAnotherItemConnectedToCurrentItem(anotherItemId)
   return connectionColor(connection)
@@ -148,9 +147,8 @@ const connectedToAnotherItemBeingDraggedColor = computed(() => {
   const isDraggingCard = store.state.currentUserIsDraggingCard
   const isDraggingBox = store.state.currentUserIsDraggingBox
   if (!isDraggingCard && !isDraggingBox) { return }
-  const currentDraggingCardId = store.state.currentDraggingCardId
-  // TODO currentDraggingBoxId
-  const connection = connectionFromAnotherItemConnectedToCurrentItem(currentDraggingCardId)
+  const itemId = store.state.currentDraggingCardId || store.state.currentDraggingBoxId
+  const connection = connectionFromAnotherItemConnectedToCurrentItem(itemId)
   const color = connectionColor(connection)
   if (color) {
     emit('shouldRenderParent', true)
