@@ -83,7 +83,7 @@ onMounted(async () => {
   await updateUrlPreviewOnload()
   checkIfShouldUpdateIframeUrl()
   initViewportObserver()
-  updateCurrentCardConnections()
+  updateCurrentConnections()
 })
 
 onBeforeUnmount(() => {
@@ -126,7 +126,7 @@ const state = reactive({
   defaultBackgroundColor: '#e3e3e3',
   pathIsUpdated: false,
   isVisibleInViewport: false,
-  currentCardConnections: [],
+  currentConnections: [],
   shouldRenderParent: false
 })
 watch(() => state.linkToPreview, (value, prevValue) => {
@@ -1464,7 +1464,7 @@ const handleMouseEnter = () => {
   if (currentCardIsBeingDragged.value) { return }
   initStickToCursor()
   store.commit('currentUserIsHoveringOverCardId', props.card.id)
-  updateCurrentCardConnections()
+  updateCurrentConnections()
 }
 const handleMouseLeave = () => {
   unstickToCursor()
@@ -1476,8 +1476,8 @@ const handleMouseEnterCheckbox = () => {
 const handleMouseLeaveCheckbox = () => {
   store.commit('currentUserIsHoveringOverCheckboxCardId', '')
 }
-const updateCurrentCardConnections = () => {
-  state.currentCardConnections = store.getters['currentConnections/byCardId'](props.card.id)
+const updateCurrentConnections = () => {
+  state.currentConnections = store.getters['currentConnections/byCardId'](props.card.id)
 }
 
 // sticky
@@ -1839,7 +1839,7 @@ article.card-wrap#card(
           ItemConnectorButton(
             :visible="connectorIsVisible"
             :card="card"
-            :itemConnections="state.currentCardConnections"
+            :itemConnections="state.currentConnections"
             :isConnectingTo="isConnectingTo"
             :isConnectingFrom="isConnectingFrom"
             :isVisibleInViewport="state.isVisibleInViewport"

@@ -26,6 +26,7 @@ const boxElement = ref(null)
 
 onMounted(() => {
   initViewportObserver()
+  updateCurrentConnections()
 })
 onUpdated(() => {
   initViewportObserver()
@@ -42,7 +43,8 @@ const state = reactive({
   isLocking: false,
   lockingPercent: 0,
   lockingAlpha: 0,
-  isVisibleInViewport: false
+  isVisibleInViewport: false,
+  currentConnections: []
 })
 
 const spaceCounterZoomDecimal = computed(() => store.getters.spaceCounterZoomDecimal)
@@ -630,6 +632,22 @@ const endBoxInfoInteractionTouch = (event) => {
     endBoxInfoInteraction(event)
   }
 }
+
+// mouse hover handlers
+
+const handleMouseEnter = () => {
+  if (isDragging.value) { return }
+  store.commit('currentUserIsHoveringOverBoxId', props.box.id)
+  updateCurrentConnections()
+}
+const handleMouseLeave = () => {
+  store.commit('currentUserIsHoveringOverBoxId', '')
+}
+const updateCurrentConnections = () => {
+  // TODO store.getters['currentConnections/byCardId'](props.card.id) byItemId
+  state.currentConnections = []
+}
+
 </script>
 
 <template lang="pug">

@@ -182,8 +182,7 @@ const currentUserIsMultipleSelectedConnectionColor = computed(() => {
 })
 // this item, or another item connected to this item, is being hovered over
 const currentUserIsHoveringOverConnectedItemColor = computed(() => {
-  const itemId = store.state.currentUserIsHoveringOverCardId
-  // TODO add new state store.state.currentUserIsHoveringOverBoxId
+  const itemId = store.state.currentUserIsHoveringOverCardId || store.state.currentUserIsHoveringOverBoxId
   const connection = connectionFromAnotherItemConnectedToCurrentItem(itemId)
   return connectionColor(connection)
 })
