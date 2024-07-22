@@ -183,11 +183,7 @@ const updateDefaultBackgroundColor = (color) => {
   state.defaultBackgroundColor = color
 }
 const currentBackgroundColor = computed(() => {
-  let background = 'transparent'
-  if (isImageCard.value) {
-    background = props.card.backgroundColor
-  }
-  return selectedColor.value || remoteSelectedColor.value || background
+  return selectedColor.value || remoteSelectedColor.value || props.card.backgroundColor
 })
 const backgroundColor = computed(() => {
   let nameColor

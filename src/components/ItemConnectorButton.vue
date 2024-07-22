@@ -18,7 +18,8 @@ const props = defineProps({
   isVisibleInViewport: Boolean,
   defaultBackgroundColor: String,
   currentBackgroundColor: String,
-  parentDetailsIsVisible: Boolean
+  parentDetailsIsVisible: Boolean,
+  backgroundIsTransparent: Boolean
 })
 
 const item = computed(() => props.card || props.box)
@@ -27,7 +28,7 @@ const item = computed(() => props.card || props.box)
 
 const canEditSpace = computed(() => store.getters['currentUser/canEditSpace']())
 const backgroundColorIsDark = computed(() => {
-  const color = item.value.backgroundColor || props.defaultBackgroundColor
+  const color = props.currentBackgroundColor || props.defaultBackgroundColor
   return utils.colorIsDark(color)
 })
 
@@ -114,6 +115,7 @@ const isConnectorLightInDarkTheme = computed(() => {
 const connectorButtonBackground = computed(() => {
   if (store.state.currentUserIsDraggingCard) { return }
   if (hasConnections.value || props.isConnectingFrom || props.isConnectingTo) { return }
+  if (props.backgroundIsTransparent) { return }
   return props.currentBackgroundColor
 })
 const connectorGlowStyle = computed(() => {

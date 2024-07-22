@@ -5,6 +5,7 @@ import { useStore } from 'vuex'
 import utils from '@/utils.js'
 import fonts from '@/data/fonts.js'
 import ItemConnectorButton from '@/components/ItemConnectorButton.vue'
+import postMessage from '@/postMessage.js'
 
 import randomColor from 'randomcolor'
 const store = useStore()
@@ -708,9 +709,6 @@ const updateRemoteConnections = () => {
     state.isRemoteConnecting = false
   }
 }
-const connectorBackgroundColor = () => {
-  return 'transparent'
-}
 </script>
 
 <template lang="pug">
@@ -772,7 +770,8 @@ const connectorBackgroundColor = () => {
     :isVisibleInViewport="state.isVisibleInViewport"
     :isRemoteConnecting="state.isRemoteConnecting"
     :remoteConnectionColor="state.remoteConnectionColor"
-    :currentBackgroundColor="connectorBackgroundColor"
+    :currentBackgroundColor="color"
+    :backgroundIsTransparent="true"
     :parentDetailsIsVisible="currentBoxDetailsIsVisible"
     @shouldRenderParent="updateShouldRenderParent"
   )
@@ -944,6 +943,14 @@ const connectorBackgroundColor = () => {
     pointer-events all
     button
       z-index 1
+  .is-light-in-dark-theme
+    border-color var(--primary-on-light-background)
+    .connector-icon
+      filter none
+  .is-dark-in-light-theme
+    border-color var(--primary-on-dark-background)
+    .connector-icon
+      filter invert()
 
   .snap-guide
     --snap-guide-width 6px
