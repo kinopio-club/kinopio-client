@@ -40,26 +40,26 @@ const isLightInDarkTheme = computed(() => !backgroundColorIsDark.value && isThem
 // connections
 
 const currentConnectionColor = computed(() => store.state.currentConnectionColor)
-const connectionFromAnotherCardConnectedToCurrentCard = (anotherCardId) => {
+const connectionFromAnotherItemConnectedToCurrentItem = (anotherItemId) => {
   return props.itemConnections.find(connection => {
-    const isConnectedToStart = connection.startCardId === anotherCardId
-    const isConnectedToEnd = connection.endCardId === anotherCardId
+    const isConnectedToStart = connection.startCardId === anotherItemId
+    const isConnectedToEnd = connection.endCardId === anotherItemId
     return isConnectedToStart || isConnectedToEnd
   })
 }
-const connectionsFromMultipleCardsConnectedToCurrentCard = (otherCardIds) => {
-  let currentCardConnection
-  otherCardIds.find(anotherCardId => {
+const connectionsFromMultipleItemsConnectedToCurrentItem = (otherItemIds) => {
+  let currentItemConnection
+  otherItemIds.find(anotherItemId => {
     return props.itemConnections.find(connection => {
-      const isConnectedToStart = connection.startCardId === anotherCardId
-      const isConnectedToEnd = connection.endCardId === anotherCardId
+      const isConnectedToStart = connection.startCardId === anotherItemId
+      const isConnectedToEnd = connection.endCardId === anotherItemId
       if (isConnectedToStart || isConnectedToEnd) {
-        currentCardConnection = connection
+        currentItemConnection = connection
         return true
       }
     })
   })
-  return currentCardConnection
+  return currentItemConnection
 }
 const connectedConnectionTypes = computed(() => store.getters['currentConnections/typesByCardId'](item.value.id))
 const connectedConnectionTypeById = (typeId) => {
@@ -70,26 +70,18 @@ const connectionTypeColorisDark = computed(() => {
   if (!type) { return }
   return utils.colorIsDark(type.color)
 })
-const currentUserIsDraggingLabelConnectedToCard = computed(() => {
-  const connectionId = store.state.currentUserIsDraggingConnectionIdLabel
-  if (!connectionId) { return }
-  const connection = store.getters['currentConnections/byId'](connectionId)
-  if (!connection) { return }
-  const isConnected = connection.startCardId === item.value.id || connection.endCardId === item.value.id
-  return isConnected
-})
 const hasConnections = computed(() => {
   const connections = store.getters['currentConnections/byCardId'](item.value.id)
   return Boolean(connections.length)
 })
 const createCurrentConnection = (event) => {
   const cursor = utils.cursorPositionInViewport(event)
-  const multipleCardsSelectedIds = store.state.multipleCardsSelectedIds
-  let cardIds = [item.value.id]
-  if (multipleCardsSelectedIds.length) {
-    cardIds = multipleCardsSelectedIds
+  const multipleItemsSelectedIds = store.state.multipleCardsSelectedIds // TODO concat multipleBoxesSelectedIds
+  let itemIds = [item.value.id]
+  if (multipleItemsSelectedIds.length) {
+    itemIds = multipleItemsSelectedIds
   }
-  store.commit('currentConnectionStartCardIds', cardIds)
+  store.commit('currentConnectionStartItemIds', itemIds)
   store.commit('currentConnectionCursorStart', cursor)
 }
 const addConnectionType = (event) => {
@@ -127,13 +119,13 @@ const connectorButtonBackground = computed(() => {
 const connectorGlowStyle = computed(() => {
   if (!props.isVisibleInViewport) { return }
   if (!utils.arrayHasItems(connectedConnectionTypes.value) && !store.state.currentUserIsDrawingConnection) { return } // cards with no connections
-  const color = connectedToAnotherCardDetailsVisibleColor.value ||
-    connectedToAnotherCardBeingDraggedColor.value ||
+  const color = connectedToAnotherItemDetailsVisibleColor.value ||
+    connectedToAnotherItemBeingDraggedColor.value ||
     connectedToConnectionDetailsIsVisibleColor.value ||
     currentUserIsHoveringOverConnectionColor.value ||
     currentUserIsMultipleSelectedConnectionColor.value ||
-    currentUserIsHoveringOverConnectedCardColor.value ||
-    currentUserIsMultipleSelectedCardColor.value ||
+    currentUserIsHoveringOverConnectedItemColor.value ||
+    currentUserIsMultipleSelectedItemColor.value ||
     currentUserIsCreatingConnectionColor.value
   return { background: color }
 })
@@ -143,19 +135,22 @@ const connectionColor = (connection) => {
   return connectionType?.color
 }
 // another card that is connected to this one is being edited
-const connectedToAnotherCardDetailsVisibleColor = computed(() => {
+const connectedToAnotherItemDetailsVisibleColor = computed(() => {
   if (props.parentDetailsIsVisible) { return }
-  const anotherCardId = store.state.cardDetailsIsVisibleForCardId
-  if (!anotherCardId) { return }
-  const connection = connectionFromAnotherCardConnectedToCurrentCard(anotherCardId)
+  const anotherItemId = store.state.cardDetailsIsVisibleForCardId
+  // TODO boxDetailsIsVisibleForBoxId
+  if (!anotherItemId) { return }
+  const connection = connectionFromAnotherItemConnectedToCurrentItem(anotherItemId)
   return connectionColor(connection)
 })
-// another card that is connected to this one is being dragged
-const connectedToAnotherCardBeingDraggedColor = computed(() => {
+// another item that is connected to this one is being dragged
+const connectedToAnotherItemBeingDraggedColor = computed(() => {
   const isDraggingCard = store.state.currentUserIsDraggingCard
-  if (!isDraggingCard) { return }
+  const isDraggingBox = store.state.currentUserIsDraggingBox
+  if (!isDraggingCard && !isDraggingBox) { return }
   const currentDraggingCardId = store.state.currentDraggingCardId
-  const connection = connectionFromAnotherCardConnectedToCurrentCard(currentDraggingCardId)
+  // TODO currentDraggingBoxId
+  const connection = connectionFromAnotherItemConnectedToCurrentItem(currentDraggingCardId)
   const color = connectionColor(connection)
   if (color) {
     emit('shouldRenderParent', true)
@@ -164,7 +159,7 @@ const connectedToAnotherCardBeingDraggedColor = computed(() => {
   }
   return color
 })
-// a connection that is connected to this card is being edited
+// a connection that is connected to this item is being edited
 const connectedToConnectionDetailsIsVisibleColor = computed(() => {
   const connectionDetailsVisibleId = store.state.connectionDetailsIsVisibleForConnectionId
   if (!connectionDetailsVisibleId) { return }
@@ -173,35 +168,36 @@ const connectedToConnectionDetailsIsVisibleColor = computed(() => {
   const connectionType = connectedConnectionTypeById(connectionWithDetailsVisible.connectionTypeId)
   return connectionType?.color
 })
-// a connection that is connected to this card is being hovered over
+// a connection that is connected to this item is being hovered over
 const currentUserIsHoveringOverConnectionColor = computed(() => {
   const connectionId = store.state.currentUserIsHoveringOverConnectionId || store.state.currentUserIsDraggingConnectionIdLabel
-  const connection = props.itemConnections.find(currentCardConnection => currentCardConnection.id === connectionId)
+  const connection = props.itemConnections.find(currentItemConnection => currentItemConnection.id === connectionId)
   return connectionColor(connection)
 })
-// a connection that is connected to this card, is paint selected
+// a connection that is connected to this item, is paint selected
 const currentUserIsMultipleSelectedConnectionColor = computed(() => {
   const connectionIds = store.state.multipleConnectionsSelectedIds
-  const connection = props.itemConnections.find(currentCardConnection => connectionIds.includes(currentCardConnection.id))
+  const connection = props.itemConnections.find(currentItemConnection => connectionIds.includes(currentItemConnection.id))
   return connectionColor(connection)
 })
-// this card, or another card connected to this card, is being hovered over
-const currentUserIsHoveringOverConnectedCardColor = computed(() => {
-  const cardId = store.state.currentUserIsHoveringOverCardId
-  const connection = connectionFromAnotherCardConnectedToCurrentCard(cardId)
+// this item, or another item connected to this item, is being hovered over
+const currentUserIsHoveringOverConnectedItemColor = computed(() => {
+  const itemId = store.state.currentUserIsHoveringOverCardId
+  // TODO add new state store.state.currentUserIsHoveringOverBoxId
+  const connection = connectionFromAnotherItemConnectedToCurrentItem(itemId)
   return connectionColor(connection)
 })
-// this card, or another card connected to this card, is paint selected
-const currentUserIsMultipleSelectedCardColor = computed(() => {
-  const cardIds = store.state.multipleCardsSelectedIds
-  const connection = connectionsFromMultipleCardsConnectedToCurrentCard(cardIds)
+// the color of this item, or another item connected to this item, that is paint selected
+const currentUserIsMultipleSelectedItemColor = computed(() => {
+  const itemIds = store.state.multipleCardsSelectedIds
+  const connection = connectionsFromMultipleItemsConnectedToCurrentItem(itemIds)
   return connectionColor(connection)
 })
-// a current connection is being made by dragging from this card's connector
+// a current connection is being made by dragging from this item's connector
 const currentUserIsCreatingConnectionColor = computed(() => {
   if (!store.state.currentUserIsDrawingConnection) { return }
-  const cardIds = store.state.currentConnectionStartCardIds
-  const isCurrentlyConnecting = cardIds.includes(item.value.id)
+  const itemIds = store.state.currentConnectionStartItemIds
+  const isCurrentlyConnecting = itemIds.includes(item.value.id)
   if (!isCurrentlyConnecting) { return }
   return store.state.currentConnectionColor
 })
@@ -252,7 +248,6 @@ const handleMouseLeaveConnector = () => {
     :class="{ active: props.isConnectingTo || props.isConnectingFrom, 'is-light-in-dark-theme': isConnectorLightInDarkTheme, 'is-dark-in-light-theme': isConnectorDarkInLightTheme}"
     :style="{background: connectorButtonBackground }"
     tabindex="-1"
-    @keyup.stop.enter="showCardDetails"
   )
     template(v-if="hasConnections || props.isConnectingFrom || props.isConnectingTo")
       img.connector-icon(src="@/assets/connector-closed-in-card.svg")

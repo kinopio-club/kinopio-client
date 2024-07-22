@@ -169,7 +169,7 @@ const store = createStore({
     isSelectingY: false,
 
     // connections
-    currentConnectionStartCardIds: [],
+    currentConnectionStartItemIds: [],
     currentConnectionSuccess: {},
     currentConnectionCursorStart: {},
     connectionDetailsPosition: {}, // x, y, pageX, pageY
@@ -728,9 +728,9 @@ const store = createStore({
       utils.typeCheck({ value: object, type: 'object' })
       state.currentConnectionCursorStart = object
     },
-    currentConnectionStartCardIds: (state, cardIds) => {
+    currentConnectionStartItemIds: (state, cardIds) => {
       utils.typeCheck({ value: cardIds, type: 'array' })
-      state.currentConnectionStartCardIds = cardIds
+      state.currentConnectionStartItemIds = cardIds
     },
     updateRemoteCurrentConnection: (state, updates) => {
       utils.typeCheck({ value: updates, type: 'object' })

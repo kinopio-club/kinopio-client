@@ -1112,12 +1112,12 @@ export default {
   spaceCounterZoomDecimal () {
     return 1 / this.spaceZoomDecimal()
   },
-  connectorCoords (cardId) {
-    const cardConnector = document.querySelector(`.connector[data-item-id="${cardId}"] button`)
-    const cardUnlockButton = document.querySelector(`.card-unlock-button[data-card-id="${cardId}"] button`)
-    const element = cardConnector || cardUnlockButton
+  connectorCoords (itemId) {
+    const itemConnector = document.querySelector(`.connector[data-item-id="${itemId}"] button`)
+    const cardUnlockButton = document.querySelector(`.card-unlock-button[data-card-id="${itemId}"] button`)
+    const element = itemConnector || cardUnlockButton
     if (!element) { return }
-    const cardElement = document.querySelector(`article#card[data-card-id="${cardId}"]`)
+    const cardElement = document.querySelector(`article#card[data-card-id="${itemId}"]`)
     if (!cardElement.dataset.shouldRender) { return }
     let rect = element.getBoundingClientRect()
     rect.x = rect.x + window.scrollX

@@ -75,7 +75,6 @@ export default {
 
       // 🚑 missing templates: Note Taking, Research, Journal, Making Hard Decisions, Mind Map, Weekly Planner,
       // 102293910caf3bbc3cdee8f07dd5e720ffd4e6e9
-      // TODO update template links on /about
 
       // Moodboarding
       // Note taking

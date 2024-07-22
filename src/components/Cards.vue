@@ -40,7 +40,7 @@ const cardCommentPreviewIsVisible = computed(() => {
   return currentHoveredCardIsComment.value
 })
 const shouldPrevent = computed(() => {
-  const isHoveringOverConnector = store.state.currentUserIsHoveringOverConnectorCardId
+  const isHoveringOverConnector = store.state.currentUserIsHoveringOverConnectorItemId
   const isHoveringOverCheckbox = store.state.currentUserIsHoveringOverCheckboxCardId
   const isInteractingWithItem = store.getters.isInteractingWithItem
   return isInteractingWithItem || isHoveringOverConnector || isHoveringOverCheckbox

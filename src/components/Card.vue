@@ -565,7 +565,7 @@ const isConnectingTo = computed(() => {
   return connectingToId === props.card.id
 })
 const isConnectingFrom = computed(() => {
-  return store.state.currentConnectionStartCardIds.includes(props.card.id)
+  return store.state.currentConnectionStartItemIds.includes(props.card.id)
 })
 const connectedConnectionTypes = computed(() => store.getters['currentConnections/typesByCardId'](props.card.id))
 
@@ -1487,7 +1487,7 @@ const shouldNotStick = computed(() => {
   if (iframeIsVisible.value) { return true }
   if (store.state.codeLanguagePickerIsVisible) { return true }
   if (store.state.currentUserIsDraggingConnectionIdLabel) { return true }
-  const userIsConnecting = store.state.currentConnectionStartCardIds.length
+  const userIsConnecting = store.state.currentConnectionStartItemIds.length
   const currentUserIsPanning = store.state.currentUserIsPanningReady || store.state.currentUserIsPanning
   return userIsConnecting || store.state.currentUserIsDraggingBox || store.state.currentUserIsResizingBox || currentUserIsPanning || currentCardDetailsIsVisible.value || isRemoteCardDetailsVisible.value || isRemoteCardDragging.value || currentCardIsBeingDragged.value || store.state.currentUserIsResizingCard || store.state.currentUserIsTiltingCard || isLocked.value
 })

@@ -226,6 +226,7 @@ export default {
       context.dispatch('api/addToQueue', { name: 'updateConnection', body: connection }, { root: true })
       context.dispatch('broadcast/update', { updates: connection, type: 'updateConnectionTypeForConnection', handler: 'currentConnections/update' }, { root: true })
     },
+    // TODO itemId
     updatePaths: (context, { cardId, connections }) => {
       const canEditSpace = context.rootGetters['currentUser/canEditSpace']()
       connections = connections || context.getters.byCardId(cardId)
@@ -251,6 +252,7 @@ export default {
       })
       context.commit('clearShouldExplicitlyRenderCardIds', null, { root: true })
     },
+    // TODO item
     updateMultiplePaths: (context, cards) => {
       const canEditSpace = context.rootGetters['currentUser/canEditSpace']()
       const cardIds = cards.map(card => card.id)
@@ -291,6 +293,7 @@ export default {
       }
       context.commit('clearShouldExplicitlyRenderCardIds', null, { root: true })
     },
+    // TODO item
     updatePathsWhileDragging: (context, { connections }) => {
       let newConnections = []
       connections = connections.forEach(connection => {
@@ -422,6 +425,7 @@ export default {
       const typeIds = uniq(state.typeIds)
       return typeIds.map(id => state.types[id])
     },
+    // TODO byItemId
     byCardId: (state, getters, rootState, rootGetters) => (cardId) => {
       let connections = getters.all
       connections = connections.filter(connection => {
@@ -432,6 +436,7 @@ export default {
       connections = getters.connectionsWithValidCards(connections)
       return connections
     },
+    // TODO byItemId
     byMultipleCardIds: (state, getters, rootState, rootGetters) => (cardIds) => {
       let connections = getters.all
       connections = connections.filter(connection => {
@@ -441,6 +446,7 @@ export default {
       })
       return connections
     },
+    // TODO byItemId
     typesByCardId: (state, getters, rootState, rootGetters) => (cardId) => {
       let connections = getters.byCardId(cardId)
       let types = getters.allTypes

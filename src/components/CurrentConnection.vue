@@ -102,7 +102,7 @@ const checkCurrentConnectionSuccess = (event) => {
 }
 const addConnections = async (event) => {
   const currentConnectionSuccess = store.state.currentConnectionSuccess
-  const startCardIds = store.state.currentConnectionStartCardIds
+  const startCardIds = store.state.currentConnectionStartItemIds
   let endCardId, estimatedEndCardConnectorPosition
   let position = utils.cursorPositionInSpace(event)
   const shouldPreventCreate = utils.isPositionOutsideOfSpace(position)
@@ -145,9 +145,9 @@ const stopInteractions = (event) => {
     addConnections(event)
   }
   store.commit('currentConnectionSuccess', {})
-  const isCurrentConnection = store.state.currentConnectionStartCardIds.length
+  const isCurrentConnection = store.state.currentConnectionStartItemIds.length
   if (isCurrentConnection) {
-    store.commit('currentConnectionStartCardIds', [])
+    store.commit('currentConnectionStartItemIds', [])
     const updates = { userId: store.state.currentUser.id }
     store.commit('broadcast/updateStore', { updates, type: 'removeRemoteCurrentConnection' })
   }
