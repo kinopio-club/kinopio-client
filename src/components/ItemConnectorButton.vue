@@ -61,7 +61,7 @@ const connectionsFromMultipleItemsConnectedToCurrentItem = (otherItemIds) => {
   })
   return currentItemConnection
 }
-const connectedConnectionTypes = computed(() => store.getters['currentConnections/typesByCardId'](item.value.id))
+const connectedConnectionTypes = computed(() => store.getters['currentConnections/typesByItemId'](item.value.id))
 const connectedConnectionTypeById = (typeId) => {
   return connectedConnectionTypes.value.find(type => type.id === typeId)
 }

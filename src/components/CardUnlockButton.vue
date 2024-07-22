@@ -26,7 +26,7 @@ const state = reactive({
 
 const canEditCard = computed(() => store.getters['currentUser/canEditCard'](props.card))
 const canEditSpace = computed(() => store.getters['currentUser/canEditSpace']())
-const connectionTypes = computed(() => store.getters['currentConnections/typesByCardId'](props.card.id))
+const connectionTypes = computed(() => store.getters['currentConnections/typesByItemId'](props.card.id))
 
 // theme
 

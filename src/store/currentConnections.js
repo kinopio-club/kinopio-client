@@ -256,7 +256,7 @@ export default {
     updateMultiplePaths: (context, cards) => {
       const canEditSpace = context.rootGetters['currentUser/canEditSpace']()
       const cardIds = cards.map(card => card.id)
-      const connections = context.getters.byMultipleCardIds(cardIds)
+      const connections = context.getters.byMultipleItemIds(cardIds)
       if (!connections.length) { return }
       let newConnections = []
       // update state
@@ -435,19 +435,17 @@ export default {
       connections = getters.connectionsWithValidItems(connections)
       return connections
     },
-    // TODO
-    byMultipleCardIds: (state, getters, rootState, rootGetters) => (cardIds) => {
+    byMultipleItemIds: (state, getters, rootState, rootGetters) => (itemIds) => {
       let connections = getters.all
       connections = connections.filter(connection => {
-        let start = cardIds.includes(connection.startItemId)
-        let end = cardIds.includes(connection.endItemId)
+        let start = itemIds.includes(connection.startItemId)
+        let end = itemIds.includes(connection.endItemId)
         return start || end
       })
       return connections
     },
-    // TODO
-    typesByCardId: (state, getters, rootState, rootGetters) => (cardId) => {
-      let connections = getters.byItemId(cardId)
+    typesByItemId: (state, getters, rootState, rootGetters) => (itemId) => {
+      let connections = getters.byItemId(itemId)
       let types = getters.allTypes
       types = types.filter(type => Boolean(type))
       connections = getters.connectionsWithValidItems(connections)
