@@ -707,6 +707,9 @@ const updateRemoteConnections = () => {
     state.isRemoteConnecting = false
   }
 }
+const connectorBackgroundColor = () => {
+  return 'transparent'
+}
 </script>
 
 <template lang="pug">
@@ -768,7 +771,7 @@ const updateRemoteConnections = () => {
     :isVisibleInViewport="state.isVisibleInViewport"
     :isRemoteConnecting="state.isRemoteConnecting"
     :remoteConnectionColor="state.remoteConnectionColor"
-    :currentBackgroundColor="color"
+    :currentBackgroundColor="connectorBackgroundColor"
     :parentDetailsIsVisible="currentBoxDetailsIsVisible"
     @shouldRenderParent="updateShouldRenderParent"
   )
