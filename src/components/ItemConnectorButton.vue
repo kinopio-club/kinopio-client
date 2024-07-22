@@ -213,6 +213,7 @@ const startConnecting = (event) => {
   if (utils.isMultiTouch(event)) { return }
   store.dispatch('closeAllDialogs')
   store.commit('preventDraggedCardFromShowingDetails', true)
+  store.commit('preventDraggedBoxFromShowingDetails', true)
   if (!store.state.currentUserIsDrawingConnection) {
     addConnectionType(event)
     createCurrentConnection(event)
@@ -220,10 +221,10 @@ const startConnecting = (event) => {
   store.commit('currentUserIsDrawingConnection', true)
 }
 const handleMouseEnterConnector = (event) => {
-  store.commit('currentUserIsHoveringOverConnectorCardId', item.value.id)
+  store.commit('currentUserIsHoveringOverConnectorItemId', item.value.id)
 }
 const handleMouseLeaveConnector = () => {
-  store.commit('currentUserIsHoveringOverConnectorCardId', '')
+  store.commit('currentUserIsHoveringOverConnectorItemId', '')
 }
 
 </script>

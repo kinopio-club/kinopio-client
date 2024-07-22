@@ -90,8 +90,8 @@ const store = createStore({
     currentUserIsDraggingCard: false,
     currentUserIsHoveringOverConnectionId: '',
     currentUserIsHoveringOverCardId: '',
-    currentUserIsHoveringOverConnectorCardId: '',
     currentUserIsHoveringOverCheckboxCardId: '',
+    currentUserIsHoveringOverConnectorItemId: '',
     currentUserIsPanningReady: false,
     currentUserIsPanning: false,
     currentUserToolbar: 'card', // card, box
@@ -663,10 +663,6 @@ const store = createStore({
       utils.typeCheck({ value: cardId, type: 'string' })
       state.currentUserIsHoveringOverCardId = cardId
     },
-    currentUserIsHoveringOverConnectorCardId: (state, cardId) => {
-      utils.typeCheck({ value: cardId, type: 'string' })
-      state.currentUserIsHoveringOverConnectorCardId = cardId
-    },
     currentUserIsHoveringOverCheckboxCardId: (state, cardId) => {
       utils.typeCheck({ value: cardId, type: 'string' })
       state.currentUserIsHoveringOverCheckboxCardId = cardId
@@ -709,6 +705,10 @@ const store = createStore({
 
     // Connections
 
+    currentUserIsHoveringOverConnectorItemId: (state, itemId) => {
+      utils.typeCheck({ value: itemId, type: 'string' })
+      state.currentUserIsHoveringOverConnectorItemId = itemId
+    },
     currentUserIsHoveringOverConnectionId: (state, connectionId) => {
       utils.typeCheck({ value: connectionId, type: 'string' })
       state.currentUserIsHoveringOverConnectionId = connectionId
