@@ -869,6 +869,7 @@ export default {
     const element = document.querySelector(`article#card[data-card-id="${card.id}"]`)
     if (!element) { return }
     const cardId = card.id
+    card.shouldRender = element.dataset.shouldRender
     card.x = parseInt(element.dataset.x)
     card.y = parseInt(element.dataset.y)
     const width = parseInt(element.dataset.resizeWidth || element.dataset.width)
@@ -882,6 +883,7 @@ export default {
     if (!box) { return }
     const element = this.boxElementFromId(box.id)
     if (!element) { return }
+    box.shouldRender = element.dataset.shouldRender
     box.x = parseInt(element.dataset.x)
     box.y = parseInt(element.dataset.y)
     box.resizeWidth = parseInt(element.dataset.resizeWidth)

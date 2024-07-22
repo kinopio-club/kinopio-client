@@ -85,7 +85,7 @@ const normalizeBox = (box) => {
 const updateShouldRenderParent = (value) => {
   state.shouldRenderParent = value
 }
-const isVisible = computed(() => {
+const shouldRender = computed(() => {
   return state.isVisibleInViewport || state.shouldRenderParent
 })
 
@@ -729,9 +729,10 @@ const updateRemoteConnections = () => {
 
   //- name
   .box-info(
-    v-if="isVisible"
+    v-if="shouldRender"
     :data-box-id="box.id"
     :data-is-visible-in-viewport="state.isVisibleInViewport"
+    :date-should-render="shouldRender"
     :style="labelStyles"
     :class="infoClasses"
     tabindex="0"
