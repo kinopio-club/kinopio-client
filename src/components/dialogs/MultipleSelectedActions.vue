@@ -244,10 +244,10 @@ const addCheckboxToCards = async () => {
 const checkIsCardsConnected = () => {
   const selectedCards = multipleCardsSelectedIds.value
   const connections = selectedCards.filter((cardId, index) => {
-    const startCardId = selectedCards[index - 1]
-    const endCardId = cardId
-    const connectionExists = connectionAlreadyExists(startCardId, endCardId)
-    const connectionExistsReverse = connectionAlreadyExists(endCardId, startCardId)
+    const startItemId = selectedCards[index - 1]
+    const endItemId = cardId
+    const connectionExists = connectionAlreadyExists(startItemId, endItemId)
+    const connectionExistsReverse = connectionAlreadyExists(endItemId, startItemId)
     if (connectionExists || connectionExistsReverse) { return true }
   })
   if (connections.length === selectedCards.length - 1) {
@@ -270,13 +270,13 @@ const connectCards = (event) => {
   const cardIds = multipleCardsSelectedIds.value
   let connections = cardIds.map((cardId, index) => {
     if (index + 1 < cardIds.length) { // create connections for middle cards
-      const startCardId = cardId
-      const endCardId = cardIds[index + 1]
-      if (connectionAlreadyExists(startCardId, endCardId)) { return }
+      const startItemId = cardId
+      const endItemId = cardIds[index + 1]
+      if (connectionAlreadyExists(startItemId, endItemId)) { return }
       const id = nanoid()
-      const path = store.getters['currentConnections/connectionPathBetweenCards']({ startCardId, endCardId })
+      const path = store.getters['currentConnections/connectionPathBetweenCards']({ startItemId, endItemId })
       return {
-        id, startCardId, endCardId, path
+        id, startItemId, endItemId, path
       }
     }
   })
@@ -334,11 +334,11 @@ const connectionType = (event) => {
   connectionType = last(store.getters['currentConnections/allTypes'])
   return connectionType
 }
-const connectionAlreadyExists = (startCardId, endCardId) => {
+const connectionAlreadyExists = (startItemId, endItemId) => {
   const connections = store.getters['currentConnections/all']
   const existingConnection = connections.find(connection => {
-    const isStart = connection.startCardId === startCardId
-    const isEnd = connection.endCardId === endCardId
+    const isStart = connection.startItemId === startItemId
+    const isEnd = connection.endItemId === endItemId
     return isStart && isEnd
   })
   return Boolean(existingConnection)

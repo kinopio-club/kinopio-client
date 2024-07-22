@@ -453,11 +453,11 @@ const addConnection = (baseCardId, position) => {
   const controlPoint = store.state.currentUser.defaultConnectionControlPoint
   const estimatedEndCardConnectorPosition = utils.estimatedNewCardConnectorPosition(position)
   let connection = {
-    startCardId: baseCardId,
-    endCardId: endCurrentCardId,
+    startItemId: baseCardId,
+    endItemId: endCurrentCardId,
     path: store.getters['currentConnections/connectionPathBetweenCards']({
-      startCardId: baseCardId,
-      endCardId: endCurrentCardId,
+      startItemId: baseCardId,
+      endItemId: endCurrentCardId,
       controlPoint,
       estimatedEndCardConnectorPosition
     }),

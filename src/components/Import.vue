@@ -187,8 +187,8 @@ const convertFromCanvas = (space) => {
       const typeId = nanoid()
       const newConnection = {
         id: edge.id,
-        startCardId: edge.fromNode,
-        endCardId: edge.toNode,
+        startItemId: edge.fromNode,
+        endItemId: edge.toNode,
         controlPoint: `q00,00`, // straight line
         directionIsVisible: Boolean(edge.fromEnd === 'arrow' || edge.toEnd === 'arrow'),
         connectionTypeId: typeId,

@@ -176,11 +176,11 @@ export default {
 
     add: (context, { connection, type, shouldNotRecordHistory }) => {
       const isExistingPath = context.getters.isExistingPath({
-        startCardId: connection.startCardId,
-        endCardId: connection.endCardId
+        startItemId: connection.startItemId,
+        endItemId: connection.endItemId
       })
       if (isExistingPath) { return }
-      if (connection.startCardId === connection.endCardId) { return }
+      if (connection.startItemId === connection.endItemId) { return }
       type = type || context.getters.typeForNewConnections
       connection.id = connection.id || nanoid()
       connection.spaceId = currentSpaceId
@@ -231,8 +231,8 @@ export default {
       const canEditSpace = context.rootGetters['currentUser/canEditSpace']()
       connections = connections || context.getters.byCardId(cardId)
       connections.map(connection => {
-        const startCard = utils.cardElementDimensions({ id: connection.startCardId })
-        const endCard = utils.cardElementDimensions({ id: connection.endCardId })
+        const startCard = utils.cardElementDimensions({ id: connection.startItemId })
+        const endCard = utils.cardElementDimensions({ id: connection.endItemId })
         const path = context.getters.connectionPathBetweenCards({
           startCard,
           endCard,
@@ -261,8 +261,8 @@ export default {
       let newConnections = []
       // update state
       connections.forEach(connection => {
-        const startCard = utils.cardElementDimensions({ id: connection.startCardId })
-        const endCard = utils.cardElementDimensions({ id: connection.endCardId })
+        const startCard = utils.cardElementDimensions({ id: connection.startItemId })
+        const endCard = utils.cardElementDimensions({ id: connection.endItemId })
         const path = context.getters.connectionPathBetweenCards({
           startCard,
           endCard,
@@ -297,8 +297,8 @@ export default {
     updatePathsWhileDragging: (context, { connections }) => {
       let newConnections = []
       connections = connections.forEach(connection => {
-        const startCard = utils.cardElementDimensions({ id: connection.startCardId })
-        const endCard = utils.cardElementDimensions({ id: connection.endCardId })
+        const startCard = utils.cardElementDimensions({ id: connection.startItemId })
+        const endCard = utils.cardElementDimensions({ id: connection.endItemId })
         const path = context.getters.connectionPathBetweenCards({
           startCard,
           endCard,
@@ -321,8 +321,8 @@ export default {
       let connections = []
       context.getters.all.forEach(connection => {
         const path = context.getters.connectionPathBetweenCards({
-          startCardId: connection.startCardId,
-          endCardId: connection.endCardId,
+          startItemId: connection.startItemId,
+          endItemId: connection.endItemId,
           controlPoint: connection.controlPoint
         })
         if (!path) { return }
@@ -368,7 +368,7 @@ export default {
 
     removeFromCard: (context, card) => {
       context.getters.all.forEach(connection => {
-        if (connection.startCardId === card.id || connection.endCardId === card.id) {
+        if (connection.startItemId === card.id || connection.endItemId === card.id) {
           context.dispatch('remove', connection)
         }
       })
@@ -377,9 +377,9 @@ export default {
       const multipleCardsSelectedIds = context.rootState.multipleCardsSelectedIds
       const connections = context.getters.all
       connections.map(connection => {
-        const { startCardId, endCardId } = connection
-        const start = startCardId === cardId && multipleCardsSelectedIds.includes(endCardId)
-        const end = endCardId === cardId && multipleCardsSelectedIds.includes(startCardId)
+        const { startItemId, endItemId } = connection
+        const start = startItemId === cardId && multipleCardsSelectedIds.includes(endItemId)
+        const end = endItemId === cardId && multipleCardsSelectedIds.includes(startItemId)
         const connectedToSelected = start || end
         if (connectedToSelected) {
           context.commit('removeFromMultipleConnectionsSelected', connection.id, { root: true })
@@ -429,8 +429,8 @@ export default {
     byCardId: (state, getters, rootState, rootGetters) => (cardId) => {
       let connections = getters.all
       connections = connections.filter(connection => {
-        let start = connection.startCardId === cardId
-        let end = connection.endCardId === cardId
+        let start = connection.startItemId === cardId
+        let end = connection.endItemId === cardId
         return start || end
       })
       connections = getters.connectionsWithValidCards(connections)
@@ -440,8 +440,8 @@ export default {
     byMultipleCardIds: (state, getters, rootState, rootGetters) => (cardIds) => {
       let connections = getters.all
       connections = connections.filter(connection => {
-        let start = cardIds.includes(connection.startCardId)
-        let end = cardIds.includes(connection.endCardId)
+        let start = cardIds.includes(connection.startItemId)
+        let end = cardIds.includes(connection.endItemId)
         return start || end
       })
       return connections
@@ -474,8 +474,8 @@ export default {
     },
     connectionsWithValidCards: (state, getters, rootState, rootGetters) => (connections) => {
       connections = connections.filter(connection => {
-        const startCard = rootGetters['currentCards/byId'](connection.startCardId)
-        const endCard = rootGetters['currentCards/byId'](connection.endCardId)
+        const startCard = rootGetters['currentCards/byId'](connection.startItemId)
+        const endCard = rootGetters['currentCards/byId'](connection.endItemId)
         return startCard && endCard
       })
       return connections
@@ -516,25 +516,25 @@ export default {
       return type
     },
     isCardConnected: (state) => (card, connection) => {
-      let start = connection.startCardId === card.id
-      let end = connection.endCardId === card.id
+      let start = connection.startItemId === card.id
+      let end = connection.endItemId === card.id
       return start || end
     },
 
     // path utils
 
-    isExistingPath: (state, getters) => ({ startCardId, endCardId }) => {
+    isExistingPath: (state, getters) => ({ startItemId, endItemId }) => {
       const connections = getters.all
       const existing = connections.filter(connection => {
-        let start = connection.startCardId === startCardId
-        let end = connection.endCardId === endCardId
+        let start = connection.startItemId === startItemId
+        let end = connection.endItemId === endItemId
         return start && end
       })
       return Boolean(existing.length)
     },
-    connectionPathBetweenCards: (state, getters, rootState, rootGetters) => ({ startCard, endCard, startCardId, endCardId, controlPoint, estimatedEndCardConnectorPosition }) => {
-      startCard = startCard || rootGetters['currentCards/byId'](startCardId)
-      endCard = endCard || rootGetters['currentCards/byId'](endCardId)
+    connectionPathBetweenCards: (state, getters, rootState, rootGetters) => ({ startCard, endCard, startItemId, endItemId, controlPoint, estimatedEndCardConnectorPosition }) => {
+      startCard = startCard || rootGetters['currentCards/byId'](startItemId)
+      endCard = endCard || rootGetters['currentCards/byId'](endItemId)
       if (!startCard || !endCard) { return }
       const start = utils.estimatedCardConnectorPosition(startCard)
       const end = estimatedEndCardConnectorPosition || utils.estimatedCardConnectorPosition(endCard)

@@ -13,8 +13,8 @@ const connections = computed(() => store.getters['currentConnections/all'])
 </script>
 
 <template lang="pug">
-template(v-for="startCardId in currentConnectionStartItemIds")
-  CurrentConnection(:startCardId="startCardId")
+template(v-for="startItemId in currentConnectionStartItemIds")
+  CurrentConnection(:startItemId="startItemId")
 .connections
   template(v-for="connection in remoteCurrentConnections")
     Connection(:connection="connection" :isRemote="true")

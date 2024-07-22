@@ -128,8 +128,8 @@ const typeName = computed(() => {
 const remoteCardsIsDragging = computed(() => Boolean(store.state.remoteCardsDragging.length))
 const cards = computed(() => {
   const cards = store.getters['currentCards/all']
-  const startCard = cards.find(card => card.id === props.connection.startCardId)
-  const endCard = cards.find(card => card.id === props.connection.endCardId)
+  const startCard = cards.find(card => card.id === props.connection.startItemId)
+  const endCard = cards.find(card => card.id === props.connection.endItemId)
   return { startCard, endCard }
 })
 const isConnectedToCommentCard = computed(() => {
@@ -141,13 +141,13 @@ const isConnectedToMultipleCardsSelected = computed(() => {
   const cardIds = store.state.multipleCardsSelectedIds
   if (!cardIds.length) { return }
   return cardIds.find(cardId => {
-    return (cardId === props.connection.startCardId || cardId === props.connection.endCardId)
+    return (cardId === props.connection.startItemId || cardId === props.connection.endItemId)
   })
 })
 const isHoveredOverConnectedCard = computed(() => {
   const cardId = store.state.currentUserIsHoveringOverCardId
   if (!cardId) { return }
-  return (cardId === props.connection.startCardId || cardId === props.connection.endCardId)
+  return (cardId === props.connection.startItemId || cardId === props.connection.endItemId)
 })
 const isCurrentCardConnection = computed(() => {
   return store.state.currentCardConnections.includes(props.connection.id)
@@ -306,7 +306,7 @@ const isUpdatingPath = computed(() => {
   }
   cards = cards.filter(card => Boolean(card))
   cards.forEach(card => {
-    if (card.id === props.connection.startCardId || card.id === props.connection.endCardId) {
+    if (card.id === props.connection.startItemId || card.id === props.connection.endItemId) {
       shouldHide = true
     }
   })
@@ -499,8 +499,8 @@ svg.connection(
     :class="connectionPathClasses"
     :style="connectionPathStyles"
 
-    :data-start-card="connection.startCardId"
-    :data-end-card="connection.endCardId"
+    :data-start-card="connection.startItemId"
+    :data-end-card="connection.endItemId"
     :data-id="connection.id"
     :data-type-name="typeName"
     :data-type-id="connection.connectionTypeId"

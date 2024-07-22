@@ -141,8 +141,8 @@ const convertToCanvas = (space) => {
       }
       const edge = {
         id: connection.id,
-        fromNode: connection.startCardId,
-        toNode: connection.endCardId,
+        fromNode: connection.startItemId,
+        toNode: connection.endItemId,
         toEnd,
         color: type.color,
         label

@@ -1103,8 +1103,22 @@ export default {
     return position
   },
 
-  // Connection Path Utils 🐙
+  // Connections 🐙
 
+  migrationConnections (connections) { // migration added July 2024
+    if (!connections) { return }
+    return connections.map(connection => {
+      if (connection.startCardId) {
+        connection.startItemId = connection.startCardId
+      }
+      if (connection.endCardId) {
+        connection.endItemId = connection.endCardId
+      }
+      delete connection.startCardId
+      delete connection.endCardId
+      return connection
+    })
+  },
   spaceZoomDecimal () {
     const element = document.getElementById('space')
     return element.dataset.zoom || 1
@@ -1457,8 +1471,8 @@ export default {
       const userId = this.itemUserId(user, connection, nullItemUsers)
       connection.id = nanoid()
       connection.connectionTypeId = this.updateAllIds(connection, 'connectionTypeId', connectionTypeIdDeltas)
-      connection.startCardId = this.updateAllIds(connection, 'startCardId', cardIdDeltas)
-      connection.endCardId = this.updateAllIds(connection, 'endCardId', cardIdDeltas)
+      connection.startItemId = this.updateAllIds(connection, 'startItemId', cardIdDeltas)
+      connection.endItemId = this.updateAllIds(connection, 'endItemId', cardIdDeltas)
       connection.userId = userId
       return connection
     })

@@ -636,6 +636,8 @@ const currentSpace = {
     },
     restoreSpaceInChunks: (context, { space, isRemote, addCards, addConnections, addConnectionTypes, addBoxes }) => {
       if (!utils.objectHasKeys(space)) { return }
+      space.connections = utils.migrationConnections(space.connections)
+      addConnections = utils.migrationConnections(addConnections)
       console.log('🌱 Restoring space', space, { 'isRemote': isRemote, addCards, addConnections, addConnectionTypes, addBoxes })
       context.commit('isLoadingSpace', true, { root: true })
       const chunkSize = 50
@@ -775,6 +777,7 @@ const currentSpace = {
       context.dispatch('createSpacePreviewImage')
     },
     loadSpace: async (context, { space }) => {
+      space.connections = utils.migrationConnections(space.connections)
       if (!context.rootState.isEmbedMode) {
         context.commit('triggerSpaceZoomReset', null, { root: true })
       }
@@ -1352,8 +1355,8 @@ const currentSpace = {
         return rootGetters['currentBoxes/byId'](boxId)
       })
       const connections = rootGetters['currentConnections/all'].filter(connection => {
-        const isStartCardMatch = rootState.multipleCardsSelectedIds.includes(connection.startCardId)
-        const isEndCardMatch = rootState.multipleCardsSelectedIds.includes(connection.endCardId)
+        const isStartCardMatch = rootState.multipleCardsSelectedIds.includes(connection.startItemId)
+        const isEndCardMatch = rootState.multipleCardsSelectedIds.includes(connection.endItemId)
         return isStartCardMatch && isEndCardMatch
       })
       const connectionTypeIds = connections.map(connection => connection.connectionTypeId)

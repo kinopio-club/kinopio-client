@@ -35,7 +35,7 @@ onBeforeUnmount(() => {
 })
 
 const props = defineProps({
-  startCardId: String
+  startItemId: String
 })
 const state = reactive({
   currentConnectionPath: undefined,
@@ -52,7 +52,7 @@ const interact = (event) => {
 const isDrawingConnection = computed(() => store.state.currentUserIsDrawingConnection)
 const drawCurrentConnection = (event) => {
   let end = utils.cursorPositionInSpace(event)
-  let start = utils.connectorCoords(props.startCardId)
+  let start = utils.connectorCoords(props.startItemId)
   start = utils.cursorPositionInSpace(null, start)
   const controlPoint = store.state.currentUser.defaultConnectionControlPoint
   const path = store.getters['currentConnections/connectionPathBetweenCoords'](start, end, controlPoint)
@@ -66,7 +66,7 @@ const drawCurrentConnection = (event) => {
     userId: store.state.currentUser.id,
     connectionTypeId: connectionType.id,
     color: connectionType.color,
-    startCardId: props.startCardId,
+    startItemId: props.startItemId,
     path
   }
   store.commit('broadcast/updateStore', { updates, type: 'updateRemoteCurrentConnection' })
@@ -81,11 +81,11 @@ const checkCurrentConnectionSuccess = (event) => {
   let updates = { userId: store.state.currentUser.id }
   let isCurrentConnectionConnected
   if (cardElement) {
-    isCurrentConnectionConnected = props.startCardId !== cardElement.dataset.cardId
+    isCurrentConnectionConnected = props.startItemId !== cardElement.dataset.cardId
   }
   if (!cardElement) {
     store.commit('currentConnectionSuccess', {})
-    updates.endCardId = null
+    updates.endItemId = null
     store.commit('broadcast/updateStore', { updates, type: 'updateRemoteCurrentConnection' })
   } else if (isCurrentConnectionConnected) {
     const card = store.getters['currentCards/byId'](cardElement.dataset.cardId)
@@ -94,7 +94,7 @@ const checkCurrentConnectionSuccess = (event) => {
       return
     }
     store.commit('currentConnectionSuccess', card)
-    updates.endCardId = card.id
+    updates.endItemId = card.id
     store.commit('broadcast/updateStore', { updates, type: 'updateRemoteCurrentConnection' })
   } else {
     store.commit('currentConnectionSuccess', {})
@@ -102,8 +102,8 @@ const checkCurrentConnectionSuccess = (event) => {
 }
 const addConnections = async (event) => {
   const currentConnectionSuccess = store.state.currentConnectionSuccess
-  const startCardIds = store.state.currentConnectionStartItemIds
-  let endCardId, estimatedEndCardConnectorPosition
+  const startItemIds = store.state.currentConnectionStartItemIds
+  let endItemId, estimatedEndCardConnectorPosition
   let position = utils.cursorPositionInSpace(event)
   const shouldPreventCreate = utils.isPositionOutsideOfSpace(position)
   if (shouldPreventCreate) {
@@ -112,27 +112,27 @@ const addConnections = async (event) => {
     return
   }
   if (currentConnectionSuccess.id) {
-    endCardId = currentConnectionSuccess.id
+    endItemId = currentConnectionSuccess.id
   } else {
     // create new card
-    const startCard = store.getters['currentCards/byId'](startCardIds[0])
-    endCardId = nanoid()
-    store.dispatch('currentCards/add', { position, id: endCardId, isParentCard: true, backgroundColor: startCard.backgroundColor })
+    const startCard = store.getters['currentCards/byId'](startItemIds[0])
+    endItemId = nanoid()
+    store.dispatch('currentCards/add', { position, id: endItemId, isParentCard: true, backgroundColor: startCard.backgroundColor })
     store.commit('childCardId', '')
     estimatedEndCardConnectorPosition = utils.estimatedNewCardConnectorPosition(position)
   }
-  // create connections to endCardId
+  // create connections to endItemId
   await nextTick()
-  startCardIds.forEach(startCardId => {
-    store.dispatch('currentCards/updateDimensions', { cards: [{ id: startCardId }] })
+  startItemIds.forEach(startItemId => {
+    store.dispatch('currentCards/updateDimensions', { cards: [{ id: startItemId }] })
     const controlPoint = store.state.currentUser.defaultConnectionControlPoint
     const path = store.getters['currentConnections/connectionPathBetweenCards']({
-      startCardId,
-      endCardId,
+      startItemId,
+      endItemId,
       controlPoint,
       estimatedEndCardConnectorPosition
     })
-    const connection = { startCardId, endCardId, path, controlPoint }
+    const connection = { startItemId, endItemId, path, controlPoint }
     store.dispatch('currentConnections/add', { connection, type: prevType })
   })
 }

@@ -902,13 +902,13 @@ const currentCards = {
       let connections = []
       cards.forEach((card, index) => {
         if (index === 0) { return }
-        const startCardId = cards[index - 1].id
-        const endCardId = cards[index].id
+        const startItemId = cards[index - 1].id
+        const endItemId = cards[index].id
         connections.push({
           id: nanoid(),
-          startCardId,
-          endCardId,
-          path: this.$store.getters['currentConnections/connectionPathBetweenCards']({ startCardId, endCardId })
+          startItemId,
+          endItemId,
+          path: this.$store.getters['currentConnections/connectionPathBetweenCards']({ startItemId, endItemId })
         })
       })
       connections.forEach(connection => {

@@ -1018,8 +1018,8 @@
   ],
   "connections": [
     {
-      "startCardId": "2sSu3ifT5Rz1MsDfP3WE4",
-      "endCardId": "HptU_kYyoM0D-kPPJcKl5",
+      "startItemId": "2sSu3ifT5Rz1MsDfP3WE4",
+      "endItemId": "HptU_kYyoM0D-kPPJcKl5",
       "path": "m243,147 q90,40 195,20",
       "controlPoint": null,
       "id": "ONvvnECMdiaridRoePxe_",
@@ -1033,8 +1033,8 @@
       "updatedAt": "2023-07-15T23:07:57.246Z"
     },
     {
-      "startCardId": "2sSu3ifT5Rz1MsDfP3WE4",
-      "endCardId": "QLh9ODjmR-IUlfnJXe70i",
+      "startItemId": "2sSu3ifT5Rz1MsDfP3WE4",
+      "endItemId": "QLh9ODjmR-IUlfnJXe70i",
       "path": "m243,147 q90,40 196,65",
       "controlPoint": null,
       "id": "vsYe4fHwuNrRzGw1-E9Td",
@@ -1048,8 +1048,8 @@
       "updatedAt": "2023-07-15T23:07:57.251Z"
     },
     {
-      "startCardId": "2sSu3ifT5Rz1MsDfP3WE4",
-      "endCardId": "s2K69fu6mh5GQDJV2Cpxk",
+      "startItemId": "2sSu3ifT5Rz1MsDfP3WE4",
+      "endItemId": "s2K69fu6mh5GQDJV2Cpxk",
       "path": "m243,147 q90,40 196,110",
       "controlPoint": null,
       "id": "AkfXbd-zn4wZEvpmuEm30",
@@ -1064,8 +1064,8 @@
     },
     {
       "id": "qCk-_okf83PsO3qGc7gkr",
-      "startCardId": "vB5xMJQkytCXungscE7qW",
-      "endCardId": "L-zEGgxp6IqTmLmfpy08O",
+      "startItemId": "vB5xMJQkytCXungscE7qW",
+      "endItemId": "L-zEGgxp6IqTmLmfpy08O",
       "path": "m265,370 q90,40 43,125",
       "labelIsVisible": true,
       "directionIsVisible": true,
@@ -1081,8 +1081,8 @@
     },
     {
       "id": "R53RVFO9oH6by84Ny0zyJ",
-      "startCardId": "L-zEGgxp6IqTmLmfpy08O",
-      "endCardId": "IfKGsV2UIjUYmTZs2Wv75",
+      "startItemId": "L-zEGgxp6IqTmLmfpy08O",
+      "endItemId": "IfKGsV2UIjUYmTZs2Wv75",
       "path": "m308,495 q90,40 301,-14",
       "labelIsVisible": false,
       "directionIsVisible": false,
@@ -1096,8 +1096,8 @@
     },
     {
       "id": "qg14PAGzqMc-MVTsmPfiH",
-      "startCardId": "IfKGsV2UIjUYmTZs2Wv75",
-      "endCardId": "i8Wjybt1-VVadJETvN0Av",
+      "startItemId": "IfKGsV2UIjUYmTZs2Wv75",
+      "endItemId": "i8Wjybt1-VVadJETvN0Av",
       "path": "m608,479 q90,40 152,-282",
       "labelIsVisible": false,
       "directionIsVisible": false,
@@ -1110,8 +1110,8 @@
       "distanceFromOrigin": 790
     },
     {
-      "startCardId": "IfKGsV2UIjUYmTZs2Wv75",
-      "endCardId": "dOLI8AaWHkZn520LJKG-e",
+      "startItemId": "IfKGsV2UIjUYmTZs2Wv75",
+      "endItemId": "dOLI8AaWHkZn520LJKG-e",
       "path": "m609,481 q90,40 68,156",
       "controlPoint": null,
       "id": "Yxi9iM7cPZ2C5pwF1Rdcz",
@@ -1122,8 +1122,8 @@
     },
     {
       "id": "TiInIvJs3EVrTHzzInWia",
-      "startCardId": "qkgUvjyAohsmK8o6kejbA",
-      "endCardId": "FfNEIjv90pj_57l2DjYnQ",
+      "startItemId": "qkgUvjyAohsmK8o6kejbA",
+      "endItemId": "FfNEIjv90pj_57l2DjYnQ",
       "path": "m334,870 q90,40 203,301",
       "labelIsVisible": false,
       "directionIsVisible": false,
@@ -1136,8 +1136,8 @@
       "distanceFromOrigin": 878
     },
     {
-      "startCardId": "qkgUvjyAohsmK8o6kejbA",
-      "endCardId": "HzSCZAV_RhQ180QKM1voy",
+      "startItemId": "qkgUvjyAohsmK8o6kejbA",
+      "endItemId": "HzSCZAV_RhQ180QKM1voy",
       "controlPoint": null,
       "id": "zVqc7R5cS0lAvmV0WQsWF",
       "spaceId": "AhQojRpGYG5VqUSwlRzJu",
@@ -1153,8 +1153,8 @@
       "path": "m334,870 q90,40 99,167"
     },
     {
-      "startCardId": "qkgUvjyAohsmK8o6kejbA",
-      "endCardId": "tf6yAPFXwgnd6_t16TcNJ",
+      "startItemId": "qkgUvjyAohsmK8o6kejbA",
+      "endItemId": "tf6yAPFXwgnd6_t16TcNJ",
       "controlPoint": null,
       "id": "7GMJQWj5HDLZqmuI5V4B4",
       "spaceId": "AhQojRpGYG5VqUSwlRzJu",
@@ -1168,8 +1168,8 @@
       "path": "m334,870 q90,40 144,232"
     },
     {
-      "startCardId": "eMCYdsjvHQ2Og2fPa9Bts",
-      "endCardId": "5Wv2npyTOSWVrfcJ5m5hx",
+      "startItemId": "eMCYdsjvHQ2Og2fPa9Bts",
+      "endItemId": "5Wv2npyTOSWVrfcJ5m5hx",
       "controlPoint": null,
       "id": "3x6JllMqLv3MqVTJ6NLSf",
       "spaceId": "AhQojRpGYG5VqUSwlRzJu",
@@ -1183,8 +1183,8 @@
       "path": "m719,870 q90,40 191,166"
     },
     {
-      "startCardId": "5Wv2npyTOSWVrfcJ5m5hx",
-      "endCardId": "nqjAvUE_vmlSQyGarVchD",
+      "startItemId": "5Wv2npyTOSWVrfcJ5m5hx",
+      "endItemId": "nqjAvUE_vmlSQyGarVchD",
       "controlPoint": "q00,00",
       "id": "Rh2kuM30uqxufEE56QGnr",
       "spaceId": "AhQojRpGYG5VqUSwlRzJu",
@@ -1199,8 +1199,8 @@
     },
     {
       "id": "nA8fgAny_a-2PULxHwVvh",
-      "startCardId": "nqjAvUE_vmlSQyGarVchD",
-      "endCardId": "nY7GtQUIC2q4VaNvhrc8h",
+      "startItemId": "nqjAvUE_vmlSQyGarVchD",
+      "endItemId": "nY7GtQUIC2q4VaNvhrc8h",
       "labelIsVisible": false,
       "directionIsVisible": false,
       "controlPoint": "q00,00",
@@ -1213,8 +1213,8 @@
       "path": "m910,1161 q00,00 0,85"
     },
     {
-      "startCardId": "nY7GtQUIC2q4VaNvhrc8h",
-      "endCardId": "As24BgewMWWTlrP1ddkLA",
+      "startItemId": "nY7GtQUIC2q4VaNvhrc8h",
+      "endItemId": "As24BgewMWWTlrP1ddkLA",
       "path": "m910,1246 q00,00 0,81",
       "controlPoint": "q00,00",
       "id": "7V3O73-p_vql_GEPrdBWl",
@@ -1225,8 +1225,8 @@
       "labelRelativePositionY": 0.5
     },
     {
-      "startCardId": "grh9vWvXf11cZbZEvi-Ij",
-      "endCardId": "r4-83aAbBqplt6SZVN-4P",
+      "startItemId": "grh9vWvXf11cZbZEvi-Ij",
+      "endItemId": "r4-83aAbBqplt6SZVN-4P",
       "path": "m305,1475 q00,00 230,0",
       "controlPoint": "q00,00",
       "id": "EDm-AcTRtQdqeiy8mXOjk",
@@ -1235,8 +1235,8 @@
       "connectionTypeId": "xUE-eioucojKYICgBWepx"
     },
     {
-      "startCardId": "nqjAvUE_vmlSQyGarVchD",
-      "endCardId": "EfZE2_gNqHWuJTfW1EXfN",
+      "startItemId": "nqjAvUE_vmlSQyGarVchD",
+      "endItemId": "EfZE2_gNqHWuJTfW1EXfN",
       "path": "m909,1158 q00,00 228,2",
       "controlPoint": "q00,00",
       "id": "2rXK0evm8gktvKVWdBflS",

@@ -654,8 +654,8 @@ const toggleFilterShowAbsoluteDates = () => {
 }
 const updateRemoteConnections = () => {
   const connection = store.state.remoteCurrentConnections.find(remoteConnection => {
-    const isConnectedToStart = remoteConnection.startCardId === props.card.id
-    const isConnectedToEnd = remoteConnection.endCardId === props.card.id
+    const isConnectedToStart = remoteConnection.startItemId === props.card.id
+    const isConnectedToEnd = remoteConnection.endItemId === props.card.id
     return isConnectedToStart || isConnectedToEnd
   })
   if (connection) {
@@ -1245,8 +1245,8 @@ const selectAllConnectedCards = (event) => {
   while (shouldSearch) {
     let cancelSearch = true
     connections.forEach(connection => {
-      const startCard = connection.startCardId
-      const endCard = connection.endCardId
+      const startCard = connection.startItemId
+      const endCard = connection.endItemId
       const startCardIsConnected = selectedCards.includes(startCard)
       const endCardIsConnected = selectedCards.includes(endCard)
       if (!startCardIsConnected && endCardIsConnected) {

@@ -42,8 +42,8 @@ const isLightInDarkTheme = computed(() => !backgroundColorIsDark.value && isThem
 const currentConnectionColor = computed(() => store.state.currentConnectionColor)
 const connectionFromAnotherItemConnectedToCurrentItem = (anotherItemId) => {
   return props.itemConnections.find(connection => {
-    const isConnectedToStart = connection.startCardId === anotherItemId
-    const isConnectedToEnd = connection.endCardId === anotherItemId
+    const isConnectedToStart = connection.startItemId === anotherItemId
+    const isConnectedToEnd = connection.endItemId === anotherItemId
     return isConnectedToStart || isConnectedToEnd
   })
 }
@@ -51,8 +51,8 @@ const connectionsFromMultipleItemsConnectedToCurrentItem = (otherItemIds) => {
   let currentItemConnection
   otherItemIds.find(anotherItemId => {
     return props.itemConnections.find(connection => {
-      const isConnectedToStart = connection.startCardId === anotherItemId
-      const isConnectedToEnd = connection.endCardId === anotherItemId
+      const isConnectedToStart = connection.startItemId === anotherItemId
+      const isConnectedToEnd = connection.endItemId === anotherItemId
       if (isConnectedToStart || isConnectedToEnd) {
         currentItemConnection = connection
         return true

@@ -37,8 +37,8 @@
   ],
   "connections": [
     {
-      "startCardId": "1",
-      "endCardId": "wQ9-NzxQyWoIGGKEgHRMF",
+      "startItemId": "1",
+      "endItemId": "wQ9-NzxQyWoIGGKEgHRMF",
       "path": "m255,156 q90,40 103,80",
       "id": "gg7DEsxy0n3syEkxfKKS4",
       "connectionTypeId": "TDbVDxv4cebeN_99XAz8T"

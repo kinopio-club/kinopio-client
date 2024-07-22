@@ -737,7 +737,7 @@ const store = createStore({
       utils.typeCheck({ value: updates, type: 'object' })
       const index = state.remoteCurrentConnections.findIndex(remoteConnection => {
         const isUserId = remoteConnection.userId === updates.userId
-        const isStartCardId = remoteConnection.startCardId === updates.startCardId
+        const isStartCardId = remoteConnection.startItemId === updates.startItemId
         return isUserId && isStartCardId
       })
       if (index >= 0) {
