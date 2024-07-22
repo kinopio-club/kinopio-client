@@ -644,7 +644,7 @@ const handleMouseLeave = () => {
   store.commit('currentUserIsHoveringOverBoxId', '')
 }
 const updateCurrentConnections = () => {
-  // TODO store.getters['currentConnections/byCardId'](props.card.id) byItemId
+  // TODO store.getters['currentConnections/byItemId'](props.card.id) byItemId
   state.currentConnections = []
 }
 

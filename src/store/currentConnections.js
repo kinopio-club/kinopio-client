@@ -229,7 +229,7 @@ export default {
     // TODO itemId
     updatePaths: (context, { cardId, connections }) => {
       const canEditSpace = context.rootGetters['currentUser/canEditSpace']()
-      connections = connections || context.getters.byCardId(cardId)
+      connections = connections || context.getters.byItemId(cardId)
       connections.map(connection => {
         const startCard = utils.cardElementDimensions({ id: connection.startItemId })
         const endCard = utils.cardElementDimensions({ id: connection.endItemId })
@@ -425,18 +425,17 @@ export default {
       const typeIds = uniq(state.typeIds)
       return typeIds.map(id => state.types[id])
     },
-    // TODO byItemId
-    byCardId: (state, getters, rootState, rootGetters) => (cardId) => {
+    byItemId: (state, getters, rootState, rootGetters) => (itemId) => {
       let connections = getters.all
       connections = connections.filter(connection => {
-        let start = connection.startItemId === cardId
-        let end = connection.endItemId === cardId
+        let start = connection.startItemId === itemId
+        let end = connection.endItemId === itemId
         return start || end
       })
       connections = getters.connectionsWithValidItems(connections)
       return connections
     },
-    // TODO byItemId
+    // TODO
     byMultipleCardIds: (state, getters, rootState, rootGetters) => (cardIds) => {
       let connections = getters.all
       connections = connections.filter(connection => {
@@ -446,9 +445,9 @@ export default {
       })
       return connections
     },
-    // TODO byItemId
+    // TODO
     typesByCardId: (state, getters, rootState, rootGetters) => (cardId) => {
-      let connections = getters.byCardId(cardId)
+      let connections = getters.byItemId(cardId)
       let types = getters.allTypes
       types = types.filter(type => Boolean(type))
       connections = getters.connectionsWithValidItems(connections)

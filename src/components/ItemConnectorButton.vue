@@ -71,7 +71,7 @@ const connectionTypeColorisDark = computed(() => {
   return utils.colorIsDark(type.color)
 })
 const hasConnections = computed(() => {
-  const connections = store.getters['currentConnections/byCardId'](item.value.id)
+  const connections = store.getters['currentConnections/byItemId'](item.value.id)
   return Boolean(connections.length)
 })
 const createCurrentConnection = (event) => {

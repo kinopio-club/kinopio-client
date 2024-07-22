@@ -306,7 +306,7 @@ const updateConnectionPaths = async () => {
   // store.commit('clearMultipleSelected')
   if (!cardIds.length) { return }
   cardIds.forEach(cardId => {
-    connections = connections.concat(store.getters['currentConnections/byCardId'](cardId))
+    connections = connections.concat(store.getters['currentConnections/byItemId'](cardId))
   })
   store.commit('multipleCardsSelectedIds', cardIds)
   store.commit('multipleConnectionsSelectedIds', connectionIds)

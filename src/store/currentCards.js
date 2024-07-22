@@ -537,7 +537,7 @@ const currentCards = {
         const updates = { id: cardId, tilt }
         context.dispatch('update', { card: updates })
         context.dispatch('broadcast/update', { updates, type: 'tiltCard', handler: 'currentCards/update' }, { root: true })
-        const connections = context.rootGetters['currentConnections/byCardId'](cardId)
+        const connections = context.rootGetters['currentConnections/byItemId'](cardId)
         context.dispatch('currentConnections/updatePathsWhileDragging', { connections }, { root: true })
       })
     },
@@ -575,7 +575,7 @@ const currentCards = {
         if (!card) { return }
         if (card.x === 0) { delta.x = Math.max(0, delta.x) }
         if (card.y === 0) { delta.y = Math.max(0, delta.y) }
-        connections = connections.concat(context.rootGetters['currentConnections/byCardId'](card.id))
+        connections = connections.concat(context.rootGetters['currentConnections/byItemId'](card.id))
       })
       cards = cards.filter(card => Boolean(card))
       // update card position

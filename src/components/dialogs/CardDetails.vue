@@ -357,7 +357,7 @@ const showCard = async (cardId) => {
   store.dispatch('checkIfItemShouldIncreasePageSize', item)
   state.previousSelectedTag = {}
   updateMediaUrls()
-  const connections = store.getters['currentConnections/byCardId'](cardId)
+  const connections = store.getters['currentConnections/byItemId'](cardId)
   store.commit('updateCurrentCardConnections', connections)
   prevCardName = card.value.name
   store.dispatch('history/pause')

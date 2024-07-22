@@ -1477,7 +1477,7 @@ const handleMouseLeaveCheckbox = () => {
   store.commit('currentUserIsHoveringOverCheckboxCardId', '')
 }
 const updateCurrentConnections = () => {
-  state.currentConnections = store.getters['currentConnections/byCardId'](props.card.id)
+  state.currentConnections = store.getters['currentConnections/byItemId'](props.card.id)
 }
 
 // sticky
