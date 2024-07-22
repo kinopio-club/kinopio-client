@@ -4,6 +4,7 @@ import { useStore } from 'vuex'
 
 import utils from '@/utils.js'
 import fonts from '@/data/fonts.js'
+import ItemConnectorButton from '@/components/ItemConnectorButton.vue'
 
 import randomColor from 'randomcolor'
 const store = useStore()
@@ -25,6 +26,12 @@ let observer
 const boxElement = ref(null)
 
 onMounted(() => {
+  store.subscribe((mutation, state) => {
+    const { type, payload } = mutation
+    if (type === 'updateRemoteCurrentConnection' || type === 'removeRemoteCurrentConnection') {
+      updateRemoteConnections()
+    }
+  })
   initViewportObserver()
   updateCurrentConnections()
 })
@@ -44,11 +51,16 @@ const state = reactive({
   lockingPercent: 0,
   lockingAlpha: 0,
   isVisibleInViewport: false,
-  currentConnections: []
+  shouldRenderParent: false,
+  // connections
+  currentConnections: [],
+  isRemoteConnecting: false,
+  remoteConnectionColor: ''
 })
 
 const spaceCounterZoomDecimal = computed(() => store.getters.spaceCounterZoomDecimal)
 const canEditBox = computed(() => store.getters['currentUser/canEditBox'](props.box))
+const currentUserIsSignedIn = computed(() => store.getters['currentUser/isSignedIn'])
 
 // normalize
 
@@ -66,6 +78,15 @@ const normalizeBox = (box) => {
   box.fill = box.fill || 'filled'
   return box
 }
+
+// should render
+
+const updateShouldRenderParent = (value) => {
+  state.shouldRenderParent = value
+}
+const isVisible = computed(() => {
+  return state.isVisibleInViewport || state.shouldRenderParent
+})
 
 // is visible in viewport
 
@@ -346,6 +367,9 @@ const endBoxInfoInteraction = (event) => {
     store.commit('boxesWereDragged', false)
   }
 }
+const currentBoxDetailsIsVisible = computed(() => {
+  return props.box.id === store.state.boxDetailsIsVisibleForBoxId
+})
 
 // select
 
@@ -647,6 +671,42 @@ const updateCurrentConnections = () => {
   state.currentConnections = store.getters['currentConnections/byItemId'](props.box.id)
 }
 
+// connections
+
+const isConnectingTo = computed(() => {
+  const connectingToId = store.state.currentConnectionSuccess.id
+  if (connectingToId) {
+    postMessage.sendHaptics({ name: 'softImpact' })
+  }
+  return connectingToId === props.box.id
+})
+const isConnectingFrom = computed(() => {
+  return store.state.currentConnectionStartItemIds.includes(props.box.id)
+})
+const connectedConnectionTypes = computed(() => store.getters['currentConnections/typesByItemId'](props.box.id))
+const connectorIsVisible = computed(() => {
+  const spaceIsOpen = store.state.currentSpace.privacy === 'open' && currentUserIsSignedIn.value
+  let isVisible
+  if (state.isRemoteConnecting) {
+    isVisible = true
+  } else if (spaceIsOpen || canEditBox.value || connectedConnectionTypes.value.length) {
+    isVisible = true
+  }
+  return isVisible
+})
+const updateRemoteConnections = () => {
+  const connection = store.state.remoteCurrentConnections.find(remoteConnection => {
+    const isConnectedToStart = remoteConnection.startItemId === props.box.id
+    const isConnectedToEnd = remoteConnection.endItemId === props.box.id
+    return isConnectedToStart || isConnectedToEnd
+  })
+  if (connection) {
+    state.isRemoteConnecting = true
+    state.remoteConnectionColor = connection.color
+  } else {
+    state.isRemoteConnecting = false
+  }
+}
 </script>
 
 <template lang="pug">
@@ -667,7 +727,7 @@ const updateCurrentConnections = () => {
 
   //- name
   .box-info(
-    v-if="state.isVisibleInViewport"
+    v-if="isVisible"
     :data-box-id="box.id"
     :data-is-visible-in-viewport="state.isVisibleInViewport"
     :style="labelStyles"
@@ -699,6 +759,19 @@ const updateCurrentConnections = () => {
   .lock-button-wrap.inline-button-wrap(v-if="isLocked")
     button.inline-button(tabindex="-1" :style="{background: color}")
       img.icon.lock-icon(src="@/assets/lock.svg")
+  ItemConnectorButton(
+    :visible="connectorIsVisible"
+    :box="box"
+    :itemConnections="state.currentConnections"
+    :isConnectingTo="isConnectingTo"
+    :isConnectingFrom="isConnectingFrom"
+    :isVisibleInViewport="state.isVisibleInViewport"
+    :isRemoteConnecting="state.isRemoteConnecting"
+    :remoteConnectionColor="state.remoteConnectionColor"
+    :currentBackgroundColor="color"
+    :parentDetailsIsVisible="currentBoxDetailsIsVisible"
+    @shouldRenderParent="updateShouldRenderParent"
+  )
 
   //- resize
   .bottom-button-wrap(v-if="resizeIsVisible" :class="{unselectable: isPainting}")
@@ -857,6 +930,16 @@ const updateCurrentConnections = () => {
     img
       width 10px
       height 10px
+
+  .connector
+    padding 8px
+    align-self right
+    cursor cell
+    position absolute
+    right 0
+    pointer-events all
+    button
+      z-index 1
 
   .snap-guide
     --snap-guide-width 6px
