@@ -1113,7 +1113,7 @@ export default {
     return 1 / this.spaceZoomDecimal()
   },
   connectorCoords (cardId) {
-    const cardConnector = document.querySelector(`.connector[data-card-id="${cardId}"] button`)
+    const cardConnector = document.querySelector(`.connector[data-item-id="${cardId}"] button`)
     const cardUnlockButton = document.querySelector(`.card-unlock-button[data-card-id="${cardId}"] button`)
     const element = cardConnector || cardUnlockButton
     if (!element) { return }

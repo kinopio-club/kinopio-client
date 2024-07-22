@@ -11,7 +11,8 @@ const emit = defineEmits(['shouldRenderParent'])
 const props = defineProps({
   visible: Boolean,
   card: Object,
-  currentItemConnections: Array,
+  box: Object,
+  itemConnections: Array,
   isConnectingTo: Boolean,
   isConnectingFrom: Boolean,
   isVisibleInViewport: Boolean,
@@ -20,11 +21,13 @@ const props = defineProps({
   parentDetailsIsVisible: Boolean
 })
 
+const item = computed(() => props.card || props.box)
+
 // space
 
 const canEditSpace = computed(() => store.getters['currentUser/canEditSpace']())
 const backgroundColorIsDark = computed(() => {
-  const color = props.card.backgroundColor || props.defaultBackgroundColor
+  const color = item.value.backgroundColor || props.defaultBackgroundColor
   return utils.colorIsDark(color)
 })
 
@@ -38,7 +41,7 @@ const isLightInDarkTheme = computed(() => !backgroundColorIsDark.value && isThem
 
 const currentConnectionColor = computed(() => store.state.currentConnectionColor)
 const connectionFromAnotherCardConnectedToCurrentCard = (anotherCardId) => {
-  return props.currentItemConnections.find(connection => {
+  return props.itemConnections.find(connection => {
     const isConnectedToStart = connection.startCardId === anotherCardId
     const isConnectedToEnd = connection.endCardId === anotherCardId
     return isConnectedToStart || isConnectedToEnd
@@ -47,7 +50,7 @@ const connectionFromAnotherCardConnectedToCurrentCard = (anotherCardId) => {
 const connectionsFromMultipleCardsConnectedToCurrentCard = (otherCardIds) => {
   let currentCardConnection
   otherCardIds.find(anotherCardId => {
-    return props.currentItemConnections.find(connection => {
+    return props.itemConnections.find(connection => {
       const isConnectedToStart = connection.startCardId === anotherCardId
       const isConnectedToEnd = connection.endCardId === anotherCardId
       if (isConnectedToStart || isConnectedToEnd) {
@@ -58,7 +61,7 @@ const connectionsFromMultipleCardsConnectedToCurrentCard = (otherCardIds) => {
   })
   return currentCardConnection
 }
-const connectedConnectionTypes = computed(() => store.getters['currentConnections/typesByCardId'](props.card.id))
+const connectedConnectionTypes = computed(() => store.getters['currentConnections/typesByCardId'](item.value.id))
 const connectedConnectionTypeById = (typeId) => {
   return connectedConnectionTypes.value.find(type => type.id === typeId)
 }
@@ -72,17 +75,17 @@ const currentUserIsDraggingLabelConnectedToCard = computed(() => {
   if (!connectionId) { return }
   const connection = store.getters['currentConnections/byId'](connectionId)
   if (!connection) { return }
-  const isConnected = connection.startCardId === props.card.id || connection.endCardId === props.card.id
+  const isConnected = connection.startCardId === item.value.id || connection.endCardId === item.value.id
   return isConnected
 })
 const hasConnections = computed(() => {
-  const connections = store.getters['currentConnections/byCardId'](props.card.id)
+  const connections = store.getters['currentConnections/byCardId'](item.value.id)
   return Boolean(connections.length)
 })
 const createCurrentConnection = (event) => {
   const cursor = utils.cursorPositionInViewport(event)
   const multipleCardsSelectedIds = store.state.multipleCardsSelectedIds
-  let cardIds = [props.card.id]
+  let cardIds = [item.value.id]
   if (multipleCardsSelectedIds.length) {
     cardIds = multipleCardsSelectedIds
   }
@@ -165,7 +168,7 @@ const connectedToAnotherCardBeingDraggedColor = computed(() => {
 const connectedToConnectionDetailsIsVisibleColor = computed(() => {
   const connectionDetailsVisibleId = store.state.connectionDetailsIsVisibleForConnectionId
   if (!connectionDetailsVisibleId) { return }
-  const connectionWithDetailsVisible = props.currentItemConnections.find(connection => connection.id === connectionDetailsVisibleId)
+  const connectionWithDetailsVisible = props.itemConnections.find(connection => connection.id === connectionDetailsVisibleId)
   if (!connectionWithDetailsVisible) { return }
   const connectionType = connectedConnectionTypeById(connectionWithDetailsVisible.connectionTypeId)
   return connectionType?.color
@@ -173,13 +176,13 @@ const connectedToConnectionDetailsIsVisibleColor = computed(() => {
 // a connection that is connected to this card is being hovered over
 const currentUserIsHoveringOverConnectionColor = computed(() => {
   const connectionId = store.state.currentUserIsHoveringOverConnectionId || store.state.currentUserIsDraggingConnectionIdLabel
-  const connection = props.currentItemConnections.find(currentCardConnection => currentCardConnection.id === connectionId)
+  const connection = props.itemConnections.find(currentCardConnection => currentCardConnection.id === connectionId)
   return connectionColor(connection)
 })
 // a connection that is connected to this card, is paint selected
 const currentUserIsMultipleSelectedConnectionColor = computed(() => {
   const connectionIds = store.state.multipleConnectionsSelectedIds
-  const connection = props.currentItemConnections.find(currentCardConnection => connectionIds.includes(currentCardConnection.id))
+  const connection = props.itemConnections.find(currentCardConnection => connectionIds.includes(currentCardConnection.id))
   return connectionColor(connection)
 })
 // this card, or another card connected to this card, is being hovered over
@@ -198,7 +201,7 @@ const currentUserIsMultipleSelectedCardColor = computed(() => {
 const currentUserIsCreatingConnectionColor = computed(() => {
   if (!store.state.currentUserIsDrawingConnection) { return }
   const cardIds = store.state.currentConnectionStartCardIds
-  const isCurrentlyConnecting = cardIds.includes(props.card.id)
+  const isCurrentlyConnecting = cardIds.includes(item.value.id)
   if (!isCurrentlyConnecting) { return }
   return store.state.currentConnectionColor
 })
@@ -217,7 +220,7 @@ const startConnecting = (event) => {
   store.commit('currentUserIsDrawingConnection', true)
 }
 const handleMouseEnterConnector = (event) => {
-  store.commit('currentUserIsHoveringOverConnectorCardId', props.card.id)
+  store.commit('currentUserIsHoveringOverConnectorCardId', item.value.id)
 }
 const handleMouseLeaveConnector = () => {
   store.commit('currentUserIsHoveringOverConnectorCardId', '')
@@ -228,8 +231,8 @@ const handleMouseLeaveConnector = () => {
 <template lang="pug">
 .connector(
   v-if="props.visible"
-  :data-card-id="props.card.id"
-  :key="props.card.id"
+  :data-item-id="item.id"
+  :key="item.id"
   @mousedown.left="startConnecting"
   @touchstart="startConnecting"
   @mouseenter="handleMouseEnterConnector"

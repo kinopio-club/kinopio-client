@@ -52,7 +52,7 @@ const interact = (event) => {
 const isDrawingConnection = computed(() => store.state.currentUserIsDrawingConnection)
 const drawCurrentConnection = (event) => {
   let end = utils.cursorPositionInSpace(event)
-  let start = utils.connectorCoords(props.startCardId) // TODO get real pos
+  let start = utils.connectorCoords(props.startCardId)
   start = utils.cursorPositionInSpace(null, start)
   const controlPoint = store.state.currentUser.defaultConnectionControlPoint
   const path = store.getters['currentConnections/connectionPathBetweenCoords'](start, end, controlPoint)

@@ -1839,7 +1839,7 @@ article.card-wrap#card(
           ItemConnectorButton(
             :visible="connectorIsVisible"
             :card="card"
-            :currentItemConnections="state.currentCardConnections"
+            :itemConnections="state.currentCardConnections"
             :isConnectingTo="isConnectingTo"
             :isConnectingFrom="isConnectingFrom"
             :isVisibleInViewport="state.isVisibleInViewport"
