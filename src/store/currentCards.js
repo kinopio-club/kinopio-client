@@ -798,7 +798,7 @@ const currentCards = {
         context.dispatch('deleteCard', card)
       }
       context.dispatch('broadcast/update', { updates: card, type: 'removeCard', handler: 'currentCards/remove' }, { root: true })
-      context.dispatch('currentConnections/removeFromCard', card, { root: true })
+      context.dispatch('currentConnections/removeFromItem', card, { root: true })
       context.commit('triggerUpdateHeaderAndFooterPosition', null, { root: true })
       const cardIsUpdatedByCurrentUser = card.userId === context.rootState.currentUser.id
       if (cardIsUpdatedByCurrentUser) {

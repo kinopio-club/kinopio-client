@@ -290,7 +290,7 @@ const connectCards = (event) => {
 const disconnectCards = () => {
   const cardIds = multipleCardsSelectedIds.value
   cardIds.forEach(cardId => {
-    store.dispatch('currentConnections/removeFromSelectedCard', cardId)
+    store.dispatch('currentConnections/removeFromSelectedItem', cardId)
   })
   store.dispatch('currentConnections/removeUnusedTypes')
 }

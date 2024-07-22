@@ -363,22 +363,20 @@ export default {
 
     // remove
 
-    // TODO
-    removeFromCard: (context, card) => {
+    removeFromItem: (context, item) => {
       context.getters.all.forEach(connection => {
-        if (connection.startItemId === card.id || connection.endItemId === card.id) {
+        if (connection.startItemId === item.id || connection.endItemId === item.id) {
           context.dispatch('remove', connection)
         }
       })
     },
-    // TODO
-    removeFromSelectedCard: (context, cardId) => {
-      const multipleCardsSelectedIds = context.rootState.multipleCardsSelectedIds
+    removeFromSelectedItem: (context, itemId) => {
+      const multipleItemsSelectedIds = context.rootState.multipleCardsSelectedIds.concat(context.rootState.multipleBoxesSelectedIds)
       const connections = context.getters.all
       connections.map(connection => {
         const { startItemId, endItemId } = connection
-        const start = startItemId === cardId && multipleCardsSelectedIds.includes(endItemId)
-        const end = endItemId === cardId && multipleCardsSelectedIds.includes(startItemId)
+        const start = startItemId === itemId && multipleItemsSelectedIds.includes(endItemId)
+        const end = endItemId === itemId && multipleItemsSelectedIds.includes(startItemId)
         const connectedToSelected = start || end
         if (connectedToSelected) {
           context.commit('removeFromMultipleConnectionsSelected', connection.id, { root: true })

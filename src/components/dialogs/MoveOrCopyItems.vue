@@ -163,7 +163,7 @@ const moveOrCopyToSpace = async () => {
 const removeCards = (cards) => {
   cards.forEach(card => {
     store.dispatch('currentCards/remove', card)
-    store.dispatch('currentConnections/removeFromCard', card)
+    store.dispatch('currentConnections/removeFromItem', card)
   })
 }
 const removeBoxes = (boxes) => {
