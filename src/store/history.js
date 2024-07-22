@@ -223,7 +223,7 @@ const self = {
             context.dispatch('currentCards/update', { card }, { root: true })
             nextTick(() => {
               context.dispatch('currentCards/resetDimensions', { cardId: card.id }, { root: true })
-              context.dispatch('currentConnections/updatePaths', { cardId: card.id }, { root: true })
+              context.dispatch('currentConnections/updatePaths', { itemId: card.id }, { root: true })
             })
             break
           case 'cardCreated':
@@ -293,7 +293,7 @@ const self = {
             context.dispatch('currentCards/update', { card }, { root: true })
             // nextTick(() => {
             //   context.dispatch('currentCards/resetDimensions', { cardId: card.id }, { root: true })
-            //   context.dispatch('currentConnections/updatePaths', { cardId: card.id }, { root: true })
+            //   context.dispatch('currentConnections/updatePaths', { itemId: card.id }, { root: true })
             // })
             break
           case 'cardCreated':

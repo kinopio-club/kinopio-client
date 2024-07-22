@@ -451,15 +451,15 @@ const addConnection = (baseCardId, position) => {
   const baseCard = document.querySelector(`.card[data-card-id="${baseCardId}"]`)
   if (!baseCard) { return }
   const controlPoint = store.state.currentUser.defaultConnectionControlPoint
-  const estimatedEndCardConnectorPosition = utils.estimatedNewCardConnectorPosition(position)
+  const estimatedEndItemConnectorPosition = utils.estimatedNewCardConnectorPosition(position)
   let connection = {
     startItemId: baseCardId,
     endItemId: endCurrentCardId,
-    path: store.getters['currentConnections/connectionPathBetweenCards']({
+    path: store.getters['currentConnections/connectionPathBetweenItems']({
       startItemId: baseCardId,
       endItemId: endCurrentCardId,
       controlPoint,
-      estimatedEndCardConnectorPosition
+      estimatedEndItemConnectorPosition
     }),
     controlPoint
   }

@@ -854,6 +854,16 @@ export default {
     let spaceBetween = 12
     return this.spaceCounterZoomDecimal() * spaceBetween
   },
+  itemElementDimensions (item) {
+    if (!item) { return }
+    const card = this.cardElementFromId(item.id)
+    const box = this.boxElementFromId(item.id)
+    if (card) {
+      return this.cardElementDimensions(item)
+    } else if (box) {
+      return this.boxElementDimensions(item)
+    }
+  },
   cardElementDimensions (card) {
     if (!card) { return }
     const element = document.querySelector(`article#card[data-card-id="${card.id}"]`)
@@ -1089,12 +1099,13 @@ export default {
       y: position.y + offset
     }
   },
-  estimatedCardConnectorPosition (card) {
+  estimatedItemConnectorPosition (item) {
     const offset = 15
-    let rightSide = card.x + card.width
+    const width = item.resizeWidth || item.width
+    let rightSide = item.x + width
     let x = rightSide
     x = x - offset
-    let y = card.y
+    let y = item.y
     y = y + offset
     const position = {
       x: Math.round(x),

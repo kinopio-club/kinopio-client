@@ -1374,6 +1374,15 @@ const currentSpace = {
       boxes = utils.updateItemsSpaceId(boxes, spaceId)
       newItems = { cards, connectionTypes, connections, boxes }
       return newItems
+    },
+
+    // items
+
+    itemById: (state, getters, rootState, rootGetters) => (itemId) => {
+      if (!itemId) { return }
+      const card = rootGetters['currentCards/byId'](itemId)
+      const box = rootGetters['currentBoxes/byId'](itemId)
+      return card || box
     }
   }
 }

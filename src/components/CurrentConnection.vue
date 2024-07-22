@@ -103,7 +103,7 @@ const checkCurrentConnectionSuccess = (event) => {
 const addConnections = async (event) => {
   const currentConnectionSuccess = store.state.currentConnectionSuccess
   const startItemIds = store.state.currentConnectionStartItemIds
-  let endItemId, estimatedEndCardConnectorPosition
+  let endItemId, estimatedEndItemConnectorPosition
   let position = utils.cursorPositionInSpace(event)
   const shouldPreventCreate = utils.isPositionOutsideOfSpace(position)
   if (shouldPreventCreate) {
@@ -119,18 +119,18 @@ const addConnections = async (event) => {
     endItemId = nanoid()
     store.dispatch('currentCards/add', { position, id: endItemId, isParentCard: true, backgroundColor: startCard.backgroundColor })
     store.commit('childCardId', '')
-    estimatedEndCardConnectorPosition = utils.estimatedNewCardConnectorPosition(position)
+    estimatedEndItemConnectorPosition = utils.estimatedNewCardConnectorPosition(position)
   }
   // create connections to endItemId
   await nextTick()
   startItemIds.forEach(startItemId => {
     store.dispatch('currentCards/updateDimensions', { cards: [{ id: startItemId }] })
     const controlPoint = store.state.currentUser.defaultConnectionControlPoint
-    const path = store.getters['currentConnections/connectionPathBetweenCards']({
+    const path = store.getters['currentConnections/connectionPathBetweenItems']({
       startItemId,
       endItemId,
       controlPoint,
-      estimatedEndCardConnectorPosition
+      estimatedEndItemConnectorPosition
     })
     const connection = { startItemId, endItemId, path, controlPoint }
     store.dispatch('currentConnections/add', { connection, type: prevType })

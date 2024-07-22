@@ -1136,7 +1136,7 @@ const updatePastedName = (event) => {
 
 const updatePaths = async () => {
   await nextTick()
-  store.dispatch('currentConnections/updatePaths', { cardId: card.value.id })
+  store.dispatch('currentConnections/updatePaths', { itemId: card.value.id })
 }
 
 // line break
