@@ -72,22 +72,28 @@ const drawCurrentConnection = (event) => {
   store.commit('broadcast/updateStore', { updates, type: 'updateRemoteCurrentConnection' })
 }
 
-// connect to card
+// connect to item
 
 const checkCurrentConnectionSuccess = (event) => {
   if (!event) { return }
   const position = utils.cursorPositionInViewport(event)
   const cardElement = utils.cardElementFromPosition(position.x, position.y)
+  const boxElement = event.target.closest('.box')
   let updates = { userId: store.state.currentUser.id }
   let isCurrentConnectionConnected
   if (cardElement) {
     isCurrentConnectionConnected = props.startItemId !== cardElement.dataset.cardId
   }
-  if (!cardElement) {
+  if (boxElement) {
+    isCurrentConnectionConnected = props.startItemId !== boxElement.dataset.boxId
+  }
+  // not connected
+  if (!cardElement && !boxElement) {
     store.commit('currentConnectionSuccess', {})
     updates.endItemId = null
     store.commit('broadcast/updateStore', { updates, type: 'updateRemoteCurrentConnection' })
-  } else if (isCurrentConnectionConnected) {
+  // connected to card
+  } else if (isCurrentConnectionConnected && cardElement) {
     const card = store.getters['currentCards/byId'](cardElement.dataset.cardId)
     if (card.isLocked) {
       store.commit('currentConnectionSuccess', {})
@@ -95,6 +101,16 @@ const checkCurrentConnectionSuccess = (event) => {
     }
     store.commit('currentConnectionSuccess', card)
     updates.endItemId = card.id
+    store.commit('broadcast/updateStore', { updates, type: 'updateRemoteCurrentConnection' })
+  // connected to box
+  } else if (isCurrentConnectionConnected && boxElement) {
+    const box = store.getters['currentBoxes/byId'](boxElement.dataset.boxId)
+    if (box.isLocked) {
+      store.commit('currentConnectionSuccess', {})
+      return
+    }
+    store.commit('currentConnectionSuccess', box)
+    updates.endItemId = box.id
     store.commit('broadcast/updateStore', { updates, type: 'updateRemoteCurrentConnection' })
   } else {
     store.commit('currentConnectionSuccess', {})
