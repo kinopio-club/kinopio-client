@@ -317,6 +317,9 @@ const handleMouseLeaveConnector = () => {
     left -1px
     top -1px
     width 9.5px
+    user-drag none
+    -webkit-user-drag none
+    pointer-events none
 
   .is-light-in-dark-theme
     border-color var(--primary-on-light-background)
