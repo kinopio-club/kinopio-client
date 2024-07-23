@@ -26,7 +26,7 @@ let observer
 
 const boxElement = ref(null)
 
-onMounted(() => {
+onMounted(async () => {
   store.subscribe((mutation, state) => {
     const { type, payload } = mutation
     if (type === 'updateRemoteCurrentConnection' || type === 'removeRemoteCurrentConnection') {
@@ -34,6 +34,7 @@ onMounted(() => {
     }
   })
   initViewportObserver()
+  await nextTick()
   updateCurrentConnections()
 })
 onUpdated(() => {
@@ -306,6 +307,9 @@ const labelStyles = computed(() => {
 
 // interacting
 
+const updateCurrentConnections = () => {
+  state.currentConnections = store.getters['currentConnections/byItemId'](props.box.id)
+}
 const isPainting = computed(() => store.state.currentUserIsPainting)
 const canEditSpace = computed(() => store.getters['currentUser/canEditSpace']())
 const shouldJiggle = computed(() => {
@@ -344,6 +348,12 @@ const updateIsHover = (value) => {
   if (isDragging.value) { return }
   if (isPainting.value) { return }
   state.isHover = value
+  if (value) {
+    store.commit('currentUserIsHoveringOverBoxId', props.box.id)
+    updateCurrentConnections()
+  } else {
+    store.commit('currentUserIsHoveringOverBoxId', '')
+  }
 }
 const endBoxInfoInteraction = (event) => {
   const isMeta = event.metaKey || event.ctrlKey
@@ -656,20 +666,6 @@ const endBoxInfoInteractionTouch = (event) => {
   if (touchIsNearTouchPosition(event)) {
     endBoxInfoInteraction(event)
   }
-}
-
-// mouse hover handlers
-
-const handleMouseEnter = () => {
-  if (isDragging.value) { return }
-  store.commit('currentUserIsHoveringOverBoxId', props.box.id)
-  updateCurrentConnections()
-}
-const handleMouseLeave = () => {
-  store.commit('currentUserIsHoveringOverBoxId', '')
-}
-const updateCurrentConnections = () => {
-  state.currentConnections = store.getters['currentConnections/byItemId'](props.box.id)
 }
 
 // connections

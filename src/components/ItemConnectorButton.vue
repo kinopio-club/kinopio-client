@@ -124,6 +124,7 @@ const connectorGlowStyle = computed(() => {
   const color = connectedToAnotherItemDetailsVisibleColor.value ||
     connectedToAnotherItemBeingDraggedColor.value ||
     connectedToConnectionDetailsIsVisibleColor.value ||
+    currentUserIsHoveringOverConnectorColor.value ||
     currentUserIsHoveringOverConnectionColor.value ||
     currentUserIsMultipleSelectedConnectionColor.value ||
     currentUserIsHoveringOverConnectedItemColor.value ||
@@ -167,6 +168,17 @@ const connectedToConnectionDetailsIsVisibleColor = computed(() => {
   if (!connectionWithDetailsVisible) { return }
   const connectionType = connectedConnectionTypeById(connectionWithDetailsVisible.connectionTypeId)
   return connectionType?.color
+})
+// a connection that is connected to this item connector that is being hovered over
+const currentUserIsHoveringOverConnectorColor = computed(() => {
+  const itemId = store.state.currentUserIsHoveringOverConnectorItemId
+
+  const connection = props.itemConnections.find(connection => {
+    const isStart = connection.startItemId === itemId
+    const isEnd = connection.endItemId === itemId
+    return isStart || isEnd
+  })
+  return connectionColor(connection)
 })
 // a connection that is connected to this item is being hovered over
 const currentUserIsHoveringOverConnectionColor = computed(() => {
