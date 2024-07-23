@@ -127,6 +127,18 @@ const convertToCanvas = (space) => {
       }
       canvas.nodes.push(node)
     })
+    space.boxes.forEach(box => {
+      const group = {
+        id: box.id,
+        type: 'group',
+        x: box.x,
+        y: box.y,
+        width: box.resizeWidth,
+        height: box.resizeHeight,
+        color: box.color,
+        label: box.name
+      }
+    })
     space.connections.forEach(connection => {
       const type = store.getters['currentConnections/typeByConnection'](connection)
       // direction
