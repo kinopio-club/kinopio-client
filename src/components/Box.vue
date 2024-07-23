@@ -721,6 +721,7 @@ const updateRemoteConnections = () => {
   :data-resize-height="normalizedBox.resizeHeight"
   :data-is-locked="isLocked"
   :data-is-visible-in-viewport="state.isVisibleInViewport"
+  :data-should-render="shouldRender"
 
   :style="styles"
   :class="{hover: state.isHover, active: isDragging, 'box-jiggle': shouldJiggle, 'is-resizing': isResizing}"
@@ -732,7 +733,6 @@ const updateRemoteConnections = () => {
     v-if="shouldRender"
     :data-box-id="box.id"
     :data-is-visible-in-viewport="state.isVisibleInViewport"
-    :date-should-render="shouldRender"
     :style="labelStyles"
     :class="infoClasses"
     tabindex="0"

@@ -845,14 +845,12 @@ export default {
     return items
   },
 
-  // Cards
+  // items (cards or boxes)
 
-  emptyCard () {
-    return { width: consts.defaultCardWidth, height: 32 }
-  },
-  spaceBetweenCards () {
-    let spaceBetween = 12
-    return this.spaceCounterZoomDecimal() * spaceBetween
+  itemElement (itemId) {
+    const card = this.cardElementFromId(itemId)
+    const box = this.boxElementFromId(itemId)
+    return card || box
   },
   itemElementDimensions (item) {
     if (!item) { return }
@@ -863,6 +861,16 @@ export default {
     } else if (box) {
       return this.boxElementDimensions(item)
     }
+  },
+
+  // Cards
+
+  emptyCard () {
+    return { width: consts.defaultCardWidth, height: 32 }
+  },
+  spaceBetweenCards () {
+    let spaceBetween = 12
+    return this.spaceCounterZoomDecimal() * spaceBetween
   },
   cardElementDimensions (card) {
     if (!card) { return }
@@ -1144,12 +1152,13 @@ export default {
     const itemUnlockButton = document.querySelector(`.item-unlock-button[data-item-id="${itemId}"] button`)
     const element = itemConnector || itemUnlockButton
     if (!element) { return }
-    const itemElement = this.itemElementDimensions({ id: itemId })
-    if (!itemElement.shouldRender) { return }
+    const itemElement = this.itemElement(itemId)
+    if (!itemElement.dataset.shouldRender) { return }
     let rect = element.getBoundingClientRect()
     rect.x = rect.x + window.scrollX
     rect.y = rect.y + window.scrollY
-    return this.rectCenter(rect)
+    const center = this.rectCenter(rect)
+    return center
   },
   coordsWithCurrentScrollOffset ({ x, y, shouldIgnoreZoom }) {
     let zoom = this.spaceCounterZoomDecimal() || 1
