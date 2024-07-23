@@ -26,15 +26,16 @@ let observer
 
 const boxElement = ref(null)
 
-onMounted(async () => {
+onMounted(() => {
   store.subscribe((mutation, state) => {
     const { type, payload } = mutation
     if (type === 'updateRemoteCurrentConnection' || type === 'removeRemoteCurrentConnection') {
       updateRemoteConnections()
+    } else if (type === 'isLoadingSpace') {
+      updateCurrentConnections()
     }
   })
   initViewportObserver()
-  await nextTick()
   updateCurrentConnections()
 })
 onUpdated(() => {
@@ -307,7 +308,8 @@ const labelStyles = computed(() => {
 
 // interacting
 
-const updateCurrentConnections = () => {
+const updateCurrentConnections = async () => {
+  await nextTick()
   state.currentConnections = store.getters['currentConnections/byItemId'](props.box.id)
 }
 const isPainting = computed(() => store.state.currentUserIsPainting)
