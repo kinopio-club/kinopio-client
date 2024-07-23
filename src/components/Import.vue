@@ -220,6 +220,7 @@ const importSpace = async (space) => {
     }
     space = utils.clearSpaceMeta(space, 'import')
     space = utils.updateSpaceItemsUser(space, currentUserId)
+    space.connections = utils.migrationConnections(space.connections)
     space.userId = currentUserId
     const uniqueNewSpace = cache.updateIdsInSpace(space)
     console.log('🧚 space to import', uniqueNewSpace)
