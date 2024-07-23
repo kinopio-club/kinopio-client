@@ -356,6 +356,7 @@ const updateIsHover = (value) => {
   }
 }
 const endBoxInfoInteraction = (event) => {
+  if (isConnectingTo.value) { return }
   const isMeta = event.metaKey || event.ctrlKey
   const userId = store.state.currentUser.id
   store.dispatch('currentBoxes/afterMove')
