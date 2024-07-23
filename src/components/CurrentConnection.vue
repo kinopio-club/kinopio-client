@@ -115,9 +115,10 @@ const addConnections = async (event) => {
     endItemId = currentConnectionSuccess.id
   } else {
     // create new card
-    const startCard = store.getters['currentCards/byId'](startItemIds[0])
+    const startItem = store.getters['currentSpace/itemById'](startItemIds[0])
+    const color = startItem.color || startItem.backgroundColor
     endItemId = nanoid()
-    store.dispatch('currentCards/add', { position, id: endItemId, isParentCard: true, backgroundColor: startCard.backgroundColor })
+    store.dispatch('currentCards/add', { position, id: endItemId, isParentCard: true, backgroundColor: color })
     store.commit('childCardId', '')
     estimatedEndItemConnectorPosition = utils.estimatedNewCardConnectorPosition(position)
   }

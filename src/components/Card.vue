@@ -734,6 +734,7 @@ const clearErrors = () => {
   state.error.spaceIsReadOnly = false
 }
 const checkIfUploadIsDraggedOver = (event) => {
+  if (!event.dataTransfer.items.length) { return }
   if (event.dataTransfer.types[0] === 'Files' || event.dataTransfer.items[0].kind === 'file') {
     state.uploadIsDraggedOver = true
     const updates = {

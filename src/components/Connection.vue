@@ -62,7 +62,7 @@ watch(() => props.connection.path, (value, prevValue) => {
 const visible = computed(() => {
   if (props.isRemote) { return true }
   if (!state.isVisibleInViewport) { return }
-  return cards.value.startCard && cards.value.endCard
+  return items.value.startCard && items.value.endCard
 })
 const isSpaceMember = computed(() => store.getters['currentUser/isSpaceMember']())
 const canEditSpace = computed(() => store.getters['currentUser/canEditSpace']())
@@ -123,17 +123,18 @@ const typeName = computed(() => {
   return connectionType.value.name
 })
 
-// cards
+// items
 
-const remoteCardsIsDragging = computed(() => Boolean(store.state.remoteCardsDragging.length))
-const cards = computed(() => {
+const items = computed(() => {
   const cards = store.getters['currentCards/all']
-  const startCard = cards.find(card => card.id === props.connection.startItemId)
-  const endCard = cards.find(card => card.id === props.connection.endItemId)
+  const boxes = store.getters['currentBoxes/all']
+  const items = cards.concat(boxes)
+  const startCard = items.find(item => item.id === props.connection.startItemId)
+  const endCard = items.find(item => item.id === props.connection.endItemId)
   return { startCard, endCard }
 })
 const isConnectedToCommentCard = computed(() => {
-  const { startCard, endCard } = cards.value
+  const { startCard, endCard } = items.value
   if (!startCard || !endCard) { return }
   return startCard.isComment || endCard.isComment
 })
@@ -144,14 +145,17 @@ const isConnectedToMultipleCardsSelected = computed(() => {
     return (cardId === props.connection.startItemId || cardId === props.connection.endItemId)
   })
 })
-const isHoveredOverConnectedCard = computed(() => {
-  const cardId = store.state.currentUserIsHoveringOverCardId
-  if (!cardId) { return }
-  return (cardId === props.connection.startItemId || cardId === props.connection.endItemId)
+const isHoveredOverConnectedItem = computed(() => {
+  const itemId = store.state.currentUserIsHoveringOverCardId || store.state.currentUserIsHoveringOverBoxId
+  if (!itemId) { return }
+  return (itemId === props.connection.startItemId || itemId === props.connection.endItemId)
 })
-const isCurrentCardConnection = computed(() => {
-  return store.state.currentCardConnections.includes(props.connection.id)
+const isCurrentItemConnection = computed(() => {
+  return store.state.currentItemConnections.includes(props.connection.id)
 })
+
+// upload
+
 const addCardsAndUploadFiles = (event) => {
   let files = event.dataTransfer.files
   files = Array.from(files)
@@ -223,8 +227,8 @@ const isDraggingCurrentConnectionLabel = computed(() => {
 const isHiddenByCommentFilter = computed(() => {
   const filterCommentsIsActive = store.state.currentUser.filterComments
   if (!filterCommentsIsActive) { return }
-  const startCard = cards.value.startCard
-  const endCard = cards.value.endCard
+  const startCard = items.value.startCard
+  const endCard = items.value.endCard
   const startCardIsComment = startCard.isComment || utils.isNameComment(startCard.name)
   const endCardIsComment = startCard.isComment || utils.isNameComment(endCard.name)
   return startCardIsComment || endCardIsComment
@@ -237,8 +241,8 @@ const filtersIsActive = computed(() => {
 })
 const isCardsFilteredByFrame = computed(() => {
   const frameIds = store.state.filteredFrameIds
-  const startCard = cards.value.startCard
-  const endCard = cards.value.endCard
+  const startCard = items.value.startCard
+  const endCard = items.value.endCard
   const startCardInFilter = frameIds.includes(startCard.frameId)
   const endCardInFilter = frameIds.includes(endCard.frameId)
   return startCardInFilter || endCardInFilter
@@ -276,37 +280,52 @@ const checkIfShouldPauseConnectionDirections = async () => {
 
 // path
 
+const remoteCardsIsDragging = computed(() => Boolean(store.state.remoteCardsDragging.length))
+const remoteBoxesIsDragging = computed(() => Boolean(store.state.remoteBoxesDragging.length))
+const remoteItemsIsDragging = computed(() => remoteCardsIsDragging.value || remoteBoxesIsDragging.value)
+const remoteItemsDragging = computed(() => {
+  const cards = utils.clone(store.state.remoteCardsSelected)
+  const boxes = utils.clone(store.state.remoteBoxesSelected)
+  return cards.concat(boxes)
+})
+const remoteItemsSelected = computed(() => {
+  const cards = utils.clone(store.state.remoteCardsSelected)
+  const boxes = utils.clone(store.state.remoteBoxesSelected)
+  return cards.concat(boxes)
+})
+const multipleItemsSelectedIds = computed(() => {
+  const cards = utils.clone(store.state.multipleCardsSelectedIds)
+  const boxes = utils.clone(store.state.multipleBoxesSelectedIds)
+  return cards.concat(boxes)
+})
 const isUpdatingPath = computed(() => {
   let shouldHide
   const currentUserIsDragging = store.state.currentUserIsDraggingCard
-  let cards = []
-  const multipleCardsSelectedIds = store.state.multipleCardsSelectedIds
-  const currentCardId = store.state.currentDraggingCardId
-  const remoteCardsDragging = utils.clone(store.state.remoteCardsDragging)
-  const remoteCardsSelected = utils.clone(store.state.remoteCardsSelected)
+  let items = []
+  const currentItemId = store.state.currentDraggingCardId || store.state.currentDraggingBoxId
   // local multiple
-  if (multipleCardsSelectedIds.length && currentUserIsDragging) {
-    cards = multipleCardsSelectedIds.map(id => store.getters['currentCards/byId'](id))
+  if (multipleItemsSelectedIds.value.length && currentUserIsDragging) {
+    items = multipleItemsSelectedIds.value.map(id => store.getters['currentSpace/itemById'](id))
   // local single
-  } else if (currentCardId && currentUserIsDragging) {
-    const currentCard = store.getters['currentCards/byId'](currentCardId)
-    cards = [currentCard]
+  } else if (currentItemId && currentUserIsDragging) {
+    const currentItem = store.getters['currentSpace/itemById'](currentItemId)
+    items = [currentItem]
   // remote multiple
-  } else if (remoteCardsIsDragging.value && remoteCardsSelected.length) {
-    cards = remoteCardsSelected.map(card => {
-      card.id = card.cardId
-      return card
+  } else if (remoteItemsIsDragging.value && remoteItemsSelected.value.length) {
+    items = remoteItemsSelected.value.map(item => {
+      item.id = item.cardId || item.boxId
+      return item
     })
   // remote single
-  } else if (remoteCardsIsDragging.value) {
-    cards = remoteCardsDragging.map(card => {
-      card.id = card.cardId
-      return card
+  } else if (remoteItemsIsDragging.value) {
+    items = remoteItemsDragging.value.map(item => {
+      item.id = item.cardId || item.boxId
+      return item
     })
   }
-  cards = cards.filter(card => Boolean(card))
-  cards.forEach(card => {
-    if (card.id === props.connection.startItemId || card.id === props.connection.endItemId) {
+  items = items.filter(item => Boolean(item))
+  items.forEach(item => {
+    if (item.id === props.connection.startItemId || item.id === props.connection.endItemId) {
       shouldHide = true
     }
   })
@@ -369,7 +388,7 @@ const cancelAnimation = () => {
   state.frameCount = 0
 }
 const shouldAnimate = computed(() => {
-  if (store.state.currentUserIsDraggingCard) { return }
+  if (store.state.currentUserIsDraggingCard || store.state.currentUserIsDraggingBox) { return }
   return Boolean(isSelected.value || detailsIsVisible.value || remoteDetailsIsVisible.value || isRemoteSelected.value)
 })
 watch(() => shouldAnimate.value, (value, prevValue) => {
@@ -421,15 +440,15 @@ const isActive = computed(() => {
     detailsIsVisible.value ||
     remoteDetailsIsVisible.value ||
     isRemoteSelected.value ||
-    isCurrentCardConnection.value ||
+    isCurrentItemConnection.value ||
     isConnectedToMultipleCardsSelected.value ||
     isDraggingCurrentConnectionLabel.value
 })
 const isHovered = computed(() => {
-  if (store.state.currentUserIsDraggingCard) { return }
+  if (store.state.currentUserIsDraggingCard || store.state.currentUserIsDraggingBox) { return }
   return props.connection.id === store.state.currentUserIsHoveringOverConnectionId ||
     props.connection.id === store.state.currentUserIsDraggingConnectionIdLabel ||
-    isHoveredOverConnectedCard.value
+    isHoveredOverConnectedItem.value
 })
 const handleMouseEnter = () => {
   store.commit('currentUserIsHoveringOverConnectionId', props.connection.id)

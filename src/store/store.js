@@ -178,7 +178,7 @@ const store = createStore({
     currentConnectionColor: '',
     remoteConnectionDetailsVisible: [],
     remoteCurrentConnections: [],
-    currentCardConnections: [],
+    currentItemConnections: [],
     // connection labels
     remoteUserDraggingConnectionLabel: [],
 
@@ -757,7 +757,7 @@ const store = createStore({
     updateCurrentCardConnections: (state, connections) => {
       connections = connections || []
       connections = connections.map(connection => connection.id)
-      state.currentCardConnections = connections
+      state.currentItemConnections = connections
     },
 
     // Connection Labels
