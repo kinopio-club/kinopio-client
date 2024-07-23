@@ -2068,17 +2068,6 @@ article.card-wrap
           background-color var(--secondary-active-background)
         input
           background-color var(--secondary-active-background)
-    .connected-colors
-      position absolute
-      display flex
-      height 12px
-      width 12px
-      top 10px
-      left 9px
-      overflow hidden
-      border-radius 100px
-      .color
-        width 100%
 
     .lock-icon
       position absolute

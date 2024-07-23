@@ -314,4 +314,17 @@ const handleMouseLeaveConnector = () => {
     border-color var(--primary-on-dark-background)
     .connector-icon
       filter invert()
+
+  .connected-colors
+    position absolute
+    display flex
+    height 12px
+    width 12px
+    top 10px
+    left 9px
+    overflow hidden
+    border-radius 100px
+    .color
+      width 100%
+
 </style>
