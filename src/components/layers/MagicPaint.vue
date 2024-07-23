@@ -517,7 +517,6 @@ const selectItemsBetweenCurrentAndPrevPosition = (position) => {
 const selectItems = (points) => {
   if (shouldPreventSelectionOnMobile()) { return }
   if (userCannotEditSpace.value) { return }
-  console.log(store.state.currentItemConnections)
   selectCards(points)
   selectBoxes(points)
   selectConnections(points)

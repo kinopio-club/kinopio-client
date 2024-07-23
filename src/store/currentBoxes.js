@@ -5,6 +5,7 @@ import utils from '@/utils.js'
 import { nanoid } from 'nanoid'
 import randomColor from 'randomcolor'
 import uniq from 'lodash-es/uniq'
+import { nextTick } from 'vue'
 
 // normalized state
 // https://github.com/vuejs/vuejs.org/issues/1636
@@ -385,6 +386,7 @@ export default {
     //     element.style.left = box.x + 'px'
     //     element.style.top = box.y + 'px'
     //   })
+    //   context.dispatch('currentConnections/updatePathsWhileDragging', { connections }, { root: true })
     // },
     move: (context, { endCursor, prevCursor, delta }) => {
       const zoom = context.rootGetters.spaceCounterZoomDecimal
@@ -402,10 +404,12 @@ export default {
       boxes = boxes.filter(box => !box.isLocked)
       boxes = boxes.filter(box => context.rootGetters['currentUser/canEditBox'](box))
       // prevent boxes bunching up at 0
+      let connections = []
       boxes.forEach(box => {
         if (!box) { return }
         if (box.x === 0) { delta.x = Math.max(0, delta.x) }
         if (box.y === 0) { delta.y = Math.max(0, delta.y) }
+        connections = connections.concat(context.rootGetters['currentConnections/byItemId'](box.id))
       })
       boxes = boxes.filter(box => Boolean(box))
       // prevent boxes with null or negative positions
@@ -447,6 +451,7 @@ export default {
       // update
       context.commit('move', { boxes })
       context.commit('boxesWereDragged', true, { root: true })
+      context.dispatch('currentConnections/updatePathsWhileDragging', { connections }, { root: true })
       context.dispatch('broadcast/update', { updates: { boxes }, type: 'moveBoxes', handler: 'currentBoxes/moveWhileDraggingBroadcast' }, { root: true })
       context.dispatch('updateSnapGuides', boxes)
     },
@@ -482,6 +487,9 @@ export default {
       context.dispatch('broadcast/update', { updates: { boxes }, type: 'moveBoxes', handler: 'currentBoxes/moveBroadcast' }, { root: true })
       context.dispatch('history/resume', null, { root: true })
       context.dispatch('history/add', { boxes, useSnapshot: true }, { root: true })
+      nextTick(() => {
+        context.dispatch('currentConnections/updateMultiplePaths', boxes, { root: true })
+      })
     },
 
     // remove
