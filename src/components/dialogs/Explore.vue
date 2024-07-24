@@ -205,7 +205,6 @@ dialog.explore.wide(v-if="visible" :open="visible" ref="dialogElement" :style="{
       :resultsSectionHeight="state.resultsSectionHeight"
       :parentDialog="parentDialog"
       :previewImageIsWide="true"
-      :hideFilter="true"
       :showCollaborators="true"
     )
 </template>
