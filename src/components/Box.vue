@@ -33,6 +33,10 @@ onMounted(() => {
       updateRemoteConnections()
     } else if (type === 'isLoadingSpace') {
       updateCurrentConnections()
+    } else if (type === 'triggerUpdateItemCurrentConnections') {
+      const itemId = payload
+      if (itemId !== props.box.id) { return }
+      updateCurrentConnections()
     }
   })
   initViewportObserver()

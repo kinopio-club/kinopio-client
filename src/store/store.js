@@ -637,6 +637,7 @@ const store = createStore({
     triggerSonarPing: (state, event) => {},
     triggerUpdatePathWhileDragging: (state, connections) => {},
     triggerUpdateCardDimensionsAndPaths: (state, cardId) => {},
+    triggerUpdateItemCurrentConnections: (state, itemId) => {},
 
     // Used by extensions only
 

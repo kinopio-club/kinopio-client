@@ -192,6 +192,7 @@ export default {
         context.dispatch('history/add', { connections: [connection] }, { root: true })
       }
       context.commit('create', connection)
+      context.commit('triggerUpdateItemCurrentConnections', connection.endItemId, { root: true })
     },
     addType: (context, type) => {
       const isThemeDark = context.rootState.currentUser.theme === 'dark'

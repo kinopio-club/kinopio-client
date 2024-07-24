@@ -72,6 +72,10 @@ onMounted(async () => {
       updateDefaultBackgroundColor(utils.cssVariable('secondary-background'))
     } else if (type === 'triggerCancelLocking') {
       cancelLocking()
+    } else if (type === 'triggerUpdateItemCurrentConnections') {
+      const itemId = payload
+      if (itemId !== props.card.id) { return }
+      updateCurrentConnections()
     }
   })
   updateDefaultBackgroundColor(utils.cssVariable('secondary-background'))
