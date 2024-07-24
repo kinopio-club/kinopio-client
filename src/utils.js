@@ -856,11 +856,13 @@ export default {
     if (!item) { return }
     const card = this.cardElementFromId(item.id)
     const box = this.boxElementFromId(item.id)
+    let rect
     if (card) {
-      return this.cardElementDimensions(item)
+      rect = this.cardElementDimensions(item)
     } else if (box) {
-      return this.boxElementDimensions(item)
+      rect = this.boxElementDimensions(item)
     }
+    return rect
   },
 
   // Cards
@@ -1226,6 +1228,7 @@ export default {
   rectFromConnectionPath (path) {
     const pathStart = this.startCoordsFromConnectionPath(path)
     const pathEndRelative = this.endCoordsFromConnectionPath(path)
+    if (!pathStart) { return {} }
     let rect = {
       x: pathStart.x,
       y: pathStart.y,

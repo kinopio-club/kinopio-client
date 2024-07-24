@@ -522,6 +522,13 @@ const currentCards = {
         return { id: cardId }
       })
       context.dispatch('updateDimensions', { cards })
+      nextTick(() => {
+        nextTick(() => {
+          let connections = context.rootGetters['currentConnections/byMultipleItemIds'](cardIds)
+          connections = utils.clone(connections)
+          context.dispatch('currentConnections/updatePaths', { connections }, { root: true })
+        })
+      })
     },
 
     // tilt
