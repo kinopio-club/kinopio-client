@@ -266,6 +266,9 @@ const self = {
           case 'boxUpdated':
             box = item.prev
             context.dispatch('currentBoxes/update', box, { root: true })
+            nextTick(() => {
+              context.dispatch('currentConnections/updatePaths', { itemId: box.id }, { root: true })
+            })
             break
         }
       })
