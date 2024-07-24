@@ -67,11 +67,11 @@ export default {
 
     // broadcast
 
-    resizeBroadcast: (state, { box }) => {
-      const element = document.querySelector(`.box[data-box-id="${box.id}"]`)
-      element.style.width = box.resizeWidth + 'px'
-      element.style.height = box.resizeHeight + 'px'
-    },
+    // resizeBroadcast: (state, { box }) => {
+    //   const element = document.querySelector(`.box[data-box-id="${box.id}"]`)
+    //   element.style.width = box.resizeWidth + 'px'
+    //   element.style.height = box.resizeHeight + 'px'
+    // },
     moveWhileDraggingBroadcast: (state, { boxes }) => {
       boxes.forEach(box => {
         const element = document.querySelector(`.box[data-box-id="${box.id}"]`)
@@ -186,6 +186,7 @@ export default {
     // resize
 
     resize: (context, { boxIds, delta }) => {
+      let connections = []
       boxIds.forEach(boxId => {
         const box = context.getters.byId(boxId)
         let width = box.resizeWidth
@@ -195,7 +196,9 @@ export default {
         const updates = { id: boxId, resizeWidth: width, resizeHeight: height }
         context.dispatch('update', updates)
         context.dispatch('broadcast/update', { updates, type: 'resizeBox', handler: 'currentBoxes/update' }, { root: true })
+        connections = connections.concat(context.rootGetters['currentConnections/byItemId'](box.id))
       })
+      context.dispatch('currentConnections/updatePathsWhileDragging', { connections }, { root: true })
     },
 
     // dimensions

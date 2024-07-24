@@ -247,6 +247,7 @@ const stopResizingBoxes = () => {
   store.dispatch('history/resume')
   const boxIds = store.state.currentUserIsResizingBoxIds
   const boxes = boxIds.map(id => store.getters['currentBoxes/byId'](id))
+  store.dispatch('currentConnections/updateMultiplePaths', boxes)
   store.dispatch('history/add', { boxes, useSnapshot: true })
   store.commit('currentUserIsResizingBox', false)
   store.dispatch('currentUserToolbar', 'card')
