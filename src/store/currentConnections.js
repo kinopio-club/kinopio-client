@@ -514,7 +514,6 @@ export default {
       return Boolean(existing.length)
     },
     connectionPathBetweenItems: (state, getters, rootState, rootGetters) => ({ startItem, endItem, startItemId, endItemId, controlPoint, estimatedEndItemConnectorPosition }) => {
-      // currentSpace/itemById
       startItem = startItem || rootGetters['currentSpace/itemById'](startItemId)
       endItem = endItem || rootGetters['currentSpace/itemById'](endItemId)
       if (!startItem || !endItem) { return }
