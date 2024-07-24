@@ -537,7 +537,7 @@ const currentCards = {
         const updates = { id: cardId, tilt }
         context.dispatch('update', { card: updates })
         context.dispatch('broadcast/update', { updates, type: 'tiltCard', handler: 'currentCards/update' }, { root: true })
-        const connections = context.rootGetters['currentConnections/byCardId'](cardId)
+        const connections = context.rootGetters['currentConnections/byItemId'](cardId)
         context.dispatch('currentConnections/updatePathsWhileDragging', { connections }, { root: true })
       })
     },
@@ -575,7 +575,7 @@ const currentCards = {
         if (!card) { return }
         if (card.x === 0) { delta.x = Math.max(0, delta.x) }
         if (card.y === 0) { delta.y = Math.max(0, delta.y) }
-        connections = connections.concat(context.rootGetters['currentConnections/byCardId'](card.id))
+        connections = connections.concat(context.rootGetters['currentConnections/byItemId'](card.id))
       })
       cards = cards.filter(card => Boolean(card))
       // update card position
@@ -798,7 +798,7 @@ const currentCards = {
         context.dispatch('deleteCard', card)
       }
       context.dispatch('broadcast/update', { updates: card, type: 'removeCard', handler: 'currentCards/remove' }, { root: true })
-      context.dispatch('currentConnections/removeFromCard', card, { root: true })
+      context.dispatch('currentConnections/removeFromItem', card, { root: true })
       context.commit('triggerUpdateHeaderAndFooterPosition', null, { root: true })
       const cardIsUpdatedByCurrentUser = card.userId === context.rootState.currentUser.id
       if (cardIsUpdatedByCurrentUser) {
@@ -902,13 +902,13 @@ const currentCards = {
       let connections = []
       cards.forEach((card, index) => {
         if (index === 0) { return }
-        const startCardId = cards[index - 1].id
-        const endCardId = cards[index].id
+        const startItemId = cards[index - 1].id
+        const endItemId = cards[index].id
         connections.push({
           id: nanoid(),
-          startCardId,
-          endCardId,
-          path: this.$store.getters['currentConnections/connectionPathBetweenCards']({ startCardId, endCardId })
+          startItemId,
+          endItemId,
+          path: this.$store.getters['currentConnections/connectionPathBetweenItems']({ startItemId, endItemId })
         })
       })
       connections.forEach(connection => {

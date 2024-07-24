@@ -59,12 +59,12 @@ const showLabelsIsVisible = () => {
 
 const reverseConnections = () => {
   props.connections.forEach(connection => {
-    const startCardId = connection.endCardId
-    const endCardId = connection.startCardId
+    const startItemId = connection.endItemId
+    const endItemId = connection.startItemId
     store.dispatch('currentConnections/update', {
       id: connection.id,
-      startCardId,
-      endCardId
+      startItemId,
+      endItemId
     })
   })
   store.dispatch('currentConnections/updatePaths', { connections: props.connections })

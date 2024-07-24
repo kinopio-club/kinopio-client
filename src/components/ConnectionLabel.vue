@@ -128,10 +128,10 @@ const isConnectionFilteredByType = computed(() => {
 const isCardsFilteredByFrame = computed(() => {
   const frameIds = store.state.filteredFrameIds
   const cards = utils.clone(store.getters['currentCards/all'])
-  const startCardId = props.connection.startCardId
-  const endCardId = props.connection.endCardId
-  const startCard = cards.filter(card => card.id === startCardId)[0]
-  const endCard = cards.filter(card => card.id === endCardId)[0]
+  const startItemId = props.connection.startItemId
+  const endItemId = props.connection.endItemId
+  const startCard = cards.filter(card => card.id === startItemId)[0]
+  const endCard = cards.filter(card => card.id === endItemId)[0]
   const startCardInFilter = frameIds.includes(startCard.frameId)
   const endCardInFilter = frameIds.includes(endCard.frameId)
   return startCardInFilter || endCardInFilter

@@ -845,6 +845,24 @@ export default {
     return items
   },
 
+  // items (cards or boxes)
+
+  itemElement (itemId) {
+    const card = this.cardElementFromId(itemId)
+    const box = this.boxElementFromId(itemId)
+    return card || box
+  },
+  itemElementDimensions (item) {
+    if (!item) { return }
+    const card = this.cardElementFromId(item.id)
+    const box = this.boxElementFromId(item.id)
+    if (card) {
+      return this.cardElementDimensions(item)
+    } else if (box) {
+      return this.boxElementDimensions(item)
+    }
+  },
+
   // Cards
 
   emptyCard () {
@@ -859,6 +877,7 @@ export default {
     const element = document.querySelector(`article#card[data-card-id="${card.id}"]`)
     if (!element) { return }
     const cardId = card.id
+    card.shouldRender = element.dataset.shouldRender
     card.x = parseInt(element.dataset.x)
     card.y = parseInt(element.dataset.y)
     const width = parseInt(element.dataset.resizeWidth || element.dataset.width)
@@ -872,6 +891,7 @@ export default {
     if (!box) { return }
     const element = this.boxElementFromId(box.id)
     if (!element) { return }
+    box.shouldRender = element.dataset.shouldRender
     box.x = parseInt(element.dataset.x)
     box.y = parseInt(element.dataset.y)
     box.resizeWidth = parseInt(element.dataset.resizeWidth)
@@ -1089,12 +1109,13 @@ export default {
       y: position.y + offset
     }
   },
-  estimatedCardConnectorPosition (card) {
+  estimatedItemConnectorPosition (item) {
     const offset = 15
-    let rightSide = card.x + card.width
+    const width = item.resizeWidth || item.width
+    let rightSide = item.x + width
     let x = rightSide
     x = x - offset
-    let y = card.y
+    let y = item.y
     y = y + offset
     const position = {
       x: Math.round(x),
@@ -1103,8 +1124,22 @@ export default {
     return position
   },
 
-  // Connection Path Utils 🐙
+  // Connections 🐙
 
+  migrationConnections (connections) { // migration added July 2024
+    if (!connections) { return }
+    return connections.map(connection => {
+      if (connection.startCardId) {
+        connection.startItemId = connection.startCardId
+      }
+      if (connection.endCardId) {
+        connection.endItemId = connection.endCardId
+      }
+      delete connection.startCardId
+      delete connection.endCardId
+      return connection
+    })
+  },
   spaceZoomDecimal () {
     const element = document.getElementById('space')
     return element.dataset.zoom || 1
@@ -1112,17 +1147,18 @@ export default {
   spaceCounterZoomDecimal () {
     return 1 / this.spaceZoomDecimal()
   },
-  connectorCoords (cardId) {
-    const cardConnector = document.querySelector(`.connector[data-card-id="${cardId}"] button`)
-    const cardUnlockButton = document.querySelector(`.card-unlock-button[data-card-id="${cardId}"] button`)
-    const element = cardConnector || cardUnlockButton
+  connectorCoords (itemId) {
+    const itemConnector = document.querySelector(`.connector[data-item-id="${itemId}"] button`)
+    const itemUnlockButton = document.querySelector(`.item-unlock-button[data-item-id="${itemId}"] button`)
+    const element = itemConnector || itemUnlockButton
     if (!element) { return }
-    const cardElement = document.querySelector(`article#card[data-card-id="${cardId}"]`)
-    if (!cardElement.dataset.shouldRender) { return }
+    const itemElement = this.itemElement(itemId)
+    if (!itemElement.dataset.shouldRender) { return }
     let rect = element.getBoundingClientRect()
     rect.x = rect.x + window.scrollX
     rect.y = rect.y + window.scrollY
-    return this.rectCenter(rect)
+    const center = this.rectCenter(rect)
+    return center
   },
   coordsWithCurrentScrollOffset ({ x, y, shouldIgnoreZoom }) {
     let zoom = this.spaceCounterZoomDecimal() || 1
@@ -1457,8 +1493,8 @@ export default {
       const userId = this.itemUserId(user, connection, nullItemUsers)
       connection.id = nanoid()
       connection.connectionTypeId = this.updateAllIds(connection, 'connectionTypeId', connectionTypeIdDeltas)
-      connection.startCardId = this.updateAllIds(connection, 'startCardId', cardIdDeltas)
-      connection.endCardId = this.updateAllIds(connection, 'endCardId', cardIdDeltas)
+      connection.startItemId = this.updateAllIds(connection, 'startItemId', cardIdDeltas)
+      connection.endItemId = this.updateAllIds(connection, 'endItemId', cardIdDeltas)
       connection.userId = userId
       return connection
     })

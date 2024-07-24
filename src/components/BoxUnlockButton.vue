@@ -13,6 +13,7 @@ const state = reactive({
 })
 
 const canEditBox = computed(() => store.getters['currentUser/canEditBox'](props.box))
+const connectionTypes = computed(() => store.getters['currentConnections/typesByItemId'](props.box.id))
 
 // styles
 
@@ -60,8 +61,11 @@ const unlockBox = (event) => {
 </script>
 
 <template lang="pug">
-.box-unlock-button.inline-button-wrap(:style="positionStyles" @mouseup.left="unlockBox" @touchend="unlockBox")
+.box-unlock-button.inline-button-wrap.item-unlock-button(:style="positionStyles" @mouseup.left="unlockBox" @touchend="unlockBox" :data-item-id="box.id")
   button.inline-button(tabindex="-1" :style="backgroundStyles" :class="{'is-light-in-dark-theme': isLightInDarkTheme, 'is-dark-in-light-theme': isDarkInLightTheme}")
+    .connected-colors
+      template(v-for="type in connectionTypes" :key="type.id")
+        .color(:style="{ background: type.color}")
     img.icon.lock-icon(src="@/assets/lock.svg")
 </template>
 
@@ -86,5 +90,16 @@ const unlockBox = (event) => {
     border-color var(--primary-on-dark-background)
     .icon
       filter invert()
+  .connected-colors
+    position absolute
+    left 0
+    top 0
+    display flex
+    height 100%
+    width 100%
+    border-radius calc(var(--entity-radius) - 1px)
+    overflow hidden
+    .color
+      width 100%
 
 </style>

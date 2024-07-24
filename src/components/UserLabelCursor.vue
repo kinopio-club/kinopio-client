@@ -30,7 +30,6 @@ const props = defineProps({
   user: Object
 })
 
-// TODO replace state w global vars
 const state = reactive({
   x: 0,
   y: 0,

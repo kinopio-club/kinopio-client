@@ -4,6 +4,8 @@ import { useStore } from 'vuex'
 
 import utils from '@/utils.js'
 import fonts from '@/data/fonts.js'
+import ItemConnectorButton from '@/components/ItemConnectorButton.vue'
+import postMessage from '@/postMessage.js'
 
 import randomColor from 'randomcolor'
 const store = useStore()
@@ -25,7 +27,20 @@ let observer
 const boxElement = ref(null)
 
 onMounted(() => {
+  store.subscribe((mutation, state) => {
+    const { type, payload } = mutation
+    if (type === 'updateRemoteCurrentConnection' || type === 'removeRemoteCurrentConnection') {
+      updateRemoteConnections()
+    } else if (type === 'isLoadingSpace') {
+      updateCurrentConnections()
+    } else if (type === 'triggerUpdateItemCurrentConnections') {
+      const itemId = payload
+      if (itemId !== props.box.id) { return }
+      updateCurrentConnections()
+    }
+  })
   initViewportObserver()
+  updateCurrentConnections()
 })
 onUpdated(() => {
   initViewportObserver()
@@ -42,11 +57,17 @@ const state = reactive({
   isLocking: false,
   lockingPercent: 0,
   lockingAlpha: 0,
-  isVisibleInViewport: false
+  isVisibleInViewport: false,
+  shouldRenderParent: false,
+  // connections
+  currentConnections: [],
+  isRemoteConnecting: false,
+  remoteConnectionColor: ''
 })
 
 const spaceCounterZoomDecimal = computed(() => store.getters.spaceCounterZoomDecimal)
 const canEditBox = computed(() => store.getters['currentUser/canEditBox'](props.box))
+const currentUserIsSignedIn = computed(() => store.getters['currentUser/isSignedIn'])
 
 // normalize
 
@@ -64,6 +85,15 @@ const normalizeBox = (box) => {
   box.fill = box.fill || 'filled'
   return box
 }
+
+// should render
+
+const updateShouldRenderParent = (value) => {
+  state.shouldRenderParent = value
+}
+const shouldRender = computed(() => {
+  return state.isVisibleInViewport || state.shouldRenderParent
+})
 
 // is visible in viewport
 
@@ -282,6 +312,10 @@ const labelStyles = computed(() => {
 
 // interacting
 
+const updateCurrentConnections = async () => {
+  await nextTick()
+  state.currentConnections = store.getters['currentConnections/byItemId'](props.box.id)
+}
 const isPainting = computed(() => store.state.currentUserIsPainting)
 const canEditSpace = computed(() => store.getters['currentUser/canEditSpace']())
 const shouldJiggle = computed(() => {
@@ -320,8 +354,15 @@ const updateIsHover = (value) => {
   if (isDragging.value) { return }
   if (isPainting.value) { return }
   state.isHover = value
+  if (value) {
+    store.commit('currentUserIsHoveringOverBoxId', props.box.id)
+    updateCurrentConnections()
+  } else {
+    store.commit('currentUserIsHoveringOverBoxId', '')
+  }
 }
 const endBoxInfoInteraction = (event) => {
+  if (isConnectingTo.value) { return }
   const isMeta = event.metaKey || event.ctrlKey
   const userId = store.state.currentUser.id
   store.dispatch('currentBoxes/afterMove')
@@ -344,6 +385,9 @@ const endBoxInfoInteraction = (event) => {
     store.commit('boxesWereDragged', false)
   }
 }
+const currentBoxDetailsIsVisible = computed(() => {
+  return props.box.id === store.state.boxDetailsIsVisibleForBoxId
+})
 
 // select
 
@@ -630,6 +674,44 @@ const endBoxInfoInteractionTouch = (event) => {
     endBoxInfoInteraction(event)
   }
 }
+
+// connections
+
+const isConnectingTo = computed(() => {
+  const connectingToId = store.state.currentConnectionSuccess.id
+  if (connectingToId) {
+    postMessage.sendHaptics({ name: 'softImpact' })
+  }
+  return connectingToId === props.box.id
+})
+const isConnectingFrom = computed(() => {
+  return store.state.currentConnectionStartItemIds.includes(props.box.id)
+})
+const connectedConnectionTypes = computed(() => store.getters['currentConnections/typesByItemId'](props.box.id))
+const connectorIsVisible = computed(() => {
+  const spaceIsOpen = store.state.currentSpace.privacy === 'open' && currentUserIsSignedIn.value
+  let isVisible
+  if (isLocked.value) { return }
+  if (state.isRemoteConnecting) {
+    isVisible = true
+  } else if (spaceIsOpen || canEditBox.value || connectedConnectionTypes.value.length) {
+    isVisible = true
+  }
+  return isVisible
+})
+const updateRemoteConnections = () => {
+  const connection = store.state.remoteCurrentConnections.find(remoteConnection => {
+    const isConnectedToStart = remoteConnection.startItemId === props.box.id
+    const isConnectedToEnd = remoteConnection.endItemId === props.box.id
+    return isConnectedToStart || isConnectedToEnd
+  })
+  if (connection) {
+    state.isRemoteConnecting = true
+    state.remoteConnectionColor = connection.color
+  } else {
+    state.isRemoteConnecting = false
+  }
+}
 </script>
 
 <template lang="pug">
@@ -642,6 +724,7 @@ const endBoxInfoInteractionTouch = (event) => {
   :data-resize-height="normalizedBox.resizeHeight"
   :data-is-locked="isLocked"
   :data-is-visible-in-viewport="state.isVisibleInViewport"
+  :data-should-render="shouldRender"
 
   :style="styles"
   :class="{hover: state.isHover, active: isDragging, 'box-jiggle': shouldJiggle, 'is-resizing': isResizing}"
@@ -650,7 +733,7 @@ const endBoxInfoInteractionTouch = (event) => {
 
   //- name
   .box-info(
-    v-if="state.isVisibleInViewport"
+    v-if="shouldRender"
     :data-box-id="box.id"
     :data-is-visible-in-viewport="state.isVisibleInViewport"
     :style="labelStyles"
@@ -675,13 +758,23 @@ const endBoxInfoInteractionTouch = (event) => {
       h2 {{h2Name}}
     template(v-else)
       span {{box.name}}
-
     .selected-user-avatar(v-if="isRemoteSelected || isRemoteBoxDetailsVisible" :style="{backgroundColor: remoteSelectedColor || remoteBoxDetailsVisibleColor}")
       img(src="@/assets/anon-avatar.svg")
 
-  .lock-button-wrap.inline-button-wrap(v-if="isLocked")
-    button.inline-button(tabindex="-1" :style="{background: color}")
-      img.icon.lock-icon(src="@/assets/lock.svg")
+  ItemConnectorButton(
+    :visible="connectorIsVisible"
+    :box="box"
+    :itemConnections="state.currentConnections"
+    :isConnectingTo="isConnectingTo"
+    :isConnectingFrom="isConnectingFrom"
+    :isVisibleInViewport="state.isVisibleInViewport"
+    :isRemoteConnecting="state.isRemoteConnecting"
+    :remoteConnectionColor="state.remoteConnectionColor"
+    :currentBackgroundColor="color"
+    :backgroundIsTransparent="true"
+    :parentDetailsIsVisible="currentBoxDetailsIsVisible"
+    @shouldRenderParent="updateShouldRenderParent"
+  )
 
   //- resize
   .bottom-button-wrap(v-if="resizeIsVisible" :class="{unselectable: isPainting}")
@@ -787,22 +880,6 @@ const endBoxInfoInteractionTouch = (event) => {
     margin 0
     display inline-block
 
-  .lock-button-wrap
-    pointer-events all
-    position absolute
-    right 0px
-    top 0px
-    cursor pointer
-    button
-      border-color transparent
-      cursor pointer
-    .lock-icon
-      opacity 0
-      position absolute
-      left 5.5px
-      top 2px
-      height 10px
-
   // resize
   .bottom-button-wrap
     .inline-button-wrap
@@ -840,6 +917,16 @@ const endBoxInfoInteractionTouch = (event) => {
     img
       width 10px
       height 10px
+
+  .connector
+    padding 8px
+    align-self right
+    cursor cell
+    position absolute
+    right 0
+    pointer-events all
+    button
+      z-index 1
 
   .snap-guide
     --snap-guide-width 6px

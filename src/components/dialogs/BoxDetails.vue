@@ -139,6 +139,10 @@ const toggleColorPicker = () => {
 const updateColor = (color) => {
   update({ color })
 }
+const isThemeDarkAndUserColorLight = computed(() => {
+  const isThemeDark = store.state.currentUser.theme === 'dark'
+  return isThemeDark && !colorisDark.value
+})
 
 // remove
 
@@ -175,6 +179,7 @@ const scrollIntoViewAndFocus = async () => {
 
 <template lang="pug">
 dialog.narrow.box-details(v-if="visible" :open="visible" @click.left.stop="closeDialogs" ref="dialogElement" :style="styles" :data-box-id="currentBox.id")
+  .dark-theme-background-layer(v-if="isThemeDarkAndUserColorLight")
   section
     .row.info-row
       //- color
@@ -197,7 +202,7 @@ dialog.narrow.box-details(v-if="visible" :open="visible" @click.left.stop="close
           v-model="name"
           @keydown.enter.stop.prevent="closeAllDialogs"
           maxLength="600"
-          :class="{'is-dark': colorisDark}"
+          :class="{'is-dark': colorisDark, 'is-light': !colorisDark}"
         )
     CardOrBoxActions(:visible="canEditBox" :boxes="[currentBox]" @closeDialogs="closeDialogs" :colorIsHidden="true")
     .row(v-if="canEditBox")
@@ -219,8 +224,11 @@ dialog.narrow.box-details(v-if="visible" :open="visible" @click.left.stop="close
     margin-top 2px
     margin-bottom 0
     width calc(100% - 6px)
+    border-color var(--primary-border)
     &.is-dark
-      color var(--primary-background)
+      color var(--primary-on-dark-background)
+    &.is-light
+      color var(--primary-on-light-background)
   .info-row
     align-items flex-start
 </style>

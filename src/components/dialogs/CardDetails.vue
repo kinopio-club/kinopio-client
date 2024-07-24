@@ -225,9 +225,15 @@ const updateDimensions = async (cardId) => {
 const updateDimensionsAndPathsDebounced = debounce(async () => {
   await updateDimensionsAndPaths()
 }, 200)
-const updateDimensionsAndPaths = async () => {
-  await updateDimensions()
-  updatePaths()
+const updateDimensionsAndPaths = async (cardId) => {
+  cardId = cardId || card.value.id
+  await updateDimensions(cardId)
+  updatePaths(cardId)
+}
+const updatePaths = async (cardId) => {
+  cardId = cardId || card.value.id
+  await nextTick()
+  store.dispatch('currentConnections/updatePaths', { itemId: cardId })
 }
 
 // space
@@ -357,7 +363,7 @@ const showCard = async (cardId) => {
   store.dispatch('checkIfItemShouldIncreasePageSize', item)
   state.previousSelectedTag = {}
   updateMediaUrls()
-  const connections = store.getters['currentConnections/byCardId'](cardId)
+  const connections = store.getters['currentConnections/byItemId'](cardId)
   store.commit('updateCurrentCardConnections', connections)
   prevCardName = card.value.name
   store.dispatch('history/pause')
@@ -381,7 +387,7 @@ const closeCard = async () => {
     store.dispatch('currentCards/remove', { id: cardId })
   }
   store.dispatch('updatePageSizes')
-  updateDimensionsAndPathsDebounced()
+  updateDimensionsAndPaths(cardId)
   store.dispatch('checkIfItemShouldIncreasePageSize', item)
   store.dispatch('history/resume')
   if (item.name || prevCardName) {
@@ -1130,13 +1136,6 @@ const updatePastedName = (event) => {
   }
   state.wasPasted = true
   store.dispatch('currentCards/updateURLQueryStrings', { cardId: card.value.id })
-}
-
-// connections
-
-const updatePaths = async () => {
-  await nextTick()
-  store.dispatch('currentConnections/updatePaths', { cardId: card.value.id })
 }
 
 // line break

@@ -184,7 +184,7 @@ const updateName = async (item, newName) => {
     store.dispatch('currentCards/updateName', { card, newName })
     await nextTick()
     await nextTick()
-    store.dispatch('currentConnections/updatePaths', { cardId: card.id })
+    store.dispatch('currentConnections/updatePaths', { itemId: card.id })
   }
   if (item.isBox) {
     const box = store.getters['currentBoxes/byId'](item.id)
@@ -469,7 +469,7 @@ const updateCard = async (card, updates) => {
   })
   store.dispatch('currentCards/update', { card })
   await updateCardDimensions()
-  store.dispatch('currentConnections/updatePaths', { cardId: card.id })
+  store.dispatch('currentConnections/updatePaths', { itemId: card.id })
 }
 
 // box

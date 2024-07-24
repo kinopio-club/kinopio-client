@@ -214,6 +214,7 @@ export default {
       if (this.isSuccess(response)) {
         this.$store.commit('clearAllNotifications', false)
         this.$store.commit('currentUser/replaceState', newUser)
+        this.migrationSpacesConnections()
         this.updateSpacesUserId()
         this.updateCurrentSpaceWithNewUserId(currentUser, newUser)
         await this.$store.dispatch('api/createSpaces')
@@ -244,6 +245,7 @@ export default {
         // update local spaces to remote user
         this.removeUneditedSpace('Hello Kinopio')
         this.removeUneditedSpace('Inbox')
+        this.migrationSpacesConnections()
         this.updateSpacesUserId()
         await this.$store.dispatch('api/createSpaces')
         this.notifySignedIn()
@@ -266,6 +268,17 @@ export default {
       } else {
         await this.handleErrors(result)
       }
+    },
+
+    migrationSpacesConnections () {
+      const spaces = cache.getAllSpaces()
+      const newSpaces = spaces.map(space => {
+        space.connections = utils.migrationConnections(space.connections)
+        return space
+      })
+      newSpaces.forEach(space => {
+        cache.saveSpace(space)
+      })
     },
 
     updateSpacesUserId () {

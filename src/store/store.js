@@ -90,8 +90,9 @@ const store = createStore({
     currentUserIsDraggingCard: false,
     currentUserIsHoveringOverConnectionId: '',
     currentUserIsHoveringOverCardId: '',
-    currentUserIsHoveringOverConnectorCardId: '',
+    currentUserIsHoveringOverBoxId: '',
     currentUserIsHoveringOverCheckboxCardId: '',
+    currentUserIsHoveringOverConnectorItemId: '',
     currentUserIsPanningReady: false,
     currentUserIsPanning: false,
     currentUserToolbar: 'card', // card, box
@@ -169,7 +170,7 @@ const store = createStore({
     isSelectingY: false,
 
     // connections
-    currentConnectionStartCardIds: [],
+    currentConnectionStartItemIds: [],
     currentConnectionSuccess: {},
     currentConnectionCursorStart: {},
     connectionDetailsPosition: {}, // x, y, pageX, pageY
@@ -177,7 +178,7 @@ const store = createStore({
     currentConnectionColor: '',
     remoteConnectionDetailsVisible: [],
     remoteCurrentConnections: [],
-    currentCardConnections: [],
+    currentItemConnections: [],
     // connection labels
     remoteUserDraggingConnectionLabel: [],
 
@@ -636,6 +637,7 @@ const store = createStore({
     triggerSonarPing: (state, event) => {},
     triggerUpdatePathWhileDragging: (state, connections) => {},
     triggerUpdateCardDimensionsAndPaths: (state, cardId) => {},
+    triggerUpdateItemCurrentConnections: (state, itemId) => {},
 
     // Used by extensions only
 
@@ -662,10 +664,6 @@ const store = createStore({
     currentUserIsHoveringOverCardId: (state, cardId) => {
       utils.typeCheck({ value: cardId, type: 'string' })
       state.currentUserIsHoveringOverCardId = cardId
-    },
-    currentUserIsHoveringOverConnectorCardId: (state, cardId) => {
-      utils.typeCheck({ value: cardId, type: 'string' })
-      state.currentUserIsHoveringOverConnectorCardId = cardId
     },
     currentUserIsHoveringOverCheckboxCardId: (state, cardId) => {
       utils.typeCheck({ value: cardId, type: 'string' })
@@ -709,6 +707,10 @@ const store = createStore({
 
     // Connections
 
+    currentUserIsHoveringOverConnectorItemId: (state, itemId) => {
+      utils.typeCheck({ value: itemId, type: 'string' })
+      state.currentUserIsHoveringOverConnectorItemId = itemId
+    },
     currentUserIsHoveringOverConnectionId: (state, connectionId) => {
       utils.typeCheck({ value: connectionId, type: 'string' })
       state.currentUserIsHoveringOverConnectionId = connectionId
@@ -728,15 +730,15 @@ const store = createStore({
       utils.typeCheck({ value: object, type: 'object' })
       state.currentConnectionCursorStart = object
     },
-    currentConnectionStartCardIds: (state, cardIds) => {
+    currentConnectionStartItemIds: (state, cardIds) => {
       utils.typeCheck({ value: cardIds, type: 'array' })
-      state.currentConnectionStartCardIds = cardIds
+      state.currentConnectionStartItemIds = cardIds
     },
     updateRemoteCurrentConnection: (state, updates) => {
       utils.typeCheck({ value: updates, type: 'object' })
       const index = state.remoteCurrentConnections.findIndex(remoteConnection => {
         const isUserId = remoteConnection.userId === updates.userId
-        const isStartCardId = remoteConnection.startCardId === updates.startCardId
+        const isStartCardId = remoteConnection.startItemId === updates.startItemId
         return isUserId && isStartCardId
       })
       if (index >= 0) {
@@ -756,7 +758,7 @@ const store = createStore({
     updateCurrentCardConnections: (state, connections) => {
       connections = connections || []
       connections = connections.map(connection => connection.id)
-      state.currentCardConnections = connections
+      state.currentItemConnections = connections
     },
 
     // Connection Labels
@@ -851,6 +853,10 @@ const store = createStore({
 
     // Boxes
 
+    currentUserIsHoveringOverBoxId: (state, boxId) => {
+      utils.typeCheck({ value: boxId, type: 'string' })
+      state.currentUserIsHoveringOverBoxId = boxId
+    },
     boxDetailsIsVisibleForBoxId: (state, value) => {
       utils.typeCheck({ value, type: 'string' })
       state.boxDetailsIsVisibleForBoxId = value
