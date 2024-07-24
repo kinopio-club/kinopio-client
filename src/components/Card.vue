@@ -455,7 +455,7 @@ const updateStylesWithWidth = (styles) => {
   const cardHasExtendedContent = cardUrlPreviewIsVisible.value || otherCardIsVisible.value || isVisualCard.value || isAudioCard.value
   const cardHasUrlsOrMedia = cardHasMedia.value || cardHasUrls.value
   let cardMaxWidth = resizeWidth.value || props.card.maxWidth || consts.normalCardMaxWidth
-  let cardWidth = resizeWidth.value || width.value
+  let cardWidth = resizeWidth.value
   if (isComment.value) { return styles }
   styles.maxWidth = cardMaxWidth + 'px'
   styles.width = cardWidth + 'px'
