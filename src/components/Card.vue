@@ -454,15 +454,11 @@ const shouldJiggle = computed(() => {
 const updateStylesWithWidth = (styles) => {
   const cardHasExtendedContent = cardUrlPreviewIsVisible.value || otherCardIsVisible.value || isVisualCard.value || isAudioCard.value
   const cardHasUrlsOrMedia = cardHasMedia.value || cardHasUrls.value
-  const maxWidth = props.card.maxWidth || consts.normalCardMaxWidth
-  styles.maxWidth = resizeWidth.value || maxWidth
+  let cardMaxWidth = resizeWidth.value || props.card.maxWidth || consts.normalCardMaxWidth
+  let cardWidth = resizeWidth.value || width.value
   if (isComment.value) { return styles }
-  if (resizeWidth.value) {
-    styles.maxWidth = resizeWidth.value
-    styles.width = resizeWidth.value
-  }
-  styles.width = styles.width + 'px'
-  styles.maxWidth = styles.maxWidth + 'px'
+  styles.maxWidth = cardMaxWidth + 'px'
+  styles.width = cardWidth + 'px'
   return styles
 }
 const updatePreviousResultItem = () => {
