@@ -758,13 +758,9 @@ const updateRemoteConnections = () => {
       h2 {{h2Name}}
     template(v-else)
       span {{box.name}}
-
     .selected-user-avatar(v-if="isRemoteSelected || isRemoteBoxDetailsVisible" :style="{backgroundColor: remoteSelectedColor || remoteBoxDetailsVisibleColor}")
       img(src="@/assets/anon-avatar.svg")
 
-  .lock-button-wrap.inline-button-wrap(v-if="isLocked")
-    button.inline-button(tabindex="-1" :style="{background: color}")
-      img.icon.lock-icon(src="@/assets/lock.svg")
   ItemConnectorButton(
     :visible="connectorIsVisible"
     :box="box"
@@ -883,22 +879,6 @@ const updateRemoteConnections = () => {
     font-size 20px
     margin 0
     display inline-block
-
-  .lock-button-wrap
-    pointer-events all
-    position absolute
-    right 0px
-    top 0px
-    cursor pointer
-    button
-      border-color transparent
-      cursor pointer
-    .lock-icon
-      opacity 0
-      position absolute
-      left 5.5px
-      top 2px
-      height 10px
 
   // resize
   .bottom-button-wrap
