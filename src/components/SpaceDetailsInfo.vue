@@ -54,7 +54,8 @@ const state = reactive({
   backgroundIsVisible: false,
   privacyPickerIsVisible: false,
   settingsIsVisible: false,
-  exportIsVisible: false
+  exportIsVisible: false,
+  errorRemoveTeam: false
 })
 
 // user
@@ -223,25 +224,23 @@ const closeAllDialogs = () => {
 
 // team
 
-const team = computed(() => currentUser.value.team)
+const team = computed(() => store.state.currentUser.team)
 const currentSpaceIsInTeam = computed(() => store.state.currentSpace.teamId === team.value.id)
 const toggleCurrentSpaceInTeam = (event) => {
   store.commit('clearNotificationsWithPosition')
   const position = utils.cursorPositionInPage(event)
   const teamName = team.value.name
   const shouldRemoveTeam = currentSpaceIsInTeam.value
-  const teamUserIsAdmin = currentUser.value.teamUser.role === 'admin'
-  const canRemoveTeam = store.state.currentSpace.addedToTeamByUserId === currentUser.value.id || teamUserIsAdmin
-  console.log('🐸', store.state.currentSpace.teamId, teamUserIsAdmin, shouldRemoveTeam, '🌺🌺', shouldRemoveTeam, teamUserIsAdmin, canRemoveTeam)
+  const currentUserIsTeamAdmin = store.state.currentUser.teamUser.role === 'admin'
+  const canRemoveTeam = store.state.currentSpace.addedToTeamByUserId === store.state.currentUser.id || currentUserIsTeamAdmin
   if (shouldRemoveTeam && canRemoveTeam) {
     store.dispatch('currentSpace/updateSpace', { teamId: null, addedToTeamByUserId: null })
   } else if (shouldRemoveTeam) {
-    // TODO show error badge state: only the person who added this space to the team, or a teamName team admin can remove the space from the team
+    state.errorRemoveTeam = true
   } else {
-    store.dispatch('currentSpace/updateSpace', { teamId: team.value.id, addedToTeamByUserId: currentUser.value.id })
+    store.dispatch('currentSpace/updateSpace', { teamId: team.value.id, addedToTeamByUserId: store.state.currentUser.id })
     store.commit('addNotificationWithPosition', { message: `Added to ${teamName}`, position, type: 'success', layer: 'app', icon: 'checkmark' })
   }
-  console.log('🐸🐸AFTER🐸', store.state.currentSpace.teamId, teamUserIsAdmin, '🌺🌺', shouldRemoveTeam, teamUserIsAdmin, canRemoveTeam)
 }
 
 </script>
@@ -289,7 +288,7 @@ template(v-if="isSpaceMember")
   .row
     //- Privacy
     PrivacyButton(:privacyPickerIsVisible="state.privacyPickerIsVisible" :showShortName="true" @togglePrivacyPickerIsVisible="togglePrivacyPickerIsVisible" @closeDialogs="closeDialogs" @updateLocalSpaces="updateLocalSpaces")
-
+      //- team | favorite
     template(v-if="team")
       .segmented-buttons
         //- Team
@@ -300,12 +299,14 @@ template(v-if="isSpaceMember")
     template(v-else)
       //- Favorite
       FavoriteSpaceButton(:parentIsDialog="true" @updateLocalSpaces="updateLocalSpaces")
-
     //- Settings
     .button-wrap
       button(@click="toggleSettingsIsVisible" :class="{active: state.settingsIsVisible}")
         img.icon.settings(src="@/assets/settings.svg")
         span Settings
+  //- team error
+  .row(v-if="state.errorRemoveTeam")
+    .badge.danger Only the person who added this space to the team, or a {{team.name}} team admin can remove this space from the team
 
 //- read only options
 .row(v-if="!isSpaceMember")
