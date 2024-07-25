@@ -242,6 +242,14 @@ const toggleCurrentSpaceInTeam = (event) => {
     store.commit('addNotificationWithPosition', { message: `Added to ${teamName}`, position, type: 'success', layer: 'app', icon: 'checkmark' })
   }
 }
+const teamButtonTitle = computed(() => {
+  let addString = 'Add'
+  if (currentSpaceIsInTeam.value) {
+    addString = 'Added'
+  }
+  const teamName = team.value.name || 'Team'
+  return `${addString} to ${teamName}`
+})
 
 </script>
 
@@ -292,7 +300,7 @@ template(v-if="isSpaceMember")
     template(v-if="team")
       .segmented-buttons
         //- Team
-        button.team-button(:title="team.name" :class="{active: currentSpaceIsInTeam}" @click.left.prevent.stop="toggleCurrentSpaceInTeam" @keydown.stop.enter="toggleCurrentSpaceInTeam")
+        button.team-button(:title="teamButtonTitle" :class="{active: currentSpaceIsInTeam}" @click.left.prevent.stop="toggleCurrentSpaceInTeam" @keydown.stop.enter="toggleCurrentSpaceInTeam")
           img.icon.team(src="@/assets/team.svg")
         //- Favorite
         FavoriteSpaceButton(:parentIsDialog="true" @updateLocalSpaces="updateLocalSpaces")
