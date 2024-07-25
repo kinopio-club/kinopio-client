@@ -45,6 +45,7 @@ const AIImages = computed(() => {
   return AIImages.reverse()
 })
 const copy = async (event, text, successMessage) => {
+  store.commit('clearNotificationsWithPosition')
   let position = utils.cursorPositionInPage(event)
   position.x = position.x - 60
   try {
@@ -54,7 +55,6 @@ const copy = async (event, text, successMessage) => {
     console.warn('🚑 copyText', error)
     store.commit('addNotificationWithPosition', { message: 'Copy Error', position, type: 'danger', layer: 'app', icon: 'cancel' })
   }
-  event.target.blur()
 }
 const isSelectedImage = (image) => {
   return state.selectedAIImage.url === image.url

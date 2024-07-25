@@ -21,7 +21,6 @@ const toggleIsFavoriteSpace = (event) => {
   const value = !isFavoriteSpace.value
   store.dispatch('currentUser/updateFavoriteSpace', { space, value })
   emit('updateLocalSpaces')
-  event.target.blur()
 }
 </script>
 
