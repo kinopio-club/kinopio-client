@@ -13,6 +13,7 @@ import AddToExplore from '@/components/AddToExplore.vue'
 import AskToAddToExplore from '@/components/AskToAddToExplore.vue'
 import FavoriteSpaceButton from '@/components/FavoriteSpaceButton.vue'
 import cache from '@/cache.js'
+import utils from '@/utils.js'
 
 const store = useStore()
 
@@ -219,6 +220,30 @@ const closeDialogsAndEmit = () => {
 const closeAllDialogs = () => {
   store.dispatch('closeAllDialogs')
 }
+
+// team
+
+const team = computed(() => currentUser.value.team)
+const currentSpaceIsInTeam = computed(() => store.state.currentSpace.teamId === team.value.id)
+const toggleCurrentSpaceInTeam = (event) => {
+  store.commit('clearNotificationsWithPosition')
+  const position = utils.cursorPositionInPage(event)
+  const teamName = team.value.name
+  const shouldRemoveTeam = currentSpaceIsInTeam.value
+  const teamUserIsAdmin = currentUser.value.teamUser.role === 'admin'
+  const canRemoveTeam = store.state.currentSpace.addedToTeamByUserId === currentUser.value.id || teamUserIsAdmin
+  console.log('🐸', store.state.currentSpace.teamId, teamUserIsAdmin, shouldRemoveTeam, '🌺🌺', shouldRemoveTeam, teamUserIsAdmin, canRemoveTeam)
+  if (shouldRemoveTeam && canRemoveTeam) {
+    store.dispatch('currentSpace/updateSpace', { teamId: null, addedToTeamByUserId: null })
+  } else if (shouldRemoveTeam) {
+    // TODO show error badge state: only the person who added this space to the team, or a teamName team admin can remove the space from the team
+  } else {
+    store.dispatch('currentSpace/updateSpace', { teamId: team.value.id, addedToTeamByUserId: currentUser.value.id })
+    store.commit('addNotificationWithPosition', { message: `Added to ${teamName}`, position, type: 'success', layer: 'app', icon: 'checkmark' })
+  }
+  console.log('🐸🐸AFTER🐸', store.state.currentSpace.teamId, teamUserIsAdmin, '🌺🌺', shouldRemoveTeam, teamUserIsAdmin, canRemoveTeam)
+}
+
 </script>
 
 <template lang="pug">
@@ -260,19 +285,31 @@ const closeAllDialogs = () => {
 ReadOnlySpaceInfoBadges
 
 //- member options
-.row(v-if="isSpaceMember")
-  //- Privacy
-  PrivacyButton(:privacyPickerIsVisible="state.privacyPickerIsVisible" :showShortName="true" @togglePrivacyPickerIsVisible="togglePrivacyPickerIsVisible" @closeDialogs="closeDialogs" @updateLocalSpaces="updateLocalSpaces")
-  FavoriteSpaceButton(@updateLocalSpaces="updateLocalSpaces")
-  //- Settings
-  .button-wrap
-    button(@click="toggleSettingsIsVisible" :class="{active: state.settingsIsVisible}")
-      img.icon.settings(src="@/assets/settings.svg")
-      span Settings
+template(v-if="isSpaceMember")
+  .row
+    //- Privacy
+    PrivacyButton(:privacyPickerIsVisible="state.privacyPickerIsVisible" :showShortName="true" @togglePrivacyPickerIsVisible="togglePrivacyPickerIsVisible" @closeDialogs="closeDialogs" @updateLocalSpaces="updateLocalSpaces")
+
+    template(v-if="team")
+      .segmented-buttons
+        //- Team
+        button.team-button(:title="team.name" :class="{active: currentSpaceIsInTeam}" @click.left.prevent.stop="toggleCurrentSpaceInTeam" @keydown.stop.enter="toggleCurrentSpaceInTeam")
+          img.icon.team(src="@/assets/team.svg")
+        //- Favorite
+        FavoriteSpaceButton(:parentIsDialog="true" @updateLocalSpaces="updateLocalSpaces")
+    template(v-else)
+      //- Favorite
+      FavoriteSpaceButton(:parentIsDialog="true" @updateLocalSpaces="updateLocalSpaces")
+
+    //- Settings
+    .button-wrap
+      button(@click="toggleSettingsIsVisible" :class="{active: state.settingsIsVisible}")
+        img.icon.settings(src="@/assets/settings.svg")
+        span Settings
 
 //- read only options
 .row(v-if="!isSpaceMember")
-  FavoriteSpaceButton(@updateLocalSpaces="updateLocalSpaces")
+  FavoriteSpaceButton(:parentIsDialog="true" @updateLocalSpaces="updateLocalSpaces")
   .button-wrap
     button(@click="toggleSettingsIsVisible" :class="{active: state.settingsIsVisible}")
       img.icon.settings(src="@/assets/settings.svg")
@@ -391,6 +428,9 @@ template(v-if="state.settingsIsVisible")
 
   .background-preview-wrap
     margin-bottom 6px
+
+.team-button
+  padding-right 6px
 
 .space-settings
   .background-preview

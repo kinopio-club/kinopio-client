@@ -966,9 +966,11 @@ button
 .button-wrap
   display inline-block
   position relative
-
   dialog
     top calc(100% - 8px)
+
+.icon.team
+  height 11px
 
 .icon.sunglasses
   height 12px
