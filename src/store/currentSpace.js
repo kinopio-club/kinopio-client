@@ -84,6 +84,9 @@ const currentSpace = {
       })
       cache.updateSpace('collaborators', state.collaborators, state.id)
     },
+    updateTeam: (state, space) => {
+      state.teamId = space.teamId
+    },
     // websocket receive
     updateUser: (state, updatedUser) => {
       state.users = utils.updateUsersWithUser(state.users, updatedUser)
@@ -797,6 +800,7 @@ const currentSpace = {
         let remoteSpace = remoteData
         console.log('🎑 remoteSpace', remoteSpace)
         if (!remoteSpace) { return }
+        context.commit('updateTeam', remoteSpace)
         const spaceIsUnchanged = utils.spaceIsUnchanged(cachedSpace, remoteSpace)
         if (spaceIsUnchanged) {
           context.commit('isLoadingSpace', false, { root: true })
