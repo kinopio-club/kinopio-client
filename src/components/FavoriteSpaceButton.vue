@@ -9,25 +9,26 @@ const props = defineProps({
   parentIsDialog: Boolean
 })
 
-const translucentButton = computed(() => {
+const isTranslucentButton = computed(() => {
   if (props.parentIsDialog) { return }
   return !store.state.currentUser.shouldIncreaseUIContrast
 })
 const isOnline = computed(() => store.state.isOnline)
 
 const isFavoriteSpace = computed(() => store.getters['currentSpace/isFavorite'])
-const toggleIsFavoriteSpace = () => {
+const toggleIsFavoriteSpace = (event) => {
   const space = store.state.currentSpace
   const value = !isFavoriteSpace.value
   store.dispatch('currentUser/updateFavoriteSpace', { space, value })
   emit('updateLocalSpaces')
+  event.target.blur()
 }
 </script>
 
 <template lang="pug">
-button.favorite-space-button(v-if="isOnline" :class="{'translucent-button': translucentButton}" @click.left.prevent="toggleIsFavoriteSpace" title="Favorite Space")
-  img.icon(v-show="isFavoriteSpace" src="@/assets/heart.svg")
-  img.icon(v-show="!isFavoriteSpace" src="@/assets/heart-empty.svg")
+  button.favorite-space-button(v-if="isOnline" :class="{active: isFavoriteSpace && props.parentIsDialog, 'translucent-button': isTranslucentButton}" @click.left.prevent="toggleIsFavoriteSpace" title="Favorite Space")
+    img.icon(v-show="isFavoriteSpace" src="@/assets/heart.svg")
+    img.icon(v-show="!isFavoriteSpace" src="@/assets/heart-empty.svg")
 </template>
 
 <style lang="stylus">
