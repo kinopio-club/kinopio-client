@@ -331,6 +331,10 @@ const currentCards = {
         cards,
         spaceId: context.rootState.currentSpace.id
       }
+      updates.cards.map(card => {
+        delete card.userId
+        return card
+      })
       context.dispatch('api/addToQueue', { name: 'updateMultipleCards', body: updates }, { root: true })
       context.dispatch('history/add', { cards }, { root: true })
       cards.forEach(card => {
