@@ -80,7 +80,9 @@ const initialState = {
   cardSettingsDefaultCharacterLimit: consts.defaultCharacterLimit,
   cardSettingsShiftEnterShouldAddChildCard: true,
   cardSettingsMaxCardWidth: consts.normalCardMaxWidth,
-  prevSettingsSection: null
+  prevSettingsSection: null,
+  team: {},
+  teamUser: {}
 }
 
 export default {
@@ -165,6 +167,7 @@ export default {
       Object.keys(user).forEach(item => {
         state[item] = user[item]
       })
+      console.log('👫 team', user.team, user.teamUser)
     },
     updateUser: (state, user) => {
       Object.keys(user).forEach(key => {
