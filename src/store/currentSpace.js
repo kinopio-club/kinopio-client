@@ -86,6 +86,7 @@ const currentSpace = {
     },
     updateTeam: (state, space) => {
       state.teamId = space.teamId
+      state.addedToTeamByUserId = space.addedToTeamByUserId
     },
     // websocket receive
     updateUser: (state, updatedUser) => {
