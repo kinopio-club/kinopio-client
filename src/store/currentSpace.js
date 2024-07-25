@@ -818,10 +818,10 @@ const currentSpace = {
       cache.saveSpace(space)
     },
     notifySpaceIsOpen: (context) => {
-      const isSpaceMember = context.rootGetters['currentUser/isSpaceMember'](context.state)
-      const canEditSpace = context.rootGetters['currentUser/canEditSpace'](context.state)
       if (context.state.isRemoved) { return }
-      if (!isSpaceMember && canEditSpace) {
+      const isSpaceMember = context.rootGetters['currentUser/isSpaceMember'](context.state)
+      const spaceIsOpen = context.state.privacy === 'open'
+      if (!isSpaceMember && spaceIsOpen) {
         context.commit('addNotification', { message: 'This space is open, which means you can add comments', icon: 'open', type: 'success' }, { root: true })
       }
     },
