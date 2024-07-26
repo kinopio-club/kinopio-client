@@ -235,11 +235,13 @@ const toggleCurrentSpaceInTeam = (event) => {
   const canRemoveTeam = store.state.currentSpace.addedToTeamByUserId === store.state.currentUser.id || currentUserIsTeamAdmin
   if (shouldRemoveTeam && canRemoveTeam) {
     store.dispatch('currentSpace/updateSpace', { teamId: null, addedToTeamByUserId: null })
+    updateLocalSpaces()
   } else if (shouldRemoveTeam) {
     state.errorRemoveTeam = true
   } else {
     store.dispatch('currentSpace/updateSpace', { teamId: team.value.id, addedToTeamByUserId: store.state.currentUser.id })
     store.commit('addNotificationWithPosition', { message: `Added to ${teamName}`, position, type: 'success', layer: 'app', icon: 'checkmark' })
+    updateLocalSpaces()
   }
 }
 const teamButtonTitle = computed(() => {

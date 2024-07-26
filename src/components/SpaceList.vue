@@ -427,6 +427,9 @@ span.space-list-wrap
             //- preview image
             .preview-thumbnail-image-wrap(v-if="space.previewThumbnailImage && isOnline" :class="{wide: previewImageIsWide}")
               img.preview-thumbnail-image(:src="space.previewThumbnailImage")
+            //- team
+            .badge.team-badge(v-if="space.teamId" title="Team Space")
+              img.icon.team(src="@/assets/team.svg")
             //- offline
             span(v-if="isNotCached(space.id)")
               OfflineBadge(:isInline="true" :isDanger="true")
@@ -471,6 +474,10 @@ span.space-list-wrap
 
     .badge
       margin-left 0
+      flex-shrink 0
+    .icon.team
+      height 9px
+      vertical-align 1px
 
     .sunglasses
       width 16px

@@ -1174,6 +1174,7 @@ code
     background-color var(--secondary-active-background-dark)
   &.team-badge
     padding-right 4px
+    background var(--info-background)
   &.last-child
     margin 0
   &.new-unread-badge

@@ -192,7 +192,7 @@ dialog.narrow.space-filters(v-if="props.visible" :open="props.visible" @click.le
       .checkbox-wrap
         label(:class="{active: showTeamSpacesOnly}")
           input(type="checkbox" v-model="showTeamSpacesOnly")
-          .badge.secondary.team-badge
+          .badge.team-badge
             img.icon.team(src="@/assets/team.svg")
           span Teams Only
     //- show hidden
