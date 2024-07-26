@@ -208,7 +208,7 @@ const isSortByCreatedAt = computed(() => {
 })
 const prependFavoriteSpaces = (spaces) => {
   let favoriteSpaces = []
-  const userFavoriteSpaces = store.state.currentUser.favoriteSpaces
+  const userFavoriteSpaces = store.state.currentUser.favoriteSpaces || []
   const favoriteSpaceIds = userFavoriteSpaces.map(space => space.id)
   spaces = spaces.map(space => {
     if (favoriteSpaceIds.includes(space.id)) {

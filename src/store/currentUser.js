@@ -571,9 +571,15 @@ export default {
           context.dispatch('api/getUserFavoriteUsers', null, { root: true }),
           context.dispatch('api/getUserFavoriteColors', null, { root: true })
         ])
-        context.commit('favoriteUsers', favoriteUsers)
-        context.commit('favoriteSpaces', favoriteSpaces)
-        context.commit('favoriteColors', favoriteColors)
+        if (favoriteUsers) {
+          context.commit('favoriteUsers', favoriteUsers)
+        }
+        if (favoriteSpaces) {
+          context.commit('favoriteSpaces', favoriteSpaces)
+        }
+        if (favoriteColors) {
+          context.commit('favoriteColors', favoriteColors)
+        }
         context.commit('isLoadingFavorites', false, { root: true })
       } catch (error) {
         console.error('🚒 restoreUserFavorites', error)
