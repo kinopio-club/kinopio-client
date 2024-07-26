@@ -47,14 +47,18 @@ const updateDialogHeight = async () => {
 
 // filters
 
+const dialogSpaceFiltersSortBy = computed(() => store.state.currentUser.dialogSpaceFiltersSortBy)
+
 const dialogSpaceFilters = computed(() => store.state.currentUser.dialogSpaceFilters)
 const dialogSpaceFilterByUser = computed(() => store.state.currentUser.dialogSpaceFilterByUser)
 const dialogSpaceFiltersSortByIsActive = computed(() => dialogSpaceFiltersSortBy.value === 'createdAt')
-const spaceFilterShowHiddenIsActive = computed(() => store.state.currentUser.dialogSpaceFilterShowHidden)
+const dialogSpaceFilterShowHidden = computed(() => store.state.currentUser.dialogSpaceFilterShowHidden)
+const dialogSpaceFilterShowTeamSpacesOnly = computed(() => store.state.currentUser.dialogSpaceFilterShowTeamSpacesOnly)
 
 // clear all
 
 const clearAllFilters = () => {
+  updateShowTeamSpacesOnly(false)
   showAllSpaces()
   updateUserFilter({})
   updateSortBy(null)
@@ -71,7 +75,10 @@ const totalFiltersActive = computed(() => {
   if (dialogSpaceFiltersSortByIsActive.value) {
     count += 1
   }
-  if (spaceFilterShowHiddenIsActive.value) {
+  if (dialogSpaceFilterShowHidden.value) {
+    count += 1
+  }
+  if (dialogSpaceFilterShowTeamSpacesOnly.value) {
     count += 1
   }
   return count
@@ -88,7 +95,7 @@ const showHiddenSpace = computed({
   }
 })
 const toggleShowHiddenSpace = () => {
-  const value = !store.state.currentUser.dialogSpaceFilterShowHidden
+  const value = !dialogSpaceFilterShowHidden.value
   store.dispatch('currentUser/update', { dialogSpaceFilterShowHidden: value })
 }
 
@@ -98,15 +105,15 @@ const allIsActive = computed(() => Boolean(!dialogSpaceFilters.value))
 const journalsIsActive = computed(() => dialogSpaceFilters.value === 'journals')
 const spacesIsActive = computed(() => dialogSpaceFilters.value === 'spaces')
 const showJournalsOnly = () => {
-  updateFilter('journals')
+  updateSpaceTypeFilter('journals')
 }
 const showSpacesOnly = () => {
-  updateFilter('spaces')
+  updateSpaceTypeFilter('spaces')
 }
 const showAllSpaces = () => {
-  updateFilter(null)
+  updateSpaceTypeFilter(null)
 }
-const updateFilter = (value) => {
+const updateSpaceTypeFilter = (value) => {
   store.dispatch('currentUser/update', { dialogSpaceFilters: value })
   if (value === 'journals') {
     updateSortBy('createdAt')
@@ -117,7 +124,6 @@ const updateFilter = (value) => {
 
 // sort by
 
-const dialogSpaceFiltersSortBy = computed(() => store.state.currentUser.dialogSpaceFiltersSortBy)
 const isSortByUpdatedAt = computed(() => {
   const value = dialogSpaceFiltersSortBy.value
   return !value || value === 'updatedAt'
@@ -150,6 +156,25 @@ const filterByUser = (event, user) => {
     updateUserFilter(user)
   }
 }
+
+// team
+
+const team = computed(() => store.state.currentUser.team)
+const showTeamSpacesOnly = computed({
+  get () {
+    return dialogSpaceFilterShowTeamSpacesOnly.value
+  },
+  set () {
+    toggleShowTeamSpacesOnly()
+  }
+})
+const toggleShowTeamSpacesOnly = () => {
+  const value = !dialogSpaceFilterShowTeamSpacesOnly.value
+  updateShowTeamSpacesOnly(value)
+}
+const updateShowTeamSpacesOnly = (value) => {
+  store.dispatch('currentUser/update', { dialogSpaceFilterShowTeamSpacesOnly: value })
+}
 </script>
 
 <template lang="pug">
@@ -162,6 +187,14 @@ dialog.narrow.space-filters(v-if="props.visible" :open="props.visible" @click.le
       img.icon.cancel(src="@/assets/add.svg")
       span Clear all
       span.badge.info.total-filters-active(v-if="totalFiltersActive") {{totalFiltersActive}}
+    //- show team
+    .row(v-if="team")
+      .checkbox-wrap
+        label(:class="{active: showTeamSpacesOnly}")
+          input(type="checkbox" v-model="showTeamSpacesOnly")
+          .badge.secondary.team-badge
+            img.icon.team(src="@/assets/team.svg")
+          span Teams Only
     //- show hidden
     .row
       .checkbox-wrap

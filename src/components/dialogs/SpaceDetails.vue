@@ -134,8 +134,9 @@ const updateResultsSectionHeight = async () => {
 const spaceFilterShowHiddenIsActive = computed(() => store.state.currentUser.dialogSpaceFilterShowHidden)
 const dialogSpaceFilters = computed(() => store.state.currentUser.dialogSpaceFilters)
 const dialogSpaceFilterByUser = computed(() => store.state.currentUser.dialogSpaceFilterByUser)
+const dialogSpaceFilterShowTeamSpacesOnly = computed(() => store.state.currentUser.dialogSpaceFilterShowTeamSpacesOnly)
 const spaceFiltersIsActive = computed(() => {
-  return Boolean(spaceFilterShowHiddenIsActive.value || dialogSpaceFilters.value || utils.objectHasKeys(dialogSpaceFilterByUser.value) || dialogSpaceFiltersSortByIsActive.value)
+  return Boolean(spaceFilterShowHiddenIsActive.value || dialogSpaceFilters.value || utils.objectHasKeys(dialogSpaceFilterByUser.value) || dialogSpaceFiltersSortByIsActive.value) || dialogSpaceFilterShowTeamSpacesOnly.value
 })
 const filteredSpaces = computed(() => {
   let spaces

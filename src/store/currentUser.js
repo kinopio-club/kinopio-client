@@ -47,6 +47,7 @@ const initialState = {
   dialogSpaceFilters: null, // null, journals, spaces
   dialogSpaceFilterByUser: {},
   dialogSpaceFilterShowHidden: false,
+  dialogSpaceFilterShowTeamSpacesOnly: false,
   dialogSpaceFiltersSortBy: null, // null, updatedAt, createdAt
   defaultSpaceBackground: undefined,
   defaultSpaceBackgroundGradient: undefined,
@@ -304,6 +305,10 @@ export default {
     dialogSpaceFilterShowHidden: (state, value) => {
       state.dialogSpaceFilterShowHidden = value
       cache.updateUser('dialogSpaceFilterShowHidden', value)
+    },
+    dialogSpaceFilterShowTeamSpacesOnly: (state, value) => {
+      state.dialogSpaceFilterShowTeamSpacesOnly = value
+      cache.updateUser('dialogSpaceFilterShowTeamSpacesOnly', value)
     },
     dialogSpaceFiltersSortBy: (state, value) => {
       state.dialogSpaceFiltersSortBy = value

@@ -1172,6 +1172,8 @@ code
     min-height initial
     min-width initial
     background-color var(--secondary-active-background-dark)
+  &.team-badge
+    padding-right 4px
   &.last-child
     margin 0
   &.new-unread-badge
