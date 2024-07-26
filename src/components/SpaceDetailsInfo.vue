@@ -224,7 +224,11 @@ const closeAllDialogs = () => {
 
 // team
 
-const team = computed(() => store.state.currentUser.team)
+const team = computed(() => {
+  let team = store.state.currentUser.team
+  if (!team.id) { return }
+  return team
+})
 const currentSpaceIsInTeam = computed(() => store.state.currentSpace.teamId === team.value.id)
 const toggleCurrentSpaceInTeam = (event) => {
   store.commit('clearNotificationsWithPosition')
