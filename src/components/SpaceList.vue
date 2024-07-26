@@ -428,10 +428,10 @@ span.space-list-wrap
             .preview-thumbnail-image-wrap(v-if="space.previewThumbnailImage && isOnline" :class="{wide: previewImageIsWide}")
               img.preview-thumbnail-image(:src="space.previewThumbnailImage")
             //- team
-            .badge.team-badge(v-if="space.teamId" title="Team Space")
+            template(v-if="space.teamId" title="Team Space")
               img.icon.team(src="@/assets/team.svg")
             //- offline
-            span(v-if="isNotCached(space.id)")
+            span(v-if="isNotCached(space.id) && !isOnline")
               OfflineBadge(:isInline="true" :isDanger="true")
             //- template category
             .badge.info.inline-badge(v-if="showCategory && space.category" :class="categoryClassName(space)") {{space.category}}
@@ -439,9 +439,9 @@ span.space-list-wrap
             span(v-if="space.isFromTweet" title="Tweet space")
               img.icon.tweet(src="@/assets/twitter.svg")
             //- space meta
-            span(v-if="space.isFavorite")
+            template(v-if="space.isFavorite")
               img.icon.favorite-icon(src="@/assets/heart.svg")
-            span(v-if="space.name === 'Inbox'")
+            template(v-if="space.name === 'Inbox'")
               img.icon.inbox-icon(src="@/assets/inbox.svg")
             SpaceTodayJournalBadge(:space="space")
             //- journal
@@ -474,10 +474,6 @@ span.space-list-wrap
 
     .badge
       margin-left 0
-      flex-shrink 0
-    .icon.team
-      height 9px
-      vertical-align 1px
 
     .sunglasses
       width 16px
@@ -486,6 +482,9 @@ span.space-list-wrap
       min-width 12px
       margin-right 4px
       vertical-align -1px
+
+    .icon
+      flex-shrink 0
 
     .name
       margin 0
@@ -500,10 +499,18 @@ span.space-list-wrap
       vertical-align -1px
 
     .favorite-icon,
-    .inbox-icon
+    .inbox-icon,
+    .icon.team
       margin-right 5px
       width 12px
-      min-width 12px
+      vertical-align -2px
+      margin-top 6px
+    .icon.team
+      width initial
+      height 10px
+      margin-top 4.5px
+    .icon.team + .icon
+      margin-left 0
 
     .user
       margin-right 6px

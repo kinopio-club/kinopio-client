@@ -971,6 +971,8 @@ button
 
 .icon.team
   height 11px
+.icon.team + span
+  margin-left 4px
 
 .icon.sunglasses
   height 12px
@@ -1172,9 +1174,6 @@ code
     min-height initial
     min-width initial
     background-color var(--secondary-active-background-dark)
-  &.team-badge
-    padding-right 4px
-    background var(--info-background)
   &.last-child
     margin 0
   &.new-unread-badge

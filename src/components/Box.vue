@@ -177,7 +177,7 @@ const infoClasses = computed(() => {
 // edge snapping
 
 const otherBoxes = computed(() => {
-  const boxes = store.getters['currentBoxes/isSelectableInViewport']
+  const boxes = store.getters['currentBoxes/isSelectableInViewport'] || []
   return boxes.filter(box => box.id !== props.box.id)
 })
 const snapGuideStyles = computed(() => {
