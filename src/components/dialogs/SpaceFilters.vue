@@ -45,8 +45,12 @@ const updateDialogHeight = async () => {
   state.dialogHeight = utils.elementHeight(element)
 }
 
+// filters
+
 const dialogSpaceFilters = computed(() => store.state.currentUser.dialogSpaceFilters)
 const dialogSpaceFilterByUser = computed(() => store.state.currentUser.dialogSpaceFilterByUser)
+const dialogSpaceFiltersSortByIsActive = computed(() => dialogSpaceFiltersSortBy.value === 'createdAt')
+const spaceFilterShowHiddenIsActive = computed(() => store.state.currentUser.dialogSpaceFilterShowHidden)
 
 // clear all
 
@@ -56,6 +60,23 @@ const clearAllFilters = () => {
   updateSortBy(null)
   store.dispatch('currentUser/update', { dialogSpaceFilterShowHidden: false })
 }
+const totalFiltersActive = computed(() => {
+  let count = 0
+  if (dialogSpaceFilters.value) {
+    count += 1
+  }
+  if (dialogSpaceFilterByUser.value) {
+    count += Object.keys(dialogSpaceFilterByUser.value).length
+  }
+  if (dialogSpaceFiltersSortByIsActive.value) {
+    count += 1
+  }
+  if (spaceFilterShowHiddenIsActive.value) {
+    count += 1
+  }
+  return count
+})
+
 // show hidden
 
 const showHiddenSpace = computed({
@@ -140,6 +161,7 @@ dialog.narrow.space-filters(v-if="props.visible" :open="props.visible" @click.le
     button(@click.left="clearAllFilters")
       img.icon.cancel(src="@/assets/add.svg")
       span Clear all
+      span.badge.info.total-filters-active(v-if="totalFiltersActive") {{totalFiltersActive}}
     //- show hidden
     .row
       .checkbox-wrap
@@ -186,4 +208,9 @@ dialog.space-filters
     margin-top 10px
   .cancel
     vertical-align 0
+  .total-filters-active
+    margin 0
+    margin-left 5px
+    margin-top -8px
+    transform translateY(2px)
 </style>
