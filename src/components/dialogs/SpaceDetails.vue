@@ -66,8 +66,6 @@ const state = reactive({
   remoteSpaces: [],
   resultsSectionHeight: null,
   dialogHeight: null,
-  journalSpaces: [],
-  normalSpaces: [],
   spaceFiltersIsVisible: false,
   parentDialog: 'spaceDetails'
 })
@@ -142,11 +140,9 @@ const filteredSpaces = computed(() => {
   let spaces
   // filter by space type
   if (dialogSpaceFilters.value === 'journals') {
-    filterJournalSpacesOnly()
-    spaces = state.journalSpaces
+    spaces = state.spaces.filter(space => space.moonPhase)
   } else if (dialogSpaceFilters.value === 'spaces') {
-    filterNormalSpacesOnly()
-    spaces = state.normalSpaces
+    spaces = state.spaces.filter(space => !space.moonPhase)
   } else {
     spaces = state.spaces
   }
@@ -183,14 +179,6 @@ const removeLabel = computed(() => {
 const clearAllFilters = () => {
   closeDialogs()
   store.commit('triggerClearAllSpaceFilters')
-}
-const filterJournalSpacesOnly = () => {
-  const journalSpaces = state.spaces.filter(space => space.moonPhase)
-  state.journalSpaces = journalSpaces
-}
-const filterNormalSpacesOnly = () => {
-  let normalSpaces = state.spaces.filter(space => !space.moonPhase)
-  state.normalSpaces = normalSpaces
 }
 const toggleSpaceFiltersIsVisible = () => {
   const isVisible = state.spaceFiltersIsVisible
