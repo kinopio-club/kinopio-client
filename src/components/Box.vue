@@ -177,8 +177,8 @@ const infoClasses = computed(() => {
 // edge snapping
 
 const otherBoxes = computed(() => {
-  const boxes = store.getters['currentBoxes/isSelectableInViewport'] || []
-  return boxes.filter(box => box.id !== props.box.id)
+  const boxes = store.getters['currentBoxes/isSelectableInViewport']
+  return boxes.filter(box => box?.id !== props.box.id)
 })
 const snapGuideStyles = computed(() => {
   if (isDragging.value) {
@@ -236,6 +236,7 @@ const updateBoxBorderRadiusStyles = (styles, otherBoxes) => {
   const box = normalizedBox.value
   otherBoxes = utils.clone(otherBoxes)
   otherBoxes.forEach(otherBox => {
+    if (!otherBox) { return }
     otherBox = normalizeBox(otherBox)
     // x
     const xStartIsSame = otherBox.x === box.x
