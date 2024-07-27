@@ -26,28 +26,29 @@ dialog.narrow.update-email(v-if="visible" :open="visible" @click.left.stop ref="
       section.subsection
         .row
           .button-wrap
-            button(@click.left.stop="toggleApiKeyIsVisible" :class="{active: apiKeyIsVisible}")
+            button(@click.left.stop="toggleDeveloperInfoIsVisible" :class="{active: developerInfoIsVisible}")
               img.icon.key(src="@/assets/key.svg")
               span Developer Info
-        template(v-if="apiKeyIsVisible")
-          //- copy api key
-          p.badge.danger.copy-api-keys
-            .button-wrap
-              button(@click.left="copy($event, 'apiKey')")
-                img.icon.copy(src="@/assets/copy.svg")
-                span Copy API Key
-            p Keep your API key secret. Anyone with your key can read, edit, and remove your cards and spaces
+        template(v-if="developerInfoIsVisible")
           //- copy user id
           .row
             .button-wrap
               button(@click.left="copy($event, 'userId')")
                 img.icon.copy(src="@/assets/copy.svg")
                 span Copy UserId
+          .row
+            //- copy api key
+            p.badge.danger.copy-api-keys
+              .button-wrap
+                button(@click.left="copy($event, 'apiKey')")
+                  img.icon.copy(src="@/assets/copy.svg")
+                  span Copy API Key
+              p Keep your API key secret. Anyone with your key can read, edit, and remove your cards and spaces
           //- api docs
           .row
             .button-wrap
               a(href="https://help.kinopio.club/api")
-                button
+                button.small-button
                   span API Docs{{' '}}
                   img.icon.visit(src="@/assets/visit.svg")
 
@@ -85,7 +86,7 @@ export default {
         unknownServerError: false,
         accountAlreadyExists: false
       },
-      apiKeyIsVisible: false
+      developerInfoIsVisible: false
     }
   },
   computed: {
@@ -141,9 +142,9 @@ export default {
       this.error.accountAlreadyExists = false
       this.success = false
     },
-    toggleApiKeyIsVisible () {
-      const isVisible = this.apiKeyIsVisible
-      this.apiKeyIsVisible = !isVisible
+    toggleDeveloperInfoIsVisible () {
+      const isVisible = this.developerInfoIsVisible
+      this.developerInfoIsVisible = !isVisible
       this.updateDialogHeight()
     },
     async copy (event, type) {

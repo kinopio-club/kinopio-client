@@ -122,7 +122,7 @@ const deleteUserPermanent = async () => {
     .row
       .button-wrap
         button(@click.left.stop="toggleUserAccountSettingsIsVisible" :class="{active: state.userAccountSettingsIsVisible}")
-          User(:user="currentUser" :isClickable="false" :hideYouLabel="true" :key="currentUser.id")
+          User(:user="currentUser" :isClickable="false" :hideYouLabel="true" :key="currentUser.id" :isSmall="true")
           span Account
         UserAccountSettings(:visible="state.userAccountSettingsIsVisible")
     .row
