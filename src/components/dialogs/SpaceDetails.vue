@@ -137,14 +137,16 @@ const spaceFiltersIsActive = computed(() => {
   return Boolean(spaceFilterShowHiddenIsActive.value || dialogSpaceFilters.value || utils.objectHasKeys(dialogSpaceFilterByUser.value) || dialogSpaceFiltersSortByIsActive.value) || dialogSpaceFilterShowTeamSpacesOnly.value
 })
 const filteredSpaces = computed(() => {
-  let spaces
+  let spaces = state.spaces
+  // filter by team
+  if (dialogSpaceFilterShowTeamSpacesOnly.value) {
+    spaces = spaces.filter(space => space.teamId)
+  }
   // filter by space type
   if (dialogSpaceFilters.value === 'journals') {
-    spaces = state.spaces.filter(space => space.moonPhase)
+    spaces = spaces.filter(space => space.moonPhase)
   } else if (dialogSpaceFilters.value === 'spaces') {
-    spaces = state.spaces.filter(space => !space.moonPhase)
-  } else {
-    spaces = state.spaces
+    spaces = spaces.filter(space => !space.moonPhase)
   }
   // filter by hidden spaces
   if (spaceFilterShowHiddenIsActive.value) {
