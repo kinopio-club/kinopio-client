@@ -121,8 +121,8 @@ const initDefaultColor = () => {
       button(@click="updateLimit(consts.highCharacterLimit)" :class="{ active: limitIsMax }")
         span {{consts.highCharacterLimit}}
     p.badge.secondary
-      span(v-if="limitIsDefault") For ideas and thoughts
-      span(v-if="!limitIsDefault") For long-form writing and documenting
+      span(v-if="limitIsDefault") Best for ideas and thoughts
+      span(v-if="!limitIsDefault") Best for long-form writing and documenting
 
   section
     p Max Card Width
