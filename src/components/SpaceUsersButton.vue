@@ -5,6 +5,7 @@ import { useStore } from 'vuex'
 import User from '@/components/User.vue'
 import utils from '@/utils.js'
 
+import uniqBy from 'lodash-es/uniqBy'
 import last from 'lodash-es/last'
 
 const store = useStore()
@@ -64,7 +65,8 @@ const spaceUsers = computed(() => {
     // TODO add team members who've added cards to the space 'currentCards/teamContributors'
     // TODO add notifications: notify teamContributors on changes. https://kinopio.club/En9p7INBEpSAhNwFVIwgZ/VelgpXzc5h8Cl1m4RJ41i
   }
-  // TODO uniqby user id
+  items = items.filter(user => user.id !== currentUser.value.id)
+  items = uniqBy(items, 'id')
   return items
 })
 
