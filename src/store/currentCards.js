@@ -1084,6 +1084,14 @@ const currentCards = {
         })
         return !member
       })
+      // remove team users
+      const teamUsers = rootState.currentUser.team.users
+      items = items.filter(item => {
+        const user = teamUsers.find(teamUser => {
+          return teamUser.id === item.id
+        })
+        return !user
+      })
       return items
     },
     colors: (state, getters) => {

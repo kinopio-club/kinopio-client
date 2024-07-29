@@ -32,21 +32,29 @@ const updateDialogHeight = async () => {
   state.dialogHeight = utils.elementHeight(element)
 }
 
+const currentUser = computed(() => store.state.currentUser)
+
+// team
+
+const team = computed(() => currentUser.value.team)
+const teamUsers = computed(() => utils.clone(team.value.users) || [])
+
 // users
 
 const isSpectators = computed(() => store.state.spaceUserListIsSpectators)
 const isCollaborators = computed(() => !isSpectators.value)
 const currentUserCanEditSpace = computed(() => store.getters['currentUser/canEditSpace']())
 
-// userlist events
-
-const showRemoveUser = computed(() => {
-  return currentUserCanEditSpace.value && isCollaborators.value
-})
 const users = computed(() => {
   let items = store.state.spaceUserListUsers
   items = utils.clone(items)
   return items
+})
+
+// userlist events
+
+const showRemoveUser = computed(() => {
+  return currentUserCanEditSpace.value && isCollaborators.value
 })
 const selectedUser = computed(() => {
   const userDetailsIsVisible = store.state.userDetailsIsVisible
@@ -91,8 +99,8 @@ const closeDialogs = () => {
 
 // other card users
 
-const isOtherCardUsers = computed(() => Boolean(otherCardUsers.value.length))
 const otherCardUsers = computed(() => store.getters['currentCards/otherContributors'])
+const isOtherCardUsers = computed(() => Boolean(otherCardUsers.value.length))
 
 </script>
 
@@ -105,28 +113,50 @@ dialog.narrow.space-user-list(
   :style="{'max-height': state.dialogHeight + 'px'}"
 )
   section
-    p(v-if="isSpectators") Spectators
-    p(v-if="isCollaborators") Collaborators
-  section.results-section
-    UserList(
-      :users="users"
-      :selectedUser="selectedUser"
-      @selectUser="toggleUserDetails"
-      :showRemoveUser="showRemoveUser"
-      @removeUser="removeCollaborator"
-      :isClickable="true"
-      :showIsOnline="true"
-    )
-  template(v-if="isCollaborators && isOtherCardUsers")
-    section.other-users-section
+    p Space Users
+  //- teams
+  template(v-if="team")
+    section
+      img.icon.team(src="@/assets/team.svg")
+      span {{ team.name }}
     section.results-section
       UserList(
-        :users="otherCardUsers"
+        :users="teamUsers"
         :selectedUser="selectedUser"
         @selectUser="toggleUserDetails"
+        :showRemoveUser="false"
+        @removeUser="removeCollaborator"
         :isClickable="true"
         :showIsOnline="true"
       )
+
+  //- users
+  template(v-if="users.length")
+    section
+      p(v-if="isSpectators") Spectators
+      p(v-if="isCollaborators") Collaborators
+    section.results-section
+      UserList(
+        :users="users"
+        :selectedUser="selectedUser"
+        @selectUser="toggleUserDetails"
+        :showRemoveUser="showRemoveUser"
+        @removeUser="removeCollaborator"
+        :isClickable="true"
+        :showIsOnline="true"
+      )
+    //- commenters
+    template(v-if="isCollaborators && isOtherCardUsers")
+      section
+        p Commenters
+      section.results-section
+        UserList(
+          :users="otherCardUsers"
+          :selectedUser="selectedUser"
+          @selectUser="toggleUserDetails"
+          :isClickable="true"
+          :showIsOnline="true"
+        )
 </template>
 
 <style lang="stylus">
@@ -134,7 +164,4 @@ dialog.narrow.space-user-list(
   left initial
   right 16px
   top 20px
-  .other-users-section
-    padding-top 0
-    padding-bottom 0
 </style>
