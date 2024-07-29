@@ -47,38 +47,36 @@ const updateDialogHeight = async () => {
 
 // filters
 
-const dialogSpaceFiltersSortBy = computed(() => store.state.currentUser.dialogSpaceFiltersSortBy)
-
-const dialogSpaceFilters = computed(() => store.state.currentUser.dialogSpaceFilters)
+const dialogSpaceFilterSortByDate = computed(() => store.state.currentUser.dialogSpaceFilterSortByDate)
+const dialogSpaceFilterByType = computed(() => store.state.currentUser.dialogSpaceFilterByType)
 const dialogSpaceFilterByUser = computed(() => store.state.currentUser.dialogSpaceFilterByUser)
-const dialogSpaceFiltersSortByIsActive = computed(() => dialogSpaceFiltersSortBy.value === 'createdAt')
 const dialogSpaceFilterShowHidden = computed(() => store.state.currentUser.dialogSpaceFilterShowHidden)
-const dialogSpaceFilterShowTeamSpacesOnly = computed(() => store.state.currentUser.dialogSpaceFilterShowTeamSpacesOnly)
+const dialogSpaceFilterByTeam = computed(() => store.state.currentUser.dialogSpaceFilterByTeam)
 
 // clear all
 
 const clearAllFilters = () => {
-  updateShowTeamSpacesOnly(false)
-  showAllSpaces()
+  updateFilterByTeam(null)
+  updateFilterByType(null)
   updateUserFilter({})
   updateSortBy(null)
   store.dispatch('currentUser/update', { dialogSpaceFilterShowHidden: false })
 }
 const totalFiltersActive = computed(() => {
   let count = 0
-  if (dialogSpaceFilters.value) {
+  if (dialogSpaceFilterByType.value) {
     count += 1
   }
   if (dialogSpaceFilterByUser.value) {
     count += Object.keys(dialogSpaceFilterByUser.value).length
   }
-  if (dialogSpaceFiltersSortByIsActive.value) {
+  if (dialogSpaceFilterSortByDate.value === 'createdAt') {
     count += 1
   }
   if (dialogSpaceFilterShowHidden.value) {
     count += 1
   }
-  if (dialogSpaceFilterShowTeamSpacesOnly.value) {
+  if (dialogSpaceFilterByTeam.value) {
     count += 1
   }
   return count
@@ -99,22 +97,23 @@ const toggleShowHiddenSpace = () => {
   store.dispatch('currentUser/update', { dialogSpaceFilterShowHidden: value })
 }
 
-// types visibile
+// by team
 
-const allIsActive = computed(() => Boolean(!dialogSpaceFilters.value))
-const journalsIsActive = computed(() => dialogSpaceFilters.value === 'journals')
-const spacesIsActive = computed(() => dialogSpaceFilters.value === 'spaces')
-const showJournalsOnly = () => {
-  updateSpaceTypeFilter('journals')
+const team = computed(() => store.state.currentUser.team)
+const filterByTeamAll = computed(() => !dialogSpaceFilterByTeam.value)
+const filterByTeamTeam = computed(() => dialogSpaceFilterByTeam.value === 'team')
+const filterByTeamPersonal = computed(() => dialogSpaceFilterByTeam.value === 'personal')
+const updateFilterByTeam = (value) => {
+  store.dispatch('currentUser/update', { dialogSpaceFilterByTeam: value })
 }
-const showSpacesOnly = () => {
-  updateSpaceTypeFilter('spaces')
-}
-const showAllSpaces = () => {
-  updateSpaceTypeFilter(null)
-}
-const updateSpaceTypeFilter = (value) => {
-  store.dispatch('currentUser/update', { dialogSpaceFilters: value })
+
+// by types
+
+const filterByTypeAll = computed(() => Boolean(!dialogSpaceFilterByType.value))
+const filterByTypeSpaces = computed(() => dialogSpaceFilterByType.value === 'spaces')
+const filterByTypeJournals = computed(() => dialogSpaceFilterByType.value === 'journals')
+const updateFilterByType = (value) => {
+  store.dispatch('currentUser/update', { dialogSpaceFilterByType: value })
   if (value === 'journals') {
     updateSortBy('createdAt')
   } else {
@@ -125,15 +124,15 @@ const updateSpaceTypeFilter = (value) => {
 // sort by
 
 const isSortByUpdatedAt = computed(() => {
-  const value = dialogSpaceFiltersSortBy.value
+  const value = dialogSpaceFilterSortByDate.value
   return !value || value === 'updatedAt'
 })
 const isSortByCreatedAt = computed(() => {
-  const value = dialogSpaceFiltersSortBy.value
+  const value = dialogSpaceFilterSortByDate.value
   return value === 'createdAt'
 })
 const updateSortBy = (value) => {
-  store.dispatch('currentUser/update', { dialogSpaceFiltersSortBy: value })
+  store.dispatch('currentUser/update', { dialogSpaceFilterSortByDate: value })
 }
 
 // collaborators
@@ -156,25 +155,6 @@ const filterByUser = (event, user) => {
     updateUserFilter(user)
   }
 }
-
-// team
-
-const team = computed(() => store.state.currentUser.team)
-const showTeamSpacesOnly = computed({
-  get () {
-    return dialogSpaceFilterShowTeamSpacesOnly.value
-  },
-  set () {
-    toggleShowTeamSpacesOnly()
-  }
-})
-const toggleShowTeamSpacesOnly = () => {
-  const value = !dialogSpaceFilterShowTeamSpacesOnly.value
-  updateShowTeamSpacesOnly(value)
-}
-const updateShowTeamSpacesOnly = (value) => {
-  store.dispatch('currentUser/update', { dialogSpaceFilterShowTeamSpacesOnly: value })
-}
 </script>
 
 <template lang="pug">
@@ -182,36 +162,38 @@ dialog.narrow.space-filters(v-if="props.visible" :open="props.visible" @click.le
   section
     p Space Filters
   section
-    //- clear all
-    button(@click.left="clearAllFilters")
-      img.icon.cancel(src="@/assets/add.svg")
-      span Clear all
-      span.badge.info.total-filters-active(v-if="totalFiltersActive") {{totalFiltersActive}}
+    .row
+      //- clear all
+      button(@click.left="clearAllFilters")
+        img.icon.cancel(src="@/assets/add.svg")
+        span Clear all
+        span.badge.info.total-filters-active(v-if="totalFiltersActive") {{totalFiltersActive}}
     //- show team
-    .row(v-if="team")
-      .checkbox-wrap
-        label(:class="{active: showTeamSpacesOnly}")
-          input(type="checkbox" v-model="showTeamSpacesOnly")
-          img.icon.team(src="@/assets/team.svg")
-          span Teams Only
-    //- show hidden
-    .row
-      .checkbox-wrap
-        label(:class="{active: showHiddenSpace}")
-          input(type="checkbox" v-model="showHiddenSpace")
-          img.icon(v-if="!showHiddenSpace" src="@/assets/view.svg")
-          img.icon(v-if="showHiddenSpace" src="@/assets/view-hidden.svg")
-          span Hidden Spaces
-    //- types visibile
-    .row
+    section.subsection(v-if="team")
+      p Filter by Team
       .segmented-buttons
-        button(@click="showAllSpaces" :class="{active: allIsActive}") All
-        button(@click="showSpacesOnly" :class="{active: spacesIsActive}") Normal
-        button(@click="showJournalsOnly" :class="{active: journalsIsActive}")
+        button(:class="{active: filterByTeamAll}" @click="updateFilterByTeam(null)")
+          span All
+        button(:class="{active: filterByTeamTeam}" @click="updateFilterByTeam('team')")
+          img.icon.team(src="@/assets/team.svg")
+        button(:class="{active: filterByTeamPersonal}" @click="updateFilterByTeam('personal')")
+          span Personal
+
+    //- types visibile
+    section.subsection
+      p Filter by Type
+
+      .segmented-buttons
+        button(@click="updateFilterByType(null)" :class="{active: filterByTypeAll}")
+          span All
+        button(@click="updateFilterByType('spaces')" :class="{active: filterByTypeSpaces}")
+          span Normal
+        button(@click="updateFilterByType('journals')" :class="{active: filterByTypeJournals}")
           MoonPhase(:moonPhase="state.moonPhase.name")
           span Journals
     //- sort by
-    .row
+    section.subsection
+      p Sort by Date
       .segmented-buttons
         button(:class="{active: isSortByUpdatedAt}" @click="updateSortBy('updatedAt')")
           img.icon.time(src="@/assets/time.svg")
@@ -219,6 +201,15 @@ dialog.narrow.space-filters(v-if="props.visible" :open="props.visible" @click.le
         button(:class="{active: isSortByCreatedAt}" @click="updateSortBy('createdAt')")
           img.icon.time(src="@/assets/time.svg")
           span Created
+    //- show hidden
+    .row
+      .checkbox-wrap
+        label(:class="{active: showHiddenSpace}")
+          input(type="checkbox" v-model="showHiddenSpace")
+          img.icon(v-if="!showHiddenSpace" src="@/assets/view.svg")
+          img.icon(v-if="showHiddenSpace" src="@/assets/view-hidden.svg")
+          span Show Hidden
+
   //- collaborators
   section.results-section.collaborators
     UserList(:users="spaceUsers" :isClickable="true" @selectUser="filterByUser" :selectedUser="dialogSpaceFilterByUser")

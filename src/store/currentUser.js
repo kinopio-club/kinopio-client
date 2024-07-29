@@ -44,11 +44,6 @@ const initialState = {
   shouldDisableRightClickToPan: false,
   shouldShowCurrentSpaceTags: false,
   showInExploreUpdatedAt: null, // date
-  dialogSpaceFilters: null, // null, journals, spaces
-  dialogSpaceFilterByUser: {},
-  dialogSpaceFilterShowHidden: false,
-  dialogSpaceFilterShowTeamSpacesOnly: false,
-  dialogSpaceFiltersSortBy: null, // null, updatedAt, createdAt
   defaultSpaceBackground: undefined,
   defaultSpaceBackgroundGradient: undefined,
   defaultSpaceBackgroundTint: undefined,
@@ -83,7 +78,15 @@ const initialState = {
   cardSettingsMaxCardWidth: consts.normalCardMaxWidth,
   prevSettingsSection: null,
   team: {},
-  teamUser: {}
+  teamUser: {},
+
+  // space filters
+
+  dialogSpaceFilterByType: null, // null, journals, spaces
+  dialogSpaceFilterByTeam: null, // null, team, personal
+  dialogSpaceFilterByUser: {},
+  dialogSpaceFilterShowHidden: false,
+  dialogSpaceFilterSortByDate: null // null, updatedAt, createdAt
 }
 
 export default {
@@ -294,9 +297,9 @@ export default {
       state.shouldUseLastConnectionType = value
       cache.updateUser('shouldUseLastConnectionType', value)
     },
-    dialogSpaceFilters: (state, value) => {
-      state.dialogSpaceFilters = value
-      cache.updateUser('dialogSpaceFilters', value)
+    dialogSpaceFilterByType: (state, value) => {
+      state.dialogSpaceFilterByType = value
+      cache.updateUser('dialogSpaceFilterByType', value)
     },
     dialogSpaceFilterByUser: (state, value) => {
       state.dialogSpaceFilterByUser = value
@@ -306,13 +309,13 @@ export default {
       state.dialogSpaceFilterShowHidden = value
       cache.updateUser('dialogSpaceFilterShowHidden', value)
     },
-    dialogSpaceFilterShowTeamSpacesOnly: (state, value) => {
-      state.dialogSpaceFilterShowTeamSpacesOnly = value
-      cache.updateUser('dialogSpaceFilterShowTeamSpacesOnly', value)
+    dialogSpaceFilterByTeam: (state, value) => {
+      state.dialogSpaceFilterByTeam = value
+      cache.updateUser('dialogSpaceFilterByTeam', value)
     },
-    dialogSpaceFiltersSortBy: (state, value) => {
-      state.dialogSpaceFiltersSortBy = value
-      cache.updateUser('dialogSpaceFiltersSortBy', value)
+    dialogSpaceFilterSortByDate: (state, value) => {
+      state.dialogSpaceFilterSortByDate = value
+      cache.updateUser('dialogSpaceFilterSortByDate', value)
     },
     defaultSpaceBackground: (state, value) => {
       state.defaultSpaceBackground = value

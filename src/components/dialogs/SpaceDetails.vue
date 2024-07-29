@@ -129,27 +129,31 @@ const updateResultsSectionHeight = async () => {
 
 // filters
 
-const spaceFilterShowHiddenIsActive = computed(() => store.state.currentUser.dialogSpaceFilterShowHidden)
-const dialogSpaceFilters = computed(() => store.state.currentUser.dialogSpaceFilters)
+const dialogSpaceFilterSortByDate = computed(() => store.state.currentUser.dialogSpaceFilterSortByDate)
+const dialogSpaceFilterByType = computed(() => store.state.currentUser.dialogSpaceFilterByType)
 const dialogSpaceFilterByUser = computed(() => store.state.currentUser.dialogSpaceFilterByUser)
-const dialogSpaceFilterShowTeamSpacesOnly = computed(() => store.state.currentUser.dialogSpaceFilterShowTeamSpacesOnly)
+const dialogSpaceFilterShowHidden = computed(() => store.state.currentUser.dialogSpaceFilterShowHidden)
+const dialogSpaceFilterByTeam = computed(() => store.state.currentUser.dialogSpaceFilterByTeam)
+
 const spaceFiltersIsActive = computed(() => {
-  return Boolean(spaceFilterShowHiddenIsActive.value || dialogSpaceFilters.value || utils.objectHasKeys(dialogSpaceFilterByUser.value) || dialogSpaceFiltersSortByIsActive.value) || dialogSpaceFilterShowTeamSpacesOnly.value
+  return Boolean(dialogSpaceFilterShowHidden.value || dialogSpaceFilterByType.value || utils.objectHasKeys(dialogSpaceFilterByUser.value) || dialogSpaceFilterSortByDateIsActive.value) || dialogSpaceFilterByTeam.value
 })
 const filteredSpaces = computed(() => {
   let spaces = state.spaces
   // filter by team
-  if (dialogSpaceFilterShowTeamSpacesOnly.value) {
+  if (dialogSpaceFilterByTeam.value === 'team') {
     spaces = spaces.filter(space => space.teamId)
+  } else if (dialogSpaceFilterByTeam.value === 'personal') {
+    spaces = spaces.filter(space => !space.teamId)
   }
   // filter by space type
-  if (dialogSpaceFilters.value === 'journals') {
+  if (dialogSpaceFilterByType.value === 'journals') {
     spaces = spaces.filter(space => space.moonPhase)
-  } else if (dialogSpaceFilters.value === 'spaces') {
+  } else if (dialogSpaceFilterByType.value === 'spaces') {
     spaces = spaces.filter(space => !space.moonPhase)
   }
   // filter by hidden spaces
-  if (spaceFilterShowHiddenIsActive.value) {
+  if (dialogSpaceFilterShowHidden.value) {
     spaces = spaces.filter(space => space.isHidden)
   } else {
     spaces = spaces.filter(space => !space.isHidden)
@@ -190,10 +194,9 @@ const toggleSpaceFiltersIsVisible = () => {
 
 // sort
 
-const dialogSpaceFiltersSortBy = computed(() => store.state.currentUser.dialogSpaceFiltersSortBy)
-const dialogSpaceFiltersSortByIsActive = computed(() => dialogSpaceFiltersSortBy.value === 'createdAt')
+const dialogSpaceFilterSortByDateIsActive = computed(() => dialogSpaceFilterSortByDate.value === 'createdAt')
 const isSortByCreatedAt = computed(() => {
-  const value = dialogSpaceFiltersSortBy.value
+  const value = dialogSpaceFilterSortByDate.value
   return value === 'createdAt'
 })
 const prependFavoriteSpaces = (spaces) => {
