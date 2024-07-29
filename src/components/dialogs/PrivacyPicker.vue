@@ -25,6 +25,7 @@ export default {
   },
   computed: {
     currentUserIsSignedIn () { return this.$store.getters['currentUser/isSignedIn'] },
+    currentSpaceIsInTeam () { return this.$store.state.currentSpace.teamId },
     privacyStates () {
       const currentUserIsSignedIn = this.$store.getters['currentUser/isSignedIn']
       const privacyStates = privacy.states()
@@ -41,7 +42,10 @@ export default {
       return utils.capitalizeFirstLetter(name)
     },
     privacyStateDescription (privacyState) {
-      const description = privacyState.description
+      let description = privacyState.description
+      if (this.currentSpaceIsInTeam) {
+        description = privacyState.descriptionTeam
+      }
       return utils.capitalizeFirstLetter(description)
     },
     spaceIsPrivate (privacyState) {

@@ -30,6 +30,7 @@ export default {
     showShortName: Boolean
   },
   computed: {
+    currentSpaceIsInTeam () { return this.$store.state.currentSpace.teamId },
     isSpaceMember () { return this.$store.getters['currentUser/isSpaceMember']() },
     isInvitedButCannotEditSpace () { return this.$store.getters['currentUser/isInvitedButCannotEditSpace']() },
     spacePrivacy () { return this.$store.state.currentSpace.privacy },
@@ -39,7 +40,11 @@ export default {
       })
     },
     description () {
-      return utils.capitalizeFirstLetter(this.privacyState.description)
+      let description = this.privacyState.description
+      if (this.currentSpaceIsInTeam) {
+        description = this.privacyState.descriptionTeam
+      }
+      return utils.capitalizeFirstLetter(description)
     },
     name () {
       const name = this.privacyState.friendlyName || this.privacyState.name
