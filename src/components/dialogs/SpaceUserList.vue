@@ -114,22 +114,12 @@ dialog.narrow.space-user-list(
 )
   section
     p Space Users
-  //- teams
+  //- teams button
   template(v-if="team")
     section
-      img.icon.team(src="@/assets/team.svg")
-      span {{ team.name }}
-    section.results-section
-      UserList(
-        :users="teamUsers"
-        :selectedUser="selectedUser"
-        @selectUser="toggleUserDetails"
-        :showRemoveUser="false"
-        @removeUser="removeCollaborator"
-        :isClickable="true"
-        :showIsOnline="true"
-      )
-
+      button
+        img.icon.team(src="@/assets/team.svg")
+        span {{ team.name }}
   //- users
   template(v-if="users.length")
     section

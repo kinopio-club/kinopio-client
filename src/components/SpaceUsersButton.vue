@@ -61,12 +61,9 @@ const spaceUsers = computed(() => {
   } else {
     items = utils.clone(currentSpace.value.users)
     items = items.concat(currentSpace.value.collaborators)
+    // TODO add team members who've added cards to the space 'currentCards/teamContributors'
   }
-  items = items.filter(user => {
-    const isNotCurrentUser = user.id !== currentUser.value.id
-    const isNotTeamMember = !teamUsers.value.find(teamUser => teamUser.id === user.id)
-    return isNotCurrentUser && isNotTeamMember
-  })
+  // TODO uniqby user id
   return items
 })
 
@@ -99,10 +96,6 @@ const spaceUsersLabel = computed(() => {
 
 const spaceUsersAndTeamUsers = computed(() => {
   let items = spaceUsers.value.concat(teamUsers.value)
-  items = items.filter(user => {
-    const isNotCurrentUser = user.id !== currentUser.value.id
-    return isNotCurrentUser
-  })
   return items
 })
 
