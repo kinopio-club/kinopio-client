@@ -18,6 +18,10 @@ const props = defineProps({
   users: Array
 })
 
+const currentUser = computed(() => store.state.currentUser)
+const currentSpace = computed(() => store.state.currentSpace)
+const currentUserIsSpaceMember = computed(() => store.getters['currentUser/isSpaceMember']())
+
 const spaceUserListIsVisible = computed(() => store.state.spaceUserListIsVisible)
 const dialogIsVisible = computed(() => {
   const isVisible = spaceUserListIsVisible.value
@@ -31,7 +35,7 @@ const toggleSpaceUserListIsVisible = () => {
   const value = dialogIsVisible.value
   store.commit('closeAllDialogs')
   store.commit('spaceUserListIsVisible', !value)
-  store.commit('spaceUserListUsers', users.value)
+  store.commit('spaceUserListUsers', spaceUsers.value)
   store.commit('spaceUserListIsSpectators', props.isSpectators)
 }
 const isActive = computed(() => {
@@ -43,35 +47,46 @@ const isActive = computed(() => {
   }
 })
 
+// team
+
+const team = computed(() => currentUser.value.team)
+const teamUsers = computed(() => team.value.users || [])
+
 // users
 
-const currentSpace = computed(() => store.state.currentSpace)
-const currentUserIsSpaceMember = computed(() => store.getters['currentUser/isSpaceMember']())
-
-const users = computed(() => {
+const spaceUsers = computed(() => {
   let items
-  const currentUser = store.state.currentUser
   if (props.users) {
     items = props.users
   } else {
     items = utils.clone(currentSpace.value.users)
     items = items.concat(currentSpace.value.collaborators)
   }
-  items = items.filter(user => user.id !== currentUser.id)
+  items = items.filter(user => {
+    const isNotCurrentUser = user.id !== currentUser.value.id
+    const isNotTeamMember = !teamUsers.value.find(teamUser => teamUser.id === user.id)
+    return isNotCurrentUser && isNotTeamMember
+  })
   return items
 })
 
-// button
+// team label
+
+const teamLabel = computed(() => {
+  return team.value.name
+})
+
+// users label
 
 const recentUser = computed(() => {
-  return last(users.value)
+  return last(spaceUsers.value)
 })
 const isOtherCardUsers = computed(() => Boolean(otherCardUsers.value.length))
 const otherCardUsers = computed(() => store.getters['currentCards/otherContributors'])
-const label = computed(() => {
-  let condition = users.value.length !== 1
+const spaceUsersLabel = computed(() => {
+  let condition = spaceUsers.value.length !== 1
   const CollaboratorsString = utils.pluralize('Collaborator', condition)
-  let string = `${users.value.length} ${CollaboratorsString}`
+  let string = `${spaceUsers.value.length} ${CollaboratorsString}`
   if (isOtherCardUsers.value) {
     condition = otherCardUsers.value.length !== 1
     const commentersString = utils.pluralize('Commenter', condition)
@@ -80,25 +95,42 @@ const label = computed(() => {
   return string
 })
 
+// button count
+
+const spaceUsersAndTeamUsers = computed(() => {
+  let items = spaceUsers.value.concat(teamUsers.value)
+  items = items.filter(user => {
+    const isNotCurrentUser = user.id !== currentUser.value.id
+    return isNotCurrentUser
+  })
+  return items
+})
+
 </script>
 
 <template lang="pug">
-button.space-users-button(v-if="users.length" @click.stop="toggleSpaceUserListIsVisible" :class="{ 'header-button': props.isParentSpaceUsers, active: isActive, 'translucent-button': props.isParentSpaceUsers }" ref="buttonElement")
-  User(:user="recentUser" :isClickable="false" :hideYouLabel="true" :isSmall="true" :shouldBounceIn="props.isParentSpaceUsers")
-  span(v-if="props.showLabel") {{ label }}
-  span(v-else) {{ users.length }}
+button.space-users-button(@click.stop="toggleSpaceUserListIsVisible" :class="{ 'header-button': props.isParentSpaceUsers, active: isActive, 'translucent-button': props.isParentSpaceUsers }" ref="buttonElement")
+  span.label(v-if="props.showLabel")
+    template(v-if="team")
+      img.icon.team(src="@/assets/team.svg")
+      span {{ teamLabel }}
+    template(v-if="spaceUsers.length")
+      User(:user="recentUser" :isClickable="false" :hideYouLabel="true" :isSmall="true" :shouldBounceIn="props.isParentSpaceUsers")
+      span {{ spaceUsersLabel }}
+
+  span(v-else) {{ spaceUsersAndTeamUsers.length }}
 
 </template>
 
 <style lang="stylus">
 .space-users-button
-  > .user.is-small
-    .user-avatar
-      margin-top -3px
-    .anon-avatar
-      top 3px
+  .label
+    > .user
+        margin-top -1px
+        margin-left 6px
+      .anon-avatar
+        top 3px
   &.header-button
     border-top-left-radius 0
     border-bottom-left-radius 0
-
 </style>

@@ -58,6 +58,7 @@ const isSpaceMember = computed(() => store.getters['currentUser/isSpaceMember'](
 const spaceIsRemote = computed(() => store.getters['currentSpace/isRemote'])
 const spaceIsPublic = computed(() => store.state.currentSpace.privacy !== 'private')
 const spaceIsPrivate = computed(() => store.state.currentSpace.privacy === 'private')
+const spaceIsInTeam = computed(() => store.state.currentSpace.teamId)
 
 // add to explore
 
@@ -212,7 +213,7 @@ dialog.share.wide(v-if="props.visible" :open="props.visible" @click.left.stop="c
   Invite(v-if="isSpaceMember && currentUserIsSignedIn" @closeDialogs="closeDialogs" @emailInvitesIsVisible="emailInvitesIsVisible")
 
   //- space users, collaborators
-  section(v-if="spaceUsersButtonIsVisible")
+  section(v-if="spaceUsersButtonIsVisible || spaceIsInTeam")
     SpaceUsersButton(:showLabel="true" :users="users")
 
   section(v-if="!spaceIsRemote")
