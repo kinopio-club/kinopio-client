@@ -62,6 +62,7 @@ const spaceUsers = computed(() => {
     items = utils.clone(currentSpace.value.users)
     items = items.concat(currentSpace.value.collaborators)
     // TODO add team members who've added cards to the space 'currentCards/teamContributors'
+    // TODO add notifications: notify teamContributors on changes. https://kinopio.club/En9p7INBEpSAhNwFVIwgZ/VelgpXzc5h8Cl1m4RJ41i
   }
   // TODO uniqby user id
   return items
