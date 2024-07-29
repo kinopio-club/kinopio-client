@@ -179,6 +179,10 @@ dialog.share.wide(v-if="props.visible" :open="props.visible" @click.left.stop="c
             span RSS
           RssFeeds(:visible="state.rssFeedsIsVisible")
 
+  //- space team, users, collaborators
+  section(v-if="spaceUsersButtonIsVisible || spaceIsInTeam")
+    SpaceUsersButton(:showLabel="true" :users="users")
+
   section(v-if="spaceIsRemote")
     ReadOnlySpaceInfoBadges
     PrivacyButton(:privacyPickerIsVisible="state.privacyPickerIsVisible" :showDescription="true" @togglePrivacyPickerIsVisible="togglePrivacyPickerIsVisible" @closeDialogs="closeDialogs")
@@ -211,10 +215,6 @@ dialog.share.wide(v-if="props.visible" :open="props.visible" @click.left.stop="c
 
   //- Invite
   Invite(v-if="isSpaceMember && currentUserIsSignedIn" @closeDialogs="closeDialogs" @emailInvitesIsVisible="emailInvitesIsVisible")
-
-  //- space users, collaborators
-  section(v-if="spaceUsersButtonIsVisible || spaceIsInTeam")
-    SpaceUsersButton(:showLabel="true" :users="users")
 
   section(v-if="!spaceIsRemote")
     p
