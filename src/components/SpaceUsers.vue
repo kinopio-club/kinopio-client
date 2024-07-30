@@ -77,12 +77,20 @@ const membersDisplay = computed(() => {
 // spectators
 
 const spectators = computed(() => {
+  const teamContributors = store.getters['currentCards/teamContributors']
   let items = utils.clone(currentSpace.value.spectators)
+  // if not a space member, currentUser is specatator
   if (!currentUserIsSpaceMember.value) {
-    // if not a space member, currentUser is specatator
     const user = utils.clone(store.state.currentUser)
     items.push(user)
     items = appendCurrentUser(items)
+  }
+  // team contributors show as members, not spectators
+  if (teamContributors) {
+    items = items.filter(item => {
+      const isContributor = teamContributors.find(contributor => contributor.id === item.id)
+      return !isContributor
+    })
   }
   return items
 })

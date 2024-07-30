@@ -1075,8 +1075,13 @@ const currentCards = {
     },
     teamContributors: (state, getters, rootState, rootGetters) => {
       // team users who have created cards in this space
-      const spaceTeamId = rootState.currentSpace.teamId
+      if (!rootState.currentSpace.teamId) { return }
+      const teamUsers = rootState.currentSpace.teamUsers
       let users = getters.users
+      users = users.filter(user => {
+        const isTeamUser = teamUsers.find(teamUser => teamUser.id === user.id)
+        return isTeamUser
+      })
       return users
     },
     commenters: (state, getters, rootState, rootGetters) => {
