@@ -53,5 +53,6 @@
   "visits": 0,
   "isRemoved": false,
   "teamId": null,
-  "teamUsers": []
+  "teamUsers": [],
+  "team": {}
 }

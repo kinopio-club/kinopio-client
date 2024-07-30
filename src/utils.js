@@ -1390,6 +1390,7 @@ export default {
       showInExplore: false,
       proposedShowInExplore: false,
       teamId: null,
+      team: {},
       teamUsers: []
     }
   },
@@ -1409,6 +1410,7 @@ export default {
     space.previewImage = null
     space.previewThumbnailImage = null
     space.teamId = null
+    space.team = {}
     space.cards = space.cards.map(card => {
       card.userId = null
       if (card.nameUpdatedByUserId) {
