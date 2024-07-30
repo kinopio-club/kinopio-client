@@ -51,5 +51,6 @@
   "tags": [],
   "boxes": [],
   "visits": 0,
-  "isRemoved": false
+  "isRemoved": false,
+  "teamId": null
 }

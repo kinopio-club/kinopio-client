@@ -11,6 +11,7 @@ import utils from '@/utils.js'
 import Loader from '@/components/Loader.vue'
 
 import debounce from 'lodash-es/debounce'
+import uniqBy from 'lodash-es/uniqBy'
 import dayjs from 'dayjs'
 
 const store = useStore()
@@ -327,13 +328,25 @@ const updateWithExistingRemoteSpaces = (cacheSpaces) => {
   return spaces
 }
 const updateWithRemoteSpaces = async () => {
-  state.isLoadingRemoteSpaces = true
-  state.remoteSpaces = await store.dispatch('api/getUserSpaces')
+  try {
+    state.isLoadingRemoteSpaces = true
+    const [userSpaces, teamSpaces] = await Promise.all([
+      store.dispatch('api/getUserSpaces'),
+      store.dispatch('api/getUserTeamSpaces')
+    ])
+    let spaces = userSpaces.concat(teamSpaces)
+    spaces = spaces.filter(space => Boolean(space))
+    spaces = uniqBy(spaces, 'id')
+    state.remoteSpaces = spaces
+    state.isLoadingRemoteSpaces = false
+    if (!state.remoteSpaces) { return }
+    removeRemovedCachedSpaces(state.remoteSpaces)
+    state.spaces = state.remoteSpaces
+    updateCachedSpaces()
+  } catch (error) {
+    console.error('🚒 updateWithRemoteSpaces', error)
+  }
   state.isLoadingRemoteSpaces = false
-  if (!state.remoteSpaces) { return }
-  removeRemovedCachedSpaces(state.remoteSpaces)
-  state.spaces = state.remoteSpaces
-  updateCachedSpaces()
 }
 const updateCachedSpaces = () => {
   state.spaces.forEach(space => {

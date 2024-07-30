@@ -1388,7 +1388,8 @@ export default {
       isHidden: false,
       visits: 0,
       showInExplore: false,
-      proposedShowInExplore: false
+      proposedShowInExplore: false,
+      teamId: null
     }
   },
   clearSpaceMeta (space, type) {
@@ -1406,6 +1407,7 @@ export default {
     space.collaboratorKey = nanoid()
     space.previewImage = null
     space.previewThumbnailImage = null
+    space.teamId = null
     space.cards = space.cards.map(card => {
       card.userId = null
       if (card.nameUpdatedByUserId) {
