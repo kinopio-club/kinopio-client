@@ -50,7 +50,7 @@ const isActive = computed(() => {
 
 // team
 
-const team = computed(() => currentUser.value.team)
+const team = computed(() => currentSpace.value.team)
 const teamUsers = computed(() => team.value.users || [])
 
 // users

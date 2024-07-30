@@ -238,7 +238,7 @@ const toggleCurrentSpaceInTeam = (event) => {
   const currentUserIsTeamAdmin = store.state.currentUser.teamUser.role === 'admin'
   const canRemoveTeam = store.state.currentSpace.addedToTeamByUserId === store.state.currentUser.id || currentUserIsTeamAdmin
   if (shouldRemoveTeam && canRemoveTeam) {
-    store.dispatch('currentSpace/updateSpace', { teamId: null, addedToTeamByUserId: null, team: {} })
+    store.dispatch('currentSpace/updateSpace', { teamId: null, addedToTeamByUserId: null, team: null })
     updateLocalSpaces()
   } else if (shouldRemoveTeam) {
     state.errorRemoveTeam = true

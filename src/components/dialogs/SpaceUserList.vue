@@ -36,7 +36,7 @@ const currentUser = computed(() => store.state.currentUser)
 
 // team
 
-const team = computed(() => currentUser.value.team)
+const team = computed(() => store.state.currentSpace.team)
 const teamUsers = computed(() => utils.clone(team.value.users) || [])
 
 // users

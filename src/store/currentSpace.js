@@ -86,7 +86,6 @@ const currentSpace = {
     },
     updateTeam: (state, space) => {
       state.teamId = space.teamId
-      state.teamUsers = space.teamUsers
       state.team = space.team
       state.addedToTeamByUserId = space.addedToTeamByUserId
     },
@@ -1309,8 +1308,8 @@ const currentSpace = {
       return members.find(member => member.id === id)
     },
     teamUserById: (state, getters, rootState) => (id) => {
-      if (!state.teamId) { return }
-      const users = state.teamUsers
+      if (!state.team) { return }
+      const users = state.team.users
       return users.find(user => user.id === id)
     },
     userById: (state, getters, rootState, rootGetters) => (id) => {
