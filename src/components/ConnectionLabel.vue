@@ -178,7 +178,11 @@ watch(() => path.value, (value, prevValue) => {
 const updateConnectionRect = () => {
   if (!props.connection.labelIsVisible) { return }
   let element = document.querySelector(`.connection-path[data-id="${id.value}"]`)
-  if (!element) { return }
+  if (!element) {
+    // compute position from path if element isn't rendered yet
+    state.connectionRect = utils.rectFromConnectionPath(path.value)
+    return
+  }
   let rect = element.getBoundingClientRect()
   state.connectionRect = utils.rectDimensions(rect)
 }
