@@ -1389,7 +1389,8 @@ export default {
       visits: 0,
       showInExplore: false,
       proposedShowInExplore: false,
-      teamId: null
+      teamId: null,
+      teamUserS: []
     }
   },
   clearSpaceMeta (space, type) {
