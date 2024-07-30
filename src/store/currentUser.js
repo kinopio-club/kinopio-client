@@ -844,7 +844,8 @@ export default {
       const currentUserIsSignedIn = getters.isSignedIn
       const canEditOpenSpace = spaceIsOpen && currentUserIsSignedIn
       const isSpaceMember = getters.isSpaceMember(space)
-      return canEditOpenSpace || isSpaceMember
+      const isTeamMember = getters.isTeamMember(space)
+      return canEditOpenSpace || isSpaceMember || isTeamMember
     },
     cannotEditUnlessSignedIn: (state, getters, rootState) => (space) => {
       space = space || rootState.currentSpace
@@ -865,7 +866,8 @@ export default {
     },
     canEditCard: (state, getters, rootState, rootGetters) => (card) => {
       const isSpaceMember = getters.isSpaceMember()
-      if (isSpaceMember) { return true }
+      const isTeamMember = getters.isTeamMember()
+      if (isSpaceMember || isTeamMember) { return true }
       const canEditSpace = getters.canEditSpace
       const cardIsCreatedByCurrentUser = getters.cardIsCreatedByCurrentUser(card)
       if (canEditSpace && cardIsCreatedByCurrentUser) { return true }
@@ -873,12 +875,14 @@ export default {
     },
     canOnlyComment: (state, getters, rootState) => () => {
       const canEditSpace = getters.canEditSpace
-      const isSpaceMember = getters.isSpaceMember(rootState.currentSpace)
-      return canEditSpace && !isSpaceMember
+      const isSpaceMember = getters.isSpaceMember()
+      const isTeamMember = getters.isTeamMember()
+      return canEditSpace && !isSpaceMember && !isTeamMember
     },
     canEditBox: (state, getters, rootState, rootGetters) => (box) => {
       const isSpaceMember = getters.isSpaceMember()
-      if (isSpaceMember) { return true }
+      const isTeamMember = getters.isTeamMember()
+      if (isSpaceMember || isTeamMember) { return true }
       const canEditSpace = getters.canEditSpace
       const boxIsCreatedByCurrentUser = getters.boxIsCreatedByCurrentUser(box)
       if (canEditSpace && boxIsCreatedByCurrentUser) { return true }
@@ -886,6 +890,10 @@ export default {
     },
     connectionIsCreatedByCurrentUser: (state, getters, rootState) => (connection) => {
       return state.id === connection.userId
+    },
+    isTeamMember: (state, getters, rootState) => (space) => {
+      space = space || rootState.currentSpace
+      return state.teamUser.teamId === space.teamId
     },
     isSpaceMember: (state, getters, rootState) => (space) => {
       // a member is a user or collaborator
