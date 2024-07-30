@@ -1313,7 +1313,7 @@ const currentSpace = {
       return members.find(member => member.id === id)
     },
     userById: (state, getters, rootState, rootGetters) => (id) => {
-      let user = getters.memberById(id) || rootGetters.otherUserById(id)
+      let user = getters.memberById(id) || rootGetters.otherUserById(id) || rootGetters.teamUserById(id)
       if (rootState.currentUser.id === id) {
         user = rootState.currentUser
       }

@@ -1927,6 +1927,16 @@ const store = createStore({
       const isDraggingBox = state.currentUserIsDraggingBox
       return isPainting || isDrawingConnection || isDraggingCard || isDraggingBox
     },
+    teamUserById: (state, getters) => (userId) => {
+      let teamUsers = state.currentUser.team.users
+      teamUsers = utils.clone(teamUsers)
+      teamUsers = teamUsers.map(user => {
+        user.team.id = state.currentUser.team.id
+        return user
+      })
+      const user = teamUsers.find(teamUser => teamUser.id === userId)
+      return user
+    },
     otherUserById: (state, getters) => (userId) => {
       const otherUsers = state.otherUsers.filter(Boolean)
       const user = otherUsers.find(otherUser => otherUser.id === userId)

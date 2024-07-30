@@ -181,7 +181,7 @@ dialog.share.wide(v-if="props.visible" :open="props.visible" @click.left.stop="c
 
   //- space team, users, collaborators
   section(v-if="spaceUsersButtonIsVisible || spaceIsInTeam")
-    SpaceUsersButton(:showLabel="true" :users="users")
+    SpaceUsersButton(:showLabel="true")
 
   section(v-if="spaceIsRemote")
     ReadOnlySpaceInfoBadges

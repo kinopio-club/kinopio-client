@@ -60,9 +60,10 @@ const spaceUsers = computed(() => {
   if (props.users) {
     items = props.users
   } else {
+    const teamContributors = store.getters['currentCards/teamContributors']
     items = utils.clone(currentSpace.value.users)
     items = items.concat(currentSpace.value.collaborators)
-    // TODO add team members who've added cards to the space 'currentCards/teamContributors'
+    items = items.concat(teamContributors)
     // TODO add notifications: notify teamContributors on changes. https://kinopio.club/En9p7INBEpSAhNwFVIwgZ/VelgpXzc5h8Cl1m4RJ41i
   }
   items = items.filter(user => user.id !== currentUser.value.id)
@@ -81,16 +82,16 @@ const teamLabel = computed(() => {
 const recentUser = computed(() => {
   return last(spaceUsers.value)
 })
-const isOtherCardUsers = computed(() => Boolean(otherCardUsers.value.length))
-const otherCardUsers = computed(() => store.getters['currentCards/commenters'])
+const isCommenters = computed(() => Boolean(commenters.value.length))
+const commenters = computed(() => store.getters['currentCards/commenters'])
 const spaceUsersLabel = computed(() => {
   let condition = spaceUsers.value.length !== 1
   const CollaboratorsString = utils.pluralize('Collaborator', condition)
   let string = `${spaceUsers.value.length} ${CollaboratorsString}`
-  if (isOtherCardUsers.value) {
-    condition = otherCardUsers.value.length !== 1
+  if (isCommenters.value) {
+    condition = commenters.value.length !== 1
     const commentersString = utils.pluralize('Commenter', condition)
-    string = string + `, ${otherCardUsers.value.length} ${commentersString}`
+    string = string + `, ${commenters.value.length} ${commentersString}`
   }
   return string
 })

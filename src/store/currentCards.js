@@ -1068,7 +1068,16 @@ const currentCards = {
       return users
     },
     users: (state, getters, rootState, rootGetters) => {
-      return getters.userIds.map(id => rootGetters['currentSpace/userById'](id))
+      return getters.userIds.map(id => {
+        let user = rootGetters['currentSpace/userById'](id)
+        return user
+      })
+    },
+    teamContributors: (state, getters, rootState, rootGetters) => {
+      // team users who have created cards in this space
+      const spaceTeamId = rootState.currentSpace.teamId
+      let users = getters.users
+      return users
     },
     commenters: (state, getters, rootState, rootGetters) => {
       const currentUserId = state.id
@@ -1079,10 +1088,14 @@ const currentCards = {
       // remove collaborators
       const members = rootGetters['currentSpace/members']()
       items = items.filter(item => {
-        const member = members.find(user => {
-          return user.id === item.id
-        })
+        const member = members.find(user => user.id === item.id)
         return !member
+      })
+      // remove team contributors
+      const teamContributors = getters.teamContributors
+      items = items.filter(item => {
+        const teamUser = teamContributors.find(user => user.id === item.id)
+        return !teamUser
       })
       return items
     },

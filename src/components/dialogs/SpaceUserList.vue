@@ -51,6 +51,11 @@ const users = computed(() => {
   return items
 })
 
+// commenters
+
+const commenters = computed(() => utils.clone(store.getters['currentCards/commenters']))
+const isCommenters = computed(() => Boolean(commenters.value.length))
+
 // userlist events
 
 const showRemoveUser = computed(() => {
@@ -96,12 +101,6 @@ const showUserDetails = (event, user) => {
 const closeDialogs = () => {
   store.commit('userDetailsIsVisible', false)
 }
-
-// other card users
-
-const otherCardUsers = computed(() => utils.clone(store.getters['currentCards/commenters']))
-const isOtherCardUsers = computed(() => Boolean(otherCardUsers.value.length))
-
 </script>
 
 <template lang="pug">
@@ -136,12 +135,12 @@ dialog.narrow.space-user-list(
         :showIsOnline="true"
       )
     //- commenters
-    template(v-if="isCollaborators && isOtherCardUsers")
+    template(v-if="isCollaborators && isCommenters")
       section
         p Commenters
       section.results-section
         UserList(
-          :users="otherCardUsers"
+          :users="commenters"
           :selectedUser="selectedUser"
           @selectUser="toggleUserDetails"
           :isClickable="true"
