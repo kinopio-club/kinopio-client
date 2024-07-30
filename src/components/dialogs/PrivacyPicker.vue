@@ -1,5 +1,83 @@
+<script setup>
+import { reactive, computed, onMounted, onBeforeUnmount, defineProps, defineEmits, watch, ref, nextTick } from 'vue'
+import { useStore } from 'vuex'
+
+import PrivacyIcon from '@/components/PrivacyIcon.vue'
+import privacy from '@/data/privacy.js'
+import utils from '@/utils.js'
+
+const store = useStore()
+
+const dialogElement = ref(null)
+
+onMounted(() => {
+  store.subscribe(mutation => {
+    if (mutation.type === 'updatePageSizes') {
+      updateDialogHeight()
+    }
+  })
+})
+
+const emit = defineEmits(['closeDialogs', 'updateLocalSpaces'])
+
+const props = defineProps({
+  visible: Boolean
+})
+
+const state = reactive({
+  dialogHeight: null
+})
+const updateDialogHeight = async () => {
+  if (!props.visible) { return }
+  await nextTick()
+  let element = dialogElement.value
+  state.dialogHeight = utils.elementHeight(element)
+}
+
+const currentUserIsSignedIn = computed(() => store.getters['currentUser/isSignedIn'])
+const currentSpaceIsInTeam = computed(() => store.state.currentSpace.teamId)
+
+// privacy states
+
+const privacyStates = computed(() => {
+  const currentUserIsSignedIn = store.getters['currentUser/isSignedIn']
+  const privacyStates = privacy.states()
+  if (currentUserIsSignedIn) {
+    return privacyStates
+  } else {
+    return privacyStates.slice(1, 3)
+  }
+})
+const privacyStateName = (privacyState) => {
+  const name = privacyState.friendlyName || privacyState.name
+  return utils.capitalizeFirstLetter(name)
+}
+const privacyStateDescription = (privacyState) => {
+  let description = privacyState.description
+  if (currentSpaceIsInTeam.value) {
+    description = privacyState.descriptionTeam
+  }
+  return utils.capitalizeFirstLetter(description)
+}
+const privacyStateIsActive = (privacyState) => {
+  const currentPrivacy = store.state.currentSpace.privacy
+  return privacyState.name === currentPrivacy
+}
+
+// update
+
+const select = (privacyState) => {
+  store.dispatch('currentSpace/updateSpace', { privacy: privacyState.name })
+  updateLocalSpaces()
+  emit('closeDialogs')
+}
+const updateLocalSpaces = () => {
+  emit('updateLocalSpaces')
+}
+</script>
+
 <template lang="pug">
-dialog.narrow.privacy-picker(v-if="visible" :open="visible" @click.left.stop)
+dialog.narrow.privacy-picker(v-if="props.visible" :open="props.visible" @click.left.stop ref="dialogElement" :style="{'max-height': state.dialogHeight + 'px'}")
   section.results-section
     ul.results-list
       template(v-for="(privacyState in privacyStates")
@@ -9,63 +87,6 @@ dialog.narrow.privacy-picker(v-if="visible" :open="visible" @click.left.stop)
             span {{ privacyStateName(privacyState) }}
           p.description {{ privacyStateDescription(privacyState) }}
 </template>
-
-<script>
-import PrivacyIcon from '@/components/PrivacyIcon.vue'
-import privacy from '@/data/privacy.js'
-import utils from '@/utils.js'
-
-export default {
-  name: 'PrivacyPicker',
-  components: {
-    PrivacyIcon
-  },
-  props: {
-    visible: Boolean
-  },
-  computed: {
-    currentUserIsSignedIn () { return this.$store.getters['currentUser/isSignedIn'] },
-    currentSpaceIsInTeam () { return this.$store.state.currentSpace.teamId },
-    privacyStates () {
-      const currentUserIsSignedIn = this.$store.getters['currentUser/isSignedIn']
-      const privacyStates = privacy.states()
-      if (currentUserIsSignedIn) {
-        return privacyStates
-      } else {
-        return privacyStates.slice(1, 3)
-      }
-    }
-  },
-  methods: {
-    privacyStateName (privacyState) {
-      const name = privacyState.friendlyName || privacyState.name
-      return utils.capitalizeFirstLetter(name)
-    },
-    privacyStateDescription (privacyState) {
-      let description = privacyState.description
-      if (this.currentSpaceIsInTeam) {
-        description = privacyState.descriptionTeam
-      }
-      return utils.capitalizeFirstLetter(description)
-    },
-    spaceIsPrivate (privacyState) {
-      return privacyState.name === 'private'
-    },
-    privacyStateIsActive (privacyState) {
-      const currentPrivacy = this.$store.state.currentSpace.privacy
-      return privacyState.name === currentPrivacy
-    },
-    select (privacyState) {
-      this.$store.dispatch('currentSpace/updateSpace', { privacy: privacyState.name })
-      this.updateLocalSpaces()
-      this.$emit('closeDialogs')
-    },
-    updateLocalSpaces () {
-      this.$emit('updateLocalSpaces')
-    }
-  }
-}
-</script>
 
 <style lang="stylus" scoped>
 .privacy-picker
