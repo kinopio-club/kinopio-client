@@ -110,4 +110,6 @@ span
         outline none
     .user-label-inline
       pointer-events none
+    .remove-user
+      flex-shrink 0
 </style>
