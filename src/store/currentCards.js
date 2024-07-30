@@ -1091,12 +1091,14 @@ const currentCards = {
         const member = members.find(user => user.id === item.id)
         return !member
       })
-      // remove team contributors
-      const teamContributors = getters.teamContributors
-      items = items.filter(item => {
-        const teamUser = teamContributors.find(user => user.id === item.id)
-        return !teamUser
-      })
+      // remove team users
+      if (rootState.currentSpace.teamId) {
+        const teamUsers = rootState.currentSpace.teamUsers
+        items = items.filter(item => {
+          const teamUser = teamUsers.find(teamUser => teamUser.id === item.id)
+          return !teamUser
+        })
+      }
       return items
     },
     colors: (state, getters) => {
