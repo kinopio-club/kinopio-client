@@ -1294,19 +1294,13 @@ const currentSpace = {
       return users
     },
     members: (state, getters, rootState) => (excludeCurrentUser) => {
-      const users = state.users
+      let users = state.users
       const collaborators = state.collaborators || []
-      let members = []
-      users.forEach(user => {
-        members.push(user)
-      })
-      collaborators.forEach(user => {
-        members.push(user)
-      })
+      users = users.concat(collaborators)
       if (excludeCurrentUser) {
-        members = members.filter(user => user.id !== rootState.currentUser.id)
+        users = users.filter(user => user.id !== rootState.currentUser.id)
       }
-      return members
+      return users
     },
     memberById: (state, getters, rootState) => (id) => {
       const members = getters.members()
