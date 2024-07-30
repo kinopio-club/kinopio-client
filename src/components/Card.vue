@@ -1393,6 +1393,7 @@ const isFiltered = computed(() => {
 const createdByUser = computed(() => {
   // same as userDetailsWrap.cardCreatedByUser
   const userId = props.card.userId
+  if (!userId) { return }
   let user = store.getters['currentSpace/userById'](userId)
   if (!user) {
     user = {
