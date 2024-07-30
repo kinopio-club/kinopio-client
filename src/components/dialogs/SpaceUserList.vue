@@ -99,7 +99,7 @@ const closeDialogs = () => {
 
 // other card users
 
-const otherCardUsers = computed(() => store.getters['currentCards/otherContributors'])
+const otherCardUsers = computed(() => utils.clone(store.getters['currentCards/commenters']))
 const isOtherCardUsers = computed(() => Boolean(otherCardUsers.value.length))
 
 </script>

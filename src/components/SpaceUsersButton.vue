@@ -82,7 +82,7 @@ const recentUser = computed(() => {
   return last(spaceUsers.value)
 })
 const isOtherCardUsers = computed(() => Boolean(otherCardUsers.value.length))
-const otherCardUsers = computed(() => store.getters['currentCards/otherContributors'])
+const otherCardUsers = computed(() => store.getters['currentCards/commenters'])
 const spaceUsersLabel = computed(() => {
   let condition = spaceUsers.value.length !== 1
   const CollaboratorsString = utils.pluralize('Collaborator', condition)

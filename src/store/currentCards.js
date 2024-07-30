@@ -1070,7 +1070,7 @@ const currentCards = {
     users: (state, getters, rootState, rootGetters) => {
       return getters.userIds.map(id => rootGetters['currentSpace/userById'](id))
     },
-    otherContributors: (state, getters, rootState, rootGetters) => {
+    commenters: (state, getters, rootState, rootGetters) => {
       const currentUserId = state.id
       let items = getters.users
       items = items.filter(user => Boolean(user))
