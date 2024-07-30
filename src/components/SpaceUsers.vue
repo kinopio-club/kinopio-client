@@ -62,8 +62,12 @@ const normalizeDisplayItems = (items, shouldShowUsersButton) => {
 // members
 
 const members = computed(() => {
+  const teamContributors = store.getters['currentCards/teamContributors']
   let items = utils.clone(currentSpace.value.users)
   items = items.concat(currentSpace.value.collaborators)
+  if (teamContributors) {
+    items = items.concat(teamContributors)
+  }
   items = appendCurrentUser(items)
   return items
 })
