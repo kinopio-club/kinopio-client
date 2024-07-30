@@ -111,19 +111,16 @@ dialog.narrow.space-user-list(
   ref="dialogElement"
   :style="{'max-height': state.dialogHeight + 'px'}"
 )
-  section
-    p Space Users
-  //- teams button
-  template(v-if="team")
-    section
-      button
-        img.icon.team(src="@/assets/team.svg")
-        span {{ team.name }}
   //- users
   template(v-if="users.length")
     section
       p(v-if="isSpectators") Spectators
       p(v-if="isCollaborators") Collaborators
+      .row(v-if="team && isCollaborators")
+        button
+          img.icon.team(src="@/assets/team.svg")
+          span {{ team.name }}
+
     section.results-section
       UserList(
         :users="users"
