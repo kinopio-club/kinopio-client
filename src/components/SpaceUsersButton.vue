@@ -36,7 +36,6 @@ const toggleSpaceUserListIsVisible = () => {
   const value = dialogIsVisible.value
   store.commit('closeAllDialogs')
   store.commit('spaceUserListIsVisible', !value)
-  store.commit('spaceUserListUsers', spaceUsers.value)
   store.commit('spaceUserListIsSpectators', props.isSpectators)
 }
 const isActive = computed(() => {
@@ -68,6 +67,7 @@ const spaceUsers = computed(() => {
     items = items.concat(teamUsers)
     // TODO add notifications: notify teamUsers on changes. https://kinopio.club/En9p7INBEpSAhNwFVIwgZ/VelgpXzc5h8Cl1m4RJ41i
   }
+  items = items.filter(item => Boolean(item))
   items = items.filter(user => user.id !== currentUser.value.id)
   items = uniqBy(items, 'id')
   return items

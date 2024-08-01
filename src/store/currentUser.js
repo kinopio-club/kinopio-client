@@ -972,7 +972,7 @@ export default {
 
     isInSpaceTeam: (state, getters, rootState) => (space) => {
       space = space || rootState.currentSpace
-      const userTeamId = state.teamUser.teamId
+      const userTeamId = state.teamUser?.teamId
       return userTeamId === space.teamId
     },
     isTeamAdmin: (state, getters) => (teamId) => {

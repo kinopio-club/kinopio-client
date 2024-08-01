@@ -15,7 +15,7 @@ const spaceUsersElement = ref(null)
 
 const avatarWidth = 30
 const maxMembersCount = 3
-const maxSpecatorsCount = 1
+const maxSpecatorsCount = 2
 
 onMounted(() => {
   updateShouldShowUsersButton()
