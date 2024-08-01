@@ -62,11 +62,11 @@ const normalizeDisplayItems = (items, shouldShowUsersButton) => {
 // members
 
 const members = computed(() => {
-  const teamContributors = store.getters['currentCards/teamContributors']
+  const teamUsers = store.getters['currentCards/teamUsersWhoAddedCards']
   let items = utils.clone(currentSpace.value.users)
   items = items.concat(currentSpace.value.collaborators)
-  if (teamContributors) {
-    items = items.concat(teamContributors)
+  if (teamUsers) {
+    items = items.concat(teamUsers)
   }
   items = appendCurrentUser(items)
   return items
@@ -81,7 +81,7 @@ const membersDisplay = computed(() => {
 // spectators
 
 const spectators = computed(() => {
-  const teamContributors = store.getters['currentCards/teamContributors']
+  const teamUsers = store.getters['currentCards/teamUsersWhoAddedCards']
   let items = utils.clone(currentSpace.value.spectators)
   // if not a space member, currentUser is specatator
   if (!currentUserIsSpaceMember.value) {
@@ -89,10 +89,10 @@ const spectators = computed(() => {
     items.push(user)
     items = appendCurrentUser(items)
   }
-  // team contributors show as members, not spectators
-  if (teamContributors) {
+  // team users who's added cards show as members, not spectators
+  if (teamUsers) {
     items = items.filter(item => {
-      const isContributor = teamContributors.find(contributor => contributor.id === item.id)
+      const isContributor = teamUsers.find(contributor => contributor.id === item.id)
       return !isContributor
     })
   }

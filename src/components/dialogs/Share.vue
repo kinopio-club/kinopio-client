@@ -58,7 +58,7 @@ const isSpaceMember = computed(() => store.getters['currentUser/isSpaceMember'](
 const spaceIsRemote = computed(() => store.getters['currentSpace/isRemote'])
 const spaceIsPublic = computed(() => store.state.currentSpace.privacy !== 'private')
 const spaceIsPrivate = computed(() => store.state.currentSpace.privacy === 'private')
-const spaceIsInTeam = computed(() => store.state.currentSpace.teamId)
+const spaceTeam = computed(() => store.state.currentSpace.team)
 
 // add to explore
 
@@ -180,7 +180,7 @@ dialog.share.wide(v-if="props.visible" :open="props.visible" @click.left.stop="c
           RssFeeds(:visible="state.rssFeedsIsVisible")
 
   //- space team, users, collaborators
-  section(v-if="spaceUsersButtonIsVisible || spaceIsInTeam")
+  section(v-if="spaceUsersButtonIsVisible || spaceTeam")
     SpaceUsersButton(:showLabel="true")
 
   section(v-if="spaceIsRemote")

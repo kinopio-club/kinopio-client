@@ -96,6 +96,7 @@ const state = reactive({
 })
 
 const isOnline = computed(() => store.state.isOnline)
+const isOffline = computed(() => !isOnline.value)
 const currentUser = computed(() => store.state.currentUser)
 
 // spaces
@@ -431,7 +432,7 @@ span.space-list-wrap
             template(v-if="space.teamId" title="Team Space")
               img.icon.team(src="@/assets/team.svg")
             //- offline
-            span(v-if="isNotCached(space.id) && !isOnline")
+            span(v-if="isOffline && isNotCached(space.id)")
               OfflineBadge(:isInline="true" :isDanger="true")
             //- template category
             .badge.info.inline-badge(v-if="showCategory && space.category" :class="categoryClassName(space)") {{space.category}}

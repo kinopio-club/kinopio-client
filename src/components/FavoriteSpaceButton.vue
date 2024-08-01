@@ -16,7 +16,7 @@ const isTranslucentButton = computed(() => {
 const isOnline = computed(() => store.state.isOnline)
 
 const isFavoriteSpace = computed(() => store.getters['currentSpace/isFavorite'])
-const toggleIsFavoriteSpace = (event) => {
+const toggleIsFavoriteSpace = () => {
   const space = store.state.currentSpace
   const value = !isFavoriteSpace.value
   store.dispatch('currentUser/updateFavoriteSpace', { space, value })

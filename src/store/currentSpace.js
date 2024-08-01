@@ -1124,6 +1124,20 @@ const currentSpace = {
       })
     },
 
+    // Team
+
+    addToTeam: (context) => {
+      const user = context.rootState.currentUser
+      context.dispatch('updateSpace', {
+        teamId: user.team.id,
+        addedToTeamByUserId: user.id,
+        team: user.team
+      })
+    },
+    removeFromTeam: (context) => {
+      context.dispatch('updateSpace', { teamId: null, addedToTeamByUserId: null, team: null })
+    },
+
     // User Card Count
 
     checkIfShouldNotifyCardsCreatedIsNearLimit: (context) => {

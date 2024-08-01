@@ -51,7 +51,9 @@ const isActive = computed(() => {
 // team
 
 const team = computed(() => currentSpace.value.team)
-const teamUsers = computed(() => team.value.users || [])
+const teamLabel = computed(() => {
+  return team.value.name
+})
 
 // users
 
@@ -60,21 +62,15 @@ const spaceUsers = computed(() => {
   if (props.users) {
     items = props.users
   } else {
-    const teamContributors = store.getters['currentCards/teamContributors']
+    const teamUsers = store.getters['currentCards/teamUsersWhoAddedCards']
     items = utils.clone(currentSpace.value.users)
     items = items.concat(currentSpace.value.collaborators)
-    items = items.concat(teamContributors)
-    // TODO add notifications: notify teamContributors on changes. https://kinopio.club/En9p7INBEpSAhNwFVIwgZ/VelgpXzc5h8Cl1m4RJ41i
+    items = items.concat(teamUsers)
+    // TODO add notifications: notify teamUsers on changes. https://kinopio.club/En9p7INBEpSAhNwFVIwgZ/VelgpXzc5h8Cl1m4RJ41i
   }
   items = items.filter(user => user.id !== currentUser.value.id)
   items = uniqBy(items, 'id')
   return items
-})
-
-// team label
-
-const teamLabel = computed(() => {
-  return team.value.name
 })
 
 // users label
@@ -96,13 +92,6 @@ const spaceUsersLabel = computed(() => {
   return string
 })
 
-// button count
-
-const spaceUsersAndTeamUsers = computed(() => {
-  let items = spaceUsers.value.concat(teamUsers.value)
-  return items
-})
-
 </script>
 
 <template lang="pug">
@@ -115,7 +104,7 @@ button.space-users-button(@click.stop="toggleSpaceUserListIsVisible" :class="{ '
       User(:user="recentUser" :isClickable="false" :hideYouLabel="true" :isSmall="true" :shouldBounceIn="props.isParentSpaceUsers")
       span {{ spaceUsersLabel }}
 
-  span(v-else) {{ spaceUsersAndTeamUsers.length }}
+  span(v-else) {{ spaceUsers.length }}
 
 </template>
 

@@ -37,7 +37,6 @@ const currentUser = computed(() => store.state.currentUser)
 // team
 
 const team = computed(() => store.state.currentSpace.team)
-const teamUsers = computed(() => utils.clone(team.value.users) || [])
 
 // users
 
@@ -120,6 +119,7 @@ dialog.narrow.space-user-list(
         button
           img.icon.team(src="@/assets/team.svg")
           span {{ team.name }}
+          //- TODO add team dialog for user management, teamuserlist
 
     section.results-section
       UserList(

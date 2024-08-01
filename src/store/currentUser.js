@@ -77,8 +77,8 @@ const initialState = {
   cardSettingsShiftEnterShouldAddChildCard: true,
   cardSettingsMaxCardWidth: consts.normalCardMaxWidth,
   prevSettingsSection: null,
-  team: {},
-  teamUser: {},
+  team: null,
+  teamUser: null,
 
   // space filters
 
@@ -171,7 +171,7 @@ export default {
       Object.keys(user).forEach(item => {
         state[item] = user[item]
       })
-      console.log('👫 team', user.team, user.teamUser)
+      console.log('👫 team user', user.team, user.teamUser)
     },
     updateUser: (state, user) => {
       Object.keys(user).forEach(key => {
@@ -844,8 +844,8 @@ export default {
       const currentUserIsSignedIn = getters.isSignedIn
       const canEditOpenSpace = spaceIsOpen && currentUserIsSignedIn
       const isSpaceMember = getters.isSpaceMember(space)
-      const isSpaceTeamMember = getters.isSpaceTeamMember(space)
-      return canEditOpenSpace || isSpaceMember || isSpaceTeamMember
+      const isInSpaceTeam = getters.isInSpaceTeam(space)
+      return canEditOpenSpace || isSpaceMember || isInSpaceTeam
     },
     cannotEditUnlessSignedIn: (state, getters, rootState) => (space) => {
       space = space || rootState.currentSpace
@@ -866,8 +866,8 @@ export default {
     },
     canEditCard: (state, getters, rootState, rootGetters) => (card) => {
       const isSpaceMember = getters.isSpaceMember()
-      const isSpaceTeamMember = getters.isSpaceTeamMember()
-      if (isSpaceMember || isSpaceTeamMember) { return true }
+      const isInSpaceTeam = getters.isInSpaceTeam()
+      if (isSpaceMember || isInSpaceTeam) { return true }
       const canEditSpace = getters.canEditSpace
       const cardIsCreatedByCurrentUser = getters.cardIsCreatedByCurrentUser(card)
       if (canEditSpace && cardIsCreatedByCurrentUser) { return true }
@@ -876,13 +876,13 @@ export default {
     canOnlyComment: (state, getters, rootState) => () => {
       const canEditSpace = getters.canEditSpace
       const isSpaceMember = getters.isSpaceMember()
-      const isSpaceTeamMember = getters.isSpaceTeamMember()
-      return canEditSpace && !isSpaceMember && !isSpaceTeamMember
+      const isInSpaceTeam = getters.isInSpaceTeam()
+      return canEditSpace && !isSpaceMember && !isInSpaceTeam
     },
     canEditBox: (state, getters, rootState, rootGetters) => (box) => {
       const isSpaceMember = getters.isSpaceMember()
-      const isSpaceTeamMember = getters.isSpaceTeamMember()
-      if (isSpaceMember || isSpaceTeamMember) { return true }
+      const isInSpaceTeam = getters.isInSpaceTeam()
+      if (isSpaceMember || isInSpaceTeam) { return true }
       const canEditSpace = getters.canEditSpace
       const boxIsCreatedByCurrentUser = getters.boxIsCreatedByCurrentUser(box)
       if (canEditSpace && boxIsCreatedByCurrentUser) { return true }
@@ -890,11 +890,6 @@ export default {
     },
     connectionIsCreatedByCurrentUser: (state, getters, rootState) => (connection) => {
       return state.id === connection.userId
-    },
-    isSpaceTeamMember: (state, getters, rootState) => (space) => {
-      space = space || rootState.currentSpace
-      const userTeamId = state.teamUser.teamId
-      return userTeamId === space.teamId
     },
     isSpaceMember: (state, getters, rootState) => (space) => {
       // a member is a user or collaborator
@@ -971,6 +966,18 @@ export default {
       const connections = rootState.filteredConnectionTypeIds
       const frames = rootState.filteredFrameIds
       return userFilters + tagNames.length + connections.length + frames.length
+    },
+
+    // team
+
+    isInSpaceTeam: (state, getters, rootState) => (space) => {
+      space = space || rootState.currentSpace
+      const userTeamId = state.teamUser.teamId
+      return userTeamId === space.teamId
+    },
+    isTeamAdmin: (state, getters) => (teamId) => {
+      if (state.team.id !== teamId) { return }
+      return state.user.role === 'admin'
     },
 
     // AI Images

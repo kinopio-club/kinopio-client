@@ -1073,8 +1073,7 @@ const currentCards = {
         return user
       })
     },
-    teamContributors: (state, getters, rootState, rootGetters) => {
-      // team users who have created cards in this space
+    teamUsersWhoAddedCards: (state, getters, rootState, rootGetters) => {
       if (!rootState.currentSpace.team) { return }
       const teamUsers = rootState.currentSpace.team.users
       let users = getters.users
