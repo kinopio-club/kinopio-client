@@ -303,10 +303,10 @@ template(v-if="isSpaceMember")
         button.team-button(:title="teamButtonTitle" :class="{active: userIsInSpaceTeam}" @click.left.prevent.stop="toggleCurrentSpaceInTeam" @keydown.stop.enter="toggleCurrentSpaceInTeam")
           img.icon.team(src="@/assets/team.svg")
         //- Favorite
-        FavoriteSpaceButton(:parentIsDialog="true" @updateLocalSpaces="updateLocalSpaces")
+        FavoriteSpaceButton(:isParentDialog="true" @updateLocalSpaces="updateLocalSpaces")
     template(v-else)
       //- Favorite
-      FavoriteSpaceButton(:parentIsDialog="true" @updateLocalSpaces="updateLocalSpaces")
+      FavoriteSpaceButton(:isParentDialog="true" @updateLocalSpaces="updateLocalSpaces")
     //- Settings
     .button-wrap
       button(@click="toggleSettingsIsVisible" :class="{active: state.settingsIsVisible}")
@@ -318,7 +318,7 @@ template(v-if="isSpaceMember")
 
 //- read only options
 .row(v-if="!isSpaceMember")
-  FavoriteSpaceButton(:parentIsDialog="true" @updateLocalSpaces="updateLocalSpaces")
+  FavoriteSpaceButton(:isParentDialog="true" @updateLocalSpaces="updateLocalSpaces")
   .button-wrap
     button(@click="toggleSettingsIsVisible" :class="{active: state.settingsIsVisible}")
       img.icon.settings(src="@/assets/settings.svg")
