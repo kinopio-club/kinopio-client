@@ -251,13 +251,8 @@ const isInvitedButCannotEditSpace = computed(() => store.getters['currentUser/is
 // user
 
 const isSpaceMember = computed(() => store.getters['currentUser/isSpaceMember']())
-const cardIsCreatedByCurrentUser = computed(() => store.getters['currentUser/cardIsCreatedByCurrentUser'](card.value))
 const isFavoriteSpace = computed(() => store.getters['currentSpace/isFavorite'])
-const canEditCard = computed(() => {
-  if (isSpaceMember.value) { return true }
-  if (canEditSpace.value && cardIsCreatedByCurrentUser.value) { return true }
-  return false
-})
+const canEditCard = computed(() => store.getters['currentUser/canEditCard'](card.value))
 const currentUserIsSignedIn = computed(() => store.getters['currentUser/isSignedIn'])
 const createdByUser = computed(() => {
   const userId = card.value.userId

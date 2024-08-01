@@ -331,6 +331,10 @@ const currentCards = {
         cards,
         spaceId: context.rootState.currentSpace.id
       }
+      updates.cards.map(card => {
+        delete card.userId
+        return card
+      })
       context.dispatch('api/addToQueue', { name: 'updateMultipleCards', body: updates }, { root: true })
       context.dispatch('history/add', { cards }, { root: true })
       cards.forEach(card => {
@@ -1064,9 +1068,23 @@ const currentCards = {
       return users
     },
     users: (state, getters, rootState, rootGetters) => {
-      return getters.userIds.map(id => rootGetters['currentSpace/userById'](id))
+      return getters.userIds.map(id => {
+        let user = rootGetters['currentSpace/userById'](id)
+        return user
+      })
     },
-    otherContributors: (state, getters, rootState, rootGetters) => {
+    teamUsersWhoAddedCards: (state, getters, rootState, rootGetters) => {
+      if (!rootState.currentSpace.team) { return }
+      const teamUsers = rootState.currentSpace.team?.users
+      if (!teamUsers) { return }
+      let users = getters.users
+      users = users.filter(user => {
+        const isTeamUser = teamUsers.find(teamUser => teamUser.id === user.id)
+        return isTeamUser
+      })
+      return users
+    },
+    commenters: (state, getters, rootState, rootGetters) => {
       const currentUserId = state.id
       let items = getters.users
       items = items.filter(user => Boolean(user))
@@ -1075,11 +1093,18 @@ const currentCards = {
       // remove collaborators
       const members = rootGetters['currentSpace/members']()
       items = items.filter(item => {
-        const member = members.find(user => {
-          return user.id === item.id
-        })
+        const member = members.find(user => user.id === item.id)
         return !member
       })
+      // remove team users
+      if (rootState.currentSpace.team) {
+        const teamUsers = rootState.currentSpace.team?.users
+        if (!teamUsers) { return }
+        items = items.filter(item => {
+          const teamUser = teamUsers.find(teamUser => teamUser.id === item.id)
+          return !teamUser
+        })
+      }
       return items
     },
     colors: (state, getters) => {

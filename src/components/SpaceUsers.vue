@@ -15,7 +15,7 @@ const spaceUsersElement = ref(null)
 
 const avatarWidth = 30
 const maxMembersCount = 3
-const maxSpecatorsCount = 1
+const maxSpecatorsCount = 2
 
 onMounted(() => {
   updateShouldShowUsersButton()
@@ -62,8 +62,12 @@ const normalizeDisplayItems = (items, shouldShowUsersButton) => {
 // members
 
 const members = computed(() => {
+  const teamUsers = store.getters['currentCards/teamUsersWhoAddedCards']
   let items = utils.clone(currentSpace.value.users)
   items = items.concat(currentSpace.value.collaborators)
+  if (teamUsers) {
+    items = items.concat(teamUsers)
+  }
   items = appendCurrentUser(items)
   return items
 })
@@ -77,12 +81,20 @@ const membersDisplay = computed(() => {
 // spectators
 
 const spectators = computed(() => {
+  const teamUsers = store.getters['currentCards/teamUsersWhoAddedCards']
   let items = utils.clone(currentSpace.value.spectators)
+  // if not a space member, currentUser is specatator
   if (!currentUserIsSpaceMember.value) {
-    // if not a space member, currentUser is specatator
     const user = utils.clone(store.state.currentUser)
     items.push(user)
     items = appendCurrentUser(items)
+  }
+  // team users who's added cards show as members, not spectators
+  if (teamUsers) {
+    items = items.filter(item => {
+      const isContributor = teamUsers.find(contributor => contributor.id === item.id)
+      return !isContributor
+    })
   }
   return items
 })
@@ -116,6 +128,7 @@ const updateShouldShowUsersButton = () => {
   // available width
   const viewportWidth = utils.visualViewport().width
   const element = spaceUsersElement.value
+  if (!element) { return }
   const usersWidth = element.getBoundingClientRect().width
   const rightElementWrap = document.querySelector('header nav .right')
   let rightSideWidth = rightElementWrap.getBoundingClientRect().width

@@ -96,6 +96,7 @@ const state = reactive({
 })
 
 const isOnline = computed(() => store.state.isOnline)
+const isOffline = computed(() => !isOnline.value)
 const currentUser = computed(() => store.state.currentUser)
 
 // spaces
@@ -427,8 +428,11 @@ span.space-list-wrap
             //- preview image
             .preview-thumbnail-image-wrap(v-if="space.previewThumbnailImage && isOnline" :class="{wide: previewImageIsWide}")
               img.preview-thumbnail-image(:src="space.previewThumbnailImage")
+            //- team
+            template(v-if="space.teamId" title="Team Space")
+              img.icon.team(src="@/assets/team.svg")
             //- offline
-            span(v-if="isNotCached(space.id)")
+            span(v-if="isOffline && isNotCached(space.id)")
               OfflineBadge(:isInline="true" :isDanger="true")
             //- template category
             .badge.info.inline-badge(v-if="showCategory && space.category" :class="categoryClassName(space)") {{space.category}}
@@ -436,9 +440,9 @@ span.space-list-wrap
             span(v-if="space.isFromTweet" title="Tweet space")
               img.icon.tweet(src="@/assets/twitter.svg")
             //- space meta
-            span(v-if="space.isFavorite")
+            template(v-if="space.isFavorite")
               img.icon.favorite-icon(src="@/assets/heart.svg")
-            span(v-if="space.name === 'Inbox'")
+            template(v-if="space.name === 'Inbox'")
               img.icon.inbox-icon(src="@/assets/inbox.svg")
             SpaceTodayJournalBadge(:space="space")
             //- journal
@@ -480,6 +484,9 @@ span.space-list-wrap
       margin-right 4px
       vertical-align -1px
 
+    .icon
+      flex-shrink 0
+
     .name
       margin 0
       margin-top 1px
@@ -493,10 +500,18 @@ span.space-list-wrap
       vertical-align -1px
 
     .favorite-icon,
-    .inbox-icon
+    .inbox-icon,
+    .icon.team
       margin-right 5px
       width 12px
-      min-width 12px
+      vertical-align -2px
+      margin-top 6px
+    .icon.team
+      width initial
+      height 10px
+      margin-top 4.5px
+    .icon.team + .icon
+      margin-left 0
 
     .user
       margin-right 6px
@@ -545,7 +560,7 @@ span.space-list-wrap
         z-index 1
       .icon.templates
         margin-right 5px
-        margin-top 5px
+        margin-top 4px
 
     .space-wrap
       position relative

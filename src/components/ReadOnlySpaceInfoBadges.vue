@@ -6,6 +6,7 @@ const store = useStore()
 const isSpaceMember = computed(() => store.getters['currentUser/isSpaceMember']())
 const spacePrivacyIsOpen = computed(() => store.state.currentSpace.privacy === 'open')
 const showInExplore = computed(() => store.state.currentSpace.showInExplore)
+const spaceTeam = computed(() => store.state.currentSpace.team)
 </script>
 
 <template lang="pug">
@@ -17,6 +18,9 @@ const showInExplore = computed(() => store.state.currentSpace.showInExplore)
   .badge.status(v-if="showInExplore")
     img.icon.sunglasses(src="@/assets/sunglasses.svg")
     span In Explore
+  .badge.secondary(v-if="spaceTeam")
+    img.icon.team(src="@/assets/team.svg")
+    span {{ spaceTeam.name }}
 </template>
 
 <style lang="stylus">

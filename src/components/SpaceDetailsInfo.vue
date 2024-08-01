@@ -13,6 +13,7 @@ import AddToExplore from '@/components/AddToExplore.vue'
 import AskToAddToExplore from '@/components/AskToAddToExplore.vue'
 import FavoriteSpaceButton from '@/components/FavoriteSpaceButton.vue'
 import cache from '@/cache.js'
+import utils from '@/utils.js'
 
 const store = useStore()
 
@@ -53,7 +54,8 @@ const state = reactive({
   backgroundIsVisible: false,
   privacyPickerIsVisible: false,
   settingsIsVisible: false,
-  exportIsVisible: false
+  exportIsVisible: false,
+  errorRemoveFromTeam: false
 })
 
 // user
@@ -219,6 +221,36 @@ const closeDialogsAndEmit = () => {
 const closeAllDialogs = () => {
   store.dispatch('closeAllDialogs')
 }
+
+// team
+
+const userTeam = computed(() => store.state.currentUser.team)
+const userIsInSpaceTeam = computed(() => store.getters['currentUser/isInSpaceTeam']())
+const toggleCurrentSpaceInTeam = (event) => {
+  store.commit('clearNotificationsWithPosition')
+  const position = utils.cursorPositionInPage(event)
+  const isTeamAdmin = store.getters['currentUser/isTeamAdmin'](userTeam.value.id)
+  const isCreatorOrTeamAdmin = store.state.currentSpace.addedToTeamByUserId === store.state.currentUser.id || isTeamAdmin
+  if (userIsInSpaceTeam.value && isCreatorOrTeamAdmin) {
+    store.dispatch('currentSpace/removeFromTeam')
+    updateLocalSpaces()
+  } else if (userIsInSpaceTeam.value) {
+    state.errorRemoveFromTeam = true
+  } else {
+    store.dispatch('currentSpace/addToTeam')
+    store.commit('addNotificationWithPosition', { message: `Added to ${userTeam.value.name}`, position, type: 'success', layer: 'app', icon: 'checkmark' })
+    updateLocalSpaces()
+  }
+}
+const teamButtonTitle = computed(() => {
+  let addString = 'Add'
+  if (userIsInSpaceTeam.value) {
+    addString = 'Added'
+  }
+  const teamName = userTeam.value.name || 'Team'
+  return `${addString} to ${teamName}`
+})
+
 </script>
 
 <template lang="pug">
@@ -260,19 +292,33 @@ const closeAllDialogs = () => {
 ReadOnlySpaceInfoBadges
 
 //- member options
-.row(v-if="isSpaceMember")
-  //- Privacy
-  PrivacyButton(:privacyPickerIsVisible="state.privacyPickerIsVisible" :showShortName="true" @togglePrivacyPickerIsVisible="togglePrivacyPickerIsVisible" @closeDialogs="closeDialogs" @updateLocalSpaces="updateLocalSpaces")
-  FavoriteSpaceButton(@updateLocalSpaces="updateLocalSpaces")
-  //- Settings
-  .button-wrap
-    button(@click="toggleSettingsIsVisible" :class="{active: state.settingsIsVisible}")
-      img.icon.settings(src="@/assets/settings.svg")
-      span Settings
+template(v-if="isSpaceMember")
+  .row
+    //- Privacy
+    PrivacyButton(:privacyPickerIsVisible="state.privacyPickerIsVisible" :showShortName="true" @togglePrivacyPickerIsVisible="togglePrivacyPickerIsVisible" @closeDialogs="closeDialogs" @updateLocalSpaces="updateLocalSpaces")
+      //- team | favorite
+    template(v-if="userTeam")
+      .segmented-buttons
+        //- Team
+        button.team-button(:title="teamButtonTitle" :class="{active: userIsInSpaceTeam}" @click.left.prevent.stop="toggleCurrentSpaceInTeam" @keydown.stop.enter="toggleCurrentSpaceInTeam")
+          img.icon.team(src="@/assets/team.svg")
+        //- Favorite
+        FavoriteSpaceButton(:parentIsDialog="true" @updateLocalSpaces="updateLocalSpaces")
+    template(v-else)
+      //- Favorite
+      FavoriteSpaceButton(:parentIsDialog="true" @updateLocalSpaces="updateLocalSpaces")
+    //- Settings
+    .button-wrap
+      button(@click="toggleSettingsIsVisible" :class="{active: state.settingsIsVisible}")
+        img.icon.settings(src="@/assets/settings.svg")
+        span Settings
+  //- team error
+  .row(v-if="state.errorRemoveFromTeam")
+    .badge.danger Only the person who added this space to the team, or a {{team.name}} team admin can remove this space from the team
 
 //- read only options
 .row(v-if="!isSpaceMember")
-  FavoriteSpaceButton(@updateLocalSpaces="updateLocalSpaces")
+  FavoriteSpaceButton(:parentIsDialog="true" @updateLocalSpaces="updateLocalSpaces")
   .button-wrap
     button(@click="toggleSettingsIsVisible" :class="{active: state.settingsIsVisible}")
       img.icon.settings(src="@/assets/settings.svg")
@@ -391,6 +437,9 @@ template(v-if="state.settingsIsVisible")
 
   .background-preview-wrap
     margin-bottom 6px
+
+.team-button
+  padding-right 6px
 
 .space-settings
   .background-preview

@@ -109,6 +109,7 @@
     img.icon(src="@/assets/star.svg")
     img.icon(src="@/assets/system.svg")
     img.icon(src="@/assets/templates.svg")
+    img.icon(src="@/assets/team.svg")
     img.icon(src="@/assets/time.svg")
     img.icon(src="@/assets/today.svg")
     img.icon(src="@/assets/transparent.svg")

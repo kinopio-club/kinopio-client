@@ -44,10 +44,6 @@ const initialState = {
   shouldDisableRightClickToPan: false,
   shouldShowCurrentSpaceTags: false,
   showInExploreUpdatedAt: null, // date
-  dialogSpaceFilters: null, // null, journals, spaces
-  dialogSpaceFilterByUser: {},
-  dialogSpaceFilterShowHidden: false,
-  dialogSpaceFiltersSortBy: null, // null, updatedAt, createdAt
   defaultSpaceBackground: undefined,
   defaultSpaceBackgroundGradient: undefined,
   defaultSpaceBackgroundTint: undefined,
@@ -80,7 +76,17 @@ const initialState = {
   cardSettingsDefaultCharacterLimit: consts.defaultCharacterLimit,
   cardSettingsShiftEnterShouldAddChildCard: true,
   cardSettingsMaxCardWidth: consts.normalCardMaxWidth,
-  prevSettingsSection: null
+  prevSettingsSection: null,
+  team: null,
+  teamUser: null,
+
+  // space filters
+
+  dialogSpaceFilterByType: null, // null, journals, spaces
+  dialogSpaceFilterByTeam: null, // null, team, personal
+  dialogSpaceFilterByUser: {},
+  dialogSpaceFilterShowHidden: false,
+  dialogSpaceFilterSortByDate: null // null, updatedAt, createdAt
 }
 
 export default {
@@ -165,6 +171,7 @@ export default {
       Object.keys(user).forEach(item => {
         state[item] = user[item]
       })
+      console.log('👫 team user', user.team, user.teamUser)
     },
     updateUser: (state, user) => {
       Object.keys(user).forEach(key => {
@@ -290,9 +297,9 @@ export default {
       state.shouldUseLastConnectionType = value
       cache.updateUser('shouldUseLastConnectionType', value)
     },
-    dialogSpaceFilters: (state, value) => {
-      state.dialogSpaceFilters = value
-      cache.updateUser('dialogSpaceFilters', value)
+    dialogSpaceFilterByType: (state, value) => {
+      state.dialogSpaceFilterByType = value
+      cache.updateUser('dialogSpaceFilterByType', value)
     },
     dialogSpaceFilterByUser: (state, value) => {
       state.dialogSpaceFilterByUser = value
@@ -302,9 +309,13 @@ export default {
       state.dialogSpaceFilterShowHidden = value
       cache.updateUser('dialogSpaceFilterShowHidden', value)
     },
-    dialogSpaceFiltersSortBy: (state, value) => {
-      state.dialogSpaceFiltersSortBy = value
-      cache.updateUser('dialogSpaceFiltersSortBy', value)
+    dialogSpaceFilterByTeam: (state, value) => {
+      state.dialogSpaceFilterByTeam = value
+      cache.updateUser('dialogSpaceFilterByTeam', value)
+    },
+    dialogSpaceFilterSortByDate: (state, value) => {
+      state.dialogSpaceFilterSortByDate = value
+      cache.updateUser('dialogSpaceFilterSortByDate', value)
     },
     defaultSpaceBackground: (state, value) => {
       state.defaultSpaceBackground = value
@@ -563,9 +574,15 @@ export default {
           context.dispatch('api/getUserFavoriteUsers', null, { root: true }),
           context.dispatch('api/getUserFavoriteColors', null, { root: true })
         ])
-        context.commit('favoriteUsers', favoriteUsers)
-        context.commit('favoriteSpaces', favoriteSpaces)
-        context.commit('favoriteColors', favoriteColors)
+        if (favoriteUsers) {
+          context.commit('favoriteUsers', favoriteUsers)
+        }
+        if (favoriteSpaces) {
+          context.commit('favoriteSpaces', favoriteSpaces)
+        }
+        if (favoriteColors) {
+          context.commit('favoriteColors', favoriteColors)
+        }
         context.commit('isLoadingFavorites', false, { root: true })
       } catch (error) {
         console.error('🚒 restoreUserFavorites', error)
@@ -827,7 +844,8 @@ export default {
       const currentUserIsSignedIn = getters.isSignedIn
       const canEditOpenSpace = spaceIsOpen && currentUserIsSignedIn
       const isSpaceMember = getters.isSpaceMember(space)
-      return canEditOpenSpace || isSpaceMember
+      const isInSpaceTeam = getters.isInSpaceTeam(space)
+      return canEditOpenSpace || isSpaceMember || isInSpaceTeam
     },
     cannotEditUnlessSignedIn: (state, getters, rootState) => (space) => {
       space = space || rootState.currentSpace
@@ -848,7 +866,8 @@ export default {
     },
     canEditCard: (state, getters, rootState, rootGetters) => (card) => {
       const isSpaceMember = getters.isSpaceMember()
-      if (isSpaceMember) { return true }
+      const isInSpaceTeam = getters.isInSpaceTeam()
+      if (isSpaceMember || isInSpaceTeam) { return true }
       const canEditSpace = getters.canEditSpace
       const cardIsCreatedByCurrentUser = getters.cardIsCreatedByCurrentUser(card)
       if (canEditSpace && cardIsCreatedByCurrentUser) { return true }
@@ -856,12 +875,14 @@ export default {
     },
     canOnlyComment: (state, getters, rootState) => () => {
       const canEditSpace = getters.canEditSpace
-      const isSpaceMember = getters.isSpaceMember(rootState.currentSpace)
-      return canEditSpace && !isSpaceMember
+      const isSpaceMember = getters.isSpaceMember()
+      const isInSpaceTeam = getters.isInSpaceTeam()
+      return canEditSpace && !isSpaceMember && !isInSpaceTeam
     },
     canEditBox: (state, getters, rootState, rootGetters) => (box) => {
       const isSpaceMember = getters.isSpaceMember()
-      if (isSpaceMember) { return true }
+      const isInSpaceTeam = getters.isInSpaceTeam()
+      if (isSpaceMember || isInSpaceTeam) { return true }
       const canEditSpace = getters.canEditSpace
       const boxIsCreatedByCurrentUser = getters.boxIsCreatedByCurrentUser(box)
       if (canEditSpace && boxIsCreatedByCurrentUser) { return true }
@@ -945,6 +966,18 @@ export default {
       const connections = rootState.filteredConnectionTypeIds
       const frames = rootState.filteredFrameIds
       return userFilters + tagNames.length + connections.length + frames.length
+    },
+
+    // team
+
+    isInSpaceTeam: (state, getters, rootState) => (space) => {
+      space = space || rootState.currentSpace
+      const userTeamId = state.teamUser?.teamId
+      return userTeamId === space.teamId
+    },
+    isTeamAdmin: (state, getters) => (teamId) => {
+      if (state.team.id !== teamId) { return }
+      return state.teamUser.role === 'admin'
     },
 
     // AI Images

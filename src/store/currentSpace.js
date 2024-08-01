@@ -84,6 +84,11 @@ const currentSpace = {
       })
       cache.updateSpace('collaborators', state.collaborators, state.id)
     },
+    updateTeam: (state, space) => {
+      state.teamId = space.teamId
+      state.team = space.team
+      state.addedToTeamByUserId = space.addedToTeamByUserId
+    },
     // websocket receive
     updateUser: (state, updatedUser) => {
       state.users = utils.updateUsersWithUser(state.users, updatedUser)
@@ -797,6 +802,7 @@ const currentSpace = {
         let remoteSpace = remoteData
         console.log('🎑 remoteSpace', remoteSpace)
         if (!remoteSpace) { return }
+        context.commit('updateTeam', remoteSpace)
         const spaceIsUnchanged = utils.spaceIsUnchanged(cachedSpace, remoteSpace)
         if (spaceIsUnchanged) {
           context.commit('isLoadingSpace', false, { root: true })
@@ -818,10 +824,10 @@ const currentSpace = {
       cache.saveSpace(space)
     },
     notifySpaceIsOpen: (context) => {
-      const isSpaceMember = context.rootGetters['currentUser/isSpaceMember'](context.state)
-      const canEditSpace = context.rootGetters['currentUser/canEditSpace'](context.state)
       if (context.state.isRemoved) { return }
-      if (!isSpaceMember && canEditSpace) {
+      const isSpaceMember = context.rootGetters['currentUser/isSpaceMember'](context.state)
+      const spaceIsOpen = context.state.privacy === 'open'
+      if (!isSpaceMember && spaceIsOpen) {
         context.commit('addNotification', { message: 'This space is open, which means you can add comments', icon: 'open', type: 'success' }, { root: true })
       }
     },
@@ -1118,6 +1124,20 @@ const currentSpace = {
       })
     },
 
+    // Team
+
+    addToTeam: (context) => {
+      const user = context.rootState.currentUser
+      context.dispatch('updateSpace', {
+        teamId: user.team.id,
+        addedToTeamByUserId: user.id,
+        team: user.team
+      })
+    },
+    removeFromTeam: (context) => {
+      context.dispatch('updateSpace', { teamId: null, addedToTeamByUserId: null, team: null })
+    },
+
     // User Card Count
 
     checkIfShouldNotifyCardsCreatedIsNearLimit: (context) => {
@@ -1289,26 +1309,25 @@ const currentSpace = {
       return users
     },
     members: (state, getters, rootState) => (excludeCurrentUser) => {
-      const users = state.users
+      let users = state.users
       const collaborators = state.collaborators || []
-      let members = []
-      users.forEach(user => {
-        members.push(user)
-      })
-      collaborators.forEach(user => {
-        members.push(user)
-      })
+      users = users.concat(collaborators)
       if (excludeCurrentUser) {
-        members = members.filter(user => user.id !== rootState.currentUser.id)
+        users = users.filter(user => user.id !== rootState.currentUser.id)
       }
-      return members
+      return users
     },
     memberById: (state, getters, rootState) => (id) => {
       const members = getters.members()
       return members.find(member => member.id === id)
     },
+    teamUserById: (state, getters, rootState) => (id) => {
+      if (!state.team) { return }
+      const users = state.team.users
+      return users.find(user => user.id === id)
+    },
     userById: (state, getters, rootState, rootGetters) => (id) => {
-      let user = getters.memberById(id) || rootGetters.otherUserById(id)
+      let user = getters.memberById(id) || rootGetters.otherUserById(id) || getters.teamUserById(id)
       if (rootState.currentUser.id === id) {
         user = rootState.currentUser
       }

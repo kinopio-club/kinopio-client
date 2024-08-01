@@ -411,6 +411,22 @@ const self = {
         context.dispatch('handleServerError', { name: 'getUserSpaces', error })
       }
     },
+    getUserTeamSpaces: async (context) => {
+      const team = context.rootState.currentUser.team
+      if (!team) { return }
+      const apiKey = context.rootState.currentUser.apiKey
+      const isOnline = context.rootState.isOnline
+      if (!shouldRequest({ apiKey, isOnline })) { return }
+      try {
+        const options = await context.dispatch('requestOptions', { method: 'GET', space: context.rootState.currentSpace })
+        const response = await fetch(`${consts.apiHost()}/user/team-spaces`, options)
+        const currentUser = context.rootState.currentUser
+        let spaces = await normalizeResponse(response)
+        return utils.AddCurrentUserIsCollaboratorToSpaces(spaces, currentUser)
+      } catch (error) {
+        context.dispatch('handleServerError', { name: 'getUserSpaces', error })
+      }
+    },
     getUserRemovedSpaces: async (context) => {
       const apiKey = context.rootState.currentUser.apiKey
       const isOnline = context.rootState.isOnline

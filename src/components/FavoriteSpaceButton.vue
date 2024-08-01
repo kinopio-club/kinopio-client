@@ -5,7 +5,14 @@ const store = useStore()
 
 const emit = defineEmits(['updateLocalSpaces'])
 
-const shouldIncreaseUIContrast = computed(() => store.state.currentUser.shouldIncreaseUIContrast)
+const props = defineProps({
+  parentIsDialog: Boolean
+})
+
+const isTranslucentButton = computed(() => {
+  if (props.parentIsDialog) { return }
+  return !store.state.currentUser.shouldIncreaseUIContrast
+})
 const isOnline = computed(() => store.state.isOnline)
 
 const isFavoriteSpace = computed(() => store.getters['currentSpace/isFavorite'])
@@ -18,8 +25,7 @@ const toggleIsFavoriteSpace = () => {
 </script>
 
 <template lang="pug">
-.button-wrap.favorite-space-button
-  button(v-if="isOnline" :class="{'translucent-button': !shouldIncreaseUIContrast}" @click.left.prevent="toggleIsFavoriteSpace" title="Favorite Space")
+  button.favorite-space-button(v-if="isOnline" :class="{active: isFavoriteSpace && props.parentIsDialog, 'translucent-button': isTranslucentButton}" @click.left.prevent="toggleIsFavoriteSpace" title="Favorite Space")
     img.icon(v-show="isFavoriteSpace" src="@/assets/heart.svg")
     img.icon(v-show="!isFavoriteSpace" src="@/assets/heart-empty.svg")
 </template>

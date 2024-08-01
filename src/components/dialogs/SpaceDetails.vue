@@ -11,6 +11,7 @@ import utils from '@/utils.js'
 import Loader from '@/components/Loader.vue'
 
 import debounce from 'lodash-es/debounce'
+import uniqBy from 'lodash-es/uniqBy'
 import dayjs from 'dayjs'
 
 const store = useStore()
@@ -66,15 +67,9 @@ const state = reactive({
   remoteSpaces: [],
   resultsSectionHeight: null,
   dialogHeight: null,
-  journalSpaces: [],
-  normalSpaces: [],
   spaceFiltersIsVisible: false,
   parentDialog: 'spaceDetails'
 })
-
-// current user
-
-const currentUserIsSignedIn = computed(() => store.getters['currentUser/isSignedIn'])
 
 // current space
 
@@ -131,26 +126,31 @@ const updateResultsSectionHeight = async () => {
 
 // filters
 
-const spaceFilterShowHiddenIsActive = computed(() => store.state.currentUser.dialogSpaceFilterShowHidden)
-const dialogSpaceFilters = computed(() => store.state.currentUser.dialogSpaceFilters)
+const dialogSpaceFilterSortByDate = computed(() => store.state.currentUser.dialogSpaceFilterSortByDate)
+const dialogSpaceFilterByType = computed(() => store.state.currentUser.dialogSpaceFilterByType)
 const dialogSpaceFilterByUser = computed(() => store.state.currentUser.dialogSpaceFilterByUser)
+const dialogSpaceFilterShowHidden = computed(() => store.state.currentUser.dialogSpaceFilterShowHidden)
+const dialogSpaceFilterByTeam = computed(() => store.state.currentUser.dialogSpaceFilterByTeam)
+
 const spaceFiltersIsActive = computed(() => {
-  return Boolean(spaceFilterShowHiddenIsActive.value || dialogSpaceFilters.value || utils.objectHasKeys(dialogSpaceFilterByUser.value) || dialogSpaceFiltersSortByIsActive.value)
+  return Boolean(dialogSpaceFilterShowHidden.value || dialogSpaceFilterByType.value || utils.objectHasKeys(dialogSpaceFilterByUser.value) || dialogSpaceFilterSortByDateIsActive.value) || dialogSpaceFilterByTeam.value
 })
 const filteredSpaces = computed(() => {
-  let spaces
+  let spaces = state.spaces
+  // filter by team
+  if (dialogSpaceFilterByTeam.value === 'team') {
+    spaces = spaces.filter(space => space.teamId)
+  } else if (dialogSpaceFilterByTeam.value === 'personal') {
+    spaces = spaces.filter(space => !space.teamId)
+  }
   // filter by space type
-  if (dialogSpaceFilters.value === 'journals') {
-    filterJournalSpacesOnly()
-    spaces = state.journalSpaces
-  } else if (dialogSpaceFilters.value === 'spaces') {
-    filterNormalSpacesOnly()
-    spaces = state.normalSpaces
-  } else {
-    spaces = state.spaces
+  if (dialogSpaceFilterByType.value === 'journals') {
+    spaces = spaces.filter(space => space.moonPhase)
+  } else if (dialogSpaceFilterByType.value === 'spaces') {
+    spaces = spaces.filter(space => !space.moonPhase)
   }
   // filter by hidden spaces
-  if (spaceFilterShowHiddenIsActive.value) {
+  if (dialogSpaceFilterShowHidden.value) {
     spaces = spaces.filter(space => space.isHidden)
   } else {
     spaces = spaces.filter(space => !space.isHidden)
@@ -183,14 +183,6 @@ const clearAllFilters = () => {
   closeDialogs()
   store.commit('triggerClearAllSpaceFilters')
 }
-const filterJournalSpacesOnly = () => {
-  const journalSpaces = state.spaces.filter(space => space.moonPhase)
-  state.journalSpaces = journalSpaces
-}
-const filterNormalSpacesOnly = () => {
-  let normalSpaces = state.spaces.filter(space => !space.moonPhase)
-  state.normalSpaces = normalSpaces
-}
 const toggleSpaceFiltersIsVisible = () => {
   const isVisible = state.spaceFiltersIsVisible
   closeDialogs()
@@ -199,15 +191,14 @@ const toggleSpaceFiltersIsVisible = () => {
 
 // sort
 
-const dialogSpaceFiltersSortBy = computed(() => store.state.currentUser.dialogSpaceFiltersSortBy)
-const dialogSpaceFiltersSortByIsActive = computed(() => dialogSpaceFiltersSortBy.value === 'createdAt')
+const dialogSpaceFilterSortByDateIsActive = computed(() => dialogSpaceFilterSortByDate.value === 'createdAt')
 const isSortByCreatedAt = computed(() => {
-  const value = dialogSpaceFiltersSortBy.value
+  const value = dialogSpaceFilterSortByDate.value
   return value === 'createdAt'
 })
 const prependFavoriteSpaces = (spaces) => {
   let favoriteSpaces = []
-  const userFavoriteSpaces = store.state.currentUser.favoriteSpaces
+  const userFavoriteSpaces = store.state.currentUser.favoriteSpaces || []
   const favoriteSpaceIds = userFavoriteSpaces.map(space => space.id)
   spaces = spaces.map(space => {
     if (favoriteSpaceIds.includes(space.id)) {
@@ -333,13 +324,31 @@ const updateWithExistingRemoteSpaces = (cacheSpaces) => {
   return spaces
 }
 const updateWithRemoteSpaces = async () => {
-  state.isLoadingRemoteSpaces = true
-  state.remoteSpaces = await store.dispatch('api/getUserSpaces')
+  const currentUserIsSignedIn = store.getters['currentUser/isSignedIn']
+  const isOffline = computed(() => !store.state.isOnline)
+  if (!currentUserIsSignedIn || !isOffline.value) { return }
+  try {
+    state.isLoadingRemoteSpaces = true
+    const [userSpaces, teamSpaces] = await Promise.all([
+      store.dispatch('api/getUserSpaces'),
+      store.dispatch('api/getUserTeamSpaces')
+    ])
+    let spaces = userSpaces
+    if (teamSpaces) {
+      spaces = spaces.concat(teamSpaces)
+    }
+    spaces = spaces.filter(space => Boolean(space))
+    spaces = uniqBy(spaces, 'id')
+    state.remoteSpaces = spaces
+    state.isLoadingRemoteSpaces = false
+    if (!state.remoteSpaces) { return }
+    removeRemovedCachedSpaces(state.remoteSpaces)
+    state.spaces = state.remoteSpaces
+    updateCachedSpaces()
+  } catch (error) {
+    console.error('🚒 updateWithRemoteSpaces', error)
+  }
   state.isLoadingRemoteSpaces = false
-  if (!state.remoteSpaces) { return }
-  removeRemovedCachedSpaces(state.remoteSpaces)
-  state.spaces = state.remoteSpaces
-  updateCachedSpaces()
 }
 const updateCachedSpaces = () => {
   state.spaces.forEach(space => {

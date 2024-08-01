@@ -45,7 +45,6 @@ onMounted(() => {
   // when a card is added through Add.vue in a sharesheet with the space open behind it
   window.addEventListener('message', addCardFromOutsideAppContext)
   // load space tasks
-  addInteractionBlur()
   window.addEventListener('beforeunload', unloadPage)
   window.addEventListener('popstate', loadSpaceOnBackOrForward)
   document.fonts.ready.then(event => {
@@ -339,13 +338,15 @@ const isInteracting = computed(() => {
     return true
   } else { return false }
 })
-const addInteractionBlur = () => {
-  if (!utils.isMobile()) { return }
-  const elements = document.querySelectorAll('button, li, label')
-  elements.forEach(element => element.addEventListener('click', blur))
-}
-const blur = (event) => {
-  event.target.blur()
+const blurButtonClick = (event) => {
+  const isMouseOrTouchEvent = event.type.includes('mouse') || event.type.includes('touch')
+  if (!isMouseOrTouchEvent) { return }
+  const isButton = event.target.closest('button')
+  const isLi = event.target.closest('li')
+  const isLabel = event.target.closest('label')
+  if (isButton || isLi || isLabel) {
+    event.target.blur()
+  }
 }
 const initInteractions = (event) => {
   if (eventIsFromTextarea(event)) {
@@ -450,7 +451,7 @@ const stopInteractions = async (event) => {
   if (isBoxesSelected && store.state.boxesWereDragged) {
     store.dispatch('currentBoxes/afterMove')
   }
-  addInteractionBlur()
+  blurButtonClick(event)
   if (event.touches) {
     store.commit('triggerUpdateHeaderAndFooterPosition')
   }

@@ -966,18 +966,20 @@ button
 .button-wrap
   display inline-block
   position relative
-
   dialog
     top calc(100% - 8px)
+
+.icon.team
+  height 11px
+.icon.team + span
+  margin-left 4px
 
 .icon.sunglasses
   height 12px
   vertical-align -1px
 
 .icon.templates
-  padding 0
-  height 9px
-  vertical-align 1px
+  vertical-align -1px
 
 .icon.minimap
   vertical-align -2px
