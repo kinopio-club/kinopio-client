@@ -252,7 +252,6 @@ export default {
         // add new spaces from remote
         const spaces = await this.$store.dispatch('api/getUserSpaces')
         cache.addSpaces(spaces)
-        this.updateCurrentSpace(previousUser)
         this.$store.commit('clearAllNotifications', false)
         this.addCollaboratorToInvitedSpaces()
         this.$store.commit('triggerSpaceDetailsVisible')
@@ -297,18 +296,6 @@ export default {
       this.$store.commit('currentSpace/removeUserFromSpace', previousUser)
       this.$store.commit('currentSpace/addUserToSpace', newUser)
     },
-
-    updateCurrentSpace (previousUser) {
-      const currentUser = this.$store.state.currentUser
-      const currentSpace = this.$store.state.currentSpace
-      this.$store.commit('triggerUpdateWindowHistory')
-      this.$store.commit('currentSpace/removeUserFromSpace', previousUser)
-      const userIsSpaceUser = this.$store.getters['currentUser/spaceUserPermission'](currentSpace) === 'user'
-      if (userIsSpaceUser) {
-        this.$store.commit('currentSpace/addUserToSpace', currentUser)
-      }
-    },
-
     removeUneditedSpace (spaceName) {
       let currentSpace = cache.getSpaceByName(spaceName)
       let space
