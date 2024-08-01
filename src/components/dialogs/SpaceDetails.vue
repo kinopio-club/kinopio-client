@@ -71,10 +71,6 @@ const state = reactive({
   parentDialog: 'spaceDetails'
 })
 
-// current user
-
-const currentUserIsSignedIn = computed(() => store.getters['currentUser/isSignedIn'])
-
 // current space
 
 const isLoadingSpace = computed(() => store.state.isLoadingSpace)
@@ -328,13 +324,19 @@ const updateWithExistingRemoteSpaces = (cacheSpaces) => {
   return spaces
 }
 const updateWithRemoteSpaces = async () => {
+  const currentUserIsSignedIn = store.getters['currentUser/isSignedIn']
+  const isOffline = computed(() => !store.state.isOnline)
+  if (!currentUserIsSignedIn || !isOffline.value) { return }
   try {
     state.isLoadingRemoteSpaces = true
     const [userSpaces, teamSpaces] = await Promise.all([
       store.dispatch('api/getUserSpaces'),
       store.dispatch('api/getUserTeamSpaces')
     ])
-    let spaces = userSpaces.concat(teamSpaces)
+    let spaces = userSpaces
+    if (teamSpaces) {
+      spaces = spaces.concat(teamSpaces)
+    }
     spaces = spaces.filter(space => Boolean(space))
     spaces = uniqBy(spaces, 'id')
     state.remoteSpaces = spaces
