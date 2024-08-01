@@ -128,6 +128,7 @@ const updateShouldShowUsersButton = () => {
   // available width
   const viewportWidth = utils.visualViewport().width
   const element = spaceUsersElement.value
+  if (!element) { return }
   const usersWidth = element.getBoundingClientRect().width
   const rightElementWrap = document.querySelector('header nav .right')
   let rightSideWidth = rightElementWrap.getBoundingClientRect().width
