@@ -977,7 +977,7 @@ export default {
     },
     isTeamAdmin: (state, getters) => (teamId) => {
       if (state.team.id !== teamId) { return }
-      return state.user.role === 'admin'
+      return state.teamUser.role === 'admin'
     },
 
     // AI Images
