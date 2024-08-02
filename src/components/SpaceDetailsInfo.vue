@@ -224,8 +224,15 @@ const closeAllDialogs = () => {
 
 // team
 
-const userTeam = computed(() => store.state.currentUser.team)
-const userIsInSpaceTeam = computed(() => store.getters['currentUser/isInSpaceTeam']())
+const userTeams = computed(() => store.state.currentUser.teams) // TODO support multiple teams
+const userTeam = computed(() => {
+  if (userTeams.value) {
+    return userTeams.value[0]
+  } else {
+    return null
+  }
+})
+const userIsInSpaceTeam = computed(() => store.getters['currentUser/teamBySpace']())
 const toggleCurrentSpaceInTeam = (event) => {
   store.commit('clearNotificationsWithPosition')
   const position = utils.cursorPositionInPage(event)

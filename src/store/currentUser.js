@@ -77,8 +77,7 @@ const initialState = {
   cardSettingsShiftEnterShouldAddChildCard: true,
   cardSettingsMaxCardWidth: consts.normalCardMaxWidth,
   prevSettingsSection: null,
-  team: null,
-  teamUser: null,
+  teams: null,
 
   // space filters
 
@@ -171,7 +170,7 @@ export default {
       Object.keys(user).forEach(item => {
         state[item] = user[item]
       })
-      console.log('👫 team user', user.team, user.teamUser)
+      console.log('👫 team user', user.teams)
     },
     updateUser: (state, user) => {
       Object.keys(user).forEach(key => {
@@ -844,8 +843,8 @@ export default {
       const currentUserIsSignedIn = getters.isSignedIn
       const canEditOpenSpace = spaceIsOpen && currentUserIsSignedIn
       const isSpaceMember = getters.isSpaceMember(space)
-      const isInSpaceTeam = getters.isInSpaceTeam(space)
-      return canEditOpenSpace || isSpaceMember || isInSpaceTeam
+      const teamBySpace = getters.teamBySpace(space)
+      return canEditOpenSpace || isSpaceMember || teamBySpace
     },
     cannotEditUnlessSignedIn: (state, getters, rootState) => (space) => {
       space = space || rootState.currentSpace
@@ -866,8 +865,8 @@ export default {
     },
     canEditCard: (state, getters, rootState, rootGetters) => (card) => {
       const isSpaceMember = getters.isSpaceMember()
-      const isInSpaceTeam = getters.isInSpaceTeam()
-      if (isSpaceMember || isInSpaceTeam) { return true }
+      const teamBySpace = getters.teamBySpace()
+      if (isSpaceMember || teamBySpace) { return true }
       const canEditSpace = getters.canEditSpace
       const cardIsCreatedByCurrentUser = getters.cardIsCreatedByCurrentUser(card)
       if (canEditSpace && cardIsCreatedByCurrentUser) { return true }
@@ -876,13 +875,13 @@ export default {
     canOnlyComment: (state, getters, rootState) => () => {
       const canEditSpace = getters.canEditSpace
       const isSpaceMember = getters.isSpaceMember()
-      const isInSpaceTeam = getters.isInSpaceTeam()
-      return canEditSpace && !isSpaceMember && !isInSpaceTeam
+      const teamBySpace = getters.teamBySpace()
+      return canEditSpace && !isSpaceMember && !teamBySpace
     },
     canEditBox: (state, getters, rootState, rootGetters) => (box) => {
       const isSpaceMember = getters.isSpaceMember()
-      const isInSpaceTeam = getters.isInSpaceTeam()
-      if (isSpaceMember || isInSpaceTeam) { return true }
+      const teamBySpace = getters.teamBySpace()
+      if (isSpaceMember || teamBySpace) { return true }
       const canEditSpace = getters.canEditSpace
       const boxIsCreatedByCurrentUser = getters.boxIsCreatedByCurrentUser(box)
       if (canEditSpace && boxIsCreatedByCurrentUser) { return true }
@@ -970,14 +969,18 @@ export default {
 
     // team
 
-    isInSpaceTeam: (state, getters, rootState) => (space) => {
+    teamBySpace: (state, getters, rootState) => (space) => {
       space = space || rootState.currentSpace
-      const userTeamId = state.teamUser?.teamId
-      return userTeamId === space.teamId
+      const spaceTeamId = space.team?.id
+      const spaceTeam = state.teams?.find(team => {
+        return spaceTeamId === team.id
+      })
+      return spaceTeam
     },
     isTeamAdmin: (state, getters) => (teamId) => {
-      if (state.team?.id !== teamId) { return }
-      return state.teamUser.role === 'admin'
+      const teamBySpace = getters.teamBySpace()
+      if (!teamBySpace) { return }
+      return teamBySpace.teamUser.role === 'admin'
     },
 
     // AI Images
