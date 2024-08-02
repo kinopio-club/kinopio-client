@@ -1903,6 +1903,14 @@ const store = createStore({
       const canOnlyComment = context.getters['currentUser/canOnlyComment']()
       if (canOnlyComment) { return }
       context.commit('currentUserToolbar', value)
+    },
+
+    // team
+
+    updateTeam: (context, update) => {
+      context.commit('currentUser/updateTeam', update)
+      context.commit('currentSpace/updateTeam', update)
+      context.dispatch('api/addToQueue', { name: 'updateTeam', body: update })
     }
   },
   getters: {

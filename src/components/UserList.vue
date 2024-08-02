@@ -13,7 +13,8 @@ const props = defineProps({
   users: Array,
   selectedUser: Object,
   showRemoveUser: Boolean,
-  showIsOnline: Boolean
+  showIsOnline: Boolean,
+  showTeamAdmin: Boolean
 })
 const state = reactive({
   filter: '',
@@ -27,6 +28,22 @@ const tabIndex = computed(() => {
     return '-1'
   }
 })
+
+// team
+
+const spaceTeam = (user) => {
+  return store.getters['currentSpace/teamByUser'](user)
+}
+const isTeamAdmin = (user) => {
+  if (!props.showTeamAdmin) { return }
+  const team = spaceTeam(user)
+  if (!team) { return }
+  return team.users.find(teamUser => {
+    const isUser = teamUser.id === user.id
+    const isAdmin = teamUser.role === 'admin'
+    return isUser && isAdmin
+  })
+}
 
 // users
 
@@ -61,7 +78,7 @@ const usersFiltered = computed(() => {
   return items
 })
 
-// user
+// handle events
 
 const selectUser = (event, user) => {
   if (!props.isClickable) { return }
@@ -84,8 +101,10 @@ span
   ul.results-list.user-list
     template(v-for="user in usersFiltered" :key="user.id")
       li(@click.left.stop="selectUser($event, user)" :tabindex="tabIndex" v-on:keyup.stop.enter="selectUser($event, user)" :class="{ active: userIsSelected(user), 'is-not-clickable': !props.isClickable }")
+        .badge.secondary.is-admin(v-if="isTeamAdmin(user)")
+          span Admin
         UserLabelInline(:user="user")
-        button.remove-user.small-button(v-if="props.showRemoveUser" @click.left.stop="removeUser(user)" title="Remove from space")
+        button.remove-user.small-button(v-if="props.showRemoveUser" @click.left.stop="removeUser(user)" title="Remove collaborator")
           img.icon.cancel(src="@/assets/add.svg")
 </template>
 
@@ -112,4 +131,6 @@ span
       pointer-events none
     .remove-user
       flex-shrink 0
+  .badge.is-admin
+    flex-shrink 0
 </style>

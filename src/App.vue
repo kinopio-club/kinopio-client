@@ -827,6 +827,8 @@ dialog
       height 14px
       width 14px
       border-radius var(--small-entity-radius)
+    .team-color
+      border-radius 100px
   a
     text-decoration-thickness 1px
     color var(--text-link)

@@ -84,7 +84,7 @@ const currentSpace = {
       })
       cache.updateSpace('collaborators', state.collaborators, state.id)
     },
-    updateTeam: (state, space) => {
+    restoreTeam: (state, space) => {
       state.teamId = space.teamId
       state.team = space.team
       state.addedToTeamByUserId = space.addedToTeamByUserId
@@ -147,6 +147,15 @@ const currentSpace = {
         return tag
       })
       cache.updateTagColorInAllSpaces(updatedTag)
+    },
+
+    // Team
+
+    updateTeam: (state, updatedTeam) => {
+      if (state.team.id !== updatedTeam.id) { return }
+      Object.keys(updatedTeam).forEach(key => {
+        state.team[key] = updatedTeam[key]
+      })
     }
   },
 
@@ -802,7 +811,7 @@ const currentSpace = {
         let remoteSpace = remoteData
         console.log('🎑 remoteSpace', remoteSpace)
         if (!remoteSpace) { return }
-        context.commit('updateTeam', remoteSpace)
+        context.commit('restoreTeam', remoteSpace)
         const spaceIsUnchanged = utils.spaceIsUnchanged(cachedSpace, remoteSpace)
         if (spaceIsUnchanged) {
           context.commit('isLoadingSpace', false, { root: true })
@@ -1402,6 +1411,15 @@ const currentSpace = {
       const card = rootGetters['currentCards/byId'](itemId)
       const box = rootGetters['currentBoxes/byId'](itemId)
       return card || box
+    },
+
+    // team
+
+    teamByUser: (state) => (user) => {
+      const teamUser = state.team?.users.find(teamUser => teamUser.id === user.id)
+      if (teamUser) {
+        return state.team
+      }
     }
   }
 }

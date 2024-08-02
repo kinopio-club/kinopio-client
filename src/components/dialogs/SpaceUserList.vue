@@ -26,6 +26,7 @@ const state = reactive({
 
 const visible = computed(() => store.state.spaceUserListIsVisible)
 watch(() => visible.value, (value, prevValue) => {
+  state.teamIsVisible = false
   if (value) {
     updateDialogHeight()
   }
@@ -136,13 +137,12 @@ dialog.narrow.space-user-list(
   :style="{'max-height': state.dialogHeight + 'px'}"
 )
   section(v-if="team && isCollaboratorsList")
+    p {{ label }}
     .button-wrap
       button(@click.stop="toggleTeamIsVisible" :class="{ active: state.teamIsVisible }")
         img.icon.team(src="@/assets/team.svg")
         span {{ team.name }}
       Team(:visible="state.teamIsVisible" :team="team")
-  section
-    p {{ label }}
 
   template(v-if="users.length")
     //- users
@@ -175,4 +175,6 @@ dialog.narrow.space-user-list(
   left initial
   right 16px
   top 20px
+  dialog.team
+    left -15px
 </style>

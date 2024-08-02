@@ -441,6 +441,15 @@ export default {
     prevSettingsSection: (state, value) => {
       utils.typeCheck({ value, type: 'string' })
       state.prevSettingsSection = value
+    },
+    updateTeam: (state, updatedTeam) => {
+      state.teams.map(team => {
+        if (team.id !== updatedTeam.id) { return team }
+        Object.keys(updatedTeam).forEach(key => {
+          team[key] = updatedTeam[key]
+        })
+        return team
+      })
     }
   },
   actions: {
