@@ -3,6 +3,7 @@ import { reactive, computed, onMounted, onUnmounted, defineProps, defineEmits, w
 import { useStore } from 'vuex'
 
 import UserDetailsInfo from '@/components/UserDetailsInfo.vue'
+import UserDetailsActions from '@/components/UserDetailsActions.vue'
 import utils from '@/utils.js'
 
 const store = useStore()
@@ -58,6 +59,7 @@ const scrollUserDetailsIntoView = async () => {
 <template lang="pug">
 dialog.narrow.user-details(v-if="visible" @keyup.stop :open="visible" @click.left.stop="closeDialogs" @keydown.stop :style="styles" ref="dialogElement")
   UserDetailsInfo(:visible="visible" :user="user")
+  UserDetailsActions(:user="user")
 </template>
 
 <style lang="stylus">

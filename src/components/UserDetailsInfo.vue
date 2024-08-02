@@ -3,7 +3,6 @@ import { reactive, computed, onMounted, onUnmounted, defineProps, defineEmits, w
 import { useStore } from 'vuex'
 
 import ColorPicker from '@/components/dialogs/ColorPicker.vue'
-import UserDetailsActions from '@/components/UserDetailsActions.vue'
 import UserBadges from '@/components/UserBadges.vue'
 import cache from '@/cache.js'
 import utils from '@/utils.js'
@@ -62,7 +61,6 @@ const closeDialogs = () => {
 
 // current user
 
-const currentUserIsSpaceMember = computed(() => store.getters['currentUser/isSpaceMember']())
 const currentUserIsSignedIn = computed(() => store.getters['currentUser/isSignedIn'])
 const signOut = () => {
   postMessage.send({ name: 'onLogout' })
@@ -174,7 +172,6 @@ const removeCollaborator = () => {
         button(v-else @click.left="triggerSignUpOrInIsVisible")
           span Sign Up or In
 
-  UserDetailsActions(:user="user" :showExploreSpaces="props.showExploreSpaces")
 </template>
 
 <style lang="stylus">

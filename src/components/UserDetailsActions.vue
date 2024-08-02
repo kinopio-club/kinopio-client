@@ -60,6 +60,7 @@ const closeDialogs = () => {
 
 // user
 
+const currentUserIsSpaceMember = computed(() => store.getters['currentUser/isSpaceMember']())
 const isCurrentUser = computed(() => store.getters['currentUser/isCurrentUser'](props.user))
 const userIsSignedIn = computed(() => {
   if (props.user.isSignedIn === false) {
@@ -132,42 +133,42 @@ const updateExploreSpaces = async () => {
 </script>
 
 <template lang="pug">
-//- Other User
-section(v-if="!isCurrentUser && userIsSignedIn && props.user.id")
-  .button-wrap
-    button(@click.left.stop="getUserSpaces" :class="{active: state.loading.userSpaces || state.spacePickerIsVisible}")
-      User(:user="props.user" :isClickable="false" :detailsOnRight="false" :key="props.user.id")
-      span Spaces
-      Loader(:visible="state.loading.userSpaces")
-    SpacePicker(:visible="state.spacePickerIsVisible" :loading="state.loading.userSpaces" :user="props.user" :userSpaces="state.userSpaces" @selectSpace="changeSpace")
-  .button-wrap
-    button(:class="{active: isFavoriteUser}" @click.left.prevent="updateFavoriteUser" @keydown.stop.enter="updateFavoriteUser")
-      span Follow
-      Loader(:visible="isLoadingFavorites")
-  .badge.danger.error-message(v-if="state.error.unknownServerError") (シ_ _)シ Something went wrong, Please try again or contact support
-
-//- Collaborator
-section(v-if="isCollaborator && currentUserIsSpaceMember")
-  template(v-if="isCurrentUser && isCollaborator")
-    button(@click.left.stop="removeCollaborator")
-      img.icon.cancel(src="@/assets/add.svg")
-      span Leave Space
-  template(v-if="!isCurrentUser")
-    button(@click.left.stop="removeCollaborator")
-      img.icon.cancel(src="@/assets/add.svg")
-      span Remove From Space
-
-//- Explore Spaces
-section.results-section.explore-spaces-section(v-if="exploreSpacesIsVisible" ref="results")
-  SpaceList(
-    :spaces="state.exploreSpaces"
-    @selectSpace="changeSpace"
-    :hideFilter="true"
-    :isLoading="state.loading.exploreSpaces"
-    :disableListOptimizaitons="true"
-  )
+.user-details-actions
+  //- Collaborator
+  section(v-if="isCollaborator && currentUserIsSpaceMember")
+    template(v-if="isCurrentUser && isCollaborator")
+      button(@click.left.stop="removeCollaborator")
+        img.icon.cancel(src="@/assets/add.svg")
+        span Leave Space
+    template(v-if="!isCurrentUser")
+      button(@click.left.stop="removeCollaborator")
+        img.icon.cancel(src="@/assets/add.svg")
+        span Remove From Space
+  //- Other User
+  section(v-if="!isCurrentUser && userIsSignedIn && props.user.id")
+    .button-wrap
+      button(@click.left.stop="getUserSpaces" :class="{active: state.loading.userSpaces || state.spacePickerIsVisible}")
+        User(:user="props.user" :isClickable="false" :detailsOnRight="false" :key="props.user.id")
+        span Spaces
+        Loader(:visible="state.loading.userSpaces")
+      SpacePicker(:visible="state.spacePickerIsVisible" :loading="state.loading.userSpaces" :user="props.user" :userSpaces="state.userSpaces" @selectSpace="changeSpace")
+    .button-wrap
+      button(:class="{active: isFavoriteUser}" @click.left.prevent="updateFavoriteUser" @keydown.stop.enter="updateFavoriteUser")
+        span Follow
+        Loader(:visible="isLoadingFavorites")
+    .badge.danger.error-message(v-if="state.error.unknownServerError") (シ_ _)シ Something went wrong, Please try again or contact support
+  //- Explore Spaces
+  section.results-section.explore-spaces-section(v-if="exploreSpacesIsVisible" ref="results")
+    SpaceList(
+      :spaces="state.exploreSpaces"
+      @selectSpace="changeSpace"
+      :hideFilter="true"
+      :isLoading="state.loading.exploreSpaces"
+      :disableListOptimizaitons="true"
+    )
 </template>
 
 <style lang="stylus">
-// .dialog-name
+.user-details-actions
+  border-top 1px solid var(--primary-border)
 </style>
