@@ -57,6 +57,9 @@ const updateDialogHeight = async () => {
 const closeDialogs = () => {
   state.spacePickerIsVisible = false
 }
+
+// user
+
 const isCurrentUser = computed(() => store.getters['currentUser/isCurrentUser'](props.user))
 const userIsSignedIn = computed(() => {
   if (props.user.isSignedIn === false) {
@@ -64,6 +67,15 @@ const userIsSignedIn = computed(() => {
   }
   return true
 })
+const isCollaborator = computed(() => {
+  const currentSpace = store.state.currentSpace
+  const collaborators = currentSpace.collaborators || []
+  return Boolean(collaborators.find(collaborator => {
+    return collaborator.id === props.user.id
+  }))
+})
+
+// spaces
 
 const changeSpace = (space) => {
   store.dispatch('currentSpace/changeSpace', space)
@@ -91,8 +103,9 @@ const clearUserSpaces = () => {
   state.userSpaces = []
 }
 
-const isLoadingFavorites = computed(() => store.state.isLoadingFavorites)
+// follow favorite
 
+const isLoadingFavorites = computed(() => store.state.isLoadingFavorites)
 const updateFavoriteUser = () => {
   const user = props.user
   const value = !isFavoriteUser.value
@@ -106,14 +119,6 @@ const isFavoriteUser = computed(() => {
   return isFavoriteUser
 })
 
-const isCollaborator = computed(() => {
-  const currentSpace = store.state.currentSpace
-  const collaborators = currentSpace.collaborators || []
-  return Boolean(collaborators.find(collaborator => {
-    return collaborator.id === props.user.id
-  }))
-})
-
 // explore spaces
 
 const exploreSpacesIsVisible = computed(() => state.exploreSpaces.length && !state.loading.exploreSpaces && !isCurrentUser.value)
@@ -124,7 +129,6 @@ const updateExploreSpaces = async () => {
   state.exploreSpaces = spaces
   state.loading.exploreSpaces = false
 }
-
 </script>
 
 <template lang="pug">
