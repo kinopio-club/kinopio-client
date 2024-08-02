@@ -43,11 +43,11 @@ const currentSpace = computed(() => store.state.currentSpace)
 
 // list type
 
-const isSpectators = computed(() => store.state.spaceUserListIsSpectators)
-const isCollaborators = computed(() => !isSpectators.value)
+const isSpectatorsList = computed(() => store.state.spaceUserListIsSpectators)
+const isCollaboratorsList = computed(() => !isSpectatorsList.value)
 const label = computed(() => {
   let string = 'Collaborators'
-  if (isSpectators.value) {
+  if (isSpectatorsList.value) {
     string = 'Spectators'
   }
   return string
@@ -67,7 +67,7 @@ const toggleTeamIsVisible = () => {
 // based on SpaceUsersButton.spaceUsers
 const users = computed(() => {
   let items
-  if (isSpectators.value) {
+  if (isSpectatorsList.value) {
     items = currentSpace.value.spectators
   } else {
     const teamUsers = store.getters['currentCards/teamUsersWhoAddedCards']
@@ -84,12 +84,11 @@ const users = computed(() => {
 // commenters
 
 const commenters = computed(() => utils.clone(store.getters['currentCards/commenters']))
-const isCommenters = computed(() => Boolean(commenters.value.length))
 
-// userlist events
+// handle userlist events
 
 const showRemoveUser = computed(() => {
-  return currentUserCanEditSpace.value && isCollaborators.value
+  return currentUserCanEditSpace.value && isCollaboratorsList.value
 })
 const selectedUser = computed(() => {
   const userDetailsIsVisible = store.state.userDetailsIsVisible
@@ -136,14 +135,15 @@ dialog.narrow.space-user-list(
   ref="dialogElement"
   :style="{'max-height': state.dialogHeight + 'px'}"
 )
+  section(v-if="team && isCollaboratorsList")
+    .button-wrap
+      button(@click.stop="toggleTeamIsVisible" :class="{ active: state.teamIsVisible }")
+        img.icon.team(src="@/assets/team.svg")
+        span {{ team.name }}
+      Team(:visible="state.teamIsVisible" :team="team")
   section
     p {{ label }}
-    .row(v-if="team && isCollaborators")
-      .button-wrap
-        button(@click.stop="toggleTeamIsVisible" :class="{ active: state.teamIsVisible }")
-          img.icon.team(src="@/assets/team.svg")
-          span {{ team.name }}
-        Team(:visible="state.teamIsVisible" :team="team")
+
   template(v-if="users.length")
     //- users
     section.results-section
@@ -157,7 +157,7 @@ dialog.narrow.space-user-list(
         :showIsOnline="true"
       )
     //- commenters
-    template(v-if="isCollaborators && isCommenters")
+    template(v-if="isCollaboratorsList && commenters.length")
       section
         p Commenters
       section.results-section

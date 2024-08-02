@@ -92,7 +92,7 @@ span
 <style lang="stylus">
 .user-list
   li
-    align-items center !important
+    align-items flex-start !important
     button
       margin-left auto
     .name
