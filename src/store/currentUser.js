@@ -976,7 +976,7 @@ export default {
       return userTeamId === space.teamId
     },
     isTeamAdmin: (state, getters) => (teamId) => {
-      if (state.team.id !== teamId) { return }
+      if (state.team?.id !== teamId) { return }
       return state.teamUser.role === 'admin'
     },
 
