@@ -159,14 +159,14 @@ section.stats(v-if="visible")
         tr
           td {{wordCount}}
 
-section
+section(v-if="visible")
   p
     img.icon(src="@/assets/heart.svg")
     span(v-if="!state.isLoadingFavorites") {{state.favoriteUsers.length}}{{' '}}
     span Favorites{{' '}}
     Loader(:visible="state.isLoadingFavorites" :isSmall="true")
 
-section.results-section(v-if="!state.isLoadingFavorites")
+section.results-section(v-if="!state.isLoadingFavorites && visible")
   template(v-if="state.favoriteUsers.length")
     UserList(:users="state.favoriteUsers" :selectedUser="userDetailsSelectedUser" @selectUser="toggleUserDetails" :isClickable="true")
   template(v-else)
