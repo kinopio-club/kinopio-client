@@ -25,10 +25,9 @@ onMounted(() => {
 
 const props = defineProps({
   visible: Boolean,
-  spaces: Object,
-  exploreSpaces: Object,
-  followingSpaces: Object,
-  everyoneSpaces: Object,
+  exploreSpaces: Array,
+  followingSpaces: Array,
+  everyoneSpaces: Array,
   loading: Boolean,
   unreadExploreSpacesCount: Number,
   unreadFollowingSpacesCount: Number,
