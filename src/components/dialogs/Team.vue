@@ -59,7 +59,6 @@ const toggleUserDetails = (event, user) => {
 dialog.narrow.dialog-name(v-if="visible" :open="visible" @click.left.stop ref="dialogElement" :style="{'max-height': state.dialogHeight + 'px'}")
   section
     p {{props.team.name}}
-    section.results-section
   UserList(
     :users="props.team.users"
     @selectUser="toggleUserDetails"

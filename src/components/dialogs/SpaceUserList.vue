@@ -136,17 +136,16 @@ dialog.narrow.space-user-list(
   ref="dialogElement"
   :style="{'max-height': state.dialogHeight + 'px'}"
 )
-  //- users
+  section
+    p {{ label }}
+    .row(v-if="team && isCollaborators")
+      .button-wrap
+        button(@click.stop="toggleTeamIsVisible" :class="{ active: state.teamIsVisible }")
+          img.icon.team(src="@/assets/team.svg")
+          span {{ team.name }}
+        Team(:visible="state.teamIsVisible" :team="team")
   template(v-if="users.length")
-    section
-      p {{ label }}
-      .row(v-if="team && isCollaborators")
-        .button-wrap
-          button(@click.stop="toggleTeamIsVisible" :class="{ active: state.teamIsVisible }")
-            img.icon.team(src="@/assets/team.svg")
-            span {{ team.name }}
-          Team(:visible="state.teamIsVisible" :team="team")
-
+    //- users
     section.results-section
       UserList(
         :users="users"
