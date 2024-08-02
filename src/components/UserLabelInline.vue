@@ -59,23 +59,24 @@ const showUserDetails = () => {
 </script>
 
 <template lang="pug">
-.user-label-inline.badge(
-  :key="props.user.id"
-  :data-id="props.user.id"
-  :style="{ background: props.user.color }"
-  :class="{ 'button-badge': props.isClickable, 'bounce-up-down': shouldBounce }"
-  @mouseup="toggleUserDetailsIsVisible"
-  @touchend="toggleUserDetailsIsVisible"
-  ref="labelElement"
-  :title="props.title"
-  @click.stop
-)
-  .user-avatar-inline(:class="{ 'is-on-dark-background': props.isOnDarkBackground }")
-    template(v-if="props.user.isOnline")
-      img.camera.anon-avatar(src="@/assets/camera.svg" title="Online")
-    template(v-else)
-      img.anon-avatar(src="@/assets/anon-avatar.svg" :class="{ 'is-dark': colorIsDark }")
-  span.user-name(v-if="userHasName && !shouldHideName" :class="{ 'is-dark': colorIsDark }") {{ props.user.name }}
+template(v-if="props.user")
+  .user-label-inline.badge(
+    :key="props.user.id"
+    :data-id="props.user.id"
+    :style="{ background: props.user.color }"
+    :class="{ 'button-badge': props.isClickable, 'bounce-up-down': shouldBounce }"
+    @mouseup="toggleUserDetailsIsVisible"
+    @touchend="toggleUserDetailsIsVisible"
+    ref="labelElement"
+    :title="props.title"
+    @click.stop
+  )
+    .user-avatar-inline(:class="{ 'is-on-dark-background': props.isOnDarkBackground }")
+      template(v-if="props.user.isOnline")
+        img.camera.anon-avatar(src="@/assets/camera.svg" title="Online")
+      template(v-else)
+        img.anon-avatar(src="@/assets/anon-avatar.svg" :class="{ 'is-dark': colorIsDark }")
+    span.user-name(v-if="userHasName && !shouldHideName" :class="{ 'is-dark': colorIsDark }") {{ props.user.name }}
 </template>
 
 <style lang="stylus">

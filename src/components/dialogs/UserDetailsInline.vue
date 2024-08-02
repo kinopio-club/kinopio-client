@@ -2,7 +2,7 @@
 import { reactive, computed, onMounted, onUnmounted, defineProps, defineEmits, watch, ref, nextTick, defineAsyncComponent } from 'vue'
 import { useStore } from 'vuex'
 
-import UserDetailsContent from '@/components/UserDetailsContent.vue'
+import UserDetailsInfo from '@/components/UserDetailsInfo.vue'
 import utils from '@/utils.js'
 
 const store = useStore()
@@ -19,7 +19,7 @@ const props = defineProps({
 
 <template lang="pug">
 dialog.narrow.user-details.user-details-inline(v-if="visible" @keyup.stop :open="visible" @click.left.stop="closeDialogs" @keydown.stop ref="dialogElement")
-  UserDetailsContent(:visible="props.visible" :user="user" :showExploreSpaces="true")
+  UserDetailsInfo(:visible="props.visible" :user="props.user" :showExploreSpaces="true")
 </template>
 
 <style lang="stylus">

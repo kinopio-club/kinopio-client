@@ -3,14 +3,11 @@ import { reactive, computed, onMounted, onUnmounted, defineProps, defineEmits, w
 import { useStore } from 'vuex'
 
 import ColorPicker from '@/components/dialogs/ColorPicker.vue'
-import SpacePicker from '@/components/dialogs/SpacePicker.vue'
-import Loader from '@/components/Loader.vue'
+import UserDetailsActions from '@/components/UserDetailsActions.vue'
 import UserBadges from '@/components/UserBadges.vue'
-import UserLabelInline from '@/components/UserLabelInline.vue'
 import cache from '@/cache.js'
 import utils from '@/utils.js'
 import postMessage from '@/postMessage.js'
-import SpaceList from '@/components/SpaceList.vue'
 const User = defineAsyncComponent({
   loader: () => import('@/components/User.vue')
 })
@@ -20,8 +17,13 @@ const descriptionElement = ref(null)
 
 onMounted(() => {
   updateTextareaSize()
-  updateExploreSpaces()
 })
+const updateTextareaSize = async () => {
+  await nextTick()
+  let textarea = descriptionElement.value
+  if (!textarea) { return }
+  textarea.style.height = textarea.scrollHeight + 1 + 'px'
+}
 
 const props = defineProps({
   visible: Boolean,
@@ -30,38 +32,13 @@ const props = defineProps({
 })
 watch(() => props.visible, (value, prevValue) => {
   closeDialogs()
-  clearUserSpaces()
 })
 
 const state = reactive({
-  colorPickerIsVisible: false,
-  spacePickerIsVisible: false,
-  userSpaces: [],
-  exploreSpaces: [],
-  loading: {
-    userSpaces: false,
-    exploreSpaces: false
-  },
-  error: {
-    unknownServerError: false
-  }
+  colorPickerIsVisible: false
 })
 
-const isLoadingFavorites = computed(() => store.state.isLoadingFavorites)
-const userSettingsIsVisible = computed(() => store.state.userSettingsIsVisible)
-const closeDialogs = () => {
-  state.colorPickerIsVisible = false
-  state.spacePickerIsVisible = false
-}
-
-const updateTextareaSize = async () => {
-  await nextTick()
-  let textarea = descriptionElement.value
-  if (!textarea) { return }
-  textarea.style.height = textarea.scrollHeight + 1 + 'px'
-}
-
-// update state
+// toggle dialogs
 
 const toggleUserSettingsIsVisible = () => {
   const value = !store.state.userSettingsIsVisible
@@ -77,8 +54,10 @@ const triggerSignUpOrInIsVisible = () => {
   store.dispatch('closeAllDialogs')
   store.commit('triggerSignUpOrInIsVisible')
 }
-const changeSpace = (space) => {
-  store.dispatch('currentSpace/changeSpace', space)
+const userSettingsIsVisible = computed(() => store.state.userSettingsIsVisible)
+const closeDialogs = () => {
+  state.colorPickerIsVisible = false
+  store.commit('triggerCloseChildDialogs')
 }
 
 // current user
@@ -100,12 +79,6 @@ const userColor = computed(() => props.user.color)
 const userIsMember = computed(() => Boolean(store.getters['currentSpace/memberById'](props.user.id)))
 const userIsUpgraded = computed(() => props.user.isUpgraded)
 const isCurrentUser = computed(() => store.getters['currentUser/isCurrentUser'](props.user))
-const userIsSignedIn = computed(() => {
-  if (props.user.isSignedIn === false) {
-    return false
-  }
-  return true
-})
 const userName = computed({
   get () {
     return props.user.name
@@ -137,52 +110,11 @@ const websiteUrl = computed(() => {
   if (!urls) { return }
   return urls[0]
 })
-const isFavoriteUser = computed(() => {
-  const favoriteUsers = store.state.currentUser.favoriteUsers
-  const isFavoriteUser = Boolean(favoriteUsers.find(favoriteUser => {
-    return favoriteUser.id === props.user.id
-  }))
-  return isFavoriteUser
-})
-const isCollaborator = computed(() => {
-  const currentSpace = store.state.currentSpace
-  const collaborators = currentSpace.collaborators || []
-  return Boolean(collaborators.find(collaborator => {
-    return collaborator.id === props.user.id
-  }))
-})
-const getUserSpaces = async () => {
-  state.error.unknownServerError = false
-  if (state.loading.userSpaces) { return }
-  if (state.spacePickerIsVisible) {
-    closeDialogs()
-    return
-  }
-  state.loading.userSpaces = true
-  state.spacePickerIsVisible = true
-  try {
-    const publicUser = await store.dispatch('api/getPublicUser', props.user)
-    state.userSpaces = publicUser.spaces
-  } catch (error) {
-    state.error.unknownServerError = true
-    clearUserSpaces()
-  }
-  state.loading.userSpaces = false
-}
-const clearUserSpaces = () => {
-  state.loading.userSpaces = false
-  state.userSpaces = []
-}
 
 // update user
 
 const updateUser = (update) => {
   store.dispatch('currentUser/update', update)
-}
-const updateFavoriteUser = () => {
-  const user = props.user
-  const value = !isFavoriteUser.value
-  store.dispatch('currentUser/updateFavoriteUser', { user, value })
 }
 const updateUserColor = (newValue) => {
   updateUser({ color: newValue })
@@ -191,22 +123,10 @@ const removeCollaborator = () => {
   store.dispatch('currentSpace/removeCollaboratorFromSpace', props.user)
   store.dispatch('closeAllDialogs')
 }
-
-// explore spaces
-
-const exploreSpacesIsVisible = computed(() => state.exploreSpaces.length && !state.loading.exploreSpaces && !isCurrentUser.value)
-const updateExploreSpaces = async () => {
-  if (!props.showExploreSpaces) { return }
-  state.loading.exploreSpaces = true
-  const spaces = await store.dispatch('api/getPublicUserExploreSpaces', props.user)
-  state.exploreSpaces = spaces
-  state.loading.exploreSpaces = false
-}
-
 </script>
 
 <template lang="pug">
-.user-details-content(v-if="props.visible")
+.user-details-info(v-if="props.visible" @click.stop="closeDialogs")
   //- Other User
   section(v-if="!isCurrentUser")
     .user-info
@@ -221,7 +141,6 @@ const updateExploreSpaces = async () => {
           p(v-if="!websiteUrl") {{user.website}}
           a(:href="websiteUrl" v-if="websiteUrl")
             span {{user.website}}
-
   //- Current User
   template(v-if="isCurrentUser")
     section.current-user
@@ -255,44 +174,11 @@ const updateExploreSpaces = async () => {
         button(v-else @click.left="triggerSignUpOrInIsVisible")
           span Sign Up or In
 
-  //- Other User
-  section(v-if="!isCurrentUser && userIsSignedIn && user.id")
-    .button-wrap
-      button(@click.left.stop="getUserSpaces" :class="{active: state.loading.userSpaces || state.spacePickerIsVisible}")
-        User(:user="user" :isClickable="false" :detailsOnRight="false" :key="user.id")
-        span Spaces
-        Loader(:visible="state.loading.userSpaces")
-      SpacePicker(:visible="state.spacePickerIsVisible" :loading="state.loading.userSpaces" :user="user" :userSpaces="state.userSpaces" @selectSpace="changeSpace")
-    .button-wrap
-      button(:class="{active: isFavoriteUser}" @click.left.prevent="updateFavoriteUser" @keydown.stop.enter="updateFavoriteUser")
-        span Follow
-        Loader(:visible="isLoadingFavorites")
-    .badge.danger.error-message(v-if="state.error.unknownServerError") (シ_ _)シ Something went wrong, Please try again or contact support
-
-  //- Collaborator
-  section(v-if="isCollaborator && currentUserIsSpaceMember")
-    template(v-if="isCurrentUser && isCollaborator")
-      button(@click.left.stop="removeCollaborator")
-        img.icon.cancel(src="@/assets/add.svg")
-        span Leave Space
-    template(v-if="!isCurrentUser")
-      button(@click.left.stop="removeCollaborator")
-        img.icon.cancel(src="@/assets/add.svg")
-        span Remove From Space
-
-  //- Explore Spaces
-  section.results-section.explore-spaces-section(v-if="exploreSpacesIsVisible" ref="results")
-    SpaceList(
-      :spaces="state.exploreSpaces"
-      @selectSpace="changeSpace"
-      :hideFilter="true"
-      :isLoading="state.loading.exploreSpaces"
-      :disableListOptimizaitons="true"
-    )
+  UserDetailsActions(:user="user" :showExploreSpaces="props.showExploreSpaces")
 </template>
 
 <style lang="stylus">
-.user-details-content
+.user-details-info
   .user-badges
     margin-top -10px
   .user-details-name
