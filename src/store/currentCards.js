@@ -1068,10 +1068,12 @@ const currentCards = {
       return users
     },
     users: (state, getters, rootState, rootGetters) => {
-      return getters.userIds.map(id => {
+      let users = getters.userIds.map(id => {
         let user = rootGetters['currentSpace/userById'](id)
         return user
       })
+      users = users.filter(user => Boolean(user))
+      return users
     },
     teamUsersWhoAddedCards: (state, getters, rootState, rootGetters) => {
       if (!rootState.currentSpace.team) { return }

@@ -1126,12 +1126,12 @@ const currentSpace = {
 
     // Team
 
-    addToTeam: (context) => {
+    addToTeam: (context, team) => {
       const user = context.rootState.currentUser
       context.dispatch('updateSpace', {
-        teamId: user.team.id,
+        teamId: team.id,
         addedToTeamByUserId: user.id,
-        team: user.team
+        team: team
       })
     },
     removeFromTeam: (context) => {
