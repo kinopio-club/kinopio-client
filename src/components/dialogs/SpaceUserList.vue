@@ -3,6 +3,7 @@ import { reactive, computed, onMounted, onBeforeUnmount, defineProps, defineEmit
 import { useStore } from 'vuex'
 
 import utils from '@/utils.js'
+import Team from '@/components/dialogs/Team.vue'
 import UserList from '@/components/UserList.vue'
 
 import uniqBy from 'lodash-es/uniqBy'
@@ -19,8 +20,10 @@ onMounted(() => {
   })
 })
 const state = reactive({
-  dialogHeight: null
+  dialogHeight: null,
+  teamIsVisible: false
 })
+
 const visible = computed(() => store.state.spaceUserListIsVisible)
 watch(() => visible.value, (value, prevValue) => {
   if (value) {
@@ -53,6 +56,11 @@ const label = computed(() => {
 // team
 
 const team = computed(() => store.state.currentSpace.team)
+const toggleTeamIsVisible = () => {
+  const value = !state.teamIsVisible
+  closeDialogs()
+  state.teamIsVisible = value
+}
 
 // users
 
@@ -116,6 +124,7 @@ const showUserDetails = (event, user) => {
 }
 const closeDialogs = () => {
   store.commit('userDetailsIsVisible', false)
+  state.teamIsVisible = false
 }
 </script>
 
@@ -132,10 +141,11 @@ dialog.narrow.space-user-list(
     section
       p {{ label }}
       .row(v-if="team && isCollaborators")
-        button
-          img.icon.team(src="@/assets/team.svg")
-          span {{ team.name }}
-          //- TODO add team dialog for user management, teamuserlist
+        .button-wrap
+          button(@click.stop="toggleTeamIsVisible" :class="{ active: state.teamIsVisible }")
+            img.icon.team(src="@/assets/team.svg")
+            span {{ team.name }}
+          Team(:visible="state.teamIsVisible" :team="team")
 
     section.results-section
       UserList(
