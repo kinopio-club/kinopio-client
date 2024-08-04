@@ -810,11 +810,11 @@ dialog
     background-color var(--secondary-background)
     padding var(--subsection-padding)
     border-radius var(--entity-radius)
-    hr
-      margin-left -5px
-      width calc(100% + 10px)
-      margin-top 10px
-      margin-bottom 10px
+    // hr
+    //   margin-left -5px
+    //   width calc(100% + 10px)
+    //   margin-top 10px
+    //   margin-bottom 10px
   section + section
     border-top 1px solid var(--primary-border)
   section.subsection + section,
