@@ -187,7 +187,6 @@ dialog.add-space.narrow(
       .segmented-buttons
         button(@click="addJournalSpace")
           img.icon(src="@/assets/add.svg")
-          //- MoonPhase(:moonPhase="state.moonPhase.name")
           span Daily Journal Space
         button(@click.left.stop="toggleJournalSettingsIsVisible" :class="{ active: state.journalSettingsIsVisible }")
           img.icon.down-arrow.button-down-arrow(src="@/assets/down-arrow.svg")
@@ -202,7 +201,8 @@ dialog.add-space.narrow(
         .row.daily-prompt-row
           .button-wrap
             button(@click.left.prevent="toggleShouldCreateJournalsWithDailyPrompt" @keydown.stop.enter="toggleShouldCreateJournalsWithDailyPrompt" :class="{ active: shouldCreateJournalsWithDailyPrompt }")
-              img.icon.today(src="@/assets/today.svg")
+              //- img.icon.today(src="@/assets/today.svg")
+              MoonPhase(:moonPhase="state.moonPhase.name")
               span Prompt of the Day
         .row(v-if="shouldCreateJournalsWithDailyPrompt")
           p {{dailyPrompt}}
@@ -215,7 +215,15 @@ dialog.add-space.narrow(
             img.icon(src="@/assets/add.svg")
             span Prompt
 
-    //- Templates and Import
+  //- Inbox
+  section(v-if="!state.hasInboxSpace")
+    button(@click="addInboxSpace")
+      img.icon(src="@/assets/add.svg")
+      img.icon.inbox-icon(src="@/assets/inbox.svg")
+      span Inbox
+    p For collecting ideas to figure out later
+
+  //- Templates and Import
   section
     //- templates
     .button-wrap
@@ -226,20 +234,13 @@ dialog.add-space.narrow(
     .button-wrap
       button(@click="triggerImportIsVisible") Import
 
-  //- Inbox
-  section(v-if="!state.hasInboxSpace")
-    button(@click="addInboxSpace")
-      img.icon(src="@/assets/add.svg")
-      img.icon.inbox-icon(src="@/assets/inbox.svg")
-      span Inbox
-    p For collecting ideas to figure out later
-
-  section
-    button
-      img.icon(src="@/assets/add.svg")
-      img.icon.team(src="@/assets/team.svg")
-      span New Team
-
+  //- section
+  //-   section.subsection
+  //-     p Work together on shared spaces
+  //-     button
+  //-       img.icon(src="@/assets/add.svg")
+  //-       img.icon.team(src="@/assets/team.svg")
+  //-       span New Team
 </template>
 <style lang="stylus">
 dialog.add-space
@@ -252,4 +253,6 @@ dialog.add-space
     margin-left 5px
   .daily-prompt-row
     justify-content space-between
+    .moon-phase
+      vertical-align -1px
 </style>
