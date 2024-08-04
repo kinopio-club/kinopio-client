@@ -137,6 +137,7 @@ const spaceFiltersIsActive = computed(() => {
 })
 const filteredSpaces = computed(() => {
   let spaces = state.spaces
+  spaces = spaces.filter(space => space.id)
   // filter by team
   if (dialogSpaceFilterByTeam.value === 'team') {
     spaces = spaces.filter(space => space.teamId)
@@ -326,7 +327,7 @@ const updateWithExistingRemoteSpaces = (cacheSpaces) => {
 const updateWithRemoteSpaces = async () => {
   const currentUserIsSignedIn = store.getters['currentUser/isSignedIn']
   const isOffline = computed(() => !store.state.isOnline)
-  if (!currentUserIsSignedIn || !isOffline.value) { return }
+  if (!currentUserIsSignedIn || isOffline.value) { return }
   try {
     state.isLoadingRemoteSpaces = true
     const [userSpaces, teamSpaces] = await Promise.all([
