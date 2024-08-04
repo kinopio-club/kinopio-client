@@ -109,11 +109,12 @@ watch(() => props.spaces, (spaces) => {
 }, { deep: true })
 
 const spacesFiltered = computed(() => {
+  let spaces = props.spaces
   if (state.filter) {
-    return state.filteredSpaces
-  } else {
-    return props.spaces
+    spaces = state.filteredSpaces
   }
+  spaces = spaces.filter(space => space.id)
+  return spaces
 })
 const isNotCached = (spaceId) => {
   return store.getters['spaceIsNotCached'](spaceId)
