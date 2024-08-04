@@ -133,7 +133,7 @@ const selectUser = (event, user) => {
 
 <template lang="pug">
 dialog.team(v-if="visible" :open="visible" @click.left.stop="closeDialogs" ref="dialogElement" :style="{'max-height': state.dialogHeight + 'px'}")
-  section.title-section
+  section
     .row
       template(v-if="currentUserIsTeamAdmin")
         input.name(placeholder="Team Name" v-model="teamName" name="teamName" maxlength=100)
@@ -148,33 +148,31 @@ dialog.team(v-if="visible" :open="visible" @click.left.stop="closeDialogs" ref="
       p btn settings -> team billing
       p next bill cost
       p update team billing info
-    section.subsection
-      .row
-        button
-          img.icon.copy(src="@/assets/copy.svg")
-          span Copy Invite to TeamUrl
-      .row
-        button
-          img.icon.mail(src="@/assets/mail.svg")
-          span Email Invites
+  section
+    .row
+      button
+        img.icon.copy(src="@/assets/copy.svg")
+        span Copy Invite to TeamUrl
+    .row
+      button
+        img.icon.mail(src="@/assets/mail.svg")
+        span Email Invites
 
   //- todo replace w subsection per user w options and filter
   UserList(
     :users="props.team.users"
     @selectUser="toggleUserDetails"
-    :showRemoveUser="true"
     @removeUser="removeTeamUser"
     :isClickable="true"
-    :showTeamAdmin="true"
   )
 </template>
 
 <style lang="stylus">
 dialog.team
+  overflow auto
   input.name
     margin-bottom 0
-  .title-section
-    border-bottom 1px solid var(--primary-border)
+  // .title-section
   // button.change-color,
   // .current-color-read-only
   //   margin-right 6px
@@ -196,4 +194,6 @@ dialog.team
         border-bottom-right-radius 0
     &.active + section.subsection
       border-top-left-radius 0
+  .user-list
+    border-top 1px solid var(--primary-border)
 </style>
