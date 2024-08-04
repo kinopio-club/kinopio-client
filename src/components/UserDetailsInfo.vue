@@ -131,14 +131,15 @@ const removeCollaborator = () => {
       .row
         User(:user="user" :isClickable="false" :detailsOnRight="false" :key="user.id")
         p.name.user-details-name {{user.name}}
-      .other-user-info
-        UserBadges(:user="user" :isCurrentUser="isCurrentUser")
+      .row
         .row(v-if="userDescription")
           p {{userDescription}}
         .row.website(v-if="user.website")
           p(v-if="!websiteUrl") {{user.website}}
           a(:href="websiteUrl" v-if="websiteUrl")
             span {{user.website}}
+      .other-user-info
+        UserBadges(:user="user" :isCurrentUser="isCurrentUser")
   //- Current User
   template(v-if="isCurrentUser")
     section.current-user
@@ -149,8 +150,6 @@ const removeCollaborator = () => {
             .current-color(:style="{ background: userColor }")
           ColorPicker(:currentColor="userColor" :visible="state.colorPickerIsVisible" @selectedColor="updateUserColor")
         input.name.user-details-name(placeholder="What's your name?" v-model="userName" name="Name" maxlength=100)
-      //- badges
-      UserBadges(:user="user" :isCurrentUser="isCurrentUser")
       //- description
       .row
         textarea(ref="descriptionElement" placeholder="Tell us about yourself" v-model="userDescription" name="Description" maxlength=220 rows="1")
@@ -160,6 +159,8 @@ const removeCollaborator = () => {
         a(:href="websiteUrl" v-if="websiteUrl")
           button.inline-button
             img.icon.visit.arrow-icon(src="@/assets/visit.svg")
+      //- badges
+      UserBadges(:user="user" :isCurrentUser="isCurrentUser")
     section
       .row
         .button-wrap

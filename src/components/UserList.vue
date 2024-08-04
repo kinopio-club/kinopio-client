@@ -133,4 +133,6 @@ span
       flex-shrink 0
   .badge.is-admin
     flex-shrink 0
+  .icon.cancel
+    vertical-align 0.5px
 </style>

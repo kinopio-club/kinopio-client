@@ -24,13 +24,13 @@ const props = defineProps({
 const state = reactive({
   dialogHeight: null,
   colorPickerIsVisible: false,
-  tipsIsVisible: false
+  billingTipsIsVisible: false
 })
 
 watch(() => props.visible, (value, prevValue) => {
   // state.selectedUser = {}
   closeDialogs()
-  state.tipsIsVisible = false
+  state.billingTipsIsVisible = false
   if (value) {
     updateDialogHeight()
   }
@@ -77,8 +77,8 @@ const teamName = computed({
 
 // tips
 
-const toggleTipsIsVisible = () => {
-  state.tipsIsVisible = !state.tipsIsVisible
+const toggleBillingTipsIsVisible = () => {
+  state.billingTipsIsVisible = !state.billingTipsIsVisible
 }
 
 // user
@@ -134,29 +134,31 @@ const selectUser = (event, user) => {
 <template lang="pug">
 dialog.team(v-if="visible" :open="visible" @click.left.stop="closeDialogs" ref="dialogElement" :style="{'max-height': state.dialogHeight + 'px'}")
   section.title-section
-    //- edit team info
-    template(v-if="currentUserIsTeamAdmin")
-      .row
-        //- .button-wrap
-        //-   button.change-color(@click.left.stop="toggleColorPicker" :class="{active: state.colorPickerIsVisible}")
-        //-     .current-color.team-color(:style="{ background: teamColor }")
-        //-   ColorPicker(:currentColor="teamColor" :visible="state.colorPickerIsVisible" @selectedColor="updateTeamColor")
+    .row
+      template(v-if="currentUserIsTeamAdmin")
         input.name(placeholder="Team Name" v-model="teamName" name="teamName" maxlength=100)
-        .button-wrap.tips-button-wrap
-          button.small-button(@click="toggleTipsIsVisible" :class="{active: state.tipsIsVisible}")
-            span ?
-    //- read only team info
-    template(v-else)
-      .row.title-row
-        .row.title-row
-          //- .current-color.team-color.current-color-read-only(:style="{ background: teamColor }")
-          span.team-name {{props.team.name}}
-        .button-wrap.tips-button-wrap
-          button.small-button(@click="toggleTipsIsVisible" :class="{active: state.tipsIsVisible}")
-            span ?
-    section.subsection.tips-section(v-if="state.tipsIsVisible")
-      p TODO tips goes here. explain admins, invite new members to your teams. team members can see and edit team spaces. link to help site
+      template(v-else)
+        span.team-name {{props.team.name}}
+    //- TODO is billing user
+    .row.billing-tips(v-if="currentUserIsTeamAdmin" :class="{ active: state.billingTipsIsVisible} ")
+      button(@click="toggleBillingTipsIsVisible" :class="{ active: state.billingTipsIsVisible} ")
+        span Billing Info
+    section.subsection(v-if="state.billingTipsIsVisible")
+      p 6$/mo teamuser
+      p btn settings -> team billing
+      p next bill cost
+      p update team billing info
+    section.subsection
+      .row
+        button
+          img.icon.copy(src="@/assets/copy.svg")
+          span Copy Invite to TeamUrl
+      .row
+        button
+          img.icon.mail(src="@/assets/mail.svg")
+          span Email Invites
 
+  //- todo replace w subsection per user w options and filter
   UserList(
     :users="props.team.users"
     @selectUser="toggleUserDetails"
@@ -173,19 +175,25 @@ dialog.team
     margin-bottom 0
   .title-section
     border-bottom 1px solid var(--primary-border)
-  button.change-color,
-  .current-color-read-only
-    margin-right 6px
-  .current-color
-    height 14px
-    width 14px
-    border-radius 100px
+  // button.change-color,
+  // .current-color-read-only
+  //   margin-right 6px
+  // .current-color
+  //   height 14px
+  //   width 14px
+  //   border-radius 100px
   .search-wrap
     padding-top 6px
-  .tips-button-wrap
-    padding-left 6px
-  .title-row
-    margin-bottom 0
-  .tips-section
-    margin-top 10px
+  // .tips-button-wrap
+  //   padding-left 6px
+  // .title-row
+  //   margin-bottom 0
+  .billing-tips
+    &.active
+      margin-bottom 0
+      button
+        border-bottom-left-radius 0
+        border-bottom-right-radius 0
+    &.active + section.subsection
+      border-top-left-radius 0
 </style>
