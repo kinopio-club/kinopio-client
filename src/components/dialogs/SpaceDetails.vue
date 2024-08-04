@@ -137,6 +137,7 @@ const spaceFiltersIsActive = computed(() => {
 })
 const filteredSpaces = computed(() => {
   let spaces = state.spaces
+  spaces = spaces.filter(space => space.id)
   // filter by team
   if (dialogSpaceFilterByTeam.value === 'team') {
     spaces = spaces.filter(space => space.teamId)
