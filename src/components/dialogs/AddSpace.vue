@@ -187,33 +187,42 @@ dialog.add-space.narrow(
       .segmented-buttons
         button(@click="addJournalSpace")
           img.icon(src="@/assets/add.svg")
-          MoonPhase(:moonPhase="state.moonPhase.name")
-          span Journal
+          //- MoonPhase(:moonPhase="state.moonPhase.name")
+          span Journal Space
         button(@click.left.stop="toggleEditPromptsIsVisible" :class="{ active: state.editPromptsIsVisible }")
           img.icon.down-arrow.button-down-arrow(src="@/assets/down-arrow.svg")
 
     //- Journal Settings
-    template(v-if="state.editPromptsIsVisible")
-      //- weather
-      section.subsection
-        Weather
+    section.subsection(v-if="state.editPromptsIsVisible")
+      Weather
+      hr
       //- daily prompt
-      section.subsection
-        .row.daily-prompt-row
-          .button-wrap
-            button(@click.left.prevent="toggleShouldCreateJournalsWithDailyPrompt" @keydown.stop.enter="toggleShouldCreateJournalsWithDailyPrompt" :class="{ active: shouldCreateJournalsWithDailyPrompt }")
-              img.icon.today(src="@/assets/today.svg")
-              span Prompt of the Day
-        .row(v-if="shouldCreateJournalsWithDailyPrompt")
-          p {{dailyPrompt}}
+      .row.daily-prompt-row
+        .button-wrap
+          button(@click.left.prevent="toggleShouldCreateJournalsWithDailyPrompt" @keydown.stop.enter="toggleShouldCreateJournalsWithDailyPrompt" :class="{ active: shouldCreateJournalsWithDailyPrompt }")
+            img.icon.today(src="@/assets/today.svg")
+            span Prompt of the Day
+      .row(v-if="shouldCreateJournalsWithDailyPrompt")
+        p {{dailyPrompt}}
+      hr
       //- prompts
-      section.subsection
-        JournalPrompt(v-for="prompt in userPrompts" :prompt="prompt" :key="prompt.id" @showScreenIsShort="showScreenIsShort")
-        //- add prompt
-        .row
-          button(@click.left="addCustomPrompt")
-            img.icon(src="@/assets/add.svg")
-            span Prompt
+      JournalPrompt(v-for="prompt in userPrompts" :prompt="prompt" :key="prompt.id" @showScreenIsShort="showScreenIsShort")
+      //- add prompt
+      .row
+        button(@click.left="addCustomPrompt")
+          img.icon(src="@/assets/add.svg")
+          span Prompt
+
+    //- Templates and Import
+    .row
+      //- templates
+      .button-wrap
+        button(@click="triggerTemplatesIsVisible")
+          img.icon.templates(src="@/assets/templates.svg")
+          span Templates
+      //- import
+      .button-wrap
+        button(@click="triggerImportIsVisible") Import
 
   //- Inbox
   section(v-if="!state.hasInboxSpace")
@@ -223,15 +232,12 @@ dialog.add-space.narrow(
       span Inbox
     p For collecting ideas to figure out later
 
-  //- Templates
   section
-    .row
-      .button-wrap
-        button(@click="triggerTemplatesIsVisible")
-          img.icon.templates(src="@/assets/templates.svg")
-          span Templates
-      .button-wrap
-        button(@click="triggerImportIsVisible") Import
+    button
+      img.icon(src="@/assets/add.svg")
+      img.icon.team(src="@/assets/team.svg")
+      span Team
+
 </template>
 <style lang="stylus">
 .add-space
