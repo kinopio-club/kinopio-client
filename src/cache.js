@@ -205,6 +205,10 @@ export default {
     this.storeLocal(`space-${spaceId}`, space)
   },
   saveSpace (space) {
+    if (!space.id) {
+      console.error('☎️ error caching space', space)
+      return
+    }
     space.cacheDate = Date.now()
     this.storeLocal(`space-${space.id}`, space)
   },
