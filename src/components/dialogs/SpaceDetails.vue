@@ -326,7 +326,7 @@ const updateWithExistingRemoteSpaces = (cacheSpaces) => {
 const updateWithRemoteSpaces = async () => {
   const currentUserIsSignedIn = store.getters['currentUser/isSignedIn']
   const isOffline = computed(() => !store.state.isOnline)
-  if (!currentUserIsSignedIn || !isOffline.value) { return }
+  if (!currentUserIsSignedIn || isOffline.value) { return }
   try {
     state.isLoadingRemoteSpaces = true
     const [userSpaces, teamSpaces] = await Promise.all([
