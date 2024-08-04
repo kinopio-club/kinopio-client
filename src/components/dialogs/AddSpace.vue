@@ -193,25 +193,27 @@ dialog.add-space.narrow(
           img.icon.down-arrow.button-down-arrow(src="@/assets/down-arrow.svg")
 
     //- Journal Settings
-    section.subsection(v-if="state.editPromptsIsVisible")
-      Weather
-      hr
+    template(v-if="state.editPromptsIsVisible")
+      //- weather
+      section.subsection
+        Weather
       //- daily prompt
-      .row.daily-prompt-row
-        .button-wrap
-          button(@click.left.prevent="toggleShouldCreateJournalsWithDailyPrompt" @keydown.stop.enter="toggleShouldCreateJournalsWithDailyPrompt" :class="{ active: shouldCreateJournalsWithDailyPrompt }")
-            img.icon.today(src="@/assets/today.svg")
-            span Prompt of the Day
-      .row(v-if="shouldCreateJournalsWithDailyPrompt")
-        p {{dailyPrompt}}
-      hr
+      section.subsection
+        .row.daily-prompt-row
+          .button-wrap
+            button(@click.left.prevent="toggleShouldCreateJournalsWithDailyPrompt" @keydown.stop.enter="toggleShouldCreateJournalsWithDailyPrompt" :class="{ active: shouldCreateJournalsWithDailyPrompt }")
+              img.icon.today(src="@/assets/today.svg")
+              span Prompt of the Day
+        .row(v-if="shouldCreateJournalsWithDailyPrompt")
+          p {{dailyPrompt}}
       //- prompts
-      JournalPrompt(v-for="prompt in userPrompts" :prompt="prompt" :key="prompt.id" @showScreenIsShort="showScreenIsShort")
-      //- add prompt
-      .row
-        button(@click.left="addCustomPrompt")
-          img.icon(src="@/assets/add.svg")
-          span Prompt
+      section.subsection
+        JournalPrompt(v-for="prompt in userPrompts" :prompt="prompt" :key="prompt.id" @showScreenIsShort="showScreenIsShort")
+        //- add prompt
+        .row
+          button(@click.left="addCustomPrompt")
+            img.icon(src="@/assets/add.svg")
+            span Prompt
 
     //- Templates and Import
     .row
