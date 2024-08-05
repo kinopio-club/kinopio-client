@@ -4,6 +4,7 @@ import { useStore } from 'vuex'
 
 import UserList from '@/components/UserList.vue'
 import User from '@/components/User.vue'
+import ColorPicker from '@/components/dialogs/ColorPicker.vue'
 import utils from '@/utils.js'
 
 import randomColor from 'randomcolor'
@@ -49,25 +50,28 @@ const closeDialogs = () => {
   store.commit('userDetailsIsVisible', false)
   store.commit('triggerCloseChildDialogs')
 }
+
+// team
+
 const currentUserIsTeamAdmin = computed(() => store.getters['currentUser/isTeamAdmin'](props.team.id))
 const updateTeam = (update) => {
   update.id = props.team.id
   store.dispatch('updateTeam', update)
 }
 
-// color
+// team color
 
-// const toggleColorPicker = () => {
-//   const isVisible = state.colorPickerIsVisible
-//   closeDialogs()
-//   state.colorPickerIsVisible = !isVisible
-// }
-// const teamColor = computed(() => 'teal') // TODO props.team.color
-// const updateUserColor = (newValue) => {
-//   updateTeam({ color: newValue })
-// }
+const teamColor = computed(() => 'teal') // TODO props.team.color
+const toggleColorPicker = () => {
+  const isVisible = state.colorPickerIsVisible
+  closeDialogs()
+  state.colorPickerIsVisible = !isVisible
+}
+const updateTeamColor = (newValue) => {
+  updateTeam({ color: newValue })
+}
 
-// name
+// team name
 
 const teamName = computed({
   get () {
@@ -78,7 +82,7 @@ const teamName = computed({
   }
 })
 
-// tips
+// billing
 
 const toggleBillingTipsIsVisible = () => {
   state.billingTipsIsVisible = !state.billingTipsIsVisible
@@ -125,9 +129,14 @@ dialog.team.wide(v-if="visible" :open="visible" @click.left.stop="closeDialogs" 
   section
     .row
       template(v-if="currentUserIsTeamAdmin")
+        .button-wrap
+          button.change-color(@click.left.stop="toggleColorPicker" :class="{active: state.colorPickerIsVisible}")
+            .current-color.team-color(:style="{ background: teamColor }")
+          ColorPicker(:currentColor="teamColor" :visible="state.colorPickerIsVisible" @selectedColor="updateTeamColor")
         input.name(placeholder="Team Name" v-model="teamName" name="teamName" maxlength=100)
 
       template(v-else)
+        .read-only-team-color.current-color.team-color(:style="{ background: teamColor }")
         span.team-name {{props.team.name}}
     //- TODO is billing user
     //- .row.billing-tips(v-if="currentUserIsTeamAdmin" :class="{ active: state.billingTipsIsVisible} ")
@@ -138,7 +147,6 @@ dialog.team.wide(v-if="visible" :open="visible" @click.left.stop="closeDialogs" 
           User(:user="currentUser" :isClickable="false" :key="currentUser.id" :isSmall="true" :hideYouLabel="true")
           User(:user="randomUser" :isClickable="false" :key="currentUser.id" :isSmall="true" :hideYouLabel="true")
         span Invite Team Members
-      //- .button-wrap.billing-button-wrap
       button.small-button(v-if="currentUserIsTeamAdmin" @click="toggleBillingTipsIsVisible" :class="{ active: state.billingTipsIsVisible} ")
         span Billing
 
@@ -175,13 +183,18 @@ dialog.team
   overflow auto
   input.name
     margin-bottom 0
-  // .billing-button-wrap
-  //   padding-left 5px
+  .read-only-team-color
+    width 14px
+    height 14px
+    margin-right 6px
+  button.change-color
+    margin-right 6px
+  .team-color
+    border-radius 100px
   .search-wrap
     padding-top 6px
   .user-list
     border-top 1px solid var(--primary-border)
-
   .invite-row
     justify-content space-between
     button
@@ -192,5 +205,4 @@ dialog.team
         vertical-align -3px
         .anon-avatar
           top 6px
-
 </style>
