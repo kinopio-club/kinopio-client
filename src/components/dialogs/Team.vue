@@ -61,14 +61,14 @@ const updateTeam = (update) => {
 
 // team color
 
-const teamColor = computed(() => 'teal') // TODO props.team.color
+const teamColor = computed(() => props.team.color)
+const updateTeamColor = (newValue) => {
+  updateTeam({ color: newValue })
+}
 const toggleColorPicker = () => {
   const isVisible = state.colorPickerIsVisible
   closeDialogs()
   state.colorPickerIsVisible = !isVisible
-}
-const updateTeamColor = (newValue) => {
-  updateTeam({ color: newValue })
 }
 
 // team name
