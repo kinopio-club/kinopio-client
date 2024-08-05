@@ -28,7 +28,6 @@ const state = reactive({
 })
 
 watch(() => props.visible, (value, prevValue) => {
-  // state.selectedUser = {}
   closeDialogs()
   state.billingTipsIsVisible = false
   if (value) {
@@ -44,6 +43,7 @@ const updateDialogHeight = async () => {
 }
 const closeDialogs = () => {
   state.colorPickerIsVisible = false
+  store.commit('userDetailsIsVisible', false)
 }
 const currentUserIsTeamAdmin = computed(() => store.getters['currentUser/isTeamAdmin'](props.team.id))
 const updateTeam = (update) => {
@@ -53,15 +53,15 @@ const updateTeam = (update) => {
 
 // color
 
-const toggleColorPicker = () => {
-  const isVisible = state.colorPickerIsVisible
-  closeDialogs()
-  state.colorPickerIsVisible = !isVisible
-}
-const teamColor = computed(() => 'teal') // TODO props.team.color
-const updateUserColor = (newValue) => {
-  updateTeam({ color: newValue })
-}
+// const toggleColorPicker = () => {
+//   const isVisible = state.colorPickerIsVisible
+//   closeDialogs()
+//   state.colorPickerIsVisible = !isVisible
+// }
+// const teamColor = computed(() => 'teal') // TODO props.team.color
+// const updateUserColor = (newValue) => {
+//   updateTeam({ color: newValue })
+// }
 
 // name
 
@@ -80,15 +80,13 @@ const toggleBillingTipsIsVisible = () => {
   state.billingTipsIsVisible = !state.billingTipsIsVisible
 }
 
-// user
+// select user
 
-// :selectedUser="selectedUser"
-// const selectedUser = computed(() => {
-
-// const removeTeamUser = async (user) => {
-//   console.log('⛪️', user)
-// }
-
+const selectedUser = computed(() => {
+  const userDetailsIsVisible = store.state.userDetailsIsVisible
+  if (!userDetailsIsVisible) { return }
+  return store.state.userDetailsUser
+})
 const toggleUserDetails = (event, user) => {
   closeDialogs()
   showUserDetails(event, user)
@@ -107,40 +105,6 @@ const showUserDetails = (event, user) => {
   store.commit('userDetailsPosition', position)
   store.commit('userDetailsIsVisible', true)
 }
-
-// const updateFilteredUsers = (users) => {
-//   state.filteredUsers = users
-// }
-// const updateFilter = (filter) => {
-//   state.filter = filter
-// }
-// const usersFiltered = computed(() => {
-//   let items
-//   if (state.filter) {
-//     items = state.filteredUsers
-//   } else {
-//     items = props.team.users
-//   }
-//   return items
-// })
-
-// user
-
-const selectUser = (event, user) => {
-  console.log(user)
-  // state.selectedUser = user
-  // console.log(state.selectedUser)
-  // emit('selectUser', event, user)
-}
-// const userIsSelected = (user) => {
-//   console.log('🌳', state.selectedUser.id, user.id, currentUserIsTeamAdmin.value, props.team.id)
-//   return state.selectedUser.id === user.id
-// }
-// const removeUser = (user) => {
-//   if (!props.isClickable) { }
-//   // emit('removeUser', user)
-// }
-
 </script>
 
 <template lang="pug">
@@ -175,10 +139,9 @@ dialog.team(v-if="visible" :open="visible" @click.left.stop="closeDialogs" ref="
       button
         img.icon.mail(src="@/assets/mail.svg")
         span Email Invites
-
-  //- todo replace w subsection per user w options and filter
   UserList(
     :users="props.team.users"
+    :selectedUser="selectedUser"
     @selectUser="toggleUserDetails"
     :isClickable="true"
     :showTeamUserOptions="currentUserIsTeamAdmin"
@@ -190,30 +153,10 @@ dialog.team
   overflow auto
   input.name
     margin-bottom 0
-  // .title-section
-  // button.change-color,
-  // .current-color-read-only
-  //   margin-right 6px
-  // .current-color
-  //   height 14px
-  //   width 14px
-  //   border-radius 100px
   .billing-button-wrap
     padding-left 5px
   .search-wrap
     padding-top 6px
-  // .tips-button-wrap
-  //   padding-left 6px
-  // .title-row
-  //   margin-bottom 0
-  // .billing-tips
-  //   &.active
-  //     margin-bottom 0
-  //     button
-  //       border-bottom-left-radius 0
-  //       border-bottom-right-radius 0
-  //   &.active + section.subsection
-  //     border-top-left-radius 0
   .user-list
     border-top 1px solid var(--primary-border)
 </style>
