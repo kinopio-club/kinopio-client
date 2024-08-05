@@ -45,7 +45,6 @@ const updateDialogHeight = async () => {
 const closeDialogs = () => {
   state.colorPickerIsVisible = false
 }
-
 const currentUserIsTeamAdmin = computed(() => store.getters['currentUser/isTeamAdmin'](props.team.id))
 const updateTeam = (update) => {
   update.id = props.team.id
@@ -86,14 +85,27 @@ const toggleBillingTipsIsVisible = () => {
 // :selectedUser="selectedUser"
 // const selectedUser = computed(() => {
 
-const removeTeamUser = async (user) => {
-  console.log('⛪️', user)
-}
+// const removeTeamUser = async (user) => {
+//   console.log('⛪️', user)
+// }
 
 const toggleUserDetails = (event, user) => {
-  console.log(event, user)
-  // closeDialogs()
-  // showUserDetails(event, user)
+  closeDialogs()
+  showUserDetails(event, user)
+}
+const showUserDetails = (event, user) => {
+  const shouldHideUserDetails = user.id === store.state.userDetailsUser.id
+  if (shouldHideUserDetails) {
+    closeDialogs()
+    store.commit('userDetailsUser', {})
+    return
+  }
+  let element = event.target
+  let options = { element, offsetX: 0, shouldIgnoreZoom: true }
+  let position = utils.childDialogPositionFromParent(options)
+  store.commit('userDetailsUser', user)
+  store.commit('userDetailsPosition', position)
+  store.commit('userDetailsIsVisible', true)
 }
 
 // const updateFilteredUsers = (users) => {

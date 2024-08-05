@@ -77,7 +77,7 @@ const users = computed(() => {
     items = items.concat(teamUsers)
   }
   items = items.filter(item => Boolean(item))
-  items = items.filter(item => item.id !== currentUser.value.id)
+  // items = items.filter(item => item.id !== currentUser.value.id)
   items = uniqBy(items, 'id')
   return items
 })
@@ -154,7 +154,6 @@ dialog.narrow.space-user-list(
         :showRemoveCollaborator="showRemoveCollaborator"
         @removeCollaborator="removeCollaborator"
         :isClickable="true"
-        :showIsOnline="true"
       )
     //- commenters
     template(v-if="isCollaboratorsList && commenters.length")
@@ -166,7 +165,6 @@ dialog.narrow.space-user-list(
           :selectedUser="selectedUser"
           @selectUser="toggleUserDetails"
           :isClickable="true"
-          :showIsOnline="true"
         )
 </template>
 
