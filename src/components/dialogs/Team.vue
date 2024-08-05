@@ -137,17 +137,23 @@ dialog.team(v-if="visible" :open="visible" @click.left.stop="closeDialogs" ref="
     .row
       template(v-if="currentUserIsTeamAdmin")
         input.name(placeholder="Team Name" v-model="teamName" name="teamName" maxlength=100)
+        .button-wrap.billing-button-wrap
+          button.small-button(v-if="currentUserIsTeamAdmin" @click="toggleBillingTipsIsVisible" :class="{ active: state.billingTipsIsVisible} ")
+            span Billing
+
       template(v-else)
         span.team-name {{props.team.name}}
     //- TODO is billing user
-    .row.billing-tips(v-if="currentUserIsTeamAdmin" :class="{ active: state.billingTipsIsVisible} ")
-      button(@click="toggleBillingTipsIsVisible" :class="{ active: state.billingTipsIsVisible} ")
-        span Billing Info
+    //- .row.billing-tips(v-if="currentUserIsTeamAdmin" :class="{ active: state.billingTipsIsVisible} ")
     section.subsection(v-if="state.billingTipsIsVisible")
-      p 6$/mo teamuser
-      p btn settings -> team billing
-      p next bill cost
-      p update team billing info
+      p Each team user costs 6$/mo or 60$/yr
+      p Team users can create unlimited cards and have all the other benefits of an upgraded account.
+      p If you have a multiple teams with the same user, you will only be billed once for that user.
+      button team billing center
+      //- p btn settings -> team billing
+      //- p next bill cost
+      //- p update team billing info
+      //- p total current cost is $12/mo
   section
     .row
       button
@@ -181,20 +187,22 @@ dialog.team
   //   height 14px
   //   width 14px
   //   border-radius 100px
+  .billing-button-wrap
+    padding-left 5px
   .search-wrap
     padding-top 6px
   // .tips-button-wrap
   //   padding-left 6px
   // .title-row
   //   margin-bottom 0
-  .billing-tips
-    &.active
-      margin-bottom 0
-      button
-        border-bottom-left-radius 0
-        border-bottom-right-radius 0
-    &.active + section.subsection
-      border-top-left-radius 0
+  // .billing-tips
+  //   &.active
+  //     margin-bottom 0
+  //     button
+  //       border-bottom-left-radius 0
+  //       border-bottom-right-radius 0
+  //   &.active + section.subsection
+  //     border-top-left-radius 0
   .user-list
     border-top 1px solid var(--primary-border)
 </style>
