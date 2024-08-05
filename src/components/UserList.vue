@@ -129,7 +129,7 @@ const teamUserDetailsIsVisibleForUser = (user) => {
           span Admin
         UserLabelInline(:user="user")
         template(v-if="props.showRemoveCollaborator")
-          button.small-button(@click.left.stop="removeCollaborator(user)" title="Remove Collaborator")
+          button.small-button.danger(@click.left.stop="removeCollaborator(user)" title="Remove Collaborator")
             img.icon.cancel(src="@/assets/add.svg")
         template(v-if="props.showTeamUserOptions")
           .button-wrap
