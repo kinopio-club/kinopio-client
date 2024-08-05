@@ -20,13 +20,11 @@ onMounted(() => {
 
 const visible = computed(() => store.state.userDetailsIsVisible)
 const user = computed(() => store.state.userDetailsUser)
-
-const userDetailsPosition = computed(() => store.state.userDetailsPosition)
-const spaceCounterZoomDecimal = computed(() => store.getters.spaceCounterZoomDecimal)
+const position = computed(() => store.state.userDetailsPosition)
 
 const styles = computed(() => {
-  let { x, y, shouldIgnoreZoom, transformOriginIsTopRight } = userDetailsPosition.value
-  let zoom = spaceCounterZoomDecimal.value
+  let { x, y, shouldIgnoreZoom, transformOriginIsTopRight } = position.value
+  let zoom = store.getters.spaceCounterZoomDecimal
   if (shouldIgnoreZoom) {
     zoom = 1
   }
@@ -63,7 +61,7 @@ dialog.narrow.user-details(v-if="visible" @keyup.stop :open="visible" @click.lef
 </template>
 
 <style lang="stylus">
-.user-details
+dialog.user-details
   cursor initial
   top calc(100% - 8px)
   position absolute

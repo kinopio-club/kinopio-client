@@ -7,52 +7,51 @@ const store = useStore()
 
 const dialogElement = ref(null)
 
-onMounted(() => {
-  store.subscribe(mutation => {
-    if (mutation.type === 'updatePageSizes') {
-      updateDialogHeight()
-    }
-  })
-})
+const visible = computed(() => store.state.teamUserDetailsIsVisible)
+const user = computed(() => store.state.userDetailsUser)
+const position = computed(() => store.state.userDetailsPosition)
 
-const props = defineProps({
-  visible: Boolean
-})
-const state = reactive({
-  dialogHeight: null
-})
-
-watch(() => props.visible, (value, prevValue) => {
-  if (value) {
-    updateDialogHeight()
+const styles = computed(() => {
+  let { x, y, shouldIgnoreZoom, transformOriginIsTopRight } = position.value
+  let zoom = store.getters.spaceCounterZoomDecimal
+  if (shouldIgnoreZoom) {
+    zoom = 1
   }
+  if (store.state.isTouchDevice) {
+    zoom = utils.pinchCounterZoomDecimal()
+    if (zoom > 1) {
+      x = x * zoom
+      y = y * zoom
+    }
+  }
+  const styles = {
+    transform: `scale(${zoom})`,
+    left: x + 'px',
+    top: y + 'px'
+  }
+  if (transformOriginIsTopRight) {
+    styles.transformOrigin = 'top right'
+  }
+  return styles
 })
-
-const updateDialogHeight = async () => {
-  if (!props.visible) { return }
-  await nextTick()
-  let element = dialogElement.value
-  state.dialogHeight = utils.elementHeight(element)
-}
-
-// const themeName = computed(() => store.state.currentUser.theme)
-// const incrementBy = () => {
-//   state.count = state.count + 1
-//   emit('updateCount', state.count)
-//   // store.dispatch('themes/isSystem', false)
-// }
 </script>
 
 <template lang="pug">
-dialog.narrow.team-user-details(v-if="visible" :open="visible" @click.left.stop ref="dialogElement" :style="{'max-height': state.dialogHeight + 'px'}")
+dialog.narrow.team-user-details(v-if="visible" :open="visible" @click.left.stop ref="dialogElement" :style="styles")
   section
-    p TODO team user details
+    p TODO team user details: {{user.name}}
+    //- UserDetailsInfo
+    p user email  (and/or show in team) (server: teammembers get it, w collaboratorkey)
+
+  section
     p .teamuserrolepicker / description
-    p remove from team
+  section
+    button.danger
+      span x remove from team
 </template>
 
 <style lang="stylus">
 dialog.team-user-details
-  left initial
-  right 8px
+  top calc(100% - 8px)
+  position absolute
 </style>

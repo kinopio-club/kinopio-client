@@ -4,7 +4,6 @@ import { useStore } from 'vuex'
 
 import ResultsFilter from '@/components/ResultsFilter.vue'
 import UserLabelInline from '@/components/UserLabelInline.vue'
-import TeamUserDetails from '@/components/dialogs/TeamUserDetails.vue'
 import utils from '@/utils.js'
 const store = useStore()
 
@@ -27,8 +26,7 @@ const props = defineProps({
 })
 const state = reactive({
   filter: '',
-  filteredUsers: [],
-  teamUserDetailsIsVisible: false
+  filteredUsers: []
 })
 
 const tabIndex = computed(() => {
@@ -39,7 +37,7 @@ const tabIndex = computed(() => {
   }
 })
 const closeDialogs = () => {
-  state.teamUserDetailsIsVisible = false
+  store.commit('teamUserDetailsIsVisible', false)
   store.commit('userDetailsIsVisible', false)
 }
 
@@ -98,7 +96,8 @@ const selectUser = (event, user) => {
 const userIsSelected = (user) => {
   if (!props.isClickable) { return }
   if (!props.selectedUser) { return }
-  return props.selectedUser.id === user.id
+  const userId = props.selectedUser.id || store.state.userDetailsUser.id
+  return userId === user.id
 }
 const removeCollaborator = (user) => {
   if (!props.isClickable) { return }
@@ -107,15 +106,18 @@ const removeCollaborator = (user) => {
 
 // team user details
 
-const toggleTeamUserDetailsIsVisible = (user) => {
-  store.commit('userDetailsUser', user)
-  const value = !state.teamUserDetailsIsVisible
+const showTeamUserDetails = (event, user) => {
   closeDialogs()
-  state.teamUserDetailsIsVisible = value
+  store.commit('teamUserDetailsIsVisible', true)
+  store.commit('userDetailsUser', user)
+  let element = event.target
+  let options = { element, offsetX: 0, shouldIgnoreZoom: true }
+  let position = utils.childDialogPositionFromParent(options)
+  store.commit('userDetailsPosition', position)
 }
 const teamUserDetailsIsVisibleForUser = (user) => {
   const isUser = user.id === store.state.userDetailsUser.id
-  return state.teamUserDetailsIsVisible && isUser
+  return store.state.teamUserDetailsIsVisible && isUser
 }
 </script>
 
@@ -133,9 +135,9 @@ const teamUserDetailsIsVisibleForUser = (user) => {
             img.icon.cancel(src="@/assets/add.svg")
         template(v-if="props.showTeamUserOptions")
           .button-wrap
-            button.small-button(@click.left.stop="toggleTeamUserDetailsIsVisible(user)" title="Team User Options" :class="{active: teamUserDetailsIsVisibleForUser(user)}")
+            button.small-button(@click.left.stop="showTeamUserDetails($event, user)" title="Team User Options" :class="{active: teamUserDetailsIsVisibleForUser(user)}")
               img.icon.down-arrow(src="@/assets/down-arrow.svg")
-            TeamUserDetails(:visible="teamUserDetailsIsVisibleForUser(user)")
+            //- TeamUserDetails(:visible="teamUserDetailsIsVisibleForUser(user)")
 </template>
 
 <style lang="stylus">
