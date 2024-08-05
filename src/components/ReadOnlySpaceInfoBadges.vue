@@ -18,8 +18,10 @@ const spaceTeam = computed(() => store.state.currentSpace.team)
   .badge.status(v-if="showInExplore")
     img.icon.sunglasses(src="@/assets/sunglasses.svg")
     span In Explore
+.row
   .badge.secondary(v-if="spaceTeam")
-    img.icon.team(src="@/assets/team.svg")
+    .team-color(:style="{ background: spaceTeam.color }" :title="spaceTeam.name")
+    img.icon.team(src="@/assets/team.svg" :title="spaceTeam.name")
     span {{ spaceTeam.name }}
 </template>
 
