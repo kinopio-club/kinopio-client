@@ -174,5 +174,5 @@ dialog.narrow.space-user-list(
   right 16px
   top 20px
   dialog.team
-    left -15px
+    left -45px
 </style>

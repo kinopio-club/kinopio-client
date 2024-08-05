@@ -3,7 +3,10 @@ import { reactive, computed, onMounted, onBeforeUnmount, defineProps, defineEmit
 import { useStore } from 'vuex'
 
 import UserList from '@/components/UserList.vue'
+import User from '@/components/User.vue'
 import utils from '@/utils.js'
+
+import randomColor from 'randomcolor'
 
 const store = useStore()
 
@@ -81,6 +84,15 @@ const toggleBillingTipsIsVisible = () => {
   state.billingTipsIsVisible = !state.billingTipsIsVisible
 }
 
+// invite
+
+const currentUser = computed(() => store.state.currentUser)
+const randomUser = computed(() => {
+  const luminosity = store.state.currentUser.theme
+  const color = randomColor({ luminosity })
+  return { color }
+})
+
 // select user
 
 const selectedUser = computed(() => {
@@ -109,19 +121,27 @@ const showUserDetails = (event, user) => {
 </script>
 
 <template lang="pug">
-dialog.team(v-if="visible" :open="visible" @click.left.stop="closeDialogs" ref="dialogElement" :style="{'max-height': state.dialogHeight + 'px'}")
+dialog.team.wide(v-if="visible" :open="visible" @click.left.stop="closeDialogs" ref="dialogElement" :style="{'max-height': state.dialogHeight + 'px'}")
   section
     .row
       template(v-if="currentUserIsTeamAdmin")
         input.name(placeholder="Team Name" v-model="teamName" name="teamName" maxlength=100)
-        .button-wrap.billing-button-wrap
-          button.small-button(v-if="currentUserIsTeamAdmin" @click="toggleBillingTipsIsVisible" :class="{ active: state.billingTipsIsVisible} ")
-            span Billing
 
       template(v-else)
         span.team-name {{props.team.name}}
     //- TODO is billing user
     //- .row.billing-tips(v-if="currentUserIsTeamAdmin" :class="{ active: state.billingTipsIsVisible} ")
+  section
+    .row.invite-row
+      p
+        .users
+          User(:user="currentUser" :isClickable="false" :key="currentUser.id" :isSmall="true" :hideYouLabel="true")
+          User(:user="randomUser" :isClickable="false" :key="currentUser.id" :isSmall="true" :hideYouLabel="true")
+        span Invite Team Members
+      //- .button-wrap.billing-button-wrap
+      button.small-button(v-if="currentUserIsTeamAdmin" @click="toggleBillingTipsIsVisible" :class="{ active: state.billingTipsIsVisible} ")
+        span Billing
+
     section.subsection(v-if="state.billingTipsIsVisible")
       p Each team user costs 6$/mo or 60$/yr
       p Team users can create unlimited cards and have all the other benefits of an upgraded account.
@@ -131,15 +151,16 @@ dialog.team(v-if="visible" :open="visible" @click.left.stop="closeDialogs" ref="
       //- p next bill cost
       //- p update team billing info
       //- p total current cost is $12/mo
-  section
-    .row
-      button
-        img.icon.copy(src="@/assets/copy.svg")
-        span Copy Invite to TeamUrl
-    .row
-      button
-        img.icon.mail(src="@/assets/mail.svg")
-        span Email Invites
+
+    section.subsection
+      .row
+        button
+          img.icon.copy(src="@/assets/copy.svg")
+          span Copy Invite to TeamUrl
+      .row
+        button
+          img.icon.mail(src="@/assets/mail.svg")
+          span Email Invites
   UserList(
     :users="props.team.users"
     :selectedUser="selectedUser"
@@ -154,10 +175,22 @@ dialog.team
   overflow auto
   input.name
     margin-bottom 0
-  .billing-button-wrap
-    padding-left 5px
+  // .billing-button-wrap
+  //   padding-left 5px
   .search-wrap
     padding-top 6px
   .user-list
     border-top 1px solid var(--primary-border)
+
+  .invite-row
+    justify-content space-between
+    button
+      margin 0
+    .users
+      margin-right 5px
+      .user
+        vertical-align -3px
+        .anon-avatar
+          top 6px
+
 </style>
