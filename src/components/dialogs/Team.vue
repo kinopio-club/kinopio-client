@@ -180,7 +180,6 @@ dialog.team(v-if="visible" :open="visible" @click.left.stop="closeDialogs" ref="
   UserList(
     :users="props.team.users"
     @selectUser="toggleUserDetails"
-    @removeUser="removeTeamUser"
     :isClickable="true"
     :showTeamUserOptions="currentUserIsTeamAdmin"
   )

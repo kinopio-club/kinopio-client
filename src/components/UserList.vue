@@ -4,6 +4,7 @@ import { useStore } from 'vuex'
 
 import ResultsFilter from '@/components/ResultsFilter.vue'
 import UserLabelInline from '@/components/UserLabelInline.vue'
+import utils from '@/utils.js'
 const store = useStore()
 
 const emit = defineEmits(['selectUser', 'removeCollaborator'])
@@ -48,7 +49,7 @@ const isTeamAdmin = (user) => {
 
 const users = computed(() => {
   const onlineUsers = store.state.currentSpace.clients
-  let items = props.users
+  let items = utils.clone(props.users)
   items = items.map(user => {
     const isOnline = onlineUsers.find(onlineUser => onlineUser.id === user.id)
     if (isOnline) {
