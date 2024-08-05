@@ -585,7 +585,9 @@ header(v-if="isVisible" :style="state.position" :class="{'fade-out': isFadingOut
         .logo
           .logo-image
         MoonPhase(v-if="currentSpace.moonPhase" :moonPhase="currentSpace.moonPhase")
-        img.icon.team(src="@/assets/team.svg" v-if="spaceTeam")
+        template(v-if="spaceTeam")
+          .team-color(:style="{ background: spaceTeam.color }" :title="spaceTeam.name")
+          img.icon.team(src="@/assets/team.svg" :title="spaceTeam.name")
         span {{currentSpaceName}}{{' '}}
         img.icon.visit(src="@/assets/visit.svg")
         //- embed badge
@@ -670,7 +672,9 @@ header(v-if="isVisible" :style="state.position" :class="{'fade-out': isFadingOut
             //- Current Space Name and Info
             .button-wrap.space-name-button-wrap(:class="{ 'back-button-is-visible': backButtonIsVisible }")
               button.space-name-button(@click.left.stop="toggleSpaceDetailsIsVisible" :class="{ active: state.spaceDetailsIsVisible, 'translucent-button': !shouldIncreaseUIContrast }")
-                img.icon.team(src="@/assets/team.svg" v-if="spaceTeam")
+                template(v-if="spaceTeam")
+                  .team-color(:style="{ background: spaceTeam.color }" :title="spaceTeam.name")
+                  img.icon.team(src="@/assets/team.svg" :title="spaceTeam.name")
                 span(v-if="currentSpaceIsInbox")
                   img.icon.inbox-icon(src="@/assets/inbox.svg")
                 span(v-if="currentSpaceIsTemplate")

@@ -130,13 +130,13 @@ dialog.team.wide(v-if="visible" :open="visible" @click.left.stop="closeDialogs" 
     .row
       template(v-if="currentUserIsTeamAdmin")
         .button-wrap
-          button.change-color(@click.left.stop="toggleColorPicker" :class="{active: state.colorPickerIsVisible}")
-            .current-color.team-color(:style="{ background: teamColor }")
+          button.change-color(@click.left.stop="toggleColorPicker" :class="{active: state.colorPickerIsVisible}" title="Change Team Color")
+            .current-color.current-team-color(:style="{ background: teamColor }")
           ColorPicker(:currentColor="teamColor" :visible="state.colorPickerIsVisible" @selectedColor="updateTeamColor")
         input.name(placeholder="Team Name" v-model="teamName" name="teamName" maxlength=100)
 
       template(v-else)
-        .read-only-team-color.current-color.team-color(:style="{ background: teamColor }")
+        .team-color(:style="{ background: teamColor }" title="Team Color")
         span.team-name {{props.team.name}}
     //- TODO is billing user
     //- .row.billing-tips(v-if="currentUserIsTeamAdmin" :class="{ active: state.billingTipsIsVisible} ")
@@ -183,14 +183,8 @@ dialog.team
   overflow auto
   input.name
     margin-bottom 0
-  .read-only-team-color
-    width 14px
-    height 14px
-    margin-right 6px
   button.change-color
     margin-right 6px
-  .team-color
-    border-radius 100px
   .search-wrap
     padding-top 6px
   .user-list

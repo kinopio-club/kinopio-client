@@ -140,6 +140,7 @@ dialog.narrow.space-user-list(
     p {{ label }}
     .button-wrap
       button(@click.stop="toggleTeamIsVisible" :class="{ active: state.teamIsVisible }")
+        .team-color(:style="{ background: team.color }")
         img.icon.team(src="@/assets/team.svg")
         span {{ team.name }}
       Team(:visible="state.teamIsVisible" :team="team")

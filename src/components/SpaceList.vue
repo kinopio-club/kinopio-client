@@ -83,7 +83,8 @@ const props = defineProps({
   disableListOptimizations: Boolean,
   search: String,
   parentDialog: String,
-  previewImageIsWide: Boolean
+  previewImageIsWide: Boolean,
+  showSpaceTeams: Boolean
 })
 
 const state = reactive({
@@ -372,6 +373,12 @@ const checkmarkSpace = (space) => {
   shouldPreventSelectSpace = true
   emit('checkmarkSpace', space)
 }
+
+// team
+
+const userTeam = (teamId) => {
+  return store.getters['currentUser/teamByTeamId'](teamId)
+}
 </script>
 
 <template lang="pug">
@@ -430,8 +437,9 @@ span.space-list-wrap
             .preview-thumbnail-image-wrap(v-if="space.previewThumbnailImage && isOnline" :class="{wide: previewImageIsWide}")
               img.preview-thumbnail-image(:src="space.previewThumbnailImage")
             //- team
-            template(v-if="space.teamId" title="Team Space")
-              img.icon.team(src="@/assets/team.svg")
+            template(v-if="space.teamId && props.showSpaceTeams")
+              .team-color(:style="{ background: userTeam(space.teamId).color }" :title="userTeam(space.teamId).name")
+              img.icon.team(src="@/assets/team.svg" :title="userTeam(space.teamId).name")
             //- offline
             span(v-if="isOffline && isNotCached(space.id)")
               OfflineBadge(:isInline="true" :isDanger="true")
@@ -500,7 +508,12 @@ span.space-list-wrap
       height 12px
       vertical-align -1px
 
-    .favorite-icon,
+    .team-color
+      margin-right 5px
+      width 10.5px
+      vertical-align -2px
+      margin-top 6px
+    .favorite-icon
     .inbox-icon,
     .icon.team
       margin-right 5px

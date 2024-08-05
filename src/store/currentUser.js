@@ -978,6 +978,12 @@ export default {
 
     // team
 
+    teamByTeamId: (state, getters) => (teamId) => {
+      const spaceTeam = state.teams?.find(team => {
+        return teamId === team.id
+      })
+      return spaceTeam
+    },
     teamBySpace: (state, getters, rootState) => (space) => {
       space = space || rootState.currentSpace
       const spaceTeamId = space.team?.id

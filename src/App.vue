@@ -729,6 +729,15 @@ p
   > .button-wrap + .button-wrap
     margin-left 0
 
+.team-color
+  width 8px
+  height 8px
+  margin-right 6px
+  border-radius 100px
+  display inline-block
+  vertical-align 1px
+  flex-shink 0
+
 dialog
   width 250px
   left 8px
@@ -833,8 +842,9 @@ dialog
       height 14px
       width 14px
       border-radius var(--small-entity-radius)
-    .team-color
+    .current-team-color
       border-radius 100px
+
   a
     text-decoration-thickness 1px
     color var(--text-link)
@@ -958,7 +968,6 @@ button
 .icon
   user-drag none
   -webkit-user-drag none
-  pointer-events none
 
 .icon + span,
 .icon + .icon
@@ -980,8 +989,6 @@ button
 
 .icon.team
   height 11px
-.icon.team + span
-  margin-left 4px
 
 .icon.sunglasses
   height 12px
