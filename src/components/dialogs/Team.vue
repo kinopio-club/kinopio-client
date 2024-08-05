@@ -164,6 +164,7 @@ dialog.team(v-if="visible" :open="visible" @click.left.stop="closeDialogs" ref="
     @selectUser="toggleUserDetails"
     @removeUser="removeTeamUser"
     :isClickable="true"
+    :showTeamUserOptions="currentUserIsTeamAdmin"
   )
 </template>
 

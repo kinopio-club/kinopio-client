@@ -88,7 +88,7 @@ const commenters = computed(() => utils.clone(store.getters['currentCards/commen
 
 // handle userlist events
 
-const showRemoveUser = computed(() => {
+const showRemoveCollaborator = computed(() => {
   return currentUserCanEditSpace.value && isCollaboratorsList.value
 })
 const selectedUser = computed(() => {
@@ -151,8 +151,8 @@ dialog.narrow.space-user-list(
         :users="users"
         :selectedUser="selectedUser"
         @selectUser="toggleUserDetails"
-        :showRemoveUser="showRemoveUser"
-        @removeUser="removeCollaborator"
+        :showRemoveCollaborator="showRemoveCollaborator"
+        @removeCollaborator="removeCollaborator"
         :isClickable="true"
         :showIsOnline="true"
       )

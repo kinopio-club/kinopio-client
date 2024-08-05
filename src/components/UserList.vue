@@ -6,13 +6,14 @@ import ResultsFilter from '@/components/ResultsFilter.vue'
 import UserLabelInline from '@/components/UserLabelInline.vue'
 const store = useStore()
 
-const emit = defineEmits(['selectUser', 'removeUser'])
+const emit = defineEmits(['selectUser', 'removeCollaborator'])
 
 const props = defineProps({
   isClickable: Boolean,
   users: Array,
   selectedUser: Object,
-  showRemoveUser: Boolean,
+  showRemoveCollaborator: Boolean,
+  showTeamUserOptions: Boolean,
   showIsOnline: Boolean
 })
 const state = reactive({
@@ -78,9 +79,9 @@ const userIsSelected = (user) => {
   if (!props.selectedUser) { return }
   return props.selectedUser.id === user.id
 }
-const removeUser = (user) => {
+const removeCollaborator = (user) => {
   if (!props.isClickable) { return }
-  emit('removeUser', user)
+  emit('removeCollaborator', user)
 }
 </script>
 
@@ -91,8 +92,12 @@ const removeUser = (user) => {
     template(v-for="user in usersFiltered" :key="user.id")
       li(@click.left.stop="selectUser($event, user)" :tabindex="tabIndex" v-on:keyup.stop.enter="selectUser($event, user)" :class="{ active: userIsSelected(user), 'is-not-clickable': !props.isClickable }")
         UserLabelInline(:user="user")
-        button.remove-user.small-button(v-if="props.showRemoveUser" @click.left.stop="removeUser(user)" title="Remove collaborator")
-          img.icon.cancel(src="@/assets/add.svg")
+        template(v-if="props.showRemoveCollaborator")
+          button.small-button(@click.left.stop="removeCollaborator(user)" title="Remove Collaborator")
+            img.icon.cancel(src="@/assets/add.svg")
+        template(v-if="props.showTeamUserOptions")
+          button.small-button(@click.left.stop="showTeamUserOptions(user)" title="Team User Options")
+            img.icon.down-arrow(src="@/assets/down-arrow.svg")
 </template>
 
 <style lang="stylus">
@@ -116,10 +121,13 @@ const removeUser = (user) => {
         outline none
     .user-label-inline
       pointer-events none
-    .remove-user
-      flex-shrink 0
+  .button-small
+    flex-shrink 0
   .badge.is-admin
     flex-shrink 0
   .icon.cancel
     vertical-align 0.5px
+  .icon.down-arrow
+    padding 0 2px
+    vertical-align 2px
 </style>
