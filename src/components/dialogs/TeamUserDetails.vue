@@ -2,6 +2,7 @@
 import { reactive, computed, onMounted, onBeforeUnmount, defineProps, defineEmits, watch, ref, nextTick } from 'vue'
 import { useStore } from 'vuex'
 
+import UserDetailsInfo from '@/components/UserDetailsInfo.vue'
 import utils from '@/utils.js'
 const store = useStore()
 
@@ -38,6 +39,7 @@ const styles = computed(() => {
 
 <template lang="pug">
 dialog.narrow.team-user-details(v-if="visible" :open="visible" @click.left.stop ref="dialogElement" :style="styles")
+  UserDetailsInfo(:user="user")
   section
     p TODO team user details: {{user.name}}
     //- UserDetailsInfo

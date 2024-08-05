@@ -25,12 +25,9 @@ const updateTextareaSize = async () => {
 }
 
 const props = defineProps({
-  visible: Boolean,
   user: Object,
-  showExploreSpaces: Boolean
-})
-watch(() => props.visible, (value, prevValue) => {
-  closeDialogs()
+  showExploreSpaces: Boolean,
+  showUserBadges: Boolean
 })
 
 const state = reactive({
@@ -39,11 +36,6 @@ const state = reactive({
 
 // toggle dialogs
 
-const toggleUserSettingsIsVisible = () => {
-  const value = !store.state.userSettingsIsVisible
-  store.dispatch('closeAllDialogs')
-  store.commit('userSettingsIsVisible', value)
-}
 const toggleColorPicker = () => {
   const isVisible = state.colorPickerIsVisible
   closeDialogs()
@@ -53,22 +45,9 @@ const triggerSignUpOrInIsVisible = () => {
   store.dispatch('closeAllDialogs')
   store.commit('triggerSignUpOrInIsVisible')
 }
-const userSettingsIsVisible = computed(() => store.state.userSettingsIsVisible)
 const closeDialogs = () => {
   state.colorPickerIsVisible = false
   store.commit('triggerCloseChildDialogs')
-}
-
-// current user
-
-const currentUserIsSignedIn = computed(() => store.getters['currentUser/isSignedIn'])
-const signOut = () => {
-  postMessage.send({ name: 'onLogout' })
-  store.commit('currentUser/resetLastSpaceId')
-  cache.removeAll()
-  // clear history wipe state from vue-router
-  window.history.replaceState({}, 'Kinopio', '/')
-  location.reload()
 }
 
 // user info
@@ -124,21 +103,20 @@ const removeCollaborator = () => {
 </script>
 
 <template lang="pug">
-.user-details-info(v-if="props.visible" @click.stop="closeDialogs")
+.user-details-info(@click.stop="closeDialogs")
   //- Other User
   section(v-if="!isCurrentUser")
     .user-info
       .row
         User(:user="user" :isClickable="false" :detailsOnRight="false" :key="user.id")
         p.name.user-details-name {{user.name}}
-      .row
-        .row(v-if="userDescription")
-          p {{userDescription}}
-        .row.website(v-if="user.website")
-          p(v-if="!websiteUrl") {{user.website}}
-          a(:href="websiteUrl" v-if="websiteUrl")
-            span {{user.website}}
-      .other-user-info
+      .row(v-if="userDescription")
+        p {{userDescription}}
+      .row.website(v-if="user.website")
+        p(v-if="!websiteUrl") {{user.website}}
+        a(:href="websiteUrl" v-if="websiteUrl")
+          span {{user.website}}
+      .other-user-info(v-if="props.showUserBadges")
         UserBadges(:user="user" :isCurrentUser="isCurrentUser")
   //- Current User
   template(v-if="isCurrentUser")
@@ -161,18 +139,6 @@ const removeCollaborator = () => {
             img.icon.visit.arrow-icon(src="@/assets/visit.svg")
       //- badges
       UserBadges(:user="user" :isCurrentUser="isCurrentUser")
-    section
-      .row
-        .button-wrap
-          button(@click.left.stop="toggleUserSettingsIsVisible" :class="{active: userSettingsIsVisible}")
-            img.icon.settings(src="@/assets/settings.svg")
-            span Settings
-        button.danger(v-if="currentUserIsSignedIn" @click.left="signOut")
-          img.icon.sign-out(src="@/assets/sign-out.svg")
-          span Sign Out
-        button(v-else @click.left="triggerSignUpOrInIsVisible")
-          span Sign Up or In
-
 </template>
 
 <style lang="stylus">

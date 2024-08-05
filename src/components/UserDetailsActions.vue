@@ -7,6 +7,7 @@ import Loader from '@/components/Loader.vue'
 import SpaceList from '@/components/SpaceList.vue'
 import User from '@/components/User.vue'
 import utils from '@/utils.js'
+import cache from '@/cache.js'
 
 const store = useStore()
 
@@ -60,8 +61,6 @@ const closeDialogs = () => {
 
 // user
 
-const currentUserIsSpaceMember = computed(() => store.getters['currentUser/isSpaceMember']())
-const isCurrentUser = computed(() => store.getters['currentUser/isCurrentUser'](props.user))
 const userIsSignedIn = computed(() => {
   if (props.user.isSignedIn === false) {
     return false
@@ -75,6 +74,26 @@ const isCollaborator = computed(() => {
     return collaborator.id === props.user.id
   }))
 })
+
+// current user
+
+const isCurrentUser = computed(() => store.getters['currentUser/isCurrentUser'](props.user))
+const currentUserIsSpaceMember = computed(() => store.getters['currentUser/isSpaceMember']())
+const userSettingsIsVisible = computed(() => store.state.userSettingsIsVisible)
+const toggleUserSettingsIsVisible = () => {
+  const value = !store.state.userSettingsIsVisible
+  store.dispatch('closeAllDialogs')
+  store.commit('userSettingsIsVisible', value)
+}
+const currentUserIsSignedIn = computed(() => store.getters['currentUser/isSignedIn'])
+const signOut = () => {
+  postMessage.send({ name: 'onLogout' })
+  store.commit('currentUser/resetLastSpaceId')
+  cache.removeAll()
+  // clear history wipe state from vue-router
+  window.history.replaceState({}, 'Kinopio', '/')
+  location.reload()
+}
 
 // spaces
 
@@ -134,6 +153,18 @@ const updateExploreSpaces = async () => {
 
 <template lang="pug">
 .user-details-actions
+  section(v-if="isCurrentUser")
+    .row
+      .button-wrap
+        button(@click.left.stop="toggleUserSettingsIsVisible" :class="{active: userSettingsIsVisible}")
+          img.icon.settings(src="@/assets/settings.svg")
+          span Settings
+      button.danger(v-if="currentUserIsSignedIn" @click.left="signOut")
+        img.icon.sign-out(src="@/assets/sign-out.svg")
+        span Sign Out
+      button(v-else @click.left="triggerSignUpOrInIsVisible")
+        span Sign Up or In
+
   //- Collaborator
   section(v-if="isCollaborator && currentUserIsSpaceMember")
     template(v-if="isCurrentUser && isCollaborator")
