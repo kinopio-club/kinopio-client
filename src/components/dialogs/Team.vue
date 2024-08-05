@@ -44,6 +44,7 @@ const updateDialogHeight = async () => {
 const closeDialogs = () => {
   state.colorPickerIsVisible = false
   store.commit('userDetailsIsVisible', false)
+  store.commit('triggerCloseChildDialogs')
 }
 const currentUserIsTeamAdmin = computed(() => store.getters['currentUser/isTeamAdmin'](props.team.id))
 const updateTeam = (update) => {

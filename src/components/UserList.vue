@@ -4,8 +4,17 @@ import { useStore } from 'vuex'
 
 import ResultsFilter from '@/components/ResultsFilter.vue'
 import UserLabelInline from '@/components/UserLabelInline.vue'
+import TeamUserDetails from '@/components/dialogs/TeamUserDetails.vue'
 import utils from '@/utils.js'
 const store = useStore()
+
+onMounted(() => {
+  store.subscribe(mutation => {
+    if (mutation.type === 'triggerCloseChildDialogs') {
+      closeDialogs()
+    }
+  })
+})
 
 const emit = defineEmits(['selectUser', 'removeCollaborator'])
 
@@ -18,7 +27,8 @@ const props = defineProps({
 })
 const state = reactive({
   filter: '',
-  filteredUsers: []
+  filteredUsers: [],
+  teamUserDetailsIsVisible: false
 })
 
 const tabIndex = computed(() => {
@@ -28,6 +38,10 @@ const tabIndex = computed(() => {
     return '-1'
   }
 })
+const closeDialogs = () => {
+  state.teamUserDetailsIsVisible = false
+  store.commit('userDetailsIsVisible', false)
+}
 
 // team
 
@@ -90,6 +104,19 @@ const removeCollaborator = (user) => {
   if (!props.isClickable) { return }
   emit('removeCollaborator', user)
 }
+
+// team user details
+
+const toggleTeamUserDetailsIsVisible = (user) => {
+  store.commit('userDetailsUser', user)
+  const value = !state.teamUserDetailsIsVisible
+  closeDialogs()
+  state.teamUserDetailsIsVisible = value
+}
+const teamUserDetailsIsVisibleForUser = (user) => {
+  const isUser = user.id === store.state.userDetailsUser.id
+  return state.teamUserDetailsIsVisible && isUser
+}
 </script>
 
 <template lang="pug">
@@ -105,15 +132,18 @@ const removeCollaborator = (user) => {
           button.small-button(@click.left.stop="removeCollaborator(user)" title="Remove Collaborator")
             img.icon.cancel(src="@/assets/add.svg")
         template(v-if="props.showTeamUserOptions")
-          button.small-button(@click.left.stop="showTeamUserOptions(user)" title="Team User Options")
-            img.icon.down-arrow(src="@/assets/down-arrow.svg")
+          .button-wrap
+            button.small-button(@click.left.stop="toggleTeamUserDetailsIsVisible(user)" title="Team User Options" :class="{active: teamUserDetailsIsVisibleForUser(user)}")
+              img.icon.down-arrow(src="@/assets/down-arrow.svg")
+            TeamUserDetails(:visible="teamUserDetailsIsVisibleForUser(user)")
 </template>
 
 <style lang="stylus">
 .user-list
   li
     align-items flex-start !important
-    button
+    > .button-wrap,
+    > button
       margin-left auto
     .name
       margin-right 0
@@ -137,5 +167,5 @@ const removeCollaborator = (user) => {
     vertical-align 0.5px
   .icon.down-arrow
     padding 0 2px
-    vertical-align 2px
+    vertical-align 3px
 </style>

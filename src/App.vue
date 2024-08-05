@@ -503,6 +503,7 @@ button,
 input[type="color"],
 select,
 label // used for checkbox buttons
+  flex-shrink 0
   touch-action manipulation
   text-align left
   padding 5px 9px
@@ -973,6 +974,7 @@ button
 .button-wrap
   display inline-block
   position relative
+  flex-shrink 0
   dialog
     top calc(100% - 8px)
 
