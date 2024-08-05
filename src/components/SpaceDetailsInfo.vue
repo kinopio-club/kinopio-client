@@ -296,7 +296,7 @@ const teamButtonTitle = computed(() => {
       button.small-button(:class="{active: dialogIsPinned}")
         img.icon.pin(src="@/assets/pin.svg")
 
-ReadOnlySpaceInfoBadges
+ReadOnlySpaceInfoBadges(:showSpaceTeam="true")
 
 //- member options
 template(v-if="isSpaceMember")
