@@ -2,7 +2,7 @@
 import { reactive, computed, onMounted, onBeforeUnmount, defineProps, defineEmits, watch, ref, nextTick } from 'vue'
 import { useStore } from 'vuex'
 
-import UserDetailsInfo from '@/components/UserDetailsInfo.vue'
+import UserLabelInline from '@/components/UserLabelInline.vue'
 import utils from '@/utils.js'
 const store = useStore()
 
@@ -39,10 +39,11 @@ const styles = computed(() => {
 
 <template lang="pug">
 dialog.narrow.team-user-details(v-if="visible" :open="visible" @click.left.stop ref="dialogElement" :style="styles")
-  UserDetailsInfo(:user="user")
+  section
+    //- UserLabelInline(:user="user")
+    p blah@blah.com {{ user.email }}
   section
     p TODO team user details: {{user.name}}
-    //- UserDetailsInfo
     p user email  (and/or show in team) (server: teammembers get it, w collaboratorkey)
 
   section
