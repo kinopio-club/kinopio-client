@@ -22,6 +22,7 @@ export default {
   AIImageLimitFreeUser: 10,
   rootUserId: 'euGhpBrR9eBcjKnK16C_g',
   sidebarWidth: 250,
+  minBoxSize: 70,
   systemCommands: { explore: 'Explore', newSpace: 'New Space', templates: 'Templates', apps: 'Apps and Extensions' },
   isSecureAppContextIOS: navigator.isSecureAppContextIOS, // true = iOS app
   isSecureAppContext: navigator.isSecureAppContext, // true = iOS app

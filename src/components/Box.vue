@@ -3,6 +3,7 @@ import { reactive, computed, onMounted, onBeforeUnmount, onUpdated, onUnmounted,
 import { useStore } from 'vuex'
 
 import utils from '@/utils.js'
+import consts from '@/consts.js'
 import fonts from '@/data/fonts.js'
 import ItemConnectorButton from '@/components/ItemConnectorButton.vue'
 import postMessage from '@/postMessage.js'
@@ -309,6 +310,14 @@ const shrink = () => {
   const items = cards.concat(boxes)
   console.log('💐', items) // shrink around items in box
   prevSelectedBox = null
+  let updated = { id: props.box.id }
+  if (!items.length) {
+    const minBoxSize = consts.minBoxSize
+    updated.resizeWidth = minBoxSize
+    updated.resizeHeight = minBoxSize
+  }
+  console.log('🌷', updated)
+  store.dispatch('currentBoxes/update', updated)
 }
 
 // locked to background

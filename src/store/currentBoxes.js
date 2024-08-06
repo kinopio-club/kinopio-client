@@ -135,7 +135,7 @@ export default {
 
     add: (context, { box, shouldResize }) => {
       const count = context.state.ids.length
-      const minBoxSize = 70
+      const minBoxSize = consts.minBoxSize
       const isThemeDark = context.rootState.currentUser.theme === 'dark'
       let color = randomColor({ luminosity: 'light' })
       if (isThemeDark) {
