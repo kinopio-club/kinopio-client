@@ -388,27 +388,44 @@ export default {
       }
       context.dispatch('update', updated)
     },
-
     expand: (context, { side, origin, target }) => {
-      console.log('🌳🌳🌳🌳🌳', side, origin, target) // origin is cardrect , target is box
       const padding = consts.spaceBetweenCards
       let updated = { id: target.id }
+      const delta = {
+        x: origin.x - target.x,
+        y: origin.y - target.y
+      }
       if (side === 'right') {
+        // increase width
         updated.resizeWidth = target.width + origin.width + padding
-        // todo handle origin is taller than target = expand height too
+        // increase height if origin is taller than target
+        if (origin.height + delta.y > target.resizeHeight) {
+          updated.resizeHeight = origin.height + delta.y + padding
+        }
       } else if (side === 'left') {
+        // increase width and shift left
         updated.resizeWidth = target.width + origin.width + padding
         updated.x = target.x - origin.width - padding
-        // todo handle origin is taller than target = expand height too
+        // increase height if origin is taller than target
+        if (origin.height + delta.y > target.resizeHeight) {
+          updated.resizeHeight = origin.height + delta.y + padding
+        }
       } else if (side === 'top') {
+        // increase height and shift up
         updated.resizeHeight = target.resizeHeight + origin.height + padding
         updated.y = target.y - origin.height - padding
-        // todo handle origin is wider than target = expand width too
+        // increase width if origin is wider than target
+        if (origin.width + delta.x > target.resizeWidth) {
+          updated.resizeWidth = origin.width + delta.x + padding
+        }
       } else if (side === 'bottom') {
+        // increase width
         updated.resizeHeight = target.resizeHeight + origin.height + padding
-        // todo handle origin is wider than target = expand width too
+        // increase width if origin is wider than target
+        if (origin.width + delta.x > target.resizeWidth) {
+          updated.resizeWidth = origin.width + delta.x + padding
+        }
       }
-      console.log('🐸', updated)
       context.dispatch('update', updated)
     },
 
