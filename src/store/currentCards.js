@@ -425,6 +425,7 @@ const currentCards = {
 
     updateDimensions: (context, { cards }) => {
       const canEditSpace = context.rootGetters['currentUser/canEditSpace']()
+      const zoom = context.rootGetters.spaceCounterZoomDecimal
       if (!cards) {
         cards = context.getters.all
       }
@@ -450,8 +451,8 @@ const currentCards = {
             const rect = element.getBoundingClientRect()
             card = {
               id: card.id,
-              width: Math.round(rect.width),
-              height: Math.round(rect.height)
+              width: Math.round(rect.width * zoom),
+              height: Math.round(rect.height * zoom)
             }
           } else {
             card = utils.cardElementDimensions(card)
