@@ -316,12 +316,18 @@ const shrink = () => {
   const { cards, boxes } = containedItems()
   prevSelectedBox = null
   const items = cards.concat(boxes)
-  let updated = { id: props.box.id }
   if (!items.length) {
     shrinkToMinBoxSize()
     return
   }
-  console.log('🌷', updated)
+  const rect = utils.boundaryRectFromItems(items)
+  const padding = consts.spaceBetweenCards
+  const paddingTop = 30 + padding
+  let updated = { id: props.box.id }
+  updated.x = rect.x - padding
+  updated.y = rect.y - paddingTop
+  updated.resizeWidth = rect.width + (padding * 2)
+  updated.resizeHeight = rect.height + (padding + paddingTop)
   store.dispatch('currentBoxes/update', updated)
 }
 
