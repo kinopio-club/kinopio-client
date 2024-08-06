@@ -188,7 +188,7 @@ const snapGuideStyles = computed(() => {
   }
 })
 const snapGuideSide = computed(() => {
-  const isDragging = store.state.currentUserIsDraggingBox
+  const isDragging = store.state.currentUserIsDraggingBox || store.state.currentUserIsDraggingCard
   if (!isDragging) { return null }
   let guides = store.state.currentBoxes.snapGuides
   const snapGuide = guides.find(guide => {

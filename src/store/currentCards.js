@@ -629,6 +629,7 @@ const currentCards = {
       connections = uniqBy(connections, 'id')
       context.commit('cardsWereDragged', true, { root: true })
       context.dispatch('currentConnections/updatePathsWhileDragging', { connections }, { root: true })
+      context.dispatch('currentBoxes/updateSnapGuides', { cards }, { root: true })
       context.dispatch('broadcast/update', { updates: { cards }, type: 'moveCards', handler: 'currentCards/moveWhileDragging' }, { root: true })
     },
     checkIfShouldIncreasePageWidthWhileDragging: (context, card) => {
