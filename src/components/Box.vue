@@ -24,6 +24,8 @@ let currentTouchPosition = {}
 
 let observer
 
+let prevSelectedBox
+
 const boxElement = ref(null)
 
 onMounted(() => {
@@ -271,7 +273,7 @@ const updateBoxBorderRadiusStyles = (styles, otherBoxes) => {
   return styles
 }
 
-// tilt resize
+// resize
 
 const resizeIsVisible = computed(() => {
   if (isLocked.value) { return }
@@ -297,6 +299,16 @@ const startResizing = (event) => {
   }
   store.commit('broadcast/updateStore', { updates, type: 'updateRemoteUserResizingBoxes' })
   event.preventDefault() // allows resizing box without scrolling on mobile
+}
+
+// shrink
+
+const shrink = () => {
+  prevSelectedBox = props.box
+  const { cards, boxes } = containedItems()
+  const items = cards.concat(boxes)
+  console.log('💐', items) // shrink around items in box
+  prevSelectedBox = null
 }
 
 // locked to background
@@ -415,6 +427,7 @@ const containedItems = () => {
   let selectableBoxes = store.getters['currentBoxes/all']
   selectableBoxes = utils.clone(selectableBoxes)
   selectableBoxes.forEach(box => {
+    if (box.id === props.box.id) { return }
     box.width = box.resizeWidth
     box.height = box.resizeHeight
     if (isItemInSelectedBoxes(box)) {
@@ -448,7 +461,10 @@ const isItemInSelectedBoxes = (item, type) => {
     if (!canEditCard) { return }
   }
   if (item.isLocked) { return }
-  const boxes = selectedBoxes.value
+  let boxes = selectedBoxes.value
+  if (prevSelectedBox) {
+    boxes = [ prevSelectedBox ]
+  }
   const isInside = boxes.find(box => {
     box = normalizeBox(box)
     const { x, y } = box
@@ -798,6 +814,7 @@ const updateRemoteConnections = () => {
         @pointerleave="updateIsHover(false)"
         @mousedown.left="startResizing"
         @touchstart="startResizing"
+        @dblclick="shrink"
       )
       button.inline-button(
         tabindex="-1"
