@@ -259,6 +259,12 @@ const checkIfShouldSnapBoxes = () => {
   if (!snapGuides.length) { return }
   snapGuides.forEach(snapGuide => store.dispatch('currentBoxes/snap', snapGuide))
 }
+const checkIfShouldExpandBoxes = () => {
+  if (!store.state.cardsWereDragged) { return }
+  const snapGuides = store.state.currentBoxes.snapGuides
+  if (!snapGuides.length) { return }
+  snapGuides.forEach(snapGuide => store.dispatch('currentBoxes/expand', snapGuide))
+}
 const unselectCardsInDraggedBox = () => {
   if (!store.state.currentDraggingBoxId) { return }
   if (store.state.multipleBoxesSelectedIds.length) { return }
@@ -457,6 +463,7 @@ const stopInteractions = async (event) => {
   }
   checkIfShouldHideFooter(event)
   checkIfShouldSnapBoxes()
+  checkIfShouldExpandBoxes()
   if (shouldCancelInteraction(event)) { return }
   addOrCloseCard(event)
   unselectCardsInDraggedBox()

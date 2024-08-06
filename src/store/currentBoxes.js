@@ -234,14 +234,19 @@ export default {
       const closenessThreshold = 100
       const targetBoxes = utils.clone(context.getters.all)
       let snapGuides = []
-      let items = boxes || cards
-      items = utils.clone(items)
+      let items
+      if (cards) {
+        cards = utils.clone(cards)
+        cards = [ utils.boundaryRectFromItems(cards) ] // combine multiple selected cards
+        items = cards
+      } else if (boxes) {
+        items = utils.clone(boxes)
+      }
       items = items.map(item => {
         item.width = item.resizeWidth || item.width
         item.height = item.resizeheight || item.height
         return item
       })
-      // TODO collapse multiple cards into a single box
       items.forEach(item => {
         targetBoxes.forEach(targetBox => {
           if (targetBox.id === item.id) { return }
