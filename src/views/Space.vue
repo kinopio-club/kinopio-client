@@ -347,6 +347,7 @@ const isInteracting = computed(() => {
 const blurButtonClick = (event) => {
   const isMouseOrTouchEvent = event.type.includes('mouse') || event.type.includes('touch')
   if (!isMouseOrTouchEvent) { return }
+  if (!event.target.closest) { return } // event is outside window
   const isButton = event.target.closest('button')
   const isLi = event.target.closest('li')
   const isLabel = event.target.closest('label')
