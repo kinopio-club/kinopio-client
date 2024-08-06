@@ -304,17 +304,22 @@ const startResizing = (event) => {
 
 // shrink
 
+const shrinkToMinBoxSize = () => {
+  const minBoxSize = consts.minBoxSize
+  let updated = { id: props.box.id }
+  updated.resizeWidth = minBoxSize
+  updated.resizeHeight = minBoxSize
+  store.dispatch('currentBoxes/update', updated)
+}
 const shrink = () => {
   prevSelectedBox = props.box
   const { cards, boxes } = containedItems()
-  const items = cards.concat(boxes)
-  console.log('💐', items) // shrink around items in box
   prevSelectedBox = null
+  const items = cards.concat(boxes)
   let updated = { id: props.box.id }
   if (!items.length) {
-    const minBoxSize = consts.minBoxSize
-    updated.resizeWidth = minBoxSize
-    updated.resizeHeight = minBoxSize
+    shrinkToMinBoxSize()
+    return
   }
   console.log('🌷', updated)
   store.dispatch('currentBoxes/update', updated)
