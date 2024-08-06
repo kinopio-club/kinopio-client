@@ -3,6 +3,7 @@ import { reactive, computed, onMounted, onBeforeUnmount, onUpdated, onUnmounted,
 import { useStore } from 'vuex'
 
 import utils from '@/utils.js'
+import consts from '@/consts.js'
 import fonts from '@/data/fonts.js'
 import ItemConnectorButton from '@/components/ItemConnectorButton.vue'
 import postMessage from '@/postMessage.js'
@@ -23,6 +24,8 @@ let touchPosition = {}
 let currentTouchPosition = {}
 
 let observer
+
+let prevSelectedBox
 
 const boxElement = ref(null)
 
@@ -188,7 +191,7 @@ const snapGuideStyles = computed(() => {
   }
 })
 const snapGuideSide = computed(() => {
-  const isDragging = store.state.currentUserIsDraggingBox
+  const isDragging = store.state.currentUserIsDraggingBox || store.state.currentUserIsDraggingCard
   if (!isDragging) { return null }
   let guides = store.state.currentBoxes.snapGuides
   const snapGuide = guides.find(guide => {
@@ -271,7 +274,7 @@ const updateBoxBorderRadiusStyles = (styles, otherBoxes) => {
   return styles
 }
 
-// tilt resize
+// resize
 
 const resizeIsVisible = computed(() => {
   if (isLocked.value) { return }
@@ -297,6 +300,35 @@ const startResizing = (event) => {
   }
   store.commit('broadcast/updateStore', { updates, type: 'updateRemoteUserResizingBoxes' })
   event.preventDefault() // allows resizing box without scrolling on mobile
+}
+
+// shrink
+
+const shrinkToMinBoxSize = () => {
+  const minBoxSize = consts.minBoxSize
+  let updated = { id: props.box.id }
+  updated.resizeWidth = minBoxSize
+  updated.resizeHeight = minBoxSize
+  store.dispatch('currentBoxes/update', updated)
+}
+const shrink = () => {
+  prevSelectedBox = props.box
+  const { cards, boxes } = containedItems()
+  prevSelectedBox = null
+  const items = cards.concat(boxes)
+  if (!items.length) {
+    shrinkToMinBoxSize()
+    return
+  }
+  const rect = utils.boundaryRectFromItems(items)
+  const padding = consts.spaceBetweenCards
+  const paddingTop = 30 + padding
+  let updated = { id: props.box.id }
+  updated.x = rect.x - padding
+  updated.y = rect.y - paddingTop
+  updated.resizeWidth = rect.width + (padding * 2)
+  updated.resizeHeight = rect.height + (padding + paddingTop)
+  store.dispatch('currentBoxes/update', updated)
 }
 
 // locked to background
@@ -402,15 +434,32 @@ const currentBoxIsSelected = computed(() => {
   return selected.find(id => props.box.id === id)
 })
 const selectedBoxes = computed(() => store.getters['currentBoxes/isSelected'])
-const selectContainedBoxes = () => {
-  let boxes = store.getters['currentBoxes/all']
-  boxes = utils.clone(boxes)
-  boxes.forEach(box => {
+const containedItems = () => {
+  let cards = []
+  let boxes = []
+  // cards
+  selectableCards().forEach(card => {
+    if (isItemInSelectedBoxes(card, 'card')) {
+      cards.push(card)
+    }
+  })
+  // boxes
+  let selectableBoxes = store.getters['currentBoxes/all']
+  selectableBoxes = utils.clone(selectableBoxes)
+  selectableBoxes.forEach(box => {
+    if (box.id === props.box.id) { return }
     box.width = box.resizeWidth
     box.height = box.resizeHeight
     if (isItemInSelectedBoxes(box)) {
-      store.dispatch('addToMultipleBoxesSelected', box.id)
+      boxes.push(box)
     }
+  })
+  return { cards, boxes }
+}
+const selectContainedBoxes = () => {
+  const boxes = containedItems().boxes
+  boxes.forEach(box => {
+    store.dispatch('addToMultipleBoxesSelected', box.id)
   })
 }
 const selectableCards = () => {
@@ -418,11 +467,9 @@ const selectableCards = () => {
   return store.getters['currentCards/canBeSelectedSortedByY'].cards
 }
 const selectContainedCards = () => {
-  const cards = selectableCards()
+  const cards = containedItems().cards
   cards.forEach(card => {
-    if (isItemInSelectedBoxes(card, 'card')) {
-      store.dispatch('addToMultipleCardsSelected', card.id)
-    }
+    store.dispatch('addToMultipleCardsSelected', card.id)
   })
   if (!multipleBoxesIsSelected.value) {
     store.commit('preventMultipleSelectedActionsIsVisible', true)
@@ -434,7 +481,10 @@ const isItemInSelectedBoxes = (item, type) => {
     if (!canEditCard) { return }
   }
   if (item.isLocked) { return }
-  const boxes = selectedBoxes.value
+  let boxes = selectedBoxes.value
+  if (prevSelectedBox) {
+    boxes = [ prevSelectedBox ]
+  }
   const isInside = boxes.find(box => {
     box = normalizeBox(box)
     const { x, y } = box
@@ -784,6 +834,7 @@ const updateRemoteConnections = () => {
         @pointerleave="updateIsHover(false)"
         @mousedown.left="startResizing"
         @touchstart="startResizing"
+        @dblclick="shrink"
       )
       button.inline-button(
         tabindex="-1"

@@ -259,6 +259,12 @@ const checkIfShouldSnapBoxes = () => {
   if (!snapGuides.length) { return }
   snapGuides.forEach(snapGuide => store.dispatch('currentBoxes/snap', snapGuide))
 }
+const checkIfShouldExpandBoxes = () => {
+  if (!store.state.cardsWereDragged) { return }
+  const snapGuides = store.state.currentBoxes.snapGuides
+  if (!snapGuides.length) { return }
+  snapGuides.forEach(snapGuide => store.dispatch('currentBoxes/expand', snapGuide))
+}
 const unselectCardsInDraggedBox = () => {
   if (!store.state.currentDraggingBoxId) { return }
   if (store.state.multipleBoxesSelectedIds.length) { return }
@@ -341,6 +347,7 @@ const isInteracting = computed(() => {
 const blurButtonClick = (event) => {
   const isMouseOrTouchEvent = event.type.includes('mouse') || event.type.includes('touch')
   if (!isMouseOrTouchEvent) { return }
+  if (!event.target.closest) { return } // event is outside window
   const isButton = event.target.closest('button')
   const isLi = event.target.closest('li')
   const isLabel = event.target.closest('label')
@@ -457,6 +464,7 @@ const stopInteractions = async (event) => {
   }
   checkIfShouldHideFooter(event)
   checkIfShouldSnapBoxes()
+  checkIfShouldExpandBoxes()
   if (shouldCancelInteraction(event)) { return }
   addOrCloseCard(event)
   unselectCardsInDraggedBox()
