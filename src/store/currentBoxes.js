@@ -487,6 +487,7 @@ export default {
         } else {
           box.y = Math.max(0, box.y + delta.y)
           box.y = Math.round(box.y)
+          box.y = Math.max(consts.minItemY, box.y)
         }
         box = {
           name: box.name,
