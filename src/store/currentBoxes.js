@@ -1,6 +1,7 @@
 // import utils from '@/utils.js'
 import cache from '@/cache.js'
 import utils from '@/utils.js'
+import consts from '@/consts.js'
 
 import { nanoid } from 'nanoid'
 import randomColor from 'randomcolor'
@@ -230,7 +231,7 @@ export default {
     // snapping
 
     updateSnapGuides: (context, { boxes, cards }) => {
-      const snapThreshold = 10
+      const snapThreshold = 6
       const closenessThreshold = 100
       const targetBoxes = utils.clone(context.getters.all)
       let snapGuides = []
@@ -385,6 +386,29 @@ export default {
       } else if (side === 'bottom') {
         updated.y = target.y + target.resizeHeight - borderWidth
       }
+      context.dispatch('update', updated)
+    },
+
+    expand: (context, { side, origin, target }) => {
+      console.log('🌳🌳🌳🌳🌳', side, origin, target) // origin is cardrect , target is box
+      const padding = consts.spaceBetweenCards
+      let updated = { id: target.id }
+      if (side === 'right') {
+        updated.resizeWidth = target.width + origin.width + padding
+        // todo handle origin is taller than target = expand height too
+      } else if (side === 'left') {
+        updated.resizeWidth = target.width + origin.width + padding
+        updated.x = target.x - origin.width - padding
+        // todo handle origin is taller than target = expand height too
+      } else if (side === 'top') {
+        updated.resizeHeight = target.resizeHeight + origin.height + padding
+        updated.y = target.y - origin.height - padding
+        // todo handle origin is wider than target = expand width too
+      } else if (side === 'bottom') {
+        updated.resizeHeight = target.resizeHeight + origin.height + padding
+        // todo handle origin is wider than target = expand width too
+      }
+      console.log('🐸', updated)
       context.dispatch('update', updated)
     },
 
