@@ -853,17 +853,20 @@ const updateRemoteConnections = () => {
 <style lang="stylus">
 .box
   --min-box-size 70px
+  --ease-out-circ cubic-bezier(0, 0.55, 0.45, 1) // https://easings.net/#easeOutCirc
   position absolute
   border-radius var(--entity-radius)
   min-height var(--min-box-size)
   min-width var(--min-box-size)
   pointer-events none
+  transition width 0.2s var(--ease-out-circ), height 0.2s var(--ease-out-circ) // animate box expand and shrink
   &.hover
     box-shadow var(--hover-shadow)
   &.active
     box-shadow var(--active-shadow)
   &.is-resizing
     box-shadow var(--active-shadow)
+    transition none
 
   .box-info
     --header-font var(--header-font-0)
