@@ -402,15 +402,31 @@ const currentBoxIsSelected = computed(() => {
   return selected.find(id => props.box.id === id)
 })
 const selectedBoxes = computed(() => store.getters['currentBoxes/isSelected'])
-const selectContainedBoxes = () => {
-  let boxes = store.getters['currentBoxes/all']
-  boxes = utils.clone(boxes)
-  boxes.forEach(box => {
+const containedItems = () => {
+  let cards = []
+  let boxes = []
+  // cards
+  selectableCards().forEach(card => {
+    if (isItemInSelectedBoxes(card, 'card')) {
+      cards.push(card)
+    }
+  })
+  // boxes
+  let selectableBoxes = store.getters['currentBoxes/all']
+  selectableBoxes = utils.clone(selectableBoxes)
+  selectableBoxes.forEach(box => {
     box.width = box.resizeWidth
     box.height = box.resizeHeight
     if (isItemInSelectedBoxes(box)) {
-      store.dispatch('addToMultipleBoxesSelected', box.id)
+      boxes.push(box)
     }
+  })
+  return { cards, boxes }
+}
+const selectContainedBoxes = () => {
+  const boxes = containedItems().boxes
+  boxes.forEach(box => {
+    store.dispatch('addToMultipleBoxesSelected', box.id)
   })
 }
 const selectableCards = () => {
@@ -418,11 +434,9 @@ const selectableCards = () => {
   return store.getters['currentCards/canBeSelectedSortedByY'].cards
 }
 const selectContainedCards = () => {
-  const cards = selectableCards()
+  const cards = containedItems().cards
   cards.forEach(card => {
-    if (isItemInSelectedBoxes(card, 'card')) {
-      store.dispatch('addToMultipleCardsSelected', card.id)
-    }
+    store.dispatch('addToMultipleCardsSelected', card.id)
   })
   if (!multipleBoxesIsSelected.value) {
     store.commit('preventMultipleSelectedActionsIsVisible', true)
