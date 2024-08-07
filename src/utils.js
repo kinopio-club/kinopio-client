@@ -1815,6 +1815,12 @@ export default {
     const url = `${consts.kinopioDomain()}/invite?spaceId=${spaceId}&${invite}&name=${spaceName}${comment}`
     return url
   },
+  teamInviteUrl ({ teamId, teamName, collaboratorKey }) {
+    teamName = this.normalizeString(teamName)
+    const invite = `collaboratorKey=${collaboratorKey}`
+    const url = `${consts.kinopioDomain()}/team/invite?teamId=${teamId}&${invite}&name=${teamName}`
+    return url
+  },
   spaceAndCardIdFromPath (path) {
     // https://regexr.com/5kr4g
     // matches (text after /) twice

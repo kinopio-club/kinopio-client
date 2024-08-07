@@ -96,6 +96,27 @@ const randomUser = computed(() => {
   const color = randomColor({ luminosity })
   return { color }
 })
+const inviteUrl = computed(() => {
+  if (!props.team.collaboratorKey) { return }
+  const url = utils.teamInviteUrl({
+    teamId: props.team.id,
+    teamName: props.team.name,
+    collaboratorKey: props.team.collaboratorKey
+  })
+  return url
+})
+const copyInviteUrl = async (event) => {
+  store.commit('clearNotificationsWithPosition')
+  const position = utils.cursorPositionInPage(event)
+  console.log('🍇 team invite url', inviteUrl.value)
+  try {
+    await navigator.clipboard.writeText(inviteUrl.value)
+    store.commit('addNotificationWithPosition', { message: 'Copied', position, type: 'success', layer: 'app', icon: 'checkmark' })
+  } catch (error) {
+    console.warn('🚑 copyInviteUrl', error, inviteUrl.value)
+    store.commit('addNotificationWithPosition', { message: 'Copy Error', position, type: 'danger', layer: 'app', icon: 'cancel' })
+  }
+}
 
 // select user
 
@@ -140,7 +161,7 @@ dialog.team.wide(v-if="visible" :open="visible" @click.left.stop="closeDialogs" 
         span.team-name {{props.team.name}}
     //- TODO is billing user
     //- .row.billing-tips(v-if="currentUserIsTeamAdmin" :class="{ active: state.billingTipsIsVisible} ")
-  section
+  section(v-if="inviteUrl")
     .row.invite-row
       p
         .users
@@ -162,9 +183,9 @@ dialog.team.wide(v-if="visible" :open="visible" @click.left.stop="closeDialogs" 
 
     section.subsection
       .row
-        button
+        button(@click.left="copyInviteUrl")
           img.icon.copy(src="@/assets/copy.svg")
-          span Copy Invite to TeamUrl
+          span Copy Invite to Team URL
       //- .row
       //-   button
       //-     img.icon.mail(src="@/assets/mail.svg")
