@@ -19,7 +19,7 @@ export default {
   state: {
     ids: [],
     boxes: {},
-    snapGuides: [] // { side, box, toBox }, { ... }
+    snapGuides: [] // { side, origin, target, distance }, { ... }
   },
   mutations: {
 
@@ -387,6 +387,7 @@ export default {
         updated.y = target.y + target.resizeHeight - borderWidth
       }
       context.dispatch('update', updated)
+      context.commit('snapGuides', [])
     },
     expand: (context, { side, origin, target }) => {
       const padding = consts.spaceBetweenCards
@@ -428,6 +429,7 @@ export default {
         }
       }
       context.dispatch('update', updated)
+      context.commit('snapGuides', [])
     },
 
     // move
