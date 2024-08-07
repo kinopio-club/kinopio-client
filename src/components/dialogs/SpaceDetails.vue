@@ -409,6 +409,7 @@ dialog.space-details.is-pinnable.wide(v-if="props.visible" :open="props.visible"
       @addSpace="addSpace"
       :resultsSectionHeight="state.resultsSectionHeight"
       :parentDialog="state.parentDialog"
+      :showSpaceTeams="true"
     )
 </template>
 

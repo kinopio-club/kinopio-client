@@ -74,6 +74,7 @@ Use the [Vue devtools](https://github.com/vuejs/vue-devtools) for Firefox and Ch
 | `mobile` | touch handlers, no hover, small screen |
 | `desktop zoom out` | using the zoom bar or cmd+/- |
 | `pinch zoom out/in` | using native touch gesture on mobile |
+| `team member or admin` | can see and edit all spaces in the team |
 
 ## Post Messages
 

@@ -50,9 +50,6 @@ const isActive = computed(() => {
 // team
 
 const team = computed(() => currentSpace.value.team)
-const teamLabel = computed(() => {
-  return team.value.name
-})
 
 // users
 
@@ -98,8 +95,8 @@ const spaceUsersLabel = computed(() => {
 button.space-users-button(@click.stop="toggleSpaceUserListIsVisible" :class="{ 'header-button': props.isParentSpaceUsers, active: isActive, 'translucent-button': props.isParentSpaceUsers }" ref="buttonElement")
   span.label(v-if="props.showLabel")
     template(v-if="team")
-      img.icon.team(src="@/assets/team.svg")
-      span {{ teamLabel }}
+      .team-color(:style="{ background: team.color }" :title="team.name")
+      img.icon.team(src="@/assets/team.svg" :title="team.name")
     template(v-if="spaceUsers.length")
       User(:user="recentUser" :isClickable="false" :hideYouLabel="true" :isSmall="true" :shouldBounceIn="props.isParentSpaceUsers")
       span {{ spaceUsersLabel }}
@@ -113,10 +110,13 @@ button.space-users-button(@click.stop="toggleSpaceUserListIsVisible" :class="{ '
   .label
     > .user
         margin-top -1px
+    > span + .user
         margin-left 6px
       .anon-avatar
         top 3px
   &.header-button
     border-top-left-radius 0
     border-bottom-left-radius 0
+  .icon.team
+    margin-right 4px
 </style>

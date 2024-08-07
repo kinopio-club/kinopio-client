@@ -4,16 +4,25 @@ import { useStore } from 'vuex'
 
 import ResultsFilter from '@/components/ResultsFilter.vue'
 import UserLabelInline from '@/components/UserLabelInline.vue'
+import utils from '@/utils.js'
 const store = useStore()
 
-const emit = defineEmits(['selectUser', 'removeUser'])
+onMounted(() => {
+  store.subscribe(mutation => {
+    if (mutation.type === 'triggerCloseChildDialogs') {
+      closeDialogs()
+    }
+  })
+})
+
+const emit = defineEmits(['selectUser', 'removeCollaborator'])
 
 const props = defineProps({
   isClickable: Boolean,
   users: Array,
   selectedUser: Object,
-  showRemoveUser: Boolean,
-  showIsOnline: Boolean
+  showRemoveCollaborator: Boolean,
+  showTeamUserOptions: Boolean
 })
 const state = reactive({
   filter: '',
@@ -27,15 +36,32 @@ const tabIndex = computed(() => {
     return '-1'
   }
 })
+const closeDialogs = () => {
+  store.commit('teamUserDetailsIsVisible', false)
+  store.commit('userDetailsIsVisible', false)
+}
+
+// team
+
+const spaceTeam = (user) => {
+  return store.getters['currentSpace/teamByUser'](user)
+}
+const isTeamAdmin = (user) => {
+  if (!props.showTeamUserOptions) { return }
+  const team = spaceTeam(user)
+  if (!team) { return }
+  return team.users.find(teamUser => {
+    const isUser = teamUser.id === user.id
+    const isAdmin = teamUser.role === 'admin'
+    return isUser && isAdmin
+  })
+}
 
 // users
 
 const users = computed(() => {
-  if (!props.showIsOnline) {
-    return props.users
-  }
   const onlineUsers = store.state.currentSpace.clients
-  let items = props.users
+  let items = utils.clone(props.users)
   items = items.map(user => {
     const isOnline = onlineUsers.find(onlineUser => onlineUser.id === user.id)
     if (isOnline) {
@@ -61,7 +87,7 @@ const usersFiltered = computed(() => {
   return items
 })
 
-// user
+// handle events
 
 const selectUser = (event, user) => {
   if (!props.isClickable) { return }
@@ -70,30 +96,56 @@ const selectUser = (event, user) => {
 const userIsSelected = (user) => {
   if (!props.isClickable) { return }
   if (!props.selectedUser) { return }
-  return props.selectedUser.id === user.id
+  const userId = props.selectedUser.id || store.state.userDetailsUser.id
+  return userId === user.id
 }
-const removeUser = (user) => {
+const removeCollaborator = (user) => {
   if (!props.isClickable) { return }
-  emit('removeUser', user)
+  emit('removeCollaborator', user)
+}
+
+// team user details
+
+const showTeamUserDetails = (event, user) => {
+  closeDialogs()
+  store.commit('teamUserDetailsIsVisible', true)
+  store.commit('userDetailsUser', user)
+  let element = event.target
+  let options = { element, offsetX: 0, shouldIgnoreZoom: true }
+  let position = utils.childDialogPositionFromParent(options)
+  store.commit('userDetailsPosition', position)
+}
+const teamUserDetailsIsVisibleForUser = (user) => {
+  const isUser = user.id === store.state.userDetailsUser.id
+  return store.state.teamUserDetailsIsVisible && isUser
 }
 </script>
 
 <template lang="pug">
-span
+.user-list
   ResultsFilter(:items="props.users" @updateFilter="updateFilter" @updateFilteredItems="updateFilteredUsers")
-  ul.results-list.user-list
+  ul.results-list
     template(v-for="user in usersFiltered" :key="user.id")
       li(@click.left.stop="selectUser($event, user)" :tabindex="tabIndex" v-on:keyup.stop.enter="selectUser($event, user)" :class="{ active: userIsSelected(user), 'is-not-clickable': !props.isClickable }")
+        .badge.success.is-admin(v-if="isTeamAdmin(user)")
+          span Admin
         UserLabelInline(:user="user")
-        button.remove-user.small-button(v-if="props.showRemoveUser" @click.left.stop="removeUser(user)" title="Remove from space")
-          img.icon.cancel(src="@/assets/add.svg")
+        template(v-if="props.showRemoveCollaborator")
+          button.small-button.danger(@click.left.stop="removeCollaborator(user)" title="Remove Collaborator")
+            img.icon.cancel(src="@/assets/add.svg")
+        template(v-if="props.showTeamUserOptions")
+          .button-wrap
+            button.small-button(@click.left.stop="showTeamUserDetails($event, user)" title="Team User Options" :class="{active: teamUserDetailsIsVisibleForUser(user)}")
+              img.icon.down-arrow(src="@/assets/down-arrow.svg")
+            //- TeamUserDetails(:visible="teamUserDetailsIsVisibleForUser(user)")
 </template>
 
 <style lang="stylus">
 .user-list
   li
-    align-items center !important
-    button
+    align-items flex-start !important
+    > .button-wrap,
+    > button
       margin-left auto
     .name
       margin-right 0
@@ -110,6 +162,12 @@ span
         outline none
     .user-label-inline
       pointer-events none
-    .remove-user
-      flex-shrink 0
+  .badge.is-admin,
+  .small-button
+    flex-shrink 0
+  .icon.cancel
+    vertical-align 0.5px
+  .icon.down-arrow
+    padding 0 2px
+    vertical-align 3px
 </style>

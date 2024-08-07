@@ -84,10 +84,15 @@ const currentSpace = {
       })
       cache.updateSpace('collaborators', state.collaborators, state.id)
     },
-    updateTeam: (state, space) => {
+    restoreTeamFromSpace: (state, space) => {
       state.teamId = space.teamId
       state.team = space.team
       state.addedToTeamByUserId = space.addedToTeamByUserId
+    },
+    restoreTeam: (state, team) => {
+      if (state.teamId !== team.id) { return }
+      state.team = team
+      console.log('🎑 space team', state.team)
     },
     // websocket receive
     updateUser: (state, updatedUser) => {
@@ -147,6 +152,15 @@ const currentSpace = {
         return tag
       })
       cache.updateTagColorInAllSpaces(updatedTag)
+    },
+
+    // Team
+
+    updateTeam: (state, updatedTeam) => {
+      if (state.team.id !== updatedTeam.id) { return }
+      Object.keys(updatedTeam).forEach(key => {
+        state.team[key] = updatedTeam[key]
+      })
     }
   },
 
@@ -327,6 +341,21 @@ const currentSpace = {
         context.commit('isLoadingOtherItems', false, { root: true })
       }
       context.commit('isLoadingOtherItems', false, { root: true })
+    },
+
+    // Team
+
+    loadTeam: async (context) => {
+      const teamId = context.state.teamId
+      if (!teamId) { return }
+      const teamUser = context.rootGetters['currentUser/teamByTeamId'](teamId)
+      if (!teamUser) { return }
+      try {
+        const team = await context.dispatch('api/getTeam', teamId, { root: true })
+        context.commit('restoreTeam', team)
+      } catch (error) {
+        console.error('🚒 Error fetching team', error)
+      }
     },
 
     // Space
@@ -802,7 +831,8 @@ const currentSpace = {
         let remoteSpace = remoteData
         console.log('🎑 remoteSpace', remoteSpace)
         if (!remoteSpace) { return }
-        context.commit('updateTeam', remoteSpace)
+        context.commit('restoreTeamFromSpace', remoteSpace)
+        context.dispatch('loadTeam')
         const spaceIsUnchanged = utils.spaceIsUnchanged(cachedSpace, remoteSpace)
         if (spaceIsUnchanged) {
           context.commit('isLoadingSpace', false, { root: true })
@@ -1126,12 +1156,12 @@ const currentSpace = {
 
     // Team
 
-    addToTeam: (context) => {
+    addToTeam: (context, team) => {
       const user = context.rootState.currentUser
       context.dispatch('updateSpace', {
-        teamId: user.team.id,
+        teamId: team.id,
         addedToTeamByUserId: user.id,
-        team: user.team
+        team: team
       })
     },
     removeFromTeam: (context) => {
@@ -1317,18 +1347,18 @@ const currentSpace = {
       }
       return users
     },
-    memberById: (state, getters, rootState) => (id) => {
+    memberById: (state, getters, rootState) => (userId) => {
       const members = getters.members()
-      return members.find(member => member.id === id)
+      return members.find(member => member.id === userId)
     },
-    teamUserById: (state, getters, rootState) => (id) => {
+    teamUserById: (state, getters, rootState) => (userId) => {
       if (!state.team) { return }
       const users = state.team.users
-      return users.find(user => user.id === id)
+      return users.find(user => user.id === userId)
     },
-    userById: (state, getters, rootState, rootGetters) => (id) => {
-      let user = getters.memberById(id) || rootGetters.otherUserById(id) || getters.teamUserById(id)
-      if (rootState.currentUser.id === id) {
+    userById: (state, getters, rootState, rootGetters) => (userId) => {
+      let user = getters.memberById(userId) || rootGetters.otherUserById(userId) || getters.teamUserById(userId)
+      if (rootState.currentUser.id === userId) {
         user = rootState.currentUser
       }
       return user
@@ -1402,6 +1432,15 @@ const currentSpace = {
       const card = rootGetters['currentCards/byId'](itemId)
       const box = rootGetters['currentBoxes/byId'](itemId)
       return card || box
+    },
+
+    // team
+
+    teamByUser: (state) => (user) => {
+      const teamUser = state.team?.users.find(teamUser => teamUser.id === user.id)
+      if (teamUser) {
+        return state.team
+      }
     }
   }
 }

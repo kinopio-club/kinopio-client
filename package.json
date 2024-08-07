@@ -43,7 +43,7 @@
     "lint-staged": "^13.2.1",
     "postcss": "^8.4.31",
     "pug": "^3.0.3",
-    "stylus": "^0.54.5",
+    "stylus": "^0.63",
     "stylus-loader": "^3.0.2",
     "vite": "^5.0.13",
     "vite-plugin-pwa": "^0.17.4",

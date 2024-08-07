@@ -224,27 +224,34 @@ const closeAllDialogs = () => {
 
 // team
 
-const userTeam = computed(() => store.state.currentUser.team)
-const userIsInSpaceTeam = computed(() => store.getters['currentUser/isInSpaceTeam']())
+const userTeams = computed(() => store.state.currentUser.teams) // TODO support multiple teams (1 space per team though)
+const userTeam = computed(() => {
+  if (userTeams.value) {
+    return userTeams.value[0]
+  } else {
+    return null
+  }
+})
+const userIsInCurrentSpaceTeam = computed(() => store.getters['currentUser/teamBySpace']())
 const toggleCurrentSpaceInTeam = (event) => {
   store.commit('clearNotificationsWithPosition')
   const position = utils.cursorPositionInPage(event)
   const isTeamAdmin = store.getters['currentUser/isTeamAdmin'](userTeam.value.id)
   const isCreatorOrTeamAdmin = store.state.currentSpace.addedToTeamByUserId === store.state.currentUser.id || isTeamAdmin
-  if (userIsInSpaceTeam.value && isCreatorOrTeamAdmin) {
+  if (userIsInCurrentSpaceTeam.value && isCreatorOrTeamAdmin) {
     store.dispatch('currentSpace/removeFromTeam')
     updateLocalSpaces()
-  } else if (userIsInSpaceTeam.value) {
+  } else if (userIsInCurrentSpaceTeam.value) {
     state.errorRemoveFromTeam = true
   } else {
-    store.dispatch('currentSpace/addToTeam')
+    store.dispatch('currentSpace/addToTeam', userTeam.value)
     store.commit('addNotificationWithPosition', { message: `Added to ${userTeam.value.name}`, position, type: 'success', layer: 'app', icon: 'checkmark' })
     updateLocalSpaces()
   }
 }
 const teamButtonTitle = computed(() => {
   let addString = 'Add'
-  if (userIsInSpaceTeam.value) {
+  if (userIsInCurrentSpaceTeam.value) {
     addString = 'Added'
   }
   const teamName = userTeam.value.name || 'Team'
@@ -289,7 +296,7 @@ const teamButtonTitle = computed(() => {
       button.small-button(:class="{active: dialogIsPinned}")
         img.icon.pin(src="@/assets/pin.svg")
 
-ReadOnlySpaceInfoBadges
+ReadOnlySpaceInfoBadges(:showSpaceTeam="true")
 
 //- member options
 template(v-if="isSpaceMember")
@@ -300,7 +307,7 @@ template(v-if="isSpaceMember")
     template(v-if="userTeam")
       .segmented-buttons
         //- Team
-        button.team-button(:title="teamButtonTitle" :class="{active: userIsInSpaceTeam}" @click.left.prevent.stop="toggleCurrentSpaceInTeam" @keydown.stop.enter="toggleCurrentSpaceInTeam")
+        button.team-button(:title="teamButtonTitle" :class="{active: userIsInCurrentSpaceTeam}" @click.left.prevent.stop="toggleCurrentSpaceInTeam" @keydown.stop.enter="toggleCurrentSpaceInTeam")
           img.icon.team(src="@/assets/team.svg")
         //- Favorite
         FavoriteSpaceButton(:parentIsDialog="true" @updateLocalSpaces="updateLocalSpaces")

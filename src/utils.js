@@ -1801,6 +1801,7 @@ export default {
     return url
   },
   inviteUrl ({ spaceId, spaceName, collaboratorKey, readOnlyKey, isCommentMode }) {
+    if (!spaceId) { return }
     spaceName = this.normalizeString(spaceName)
     let invite = ''
     let comment = ''
@@ -1813,6 +1814,13 @@ export default {
       comment = '&comment=true'
     }
     const url = `${consts.kinopioDomain()}/invite?spaceId=${spaceId}&${invite}&name=${spaceName}${comment}`
+    return url
+  },
+  teamInviteUrl ({ teamId, teamName, collaboratorKey }) {
+    if (!teamId || !collaboratorKey) { return }
+    teamName = this.normalizeString(teamName)
+    const invite = `collaboratorKey=${collaboratorKey}`
+    const url = `${consts.kinopioDomain()}/team/invite?teamId=${teamId}&${invite}&name=${teamName}`
     return url
   },
   spaceAndCardIdFromPath (path) {

@@ -153,6 +153,8 @@ const store = createStore({
     userDetailsIsVisible: false,
     userDetailsPosition: {}, // x, y, shouldIgnoreZoom
     userDetailsUser: {},
+    // team user details
+    teamUserDetailsIsVisible: false,
 
     // multiple selection
     multipleSelectedActionsIsVisible: false,
@@ -206,6 +208,7 @@ const store = createStore({
     isJoiningSpace: false, // broadcast
     isLoadingOtherItems: false,
     spaceUrlToLoad: '',
+    teamToJoinOnLoad: null, // { teamId, collaboratorKey }
     spaceReadOnlyKey: {}, //  { spaceId, key }
     spaceCollaboratorKeys: [],
     remotePendingUploads: [],
@@ -229,6 +232,7 @@ const store = createStore({
     notifySpaceIsRemoved: false,
     notifyCurrentSpaceIsNowRemoved: false,
     notifySignUpToEditSpace: false,
+    notifySignUpToJoinTeam: false,
     notifyCardsCreatedIsNearLimit: false,
     notifyCardsCreatedIsOverLimit: false,
     notifyKinopioUpdatesAreAvailable: false,
@@ -238,6 +242,7 @@ const store = createStore({
     notifySpaceIsHidden: false,
     notifyThanksForDonating: false,
     notifyThanksForUpgrading: false,
+    notifyIsJoiningTeam: false,
 
     // notifications with position
     notificationsWithPosition: [],
@@ -345,6 +350,7 @@ const store = createStore({
       state.cardsWereDragged = false
       state.boxesWereDragged = false
       state.userDetailsIsVisible = false
+      state.teamUserDetailsIsVisible = false
       state.pricingIsVisible = false
       state.codeLanguagePickerIsVisible = false
       state.offlineIsVisible = false
@@ -1005,6 +1011,13 @@ const store = createStore({
       state.userDetailsUser = user
     },
 
+    // Team User Details
+
+    teamUserDetailsIsVisible: (state, value) => {
+      utils.typeCheck({ value, type: 'boolean' })
+      state.teamUserDetailsIsVisible = value
+    },
+
     // Tag Details
 
     tagDetailsIsVisible: (state, value) => {
@@ -1374,6 +1387,10 @@ const store = createStore({
       utils.typeCheck({ value, type: 'object' })
       state.spaceReadOnlyKey = value
     },
+    teamToJoinOnLoad: (state, value) => {
+      utils.typeCheck({ value, type: 'object' })
+      state.teamToJoinOnLoad = value
+    },
 
     // Notifications
 
@@ -1398,6 +1415,7 @@ const store = createStore({
       state.notifyConnectionError = false
       state.notifyServerCouldNotSave = false
       state.notifySignUpToEditSpace = false
+      state.notifySignUpToJoinTeam = false
       state.notifyCardsCreatedIsNearLimit = false
       state.notifyCardsCreatedIsOverLimit = false
       state.notifyMoveOrCopyToSpace = false
@@ -1443,6 +1461,10 @@ const store = createStore({
       utils.typeCheck({ value, type: 'boolean' })
       state.notifySignUpToEditSpace = value
     },
+    notifySignUpToJoinTeam: (state, value) => {
+      utils.typeCheck({ value, type: 'boolean' })
+      state.notifySignUpToJoinTeam = value
+    },
     notifyCardsCreatedIsNearLimit: (state, value) => {
       utils.typeCheck({ value, type: 'boolean' })
       state.notifyCardsCreatedIsNearLimit = value
@@ -1481,6 +1503,10 @@ const store = createStore({
     notifyThanksForUpgrading: (state, value) => {
       utils.typeCheck({ value, type: 'boolean' })
       state.notifyThanksForUpgrading = value
+    },
+    notifyIsJoiningTeam: (state, value) => {
+      utils.typeCheck({ value, type: 'boolean' })
+      state.notifyIsJoiningTeam = value
     },
 
     // Notifications with Position
@@ -1903,6 +1929,14 @@ const store = createStore({
       const canOnlyComment = context.getters['currentUser/canOnlyComment']()
       if (canOnlyComment) { return }
       context.commit('currentUserToolbar', value)
+    },
+
+    // team
+
+    updateTeam: (context, update) => {
+      context.commit('currentUser/updateTeam', update)
+      context.commit('currentSpace/updateTeam', update)
+      context.dispatch('api/addToQueue', { name: 'updateTeam', body: update })
     }
   },
   getters: {

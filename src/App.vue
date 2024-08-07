@@ -12,6 +12,7 @@ import ScrollHandler from '@/components/ScrollHandler.vue'
 import TagDetails from '@/components/dialogs/TagDetails.vue'
 import ItemsLocked from '@/components/ItemsLocked.vue'
 import UserDetails from '@/components/dialogs/UserDetails.vue'
+import TeamUserDetails from '@/components/dialogs/TeamUserDetails.vue'
 import NotificationsWithPosition from '@/components/NotificationsWithPosition.vue'
 import SpaceBackground from '@/components/SpaceBackground.vue'
 import OutsideSpaceBackground from '@/components/OutsideSpaceBackground.vue'
@@ -292,6 +293,7 @@ const updateMetaRSSFeed = () => {
     Footer
     TagDetails
     UserDetails
+    TeamUserDetails
     WindowHistoryHandler
     KeyboardShortcutsHandler
     ScrollHandler
@@ -503,6 +505,7 @@ button,
 input[type="color"],
 select,
 label // used for checkbox buttons
+  flex-shrink 0
   touch-action manipulation
   text-align left
   padding 5px 9px
@@ -728,6 +731,15 @@ p
   > .button-wrap + .button-wrap
     margin-left 0
 
+.team-color
+  width 8px
+  height 8px
+  margin-right 6px
+  border-radius 100px
+  display inline-block
+  vertical-align 1px
+  flex-shink 0
+
 dialog
   width 250px
   left 8px
@@ -810,6 +822,11 @@ dialog
     background-color var(--secondary-background)
     padding var(--subsection-padding)
     border-radius var(--entity-radius)
+    // hr
+    //   margin-left -5px
+    //   width calc(100% + 10px)
+    //   margin-top 10px
+    //   margin-bottom 10px
   section + section
     border-top 1px solid var(--primary-border)
   section.subsection + section,
@@ -827,6 +844,9 @@ dialog
       height 14px
       width 14px
       border-radius var(--small-entity-radius)
+    .current-team-color
+      border-radius 100px
+
   a
     text-decoration-thickness 1px
     color var(--text-link)
@@ -950,7 +970,6 @@ button
 .icon
   user-drag none
   -webkit-user-drag none
-  pointer-events none
 
 .icon + span,
 .icon + .icon
@@ -966,13 +985,12 @@ button
 .button-wrap
   display inline-block
   position relative
+  flex-shrink 0
   dialog
     top calc(100% - 8px)
 
 .icon.team
   height 11px
-.icon.team + span
-  margin-left 4px
 
 .icon.sunglasses
   height 12px

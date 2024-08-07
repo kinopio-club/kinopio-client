@@ -7,6 +7,10 @@ const isSpaceMember = computed(() => store.getters['currentUser/isSpaceMember'](
 const spacePrivacyIsOpen = computed(() => store.state.currentSpace.privacy === 'open')
 const showInExplore = computed(() => store.state.currentSpace.showInExplore)
 const spaceTeam = computed(() => store.state.currentSpace.team)
+
+const props = defineProps({
+  showSpaceTeam: Boolean
+})
 </script>
 
 <template lang="pug">
@@ -18,8 +22,10 @@ const spaceTeam = computed(() => store.state.currentSpace.team)
   .badge.status(v-if="showInExplore")
     img.icon.sunglasses(src="@/assets/sunglasses.svg")
     span In Explore
+.row(v-if="props.showSpaceTeam")
   .badge.secondary(v-if="spaceTeam")
-    img.icon.team(src="@/assets/team.svg")
+    .team-color(:style="{ background: spaceTeam.color }" :title="spaceTeam.name")
+    img.icon.team(src="@/assets/team.svg" :title="spaceTeam.name")
     span {{ spaceTeam.name }}
 </template>
 
