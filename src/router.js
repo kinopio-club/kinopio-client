@@ -197,6 +197,29 @@ const router = createRouter({
         next()
       }
     }, {
+      path: '/team/invite',
+      name: 'teamInvite',
+      component: Space,
+      beforeEnter: (to, from, next) => {
+        const urlParams = new URLSearchParams(window.location.search)
+        // https://kinopio.local:8080/team/invite?teamId=1&collaboratorKey=abc123&name=test-team
+        const teamId = urlParams.get('teamId')
+        const collaboratorKey = urlParams.get('collaboratorKey')
+        pageMeta.team({ teamId, isTeamInvite: true })
+
+        // ?store.commit('joinTeamOnLoad', {teamId, collaboratorKey})
+        // store.commit('notifyJoiningTeam', {teamId, collaboratorKey})
+
+        // user must be signed in to join, sign up and try this url again,
+        // or sign in or up to join your team [btns]
+        // then based on state, join team on sign inorup
+        // notification for joining team w loader
+        // notification for joining team success -> cta?
+        // noitifcation for joining team err
+
+        next()
+      }
+    }, {
       path: '/invite',
       name: 'invite',
       component: Space,
@@ -212,9 +235,8 @@ const router = createRouter({
         const collaboratorKey = urlParams.get('collaboratorKey')
         const readOnlyKey = urlParams.get('readOnlyKey')
         const isPresentationMode = urlParams.get('present') || false
-        const isInvite = true
         store.commit('disableViewportOptimizations', urlParams.get('disableViewportOptimizations'))
-        pageMeta.space(spaceId, isInvite)
+        pageMeta.space({ spaceId, isSpaceInvite: true })
         store.dispatch('currentUser/init')
         store.commit('isLoadingSpace', true)
         if (!spaceId) {
