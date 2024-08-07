@@ -486,8 +486,9 @@ export default {
       if (currentUserIsSignedIn) {
         context.dispatch('joinTeam')
       } else {
-        // TODO if not signed in then show signup notification
-        // todo call join team on sign up/in
+        context.commit('notifySignUpToJoinTeam', true, { root: true })
+        // TODO signuporin composition
+        // TODO call join team on sign up/in
       }
     },
     joinTeam: async (context) => {

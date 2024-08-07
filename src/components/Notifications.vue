@@ -159,6 +159,7 @@ const notifyThanksForDonating = computed(() => store.state.notifyThanksForDonati
 const notifyThanksForUpgrading = computed(() => store.state.notifyThanksForUpgrading)
 const notifySpaceIsUnavailableOffline = computed(() => store.getters['currentSpace/isUnavailableOffline'])
 const notifyIsJoiningTeam = computed(() => store.state.notifyIsJoiningTeam)
+const notifySignUpToJoinTeam = computed(() => store.state.notifySignUpToJoinTeam)
 const notifificationClasses = (item) => {
   let classes = {
     'danger': item.type === 'danger',
@@ -452,6 +453,11 @@ aside.notifications(@click.left="closeAllDialogs")
     p
       Loader(:visible="true" :isSmall="true")
       span Joining Team…
+
+  .persistent-item(v-if="notifySignUpToJoinTeam" ref="readOnlyElement" :class="{'notification-jiggle': state.readOnlyJiggle}")
+    p
+      button(@click.left.stop="triggerSignUpOrInIsVisible") Sign Up or In to Join Team
+
 </template>
 
 <style lang="stylus">

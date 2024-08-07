@@ -232,6 +232,7 @@ const store = createStore({
     notifySpaceIsRemoved: false,
     notifyCurrentSpaceIsNowRemoved: false,
     notifySignUpToEditSpace: false,
+    notifySignUpToJoinTeam: false,
     notifyCardsCreatedIsNearLimit: false,
     notifyCardsCreatedIsOverLimit: false,
     notifyKinopioUpdatesAreAvailable: false,
@@ -1414,6 +1415,7 @@ const store = createStore({
       state.notifyConnectionError = false
       state.notifyServerCouldNotSave = false
       state.notifySignUpToEditSpace = false
+      state.notifySignUpToJoinTeam = false
       state.notifyCardsCreatedIsNearLimit = false
       state.notifyCardsCreatedIsOverLimit = false
       state.notifyMoveOrCopyToSpace = false
@@ -1458,6 +1460,10 @@ const store = createStore({
     notifySignUpToEditSpace: (state, value) => {
       utils.typeCheck({ value, type: 'boolean' })
       state.notifySignUpToEditSpace = value
+    },
+    notifySignUpToJoinTeam: (state, value) => {
+      utils.typeCheck({ value, type: 'boolean' })
+      state.notifySignUpToJoinTeam = value
     },
     notifyCardsCreatedIsNearLimit: (state, value) => {
       utils.typeCheck({ value, type: 'boolean' })
