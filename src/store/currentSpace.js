@@ -84,7 +84,7 @@ const currentSpace = {
       })
       cache.updateSpace('collaborators', state.collaborators, state.id)
     },
-    restoreTeam: (state, space) => {
+    restoreTeamFromSpace: (state, space) => {
       state.teamId = space.teamId
       state.team = space.team
       state.addedToTeamByUserId = space.addedToTeamByUserId
@@ -811,7 +811,7 @@ const currentSpace = {
         let remoteSpace = remoteData
         console.log('🎑 remoteSpace', remoteSpace)
         if (!remoteSpace) { return }
-        context.commit('restoreTeam', remoteSpace)
+        context.commit('restoreTeamFromSpace', remoteSpace)
         const spaceIsUnchanged = utils.spaceIsUnchanged(cachedSpace, remoteSpace)
         if (spaceIsUnchanged) {
           context.commit('isLoadingSpace', false, { root: true })
