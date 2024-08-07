@@ -82,6 +82,7 @@ const focusEmail = async () => {
   if (!element) { return }
   element.focus()
 }
+const teamToJoinOnLoad = computed(() => store.state.teamToJoinOnLoad)
 
 // errors
 
@@ -194,6 +195,7 @@ const signUp = async (event) => {
     updateCurrentSpaceWithNewUserId(currentUser, newUser)
     await store.dispatch('api/createSpaces')
     notifySignedIn()
+    store.dispatch('currentUser/checkIfShouldJoinTeam')
     addCollaboratorToInvitedSpaces()
     const currentSpace = store.state.currentSpace
     store.commit('triggerUpdateWindowHistory')
@@ -226,6 +228,7 @@ const signIn = async (event) => {
     updateSpacesUserId()
     await store.dispatch('api/createSpaces')
     notifySignedIn()
+    store.dispatch('currentUser/checkIfShouldJoinTeam')
     // add new spaces from remote
     const spaces = await store.dispatch('api/getUserSpaces')
     cache.addSpaces(spaces)
@@ -342,6 +345,8 @@ dialog.narrow.sign-up-or-in(v-if="props.visible" :open="props.visible")
   //- Sign Up
   section(v-if="state.signUpVisible")
     p Create an account to share your spaces and access them anywhere
+    p(v-if="teamToJoinOnLoad")
+      span.badge.info Sign up to join team
     form(@submit.prevent="signUp")
       input(ref="emailElement" name="email" type="email" autocomplete="email" placeholder="Email" required v-model="state.email" @input="clearErrors")
       .badge.info(v-if="state.error.accountAlreadyExists") An account with this email already exists, Sign In instead
@@ -359,6 +364,8 @@ dialog.narrow.sign-up-or-in(v-if="props.visible" :open="props.visible")
   //- Sign In
   section(v-else)
     p Welcome back
+    p(v-if="teamToJoinOnLoad")
+      span.badge.info Sign in to join team
     form(@submit.prevent="signIn")
       input.email(ref="emailElement" name="email" type="email" autocomplete="email" placeholder="Email" required v-model="state.email" @input="clearErrors")
       input(type="password" name="password" placeholder="Password" required v-model="state.password" @input="clearErrors")

@@ -487,8 +487,6 @@ export default {
         context.dispatch('joinTeam')
       } else {
         context.commit('notifySignUpToJoinTeam', true, { root: true })
-        // TODO signuporin composition
-        // TODO call join team on sign up/in
       }
     },
     joinTeam: async (context) => {
