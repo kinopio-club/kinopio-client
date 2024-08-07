@@ -1326,18 +1326,18 @@ const currentSpace = {
       }
       return users
     },
-    memberById: (state, getters, rootState) => (id) => {
+    memberById: (state, getters, rootState) => (userId) => {
       const members = getters.members()
-      return members.find(member => member.id === id)
+      return members.find(member => member.id === userId)
     },
-    teamUserById: (state, getters, rootState) => (id) => {
+    teamUserById: (state, getters, rootState) => (userId) => {
       if (!state.team) { return }
       const users = state.team.users
-      return users.find(user => user.id === id)
+      return users.find(user => user.id === userId)
     },
-    userById: (state, getters, rootState, rootGetters) => (id) => {
-      let user = getters.memberById(id) || rootGetters.otherUserById(id) || getters.teamUserById(id)
-      if (rootState.currentUser.id === id) {
+    userById: (state, getters, rootState, rootGetters) => (userId) => {
+      let user = getters.memberById(userId) || rootGetters.otherUserById(userId) || getters.teamUserById(userId)
+      if (rootState.currentUser.id === userId) {
         user = rootState.currentUser
       }
       return user
