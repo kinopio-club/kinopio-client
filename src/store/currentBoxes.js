@@ -1,6 +1,7 @@
 // import utils from '@/utils.js'
 import cache from '@/cache.js'
 import utils from '@/utils.js'
+import consts from '@/consts.js'
 
 import { nanoid } from 'nanoid'
 import randomColor from 'randomcolor'
@@ -18,7 +19,7 @@ export default {
   state: {
     ids: [],
     boxes: {},
-    snapGuides: [] // { side, box, toBox }, { ... }
+    snapGuides: [] // { side, origin, target, distance }, { ... }
   },
   mutations: {
 
@@ -134,7 +135,7 @@ export default {
 
     add: (context, { box, shouldResize }) => {
       const count = context.state.ids.length
-      const minBoxSize = 70
+      const minBoxSize = consts.minBoxSize
       const isThemeDark = context.rootState.currentUser.theme === 'dark'
       let color = randomColor({ luminosity: 'light' })
       if (isThemeDark) {
@@ -229,18 +230,29 @@ export default {
 
     // snapping
 
-    updateSnapGuides: (context, boxes) => {
-      const snapThreshold = 10
+    updateSnapGuides: (context, { boxes, cards }) => {
+      const snapThreshold = 6
       const closenessThreshold = 100
       const targetBoxes = utils.clone(context.getters.all)
-      boxes = utils.clone(boxes)
       let snapGuides = []
-      boxes.forEach(box => {
+      let items
+      if (cards) {
+        cards = utils.clone(cards)
+        cards = [ utils.boundaryRectFromItems(cards) ] // combine multiple selected cards
+        items = cards
+      } else if (boxes) {
+        items = utils.clone(boxes)
+      }
+      items = items.map(item => {
+        item.width = item.resizeWidth || item.width
+        item.height = item.resizeheight || item.height
+        return item
+      })
+      items.forEach(item => {
         targetBoxes.forEach(targetBox => {
-          if (targetBox.id === box.id) { return }
+          if (targetBox.id === item.id) { return }
           targetBox.width = targetBox.resizeWidth
           targetBox.height = targetBox.resizeHeight
-          // const left = closestBox.distances.left
           const distances = {
             // ┌────┐     ┌────┐
             // │ B  │────▶│ OB │ y + height/2
@@ -248,8 +260,8 @@ export default {
             //  x + w      x
             left: utils.distanceBetweenTwoPoints(
               {
-                x: box.x + box.width,
-                y: box.y + (box.height / 2)
+                x: item.x + item.width,
+                y: item.y + (item.height / 2)
               },
               {
                 x: targetBox.x,
@@ -262,8 +274,8 @@ export default {
             //  x + w      x
             right: utils.distanceBetweenTwoPoints(
               {
-                x: box.x,
-                y: box.y + (box.height / 2)
+                x: item.x,
+                y: item.y + (item.height / 2)
               },
               {
                 x: targetBox.x + targetBox.width,
@@ -281,8 +293,8 @@ export default {
             //    x + width/2
             top: utils.distanceBetweenTwoPoints(
               {
-                x: box.x + (box.width / 2),
-                y: box.y + box.height
+                x: item.x + (item.width / 2),
+                y: item.y + item.height
               },
               {
                 x: targetBox.x + (targetBox.width / 2),
@@ -300,8 +312,8 @@ export default {
             //    x + width/2
             bottom: utils.distanceBetweenTwoPoints(
               {
-                x: box.x + (box.width / 2),
-                y: box.y
+                x: item.x + (item.width / 2),
+                y: item.y
               },
               {
                 x: targetBox.x + (targetBox.width / 2),
@@ -311,35 +323,31 @@ export default {
           }
           // snap left
           const isNearLeft = distances.left < closenessThreshold
-          const isSnapLeft = Math.abs((box.x + box.width) - targetBox.x) <= snapThreshold
-          const isLeftOf = (box.x + box.width) < targetBox.x
-          if (isNearLeft && isSnapLeft && isLeftOf) {
-            snapGuides.push({ side: 'left', origin: box, target: targetBox, distance: distances.left })
+          const isSnapLeft = Math.abs((item.x + item.width) - targetBox.x) <= snapThreshold
+          if (isNearLeft && isSnapLeft) {
+            snapGuides.push({ side: 'left', origin: item, target: targetBox, distance: distances.left })
           }
           // snap right
           const isNearRight = distances.right < closenessThreshold
-          const isSnapRight = Math.abs(box.x - (targetBox.x + targetBox.width)) <= snapThreshold
-          const isRightOf = box.x > (targetBox.x + targetBox.width)
-          if (isNearRight && isSnapRight && isRightOf) {
-            snapGuides.push({ side: 'right', origin: box, target: targetBox, distance: distances.right })
+          const isSnapRight = Math.abs(item.x - (targetBox.x + targetBox.width)) <= snapThreshold
+          if (isNearRight && isSnapRight) {
+            snapGuides.push({ side: 'right', origin: item, target: targetBox, distance: distances.right })
           }
           // snap top
           const isNearTop = distances.top < closenessThreshold
-          const isSnapTop = Math.abs((box.y + box.height) - targetBox.y) <= snapThreshold
-          const isTopOf = (box.y + box.height) < targetBox.y
-          if (isNearTop && isSnapTop && isTopOf) {
-            snapGuides.push({ side: 'top', origin: box, target: targetBox, distance: distances.top })
+          const isSnapTop = Math.abs((item.y + item.height) - targetBox.y) <= snapThreshold
+          if (isNearTop && isSnapTop) {
+            snapGuides.push({ side: 'top', origin: item, target: targetBox, distance: distances.top })
           }
           // snap bottom
           const isNearBottom = distances.bottom < closenessThreshold
-          const isSnapBottom = Math.abs(box.y - (targetBox.y + targetBox.height)) <= snapThreshold
-          const isBottomOf = box.y > (targetBox.y + targetBox.height)
-          if (isNearBottom && isSnapBottom && isBottomOf) {
-            snapGuides.push({ side: 'bottom', origin: box, target: targetBox, distance: distances.bottom })
+          const isSnapBottom = Math.abs(item.y - (targetBox.y + targetBox.height)) <= snapThreshold
+          if (isNearBottom && isSnapBottom) {
+            snapGuides.push({ side: 'bottom', origin: item, target: targetBox, distance: distances.bottom })
           }
         })
       })
-      // limit each origin box to it's closest target
+      // limit each origin item to it's closest target
       let normalizedGuides = {}
       snapGuides.forEach(snapGuide => {
         const originGuide = normalizedGuides[snapGuide.origin.id]
@@ -379,6 +387,49 @@ export default {
         updated.y = target.y + target.resizeHeight - borderWidth
       }
       context.dispatch('update', updated)
+      context.commit('snapGuides', [])
+    },
+    expand: (context, { side, origin, target }) => {
+      const padding = consts.spaceBetweenCards
+      let updated = { id: target.id }
+      const delta = {
+        x: origin.x - target.x,
+        y: origin.y - target.y
+      }
+      if (side === 'right') {
+        // increase width
+        updated.resizeWidth = target.width + origin.width + padding
+        // increase height if origin is taller than target
+        if (origin.height + delta.y > target.resizeHeight) {
+          updated.resizeHeight = origin.height + delta.y + padding
+        }
+      } else if (side === 'left') {
+        // increase width and shift left
+        updated.resizeWidth = target.width + origin.width + padding
+        updated.x = target.x - origin.width - padding
+        // increase height if origin is taller than target
+        if (origin.height + delta.y > target.resizeHeight) {
+          updated.resizeHeight = origin.height + delta.y + padding
+        }
+      } else if (side === 'top') {
+        // increase height and shift up
+        const paddingTop = 30 + padding
+        updated.resizeHeight = target.resizeHeight + origin.height + paddingTop
+        updated.y = target.y - origin.height - paddingTop
+        // increase width if origin is wider than target
+        if (origin.width + delta.x > target.resizeWidth) {
+          updated.resizeWidth = origin.width + delta.x + padding
+        }
+      } else if (side === 'bottom') {
+        // increase width
+        updated.resizeHeight = target.resizeHeight + origin.height + padding
+        // increase width if origin is wider than target
+        if (origin.width + delta.x > target.resizeWidth) {
+          updated.resizeWidth = origin.width + delta.x + padding
+        }
+      }
+      context.dispatch('update', updated)
+      context.commit('snapGuides', [])
     },
 
     // move
@@ -439,6 +490,7 @@ export default {
         } else {
           box.y = Math.max(0, box.y + delta.y)
           box.y = Math.round(box.y)
+          box.y = Math.max(consts.minItemY, box.y)
         }
         box = {
           name: box.name,
@@ -456,7 +508,7 @@ export default {
       context.commit('boxesWereDragged', true, { root: true })
       context.dispatch('currentConnections/updatePathsWhileDragging', { connections }, { root: true })
       context.dispatch('broadcast/update', { updates: { boxes }, type: 'moveBoxes', handler: 'currentBoxes/moveWhileDraggingBroadcast' }, { root: true })
-      context.dispatch('updateSnapGuides', boxes)
+      context.dispatch('updateSnapGuides', { boxes })
     },
     afterMove: (context) => {
       prevMovePositions = {}

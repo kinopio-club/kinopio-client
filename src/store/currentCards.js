@@ -425,6 +425,7 @@ const currentCards = {
 
     updateDimensions: (context, { cards }) => {
       const canEditSpace = context.rootGetters['currentUser/canEditSpace']()
+      const zoom = context.rootGetters.spaceCounterZoomDecimal
       if (!cards) {
         cards = context.getters.all
       }
@@ -450,8 +451,8 @@ const currentCards = {
             const rect = element.getBoundingClientRect()
             card = {
               id: card.id,
-              width: Math.round(rect.width),
-              height: Math.round(rect.height)
+              width: Math.round(rect.width * zoom),
+              height: Math.round(rect.height * zoom)
             }
           } else {
             card = utils.cardElementDimensions(card)
@@ -610,7 +611,7 @@ const currentCards = {
         if (isNoY) {
           delete card.y
         } else {
-          card.y = Math.max(consts.defaultCardHeight, card.y + prevMoveDelta.y)
+          card.y = Math.max(consts.minItemY, card.y + prevMoveDelta.y)
           context.dispatch('checkIfShouldIncreasePageHeightWhileDragging', card)
         }
         card = {
@@ -629,6 +630,7 @@ const currentCards = {
       connections = uniqBy(connections, 'id')
       context.commit('cardsWereDragged', true, { root: true })
       context.dispatch('currentConnections/updatePathsWhileDragging', { connections }, { root: true })
+      context.dispatch('currentBoxes/updateSnapGuides', { cards }, { root: true })
       context.dispatch('broadcast/update', { updates: { cards }, type: 'moveCards', handler: 'currentCards/moveWhileDragging' }, { root: true })
     },
     checkIfShouldIncreasePageWidthWhileDragging: (context, card) => {
@@ -671,6 +673,7 @@ const currentCards = {
         card.x = Math.round(card.x)
         card.y = Math.max(card.y + prevMoveDelta.y, 0)
         card.y = Math.round(card.y)
+        card.y = Math.max(consts.minItemY, card.y)
         card.userId = context.rootState.currentUser.id
         return card
       })

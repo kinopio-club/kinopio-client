@@ -327,6 +327,7 @@ export default {
     return ((value - min) * 100) / (max - min)
   },
   clone (object) {
+    if (!object) { return }
     this.typeCheck({ value: object, type: 'object' })
     let cloned = JSON.stringify(object)
     cloned = JSON.parse(cloned)
