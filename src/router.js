@@ -149,7 +149,7 @@ const router = createRouter({
       path: '/:space',
       component: Space,
       beforeEnter: (to, from, next) => {
-        pageMeta.space()
+        pageMeta.space({})
         const path = window.location.pathname
         const urlParams = new URLSearchParams(window.location.search)
         if (urlParams.get('present')) {
@@ -207,8 +207,11 @@ const router = createRouter({
         const collaboratorKey = urlParams.get('collaboratorKey')
         pageMeta.team({ teamId, isTeamInvite: true })
 
-        // ?store.commit('joinTeamOnLoad', {teamId, collaboratorKey})
-        // store.commit('notifyJoiningTeam', {teamId, collaboratorKey})
+        store.commit('teamToJoinOnLoad', { teamId, collaboratorKey })
+
+        // store.commit('noitifyJoiningTeam', true)
+
+        // store.commit('notifyIsJoiningTeam', {teamId, collaboratorKey})
 
         // user must be signed in to join, sign up and try this url again,
         // or sign in or up to join your team [btns]

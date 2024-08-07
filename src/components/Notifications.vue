@@ -9,6 +9,7 @@ import utils from '@/utils.js'
 import templates from '@/data/templates.js'
 import PrivacyIcon from '@/components/PrivacyIcon.vue'
 import OfflineBadge from '@/components/OfflineBadge.vue'
+import Loader from '@/components/Loader.vue'
 
 import dayjs from 'dayjs'
 const store = useStore()
@@ -157,6 +158,7 @@ const notifyCurrentSpaceIsNowRemoved = computed(() => store.state.notifyCurrentS
 const notifyThanksForDonating = computed(() => store.state.notifyThanksForDonating)
 const notifyThanksForUpgrading = computed(() => store.state.notifyThanksForUpgrading)
 const notifySpaceIsUnavailableOffline = computed(() => store.getters['currentSpace/isUnavailableOffline'])
+const notifyIsJoiningTeam = computed(() => store.state.notifyIsJoiningTeam)
 const notifificationClasses = (item) => {
   let classes = {
     'danger': item.type === 'danger',
@@ -275,6 +277,7 @@ const removeReadOnlyJiggle = () => {
 aside.notifications(@click.left="closeAllDialogs")
   .item(v-for="item in items" v-bind:key="item.id" :data-notification-id="item.id" :data-is-persistent-item="item.isPersistentItem" :class="notifificationClasses(item)")
     p
+      .team-color(v-if="item.teamColor" :style="{ background: item.teamColor }")
       span.label-badge(v-if="item.label") {{item.label}}
       template(v-if="item.icon")
         img.icon(v-if="item.icon === 'open'" src="@/assets/open.svg" class="open")
@@ -287,9 +290,10 @@ aside.notifications(@click.left="closeAllDialogs")
         img.icon(v-else-if="item.icon === 'minimap'" src="@/assets/minimap.svg" class="minimap")
         img.icon(v-else-if="item.icon === 'offline'" src="@/assets/offline.svg" class="offline")
         img.icon(v-else-if="item.icon === 'mail'" src="@/assets/mail.svg" class="mail")
+        img.icon(v-else-if="item.icon === 'team'" src="@/assets/team.svg" class="team")
       span {{item.message}}
     .row(v-if="item.isPersistentItem")
-      button(@click="removeById(item)")
+      button.small-button(@click="removeById(item)")
         img.icon.cancel(src="@/assets/add.svg")
 
   .persistent-item.danger.hidden#notify-cache-is-full
@@ -406,7 +410,9 @@ aside.notifications(@click.left="closeAllDialogs")
           span Update
 
   .persistent-item.danger(v-if="notifyServerCouldNotSave")
-    p Error saving changes to server, retrying…
+    p
+      Loader(:visible="true" :isSmall="true")
+      span Error saving changes to server, retrying…
     .row
       .button-wrap
         button(@click.left="refreshBrowser")
@@ -439,6 +445,13 @@ aside.notifications(@click.left="closeAllDialogs")
         span Space is unavailable offline.
     .row
       p Only spaces that you're a member of, and have visited recently, are available offline
+
+  //- team
+
+  .persistent-item(v-if="notifyIsJoiningTeam")
+    p
+      Loader(:visible="true" :isSmall="true")
+      span Joining Team…
 </template>
 
 <style lang="stylus">
@@ -529,6 +542,10 @@ aside.notifications(@click.left="closeAllDialogs")
       margin 0
       margin-left 6px
       vertical-align 0
+
+  .loader
+    vertical-align -1.5px
+    margin-right 6px
 
 @keyframes notificationJiggle
   0%

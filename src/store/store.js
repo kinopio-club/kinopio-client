@@ -208,6 +208,7 @@ const store = createStore({
     isJoiningSpace: false, // broadcast
     isLoadingOtherItems: false,
     spaceUrlToLoad: '',
+    teamToJoinOnLoad: null, // { teamId, collaboratorKey }
     spaceReadOnlyKey: {}, //  { spaceId, key }
     spaceCollaboratorKeys: [],
     remotePendingUploads: [],
@@ -240,6 +241,7 @@ const store = createStore({
     notifySpaceIsHidden: false,
     notifyThanksForDonating: false,
     notifyThanksForUpgrading: false,
+    notifyIsJoiningTeam: false,
 
     // notifications with position
     notificationsWithPosition: [],
@@ -1384,6 +1386,10 @@ const store = createStore({
       utils.typeCheck({ value, type: 'object' })
       state.spaceReadOnlyKey = value
     },
+    teamToJoinOnLoad: (state, value) => {
+      utils.typeCheck({ value, type: 'object' })
+      state.teamToJoinOnLoad = value
+    },
 
     // Notifications
 
@@ -1491,6 +1497,10 @@ const store = createStore({
     notifyThanksForUpgrading: (state, value) => {
       utils.typeCheck({ value, type: 'boolean' })
       state.notifyThanksForUpgrading = value
+    },
+    notifyIsJoiningTeam: (state, value) => {
+      utils.typeCheck({ value, type: 'boolean' })
+      state.notifyIsJoiningTeam = value
     },
 
     // Notifications with Position

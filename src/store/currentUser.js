@@ -468,6 +468,7 @@ export default {
       context.commit('triggerUserIsLoaded', null, { root: true })
       context.dispatch('updateWeather')
       context.dispatch('updateJournalDailyPrompt')
+      context.dispatch('checkIfShouldJoinTeam')
     },
     updateWeather: async (context) => {
       const weather = await context.dispatch('api/weather', null, { root: true })
@@ -478,6 +479,46 @@ export default {
       const data = await context.dispatch('api/journalDailyPrompt', null, { root: true })
       if (!data) { return }
       context.commit('journalDailyPrompt', data)
+    },
+    checkIfShouldJoinTeam: (context) => {
+      if (!context.rootState.teamToJoinOnLoad) { return }
+      const currentUserIsSignedIn = context.getters.isSignedIn
+      if (currentUserIsSignedIn) {
+        context.dispatch('joinTeam')
+      } else {
+        // TODO if not signed in then show signup notification
+        // todo call join team on sign up/in
+      }
+    },
+    joinTeam: async (context) => {
+      const userId = context.state.id
+      const team = context.rootState.teamToJoinOnLoad
+      if (!team) { return }
+      context.commit('notifyIsJoiningTeam', true, { root: true })
+      try {
+        const response = await context.dispatch('api/joinTeam', {
+          teamId: team.teamId,
+          collaboratorKey: team.collaboratorKey,
+          userId
+        }, { root: true })
+        context.commit('addNotification', {
+          message: `Joined ${response.team.name}`,
+          type: 'success',
+          icon: 'team',
+          isPersistentItem: true,
+          teamColor: response.team.color
+        }, { root: true })
+      } catch (error) {
+        console.error('🚒 joinTeam', error)
+        context.commit('addNotification', {
+          message: `Failed to Join Team`,
+          type: 'danger',
+          icon: 'team',
+          isPersistentItem: true
+        }, { root: true })
+      }
+      context.commit('notifyIsJoiningTeam', false, { root: true })
+      context.commit('teamToJoinOnLoad', null, { root: true })
     },
     update: (context, updates) => {
       const keys = Object.keys(updates)

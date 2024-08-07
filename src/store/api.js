@@ -1221,7 +1221,20 @@ const self = {
       } catch (error) {
         context.dispatch('handleServerError', { name: 'getTeam', error })
       }
+    },
+    joinTeam: async (context, body) => {
+      const apiKey = context.rootState.currentUser.apiKey
+      const isOnline = context.rootState.isOnline
+      if (!shouldRequest({ apiKey, isOnline })) { return }
+      try {
+        const options = await context.dispatch('requestOptions', { body, method: 'POST', space: context.rootState.currentSpace })
+        const response = await fetch(`${consts.apiHost()}/team/team-user`, options)
+        return normalizeResponse(response)
+      } catch (error) {
+        context.dispatch('handleServerError', { name: 'getTeam', error })
+      }
     }
+
   }
 }
 
