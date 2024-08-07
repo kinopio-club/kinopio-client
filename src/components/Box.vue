@@ -859,7 +859,11 @@ const updateRemoteConnections = () => {
   min-height var(--min-box-size)
   min-width var(--min-box-size)
   pointer-events none
-  transition width 0.2s var(--ease-out-circ), height 0.2s var(--ease-out-circ) // animate box expand and shrink
+  // animate box expand and shrink
+  transition width 0.2s var(--ease-out-circ),
+    height 0.2s var(--ease-out-circ),
+    left 0.2s var(--ease-out-circ),
+    top 0.2s var(--ease-out-circ)
   &.hover
     box-shadow var(--hover-shadow)
   &.active

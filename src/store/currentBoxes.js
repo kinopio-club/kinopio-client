@@ -412,8 +412,9 @@ export default {
         }
       } else if (side === 'top') {
         // increase height and shift up
-        updated.resizeHeight = target.resizeHeight + origin.height + padding
-        updated.y = target.y - origin.height - padding
+        const paddingTop = 30 + padding
+        updated.resizeHeight = target.resizeHeight + origin.height + paddingTop
+        updated.y = target.y - origin.height - paddingTop
         // increase width if origin is wider than target
         if (origin.width + delta.x > target.resizeWidth) {
           updated.resizeWidth = origin.width + delta.x + padding
