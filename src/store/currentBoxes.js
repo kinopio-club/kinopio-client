@@ -19,7 +19,7 @@ export default {
   state: {
     ids: [],
     boxes: {},
-    snapGuides: [] // { side, origin, target, distance }, { ... }
+    snapGuides: [] // { side, origin, target }, { ... }
   },
   mutations: {
 
@@ -253,97 +253,35 @@ export default {
           if (targetBox.id === item.id) { return }
           targetBox.width = targetBox.resizeWidth
           targetBox.height = targetBox.resizeHeight
-          const distances = {
-            // ┌────┐     ┌────┐
-            // │ B  │────▶│ OB │ y + height/2
-            // └────┘     └────┘
-            //  x + w      x
-            left: utils.distanceBetweenTwoPoints(
-              {
-                x: item.x + item.width,
-                y: item.y + (item.height / 2)
-              },
-              {
-                x: targetBox.x,
-                y: targetBox.y + (targetBox.height / 2)
-              }
-            ),
-            // ┌────┐     ┌────┐
-            // │ OB │◀────│ B  │ y + height/2
-            // └────┘     └────┘
-            //  x + w      x
-            right: utils.distanceBetweenTwoPoints(
-              {
-                x: item.x,
-                y: item.y + (item.height / 2)
-              },
-              {
-                x: targetBox.x + targetBox.width,
-                y: targetBox.y + (targetBox.height / 2)
-              }
-            ),
-            // ┌────┐
-            // │ B  │
-            // └────┘ y + height
-            //    │
-            //    ▼
-            // ┌────┐ y
-            // │ OB │
-            // └────┘
-            //    x + width/2
-            top: utils.distanceBetweenTwoPoints(
-              {
-                x: item.x + (item.width / 2),
-                y: item.y + item.height
-              },
-              {
-                x: targetBox.x + (targetBox.width / 2),
-                y: targetBox.y
-              }
-            ),
-            // ┌────┐
-            // │ OB │
-            // └────┘ y
-            //    ▲
-            //    │
-            // ┌────┐ y + height
-            // │ B  │
-            // └────┘
-            //    x + width/2
-            bottom: utils.distanceBetweenTwoPoints(
-              {
-                x: item.x + (item.width / 2),
-                y: item.y
-              },
-              {
-                x: targetBox.x + (targetBox.width / 2),
-                y: targetBox.y + targetBox.height
-              }
-            )
-          }
+          const isBetweenTargetBoxPointsX = utils.isBetween({
+            value: item.x,
+            min: targetBox.x,
+            max: targetBox.x + targetBox.width
+          })
+          const isBetweenTargetBoxPointsY = utils.isBetween({
+            value: item.y,
+            min: targetBox.y,
+            max: targetBox.y + targetBox.height
+          })
           // snap left
-          const isNearLeft = distances.left < closenessThreshold
           const isSnapLeft = Math.abs((item.x + item.width) - targetBox.x) <= snapThreshold
-          if (isNearLeft && isSnapLeft) {
-            snapGuides.push({ side: 'left', origin: item, target: targetBox, distance: distances.left })
+          if (isBetweenTargetBoxPointsY && isSnapLeft) {
+            snapGuides.push({ side: 'left', origin: item, target: targetBox })
           }
           // snap right
-          const isNearRight = distances.right < closenessThreshold
           const isSnapRight = Math.abs(item.x - (targetBox.x + targetBox.width)) <= snapThreshold
-          if (isNearRight && isSnapRight) {
-            snapGuides.push({ side: 'right', origin: item, target: targetBox, distance: distances.right })
+          if (isBetweenTargetBoxPointsY && isSnapRight) {
+            snapGuides.push({ side: 'right', origin: item, target: targetBox })
           }
           // snap top
-          const isNearTop = distances.top < closenessThreshold
           const isSnapTop = Math.abs((item.y + item.height) - targetBox.y) <= snapThreshold
-          if (isNearTop && isSnapTop) {
-            snapGuides.push({ side: 'top', origin: item, target: targetBox, distance: distances.top })
+          if (isBetweenTargetBoxPointsX && isSnapTop) {
+            snapGuides.push({ side: 'top', origin: item, target: targetBox })
           }
           // snap bottom
-          const isNearBottom = distances.bottom < closenessThreshold
           const isSnapBottom = Math.abs(item.y - (targetBox.y + targetBox.height)) <= snapThreshold
-          if (isNearBottom && isSnapBottom) {
-            snapGuides.push({ side: 'bottom', origin: item, target: targetBox, distance: distances.bottom })
+          if (isBetweenTargetBoxPointsX && isSnapBottom) {
+            snapGuides.push({ side: 'bottom', origin: item, target: targetBox })
           }
         })
       })
