@@ -165,10 +165,10 @@ dialog.team.wide(v-if="visible" :open="visible" @click.left.stop="closeDialogs" 
         button
           img.icon.copy(src="@/assets/copy.svg")
           span Copy Invite to TeamUrl
-      .row
-        button
-          img.icon.mail(src="@/assets/mail.svg")
-          span Email Invites
+      //- .row
+      //-   button
+      //-     img.icon.mail(src="@/assets/mail.svg")
+      //-     span Email Invites
   UserList(
     :users="props.team.users"
     :selectedUser="selectedUser"
