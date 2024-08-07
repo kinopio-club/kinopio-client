@@ -868,6 +868,7 @@ const updateRemoteConnections = () => {
     box-shadow var(--hover-shadow)
   &.active
     box-shadow var(--active-shadow)
+    transition none
   &.is-resizing
     box-shadow var(--active-shadow)
     transition none
