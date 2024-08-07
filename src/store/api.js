@@ -1205,24 +1205,23 @@ const self = {
       } catch (error) {
         context.dispatch('handleServerError', { name: 'downloadAllSpaces', error })
       }
-    }
+    },
 
     // Team
 
-    // updateTeam: async (context, update) => {
-    //   const apiKey = context.rootState.currentUser.apiKey
-    //   const isOnline = context.rootState.isOnline
-    //   if (!shouldRequest({ apiKey, isOnline })) { return }
-    //   try {
-    //     const body = update
-    //     const options = await context.dispatch('requestOptions', { body, method: 'PATCH', space: context.rootState.currentSpace })
-    //     const response = await fetch(`${consts.apiHost()}/team`, options)
-    //     return normalizeResponse(response)
-    //   } catch (error) {
-    //     context.dispatch('handleServerError', { name: 'updateSpace', error })
-    //   }
-    // }
-
+    getTeam: async (context, teamId) => {
+      const apiKey = context.rootState.currentUser.apiKey
+      const isOnline = context.rootState.isOnline
+      if (!shouldRequest({ apiKey, isOnline })) { return }
+      try {
+        console.log('🛬 getting remote team', teamId)
+        const options = await context.dispatch('requestOptions', { method: 'GET', space: context.rootState.currentSpace })
+        const response = await fetch(`${consts.apiHost()}/team/${teamId}`, options)
+        return normalizeResponse(response)
+      } catch (error) {
+        context.dispatch('handleServerError', { name: 'getTeam', error })
+      }
+    }
   }
 }
 

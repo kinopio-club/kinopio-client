@@ -89,6 +89,10 @@ const currentSpace = {
       state.team = space.team
       state.addedToTeamByUserId = space.addedToTeamByUserId
     },
+    restoreTeam: (state, team) => {
+      if (state.teamId !== team.id) { return }
+      state.team = team
+    },
     // websocket receive
     updateUser: (state, updatedUser) => {
       state.users = utils.updateUsersWithUser(state.users, updatedUser)
@@ -336,6 +340,24 @@ const currentSpace = {
         context.commit('isLoadingOtherItems', false, { root: true })
       }
       context.commit('isLoadingOtherItems', false, { root: true })
+    },
+
+    // Team
+
+    loadTeam: async (context) => {
+      const teamId = context.state.teamId
+      if (!teamId) { return }
+      const teamUser = context.rootGetters['currentUser/teamByTeamId'](teamId)
+      console.log('♥️♥️♥️♥️ private team user', teamUser, context.state.team)
+      if (!teamUser) { return }
+      try {
+      // (after remote space load, if user is team member curruserUser/teamByTeamId teamId)
+        const team = await context.dispatch('api/getTeam', teamId, { root: true })
+        console.log('🐸🐸🐸', team)
+        // context.commit('restoreTeam', team)
+      } catch (error) {
+        console.error('🚒 Error fetching team', error)
+      }
     },
 
     // Space
@@ -812,6 +834,7 @@ const currentSpace = {
         console.log('🎑 remoteSpace', remoteSpace)
         if (!remoteSpace) { return }
         context.commit('restoreTeamFromSpace', remoteSpace)
+        context.dispatch('loadTeam')
         const spaceIsUnchanged = utils.spaceIsUnchanged(cachedSpace, remoteSpace)
         if (spaceIsUnchanged) {
           context.commit('isLoadingSpace', false, { root: true })
