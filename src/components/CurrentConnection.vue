@@ -212,6 +212,7 @@ svg.current-connection(:style="connectionStyles")
     fill="none"
     stroke-width="5"
     :stroke="state.currentConnectionColor"
+    stroke-linecap="round"
     :d="state.currentConnectionPath"
     :style="connectionPathStyles"
   )
@@ -220,6 +221,8 @@ svg.current-connection(:style="connectionStyles")
 <style lang="stylus">
 svg.current-connection
   position absolute
+  min-width 5px
+  min-height 5px
   path.current-connection-path
     pointer-events none
 </style>
