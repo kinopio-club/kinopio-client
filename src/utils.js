@@ -1055,23 +1055,32 @@ export default {
   boundaryRectFromItems (items) {
     items = this.clone(items)
     items = items.filter(item => item.x && item.y)
+    items = items.map(item => {
+      const defaultSize = 200
+      item.width = item.resizeWidth || item.width || defaultSize
+      item.height = item.resizeHeight || item.height || defaultSize
+      return item
+    })
     if (!items.length) {
       return { x: 0, y: 0, width: 0, height: 0 }
     }
-    const defaultSize = 200
     let rect = {}
-    // x, width
-    let sortedItems = sortBy(items, ['x', 'width'])
-    const xStart = sortedItems[0]
-    let xEnd = last(sortedItems)
-    xEnd.width = xEnd.resizeWidth || xEnd.width || defaultSize
+    let xEnd = { x: 0, width: 0 }
+    let yEnd = { y: 0, height: 0 }
+    let xStart = { x: items[0].x }
+    let yStart = { y: items[0].y }
+    items.forEach(item => {
+      const currentXEnd = xEnd.x + xEnd.width
+      const currentYEnd = yEnd.y + yEnd.height
+      const itemXEnd = item.x + item.width
+      const itemYEnd = item.y + item.height
+      if (itemXEnd > currentXEnd) { xEnd = item }
+      if (itemYEnd > currentYEnd) { yEnd = item }
+      if (item.x < xStart.x) { xStart = item }
+      if (item.y < yStart.y) { yStart = item }
+    })
     rect.x = xStart.x
     rect.width = xEnd.x + xEnd.width - xStart.x
-    // y, height
-    sortedItems = sortBy(items, ['y', 'height'])
-    const yStart = sortedItems[0]
-    let yEnd = last(sortedItems)
-    yEnd.height = xEnd.resizeHeight || xEnd.height || defaultSize
     rect.y = yStart.y
     rect.height = yEnd.y + yEnd.height - yStart.y
     return rect
