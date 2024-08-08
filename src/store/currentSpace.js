@@ -803,6 +803,7 @@ const currentSpace = {
         console.log('🎑 remoteSpace', remoteSpace)
         if (!remoteSpace) { return }
         context.commit('updateTeam', remoteSpace)
+        remoteSpace = utils.dedupeConnectionTypes(remoteSpace)
         const spaceIsUnchanged = utils.spaceIsUnchanged(cachedSpace, remoteSpace)
         if (spaceIsUnchanged) {
           context.commit('isLoadingSpace', false, { root: true })

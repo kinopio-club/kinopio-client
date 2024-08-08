@@ -1152,6 +1152,33 @@ export default {
       return connection
     })
   },
+  dedupeConnectionTypes (space) {
+    // connection.connectionTypeId
+    // type.id: name, color
+
+    let types = []
+    let dupeTypes = []
+    space.connectionTypes.forEach(currentType => {
+      const dupeType = types.find(type => {
+        const isName = type.name === currentType.name
+        const isColor = type.color === currentType.color
+        return isName && isColor
+      })
+      if (dupeType) {
+        dupeTypes.push(currentType)
+      } else {
+        types.push(currentType)
+      }
+    })
+
+    console.log('☎️☎️☎️', space.connections, space.connectionTypes, space)
+    console.log('🍓🍓', types, dupeTypes)
+
+    // find duped types and pick the uniq one
+    // update connections to uniq types
+    // delete dupe types
+    return space
+  },
   spaceZoomDecimal () {
     const element = document.getElementById('space')
     return element.dataset.zoom || 1
