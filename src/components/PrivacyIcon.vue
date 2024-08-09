@@ -1,3 +1,25 @@
+<script setup>
+import { reactive, computed, onMounted, onBeforeUnmount, defineProps, defineEmits, watch, ref, nextTick } from 'vue'
+import { useStore } from 'vuex'
+
+import privacy from '@/data/privacy.js'
+const store = useStore()
+
+const props = defineProps({
+  privacy: String,
+  closedIsNotVisible: Boolean
+})
+
+const privacyState = computed(() => {
+  return privacy.states().find(state => {
+    return state.name === props.privacy
+  })
+})
+const isOpen = computed(() => privacyState.value.name === 'open')
+const isClosed = computed(() => privacyState.value.name === 'closed' && !props.closedIsNotVisible)
+const isPrivate = computed(() => privacyState.value.name === 'private')
+</script>
+
 <template lang="pug">
 img.icon.privacy-icon(
   v-if="isOpen"
@@ -15,34 +37,6 @@ img.icon.privacy-icon(
   :class="privacyState.name"
 )
 </template>
-
-<script>
-import privacy from '@/data/privacy.js'
-
-export default {
-  name: 'PrivacyIcon',
-  props: {
-    privacy: String,
-    closedIsNotVisible: Boolean
-  },
-  computed: {
-    privacyState () {
-      return privacy.states().find(state => {
-        return state.name === this.privacy
-      })
-    },
-    isOpen () {
-      return this.privacyState.name === 'open'
-    },
-    isClosed () {
-      return this.privacyState.name === 'closed' && !this.closedIsNotVisible
-    },
-    isPrivate () {
-      return this.privacyState.name === 'private'
-    }
-  }
-}
-</script>
 
 <style lang="stylus">
 .icon.privacy-icon
