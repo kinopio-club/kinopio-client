@@ -233,13 +233,14 @@ export default {
     updateSnapGuides: (context, { boxes, cards }) => {
       const snapThreshold = 6
       const closenessThreshold = 100
-      const targetBoxes = utils.clone(context.getters.all)
+      let targetBoxes = utils.clone(context.getters.all)
       let snapGuides = []
       let items
       if (cards) {
         cards = utils.clone(cards)
         cards = [ utils.boundaryRectFromItems(cards) ] // combine multiple selected cards
         items = cards
+        targetBoxes = targetBoxes.filter(box => !box.isLocked)
       } else if (boxes) {
         items = utils.clone(boxes)
       }
