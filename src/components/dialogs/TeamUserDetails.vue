@@ -84,6 +84,7 @@ const updateRole = (role) => {
 // remove user
 
 const removeTeamUser = () => {
+  // TODO
   if (state.loading.removeTeamUser) { return }
   try {
     state.loading.removeTeamUser = true
