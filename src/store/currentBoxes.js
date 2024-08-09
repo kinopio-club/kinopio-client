@@ -325,6 +325,7 @@ export default {
       } else if (side === 'bottom') {
         updated.y = target.y + target.resizeHeight - borderWidth
       }
+      context.dispatch('history/resume', null, { root: true })
       context.dispatch('update', updated)
       context.commit('snapGuides', [])
     },
@@ -367,6 +368,7 @@ export default {
           updated.resizeWidth = origin.width + delta.x + padding
         }
       }
+      context.dispatch('history/resume', null, { root: true })
       context.dispatch('update', updated)
       context.commit('snapGuides', [])
     },
