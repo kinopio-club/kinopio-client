@@ -495,7 +495,7 @@ export default {
       if (!team) { return }
       context.commit('notifyIsJoiningTeam', true, { root: true })
       try {
-        const response = await context.dispatch('api/joinTeam', {
+        const response = await context.dispatch('api/createTeamUser', {
           teamId: team.teamId,
           collaboratorKey: team.collaboratorKey,
           userId

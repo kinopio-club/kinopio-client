@@ -108,7 +108,9 @@ const removeCollaborator = (user) => {
 
 const showTeamUserDetails = (event, user) => {
   closeDialogs()
+  const team = spaceTeam(user)
   store.commit('teamUserDetailsIsVisible', true)
+  store.commit('teamUserDetailsTeam', team)
   store.commit('userDetailsUser', user)
   let element = event.target
   let options = { element, offsetX: 0, shouldIgnoreZoom: true }

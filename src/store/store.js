@@ -155,6 +155,7 @@ const store = createStore({
     userDetailsUser: {},
     // team user details
     teamUserDetailsIsVisible: false,
+    teamUserDetailsTeam: {},
 
     // multiple selection
     multipleSelectedActionsIsVisible: false,
@@ -1010,12 +1011,21 @@ const store = createStore({
       utils.typeCheck({ value: user, type: 'object' })
       state.userDetailsUser = user
     },
+    updateUserDetailsUserRole: (state, update) => {
+      const isUser = state.userDetailsUser.id === update.userId
+      if (!isUser) { return }
+      state.userDetailsUser.role = update.role
+    },
 
     // Team User Details
 
     teamUserDetailsIsVisible: (state, value) => {
       utils.typeCheck({ value, type: 'boolean' })
       state.teamUserDetailsIsVisible = value
+    },
+    teamUserDetailsTeam: (state, user) => {
+      utils.typeCheck({ value: user, type: 'object' })
+      state.teamUserDetailsTeam = user
     },
 
     // Tag Details
@@ -1937,6 +1947,11 @@ const store = createStore({
       context.commit('currentUser/updateTeam', update)
       context.commit('currentSpace/updateTeam', update)
       context.dispatch('api/addToQueue', { name: 'updateTeam', body: update })
+    },
+    updateTeamUser: (context, update) => {
+      context.commit('updateUserDetailsUserRole', update)
+      context.commit('currentSpace/updateTeamUser', update)
+      context.dispatch('api/addToQueue', { name: 'updateTeamUser', body: update })
     }
   },
   getters: {

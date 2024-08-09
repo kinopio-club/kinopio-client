@@ -161,6 +161,16 @@ const currentSpace = {
       Object.keys(updatedTeam).forEach(key => {
         state.team[key] = updatedTeam[key]
       })
+    },
+    updateTeamUser: (state, updatedTeamUser) => {
+      const users = state.team.users
+      users.map(user => {
+        const isUser = user.id === updatedTeamUser.userId
+        if (isUser) {
+          user.role = updatedTeamUser.role
+        }
+        return user
+      })
     }
   },
 

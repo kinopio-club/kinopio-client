@@ -23,6 +23,7 @@ const state = reactive({
 const visible = computed(() => store.state.teamUserDetailsIsVisible)
 const user = computed(() => store.state.userDetailsUser)
 const position = computed(() => store.state.userDetailsPosition)
+const team = computed(() => store.state.teamUserDetailsTeam)
 
 const styles = computed(() => {
   let { x, y, shouldIgnoreZoom, transformOriginIsTopRight } = position.value
@@ -66,7 +67,18 @@ const roleIsMember = (role) => {
   return role.name === 'member'
 }
 const updateRole = (role) => {
-  // TODO
+  try {
+    const update = {
+      userId: user.value.id,
+      teamId: team.value.id,
+      role: role.name
+    }
+    store.dispatch('updateTeamUser', update)
+  } catch (error) {
+    console.error('🚒 updateRole', error)
+  }
+  // TODO team userlist userlabel :showYouLabel
+  // TODO cannot unadmin yourself if you're the only admin
 }
 
 // remove user
@@ -75,7 +87,7 @@ const removeTeamUser = () => {
   if (state.loading.removeTeamUser) { return }
   try {
     state.loading.removeTeamUser = true
-    // - api/removeTeamUserFromTeam (teamId, userId)
+    // - api/removeTeamUser ({ teamId, userId })
     // loader
     // on success show notification , update localstate, and close dialog
   } catch (error) {
