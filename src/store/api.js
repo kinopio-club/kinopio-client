@@ -1233,6 +1233,10 @@ const self = {
       } catch (error) {
         context.dispatch('handleServerError', { name: 'getTeam', error })
       }
+    },
+    removeTeamUserFromTeam: async (context, body) => {
+      // DEL /team/team-user
+      // server verifies that request comes from team admin
     }
 
   }

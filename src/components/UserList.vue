@@ -22,7 +22,7 @@ const props = defineProps({
   users: Array,
   selectedUser: Object,
   showRemoveCollaborator: Boolean,
-  showTeamUserOptions: Boolean
+  currentUserIsTeamAdmin: Boolean
 })
 const state = reactive({
   filter: '',
@@ -47,7 +47,7 @@ const spaceTeam = (user) => {
   return store.getters['currentSpace/teamByUser'](user)
 }
 const isTeamAdmin = (user) => {
-  if (!props.showTeamUserOptions) { return }
+  if (!props.currentUserIsTeamAdmin) { return }
   const team = spaceTeam(user)
   if (!team) { return }
   return team.users.find(teamUser => {
@@ -133,11 +133,10 @@ const teamUserDetailsIsVisibleForUser = (user) => {
         template(v-if="props.showRemoveCollaborator")
           button.small-button.danger(@click.left.stop="removeCollaborator(user)" title="Remove Collaborator")
             img.icon.cancel(src="@/assets/add.svg")
-        template(v-if="props.showTeamUserOptions")
+        template(v-if="props.currentUserIsTeamAdmin")
           .button-wrap
             button.small-button(@click.left.stop="showTeamUserDetails($event, user)" title="Team User Options" :class="{active: teamUserDetailsIsVisibleForUser(user)}")
               img.icon.down-arrow(src="@/assets/down-arrow.svg")
-            //- TeamUserDetails(:visible="teamUserDetailsIsVisibleForUser(user)")
 </template>
 
 <style lang="stylus">

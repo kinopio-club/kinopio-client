@@ -2,11 +2,21 @@
 import { reactive, computed, onMounted, onBeforeUnmount, defineProps, defineEmits, watch, ref, nextTick } from 'vue'
 import { useStore } from 'vuex'
 
-import UserLabelInline from '@/components/UserLabelInline.vue'
+import User from '@/components/User.vue'
+import Loader from '@/components/Loader.vue'
 import utils from '@/utils.js'
 const store = useStore()
 
 const dialogElement = ref(null)
+
+const state = reactive({
+  loading: {
+    removeTeamUser: false
+  },
+  error: {
+    removeTeamUser: false
+  }
+})
 
 const visible = computed(() => store.state.teamUserDetailsIsVisible)
 const user = computed(() => store.state.userDetailsUser)
@@ -35,26 +45,51 @@ const styles = computed(() => {
   }
   return styles
 })
+
+const removeTeamUser = () => {
+  if (state.loading.removeTeamUser) { return }
+  try {
+    state.loading.removeTeamUser = true
+    // - api/removeTeamUserFromTeam (teamId, userId)
+    // loader
+    // on success show notification , update localstate, and close dialog
+  } catch (error) {
+    console.error('🚒 removeTeamUser', error)
+    // on error show err in dialog
+  }
+  state.loading.removeTeamUser = false
+}
+
+// TODO
+
 </script>
 
 <template lang="pug">
 dialog.narrow.team-user-details(v-if="visible" :open="visible" @click.left.stop ref="dialogElement" :style="styles")
   section
-    //- UserLabelInline(:user="user")
-    p blah@blah.com {{ user.email }}
-  section
-    p TODO team user details: {{user.name}}
-    p user email  (and/or show in team) (server: teammembers get it, w collaboratorkey)
-
-  section
+    .row.user-info
+      User(:user="user")
+      span {{user.name}}
+    .row
+      img.icon(src="@/assets/mail.svg")
+      span {{ user.email }}
+  section.team-user-role-picker
+    //- like space privacy picker
     p .teamuserrolepicker / description
   section
-    button.danger
-      span x remove from team
+    button.danger(@click="removeTeamUser" :class="{ active: state.loading.removeTeamUser }")
+      img.icon.cancel(src="@/assets/add.svg")
+      span Remove from Team
+      Loader(:visible="state.loading.removeTeamUser" :isSmall="true")
+    p.badge.danger(v-if="state.error.removeTeamUser")
+      span (シ_ _)シ Could not remove team user, Please try again or contact support
 </template>
 
 <style lang="stylus">
 dialog.team-user-details
   top calc(100% - 8px)
   position absolute
+  .user-info
+    > span
+      margin-left 6px
 </style>
