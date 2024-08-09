@@ -127,7 +127,8 @@ const teamUserDetailsIsVisibleForUser = (user) => {
   ul.results-list
     template(v-for="user in usersFiltered" :key="user.id")
       li(@click.left.stop="selectUser($event, user)" :tabindex="tabIndex" v-on:keyup.stop.enter="selectUser($event, user)" :class="{ active: userIsSelected(user), 'is-not-clickable': !props.isClickable }")
-        .badge.success.is-admin(v-if="isTeamAdmin(user)")
+        .badge.danger.is-admin(v-if="isTeamAdmin(user)")
+          //- img.icon.key(src="@/assets/key.svg")
           span Admin
         UserLabelInline(:user="user")
         template(v-if="props.showRemoveCollaborator")

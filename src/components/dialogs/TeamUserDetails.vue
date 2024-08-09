@@ -5,6 +5,8 @@ import { useStore } from 'vuex'
 import User from '@/components/User.vue'
 import Loader from '@/components/Loader.vue'
 import utils from '@/utils.js'
+import teamUserRoles from '@/data/teamUserRoles.js'
+
 const store = useStore()
 
 const dialogElement = ref(null)
@@ -46,6 +48,29 @@ const styles = computed(() => {
   return styles
 })
 
+// team roles
+
+const roles = computed(() => {
+  return teamUserRoles.states()
+})
+const roleName = (role) => {
+  return utils.capitalizeFirstLetter(role.name)
+}
+const roleIsActive = (role) => {
+  return user.value.role === role.name
+}
+const roleIsAdmin = (role) => {
+  return role.name === 'admin'
+}
+const roleIsMember = (role) => {
+  return role.name === 'member'
+}
+const updateRole = (role) => {
+  // TODO
+}
+
+// remove user
+
 const removeTeamUser = () => {
   if (state.loading.removeTeamUser) { return }
   try {
@@ -60,8 +85,6 @@ const removeTeamUser = () => {
   state.loading.removeTeamUser = false
 }
 
-// TODO
-
 </script>
 
 <template lang="pug">
@@ -73,9 +96,22 @@ dialog.narrow.team-user-details(v-if="visible" :open="visible" @click.left.stop 
     .row
       img.icon(src="@/assets/mail.svg")
       span {{ user.email }}
-  section.team-user-role-picker
-    //- like space privacy picker
-    p .teamuserrolepicker / description
+  section.results-section.team-user-role-picker
+    ul.results-list
+      template(v-for="(role in roles")
+        li(:class="{ active: roleIsActive(role) }" @click.left="updateRole(role)")
+          .badge(:class="role.color")
+            img.icon.key(
+              v-if="roleIsAdmin(role)"
+              src="@/assets/key.svg"
+            )
+            img.icon.star(
+              v-if="roleIsMember(role)"
+              src="@/assets/star.svg"
+            )
+            span {{roleName(role)}}
+          .description {{ role.description }}
+
   section
     button.danger(@click="removeTeamUser" :class="{ active: state.loading.removeTeamUser }")
       img.icon.cancel(src="@/assets/add.svg")
@@ -89,7 +125,16 @@ dialog.narrow.team-user-details(v-if="visible" :open="visible" @click.left.stop 
 dialog.team-user-details
   top calc(100% - 8px)
   position absolute
+  .results-section
+    padding-top 4px
+    border-top 1px solid var(--primary-border)
+  li
+    flex-direction column
   .user-info
     > span
       margin-left 6px
+  .badge
+    flex-shrink 0
+  .description
+    margin-top 3px
 </style>
