@@ -509,6 +509,7 @@ svg.connection(
     v-if="visible"
     fill="none"
     :stroke="typeColor"
+    stroke-linecap="round"
     stroke-width="5"
     ref="connectionPathElement"
     tabindex="0"
@@ -561,6 +562,8 @@ svg.connection(
 svg.connection
   position absolute
   overflow visible
+  min-width 5px
+  min-height 5px
   path.connection-path
     pointer-events all
     cursor pointer
