@@ -1737,6 +1737,9 @@ article.card-wrap#card(
   :data-resize-width="resizeWidth"
   :data-width="resizeWidth || card.width"
   :data-height="card.height"
+  :data-created-by-user="card.userId"
+  :data-name-updated-by-user="card.nameUpdatedByUserId"
+
   :key="card.id"
   ref="cardElement"
   :class="articleClasses"

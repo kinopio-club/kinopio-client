@@ -45,6 +45,7 @@ const changeConnectionTypes = (type) => {
       connectionTypeId: type.id
     })
   })
+  store.commit('currentConnections/lastTypeId', type.id)
 }
 const connectionTypeIsActive = (type) => {
   return props.selectedConnections.find(connection => {
