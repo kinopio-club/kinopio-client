@@ -103,12 +103,13 @@ const removeTeamUser = () => {
 <template lang="pug">
 dialog.narrow.team-user-details(v-if="visible" :open="visible" @click.left.stop ref="dialogElement" :style="styles")
   section
-    .row.user-info
-      User(:user="user")
-      span {{user.name}}
     .row
-      img.icon(src="@/assets/mail.svg")
-      span {{ user.email }}
+      User(:user="user")
+      span.user-name {{user.name}}
+    .row
+      .badge.secondary
+        img.icon(src="@/assets/mail.svg")
+        span {{ user.email }}
   section.results-section.team-user-role-picker
     ul.results-list
       template(v-for="(role in roles")
@@ -138,14 +139,17 @@ dialog.narrow.team-user-details(v-if="visible" :open="visible" @click.left.stop 
 dialog.team-user-details
   top calc(100% - 8px)
   position absolute
+  .user-name
+    margin-left 6px
   .results-section
     padding-top 4px
     border-top 1px solid var(--primary-border)
   li
     flex-direction column
-  .user-info
-    > span
-      margin-left 6px
+  // .user-info-wrap
+  //   align-items flex-start
+  //   .user-info
+  //     margin-left 6px
   .badge
     flex-shrink 0
   .description

@@ -106,7 +106,13 @@ const removeCollaborator = (user) => {
 
 // team user details
 
-const showTeamUserDetails = (event, user) => {
+const toggleTeamUserDetails = (event, user) => {
+  const shouldHideUserDetails = user.id === store.state.userDetailsUser.id
+  if (shouldHideUserDetails && store.state.teamUserDetailsIsVisible) {
+    closeDialogs()
+    store.commit('userDetailsUser', {})
+    return
+  }
   closeDialogs()
   const team = spaceTeam(user)
   store.commit('teamUserDetailsIsVisible', true)
@@ -138,7 +144,7 @@ const teamUserDetailsIsVisibleForUser = (user) => {
             img.icon.cancel(src="@/assets/add.svg")
         template(v-if="props.currentUserIsTeamAdmin")
           .button-wrap
-            button.small-button(@click.left.stop="showTeamUserDetails($event, user)" title="Team User Options" :class="{active: teamUserDetailsIsVisibleForUser(user)}")
+            button.small-button(@click.left.stop="toggleTeamUserDetails($event, user)" title="Team User Options" :class="{active: teamUserDetailsIsVisibleForUser(user)}")
               img.icon.down-arrow(src="@/assets/down-arrow.svg")
 </template>
 
