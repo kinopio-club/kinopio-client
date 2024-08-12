@@ -77,7 +77,6 @@ const initialState = {
   cardSettingsShiftEnterShouldAddChildCard: true,
   cardSettingsMaxCardWidth: consts.normalCardMaxWidth,
   prevSettingsSection: null,
-  teams: null,
 
   // space filters
 
@@ -170,7 +169,6 @@ export default {
       Object.keys(user).forEach(item => {
         state[item] = user[item]
       })
-      console.log('👫 team user', user.teams)
     },
     updateUser: (state, user) => {
       Object.keys(user).forEach(key => {
@@ -441,15 +439,6 @@ export default {
     prevSettingsSection: (state, value) => {
       utils.typeCheck({ value, type: 'string' })
       state.prevSettingsSection = value
-    },
-    updateTeam: (state, updatedTeam) => {
-      state.teams.map(team => {
-        if (team.id !== updatedTeam.id) { return team }
-        Object.keys(updatedTeam).forEach(key => {
-          team[key] = updatedTeam[key]
-        })
-        return team
-      })
     }
   },
   actions: {
@@ -484,40 +473,10 @@ export default {
       if (!context.rootState.teamToJoinOnLoad) { return }
       const currentUserIsSignedIn = context.getters.isSignedIn
       if (currentUserIsSignedIn) {
-        context.dispatch('joinTeam')
+        context.dispatch('teams/joinTeam')
       } else {
         context.commit('notifySignUpToJoinTeam', true, { root: true })
       }
-    },
-    joinTeam: async (context) => {
-      const userId = context.state.id
-      const team = context.rootState.teamToJoinOnLoad
-      if (!team) { return }
-      context.commit('notifyIsJoiningTeam', true, { root: true })
-      try {
-        const response = await context.dispatch('api/createTeamUser', {
-          teamId: team.teamId,
-          collaboratorKey: team.collaboratorKey,
-          userId
-        }, { root: true })
-        context.commit('addNotification', {
-          message: `Joined ${response.team.name}`,
-          type: 'success',
-          icon: 'team',
-          isPersistentItem: true,
-          teamColor: response.team.color
-        }, { root: true })
-      } catch (error) {
-        console.error('🚒 joinTeam', error)
-        context.commit('addNotification', {
-          message: `Failed to Join Team`,
-          type: 'danger',
-          icon: 'team',
-          isPersistentItem: true
-        }, { root: true })
-      }
-      context.commit('notifyIsJoiningTeam', false, { root: true })
-      context.commit('teamToJoinOnLoad', null, { root: true })
     },
     update: (context, updates) => {
       const keys = Object.keys(updates)
@@ -609,6 +568,7 @@ export default {
       }
       const remoteTags = await context.dispatch('api/getUserTags', null, { root: true }) || []
       context.commit('otherTags', remoteTags, { root: true })
+      context.commit('teams/restore', remoteUser.teams, { root: true })
     },
     restoreUserFavorites: async (context) => {
       try {
@@ -886,14 +846,14 @@ export default {
       if (state.isUpgraded) { return }
       if (state.cardsCreatedCount + count >= cardsCreatedLimit) { return true }
     },
-    canEditSpace: (state, getters, rootState) => (space) => {
+    canEditSpace: (state, getters, rootState, rootGetters) => (space) => {
       space = space || rootState.currentSpace
       const spaceIsOpen = space.privacy === 'open'
       const currentUserIsSignedIn = getters.isSignedIn
       const canEditOpenSpace = spaceIsOpen && currentUserIsSignedIn
       const isSpaceMember = getters.isSpaceMember(space)
-      const teamBySpace = getters.teamBySpace(space)
-      return canEditOpenSpace || isSpaceMember || teamBySpace
+      const teamUser = rootGetters['teams/teamUser']({ userId: state.id, space })
+      return canEditOpenSpace || isSpaceMember || teamUser
     },
     cannotEditUnlessSignedIn: (state, getters, rootState) => (space) => {
       space = space || rootState.currentSpace
@@ -914,23 +874,23 @@ export default {
     },
     canEditCard: (state, getters, rootState, rootGetters) => (card) => {
       const isSpaceMember = getters.isSpaceMember()
-      const teamBySpace = getters.teamBySpace()
-      if (isSpaceMember || teamBySpace) { return true }
+      const teamUser = rootGetters['teams/teamUser']({ userId: state.id })
+      if (isSpaceMember || teamUser) { return true }
       const canEditSpace = getters.canEditSpace
       const cardIsCreatedByCurrentUser = getters.cardIsCreatedByCurrentUser(card)
       if (canEditSpace && cardIsCreatedByCurrentUser) { return true }
       return false
     },
-    canOnlyComment: (state, getters, rootState) => () => {
+    canOnlyComment: (state, getters, rootState, rootGetters) => () => {
       const canEditSpace = getters.canEditSpace
       const isSpaceMember = getters.isSpaceMember()
-      const teamBySpace = getters.teamBySpace()
-      return canEditSpace && !isSpaceMember && !teamBySpace
+      const teamUser = rootGetters['teams/teamUser']({ userId: state.id })
+      return canEditSpace && !isSpaceMember && !teamUser
     },
     canEditBox: (state, getters, rootState, rootGetters) => (box) => {
       const isSpaceMember = getters.isSpaceMember()
-      const teamBySpace = getters.teamBySpace()
-      if (isSpaceMember || teamBySpace) { return true }
+      const teamUser = rootGetters['teams/teamUser']({ userId: state.id })
+      if (isSpaceMember || teamUser) { return true }
       const canEditSpace = getters.canEditSpace
       const boxIsCreatedByCurrentUser = getters.boxIsCreatedByCurrentUser(box)
       if (canEditSpace && boxIsCreatedByCurrentUser) { return true }
@@ -1014,28 +974,6 @@ export default {
       const connections = rootState.filteredConnectionTypeIds
       const frames = rootState.filteredFrameIds
       return userFilters + tagNames.length + connections.length + frames.length
-    },
-
-    // team
-
-    teamByTeamId: (state, getters) => (teamId) => {
-      const spaceTeam = state.teams?.find(team => {
-        return teamId === team.id
-      })
-      return spaceTeam
-    },
-    teamBySpace: (state, getters, rootState) => (space) => {
-      space = space || rootState.currentSpace
-      const spaceTeamId = space.team?.id
-      const spaceTeam = state.teams?.find(team => {
-        return spaceTeamId === team.id
-      })
-      return spaceTeam
-    },
-    isTeamAdmin: (state, getters) => (teamId) => {
-      const teamBySpace = getters.teamBySpace()
-      if (!teamBySpace) { return }
-      return teamBySpace.teamUser.role === 'admin'
     },
 
     // AI Images

@@ -23,9 +23,9 @@ const state = reactive({
   teamIsVisible: false
 })
 
-const userTeams = computed(() => store.state.currentUser.teams)
+const teams = computed(() => store.getters['teams/byUser'])
 
-const visible = computed(() => userTeams.value?.length)
+const visible = computed(() => teams.value?.length)
 watch(() => visible.value, async (value, prevValue) => {
   state.teamIsVisible = false
 })
@@ -36,7 +36,7 @@ watch(() => visible.value, async (value, prevValue) => {
 
 <template lang="pug">
 section.user-details-teams(v-if="visible")
-  template(v-for="team in userTeams")
+  template(v-for="team in teams")
     button {{team.color}} {{ team.name }}
 </template>
 

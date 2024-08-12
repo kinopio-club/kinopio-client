@@ -53,10 +53,15 @@ const closeDialogs = () => {
 
 // team
 
-const currentUserIsTeamAdmin = computed(() => store.getters['currentUser/isTeamAdmin'](props.team.id))
+const currentUserIsTeamAdmin = computed(() => {
+  return store.getters['teams/teamUserIsAdmin']({
+    userId: store.state.currentUser.id,
+    teamId: props.team.id
+  })
+})
 const updateTeam = (update) => {
   update.id = props.team.id
-  store.dispatch('updateTeam', update)
+  store.dispatch('teams/update', update)
 }
 
 // team color

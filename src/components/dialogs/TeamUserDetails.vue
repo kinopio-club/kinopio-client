@@ -21,9 +21,16 @@ const state = reactive({
 })
 
 const visible = computed(() => store.state.teamUserDetailsIsVisible)
-const user = computed(() => store.state.userDetailsUser)
 const position = computed(() => store.state.userDetailsPosition)
-const team = computed(() => store.state.teamUserDetailsTeam)
+const team = computed(() => {
+  const teamId = store.state.teamUserDetailsTeamId
+  return store.getters('teams/byId', teamId)
+})
+const user = computed(() => {
+  const userId = store.state.teamUserDetailsUserId
+  const teamId = store.state.teamUserDetailsTeamId
+  return store.getters('teams/teamUser', { userId, teamId })
+})
 
 const styles = computed(() => {
   let { x, y, shouldIgnoreZoom, transformOriginIsTopRight } = position.value
@@ -73,7 +80,7 @@ const updateRole = (role) => {
       teamId: team.value.id,
       role: role.name
     }
-    store.dispatch('updateTeamUser', update)
+    store.dispatch('teams/updateUserRole', update)
   } catch (error) {
     console.error('🚒 updateRole', error)
   }

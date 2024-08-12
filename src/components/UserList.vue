@@ -43,18 +43,12 @@ const closeDialogs = () => {
 
 // team
 
-const spaceTeam = (user) => {
-  return store.getters['currentSpace/teamByUser'](user)
+const spaceTeams = (user) => {
+  return store.getters['teams/bySpace'](user)
 }
 const isTeamAdmin = (user) => {
   if (!props.currentUserIsTeamAdmin) { return }
-  const team = spaceTeam(user)
-  if (!team) { return }
-  return team.users.find(teamUser => {
-    const isUser = teamUser.id === user.id
-    const isAdmin = teamUser.role === 'admin'
-    return isUser && isAdmin
-  })
+  return store.getters('teams/teamUserIsAdmin', { userId: user.id })
 }
 
 // users
@@ -114,10 +108,10 @@ const toggleTeamUserDetails = (event, user) => {
     return
   }
   closeDialogs()
-  const team = spaceTeam(user)
+  const team = spaceTeams(user)
   store.commit('teamUserDetailsIsVisible', true)
-  store.commit('teamUserDetailsTeam', team)
-  store.commit('userDetailsUser', user)
+  store.commit('teamUserDetailsTeamId', team.id)
+  store.commit('teamUserDetailsUserId', user.id)
   let element = event.target
   let options = { element, offsetX: 0, shouldIgnoreZoom: true }
   let position = utils.childDialogPositionFromParent(options)

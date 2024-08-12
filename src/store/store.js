@@ -156,7 +156,8 @@ const store = createStore({
     userDetailsUser: {},
     // team user details
     teamUserDetailsIsVisible: false,
-    teamUserDetailsTeam: {},
+    teamUserDetailsUserId: '',
+    teamUserDetailsTeamId: '',
 
     // multiple selection
     multipleSelectedActionsIsVisible: false,
@@ -1024,9 +1025,13 @@ const store = createStore({
       utils.typeCheck({ value, type: 'boolean' })
       state.teamUserDetailsIsVisible = value
     },
-    teamUserDetailsTeam: (state, user) => {
-      utils.typeCheck({ value: user, type: 'object' })
-      state.teamUserDetailsTeam = user
+    teamUserDetailsUserId: (state, id) => {
+      utils.typeCheck({ value: id, type: 'object' })
+      state.teamUserDetailsUserId = id
+    },
+    teamUserDetailsTeamId: (state, id) => {
+      utils.typeCheck({ value: id, type: 'object' })
+      state.teamUserDetailsTeamId = id
     },
 
     // Tag Details
@@ -1940,19 +1945,6 @@ const store = createStore({
       const canOnlyComment = context.getters['currentUser/canOnlyComment']()
       if (canOnlyComment) { return }
       context.commit('currentUserToolbar', value)
-    },
-
-    // team
-
-    updateTeam: (context, update) => {
-      context.commit('currentUser/updateTeam', update)
-      context.commit('currentSpace/updateTeam', update)
-      context.dispatch('api/addToQueue', { name: 'updateTeam', body: update })
-    },
-    updateTeamUser: (context, update) => {
-      context.commit('updateUserDetailsUserRole', update)
-      context.commit('currentSpace/updateTeamUser', update)
-      context.dispatch('api/addToQueue', { name: 'updateTeamUser', body: update })
     }
   },
   getters: {

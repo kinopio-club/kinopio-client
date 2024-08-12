@@ -54,8 +54,7 @@ const state = reactive({
   backgroundIsVisible: false,
   privacyPickerIsVisible: false,
   settingsIsVisible: false,
-  exportIsVisible: false,
-  errorRemoveFromTeam: false
+  exportIsVisible: false
 })
 
 // user
@@ -224,37 +223,36 @@ const closeAllDialogs = () => {
 
 // team
 
-const userTeams = computed(() => store.state.currentUser.teams) // TODO support multiple teams (1 space per team though)
-const userTeam = computed(() => {
-  if (userTeams.value) {
-    return userTeams.value[0]
+const teams = computed(() => store.getters['teams/byUser']())
+const team = computed(() => {
+  if (teams.value) {
+    return teams.value[0] // TODO support multiple teams
   } else {
     return null
   }
 })
-const userIsInCurrentSpaceTeam = computed(() => store.getters['currentUser/teamBySpace']())
+const spaceTeam = computed(() => {
+  const teamId = store.state.currentSpace.teamId
+  return store.getters['teams/byId'](teamId)
+})
 const toggleCurrentSpaceInTeam = (event) => {
   store.commit('clearNotificationsWithPosition')
   const position = utils.cursorPositionInPage(event)
-  const isTeamAdmin = store.getters['currentUser/isTeamAdmin'](userTeam.value.id)
-  const isCreatorOrTeamAdmin = store.state.currentSpace.addedToTeamByUserId === store.state.currentUser.id || isTeamAdmin
-  if (userIsInCurrentSpaceTeam.value && isCreatorOrTeamAdmin) {
-    store.dispatch('currentSpace/removeFromTeam')
+  if (spaceTeam.value) {
+    store.dispatch('teams/removeCurrentSpace')
     updateLocalSpaces()
-  } else if (userIsInCurrentSpaceTeam.value) {
-    state.errorRemoveFromTeam = true
   } else {
-    store.dispatch('currentSpace/addToTeam', userTeam.value)
-    store.commit('addNotificationWithPosition', { message: `Added to ${userTeam.value.name}`, position, type: 'success', layer: 'app', icon: 'checkmark' })
+    store.dispatch('teams/addCurrentSpace', team.value) // space.team
+    store.commit('addNotificationWithPosition', { message: `Added to ${team.value.name}`, position, type: 'success', layer: 'app', icon: 'checkmark' })
     updateLocalSpaces()
   }
 }
 const teamButtonTitle = computed(() => {
   let addString = 'Add'
-  if (userIsInCurrentSpaceTeam.value) {
+  if (team.value) {
     addString = 'Added'
   }
-  const teamName = userTeam.value.name || 'Team'
+  const teamName = team.value.name || 'Team'
   return `${addString} to ${teamName}`
 })
 
@@ -296,7 +294,7 @@ const teamButtonTitle = computed(() => {
       button.small-button(:class="{active: dialogIsPinned}")
         img.icon.pin(src="@/assets/pin.svg")
 
-ReadOnlySpaceInfoBadges(:showSpaceTeam="true")
+ReadOnlySpaceInfoBadges(:spaceTeam="spaceTeam")
 
 //- member options
 template(v-if="isSpaceMember")
@@ -304,10 +302,10 @@ template(v-if="isSpaceMember")
     //- Privacy
     PrivacyButton(:privacyPickerIsVisible="state.privacyPickerIsVisible" :showShortName="true" @togglePrivacyPickerIsVisible="togglePrivacyPickerIsVisible" @closeDialogs="closeDialogs" @updateLocalSpaces="updateLocalSpaces")
       //- team | favorite
-    template(v-if="userTeam")
+    template(v-if="team")
       .segmented-buttons
         //- Team
-        button.team-button(:title="teamButtonTitle" :class="{active: userIsInCurrentSpaceTeam}" @click.left.prevent.stop="toggleCurrentSpaceInTeam" @keydown.stop.enter="toggleCurrentSpaceInTeam")
+        button.team-button(:title="teamButtonTitle" :class="{active: spaceTeam}" @click.left.prevent.stop="toggleCurrentSpaceInTeam" @keydown.stop.enter="toggleCurrentSpaceInTeam")
           img.icon.team(src="@/assets/team.svg")
         //- Favorite
         FavoriteSpaceButton(:parentIsDialog="true" @updateLocalSpaces="updateLocalSpaces")
@@ -319,9 +317,6 @@ template(v-if="isSpaceMember")
       button(@click="toggleSettingsIsVisible" :class="{active: state.settingsIsVisible}")
         img.icon.settings(src="@/assets/settings.svg")
         span Settings
-  //- team error
-  .row(v-if="state.errorRemoveFromTeam")
-    .badge.danger Only the person who added this space to the team, or a {{team.name}} team admin can remove this space from the team
 
 //- read only options
 .row(v-if="!isSpaceMember")

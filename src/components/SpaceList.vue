@@ -376,8 +376,9 @@ const checkmarkSpace = (space) => {
 
 // team
 
-const userTeam = (teamId) => {
-  return store.getters['currentUser/teamByTeamId'](teamId)
+const team = (teamId) => {
+  if (!teamId) { return }
+  return store.getters['teams/byId'](teamId) || { color: null, name: null }
 }
 </script>
 
@@ -437,9 +438,9 @@ span.space-list-wrap
             .preview-thumbnail-image-wrap(v-if="space.previewThumbnailImage && isOnline" :class="{wide: previewImageIsWide}")
               img.preview-thumbnail-image(:src="space.previewThumbnailImage")
             //- team
-            template(v-if="space.teamId && props.showSpaceTeams")
-              .team-color(:style="{ background: userTeam(space.teamId).color }" :title="userTeam(space.teamId).name")
-              img.icon.team(src="@/assets/team.svg" :title="userTeam(space.teamId).name")
+            template(v-if="team(space.teamId) && props.showSpaceTeams")
+              .team-color(:style="{ background: team(space.teamId).color }" :title="team(space.teamId).name")
+              img.icon.team(src="@/assets/team.svg" :title="team(space.teamId).name")
             //- offline
             span(v-if="isOffline && isNotCached(space.id)")
               OfflineBadge(:isInline="true" :isDanger="true")
