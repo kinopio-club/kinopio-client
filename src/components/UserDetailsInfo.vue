@@ -96,10 +96,6 @@ const updateUser = (update) => {
 const updateUserColor = (newValue) => {
   updateUser({ color: newValue })
 }
-const removeCollaborator = () => {
-  store.dispatch('currentSpace/removeCollaboratorFromSpace', props.user)
-  store.dispatch('closeAllDialogs')
-}
 </script>
 
 <template lang="pug">

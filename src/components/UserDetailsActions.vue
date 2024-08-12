@@ -67,18 +67,11 @@ const userIsSignedIn = computed(() => {
   }
   return true
 })
-const isCollaborator = computed(() => {
-  const currentSpace = store.state.currentSpace
-  const collaborators = currentSpace.collaborators || []
-  return Boolean(collaborators.find(collaborator => {
-    return collaborator.id === props.user.id
-  }))
-})
 
 // current user
 
 const isCurrentUser = computed(() => store.getters['currentUser/isCurrentUser'](props.user))
-const currentUserIsSpaceMember = computed(() => store.getters['currentUser/isSpaceMember']())
+// const currentUserIsSpaceMember = computed(() => store.getters['currentUser/isSpaceMember']())
 const userSettingsIsVisible = computed(() => store.state.userSettingsIsVisible)
 const toggleUserSettingsIsVisible = () => {
   const value = !store.state.userSettingsIsVisible
@@ -165,16 +158,6 @@ const updateExploreSpaces = async () => {
       button(v-else @click.left="triggerSignUpOrInIsVisible")
         span Sign Up or In
 
-  //- Collaborator
-  section(v-if="isCollaborator && currentUserIsSpaceMember")
-    template(v-if="isCurrentUser && isCollaborator")
-      button(@click.left.stop="removeCollaborator")
-        img.icon.cancel(src="@/assets/add.svg")
-        span Leave Space
-    template(v-if="!isCurrentUser")
-      button(@click.left.stop="removeCollaborator")
-        img.icon.cancel(src="@/assets/add.svg")
-        span Remove From Space
   //- Other User
   section(v-if="!isCurrentUser && userIsSignedIn && props.user.id")
     .button-wrap

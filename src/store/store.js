@@ -3,7 +3,6 @@ import consts from '@/consts.js'
 import cache from '@/cache.js'
 import postMessage from '@/postMessage.js'
 // store modules
-import themes from '@/store/themes.js'
 import api from '@/store/api.js'
 import broadcast from '@/store/broadcast.js'
 import history from '@/store/history.js'
@@ -14,6 +13,8 @@ import currentConnections from '@/store/currentConnections.js'
 import currentBoxes from '@/store/currentBoxes.js'
 import upload from '@/store/upload.js'
 import userNotifications from '@/store/userNotifications.js'
+import teams from '@/store/teams.js'
+import themes from '@/store/themes.js'
 // store plugins
 import websocket from '@/store/plugins/websocket.js'
 
@@ -2034,7 +2035,6 @@ const store = createStore({
   },
 
   modules: {
-    themes,
     api,
     broadcast,
     history,
@@ -2044,7 +2044,9 @@ const store = createStore({
     currentConnections,
     currentBoxes,
     upload,
-    userNotifications
+    userNotifications,
+    teams,
+    themes
   },
   plugins: [websocket()]
 })
