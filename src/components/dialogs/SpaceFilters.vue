@@ -99,7 +99,8 @@ const toggleShowHiddenSpace = () => {
 
 // by team
 
-const team = computed(() => store.state.currentUser.team)
+const teams = computed(() => store.getters['teams/byUser']())
+
 const filterByTeamAll = computed(() => !dialogSpaceFilterByTeam.value)
 const filterByTeamTeam = computed(() => dialogSpaceFilterByTeam.value === 'team')
 const filterByTeamPersonal = computed(() => dialogSpaceFilterByTeam.value === 'personal')
@@ -169,7 +170,7 @@ dialog.narrow.space-filters(v-if="props.visible" :open="props.visible" @click.le
         span Clear all
         span.badge.info.total-filters-active(v-if="totalFiltersActive") {{totalFiltersActive}}
     //- show team
-    section.subsection(v-if="team")
+    section.subsection(v-if="teams")
       p Filter by Team
       .segmented-buttons
         button(:class="{active: filterByTeamAll}" @click="updateFilterByTeam(null)")
