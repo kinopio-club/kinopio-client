@@ -242,7 +242,7 @@ const toggleCurrentSpaceInTeam = (event) => {
     store.dispatch('teams/removeCurrentSpace')
     updateLocalSpaces()
   } else {
-    store.dispatch('teams/addCurrentSpace', team.value) // space.team
+    store.dispatch('teams/addCurrentSpace', team.value)
     store.commit('addNotificationWithPosition', { message: `Added to ${team.value.name}`, position, type: 'success', layer: 'app', icon: 'checkmark' })
     updateLocalSpaces()
   }

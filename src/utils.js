@@ -1399,8 +1399,7 @@ export default {
       visits: 0,
       showInExplore: false,
       proposedShowInExplore: false,
-      teamId: null,
-      team: null
+      teamId: null
     }
   },
   clearSpaceMeta (space, type) {
@@ -1419,7 +1418,6 @@ export default {
     space.previewImage = null
     space.previewThumbnailImage = null
     space.teamId = null
-    space.team = null
     space.cards = space.cards.map(card => {
       card.userId = null
       if (card.nameUpdatedByUserId) {

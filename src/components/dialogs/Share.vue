@@ -58,7 +58,7 @@ const isSpaceMember = computed(() => store.getters['currentUser/isSpaceMember'](
 const spaceIsRemote = computed(() => store.getters['currentSpace/isRemote'])
 const spaceIsPublic = computed(() => store.state.currentSpace.privacy !== 'private')
 const spaceIsPrivate = computed(() => store.state.currentSpace.privacy === 'private')
-const spaceTeam = computed(() => store.state.currentSpace.team)
+const spaceTeam = computed(() => store.getters['teams/bySpace']())
 
 // add to explore
 

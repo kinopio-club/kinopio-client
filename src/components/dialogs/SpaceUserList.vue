@@ -56,7 +56,7 @@ const label = computed(() => {
 
 // team
 
-const team = computed(() => store.state.currentSpace.team)
+const team = computed(() => store.getters['teams/bySpace']())
 const toggleTeamIsVisible = () => {
   const value = !state.teamIsVisible
   closeDialogs()

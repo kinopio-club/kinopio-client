@@ -1079,8 +1079,8 @@ const currentCards = {
       return users
     },
     teamUsersWhoAddedCards: (state, getters, rootState, rootGetters) => {
-      if (!rootState.currentSpace.team) { return }
-      const teamUsers = rootState.currentSpace.team?.users
+      const spaceTeam = rootGetters['teams/bySpace']()
+      const teamUsers = spaceTeam?.users
       if (!teamUsers) { return }
       let users = getters.users
       users = users.filter(user => {
@@ -1102,8 +1102,9 @@ const currentCards = {
         return !member
       })
       // remove team users
-      if (rootState.currentSpace.team) {
-        const teamUsers = rootState.currentSpace.team?.users
+      const spaceTeam = rootGetters['teams/bySpace']()
+      if (spaceTeam) {
+        const teamUsers = spaceTeam?.users
         if (!teamUsers) { return }
         items = items.filter(item => {
           const teamUser = teamUsers.find(teamUser => teamUser.id === item.id)
