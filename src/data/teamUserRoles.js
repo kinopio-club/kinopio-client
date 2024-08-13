@@ -9,7 +9,7 @@ export default {
       {
         name: 'admin',
         description: 'Can edit team info, remove members, and assign admins',
-        color: 'danger'
+        color: 'success'
       }
     ]
   }

@@ -20,10 +20,10 @@ onMounted(() => {
 const props = defineProps({
   visible: Boolean,
   user: Object
-  // isPositionBottom: Boolean TODO
 })
 const state = reactive({
   dialogHeight: null,
+  isPositionBottom: false,
   error: {
     isRemovingSoleAdmin: false
   }
@@ -31,8 +31,10 @@ const state = reactive({
 
 watch(() => props.visible, (value, prevValue) => {
   if (value) {
-    updateDialogHeight()
     state.error.isRemovingSoleAdmin = false
+    state.isPositionBottom = false
+    updateDialogHeight()
+    updateIsPositionBottom()
   }
 })
 
@@ -41,6 +43,14 @@ const updateDialogHeight = async () => {
   await nextTick()
   let element = dialogElement.value
   state.dialogHeight = utils.elementHeight(element)
+}
+const updateIsPositionBottom = async () => {
+  const threshold = 50
+  await nextTick()
+  const element = dialogElement.value
+  const rect = element.getBoundingClientRect()
+  const dialogIsBelowViewport = rect.y + rect.height + threshold > store.state.viewportHeight
+  state.isPositionBottom = dialogIsBelowViewport
 }
 
 const currentSpaceTeam = computed(() => store.getters['teams/bySpace']())
@@ -62,7 +72,7 @@ const roleIsMember = (role) => {
 }
 const checkIsRemovingSoleAdminError = (role) => {
   if (props.user.role === 'member') { return }
-  if (role === 'admin') { return }
+  if (role.name === 'admin') { return }
   const teamAdmins = currentSpaceTeam.value.users.filter(user => user.role === 'admin')
   if (teamAdmins.length > 1) { return }
   state.error.isRemovingSoleAdmin = true
@@ -79,10 +89,13 @@ const updateRole = (role) => {
   }
   store.dispatch('teams/updateUserRole', update)
 }
+
 </script>
 
 <template lang="pug">
-dialog.narrow.team-user-role-picker(v-if="visible" :open="visible" @click.left.stop ref="dialogElement" :style="{'max-height': state.dialogHeight + 'px'}")
+dialog.narrow.team-user-role-picker(v-if="visible" :open="visible" @click.left.stop ref="dialogElement" :style="{'max-height': state.dialogHeight + 'px'}" :class="{'position-bottom': state.isPositionBottom}")
+  section(v-if="state.error.isRemovingSoleAdmin")
+    .badge.danger Team must have at least one admin
   section.results-section
     ul.results-list
       template(v-for="(role in roles")
@@ -90,11 +103,14 @@ dialog.narrow.team-user-role-picker(v-if="visible" :open="visible" @click.left.s
           .badge(:class="role.color")
             span {{roleName(role)}}
           .description {{ role.description }}
-  section(v-if="state.error.isRemovingSoleAdmin")
-    .badge.danger Team must have at least one admin
 </template>
 
 <style lang="stylus">
 dialog.team-user-role-picker
+  overflow auto
   padding-top 4px
+  min-height 154px
+  &.position-bottom
+    top initial
+    bottom 10px
 </style>
