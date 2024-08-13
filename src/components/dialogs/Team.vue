@@ -200,7 +200,7 @@ dialog.team.wide(v-if="visible" :open="visible" @click.left.stop="closeDialogs" 
     :selectedUser="selectedUser"
     @selectUser="toggleUserDetails"
     :isClickable="true"
-    :currentUserIsTeamAdmin="currentUserIsTeamAdmin"
+    :showTeamUserActions="true"
   )
 </template>
 

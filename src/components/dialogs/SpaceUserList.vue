@@ -56,7 +56,7 @@ const label = computed(() => {
 
 // team
 
-const team = computed(() => store.getters['teams/bySpace']())
+const spaceTeam = computed(() => store.getters['teams/bySpace']())
 const toggleTeamIsVisible = () => {
   const value = !state.teamIsVisible
   closeDialogs()
@@ -88,9 +88,9 @@ const commenters = computed(() => utils.clone(store.getters['currentCards/commen
 
 // handle userlist events
 
-const showRemoveCollaborator = computed(() => {
-  return currentUserCanEditSpace.value && isCollaboratorsList.value
-})
+// const showRemoveCollaborator = computed(() => {
+//   return currentUserCanEditSpace.value && isCollaboratorsList.value
+// })
 const selectedUser = computed(() => {
   const userDetailsIsVisible = store.state.userDetailsIsVisible
   if (!userDetailsIsVisible) { return }
@@ -99,14 +99,6 @@ const selectedUser = computed(() => {
 const toggleUserDetails = (event, user) => {
   closeDialogs()
   showUserDetails(event, user)
-}
-const removeCollaborator = async (user) => {
-  store.dispatch('currentSpace/removeCollaboratorFromSpace', user)
-  const isCurrentUserRemove = store.state.currentUser.id === user.id
-  if (isCurrentUserRemove) {
-    store.dispatch('closeAllDialogs')
-  }
-  closeDialogs()
 }
 const showUserDetails = (event, user) => {
   const shouldHideUserDetails = user.id === store.state.userDetailsUser.id
@@ -136,14 +128,15 @@ dialog.narrow.space-user-list(
   ref="dialogElement"
   :style="{'max-height': state.dialogHeight + 'px'}"
 )
-  section(v-if="team && isCollaboratorsList")
+  section
+    //- (v-if="isCollaboratorsList")
     p {{ label }}
-    .button-wrap
+    .button-wrap(v-if="spaceTeam")
       button(@click.stop="toggleTeamIsVisible" :class="{ active: state.teamIsVisible }")
-        .team-color(:style="{ background: team.color }")
+        .team-color(:style="{ background: spaceTeam.color }")
         img.icon.team(src="@/assets/team.svg")
-        span {{ team.name }}
-      Team(:visible="state.teamIsVisible" :team="team")
+        span {{ spaceTeam.name }}
+      Team(:visible="state.teamIsVisible" :team="spaceTeam")
 
   template(v-if="users.length")
     //- users
@@ -152,10 +145,9 @@ dialog.narrow.space-user-list(
         :users="users"
         :selectedUser="selectedUser"
         @selectUser="toggleUserDetails"
-        :showRemoveCollaborator="showRemoveCollaborator"
-        @removeCollaborator="removeCollaborator"
-        :isClickable="true"
+        :showCollaboratorActions="true"
       )
+
     //- commenters
     template(v-if="isCollaboratorsList && commenters.length")
       section

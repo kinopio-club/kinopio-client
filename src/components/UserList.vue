@@ -15,40 +15,27 @@ onMounted(() => {
   })
 })
 
-const emit = defineEmits(['selectUser', 'removeCollaborator'])
+const emit = defineEmits(['selectUser'])
 
 const props = defineProps({
   users: Array,
   selectedUser: Object,
-  showRemoveCollaborator: Boolean,
-  currentUserIsTeamAdmin: Boolean
+  showCollaboratorActions: Boolean,
+  showTeamUserActions: Boolean
+  // showRemoveCollaborator: Boolean,
 })
 const state = reactive({
   filter: '',
   filteredUsers: []
 })
 
-const tabIndex = computed(() => {
-  if (props.isClickable) {
-    return '0'
-  } else {
-    return '-1'
-  }
-})
 const closeDialogs = () => {
   store.commit('teamUserDetailsIsVisible', false)
   store.commit('userDetailsIsVisible', false)
 }
-
-// team
-
-const spaceTeams = (user) => {
-  return store.getters['teams/bySpace'](user)
-}
-const isTeamAdmin = (user) => {
-  if (!props.currentUserIsTeamAdmin) { return }
-  return store.getters('teams/teamUserIsAdmin', { userId: user.id })
-}
+const actionsSectionIsVisible = computed(() => {
+  return props.showCollaboratorActions || props.showTeamUserActions
+})
 
 // users
 
@@ -79,25 +66,55 @@ const usersFiltered = computed(() => {
   }
   return items
 })
+const isCurrentUser = (user) => {
+  return store.state.currentUser.id === user.id
+}
 
 // handle events
 
 const selectUser = (event, user) => {
-  if (!props.isClickable) { return }
   emit('selectUser', event, user)
 }
 const userIsSelected = (user) => {
-  if (!props.isClickable) { return }
   if (!props.selectedUser) { return }
   const userId = props.selectedUser.id || store.state.userDetailsUser.id
   return userId === user.id
 }
-const removeCollaborator = (user) => {
-  if (!props.isClickable) { return }
-  emit('removeCollaborator', user)
+
+// space
+
+const removeCollaborator = async (user) => {
+  store.dispatch('currentSpace/removeCollaboratorFromSpace', user)
+  if (isCurrentUser(user)) {
+    store.dispatch('closeAllDialogs')
+  }
+  closeDialogs()
+}
+const userIsSpaceCreator = (user) => {
+  const space = store.state.currentSpace
+  return user.id === space.userId
 }
 
-// team user details
+// team
+
+const currentSpaceTeam = computed(() => store.getters['teams/bySpace']())
+const teamUser = (user) => {
+  if (!currentSpaceTeam.value) { return }
+  const teamId = currentSpaceTeam.value.id
+  return store.getters['teams/teamUser']({ userId: user.id, teamId })
+}
+const currentUserIsTeamAdmin = computed(() => {
+  // if (!currentSpaceTeam.value) { return }
+  return store.getters['teams/teamUserIsAdmin']({
+    userId: store.state.currentUser.id,
+    teamId: currentSpaceTeam.value.id
+  })
+})
+
+// const isTeamAdmin = (user) => {
+//   // if (!currentUserIsTeamAdmin.value) { return }
+//   return store.getters('teams/teamUserIsAdmin', { userId: user.id })
+// }
 
 const toggleTeamUserDetails = (event, user) => {
   const shouldHideUserDetails = user.id === store.state.userDetailsUser.id
@@ -107,7 +124,7 @@ const toggleTeamUserDetails = (event, user) => {
     return
   }
   closeDialogs()
-  const team = spaceTeams(user)
+  const team = currentSpaceTeam.value
   store.commit('teamUserDetailsIsVisible', true)
   store.commit('teamUserDetailsTeamId', team.id)
   store.commit('teamUserDetailsUserId', user.id)
@@ -120,6 +137,7 @@ const teamUserDetailsIsVisibleForUser = (user) => {
   const isUser = user.id === store.state.userDetailsUser.id
   return store.state.teamUserDetailsIsVisible && isUser
 }
+
 </script>
 
 <template lang="pug">
@@ -127,40 +145,53 @@ const teamUserDetailsIsVisibleForUser = (user) => {
   ResultsFilter(:items="props.users" @updateFilter="updateFilter" @updateFilteredItems="updateFilteredUsers")
   ul.results-list
     template(v-for="user in usersFiltered" :key="user.id")
-      li(@click.left.stop="selectUser($event, user)" :tabindex="tabIndex" v-on:keyup.stop.enter="selectUser($event, user)" :class="{ active: userIsSelected(user), 'is-not-clickable': !props.isClickable }")
-        .badge.danger.is-admin(v-if="isTeamAdmin(user)")
-          //- img.icon.key(src="@/assets/key.svg")
-          span Admin
-        UserLabelInline(:user="user")
-        template(v-if="props.showRemoveCollaborator")
-          button.small-button.danger(@click.left.stop="removeCollaborator(user)" title="Remove Collaborator")
-            img.icon.cancel(src="@/assets/add.svg")
-        template(v-if="props.currentUserIsTeamAdmin")
-          .button-wrap
-            button.small-button(@click.left.stop="toggleTeamUserDetails($event, user)" title="Team User Options" :class="{active: teamUserDetailsIsVisibleForUser(user)}")
-              img.icon.down-arrow(src="@/assets/down-arrow.svg")
+      li(@click.left.stop="selectUser($event, user)" tabindex="0" v-on:keyup.stop.enter="selectUser($event, user)" :class="{ active: userIsSelected(user) }")
+        .user-info(:class="{'actions-section-is-visible': actionsSectionIsVisible }")
+          //- admin badge
+          //- .badge.danger.is-admin(v-if="isTeamAdmin(user)")
+          //-   //- img.icon.key(src="@/assets/key.svg")
+          //-   span Admin
+          //- todo member?
+
+          UserLabelInline(:user="user")
+
+        //- collaborator actions
+        section.subsection(v-if="props.showCollaboratorActions")
+          //- team user
+          template(v-if="teamUser(user)")
+            .team-color(:style="{ background: currentSpaceTeam.color }")
+            img.icon.team(src="@/assets/team.svg")
+            span {{ currentSpaceTeam.name }}
+          //- space creator
+          template(v-else-if="userIsSpaceCreator(user)")
+            span Space Creator
+          //- space collaborator
+          template(v-else)
+            button.small-button(@click.stop="removeCollaborator(user)")
+              img.icon.cancel(src="@/assets/add.svg")
+
+              span(v-if="isCurrentUser(user)") Leave Space
+              span(v-else) Remove Collaborator
+
+              //- Leave Space
+
+        //- template(v-if="currentUserIsTeamAdmin")
+        //-   .button-wrap
+        //-     button.small-button(@click.left.stop="toggleTeamUserDetails($event, user)" title="Team User Options" :class="{active: teamUserDetailsIsVisibleForUser(user)}")
+        //-       img.icon.down-arrow(src="@/assets/down-arrow.svg")
 </template>
 
 <style lang="stylus">
 .user-list
   li
     align-items flex-start !important
+    flex-direction column
     > .button-wrap,
     > button
       margin-left auto
     .name
       margin-right 0
       display inline-block
-    &.is-not-clickable
-      cursor auto
-      padding-left 0
-      padding-right 0
-      &:hover,
-      &:active,
-      &:focus
-        box-shadow none
-        background-color transparent
-        outline none
     .user-label-inline
       pointer-events none
   .badge.is-admin,
@@ -168,7 +199,16 @@ const teamUserDetailsIsVisibleForUser = (user) => {
     flex-shrink 0
   .icon.cancel
     vertical-align 0.5px
+
   .icon.down-arrow
     padding 0 2px
     vertical-align 3px
+
+  .subsection
+    width 100%
+    border-top-left-radius 0
+  .actions-section-is-visible
+    .user-label-inline
+      border-bottom-left-radius 0
+      border-bottom-right-radius 0
 </style>
