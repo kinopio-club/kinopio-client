@@ -168,7 +168,7 @@ const toggleTeamRolePickerUserId = (user) => {
               .button-wrap
                 button.small-button(@click.stop="removeTeamUser(user)")
                   img.icon.cancel(src="@/assets/add.svg")
-                  span Remove from User
+                  span Remove from Team
           //- member only
           template(v-else)
             span {{ teamUserRole(user) }}
