@@ -4,14 +4,12 @@ export default {
       {
         name: 'member',
         description: 'Can create and edit team spaces and invite members',
-        color: 'info',
-        icon: 'star'
+        color: 'info'
       },
       {
         name: 'admin',
         description: 'Can edit team info, remove members, and assign admins',
-        color: 'danger',
-        icon: 'key'
+        color: 'danger'
       }
     ]
   }

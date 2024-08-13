@@ -23,12 +23,16 @@ const props = defineProps({
   // isPositionBottom: Boolean TODO
 })
 const state = reactive({
-  dialogHeight: null
+  dialogHeight: null,
+  error: {
+    isRemovingSoleAdmin: false
+  }
 })
 
 watch(() => props.visible, (value, prevValue) => {
   if (value) {
     updateDialogHeight()
+    state.error.isRemovingSoleAdmin = false
   }
 })
 
@@ -56,9 +60,18 @@ const roleIsAdmin = (role) => {
 const roleIsMember = (role) => {
   return role.name === 'member'
 }
-const updateRole = (event, role) => {
-  // check if there's at least one admin , if role.name === 'admin'
-  // if err then show danger notification w pos
+const checkIsRemovingSoleAdminError = (role) => {
+  if (props.user.role === 'member') { return }
+  if (role === 'admin') { return }
+  const teamAdmins = currentSpaceTeam.value.users.filter(user => user.role === 'admin')
+  if (teamAdmins.length > 1) { return }
+  state.error.isRemovingSoleAdmin = true
+  return true
+}
+const updateRole = (role) => {
+  if (checkIsRemovingSoleAdminError(role)) {
+    return
+  }
   const update = {
     userId: props.user.id,
     teamId: currentSpaceTeam.value.id,
@@ -73,18 +86,12 @@ dialog.narrow.team-user-role-picker(v-if="visible" :open="visible" @click.left.s
   section.results-section
     ul.results-list
       template(v-for="(role in roles")
-        li(:class="{ active: roleIsActive(role) }" @click.left="updateRole($event, role)")
+        li(:class="{ active: roleIsActive(role) }" @click.left="updateRole(role)")
           .badge(:class="role.color")
-            img.icon.key(
-              v-if="roleIsAdmin(role)"
-              src="@/assets/key.svg"
-            )
-            img.icon.star(
-              v-if="roleIsMember(role)"
-              src="@/assets/star.svg"
-            )
             span {{roleName(role)}}
           .description {{ role.description }}
+  section(v-if="state.error.isRemovingSoleAdmin")
+    .badge.danger Team must have at least one admin
 </template>
 
 <style lang="stylus">
