@@ -140,7 +140,7 @@ export default {
     teamUser: (state, getters, rootState) => ({ userId, space, teamId }) => {
       let team
       if (teamId) {
-        getters.byId(teamId)
+        team = getters.byId(teamId)
       } else {
         const currentSpace = rootState.currentSpace
         space = space || currentSpace
