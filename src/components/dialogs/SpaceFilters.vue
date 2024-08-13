@@ -213,7 +213,7 @@ dialog.narrow.space-filters(v-if="props.visible" :open="props.visible" @click.le
 
   //- collaborators
   section.results-section.collaborators
-    UserList(:users="spaceUsers" :isClickable="true" @selectUser="filterByUser" :selectedUser="dialogSpaceFilterByUser")
+    UserList(:users="spaceUsers" @selectUser="filterByUser" :selectedUser="dialogSpaceFilterByUser")
 </template>
 
 <style lang="stylus">

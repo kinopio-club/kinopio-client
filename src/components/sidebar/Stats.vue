@@ -168,7 +168,7 @@ section(v-if="visible")
 
 section.results-section(v-if="!state.isLoadingFavorites && visible")
   template(v-if="state.favoriteUsers.length")
-    UserList(:users="state.favoriteUsers" :selectedUser="userDetailsSelectedUser" @selectUser="toggleUserDetails" :isClickable="true")
+    UserList(:users="state.favoriteUsers" :selectedUser="userDetailsSelectedUser" @selectUser="toggleUserDetails")
   template(v-else)
     .badge.secondary
       span Try sharing the public url, or adding this space to explore.

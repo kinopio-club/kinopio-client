@@ -18,7 +18,6 @@ onMounted(() => {
 const emit = defineEmits(['selectUser', 'removeCollaborator'])
 
 const props = defineProps({
-  isClickable: Boolean,
   users: Array,
   selectedUser: Object,
   showRemoveCollaborator: Boolean,

@@ -165,7 +165,6 @@ dialog.narrow.space-user-list(
           :users="commenters"
           :selectedUser="selectedUser"
           @selectUser="toggleUserDetails"
-          :isClickable="true"
         )
 </template>
 
