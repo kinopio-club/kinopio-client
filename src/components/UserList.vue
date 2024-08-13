@@ -22,7 +22,6 @@ const props = defineProps({
   selectedUser: Object,
   showCollaboratorActions: Boolean,
   showTeamUserActions: Boolean
-  // showRemoveCollaborator: Boolean,
 })
 const state = reactive({
   filter: '',
@@ -30,7 +29,6 @@ const state = reactive({
 })
 
 const closeDialogs = () => {
-  store.commit('teamUserDetailsIsVisible', false)
   store.commit('userDetailsIsVisible', false)
 }
 const actionsSectionIsVisible = computed(() => {
@@ -104,39 +102,11 @@ const teamUser = (user) => {
   return store.getters['teams/teamUser']({ userId: user.id, teamId })
 }
 const currentUserIsTeamAdmin = computed(() => {
-  // if (!currentSpaceTeam.value) { return }
   return store.getters['teams/teamUserIsAdmin']({
     userId: store.state.currentUser.id,
     teamId: currentSpaceTeam.value.id
   })
 })
-
-// const isTeamAdmin = (user) => {
-//   // if (!currentUserIsTeamAdmin.value) { return }
-//   return store.getters('teams/teamUserIsAdmin', { userId: user.id })
-// }
-
-const toggleTeamUserDetails = (event, user) => {
-  const shouldHideUserDetails = user.id === store.state.userDetailsUser.id
-  if (shouldHideUserDetails && store.state.teamUserDetailsIsVisible) {
-    closeDialogs()
-    store.commit('userDetailsUser', {})
-    return
-  }
-  closeDialogs()
-  const team = currentSpaceTeam.value
-  store.commit('teamUserDetailsIsVisible', true)
-  store.commit('teamUserDetailsTeamId', team.id)
-  store.commit('teamUserDetailsUserId', user.id)
-  let element = event.target
-  let options = { element, offsetX: 0, shouldIgnoreZoom: true }
-  let position = utils.childDialogPositionFromParent(options)
-  store.commit('userDetailsPosition', position)
-}
-const teamUserDetailsIsVisibleForUser = (user) => {
-  const isUser = user.id === store.state.userDetailsUser.id
-  return store.state.teamUserDetailsIsVisible && isUser
-}
 
 </script>
 
@@ -147,14 +117,7 @@ const teamUserDetailsIsVisibleForUser = (user) => {
     template(v-for="user in usersFiltered" :key="user.id")
       li(@click.left.stop="selectUser($event, user)" tabindex="0" v-on:keyup.stop.enter="selectUser($event, user)" :class="{ active: userIsSelected(user) }")
         .user-info(:class="{'actions-section-is-visible': actionsSectionIsVisible }")
-          //- admin badge
-          //- .badge.danger.is-admin(v-if="isTeamAdmin(user)")
-          //-   //- img.icon.key(src="@/assets/key.svg")
-          //-   span Admin
-          //- todo member?
-
           UserLabelInline(:user="user")
-
         //- collaborator actions
         section.subsection(v-if="props.showCollaboratorActions")
           //- team user
@@ -169,16 +132,25 @@ const teamUserDetailsIsVisibleForUser = (user) => {
           template(v-else)
             button.small-button(@click.stop="removeCollaborator(user)")
               img.icon.cancel(src="@/assets/add.svg")
-
               span(v-if="isCurrentUser(user)") Leave Space
               span(v-else) Remove Collaborator
-
-              //- Leave Space
-
-        //- template(v-if="currentUserIsTeamAdmin")
-        //-   .button-wrap
-        //-     button.small-button(@click.left.stop="toggleTeamUserDetails($event, user)" title="Team User Options" :class="{active: teamUserDetailsIsVisibleForUser(user)}")
-        //-       img.icon.down-arrow(src="@/assets/down-arrow.svg")
+        //- team user actions
+        section.subsection(v-if="props.showTeamUserActions")
+          //- admin actions
+          template(v-if="currentUserIsTeamAdmin")
+            .row
+              span {{ teamUser(user).email }}
+            .row
+              .button-wrap
+                button.small-button(@click.stop)
+                  span {{ teamUser(user).role }}
+              .button-wrap
+                button.small-button(@click.stop="removeTeamUser(user)")
+                  img.icon.cancel(src="@/assets/add.svg")
+                  span Remove from User
+          //- member only
+          template(v-else)
+            span {{ teamUser(user).role }}
 </template>
 
 <style lang="stylus">
@@ -194,15 +166,10 @@ const teamUserDetailsIsVisibleForUser = (user) => {
       display inline-block
     .user-label-inline
       pointer-events none
-  .badge.is-admin,
   .small-button
     flex-shrink 0
   .icon.cancel
     vertical-align 0.5px
-
-  .icon.down-arrow
-    padding 0 2px
-    vertical-align 3px
 
   .subsection
     width 100%

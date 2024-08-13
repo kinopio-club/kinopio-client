@@ -154,10 +154,6 @@ const store = createStore({
     userDetailsIsVisible: false,
     userDetailsPosition: {}, // x, y, shouldIgnoreZoom
     userDetailsUser: {},
-    // team user details
-    teamUserDetailsIsVisible: false,
-    teamUserDetailsUserId: '',
-    teamUserDetailsTeamId: '',
 
     // multiple selection
     multipleSelectedActionsIsVisible: false,
@@ -353,7 +349,6 @@ const store = createStore({
       state.cardsWereDragged = false
       state.boxesWereDragged = false
       state.userDetailsIsVisible = false
-      state.teamUserDetailsIsVisible = false
       state.pricingIsVisible = false
       state.codeLanguagePickerIsVisible = false
       state.offlineIsVisible = false
@@ -1017,21 +1012,6 @@ const store = createStore({
       const isUser = state.userDetailsUser.id === update.userId
       if (!isUser) { return }
       state.userDetailsUser.role = update.role
-    },
-
-    // Team User Details
-
-    teamUserDetailsIsVisible: (state, value) => {
-      utils.typeCheck({ value, type: 'boolean' })
-      state.teamUserDetailsIsVisible = value
-    },
-    teamUserDetailsUserId: (state, id) => {
-      utils.typeCheck({ value: id, type: 'object' })
-      state.teamUserDetailsUserId = id
-    },
-    teamUserDetailsTeamId: (state, id) => {
-      utils.typeCheck({ value: id, type: 'object' })
-      state.teamUserDetailsTeamId = id
     },
 
     // Tag Details

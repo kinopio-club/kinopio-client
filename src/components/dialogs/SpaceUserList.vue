@@ -129,7 +129,6 @@ dialog.narrow.space-user-list(
   :style="{'max-height': state.dialogHeight + 'px'}"
 )
   section
-    //- (v-if="isCollaboratorsList")
     p {{ label }}
     .button-wrap(v-if="spaceTeam")
       button(@click.stop="toggleTeamIsVisible" :class="{ active: state.teamIsVisible }")
@@ -145,7 +144,7 @@ dialog.narrow.space-user-list(
         :users="users"
         :selectedUser="selectedUser"
         @selectUser="toggleUserDetails"
-        :showCollaboratorActions="true"
+        :showCollaboratorActions="currentUserCanEditSpace"
       )
 
     //- commenters
