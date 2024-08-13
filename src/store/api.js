@@ -747,8 +747,8 @@ const self = {
       if (!shouldRequest({ apiKey, isOnline })) { return }
       const userId = context.rootState.currentUser.id
       try {
-        const body = { userId, spaceId }
-        const space = { collaboratorKey: collaboratorKey }
+        const body = { userId, spaceId, collaboratorKey }
+        const space = { id: spaceId, collaboratorKey }
         const options = await context.dispatch('requestOptions', { body, method: 'PATCH', space })
         const response = await fetch(`${consts.apiHost()}/space/collaborator`, options)
         return normalizeResponse(response)
