@@ -4,6 +4,7 @@ import { useStore } from 'vuex'
 
 import ResultsFilter from '@/components/ResultsFilter.vue'
 import UserLabelInline from '@/components/UserLabelInline.vue'
+import TeamUserRolePicker from '@/components/dialogs/TeamUserRolePicker.vue'
 import utils from '@/utils.js'
 const store = useStore()
 
@@ -25,11 +26,13 @@ const props = defineProps({
 })
 const state = reactive({
   filter: '',
-  filteredUsers: []
+  filteredUsers: [],
+  teamUserRolePickerUserId: ''
 })
 
 const closeDialogs = () => {
   store.commit('userDetailsIsVisible', false)
+  state.teamUserRolePickerUserId = ''
 }
 const actionsSectionIsVisible = computed(() => {
   return props.showCollaboratorActions || props.showTeamUserActions
@@ -112,10 +115,22 @@ const currentUserIsTeamAdmin = computed(() => {
   })
 })
 
+// team user role picker
+
+const teamUserRolePickerIsVisibleUser = (user) => {
+  return user.id === state.teamUserRolePickerUserId
+}
+const toggleTeamRolePickerUserId = (user) => {
+  const isPrevUser = teamUserRolePickerIsVisibleUser(user)
+  closeDialogs()
+  if (isPrevUser) { return }
+  state.teamUserRolePickerUserId = user.id
+}
+
 </script>
 
 <template lang="pug">
-.user-list
+.user-list(@click.stop="closeDialogs")
   ResultsFilter(:items="props.users" @updateFilter="updateFilter" @updateFilteredItems="updateFilteredUsers")
   ul.results-list
     template(v-for="user in usersFiltered" :key="user.id")
@@ -147,8 +162,9 @@ const currentUserIsTeamAdmin = computed(() => {
               span {{ teamUser(user).email }}
             .row
               .button-wrap
-                button.small-button(@click.stop)
+                button.small-button(@click.stop="toggleTeamRolePickerUserId(user)" :class="{ active: teamUserRolePickerIsVisibleUser(user) }")
                   span {{ teamUserRole(user) }}
+                TeamUserRolePicker(:visible="teamUserRolePickerIsVisibleUser(user)")
               .button-wrap
                 button.small-button(@click.stop="removeTeamUser(user)")
                   img.icon.cancel(src="@/assets/add.svg")

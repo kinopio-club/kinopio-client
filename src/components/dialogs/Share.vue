@@ -205,14 +205,6 @@ dialog.share.wide(v-if="props.visible" :open="props.visible" @click.left.stop="c
             input(type="checkbox" :value="state.isShareInPresentationMode")
             img.icon(src="@/assets/presentation.svg")
 
-      //- Explore
-      template(v-if="exploreSectionIsVisible")
-        .row
-          p Share with the Community
-        .row
-          AddToExplore
-          AskToAddToExplore
-
   //- Invite
   Invite(v-if="isSpaceMember && currentUserIsSignedIn" @closeDialogs="closeDialogs" @emailInvitesIsVisible="emailInvitesIsVisible")
 
@@ -222,6 +214,14 @@ dialog.share.wide(v-if="props.visible" :open="props.visible" @click.left.stop="c
       span.badge.info you need to Sign Up or In
       span for your spaces to be synced and accessible anywhere.
     button(@click.left="triggerSignUpOrInIsVisible") Sign Up or In
+
+  //- Explore
+  section(v-if="exploreSectionIsVisible")
+    .row
+      p Share with the Community
+    .row
+      AddToExplore
+      AskToAddToExplore
 
   //- Import, Export, Embed
   section.import-export-section

@@ -1,3 +1,5 @@
+<!-- delete -->
+
 <script setup>
 import { reactive, computed, onMounted, onBeforeUnmount, defineProps, defineEmits, watch, ref, nextTick } from 'vue'
 import { useStore } from 'vuex'
@@ -12,12 +14,12 @@ const store = useStore()
 const dialogElement = ref(null)
 
 const state = reactive({
-  loading: {
-    removeTeamUser: false
-  },
-  error: {
-    removeTeamUser: false
-  }
+  // loading: {
+  //   removeTeamUser: false
+  // },
+  // error: {
+  //   removeTeamUser: false
+  // }
 })
 
 const visible = computed(() => store.state.teamUserDetailsIsVisible)
@@ -94,6 +96,7 @@ const removeTeamUser = () => {
   // TODO
   if (state.loading.removeTeamUser) { return }
   try {
+    // do it in async , show global notification and notification success
     state.loading.removeTeamUser = true
     // - api/removeTeamUser ({ teamId, userId })
     // loader
@@ -117,26 +120,27 @@ dialog.narrow.team-user-details(v-if="visible" :open="visible" @click.left.stop 
       .badge.secondary
         img.icon(src="@/assets/mail.svg")
         span {{ user.email }}
-  section.results-section.team-user-role-picker
-    ul.results-list
-      template(v-for="(role in roles")
-        li(:class="{ active: roleIsActive(role) }" @click.left="updateRole(role)")
-          .badge(:class="role.color")
-            img.icon.key(
-              v-if="roleIsAdmin(role)"
-              src="@/assets/key.svg"
-            )
-            img.icon.star(
-              v-if="roleIsMember(role)"
-              src="@/assets/star.svg"
-            )
-            span {{roleName(role)}}
-          .description {{ role.description }}
+  //- section.results-section.team-user-role-picker
+  //-   ul.results-list
+  //-     template(v-for="(role in roles")
+  //-       li(:class="{ active: roleIsActive(role) }" @click.left="updateRole(role)")
+  //-         .badge(:class="role.color")
+  //-           img.icon.key(
+  //-             v-if="roleIsAdmin(role)"
+  //-             src="@/assets/key.svg"
+  //-           )
+  //-           img.icon.star(
+  //-             v-if="roleIsMember(role)"
+  //-             src="@/assets/star.svg"
+  //-           )
+  //-           span {{roleName(role)}}
+  //-         .description {{ role.description }}
 
   section
     button.danger(@click="removeTeamUser" :class="{ active: state.loading.removeTeamUser }")
       img.icon.cancel(src="@/assets/add.svg")
       span Remove from Team
+
       Loader(:visible="state.loading.removeTeamUser" :isSmall="true")
     p.badge.danger(v-if="state.error.removeTeamUser")
       span (シ_ _)シ Could not remove team user, Please try again or contact support
