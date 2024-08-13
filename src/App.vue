@@ -1042,6 +1042,10 @@ button
 .icon.json-canvas
   width 10px
 
+.icon.mail
+  width 11px
+  vertical-align 1px
+
 label,
 li
   position relative

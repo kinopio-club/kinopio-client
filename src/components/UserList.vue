@@ -101,6 +101,10 @@ const teamUser = (user) => {
   const teamId = currentSpaceTeam.value.id
   return store.getters['teams/teamUser']({ userId: user.id, teamId })
 }
+const teamUserRole = (user) => {
+  const role = teamUser(user).role
+  return utils.capitalizeFirstLetter(role)
+}
 const currentUserIsTeamAdmin = computed(() => {
   return store.getters['teams/teamUserIsAdmin']({
     userId: store.state.currentUser.id,
@@ -139,18 +143,19 @@ const currentUserIsTeamAdmin = computed(() => {
           //- admin actions
           template(v-if="currentUserIsTeamAdmin")
             .row
+              img.icon.mail(src="@/assets/mail.svg")
               span {{ teamUser(user).email }}
             .row
               .button-wrap
                 button.small-button(@click.stop)
-                  span {{ teamUser(user).role }}
+                  span {{ teamUserRole(user) }}
               .button-wrap
                 button.small-button(@click.stop="removeTeamUser(user)")
                   img.icon.cancel(src="@/assets/add.svg")
                   span Remove from User
           //- member only
           template(v-else)
-            span {{ teamUser(user).role }}
+            span {{ teamUserRole(user) }}
 </template>
 
 <style lang="stylus">
@@ -170,7 +175,6 @@ const currentUserIsTeamAdmin = computed(() => {
     flex-shrink 0
   .icon.cancel
     vertical-align 0.5px
-
   .subsection
     width 100%
     border-top-left-radius 0
