@@ -164,7 +164,7 @@ const toggleTeamRolePickerUserId = (user) => {
               .button-wrap
                 button.small-button(@click.stop="toggleTeamRolePickerUserId(user)" :class="{ active: teamUserRolePickerIsVisibleUser(user) }")
                   span {{ teamUserRole(user) }}
-                TeamUserRolePicker(:visible="teamUserRolePickerIsVisibleUser(user)")
+                TeamUserRolePicker(:visible="teamUserRolePickerIsVisibleUser(user)" :user="user")
               .button-wrap
                 button.small-button(@click.stop="removeTeamUser(user)")
                   img.icon.cancel(src="@/assets/add.svg")

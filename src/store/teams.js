@@ -100,6 +100,7 @@ export default {
     updateUserRole: (context, update) => {
       const { userId, teamId, role } = update
       let team = context.getters.byId(teamId)
+      team = utils.clone(team)
       team.users = team.users.map(user => {
         if (user.id === userId) {
           user.role = role
@@ -107,7 +108,7 @@ export default {
         return user
       })
       context.commit('update', team)
-      context.dispatch('api/addToQueue', { name: 'updateTeamUser', body: update })
+      context.dispatch('api/addToQueue', { name: 'updateTeamUser', body: update }, { root: true })
     },
     addCurrentSpace: (context, team) => {
       const user = context.rootState.currentUser

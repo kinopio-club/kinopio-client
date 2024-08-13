@@ -20,6 +20,7 @@ onMounted(() => {
 const props = defineProps({
   visible: Boolean,
   user: Object
+  // isPositionBottom: Boolean TODO
 })
 const state = reactive({
   dialogHeight: null
@@ -55,40 +56,38 @@ const roleIsAdmin = (role) => {
 const roleIsMember = (role) => {
   return role.name === 'member'
 }
-const updateRole = (role) => {
-  try {
-    const update = {
-      userId: props.user.id,
-      teamId: currentSpaceTeam.value.id,
-      role: role.name
-    }
-    store.dispatch('teams/updateUserRole', update)
-  } catch (error) {
-    console.error('🚒 updateRole', error)
+const updateRole = (event, role) => {
+  // check if there's at least one admin , if role.name === 'admin'
+  // if err then show danger notification w pos
+  const update = {
+    userId: props.user.id,
+    teamId: currentSpaceTeam.value.id,
+    role: role.name
   }
+  store.dispatch('teams/updateUserRole', update)
 }
 </script>
 
 <template lang="pug">
 dialog.narrow.team-user-role-picker(v-if="visible" :open="visible" @click.left.stop ref="dialogElement" :style="{'max-height': state.dialogHeight + 'px'}")
-  p asdlfkj
-  //- section.results-section
-  //-   ul.results-list
-  //-     template(v-for="(role in roles")
-  //-       li(:class="{ active: roleIsActive(role) }" @click.left="updateRole(role)")
-  //-         .badge(:class="role.color")
-  //-           img.icon.key(
-  //-             v-if="roleIsAdmin(role)"
-  //-             src="@/assets/key.svg"
-  //-           )
-  //-           img.icon.star(
-  //-             v-if="roleIsMember(role)"
-  //-             src="@/assets/star.svg"
-  //-           )
-  //-           span {{roleName(role)}}
-  //-         .description {{ role.description }}
+  section.results-section
+    ul.results-list
+      template(v-for="(role in roles")
+        li(:class="{ active: roleIsActive(role) }" @click.left="updateRole($event, role)")
+          .badge(:class="role.color")
+            img.icon.key(
+              v-if="roleIsAdmin(role)"
+              src="@/assets/key.svg"
+            )
+            img.icon.star(
+              v-if="roleIsMember(role)"
+              src="@/assets/star.svg"
+            )
+            span {{roleName(role)}}
+          .description {{ role.description }}
 </template>
 
 <style lang="stylus">
-// .team-user-role-picker
+dialog.team-user-role-picker
+  padding-top 4px
 </style>
