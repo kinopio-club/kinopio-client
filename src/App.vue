@@ -732,7 +732,7 @@ p
 .team-color
   width 8px
   height 8px
-  margin-right 6px
+  margin-right 5px
   border-radius 100px
   display inline-block
   vertical-align 1px

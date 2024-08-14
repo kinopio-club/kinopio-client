@@ -122,7 +122,7 @@ const closeDialogs = () => {
 </script>
 
 <template lang="pug">
-dialog.narrow.space-user-list(
+dialog.space-user-list(
   v-if="visible"
   :open="visible"
   @click.left.stop="closeDialogs"

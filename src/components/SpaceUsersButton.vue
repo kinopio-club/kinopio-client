@@ -99,7 +99,7 @@ button.space-users-button(@click.stop="toggleSpaceUserListIsVisible" :class="{ '
       TeamLabel(:team="team" :showIcon="true")
     template(v-if="spaceUsers.length")
       User(:user="recentUser" :isClickable="false" :hideYouLabel="true" :isSmall="true" :shouldBounceIn="props.isParentSpaceUsers")
-      span {{ spaceUsersLabel }}
+    span {{ spaceUsersLabel }}
 
   span(v-else) {{ spaceUsers.length }}
 
@@ -117,6 +117,4 @@ button.space-users-button(@click.stop="toggleSpaceUserListIsVisible" :class="{ '
   &.header-button
     border-top-left-radius 0
     border-bottom-left-radius 0
-  .icon.team
-    margin-right 6px
 </style>

@@ -509,15 +509,8 @@ span.space-list-wrap
       height 12px
       vertical-align -1px
 
-    .team-color
-      margin-right 5px
-      width 10.5px
-      vertical-align -2px
-      margin-top 6px
-
     .favorite-icon
-    .inbox-icon,
-    .icon.team
+    .inbox-icon
       margin-right 5px
       width 12px
       vertical-align -2px
@@ -525,9 +518,6 @@ span.space-list-wrap
     .icon.team
       width initial
       height 10px
-      margin-top 4.5px
-    .icon.team + .icon
-      margin-left 0
 
     .user
       margin-right 6px
@@ -577,6 +567,8 @@ span.space-list-wrap
       .icon.templates
         margin-right 5px
         margin-top 3px
+      .team-label
+        margin-right 5px
 
     .space-wrap
       position relative
