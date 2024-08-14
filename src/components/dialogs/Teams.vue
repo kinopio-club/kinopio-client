@@ -15,13 +15,11 @@ onMounted(() => {
   })
 })
 
-const emit = defineEmits(['updateCount'])
-
 const props = defineProps({
-  visible: Boolean
+  visible: Boolean,
+  teams: Array
 })
 const state = reactive({
-  count: 0,
   dialogHeight: null
 })
 
@@ -30,7 +28,6 @@ watch(() => props.visible, (value, prevValue) => {
     updateDialogHeight()
   }
 })
-
 const updateDialogHeight = async () => {
   if (!props.visible) { return }
   await nextTick()
@@ -38,24 +35,30 @@ const updateDialogHeight = async () => {
   state.dialogHeight = utils.elementHeight(element)
 }
 
-const themeName = computed(() => store.state.currentUser.theme)
-const incrementBy = () => {
-  state.count = state.count + 1
-  emit('updateCount', state.count)
-  // store.dispatch('themes/isSystem', false)
-}
+const currentUserIsSignedIn = computed(() => store.getters['currentUser/isSignedIn'])
 </script>
 
 <template lang="pug">
-dialog.narrow.dialog-name(v-if="visible" :open="visible" @click.left.stop ref="dialogElement" :style="{'max-height': state.dialogHeight + 'px'}")
+dialog.narrow.teams(v-if="visible" :open="visible" @click.left.stop ref="dialogElement" :style="{'max-height': state.dialogHeight + 'px'}")
   section
-    p blank dialog, please duplicate
-  section
-    button(@click="incrementBy")
-      span Count is: {{ state.count }}
-    p Current theme is: {{ themeName }}
+    p Teams
+
+  section(v-if="!currentUserIsSignedIn")
+    p sign up or in to create and manage teams
+    p [btn]
+
+  //- teams list picker
+  section(v-if="props.teams.length")
+    template(v-for="team in props.teams")
+      p {{ team.name }}
+
+  section(v-else)
+    p Currently only users in the teams beta program can create and manage teams
+    //- help dialog mailbox
+    p Interested in trying teams in your company? email hi@kinopio.club
+
 </template>
 
 <style lang="stylus">
-// dialog.dialog-name
+// dialog.teams
 </style>

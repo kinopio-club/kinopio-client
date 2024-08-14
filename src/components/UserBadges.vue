@@ -4,7 +4,16 @@ import { useStore } from 'vuex'
 
 import userBadges from '@/data/userBadges.json'
 import TeamLabel from '@/components/TeamLabel.vue'
+import Teams from '@/components/dialogs/Teams.vue'
 const store = useStore()
+
+onMounted(() => {
+  store.subscribe((mutation, state) => {
+    if (mutation.type === 'triggerCloseChildDialogs') {
+      closeDialogs()
+    }
+  })
+})
 
 const props = defineProps({
   user: Object,
@@ -12,7 +21,8 @@ const props = defineProps({
 })
 const state = reactive({
   name: '',
-  description: ''
+  description: '',
+  teamsIsVisible: false
 })
 
 const isBadges = computed(() => {
@@ -42,11 +52,21 @@ const cardsCreatedCount = computed(() => {
   return count
 })
 
+// teams
+
+const closeDialogs = () => {
+  state.teamsIsVisible = false
+}
+const toggleTeamsIsVisible = () => {
+  const value = !state.teamsIsVisible
+  closeDialogs()
+  state.teamsIsVisible = value
+}
 const userTeams = computed(() => store.getters['teams/byUser'](props.user))
 </script>
 
 <template lang="pug">
-.row.user-badges(v-if="isBadges")
+.row.user-badges(v-if="isBadges" @click.stop="closeDialogs")
   //- Spectator
   .badge.button-badge.status(v-if="user.isSpectator" @click.stop="toggleDescription('Spectators')" :class="{active: state.name === 'Spectators'}")
     span Spectator
@@ -65,23 +85,25 @@ const userTeams = computed(() => store.getters['teams/byUser'](props.user))
     span Ambassador
 
 //- badge description
-.row(v-if="state.description")
+.row(v-if="state.description" @click.stop="closeDialogs")
   section.subsection
     span(v-html="state.description")
 
 //- card count
-.row
+.row(@click.stop="closeDialogs")
   .badge.secondary
     img.icon.card(src="@/assets/card.svg")
     span {{cardsCreatedCount}} Cards Created
 
 //- teams
 .row(v-if="props.isCurrentUser")
-  button
-    template(v-for="team in userTeams")
-      TeamLabel(:team="team")
-    img.icon.team(src="@/assets/team.svg")
-    span Teams
+  .button-wrap
+    button(@click.stop="toggleTeamsIsVisible" :class="{ active: state.teamsIsVisible }")
+      template(v-for="team in userTeams")
+        TeamLabel(:team="team")
+      img.icon.team(src="@/assets/team.svg")
+      span Teams
+    Teams(:visible="state.teamsIsVisible" :teams="userTeams")
 //- other user teams list
 .row(v-else-if="userTeams.length")
   .badge.secondary(v-for="team in userTeams")
