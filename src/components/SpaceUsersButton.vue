@@ -83,9 +83,7 @@ const spaceUsersLabel = computed(() => {
   const CollaboratorsString = utils.pluralize('Collaborator', condition)
   let string = `${spaceUsers.value.length} ${CollaboratorsString}`
   if (isCommenters.value) {
-    condition = commenters.value.length !== 1
-    const commentersString = utils.pluralize('Commenter', condition)
-    string = string + `, ${commenters.value.length} ${commentersString}`
+    string = string + ` + ${commenters.value.length}`
   }
   return string
 })
@@ -107,6 +105,7 @@ button.space-users-button(@click.stop="toggleSpaceUserListIsVisible" :class="{ '
 
 <style lang="stylus">
 .space-users-button
+  max-width 100%
   .label
     > .user
         margin-top -1px

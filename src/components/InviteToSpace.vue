@@ -5,6 +5,7 @@ import { useStore, mapState, mapGetters } from 'vuex'
 import Loader from '@/components/Loader.vue'
 import User from '@/components/User.vue'
 import EmailInvites from '@/components/dialogs/EmailInvites.vue'
+import SpaceUsersButton from '@/components/SpaceUsersButton.vue'
 import utils from '@/utils.js'
 import consts from '@/consts.js'
 
@@ -139,7 +140,9 @@ watch(() => state.emailInvitesIsVisible, (value, prevValue) => {
 </script>
 
 <template lang="pug">
-section.invite
+section.invite-to-space
+  .row
+    SpaceUsersButton(:showLabel="true")
   .row
     p
       .users
@@ -187,7 +190,7 @@ EmailInvites(:visible="state.emailInvitesIsVisible")
 </template>
 
 <style lang="stylus">
-section.invite
+section.invite-to-space
   user-select text
   .badge
     margin 0
