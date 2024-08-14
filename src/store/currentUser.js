@@ -836,14 +836,19 @@ export default {
     isSignedIn: (state) => {
       return Boolean(state.apiKey)
     },
+    isUpgradedOrOnTeam: (state, getters, rootState, rootGetters) => {
+      if (state.isUpgraded) { return }
+      const teamUser = rootGetters['teams/byUser']()
+      return Boolean(teamUser)
+    },
     cardsCreatedIsOverLimit: (state, getters, rootState) => {
       const cardsCreatedLimit = rootState.cardsCreatedLimit
-      if (state.isUpgraded) { return }
+      if (getters.isUpgradedOrOnTeam) { return }
       if (state.cardsCreatedCount >= cardsCreatedLimit) { return true }
     },
     cardsCreatedWillBeOverLimit: (state, getters, rootState) => (count) => {
       const cardsCreatedLimit = rootState.cardsCreatedLimit
-      if (state.isUpgraded) { return }
+      if (getters.isUpgradedOrOnTeam) { return }
       if (state.cardsCreatedCount + count >= cardsCreatedLimit) { return true }
     },
     canEditSpace: (state, getters, rootState, rootGetters) => (space) => {
@@ -982,8 +987,8 @@ export default {
 
     // AI Images
 
-    AIImagesThisMonth: (state) => {
-      if (state.isUpgraded) {
+    AIImagesThisMonth: (state, getters) => {
+      if (getters.isUpgradedOrOnTeam) {
         const currentMonth = dayjs().month()
         const currentYear = dayjs().year()
         return state.AIImages.filter(image => {
@@ -1002,7 +1007,7 @@ export default {
       return Math.floor(images.length / 2)
     },
     AIImagesLimit: (state, getters) => {
-      if (state.isUpgraded) {
+      if (getters.isUpgradedOrOnTeam) {
         return consts.AIImageLimitUpgradedUser
       } else {
         return consts.AIImageLimitFreeUser

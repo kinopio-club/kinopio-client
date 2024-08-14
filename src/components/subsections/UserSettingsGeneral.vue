@@ -27,7 +27,7 @@ const props = defineProps({
 })
 
 const isSignedIn = computed(() => store.getters['currentUser/isSignedIn'])
-const isUpgraded = computed(() => store.state.currentUser.isUpgraded)
+const isUpgraded = computed(() => store.getters['currentUser/isUpgradedOrOnTeam'])
 const currentUser = computed(() => store.state.currentUser)
 const isSecureAppContextIOS = computed(() => consts.isSecureAppContextIOS)
 
@@ -85,7 +85,7 @@ const toggleThemeSettingsIsVisible = () => {
 
 const deleteUserPermanent = async () => {
   state.loading.deleteUserPermanent = true
-  if (store.state.currentUser.isUpgraded) {
+  if (store.getters['currentUser/isUpgradedOrOnTeam']) {
     await store.dispatch('api/cancelSubscription', {
       userId: store.state.currentUser.id
     })

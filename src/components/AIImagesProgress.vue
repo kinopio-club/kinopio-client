@@ -10,7 +10,7 @@ const props = defineProps({
 })
 
 const currentUserIsSignedIn = computed(() => store.getters['currentUser/isSignedIn'])
-const currentUserIsUpgraded = computed(() => store.state.currentUser.isUpgraded)
+const currentUserIsUpgraded = computed(() => store.getters['currentUser/isUpgradedOrOnTeam'])
 const AIImagesThisMonthCount = computed(() => store.getters['currentUser/AIImagesThisMonthCount'])
 const AIImagesLimit = computed(() => store.getters['currentUser/AIImagesLimit'])
 const AIImageLimitUpgradedUser = computed(() => consts.AIImageLimitUpgradedUser)

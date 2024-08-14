@@ -28,7 +28,7 @@ const state = reactive({
 })
 
 const user = computed(() => store.state.currentUser)
-const isUpgraded = computed(() => store.state.currentUser.isUpgraded)
+const isUpgraded = computed(() => store.getters['currentUser/isUpgradedOrOnTeam'])
 const appleAppAccountToken = computed(() => store.state.currentUser.appleAppAccountToken)
 
 const clearErrors = () => {
