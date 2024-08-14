@@ -3,6 +3,8 @@ import { reactive, computed, onMounted, onBeforeUnmount, defineProps, defineEmit
 import { useStore } from 'vuex'
 
 import utils from '@/utils.js'
+import TeamLabel from '@/components/TeamLabel.vue'
+
 const store = useStore()
 
 const dialogElement = ref(null)
@@ -46,16 +48,15 @@ const triggerSignUpOrInIsVisible = () => {
 dialog.narrow.teams(v-if="visible" :open="visible" @click.left.stop ref="dialogElement" :style="{'max-height': state.dialogHeight + 'px'}")
   section
     p Teams
-
   section(v-if="!currentUserIsSignedIn")
     p Sign Up or In to create and manage teams
     button(@click.left="triggerSignUpOrInIsVisible") Sign Up or In
-
-  //- teams list picker
-  section(v-if="props.teams.length")
-    template(v-for="team in props.teams")
-      p {{ team.name }}
-
+  //- team picker
+  section.results-section(v-if="props.teams.length")
+    ul.results-list
+      template(v-for="team in props.teams")
+        li
+          TeamLabel(:team="team" :showIcon="true" :showName="true")
   //- teams beta notice
   section(v-else)
     section.subsection
@@ -67,5 +68,8 @@ dialog.narrow.teams(v-if="visible" :open="visible" @click.left.stop ref="dialogE
 </template>
 
 <style lang="stylus">
-// dialog.teams
+dialog.teams
+  ul.results-list
+    li
+      align-items center
 </style>
