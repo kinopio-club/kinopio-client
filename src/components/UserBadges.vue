@@ -4,16 +4,7 @@ import { useStore } from 'vuex'
 
 import userBadges from '@/data/userBadges.json'
 import TeamLabel from '@/components/TeamLabel.vue'
-import Teams from '@/components/dialogs/Teams.vue'
 const store = useStore()
-
-onMounted(() => {
-  store.subscribe((mutation, state) => {
-    if (mutation.type === 'triggerCloseChildDialogs') {
-      closeDialogs()
-    }
-  })
-})
 
 const props = defineProps({
   user: Object,
@@ -21,8 +12,7 @@ const props = defineProps({
 })
 const state = reactive({
   name: '',
-  description: '',
-  teamsIsVisible: false
+  description: ''
 })
 
 const isBadges = computed(() => {
@@ -54,19 +44,11 @@ const cardsCreatedCount = computed(() => {
 
 // teams
 
-const closeDialogs = () => {
-  state.teamsIsVisible = false
-}
-const toggleTeamsIsVisible = () => {
-  const value = !state.teamsIsVisible
-  closeDialogs()
-  state.teamsIsVisible = value
-}
 const userTeams = computed(() => store.getters['teams/byUser'](props.user))
 </script>
 
 <template lang="pug">
-.row.user-badges(v-if="isBadges" @click.stop="closeDialogs")
+.row.user-badges(v-if="isBadges")
   //- Spectator
   .badge.button-badge.status(v-if="user.isSpectator" @click.stop="toggleDescription('Spectators')" :class="{active: state.name === 'Spectators'}")
     span Spectator
@@ -85,30 +67,20 @@ const userTeams = computed(() => store.getters['teams/byUser'](props.user))
     span Ambassador
 
 //- badge description
-.row(v-if="state.description" @click.stop="closeDialogs")
+.row(v-if="state.description")
   section.subsection
     span(v-html="state.description")
 
 //- card count
-.row(@click.stop="closeDialogs")
+.row
   .badge.secondary
     img.icon.card(src="@/assets/card.svg")
     span {{cardsCreatedCount}} Cards Created
 
-//- teams
-.row(v-if="props.isCurrentUser")
-  .button-wrap
-    button(@click.stop="toggleTeamsIsVisible" :class="{ active: state.teamsIsVisible }")
-      template(v-for="team in userTeams")
-        TeamLabel(:team="team")
-      img.icon.team(src="@/assets/team.svg")
-      span Teams
-    Teams(:visible="state.teamsIsVisible" :teams="userTeams")
-//- other user teams list
-.row(v-else-if="userTeams.length")
+//- team badges list
+.row(v-if="!props.isCurrentUser && userTeams.length")
   .badge.secondary(v-for="team in userTeams")
     TeamLabel(:team="team" :showIcon="true" :showName="true")
-
 </template>
 
 <style lang="stylus">

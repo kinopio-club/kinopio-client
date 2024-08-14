@@ -49,7 +49,6 @@ const updateDialogHeight = async () => {
 const closeDialogs = () => {
   state.colorPickerIsVisible = false
   store.commit('userDetailsIsVisible', false)
-  store.commit('triggerCloseChildDialogs')
 }
 
 // team
@@ -145,6 +144,8 @@ const showUserDetails = (event, user) => {
   let element = event.target
   let options = { element, offsetX: 0, shouldIgnoreZoom: true }
   let position = utils.childDialogPositionFromParent(options)
+  const userListBadgeOffsetY = 60
+  position.y = position.y - userListBadgeOffsetY
   store.commit('userDetailsUser', user)
   store.commit('userDetailsPosition', position)
   store.commit('userDetailsIsVisible', true)
@@ -202,6 +203,7 @@ dialog.team.wide(v-if="visible" :open="visible" @click.left.stop="closeDialogs" 
     @selectUser="toggleUserDetails"
     :isClickable="true"
     :showTeamUserActions="true"
+    :team="props.team"
   )
 </template>
 

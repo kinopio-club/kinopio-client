@@ -6,6 +6,8 @@ import ColorPicker from '@/components/dialogs/ColorPicker.vue'
 import UserBadges from '@/components/UserBadges.vue'
 import cache from '@/cache.js'
 import utils from '@/utils.js'
+import TeamLabel from '@/components/TeamLabel.vue'
+import Teams from '@/components/dialogs/Teams.vue'
 import postMessage from '@/postMessage.js'
 const User = defineAsyncComponent({
   loader: () => import('@/components/User.vue')
@@ -31,7 +33,8 @@ const props = defineProps({
 })
 
 const state = reactive({
-  colorPickerIsVisible: false
+  colorPickerIsVisible: false,
+  teamsIsVisible: false
 })
 
 // toggle dialogs
@@ -47,6 +50,7 @@ const triggerSignUpOrInIsVisible = () => {
 }
 const closeDialogs = () => {
   state.colorPickerIsVisible = false
+  state.teamsIsVisible = false
   store.commit('triggerCloseChildDialogs')
 }
 
@@ -96,6 +100,15 @@ const updateUser = (update) => {
 const updateUserColor = (newValue) => {
   updateUser({ color: newValue })
 }
+
+// teams
+
+const toggleTeamsIsVisible = () => {
+  const value = !state.teamsIsVisible
+  closeDialogs()
+  state.teamsIsVisible = value
+}
+const userTeams = computed(() => store.getters['teams/byUser'](props.user))
 </script>
 
 <template lang="pug">
@@ -135,6 +148,16 @@ const updateUserColor = (newValue) => {
             img.icon.visit.arrow-icon(src="@/assets/visit.svg")
       //- badges
       UserBadges(:user="user" :isCurrentUser="isCurrentUser")
+      //- team
+      .row
+        .button-wrap
+          button(@click.stop="toggleTeamsIsVisible" :class="{ active: state.teamsIsVisible }")
+            template(v-for="team in userTeams")
+              TeamLabel(:team="team")
+            img.icon.team(src="@/assets/team.svg")
+            span Teams
+          Teams(:visible="state.teamsIsVisible" :teams="userTeams")
+
 </template>
 
 <style lang="stylus">

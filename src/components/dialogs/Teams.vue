@@ -4,6 +4,7 @@ import { useStore } from 'vuex'
 
 import utils from '@/utils.js'
 import TeamLabel from '@/components/TeamLabel.vue'
+import Team from '@/components/dialogs/Team.vue'
 
 const store = useStore()
 
@@ -22,11 +23,13 @@ const props = defineProps({
   teams: Array
 })
 const state = reactive({
-  dialogHeight: null
+  dialogHeight: null,
+  teamIsVisibleForTeamId: ''
 })
 
 watch(() => props.visible, (value, prevValue) => {
   if (value) {
+    state.teamIsVisibleForTeamId = ''
     updateDialogHeight()
   }
 })
@@ -42,6 +45,16 @@ const triggerSignUpOrInIsVisible = () => {
   store.dispatch('closeAllDialogs')
   store.commit('triggerSignUpOrInIsVisible')
 }
+const teamIsVisible = (team) => {
+  return state.teamIsVisibleForTeamId === team.id
+}
+const toggleTeamIsVisible = (team) => {
+  if (teamIsVisible(team)) {
+    state.teamIsVisibleForTeamId = ''
+  } else {
+    state.teamIsVisibleForTeamId = team.id
+  }
+}
 </script>
 
 <template lang="pug">
@@ -55,8 +68,9 @@ dialog.narrow.teams(v-if="visible" :open="visible" @click.left.stop ref="dialogE
   section.results-section(v-if="props.teams.length")
     ul.results-list
       template(v-for="team in props.teams")
-        li
+        li(:class="{ active: teamIsVisible(team) }" @click.stop="toggleTeamIsVisible(team)")
           TeamLabel(:team="team" :showIcon="true" :showName="true")
+          Team(:visible="teamIsVisible(team)" :team="team")
   //- teams beta notice
   section(v-else)
     section.subsection
@@ -69,7 +83,10 @@ dialog.narrow.teams(v-if="visible" :open="visible" @click.left.stop ref="dialogE
 
 <style lang="stylus">
 dialog.teams
+  top initial !important
+  bottom 8px
   ul.results-list
     li
       align-items center
+      position initial
 </style>

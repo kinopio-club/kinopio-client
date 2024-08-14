@@ -50,7 +50,7 @@ const isActive = computed(() => {
 
 // team
 
-const team = computed(() => currentSpace.value.team)
+const team = computed(() => store.getters['teams/bySpace'](currentSpace.value))
 
 // users
 

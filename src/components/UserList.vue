@@ -24,7 +24,8 @@ const props = defineProps({
   users: Array,
   selectedUser: Object,
   showCollaboratorActions: Boolean,
-  showTeamUserActions: Boolean
+  showTeamUserActions: Boolean,
+  team: Object
 })
 const state = reactive({
   filter: '',
@@ -106,10 +107,12 @@ const userIsSpaceCreator = (user) => {
 
 // team
 
-const currentSpaceTeam = computed(() => store.getters['teams/bySpace']())
+const team = computed(() => {
+  return props.team || store.getters['teams/bySpace']()
+})
 const teamUser = (user) => {
-  if (!currentSpaceTeam.value) { return }
-  const teamId = currentSpaceTeam.value.id
+  if (!team.value) { return }
+  const teamId = team.value.id
   return store.getters['teams/teamUser']({ userId: user.id, teamId })
 }
 const teamUserRole = (user) => {
@@ -119,7 +122,7 @@ const teamUserRole = (user) => {
 const currentUserIsTeamAdmin = computed(() => {
   return store.getters['teams/teamUserIsAdmin']({
     userId: store.state.currentUser.id,
-    teamId: currentSpaceTeam.value.id
+    teamId: team.value.id
   })
 })
 
@@ -150,7 +153,7 @@ const removeTeamUser = async (user) => {
   try {
     state.loading.removeTeamUserId = user.id
     const options = {
-      teamId: currentSpaceTeam.value.id,
+      teamId: team.value.id,
       userId: user.id
     }
     const response = await store.dispatch('api/removeTeamUser', options, { root: true })
@@ -176,7 +179,7 @@ const removeTeamUser = async (user) => {
         section.subsection(v-if="props.showCollaboratorActions")
           //- team user
           template(v-if="teamUser(user)")
-            TeamLabel(:team="currentSpaceTeam" :showIcon="true" :showName="true")
+            TeamLabel(:team="team" :showIcon="true" :showName="true")
           //- space creator
           template(v-else-if="userIsSpaceCreator(user)")
             span Space Creator
