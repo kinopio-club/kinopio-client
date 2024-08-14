@@ -56,11 +56,14 @@ dialog.narrow.teams(v-if="visible" :open="visible" @click.left.stop ref="dialogE
     template(v-for="team in props.teams")
       p {{ team.name }}
 
+  //- teams beta notice
   section(v-else)
-    p Currently only users in the teams beta program can create and manage teams
-    //- help dialog mailbox
-    p Interested in trying teams in your company? email hi@kinopio.club
-
+    section.subsection
+      p While teams is in beta, you'll need to be in beta program to create and manage teams
+      p
+        img.icon(src="@/assets/mail.svg")
+        span Interested in trying teams in your company? Email&nbsp;
+        a(href="mailto:support@kinopio.club?subject=Kinopio Teams Beta") support@kinopio.club
 </template>
 
 <style lang="stylus">
