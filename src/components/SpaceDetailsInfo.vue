@@ -61,6 +61,7 @@ const state = reactive({
 
 const currentUser = computed(() => store.state.currentUser)
 const currentUserIsSpaceCollaborator = computed(() => store.getters['currentUser/isSpaceCollaborator']())
+const currentUserIsSpaceCreator = computed(() => store.getters['currentUser/isSpaceCreator']())
 const isSpaceMember = computed(() => {
   const currentSpace = store.state.currentSpace
   return store.getters['currentUser/isSpaceMember'](currentSpace)
@@ -235,14 +236,23 @@ const spaceTeam = computed(() => {
   const teamId = store.state.currentSpace.teamId
   return store.getters['teams/byId'](teamId)
 })
+const checkCanAssignTeam = (event) => {
+  if (currentUserIsSpaceCreator.value) {
+    return true
+  } else {
+    const position = utils.cursorPositionInPage(event)
+    store.commit('addNotificationWithPosition', { message: `Only space creator can add to team`, position, type: 'danger', layer: 'app', icon: 'cancel' })
+  }
+}
 const toggleCurrentSpaceInTeam = (event) => {
   store.commit('clearNotificationsWithPosition')
-  const position = utils.cursorPositionInPage(event)
   if (spaceTeam.value) {
     store.dispatch('teams/removeCurrentSpace')
     updateLocalSpaces()
   } else {
+    if (!checkCanAssignTeam(event)) { return }
     store.dispatch('teams/addCurrentSpace', team.value)
+    const position = utils.cursorPositionInPage(event)
     store.commit('addNotificationWithPosition', { message: `Added to ${team.value.name}`, position, type: 'success', layer: 'app', icon: 'checkmark' })
     updateLocalSpaces()
   }

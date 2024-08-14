@@ -921,6 +921,10 @@ export default {
         }))
       }
     },
+    isSpaceCreator: (state, getters, rootState) => (space) => {
+      space = space || rootState.currentSpace
+      return space.userId === state.id
+    },
     spaceUserPermission: (state, getters, rootState) => (space) => {
       space = space || rootState.currentSpace
       const isSpaceUser = getters.isSpaceUser(space)
