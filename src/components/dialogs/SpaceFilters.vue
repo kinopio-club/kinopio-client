@@ -35,7 +35,8 @@ watch(() => props.visible, (value, prevValue) => {
 })
 
 const state = reactive({
-  moonPhase: {}
+  moonPhase: {},
+  dialogHeight: null
 })
 
 const updateDialogHeight = async () => {
@@ -159,7 +160,7 @@ const filterByUser = (event, user) => {
 </script>
 
 <template lang="pug">
-dialog.narrow.space-filters(v-if="props.visible" :open="props.visible" @click.left.stop ref="dialogElement")
+dialog.narrow.space-filters(v-if="props.visible" :open="props.visible" @click.left.stop ref="dialogElement" :style="{'max-height': state.dialogHeight + 'px'}")
   section
     p Space Filters
   section
@@ -218,6 +219,7 @@ dialog.narrow.space-filters(v-if="props.visible" :open="props.visible" @click.le
 
 <style lang="stylus">
 dialog.space-filters
+  overflow auto
   left inherit
   right -212px
   @media(max-width 560px)
