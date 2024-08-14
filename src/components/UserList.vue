@@ -5,6 +5,7 @@ import { useStore } from 'vuex'
 import ResultsFilter from '@/components/ResultsFilter.vue'
 import UserLabelInline from '@/components/UserLabelInline.vue'
 import TeamUserRolePicker from '@/components/dialogs/TeamUserRolePicker.vue'
+import Loader from '@/components/Loader.vue'
 import utils from '@/utils.js'
 const store = useStore()
 
@@ -27,7 +28,13 @@ const props = defineProps({
 const state = reactive({
   filter: '',
   filteredUsers: [],
-  teamUserRolePickerUserId: ''
+  teamUserRolePickerUserId: '',
+  loading: {
+    removeTeamUserId: ''
+  },
+  error: {
+    removeTeamUserId: ''
+  }
 })
 
 const closeDialogs = () => {
@@ -127,6 +134,32 @@ const toggleTeamRolePickerUserId = (user) => {
   state.teamUserRolePickerUserId = user.id
 }
 
+// remove team user
+
+const isLoadingRemoveTeamUser = (user) => {
+  return state.loading.removeTeamUserId === user.id
+}
+const isErrorRemoveTeamUser = (user) => {
+  return state.error.removeTeamUserId === user.id
+}
+const removeTeamUser = async (user) => {
+  state.error.removeTeamUserId = ''
+  console.log('user', user.id, state.loading.removeTeamUserId)
+  if (isLoadingRemoveTeamUser(user)) { return }
+  try {
+    state.loading.removeTeamUserId = user.id
+    const options = {
+      teamId: currentSpaceTeam.value.id,
+      userId: user.id
+    }
+    const response = await store.dispatch('api/removeTeamUser', options, { root: true })
+    store.dispatch('teams/removeTeamUser', options)
+  } catch (error) {
+    console.error('🚒 removeTeamUser', user, error)
+    state.error.removeTeamUserId = user.id
+  }
+  state.loading.removeTeamUserId = ''
+}
 </script>
 
 <template lang="pug">
@@ -137,6 +170,7 @@ const toggleTeamRolePickerUserId = (user) => {
       li(@click.left.stop="selectUser($event, user)" tabindex="0" v-on:keyup.stop.enter="selectUser($event, user)" :class="{ active: userIsSelected(user) }")
         .user-info(:class="{'actions-section-is-visible': actionsSectionIsVisible }")
           UserLabelInline(:user="user")
+
         //- collaborator actions
         section.subsection(v-if="props.showCollaboratorActions")
           //- team user
@@ -153,6 +187,7 @@ const toggleTeamRolePickerUserId = (user) => {
               img.icon.cancel(src="@/assets/add.svg")
               span(v-if="isCurrentUser(user)") Leave Space
               span(v-else) Remove Collaborator
+
         //- team user actions
         section.subsection(v-if="props.showTeamUserActions")
           //- admin actions
@@ -166,10 +201,14 @@ const toggleTeamRolePickerUserId = (user) => {
                   span {{ teamUserRole(user) }}
                 TeamUserRolePicker(:visible="teamUserRolePickerIsVisibleUser(user)" :user="user")
               .button-wrap
-                button.small-button(@click.stop="removeTeamUser(user)")
+                button.small-button(@click.stop="removeTeamUser(user)" :class="{ active: isLoadingRemoveTeamUser(user) }")
                   img.icon.cancel(src="@/assets/add.svg")
                   span Remove from Team
-          //- member only
+                  Loader(:visible="isLoadingRemoveTeamUser(user)" :isSmall="true")
+            .row(v-if="isErrorRemoveTeamUser(user)")
+              p.badge.danger
+                span (シ_ _)シ Could not remove team user, Please try again or contact support
+          //- non-admin actions
           template(v-else)
             span {{ teamUserRole(user) }}
 </template>

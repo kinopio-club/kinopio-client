@@ -1245,8 +1245,6 @@ const self = {
       } catch (error) {
         context.dispatch('handleServerError', { name: 'removeTeamUser', error })
       }
-      // DEL /team/team-user
-      // server verifies that request comes from team admin
     }
 
   }

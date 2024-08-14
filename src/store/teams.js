@@ -116,6 +116,16 @@ export default {
     },
     removeCurrentSpace: (context) => {
       context.dispatch('currentSpace/updateSpace', { teamId: null, addedToTeamByUserId: null }, { root: true })
+    },
+    removeTeamUser: (context, { teamId, userId }) => {
+      let team = context.getters.byId(teamId)
+      team = utils.clone(team)
+      team.users = team.users.filter(user => user.id !== userId)
+      const updatedTeam = {
+        id: team.id,
+        users: team.users
+      }
+      context.commit('update', updatedTeam)
     }
   },
   getters: {

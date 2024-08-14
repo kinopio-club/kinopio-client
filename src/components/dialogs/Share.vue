@@ -217,11 +217,12 @@ dialog.share.wide(v-if="props.visible" :open="props.visible" @click.left.stop="c
 
   //- Explore
   section(v-if="exploreSectionIsVisible")
-    .row
-      p Share with the Community
-    .row
-      AddToExplore
-      AskToAddToExplore
+    section.subsection
+      .row
+        p Share with the Community
+      .row
+        AddToExplore
+        AskToAddToExplore
 
   //- Import, Export, Embed
   section.import-export-section
