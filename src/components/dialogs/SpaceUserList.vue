@@ -128,6 +128,7 @@ dialog.narrow.space-user-list(
   @click.left.stop="closeDialogs"
   ref="dialogElement"
   :style="{'max-height': state.dialogHeight + 'px'}"
+  :class="{'child-is-visible': state.teamIsVisible }"
 )
   section
     p {{ label }}
@@ -159,10 +160,13 @@ dialog.narrow.space-user-list(
 </template>
 
 <style lang="stylus">
-.space-user-list
+dialog.space-user-list
+  overflow auto
   left initial
   right 16px
   top 20px
+  &.child-is-visible
+    overflow initial
   dialog.team
     left -45px
 </style>
