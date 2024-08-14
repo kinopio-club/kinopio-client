@@ -36,6 +36,10 @@ const updateDialogHeight = async () => {
 }
 
 const currentUserIsSignedIn = computed(() => store.getters['currentUser/isSignedIn'])
+const triggerSignUpOrInIsVisible = () => {
+  store.dispatch('closeAllDialogs')
+  store.commit('triggerSignUpOrInIsVisible')
+}
 </script>
 
 <template lang="pug">
@@ -44,8 +48,8 @@ dialog.narrow.teams(v-if="visible" :open="visible" @click.left.stop ref="dialogE
     p Teams
 
   section(v-if="!currentUserIsSignedIn")
-    p sign up or in to create and manage teams
-    p [btn]
+    p Sign Up or In to create and manage teams
+    button(@click.left="triggerSignUpOrInIsVisible") Sign Up or In
 
   //- teams list picker
   section(v-if="props.teams.length")
