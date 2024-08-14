@@ -76,7 +76,14 @@ const userTeams = computed(() => store.getters['teams/byUser'](props.user))
     span {{cardsCreatedCount}} Cards Created
 
 //- teams
-.row(v-if="userTeams.length")
+.row(v-if="props.isCurrentUser")
+  button
+    template(v-for="team in userTeams")
+      TeamLabel(:team="team")
+    img.icon.team(src="@/assets/team.svg")
+    span Teams
+//- other user teams list
+.row(v-else-if="userTeams.length")
   .badge.secondary(v-for="team in userTeams")
     TeamLabel(:team="team" :showIcon="true" :showName="true")
 
