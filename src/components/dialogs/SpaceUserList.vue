@@ -5,6 +5,7 @@ import { useStore } from 'vuex'
 import utils from '@/utils.js'
 import Team from '@/components/dialogs/Team.vue'
 import UserList from '@/components/UserList.vue'
+import TeamLabel from '@/components/TeamLabel.vue'
 
 import uniqBy from 'lodash-es/uniqBy'
 
@@ -132,9 +133,7 @@ dialog.narrow.space-user-list(
     p {{ label }}
     .button-wrap(v-if="spaceTeam")
       button(@click.stop="toggleTeamIsVisible" :class="{ active: state.teamIsVisible }")
-        .team-color(:style="{ background: spaceTeam.color }")
-        img.icon.team(src="@/assets/team.svg")
-        span {{ spaceTeam.name }}
+        TeamLabel(:team="spaceTeam" :showIcon="true" :showName="true")
       Team(:visible="state.teamIsVisible" :team="spaceTeam")
 
   template(v-if="users.length")

@@ -6,6 +6,7 @@ import ResultsFilter from '@/components/ResultsFilter.vue'
 import UserLabelInline from '@/components/UserLabelInline.vue'
 import TeamUserRolePicker from '@/components/dialogs/TeamUserRolePicker.vue'
 import Loader from '@/components/Loader.vue'
+import TeamLabel from '@/components/TeamLabel.vue'
 import utils from '@/utils.js'
 const store = useStore()
 
@@ -175,9 +176,7 @@ const removeTeamUser = async (user) => {
         section.subsection(v-if="props.showCollaboratorActions")
           //- team user
           template(v-if="teamUser(user)")
-            .team-color(:style="{ background: currentSpaceTeam.color }")
-            img.icon.team(src="@/assets/team.svg")
-            span {{ currentSpaceTeam.name }}
+            TeamLabel(:team="currentSpaceTeam" :showIcon="true" :showName="true")
           //- space creator
           template(v-else-if="userIsSpaceCreator(user)")
             span Space Creator

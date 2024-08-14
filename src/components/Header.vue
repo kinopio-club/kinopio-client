@@ -38,6 +38,7 @@ import UserSettings from '@/components/dialogs/UserSettings.vue'
 import SpaceUserList from '@/components/dialogs/SpaceUserList.vue'
 import CommentButton from '@/components/CommentButton.vue'
 import FavoriteSpaceButton from '@/components/FavoriteSpaceButton.vue'
+import TeamLabel from '@/components/TeamLabel.vue'
 import consts from '@/consts.js'
 
 import sortBy from 'lodash-es/sortBy'
@@ -586,8 +587,7 @@ header(v-if="isVisible" :style="state.position" :class="{'fade-out': isFadingOut
           .logo-image
         MoonPhase(v-if="currentSpace.moonPhase" :moonPhase="currentSpace.moonPhase")
         template(v-if="spaceTeam")
-          .team-color(:style="{ background: spaceTeam.color }" :title="spaceTeam.name")
-          img.icon.team(src="@/assets/team.svg" :title="spaceTeam.name")
+          TeamLabel(:team="spaceTeam" :showIcon="true")
         span {{currentSpaceName}}{{' '}}
         img.icon.visit(src="@/assets/visit.svg")
         //- embed badge
@@ -673,8 +673,7 @@ header(v-if="isVisible" :style="state.position" :class="{'fade-out': isFadingOut
             .button-wrap.space-name-button-wrap(:class="{ 'back-button-is-visible': backButtonIsVisible }")
               button.space-name-button(@click.left.stop="toggleSpaceDetailsIsVisible" :class="{ active: state.spaceDetailsIsVisible, 'translucent-button': !shouldIncreaseUIContrast }")
                 template(v-if="spaceTeam")
-                  .team-color(:style="{ background: spaceTeam.color }" :title="spaceTeam.name")
-                  img.icon.team(src="@/assets/team.svg" :title="spaceTeam.name")
+                  TeamLabel(:team="spaceTeam" :showIcon="true")
                 span(v-if="currentSpaceIsInbox")
                   img.icon.inbox-icon(src="@/assets/inbox.svg")
                 span(v-if="currentSpaceIsTemplate")

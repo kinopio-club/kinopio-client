@@ -1,6 +1,9 @@
 <script setup>
 import { reactive, computed, onMounted, defineProps, defineEmits, watch } from 'vue'
 import { useStore } from 'vuex'
+
+import TeamLabel from '@/components/TeamLabel.vue'
+
 const store = useStore()
 
 const props = defineProps({
@@ -23,9 +26,7 @@ const showInExplore = computed(() => store.state.currentSpace.showInExplore)
     span In Explore
 .row(v-if="spaceTeam")
   .badge.secondary
-    .team-color(:style="{ background: spaceTeam.color }" :title="spaceTeam.name")
-    img.icon.team(src="@/assets/team.svg" :title="spaceTeam.name")
-    span {{ spaceTeam.name }}
+    TeamLabel(:team="spaceTeam" :showIcon="true" :showName="true")
 </template>
 
 <style lang="stylus">

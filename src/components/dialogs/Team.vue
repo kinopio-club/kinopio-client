@@ -5,6 +5,7 @@ import { useStore } from 'vuex'
 import UserList from '@/components/UserList.vue'
 import User from '@/components/User.vue'
 import ColorPicker from '@/components/dialogs/ColorPicker.vue'
+import TeamLabel from '@/components/TeamLabel.vue'
 import utils from '@/utils.js'
 
 import randomColor from 'randomcolor'
@@ -162,8 +163,8 @@ dialog.team.wide(v-if="visible" :open="visible" @click.left.stop="closeDialogs" 
         input.name(placeholder="Team Name" v-model="teamName" name="teamName" maxlength=100)
 
       template(v-else)
-        .team-color(:style="{ background: teamColor }" title="Team Color")
-        span.team-name {{props.team.name}}
+        TeamLabel(:team="props.team" :showName="true")
+
     //- TODO is billing user
     //- .row.billing-tips(v-if="currentUserIsTeamAdmin" :class="{ active: state.billingTipsIsVisible} ")
   section(v-if="inviteUrl")

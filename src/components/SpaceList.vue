@@ -12,6 +12,7 @@ import UserLabelInline from '@/components/UserLabelInline.vue'
 import NameMatch from '@/components/NameMatch.vue'
 import OfflineBadge from '@/components/OfflineBadge.vue'
 import SpaceTodayJournalBadge from '@/components/SpaceTodayJournalBadge.vue'
+import TeamLabel from '@/components/TeamLabel.vue'
 import utils from '@/utils.js'
 import cache from '@/cache.js'
 
@@ -439,8 +440,7 @@ span.space-list-wrap
               img.preview-thumbnail-image(:src="space.previewThumbnailImage")
             //- team
             template(v-if="team(space.teamId) && props.showSpaceTeams")
-              .team-color(:style="{ background: team(space.teamId).color }" :title="team(space.teamId).name")
-              img.icon.team(src="@/assets/team.svg" :title="team(space.teamId).name")
+              TeamLabel(:team="team(space.teamId)" :showIcon="true")
             //- offline
             span(v-if="isOffline && isNotCached(space.id)")
               OfflineBadge(:isInline="true" :isDanger="true")
@@ -514,6 +514,7 @@ span.space-list-wrap
       width 10.5px
       vertical-align -2px
       margin-top 6px
+
     .favorite-icon
     .inbox-icon,
     .icon.team

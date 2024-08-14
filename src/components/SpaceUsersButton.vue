@@ -4,6 +4,7 @@ import { useStore } from 'vuex'
 
 import User from '@/components/User.vue'
 import utils from '@/utils.js'
+import TeamLabel from '@/components/TeamLabel.vue'
 
 import uniqBy from 'lodash-es/uniqBy'
 import last from 'lodash-es/last'
@@ -95,8 +96,7 @@ const spaceUsersLabel = computed(() => {
 button.space-users-button(@click.stop="toggleSpaceUserListIsVisible" :class="{ 'header-button': props.isParentSpaceUsers, active: isActive, 'translucent-button': props.isParentSpaceUsers }" ref="buttonElement")
   span.label(v-if="props.showLabel")
     template(v-if="team")
-      .team-color(:style="{ background: team.color }" :title="team.name")
-      img.icon.team(src="@/assets/team.svg" :title="team.name")
+      TeamLabel(:team="team" :showIcon="true")
     template(v-if="spaceUsers.length")
       User(:user="recentUser" :isClickable="false" :hideYouLabel="true" :isSmall="true" :shouldBounceIn="props.isParentSpaceUsers")
       span {{ spaceUsersLabel }}
@@ -118,5 +118,5 @@ button.space-users-button(@click.stop="toggleSpaceUserListIsVisible" :class="{ '
     border-top-left-radius 0
     border-bottom-left-radius 0
   .icon.team
-    margin-right 4px
+    margin-right 6px
 </style>
