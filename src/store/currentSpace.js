@@ -1127,7 +1127,7 @@ const currentSpace = {
     // User Card Count
 
     checkIfShouldNotifyCardsCreatedIsNearLimit: (context) => {
-      const spaceUserIsUpgraded = context.getters.spaceUserIsUpgraded
+      const spaceUserIsUpgraded = context.getters.spaceUserIsUpgradedOrOnTeam
       if (spaceUserIsUpgraded) { return }
       const currentUser = context.rootState.currentUser
       if (currentUser.isUpgraded) { return }
@@ -1316,14 +1316,15 @@ const currentSpace = {
       }
       return user
     },
-    spaceUserIsUpgraded: (state, getters, rootState) => {
+    spaceUserIsUpgradedOrOnTeam: (state, getters, rootState, rootGetters) => {
       const currentUser = rootState.currentUser
       const users = state.users
       const userIds = users.map(user => user.id)
       if (userIds.includes(currentUser.id)) { return }
       let userIsUpgraded
       users.forEach(user => {
-        if (user.isUpgraded) { userIsUpgraded = true }
+        const teamUser = rootGetters['teams/byUser'](user)
+        if (user.isUpgraded || teamUser) { userIsUpgraded = true }
       })
       return userIsUpgraded
     },
@@ -1335,7 +1336,7 @@ const currentSpace = {
     },
     shouldPreventAddCard: (state, getters, rootState, rootGetters) => {
       const cardsCreatedIsOverLimit = rootGetters['currentUser/cardsCreatedIsOverLimit']
-      const spaceUserIsUpgraded = getters.spaceUserIsUpgraded
+      const spaceUserIsUpgraded = getters.spaceUserIsUpgradedOrOnTeam
       return cardsCreatedIsOverLimit && !spaceUserIsUpgraded
     },
     readOnlyKey: (state, getters, rootState, rootGetters) => (space) => {

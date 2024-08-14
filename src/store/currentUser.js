@@ -950,7 +950,7 @@ export default {
       return isReadOnlyInvitedToSpace || inviteRequiresSignIn
     },
     shouldPreventCardsCreatedCountUpdate: (state, getters, rootState, rootGetters) => {
-      const spaceUserIsUpgraded = rootGetters['currentSpace/spaceUserIsUpgraded']
+      const spaceUserIsUpgraded = rootGetters['currentSpace/spaceUserIsUpgradedOrOnTeam']
       const spaceUserIsCurrentUser = rootGetters['currentSpace/spaceUserIsCurrentUser']
       if (spaceUserIsUpgraded && !spaceUserIsCurrentUser) {
         return true
