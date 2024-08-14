@@ -1,5 +1,7 @@
 import utils from '@/utils.js'
 
+import uniqBy from 'lodash-es/uniqBy'
+
 // normalized state
 // https://github.com/vuejs/vuejs.org/issues/1636
 
@@ -138,9 +140,10 @@ export default {
     byUser: (state, getters, rootState) => (user) => {
       user = user || rootState.currentUser
       const teams = getters.all
-      const teamUserTeams = teams.filter(team => {
+      let teamUserTeams = teams.filter(team => {
         return team.users.find(teamUser => teamUser.id === user.id)
       })
+      teamUserTeams = uniqBy(teamUserTeams, 'id')
       return teamUserTeams
     },
     bySpace: (state, getters, rootState) => (space) => {
