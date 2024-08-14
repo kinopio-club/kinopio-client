@@ -6,6 +6,8 @@ import SpacePicker from '@/components/dialogs/SpacePicker.vue'
 import Loader from '@/components/Loader.vue'
 import SpaceList from '@/components/SpaceList.vue'
 import User from '@/components/User.vue'
+import TeamLabel from '@/components/TeamLabel.vue'
+import Teams from '@/components/dialogs/Teams.vue'
 import utils from '@/utils.js'
 import cache from '@/cache.js'
 
@@ -33,6 +35,7 @@ const state = reactive({
   spacePickerIsVisible: false,
   exploreSpaces: [],
   userSpaces: [],
+  teamsIsVisible: false,
   loading: {
     exploreSpaces: false,
     userSpaces: false
@@ -57,6 +60,7 @@ const updateDialogHeight = async () => {
 
 const closeDialogs = () => {
   state.spacePickerIsVisible = false
+  state.teamsIsVisible = false
 }
 
 // user
@@ -142,11 +146,32 @@ const updateExploreSpaces = async () => {
   state.exploreSpaces = spaces
   state.loading.exploreSpaces = false
 }
+
+// teams
+
+const toggleTeamsIsVisible = () => {
+  const value = !state.teamsIsVisible
+  closeDialogs()
+  state.teamsIsVisible = value
+}
+const userTeams = computed(() => store.getters['teams/byUser'](props.user))
 </script>
 
 <template lang="pug">
-.user-details-actions
+.user-details-actions(@click.stop="closeDialogs")
+  //- Current User
   section(v-if="isCurrentUser")
+    //- team
+    .row
+      .button-wrap
+        button(@click.stop="toggleTeamsIsVisible" :class="{ active: state.teamsIsVisible }")
+          template(v-for="team in userTeams")
+            TeamLabel(:team="team")
+          img.icon.team(src="@/assets/team.svg")
+          span Teams
+        Teams(:visible="state.teamsIsVisible" :teams="userTeams")
+  section(v-if="isCurrentUser")
+    //- settings, sign out
     .row
       .button-wrap
         button(@click.left.stop="toggleUserSettingsIsVisible" :class="{active: userSettingsIsVisible}")
@@ -157,7 +182,6 @@ const updateExploreSpaces = async () => {
         span Sign Out
       button(v-else @click.left="triggerSignUpOrInIsVisible")
         span Sign Up or In
-
   //- Other User
   section(v-if="!isCurrentUser && userIsSignedIn && props.user.id")
     .button-wrap

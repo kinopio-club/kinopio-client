@@ -22,7 +22,7 @@ const spaceIsLoading = computed(() => {
 <template lang="pug">
 span.team-label
   OfflineBadge
-  Loader(:visible="spaceIsLoading" :isStatic="true" :isSmall="true")
+  Loader(:visible="spaceIsLoading" :isSmall="true")
   .team-color(v-if="!spaceIsLoading" :style="{ background: props.team.color }" :title="props.team.name")
   img.icon.team(v-if="props.showIcon" src="@/assets/team.svg" :title="props.team.name")
   span.team-name(v-if="props.showName") {{ props.team.name }}
