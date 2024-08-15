@@ -233,14 +233,6 @@ dialog.add-space.narrow(
     //- import
     .button-wrap
       button(@click="triggerImportIsVisible") Import
-
-  //- section
-  //-   section.subsection
-  //-     p Work together on shared spaces
-  //-     button
-  //-       img.icon(src="@/assets/add.svg")
-  //-       img.icon.team(src="@/assets/team.svg")
-  //-       span New Team
 </template>
 <style lang="stylus">
 dialog.add-space
