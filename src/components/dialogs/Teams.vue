@@ -74,7 +74,7 @@ dialog.narrow.teams(v-if="visible" :open="visible" @click.left.stop ref="dialogE
   //- teams beta notice
   section(v-else)
     section.subsection
-      p While teams is in beta, you'll need to be in beta program to create and manage teams
+      p While teams is in beta, only beta program users can create and manage teams.
       p
         img.icon(src="@/assets/mail.svg")
         span Interested in trying teams in your company? Email&nbsp;
