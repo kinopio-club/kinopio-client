@@ -582,18 +582,20 @@ const handlePastePlainText = async (data, position) => {
     }
   })
   store.dispatch('currentCards/addMultiple', { cards })
-  store.dispatch('currentCards/distributeVertically', cards)
-  await nextTick()
-  // select
-  const cardIds = cards.map(card => card.id)
-  store.commit('multipleCardsSelectedIds', cardIds)
-  // ⏺ history
-  cards = cardIds.map(cardId => store.getters['currentCards/byId'](cardId))
-  store.dispatch('history/resume')
-  store.dispatch('history/add', { cards, useSnapshot: true })
-  // update page size
-  await nextTick()
-  afterPaste({ cards, boxes: [] })
+  setTimeout(async () => {
+    store.dispatch('currentCards/distributeVertically', cards)
+    await nextTick()
+    // select
+    const cardIds = cards.map(card => card.id)
+    store.commit('multipleCardsSelectedIds', cardIds)
+    // ⏺ history
+    cards = cardIds.map(cardId => store.getters['currentCards/byId'](cardId))
+    store.dispatch('history/resume')
+    store.dispatch('history/add', { cards, useSnapshot: true })
+    // update page size
+    await nextTick()
+    afterPaste({ cards, boxes: [] })
+  }, 100)
 }
 
 const afterPaste = ({ cards, boxes }) => {

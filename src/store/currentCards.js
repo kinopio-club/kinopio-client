@@ -716,13 +716,13 @@ const currentCards = {
             card.y = prevCard.y + (prevCardRect.height * zoom) + spaceBetweenCards
             prevCard = card
           }
-          card = utils.cardElementDimensions(card)
+          const rect = utils.cardRectFromId(card.id)
           card = {
             name: card.name,
             id: card.id,
             y: card.y,
-            width: card.width,
-            height: card.height
+            width: rect.width,
+            height: rect.height
           }
           context.dispatch('update', { card })
         })
