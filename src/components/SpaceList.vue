@@ -379,7 +379,7 @@ const checkmarkSpace = (space) => {
 
 const team = (teamId) => {
   if (!teamId) { return }
-  return store.getters['teams/byId'](teamId) || { color: null, name: null }
+  return store.getters['teams/byId'](teamId)
 }
 </script>
 
