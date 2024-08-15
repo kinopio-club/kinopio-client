@@ -34,4 +34,6 @@ span.team-label(v-if="isVisible")
     margin 0
 .team-label + span
   margin-left 5px
+.team-label +.team-label
+  margin-left 0
 </style>
