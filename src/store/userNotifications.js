@@ -101,6 +101,7 @@ export default {
     recipientUserIds: (state, getters, rootState, rootGetters) => {
       const currentUserId = rootState.currentUser.id
       const spaceIsOpen = rootState.currentSpace.privacy === 'open'
+      // space members
       let members = rootGetters['currentSpace/members'](true)
       members = members.map(member => member.id)
       let recipients = members
@@ -108,6 +109,12 @@ export default {
         let contributors = []
         contributors = rootState.currentSpace.cards.map(card => card.userId)
         recipients = members.concat(contributors)
+      }
+      // team users who added cards
+      let teamUsers = rootGetters['currentCards/teamUsersWhoAddedCards']
+      if (teamUsers) {
+        teamUsers = teamUsers.map(user => user.id)
+        recipients.concat(teamUsers)
       }
       recipients = uniq(recipients)
       // exclude currently connected recipients
