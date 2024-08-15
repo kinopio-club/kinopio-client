@@ -278,7 +278,6 @@ const removeReadOnlyJiggle = () => {
 aside.notifications(@click.left="closeAllDialogs")
   .item(v-for="item in items" v-bind:key="item.id" :data-notification-id="item.id" :data-is-persistent-item="item.isPersistentItem" :class="notifificationClasses(item)")
     p
-      .team-color(v-if="item.teamColor" :style="{ background: item.teamColor }")
       span.label-badge(v-if="item.label") {{item.label}}
       template(v-if="item.icon")
         img.icon(v-if="item.icon === 'open'" src="@/assets/open.svg" class="open")

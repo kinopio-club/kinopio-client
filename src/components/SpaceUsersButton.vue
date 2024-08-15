@@ -94,7 +94,7 @@ const spaceUsersLabel = computed(() => {
 button.space-users-button(@click.stop="toggleSpaceUserListIsVisible" :class="{ 'header-button': props.isParentSpaceUsers, active: isActive, 'translucent-button': props.isParentSpaceUsers }" ref="buttonElement")
   span.label(v-if="props.showLabel")
     template(v-if="team")
-      TeamLabel(:team="team" :showIcon="true")
+      TeamLabel(:team="team")
     template(v-if="spaceUsers.length")
       User(:user="recentUser" :isClickable="false" :hideYouLabel="true" :isSmall="true" :shouldBounceIn="props.isParentSpaceUsers")
     span {{ spaceUsersLabel }}

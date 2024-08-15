@@ -69,7 +69,7 @@ dialog.narrow.teams(v-if="visible" :open="visible" @click.left.stop ref="dialogE
     ul.results-list
       template(v-for="team in props.teams")
         li(:class="{ active: teamIsVisible(team) }" @click.stop="toggleTeamIsVisible(team)")
-          TeamLabel(:team="team" :showIcon="true" :showName="true")
+          TeamLabel(:team="team" :showName="true")
           TeamDetails(:visible="teamIsVisible(team)" :team="team")
   //- teams beta notice
   section(v-else)

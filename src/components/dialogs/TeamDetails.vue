@@ -233,4 +233,7 @@ dialog.team
         vertical-align -3px
         .anon-avatar
           top 6px
+  .change-color
+    .current-team-color
+      border-radius 10px
 </style>

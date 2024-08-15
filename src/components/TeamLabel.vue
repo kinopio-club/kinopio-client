@@ -2,38 +2,58 @@
 import { reactive, computed, onMounted, onBeforeUnmount, defineProps, defineEmits, watch, ref, nextTick } from 'vue'
 import { useStore } from 'vuex'
 
-// import OfflineBadge from '@/components/OfflineBadge.vue'
+import utils from '@/utils.js'
 
 const store = useStore()
 
 const props = defineProps({
   team: Object,
-  showIcon: Boolean,
   showName: Boolean
 })
 
 const isVisible = computed(() => Boolean(props.team))
+const shortName = computed(() => {
+  let name = props.team.name
+  name = utils.normalizeString(name)
+  return name.charAt(0).toUpperCase()
+})
+const classes = computed(() => {
+  return utils.textColorClasses({ backgroundColor: props.team.color })
+})
 </script>
 
 <template lang="pug">
-span.team-label(v-if="isVisible")
-  //- OfflineBadge
-  .team-color(v-if="props.team.color" :style="{ background: props.team.color }" :title="props.team.name")
-  img.icon.team(v-if="props.showIcon" src="@/assets/team.svg" :title="props.team.name")
-  span.team-name(v-if="props.showName") {{ props.team.name }}
-
+span.team-label(v-if="isVisible" :title="props.team.name")
+  .badge.team-badge(:style="{ background: props.team.color }" :class="classes")
+    img.icon.team(src="@/assets/team.svg")
+    span {{ shortName }}
+  span(v-if="props.showName") {{ props.team.name }}
 </template>
 
 <style lang="stylus">
 .team-label
   flex-shrink 0
-  .loader
-    margin 0
-    margin-right 5px
-  .icon.team
-    margin 0
-.team-label + span
-  margin-left 5px
-.team-label +.team-label
-  margin-left 0
+  .team-badge
+    border-radius 100px
+    min-width initial
+    min-height initial
+    padding 0 6px
+    display inline
+    .icon.team
+      vertical-align 1px
+    span
+      vertical-align 1.5px
+      font-size 12px
+    &.is-background-light
+      span
+        color var(--primary-on-light-background)
+      .icon
+        filter none
+
+    &.is-background-dark
+      span
+        color var(--primary-on-dark-background)
+      .icon
+        filter invert(1)
+
 </style>

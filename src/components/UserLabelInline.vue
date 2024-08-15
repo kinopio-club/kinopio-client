@@ -85,6 +85,7 @@ const showUserDetails = () => {
   .icon.camera
     margin-left 6px
     vertical-align 1px
+    filter none
     &.is-dark
       filter invert(1)
   .anon-avatar

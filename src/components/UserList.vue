@@ -179,7 +179,7 @@ const removeTeamUser = async (user) => {
         section.subsection(v-if="props.showCollaboratorActions")
           //- team user
           template(v-if="teamUser(user)")
-            TeamLabel(:team="team" :showIcon="true" :showName="true")
+            TeamLabel(:team="team")
           //- space creator
           template(v-else-if="userIsSpaceCreator(user)")
             span Space Creator

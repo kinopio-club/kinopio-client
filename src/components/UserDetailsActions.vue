@@ -165,8 +165,6 @@ const userTeams = computed(() => store.getters['teams/byUser'](props.user))
     .row
       .button-wrap
         button(@click.stop="toggleTeamsIsVisible" :class="{ active: state.teamsIsVisible }")
-          template(v-for="team in userTeams")
-            TeamLabel(:team="team")
           img.icon.team(src="@/assets/team.svg")
           span Teams
         Teams(:visible="state.teamsIsVisible" :teams="userTeams")

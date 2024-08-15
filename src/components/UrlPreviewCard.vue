@@ -240,7 +240,7 @@ const description = computed(() => {
   .description
     &.is-background-light
       span
-       color var(--primary-on-light-background)
+        color var(--primary-on-light-background)
     &.is-background-dark
       span
         color var(--primary-on-dark-background)

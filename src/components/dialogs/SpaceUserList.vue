@@ -130,7 +130,7 @@ dialog.space-user-list(
     p {{ label }}
     .button-wrap(v-if="spaceTeam")
       button(@click.stop="toggleTeamIsVisible" :class="{ active: state.teamIsVisible }")
-        TeamLabel(:team="spaceTeam" :showIcon="true" :showName="true")
+        TeamLabel(:team="spaceTeam" :showName="true")
       TeamDetails(:visible="state.teamIsVisible" :team="spaceTeam")
 
   template(v-if="users.length")

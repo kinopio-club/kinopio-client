@@ -440,7 +440,7 @@ span.space-list-wrap
               img.preview-thumbnail-image(:src="space.previewThumbnailImage")
             //- team
             template(v-if="team(space.teamId) && props.showSpaceTeams")
-              TeamLabel(:team="team(space.teamId)" :showIcon="true")
+              TeamLabel(:team="team(space.teamId)")
             //- offline
             span(v-if="isOffline && isNotCached(space.id)")
               OfflineBadge(:isInline="true" :isDanger="true")
@@ -567,8 +567,6 @@ span.space-list-wrap
       .icon.templates
         margin-right 5px
         margin-top 3px
-      .team-label
-        margin-right 5px
 
     .space-wrap
       position relative

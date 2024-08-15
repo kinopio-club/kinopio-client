@@ -26,7 +26,7 @@ const showInExplore = computed(() => store.state.currentSpace.showInExplore)
     span In Explore
 .row(v-if="props.spaceTeam")
   .badge.secondary
-    TeamLabel(:team="props.spaceTeam" :showIcon="true" :showName="true")
+    TeamLabel(:team="props.spaceTeam" :showName="true")
 </template>
 
 <style lang="stylus">

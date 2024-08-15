@@ -729,15 +729,6 @@ p
   > .button-wrap + .button-wrap
     margin-left 0
 
-.team-color
-  width 8px
-  height 8px
-  margin-right 5px
-  border-radius 100px
-  display inline-block
-  vertical-align 1px
-  flex-shink 0
-
 dialog
   width 250px
   left 8px
@@ -837,8 +828,6 @@ dialog
       height 14px
       width 14px
       border-radius var(--small-entity-radius)
-    .current-team-color
-      border-radius 100px
 
   a
     text-decoration-thickness 1px
