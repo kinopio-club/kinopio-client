@@ -202,24 +202,10 @@ const router = createRouter({
       component: Space,
       beforeEnter: (to, from, next) => {
         const urlParams = new URLSearchParams(window.location.search)
-        // https://kinopio.local:8080/team/invite?teamId=1&collaboratorKey=abc123&name=test-team
         const teamId = urlParams.get('teamId')
         const collaboratorKey = urlParams.get('collaboratorKey')
         pageMeta.team({ teamId, isTeamInvite: true })
-
         store.commit('teamToJoinOnLoad', { teamId, collaboratorKey })
-
-        // store.commit('noitifyJoiningTeam', true)
-
-        // store.commit('notifyIsJoiningTeam', {teamId, collaboratorKey})
-
-        // user must be signed in to join, sign up and try this url again,
-        // or sign in or up to join your team [btns]
-        // then based on state, join team on sign inorup
-        // notification for joining team w loader
-        // notification for joining team success -> cta?
-        // noitifcation for joining team err
-
         next()
       }
     }, {
