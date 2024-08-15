@@ -171,7 +171,7 @@ dialog.narrow.space-filters(v-if="props.visible" :open="props.visible" @click.le
         span Clear all
         span.badge.info.total-filters-active(v-if="totalFiltersActive") {{totalFiltersActive}}
     //- show team
-    section.subsection(v-if="teams")
+    section.subsection(v-if="teams.length")
       p Filter by Team
       .segmented-buttons
         button(:class="{active: filterByTeamAll}" @click="updateFilterByTeam(null)")
