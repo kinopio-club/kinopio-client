@@ -98,7 +98,7 @@ const userTeams = computed(() => store.getters['teams/byUser'](props.user))
 .badge-upgraded
   background var(--badge-upgraded) !important
 .badge-moderator
-  background var(--badge-moderator) !important
+  background var(--secondary-background) !important
 .badge-ambassador
-  background var(--badge-ambassador) !important
+  background var(--secondary-background) !important
 </style>

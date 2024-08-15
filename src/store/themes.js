@@ -32,9 +32,7 @@ const themes = {
       'code-keyword': '#00119e',
       // user badges
       'badge-donor': '#ff9dff',
-      'badge-upgraded': 'springgreen',
-      'badge-moderator': 'bisque',
-      'badge-ambassador': 'aqua'
+      'badge-upgraded': 'springgreen'
     }
   },
   dark: {
