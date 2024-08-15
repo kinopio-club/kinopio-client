@@ -97,7 +97,7 @@ export default {
     },
     update: (context, team) => {
       context.commit('update', team)
-      context.dispatch('api/addToQueue', { name: 'updateTeam', body: team })
+      context.dispatch('api/addToQueue', { name: 'updateTeam', body: team }, { root: true })
     },
     updateUserRole: (context, update) => {
       const { userId, teamId, role } = update
