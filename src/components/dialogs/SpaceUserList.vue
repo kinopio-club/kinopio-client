@@ -3,7 +3,7 @@ import { reactive, computed, onMounted, onBeforeUnmount, defineProps, defineEmit
 import { useStore } from 'vuex'
 
 import utils from '@/utils.js'
-import Team from '@/components/dialogs/Team.vue'
+import TeamDetails from '@/components/dialogs/TeamDetails.vue'
 import UserList from '@/components/UserList.vue'
 import TeamLabel from '@/components/TeamLabel.vue'
 
@@ -135,7 +135,7 @@ dialog.space-user-list(
     .button-wrap(v-if="spaceTeam")
       button(@click.stop="toggleTeamIsVisible" :class="{ active: state.teamIsVisible }")
         TeamLabel(:team="spaceTeam" :showIcon="true" :showName="true")
-      Team(:visible="state.teamIsVisible" :team="spaceTeam")
+      TeamDetails(:visible="state.teamIsVisible" :team="spaceTeam")
 
   template(v-if="users.length")
     //- users

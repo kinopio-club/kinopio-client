@@ -4,7 +4,7 @@ import { useStore } from 'vuex'
 
 import utils from '@/utils.js'
 import TeamLabel from '@/components/TeamLabel.vue'
-import Team from '@/components/dialogs/Team.vue'
+import TeamDetails from '@/components/dialogs/TeamDetails.vue'
 
 const store = useStore()
 
@@ -70,7 +70,7 @@ dialog.narrow.teams(v-if="visible" :open="visible" @click.left.stop ref="dialogE
       template(v-for="team in props.teams")
         li(:class="{ active: teamIsVisible(team) }" @click.stop="toggleTeamIsVisible(team)")
           TeamLabel(:team="team" :showIcon="true" :showName="true")
-          Team(:visible="teamIsVisible(team)" :team="team")
+          TeamDetails(:visible="teamIsVisible(team)" :team="team")
   //- teams beta notice
   section(v-else)
     section.subsection
