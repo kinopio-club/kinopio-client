@@ -78,7 +78,6 @@ const users = computed(() => {
     items = items.concat(teamUsers)
   }
   items = items.filter(item => Boolean(item))
-  // items = items.filter(item => item.id !== currentUser.value.id)
   items = uniqBy(items, 'id')
   return items
 })
@@ -89,9 +88,6 @@ const commenters = computed(() => utils.clone(store.getters['currentCards/commen
 
 // handle userlist events
 
-// const showRemoveCollaborator = computed(() => {
-//   return currentUserCanEditSpace.value && isCollaboratorsList.value
-// })
 const selectedUser = computed(() => {
   const userDetailsIsVisible = store.state.userDetailsIsVisible
   if (!userDetailsIsVisible) { return }
