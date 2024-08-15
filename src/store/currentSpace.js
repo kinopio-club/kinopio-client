@@ -1319,12 +1319,11 @@ const currentSpace = {
     spaceUserIsUpgradedOrOnTeam: (state, getters, rootState, rootGetters) => {
       const currentUser = rootState.currentUser
       const users = state.users
-      const userIds = users.map(user => user.id)
-      if (userIds.includes(currentUser.id)) { return }
       let userIsUpgraded
       users.forEach(user => {
-        const teamUser = rootGetters['teams/byUser'](user)
-        if (user.isUpgraded || teamUser) { userIsUpgraded = true }
+        const userTeams = rootGetters['teams/byUser'](user)
+        const isTeamUser = Boolean(userTeams.length)
+        if (user.isUpgraded || isTeamUser) { userIsUpgraded = true }
       })
       return userIsUpgraded
     },
@@ -1336,8 +1335,8 @@ const currentSpace = {
     },
     shouldPreventAddCard: (state, getters, rootState, rootGetters) => {
       const cardsCreatedIsOverLimit = rootGetters['currentUser/cardsCreatedIsOverLimit']
-      const spaceUserIsUpgraded = getters.spaceUserIsUpgradedOrOnTeam
-      return cardsCreatedIsOverLimit && !spaceUserIsUpgraded
+      const spaceUserIsUpgradedOrOnTeam = getters.spaceUserIsUpgradedOrOnTeam
+      return cardsCreatedIsOverLimit && !spaceUserIsUpgradedOrOnTeam
     },
     readOnlyKey: (state, getters, rootState, rootGetters) => (space) => {
       const readOnlyKey = rootState.spaceReadOnlyKey

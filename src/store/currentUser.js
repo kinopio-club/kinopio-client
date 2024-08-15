@@ -837,9 +837,10 @@ export default {
       return Boolean(state.apiKey)
     },
     isUpgradedOrOnTeam: (state, getters, rootState, rootGetters) => {
-      if (state.isUpgraded) { return }
-      const teamUser = rootGetters['teams/byUser']()
-      return Boolean(teamUser)
+      if (state.isUpgraded) { return true }
+      const userTeams = rootGetters['teams/byUser']()
+      const isTeamUser = Boolean(userTeams.length)
+      return isTeamUser
     },
     cardsCreatedIsOverLimit: (state, getters, rootState) => {
       const cardsCreatedLimit = rootState.cardsCreatedLimit

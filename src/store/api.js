@@ -413,7 +413,7 @@ const self = {
     },
     getUserTeamSpaces: async (context) => {
       const teams = context.rootGetters['teams/byUser']()
-      if (!teams) { return }
+      if (!teams.length) { return }
       const apiKey = context.rootState.currentUser.apiKey
       const isOnline = context.rootState.isOnline
       if (!shouldRequest({ apiKey, isOnline })) { return }
