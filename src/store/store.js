@@ -1008,11 +1008,6 @@ const store = createStore({
       utils.typeCheck({ value: user, type: 'object' })
       state.userDetailsUser = user
     },
-    updateUserDetailsUserRole: (state, update) => {
-      const isUser = state.userDetailsUser.id === update.userId
-      if (!isUser) { return }
-      state.userDetailsUser.role = update.role
-    },
 
     // Tag Details
 
