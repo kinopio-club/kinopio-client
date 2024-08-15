@@ -256,10 +256,10 @@ const toggleCurrentSpaceInTeam = (event) => {
 }
 const teamButtonTitle = computed(() => {
   let addString = 'Add'
-  if (team.value) {
+  if (spaceTeam.value) {
     addString = 'Added'
   }
-  const teamName = team.value.name || 'Team'
+  const teamName = spaceTeam.value.name || 'Team'
   return `${addString} to ${teamName}`
 })
 
