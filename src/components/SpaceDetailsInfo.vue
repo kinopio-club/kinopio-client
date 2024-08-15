@@ -232,10 +232,7 @@ const team = computed(() => {
     return null
   }
 })
-const spaceTeam = computed(() => {
-  const teamId = store.state.currentSpace.teamId
-  return store.getters['teams/byId'](teamId)
-})
+const spaceTeam = computed(() => store.getters['teams/spaceTeam']())
 const checkCanAssignTeam = (event) => {
   if (currentUserIsSpaceCreator.value) {
     return true

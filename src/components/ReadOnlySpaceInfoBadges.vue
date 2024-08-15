@@ -24,9 +24,9 @@ const showInExplore = computed(() => store.state.currentSpace.showInExplore)
   .badge.status(v-if="showInExplore")
     img.icon.sunglasses(src="@/assets/sunglasses.svg")
     span In Explore
-.row(v-if="spaceTeam")
+.row(v-if="props.spaceTeam")
   .badge.secondary
-    TeamLabel(:team="spaceTeam" :showIcon="true" :showName="true")
+    TeamLabel(:team="props.spaceTeam" :showIcon="true" :showName="true")
 </template>
 
 <style lang="stylus">
