@@ -53,7 +53,7 @@ const updateIsPositionBottom = async () => {
   state.isPositionBottom = dialogIsBelowViewport
 }
 
-const currentSpaceTeam = computed(() => store.getters['teams/bySpace']())
+const currentSpaceTeam = computed(() => store.getters['teams/spaceTeam']())
 
 const roles = computed(() => {
   return teamUserRoles.states()

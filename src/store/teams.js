@@ -146,7 +146,7 @@ export default {
       teamUserTeams = uniqBy(teamUserTeams, 'id')
       return teamUserTeams
     },
-    bySpace: (state, getters, rootState) => (space) => {
+    spaceTeam: (state, getters, rootState) => (space) => {
       const currentSpace = rootState.currentSpace
       space = space || currentSpace
       return state.teams[space.teamId]
@@ -158,7 +158,7 @@ export default {
       } else {
         const currentSpace = rootState.currentSpace
         space = space || currentSpace
-        team = getters.bySpace(space)
+        team = getters.spaceTeam(space)
       }
       if (!team) { return }
       return team.users.find(user => user.id === userId)

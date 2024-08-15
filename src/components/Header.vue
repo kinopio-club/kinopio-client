@@ -192,7 +192,7 @@ const currentSpaceName = computed(() => {
     return `Space ${id}`
   }
 })
-const spaceTeam = computed(() => store.getters['teams/bySpace']())
+const spaceTeam = computed(() => store.getters['teams/spaceTeam']())
 const spaceHasStatus = computed(() => {
   if (!isOnline.value) { return }
   return store.state.isLoadingSpace || store.state.isJoiningSpace || store.state.isReconnectingToBroadcast || store.state.isLoadingOtherItems

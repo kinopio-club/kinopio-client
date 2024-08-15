@@ -108,7 +108,7 @@ const userIsSpaceCreator = (user) => {
 // team
 
 const team = computed(() => {
-  return props.team || store.getters['teams/bySpace']()
+  return props.team || store.getters['teams/spaceTeam']()
 })
 const teamUser = (user) => {
   if (!team.value) { return }
