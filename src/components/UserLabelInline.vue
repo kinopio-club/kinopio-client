@@ -55,21 +55,21 @@ const showUserDetails = () => {
 </script>
 
 <template lang="pug">
-template(v-if="props.user")
-  .user-label-inline.badge(
-    :key="props.user.id"
-    :data-id="props.user.id"
-    :style="{ background: props.user.color }"
-    :class="{ 'button-badge': props.isClickable }"
-    @mouseup="toggleUserDetailsIsVisible"
-    @touchend="toggleUserDetailsIsVisible"
-    ref="labelElement"
-    :title="props.title"
-    @click.stop
-  )
-    img.anon-avatar(src="@/assets/anon-avatar.svg" :class="{ 'is-dark': colorIsDark }")
-    img.icon.camera(v-if="props.user.isOnline" src="@/assets/camera.svg" title="Online" :class="{ 'is-dark': colorIsDark }")
-    span.user-name(v-if="userHasName && !shouldHideName" :class="{ 'is-dark': colorIsDark }") {{ props.user.name }}
+.user-label-inline.badge(
+  v-if="props.user"
+  :key="props.user.id"
+  :data-id="props.user.id"
+  :style="{ background: props.user.color }"
+  :class="{ 'button-badge': props.isClickable }"
+  @mouseup="toggleUserDetailsIsVisible"
+  @touchend="toggleUserDetailsIsVisible"
+  ref="labelElement"
+  :title="props.title"
+  @click.stop
+)
+  img.anon-avatar(src="@/assets/anon-avatar.svg" :class="{ 'is-dark': colorIsDark }")
+  img.icon.camera(v-if="props.user.isOnline" src="@/assets/camera.svg" title="Online" :class="{ 'is-dark': colorIsDark }")
+  span.user-name(v-if="userHasName && !shouldHideName" :class="{ 'is-dark': colorIsDark }") {{ props.user.name }}
 </template>
 
 <style lang="stylus">
