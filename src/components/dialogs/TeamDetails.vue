@@ -50,6 +50,9 @@ const closeDialogs = () => {
   state.colorPickerIsVisible = false
   store.commit('userDetailsIsVisible', false)
 }
+const childDialogIsVisible = computed(() => {
+  return state.colorPickerIsVisible
+})
 
 // team
 
@@ -153,7 +156,7 @@ const showUserDetails = (event, user) => {
 </script>
 
 <template lang="pug">
-dialog.team.wide(v-if="visible" :open="visible" @click.left.stop="closeDialogs" ref="dialogElement" :style="{'max-height': state.dialogHeight + 'px'}")
+dialog.team.wide(v-if="visible" :open="visible" @click.left.stop="closeDialogs" ref="dialogElement" :style="{'max-height': state.dialogHeight + 'px'}" :class="{ 'child-dialog-is-visible': childDialogIsVisible }")
   section
     .row
       template(v-if="currentUserIsTeamAdmin")
@@ -210,6 +213,8 @@ dialog.team.wide(v-if="visible" :open="visible" @click.left.stop="closeDialogs" 
 <style lang="stylus">
 dialog.team
   overflow auto
+  &.child-dialog-is-visible
+    overflow initial
   input.name
     margin-bottom 0
   button.change-color
