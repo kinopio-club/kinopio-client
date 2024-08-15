@@ -12,10 +12,11 @@ const props = defineProps({
   showName: Boolean
 })
 
+const isVisible = computed(() => Boolean(props.team))
 </script>
 
 <template lang="pug">
-span.team-label
+span.team-label(v-if="isVisible")
   //- OfflineBadge
   .team-color(v-if="props.team.color" :style="{ background: props.team.color }" :title="props.team.name")
   img.icon.team(v-if="props.showIcon" src="@/assets/team.svg" :title="props.team.name")
