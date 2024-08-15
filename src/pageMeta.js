@@ -60,7 +60,7 @@ export default {
     if (isTeamInvite) {
       name = `[Invite] ${name}`
     }
-    let description = 'Join.. team , collaborate on spaces A space to whiteboard, moodboard, brainstorm, and take notes'
+    let description = 'Work together on shared whiteboards, brainstorms, and diagrams'
     document.title = name
     document.querySelector('meta[property="og:title"]').content = name
     document.querySelector('meta[property="og:image"]').content = logo
