@@ -182,8 +182,8 @@ const userTeams = computed(() => store.getters['teams/byUser'](props.user))
         span Sign Out
       button(v-else @click.left="triggerSignUpOrInIsVisible")
         span Sign Up or In
-  //- Other User
-  section(v-if="!isCurrentUser && userIsSignedIn && props.user.id")
+  //- spaces, follow
+  section(v-if="!isCurrentUser && userIsSignedIn")
     .button-wrap
       button(@click.left.stop="getUserSpaces" :class="{active: state.loading.userSpaces || state.spacePickerIsVisible}")
         User(:user="props.user" :isClickable="false" :detailsOnRight="false" :key="props.user.id")
