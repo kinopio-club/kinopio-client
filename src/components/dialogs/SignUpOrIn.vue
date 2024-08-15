@@ -168,7 +168,7 @@ const isSignUpPasswordTooShort = (password) => {
     return true
   }
 }
-const checkUserAttributes = () => {
+const migrationAppleAppAccountToken = () => {
   const appleToken = store.state.currentUser.appleAppAccountToken
   if (!appleToken) {
     store.commit('currentUser/updateAppleAppAccountToken')
@@ -179,7 +179,7 @@ const signUp = async (event) => {
   const email = event.target[0].value.toLowerCase()
   const password = event.target[1].value
   const confirmPassword = event.target[2].value
-  checkUserAttributes()
+  migrationAppleAppAccountToken()
   let currentUser = utils.clone(store.state.currentUser)
   if (!isPasswordMatchesEmail(email, password)) { return }
   if (!isSignUpPasswordTooShort(password)) { return }
