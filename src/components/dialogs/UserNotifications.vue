@@ -79,7 +79,6 @@ const cardUrl = (notification) => {
 const cardDetailsIsVisible = (cardId) => {
   return store.state.cardDetailsIsVisibleForCardId === cardId
 }
-
 const showCardDetails = (notification) => {
   let space = utils.clone(notification.space)
   const card = utils.clone(notification.card)
@@ -124,6 +123,14 @@ const cardNameSegments = (name) => {
 }
 const markAllAsRead = () => {
   emit('markAllAsRead')
+}
+const isThemeDark = computed(() => store.getters['themes/isThemeDark'])
+const cardBackgroundIsDark = (card) => {
+  if (card.backgroundColor) {
+    return utils.colorIsDark(card.backgroundColor)
+  } else {
+    return isThemeDark.value
+  }
 }
 
 // user
@@ -214,9 +221,9 @@ dialog.narrow.user-notifications(v-if="props.visible" :open="props.visible" ref=
             //- card details
             .row(v-if="notification.card")
               a(:href="cardUrl(notification)")
-                .card-details.badge.button-badge(@click.stop.prevent="showCardDetails(notification)" :class="{ active: cardDetailsIsVisible(notification.card.id) }")
+                .card-details.badge.button-badge(@click.stop.prevent="showCardDetails(notification)" :class="{ active: cardDetailsIsVisible(notification.card.id) }" :style="{backgroundColor: notification.card.backgroundColor}")
                   template(v-for="segment in cardNameSegments(notification.card.name)")
-                    NameSegment(:segment="segment" @showTagDetailsIsVisible="showCardDetails(notification)")
+                    NameSegment(:segment="segment" @showTagDetailsIsVisible="showCardDetails(notification)" :backgroundColorIsDark="cardBackgroundIsDark(notification.card)")
                   img.card-image(v-if="notification.detailsImage" :src="notification.detailsImage")
 </template>
 
