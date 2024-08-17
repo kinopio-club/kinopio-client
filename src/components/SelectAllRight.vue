@@ -143,6 +143,7 @@ const selectAllRight = (event) => {
     padding 3px
     margin-left 6px
     margin-right 8px
+    pointer-events none
 
   .pointer
     position absolute

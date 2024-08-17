@@ -692,13 +692,14 @@ const selectAllItemsBelowCursor = (position) => {
   const cardIds = cards.map(card => card.id)
   // boxes
   let boxes = utils.clone(store.getters['currentBoxes/all'])
-  boxes = boxes.filter(boxes => (boxes.y * zoom) > position.y)
-  const boxIds = boxes.map(boxes => boxes.id)
+  boxes = boxes.filter(box => (box.y * zoom) > position.y)
+  const boxIds = boxes.map(box => box.id)
+  const isItemIds = Boolean(cardIds.length || boxIds.length)
   // select
-  if (cardIds.length && preventMultipleSelectedActionsIsVisible) {
+  if (isItemIds && preventMultipleSelectedActionsIsVisible) {
     store.commit('multipleCardsSelectedIds', cardIds)
     store.commit('multipleBoxesSelectedIds', boxIds)
-  } else if (cardIds.length) {
+  } else if (isItemIds) {
     store.commit('multipleSelectedActionsPosition', position)
     store.commit('multipleSelectedActionsIsVisible', true)
     store.commit('multipleCardsSelectedIds', cardIds)
@@ -727,13 +728,16 @@ const selectAllItemsRightOfCursor = (position) => {
   const cardIds = cards.map(card => card.id)
   // boxes
   let boxes = utils.clone(store.getters['currentBoxes/all'])
-  boxes = boxes.filter(boxes => (boxes.x * zoom) > position.x)
-  const boxIds = boxes.map(boxes => boxes.id)
+  boxes = boxes.filter(box => {
+    return (box.x * zoom) >= position.x
+  })
+  const boxIds = boxes.map(box => box.id)
+  const isItemIds = Boolean(cardIds.length || boxIds.length)
   // select
-  if (cardIds.length && preventMultipleSelectedActionsIsVisible) {
+  if (isItemIds && preventMultipleSelectedActionsIsVisible) {
     store.commit('multipleCardsSelectedIds', cardIds)
     store.commit('multipleBoxesSelectedIds', boxIds)
-  } else if (cardIds.length) {
+  } else if (isItemIds) {
     store.commit('multipleSelectedActionsPosition', position)
     store.commit('multipleSelectedActionsIsVisible', true)
     store.commit('multipleCardsSelectedIds', cardIds)
