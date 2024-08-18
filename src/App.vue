@@ -515,6 +515,7 @@ label // used for checkbox buttons
   cursor pointer
   user-select none
   color var(--primary)
+  max-width 100%
   .down-arrow
     padding-left 4px
     vertical-align 1px
