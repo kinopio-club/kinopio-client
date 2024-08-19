@@ -224,14 +224,7 @@ const closeAllDialogs = () => {
 
 // team
 
-const teams = computed(() => store.getters['teams/byUser']())
-const team = computed(() => {
-  if (teams.value) {
-    return teams.value[0] // TODO support multiple teams
-  } else {
-    return null
-  }
-})
+const userTeams = computed(() => store.getters['teams/byUser']())
 const spaceTeam = computed(() => store.getters['teams/spaceTeam']())
 const checkCanAssignTeam = (event) => {
   if (currentUserIsSpaceCreator.value) {
@@ -248,9 +241,8 @@ const toggleCurrentSpaceInTeam = (event) => {
     updateLocalSpaces()
   } else {
     if (!checkCanAssignTeam(event)) { return }
-    store.dispatch('teams/addCurrentSpace', team.value)
-    const position = utils.cursorPositionInPage(event)
-    store.commit('addNotificationWithPosition', { message: `Added to ${team.value.name}`, position, type: 'success', layer: 'app', icon: 'checkmark' })
+    const team = userTeams.value[0]
+    store.dispatch('teams/addCurrentSpace', team)
     updateLocalSpaces()
   }
 }
@@ -259,8 +251,7 @@ const teamButtonTitle = computed(() => {
   if (spaceTeam.value) {
     addString = 'Added'
   }
-  const teamName = spaceTeam.value.name || 'Team'
-  return `${addString} to ${teamName}`
+  return `${addString} to Team`
 })
 
 </script>
@@ -308,8 +299,8 @@ template(v-if="isSpaceMember")
   .row
     //- Privacy
     PrivacyButton(:privacyPickerIsVisible="state.privacyPickerIsVisible" :showShortName="true" @togglePrivacyPickerIsVisible="togglePrivacyPickerIsVisible" @closeDialogs="closeDialogs" @updateLocalSpaces="updateLocalSpaces")
-      //- team | favorite
-    template(v-if="team")
+      //- toggle space team | favorite
+    template(v-if="userTeams")
       .segmented-buttons
         //- Team
         button.team-button(:title="teamButtonTitle" :class="{active: spaceTeam}" @click.left.prevent.stop="toggleCurrentSpaceInTeam" @keydown.stop.enter="toggleCurrentSpaceInTeam")
