@@ -1,12 +1,18 @@
 <script setup>
 import { reactive, computed, onMounted, defineProps, defineEmits, watch } from 'vue'
 import { useStore } from 'vuex'
+
+import TeamLabel from '@/components/TeamLabel.vue'
+
 const store = useStore()
+
+const props = defineProps({
+  spaceTeam: Object
+})
 
 const isSpaceMember = computed(() => store.getters['currentUser/isSpaceMember']())
 const spacePrivacyIsOpen = computed(() => store.state.currentSpace.privacy === 'open')
 const showInExplore = computed(() => store.state.currentSpace.showInExplore)
-const spaceTeam = computed(() => store.state.currentSpace.team)
 </script>
 
 <template lang="pug">
@@ -18,9 +24,9 @@ const spaceTeam = computed(() => store.state.currentSpace.team)
   .badge.status(v-if="showInExplore")
     img.icon.sunglasses(src="@/assets/sunglasses.svg")
     span In Explore
-  .badge.secondary(v-if="spaceTeam")
-    img.icon.team(src="@/assets/team.svg")
-    span {{ spaceTeam.name }}
+.row(v-if="props.spaceTeam")
+  .badge.secondary
+    TeamLabel(:team="props.spaceTeam" :showName="true")
 </template>
 
 <style lang="stylus">

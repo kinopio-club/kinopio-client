@@ -3,10 +3,9 @@ import { reactive, computed, onMounted, defineProps, defineEmits, watch, ref, ne
 import { useStore } from 'vuex'
 
 import PrivacyButton from '@/components/PrivacyButton.vue'
-import Invite from '@/components/Invite.vue'
+import InviteToSpace from '@/components/InviteToSpace.vue'
 import RssFeeds from '@/components/dialogs/RssFeeds.vue'
 import Embed from '@/components/dialogs/Embed.vue'
-import SpaceUsersButton from '@/components/SpaceUsersButton.vue'
 import utils from '@/utils.js'
 import ImportExport from '@/components/dialogs/ImportExport.vue'
 import AddToExplore from '@/components/AddToExplore.vue'
@@ -58,7 +57,6 @@ const isSpaceMember = computed(() => store.getters['currentUser/isSpaceMember'](
 const spaceIsRemote = computed(() => store.getters['currentSpace/isRemote'])
 const spaceIsPublic = computed(() => store.state.currentSpace.privacy !== 'private')
 const spaceIsPrivate = computed(() => store.state.currentSpace.privacy === 'private')
-const spaceTeam = computed(() => store.state.currentSpace.team)
 
 // add to explore
 
@@ -162,10 +160,6 @@ const users = computed(() => {
   items = items.concat(store.state.currentSpace.collaborators)
   return items
 })
-const spaceUsersButtonIsVisible = computed(() => {
-  return spaceIsRemote.value && users.value.length > 1
-})
-
 </script>
 
 <template lang="pug">
@@ -178,10 +172,6 @@ dialog.share.wide(v-if="props.visible" :open="props.visible" @click.left.stop="c
           button.small-button(@click.left.stop="toggleRssFeedsIsVisible" :class="{ active: state.rssFeedsIsVisible }" title="RSS Feeds")
             span RSS
           RssFeeds(:visible="state.rssFeedsIsVisible")
-
-  //- space team, users, collaborators
-  section(v-if="spaceUsersButtonIsVisible || spaceTeam")
-    SpaceUsersButton(:showLabel="true")
 
   section(v-if="spaceIsRemote")
     ReadOnlySpaceInfoBadges
@@ -205,16 +195,8 @@ dialog.share.wide(v-if="props.visible" :open="props.visible" @click.left.stop="c
             input(type="checkbox" :value="state.isShareInPresentationMode")
             img.icon(src="@/assets/presentation.svg")
 
-      //- Explore
-      template(v-if="exploreSectionIsVisible")
-        .row
-          p Share with the Community
-        .row
-          AddToExplore
-          AskToAddToExplore
-
   //- Invite
-  Invite(v-if="isSpaceMember && currentUserIsSignedIn" @closeDialogs="closeDialogs" @emailInvitesIsVisible="emailInvitesIsVisible")
+  InviteToSpace(v-if="isSpaceMember && currentUserIsSignedIn" @closeDialogs="closeDialogs" @emailInvitesIsVisible="emailInvitesIsVisible")
 
   section(v-if="!spaceIsRemote")
     p
@@ -222,6 +204,15 @@ dialog.share.wide(v-if="props.visible" :open="props.visible" @click.left.stop="c
       span.badge.info you need to Sign Up or In
       span for your spaces to be synced and accessible anywhere.
     button(@click.left="triggerSignUpOrInIsVisible") Sign Up or In
+
+  //- Explore
+  section(v-if="exploreSectionIsVisible")
+    section.subsection
+      .row
+        p Share with the Community
+      .row
+        AddToExplore
+        AskToAddToExplore
 
   //- Import, Export, Embed
   section.import-export-section

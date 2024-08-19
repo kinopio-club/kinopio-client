@@ -45,7 +45,7 @@ watch(() => props.visible, (value, prevValue) => {
 
 const state = reactive({
   moonPhase: {},
-  editPromptsIsVisible: false,
+  journalSettingsIsVisible: false,
   urlIsCopied: false,
   screenIsShort: false,
   dialogHeight: null,
@@ -54,7 +54,7 @@ const state = reactive({
 
 const currentUserId = computed(() => store.state.currentUser.id)
 const closeAll = () => {
-  state.editPromptsIsVisible = false
+  state.journalSettingsIsVisible = false
   state.urlIsCopied = false
 }
 
@@ -124,10 +124,10 @@ const toggleShouldCreateJournalsWithDailyPrompt = () => {
   const value = !shouldCreateJournalsWithDailyPrompt.value
   store.dispatch('currentUser/update', { shouldCreateJournalsWithDailyPrompt: value })
 }
-const toggleEditPromptsIsVisible = () => {
-  const value = !state.editPromptsIsVisible
+const toggleJournalSettingsIsVisible = () => {
+  const value = !state.journalSettingsIsVisible
   closeAll()
-  state.editPromptsIsVisible = value
+  state.journalSettingsIsVisible = value
   updateDialogHeight()
 }
 const userPrompts = computed(() => {
@@ -187,13 +187,12 @@ dialog.add-space.narrow(
       .segmented-buttons
         button(@click="addJournalSpace")
           img.icon(src="@/assets/add.svg")
-          MoonPhase(:moonPhase="state.moonPhase.name")
-          span Journal
-        button(@click.left.stop="toggleEditPromptsIsVisible" :class="{ active: state.editPromptsIsVisible }")
+          span Daily Journal Space
+        button(@click.left.stop="toggleJournalSettingsIsVisible" :class="{ active: state.journalSettingsIsVisible }")
           img.icon.down-arrow.button-down-arrow(src="@/assets/down-arrow.svg")
 
     //- Journal Settings
-    template(v-if="state.editPromptsIsVisible")
+    template(v-if="state.journalSettingsIsVisible")
       //- weather
       section.subsection
         Weather
@@ -202,7 +201,8 @@ dialog.add-space.narrow(
         .row.daily-prompt-row
           .button-wrap
             button(@click.left.prevent="toggleShouldCreateJournalsWithDailyPrompt" @keydown.stop.enter="toggleShouldCreateJournalsWithDailyPrompt" :class="{ active: shouldCreateJournalsWithDailyPrompt }")
-              img.icon.today(src="@/assets/today.svg")
+              //- img.icon.today(src="@/assets/today.svg")
+              MoonPhase(:moonPhase="state.moonPhase.name")
               span Prompt of the Day
         .row(v-if="shouldCreateJournalsWithDailyPrompt")
           p {{dailyPrompt}}
@@ -223,18 +223,19 @@ dialog.add-space.narrow(
       span Inbox
     p For collecting ideas to figure out later
 
-  //- Templates
+  //- Templates and Import
   section
-    .row
-      .button-wrap
-        button(@click="triggerTemplatesIsVisible")
-          img.icon.templates(src="@/assets/templates.svg")
-          span Templates
-      .button-wrap
-        button(@click="triggerImportIsVisible") Import
+    //- templates
+    .button-wrap
+      button(@click="triggerTemplatesIsVisible")
+        img.icon.templates(src="@/assets/templates.svg")
+        span Templates
+    //- import
+    .button-wrap
+      button(@click="triggerImportIsVisible") Import
 </template>
 <style lang="stylus">
-.add-space
+dialog.add-space
   overflow auto
   max-height calc(100vh - 230px)
   &.short
@@ -244,4 +245,6 @@ dialog.add-space.narrow(
     margin-left 5px
   .daily-prompt-row
     justify-content space-between
+    .moon-phase
+      vertical-align -1px
 </style>

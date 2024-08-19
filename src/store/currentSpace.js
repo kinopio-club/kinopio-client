@@ -84,9 +84,8 @@ const currentSpace = {
       })
       cache.updateSpace('collaborators', state.collaborators, state.id)
     },
-    updateTeam: (state, space) => {
+    updateTeamMeta: (state, space) => {
       state.teamId = space.teamId
-      state.team = space.team
       state.addedToTeamByUserId = space.addedToTeamByUserId
     },
     // websocket receive
@@ -802,7 +801,8 @@ const currentSpace = {
         let remoteSpace = remoteData
         console.log('🎑 remoteSpace', remoteSpace)
         if (!remoteSpace) { return }
-        context.commit('updateTeam', remoteSpace)
+        context.dispatch('teams/loadTeam', remoteSpace, { root: true })
+        context.commit('updateSpace', { collaboratorKey: remoteSpace.collaboratorKey })
         const spaceIsUnchanged = utils.spaceIsUnchanged(cachedSpace, remoteSpace)
         if (spaceIsUnchanged) {
           context.commit('isLoadingSpace', false, { root: true })
@@ -1124,24 +1124,10 @@ const currentSpace = {
       })
     },
 
-    // Team
-
-    addToTeam: (context) => {
-      const user = context.rootState.currentUser
-      context.dispatch('updateSpace', {
-        teamId: user.team.id,
-        addedToTeamByUserId: user.id,
-        team: user.team
-      })
-    },
-    removeFromTeam: (context) => {
-      context.dispatch('updateSpace', { teamId: null, addedToTeamByUserId: null, team: null })
-    },
-
     // User Card Count
 
     checkIfShouldNotifyCardsCreatedIsNearLimit: (context) => {
-      const spaceUserIsUpgraded = context.getters.spaceUserIsUpgraded
+      const spaceUserIsUpgraded = context.getters.spaceUserIsUpgradedOrOnTeam
       if (spaceUserIsUpgraded) { return }
       const currentUser = context.rootState.currentUser
       if (currentUser.isUpgraded) { return }
@@ -1317,30 +1303,27 @@ const currentSpace = {
       }
       return users
     },
-    memberById: (state, getters, rootState) => (id) => {
+    memberById: (state, getters, rootState) => (userId) => {
       const members = getters.members()
-      return members.find(member => member.id === id)
+      return members.find(member => member.id === userId)
     },
-    teamUserById: (state, getters, rootState) => (id) => {
-      if (!state.team) { return }
-      const users = state.team.users
-      return users.find(user => user.id === id)
-    },
-    userById: (state, getters, rootState, rootGetters) => (id) => {
-      let user = getters.memberById(id) || rootGetters.otherUserById(id) || getters.teamUserById(id)
-      if (rootState.currentUser.id === id) {
+    userById: (state, getters, rootState, rootGetters) => (userId) => {
+      const space = utils.clone(state)
+      const teamUser = rootGetters['teams/teamUser']({ userId, space })
+      let user = getters.memberById(userId) || rootGetters.otherUserById(userId) || teamUser
+      if (rootState.currentUser.id === userId) {
         user = rootState.currentUser
       }
       return user
     },
-    spaceUserIsUpgraded: (state, getters, rootState) => {
+    spaceUserIsUpgradedOrOnTeam: (state, getters, rootState, rootGetters) => {
       const currentUser = rootState.currentUser
       const users = state.users
-      const userIds = users.map(user => user.id)
-      if (userIds.includes(currentUser.id)) { return }
       let userIsUpgraded
       users.forEach(user => {
-        if (user.isUpgraded) { userIsUpgraded = true }
+        const userTeams = rootGetters['teams/byUser'](user)
+        const isTeamUser = Boolean(userTeams.length)
+        if (user.isUpgraded || isTeamUser) { userIsUpgraded = true }
       })
       return userIsUpgraded
     },
@@ -1352,8 +1335,8 @@ const currentSpace = {
     },
     shouldPreventAddCard: (state, getters, rootState, rootGetters) => {
       const cardsCreatedIsOverLimit = rootGetters['currentUser/cardsCreatedIsOverLimit']
-      const spaceUserIsUpgraded = getters.spaceUserIsUpgraded
-      return cardsCreatedIsOverLimit && !spaceUserIsUpgraded
+      const spaceUserIsUpgradedOrOnTeam = getters.spaceUserIsUpgradedOrOnTeam
+      return cardsCreatedIsOverLimit && !spaceUserIsUpgradedOrOnTeam
     },
     readOnlyKey: (state, getters, rootState, rootGetters) => (space) => {
       const readOnlyKey = rootState.spaceReadOnlyKey

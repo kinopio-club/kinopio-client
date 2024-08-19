@@ -12,6 +12,7 @@ import UserLabelInline from '@/components/UserLabelInline.vue'
 import NameMatch from '@/components/NameMatch.vue'
 import OfflineBadge from '@/components/OfflineBadge.vue'
 import SpaceTodayJournalBadge from '@/components/SpaceTodayJournalBadge.vue'
+import TeamLabel from '@/components/TeamLabel.vue'
 import utils from '@/utils.js'
 import cache from '@/cache.js'
 
@@ -83,7 +84,8 @@ const props = defineProps({
   disableListOptimizations: Boolean,
   search: String,
   parentDialog: String,
-  previewImageIsWide: Boolean
+  previewImageIsWide: Boolean,
+  showSpaceTeams: Boolean
 })
 
 const state = reactive({
@@ -372,6 +374,13 @@ const checkmarkSpace = (space) => {
   shouldPreventSelectSpace = true
   emit('checkmarkSpace', space)
 }
+
+// team
+
+const team = (teamId) => {
+  if (!teamId) { return }
+  return store.getters['teams/byId'](teamId)
+}
 </script>
 
 <template lang="pug">
@@ -430,8 +439,8 @@ span.space-list-wrap
             .preview-thumbnail-image-wrap(v-if="space.previewThumbnailImage && isOnline" :class="{wide: previewImageIsWide}")
               img.preview-thumbnail-image(:src="space.previewThumbnailImage")
             //- team
-            template(v-if="space.teamId" title="Team Space")
-              img.icon.team(src="@/assets/team.svg")
+            template(v-if="team(space.teamId) && props.showSpaceTeams")
+              TeamLabel(:team="team(space.teamId)")
             //- offline
             span(v-if="isOffline && isNotCached(space.id)")
               OfflineBadge(:isInline="true" :isDanger="true")
@@ -500,9 +509,8 @@ span.space-list-wrap
       height 12px
       vertical-align -1px
 
-    .favorite-icon,
-    .inbox-icon,
-    .icon.team
+    .favorite-icon
+    .inbox-icon
       margin-right 5px
       width 12px
       vertical-align -2px
@@ -510,9 +518,6 @@ span.space-list-wrap
     .icon.team
       width initial
       height 10px
-      margin-top 4.5px
-    .icon.team + .icon
-      margin-left 0
 
     .user
       margin-right 6px
@@ -561,7 +566,7 @@ span.space-list-wrap
         z-index 1
       .icon.templates
         margin-right 5px
-        margin-top 4px
+        margin-top 3px
 
     .space-wrap
       position relative

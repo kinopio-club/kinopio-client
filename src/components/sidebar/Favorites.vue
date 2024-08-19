@@ -162,7 +162,7 @@ template(v-if="visible")
 
     //- People
     template(v-if="!state.spacesIsVisible")
-      UserList(:users="favoriteUsers" :selectedUser="userDetailsSelectedUser" @selectUser="toggleUserDetails" :isClickable="true")
+      UserList(:users="favoriteUsers" :selectedUser="userDetailsSelectedUser" @selectUser="toggleUserDetails")
 
   //- blank state
   section.favorites.tips-section(v-if="isEmpty && !loading")

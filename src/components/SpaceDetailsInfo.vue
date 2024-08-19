@@ -54,14 +54,14 @@ const state = reactive({
   backgroundIsVisible: false,
   privacyPickerIsVisible: false,
   settingsIsVisible: false,
-  exportIsVisible: false,
-  errorRemoveFromTeam: false
+  exportIsVisible: false
 })
 
 // user
 
 const currentUser = computed(() => store.state.currentUser)
 const currentUserIsSpaceCollaborator = computed(() => store.getters['currentUser/isSpaceCollaborator']())
+const currentUserIsSpaceCreator = computed(() => store.getters['currentUser/isSpaceCreator']())
 const isSpaceMember = computed(() => {
   const currentSpace = store.state.currentSpace
   return store.getters['currentUser/isSpaceMember'](currentSpace)
@@ -224,30 +224,42 @@ const closeAllDialogs = () => {
 
 // team
 
-const userTeam = computed(() => store.state.currentUser.team)
-const userIsInSpaceTeam = computed(() => store.getters['currentUser/isInSpaceTeam']())
+const teams = computed(() => store.getters['teams/byUser']())
+const team = computed(() => {
+  if (teams.value) {
+    return teams.value[0] // TODO support multiple teams
+  } else {
+    return null
+  }
+})
+const spaceTeam = computed(() => store.getters['teams/spaceTeam']())
+const checkCanAssignTeam = (event) => {
+  if (currentUserIsSpaceCreator.value) {
+    return true
+  } else {
+    const position = utils.cursorPositionInPage(event)
+    store.commit('addNotificationWithPosition', { message: `Only space creator can add to team`, position, type: 'danger', layer: 'app', icon: 'cancel' })
+  }
+}
 const toggleCurrentSpaceInTeam = (event) => {
   store.commit('clearNotificationsWithPosition')
-  const position = utils.cursorPositionInPage(event)
-  const isTeamAdmin = store.getters['currentUser/isTeamAdmin'](userTeam.value.id)
-  const isCreatorOrTeamAdmin = store.state.currentSpace.addedToTeamByUserId === store.state.currentUser.id || isTeamAdmin
-  if (userIsInSpaceTeam.value && isCreatorOrTeamAdmin) {
-    store.dispatch('currentSpace/removeFromTeam')
+  if (spaceTeam.value) {
+    store.dispatch('teams/removeCurrentSpace')
     updateLocalSpaces()
-  } else if (userIsInSpaceTeam.value) {
-    state.errorRemoveFromTeam = true
   } else {
-    store.dispatch('currentSpace/addToTeam')
-    store.commit('addNotificationWithPosition', { message: `Added to ${userTeam.value.name}`, position, type: 'success', layer: 'app', icon: 'checkmark' })
+    if (!checkCanAssignTeam(event)) { return }
+    store.dispatch('teams/addCurrentSpace', team.value)
+    const position = utils.cursorPositionInPage(event)
+    store.commit('addNotificationWithPosition', { message: `Added to ${team.value.name}`, position, type: 'success', layer: 'app', icon: 'checkmark' })
     updateLocalSpaces()
   }
 }
 const teamButtonTitle = computed(() => {
   let addString = 'Add'
-  if (userIsInSpaceTeam.value) {
+  if (spaceTeam.value) {
     addString = 'Added'
   }
-  const teamName = userTeam.value.name || 'Team'
+  const teamName = spaceTeam.value.name || 'Team'
   return `${addString} to ${teamName}`
 })
 
@@ -289,7 +301,7 @@ const teamButtonTitle = computed(() => {
       button.small-button(:class="{active: dialogIsPinned}")
         img.icon.pin(src="@/assets/pin.svg")
 
-ReadOnlySpaceInfoBadges
+ReadOnlySpaceInfoBadges(:spaceTeam="spaceTeam")
 
 //- member options
 template(v-if="isSpaceMember")
@@ -297,10 +309,10 @@ template(v-if="isSpaceMember")
     //- Privacy
     PrivacyButton(:privacyPickerIsVisible="state.privacyPickerIsVisible" :showShortName="true" @togglePrivacyPickerIsVisible="togglePrivacyPickerIsVisible" @closeDialogs="closeDialogs" @updateLocalSpaces="updateLocalSpaces")
       //- team | favorite
-    template(v-if="userTeam")
+    template(v-if="team")
       .segmented-buttons
         //- Team
-        button.team-button(:title="teamButtonTitle" :class="{active: userIsInSpaceTeam}" @click.left.prevent.stop="toggleCurrentSpaceInTeam" @keydown.stop.enter="toggleCurrentSpaceInTeam")
+        button.team-button(:title="teamButtonTitle" :class="{active: spaceTeam}" @click.left.prevent.stop="toggleCurrentSpaceInTeam" @keydown.stop.enter="toggleCurrentSpaceInTeam")
           img.icon.team(src="@/assets/team.svg")
         //- Favorite
         FavoriteSpaceButton(:parentIsDialog="true" @updateLocalSpaces="updateLocalSpaces")
@@ -312,9 +324,6 @@ template(v-if="isSpaceMember")
       button(@click="toggleSettingsIsVisible" :class="{active: state.settingsIsVisible}")
         img.icon.settings(src="@/assets/settings.svg")
         span Settings
-  //- team error
-  .row(v-if="state.errorRemoveFromTeam")
-    .badge.danger Only the person who added this space to the team, or a {{team.name}} team admin can remove this space from the team
 
 //- read only options
 .row(v-if="!isSpaceMember")

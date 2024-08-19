@@ -27,7 +27,12 @@ const state = reactive({
 })
 const otherCard = computed(() => store.state.currentSelectedOtherItem)
 const url = computed(() => utils.urlFromSpaceAndCard({ spaceId: otherSpace.value.id, cardId: otherCard.value.id }))
-const canEdit = computed(() => store.getters['currentUser/cardIsCreatedByCurrentUser'](otherCard.value))
+const canEditOtherCard = computed(() => {
+  const canEditCard = store.getters['currentUser/cardIsCreatedByCurrentUser'](otherCard.value)
+  if (canEditCard) { return true }
+  const canEditSpace = store.getters['currentUser/canEditSpace'](otherSpace.value)
+  return canEditSpace
+})
 const isLoadingOtherItems = computed(() => store.state.isLoadingOtherItems)
 const otherSpace = computed(() => store.getters.otherSpaceById(otherCard.value.spaceId))
 
@@ -148,7 +153,7 @@ dialog.narrow.other-card-details(v-if="visible" :open="visible" :style="styles" 
       .row
         OtherSpacePreview(:otherSpace="otherSpace" :isStatic="true" :url="url")
       //- edit
-      template(v-if="canEdit")
+      template(v-if="canEditOtherCard")
         section.subsection.textarea-wrap
           textarea.name(
             ref="textarea"

@@ -503,6 +503,7 @@ button,
 input[type="color"],
 select,
 label // used for checkbox buttons
+  flex-shrink 0
   touch-action manipulation
   text-align left
   padding 5px 9px
@@ -827,6 +828,7 @@ dialog
       height 14px
       width 14px
       border-radius var(--small-entity-radius)
+
   a
     text-decoration-thickness 1px
     color var(--text-link)
@@ -950,7 +952,6 @@ button
 .icon
   user-drag none
   -webkit-user-drag none
-  pointer-events none
 
 .icon + span,
 .icon + .icon
@@ -966,13 +967,12 @@ button
 .button-wrap
   display inline-block
   position relative
+  flex-shrink 0
   dialog
     top calc(100% - 8px)
 
 .icon.team
   height 11px
-.icon.team + span
-  margin-left 4px
 
 .icon.sunglasses
   height 12px
@@ -1025,6 +1025,10 @@ button
 
 .icon.json-canvas
   width 10px
+
+.icon.mail
+  width 11px
+  vertical-align 1px
 
 label,
 li

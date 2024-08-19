@@ -56,6 +56,7 @@ onMounted(() => {
       dragItemsOnNextTick()
     }
   })
+  updateIconsNotDraggable()
   // ⏰ scheduled tasks
   // retry failed sync operations
   processQueueIntervalTimer = setInterval(() => {
@@ -355,6 +356,12 @@ const blurButtonClick = (event) => {
     event.target.blur()
   }
 }
+const updateIconsNotDraggable = () => {
+  const iconElements = document.querySelectorAll('img.icon')
+  iconElements.forEach(element => {
+    element.draggable = false
+  })
+}
 const initInteractions = (event) => {
   if (eventIsFromTextarea(event)) {
     shouldCancel = true
@@ -458,6 +465,7 @@ const stopInteractions = async (event) => {
   if (isBoxesSelected && store.state.boxesWereDragged) {
     store.dispatch('currentBoxes/afterMove')
   }
+  updateIconsNotDraggable()
   blurButtonClick(event)
   if (event.touches) {
     store.commit('triggerUpdateHeaderAndFooterPosition')

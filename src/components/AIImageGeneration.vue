@@ -137,7 +137,7 @@ const updateCurrentUserAIImages = () => {
   //- sign up
   section(v-if="!currentUserIsSignedIn")
     section.subsection
-      p Because of the cost of generating AI images, you'll need to sign in or up to use this
+      p Because of the cost of generating AI images, you'll need to sign up or in to use this
       .button-wrap
         button(@click.left="triggerSignUpOrInIsVisible")
           span Sign Up or In

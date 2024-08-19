@@ -35,7 +35,8 @@ watch(() => props.visible, (value, prevValue) => {
 })
 
 const state = reactive({
-  moonPhase: {}
+  moonPhase: {},
+  dialogHeight: null
 })
 
 const updateDialogHeight = async () => {
@@ -99,7 +100,8 @@ const toggleShowHiddenSpace = () => {
 
 // by team
 
-const team = computed(() => store.state.currentUser.team)
+const teams = computed(() => store.getters['teams/byUser']())
+
 const filterByTeamAll = computed(() => !dialogSpaceFilterByTeam.value)
 const filterByTeamTeam = computed(() => dialogSpaceFilterByTeam.value === 'team')
 const filterByTeamPersonal = computed(() => dialogSpaceFilterByTeam.value === 'personal')
@@ -158,7 +160,7 @@ const filterByUser = (event, user) => {
 </script>
 
 <template lang="pug">
-dialog.narrow.space-filters(v-if="props.visible" :open="props.visible" @click.left.stop ref="dialogElement")
+dialog.narrow.space-filters(v-if="props.visible" :open="props.visible" @click.left.stop ref="dialogElement" :style="{'max-height': state.dialogHeight + 'px'}")
   section
     p Space Filters
   section
@@ -169,7 +171,7 @@ dialog.narrow.space-filters(v-if="props.visible" :open="props.visible" @click.le
         span Clear all
         span.badge.info.total-filters-active(v-if="totalFiltersActive") {{totalFiltersActive}}
     //- show team
-    section.subsection(v-if="team")
+    section.subsection(v-if="teams.length")
       p Filter by Team
       .segmented-buttons
         button(:class="{active: filterByTeamAll}" @click="updateFilterByTeam(null)")
@@ -212,11 +214,12 @@ dialog.narrow.space-filters(v-if="props.visible" :open="props.visible" @click.le
 
   //- collaborators
   section.results-section.collaborators
-    UserList(:users="spaceUsers" :isClickable="true" @selectUser="filterByUser" :selectedUser="dialogSpaceFilterByUser")
+    UserList(:users="spaceUsers" @selectUser="filterByUser" :selectedUser="dialogSpaceFilterByUser")
 </template>
 
 <style lang="stylus">
 dialog.space-filters
+  overflow auto
   left inherit
   right -212px
   @media(max-width 560px)

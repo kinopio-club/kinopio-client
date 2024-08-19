@@ -55,7 +55,7 @@ export default {
     z-index var(--max-z)
     pointer-events none
     animation-name hideme
-    animation-delay 5s
+    animation-delay 1s
     animation-duration 0.1s
     animation-iteration-count 1
     animation-direction forward

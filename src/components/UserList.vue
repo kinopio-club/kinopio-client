@@ -4,38 +4,54 @@ import { useStore } from 'vuex'
 
 import ResultsFilter from '@/components/ResultsFilter.vue'
 import UserLabelInline from '@/components/UserLabelInline.vue'
+import TeamUserRolePicker from '@/components/dialogs/TeamUserRolePicker.vue'
+import Loader from '@/components/Loader.vue'
+import TeamLabel from '@/components/TeamLabel.vue'
+import utils from '@/utils.js'
 const store = useStore()
 
-const emit = defineEmits(['selectUser', 'removeUser'])
+onMounted(() => {
+  store.subscribe(mutation => {
+    if (mutation.type === 'triggerCloseChildDialogs') {
+      closeDialogs()
+    }
+  })
+})
+
+const emit = defineEmits(['selectUser'])
 
 const props = defineProps({
-  isClickable: Boolean,
   users: Array,
   selectedUser: Object,
-  showRemoveUser: Boolean,
-  showIsOnline: Boolean
+  showCollaboratorActions: Boolean,
+  showTeamUserActions: Boolean,
+  team: Object
 })
 const state = reactive({
   filter: '',
-  filteredUsers: []
+  filteredUsers: [],
+  teamUserRolePickerUserId: '',
+  loading: {
+    removeTeamUserId: ''
+  },
+  error: {
+    removeTeamUserId: ''
+  }
 })
 
-const tabIndex = computed(() => {
-  if (props.isClickable) {
-    return '0'
-  } else {
-    return '-1'
-  }
+const closeDialogs = () => {
+  store.commit('userDetailsIsVisible', false)
+  state.teamUserRolePickerUserId = ''
+}
+const actionsSectionIsVisible = computed(() => {
+  return props.showCollaboratorActions || props.showTeamUserActions
 })
 
 // users
 
 const users = computed(() => {
-  if (!props.showIsOnline) {
-    return props.users
-  }
   const onlineUsers = store.state.currentSpace.clients
-  let items = props.users
+  let items = utils.clone(props.users)
   items = items.map(user => {
     const isOnline = onlineUsers.find(onlineUser => onlineUser.id === user.id)
     if (isOnline) {
@@ -60,56 +76,167 @@ const usersFiltered = computed(() => {
   }
   return items
 })
+const isCurrentUser = (user) => {
+  return store.state.currentUser.id === user.id
+}
 
-// user
+// handle events
 
 const selectUser = (event, user) => {
-  if (!props.isClickable) { return }
   emit('selectUser', event, user)
 }
 const userIsSelected = (user) => {
-  if (!props.isClickable) { return }
   if (!props.selectedUser) { return }
-  return props.selectedUser.id === user.id
+  const userId = props.selectedUser.id || store.state.userDetailsUser.id
+  return userId === user.id
 }
-const removeUser = (user) => {
-  if (!props.isClickable) { return }
-  emit('removeUser', user)
+
+// space
+
+const removeCollaborator = async (user) => {
+  store.dispatch('currentSpace/removeCollaboratorFromSpace', user)
+  if (isCurrentUser(user)) {
+    store.dispatch('closeAllDialogs')
+  }
+  closeDialogs()
+}
+const userIsSpaceCreator = (user) => {
+  const space = store.state.currentSpace
+  return user.id === space.userId
+}
+
+// team
+
+const team = computed(() => {
+  return props.team || store.getters['teams/spaceTeam']()
+})
+const teamUser = (user) => {
+  if (!team.value) { return }
+  const teamId = team.value.id
+  return store.getters['teams/teamUser']({ userId: user.id, teamId })
+}
+const teamUserRole = (user) => {
+  const role = teamUser(user).role
+  return utils.capitalizeFirstLetter(role)
+}
+const currentUserIsTeamAdmin = computed(() => {
+  return store.getters['teams/teamUserIsAdmin']({
+    userId: store.state.currentUser.id,
+    teamId: team.value.id
+  })
+})
+
+// team user role picker
+
+const teamUserRolePickerIsVisibleUser = (user) => {
+  return user.id === state.teamUserRolePickerUserId
+}
+const toggleTeamRolePickerUserId = (user) => {
+  const isPrevUser = teamUserRolePickerIsVisibleUser(user)
+  closeDialogs()
+  if (isPrevUser) { return }
+  state.teamUserRolePickerUserId = user.id
+}
+
+// remove team user
+
+const isLoadingRemoveTeamUser = (user) => {
+  return state.loading.removeTeamUserId === user.id
+}
+const isErrorRemoveTeamUser = (user) => {
+  return state.error.removeTeamUserId === user.id
+}
+const removeTeamUser = async (user) => {
+  state.error.removeTeamUserId = ''
+  console.log('user', user.id, state.loading.removeTeamUserId)
+  if (isLoadingRemoveTeamUser(user)) { return }
+  try {
+    state.loading.removeTeamUserId = user.id
+    const options = {
+      teamId: team.value.id,
+      userId: user.id
+    }
+    const response = await store.dispatch('api/removeTeamUser', options, { root: true })
+    store.dispatch('teams/removeTeamUser', options)
+  } catch (error) {
+    console.error('🚒 removeTeamUser', user, error)
+    state.error.removeTeamUserId = user.id
+  }
+  state.loading.removeTeamUserId = ''
 }
 </script>
 
 <template lang="pug">
-span
+.user-list(@click.stop="closeDialogs")
   ResultsFilter(:items="props.users" @updateFilter="updateFilter" @updateFilteredItems="updateFilteredUsers")
-  ul.results-list.user-list
+  ul.results-list
     template(v-for="user in usersFiltered" :key="user.id")
-      li(@click.left.stop="selectUser($event, user)" :tabindex="tabIndex" v-on:keyup.stop.enter="selectUser($event, user)" :class="{ active: userIsSelected(user), 'is-not-clickable': !props.isClickable }")
-        UserLabelInline(:user="user")
-        button.remove-user.small-button(v-if="props.showRemoveUser" @click.left.stop="removeUser(user)" title="Remove from space")
-          img.icon.cancel(src="@/assets/add.svg")
+      li(@click.left.stop="selectUser($event, user)" tabindex="0" v-on:keyup.stop.enter="selectUser($event, user)" :class="{ active: userIsSelected(user) }")
+        .user-info(:class="{'actions-section-is-visible': actionsSectionIsVisible }")
+          UserLabelInline(:user="user")
+
+        //- collaborator actions
+        section.subsection(v-if="props.showCollaboratorActions")
+          //- team user
+          template(v-if="teamUser(user)")
+            TeamLabel(:team="team")
+          //- space creator
+          template(v-else-if="userIsSpaceCreator(user)")
+            span Space Creator
+          //- space collaborator
+          template(v-else)
+            button.small-button(@click.stop="removeCollaborator(user)")
+              img.icon.cancel(src="@/assets/add.svg")
+              span(v-if="isCurrentUser(user)") Leave Space
+              span(v-else) Remove Collaborator
+
+        //- team user actions
+        section.subsection(v-if="props.showTeamUserActions")
+          //- admin actions
+          template(v-if="currentUserIsTeamAdmin")
+            .row
+              img.icon.mail(src="@/assets/mail.svg")
+              span {{ teamUser(user).email }}
+            .row
+              .button-wrap
+                button.small-button(@click.stop="toggleTeamRolePickerUserId(user)" :class="{ active: teamUserRolePickerIsVisibleUser(user) }")
+                  span {{ teamUserRole(user) }}
+                TeamUserRolePicker(:visible="teamUserRolePickerIsVisibleUser(user)" :user="user")
+              .button-wrap
+                button.small-button(@click.stop="removeTeamUser(user)" :class="{ active: isLoadingRemoveTeamUser(user) }")
+                  img.icon.cancel(src="@/assets/add.svg")
+                  span Remove from Team
+                  Loader(:visible="isLoadingRemoveTeamUser(user)" :isSmall="true")
+            .row(v-if="isErrorRemoveTeamUser(user)")
+              p.badge.danger
+                span (シ_ _)シ Could not remove team user, Please try again or contact support
+          //- non-admin actions
+          template(v-else)
+            span {{ teamUserRole(user) }}
 </template>
 
 <style lang="stylus">
 .user-list
   li
-    align-items center !important
-    button
+    align-items flex-start !important
+    flex-direction column
+    > .button-wrap,
+    > button
       margin-left auto
     .name
       margin-right 0
       display inline-block
-    &.is-not-clickable
-      cursor auto
-      padding-left 0
-      padding-right 0
-      &:hover,
-      &:active,
-      &:focus
-        box-shadow none
-        background-color transparent
-        outline none
     .user-label-inline
       pointer-events none
-    .remove-user
-      flex-shrink 0
+  .small-button
+    flex-shrink 0
+  .icon.cancel
+    vertical-align 0.5px
+  .subsection
+    width 100%
+    border-top-left-radius 0
+  .actions-section-is-visible
+    .user-label-inline
+      border-bottom-left-radius 0
+      border-bottom-right-radius 0
 </style>

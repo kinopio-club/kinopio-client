@@ -17,16 +17,20 @@ const props = defineProps({
   selectedColor: String
 })
 const state = reactive({
-  nameSegments: []
+  nameSegments: [],
+  primaryBackgroundColor: ''
 })
 
 onMounted(() => {
   updateNameSegments()
+  updatePrimaryBackgroundColor()
   store.subscribe((mutation, state) => {
     if (mutation.type === 'triggerUpdateOtherCard') {
       if (!props.otherCard) { return }
       if (mutation.payload !== props.otherCard.id) { return }
       updateNameSegments()
+    } else if (mutation.type === 'triggerUpdateTheme') {
+      updatePrimaryBackgroundColor()
     }
   })
 })
@@ -37,20 +41,27 @@ const isActive = computed(() => {
   const otherCardDetailsIsVisible = store.state.otherCardDetailsIsVisible
   return otherCardDetailsIsVisible && isFromParentCard
 })
+const updatePrimaryBackgroundColor = () => {
+  state.primaryBackgroundColor = utils.cssVariable('primary-background')
+}
+const background = computed(() => props.selectedColor || props.otherCard.backgroundColor)
+const backgroundColorIsDark = computed(() => {
+  let color = background.value || state.primaryBackgroundColor
+  return utils.colorIsDark(color)
+})
 const styles = computed(() => {
   if (!props.otherCard) { return }
   const isThemeDark = store.getters['themes/isThemeDark']
-  const background = props.selectedColor || props.otherCard.backgroundColor
   let color = utils.cssVariable('primary-on-light-background')
   if (isThemeDark) {
     color = utils.cssVariable('primary-on-dark-background')
   }
-  if (utils.colorIsDark(background)) {
+  if (backgroundColorIsDark.value) {
     color = utils.cssVariable('primary-on-dark-background')
   }
   return {
     color,
-    background
+    background: background.value
   }
 })
 
@@ -129,7 +140,7 @@ a.other-card-preview(@click.prevent.stop :href="props.url")
       //- name
       template(v-for="segment in state.nameSegments")
         img.card-image(v-if="segment.isImage" :src="segment.url")
-        NameSegment(:segment="segment")
+        NameSegment(:segment="segment" :backgroundColorIsDark="backgroundColorIsDark")
     template(v-else)
       Loader(:visible="true" :isSmall="true" :isStatic="!isLoadingOtherItems")
       span Card

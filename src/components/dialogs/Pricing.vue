@@ -71,7 +71,7 @@ const updateDialogHeight = async () => {
 
 // free cards from space member
 
-const spaceUserIsUpgraded = computed(() => store.getters['currentSpace/spaceUserIsUpgraded'])
+const spaceUserIsUpgraded = computed(() => store.getters['currentSpace/spaceUserIsUpgradedOrOnTeam'])
 const spaceUser = computed(() => store.state.currentSpace.users[0])
 
 </script>

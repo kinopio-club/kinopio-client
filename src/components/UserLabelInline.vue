@@ -21,10 +21,6 @@ const props = defineProps({
 
 const userHasName = computed(() => Boolean(props.user.name))
 const colorIsDark = computed(() => utils.colorIsDark(props.user.color))
-const shouldBounce = computed(() => {
-  if (consts.userPrefersReducedMotion()) { return }
-  return props.user.isOnline
-})
 
 // user details
 
@@ -60,21 +56,19 @@ const showUserDetails = () => {
 
 <template lang="pug">
 .user-label-inline.badge(
+  v-if="props.user"
   :key="props.user.id"
   :data-id="props.user.id"
   :style="{ background: props.user.color }"
-  :class="{ 'button-badge': props.isClickable, 'bounce-up-down': shouldBounce }"
+  :class="{ 'button-badge': props.isClickable }"
   @mouseup="toggleUserDetailsIsVisible"
   @touchend="toggleUserDetailsIsVisible"
   ref="labelElement"
   :title="props.title"
   @click.stop
 )
-  .user-avatar-inline(:class="{ 'is-on-dark-background': props.isOnDarkBackground }")
-    template(v-if="props.user.isOnline")
-      img.camera.anon-avatar(src="@/assets/camera.svg" title="Online")
-    template(v-else)
-      img.anon-avatar(src="@/assets/anon-avatar.svg" :class="{ 'is-dark': colorIsDark }")
+  img.anon-avatar(src="@/assets/anon-avatar.svg" :class="{ 'is-dark': colorIsDark }")
+  img.icon.camera(v-if="props.user.isOnline" src="@/assets/camera.svg" title="Online" :class="{ 'is-dark': colorIsDark }")
   span.user-name(v-if="userHasName && !shouldHideName" :class="{ 'is-dark': colorIsDark }") {{ props.user.name }}
 </template>
 
@@ -84,19 +78,19 @@ const showUserDetails = () => {
   min-height initial
   padding 0 2px
   background var(--secondary-background)
-  &.is-on-dark-background
-    background var(--secondary-active-background)
-  .user-avatar-inline
-    width 4px
-    margin-right 4px
+  .icon.camera,
+  .anon-avatar
     display inline-block
-    .anon-avatar
-      left 4px
-      top 8px
-      width 10.5px
-    .camera
-      top 7px
-      width 11px
+    position static
+  .icon.camera
+    margin-left 6px
+    vertical-align 1px
+    filter none
+    &.is-dark
+      filter invert(1)
+  .anon-avatar
+    width 12px
+    vertical-align 2px
   .user-name
     margin-left 6px
     color var(--primary-on-light-background)
@@ -108,13 +102,4 @@ const showUserDetails = () => {
     padding-bottom 0
     .anon-avatar
       top 6px
-
-.bounce-up-down
-  animation bounce-up-down 0.5s infinite ease-out alternate
-@keyframes bounce-up-down
-  0%
-    transform translateY(-2px)
-  100%
-    transform translateY(2px)
-
 </style>

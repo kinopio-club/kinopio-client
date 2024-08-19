@@ -1977,7 +1977,7 @@ article.card-wrap
         height 18px
         min-height 17px
         img
-          top 6px
+          vertical-align 4px
 
     .card-content-wrap
       display flex

@@ -57,5 +57,5 @@ dialog.narrow.dialog-name(v-if="visible" :open="visible" @click.left.stop ref="d
 </template>
 
 <style lang="stylus">
-// .dialog-name
+// dialog.dialog-name
 </style>

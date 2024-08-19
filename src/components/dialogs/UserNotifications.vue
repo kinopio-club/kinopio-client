@@ -1,15 +1,203 @@
+<script setup>
+import { reactive, computed, onMounted, onBeforeUnmount, defineProps, defineEmits, watch, ref, nextTick } from 'vue'
+import { useStore } from 'vuex'
+
+import Loader from '@/components/Loader.vue'
+import UserLabelInline from '@/components/UserLabelInline.vue'
+import NameSegment from '@/components/NameSegment.vue'
+import utils from '@/utils.js'
+import consts from '@/consts.js'
+import cache from '@/cache.js'
+import AddToExplore from '@/components/AddToExplore.vue'
+import OfflineBadge from '@/components/OfflineBadge.vue'
+
+const store = useStore()
+
+const dialogElement = ref(null)
+
+onMounted(() => {
+  store.subscribe(mutation => {
+    if (mutation.type === 'updatePageSizes') {
+      updateDialogHeight()
+    }
+  })
+})
+
+const emit = defineEmits(['markAsRead', 'markAllAsRead'])
+
+const props = defineProps({
+  visible: Boolean,
+  loading: Boolean,
+  notifications: Array
+})
+watch(() => props.visible, (value, prevValue) => {
+  if (value) {
+    updateDialogHeight()
+    state.filteredNotifications = props.notifications
+    store.commit('shouldExplicitlyHideFooter', true)
+  } else {
+    store.commit('shouldExplicitlyHideFooter', false)
+    markAllAsRead()
+    state.filteredNotifications = null
+  }
+})
+watch(() => props.loading, (value, prevValue) => {
+  updateDialogHeight()
+})
+
+const state = reactive({
+  filteredNotifications: null,
+  dialogHeight: null
+})
+
+const updateDialogHeight = async () => {
+  if (!props.visible) { return }
+  await nextTick()
+  let element = dialogElement.value
+  state.dialogHeight = utils.elementHeight(element)
+}
+
+const currentUser = computed(() => store.state.currentUser)
+
+// space
+
+const currentSpaceId = computed(() => store.state.currentSpace.id)
+const isCurrentSpace = (spaceId) => {
+  return spaceId === currentSpaceId.value
+}
+const spaceUrl = (notification) => {
+  if (!notification.space) { return }
+  return `${consts.kinopioDomain()}/${notification.space.id}`
+}
+
+// card
+
+const cardUrl = (notification) => {
+  if (!notification.card) { return }
+  return `${consts.kinopioDomain()}/${notification.space.id}/${notification.card.id}`
+}
+const cardDetailsIsVisible = (cardId) => {
+  return store.state.cardDetailsIsVisibleForCardId === cardId
+}
+const showCardDetails = (notification) => {
+  let space = utils.clone(notification.space)
+  const card = utils.clone(notification.card)
+  if (currentSpaceId.value !== space.id) {
+    store.commit('loadSpaceShowDetailsForCardId', card.id)
+    store.dispatch('currentSpace/changeSpace', space)
+  } else {
+    store.dispatch('currentCards/showCardDetails', card.id)
+  }
+  emit('markAsRead', notification.id)
+}
+const segmentTagColor = (segment) => {
+  const spaceTag = store.getters['currentSpace/tagByName'](segment.name)
+  const cachedTag = cache.tagByName(segment.name)
+  if (spaceTag) {
+    return spaceTag.color
+  } else if (cachedTag) {
+    return cachedTag.color
+  } else {
+    return currentUser.value.color
+  }
+}
+const cardNameSegments = (name) => {
+  let url = utils.urlFromString(name)
+  let imageUrl
+  if (utils.urlIsImage(url)) {
+    imageUrl = url
+    name = name.replace(url, '')
+  }
+  let segments = utils.cardNameSegments(name)
+  if (imageUrl) {
+    segments.unshift({
+      isImage: true,
+      url: imageUrl
+    })
+  }
+  return segments.map(segment => {
+    if (!segment.isTag) { return segment }
+    segment.color = segmentTagColor(segment)
+    return segment
+  })
+}
+const markAllAsRead = () => {
+  emit('markAllAsRead')
+}
+const isThemeDark = computed(() => store.getters['themes/isThemeDark'])
+const cardBackgroundIsDark = (card) => {
+  if (card.backgroundColor) {
+    return utils.colorIsDark(card.backgroundColor)
+  } else {
+    return isThemeDark.value
+  }
+}
+
+// user
+
+const userColor = (notification) => {
+  if (notification.user) {
+    return notification.user.color
+  }
+}
+const userName = (notification) => {
+  if (notification.user) {
+    return notification.user.name
+  }
+}
+
+// actions
+
+const primaryAction = (notification) => {
+  if (notification.space) {
+    changeSpace(notification.spaceId)
+  }
+}
+const changeSpace = (spaceId) => {
+  store.commit('cardDetailsIsVisibleForCardId', null)
+  if (isCurrentSpace(spaceId)) { return }
+  const space = { id: spaceId }
+  store.dispatch('currentSpace/changeSpace', space)
+}
+
+// explore
+
+const isAskToAddToExplore = (notification) => {
+  return notification.type === 'askToAddToExplore'
+}
+const updateAddToExplore = (space) => {
+  const isCurrentSpace = space.id === store.state.currentSpace.id
+  state.filteredNotifications = state.filteredNotifications.map(notification => {
+    if (!notification.space) {
+      return notification
+    }
+    if (notification.space.id === space.id) {
+      notification.space.showInExplore = space.showInExplore
+    }
+    return notification
+  })
+  if (isCurrentSpace) {
+    store.dispatch('currentSpace/updateSpace', { showInExplore: space.showInExplore })
+  } else {
+    space = { id: space.id, showInExplore: space.showInExplore }
+    store.dispatch('api/updateSpace', space)
+  }
+}
+
+</script>
+
 <template lang="pug">
-dialog.narrow.user-notifications(v-if="visible" :open="visible" ref="dialog" :style="{'max-height': dialogHeight -50 + 'px'}")
+dialog.narrow.user-notifications(v-if="props.visible" :open="props.visible" ref="dialogElement" :style="{'max-height': state.dialogHeight -50 + 'px'}")
   section
     p
       span Notifications
-      Loader(:visible="loading")
+      Loader(:visible="props.loading")
     OfflineBadge
-  section.results-section(v-if="filteredNotifications.length" :style="{'max-height': dialogHeight + 'px'}")
-    p(v-if="!loading && !filteredNotifications.length")
+  section.results-section(v-if="state.filteredNotifications.length" :style="{'max-height': state.dialogHeight + 'px'}")
+    p(v-if="!props.loading && !state.filteredNotifications.length")
       span Cards added to your spaces by collaborators can be found here
-    ul.results-list(v-if="filteredNotifications.length")
-      template(v-for="notification in filteredNotifications")
+    ul.results-list(v-if="state.filteredNotifications.length")
+      template(v-for="notification in state.filteredNotifications")
         a(:href="spaceUrl(notification)")
           li(@click.stop.prevent="primaryAction(notification)" :class="{ active: isCurrentSpace(notification.spaceId) }" :data-notification-id="notification.id")
             div
@@ -33,183 +221,11 @@ dialog.narrow.user-notifications(v-if="visible" :open="visible" ref="dialog" :st
             //- card details
             .row(v-if="notification.card")
               a(:href="cardUrl(notification)")
-                .card-details.badge.button-badge(@click.stop.prevent="showCardDetails(notification)" :class="{ active: cardDetailsIsVisible(notification.card.id) }")
+                .card-details.badge.button-badge(@click.stop.prevent="showCardDetails(notification)" :class="{ active: cardDetailsIsVisible(notification.card.id) }" :style="{backgroundColor: notification.card.backgroundColor}")
                   template(v-for="segment in cardNameSegments(notification.card.name)")
-                    NameSegment(:segment="segment" @showTagDetailsIsVisible="showCardDetails(notification)")
+                    NameSegment(:segment="segment" @showTagDetailsIsVisible="showCardDetails(notification)" :backgroundColorIsDark="cardBackgroundIsDark(notification.card)")
                   img.card-image(v-if="notification.detailsImage" :src="notification.detailsImage")
-
 </template>
-
-<script>
-import Loader from '@/components/Loader.vue'
-import UserLabelInline from '@/components/UserLabelInline.vue'
-import NameSegment from '@/components/NameSegment.vue'
-import utils from '@/utils.js'
-import consts from '@/consts.js'
-import cache from '@/cache.js'
-import AddToExplore from '@/components/AddToExplore.vue'
-import OfflineBadge from '@/components/OfflineBadge.vue'
-
-export default {
-  name: 'UserNotifications',
-  components: {
-    Loader,
-    UserLabelInline,
-    NameSegment,
-    AddToExplore,
-    OfflineBadge
-  },
-  props: {
-    visible: Boolean,
-    loading: Boolean,
-    notifications: Array,
-    unreadCount: Number
-  },
-  created () {
-    this.$store.subscribe((mutation, state) => {
-      if (mutation.type === 'updatePageSizes') {
-        this.updateDialogHeight()
-      }
-    })
-  },
-  data () {
-    return {
-      dialogHeight: null,
-      filteredNotifications: null
-    }
-  },
-  computed: {
-    currentSpaceId () { return this.$store.state.currentSpace.id },
-    currentUser () { return this.$store.state.currentUser }
-  },
-  methods: {
-    spaceUrl (notification) {
-      if (!notification.space) { return }
-      return `${consts.kinopioDomain()}/${notification.space.id}`
-    },
-    cardUrl (notification) {
-      if (!notification.card) { return }
-      return `${consts.kinopioDomain()}/${notification.space.id}/${notification.card.id}`
-    },
-    isAskToAddToExplore (notification) {
-      return notification.type === 'askToAddToExplore'
-    },
-    cardDetailsIsVisible (cardId) {
-      return this.$store.state.cardDetailsIsVisibleForCardId === cardId
-    },
-    isCurrentSpace (spaceId) {
-      return spaceId === this.currentSpaceId
-    },
-    primaryAction (notification) {
-      if (notification.space) {
-        this.changeSpace(notification.spaceId)
-      }
-    },
-    changeSpace (spaceId) {
-      this.$store.commit('cardDetailsIsVisibleForCardId', null)
-      if (this.isCurrentSpace(spaceId)) { return }
-      const space = { id: spaceId }
-      this.$store.dispatch('currentSpace/changeSpace', space)
-    },
-    showCardDetails (notification) {
-      let space = utils.clone(notification.space)
-      const card = utils.clone(notification.card)
-      if (this.currentSpaceId !== space.id) {
-        this.$store.commit('loadSpaceShowDetailsForCardId', card.id)
-        this.$store.dispatch('currentSpace/changeSpace', space)
-      } else {
-        this.$store.dispatch('currentCards/showCardDetails', card.id)
-      }
-      this.$emit('markAsRead', notification.id)
-    },
-    segmentTagColor (segment) {
-      const spaceTag = this.$store.getters['currentSpace/tagByName'](segment.name)
-      const cachedTag = cache.tagByName(segment.name)
-      if (spaceTag) {
-        return spaceTag.color
-      } else if (cachedTag) {
-        return cachedTag.color
-      } else {
-        return this.currentUser.color
-      }
-    },
-    cardNameSegments (name) {
-      let url = utils.urlFromString(name)
-      let imageUrl
-      if (utils.urlIsImage(url)) {
-        imageUrl = url
-        name = name.replace(url, '')
-      }
-      let segments = utils.cardNameSegments(name)
-      if (imageUrl) {
-        segments.unshift({
-          isImage: true,
-          url: imageUrl
-        })
-      }
-      return segments.map(segment => {
-        if (!segment.isTag) { return segment }
-        segment.color = this.segmentTagColor(segment)
-        return segment
-      })
-    },
-    markAllAsRead () {
-      this.$emit('markAllAsRead')
-    },
-    updateDialogHeight () {
-      if (!this.visible) { return }
-      this.$nextTick(() => {
-        let element = this.$refs.dialog
-        this.dialogHeight = utils.elementHeight(element)
-      })
-    },
-    userColor (notification) {
-      if (notification.user) {
-        return notification.user.color
-      }
-    },
-    userName (notification) {
-      if (notification.user) {
-        return notification.user.name
-      }
-    },
-    updateAddToExplore (space) {
-      const isCurrentSpace = space.id === this.$store.state.currentSpace.id
-      this.filteredNotifications = this.filteredNotifications.map(notification => {
-        if (!notification.space) {
-          return notification
-        }
-        if (notification.space.id === space.id) {
-          notification.space.showInExplore = space.showInExplore
-        }
-        return notification
-      })
-      if (isCurrentSpace) {
-        this.$store.dispatch('currentSpace/updateSpace', { showInExplore: space.showInExplore })
-      } else {
-        space = { id: space.id, showInExplore: space.showInExplore }
-        this.$store.dispatch('api/updateSpace', space)
-      }
-    }
-  },
-  watch: {
-    visible (visible) {
-      if (visible) {
-        this.filteredNotifications = this.notifications
-        this.updateDialogHeight()
-        this.$store.commit('shouldExplicitlyHideFooter', true)
-      } else {
-        this.$store.commit('shouldExplicitlyHideFooter', false)
-        this.markAllAsRead()
-        this.filteredNotifications = null
-      }
-    },
-    loading (loading) {
-      this.updateDialogHeight()
-    }
-  }
-}
-</script>
 
 <style lang="stylus">
 .user-notifications

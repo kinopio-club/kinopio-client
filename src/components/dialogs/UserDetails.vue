@@ -2,7 +2,8 @@
 import { reactive, computed, onMounted, onUnmounted, defineProps, defineEmits, watch, ref, nextTick, defineAsyncComponent } from 'vue'
 import { useStore } from 'vuex'
 
-import UserDetailsContent from '@/components/UserDetailsContent.vue'
+import UserDetailsInfo from '@/components/UserDetailsInfo.vue'
+import UserDetailsActions from '@/components/UserDetailsActions.vue'
 import utils from '@/utils.js'
 
 const store = useStore()
@@ -19,13 +20,11 @@ onMounted(() => {
 
 const visible = computed(() => store.state.userDetailsIsVisible)
 const user = computed(() => store.state.userDetailsUser)
-
-const userDetailsPosition = computed(() => store.state.userDetailsPosition)
-const spaceCounterZoomDecimal = computed(() => store.getters.spaceCounterZoomDecimal)
+const position = computed(() => store.state.userDetailsPosition)
 
 const styles = computed(() => {
-  let { x, y, shouldIgnoreZoom, transformOriginIsTopRight } = userDetailsPosition.value
-  let zoom = spaceCounterZoomDecimal.value
+  let { x, y, shouldIgnoreZoom, transformOriginIsTopRight } = position.value
+  let zoom = store.getters.spaceCounterZoomDecimal
   if (shouldIgnoreZoom) {
     zoom = 1
   }
@@ -57,11 +56,12 @@ const scrollUserDetailsIntoView = async () => {
 
 <template lang="pug">
 dialog.narrow.user-details(v-if="visible" @keyup.stop :open="visible" @click.left.stop="closeDialogs" @keydown.stop :style="styles" ref="dialogElement")
-  UserDetailsContent(:visible="visible" :user="user")
+  UserDetailsInfo(:user="user" :showUserBadges="true")
+  UserDetailsActions(:user="user")
 </template>
 
 <style lang="stylus">
-.user-details
+dialog.user-details
   cursor initial
   top calc(100% - 8px)
   position absolute
