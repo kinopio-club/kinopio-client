@@ -336,6 +336,9 @@ export default {
       context.dispatch('history/resume', null, { root: true })
       context.dispatch('update', updated)
       context.commit('snapGuides', [])
+      nextTick(() => {
+        context.dispatch('currentConnections/updatePaths', { itemId: origin.id }, { root: true })
+      })
     },
     expand: (context, { side, origin, target }) => {
       const padding = consts.spaceBetweenCards
@@ -379,6 +382,9 @@ export default {
       context.dispatch('history/resume', null, { root: true })
       context.dispatch('update', updated)
       context.commit('snapGuides', [])
+      nextTick(() => {
+        context.dispatch('currentConnections/updatePaths', { itemId: target.id }, { root: true })
+      })
     },
 
     // move

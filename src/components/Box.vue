@@ -310,6 +310,7 @@ const shrinkToMinBoxSize = () => {
   updated.resizeWidth = minBoxSize
   updated.resizeHeight = minBoxSize
   store.dispatch('currentBoxes/update', updated)
+  updateConnectionPaths()
 }
 const shrink = () => {
   prevSelectedBox = props.box
@@ -348,6 +349,10 @@ const labelStyles = computed(() => {
 const updateCurrentConnections = async () => {
   await nextTick()
   state.currentConnections = store.getters['currentConnections/byItemId'](props.box.id)
+}
+const updateConnectionPaths = async () => {
+  await nextTick()
+  store.dispatch('currentConnections/updatePaths', { itemId: props.box.id })
 }
 const isPainting = computed(() => store.state.currentUserIsPainting)
 const canEditSpace = computed(() => store.getters['currentUser/canEditSpace']())
