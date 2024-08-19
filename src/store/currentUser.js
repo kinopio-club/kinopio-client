@@ -77,6 +77,7 @@ const initialState = {
   cardSettingsShiftEnterShouldAddChildCard: true,
   cardSettingsMaxCardWidth: consts.normalCardMaxWidth,
   prevSettingsSection: null,
+  betaPermissionCreateTeam: false,
 
   // space filters
 

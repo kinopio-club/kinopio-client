@@ -156,7 +156,7 @@ const showUserDetails = (event, user) => {
 </script>
 
 <template lang="pug">
-dialog.team.wide(v-if="visible" :open="visible" @click.left.stop="closeDialogs" ref="dialogElement" :style="{'max-height': state.dialogHeight + 'px'}" :class="{ 'child-dialog-is-visible': childDialogIsVisible }")
+dialog.team-details.wide(v-if="visible" :open="visible" @click.left.stop="closeDialogs" ref="dialogElement" :style="{'max-height': state.dialogHeight + 'px'}" :class="{ 'child-dialog-is-visible': childDialogIsVisible }")
   section
     .row
       template(v-if="currentUserIsTeamAdmin")
@@ -211,7 +211,7 @@ dialog.team.wide(v-if="visible" :open="visible" @click.left.stop="closeDialogs" 
 </template>
 
 <style lang="stylus">
-dialog.team
+dialog.team-details
   overflow auto
   &.child-dialog-is-visible
     overflow initial
