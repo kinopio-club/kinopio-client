@@ -314,9 +314,8 @@ const uploadSelectedFile = async (selectedFile) => {
     }
   }
 }
-const uploadFiles = async () => {
-  const input = inputElement.value
-  const files = Array.from(input.files)
+const uploadFiles = async (event) => {
+  const files = Array.from(event.target.files)
   const selectedFile = files[0]
   const otherSelectedFiles = files.slice(1)
   uploadOtherSelectedFiles(otherSelectedFiles)
