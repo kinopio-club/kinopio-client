@@ -61,11 +61,17 @@ export default {
   },
   actions: {
     createTeam: async (context, team) => {
-      const response = await context.dispatch('api/createTeam', team, { root: true })
-      let newTeam = response.team
-      newTeam.teamUser = response.teamUser
-      newTeam.users = [response.teamUser]
-      context.commit('create', newTeam)
+      try {
+        const response = await context.dispatch('api/createTeam', team, { root: true })
+        let newTeam = response.team
+        let teamUser = response.teamUser
+        teamUser.id = teamUser.userId
+        newTeam.teamUser = teamUser
+        newTeam.users = [response.teamUser]
+        context.commit('create', newTeam)
+      } catch (error) {
+        console.error('🚒 createTeam', error, team)
+      }
     },
     loadTeam: async (context, space) => {
       context.commit('currentSpace/updateTeamMeta', space, { root: true })
@@ -157,7 +163,10 @@ export default {
       user = user || rootState.currentUser
       const teams = getters.all
       let teamUserTeams = teams.filter(team => {
-        return team.users.find(teamUser => teamUser.id === user.id)
+        return team.users.find(teamUser => {
+          const teamUserId = teamUser.id || teamUser.userId
+          return teamUserId === user.id
+        })
       })
       teamUserTeams = uniqBy(teamUserTeams, 'id')
       return teamUserTeams
