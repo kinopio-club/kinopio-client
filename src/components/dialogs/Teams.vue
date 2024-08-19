@@ -22,6 +22,7 @@ onMounted(() => {
 const visible = computed(() => store.state.teamsIsVisible)
 watch(() => visible.value, (value, prevValue) => {
   if (value) {
+    store.commit('shouldExplicitlyHideFooter', true)
     updateTeams()
     closeDialogs()
     state.teamDetailsIsVisibleForTeamId = ''
@@ -116,8 +117,14 @@ dialog.teams
   left initial
   right 16px
   top 20px
+  .results-section
+    overflow initial
   ul.results-list
+    overflow initial
     li
       align-items center
-      position initial
+      position relative
+    dialog.team-details
+      left -40px
+      top 30px
 </style>
