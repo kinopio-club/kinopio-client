@@ -182,7 +182,12 @@ const searchGiphy = async (isStickers) => {
   if (state.search) {
     endpoint = 'search'
   }
-  const body = { search: state.search, endpoint, resource }
+  let body = { search: state.search, endpoint, resource }
+  if (state.search) {
+    body.rating = 'pg-13'
+  } else {
+    body.rating = 'g'
+  }
   const data = await store.dispatch('api/gifImageSearch', body)
   normalizeResults(data, 'giphy')
 }
@@ -214,7 +219,7 @@ const searchService = debounce(async () => {
 const normalizeResults = async (data, service) => {
   const pexels = service === 'pexels' && serviceIsPexels.value
   const giphy = service === 'giphy' && (serviceIsStickers.value || serviceIsGifs.value)
-  // giphy
+  // pexels
   if (pexels) {
     state.images = data.photos.map(image => {
       return {
@@ -223,6 +228,7 @@ const normalizeResults = async (data, service) => {
         url: image.src.large
       }
     })
+  // giphy
   } else if (giphy) {
     state.images = data.map(image => {
       // stickers
