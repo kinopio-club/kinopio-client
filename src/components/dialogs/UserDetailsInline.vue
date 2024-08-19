@@ -19,7 +19,7 @@ const props = defineProps({
 </script>
 
 <template lang="pug">
-dialog.narrow.user-details.user-details-inline(v-if="props.visible" @keyup.stop :open="props.visible" @click.left.stop="closeDialogs" @keydown.stop ref="dialogElement")
+dialog.narrow.user-details.user-details-inline(v-if="props.visible" @keyup.stop :open="props.visible" @click.left.stop="closeDialogs" @keydown.stop ref="dialogElement" title="")
   UserDetailsInfo(:user="props.user" :showExploreSpaces="true" :showUserBadges="true")
   UserDetailsActions(:user="props.user" :showExploreSpaces="true")
 </template>
