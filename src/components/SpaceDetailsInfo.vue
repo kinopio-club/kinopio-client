@@ -12,6 +12,7 @@ import ReadOnlySpaceInfoBadges from '@/components/ReadOnlySpaceInfoBadges.vue'
 import AddToExplore from '@/components/AddToExplore.vue'
 import AskToAddToExplore from '@/components/AskToAddToExplore.vue'
 import FavoriteSpaceButton from '@/components/FavoriteSpaceButton.vue'
+import TeamLabel from '@/components/TeamLabel.vue'
 import cache from '@/cache.js'
 import utils from '@/utils.js'
 
@@ -315,6 +316,8 @@ template(v-if="isSpaceMember")
       button(@click="toggleSettingsIsVisible" :class="{active: state.settingsIsVisible}")
         img.icon.settings(src="@/assets/settings.svg")
         span Settings
+        .settings-label-badge(v-if="spaceTeam")
+          TeamLabel(:team="spaceTeam")
 
 //- read only options
 .row(v-if="!isSpaceMember")
@@ -344,6 +347,9 @@ template(v-if="state.settingsIsVisible")
 
   //- member space settings
   section.subsection.space-settings(v-if="isSpaceMember")
+    .row(v-if='spaceTeam')
+      button
+        TeamLabel(:team="spaceTeam" showName="true")
     .row
       AddToExplore
     .row
@@ -440,6 +446,21 @@ template(v-if="state.settingsIsVisible")
 
 .team-button
   padding-right 6px
+
+.settings-label-badge
+  pointer-events none
+  position absolute
+  bottom -12px
+  left 0
+  .team-badge
+    margin 0
+    .icon.team
+      height 7px
+    span
+      font-size 8px
+    .icon,
+    span
+      vertical-align 2px !important
 
 .space-settings
   .background-preview

@@ -116,4 +116,6 @@ button.space-users-button(@click.stop="toggleSpaceUserListIsVisible" :class="{ '
   &.header-button
     border-top-left-radius 0
     border-bottom-left-radius 0
+  .team-label
+    margin-right 6px
 </style>
