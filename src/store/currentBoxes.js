@@ -174,6 +174,14 @@ export default {
       context.commit('update', box)
       context.dispatch('api/addToQueue', { name: 'updateBox', body: box }, { root: true })
       context.dispatch('broadcast/update', { updates: box, type: 'updateBox', handler: 'currentBoxes/update' }, { root: true })
+      const keys = Object.keys(box)
+      const shouldUpdatePathsKeys = ['x', 'resizeWidth']
+      let shouldUpdatePaths = keys.find(key => shouldUpdatePathsKeys.includes(key))
+      if (shouldUpdatePaths) {
+        nextTick(() => {
+          context.dispatch('currentConnections/updatePaths', { itemId: box.id }, { root: true })
+        })
+      }
     },
     updateName (context, { box, newName }) {
       const canEditBox = context.rootGetters['currentUser/canEditBox'](box)
