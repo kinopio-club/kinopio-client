@@ -512,7 +512,6 @@ const self = {
       }
     },
     getPublicUserExploreSpaces: async (context, user) => {
-      console.log(user)
       try {
         const options = await context.dispatch('requestOptions', { method: 'GET', space: context.rootState.currentSpace })
         const response = await fetch(`${consts.apiHost()}/user/public/explore-spaces/${user.id}`, options)
@@ -1220,6 +1219,18 @@ const self = {
         return normalizeResponse(response)
       } catch (error) {
         context.dispatch('handleServerError', { name: 'getTeam', error })
+      }
+    },
+    createTeam: async (context, body) => {
+      const apiKey = context.rootState.currentUser.apiKey
+      const isOnline = context.rootState.isOnline
+      if (!shouldRequest({ apiKey, isOnline })) { return }
+      try {
+        const options = await context.dispatch('requestOptions', { body, method: 'POST', space: context.rootState.currentSpace })
+        const response = await fetch(`${consts.apiHost()}/team/`, options)
+        return normalizeResponse(response)
+      } catch (error) {
+        context.dispatch('handleServerError', { name: 'createTeamUser', error })
       }
     },
     createTeamUser: async (context, body) => {

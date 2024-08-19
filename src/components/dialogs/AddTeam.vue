@@ -22,6 +22,8 @@ onMounted(() => {
   })
 })
 
+const emit = defineEmits(['closeDialogs'])
+
 const props = defineProps({
   visible: Boolean
 })
@@ -107,10 +109,9 @@ const createTeam = async () => {
   }
   try {
     state.loading.createTeam = true
-    // const newTeam = await store.dispatch('teams/create', state.team)
-    // on success,
-    // update localstate
-    // open team details: close this dialog, emit update teamDetailsIsVisibleForTeamId (newteam)
+    await store.dispatch('teams/createTeam', state.team)
+    emit('closeDialogs')
+    // ?? open team details: close this dialog, emit update teamDetailsIsVisibleForTeamId (newteam)
   } catch (error) {
     console.error('🚒 createTeam', error)
     state.unknownServerError = true
@@ -128,7 +129,7 @@ dialog.narrow.add-team(v-if="visible" :open="visible" @click.left.stop="closeDia
           button.change-color(@click.left.stop="toggleColorPicker" :class="{active: state.colorPickerIsVisible}" title="Change Team Color")
             .current-color.current-team-color(:style="{ background: teamColor }")
           ColorPicker(:currentColor="teamColor" :visible="state.colorPickerIsVisible" @selectedColor="updateTeamColor")
-      input.name(placeholder="Team Name" v-model="teamName" name="teamName" maxlength=100 ref="nameInputElement")
+      input.name(placeholder="Team Name" v-model="teamName" name="teamName" maxlength=100 ref="nameInputElement" @keydown.enter.exact.prevent="createTeam")
     .row
       button(:class="{ active: state.loading.createTeam }" @click.stop="createTeam")
         img.icon.add(src="@/assets/add.svg")

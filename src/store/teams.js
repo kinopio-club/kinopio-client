@@ -29,6 +29,15 @@ export default {
       console.log('👫 teams', state.teams)
     },
 
+    // create
+
+    create: (state, team) => {
+      utils.typeCheck({ value: team, type: 'object' })
+      state.teams[team.id] = team
+      state.ids.push(team.id)
+      console.log('👫 teams', state.teams)
+    },
+
     // update
 
     update: (state, team) => {
@@ -51,6 +60,13 @@ export default {
     }
   },
   actions: {
+    createTeam: async (context, team) => {
+      const response = await context.dispatch('api/createTeam', team, { root: true })
+      let newTeam = response.team
+      newTeam.teamUser = response.teamUser
+      newTeam.users = [response.teamUser]
+      context.commit('create', newTeam)
+    },
     loadTeam: async (context, space) => {
       context.commit('currentSpace/updateTeamMeta', space, { root: true })
       let team = space.team
