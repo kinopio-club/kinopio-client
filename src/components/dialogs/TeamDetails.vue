@@ -164,7 +164,7 @@ dialog.team-details.wide(v-if="visible" :open="visible" @click.left.stop="closeD
           button.change-color(@click.left.stop="toggleColorPicker" :class="{active: state.colorPickerIsVisible}" title="Change Team Color")
             .current-color.current-team-color(:style="{ background: teamColor }")
           ColorPicker(:currentColor="teamColor" :visible="state.colorPickerIsVisible" @selectedColor="updateTeamColor")
-        input.name(placeholder="Team Name" v-model="teamName" name="teamName" maxlength=100)
+        input.name(placeholder="Team Name" v-model="teamName" name="teamName" maxlength=100 @mouseup.stop)
 
       template(v-else)
         TeamLabel(:team="props.team" :showName="true")
