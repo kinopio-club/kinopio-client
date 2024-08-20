@@ -289,7 +289,7 @@ const handleMouseUpEvents = (event) => {
   const isFromOutsideWindow = event.target.nodeType === Node.DOCUMENT_NODE
   let isFromCard
   if (!isFromOutsideWindow) {
-    isFromCard = event.target.closest('article#card')
+    isFromCard = event.target.closest('#card')
   }
   const position = utils.cursorPositionInPage(event)
   prevCursorPosition = undefined
@@ -309,7 +309,7 @@ const handleContextMenuEvents = (event) => {
 }
 
 const scrollIntoView = (card) => {
-  const element = document.querySelector(`article [data-card-id="${card.id}"]`)
+  const element = document.querySelector(`#card[data-card-id="${card.id}"]`)
   store.commit('scrollElementIntoView', { element })
 }
 

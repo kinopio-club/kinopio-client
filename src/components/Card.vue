@@ -1723,7 +1723,7 @@ const checkIfShouldUpdateIframeUrl = () => {
 </script>
 
 <template lang="pug">
-article.card-wrap#card(
+p.card-wrap#card(
   :style="articleStyle"
   :data-card-id="card.id"
   :data-is-hidden-by-comment-filter="isCardHiddenByCommentFilter"

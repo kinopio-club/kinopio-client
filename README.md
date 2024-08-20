@@ -115,7 +115,8 @@ Use Ngrok to pipe your localhost through an external https server. Helpful for d
 
 ### Run Ngrok
 
-    ngrok http https://localhost:8080
+    npm run preview
+    ngrok http https://localhost:4173
 
 ## See Also
 

@@ -382,7 +382,7 @@ const positionNewCards = async (newCards) => {
   newCards = newCards.map((card, index) => {
     if (index === 0) { return card }
     const prevCard = newCards[index - 1]
-    const element = document.querySelector(`article [data-card-id="${prevCard.id}"]`)
+    const element = document.querySelector(`#card[data-card-id="${prevCard.id}"]`)
     const prevCardRect = element.getBoundingClientRect()
     card.y = prevCard.y + (prevCardRect.height * spaceCounterZoomDecimal.value) + spaceBetweenCards
     return card
