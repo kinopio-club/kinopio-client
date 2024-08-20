@@ -125,6 +125,7 @@ const copy = async (event) => {
     .button-wrap
       padding 8px
       padding-left 8px
+      margin-left 0
       &:last-child
         padding-left 0
       &:hover
@@ -136,8 +137,6 @@ const copy = async (event) => {
           box-shadow var(--button-active-inset-shadow)
           background-color var(--secondary-active-background)
       button
-        margin-right -6px
-        margin-bottom -6px
         width initial
         cursor pointer
         &.active
