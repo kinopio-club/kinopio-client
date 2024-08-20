@@ -35,6 +35,7 @@ const updateIsSelectingX = (value) => {
 }
 const isVisible = computed(() => {
   if (store.state.isSelectingY) { return }
+  if (store.state.currentUserIsPanning || store.state.currentUserIsPanningReady) { return }
   return state.isVisible
 })
 
