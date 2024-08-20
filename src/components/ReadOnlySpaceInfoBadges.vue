@@ -16,17 +16,18 @@ const showInExplore = computed(() => store.state.currentSpace.showInExplore)
 </script>
 
 <template lang="pug">
-.row.align-items-top.read-only-space-info-badges(v-if="!isSpaceMember")
-  .badge.info(v-if="!spacePrivacyIsOpen")
-    span Read Only
-  .badge.success(v-if="spacePrivacyIsOpen")
-    span Open to All
-  .badge.status(v-if="showInExplore")
-    img.icon.sunglasses(src="@/assets/sunglasses.svg")
-    span In Explore
-.row(v-if="props.spaceTeam")
-  .badge.secondary
-    TeamLabel(:team="props.spaceTeam" :showName="true")
+template(v-if="!isSpaceMember")
+  .row.align-items-top.read-only-space-info-badges
+    .badge.info(v-if="!spacePrivacyIsOpen")
+      span Read Only
+    .badge.success(v-if="spacePrivacyIsOpen")
+      span Open to All
+    .badge.status(v-if="showInExplore")
+      img.icon.sunglasses(src="@/assets/sunglasses.svg")
+      span In Explore
+  .row(v-if="props.spaceTeam")
+    .badge.secondary
+      TeamLabel(:team="props.spaceTeam" :showName="true")
 </template>
 
 <style lang="stylus">

@@ -133,17 +133,11 @@ const dialogSpaceFilterShowHidden = computed(() => store.state.currentUser.dialo
 const dialogSpaceFilterByTeam = computed(() => store.state.currentUser.dialogSpaceFilterByTeam)
 
 const spaceFiltersIsActive = computed(() => {
-  return Boolean(dialogSpaceFilterShowHidden.value || dialogSpaceFilterByType.value || utils.objectHasKeys(dialogSpaceFilterByUser.value) || dialogSpaceFilterSortByDateIsActive.value) || dialogSpaceFilterByTeam.value
+  return Boolean(dialogSpaceFilterShowHidden.value || dialogSpaceFilterByType.value || utils.objectHasKeys(dialogSpaceFilterByUser.value) || dialogSpaceFilterSortByDateIsActive.value) || utils.objectHasKeys(dialogSpaceFilterByTeam.value)
 })
 const filteredSpaces = computed(() => {
   let spaces = state.spaces
   spaces = spaces.filter(space => space.id)
-  // filter by team
-  if (dialogSpaceFilterByTeam.value === 'team') {
-    spaces = spaces.filter(space => space.teamId)
-  } else if (dialogSpaceFilterByTeam.value === 'personal') {
-    spaces = spaces.filter(space => !space.teamId)
-  }
   // filter by space type
   if (dialogSpaceFilterByType.value === 'journals') {
     spaces = spaces.filter(space => space.moonPhase)
@@ -155,6 +149,10 @@ const filteredSpaces = computed(() => {
     spaces = spaces.filter(space => space.isHidden)
   } else {
     spaces = spaces.filter(space => !space.isHidden)
+  }
+  // filter by user
+  if (utils.objectHasKeys(dialogSpaceFilterByTeam.value)) {
+    spaces = spaces.filter(space => space.teamId === dialogSpaceFilterByTeam.value.id)
   }
   // filter by user
   if (utils.objectHasKeys(dialogSpaceFilterByUser.value)) {

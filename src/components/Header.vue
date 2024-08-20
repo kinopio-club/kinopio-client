@@ -39,6 +39,7 @@ import SpaceUserList from '@/components/dialogs/SpaceUserList.vue'
 import CommentButton from '@/components/CommentButton.vue'
 import FavoriteSpaceButton from '@/components/FavoriteSpaceButton.vue'
 import TeamLabel from '@/components/TeamLabel.vue'
+import Teams from '@/components/dialogs/Teams.vue'
 import consts from '@/consts.js'
 
 import sortBy from 'lodash-es/sortBy'
@@ -647,6 +648,7 @@ header(v-if="isVisible" :style="state.position" :class="{'fade-out': isFadingOut
         UserSettings
         UpdatePassword
         SpaceUserList
+        Teams
         //- Share
         .button-wrap
           button(@click.left.stop="toggleShareIsVisible" :class="{active: state.shareIsVisible, 'translucent-button': !shouldIncreaseUIContrast}")

@@ -61,6 +61,7 @@ const store = createStore({
     prevSpaceIdInSession: '',
     prevSpaceIdInSessionPagePosition: {},
     outsideSpaceBackgroundColor: '',
+    teamsIsVisible: false,
 
     // zoom and scroll
     spaceZoomPercent: 100,
@@ -354,6 +355,7 @@ const store = createStore({
       state.offlineIsVisible = false
       state.spaceUserListIsVisible = false
       state.importArenaChannelIsVisible = false
+      state.teamsIsVisible = false
     },
     isOnline: (state, value) => {
       utils.typeCheck({ value, type: 'boolean' })
@@ -527,6 +529,10 @@ const store = createStore({
     outsideSpaceBackgroundColor: (state, value) => {
       utils.typeCheck({ value, type: 'string' })
       state.outsideSpaceBackgroundColor = value
+    },
+    teamsIsVisible: (state, value) => {
+      utils.typeCheck({ value, type: 'boolean' })
+      state.teamsIsVisible = value
     },
     searchIsVisible: (state, value) => {
       utils.typeCheck({ value, type: 'boolean' })

@@ -7,7 +7,6 @@ import Loader from '@/components/Loader.vue'
 import SpaceList from '@/components/SpaceList.vue'
 import User from '@/components/User.vue'
 import TeamLabel from '@/components/TeamLabel.vue'
-import Teams from '@/components/dialogs/Teams.vue'
 import utils from '@/utils.js'
 import cache from '@/cache.js'
 
@@ -60,7 +59,6 @@ const updateDialogHeight = async () => {
 
 const closeDialogs = () => {
   state.spacePickerIsVisible = false
-  state.teamsIsVisible = false
 }
 
 // user
@@ -150,11 +148,9 @@ const updateExploreSpaces = async () => {
 // teams
 
 const toggleTeamsIsVisible = () => {
-  const value = !state.teamsIsVisible
-  closeDialogs()
-  state.teamsIsVisible = value
+  store.commit('closeAllDialogs')
+  store.commit('teamsIsVisible', true)
 }
-const userTeams = computed(() => store.getters['teams/byUser'](props.user))
 </script>
 
 <template lang="pug">
@@ -164,10 +160,9 @@ const userTeams = computed(() => store.getters['teams/byUser'](props.user))
     //- team
     .row
       .button-wrap
-        button(@click.stop="toggleTeamsIsVisible" :class="{ active: state.teamsIsVisible }")
+        button(@click.stop="toggleTeamsIsVisible")
           img.icon.team(src="@/assets/team.svg")
           span Teams
-        Teams(:visible="state.teamsIsVisible" :teams="userTeams")
   section(v-if="isCurrentUser")
     //- settings, sign out
     .row

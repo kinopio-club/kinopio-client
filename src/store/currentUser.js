@@ -77,11 +77,12 @@ const initialState = {
   cardSettingsShiftEnterShouldAddChildCard: true,
   cardSettingsMaxCardWidth: consts.normalCardMaxWidth,
   prevSettingsSection: null,
+  betaPermissionCreateTeam: false,
 
   // space filters
 
   dialogSpaceFilterByType: null, // null, journals, spaces
-  dialogSpaceFilterByTeam: null, // null, team, personal
+  dialogSpaceFilterByTeam: {},
   dialogSpaceFilterByUser: {},
   dialogSpaceFilterShowHidden: false,
   dialogSpaceFilterSortByDate: null // null, updatedAt, createdAt
@@ -299,6 +300,7 @@ export default {
       cache.updateUser('dialogSpaceFilterByType', value)
     },
     dialogSpaceFilterByUser: (state, value) => {
+      utils.typeCheck({ value, type: 'object' })
       state.dialogSpaceFilterByUser = value
       cache.updateUser('dialogSpaceFilterByUser', value)
     },
@@ -307,6 +309,7 @@ export default {
       cache.updateUser('dialogSpaceFilterShowHidden', value)
     },
     dialogSpaceFilterByTeam: (state, value) => {
+      utils.typeCheck({ value, type: 'object' })
       state.dialogSpaceFilterByTeam = value
       cache.updateUser('dialogSpaceFilterByTeam', value)
     },
@@ -473,7 +476,7 @@ export default {
       if (!context.rootState.teamToJoinOnLoad) { return }
       const currentUserIsSignedIn = context.getters.isSignedIn
       if (currentUserIsSignedIn) {
-        context.dispatch('teams/joinTeam')
+        context.dispatch('teams/joinTeam', null, { root: true })
       } else {
         context.commit('notifySignUpToJoinTeam', true, { root: true })
       }

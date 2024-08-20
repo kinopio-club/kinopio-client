@@ -1,6 +1,7 @@
 import utils from '@/utils.js'
 
 import uniqBy from 'lodash-es/uniqBy'
+import uniq from 'lodash-es/uniq'
 
 // normalized state
 // https://github.com/vuejs/vuejs.org/issues/1636
@@ -29,6 +30,15 @@ export default {
       console.log('👫 teams', state.teams)
     },
 
+    // create
+
+    create: (state, team) => {
+      utils.typeCheck({ value: team, type: 'object' })
+      state.teams[team.id] = team
+      state.ids.push(team.id)
+      console.log('👫 teams', state.teams)
+    },
+
     // update
 
     update: (state, team) => {
@@ -51,6 +61,19 @@ export default {
     }
   },
   actions: {
+    createTeam: async (context, team) => {
+      try {
+        const response = await context.dispatch('api/createTeam', team, { root: true })
+        let newTeam = response.team
+        let teamUser = response.teamUser
+        teamUser.id = teamUser.userId
+        newTeam.teamUser = teamUser
+        newTeam.users = [response.teamUser]
+        context.commit('create', newTeam)
+      } catch (error) {
+        console.error('🚒 createTeam', error, team)
+      }
+    },
     loadTeam: async (context, space) => {
       context.commit('currentSpace/updateTeamMeta', space, { root: true })
       let team = space.team
@@ -77,11 +100,10 @@ export default {
           userId
         }, { root: true })
         context.commit('addNotification', {
-          message: `Joined ${response.team.name}`,
+          message: `Joined ${response.team.name}. Join team spaces from your spaces list`,
           type: 'success',
-          icon: 'team',
           isPersistentItem: true,
-          teamColor: response.team.color
+          team: response.team
         }, { root: true })
       } catch (error) {
         console.error('🚒 joinTeam', error)
@@ -141,7 +163,10 @@ export default {
       user = user || rootState.currentUser
       const teams = getters.all
       let teamUserTeams = teams.filter(team => {
-        return team.users.find(teamUser => teamUser.id === user.id)
+        return team.users.find(teamUser => {
+          const teamUserId = teamUser.id || teamUser.userId
+          return teamUserId === user.id
+        })
       })
       teamUserTeams = uniqBy(teamUserTeams, 'id')
       return teamUserTeams
@@ -172,6 +197,13 @@ export default {
         teamUser = getters.teamUser({ userId, space })
       }
       return teamUser?.role === 'admin'
+    },
+    bySpaces: (state, getters, rootState) => (spaces) => {
+      let teamIds = spaces.map(space => space.teamId)
+      teamIds = teamIds.filter(id => Boolean(id))
+      teamIds = uniq(teamIds)
+      const teams = teamIds.map(id => getters.byId(id))
+      return teams
     }
   }
 }

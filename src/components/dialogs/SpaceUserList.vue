@@ -163,6 +163,6 @@ dialog.space-user-list
   top 20px
   &.child-is-visible
     overflow initial
-  dialog.team
+  dialog.team-details
     left -45px
 </style>

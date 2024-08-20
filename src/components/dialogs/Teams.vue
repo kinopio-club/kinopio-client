@@ -5,6 +5,7 @@ import { useStore } from 'vuex'
 import utils from '@/utils.js'
 import TeamLabel from '@/components/TeamLabel.vue'
 import TeamDetails from '@/components/dialogs/TeamDetails.vue'
+import AddTeam from '@/components/dialogs/AddTeam.vue'
 
 const store = useStore()
 
@@ -18,57 +19,87 @@ onMounted(() => {
   })
 })
 
-const props = defineProps({
-  visible: Boolean,
-  teams: Array
-})
-const state = reactive({
-  dialogHeight: null,
-  teamIsVisibleForTeamId: ''
-})
-
-watch(() => props.visible, (value, prevValue) => {
+const visible = computed(() => store.state.teamsIsVisible)
+watch(() => visible.value, (value, prevValue) => {
   if (value) {
-    state.teamIsVisibleForTeamId = ''
+    store.commit('shouldExplicitlyHideFooter', true)
+    updateTeams()
+    closeDialogs()
+    state.teamDetailsIsVisibleForTeamId = ''
     updateDialogHeight()
   }
 })
 const updateDialogHeight = async () => {
-  if (!props.visible) { return }
+  if (!visible.value) { return }
   await nextTick()
   let element = dialogElement.value
   state.dialogHeight = utils.elementHeight(element)
 }
 
+const state = reactive({
+  dialogHeight: null,
+  teamDetailsIsVisibleForTeamId: '',
+  addTeamIsVisible: false,
+  teams: []
+})
+const closeDialogs = () => {
+  state.addTeamIsVisible = false
+  state.teamDetailsIsVisibleForTeamId = ''
+}
+
 const currentUserIsSignedIn = computed(() => store.getters['currentUser/isSignedIn'])
+const currentUserCanCreateTeam = computed(() => currentUserIsSignedIn.value && store.state.currentUser.betaPermissionCreateTeam)
 const triggerSignUpOrInIsVisible = () => {
   store.dispatch('closeAllDialogs')
   store.commit('triggerSignUpOrInIsVisible')
 }
-const teamIsVisible = (team) => {
-  return state.teamIsVisibleForTeamId === team.id
+
+// teams picker list
+
+const updateTeams = () => {
+  state.teams = store.getters['teams/byUser']()
 }
-const toggleTeamIsVisible = (team) => {
+
+// add team
+
+const toggleAddTeamIsVisible = () => {
+  const value = !state.addTeamIsVisible
+  closeDialogs()
+  state.addTeamIsVisible = value
+}
+
+// team details
+
+const teamIsVisible = (team) => {
+  return state.teamDetailsIsVisibleForTeamId === team.id
+}
+const toggleTeamDetailsIsVisible = (team) => {
   if (teamIsVisible(team)) {
-    state.teamIsVisibleForTeamId = ''
+    state.teamDetailsIsVisibleForTeamId = ''
   } else {
-    state.teamIsVisibleForTeamId = team.id
+    state.teamDetailsIsVisibleForTeamId = team.id
   }
 }
 </script>
 
 <template lang="pug">
-dialog.narrow.teams(v-if="visible" :open="visible" @click.left.stop ref="dialogElement" :style="{'max-height': state.dialogHeight + 'px'}")
+dialog.narrow.teams(v-if="visible" :open="visible" @click.left.stop="closeDialogs" ref="dialogElement" :style="{'max-height': state.dialogHeight + 'px'}")
   section
     p Teams
+    .row(v-if="currentUserCanCreateTeam")
+      .button-wrap
+        button(:class="{ active: state.addTeamIsVisible }" @click.stop="toggleAddTeamIsVisible")
+          img.icon.add(src="@/assets/add.svg")
+          span New Team
+        AddTeam(:visible="state.addTeamIsVisible" @closeDialogs="closeDialogs" @updateTeams="updateTeams")
   section(v-if="!currentUserIsSignedIn")
     p Sign Up or In to create and manage teams
     button(@click.left="triggerSignUpOrInIsVisible") Sign Up or In
   //- team picker
-  section.results-section(v-if="props.teams.length")
+  section.results-section(v-if="state.teams.length")
     ul.results-list
-      template(v-for="team in props.teams")
-        li(:class="{ active: teamIsVisible(team) }" @click.stop="toggleTeamIsVisible(team)")
+      template(v-for="team in state.teams")
+        li(:class="{ active: teamIsVisible(team) }" @click.stop="toggleTeamDetailsIsVisible(team)")
           TeamLabel(:team="team" :showName="true")
           TeamDetails(:visible="teamIsVisible(team)" :team="team")
   //- teams beta notice
@@ -83,10 +114,17 @@ dialog.narrow.teams(v-if="visible" :open="visible" @click.left.stop ref="dialogE
 
 <style lang="stylus">
 dialog.teams
-  top initial !important
-  bottom 8px
+  left initial
+  right 16px
+  top 20px
+  .results-section
+    overflow initial
   ul.results-list
+    overflow initial
     li
       align-items center
-      position initial
+      position relative
+    dialog.team-details
+      left -40px
+      top 30px
 </style>
