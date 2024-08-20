@@ -128,6 +128,18 @@ const copyInviteUrl = async (event) => {
 
 // select user
 
+const teamUsers = computed(() => {
+  let users = utils.clone(props.team.users)
+  users = users.map(user => {
+    if (user.id === currentUser.value.id) {
+      user.name = currentUser.value.name
+      user.color = currentUser.value.color
+      user.email = currentUser.value.email
+    }
+    return user
+  })
+  return users
+})
 const selectedUser = computed(() => {
   const userDetailsIsVisible = store.state.userDetailsIsVisible
   if (!userDetailsIsVisible) { return }
@@ -201,7 +213,7 @@ dialog.team-details.wide(v-if="visible" :open="visible" @click.left.stop="closeD
       //-     img.icon.mail(src="@/assets/mail.svg")
       //-     span Email Invites
   UserList(
-    :users="props.team.users"
+    :users="teamUsers"
     :selectedUser="selectedUser"
     @selectUser="toggleUserDetails"
     :isClickable="true"
