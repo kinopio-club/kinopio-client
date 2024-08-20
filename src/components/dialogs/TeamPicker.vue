@@ -2,8 +2,8 @@
 import { reactive, computed, onMounted, onBeforeUnmount, defineProps, defineEmits, watch, ref, nextTick } from 'vue'
 import { useStore } from 'vuex'
 
+import TeamList from '@/components/TeamList.vue'
 import utils from '@/utils.js'
-import TeamLabel from '@/components/TeamLabel.vue'
 
 const store = useStore()
 
@@ -50,10 +50,7 @@ const clearTeam = () => {
 const selectTeam = (team) => {
   emit('selectTeam', team)
 }
-const teamIsSelected = (team) => {
-  if (!props.selectedTeam) { return }
-  return team.id === props.selectedTeam.id
-}
+
 </script>
 
 <template lang="pug">
@@ -63,10 +60,7 @@ dialog.narrow.team-picker(v-if="visible" :open="visible" @click.left.stop ref="d
       img.icon.cancel(src="@/assets/add.svg")
       span Clear Team
   section.results-section(v-if="props.teams.length")
-    ul.results-list
-      template(v-for="team in props.teams")
-        li(:class="{ active: teamIsSelected(team) }" @click.stop="selectTeam(team)")
-          TeamLabel(:team="team" :showName="true")
+    TeamList(:teams="props.teams" :selectedTeam="props.selectedTeam" @selectTeam="selectTeam")
 </template>
 
 <style lang="stylus">

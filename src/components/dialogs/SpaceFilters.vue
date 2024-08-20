@@ -6,6 +6,7 @@ import MoonPhase from '@/components/MoonPhase.vue'
 import moonphase from '@/moonphase.js'
 import UserList from '@/components/UserList.vue'
 import utils from '@/utils.js'
+import TeamList from '@/components/TeamList.vue'
 
 import uniqBy from 'lodash-es/uniqBy'
 
@@ -57,8 +58,8 @@ const dialogSpaceFilterByTeam = computed(() => store.state.currentUser.dialogSpa
 // clear all
 
 const clearAllFilters = () => {
-  updateFilterByTeam(null)
   updateFilterByType(null)
+  updateTeamFilter({})
   updateUserFilter({})
   updateSortBy(null)
   store.dispatch('currentUser/update', { dialogSpaceFilterShowHidden: false })
@@ -98,17 +99,6 @@ const toggleShowHiddenSpace = () => {
   store.dispatch('currentUser/update', { dialogSpaceFilterShowHidden: value })
 }
 
-// by team
-
-const teams = computed(() => store.getters['teams/byUser']())
-
-const filterByTeamAll = computed(() => !dialogSpaceFilterByTeam.value)
-const filterByTeamTeam = computed(() => dialogSpaceFilterByTeam.value === 'team')
-const filterByTeamPersonal = computed(() => dialogSpaceFilterByTeam.value === 'personal')
-const updateFilterByTeam = (value) => {
-  store.dispatch('currentUser/update', { dialogSpaceFilterByTeam: value })
-}
-
 // by types
 
 const filterByTypeAll = computed(() => Boolean(!dialogSpaceFilterByType.value))
@@ -135,6 +125,20 @@ const isSortByCreatedAt = computed(() => {
 })
 const updateSortBy = (value) => {
   store.dispatch('currentUser/update', { dialogSpaceFilterSortByDate: value })
+}
+
+// teams
+
+const teams = computed(() => store.getters['teams/byUser']())
+const filterByTeam = (event, team) => {
+  if (team.id === dialogSpaceFilterByTeam.value.id) {
+    updateTeamFilter({})
+  } else {
+    updateTeamFilter(team)
+  }
+}
+const updateTeamFilter = (value) => {
+  store.dispatch('currentUser/update', { dialogSpaceFilterByTeam: value })
 }
 
 // collaborators
@@ -170,16 +174,6 @@ dialog.narrow.space-filters(v-if="props.visible" :open="props.visible" @click.le
         img.icon.cancel(src="@/assets/add.svg")
         span Clear all
         span.badge.info.total-filters-active(v-if="totalFiltersActive") {{totalFiltersActive}}
-    //- show team
-    section.subsection(v-if="teams.length")
-      p Filter by Team
-      .segmented-buttons
-        button(:class="{active: filterByTeamAll}" @click="updateFilterByTeam(null)")
-          span All
-        button(:class="{active: filterByTeamTeam}" @click="updateFilterByTeam('team')")
-          img.icon.team(src="@/assets/team.svg")
-        button(:class="{active: filterByTeamPersonal}" @click="updateFilterByTeam('personal')")
-          span Personal
 
     //- types visibile
     section.subsection
@@ -211,10 +205,12 @@ dialog.narrow.space-filters(v-if="props.visible" :open="props.visible" @click.le
           img.icon(v-if="!showHiddenSpace" src="@/assets/view.svg")
           img.icon(v-if="showHiddenSpace" src="@/assets/view-hidden.svg")
           span Show Hidden
-
+  //- teams
+  section.results-section.teams(v-if="teams.length")
+    TeamList(:teams="teams" :selectedTeam="dialogSpaceFilterByTeam" @selectTeam="filterByTeam")
   //- collaborators
-  section.results-section.collaborators
-    UserList(:users="spaceUsers" @selectUser="filterByUser" :selectedUser="dialogSpaceFilterByUser")
+  section.results-section.collaborators(v-if="spaceUsers.length")
+    UserList(:users="spaceUsers" :selectedUser="dialogSpaceFilterByUser" @selectUser="filterByUser")
 </template>
 
 <style lang="stylus">

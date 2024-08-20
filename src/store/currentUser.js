@@ -82,7 +82,7 @@ const initialState = {
   // space filters
 
   dialogSpaceFilterByType: null, // null, journals, spaces
-  dialogSpaceFilterByTeam: null, // null, team, personal
+  dialogSpaceFilterByTeam: {},
   dialogSpaceFilterByUser: {},
   dialogSpaceFilterShowHidden: false,
   dialogSpaceFilterSortByDate: null // null, updatedAt, createdAt

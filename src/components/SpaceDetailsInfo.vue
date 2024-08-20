@@ -253,10 +253,14 @@ const teamButtonTitle = computed(() => {
   }
   return `${addString} to Team`
 })
-const addSpaceTeam = (team) => {
+const toggleSpaceTeam = (team) => {
   if (!checkCanAssignTeam()) { return }
-  store.dispatch('teams/addCurrentSpace', team)
-  updateLocalSpaces()
+  if (currentSpace.value.teamId === team.id) {
+    removeSpaceTeam()
+  } else {
+    store.dispatch('teams/addCurrentSpace', team)
+    updateLocalSpaces()
+  }
 }
 const removeSpaceTeam = () => {
   store.dispatch('teams/removeCurrentSpace')
@@ -317,7 +321,7 @@ template(v-if="isSpaceMember")
             img.icon.team(src="@/assets/team.svg")
           //- Favorite
           FavoriteSpaceButton(:parentIsDialog="true" @updateLocalSpaces="updateLocalSpaces")
-        TeamPicker(:visible="state.teamPickerIsVisible" @selectTeam="addSpaceTeam" @clearTeam="removeSpaceTeam" :teams="userTeams" :selectedTeam="spaceTeam" @closeDialogs="closeDialogs")
+        TeamPicker(:visible="state.teamPickerIsVisible" @selectTeam="toggleSpaceTeam" @clearTeam="removeSpaceTeam" :teams="userTeams" :selectedTeam="spaceTeam" @closeDialogs="closeDialogs")
     template(v-else)
       //- Favorite
       FavoriteSpaceButton(:parentIsDialog="true" @updateLocalSpaces="updateLocalSpaces")
