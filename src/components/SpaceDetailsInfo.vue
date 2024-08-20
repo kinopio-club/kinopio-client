@@ -317,7 +317,7 @@ template(v-if="isSpaceMember")
       .button-wrap
         .segmented-buttons
           //- Team
-          button.team-button(:title="teamButtonTitle" :class="{active: state.teamPickerIsVisible}" @click.left.prevent.stop="toggleTeamPickerIsVisible" @keydown.stop.enter="toggleTeamPickerIsVisible")
+          button.team-button(:title="teamButtonTitle" :class="{active: state.teamPickerIsVisible || spaceTeam}" @click.left.prevent.stop="toggleTeamPickerIsVisible" @keydown.stop.enter="toggleTeamPickerIsVisible")
             img.icon.team(src="@/assets/team.svg")
           //- Favorite
           FavoriteSpaceButton(:parentIsDialog="true" @updateLocalSpaces="updateLocalSpaces")
