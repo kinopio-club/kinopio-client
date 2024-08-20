@@ -9,6 +9,7 @@ import utils from '@/utils.js'
 import templates from '@/data/templates.js'
 import PrivacyIcon from '@/components/PrivacyIcon.vue'
 import OfflineBadge from '@/components/OfflineBadge.vue'
+import TeamLabel from '@/components/TeamLabel.vue'
 import Loader from '@/components/Loader.vue'
 
 import dayjs from 'dayjs'
@@ -278,6 +279,8 @@ const removeReadOnlyJiggle = () => {
 aside.notifications(@click.left="closeAllDialogs")
   .item(v-for="item in items" v-bind:key="item.id" :data-notification-id="item.id" :data-is-persistent-item="item.isPersistentItem" :class="notifificationClasses(item)")
     p
+      template(v-if="item.team")
+        TeamLabel(:team="item.team")
       span.label-badge(v-if="item.label") {{item.label}}
       template(v-if="item.icon")
         img.icon(v-if="item.icon === 'open'" src="@/assets/open.svg" class="open")

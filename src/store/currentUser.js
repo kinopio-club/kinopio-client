@@ -474,7 +474,7 @@ export default {
       if (!context.rootState.teamToJoinOnLoad) { return }
       const currentUserIsSignedIn = context.getters.isSignedIn
       if (currentUserIsSignedIn) {
-        context.dispatch('teams/joinTeam')
+        context.dispatch('teams/joinTeam', null, { root: true })
       } else {
         context.commit('notifySignUpToJoinTeam', true, { root: true })
       }

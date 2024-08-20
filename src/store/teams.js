@@ -101,9 +101,8 @@ export default {
         context.commit('addNotification', {
           message: `Joined ${response.team.name}`,
           type: 'success',
-          icon: 'team',
           isPersistentItem: true,
-          teamColor: response.team.color
+          team: response.team
         }, { root: true })
       } catch (error) {
         console.error('🚒 joinTeam', error)
