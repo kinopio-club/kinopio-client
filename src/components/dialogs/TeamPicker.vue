@@ -3,6 +3,8 @@ import { reactive, computed, onMounted, onBeforeUnmount, defineProps, defineEmit
 import { useStore } from 'vuex'
 
 import utils from '@/utils.js'
+import TeamLabel from '@/components/TeamLabel.vue'
+
 const store = useStore()
 
 const dialogElement = ref(null)
@@ -15,17 +17,24 @@ onMounted(() => {
   })
 })
 
-const emit = defineEmits(['selectTeam'])
+const emit = defineEmits(['selectTeam', 'clearTeam', 'closeDialogs'])
 
 const props = defineProps({
   visible: Boolean,
-  teams: Array
+  teams: Array,
+  selectedTeam: Object
 })
+
 watch(() => props.visible, (value, prevValue) => {
   if (value) {
     updateDialogHeight()
   }
 })
+
+const state = reactive({
+  dialogHeight: null
+})
+
 const updateDialogHeight = async () => {
   if (!props.visible) { return }
   await nextTick()
@@ -33,24 +42,31 @@ const updateDialogHeight = async () => {
   state.dialogHeight = utils.elementHeight(element)
 }
 
-const state = reactive({
-  dialogHeight: null
-})
+// select team
 
-// const themeName = computed(() => store.state.currentUser.theme)
-// const incrementBy = () => {
-//   state.count = state.count + 1
-//   emit('updateCount', state.count)
-//   // store.dispatch('themes/isSystem', false)
-// }
+const clearTeam = () => {
+  emit('clearTeam')
+}
+const selectTeam = (team) => {
+  emit('selectTeam', team)
+}
+const teamIsSelected = (team) => {
+  if (!props.selectedTeam) { return }
+  return team.id === props.selectedTeam.id
+}
 </script>
 
 <template lang="pug">
 dialog.narrow.team-picker(v-if="visible" :open="visible" @click.left.stop ref="dialogElement" :style="{'max-height': state.dialogHeight + 'px'}")
   section
-    p team picker,
-    //- @select team, save user.prevSpaceTeamId, cache
-    //- use in spacedetailsinfo toggleCurrentSpaceInTeam
+    button(@click.left="clearTeam")
+      img.icon.cancel(src="@/assets/add.svg")
+      span Clear Team
+  section.results-section(v-if="props.teams.length")
+    ul.results-list
+      template(v-for="team in props.teams")
+        li(:class="{ active: teamIsSelected(team) }" @click.stop="selectTeam(team)")
+          TeamLabel(:team="team" :showName="true")
 </template>
 
 <style lang="stylus">
