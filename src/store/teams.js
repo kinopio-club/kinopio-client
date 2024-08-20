@@ -99,7 +99,7 @@ export default {
           userId
         }, { root: true })
         context.commit('addNotification', {
-          message: `Joined ${response.team.name}`,
+          message: `Joined ${response.team.name}. Join team spaces from your spaces list`,
           type: 'success',
           isPersistentItem: true,
           team: response.team
