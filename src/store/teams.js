@@ -1,6 +1,7 @@
 import utils from '@/utils.js'
 
 import uniqBy from 'lodash-es/uniqBy'
+import uniq from 'lodash-es/uniq'
 
 // normalized state
 // https://github.com/vuejs/vuejs.org/issues/1636
@@ -196,6 +197,13 @@ export default {
         teamUser = getters.teamUser({ userId, space })
       }
       return teamUser?.role === 'admin'
+    },
+    bySpaces: (state, getters, rootState) => (spaces) => {
+      let teamIds = spaces.map(space => space.teamId)
+      teamIds = teamIds.filter(id => Boolean(id))
+      teamIds = uniq(teamIds)
+      const teams = teamIds.map(id => getters.byId(id))
+      return teams
     }
   }
 }

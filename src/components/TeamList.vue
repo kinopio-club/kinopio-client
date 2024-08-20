@@ -12,8 +12,8 @@ const props = defineProps({
   selectedTeam: Object
 })
 
-const selectTeam = (team) => {
-  emit('selectTeam', team)
+const selectTeam = (event, team) => {
+  emit('selectTeam', event, team)
 }
 const teamIsSelected = (team) => {
   if (!props.selectedTeam) { return }
@@ -24,7 +24,7 @@ const teamIsSelected = (team) => {
 <template lang="pug">
 ul.results-list.team-list
   template(v-for="team in props.teams")
-    li(:class="{ active: teamIsSelected(team) }" @click.stop="selectTeam(team)")
+    li(:class="{ active: teamIsSelected(team) }" @click.stop="selectTeam($event, team)")
       TeamLabel(:team="team" :showName="true")
 </template>
 

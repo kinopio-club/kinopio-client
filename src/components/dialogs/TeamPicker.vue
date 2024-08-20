@@ -47,7 +47,7 @@ const updateDialogHeight = async () => {
 const clearTeam = () => {
   emit('clearTeam')
 }
-const selectTeam = (team) => {
+const selectTeam = (event, team) => {
   emit('selectTeam', team)
 }
 

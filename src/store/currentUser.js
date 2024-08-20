@@ -300,6 +300,7 @@ export default {
       cache.updateUser('dialogSpaceFilterByType', value)
     },
     dialogSpaceFilterByUser: (state, value) => {
+      utils.typeCheck({ value, type: 'object' })
       state.dialogSpaceFilterByUser = value
       cache.updateUser('dialogSpaceFilterByUser', value)
     },
@@ -308,6 +309,7 @@ export default {
       cache.updateUser('dialogSpaceFilterShowHidden', value)
     },
     dialogSpaceFilterByTeam: (state, value) => {
+      utils.typeCheck({ value, type: 'object' })
       state.dialogSpaceFilterByTeam = value
       cache.updateUser('dialogSpaceFilterByTeam', value)
     },

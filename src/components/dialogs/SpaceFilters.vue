@@ -69,17 +69,17 @@ const totalFiltersActive = computed(() => {
   if (dialogSpaceFilterByType.value) {
     count += 1
   }
-  if (dialogSpaceFilterByUser.value) {
-    count += Object.keys(dialogSpaceFilterByUser.value).length
-  }
   if (dialogSpaceFilterSortByDate.value === 'createdAt') {
     count += 1
   }
   if (dialogSpaceFilterShowHidden.value) {
     count += 1
   }
-  if (dialogSpaceFilterByTeam.value) {
-    count += Object.keys(dialogSpaceFilterByTeam.value).length
+  if (utils.objectHasKeys(dialogSpaceFilterByTeam.value)) {
+    count += 1
+  }
+  if (utils.objectHasKeys(dialogSpaceFilterByUser.value)) {
+    count += 1
   }
   return count
 })
@@ -129,7 +129,9 @@ const updateSortBy = (value) => {
 
 // teams
 
-const teams = computed(() => store.getters['teams/byUser']())
+const teams = computed(() => {
+  return store.getters['teams/bySpaces'](props.spaces)
+})
 const filterByTeam = (event, team) => {
   if (team.id === dialogSpaceFilterByTeam.value.id) {
     updateTeamFilter({})
