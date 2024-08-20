@@ -18,7 +18,7 @@ onMounted(() => {
   })
 })
 
-const emit = defineEmits(['selectUser'])
+const emit = defineEmits(['selectUser', 'childDialogIsVisible'])
 
 const props = defineProps({
   users: Array,
@@ -128,6 +128,13 @@ const currentUserIsTeamAdmin = computed(() => {
 
 // team user role picker
 
+watch(() => state.teamUserRolePickerUserId, (value, prevValue) => {
+  if (value) {
+    emit('childDialogIsVisible', true)
+  } else {
+    emit('childDialogIsVisible', false)
+  }
+})
 const teamUserRolePickerIsVisibleUser = (user) => {
   return user.id === state.teamUserRolePickerUserId
 }

@@ -29,7 +29,8 @@ const props = defineProps({
 const state = reactive({
   dialogHeight: null,
   colorPickerIsVisible: false,
-  billingTipsIsVisible: false
+  billingTipsIsVisible: false,
+  childDialogIsVisible: false
 })
 
 watch(() => props.visible, (value, prevValue) => {
@@ -49,10 +50,14 @@ const updateDialogHeight = async () => {
 const closeDialogs = () => {
   state.colorPickerIsVisible = false
   store.commit('userDetailsIsVisible', false)
+  store.commit('triggerCloseChildDialogs')
 }
 const childDialogIsVisible = computed(() => {
-  return state.colorPickerIsVisible
+  return state.colorPickerIsVisible || state.childDialogIsVisible
 })
+const updateChildDialogIsVisible = (value) => {
+  state.childDialogIsVisible = value
+}
 
 // team
 
@@ -219,6 +224,7 @@ dialog.team-details.wide(v-if="visible" :open="visible" @click.left.stop="closeD
     :isClickable="true"
     :showTeamUserActions="true"
     :team="props.team"
+    @childDialogIsVisible="updateChildDialogIsVisible"
   )
 </template>
 
