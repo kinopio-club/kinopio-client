@@ -210,7 +210,7 @@ dialog.narrow.color-picker(v-if="visible" :open="visible" ref="dialogElement" @c
     .row
       .badge.full-width-color-badge(:style="{backgroundColor: currentColor}")
         //- Input
-        input(v-model="color" @focus="resetPinchCounterZoomDecimal" @blur="triggerUpdateHeaderAndFooterPosition" @keyup.stop.backspace :class="{ 'is-dark': isDark }")
+        input(v-model="color" @focus="resetPinchCounterZoomDecimal" @blur="triggerUpdateHeaderAndFooterPosition" @keyup.stop.backspace :class="{ 'is-dark': isDark }" @mouseup.stop)
           //- Remove
         button.small-button.remove-button(v-if="removeIsVisible" title="remove" @click="removeColor")
           img.icon(src="@/assets/remove.svg")
