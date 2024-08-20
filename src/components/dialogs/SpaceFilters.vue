@@ -79,7 +79,7 @@ const totalFiltersActive = computed(() => {
     count += 1
   }
   if (dialogSpaceFilterByTeam.value) {
-    count += 1
+    count += Object.keys(dialogSpaceFilterByTeam.value).length
   }
   return count
 })
