@@ -7,6 +7,8 @@ import TeamLabel from '@/components/TeamLabel.vue'
 import TeamDetails from '@/components/dialogs/TeamDetails.vue'
 import AddTeam from '@/components/dialogs/AddTeam.vue'
 
+import uniqBy from 'lodash-es/uniqBy'
+
 const store = useStore()
 
 const dialogElement = ref(null)
@@ -23,7 +25,6 @@ const visible = computed(() => store.state.teamsIsVisible)
 watch(() => visible.value, (value, prevValue) => {
   if (value) {
     store.commit('shouldExplicitlyHideFooter', true)
-    updateTeams()
     closeDialogs()
     state.teamDetailsIsVisibleForTeamId = ''
     updateDialogHeight()
@@ -39,8 +40,7 @@ const updateDialogHeight = async () => {
 const state = reactive({
   dialogHeight: null,
   teamDetailsIsVisibleForTeamId: '',
-  addTeamIsVisible: false,
-  teams: []
+  addTeamIsVisible: false
 })
 const closeDialogs = () => {
   state.addTeamIsVisible = false
@@ -56,9 +56,19 @@ const triggerSignUpOrInIsVisible = () => {
 
 // teams picker list
 
-const updateTeams = () => {
-  state.teams = store.getters['teams/byUser']()
-}
+const teams = computed(() => {
+  const user = store.state.currentUser
+  const teamIds = utils.clone(store.state.teams.ids)
+  const teams = teamIds.map(id => store.getters['teams/byId'](id))
+  let teamUserTeams = teams.filter(team => {
+    return team.users.find(teamUser => {
+      const teamUserId = teamUser.id || teamUser.userId
+      return teamUserId === user.id
+    })
+  })
+  teamUserTeams = uniqBy(teamUserTeams, 'id')
+  return teamUserTeams
+})
 
 // add team
 
@@ -91,14 +101,14 @@ dialog.narrow.teams(v-if="visible" :open="visible" @click.left.stop="closeDialog
         button(:class="{ active: state.addTeamIsVisible }" @click.stop="toggleAddTeamIsVisible")
           img.icon.add(src="@/assets/add.svg")
           span New Team
-        AddTeam(:visible="state.addTeamIsVisible" @closeDialogs="closeDialogs" @updateTeams="updateTeams")
+        AddTeam(:visible="state.addTeamIsVisible" @closeDialogs="closeDialogs")
   section(v-if="!currentUserIsSignedIn")
     p Sign Up or In to create and manage teams
     button(@click.left="triggerSignUpOrInIsVisible") Sign Up or In
   //- team picker
-  section.results-section(v-if="state.teams.length")
+  section.results-section(v-if="teams.length")
     ul.results-list
-      template(v-for="team in state.teams")
+      template(v-for="team in teams")
         li(:class="{ active: teamIsVisible(team) }" @click.stop="toggleTeamDetailsIsVisible(team)")
           TeamLabel(:team="team" :showName="true")
           TeamDetails(:visible="teamIsVisible(team)" :team="team")

@@ -22,7 +22,7 @@ onMounted(() => {
   })
 })
 
-const emit = defineEmits(['closeDialogs', 'updateTeams'])
+const emit = defineEmits(['closeDialogs'])
 
 const props = defineProps({
   visible: Boolean
@@ -111,7 +111,6 @@ const createTeam = async () => {
     state.loading.createTeam = true
     await store.dispatch('teams/createTeam', state.team)
     emit('closeDialogs')
-    emit('updateTeams')
   } catch (error) {
     console.error('🚒 createTeam', error)
     state.unknownServerError = true
