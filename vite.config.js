@@ -28,7 +28,7 @@ export default defineConfig(async ({ command, mode }) => {
   ]
   const exploreSpaceRoutes = await exploreSpaces() || []
   const dynamicRoutes = routes.concat(exploreSpaceRoutes)
-  console.log('🌺', routes)
+  console.log('🌺 sitemap routes', dynamicRoutes)
 
   return {
     resolve: {
