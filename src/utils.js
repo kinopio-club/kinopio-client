@@ -2658,6 +2658,25 @@ export default {
     newString = string.replace(match[0], '')
     return { language, newString }
   },
+  sanitizeString (string) {
+    // Replace newlines, tabs, and other control characters with a space
+    string = string.replace(/[\n\r\t]/g, ' ')
+    // Replace double quotes with escaped quotes
+    string = string.replace(/"/g, '\\"')
+    // Replace backslashes with double backslashes
+    string = string.replace(/\\/g, '\\\\')
+    // Remove markdown syntax (e.g., **bold**, `code`, etc.)
+    string = string.replace(/\*\*[^*]+\*\*/g, '') // Remove bold
+    string = string.replace(/`[^`]+`/g, '') // Remove inline code
+    string = string.replace(/\[\[.*?\]\]/g, '') // Remove double-bracketed links
+    string = string.replace(/\[.*?\]\(.*?\)/g, '') // Remove markdown links
+    // Optionally remove or encode other special characters
+    string = string.replace(/[<>]/g, '') // Remove angle brackets (e.g., <, >)
+    string = string.replace(/&/g, '&amp;') // Escape ampersand
+    string = string.replace(/'/g, '&#39;') // Escape single quotes
+    string = string.trim()
+    return string
+  },
 
   // Background Gradient
 

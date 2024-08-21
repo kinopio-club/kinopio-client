@@ -6,6 +6,7 @@ import utils from '@/utils.js'
 import cache from '@/cache.js'
 import consts from '@/consts.js'
 import postMessage from '@/postMessage.js'
+import pageMeta from '@/pageMeta.js'
 
 import { nextTick } from 'vue'
 import randomColor from 'randomcolor'
@@ -359,6 +360,7 @@ const currentSpace = {
         const nullCardUsers = true
         cache.updateIdsInSpace(space, nullCardUsers)
       }
+      pageMeta.update(space)
     },
     createNewSpace: (context, space) => {
       const currentUser = context.rootState.currentUser
@@ -801,6 +803,7 @@ const currentSpace = {
         let remoteSpace = remoteData
         console.log('🎑 remoteSpace', remoteSpace)
         if (!remoteSpace) { return }
+        pageMeta.update(remoteSpace)
         context.dispatch('teams/loadTeam', remoteSpace, { root: true })
         context.commit('updateSpace', { collaboratorKey: remoteSpace.collaboratorKey })
         const spaceIsUnchanged = utils.spaceIsUnchanged(cachedSpace, remoteSpace)
