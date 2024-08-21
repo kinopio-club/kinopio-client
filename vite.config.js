@@ -22,14 +22,14 @@ const exploreSpaces = async () => {
 }
 
 export default defineConfig(async ({ command, mode }) => {
+  // sitemap routes
   const routes = [
     '/kinopio-roadmap-6TRE21gchHI7alHLuwzd5',
     '/-kinopio-what-s-new-6lsytK8ZfOtMl2oqG05Rj'
   ]
   const exploreSpaceRoutes = await exploreSpaces() || []
   const dynamicRoutes = routes.concat(exploreSpaceRoutes)
-  console.log('🌺 sitemap routes', dynamicRoutes)
-
+  // config
   return {
     resolve: {
       alias: {
