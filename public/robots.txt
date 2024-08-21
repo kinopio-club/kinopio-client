@@ -1,7 +1,2 @@
-# sitemaps generated dyncamically in vite.config.js
-
-# sitemap index
+# sitemap generated in vite.config.js
 Sitemap: https://kinopio.club/sitemap.xml
-# sitemaps
-Sitemap: https://kinopio.club/static-sitemap.xml
-Sitemap: https://kinopio.club/dynamic-sitemap.xml
