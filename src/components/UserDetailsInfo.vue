@@ -1,15 +1,13 @@
 <script setup>
-import { reactive, computed, onMounted, onUnmounted, defineProps, defineEmits, watch, ref, nextTick, defineAsyncComponent } from 'vue'
+import { reactive, computed, onMounted, onUnmounted, defineProps, defineEmits, watch, ref, nextTick } from 'vue'
 import { useStore } from 'vuex'
 
 import ColorPicker from '@/components/dialogs/ColorPicker.vue'
 import UserBadges from '@/components/UserBadges.vue'
+import User from '@/components/User.vue'
 import cache from '@/cache.js'
 import utils from '@/utils.js'
 import postMessage from '@/postMessage.js'
-const User = defineAsyncComponent({
-  loader: () => import('@/components/User.vue')
-})
 const store = useStore()
 
 const descriptionElement = ref(null)

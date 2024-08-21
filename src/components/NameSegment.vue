@@ -1,5 +1,5 @@
 <script setup>
-import { reactive, computed, onMounted, defineProps, defineEmits, watch, ref, nextTick, defineAsyncComponent } from 'vue'
+import { reactive, computed, onMounted, defineProps, defineEmits, watch, ref, nextTick } from 'vue'
 import { useStore } from 'vuex'
 
 import NameMatch from '@/components/NameMatch.vue'
