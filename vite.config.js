@@ -1,9 +1,11 @@
 import { defineConfig } from 'vite'
 import createVuePlugin from '@vitejs/plugin-vue'
 import { VitePWA } from 'vite-plugin-pwa'
+import sitemap from 'vite-plugin-sitemap'
 import path from 'path'
-import fs from 'fs'
+import { writeFileSync, mkdirSync, existsSync, readFileSync } from 'fs'
 
+const outputDir = './dist'
 const isDevelopment = process.env.NODE_ENV === 'development'
 let apiHost = 'https://api.kinopio.club'
 if (isDevelopment) {
@@ -45,8 +47,11 @@ const yearTime = 60 * 60 * 24 * 365 // 365 days
 
 export default defineConfig(async ({ command, mode }) => {
   const exploreSpaceUrls = await updateExploreSpaceUrls()
+  if (!existsSync(outputDir)) {
+    mkdirSync(outputDir, { recursive: true })
+  }
   if (!isDevelopment) {
-    fs.writeFileSync('./dist/sitemap.xml', sitemapIndex)
+    writeFileSync(`${outputDir}/sitemap.xml`, sitemapIndex)
   }
   return {
     resolve: {
@@ -131,8 +136,8 @@ export default defineConfig(async ({ command, mode }) => {
         allow: ['..']
       },
       https: {
-        key: fs.readFileSync('./.cert/key.pem'),
-        cert: fs.readFileSync('./.cert/cert.pem')
+        key: readFileSync('./.cert/key.pem'),
+        cert: readFileSync('./.cert/cert.pem')
       }
     }
   }
