@@ -3,6 +3,7 @@ import createVuePlugin from '@vitejs/plugin-vue'
 import { VitePWA } from 'vite-plugin-pwa'
 import path from 'path'
 import fs from 'fs'
+import { writeFile } from 'fs/promises'
 
 const isDevelopment = process.env.NODE_ENV === 'development'
 let apiHost = 'https://api.kinopio.club'
@@ -25,12 +26,29 @@ const updateExploreSpaceUrls = async () => {
   }
 }
 
+// sitemap index
+const date = new Date().toISOString()
+const sitemapIndex = `<?xml version="1.0" encoding="UTF-8"?>
+<sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+   <sitemap>
+      <loc>https://kinopio.club/static-sitemap.xml</loc>
+      <lastmod>${date}</lastmod>
+   </sitemap>
+   <sitemap>
+      <loc>https://kinopio.club/dynamic-sitemap.xml</loc>
+      <lastmod>${date}</lastmod>
+   </sitemap>
+</sitemapindex>`
+
 // exploreSpaceUrls()
 
 const yearTime = 60 * 60 * 24 * 365 // 365 days
 
 export default defineConfig(async ({ command, mode }) => {
   const exploreSpaceUrls = await updateExploreSpaceUrls()
+  if (!isDevelopment) {
+    await writeFile(path.resolve('dist/sitemap.xml'), sitemapIndex)
+  }
   return {
     resolve: {
       alias: {
