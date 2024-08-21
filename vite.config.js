@@ -5,7 +5,6 @@ import sitemap from 'vite-plugin-sitemap'
 import path from 'path'
 import fs from 'fs'
 
-const lastmod = new Date().toISOString()
 const yearTime = 60 * 60 * 24 * 365 // 365 days
 
 export default defineConfig({
@@ -87,7 +86,8 @@ export default defineConfig({
     sitemap({
       hostname: 'https://kinopio.club',
       routes: async () => {
-        return [
+        const lastmod = new Date().toISOString()
+        const urls = [
           { url: '/', lastmod },
           { url: 'https://help.kinopio.club', lastmod },
           { url: 'https://blog.kinopio.club', lastmod },
@@ -95,6 +95,8 @@ export default defineConfig({
           { url: 'https://kinopio.club/-kinopio-what-s-new-6lsytK8ZfOtMl2oqG05Rj', lastmod },
           { url: 'https://club.kinopio.club', lastmod }
         ]
+        console.log('🌺 Sitemap URLs:', urls)
+        return urls
       },
       outDir: 'dist',
       filename: 'sitemap.xml'
