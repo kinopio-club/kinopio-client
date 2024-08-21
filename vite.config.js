@@ -46,7 +46,7 @@ const yearTime = 60 * 60 * 24 * 365 // 365 days
 export default defineConfig(async ({ command, mode }) => {
   const exploreSpaceUrls = await updateExploreSpaceUrls()
   if (!isDevelopment) {
-    fs.writeFileSync('dist/sitemap.xml', sitemapIndex)
+    fs.writeFileSync('./dist/sitemap.xml', sitemapIndex)
   }
   return {
     resolve: {
