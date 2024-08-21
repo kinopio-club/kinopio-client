@@ -1,13 +1,35 @@
 import { defineConfig } from 'vite'
 import createVuePlugin from '@vitejs/plugin-vue'
 import { VitePWA } from 'vite-plugin-pwa'
-import sitemap from 'vite-plugin-sitemap'
+import Sitemap from 'vite-plugin-sitemap'
 import path from 'path'
 import fs from 'fs'
 
 const yearTime = 60 * 60 * 24 * 365 // 365 days
 
+const isDevelopment = process.env.NODE_ENV === 'development'
+const exploreSpaces = async () => {
+  try {
+    if (isDevelopment) { return }
+    const apiHost = 'https://api.kinopio.club'
+    const response = await fetch(`${apiHost}/space/explore-spaces`)
+    const data = await response.json()
+    let paths = data.map(space => space.url)
+    return paths.map(path => `/${path}`)
+  } catch (error) {
+    console.error('🚒 exploreSpaceUrls', error)
+  }
+}
+
 export default defineConfig(async ({ command, mode }) => {
+  const routes = [
+    '/kinopio-roadmap-6TRE21gchHI7alHLuwzd5',
+    '/-kinopio-what-s-new-6lsytK8ZfOtMl2oqG05Rj'
+  ]
+  const exploreSpaceRoutes = await exploreSpaces() || []
+  const dynamicRoutes = routes.concat(exploreSpaceRoutes)
+  console.log('🌺', routes)
+
   return {
     resolve: {
       alias: {
@@ -84,23 +106,11 @@ export default defineConfig(async ({ command, mode }) => {
         }
       }),
       // sitemap
-      sitemap({
-        hostname: 'https://kinopio.club',
-        routes: async () => {
-          const lastmod = new Date().toISOString()
-          const urls = [
-            { url: '/', lastmod },
-            { url: 'https://help.kinopio.club', lastmod },
-            { url: 'https://blog.kinopio.club', lastmod },
-            { url: 'https://kinopio.club/kinopio-roadmap-6TRE21gchHI7alHLuwzd5', lastmod },
-            { url: 'https://kinopio.club/-kinopio-what-s-new-6lsytK8ZfOtMl2oqG05Rj', lastmod },
-            { url: 'https://club.kinopio.club', lastmod }
-          ]
-          console.log('🌺 Sitemap URLs:', urls)
-          return urls
-        },
-        outDir: 'dist',
-        filename: 'sitemap.xml'
+      Sitemap({
+        hostname: 'http://kinopio.club',
+        dynamicRoutes,
+        readable: true,
+        generateRobotsTxt: false
       })
     ],
     server: {
