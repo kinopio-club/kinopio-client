@@ -25,6 +25,7 @@ const themes = {
       'secondary-active-background-dark': '#cdcdcd',
       'light-shadow': 'rgba(0,0,0,0.20)',
       'heavy-shadow': 'rgba(0,0,0,0.25)',
+      'inset-heavy-shadow': 'rgba(0,0,0,0.35)',
       // codeblock
       'code-comment': '#898989',
       'code-punctuation': 'black',
@@ -59,6 +60,7 @@ const themes = {
       'secondary-active-background-dark': '#444',
       'light-shadow': 'rgba(0,0,0,0.25)',
       'heavy-shadow': 'rgba(0,0,0,0.55)',
+      'inset-heavy-shadow': 'rgba(0,0,0,0.65)',
       // codeblock
       'code-comment': '#898989',
       'code-punctuation': 'white',
