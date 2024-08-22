@@ -125,6 +125,7 @@ const copy = async (event) => {
     .button-wrap
       padding 8px
       padding-left 8px
+      padding-right 6px
       margin-left 0
       &:last-child
         padding-left 0
