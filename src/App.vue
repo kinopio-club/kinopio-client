@@ -1225,18 +1225,8 @@ code
     margin-right 5px
     border-radius var(--small-entity-radius)
   &.card-button-badge
-    box-shadow none
+    box-shadow 1px 1px 2px var(--heavy-shadow)
     text-decoration none
-    &:hover
-      span
-        text-decoration underline
-    &.active,
-    &:active
-      background cyan // temp
-    &.is-being-dragged
-      box-shadow none
-      span
-        text-decoration none
   &.dot
     min-width initial
     min-height initial

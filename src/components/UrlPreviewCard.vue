@@ -55,21 +55,7 @@ const background = computed(() => {
 })
 const backgroundColorIsDark = computed(() => utils.colorIsDark(background.value))
 const textColorClasses = computed(() => {
-  const color = buttonBadgeStyles.value.background
-  return utils.textColorClasses({ backgroundColor: color })
-})
-const buttonBadgeStyles = computed(() => {
-  let color = background.value
-  if (state.isActive) {
-    color = store.state.currentUser.color
-  }
-  let styles = { background: color }
-  if (utils.colorIsDark(color)) {
-    styles.color = utils.cssVariable('primary-on-dark-background')
-  } else {
-    styles.color = utils.cssVariable('primary-on-light-background')
-  }
-  return styles
+  return utils.textColorClasses({ backgroundColor: background.value })
 })
 
 // preview image
@@ -245,7 +231,7 @@ const openUrl = async (event, url) => {
     :title="props.card.urlPreviewUrl"
     :href="props.card.urlPreviewUrl"
     :class="{ 'iframe-info': props.card.urlPreviewIframeUrl, 'preview-image-is-visible': previewImageIsVisible, active: state.isActive, 'is-being-dragged': store.state.preventDraggedCardFromShowingDetails }"
-    :style="buttonBadgeStyles"
+    :style="{background: background}"
     target="_blank"
     @mouseenter="handleMouseEnterUrlButton"
     @mouseleave="handleMouseLeaveUrlButton"
