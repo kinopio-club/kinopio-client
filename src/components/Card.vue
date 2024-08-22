@@ -438,7 +438,8 @@ const cardClasses = computed(() => {
     'is-playing-audio': state.isPlayingAudio,
     'is-locked': isLocked.value,
     'has-url-preview': cardUrlPreviewIsVisible.value,
-    'is-dark': backgroundColorIsDark.value
+    'is-dark': backgroundColorIsDark.value,
+    'child-is-hovered': currentUserIsHoveringOverUrlButton.value && !currentCardIsBeingDragged.value
   }
   classes = addSizeClasses(classes)
   return classes
@@ -568,6 +569,9 @@ const connectedConnectionTypes = computed(() => store.getters['currentConnection
 
 // card buttons
 
+const currentUserIsHoveringOverUrlButton = computed(() => {
+  return store.state.currentUserIsHoveringOverUrlButtonCardId === props.card.id
+})
 const connectorIsVisible = computed(() => {
   const spaceIsOpen = store.state.currentSpace.privacy === 'open' && currentUserIsSignedIn.value
   let isVisible
@@ -1493,7 +1497,6 @@ const handleMouseLeaveUrlButton = () => {
 
 // sticky
 
-const currentUserIsHoveringOverUrlButton = computed(() => store.state.currentUserIsHoveringOverUrlButtonCardId === props.card.id)
 const shouldNotStick = computed(() => {
   if (!store.state.currentUser.shouldUseStickyCards) { return true }
   if (iframeIsVisible.value) { return true }
@@ -1975,6 +1978,8 @@ article.card-wrap
     &:active,
     &.active
       box-shadow var(--active-shadow)
+    &.child-is-hovered
+      box-shadow none
     &.is-dark
       .name
         color var(--primary-on-dark-background)
