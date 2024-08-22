@@ -1811,12 +1811,12 @@ article.card-wrap#card(
         .audio-wrap(v-if="Boolean(state.formats.audio)")
           Audio(:visible="Boolean(state.formats.audio)" :url="state.formats.audio" @isPlaying="updateIsPlayingAudio" :selectedColor="selectedColor" :normalizedName="normalizedName")
         .name-wrap
-          //- [·]
-          .checkbox-wrap(v-if="hasCheckbox" @mouseup.left="toggleCardChecked" @touchend.prevent="toggleCardChecked")
-            label(:class="{active: isChecked, disabled: !canEditSpace}")
-              input(name="checkbox" type="checkbox" v-model="checkboxState")
           //- Name
           p.name.name-segments(v-if="normalizedName" :style="{background: currentBackgroundColor}" :class="{'is-checked': isChecked, 'has-checkbox': hasCheckbox, 'badge badge-status': isImageCard && hasTextSegments}")
+            //- [·]
+            .checkbox-wrap(v-if="hasCheckbox" @mouseup.left="toggleCardChecked" @touchend.prevent="toggleCardChecked")
+              label(:class="{active: isChecked, disabled: !canEditSpace}")
+                input(name="checkbox" type="checkbox" v-model="checkboxState")
             template(v-for="segment in nameSegments")
               NameSegment(:segment="segment" @showTagDetailsIsVisible="showTagDetailsIsVisible" :parentCardId="card.id" :backgroundColorIsDark="currentBackgroundColorIsDark" :headerFontId="card.headerFontId" :headerFontSize="card.headerFontSize")
             Loader(:visible="isLoadingUrlPreview")
@@ -2011,9 +2011,10 @@ article.card-wrap
       > .loader
         transform translateX(8px) translateY(8px)
       .checkbox-wrap
-        padding-top 8px
-        padding-left 8px
-        padding-bottom 8px
+        padding 0
+        padding-right 5px
+        display inline-block
+        vertical-align 1px
         label
           pointer-events none
           width 20px
@@ -2045,6 +2046,12 @@ article.card-wrap
         &.has-checkbox
           .audio
             width 132px
+    .card-comment
+      .checkbox-wrap
+        padding 0
+        padding-top 8px
+        padding-left 8px
+        padding-bottom 8px
 
     .connector,
     .url
