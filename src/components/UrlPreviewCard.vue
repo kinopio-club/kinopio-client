@@ -20,6 +20,7 @@ const props = defineProps({
   urlPreviewImageIsVisible: Boolean,
   backgroundColor: String
 })
+
 const state = reactive({
   isActive: null
 })
