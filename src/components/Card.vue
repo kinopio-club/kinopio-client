@@ -580,6 +580,11 @@ const connectorIsVisible = computed(() => {
 const isCardButtonsVisible = computed(() => {
   return isLocked.value || (cardButtonUrl.value && !isComment.value) || connectorIsVisible.value
 })
+const urlButtonIsVisible = computed(() => {
+  if (!cardButtonUrl.value) { return }
+  if (isComment.value) { return true }
+  return !props.card.urlPreviewIsVisible
+})
 const cardButtonUrl = computed(() => {
   const link = state.formats.link
   const file = state.formats.file
@@ -1477,6 +1482,12 @@ const handleMouseLeaveCheckbox = () => {
 const updateCurrentConnections = () => {
   state.currentConnections = store.getters['currentConnections/byItemId'](props.card.id)
 }
+const handleMouseEnterUrlButton = () => {
+  store.commit('currentUserIsHoveringOverUrlButtonCardId', props.card.id)
+}
+const handleMouseLeaveUrlButton = () => {
+  store.commit('currentUserIsHoveringOverUrlButtonCardId', '')
+}
 
 // sticky
 
@@ -1804,6 +1815,11 @@ article.card-wrap#card(
           img.icon.view(src="@/assets/comment.svg")
           //- User
           UserLabelInline(:user="createdByUser" :shouldHideName="true")
+          //- Url →
+          a.url-wrap(v-if="urlButtonIsVisible" :href="cardButtonUrl" @mouseup.exact.prevent="closeAllDialogs" @click.stop="openUrl($event, cardButtonUrl)" @touchend.prevent="openUrl($event, cardButtonUrl)" target="_blank" @mouseenter="handleMouseEnterUrlButton" @mouseleave="handleMouseLeaveUrlButton")
+            .url.inline-button-wrap
+              button.inline-button(:style="{background: currentBackgroundColor}" :class="{'is-light-in-dark-theme': isLightInDarkTheme, 'is-dark-in-light-theme': isDarkInLightTheme}" tabindex="-1")
+                img.icon.visit.arrow-icon(src="@/assets/visit.svg")
 
       //- Not Comment
       .card-content(v-if="!isComment" :style="cardContentStyles")
@@ -1820,7 +1836,11 @@ article.card-wrap#card(
             template(v-for="segment in nameSegments")
               NameSegment(:segment="segment" @showTagDetailsIsVisible="showTagDetailsIsVisible" :parentCardId="card.id" :backgroundColorIsDark="currentBackgroundColorIsDark" :headerFontId="card.headerFontId" :headerFontSize="card.headerFontSize")
             Loader(:visible="isLoadingUrlPreview")
-
+            //- Url →
+            a.url-wrap(v-if="urlButtonIsVisible" :href="cardButtonUrl" @mouseup.exact.prevent="closeAllDialogs" @click.stop="openUrl($event, cardButtonUrl)" @touchend.prevent="openUrl($event, cardButtonUrl)" target="_blank" @mouseenter="handleMouseEnterUrlButton" @mouseleave="handleMouseLeaveUrlButton")
+              .url.inline-button-wrap
+                button.inline-button(:style="{background: currentBackgroundColor}" :class="{'is-light-in-dark-theme': isLightInDarkTheme, 'is-dark-in-light-theme': isDarkInLightTheme}" tabindex="-1")
+                  img.icon.visit.arrow-icon(src="@/assets/visit.svg")
       //- Right buttons
       span.card-buttons-wrap(v-if="isCardButtonsVisible")
         //- Lock
@@ -1831,11 +1851,6 @@ article.card-wrap#card(
             button.inline-button(tabindex="-1" :style="{background: currentBackgroundColor}")
               img.icon.lock-icon(src="@/assets/lock.svg")
         template(v-else)
-          //- Url →
-          a.url-wrap(v-if="cardButtonUrl && !isComment" :href="cardButtonUrl" @mouseup.exact.prevent="closeAllDialogs" @click.stop="openUrl($event, cardButtonUrl)" @touchend.prevent="openUrl($event, cardButtonUrl)" :class="{'connector-is-visible': connectorIsVisible}" target="_blank")
-            .url.inline-button-wrap
-              button.inline-button(:style="{background: currentBackgroundColor}" :class="{'is-light-in-dark-theme': isLightInDarkTheme, 'is-dark-in-light-theme': isDarkInLightTheme}" tabindex="-1")
-                img.icon.visit.arrow-icon(src="@/assets/visit.svg")
           //- connector
           ItemConnectorButton(
             :visible="connectorIsVisible"
@@ -2060,6 +2075,19 @@ article.card-wrap
       cursor cell
       button
         z-index 1
+
+    .url-wrap
+      padding 0
+      margin 0
+      padding-left 5px
+      vertical-align -1px
+      .url
+        display inline
+        cursor pointer
+        padding 0
+        button
+          cursor pointer
+
     .checkbox-wrap
       &:hover
         label
@@ -2089,20 +2117,6 @@ article.card-wrap
       position absolute
       left 5px
       top 3.5px
-    .url
-      cursor pointer
-      padding-right 0
-      button
-        cursor pointer
-        span
-          top -3px
-          position relative
-
-    .url-wrap
-      max-height 28px
-      padding-right 8px
-      &.connector-is-visible
-        padding-right 0
 
     .is-light-in-dark-theme
       border-color var(--primary-on-light-background)
