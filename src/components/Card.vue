@@ -2007,6 +2007,7 @@ article.card-wrap
       min-width 28px
       margin-right 6px
       border-radius var(--entity-radius)
+      max-width 100%
     .card-comment
       margin-right 8px
     .card-buttons-wrap
