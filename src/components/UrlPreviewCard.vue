@@ -20,6 +20,12 @@ const props = defineProps({
   urlPreviewImageIsVisible: Boolean,
   backgroundColor: String
 })
+const state = reactive({
+  isActive: null
+})
+watch(() => store.state.preventDraggedCardFromShowingDetails, (value, prevValue) => {
+  state.isActive = false
+})
 
 const shouldHideImage = computed(() => props.card.shouldHideUrlPreviewImage)
 const shouldHideInfo = computed(() => props.card.shouldHideUrlPreviewInfo)
@@ -43,6 +49,12 @@ const background = computed(() => {
 const backgroundColorIsDark = computed(() => utils.colorIsDark(background.value))
 const textColorClasses = computed(() => {
   return utils.textColorClasses({ backgroundColor: background.value })
+})
+
+// preview image
+
+const previewImageIsVisible = computed(() => {
+  return props.card.urlPreviewImage && !shouldHideImage.value
 })
 
 // url embed (spotify, youtube, etc.)
@@ -155,6 +167,9 @@ const description = computed(() => {
 
 // url
 
+const enableIsActive = () => {
+  state.isActive = true
+}
 const handleMouseEnterUrlButton = () => {
   store.commit('currentUserIsHoveringOverUrlButtonCardId', props.card.id)
 }
@@ -162,6 +177,9 @@ const handleMouseLeaveUrlButton = () => {
   store.commit('currentUserIsHoveringOverUrlButtonCardId', '')
 }
 const openUrl = async (event, url) => {
+  state.isActive = false
+  if (store.state.currentUserIsDraggingConnectionIdLabel) { return }
+  if (store.state.preventDraggedCardFromShowingDetails) { return }
   if (event) {
     if (event.metaKey || event.ctrlKey) {
       await nextTick()
@@ -190,37 +208,44 @@ const openUrl = async (event, url) => {
 .url-preview-card(v-if="visible" :style="{background: background}" :class="{'is-image-card': props.isImageCard}")
   //- image
   template(v-if="!shouldDisplayIframe")
-    .preview-image-wrap(v-if="card.urlPreviewImage && !shouldHideImage")
-      img.preview-image(:src="card.urlPreviewImage" :class="{selected: isSelected, 'border-bottom-radius': !shouldHideInfo}" ref="image" @error="handleImageError")
+    .preview-image-wrap(v-if="previewImageIsVisible")
+      img.preview-image(:src="props.card.urlPreviewImage" :class="{selected: isSelected, 'border-bottom-radius': !shouldHideInfo}" ref="image" @error="handleImageError")
 
   //- embed
   template(v-if="shouldDisplayIframe")
-    iframe(:src="card.urlPreviewIframeUrl" :class="{ ignore: isInteractingWithItem }" :style="{ height: iframeHeight + 'px' }" sandbox="allow-same-origin allow-scripts allow-forms")
-
-  .row.info.badge.status(v-if="!shouldHideInfo" :class="{ 'iframe-info': card.urlPreviewIframeUrl }" :style="{background: background}")
+    iframe(:src="props.card.urlPreviewIframeUrl" :class="{ ignore: isInteractingWithItem }" :style="{ height: iframeHeight + 'px' }" sandbox="allow-same-origin allow-scripts allow-forms")
+  //- url
+  a.row.info.badge.status.button-badge.card-button-badge(
+    v-if="!shouldHideInfo"
+    :title="props.card.urlPreviewUrl"
+    :href="props.card.urlPreviewUrl"
+    :class="{ 'iframe-info': props.card.urlPreviewIframeUrl, 'preview-image-is-visible': previewImageIsVisible, active: state.isActive }"
+    :style="{background: background}"
+    target="_blank"
+    @mouseenter="handleMouseEnterUrlButton"
+    @mouseleave="handleMouseLeaveUrlButton"
+    @mousedown="enableIsActive"
+    @touchstart="enableIsActive"
+    @click.stop.prevent
+    @mouseup.left="openUrl($event, props.card.urlPreviewUrl)"
+    @touchend.prevent="openUrl($event, props.card.urlPreviewUrl)"
+  )
     //- play
-    .button-wrap.play-button-wrap(v-if="card.urlPreviewIframeUrl" @mousedown.stop @touchstart.stop @click.stop="toggleShouldDisplayIframe" @touchend.stop="toggleShouldDisplayIframe")
+    .button-wrap.play-button-wrap(v-if="props.card.urlPreviewIframeUrl" @mousedown.stop @touchstart.stop @click.stop="toggleShouldDisplayIframe" @touchend.stop="toggleShouldDisplayIframe")
       button.small-button(v-if="!isTwitterUrl")
         img.icon.stop(v-if="shouldDisplayIframe" src="@/assets/box-filled.svg")
         img.icon.play(v-else src="@/assets/play.svg")
-      img.favicon(v-if="card.urlPreviewFavicon" :src="card.urlPreviewFavicon")
-
+      img.favicon(v-if="props.card.urlPreviewFavicon" :src="props.card.urlPreviewFavicon")
     //- text
     .text(v-if="!shouldHideInfo")
       .row
-        template(v-if="!card.urlPreviewIframeUrl")
-          img.favicon(v-if="card.urlPreviewFavicon" :src="card.urlPreviewFavicon")
+        template(v-if="!props.card.urlPreviewIframeUrl")
+          img.favicon(v-if="props.card.urlPreviewFavicon" :src="props.card.urlPreviewFavicon")
           img.icon.favicon.open(v-else src="@/assets/open.svg")
         .title(:class="textColorClasses")
           span {{title}}
       .description(v-if="description" :class="textColorClasses")
         span {{description}}
-
-    //- Url →
-    a.url-wrap(:href="card.urlPreviewUrl" @mouseup.exact.prevent="closeAllDialogs" @click.stop="openUrl($event, card.urlPreviewUrl)" @touchend.prevent="openUrl($event, card.urlPreviewUrl)" target="_blank" @mouseenter="handleMouseEnterUrlButton" @mouseleave="handleMouseLeaveUrlButton")
-      .url.inline-button-wrap
-        button.inline-button(:style="{ background: background }" tabindex="-1")
-          img.icon.visit.arrow-icon(src="@/assets/visit.svg")
 </template>
 
 <style lang="stylus">
@@ -291,10 +316,6 @@ const openUrl = async (event, url) => {
     &.ignore
       pointer-events none
 
-  .iframe-info
-    border-top-left-radius 0
-    border-top-right-radius 0
-
   .play-button-wrap
     flex-shrink 0
     padding-right 4px
@@ -331,10 +352,16 @@ const openUrl = async (event, url) => {
     margin-right 4px
     vertical-align 0
 
-  .url-wrap
-    position absolute
-    right 5px
-    top 6px
-    button
-      background var(--secondary-active-background)
+  .badge.button-badge
+    &.preview-image-is-visible,
+    &.iframe-info
+      border-top-left-radius 0
+      border-top-right-radius 0
+    &:hover
+    &:focus
+      text-decoration none
+      box-shadow var(--button-hover-shadow)
+    &:active,
+    &.active
+      box-shadow var(--button-active-inset-shadow)
 </style>

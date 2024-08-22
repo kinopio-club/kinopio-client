@@ -1492,11 +1492,13 @@ const handleMouseLeaveUrlButton = () => {
 
 // sticky
 
+const currentUserIsHoveringOverUrlButton = computed(() => store.state.currentUserIsHoveringOverUrlButtonCardId === props.card.id)
 const shouldNotStick = computed(() => {
   if (!store.state.currentUser.shouldUseStickyCards) { return true }
   if (iframeIsVisible.value) { return true }
   if (store.state.codeLanguagePickerIsVisible) { return true }
   if (store.state.currentUserIsDraggingConnectionIdLabel) { return true }
+  if (currentUserIsHoveringOverUrlButton.value) { return true }
   const userIsConnecting = store.state.currentConnectionStartItemIds.length
   const currentUserIsPanning = store.state.currentUserIsPanningReady || store.state.currentUserIsPanning
   return userIsConnecting || store.state.currentUserIsDraggingBox || store.state.currentUserIsResizingBox || currentUserIsPanning || currentCardDetailsIsVisible.value || isRemoteCardDetailsVisible.value || isRemoteCardDragging.value || currentCardIsBeingDragged.value || store.state.currentUserIsResizingCard || store.state.currentUserIsTiltingCard || isLocked.value
