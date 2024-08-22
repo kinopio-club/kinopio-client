@@ -31,8 +31,7 @@ const props = defineProps({
 })
 
 const state = reactive({
-  isActive: null,
-  childIsHovered: false
+  isActive: null
 })
 
 const shouldHideImage = computed(() => props.card.shouldHideUrlPreviewImage)
@@ -213,12 +212,6 @@ const openUrl = async (event, url) => {
     window.open(url) // opens url in new tab
   }
 }
-const handleMouseEnterPlayButton = () => {
-  state.childIsHovered = true
-}
-const handleMouseLeavePlayButton = () => {
-  state.childIsHovered = false
-}
 </script>
 
 <template lang="pug">
@@ -237,7 +230,7 @@ const handleMouseLeavePlayButton = () => {
     v-if="!shouldHideInfo"
     :title="props.card.urlPreviewUrl"
     :href="props.card.urlPreviewUrl"
-    :class="{ 'iframe-info': props.card.urlPreviewIframeUrl, 'preview-image-is-visible': previewImageIsVisible, active: state.isActive, 'is-being-dragged': store.state.preventDraggedCardFromShowingDetails, 'no-underline': state.childIsHovered }"
+    :class="{ 'iframe-info': props.card.urlPreviewIframeUrl, 'preview-image-is-visible': previewImageIsVisible, active: state.isActive, 'is-being-dragged': store.state.preventDraggedCardFromShowingDetails }"
     :style="{background: background}"
     target="_blank"
     @mouseenter="handleMouseEnterUrlButton"
