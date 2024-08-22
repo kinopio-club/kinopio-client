@@ -55,7 +55,12 @@ const background = computed(() => {
 })
 const backgroundColorIsDark = computed(() => utils.colorIsDark(background.value))
 const textColorClasses = computed(() => {
-  return utils.textColorClasses({ backgroundColor: background.value })
+  const recomputeOnThemeChange = isThemeDark.value // used to force recompute
+  let color = background.value
+  if (!color) {
+    color = utils.cssVariable('secondary-background')
+  }
+  return utils.textColorClasses({ backgroundColor: color })
 })
 
 // preview image
