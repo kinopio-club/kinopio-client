@@ -188,6 +188,13 @@ export default {
       if (!team) { return }
       return team.users.find(user => user.id === userId)
     },
+    currentUserIsCurrentSpaceTeamUser: (state, getters, rootState) => {
+      const userId = rootState.currentUser.id
+      const teamId = rootState.currentSpace.teamId
+      if (!teamId) { return }
+      const team = getters.spaceTeam()
+      return team.users.find(user => user.id === userId)
+    },
     teamUserIsAdmin: (state, getters, rootState) => ({ userId, space, teamId }) => {
       let teamUser
       if (teamId) {

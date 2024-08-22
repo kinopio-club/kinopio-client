@@ -861,7 +861,7 @@ export default {
       const currentUserIsSignedIn = getters.isSignedIn
       const canEditOpenSpace = spaceIsOpen && currentUserIsSignedIn
       const isSpaceMember = getters.isSpaceMember(space)
-      const teamUser = rootGetters['teams/teamUser']({ userId: state.id, space })
+      const teamUser = rootGetters['teams/isCurrentSpaceTeamUser']
       return canEditOpenSpace || isSpaceMember || teamUser
     },
     cannotEditUnlessSignedIn: (state, getters, rootState) => (space) => {
@@ -883,24 +883,24 @@ export default {
     },
     canEditCard: (state, getters, rootState, rootGetters) => (card) => {
       const isSpaceMember = getters.isSpaceMember()
-      const teamUser = rootGetters['teams/teamUser']({ userId: state.id })
+      const teamUser = rootGetters['teams/isCurrentSpaceTeamUser']
       if (isSpaceMember || teamUser) { return true }
-      const canEditSpace = getters.canEditSpace
+      const canEditSpace = getters.canEditSpace()
       const cardIsCreatedByCurrentUser = getters.cardIsCreatedByCurrentUser(card)
       if (canEditSpace && cardIsCreatedByCurrentUser) { return true }
       return false
     },
     canOnlyComment: (state, getters, rootState, rootGetters) => () => {
-      const canEditSpace = getters.canEditSpace
+      const canEditSpace = getters.canEditSpace()
       const isSpaceMember = getters.isSpaceMember()
-      const teamUser = rootGetters['teams/teamUser']({ userId: state.id })
+      const teamUser = rootGetters['teams/isCurrentSpaceTeamUser']
       return canEditSpace && !isSpaceMember && !teamUser
     },
     canEditBox: (state, getters, rootState, rootGetters) => (box) => {
       const isSpaceMember = getters.isSpaceMember()
-      const teamUser = rootGetters['teams/teamUser']({ userId: state.id })
+      const teamUser = rootGetters['teams/isCurrentSpaceTeamUser']
       if (isSpaceMember || teamUser) { return true }
-      const canEditSpace = getters.canEditSpace
+      const canEditSpace = getters.canEditSpace()
       const boxIsCreatedByCurrentUser = getters.boxIsCreatedByCurrentUser(box)
       if (canEditSpace && boxIsCreatedByCurrentUser) { return true }
       return false
