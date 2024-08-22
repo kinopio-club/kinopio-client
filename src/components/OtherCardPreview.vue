@@ -19,6 +19,11 @@ onMounted(() => {
       updatePrimaryBackgroundColor()
     }
   })
+  window.addEventListener('touchend', disableIsActive)
+  window.addEventListener('mouseup', disableIsActive)
+})
+watch(() => store.state.preventDraggedCardFromShowingDetails, (value, prevValue) => {
+  disableIsActive()
 })
 
 const props = defineProps({
@@ -35,9 +40,6 @@ const state = reactive({
   nameSegments: [],
   primaryBackgroundColor: '',
   isActive: null
-})
-watch(() => store.state.preventDraggedCardFromShowingDetails, (value, prevValue) => {
-  state.isActive = false
 })
 
 const isLoadingOtherItems = computed(() => store.state.isLoadingOtherItems)
@@ -133,6 +135,9 @@ const showOtherCardDetailsIsVisible = async (event) => {
   store.commit('broadcast/updateStore', { updates, type: 'clearRemoteCardsDragging' })
   await nextTick()
   store.commit('broadcast/updateStore', { updates, type: 'updateRemoteCardDetailsVisible' })
+}
+const disableIsActive = () => {
+  state.isActive = false
 }
 const enableIsActive = () => {
   state.isActive = true

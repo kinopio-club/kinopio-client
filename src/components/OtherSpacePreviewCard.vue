@@ -7,6 +7,14 @@ import UserLabelInline from '@/components/UserLabelInline.vue'
 import utils from '@/utils.js'
 const store = useStore()
 
+onMounted(() => {
+  window.addEventListener('touchend', disableIsActive)
+  window.addEventListener('mouseup', disableIsActive)
+})
+watch(() => store.state.preventDraggedCardFromShowingDetails, (value, prevValue) => {
+  disableIsActive()
+})
+
 const props = defineProps({
   otherSpace: Object,
   url: String,
@@ -17,9 +25,6 @@ const props = defineProps({
 
 const state = reactive({
   isActive: null
-})
-watch(() => store.state.preventDraggedCardFromShowingDetails, (value, prevValue) => {
-  state.isActive = false
 })
 
 // space info
@@ -69,6 +74,9 @@ const previewImageIsVisible = computed(() => shouldShowPreviewImage.value && pre
 
 // url
 
+const disableIsActive = () => {
+  state.isActive = false
+}
 const enableIsActive = () => {
   state.isActive = true
 }

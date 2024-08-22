@@ -9,6 +9,15 @@ import consts from '@/consts.js'
 const store = useStore()
 
 let hasRetried
+
+onMounted(() => {
+  window.addEventListener('touchend', disableIsActive)
+  window.addEventListener('mouseup', disableIsActive)
+})
+watch(() => store.state.preventDraggedCardFromShowingDetails, (value, prevValue) => {
+  disableIsActive()
+})
+
 const emit = defineEmits(['retryUrlPreview'])
 
 const props = defineProps({
@@ -23,9 +32,6 @@ const props = defineProps({
 
 const state = reactive({
   isActive: null
-})
-watch(() => store.state.preventDraggedCardFromShowingDetails, (value, prevValue) => {
-  state.isActive = false
 })
 
 const shouldHideImage = computed(() => props.card.shouldHideUrlPreviewImage)
@@ -168,6 +174,9 @@ const description = computed(() => {
 
 // url
 
+const disableIsActive = () => {
+  state.isActive = false
+}
 const enableIsActive = () => {
   state.isActive = true
 }
