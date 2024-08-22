@@ -15,6 +15,13 @@ const props = defineProps({
   selectedColor: String
 })
 
+const state = reactive({
+  isActive: null
+})
+watch(() => store.state.preventDraggedCardFromShowingDetails, (value, prevValue) => {
+  state.isActive = false
+})
+
 // space info
 
 const otherSpaceIsPrivate = computed(() => {
@@ -62,17 +69,25 @@ const previewImageIsVisible = computed(() => shouldShowPreviewImage.value && pre
 
 // url
 
+const enableIsActive = () => {
+  state.isActive = true
+}
 const handleMouseEnterUrlButton = () => {
   store.commit('currentUserIsHoveringOverUrlButtonCardId', props.card.id)
 }
 const handleMouseLeaveUrlButton = () => {
   store.commit('currentUserIsHoveringOverUrlButtonCardId', '')
 }
-const openUrl = async (event, url) => {
+const url = computed(() => utils.urlFromSpaceAndCard({ spaceId: props.otherSpace?.url || props.otherSpace?.id }))
+const openUrl = async (event) => {
+  const prevIsActive = state.isActive
+  state.isActive = false
+  if (store.state.currentUserIsDraggingConnectionIdLabel) { return }
+  if (store.state.preventDraggedCardFromShowingDetails) { return }
   if (event) {
     if (event.metaKey || event.ctrlKey) {
-      await nextTick()
-      store.dispatch('closeAllDialogs')
+      window.open(url.value) // opens url in new tab
+      store.commit('preventDraggedCardFromShowingDetails', true)
       return
     } else {
       event.preventDefault()
@@ -83,32 +98,9 @@ const openUrl = async (event, url) => {
   if (store.state.cardsWereDragged) {
     return
   }
-  changeSpace(url)
-}
-const changeSpace = async (url) => {
-  const { spaceId, spaceUrl, cardId } = utils.spaceAndCardIdFromUrl(url)
-  if (cardId) {
-    changeSpaceAndCard(spaceId, cardId)
-  } else {
-    const space = { id: spaceId }
-    store.dispatch('currentSpace/changeSpace', space)
-  }
+  store.dispatch('currentSpace/changeSpace', props.otherSpace)
   store.dispatch('closeAllDialogs')
 }
-const changeSpaceAndCard = async (spaceId, cardId) => {
-  const currentSpaceId = store.state.currentSpace.id
-  // space and card
-  if (currentSpaceId !== spaceId) {
-    store.commit('loadSpaceShowDetailsForCardId', cardId)
-    const space = { id: spaceId }
-    store.dispatch('currentSpace/changeSpace', space)
-  // card in current space
-  } else {
-    await nextTick()
-    store.dispatch('currentCards/showCardDetails', cardId)
-  }
-}
-
 </script>
 
 <template lang="pug">
@@ -116,7 +108,20 @@ const changeSpaceAndCard = async (spaceId, cardId) => {
   //- preview image
   .preview-image-wrap(v-if="previewImageIsVisible")
     img.preview-image(:src="previewImage" :class="{selected: props.isSelected}" ref="image")
-  .badge.link-badge(:class="{ 'preview-image-is-visible': previewImageIsVisible }" :style="{ background: background }")
+  a.badge.link-badge.button-badge.card-button-badge(
+    :title="url"
+    :class="{ 'preview-image-is-visible': previewImageIsVisible, 'preview-image-is-visible': previewImageIsVisible, active: state.isActive, 'is-being-dragged': store.state.preventDraggedCardFromShowingDetails }"
+    :style="{ background: background }"
+    target="_blank"
+    :href="url"
+    @mouseenter="handleMouseEnterUrlButton"
+    @mouseleave="handleMouseLeaveUrlButton"
+    @mousedown.left="enableIsActive"
+    @touchstart="enableIsActive"
+    @click.stop.prevent
+    @mouseup.left="openUrl($event)"
+    @touchend.prevent="openUrl($event)"
+  )
     //- badges
     .badge.info.inline-badge(v-if="urlIsInvite")
       span Invite
@@ -132,11 +137,6 @@ const changeSpaceAndCard = async (spaceId, cardId) => {
     template(v-else)
       Loader(:visible="true" :isSmall="true" :isStatic="!isLoadingOtherItems")
       span Space
-    //- Url →
-    a.url-wrap(:href="props.url" @mouseup.exact.prevent="closeAllDialogs" @click.stop="openUrl($event, props.url)" @touchend.prevent="openUrl($event, props.url)" target="_blank" @mouseenter="handleMouseEnterUrlButton" @mouseleave="handleMouseLeaveUrlButton")
-      .url.inline-button-wrap
-        button.inline-button(:style="{ background: background }" tabindex="-1")
-          img.icon.visit.arrow-icon(src="@/assets/visit.svg")
 </template>
 
 <style lang="stylus">
@@ -185,10 +185,9 @@ const changeSpaceAndCard = async (spaceId, cardId) => {
     .icon
       filter invert()
 
-  .url-wrap
-    position absolute
-    right 5px
-    top 3px
-    button
-      background var(--secondary-active-background)
+  .badge.button-badge
+    &.preview-image-is-visible,
+    &.iframe-info
+      border-top-left-radius 0
+      border-top-right-radius 0
 </style>

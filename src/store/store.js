@@ -1423,6 +1423,16 @@ const store = createStore({
       state.notifyMoveOrCopyToSpace = false
       state.notificationsWithPosition = []
     },
+    clearAllInteractingWithAndSelected: (state) => {
+      state.currentUserIsDraggingCard = false
+      state.currentUserIsDrawingConnection = false
+      state.currentUserIsResizingCard = false
+      state.currentUserIsResizingBox = false
+      state.currentUserIsDraggingBox = false
+      state.multipleCardsSelectedIds = []
+      state.multipleConnectionsSelectedIds = []
+      state.multipleBoxesSelectedIds = []
+    },
     notifySpaceNotFound: (state, value) => {
       utils.typeCheck({ value, type: 'boolean' })
       state.notifySpaceNotFound = value

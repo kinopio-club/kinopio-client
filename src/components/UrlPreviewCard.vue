@@ -183,9 +183,8 @@ const openUrl = async (event, url) => {
   if (store.state.preventDraggedCardFromShowingDetails) { return }
   if (event) {
     if (event.metaKey || event.ctrlKey) {
-      await nextTick()
-      store.dispatch('closeAllDialogs')
-      event.stopPropagation()
+      window.open(url) // opens url in new tab
+      store.commit('preventDraggedCardFromShowingDetails', true)
       return
     } else {
       event.preventDefault()
@@ -220,12 +219,12 @@ const openUrl = async (event, url) => {
     v-if="!shouldHideInfo"
     :title="props.card.urlPreviewUrl"
     :href="props.card.urlPreviewUrl"
-    :class="{ 'iframe-info': props.card.urlPreviewIframeUrl, 'preview-image-is-visible': previewImageIsVisible, active: state.isActive }"
+    :class="{ 'iframe-info': props.card.urlPreviewIframeUrl, 'preview-image-is-visible': previewImageIsVisible, active: state.isActive, 'is-being-dragged': store.state.preventDraggedCardFromShowingDetails }"
     :style="{background: background}"
     target="_blank"
     @mouseenter="handleMouseEnterUrlButton"
     @mouseleave="handleMouseLeaveUrlButton"
-    @mousedown="enableIsActive"
+    @mousedown.left="enableIsActive"
     @touchstart="enableIsActive"
     @click.stop.prevent
     @mouseup.left="openUrl($event, props.card.urlPreviewUrl)"
@@ -358,11 +357,4 @@ const openUrl = async (event, url) => {
     &.iframe-info
       border-top-left-radius 0
       border-top-right-radius 0
-    &:hover
-    &:focus
-      text-decoration none
-      box-shadow var(--button-hover-shadow)
-    &:active,
-    &.active
-      box-shadow var(--button-active-inset-shadow)
 </style>

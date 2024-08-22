@@ -949,6 +949,7 @@ const currentSpace = {
     },
     changeSpace: async (context, space) => {
       context.dispatch('prevSpaceIdInSession', context.state.id, { root: true })
+      context.commit('clearAllInteractingWithAndSelected', null, { root: true })
       console.log('🚟 Change space', space)
       context.commit('isLoadingSpace', true, { root: true })
       context.commit('notifySpaceIsRemoved', false, { root: true })

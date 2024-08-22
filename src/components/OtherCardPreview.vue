@@ -144,7 +144,7 @@ a.other-card-preview(@click.prevent.stop :href="props.url")
   .badge.button-badge.link-badge.card-button-badge(
     :class="{ active: state.isActive }"
     :style="styles"
-    @mousedown="enableIsActive"
+    @mousedown.left="enableIsActive"
     @touchstart="enableIsActive"
     @mouseup.prevent="showOtherCardDetailsIsVisible($event)"
     @touchend.prevent="showOtherCardDetailsIsVisible($event)"
@@ -184,5 +184,8 @@ a.other-card-preview(@click.prevent.stop :href="props.url")
   .badge
     > .loader
       vertical-align -2px
-
+  .card-button-badge
+    &:hover
+      span
+        text-decoration none !important
 </style>
