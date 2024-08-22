@@ -153,6 +153,36 @@ const description = computed(() => {
   return null
 })
 
+// url
+
+const handleMouseEnterUrlButton = () => {
+  store.commit('currentUserIsHoveringOverUrlButtonCardId', props.card.id)
+}
+const handleMouseLeaveUrlButton = () => {
+  store.commit('currentUserIsHoveringOverUrlButtonCardId', '')
+}
+const openUrl = async (event, url) => {
+  if (event) {
+    if (event.metaKey || event.ctrlKey) {
+      await nextTick()
+      store.dispatch('closeAllDialogs')
+      event.stopPropagation()
+      return
+    } else {
+      event.preventDefault()
+      event.stopPropagation()
+    }
+  }
+  store.dispatch('closeAllDialogs')
+  if (store.state.cardsWereDragged) {
+    return
+  }
+  if (event.type === 'touchend') {
+    window.location = url
+  } else {
+    window.open(url) // opens url in new tab
+  }
+}
 </script>
 
 <template lang="pug">
@@ -186,6 +216,11 @@ const description = computed(() => {
       .description(v-if="description" :class="textColorClasses")
         span {{description}}
 
+    //- Url →
+    a.url-wrap(:href="card.urlPreviewUrl" @mouseup.exact.prevent="closeAllDialogs" @click.stop="openUrl($event, card.urlPreviewUrl)" @touchend.prevent="openUrl($event, card.urlPreviewUrl)" target="_blank" @mouseenter="handleMouseEnterUrlButton" @mouseleave="handleMouseLeaveUrlButton")
+      .url.inline-button-wrap
+        button.inline-button(:style="{ background: background }" tabindex="-1")
+          img.icon.visit.arrow-icon(src="@/assets/visit.svg")
 </template>
 
 <style lang="stylus">
@@ -296,4 +331,10 @@ const description = computed(() => {
     margin-right 4px
     vertical-align 0
 
+  .url-wrap
+    position absolute
+    right 5px
+    top 6px
+    button
+      background var(--secondary-active-background)
 </style>

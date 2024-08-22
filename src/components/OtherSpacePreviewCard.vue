@@ -60,6 +60,55 @@ const shouldShowPreviewImage = computed(() => props.card.shouldShowOtherSpacePre
 const previewImage = computed(() => props.otherSpace?.previewImage)
 const previewImageIsVisible = computed(() => shouldShowPreviewImage.value && previewImage.value)
 
+// url
+
+const handleMouseEnterUrlButton = () => {
+  store.commit('currentUserIsHoveringOverUrlButtonCardId', props.card.id)
+}
+const handleMouseLeaveUrlButton = () => {
+  store.commit('currentUserIsHoveringOverUrlButtonCardId', '')
+}
+const openUrl = async (event, url) => {
+  if (event) {
+    if (event.metaKey || event.ctrlKey) {
+      await nextTick()
+      store.dispatch('closeAllDialogs')
+      return
+    } else {
+      event.preventDefault()
+      event.stopPropagation()
+    }
+  }
+  store.dispatch('closeAllDialogs')
+  if (store.state.cardsWereDragged) {
+    return
+  }
+  changeSpace(url)
+}
+const changeSpace = async (url) => {
+  const { spaceId, spaceUrl, cardId } = utils.spaceAndCardIdFromUrl(url)
+  if (cardId) {
+    changeSpaceAndCard(spaceId, cardId)
+  } else {
+    const space = { id: spaceId }
+    store.dispatch('currentSpace/changeSpace', space)
+  }
+  store.dispatch('closeAllDialogs')
+}
+const changeSpaceAndCard = async (spaceId, cardId) => {
+  const currentSpaceId = store.state.currentSpace.id
+  // space and card
+  if (currentSpaceId !== spaceId) {
+    store.commit('loadSpaceShowDetailsForCardId', cardId)
+    const space = { id: spaceId }
+    store.dispatch('currentSpace/changeSpace', space)
+  // card in current space
+  } else {
+    await nextTick()
+    store.dispatch('currentCards/showCardDetails', cardId)
+  }
+}
+
 </script>
 
 <template lang="pug">
@@ -83,6 +132,11 @@ const previewImageIsVisible = computed(() => shouldShowPreviewImage.value && pre
     template(v-else)
       Loader(:visible="true" :isSmall="true" :isStatic="!isLoadingOtherItems")
       span Space
+    //- Url →
+    a.url-wrap(:href="props.url" @mouseup.exact.prevent="closeAllDialogs" @click.stop="openUrl($event, props.url)" @touchend.prevent="openUrl($event, props.url)" target="_blank" @mouseenter="handleMouseEnterUrlButton" @mouseleave="handleMouseLeaveUrlButton")
+      .url.inline-button-wrap
+        button.inline-button(:style="{ background: background }" tabindex="-1")
+          img.icon.visit.arrow-icon(src="@/assets/visit.svg")
 </template>
 
 <style lang="stylus">
@@ -129,4 +183,10 @@ const previewImageIsVisible = computed(() => shouldShowPreviewImage.value && pre
     .icon
       filter invert()
 
+  .url-wrap
+    position absolute
+    right 5px
+    top 6px
+    button
+      background var(--secondary-active-background)
 </style>
