@@ -404,6 +404,7 @@ const cardContentStyles = computed(() => {
   if (isAudioCard.value) {
     styles.width = '100%'
   }
+  styles.background = currentBackgroundColor.value
   return styles
 })
 const cardContentWrapStyles = computed(() => {
@@ -2005,6 +2006,7 @@ article.card-wrap
     .card-content
       min-width 28px
       margin-right 6px
+      border-radius var(--entity-radius)
     .card-comment
       margin-right 8px
     .card-buttons-wrap
@@ -2087,7 +2089,7 @@ article.card-wrap
       .url
         display inline
         cursor pointer
-        padding 0
+        padding-left 0
         button
           cursor pointer
 
