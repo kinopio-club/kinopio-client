@@ -1986,7 +1986,7 @@ article.card-wrap
 
     .card-content
       min-width 28px
-      margin-right 8px
+      margin-right 6px
     .card-comment
       margin-right 8px
     .card-buttons-wrap
