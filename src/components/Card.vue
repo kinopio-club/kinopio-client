@@ -2014,7 +2014,7 @@ article.card-wrap
         padding 0
         padding-right 5px
         display inline-block
-        vertical-align 1px
+        vertical-align 0px
         label
           pointer-events none
           width 20px

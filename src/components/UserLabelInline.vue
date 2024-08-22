@@ -67,7 +67,7 @@ const showUserDetails = () => {
   :title="props.title"
   @click.stop
 )
-  img.anon-avatar(src="@/assets/anon-avatar.svg" :class="{ 'is-dark': colorIsDark }")
+  img.anon-avatar(src="@/assets/anon-avatar.svg" :class="{ 'is-dark': colorIsDark, 'should-hide-name': shouldHideName }")
   img.icon.camera(v-if="props.user.isOnline" src="@/assets/camera.svg" title="Online" :class="{ 'is-dark': colorIsDark }")
   span.user-name(v-if="userHasName && !shouldHideName" :class="{ 'is-dark': colorIsDark }") {{ props.user.name }}
 </template>
@@ -90,7 +90,10 @@ const showUserDetails = () => {
       filter invert(1)
   .anon-avatar
     width 12px
-    vertical-align 2px
+    vertical-align 1px
+    &.should-hide-name
+      width 11px
+      vertical-align 4px
   .user-name
     margin-left 6px
     color var(--primary-on-light-background)

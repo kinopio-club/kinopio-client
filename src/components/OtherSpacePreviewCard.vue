@@ -102,9 +102,6 @@ const previewImageIsVisible = computed(() => shouldShowPreviewImage.value && pre
     border-top-right-radius 0
     padding var(--subsection-padding)
 
-  .anon-avatar
-    top 6px !important
-
   // from UrlPreviewCard
   .preview-image-wrap
     display flex
