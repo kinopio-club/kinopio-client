@@ -155,6 +155,8 @@ const changeSpaceAndCard = async (spaceId, cardId) => {
     border-top-left-radius 0
     border-top-right-radius 0
     padding var(--subsection-padding)
+    .url-wrap
+      top 6px
 
   // from UrlPreviewCard
   .preview-image-wrap
@@ -186,7 +188,7 @@ const changeSpaceAndCard = async (spaceId, cardId) => {
   .url-wrap
     position absolute
     right 5px
-    top 6px
+    top 3px
     button
       background var(--secondary-active-background)
 </style>
