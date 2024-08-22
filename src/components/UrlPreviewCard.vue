@@ -31,12 +31,13 @@ const props = defineProps({
 })
 
 const state = reactive({
-  isActive: null
+  isActive: null,
+  childIsHovered: false
 })
 
 const shouldHideImage = computed(() => props.card.shouldHideUrlPreviewImage)
 const shouldHideInfo = computed(() => props.card.shouldHideUrlPreviewInfo)
-const isImageCard = computed(() => props.isImageCard || props.urlPreviewImageIsVisible)
+const cardIsImageCard = computed(() => props.isImageCard || props.urlPreviewImageIsVisible)
 const selectedColor = computed(() => {
   if (!props.isSelected) { return }
   return props.user.color
@@ -66,7 +67,9 @@ const previewImageIsVisible = computed(() => {
 
 // url embed (spotify, youtube, etc.)
 
-const toggleShouldDisplayIframe = () => {
+const toggleShouldDisplayIframe = (event) => {
+  event.preventDefault()
+  event.stopPropagation()
   if (isTwitterUrl.value) { return }
   store.dispatch('closeAllDialogs')
   store.dispatch('currentCards/incrementZ', props.card.id)
@@ -210,15 +213,21 @@ const openUrl = async (event, url) => {
     window.open(url) // opens url in new tab
   }
 }
+const handleMouseEnterPlayButton = () => {
+  state.childIsHovered = true
+}
+const handleMouseLeavePlayButton = () => {
+  state.childIsHovered = false
+}
 </script>
 
 <template lang="pug">
 //- image
-.url-preview-card(v-if="visible" :style="{background: background}" :class="{'is-image-card': props.isImageCard}")
+.url-preview-card(v-if="visible" :style="{background: background}" :class="{'is-image-card': cardIsImageCard}" :data-card-id="props.card.id")
   //- image
   template(v-if="!shouldDisplayIframe")
     .preview-image-wrap(v-if="previewImageIsVisible")
-      img.preview-image(:src="props.card.urlPreviewImage" :class="{selected: isSelected, 'border-bottom-radius': !shouldHideInfo}" ref="image" @error="handleImageError")
+      img.preview-image(:src="props.card.urlPreviewImage" :class="{selected: isSelected, 'border-bottom-radius': shouldHideInfo}" ref="image" @error="handleImageError")
 
   //- embed
   template(v-if="shouldDisplayIframe")
@@ -228,7 +237,7 @@ const openUrl = async (event, url) => {
     v-if="!shouldHideInfo"
     :title="props.card.urlPreviewUrl"
     :href="props.card.urlPreviewUrl"
-    :class="{ 'iframe-info': props.card.urlPreviewIframeUrl, 'preview-image-is-visible': previewImageIsVisible, active: state.isActive, 'is-being-dragged': store.state.preventDraggedCardFromShowingDetails }"
+    :class="{ 'iframe-info': props.card.urlPreviewIframeUrl, 'preview-image-is-visible': previewImageIsVisible, active: state.isActive, 'is-being-dragged': store.state.preventDraggedCardFromShowingDetails, 'no-underline': state.childIsHovered }"
     :style="{background: background}"
     target="_blank"
     @mouseenter="handleMouseEnterUrlButton"
@@ -240,7 +249,16 @@ const openUrl = async (event, url) => {
     @touchend.prevent="openUrl($event, props.card.urlPreviewUrl)"
   )
     //- play
-    .button-wrap.play-button-wrap(v-if="props.card.urlPreviewIframeUrl" @mousedown.stop @touchstart.stop @click.stop="toggleShouldDisplayIframe" @touchend.stop="toggleShouldDisplayIframe")
+    .button-wrap.play-button-wrap(
+      v-if="props.card.urlPreviewIframeUrl"
+      @mousedown.stop
+      @touchstart.stop
+      @mouseup.stop.prevent
+      @click.stop="toggleShouldDisplayIframe"
+      @touchend.stop="toggleShouldDisplayIframe"
+      @mouseenter="handleMouseEnterPlayButton"
+      @mouseleave="handleMouseLeavePlayButton"
+    )
       button.small-button(v-if="!isTwitterUrl")
         img.icon.stop(v-if="shouldDisplayIframe" src="@/assets/box-filled.svg")
         img.icon.play(v-else src="@/assets/play.svg")
@@ -274,14 +292,12 @@ const openUrl = async (event, url) => {
       mix-blend-mode color-burn
 
   &.is-image-card
-    border-top-left-radius 0
-    border-top-right-radius 0
     .preview-image
-      border-top-left-radius 0
-      border-top-right-radius 0
-  .border-bottom-radius
-    border-bottom-left-radius 0
-    border-bottom-right-radius 0
+      border-bottom-left-radius 0
+      border-bottom-right-radius 0
+    .border-bottom-radius
+      border-bottom-left-radius var(--entity-radius)
+      border-bottom-right-radius var(--entity-radius)
 
   .preview-image-wrap
     display flex
@@ -328,6 +344,7 @@ const openUrl = async (event, url) => {
   .play-button-wrap
     flex-shrink 0
     padding-right 4px
+    height fit-content
     button
       width 23px
       background transparent
@@ -366,4 +383,7 @@ const openUrl = async (event, url) => {
     &.iframe-info
       border-top-left-radius 0
       border-top-right-radius 0
+    &.no-underline
+      span
+        text-decoration none
 </style>
