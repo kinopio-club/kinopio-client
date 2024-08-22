@@ -190,9 +190,6 @@ const enableIsActive = () => {
 const handleMouseEnterUrlButton = () => {
   store.commit('currentUserIsHoveringOverUrlButtonCardId', props.card.id)
 }
-const handleMouseLeaveUrlButton = () => {
-  store.commit('currentUserIsHoveringOverUrlButtonCardId', '')
-}
 const openUrl = async (event, url) => {
   state.isActive = false
   if (store.state.currentUserIsDraggingConnectionIdLabel) { return }
@@ -239,7 +236,6 @@ const openUrl = async (event, url) => {
     :style="{background: background}"
     target="_blank"
     @mouseenter="handleMouseEnterUrlButton"
-    @mouseleave="handleMouseLeaveUrlButton"
     @mousedown.left="enableIsActive"
     @touchstart="enableIsActive"
     @click.stop.prevent
