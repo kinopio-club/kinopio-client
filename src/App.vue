@@ -1227,12 +1227,12 @@ code
   &.card-button-badge
     box-shadow 1px 1px 2px var(--heavy-shadow)
     text-decoration none
-    &:hover
-      span
-        text-decoration underline
-    &.is-being-dragged
-      span
-        text-decoration none
+    // &:hover
+    //   span
+    //     text-decoration underline
+    // &.is-being-dragged
+    //   span
+    //     text-decoration none
   &.dot
     min-width initial
     min-height initial
