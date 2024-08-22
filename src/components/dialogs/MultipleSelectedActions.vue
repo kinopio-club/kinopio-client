@@ -298,7 +298,6 @@ const disconnectCards = () => {
 // connections
 
 const moreLineOptionsLabel = computed(() => {
-  console.log(multipleConnectionsSelectedIds.value)
   if (multipleConnectionsSelectedIds.value.length > 1) {
     return 'LINES'
   } else {
