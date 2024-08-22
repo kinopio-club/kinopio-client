@@ -582,6 +582,7 @@ const isCardButtonsVisible = computed(() => {
 })
 const urlButtonIsVisible = computed(() => {
   if (!cardButtonUrl.value) { return }
+  if (otherCardIsVisible.value) { return true }
   if (isComment.value) { return true }
   return !props.card.urlPreviewIsVisible
 })
