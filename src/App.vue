@@ -1235,7 +1235,8 @@ code
       box-shadow inset 0 3px 3px var(--inset-heavy-shadow)
     &.is-being-dragged
       box-shadow none
-      text-decoration none
+      span
+        text-decoration none
 
   &.dot
     min-width initial
