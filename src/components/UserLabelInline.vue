@@ -59,6 +59,9 @@ const showUserDetails = () => {
   store.commit('userDetailsPosition', position)
   store.commit('userDetailsIsVisible', true)
 }
+const title = computed(() => {
+  return props.title || props.user.name
+})
 
 </script>
 
@@ -72,7 +75,7 @@ const showUserDetails = () => {
   @mouseup="toggleUserDetailsIsVisible"
   @touchend="toggleUserDetailsIsVisible"
   ref="labelElement"
-  :title="props.title"
+  :title="title"
   @click.stop
 )
   img.anon-avatar(src="@/assets/anon-avatar.svg" :class="{ 'is-dark': colorIsDark, 'should-hide-name': shouldHideName }")
@@ -101,7 +104,7 @@ const showUserDetails = () => {
     vertical-align 1px
     &.should-hide-name
       width 11px
-      vertical-align 4px
+      vertical-align 4.5px
   .user-name
     margin-left 6px
     color var(--primary-on-light-background)

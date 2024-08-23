@@ -36,7 +36,6 @@ const state = reactive({
 
 const shouldHideImage = computed(() => props.card.shouldHideUrlPreviewImage)
 const shouldHideInfo = computed(() => props.card.shouldHideUrlPreviewInfo)
-const cardIsImageCard = computed(() => props.isImageCard || props.urlPreviewImageIsVisible)
 const selectedColor = computed(() => {
   if (!props.isSelected) { return }
   return props.user.color
@@ -241,7 +240,7 @@ const openUrl = async (event, url) => {
 
 <template lang="pug">
 //- image
-.url-preview-card(v-if="visible" :style="{background: background}" :class="{'is-image-card': cardIsImageCard}" :data-card-id="props.card.id")
+.url-preview-card(v-if="visible" :style="{background: background}" :class="{'is-image-card': props.isImageCard}" :data-card-id="props.card.id")
   //- image
   template(v-if="!shouldDisplayIframe")
     .preview-image-wrap(v-if="previewImageIsVisible")
@@ -311,11 +310,13 @@ const openUrl = async (event, url) => {
 
   &.is-image-card
     .preview-image
-      border-bottom-left-radius 0
-      border-bottom-right-radius 0
+      border-radius 0
     .border-bottom-radius
       border-bottom-left-radius var(--entity-radius)
       border-bottom-right-radius var(--entity-radius)
+    .badge-card-button
+      border-top-left-radius 0
+      border-top-right-radius 0
 
   .preview-image-wrap
     display flex

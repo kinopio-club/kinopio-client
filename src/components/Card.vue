@@ -1906,6 +1906,7 @@ article.card-wrap#card(
           :card="card"
           :isSelected="isSelectedOrDragging"
           :selectedColor="selectedColor"
+          :isImageCard="isImageCard"
         )
     //- Upload Progress
     .uploading-container(v-if="cardPendingUpload")

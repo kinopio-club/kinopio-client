@@ -20,7 +20,8 @@ const props = defineProps({
   url: String,
   card: Object,
   isSelected: Boolean,
-  selectedColor: String
+  selectedColor: String,
+  isImageCard: Boolean
 })
 
 const state = reactive({
@@ -63,7 +64,11 @@ const textColorClasses = computed(() => {
   if (isThemeDark.value) {
     color = background.value || defaultColor
   }
-  return utils.textColorClasses({ backgroundColor: color })
+  let classes = utils.textColorClasses({ backgroundColor: color })
+  if (props.isImageCard) {
+    classes.push('is-image-card')
+  }
+  return classes
 })
 
 // preivew image
@@ -182,6 +187,15 @@ const openUrl = async (event) => {
       mix-blend-mode color-burn
   .space-name
     overflow-wrap break-word
+
+  // from UrlPreviewCard
+  &.is-image-card
+    .preview-image
+      border-radius 0
+    .badge-card-button
+      border-top-left-radius 0
+      border-top-right-radius 0
+      padding var(--subsection-padding)
 
   &.is-background-light
     .space-name span
