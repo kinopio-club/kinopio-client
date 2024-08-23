@@ -403,7 +403,4 @@ const openUrl = async (event, url) => {
     &.iframe-info
       border-top-left-radius 0
       border-top-right-radius 0
-    &.no-underline
-      span
-        text-decoration none
 </style>
