@@ -69,7 +69,16 @@ const previewImageIsVisible = computed(() => {
   return props.card.urlPreviewImage && !shouldHideImage.value
 })
 
-// url embed (spotify, youtube, etc.)
+// embed play button
+
+const handleMouseEnterPlayButton = () => {
+  store.commit('preventDraggedCardFromShowingDetails', true)
+}
+const handleMouseLeavePlayButton = () => {
+  store.commit('preventDraggedCardFromShowingDetails', false)
+}
+
+// iframe embed (spotify, youtube, etc.)
 
 const toggleShouldDisplayIframe = (event) => {
   event.preventDefault()
@@ -257,7 +266,7 @@ const openUrl = async (event, url) => {
     @mouseup.left="openUrl($event, props.card.urlPreviewUrl)"
     @touchend.prevent="openUrl($event, props.card.urlPreviewUrl)"
   )
-    //- play
+    //- play button
     .button-wrap.play-button-wrap(
       v-if="props.card.urlPreviewIframeUrl"
       @mousedown.stop
@@ -357,11 +366,13 @@ const openUrl = async (event, url) => {
     button
       width 23px
       background transparent
-      .play
+      .icon.play
+        pointer-events none
         vertical-align 1px
         margin-left 4px
         margin-right 2px
-      .stop
+      .icon.stop
+        pointer-events none
         width 7px
         margin-left 3px
         margin-bottom 2px
