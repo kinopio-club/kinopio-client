@@ -9,6 +9,7 @@ import User from '@/components/User.vue'
 import TeamLabel from '@/components/TeamLabel.vue'
 import utils from '@/utils.js'
 import cache from '@/cache.js'
+import postMessage from '@/postMessage.js'
 
 const store = useStore()
 

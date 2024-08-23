@@ -7,7 +7,6 @@ import UserBadges from '@/components/UserBadges.vue'
 import User from '@/components/User.vue'
 import cache from '@/cache.js'
 import utils from '@/utils.js'
-import postMessage from '@/postMessage.js'
 const store = useStore()
 
 const descriptionElement = ref(null)
