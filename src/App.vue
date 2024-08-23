@@ -1227,6 +1227,8 @@ code
   &.card-button-badge
     box-shadow none
     text-decoration none
+    &:hover
+      background var(--tertiary-hover-background)
     &.active
       box-shadow inset 0 3px 3px var(--inset-heavy-shadow)
     &.is-being-dragged
