@@ -117,7 +117,7 @@ const openUrl = async (event) => {
   //- preview image
   .preview-image-wrap(v-if="previewImageIsVisible")
     img.preview-image(:src="previewImage" :class="{selected: props.isSelected}" ref="image")
-  a.badge.link-badge.button-badge.card-button-badge(
+  a.badge.link-badge.button-badge.badge-card-button(
     :title="url"
     :class="{ 'preview-image-is-visible': previewImageIsVisible, 'preview-image-is-visible': previewImageIsVisible, active: state.isActive, 'is-being-dragged': store.state.preventDraggedCardFromShowingDetails }"
     :style="{ background: background }"

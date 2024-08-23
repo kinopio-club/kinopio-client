@@ -146,7 +146,7 @@ const enableIsActive = () => {
 
 <template lang="pug">
 a.other-card-preview(@click.prevent.stop :href="props.url")
-  .badge.button-badge.link-badge.card-button-badge(
+  .badge.button-badge.link-badge.badge-card-button(
     :class="{ active: state.isActive }"
     :style="styles"
     @mousedown.left="enableIsActive"
@@ -189,7 +189,8 @@ a.other-card-preview(@click.prevent.stop :href="props.url")
   .badge
     > .loader
       vertical-align -2px
-  .card-button-badge
+  .badge-card-button
     &:hover
-      text-decoration none !important
+      span
+        text-decoration none !important
 </style>

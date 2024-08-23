@@ -84,7 +84,7 @@ const userDetailsIsUser = (user) => {
 </script>
 
 <template lang="pug">
-.row.collaboration-info(v-if="visible" @click.left.stop="closeDialogs")
+.row.card-collaboration-info(v-if="visible" @click.left.stop="closeDialogs")
   //- comment
   .badge.info.is-comment-badge(v-if="isComment")
     img.icon.comment(src="@/assets/comment.svg")
@@ -95,10 +95,10 @@ const userDetailsIsUser = (user) => {
   .users(v-if="shouldShowItemActions")
     //- created by
     template(v-if="createdByUserIsNotEmpty")
-      UserLabelInline(:user="createdByUser" :isClickable="true" :title="'Created by'" :isOnDarkBackground="true")
+      UserLabelInline(:user="createdByUser" :isClickable="true" :title="'Created by'" :isOnDarkBackground="true" :nameIsTruncated="true")
     //- updated by
     template(v-if="isUpdatedByDifferentUser")
-      UserLabelInline(:user="updatedByUser" :isClickable="true" :title="'Updated by'" :isOnDarkBackground="true")
+      UserLabelInline(:user="updatedByUser" :isClickable="true" :title="'Updated by'" :isOnDarkBackground="true" :nameIsTruncated="true")
     //- created through api
     .badge.status.system-badge(v-if="card.isCreatedThroughPublicApi" title="Created via public API")
       img.icon.system(src="@/assets/system.svg")
@@ -107,7 +107,7 @@ const userDetailsIsUser = (user) => {
 </template>
 
 <style lang="stylus">
-.collaboration-info
+.card-collaboration-info
   .users
     display flex
     flex-wrap wrap

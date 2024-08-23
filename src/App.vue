@@ -1224,12 +1224,13 @@ code
     vertical-align 0
     margin-right 5px
     border-radius var(--small-entity-radius)
-  &.card-button-badge
+  &.badge-card-button
     box-shadow none
     text-decoration none
     &:hover
       background var(--tertiary-hover-background)
-      text-decoration underline
+      span
+        text-decoration underline
     &.active
       box-shadow inset 0 3px 3px var(--inset-heavy-shadow)
     &.is-being-dragged

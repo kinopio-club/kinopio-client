@@ -13,6 +13,7 @@ const props = defineProps({
   user: Object,
   isClickable: Boolean,
   shouldHideName: Boolean,
+  nameIsTruncated: Boolean,
   title: String,
   isOnDarkBackground: Boolean
 })
@@ -21,6 +22,13 @@ const props = defineProps({
 
 const userHasName = computed(() => Boolean(props.user.name))
 const colorIsDark = computed(() => utils.colorIsDark(props.user.color))
+const userName = computed(() => {
+  let name = props.user.name
+  if (props.nameIsTruncated) {
+    name = utils.truncated(name, 15)
+  }
+  return name
+})
 
 // user details
 
@@ -69,7 +77,7 @@ const showUserDetails = () => {
 )
   img.anon-avatar(src="@/assets/anon-avatar.svg" :class="{ 'is-dark': colorIsDark, 'should-hide-name': shouldHideName }")
   img.icon.camera(v-if="props.user.isOnline" src="@/assets/camera.svg" title="Online" :class="{ 'is-dark': colorIsDark }")
-  span.user-name(v-if="userHasName && !shouldHideName" :class="{ 'is-dark': colorIsDark }") {{ props.user.name }}
+  span.user-name(v-if="userHasName && !shouldHideName" :class="{ 'is-dark': colorIsDark }") {{ userName }}
 </template>
 
 <style lang="stylus">

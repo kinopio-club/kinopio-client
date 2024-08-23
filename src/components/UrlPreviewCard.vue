@@ -251,7 +251,7 @@ const openUrl = async (event, url) => {
   template(v-if="shouldDisplayIframe")
     iframe(:src="props.card.urlPreviewIframeUrl" :class="{ ignore: isInteractingWithItem }" :style="{ height: iframeHeight + 'px' }" :sandbox="iframeSandbox")
   //- url
-  a.row.info.badge.status.button-badge.card-button-badge(
+  a.row.info.badge.status.button-badge.badge-card-button(
     v-if="!shouldHideInfo"
     :title="props.card.urlPreviewUrl"
     :href="props.card.urlPreviewUrl"
