@@ -191,6 +191,5 @@ a.other-card-preview(@click.prevent.stop :href="props.url")
       vertical-align -2px
   .card-button-badge
     &:hover
-      span
-        text-decoration none !important
+      text-decoration none !important
 </style>
