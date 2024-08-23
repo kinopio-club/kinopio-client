@@ -15,6 +15,7 @@ const themes = {
       'secondary-background': '#e3e3e3',
       'secondary-hover-background': '#d8d8d8',
       'secondary-active-background': '#cdcdcd',
+      'tertiary-hover-background': '#c1c1c1',
       'danger-background': '#ffb8b3',
       'danger-hover-background': '#ffa49e',
       'danger-active-background': '#ff928b',
@@ -25,6 +26,7 @@ const themes = {
       'secondary-active-background-dark': '#cdcdcd',
       'light-shadow': 'rgba(0,0,0,0.20)',
       'heavy-shadow': 'rgba(0,0,0,0.25)',
+      'inset-heavy-shadow': 'rgba(0,0,0,0.35)',
       // codeblock
       'code-comment': '#898989',
       'code-punctuation': 'black',
@@ -49,6 +51,7 @@ const themes = {
       'secondary-background': '#262626',
       'secondary-hover-background': '#555',
       'secondary-active-background': '#333',
+      'tertiary-hover-background': '444',
       'danger-background': '#732b26',
       'danger-hover-background': '#8f3832',
       'danger-active-background': '#a83730',
@@ -59,6 +62,7 @@ const themes = {
       'secondary-active-background-dark': '#444',
       'light-shadow': 'rgba(0,0,0,0.25)',
       'heavy-shadow': 'rgba(0,0,0,0.55)',
+      'inset-heavy-shadow': 'rgba(0,0,0,0.65)',
       // codeblock
       'code-comment': '#898989',
       'code-punctuation': 'white',

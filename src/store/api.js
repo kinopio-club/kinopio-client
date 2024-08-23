@@ -596,7 +596,7 @@ const self = {
       try {
         const isOnline = context.rootState.isOnline
         if (!isOnline) { return }
-        console.log('🛬 getting remote space updatedAt', space.id)
+        // console.log('🛬 getting remote space updatedAt', space.id)
         const options = await context.dispatch('requestOptions', { method: 'GET', space: context.rootState.currentSpace })
         const response = await utils.timeout(consts.defaultTimeout, fetch(`${consts.apiHost()}/space/updated-at/${space.id}`, options))
         return normalizeResponse(response)

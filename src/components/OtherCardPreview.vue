@@ -7,20 +7,6 @@ import { reactive, computed, onMounted, defineProps, defineEmits, watch, ref, ne
 import { useStore } from 'vuex'
 const store = useStore()
 
-const props = defineProps({
-  otherCard: Object,
-  url: String,
-  parentCardId: String,
-  shouldCloseAllDialogs: Boolean,
-  shouldTruncateName: Boolean,
-  isSelected: Boolean,
-  selectedColor: String
-})
-const state = reactive({
-  nameSegments: [],
-  primaryBackgroundColor: ''
-})
-
 onMounted(() => {
   updateNameSegments()
   updatePrimaryBackgroundColor()
@@ -33,6 +19,27 @@ onMounted(() => {
       updatePrimaryBackgroundColor()
     }
   })
+  window.addEventListener('touchend', disableIsActive)
+  window.addEventListener('mouseup', disableIsActive)
+})
+watch(() => store.state.preventDraggedCardFromShowingDetails, (value, prevValue) => {
+  disableIsActive()
+})
+
+const props = defineProps({
+  otherCard: Object,
+  url: String,
+  parentCardId: String,
+  shouldCloseAllDialogs: Boolean,
+  shouldTruncateName: Boolean,
+  isSelected: Boolean,
+  selectedColor: String
+})
+
+const state = reactive({
+  nameSegments: [],
+  primaryBackgroundColor: '',
+  isActive: null
 })
 
 const isLoadingOtherItems = computed(() => store.state.isLoadingOtherItems)
@@ -66,6 +73,7 @@ const styles = computed(() => {
 })
 
 // update card
+
 watch(() => store.state.isLoadingOtherItems, (value, prevValue) => {
   if (!value) {
     updateNameSegments()
@@ -94,8 +102,10 @@ const updateNameSegments = () => {
   state.nameSegments = card.nameSegments
 }
 
-// dialog
+// otherCardDetails
+
 const showOtherCardDetailsIsVisible = async (event) => {
+  state.isActive = false
   if (utils.isMultiTouch(event)) { return }
   if (store.state.preventDraggedCardFromShowingDetails) { return }
   let otherItem = {}
@@ -126,12 +136,24 @@ const showOtherCardDetailsIsVisible = async (event) => {
   await nextTick()
   store.commit('broadcast/updateStore', { updates, type: 'updateRemoteCardDetailsVisible' })
 }
-
+const disableIsActive = () => {
+  state.isActive = false
+}
+const enableIsActive = () => {
+  state.isActive = true
+}
 </script>
 
 <template lang="pug">
 a.other-card-preview(@click.prevent.stop :href="props.url")
-  .badge.button-badge.link-badge(:class="{ active: isActive }" :style="styles" @mouseup.prevent="showOtherCardDetailsIsVisible($event)" @touchend.prevent="showOtherCardDetailsIsVisible($event)")
+  .badge.button-badge.link-badge.badge-card-button(
+    :class="{ active: state.isActive }"
+    :style="styles"
+    @mousedown.left="enableIsActive"
+    @touchstart="enableIsActive"
+    @mouseup.prevent="showOtherCardDetailsIsVisible($event)"
+    @touchend.prevent="showOtherCardDetailsIsVisible($event)"
+  )
     template(v-if="props.otherCard")
       //- removed
       template(v-if="props.otherCard.isRemoved")
@@ -152,6 +174,7 @@ a.other-card-preview(@click.prevent.stop :href="props.url")
   display block
   text-decoration none
   word-wrap break-word
+  width 100%
   .link-badge
     display block
     margin 0
@@ -166,5 +189,8 @@ a.other-card-preview(@click.prevent.stop :href="props.url")
   .badge
     > .loader
       vertical-align -2px
-
+  .badge-card-button
+    &:hover
+      span
+        text-decoration none !important
 </style>

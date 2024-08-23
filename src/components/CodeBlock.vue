@@ -17,7 +17,7 @@ const props = defineProps({
 })
 
 const parentCard = computed(() => store.getters['currentCards/byId'](props.parentCardId))
-const isCheckboxCard = computed(() => utils.checkboxFromString(parentCard.value.name))
+const canEditCard = computed(() => store.getters['currentUser/canEditCard']({ id: props.parentCardId }))
 
 // syntax highlight
 
@@ -94,9 +94,9 @@ const copy = async (event) => {
 </script>
 
 <template lang="pug">
-.code-block(:class="{ narrow: isCheckboxCard }")
-  .code-buttons
-    .button-wrap(@click.stop="toggleCodeLanguagePicker" title="Code Language")
+.code-block
+  .code-buttons(:data-x="canEditCard")
+    .button-wrap(v-if="canEditCard" @click.stop="toggleCodeLanguagePicker" title="Code Language")
       button.small-button.inline-button(:class="{ active: languagePickerIsVisible }")
         span(v-if="currentLanguage.color")
           .badge.dot(:style="{ backgroundColor: currentLanguage.color }")
@@ -115,9 +115,7 @@ const copy = async (event) => {
 <style lang="stylus">
 .code-block
   position relative
-  width calc(100% + 14px)
-  &.narrow
-    width calc(100% - 14px)
+  width calc(100% - 8px)
   .code-buttons
     position absolute
     right 0
@@ -125,6 +123,7 @@ const copy = async (event) => {
     .button-wrap
       padding 8px
       padding-left 8px
+      padding-right 6px
       margin-left 0
       &:last-child
         padding-left 0
