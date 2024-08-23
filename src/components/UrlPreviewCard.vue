@@ -106,6 +106,16 @@ const iframeHeight = computed(() => {
   let height = Math.round(width * aspectRatio)
   return height
 })
+const iframeSandbox = computed(() => {
+  const url = props.card.urlPreviewIframeUrl
+  let sandbox = 'allow-scripts allow-forms'
+  if (utils.urlIsYoutube(url)) {
+    // youtube embeds require allow-same-origin, presumably for ad tracking
+    // https://stackoverflow.com/questions/59827851/embedding-youtube-iframe-fails-within-sandbox-iframe
+    sandbox = 'allow-same-origin allow-scripts allow-forms'
+  }
+  return sandbox
+})
 
 // autoplay
 
@@ -230,7 +240,7 @@ const openUrl = async (event, url) => {
 
   //- embed
   template(v-if="shouldDisplayIframe")
-    iframe(:src="props.card.urlPreviewIframeUrl" :class="{ ignore: isInteractingWithItem }" :style="{ height: iframeHeight + 'px' }" sandbox="allow-same-origin allow-scripts allow-forms")
+    iframe(:src="props.card.urlPreviewIframeUrl" :class="{ ignore: isInteractingWithItem }" :style="{ height: iframeHeight + 'px' }" :sandbox="iframeSandbox")
   //- url
   a.row.info.badge.status.button-badge.card-button-badge(
     v-if="!shouldHideInfo"
