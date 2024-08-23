@@ -1229,10 +1229,12 @@ code
     text-decoration none
     &:hover
       background var(--tertiary-hover-background)
+      text-decoration underline
     &.active
       box-shadow inset 0 3px 3px var(--inset-heavy-shadow)
     &.is-being-dragged
       box-shadow none
+      text-decoration none
   &.dot
     min-width initial
     min-height initial
