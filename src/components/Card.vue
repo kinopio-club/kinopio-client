@@ -1544,9 +1544,9 @@ const updateStickyStretchResistance = () => {
   } else if (size.l) {
     stretchResistance = 16
   } else if (size.m) {
-    stretchResistance = 12
+    stretchResistance = 14
   } else if (size.s) {
-    stretchResistance = 10
+    stretchResistance = 12
   }
   state.stickyStretchResistance = stretchResistance
 }
