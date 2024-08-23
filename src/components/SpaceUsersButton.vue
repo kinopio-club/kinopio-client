@@ -87,11 +87,15 @@ const spaceUsersLabel = computed(() => {
   }
   return string
 })
+const isTranslucentButton = computed(() => {
+  const shouldIncreaseUIContrast = store.state.currentUser.shouldIncreaseUIContrast
+  return props.isParentSpaceUsers && !shouldIncreaseUIContrast
+})
 
 </script>
 
 <template lang="pug">
-button.space-users-button(@click.stop="toggleSpaceUserListIsVisible" :class="{ 'header-button': props.isParentSpaceUsers, active: isActive, 'translucent-button': props.isParentSpaceUsers }" ref="buttonElement")
+button.space-users-button(@click.stop="toggleSpaceUserListIsVisible" :class="{ 'header-button': props.isParentSpaceUsers, active: isActive, 'translucent-button': isTranslucentButton }" ref="buttonElement")
   span.label(v-if="props.showLabel")
     template(v-if="team")
       TeamLabel(:team="team")
