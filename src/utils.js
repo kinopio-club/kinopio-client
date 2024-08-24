@@ -2480,7 +2480,7 @@ export default {
     const links = urls.filter(url => {
       const linkIsMarkdown = markdownLinks.find(markdownLink => markdownLink.includes(url))
       if (linkIsMarkdown) { return }
-      return this.urlIsSpace(url) || this.urlIsSpaceInvite(url)
+      return this.urlIsSpace(url) || this.urlIsSpaceInvite(url) || this.urlIsTeamInvite(url)
     })
     const files = urls.filter(url => this.urlIsFile(url))
     let segments = []
