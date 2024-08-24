@@ -44,7 +44,7 @@ const isRemoved = computed(() => {
   if (!space) { return }
   return space.isRemoved
 })
-const urlIsSpaceInvite = computed(() => utils.urlIsSpaceInvite(props.url))
+const urlIsSpaceInvite = computed(() => props.otherSpace?.isInviteLink)
 
 // colors
 
@@ -124,7 +124,7 @@ const openUrl = async (event) => {
     img.preview-image(:src="previewImage" :class="{selected: props.isSelected}" ref="image")
   a.badge.link-badge.button-badge.badge-card-button(
     :title="url"
-    :class="{ 'preview-image-is-visible': previewImageIsVisible, 'preview-image-is-visible': previewImageIsVisible, active: state.isActive, 'is-being-dragged': store.state.preventDraggedCardFromShowingDetails }"
+    :class="{ 'preview-image-is-visible': previewImageIsVisible, active: state.isActive, 'is-being-dragged': store.state.preventDraggedCardFromShowingDetails }"
     :style="{ background: background }"
     target="_blank"
     :href="url"

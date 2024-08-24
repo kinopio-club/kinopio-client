@@ -323,15 +323,14 @@ const otherCardIsVisible = computed(() => {
 
 // other space
 
+const otherSpaceSegment = computed(() => nameSegments.value.find(segment => segment.otherSpace))
 const otherSpace = computed(() => {
-  let isInviteLink, collaboratorKey, readOnlyKey
-  let space = nameSegments.value.find(segment => segment.otherSpace)
-  if (!space) { return }
-  return space.otherSpace
+  let nameSegment = otherSpaceSegment.value
+  return nameSegment?.otherSpace
 })
 const otherSpaceUrl = computed(() => {
-  let segment = nameSegments.value.find(segment => segment.otherSpace)
-  return segment?.name
+  let nameSegment = otherSpaceSegment.value
+  return nameSegment?.name
 })
 const spaceOrInviteUrl = computed(() => {
   const link = state.formats.link
@@ -1718,15 +1717,16 @@ const updateOtherSpaceOrCardItems = (url) => {
 }
 const updateOtherInviteItems = (url) => {
   const { spaceId, collaboratorKey } = qs.decode(url.search)
-  const linkExists = spaceId === props.card.linkToSpaceId && collaboratorKey === props.card.linkToSpaceCollaboratorKey
-  if (linkExists) { return }
-  const update = {
-    id: props.card.id,
-    linkToSpaceId: spaceId,
-    linkToCardId: null,
-    linkToSpaceCollaboratorKey: collaboratorKey
+  const isCardLink = spaceId === props.card.linkToSpaceId && collaboratorKey === props.card.linkToSpaceCollaboratorKey
+  if (!isCardLink) {
+    const update = {
+      id: props.card.id,
+      linkToSpaceId: spaceId,
+      linkToCardId: null,
+      linkToSpaceCollaboratorKey: collaboratorKey
+    }
+    store.dispatch('currentCards/update', { card: update })
   }
-  store.dispatch('currentCards/update', { card: update })
   store.dispatch('currentSpace/updateOtherItems', { spaceId, collaboratorKey })
 }
 
