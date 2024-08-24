@@ -44,7 +44,7 @@ const isRemoved = computed(() => {
   if (!space) { return }
   return space.isRemoved
 })
-const urlIsSpaceInvite = computed(() => props.otherSpace?.isInviteLink)
+const urlIsSpaceInvite = computed(() => utils.urlIsSpaceInvite(props.url))
 
 // colors
 
