@@ -157,6 +157,11 @@ const openUrl = async (event) => {
 .other-space-preview-card
   text-decoration none
   margin 0
+  &:hover
+    .badge.info,
+    .badge.danger
+      span
+        text-decoration none
   > .badge
     display block
     margin 0
