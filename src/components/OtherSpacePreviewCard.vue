@@ -44,7 +44,7 @@ const isRemoved = computed(() => {
   if (!space) { return }
   return space.isRemoved
 })
-const urlIsInvite = computed(() => utils.urlIsInvite(props.url))
+const urlIsSpaceInvite = computed(() => utils.urlIsSpaceInvite(props.url))
 
 // colors
 
@@ -137,7 +137,7 @@ const openUrl = async (event) => {
     @touchend.prevent="openUrl($event)"
   )
     //- badges
-    .badge.info.inline-badge(v-if="urlIsInvite")
+    .badge.info.inline-badge(v-if="urlIsSpaceInvite")
       span Invite
     .badge.danger.inline-badge(v-if="isRemoved")
       img.icon(src="@/assets/remove.svg")

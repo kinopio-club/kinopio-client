@@ -268,8 +268,9 @@ const isAudioCard = computed(() => {
   return state.formats.audio
 })
 const cardHasMedia = computed(() => state.formats.image || state.formats.video || state.formats.audio)
+const urlsInName = computed(() => utils.urlsFromString(props.card.name))
 const updateMediaUrls = (urls) => {
-  urls = urls || utils.urlsFromString(props.card.name)
+  urls = urls || urlsInName.value
   state.formats.image = ''
   state.formats.video = ''
   state.formats.audio = ''
@@ -296,6 +297,13 @@ const updateIsPlayingAudio = (value) => {
   cancelLocking()
 }
 
+// team invite
+
+const teamInviteUrl = computed(() => {
+  const urls = urlsInName.value || []
+  return urls.find(url => utils.urlIsTeamInvite(url))
+})
+
 // other card
 
 const otherCardUrl = computed(() => utils.urlFromSpaceAndCard({ cardId: props.card.linkToCardId, spaceId: props.card.linkToSpaceId }))
@@ -305,8 +313,7 @@ const otherCard = computed(() => {
 })
 const otherCardIsVisible = computed(() => {
   if (!props.card.linkToCardId) { return }
-  const name = props.card.name
-  const urls = utils.urlsFromString(name) || []
+  const urls = urlsInName.value || []
   const value = urls.find((url) => {
     return url?.includes(props.card.linkToCardId)
   })
@@ -327,7 +334,7 @@ const otherSpaceUrl = computed(() => {
 })
 const spaceOrInviteUrl = computed(() => {
   const link = state.formats.link
-  if (utils.urlIsSpace(link) || utils.urlIsInvite(link)) {
+  if (utils.urlIsSpace(link) || utils.urlIsSpaceInvite(link)) {
     return link
   } else {
     return null
@@ -626,7 +633,7 @@ const openUrl = async (event, url) => {
   if (store.state.cardsWereDragged) {
     return
   }
-  const isSpaceUrl = utils.urlIsSpace(url) && !utils.urlIsInvite(url)
+  const isSpaceUrl = utils.urlIsSpace(url) && !utils.urlIsSpaceInvite(url)
   if (isSpaceUrl) {
     changeSpace(url)
   } else if (event.type === 'touchend') {
@@ -1689,9 +1696,9 @@ const updateOtherItems = () => {
   }
   if (!url) { return }
   const urlIsSpace = utils.urlIsSpace(url)
-  const urlIsInvite = utils.urlIsInvite(url)
+  const urlIsSpaceInvite = utils.urlIsSpaceInvite(url)
   url = new URL(url)
-  if (urlIsInvite) {
+  if (urlIsSpaceInvite) {
     updateOtherInviteItems(url)
   } else if (urlIsSpace) {
     updateOtherSpaceOrCardItems(url)
@@ -1877,7 +1884,7 @@ article.card-wrap#card(
             :parentDetailsIsVisible="currentCardDetailsIsVisible"
             @shouldRenderParent="updateShouldRenderParent"
           )
-    .url-preview-wrap(v-if="cardUrlPreviewIsVisible || otherCardIsVisible || otherSpaceIsVisible" :class="{'is-image-card': isImageCard}")
+    .url-preview-wrap(v-if="cardUrlPreviewIsVisible || teamInviteUrl || otherCardIsVisible || otherSpaceIsVisible" :class="{'is-image-card': isImageCard}")
       template(v-if="cardUrlPreviewIsVisible")
         UrlPreviewCard(
           :visible="true"
@@ -1890,7 +1897,9 @@ article.card-wrap#card(
           @retryUrlPreview="retryUrlPreview"
           :backgroundColor="backgroundColor"
         )
-      template(v-if="otherCardIsVisible")
+      template(v-if="teamInviteUrl")
+        p TeamInvitePreview here
+      template(v-else-if="otherCardIsVisible")
         OtherCardPreview(
           :otherCard="otherCard"
           :url="otherCardUrl"
