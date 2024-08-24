@@ -150,6 +150,12 @@ export default {
         users: team.users
       }
       context.commit('update', updatedTeam)
+    },
+    updateOtherTeams: async (context, otherTeam) => {
+      let team = context.getters.byId(otherTeam.id)
+      if (team) { return }
+      team = await context.dispatch('api/getTeam', otherTeam.id, { root: true })
+      context.commit('create', team)
     }
   },
   getters: {

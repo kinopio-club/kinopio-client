@@ -21,7 +21,7 @@ const props = defineProps({
 const state = reactive({
   isActive: null,
   team: {},
-  isLoading: false
+  isLoading: true
 })
 
 // url
@@ -65,8 +65,7 @@ const openUrl = async (event) => {
   if (store.state.cardsWereDragged) {
     return
   }
-  store.dispatch('currentSpace/changeSpace', props.otherSpace)
-  store.dispatch('closeAllDialogs')
+  window.location = url.value
 }
 
 // colors
@@ -100,10 +99,19 @@ const updateTeam = async () => {
   await nextTick()
   state.isLoading = true
   try {
-    console.log('🏎️🏎️', props.card, props.teamInviteUrl, props.selectedColor)
+    const teamFromUrl = utils.teamFromTeamInviteUrl(props.teamInviteUrl)
+    let team = store.getters['teams/byId'](teamFromUrl.id)
+    if (team) {
+      state.team = team
+    } else {
+      await store.dispatch('teams/updateOtherTeams', teamFromUrl)
+      team = store.getters['teams/byId'](teamFromUrl.id)
+      state.team = team
+    }
   } catch (error) {
     console.error('🚒 updateTeam', error)
   }
+  state.isLoading = false
 }
 
 </script>
@@ -127,10 +135,10 @@ const updateTeam = async () => {
     .row
       .badge.info.inline-badge
         span Team Invite
+    .row
       Loader(:visible="state.isLoading" :isSmall="true" :isStatic="true")
-      //- TeamLabel(:team="state.team" :showName="true")
-    .badge.danger.inline-badge
-      span Keep Private
+      template(v-if="!state.isLoading")
+        TeamLabel(:team="state.team" :showName="true")
 </template>
 
 <style lang="stylus">

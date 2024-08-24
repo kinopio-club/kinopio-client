@@ -1830,6 +1830,21 @@ export default {
     const url = `${consts.kinopioDomain()}/team/invite?teamId=${teamId}&${invite}&name=${teamName}`
     return url
   },
+  urlSearchParamsToObject (searchParams) {
+    let object = {}
+    for (const [key, value] of searchParams.entries()) {
+      object[key] = value
+    }
+    return object
+  },
+  teamFromTeamInviteUrl (url) {
+    if (!url) { return }
+    url = new URL(url)
+    const params = url.searchParams
+    let team = this.urlSearchParamsToObject(params)
+    team.id = team.teamId
+    return team
+  },
   spaceAndCardIdFromPath (path) {
     // https://regexr.com/5kr4g
     // matches (text after /) twice

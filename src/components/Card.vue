@@ -1697,11 +1697,14 @@ const updateOtherItems = () => {
   if (!url) { return }
   const urlIsSpace = utils.urlIsSpace(url)
   const urlIsSpaceInvite = utils.urlIsSpaceInvite(url)
+  const urlIsTeamInvite = utils.urlIsTeamInvite(url)
   url = new URL(url)
   if (urlIsSpaceInvite) {
     updateOtherInviteItems(url)
   } else if (urlIsSpace) {
     updateOtherSpaceOrCardItems(url)
+  } else if (urlIsTeamInvite) {
+    updateOtherTeamItems(url)
   }
 }
 const updateOtherSpaceOrCardItems = (url) => {
@@ -1728,6 +1731,10 @@ const updateOtherInviteItems = (url) => {
     store.dispatch('currentCards/update', { card: update })
   }
   store.dispatch('currentSpace/updateOtherItems', { spaceId, collaboratorKey })
+}
+const updateOtherTeamItems = (url) => {
+  const teamFromUrl = utils.teamFromTeamInviteUrl(url)
+  store.dispatch('teams/updateOtherTeams', teamFromUrl)
 }
 
 // utils
