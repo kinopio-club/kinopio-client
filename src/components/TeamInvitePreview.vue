@@ -9,7 +9,6 @@ import utils from '@/utils.js'
 const store = useStore()
 
 onMounted(() => {
-  console.log(`🐴 the component is now mounted.`, props.card, props.teamInviteUrl, props.selectedColor)
   updateTeam()
 })
 
@@ -99,7 +98,7 @@ const updateTeam = async () => {
   await nextTick()
   state.isLoading = true
   try {
-    const teamFromUrl = utils.teamFromTeamInviteUrl(props.teamInviteUrl)
+    const teamFromUrl = utils.teamFromTeamInviteUrl(url.value)
     let team = store.getters['teams/byId'](teamFromUrl.id)
     if (team) {
       state.team = team
@@ -139,6 +138,8 @@ const updateTeam = async () => {
       Loader(:visible="state.isLoading" :isSmall="true" :isStatic="true")
       template(v-if="!state.isLoading")
         TeamLabel(:team="state.team" :showName="true")
+    .row
+      .badge.danger Should not be shared publicly
 </template>
 
 <style lang="stylus">
@@ -156,5 +157,6 @@ const updateTeam = async () => {
   .inline-badge
     display inline-block
     margin-right 6px
-
+  .badge.danger
+    margin 0
 </style>
