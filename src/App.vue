@@ -1236,7 +1236,8 @@ code
     &.is-being-dragged
       box-shadow none
       text-decoration none
-
+      span
+        text-decoration none
   &.dot
     min-width initial
     min-height initial
