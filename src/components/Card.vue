@@ -9,6 +9,7 @@ import Audio from '@/components/Audio.vue'
 import NameSegment from '@/components/NameSegment.vue'
 import UserLabelInline from '@/components/UserLabelInline.vue'
 import OtherCardPreview from '@/components/OtherCardPreview.vue'
+import TeamInvitePreview from '@/components/TeamInvitePreview.vue'
 import ItemConnectorButton from '@/components/ItemConnectorButton.vue'
 import consts from '@/consts.js'
 import postMessage from '@/postMessage.js'
@@ -1898,14 +1899,17 @@ article.card-wrap#card(
           :backgroundColor="backgroundColor"
         )
       template(v-if="teamInviteUrl")
-        p TeamInvitePreview here
+        TeamInvitePreview(
+          :card="card"
+          :teamInviteUrl="teamInviteUrl"
+          :selectedColor="selectedColor"
+        )
       template(v-else-if="otherCardIsVisible")
         OtherCardPreview(
           :otherCard="otherCard"
           :url="otherCardUrl"
           :parentCardId="card.id"
           :shouldCloseAllDialogs="true"
-          :isSelected="isSelectedOrDragging"
           :selectedColor="selectedColor"
         )
       template(v-else-if="otherSpaceIsVisible")
