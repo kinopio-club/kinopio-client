@@ -15,7 +15,8 @@ onMounted(() => {
 const props = defineProps({
   card: Object,
   teamInviteUrl: String,
-  selectedColor: String
+  selectedColor: String,
+  parentIsCardDetails: Boolean
 })
 const state = reactive({
   isActive: null,
@@ -119,7 +120,7 @@ const updateTeam = async () => {
 .team-invite-preview
   a.badge.link-badge.button-badge.badge-card-button(
     :title="url"
-    :class="{ active: state.isActive, 'is-being-dragged': store.state.preventDraggedCardFromShowingDetails }"
+    :class="{ active: state.isActive, 'is-being-dragged': store.state.preventDraggedCardFromShowingDetails, 'preview-content': props.parentIsCardDetails }"
     :style="{ background: background }"
     target="_blank"
     :href="url"
@@ -159,4 +160,9 @@ const updateTeam = async () => {
     margin-right 6px
   .badge.danger
     margin 0
+  .preview-content
+    padding var(--subsection-padding)
+    pointer-events none
+    .team-label
+      pointer-events all
 </style>

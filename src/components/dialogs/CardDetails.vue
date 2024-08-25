@@ -16,6 +16,7 @@ import CardCollaborationInfo from '@/components/CardCollaborationInfo.vue'
 import ShareCard from '@/components/dialogs/ShareCard.vue'
 import OtherCardPreview from '@/components/OtherCardPreview.vue'
 import OtherSpacePreview from '@/components/OtherSpacePreview.vue'
+import TeamInvitePreview from '@/components/TeamInvitePreview.vue'
 import utils from '@/utils.js'
 import consts from '@/consts.js'
 
@@ -980,6 +981,13 @@ const removeUrlPreview = async () => {
   store.dispatch('currentCards/update', { card: update })
 }
 
+// team invite preview
+
+const teamInviteUrl = computed(() => {
+  const urls = validUrls.value
+  return urls.find(url => utils.urlIsTeamInvite(url))
+})
+
 // media
 
 const urlIsAudio = computed(() => utils.urlIsAudio(url.value))
@@ -1419,13 +1427,22 @@ dialog.card-details(v-if="visible" :open="visible" ref="dialogElement" @click.le
       OtherCardPreview(:otherCard="otherCard" :url="otherCardUrl" :parentCardId="card.id" :shouldTruncateName="true")
 
     MediaPreview(:visible="cardHasMedia" :card="card" :formats="state.formats")
-    UrlPreview(
-      :visible="urlPreviewIsVisible"
-      :loading="isLoadingUrlPreview"
-      :card="card"
-      :urlsIsVisibleInName="urlsIsVisible"
-      @toggleUrlsIsVisible="toggleUrlsIsVisible"
-    )
+
+    template(v-if="teamInviteUrl")
+      TeamInvitePreview(
+        :card="card"
+        :teamInviteUrl="teamInviteUrl"
+        :parentIsCardDetails="true"
+      )
+    template(v-else-if="urlPreviewIsVisible")
+      UrlPreview(
+        :visible="true"
+        :loading="isLoadingUrlPreview"
+        :card="card"
+        :urlsIsVisibleInName="urlsIsVisible"
+        @toggleUrlsIsVisible="toggleUrlsIsVisible"
+      )
+
     //- other space
     template(v-if="otherSpaceIsVisible")
       OtherSpacePreview(
