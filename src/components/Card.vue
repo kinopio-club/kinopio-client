@@ -9,6 +9,7 @@ import Audio from '@/components/Audio.vue'
 import NameSegment from '@/components/NameSegment.vue'
 import UserLabelInline from '@/components/UserLabelInline.vue'
 import OtherCardPreview from '@/components/OtherCardPreview.vue'
+import TeamInvitePreview from '@/components/TeamInvitePreview.vue'
 import ItemConnectorButton from '@/components/ItemConnectorButton.vue'
 import consts from '@/consts.js'
 import postMessage from '@/postMessage.js'
@@ -268,8 +269,9 @@ const isAudioCard = computed(() => {
   return state.formats.audio
 })
 const cardHasMedia = computed(() => state.formats.image || state.formats.video || state.formats.audio)
+const urlsInName = computed(() => utils.urlsFromString(props.card.name))
 const updateMediaUrls = (urls) => {
-  urls = urls || utils.urlsFromString(props.card.name)
+  urls = urls || urlsInName.value
   state.formats.image = ''
   state.formats.video = ''
   state.formats.audio = ''
@@ -296,6 +298,13 @@ const updateIsPlayingAudio = (value) => {
   cancelLocking()
 }
 
+// team invite
+
+const teamInviteUrl = computed(() => {
+  const urls = urlsInName.value || []
+  return urls.find(url => utils.urlIsTeamInvite(url))
+})
+
 // other card
 
 const otherCardUrl = computed(() => utils.urlFromSpaceAndCard({ cardId: props.card.linkToCardId, spaceId: props.card.linkToSpaceId }))
@@ -305,8 +314,7 @@ const otherCard = computed(() => {
 })
 const otherCardIsVisible = computed(() => {
   if (!props.card.linkToCardId) { return }
-  const name = props.card.name
-  const urls = utils.urlsFromString(name) || []
+  const urls = urlsInName.value || []
   const value = urls.find((url) => {
     return url?.includes(props.card.linkToCardId)
   })
@@ -315,19 +323,18 @@ const otherCardIsVisible = computed(() => {
 
 // other space
 
+const otherSpaceSegment = computed(() => nameSegments.value.find(segment => segment.otherSpace))
 const otherSpace = computed(() => {
-  let isInviteLink, collaboratorKey, readOnlyKey
-  let space = nameSegments.value.find(segment => segment.otherSpace)
-  if (!space) { return }
-  return space.otherSpace
+  let nameSegment = otherSpaceSegment.value
+  return nameSegment?.otherSpace
 })
 const otherSpaceUrl = computed(() => {
-  let segment = nameSegments.value.find(segment => segment.otherSpace)
-  return segment?.name
+  let nameSegment = otherSpaceSegment.value
+  return nameSegment?.name
 })
 const spaceOrInviteUrl = computed(() => {
   const link = state.formats.link
-  if (utils.urlIsSpace(link) || utils.urlIsInvite(link)) {
+  if (utils.urlIsSpace(link) || utils.urlIsSpaceInvite(link)) {
     return link
   } else {
     return null
@@ -626,7 +633,7 @@ const openUrl = async (event, url) => {
   if (store.state.cardsWereDragged) {
     return
   }
-  const isSpaceUrl = utils.urlIsSpace(url) && !utils.urlIsInvite(url)
+  const isSpaceUrl = utils.urlIsSpace(url) && !utils.urlIsSpaceInvite(url)
   if (isSpaceUrl) {
     changeSpace(url)
   } else if (event.type === 'touchend') {
@@ -1689,12 +1696,15 @@ const updateOtherItems = () => {
   }
   if (!url) { return }
   const urlIsSpace = utils.urlIsSpace(url)
-  const urlIsInvite = utils.urlIsInvite(url)
+  const urlIsSpaceInvite = utils.urlIsSpaceInvite(url)
+  const urlIsTeamInvite = utils.urlIsTeamInvite(url)
   url = new URL(url)
-  if (urlIsInvite) {
+  if (urlIsSpaceInvite) {
     updateOtherInviteItems(url)
   } else if (urlIsSpace) {
     updateOtherSpaceOrCardItems(url)
+  } else if (urlIsTeamInvite) {
+    updateOtherTeamItems(url)
   }
 }
 const updateOtherSpaceOrCardItems = (url) => {
@@ -1710,16 +1720,21 @@ const updateOtherSpaceOrCardItems = (url) => {
 }
 const updateOtherInviteItems = (url) => {
   const { spaceId, collaboratorKey } = qs.decode(url.search)
-  const linkExists = spaceId === props.card.linkToSpaceId && collaboratorKey === props.card.linkToSpaceCollaboratorKey
-  if (linkExists) { return }
-  const update = {
-    id: props.card.id,
-    linkToSpaceId: spaceId,
-    linkToCardId: null,
-    linkToSpaceCollaboratorKey: collaboratorKey
+  const isCardLink = spaceId === props.card.linkToSpaceId && collaboratorKey === props.card.linkToSpaceCollaboratorKey
+  if (!isCardLink) {
+    const update = {
+      id: props.card.id,
+      linkToSpaceId: spaceId,
+      linkToCardId: null,
+      linkToSpaceCollaboratorKey: collaboratorKey
+    }
+    store.dispatch('currentCards/update', { card: update })
   }
-  store.dispatch('currentCards/update', { card: update })
   store.dispatch('currentSpace/updateOtherItems', { spaceId, collaboratorKey })
+}
+const updateOtherTeamItems = (url) => {
+  const teamFromUrl = utils.teamFromTeamInviteUrl(url)
+  store.dispatch('teams/updateOtherTeams', teamFromUrl)
 }
 
 // utils
@@ -1877,7 +1892,7 @@ article.card-wrap#card(
             :parentDetailsIsVisible="currentCardDetailsIsVisible"
             @shouldRenderParent="updateShouldRenderParent"
           )
-    .url-preview-wrap(v-if="cardUrlPreviewIsVisible || otherCardIsVisible || otherSpaceIsVisible" :class="{'is-image-card': isImageCard}")
+    .url-preview-wrap(v-if="cardUrlPreviewIsVisible || teamInviteUrl || otherCardIsVisible || otherSpaceIsVisible" :class="{'is-image-card': isImageCard}")
       template(v-if="cardUrlPreviewIsVisible")
         UrlPreviewCard(
           :visible="true"
@@ -1890,13 +1905,18 @@ article.card-wrap#card(
           @retryUrlPreview="retryUrlPreview"
           :backgroundColor="backgroundColor"
         )
-      template(v-if="otherCardIsVisible")
+      template(v-if="teamInviteUrl")
+        TeamInvitePreview(
+          :card="card"
+          :teamInviteUrl="teamInviteUrl"
+          :selectedColor="selectedColor"
+        )
+      template(v-else-if="otherCardIsVisible")
         OtherCardPreview(
           :otherCard="otherCard"
           :url="otherCardUrl"
           :parentCardId="card.id"
           :shouldCloseAllDialogs="true"
-          :isSelected="isSelectedOrDragging"
           :selectedColor="selectedColor"
         )
       template(v-else-if="otherSpaceIsVisible")

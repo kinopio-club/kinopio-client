@@ -44,7 +44,7 @@ const isRemoved = computed(() => {
   if (!space) { return }
   return space.isRemoved
 })
-const urlIsInvite = computed(() => utils.urlIsInvite(props.url))
+const urlIsSpaceInvite = computed(() => utils.urlIsSpaceInvite(props.url))
 
 // colors
 
@@ -124,7 +124,7 @@ const openUrl = async (event) => {
     img.preview-image(:src="previewImage" :class="{selected: props.isSelected}" ref="image")
   a.badge.link-badge.button-badge.badge-card-button(
     :title="url"
-    :class="{ 'preview-image-is-visible': previewImageIsVisible, 'preview-image-is-visible': previewImageIsVisible, active: state.isActive, 'is-being-dragged': store.state.preventDraggedCardFromShowingDetails }"
+    :class="{ 'preview-image-is-visible': previewImageIsVisible, active: state.isActive, 'is-being-dragged': store.state.preventDraggedCardFromShowingDetails }"
     :style="{ background: background }"
     target="_blank"
     :href="url"
@@ -137,7 +137,7 @@ const openUrl = async (event) => {
     @touchend.prevent="openUrl($event)"
   )
     //- badges
-    .badge.info.inline-badge(v-if="urlIsInvite")
+    .badge.info.inline-badge(v-if="urlIsSpaceInvite")
       span Invite
     .badge.danger.inline-badge(v-if="isRemoved")
       img.icon(src="@/assets/remove.svg")
@@ -157,6 +157,11 @@ const openUrl = async (event) => {
 .other-space-preview-card
   text-decoration none
   margin 0
+  &:hover
+    .badge.info,
+    .badge.danger
+      span
+        text-decoration none
   > .badge
     display block
     margin 0

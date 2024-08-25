@@ -1830,6 +1830,21 @@ export default {
     const url = `${consts.kinopioDomain()}/team/invite?teamId=${teamId}&${invite}&name=${teamName}`
     return url
   },
+  urlSearchParamsToObject (searchParams) {
+    let object = {}
+    for (const [key, value] of searchParams.entries()) {
+      object[key] = value
+    }
+    return object
+  },
+  teamFromTeamInviteUrl (url) {
+    if (!url) { return }
+    url = new URL(url)
+    const params = url.searchParams
+    let team = this.urlSearchParamsToObject(params)
+    team.id = team.teamId
+    return team
+  },
   spaceAndCardIdFromPath (path) {
     // https://regexr.com/5kr4g
     // matches (text after /) twice
@@ -1880,6 +1895,10 @@ export default {
     if (url.match(currencyFloatPattern)) {
       return true
     }
+  },
+  hostIsKinopio (url) {
+    url = new URL(url)
+    return url.origin === consts.kinopioDomain()
   },
   urlIsValidLocalhost (url) {
     // https://regexr.com/7vc0o
@@ -2036,19 +2055,26 @@ export default {
     const isFile = url.toLowerCase().match(fileUrlPattern)
     return Boolean(isFile)
   },
-  urlIsInvite (url) {
+  urlIsSpaceInvite (url) {
     url = this.urlWithProtocol(url)
     if (!url) { return }
     try {
       url = new URL(url)
       return url.pathname === '/invite'
     } catch (error) {
-      console.warn('🚑 urlIsInvite', error)
+      console.warn('🚑 urlIsSpaceInvite', error)
     }
+  },
+  urlIsTeamInvite (url) {
+    const hostIsKinopio = this.hostIsKinopio(url)
+    if (!hostIsKinopio) { return }
+    url = new URL(url)
+    return url.pathname === '/team/invite'
   },
   urlIsSpace (url) {
     if (!url) { return }
-    if (this.urlIsInvite(url)) { return true }
+    if (this.urlIsTeamInvite(url)) { return }
+    if (this.urlIsSpaceInvite(url)) { return true }
     let spaceUrlPattern
     if (consts.isDevelopment()) {
       // https://regexr.com/5hjc2
@@ -2454,7 +2480,7 @@ export default {
     const links = urls.filter(url => {
       const linkIsMarkdown = markdownLinks.find(markdownLink => markdownLink.includes(url))
       if (linkIsMarkdown) { return }
-      return this.urlIsSpace(url) || this.urlIsInvite(url)
+      return this.urlIsSpace(url) || this.urlIsSpaceInvite(url) || this.urlIsTeamInvite(url)
     })
     const files = urls.filter(url => this.urlIsFile(url))
     let segments = []
@@ -2473,7 +2499,7 @@ export default {
       const endPosition = startPosition + link.length
       const { spaceId, spaceUrl, cardId } = this.spaceAndCardIdFromUrl(link)
       let segment = { link, name: link, startPosition, endPosition, spaceId, spaceUrl, cardId, isLink: true }
-      if (this.urlIsInvite(link)) {
+      if (this.urlIsSpaceInvite(link)) {
         segment.isInviteLink = true
         const url = new URL(link)
         const queryObject = qs.decode(url.search)

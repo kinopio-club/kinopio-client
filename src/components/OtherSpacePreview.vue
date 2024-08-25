@@ -38,7 +38,7 @@ const changeSpace = () => {
 
 // space info
 
-const isInvite = computed(() => utils.urlIsInvite(props.url))
+const isInvite = computed(() => utils.urlIsSpaceInvite(props.url))
 const isRemoved = computed(() => {
   const space = props.otherSpace
   if (!space) { return }

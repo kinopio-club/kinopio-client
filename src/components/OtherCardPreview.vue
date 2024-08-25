@@ -32,7 +32,6 @@ const props = defineProps({
   parentCardId: String,
   shouldCloseAllDialogs: Boolean,
   shouldTruncateName: Boolean,
-  isSelected: Boolean,
   selectedColor: String
 })
 

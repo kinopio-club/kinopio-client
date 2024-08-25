@@ -100,11 +100,13 @@ export default {
           userId
         }, { root: true })
         context.commit('addNotification', {
-          message: `Joined ${response.team.name}. Join team spaces from your spaces list`,
+          badge: 'Joined Team',
+          message: `${response.team.name}`,
           type: 'success',
           isPersistentItem: true,
           team: response.team
         }, { root: true })
+        context.commit('triggerSpaceDetailsVisible', null, { root: true })
       } catch (error) {
         console.error('🚒 joinTeam', error)
         context.commit('addNotification', {
@@ -150,6 +152,12 @@ export default {
         users: team.users
       }
       context.commit('update', updatedTeam)
+    },
+    updateOtherTeams: async (context, otherTeam) => {
+      let team = context.getters.byId(otherTeam.id)
+      if (team) { return }
+      team = await context.dispatch('api/getTeam', otherTeam.id, { root: true })
+      context.commit('create', team)
     }
   },
   getters: {

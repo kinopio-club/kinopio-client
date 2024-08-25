@@ -206,6 +206,7 @@ const router = createRouter({
         const collaboratorKey = urlParams.get('collaboratorKey')
         pageMeta.team({ teamId, isTeamInvite: true })
         store.commit('teamToJoinOnLoad', { teamId, collaboratorKey })
+        store.commit('notifyIsJoiningTeam', true)
         next()
       }
     }, {

@@ -2,7 +2,6 @@
 import { reactive, computed, onMounted, defineProps, defineEmits, watch, ref, nextTick } from 'vue'
 import { useStore } from 'vuex'
 
-import Loader from '@/components/Loader.vue'
 import utils from '@/utils.js'
 import consts from '@/consts.js'
 
@@ -297,6 +296,10 @@ const openUrl = async (event, url) => {
   flex-wrap wrap
   background var(--secondary-active-background)
   border-radius var(--entity-radius)
+  &:hover
+    .badge.info,
+    .badge.danger
+      text-decoration none
   .row
     display flex
   .preview-image
