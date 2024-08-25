@@ -105,6 +105,7 @@ export default {
           isPersistentItem: true,
           team: response.team
         }, { root: true })
+        context.commit('triggerSpaceDetailsVisible', null, { root: true })
       } catch (error) {
         console.error('🚒 joinTeam', error)
         context.commit('addNotification', {
