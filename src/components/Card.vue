@@ -411,7 +411,6 @@ const cardContentStyles = computed(() => {
   if (isAudioCard.value) {
     styles.width = '100%'
   }
-  styles.background = currentBackgroundColor.value
   return styles
 })
 const cardContentWrapStyles = computed(() => {
