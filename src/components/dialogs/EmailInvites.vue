@@ -15,11 +15,7 @@ const textareaWrapElement = ref(null)
 let sessionToken
 
 onMounted(() => {
-  store.subscribe((mutation, state) => {
-    if (mutation.type === 'updatePageSizes') {
-      updateDialogHeight()
-    }
-  })
+  window.addEventListener('resize', updateDialogHeight)
 })
 
 const emit = defineEmits(['updateCount'])

@@ -32,6 +32,7 @@ export default {
     parentIsPinned: Boolean
   },
   created () {
+    window.addEventListener('resize', this.updateResultsSectionHeight)
     this.$store.subscribe((mutation, state) => {
       const tagMutations = [
         'currentSpace/addTag',
@@ -41,9 +42,7 @@ export default {
         'currentSpace/deleteTagsFromAllRemovedCardsPermanent'
       ]
 
-      if (mutation.type === 'updatePageSizes') {
-        this.updateResultsSectionHeight()
-      } else if (mutation.type === 'currentSpace/removeTags') {
+      if (mutation.type === 'currentSpace/removeTags') {
         this.removeTag(mutation.payload)
       } else if (mutation.type === 'currentSpace/updateTagNameColor') {
         this.updateTagColor(mutation.payload)

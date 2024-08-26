@@ -38,12 +38,7 @@ export default {
     loading: Boolean
   },
   created () {
-    this.$store.subscribe((mutation, state) => {
-      if (mutation.type === 'updatePageSizes') {
-        this.updateDialogHeight()
-        this.updateResultsSectionHeight()
-      }
-    })
+    window.addEventListener('resize', this.updateHeights)
   },
   data () {
     return {
@@ -57,6 +52,10 @@ export default {
   methods: {
     changeSpace (space) {
       this.$store.dispatch('currentSpace/changeSpace', space)
+    },
+    updateHeights () {
+      this.updateDialogHeight()
+      this.updateResultsSectionHeight()
     },
     updateDialogHeight () {
       if (!this.visible) { return }

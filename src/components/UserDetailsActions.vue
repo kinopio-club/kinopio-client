@@ -16,10 +16,9 @@ const store = useStore()
 const dialogElement = ref(null)
 
 onMounted(() => {
+  window.addEventListener('resize', updateDialogHeight)
   store.subscribe(mutation => {
-    if (mutation.type === 'updatePageSizes') {
-      updateDialogHeight()
-    } else if (mutation.type === 'triggerCloseChildDialogs') {
+    if (mutation.type === 'triggerCloseChildDialogs') {
       closeDialogs()
     }
   })

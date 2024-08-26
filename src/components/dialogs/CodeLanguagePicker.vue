@@ -13,11 +13,7 @@ const placeholder = 'Search Languages'
 
 onMounted(() => {
   updateDialogHeight()
-  store.subscribe((mutation, state) => {
-    if (mutation.type === 'updatePageSizes') {
-      updateDialogHeight()
-    }
-  })
+  window.addEventListener('resize', updateDialogHeight)
 })
 
 const state = reactive({

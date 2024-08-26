@@ -49,12 +49,7 @@ export default {
     visible: Boolean
   },
   created () {
-    this.$store.subscribe((mutation, state) => {
-      if (mutation.type === 'updatePageSizes') {
-        this.updateDialogHeight()
-        this.updateResultsSectionHeight()
-      }
-    })
+    window.addEventListener('resize', this.updateHeights)
   },
   data () {
     return {
@@ -148,6 +143,10 @@ export default {
     clearAllFilters () {
       this.$store.dispatch('clearAllFilters')
       this.clearResultsFilter()
+    },
+    updateHeights () {
+      this.updateDialogHeight()
+      this.updateResultsSectionHeight()
     },
     updateDialogHeight () {
       if (!this.visible) { return }

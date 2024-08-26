@@ -17,10 +17,10 @@ const dialogElement = ref(null)
 const resultsElement = ref(null)
 
 onMounted(() => {
+  window.addEventListener('resize', updateHeights)
+
   store.subscribe((mutation, state) => {
-    if (mutation.type === 'updatePageSizes') {
-      updateHeights()
-    } else if (mutation.type === 'triggerPickerNavigationKey') {
+    if (mutation.type === 'triggerPickerNavigationKey') {
       if (!props.visible) { return }
       const key = mutation.payload
       triggerPickerNavigationKey(key)
