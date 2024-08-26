@@ -4,6 +4,7 @@ import { useStore } from 'vuex'
 
 import User from '@/components/User.vue'
 import utils from '@/utils.js'
+import TeamLabel from '@/components/TeamLabel.vue'
 
 import uniqBy from 'lodash-es/uniqBy'
 import last from 'lodash-es/last'
@@ -49,10 +50,7 @@ const isActive = computed(() => {
 
 // team
 
-const team = computed(() => currentSpace.value.team)
-const teamLabel = computed(() => {
-  return team.value.name
-})
+const team = computed(() => store.getters['teams/spaceTeam'](currentSpace.value))
 
 // users
 
@@ -85,24 +83,25 @@ const spaceUsersLabel = computed(() => {
   const CollaboratorsString = utils.pluralize('Collaborator', condition)
   let string = `${spaceUsers.value.length} ${CollaboratorsString}`
   if (isCommenters.value) {
-    condition = commenters.value.length !== 1
-    const commentersString = utils.pluralize('Commenter', condition)
-    string = string + `, ${commenters.value.length} ${commentersString}`
+    string = string + ` + ${commenters.value.length}`
   }
   return string
+})
+const isTranslucentButton = computed(() => {
+  const shouldIncreaseUIContrast = store.state.currentUser.shouldIncreaseUIContrast
+  return props.isParentSpaceUsers && !shouldIncreaseUIContrast
 })
 
 </script>
 
 <template lang="pug">
-button.space-users-button(@click.stop="toggleSpaceUserListIsVisible" :class="{ 'header-button': props.isParentSpaceUsers, active: isActive, 'translucent-button': props.isParentSpaceUsers }" ref="buttonElement")
+button.space-users-button(@click.stop="toggleSpaceUserListIsVisible" :class="{ 'header-button': props.isParentSpaceUsers, active: isActive, 'translucent-button': isTranslucentButton }" ref="buttonElement")
   span.label(v-if="props.showLabel")
     template(v-if="team")
-      img.icon.team(src="@/assets/team.svg")
-      span {{ teamLabel }}
+      TeamLabel(:team="team")
     template(v-if="spaceUsers.length")
       User(:user="recentUser" :isClickable="false" :hideYouLabel="true" :isSmall="true" :shouldBounceIn="props.isParentSpaceUsers")
-      span {{ spaceUsersLabel }}
+    span {{ spaceUsersLabel }}
 
   span(v-else) {{ spaceUsers.length }}
 
@@ -110,13 +109,17 @@ button.space-users-button(@click.stop="toggleSpaceUserListIsVisible" :class="{ '
 
 <style lang="stylus">
 .space-users-button
+  max-width 100%
   .label
     > .user
         margin-top -1px
+    > span + .user
         margin-left 6px
       .anon-avatar
         top 3px
   &.header-button
     border-top-left-radius 0
     border-bottom-left-radius 0
+  .team-label
+    margin-right 6px
 </style>

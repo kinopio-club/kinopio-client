@@ -1,7 +1,9 @@
 <script setup>
-import { reactive, computed, onMounted, onBeforeUnmount, defineProps, defineEmits, watch, ref, nextTick, defineAsyncComponent } from 'vue'
+import { reactive, computed, onMounted, onBeforeUnmount, defineProps, defineEmits, watch, ref, nextTick } from 'vue'
 import { useStore } from 'vuex'
 
+import User from '@/components/User.vue'
+import SpaceList from '@/components/SpaceList.vue'
 import Loader from '@/components/Loader.vue'
 import words from '@/data/words.js'
 import newSpace from '@/data/new.json'
@@ -14,12 +16,6 @@ import fuzzy from '@/libs/fuzzy.js'
 import dayjs from 'dayjs'
 import sortBy from 'lodash-es/sortBy'
 
-const User = defineAsyncComponent({
-  loader: () => import('@/components/User.vue')
-})
-const SpaceList = defineAsyncComponent({
-  loader: () => import('@/components/SpaceList.vue')
-})
 const store = useStore()
 
 const dialogElement = ref(null)

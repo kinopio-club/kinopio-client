@@ -1,5 +1,6 @@
 <script setup>
 import utils from '@/utils.js'
+import consts from '@/consts.js'
 
 import { reactive, computed, onMounted, defineProps, defineEmits, watch, ref, nextTick } from 'vue'
 import { useStore } from 'vuex'
@@ -11,6 +12,8 @@ const props = defineProps({
 })
 
 const isPresentationMode = computed(() => store.state.isPresentationMode)
+
+// both
 
 const start = (event, action) => {
   if (utils.isMultiTouch(event)) { return }
@@ -39,7 +42,6 @@ const start = (event, action) => {
     store.commit('broadcast/updateStore', { updates, type: 'updateRemoteUserTiltingCards' })
   }
 }
-
 const remove = (action) => {
   let cardIds = [props.card.id]
   if (store.state.multipleCardsSelectedIds.length) {
@@ -52,22 +54,35 @@ const remove = (action) => {
   }
 }
 
+// tilt
+
+const tiltIsVisible = computed(() => {
+  const minCardWidth = consts.defaultCardWidth + 10
+  const cardIsWideEnough = props.card.width >= minCardWidth
+  return props.visible && cardIsWideEnough
+})
 const isTilting = computed(() => {
   const cardIds = store.state.currentUserIsTiltingCardIds
   if (!cardIds.length) { return }
   return cardIds.includes(props.card.id)
+})
+
+// resize
+
+const isComment = computed(() => store.getters['currentCards/isComment'](props.card))
+const resizeIsVisible = computed(() => {
+  return props.visible && !isComment.value
 })
 const isResizing = computed(() => {
   const cardIds = store.state.currentUserIsResizingCardIds
   if (!cardIds.length) { return }
   return cardIds.includes(props.card.id)
 })
-const isComment = computed(() => store.getters['currentCards/isComment'](props.card))
 </script>
 
 <template lang="pug">
 //- resize
-.right-resize.bottom-button-wrap(v-if="visible && !isComment")
+.right-resize.bottom-button-wrap(v-if="resizeIsVisible")
   .inline-button-wrap(
     @mousedown.left.stop="start($event, 'resize')"
     @touchstart.stop="start($event, 'resize')"
@@ -77,7 +92,7 @@ const isComment = computed(() => store.getters['currentCards/isComment'](props.c
     button.inline-button(tabindex="-1" :class="{hidden: isPresentationMode, active: isResizing}")
       img.icon(src="@/assets/resize-corner.svg")
 //- tilt
-.left-tilt.bottom-button-wrap(v-if="visible")
+.left-tilt.bottom-button-wrap(v-if="tiltIsVisible")
   .inline-button-wrap(
     @mousedown.left.stop="start($event, 'tilt')"
     @touchstart.stop="start($event, 'tilt')"

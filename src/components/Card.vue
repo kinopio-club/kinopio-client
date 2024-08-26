@@ -9,6 +9,7 @@ import Audio from '@/components/Audio.vue'
 import NameSegment from '@/components/NameSegment.vue'
 import UserLabelInline from '@/components/UserLabelInline.vue'
 import OtherCardPreview from '@/components/OtherCardPreview.vue'
+import TeamInvitePreview from '@/components/TeamInvitePreview.vue'
 import ItemConnectorButton from '@/components/ItemConnectorButton.vue'
 import consts from '@/consts.js'
 import postMessage from '@/postMessage.js'
@@ -268,8 +269,9 @@ const isAudioCard = computed(() => {
   return state.formats.audio
 })
 const cardHasMedia = computed(() => state.formats.image || state.formats.video || state.formats.audio)
+const urlsInName = computed(() => utils.urlsFromString(props.card.name))
 const updateMediaUrls = (urls) => {
-  urls = urls || utils.urlsFromString(props.card.name)
+  urls = urls || urlsInName.value
   state.formats.image = ''
   state.formats.video = ''
   state.formats.audio = ''
@@ -296,6 +298,13 @@ const updateIsPlayingAudio = (value) => {
   cancelLocking()
 }
 
+// team invite
+
+const teamInviteUrl = computed(() => {
+  const urls = urlsInName.value || []
+  return urls.find(url => utils.urlIsTeamInvite(url))
+})
+
 // other card
 
 const otherCardUrl = computed(() => utils.urlFromSpaceAndCard({ cardId: props.card.linkToCardId, spaceId: props.card.linkToSpaceId }))
@@ -305,8 +314,7 @@ const otherCard = computed(() => {
 })
 const otherCardIsVisible = computed(() => {
   if (!props.card.linkToCardId) { return }
-  const name = props.card.name
-  const urls = utils.urlsFromString(name) || []
+  const urls = urlsInName.value || []
   const value = urls.find((url) => {
     return url?.includes(props.card.linkToCardId)
   })
@@ -315,19 +323,18 @@ const otherCardIsVisible = computed(() => {
 
 // other space
 
+const otherSpaceSegment = computed(() => nameSegments.value.find(segment => segment.otherSpace))
 const otherSpace = computed(() => {
-  let isInviteLink, collaboratorKey, readOnlyKey
-  let space = nameSegments.value.find(segment => segment.otherSpace)
-  if (!space) { return }
-  return space.otherSpace
+  let nameSegment = otherSpaceSegment.value
+  return nameSegment?.otherSpace
 })
 const otherSpaceUrl = computed(() => {
-  let segment = nameSegments.value.find(segment => segment.otherSpace)
-  return segment?.name
+  let nameSegment = otherSpaceSegment.value
+  return nameSegment?.name
 })
 const spaceOrInviteUrl = computed(() => {
   const link = state.formats.link
-  if (utils.urlIsSpace(link) || utils.urlIsInvite(link)) {
+  if (utils.urlIsSpace(link) || utils.urlIsSpaceInvite(link)) {
     return link
   } else {
     return null
@@ -437,7 +444,8 @@ const cardClasses = computed(() => {
     'is-playing-audio': state.isPlayingAudio,
     'is-locked': isLocked.value,
     'has-url-preview': cardUrlPreviewIsVisible.value,
-    'is-dark': backgroundColorIsDark.value
+    'is-dark': backgroundColorIsDark.value,
+    'child-is-hovered': currentUserIsHoveringOverUrlButton.value && !currentCardIsBeingDragged.value
   }
   classes = addSizeClasses(classes)
   return classes
@@ -470,6 +478,10 @@ const updatePreviousResultItem = () => {
     store.commit('previousResultItem', props.card)
   }
 }
+const nameSegmentsStyles = computed(() => {
+  if (!isImageCard.value) { return }
+  return { background: currentBackgroundColor.value }
+})
 
 // position and dimensions
 
@@ -567,6 +579,9 @@ const connectedConnectionTypes = computed(() => store.getters['currentConnection
 
 // card buttons
 
+const currentUserIsHoveringOverUrlButton = computed(() => {
+  return store.state.currentUserIsHoveringOverUrlButtonCardId === props.card.id
+})
 const connectorIsVisible = computed(() => {
   const spaceIsOpen = store.state.currentSpace.privacy === 'open' && currentUserIsSignedIn.value
   let isVisible
@@ -579,6 +594,11 @@ const connectorIsVisible = computed(() => {
 })
 const isCardButtonsVisible = computed(() => {
   return isLocked.value || (cardButtonUrl.value && !isComment.value) || connectorIsVisible.value
+})
+const urlButtonIsVisible = computed(() => {
+  if (!cardButtonUrl.value) { return }
+  if (isComment.value) { return true }
+  return !props.card.urlPreviewIsVisible
 })
 const cardButtonUrl = computed(() => {
   const link = state.formats.link
@@ -616,7 +636,7 @@ const openUrl = async (event, url) => {
   if (store.state.cardsWereDragged) {
     return
   }
-  const isSpaceUrl = utils.urlIsSpace(url) && !utils.urlIsInvite(url)
+  const isSpaceUrl = utils.urlIsSpace(url) && !utils.urlIsSpaceInvite(url)
   if (isSpaceUrl) {
     changeSpace(url)
   } else if (event.type === 'touchend') {
@@ -818,6 +838,11 @@ const normalizedName = computed(() => {
   }
   newName = removeCommentBrackets(newName)
   return newName.trim()
+})
+const normalizedNameOrHiddenUrl = computed(() => {
+  const urlPreviewIsHidden = props.card.urlPreviewUrl && !props.card.urlPreviewIsVisible
+  if (urlPreviewIsHidden) { return true }
+  return normalizedName.value
 })
 const nameSegments = computed(() => {
   let segments = utils.cardNameSegments(normalizedName.value)
@@ -1477,6 +1502,12 @@ const handleMouseLeaveCheckbox = () => {
 const updateCurrentConnections = () => {
   state.currentConnections = store.getters['currentConnections/byItemId'](props.card.id)
 }
+const handleMouseEnterUrlButton = () => {
+  store.commit('currentUserIsHoveringOverUrlButtonCardId', props.card.id)
+}
+const handleMouseLeaveUrlButton = () => {
+  store.commit('currentUserIsHoveringOverUrlButtonCardId', '')
+}
 
 // sticky
 
@@ -1485,6 +1516,7 @@ const shouldNotStick = computed(() => {
   if (iframeIsVisible.value) { return true }
   if (store.state.codeLanguagePickerIsVisible) { return true }
   if (store.state.currentUserIsDraggingConnectionIdLabel) { return true }
+  if (currentUserIsHoveringOverUrlButton.value) { return true }
   const userIsConnecting = store.state.currentConnectionStartItemIds.length
   const currentUserIsPanning = store.state.currentUserIsPanningReady || store.state.currentUserIsPanning
   return userIsConnecting || store.state.currentUserIsDraggingBox || store.state.currentUserIsResizingBox || currentUserIsPanning || currentCardDetailsIsVisible.value || isRemoteCardDetailsVisible.value || isRemoteCardDragging.value || currentCardIsBeingDragged.value || store.state.currentUserIsResizingCard || store.state.currentUserIsTiltingCard || isLocked.value
@@ -1526,9 +1558,9 @@ const updateStickyStretchResistance = () => {
   } else if (size.l) {
     stretchResistance = 16
   } else if (size.m) {
-    stretchResistance = 12
+    stretchResistance = 14
   } else if (size.s) {
-    stretchResistance = 10
+    stretchResistance = 12
   }
   state.stickyStretchResistance = stretchResistance
 }
@@ -1667,12 +1699,15 @@ const updateOtherItems = () => {
   }
   if (!url) { return }
   const urlIsSpace = utils.urlIsSpace(url)
-  const urlIsInvite = utils.urlIsInvite(url)
+  const urlIsSpaceInvite = utils.urlIsSpaceInvite(url)
+  const urlIsTeamInvite = utils.urlIsTeamInvite(url)
   url = new URL(url)
-  if (urlIsInvite) {
+  if (urlIsSpaceInvite) {
     updateOtherInviteItems(url)
   } else if (urlIsSpace) {
     updateOtherSpaceOrCardItems(url)
+  } else if (urlIsTeamInvite) {
+    updateOtherTeamItems(url)
   }
 }
 const updateOtherSpaceOrCardItems = (url) => {
@@ -1688,16 +1723,21 @@ const updateOtherSpaceOrCardItems = (url) => {
 }
 const updateOtherInviteItems = (url) => {
   const { spaceId, collaboratorKey } = qs.decode(url.search)
-  const linkExists = spaceId === props.card.linkToSpaceId && collaboratorKey === props.card.linkToSpaceCollaboratorKey
-  if (linkExists) { return }
-  const update = {
-    id: props.card.id,
-    linkToSpaceId: spaceId,
-    linkToCardId: null,
-    linkToSpaceCollaboratorKey: collaboratorKey
+  const isCardLink = spaceId === props.card.linkToSpaceId && collaboratorKey === props.card.linkToSpaceCollaboratorKey
+  if (!isCardLink) {
+    const update = {
+      id: props.card.id,
+      linkToSpaceId: spaceId,
+      linkToCardId: null,
+      linkToSpaceCollaboratorKey: collaboratorKey
+    }
+    store.dispatch('currentCards/update', { card: update })
   }
-  store.dispatch('currentCards/update', { card: update })
   store.dispatch('currentSpace/updateOtherItems', { spaceId, collaboratorKey })
+}
+const updateOtherTeamItems = (url) => {
+  const teamFromUrl = utils.teamFromTeamInviteUrl(url)
+  store.dispatch('teams/updateOtherTeams', teamFromUrl)
 }
 
 // utils
@@ -1804,6 +1844,11 @@ article.card-wrap#card(
           img.icon.view(src="@/assets/comment.svg")
           //- User
           UserLabelInline(:user="createdByUser" :shouldHideName="true")
+          //- Url →
+          a.url-wrap(v-if="urlButtonIsVisible" :href="cardButtonUrl" @mouseup.exact.prevent="closeAllDialogs" @click.stop="openUrl($event, cardButtonUrl)" @touchend.prevent="openUrl($event, cardButtonUrl)" target="_blank" @mouseenter="handleMouseEnterUrlButton" @mouseleave="handleMouseLeaveUrlButton")
+            .url.inline-button-wrap
+              button.inline-button(:style="{background: currentBackgroundColor}" :class="{'is-light-in-dark-theme': isLightInDarkTheme, 'is-dark-in-light-theme': isDarkInLightTheme}" tabindex="-1")
+                img.icon.visit.arrow-icon(src="@/assets/visit.svg")
 
       //- Not Comment
       .card-content(v-if="!isComment" :style="cardContentStyles")
@@ -1816,11 +1861,15 @@ article.card-wrap#card(
             label(:class="{active: isChecked, disabled: !canEditSpace}")
               input(name="checkbox" type="checkbox" v-model="checkboxState")
           //- Name
-          p.name.name-segments(v-if="normalizedName" :style="{background: currentBackgroundColor}" :class="{'is-checked': isChecked, 'has-checkbox': hasCheckbox, 'badge badge-status': isImageCard && hasTextSegments}")
+          p.name.name-segments(v-if="normalizedNameOrHiddenUrl" :style="nameSegmentsStyles" :class="{'is-checked': isChecked, 'has-checkbox': hasCheckbox, 'badge badge-status': isImageCard && hasTextSegments}")
             template(v-for="segment in nameSegments")
               NameSegment(:segment="segment" @showTagDetailsIsVisible="showTagDetailsIsVisible" :parentCardId="card.id" :backgroundColorIsDark="currentBackgroundColorIsDark" :headerFontId="card.headerFontId" :headerFontSize="card.headerFontSize")
             Loader(:visible="isLoadingUrlPreview")
-
+            //- Url →
+            a.url-wrap(v-if="urlButtonIsVisible" :href="cardButtonUrl" @mouseup.exact.prevent="closeAllDialogs" @click.stop="openUrl($event, cardButtonUrl)" @touchend.prevent="openUrl($event, cardButtonUrl)" target="_blank" @mouseenter="handleMouseEnterUrlButton" @mouseleave="handleMouseLeaveUrlButton")
+              .url.inline-button-wrap
+                button.inline-button(:style="{background: currentBackgroundColor}" :class="{'is-light-in-dark-theme': isLightInDarkTheme, 'is-dark-in-light-theme': isDarkInLightTheme}" tabindex="-1")
+                  img.icon.visit.arrow-icon(src="@/assets/visit.svg")
       //- Right buttons
       span.card-buttons-wrap(v-if="isCardButtonsVisible")
         //- Lock
@@ -1831,11 +1880,6 @@ article.card-wrap#card(
             button.inline-button(tabindex="-1" :style="{background: currentBackgroundColor}")
               img.icon.lock-icon(src="@/assets/lock.svg")
         template(v-else)
-          //- Url →
-          a.url-wrap(v-if="cardButtonUrl && !isComment" :href="cardButtonUrl" @mouseup.exact.prevent="closeAllDialogs" @click.stop="openUrl($event, cardButtonUrl)" @touchend.prevent="openUrl($event, cardButtonUrl)" :class="{'connector-is-visible': connectorIsVisible}" target="_blank")
-            .url.inline-button-wrap
-              button.inline-button(:style="{background: currentBackgroundColor}" :class="{'is-light-in-dark-theme': isLightInDarkTheme, 'is-dark-in-light-theme': isDarkInLightTheme}" tabindex="-1")
-                img.icon.visit.arrow-icon(src="@/assets/visit.svg")
           //- connector
           ItemConnectorButton(
             :visible="connectorIsVisible"
@@ -1851,7 +1895,7 @@ article.card-wrap#card(
             :parentDetailsIsVisible="currentCardDetailsIsVisible"
             @shouldRenderParent="updateShouldRenderParent"
           )
-    .url-preview-wrap(v-if="cardUrlPreviewIsVisible || otherCardIsVisible || otherSpaceIsVisible" :class="{'is-image-card': isImageCard}")
+    .url-preview-wrap(v-if="cardUrlPreviewIsVisible || teamInviteUrl || otherCardIsVisible || otherSpaceIsVisible" :class="{'is-image-card': isImageCard}")
       template(v-if="cardUrlPreviewIsVisible")
         UrlPreviewCard(
           :visible="true"
@@ -1864,13 +1908,18 @@ article.card-wrap#card(
           @retryUrlPreview="retryUrlPreview"
           :backgroundColor="backgroundColor"
         )
-      template(v-if="otherCardIsVisible")
+      template(v-if="teamInviteUrl")
+        TeamInvitePreview(
+          :card="card"
+          :teamInviteUrl="teamInviteUrl"
+          :selectedColor="selectedColor"
+        )
+      template(v-else-if="otherCardIsVisible")
         OtherCardPreview(
           :otherCard="otherCard"
           :url="otherCardUrl"
           :parentCardId="card.id"
           :shouldCloseAllDialogs="true"
-          :isSelected="isSelectedOrDragging"
           :selectedColor="selectedColor"
         )
       template(v-else-if="otherSpaceIsVisible")
@@ -1880,6 +1929,7 @@ article.card-wrap#card(
           :card="card"
           :isSelected="isSelectedOrDragging"
           :selectedColor="selectedColor"
+          :isImageCard="isImageCard"
         )
     //- Upload Progress
     .uploading-container(v-if="cardPendingUpload")
@@ -1956,6 +2006,8 @@ article.card-wrap
     &:active,
     &.active
       box-shadow var(--active-shadow)
+    &.child-is-hovered
+      box-shadow none
     &.is-dark
       .name
         color var(--primary-on-dark-background)
@@ -1977,7 +2029,7 @@ article.card-wrap
         height 18px
         min-height 17px
         img
-          top 6px
+          vertical-align 4px
 
     .card-content-wrap
       display flex
@@ -1986,7 +2038,9 @@ article.card-wrap
 
     .card-content
       min-width 28px
-      margin-right 8px
+      margin-right 6px
+      border-radius var(--entity-radius)
+      max-width 100%
     .card-comment
       margin-right 8px
     .card-buttons-wrap
@@ -2053,6 +2107,19 @@ article.card-wrap
       cursor cell
       button
         z-index 1
+
+    .url-wrap
+      padding 0
+      margin 0
+      padding-left 5px
+      vertical-align -1px
+      .url
+        display inline
+        cursor pointer
+        padding-left 0
+        button
+          cursor pointer
+
     .checkbox-wrap
       &:hover
         label
@@ -2082,20 +2149,6 @@ article.card-wrap
       position absolute
       left 5px
       top 3.5px
-    .url
-      cursor pointer
-      padding-right 0
-      button
-        cursor pointer
-        span
-          top -3px
-          position relative
-
-    .url-wrap
-      max-height 28px
-      padding-right 8px
-      &.connector-is-visible
-        padding-right 0
 
     .is-light-in-dark-theme
       border-color var(--primary-on-light-background)

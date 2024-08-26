@@ -503,6 +503,7 @@ button,
 input[type="color"],
 select,
 label // used for checkbox buttons
+  flex-shrink 0
   touch-action manipulation
   text-align left
   padding 5px 9px
@@ -514,6 +515,7 @@ label // used for checkbox buttons
   cursor pointer
   user-select none
   color var(--primary)
+  max-width 100%
   .down-arrow
     padding-left 4px
     vertical-align 1px
@@ -827,6 +829,7 @@ dialog
       height 14px
       width 14px
       border-radius var(--small-entity-radius)
+
   a
     text-decoration-thickness 1px
     color var(--text-link)
@@ -950,7 +953,6 @@ button
 .icon
   user-drag none
   -webkit-user-drag none
-  pointer-events none
 
 .icon + span,
 .icon + .icon
@@ -966,13 +968,12 @@ button
 .button-wrap
   display inline-block
   position relative
+  flex-shrink 0
   dialog
     top calc(100% - 8px)
 
 .icon.team
   height 11px
-.icon.team + span
-  margin-left 4px
 
 .icon.sunglasses
   height 12px
@@ -1025,6 +1026,10 @@ button
 
 .icon.json-canvas
   width 10px
+
+.icon.mail
+  width 11px
+  vertical-align 1px
 
 label,
 li
@@ -1219,6 +1224,20 @@ code
     vertical-align 0
     margin-right 5px
     border-radius var(--small-entity-radius)
+  &.badge-card-button
+    box-shadow none
+    text-decoration none
+    &:hover
+      background var(--tertiary-hover-background)
+      span
+        text-decoration underline
+    &.active
+      box-shadow inset 0 3px 3px var(--inset-heavy-shadow)
+    &.is-being-dragged
+      box-shadow none
+      text-decoration none
+      span
+        text-decoration none
   &.dot
     min-width initial
     min-height initial

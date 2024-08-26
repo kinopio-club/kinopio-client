@@ -38,7 +38,7 @@ const changeSpace = () => {
 
 // space info
 
-const isInvite = computed(() => utils.urlIsInvite(props.url))
+const isInvite = computed(() => utils.urlIsSpaceInvite(props.url))
 const isRemoved = computed(() => {
   const space = props.otherSpace
   if (!space) { return }
@@ -163,14 +163,8 @@ const previewImageHover = (value) => {
     display inline-block
     margin-right 6px
 
-  .user-label-inline
-    width 18px
-    height 17px
-    min-width initial
-    min-height initial
-    vertical-align -2px
   .anon-avatar
-    top 6px !important
+    vertical-align 2px !important
 
   .content-buttons
     z-index 1

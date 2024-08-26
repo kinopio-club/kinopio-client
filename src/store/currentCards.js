@@ -716,13 +716,13 @@ const currentCards = {
             card.y = prevCard.y + (prevCardRect.height * zoom) + spaceBetweenCards
             prevCard = card
           }
-          card = utils.cardElementDimensions(card)
+          const rect = utils.cardRectFromId(card.id)
           card = {
             name: card.name,
             id: card.id,
             y: card.y,
-            width: card.width,
-            height: card.height
+            width: rect.width,
+            height: rect.height
           }
           context.dispatch('update', { card })
         })
@@ -1071,14 +1071,16 @@ const currentCards = {
       return users
     },
     users: (state, getters, rootState, rootGetters) => {
-      return getters.userIds.map(id => {
+      let users = getters.userIds.map(id => {
         let user = rootGetters['currentSpace/userById'](id)
         return user
       })
+      users = users.filter(user => Boolean(user))
+      return users
     },
     teamUsersWhoAddedCards: (state, getters, rootState, rootGetters) => {
-      if (!rootState.currentSpace.team) { return }
-      const teamUsers = rootState.currentSpace.team?.users
+      const spaceTeam = rootGetters['teams/spaceTeam']()
+      const teamUsers = spaceTeam?.users
       if (!teamUsers) { return }
       let users = getters.users
       users = users.filter(user => {
@@ -1100,8 +1102,9 @@ const currentCards = {
         return !member
       })
       // remove team users
-      if (rootState.currentSpace.team) {
-        const teamUsers = rootState.currentSpace.team?.users
+      const spaceTeam = rootGetters['teams/spaceTeam']()
+      if (spaceTeam) {
+        const teamUsers = spaceTeam?.users
         if (!teamUsers) { return }
         items = items.filter(item => {
           const teamUser = teamUsers.find(teamUser => teamUser.id === item.id)

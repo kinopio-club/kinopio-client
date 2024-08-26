@@ -149,7 +149,7 @@ const router = createRouter({
       path: '/:space',
       component: Space,
       beforeEnter: (to, from, next) => {
-        pageMeta.space()
+        pageMeta.space({})
         const path = window.location.pathname
         const urlParams = new URLSearchParams(window.location.search)
         if (urlParams.get('present')) {
@@ -197,6 +197,19 @@ const router = createRouter({
         next()
       }
     }, {
+      path: '/team/invite',
+      name: 'teamInvite',
+      component: Space,
+      beforeEnter: (to, from, next) => {
+        const urlParams = new URLSearchParams(window.location.search)
+        const teamId = urlParams.get('teamId')
+        const collaboratorKey = urlParams.get('collaboratorKey')
+        pageMeta.team({ teamId, isTeamInvite: true })
+        store.commit('teamToJoinOnLoad', { teamId, collaboratorKey })
+        store.commit('notifyIsJoiningTeam', true)
+        next()
+      }
+    }, {
       path: '/invite',
       name: 'invite',
       component: Space,
@@ -212,9 +225,8 @@ const router = createRouter({
         const collaboratorKey = urlParams.get('collaboratorKey')
         const readOnlyKey = urlParams.get('readOnlyKey')
         const isPresentationMode = urlParams.get('present') || false
-        const isInvite = true
         store.commit('disableViewportOptimizations', urlParams.get('disableViewportOptimizations'))
-        pageMeta.space(spaceId, isInvite)
+        pageMeta.space({ spaceId, isSpaceInvite: true })
         store.dispatch('currentUser/init')
         store.commit('isLoadingSpace', true)
         if (!spaceId) {

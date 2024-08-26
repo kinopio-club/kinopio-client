@@ -7,12 +7,25 @@ import UserLabelInline from '@/components/UserLabelInline.vue'
 import utils from '@/utils.js'
 const store = useStore()
 
+onMounted(() => {
+  window.addEventListener('touchend', disableIsActive)
+  window.addEventListener('mouseup', disableIsActive)
+})
+watch(() => store.state.preventDraggedCardFromShowingDetails, (value, prevValue) => {
+  disableIsActive()
+})
+
 const props = defineProps({
   otherSpace: Object,
   url: String,
   card: Object,
   isSelected: Boolean,
-  selectedColor: String
+  selectedColor: String,
+  isImageCard: Boolean
+})
+
+const state = reactive({
+  isActive: null
 })
 
 // space info
@@ -31,7 +44,7 @@ const isRemoved = computed(() => {
   if (!space) { return }
   return space.isRemoved
 })
-const urlIsInvite = computed(() => utils.urlIsInvite(props.url))
+const urlIsSpaceInvite = computed(() => utils.urlIsSpaceInvite(props.url))
 
 // colors
 
@@ -51,7 +64,11 @@ const textColorClasses = computed(() => {
   if (isThemeDark.value) {
     color = background.value || defaultColor
   }
-  return utils.textColorClasses({ backgroundColor: color })
+  let classes = utils.textColorClasses({ backgroundColor: color })
+  if (props.isImageCard) {
+    classes.push('is-image-card')
+  }
+  return classes
 })
 
 // preivew image
@@ -60,6 +77,44 @@ const shouldShowPreviewImage = computed(() => props.card.shouldShowOtherSpacePre
 const previewImage = computed(() => props.otherSpace?.previewImage)
 const previewImageIsVisible = computed(() => shouldShowPreviewImage.value && previewImage.value)
 
+// url
+
+const disableIsActive = () => {
+  state.isActive = false
+}
+const enableIsActive = () => {
+  state.isActive = true
+}
+const handleMouseEnterUrlButton = () => {
+  store.commit('currentUserIsHoveringOverUrlButtonCardId', props.card.id)
+}
+const handleMouseLeaveUrlButton = () => {
+  if (store.state.currentUserIsDraggingCard) { return }
+  store.commit('currentUserIsHoveringOverUrlButtonCardId', '')
+}
+const url = computed(() => utils.urlFromSpaceAndCard({ spaceId: props.otherSpace?.url || props.otherSpace?.id }))
+const openUrl = async (event) => {
+  const prevIsActive = state.isActive
+  state.isActive = false
+  if (store.state.currentUserIsDraggingConnectionIdLabel) { return }
+  if (store.state.preventDraggedCardFromShowingDetails) { return }
+  if (event) {
+    if (event.metaKey || event.ctrlKey) {
+      window.open(url.value) // opens url in new tab
+      store.commit('preventDraggedCardFromShowingDetails', true)
+      return
+    } else {
+      event.preventDefault()
+      event.stopPropagation()
+    }
+  }
+  store.dispatch('closeAllDialogs')
+  if (store.state.cardsWereDragged) {
+    return
+  }
+  store.dispatch('currentSpace/changeSpace', props.otherSpace)
+  store.dispatch('closeAllDialogs')
+}
 </script>
 
 <template lang="pug">
@@ -67,9 +122,22 @@ const previewImageIsVisible = computed(() => shouldShowPreviewImage.value && pre
   //- preview image
   .preview-image-wrap(v-if="previewImageIsVisible")
     img.preview-image(:src="previewImage" :class="{selected: props.isSelected}" ref="image")
-  .badge.link-badge(:class="{ 'preview-image-is-visible': previewImageIsVisible }" :style="{ background: background }")
+  a.badge.link-badge.button-badge.badge-card-button(
+    :title="url"
+    :class="{ 'preview-image-is-visible': previewImageIsVisible, active: state.isActive, 'is-being-dragged': store.state.preventDraggedCardFromShowingDetails }"
+    :style="{ background: background }"
+    target="_blank"
+    :href="url"
+    @mouseenter="handleMouseEnterUrlButton"
+    @mouseleave="handleMouseLeaveUrlButton"
+    @mousedown.left="enableIsActive"
+    @touchstart="enableIsActive"
+    @click.stop.prevent
+    @mouseup.left="openUrl($event)"
+    @touchend.prevent="openUrl($event)"
+  )
     //- badges
-    .badge.info.inline-badge(v-if="urlIsInvite")
+    .badge.info.inline-badge(v-if="urlIsSpaceInvite")
       span Invite
     .badge.danger.inline-badge(v-if="isRemoved")
       img.icon(src="@/assets/remove.svg")
@@ -89,6 +157,11 @@ const previewImageIsVisible = computed(() => shouldShowPreviewImage.value && pre
 .other-space-preview-card
   text-decoration none
   margin 0
+  &:hover
+    .badge.info,
+    .badge.danger
+      span
+        text-decoration none
   > .badge
     display block
     margin 0
@@ -101,9 +174,8 @@ const previewImageIsVisible = computed(() => shouldShowPreviewImage.value && pre
     border-top-left-radius 0
     border-top-right-radius 0
     padding var(--subsection-padding)
-
-  .anon-avatar
-    top 6px !important
+    .url-wrap
+      top 6px
 
   // from UrlPreviewCard
   .preview-image-wrap
@@ -121,6 +193,15 @@ const previewImageIsVisible = computed(() => shouldShowPreviewImage.value && pre
   .space-name
     overflow-wrap break-word
 
+  // from UrlPreviewCard
+  &.is-image-card
+    .preview-image
+      border-radius 0
+    .badge-card-button
+      border-top-left-radius 0
+      border-top-right-radius 0
+      padding var(--subsection-padding)
+
   &.is-background-light
     .space-name span
       color var(--primary-on-light-background)
@@ -132,4 +213,9 @@ const previewImageIsVisible = computed(() => shouldShowPreviewImage.value && pre
     .icon
       filter invert()
 
+  .badge.button-badge
+    &.preview-image-is-visible,
+    &.iframe-info
+      border-top-left-radius 0
+      border-top-right-radius 0
 </style>

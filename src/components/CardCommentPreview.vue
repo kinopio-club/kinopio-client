@@ -79,6 +79,7 @@ const urlPreviewImage = computed(() => {
   pointer-events none
   max-height 400px
   overflow hidden
+  box-shadow var(--hover-shadow)
   .row
     margin-top 1px
     margin-bottom 6px

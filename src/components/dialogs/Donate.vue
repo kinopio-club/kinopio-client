@@ -93,7 +93,7 @@ export default {
       }
     },
     currentUser () { return this.$store.state.currentUser },
-    currentUserIsUpgraded () { return this.$store.state.currentUser.isUpgraded }
+    currentUserIsUpgraded () { return this.$store.getters['currentUser/isUpgradedOrOnTeam'] }
   },
   methods: {
     triggerUpgradeUserIsVisible () {

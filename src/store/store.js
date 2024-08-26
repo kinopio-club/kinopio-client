@@ -3,7 +3,6 @@ import consts from '@/consts.js'
 import cache from '@/cache.js'
 import postMessage from '@/postMessage.js'
 // store modules
-import themes from '@/store/themes.js'
 import api from '@/store/api.js'
 import broadcast from '@/store/broadcast.js'
 import history from '@/store/history.js'
@@ -14,6 +13,8 @@ import currentConnections from '@/store/currentConnections.js'
 import currentBoxes from '@/store/currentBoxes.js'
 import upload from '@/store/upload.js'
 import userNotifications from '@/store/userNotifications.js'
+import teams from '@/store/teams.js'
+import themes from '@/store/themes.js'
 // store plugins
 import websocket from '@/store/plugins/websocket.js'
 
@@ -60,6 +61,7 @@ const store = createStore({
     prevSpaceIdInSession: '',
     prevSpaceIdInSessionPagePosition: {},
     outsideSpaceBackgroundColor: '',
+    teamsIsVisible: false,
 
     // zoom and scroll
     spaceZoomPercent: 100,
@@ -92,6 +94,7 @@ const store = createStore({
     currentUserIsHoveringOverBoxId: '',
     currentUserIsHoveringOverCheckboxCardId: '',
     currentUserIsHoveringOverConnectorItemId: '',
+    currentUserIsHoveringOverUrlButtonCardId: '',
     currentUserIsPanningReady: false,
     currentUserIsPanning: false,
     currentUserToolbar: 'card', // card, box
@@ -206,6 +209,7 @@ const store = createStore({
     isJoiningSpace: false, // broadcast
     isLoadingOtherItems: false,
     spaceUrlToLoad: '',
+    teamToJoinOnLoad: null, // { teamId, collaboratorKey }
     spaceReadOnlyKey: {}, //  { spaceId, key }
     spaceCollaboratorKeys: [],
     remotePendingUploads: [],
@@ -229,6 +233,7 @@ const store = createStore({
     notifySpaceIsRemoved: false,
     notifyCurrentSpaceIsNowRemoved: false,
     notifySignUpToEditSpace: false,
+    notifySignUpToJoinTeam: false,
     notifyCardsCreatedIsNearLimit: false,
     notifyCardsCreatedIsOverLimit: false,
     notifyKinopioUpdatesAreAvailable: false,
@@ -238,6 +243,7 @@ const store = createStore({
     notifySpaceIsHidden: false,
     notifyThanksForDonating: false,
     notifyThanksForUpgrading: false,
+    notifyIsJoiningTeam: false,
 
     // notifications with position
     notificationsWithPosition: [],
@@ -350,6 +356,7 @@ const store = createStore({
       state.offlineIsVisible = false
       state.spaceUserListIsVisible = false
       state.importArenaChannelIsVisible = false
+      state.teamsIsVisible = false
     },
     isOnline: (state, value) => {
       utils.typeCheck({ value, type: 'boolean' })
@@ -524,6 +531,10 @@ const store = createStore({
       utils.typeCheck({ value, type: 'string' })
       state.outsideSpaceBackgroundColor = value
     },
+    teamsIsVisible: (state, value) => {
+      utils.typeCheck({ value, type: 'boolean' })
+      state.teamsIsVisible = value
+    },
     searchIsVisible: (state, value) => {
       utils.typeCheck({ value, type: 'boolean' })
       state.searchIsVisible = value
@@ -663,6 +674,10 @@ const store = createStore({
     currentUserIsHoveringOverCheckboxCardId: (state, cardId) => {
       utils.typeCheck({ value: cardId, type: 'string' })
       state.currentUserIsHoveringOverCheckboxCardId = cardId
+    },
+    currentUserIsHoveringOverUrlButtonCardId: (state, cardId) => {
+      utils.typeCheck({ value: cardId, type: 'string' })
+      state.currentUserIsHoveringOverUrlButtonCardId = cardId
     },
     cardDetailsIsVisibleForCardId: (state, cardId) => {
       utils.typeCheck({ value: cardId, type: 'string' })
@@ -1374,6 +1389,10 @@ const store = createStore({
       utils.typeCheck({ value, type: 'object' })
       state.spaceReadOnlyKey = value
     },
+    teamToJoinOnLoad: (state, value) => {
+      utils.typeCheck({ value, type: 'object' })
+      state.teamToJoinOnLoad = value
+    },
 
     // Notifications
 
@@ -1398,10 +1417,21 @@ const store = createStore({
       state.notifyConnectionError = false
       state.notifyServerCouldNotSave = false
       state.notifySignUpToEditSpace = false
+      state.notifySignUpToJoinTeam = false
       state.notifyCardsCreatedIsNearLimit = false
       state.notifyCardsCreatedIsOverLimit = false
       state.notifyMoveOrCopyToSpace = false
       state.notificationsWithPosition = []
+    },
+    clearAllInteractingWithAndSelected: (state) => {
+      state.currentUserIsDraggingCard = false
+      state.currentUserIsDrawingConnection = false
+      state.currentUserIsResizingCard = false
+      state.currentUserIsResizingBox = false
+      state.currentUserIsDraggingBox = false
+      state.multipleCardsSelectedIds = []
+      state.multipleConnectionsSelectedIds = []
+      state.multipleBoxesSelectedIds = []
     },
     notifySpaceNotFound: (state, value) => {
       utils.typeCheck({ value, type: 'boolean' })
@@ -1443,6 +1473,10 @@ const store = createStore({
       utils.typeCheck({ value, type: 'boolean' })
       state.notifySignUpToEditSpace = value
     },
+    notifySignUpToJoinTeam: (state, value) => {
+      utils.typeCheck({ value, type: 'boolean' })
+      state.notifySignUpToJoinTeam = value
+    },
     notifyCardsCreatedIsNearLimit: (state, value) => {
       utils.typeCheck({ value, type: 'boolean' })
       state.notifyCardsCreatedIsNearLimit = value
@@ -1481,6 +1515,10 @@ const store = createStore({
     notifyThanksForUpgrading: (state, value) => {
       utils.typeCheck({ value, type: 'boolean' })
       state.notifyThanksForUpgrading = value
+    },
+    notifyIsJoiningTeam: (state, value) => {
+      utils.typeCheck({ value, type: 'boolean' })
+      state.notifyIsJoiningTeam = value
     },
 
     // Notifications with Position
@@ -1985,7 +2023,6 @@ const store = createStore({
   },
 
   modules: {
-    themes,
     api,
     broadcast,
     history,
@@ -1995,7 +2032,9 @@ const store = createStore({
     currentConnections,
     currentBoxes,
     upload,
-    userNotifications
+    userNotifications,
+    teams,
+    themes
   },
   plugins: [websocket()]
 })

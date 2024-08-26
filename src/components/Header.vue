@@ -38,6 +38,8 @@ import UserSettings from '@/components/dialogs/UserSettings.vue'
 import SpaceUserList from '@/components/dialogs/SpaceUserList.vue'
 import CommentButton from '@/components/CommentButton.vue'
 import FavoriteSpaceButton from '@/components/FavoriteSpaceButton.vue'
+import TeamLabel from '@/components/TeamLabel.vue'
+import Teams from '@/components/dialogs/Teams.vue'
 import consts from '@/consts.js'
 
 import sortBy from 'lodash-es/sortBy'
@@ -164,7 +166,7 @@ const isSpace = computed(() => {
 })
 const userCanEditSpace = computed(() => store.getters['currentUser/canEditSpace']())
 const userCanOnlyComment = computed(() => store.getters['currentUser/canOnlyComment']())
-const userIsUpgraded = computed(() => store.state.currentUser.isUpgraded)
+const isUpgradedOrOnTeam = computed(() => store.getters['currentUser/isUpgradedOrOnTeam'])
 const isOnline = computed(() => store.state.isOnline)
 const currentUserIsSignedIn = computed(() => store.getters['currentUser/isSignedIn'])
 const shouldIncreaseUIContrast = computed(() => store.state.currentUser.shouldIncreaseUIContrast)
@@ -191,7 +193,7 @@ const currentSpaceName = computed(() => {
     return `Space ${id}`
   }
 })
-const spaceTeam = computed(() => currentSpace.value.team)
+const spaceTeam = computed(() => store.getters['teams/spaceTeam']())
 const spaceHasStatus = computed(() => {
   if (!isOnline.value) { return }
   return store.state.isLoadingSpace || store.state.isJoiningSpace || store.state.isReconnectingToBroadcast || store.state.isLoadingOtherItems
@@ -585,7 +587,7 @@ header(v-if="isVisible" :style="state.position" :class="{'fade-out': isFadingOut
         .logo
           .logo-image
         MoonPhase(v-if="currentSpace.moonPhase" :moonPhase="currentSpace.moonPhase")
-        img.icon.team(src="@/assets/team.svg" v-if="spaceTeam")
+        TeamLabel(:team="spaceTeam")
         span {{currentSpaceName}}{{' '}}
         img.icon.visit(src="@/assets/visit.svg")
         //- embed badge
@@ -646,6 +648,7 @@ header(v-if="isVisible" :style="state.position" :class="{'fade-out': isFadingOut
         UserSettings
         UpdatePassword
         SpaceUserList
+        Teams
         //- Share
         .button-wrap
           button(@click.left.stop="toggleShareIsVisible" :class="{active: state.shareIsVisible, 'translucent-button': !shouldIncreaseUIContrast}")
@@ -670,7 +673,7 @@ header(v-if="isVisible" :style="state.position" :class="{'fade-out': isFadingOut
             //- Current Space Name and Info
             .button-wrap.space-name-button-wrap(:class="{ 'back-button-is-visible': backButtonIsVisible }")
               button.space-name-button(@click.left.stop="toggleSpaceDetailsIsVisible" :class="{ active: state.spaceDetailsIsVisible, 'translucent-button': !shouldIncreaseUIContrast }")
-                img.icon.team(src="@/assets/team.svg" v-if="spaceTeam")
+                TeamLabel(:team="spaceTeam")
                 span(v-if="currentSpaceIsInbox")
                   img.icon.inbox-icon(src="@/assets/inbox.svg")
                 span(v-if="currentSpaceIsTemplate")
@@ -722,7 +725,7 @@ header(v-if="isVisible" :style="state.position" :class="{'fade-out': isFadingOut
       .left
       .right
         //- Pricing
-        .button-wrap.pricing-button-wrap(v-if="!userIsUpgraded")
+        .button-wrap.pricing-button-wrap(v-if="!isUpgradedOrOnTeam")
           button(@click.left.stop="togglePricingIsVisible" :class="{active: pricingIsVisible, 'translucent-button': !shouldIncreaseUIContrast}")
             span Pricing
           Pricing(:visible="pricingIsVisible")
@@ -733,7 +736,7 @@ header(v-if="isVisible" :style="state.position" :class="{'fade-out': isFadingOut
             Loader(:visible="state.loadingSignUpOrIn")
           SignUpOrIn(:visible="state.signUpOrInIsVisible" @loading="setLoadingSignUpOrIn")
         //- Upgrade
-        .button-wrap(v-if="!userIsUpgraded && isOnline && currentUserIsSignedIn")
+        .button-wrap(v-if="!isUpgradedOrOnTeam && isOnline && currentUserIsSignedIn")
           button(@click.left.stop="toggleUpgradeUserIsVisible" :class="{active: state.upgradeUserIsVisible, 'translucent-button': !shouldIncreaseUIContrast}")
             span Upgrade
           UpgradeUser(:visible="state.upgradeUserIsVisible" @closeDialog="closeAllDialogs")

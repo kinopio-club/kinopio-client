@@ -6,6 +6,7 @@ import MoonPhase from '@/components/MoonPhase.vue'
 import moonphase from '@/moonphase.js'
 import UserList from '@/components/UserList.vue'
 import utils from '@/utils.js'
+import TeamList from '@/components/TeamList.vue'
 
 import uniqBy from 'lodash-es/uniqBy'
 
@@ -35,7 +36,8 @@ watch(() => props.visible, (value, prevValue) => {
 })
 
 const state = reactive({
-  moonPhase: {}
+  moonPhase: {},
+  dialogHeight: null
 })
 
 const updateDialogHeight = async () => {
@@ -56,8 +58,8 @@ const dialogSpaceFilterByTeam = computed(() => store.state.currentUser.dialogSpa
 // clear all
 
 const clearAllFilters = () => {
-  updateFilterByTeam(null)
   updateFilterByType(null)
+  updateTeamFilter({})
   updateUserFilter({})
   updateSortBy(null)
   store.dispatch('currentUser/update', { dialogSpaceFilterShowHidden: false })
@@ -67,16 +69,16 @@ const totalFiltersActive = computed(() => {
   if (dialogSpaceFilterByType.value) {
     count += 1
   }
-  if (dialogSpaceFilterByUser.value) {
-    count += Object.keys(dialogSpaceFilterByUser.value).length
-  }
   if (dialogSpaceFilterSortByDate.value === 'createdAt') {
     count += 1
   }
   if (dialogSpaceFilterShowHidden.value) {
     count += 1
   }
-  if (dialogSpaceFilterByTeam.value) {
+  if (utils.objectHasKeys(dialogSpaceFilterByTeam.value)) {
+    count += 1
+  }
+  if (utils.objectHasKeys(dialogSpaceFilterByUser.value)) {
     count += 1
   }
   return count
@@ -95,16 +97,6 @@ const showHiddenSpace = computed({
 const toggleShowHiddenSpace = () => {
   const value = !dialogSpaceFilterShowHidden.value
   store.dispatch('currentUser/update', { dialogSpaceFilterShowHidden: value })
-}
-
-// by team
-
-const team = computed(() => store.state.currentUser.team)
-const filterByTeamAll = computed(() => !dialogSpaceFilterByTeam.value)
-const filterByTeamTeam = computed(() => dialogSpaceFilterByTeam.value === 'team')
-const filterByTeamPersonal = computed(() => dialogSpaceFilterByTeam.value === 'personal')
-const updateFilterByTeam = (value) => {
-  store.dispatch('currentUser/update', { dialogSpaceFilterByTeam: value })
 }
 
 // by types
@@ -135,6 +127,22 @@ const updateSortBy = (value) => {
   store.dispatch('currentUser/update', { dialogSpaceFilterSortByDate: value })
 }
 
+// teams
+
+const teams = computed(() => {
+  return store.getters['teams/bySpaces'](props.spaces)
+})
+const filterByTeam = (event, team) => {
+  if (team.id === dialogSpaceFilterByTeam.value.id) {
+    updateTeamFilter({})
+  } else {
+    updateTeamFilter(team)
+  }
+}
+const updateTeamFilter = (value) => {
+  store.dispatch('currentUser/update', { dialogSpaceFilterByTeam: value })
+}
+
 // collaborators
 
 const spaceUsers = computed(() => {
@@ -158,7 +166,7 @@ const filterByUser = (event, user) => {
 </script>
 
 <template lang="pug">
-dialog.narrow.space-filters(v-if="props.visible" :open="props.visible" @click.left.stop ref="dialogElement")
+dialog.narrow.space-filters(v-if="props.visible" :open="props.visible" @click.left.stop ref="dialogElement" :style="{'max-height': state.dialogHeight + 'px'}")
   section
     p Space Filters
   section
@@ -168,16 +176,6 @@ dialog.narrow.space-filters(v-if="props.visible" :open="props.visible" @click.le
         img.icon.cancel(src="@/assets/add.svg")
         span Clear all
         span.badge.info.total-filters-active(v-if="totalFiltersActive") {{totalFiltersActive}}
-    //- show team
-    section.subsection(v-if="team")
-      p Filter by Team
-      .segmented-buttons
-        button(:class="{active: filterByTeamAll}" @click="updateFilterByTeam(null)")
-          span All
-        button(:class="{active: filterByTeamTeam}" @click="updateFilterByTeam('team')")
-          img.icon.team(src="@/assets/team.svg")
-        button(:class="{active: filterByTeamPersonal}" @click="updateFilterByTeam('personal')")
-          span Personal
 
     //- types visibile
     section.subsection
@@ -209,14 +207,17 @@ dialog.narrow.space-filters(v-if="props.visible" :open="props.visible" @click.le
           img.icon(v-if="!showHiddenSpace" src="@/assets/view.svg")
           img.icon(v-if="showHiddenSpace" src="@/assets/view-hidden.svg")
           span Show Hidden
-
+  //- teams
+  section.results-section.teams(v-if="teams.length")
+    TeamList(:teams="teams" :selectedTeam="dialogSpaceFilterByTeam" @selectTeam="filterByTeam")
   //- collaborators
-  section.results-section.collaborators
-    UserList(:users="spaceUsers" :isClickable="true" @selectUser="filterByUser" :selectedUser="dialogSpaceFilterByUser")
+  section.results-section.collaborators(v-if="spaceUsers.length")
+    UserList(:users="spaceUsers" :selectedUser="dialogSpaceFilterByUser" @selectUser="filterByUser")
 </template>
 
 <style lang="stylus">
 dialog.space-filters
+  overflow auto
   left inherit
   right -212px
   @media(max-width 560px)

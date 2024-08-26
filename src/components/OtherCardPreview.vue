@@ -7,28 +7,38 @@ import { reactive, computed, onMounted, defineProps, defineEmits, watch, ref, ne
 import { useStore } from 'vuex'
 const store = useStore()
 
+onMounted(() => {
+  updateNameSegments()
+  updatePrimaryBackgroundColor()
+  store.subscribe((mutation, state) => {
+    if (mutation.type === 'triggerUpdateOtherCard') {
+      if (!props.otherCard) { return }
+      if (mutation.payload !== props.otherCard.id) { return }
+      updateNameSegments()
+    } else if (mutation.type === 'triggerUpdateTheme') {
+      updatePrimaryBackgroundColor()
+    }
+  })
+  window.addEventListener('touchend', disableIsActive)
+  window.addEventListener('mouseup', disableIsActive)
+})
+watch(() => store.state.preventDraggedCardFromShowingDetails, (value, prevValue) => {
+  disableIsActive()
+})
+
 const props = defineProps({
   otherCard: Object,
   url: String,
   parentCardId: String,
   shouldCloseAllDialogs: Boolean,
   shouldTruncateName: Boolean,
-  isSelected: Boolean,
   selectedColor: String
 })
-const state = reactive({
-  nameSegments: []
-})
 
-onMounted(() => {
-  updateNameSegments()
-  store.subscribe((mutation, state) => {
-    if (mutation.type === 'triggerUpdateOtherCard') {
-      if (!props.otherCard) { return }
-      if (mutation.payload !== props.otherCard.id) { return }
-      updateNameSegments()
-    }
-  })
+const state = reactive({
+  nameSegments: [],
+  primaryBackgroundColor: '',
+  isActive: null
 })
 
 const isLoadingOtherItems = computed(() => store.state.isLoadingOtherItems)
@@ -37,24 +47,32 @@ const isActive = computed(() => {
   const otherCardDetailsIsVisible = store.state.otherCardDetailsIsVisible
   return otherCardDetailsIsVisible && isFromParentCard
 })
+const updatePrimaryBackgroundColor = () => {
+  state.primaryBackgroundColor = utils.cssVariable('primary-background')
+}
+const background = computed(() => props.selectedColor || props.otherCard.backgroundColor)
+const backgroundColorIsDark = computed(() => {
+  let color = background.value || state.primaryBackgroundColor
+  return utils.colorIsDark(color)
+})
 const styles = computed(() => {
   if (!props.otherCard) { return }
   const isThemeDark = store.getters['themes/isThemeDark']
-  const background = props.selectedColor || props.otherCard.backgroundColor
   let color = utils.cssVariable('primary-on-light-background')
   if (isThemeDark) {
     color = utils.cssVariable('primary-on-dark-background')
   }
-  if (utils.colorIsDark(background)) {
+  if (backgroundColorIsDark.value) {
     color = utils.cssVariable('primary-on-dark-background')
   }
   return {
     color,
-    background
+    background: background.value
   }
 })
 
 // update card
+
 watch(() => store.state.isLoadingOtherItems, (value, prevValue) => {
   if (!value) {
     updateNameSegments()
@@ -83,8 +101,10 @@ const updateNameSegments = () => {
   state.nameSegments = card.nameSegments
 }
 
-// dialog
+// otherCardDetails
+
 const showOtherCardDetailsIsVisible = async (event) => {
+  state.isActive = false
   if (utils.isMultiTouch(event)) { return }
   if (store.state.preventDraggedCardFromShowingDetails) { return }
   let otherItem = {}
@@ -115,12 +135,24 @@ const showOtherCardDetailsIsVisible = async (event) => {
   await nextTick()
   store.commit('broadcast/updateStore', { updates, type: 'updateRemoteCardDetailsVisible' })
 }
-
+const disableIsActive = () => {
+  state.isActive = false
+}
+const enableIsActive = () => {
+  state.isActive = true
+}
 </script>
 
 <template lang="pug">
 a.other-card-preview(@click.prevent.stop :href="props.url")
-  .badge.button-badge.link-badge(:class="{ active: isActive }" :style="styles" @mouseup.prevent="showOtherCardDetailsIsVisible($event)" @touchend.prevent="showOtherCardDetailsIsVisible($event)")
+  .badge.button-badge.link-badge.badge-card-button(
+    :class="{ active: state.isActive }"
+    :style="styles"
+    @mousedown.left="enableIsActive"
+    @touchstart="enableIsActive"
+    @mouseup.prevent="showOtherCardDetailsIsVisible($event)"
+    @touchend.prevent="showOtherCardDetailsIsVisible($event)"
+  )
     template(v-if="props.otherCard")
       //- removed
       template(v-if="props.otherCard.isRemoved")
@@ -129,7 +161,7 @@ a.other-card-preview(@click.prevent.stop :href="props.url")
       //- name
       template(v-for="segment in state.nameSegments")
         img.card-image(v-if="segment.isImage" :src="segment.url")
-        NameSegment(:segment="segment")
+        NameSegment(:segment="segment" :backgroundColorIsDark="backgroundColorIsDark")
     template(v-else)
       Loader(:visible="true" :isSmall="true" :isStatic="!isLoadingOtherItems")
       span Card
@@ -141,6 +173,7 @@ a.other-card-preview(@click.prevent.stop :href="props.url")
   display block
   text-decoration none
   word-wrap break-word
+  width 100%
   .link-badge
     display block
     margin 0
@@ -155,5 +188,8 @@ a.other-card-preview(@click.prevent.stop :href="props.url")
   .badge
     > .loader
       vertical-align -2px
-
+  .badge-card-button
+    &:hover
+      span
+        text-decoration none !important
 </style>

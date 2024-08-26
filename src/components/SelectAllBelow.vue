@@ -33,6 +33,7 @@ const updateIsSelectingY = (value) => {
 }
 const isVisible = computed(() => {
   if (store.state.isSelectingX) { return }
+  if (store.state.currentUserIsPanning || store.state.currentUserIsPanningReady) { return }
   return state.isVisible
 })
 
@@ -133,6 +134,7 @@ const selectAllBelow = (event) => {
     padding 3px
     margin-left 6px
     margin-right 8px
+    pointer-events none
 
   .pointer
     position absolute

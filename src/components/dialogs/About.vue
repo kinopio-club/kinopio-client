@@ -214,6 +214,7 @@ dialog.about.narrow(v-if="visible" :open="visible" @click.left="closeDialogs" re
     .row
       .button-wrap
         button(@click.left.stop="toggleAppsAndExtensionsIsVisible" :class="{active: state.appsAndExtensionsIsVisible}")
+          img.icon.system(src="@/assets/system.svg")
           span Apps and Extensions
         AppsAndExtensions(:visible="state.appsAndExtensionsIsVisible")
     .row
@@ -263,4 +264,6 @@ dialog.about.narrow(v-if="visible" :open="visible" @click.left="closeDialogs" re
     padding 0 4px !important
   .about-video
     border-radius var(--entity-radius)
+  .icon.system
+    vertical-align -1px
 </style>

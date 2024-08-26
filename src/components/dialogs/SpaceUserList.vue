@@ -3,7 +3,9 @@ import { reactive, computed, onMounted, onBeforeUnmount, defineProps, defineEmit
 import { useStore } from 'vuex'
 
 import utils from '@/utils.js'
+import TeamDetails from '@/components/dialogs/TeamDetails.vue'
 import UserList from '@/components/UserList.vue'
+import TeamLabel from '@/components/TeamLabel.vue'
 
 import uniqBy from 'lodash-es/uniqBy'
 
@@ -19,10 +21,13 @@ onMounted(() => {
   })
 })
 const state = reactive({
-  dialogHeight: null
+  dialogHeight: null,
+  teamIsVisible: false
 })
+
 const visible = computed(() => store.state.spaceUserListIsVisible)
 watch(() => visible.value, (value, prevValue) => {
+  state.teamIsVisible = false
   if (value) {
     updateDialogHeight()
   }
@@ -40,11 +45,11 @@ const currentSpace = computed(() => store.state.currentSpace)
 
 // list type
 
-const isSpectators = computed(() => store.state.spaceUserListIsSpectators)
-const isCollaborators = computed(() => !isSpectators.value)
+const isSpectatorsList = computed(() => store.state.spaceUserListIsSpectators)
+const isCollaboratorsList = computed(() => !isSpectatorsList.value)
 const label = computed(() => {
   let string = 'Collaborators'
-  if (isSpectators.value) {
+  if (isSpectatorsList.value) {
     string = 'Spectators'
   }
   return string
@@ -52,14 +57,19 @@ const label = computed(() => {
 
 // team
 
-const team = computed(() => store.state.currentSpace.team)
+const spaceTeam = computed(() => store.getters['teams/spaceTeam']())
+const toggleTeamIsVisible = () => {
+  const value = !state.teamIsVisible
+  closeDialogs()
+  state.teamIsVisible = value
+}
 
 // users
 
 // based on SpaceUsersButton.spaceUsers
 const users = computed(() => {
   let items
-  if (isSpectators.value) {
+  if (isSpectatorsList.value) {
     items = currentSpace.value.spectators
   } else {
     const teamUsers = store.getters['currentCards/teamUsersWhoAddedCards']
@@ -68,7 +78,6 @@ const users = computed(() => {
     items = items.concat(teamUsers)
   }
   items = items.filter(item => Boolean(item))
-  items = items.filter(item => item.id !== currentUser.value.id)
   items = uniqBy(items, 'id')
   return items
 })
@@ -76,13 +85,9 @@ const users = computed(() => {
 // commenters
 
 const commenters = computed(() => utils.clone(store.getters['currentCards/commenters']))
-const isCommenters = computed(() => Boolean(commenters.value.length))
 
-// userlist events
+// handle userlist events
 
-const showRemoveUser = computed(() => {
-  return currentUserCanEditSpace.value && isCollaborators.value
-})
 const selectedUser = computed(() => {
   const userDetailsIsVisible = store.state.userDetailsIsVisible
   if (!userDetailsIsVisible) { return }
@@ -91,14 +96,6 @@ const selectedUser = computed(() => {
 const toggleUserDetails = (event, user) => {
   closeDialogs()
   showUserDetails(event, user)
-}
-const removeCollaborator = async (user) => {
-  store.dispatch('currentSpace/removeCollaboratorFromSpace', user)
-  const isCurrentUserRemove = store.state.currentUser.id === user.id
-  if (isCurrentUserRemove) {
-    store.dispatch('closeAllDialogs')
-  }
-  closeDialogs()
 }
 const showUserDetails = (event, user) => {
   const shouldHideUserDetails = user.id === store.state.userDetailsUser.id
@@ -116,39 +113,38 @@ const showUserDetails = (event, user) => {
 }
 const closeDialogs = () => {
   store.commit('userDetailsIsVisible', false)
+  state.teamIsVisible = false
 }
 </script>
 
 <template lang="pug">
-dialog.narrow.space-user-list(
+dialog.space-user-list(
   v-if="visible"
   :open="visible"
   @click.left.stop="closeDialogs"
   ref="dialogElement"
   :style="{'max-height': state.dialogHeight + 'px'}"
+  :class="{'child-is-visible': state.teamIsVisible }"
 )
-  //- users
-  template(v-if="users.length")
-    section
-      p {{ label }}
-      .row(v-if="team && isCollaborators")
-        button
-          img.icon.team(src="@/assets/team.svg")
-          span {{ team.name }}
-          //- TODO add team dialog for user management, teamuserlist
+  section
+    p {{ label }}
+    .button-wrap(v-if="spaceTeam")
+      button(@click.stop="toggleTeamIsVisible" :class="{ active: state.teamIsVisible }")
+        TeamLabel(:team="spaceTeam" :showName="true")
+      TeamDetails(:visible="state.teamIsVisible" :team="spaceTeam")
 
+  template(v-if="users.length")
+    //- users
     section.results-section
       UserList(
         :users="users"
         :selectedUser="selectedUser"
         @selectUser="toggleUserDetails"
-        :showRemoveUser="showRemoveUser"
-        @removeUser="removeCollaborator"
-        :isClickable="true"
-        :showIsOnline="true"
+        :showCollaboratorActions="currentUserCanEditSpace"
       )
+
     //- commenters
-    template(v-if="isCollaborators && isCommenters")
+    template(v-if="isCollaboratorsList && commenters.length")
       section
         p Commenters
       section.results-section
@@ -156,14 +152,17 @@ dialog.narrow.space-user-list(
           :users="commenters"
           :selectedUser="selectedUser"
           @selectUser="toggleUserDetails"
-          :isClickable="true"
-          :showIsOnline="true"
         )
 </template>
 
 <style lang="stylus">
-.space-user-list
+dialog.space-user-list
+  overflow auto
   left initial
   right 16px
   top 20px
+  &.child-is-visible
+    overflow initial
+  dialog.team-details
+    left -45px
 </style>

@@ -778,7 +778,7 @@ const updateRemoteConnections = () => {
   :data-should-render="shouldRender"
 
   :style="styles"
-  :class="{hover: state.isHover, active: isDragging, 'box-jiggle': shouldJiggle, 'is-resizing': isResizing}"
+  :class="{hover: state.isHover, active: isDragging, 'box-jiggle': shouldJiggle, 'is-resizing': isResizing, 'is-selected': isSelected}"
   ref="boxElement"
 )
 
@@ -872,7 +872,8 @@ const updateRemoteConnections = () => {
   &.is-resizing
     box-shadow var(--active-shadow)
     transition none
-
+  &.is-selected
+    transition none
   .box-info
     --header-font var(--header-font-0)
     &.header-font-1

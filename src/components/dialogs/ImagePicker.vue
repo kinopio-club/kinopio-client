@@ -182,7 +182,12 @@ const searchGiphy = async (isStickers) => {
   if (state.search) {
     endpoint = 'search'
   }
-  const body = { search: state.search, endpoint, resource }
+  let body = { search: state.search, endpoint, resource }
+  if (state.search) {
+    body.rating = 'pg-13'
+  } else {
+    body.rating = 'g'
+  }
   const data = await store.dispatch('api/gifImageSearch', body)
   normalizeResults(data, 'giphy')
 }
@@ -214,7 +219,7 @@ const searchService = debounce(async () => {
 const normalizeResults = async (data, service) => {
   const pexels = service === 'pexels' && serviceIsPexels.value
   const giphy = service === 'giphy' && (serviceIsStickers.value || serviceIsGifs.value)
-  // giphy
+  // pexels
   if (pexels) {
     state.images = data.photos.map(image => {
       return {
@@ -223,6 +228,7 @@ const normalizeResults = async (data, service) => {
         url: image.src.large
       }
     })
+  // giphy
   } else if (giphy) {
     state.images = data.map(image => {
       // stickers
@@ -418,11 +424,11 @@ dialog.image-picker(v-if="visible" :open="visible" @click.left.stop ref="dialogE
         button.borderless.clear-input-wrap(@click.left="clearSearch")
           img.icon.cancel(src="@/assets/add.svg")
       .error-container(v-if="isNoSearchResults || state.error.unknownServerError || state.error.userIsOffline")
-        p(v-if="isNoSearchResults") Nothing found on {{service}} for {{search}}
+        p(v-if="isNoSearchResults") Nothing found on {{state.service}} for {{state.search}}
         .badge.danger(v-if="state.error.unknownServerError")
           span (シ_ _)シ Something went wrong, Please try again or contact support
         .badge.danger(v-if="state.error.userIsOffline")
-          span Can't search {{service}} while offline, Please try again later
+          span Can't search {{state.service}} while offline, Please try again later
 
     //- search results
     section.results-section.search-results(ref="resultsSectionElement" :style="{'max-height': state.resultsSectionHeight + 'px'}")

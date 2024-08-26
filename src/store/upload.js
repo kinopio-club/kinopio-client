@@ -44,8 +44,8 @@ export default {
   },
   actions: {
     checkIfFileTooBig: (context, file) => {
-      const userIsUpgraded = context.rootState.currentUser.isUpgraded
-      const spaceUserIsUpgraded = context.rootGetters['currentSpace/spaceUserIsUpgraded']
+      const userIsUpgraded = context.rootGetters['currentUser/isUpgradedOrOnTeam']
+      const spaceUserIsUpgraded = context.rootGetters['currentSpace/spaceUserIsUpgradedOrOnTeam']
       const isFileTooBig = utils.isFileTooBig({ file, userIsUpgraded, spaceUserIsUpgraded })
       if (isFileTooBig) {
         throw {
@@ -67,8 +67,8 @@ export default {
       const uploadId = nanoid()
       const fileName = utils.normalizeFileUrl(file.name)
       let key = `${cardId || spaceId}/${fileName}`
-      const userIsUpgraded = context.rootState.currentUser.isUpgraded
-      const spaceUserIsUpgraded = context.rootGetters['currentSpace/spaceUserIsUpgraded']
+      const userIsUpgraded = context.rootGetters['currentUser/isUpgradedOrOnTeam']
+      const spaceUserIsUpgraded = context.rootGetters['currentSpace/spaceUserIsUpgradedOrOnTeam']
       context.dispatch('checkIfFileTooBig', file)
       // add presignedPostData to upload
       let presignedPostData
@@ -128,8 +128,8 @@ export default {
     addCardsAndUploadFiles: async (context, { files, event, position }) => {
       position = position || utils.cursorPositionInSpace(event)
       context.dispatch('currentUser/notifyReadOnly', position, { root: true })
-      const userIsUpgraded = context.rootState.currentUser.isUpgraded
-      const spaceUserIsUpgraded = context.rootGetters['currentSpace/spaceUserIsUpgraded']
+      const userIsUpgraded = context.rootGetters['currentUser/isUpgradedOrOnTeam']
+      const spaceUserIsUpgraded = context.rootGetters['currentSpace/spaceUserIsUpgradedOrOnTeam']
       const canEditSpace = context.rootGetters['currentUser/canEditSpace']()
       if (!canEditSpace) {
         context.commit('addNotification', { message: 'You can only upload files on spaces you can edit', type: 'info' }, { root: true })

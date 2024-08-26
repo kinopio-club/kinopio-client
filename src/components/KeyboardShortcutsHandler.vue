@@ -582,18 +582,20 @@ const handlePastePlainText = async (data, position) => {
     }
   })
   store.dispatch('currentCards/addMultiple', { cards })
-  store.dispatch('currentCards/distributeVertically', cards)
-  await nextTick()
-  // select
-  const cardIds = cards.map(card => card.id)
-  store.commit('multipleCardsSelectedIds', cardIds)
-  // ⏺ history
-  cards = cardIds.map(cardId => store.getters['currentCards/byId'](cardId))
-  store.dispatch('history/resume')
-  store.dispatch('history/add', { cards, useSnapshot: true })
-  // update page size
-  await nextTick()
-  afterPaste({ cards, boxes: [] })
+  setTimeout(async () => {
+    store.dispatch('currentCards/distributeVertically', cards)
+    await nextTick()
+    // select
+    const cardIds = cards.map(card => card.id)
+    store.commit('multipleCardsSelectedIds', cardIds)
+    // ⏺ history
+    cards = cardIds.map(cardId => store.getters['currentCards/byId'](cardId))
+    store.dispatch('history/resume')
+    store.dispatch('history/add', { cards, useSnapshot: true })
+    // update page size
+    await nextTick()
+    afterPaste({ cards, boxes: [] })
+  }, 100)
 }
 
 const afterPaste = ({ cards, boxes }) => {
@@ -690,13 +692,14 @@ const selectAllItemsBelowCursor = (position) => {
   const cardIds = cards.map(card => card.id)
   // boxes
   let boxes = utils.clone(store.getters['currentBoxes/all'])
-  boxes = boxes.filter(boxes => (boxes.y * zoom) > position.y)
-  const boxIds = boxes.map(boxes => boxes.id)
+  boxes = boxes.filter(box => (box.y * zoom) > position.y)
+  const boxIds = boxes.map(box => box.id)
+  const isItemIds = Boolean(cardIds.length || boxIds.length)
   // select
-  if (cardIds.length && preventMultipleSelectedActionsIsVisible) {
+  if (isItemIds && preventMultipleSelectedActionsIsVisible) {
     store.commit('multipleCardsSelectedIds', cardIds)
     store.commit('multipleBoxesSelectedIds', boxIds)
-  } else if (cardIds.length) {
+  } else if (isItemIds) {
     store.commit('multipleSelectedActionsPosition', position)
     store.commit('multipleSelectedActionsIsVisible', true)
     store.commit('multipleCardsSelectedIds', cardIds)
@@ -725,13 +728,16 @@ const selectAllItemsRightOfCursor = (position) => {
   const cardIds = cards.map(card => card.id)
   // boxes
   let boxes = utils.clone(store.getters['currentBoxes/all'])
-  boxes = boxes.filter(boxes => (boxes.x * zoom) > position.x)
-  const boxIds = boxes.map(boxes => boxes.id)
+  boxes = boxes.filter(box => {
+    return (box.x * zoom) >= position.x
+  })
+  const boxIds = boxes.map(box => box.id)
+  const isItemIds = Boolean(cardIds.length || boxIds.length)
   // select
-  if (cardIds.length && preventMultipleSelectedActionsIsVisible) {
+  if (isItemIds && preventMultipleSelectedActionsIsVisible) {
     store.commit('multipleCardsSelectedIds', cardIds)
     store.commit('multipleBoxesSelectedIds', boxIds)
-  } else if (cardIds.length) {
+  } else if (isItemIds) {
     store.commit('multipleSelectedActionsPosition', position)
     store.commit('multipleSelectedActionsIsVisible', true)
     store.commit('multipleCardsSelectedIds', cardIds)
