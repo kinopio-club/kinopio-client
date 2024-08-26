@@ -4,8 +4,6 @@ import consts from '@/consts.js'
 import { nanoid } from 'nanoid'
 import { nextTick } from 'vue'
 
-const placeholder = '⬬⬭'
-
 export default {
   namespaced: true,
   state: {
@@ -113,7 +111,7 @@ export default {
             nextTick(() => {
               nextTick(() => {
                 const card = { id: cardId }
-                context.dispatch('currentCards/updateDimensions', { cards: [card] }, { root: true })
+                context.dispatch('currentCards/updateNameRemovePlaceholders', cardId, { root: true })
               })
             })
           }
@@ -169,7 +167,7 @@ export default {
             x: position.x + (index * positionOffset),
             y: position.y + (index * positionOffset)
           },
-          name: placeholder,
+          name: consts.uploadPlaceholder,
           id: cardId
         }, { root: true })
         const fileName = utils.normalizeFileUrl(file.name)
@@ -195,16 +193,10 @@ export default {
           context.commit('addNotification', { message: error.message, type: 'danger' }, { root: true })
         }
       }))
-      // remove placeholder from card names
+      // remove placeholders from card names
       files.forEach((file, index) => {
         const cardId = cardIds[index]
-        let card = context.rootGetters['currentCards/byId'](cardId)
-        const name = card.name.replaceAll(placeholder, '')
-        const update = {
-          id: cardId,
-          name
-        }
-        context.dispatch('currentCards/update', { card: update }, { root: true })
+        context.dispatch('currentCards/updateNameRemovePlaceholders', cardId, { root: true })
       })
     }
   }

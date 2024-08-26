@@ -22,6 +22,8 @@ onMounted(() => {
     if (mutation.type === 'updatePageSizes') {
       clearHeights()
       updateDialogHeight()
+    } else if (mutation.type === 'closeAllDialogs') {
+      closeImagePicker()
     }
   })
 })
@@ -42,6 +44,8 @@ watch(() => props.visible, async (value, prevValue) => {
     searchService()
     focusSearchInput()
     scrollIntoView()
+  } else {
+    closeImagePicker()
   }
 })
 
@@ -71,6 +75,9 @@ const triggerSignUpOrInIsVisible = () => {
 const triggerUpgradeUserIsVisible = () => {
   store.dispatch('closeAllDialogs')
   store.commit('triggerUpgradeUserIsVisible')
+}
+const closeImagePicker = () => {
+  store.dispatch('currentCards/updateNameRemovePlaceholders', props.cardId)
 }
 
 // input
@@ -329,14 +336,13 @@ const uploadFiles = async (event) => {
   uploadSelectedFile(selectedFile)
 }
 const addPlaceholderToCardName = (event) => {
-  const uploadPlaceholder = '⬬⬭'
   console.log('💐💐🌺 addPlaceholderToCardName')
   // prevents empty cards from being removed on blur by the @change event on iOS
   const card = store.getters['currentCards/byId'](props.cardId)
   if (!card.name) {
     const update = {
       id: card.id,
-      name: uploadPlaceholder
+      name: consts.uploadPlaceholder
     }
     store.dispatch('currentCards/update', { card: update, shouldPreventUpdateDimensionsAndPaths: true })
     console.log('💐💐💐addPlaceholderToCardName added', update) // placeholder should be removed after

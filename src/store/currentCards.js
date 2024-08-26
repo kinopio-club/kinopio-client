@@ -420,6 +420,12 @@ const currentCards = {
         context.dispatch('update', { card: update })
       }, 100)
     },
+    updateNameRemovePlaceholders: (context, cardId) => {
+      const card = context.getters.byId(cardId)
+      if (!card) { return }
+      const newName = card.name.replaceAll(consts.uploadPlaceholder, '')
+      context.dispatch('updateName', { card, newName })
+    },
 
     // dimensions
 
