@@ -199,7 +199,7 @@ export default {
       files.forEach((file, index) => {
         const cardId = cardIds[index]
         let card = context.rootGetters['currentCards/byId'](cardId)
-        const name = card.name.replace(placeholder, '')
+        const name = card.name.replaceAll(placeholder, '')
         const update = {
           id: cardId,
           name
