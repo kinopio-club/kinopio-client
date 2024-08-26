@@ -452,7 +452,7 @@ const shouldCancelInteraction = (event) => {
 const handleTouchEnd = (event) => {
   store.commit('isPinchZooming', false)
   store.commit('isTouchScrolling', false)
-  updatePageSizes()
+  updatePageSizesDebounced(event)
   stopInteractions(event)
 }
 const stopInteractions = async (event) => {

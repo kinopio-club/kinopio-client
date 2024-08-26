@@ -1666,6 +1666,7 @@ const store = createStore({
       context.commit('spaceUrlToLoad', matches.spaceUrl)
     },
     updatePageSizes: (context) => {
+      console.error('🏎️')
       const cards = context.getters['currentCards/all']
       const boxes = context.getters['currentBoxes/all']
       let items = cards.concat(boxes)

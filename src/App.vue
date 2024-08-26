@@ -288,8 +288,8 @@ const updateMetaRSSFeed = () => {
   //- router-view is Space or Add
   router-view
   template(v-if="isSpacePage")
-    Header
-    Footer
+    //- Header
+    //- Footer
     TagDetails
     UserDetails
     WindowHistoryHandler
