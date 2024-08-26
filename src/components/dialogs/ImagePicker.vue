@@ -327,14 +327,12 @@ const uploadSelectedFile = async (selectedFile) => {
 }
 const uploadFiles = async (event) => {
   const files = Array.from(event.target.files)
-  console.log('💐uploadfiles💐', files, props.cardId)
   const selectedFile = files[0]
   const otherSelectedFiles = files.slice(1)
   uploadOtherSelectedFiles(otherSelectedFiles)
   uploadSelectedFile(selectedFile)
 }
 const addPlaceholderToCardName = (event) => {
-  console.log('💐💐🌺 addPlaceholderToCardName')
   // prevents empty cards from being removed on blur by the @change event on iOS
   const card = store.getters['currentCards/byId'](props.cardId)
   if (!card.name) {
@@ -343,7 +341,6 @@ const addPlaceholderToCardName = (event) => {
       name: consts.uploadPlaceholder
     }
     store.dispatch('currentCards/update', { card: update, shouldPreventUpdateDimensionsAndPaths: true })
-    console.log('💐💐💐addPlaceholderToCardName added', update) // placeholder should be removed after
   }
 }
 

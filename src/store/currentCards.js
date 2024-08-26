@@ -421,7 +421,6 @@ const currentCards = {
       }, 100)
     },
     updateNameRemovePlaceholders: (context, cardId) => {
-      console.error('🌷🌷🌷')
       const card = context.getters.byId(cardId)
       if (!card) { return }
       const newName = card.name.replaceAll(consts.uploadPlaceholder, '')
