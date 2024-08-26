@@ -22,8 +22,6 @@ onMounted(() => {
     if (mutation.type === 'updatePageSizes') {
       clearHeights()
       updateDialogHeight()
-    } else if (mutation.type === 'closeAllDialogs') {
-      closeImagePicker()
     }
   })
 })
