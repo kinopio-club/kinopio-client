@@ -376,7 +376,7 @@ dialog.image-picker(v-if="visible" :open="visible" @click.left.stop ref="dialogE
           span GIF
       .button-wrap
         button(@click.left.stop="selectFile") Upload
-        input.hidden(type="file" ref="inputElement" @change.prevent.stop="uploadFiles" multiple="true")
+        input.hidden(type="file" ref="inputElement" @change="uploadFiles" multiple="true")
 
     //- upload progress
     .uploading-container(v-if="cardPendingUpload")
