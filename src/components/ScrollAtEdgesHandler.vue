@@ -165,12 +165,10 @@ const updateMovementDirection = () => {
   }
 }
 const shouldScrollRight = () => {
-  updatePageSizes()
   const scrolledTooFarRight = (window.scrollX + viewportWidth.value) > maxWidth
   return !scrolledTooFarRight
 }
 const shouldScrollDown = () => {
-  updatePageSizes()
   const scrolledTooFarDown = (window.scrollY + viewportHeight.value) > maxHeight
   return !scrolledTooFarDown
 }
@@ -261,9 +259,6 @@ const increasePageHeight = (delta) => {
     const height = pageHeight.value + delta.y
     store.commit('pageHeight', height)
   }
-}
-const updatePageSizes = () => {
-  store.dispatch('updatePageSizes')
 }
 
 </script>

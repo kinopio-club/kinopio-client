@@ -110,10 +110,6 @@ const triggerSignUpOrInIsVisible = () => {
 const closeDialogs = async () => {
   state.colorPickerIsVisible = false
 }
-const updatePageSizes = async () => {
-  await nextTick()
-  store.dispatch('updatePageSizes')
-}
 const updatePreviewImage = async () => {
   await nextTick()
   store.dispatch('currentSpace/createSpacePreviewImage')
@@ -180,7 +176,6 @@ const selectGradient = (index) => {
     backgroundGradient: gradient
   }
   store.dispatch('currentSpace/updateSpace', updates)
-  updatePageSizes()
   updatePreviewImage()
 }
 const gradientIsActive = (gradient) => {
@@ -227,7 +222,6 @@ const updateSpaceBackground = (url) => {
     background: url
   }
   store.dispatch('currentSpace/updateSpace', updates)
-  updatePageSizes()
   updatePreviewImage()
 }
 const removeBackgroundAll = async () => {
@@ -329,7 +323,6 @@ const backgroundTintBadgeColor = computed(() => {
 const updateBackgroundTint = (value) => {
   state.backgroundTint = value
   store.dispatch('currentSpace/updateSpace', { backgroundTint: value })
-  updatePageSizes()
   emit('updateSpaces')
   updatePreviewImage()
 }

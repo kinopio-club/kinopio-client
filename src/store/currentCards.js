@@ -700,7 +700,6 @@ const currentCards = {
         context.dispatch('currentConnections/updateMultiplePaths', cards, { root: true })
         context.dispatch('history/resume', null, { root: true })
         context.dispatch('history/add', { cards, useSnapshot: true }, { root: true })
-        context.dispatch('updatePageSizes', null, { root: true })
         prevMoveDelta = { x: 0, y: 0 }
       })
     },
@@ -908,7 +907,6 @@ const currentCards = {
           setTimeout(() => {
             context.dispatch('currentCards/distributeVertically', cards, { root: true })
             context.commit('isLoadingSpace', false, { root: true })
-            context.dispatch('updatePageSizes', null, { root: true })
             console.log('🕊 addTweetCardsComplete', cards)
           }, 1000)
         })
