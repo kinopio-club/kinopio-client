@@ -61,6 +61,10 @@ const updateDialogHeight = async () => {
 const closeDialogs = () => {
   state.spacePickerIsVisible = false
 }
+const triggerSignUpOrInIsVisible = () => {
+  store.dispatch('closeAllDialogs')
+  store.commit('triggerSignUpOrInIsVisible')
+}
 
 // user
 

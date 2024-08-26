@@ -38,10 +38,6 @@ const toggleColorPicker = () => {
   closeDialogs()
   state.colorPickerIsVisible = !isVisible
 }
-const triggerSignUpOrInIsVisible = () => {
-  store.dispatch('closeAllDialogs')
-  store.commit('triggerSignUpOrInIsVisible')
-}
 const closeDialogs = () => {
   state.colorPickerIsVisible = false
   store.commit('triggerCloseChildDialogs')
