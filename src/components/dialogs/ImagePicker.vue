@@ -328,6 +328,19 @@ const uploadFiles = async (event) => {
   uploadOtherSelectedFiles(otherSelectedFiles)
   uploadSelectedFile(selectedFile)
 }
+const addPlaceholderToCardName = (event) => {
+  console.log('💐💐🌺 addPlaceholderToCardName')
+  // prevents empty cards from being removed on blur by the @change event on iOS
+  const card = store.getters['currentCards/byId'](props.cardId)
+  if (!card.name) {
+    const update = {
+      id: card.id,
+      name: placeholder
+    }
+    store.dispatch('currentCards/update', { card: update, shouldPreventUpdateDimensionsAndPaths: true })
+    console.log('💐💐💐addPlaceholderToCardName added', update) // placeholder should be removed after
+  }
+}
 
 // styles
 
@@ -376,7 +389,7 @@ dialog.image-picker(v-if="visible" :open="visible" @click.left.stop ref="dialogE
           span GIF
       .button-wrap
         button(@click.left.stop="selectFile") Upload
-        input.hidden(type="file" ref="inputElement" @change="uploadFiles" multiple="true")
+        input.hidden(type="file" ref="inputElement" @change="uploadFiles" multiple="true" @click="addPlaceholderToCardName")
 
     //- upload progress
     .uploading-container(v-if="cardPendingUpload")
