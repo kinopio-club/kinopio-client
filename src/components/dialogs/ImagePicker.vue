@@ -322,6 +322,7 @@ const uploadSelectedFile = async (selectedFile) => {
 }
 const uploadFiles = async (event) => {
   const files = Array.from(event.target.files)
+  console.log('💐uploadfiles💐', files, props.cardId)
   const selectedFile = files[0]
   const otherSelectedFiles = files.slice(1)
   uploadOtherSelectedFiles(otherSelectedFiles)

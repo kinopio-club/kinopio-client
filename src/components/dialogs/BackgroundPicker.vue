@@ -282,6 +282,7 @@ const uploadFile = async () => {
   const spaceId = currentSpace.value.id
   const input = inputElement.value
   const file = input.files[0]
+  console.log('💐uploadfile💐', file, input) // temp
   if (isFileTooBig(file)) {
     state.error.sizeLimit = true
     return
