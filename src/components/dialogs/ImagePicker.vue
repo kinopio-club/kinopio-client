@@ -329,13 +329,14 @@ const uploadFiles = async (event) => {
   uploadSelectedFile(selectedFile)
 }
 const addPlaceholderToCardName = (event) => {
+  const uploadPlaceholder = '⬬⬭'
   console.log('💐💐🌺 addPlaceholderToCardName')
   // prevents empty cards from being removed on blur by the @change event on iOS
   const card = store.getters['currentCards/byId'](props.cardId)
   if (!card.name) {
     const update = {
       id: card.id,
-      name: placeholder
+      name: uploadPlaceholder
     }
     store.dispatch('currentCards/update', { card: update, shouldPreventUpdateDimensionsAndPaths: true })
     console.log('💐💐💐addPlaceholderToCardName added', update) // placeholder should be removed after
