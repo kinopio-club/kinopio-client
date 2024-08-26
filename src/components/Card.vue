@@ -478,6 +478,10 @@ const updatePreviousResultItem = () => {
     store.commit('previousResultItem', props.card)
   }
 }
+const nameSegmentsStyles = computed(() => {
+  if (!isImageCard.value) { return }
+  return { background: currentBackgroundColor.value }
+})
 
 // position and dimensions
 
@@ -1857,7 +1861,7 @@ article.card-wrap#card(
             label(:class="{active: isChecked, disabled: !canEditSpace}")
               input(name="checkbox" type="checkbox" v-model="checkboxState")
           //- Name
-          p.name.name-segments(v-if="normalizedNameOrHiddenUrl" :style="{background: currentBackgroundColor}" :class="{'is-checked': isChecked, 'has-checkbox': hasCheckbox, 'badge badge-status': isImageCard && hasTextSegments}")
+          p.name.name-segments(v-if="normalizedNameOrHiddenUrl" :style="nameSegmentsStyles" :class="{'is-checked': isChecked, 'has-checkbox': hasCheckbox, 'badge badge-status': isImageCard && hasTextSegments}")
             template(v-for="segment in nameSegments")
               NameSegment(:segment="segment" @showTagDetailsIsVisible="showTagDetailsIsVisible" :parentCardId="card.id" :backgroundColorIsDark="currentBackgroundColorIsDark" :headerFontId="card.headerFontId" :headerFontSize="card.headerFontSize")
             Loader(:visible="isLoadingUrlPreview")
