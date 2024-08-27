@@ -95,10 +95,12 @@ const hidden = (event) => {
   state.isHidden = true
 }
 const cancelHidden = () => {
+  const viewport = utils.visualViewport()
+  if (viewport.scale > 3) { return }
   const momentumScrollingDelay = 400
   setTimeout(() => {
-    updatePosition()
     state.isHidden = false
+    updatePosition()
   }, momentumScrollingDelay)
 }
 
@@ -128,6 +130,7 @@ const updatePositionFrame = () => {
   }
 }
 const updatePositionInVisualViewport = () => {
+  if (state.isHidden) { return }
   const viewport = utils.visualViewport()
   const scale = utils.roundFloat(viewport.scale)
   const counterScale = utils.roundFloat(1 / viewport.scale)
