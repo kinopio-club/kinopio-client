@@ -127,6 +127,5 @@ canvas#outside-space-background(:style="styles")
   left 0
   width 10px
   height 10px
-  background-color var(--secondary-active-background)
   transform-origin left top
 </style>
