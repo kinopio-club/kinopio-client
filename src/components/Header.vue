@@ -58,9 +58,9 @@ onMounted(() => {
   window.addEventListener('scroll', updatePosition)
 
   window.addEventListener('touchstart', hidden)
-  window.addEventListener('gesturestart', hidden)
+  // window.addEventListener('gesturestart', hidden)
   window.addEventListener('touchend', cancelHidden)
-  window.addEventListener('gestureend', cancelHidden)
+  // window.addEventListener('gestureend', cancelHidden)
 
   updatePosition()
   updateNotifications()
@@ -454,22 +454,23 @@ const toggleUpgradeUserIsVisible = () => {
 
 const hidden = (event) => {
   if (!store.getters.isTouchDevice) { return }
-  hiddenIteration = 0
-  if (hiddenTimer) { return }
-  hiddenTimer = window.requestAnimationFrame(hiddenFrame)
-}
-const hiddenFrame = () => {
-  hiddenIteration++
   state.isHidden = true
-  if (hiddenIteration < hiddenDuration) {
-    window.requestAnimationFrame(hiddenFrame)
-  } else {
-    cancelHidden()
-  }
+  // hiddenIteration = 0
+  // if (hiddenTimer) { return }
+  // hiddenTimer = window.requestAnimationFrame(hiddenFrame)
+// }
+// const hiddenFrame = () => {
+//   hiddenIteration++
+//   state.isHidden = true
+//   // if (hiddenIteration < hiddenDuration) {
+//   window.requestAnimationFrame(hiddenFrame)
+//   // } else {
+//   //   cancelHidden()
+//   // }
 }
 const cancelHidden = () => {
-  window.cancelAnimationFrame(hiddenTimer)
-  hiddenTimer = undefined
+  // window.cancelAnimationFrame(hiddenTimer)
+  // hiddenTimer = undefined
   state.isHidden = false
 }
 
