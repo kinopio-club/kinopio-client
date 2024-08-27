@@ -6,7 +6,7 @@ import utils from '@/utils.js'
 
 const store = useStore()
 
-const scrollArea = 50
+const threshold = 50
 let startCursor, prevCursor, prevCursorPage, endCursor, scrollTimer, maxHeight, maxWidth, currentEvent
 let movementDirection = {}
 
@@ -46,26 +46,31 @@ onBeforeUnmount(() => {
 
 const initInteractions = (event) => {
   currentEvent = event
+  const shouldScrollAtEdges = store.getters.shouldScrollAtEdges(event)
   const position = utils.cursorPositionInViewport(event)
   const zoom = spaceZoomDecimal.value
   startCursor = position
   endCursor = position
   maxHeight = Math.max(6500, store.state.viewportHeight) * zoom
   maxWidth = Math.max(6500, store.state.viewportWidth) * zoom
-  if (store.getters.shouldScrollAtEdges(event)) {
+  if (shouldScrollAtEdges) {
     updateMovementDirection()
   }
-  if (store.getters.shouldScrollAtEdges(event) && !scrollTimer) {
+  if (shouldScrollAtEdges && !scrollTimer) {
     scrollTimer = window.requestAnimationFrame(scrollFrame)
   }
 }
 const interact = (event) => {
   currentEvent = event
-  if (store.getters.shouldScrollAtEdges(event)) {
+  const shouldScrollAtEdges = store.getters.shouldScrollAtEdges(event)
+  if (shouldScrollAtEdges) {
     updateMovementDirection()
   }
   prevCursor = utils.cursorPositionInViewport(event)
   prevCursorPage = utils.cursorPositionInPage(event)
+  if (shouldScrollAtEdges && !scrollTimer) {
+    scrollTimer = window.requestAnimationFrame(scrollFrame)
+  }
 }
 const stopScrollTimer = () => {
   window.cancelAnimationFrame(scrollTimer)
@@ -106,10 +111,10 @@ const shouldPreventResize = computed(() => currentUserIsPainting.value || isDraw
 const scrollFrame = () => {
   let delta, currentSpeed
   const currentCursor = cursor()
-  const cursorIsTopSide = currentCursor.y <= scrollArea
-  const cursorIsBottomSide = currentCursor.y >= (viewportHeight.value - scrollArea)
-  const cursorIsLeftSide = currentCursor.x <= scrollArea
-  const cursorIsRightSide = currentCursor.x >= (viewportWidth.value - scrollArea)
+  const cursorIsTopSide = currentCursor.y <= threshold
+  const cursorIsBottomSide = currentCursor.y >= (viewportHeight.value - threshold)
+  const cursorIsLeftSide = currentCursor.x <= threshold
+  const cursorIsRightSide = currentCursor.x >= (viewportWidth.value - threshold)
   const shouldScrollUp = Boolean(cursorIsTopSide && window.scrollY)
   // Y movement
   if (movementDirection.y === 'up' && shouldScrollUp) {
@@ -187,17 +192,17 @@ const scrollSpeed = (cursor, direction) => {
     cursor = cursor.y
     viewportSize = viewportHeight.value
   }
-  // calc percent over scrollArea
+  // calc percent over threshold
   let amount
   if (direction === 'up' || direction === 'left') {
-    amount = Math.abs(cursor - scrollArea)
+    amount = Math.abs(cursor - threshold)
   }
   if (direction === 'down' || direction === 'right') {
-    amount = Math.abs(cursor - (viewportSize - scrollArea))
+    amount = Math.abs(cursor - (viewportSize - threshold))
   }
-  let percent = utils.roundFloat(amount / scrollArea)
+  let percent = utils.roundFloat(amount / threshold)
   // speed
-  let speed = percent * scrollArea
+  let speed = percent * threshold
   speed = Math.max(speed, minSpeed)
   if (percent > 1) {
     speed = Math.min(speed, maxSpeedOutsideWindow)
@@ -246,7 +251,7 @@ const scrollBy = (delta) => {
 
 const increasePageWidth = (delta) => {
   if (shouldPreventResize.value) { return }
-  const cursorIsRightSideOfPage = (pageWidth.value - prevCursorPage.x) < scrollArea
+  const cursorIsRightSideOfPage = (pageWidth.value - prevCursorPage.x) < threshold
   if (cursorIsRightSideOfPage) {
     const width = pageWidth.value + delta.x
     store.commit('pageWidth', width)
@@ -254,7 +259,7 @@ const increasePageWidth = (delta) => {
 }
 const increasePageHeight = (delta) => {
   if (shouldPreventResize.value) { return }
-  const cursorIsBottomSideOfPage = (pageHeight.value - prevCursorPage.y) < scrollArea
+  const cursorIsBottomSideOfPage = (pageHeight.value - prevCursorPage.y) < threshold
   if (cursorIsBottomSideOfPage) {
     const height = pageHeight.value + delta.y
     store.commit('pageHeight', height)
