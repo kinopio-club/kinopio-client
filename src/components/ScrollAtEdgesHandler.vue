@@ -62,6 +62,10 @@ const initInteractions = (event) => {
 }
 const interact = (event) => {
   currentEvent = event
+  const isLeftMouseButtonDown = event.buttons === 1
+  const isTouch = Boolean(event.touches)
+  const isInteracting = isLeftMouseButtonDown || isTouch
+  if (!isInteracting) { return }
   const shouldScrollAtEdges = store.getters.shouldScrollAtEdges(event)
   if (shouldScrollAtEdges) {
     updateMovementDirection()
