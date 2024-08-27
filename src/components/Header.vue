@@ -55,7 +55,6 @@ let hiddenIteration, hiddenTimer, updatePositionIteration, updatePositionTimer, 
 const readOnlyElement = ref(null)
 
 onMounted(() => {
-  window.addEventListener('scroll', updatePosition)
   window.addEventListener('touchstart', hidden)
   window.addEventListener('touchend', cancelHidden)
   updatePosition()
@@ -109,7 +108,6 @@ onMounted(() => {
   })
 })
 onBeforeUnmount(() => {
-  window.removeEventListener('scroll', updatePosition)
   window.removeEventListener('touchstart', hidden)
   window.removeEventListener('touchend', cancelHidden)
   clearInterval(updateNotificationsIntervalTimer)
@@ -434,8 +432,11 @@ const hidden = (event) => {
   state.isHidden = true
 }
 const cancelHidden = () => {
-  updatePosition()
-  state.isHidden = false
+  const momentumScrollingDelay = 400
+  setTimeout(() => {
+    updatePosition()
+    state.isHidden = false
+  }, momentumScrollingDelay)
 }
 
 // position
