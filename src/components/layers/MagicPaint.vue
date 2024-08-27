@@ -82,13 +82,8 @@ onMounted(() => {
       }
       if (checkIsCircleVisible(circle)) { return }
       createNotifyOffscreenCircle(circle)
-    } else if (mutation.type === 'updatePageSizes') {
-      updateViewportSizes()
     }
   })
-  // update canvas sizes
-  addEventListener('touchend', updateViewportSizes)
-  addEventListener('gesturecancel', updateViewportSizes)
   // init canvases
   paintingCanvas = document.getElementById('magic-painting')
   paintingContext = paintingCanvas.getContext('2d')
@@ -130,9 +125,7 @@ onBeforeUnmount(() => {
 const state = reactive({
   currentCursor: {},
   currentCursorInSpace: {},
-  uploadIsDraggedOver: false,
-  viewportWidth: null,
-  viewportHeight: null
+  uploadIsDraggedOver: false
 })
 
 const clearRects = () => {
@@ -143,19 +136,6 @@ const clearRects = () => {
   notifyOffscreenCircleContext.clearRect(0, 0, pageWidth.value, pageHeight.value)
 }
 
-// canvas size
-// keep canvases updated to viewport size so you can draw on newly created areas
-
-const pageHeight = computed(() => store.state.pageHeight)
-const pageWidth = computed(() => store.state.pageWidth)
-
-const updateViewportSizes = () => {
-  const viewport = utils.visualViewport()
-  state.viewportWidth = viewport.width
-  state.viewportHeight = viewport.height
-}
-const spaceZoomDecimal = computed(() => store.getters.spaceZoomDecimal)
-
 // current user
 
 const currentUserColor = computed(() => store.state.currentUser.color)
@@ -164,6 +144,15 @@ const isPanning = computed(() => store.state.currentUserIsPanningReady)
 const isBoxSelecting = computed(() => store.state.currentUserIsBoxSelecting)
 const toolbarIsCard = computed(() => store.state.currentUserToolbar === 'card')
 const toolbarIsBox = computed(() => store.state.currentUserToolbar === 'box')
+
+// page size
+// keep canvases updated to viewport size so you can draw on newly created areas
+
+const pageHeight = computed(() => store.state.pageHeight)
+const pageWidth = computed(() => store.state.pageWidth)
+const viewportHeight = computed(() => store.state.viewportHeight)
+const viewportWidth = computed(() => store.state.viewportWidth)
+const spaceZoomDecimal = computed(() => store.getters.spaceZoomDecimal)
 
 // selectable items
 
@@ -271,25 +260,25 @@ const checkIsCircleVisible = (circle) => {
   let isBetween = {
     value: x + radius,
     min: 0,
-    max: state.viewportWidth
+    max: viewportWidth.value
   }
   const isCircleVisibleX = utils.isBetween(isBetween)
   isBetween = {
     value: y + radius,
     min: 0,
-    max: state.viewportHeight
+    max: viewportHeight.value
   }
   const isCircleVisibleY = utils.isBetween(isBetween)
   return Boolean(isCircleVisibleX && isCircleVisibleY)
 }
 const offscreenCircle = (circle) => {
-  if (circle.x > state.viewportWidth) {
-    circle.x = state.state.viewportWidth
+  if (circle.x > viewportWidth.value) {
+    circle.x = viewportWidth.value
   } else if (circle.x < 0) {
     circle.x = 0
   }
-  if (circle.y > state.viewportHeight) {
-    circle.y = state.viewportHeight
+  if (circle.y > viewportHeight.value) {
+    circle.y = viewportHeight.value
   } else if (circle.y < 0) {
     circle.y = 0
   }
@@ -784,8 +773,8 @@ aside
     @touchstart="startPainting"
     @mousemove="painting"
     @touchmove="painting"
-    :width="state.viewportWidth"
-    :height="state.viewportHeight"
+    :width="viewportWidth"
+    :height="viewportHeight"
     @dragenter="checkIfUploadIsDraggedOver"
     @dragover.prevent="checkIfUploadIsDraggedOver"
     @dragleave="removeUploadIsDraggedOver"
@@ -793,23 +782,23 @@ aside
     @drop.prevent.stop="addCardsAndUploadFiles"
   )
   canvas#remote-painting.remote-painting(
-    :width="state.viewportWidth"
-    :height="state.viewportHeight"
+    :width="viewportWidth"
+    :height="viewportHeight"
     :data-should-decay-slow="true"
   )
   canvas#locking.locking(
-    :width="state.viewportWidth"
-    :height="state.viewportHeight"
+    :width="viewportWidth"
+    :height="viewportHeight"
     :data-should-decay-slow="true"
   )
   canvas#initial-circle.initial-circle(
-    :width="state.viewportWidth"
-    :height="state.viewportHeight"
+    :width="viewportWidth"
+    :height="viewportHeight"
     :data-should-decay-slow="true"
   )
   canvas#notify-offscreen-circle.notify-offscreen-circle(
-    :width="state.viewportWidth"
-    :height="state.viewportHeight"
+    :width="viewportWidth"
+    :height="viewportHeight"
     :data-should-decay-slow="true"
   )
   template(v-if="state.dropGuideLineIsVisible")
@@ -817,8 +806,8 @@ aside
       :currentCursor="state.currentCursor"
       :currentCursorInSpace="state.currentCursorInSpace"
       :uploadIsDraggedOver="state.uploadIsDraggedOver"
-      :viewportWidth="state.viewportWidth"
-      :viewportHeight="state.viewportHeight"
+      :viewportWidth="viewportWidth"
+      :viewportHeight="viewportHeight"
     )
 </template>
 
