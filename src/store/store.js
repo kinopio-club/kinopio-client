@@ -272,14 +272,14 @@ const store = createStore({
     },
     updatePageSizes: (state, itemsRect) => {
       if (!itemsRect) { return }
-      const viewportWidth = utils.visualViewport().width
-      let viewportHeight = utils.visualViewport().height
-      state.viewportWidth = Math.round(viewportWidth)
-      state.viewportHeight = Math.round(viewportHeight)
-      let pageWidth = Math.max(viewportWidth, itemsRect.width, state.pageWidth)
-      let pageHeight = Math.max(viewportHeight, itemsRect.height, state.pageHeight)
+      let pageWidth = Math.max(state.viewportWidth, itemsRect.width, state.pageWidth)
+      let pageHeight = Math.max(state.viewportHeight, itemsRect.height, state.pageHeight)
       state.pageWidth = Math.round(pageWidth)
       state.pageHeight = Math.round(pageHeight)
+    },
+    updateViewportSizes: (state, viewport) => {
+      state.viewportWidth = Math.round(viewport.width)
+      state.viewportHeight = Math.round(viewport.height)
     },
     updateSpacePageSize: (state) => {
       const extraScrollArea = 160
@@ -1675,6 +1675,10 @@ const store = createStore({
       })
       let itemsRect = utils.pageSizeFromItems(items)
       context.commit('updatePageSizes', itemsRect)
+    },
+    updateViewportSizes: (context) => {
+      const viewport = utils.visualViewport()
+      context.commit('updateViewportSizes', viewport)
     },
     checkIfItemShouldIncreasePageSize: (context, item) => {
       if (!item) { return }

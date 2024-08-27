@@ -41,6 +41,11 @@ onMounted(() => {
   window.addEventListener('mouseup', stopInteractions)
   window.addEventListener('touchend', handleTouchEnd)
   window.addEventListener('visibilitychange', handleTouchEnd)
+  // update viewport size
+  addEventListener('touchend', updateViewportSizes)
+  addEventListener('gesturecancel', updateViewportSizes)
+  addEventListener('resize', updateViewportSizes)
+  updateViewportSizes()
   // when a card is added through Add.vue in a sharesheet with the space open behind it
   window.addEventListener('message', addCardFromOutsideAppContext)
   // load space tasks
@@ -122,6 +127,9 @@ const updatePageSizeFromMutation = (value) => {
   if (!value) {
     store.dispatch('updatePageSizes')
   }
+}
+const updateViewportSizes = () => {
+  store.dispatch('updateViewportSizes')
 }
 
 // user
