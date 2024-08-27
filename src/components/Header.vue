@@ -477,7 +477,7 @@ const updatePositionInVisualViewport = () => {
   state.position = style
 }
 const styles = computed(() => {
-  // if (isFadingOut.value) { return }
+  if (state.isHidden) { return }
   return state.position
 })
 

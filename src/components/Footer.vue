@@ -10,19 +10,19 @@ const store = useStore()
 
 const footerElement = ref(null)
 
-const hiddenOnTouchDuration = 20
+const hiddenDuration = 20
 const updatePositionDuration = 60
-let hiddenOnTouchIteration, hiddenOnTouchTimer, updatePositionIteration, updatePositionTimer
+let hiddenIteration, hiddenTimer, updatePositionIteration, updatePositionTimer
 
 onMounted(() => {
-  window.addEventListener('scroll', updatePosition)
-  window.addEventListener('resize', updatePosition)
+  window.addEventListener('touchstart', hidden)
+  window.addEventListener('touchend', cancelHidden)
   updatePosition()
   store.subscribe((mutation, state) => {
     if (mutation.type === 'triggerUpdateHeaderAndFooterPosition') {
       updatePosition()
     } else if (mutation.type === 'triggerHideTouchInterface') {
-      hideOnTouch()
+      hidden()
     } else if (mutation.type === 'isPresentationMode') {
       if (!mutation.payload) {
         store.commit('shouldExplicitlyHideFooter', false)
@@ -31,28 +31,13 @@ onMounted(() => {
   })
 })
 onBeforeUnmount(() => {
-  window.removeEventListener('scroll', updatePosition)
+  window.removeEventListener('touchstart', hidden)
+  window.removeEventListener('touchend', cancelHidden)
 })
 
 const state = reactive({
   position: {},
-  isHiddenOnTouch: false
-})
-
-const isPinchZooming = computed(() => store.state.isPinchZooming)
-watch(() => isPinchZooming.value, (value, prevValue) => {
-  if (value) {
-    updatePosition()
-  }
-})
-const isTouchScrolling = computed(() => store.state.isTouchScrolling)
-watch(() => isTouchScrolling.value, (value, prevValue) => {
-  if (value) {
-    if (!utils.isAndroid()) { return }
-    if (value) {
-      updatePosition()
-    }
-  }
+  isHidden: false
 })
 
 const isAddPage = computed(() => store.state.isAddPage)
@@ -103,25 +88,17 @@ const toggleUserSettingsIsVisible = async () => {
 
 // hide
 
-const hideOnTouch = (event) => {
-  if (!isTouchDevice.value) { return }
-  hiddenOnTouchIteration = 0
-  if (hiddenOnTouchTimer) { return }
-  hiddenOnTouchTimer = window.requestAnimationFrame(hiddenOnTouchFrame)
-}
-const hiddenOnTouchFrame = () => {
-  hiddenOnTouchIteration++
-  state.isHiddenOnTouch = true
-  if (hiddenOnTouchIteration < hiddenOnTouchDuration) {
-    window.requestAnimationFrame(hiddenOnTouchFrame)
-  } else {
-    cancelHidden()
-  }
+const hidden = (event) => {
+  if (!store.getters.isTouchDevice) { return }
+  if (utils.unpinnedDialogIsVisible()) { return }
+  state.isHidden = true
 }
 const cancelHidden = () => {
-  window.cancelAnimationFrame(hiddenOnTouchTimer)
-  hiddenOnTouchTimer = undefined
-  state.isHiddenOnTouch = false
+  const momentumScrollingDelay = 400
+  setTimeout(() => {
+    updatePosition()
+    state.isHidden = false
+  }, momentumScrollingDelay)
 }
 
 // position
@@ -166,17 +143,21 @@ const updatePositionInVisualViewport = () => {
   }
   state.position = style
 }
+const styles = computed(() => {
+  if (state.isHidden) { return }
+  return state.position
+})
 
 </script>
 
 <template lang="pug">
-.footer-wrap(:style="state.position" v-if="isVisible" :class="{'fade-out': isFadingOut}" ref="footerElement")
+.footer-wrap(:style="styles" v-if="isVisible" :class="{'hidden': state.isHidden}" ref="footerElement")
   .left(v-if="leftIsVisble")
     footer
       Notifications
   .right(v-if="controlsIsVisible" :class="{'is-embed': isEmbedMode}")
     SpaceZoom
-    .button-wrap.input-button-wrap.settings-button-wrap(@click="toggleUserSettingsIsVisible" @touchend.stop :class="{'hidden': state.isHiddenOnTouch}")
+    .button-wrap.input-button-wrap.settings-button-wrap(@click="toggleUserSettingsIsVisible" @touchend.stop :class="{'hidden': state.isHidden}")
       button.small-button(:class="{active: userSettingsIsVisible, 'translucent-button': !shouldIncreaseUIContrast}" title="Settings")
         img.icon.settings(src="@/assets/settings.svg")
 </template>
