@@ -31,9 +31,15 @@ let bi = Math.floor(Math.random() * 4)
 
 let shouldNotUpdate
 
+let canvas, context
+
 // start, stop
 
 onMounted(() => {
+  canvas = document.getElementById('outside-space-background')
+  context = canvas.getContext('2d')
+  context.scale(window.devicePixelRatio, window.devicePixelRatio)
+
   start()
 })
 onBeforeUnmount(() => {
@@ -57,14 +63,8 @@ const cancel = () => {
   window.cancelAnimationFrame(colorCycleTimer)
   colorCycleTimer = undefined
 }
-
 const spaceZoomDecimal = computed(() => store.getters.spaceZoomDecimal)
 const outsideSpaceBackgroundIsStatic = computed(() => store.state.currentUser.outsideSpaceBackgroundIsStatic)
-const styles = computed(() => {
-  return {
-    backgroundColor: store.state.outsideSpaceBackgroundColor
-  }
-})
 
 // update color
 
@@ -87,6 +87,10 @@ const updateBackgroundColor = () => {
   }
   store.commit('outsideSpaceBackgroundColor', backgroundColor)
   updateMetaThemeColor(backgroundColor)
+  // update canvas bk
+  context.clearRect(0, 0, canvas.width, canvas.height)
+  context.fillStyle = backgroundColor
+  context.fillRect(0, 0, canvas.width, canvas.height)
 }
 const shouldUpdate = () => {
   if (shouldNotUpdate) { return }
@@ -108,11 +112,11 @@ const updateMetaThemeColor = (color) => {
 </script>
 
 <template lang="pug">
-.outside-space-background(:style="styles")
+canvas#outside-space-background
 </template>
 
 <style lang="stylus">
-.outside-space-background
+#outside-space-background
   position fixed
   top 0
   left 0
