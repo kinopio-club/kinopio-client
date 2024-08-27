@@ -109,10 +109,15 @@ const updateMetaThemeColor = (color) => {
   metaThemeColor.setAttribute('content', color)
   postMessage.send({ name: 'setBackgroundColor', value: color })
 }
+const styles = computed(() => {
+  const canvasSize = 10
+  const scale = store.state.viewportWidth / canvasSize
+  return { transform: `scale(${scale})` }
+})
 </script>
 
 <template lang="pug">
-canvas#outside-space-background
+canvas#outside-space-background(:style="styles")
 </template>
 
 <style lang="stylus">
@@ -120,7 +125,8 @@ canvas#outside-space-background
   position fixed
   top 0
   left 0
-  width 110%
-  height 110%
+  width 10px
+  height 10px
   background-color var(--secondary-active-background)
+  transform-origin left top
 </style>
