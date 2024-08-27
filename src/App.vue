@@ -94,6 +94,7 @@ const users = computed(() => {
   const excludeCurrentUser = true
   return store.getters['currentSpace/allUsers'](excludeCurrentUser)
 })
+const currentUserId = computed(() => store.state.currentUser.id)
 
 // touch actions
 
@@ -273,6 +274,7 @@ const updateMetaRSSFeed = () => {
   @touchstart="isTouchDevice"
   :style="{ width: pageWidth, height: pageHeight, cursor: pageCursor }"
   :class="{ 'no-background': !isSpacePage, 'is-dark-theme': isThemeDark }"
+  :data-current-user-id="currentUserId"
 )
   base(v-if="!isSpacePage" target="_blank")
   template(v-if="isSpacePage")
