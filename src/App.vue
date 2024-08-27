@@ -436,7 +436,7 @@ const updateMetaRSSFeed = () => {
   font-style normal
 
 *
-  -webkit-overflow-scrolling touch
+  // -webkit-overflow-scrolling touch
   -webkit-tap-highlight-color transparent
   box-sizing border-box
   font-family  var(--sans-serif-font)
