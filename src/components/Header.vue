@@ -429,6 +429,7 @@ const toggleUpgradeUserIsVisible = () => {
 const hidden = (event) => {
   if (!store.getters.isTouchDevice) { return }
   if (utils.unpinnedDialogIsVisible()) { return }
+  if (event.target.closest('button')) { return }
   state.isHidden = true
 }
 const cancelHidden = () => {
