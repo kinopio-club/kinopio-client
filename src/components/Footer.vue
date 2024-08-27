@@ -96,7 +96,7 @@ const hidden = (event) => {
 }
 const cancelHidden = () => {
   const viewport = utils.visualViewport()
-  if (viewport.scale > 3) { return }
+  if (viewport.scale > 2) { return }
   const momentumScrollingDelay = 400
   setTimeout(() => {
     state.isHidden = false
