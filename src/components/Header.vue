@@ -529,6 +529,10 @@ const updatePositionInVisualViewport = () => {
   }
   state.position = style
 }
+const styles = computed(() => {
+  if (isFadingOut.value) { return }
+  return state.position
+})
 
 // notifications
 
@@ -573,13 +577,13 @@ const togglePresentationMode = () => {
 </script>
 
 <template lang="pug">
-header.presentation-header(v-if="isPresentationMode" :style="state.position" :class="{'fade-out': isFadingOut}")
+header.presentation-header(v-if="isPresentationMode" :style="styles" :class="{'hidden': isFadingOut}")
   button.active(@click="disablePresentationMode" :class="{ 'translucent-button': !shouldIncreaseUIContrast }")
     img.icon(src="@/assets/presentation.svg")
   SelectAllBelow
   SelectAllRight
 
-header(v-if="isVisible" :style="state.position" :class="{'fade-out': isFadingOut, 'hidden': state.isHidden}")
+header(v-if="isVisible" :style="styles" :class="{'hidden': isFadingOut, 'hidden': state.isHidden}")
   //- embed
   nav.embed-nav(v-if="isEmbedMode")
     a(:href="currentSpaceUrl" @mousedown.left.stop="openKinopio" @touchstart.stop="openKinopio")
@@ -763,7 +767,6 @@ header
   padding 8px
   display flex
   justify-content space-between
-  transition 0.2s opacity
   transform-origin left top
   nav,
   aside
