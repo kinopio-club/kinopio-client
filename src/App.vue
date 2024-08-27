@@ -59,7 +59,6 @@ const isSpacePage = computed(() => store.getters.isSpacePage)
 
 // styles and position
 
-const outsideSpaceBackgroundColor = computed(() => store.state.outsideSpaceBackgroundColor)
 const pageWidth = computed(() => {
   if (!isSpacePage.value) { return }
   const size = Math.max(store.state.pageWidth, store.state.viewportWidth)
@@ -272,7 +271,7 @@ const updateMetaRSSFeed = () => {
 .app(
   @pointermove="broadcastUserLabelCursor"
   @touchstart="isTouchDevice"
-  :style="{ width: pageWidth, height: pageHeight, cursor: pageCursor, backgroundColor: outsideSpaceBackgroundColor }"
+  :style="{ width: pageWidth, height: pageHeight, cursor: pageCursor }"
   :class="{ 'no-background': !isSpacePage, 'is-dark-theme': isThemeDark }"
 )
   base(v-if="!isSpacePage" target="_blank")
