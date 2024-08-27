@@ -42,9 +42,9 @@ onMounted(() => {
   window.addEventListener('touchend', handleTouchEnd)
   window.addEventListener('visibilitychange', handleTouchEnd)
   // update viewport size
-  addEventListener('touchend', updateViewportSizes)
-  addEventListener('gesturecancel', updateViewportSizes)
-  addEventListener('resize', updateViewportSizes)
+  window.addEventListener('touchend', updateViewportSizes)
+  window.addEventListener('gesturecancel', updateViewportSizes)
+  window.addEventListener('resize', updateViewportSizes)
   updateViewportSizes()
   // when a card is added through Add.vue in a sharesheet with the space open behind it
   window.addEventListener('message', addCardFromOutsideAppContext)
@@ -88,6 +88,9 @@ onBeforeUnmount(() => {
   window.removeEventListener('unload', unloadPage)
   window.removeEventListener('message', addCardFromOutsideAppContext)
   window.removeEventListener('popstate', loadSpaceOnBackOrForward)
+  window.removeEventListener('touchend', updateViewportSizes)
+  window.removeEventListener('gesturecancel', updateViewportSizes)
+  window.removeEventListener('resize', updateViewportSizes)
   clearInterval(processQueueIntervalTimer)
   clearInterval(updateJournalDailyPromptTimer)
   clearInterval(updateInboxCache)
