@@ -47,15 +47,21 @@ const store = useStore()
 
 let updateNotificationsIntervalTimer
 
-const fadeOutDuration = 10
+// const fadeOutDuration = 10
 const hiddenDuration = 20
 const updatePositionDuration = 60
-let fadeOutIteration, fadeOutTimer, hiddenIteration, hiddenTimer, updatePositionIteration, updatePositionTimer, shouldCancelFadeOut
+let hiddenIteration, hiddenTimer, updatePositionIteration, updatePositionTimer, shouldCancelFadeOut
 
 const readOnlyElement = ref(null)
 
 onMounted(() => {
   window.addEventListener('scroll', updatePosition)
+
+  window.addEventListener('touchstart', hidden)
+  window.addEventListener('gesturestart', hidden)
+  window.addEventListener('touchend', cancelHidden)
+  window.addEventListener('gestureend', cancelHidden)
+
   updatePosition()
   updateNotifications()
   store.commit('isLoadingSpace', true)
@@ -68,6 +74,7 @@ onMounted(() => {
     } else if (mutation.type === 'triggerSpaceDetailsVisible') {
       updateSpaceDetailsIsVisible(true)
     } else if (mutation.type === 'triggerUpdateHeaderAndFooterPosition') {
+      // handle mobile keyboard
       updatePosition()
     } else if (mutation.type === 'triggerSpaceDetailsInfoIsVisible') {
       updateSpaceDetailsInfoIsVisible(true)
@@ -135,26 +142,26 @@ const state = reactive({
   importIsVisible: false
 })
 
-const isPinchZooming = computed(() => store.state.isPinchZooming)
-watch(() => isPinchZooming.value, (value, prevValue) => {
-  if (value) {
-    fadeOut()
-    updatePosition()
-  } else {
-    shouldCancelFadeOut = true
-    cancelFadeOut()
-  }
-})
-const isTouchScrolling = computed(() => store.state.isTouchScrolling)
-watch(() => isTouchScrolling.value, (value, prevValue) => {
-  if (value) {
-    fadeOut()
-    updatePosition()
-  } else {
-    shouldCancelFadeOut = true
-    cancelFadeOut()
-  }
-})
+// const isPinchZooming = computed(() => store.state.isPinchZooming)
+// watch(() => isPinchZooming.value, (value, prevValue) => {
+//   if (value) {
+//     fadeOut()
+//     updatePosition()
+//   } else {
+//     shouldCancelFadeOut = true
+//     cancelFadeOut()
+//   }
+// })
+// const isTouchScrolling = computed(() => store.state.isTouchScrolling)
+// watch(() => isTouchScrolling.value, (value, prevValue) => {
+//   if (value) {
+//     fadeOut()
+//     updatePosition()
+//   } else {
+//     shouldCancelFadeOut = true
+//     cancelFadeOut()
+//   }
+// })
 
 const importArenaChannelIsVisible = computed(() => store.state.importArenaChannelIsVisible)
 const kinopioDomain = computed(() => consts.kinopioDomain())
@@ -468,29 +475,29 @@ const cancelHidden = () => {
 
 // fade out
 
-const isFadingOut = computed(() => store.state.isFadingOutDuringTouch)
-const fadeOut = () => {
-  fadeOutIteration = 0
-  if (fadeOutTimer) { return }
-  shouldCancelFadeOut = false
-  fadeOutTimer = window.requestAnimationFrame(fadeOutFrame)
-}
-const cancelFadeOut = () => {
-  window.cancelAnimationFrame(fadeOutTimer)
-  fadeOutTimer = undefined
-  store.commit('isFadingOutDuringTouch', false)
-  cancelUpdatePosition()
-  updatePosition()
-}
-const fadeOutFrame = () => {
-  fadeOutIteration++
-  store.commit('isFadingOutDuringTouch', true)
-  if (shouldCancelFadeOut) {
-    cancelFadeOut()
-  } else if (fadeOutIteration < fadeOutDuration) {
-    window.requestAnimationFrame(fadeOutFrame)
-  }
-}
+// const isFadingOut = computed(() => store.state.isFadingOutDuringTouch)
+// const fadeOut = () => {
+//   fadeOutIteration = 0
+//   if (fadeOutTimer) { return }
+//   shouldCancelFadeOut = false
+//   fadeOutTimer = window.requestAnimationFrame(fadeOutFrame)
+// }
+// const cancelFadeOut = () => {
+//   window.cancelAnimationFrame(fadeOutTimer)
+//   fadeOutTimer = undefined
+//   store.commit('isFadingOutDuringTouch', false)
+//   cancelUpdatePosition()
+//   updatePosition()
+// }
+// const fadeOutFrame = () => {
+//   fadeOutIteration++
+//   store.commit('isFadingOutDuringTouch', true)
+//   if (shouldCancelFadeOut) {
+//     cancelFadeOut()
+//   } else if (fadeOutIteration < fadeOutDuration) {
+//     window.requestAnimationFrame(fadeOutFrame)
+//   }
+// }
 
 // position
 
@@ -530,7 +537,7 @@ const updatePositionInVisualViewport = () => {
   state.position = style
 }
 const styles = computed(() => {
-  if (isFadingOut.value) { return }
+  // if (isFadingOut.value) { return }
   return state.position
 })
 
@@ -577,13 +584,13 @@ const togglePresentationMode = () => {
 </script>
 
 <template lang="pug">
-header.presentation-header(v-if="isPresentationMode" :style="styles" :class="{'hidden': isFadingOut}")
+header.presentation-header(v-if="isPresentationMode" :style="styles" :class="{'hidden': state.isHidden}")
   button.active(@click="disablePresentationMode" :class="{ 'translucent-button': !shouldIncreaseUIContrast }")
     img.icon(src="@/assets/presentation.svg")
   SelectAllBelow
   SelectAllRight
 
-header(v-if="isVisible" :style="styles" :class="{'hidden': isFadingOut, 'hidden': state.isHidden}")
+header(v-if="isVisible" :style="styles" :class="{'hidden': state.isHidden}")
   //- embed
   nav.embed-nav(v-if="isEmbedMode")
     a(:href="currentSpaceUrl" @mousedown.left.stop="openKinopio" @touchstart.stop="openKinopio")
