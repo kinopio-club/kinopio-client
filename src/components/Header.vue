@@ -56,12 +56,8 @@ const readOnlyElement = ref(null)
 
 onMounted(() => {
   window.addEventListener('scroll', updatePosition)
-
   window.addEventListener('touchstart', hidden)
-  // window.addEventListener('gesturestart', hidden)
   window.addEventListener('touchend', cancelHidden)
-  // window.addEventListener('gestureend', cancelHidden)
-
   updatePosition()
   updateNotifications()
   store.commit('isLoadingSpace', true)
@@ -74,7 +70,6 @@ onMounted(() => {
     } else if (mutation.type === 'triggerSpaceDetailsVisible') {
       updateSpaceDetailsIsVisible(true)
     } else if (mutation.type === 'triggerUpdateHeaderAndFooterPosition') {
-      // handle mobile keyboard
       updatePosition()
     } else if (mutation.type === 'triggerSpaceDetailsInfoIsVisible') {
       updateSpaceDetailsInfoIsVisible(true)
@@ -115,6 +110,8 @@ onMounted(() => {
 })
 onBeforeUnmount(() => {
   window.removeEventListener('scroll', updatePosition)
+  window.removeEventListener('touchstart', hidden)
+  window.removeEventListener('touchend', cancelHidden)
   clearInterval(updateNotificationsIntervalTimer)
 })
 
@@ -141,27 +138,6 @@ const state = reactive({
   donateIsVisible: false,
   importIsVisible: false
 })
-
-// const isPinchZooming = computed(() => store.state.isPinchZooming)
-// watch(() => isPinchZooming.value, (value, prevValue) => {
-//   if (value) {
-//     fadeOut()
-//     updatePosition()
-//   } else {
-//     shouldCancelFadeOut = true
-//     cancelFadeOut()
-//   }
-// })
-// const isTouchScrolling = computed(() => store.state.isTouchScrolling)
-// watch(() => isTouchScrolling.value, (value, prevValue) => {
-//   if (value) {
-//     fadeOut()
-//     updatePosition()
-//   } else {
-//     shouldCancelFadeOut = true
-//     cancelFadeOut()
-//   }
-// })
 
 const importArenaChannelIsVisible = computed(() => store.state.importArenaChannelIsVisible)
 const kinopioDomain = computed(() => consts.kinopioDomain())
@@ -454,51 +430,13 @@ const toggleUpgradeUserIsVisible = () => {
 
 const hidden = (event) => {
   if (!store.getters.isTouchDevice) { return }
+  if (utils.unpinnedDialogIsVisible()) { return }
   state.isHidden = true
-  // hiddenIteration = 0
-  // if (hiddenTimer) { return }
-  // hiddenTimer = window.requestAnimationFrame(hiddenFrame)
-// }
-// const hiddenFrame = () => {
-//   hiddenIteration++
-//   state.isHidden = true
-//   // if (hiddenIteration < hiddenDuration) {
-//   window.requestAnimationFrame(hiddenFrame)
-//   // } else {
-//   //   cancelHidden()
-//   // }
 }
 const cancelHidden = () => {
-  // window.cancelAnimationFrame(hiddenTimer)
-  // hiddenTimer = undefined
+  updatePosition()
   state.isHidden = false
 }
-
-// fade out
-
-// const isFadingOut = computed(() => store.state.isFadingOutDuringTouch)
-// const fadeOut = () => {
-//   fadeOutIteration = 0
-//   if (fadeOutTimer) { return }
-//   shouldCancelFadeOut = false
-//   fadeOutTimer = window.requestAnimationFrame(fadeOutFrame)
-// }
-// const cancelFadeOut = () => {
-//   window.cancelAnimationFrame(fadeOutTimer)
-//   fadeOutTimer = undefined
-//   store.commit('isFadingOutDuringTouch', false)
-//   cancelUpdatePosition()
-//   updatePosition()
-// }
-// const fadeOutFrame = () => {
-//   fadeOutIteration++
-//   store.commit('isFadingOutDuringTouch', true)
-//   if (shouldCancelFadeOut) {
-//     cancelFadeOut()
-//   } else if (fadeOutIteration < fadeOutDuration) {
-//     window.requestAnimationFrame(fadeOutFrame)
-//   }
-// }
 
 // position
 

@@ -484,9 +484,6 @@ const stopInteractions = async (event) => {
   }
   updateIconsNotDraggable()
   blurButtonClick(event)
-  if (event.touches) {
-    store.commit('triggerUpdateHeaderAndFooterPosition')
-  }
   checkIfShouldHideFooter(event)
   checkIfShouldSnapBoxes()
   checkIfShouldExpandBoxes()
