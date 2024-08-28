@@ -95,6 +95,8 @@ const updateNameSegments = () => {
       segment.isLink = false
       segment.isText = true
       segment.content = segment.name
+    } else if (segment.isText) {
+      segment.markdown = utils.markdownSegments(segment.content)
     }
     return segment
   })
