@@ -139,7 +139,6 @@ watch(() => state.linkToPreview, (value, prevValue) => {
 })
 const updateUrlData = () => {
   updateOtherItems()
-  if (store.state.isLoadingSpace) { return }
   updateUrlPreview()
 }
 
@@ -802,7 +801,6 @@ const uploadFile = async (event) => {
 // name
 
 const name = computed(() => {
-  updateMediaUrls()
   return props.card.name
 })
 const hasTextSegments = computed(() => {
@@ -985,6 +983,7 @@ const preventUpdatePrevPreview = computed(() => {
   return updateDelta < 0
 })
 const updateUrlPreview = () => {
+  if (store.state.isLoadingUrlPreview) { return }
   const isOffline = !store.state.isOnline
   if (preventUpdatePrevPreview.value) { return }
   if (isOffline) {

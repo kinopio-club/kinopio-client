@@ -602,7 +602,6 @@ const afterPaste = ({ cards, boxes }) => {
   cards.forEach(card => {
     store.dispatch('checkIfItemShouldIncreasePageSize', card)
     store.dispatch('currentCards/updateURLQueryStrings', { cardId: card.id })
-    store.commit('triggerUpdateUrlPreview', card.id)
   })
   boxes.forEach(box => {
     store.dispatch('checkIfItemShouldIncreasePageSize', box)

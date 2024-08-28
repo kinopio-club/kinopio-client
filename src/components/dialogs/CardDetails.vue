@@ -1139,7 +1139,6 @@ const updatePastedName = (event) => {
   }
   state.wasPasted = true
   store.dispatch('currentCards/updateURLQueryStrings', { cardId: card.value.id })
-  store.commit('triggerUpdateUrlPreview', card.value.id)
 }
 
 // line break
