@@ -1961,15 +1961,15 @@ export default {
       })
     }
     string = this.removeMarkdownCodeblocksFromString(string)
+    // matches multiple urls and returns [urls]
     // https://regexr.com/59m5t
     // start, newline, or space
     // starts with http/s protocol
     // followed by alphanumerics
     // then '.', or ':' + portnumbers
-    // followed by alphanumerics
-    // then trailing '/' or '-'
-    // matches multiple urls and returns [urls]
-    const urlPattern = new RegExp(/(^|\n| )(http[s]?:\/\/)[^\s(["<>]{1,}(\.|(:[0-9]+))[^\s."><]+[\w=]\/?-?/igm)
+    // followed by at least 1 alphanumeric, '=', or '.'
+    // then optional trailing '/' or '-'
+    const urlPattern = new RegExp(/(^|\n| )(http[s]?:\/\/)[^\s(["<>]{1,}(\.|(:[0-9]+))[^\s."><]+[\w=.]+\/?-?/igm)
     let localhostUrls = string.match(this.localhostUrlPattern()) || []
     let urls = string.match(urlPattern) || []
     urls = urls.concat(localhostUrls)
