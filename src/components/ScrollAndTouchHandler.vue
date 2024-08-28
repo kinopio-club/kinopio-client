@@ -3,6 +3,8 @@ import { reactive, computed, onMounted, onUnmounted, onBeforeUnmount, defineProp
 import { useStore } from 'vuex'
 
 import utils from '@/utils.js'
+import consts from '@/consts.js'
+
 const store = useStore()
 
 let multiTouchAction, shouldCancelUndo
@@ -10,17 +12,61 @@ let multiTouchAction, shouldCancelUndo
 let inertiaScrollEndIntervalTimer, prevPosition
 
 onMounted(() => {
+  window.addEventListener('wheel', handleMouseWheelEvents, { passive: false })
+  // use timer to prevent being fired from page reload scroll
+  // https://stackoverflow.com/questions/34095038/on-scroll-fires-automatically-on-page-refresh
+  setTimeout(() => {
+    window.addEventListener('scroll', scroll)
+  }, 100)
   window.addEventListener('touchstart', touchStart)
   window.addEventListener('touchmove', touchMove)
   window.addEventListener('touchend', touchEnd)
 })
 onBeforeUnmount(() => {
+  window.removeEventListener('wheel', handleMouseWheelEvents, { passive: false })
   window.removeEventListener('touchstart', touchStart)
   window.removeEventListener('touchmove', touchMove)
   window.removeEventListener('touchend', touchEnd)
 })
 
 const isSpacePage = computed(() => store.getters.isSpacePage)
+
+// wheel
+
+const handleMouseWheelEvents = (event) => {
+  const min = consts.spaceZoom.min
+  const max = consts.spaceZoom.max
+  const maxSpeed = 10 // windows deltaY fix
+  const isMeta = event.metaKey || event.ctrlKey // event.ctrlKey is true for trackpad pinch
+  if (!isMeta) { return }
+  event.preventDefault()
+  const deltaY = event.deltaY
+  let shouldZoomIn = deltaY < 0
+  let shouldZoomOut = deltaY > 0
+  let invertZoom = event.webkitDirectionInvertedFromDevice
+  if (store.state.currentUser.shouldInvertZoom) {
+    invertZoom = !invertZoom
+  }
+  if (invertZoom) {
+    shouldZoomIn = deltaY > 0
+    shouldZoomOut = deltaY < 0
+  }
+  let speed = Math.max(Math.abs(deltaY), 1)
+  speed = Math.min(maxSpeed, speed)
+  updateZoomOrigin(event)
+  store.dispatch('zoomSpace', { shouldZoomIn, shouldZoomOut, speed })
+}
+
+// scroll
+
+const updateZoomOrigin = (event) => {
+  const cursor = utils.cursorPositionInPage(event)
+  store.dispatch('zoomOrigin', cursor)
+}
+const scroll = () => {
+  if (store.state.userHasScrolled) { return }
+  store.commit('userHasScrolled', true)
+}
 
 // touch start
 
@@ -101,7 +147,6 @@ const toggleIsPinchZooming = (event) => {
   if (utils.shouldIgnoreTouchInteraction(event)) { return }
   store.commit('isPinchZooming', true)
 }
-
 </script>
 
 <template lang="pug">

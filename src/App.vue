@@ -8,8 +8,7 @@ import UserLabelCursor from '@/components/UserLabelCursor.vue'
 import Footer from '@/components/Footer.vue'
 import WindowHistoryHandler from '@/components/WindowHistoryHandler.vue'
 import KeyboardShortcutsHandler from '@/components/KeyboardShortcutsHandler.vue'
-import ScrollHandler from '@/components/ScrollHandler.vue'
-import TouchHandler from '@/components/TouchHandler.vue'
+import ScrollAndTouchHandler from '@/components/ScrollAndTouchHandler.vue'
 import TagDetails from '@/components/dialogs/TagDetails.vue'
 import ItemsLocked from '@/components/ItemsLocked.vue'
 import UserDetails from '@/components/dialogs/UserDetails.vue'
@@ -209,8 +208,7 @@ const updateMetaRSSFeed = () => {
     UserDetails
     WindowHistoryHandler
     KeyboardShortcutsHandler
-    ScrollHandler
-    TouchHandler
+    ScrollAndTouchHandler
     NotificationsWithPosition(layer="app")
     Preload
     .badge.label-badge.development-badge(v-if="isDevelpmentBadgeVisible")
