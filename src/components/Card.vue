@@ -1030,7 +1030,7 @@ const updateUrlPreviewSuccess = (url, data) => {
     store.commit('removeUrlPreviewLoadingForCardIds', cardId)
     return
   }
-  data.name = utils.addHiddenQueryStringToURLs(data.name)
+  data.name = utils.addHiddenQueryStringToURLs(props.card.name)
   store.dispatch('currentCards/update', { card: data })
   store.commit('removeUrlPreviewLoadingForCardIds', cardId)
   store.dispatch('api/addToQueue', { name: 'updateUrlPreviewImage', body: data })
