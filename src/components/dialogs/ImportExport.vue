@@ -12,11 +12,7 @@ const dialogElement = ref(null)
 const emit = defineEmits(['updateSpaces', 'closeDialog'])
 
 onMounted(() => {
-  store.subscribe((mutation, state) => {
-    if (mutation.type === 'updatePageSizes') {
-      updateDialogHeight()
-    }
-  })
+  window.addEventListener('resize', updateDialogHeight)
 })
 
 const props = defineProps({

@@ -16,11 +16,7 @@ const resultsSectionElement = ref(null)
 
 onMounted(() => {
   initUserTemplates()
-  store.subscribe((mutation, state) => {
-    if (mutation.type === 'updatePageSizes') {
-      updateDialogHeight()
-    }
-  })
+  window.addEventListener('resize', updateDialogHeight)
 })
 
 const props = defineProps({

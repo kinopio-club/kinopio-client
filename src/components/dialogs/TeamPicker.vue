@@ -10,11 +10,7 @@ const store = useStore()
 const dialogElement = ref(null)
 
 onMounted(() => {
-  store.subscribe(mutation => {
-    if (mutation.type === 'updatePageSizes') {
-      updateDialogHeight()
-    }
-  })
+  window.addEventListener('resize', updateDialogHeight)
 })
 
 const emit = defineEmits(['selectTeam', 'clearTeam', 'closeDialogs'])

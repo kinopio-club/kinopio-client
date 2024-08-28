@@ -8,7 +8,7 @@ import UserLabelCursor from '@/components/UserLabelCursor.vue'
 import Footer from '@/components/Footer.vue'
 import WindowHistoryHandler from '@/components/WindowHistoryHandler.vue'
 import KeyboardShortcutsHandler from '@/components/KeyboardShortcutsHandler.vue'
-import ScrollHandler from '@/components/ScrollHandler.vue'
+import ScrollAndTouchHandler from '@/components/ScrollAndTouchHandler.vue'
 import TagDetails from '@/components/dialogs/TagDetails.vue'
 import ItemsLocked from '@/components/ItemsLocked.vue'
 import UserDetails from '@/components/dialogs/UserDetails.vue'
@@ -19,10 +19,6 @@ import Preload from '@/components/Preload.vue'
 import utils from '@/utils.js'
 import consts from '@/consts.js'
 const store = useStore()
-
-let multiTouchAction, shouldCancelUndo
-
-let inertiaScrollEndIntervalTimer, prevPosition
 
 let statusRetryCount = 0
 
@@ -39,14 +35,6 @@ onMounted(() => {
   if (utils.isLinux()) {
     utils.setCssVariable('sans-serif-font', '"Noto Sans", "Helvetica Neue", Helvetica, Arial, sans-serif')
   }
-  // use timer to prevent being fired from page reload scroll
-  // https://stackoverflow.com/questions/34095038/on-scroll-fires-automatically-on-page-refresh
-  setTimeout(() => {
-    window.addEventListener('scroll', scroll)
-  }, 100)
-  window.addEventListener('touchstart', touchStart)
-  window.addEventListener('touchmove', touchMove)
-  window.addEventListener('touchend', touchEnd)
   window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', logMatchMediaChange)
   window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', updateThemeFromSystem)
   updateIsOnline()
@@ -59,7 +47,6 @@ const isSpacePage = computed(() => store.getters.isSpacePage)
 
 // styles and position
 
-const outsideSpaceBackgroundColor = computed(() => store.state.outsideSpaceBackgroundColor)
 const pageWidth = computed(() => {
   if (!isSpacePage.value) { return }
   const size = Math.max(store.state.pageWidth, store.state.viewportWidth)
@@ -95,81 +82,7 @@ const users = computed(() => {
   const excludeCurrentUser = true
   return store.getters['currentSpace/allUsers'](excludeCurrentUser)
 })
-
-// touch actions
-
-const touchStart = (event) => {
-  shouldCancelUndo = false
-  if (!utils.isMultiTouch(event)) {
-    multiTouchAction = null
-    return
-  }
-  store.commit('shouldAddCard', false)
-  const touches = event.touches.length
-  if (touches >= 2) {
-    toggleIsPinchZooming(event)
-  }
-  // undo/redo
-  if (touches === 2) {
-    multiTouchAction = 'undo'
-  } else if (touches === 3) {
-    multiTouchAction = 'redo'
-  }
-}
-const touchMove = (event) => {
-  const isFromDialog = event.target.closest('dialog')
-  if (isFromDialog) { return }
-  shouldCancelUndo = true
-  store.commit('isTouchScrolling', true)
-}
-const touchEnd = () => {
-  if (!isSpacePage.value) { return }
-  store.commit('isPinchZooming', false)
-  checkIfInertiaScrollEnd()
-  if (shouldCancelUndo) {
-    shouldCancelUndo = false
-    multiTouchAction = ''
-    return
-  }
-  if (!multiTouchAction) { return }
-  if (multiTouchAction === 'undo') {
-    store.dispatch('history/undo')
-    store.commit('addNotification', { message: 'Undo', icon: 'undo' })
-  } else if (multiTouchAction === 'redo') {
-    store.dispatch('history/redo')
-    store.commit('addNotification', { message: 'Redo', icon: 'redo' })
-  }
-  multiTouchAction = null
-}
-const scroll = () => {
-  if (store.state.userHasScrolled) { return }
-  store.commit('userHasScrolled', true)
-}
-const toggleIsPinchZooming = (event) => {
-  if (utils.shouldIgnoreTouchInteraction(event)) { return }
-  store.commit('isPinchZooming', true)
-}
-const checkIfInertiaScrollEnd = () => {
-  if (!utils.isAndroid) { return }
-  if (inertiaScrollEndIntervalTimer) { return }
-  prevPosition = null
-  inertiaScrollEndIntervalTimer = setInterval(() => {
-    const viewport = utils.visualViewport()
-    const current = {
-      left: viewport.offsetLeft,
-      top: viewport.offsetTop
-    }
-    if (!prevPosition) {
-      prevPosition = current
-    } else if (prevPosition.left === current.left && prevPosition.top === current.top) {
-      clearInterval(inertiaScrollEndIntervalTimer)
-      inertiaScrollEndIntervalTimer = null
-      store.commit('isTouchScrolling', false)
-    } else {
-      prevPosition = current
-    }
-  }, 250)
-}
+const currentUserId = computed(() => store.state.currentUser.id)
 
 // online
 
@@ -272,8 +185,9 @@ const updateMetaRSSFeed = () => {
 .app(
   @pointermove="broadcastUserLabelCursor"
   @touchstart="isTouchDevice"
-  :style="{ width: pageWidth, height: pageHeight, cursor: pageCursor, backgroundColor: outsideSpaceBackgroundColor }"
+  :style="{ width: pageWidth, height: pageHeight, cursor: pageCursor }"
   :class="{ 'no-background': !isSpacePage, 'is-dark-theme': isThemeDark }"
+  :data-current-user-id="currentUserId"
 )
   base(v-if="!isSpacePage" target="_blank")
   template(v-if="isSpacePage")
@@ -294,7 +208,7 @@ const updateMetaRSSFeed = () => {
     UserDetails
     WindowHistoryHandler
     KeyboardShortcutsHandler
-    ScrollHandler
+    ScrollAndTouchHandler
     NotificationsWithPosition(layer="app")
     Preload
     .badge.label-badge.development-badge(v-if="isDevelpmentBadgeVisible")
@@ -437,7 +351,7 @@ const updateMetaRSSFeed = () => {
   font-style normal
 
 *
-  -webkit-overflow-scrolling touch
+  // -webkit-overflow-scrolling touch
   -webkit-tap-highlight-color transparent
   box-sizing border-box
   font-family  var(--sans-serif-font)

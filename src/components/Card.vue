@@ -2038,7 +2038,7 @@ article.card-wrap
 
     .card-content
       min-width 28px
-      margin-right 6px
+      padding-right 6px
       border-radius var(--entity-radius)
       max-width 100%
     .card-comment

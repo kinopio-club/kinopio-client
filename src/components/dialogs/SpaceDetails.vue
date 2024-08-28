@@ -24,11 +24,10 @@ const dialogElement = ref(null)
 const resultsElement = ref(null)
 
 onMounted(() => {
+  window.addEventListener('resize', updateHeights)
   store.subscribe(mutation => {
     if (mutation.type === 'triggerSpaceDetailsUpdateLocalSpaces') {
       updateLocalSpaces()
-    } else if (mutation.type === 'updatePageSizes') {
-      updateHeights()
     } else if (mutation.type === 'currentUser/favoriteSpaces') {
       if (!props.visible) { return }
       updateLocalSpaces()

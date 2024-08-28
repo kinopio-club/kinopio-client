@@ -64,11 +64,7 @@ export default {
     }
   },
   created () {
-    this.$store.subscribe((mutation, state) => {
-      if (mutation.type === 'updatePageSizes') {
-        this.updateDialogHeight()
-      }
-    })
+    window.addEventListener('resize', this.updateDialogHeight)
   },
   computed: {
     isSignedIn () { return this.$store.getters['currentUser/isSignedIn'] },

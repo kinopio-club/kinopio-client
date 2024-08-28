@@ -202,7 +202,6 @@ const currentSpace = {
       if (!currentUserIsSignedIn) { return }
       if (!canEditSpace) { return }
       try {
-        console.log('🙈 create space preview image')
         const response = await context.dispatch('api/createSpacePreviewImage', context.state.id, { root: true })
         console.log('🙈 updated space preview image', response.urls)
       } catch (error) {

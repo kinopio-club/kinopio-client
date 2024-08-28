@@ -41,7 +41,11 @@ onMounted(() => {
   window.addEventListener('mouseup', stopInteractions)
   window.addEventListener('touchend', handleTouchEnd)
   window.addEventListener('visibilitychange', handleTouchEnd)
-  window.addEventListener('resize', updatePageSizesDebounced)
+  // update viewport size
+  window.addEventListener('touchend', updateViewportSizes)
+  window.addEventListener('gesturecancel', updateViewportSizes)
+  window.addEventListener('resize', updateViewportSizes)
+  updateViewportSizes()
   // when a card is added through Add.vue in a sharesheet with the space open behind it
   window.addEventListener('message', addCardFromOutsideAppContext)
   // load space tasks
@@ -81,10 +85,12 @@ onBeforeUnmount(() => {
   window.removeEventListener('mouseup', stopInteractions)
   window.removeEventListener('touchend', handleTouchEnd)
   window.removeEventListener('visibilitychange', handleTouchEnd)
-  window.removeEventListener('resize', updatePageSizesDebounced)
   window.removeEventListener('unload', unloadPage)
   window.removeEventListener('message', addCardFromOutsideAppContext)
   window.removeEventListener('popstate', loadSpaceOnBackOrForward)
+  window.removeEventListener('touchend', updateViewportSizes)
+  window.removeEventListener('gesturecancel', updateViewportSizes)
+  window.removeEventListener('resize', updateViewportSizes)
   clearInterval(processQueueIntervalTimer)
   clearInterval(updateJournalDailyPromptTimer)
   clearInterval(updateInboxCache)
@@ -105,6 +111,29 @@ const isTiltingCard = computed(() => store.state.currentUserIsTiltingCard)
 const isDraggingCard = computed(() => store.state.currentUserIsDraggingCard)
 const isResizingBox = computed(() => store.state.currentUserIsResizingBox)
 const isDraggingBox = computed(() => store.state.currentUserIsDraggingBox)
+
+// page size
+
+watch(() => store.state.currentUserIsDraggingCard, (value, prevValue) => {
+  updatePageSizeFromMutation(value)
+})
+watch(() => store.state.currentUserIsResizingCard, (value, prevValue) => {
+  updatePageSizeFromMutation(value)
+})
+watch(() => store.state.currentUserIsDraggingBox, (value, prevValue) => {
+  updatePageSizeFromMutation(value)
+})
+watch(() => store.state.currentUserIsResizingBox, (value, prevValue) => {
+  updatePageSizeFromMutation(value)
+})
+const updatePageSizeFromMutation = (value) => {
+  if (!value) {
+    store.dispatch('updatePageSizes')
+  }
+}
+const updateViewportSizes = () => {
+  store.dispatch('updateViewportSizes')
+}
 
 // user
 
@@ -137,17 +166,6 @@ const unloadPage = () => {
   store.commit('broadcast/close')
   store.dispatch('currentSpace/removeEmptyCards')
   store.commit('triggerUnloadPage')
-}
-
-// page size
-
-const updatePageSizesDebounced = debounce((event) => {
-  if (utils.isMultiTouch(event)) { return }
-  updatePageSizes()
-}, 500)
-const updatePageSizes = async () => {
-  await nextTick()
-  store.dispatch('updatePageSizes')
 }
 
 // cards
@@ -452,7 +470,6 @@ const shouldCancelInteraction = (event) => {
 const handleTouchEnd = (event) => {
   store.commit('isPinchZooming', false)
   store.commit('isTouchScrolling', false)
-  updatePageSizes()
   stopInteractions(event)
 }
 const stopInteractions = async (event) => {

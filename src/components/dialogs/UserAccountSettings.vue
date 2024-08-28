@@ -70,11 +70,7 @@ export default {
     visible: Boolean
   },
   created () {
-    this.$store.subscribe((mutation, state) => {
-      if (mutation.type === 'updatePageSizes') {
-        this.updateDialogHeight()
-      }
-    })
+    window.addEventListener('resize', this.updateDialogHeight)
   },
   data () {
     return {

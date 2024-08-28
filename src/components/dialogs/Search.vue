@@ -20,10 +20,9 @@ const maxIterations = 30
 let currentIteration, updatePositionTimer
 
 onMounted(() => {
+  window.addEventListener('resize', updateHeights)
   store.subscribe((mutation, state) => {
-    if (mutation.type === 'updatePageSizes') {
-      updateHeights()
-    } else if (mutation.type === 'triggerSearchScopeIsRemote') {
+    if (mutation.type === 'triggerSearchScopeIsRemote') {
       updateScopeIsCurrentSpace(false)
     } else if (mutation.type === 'triggerSearchScopeIsCurrentSpace') {
       updateScopeIsCurrentSpace(true)

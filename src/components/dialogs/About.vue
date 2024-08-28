@@ -18,12 +18,10 @@ const initTime = dayjs(new Date())
 let checkKinopioUpdatesIntervalTimer
 
 onMounted(() => {
+  window.addEventListener('resize', updateDialogHeight)
   store.subscribe((mutation, state) => {
     if (mutation.type === 'closeAllDialogs') {
       hideWhatsNewIsVisible()
-    }
-    if (mutation.type === 'updatePageSizes') {
-      updateDialogHeight()
     }
   })
   const isOffline = !store.state.isOnline

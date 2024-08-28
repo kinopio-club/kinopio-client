@@ -13,11 +13,7 @@ const store = useStore()
 const resultsElement = ref(null)
 
 onMounted(() => {
-  store.subscribe(mutation => {
-    if (mutation.type === 'updatePageSizes') {
-      updateResultsSectionHeight()
-    }
-  })
+  window.addEventListener('resize', updateResultsSectionHeight)
   init()
 })
 

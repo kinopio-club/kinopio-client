@@ -14,11 +14,7 @@ const dialogElement = ref(null)
 const resultsElement = ref(null)
 
 onMounted(() => {
-  store.subscribe((mutation, state) => {
-    if (mutation.type === 'updatePageSizes') {
-      updateHeights()
-    }
-  })
+  window.addEventListener('resize', updateHeights)
 })
 
 const props = defineProps({

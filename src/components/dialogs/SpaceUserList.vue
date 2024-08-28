@@ -14,11 +14,7 @@ const store = useStore()
 const dialogElement = ref(null)
 
 onMounted(() => {
-  store.subscribe(mutation => {
-    if (mutation.type === 'updatePageSizes') {
-      updateDialogHeight()
-    }
-  })
+  window.addEventListener('resize', updateDialogHeight)
 })
 const state = reactive({
   dialogHeight: null,

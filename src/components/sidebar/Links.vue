@@ -46,10 +46,9 @@ export default {
     parentIsPinned: Boolean
   },
   created () {
+    window.addEventListener('resize', this.updateResultsSectionHeight)
     this.$store.subscribe((mutation, state) => {
-      if (mutation.type === 'updatePageSizes') {
-        this.updateResultsSectionHeight()
-      } else if (mutation.type === 'currentSpace/restoreSpace' && this.visible) {
+      if (mutation.type === 'currentSpace/restoreSpace' && this.visible) {
         this.updateLinks()
       }
     })

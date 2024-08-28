@@ -18,10 +18,9 @@ const store = useStore()
 const dialogElement = ref(null)
 
 onMounted(() => {
+  window.addEventListener('resize', updateDialogHeight)
   store.subscribe((mutation, state) => {
-    if (mutation.type === 'updatePageSizes') {
-      updateDialogHeight()
-    } else if (mutation.type === 'triggerRemovedIsVisible') {
+    if (mutation.type === 'triggerRemovedIsVisible') {
       triggerRemovedIsVisible()
     } else if (mutation.type === 'triggerAIImagesIsVisible') {
       triggerAIImagesIsVisible()

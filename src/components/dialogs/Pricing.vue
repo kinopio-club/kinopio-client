@@ -17,10 +17,9 @@ const props = defineProps({
 const dialog = ref(null)
 
 onMounted(() => {
+  window.addEventListener('resize', updateDialogHeight)
   store.subscribe((mutation, state) => {
-    if (mutation.type === 'updatePageSizes') {
-      updateDialogHeight()
-    } else if (mutation.type === 'triggerCloseChildDialogs') {
+    if (mutation.type === 'triggerCloseChildDialogs') {
       closeChildDialogs()
     }
   })

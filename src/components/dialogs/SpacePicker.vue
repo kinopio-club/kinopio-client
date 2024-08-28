@@ -22,11 +22,7 @@ const dialogElement = ref(null)
 const newSpaceNameElement = ref(null)
 
 onMounted(() => {
-  store.subscribe((mutation, state) => {
-    if (mutation.type === 'updatePageSizes') {
-      updateDialogHeight()
-    }
-  })
+  window.addEventListener('resize', updateDialogHeight)
 })
 
 const emit = defineEmits(['selectSpace'])
