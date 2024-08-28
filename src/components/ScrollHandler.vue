@@ -8,6 +8,11 @@ const store = useStore()
 
 onMounted(() => {
   window.addEventListener('wheel', handleMouseWheelEvents, { passive: false })
+  // use timer to prevent being fired from page reload scroll
+  // https://stackoverflow.com/questions/34095038/on-scroll-fires-automatically-on-page-refresh
+  setTimeout(() => {
+    window.addEventListener('scroll', scroll)
+  }, 100)
 })
 onBeforeUnmount(() => {
   window.removeEventListener('wheel', handleMouseWheelEvents, { passive: false })
@@ -44,6 +49,10 @@ const handleMouseWheelEvents = (event) => {
 const updateZoomOrigin = (event) => {
   const cursor = utils.cursorPositionInPage(event)
   store.dispatch('zoomOrigin', cursor)
+}
+const scroll = () => {
+  if (store.state.userHasScrolled) { return }
+  store.commit('userHasScrolled', true)
 }
 </script>
 
