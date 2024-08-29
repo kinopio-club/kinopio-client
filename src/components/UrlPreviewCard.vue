@@ -213,6 +213,7 @@ const handleMouseLeaveUrlButton = () => {
 }
 const openUrl = async (event, url) => {
   state.isActive = false
+  store.commit('clearAllInteractingWithAndSelected')
   if (store.state.currentUserIsDraggingConnectionIdLabel) { return }
   if (store.state.preventDraggedCardFromShowingDetails) { return }
   if (event) {
