@@ -415,10 +415,16 @@ export default {
   prevChangelogTime () {
     return window.localStorage['prevChangelogTime']
   },
-  updatePrevChangelogTime (state) {
+  updatePrevChangelogTime () {
     let time = new Date()
     time = time.toString()
     this.storeLocal('prevChangelogTime', time)
+  },
+  prevReadChangelogId () {
+    return window.localStorage['prevReadChangelogId'] || 0
+  },
+  updatePrevReadChangelogId (id) {
+    this.storeLocal('prevReadChangelogId', id)
   }
 
 }

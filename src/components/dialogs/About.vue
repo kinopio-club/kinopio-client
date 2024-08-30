@@ -89,9 +89,8 @@ const updateChangelog = async () => {
 }
 const checkChangelogIsUpdated = () => {
   const newId = state.changelog[0].id
-  const prevId = store.state.currentUser.lastReadChangelogId
+  const prevId = cache.prevReadChangelogId()
   const isUpdated = parseInt(prevId) < parseInt(newId)
-  console.log('🌳🌳🌳', newId, prevId, isUpdated, state.changelog)
 
   store.commit('changelogIsUpdated', isUpdated)
 }
@@ -103,8 +102,6 @@ const checkIfShouldNotify = async () => {
   prevTime = dayjs(prevTime)
   const timeSinceNewest = prevTime.diff(newest, 'second')
   const isNew = timeSinceNewest < 0
-  console.log('😈😈😈', prevTime, newest, timeSinceNewest, isNew)
-
   store.commit('notifyKinopioUpdatesAreAvailable', isNew)
 }
 
@@ -112,8 +109,8 @@ const checkIfShouldNotify = async () => {
 
 const changeSpaceToChangelog = () => {
   const space = { id: consts.changelogSpaceId() }
-  const lastReadChangelogId = state.changelog[0].id
-  store.dispatch('currentUser/lastReadChangelogId', lastReadChangelogId)
+  const changelogId = state.changelog[0].id
+  cache.updatePrevReadChangelogId(changelogId)
   store.commit('changelogIsUpdated', false)
   store.dispatch('currentSpace/changeSpace', space)
 }
