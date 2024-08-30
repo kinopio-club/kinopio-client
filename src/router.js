@@ -9,7 +9,7 @@ import { createRouter, createWebHistory } from 'vue-router'
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
 
-  // see also: server level redirects in netlify.toml
+  // server level redirects in _redirects
 
   routes: [
     {

@@ -1,2 +1,7 @@
 # Netlify settings for single-page application
-/*    /index.html   200
+/robots.txt       /robots.txt   200
+/sitemap.xml      /sitemap.xml   200
+/about            https://about.kinopio.club
+/api              https://about.kinopio.club/api
+/forum            https://forum.kinopio.club
+/*                /index.html   200
