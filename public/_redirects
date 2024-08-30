@@ -1,8 +1,18 @@
 # Netlify settings for single-page application
+
 /robots.txt       /robots.txt   200
+
+# sitemap entries in vite.config.js
 /sitemap.xml      /sitemap.xml   200
+
+# help and about are currently the same site
+/help             https://help.kinopio.club
 /about            https://about.kinopio.club
-/api              https://about.kinopio.club/api
+
+/api              https://help.kinopio.club/api
 /forum            https://forum.kinopio.club
 /discord          https://discord.gg/h2sR45Nby8
+/changelog        https://kinopio.club/whats-new-6lsytK8ZfOtMl2oqG05Rj
+/roadmap          https://kinopio.club/-roadmap-6TRE21gchHI7alHLuwzd5
+
 /*                /index.html   200

@@ -408,5 +408,23 @@ export default {
       return invitedSpace.id !== space.id
     })
     this.storeLocal('invitedSpaces', invitedSpaces)
+  },
+
+  // Changelog
+
+  prevChangelogTime () {
+    return window.localStorage['prevChangelogTime']
+  },
+  updatePrevChangelogTime () {
+    let time = new Date()
+    time = time.toString()
+    this.storeLocal('prevChangelogTime', time)
+  },
+  prevReadChangelogId () {
+    return window.localStorage['prevReadChangelogId'] || 0
+  },
+  updatePrevReadChangelogId (id) {
+    this.storeLocal('prevReadChangelogId', id)
   }
+
 }

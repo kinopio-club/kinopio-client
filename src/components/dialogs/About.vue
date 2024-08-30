@@ -2,11 +2,11 @@
 import { reactive, computed, onMounted, onBeforeUnmount, onUnmounted, defineProps, defineEmits, watch, ref, nextTick } from 'vue'
 import { useStore } from 'vuex'
 
-import WhatsNew from '@/components/dialogs/WhatsNew.vue'
 import AppsAndExtensions from '@/components/dialogs/AppsAndExtensions.vue'
 import Help from '@/components/dialogs/Help.vue'
 import utils from '@/utils.js'
 import consts from '@/consts.js'
+import cache from '@/cache.js'
 import AboutMe from '@/components/AboutMe.vue'
 
 import dayjs from 'dayjs'
@@ -14,28 +14,20 @@ import dayjs from 'dayjs'
 const store = useStore()
 
 const dialogElement = ref(null)
-const initTime = dayjs(new Date())
+
 let checkKinopioUpdatesIntervalTimer
 
 onMounted(() => {
   window.addEventListener('resize', updateDialogHeight)
-  store.subscribe((mutation, state) => {
-    if (mutation.type === 'closeAllDialogs') {
-      hideWhatsNewIsVisible()
-    }
-  })
   const isOffline = !store.state.isOnline
   if (isOffline) { return }
-  initBlogPosts()
+  initChangelog()
 })
 
 const props = defineProps({
   visible: Boolean
 })
 watch(() => props.visible, (value, prevValue) => {
-  if (value && state.blogPosts.length) {
-    checkBlogPostsIsUpdated(state.blogPosts[0].id)
-  }
   if (value) {
     closeDialogs()
     updateDialogHeight()
@@ -49,7 +41,7 @@ const state = reactive({
   whatsNewIsVisible: false,
   appsAndExtensionsIsVisible: false,
   helpIsVisible: false,
-  blogPosts: [],
+  changelog: [],
   dialogHeight: null
 })
 
@@ -72,46 +64,55 @@ const updateDialogHeight = async () => {
   state.dialogHeight = utils.elementHeight(element)
 }
 
-// new stuff
+// check changelog updates
 
-const initBlogPosts = async () => {
-  await updateBlogPosts()
-  if (!utils.arrayHasItems(state.blogPosts)) { return }
-  checkBlogPostsIsUpdated(state.blogPosts[0].id)
+const changelogIsUpdated = computed(() => store.state.changelogIsUpdated)
+const initChangelog = async () => {
+  await updateChangelog()
+  cache.updatePrevChangelogTime()
+  if (!utils.arrayHasItems(state.changelog)) { return }
   checkKinopioUpdatesIntervalTimer = setInterval(() => {
-    checkIfKinopioUpdatesAreAvailable()
+    updateChangelog()
   }, 1000 * 60 * 60 * 1) // 1 hour
 }
-const blogPostsIsUpdated = computed(() => store.state.blogPostsIsUpdated)
-const updateBlogPosts = async () => {
+const updateChangelog = async () => {
   try {
-    let posts = await store.dispatch('api/getBlogPosts')
+    let posts = await store.dispatch('api/getChangelog')
     if (!posts) { return }
     posts = posts.slice(0, 20)
-    if (isSecureAppContextIOS.value) {
-      posts = posts.filter(post => {
-        return !post.title.includes('Lifetime Plan')
-      })
-    }
-    state.blogPosts = posts
+    state.changelog = posts
+    checkChangelogIsUpdated()
+    checkIfShouldNotify()
   } catch (error) {
-    console.error('🚒 updateBlogPosts', error)
+    console.error('🚒 updateChangelog', error)
   }
 }
-const checkBlogPostsIsUpdated = (newId) => {
-  const prevId = store.state.currentUser.lastReadBlogPostId
+const checkChangelogIsUpdated = () => {
+  const newId = state.changelog[0].id
+  const prevId = cache.prevReadChangelogId()
   const isUpdated = parseInt(prevId) < parseInt(newId)
-  store.commit('blogPostsIsUpdated', isUpdated)
+
+  store.commit('changelogIsUpdated', isUpdated)
 }
-const checkIfKinopioUpdatesAreAvailable = async () => {
-  await updateBlogPosts()
-  if (!state.blogPosts.length) { return }
-  let newest = state.blogPosts[0]
+const checkIfShouldNotify = async () => {
+  let prevTime = cache.prevChangelogTime()
+  if (!prevTime) { return }
+  let newest = state.changelog[0]
   newest = dayjs(newest.createdAt)
-  const timeSinceNewest = initTime.diff(newest, 'minute')
-  if (timeSinceNewest < 0) {
-    store.commit('notifyKinopioUpdatesAreAvailable', true)
-  }
+  prevTime = dayjs(prevTime)
+  const timeSinceNewest = prevTime.diff(newest, 'second')
+  const isNew = timeSinceNewest < 0
+  store.commit('notifyKinopioUpdatesAreAvailable', isNew)
+}
+
+// changelog
+
+const changeSpaceToChangelog = () => {
+  const space = { id: consts.changelogSpaceId() }
+  const changelogId = state.changelog[0].id
+  cache.updatePrevReadChangelogId(changelogId)
+  store.commit('changelogIsUpdated', false)
+  store.dispatch('currentSpace/changeSpace', space)
 }
 
 // donate
@@ -119,17 +120,6 @@ const checkIfKinopioUpdatesAreAvailable = async () => {
 const triggerDonateIsVisible = () => {
   store.dispatch('closeAllDialogs')
   store.commit('triggerDonateIsVisible')
-}
-
-// what's new
-const hideWhatsNewIsVisible = () => {
-  state.whatsNewIsVisible = false
-}
-const toggleWhatsNewIsVisible = () => {
-  const isVisible = state.whatsNewIsVisible
-  closeDialogs()
-  state.whatsNewIsVisible = !isVisible
-  store.commit('blogPostsIsUpdated', false)
 }
 
 // keyboard shortcuts
@@ -155,19 +145,12 @@ const toggleHelpIsVisible = () => {
   state.helpIsVisible = !isVisible
 }
 
-// links
+// roadmap
 
 const changeSpaceToRoadmap = () => {
   const space = { id: consts.roadmapSpaceId() }
   store.dispatch('currentSpace/changeSpace', space)
 }
-const changeSpaceToBlog = () => {
-  const space = { id: consts.blogSpaceId() }
-  store.dispatch('currentSpace/changeSpace', space)
-}
-const discordUrl = computed(() => consts.discordUrl)
-const roadmapUrl = computed(() => consts.roadmapUrl())
-const blogUrl = computed(() => consts.blogUrl())
 
 </script>
 
@@ -189,19 +172,15 @@ dialog.about.narrow(v-if="visible" :open="visible" @click.left="closeDialogs" re
           span Help
         Help(:visible="state.helpIsVisible")
       .button-wrap
-        a(:href="roadmapUrl")
+        a(href="/roadmap")
           button(@click.left.stop="changeSpaceToRoadmap")
             span 💐 Roadmap
     .row
       .button-wrap
-        .segmented-buttons
-          button(@click.left.stop="changeSpaceToBlog")
-            span Blog
-          button(@click.left.stop="toggleWhatsNewIsVisible" :class="{active: state.whatsNewIsVisible}")
-            span What's New
-            img.updated.icon(src="@/assets/updated.gif" v-if="blogPostsIsUpdated")
-        WhatsNew(:visible="state.whatsNewIsVisible" :blogPosts="state.blogPosts")
-
+        a(href="/changelog")
+          button(@click.left.stop="changeSpaceToChangelog")
+            span Changelog
+            img.updated.icon(src="@/assets/updated.gif" v-if="changelogIsUpdated")
     //- .row
     //-   a(href="https://kinopio.club/pop-up-shop-u9XxpuIzz2_LvQUAayl65")
     //-     button
@@ -227,7 +206,7 @@ dialog.about.narrow(v-if="visible" :open="visible" @click.left="closeDialogs" re
       AboutMe
     .row
       .button-wrap
-        a(:href="discordUrl")
+        a(href="https://kinopio.club/discord")
           button
             span Discord{{' '}}
             img.icon.visit(src="@/assets/visit.svg")
@@ -237,17 +216,14 @@ dialog.about.narrow(v-if="visible" :open="visible" @click.left="closeDialogs" re
             span Forum{{' '}}
             img.icon.visit(src="@/assets/visit.svg")
     .row
+      //- .button-wrap
+      //-   a(href="/blog")
+      //-     button
+      //-       span Blog →
       .button-wrap(v-if="!isSecureAppContextIOS")
         button(@click.left.stop="triggerDonateIsVisible")
           img.icon(src="@/assets/heart-empty.svg")
           span Donate
-
-    //- .row
-    //-   .button-wrap
-    //-     a(href="https://kinopio.club/social-media-plezJhK98WCzh52YOYSLR")
-    //-       button
-    //-         span Social Media{{' '}}
-    //-         img.icon.visit(src="@/assets/visit.svg")
 </template>
 
 <style lang="stylus">
