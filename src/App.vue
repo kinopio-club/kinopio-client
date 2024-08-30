@@ -883,6 +883,7 @@ button
   display inline-block
   position relative
   flex-shrink 0
+  max-width 100%
   dialog
     top calc(100% - 8px)
 
