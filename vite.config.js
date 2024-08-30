@@ -24,6 +24,10 @@ const exploreSpaces = async () => {
 export default defineConfig(async ({ command, mode }) => {
   // sitemap routes
   const routes = [
+    '/about',
+    '/api',
+    '/forum',
+    '/discord',
     '/kinopio-roadmap-6TRE21gchHI7alHLuwzd5',
     '/-kinopio-what-s-new-6lsytK8ZfOtMl2oqG05Rj'
   ]

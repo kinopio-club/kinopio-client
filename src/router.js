@@ -8,6 +8,9 @@ import { createRouter, createWebHistory } from 'vue-router'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
+
+  // see also: server level redirects in netlify.toml
+
   routes: [
     {
       path: '/add',
@@ -123,12 +126,6 @@ const router = createRouter({
       beforeEnter: (to, from, next) => {
         store.commit('loadInboxSpace', true)
         next()
-      }
-    }, {
-      path: '/discord',
-      component: Space,
-      beforeEnter: (to, from, next) => {
-        window.location.href = consts.discordUrl
       }
     }, {
       path: '/:space/:card',
