@@ -211,6 +211,10 @@ const handleMouseLeaveUrlButton = () => {
   if (store.state.currentUserIsDraggingCard) { return }
   store.commit('currentUserIsHoveringOverUrlButtonCardId', '')
 }
+const handleTouchMove = () => {
+  store.commit('preventDraggedCardFromShowingDetails', true)
+  disableIsActive()
+}
 const openUrl = async (event, url) => {
   state.isActive = false
   store.commit('clearAllInteractingWithAndSelected')
@@ -263,6 +267,7 @@ const openUrl = async (event, url) => {
     @touchstart="enableIsActive"
     @click.stop.prevent
     @mouseup.left="openUrl($event, props.card.urlPreviewUrl)"
+    @touchmove="handleTouchMove"
     @touchend.prevent="openUrl($event, props.card.urlPreviewUrl)"
   )
     //- play button
