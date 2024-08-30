@@ -594,9 +594,13 @@ const connectorIsVisible = computed(() => {
 const isCardButtonsVisible = computed(() => {
   return isLocked.value || (cardButtonUrl.value && !isComment.value) || connectorIsVisible.value
 })
+const isUrlPreviewError = computed(() => {
+  return props.card.urlPreviewUrl === props.card.urlPreviewErrorUrl
+})
 const urlButtonIsVisible = computed(() => {
   if (!cardButtonUrl.value) { return }
   if (isComment.value) { return true }
+  if (isUrlPreviewError.value) { return true }
   return !props.card.urlPreviewIsVisible
 })
 const cardButtonUrl = computed(() => {
@@ -1844,10 +1848,10 @@ article.card-wrap#card(
           //- User
           UserLabelInline(:user="createdByUser" :shouldHideName="true")
           //- Url →
-          a.url-wrap(v-if="urlButtonIsVisible" :href="cardButtonUrl" @mouseup.exact.prevent="closeAllDialogs" @click.stop="openUrl($event, cardButtonUrl)" @touchend.prevent="openUrl($event, cardButtonUrl)" target="_blank" @mouseenter="handleMouseEnterUrlButton" @mouseleave="handleMouseLeaveUrlButton")
-            .url.inline-button-wrap
-              button.inline-button(:style="{background: currentBackgroundColor}" :class="{'is-light-in-dark-theme': isLightInDarkTheme, 'is-dark-in-light-theme': isDarkInLightTheme}" tabindex="-1")
-                img.icon.visit.arrow-icon(src="@/assets/visit.svg")
+        a.url-wrap(v-if="urlButtonIsVisible" :href="cardButtonUrl" @mouseup.exact.prevent="closeAllDialogs" @click.stop="openUrl($event, cardButtonUrl)" @touchend.prevent="openUrl($event, cardButtonUrl)" target="_blank" @mouseenter="handleMouseEnterUrlButton" @mouseleave="handleMouseLeaveUrlButton")
+          .url.inline-button-wrap
+            button.inline-button(:style="{background: currentBackgroundColor}" :class="{'is-light-in-dark-theme': isLightInDarkTheme, 'is-dark-in-light-theme': isDarkInLightTheme}" tabindex="-1")
+              img.icon.visit.arrow-icon(src="@/assets/visit.svg")
 
       //- Not Comment
       .card-content(v-if="!isComment" :style="cardContentStyles")
@@ -1864,11 +1868,11 @@ article.card-wrap#card(
             template(v-for="segment in nameSegments")
               NameSegment(:segment="segment" @showTagDetailsIsVisible="showTagDetailsIsVisible" :parentCardId="card.id" :backgroundColorIsDark="currentBackgroundColorIsDark" :headerFontId="card.headerFontId" :headerFontSize="card.headerFontSize")
             Loader(:visible="isLoadingUrlPreview")
-            //- Url →
-            a.url-wrap(v-if="urlButtonIsVisible" :href="cardButtonUrl" @mouseup.exact.prevent="closeAllDialogs" @click.stop="openUrl($event, cardButtonUrl)" @touchend.prevent="openUrl($event, cardButtonUrl)" target="_blank" @mouseenter="handleMouseEnterUrlButton" @mouseleave="handleMouseLeaveUrlButton")
-              .url.inline-button-wrap
-                button.inline-button(:style="{background: currentBackgroundColor}" :class="{'is-light-in-dark-theme': isLightInDarkTheme, 'is-dark-in-light-theme': isDarkInLightTheme}" tabindex="-1")
-                  img.icon.visit.arrow-icon(src="@/assets/visit.svg")
+          //- Url →
+          a.url-wrap(v-if="urlButtonIsVisible" :href="cardButtonUrl" @mouseup.exact.prevent="closeAllDialogs" @click.stop="openUrl($event, cardButtonUrl)" @touchend.prevent="openUrl($event, cardButtonUrl)" target="_blank" @mouseenter="handleMouseEnterUrlButton" @mouseleave="handleMouseLeaveUrlButton")
+            .url.inline-button-wrap
+              button.inline-button(:style="{background: currentBackgroundColor}" :class="{'is-light-in-dark-theme': isLightInDarkTheme, 'is-dark-in-light-theme': isDarkInLightTheme}" tabindex="-1")
+                img.icon.visit.arrow-icon(src="@/assets/visit.svg")
       //- Right buttons
       span.card-buttons-wrap(v-if="isCardButtonsVisible")
         //- Lock
@@ -2110,14 +2114,20 @@ article.card-wrap
     .url-wrap
       padding 0
       margin 0
+      margin-left 16px // for extra card click area when no card name
       padding-left 5px
       vertical-align -1px
       .url
-        display inline
+        display inline-block
         cursor pointer
         padding-left 0
+        padding-right 0
         button
           cursor pointer
+    span + .url-wrap,
+    p + .url-wrap,
+    .badge + .url-wrap
+      margin-left 0
 
     .checkbox-wrap
       &:hover
