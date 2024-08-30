@@ -35,7 +35,7 @@ const store = createStore({
     isReconnectingToBroadcast: false,
     isBeta: false,
     shouldHideConnectionOutline: false,
-    blogPostsIsUpdated: false,
+    changelogIsUpdated: false,
     stripeIsLoaded: false,
     shouldHideFooter: false,
     shouldExplicitlyHideFooter: false,
@@ -412,9 +412,9 @@ const store = createStore({
       utils.typeCheck({ value, type: 'boolean' })
       state.shouldHideConnectionOutline = value
     },
-    blogPostsIsUpdated: (state, value) => {
+    changelogIsUpdated: (state, value) => {
       utils.typeCheck({ value, type: 'boolean' })
-      state.blogPostsIsUpdated = value
+      state.changelogIsUpdated = value
     },
     stripeIsLoaded: (state, value) => {
       utils.typeCheck({ value, type: 'boolean' })

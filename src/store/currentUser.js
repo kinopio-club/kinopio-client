@@ -16,7 +16,7 @@ const initialState = {
   name: undefined,
   description: undefined,
   website: undefined,
-  lastReadBlogPostId: undefined,
+  lastReadChangelogId: undefined,
   apiKey: '',
   arenaAccessToken: '',
   favoriteUsers: [],
@@ -136,9 +136,9 @@ export default {
       }
       cache.updateUser('lastSpaceId', state.lastSpaceId)
     },
-    lastReadBlogPostId: (state, id) => {
-      state.lastReadBlogPostId = id
-      cache.updateUser('lastReadBlogPostId', id)
+    lastReadChangelogId: (state, id) => {
+      state.lastReadChangelogId = id
+      cache.updateUser('lastReadChangelogId', id)
     },
     favoriteUsers: (state, users) => {
       utils.typeCheck({ value: users, type: 'array' })
@@ -549,11 +549,11 @@ export default {
           lastSpaceId: spaceId
         } }, { root: true })
     },
-    lastReadBlogPostId: (context, id) => {
-      context.commit('lastReadBlogPostId', id)
+    lastReadChangelogId: (context, id) => {
+      context.commit('lastReadChangelogId', id)
       context.dispatch('api/addToQueue', { name: 'updateUser',
         body: {
-          lastReadBlogPostId: id
+          lastReadChangelogId: id
         } }, { root: true })
     },
     restoreRemoteUser: async (context, cachedUser) => {

@@ -20,15 +20,15 @@ onMounted(() => {
   window.addEventListener('resize', updateDialogHeight)
   const isOffline = !store.state.isOnline
   if (isOffline) { return }
-  initBlogPosts()
+  initChangelog()
 })
 
 const props = defineProps({
   visible: Boolean
 })
 watch(() => props.visible, (value, prevValue) => {
-  if (value && state.blogPosts.length) {
-    checkBlogPostsIsUpdated(state.blogPosts[0].id)
+  if (value && state.changelog.length) {
+    checkChangelogIsUpdated(state.changelog[0].id)
   }
   if (value) {
     closeDialogs()
@@ -43,7 +43,7 @@ const state = reactive({
   whatsNewIsVisible: false,
   appsAndExtensionsIsVisible: false,
   helpIsVisible: false,
-  blogPosts: [],
+  changelog: [],
   dialogHeight: null
 })
 
@@ -68,19 +68,19 @@ const updateDialogHeight = async () => {
 
 // changelog
 
-const initBlogPosts = async () => {
-  await updateBlogPosts()
-  if (!utils.arrayHasItems(state.blogPosts)) { return }
-  checkBlogPostsIsUpdated(state.blogPosts[0].id)
+const initChangelog = async () => {
+  await updateChangelog()
+  if (!utils.arrayHasItems(state.changelog)) { return }
+  checkChangelogIsUpdated(state.changelog[0].id)
   checkKinopioUpdatesIntervalTimer = setInterval(() => {
     checkIfKinopioUpdatesAreAvailable()
   }, 1000 * 60 * 60 * 1) // 1 hour
 }
 // TODO rename blog post to changelog in api and server db/routes
-const blogPostsIsUpdated = computed(() => store.state.blogPostsIsUpdated)
-const updateBlogPosts = async () => {
+const changelogIsUpdated = computed(() => store.state.changelogIsUpdated)
+const updateChangelog = async () => {
   try {
-    let posts = await store.dispatch('api/getBlogPosts')
+    let posts = await store.dispatch('api/getChangelog')
     if (!posts) { return }
     posts = posts.slice(0, 20)
     if (isSecureAppContextIOS.value) {
@@ -88,20 +88,20 @@ const updateBlogPosts = async () => {
         return !post.title.includes('Lifetime Plan')
       })
     }
-    state.blogPosts = posts
+    state.changelog = posts
   } catch (error) {
-    console.error('🚒 updateBlogPosts', error)
+    console.error('🚒 updateChangelog', error)
   }
 }
-const checkBlogPostsIsUpdated = (newId) => {
-  const prevId = store.state.currentUser.lastReadBlogPostId
+const checkChangelogIsUpdated = (newId) => {
+  const prevId = store.state.currentUser.lastReadChangelogId
   const isUpdated = parseInt(prevId) < parseInt(newId)
-  store.commit('blogPostsIsUpdated', isUpdated)
+  store.commit('changelogIsUpdated', isUpdated)
 }
 const checkIfKinopioUpdatesAreAvailable = async () => {
-  await updateBlogPosts()
-  if (!state.blogPosts.length) { return }
-  let newest = state.blogPosts[0]
+  await updateChangelog()
+  if (!state.changelog.length) { return }
+  let newest = state.changelog[0]
   newest = dayjs(newest.createdAt)
   const timeSinceNewest = initTime.diff(newest, 'minute')
   if (timeSinceNewest < 0) {
@@ -110,9 +110,9 @@ const checkIfKinopioUpdatesAreAvailable = async () => {
 }
 const changeSpaceToChangelog = () => {
   const space = { id: consts.changelogSpaceId() }
-  const lastReadBlogPostId = state.blogPosts[0].id
-  store.commit('blogPostsIsUpdated', false)
-  store.dispatch('currentUser/lastReadBlogPostId', lastReadBlogPostId)
+  const lastReadChangelogId = state.changelog[0].id
+  store.commit('changelogIsUpdated', false)
+  store.dispatch('currentUser/lastReadChangelogId', lastReadChangelogId)
   store.dispatch('currentSpace/changeSpace', space)
 }
 
@@ -181,7 +181,7 @@ dialog.about.narrow(v-if="visible" :open="visible" @click.left="closeDialogs" re
         a(href="/changelog")
           button(@click.left.stop="changeSpaceToChangelog")
             span Changelog
-            img.updated.icon(src="@/assets/updated.gif" v-if="blogPostsIsUpdated")
+            img.updated.icon(src="@/assets/updated.gif" v-if="changelogIsUpdated")
     //- .row
     //-   a(href="https://kinopio.club/pop-up-shop-u9XxpuIzz2_LvQUAayl65")
     //-     button
