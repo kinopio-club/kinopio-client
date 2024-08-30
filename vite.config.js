@@ -26,10 +26,11 @@ export default defineConfig(async ({ command, mode }) => {
   const routes = [
     '/about',
     '/api',
-    '/forum',
+    '/changelog',
     '/discord',
-    '/kinopio-roadmap-6TRE21gchHI7alHLuwzd5',
-    '/-kinopio-what-s-new-6lsytK8ZfOtMl2oqG05Rj'
+    '/forum',
+    '/help',
+    '/roadmap'
   ]
   const exploreSpaceRoutes = await exploreSpaces() || []
   const dynamicRoutes = routes.concat(exploreSpaceRoutes)

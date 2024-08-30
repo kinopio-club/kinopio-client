@@ -2,7 +2,6 @@
 import { reactive, computed, onMounted, onBeforeUnmount, onUnmounted, defineProps, defineEmits, watch, ref, nextTick } from 'vue'
 import { useStore } from 'vuex'
 
-import WhatsNew from '@/components/dialogs/WhatsNew.vue'
 import AppsAndExtensions from '@/components/dialogs/AppsAndExtensions.vue'
 import Help from '@/components/dialogs/Help.vue'
 import utils from '@/utils.js'
@@ -19,11 +18,6 @@ let checkKinopioUpdatesIntervalTimer
 
 onMounted(() => {
   window.addEventListener('resize', updateDialogHeight)
-  store.subscribe((mutation, state) => {
-    if (mutation.type === 'closeAllDialogs') {
-      hideWhatsNewIsVisible()
-    }
-  })
   const isOffline = !store.state.isOnline
   if (isOffline) { return }
   initBlogPosts()
@@ -72,7 +66,7 @@ const updateDialogHeight = async () => {
   state.dialogHeight = utils.elementHeight(element)
 }
 
-// new stuff
+// changelog
 
 const initBlogPosts = async () => {
   await updateBlogPosts()
@@ -82,6 +76,7 @@ const initBlogPosts = async () => {
     checkIfKinopioUpdatesAreAvailable()
   }, 1000 * 60 * 60 * 1) // 1 hour
 }
+// TODO rename blog post to changelog in api and server db/routes
 const blogPostsIsUpdated = computed(() => store.state.blogPostsIsUpdated)
 const updateBlogPosts = async () => {
   try {
@@ -113,23 +108,19 @@ const checkIfKinopioUpdatesAreAvailable = async () => {
     store.commit('notifyKinopioUpdatesAreAvailable', true)
   }
 }
+const changeSpaceToChangelog = () => {
+  const space = { id: consts.changelogSpaceId() }
+  const lastReadBlogPostId = state.blogPosts[0].id
+  store.commit('blogPostsIsUpdated', false)
+  store.dispatch('currentUser/lastReadBlogPostId', lastReadBlogPostId)
+  store.dispatch('currentSpace/changeSpace', space)
+}
 
 // donate
 
 const triggerDonateIsVisible = () => {
   store.dispatch('closeAllDialogs')
   store.commit('triggerDonateIsVisible')
-}
-
-// what's new
-const hideWhatsNewIsVisible = () => {
-  state.whatsNewIsVisible = false
-}
-const toggleWhatsNewIsVisible = () => {
-  const isVisible = state.whatsNewIsVisible
-  closeDialogs()
-  state.whatsNewIsVisible = !isVisible
-  store.commit('blogPostsIsUpdated', false)
 }
 
 // keyboard shortcuts
@@ -155,19 +146,12 @@ const toggleHelpIsVisible = () => {
   state.helpIsVisible = !isVisible
 }
 
-// links
+// roadmap
 
 const changeSpaceToRoadmap = () => {
   const space = { id: consts.roadmapSpaceId() }
   store.dispatch('currentSpace/changeSpace', space)
 }
-const changeSpaceToBlog = () => {
-  const space = { id: consts.blogSpaceId() }
-  store.dispatch('currentSpace/changeSpace', space)
-}
-const discordUrl = computed(() => consts.discordUrl)
-const roadmapUrl = computed(() => consts.roadmapUrl())
-const blogUrl = computed(() => consts.blogUrl())
 
 </script>
 
@@ -189,19 +173,15 @@ dialog.about.narrow(v-if="visible" :open="visible" @click.left="closeDialogs" re
           span Help
         Help(:visible="state.helpIsVisible")
       .button-wrap
-        a(:href="roadmapUrl")
+        a(href="/roadmap")
           button(@click.left.stop="changeSpaceToRoadmap")
             span 💐 Roadmap
     .row
       .button-wrap
-        .segmented-buttons
-          button(@click.left.stop="changeSpaceToBlog")
-            span Blog
-          button(@click.left.stop="toggleWhatsNewIsVisible" :class="{active: state.whatsNewIsVisible}")
-            span What's New
+        a(href="/changelog")
+          button(@click.left.stop="changeSpaceToChangelog")
+            span Changelog
             img.updated.icon(src="@/assets/updated.gif" v-if="blogPostsIsUpdated")
-        WhatsNew(:visible="state.whatsNewIsVisible" :blogPosts="state.blogPosts")
-
     //- .row
     //-   a(href="https://kinopio.club/pop-up-shop-u9XxpuIzz2_LvQUAayl65")
     //-     button
@@ -227,7 +207,7 @@ dialog.about.narrow(v-if="visible" :open="visible" @click.left="closeDialogs" re
       AboutMe
     .row
       .button-wrap
-        a(:href="discordUrl")
+        a(href="https://kinopio.club/discord")
           button
             span Discord{{' '}}
             img.icon.visit(src="@/assets/visit.svg")
@@ -237,17 +217,14 @@ dialog.about.narrow(v-if="visible" :open="visible" @click.left="closeDialogs" re
             span Forum{{' '}}
             img.icon.visit(src="@/assets/visit.svg")
     .row
+      //- .button-wrap
+      //-   a(href="/blog")
+      //-     button
+      //-       span Blog →
       .button-wrap(v-if="!isSecureAppContextIOS")
         button(@click.left.stop="triggerDonateIsVisible")
           img.icon(src="@/assets/heart-empty.svg")
           span Donate
-
-    //- .row
-    //-   .button-wrap
-    //-     a(href="https://kinopio.club/social-media-plezJhK98WCzh52YOYSLR")
-    //-       button
-    //-         span Social Media{{' '}}
-    //-         img.icon.visit(src="@/assets/visit.svg")
 </template>
 
 <style lang="stylus">
