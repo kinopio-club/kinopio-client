@@ -211,7 +211,7 @@ dialog.about.narrow(v-if="visible" :open="visible" @click.left="closeDialogs" re
             span Discord{{' '}}
             img.icon.visit(src="@/assets/visit.svg")
       .button-wrap
-        a(href="https://club.kinopio.club")
+        a(href="https://kinopio.club/forum")
           button
             span Forum{{' '}}
             img.icon.visit(src="@/assets/visit.svg")
