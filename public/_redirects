@@ -1,5 +1,8 @@
 # Netlify settings for single-page application
+
 /robots.txt       /robots.txt   200
+
+# sitemap entries in vite.config.js
 /sitemap.xml      /sitemap.xml   200
 
 # help and about are currently the same site
