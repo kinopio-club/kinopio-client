@@ -745,6 +745,7 @@ const initialCirclesAnimationFrame = () => {
 
 const checkIfUploadIsDraggedOver = (event) => {
   const uploadIsFiles = event.dataTransfer.types.find(type => type === 'Files')
+  if (!event.dataTransfer) { return }
   if (!uploadIsFiles) { return }
   state.currentCursor = utils.cursorPositionInViewport(event)
   state.currentCursorInSpace = utils.cursorPositionInSpace(event)
