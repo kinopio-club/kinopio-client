@@ -6,6 +6,7 @@ import AppsAndExtensions from '@/components/dialogs/AppsAndExtensions.vue'
 import Help from '@/components/dialogs/Help.vue'
 import utils from '@/utils.js'
 import consts from '@/consts.js'
+import cache from '@/cache.js'
 import AboutMe from '@/components/AboutMe.vue'
 
 import dayjs from 'dayjs'
@@ -13,7 +14,7 @@ import dayjs from 'dayjs'
 const store = useStore()
 
 const dialogElement = ref(null)
-const initTime = dayjs(new Date())
+
 let checkKinopioUpdatesIntervalTimer
 
 onMounted(() => {
@@ -27,9 +28,6 @@ const props = defineProps({
   visible: Boolean
 })
 watch(() => props.visible, (value, prevValue) => {
-  if (value && state.changelog.length) {
-    checkChangelogIsUpdated(state.changelog[0].id)
-  }
   if (value) {
     closeDialogs()
     updateDialogHeight()
@@ -66,53 +64,57 @@ const updateDialogHeight = async () => {
   state.dialogHeight = utils.elementHeight(element)
 }
 
-// changelog
+// check changelog updates
 
+const changelogIsUpdated = computed(() => store.state.changelogIsUpdated)
 const initChangelog = async () => {
   await updateChangelog()
+  cache.updatePrevChangelogTime()
   if (!utils.arrayHasItems(state.changelog)) { return }
-  checkChangelogIsUpdated(state.changelog[0].id)
   checkKinopioUpdatesIntervalTimer = setInterval(() => {
-    checkIfKinopioUpdatesAreAvailable()
+    updateChangelog()
   }, 1000 * 60 * 60 * 1) // 1 hour
 }
-// TODO rename blog post to changelog in api and server db/routes
-const changelogIsUpdated = computed(() => store.state.changelogIsUpdated)
 const updateChangelog = async () => {
   try {
     let posts = await store.dispatch('api/getChangelog')
     if (!posts) { return }
     posts = posts.slice(0, 20)
-    if (isSecureAppContextIOS.value) {
-      posts = posts.filter(post => {
-        return !post.title.includes('Lifetime Plan')
-      })
-    }
     state.changelog = posts
+    checkChangelogIsUpdated()
+    checkIfShouldNotify()
   } catch (error) {
     console.error('🚒 updateChangelog', error)
   }
 }
-const checkChangelogIsUpdated = (newId) => {
+const checkChangelogIsUpdated = () => {
+  const newId = state.changelog[0].id
   const prevId = store.state.currentUser.lastReadChangelogId
   const isUpdated = parseInt(prevId) < parseInt(newId)
+  console.log('🌳🌳🌳', newId, prevId, isUpdated, state.changelog)
+
   store.commit('changelogIsUpdated', isUpdated)
 }
-const checkIfKinopioUpdatesAreAvailable = async () => {
-  await updateChangelog()
-  if (!state.changelog.length) { return }
+const checkIfShouldNotify = async () => {
+  let prevTime = cache.prevChangelogTime()
+  if (!prevTime) { return }
   let newest = state.changelog[0]
   newest = dayjs(newest.createdAt)
-  const timeSinceNewest = initTime.diff(newest, 'minute')
-  if (timeSinceNewest < 0) {
-    store.commit('notifyKinopioUpdatesAreAvailable', true)
-  }
+  prevTime = dayjs(prevTime)
+  const timeSinceNewest = prevTime.diff(newest, 'second')
+  const isNew = timeSinceNewest < 0
+  console.log('😈😈😈', prevTime, newest, timeSinceNewest, isNew)
+
+  store.commit('notifyKinopioUpdatesAreAvailable', isNew)
 }
+
+// changelog
+
 const changeSpaceToChangelog = () => {
   const space = { id: consts.changelogSpaceId() }
   const lastReadChangelogId = state.changelog[0].id
-  store.commit('changelogIsUpdated', false)
   store.dispatch('currentUser/lastReadChangelogId', lastReadChangelogId)
+  store.commit('changelogIsUpdated', false)
   store.dispatch('currentSpace/changeSpace', space)
 }
 
