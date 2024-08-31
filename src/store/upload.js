@@ -176,6 +176,7 @@ export default {
           key,
           type: file.type
         })
+        console.log('🍡 addCardsAndUploadFiles', file.type, file)
       }
       // add presignedPostData to files
       const multiplePresignedPostData = await context.dispatch('api/createMultiplePresignedPosts', { files: filesPostData, userIsUpgraded, spaceUserIsUpgraded }, { root: true })
