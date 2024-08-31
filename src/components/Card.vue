@@ -595,6 +595,7 @@ const isCardButtonsVisible = computed(() => {
   return isLocked.value || (cardButtonUrl.value && !isComment.value) || connectorIsVisible.value
 })
 const isUrlPreviewError = computed(() => {
+  if (!props.card.urlPreviewErrorUrl) { return }
   return props.card.urlPreviewUrl === props.card.urlPreviewErrorUrl
 })
 const urlButtonIsVisible = computed(() => {
