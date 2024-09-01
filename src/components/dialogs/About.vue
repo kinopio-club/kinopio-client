@@ -113,6 +113,7 @@ const changeSpaceToChangelog = () => {
   cache.updatePrevReadChangelogId(changelogId)
   store.commit('changelogIsUpdated', false)
   store.dispatch('currentSpace/changeSpace', space)
+  store.commit('addNotification', { message: 'Changelog space opened', type: 'success' })
 }
 
 // donate
@@ -150,6 +151,7 @@ const toggleHelpIsVisible = () => {
 const changeSpaceToRoadmap = () => {
   const space = { id: consts.roadmapSpaceId() }
   store.dispatch('currentSpace/changeSpace', space)
+  store.commit('addNotification', { message: 'Roadmap space opened', type: 'success' })
 }
 
 </script>
