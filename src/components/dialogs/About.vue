@@ -175,12 +175,12 @@ dialog.about.narrow(v-if="visible" :open="visible" @click.left="closeDialogs" re
         Help(:visible="state.helpIsVisible")
       .button-wrap
         a(href="/roadmap")
-          button(@click.left.stop="changeSpaceToRoadmap")
+          button(@click.left.stop.prevent="changeSpaceToRoadmap")
             span 💐 Roadmap
     .row
       .button-wrap
         a(href="/changelog")
-          button(@click.left.stop="changeSpaceToChangelog")
+          button(@click.left.stop.prevent="changeSpaceToChangelog")
             span Changelog
             img.updated.icon(src="@/assets/updated.gif" v-if="changelogIsUpdated")
     //- .row
