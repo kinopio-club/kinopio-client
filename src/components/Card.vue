@@ -815,6 +815,7 @@ const normalizedName = computed(() => {
   // name without urls and checkbox text
   let newName = name.value
   if (!newName) { return }
+  if (newName === ' ') { return }
   if (cardHasMedia.value) {
     newName = newName.replace(state.formats.image, '')
     newName = newName.replace(state.formats.video, '')
@@ -842,7 +843,7 @@ const normalizedName = computed(() => {
   newName = removeCommentBrackets(newName)
   return newName.trim()
 })
-const normalizedNameOrHiddenUrl = computed(() => {
+const isNormalizedNameOrHiddenUrl = computed(() => {
   const urlPreviewIsHidden = props.card.urlPreviewUrl && !props.card.urlPreviewIsVisible
   if (urlPreviewIsHidden) { return true }
   return normalizedName.value
@@ -1865,7 +1866,7 @@ article.card-wrap#card(
             label(:class="{active: isChecked, disabled: !canEditSpace}")
               input(name="checkbox" type="checkbox" v-model="checkboxState")
           //- Name
-          p.name.name-segments(v-if="normalizedNameOrHiddenUrl" :style="nameSegmentsStyles" :class="{'is-checked': isChecked, 'has-checkbox': hasCheckbox, 'badge badge-status': isImageCard && hasTextSegments}")
+          p.name.name-segments(v-if="isNormalizedNameOrHiddenUrl" :style="nameSegmentsStyles" :class="{'is-checked': isChecked, 'has-checkbox': hasCheckbox, 'badge badge-status': isImageCard && hasTextSegments}")
             template(v-for="segment in nameSegments")
               NameSegment(:segment="segment" @showTagDetailsIsVisible="showTagDetailsIsVisible" :parentCardId="card.id" :backgroundColorIsDark="currentBackgroundColorIsDark" :headerFontId="card.headerFontId" :headerFontSize="card.headerFontSize")
             Loader(:visible="isLoadingUrlPreview")
@@ -2103,7 +2104,8 @@ article.card-wrap
         &.has-checkbox
           .audio
             width 132px
-
+    .name-wrap
+      min-width 40px
     .connector,
     .url
       padding 8px
@@ -2115,8 +2117,7 @@ article.card-wrap
     .url-wrap
       padding 0
       margin 0
-      margin-left 16px // for extra card click area when no card name
-      padding-left 5px
+      padding-left 8px
       vertical-align -1px
       .url
         display inline-block
