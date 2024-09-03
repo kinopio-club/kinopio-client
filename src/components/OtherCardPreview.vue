@@ -71,6 +71,63 @@ const styles = computed(() => {
   }
 })
 
+// checkbox
+
+const hasCheckbox = computed(() => {
+  return utils.checkboxFromString(props.otherCard?.name)
+})
+const isChecked = computed(() => utils.nameIsChecked(props.otherCard?.name))
+const checkboxState = computed({
+  get () {
+    return isChecked.value
+  }
+})
+const toggleCardChecked = () => {
+  if (store.state.currentUserIsDraggingConnectionIdLabel) { return }
+  if (store.state.preventDraggedCardFromShowingDetails) { return }
+  const spaceId = props.otherCard.spaceId
+  const canEditSpace = store.getters['currentUser/canEditSpace']({ id: spaceId })
+  if (!canEditSpace) { return }
+  const value = !isChecked.value
+  store.dispatch('closeAllDialogs')
+
+  // update card in other space..
+  // spaceid = props.otherCard.spaceId
+  // ? store.dispatch('currentCards/toggleChecked', { cardId: props.otherCard.name, value })
+  let card = {
+    id: props.otherCard.id,
+    name: props.otherCard.name,
+    spaceId
+  }
+
+  const checkbox = utils.checkboxFromString(card.name)
+  card.name = card.name.replace(checkbox, '')
+  if (value) {
+    card.name = `[x] ${card.name}`
+  } else {
+    card.name = `[] ${card.name}`
+  }
+
+  console.log('🐸', card)
+
+  // const spaceId = otherCard.value.spaceId
+  // const card = { id: otherCard.value.id, name: newName }
+  // update local
+  store.commit('updateCardNameInOtherItems', card)
+  store.commit('triggerUpdateOtherCard', card.id)
+  // updateOtherCardNameInCurrentSpace({ card, spaceId }) tODO
+  // update remote
+  store.dispatch('api/addToQueue', { name: 'updateCard', body: card, spaceId })
+
+  postMessage.sendHaptics({ name: 'heavyImpact' })
+  // cancelLocking()
+  // emit('cancelLocking') TODO emit and handle in card.vue
+  store.commit('currentUserIsDraggingCard', false)
+  const userId = store.state.currentUser.id
+  store.commit('broadcast/updateStore', { updates: { userId }, type: 'clearRemoteCardsDragging' })
+  event.stopPropagation()
+}
+
 // update card
 
 watch(() => store.state.isLoadingOtherItems, (value, prevValue) => {
@@ -88,6 +145,10 @@ const updateNameSegments = () => {
   let card = utils.clone(props.otherCard)
   if (props.shouldTruncateName) {
     card.name = utils.truncated(card.name, 25)
+  }
+  const checkbox = utils.checkboxFromString(card.name)
+  if (checkbox) {
+    card.name = card.name.replace(checkbox, '')
   }
   card = store.getters['currentCards/nameSegments'](card)
   card.nameSegments = card.nameSegments.map(segment => {
@@ -154,12 +215,18 @@ a.other-card-preview(@click.prevent.stop :href="props.url")
     @touchstart="enableIsActive"
     @mouseup.prevent="showOtherCardDetailsIsVisible($event)"
     @touchend.prevent="showOtherCardDetailsIsVisible($event)"
+    :data-checkbox="hasCheckbox"
   )
     template(v-if="props.otherCard")
       //- removed
       template(v-if="props.otherCard.isRemoved")
         span.badge.danger
           img.icon(src="@/assets/remove.svg")
+      //- .row
+      //- [·]
+      .checkbox-wrap(v-if="hasCheckbox" @mouseup.left.stop="toggleCardChecked" @touchend.prevent.stop="toggleCardChecked" @click.stop)
+        label(:class="{active: isChecked, disabled: !canEditSpace}")
+          input(name="checkbox" type="checkbox" v-model="checkboxState")
       //- name
       template(v-for="segment in state.nameSegments")
         img.card-image(v-if="segment.isImage" :src="segment.url")
@@ -194,4 +261,25 @@ a.other-card-preview(@click.prevent.stop :href="props.url")
     &:hover
       span
         text-decoration none !important
+
+  .checkbox-wrap
+    padding-top 8px
+    padding-left 8px
+    padding-bottom 8px
+    // display inline-block
+    label
+      pointer-events none
+      width 20px
+      height 16px
+      display flex
+      align-items center
+      padding-left 4px
+      padding-right 4px
+      input
+        margin 0
+        margin-top -1px
+        width 10px
+        height 10px
+        background-size contain
+
 </style>

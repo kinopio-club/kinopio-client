@@ -99,7 +99,7 @@ const updateName = (newName) => {
   // update local
   store.commit('updateCardNameInOtherItems', card)
   store.commit('triggerUpdateOtherCard', card.id)
-  updateOtherNameInCurrentSpace({ card, spaceId })
+  updateOtherCardNameInCurrentSpace({ card, spaceId })
   // update remote
   store.dispatch('api/addToQueue', { name: 'updateCard', body: card, spaceId })
   // update input
@@ -107,7 +107,7 @@ const updateName = (newName) => {
   updateErrorMaxCharacterLimit(newName)
   store.dispatch('currentCards/updateDimensions', { cards: [card] })
 }
-const updateOtherNameInCurrentSpace = ({ card, spaceId }) => {
+const updateOtherCardNameInCurrentSpace = ({ card, spaceId }) => {
   const currentSpaceId = store.state.currentSpace.id
   if (currentSpaceId !== spaceId) { return }
   store.commit('currentCards/update', card)
