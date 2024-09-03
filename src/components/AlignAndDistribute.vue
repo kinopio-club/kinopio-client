@@ -69,7 +69,7 @@ const yIsDistributed = computed(() => {
       if (index > 0) {
         const previousItem = cards[index - 1]
         const rect = utils.cardElementDimensions({ id: previousItem.id }) || utils.boxElementDimensions({ id: previousItem.id }) || previousItem
-        const previousItemHeight = rect.height * zoom
+        const previousItemHeight = rect.height
         const previousBottomSide = previousItem.y + previousItemHeight
         const yDelta = card.y - previousBottomSide
         const isNotEquallyDistributed = !utils.isBetween({
@@ -94,7 +94,7 @@ const xIsDistributed = computed(() => {
       if (index > 0) {
         const previousItem = cards[index - 1]
         const rect = utils.cardElementDimensions({ id: previousItem.id }) || utils.boxElementDimensions({ id: previousItem.id }) || previousItem
-        const previousItemWidth = rect.width * zoom
+        const previousItemWidth = rect.width
         const previousRightSide = previousItem.x + previousItemWidth
         const xDelta = card.x - previousRightSide
         const isNotEquallyDistributed = !utils.isBetween({
@@ -335,7 +335,7 @@ const alignTopItems = (items, type) => {
       if (props.shouldDistributeWithAlign) {
         const previousItem = newItems[index - 1]
         const rect = utils.cardElementDimensions({ id: previousItem.id }) || utils.boxElementDimensions({ id: previousItem.id }) || previousItem
-        const previousRightSide = previousItem.x + (rect.width * zoom)
+        const previousRightSide = previousItem.x + rect.width
         item.x = previousRightSide + consts.spaceBetweenCards
       }
       updateItem(item, type)
@@ -379,12 +379,12 @@ const alignRightItems = (items, type) => {
   const origin = items[0]
   if (!origin) { return }
   let rect = utils.cardElementDimensions({ id: origin.id }) || utils.boxElementDimensions({ id: origin.id }) || origin
-  const originWidth = rect.width * zoom
+  const originWidth = rect.width
   items.forEach((item, index) => {
     if (index > 0) {
       item = utils.clone(item)
       rect = utils.cardElementDimensions({ id: item.id }) || utils.boxElementDimensions({ id: item.id }) || item
-      const itemWidth = rect.width * zoom
+      const itemWidth = rect.width
       item.x = origin.x + originWidth - itemWidth
       updateItem(item, type)
     }
@@ -431,7 +431,7 @@ const alignLeftItems = (items, type) => {
       if (props.shouldDistributeWithAlign) {
         const previousItem = newItems[index - 1]
         const rect = utils.cardElementDimensions({ id: previousItem.id }) || utils.boxElementDimensions({ id: previousItem.id }) || previousItem
-        const previousItemHeight = rect.height * zoom
+        const previousItemHeight = rect.height
         const previousBottomSide = previousItem.y + previousItemHeight
         item.y = previousBottomSide + consts.spaceBetweenCards
         console.error(item)
