@@ -275,6 +275,7 @@ const updateMediaUrls = (urls) => {
   state.formats.video = ''
   state.formats.audio = ''
   state.formats.link = ''
+  state.formats.file = ''
   if (!urls) { return }
   if (!urls.length) { return }
   urls.forEach(url => {
@@ -602,6 +603,7 @@ const urlButtonIsVisible = computed(() => {
   if (!cardButtonUrl.value) { return }
   if (isComment.value) { return true }
   if (isUrlPreviewError.value) { return true }
+  if (state.formats.file) { return true }
   return !props.card.urlPreviewIsVisible
 })
 const cardButtonUrl = computed(() => {
