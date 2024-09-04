@@ -229,9 +229,9 @@ export default {
     return isOutsideX || isOutsideY
   },
   outsideSpaceOffset () {
-    const zoom = this.spaceCounterZoomDecimal() || 1
     const space = document.getElementById('space')
     if (!space) { return }
+    const zoom = this.spaceCounterZoomDecimal() || 1
     let spaceRect = space.getBoundingClientRect()
     spaceRect = {
       x: Math.round(spaceRect.x * zoom),
