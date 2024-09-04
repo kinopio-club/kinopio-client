@@ -1,4 +1,5 @@
 # Netlify settings for single-page application
+# Should match offline excluded routes in vite.vonfig.js
 
 /robots.txt       /robots.txt   200
 
