@@ -1,0 +1,48 @@
+[[redirects]]
+  from = "/robots.txt"
+  to = "/robots.txt"
+  status = 200
+
+[[redirects]]
+  from = "/sitemap.xml"
+  to = "/sitemap.xml"
+  status = 200
+
+
+
+[[redirects]]
+  from = "/help"
+  to = "https://help.kinopio.club"
+  force = true
+
+[[redirects]]
+  from = "/about"
+  to = "https://about.kinopio.club"
+  force = true
+
+
+
+[[redirects]]
+  from = "/api"
+  to = "https://help.kinopio.club/api"
+  force = true
+
+[[redirects]]
+  from = "/forum"
+  to = "https://forum.kinopio.club"
+  force = true
+
+[[redirects]]
+  from = "/discord"
+  to = "https://discord.gg/h2sR45Nby8"
+  force = true
+
+  [[redirects]]
+  from = "/changelog"
+  to = "https://kinopio.club/changelog-6lsytK8ZfOtMl2oqG05Rj"
+  force = true
+
+[[redirects]]
+  from = "/roadmap"
+  to = "https://kinopio.club/-roadmap-6TRE21gchHI7alHLuwzd5"
+  force = true
