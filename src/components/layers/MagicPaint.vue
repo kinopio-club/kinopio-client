@@ -6,6 +6,7 @@ import utils from '@/utils.js'
 import collisionDetection from '@/collisionDetection.js'
 import postMessage from '@/postMessage.js'
 import DropGuideLine from '@/components/layers/DropGuideLine.vue'
+import SonarPing from '@/components/layers/SonarPing.vue'
 const store = useStore()
 
 const circleRadius = 20
@@ -810,6 +811,7 @@ aside
       :viewportWidth="viewportWidth"
       :viewportHeight="viewportHeight"
     )
+  SonarPing
 </template>
 
 <style lang="stylus" scoped>

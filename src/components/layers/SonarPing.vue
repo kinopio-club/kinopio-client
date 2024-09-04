@@ -41,9 +41,10 @@ const updateScroll = () => {
   state.scroll = store.getters.windowScrollWithSpaceOffset()
 }
 
+const spaceZoomDecimal = computed(() => store.getters.spaceZoomDecimal)
 const spaceCounterZoomDecimal = computed(() => store.getters.spaceCounterZoomDecimal)
-const viewportHeight = computed(() => store.state.viewportHeight * spaceCounterZoomDecimal.value)
-const viewportWidth = computed(() => store.state.viewportWidth * spaceCounterZoomDecimal.value)
+const viewportHeight = computed(() => store.state.viewportHeight)
+const viewportWidth = computed(() => store.state.viewportWidth)
 const isDarkTheme = computed(() => store.getters['themes/isThemeDark'])
 const styles = computed(() => {
   return {
@@ -85,8 +86,11 @@ const createRipples = (ping) => {
   }
 }
 const updateRippleOrigin = ({ x, y }) => {
+  const zoom = spaceZoomDecimal.value
   x = x - state.scroll.x
   y = y - state.scroll.y
+  x = x * zoom
+  y = y * zoom
   // left side
   if (x < 0) {
     x = 0
@@ -160,12 +164,10 @@ const destroyRipples = () => {
 </script>
 
 <template lang="pug">
-aside
-  canvas#sonar(
-    :width="viewportWidth"
-    :height="viewportHeight"
-    :style="styles"
-  )
+canvas#sonar(
+  :width="viewportWidth"
+  :height="viewportHeight"
+)
 </template>
 
 <style lang="stylus">
