@@ -190,7 +190,7 @@ const currentSpaceName = computed(() => {
   if (name) {
     return name
   } else {
-    return `Space ${id}`
+    return `X Space ${id}`
   }
 })
 const spaceTeam = computed(() => store.getters['teams/spaceTeam']())
