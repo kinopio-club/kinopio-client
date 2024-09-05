@@ -537,6 +537,7 @@ const selectConnections = (points) => {
     if (svg.dataset.isVisibleInViewport === 'false') { return }
     const path = svg.querySelector('path.connection-path')
     const matches = collisionDetection.checkPointsInsidePath(points, svg, path)
+    if (!matches) { return }
     const connectionIds = matches.map(match => match.id)
     store.dispatch('addMultipleToMultipleConnectionsSelected', connectionIds)
   })

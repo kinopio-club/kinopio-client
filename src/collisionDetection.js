@@ -88,6 +88,7 @@ export default {
   // check paths
 
   checkPointsInsidePath (points, svg, path) {
+    if (!path) { return }
     // Convert points to SVG points
     const svgPoints = Array.from(points).map(point => {
       let svgPoint = svg.createSVGPoint()
