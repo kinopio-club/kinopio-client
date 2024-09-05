@@ -261,6 +261,10 @@ const changeSpace = (spaceId) => {
   store.dispatch('currentSpace/changeSpace', space)
   store.dispatch('closeAllDialogs')
 }
+const changeSpaceAndSelectItems = (spaceId, items) => {
+  store.commit('multipleSelectedItemsToLoad', items)
+  changeSpace(spaceId)
+}
 
 // read-only jiggle
 
@@ -441,7 +445,7 @@ aside.notifications(@click.left="closeAllDialogs")
     p {{notifyMoveOrCopyToSpaceDetails.message}}
     .row
       a(:href="notifyMoveOrCopyToSpaceDetails.id")
-        button(@click.left.prevent.stop="changeSpace(notifyMoveOrCopyToSpaceDetails.id)") {{notifyMoveOrCopyToSpaceDetails.name}} →
+        button(@click.left.prevent.stop="changeSpaceAndSelectItems(notifyMoveOrCopyToSpaceDetails.id, notifyMoveOrCopyToSpaceDetails.items)") {{notifyMoveOrCopyToSpaceDetails.name}} →
 
   .persistent-item.danger(v-if="notifySpaceIsUnavailableOffline")
     OfflineBadge

@@ -861,23 +861,26 @@ const currentSpace = {
       remoteSpace = utils.normalizeSpace(remoteSpace)
       // cards
       const cards = context.rootGetters['currentCards/all']
-      const selectedCards = context.rootGetters['currentCards/selectedCardsPositions']()
-      let cardResults = utils.mergeSpaceKeyValues({ prevItems: cards, newItems: remoteSpace.cards, selectedItems: selectedCards })
+      const selectedCardIds = context.rootState.multipleCardsSelectedIds.concat(context.rootState.multipleCardsSelectedIdsToLoad)
+      let cardResults = utils.mergeSpaceKeyValues({ prevItems: cards, newItems: remoteSpace.cards, selectedItemIds: selectedCardIds })
       context.dispatch('currentCards/mergeUnique', cardResults.updateItems, { root: true })
       context.dispatch('currentCards/mergeRemove', cardResults.removeItems, { root: true })
       // connectionTypes
       const connectionTypes = context.rootGetters['currentConnections/allTypes']
-      const connectionTypeReults = utils.mergeSpaceKeyValues({ prevItems: connectionTypes, newItems: remoteSpace.connectionTypes })
+      const selectedConnectionTypeIds = context.rootState.multipleConnectionTypesSelectedIdsToLoad
+      const connectionTypeReults = utils.mergeSpaceKeyValues({ prevItems: connectionTypes, newItems: remoteSpace.connectionTypes, selectedItemIds: selectedConnectionTypeIds })
       context.dispatch('currentConnections/mergeUnique', { newItems: connectionTypeReults.updateItems, itemType: 'type' }, { root: true })
       context.dispatch('currentConnections/mergeRemove', { removeItems: connectionTypeReults.removeItems, itemType: 'type' }, { root: true })
       // connections
       const connections = context.rootGetters['currentConnections/all']
-      const connectionResults = utils.mergeSpaceKeyValues({ prevItems: connections, newItems: remoteSpace.connections })
+      const selectedConnectionIds = context.rootState.multipleConnectionsSelectedIds.concat(context.rootState.multipleConnectionsSelectedIdsToLoad)
+      const connectionResults = utils.mergeSpaceKeyValues({ prevItems: connections, newItems: remoteSpace.connections, selectedItemIds: selectedConnectionIds })
       context.dispatch('currentConnections/mergeUnique', { newItems: connectionResults.updateItems, itemType: 'connection' }, { root: true })
       context.dispatch('currentConnections/mergeRemove', { removeItems: connectionResults.removeItems, itemType: 'connection' }, { root: true })
       // boxes
       const boxes = context.rootGetters['currentBoxes/all']
-      const boxResults = utils.mergeSpaceKeyValues({ prevItems: boxes, newItems: remoteSpace.boxes })
+      const selectedBoxIds = context.rootState.multipleBoxesSelectedIds.concat(context.rootState.multipleBoxesSelectedIdsToLoad)
+      const boxResults = utils.mergeSpaceKeyValues({ prevItems: boxes, newItems: remoteSpace.boxes, selectedItemIds: selectedBoxIds })
       context.dispatch('currentBoxes/mergeUnique', { newItems: boxResults.updateItems, itemType: 'box' }, { root: true })
       context.dispatch('currentBoxes/mergeRemove', { removeItems: boxResults.removeItems, itemType: 'box' }, { root: true })
       context.dispatch('history/redoLocalUpdates', null, { root: true })
@@ -968,6 +971,7 @@ const currentSpace = {
       if (cardId) {
         context.dispatch('currentCards/showCardDetails', cardId, { root: true })
       }
+      context.commit('restoreMultipleSelectedItemsToLoad', null, { root: true })
     },
     updateUserLastSpaceId: (context) => {
       const isPrivate = context.state.privacy === 'private'

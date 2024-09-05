@@ -1155,18 +1155,6 @@ const currentCards = {
       } else {
         return rootState.currentUser.color
       }
-    },
-    selectedCardsPositions: (state, getters) => () => {
-      const cardIds = getters.isSelectedIds
-      let cards = cardIds.map(id => {
-        const element = document.querySelector(`article[data-card-id="${id}"]`)
-        if (!element) { return }
-        const x = parseInt(element.style.left)
-        const y = parseInt(element.style.top)
-        return { id, x, y }
-      })
-      cards = cards.filter(card => Boolean(card))
-      return cards
     }
   }
 }

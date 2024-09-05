@@ -1320,11 +1320,10 @@ export default {
     if (!prevSpace.cards || !prevSpace.connections) { return false }
     return prevSpace.editedAt === newSpace.editedAt
   },
-  mergeSpaceKeyValues ({ prevItems, newItems, selectedItems }) {
+  mergeSpaceKeyValues ({ prevItems, newItems, selectedItemIds }) {
     prevItems = prevItems.filter(item => Boolean(item))
     newItems = newItems.filter(item => Boolean(item))
-    selectedItems = selectedItems || []
-    const selectedItemIds = selectedItems.map(item => item.id)
+    selectedItemIds = selectedItemIds || []
     const prevIds = prevItems.map(item => item.id)
     const newIds = newItems.map(item => item.id)
     newItems = this.normalizeItems(newItems)
@@ -1333,7 +1332,7 @@ export default {
     let updateItems = []
     let removeItems = []
     newIds.forEach(id => {
-      const selectedItem = selectedItems.find(item => item.id === id)
+      const selectedItem = selectedItemIds.find(selectedItemId => selectedItemId === id)
       const itemExists = prevIds.includes(id)
       if (selectedItem) {
         const prevItem = prevItems[id]
@@ -1350,9 +1349,10 @@ export default {
     })
     prevIds.forEach(id => {
       const prevItemNotFoundInNewItems = !newIds.includes(id)
-      const threshold = 10 * 1000 // 10 seconds
+      const threshold = 30 * 1000 // 30 seconds
       const prevItemUpdatedInCurrentSession = dayjs(Date.now()).diff(prevItems[id].updatedAt) < threshold
-      const itemIsRemoved = prevItemNotFoundInNewItems && !prevItemUpdatedInCurrentSession
+      const selectedItem = selectedItemIds.find(selectedItemId => selectedItemId === id)
+      const itemIsRemoved = prevItemNotFoundInNewItems && !prevItemUpdatedInCurrentSession && !selectedItem
       if (itemIsRemoved) {
         removeItems.push(prevItems[id])
       }
