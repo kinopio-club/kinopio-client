@@ -16,6 +16,7 @@ const store = useStore()
 const dialogElement = ref(null)
 
 onMounted(() => {
+  window.addEventListener('resize', updateDialogHeight)
   store.subscribe(mutation => {
     if (mutation.type === 'triggerCloseChildDialogs') {
       closeDialogs()
@@ -29,6 +30,7 @@ const props = defineProps({
   showExploreSpaces: Boolean
 })
 const state = reactive({
+  dialogHeight: null,
   spacePickerIsVisible: false,
   exploreSpaces: [],
   userSpaces: [],
@@ -44,9 +46,17 @@ const state = reactive({
 
 watch(() => props.visible, (value, prevValue) => {
   if (value) {
+    updateDialogHeight()
     clearUserSpaces()
   }
 })
+const updateDialogHeight = async () => {
+  if (!props.visible) { return }
+  await nextTick()
+  let element = dialogElement.value
+  state.dialogHeight = utils.elementHeight(element)
+}
+
 const closeDialogs = () => {
   state.spacePickerIsVisible = false
 }
