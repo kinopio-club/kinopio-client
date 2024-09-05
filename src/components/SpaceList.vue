@@ -1,5 +1,5 @@
 <script setup>
-import { reactive, computed, onMounted, onBeforeUnmount, onUnmounted, defineProps, defineEmits, watch, ref, nextTick } from 'vue'
+import { reactive, computed, onMounted, onBeforeUnmount, onUnmounted, defineProps, defineEmits, watch, useTemplateRef, nextTick } from 'vue'
 import { useStore } from 'vuex'
 
 import templates from '@/data/templates.js'
@@ -25,7 +25,7 @@ let unsubscribe, shouldPreventSelectSpace
 
 const itemsPerPage = 60
 
-const spaceListElement = ref(null)
+const spaceListElement = useTemplateRef('spaceListElement')
 
 onMounted(() => {
   unsubscribe = store.subscribe((mutation) => {

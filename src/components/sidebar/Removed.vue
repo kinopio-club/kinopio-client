@@ -1,5 +1,5 @@
 <script setup>
-import { reactive, computed, onMounted, onBeforeUnmount, defineProps, defineEmits, watch, ref, nextTick } from 'vue'
+import { reactive, computed, onMounted, onBeforeUnmount, defineProps, defineEmits, watch, useTemplateRef, nextTick } from 'vue'
 import { useStore } from 'vuex'
 
 import merge from 'lodash-es/merge'
@@ -10,7 +10,7 @@ import PrivacyIcon from '@/components/PrivacyIcon.vue'
 import utils from '@/utils.js'
 const store = useStore()
 
-const resultsElement = ref(null)
+const resultsElement = useTemplateRef('resultsElement')
 
 onMounted(() => {
   window.addEventListener('resize', updateResultsSectionHeight)

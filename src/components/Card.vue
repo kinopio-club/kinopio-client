@@ -1,5 +1,5 @@
 <script setup>
-import { reactive, computed, onMounted, onBeforeUnmount, onUnmounted, defineProps, defineEmits, watch, ref, nextTick } from 'vue'
+import { reactive, computed, onMounted, onBeforeUnmount, onUnmounted, defineProps, defineEmits, watch, useTemplateRef, nextTick } from 'vue'
 import { useStore, mapState, mapGetters } from 'vuex'
 
 import utils from '@/utils.js'
@@ -26,7 +26,7 @@ import qs from '@aguezz/qs-parse'
 
 const store = useStore()
 
-const cardElement = ref(null)
+const cardElement = useTemplateRef('cardElement')
 
 let isMultiTouch
 let initialTouchEvent = {}

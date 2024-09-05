@@ -1,5 +1,5 @@
 <script setup>
-import { reactive, computed, onMounted, defineProps, defineEmits, watch, ref, nextTick } from 'vue'
+import { reactive, computed, onMounted, defineProps, defineEmits, watch, useTemplateRef, nextTick } from 'vue'
 import { useStore } from 'vuex'
 
 import UpgradeUserStripe from '@/components/UpgradeUserStripe.vue'
@@ -10,7 +10,7 @@ import utils from '@/utils.js'
 import consts from '@/consts.js'
 
 const store = useStore()
-const dialog = ref(null)
+const dialogElement = useTemplateRef('dialogElement')
 
 onMounted(() => {
   window.addEventListener('resize', updateDialogHeight)
@@ -96,7 +96,7 @@ const triggerSignUpOrInIsVisible = () => {
 const updateDialogHeight = async () => {
   if (!props.visible) { return }
   await nextTick()
-  const element = dialog.value
+  const element = dialogElement.value
   state.dialogHeight = utils.elementHeight(element)
 }
 const closeChildDialogs = () => {
@@ -105,7 +105,7 @@ const closeChildDialogs = () => {
 </script>
 
 <template lang="pug">
-dialog.upgrade-user.wide(v-if="props.visible" :open="props.visible" @click.left.stop="closeChildDialogs" @keydown.stop ref="dialog" :style="{'max-height': state.dialogHeight + 'px'}")
+dialog.upgrade-user.wide(v-if="props.visible" :open="props.visible" @click.left.stop="closeChildDialogs" @keydown.stop ref="dialogElement" :style="{'max-height': state.dialogHeight + 'px'}")
   section
     .row.title-row
       p Upgrade your account for unlimited cards and uploads

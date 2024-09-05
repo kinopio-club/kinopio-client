@@ -1,5 +1,5 @@
 <script setup>
-import { reactive, computed, onMounted, onBeforeUnmount, defineProps, defineEmits, watch, ref, nextTick } from 'vue'
+import { reactive, computed, onMounted, onBeforeUnmount, defineProps, defineEmits, watch, useTemplateRef, nextTick } from 'vue'
 import { useStore } from 'vuex'
 
 import User from '@/components/User.vue'
@@ -11,7 +11,7 @@ import last from 'lodash-es/last'
 
 const store = useStore()
 
-const buttonElement = ref(null)
+const buttonElement = useTemplateRef('buttonElement')
 
 const props = defineProps({
   showLabel: Boolean,

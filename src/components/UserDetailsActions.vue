@@ -1,5 +1,5 @@
 <script setup>
-import { reactive, computed, onMounted, onBeforeUnmount, defineProps, defineEmits, watch, ref, nextTick } from 'vue'
+import { reactive, computed, onMounted, onBeforeUnmount, defineProps, defineEmits, watch, useTemplateRef, nextTick } from 'vue'
 import { useStore } from 'vuex'
 
 import SpacePicker from '@/components/dialogs/SpacePicker.vue'
@@ -12,8 +12,6 @@ import cache from '@/cache.js'
 import postMessage from '@/postMessage.js'
 
 const store = useStore()
-
-const dialogElement = ref(null)
 
 onMounted(() => {
   store.subscribe(mutation => {

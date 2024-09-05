@@ -1,5 +1,5 @@
 <script setup>
-import { reactive, computed, onMounted, onBeforeUnmount, defineProps, defineEmits, watch, ref, nextTick } from 'vue'
+import { reactive, computed, onMounted, onBeforeUnmount, defineProps, defineEmits, watch, useTemplateRef, nextTick } from 'vue'
 import { useStore } from 'vuex'
 
 import Slider from '@/components/Slider.vue'
@@ -11,7 +11,7 @@ import { colord } from 'colord'
 
 const store = useStore()
 
-const dialogElement = ref(null)
+const dialogElement = useTemplateRef('dialogElement')
 
 onMounted(() => {
   window.addEventListener('resize', updateDialogHeight)

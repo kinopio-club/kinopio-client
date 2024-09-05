@@ -1,12 +1,12 @@
 <script setup>
 import utils from '@/utils.js'
 
-import { reactive, computed, onMounted, defineProps, defineEmits, watch, ref, nextTick } from 'vue'
+import { reactive, computed, onMounted, defineProps, defineEmits, watch, useTemplateRef, nextTick } from 'vue'
 import { useStore } from 'vuex'
 const store = useStore()
 
 let shouldRestoreUrlPath, title, pathname
-const dialog = ref(null)
+const dialogElement = useTemplateRef('dialogElement')
 
 onMounted(() => {
   updateCurrentDeviceView()
@@ -14,7 +14,7 @@ onMounted(() => {
   shouldRestoreUrlPath = true
   store.subscribe((mutation, state) => {
     if (mutation.type === 'closeAllDialogs') {
-      const element = dialog.value
+      const element = dialogElement.value
       if (!element) { return }
       if (shouldRestoreUrlPath) {
         shouldRestoreUrlPath = false
@@ -80,14 +80,14 @@ const restoreUrlPath = () => {
 const updateDialogHeight = async () => {
   if (!props.visible) { return }
   await nextTick()
-  let element = dialog.value
+  let element = dialogElement.value
   state.dialogHeight = utils.elementHeight(element)
 }
 
 </script>
 
 <template lang="pug">
-dialog.apps.narrow(v-if="visible" @click.stop :open="visible" ref="dialog" :style="{'max-height': state.dialogHeight + 'px'}")
+dialog.apps.narrow(v-if="visible" @click.stop :open="visible" ref="dialogElement" :style="{'max-height': state.dialogHeight + 'px'}")
   section
     .segmented-buttons
       button(:class="{active: state.isDesktop}" @click="toggleIsDesktop(true)")

@@ -1,5 +1,5 @@
 <script setup>
-import { reactive, computed, onMounted, onBeforeUnmount, onUnmounted, defineProps, defineEmits, watch, ref, nextTick } from 'vue'
+import { reactive, computed, onMounted, onBeforeUnmount, onUnmounted, defineProps, defineEmits, watch, useTemplateRef, nextTick } from 'vue'
 import { useStore } from 'vuex'
 
 import cache from '@/cache.js'
@@ -13,8 +13,8 @@ import randomColor from 'randomcolor'
 
 const store = useStore()
 
-const dialogElement = ref(null)
-const resultsElement = ref(null)
+const dialogElement = useTemplateRef('dialogElement')
+const resultsElement = useTemplateRef('resultsElement')
 
 onMounted(() => {
   window.addEventListener('resize', updateHeights)

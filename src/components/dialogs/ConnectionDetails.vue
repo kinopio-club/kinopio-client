@@ -1,5 +1,5 @@
 <script setup>
-import { reactive, computed, onMounted, onUnmounted, defineProps, defineEmits, watch, ref, nextTick } from 'vue'
+import { reactive, computed, onMounted, onUnmounted, defineProps, defineEmits, watch, useTemplateRef, nextTick } from 'vue'
 import { useStore } from 'vuex'
 
 import ResultsFilter from '@/components/ResultsFilter.vue'
@@ -16,10 +16,10 @@ import dayjs from 'dayjs'
 const store = useStore()
 
 let prevConnectionType
-const dialogElement = ref(null)
-const typeNameElement = ref(null)
-const infoSectionElement = ref(null)
-const resultsActionsElement = ref(null)
+const dialogElement = useTemplateRef('dialogElement')
+const typeNameElement = useTemplateRef('nameElement')
+const infoSectionElement = useTemplateRef('infoSectionElement')
+const resultsActionsElement = useTemplateRef('resultsActionsElement')
 
 onMounted(() => {
   updatePinchCounterZoomDecimal()

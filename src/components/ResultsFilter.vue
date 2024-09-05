@@ -1,5 +1,5 @@
 <script setup>
-import { reactive, computed, onMounted, onUnmounted, defineProps, defineEmits, watch, ref, nextTick } from 'vue'
+import { reactive, computed, onMounted, onUnmounted, defineProps, defineEmits, watch, useTemplateRef, nextTick } from 'vue'
 import { useStore } from 'vuex'
 
 import Loader from '@/components/Loader.vue'
@@ -10,8 +10,8 @@ import dayjs from 'dayjs'
 
 const store = useStore()
 
-const resultsFilterElement = ref(null)
-const filterInputElement = ref(null)
+const resultsFilterElement = useTemplateRef('resultsFilterElement')
+const filterInputElement = useTemplateRef('filterInputElement')
 
 onMounted(() => {
   if (props.initialValue) {

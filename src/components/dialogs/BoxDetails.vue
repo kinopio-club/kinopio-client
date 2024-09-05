@@ -1,5 +1,5 @@
 <script setup>
-import { reactive, computed, onMounted, onBeforeUnmount, onUnmounted, defineProps, defineEmits, watch, ref, nextTick } from 'vue'
+import { reactive, computed, onMounted, onBeforeUnmount, onUnmounted, defineProps, defineEmits, watch, useTemplateRef, nextTick } from 'vue'
 import { useStore } from 'vuex'
 
 import ColorPicker from '@/components/dialogs/ColorPicker.vue'
@@ -10,8 +10,8 @@ import { colord, extend } from 'colord'
 
 const store = useStore()
 
-const dialogElement = ref(null)
-const nameElement = ref(null)
+const dialogElement = useTemplateRef('dialogElement')
+const nameElement = useTemplateRef('nameElement')
 
 let prevBoxId
 

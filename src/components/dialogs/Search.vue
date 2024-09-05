@@ -1,5 +1,5 @@
 <script setup>
-import { reactive, computed, onMounted, onBeforeUnmount, defineProps, defineEmits, watch, ref, nextTick } from 'vue'
+import { reactive, computed, onMounted, onBeforeUnmount, defineProps, defineEmits, watch, useTemplateRef, nextTick } from 'vue'
 import { useStore } from 'vuex'
 
 import ResultsFilter from '@/components/ResultsFilter.vue'
@@ -13,8 +13,8 @@ import orderBy from 'lodash-es/orderBy'
 
 const store = useStore()
 
-const dialogElement = ref(null)
-const resultsElement = ref(null)
+const dialogElement = useTemplateRef('dialogElement')
+const resultsElement = useTemplateRef('resultsElement')
 
 const maxIterations = 30
 let currentIteration, updatePositionTimer

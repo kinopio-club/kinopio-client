@@ -1,5 +1,5 @@
 <script setup>
-import { reactive, computed, onMounted, onBeforeUnmount, onUnmounted, defineProps, defineEmits, watch, ref, nextTick } from 'vue'
+import { reactive, computed, onMounted, onBeforeUnmount, onUnmounted, defineProps, defineEmits, watch, useTemplateRef, nextTick } from 'vue'
 import { useStore } from 'vuex'
 
 import utils from '@/utils.js'
@@ -9,8 +9,8 @@ let animationTimer, isMultiTouch, startCursor, currentCursor
 
 let observer
 
-const connectionElement = ref(null)
-const connectionPathElement = ref(null)
+const connectionElement = useTemplateRef('connectionElement')
+const connectionPathElement = useTemplateRef('connectionPathElement')
 
 onMounted(() => {
   store.subscribe((mutation, state) => {

@@ -1,5 +1,5 @@
 <script setup>
-import { reactive, computed, onMounted, onUnmounted, defineProps, defineEmits, watch, ref, nextTick } from 'vue'
+import { reactive, computed, onMounted, onUnmounted, defineProps, defineEmits, watch, useTemplateRef, nextTick } from 'vue'
 import { useStore } from 'vuex'
 
 import ColorPicker from '@/components/dialogs/ColorPicker.vue'
@@ -9,7 +9,7 @@ import cache from '@/cache.js'
 import utils from '@/utils.js'
 const store = useStore()
 
-const descriptionElement = ref(null)
+const descriptionElement = useTemplateRef('descriptionElement')
 
 onMounted(() => {
   updateTextareaSize()

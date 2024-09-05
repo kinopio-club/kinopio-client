@@ -1,5 +1,5 @@
 <script setup>
-import { reactive, computed, onMounted, onUpdated, defineProps, defineEmits, watch, ref, nextTick } from 'vue'
+import { reactive, computed, onMounted, onUpdated, defineProps, defineEmits, watch, useTemplateRef, nextTick } from 'vue'
 import { useStore } from 'vuex'
 
 import utils from '@/utils.js'
@@ -69,16 +69,16 @@ const scrollIntoView = async () => {
 
 // textarea styles
 
-const textarea = ref(null)
+const textareaElement = useTemplateRef('textareaElement')
 const textareaStyles = async () => {
   await nextTick()
-  if (!textarea.value) { return }
-  textarea.value.style.height = textarea.value.scrollHeight + 1 + 'px'
+  if (!textareaElement.value) { return }
+  textareaElement.value.style.height = textareaElement.value.scrollHeight + 1 + 'px'
 }
 const focusTextarea = async () => {
   await nextTick()
-  if (!textarea.value) { return }
-  textarea.value.focus()
+  if (!textareaElement.value) { return }
+  textareaElement.value.focus()
 }
 
 // edit parent card
@@ -143,7 +143,7 @@ const selectSpaceCard = () => {
 </script>
 
 <template lang="pug">
-dialog.narrow.other-card-details(v-if="visible" :open="visible" :style="styles" @click.left.stop ref="dialog")
+dialog.narrow.other-card-details(v-if="visible" :open="visible" :style="styles" @click.left.stop ref="dialogElement")
   //- edit parent card
   section.edit-card(v-if="!cardDetailsIsVisibleForCardId && parentCardId")
     button(@click="showCardDetails") Edit Card
@@ -156,7 +156,7 @@ dialog.narrow.other-card-details(v-if="visible" :open="visible" :style="styles" 
       template(v-if="canEditOtherCard")
         section.subsection.textarea-wrap
           textarea.name(
-            ref="textarea"
+            ref="textareaElement"
             rows="1"
             :value="otherCard.name"
             @input="updateName($event.target.value)"

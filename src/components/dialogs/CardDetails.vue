@@ -1,5 +1,5 @@
 <script setup>
-import { reactive, computed, onMounted, onUpdated, onBeforeUnmount, defineProps, defineEmits, watch, ref, nextTick } from 'vue'
+import { reactive, computed, onMounted, onUpdated, onBeforeUnmount, defineProps, defineEmits, watch, useTemplateRef, nextTick } from 'vue'
 import { useStore, mapState, mapGetters } from 'vuex'
 
 import CardOrBoxActions from '@/components/subsections/CardOrBoxActions.vue'
@@ -34,8 +34,8 @@ let openingAnimationTimer, openingStartTime, shouldCancelOpening
 
 const store = useStore()
 
-const dialogElement = ref(null)
-const nameElement = ref(null)
+const dialogElement = useTemplateRef('dialogElement')
+const nameElement = useTemplateRef('nameElement')
 
 onMounted(() => {
   store.subscribe(async (mutation, state) => {

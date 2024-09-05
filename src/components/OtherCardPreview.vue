@@ -3,7 +3,7 @@ import Loader from '@/components/Loader.vue'
 import NameSegment from '@/components/NameSegment.vue'
 import utils from '@/utils.js'
 
-import { reactive, computed, onMounted, defineProps, defineEmits, watch, ref, nextTick } from 'vue'
+import { reactive, computed, onMounted, defineProps, defineEmits, watch, useTemplateRef, nextTick } from 'vue'
 import { useStore } from 'vuex'
 const store = useStore()
 
