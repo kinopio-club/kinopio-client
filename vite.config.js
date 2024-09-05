@@ -50,15 +50,18 @@ export default defineConfig(async ({ command, mode }) => {
         strategies: 'generateSW',
         workbox: {
           navigateFallbackDenylist: [
-            /^\/robots\.txt$/, // Exclude '/robots.txt'
-            /^\/sitemap\.xml$/, // Exclude 'sitemap.xml'
-            /^\/changelog$/, // Exclude '/changelog'
-            /^\/roadmap$/, // Exclude '/roadmap'
-            /^\/discord$/, // Exclude '/discord'
-            /^\/help(?:\/.*)?$/, // Exclude '/help' and all subpaths (e.g. /help/post)
-            /^\/about(?:\/.*)?$/, // Exclude '/about' and all subpaths
-            /^\/api(?:\/.*)?$/, // Exclude '/api' and all subpaths
-            /^\/forum(?:\/.*)?$/ // Exclude '/forum' and all subpaths
+            // Exclude exact route only
+            /^\/robots\.txt$/,
+            /^\/sitemap\.xml$/,
+            /^\/changelog$/,
+            /^\/roadmap$/,
+            /^\/discord$/,
+            // Exclude '/route' and all subpaths (e.g. /route/post)
+            /^\/help(?:\/.*)?$/,
+            /^\/about(?:\/.*)?$/,
+            /^\/api(?:\/.*)?$/,
+            /^\/forum(?:\/.*)?$/,
+            /^\/blog(?:\/.*)?$/
           ],
           globPatterns: ['**/*.{js,css,html,svg,png,gif,woff2,ico,jpg,jpeg,webp}'],
           runtimeCaching: [
