@@ -1,5 +1,5 @@
 <script setup>
-import { reactive, computed, onMounted, onUnmounted, defineProps, defineEmits, watch, useTemplateRef, nextTick } from 'vue'
+import { reactive, computed, onMounted, onUnmounted, defineProps, defineEmits, watch, ref, nextTick } from 'vue'
 import { useStore } from 'vuex'
 
 import UserLabelInline from '@/components/UserLabelInline.vue'
@@ -10,8 +10,8 @@ import consts from '@/consts.js'
 import { nanoid } from 'nanoid'
 const store = useStore()
 
-const dialogElement = useTemplateRef('dialogElement')
-const textareaWrapElement = useTemplateRef('textareaWrapElement')
+const dialogElement = ref(null)
+const textareaWrapElement = ref(null)
 let sessionToken
 
 onMounted(() => {

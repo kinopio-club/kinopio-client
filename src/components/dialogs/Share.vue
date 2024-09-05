@@ -1,5 +1,5 @@
 <script setup>
-import { reactive, computed, onMounted, defineProps, defineEmits, watch, useTemplateRef, nextTick } from 'vue'
+import { reactive, computed, onMounted, defineProps, defineEmits, watch, ref, nextTick } from 'vue'
 import { useStore } from 'vuex'
 
 import PrivacyButton from '@/components/PrivacyButton.vue'
@@ -14,7 +14,7 @@ import ReadOnlySpaceInfoBadges from '@/components/ReadOnlySpaceInfoBadges.vue'
 import consts from '@/consts.js'
 const store = useStore()
 
-const dialogElement = useTemplateRef('dialogElement')
+const dialog = ref(null)
 
 onMounted(() => {
   window.addEventListener('resize', updateDialogHeight)
@@ -99,7 +99,7 @@ const webShare = () => {
 const updateDialogHeight = () => {
   if (!props.visible) { return }
   nextTick(() => {
-    let element = dialogElement.value
+    let element = dialog.value
     state.dialogHeight = utils.elementHeight(element)
   })
 }
@@ -159,7 +159,7 @@ const users = computed(() => {
 </script>
 
 <template lang="pug">
-dialog.share.wide(v-if="props.visible" :open="props.visible" @click.left.stop="closeDialogs" ref="dialogElement" :style="{'max-height': state.dialogHeight + 'px'}" :class="{overflow: !dialogIsVisible}")
+dialog.share.wide(v-if="props.visible" :open="props.visible" @click.left.stop="closeDialogs" ref="dialog" :style="{'max-height': state.dialogHeight + 'px'}" :class="{overflow: !dialogIsVisible}")
   section
     .row.title-row
       p Share

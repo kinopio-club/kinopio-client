@@ -1,5 +1,5 @@
 <script setup>
-import { reactive, computed, onMounted, onUnmounted, defineProps, defineEmits, watch, useTemplateRef, nextTick } from 'vue'
+import { reactive, computed, onMounted, onUnmounted, defineProps, defineEmits, watch, ref, nextTick } from 'vue'
 import { useStore } from 'vuex'
 
 import Import from '@/components/Import.vue'
@@ -7,7 +7,7 @@ import Export from '@/components/Export.vue'
 import utils from '@/utils.js'
 const store = useStore()
 
-const dialogElement = useTemplateRef('dialogElement')
+const dialogElement = ref(null)
 
 const emit = defineEmits(['updateSpaces', 'closeDialog'])
 

@@ -1,12 +1,12 @@
 <script setup>
-import { reactive, computed, onMounted, onUnmounted, defineProps, defineEmits, watch, useTemplateRef, nextTick } from 'vue'
+import { reactive, computed, onMounted, onUnmounted, defineProps, defineEmits, watch, ref, nextTick } from 'vue'
 import { useStore } from 'vuex'
 
 import AIImagesProgress from '@/components/AIImagesProgress.vue'
 import utils from '@/utils.js'
 const store = useStore()
 
-const sectionElement = useTemplateRef('sectionElement')
+const sectionElement = ref(null)
 
 onMounted(() => {
   window.addEventListener('resize', updateHeight)

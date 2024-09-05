@@ -1,5 +1,5 @@
 <script setup>
-import { reactive, computed, onMounted, onBeforeUnmount, defineProps, defineEmits, watch, useTemplateRef, nextTick } from 'vue'
+import { reactive, computed, onMounted, onBeforeUnmount, defineProps, defineEmits, watch, ref, nextTick } from 'vue'
 import { useStore } from 'vuex'
 
 import utils from '@/utils.js'
@@ -16,7 +16,7 @@ const store = useStore()
 let shouldLoadLastSpace
 let sessionToken
 
-const emailElement = useTemplateRef('emailElement')
+const emailElement = ref(null)
 
 const emit = defineEmits(['loading'])
 

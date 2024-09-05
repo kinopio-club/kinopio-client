@@ -1,5 +1,5 @@
 <script setup>
-import { reactive, computed, onMounted, onUnmounted, defineProps, defineEmits, watch, useTemplateRef, nextTick } from 'vue'
+import { reactive, computed, onMounted, onUnmounted, defineProps, defineEmits, watch, ref, nextTick } from 'vue'
 import { useStore } from 'vuex'
 
 import frames from '@/data/frames.js'
@@ -7,7 +7,7 @@ import FrameBadge from '@/components/FrameBadge.vue'
 import utils from '@/utils.js'
 const store = useStore()
 
-const dialogElement = useTemplateRef('dialogElement')
+const dialogElement = ref(null)
 
 onMounted(() => {
   window.addEventListener('resize', updateDialogHeight)

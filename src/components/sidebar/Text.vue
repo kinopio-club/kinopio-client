@@ -1,5 +1,5 @@
 <script setup>
-import { reactive, computed, onMounted, defineProps, defineEmits, watch, useTemplateRef, nextTick } from 'vue'
+import { reactive, computed, onMounted, defineProps, defineEmits, watch, ref, nextTick } from 'vue'
 import { useStore } from 'vuex'
 
 import utils from '@/utils.js'
@@ -32,8 +32,7 @@ const state = reactive({
   sortOrderIsDesc: true,
   sortedCards: []
 })
-const sectionElement = useTemplateRef('sectionElement')
-
+const section = ref(null)
 let prevIndex
 
 watch(() => props.visible, (value, prevValue) => {
@@ -122,7 +121,7 @@ const addCard = async (card, index) => {
   await nextTick()
   updateSortedCardsWithNewCard({ newCardId, index })
   await nextTick()
-  const element = sectionElement.value.querySelector(`textarea[data-card-id="${newCardId}"]`)
+  const element = section.value.querySelector(`textarea[data-card-id="${newCardId}"]`)
   updateAllTextareaSizes()
   element.focus()
   prevIndex = index
@@ -137,7 +136,7 @@ const addChildCard = async (card, index) => {
   await nextTick()
   updateSortedCardsWithNewCard({ newCardId, index })
   await nextTick()
-  const element = sectionElement.value.querySelector(`textarea[data-card-id="${newCardId}"]`)
+  const element = section.value.querySelector(`textarea[data-card-id="${newCardId}"]`)
   updateAllTextareaSizes()
   element.focus()
   prevIndex = index
@@ -157,7 +156,7 @@ const updateTextareaSize = (element) => {
 const updateAllTextareaSizes = async () => {
   if (!props.visible) { return }
   await nextTick()
-  const textareas = sectionElement.value.querySelectorAll('textarea')
+  const textareas = section.value.querySelectorAll('textarea')
   textareas.forEach(element => {
     element.style.height = null
     updateTextareaSize(element)
@@ -212,7 +211,7 @@ const focus = (card, index) => {
   prevIndex = index
 }
 const focusTextarea = async (card, index) => {
-  let element = sectionElement.value.querySelector(`textarea[data-card-id="${card.id}"]`)
+  let element = section.value.querySelector(`textarea[data-card-id="${card.id}"]`)
   focus(card, index)
   await nextTick()
   await nextTick()
@@ -293,7 +292,7 @@ template(v-if="visible")
             img.icon.triangle(src="@/assets/triangle.svg")
             //- span Oldest
 
-  section.text.results-section(ref="sectionElement" @click="closeDialogs")
+  section.text.results-section(ref="section" @click="closeDialogs")
     template(v-for="(card, index) in state.sortedCards")
       //- edit
       template(v-if="canEditCard(card)")

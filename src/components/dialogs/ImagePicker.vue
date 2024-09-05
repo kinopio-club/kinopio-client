@@ -1,5 +1,5 @@
 <script setup>
-import { reactive, computed, onMounted, onUnmounted, defineProps, defineEmits, watch, useTemplateRef, nextTick } from 'vue'
+import { reactive, computed, onMounted, onUnmounted, defineProps, defineEmits, watch, ref, nextTick } from 'vue'
 import { useStore } from 'vuex'
 
 import Loader from '@/components/Loader.vue'
@@ -12,10 +12,10 @@ import debounce from 'lodash-es/debounce'
 import sample from 'lodash-es/sample'
 const store = useStore()
 
-const dialogElement = useTemplateRef('dialogElement')
-const searchInputElement = useTemplateRef('searchInputElement')
-const inputElement = useTemplateRef('inputElement')
-const resultsSectionElement = useTemplateRef('resultsSectionElement')
+const dialogElement = ref(null)
+const searchInputElement = ref(null)
+const inputElement = ref(null)
+const resultsSectionElement = ref(null)
 
 onMounted(() => {
   window.addEventListener('resize', updateDialogHeight)

@@ -1,5 +1,5 @@
 <script setup>
-import { reactive, computed, onMounted, onUpdated, defineProps, defineEmits, watch, useTemplateRef, nextTick } from 'vue'
+import { reactive, computed, onMounted, onUpdated, defineProps, defineEmits, watch, ref, nextTick } from 'vue'
 import { useStore } from 'vuex'
 
 import ColorPicker from '@/components/dialogs/ColorPicker.vue'
@@ -19,8 +19,8 @@ import times from 'lodash-es/times'
 import { nanoid } from 'nanoid'
 const store = useStore()
 
-const searchInputElement = useTemplateRef('searchInputElement')
-const inputElement = useTemplateRef('inputElement')
+const searchInputElement = ref(null)
+const inputElement = ref(null)
 
 const props = defineProps({
   visible: Boolean

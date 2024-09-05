@@ -1,5 +1,5 @@
 <script setup>
-import { reactive, computed, onMounted, onBeforeUnmount, defineProps, defineEmits, watch, useTemplateRef, nextTick } from 'vue'
+import { reactive, computed, onMounted, onBeforeUnmount, defineProps, defineEmits, watch, ref, nextTick } from 'vue'
 import { useStore } from 'vuex'
 
 import UserLabelInline from '@/components/UserLabelInline.vue'
@@ -8,7 +8,7 @@ import utils from '@/utils.js'
 
 const store = useStore()
 
-const dialogElement = useTemplateRef('dialogElement')
+const dialogElement = ref(null)
 
 const props = defineProps({
   visible: Boolean

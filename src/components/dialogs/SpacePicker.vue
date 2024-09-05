@@ -1,5 +1,5 @@
 <script setup>
-import { reactive, computed, onMounted, onBeforeUnmount, defineProps, defineEmits, watch, useTemplateRef, nextTick } from 'vue'
+import { reactive, computed, onMounted, onBeforeUnmount, defineProps, defineEmits, watch, ref, nextTick } from 'vue'
 import { useStore } from 'vuex'
 
 import User from '@/components/User.vue'
@@ -18,8 +18,8 @@ import sortBy from 'lodash-es/sortBy'
 
 const store = useStore()
 
-const dialogElement = useTemplateRef('dialogElement')
-const newSpaceNameElement = useTemplateRef('nameElement')
+const dialogElement = ref(null)
+const newSpaceNameElement = ref(null)
 
 onMounted(() => {
   window.addEventListener('resize', updateDialogHeight)

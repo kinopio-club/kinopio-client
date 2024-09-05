@@ -1,5 +1,5 @@
 <script setup>
-import { reactive, computed, onMounted, onBeforeUnmount, defineProps, defineEmits, watch, useTemplateRef, nextTick } from 'vue'
+import { reactive, computed, onMounted, onBeforeUnmount, defineProps, defineEmits, watch, ref, nextTick } from 'vue'
 import { useStore } from 'vuex'
 
 import cache from '@/cache.js'
@@ -17,9 +17,9 @@ const store = useStore()
 
 let checkIfShouldNotifySpaceOutOfSyncIntervalTimer
 
-const cardsOverLimitElement = useTemplateRef('cardsOverLimitElement')
-const readOnlyElement = useTemplateRef('readOnlyElement')
-const templateElement = useTemplateRef('templateElement')
+const cardsOverLimitElement = ref(null)
+const readOnlyElement = ref(null)
+const templateElement = ref(null)
 
 onMounted(() => {
   update()

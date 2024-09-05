@@ -2,11 +2,11 @@
 import utils from '@/utils.js'
 import consts from '@/consts.js'
 
-import { reactive, computed, onMounted, defineProps, defineEmits, watch, useTemplateRef, nextTick } from 'vue'
+import { reactive, computed, onMounted, defineProps, defineEmits, watch, ref, nextTick } from 'vue'
 import { useStore } from 'vuex'
 const store = useStore()
 
-const dialogElement = useTemplateRef('dialogElement')
+const dialog = ref(null)
 
 const props = defineProps({
   visible: Boolean,
@@ -33,7 +33,7 @@ watch(() => props.visible, (value, prevValue) => {
 })
 const scrollIntoView = async () => {
   await nextTick()
-  store.commit('scrollElementIntoView', { element: dialogElement.value })
+  store.commit('scrollElementIntoView', { element: dialog.value })
 }
 
 // copy url
@@ -71,7 +71,7 @@ const webShare = () => {
 </script>
 
 <template lang="pug">
-dialog.narrow.share-card(v-if="visible" :open="visible" @click.left.stop ref="dialogElement" :class="{ 'read-only': props.isReadOnly }")
+dialog.narrow.share-card(v-if="visible" :open="visible" @click.left.stop ref="dialog" :class="{ 'read-only': props.isReadOnly }")
   section(v-if="canShare")
     section.subsection
       .row

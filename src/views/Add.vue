@@ -1,5 +1,5 @@
 <script setup>
-import { reactive, computed, onMounted, onUnmounted, onBeforeUnmount, defineProps, defineEmits, watch, useTemplateRef, nextTick } from 'vue'
+import { reactive, computed, onMounted, onUnmounted, onBeforeUnmount, defineProps, defineEmits, watch, ref, nextTick } from 'vue'
 import { useStore } from 'vuex'
 
 import inboxSpace from '@/data/inbox.json'
@@ -37,7 +37,7 @@ const state = reactive({
   filteredSpaces: []
 })
 
-const textareaElement = useTemplateRef('textareaElement')
+const textareaElement = ref(null)
 
 // init
 

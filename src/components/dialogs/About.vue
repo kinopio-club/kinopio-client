@@ -1,5 +1,5 @@
 <script setup>
-import { reactive, computed, onMounted, onBeforeUnmount, onUnmounted, defineProps, defineEmits, watch, useTemplateRef, nextTick } from 'vue'
+import { reactive, computed, onMounted, onBeforeUnmount, onUnmounted, defineProps, defineEmits, watch, ref, nextTick } from 'vue'
 import { useStore } from 'vuex'
 
 import AppsAndExtensions from '@/components/dialogs/AppsAndExtensions.vue'
@@ -13,7 +13,7 @@ import dayjs from 'dayjs'
 
 const store = useStore()
 
-const dialogElement = useTemplateRef('dialogElement')
+const dialogElement = ref(null)
 
 let checkKinopioUpdatesIntervalTimer
 

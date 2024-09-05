@@ -1,5 +1,5 @@
 <script setup>
-import { reactive, computed, onMounted, defineProps, defineEmits, watch, useTemplateRef, nextTick } from 'vue'
+import { reactive, computed, onMounted, defineProps, defineEmits, watch, ref, nextTick } from 'vue'
 import { useStore } from 'vuex'
 
 import ResultsFilter from '@/components/ResultsFilter.vue'
@@ -8,7 +8,7 @@ import utils from '@/utils.js'
 
 const store = useStore()
 
-const dialogElement = useTemplateRef('dialogElement')
+const dialog = ref(null)
 const placeholder = 'Search Languages'
 
 onMounted(() => {
@@ -114,7 +114,7 @@ const styles = computed(() => {
 const updateDialogHeight = async () => {
   await nextTick()
   await nextTick()
-  const element = dialogElement.value
+  const element = dialog.value
   if (!element) { return }
   state.dialogHeight = utils.elementHeight(element)
 }
@@ -124,13 +124,13 @@ const scrollIntoView = async () => {
   await nextTick()
   await nextTick()
   await nextTick()
-  const element = dialogElement.value
+  const element = dialog.value
   store.commit('scrollElementIntoView', { element })
 }
 </script>
 
 <template lang="pug">
-dialog.narrow.code-language-picker(v-if="visible" :open="visible" @click.left.stop ref="dialogElement" :style="styles" :data-card-id="cardId")
+dialog.narrow.code-language-picker(v-if="visible" :open="visible" @click.left.stop ref="dialog" :style="styles" :data-card-id="cardId")
   ResultsFilter(
     :items="codeLanguages"
     :placeholder="placeholder"

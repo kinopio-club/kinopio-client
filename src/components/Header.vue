@@ -1,5 +1,5 @@
 <script setup>
-import { reactive, computed, onMounted, onUnmounted, onBeforeUnmount, defineProps, defineEmits, watch, useTemplateRef, nextTick } from 'vue'
+import { reactive, computed, onMounted, onUnmounted, onBeforeUnmount, defineProps, defineEmits, watch, ref, nextTick } from 'vue'
 import { useStore } from 'vuex'
 
 import About from '@/components/dialogs/About.vue'
@@ -52,7 +52,7 @@ const hiddenDuration = 20
 const updatePositionDuration = 60
 let fadeOutIteration, fadeOutTimer, hiddenIteration, hiddenTimer, updatePositionIteration, updatePositionTimer, shouldCancelFadeOut
 
-const readOnlyElement = useTemplateRef('readOnlyElement')
+const readOnlyElement = ref(null)
 
 onMounted(() => {
   window.addEventListener('scroll', updatePosition)

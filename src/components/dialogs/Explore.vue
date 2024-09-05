@@ -1,5 +1,5 @@
 <script setup>
-import { reactive, computed, onMounted, onBeforeUnmount, onUnmounted, defineProps, defineEmits, watch, useTemplateRef, nextTick } from 'vue'
+import { reactive, computed, onMounted, onBeforeUnmount, onUnmounted, defineProps, defineEmits, watch, ref, nextTick } from 'vue'
 import { useStore } from 'vuex'
 
 import SpaceList from '@/components/SpaceList.vue'
@@ -12,8 +12,8 @@ import randomColor from 'randomcolor'
 
 const store = useStore()
 
-const dialogElement = useTemplateRef('dialogElement')
-const resultsElement = useTemplateRef('resultsElement')
+const dialogElement = ref(null)
+const resultsElement = ref(null)
 
 onMounted(() => {
   window.addEventListener('resize', updateHeights)

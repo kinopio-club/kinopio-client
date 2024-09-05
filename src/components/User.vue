@@ -1,12 +1,12 @@
 <script setup>
-import { reactive, computed, onMounted, onUnmounted, defineProps, defineEmits, watch, useTemplateRef, nextTick } from 'vue'
+import { reactive, computed, onMounted, onUnmounted, defineProps, defineEmits, watch, ref, nextTick } from 'vue'
 import { useStore } from 'vuex'
 
 import UserDetailsInline from '@/components/dialogs/UserDetailsInline.vue'
 import utils from '@/utils.js'
 const store = useStore()
 
-const userElement = useTemplateRef('userElement')
+const userElement = ref(null)
 
 onMounted(() => {
   state.userDetailsInlineIsVisible = false

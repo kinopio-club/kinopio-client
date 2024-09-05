@@ -1,5 +1,5 @@
 <script setup>
-import { reactive, computed, onMounted, onBeforeUnmount, onUpdated, onUnmounted, defineProps, defineEmits, watch, useTemplateRef, nextTick } from 'vue'
+import { reactive, computed, onMounted, onBeforeUnmount, onUpdated, onUnmounted, defineProps, defineEmits, watch, ref, nextTick } from 'vue'
 import { useStore } from 'vuex'
 
 import utils from '@/utils.js'
@@ -27,7 +27,7 @@ let observer
 
 let prevSelectedBox
 
-const boxElement = useTemplateRef('boxElement')
+const boxElement = ref(null)
 
 onMounted(() => {
   store.subscribe((mutation, state) => {

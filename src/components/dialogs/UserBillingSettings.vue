@@ -1,5 +1,5 @@
 <script setup>
-import { reactive, computed, onMounted, defineProps, defineEmits, watch, useTemplateRef, nextTick } from 'vue'
+import { reactive, computed, onMounted, defineProps, defineEmits, watch, ref, nextTick } from 'vue'
 import { useStore } from 'vuex'
 
 import Loader from '@/components/Loader.vue'
@@ -9,7 +9,7 @@ import consts from '@/consts.js'
 import dayjs from 'dayjs'
 const store = useStore()
 
-const dialogElement = useTemplateRef('dialogElement')
+const dialog = ref(null)
 
 onMounted(() => {
   window.addEventListener('resize', updateDialogHeight)
@@ -47,7 +47,7 @@ const isSecureAppContextIOS = computed(() => consts.isSecureAppContextIOS)
 const updateDialogHeight = async () => {
   if (!props.visible) { return }
   await nextTick()
-  let element = dialogElement.value
+  let element = dialog.value
   state.dialogHeight = utils.elementHeight(element)
 }
 
@@ -75,7 +75,7 @@ const customerPortal = async () => {
 </script>
 
 <template lang="pug">
-dialog.narrow.user-billing(v-if="visible" :open="visible" @click.left.stop ref="dialogElement" :style="{'max-height': state.dialogHeight + 'px'}")
+dialog.narrow.user-billing(v-if="visible" :open="visible" @click.left.stop ref="dialog" :style="{'max-height': state.dialogHeight + 'px'}")
   section
     p Billing
 

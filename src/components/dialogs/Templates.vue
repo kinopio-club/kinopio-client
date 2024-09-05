@@ -1,5 +1,5 @@
 <script setup>
-import { reactive, computed, onMounted, onBeforeUnmount, onUnmounted, defineProps, defineEmits, watch, useTemplateRef, nextTick } from 'vue'
+import { reactive, computed, onMounted, onBeforeUnmount, onUnmounted, defineProps, defineEmits, watch, ref, nextTick } from 'vue'
 import { useStore } from 'vuex'
 
 import SpaceList from '@/components/SpaceList.vue'
@@ -11,8 +11,8 @@ import dayjs from 'dayjs'
 
 const store = useStore()
 
-const dialogElement = useTemplateRef('dialogElement')
-const resultsSectionElement = useTemplateRef('resultsSectionElement')
+const dialogElement = ref(null)
+const resultsSectionElement = ref(null)
 
 onMounted(() => {
   initUserTemplates()

@@ -1,5 +1,5 @@
 <script setup>
-import { reactive, computed, onMounted, onBeforeUnmount, defineProps, defineEmits, watch, useTemplateRef, nextTick } from 'vue'
+import { reactive, computed, onMounted, onBeforeUnmount, defineProps, defineEmits, watch, ref, nextTick } from 'vue'
 import { useStore } from 'vuex'
 
 import BackgroundPicker from '@/components/dialogs/BackgroundPicker.vue'
@@ -19,7 +19,7 @@ import utils from '@/utils.js'
 
 const store = useStore()
 
-const nameElement = useTemplateRef('nameElement')
+const nameElement = ref(null)
 
 onMounted(() => {
   store.subscribe(async (mutation) => {

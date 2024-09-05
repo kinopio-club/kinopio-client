@@ -1,5 +1,5 @@
 <script setup>
-import { reactive, computed, onMounted, defineProps, defineEmits, watch, useTemplateRef, nextTick } from 'vue'
+import { reactive, computed, onMounted, defineProps, defineEmits, watch, ref, nextTick } from 'vue'
 import { useStore } from 'vuex'
 
 import DiscountRow from '@/components/DiscountRow.vue'
@@ -14,7 +14,7 @@ const store = useStore()
 const props = defineProps({
   visible: Boolean
 })
-const dialogElement = useTemplateRef('dialogElement')
+const dialog = ref(null)
 
 onMounted(() => {
   window.addEventListener('resize', updateDialogHeight)
@@ -65,7 +65,7 @@ const closeChildDialogs = () => {
 const updateDialogHeight = async () => {
   if (!props.visible) { return }
   await nextTick()
-  state.dialogHeight = utils.elementHeight(dialogElement.value)
+  state.dialogHeight = utils.elementHeight(dialog.value)
 }
 
 // free cards from space member
@@ -76,7 +76,7 @@ const spaceUser = computed(() => store.state.currentSpace.users[0])
 </script>
 
 <template lang="pug">
-dialog.pricing(v-if="visible" :open="visible" @click.left.stop="closeDialogs" ref="dialogElement" :style="{'max-height': state.dialogHeight + 'px'}")
+dialog.pricing(v-if="visible" :open="visible" @click.left.stop="closeDialogs" ref="dialog" :style="{'max-height': state.dialogHeight + 'px'}")
   section
     .row.title-row
       //- price

@@ -1,5 +1,5 @@
 <script setup>
-import { reactive, computed, onMounted, onUnmounted, defineProps, defineEmits, watch, useTemplateRef, nextTick } from 'vue'
+import { reactive, computed, onMounted, onUnmounted, defineProps, defineEmits, watch, ref, nextTick } from 'vue'
 import { useStore } from 'vuex'
 
 import Loader from '@/components/Loader.vue'
@@ -12,7 +12,7 @@ import randomColor from 'randomcolor'
 
 const store = useStore()
 
-const inputElement = useTemplateRef('inputElement')
+const inputElement = ref(null)
 
 const emit = defineEmits(['updateSpaces', 'closeDialog'])
 

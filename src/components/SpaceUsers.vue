@@ -1,5 +1,5 @@
 <script setup>
-import { reactive, computed, onMounted, onUnmounted, onBeforeUnmount, defineProps, defineEmits, watch, useTemplateRef, nextTick } from 'vue'
+import { reactive, computed, onMounted, onUnmounted, onBeforeUnmount, defineProps, defineEmits, watch, ref, nextTick } from 'vue'
 import { useStore } from 'vuex'
 
 import User from '@/components/User.vue'
@@ -11,7 +11,7 @@ import last from 'lodash-es/last'
 
 const store = useStore()
 
-const spaceUsersElement = useTemplateRef('spaceUsersElement')
+const spaceUsersElement = ref(null)
 
 const avatarWidth = 30
 const maxMembersCount = 3

@@ -1,5 +1,5 @@
 <script setup>
-import { reactive, computed, onMounted, onBeforeUnmount, defineProps, defineEmits, watch, useTemplateRef, nextTick } from 'vue'
+import { reactive, computed, onMounted, onBeforeUnmount, defineProps, defineEmits, watch, ref, nextTick } from 'vue'
 import { useStore } from 'vuex'
 
 import cache from '@/cache.js'
@@ -20,8 +20,8 @@ let shouldUpdateFavorites = true
 const maxIterations = 30
 let currentIteration, updatePositionTimer
 
-const dialogElement = useTemplateRef('dialogElement')
-const resultsElement = useTemplateRef('resultsElement')
+const dialogElement = ref(null)
+const resultsElement = ref(null)
 
 onMounted(() => {
   window.addEventListener('resize', updateHeights)

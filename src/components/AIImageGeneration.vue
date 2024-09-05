@@ -1,5 +1,5 @@
 <script setup>
-import { reactive, computed, onMounted, onUnmounted, defineProps, defineEmits, watch, useTemplateRef, nextTick } from 'vue'
+import { reactive, computed, onMounted, onUnmounted, defineProps, defineEmits, watch, ref, nextTick } from 'vue'
 import { useStore } from 'vuex'
 
 import AIImagesProgress from '@/components/AIImagesProgress.vue'
@@ -7,7 +7,7 @@ import Loader from '@/components/Loader.vue'
 import utils from '@/utils.js'
 const store = useStore()
 
-const textareaElement = useTemplateRef('textareaElement')
+const textareaElement = ref(null)
 
 const props = defineProps({
   visible: Boolean,
