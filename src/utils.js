@@ -229,9 +229,9 @@ export default {
     return isOutsideX || isOutsideY
   },
   outsideSpaceOffset () {
-    const zoom = this.spaceCounterZoomDecimal() || 1
     const space = document.getElementById('space')
     if (!space) { return }
+    const zoom = this.spaceCounterZoomDecimal() || 1
     let spaceRect = space.getBoundingClientRect()
     spaceRect = {
       x: Math.round(spaceRect.x * zoom),
@@ -1320,11 +1320,10 @@ export default {
     if (!prevSpace.cards || !prevSpace.connections) { return false }
     return prevSpace.editedAt === newSpace.editedAt
   },
-  mergeSpaceKeyValues ({ prevItems, newItems, selectedItems }) {
+  mergeSpaceKeyValues ({ prevItems, newItems, selectedItemIds }) {
     prevItems = prevItems.filter(item => Boolean(item))
     newItems = newItems.filter(item => Boolean(item))
-    selectedItems = selectedItems || []
-    const selectedItemIds = selectedItems.map(item => item.id)
+    selectedItemIds = selectedItemIds || []
     const prevIds = prevItems.map(item => item.id)
     const newIds = newItems.map(item => item.id)
     newItems = this.normalizeItems(newItems)
@@ -1333,7 +1332,7 @@ export default {
     let updateItems = []
     let removeItems = []
     newIds.forEach(id => {
-      const selectedItem = selectedItems.find(item => item.id === id)
+      const selectedItem = selectedItemIds.find(selectedItemId => selectedItemId === id)
       const itemExists = prevIds.includes(id)
       if (selectedItem) {
         const prevItem = prevItems[id]
@@ -1350,9 +1349,10 @@ export default {
     })
     prevIds.forEach(id => {
       const prevItemNotFoundInNewItems = !newIds.includes(id)
-      const threshold = 10 * 1000 // 10 seconds
+      const threshold = 30 * 1000 // 30 seconds
       const prevItemUpdatedInCurrentSession = dayjs(Date.now()).diff(prevItems[id].updatedAt) < threshold
-      const itemIsRemoved = prevItemNotFoundInNewItems && !prevItemUpdatedInCurrentSession
+      const selectedItem = selectedItemIds.find(selectedItemId => selectedItemId === id)
+      const itemIsRemoved = prevItemNotFoundInNewItems && !prevItemUpdatedInCurrentSession && !selectedItem
       if (itemIsRemoved) {
         removeItems.push(prevItems[id])
       }
@@ -2051,7 +2051,7 @@ export default {
   urlIsFile (url) {
     if (!url) { return }
     url = url + ' '
-    const fileUrlPattern = new RegExp(/(?:\.txt|\.md|\.markdown|\.pdf|\.ppt|\.pptx|\.doc|\.docx|\.csv|\.xsl|\.xslx|\.rtf|\.zip|\.tar|\.xml|\.psd|\.ai|\.ind|\.sketch|\.mov|\.heic|\.7z|\.woff|\.woff2|\.otf|\.ttf|\.wav|\.flac)(?:\n| |\?|&)/igm)
+    const fileUrlPattern = new RegExp(/(?:\.txt|\.md|\.markdown|\.pdf|\.log|\.ppt|\.pptx|\.doc|\.docx|\.csv|\.xsl|\.xslx|\.rtf|\.zip|\.tar|\.xml|\.psd|\.ai|\.ind|\.sketch|\.mov|\.heic|\.7z|\.woff|\.woff2|\.otf|\.ttf|\.wav|\.flac)(?:\n| |\?|&)/igm)
     const isFile = url.toLowerCase().match(fileUrlPattern)
     return Boolean(isFile)
   },

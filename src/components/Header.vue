@@ -308,6 +308,7 @@ const removeReadOnlyJiggle = () => {
 
 // visible
 
+const isPresentationMode = computed(() => store.state.isPresentationMode)
 const isVisible = computed(() => {
   if (isPresentationMode.value) { return }
   if (store.state.isAddPage) { return }
@@ -559,26 +560,9 @@ const updateNotificationsIsRead = (notificationIds) => {
     body: notificationIds
   })
 }
-const disablePresentationMode = () => {
-  store.commit('isPresentationMode', false)
-}
-
-// presentation mode
-
-const isPresentationMode = computed(() => store.state.isPresentationMode)
-const togglePresentationMode = () => {
-  const value = !isPresentationMode.value
-  store.commit('isPresentationMode', value)
-}
 </script>
 
 <template lang="pug">
-header.presentation-header(v-if="isPresentationMode" :style="state.position" :class="{'fade-out': isFadingOut}")
-  button.active(@click="disablePresentationMode" :class="{ 'translucent-button': !shouldIncreaseUIContrast }")
-    img.icon(src="@/assets/presentation.svg")
-  SelectAllBelow
-  SelectAllRight
-
 header(v-if="isVisible" :style="state.position" :class="{'fade-out': isFadingOut, 'hidden': state.isHidden}")
   //- embed
   nav.embed-nav(v-if="isEmbedMode")
@@ -741,11 +725,7 @@ header(v-if="isVisible" :style="state.position" :class="{'fade-out': isFadingOut
             span Upgrade
           UpgradeUser(:visible="state.upgradeUserIsVisible" @closeDialog="closeAllDialogs")
         //- comments
-        CommentButton
-        //- presentation mode
-        .button-wrap
-          button(:class="{ 'translucent-button': !shouldIncreaseUIContrast }" @click="togglePresentationMode" title="Focus/Presentation Mode (P)")
-            img.icon(src="@/assets/presentation.svg")
+        //- CommentButton
 
   Toolbar(:visible="isSpace")
   SelectAllBelow
@@ -982,11 +962,6 @@ header
     transform rotate(-4deg)
   100%
     transform rotate(0deg)
-
-.presentation-header
-  flex-direction row-reverse
-  button
-    pointer-events all
 
 .button-wrap.space-status-button-wrap
   position absolute

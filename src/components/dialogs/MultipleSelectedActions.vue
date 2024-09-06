@@ -52,9 +52,11 @@ watch(() => visible.value, async (value, prevValue) => {
     scrollIntoView()
     closeDialogs()
     store.dispatch('history/snapshots')
+    store.commit('shouldExplicitlyHideFooter', true)
   } else {
     store.dispatch('history/resume')
     store.dispatch('history/add', { cards: prevCards, boxes: prevBoxes, useSnapshot: true })
+    store.commit('shouldExplicitlyHideFooter', false)
   }
 })
 

@@ -49,6 +49,20 @@ export default defineConfig(async ({ command, mode }) => {
         registerType: 'autoUpdate',
         strategies: 'generateSW',
         workbox: {
+          navigateFallbackDenylist: [
+            // Exclude exact route only
+            /^\/robots\.txt$/,
+            /^\/sitemap\.xml$/,
+            /^\/changelog$/,
+            /^\/roadmap$/,
+            /^\/discord$/,
+            // Exclude '/route' and all subpaths (e.g. /route/post)
+            /^\/help(?:\/.*)?$/,
+            /^\/about(?:\/.*)?$/,
+            /^\/api(?:\/.*)?$/,
+            /^\/forum(?:\/.*)?$/,
+            /^\/blog(?:\/.*)?$/
+          ],
           globPatterns: ['**/*.{js,css,html,svg,png,gif,woff2,ico,jpg,jpeg,webp}'],
           runtimeCaching: [
             {

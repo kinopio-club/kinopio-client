@@ -170,6 +170,10 @@ const store = createStore({
     previousMultipleBoxesSelectedIds: [],
     isSelectingX: false,
     isSelectingY: false,
+    multipleCardsSelectedIdsToLoad: [],
+    multipleConnectionsSelectedIdsToLoad: [],
+    multipleBoxesSelectedIdsToLoad: [],
+    multipleConnectionTypesSelectedIdsToLoad: [],
 
     // connections
     currentConnectionStartItemIds: [],
@@ -1149,6 +1153,23 @@ const store = createStore({
       state.prevNewTweetCards = state.newTweetCards
       state.newTweetCards = []
     },
+    multipleSelectedItemsToLoad: (state, items) => {
+      utils.typeCheck({ value: items, type: 'object' })
+      console.log('multipleSelectedItemsToLoad', items)
+      state.multipleCardsSelectedIdsToLoad = items.cards.map(card => card.id)
+      state.multipleConnectionsSelectedIdsToLoad = items.connections.map(connection => connection.id)
+      state.multipleBoxesSelectedIdsToLoad = items.boxes.map(box => box.id)
+      state.multipleConnectionTypesSelectedIdsToLoad = items.connectionTypes.map(type => type.id)
+    },
+    restoreMultipleSelectedItemsToLoad: (state) => {
+      state.multipleCardsSelectedIds = state.multipleCardsSelectedIdsToLoad
+      state.multipleConnectionsSelectedIds = state.multipleConnectionsSelectedIdsToLoad
+      state.multipleBoxesSelectedIds = state.multipleBoxesSelectedIdsToLoad
+      state.multipleCardsSelectedIdsToLoad = []
+      state.multipleConnectionsSelectedIdsToLoad = []
+      state.multipleConnectionTypesSelectedIdsToLoad = []
+      state.multipleBoxesSelectedIdsToLoad = []
+    },
 
     // multiple cards
 
@@ -1170,10 +1191,6 @@ const store = createStore({
       state.multipleCardsSelectedIds = state.multipleCardsSelectedIds.filter(id => {
         return id !== cardId
       })
-    },
-    multipleConnectionsSelectedIds: (state, connectionIds) => {
-      utils.typeCheck({ value: connectionIds, type: 'array' })
-      state.multipleConnectionsSelectedIds = connectionIds
     },
     addToRemoteCardsSelected: (state, update) => {
       utils.typeCheck({ value: update, type: 'object' })
@@ -1213,6 +1230,10 @@ const store = createStore({
 
     // muiltiple connections
 
+    multipleConnectionsSelectedIds: (state, connectionIds) => {
+      utils.typeCheck({ value: connectionIds, type: 'array' })
+      state.multipleConnectionsSelectedIds = connectionIds
+    },
     updateRemoteConnectionsSelected: (state, update) => {
       state.remoteConnectionsSelected = state.remoteConnectionsSelected.filter(connection => connection.userId !== update.userId)
       const updates = update.connectionIds.map(connectionId => {

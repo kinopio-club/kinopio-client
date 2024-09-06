@@ -10,6 +10,8 @@ const store = useStore()
 
 const dialogElement = ref(null)
 
+let newItems
+
 const props = defineProps({
   visible: Boolean,
   actionIsMove: Boolean
@@ -115,7 +117,7 @@ const copyToSelectedSpace = (items) => {
   state.loading = true
   const selectedSpaceId = state.selectedSpace.id
   const selectedSpaceisCurrentSpace = selectedSpaceId === store.state.currentSpace.id
-  const newItems = store.getters['currentSpace/newItems']({ items, selectedSpaceId })
+  newItems = store.getters['currentSpace/newItems']({ items, selectedSpaceId })
   // update cache
   const spaceIsCached = Boolean(cache.space(selectedSpaceId).cards)
   if (!spaceIsCached) {
@@ -189,13 +191,13 @@ const isCardsCreatedIsOverLimit = () => {
 const notifySuccess = () => {
   const action = utils.pastTense(actionLabel.value)
   const message = `${itemsCount.value} ${pluralItem.value} ${action} to ${state.selectedSpace.name}` // 3 cards copied to SpacePalace
-  store.commit('notifyMoveOrCopyToSpaceDetails', { id: state.selectedSpace.id, name: state.selectedSpace.name, message })
+  store.commit('notifyMoveOrCopyToSpaceDetails', { id: state.selectedSpace.id, name: state.selectedSpace.name, message, items: newItems })
   store.commit('notifyMoveOrCopyToSpace', true)
 }
 const notifyNewSpaceSuccess = (newSpace) => {
   const action = utils.pastTense(actionLabel.value)
   const message = `${newSpace.name} added with ${itemsCount.value} ${pluralItem.value} ${action} ` // SpacePalace added with 3 cards copied
-  store.commit('notifyMoveOrCopyToSpaceDetails', { id: newSpace.id, name: newSpace.name, message })
+  store.commit('notifyMoveOrCopyToSpaceDetails', { id: newSpace.id, name: newSpace.name, message, items: newItems })
   store.commit('notifyMoveOrCopyToSpace', true)
 }
 </script>

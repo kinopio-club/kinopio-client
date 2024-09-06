@@ -1,11 +1,14 @@
 # Netlify settings for single-page application
+# Should match offline excluded routes in vite.vonfig.js
 
 /robots.txt       /robots.txt   200
 
 # sitemap entries in vite.config.js
+
 /sitemap.xml      /sitemap.xml   200
 
 # help and about are currently the same site
+
 /help             https://help.kinopio.club
 /about            https://about.kinopio.club
 

@@ -63,7 +63,6 @@ const cardDetailsIsVisibleForCardId = computed(() => store.state.cardDetailsIsVi
 const multipleSelectedActionsIsVisible = computed(() => store.state.multipleSelectedActionsIsVisible)
 const connectionDetailsIsVisibleForConnectionId = computed(() => store.state.connectionDetailsIsVisibleForConnectionId)
 const shouldHideFooter = computed(() => store.state.shouldHideFooter)
-const isPresentationMode = computed(() => store.state.isPresentationMode)
 const isTouchDevice = computed(() => store.getters.isTouchDevice)
 const isMobile = computed(() => utils.isMobile())
 const isMobileStandalone = computed(() => utils.isMobile() && navigator.standalone) // is homescreen app
@@ -77,12 +76,12 @@ const isVisible = computed(() => {
   return true
 })
 const leftIsVisble = computed(() => {
-  if (isPresentationMode.value) { return }
+  // if (isPresentationMode.value) { return }
   if (isEmbedMode.value) { return }
   return true
 })
 const controlsIsVisible = computed(() => {
-  if (isPresentationMode.value) { return }
+  // if (isPresentationMode.value) { return }
   if (shouldExplicitlyHideFooter.value) { return }
   const isTouchDevice = store.state.isTouchDevice
   if (!isTouchDevice) { return true }
@@ -92,13 +91,12 @@ const controlsIsVisible = computed(() => {
   return true
 })
 
-// settings
+// presentation mode
 
-const userSettingsIsVisible = computed(() => store.state.userSettingsIsVisible)
-const toggleUserSettingsIsVisible = async () => {
-  const value = !store.state.userSettingsIsVisible
-  store.dispatch('closeAllDialogs')
-  store.commit('userSettingsIsVisible', value)
+const isPresentationMode = computed(() => store.state.isPresentationMode)
+const togglePresentationMode = () => {
+  const value = !isPresentationMode.value
+  store.commit('isPresentationMode', value)
 }
 
 // hide
@@ -166,7 +164,6 @@ const updatePositionInVisualViewport = () => {
   }
   state.position = style
 }
-
 </script>
 
 <template lang="pug">
@@ -174,11 +171,13 @@ const updatePositionInVisualViewport = () => {
   .left(v-if="leftIsVisble")
     footer
       Notifications
+
   .right(v-if="controlsIsVisible" :class="{'is-embed': isEmbedMode}")
-    SpaceZoom
-    .button-wrap.input-button-wrap.settings-button-wrap(@click="toggleUserSettingsIsVisible" @touchend.stop :class="{'hidden': state.isHiddenOnTouch}")
-      button.small-button(:class="{active: userSettingsIsVisible, 'translucent-button': !shouldIncreaseUIContrast}" title="Settings")
-        img.icon.settings(src="@/assets/settings.svg")
+    SpaceZoom(v-if="!isPresentationMode")
+    //- presentation mode
+    .button-wrap.input-button-wrap.footer-button-wrap(@click="togglePresentationMode" @touchend.stop :class="{'hidden': state.isHiddenOnTouch}")
+      button.small-button(:class="{active: isPresentationMode, 'translucent-button': !shouldIncreaseUIContrast}" title="Focus/Presentation Mode (P)")
+        img.icon.settings(src="@/assets/presentation.svg")
 </template>
 
 <style lang="stylus">
@@ -196,6 +195,7 @@ const updatePositionInVisualViewport = () => {
   pointer-events none
   transform-origin left bottom
   margin-bottom env(safe-area-inset-bottom)
+
   .right
     margin-left auto
     display flex
@@ -206,22 +206,15 @@ const updatePositionInVisualViewport = () => {
     &.is-embed
       position absolute
       right 0
-    .settings-button-wrap
-      pointer-events all
-      cursor pointer
-      padding-top 6px
-      padding-left 4px
-      padding-bottom 10px
-      padding-right 6px
-      margin-right -6px
-      translate 0px 3px
-      display block
-      button
-        font-size 1rem
   &.is-mobile
     margin-bottom 10px
   &.is-mobile-standalone
     margin-bottom 20px
+
+  .left
+    .footer-button-wrap
+      padding-left 0
+      padding-right 4px
 
   .left,
   .right
@@ -229,6 +222,18 @@ const updatePositionInVisualViewport = () => {
     button,
     .space-zoom
       pointer-events auto
+
+  .footer-button-wrap
+    pointer-events all
+    cursor pointer
+    padding-top 6px
+    padding-left 4px
+    padding-bottom 10px
+    padding-right 0
+    translate 0px 3px
+    display inline-block
+    button
+      font-size 1rem
 
 footer
   .is-mobile-icon
