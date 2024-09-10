@@ -1771,6 +1771,8 @@ export default {
 
   // same as server util
   normalizeString (string) {
+    // remove punctuation characters, what's → whats
+    string = string.replace(/'|"|‘|’|“|”/ig, '')
     // replaces non alphanumeric (spaces, emojis, $%&, etc.) characters with '-'s
     return string.replace(/([^a-z0-9-]+)/ig, '-').toLowerCase()
   },
