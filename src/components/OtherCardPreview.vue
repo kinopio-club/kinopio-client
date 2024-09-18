@@ -187,6 +187,7 @@ a.other-card-preview(@click.prevent.stop :href="props.url")
   .tag
     display inline-block
     pointer-events none
+    box-shadow none
   .badge
     > .loader
       vertical-align -2px
