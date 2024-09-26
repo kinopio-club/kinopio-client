@@ -4,7 +4,6 @@ import { useStore } from 'vuex'
 
 import backgroundImages from '@/data/backgroundImages.json'
 import SpaceBackgroundGradients from '@/components/SpaceBackgroundGradients.vue'
-import SpaceBackgroundTint from '@/components/SpaceBackgroundTint.vue'
 import utils from '@/utils.js'
 import consts from '@/consts.js'
 
@@ -77,7 +76,6 @@ template(v-if="currentSpace.backgroundIsGradient")
   SpaceBackgroundGradients(:visible="true" :layers="gradientLayers" :backgroundStyles="backgroundStyles")
 template(v-else)
   .space-background-image(:style="backgroundStyles" :class="{'space-border-radius': spaceShouldHaveBorderRadius}")
-SpaceBackgroundTint
 </template>
 
 <style lang="stylus">

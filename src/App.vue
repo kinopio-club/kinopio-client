@@ -14,6 +14,7 @@ import ItemsLocked from '@/components/ItemsLocked.vue'
 import UserDetails from '@/components/dialogs/UserDetails.vue'
 import NotificationsWithPosition from '@/components/NotificationsWithPosition.vue'
 import SpaceBackground from '@/components/SpaceBackground.vue'
+import SpaceBackgroundTint from '@/components/SpaceBackgroundTint.vue'
 import OutsideSpaceBackground from '@/components/OutsideSpaceBackground.vue'
 import Preload from '@/components/Preload.vue'
 import utils from '@/utils.js'
@@ -193,6 +194,7 @@ const updateMetaRSSFeed = () => {
   template(v-if="isSpacePage")
     OutsideSpaceBackground
     SpaceBackground
+    SpaceBackgroundTint
     ItemsLocked
     MagicPaint
     //- Presence
