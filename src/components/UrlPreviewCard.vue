@@ -248,7 +248,7 @@ const openUrl = async (event, url) => {
   //- image
   template(v-if="!shouldDisplayIframe")
     .preview-image-wrap(v-if="previewImageIsVisible")
-      img.preview-image(:src="props.card.urlPreviewImage" :class="{selected: isSelected, 'border-bottom-radius': shouldHideInfo}" ref="image" @error="handleImageError")
+      img.preview-image(:src="props.card.urlPreviewImage" :class="{selected: isSelected, 'border-bottom-radius': shouldHideInfo}" ref="image" @error="handleImageError" loading="lazy")
 
   //- embed
   template(v-if="shouldDisplayIframe")
