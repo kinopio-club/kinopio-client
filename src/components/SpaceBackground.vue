@@ -4,15 +4,12 @@ import { useStore } from 'vuex'
 
 import backgroundImages from '@/data/backgroundImages.json'
 import SpaceBackgroundGradients from '@/components/SpaceBackgroundGradients.vue'
+import SpaceBackgroundTint from '@/components/SpaceBackgroundTint.vue'
 import utils from '@/utils.js'
 import consts from '@/consts.js'
-import postMessage from '@/postMessage.js'
-
-import { colord, extend } from 'colord'
 
 const store = useStore()
 
-const visible = computed(() => store.getters.isSpacePage)
 const spaceShouldHaveBorderRadius = computed(() => store.getters.spaceShouldHaveBorderRadius)
 const isSecureAppContext = computed(() => consts.isSecureAppContext)
 const isSpacePage = computed(() => {
@@ -66,26 +63,6 @@ const backgroundUrl = computed(() => {
   return url
 })
 
-// Tint
-
-const backgroundTint = computed(() => {
-  let color = currentSpace.value.backgroundTint || 'white'
-  let darkness = 0
-  const colorIsDark = utils.colorIsDark(color, 0.2)
-  if (shouldDarkenTint.value && colorIsDark) {
-    darkness = 0.5
-  }
-  color = colord(color).darken(darkness).toRgbString()
-  postMessage.send({ name: 'setBackgroundTintColor', value: color })
-  return color
-})
-const isNoBackgroundTint = computed(() => {
-  const color = currentSpace.value.backgroundTint
-  return !color || color === 'rgb(255, 255, 255)' || color === 'white'
-})
-const shouldDarkenTint = computed(() => isThemeDark.value && !spaceBackgroundTintIsDark.value)
-const spaceBackgroundTintIsDark = computed(() => utils.colorIsDark(backgroundTint.value))
-
 // Background Gradient
 
 const gradientLayers = computed(() => {
@@ -100,8 +77,7 @@ template(v-if="currentSpace.backgroundIsGradient")
   SpaceBackgroundGradients(:visible="true" :layers="gradientLayers" :backgroundStyles="backgroundStyles")
 template(v-else)
   .space-background-image(:style="backgroundStyles" :class="{'space-border-radius': spaceShouldHaveBorderRadius}")
-.space-background-tint(v-if="visible" :style="{ background: backgroundTint }" :class="{'space-border-radius': spaceShouldHaveBorderRadius && isSecureAppContext}")
-.space-background-tint.dark-tint(v-if="visible && isThemeDark && isNoBackgroundTint")
+SpaceBackgroundTint
 </template>
 
 <style lang="stylus">
@@ -113,16 +89,4 @@ template(v-else)
   z-index 0
   transform-origin top left
   background var(--primary-background)
-
-.space-background-tint
-  position absolute
-  width 110%
-  height 110%
-  pointer-events none
-  z-index 0
-  mix-blend-mode multiply
-  transform-origin top left
-  &.dark-tint
-    background-color black
-    opacity 0.6
 </style>
