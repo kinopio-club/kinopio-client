@@ -221,7 +221,7 @@ const self = {
         const options = await context.dispatch('requestOptions', { body, method: 'POST', space })
         response = await fetch(`${consts.apiHost()}/operations`, options)
         if (response.ok) {
-          console.log('🛬 operations ok')
+          console.log('🛬 operations ok', body)
           cache.clearSendingInProgressQueue()
         } else {
           throw Error(response.statusText)
