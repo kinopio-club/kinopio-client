@@ -437,7 +437,7 @@ span.space-list-wrap
 
             //- preview image
             .preview-thumbnail-image-wrap(v-if="space.previewThumbnailImage && isOnline" :class="{wide: previewImageIsWide}")
-              img.preview-thumbnail-image(:src="space.previewThumbnailImage")
+              img.preview-thumbnail-image(:src="space.previewThumbnailImage" loading="lazy")
             //- team
             template(v-if="team(space.teamId) && props.showSpaceTeams")
               TeamLabel(:team="team(space.teamId)")
