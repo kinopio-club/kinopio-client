@@ -16,6 +16,24 @@ let prevMoveDelta = { x: 0, y: 0 }
 let tallestCardHeight = 0
 let canBeSelectedSortedByY = {}
 
+const incrementCardsZ = (context, cards) => {
+  cards = cards.map(card => {
+    if (card.isLocked) { return card }
+    const cards = context.getters.all
+    const maxInt = Number.MAX_SAFE_INTEGER - 1000
+    let highestCardZ = utils.highestCardZ(cards)
+    if (highestCardZ > maxInt) {
+      context.dispatch('clearAllZs')
+      highestCardZ = 1
+    }
+    const canEditSpace = context.rootGetters['currentUser/canEditSpace']()
+    const z = highestCardZ + 1
+    card.z = z
+    return card
+  })
+  return cards
+}
+
 const currentCards = {
   namespaced: true,
   state: {
@@ -683,7 +701,7 @@ const currentCards = {
         card.userId = context.rootState.currentUser.id
         return card
       })
-      context.dispatch('incrementSelectedZs')
+      cards = incrementCardsZ(context, cards)
       context.commit('move', { cards, spaceId })
       cards = cards.filter(card => card)
       context.dispatch('api/addToQueue', {
@@ -762,43 +780,6 @@ const currentCards = {
       if (!canEditSpace) { return }
       context.dispatch('api/addToQueue', { name: 'updateCard', body }, { root: true })
       context.dispatch('broadcast/update', { updates: body, type: 'updateCard', handler: 'currentCards/update' }, { root: true })
-    },
-    incrementSelectedZs: (context) => {
-      const canEditSpace = context.rootGetters['currentUser/canEditSpace']()
-      const multipleCardsSelectedIds = context.rootState.multipleCardsSelectedIds
-      const currentDraggingCardId = context.rootState.currentDraggingCardId
-      if (multipleCardsSelectedIds.length) {
-        // calculate the highest z once
-        let cards = context.getters.all
-        const maxInt = Number.MAX_SAFE_INTEGER - 1000
-        let highestCardZ = utils.highestCardZ(cards)
-        if (highestCardZ > maxInt) {
-          context.dispatch('clearAllZs')
-          highestCardZ = 1
-        }
-        const newHighestCardZ = highestCardZ + 1
-        // update all selected
-        const spaceId = context.rootState.currentSpace.id
-        cards = multipleCardsSelectedIds.map(cardId => {
-          return {
-            id: cardId,
-            z: newHighestCardZ,
-            spaceId
-          }
-        })
-        context.dispatch('api/addToQueue', {
-          name: 'updateMultipleCards',
-          body: { cards, spaceId }
-        }, { root: true })
-        // broadcast
-        multipleCardsSelectedIds.forEach(id => {
-          const body = { id, z: newHighestCardZ }
-          if (!canEditSpace) { return }
-          context.dispatch('broadcast/update', { updates: body, type: 'updateCard', handler: 'currentCards/update' }, { root: true })
-        })
-      } else {
-        context.dispatch('incrementZ', currentDraggingCardId)
-      }
     },
 
     // remove
