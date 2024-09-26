@@ -111,7 +111,9 @@ const updateMetaThemeColor = (color) => {
 }
 const styles = computed(() => {
   const canvasSize = 10
-  const scale = store.state.viewportWidth / canvasSize
+  const widthScale = store.state.viewportWidth / canvasSize
+  const heightScale = store.state.viewportHeight / canvasSize
+  const scale = Math.max(widthScale, heightScale)
   return { transform: `scale(${scale})` }
 })
 </script>
