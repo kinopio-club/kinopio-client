@@ -205,12 +205,15 @@ dialog.narrow.box-details(v-if="visible" :open="visible" @click.left.stop="close
           maxLength="600"
           :class="{'is-dark': colorisDark, 'is-light': !colorisDark}"
         )
-    CardOrBoxActions(:visible="canEditBox" :boxes="[currentBox]" @closeDialogs="closeDialogs" :colorIsHidden="true")
     .row(v-if="canEditBox")
       //- remove
       .button-wrap
         button.danger(@click.left="removeBox")
           img.icon(src="@/assets/remove.svg")
+      //- checkbox
+      .button-wrap
+        button C
+    CardOrBoxActions(:visible="canEditBox" :boxes="[currentBox]" @closeDialogs="closeDialogs" :colorIsHidden="true")
     .row(v-if="!canEditBox")
       span.badge.info
         img.icon(src="@/assets/unlock.svg")
