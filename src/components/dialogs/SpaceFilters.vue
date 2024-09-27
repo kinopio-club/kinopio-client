@@ -122,6 +122,10 @@ const isSortByCreatedAt = computed(() => {
   const value = dialogSpaceFilterSortByDate.value
   return value === 'createdAt'
 })
+const isSortByAlphabetical = computed(() => {
+  const value = dialogSpaceFilterSortByDate.value
+  return value === 'alphabetical'
+})
 const updateSortBy = (value) => {
   store.dispatch('currentUser/update', { dialogSpaceFilterSortByDate: value })
 }
@@ -169,42 +173,44 @@ dialog.narrow.space-filters(v-if="props.visible" :open="props.visible" @click.le
   section.section-title
     .row.title-row
       span Space Filters
-      button.small-button(@click.left="clearAllFilters")
+      button.small-button(@click.left="clearAllFilters" title="Clear all space filters")
         img.icon.cancel(src="@/assets/add.svg")
         span Clear
-        span.badge.info.total-filters-active(v-if="totalFiltersActive") {{totalFiltersActive}}
+        span.badge.info.filter-is-active(v-if="totalFiltersActive")
 
   section
     //- types visibile
     section.subsection
-      p Filter by Type
+      .row.title-row
+        span
+          //- img.icon(src="@/assets/view.svg")
+          span Show
+        .checkbox-wrap
+          label.small-button(:class="{active: showHiddenSpace}" title="Show hidden spaces")
+            input(type="checkbox" v-model="showHiddenSpace")
+            //- img.icon(v-if="!showHiddenSpace" src="@/assets/view.svg")
+            //- img.icon(v-if="showHiddenSpace" src="@/assets/view-hidden.svg")
+            span Hidden
 
       .segmented-buttons
-        button(@click="updateFilterByType(null)" :class="{active: filterByTypeAll}")
+        button(@click="updateFilterByType(null)" :class="{active: filterByTypeAll}" title="Show all spaces")
           span All
-        button(@click="updateFilterByType('spaces')" :class="{active: filterByTypeSpaces}")
-          span Normal
-        button(@click="updateFilterByType('journals')" :class="{active: filterByTypeJournals}")
+        button(@click="updateFilterByType('journals')" :class="{active: filterByTypeJournals}" title="Show journal spaces only")
           MoonPhase(:moonPhase="state.moonPhase.name")
-          span Journals
+          span Journals Only
+
     //- sort by
     section.subsection
-      p Sort by Date
+      p
+        //- img.icon.time(src="@/assets/time.svg")
+        span Sort by
       .segmented-buttons
-        button(:class="{active: isSortByUpdatedAt}" @click="updateSortBy('updatedAt')")
-          img.icon.time(src="@/assets/time.svg")
+        button(:class="{active: isSortByUpdatedAt}" @click="updateSortBy('updatedAt')" title="Sort spaces by updated at")
           span Updated
-        button(:class="{active: isSortByCreatedAt}" @click="updateSortBy('createdAt')")
-          img.icon.time(src="@/assets/time.svg")
+        button(:class="{active: isSortByCreatedAt}" @click="updateSortBy('createdAt')" title="Sort spaces by created at")
           span Created
-    //- show hidden
-    .row
-      .checkbox-wrap
-        label(:class="{active: showHiddenSpace}")
-          input(type="checkbox" v-model="showHiddenSpace")
-          img.icon(v-if="!showHiddenSpace" src="@/assets/view.svg")
-          img.icon(v-if="showHiddenSpace" src="@/assets/view-hidden.svg")
-          span Show Hidden
+        button(:class="{active: isSortByAlphabetical}" @click="updateSortBy('alphabetical')" title="Sort spaces alphabetically")
+          span ABC
   //- teams
   section.results-section.teams(v-if="teams.length")
     TeamList(:teams="teams" :selectedTeam="dialogSpaceFilterByTeam" @selectTeam="filterByTeam")
