@@ -137,10 +137,7 @@ export default {
       const count = context.state.ids.length
       const minBoxSize = consts.minBoxSize
       const isThemeDark = context.rootState.currentUser.theme === 'dark'
-      let color = randomColor({ luminosity: 'light' })
-      if (isThemeDark) {
-        color = randomColor({ luminosity: 'dark' })
-      }
+      const color = randomColor({ luminosity: 'dark' })
       box = {
         id: box.id || nanoid(),
         spaceId: currentSpaceId,
