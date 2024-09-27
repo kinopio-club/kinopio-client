@@ -86,4 +86,5 @@ template(v-else)
   pointer-events none
   z-index 0
   transform-origin top left
+  background var(--primary-background)
 </style>

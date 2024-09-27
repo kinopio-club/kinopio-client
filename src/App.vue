@@ -361,7 +361,7 @@ const updateMetaRSSFeed = () => {
   line-height 1.2
 
 html
-  background var(--primary-background)
+  background transparent
 
 body
   background transparent
