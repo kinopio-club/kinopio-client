@@ -197,20 +197,28 @@ const updateDimensionsAndPaths = async () => {
   store.dispatch('currentConnections/updateMultiplePaths', cards.value)
 }
 
-// card checkboxes
+// item checkboxes
 
 const itemCheckboxes = computed({
   get () {
     return state.itemsCheckboxIsChecked
   },
   set (value) {
+    // remove checkbox
     if (state.itemsCheckboxIsChecked) {
       cards.value.forEach(card => {
         store.dispatch('currentCards/removeChecked', card.id)
       })
+      boxes.value.forEach(box => {
+        store.dispatch('currentBoxes/removeChecked', box.id)
+      })
+    // add checkbox
     } else {
       cards.value.forEach(card => {
         store.dispatch('currentCards/toggleChecked', { cardId: card.id, value })
+      })
+      boxes.value.forEach(box => {
+        store.dispatch('currentBoxes/toggleChecked', { boxId: box.id, value })
       })
     }
     checkItemsHaveCheckboxes()
@@ -229,8 +237,10 @@ const checkItemsCheckboxIsChecked = () => {
   const itemsChecked = items.value.filter(item => utils.nameIsChecked(item.name))
   state.itemsCheckboxIsChecked = itemsChecked.length === items.value.length
 }
-const addCheckboxToCards = async () => {
+const addCheckboxToItems = async () => {
   let updatedCards = []
+  let updatedBoxes = []
+  // cards
   cards.value.forEach(card => {
     if (!utils.checkboxFromString(card.name)) {
       const update = {
@@ -241,6 +251,17 @@ const addCheckboxToCards = async () => {
     }
   })
   store.dispatch('currentCards/updateMultiple', updatedCards)
+  // boxes
+  boxes.value.forEach(box => {
+    if (!utils.checkboxFromString(box.name)) {
+      const update = {
+        id: box.id,
+        name: `[] ${box.name}`
+      }
+      updatedBoxes.push(update)
+    }
+  })
+  store.dispatch('currentBoxes/updateMultiple', updatedBoxes)
   state.itemsHaveCheckboxes = true
   updateDimensionsAndPaths()
 }
@@ -530,7 +551,7 @@ dialog.narrow.multiple-selected-actions(
       .button-wrap.items-checkboxes(:class="{ disabled: !canEditAll.cards && !canEditAll.boxes }" title="Toggle Checkboxes")
         label.fixed-height(v-if="state.itemsHaveCheckboxes" :class="{active: state.itemsCheckboxIsChecked}" tabindex="0")
           input(type="checkbox" v-model="itemCheckboxes" tabindex="-1")
-        label(v-if="!state.itemsHaveCheckboxes" @click.left.prevent="addCheckboxToCards" @keydown.stop.enter="addCheckboxToCards" tabindex="0")
+        label(v-if="!state.itemsHaveCheckboxes" @click.left.prevent="addCheckboxToItems" @keydown.stop.enter="addCheckboxToItems" tabindex="0")
           input.add(type="checkbox" tabindex="-1")
       //- Connect
       button(v-if="multipleCardsIsSelected" :class="{active: state.cardsIsConnected}" @click.left.prevent="toggleConnectCards" @keydown.stop.enter="toggleConnectCards" :disabled="!canEditAll.cards" title="Connect/Disconnect Cards")

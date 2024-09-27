@@ -188,6 +188,56 @@ export default {
         name: newName
       })
     },
+    updateMultiple: (context, boxes) => {
+      const spaceId = context.rootState.currentSpace.id
+      let updates = {
+        boxes,
+        spaceId: context.rootState.currentSpace.id
+      }
+      updates.boxes.map(box => {
+        delete box.userId
+        return box
+      })
+      context.dispatch('api/addToQueue', { name: 'updateMultipleBoxes', body: updates }, { root: true })
+      context.dispatch('history/add', { boxes }, { root: true })
+      boxes.forEach(box => {
+        context.dispatch('broadcast/update', { updates: box, type: 'updateBox', handler: 'currentBoxes/update' }, { root: true })
+        context.commit('update', box)
+      })
+      cache.updateSpace('editedByUserId', context.rootState.currentUser.id, currentSpaceId)
+    },
+
+    // checkboxes
+
+    toggleChecked (context, { boxId, value }) {
+      utils.typeCheck({ value, type: 'boolean' })
+      utils.typeCheck({ value: boxId, type: 'string' })
+      const box = context.getters.byId(boxId)
+      let name = box.name
+      const checkbox = utils.checkboxFromString(name)
+      name = name.replace(checkbox, '')
+      if (value) {
+        name = `[x] ${name}`
+      } else {
+        name = `[] ${name}`
+      }
+      const update = {
+        id: boxId,
+        name
+      }
+      context.dispatch('update', update)
+    },
+    removeChecked: (context, boxId) => {
+      utils.typeCheck({ value: boxId, type: 'string' })
+      const box = context.getters.byId(boxId)
+      let name = box.name
+      name = name.replace('[x]', '').trim()
+      const update = {
+        id: boxId,
+        name
+      }
+      context.dispatch('update', update)
+    },
 
     // resize
 
