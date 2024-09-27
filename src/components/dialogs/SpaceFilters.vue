@@ -166,16 +166,15 @@ const filterByUser = (event, user) => {
 
 <template lang="pug">
 dialog.narrow.space-filters(v-if="props.visible" :open="props.visible" @click.left.stop ref="dialogElement" :style="{'max-height': state.dialogHeight + 'px'}")
-  section
-    p Space Filters
-  section
-    .row
-      //- clear all
-      button(@click.left="clearAllFilters")
+  section.section-title
+    .row.title-row
+      span Space Filters
+      button.small-button(@click.left="clearAllFilters")
         img.icon.cancel(src="@/assets/add.svg")
-        span Clear all
+        span Clear
         span.badge.info.total-filters-active(v-if="totalFiltersActive") {{totalFiltersActive}}
 
+  section
     //- types visibile
     section.subsection
       p Filter by Type

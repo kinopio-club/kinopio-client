@@ -325,7 +325,9 @@ const self = {
       if (!shouldRequest({ apiKey, isOnline })) { return }
       try {
         const options = await context.dispatch('requestOptions', { method: 'GET', space: context.rootState.currentSpace })
+        context.commit('isLoadingUserTeamsSpaces', true, { root: true })
         const response = await fetch(`${consts.apiHost()}/user`, options)
+        context.commit('isLoadingUserTeamsSpaces', false, { root: true })
         return normalizeResponse(response)
       } catch (error) {
         context.dispatch('handleServerError', { name: 'getUser', error })
@@ -419,7 +421,9 @@ const self = {
       if (!shouldRequest({ apiKey, isOnline })) { return }
       try {
         const options = await context.dispatch('requestOptions', { method: 'GET', space: context.rootState.currentSpace })
+        context.commit('isLoadingUserTeamsSpaces', true, { root: true })
         const response = await fetch(`${consts.apiHost()}/user/team-spaces`, options)
+        context.commit('isLoadingUserTeamsSpaces', false, { root: true })
         const currentUser = context.rootState.currentUser
         let spaces = await normalizeResponse(response)
         return utils.AddCurrentUserIsCollaboratorToSpaces(spaces, currentUser)

@@ -4,6 +4,7 @@ import { useStore } from 'vuex'
 
 import TeamList from '@/components/TeamList.vue'
 import TeamsBetaInfo from '@/components/TeamsBetaInfo.vue'
+import Loader from '@/components/Loader.vue'
 import utils from '@/utils.js'
 
 const store = useStore()
@@ -39,6 +40,8 @@ const updateDialogHeight = async () => {
   state.dialogHeight = utils.elementHeight(element)
 }
 
+const isLoadingUserTeamsSpaces = computed(() => store.state.isLoadingUserTeamsSpaces)
+
 // select team
 
 const clearTeam = () => {
@@ -60,13 +63,19 @@ const teamBetaMessage = computed(() => 'Only teams beta users can add spaces to 
 
 <template lang="pug">
 dialog.narrow.team-picker(v-if="visible" :open="visible" @click.left.stop ref="dialogElement" :style="{'max-height': state.dialogHeight + 'px'}")
-  section
-    p Add to Team
-  template(v-if="isOnTeam")
-    section
-      button(@click.left="clearTeam")
+  section.title-section
+    .row.title-row
+      span Add to Team
+      button.small-button(v-if="isOnTeam" @click.left="clearTeam")
         img.icon.cancel(src="@/assets/add.svg")
-        span Clear Team
+        span Clear
+
+  //- loading
+  template(v-if="isLoadingUserTeamsSpaces")
+    section
+      Loader(:visible="true")
+  //- teams list
+  template(v-else-if="isOnTeam")
     section.results-section(v-if="props.teams.length")
       TeamList(:teams="props.teams" :selectedTeam="props.selectedTeam" @selectTeam="selectTeam")
   //- teams beta info

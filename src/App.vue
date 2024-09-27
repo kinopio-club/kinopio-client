@@ -724,6 +724,8 @@ dialog
       user-select text
       &:first-child
         margin-top 0
+  section.title-section
+    border-bottom 1px solid var(--primary-border)
   section.subsection
     background-color var(--secondary-background)
     padding var(--subsection-padding)
