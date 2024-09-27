@@ -7,6 +7,7 @@ import moonphase from '@/moonphase.js'
 import UserList from '@/components/UserList.vue'
 import utils from '@/utils.js'
 import TeamList from '@/components/TeamList.vue'
+import Loader from '@/components/Loader.vue'
 
 import uniqBy from 'lodash-es/uniqBy'
 
@@ -26,7 +27,8 @@ onMounted(() => {
 
 const props = defineProps({
   visible: Boolean,
-  spaces: Array
+  spaces: Array,
+  isLoading: Boolean
 })
 watch(() => props.visible, (value, prevValue) => {
   if (value) {
@@ -48,7 +50,7 @@ const updateDialogHeight = async () => {
 
 // filters
 
-const dialogSpaceFilterSortByDate = computed(() => store.state.currentUser.dialogSpaceFilterSortByDate)
+const dialogSpaceFilterSortBy = computed(() => store.state.currentUser.dialogSpaceFilterSortBy)
 const dialogSpaceFilterByType = computed(() => store.state.currentUser.dialogSpaceFilterByType)
 const dialogSpaceFilterByUser = computed(() => store.state.currentUser.dialogSpaceFilterByUser)
 const dialogSpaceFilterShowHidden = computed(() => store.state.currentUser.dialogSpaceFilterShowHidden)
@@ -68,7 +70,7 @@ const totalFiltersActive = computed(() => {
   if (dialogSpaceFilterByType.value) {
     count += 1
   }
-  if (dialogSpaceFilterSortByDate.value === 'createdAt') {
+  if (dialogSpaceFilterSortBy.value === 'createdAt') {
     count += 1
   }
   if (dialogSpaceFilterShowHidden.value) {
@@ -115,23 +117,27 @@ const updateFilterByType = (value) => {
 // sort by
 
 const isSortByUpdatedAt = computed(() => {
-  const value = dialogSpaceFilterSortByDate.value
+  const value = dialogSpaceFilterSortBy.value
   return !value || value === 'updatedAt'
 })
 const isSortByCreatedAt = computed(() => {
-  const value = dialogSpaceFilterSortByDate.value
+  const value = dialogSpaceFilterSortBy.value
   return value === 'createdAt'
 })
 const isSortByAlphabetical = computed(() => {
-  const value = dialogSpaceFilterSortByDate.value
+  const value = dialogSpaceFilterSortBy.value
   return value === 'alphabetical'
 })
 const updateSortBy = (value) => {
-  store.dispatch('currentUser/update', { dialogSpaceFilterSortByDate: value })
+  store.dispatch('currentUser/update', { dialogSpaceFilterSortBy: value })
 }
 
 // teams
 
+const isTeams = computed(() => {
+  if (!teams.value) { return }
+  return teams.value.length
+})
 const teams = computed(() => {
   return store.getters['teams/bySpaces'](props.spaces)
 })
@@ -166,6 +172,11 @@ const filterByUser = (event, user) => {
     updateUserFilter(user)
   }
 }
+
+const isLoading = computed(() => {
+  return props.isLoading || store.state.isLoadingUserTeamsSpaces
+})
+
 </script>
 
 <template lang="pug">
@@ -211,12 +222,18 @@ dialog.narrow.space-filters(v-if="props.visible" :open="props.visible" @click.le
           span Created
         button(:class="{active: isSortByAlphabetical}" @click="updateSortBy('alphabetical')" title="Sort spaces alphabetically")
           span ABC
+
+  //- loading
+  section(v-if="isLoading")
+    Loader(:visible="true")
+
   //- teams
-  section.results-section.teams(v-if="teams.length")
+  section.results-section.teams(v-if="isTeams")
     TeamList(:teams="teams" :selectedTeam="dialogSpaceFilterByTeam" @selectTeam="filterByTeam")
   //- collaborators
   section.results-section.collaborators(v-if="spaceUsers.length")
     UserList(:users="spaceUsers" :selectedUser="dialogSpaceFilterByUser" @selectUser="filterByUser")
+
 </template>
 
 <style lang="stylus">

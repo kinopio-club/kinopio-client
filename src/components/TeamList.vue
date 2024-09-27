@@ -16,6 +16,7 @@ const selectTeam = (event, team) => {
   emit('selectTeam', event, team)
 }
 const teamIsSelected = (team) => {
+  if (!team) { return }
   if (!props.selectedTeam) { return }
   return team.id === props.selectedTeam.id
 }

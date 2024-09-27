@@ -80,11 +80,11 @@ const initialState = {
 
   // space filters
 
-  dialogSpaceFilterByType: null, // null, journals, spaces
+  dialogSpaceFilterByType: null, // null, journals
   dialogSpaceFilterByTeam: {},
   dialogSpaceFilterByUser: {},
   dialogSpaceFilterShowHidden: false,
-  dialogSpaceFilterSortByDate: null // null, updatedAt, createdAt
+  dialogSpaceFilterSortBy: null // null, updatedAt, createdAt, alphabetical
 }
 
 export default {
@@ -308,9 +308,9 @@ export default {
       state.dialogSpaceFilterByTeam = value
       cache.updateUser('dialogSpaceFilterByTeam', value)
     },
-    dialogSpaceFilterSortByDate: (state, value) => {
-      state.dialogSpaceFilterSortByDate = value
-      cache.updateUser('dialogSpaceFilterSortByDate', value)
+    dialogSpaceFilterSortBy: (state, value) => {
+      state.dialogSpaceFilterSortBy = value
+      cache.updateUser('dialogSpaceFilterSortBy', value)
     },
     defaultSpaceBackground: (state, value) => {
       state.defaultSpaceBackground = value

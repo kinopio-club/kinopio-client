@@ -13,6 +13,7 @@ import Loader from '@/components/Loader.vue'
 import debounce from 'lodash-es/debounce'
 import uniqBy from 'lodash-es/uniqBy'
 import dayjs from 'dayjs'
+import sortBy from 'lodash-es/sortBy'
 
 const store = useStore()
 
@@ -125,14 +126,14 @@ const updateResultsSectionHeight = async () => {
 
 // filters
 
-const dialogSpaceFilterSortByDate = computed(() => store.state.currentUser.dialogSpaceFilterSortByDate)
+const dialogSpaceFilterSortBy = computed(() => store.state.currentUser.dialogSpaceFilterSortBy)
 const dialogSpaceFilterByType = computed(() => store.state.currentUser.dialogSpaceFilterByType)
 const dialogSpaceFilterByUser = computed(() => store.state.currentUser.dialogSpaceFilterByUser)
 const dialogSpaceFilterShowHidden = computed(() => store.state.currentUser.dialogSpaceFilterShowHidden)
 const dialogSpaceFilterByTeam = computed(() => store.state.currentUser.dialogSpaceFilterByTeam)
 
 const spaceFiltersIsActive = computed(() => {
-  return Boolean(dialogSpaceFilterShowHidden.value || dialogSpaceFilterByType.value || utils.objectHasKeys(dialogSpaceFilterByUser.value) || dialogSpaceFilterSortByDateIsActive.value) || utils.objectHasKeys(dialogSpaceFilterByTeam.value)
+  return Boolean(dialogSpaceFilterShowHidden.value || dialogSpaceFilterByType.value || utils.objectHasKeys(dialogSpaceFilterByUser.value) || dialogSpaceFilterSortByIsActive.value) || utils.objectHasKeys(dialogSpaceFilterByTeam.value)
 })
 const filteredSpaces = computed(() => {
   let spaces = state.spaces
@@ -140,8 +141,6 @@ const filteredSpaces = computed(() => {
   // filter by space type
   if (dialogSpaceFilterByType.value === 'journals') {
     spaces = spaces.filter(space => space.moonPhase)
-  } else if (dialogSpaceFilterByType.value === 'spaces') {
-    spaces = spaces.filter(space => !space.moonPhase)
   }
   // filter by hidden spaces
   if (dialogSpaceFilterShowHidden.value) {
@@ -189,10 +188,16 @@ const toggleSpaceFiltersIsVisible = () => {
 
 // sort
 
-const dialogSpaceFilterSortByDateIsActive = computed(() => dialogSpaceFilterSortByDate.value === 'createdAt')
+const dialogSpaceFilterSortByIsActive = computed(() => {
+  return isSortByCreatedAt.value || isSortByAlphabetical.value
+})
 const isSortByCreatedAt = computed(() => {
-  const value = dialogSpaceFilterSortByDate.value
+  const value = dialogSpaceFilterSortBy.value
   return value === 'createdAt'
+})
+const isSortByAlphabetical = computed(() => {
+  const value = dialogSpaceFilterSortBy.value
+  return value === 'alphabetical'
 })
 const prependFavoriteSpaces = (spaces) => {
   let favoriteSpaces = []
@@ -240,9 +245,14 @@ const sortByUpdatedAt = (spaces) => {
   })
   return sortedSpaces
 }
+const sortByAlphabetical = (spaces) => {
+  return sortBy(spaces, 'name')
+}
 const sort = (spaces) => {
   if (isSortByCreatedAt.value) {
     spaces = sortByCreatedAt(spaces)
+  } else if (isSortByAlphabetical.value) {
+    spaces = sortByAlphabetical(spaces)
   } else {
     spaces = sortByUpdatedAt(spaces)
   }
@@ -393,7 +403,7 @@ dialog.space-details.is-pinnable.wide(v-if="props.visible" :open="props.visible"
               .badge.info.filter-is-active
             button.small-button(@click.left.stop="clearAllFilters")
               img.icon.cancel(src="@/assets/add.svg")
-        SpaceFilters(:visible="state.spaceFiltersIsVisible" :spaces="filteredSpaces")
+        SpaceFilters(:visible="state.spaceFiltersIsVisible" :spaces="filteredSpaces" :isLoading="state.isLoadingRemoteSpaces")
 
   section.results-section(ref="resultsElement" :style="{'max-height': state.resultsSectionHeight + 'px'}")
     SpaceList(
