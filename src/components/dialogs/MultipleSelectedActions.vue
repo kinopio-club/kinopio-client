@@ -24,7 +24,7 @@ const state = reactive({
   moveItemsIsVisible: false,
   cardsIsConnected: false,
   cardsHaveCheckboxes: false,
-  cardsCheckboxIsChecked: false,
+  itemsCheckboxIsChecked: false,
   shareCardIsVisible: false
 })
 
@@ -44,8 +44,8 @@ const visible = computed(() => {
 })
 watch(() => visible.value, async (value, prevValue) => {
   if (value) {
-    checkCardsHaveCheckboxes()
-    checkCardsCheckboxIsChecked()
+    checkItemsHaveCheckboxes()
+    checkItemsCheckboxIsChecked()
     await nextTick()
     store.commit('pinchCounterZoomDecimal', utils.pinchCounterZoomDecimal())
     checkIsCardsConnected()
@@ -195,12 +195,12 @@ const updateDimensionsAndPaths = async () => {
 
 // card checkboxes
 
-const cardCheckboxes = computed({
+const itemCheckboxes = computed({
   get () {
-    return state.cardsCheckboxIsChecked
+    return state.itemsCheckboxIsChecked
   },
   set (value) {
-    if (state.cardsCheckboxIsChecked) {
+    if (state.itemsCheckboxIsChecked) {
       cards.value.forEach(card => {
         store.dispatch('currentCards/removeChecked', card.id)
       })
@@ -209,21 +209,22 @@ const cardCheckboxes = computed({
         store.dispatch('currentCards/toggleChecked', { cardId: card.id, value })
       })
     }
-    checkCardsHaveCheckboxes()
-    checkCardsCheckboxIsChecked()
+    checkItemsHaveCheckboxes()
+    checkItemsCheckboxIsChecked()
     updateDimensionsAndPaths()
   }
 })
-const checkCardsHaveCheckboxes = () => {
+const checkItemsHaveCheckboxes = () => {
   const cardsWithCheckboxes = cards.value.filter(card => {
     if (!card) { return }
     return utils.checkboxFromString(card.name)
   })
   state.cardsHaveCheckboxes = cardsWithCheckboxes.length === cards.value.length
 }
-const checkCardsCheckboxIsChecked = () => {
-  const cardsChecked = cards.value.filter(card => utils.nameIsChecked(card.name))
-  state.cardsCheckboxIsChecked = cardsChecked.length === cards.value.length
+const checkItemsCheckboxIsChecked = () => {
+  const items = cards.value.concat(boxes.value)
+  const itemsChecked = items.filter(item => utils.nameIsChecked(item.name))
+  state.itemsCheckboxIsChecked = itemsChecked.length === items.length
 }
 const addCheckboxToCards = async () => {
   let updatedCards = []
@@ -521,11 +522,11 @@ dialog.narrow.multiple-selected-actions(
   .dark-theme-background-layer(v-if="isThemeDarkAndUserColorLight")
   section
     //- Edit Cards
-    .row(v-if="cardsIsSelected")
+    .row(v-if="cardOrBoxIsSelected")
       //- [·]
-      .button-wrap.cards-checkboxes(:class="{ disabled: !canEditAll.cards }" title="Card Checkboxes")
-        label.fixed-height(v-if="state.cardsHaveCheckboxes" :class="{active: state.cardsCheckboxIsChecked}" tabindex="0")
-          input(type="checkbox" v-model="cardCheckboxes" tabindex="-1")
+      .button-wrap.items-checkboxes(:class="{ disabled: !canEditAll.cards && !canEditAll.boxes }" title="Toggle Checkboxes")
+        label.fixed-height(v-if="state.cardsHaveCheckboxes" :class="{active: state.itemsCheckboxIsChecked}" tabindex="0")
+          input(type="checkbox" v-model="itemCheckboxes" tabindex="-1")
         label(v-if="!state.cardsHaveCheckboxes" @click.left.prevent="addCheckboxToCards" @keydown.stop.enter="addCheckboxToCards" tabindex="0")
           input.add(type="checkbox" tabindex="-1")
       //- Connect
@@ -599,7 +600,7 @@ dialog.narrow.multiple-selected-actions(
         border-top-right-radius var(--small-entity-radius)
         border-bottom-right-radius var(--small-entity-radius)
         margin-right 0
-  .cards-checkboxes
+  .items-checkboxes
     input
       margin 0
     vertical-align 1px
