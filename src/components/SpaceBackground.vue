@@ -25,16 +25,18 @@ const backgroundIsDefault = computed(() => !currentSpace.value.background)
 const backgroundStyles = computed(() => {
   if (!isSpacePage.value) { return }
   const url = backgroundUrl.value
-  if (!url) { return }
+  let styles = {
+    transform: store.getters.zoomTransform
+  }
+  if (!url) {
+    return styles
+  }
   const isRetina = url.includes('-2x.') || url.includes('@2x.')
   let backgroundImage = `url('${url}')`
   if (isRetina) {
     backgroundImage = `image-set(${backgroundImage} 2x)`
   }
-  const styles = {
-    backgroundImage,
-    transform: store.getters.zoomTransform
-  }
+  styles.backgroundImage = backgroundImage
   return styles
 })
 
@@ -72,8 +74,10 @@ const gradientLayers = computed(() => {
 </script>
 
 <template lang="pug">
+//- gradient
 template(v-if="currentSpace.backgroundIsGradient")
   SpaceBackgroundGradients(:visible="true" :layers="gradientLayers" :backgroundStyles="backgroundStyles")
+//- or image
 template(v-else)
   .space-background-image(:style="backgroundStyles" :class="{'space-border-radius': spaceShouldHaveBorderRadius}")
 </template>

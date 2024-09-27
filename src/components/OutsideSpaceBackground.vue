@@ -44,7 +44,13 @@ onMounted(() => {
   canvas = document.getElementById('outside-space-background')
   context = canvas.getContext('2d')
   context.scale(window.devicePixelRatio, window.devicePixelRatio)
-
+  store.subscribe(mutation => {
+    if (mutation.type === 'currentSpace/updateSpace') {
+      if (mutation.payload.backgroundTint) {
+        updateBackgroundColor()
+      }
+    }
+  })
   start()
 })
 onBeforeUnmount(() => {
