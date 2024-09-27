@@ -24,7 +24,8 @@ const props = defineProps({
   visible: Boolean,
   removeIsVisible: Boolean,
   shouldLightenColors: Boolean,
-  recentColors: Array
+  recentColors: Array,
+  luminosityIsDark: Boolean
 })
 watch(() => props.visible, (value, prevValue) => {
   if (value) {
@@ -118,6 +119,10 @@ const updateLuminosity = (value) => {
   shuffleColors()
 }
 const updateLuminosityFromTheme = () => {
+  if (props.luminosityIsDark) {
+    updateLuminosity('dark')
+    return
+  }
   const isThemeDark = store.state.currentUser.theme === 'dark'
   if (isThemeDark) {
     updateLuminosity('dark')

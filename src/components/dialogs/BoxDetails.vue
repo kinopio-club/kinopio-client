@@ -190,6 +190,7 @@ dialog.narrow.box-details(v-if="visible" :open="visible" @click.left.stop="close
           :currentColor="currentBox.color"
           :visible="state.colorPickerIsVisible"
           :recentColors="itemColors"
+          :luminosityIsDark="true"
           @selectedColor="updateColor"
         )
       //- name
