@@ -325,7 +325,7 @@ dialog.search.is-pinnable(@click="closeDialogs" v-if="visible" :open="visible" r
     template(v-if="state.scopeIsCurrentSpace")
       CardList(:cards="cards" :search="search" @selectCard="selectCard")
     template(v-else)
-      SpaceCardList(:groupedItems="state.cardsBySpace" :search="search" :state.isLoading="state.isLoading" @selectSpace="changeSpace" @selectCard="selectSpaceCard")
+      SpaceCardList(:groupedItems="state.cardsBySpace" :search="search" :isLoading="state.isLoading" @selectSpace="changeSpace" @selectCard="selectSpaceCard")
       p.description(v-if="noResults")
         span No matches found
 

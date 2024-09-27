@@ -33,15 +33,15 @@ const selectCard = (card) => {
 
 <template lang="pug">
 ul.results-list
-  template(v-for="group in groupedItems")
+  template(v-for="group in props.groupedItems" :key="index")
     //- space
     hr
     li.space-name(v-if="group.spaceId" :data-space-id="group.spaceId" @click="selectSpace(group.spaceId)" :class="{ active: spaceIsCurrentSpace(group.spaceId), hover: spaceIsFocused(group.spaceId) }")
       BackgroundPreview(v-if="group.space" :space="group.space")
       span {{group.spaceName}}
     //- cards
-    CardList(:cards="group.cards" :search="search" @selectCard="selectCard")
-Loader(:visible="isLoading")
+    CardList(:cards="group.cards" :search="props.search" @selectCard="selectCard")
+Loader(:visible="props.isLoading")
 </template>
 
 <style lang="stylus">
