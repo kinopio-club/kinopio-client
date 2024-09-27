@@ -551,7 +551,7 @@ dialog.narrow.multiple-selected-actions(
       .button-wrap.items-checkboxes(:class="{ disabled: !canEditAll.cards && !canEditAll.boxes }" title="Toggle Checkboxes")
         label.fixed-height(v-if="state.itemsHaveCheckboxes" :class="{active: state.itemsCheckboxIsChecked}" tabindex="0")
           input(type="checkbox" v-model="itemCheckboxes" tabindex="-1")
-        label(v-if="!state.itemsHaveCheckboxes" @click.left.prevent="addCheckboxToItems" @keydown.stop.enter="addCheckboxToItems" tabindex="0")
+        label.fixed-height(v-if="!state.itemsHaveCheckboxes" @click.left.prevent="addCheckboxToItems" @keydown.stop.enter="addCheckboxToItems" tabindex="0")
           input.add(type="checkbox" tabindex="-1")
       //- Connect
       button(v-if="multipleCardsIsSelected" :class="{active: state.cardsIsConnected}" @click.left.prevent="toggleConnectCards" @keydown.stop.enter="toggleConnectCards" :disabled="!canEditAll.cards" title="Connect/Disconnect Cards")

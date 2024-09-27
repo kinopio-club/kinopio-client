@@ -228,7 +228,6 @@ const removeCommentBrackets = (name) => {
 
 const isChecked = computed(() => utils.nameIsChecked(name.value))
 const hasCheckbox = computed(() => {
-  if (isLocked.value) { return }
   return utils.checkboxFromString(name.value)
 })
 const checkboxState = computed({

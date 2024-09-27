@@ -71,6 +71,7 @@ const state = reactive({
 const spaceCounterZoomDecimal = computed(() => store.getters.spaceCounterZoomDecimal)
 const canEditBox = computed(() => store.getters['currentUser/canEditBox'](props.box))
 const currentUserIsSignedIn = computed(() => store.getters['currentUser/isSignedIn'])
+const name = computed(() => props.box.name)
 
 // normalize
 
@@ -88,6 +89,16 @@ const normalizeBox = (box) => {
   box.fill = box.fill || 'filled'
   return box
 }
+const normalizedName = computed(() => {
+  // name without checkbox text
+  let newName = name.value
+  if (!newName) { return }
+  const checkbox = utils.checkboxFromString(newName)
+  if (checkbox) {
+    newName = newName.replace(checkbox, '')
+  }
+  return newName.trim()
+})
 
 // should render
 
@@ -601,8 +612,8 @@ const isH2 = computed(() => {
   const pattern = 'h2Pattern'
   return nameHasPattern(pattern)
 })
-const h1Name = computed(() => props.box.name.replace('# ', ''))
-const h2Name = computed(() => props.box.name.replace('## ', ''))
+const h1Name = computed(() => normalizedName.value.replace('# ', ''))
+const h2Name = computed(() => normalizedName.value.replace('## ', ''))
 const nameHasPattern = (pattern) => {
   const result = utils.markdown()[pattern].exec(props.box.name)
   return Boolean(result)
@@ -763,6 +774,33 @@ const updateRemoteConnections = () => {
     state.isRemoteConnecting = false
   }
 }
+
+// checkbox
+
+const isChecked = computed(() => utils.nameIsChecked(name.value))
+const hasCheckbox = computed(() => {
+  return utils.checkboxFromString(name.value)
+})
+const checkboxState = computed({
+  get () {
+    return isChecked.value
+  }
+})
+const toggleBoxChecked = () => {
+  if (store.state.preventDraggedBoxFromShowingDetails) { return }
+  if (!canEditSpace.value) { return }
+  const value = !isChecked.value
+  store.dispatch('closeAllDialogs')
+  store.dispatch('currentBoxes/toggleChecked', { boxId: props.box.id, value })
+  postMessage.sendHaptics({ name: 'heavyImpact' })
+  cancelLocking()
+  store.commit('currentUserIsDraggingBox', false)
+  const userId = store.state.currentUser.id
+  store.commit('broadcast/updateStore', { updates: { userId }, type: 'clearRemoteBoxesDragging' })
+  event.stopPropagation()
+  store.commit('preventMultipleSelectedActionsIsVisible', false)
+  store.dispatch('clearMultipleSelected')
+}
 </script>
 
 <template lang="pug">
@@ -803,14 +841,19 @@ const updateRemoteConnections = () => {
     @touchend="endBoxInfoInteractionTouch"
   )
     .locking-frame(v-if="state.isLocking" :style="lockingFrameStyle")
-    template(v-if="isH1")
-      h1 {{h1Name}}
-    template(v-else-if="isH2")
-      h2 {{h2Name}}
-    template(v-else)
-      span {{box.name}}
-    .selected-user-avatar(v-if="isRemoteSelected || isRemoteBoxDetailsVisible" :style="{backgroundColor: remoteSelectedColor || remoteBoxDetailsVisibleColor}")
-      img(src="@/assets/anon-avatar.svg")
+    //- [·]
+    .checkbox-wrap(v-if="hasCheckbox" @mouseup.left="toggleBoxChecked" @touchend.prevent="toggleBoxChecked")
+      label(:class="{active: isChecked, disabled: !canEditSpace}")
+        input(name="checkbox" type="checkbox" v-model="checkboxState")
+    .name-wrap
+      template(v-if="isH1")
+        h1 {{h1Name}}
+      template(v-else-if="isH2")
+        h2 {{h2Name}}
+      template(v-else)
+        span {{normalizedName}}
+      .selected-user-avatar(v-if="isRemoteSelected || isRemoteBoxDetailsVisible" :style="{backgroundColor: remoteSelectedColor || remoteBoxDetailsVisibleColor}")
+        img(src="@/assets/anon-avatar.svg")
 
   ItemConnectorButton(
     :visible="connectorIsVisible"
@@ -916,8 +959,6 @@ const updateRemoteConnections = () => {
     pointer-events all
     position absolute
     cursor pointer
-    padding 6px 8px
-    padding-right 10px
     border-bottom-right-radius var(--entity-radius)
     word-break break-word
     color var(--primary-on-light-background)
@@ -928,6 +969,49 @@ const updateRemoteConnections = () => {
     &.is-dark
       color var(--primary-on-dark-background)
 
+  .checkbox-wrap
+    padding-left 8px
+    padding-top 5px
+    padding-bottom 6px
+    display inline-block
+    label
+      pointer-events none
+      width 20px
+      height 16px
+      display flex
+      align-items center
+      padding-left 4px
+      padding-right 4px
+      input
+        margin 0
+        margin-top -1px
+        width 10px
+        height 10px
+        background-size contain
+    &:hover
+      label
+        box-shadow 3px 3px 0 var(--heavy-shadow)
+        background-color var(--secondary-hover-background)
+        input
+          background-color var(--secondary-hover-background)
+      label.active
+        box-shadow var(--active-inset-shadow)
+        background-color var(--secondary-active-background)
+        input
+          background-color var(--secondary-active-background)
+    &:active
+      label
+        box-shadow none
+        color var(--primary)
+        background-color var(--secondary-active-background)
+      input
+        background-color var(--secondary-active-background)
+
+  .name-wrap
+    padding 6px 8px
+    padding-top 4px
+    padding-right 10px
+    display inline-block
   h1
     font-family var(--header-font)
     font-size 20px
