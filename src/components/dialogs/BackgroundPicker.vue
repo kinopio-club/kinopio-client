@@ -418,7 +418,8 @@ dialog.background-picker.wide(v-if="visible" :open="visible" @click.left.stop="c
             span URL
         .button-wrap
           button.small-button(v-if="canEditSpace" @click.left="removeBackgroundAll")
-            img.icon(src="@/assets/remove.svg")
+            img.icon.cancel(src="@/assets/add.svg")
+            span Clear
 
   section(@mouseup.stop @touchend.stop)
     .row(v-if="canEditSpace && state.spaceBackgroundInputIsVisible")

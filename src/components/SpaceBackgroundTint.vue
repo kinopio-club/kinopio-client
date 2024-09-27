@@ -10,28 +10,22 @@ import { colord, extend } from 'colord'
 const store = useStore()
 
 const visible = computed(() => store.getters.isSpacePage)
-const isThemeDark = computed(() => store.state.currentUser.theme === 'dark')
+const isThemeDark = computed(() => store.getters['themes/isThemeDark'])
 const currentSpace = computed(() => store.state.currentSpace)
 
 // tint
 
 const backgroundTint = computed(() => {
   let color = currentSpace.value.backgroundTint || 'white'
-  let darkness = 0
-  const colorIsDark = utils.colorIsDark(color, 0.2)
-  if (shouldDarkenTint.value && colorIsDark) {
-    darkness = 0.5
+  if (isThemeDark.value) {
+    const darkness = 0.5
+    color = colord(color).darken(darkness).toRgbString()
+  } else {
+    color = colord(color).toRgbString()
   }
-  color = colord(color).darken(darkness).toRgbString()
   postMessage.send({ name: 'setBackgroundTintColor', value: color })
   return color
 })
-const isNoBackgroundTint = computed(() => {
-  const color = currentSpace.value.backgroundTint
-  return !color || color === 'rgb(255, 255, 255)' || color === 'white'
-})
-const shouldDarkenTint = computed(() => isThemeDark.value && !spaceBackgroundTintIsDark.value)
-const spaceBackgroundTintIsDark = computed(() => utils.colorIsDark(backgroundTint.value))
 
 // styles
 
@@ -53,7 +47,6 @@ const styles = computed(() => {
 
 <template lang="pug">
 .space-background-tint(v-if="visible" :style="styles" :class="{'space-border-radius': spaceShouldHaveBorderRadius}")
-.space-background-tint.dark-tint(v-if="visible && isThemeDark && isNoBackgroundTint" :style="styles")
 </template>
 
 <style lang="stylus">
@@ -63,7 +56,4 @@ const styles = computed(() => {
   z-index 0
   mix-blend-mode multiply
   transform-origin top left
-  &.dark-tint
-    background-color black
-    opacity 0.6
 </style>

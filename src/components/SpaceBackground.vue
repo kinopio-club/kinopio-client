@@ -25,8 +25,12 @@ const backgroundIsDefault = computed(() => !currentSpace.value.background)
 const backgroundStyles = computed(() => {
   if (!isSpacePage.value) { return }
   const url = backgroundUrl.value
+  const tintColor = currentSpace.value.backgroundTint
   let styles = {
     transform: store.getters.zoomTransform
+  }
+  if (tintColor) {
+    styles.background = 'transparent'
   }
   if (!url) {
     return styles
