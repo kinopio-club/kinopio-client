@@ -219,8 +219,8 @@ export default {
     return {
       x: Math.round(rectPosition.x * zoom),
       y: Math.round(rectPosition.y * zoom),
-      width: Math.round(rect.width * zoom),
-      height: Math.round(rect.height * zoom)
+      width: Math.round(rect.width || rect.resizeWidth * zoom),
+      height: Math.round(rect.height || rect.resizeHeight * zoom)
     }
   },
   isPositionOutsideOfSpace (position) {
