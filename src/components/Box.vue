@@ -845,7 +845,7 @@ const toggleBoxChecked = () => {
     .checkbox-wrap(v-if="hasCheckbox" @mouseup.left="toggleBoxChecked" @touchend.prevent="toggleBoxChecked")
       label(:class="{active: isChecked, disabled: !canEditSpace}")
         input(name="checkbox" type="checkbox" v-model="checkboxState")
-    .name-wrap
+    .name-wrap(:class="{'is-checked': isChecked}")
       template(v-if="isH1")
         h1 {{h1Name}}
       template(v-else-if="isH2")
@@ -1012,6 +1012,8 @@ const toggleBoxChecked = () => {
     padding-top 4px
     padding-right 10px
     display inline-block
+    &.is-checked
+      text-decoration line-through
   h1
     font-family var(--header-font)
     font-size 20px
