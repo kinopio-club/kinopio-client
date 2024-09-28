@@ -1385,7 +1385,7 @@ dialog.card-details(v-if="visible" :open="visible" ref="dialogElement" @click.le
             img.icon.remove(src="@/assets/remove.svg")
             //- span Remove
         //- [·]
-        .button-wrap.cards-checkboxes
+        .button-wrap.checkbox-button-wrap
           label.fixed-height(v-if="checkbox" :class="{active: checkboxIsChecked, disabled: !canEditCard}" tabindex="0" title="Checkbox")
             input(type="checkbox" v-model="checkboxIsChecked" tabindex="-1")
           label.fixed-height(v-else @click.left.prevent="addCheckbox" @keydown.stop.enter="addCheckbox" :class="{disabled: !canEditCard}" tabindex="0")
@@ -1516,7 +1516,7 @@ dialog.card-details(v-if="visible" :open="visible" ref="dialogElement" @click.le
   .edit-message
     button
       margin-top 10px
-  .cards-checkboxes
+  .checkbox-button-wrap
     label
       display flex
       align-items center
