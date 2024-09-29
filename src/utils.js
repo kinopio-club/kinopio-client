@@ -865,6 +865,22 @@ export default {
     }
     return rect
   },
+  sortItemsAlphabeticallyBy (items, property) {
+    const sorted = items.sort((a, b) => {
+      // Case-insensitive comparison, ignore emojis
+      let propA = this.normalizeString(a[property]).trim()
+      let propB = this.normalizeString(b[property]).trim()
+      // remove leading dashes
+      propA = this.removeLeadingDashes(propA)
+      propB = this.removeLeadingDashes(propB)
+      if (propA === propB) {
+        // If stripped values are equal, fall back to comparing the original strings
+        return a[property] < b[property] ? -1 : 1
+      }
+      return propA < propB ? -1 : 1
+    })
+    return sorted
+  },
 
   // Cards
 
@@ -1773,6 +1789,10 @@ export default {
   normalizeString (string) {
     // replaces non alphanumeric (spaces, emojis, $%&, etc.) characters with '-'s
     return string.replace(/([^a-z0-9-]+)/ig, '-').toLowerCase()
+  },
+  removeLeadingDashes (string) {
+    // -123-abc -> 123-abc
+    return string.replace(/^-+/, '')
   },
   normalizeFileUrl (string) {
     // same as normalizeString^, but keeps '.' and case

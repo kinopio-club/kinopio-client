@@ -13,7 +13,6 @@ import Loader from '@/components/Loader.vue'
 import debounce from 'lodash-es/debounce'
 import uniqBy from 'lodash-es/uniqBy'
 import dayjs from 'dayjs'
-import sortBy from 'lodash-es/sortBy'
 
 const store = useStore()
 
@@ -246,7 +245,7 @@ const sortByUpdatedAt = (spaces) => {
   return sortedSpaces
 }
 const sortByAlphabetical = (spaces) => {
-  return sortBy(spaces, 'name')
+  return utils.sortItemsAlphabeticallyBy(spaces, 'name')
 }
 const sort = (spaces) => {
   if (isSortByCreatedAt.value) {
