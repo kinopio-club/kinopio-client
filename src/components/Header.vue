@@ -657,17 +657,17 @@ header(v-if="isVisible" :style="state.position" :class="{'fade-out': isFadingOut
             //- Current Space Name and Info
             .button-wrap.space-name-button-wrap(:class="{ 'back-button-is-visible': backButtonIsVisible }")
               button.space-name-button(@click.left.stop="toggleSpaceDetailsIsVisible" :class="{ active: state.spaceDetailsIsVisible, 'translucent-button': !shouldIncreaseUIContrast }")
-                TeamLabel(:team="spaceTeam")
-                span(v-if="currentSpaceIsInbox")
-                  img.icon.inbox-icon(src="@/assets/inbox.svg")
-                span(v-if="currentSpaceIsTemplate")
-                  img.icon.templates(src="@/assets/templates.svg")
-                SpaceTodayJournalBadge(:space="currentSpace")
-                MoonPhase(v-if="currentSpace.moonPhase" :moonPhase="currentSpace.moonPhase")
-                span {{currentSpaceName}}
-                  PrivacyIcon(:privacy="currentSpace.privacy" :closedIsNotVisible="true")
-                img.icon.sunglasses.explore(src="@/assets/sunglasses.svg" v-if="shouldShowInExplore" title="Shown in Explore")
-                img.icon.view-hidden(v-if="currentSpaceIsHidden" src="@/assets/view-hidden.svg")
+                .button-contents(:class="{'space-is-hidden': currentSpaceIsHidden}")
+                  TeamLabel(:team="spaceTeam")
+                  span(v-if="currentSpaceIsInbox")
+                    img.icon.inbox-icon(src="@/assets/inbox.svg")
+                  span(v-if="currentSpaceIsTemplate")
+                    img.icon.templates(src="@/assets/templates.svg")
+                  SpaceTodayJournalBadge(:space="currentSpace")
+                  MoonPhase(v-if="currentSpace.moonPhase" :moonPhase="currentSpace.moonPhase")
+                  span {{currentSpaceName}}
+                    PrivacyIcon(:privacy="currentSpace.privacy" :closedIsNotVisible="true")
+                  img.icon.sunglasses.explore(src="@/assets/sunglasses.svg" v-if="shouldShowInExplore" title="Shown in Explore")
               SpaceDetails(:visible="state.spaceDetailsIsVisible")
               ImportArenaChannel(:visible="importArenaChannelIsVisible")
               SpaceDetailsInfo(:visible="state.spaceDetailsInfoIsVisible")
@@ -943,6 +943,9 @@ header
     span
       width 100%
       color var(--primary)
+
+  .space-is-hidden
+    opacity 0.5
 
 .badge-jiggle
   animation-name notificationJiggle
