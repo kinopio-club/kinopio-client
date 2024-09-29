@@ -801,6 +801,24 @@ const toggleBoxChecked = () => {
   store.commit('preventMultipleSelectedActionsIsVisible', false)
   store.dispatch('clearMultipleSelected')
 }
+const containingBoxes = computed(() => {
+  if (!state.isVisibleInViewport) { return }
+  if (isDragging.value) { return }
+  if (isSelected.value) { return }
+  if (isResizing.value) { return }
+  let boxes = store.getters['currentBoxes/all']
+  boxes = boxes.filter(box => {
+    box = utils.clone(box)
+    const currentBox = utils.clone(props.box)
+    return utils.isRectAInsideRectB(currentBox, box)
+  })
+  return boxes
+})
+const isInCheckedBox = computed(() => {
+  if (!containingBoxes.value) { return }
+  const checkedBox = containingBoxes.value.find(box => utils.nameIsChecked(box.name))
+  return Boolean(checkedBox)
+})
 </script>
 
 <template lang="pug">
@@ -816,7 +834,7 @@ const toggleBoxChecked = () => {
   :data-should-render="shouldRender"
 
   :style="styles"
-  :class="{hover: state.isHover, active: isDragging, 'box-jiggle': shouldJiggle, 'is-resizing': isResizing, 'is-selected': isSelected}"
+  :class="{hover: state.isHover, active: isDragging, 'box-jiggle': shouldJiggle, 'is-resizing': isResizing, 'is-selected': isSelected, 'is-checked': isChecked || isInCheckedBox}"
   ref="boxElement"
 )
 
@@ -917,6 +935,8 @@ const toggleBoxChecked = () => {
     transition none
   &.is-selected
     transition none
+  &.is-checked
+    opacity 0.5
   .box-info
     --header-font var(--header-font-0)
     &.header-font-1
