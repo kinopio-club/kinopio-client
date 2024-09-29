@@ -810,7 +810,11 @@ const containingBoxes = computed(() => {
   boxes = boxes.filter(box => {
     box = utils.clone(box)
     const currentBox = utils.clone(props.box)
-    return utils.isRectAInsideRectB(currentBox, box)
+    const isInsideBox = utils.isRectAInsideRectB(currentBox, box)
+    const boxArea = box.resizeWidth * box.resizeHeight
+    const currentBoxArea = currentBox.resizeWidth * currentBox.resizeHeight
+    const boxIsParent = boxArea > currentBoxArea
+    return isInsideBox && boxIsParent
   })
   return boxes
 })
