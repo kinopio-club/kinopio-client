@@ -290,7 +290,7 @@ dialog.connection-details.narrow(v-if="visible" :open="visible" :style="styles" 
         img.icon(src="@/assets/remove.svg")
 
     //- label etc.
-    ConnectionActions(:hideType="true" :visible="canEditConnection" :connections="[currentConnection]" @closeDialogs="closeDialogs" :canEditAll="canEditConnection" :backgroundColor="userColor" :label="moreLineOptionsLabel")
+    ConnectionActions(:hideType="true" :visible="canEditConnection" :connections="[currentConnection]" :canEditAll="canEditConnection" :backgroundColor="userColor" :label="moreLineOptionsLabel")
 
     p.edit-message.badge.info(v-if="!canEditConnection")
       template(v-if="spacePrivacyIsOpen")

@@ -21,7 +21,6 @@ const state = reactive({
   isUpdated: false
 })
 
-const visible = computed(() => utils.objectHasKeys(currentBox.value))
 const spaceCounterZoomDecimal = computed(() => store.getters.spaceCounterZoomDecimal)
 const canEditBox = computed(() => store.getters['currentUser/canEditBox'](currentBox.value))
 
@@ -52,6 +51,17 @@ watch(() => currentBox.value, async (value, prevValue) => {
     store.dispatch('history/add', { boxes: [box], useSnapshot: true })
   }
 })
+
+const visible = computed(() => utils.objectHasKeys(currentBox.value))
+watch(() => visible.value, async (value, prevValue) => {
+  await nextTick()
+  if (!value) {
+    store.commit('currentDraggingBoxId', '')
+    store.dispatch('multipleBoxesSelectedIds', [])
+    store.commit('preventMultipleSelectedActionsIsVisible', false)
+  }
+})
+
 const broadcastShowBoxDetails = () => {
   const updates = {
     boxId: currentBox.value.id,

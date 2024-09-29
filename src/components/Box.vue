@@ -804,6 +804,8 @@ const toggleBoxChecked = () => {
   event.stopPropagation()
   store.commit('preventMultipleSelectedActionsIsVisible', false)
   store.dispatch('clearMultipleSelected')
+  store.commit('currentDraggingBoxId', '')
+  store.dispatch('multipleBoxesSelectedIds', [])
 }
 const containingBoxes = computed(() => {
   if (!state.isVisibleInViewport) { return }
