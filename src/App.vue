@@ -974,11 +974,6 @@ li
       background-image url('assets/checkmark.svg')
       background-repeat no-repeat
       background-position center
-    &.add
-      background-image url('assets/add.svg')
-      background-repeat no-repeat
-      background-position center
-      background-size 69%
 
 details
   summary
