@@ -944,9 +944,6 @@ header
       width 100%
       color var(--primary)
 
-  .space-is-hidden
-    opacity 0.5
-
 .badge-jiggle
   animation-name notificationJiggle
   animation-duration 0.4s

@@ -599,6 +599,4 @@ span.space-list-wrap
           width 100%
           height 100%
 
-  .space-is-hidden
-    opacity 0.5
 </style>

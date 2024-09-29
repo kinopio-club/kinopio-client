@@ -1242,6 +1242,9 @@ code
   opacity 0
   pointer-events none !important
 
+.space-is-hidden
+  opacity 0.5
+
 .fade-out
   opacity 0
 
