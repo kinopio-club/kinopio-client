@@ -27,6 +27,15 @@ const props = defineProps({
     }
   }
 })
+watch(() => props.cards, async (value, prevValue) => {
+  checkItemsHaveCheckboxes()
+  checkItemsCheckboxIsChecked()
+})
+watch(() => props.boxes, async (value, prevValue) => {
+  checkItemsHaveCheckboxes()
+  checkItemsCheckboxIsChecked()
+})
+
 const state = reactive({
   itemsHaveCheckboxes: false,
   itemsCheckboxIsChecked: false
