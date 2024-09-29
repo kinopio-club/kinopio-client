@@ -277,12 +277,18 @@ const focusName = async () => {
 dialog.connection-details.narrow(v-if="visible" :open="visible" :style="styles" @click.left="closeColorPicker" ref="dialogElement")
   section.info-section(:style="{backgroundColor: typeColor}" ref="infoSectionElement")
     .dark-theme-background-layer(v-if="isThemeDarkAndTypeColorLight")
+    //- color, name
     .row
       .button-wrap
         button.change-color(:disabled="!canEditConnection" @click.left.stop="toggleColorPicker" :class="{active: state.colorPickerIsVisible}")
           .current-color(:style="{backgroundColor: typeColor}")
         ColorPicker(:currentColor="typeColor" :visible="state.colorPickerIsVisible" @selectedColor="updateTypeColor")
       input.type-name(:disabled="!canEditConnection" placeholder="Connection Name" v-model="typeName" ref="typeNameElement" @focus="focus" @blur="blur" :class="{'is-dark': typeColorisDark}")
+    .row(v-if="canEditConnection")
+      //- Remove
+      button.danger(@click.left="removeConnection")
+        img.icon(src="@/assets/remove.svg")
+
     .row(v-if="canEditConnection")
       //- Arrows or Label
       ConnectionDecorators(:connections="[currentConnection]")
@@ -299,10 +305,6 @@ dialog.connection-details.narrow(v-if="visible" :open="visible" :style="styles" 
       template(v-else-if="spacePrivacyIsClosed")
         img.icon(src="@/assets/unlock.svg")
         span Read Only
-    .row(v-if="canEditConnection")
-      //- Remove
-      button.danger(@click.left="removeConnection")
-        img.icon(src="@/assets/remove.svg")
   section.results-actions(v-if="canEditConnection" ref="resultsActionsElement")
     //- Use Last Type
     .row.title-row
