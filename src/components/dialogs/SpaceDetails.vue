@@ -140,6 +140,8 @@ const filteredSpaces = computed(() => {
   // filter by space type
   if (dialogSpaceFilterByType.value === 'journals') {
     spaces = spaces.filter(space => space.moonPhase)
+  } else if (dialogSpaceFilterByType.value === 'spaces') {
+    spaces = spaces.filter(space => !space.moonPhase)
   }
   // hide by hidden spaces unless filter active
   if (!dialogSpaceFilterShowHidden.value) {

@@ -80,7 +80,7 @@ const initialState = {
 
   // space filters
 
-  dialogSpaceFilterByType: null, // null, journals
+  dialogSpaceFilterByType: null, // null, journals, spaces
   dialogSpaceFilterByTeam: {},
   dialogSpaceFilterByUser: {},
   dialogSpaceFilterShowHidden: false,
