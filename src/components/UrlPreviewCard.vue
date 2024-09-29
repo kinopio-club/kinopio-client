@@ -52,13 +52,13 @@ const background = computed(() => {
   return utils.alternateColor(color, isThemeDark.value)
 })
 const backgroundColorIsDark = computed(() => utils.colorIsDark(background.value))
-const textColorClasses = computed(() => {
+const colorClasses = computed(() => {
   const recomputeOnThemeChange = isThemeDark.value // used to force recompute
   let color = background.value
   if (!color) {
     color = utils.cssVariable('secondary-background')
   }
-  return utils.textColorClasses({ backgroundColor: color })
+  return utils.colorClasses({ backgroundColor: color })
 })
 
 // preview image
@@ -291,9 +291,9 @@ const openUrl = async (event, url) => {
         template(v-if="!props.card.urlPreviewIframeUrl")
           img.favicon(v-if="props.card.urlPreviewFavicon" :src="props.card.urlPreviewFavicon")
           img.icon.favicon.open(v-else src="@/assets/open.svg")
-        .title(:class="textColorClasses")
+        .title(:class="colorClasses")
           span {{title}}
-      .description(v-if="description" :class="textColorClasses")
+      .description(v-if="description" :class="colorClasses")
         span {{description}}
 </template>
 

@@ -815,7 +815,7 @@ export default {
     }
     return color
   },
-  textColorClasses ({ backgroundColor, backgroundColorIsDark }) {
+  colorClasses ({ backgroundColor, backgroundColorIsDark }) {
     backgroundColorIsDark = backgroundColorIsDark || this.colorIsDark(backgroundColor)
     let classes = []
     if (backgroundColorIsDark) {
