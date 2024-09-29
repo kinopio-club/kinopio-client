@@ -4,6 +4,7 @@ import { useStore } from 'vuex'
 
 import ColorPicker from '@/components/dialogs/ColorPicker.vue'
 import CardOrBoxActions from '@/components/subsections/CardOrBoxActions.vue'
+import ItemCheckboxButton from '@/components/ItemCheckboxButton.vue'
 import utils from '@/utils.js'
 
 import { colord, extend } from 'colord'
@@ -151,29 +152,6 @@ const removeBox = () => {
   store.dispatch('currentBoxes/remove', currentBox.value)
 }
 
-// checkbox
-
-const checkbox = computed(() => Boolean(utils.checkboxFromString(name.value)))
-const checkboxIsChecked = computed({
-  get () {
-    return utils.nameIsChecked(name.value)
-  },
-  set (value) {
-    if (utils.nameIsChecked(name.value)) {
-      store.dispatch('currentBoxes/removeChecked', currentBox.value.id)
-    } else {
-      store.dispatch('currentBoxes/toggleChecked', { boxId: currentBox.value.id, value })
-    }
-  }
-})
-const addCheckbox = () => {
-  const update = {
-    id: currentBox.value.id,
-    name: `[] ${currentBox.value.name}`
-  }
-  store.dispatch('currentBoxes/update', update)
-}
-
 // dialog state
 
 const closeDialogs = () => {
@@ -234,11 +212,7 @@ dialog.narrow.box-details(v-if="visible" :open="visible" @click.left.stop="close
         button.danger(@click.left="removeBox")
           img.icon(src="@/assets/remove.svg")
       //- [·]
-      .button-wrap.checkbox-button-wrap
-        label.fixed-height(v-if="checkbox" :class="{active: checkboxIsChecked, disabled: !canEditBox}" tabindex="0" title="Checkbox")
-          input(type="checkbox" v-model="checkboxIsChecked" tabindex="-1")
-        label.fixed-height(v-else @click.left.prevent="addCheckbox" @keydown.stop.enter="addCheckbox" :class="{disabled: !canEditBox}" tabindex="0")
-          input.add(type="checkbox" tabindex="-1")
+      ItemCheckboxButton(:boxes="[currentBox]" :isDisabled="!canEditBox")
     CardOrBoxActions(:visible="canEditBox" :boxes="[currentBox]" @closeDialogs="closeDialogs" :colorIsHidden="true")
     .row(v-if="!canEditBox")
       span.badge.info
@@ -261,11 +235,4 @@ dialog.narrow.box-details(v-if="visible" :open="visible" @click.left.stop="close
       color var(--primary-on-light-background)
   .info-row
     align-items flex-start
-  .checkbox-button-wrap
-    label
-      display flex
-      align-items center
-    input
-      margin 0
-      vertical-align -1px
 </style>

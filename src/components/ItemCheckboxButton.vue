@@ -111,12 +111,12 @@ const updateDimensionsAndPaths = async () => {
 .button-wrap.items-checkboxes.checkbox-button(:class="{ disabled: isDisabled }" title="Toggle Checkboxes")
   label.fixed-height(v-if="state.itemsHaveCheckboxes" :class="{active: state.itemsCheckboxIsChecked}" tabindex="0")
     input(type="checkbox" v-model="itemCheckboxes" tabindex="-1")
-  label.fixed-height(v-if="!state.itemsHaveCheckboxes" @click.left.prevent="addCheckboxToItems" @keydown.stop.enter="addCheckboxToItems" tabindex="0")
+  label.fixed-height(v-if="!state.itemsHaveCheckboxes" @click.left.prevent="addCheckboxToItems" @keydown.stop.enter="addCheckboxToItems" tabindex="0" title="Add Checkboxes")
     input.add(type="checkbox" tabindex="-1")
 </template>
 
 <style lang="stylus">
 .checkbox-button
   input
-    margin 0
+    margin 0 !important
 </style>
