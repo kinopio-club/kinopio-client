@@ -4,7 +4,7 @@ import { useStore } from 'vuex'
 
 import ResultsFilter from '@/components/ResultsFilter.vue'
 import ConnectionTypeList from '@/components/ConnectionTypeList.vue'
-import ConnectionDecorators from '@/components/ConnectionDecorators.vue'
+import ConnectionActions from '@/components/subsections/ConnectionActions.vue'
 import ColorPicker from '@/components/dialogs/ColorPicker.vue'
 import utils from '@/utils.js'
 
@@ -289,9 +289,9 @@ dialog.connection-details.narrow(v-if="visible" :open="visible" :style="styles" 
       button.danger(@click.left="removeConnection")
         img.icon(src="@/assets/remove.svg")
 
-    .row(v-if="canEditConnection")
-      //- Arrows or Label
-      ConnectionDecorators(:connections="[currentConnection]")
+    //- label etc.
+    ConnectionActions(:hideType="true" :visible="canEditConnection" :connections="[currentConnection]" @closeDialogs="closeDialogs" :canEditAll="canEditConnection" :backgroundColor="userColor" :label="moreLineOptionsLabel")
+
     p.edit-message.badge.info(v-if="!canEditConnection")
       template(v-if="spacePrivacyIsOpen")
         img.icon.open(src="@/assets/open.svg")
