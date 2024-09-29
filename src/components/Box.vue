@@ -312,6 +312,10 @@ const startResizing = (event) => {
   store.commit('broadcast/updateStore', { updates, type: 'updateRemoteUserResizingBoxes' })
   event.preventDefault() // allows resizing box without scrolling on mobile
 }
+const resizeColorClass = computed(() => {
+  const colorClass = utils.colorClasses({ backgroundColorIsDark: colorIsDark.value })
+  return [colorClass]
+})
 
 // shrink
 
@@ -904,7 +908,7 @@ const isInCheckedBox = computed(() => {
       button.inline-button(
         tabindex="-1"
       )
-        img.resize-icon.icon(src="@/assets/resize-corner.svg")
+        img.resize-icon.icon(src="@/assets/resize-corner.svg" :class="resizeColorClass")
 
   //- fill
   .background.filled(v-if="hasFill" :style="{background: color}")

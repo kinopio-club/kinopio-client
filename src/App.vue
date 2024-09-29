@@ -867,10 +867,13 @@ button
 .is-dark-theme
   .icon
     filter invert()
-
 .icon
   user-drag none
   -webkit-user-drag none
+  &.is-background-light
+    filter none
+  &.is-background-dark
+    filter invert(1)
 
 .icon + span,
 .icon + .icon
