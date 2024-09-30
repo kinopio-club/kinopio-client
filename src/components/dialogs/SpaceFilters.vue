@@ -2,8 +2,6 @@
 import { reactive, computed, onMounted, onBeforeUnmount, defineProps, defineEmits, watch, ref, nextTick } from 'vue'
 import { useStore } from 'vuex'
 
-import MoonPhase from '@/components/MoonPhase.vue'
-import moonphase from '@/moonphase.js'
 import UserList from '@/components/UserList.vue'
 import utils from '@/utils.js'
 import TeamList from '@/components/TeamList.vue'
@@ -22,7 +20,6 @@ onMounted(() => {
       clearAllFilters()
     }
   })
-  state.moonPhase = moonphase()
 })
 
 const props = defineProps({
@@ -37,7 +34,6 @@ watch(() => props.visible, (value, prevValue) => {
 })
 
 const state = reactive({
-  moonPhase: {},
   dialogHeight: null
 })
 
@@ -206,9 +202,10 @@ dialog.narrow.space-filters(v-if="props.visible" :open="props.visible" @click.le
       .segmented-buttons
         button(@click="updateFilterByType(null)" :class="{active: filterByTypeAll}" title="Show all spaces")
           span All
+        button(@click="updateFilterByType('spaces')" :class="{active: filterByTypeSpaces}" title="Show normal spaces only")
+          span Spaces
         button(@click="updateFilterByType('journals')" :class="{active: filterByTypeJournals}" title="Show journal spaces only")
-          MoonPhase(:moonPhase="state.moonPhase.name")
-          span Journals Only
+          span Journals
 
     //- sort by
     section.subsection

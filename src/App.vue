@@ -867,10 +867,13 @@ button
 .is-dark-theme
   .icon
     filter invert()
-
 .icon
   user-drag none
   -webkit-user-drag none
+  &.is-background-light
+    filter none
+  &.is-background-dark
+    filter invert(1)
 
 .icon + span,
 .icon + .icon
@@ -974,11 +977,6 @@ li
       background-image url('assets/checkmark.svg')
       background-repeat no-repeat
       background-position center
-    &.add
-      background-image url('assets/add.svg')
-      background-repeat no-repeat
-      background-position center
-      background-size 69%
 
 details
   summary
@@ -1142,7 +1140,6 @@ code
     padding 0px 7px
     vertical-align 0
     margin-right 5px
-    border-radius var(--small-entity-radius)
   &.badge-card-button
     box-shadow none
     text-decoration none
@@ -1243,6 +1240,9 @@ code
 .is-hidden-by-opacity
   opacity 0
   pointer-events none !important
+
+.space-is-hidden
+  opacity 0.5
 
 .fade-out
   opacity 0

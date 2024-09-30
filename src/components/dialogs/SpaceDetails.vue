@@ -13,7 +13,6 @@ import Loader from '@/components/Loader.vue'
 import debounce from 'lodash-es/debounce'
 import uniqBy from 'lodash-es/uniqBy'
 import dayjs from 'dayjs'
-import sortBy from 'lodash-es/sortBy'
 
 const store = useStore()
 
@@ -141,11 +140,11 @@ const filteredSpaces = computed(() => {
   // filter by space type
   if (dialogSpaceFilterByType.value === 'journals') {
     spaces = spaces.filter(space => space.moonPhase)
+  } else if (dialogSpaceFilterByType.value === 'spaces') {
+    spaces = spaces.filter(space => !space.moonPhase)
   }
-  // filter by hidden spaces
-  if (dialogSpaceFilterShowHidden.value) {
-    spaces = spaces.filter(space => space.isHidden)
-  } else {
+  // hide by hidden spaces unless filter active
+  if (!dialogSpaceFilterShowHidden.value) {
     spaces = spaces.filter(space => !space.isHidden)
   }
   // filter by user
@@ -246,7 +245,7 @@ const sortByUpdatedAt = (spaces) => {
   return sortedSpaces
 }
 const sortByAlphabetical = (spaces) => {
-  return sortBy(spaces, 'name')
+  return utils.sortItemsAlphabeticallyBy(spaces, 'name')
 }
 const sort = (spaces) => {
   if (isSortByCreatedAt.value) {

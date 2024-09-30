@@ -362,8 +362,8 @@ const currentCards = {
           context.commit('updateCardNameInOtherItems', card, { root: true })
           context.commit('triggerUpdateOtherCard', card.id, { root: true })
         }
-        cache.updateSpace('editedByUserId', context.rootState.currentUser.id, currentSpaceId)
       })
+      cache.updateSpace('editedByUserId', context.rootState.currentUser.id, currentSpaceId)
     },
     updateCounter: (context, { card, shouldIncrement, shouldDecrement }) => {
       const isSignedIn = context.rootGetters['currentUser/isSignedIn']

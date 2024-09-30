@@ -18,7 +18,7 @@ const shortName = computed(() => {
   return name.charAt(0).toUpperCase()
 })
 const classes = computed(() => {
-  return utils.textColorClasses({ backgroundColor: props.team.color })
+  return utils.colorClasses({ backgroundColor: props.team.color })
 })
 </script>
 

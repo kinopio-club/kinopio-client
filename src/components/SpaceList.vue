@@ -406,7 +406,7 @@ span.space-list-wrap
         a(:href="space.url")
           li(
             @click.left="selectSpace($event, space)"
-            :class="{ active: spaceIsActive(space), hover: state.focusOnId === space.id }"
+            :class="{ active: spaceIsActive(space), hover: state.focusOnId === space.id, 'space-is-hidden': space.isHidden }"
             tabindex="0"
             @keyup.enter="selectSpace(null, space)"
             :data-created-at="space.createdAt"
@@ -598,4 +598,5 @@ span.space-list-wrap
         .preview-thumbnail-image
           width 100%
           height 100%
+
 </style>

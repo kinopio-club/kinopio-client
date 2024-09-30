@@ -228,7 +228,6 @@ const removeCommentBrackets = (name) => {
 
 const isChecked = computed(() => utils.nameIsChecked(name.value))
 const hasCheckbox = computed(() => {
-  if (isLocked.value) { return }
   return utils.checkboxFromString(name.value)
 })
 const checkboxState = computed({
@@ -445,7 +444,8 @@ const cardClasses = computed(() => {
     'is-locked': isLocked.value,
     'has-url-preview': cardUrlPreviewIsVisible.value,
     'is-dark': backgroundColorIsDark.value,
-    'child-is-hovered': currentUserIsHoveringOverUrlButton.value && !currentCardIsBeingDragged.value
+    'child-is-hovered': currentUserIsHoveringOverUrlButton.value && !currentCardIsBeingDragged.value,
+    'is-in-checked-box': isInCheckedBox.value
   }
   classes = addSizeClasses(classes)
   return classes
@@ -1767,6 +1767,26 @@ const checkIfShouldUpdateIframeUrl = () => {
   }
 }
 
+// containing box
+
+const containingBoxes = computed(() => {
+  if (!state.isVisibleInViewport) { return }
+  if (isSelectedOrDragging.value) { return }
+  if (currentCardIsBeingDragged.value) { return }
+  let boxes = store.getters['currentBoxes/all']
+  boxes = boxes.filter(box => {
+    box = utils.clone(box)
+    const card = utils.clone(props.card)
+    return utils.isRectAInsideRectB(card, box)
+  })
+  return boxes
+})
+const isInCheckedBox = computed(() => {
+  if (!containingBoxes.value) { return }
+  const checkedBox = containingBoxes.value.find(box => utils.nameIsChecked(box.name))
+  return Boolean(checkedBox)
+})
+
 </script>
 
 <template lang="pug">
@@ -2303,6 +2323,9 @@ article.card-wrap
     img
       width 10px
       height 10px
+
+  .is-in-checked-box
+    opacity 0.5
 
 @keyframes bounce
   0%
