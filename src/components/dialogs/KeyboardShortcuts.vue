@@ -4,6 +4,7 @@ import { useStore } from 'vuex'
 
 import UserLabelInline from '@/components/UserLabelInline.vue'
 import keyboardShortcutsCategories from '@/data/keyboardShortcutsCategories.js'
+import postMessage from '@/postMessage.js'
 import utils from '@/utils.js'
 
 const store = useStore()
@@ -63,40 +64,31 @@ const closeDialogs = () => {
   // this.keyboardShortcutsCategoriesIsVisible = false
 }
 
-// disable checkboxes
+// [.] disable checkboxes
 
-// const checkboxState = computed({
-//   get (value) {
-//     return isChecked(value)
-//   },
-//   set () {
-
-//   }
-// })
-const isChecked = (value) => {
-  console.log('🛃🛃🛃🛃🛃', value)
-  if (value === 'newSpace') {
-    return true
+const checkboxStateNewSpace = computed({
+  get () {
+    return isChecked('newSpace')
+  },
+  set () {
+    toggleChecked('newSpace')
   }
-  // console.log(value)
+})
+const isChecked = (value) => {
+  const disabledKeyboardShortcuts = store.state.currentUser.disabledKeyboardShortcuts
+  const isEnabled = !disabledKeyboardShortcuts.includes(value)
+  return isEnabled
 }
-
 const toggleChecked = (name) => {
-  console.log('🍓', name)
-  // if (store.state.currentUserIsDraggingConnectionIdLabel) { return }
-  // if (store.state.preventDraggedCardFromShowingDetails) { return }
-  // if (!canEditSpace.value) { return }
-  // const value = !isChecked.value
-  // store.dispatch('closeAllDialogs')
-  // store.dispatch('currentCards/toggleChecked', { cardId: props.card.id, value })
-  // postMessage.sendHaptics({ name: 'heavyImpact' })
-  // cancelLocking()
-  // store.commit('currentUserIsDraggingCard', false)
-  // const userId = store.state.currentUser.id
-  // store.commit('broadcast/updateStore', { updates: { userId }, type: 'clearRemoteCardsDragging' })
+  const prevValue = isChecked(name)
+  if (prevValue) {
+    store.commit('currentUser/addToDisabledKeyboardShortcuts', name)
+  } else {
+    store.commit('currentUser/removeFromDisabledKeyboardShortcuts', name)
+  }
+  postMessage.sendHaptics({ name: 'heavyImpact' })
   event.stopPropagation()
 }
-
 </script>
 
 <template lang="pug">
@@ -116,11 +108,10 @@ dialog.keyboard-shortcuts(v-if="visible" :open="visible" @click.left.stop ref="d
       article
         .row
           .badge.title
-
-            .checkbox-wrap(@mouseup.left="toggleChecked('newSpace')" @touchend.prevent="toggleChecked('newSpace')" title="Uncheck to disable shortcut")
-              label(:class="{active: isChecked('newSpace') }")
-                input(name="checkbox" type="checkbox" :checked="isChecked('newSpace')")
-
+            //- [.]
+            .checkbox-wrap(title="Uncheck to disable N shortcut")
+              label(:class="{active: checkboxStateNewSpace }")
+                input(name="checkbox" type="checkbox" v-model="checkboxStateNewSpace")
             img.icon(src="@/assets/add.svg")
             span New Space
           .badge.keyboard-shortcut N

@@ -56,6 +56,12 @@ onBeforeUnmount(() => {
   window.removeEventListener('paste', handlePasteEvent)
 })
 
+const isDisabledKeyboardShortcut = (value) => {
+  const disabledKeyboardShortcuts = store.state.currentUser.disabledKeyboardShortcuts
+  const isDisabled = disabledKeyboardShortcuts.includes(value)
+  return isDisabled
+}
+
 // check scope
 
 const checkIsSpaceScope = (event) => {
@@ -91,6 +97,7 @@ const handleShortcuts = (event) => {
   // n
   } else if (key === 'n' && isSpaceScope) {
     if (store.state.isAddPage) { return }
+    if (isDisabledKeyboardShortcut('newSpace')) { return }
     store.dispatch('currentSpace/addSpace')
     store.commit('addNotification', { message: 'New space created', icon: 'add', type: 'success', label: 'N' })
     store.commit('triggerSpaceDetailsInfoIsVisible')

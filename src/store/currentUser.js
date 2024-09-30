@@ -442,10 +442,12 @@ export default {
     addToDisabledKeyboardShortcuts: (state, value) => {
       utils.typeCheck({ value, type: 'string' })
       state.disabledKeyboardShortcuts.push(value)
+      cache.updateUser('disabledKeyboardShortcuts', state.disabledKeyboardShortcuts)
     },
     removeFromDisabledKeyboardShortcuts: (state, value) => {
       utils.typeCheck({ value, type: 'string' })
       state.disabledKeyboardShortcuts = state.disabledKeyboardShortcuts.filter(shortcutName => value !== shortcutName)
+      cache.updateUser('disabledKeyboardShortcuts', state.disabledKeyboardShortcuts)
     }
   },
   actions: {
