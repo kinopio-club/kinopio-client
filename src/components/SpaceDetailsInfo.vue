@@ -329,7 +329,6 @@ template(v-if="isSpaceMember")
     .button-wrap
       button(@click="toggleSettingsIsVisible" :class="{active: state.settingsIsVisible}")
         img.icon.settings(src="@/assets/settings.svg")
-        span Settings
   .row(v-if="state.error.memberAssignTeam")
     .badge.danger
       img.icon.cancel(src="@/assets/add.svg")
