@@ -36,6 +36,7 @@ const store = createStore({
     isBeta: false,
     shouldHideConnectionOutline: false,
     changelogIsUpdated: false,
+    changelog: [],
     stripeIsLoaded: false,
     shouldHideFooter: false,
     shouldExplicitlyHideFooter: false,
@@ -241,7 +242,6 @@ const store = createStore({
     notifySignUpToJoinTeam: false,
     notifyCardsCreatedIsNearLimit: false,
     notifyCardsCreatedIsOverLimit: false,
-    notifyKinopioUpdatesAreAvailable: false,
     notifyMoveOrCopyToSpace: false,
     notifyMoveOrCopyToSpaceDetails: {},
     hasNotifiedPressAndHoldToDrag: false,
@@ -424,6 +424,10 @@ const store = createStore({
     changelogIsUpdated: (state, value) => {
       utils.typeCheck({ value, type: 'boolean' })
       state.changelogIsUpdated = value
+    },
+    changelog: (state, value) => {
+      utils.typeCheck({ value, type: 'array' })
+      state.changelog = value
     },
     stripeIsLoaded: (state, value) => {
       utils.typeCheck({ value, type: 'boolean' })
@@ -1513,10 +1517,6 @@ const store = createStore({
       if (value === true) {
         state.notifyCardsCreatedIsNearLimit = false
       }
-    },
-    notifyKinopioUpdatesAreAvailable: (state, value) => {
-      utils.typeCheck({ value, type: 'boolean' })
-      state.notifyKinopioUpdatesAreAvailable = value
     },
     notifyMoveOrCopyToSpace: (state, value) => {
       utils.typeCheck({ value, type: 'boolean' })

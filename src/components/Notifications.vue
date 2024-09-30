@@ -151,7 +151,6 @@ const notifySpaceIsRemoved = computed(() => store.state.notifySpaceIsRemoved)
 const notifySignUpToEditSpace = computed(() => store.state.notifySignUpToEditSpace)
 const notifyCardsCreatedIsNearLimit = computed(() => store.state.notifyCardsCreatedIsNearLimit)
 const notifyCardsCreatedIsOverLimit = computed(() => store.state.notifyCardsCreatedIsOverLimit)
-const notifyKinopioUpdatesAreAvailable = computed(() => store.state.notifyKinopioUpdatesAreAvailable)
 const notifyMoveOrCopyToSpace = computed(() => store.state.notifyMoveOrCopyToSpace)
 const notifyMoveOrCopyToSpaceDetails = computed(() => store.state.notifyMoveOrCopyToSpaceDetails)
 const notifySpaceIsHidden = computed(() => store.state.notifySpaceIsHidden)
@@ -176,6 +175,15 @@ const removePrevious = () => {
 const removeById = (item) => {
   store.commit('removeNotificationById', item.id)
 }
+
+// new stuff
+
+const changelogIsUpdated = computed(() => {
+  return store.state.changelogIsUpdated
+})
+const latestChangelogPost = computed(() => {
+  return store.state.changelog[0]
+})
 
 // toggle notifications
 
@@ -252,6 +260,10 @@ const triggerUpgradeUserIsVisible = () => {
 }
 const refreshBrowser = () => {
   window.location.reload()
+}
+const updateChangelogAndRefreshBrowser = () => {
+  cache.updatePrevReadChangelogId(latestChangelogPost.value.id)
+  refreshBrowser()
 }
 const duplicateSpace = () => {
   store.dispatch('currentSpace/duplicateSpace')
@@ -408,13 +420,16 @@ aside.notifications(@click.left="closeAllDialogs")
         button(@click="removeNotifyConnectionError")
           img.icon.cancel(src="@/assets/add.svg")
 
-  .persistent-item(v-if="notifyKinopioUpdatesAreAvailable")
+  .persistent-item(v-if="changelogIsUpdated")
     p
       span.label-badge NEW
       span Kinopio updates are available
     .row
+      span.badge.secondary {{latestChangelogPost.title}}
+    .row
       .button-wrap
-        button(@click.left="refreshBrowser")
+        button(@click.left="updateChangelogAndRefreshBrowser")
+          //- TODO update changelog and refresh browser
           img.refresh.icon(src="@/assets/refresh.svg")
           span Update
 

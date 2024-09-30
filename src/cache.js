@@ -412,16 +412,14 @@ export default {
 
   // Changelog
 
-  prevChangelogTime () {
-    return window.localStorage['prevChangelogTime']
+  prevChangelogId () {
+    return window.localStorage['prevChangelogId']
   },
-  updatePrevChangelogTime () {
-    let time = new Date()
-    time = time.toString()
-    this.storeLocal('prevChangelogTime', time)
+  updatePrevChangelogId (id) {
+    this.storeLocal('prevChangelogId', id)
   },
   prevReadChangelogId () {
-    return window.localStorage['prevReadChangelogId'] || 0
+    return window.localStorage['prevReadChangelogId'] || ''
   },
   updatePrevReadChangelogId (id) {
     this.storeLocal('prevReadChangelogId', id)

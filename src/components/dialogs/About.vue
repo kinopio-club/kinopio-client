@@ -41,7 +41,6 @@ const state = reactive({
   whatsNewIsVisible: false,
   appsAndExtensionsIsVisible: false,
   helpIsVisible: false,
-  changelog: [],
   dialogHeight: null
 })
 
@@ -67,10 +66,10 @@ const updateDialogHeight = async () => {
 // check changelog updates
 
 const changelogIsUpdated = computed(() => store.state.changelogIsUpdated)
+const changelog = computed(() => store.state.changelog)
 const initChangelog = async () => {
   await updateChangelog()
-  cache.updatePrevChangelogTime()
-  if (!utils.arrayHasItems(state.changelog)) { return }
+  if (!utils.arrayHasItems(changelog.value)) { return }
   checkKinopioUpdatesIntervalTimer = setInterval(() => {
     updateChangelog()
   }, 1000 * 60 * 60 * 1) // 1 hour
@@ -80,36 +79,25 @@ const updateChangelog = async () => {
     let posts = await store.dispatch('api/getChangelog')
     if (!posts) { return }
     posts = posts.slice(0, 20)
-    state.changelog = posts
+    store.commit('changelog', posts)
+    cache.updatePrevChangelogId(posts[0].id)
     checkChangelogIsUpdated()
-    checkIfShouldNotify()
   } catch (error) {
     console.error('🚒 updateChangelog', error)
   }
 }
 const checkChangelogIsUpdated = () => {
-  const newId = state.changelog[0].id
+  const newId = changelog.value[0].id
   const prevId = cache.prevReadChangelogId()
-  const isUpdated = parseInt(prevId) < parseInt(newId)
-
+  const isUpdated = prevId !== newId
   store.commit('changelogIsUpdated', isUpdated)
-}
-const checkIfShouldNotify = async () => {
-  let prevTime = cache.prevChangelogTime()
-  if (!prevTime) { return }
-  let newest = state.changelog[0]
-  newest = dayjs(newest.createdAt)
-  prevTime = dayjs(prevTime)
-  const timeSinceNewest = prevTime.diff(newest, 'second')
-  const isNew = timeSinceNewest < 0
-  store.commit('notifyKinopioUpdatesAreAvailable', isNew)
 }
 
 // changelog
 
 const changeSpaceToChangelog = () => {
   const space = { id: consts.changelogSpaceId() }
-  const changelogId = state.changelog[0].id
+  const changelogId = changelog.value[0].id
   cache.updatePrevReadChangelogId(changelogId)
   store.commit('changelogIsUpdated', false)
   store.dispatch('currentSpace/changeSpace', space)
@@ -182,7 +170,8 @@ dialog.about.narrow(v-if="visible" :open="visible" @click.left="closeDialogs" re
         a(href="/changelog")
           button(@click.left.stop.prevent="changeSpaceToChangelog")
             span Changelog
-            img.updated.icon(src="@/assets/updated.gif" v-if="changelogIsUpdated")
+            img.updated.icon(src="@/assets/updated.gif")
+            //- v-if="changelogIsUpdated"
     //- .row
     //-   a(href="https://kinopio.club/pop-up-shop-u9XxpuIzz2_LvQUAayl65")
     //-     button
