@@ -63,6 +63,40 @@ const closeDialogs = () => {
   // this.keyboardShortcutsCategoriesIsVisible = false
 }
 
+// disable checkboxes
+
+// const checkboxState = computed({
+//   get (value) {
+//     return isChecked(value)
+//   },
+//   set () {
+
+//   }
+// })
+const isChecked = (value) => {
+  console.log('🛃🛃🛃🛃🛃', value)
+  if (value === 'newSpace') {
+    return true
+  }
+  // console.log(value)
+}
+
+const toggleChecked = (name) => {
+  console.log('🍓', name)
+  // if (store.state.currentUserIsDraggingConnectionIdLabel) { return }
+  // if (store.state.preventDraggedCardFromShowingDetails) { return }
+  // if (!canEditSpace.value) { return }
+  // const value = !isChecked.value
+  // store.dispatch('closeAllDialogs')
+  // store.dispatch('currentCards/toggleChecked', { cardId: props.card.id, value })
+  // postMessage.sendHaptics({ name: 'heavyImpact' })
+  // cancelLocking()
+  // store.commit('currentUserIsDraggingCard', false)
+  // const userId = store.state.currentUser.id
+  // store.commit('broadcast/updateStore', { updates: { userId }, type: 'clearRemoteCardsDragging' })
+  event.stopPropagation()
+}
+
 </script>
 
 <template lang="pug">
@@ -82,6 +116,11 @@ dialog.keyboard-shortcuts(v-if="visible" :open="visible" @click.left.stop ref="d
       article
         .row
           .badge.title
+
+            .checkbox-wrap(@mouseup.left="toggleChecked('newSpace')" @touchend.prevent="toggleChecked('newSpace')" title="Uncheck to disable shortcut")
+              label(:class="{active: isChecked('newSpace') }")
+                input(name="checkbox" type="checkbox" :checked="isChecked('newSpace')")
+
             img.icon(src="@/assets/add.svg")
             span New Space
           .badge.keyboard-shortcut N
@@ -385,4 +424,11 @@ dialog.keyboard-shortcuts(v-if="visible" :open="visible" @click.left.stop ref="d
   .icon.presentation
     width 12px
     vertical-align -1px
+
+  .checkbox-wrap
+    display inline-block
+    label
+      padding 0
+      padding-left 5px
+    margin-right 6px
 </style>

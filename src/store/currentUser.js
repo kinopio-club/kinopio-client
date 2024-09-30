@@ -77,6 +77,7 @@ const initialState = {
   cardSettingsMaxCardWidth: consts.normalCardMaxWidth,
   prevSettingsSection: null,
   betaPermissionCreateTeam: false,
+  disabledKeyboardShortcuts: [],
 
   // space filters
 
@@ -437,6 +438,14 @@ export default {
     prevSettingsSection: (state, value) => {
       utils.typeCheck({ value, type: 'string' })
       state.prevSettingsSection = value
+    },
+    addToDisabledKeyboardShortcuts: (state, value) => {
+      utils.typeCheck({ value, type: 'string' })
+      state.disabledKeyboardShortcuts.push(value)
+    },
+    removeFromDisabledKeyboardShortcuts: (state, value) => {
+      utils.typeCheck({ value, type: 'string' })
+      state.disabledKeyboardShortcuts = state.disabledKeyboardShortcuts.filter(shortcutName => value !== shortcutName)
     }
   },
   actions: {
