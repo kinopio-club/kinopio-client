@@ -1140,7 +1140,6 @@ code
     padding 0px 7px
     vertical-align 0
     margin-right 5px
-    border-radius var(--small-entity-radius)
   &.badge-card-button
     box-shadow none
     text-decoration none
