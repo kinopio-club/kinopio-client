@@ -523,7 +523,7 @@ const tiltResizeIsVisible = computed(() => {
   if (!canEditSpace.value) { return }
   if (!canEditCard.value) { return }
   if (cardPendingUpload.value || remoteCardPendingUpload.value) { return }
-  if (utils.isMobile()) { return }
+  if (store.state.spaceZoomPercent < 50 || store.state.pinchCounterZoomDecimal < 0.5) { return }
   return true
 })
 const x = computed(() => {
