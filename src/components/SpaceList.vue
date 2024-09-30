@@ -252,7 +252,7 @@ const updateScroll = async () => {
 
 const updateCurrentPage = () => {
   const zoom = utils.pinchCounterZoomDecimal()
-  const threshold = 400
+  const threshold = 600
   const nearBottomY = state.pageHeight - (threshold * state.currentPage)
   if ((state.scrollY * zoom) > nearBottomY) {
     state.currentPage = Math.min(state.currentPage + 1, totalPages.value)
@@ -406,7 +406,7 @@ span.space-list-wrap
         a(:href="space.url")
           li(
             @click.left="selectSpace($event, space)"
-            :class="{ active: spaceIsActive(space), hover: state.focusOnId === space.id }"
+            :class="{ active: spaceIsActive(space), hover: state.focusOnId === space.id, 'space-is-hidden': space.isHidden }"
             tabindex="0"
             @keyup.enter="selectSpace(null, space)"
             :data-created-at="space.createdAt"
@@ -437,7 +437,7 @@ span.space-list-wrap
 
             //- preview image
             .preview-thumbnail-image-wrap(v-if="space.previewThumbnailImage && isOnline" :class="{wide: previewImageIsWide}")
-              img.preview-thumbnail-image(:src="space.previewThumbnailImage")
+              img.preview-thumbnail-image(:src="space.previewThumbnailImage" loading="lazy")
             //- team
             template(v-if="team(space.teamId) && props.showSpaceTeams")
               TeamLabel(:team="team(space.teamId)")
@@ -598,4 +598,5 @@ span.space-list-wrap
         .preview-thumbnail-image
           width 100%
           height 100%
+
 </style>

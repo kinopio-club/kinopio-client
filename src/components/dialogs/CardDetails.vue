@@ -17,6 +17,7 @@ import ShareCard from '@/components/dialogs/ShareCard.vue'
 import OtherCardPreview from '@/components/OtherCardPreview.vue'
 import OtherSpacePreview from '@/components/OtherSpacePreview.vue'
 import TeamInvitePreview from '@/components/TeamInvitePreview.vue'
+import ItemCheckboxButton from '@/components/ItemCheckboxButton.vue'
 import utils from '@/utils.js'
 import consts from '@/consts.js'
 
@@ -490,29 +491,6 @@ const clickName = (event) => {
     updateSpacePickerSearch()
     event.stopPropagation()
   }
-}
-
-// checkbox
-
-const checkbox = computed(() => Boolean(utils.checkboxFromString(name.value)))
-const checkboxIsChecked = computed({
-  get () {
-    return utils.nameIsChecked(name.value)
-  },
-  set (value) {
-    if (utils.nameIsChecked(name.value)) {
-      store.dispatch('currentCards/removeChecked', card.value.id)
-    } else {
-      store.dispatch('currentCards/toggleChecked', { cardId: card.value.id, value })
-    }
-  }
-})
-const addCheckbox = () => {
-  const update = {
-    id: card.value.id,
-    name: `[] ${card.value.name}`
-  }
-  store.dispatch('currentCards/update', { card: update })
 }
 
 // character limit
@@ -1385,11 +1363,7 @@ dialog.card-details(v-if="visible" :open="visible" ref="dialogElement" @click.le
             img.icon.remove(src="@/assets/remove.svg")
             //- span Remove
         //- [·]
-        .button-wrap.cards-checkboxes
-          label.fixed-height(v-if="checkbox" :class="{active: checkboxIsChecked, disabled: !canEditCard}" tabindex="0" title="Checkbox")
-            input(type="checkbox" v-model="checkboxIsChecked" tabindex="-1")
-          label.fixed-height(v-else @click.left.prevent="addCheckbox" @keydown.stop.enter="addCheckbox" :class="{disabled: !canEditCard}" tabindex="0")
-            input.add(type="checkbox" tabindex="-1")
+        ItemCheckboxButton(:cards="[card]" :isDisabled="!canEditCard")
         //- Image
         .button-wrap
           button(@click.left.stop="toggleImagePickerIsVisible" :class="{active : state.imagePickerIsVisible}" title="Image")
@@ -1516,13 +1490,6 @@ dialog.card-details(v-if="visible" :open="visible" ref="dialogElement" @click.le
   .edit-message
     button
       margin-top 10px
-  .cards-checkboxes
-    label
-      display flex
-      align-items center
-    input
-      margin 0
-      vertical-align -1px
   .badges-row
     display flex
     flex-wrap wrap

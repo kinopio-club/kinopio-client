@@ -82,7 +82,7 @@ const handleError = (event) => {
 video(v-if="Boolean(video)" autoplay loop muted playsinline :key="video" :class="{selected: isSelectedOrDragging}" @canplay="handleSuccess" ref="videoElement" @load="handleSuccess")
   source(:src="video")
 //- Image
-img.image(v-if="state.imageUrl" :src="state.imageUrl" :class="{selected: isSelectedOrDragging}" @load="handleSuccess" @error="handleError")
+img.image(v-if="state.imageUrl" :src="state.imageUrl" :class="{selected: isSelectedOrDragging}" @load="handleSuccess" @error="handleError" loading="lazy")
 </template>
 
 <style lang="stylus">

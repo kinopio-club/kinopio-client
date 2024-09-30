@@ -287,7 +287,7 @@ const removeSpaceTeam = () => {
           span {{remotePendingUpload.percentComplete}}%
       BackgroundPicker(:visible="state.backgroundIsVisible" @updateLocalSpaces="updateLocalSpaces")
     //- Name
-    .textarea-wrap(:class="{'full-width': props.shouldHidePin}")
+    .textarea-wrap(:class="{'full-width': props.shouldHidePin, 'space-is-hidden': props.currentSpaceIsHidden}")
       textarea.name(
         :readonly="!isSpaceMember"
         ref="nameElement"
@@ -395,8 +395,6 @@ template(v-if="state.settingsIsVisible")
               span Remove
           //- Hide
           button(@click.stop="toggleHideSpace" :class="{ active: props.currentSpaceIsHidden }")
-            img.icon(v-if="!props.currentSpaceIsHidden" src="@/assets/view.svg")
-            img.icon(v-if="props.currentSpaceIsHidden" src="@/assets/view-hidden.svg")
             span Hide
 </template>
 

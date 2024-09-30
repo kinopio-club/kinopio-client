@@ -53,6 +53,11 @@ const remove = (action) => {
     store.dispatch('currentCards/removeTilt', { cardIds })
   }
 }
+const colorClass = computed(() => {
+  if (!props.card.backgroundColor) { return }
+  const colorClass = utils.colorClasses({ backgroundColor: props.card.backgroundColor })
+  return [colorClass]
+})
 
 // tilt
 
@@ -90,7 +95,7 @@ const isResizing = computed(() => {
     title="Drag to Resize"
   )
     button.inline-button(tabindex="-1" :class="{hidden: isPresentationMode, active: isResizing}")
-      img.icon(src="@/assets/resize-corner.svg")
+      img.icon(src="@/assets/resize-corner.svg" :class="colorClass")
 //- tilt
 .left-tilt.bottom-button-wrap(v-if="tiltIsVisible")
   .inline-button-wrap(
@@ -100,7 +105,7 @@ const isResizing = computed(() => {
     title="Drag to Tilt"
   )
     button.inline-button(tabindex="-1" :class="{hidden: isPresentationMode, active: isTilting}")
-      img.icon(src="@/assets/resize-corner.svg")
+      img.icon(src="@/assets/resize-corner.svg" :class="colorClass")
 </template>
 
 <style lang="stylus">

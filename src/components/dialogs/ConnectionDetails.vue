@@ -4,7 +4,7 @@ import { useStore } from 'vuex'
 
 import ResultsFilter from '@/components/ResultsFilter.vue'
 import ConnectionTypeList from '@/components/ConnectionTypeList.vue'
-import ConnectionDecorators from '@/components/ConnectionDecorators.vue'
+import ConnectionActions from '@/components/subsections/ConnectionActions.vue'
 import ColorPicker from '@/components/dialogs/ColorPicker.vue'
 import utils from '@/utils.js'
 
@@ -277,6 +277,7 @@ const focusName = async () => {
 dialog.connection-details.narrow(v-if="visible" :open="visible" :style="styles" @click.left="closeColorPicker" ref="dialogElement")
   section.info-section(:style="{backgroundColor: typeColor}" ref="infoSectionElement")
     .dark-theme-background-layer(v-if="isThemeDarkAndTypeColorLight")
+    //- color, name
     .row
       .button-wrap
         button.change-color(:disabled="!canEditConnection" @click.left.stop="toggleColorPicker" :class="{active: state.colorPickerIsVisible}")
@@ -284,8 +285,13 @@ dialog.connection-details.narrow(v-if="visible" :open="visible" :style="styles" 
         ColorPicker(:currentColor="typeColor" :visible="state.colorPickerIsVisible" @selectedColor="updateTypeColor")
       input.type-name(:disabled="!canEditConnection" placeholder="Connection Name" v-model="typeName" ref="typeNameElement" @focus="focus" @blur="blur" :class="{'is-dark': typeColorisDark}")
     .row(v-if="canEditConnection")
-      //- Arrows or Label
-      ConnectionDecorators(:connections="[currentConnection]")
+      //- Remove
+      button.danger(@click.left="removeConnection")
+        img.icon(src="@/assets/remove.svg")
+
+    //- label etc.
+    ConnectionActions(:hideType="true" :visible="canEditConnection" :connections="[currentConnection]" :canEditAll="canEditConnection" :backgroundColor="userColor" :label="moreLineOptionsLabel")
+
     p.edit-message.badge.info(v-if="!canEditConnection")
       template(v-if="spacePrivacyIsOpen")
         img.icon.open(src="@/assets/open.svg")
@@ -299,10 +305,6 @@ dialog.connection-details.narrow(v-if="visible" :open="visible" :style="styles" 
       template(v-else-if="spacePrivacyIsClosed")
         img.icon(src="@/assets/unlock.svg")
         span Read Only
-    .row(v-if="canEditConnection")
-      //- Remove
-      button.danger(@click.left="removeConnection")
-        img.icon(src="@/assets/remove.svg")
   section.results-actions(v-if="canEditConnection" ref="resultsActionsElement")
     //- Use Last Type
     .row.title-row

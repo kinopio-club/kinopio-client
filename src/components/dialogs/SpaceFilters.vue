@@ -2,11 +2,10 @@
 import { reactive, computed, onMounted, onBeforeUnmount, defineProps, defineEmits, watch, ref, nextTick } from 'vue'
 import { useStore } from 'vuex'
 
-import MoonPhase from '@/components/MoonPhase.vue'
-import moonphase from '@/moonphase.js'
 import UserList from '@/components/UserList.vue'
 import utils from '@/utils.js'
 import TeamList from '@/components/TeamList.vue'
+import Loader from '@/components/Loader.vue'
 
 import uniqBy from 'lodash-es/uniqBy'
 
@@ -21,12 +20,12 @@ onMounted(() => {
       clearAllFilters()
     }
   })
-  state.moonPhase = moonphase()
 })
 
 const props = defineProps({
   visible: Boolean,
-  spaces: Array
+  spaces: Array,
+  isLoading: Boolean
 })
 watch(() => props.visible, (value, prevValue) => {
   if (value) {
@@ -35,7 +34,6 @@ watch(() => props.visible, (value, prevValue) => {
 })
 
 const state = reactive({
-  moonPhase: {},
   dialogHeight: null
 })
 
@@ -48,7 +46,7 @@ const updateDialogHeight = async () => {
 
 // filters
 
-const dialogSpaceFilterSortByDate = computed(() => store.state.currentUser.dialogSpaceFilterSortByDate)
+const dialogSpaceFilterSortBy = computed(() => store.state.currentUser.dialogSpaceFilterSortBy)
 const dialogSpaceFilterByType = computed(() => store.state.currentUser.dialogSpaceFilterByType)
 const dialogSpaceFilterByUser = computed(() => store.state.currentUser.dialogSpaceFilterByUser)
 const dialogSpaceFilterShowHidden = computed(() => store.state.currentUser.dialogSpaceFilterShowHidden)
@@ -68,7 +66,7 @@ const totalFiltersActive = computed(() => {
   if (dialogSpaceFilterByType.value) {
     count += 1
   }
-  if (dialogSpaceFilterSortByDate.value === 'createdAt') {
+  if (dialogSpaceFilterSortBy.value === 'createdAt') {
     count += 1
   }
   if (dialogSpaceFilterShowHidden.value) {
@@ -115,19 +113,27 @@ const updateFilterByType = (value) => {
 // sort by
 
 const isSortByUpdatedAt = computed(() => {
-  const value = dialogSpaceFilterSortByDate.value
+  const value = dialogSpaceFilterSortBy.value
   return !value || value === 'updatedAt'
 })
 const isSortByCreatedAt = computed(() => {
-  const value = dialogSpaceFilterSortByDate.value
+  const value = dialogSpaceFilterSortBy.value
   return value === 'createdAt'
 })
+const isSortByAlphabetical = computed(() => {
+  const value = dialogSpaceFilterSortBy.value
+  return value === 'alphabetical'
+})
 const updateSortBy = (value) => {
-  store.dispatch('currentUser/update', { dialogSpaceFilterSortByDate: value })
+  store.dispatch('currentUser/update', { dialogSpaceFilterSortBy: value })
 }
 
 // teams
 
+const isTeams = computed(() => {
+  if (!teams.value) { return }
+  return teams.value.length
+})
 const teams = computed(() => {
   return store.getters['teams/bySpaces'](props.spaces)
 })
@@ -162,56 +168,69 @@ const filterByUser = (event, user) => {
     updateUserFilter(user)
   }
 }
+
+const isLoading = computed(() => {
+  return props.isLoading || store.state.isLoadingUserTeamsSpaces
+})
+
 </script>
 
 <template lang="pug">
 dialog.narrow.space-filters(v-if="props.visible" :open="props.visible" @click.left.stop ref="dialogElement" :style="{'max-height': state.dialogHeight + 'px'}")
-  section
-    p Space Filters
-  section
-    .row
-      //- clear all
-      button(@click.left="clearAllFilters")
+  section.section-title
+    .row.title-row
+      span Space Filters
+      button.small-button(@click.left="clearAllFilters" title="Clear all space filters")
         img.icon.cancel(src="@/assets/add.svg")
-        span Clear all
-        span.badge.info.total-filters-active(v-if="totalFiltersActive") {{totalFiltersActive}}
+        span Clear
+        span.badge.info.filter-is-active(v-if="totalFiltersActive")
 
+  section
     //- types visibile
     section.subsection
-      p Filter by Type
+      .row.title-row
+        span
+          //- img.icon(src="@/assets/view.svg")
+          span Show
+        .checkbox-wrap
+          label.small-button(:class="{active: showHiddenSpace}" title="Show hidden spaces")
+            input(type="checkbox" v-model="showHiddenSpace")
+            //- img.icon(v-if="!showHiddenSpace" src="@/assets/view.svg")
+            //- img.icon(v-if="showHiddenSpace" src="@/assets/view-hidden.svg")
+            span Hidden
 
       .segmented-buttons
-        button(@click="updateFilterByType(null)" :class="{active: filterByTypeAll}")
+        button(@click="updateFilterByType(null)" :class="{active: filterByTypeAll}" title="Show all spaces")
           span All
-        button(@click="updateFilterByType('spaces')" :class="{active: filterByTypeSpaces}")
-          span Normal
-        button(@click="updateFilterByType('journals')" :class="{active: filterByTypeJournals}")
-          MoonPhase(:moonPhase="state.moonPhase.name")
+        button(@click="updateFilterByType('spaces')" :class="{active: filterByTypeSpaces}" title="Show normal spaces only")
+          span Spaces
+        button(@click="updateFilterByType('journals')" :class="{active: filterByTypeJournals}" title="Show journal spaces only")
           span Journals
+
     //- sort by
     section.subsection
-      p Sort by Date
+      p
+        //- img.icon.time(src="@/assets/time.svg")
+        span Sort by
       .segmented-buttons
-        button(:class="{active: isSortByUpdatedAt}" @click="updateSortBy('updatedAt')")
-          img.icon.time(src="@/assets/time.svg")
+        button(:class="{active: isSortByUpdatedAt}" @click="updateSortBy('updatedAt')" title="Sort spaces by updated at")
           span Updated
-        button(:class="{active: isSortByCreatedAt}" @click="updateSortBy('createdAt')")
-          img.icon.time(src="@/assets/time.svg")
+        button(:class="{active: isSortByCreatedAt}" @click="updateSortBy('createdAt')" title="Sort spaces by created at")
           span Created
-    //- show hidden
-    .row
-      .checkbox-wrap
-        label(:class="{active: showHiddenSpace}")
-          input(type="checkbox" v-model="showHiddenSpace")
-          img.icon(v-if="!showHiddenSpace" src="@/assets/view.svg")
-          img.icon(v-if="showHiddenSpace" src="@/assets/view-hidden.svg")
-          span Show Hidden
+        button(:class="{active: isSortByAlphabetical}" @click="updateSortBy('alphabetical')" title="Sort spaces alphabetically")
+          span ABC
+
+  //- loading
+  section(v-if="isLoading")
+    Loader(:visible="true")
+
   //- teams
-  section.results-section.teams(v-if="teams.length")
+  section.results-section.teams(v-if="isTeams")
     TeamList(:teams="teams" :selectedTeam="dialogSpaceFilterByTeam" @selectTeam="filterByTeam")
   //- collaborators
   section.results-section.collaborators(v-if="spaceUsers.length")
     UserList(:users="spaceUsers" :selectedUser="dialogSpaceFilterByUser" @selectUser="filterByUser")
+
 </template>
 
 <style lang="stylus">

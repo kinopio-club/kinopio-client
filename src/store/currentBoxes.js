@@ -137,10 +137,7 @@ export default {
       const count = context.state.ids.length
       const minBoxSize = consts.minBoxSize
       const isThemeDark = context.rootState.currentUser.theme === 'dark'
-      let color = randomColor({ luminosity: 'light' })
-      if (isThemeDark) {
-        color = randomColor({ luminosity: 'dark' })
-      }
+      const color = randomColor({ luminosity: 'dark' })
       box = {
         id: box.id || nanoid(),
         spaceId: currentSpaceId,
@@ -190,6 +187,56 @@ export default {
         id: box.id,
         name: newName
       })
+    },
+    updateMultiple: (context, boxes) => {
+      const spaceId = context.rootState.currentSpace.id
+      let updates = {
+        boxes,
+        spaceId: context.rootState.currentSpace.id
+      }
+      updates.boxes.map(box => {
+        delete box.userId
+        return box
+      })
+      context.dispatch('api/addToQueue', { name: 'updateMultipleBoxes', body: updates }, { root: true })
+      context.dispatch('history/add', { boxes }, { root: true })
+      boxes.forEach(box => {
+        context.dispatch('broadcast/update', { updates: box, type: 'updateBox', handler: 'currentBoxes/update' }, { root: true })
+        context.commit('update', box)
+      })
+      cache.updateSpace('editedByUserId', context.rootState.currentUser.id, currentSpaceId)
+    },
+
+    // checkboxes
+
+    toggleChecked (context, { boxId, value }) {
+      utils.typeCheck({ value, type: 'boolean' })
+      utils.typeCheck({ value: boxId, type: 'string' })
+      const box = context.getters.byId(boxId)
+      let name = box.name
+      const checkbox = utils.checkboxFromString(name)
+      name = name.replace(checkbox, '')
+      if (value) {
+        name = `[x] ${name}`
+      } else {
+        name = `[] ${name}`
+      }
+      const update = {
+        id: boxId,
+        name
+      }
+      context.dispatch('update', update)
+    },
+    removeChecked: (context, boxId) => {
+      utils.typeCheck({ value: boxId, type: 'string' })
+      const box = context.getters.byId(boxId)
+      let name = box.name
+      name = name.replace('[x]', '').trim()
+      const update = {
+        id: boxId,
+        name
+      }
+      context.dispatch('update', update)
     },
 
     // resize
@@ -264,13 +311,13 @@ export default {
           targetBox.height = targetBox.resizeHeight
           const isBetweenTargetBoxPointsX = utils.isBetween({
             value: item.x,
-            min: targetBox.x,
-            max: targetBox.x + targetBox.width
+            min: targetBox.x + snapThreshold,
+            max: targetBox.x + targetBox.width - snapThreshold
           })
           const isBetweenTargetBoxPointsY = utils.isBetween({
             value: item.y,
-            min: targetBox.y,
-            max: targetBox.y + targetBox.height
+            min: targetBox.y + snapThreshold,
+            max: targetBox.y + targetBox.height - snapThreshold
           })
           // item sides
           const itemLeft = item.x

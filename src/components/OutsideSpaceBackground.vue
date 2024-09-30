@@ -4,6 +4,11 @@ import { useStore } from 'vuex'
 
 import postMessage from '@/postMessage.js'
 import utils from '@/utils.js'
+
+import { colord, extend } from 'colord'
+import mixPlugin from 'colord/plugins/mix'
+extend([mixPlugin])
+
 const store = useStore()
 
 // adapted from https://gist.github.com/pketh/3f62b807db3835d564c1
@@ -39,7 +44,13 @@ onMounted(() => {
   canvas = document.getElementById('outside-space-background')
   context = canvas.getContext('2d')
   context.scale(window.devicePixelRatio, window.devicePixelRatio)
-
+  store.subscribe(mutation => {
+    if (mutation.type === 'currentSpace/updateSpace') {
+      if (mutation.payload.backgroundTint) {
+        updateBackgroundColor()
+      }
+    }
+  })
   start()
 })
 onBeforeUnmount(() => {
@@ -65,6 +76,7 @@ const cancel = () => {
 }
 const spaceZoomDecimal = computed(() => store.getters.spaceZoomDecimal)
 const outsideSpaceBackgroundIsStatic = computed(() => store.state.currentUser.outsideSpaceBackgroundIsStatic)
+const backgroundTintColor = computed(() => store.state.currentSpace.backgroundTint)
 
 // update color
 
@@ -84,6 +96,10 @@ const updateBackgroundColor = () => {
   let backgroundColor = `rgb(${r}, ${g}, ${b})`
   if (outsideSpaceBackgroundIsStatic.value) {
     backgroundColor = utils.cssVariable('secondary-active-background')
+  }
+  if (backgroundTintColor.value) {
+    let tint = backgroundTintColor.value
+    backgroundColor = colord(backgroundColor).mix(tint, 0.5).toHex()
   }
   store.commit('outsideSpaceBackgroundColor', backgroundColor)
   updateMetaThemeColor(backgroundColor)
@@ -111,7 +127,9 @@ const updateMetaThemeColor = (color) => {
 }
 const styles = computed(() => {
   const canvasSize = 10
-  const scale = store.state.viewportWidth / canvasSize
+  const widthScale = store.state.viewportWidth / canvasSize
+  const heightScale = store.state.viewportHeight / canvasSize
+  const scale = Math.max(widthScale, heightScale)
   return { transform: `scale(${scale})` }
 })
 </script>

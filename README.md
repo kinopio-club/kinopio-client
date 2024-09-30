@@ -10,7 +10,7 @@ The `kinopio-client` is the client web app that users use to read and update spa
 
 - [Kinopio Architecture and Costs](https://kinopio.club/JOGXFJ0FEMpS3crbh6U9k)
 - [How Kinopio is Made](https://pketh.org/how-kinopio-is-made.html)
-
+- [Discord](https://kinopio.club/discord)
 
 ## Install
 

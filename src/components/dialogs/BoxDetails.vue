@@ -4,6 +4,7 @@ import { useStore } from 'vuex'
 
 import ColorPicker from '@/components/dialogs/ColorPicker.vue'
 import CardOrBoxActions from '@/components/subsections/CardOrBoxActions.vue'
+import ItemCheckboxButton from '@/components/ItemCheckboxButton.vue'
 import utils from '@/utils.js'
 
 import { colord, extend } from 'colord'
@@ -20,7 +21,6 @@ const state = reactive({
   isUpdated: false
 })
 
-const visible = computed(() => utils.objectHasKeys(currentBox.value))
 const spaceCounterZoomDecimal = computed(() => store.getters.spaceCounterZoomDecimal)
 const canEditBox = computed(() => store.getters['currentUser/canEditBox'](currentBox.value))
 
@@ -51,6 +51,17 @@ watch(() => currentBox.value, async (value, prevValue) => {
     store.dispatch('history/add', { boxes: [box], useSnapshot: true })
   }
 })
+
+const visible = computed(() => utils.objectHasKeys(currentBox.value))
+watch(() => visible.value, async (value, prevValue) => {
+  await nextTick()
+  if (!value) {
+    store.commit('currentDraggingBoxId', '')
+    store.dispatch('multipleBoxesSelectedIds', [])
+    store.commit('preventMultipleSelectedActionsIsVisible', false)
+  }
+})
+
 const broadcastShowBoxDetails = () => {
   const updates = {
     boxId: currentBox.value.id,
@@ -190,6 +201,7 @@ dialog.narrow.box-details(v-if="visible" :open="visible" @click.left.stop="close
           :currentColor="currentBox.color"
           :visible="state.colorPickerIsVisible"
           :recentColors="itemColors"
+          :luminosityIsDark="true"
           @selectedColor="updateColor"
         )
       //- name
@@ -204,12 +216,14 @@ dialog.narrow.box-details(v-if="visible" :open="visible" @click.left.stop="close
           maxLength="600"
           :class="{'is-dark': colorisDark, 'is-light': !colorisDark}"
         )
-    CardOrBoxActions(:visible="canEditBox" :boxes="[currentBox]" @closeDialogs="closeDialogs" :colorIsHidden="true")
     .row(v-if="canEditBox")
       //- remove
       .button-wrap
         button.danger(@click.left="removeBox")
           img.icon(src="@/assets/remove.svg")
+      //- [·]
+      ItemCheckboxButton(:boxes="[currentBox]" :isDisabled="!canEditBox")
+    CardOrBoxActions(:visible="canEditBox" :boxes="[currentBox]" @closeDialogs="closeDialogs" :colorIsHidden="true")
     .row(v-if="!canEditBox")
       span.badge.info
         img.icon(src="@/assets/unlock.svg")

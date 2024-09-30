@@ -227,6 +227,7 @@ const store = createStore({
     loadBlogSpace: false,
     shouldResetDimensionsOnLoad: false,
     shouldShowExploreOnLoad: false,
+    isLoadingUserTeamsSpaces: false,
 
     // notifications
     notifications: [],
@@ -401,6 +402,10 @@ const store = createStore({
     shouldShowExploreOnLoad: (state, value) => {
       utils.typeCheck({ value, type: 'boolean' })
       state.shouldShowExploreOnLoad = value
+    },
+    isLoadingUserTeamsSpaces: (state, value) => {
+      utils.typeCheck({ value, type: 'boolean' })
+      state.isLoadingUserTeamsSpaces = value
     },
     addUrlPreviewLoadingForCardIds: (state, cardId) => {
       utils.typeCheck({ value: cardId, type: 'string' })

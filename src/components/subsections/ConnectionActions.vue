@@ -14,7 +14,8 @@ const props = defineProps({
   connections: Array,
   canEditAll: Object,
   backgroundColor: String,
-  label: String
+  label: String,
+  hideType: Boolean
 })
 const emit = defineEmits(['closeDialogs'])
 const state = reactive({
@@ -73,7 +74,7 @@ section.subsection.connection-actions(v-if="visible")
     span {{label}}
   .row.edit-connection-types
     //- Type Color
-    .button-wrap
+    .button-wrap(v-if="!props.hideType")
       button.change-color(:disabled="!canEditAll.connections" @click.left.stop="toggleMultipleConnectionsPickerVisible" :class="{active: state.multipleConnectionsPickerVisible}")
         .segmented-colors.icon
           template(v-for="type in connectionTypes")

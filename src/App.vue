@@ -14,6 +14,7 @@ import ItemsLocked from '@/components/ItemsLocked.vue'
 import UserDetails from '@/components/dialogs/UserDetails.vue'
 import NotificationsWithPosition from '@/components/NotificationsWithPosition.vue'
 import SpaceBackground from '@/components/SpaceBackground.vue'
+import SpaceBackgroundTint from '@/components/SpaceBackgroundTint.vue'
 import OutsideSpaceBackground from '@/components/OutsideSpaceBackground.vue'
 import Preload from '@/components/Preload.vue'
 import utils from '@/utils.js'
@@ -193,6 +194,7 @@ const updateMetaRSSFeed = () => {
   template(v-if="isSpacePage")
     OutsideSpaceBackground
     SpaceBackground
+    SpaceBackgroundTint
     ItemsLocked
     MagicPaint
     //- Presence
@@ -722,6 +724,8 @@ dialog
       user-select text
       &:first-child
         margin-top 0
+  section.title-section
+    border-bottom 1px solid var(--primary-border)
   section.subsection
     background-color var(--secondary-background)
     padding var(--subsection-padding)
@@ -863,10 +867,13 @@ button
 .is-dark-theme
   .icon
     filter invert()
-
 .icon
   user-drag none
   -webkit-user-drag none
+  &.is-background-light
+    filter none
+  &.is-background-dark
+    filter invert(1)
 
 .icon + span,
 .icon + .icon
@@ -970,11 +977,6 @@ li
       background-image url('assets/checkmark.svg')
       background-repeat no-repeat
       background-position center
-    &.add
-      background-image url('assets/add.svg')
-      background-repeat no-repeat
-      background-position center
-      background-size 69%
 
 details
   summary
@@ -1138,7 +1140,6 @@ code
     padding 0px 7px
     vertical-align 0
     margin-right 5px
-    border-radius var(--small-entity-radius)
   &.badge-card-button
     box-shadow none
     text-decoration none
@@ -1239,6 +1240,9 @@ code
 .is-hidden-by-opacity
   opacity 0
   pointer-events none !important
+
+.space-is-hidden
+  opacity 0.5
 
 .fade-out
   opacity 0

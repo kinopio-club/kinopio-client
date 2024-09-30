@@ -6,6 +6,7 @@ import utils from '@/utils.js'
 import TeamLabel from '@/components/TeamLabel.vue'
 import TeamDetails from '@/components/dialogs/TeamDetails.vue'
 import AddTeam from '@/components/dialogs/AddTeam.vue'
+import TeamsBetaInfo from '@/components/TeamsBetaInfo.vue'
 
 import uniqBy from 'lodash-es/uniqBy'
 
@@ -86,6 +87,11 @@ const toggleTeamDetailsIsVisible = (team) => {
     state.teamDetailsIsVisibleForTeamId = team.id
   }
 }
+
+// beta info
+
+const teamBetaMessage = computed(() => 'Only teams beta users can create and manage teams.')
+
 </script>
 
 <template lang="pug">
@@ -102,20 +108,16 @@ dialog.narrow.teams(v-if="visible" :open="visible" @click.left.stop="closeDialog
     p Sign Up or In to create and manage teams
     button(@click.left="triggerSignUpOrInIsVisible") Sign Up or In
   //- team picker
-  section.results-section(v-if="teams.length")
-    ul.results-list
-      template(v-for="team in teams")
-        li(:class="{ active: teamIsVisible(team) }" @click.stop="toggleTeamDetailsIsVisible(team)")
-          TeamLabel(:team="team" :showName="true")
-          TeamDetails(:visible="teamIsVisible(team)" :team="team")
+  template(v-if="teams.length")
+    section.results-section
+      ul.results-list
+        template(v-for="team in teams")
+          li(:class="{ active: teamIsVisible(team) }" @click.stop="toggleTeamDetailsIsVisible(team)")
+            TeamLabel(:team="team" :showName="true")
+            TeamDetails(:visible="teamIsVisible(team)" :team="team")
   //- teams beta notice
-  section(v-else)
-    section.subsection
-      p While teams is in beta, only beta program users can create and manage teams.
-      p
-        img.icon(src="@/assets/mail.svg")
-        span Interested in trying teams in your company? Email&nbsp;
-        a(href="mailto:support@kinopio.club?subject=Kinopio Teams Beta") support@kinopio.club
+  template(v-else)
+    TeamsBetaInfo(:message="teamBetaMessage")
 </template>
 
 <style lang="stylus">

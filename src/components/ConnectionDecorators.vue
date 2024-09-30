@@ -153,7 +153,4 @@ button
     &.reverse,
     &.connection-path
       vertical-align 0
-.subsection
-  .button-wrap
-    margin-bottom 4px !important
 </style>

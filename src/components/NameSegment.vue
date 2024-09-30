@@ -51,11 +51,11 @@ const nameSegmentClasses = computed(() => {
 const smartQuotes = (string) => {
   return smartquotes(string)
 }
-const textColorClasses = computed(() => {
-  return utils.textColorClasses({ backgroundColorIsDark: props.backgroundColorIsDark })
+const colorClasses = computed(() => {
+  return utils.colorClasses({ backgroundColorIsDark: props.backgroundColorIsDark })
 })
 const textClasses = computed(() => {
-  let classes = textColorClasses.value
+  let classes = colorClasses.value
   classes.strikethrough = props.isStrikeThrough
   return classes
 })
@@ -140,7 +140,7 @@ const showTagDetailsIsVisible = (event, tag) => {
 span.name-segment(:data-segment-types="dataMarkdownType" :data-tag-color="dataTagColor" :data-tag-name="dataTagName" :class="nameSegmentClasses")
   template(v-if="props.segment.isText && props.segment.content")
     //- Name markdown
-    span.markdown(v-if="props.segment.markdown" :class="textColorClasses")
+    span.markdown(v-if="props.segment.markdown" :class="colorClasses")
       template(v-for="markdown in props.segment.markdown")
         template(v-if="markdown.type === 'text'")
           span {{smartQuotes(markdown.content)}}

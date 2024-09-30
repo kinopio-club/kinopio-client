@@ -190,6 +190,7 @@ const signUp = async (event) => {
   if (isSuccess(response)) {
     store.commit('clearAllNotifications', false)
     store.commit('currentUser/replaceState', newUser)
+    createSpacesBackup()
     migrationSpacesConnections()
     updateSpacesUserId()
     updateCurrentSpaceWithNewUserId(currentUser, newUser)
@@ -197,7 +198,6 @@ const signUp = async (event) => {
     notifySignedIn()
     store.dispatch('currentUser/checkIfShouldJoinTeam')
     addCollaboratorToInvitedSpaces()
-    const currentSpace = store.state.currentSpace
     store.commit('triggerUpdateWindowHistory')
     store.dispatch('themes/restore')
   } else {
@@ -264,6 +264,10 @@ const notifySignedIn = () => {
 
 // update spaces on success
 
+const createSpacesBackup = () => {
+  const spaces = cache.getAllSpaces()
+  cache.storeLocal('spacesBackup', spaces)
+}
 const migrationSpacesConnections = () => {
   const spaces = cache.getAllSpaces()
   const newSpaces = spaces.map(space => {

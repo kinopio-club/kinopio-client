@@ -7,6 +7,7 @@ import MoveOrCopyItems from '@/components/dialogs/MoveOrCopyItems.vue'
 import CardOrBoxActions from '@/components/subsections/CardOrBoxActions.vue'
 import ConnectionActions from '@/components/subsections/ConnectionActions.vue'
 import AlignAndDistribute from '@/components/AlignAndDistribute.vue'
+import ItemCheckboxButton from '@/components/ItemCheckboxButton.vue'
 import ShareCard from '@/components/dialogs/ShareCard.vue'
 
 import { nanoid } from 'nanoid'
@@ -23,8 +24,6 @@ const state = reactive({
   copyItemsIsVisible: false,
   moveItemsIsVisible: false,
   cardsIsConnected: false,
-  cardsHaveCheckboxes: false,
-  cardsCheckboxIsChecked: false,
   shareCardIsVisible: false
 })
 
@@ -44,8 +43,6 @@ const visible = computed(() => {
 })
 watch(() => visible.value, async (value, prevValue) => {
   if (value) {
-    checkCardsHaveCheckboxes()
-    checkCardsCheckboxIsChecked()
     await nextTick()
     store.commit('pinchCounterZoomDecimal', utils.pinchCounterZoomDecimal())
     checkIsCardsConnected()
@@ -186,60 +183,6 @@ const editableCards = computed(() => {
     })
   }
 })
-const updateDimensionsAndPaths = async () => {
-  store.dispatch('currentCards/updateDimensions', { cards: cards.value })
-  await nextTick()
-  await nextTick()
-  store.dispatch('currentConnections/updateMultiplePaths', cards.value)
-}
-
-// card checkboxes
-
-const cardCheckboxes = computed({
-  get () {
-    return state.cardsCheckboxIsChecked
-  },
-  set (value) {
-    if (state.cardsCheckboxIsChecked) {
-      cards.value.forEach(card => {
-        store.dispatch('currentCards/removeChecked', card.id)
-      })
-    } else {
-      cards.value.forEach(card => {
-        store.dispatch('currentCards/toggleChecked', { cardId: card.id, value })
-      })
-    }
-    checkCardsHaveCheckboxes()
-    checkCardsCheckboxIsChecked()
-    updateDimensionsAndPaths()
-  }
-})
-const checkCardsHaveCheckboxes = () => {
-  const cardsWithCheckboxes = cards.value.filter(card => {
-    if (!card) { return }
-    return utils.checkboxFromString(card.name)
-  })
-  state.cardsHaveCheckboxes = cardsWithCheckboxes.length === cards.value.length
-}
-const checkCardsCheckboxIsChecked = () => {
-  const cardsChecked = cards.value.filter(card => utils.nameIsChecked(card.name))
-  state.cardsCheckboxIsChecked = cardsChecked.length === cards.value.length
-}
-const addCheckboxToCards = async () => {
-  let updatedCards = []
-  cards.value.forEach(card => {
-    if (!utils.checkboxFromString(card.name)) {
-      const update = {
-        id: card.id,
-        name: `[] ${card.name}`
-      }
-      updatedCards.push(update)
-    }
-  })
-  store.dispatch('currentCards/updateMultiple', updatedCards)
-  state.cardsHaveCheckboxes = true
-  updateDimensionsAndPaths()
-}
 
 // connect cards
 
@@ -520,25 +463,20 @@ dialog.narrow.multiple-selected-actions(
 )
   .dark-theme-background-layer(v-if="isThemeDarkAndUserColorLight")
   section
-    //- Edit Cards
-    .row(v-if="cardsIsSelected")
-      //- [·]
-      .button-wrap.cards-checkboxes(:class="{ disabled: !canEditAll.cards }" title="Card Checkboxes")
-        label.fixed-height(v-if="state.cardsHaveCheckboxes" :class="{active: state.cardsCheckboxIsChecked}" tabindex="0")
-          input(type="checkbox" v-model="cardCheckboxes" tabindex="-1")
-        label(v-if="!state.cardsHaveCheckboxes" @click.left.prevent="addCheckboxToCards" @keydown.stop.enter="addCheckboxToCards" tabindex="0")
-          input.add(type="checkbox" tabindex="-1")
-      //- Connect
-      button(v-if="multipleCardsIsSelected" :class="{active: state.cardsIsConnected}" @click.left.prevent="toggleConnectCards" @keydown.stop.enter="toggleConnectCards" :disabled="!canEditAll.cards" title="Connect/Disconnect Cards")
-        img.connector-icon.icon(src="@/assets/connector-closed.svg" v-if="state.cardsIsConnected")
-        img.connector-icon.icon(src="@/assets/connector-open.svg" v-else)
-        span Connect
-      //- Share Card
-      //- .button-wrap(v-if="oneCardIsSelected" @click.left.stop="toggleShareCardIsVisible")
-      //-   button(:class="{active: state.shareCardIsVisible}")
-      //-     span Share
-      //-   ShareCard(:visible="state.shareCardIsVisible" :card="cards[0]")
 
+    //- Edit Cards
+    .row
+      //- Remove
+      button.danger(:disabled="!canEditAll.all" @click.left="remove")
+        img.icon(src="@/assets/remove.svg")
+      template(v-if="cardOrBoxIsSelected")
+        //- [·]
+        ItemCheckboxButton(:boxes="boxes" :cards="cards" :isDisabled="!canEditAll.cards && !canEditAll.boxes")
+        //- Connect
+        button(v-if="multipleCardsIsSelected" :class="{active: state.cardsIsConnected}" @click.left.prevent="toggleConnectCards" @keydown.stop.enter="toggleConnectCards" :disabled="!canEditAll.cards" title="Connect/Disconnect Cards")
+          img.connect-items.icon(src="@/assets/connect-items.svg")
+          //- img.connector-icon.icon(src="@/assets/connector-open.svg" v-else)
+          //- span Connect
       //- LINE Options
       .button-wrap(v-if="connectionsIsSelected && !onlyConnectionsIsSelected")
         button(:disabled="!canEditAll.cards && !canEditAll.boxes" @click.left.stop="toggleShouldShowMultipleSelectedLineActions" :class="{active : shouldShowMultipleSelectedLineActions}" title="More Line Options")
@@ -548,28 +486,24 @@ dialog.narrow.multiple-selected-actions(
     CardOrBoxActions(:visible="cardsIsSelected || boxesIsSelected" :cards="cards" :boxes="boxes" @closeDialogs="closeDialogs" :class="{ 'last-row': !connectionsIsSelected }" :backgroundColor="userColor")
     ConnectionActions(:visible="(shouldShowMultipleSelectedLineActions || onlyConnectionsIsSelected) && connectionsIsSelected" :connections="editableConnections" @closeDialogs="closeDialogs" :canEditAll="canEditAll" :backgroundColor="userColor" :label="moreLineOptionsLabel")
 
-  section
-    template(v-if="cardOrBoxIsSelected")
-      .row
-        //- Align And Distribute
-        AlignAndDistribute(:visible="multipleCardOrBoxesIsSelected" :shouldHideMoreOptions="true" :shouldDistributeWithAlign="true" :numberOfSelectedItemsCreatedByCurrentUser="numberOfSelectedItemsCreatedByCurrentUser" :canEditAll="canEditAll" :cards="cards" :editableCards="cards" :connections="connections" :boxes="boxes" :editableBoxes="editableBoxes")
-        //- Move/Copy
-        .segmented-buttons.move-or-copy-wrap
-          button(@click.left.stop="toggleCopyItemsIsVisible" :class="{ active: state.copyItemsIsVisible }")
-            span Copy
-            MoveOrCopyItems(:visible="state.copyItemsIsVisible" :actionIsMove="false")
-          button(@click.left.stop="toggleMoveItemsIsVisible" :class="{ active: state.moveItemsIsVisible }" :disabled="!canEditAll.cards")
-            span Move
-            MoveOrCopyItems(:visible="state.moveItemsIsVisible" :actionIsMove="true")
-      //- More Options
-      AlignAndDistribute(:visible="multipleCardOrBoxesIsSelected && moreOptionsIsVisible" :numberOfSelectedItemsCreatedByCurrentUser="numberOfSelectedItemsCreatedByCurrentUser" :canEditAll="canEditAll" :cards="cards" :editableCards="cards" :connections="connections" :boxes="boxes" :editableBoxes="editableBoxes")
-
+  section(v-if="cardOrBoxIsSelected")
     .row
-      //- Remove
-      button.danger(:disabled="!canEditAll.all" @click.left="remove")
-        img.icon(src="@/assets/remove.svg")
+      //- Align And Distribute
+      AlignAndDistribute(:visible="multipleCardOrBoxesIsSelected" :shouldHideMoreOptions="true" :shouldDistributeWithAlign="true" :numberOfSelectedItemsCreatedByCurrentUser="numberOfSelectedItemsCreatedByCurrentUser" :canEditAll="canEditAll" :cards="cards" :editableCards="cards" :connections="connections" :boxes="boxes" :editableBoxes="editableBoxes")
+      //- Move/Copy
+      .segmented-buttons.move-or-copy-wrap
+        button(@click.left.stop="toggleCopyItemsIsVisible" :class="{ active: state.copyItemsIsVisible }")
+          span Copy
+          MoveOrCopyItems(:visible="state.copyItemsIsVisible" :actionIsMove="false")
+        button(@click.left.stop="toggleMoveItemsIsVisible" :class="{ active: state.moveItemsIsVisible }" :disabled="!canEditAll.cards")
+          span Move
+          MoveOrCopyItems(:visible="state.moveItemsIsVisible" :actionIsMove="true")
+    //- More Options
+    AlignAndDistribute(:visible="multipleCardOrBoxesIsSelected && moreOptionsIsVisible" :numberOfSelectedItemsCreatedByCurrentUser="numberOfSelectedItemsCreatedByCurrentUser" :canEditAll="canEditAll" :cards="cards" :editableCards="cards" :connections="connections" :boxes="boxes" :editableBoxes="editableBoxes")
+
+    .row(v-if="multipleCardsIsSelected")
       //- Merge
-      button(v-if="multipleCardsIsSelected" @click="mergeSelectedCards" :disabled="!canEditAll.cards")
+      button(@click="mergeSelectedCards" :disabled="!canEditAll.cards")
         img.icon(src="@/assets/merge.svg")
         span Merge
       //- Split
@@ -599,7 +533,7 @@ dialog.narrow.multiple-selected-actions(
         border-top-right-radius var(--small-entity-radius)
         border-bottom-right-radius var(--small-entity-radius)
         margin-right 0
-  .cards-checkboxes
+  .items-checkboxes
     input
       margin 0
     vertical-align 1px
@@ -631,4 +565,8 @@ dialog.narrow.multiple-selected-actions(
 
   .segmented-buttons + .segmented-buttons
     margin-left 0
+
+  .icon.connect-items
+    height 12px
+    vertical-align -1px
 </style>

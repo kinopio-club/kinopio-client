@@ -1,0 +1,59 @@
+<script setup>
+import { reactive, computed, onMounted, onBeforeUnmount, defineProps, defineEmits, watch, ref, nextTick } from 'vue'
+import { useStore } from 'vuex'
+
+import postMessage from '@/postMessage.js'
+import utils from '@/utils.js'
+
+import { colord, extend } from 'colord'
+
+const store = useStore()
+
+const visible = computed(() => store.getters.isSpacePage)
+const isThemeDark = computed(() => store.getters['themes/isThemeDark'])
+const currentSpace = computed(() => store.state.currentSpace)
+
+// tint
+
+const backgroundTint = computed(() => {
+  let color = currentSpace.value.backgroundTint || 'white'
+  if (isThemeDark.value) {
+    const darkness = 0.5
+    color = colord(color).darken(darkness).toRgbString()
+  } else {
+    color = colord(color).toRgbString()
+  }
+  postMessage.send({ name: 'setBackgroundTintColor', value: color })
+  return color
+})
+
+// styles
+
+const spaceShouldHaveBorderRadius = computed(() => store.getters.spaceShouldHaveBorderRadius)
+const spaceZoomDecimal = computed(() => store.getters.spaceZoomDecimal)
+const pageHeight = computed(() => store.state.pageHeight)
+const pageWidth = computed(() => store.state.pageWidth)
+const styles = computed(() => {
+  const zoom = 1 / spaceZoomDecimal.value
+  return {
+    width: `${pageWidth.value}px`,
+    height: `${pageHeight.value}px`,
+    transform: store.getters.zoomTransform,
+    background: backgroundTint.value
+  }
+})
+
+</script>
+
+<template lang="pug">
+.space-background-tint(v-if="visible" :style="styles" :class="{'space-border-radius': spaceShouldHaveBorderRadius}")
+</template>
+
+<style lang="stylus">
+.space-background-tint
+  position absolute
+  pointer-events none
+  z-index 0
+  mix-blend-mode multiply
+  transform-origin top left
+</style>
