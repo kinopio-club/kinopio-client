@@ -118,12 +118,8 @@ const selectName = () => {
   const currentBoxIsNew = store.state.currentBoxIsNew
   const element = nameElement.value
   const length = name.value.length
-  let start = length
-  if (currentBoxIsNew) {
-    start = 0
-  }
   if (length && element) {
-    element.setSelectionRange(start, length)
+    element.setSelectionRange(0, length)
   }
   store.commit('currentBoxIsNew', false)
 }
