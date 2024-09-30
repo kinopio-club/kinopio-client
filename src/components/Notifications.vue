@@ -186,7 +186,6 @@ const latestChangelogPost = computed(() => {
 })
 const changeSpaceToChangelog = () => {
   const space = { id: consts.changelogSpaceId() }
-  console.log(space)
   store.dispatch('currentSpace/changeSpace', space)
   store.commit('addNotification', { message: 'Changelog space opened', type: 'success' })
 }
