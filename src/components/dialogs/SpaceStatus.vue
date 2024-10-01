@@ -27,7 +27,9 @@ const isLoadingSpace = computed(() => store.state.isLoadingSpace)
 const isLoadingOtherItems = computed(() => store.state.isLoadingOtherItems)
 const isJoiningSpace = computed(() => store.state.isJoiningSpace)
 const isReconnectingToBroadcast = computed(() => store.state.isReconnectingToBroadcast)
-const isConnected = computed(() => !isLoadingSpace.value && !isJoiningSpace.value && !isReconnectingToBroadcast.value)
+const isConnected = computed(() => !isLoadingSpace.value && !isJoiningSpace.value && !isReconnectingToBroadcast.value && !isSaving.value)
+// const sendingInProgressQueue = computed(() => store.state.sendingInProgressQueue)
+const isSaving = computed(() => Boolean(store.state.sendingInProgressQueue.length))
 
 const refreshBrowser = () => {
   window.location.reload()
@@ -42,6 +44,7 @@ dialog.narrow.space-status(v-if="visible" :open="visible" ref="dialog")
       span(v-if="isLoadingSpace || isLoadingOtherItems") Downloading
       span(v-else-if="isJoiningSpace") Connecting to Broadcast
       span(v-else-if="isReconnectingToBroadcast") Reconnecting
+      span(v-else-if="isSaving") Saving
     p.badge.success(v-if="isConnected") Connected
 
   template(v-if="!isConnected")
@@ -53,14 +56,16 @@ dialog.narrow.space-status(v-if="visible" :open="visible" ref="dialog")
         span.badge.info You can edit right now
         span {{' '}}
         span but cannot collaborate yet, your changes will sync once connected
-      .button-wrap
-        button(@click.left="refreshBrowser")
-          img.icon(src="@/assets/refresh.svg")
-          span Refresh
+      //- .button-wrap
+      //-   button(@click.left="refreshBrowser")
+      //-     img.icon(src="@/assets/refresh.svg")
+      //-     span Refresh
+      p(v-if="isSaving")
+        span Every change that you make is automatically saved
 </template>
 
 <style lang="stylus">
-.space-status
+dialog.space-status
   @media(max-width 414px)
     left -60px
   .badge
@@ -71,4 +76,6 @@ dialog.narrow.space-status(v-if="visible" :open="visible" ref="dialog")
     height 14px
     vertical-align -3px
     margin-right 6px
+  .loader + span
+    margin-left 2px
 </style>

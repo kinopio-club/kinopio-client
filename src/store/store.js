@@ -263,6 +263,7 @@ const store = createStore({
     otherUsers: [], // { id, name color }
     otherItems: { spaces: [], cards: [] },
     otherTags: [],
+    sendingInProgressQueue: [],
 
     // codeblocks
     codeLanguagePickerIsVisible: false,
@@ -1642,6 +1643,18 @@ const store = createStore({
       state.otherTags = remoteTags
     },
 
+    // Sync Session Data
+
+    sendingInProgressQueue: (state, value) => {
+      utils.typeCheck({ value, type: 'array' })
+      state.sendingInProgressQueue = value
+      cache.saveSendingInProgressQueue(value)
+    },
+    clearSendingInProgressQueue: (state) => {
+      state.sendingInProgressQueue = []
+      cache.clearSendingInProgressQueue()
+    },
+
     // Code Blocks
 
     codeLanguagePickerIsVisible: (state, value) => {
@@ -1660,6 +1673,13 @@ const store = createStore({
   },
 
   actions: {
+    removeSendingInProgressQueueOperationById: (context, operationId) => {
+      let operations = context.state.sendingInProgressQueue
+      const prevOperationsLength = operations.length
+      const queue = operations.filter(operation => operation.body.operationId !== operationId)
+      if (queue.length === prevOperationsLength) { return }
+      context.commit('sendingInProgressQueue', queue)
+    },
     prevSpaceIdInSession: (context, id) => {
       utils.typeCheck({ value: id, type: 'string' })
       const position = {

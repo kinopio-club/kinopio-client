@@ -196,7 +196,7 @@ const currentSpaceName = computed(() => {
 const spaceTeam = computed(() => store.getters['teams/spaceTeam']())
 const spaceHasStatus = computed(() => {
   if (!isOnline.value) { return }
-  return store.state.isLoadingSpace || store.state.isJoiningSpace || store.state.isReconnectingToBroadcast || store.state.isLoadingOtherItems
+  return Boolean(store.state.isLoadingSpace || store.state.isJoiningSpace || store.state.isReconnectingToBroadcast || store.state.isLoadingOtherItems || store.state.sendingInProgressQueue.length)
 })
 const spaceHasStatusAndStatusDialogIsNotVisible = computed(() => {
   if (spaceHasStatus.value) {
@@ -687,7 +687,7 @@ header(v-if="isVisible" :style="state.position" :class="{'fade-out': isFadingOut
               //- Loading State
               .button-wrap.space-status-button-wrap(v-if="spaceHasStatusAndStatusDialogIsNotVisible")
                 button.small-button(@click.left.stop="toggleSpaceStatusIsVisible" :class="{active: state.spaceStatusIsVisible, 'translucent-button': !shouldIncreaseUIContrast}")
-                  Loader(:visible="spaceHasStatus")
+                  Loader(:visible="spaceHasStatus" :isStatic="true")
                   .badge.success.space-status-success(v-if="!spaceHasStatus")
                 SpaceStatus(:visible="state.spaceStatusIsVisible")
             //- favorite
