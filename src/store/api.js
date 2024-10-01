@@ -154,11 +154,11 @@ const self = {
       const data = await response.json()
       const operations = data.operations
       console.warn('🚑 serverOperationsError', data)
-      const nonErrorStatusCodes = [400, 401, 404, 422]
+      const nonCriticalErrorStatusCodes = [400, 401, 404, 422]
       operations.forEach(operation => {
         const error = operation.error
         if (!error) { return }
-        const isCritical = !nonErrorStatusCodes.includes(error.status)
+        const isCritical = !nonCriticalErrorStatusCodes.includes(error.status)
         if (isCritical) {
           console.error('🚒 critical serverOperationsError operation', operation)
           context.commit('notifyServerCouldNotSave', true, { root: true })
