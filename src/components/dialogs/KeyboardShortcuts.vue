@@ -112,9 +112,9 @@ dialog.keyboard-shortcuts(v-if="visible" :open="visible" @click.left.stop ref="d
             .checkbox-wrap(title="Uncheck to disable N shortcut")
               label(:class="{active: checkboxStateNewSpace }")
                 input(name="checkbox" type="checkbox" v-model="checkboxStateNewSpace")
-            img.icon(src="@/assets/add.svg")
-            span New Space
-          .badge.keyboard-shortcut N
+            img.icon(src="@/assets/add.svg" :class="{'is-disabled': !isChecked('newSpace')}")
+            span(:class="{'is-disabled': !isChecked('newSpace')}") New Space
+          .badge.keyboard-shortcut(:class="{'is-disabled': !isChecked('newSpace')}") N
       article
         .row
           .badge.title
@@ -422,4 +422,7 @@ dialog.keyboard-shortcuts(v-if="visible" :open="visible" @click.left.stop ref="d
       padding 0
       padding-left 5px
     margin-right 6px
+
+  .is-disabled
+    opacity 0.5
 </style>
