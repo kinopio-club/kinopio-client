@@ -39,29 +39,31 @@ const refreshBrowser = () => {
 <template lang="pug">
 dialog.narrow.space-status(v-if="visible" :open="visible" ref="dialog")
   section
-    p(v-if="!isConnected")
-      Loader(:visible="true")
-      span(v-if="isLoadingSpace || isLoadingOtherItems") Downloading
-      span(v-else-if="isJoiningSpace") Connecting to Broadcast
-      span(v-else-if="isReconnectingToBroadcast") Reconnecting
-      span(v-else-if="isSaving") Saving
-    p.badge.success(v-if="isConnected") Connected
+    .row.title-row
+      div(v-if="isConnected")
+        .badge.success Connected
+      div(v-else)
+        Loader(:visible="true")
+        span(v-if="isLoadingSpace || isLoadingOtherItems") Downloading
+        span(v-else-if="isJoiningSpace") Connecting to Broadcast
+        span(v-else-if="isReconnectingToBroadcast") Reconnecting
+        span(v-else-if="isSaving") Saving
+      .button-wrap
+        button.small-button(@click.left="refreshBrowser" title="Refresh browser")
+          img.icon(src="@/assets/refresh.svg")
 
-  template(v-if="!isConnected")
-    section
-      p(v-if="(isLoadingSpace || isLoadingOtherItems) && state.spaceIsCached")
-        span.badge.info You can edit right now
-        span and your changes will sync once connected
-      p(v-else-if="isJoiningSpace || isReconnectingToBroadcast")
-        span.badge.info You can edit right now
-        span {{' '}}
-        span but cannot collaborate yet, your changes will sync once connected
-      //- .button-wrap
-      //-   button(@click.left="refreshBrowser")
-      //-     img.icon(src="@/assets/refresh.svg")
-      //-     span Refresh
-      p(v-if="isSaving")
-        span Every change that you make is automatically saved
+  section(v-if="isConnected")
+    p All changes saved
+  section(v-else)
+    p(v-if="(isLoadingSpace || isLoadingOtherItems) && state.spaceIsCached")
+      span.badge.info You can edit right now
+      span and your changes will sync once connected
+    p(v-else-if="isJoiningSpace || isReconnectingToBroadcast")
+      span.badge.info You can edit right now
+      span {{' '}}
+      span but cannot collaborate yet, your changes will sync once connected
+    p(v-else-if="isSaving")
+      span Every change that you make is automatically saved
 </template>
 
 <style lang="stylus">

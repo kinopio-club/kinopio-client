@@ -922,8 +922,8 @@ header
     vertical-align -1px
 
   .badge.space-status-success
-    width 16px
-    height 16px
+    width 14px
+    height 14px
     border-radius 10px
     vertical-align 0
     margin 2px 2px
