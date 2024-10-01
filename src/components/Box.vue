@@ -792,7 +792,7 @@ const checkboxState = computed({
 })
 const toggleBoxChecked = () => {
   if (store.state.preventDraggedBoxFromShowingDetails) { return }
-  if (!canEditSpace.value) { return }
+  if (!canEditBox.value) { return }
   const value = !isChecked.value
   store.dispatch('closeAllDialogs')
   store.dispatch('currentBoxes/toggleChecked', { boxId: props.box.id, value })
@@ -871,7 +871,7 @@ const isInCheckedBox = computed(() => {
     .locking-frame(v-if="state.isLocking" :style="lockingFrameStyle")
     //- [·]
     .checkbox-wrap(v-if="hasCheckbox" @mouseup.left="toggleBoxChecked" @touchend.prevent="toggleBoxChecked")
-      label(:class="{active: isChecked, disabled: !canEditSpace}")
+      label(:class="{active: isChecked, disabled: !canEditBox}")
         input(name="checkbox" type="checkbox" v-model="checkboxState")
     .name-wrap(:class="{'is-checked': isChecked}")
       template(v-if="isH1")
