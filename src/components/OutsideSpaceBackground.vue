@@ -77,6 +77,7 @@ const cancel = () => {
 const spaceZoomDecimal = computed(() => store.getters.spaceZoomDecimal)
 const outsideSpaceBackgroundIsStatic = computed(() => store.state.currentUser.outsideSpaceBackgroundIsStatic)
 const backgroundTintColor = computed(() => store.state.currentSpace.backgroundTint)
+const isThemeDark = computed(() => store.getters['themes/isThemeDark'])
 
 // update color
 
@@ -97,10 +98,18 @@ const updateBackgroundColor = () => {
   if (outsideSpaceBackgroundIsStatic.value) {
     backgroundColor = utils.cssVariable('secondary-active-background')
   }
+  // darken
+  let darkness = 0.6
+  if (isThemeDark.value) {
+    darkness = 0.8
+  }
+  backgroundColor = colord(backgroundColor).darken(darkness)
+  // mix in tint color
   if (backgroundTintColor.value) {
     let tint = backgroundTintColor.value
     backgroundColor = colord(backgroundColor).mix(tint, 0.5).toHex()
   }
+  // save color
   store.commit('outsideSpaceBackgroundColor', backgroundColor)
   updateMetaThemeColor(backgroundColor)
   // update canvas bk
