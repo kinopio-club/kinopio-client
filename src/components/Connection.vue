@@ -62,7 +62,7 @@ watch(() => props.connection.path, (value, prevValue) => {
 const visible = computed(() => {
   if (props.isRemote) { return true }
   if (!state.isVisibleInViewport) { return }
-  return items.value.startCard && items.value.endCard
+  return items.value.startItem && items.value.endItem
 })
 const isSpaceMember = computed(() => store.getters['currentUser/isSpaceMember']())
 const canEditSpace = computed(() => store.getters['currentUser/canEditSpace']())
@@ -129,14 +129,14 @@ const items = computed(() => {
   const cards = store.getters['currentCards/all']
   const boxes = store.getters['currentBoxes/all']
   const items = cards.concat(boxes)
-  const startCard = items.find(item => item.id === props.connection.startItemId)
-  const endCard = items.find(item => item.id === props.connection.endItemId)
-  return { startCard, endCard }
+  const startItem = items.find(item => item.id === props.connection.startItemId)
+  const endItem = items.find(item => item.id === props.connection.endItemId)
+  return { startItem, endItem }
 })
 const isConnectedToCommentCard = computed(() => {
-  const { startCard, endCard } = items.value
-  if (!startCard || !endCard) { return }
-  return startCard.isComment || endCard.isComment
+  const { startItem, endItem } = items.value
+  if (!startItem || !endItem) { return }
+  return startItem.isComment || endItem.isComment
 })
 const isConnectedToMultipleCardsSelected = computed(() => {
   const cardIds = store.state.multipleCardsSelectedIds
@@ -227,11 +227,12 @@ const isDraggingCurrentConnectionLabel = computed(() => {
 const isHiddenByCommentFilter = computed(() => {
   const filterCommentsIsActive = store.state.currentUser.filterComments
   if (!filterCommentsIsActive) { return }
-  const startCard = items.value.startCard
-  const endCard = items.value.endCard
-  const startCardIsComment = startCard.isComment || utils.isNameComment(startCard.name)
-  const endCardIsComment = startCard.isComment || utils.isNameComment(endCard.name)
-  return startCardIsComment || endCardIsComment
+  const startItem = items.value.startItem
+  const endItem = items.value.endItem
+  if (!startItem || !endItem) { return }
+  const startItemIsComment = startItem.isComment || utils.isNameComment(startItem.name)
+  const endItemIsComment = startItem.isComment || utils.isNameComment(endItem.name)
+  return startItemIsComment || endItemIsComment || isConnectedToCommentCard.value
 })
 const filtersIsActive = computed(() => {
   const types = store.state.filteredConnectionTypeIds
@@ -241,11 +242,11 @@ const filtersIsActive = computed(() => {
 })
 const isCardsFilteredByFrame = computed(() => {
   const frameIds = store.state.filteredFrameIds
-  const startCard = items.value.startCard
-  const endCard = items.value.endCard
-  const startCardInFilter = frameIds.includes(startCard.frameId)
-  const endCardInFilter = frameIds.includes(endCard.frameId)
-  return startCardInFilter || endCardInFilter
+  const startItem = items.value.startItem
+  const endItem = items.value.endItem
+  const startItemInFilter = frameIds.includes(startItem.frameId)
+  const endItemInFilter = frameIds.includes(endItem.frameId)
+  return startItemInFilter || endItemInFilter
 })
 const isConnectionFilteredByType = computed(() => {
   const typeIds = store.state.filteredConnectionTypeIds

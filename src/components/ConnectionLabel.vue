@@ -107,6 +107,14 @@ const toggleConnectionDetails = (event) => {
     })
   }
 }
+const items = computed(() => {
+  const cards = store.getters['currentCards/all']
+  const boxes = store.getters['currentBoxes/all']
+  const items = cards.concat(boxes)
+  const startItem = items.find(item => item.id === props.connection.startItemId)
+  const endItem = items.find(item => item.id === props.connection.endItemId)
+  return { startItem, endItem }
+})
 
 // visible
 
@@ -145,6 +153,16 @@ const isFiltered = computed(() => {
       return true
     }
   } else { return false }
+})
+const isHiddenByCommentFilter = computed(() => {
+  const filterCommentsIsActive = store.state.currentUser.filterComments
+  if (!filterCommentsIsActive) { return }
+  const startItem = items.value.startItem
+  const endItem = items.value.endItem
+  if (!startItem || !endItem) { return }
+  const startItemIsComment = startItem.isComment || utils.isNameComment(startItem.name)
+  const endItemIsComment = startItem.isComment || utils.isNameComment(endItem.name)
+  return startItemIsComment || endItemIsComment
 })
 
 // parent connection type
@@ -448,7 +466,12 @@ const boundaryBottomIsVisible = computed(() => labelRelativePosition.value.y >= 
 </script>
 
 <template lang="pug">
-.connection-label-wrap(v-if="visible" :style="connectionLabelWrapStyles")
+.connection-label-wrap(
+  v-if="visible"
+  :style="connectionLabelWrapStyles"
+  :class="{'is-hidden-by-opacity': isHiddenByCommentFilter}"
+  :data-is-hidden-by-comment-filter="isHiddenByCommentFilter"
+)
   .connection-label.badge(
     :data-id="id"
     :data-label-offset-x="labelRelativePosition.x"
