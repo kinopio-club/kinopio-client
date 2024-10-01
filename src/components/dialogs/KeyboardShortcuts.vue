@@ -4,6 +4,7 @@ import { useStore } from 'vuex'
 
 import UserLabelInline from '@/components/UserLabelInline.vue'
 import keyboardShortcutsCategories from '@/data/keyboardShortcutsCategories.js'
+import postMessage from '@/postMessage.js'
 import utils from '@/utils.js'
 
 const store = useStore()
@@ -63,6 +64,31 @@ const closeDialogs = () => {
   // this.keyboardShortcutsCategoriesIsVisible = false
 }
 
+// [.] disable checkboxes
+
+const checkboxStateNewSpace = computed({
+  get () {
+    return isChecked('newSpace')
+  },
+  set () {
+    toggleChecked('newSpace')
+  }
+})
+const isChecked = (value) => {
+  const disabledKeyboardShortcuts = store.state.currentUser.disabledKeyboardShortcuts
+  const isEnabled = !disabledKeyboardShortcuts.includes(value)
+  return isEnabled
+}
+const toggleChecked = (name) => {
+  const prevValue = isChecked(name)
+  if (prevValue) {
+    store.commit('currentUser/addToDisabledKeyboardShortcuts', name)
+  } else {
+    store.commit('currentUser/removeFromDisabledKeyboardShortcuts', name)
+  }
+  postMessage.sendHaptics({ name: 'heavyImpact' })
+  event.stopPropagation()
+}
 </script>
 
 <template lang="pug">
@@ -82,9 +108,13 @@ dialog.keyboard-shortcuts(v-if="visible" :open="visible" @click.left.stop ref="d
       article
         .row
           .badge.title
-            img.icon(src="@/assets/add.svg")
-            span New Space
-          .badge.keyboard-shortcut N
+            //- [.]
+            .checkbox-wrap(title="Uncheck to disable N shortcut")
+              label(:class="{active: checkboxStateNewSpace }")
+                input(name="checkbox" type="checkbox" v-model="checkboxStateNewSpace")
+            img.icon(src="@/assets/add.svg" :class="{'is-disabled': !isChecked('newSpace')}")
+            span(:class="{'is-disabled': !isChecked('newSpace')}") New Space
+          .badge.keyboard-shortcut(:class="{'is-disabled': !isChecked('newSpace')}") N
       article
         .row
           .badge.title
@@ -385,4 +415,14 @@ dialog.keyboard-shortcuts(v-if="visible" :open="visible" @click.left.stop ref="d
   .icon.presentation
     width 12px
     vertical-align -1px
+
+  .checkbox-wrap
+    display inline-block
+    label
+      padding 0
+      padding-left 5px
+    margin-right 6px
+
+  .is-disabled
+    opacity 0.5
 </style>

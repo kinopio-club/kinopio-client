@@ -184,6 +184,11 @@ const changelogIsUpdated = computed(() => {
 const latestChangelogPost = computed(() => {
   return store.state.changelog[0]
 })
+const changeSpaceToChangelog = () => {
+  const space = { id: consts.changelogSpaceId() }
+  store.dispatch('currentSpace/changeSpace', space)
+  store.commit('addNotification', { message: 'Changelog space opened', type: 'success' })
+}
 
 // toggle notifications
 
@@ -427,6 +432,10 @@ aside.notifications(@click.left="closeAllDialogs")
     .row
       span.badge.secondary {{latestChangelogPost.title}}
     .row
+      .button-wrap
+        a(href="/changelog")
+          button(@click.left.stop.prevent="changeSpaceToChangelog")
+            span Changelog
       .button-wrap
         button(@click.left="updateChangelogAndRefreshBrowser")
           //- TODO update changelog and refresh browser
