@@ -238,7 +238,7 @@ const checkboxState = computed({
 const toggleCardChecked = () => {
   if (store.state.currentUserIsDraggingConnectionIdLabel) { return }
   if (store.state.preventDraggedCardFromShowingDetails) { return }
-  if (!canEditSpace.value) { return }
+  if (!canEditCard.value) { return }
   const value = !isChecked.value
   store.dispatch('closeAllDialogs')
   store.dispatch('currentCards/toggleChecked', { cardId: props.card.id, value })
@@ -1864,7 +1864,7 @@ article.card-wrap#card(
       .card-comment(v-if="isComment")
         //- [·]
         .checkbox-wrap(v-if="hasCheckbox" @mouseup.left="toggleCardChecked" @touchend.prevent="toggleCardChecked" @mouseenter="handleMouseEnterCheckbox" @mouseleave="handleMouseLeaveCheckbox")
-          label(:class="{active: isChecked, disabled: !canEditSpace}")
+          label(:class="{active: isChecked, disabled: !canEditCard}")
             input(name="checkbox" type="checkbox" v-model="checkboxState")
         //- Name
         .badge.comment-badge(:class="{'is-light-in-dark-theme': isLightInDarkTheme, 'is-dark-in-light-theme': isDarkInLightTheme}")
@@ -1885,7 +1885,7 @@ article.card-wrap#card(
         .name-wrap
           //- [·]
           .checkbox-wrap(v-if="hasCheckbox" @mouseup.left="toggleCardChecked" @touchend.prevent="toggleCardChecked")
-            label(:class="{active: isChecked, disabled: !canEditSpace}")
+            label(:class="{active: isChecked, disabled: !canEditCard}")
               input(name="checkbox" type="checkbox" v-model="checkboxState")
           //- Name
           p.name.name-segments(v-if="isNormalizedNameOrHiddenUrl" :style="nameSegmentsStyles" :class="{'is-checked': isChecked, 'has-checkbox': hasCheckbox, 'badge badge-status': isImageCard && hasTextSegments}")
