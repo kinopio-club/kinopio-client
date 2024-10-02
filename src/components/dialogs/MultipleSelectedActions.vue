@@ -67,7 +67,7 @@ const isThemeDarkAndUserColorLight = computed(() => {
   const userColorIsLight = !utils.colorIsDark(userColor.value)
   return isThemeDark && userColorIsLight
 })
-const maxCardCharacterLimit = computed(() => consts.defaultCharacterLimit)
+const maxCardCharacterLimit = computed(() => store.state.currentUser.cardSettingsDefaultCharacterLimit || consts.defaultCharacterLimit)
 const userColor = computed(() => store.state.currentUser.color)
 const spaceCounterZoomDecimal = computed(() => store.getters.spaceCounterZoomDecimal)
 const pinchCounterZoomDecimal = computed(() => store.state.pinchCounterZoomDecimal)
@@ -330,9 +330,8 @@ const positionNewCards = async (newCards) => {
   newCards = newCards.map((card, index) => {
     if (index === 0) { return card }
     const prevCard = newCards[index - 1]
-    const element = document.querySelector(`article [data-card-id="${prevCard.id}"]`)
-    const prevCardRect = element.getBoundingClientRect()
-    card.y = prevCard.y + (prevCardRect.height * spaceCounterZoomDecimal.value) + spaceBetweenCards
+    const rect = utils.cardElementDimensions(prevCard)
+    card.y = rect.y + rect.height + spaceBetweenCards
     return card
   })
   newCards = newCards.map(card => {
@@ -407,7 +406,9 @@ const mergeSelectedCards = () => {
   })
   store.dispatch('currentCards/addMultiple', { cards: newCards })
   prevCards = newCards // for history
-  positionNewCards(newCards)
+  setTimeout(() => {
+    positionNewCards(newCards)
+  }, 100)
 }
 
 // copy and move
