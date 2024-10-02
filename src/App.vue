@@ -1238,7 +1238,7 @@ code
   display none
 
 .is-hidden-by-opacity
-  opacity 0
+  opacity 0 !important
   pointer-events none !important
 
 .space-is-hidden

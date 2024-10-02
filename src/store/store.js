@@ -263,6 +263,7 @@ const store = createStore({
     otherUsers: [], // { id, name color }
     otherItems: { spaces: [], cards: [] },
     otherTags: [],
+    sendingQueue: [],
 
     // codeblocks
     codeLanguagePickerIsVisible: false,
@@ -1642,6 +1643,18 @@ const store = createStore({
       state.otherTags = remoteTags
     },
 
+    // Sync Session Data
+
+    sendingQueue: (state, value) => {
+      utils.typeCheck({ value, type: 'array' })
+      state.sendingQueue = value
+      cache.saveSendingQueue(value)
+    },
+    clearSendingQueue: (state) => {
+      state.sendingQueue = []
+      cache.clearSendingQueue()
+    },
+
     // Code Blocks
 
     codeLanguagePickerIsVisible: (state, value) => {
@@ -1660,6 +1673,16 @@ const store = createStore({
   },
 
   actions: {
+    moveFailedSendingQueueOperationBackIntoQueue: (context, operation) => {
+      // save to queue
+      let queue = cache.queue()
+      queue.unshift(operation)
+      cache.saveQueue(queue)
+      // remove from sending queue
+      let sendingQueue = context.state.sendingQueue
+      sendingQueue = sendingQueue.filter(queueItem => queueItem.body.operationId !== operation.operationId)
+      context.commit('sendingQueue', sendingQueue)
+    },
     prevSpaceIdInSession: (context, id) => {
       utils.typeCheck({ value: id, type: 'string' })
       const position = {

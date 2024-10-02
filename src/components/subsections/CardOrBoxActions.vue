@@ -552,12 +552,10 @@ section.subsection.style-actions(v-if="visible" @click.left.stop="closeDialogs")
 .style-actions
   position relative
   padding var(--subsection-padding)
-  padding-bottom 0
   background-color transparent
   &.subsection
     border 1px solid var(--primary-border)
     padding var(--subsection-padding)
-    padding-bottom 0
   .row
     max-width 203px
     display block
@@ -568,7 +566,7 @@ section.subsection.style-actions(v-if="visible" @click.left.stop="closeDialogs")
     margin-left 0
     margin-right 4px
     vertical-align top
-    margin-bottom 10px
+    margin-bottom var(--subsection-padding)
   .segmented-buttons
     display inline-flex
   .header-buttons-wrap

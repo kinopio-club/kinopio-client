@@ -31,8 +31,8 @@ const kinopioUser = computed(() => {
       .row
         User(:user="kinopioUser" :isClickable="false" :hideYouLabel="true")
         div
-          p Hi, my name is{{' '}}
-            a(href="https://pketh.org/about") Pirijan
+          p Hi, you can call me{{' '}}
+            a(href="https://pketh.org/about") Piri
             span .{{' '}} I believe in building ethical, economically-sustainable,
             span {{' '}}
             a(href="https://pketh.org/organic-software.html") organic software

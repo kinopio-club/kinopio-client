@@ -67,7 +67,7 @@ const isThemeDarkAndUserColorLight = computed(() => {
   const userColorIsLight = !utils.colorIsDark(userColor.value)
   return isThemeDark && userColorIsLight
 })
-const maxCardCharacterLimit = computed(() => consts.defaultCharacterLimit)
+const maxCardCharacterLimit = computed(() => store.state.currentUser.cardSettingsDefaultCharacterLimit || consts.defaultCharacterLimit)
 const userColor = computed(() => store.state.currentUser.color)
 const spaceCounterZoomDecimal = computed(() => store.getters.spaceCounterZoomDecimal)
 const pinchCounterZoomDecimal = computed(() => store.state.pinchCounterZoomDecimal)
@@ -219,7 +219,11 @@ const connectCards = (event) => {
       const endItemId = cardIds[index + 1]
       if (connectionAlreadyExists(startItemId, endItemId)) { return }
       const id = nanoid()
-      const path = store.getters['currentConnections/connectionPathBetweenItems']({ startItemId, endItemId })
+      const path = store.getters['currentConnections/connectionPathBetweenItems']({
+        startItemId,
+        endItemId,
+        controlPoint: 'q00,00' // straight line
+      })
       return {
         id, startItemId, endItemId, path
       }
@@ -326,9 +330,8 @@ const positionNewCards = async (newCards) => {
   newCards = newCards.map((card, index) => {
     if (index === 0) { return card }
     const prevCard = newCards[index - 1]
-    const element = document.querySelector(`article [data-card-id="${prevCard.id}"]`)
-    const prevCardRect = element.getBoundingClientRect()
-    card.y = prevCard.y + (prevCardRect.height * spaceCounterZoomDecimal.value) + spaceBetweenCards
+    const rect = utils.cardElementDimensions(prevCard)
+    card.y = rect.y + rect.height + spaceBetweenCards
     return card
   })
   newCards = newCards.map(card => {
@@ -403,7 +406,9 @@ const mergeSelectedCards = () => {
   })
   store.dispatch('currentCards/addMultiple', { cards: newCards })
   prevCards = newCards // for history
-  positionNewCards(newCards)
+  setTimeout(() => {
+    positionNewCards(newCards)
+  }, 100)
 }
 
 // copy and move
@@ -466,9 +471,6 @@ dialog.narrow.multiple-selected-actions(
 
     //- Edit Cards
     .row
-      //- Remove
-      button.danger(:disabled="!canEditAll.all" @click.left="remove")
-        img.icon(src="@/assets/remove.svg")
       template(v-if="cardOrBoxIsSelected")
         //- [·]
         ItemCheckboxButton(:boxes="boxes" :cards="cards" :isDisabled="!canEditAll.cards && !canEditAll.boxes")
@@ -501,15 +503,20 @@ dialog.narrow.multiple-selected-actions(
     //- More Options
     AlignAndDistribute(:visible="multipleCardOrBoxesIsSelected && moreOptionsIsVisible" :numberOfSelectedItemsCreatedByCurrentUser="numberOfSelectedItemsCreatedByCurrentUser" :canEditAll="canEditAll" :cards="cards" :editableCards="cards" :connections="connections" :boxes="boxes" :editableBoxes="editableBoxes")
 
-    .row(v-if="multipleCardsIsSelected")
-      //- Merge
-      button(@click="mergeSelectedCards" :disabled="!canEditAll.cards")
-        img.icon(src="@/assets/merge.svg")
-        span Merge
-      //- Split
-      button(v-if="cardCanBeSplit" @click="splitCard" :disabled="!canEditAll.cards")
-        img.icon(src="@/assets/split.svg")
-        span Split
+    .row(v-if="cardOrBoxIsSelected")
+      //- Remove
+      button.danger(:disabled="!canEditAll.all" @click.left="remove")
+        img.icon(src="@/assets/remove.svg")
+
+      template(v-if="multipleCardsIsSelected")
+        //- Merge
+        button(@click="mergeSelectedCards" :disabled="!canEditAll.cards")
+          img.icon(src="@/assets/merge.svg")
+          span Merge
+        //- Split
+        button(v-if="cardCanBeSplit" @click="splitCard" :disabled="!canEditAll.cards")
+          img.icon(src="@/assets/split.svg")
+          span Split
 
     p.badge.info(v-if="canEditAsNonMember && !selectedItemsIsEditableByCurrentUser")
       img.icon.open(src="@/assets/open.svg")

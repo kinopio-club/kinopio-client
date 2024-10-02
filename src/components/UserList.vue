@@ -79,6 +79,7 @@ const usersFiltered = computed(() => {
 const isCurrentUser = (user) => {
   return store.state.currentUser.id === user.id
 }
+const currentUserIsMember = computed(() => store.getters['currentUser/isSpaceMember']())
 
 // handle events
 
@@ -191,7 +192,7 @@ const removeTeamUser = async (user) => {
           template(v-else-if="userIsSpaceCreator(user)")
             span Space Creator
           //- space collaborator
-          template(v-else)
+          template(v-else-if="currentUserIsMember")
             button.small-button(@click.stop="removeCollaborator(user)")
               img.icon.cancel(src="@/assets/add.svg")
               span(v-if="isCurrentUser(user)") Leave Space
