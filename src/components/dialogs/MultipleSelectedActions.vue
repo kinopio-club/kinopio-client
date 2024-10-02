@@ -470,9 +470,6 @@ dialog.narrow.multiple-selected-actions(
 
     //- Edit Cards
     .row
-      //- Remove
-      button.danger(:disabled="!canEditAll.all" @click.left="remove")
-        img.icon(src="@/assets/remove.svg")
       template(v-if="cardOrBoxIsSelected")
         //- [·]
         ItemCheckboxButton(:boxes="boxes" :cards="cards" :isDisabled="!canEditAll.cards && !canEditAll.boxes")
@@ -505,15 +502,20 @@ dialog.narrow.multiple-selected-actions(
     //- More Options
     AlignAndDistribute(:visible="multipleCardOrBoxesIsSelected && moreOptionsIsVisible" :numberOfSelectedItemsCreatedByCurrentUser="numberOfSelectedItemsCreatedByCurrentUser" :canEditAll="canEditAll" :cards="cards" :editableCards="cards" :connections="connections" :boxes="boxes" :editableBoxes="editableBoxes")
 
-    .row(v-if="multipleCardsIsSelected")
-      //- Merge
-      button(@click="mergeSelectedCards" :disabled="!canEditAll.cards")
-        img.icon(src="@/assets/merge.svg")
-        span Merge
-      //- Split
-      button(v-if="cardCanBeSplit" @click="splitCard" :disabled="!canEditAll.cards")
-        img.icon(src="@/assets/split.svg")
-        span Split
+    .row(v-if="cardOrBoxIsSelected")
+      //- Remove
+      button.danger(:disabled="!canEditAll.all" @click.left="remove")
+        img.icon(src="@/assets/remove.svg")
+
+      template(v-if="multipleCardsIsSelected")
+        //- Merge
+        button(@click="mergeSelectedCards" :disabled="!canEditAll.cards")
+          img.icon(src="@/assets/merge.svg")
+          span Merge
+        //- Split
+        button(v-if="cardCanBeSplit" @click="splitCard" :disabled="!canEditAll.cards")
+          img.icon(src="@/assets/split.svg")
+          span Split
 
     p.badge.info(v-if="canEditAsNonMember && !selectedItemsIsEditableByCurrentUser")
       img.icon.open(src="@/assets/open.svg")
