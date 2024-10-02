@@ -364,14 +364,14 @@ export default {
   // API Sending in Progress Queue
   // queue items are moved here at api.sendQueue
 
-  sendingInProgressQueue () {
-    return this.getLocal('sendingInProgressQueue') || []
+  sendingQueue () {
+    return this.getLocal('sendingQueue') || []
   },
-  saveSendingInProgressQueue (queue) {
-    this.storeLocal('sendingInProgressQueue', queue)
+  saveSendingQueue (queue) {
+    this.storeLocal('sendingQueue', queue)
   },
-  clearSendingInProgressQueue () {
-    this.storeLocal('sendingInProgressQueue', [])
+  clearSendingQueue () {
+    this.storeLocal('sendingQueue', [])
   },
 
   // Invited Spaces

@@ -7,6 +7,8 @@ import merge from 'lodash-es/merge'
 import uniq from 'lodash-es/uniq'
 import { nanoid } from 'nanoid'
 
+// process queue
+
 const squashCardsCreatedCount = (queue, request, isRaw) => {
   let isSquashed
   let name = 'updateUserCardsCreatedCount'
@@ -25,7 +27,6 @@ const squashCardsCreatedCount = (queue, request, isRaw) => {
   }
   return queue
 }
-
 const sortQueueItems = (queue) => {
   // sort create connectiontype operations first
   let createConnectionTypes = []
@@ -49,7 +50,6 @@ const sortQueueItems = (queue) => {
   queue = createCards.concat(queue)
   return queue
 }
-
 const squashQueue = (queue) => {
   let squashed = []
   queue.forEach(request => {
@@ -70,6 +70,8 @@ const squashQueue = (queue) => {
   return squashed
 }
 
+// request handlers
+
 const shouldRequest = ({ shouldRequestRemote, apiKey, isOnline }) => {
   if (utils.isUndefinedOrNull(isOnline)) {
     isOnline = true
@@ -82,7 +84,6 @@ const shouldRequest = ({ shouldRequestRemote, apiKey, isOnline }) => {
     return true
   }
 }
-
 const normalizeResponse = async (response) => {
   const success = [200, 201, 202, 204]
   if (success.includes(response.status)) {
@@ -93,6 +94,8 @@ const normalizeResponse = async (response) => {
   }
 }
 
+// normalize data
+
 const normalizeSpaceToRemote = (space) => {
   if (!space.removedCards) { return space }
   space.removedCards.forEach(card => {
@@ -101,7 +104,6 @@ const normalizeSpaceToRemote = (space) => {
   })
   return space
 }
-
 const normalizeCollaboratorKey = (space) => {
   if (!space.collaboratorKey) { return }
   if (typeof space.collaboratorKey === 'string') {
@@ -148,26 +150,7 @@ const self = {
       }
     },
 
-    // Queue
-
-    handleServerOperationsError: async (context, { error, response }) => {
-      const data = await response.json()
-      const operations = data.operations
-      console.warn('🚑 serverOperationsError', data)
-      const nonCriticalErrorStatusCodes = [400, 401, 404, 422]
-      operations.forEach(operation => {
-        const error = operation.error
-        if (!error) { return }
-        const isCritical = !nonCriticalErrorStatusCodes.includes(error.status)
-        if (isCritical) {
-          console.error('🚒 critical serverOperationsError operation', operation)
-          context.commit('notifyServerCouldNotSave', true, { root: true })
-        } else {
-          console.warn('🚑 non-critical serverOperationsError operation', operation)
-        }
-        cache.removeSendingInProgressQueueOperationById(operation.body.operationId)
-      })
-    },
+    // Queue Operations
 
     addToQueue: (context, { name, body, spaceId }) => {
       body = utils.clone(body)
@@ -197,22 +180,38 @@ const self = {
       dispatch('sendQueue')
     }, 500),
 
+    // Send Queue Operations
+
+    handleServerOperationsError: async (context, { error, response }) => {
+      const data = await response.json()
+      const operations = data.operations
+      console.warn('🚑 serverOperationsError', data)
+      const nonCriticalErrorStatusCodes = [400, 401, 404, 422]
+      operations.forEach(operation => {
+        const error = operation.error
+        if (!error) { return }
+        const isCritical = !nonCriticalErrorStatusCodes.includes(error.status)
+        if (isCritical) {
+          console.error('🚒 critical serverOperationsError operation', operation)
+          context.commit('notifyServerCouldNotSave', true, { root: true })
+        } else {
+          console.warn('🚑 non-critical serverOperationsError operation', operation)
+        }
+        cache.moveFailedSendingQueueOperationBackIntoQueue(operation)
+      })
+      // clear sending queue
+      context.commit('clearSendingQueue', null, { root: true })
+    },
     sendQueue: async (context) => {
-      let body
       const apiKey = context.rootState.currentUser.apiKey
       const isOnline = context.rootState.isOnline
       const queue = cache.queue()
-      const sendingInProgressQueue = cache.sendingInProgressQueue()
-      if (!shouldRequest({ apiKey, isOnline }) || !queue.length) { return }
-      if (sendingInProgressQueue.length) {
-        body = sendingInProgressQueue
-        body = sortQueueItems(body)
-        console.log('🛃 sending operations from sendingInProgressQueue', body)
-      } else {
-        body = squashQueue(queue)
-        cache.saveSendingInProgressQueue(body)
-        cache.clearQueue()
-      }
+      if (!shouldRequest({ apiKey, isOnline }) || !queue.length) { return } // offline check
+      // empty queue into sendingQueue
+      let body = squashQueue(queue)
+      context.commit('sendingQueue', body, { root: true })
+      cache.clearQueue()
+      // send
       let response
       try {
         console.warn(`🛫 sending operations`, body)
@@ -222,15 +221,17 @@ const self = {
         response = await fetch(`${consts.apiHost()}/operations`, options)
         if (response.ok) {
           console.log('🛬 operations ok', body)
-          cache.clearSendingInProgressQueue()
+          // clear sendingQueue on success
+          context.commit('clearSendingQueue', null, { root: true })
         } else {
           throw Error(response.statusText)
         }
         if (context.rootState.notifyServerCouldNotSave) {
-          // context.commit('notifyServerCouldNotSave', false, { root: true })
           context.commit('addNotification', { message: 'Reconnected to server', type: 'success' }, { root: true })
         }
       } catch (error) {
+        console.error('🚑 sendQueue', error)
+        // move failed sendingQueue operations back into queue
         context.dispatch('handleServerOperationsError', { error, response })
       }
     },

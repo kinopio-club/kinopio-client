@@ -23,17 +23,33 @@ const state = reactive({
 })
 
 const currentSpace = computed(() => store.state.currentSpace)
-const isLoadingSpace = computed(() => store.state.isLoadingSpace)
-const isLoadingOtherItems = computed(() => store.state.isLoadingOtherItems)
-const isJoiningSpace = computed(() => store.state.isJoiningSpace)
-const isReconnectingToBroadcast = computed(() => store.state.isReconnectingToBroadcast)
-const isConnected = computed(() => !isLoadingSpace.value && !isJoiningSpace.value && !isReconnectingToBroadcast.value && !isSaving.value)
-// const sendingInProgressQueue = computed(() => store.state.sendingInProgressQueue)
-const isSaving = computed(() => Boolean(store.state.sendingInProgressQueue.length))
 
 const refreshBrowser = () => {
   window.location.reload()
 }
+
+// loading
+
+const isLoadingSpace = computed(() => store.state.isLoadingSpace)
+const isLoadingOtherItems = computed(() => store.state.isLoadingOtherItems)
+const isJoiningSpace = computed(() => store.state.isJoiningSpace)
+const isReconnectingToBroadcast = computed(() => store.state.isReconnectingToBroadcast)
+
+// saving
+
+const sendingQueue = computed(() => store.state.sendingQueue)
+const isSavingOperations = computed(() => Boolean(sendingQueue.value.length))
+const savingOperations = computed(() => {
+  const names = sendingQueue.value.map(queueItem => queueItem.name)
+  return names.join(', ')
+})
+
+// connected
+
+const isConnected = computed(() => {
+  const value = !isLoadingSpace.value && !isJoiningSpace.value && !isReconnectingToBroadcast.value && !isSavingOperations.value
+  return value
+})
 </script>
 
 <template lang="pug">
@@ -47,7 +63,7 @@ dialog.narrow.space-status(v-if="visible" :open="visible" ref="dialog")
         span(v-if="isLoadingSpace || isLoadingOtherItems") Downloading
         span(v-else-if="isJoiningSpace") Connecting to Broadcast
         span(v-else-if="isReconnectingToBroadcast") Reconnecting
-        span(v-else-if="isSaving") Saving
+        span(v-else-if="isSavingOperations") Saving Changes
       .button-wrap
         button.small-button(@click.left="refreshBrowser" title="Refresh browser")
           img.icon(src="@/assets/refresh.svg")
@@ -62,8 +78,12 @@ dialog.narrow.space-status(v-if="visible" :open="visible" ref="dialog")
       span.badge.info You can edit right now
       span {{' '}}
       span but cannot collaborate yet, your changes will sync once connected
-    p(v-else-if="isSaving")
-      span Every change that you make is automatically saved
+    p(v-else-if="isSavingOperations")
+      span.badge.info You can edit right now
+      span Updates are automatically synced
+      section.subsection.operations-list
+        //- span.badge.info {{sendingQueue.length}}
+        pre {{savingOperations}}
 </template>
 
 <style lang="stylus">
@@ -80,4 +100,11 @@ dialog.space-status
     margin-right 6px
   .loader + span
     margin-left 2px
+
+  .operations-list
+    margin-top 10px
+    pre
+      white-space pre-wrap
+      word-wrap break-word
+      margin 0
 </style>

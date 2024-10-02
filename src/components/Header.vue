@@ -196,7 +196,7 @@ const currentSpaceName = computed(() => {
 const spaceTeam = computed(() => store.getters['teams/spaceTeam']())
 const spaceHasStatus = computed(() => {
   if (!isOnline.value) { return }
-  return Boolean(store.state.isLoadingSpace || store.state.isJoiningSpace || store.state.isReconnectingToBroadcast || store.state.isLoadingOtherItems || store.state.sendingInProgressQueue.length)
+  return Boolean(store.state.isLoadingSpace || store.state.isJoiningSpace || store.state.isReconnectingToBroadcast || store.state.isLoadingOtherItems || store.state.sendingQueue.length)
 })
 const spaceHasStatusAndStatusDialogIsNotVisible = computed(() => {
   if (spaceHasStatus.value) {
