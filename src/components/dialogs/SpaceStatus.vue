@@ -39,9 +39,9 @@ const isReconnectingToBroadcast = computed(() => store.state.isReconnectingToBro
 
 const sendingQueue = computed(() => store.state.sendingQueue)
 const isSavingOperations = computed(() => Boolean(sendingQueue.value.length))
-const savingOperations = computed(() => {
-  const names = sendingQueue.value.map(queueItem => queueItem.name)
-  return names.join(', ')
+const pluralChanges = computed(() => {
+  const condition = sendingQueue.value.length !== 1
+  return utils.pluralize('change', condition)
 })
 
 // connected
@@ -53,7 +53,7 @@ const isConnected = computed(() => {
 </script>
 
 <template lang="pug">
-dialog.narrow.space-status(v-if="visible" :open="visible" ref="dialog")
+dialog.space-status(v-if="visible" :open="visible" ref="dialog")
   section
     .row.title-row
       div(v-if="isConnected")
@@ -63,13 +63,13 @@ dialog.narrow.space-status(v-if="visible" :open="visible" ref="dialog")
         span(v-if="isLoadingSpace || isLoadingOtherItems") Downloading
         span(v-else-if="isJoiningSpace") Connecting to Broadcast
         span(v-else-if="isReconnectingToBroadcast") Reconnecting
-        span(v-else-if="isSavingOperations") Saving Changes
+        span(v-else-if="isSavingOperations") Syncing
       .button-wrap
         button.small-button(@click.left="refreshBrowser" title="Refresh browser")
           img.icon(src="@/assets/refresh.svg")
 
   section(v-if="isConnected")
-    p All changes saved
+    p Updates synced
   section(v-else)
     p(v-if="(isLoadingSpace || isLoadingOtherItems) && state.spaceIsCached")
       span.badge.info You can edit right now
@@ -79,15 +79,16 @@ dialog.narrow.space-status(v-if="visible" :open="visible" ref="dialog")
       span {{' '}}
       span but cannot collaborate yet, your changes will sync once connected
     p(v-else-if="isSavingOperations")
-      span.badge.info You can edit right now
-      span Updates are automatically synced
+      span Your changes are saving to the server
       section.subsection.operations-list
-        //- span.badge.info {{sendingQueue.length}}
-        pre {{savingOperations}}
+        span.badge.info
+          Loader(:visible="true" :isSmall="true" :isStatic="true")
+          span {{sendingQueue.length}} {{pluralChanges}} to sync
 </template>
 
 <style lang="stylus">
 dialog.space-status
+  width 200px
   @media(max-width 414px)
     left -60px
   .badge
@@ -103,8 +104,4 @@ dialog.space-status
 
   .operations-list
     margin-top 10px
-    pre
-      white-space pre-wrap
-      word-wrap break-word
-      margin 0
 </style>
