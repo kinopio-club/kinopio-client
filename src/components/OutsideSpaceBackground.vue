@@ -103,7 +103,7 @@ const updateBackgroundColor = () => {
   if (isThemeDark.value) {
     darkness = 0.8
   }
-  backgroundColor = colord(backgroundColor).darken(darkness)
+  backgroundColor = colord(backgroundColor).darken(darkness).toHex()
   // mix in tint color
   if (backgroundTintColor.value) {
     let tint = backgroundTintColor.value
