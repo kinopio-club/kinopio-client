@@ -6,6 +6,7 @@ import utils from '@/utils.js'
 import consts from '@/consts.js'
 import fonts from '@/data/fonts.js'
 import ItemConnectorButton from '@/components/ItemConnectorButton.vue'
+import smartquotes from 'smartquotes'
 import postMessage from '@/postMessage.js'
 
 import randomColor from 'randomcolor'
@@ -99,6 +100,13 @@ const normalizedName = computed(() => {
   }
   return newName.trim()
 })
+const nameSegments = computed(() => {
+  let markdownSegments = utils.markdownSegments(normalizedName.value)
+  return markdownSegments
+})
+const smartQuotes = (string) => {
+  return smartquotes(string)
+}
 
 // should render
 
@@ -606,23 +614,6 @@ const remoteBoxDraggingColor = computed(() => {
   }
 })
 
-// header fonts
-
-const isH1 = computed(() => {
-  const pattern = 'h1Pattern'
-  return nameHasPattern(pattern)
-})
-const isH2 = computed(() => {
-  const pattern = 'h2Pattern'
-  return nameHasPattern(pattern)
-})
-const h1Name = computed(() => normalizedName.value.replace('# ', ''))
-const h2Name = computed(() => normalizedName.value.replace('## ', ''))
-const nameHasPattern = (pattern) => {
-  const result = utils.markdown()[pattern].exec(props.box.name)
-  return Boolean(result)
-}
-
 // touch locking
 
 const lockingFrameStyle = computed(() => {
@@ -874,12 +865,24 @@ const isInCheckedBox = computed(() => {
       label(:class="{active: isChecked, disabled: !canEditBox}")
         input(name="checkbox" type="checkbox" v-model="checkboxState")
     .name-wrap(:class="{'is-checked': isChecked}")
-      template(v-if="isH1")
-        h1 {{h1Name}}
-      template(v-else-if="isH2")
-        h2 {{h2Name}}
-      template(v-else)
-        span {{normalizedName}}
+      //- simplified nameSegments
+      template(v-for="segment in nameSegments")
+        template(v-if="segment.type === 'text'")
+          span {{smartQuotes(segment.content)}}
+        template(v-else-if="segment.type === 'bold'")
+          strong {{smartQuotes(segment.content)}}
+        template(v-else-if="segment.type === 'h1'")
+          h1 {{smartQuotes(segment.content)}}
+        template(v-else-if="segment.type === 'h2'")
+          h2 {{smartQuotes(segment.content)}}
+        template(v-else-if="segment.type === 'h3'")
+          h3 {{smartQuotes(segment.content)}}
+        template(v-else-if="segment.type === 'h4'")
+          h4 {{segment.content}}
+        template(v-else-if="segment.type === 'emphasis'")
+          em {{smartQuotes(segment.content)}}
+        template(v-else-if="segment.type === 'strikethrough'")
+          del {{smartQuotes(segment.content)}}
       .selected-user-avatar(v-if="isRemoteSelected || isRemoteBoxDetailsVisible" :style="{backgroundColor: remoteSelectedColor || remoteBoxDetailsVisibleColor}")
         img(src="@/assets/anon-avatar.svg")
 
@@ -1048,14 +1051,18 @@ const isInCheckedBox = computed(() => {
     font-family var(--header-font)
     font-size 20px
     font-weight bold
-    margin 0
     display inline-block
   h2
     font-family var(--header-font)
     font-weight normal
     font-size 20px
-    margin 0
     display inline-block
+  h1,
+  h2,
+  h3,
+  h4
+    margin 0
+    margin-top 2px
 
   // resize
   .bottom-button-wrap
