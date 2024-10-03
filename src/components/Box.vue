@@ -6,6 +6,7 @@ import utils from '@/utils.js'
 import consts from '@/consts.js'
 import fonts from '@/data/fonts.js'
 import ItemConnectorButton from '@/components/ItemConnectorButton.vue'
+import smartquotes from 'smartquotes'
 import postMessage from '@/postMessage.js'
 
 import randomColor from 'randomcolor'
@@ -99,6 +100,13 @@ const normalizedName = computed(() => {
   }
   return newName.trim()
 })
+const nameSegments = computed(() => {
+  let markdownSegments = utils.markdownSegments(normalizedName.value)
+  return markdownSegments
+})
+const smartQuotes = (string) => {
+  return smartquotes(string)
+}
 
 // should render
 
@@ -426,12 +434,12 @@ const endBoxInfoInteraction = (event) => {
   } else {
     store.dispatch('clearMultipleSelected')
   }
-  if (!store.state.boxesWereDragged && !isMeta) {
-    store.commit('boxDetailsIsVisibleForBoxId', props.box.id)
-    event.stopPropagation() // prevent stopInteractions() from closing boxDetails
-    store.commit('currentUserIsDraggingBox', false)
-    store.commit('boxesWereDragged', false)
-  }
+  if (store.state.preventDraggedBoxFromShowingDetails) { return }
+  if (isMeta) { return }
+  store.commit('boxDetailsIsVisibleForBoxId', props.box.id)
+  event.stopPropagation() // prevent stopInteractions() from closing boxDetails
+  store.commit('currentUserIsDraggingBox', false)
+  store.commit('boxesWereDragged', false)
 }
 const currentBoxDetailsIsVisible = computed(() => {
   return props.box.id === store.state.boxDetailsIsVisibleForBoxId
@@ -605,23 +613,6 @@ const remoteBoxDraggingColor = computed(() => {
     return undefined
   }
 })
-
-// header fonts
-
-const isH1 = computed(() => {
-  const pattern = 'h1Pattern'
-  return nameHasPattern(pattern)
-})
-const isH2 = computed(() => {
-  const pattern = 'h2Pattern'
-  return nameHasPattern(pattern)
-})
-const h1Name = computed(() => normalizedName.value.replace('# ', ''))
-const h2Name = computed(() => normalizedName.value.replace('## ', ''))
-const nameHasPattern = (pattern) => {
-  const result = utils.markdown()[pattern].exec(props.box.name)
-  return Boolean(result)
-}
 
 // touch locking
 
@@ -874,12 +865,24 @@ const isInCheckedBox = computed(() => {
       label(:class="{active: isChecked, disabled: !canEditBox}")
         input(name="checkbox" type="checkbox" v-model="checkboxState")
     .name-wrap(:class="{'is-checked': isChecked}")
-      template(v-if="isH1")
-        h1 {{h1Name}}
-      template(v-else-if="isH2")
-        h2 {{h2Name}}
-      template(v-else)
-        span {{normalizedName}}
+      //- simplified nameSegments
+      template(v-for="segment in nameSegments")
+        template(v-if="segment.type === 'text'")
+          span {{smartQuotes(segment.content)}}
+        template(v-else-if="segment.type === 'bold'")
+          strong {{smartQuotes(segment.content)}}
+        template(v-else-if="segment.type === 'h1'")
+          h1 {{smartQuotes(segment.content)}}
+        template(v-else-if="segment.type === 'h2'")
+          h2 {{smartQuotes(segment.content)}}
+        template(v-else-if="segment.type === 'h3'")
+          h3 {{smartQuotes(segment.content)}}
+        template(v-else-if="segment.type === 'h4'")
+          h4 {{segment.content}}
+        template(v-else-if="segment.type === 'emphasis'")
+          em {{smartQuotes(segment.content)}}
+        template(v-else-if="segment.type === 'strikethrough'")
+          del {{smartQuotes(segment.content)}}
       .selected-user-avatar(v-if="isRemoteSelected || isRemoteBoxDetailsVisible" :style="{backgroundColor: remoteSelectedColor || remoteBoxDetailsVisibleColor}")
         img(src="@/assets/anon-avatar.svg")
 
@@ -946,7 +949,7 @@ const isInCheckedBox = computed(() => {
   &.is-selected
     transition none
   &.is-checked
-    opacity 0.5
+    opacity var(--is-checked-opacity)
   .box-info
     --header-font var(--header-font-0)
     &.header-font-1
@@ -1048,14 +1051,19 @@ const isInCheckedBox = computed(() => {
     font-family var(--header-font)
     font-size 20px
     font-weight bold
-    margin 0
     display inline-block
   h2
     font-family var(--header-font)
     font-weight normal
     font-size 20px
-    margin 0
     display inline-block
+  h1,
+  h2,
+  h3,
+  h4
+    margin 0
+    margin-top 2px
+    vertical-align sub // to align with checkboxes
 
   // resize
   .bottom-button-wrap

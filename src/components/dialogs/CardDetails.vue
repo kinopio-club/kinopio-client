@@ -63,6 +63,9 @@ onMounted(() => {
       const cardId = mutation.payload
       if (cardId !== card.value.id) { return }
       await updateDimensionsAndPaths()
+    } else if (mutation.type === 'triggerTextEditAction') {
+      const action = mutation.payload
+      toggleTextEditAction(action)
     }
   })
 })
@@ -814,6 +817,29 @@ const updatePickerSearch = () => {
   } else if (state.space.pickerIsVisible) {
     updateSpacePickerSearch()
   }
+}
+
+// text edit actions
+
+const selectionEndPosition = () => {
+  if (!nameElement.value) { return }
+  const position = nameElement.value.selectionEnd
+  const endPosition = position
+  return endPosition
+}
+const toggleTextEditAction = async (action) => {
+  if (!visible.value) { return }
+  const startPosition = selectionStartPosition()
+  const endPosition = selectionEndPosition()
+  const { newName, offset } = utils.nameTextEditAction({
+    action,
+    startPosition,
+    endPosition,
+    name: nameElement.value.value
+  })
+  updateCardName(newName)
+  await nextTick()
+  setSelectionRange(startPosition + offset, endPosition + offset)
 }
 
 // card tips

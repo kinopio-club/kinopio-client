@@ -881,6 +881,32 @@ export default {
     })
     return sorted
   },
+  nameTextEditAction ({ action, startPosition, endPosition, name }) {
+    let newName, offset
+    let md = ''
+    if (action === 'bold') {
+      md = '**'
+    } else if (action === 'italic') {
+      md = '_'
+    }
+    const length = md.length
+    const before = name.slice(0, startPosition)
+    const selected = name.slice(startPosition, endPosition)
+    const after = name.slice(endPosition)
+    const start = before.endsWith(md)
+    const end = after.startsWith(md)
+
+    if (start && end) {
+      // remove md
+      newName = before.slice(0, -length) + selected + after.slice(length)
+      offset = -length
+    } else {
+      // add md
+      newName = before + `${md}${selected}${md}` + after
+      offset = length
+    }
+    return { newName, offset }
+  },
 
   // Cards
 

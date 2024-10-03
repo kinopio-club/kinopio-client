@@ -16,6 +16,15 @@ const nameElement = ref(null)
 
 let prevBoxId
 
+onMounted(() => {
+  store.subscribe(async (mutation, state) => {
+    if (mutation.type === 'triggerTextEditAction') {
+      const action = mutation.payload
+      toggleTextEditAction(action)
+    }
+  })
+})
+
 const state = reactive({
   colorPickerIsVisible: false,
   isUpdated: false
@@ -131,6 +140,39 @@ const textareaSizes = () => {
     modifier = 1
   }
   textarea.style.height = textarea.scrollHeight + modifier + 'px'
+}
+
+// text edit actions
+
+const selectionStartPosition = () => {
+  if (!nameElement.value) { return }
+  const startPosition = nameElement.value.selectionStart
+  return startPosition
+}
+const selectionEndPosition = () => {
+  if (!nameElement.value) { return }
+  const endPosition = nameElement.value.selectionEnd
+  return endPosition
+}
+const setSelectionRange = (start, end) => {
+  if (nameElement.value) {
+    nameElement.value.setSelectionRange(start, end)
+  }
+}
+const toggleTextEditAction = async (action) => {
+  if (!visible.value) { return }
+  const startPosition = selectionStartPosition()
+  const endPosition = selectionEndPosition()
+  const { newName, offset } = utils.nameTextEditAction({
+    action,
+    startPosition,
+    endPosition,
+    name: nameElement.value.value
+  })
+  update({ name: newName })
+  textareaSizes()
+  await nextTick()
+  setSelectionRange(startPosition + offset, endPosition + offset)
 }
 
 // colors

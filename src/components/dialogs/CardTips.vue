@@ -27,6 +27,7 @@ watch(() => props.visible, (value, prevValue) => {
 
 const maxCardCharacterLimit = computed(() => store.state.currentUser.cardSettingsDefaultCharacterLimit || consts.defaultCharacterLimit)
 const shiftEnterShouldAddChildCard = computed(() => store.state.currentUser.cardSettingsShiftEnterShouldAddChildCard)
+const meta = computed(() => utils.metaKey())
 
 // buttons
 
@@ -69,7 +70,8 @@ dialog.card-tips.narrow(v-if="visible" @click.stop :open="visible" ref="dialogEl
         span Card Settings
   section
     article
-      p Card character limit is {{maxCardCharacterLimit}}
+      p
+        .badge.info Character limit is {{maxCardCharacterLimit}}
     article
       .row
         p
@@ -101,6 +103,18 @@ dialog.card-tips.narrow(v-if="visible" @click.stop :open="visible" ref="dialogEl
           p
             span Link to Other Spaces
           span.badge.keyboard-shortcut /
+
+    article
+      .row
+        p
+          span Bold selected
+        span.badge.keyboard-shortcut {{meta}}-B
+    article
+      .row
+        p
+          span Italicize selected
+        span.badge.keyboard-shortcut {{meta}}-I
+
       //- article
       //-   .row
       //-     span Comment Card

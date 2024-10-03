@@ -227,6 +227,14 @@ const handleMetaKeyShortcuts = (event) => {
   } else if (event.shiftKey && isMeta && key === 'l') {
     event.preventDefault()
     toggleLockCards()
+  // Bold selected text
+  } else if (isMeta && key === 'b' && isFromInput) {
+    event.preventDefault()
+    store.commit('triggerTextEditAction', 'bold')
+  // Italic selected text
+  } else if (isMeta && key === 'i' && isFromInput) {
+    event.preventDefault()
+    store.commit('triggerTextEditAction', 'italic')
   }
 }
 // on mouse down
