@@ -1063,6 +1063,7 @@ const isInCheckedBox = computed(() => {
   h4
     margin 0
     margin-top 2px
+    vertical-align sub // to align with checkboxes
 
   // resize
   .bottom-button-wrap
