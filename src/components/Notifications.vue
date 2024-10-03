@@ -179,6 +179,7 @@ const removeById = (item) => {
 // new stuff
 
 const changelogIsUpdated = computed(() => {
+  if (!currentUserIsSignedIn.value) { return }
   return store.state.changelogIsUpdated
 })
 const latestChangelogPost = computed(() => {
