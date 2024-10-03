@@ -240,6 +240,7 @@ const updateMetaRSSFeed = () => {
   --mono-font Menlo, Monaco, monospace
   --serif-font georgia, serif
   --glyphs-font GoodGlyphs, wingdings
+  --is-checked-opacity 0.6
 
 @font-face
   font-family 'GoodGlyphs'

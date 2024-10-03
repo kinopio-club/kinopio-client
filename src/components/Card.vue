@@ -2327,7 +2327,7 @@ article.card-wrap
 
   .is-in-checked-box,
   .is-checked
-    opacity 0.5
+    opacity var(--is-checked-opacity)
 
 @keyframes bounce
   0%
