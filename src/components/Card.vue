@@ -445,7 +445,8 @@ const cardClasses = computed(() => {
     'has-url-preview': cardUrlPreviewIsVisible.value,
     'is-dark': backgroundColorIsDark.value,
     'child-is-hovered': currentUserIsHoveringOverUrlButton.value && !currentCardIsBeingDragged.value,
-    'is-in-checked-box': isInCheckedBox.value
+    'is-in-checked-box': isInCheckedBox.value,
+    'is-checked': isChecked.value
   }
   classes = addSizeClasses(classes)
   return classes
@@ -2324,7 +2325,8 @@ article.card-wrap
       width 10px
       height 10px
 
-  .is-in-checked-box
+  .is-in-checked-box,
+  .is-checked
     opacity 0.5
 
 @keyframes bounce
