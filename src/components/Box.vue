@@ -426,12 +426,12 @@ const endBoxInfoInteraction = (event) => {
   } else {
     store.dispatch('clearMultipleSelected')
   }
-  if (!store.state.boxesWereDragged && !isMeta) {
-    store.commit('boxDetailsIsVisibleForBoxId', props.box.id)
-    event.stopPropagation() // prevent stopInteractions() from closing boxDetails
-    store.commit('currentUserIsDraggingBox', false)
-    store.commit('boxesWereDragged', false)
-  }
+  if (store.state.preventDraggedBoxFromShowingDetails) { return }
+  if (isMeta) { return }
+  store.commit('boxDetailsIsVisibleForBoxId', props.box.id)
+  event.stopPropagation() // prevent stopInteractions() from closing boxDetails
+  store.commit('currentUserIsDraggingBox', false)
+  store.commit('boxesWereDragged', false)
 }
 const currentBoxDetailsIsVisible = computed(() => {
   return props.box.id === store.state.boxDetailsIsVisibleForBoxId
