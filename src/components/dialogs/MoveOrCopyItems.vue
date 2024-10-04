@@ -83,7 +83,6 @@ const sortedByY = (items) => {
 }
 const text = computed(() => {
   let cards = selectedItems.value.cards
-  console.log(selectedItems.value.cards)
   cards = sortedByY(cards)
   return utils.textFromCardNames(cards)
 })
