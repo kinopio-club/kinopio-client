@@ -714,8 +714,8 @@ const currentCards = {
       context.commit('broadcast/updateStore', { updates: { userId: context.rootState.currentUser.id }, type: 'clearRemoteCardsDragging' }, { root: true })
       // ..
       nextTick(() => {
-        context.dispatch('currentConnections/updateMultiplePaths', cards, { root: true })
         context.dispatch('history/resume', null, { root: true })
+        context.dispatch('currentConnections/updateMultiplePaths', cards, { root: true })
         context.dispatch('history/add', { cards, useSnapshot: true }, { root: true })
         prevMoveDelta = { x: 0, y: 0 }
       })

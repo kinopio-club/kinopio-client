@@ -230,7 +230,7 @@ export default {
     updatePaths: (context, { itemId, connections }) => {
       const canEditSpace = context.rootGetters['currentUser/canEditSpace']()
       connections = connections || context.getters.byItemId(itemId)
-      connections.map(connection => {
+      connections = connections.map(connection => {
         const startItem = utils.itemElementDimensions({ id: connection.startItemId })
         const endItem = utils.itemElementDimensions({ id: connection.endItemId })
         const path = context.getters.connectionPathBetweenItems({
@@ -249,13 +249,16 @@ export default {
         } else {
           context.commit('updateReadOnly', newConnection)
         }
+        return newConnection
       })
       context.commit('clearShouldExplicitlyRenderCardIds', null, { root: true })
+      context.dispatch('history/add', { connections }, { root: true })
     },
     updateMultiplePaths: (context, items) => {
       const canEditSpace = context.rootGetters['currentUser/canEditSpace']()
       const itemIds = items.map(item => item.id)
       const connections = context.getters.byMultipleItemIds(itemIds)
+
       if (!connections.length) { return }
       let newConnections = []
       // update state
@@ -290,6 +293,7 @@ export default {
           }
         }, { root: true })
       }
+      context.dispatch('history/add', { connections: newConnections, useSnapshot: true }, { root: true })
       context.commit('clearShouldExplicitlyRenderCardIds', null, { root: true })
     },
     updatePathsWhileDragging: (context, { connections }) => {
