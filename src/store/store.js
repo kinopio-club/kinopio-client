@@ -658,7 +658,6 @@ const store = createStore({
     triggerUpdatePathWhileDragging: (state, connections) => {},
     triggerUpdateCardDimensionsAndPaths: (state, cardId) => {},
     triggerUpdateItemCurrentConnections: (state, itemId) => {},
-    triggerTextEditAction: (state, action) => {},
 
     // Used by extensions only
 

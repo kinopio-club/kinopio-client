@@ -16,15 +16,6 @@ const nameElement = ref(null)
 
 let prevBoxId
 
-onMounted(() => {
-  store.subscribe(async (mutation, state) => {
-    if (mutation.type === 'triggerTextEditAction') {
-      const action = mutation.payload
-      toggleTextEditAction(action)
-    }
-  })
-})
-
 const state = reactive({
   colorPickerIsVisible: false,
   isUpdated: false
@@ -253,6 +244,10 @@ dialog.narrow.box-details(v-if="visible" :open="visible" @click.left.stop="close
           @keydown.enter.stop.prevent="closeAllDialogs"
           maxLength="600"
           :class="{'is-dark': colorisDark, 'is-light': !colorisDark}"
+          @keydown.meta.b.exact.stop.prevent="toggleTextEditAction('bold')"
+          @keydown.ctrl.b.exact.stop.prevent="toggleTextEditAction('bold')"
+          @keydown.meta.i.exact.stop.prevent="toggleTextEditAction('italic')"
+          @keydown.ctrl.i.exact.stop.prevent="toggleTextEditAction('italic')"
         )
     .row(v-if="canEditBox")
       //- remove
