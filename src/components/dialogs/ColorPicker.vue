@@ -214,7 +214,7 @@ dialog.narrow.color-picker(v-if="visible" :open="visible" ref="dialogElement" @c
         input(v-model="color" @focus="resetPinchCounterZoomDecimal" @blur="triggerUpdateHeaderAndFooterPosition" @keyup.stop.backspace :class="{ 'is-dark': isDark }" @mouseup.stop)
           //- Remove
         button.small-button.remove-button(v-if="removeIsVisible" title="remove" @click="removeColor")
-          img.icon(src="@/assets/remove.svg")
+          img.icon.cancel(src="@/assets/add.svg")
   section
     //- Colors
     .recent-colors(v-if="recentColors")
