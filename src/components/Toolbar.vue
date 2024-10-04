@@ -7,10 +7,6 @@ const props = defineProps({
   visible: Boolean
 })
 
-const canEditSpace = computed(() => store.getters['currentUser/canEditSpace']())
-const canOnlyComment = computed(() => store.getters['currentUser/canOnlyComment']())
-const isTouchDevice = computed(() => store.state.isTouchDevice)
-
 const currentUserToolbar = computed(() => store.state.currentUserToolbar)
 watch(() => currentUserToolbar.value, (value, prevValue) => {
   if (value) {
@@ -24,13 +20,7 @@ const currentUserToolbarIsBox = computed(() => {
   return currentUserToolbar.value === 'box'
 })
 const boxBadgeLabel = computed(() => {
-  if (canOnlyComment.value) {
-    return 'Only collaborators can add boxes'
-  }
-  let label = 'Draw Box'
-  if (!isTouchDevice.value) {
-    label = label + ' (B)'
-  }
+  let label = 'Draw Box (B)'
   return label
 })
 const toggleToolbar = (value) => {
@@ -51,10 +41,8 @@ nav.toolbar(v-if="visible")
   .segmented-buttons
     .button-wrap(:title="boxBadgeLabel")
       button(
-        v-if="canEditSpace"
         :class="{ active: currentUserToolbarIsBox, 'translucent-button': !shouldIncreaseUIContrast }"
         @click="toggleToolbar('box')"
-        :disabled="canOnlyComment"
       )
         img.icon.box-icon(src="@/assets/box.svg")
         .label-badge.toolbar-badge-wrap.jiggle(v-if="currentUserToolbarIsBox")
