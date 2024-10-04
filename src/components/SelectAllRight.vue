@@ -24,7 +24,6 @@ const state = reactive({
   positionX: 250
 })
 
-const userColor = computed(() => store.state.currentUser.color)
 const canEditSpace = computed(() => store.getters['currentUser/canEditSpace']())
 const isSelectingX = computed(() => store.state.isSelectingX)
 const updateIsSelectingX = (value) => {
@@ -37,6 +36,14 @@ const isVisible = computed(() => {
   if (store.state.isSelectingY) { return }
   if (store.state.currentUserIsPanning || store.state.currentUserIsPanningReady) { return }
   return state.isVisible
+})
+
+// style
+
+const userColor = computed(() => store.state.currentUser.color)
+const colorClasses = computed(() => {
+  let classes = utils.colorClasses({ backgroundColor: userColor.value })
+  return classes
 })
 
 // position
@@ -112,7 +119,7 @@ const selectAllRight = (event) => {
 <template lang="pug">
 .select-all-right(v-if="isVisible" :style="{ left: state.positionX + 'px' }")
   .badge.label-badge(:style="{ 'background-color': userColor }" @mousedown="handleMouseDown")
-    img.icon(src="@/assets/brush-x.svg")
+    img.icon(src="@/assets/brush-x.svg" :class="colorClasses")
     .pointer(:style="{ 'background-color': userColor }" :class="{ 'is-selecting': isSelectingX }")
 </template>
 
