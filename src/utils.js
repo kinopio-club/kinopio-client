@@ -1347,12 +1347,7 @@ export default {
     return -endValue * (elaspedTime /= duration) * (elaspedTime - 2) + startValue
   },
   highestCardZ (cards) {
-    let highestCardZ = 0
-    cards.forEach(card => {
-      if (card.z > highestCardZ) {
-        highestCardZ = card.z
-      }
-    })
+    let highestCardZ = Math.max(...cards.map(card => card.z)) + 1
     return highestCardZ
   },
 

@@ -26,9 +26,7 @@ const incrementCardsZ = (context, cards) => {
       context.dispatch('clearAllZs')
       highestCardZ = 1
     }
-    const canEditSpace = context.rootGetters['currentUser/canEditSpace']()
-    const z = highestCardZ + 1
-    card.z = z
+    card.z = highestCardZ
     return card
   })
   return cards
@@ -105,6 +103,7 @@ const currentCards = {
       cards.forEach(card => {
         state.cards[card.id].x = card.x
         state.cards[card.id].y = card.y
+        state.cards[card.id].z = card.z
       })
       cache.updateSpaceCardsDebounced(state.cards, currentSpaceId)
     },
