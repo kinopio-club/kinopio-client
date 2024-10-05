@@ -63,9 +63,6 @@ onMounted(() => {
       const cardId = mutation.payload
       if (cardId !== card.value.id) { return }
       await updateDimensionsAndPaths()
-    } else if (mutation.type === 'triggerTextEditAction') {
-      const action = mutation.payload
-      toggleTextEditAction(action)
     }
   })
 })
@@ -1346,6 +1343,11 @@ dialog.card-details(v-if="visible" :open="visible" ref="dialogElement" @click.le
         @keydown.up.stop="triggerPickerNavigation"
 
         @keydown.tab.exact="triggerPickerSelectItem"
+
+        @keydown.meta.b.exact.stop.prevent="toggleTextEditAction('bold')"
+        @keydown.ctrl.b.exact.stop.prevent="toggleTextEditAction('bold')"
+        @keydown.meta.i.exact.stop.prevent="toggleTextEditAction('italic')"
+        @keydown.ctrl.i.exact.stop.prevent="toggleTextEditAction('italic')"
 
         @focus="resetPinchCounterZoomDecimal"
       )

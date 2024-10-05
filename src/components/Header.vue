@@ -171,6 +171,11 @@ const isOnline = computed(() => store.state.isOnline)
 const currentUserIsSignedIn = computed(() => store.getters['currentUser/isSignedIn'])
 const shouldIncreaseUIContrast = computed(() => store.state.currentUser.shouldIncreaseUIContrast)
 const isMobile = computed(() => utils.isMobile())
+const toolbarIsVisible = computed(() => {
+  if (!isSpace.value) { return }
+  if (userCanOnlyComment.value) { return }
+  return userCanEditSpace.value
+})
 
 // new stuff
 
@@ -727,7 +732,7 @@ header(v-if="isVisible" :style="state.position" :class="{'fade-out': isFadingOut
         //- comments
         //- CommentButton
 
-  Toolbar(:visible="isSpace")
+  Toolbar(:visible="toolbarIsVisible")
   SelectAllBelow
   SelectAllRight
 </template>

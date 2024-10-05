@@ -75,7 +75,17 @@ const multipleCardsIsSelected = computed(() => {
 const itemsCount = computed(() => multipleCardsSelectedIds.value.length + multipleBoxesSelectedIds.value.length)
 const selectedItems = computed(() => store.getters['currentSpace/selectedItems'])
 const names = computed(() => selectedItems.value.cards.map(card => card.name))
-const text = computed(() => utils.textFromCardNames(selectedItems.value.cards))
+const sortedByY = (items) => {
+  items = items.sort((a, b) => {
+    return a.y - b.y
+  })
+  return items
+}
+const text = computed(() => {
+  let cards = selectedItems.value.cards
+  cards = sortedByY(cards)
+  return utils.textFromCardNames(cards)
+})
 
 // labels
 

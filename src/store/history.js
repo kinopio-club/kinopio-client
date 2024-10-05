@@ -30,6 +30,8 @@ import { nextTick } from 'vue'
 let showDebugMessages = false
 const showLogMessages = true // true
 
+let prevPatchTime = new Date() // unix timestamp ms
+
 let patches = []
 let pointer = 0
 let isPaused = false
@@ -86,8 +88,14 @@ const self = {
       patches.splice(pointer, 0, patch)
       pointer = pointer + 1
       if (showLogMessages) {
-        console.log('⏺ history', { newPatch: patch, pointer })
+        console.log('⏺ add history patch', { newPatch: patch, pointer })
       }
+    },
+    addToPrevPatch: (state, patch) => {
+      const prevPatch = patches[patches.length - 1]
+      const updatedPatch = prevPatch.concat(patch)
+      patches[patches.length - 1] = updatedPatch
+      console.log('⏺ updated prev history patch', { updatedPatch, pointer })
     },
     trim: (state) => {
       const max = 60
@@ -153,6 +161,10 @@ const self = {
 
     add: (context, { cards, connections, connectionTypes, boxes, useSnapshot, isRemoved }) => {
       if (isPaused) { return }
+      const groupTime = 1000
+      const time = new Date()
+      const timeDelta = time - prevPatchTime
+      const shouldAddToPreviousPatch = timeDelta < groupTime
       let patch = []
       // cards
       if (cards) {
@@ -198,8 +210,14 @@ const self = {
         })
         patch = patch.concat(boxes)
       }
-      context.commit('add', patch)
+      patch = patch.filter(item => Boolean(item))
+      if (patches.length && shouldAddToPreviousPatch) {
+        context.commit('addToPrevPatch', patch)
+      } else {
+        context.commit('add', patch)
+      }
       context.commit('trim')
+      prevPatchTime = time
     },
 
     // Undo

@@ -217,6 +217,9 @@ const backgroundImages = computed(() => {
 })
 const updateSpaceBackground = (url) => {
   url = url.url || url
+  if (url === background.value) {
+    url = ''
+  }
   const updates = {
     backgroundIsGradient: false,
     background: url
