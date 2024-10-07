@@ -207,10 +207,10 @@ dialog.about.narrow(v-if="visible" :open="visible" @click.left="closeDialogs" re
             span Forum{{' '}}
             img.icon.visit(src="@/assets/visit.svg")
     .row
-      .button-wrap
-        a(href="https://kinopio.club/blog")
-          button
-            span Blog →
+      //- .button-wrap
+      //-   a(href="https://kinopio.club/blog")
+      //-     button
+      //-       span Blog →
       .button-wrap(v-if="!isSecureAppContextIOS")
         button(@click.left.stop="triggerDonateIsVisible")
           img.icon(src="@/assets/heart-empty.svg")
