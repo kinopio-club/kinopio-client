@@ -3,7 +3,7 @@ dialog.donate.narrow(v-if="visible" :open="visible" @click.left.stop ref="dialog
   section
     p Donate
   section
-    p Donations help support my work. I'm grateful and flattered that you're even here.
+    p Donations help support my work on Kinopio. I'm grateful and flattered that you're even here.
     p
       span You'll also get the coveted {{' '}}
       span.badge.success
