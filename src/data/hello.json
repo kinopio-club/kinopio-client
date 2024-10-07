@@ -1165,7 +1165,9 @@
       "directionIsVisible": false,
       "createdAt": "2023-07-15T22:49:19.750Z",
       "updatedAt": "2023-07-17T03:15:19.328Z",
-      "path": "m334,870 q90,40 144,232"
+      "path": "m334,869 q90,40 37,167",
+      "labelRelativePositionX": 0.66,
+      "labelRelativePositionY": 0.05
     },
     {
       "startItemId": "eMCYdsjvHQ2Og2fPa9Bts",
