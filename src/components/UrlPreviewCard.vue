@@ -216,6 +216,8 @@ const handleTouchMove = () => {
   disableIsActive()
 }
 const openUrl = async (event, url) => {
+  const userIsConnecting = store.state.currentConnectionStartItemIds.length
+  if (userIsConnecting) { return }
   state.isActive = false
   store.commit('clearAllInteractingWithAndSelected')
   if (store.state.currentUserIsDraggingConnectionIdLabel) { return }
@@ -231,9 +233,6 @@ const openUrl = async (event, url) => {
     }
   }
   store.dispatch('closeAllDialogs')
-  if (store.state.cardsWereDragged) {
-    return
-  }
   if (event.type === 'touchend') {
     window.location = url
   } else {
