@@ -99,9 +99,9 @@ dialog section.connection-actions
   padding 4px
   padding-bottom 0
   &.is-background-light
-    border-color var(--primary-border-on-light-background)
+    border-color var(--primary-border-on-light-background) !important
   &.is-background-dark
-    border-color var(--primary-border-on-dark-background)
+    border-color var(--primary-border-on-dark-background) !important
 
   .row
     margin-top 0

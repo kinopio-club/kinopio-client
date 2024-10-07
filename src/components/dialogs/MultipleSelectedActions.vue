@@ -491,8 +491,8 @@ dialog.narrow.multiple-selected-actions(
     CardOrBoxActions(:visible="cardsIsSelected || boxesIsSelected" :cards="cards" :boxes="boxes" @closeDialogs="closeDialogs" :class="{ 'last-row': !connectionsIsSelected }" :backgroundColor="userColor")
     ConnectionActions(:visible="(shouldShowMultipleSelectedLineActions || onlyConnectionsIsSelected) && connectionsIsSelected" :connections="editableConnections" @closeDialogs="closeDialogs" :canEditAll="canEditAll" :backgroundColor="userColor" :label="moreLineOptionsLabel")
 
-  section(v-if="cardOrBoxIsSelected")
-    .row
+  section
+    .row(v-if="cardOrBoxIsSelected")
       //- Align And Distribute
       AlignAndDistribute(:visible="multipleCardOrBoxesIsSelected" :shouldHideMoreOptions="true" :shouldDistributeWithAlign="true" :numberOfSelectedItemsCreatedByCurrentUser="numberOfSelectedItemsCreatedByCurrentUser" :canEditAll="canEditAll" :cards="cards" :editableCards="cards" :connections="connections" :boxes="boxes" :editableBoxes="editableBoxes")
       //- Move/Copy
@@ -506,7 +506,7 @@ dialog.narrow.multiple-selected-actions(
     //- More Options
     AlignAndDistribute(:visible="multipleCardOrBoxesIsSelected && moreOptionsIsVisible" :numberOfSelectedItemsCreatedByCurrentUser="numberOfSelectedItemsCreatedByCurrentUser" :canEditAll="canEditAll" :cards="cards" :editableCards="cards" :connections="connections" :boxes="boxes" :editableBoxes="editableBoxes")
 
-    .row(v-if="cardOrBoxIsSelected")
+    .row
       //- Remove
       button.danger(:disabled="!canEditAll.all" @click.left="remove")
         img.icon(src="@/assets/remove.svg")

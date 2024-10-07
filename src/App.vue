@@ -918,9 +918,6 @@ button
   transform rotate(-90deg)
   vertical-align 2px
 
-.icon.box-icon
-  vertical-align -1px
-
 .icon.comment
   vertical-align -1px
 
