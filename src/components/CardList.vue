@@ -135,7 +135,8 @@ const updateCurrentPage = () => {
   const zoom = utils.pinchCounterZoomDecimal()
   const threshold = 600
   const nearBottomY = state.pageHeight - (threshold * state.currentPage)
-  if ((state.scrollY * zoom) > nearBottomY) {
+  const isNextPage = (state.scrollY * zoom) > nearBottomY
+  if (isNextPage) {
     state.currentPage = Math.min(state.currentPage + 1, totalPages.value)
   }
 }
