@@ -336,7 +336,7 @@ const addCard = async (options) => {
   let childCard = document.querySelector(`.card[data-card-id="${childCardId}"]`)
   const childCardData = store.getters['currentCards/byId'](childCardId)
   const shouldOutdentChildToParent = childCard && !childCardData
-  const spaceBetweenCards = utils.spaceBetweenCards()
+  const spaceBetweenCards = consts.spaceBetweenCards
   let position = {}
   let isParentCard = true
   if (shouldOutdentChildToParent) {
@@ -384,7 +384,8 @@ const addCard = async (options) => {
 const addChildCard = async (options) => {
   options = options || {}
   useSiblingConnectionType = false
-  const spaceBetweenCards = utils.spaceBetweenCards()
+  const spaceBetweenCards = consts.spaceBetweenCards
+
   const parentCardId = store.state.parentCardId
   const childCardId = store.state.childCardId
   let parentCardElement = document.querySelector(`.card[data-card-id="${parentCardId}"]`)
@@ -416,7 +417,7 @@ const addChildCard = async (options) => {
 
 // recursive
 const nonOverlappingCardPosition = (position) => {
-  const spaceBetweenCards = utils.spaceBetweenCards()
+  const spaceBetweenCards = consts.spaceBetweenCards
   const cards = store.getters['currentCards/isSelectable'](position)
   if (!utils.arrayHasItems(cards)) { return position }
   const overlappingCard = cards.find(card => {

@@ -913,10 +913,6 @@ export default {
   emptyCard () {
     return { width: consts.defaultCardWidth, height: 32 }
   },
-  spaceBetweenCards () {
-    let spaceBetween = 12
-    return this.spaceCounterZoomDecimal() * spaceBetween
-  },
   cardElementDimensions (card) {
     if (!card) { return }
     const element = document.querySelector(`article#card[data-card-id="${card.id}"]`)
