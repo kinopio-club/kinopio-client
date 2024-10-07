@@ -254,20 +254,21 @@ const updateCurrentPage = () => {
   const zoom = utils.pinchCounterZoomDecimal()
   const threshold = 600
   const nearBottomY = state.pageHeight - (threshold * state.currentPage)
-  if ((state.scrollY * zoom) > nearBottomY) {
+  const isNextPage = (state.scrollY * zoom) > nearBottomY
+  if (isNextPage) {
     state.currentPage = Math.min(state.currentPage + 1, totalPages.value)
   }
 }
 const totalPages = computed(() => {
-  const spaces = spacesFiltered.value
-  const total = Math.ceil(spaces.length / itemsPerPage)
+  const items = spacesFiltered.value
+  const total = Math.ceil(items.length / itemsPerPage)
   return total
 })
-const spacesRendered = computed(() => {
-  let spaces = spacesFiltered.value
+const itemsRendered = computed(() => {
+  let items = spacesFiltered.value
   const max = state.currentPage * itemsPerPage
-  spaces = spaces.slice(0, max)
-  return spaces
+  items = items.slice(0, max)
+  return items
 })
 
 // results filter
@@ -401,7 +402,7 @@ span.space-list-wrap
   )
   ul.results-list.space-list(ref="spaceListElement")
     .prev-scroll-area-height(:style="{height: state.prevScrollAreaHeight + 'px'}")
-    template(v-for="(space, index) in spacesRendered" :key="space.id")
+    template(v-for="(space, index) in itemsRendered" :key="space.id")
       .space-wrap(:data-space-id="space.id")
         a(:href="space.url")
           li(

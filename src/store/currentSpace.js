@@ -1315,6 +1315,10 @@ const currentSpace = {
       return members.find(member => member.id === userId)
     },
     userById: (state, getters, rootState, rootGetters) => (userId) => {
+      const otherUser = rootState.otherUsers[userId]
+      if (otherUser) {
+        return otherUser
+      }
       const space = utils.clone(state)
       const teamUser = rootGetters['teams/teamUser']({ userId, space })
       let user = getters.memberById(userId) || rootGetters.otherUserById(userId) || teamUser
