@@ -121,5 +121,5 @@ Use Ngrok to pipe your localhost through an external https server. Helpful for d
 
 - [are.na/kinopio/kinopio-design](https://www.are.na/kinopio/kinopio-design)
 - [github.com/kinopio-club](https://github.com/kinopio-club)
-- [User Forums](https://club.kinopio.club)
+- [User Forums](https://forum.kinopio.club)
 - [Discord](https://discord.gg/h2sR45Nby8)

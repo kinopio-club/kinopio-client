@@ -26,6 +26,7 @@ export default defineConfig(async ({ command, mode }) => {
   const routes = [
     '/about',
     '/api',
+    '/blog',
     '/changelog',
     '/discord',
     '/forum',
@@ -60,6 +61,7 @@ export default defineConfig(async ({ command, mode }) => {
             /^\/help(?:\/.*)?$/,
             /^\/about(?:\/.*)?$/,
             /^\/api(?:\/.*)?$/,
+            /^\/blog(?:\/.*)?$/,
             /^\/forum(?:\/.*)?$/,
             /^\/blog(?:\/.*)?$/
           ],
