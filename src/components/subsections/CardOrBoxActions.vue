@@ -7,6 +7,7 @@ import TagPickerStyleActions from '@/components/dialogs/TagPickerStyleActions.vu
 import ColorPicker from '@/components/dialogs/ColorPicker.vue'
 import FontPicker from '@/components/dialogs/FontPicker.vue'
 import utils from '@/utils.js'
+import consts from '@/consts.js'
 
 import uniq from 'lodash-es/uniq'
 import { nanoid } from 'nanoid'
@@ -208,15 +209,17 @@ const toggleTagPickerIsVisible = () => {
 
 const containItemsInNewBox = async () => {
   if (isNotCollaborator.value) { return }
-  let box = utils.boundaryRectFromItems(items.value)
-  // add box margins
-  const margin = 20
-  box = {
+  const rect = utils.boundaryRectFromItems(items.value)
+  // box size
+  const padding = consts.spaceBetweenCards
+  const paddingTop = 30 + padding
+  // same as Box shrinkToMinBoxSize
+  const box = {
     id: nanoid(),
-    x: box.x - margin,
-    resizeWidth: box.width + (margin * 2),
-    y: box.y - (margin * 2.5),
-    resizeHeight: box.height + (margin * 3.5)
+    x: rect.x - padding,
+    y: rect.y - paddingTop,
+    resizeWidth: rect.width + (padding * 2),
+    resizeHeight: rect.height + (padding + paddingTop)
   }
   store.dispatch('currentBoxes/add', { box })
   store.dispatch('closeAllDialogs')
