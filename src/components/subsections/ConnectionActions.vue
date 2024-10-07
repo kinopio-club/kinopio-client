@@ -4,6 +4,7 @@ import { useStore } from 'vuex'
 
 import MultipleConnectionsPicker from '@/components/dialogs/MultipleConnectionsPicker.vue'
 import ConnectionDecorators from '@/components/ConnectionDecorators.vue'
+import utils from '@/utils.js'
 
 import uniq from 'lodash-es/uniq'
 import uniqBy from 'lodash-es/uniqBy'
@@ -30,6 +31,9 @@ onMounted(() => {
   })
 })
 
+const colorClasses = computed(() => {
+  return utils.colorClasses({ backgroundColor: props.backgroundColor })
+})
 const toggleMultipleConnectionsPickerVisible = () => {
   const isVisible = state.multipleConnectionsPickerVisible
   closeDialogsAndEmit()
@@ -69,9 +73,9 @@ const closeDialogs = () => {
 </script>
 
 <template lang="pug">
-section.subsection.connection-actions(v-if="visible")
+section.subsection.connection-actions(v-if="visible" :class="colorClasses")
   p.subsection-vertical-label(:style="{ background: backgroundColor }")
-    span {{label}}
+    span.label(:class="colorClasses") {{label}}
   .row.edit-connection-types
     //- Type Color
     .button-wrap(v-if="!props.hideType")
@@ -94,11 +98,22 @@ dialog section.connection-actions
   border 1px solid var(--primary-border)
   padding 4px
   padding-bottom 0
+  &.is-background-light
+    border-color var(--primary-border-on-light-background)
+  &.is-background-dark
+    border-color var(--primary-border-on-dark-background)
+
   .row
     margin-top 0
   .button-wrap
     margin-left 0
     margin-right 4px
     vertical-align middle
-    margin-bottom 10px
+    margin-bottom 4px
+  .label
+    &.is-background-light
+      color var(--primary-on-light-background)
+    &.is-background-dark
+      color var(--primary-on-dark-background)
+
 </style>

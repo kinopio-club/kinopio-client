@@ -67,6 +67,9 @@ const isThemeDarkAndUserColorLight = computed(() => {
   const userColorIsLight = !utils.colorIsDark(userColor.value)
   return isThemeDark && userColorIsLight
 })
+const colorClasses = computed(() => {
+  return utils.colorClasses({ backgroundColor: userColor.value })
+})
 const maxCardCharacterLimit = computed(() => store.state.currentUser.cardSettingsDefaultCharacterLimit || consts.defaultCharacterLimit)
 const userColor = computed(() => store.state.currentUser.color)
 const spaceCounterZoomDecimal = computed(() => store.getters.spaceCounterZoomDecimal)
@@ -465,20 +468,20 @@ dialog.narrow.multiple-selected-actions(
   ref="dialogElement"
   @click.left="closeDialogs"
   :style="styles"
+  :class="colorClasses"
 )
   .dark-theme-background-layer(v-if="isThemeDarkAndUserColorLight")
   section
 
     //- Edit Cards
-    .row
-      template(v-if="cardOrBoxIsSelected")
-        //- [·]
-        ItemCheckboxButton(:boxes="boxes" :cards="cards" :isDisabled="!canEditAll.cards && !canEditAll.boxes")
-        //- Connect
-        button(v-if="multipleCardsIsSelected" :class="{active: state.cardsIsConnected}" @click.left.prevent="toggleConnectCards" @keydown.stop.enter="toggleConnectCards" :disabled="!canEditAll.cards" title="Connect/Disconnect Cards")
-          img.connect-items.icon(src="@/assets/connect-items.svg")
-          //- img.connector-icon.icon(src="@/assets/connector-open.svg" v-else)
-          //- span Connect
+    .row(v-if="cardOrBoxIsSelected")
+      //- [·]
+      ItemCheckboxButton(:boxes="boxes" :cards="cards" :isDisabled="!canEditAll.cards && !canEditAll.boxes")
+      //- Connect
+      button(v-if="multipleCardsIsSelected" :class="{active: state.cardsIsConnected}" @click.left.prevent="toggleConnectCards" @keydown.stop.enter="toggleConnectCards" :disabled="!canEditAll.cards" title="Connect/Disconnect Cards")
+        img.connect-items.icon(src="@/assets/connect-items.svg")
+        //- img.connector-icon.icon(src="@/assets/connector-open.svg" v-else)
+        //- span Connect
       //- LINE Options
       .button-wrap(v-if="connectionsIsSelected && !onlyConnectionsIsSelected")
         button(:disabled="!canEditAll.cards && !canEditAll.boxes" @click.left.stop="toggleShouldShowMultipleSelectedLineActions" :class="{active : shouldShowMultipleSelectedLineActions}" title="More Line Options")
@@ -576,4 +579,11 @@ dialog.narrow.multiple-selected-actions(
   .icon.connect-items
     height 12px
     vertical-align -1px
+
+  &.is-background-light
+    section
+      border-color var(--primary-border-on-light-background)
+  &.is-background-dark
+    section
+      border-color var(--primary-border-on-dark-background)
 </style>

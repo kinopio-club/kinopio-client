@@ -291,6 +291,9 @@ const toggleColorPickerIsVisible = () => {
   closeDialogs()
   state.colorPickerIsVisible = !isVisible
 }
+const colorClasses = computed(() => {
+  return utils.colorClasses({ backgroundColor: background.value })
+})
 
 // frames
 
@@ -485,7 +488,7 @@ const updateBox = (box, updates) => {
 </script>
 
 <template lang="pug">
-section.subsection.style-actions(v-if="visible" @click.left.stop="closeDialogs")
+section.subsection.style-actions(v-if="visible" @click.left.stop="closeDialogs" :class="colorClasses")
   p.subsection-vertical-label(v-if="labelIsVisible" :style="{ background: background }")
     span {{label}}
   .row
@@ -553,9 +556,13 @@ section.subsection.style-actions(v-if="visible" @click.left.stop="closeDialogs")
   position relative
   padding var(--subsection-padding)
   background-color transparent
-  &.subsection
-    border 1px solid var(--primary-border)
-    padding var(--subsection-padding)
+  border 1px solid var(--primary-border)
+  padding var(--subsection-padding)
+  &.is-background-light
+    border-color var(--primary-border-on-light-background)
+  &.is-background-dark
+    border-color var(--primary-border-on-dark-background)
+
   .row
     max-width 203px
     display block
