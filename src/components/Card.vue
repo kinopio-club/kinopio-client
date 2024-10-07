@@ -1533,11 +1533,21 @@ const shouldNotStick = computed(() => {
 const updateShouldNotStickMap = () => {
   stickyMap = []
   const element = cardElement.value
+  let rect
   // connector
   const connector = element.querySelector('.connector')
-  let rect = connector.getBoundingClientRect()
-  rect = utils.rectDimensions(rect)
-  stickyMap.push(rect)
+  if (connector) {
+    rect = connector.getBoundingClientRect()
+    rect = utils.rectDimensions(rect)
+    stickyMap.push(rect)
+  }
+  // checkbox
+  const checkbox = element.querySelector('.checkbox-wrap')
+  if (checkbox) {
+    rect = checkbox.getBoundingClientRect()
+    rect = utils.rectDimensions(rect)
+    stickyMap.push(rect)
+  }
   // tilt resize buttons
   const tiltResizeButtons = element.querySelectorAll('.bottom-button-wrap')
   tiltResizeButtons.forEach(button => {
