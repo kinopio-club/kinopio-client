@@ -813,7 +813,7 @@ const toggleLockCards = () => {
     cards = [store.getters['currentCards/byId'](cardId)]
   } else {
     cards = store.getters['currentCards/all']
-    cards = cards.filter(card => utils.isPointInsideCard(currentCursorPosition, card))
+    cards = cards.filter(card => utils.isPointInsideRect(currentCursorPosition, card))
   }
   cards = cards.filter(card => Boolean(card))
   if (!cards) { return }

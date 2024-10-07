@@ -1021,16 +1021,16 @@ export default {
     const y = parseInt(element.style.top)
     return { x, y }
   },
-  isPointInsideCard (point, card) {
+  isPointInsideRect (point, rect) {
     const xIsInside = this.isBetween({
       value: point.x,
-      min: card.x,
-      max: card.x + card.width
+      min: rect.x,
+      max: rect.x + rect.width
     })
     const yIsInside = this.isBetween({
       value: point.y,
-      min: card.y,
-      max: card.y + card.height
+      min: rect.y,
+      max: rect.y + rect.height
     })
     return xIsInside && yIsInside
   },

@@ -45,6 +45,7 @@ const stickyTimerDuration = 250
 let preventSticking = false
 let stickyTimerComplete = false
 let stickyTimer
+let stickyMap
 
 let prevIsLoadingUrlPreview
 
@@ -1529,6 +1530,22 @@ const shouldNotStick = computed(() => {
   const currentUserIsPanning = store.state.currentUserIsPanningReady || store.state.currentUserIsPanning
   return userIsConnecting || store.state.currentUserIsDraggingBox || store.state.currentUserIsResizingBox || currentUserIsPanning || currentCardDetailsIsVisible.value || isRemoteCardDetailsVisible.value || isRemoteCardDragging.value || currentCardIsBeingDragged.value || store.state.currentUserIsResizingCard || store.state.currentUserIsTiltingCard || isLocked.value
 })
+const updateShouldNotStickMap = () => {
+  stickyMap = []
+  const element = cardElement.value
+  // connector
+  const connector = element.querySelector('.connector')
+  let rect = connector.getBoundingClientRect()
+  rect = utils.rectDimensions(rect)
+  stickyMap.push(rect)
+  // tilt resize buttons
+  const tiltResizeButtons = element.querySelectorAll('.bottom-button-wrap')
+  tiltResizeButtons.forEach(button => {
+    rect = button.getBoundingClientRect()
+    rect = utils.rectDimensions(rect)
+    stickyMap.push(rect)
+  })
+}
 const initStickToCursor = () => {
   preventSticking = false
   if (shouldNotStick.value || consts.userPrefersReducedMotion()) {
@@ -1538,10 +1555,15 @@ const initStickToCursor = () => {
     stickyTimerComplete = true
   }, stickyTimerDuration)
   updateStickyStretchResistance()
+  updateShouldNotStickMap()
 }
 const clearStickyTimer = () => {
   clearTimeout(stickyTimer)
   stickyTimerComplete = false
+}
+const stopSticking = () => {
+  clearStickyPositionOffsets()
+  preventSticking = true
 }
 const isValidStickySize = (width, height, min) => {
   const isWidth = width > min
@@ -1576,27 +1598,34 @@ const stickToCursor = (event) => {
   if (state.isAnimationUnsticking) { return }
   if (preventSticking) { return }
   if (!stickyTimerComplete) { return }
+  const position = utils.cursorPositionInSpace(event)
+  // stop sticking by map
+  const positionIsInsideMap = stickyMap.find(rect => utils.isPointInsideRect(position, rect))
+  if (positionIsInsideMap) {
+    stopSticking()
+    return
+  }
+  // stop sticking by element
   const classes = ['checkbox-wrap', 'button-wrap', 'progress-wrap', 'inline-button', 'badge']
   const elements = ['button', 'progress', 'iframe']
   const isOverAction = classes.includes(event.target.className) || elements.includes(event.target.nodeName.toLowerCase())
   const isOverTag = event.target.className.includes('button-badge')
   if (shouldNotStick.value || isOverAction || isOverTag) {
-    clearStickyPositionOffsets()
-    preventSticking = true
+    stopSticking()
     return
   }
   const isButtonHover = event.target.closest('.inline-button-wrap') || event.target.closest('.button-wrap')
   if (isButtonHover) {
-    clearStickyPositionOffsets()
+    stopSticking()
     return
   }
+  // position
   const stretchResistance = state.stickyStretchResistance
   const { height, width } = props.card
   const halfWidth = width / 2
   const halfHeight = height / 2
   let centerX = x.value + halfWidth
   let centerY = y.value + halfHeight
-  let position = utils.cursorPositionInSpace(event)
   // position from card center
   const xFromCenter = position.x - centerX
   const yFromCenter = position.y - centerY
