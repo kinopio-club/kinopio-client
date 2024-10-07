@@ -40,6 +40,7 @@ const initialState = {
   shouldUseLastConnectionType: true,
   shouldShowItemActions: false,
   shouldShowMultipleSelectedLineActions: false,
+  shouldShowMultipleSelectedBoxActions: false,
   shouldDisableRightClickToPan: false,
   shouldShowCurrentSpaceTags: false,
   showInExploreUpdatedAt: null, // date
@@ -274,6 +275,10 @@ export default {
     shouldShowMultipleSelectedLineActions: (state, value) => {
       state.shouldShowMultipleSelectedLineActions = value
       cache.updateUser('shouldShowMultipleSelectedLineActions', value)
+    },
+    shouldShowMultipleSelectedBoxActions: (state, value) => {
+      state.shouldShowMultipleSelectedBoxActions = value
+      cache.updateUser('shouldShowMultipleSelectedBoxActions', value)
     },
     showInExploreUpdatedAt: (state, value) => {
       state.showInExploreUpdatedAt = value
@@ -782,6 +787,14 @@ export default {
       context.dispatch('api/addToQueue', { name: 'updateUser',
         body: {
           shouldShowMultipleSelectedLineActions: value
+        } }, { root: true })
+    },
+    shouldShowMultipleSelectedBoxActions: (context, value) => {
+      utils.typeCheck({ value, type: 'boolean' })
+      context.commit('shouldShowMultipleSelectedBoxActions', value)
+      context.dispatch('api/addToQueue', { name: 'updateUser',
+        body: {
+          shouldShowMultipleSelectedBoxActions: value
         } }, { root: true })
     },
     showInExploreUpdatedAt: (context, value) => {

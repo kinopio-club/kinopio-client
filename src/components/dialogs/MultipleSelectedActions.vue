@@ -76,10 +76,6 @@ const spaceCounterZoomDecimal = computed(() => store.getters.spaceCounterZoomDec
 const pinchCounterZoomDecimal = computed(() => store.state.pinchCounterZoomDecimal)
 const spaceZoomDecimal = computed(() => store.getters.spaceZoomDecimal)
 
-const shouldShowMultipleSelectedCardActions = computed(() => store.state.currentUser.shouldShowMultipleSelectedCardActions)
-const shouldShowMultipleSelectedLineActions = computed(() => store.state.currentUser.shouldShowMultipleSelectedLineActions)
-const moreOptionsIsVisible = computed(() => store.state.currentUser.shouldShowMoreAlignOptions)
-
 const cardOrBoxIsSelected = computed(() => cards.value.length || boxes.value.length)
 
 // items
@@ -256,7 +252,7 @@ const moreLineOptionsLabel = computed(() => {
     return 'LINE'
   }
 })
-const onlyConnectionsIsSelected = computed(() => connectionsIsSelected.value && !cardsIsSelected.value)
+const onlyConnectionsIsSelected = computed(() => connectionsIsSelected.value && !cardsIsSelected.value && !boxesIsSelected.value)
 const connectionsIsSelected = computed(() => Boolean(multipleConnectionsSelectedIds.value.length))
 const connections = computed(() => {
   let connections = multipleConnectionsSelectedIds.value.map(id => {
@@ -297,6 +293,7 @@ const connectionAlreadyExists = (startItemId, endItemId) => {
 
 // boxes
 
+const onlyBoxesIsSelected = computed(() => boxesIsSelected.value && !cardsIsSelected.value && !connectionsIsSelected.value)
 const boxesIsSelected = computed(() => multipleBoxesSelectedIds.value.length > 0)
 const boxes = computed(() => {
   let boxes = multipleBoxesSelectedIds.value.map(boxId => {
@@ -437,10 +434,21 @@ const toggleMoveItemsIsVisible = () => {
 
 // more options
 
+const moreOptionsIsVisible = computed(() => store.state.currentUser.shouldShowMoreAlignOptions)
+const shouldShowMultipleSelectedLineActions = computed(() => store.state.currentUser.shouldShowMultipleSelectedLineActions)
+const shouldShowMultipleSelectedBoxActions = computed(() => store.state.currentUser.shouldShowMultipleSelectedBoxActions)
 const toggleShouldShowMultipleSelectedLineActions = () => {
   closeDialogs()
   const isVisible = !shouldShowMultipleSelectedLineActions.value
   store.dispatch('currentUser/shouldShowMultipleSelectedLineActions', isVisible)
+  nextTick(() => {
+    scrollIntoView()
+  })
+}
+const toggleShouldShowMultipleSelectedBoxActions = () => {
+  closeDialogs()
+  const isVisible = !shouldShowMultipleSelectedBoxActions.value
+  store.dispatch('currentUser/shouldShowMultipleSelectedBoxActions', isVisible)
   nextTick(() => {
     scrollIntoView()
   })
@@ -480,15 +488,22 @@ dialog.narrow.multiple-selected-actions(
       //- Connect
       button(v-if="multipleCardsIsSelected" :class="{active: state.cardsIsConnected}" @click.left.prevent="toggleConnectCards" @keydown.stop.enter="toggleConnectCards" :disabled="!canEditAll.cards" title="Connect/Disconnect Cards")
         img.connect-items.icon(src="@/assets/connect-items.svg")
-        //- img.connector-icon.icon(src="@/assets/connector-open.svg" v-else)
-        //- span Connect
       //- LINE Options
       .button-wrap(v-if="connectionsIsSelected && !onlyConnectionsIsSelected")
         button(:disabled="!canEditAll.cards && !canEditAll.boxes" @click.left.stop="toggleShouldShowMultipleSelectedLineActions" :class="{active : shouldShowMultipleSelectedLineActions}" title="More Line Options")
           span Line
           img.icon.down-arrow(src="@/assets/down-arrow.svg")
+      //- BOX options
+      .button-wrap(v-if="boxesIsSelected && !onlyBoxesIsSelected")
+        button(:disabled="!canEditAll.cards && !canEditAll.boxes" @click.left.stop="toggleShouldShowMultipleSelectedBoxActions" :class="{active : shouldShowMultipleSelectedBoxActions}" title="More Box Options")
+          span Box
+          img.icon.down-arrow(src="@/assets/down-arrow.svg")
 
-    CardOrBoxActions(:visible="cardsIsSelected || boxesIsSelected" :cards="cards" :boxes="boxes" @closeDialogs="closeDialogs" :class="{ 'last-row': !connectionsIsSelected }" :backgroundColor="userColor")
+    CardOrBoxActions(:visible="cardsIsSelected" :cards="cards" @closeDialogs="closeDialogs" :backgroundColor="userColor")
+    CardOrBoxActions(:labelIsVisible="true" :visible="(shouldShowMultipleSelectedBoxActions || onlyBoxesIsSelected) && boxesIsSelected" :boxes="boxes" @closeDialogs="closeDialogs" :backgroundColor="userColor")
+
+      //- :class="{ 'last-row': !connectionsIsSelected }"
+
     ConnectionActions(:visible="(shouldShowMultipleSelectedLineActions || onlyConnectionsIsSelected) && connectionsIsSelected" :connections="editableConnections" @closeDialogs="closeDialogs" :canEditAll="canEditAll" :backgroundColor="userColor" :label="moreLineOptionsLabel")
 
   section
@@ -583,7 +598,11 @@ dialog.narrow.multiple-selected-actions(
   &.is-background-light
     section
       border-color var(--primary-border-on-light-background)
+    section.subsection + section.subsection
+      border-top 1px solid var(--primary-border-on-light-background)
   &.is-background-dark
     section
       border-color var(--primary-border-on-dark-background)
+    section.subsection + section.subsection
+      border-top 1px solid var(--primary-border-on-dark-background)
 </style>
