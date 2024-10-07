@@ -10,6 +10,10 @@ import cache from '@/cache.js'
 
 const store = useStore()
 
+const itemsPerPage = 60
+
+const resultsListElement = ref(null)
+
 onMounted(() => {
   store.subscribe(mutation => {
     if (mutation.type === 'triggerRemoveCardFromCardList') {
@@ -17,6 +21,11 @@ onMounted(() => {
       state.removedCardIds.push(card.id)
     }
   })
+  updateScroll()
+  resultsListElement.value.closest('section').addEventListener('scroll', updateScroll)
+  if (props.disableListOptimizations) {
+    state.currentPage = totalPages.value
+  }
 })
 
 const emit = defineEmits(['selectCard', 'removeCard'])
@@ -25,11 +34,15 @@ const props = defineProps({
   cards: Array,
   search: String,
   cardsShowRemoveButton: Boolean,
-  dateIsCreatedAt: Boolean
+  dateIsCreatedAt: Boolean,
+  resultsSectionHeight: Number
 })
 
 const state = reactive({
-  removedCardIds: []
+  removedCardIds: [],
+  scrollY: 0,
+  currentPage: 1,
+  prevScrollAreaHeight: 0
 })
 
 const normalizedCards = computed(() => {
@@ -90,12 +103,61 @@ const styles = (card) => {
     backgroundColor: card.backgroundColor
   }
 }
+
+// scroll
+
+watch(() => props.resultsSectionHeight, async (value, prevValue) => {
+  await nextTick()
+  updateScroll()
+})
+watch(() => props.isLoading, async (value, prevValue) => {
+  await nextTick()
+  updateScroll()
+})
+const updateScroll = async () => {
+  await nextTick()
+  let element = resultsListElement.value
+  if (!element) { return }
+  element = element.closest('section')
+  if (!element) {
+    console.error('scroll element not found', element)
+  }
+  state.scrollY = element.scrollTop
+  const scrollHeight = element.getBoundingClientRect().height
+  let minItemHeight = 36 // 37.5
+  state.pageHeight = itemsPerPage * minItemHeight * state.currentPage
+  updateCurrentPage()
+}
+
+// list render optimization
+
+const updateCurrentPage = () => {
+  const zoom = utils.pinchCounterZoomDecimal()
+  const threshold = 600
+  const nearBottomY = state.pageHeight - (threshold * state.currentPage)
+  if ((state.scrollY * zoom) > nearBottomY) {
+    state.currentPage = Math.min(state.currentPage + 1, totalPages.value)
+  }
+}
+const totalPages = computed(() => {
+  const items = normalizedCards.value
+  const total = Math.ceil(items.length / itemsPerPage)
+  return total
+})
+const itemsRendered = computed(() => {
+  let items = normalizedCards.value
+  const max = state.currentPage * itemsPerPage
+  items = items.slice(0, max)
+  return items
+})
+
 </script>
 
 <template lang="pug">
 span
-  ul.results-list.card-list(ref="resultsList")
-    template(v-for="card in normalizedCards" :key="card.id")
+  ul.results-list.card-list(ref="resultsListElement")
+    .prev-scroll-area-height(:style="{height: state.prevScrollAreaHeight + 'px'}")
+    template(v-for="card in itemsRendered" :key="card.id")
       li(@click.stop="selectCard(card)" :data-card-id="card.id" :class="{active: cardIsActive(card), hover: cardIsFocused(card)}")
         //- date
         span.badge.status.inline-badge
