@@ -1606,15 +1606,7 @@ const store = createStore({
     updateOtherUsers: (state, updatedUser) => {
       if (!updatedUser) { return }
       utils.typeCheck({ value: updatedUser, type: 'object' })
-      let users = utils.clone(state.otherUsers)
-      users = users.filter(Boolean)
-      users = users.filter(user => {
-        if (user.id !== updatedUser.id) {
-          return user
-        }
-      })
-      users.push(updatedUser)
-      state.otherUsers = users
+      state.otherUsers[updatedUser.id] = updatedUser
     },
     updateOtherItems: (state, { cards, spaces }) => {
       utils.typeCheck({ value: cards, type: 'array' })

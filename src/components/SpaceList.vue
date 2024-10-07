@@ -23,7 +23,7 @@ const store = useStore()
 
 let unsubscribe, shouldPreventSelectSpace
 
-const itemsPerPage = 30
+const itemsPerPage = 60
 
 const spaceListElement = ref(null)
 

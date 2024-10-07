@@ -10,7 +10,7 @@ import cache from '@/cache.js'
 
 const store = useStore()
 
-const itemsPerPage = 60
+const itemsPerPage = 15
 
 const resultsListElement = ref(null)
 
@@ -51,6 +51,7 @@ const normalizedCards = computed(() => {
   return items.map(card => {
     card = store.getters['currentCards/nameSegments'](card)
     card.user = store.getters['currentSpace/userById'](card.userId)
+    store.commit('updateOtherUsers', card.user)
     if (!card.user) {
       card.user = {
         id: '',
@@ -61,7 +62,6 @@ const normalizedCards = computed(() => {
     return card
   })
 })
-
 const urlPreviewImage = (card) => {
   if (!card.urlPreviewIsVisible) { return }
   return card.urlPreviewImage
@@ -133,7 +133,7 @@ const updateScroll = async () => {
 
 const updateCurrentPage = () => {
   const zoom = utils.pinchCounterZoomDecimal()
-  const threshold = 600
+  const threshold = 0
   const nearBottomY = state.pageHeight - (threshold * state.currentPage)
   const isNextPage = (state.scrollY * zoom) > nearBottomY
   if (isNextPage) {
@@ -141,14 +141,14 @@ const updateCurrentPage = () => {
   }
 }
 const totalPages = computed(() => {
-  const items = normalizedCards.value
+  const items = props.cards
   const total = Math.ceil(items.length / itemsPerPage)
   return total
 })
 const itemsRendered = computed(() => {
-  let items = normalizedCards.value
+  let items = props.cards
   const max = state.currentPage * itemsPerPage
-  items = items.slice(0, max)
+  items = normalizedCards.value.slice(0, max)
   return items
 })
 
@@ -165,7 +165,7 @@ span
           img.icon.time(src="@/assets/time.svg")
           span {{ relativeDate(card) }}
         //- user
-        UserLabelInline(v-if="userIsNotCurrentUser(card.user.id)" :user="card.user")
+        UserLabelInline(v-if="card.user.id && userIsNotCurrentUser(card.user.id)" :user="card.user")
         //- name
         span.card-info(:class="{ badge: card.backgroundColor, 'is-dark': colorIsDark(card) }" :style="styles(card)")
           template(v-for="segment in card.nameSegments")
