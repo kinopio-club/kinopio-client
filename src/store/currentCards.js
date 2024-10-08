@@ -750,6 +750,17 @@ const currentCards = {
         })
       })
     },
+    updateBelowCardsPosition: (context, { prevCardHeight, cardId }) => {
+      // calc height delta
+      const card = context.getters.byId(cardId)
+      const deltaHeight = card.height - prevCardHeight
+      if (deltaHeight === 0) { return }
+      // aligned cards
+      const alignedCards = context.getters['verticallyAlignedCardsBelowId'](cardId, deltaHeight)
+      if (!alignedCards.length) { return }
+      alignedCards.unshift(card)
+      context.dispatch('distributeVertically', alignedCards)
+    },
 
     // z-index
 
@@ -945,6 +956,35 @@ const currentCards = {
     },
     canBeSelectedSortedByY: (state, getters) => {
       return canBeSelectedSortedByY
+    },
+    verticallyAlignedCardsBelowId: (state, getters) => (cardId, deltaHeight) => {
+      deltaHeight = deltaHeight || 0
+      let parentCard = utils.clone(getters.byId(cardId))
+      parentCard.height = parentCard.height - deltaHeight
+      let cards = getters.all
+      cards = cards.filter(card => {
+        const isAlignedX = card.x === parentCard.x
+        const isBelow = card.y > parentCard.y
+        return isAlignedX && isBelow
+      })
+      // recursion: match cards alignedY successively
+      let alignedCards = []
+      let prevAlignedCard
+      do {
+        const parent = prevAlignedCard || parentCard
+        const match = cards.find(card => {
+          const isAlignedY = parent.y + parent.height + consts.spaceBetweenCards === card.y
+          return isAlignedY
+        })
+        if (match) {
+          prevAlignedCard = match
+          alignedCards.push(match)
+          cards = cards.filter(card => card.id !== match.id)
+        } else {
+          prevAlignedCard = null
+        }
+      } while (prevAlignedCard)
+      return alignedCards
     },
     isSelectableInViewport: (state, getters, rootState, rootGetters) => () => {
       const elements = document.querySelectorAll(`article#card`)

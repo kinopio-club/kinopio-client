@@ -33,6 +33,8 @@ const openingPreDuration = 250 // ms
 const openingDuration = 250 // ms
 let openingAnimationTimer, openingStartTime, shouldCancelOpening
 
+let prevCardHeight = 0
+
 const store = useStore()
 
 const dialogElement = ref(null)
@@ -167,6 +169,11 @@ const showTagDetailsIsVisible = (event, tag) => {
   })
   store.commit('currentSelectedTag', tag)
   store.commit('tagDetailsIsVisible', true)
+}
+const currentCardHeight = () => {
+  const cardId = card.value.id
+  const rect = utils.cardRectFromId(cardId)
+  return rect.height
 }
 
 // styles
@@ -365,6 +372,7 @@ const showCard = async (cardId) => {
   prevCardName = card.value.name
   store.dispatch('history/pause')
   textareaSizes()
+  prevCardHeight = currentCardHeight()
 }
 const closeCard = async () => {
   store.commit('triggerHideTouchInterface')
@@ -390,6 +398,10 @@ const closeCard = async () => {
   if (item.name || prevCardName) {
     store.dispatch('history/add', { cards: [item], useSnapshot: true })
   }
+  store.dispatch('currentCards/updateBelowCardsPosition', {
+    prevCardHeight,
+    cardId: item.id
+  })
 }
 
 // name
