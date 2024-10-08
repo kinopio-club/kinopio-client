@@ -217,10 +217,13 @@ const triggerUpdateMagicPaintPositionOffset = () => {
 // dimensions and connection paths
 
 const updateDimensions = async (cardId) => {
-  cardId = cardId || card.value.id
-  const item = { id: cardId }
+  let cards = [card.value]
+  if (cardId) {
+    const item = store.getters['currentCards/byId'](cardId)
+    cards = [item]
+  }
   await nextTick()
-  store.dispatch('currentCards/updateDimensions', { cards: [item] })
+  store.dispatch('currentCards/updateDimensions', { cards })
   await nextTick()
   await nextTick()
 }

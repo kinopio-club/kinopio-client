@@ -457,6 +457,7 @@ const currentCards = {
           cards: [],
           spaceId: context.rootState.currentSpace.id
         }
+        cards = cards.filter(card => Boolean(card))
         let cardIds = cards.map(newCard => newCard.id)
         cardIds = cardIds.filter(cardId => Boolean(cardId))
         if (!cardIds) { return }
@@ -495,6 +496,11 @@ const currentCards = {
           context.dispatch('updateTallestCardHeight', card)
           context.dispatch('broadcast/update', { updates: body, type: 'updateCard', handler: 'currentCards/update' }, { root: true })
           updates.cards.push(body)
+          context.dispatch('updateBelowCardsPosition', {
+            prevCardHeight: prevDimensions.height,
+            newCardHeight: card.height,
+            cardId: card.id
+          })
         })
         if (canEditSpace) {
           context.dispatch('api/addToQueue', { name: 'updateMultipleCards', body: updates }, { root: true })
@@ -750,6 +756,19 @@ const currentCards = {
         })
       })
     },
+    updateBelowCardsPosition: (context, { prevCardHeight, newCardHeight, cardId }) => {
+      // calc height delta
+      const card = context.getters.byId(cardId)
+      if (!card) { return }
+      newCardHeight = newCardHeight || card.height
+      const deltaHeight = newCardHeight - prevCardHeight
+      if (deltaHeight === 0) { return }
+      // distributeVertically aligned cards below
+      const alignedCards = context.getters['verticallyAlignedCardsBelowId'](cardId, deltaHeight)
+      if (!alignedCards.length) { return }
+      alignedCards.unshift(card)
+      context.dispatch('distributeVertically', alignedCards)
+    },
 
     // z-index
 
@@ -945,6 +964,35 @@ const currentCards = {
     },
     canBeSelectedSortedByY: (state, getters) => {
       return canBeSelectedSortedByY
+    },
+    verticallyAlignedCardsBelowId: (state, getters) => (cardId, deltaHeight) => {
+      deltaHeight = deltaHeight || 0
+      let parentCard = utils.clone(getters.byId(cardId))
+      parentCard.height = parentCard.height - deltaHeight
+      let cards = getters.all
+      cards = cards.filter(card => {
+        const isAlignedX = card.x === parentCard.x
+        const isBelow = card.y > parentCard.y
+        return isAlignedX && isBelow
+      })
+      // recursion: match cards alignedY successively
+      let alignedCards = []
+      let prevAlignedCard
+      do {
+        const parent = prevAlignedCard || parentCard
+        const match = cards.find(card => {
+          const isAlignedY = parent.y + parent.height + consts.spaceBetweenCards === card.y
+          return isAlignedY
+        })
+        if (match) {
+          prevAlignedCard = match
+          alignedCards.push(match)
+          cards = cards.filter(card => card.id !== match.id)
+        } else {
+          prevAlignedCard = null
+        }
+      } while (prevAlignedCard)
+      return alignedCards
     },
     isSelectableInViewport: (state, getters, rootState, rootGetters) => () => {
       const elements = document.querySelectorAll(`article#card`)

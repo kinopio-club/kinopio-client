@@ -108,6 +108,9 @@ const addCheckboxToItems = async () => {
   state.itemsHaveCheckboxes = true
   updateDimensionsAndPaths()
 }
+
+// card positions
+
 const updateDimensionsAndPaths = async () => {
   store.dispatch('currentCards/updateDimensions', { cards: props.cards })
   await nextTick()

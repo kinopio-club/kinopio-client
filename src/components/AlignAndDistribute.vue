@@ -434,7 +434,6 @@ const alignLeftItems = (items, type) => {
         const previousItemHeight = rect.height
         const previousBottomSide = previousItem.y + previousItemHeight
         item.y = previousBottomSide + consts.spaceBetweenCards
-        console.error(item)
       }
       updateItem(item, type)
     }
