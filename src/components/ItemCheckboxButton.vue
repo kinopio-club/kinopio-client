@@ -5,12 +5,9 @@ import { useStore } from 'vuex'
 import utils from '@/utils.js'
 const store = useStore()
 
-let prevCardHeights = []
-
 onMounted(() => {
   checkItemsHaveCheckboxes()
   checkItemsCheckboxIsChecked()
-  updatePrevCards()
 })
 
 const emit = defineEmits(['updateCount'])
@@ -119,30 +116,6 @@ const updateDimensionsAndPaths = async () => {
   await nextTick()
   await nextTick()
   store.dispatch('currentConnections/updateMultiplePaths', props.cards)
-  await nextTick()
-  updateBelowCardsPosition()
-}
-
-// auto align cards below
-
-const updatePrevCards = () => {
-  prevCardHeights = props.cards.map(card => {
-    return {
-      cardId: card.id,
-      prevCardHeight: card.height
-    }
-  })
-}
-const updateBelowCardsPosition = async () => {
-  for (const item of prevCardHeights) {
-    await nextTick()
-    const { prevCardHeight, cardId } = item
-    store.dispatch('currentCards/updateBelowCardsPosition', {
-      prevCardHeight,
-      cardId
-    })
-  }
-  updatePrevCards()
 }
 </script>
 
