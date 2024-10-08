@@ -33,8 +33,6 @@ const openingPreDuration = 250 // ms
 const openingDuration = 250 // ms
 let openingAnimationTimer, openingStartTime, shouldCancelOpening
 
-let prevCardHeight = 0
-
 const store = useStore()
 
 const dialogElement = ref(null)
@@ -219,10 +217,13 @@ const triggerUpdateMagicPaintPositionOffset = () => {
 // dimensions and connection paths
 
 const updateDimensions = async (cardId) => {
-  cardId = cardId || card.value.id
-  const item = { id: cardId }
+  let cards = [card.value]
+  if (cardId) {
+    const item = store.getters['currentCards/byId'](cardId)
+    cards = [item]
+  }
   await nextTick()
-  store.dispatch('currentCards/updateDimensions', { cards: [item] })
+  store.dispatch('currentCards/updateDimensions', { cards })
   await nextTick()
   await nextTick()
 }
@@ -367,7 +368,6 @@ const showCard = async (cardId) => {
   prevCardName = card.value.name
   store.dispatch('history/pause')
   textareaSizes()
-  prevCardHeight = item.height
 }
 const closeCard = async () => {
   store.commit('triggerHideTouchInterface')
@@ -393,10 +393,6 @@ const closeCard = async () => {
   if (item.name || prevCardName) {
     store.dispatch('history/add', { cards: [item], useSnapshot: true })
   }
-  store.dispatch('currentCards/updateBelowCardsPosition', {
-    prevCardHeight,
-    cardId: item.id
-  })
 }
 
 // name

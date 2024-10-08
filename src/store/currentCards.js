@@ -495,6 +495,11 @@ const currentCards = {
           context.dispatch('updateTallestCardHeight', card)
           context.dispatch('broadcast/update', { updates: body, type: 'updateCard', handler: 'currentCards/update' }, { root: true })
           updates.cards.push(body)
+          context.dispatch('updateBelowCardsPosition', {
+            prevCardHeight: prevDimensions.height,
+            newCardHeight: card.height,
+            cardId: card.id
+          })
         })
         if (canEditSpace) {
           context.dispatch('api/addToQueue', { name: 'updateMultipleCards', body: updates }, { root: true })
@@ -750,13 +755,14 @@ const currentCards = {
         })
       })
     },
-    updateBelowCardsPosition: (context, { prevCardHeight, cardId }) => {
+    updateBelowCardsPosition: (context, { prevCardHeight, newCardHeight, cardId }) => {
       // calc height delta
       const card = context.getters.byId(cardId)
       if (!card) { return }
-      const deltaHeight = card.height - prevCardHeight
+      newCardHeight = newCardHeight || card.height
+      const deltaHeight = newCardHeight - prevCardHeight
       if (deltaHeight === 0) { return }
-      // aligned cards
+      // distributeVertically aligned cards below
       const alignedCards = context.getters['verticallyAlignedCardsBelowId'](cardId, deltaHeight)
       if (!alignedCards.length) { return }
       alignedCards.unshift(card)
