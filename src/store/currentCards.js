@@ -753,6 +753,7 @@ const currentCards = {
     updateBelowCardsPosition: (context, { prevCardHeight, cardId }) => {
       // calc height delta
       const card = context.getters.byId(cardId)
+      if (!card) { return }
       const deltaHeight = card.height - prevCardHeight
       if (deltaHeight === 0) { return }
       // aligned cards
