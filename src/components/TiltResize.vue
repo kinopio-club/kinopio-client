@@ -147,9 +147,9 @@ const isResizing = computed(() => {
     .inline-button-wrap
       padding-right 0
       transform translate(-8px, 13px)
-      cursor col-resize
+      cursor nwse-resize
       button
-        cursor col-resize
+        cursor nwse-resize
         transform scaleX(-1)
   // resize
   &.right-resize
