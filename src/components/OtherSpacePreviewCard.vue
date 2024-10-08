@@ -108,10 +108,6 @@ const openUrl = async (event) => {
       event.stopPropagation()
     }
   }
-  store.dispatch('closeAllDialogs')
-  if (store.state.cardsWereDragged) {
-    return
-  }
   store.dispatch('currentSpace/changeSpace', props.otherSpace)
   store.dispatch('closeAllDialogs')
 }
