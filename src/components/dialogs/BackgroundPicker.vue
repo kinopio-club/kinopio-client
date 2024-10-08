@@ -91,10 +91,10 @@ const state = reactive({
   service: 'background' // background, recent, pexels
 })
 
-const canEditSpace = computed(() => store.getters['currentUser/canEditSpace']())
 const currentSpace = computed(() => store.state.currentSpace)
 const currentUserIsSignedIn = computed(() => store.getters['currentUser/isSignedIn'])
 const currentUser = computed(() => store.state.currentUser)
+const currentUserIsMember = computed(() => store.getters['currentUser/isSpaceMember']())
 
 // dialog
 
@@ -417,27 +417,25 @@ dialog.background-picker.wide(v-if="visible" :open="visible" @click.left.stop="c
         span.title Background
       .row
         .button-wrap
-          button.small-button(v-if="canEditSpace" :class="{active: state.spaceBackgroundInputIsVisible}" @click="toggleSpaceBackgroundInputIsVisible")
+          button.small-button(:class="{active: state.spaceBackgroundInputIsVisible}" @click="toggleSpaceBackgroundInputIsVisible")
             span URL
-        .button-wrap
-          button.small-button(v-if="canEditSpace" @click.left="removeBackgroundAll")
+        .button-wrap(v-if="currentUserIsMember")
+          button.small-button(@click.left="removeBackgroundAll")
             img.icon.cancel(src="@/assets/add.svg")
             span Clear
 
   section(@mouseup.stop @touchend.stop)
-    .row(v-if="canEditSpace && state.spaceBackgroundInputIsVisible")
+    .row(v-if="state.spaceBackgroundInputIsVisible")
       input(
         rows="1"
         placeholder="Paste an image URL or upload"
         v-model="background"
         data-type="name"
         maxlength="400"
+        :disabled="currentUserIsMember"
       )
 
-    template(v-if="!canEditSpace")
-      .row
-        .large-background-preview
-          BackgroundPreview(:space="currentSpace")
+    template(v-if="!currentUserIsMember")
       .row
         span.badge.info
           img.icon.cancel(src="@/assets/add.svg")
@@ -477,7 +475,7 @@ dialog.background-picker.wide(v-if="visible" :open="visible" @click.left.stop="c
       .badge.danger (シ_ _)シ Something went wrong, Please try again or contact support
 
     //- buttons
-    template(v-if="canEditSpace")
+    template(v-if="currentUserIsMember")
       .row
         //- Tint
         .button-wrap
@@ -500,7 +498,7 @@ dialog.background-picker.wide(v-if="visible" :open="visible" @click.left.stop="c
           input.hidden(type="file" ref="inputElement" @change="uploadFile" accept="image/*")
 
   //- results
-  template(v-if="canEditSpace")
+  template(v-if="currentUserIsMember")
     //- backgrounds
     template(v-if="serviceIsBackground")
       //- gradient backgrounds

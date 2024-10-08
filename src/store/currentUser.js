@@ -873,8 +873,7 @@ export default {
       const currentUserIsSignedIn = getters.isSignedIn
       const canEditOpenSpace = spaceIsOpen && currentUserIsSignedIn
       const isSpaceMember = getters.isSpaceMember(space)
-      const teamUser = rootGetters['teams/isCurrentSpaceTeamUser']
-      return canEditOpenSpace || isSpaceMember || teamUser
+      return canEditOpenSpace || isSpaceMember
     },
     cannotEditUnlessSignedIn: (state, getters, rootState) => (space) => {
       space = space || rootState.currentSpace
@@ -895,8 +894,7 @@ export default {
     },
     canEditCard: (state, getters, rootState, rootGetters) => (card) => {
       const isSpaceMember = getters.isSpaceMember()
-      const teamUser = rootGetters['teams/isCurrentSpaceTeamUser']
-      if (isSpaceMember || teamUser) { return true }
+      if (isSpaceMember) { return true }
       const canEditSpace = getters.canEditSpace()
       const cardIsCreatedByCurrentUser = getters.cardIsCreatedByCurrentUser(card)
       if (canEditSpace && cardIsCreatedByCurrentUser) { return true }
@@ -905,13 +903,11 @@ export default {
     canOnlyComment: (state, getters, rootState, rootGetters) => () => {
       const canEditSpace = getters.canEditSpace()
       const isSpaceMember = getters.isSpaceMember()
-      const teamUser = rootGetters['teams/isCurrentSpaceTeamUser']
-      return canEditSpace && !isSpaceMember && !teamUser
+      return canEditSpace && !isSpaceMember
     },
     canEditBox: (state, getters, rootState, rootGetters) => (box) => {
       const isSpaceMember = getters.isSpaceMember()
-      const teamUser = rootGetters['teams/isCurrentSpaceTeamUser']
-      if (isSpaceMember || teamUser) { return true }
+      if (isSpaceMember) { return true }
       const canEditSpace = getters.canEditSpace()
       const boxIsCreatedByCurrentUser = getters.boxIsCreatedByCurrentUser(box)
       if (canEditSpace && boxIsCreatedByCurrentUser) { return true }
@@ -920,12 +916,13 @@ export default {
     connectionIsCreatedByCurrentUser: (state, getters, rootState) => (connection) => {
       return state.id === connection.userId
     },
-    isSpaceMember: (state, getters, rootState) => (space) => {
-      // a member is a user or collaborator
+    isSpaceMember: (state, getters, rootState, rootGetters) => (space) => {
+      // a member is a user, collaborator, or group member
       space = space || rootState.currentSpace
       const isSpaceUser = getters.isSpaceUser(space)
       const isSpaceCollaborator = getters.isSpaceCollaborator(space)
-      return isSpaceUser || isSpaceCollaborator
+      const isTeamMember = rootGetters['teams/isCurrentSpaceTeamUser']
+      return Boolean(isSpaceUser || isSpaceCollaborator || isTeamMember)
     },
     isSpaceUser: (state, getters, rootState) => (space) => {
       let userIsInSpace = Boolean(space.users?.find(user => {
