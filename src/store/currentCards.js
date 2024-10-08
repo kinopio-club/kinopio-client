@@ -457,6 +457,7 @@ const currentCards = {
           cards: [],
           spaceId: context.rootState.currentSpace.id
         }
+        cards = cards.filter(card => Boolean(card))
         let cardIds = cards.map(newCard => newCard.id)
         cardIds = cardIds.filter(cardId => Boolean(cardId))
         if (!cardIds) { return }
