@@ -170,11 +170,6 @@ const showTagDetailsIsVisible = (event, tag) => {
   store.commit('currentSelectedTag', tag)
   store.commit('tagDetailsIsVisible', true)
 }
-const currentCardHeight = () => {
-  const cardId = card.value.id
-  const rect = utils.cardRectFromId(cardId)
-  return rect.height
-}
 
 // styles
 
@@ -372,7 +367,7 @@ const showCard = async (cardId) => {
   prevCardName = card.value.name
   store.dispatch('history/pause')
   textareaSizes()
-  prevCardHeight = currentCardHeight()
+  prevCardHeight = item.height
 }
 const closeCard = async () => {
   store.commit('triggerHideTouchInterface')
