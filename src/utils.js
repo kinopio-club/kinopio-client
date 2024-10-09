@@ -1560,8 +1560,7 @@ export default {
   },
   updateSpaceItemsRelativeToPosition (items, position) {
     items = this.clone(items)
-    const itemNamesWithPosition = ['boxes', 'cards']
-    itemNamesWithPosition.forEach(itemName => {
+    consts.itemTypesWithPositions.forEach(itemName => {
       items[itemName] = items[itemName].map(item => {
         item.x = item.x - position.x
         item.y = item.y - position.y
@@ -1572,8 +1571,7 @@ export default {
   },
   updateSpaceItemsAddPosition (items, position) {
     items = this.clone(items)
-    const itemNamesWithPosition = ['boxes', 'cards']
-    itemNamesWithPosition.forEach(itemName => {
+    consts.itemTypesWithPositions.forEach(itemName => {
       items[itemName] = items[itemName].map(item => {
         item.x = item.x + position.x
         item.y = item.y + position.y
