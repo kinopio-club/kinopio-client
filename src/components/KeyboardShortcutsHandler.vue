@@ -692,6 +692,7 @@ const handlePasteEvent = async (event) => {
   } else if (data.kinopio) {
     let items = utils.uniqueSpaceItems(data.kinopio)
     items = utils.updateSpaceItemsSpaceId(items, store.state.currentSpace.id)
+    items = utils.updateSpaceItemsAddPosition(items, position)
     console.log('🎃🎃🎃data.kinopio', items, position)
     // update pos to be relative to current cursor position
 
