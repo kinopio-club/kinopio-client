@@ -550,7 +550,7 @@ const writeSelectedToClipboard = async (position) => {
   cards = utils.sortByY(cards)
   boxes = utils.sortByY(boxes)
   let data = { cards, connections, connectionTypes, boxes }
-  data = utils.updateSpaceItemsRelativeToPosition(data, position)
+  data = utils.updateSpaceItemsRelativeToOrigin(data, position)
   store.commit('clipboardData', data)
   // text
   let items = cards.concat(boxes)
@@ -642,8 +642,8 @@ const kinopioClipboardDataFromData = (data) => {
   let isKinopioClipboardData
   const names = data.text.split('\n\n') // "xyz\n\nabc" -> ["xyz", "abc"]
   names.forEach(name => {
-    const card = store.state.clipboardData.cards.find(card => card.name === name)
-    const box = store.state.clipboardData.boxes.find(box => box.name === name)
+    const card = store.state.clipboardData?.cards?.find(card => card.name === name)
+    const box = store.state.clipboardData?.boxes?.find(box => box.name === name)
     if (card || box) {
       isKinopioClipboardData = true
     }
@@ -689,11 +689,18 @@ const handlePasteEvent = async (event) => {
   // add data items
   if (data.file) {
     store.dispatch('upload/addCardsAndUploadFiles', { files: [data.file], position })
-  // add kinopio data
+  // add kinopio items
   } else if (data.kinopio) {
     let items = utils.updateSpaceItemsAddPosition(data.kinopio, position)
     items = store.getters['currentSpace/newItems']({ items })
     store.dispatch('currentSpace/addItems', items)
+    // select new items
+    await nextTick()
+    store.dispatch('closeAllDialogs')
+    const cardIds = items.cards.map(card => card.id)
+    const boxIds = items.boxes.map(box => box.id)
+    store.dispatch('addMultipleToMultipleCardsSelected', cardIds)
+    store.dispatch('addMultipleToMultipleBoxesSelected', boxIds)
   // add plain text cards
   } else {
     data.text = utils.decodeEntitiesFromHTML(data.text)
@@ -801,9 +808,9 @@ const selectAllItems = () => {
 const focusOnSpaceDetailsFilter = async () => {
   store.dispatch('closeAllDialogs')
   store.commit('triggerSpaceDetailsVisible')
-  nextTick()
-  nextTick()
-  nextTick()
+  await nextTick()
+  await nextTick()
+  await nextTick()
   store.commit('triggerFocusResultsFilter')
 }
 const focusOnSearchCardFilter = async (event) => {
@@ -814,9 +821,9 @@ const focusOnSearchCardFilter = async (event) => {
   } else {
     store.commit('triggerSearchScopeIsLocal')
   }
-  nextTick()
-  nextTick()
-  nextTick()
+  await nextTick()
+  await nextTick()
+  await nextTick()
   store.commit('triggerFocusResultsFilter')
 }
 

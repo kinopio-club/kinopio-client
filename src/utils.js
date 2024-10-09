@@ -979,6 +979,19 @@ export default {
   isMissingDimensions (item) {
     return !item.width || !item.height
   },
+  topLeftItem (items) {
+    items = this.clone(items)
+    let shortestDistanceItem = {}
+    items.forEach(item => {
+      item.distance = Math.sqrt(Math.pow(item.x, 2) + Math.pow(item.y, 2))
+      if (!shortestDistanceItem.distance) {
+        shortestDistanceItem = item
+      } else if (item.distance < shortestDistanceItem.distance) {
+        shortestDistanceItem = item
+      }
+    })
+    return shortestDistanceItem
+  },
   cardElementFromPosition (x, y) {
     let elements = document.elementsFromPoint(x, y)
     const cardElement = elements.find(element => {
@@ -1559,12 +1572,20 @@ export default {
       return item
     })
   },
-  updateSpaceItemsRelativeToPosition (items, position) {
+  updateSpaceItemsRelativeToOrigin (items) {
     items = this.clone(items)
+    // offset
+    let positionItems = []
+    consts.itemTypesWithPositions.forEach(itemName => {
+      items[itemName].forEach(item => positionItems.push(item))
+    })
+    const offset = this.topLeftItem(positionItems)
+    console.log(positionItems, offset)
+    // update positions
     consts.itemTypesWithPositions.forEach(itemName => {
       items[itemName] = items[itemName].map(item => {
-        item.x = item.x - position.x
-        item.y = item.y - position.y
+        item.x = item.x - offset.x
+        item.y = item.y - offset.y
         return item
       })
     })

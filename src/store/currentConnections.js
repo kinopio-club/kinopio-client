@@ -427,6 +427,10 @@ export default {
       const typeIds = uniq(state.typeIds)
       return typeIds.map(id => state.types[id])
     },
+    typeByName: (state, getters) => (name) => {
+      const types = getters.allTypes
+      return types.find(type => type.name === name)
+    },
     byItemId: (state, getters, rootState, rootGetters) => (itemId) => {
       let connections = getters.all
       connections = connections.filter(connection => {

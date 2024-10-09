@@ -1211,10 +1211,18 @@ const currentSpace = {
     // items
 
     addItems: (context, items) => {
-      console.log('☎️', items)
-      // create items: cards, boxes, connections, connectionTypes
-      // nexttick?
-      // update all connections paths
+      const { cards, boxes, connections, connectionTypes, tags } = items
+      cards.forEach(card => context.dispatch('currentCards/add', card, { root: true }))
+      boxes.forEach(box => context.dispatch('currentBoxes/add', { box }, { root: true }))
+      connections.forEach(connection => {
+        let type = connectionTypes.find(connectionType => connectionType.id === connection.connectionTypeId)
+        const prevTypeInCurrentSpace = context.rootGetters['currentConnections/typeByName'](type.name)
+        type = prevTypeInCurrentSpace || type
+        context.dispatch('currentConnections/addType', type, { root: true })
+        connection.connectionTypeId = type.id
+        context.dispatch('currentConnections/add', { connection, type }, { root: true })
+      })
+      tags.forEach(tag => context.dispatch('addTag', tag))
     }
   },
 
