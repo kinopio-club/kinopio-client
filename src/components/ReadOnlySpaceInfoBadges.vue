@@ -20,7 +20,7 @@ template(v-if="!isSpaceMember")
   .row.align-items-top.read-only-space-info-badges
     .badge.info(v-if="!spacePrivacyIsOpen")
       span Read Only
-    .badge.info(v-if="spacePrivacyIsOpen")
+    .badge.success(v-if="spacePrivacyIsOpen")
       img.icon.comment(src="@/assets/comment.svg")
       span Open to Comments
     .badge.status(v-if="showInExplore")

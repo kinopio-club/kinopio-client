@@ -685,7 +685,7 @@ header(v-if="isVisible" :style="state.position" :class="{'fade-out': isFadingOut
                 span.invisible-badge(ref="readOnlyElement" :class="{'badge-jiggle': state.readOnlyJiggle, 'invisible': !state.readOnlyJiggle}")
                   span Read Only
               //- comment only badge
-              .label-badge.space-name-badge-wrap(v-else-if="userCanOnlyComment")
+              .label-badge.space-name-badge-wrap.success(v-else-if="userCanOnlyComment")
                 span(:class="{'invisible': state.readOnlyJiggle}")
                   span Comment Only
 
@@ -906,6 +906,8 @@ header
     span
       width 100%
       color var(--primary)
+    &.success
+      background-color var(--success-background)
 
   .invisible
     visibility hidden
