@@ -1558,6 +1558,18 @@ export default {
       return item
     })
   },
+  updateSpaceItemsRelativeToPosition (items, position) {
+    items = this.clone(items)
+    const itemNamesWithPosition = ['boxes', 'cards']
+    itemNamesWithPosition.forEach(itemName => {
+      items[itemName] = items[itemName].map(item => {
+        item.x = item.x - position.x
+        item.y = item.y - position.y
+        return item
+      })
+    })
+    return items
+  },
   updateConnectionsType ({ connections, prevTypeId, newTypeId }) {
     return connections.map(connection => {
       if (connection.connectionTypeId === prevTypeId) {

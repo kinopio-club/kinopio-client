@@ -542,13 +542,14 @@ const remove = () => {
 
 // Copy, Cut
 
-const writeSelectedToClipboard = async () => {
+const writeSelectedToClipboard = async (position) => {
   const selectedItems = store.getters['currentSpace/selectedItems']
   let { cards, connectionTypes, connections, boxes } = selectedItems
   // data
   cards = utils.sortByY(cards)
   boxes = utils.sortByY(boxes)
   let data = { cards, connections, connectionTypes, boxes }
+  data = utils.updateSpaceItemsRelativeToPosition(data, position)
   store.commit('clipboardData', data)
   // text
   let items = cards.concat(boxes)
@@ -571,7 +572,7 @@ const handleCopyCutEvent = async (event) => {
   const position = currentCursorPosition || prevCursorPosition
   event.preventDefault()
   try {
-    await writeSelectedToClipboard()
+    await writeSelectedToClipboard(position)
     if (event.type === 'cut') { remove() }
     store.commit('addNotificationWithPosition', { message: utils.pastTense(event.type), position, type: 'success', layer: 'app', icon: 'cut' })
   } catch (error) {
@@ -636,6 +637,7 @@ const afterPaste = ({ cards, boxes }) => {
 const kinopioClipboardDataFromData = (data) => {
   if (!data.text) { return }
   if (data.file) { return }
+  // match text with names
   let isKinopioClipboardData
   const names = data.text.split('\n\n') // "xyz\n\nabc" -> ["xyz", "abc"]
   names.forEach(name => {
@@ -653,7 +655,7 @@ const getClipboardData = async () => {
   let position = currentCursorPosition || prevCursorPosition
   try {
     let data = await utils.dataFromClipboard()
-    data.kinopio = kinopioClipboardDataFromData(data)
+    data.kinopio = kinopioClipboardDataFromData(data, position)
     if (data.text || data.file || data.kinopio) {
       store.commit('addNotificationWithPosition', { message: 'Pasted', position, type: 'success', layer: 'app', icon: 'cut' })
       return data
