@@ -8,7 +8,7 @@ export default {
         description: 'Anyone can view and add comments, only collaborators can edit',
         descriptionTeam: 'Anyone can view and add comments, only team members and collaborators can edit',
         color: 'success',
-        icon: 'open'
+        icon: 'comment'
       },
       {
         name: 'closed',

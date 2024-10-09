@@ -21,7 +21,8 @@ template(v-if="!isSpaceMember")
     .badge.info(v-if="!spacePrivacyIsOpen")
       span Read Only
     .badge.success(v-if="spacePrivacyIsOpen")
-      span Open to All
+      img.icon.comment(src="@/assets/comment.svg")
+      span Open to Comments
     .badge.status(v-if="showInExplore")
       img.icon.sunglasses(src="@/assets/sunglasses.svg")
       span In Explore
@@ -33,6 +34,7 @@ template(v-if="!isSpaceMember")
 <style lang="stylus">
 .read-only-space-info-badges
   align-items flex-start
+  flex-wrap wrap
   .sunglasses
     margin-left 1px
 </style>

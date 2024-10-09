@@ -84,7 +84,7 @@ const sortedByY = (items) => {
 const text = computed(() => {
   let cards = selectedItems.value.cards
   cards = sortedByY(cards)
-  return utils.textFromCardNames(cards)
+  return utils.nameStringFromItems(cards)
 })
 
 // labels

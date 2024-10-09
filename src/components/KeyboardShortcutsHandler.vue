@@ -73,7 +73,8 @@ const checkIsSpaceScope = (event) => {
   const nodeList = event.target.classList
   const classes = [ ...nodeList ]
   const isFocusedCard = classes.includes('card')
-  return isBody || isMain || isFocusedCard
+  const isSpaceNameButton = classes.includes('space-name-button-wrap') // for paste in empty spaces
+  return isBody || isMain || isFocusedCard || isSpaceNameButton
 }
 const checkIsCardScope = (event) => {
   const isFromCardName = event.target.closest('dialog.card-details')
@@ -542,6 +543,29 @@ const remove = () => {
 
 // Copy, Cut
 
+const writeSelectedToClipboard = async (position) => {
+  const selectedItems = store.getters['currentSpace/selectedItems']
+  let { cards, connectionTypes, connections, boxes } = selectedItems
+  // data
+  cards = utils.sortByY(cards)
+  boxes = utils.sortByY(boxes)
+  let data = { cards, connections, connectionTypes, boxes }
+  data = utils.updateSpaceItemsRelativeToOrigin(data, position)
+  store.commit('clipboardData', data)
+  // text
+  let items = cards.concat(boxes)
+  items = utils.sortByY(items)
+  const text = utils.nameStringFromItems(items)
+  // clipboard
+  try {
+    console.log('🎊 copyData', data, text)
+    await navigator.clipboard.writeText(text)
+  } catch (error) {
+    console.warn('🚑 writeSelectedToClipboard', error)
+    throw { error }
+  }
+}
+
 const handleCopyCutEvent = async (event) => {
   const isSpaceScope = checkIsSpaceScope(event)
   if (!isSpaceScope) { return }
@@ -549,7 +573,7 @@ const handleCopyCutEvent = async (event) => {
   const position = currentCursorPosition || prevCursorPosition
   event.preventDefault()
   try {
-    await writeSelectedToClipboard()
+    await writeSelectedToClipboard(position)
     if (event.type === 'cut') { remove() }
     store.commit('addNotificationWithPosition', { message: utils.pastTense(event.type), position, type: 'success', layer: 'app', icon: 'cut' })
   } catch (error) {
@@ -560,10 +584,6 @@ const handleCopyCutEvent = async (event) => {
 }
 
 // Paste
-
-const notifyPasted = (position) => {
-  store.commit('addNotificationWithPosition', { message: 'Pasted', position, type: 'success', layer: 'app', icon: 'cut' })
-}
 
 const normalizePasteData = (data) => {
   data.cards = data.cards.map(card => {
@@ -600,9 +620,6 @@ const handlePastePlainText = async (data, position) => {
     cards = cardIds.map(cardId => store.getters['currentCards/byId'](cardId))
     store.dispatch('history/resume')
     store.dispatch('history/add', { cards, useSnapshot: true })
-    // update page size
-    await nextTick()
-    afterPaste({ cards, boxes: [] })
   }, 100)
 }
 
@@ -615,22 +632,30 @@ const afterPaste = ({ cards, boxes }) => {
     store.dispatch('checkIfItemShouldIncreasePageSize', box)
   })
 }
-
+const kinopioClipboardDataFromData = (data) => {
+  if (!data.text) { return }
+  if (data.file) { return }
+  // match text with names
+  let isKinopioClipboardData
+  const names = data.text.split('\n\n') // "xyz\n\nabc" -> ["xyz", "abc"]
+  names.forEach(name => {
+    const card = store.state.clipboardData?.cards?.find(card => card.name === name)
+    const box = store.state.clipboardData?.boxes?.find(box => box.name === name)
+    if (card || box) {
+      isKinopioClipboardData = true
+    }
+  })
+  if (!isKinopioClipboardData) { return }
+  return utils.clone(store.state.clipboardData)
+}
 const getClipboardData = async () => {
   store.commit('clearNotificationsWithPosition')
   let position = currentCursorPosition || prevCursorPosition
   try {
-    if (!navigator.clipboard.read) { // firefox
-      const data = utils.clone(store.state.clipboardDataPolyfill)
-      const emptyData = utils.objectHasKeys(data)
-      if (!emptyData) {
-        throw new Error('Firefox does not support paste')
-      }
-      return data
-    }
-    const data = await utils.dataFromClipboard()
-    if (data.text || data.file) {
-      notifyPasted(position)
+    let data = await utils.dataFromClipboard()
+    data.kinopio = kinopioClipboardDataFromData(data, position)
+    if (data.text || data.file || data.kinopio) {
+      store.commit('addNotificationWithPosition', { message: 'Pasted', position, type: 'success', layer: 'app', icon: 'cut' })
       return data
     }
   } catch (error) {
@@ -643,6 +668,7 @@ const handlePasteEvent = async (event) => {
   const isSpaceScope = checkIsSpaceScope(event)
   if (!isSpaceScope) { return }
   event.preventDefault()
+  let items
   let position = currentCursorPosition || prevCursorPosition
   position = utils.cursorPositionInSpace(null, position)
   // check card limits
@@ -661,28 +687,28 @@ const handlePasteEvent = async (event) => {
   // add data items
   if (data.file) {
     store.dispatch('upload/addCardsAndUploadFiles', { files: [data.file], position })
+  // add kinopio items
+  } else if (data.kinopio) {
+    items = utils.updateSpaceItemsAddPosition(data.kinopio, position)
+    items = store.getters['currentSpace/newItems']({ items })
+    store.dispatch('currentSpace/addItems', items)
+    // select new items
+    await nextTick()
+    store.dispatch('closeAllDialogs')
+    const cardIds = items.cards.map(card => card.id)
+    const boxIds = items.boxes.map(box => box.id)
+    store.dispatch('addMultipleToMultipleCardsSelected', cardIds)
+    store.dispatch('addMultipleToMultipleBoxesSelected', boxIds)
+    await nextTick()
+    store.dispatch('currentConnections/updatePaths', { connections: items.connections })
   // add plain text cards
   } else {
     data.text = utils.decodeEntitiesFromHTML(data.text)
     handlePastePlainText(data, position)
   }
-}
-
-const writeSelectedToClipboard = async () => {
-  const selectedItems = store.getters['currentSpace/selectedItems']
-  let { cards, connectionTypes, connections, boxes } = selectedItems
-  cards = utils.sortByY(cards)
-  boxes = utils.sortByY(boxes)
-  let data = { isKinopioData: true, cards, connections, connectionTypes, boxes }
-  const text = utils.textFromCardNames(cards)
-  console.log('🎊 copyData', data, text)
-  try {
-    store.commit('clipboardDataPolyfill', data)
-    await navigator.clipboard.writeText(text)
-  } catch (error) {
-    console.warn('🚑 writeSelectedToClipboard', error)
-    throw { error }
-  }
+  // update page size
+  await nextTick()
+  afterPaste(items)
 }
 
 // Select All Cards Below Cursor
@@ -785,9 +811,9 @@ const selectAllItems = () => {
 const focusOnSpaceDetailsFilter = async () => {
   store.dispatch('closeAllDialogs')
   store.commit('triggerSpaceDetailsVisible')
-  nextTick()
-  nextTick()
-  nextTick()
+  await nextTick()
+  await nextTick()
+  await nextTick()
   store.commit('triggerFocusResultsFilter')
 }
 const focusOnSearchCardFilter = async (event) => {
@@ -798,9 +824,9 @@ const focusOnSearchCardFilter = async (event) => {
   } else {
     store.commit('triggerSearchScopeIsLocal')
   }
-  nextTick()
-  nextTick()
-  nextTick()
+  await nextTick()
+  await nextTick()
+  await nextTick()
   store.commit('triggerFocusResultsFilter')
 }
 

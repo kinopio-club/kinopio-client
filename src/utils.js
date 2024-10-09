@@ -925,6 +925,7 @@ export default {
   },
   cardElementDimensions (card) {
     if (!card) { return }
+    card = this.clone(card)
     const element = document.querySelector(`article#card[data-card-id="${card.id}"]`)
     if (!element) { return }
     const cardId = card.id
@@ -1062,21 +1063,9 @@ export default {
       rectA.y + rectA.height > rectB.y
     )
   },
-  itemsPositionsShifted (items, position) {
-    const origin = this.topLeftItem(items)
-    const delta = {
-      x: position.x - origin.x,
-      y: position.y - origin.y
-    }
-    return items.map(item => {
-      item.x = item.x + delta.x
-      item.y = item.y + delta.y
-      return item
-    })
-  },
-  textFromCardNames (cards) {
-    cards = cards.filter(card => Boolean(card))
-    const data = cards.map(card => card.name)
+  nameStringFromItems (items) {
+    items = items.filter(item => Boolean(item))
+    const data = items.map(item => item.name)
     return join(data, '\n\n')
   },
   trim (string) {
@@ -1519,7 +1508,7 @@ export default {
     return userId
   },
   uniqueSpaceItems (items, nullItemUsers) {
-    const cardIdDeltas = []
+    const itemIdDeltas = []
     const connectionTypeIdDeltas = []
     const user = cache.user()
     let { cards, connections, connectionTypes, boxes, tags } = items
@@ -1528,13 +1517,24 @@ export default {
     cards = cards.map(card => {
       const userId = this.itemUserId(user, card, nullItemUsers)
       const newId = nanoid()
-      cardIdDeltas.push({
+      itemIdDeltas.push({
         prevId: card.id,
         newId
       })
       card.id = newId
       card.userId = userId
       return card
+    })
+    boxes = boxes.map(box => {
+      const userId = this.itemUserId(user, box, nullItemUsers)
+      const newId = nanoid()
+      itemIdDeltas.push({
+        prevId: box.id,
+        newId
+      })
+      box.id = newId
+      box.userId = userId
+      return box
     })
     connectionTypes = connectionTypes.map(type => {
       const userId = this.itemUserId(user, type, nullItemUsers)
@@ -1551,23 +1551,24 @@ export default {
       const userId = this.itemUserId(user, connection, nullItemUsers)
       connection.id = nanoid()
       connection.connectionTypeId = this.updateAllIds(connection, 'connectionTypeId', connectionTypeIdDeltas)
-      connection.startItemId = this.updateAllIds(connection, 'startItemId', cardIdDeltas)
-      connection.endItemId = this.updateAllIds(connection, 'endItemId', cardIdDeltas)
+      connection.startItemId = this.updateAllIds(connection, 'startItemId', itemIdDeltas)
+      connection.endItemId = this.updateAllIds(connection, 'endItemId', itemIdDeltas)
       connection.userId = userId
       return connection
     })
-    boxes = boxes.map(box => {
-      const userId = this.itemUserId(user, box, nullItemUsers)
-      box.id = nanoid()
-      box.userId = userId
-      return box
-    })
     tags = tags.map(tag => {
       tag.id = nanoid()
-      tag.cardId = this.updateAllIds(tag, 'cardId', cardIdDeltas)
+      tag.cardId = this.updateAllIds(tag, 'cardId', itemIdDeltas)
       return tag
     })
     items = { cards, connections, connectionTypes, boxes, tags }
+    return items
+  },
+  updateSpaceItemsSpaceId (items, spaceId) {
+    const keys = Object.keys(items)
+    keys.forEach(key => {
+      items[key] = this.updateItemsSpaceId(items[key], spaceId)
+    })
     return items
   },
   updateItemsSpaceId (items, spaceId) {
@@ -1575,6 +1576,38 @@ export default {
       item.spaceId = spaceId
       return item
     })
+  },
+  updateSpaceItemsRelativeToOrigin (items) {
+    items = this.clone(items)
+    // offset
+    let positionItems = []
+    consts.itemTypesWithPositions.forEach(itemName => {
+      items[itemName].forEach(item => positionItems.push(item))
+    })
+    const offset = this.topLeftItem(positionItems)
+    console.log(positionItems, offset)
+    // update positions
+    consts.itemTypesWithPositions.forEach(itemName => {
+      items[itemName] = items[itemName].map(item => {
+        item.x = item.x - offset.x
+        item.y = item.y - offset.y
+        return item
+      })
+    })
+    return items
+  },
+  updateSpaceItemsAddPosition (items, position) {
+    items = this.clone(items)
+    consts.itemTypesWithPositions.forEach(itemName => {
+      items[itemName] = items[itemName].map(item => {
+        item.x = item.x + position.x
+        item.y = item.y + position.y
+        item.x = Math.max(consts.minItemXY, item.x)
+        item.y = Math.max(consts.minItemXY, item.y)
+        return item
+      })
+    })
+    return items
   },
   updateConnectionsType ({ connections, prevTypeId, newTypeId }) {
     return connections.map(connection => {
@@ -2379,7 +2412,7 @@ export default {
   async dataFromClipboard () {
     let text, file
     const items = await navigator.clipboard.read()
-    console.log('🍇 clipboard paste', items)
+    console.log('🎊 dataFromClipboard', items)
     for (const item of items) {
       const imageMatch = 'image/'
       const imageType = item.types.find(type => {

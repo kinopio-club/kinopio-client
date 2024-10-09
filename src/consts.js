@@ -12,7 +12,7 @@ export default {
   highCharacterLimit: 4000,
   defaultCardWidth: 58,
   defaultCardHeight: 70,
-  minItemY: 70,
+  minItemXY: 70,
   normalCardMaxWidth: 200,
   wideCardMaxWidth: 390,
   minCardIframeWidth: 260,
@@ -31,6 +31,7 @@ export default {
   defaultSpaceBackground: 'https://bk.kinopio.club/grid-large-boxes-2x.png',
   moderatorUserId: 'euGhpBrR9eBcjKnK16C_g',
   uploadPlaceholder: '⬬⬭',
+  itemTypesWithPositions: ['boxes', 'cards'],
   isDevelopment () {
     if (env.VITE_PROD_SERVER === 'true') {
       return false

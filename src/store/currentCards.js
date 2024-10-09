@@ -206,37 +206,37 @@ const currentCards = {
 
     // create
 
-    add: (context, { x, y, position, isParentCard, name, id, backgroundColor, width, height, shouldUpdateUrlPreview }) => {
-      utils.typeCheck({ value: position, type: 'object', allowUndefined: true })
+    add: (context, card) => {
       if (context.rootGetters['currentSpace/shouldPreventAddCard']) {
         context.commit('notifyCardsCreatedIsOverLimit', true, { root: true })
         return
       }
+      const { x, y, position, isParentCard, name, id, backgroundColor, width, height } = card
+      utils.typeCheck({ value: position, type: 'object', allowUndefined: true })
       let cards = context.getters.all
+      // new card values
       const highestCardZ = utils.highestCardZ(cards)
       const defaultBackgroundColor = context.rootState.currentUser.defaultCardBackgroundColor
       const isComment = context.rootState.isCommentMode || context.rootGetters['currentUser/canOnlyComment']()
-      let card = {
-        id: id || nanoid(),
-        x: x || position.x,
-        y: y || position.y,
-        z: highestCardZ + 1,
-        name: name || '',
-        frameId: 0,
-        userId: context.rootState.currentUser.id,
-        urlPreviewIsVisible: true,
-        width: width || utils.emptyCard().width,
-        height: height || utils.emptyCard().height,
-        isLocked: false,
-        backgroundColor: backgroundColor || defaultBackgroundColor,
-        isRemoved: false,
-        shouldUpdateUrlPreview,
-        headerFontId: context.rootState.currentUser.prevHeaderFontId || 0,
-        maxWidth: context.rootState.currentUser.cardSettingsMaxCardWidth,
-        isComment
-      }
-      context.commit('cardDetailsIsVisibleForCardId', card.id, { root: true })
+      card.id = id || nanoid()
+      card.x = x || position.x
+      card.y = y || position.y
+      card.z = highestCardZ + 1
+      card.name = name || ''
+      card.frameId = 0
+      card.userId = context.rootState.currentUser.id
+      card.urlPreviewIsVisible = true
+      card.width = width || utils.emptyCard().width
+      card.height = height || utils.emptyCard().height
+      card.isLocked = false
+      card.backgroundColor = backgroundColor || defaultBackgroundColor
+      card.isRemoved = false
+      card.headerFontId = context.rootState.currentUser.prevHeaderFontId || 0
+      card.maxWidth = context.rootState.currentUser.cardSettingsMaxCardWidth
       card.spaceId = currentSpaceId
+      card.isComment = isComment
+      // create card
+      context.commit('cardDetailsIsVisibleForCardId', card.id, { root: true })
       context.dispatch('api/addToQueue', { name: 'createCard', body: card }, { root: true })
       context.dispatch('broadcast/update', { updates: { card }, type: 'createCard', handler: 'currentCards/create' }, { root: true })
       context.commit('create', { card })
@@ -640,7 +640,7 @@ const currentCards = {
         if (isNoY) {
           delete card.y
         } else {
-          card.y = Math.max(consts.minItemY, card.y + prevMoveDelta.y)
+          card.y = Math.max(consts.minItemXY, card.y + prevMoveDelta.y)
           context.dispatch('checkIfShouldIncreasePageHeightWhileDragging', card)
         }
         card = {
@@ -702,7 +702,7 @@ const currentCards = {
         card.x = Math.round(card.x)
         card.y = Math.max(card.y + prevMoveDelta.y, 0)
         card.y = Math.round(card.y)
-        card.y = Math.max(consts.minItemY, card.y)
+        card.y = Math.max(consts.minItemXY, card.y)
         card.userId = context.rootState.currentUser.id
         return card
       })

@@ -23,7 +23,7 @@ const isPrivate = computed(() => privacyState.value.name === 'private')
 <template lang="pug">
 img.icon.privacy-icon(
   v-if="isOpen"
-  src="@/assets/open.svg"
+  src="@/assets/comment.svg"
   :class="privacyState.name"
 )
 img.icon.privacy-icon(

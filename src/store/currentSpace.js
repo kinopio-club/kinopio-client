@@ -1206,6 +1206,23 @@ const currentSpace = {
       const tagsInCard = context.getters.tagsInCard({ id: cardId })
       const tagsToRemove = tagsInCard.filter(tag => !cardTagNames.includes(tag.name))
       tagsToRemove.forEach(tag => context.dispatch('removeTag', tag))
+    },
+
+    // items
+
+    addItems: (context, items) => {
+      const { cards, boxes, connections, connectionTypes, tags } = items
+      cards.forEach(card => context.dispatch('currentCards/add', card, { root: true }))
+      boxes.forEach(box => context.dispatch('currentBoxes/add', { box }, { root: true }))
+      connections.forEach(connection => {
+        let type = connectionTypes.find(connectionType => connectionType.id === connection.connectionTypeId)
+        const prevTypeInCurrentSpace = context.rootGetters['currentConnections/typeByName'](type.name)
+        type = prevTypeInCurrentSpace || type
+        context.dispatch('currentConnections/addType', type, { root: true })
+        connection.connectionTypeId = type.id
+        context.dispatch('currentConnections/add', { connection, type }, { root: true })
+      })
+      tags.forEach(tag => context.dispatch('addTag', tag))
     }
   },
 
@@ -1368,8 +1385,9 @@ const currentSpace = {
         return rootGetters['currentBoxes/byId'](boxId)
       })
       const connections = rootGetters['currentConnections/all'].filter(connection => {
-        const isStartCardMatch = rootState.multipleCardsSelectedIds.includes(connection.startItemId)
-        const isEndCardMatch = rootState.multipleCardsSelectedIds.includes(connection.endItemId)
+        const selectedIds = rootState.multipleCardsSelectedIds.concat(rootState.multipleBoxesSelectedIds)
+        const isStartCardMatch = selectedIds.includes(connection.startItemId)
+        const isEndCardMatch = selectedIds.includes(connection.endItemId)
         return isStartCardMatch && isEndCardMatch
       })
       const connectionTypeIds = connections.map(connection => connection.connectionTypeId)
@@ -1380,12 +1398,7 @@ const currentSpace = {
       items = items || getters.selectedItems
       spaceId = spaceId || state.id
       let newItems = utils.uniqueSpaceItems(utils.clone(items))
-      let { cards, connectionTypes, connections, boxes } = newItems
-      cards = utils.updateItemsSpaceId(cards, spaceId)
-      connectionTypes = utils.updateItemsSpaceId(connectionTypes, spaceId)
-      connections = utils.updateItemsSpaceId(connections, spaceId)
-      boxes = utils.updateItemsSpaceId(boxes, spaceId)
-      newItems = { cards, connectionTypes, connections, boxes }
+      newItems = utils.updateSpaceItemsSpaceId(newItems, spaceId)
       return newItems
     },
 

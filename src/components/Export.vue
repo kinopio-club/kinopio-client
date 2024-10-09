@@ -30,7 +30,7 @@ const state = reactive({
 
 const currentUserIsSignedIn = computed(() => store.getters['currentUser/isSignedIn'])
 const currentSpace = computed(() => store.getters['currentSpace/all'])
-const text = computed(() => utils.textFromCardNames(currentSpace.value.cards))
+const text = computed(() => utils.nameStringFromItems(currentSpace.value.cards))
 
 const fileName = () => {
   const spaceName = store.state.currentSpace.name
