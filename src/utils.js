@@ -1545,6 +1545,13 @@ export default {
     items = { cards, connections, connectionTypes, boxes, tags }
     return items
   },
+  updateSpaceItemsSpaceId (items, spaceId) {
+    const keys = Object.keys(items)
+    keys.forEach(key => {
+      items[key] = this.updateItemsSpaceId(items[key], spaceId)
+    })
+    return items
+  },
   updateItemsSpaceId (items, spaceId) {
     return items.map(item => {
       item.spaceId = spaceId

@@ -688,10 +688,10 @@ const handlePasteEvent = async (event) => {
     store.dispatch('upload/addCardsAndUploadFiles', { files: [data.file], position })
   // add kinopio data
   } else if (data.kinopio) {
-    console.log('🎃🎃🎃data.kinopio', data.kinopio, position)
-    // TODO if data.text matches names in store.state.clipboardData,
-    // then data = store.state.clipboardData
-    // w new ids and pos
+    let items = utils.uniqueSpaceItems(data.kinopio)
+    items = utils.updateSpaceItemsSpaceId(items, store.state.currentSpace.id)
+    console.log('🎃🎃🎃data.kinopio', items, position)
+    // update pos to be relative to current cursor position
 
   // add plain text cards
   } else {
