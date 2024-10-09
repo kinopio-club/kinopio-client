@@ -925,6 +925,7 @@ export default {
   },
   cardElementDimensions (card) {
     if (!card) { return }
+    card = this.clone(card)
     const element = document.querySelector(`article#card[data-card-id="${card.id}"]`)
     if (!element) { return }
     const cardId = card.id
