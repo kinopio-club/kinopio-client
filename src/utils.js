@@ -881,6 +881,16 @@ export default {
     })
     return sorted
   },
+  sortByY (items) {
+    return items.sort((a, b) => {
+      return a.y - b.y
+    })
+  },
+  sortByX (items) {
+    return items.sort((a, b) => {
+      return a.x - b.x
+    })
+  },
   nameTextEditAction ({ action, startPosition, endPosition, name }) {
     let newName, offset
     let md = ''

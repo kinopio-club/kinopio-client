@@ -670,7 +670,9 @@ const handlePasteEvent = async (event) => {
 
 const writeSelectedToClipboard = async () => {
   const selectedItems = store.getters['currentSpace/selectedItems']
-  const { cards, connectionTypes, connections, boxes } = selectedItems
+  let { cards, connectionTypes, connections, boxes } = selectedItems
+  cards = utils.sortByY(cards)
+  boxes = utils.sortByY(boxes)
   let data = { isKinopioData: true, cards, connections, connectionTypes, boxes }
   const text = utils.textFromCardNames(cards)
   console.log('🎊 copyData', data, text)

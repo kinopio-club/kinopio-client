@@ -224,28 +224,26 @@ const isDistributedVertically = computed(() => {
 // sort items
 
 const sortedByX = computed(() => {
+  // cards
   const editableCards = utils.clone(props.editableCards)
-  const cards = editableCards.sort((a, b) => {
-    return a.x - b.x
-  })
+  const cards = utils.sortByX(editableCards)
+  // boxes
   const editableBoxes = utils.clone(props.editableBoxes)
   let boxes = normalizeBoxes(editableBoxes)
-  boxes = boxes.sort((a, b) => {
-    return a.x - b.x
-  })
+  boxes = utils.sortByX(boxes)
+  // all
   const all = cards.concat(boxes)
   return { cards, boxes, all }
 })
 const sortedByY = computed(() => {
+  // cards
   const editableCards = utils.clone(props.editableCards)
-  const cards = editableCards.sort((a, b) => {
-    return a.y - b.y
-  })
+  const cards = utils.sortByY(editableCards)
+  // boxes
   const editableBoxes = utils.clone(props.editableBoxes)
   let boxes = normalizeBoxes(editableBoxes)
-  boxes = boxes.sort((a, b) => {
-    return a.y - b.y
-  })
+  boxes = utils.sortByY(boxes)
+  // all
   const all = cards.concat(boxes)
   return { cards, boxes, all }
 })
