@@ -978,19 +978,6 @@ export default {
   isMissingDimensions (item) {
     return !item.width || !item.height
   },
-  topLeftItem (items) {
-    items = this.clone(items)
-    let shortestDistanceItem = {}
-    items.forEach(item => {
-      item.distance = Math.sqrt(Math.pow(item.x, 2) + Math.pow(item.y, 2))
-      if (!shortestDistanceItem.distance) {
-        shortestDistanceItem = item
-      } else if (item.distance < shortestDistanceItem.distance) {
-        shortestDistanceItem = item
-      }
-    })
-    return shortestDistanceItem
-  },
   cardElementFromPosition (x, y) {
     let elements = document.elementsFromPoint(x, y)
     const cardElement = elements.find(element => {
@@ -1062,21 +1049,9 @@ export default {
       rectA.y + rectA.height > rectB.y
     )
   },
-  itemsPositionsShifted (items, position) {
-    const origin = this.topLeftItem(items)
-    const delta = {
-      x: position.x - origin.x,
-      y: position.y - origin.y
-    }
-    return items.map(item => {
-      item.x = item.x + delta.x
-      item.y = item.y + delta.y
-      return item
-    })
-  },
-  textFromCardNames (cards) {
-    cards = cards.filter(card => Boolean(card))
-    const data = cards.map(card => card.name)
+  nameStringFromItems (items) {
+    items = items.filter(item => Boolean(item))
+    const data = items.map(item => item.name)
     return join(data, '\n\n')
   },
   trim (string) {
@@ -2379,7 +2354,7 @@ export default {
   async dataFromClipboard () {
     let text, file
     const items = await navigator.clipboard.read()
-    console.log('🍇 clipboard paste', items)
+    console.log('🎊 dataFromClipboard', items)
     for (const item of items) {
       const imageMatch = 'image/'
       const imageType = item.types.find(type => {

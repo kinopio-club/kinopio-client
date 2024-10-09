@@ -545,13 +545,18 @@ const remove = () => {
 const writeSelectedToClipboard = async () => {
   const selectedItems = store.getters['currentSpace/selectedItems']
   let { cards, connectionTypes, connections, boxes } = selectedItems
+  // data
   cards = utils.sortByY(cards)
   boxes = utils.sortByY(boxes)
-  let data = { isKinopioData: true, cards, connections, connectionTypes, boxes }
-  const text = utils.textFromCardNames(cards)
-  console.log('🎊 copyData', data, text)
+  let data = { cards, connections, connectionTypes, boxes }
+  store.commit('clipboardData', data)
+  // text
+  let items = cards.concat(boxes)
+  items = utils.sortByY(items)
+  const text = utils.nameStringFromItems(items)
+  // clipboard
   try {
-    store.commit('clipboardDataPolyfill', data)
+    console.log('🎊 copyData', data, text)
     await navigator.clipboard.writeText(text)
   } catch (error) {
     console.warn('🚑 writeSelectedToClipboard', error)
@@ -577,10 +582,6 @@ const handleCopyCutEvent = async (event) => {
 }
 
 // Paste
-
-const notifyPasted = (position) => {
-  store.commit('addNotificationWithPosition', { message: 'Pasted', position, type: 'success', layer: 'app', icon: 'cut' })
-}
 
 const normalizePasteData = (data) => {
   data.cards = data.cards.map(card => {
@@ -632,22 +633,29 @@ const afterPaste = ({ cards, boxes }) => {
     store.dispatch('checkIfItemShouldIncreasePageSize', box)
   })
 }
-
+const kinopioClipboardDataFromData = (data) => {
+  if (!data.text) { return }
+  if (data.file) { return }
+  let isKinopioClipboardData
+  const names = data.text.split('\n\n') // "xyz\n\nabc" -> ["xyz", "abc"]
+  names.forEach(name => {
+    const card = store.state.clipboardData.cards.find(card => card.name === name)
+    const box = store.state.clipboardData.boxes.find(box => box.name === name)
+    if (card || box) {
+      isKinopioClipboardData = true
+    }
+  })
+  if (!isKinopioClipboardData) { return }
+  return utils.clone(store.state.clipboardData)
+}
 const getClipboardData = async () => {
   store.commit('clearNotificationsWithPosition')
   let position = currentCursorPosition || prevCursorPosition
   try {
-    if (!navigator.clipboard.read) { // firefox
-      const data = utils.clone(store.state.clipboardDataPolyfill)
-      const emptyData = utils.objectHasKeys(data)
-      if (!emptyData) {
-        throw new Error('Firefox does not support paste')
-      }
-      return data
-    }
-    const data = await utils.dataFromClipboard()
-    if (data.text || data.file) {
-      notifyPasted(position)
+    let data = await utils.dataFromClipboard()
+    data.kinopio = kinopioClipboardDataFromData(data)
+    if (data.text || data.file || data.kinopio) {
+      store.commit('addNotificationWithPosition', { message: 'Pasted', position, type: 'success', layer: 'app', icon: 'cut' })
       return data
     }
   } catch (error) {
@@ -678,6 +686,13 @@ const handlePasteEvent = async (event) => {
   // add data items
   if (data.file) {
     store.dispatch('upload/addCardsAndUploadFiles', { files: [data.file], position })
+  // add kinopio data
+  } else if (data.kinopio) {
+    console.log('🎃🎃🎃data.kinopio', data.kinopio, position)
+    // TODO if data.text matches names in store.state.clipboardData,
+    // then data = store.state.clipboardData
+    // w new ids and pos
+
   // add plain text cards
   } else {
     data.text = utils.decodeEntitiesFromHTML(data.text)

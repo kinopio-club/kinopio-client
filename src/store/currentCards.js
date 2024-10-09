@@ -640,7 +640,7 @@ const currentCards = {
         if (isNoY) {
           delete card.y
         } else {
-          card.y = Math.max(consts.minItemY, card.y + prevMoveDelta.y)
+          card.y = Math.max(consts.minItemXY, card.y + prevMoveDelta.y)
           context.dispatch('checkIfShouldIncreasePageHeightWhileDragging', card)
         }
         card = {
@@ -702,7 +702,7 @@ const currentCards = {
         card.x = Math.round(card.x)
         card.y = Math.max(card.y + prevMoveDelta.y, 0)
         card.y = Math.round(card.y)
-        card.y = Math.max(consts.minItemY, card.y)
+        card.y = Math.max(consts.minItemXY, card.y)
         card.userId = context.rootState.currentUser.id
         return card
       })

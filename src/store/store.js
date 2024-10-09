@@ -100,7 +100,7 @@ const store = createStore({
     currentUserIsPanning: false,
     currentUserToolbar: 'card', // card, box
     currentUserIsDraggingConnectionIdLabel: '',
-    clipboardDataPolyfill: {}, // for firefox pasting
+    clipboardData: {}, // for kinopio data pasting
 
     // box-selecting
     currentUserIsBoxSelecting: false,
@@ -941,9 +941,9 @@ const store = createStore({
       utils.typeCheck({ value, type: 'string' })
       state.currentUserIsDraggingConnectionIdLabel = value
     },
-    clipboardDataPolyfill: (state, data) => {
+    clipboardData: (state, data) => {
       utils.typeCheck({ value: data, type: 'object' })
-      state.clipboardDataPolyfill = data
+      state.clipboardData = data
     },
 
     // Dragging Cards
