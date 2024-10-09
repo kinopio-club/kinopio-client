@@ -1576,8 +1576,8 @@ export default {
       items[itemName] = items[itemName].map(item => {
         item.x = item.x + position.x
         item.y = item.y + position.y
-        item.x = Math.min(consts.minItemXY, item.x)
-        item.y = Math.min(consts.minItemXY, item.y)
+        item.x = Math.max(consts.minItemXY, item.x)
+        item.y = Math.max(consts.minItemXY, item.y)
         return item
       })
     })

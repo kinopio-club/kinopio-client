@@ -1206,6 +1206,15 @@ const currentSpace = {
       const tagsInCard = context.getters.tagsInCard({ id: cardId })
       const tagsToRemove = tagsInCard.filter(tag => !cardTagNames.includes(tag.name))
       tagsToRemove.forEach(tag => context.dispatch('removeTag', tag))
+    },
+
+    // items
+
+    addItems: (context, items) => {
+      console.log('☎️', items)
+      // create items: cards, boxes, connections, connectionTypes
+      // nexttick?
+      // update all connections paths
     }
   },
 
@@ -1380,12 +1389,7 @@ const currentSpace = {
       items = items || getters.selectedItems
       spaceId = spaceId || state.id
       let newItems = utils.uniqueSpaceItems(utils.clone(items))
-      let { cards, connectionTypes, connections, boxes } = newItems
-      cards = utils.updateItemsSpaceId(cards, spaceId)
-      connectionTypes = utils.updateItemsSpaceId(connectionTypes, spaceId)
-      connections = utils.updateItemsSpaceId(connections, spaceId)
-      boxes = utils.updateItemsSpaceId(boxes, spaceId)
-      newItems = { cards, connectionTypes, connections, boxes }
+      newItems = utils.updateSpaceItemsSpaceId(newItems, spaceId)
       return newItems
     },
 
