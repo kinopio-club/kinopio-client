@@ -699,6 +699,8 @@ const handlePasteEvent = async (event) => {
     const boxIds = items.boxes.map(box => box.id)
     store.dispatch('addMultipleToMultipleCardsSelected', cardIds)
     store.dispatch('addMultipleToMultipleBoxesSelected', boxIds)
+    await nextTick()
+    store.dispatch('currentConnections/updatePaths', { connections: items.connections })
   // add plain text cards
   } else {
     data.text = utils.decodeEntitiesFromHTML(data.text)
