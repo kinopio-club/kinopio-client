@@ -620,9 +620,6 @@ const handlePastePlainText = async (data, position) => {
     cards = cardIds.map(cardId => store.getters['currentCards/byId'](cardId))
     store.dispatch('history/resume')
     store.dispatch('history/add', { cards, useSnapshot: true })
-    // update page size
-    await nextTick()
-    afterPaste({ cards, boxes: [] })
   }, 100)
 }
 
@@ -671,6 +668,7 @@ const handlePasteEvent = async (event) => {
   const isSpaceScope = checkIsSpaceScope(event)
   if (!isSpaceScope) { return }
   event.preventDefault()
+  let items
   let position = currentCursorPosition || prevCursorPosition
   position = utils.cursorPositionInSpace(null, position)
   // check card limits
@@ -691,7 +689,7 @@ const handlePasteEvent = async (event) => {
     store.dispatch('upload/addCardsAndUploadFiles', { files: [data.file], position })
   // add kinopio items
   } else if (data.kinopio) {
-    let items = utils.updateSpaceItemsAddPosition(data.kinopio, position)
+    items = utils.updateSpaceItemsAddPosition(data.kinopio, position)
     items = store.getters['currentSpace/newItems']({ items })
     store.dispatch('currentSpace/addItems', items)
     // select new items
@@ -706,6 +704,9 @@ const handlePasteEvent = async (event) => {
     data.text = utils.decodeEntitiesFromHTML(data.text)
     handlePastePlainText(data, position)
   }
+  // update page size
+  await nextTick()
+  afterPaste(items)
 }
 
 // Select All Cards Below Cursor

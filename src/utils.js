@@ -1508,7 +1508,7 @@ export default {
     return userId
   },
   uniqueSpaceItems (items, nullItemUsers) {
-    const cardIdDeltas = []
+    const itemIdDeltas = []
     const connectionTypeIdDeltas = []
     const user = cache.user()
     let { cards, connections, connectionTypes, boxes, tags } = items
@@ -1517,13 +1517,24 @@ export default {
     cards = cards.map(card => {
       const userId = this.itemUserId(user, card, nullItemUsers)
       const newId = nanoid()
-      cardIdDeltas.push({
+      itemIdDeltas.push({
         prevId: card.id,
         newId
       })
       card.id = newId
       card.userId = userId
       return card
+    })
+    boxes = boxes.map(box => {
+      const userId = this.itemUserId(user, box, nullItemUsers)
+      const newId = nanoid()
+      itemIdDeltas.push({
+        prevId: box.id,
+        newId
+      })
+      box.id = newId
+      box.userId = userId
+      return box
     })
     connectionTypes = connectionTypes.map(type => {
       const userId = this.itemUserId(user, type, nullItemUsers)
@@ -1540,20 +1551,14 @@ export default {
       const userId = this.itemUserId(user, connection, nullItemUsers)
       connection.id = nanoid()
       connection.connectionTypeId = this.updateAllIds(connection, 'connectionTypeId', connectionTypeIdDeltas)
-      connection.startItemId = this.updateAllIds(connection, 'startItemId', cardIdDeltas)
-      connection.endItemId = this.updateAllIds(connection, 'endItemId', cardIdDeltas)
+      connection.startItemId = this.updateAllIds(connection, 'startItemId', itemIdDeltas)
+      connection.endItemId = this.updateAllIds(connection, 'endItemId', itemIdDeltas)
       connection.userId = userId
       return connection
     })
-    boxes = boxes.map(box => {
-      const userId = this.itemUserId(user, box, nullItemUsers)
-      box.id = nanoid()
-      box.userId = userId
-      return box
-    })
     tags = tags.map(tag => {
       tag.id = nanoid()
-      tag.cardId = this.updateAllIds(tag, 'cardId', cardIdDeltas)
+      tag.cardId = this.updateAllIds(tag, 'cardId', itemIdDeltas)
       return tag
     })
     items = { cards, connections, connectionTypes, boxes, tags }

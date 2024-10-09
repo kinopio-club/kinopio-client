@@ -1385,8 +1385,9 @@ const currentSpace = {
         return rootGetters['currentBoxes/byId'](boxId)
       })
       const connections = rootGetters['currentConnections/all'].filter(connection => {
-        const isStartCardMatch = rootState.multipleCardsSelectedIds.includes(connection.startItemId)
-        const isEndCardMatch = rootState.multipleCardsSelectedIds.includes(connection.endItemId)
+        const selectedIds = rootState.multipleCardsSelectedIds.concat(rootState.multipleBoxesSelectedIds)
+        const isStartCardMatch = selectedIds.includes(connection.startItemId)
+        const isEndCardMatch = selectedIds.includes(connection.endItemId)
         return isStartCardMatch && isEndCardMatch
       })
       const connectionTypeIds = connections.map(connection => connection.connectionTypeId)
