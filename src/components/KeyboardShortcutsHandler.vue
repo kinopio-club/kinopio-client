@@ -542,6 +542,23 @@ const remove = () => {
 
 // Copy, Cut
 
+const writeSelectedToClipboard = async () => {
+  const selectedItems = store.getters['currentSpace/selectedItems']
+  let { cards, connectionTypes, connections, boxes } = selectedItems
+  cards = utils.sortByY(cards)
+  boxes = utils.sortByY(boxes)
+  let data = { isKinopioData: true, cards, connections, connectionTypes, boxes }
+  const text = utils.textFromCardNames(cards)
+  console.log('🎊 copyData', data, text)
+  try {
+    store.commit('clipboardDataPolyfill', data)
+    await navigator.clipboard.writeText(text)
+  } catch (error) {
+    console.warn('🚑 writeSelectedToClipboard', error)
+    throw { error }
+  }
+}
+
 const handleCopyCutEvent = async (event) => {
   const isSpaceScope = checkIsSpaceScope(event)
   if (!isSpaceScope) { return }
@@ -665,23 +682,6 @@ const handlePasteEvent = async (event) => {
   } else {
     data.text = utils.decodeEntitiesFromHTML(data.text)
     handlePastePlainText(data, position)
-  }
-}
-
-const writeSelectedToClipboard = async () => {
-  const selectedItems = store.getters['currentSpace/selectedItems']
-  let { cards, connectionTypes, connections, boxes } = selectedItems
-  cards = utils.sortByY(cards)
-  boxes = utils.sortByY(boxes)
-  let data = { isKinopioData: true, cards, connections, connectionTypes, boxes }
-  const text = utils.textFromCardNames(cards)
-  console.log('🎊 copyData', data, text)
-  try {
-    store.commit('clipboardDataPolyfill', data)
-    await navigator.clipboard.writeText(text)
-  } catch (error) {
-    console.warn('🚑 writeSelectedToClipboard', error)
-    throw { error }
   }
 }
 
