@@ -6,7 +6,7 @@ import SpacePicker from '@/components/dialogs/SpacePicker.vue'
 import Loader from '@/components/Loader.vue'
 import SpaceList from '@/components/SpaceList.vue'
 import User from '@/components/User.vue'
-import TeamLabel from '@/components/TeamLabel.vue'
+import GroupLabel from '@/components/GroupLabel.vue'
 import utils from '@/utils.js'
 import cache from '@/cache.js'
 import postMessage from '@/postMessage.js'
@@ -34,7 +34,7 @@ const state = reactive({
   spacePickerIsVisible: false,
   exploreSpaces: [],
   userSpaces: [],
-  teamsIsVisible: false,
+  groupsIsVisible: false,
   loading: {
     exploreSpaces: false,
     userSpaces: false
@@ -149,11 +149,11 @@ const updateExploreSpaces = async () => {
   state.loading.exploreSpaces = false
 }
 
-// teams
+// groups
 
-const toggleTeamsIsVisible = () => {
+const toggleGroupsIsVisible = () => {
   store.commit('closeAllDialogs')
-  store.commit('teamsIsVisible', true)
+  store.commit('groupsIsVisible', true)
 }
 </script>
 
@@ -161,12 +161,12 @@ const toggleTeamsIsVisible = () => {
 .user-details-actions(@click.stop="closeDialogs")
   //- Current User
   section(v-if="isCurrentUser")
-    //- team
+    //- group
     .row
       .button-wrap
-        button(@click.stop="toggleTeamsIsVisible")
-          img.icon.team(src="@/assets/team.svg")
-          span Teams
+        button(@click.stop="toggleGroupsIsVisible")
+          img.icon.group(src="@/assets/group.svg")
+          span Groups
   section(v-if="isCurrentUser")
     //- settings, sign out
     .row

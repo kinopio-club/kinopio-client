@@ -49,7 +49,7 @@ section.subsection.cards-created-progress(@click="closeChildDialogs")
       span {{cardsCreatedCount}}/{{cardsCreatedLimit}} free cards created
     .button-wrap
       button.small-button(@click.stop="toggleFreeLimitFAQIsVisible" :class="{active: state.freeLimitFAQIsVisible}")
-        span ?
+        span(title="Free Limit FAQ") ?
       FreeLimitFAQ(:visible="state.freeLimitFAQIsVisible")
   progress(:value="cardsCreatedCount" :max="cardsCreatedLimit")
   .row

@@ -110,11 +110,11 @@ export default {
         contributors = rootState.currentSpace.cards.map(card => card.userId)
         recipients = members.concat(contributors)
       }
-      // team users who added cards
-      let teamUsers = rootGetters['currentCards/teamUsersWhoAddedCards']
-      if (teamUsers) {
-        teamUsers = teamUsers.map(user => user.id)
-        recipients.concat(teamUsers)
+      // group users who added cards
+      let groupUsers = rootGetters['currentCards/groupUsersWhoAddedCards']
+      if (groupUsers) {
+        groupUsers = groupUsers.map(user => user.id)
+        recipients.concat(groupUsers)
       }
       recipients = uniq(recipients)
       // exclude currently connected recipients

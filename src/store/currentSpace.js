@@ -85,9 +85,9 @@ const currentSpace = {
       })
       cache.updateSpace('collaborators', state.collaborators, state.id)
     },
-    updateTeamMeta: (state, space) => {
-      state.teamId = space.teamId
-      state.addedToTeamByUserId = space.addedToTeamByUserId
+    updateGroupMeta: (state, space) => {
+      state.groupId = space.groupId
+      state.addedToGroupByUserId = space.addedToGroupByUserId
     },
     // websocket receive
     updateUser: (state, updatedUser) => {
@@ -803,7 +803,7 @@ const currentSpace = {
         console.log('🎑 remoteSpace', remoteSpace)
         if (!remoteSpace) { return }
         pageMeta.update(remoteSpace)
-        context.dispatch('teams/loadTeam', remoteSpace, { root: true })
+        context.dispatch('groups/loadGroup', remoteSpace, { root: true })
         context.commit('updateSpace', { collaboratorKey: remoteSpace.collaboratorKey })
         const spaceIsUnchanged = utils.spaceIsUnchanged(cachedSpace, remoteSpace)
         if (spaceIsUnchanged) {
@@ -1134,8 +1134,8 @@ const currentSpace = {
     // User Card Count
 
     checkIfShouldNotifyCardsCreatedIsNearLimit: (context) => {
-      const spaceUserIsUpgraded = context.getters.spaceUserIsUpgradedOrOnTeam
-      if (spaceUserIsUpgraded) { return }
+      const spaceCreatorIsUpgraded = context.getters.spaceCreatorIsUpgraded
+      if (spaceCreatorIsUpgraded) { return }
       const currentUser = context.rootState.currentUser
       if (currentUser.isUpgraded) { return }
       const cardsCreatedLimit = context.rootState.cardsCreatedLimit
@@ -1327,6 +1327,9 @@ const currentSpace = {
       }
       return users
     },
+    creator: (state, getters) => {
+      return getters.memberById(state.userId)
+    },
     memberById: (state, getters, rootState) => (userId) => {
       const members = getters.members()
       return members.find(member => member.id === userId)
@@ -1337,34 +1340,26 @@ const currentSpace = {
         return otherUser
       }
       const space = utils.clone(state)
-      const teamUser = rootGetters['teams/teamUser']({ userId, space })
-      let user = getters.memberById(userId) || rootGetters.otherUserById(userId) || teamUser
+      const groupUser = rootGetters['groups/groupUser']({ userId, space })
+      let user = getters.memberById(userId) || rootGetters.otherUserById(userId) || groupUser
       if (rootState.currentUser.id === userId) {
         user = rootState.currentUser
       }
       return user
     },
-    spaceUserIsUpgradedOrOnTeam: (state, getters, rootState, rootGetters) => {
-      const currentUser = rootState.currentUser
-      const users = state.users
-      let userIsUpgraded
-      users.forEach(user => {
-        const userTeams = rootGetters['teams/byUser'](user)
-        const isTeamUser = Boolean(userTeams.length)
-        if (user.isUpgraded || isTeamUser) { userIsUpgraded = true }
-      })
-      return userIsUpgraded
+    spaceCreatorIsUpgraded: (state, getters, rootState, rootGetters) => {
+      const creatorUser = getters.creator
+      return creatorUser.isUpgraded
     },
-    spaceUserIsCurrentUser: (state, getters, rootState) => {
+    spaceCreatorIsCurrentUser: (state, getters, rootState) => {
       const currentUser = rootState.currentUser
-      const users = state.users
-      const userIds = users.map(user => user.id)
-      return userIds.includes(currentUser.id)
+      const creatorUser = getters.creator
+      return currentUser.id === creatorUser.id
     },
     shouldPreventAddCard: (state, getters, rootState, rootGetters) => {
       const cardsCreatedIsOverLimit = rootGetters['currentUser/cardsCreatedIsOverLimit']
-      const spaceUserIsUpgradedOrOnTeam = getters.spaceUserIsUpgradedOrOnTeam
-      return cardsCreatedIsOverLimit && !spaceUserIsUpgradedOrOnTeam
+      const spaceCreatorIsUpgraded = getters.spaceCreatorIsUpgraded
+      return cardsCreatedIsOverLimit && !spaceCreatorIsUpgraded
     },
     readOnlyKey: (state, getters, rootState, rootGetters) => (space) => {
       const readOnlyKey = rootState.spaceReadOnlyKey

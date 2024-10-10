@@ -70,7 +70,7 @@ const updateDialogHeight = async () => {
 
 // free cards from space member
 
-const spaceUserIsUpgraded = computed(() => store.getters['currentSpace/spaceUserIsUpgradedOrOnTeam'])
+const spaceCreatorIsUpgraded = computed(() => store.getters['currentSpace/spaceCreatorIsUpgraded'])
 const spaceUser = computed(() => store.state.currentSpace.users[0])
 
 </script>
@@ -98,23 +98,26 @@ dialog.pricing(v-if="visible" :open="visible" @click.left.stop="closeDialogs" re
           td
             span.badge.success Upgraded
         tr
-          td 100 Cards
-          td Unlimited Cards
+          td 100 cards
+          td Unlimited cards
         tr
           td 5mb file upload size limit
           td No upload limit
         tr
           td 10 AI images
           td 50 AI images/mo
-
+        tr
+          td Can only join groups
+          td
+            .row
+              span Can create groups
+              //- button.small-button(title="About Groups") ?
     CardsCreatedProgress
-
     //- free cards from space member
-    section.subsection(v-if="spaceUserIsUpgraded")
+    section.subsection(v-if="spaceCreatorIsUpgraded")
       p
         UserLabelInline(:user="spaceUser")
         span is upgraded, so cards you create in this space won't increase your free card count
-
   section
     AboutMe
 </template>

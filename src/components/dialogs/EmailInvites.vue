@@ -70,7 +70,7 @@ const createSessionToken = () => {
 
 // requires upgraded user (temp)
 
-const currentUserIsUpgraded = computed(() => store.getters['currentUser/isUpgradedOrOnTeam'])
+const currentUserIsUpgraded = computed(() => store.state.currentUser.isUpgraded)
 const triggerUpgradeUserIsVisible = () => {
   store.dispatch('closeAllDialogs')
   store.commit('triggerUpgradeUserIsVisible')

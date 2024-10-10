@@ -74,7 +74,7 @@ Use the [Vue devtools](https://github.com/vuejs/vue-devtools) for Firefox and Ch
 | `mobile` | touch handlers, no hover, small screen |
 | `desktop zoom out` | using the zoom bar or cmd+/- |
 | `pinch zoom out/in` | using native touch gesture on mobile |
-| `team member or admin` | can see and edit all spaces in the team |
+| `group member or admin` | can see and edit all spaces in the group |
 
 ## Post Messages
 
@@ -86,9 +86,9 @@ The hello space serves as the entry point and marketing page for new users. It's
 
 To update it, create the space and export its json. Replace the contents of`hello.json` with the new json file.
 
-## How to update the Blog and "What's New"
+## How to update the Changelog and "What's New"
 
-[Instructions here](https://kinopio.club/-kinopio-team-how-to-update-blog-oi4jZTSI_eAEvov9XbjJM)
+[Instructions here](https://kinopio.club/how-to-update-changelog-oi4jZTSI_eAEvov9XbjJM)
 
 ## HTTPS Signing
 
