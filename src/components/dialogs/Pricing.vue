@@ -98,14 +98,17 @@ dialog.pricing(v-if="visible" :open="visible" @click.left.stop="closeDialogs" re
           td
             span.badge.success Upgraded
         tr
-          td 100 Cards
-          td Unlimited Cards
+          td 100 cards
+          td Unlimited cards
         tr
           td 5mb file upload size limit
           td No upload limit
         tr
           td 10 AI images
           td 50 AI images/mo
+        tr
+          td Can only join groups
+          td Can create groups
 
     CardsCreatedProgress
 
