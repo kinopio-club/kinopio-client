@@ -6,7 +6,8 @@ import utils from '@/utils.js'
 import GroupLabel from '@/components/GroupLabel.vue'
 import GroupDetails from '@/components/dialogs/GroupDetails.vue'
 import AddGroup from '@/components/dialogs/AddGroup.vue'
-import GroupsBetaInfo from '@/components/GroupsBetaInfo.vue'
+import AboutGroups from '@/components/AboutGroups.vue'
+import Loader from '@/components/Loader.vue'
 
 import uniqBy from 'lodash-es/uniqBy'
 
@@ -44,28 +45,26 @@ const closeDialogs = () => {
   state.groupDetailsIsVisibleForGroupId = ''
 }
 
-const currentUserIsSignedIn = computed(() => store.getters['currentUser/isSignedIn'])
 const currentUserIsUpgraded = computed(() => store.state.currentUser.isUpgraded)
-const triggerSignUpOrInIsVisible = () => {
-  store.dispatch('closeAllDialogs')
-  store.commit('triggerSignUpOrInIsVisible')
-}
+const isLoadingUserGroupsSpaces = computed(() => store.state.isLoadingUserGroupsSpaces)
 
 // groups picker list
 
-const groups = computed(() => {
-  const user = store.state.currentUser
-  const groupIds = utils.clone(store.state.groups.ids)
-  const groups = groupIds.map(id => store.getters['groups/byId'](id))
-  let groupUserGroups = groups.filter(group => {
-    return group.users.find(groupUser => {
-      const groupUserId = groupUser.id || groupUser.userId
-      return groupUserId === user.id
-    })
-  })
-  groupUserGroups = uniqBy(groupUserGroups, 'id')
-  return groupUserGroups
-})
+const groups = computed(() => store.getters['groups/byUser']())
+
+// const groups = computed(() => {
+//   const user = store.state.currentUser
+//   const groupIds = utils.clone(store.state.groups.ids)
+//   const groups = groupIds.map(id => store.getters['groups/byId'](id))
+//   let groupUserGroups = groups.filter(group => {
+//     return group.users.find(groupUser => {
+//       const groupUserId = groupUser.id || groupUser.userId
+//       return groupUserId === user.id
+//     })
+//   })
+//   groupUserGroups = uniqBy(groupUserGroups, 'id')
+//   return groupUserGroups
+// })
 
 // add group
 
@@ -87,11 +86,6 @@ const toggleGroupDetailsIsVisible = (group) => {
     state.groupDetailsIsVisibleForGroupId = group.id
   }
 }
-
-// beta info
-
-const groupBetaMessage = computed(() => 'Only groups beta users can create and manage groups.')
-
 </script>
 
 <template lang="pug">
@@ -104,20 +98,21 @@ dialog.narrow.groups(v-if="visible" :open="visible" @click.left.stop="closeDialo
           img.icon.add(src="@/assets/add.svg")
           span New Group
         AddGroup(:visible="state.addGroupIsVisible" @closeDialogs="closeDialogs")
-  section(v-if="!currentUserIsSignedIn")
-    p Sign Up or In to create and manage groups
-    button(@click.left="triggerSignUpOrInIsVisible") Sign Up or In
   //- group picker
-  template(v-if="groups.length")
+  template(v-if="isLoadingUserGroupsSpaces")
+    section
+      Loader(:visible="true")
+
+  template(v-else-if="groups.length")
     section.results-section
       ul.results-list
         template(v-for="group in groups")
           li(:class="{ active: groupIsVisible(group) }" @click.stop="toggleGroupDetailsIsVisible(group)")
             GroupLabel(:group="group" :showName="true")
             GroupDetails(:visible="groupIsVisible(group)" :group="group")
-  //- groups beta notice
+  //- groups info
   template(v-else)
-    GroupsBetaInfo(:message="groupBetaMessage")
+    AboutGroups
 </template>
 
 <style lang="stylus">

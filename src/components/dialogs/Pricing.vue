@@ -108,16 +108,16 @@ dialog.pricing(v-if="visible" :open="visible" @click.left.stop="closeDialogs" re
           td 50 AI images/mo
         tr
           td Can only join groups
-          td Can create groups
-
+          td
+            .row
+              span Can create groups
+              //- button.small-button(title="About Groups") ?
     CardsCreatedProgress
-
     //- free cards from space member
     section.subsection(v-if="spaceCreatorIsUpgraded")
       p
         UserLabelInline(:user="spaceUser")
         span is upgraded, so cards you create in this space won't increase your free card count
-
   section
     AboutMe
 </template>

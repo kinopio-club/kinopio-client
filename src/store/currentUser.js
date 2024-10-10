@@ -574,7 +574,7 @@ export default {
       }
       const remoteTags = await context.dispatch('api/getUserTags', null, { root: true }) || []
       context.commit('otherTags', remoteTags, { root: true })
-      context.commit('groups/restore', remoteUser.groups, { root: true })
+      context.dispatch('groups/restore', remoteUser.groups, { root: true })
     },
     restoreUserFavorites: async (context) => {
       try {

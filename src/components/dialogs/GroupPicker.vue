@@ -3,7 +3,7 @@ import { reactive, computed, onMounted, onBeforeUnmount, defineProps, defineEmit
 import { useStore } from 'vuex'
 
 import GroupList from '@/components/GroupList.vue'
-import GroupsBetaInfo from '@/components/GroupsBetaInfo.vue'
+import AboutGroups from '@/components/AboutGroups.vue'
 import Loader from '@/components/Loader.vue'
 import utils from '@/utils.js'
 
@@ -40,7 +40,13 @@ const updateDialogHeight = async () => {
   state.dialogHeight = utils.elementHeight(element)
 }
 
+const currentUserIsUpgraded = computed(() => store.state.currentUser.isUpgraded)
 const isLoadingUserGroupsSpaces = computed(() => store.state.isLoadingUserGroupsSpaces)
+
+// groups list
+
+const isGroups = computed(() => Boolean(props.groups.length))
+const groupsListIsVisible = computed(() => currentUserIsUpgraded.value && isGroups.value)
 
 // select group
 
@@ -51,38 +57,27 @@ const selectGroup = (event, group) => {
   emit('selectGroup', group)
 }
 
-// is in group
-
-const isOnGroup = computed(() => {
-  const groups = store.getters['groups/byUser']()
-  return Boolean(groups.length)
-})
-const groupBetaMessage = computed(() => 'Only groups beta users can add spaces to groups.')
-
 </script>
 
 <template lang="pug">
 dialog.narrow.group-picker(v-if="visible" :open="visible" @click.left.stop ref="dialogElement" :style="{'max-height': state.dialogHeight + 'px'}")
-  section.title-section
+  section(:class="{ 'title-section': groupsListIsVisible }")
     .row.title-row
       span Add to Group
-      button.small-button(v-if="isOnGroup" @click.left="clearGroup")
+      button.small-button(v-if="isGroups" @click.left="clearGroup")
         img.icon.cancel(src="@/assets/add.svg")
         span Clear
-
   //- loading
-  template(v-if="isLoadingUserGroupsSpaces")
-    section
-      Loader(:visible="true")
+  section(v-if="isLoadingUserGroupsSpaces")
+    Loader(:visible="true")
   //- groups list
-  template(v-else-if="isOnGroup")
-    section.results-section(v-if="props.groups.length")
-      GroupList(:groups="props.groups" :selectedGroup="props.selectedGroup" @selectGroup="selectGroup")
-  //- groups beta info
-  template(v-else)
-    GroupsBetaInfo(:message="groupBetaMessage")
+  section.results-section(v-else-if="groupsListIsVisible")
+    GroupList(:groups="props.groups" :selectedGroup="props.selectedGroup" @selectGroup="selectGroup")
+  //- about groups
+  AboutGroups(v-else)
 </template>
 
 <style lang="stylus">
-// dialog.group-picker
+dialog.group-picker
+  overflow auto
 </style>

@@ -39,7 +39,7 @@ import SpaceUserList from '@/components/dialogs/SpaceUserList.vue'
 import CommentButton from '@/components/CommentButton.vue'
 import FavoriteSpaceButton from '@/components/FavoriteSpaceButton.vue'
 import GroupLabel from '@/components/GroupLabel.vue'
-import Groups from '@/components/dialogs/Groups.vue'
+import UserGroups from '@/components/dialogs/UserGroups.vue'
 import consts from '@/consts.js'
 
 import sortBy from 'lodash-es/sortBy'
@@ -637,7 +637,7 @@ header(v-if="isVisible" :style="state.position" :class="{'fade-out': isFadingOut
         UserSettings
         UpdatePassword
         SpaceUserList
-        Groups
+        UserGroups
         //- Share
         .button-wrap
           button(@click.left.stop="toggleShareIsVisible" :class="{active: state.shareIsVisible, 'translucent-button': !shouldIncreaseUIContrast}")

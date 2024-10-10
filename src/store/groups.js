@@ -61,6 +61,10 @@ export default {
     }
   },
   actions: {
+    restore: (context, groups) => {
+      context.commit('restore', groups)
+      context.commit('isLoadingUserGroupsSpaces', false, { root: true })
+    },
     createGroup: async (context, group) => {
       try {
         const response = await context.dispatch('api/createGroup', group, { root: true })
