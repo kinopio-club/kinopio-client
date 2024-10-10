@@ -45,7 +45,7 @@ const closeDialogs = () => {
 }
 
 const currentUserIsSignedIn = computed(() => store.getters['currentUser/isSignedIn'])
-const currentUserCanCreateGroup = computed(() => currentUserIsSignedIn.value && store.state.currentUser.betaPermissionCreateGroup)
+const currentUserIsUpgraded = computed(() => store.state.currentUser.isUpgraded)
 const triggerSignUpOrInIsVisible = () => {
   store.dispatch('closeAllDialogs')
   store.commit('triggerSignUpOrInIsVisible')
@@ -98,7 +98,7 @@ const groupBetaMessage = computed(() => 'Only groups beta users can create and m
 dialog.narrow.groups(v-if="visible" :open="visible" @click.left.stop="closeDialogs" ref="dialogElement" :style="{'max-height': state.dialogHeight + 'px'}")
   section
     p Groups
-    .row(v-if="currentUserCanCreateGroup")
+    .row(v-if="currentUserIsUpgraded")
       .button-wrap
         button(:class="{ active: state.addGroupIsVisible }" @click.stop="toggleAddGroupIsVisible")
           img.icon.add(src="@/assets/add.svg")
