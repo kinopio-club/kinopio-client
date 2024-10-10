@@ -298,9 +298,9 @@ const updateIsPlayingAudio = (value) => {
   cancelLocking()
 }
 
-// team invite
+// group invite
 
-const teamInviteUrl = computed(() => {
+const groupInviteUrl = computed(() => {
   const urls = urlsInName.value || []
   return urls.find(url => utils.urlIsGroupInvite(url))
 })
@@ -1783,8 +1783,8 @@ const updateOtherInviteItems = (url) => {
   store.dispatch('currentSpace/updateOtherItems', { spaceId, collaboratorKey })
 }
 const updateOtherGroupItems = (url) => {
-  const teamFromUrl = utils.teamFromGroupInviteUrl(url)
-  store.dispatch('teams/updateOtherGroups', teamFromUrl)
+  const groupFromUrl = utils.groupFromGroupInviteUrl(url)
+  store.dispatch('groups/updateOtherGroups', groupFromUrl)
 }
 
 // utils
@@ -1962,7 +1962,7 @@ article.card-wrap#card(
             :parentDetailsIsVisible="currentCardDetailsIsVisible"
             @shouldRenderParent="updateShouldRenderParent"
           )
-    .url-preview-wrap(v-if="cardUrlPreviewIsVisible || teamInviteUrl || otherCardIsVisible || otherSpaceIsVisible" :class="{'is-image-card': isImageCard}")
+    .url-preview-wrap(v-if="cardUrlPreviewIsVisible || groupInviteUrl || otherCardIsVisible || otherSpaceIsVisible" :class="{'is-image-card': isImageCard}")
       template(v-if="cardUrlPreviewIsVisible")
         UrlPreviewCard(
           :visible="true"
@@ -1975,10 +1975,10 @@ article.card-wrap#card(
           @retryUrlPreview="retryUrlPreview"
           :backgroundColor="backgroundColor"
         )
-      template(v-if="teamInviteUrl")
+      template(v-if="groupInviteUrl")
         GroupInvitePreview(
           :card="card"
-          :teamInviteUrl="teamInviteUrl"
+          :groupInviteUrl="groupInviteUrl"
           :selectedColor="selectedColor"
         )
       template(v-else-if="otherCardIsVisible")

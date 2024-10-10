@@ -48,9 +48,9 @@ const isActive = computed(() => {
   }
 })
 
-// team
+// group
 
-const team = computed(() => store.getters['teams/spaceGroup'](currentSpace.value))
+const group = computed(() => store.getters['groups/spaceGroup'](currentSpace.value))
 
 // users
 
@@ -59,11 +59,11 @@ const spaceUsers = computed(() => {
   if (props.users) {
     items = props.users
   } else {
-    const teamUsers = store.getters['currentCards/teamUsersWhoAddedCards']
+    const groupUsers = store.getters['currentCards/groupUsersWhoAddedCards']
     items = utils.clone(currentSpace.value.users)
     items = items.concat(currentSpace.value.collaborators)
-    items = items.concat(teamUsers)
-    // TODO add notifications: notify teamUsers on changes. https://kinopio.club/En9p7INBEpSAhNwFVIwgZ/VelgpXzc5h8Cl1m4RJ41i
+    items = items.concat(groupUsers)
+    // TODO add notifications: notify groupUsers on changes. https://kinopio.club/En9p7INBEpSAhNwFVIwgZ/VelgpXzc5h8Cl1m4RJ41i
   }
   items = items.filter(item => Boolean(item))
   items = items.filter(user => user.id !== currentUser.value.id)
@@ -97,8 +97,8 @@ const isTranslucentButton = computed(() => {
 <template lang="pug">
 button.space-users-button(@click.stop="toggleSpaceUserListIsVisible" :class="{ 'header-button': props.isParentSpaceUsers, active: isActive, 'translucent-button': isTranslucentButton }" ref="buttonElement")
   span.label(v-if="props.showLabel")
-    template(v-if="team")
-      GroupLabel(:team="team")
+    template(v-if="group")
+      GroupLabel(:group="group")
     template(v-if="spaceUsers.length")
       User(:user="recentUser" :isClickable="false" :hideYouLabel="true" :isSmall="true" :shouldBounceIn="props.isParentSpaceUsers")
     span {{ spaceUsersLabel }}
@@ -120,6 +120,6 @@ button.space-users-button(@click.stop="toggleSpaceUserListIsVisible" :class="{ '
   &.header-button
     border-top-left-radius 0
     border-bottom-left-radius 0
-  .team-label
+  .group-label
     margin-right 6px
 </style>

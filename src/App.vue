@@ -897,7 +897,7 @@ button
   dialog
     top calc(100% - 8px)
 
-.icon.team
+.icon.group
   height 11px
 
 .icon.sunglasses

@@ -18,8 +18,8 @@ const fetchSpacePublicMeta = async (spaceId) => {
     console.warn('🚑 fetchSpacePublicMeta', error)
   }
 }
-const fetchGroupPublicMeta = async (teamId) => {
-  const url = `${consts.apiHost()}/team/${teamId}/public-meta`
+const fetchGroupPublicMeta = async (groupId) => {
+  const url = `${consts.apiHost()}/group/${groupId}/public-meta`
   try {
     const response = await fetch(url)
     if (response.status !== 200) {
@@ -120,8 +120,8 @@ export default {
     scriptTag.text = jsonLD
     document.head.appendChild(scriptTag)
   },
-  async groupInvite ({ teamId, isGroupInvite }) {
-    const meta = await fetchGroupPublicMeta(teamId)
+  async groupInvite ({ groupId, isGroupInvite }) {
+    const meta = await fetchGroupPublicMeta(groupId)
     let name = `${meta.name} – Kinopio Group`
     if (isGroupInvite) {
       name = `[Invite] ${name}`

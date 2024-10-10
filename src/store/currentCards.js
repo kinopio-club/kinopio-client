@@ -1110,13 +1110,13 @@ const currentCards = {
       users = users.filter(user => Boolean(user))
       return users
     },
-    teamUsersWhoAddedCards: (state, getters, rootState, rootGetters) => {
-      const spaceGroup = rootGetters['teams/spaceGroup']()
-      const teamUsers = spaceGroup?.users
-      if (!teamUsers) { return }
+    groupUsersWhoAddedCards: (state, getters, rootState, rootGetters) => {
+      const spaceGroup = rootGetters['groups/spaceGroup']()
+      const groupUsers = spaceGroup?.users
+      if (!groupUsers) { return }
       let users = getters.users
       users = users.filter(user => {
-        const isGroupUser = teamUsers.find(teamUser => teamUser.id === user.id)
+        const isGroupUser = groupUsers.find(groupUser => groupUser.id === user.id)
         return isGroupUser
       })
       return users
@@ -1133,14 +1133,14 @@ const currentCards = {
         const member = members.find(user => user.id === item.id)
         return !member
       })
-      // remove team users
-      const spaceGroup = rootGetters['teams/spaceGroup']()
+      // remove group users
+      const spaceGroup = rootGetters['groups/spaceGroup']()
       if (spaceGroup) {
-        const teamUsers = spaceGroup?.users
-        if (!teamUsers) { return }
+        const groupUsers = spaceGroup?.users
+        if (!groupUsers) { return }
         items = items.filter(item => {
-          const teamUser = teamUsers.find(teamUser => teamUser.id === item.id)
-          return !teamUser
+          const groupUser = groupUsers.find(groupUser => groupUser.id === item.id)
+          return !groupUser
         })
       }
       return items

@@ -34,7 +34,7 @@ const state = reactive({
   spacePickerIsVisible: false,
   exploreSpaces: [],
   userSpaces: [],
-  teamsIsVisible: false,
+  groupsIsVisible: false,
   loading: {
     exploreSpaces: false,
     userSpaces: false
@@ -149,11 +149,11 @@ const updateExploreSpaces = async () => {
   state.loading.exploreSpaces = false
 }
 
-// teams
+// groups
 
 const toggleGroupsIsVisible = () => {
   store.commit('closeAllDialogs')
-  store.commit('teamsIsVisible', true)
+  store.commit('groupsIsVisible', true)
 }
 </script>
 
@@ -161,11 +161,11 @@ const toggleGroupsIsVisible = () => {
 .user-details-actions(@click.stop="closeDialogs")
   //- Current User
   section(v-if="isCurrentUser")
-    //- team
+    //- group
     .row
       .button-wrap
         button(@click.stop="toggleGroupsIsVisible")
-          img.icon.team(src="@/assets/team.svg")
+          img.icon.group(src="@/assets/group.svg")
           span Groups
   section(v-if="isCurrentUser")
     //- settings, sign out

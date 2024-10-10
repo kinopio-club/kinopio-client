@@ -19,7 +19,7 @@ const emit = defineEmits(['selectGroup', 'clearGroup', 'closeDialogs'])
 
 const props = defineProps({
   visible: Boolean,
-  teams: Array,
+  groups: Array,
   selectedGroup: Object
 })
 
@@ -42,27 +42,27 @@ const updateDialogHeight = async () => {
 
 const isLoadingUserGroupsSpaces = computed(() => store.state.isLoadingUserGroupsSpaces)
 
-// select team
+// select group
 
 const clearGroup = () => {
   emit('clearGroup')
 }
-const selectGroup = (event, team) => {
-  emit('selectGroup', team)
+const selectGroup = (event, group) => {
+  emit('selectGroup', group)
 }
 
-// is in team
+// is in group
 
 const isOnGroup = computed(() => {
-  const teams = store.getters['teams/byUser']()
-  return Boolean(teams.length)
+  const groups = store.getters['groups/byUser']()
+  return Boolean(groups.length)
 })
-const teamBetaMessage = computed(() => 'Only teams beta users can add spaces to teams.')
+const groupBetaMessage = computed(() => 'Only groups beta users can add spaces to groups.')
 
 </script>
 
 <template lang="pug">
-dialog.narrow.team-picker(v-if="visible" :open="visible" @click.left.stop ref="dialogElement" :style="{'max-height': state.dialogHeight + 'px'}")
+dialog.narrow.group-picker(v-if="visible" :open="visible" @click.left.stop ref="dialogElement" :style="{'max-height': state.dialogHeight + 'px'}")
   section.title-section
     .row.title-row
       span Add to Group
@@ -74,15 +74,15 @@ dialog.narrow.team-picker(v-if="visible" :open="visible" @click.left.stop ref="d
   template(v-if="isLoadingUserGroupsSpaces")
     section
       Loader(:visible="true")
-  //- teams list
+  //- groups list
   template(v-else-if="isOnGroup")
-    section.results-section(v-if="props.teams.length")
-      GroupList(:teams="props.teams" :selectedGroup="props.selectedGroup" @selectGroup="selectGroup")
-  //- teams beta info
+    section.results-section(v-if="props.groups.length")
+      GroupList(:groups="props.groups" :selectedGroup="props.selectedGroup" @selectGroup="selectGroup")
+  //- groups beta info
   template(v-else)
-    GroupsBetaInfo(:message="teamBetaMessage")
+    GroupsBetaInfo(:message="groupBetaMessage")
 </template>
 
 <style lang="stylus">
-// dialog.team-picker
+// dialog.group-picker
 </style>

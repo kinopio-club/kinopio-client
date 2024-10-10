@@ -198,7 +198,7 @@ const currentSpaceName = computed(() => {
     return `Space ${id}`
   }
 })
-const spaceGroup = computed(() => store.getters['teams/spaceGroup']())
+const spaceGroup = computed(() => store.getters['groups/spaceGroup']())
 const spaceHasStatus = computed(() => {
   if (!isOnline.value) { return }
   return Boolean(store.state.isLoadingSpace || store.state.isJoiningSpace || store.state.isReconnectingToBroadcast || store.state.isLoadingOtherItems || store.state.sendingQueue.length)
@@ -576,7 +576,7 @@ header(v-if="isVisible" :style="state.position" :class="{'fade-out': isFadingOut
         .logo
           .logo-image
         MoonPhase(v-if="currentSpace.moonPhase" :moonPhase="currentSpace.moonPhase")
-        GroupLabel(:team="spaceGroup")
+        GroupLabel(:group="spaceGroup")
         span {{currentSpaceName}}{{' '}}
         img.icon.visit(src="@/assets/visit.svg")
         //- embed badge
@@ -663,7 +663,7 @@ header(v-if="isVisible" :style="state.position" :class="{'fade-out': isFadingOut
             .button-wrap.space-name-button-wrap(:class="{ 'back-button-is-visible': backButtonIsVisible }")
               button.space-name-button(@click.left.stop="toggleSpaceDetailsIsVisible" :class="{ active: state.spaceDetailsIsVisible, 'translucent-button': !shouldIncreaseUIContrast }")
                 .button-contents(:class="{'space-is-hidden': currentSpaceIsHidden}")
-                  GroupLabel(:team="spaceGroup")
+                  GroupLabel(:group="spaceGroup")
                   span(v-if="currentSpaceIsInbox")
                     img.icon.inbox-icon(src="@/assets/inbox.svg")
                   span(v-if="currentSpaceIsTemplate")

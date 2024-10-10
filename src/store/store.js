@@ -13,7 +13,7 @@ import currentConnections from '@/store/currentConnections.js'
 import currentBoxes from '@/store/currentBoxes.js'
 import upload from '@/store/upload.js'
 import userNotifications from '@/store/userNotifications.js'
-import teams from '@/store/teams.js'
+import groups from '@/store/groups.js'
 import themes from '@/store/themes.js'
 // store plugins
 import websocket from '@/store/plugins/websocket.js'
@@ -62,7 +62,7 @@ const store = createStore({
     prevSpaceIdInSession: '',
     prevSpaceIdInSessionPagePosition: {},
     outsideSpaceBackgroundColor: '',
-    teamsIsVisible: false,
+    groupsIsVisible: false,
 
     // zoom and scroll
     spaceZoomPercent: 100,
@@ -214,7 +214,7 @@ const store = createStore({
     isJoiningSpace: false, // broadcast
     isLoadingOtherItems: false,
     spaceUrlToLoad: '',
-    teamToJoinOnLoad: null, // { teamId, collaboratorKey }
+    groupToJoinOnLoad: null, // { groupId, collaboratorKey }
     spaceReadOnlyKey: {}, //  { spaceId, key }
     spaceCollaboratorKeys: [],
     remotePendingUploads: [],
@@ -362,7 +362,7 @@ const store = createStore({
       state.offlineIsVisible = false
       state.spaceUserListIsVisible = false
       state.importArenaChannelIsVisible = false
-      state.teamsIsVisible = false
+      state.groupsIsVisible = false
     },
     isOnline: (state, value) => {
       utils.typeCheck({ value, type: 'boolean' })
@@ -545,9 +545,9 @@ const store = createStore({
       utils.typeCheck({ value, type: 'string' })
       state.outsideSpaceBackgroundColor = value
     },
-    teamsIsVisible: (state, value) => {
+    groupsIsVisible: (state, value) => {
       utils.typeCheck({ value, type: 'boolean' })
-      state.teamsIsVisible = value
+      state.groupsIsVisible = value
     },
     searchIsVisible: (state, value) => {
       utils.typeCheck({ value, type: 'boolean' })
@@ -1420,9 +1420,9 @@ const store = createStore({
       utils.typeCheck({ value, type: 'object' })
       state.spaceReadOnlyKey = value
     },
-    teamToJoinOnLoad: (state, value) => {
+    groupToJoinOnLoad: (state, value) => {
       utils.typeCheck({ value, type: 'object' })
-      state.teamToJoinOnLoad = value
+      state.groupToJoinOnLoad = value
     },
 
     // Notifications
@@ -2078,7 +2078,7 @@ const store = createStore({
     currentBoxes,
     upload,
     userNotifications,
-    teams,
+    groups,
     themes
   },
   plugins: [websocket()]

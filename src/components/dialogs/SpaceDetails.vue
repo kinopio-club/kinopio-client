@@ -149,7 +149,7 @@ const filteredSpaces = computed(() => {
   }
   // filter by user
   if (utils.objectHasKeys(dialogSpaceFilterByGroup.value)) {
-    spaces = spaces.filter(space => space.teamId === dialogSpaceFilterByGroup.value.id)
+    spaces = spaces.filter(space => space.groupId === dialogSpaceFilterByGroup.value.id)
   }
   // filter by user
   if (utils.objectHasKeys(dialogSpaceFilterByUser.value)) {
@@ -336,13 +336,13 @@ const updateWithRemoteSpaces = async () => {
   if (!currentUserIsSignedIn || isOffline.value) { return }
   try {
     state.isLoadingRemoteSpaces = true
-    const [userSpaces, teamSpaces] = await Promise.all([
+    const [userSpaces, groupSpaces] = await Promise.all([
       store.dispatch('api/getUserSpaces'),
       store.dispatch('api/getUserGroupSpaces')
     ])
     let spaces = userSpaces
-    if (teamSpaces) {
-      spaces = spaces.concat(teamSpaces)
+    if (groupSpaces) {
+      spaces = spaces.concat(groupSpaces)
     }
     spaces = spaces.filter(space => Boolean(space))
     spaces = uniqBy(spaces, 'id')

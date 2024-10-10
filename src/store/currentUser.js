@@ -484,10 +484,10 @@ export default {
       context.commit('journalDailyPrompt', data)
     },
     checkIfShouldJoinGroup: (context) => {
-      if (!context.rootState.teamToJoinOnLoad) { return }
+      if (!context.rootState.groupToJoinOnLoad) { return }
       const currentUserIsSignedIn = context.getters.isSignedIn
       if (currentUserIsSignedIn) {
-        context.dispatch('teams/joinGroup', null, { root: true })
+        context.dispatch('groups/joinGroup', null, { root: true })
       } else {
         context.commit('notifySignUpToJoinGroup', true, { root: true })
       }
@@ -575,7 +575,7 @@ export default {
       }
       const remoteTags = await context.dispatch('api/getUserTags', null, { root: true }) || []
       context.commit('otherTags', remoteTags, { root: true })
-      context.commit('teams/restore', remoteUser.teams, { root: true })
+      context.commit('groups/restore', remoteUser.groups, { root: true })
     },
     restoreUserFavorites: async (context) => {
       try {
@@ -915,7 +915,7 @@ export default {
       space = space || rootState.currentSpace
       const isSpaceUser = getters.isSpaceUser(space)
       const isSpaceCollaborator = getters.isSpaceCollaborator(space)
-      const isGroupMember = rootGetters['teams/isCurrentSpaceGroupUser']
+      const isGroupMember = rootGetters['groups/isCurrentSpaceGroupUser']
       return Boolean(isSpaceUser || isSpaceCollaborator || isGroupMember)
     },
     isSpaceUser: (state, getters, rootState) => (space) => {

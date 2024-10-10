@@ -16,7 +16,7 @@ const props = defineProps({
   showShortName: Boolean
 })
 
-const spaceGroup = computed(() => store.getters['teams/spaceGroup']())
+const spaceGroup = computed(() => store.getters['groups/spaceGroup']())
 const isSpaceMember = computed(() => store.getters['currentUser/isSpaceMember']())
 const isInvitedButCannotEditSpace = computed(() => store.getters['currentUser/isInvitedButCannotEditSpace']())
 

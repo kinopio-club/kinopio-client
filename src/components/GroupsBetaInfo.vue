@@ -9,9 +9,9 @@ const props = defineProps({
 </script>
 
 <template lang="pug">
-section.teams-beta-info
+section.groups-beta-info
   p {{ props.message }}
-  p Interested in trying teams in your company?
+  p Interested in trying groups in your company?
   p
     a(href="mailto:support@kinopio.club?subject=Kinopio Groups Beta")
       button
@@ -21,7 +21,7 @@ section.teams-beta-info
 </template>
 
 <style lang="stylus">
-.teams-beta-info
+.groups-beta-info
   .placeholder
     border-radius var(--small-entity-radius)
     margin-top 10px

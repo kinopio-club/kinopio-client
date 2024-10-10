@@ -31,7 +31,7 @@ const updateDialogHeight = async () => {
 }
 
 const currentUserIsSignedIn = computed(() => store.getters['currentUser/isSignedIn'])
-const currentSpaceIsInGroup = computed(() => store.state.currentSpace.teamId)
+const currentSpaceIsInGroup = computed(() => store.state.currentSpace.groupId)
 
 // privacy states
 

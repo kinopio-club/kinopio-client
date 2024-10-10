@@ -14,21 +14,21 @@ onMounted(() => {
 
 const props = defineProps({
   card: Object,
-  teamInviteUrl: String,
+  groupInviteUrl: String,
   selectedColor: String,
   parentIsCardDetails: Boolean
 })
 const state = reactive({
   isActive: null,
-  team: {},
+  group: {},
   isLoading: true
 })
 
 // url
 
 const url = computed(() => {
-  if (props.teamInviteUrl) {
-    return props.teamInviteUrl
+  if (props.groupInviteUrl) {
+    return props.groupInviteUrl
   }
   const urls = utils.urlsFromString(props.card.name)
   return urls.find(url => utils.urlIsGroupInvite(url))
@@ -93,20 +93,20 @@ const colorClasses = computed(() => {
   return classes
 })
 
-// team info
+// group info
 
 const updateGroup = async () => {
   await nextTick()
   state.isLoading = true
   try {
-    const teamFromUrl = utils.teamFromGroupInviteUrl(url.value)
-    let team = store.getters['teams/byId'](teamFromUrl.id)
-    if (team) {
-      state.team = team
+    const groupFromUrl = utils.groupFromGroupInviteUrl(url.value)
+    let group = store.getters['groups/byId'](groupFromUrl.id)
+    if (group) {
+      state.group = group
     } else {
-      await store.dispatch('teams/updateOtherGroups', teamFromUrl)
-      team = store.getters['teams/byId'](teamFromUrl.id)
-      state.team = team
+      await store.dispatch('groups/updateOtherGroups', groupFromUrl)
+      group = store.getters['groups/byId'](groupFromUrl.id)
+      state.group = group
     }
   } catch (error) {
     console.error('🚒 updateGroup', error)
@@ -117,7 +117,7 @@ const updateGroup = async () => {
 </script>
 
 <template lang="pug">
-.team-invite-preview
+.group-invite-preview
   a.badge.link-badge.button-badge.badge-card-button(
     :title="url"
     :class="{ active: state.isActive, 'is-being-dragged': store.state.preventDraggedCardFromShowingDetails, 'preview-content': props.parentIsCardDetails }"
@@ -138,13 +138,13 @@ const updateGroup = async () => {
     .row
       Loader(:visible="state.isLoading" :isSmall="true" :isStatic="true")
       template(v-if="!state.isLoading")
-        GroupLabel(:team="state.team" :showName="true")
+        GroupLabel(:group="state.group" :showName="true")
     .row
       .badge.danger Should not be shared publicly
 </template>
 
 <style lang="stylus">
-.team-invite-preview
+.group-invite-preview
   text-decoration none
   margin 0
   &:hover
@@ -163,6 +163,6 @@ const updateGroup = async () => {
   .preview-content
     padding var(--subsection-padding)
     pointer-events none
-    .team-label
+    .group-label
       pointer-events all
 </style>

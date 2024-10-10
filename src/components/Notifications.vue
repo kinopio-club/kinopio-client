@@ -304,8 +304,8 @@ aside.notifications(@click.left="closeAllDialogs")
       .row(v-if="item.badge")
         span.badge.info {{ item.badge }}
       span.label-badge(v-if="item.label") {{item.label}}
-      template(v-if="item.team")
-        GroupLabel(:team="item.team")
+      template(v-if="item.group")
+        GroupLabel(:group="item.group")
       template(v-if="item.icon")
         img.icon(v-if="item.icon === 'open'" src="@/assets/open.svg" class="open")
         img.icon(v-else-if="item.icon === 'press-and-hold'" src="@/assets/press-and-hold.svg" class="press-and-hold")
@@ -317,7 +317,7 @@ aside.notifications(@click.left="closeAllDialogs")
         img.icon(v-else-if="item.icon === 'minimap'" src="@/assets/minimap.svg" class="minimap")
         img.icon(v-else-if="item.icon === 'offline'" src="@/assets/offline.svg" class="offline")
         img.icon(v-else-if="item.icon === 'mail'" src="@/assets/mail.svg" class="mail")
-        img.icon(v-else-if="item.icon === 'team'" src="@/assets/team.svg" class="team")
+        img.icon(v-else-if="item.icon === 'group'" src="@/assets/group.svg" class="group")
       span {{item.message}}
     .row(v-if="item.isPersistentItem")
       button.small-button(@click="removeById(item)")
@@ -480,7 +480,7 @@ aside.notifications(@click.left="closeAllDialogs")
     .row
       p Only spaces that you're a member of, and have visited recently, are available offline
 
-  //- team
+  //- group
 
   .persistent-item(v-if="notifyIsJoiningGroup")
     p

@@ -86,7 +86,7 @@ const currentSpace = {
       cache.updateSpace('collaborators', state.collaborators, state.id)
     },
     updateGroupMeta: (state, space) => {
-      state.teamId = space.teamId
+      state.groupId = space.groupId
       state.addedToGroupByUserId = space.addedToGroupByUserId
     },
     // websocket receive
@@ -803,7 +803,7 @@ const currentSpace = {
         console.log('🎑 remoteSpace', remoteSpace)
         if (!remoteSpace) { return }
         pageMeta.update(remoteSpace)
-        context.dispatch('teams/loadGroup', remoteSpace, { root: true })
+        context.dispatch('groups/loadGroup', remoteSpace, { root: true })
         context.commit('updateSpace', { collaboratorKey: remoteSpace.collaboratorKey })
         const spaceIsUnchanged = utils.spaceIsUnchanged(cachedSpace, remoteSpace)
         if (spaceIsUnchanged) {
@@ -1340,8 +1340,8 @@ const currentSpace = {
         return otherUser
       }
       const space = utils.clone(state)
-      const teamUser = rootGetters['teams/teamUser']({ userId, space })
-      let user = getters.memberById(userId) || rootGetters.otherUserById(userId) || teamUser
+      const groupUser = rootGetters['groups/groupUser']({ userId, space })
+      let user = getters.memberById(userId) || rootGetters.otherUserById(userId) || groupUser
       if (rootState.currentUser.id === userId) {
         user = rootState.currentUser
       }

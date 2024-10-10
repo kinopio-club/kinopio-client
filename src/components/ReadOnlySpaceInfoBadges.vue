@@ -28,7 +28,7 @@ template(v-if="!isSpaceMember")
       span In Explore
   .row(v-if="props.spaceGroup")
     .badge.secondary
-      GroupLabel(:team="props.spaceGroup" :showName="true")
+      GroupLabel(:group="props.spaceGroup" :showName="true")
 </template>
 
 <style lang="stylus">

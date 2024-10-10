@@ -18,12 +18,12 @@ onMounted(() => {
   window.addEventListener('resize', updateDialogHeight)
 })
 
-const visible = computed(() => store.state.teamsIsVisible)
+const visible = computed(() => store.state.groupsIsVisible)
 watch(() => visible.value, (value, prevValue) => {
   if (value) {
     store.commit('shouldExplicitlyHideFooter', true)
     closeDialogs()
-    state.teamDetailsIsVisibleForGroupId = ''
+    state.groupDetailsIsVisibleForGroupId = ''
     updateDialogHeight()
   }
 })
@@ -36,12 +36,12 @@ const updateDialogHeight = async () => {
 
 const state = reactive({
   dialogHeight: null,
-  teamDetailsIsVisibleForGroupId: '',
+  groupDetailsIsVisibleForGroupId: '',
   addGroupIsVisible: false
 })
 const closeDialogs = () => {
   state.addGroupIsVisible = false
-  state.teamDetailsIsVisibleForGroupId = ''
+  state.groupDetailsIsVisibleForGroupId = ''
 }
 
 const currentUserIsSignedIn = computed(() => store.getters['currentUser/isSignedIn'])
@@ -51,23 +51,23 @@ const triggerSignUpOrInIsVisible = () => {
   store.commit('triggerSignUpOrInIsVisible')
 }
 
-// teams picker list
+// groups picker list
 
-const teams = computed(() => {
+const groups = computed(() => {
   const user = store.state.currentUser
-  const teamIds = utils.clone(store.state.teams.ids)
-  const teams = teamIds.map(id => store.getters['teams/byId'](id))
-  let teamUserGroups = teams.filter(team => {
-    return team.users.find(teamUser => {
-      const teamUserId = teamUser.id || teamUser.userId
-      return teamUserId === user.id
+  const groupIds = utils.clone(store.state.groups.ids)
+  const groups = groupIds.map(id => store.getters['groups/byId'](id))
+  let groupUserGroups = groups.filter(group => {
+    return group.users.find(groupUser => {
+      const groupUserId = groupUser.id || groupUser.userId
+      return groupUserId === user.id
     })
   })
-  teamUserGroups = uniqBy(teamUserGroups, 'id')
-  return teamUserGroups
+  groupUserGroups = uniqBy(groupUserGroups, 'id')
+  return groupUserGroups
 })
 
-// add team
+// add group
 
 const toggleAddGroupIsVisible = () => {
   const value = !state.addGroupIsVisible
@@ -75,27 +75,27 @@ const toggleAddGroupIsVisible = () => {
   state.addGroupIsVisible = value
 }
 
-// team details
+// group details
 
-const teamIsVisible = (team) => {
-  return state.teamDetailsIsVisibleForGroupId === team.id
+const groupIsVisible = (group) => {
+  return state.groupDetailsIsVisibleForGroupId === group.id
 }
-const toggleGroupDetailsIsVisible = (team) => {
-  if (teamIsVisible(team)) {
-    state.teamDetailsIsVisibleForGroupId = ''
+const toggleGroupDetailsIsVisible = (group) => {
+  if (groupIsVisible(group)) {
+    state.groupDetailsIsVisibleForGroupId = ''
   } else {
-    state.teamDetailsIsVisibleForGroupId = team.id
+    state.groupDetailsIsVisibleForGroupId = group.id
   }
 }
 
 // beta info
 
-const teamBetaMessage = computed(() => 'Only teams beta users can create and manage teams.')
+const groupBetaMessage = computed(() => 'Only groups beta users can create and manage groups.')
 
 </script>
 
 <template lang="pug">
-dialog.narrow.teams(v-if="visible" :open="visible" @click.left.stop="closeDialogs" ref="dialogElement" :style="{'max-height': state.dialogHeight + 'px'}")
+dialog.narrow.groups(v-if="visible" :open="visible" @click.left.stop="closeDialogs" ref="dialogElement" :style="{'max-height': state.dialogHeight + 'px'}")
   section
     p Groups
     .row(v-if="currentUserCanCreateGroup")
@@ -105,23 +105,23 @@ dialog.narrow.teams(v-if="visible" :open="visible" @click.left.stop="closeDialog
           span New Group
         AddGroup(:visible="state.addGroupIsVisible" @closeDialogs="closeDialogs")
   section(v-if="!currentUserIsSignedIn")
-    p Sign Up or In to create and manage teams
+    p Sign Up or In to create and manage groups
     button(@click.left="triggerSignUpOrInIsVisible") Sign Up or In
-  //- team picker
-  template(v-if="teams.length")
+  //- group picker
+  template(v-if="groups.length")
     section.results-section
       ul.results-list
-        template(v-for="team in teams")
-          li(:class="{ active: teamIsVisible(team) }" @click.stop="toggleGroupDetailsIsVisible(team)")
-            GroupLabel(:team="team" :showName="true")
-            GroupDetails(:visible="teamIsVisible(team)" :team="team")
-  //- teams beta notice
+        template(v-for="group in groups")
+          li(:class="{ active: groupIsVisible(group) }" @click.stop="toggleGroupDetailsIsVisible(group)")
+            GroupLabel(:group="group" :showName="true")
+            GroupDetails(:visible="groupIsVisible(group)" :group="group")
+  //- groups beta notice
   template(v-else)
-    GroupsBetaInfo(:message="teamBetaMessage")
+    GroupsBetaInfo(:message="groupBetaMessage")
 </template>
 
 <style lang="stylus">
-dialog.teams
+dialog.groups
   left initial
   right 16px
   top 20px
@@ -132,7 +132,7 @@ dialog.teams
     li
       align-items center
       position relative
-    dialog.team-details
+    dialog.group-details
       left -40px
       top 30px
 </style>

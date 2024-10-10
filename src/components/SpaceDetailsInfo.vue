@@ -57,7 +57,7 @@ const state = reactive({
   privacyPickerIsVisible: false,
   settingsIsVisible: false,
   exportIsVisible: false,
-  teamPickerIsVisible: false,
+  groupPickerIsVisible: false,
   error: {
     memberAssignGroup: false
   }
@@ -216,16 +216,16 @@ const toggleExportIsVisible = () => {
   emit('updateDialogHeight')
 }
 const toggleGroupPickerIsVisible = () => {
-  const isVisible = state.teamPickerIsVisible
+  const isVisible = state.groupPickerIsVisible
   state.error.memberAssignGroup = false
   closeDialogsAndEmit()
-  state.teamPickerIsVisible = !isVisible
+  state.groupPickerIsVisible = !isVisible
 }
 const closeDialogs = () => {
   state.backgroundIsVisible = false
   state.privacyPickerIsVisible = false
   state.exportIsVisible = false
-  state.teamPickerIsVisible = false
+  state.groupPickerIsVisible = false
 }
 const closeDialogsAndEmit = () => {
   closeDialogs()
@@ -235,10 +235,10 @@ const closeAllDialogs = () => {
   store.dispatch('closeAllDialogs')
 }
 
-// team
+// group
 
-const userGroups = computed(() => store.getters['teams/byUser']())
-const spaceGroup = computed(() => store.getters['teams/spaceGroup']())
+const userGroups = computed(() => store.getters['groups/byUser']())
+const spaceGroup = computed(() => store.getters['groups/spaceGroup']())
 const checkCanAssignGroup = () => {
   if (currentUserIsSpaceCreator.value) {
     return true
@@ -246,24 +246,24 @@ const checkCanAssignGroup = () => {
     state.error.memberAssignGroup = true
   }
 }
-const teamButtonTitle = computed(() => {
+const groupButtonTitle = computed(() => {
   let addString = 'Add'
   if (spaceGroup.value) {
     addString = 'Added'
   }
   return `${addString} to Group`
 })
-const toggleSpaceGroup = (team) => {
+const toggleSpaceGroup = (group) => {
   if (!checkCanAssignGroup()) { return }
-  if (currentSpace.value.teamId === team.id) {
+  if (currentSpace.value.groupId === group.id) {
     removeSpaceGroup()
   } else {
-    store.dispatch('teams/addCurrentSpace', team)
+    store.dispatch('groups/addCurrentSpace', group)
     updateLocalSpaces()
   }
 }
 const removeSpaceGroup = () => {
-  store.dispatch('teams/removeCurrentSpace')
+  store.dispatch('groups/removeCurrentSpace')
   updateLocalSpaces()
 }
 
@@ -312,16 +312,16 @@ template(v-if="isSpaceMember")
   .row
     //- Privacy
     PrivacyButton(:privacyPickerIsVisible="state.privacyPickerIsVisible" :showShortName="true" @togglePrivacyPickerIsVisible="togglePrivacyPickerIsVisible" @closeDialogs="closeDialogs" @updateLocalSpaces="updateLocalSpaces")
-      //- toggle space team | favorite
+      //- toggle space group | favorite
     template(v-if="userGroups")
       .button-wrap
         .segmented-buttons
           //- Group
-          button.team-button(:title="teamButtonTitle" :class="{active: state.teamPickerIsVisible || spaceGroup}" @click.left.prevent.stop="toggleGroupPickerIsVisible" @keydown.stop.enter="toggleGroupPickerIsVisible")
-            img.icon.team(src="@/assets/team.svg")
+          button.group-button(:title="groupButtonTitle" :class="{active: state.groupPickerIsVisible || spaceGroup}" @click.left.prevent.stop="toggleGroupPickerIsVisible" @keydown.stop.enter="toggleGroupPickerIsVisible")
+            img.icon.group(src="@/assets/group.svg")
           //- Favorite
           FavoriteSpaceButton(:parentIsDialog="true" @updateLocalSpaces="updateLocalSpaces")
-        GroupPicker(:visible="state.teamPickerIsVisible" @selectGroup="toggleSpaceGroup" @clearGroup="removeSpaceGroup" :teams="userGroups" :selectedGroup="spaceGroup" @closeDialogs="closeDialogs")
+        GroupPicker(:visible="state.groupPickerIsVisible" @selectGroup="toggleSpaceGroup" @clearGroup="removeSpaceGroup" :groups="userGroups" :selectedGroup="spaceGroup" @closeDialogs="closeDialogs")
     template(v-else)
       //- Favorite
       FavoriteSpaceButton(:parentIsDialog="true" @updateLocalSpaces="updateLocalSpaces")
@@ -332,7 +332,7 @@ template(v-if="isSpaceMember")
   .row(v-if="state.error.memberAssignGroup")
     .badge.danger
       img.icon.cancel(src="@/assets/add.svg")
-      span Only space creator can assign to team
+      span Only space creator can assign to group
 
 //- read only options
 .row(v-if="!isSpaceMember")
@@ -454,7 +454,7 @@ template(v-if="state.settingsIsVisible")
   .background-preview-wrap
     margin-bottom 6px
 
-.team-button
+.group-button
   padding-right 6px
 
 .space-settings

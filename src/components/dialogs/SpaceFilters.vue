@@ -128,20 +128,20 @@ const updateSortBy = (value) => {
   store.dispatch('currentUser/update', { dialogSpaceFilterSortBy: value })
 }
 
-// teams
+// groups
 
 const isGroups = computed(() => {
-  if (!teams.value) { return }
-  return teams.value.length
+  if (!groups.value) { return }
+  return groups.value.length
 })
-const teams = computed(() => {
-  return store.getters['teams/bySpaces'](props.spaces)
+const groups = computed(() => {
+  return store.getters['groups/bySpaces'](props.spaces)
 })
-const filterByGroup = (event, team) => {
-  if (team.id === dialogSpaceFilterByGroup.value.id) {
+const filterByGroup = (event, group) => {
+  if (group.id === dialogSpaceFilterByGroup.value.id) {
     updateGroupFilter({})
   } else {
-    updateGroupFilter(team)
+    updateGroupFilter(group)
   }
 }
 const updateGroupFilter = (value) => {
@@ -224,9 +224,9 @@ dialog.narrow.space-filters(v-if="props.visible" :open="props.visible" @click.le
   section(v-if="isLoading")
     Loader(:visible="true")
 
-  //- teams
-  section.results-section.teams(v-if="isGroups")
-    GroupList(:teams="teams" :selectedGroup="dialogSpaceFilterByGroup" @selectGroup="filterByGroup")
+  //- groups
+  section.results-section.groups(v-if="isGroups")
+    GroupList(:groups="groups" :selectedGroup="dialogSpaceFilterByGroup" @selectGroup="filterByGroup")
   //- collaborators
   section.results-section.collaborators(v-if="spaceUsers.length")
     UserList(:users="spaceUsers" :selectedUser="dialogSpaceFilterByUser" @selectUser="filterByUser")

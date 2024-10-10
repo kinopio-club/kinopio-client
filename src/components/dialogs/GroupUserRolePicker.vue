@@ -3,7 +3,7 @@ import { reactive, computed, onMounted, onBeforeUnmount, defineProps, defineEmit
 import { useStore } from 'vuex'
 
 import utils from '@/utils.js'
-import teamUserRoles from '@/data/teamUserRoles.js'
+import groupUserRoles from '@/data/groupUserRoles.js'
 
 const store = useStore()
 
@@ -49,10 +49,10 @@ const updateIsPositionBottom = async () => {
   state.isPositionBottom = dialogIsBelowViewport
 }
 
-const currentSpaceGroup = computed(() => store.getters['teams/spaceGroup']())
+const currentSpaceGroup = computed(() => store.getters['groups/spaceGroup']())
 
 const roles = computed(() => {
-  return teamUserRoles.states()
+  return groupUserRoles.states()
 })
 const roleName = (role) => {
   return utils.capitalizeFirstLetter(role.name)
@@ -69,8 +69,8 @@ const roleIsMember = (role) => {
 const checkIsRemovingSoleAdminError = (role) => {
   if (props.user.role === 'member') { return }
   if (role.name === 'admin') { return }
-  const teamAdmins = currentSpaceGroup.value.users.filter(user => user.role === 'admin')
-  if (teamAdmins.length > 1) { return }
+  const groupAdmins = currentSpaceGroup.value.users.filter(user => user.role === 'admin')
+  if (groupAdmins.length > 1) { return }
   state.error.isRemovingSoleAdmin = true
   return true
 }
@@ -80,16 +80,16 @@ const updateRole = (role) => {
   }
   const update = {
     userId: props.user.id,
-    teamId: currentSpaceGroup.value.id,
+    groupId: currentSpaceGroup.value.id,
     role: role.name
   }
-  store.dispatch('teams/updateUserRole', update)
+  store.dispatch('groups/updateUserRole', update)
 }
 
 </script>
 
 <template lang="pug">
-dialog.narrow.team-user-role-picker(v-if="visible" :open="visible" @click.left.stop ref="dialogElement" :style="{'max-height': state.dialogHeight + 'px'}" :class="{'position-bottom': state.isPositionBottom}")
+dialog.narrow.group-user-role-picker(v-if="visible" :open="visible" @click.left.stop ref="dialogElement" :style="{'max-height': state.dialogHeight + 'px'}" :class="{'position-bottom': state.isPositionBottom}")
   section(v-if="state.error.isRemovingSoleAdmin")
     .badge.danger Group must have at least one admin
   section.results-section
@@ -102,7 +102,7 @@ dialog.narrow.team-user-role-picker(v-if="visible" :open="visible" @click.left.s
 </template>
 
 <style lang="stylus">
-dialog.team-user-role-picker
+dialog.group-user-role-picker
   overflow auto
   padding-top 4px
   min-height 154px

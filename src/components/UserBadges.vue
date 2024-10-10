@@ -42,9 +42,9 @@ const cardsCreatedCount = computed(() => {
   return count
 })
 
-// teams
+// groups
 
-const userGroups = computed(() => store.getters['teams/byUser'](props.user))
+const userGroups = computed(() => store.getters['groups/byUser'](props.user))
 </script>
 
 <template lang="pug">
@@ -77,10 +77,10 @@ const userGroups = computed(() => store.getters['teams/byUser'](props.user))
     img.icon.card(src="@/assets/card.svg")
     span {{cardsCreatedCount}} Cards Created
 
-//- team badges list
+//- group badges list
 .row(v-if="!props.isCurrentUser && userGroups.length")
-  .badge.secondary(v-for="team in userGroups")
-    GroupLabel(:team="team" :showIcon="true" :showName="true")
+  .badge.secondary(v-for="group in userGroups")
+    GroupLabel(:group="group" :showIcon="true" :showName="true")
 </template>
 
 <style lang="stylus">

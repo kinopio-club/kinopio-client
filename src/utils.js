@@ -1431,7 +1431,7 @@ export default {
       visits: 0,
       showInExplore: false,
       proposedShowInExplore: false,
-      teamId: null
+      groupId: null
     }
   },
   clearSpaceMeta (space, type) {
@@ -1449,7 +1449,7 @@ export default {
     space.collaboratorKey = nanoid()
     space.previewImage = null
     space.previewThumbnailImage = null
-    space.teamId = null
+    space.groupId = null
     space.cards = space.cards.map(card => {
       card.userId = null
       if (card.nameUpdatedByUserId) {
@@ -1905,11 +1905,11 @@ export default {
     const url = `${consts.kinopioDomain()}/invite?spaceId=${spaceId}&${invite}&name=${spaceName}${comment}`
     return url
   },
-  teamInviteUrl ({ teamId, teamName, collaboratorKey }) {
-    if (!teamId || !collaboratorKey) { return }
-    teamName = this.normalizeString(teamName)
+  groupInviteUrl ({ groupId, groupName, collaboratorKey }) {
+    if (!groupId || !collaboratorKey) { return }
+    groupName = this.normalizeString(groupName)
     const invite = `collaboratorKey=${collaboratorKey}`
-    const url = `${consts.kinopioDomain()}/team/invite?teamId=${teamId}&${invite}&name=${teamName}`
+    const url = `${consts.kinopioDomain()}/group/invite?groupId=${groupId}&${invite}&name=${groupName}`
     return url
   },
   urlSearchParamsToObject (searchParams) {
@@ -1919,13 +1919,13 @@ export default {
     }
     return object
   },
-  teamFromGroupInviteUrl (url) {
+  groupFromGroupInviteUrl (url) {
     if (!url) { return }
     url = new URL(url)
     const params = url.searchParams
-    let team = this.urlSearchParamsToObject(params)
-    team.id = team.teamId
-    return team
+    let group = this.urlSearchParamsToObject(params)
+    group.id = group.groupId
+    return group
   },
   spaceAndCardIdFromPath (path) {
     // https://regexr.com/5kr4g
@@ -2151,7 +2151,7 @@ export default {
     const hostIsKinopio = this.hostIsKinopio(url)
     if (!hostIsKinopio) { return }
     url = new URL(url)
-    return url.pathname === '/team/invite'
+    return url.pathname === '/group/invite'
   },
   urlIsSpace (url) {
     if (!url) { return }

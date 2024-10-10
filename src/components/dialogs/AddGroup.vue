@@ -26,7 +26,7 @@ const props = defineProps({
 const state = reactive({
   dialogHeight: null,
   colorPickerIsVisible: false,
-  team: null,
+  group: null,
   loading: {
     createGroup: false
   },
@@ -58,11 +58,11 @@ const clearErrors = () => {
   state.error.unknownServerError = false
 }
 
-// team color
+// group color
 
-const teamColor = computed(() => state.team.color)
+const groupColor = computed(() => state.group.color)
 const updateGroupColor = (newValue) => {
-  state.team.color = newValue
+  state.group.color = newValue
 }
 const toggleColorPicker = () => {
   const isVisible = state.colorPickerIsVisible
@@ -70,7 +70,7 @@ const toggleColorPicker = () => {
   state.colorPickerIsVisible = !isVisible
 }
 
-// team name
+// group name
 
 const focusNameInput = async () => {
   await nextTick()
@@ -78,34 +78,34 @@ const focusNameInput = async () => {
   element.focus()
   element.select()
 }
-const teamName = computed({
+const groupName = computed({
   get () {
-    return state.team.name
+    return state.group.name
   },
   set (newValue) {
-    state.team.name = newValue
+    state.group.name = newValue
   }
 })
 
-// team
+// group
 
 const initGroup = () => {
-  let team = {
+  let group = {
     name: 'Group Name',
     color: randomColor()
   }
-  state.team = team
+  state.group = group
 }
 const createGroup = async () => {
   if (state.loading.createGroup) { return }
   clearErrors()
-  if (!state.team.name) {
+  if (!state.group.name) {
     state.error.missingName = true
     return
   }
   try {
     state.loading.createGroup = true
-    await store.dispatch('teams/createGroup', state.team)
+    await store.dispatch('groups/createGroup', state.group)
     emit('closeDialogs')
   } catch (error) {
     console.error('🚒 createGroup', error)
@@ -117,18 +117,18 @@ const createGroup = async () => {
 </script>
 
 <template lang="pug">
-dialog.narrow.add-team(v-if="visible" :open="visible" @click.left.stop="closeDialogs" ref="dialogElement" :style="{'max-height': state.dialogHeight + 'px'}")
+dialog.narrow.add-group(v-if="visible" :open="visible" @click.left.stop="closeDialogs" ref="dialogElement" :style="{'max-height': state.dialogHeight + 'px'}")
   section
     .row
       .button-wrap
           button.change-color(@click.left.stop="toggleColorPicker" :class="{active: state.colorPickerIsVisible}" title="Change Group Color")
-            .current-color.current-team-color(:style="{ background: teamColor }")
-          ColorPicker(:currentColor="teamColor" :visible="state.colorPickerIsVisible" @selectedColor="updateGroupColor")
-      input.name(placeholder="Group Name" v-model="teamName" name="teamName" maxlength=100 ref="nameInputElement" @keydown.enter.exact.prevent="createGroup")
+            .current-color.current-group-color(:style="{ background: groupColor }")
+          ColorPicker(:currentColor="groupColor" :visible="state.colorPickerIsVisible" @selectedColor="updateGroupColor")
+      input.name(placeholder="Group Name" v-model="groupName" name="groupName" maxlength=100 ref="nameInputElement" @keydown.enter.exact.prevent="createGroup")
     .row
       button(:class="{ active: state.loading.createGroup }" @click.stop="createGroup")
         img.icon.add(src="@/assets/add.svg")
-        GroupLabel(:team="state.team")
+        GroupLabel(:group="state.group")
         span Create Group
         Loader(:visible="state.loading.createGroup")
     //- errors
@@ -140,7 +140,7 @@ dialog.narrow.add-team(v-if="visible" :open="visible" @click.left.stop="closeDia
 </template>
 
 <style lang="stylus">
-dialog.add-team
+dialog.add-group
   input.name
     margin-bottom 0
   button.change-color

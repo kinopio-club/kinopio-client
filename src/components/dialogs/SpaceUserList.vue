@@ -18,12 +18,12 @@ onMounted(() => {
 })
 const state = reactive({
   dialogHeight: null,
-  teamIsVisible: false
+  groupIsVisible: false
 })
 
 const visible = computed(() => store.state.spaceUserListIsVisible)
 watch(() => visible.value, (value, prevValue) => {
-  state.teamIsVisible = false
+  state.groupIsVisible = false
   if (value) {
     updateDialogHeight()
   }
@@ -51,13 +51,13 @@ const label = computed(() => {
   return string
 })
 
-// team
+// group
 
-const spaceGroup = computed(() => store.getters['teams/spaceGroup']())
+const spaceGroup = computed(() => store.getters['groups/spaceGroup']())
 const toggleGroupIsVisible = () => {
-  const value = !state.teamIsVisible
+  const value = !state.groupIsVisible
   closeDialogs()
-  state.teamIsVisible = value
+  state.groupIsVisible = value
 }
 
 // users
@@ -68,10 +68,10 @@ const users = computed(() => {
   if (isSpectatorsList.value) {
     items = currentSpace.value.spectators
   } else {
-    const teamUsers = store.getters['currentCards/teamUsersWhoAddedCards']
+    const groupUsers = store.getters['currentCards/groupUsersWhoAddedCards']
     items = utils.clone(currentSpace.value.users)
     items = items.concat(currentSpace.value.collaborators)
-    items = items.concat(teamUsers)
+    items = items.concat(groupUsers)
   }
   items = items.filter(item => Boolean(item))
   items = uniqBy(items, 'id')
@@ -109,7 +109,7 @@ const showUserDetails = (event, user) => {
 }
 const closeDialogs = () => {
   store.commit('userDetailsIsVisible', false)
-  state.teamIsVisible = false
+  state.groupIsVisible = false
 }
 </script>
 
@@ -120,14 +120,14 @@ dialog.space-user-list(
   @click.left.stop="closeDialogs"
   ref="dialogElement"
   :style="{'max-height': state.dialogHeight + 'px'}"
-  :class="{'child-is-visible': state.teamIsVisible }"
+  :class="{'child-is-visible': state.groupIsVisible }"
 )
   section
     p {{ label }}
     .button-wrap(v-if="spaceGroup")
-      button(@click.stop="toggleGroupIsVisible" :class="{ active: state.teamIsVisible }")
-        GroupLabel(:team="spaceGroup" :showName="true")
-      GroupDetails(:visible="state.teamIsVisible" :team="spaceGroup")
+      button(@click.stop="toggleGroupIsVisible" :class="{ active: state.groupIsVisible }")
+        GroupLabel(:group="spaceGroup" :showName="true")
+      GroupDetails(:visible="state.groupIsVisible" :group="spaceGroup")
 
   template(v-if="users.length")
     //- users
@@ -159,6 +159,6 @@ dialog.space-user-list
   top 20px
   &.child-is-visible
     overflow initial
-  dialog.team-details
+  dialog.group-details
     left -45px
 </style>
