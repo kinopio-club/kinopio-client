@@ -70,7 +70,7 @@ const updateDialogHeight = async () => {
 
 // free cards from space member
 
-const spaceUserIsUpgraded = computed(() => store.getters['currentSpace/spaceUserIsUpgradedOrOnTeam'])
+const spaceCreatorIsUpgraded = computed(() => store.getters['currentSpace/spaceCreatorIsUpgraded'])
 const spaceUser = computed(() => store.state.currentSpace.users[0])
 
 </script>
@@ -110,7 +110,7 @@ dialog.pricing(v-if="visible" :open="visible" @click.left.stop="closeDialogs" re
     CardsCreatedProgress
 
     //- free cards from space member
-    section.subsection(v-if="spaceUserIsUpgraded")
+    section.subsection(v-if="spaceCreatorIsUpgraded")
       p
         UserLabelInline(:user="spaceUser")
         span is upgraded, so cards you create in this space won't increase your free card count

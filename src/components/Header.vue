@@ -166,7 +166,7 @@ const isSpace = computed(() => {
 })
 const userCanEditSpace = computed(() => store.getters['currentUser/canEditSpace']())
 const userCanOnlyComment = computed(() => store.getters['currentUser/canOnlyComment']())
-const isUpgradedOrOnTeam = computed(() => store.getters['currentUser/isUpgradedOrOnTeam'])
+const isUpgraded = computed(() => store.state.currentUser.isUpgraded)
 const isOnline = computed(() => store.state.isOnline)
 const currentUserIsSignedIn = computed(() => store.getters['currentUser/isSignedIn'])
 const shouldIncreaseUIContrast = computed(() => store.state.currentUser.shouldIncreaseUIContrast)
@@ -714,7 +714,7 @@ header(v-if="isVisible" :style="state.position" :class="{'fade-out': isFadingOut
       .left
       .right
         //- Pricing
-        .button-wrap.pricing-button-wrap(v-if="!isUpgradedOrOnTeam")
+        .button-wrap.pricing-button-wrap(v-if="!isUpgraded")
           button(@click.left.stop="togglePricingIsVisible" :class="{active: pricingIsVisible, 'translucent-button': !shouldIncreaseUIContrast}")
             span Pricing
           Pricing(:visible="pricingIsVisible")
@@ -725,7 +725,7 @@ header(v-if="isVisible" :style="state.position" :class="{'fade-out': isFadingOut
             Loader(:visible="state.loadingSignUpOrIn")
           SignUpOrIn(:visible="state.signUpOrInIsVisible" @loading="setLoadingSignUpOrIn")
         //- Upgrade
-        .button-wrap(v-if="!isUpgradedOrOnTeam && isOnline && currentUserIsSignedIn")
+        .button-wrap(v-if="!isUpgraded && isOnline && currentUserIsSignedIn")
           button(@click.left.stop="toggleUpgradeUserIsVisible" :class="{active: state.upgradeUserIsVisible, 'translucent-button': !shouldIncreaseUIContrast}")
             span Upgrade
           UpgradeUser(:visible="state.upgradeUserIsVisible" @closeDialog="closeAllDialogs")

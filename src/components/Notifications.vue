@@ -70,7 +70,7 @@ const currentUserIsTiltingCard = computed(() => store.state.currentUserIsTilting
 const currentUserIsPanning = computed(() => store.state.currentUserIsPanning)
 const currentUserIsPanningReady = computed(() => store.state.currentUserIsPanningReady)
 const currentUserIsSignedIn = computed(() => store.getters['currentUser/isSignedIn'])
-const currentUserIsUpgraded = computed(() => store.getters['currentUser/isUpgradedOrOnTeam'])
+const currentUserIsUpgraded = computed(() => store.state.currentUser.isUpgraded)
 const isTouchDevice = computed(() => store.state.isTouchDevice)
 
 // space

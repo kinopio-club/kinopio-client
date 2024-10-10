@@ -31,7 +31,7 @@ const state = reactive({
 })
 
 const currentUser = computed(() => store.state.currentUser)
-const currentUserIsUpgraded = computed(() => store.getters['currentUser/isUpgradedOrOnTeam'])
+const currentUserIsUpgraded = computed(() => store.state.currentUser.isUpgraded)
 const spaceName = computed(() => store.state.currentSpace.name)
 const randomUser = computed(() => {
   const luminosity = store.state.currentUser.theme

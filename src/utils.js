@@ -2402,8 +2402,8 @@ export default {
 
   // Upload
 
-  isFileTooBig ({ file, userIsUpgraded, spaceUserIsUpgraded }) {
-    const isUpgraded = userIsUpgraded || spaceUserIsUpgraded
+  isFileTooBig ({ file, userIsUpgraded, spaceCreatorIsUpgraded }) {
+    const isUpgraded = userIsUpgraded || spaceCreatorIsUpgraded
     const sizeLimit = 1024 * 1024 * 5 // 5mb
     if (file.size > sizeLimit && !isUpgraded) {
       return true

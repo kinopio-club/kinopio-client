@@ -120,7 +120,7 @@ export default {
     scriptTag.text = jsonLD
     document.head.appendChild(scriptTag)
   },
-  async team ({ teamId, isTeamInvite }) {
+  async groupInvite ({ teamId, isTeamInvite }) {
     const meta = await fetchTeamPublicMeta(teamId)
     let name = `${meta.name} – Kinopio Team`
     if (isTeamInvite) {

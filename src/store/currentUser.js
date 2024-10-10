@@ -851,20 +851,14 @@ export default {
     isSignedIn: (state) => {
       return Boolean(state.apiKey)
     },
-    isUpgradedOrOnTeam: (state, getters, rootState, rootGetters) => {
-      if (state.isUpgraded) { return true }
-      const userTeams = rootGetters['teams/byUser']()
-      const isTeamUser = Boolean(userTeams.length)
-      return isTeamUser
-    },
     cardsCreatedIsOverLimit: (state, getters, rootState) => {
       const cardsCreatedLimit = rootState.cardsCreatedLimit
-      if (getters.isUpgradedOrOnTeam) { return }
+      if (state.isUpgraded) { return }
       if (state.cardsCreatedCount >= cardsCreatedLimit) { return true }
     },
     cardsCreatedWillBeOverLimit: (state, getters, rootState) => (count) => {
       const cardsCreatedLimit = rootState.cardsCreatedLimit
-      if (getters.isUpgradedOrOnTeam) { return }
+      if (state.isUpgraded) { return }
       if (state.cardsCreatedCount + count >= cardsCreatedLimit) { return true }
     },
     canEditSpace: (state, getters, rootState, rootGetters) => (space) => {
@@ -968,9 +962,9 @@ export default {
       return isReadOnlyInvitedToSpace || inviteRequiresSignIn
     },
     shouldPreventCardsCreatedCountUpdate: (state, getters, rootState, rootGetters) => {
-      const spaceUserIsUpgraded = rootGetters['currentSpace/spaceUserIsUpgradedOrOnTeam']
-      const spaceUserIsCurrentUser = rootGetters['currentSpace/spaceUserIsCurrentUser']
-      if (spaceUserIsUpgraded && !spaceUserIsCurrentUser) {
+      const spaceCreatorIsUpgraded = rootGetters['currentSpace/spaceCreatorIsUpgraded']
+      const spaceCreatorIsCurrentUser = rootGetters['currentSpace/spaceCreatorIsCurrentUser']
+      if (spaceCreatorIsUpgraded && !spaceCreatorIsCurrentUser) {
         return true
       }
     },
@@ -1001,7 +995,7 @@ export default {
     // AI Images
 
     AIImagesThisMonth: (state, getters) => {
-      if (getters.isUpgradedOrOnTeam) {
+      if (state.isUpgraded) {
         const currentMonth = dayjs().month()
         const currentYear = dayjs().year()
         return state.AIImages.filter(image => {
@@ -1020,7 +1014,7 @@ export default {
       return Math.floor(images.length / 2)
     },
     AIImagesLimit: (state, getters) => {
-      if (getters.isUpgradedOrOnTeam) {
+      if (state.isUpgraded) {
         return consts.AIImageLimitUpgradedUser
       } else {
         return consts.AIImageLimitFreeUser
