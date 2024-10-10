@@ -77,13 +77,13 @@ const initialState = {
   cardSettingsShiftEnterShouldAddChildCard: true,
   cardSettingsMaxCardWidth: consts.normalCardMaxWidth,
   prevSettingsSection: null,
-  betaPermissionCreateTeam: false,
+  betaPermissionCreateGroup: false,
   disabledKeyboardShortcuts: [],
 
   // space filters
 
   dialogSpaceFilterByType: null, // null, journals, spaces
-  dialogSpaceFilterByTeam: {},
+  dialogSpaceFilterByGroup: {},
   dialogSpaceFilterByUser: {},
   dialogSpaceFilterShowHidden: false,
   dialogSpaceFilterSortBy: null // null, updatedAt, createdAt, alphabetical
@@ -309,10 +309,10 @@ export default {
       state.dialogSpaceFilterShowHidden = value
       cache.updateUser('dialogSpaceFilterShowHidden', value)
     },
-    dialogSpaceFilterByTeam: (state, value) => {
+    dialogSpaceFilterByGroup: (state, value) => {
       utils.typeCheck({ value, type: 'object' })
-      state.dialogSpaceFilterByTeam = value
-      cache.updateUser('dialogSpaceFilterByTeam', value)
+      state.dialogSpaceFilterByGroup = value
+      cache.updateUser('dialogSpaceFilterByGroup', value)
     },
     dialogSpaceFilterSortBy: (state, value) => {
       state.dialogSpaceFilterSortBy = value
@@ -471,7 +471,7 @@ export default {
       context.commit('triggerUserIsLoaded', null, { root: true })
       context.dispatch('updateWeather')
       context.dispatch('updateJournalDailyPrompt')
-      context.dispatch('checkIfShouldJoinTeam')
+      context.dispatch('checkIfShouldJoinGroup')
     },
     updateWeather: async (context) => {
       const weather = await context.dispatch('api/weather', null, { root: true })
@@ -483,13 +483,13 @@ export default {
       if (!data) { return }
       context.commit('journalDailyPrompt', data)
     },
-    checkIfShouldJoinTeam: (context) => {
+    checkIfShouldJoinGroup: (context) => {
       if (!context.rootState.teamToJoinOnLoad) { return }
       const currentUserIsSignedIn = context.getters.isSignedIn
       if (currentUserIsSignedIn) {
-        context.dispatch('teams/joinTeam', null, { root: true })
+        context.dispatch('teams/joinGroup', null, { root: true })
       } else {
-        context.commit('notifySignUpToJoinTeam', true, { root: true })
+        context.commit('notifySignUpToJoinGroup', true, { root: true })
       }
     },
     update: (context, updates) => {
@@ -915,8 +915,8 @@ export default {
       space = space || rootState.currentSpace
       const isSpaceUser = getters.isSpaceUser(space)
       const isSpaceCollaborator = getters.isSpaceCollaborator(space)
-      const isTeamMember = rootGetters['teams/isCurrentSpaceTeamUser']
-      return Boolean(isSpaceUser || isSpaceCollaborator || isTeamMember)
+      const isGroupMember = rootGetters['teams/isCurrentSpaceGroupUser']
+      return Boolean(isSpaceUser || isSpaceCollaborator || isGroupMember)
     },
     isSpaceUser: (state, getters, rootState) => (space) => {
       let userIsInSpace = Boolean(space.users?.find(user => {

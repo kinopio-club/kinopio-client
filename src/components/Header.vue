@@ -38,8 +38,8 @@ import UserSettings from '@/components/dialogs/UserSettings.vue'
 import SpaceUserList from '@/components/dialogs/SpaceUserList.vue'
 import CommentButton from '@/components/CommentButton.vue'
 import FavoriteSpaceButton from '@/components/FavoriteSpaceButton.vue'
-import TeamLabel from '@/components/TeamLabel.vue'
-import Teams from '@/components/dialogs/Teams.vue'
+import GroupLabel from '@/components/GroupLabel.vue'
+import Groups from '@/components/dialogs/Groups.vue'
 import consts from '@/consts.js'
 
 import sortBy from 'lodash-es/sortBy'
@@ -198,7 +198,7 @@ const currentSpaceName = computed(() => {
     return `Space ${id}`
   }
 })
-const spaceTeam = computed(() => store.getters['teams/spaceTeam']())
+const spaceGroup = computed(() => store.getters['teams/spaceGroup']())
 const spaceHasStatus = computed(() => {
   if (!isOnline.value) { return }
   return Boolean(store.state.isLoadingSpace || store.state.isJoiningSpace || store.state.isReconnectingToBroadcast || store.state.isLoadingOtherItems || store.state.sendingQueue.length)
@@ -576,7 +576,7 @@ header(v-if="isVisible" :style="state.position" :class="{'fade-out': isFadingOut
         .logo
           .logo-image
         MoonPhase(v-if="currentSpace.moonPhase" :moonPhase="currentSpace.moonPhase")
-        TeamLabel(:team="spaceTeam")
+        GroupLabel(:team="spaceGroup")
         span {{currentSpaceName}}{{' '}}
         img.icon.visit(src="@/assets/visit.svg")
         //- embed badge
@@ -637,7 +637,7 @@ header(v-if="isVisible" :style="state.position" :class="{'fade-out': isFadingOut
         UserSettings
         UpdatePassword
         SpaceUserList
-        Teams
+        Groups
         //- Share
         .button-wrap
           button(@click.left.stop="toggleShareIsVisible" :class="{active: state.shareIsVisible, 'translucent-button': !shouldIncreaseUIContrast}")
@@ -663,7 +663,7 @@ header(v-if="isVisible" :style="state.position" :class="{'fade-out': isFadingOut
             .button-wrap.space-name-button-wrap(:class="{ 'back-button-is-visible': backButtonIsVisible }")
               button.space-name-button(@click.left.stop="toggleSpaceDetailsIsVisible" :class="{ active: state.spaceDetailsIsVisible, 'translucent-button': !shouldIncreaseUIContrast }")
                 .button-contents(:class="{'space-is-hidden': currentSpaceIsHidden}")
-                  TeamLabel(:team="spaceTeam")
+                  GroupLabel(:team="spaceGroup")
                   span(v-if="currentSpaceIsInbox")
                     img.icon.inbox-icon(src="@/assets/inbox.svg")
                   span(v-if="currentSpaceIsTemplate")

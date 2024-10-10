@@ -2,8 +2,8 @@
 import { reactive, computed, onMounted, onBeforeUnmount, defineProps, defineEmits, watch, ref, nextTick } from 'vue'
 import { useStore } from 'vuex'
 
-import TeamList from '@/components/TeamList.vue'
-import TeamsBetaInfo from '@/components/TeamsBetaInfo.vue'
+import GroupList from '@/components/GroupList.vue'
+import GroupsBetaInfo from '@/components/GroupsBetaInfo.vue'
 import Loader from '@/components/Loader.vue'
 import utils from '@/utils.js'
 
@@ -15,12 +15,12 @@ onMounted(() => {
   window.addEventListener('resize', updateDialogHeight)
 })
 
-const emit = defineEmits(['selectTeam', 'clearTeam', 'closeDialogs'])
+const emit = defineEmits(['selectGroup', 'clearGroup', 'closeDialogs'])
 
 const props = defineProps({
   visible: Boolean,
   teams: Array,
-  selectedTeam: Object
+  selectedGroup: Object
 })
 
 watch(() => props.visible, (value, prevValue) => {
@@ -40,20 +40,20 @@ const updateDialogHeight = async () => {
   state.dialogHeight = utils.elementHeight(element)
 }
 
-const isLoadingUserTeamsSpaces = computed(() => store.state.isLoadingUserTeamsSpaces)
+const isLoadingUserGroupsSpaces = computed(() => store.state.isLoadingUserGroupsSpaces)
 
 // select team
 
-const clearTeam = () => {
-  emit('clearTeam')
+const clearGroup = () => {
+  emit('clearGroup')
 }
-const selectTeam = (event, team) => {
-  emit('selectTeam', team)
+const selectGroup = (event, team) => {
+  emit('selectGroup', team)
 }
 
 // is in team
 
-const isOnTeam = computed(() => {
+const isOnGroup = computed(() => {
   const teams = store.getters['teams/byUser']()
   return Boolean(teams.length)
 })
@@ -65,22 +65,22 @@ const teamBetaMessage = computed(() => 'Only teams beta users can add spaces to 
 dialog.narrow.team-picker(v-if="visible" :open="visible" @click.left.stop ref="dialogElement" :style="{'max-height': state.dialogHeight + 'px'}")
   section.title-section
     .row.title-row
-      span Add to Team
-      button.small-button(v-if="isOnTeam" @click.left="clearTeam")
+      span Add to Group
+      button.small-button(v-if="isOnGroup" @click.left="clearGroup")
         img.icon.cancel(src="@/assets/add.svg")
         span Clear
 
   //- loading
-  template(v-if="isLoadingUserTeamsSpaces")
+  template(v-if="isLoadingUserGroupsSpaces")
     section
       Loader(:visible="true")
   //- teams list
-  template(v-else-if="isOnTeam")
+  template(v-else-if="isOnGroup")
     section.results-section(v-if="props.teams.length")
-      TeamList(:teams="props.teams" :selectedTeam="props.selectedTeam" @selectTeam="selectTeam")
+      GroupList(:teams="props.teams" :selectedGroup="props.selectedGroup" @selectGroup="selectGroup")
   //- teams beta info
   template(v-else)
-    TeamsBetaInfo(:message="teamBetaMessage")
+    GroupsBetaInfo(:message="teamBetaMessage")
 </template>
 
 <style lang="stylus">

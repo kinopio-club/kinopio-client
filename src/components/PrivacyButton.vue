@@ -16,7 +16,7 @@ const props = defineProps({
   showShortName: Boolean
 })
 
-const spaceTeam = computed(() => store.getters['teams/spaceTeam']())
+const spaceGroup = computed(() => store.getters['teams/spaceGroup']())
 const isSpaceMember = computed(() => store.getters['currentUser/isSpaceMember']())
 const isInvitedButCannotEditSpace = computed(() => store.getters['currentUser/isInvitedButCannotEditSpace']())
 
@@ -30,8 +30,8 @@ const privacyState = computed(() => {
 })
 const description = computed(() => {
   let description = privacyState.value.description
-  if (spaceTeam.value) {
-    description = privacyState.value.descriptionTeam
+  if (spaceGroup.value) {
+    description = privacyState.value.descriptionGroup
   }
   return utils.capitalizeFirstLetter(description)
 })

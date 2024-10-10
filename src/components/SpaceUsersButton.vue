@@ -4,7 +4,7 @@ import { useStore } from 'vuex'
 
 import User from '@/components/User.vue'
 import utils from '@/utils.js'
-import TeamLabel from '@/components/TeamLabel.vue'
+import GroupLabel from '@/components/GroupLabel.vue'
 
 import uniqBy from 'lodash-es/uniqBy'
 import last from 'lodash-es/last'
@@ -50,7 +50,7 @@ const isActive = computed(() => {
 
 // team
 
-const team = computed(() => store.getters['teams/spaceTeam'](currentSpace.value))
+const team = computed(() => store.getters['teams/spaceGroup'](currentSpace.value))
 
 // users
 
@@ -98,7 +98,7 @@ const isTranslucentButton = computed(() => {
 button.space-users-button(@click.stop="toggleSpaceUserListIsVisible" :class="{ 'header-button': props.isParentSpaceUsers, active: isActive, 'translucent-button': isTranslucentButton }" ref="buttonElement")
   span.label(v-if="props.showLabel")
     template(v-if="team")
-      TeamLabel(:team="team")
+      GroupLabel(:team="team")
     template(v-if="spaceUsers.length")
       User(:user="recentUser" :isClickable="false" :hideYouLabel="true" :isSmall="true" :shouldBounceIn="props.isParentSpaceUsers")
     span {{ spaceUsersLabel }}

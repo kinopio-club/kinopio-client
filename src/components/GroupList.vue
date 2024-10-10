@@ -2,31 +2,31 @@
 import { reactive, computed, onMounted, onBeforeUnmount, defineProps, defineEmits, watch, ref, nextTick } from 'vue'
 import { useStore } from 'vuex'
 
-import TeamLabel from '@/components/TeamLabel.vue'
+import GroupLabel from '@/components/GroupLabel.vue'
 const store = useStore()
 
-const emit = defineEmits(['selectTeam'])
+const emit = defineEmits(['selectGroup'])
 
 const props = defineProps({
   teams: Array,
-  selectedTeam: Object
+  selectedGroup: Object
 })
 
-const selectTeam = (event, team) => {
-  emit('selectTeam', event, team)
+const selectGroup = (event, team) => {
+  emit('selectGroup', event, team)
 }
 const teamIsSelected = (team) => {
   if (!team) { return }
-  if (!props.selectedTeam) { return }
-  return team.id === props.selectedTeam.id
+  if (!props.selectedGroup) { return }
+  return team.id === props.selectedGroup.id
 }
 </script>
 
 <template lang="pug">
 ul.results-list.team-list
   template(v-for="team in props.teams")
-    li(:class="{ active: teamIsSelected(team) }" @click.stop="selectTeam($event, team)")
-      TeamLabel(:team="team" :showName="true")
+    li(:class="{ active: teamIsSelected(team) }" @click.stop="selectGroup($event, team)")
+      GroupLabel(:team="team" :showName="true")
 </template>
 
 <style lang="stylus">

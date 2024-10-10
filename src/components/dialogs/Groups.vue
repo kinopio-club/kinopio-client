@@ -3,10 +3,10 @@ import { reactive, computed, onMounted, onBeforeUnmount, defineProps, defineEmit
 import { useStore } from 'vuex'
 
 import utils from '@/utils.js'
-import TeamLabel from '@/components/TeamLabel.vue'
-import TeamDetails from '@/components/dialogs/TeamDetails.vue'
-import AddTeam from '@/components/dialogs/AddTeam.vue'
-import TeamsBetaInfo from '@/components/TeamsBetaInfo.vue'
+import GroupLabel from '@/components/GroupLabel.vue'
+import GroupDetails from '@/components/dialogs/GroupDetails.vue'
+import AddGroup from '@/components/dialogs/AddGroup.vue'
+import GroupsBetaInfo from '@/components/GroupsBetaInfo.vue'
 
 import uniqBy from 'lodash-es/uniqBy'
 
@@ -23,7 +23,7 @@ watch(() => visible.value, (value, prevValue) => {
   if (value) {
     store.commit('shouldExplicitlyHideFooter', true)
     closeDialogs()
-    state.teamDetailsIsVisibleForTeamId = ''
+    state.teamDetailsIsVisibleForGroupId = ''
     updateDialogHeight()
   }
 })
@@ -36,16 +36,16 @@ const updateDialogHeight = async () => {
 
 const state = reactive({
   dialogHeight: null,
-  teamDetailsIsVisibleForTeamId: '',
-  addTeamIsVisible: false
+  teamDetailsIsVisibleForGroupId: '',
+  addGroupIsVisible: false
 })
 const closeDialogs = () => {
-  state.addTeamIsVisible = false
-  state.teamDetailsIsVisibleForTeamId = ''
+  state.addGroupIsVisible = false
+  state.teamDetailsIsVisibleForGroupId = ''
 }
 
 const currentUserIsSignedIn = computed(() => store.getters['currentUser/isSignedIn'])
-const currentUserCanCreateTeam = computed(() => currentUserIsSignedIn.value && store.state.currentUser.betaPermissionCreateTeam)
+const currentUserCanCreateGroup = computed(() => currentUserIsSignedIn.value && store.state.currentUser.betaPermissionCreateGroup)
 const triggerSignUpOrInIsVisible = () => {
   store.dispatch('closeAllDialogs')
   store.commit('triggerSignUpOrInIsVisible')
@@ -57,34 +57,34 @@ const teams = computed(() => {
   const user = store.state.currentUser
   const teamIds = utils.clone(store.state.teams.ids)
   const teams = teamIds.map(id => store.getters['teams/byId'](id))
-  let teamUserTeams = teams.filter(team => {
+  let teamUserGroups = teams.filter(team => {
     return team.users.find(teamUser => {
       const teamUserId = teamUser.id || teamUser.userId
       return teamUserId === user.id
     })
   })
-  teamUserTeams = uniqBy(teamUserTeams, 'id')
-  return teamUserTeams
+  teamUserGroups = uniqBy(teamUserGroups, 'id')
+  return teamUserGroups
 })
 
 // add team
 
-const toggleAddTeamIsVisible = () => {
-  const value = !state.addTeamIsVisible
+const toggleAddGroupIsVisible = () => {
+  const value = !state.addGroupIsVisible
   closeDialogs()
-  state.addTeamIsVisible = value
+  state.addGroupIsVisible = value
 }
 
 // team details
 
 const teamIsVisible = (team) => {
-  return state.teamDetailsIsVisibleForTeamId === team.id
+  return state.teamDetailsIsVisibleForGroupId === team.id
 }
-const toggleTeamDetailsIsVisible = (team) => {
+const toggleGroupDetailsIsVisible = (team) => {
   if (teamIsVisible(team)) {
-    state.teamDetailsIsVisibleForTeamId = ''
+    state.teamDetailsIsVisibleForGroupId = ''
   } else {
-    state.teamDetailsIsVisibleForTeamId = team.id
+    state.teamDetailsIsVisibleForGroupId = team.id
   }
 }
 
@@ -97,13 +97,13 @@ const teamBetaMessage = computed(() => 'Only teams beta users can create and man
 <template lang="pug">
 dialog.narrow.teams(v-if="visible" :open="visible" @click.left.stop="closeDialogs" ref="dialogElement" :style="{'max-height': state.dialogHeight + 'px'}")
   section
-    p Teams
-    .row(v-if="currentUserCanCreateTeam")
+    p Groups
+    .row(v-if="currentUserCanCreateGroup")
       .button-wrap
-        button(:class="{ active: state.addTeamIsVisible }" @click.stop="toggleAddTeamIsVisible")
+        button(:class="{ active: state.addGroupIsVisible }" @click.stop="toggleAddGroupIsVisible")
           img.icon.add(src="@/assets/add.svg")
-          span New Team
-        AddTeam(:visible="state.addTeamIsVisible" @closeDialogs="closeDialogs")
+          span New Group
+        AddGroup(:visible="state.addGroupIsVisible" @closeDialogs="closeDialogs")
   section(v-if="!currentUserIsSignedIn")
     p Sign Up or In to create and manage teams
     button(@click.left="triggerSignUpOrInIsVisible") Sign Up or In
@@ -112,12 +112,12 @@ dialog.narrow.teams(v-if="visible" :open="visible" @click.left.stop="closeDialog
     section.results-section
       ul.results-list
         template(v-for="team in teams")
-          li(:class="{ active: teamIsVisible(team) }" @click.stop="toggleTeamDetailsIsVisible(team)")
-            TeamLabel(:team="team" :showName="true")
-            TeamDetails(:visible="teamIsVisible(team)" :team="team")
+          li(:class="{ active: teamIsVisible(team) }" @click.stop="toggleGroupDetailsIsVisible(team)")
+            GroupLabel(:team="team" :showName="true")
+            GroupDetails(:visible="teamIsVisible(team)" :team="team")
   //- teams beta notice
   template(v-else)
-    TeamsBetaInfo(:message="teamBetaMessage")
+    GroupsBetaInfo(:message="teamBetaMessage")
 </template>
 
 <style lang="stylus">

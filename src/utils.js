@@ -1919,7 +1919,7 @@ export default {
     }
     return object
   },
-  teamFromTeamInviteUrl (url) {
+  teamFromGroupInviteUrl (url) {
     if (!url) { return }
     url = new URL(url)
     const params = url.searchParams
@@ -2147,7 +2147,7 @@ export default {
       console.warn('🚑 urlIsSpaceInvite', error)
     }
   },
-  urlIsTeamInvite (url) {
+  urlIsGroupInvite (url) {
     const hostIsKinopio = this.hostIsKinopio(url)
     if (!hostIsKinopio) { return }
     url = new URL(url)
@@ -2155,7 +2155,7 @@ export default {
   },
   urlIsSpace (url) {
     if (!url) { return }
-    if (this.urlIsTeamInvite(url)) { return }
+    if (this.urlIsGroupInvite(url)) { return }
     if (this.urlIsSpaceInvite(url)) { return true }
     let spaceUrlPattern
     if (consts.isDevelopment()) {
@@ -2562,7 +2562,7 @@ export default {
     const links = urls.filter(url => {
       const linkIsMarkdown = markdownLinks.find(markdownLink => markdownLink.includes(url))
       if (linkIsMarkdown) { return }
-      return this.urlIsSpace(url) || this.urlIsSpaceInvite(url) || this.urlIsTeamInvite(url)
+      return this.urlIsSpace(url) || this.urlIsSpaceInvite(url) || this.urlIsGroupInvite(url)
     })
     const files = urls.filter(url => this.urlIsFile(url))
     let segments = []

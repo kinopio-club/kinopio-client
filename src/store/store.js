@@ -228,7 +228,7 @@ const store = createStore({
     loadBlogSpace: false,
     shouldResetDimensionsOnLoad: false,
     shouldShowExploreOnLoad: false,
-    isLoadingUserTeamsSpaces: false,
+    isLoadingUserGroupsSpaces: false,
 
     // notifications
     notifications: [],
@@ -239,7 +239,7 @@ const store = createStore({
     notifySpaceIsRemoved: false,
     notifyCurrentSpaceIsNowRemoved: false,
     notifySignUpToEditSpace: false,
-    notifySignUpToJoinTeam: false,
+    notifySignUpToJoinGroup: false,
     notifyCardsCreatedIsNearLimit: false,
     notifyCardsCreatedIsOverLimit: false,
     notifyMoveOrCopyToSpace: false,
@@ -248,7 +248,7 @@ const store = createStore({
     notifySpaceIsHidden: false,
     notifyThanksForDonating: false,
     notifyThanksForUpgrading: false,
-    notifyIsJoiningTeam: false,
+    notifyIsJoiningGroup: false,
 
     // notifications with position
     notificationsWithPosition: [],
@@ -404,9 +404,9 @@ const store = createStore({
       utils.typeCheck({ value, type: 'boolean' })
       state.shouldShowExploreOnLoad = value
     },
-    isLoadingUserTeamsSpaces: (state, value) => {
+    isLoadingUserGroupsSpaces: (state, value) => {
       utils.typeCheck({ value, type: 'boolean' })
-      state.isLoadingUserTeamsSpaces = value
+      state.isLoadingUserGroupsSpaces = value
     },
     addUrlPreviewLoadingForCardIds: (state, cardId) => {
       utils.typeCheck({ value: cardId, type: 'string' })
@@ -1448,7 +1448,7 @@ const store = createStore({
       state.notifyConnectionError = false
       state.notifyServerCouldNotSave = false
       state.notifySignUpToEditSpace = false
-      state.notifySignUpToJoinTeam = false
+      state.notifySignUpToJoinGroup = false
       state.notifyCardsCreatedIsNearLimit = false
       state.notifyCardsCreatedIsOverLimit = false
       state.notifyMoveOrCopyToSpace = false
@@ -1504,9 +1504,9 @@ const store = createStore({
       utils.typeCheck({ value, type: 'boolean' })
       state.notifySignUpToEditSpace = value
     },
-    notifySignUpToJoinTeam: (state, value) => {
+    notifySignUpToJoinGroup: (state, value) => {
       utils.typeCheck({ value, type: 'boolean' })
-      state.notifySignUpToJoinTeam = value
+      state.notifySignUpToJoinGroup = value
     },
     notifyCardsCreatedIsNearLimit: (state, value) => {
       utils.typeCheck({ value, type: 'boolean' })
@@ -1543,9 +1543,9 @@ const store = createStore({
       utils.typeCheck({ value, type: 'boolean' })
       state.notifyThanksForUpgrading = value
     },
-    notifyIsJoiningTeam: (state, value) => {
+    notifyIsJoiningGroup: (state, value) => {
       utils.typeCheck({ value, type: 'boolean' })
-      state.notifyIsJoiningTeam = value
+      state.notifyIsJoiningGroup = value
     },
 
     // Notifications with Position

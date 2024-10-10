@@ -16,7 +16,7 @@ import CardCollaborationInfo from '@/components/CardCollaborationInfo.vue'
 import ShareCard from '@/components/dialogs/ShareCard.vue'
 import OtherCardPreview from '@/components/OtherCardPreview.vue'
 import OtherSpacePreview from '@/components/OtherSpacePreview.vue'
-import TeamInvitePreview from '@/components/TeamInvitePreview.vue'
+import GroupInvitePreview from '@/components/GroupInvitePreview.vue'
 import ItemCheckboxButton from '@/components/ItemCheckboxButton.vue'
 import utils from '@/utils.js'
 import consts from '@/consts.js'
@@ -989,7 +989,7 @@ const removeUrlPreview = async () => {
 
 const teamInviteUrl = computed(() => {
   const urls = validUrls.value
-  return urls.find(url => utils.urlIsTeamInvite(url))
+  return urls.find(url => utils.urlIsGroupInvite(url))
 })
 
 // media
@@ -1434,7 +1434,7 @@ dialog.card-details(v-if="visible" :open="visible" ref="dialogElement" @click.le
     MediaPreview(:visible="cardHasMedia" :card="card" :formats="state.formats")
 
     template(v-if="teamInviteUrl")
-      TeamInvitePreview(
+      GroupInvitePreview(
         :card="card"
         :teamInviteUrl="teamInviteUrl"
         :parentIsCardDetails="true"

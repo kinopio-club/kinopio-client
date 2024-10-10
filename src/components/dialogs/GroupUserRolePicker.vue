@@ -49,7 +49,7 @@ const updateIsPositionBottom = async () => {
   state.isPositionBottom = dialogIsBelowViewport
 }
 
-const currentSpaceTeam = computed(() => store.getters['teams/spaceTeam']())
+const currentSpaceGroup = computed(() => store.getters['teams/spaceGroup']())
 
 const roles = computed(() => {
   return teamUserRoles.states()
@@ -69,7 +69,7 @@ const roleIsMember = (role) => {
 const checkIsRemovingSoleAdminError = (role) => {
   if (props.user.role === 'member') { return }
   if (role.name === 'admin') { return }
-  const teamAdmins = currentSpaceTeam.value.users.filter(user => user.role === 'admin')
+  const teamAdmins = currentSpaceGroup.value.users.filter(user => user.role === 'admin')
   if (teamAdmins.length > 1) { return }
   state.error.isRemovingSoleAdmin = true
   return true
@@ -80,7 +80,7 @@ const updateRole = (role) => {
   }
   const update = {
     userId: props.user.id,
-    teamId: currentSpaceTeam.value.id,
+    teamId: currentSpaceGroup.value.id,
     role: role.name
   }
   store.dispatch('teams/updateUserRole', update)
@@ -91,7 +91,7 @@ const updateRole = (role) => {
 <template lang="pug">
 dialog.narrow.team-user-role-picker(v-if="visible" :open="visible" @click.left.stop ref="dialogElement" :style="{'max-height': state.dialogHeight + 'px'}" :class="{'position-bottom': state.isPositionBottom}")
   section(v-if="state.error.isRemovingSoleAdmin")
-    .badge.danger Team must have at least one admin
+    .badge.danger Group must have at least one admin
   section.results-section
     ul.results-list
       template(v-for="(role in roles")

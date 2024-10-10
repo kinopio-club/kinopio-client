@@ -129,10 +129,10 @@ const dialogSpaceFilterSortBy = computed(() => store.state.currentUser.dialogSpa
 const dialogSpaceFilterByType = computed(() => store.state.currentUser.dialogSpaceFilterByType)
 const dialogSpaceFilterByUser = computed(() => store.state.currentUser.dialogSpaceFilterByUser)
 const dialogSpaceFilterShowHidden = computed(() => store.state.currentUser.dialogSpaceFilterShowHidden)
-const dialogSpaceFilterByTeam = computed(() => store.state.currentUser.dialogSpaceFilterByTeam)
+const dialogSpaceFilterByGroup = computed(() => store.state.currentUser.dialogSpaceFilterByGroup)
 
 const spaceFiltersIsActive = computed(() => {
-  return Boolean(dialogSpaceFilterShowHidden.value || dialogSpaceFilterByType.value || utils.objectHasKeys(dialogSpaceFilterByUser.value) || dialogSpaceFilterSortByIsActive.value) || utils.objectHasKeys(dialogSpaceFilterByTeam.value)
+  return Boolean(dialogSpaceFilterShowHidden.value || dialogSpaceFilterByType.value || utils.objectHasKeys(dialogSpaceFilterByUser.value) || dialogSpaceFilterSortByIsActive.value) || utils.objectHasKeys(dialogSpaceFilterByGroup.value)
 })
 const filteredSpaces = computed(() => {
   let spaces = state.spaces
@@ -148,8 +148,8 @@ const filteredSpaces = computed(() => {
     spaces = spaces.filter(space => !space.isHidden)
   }
   // filter by user
-  if (utils.objectHasKeys(dialogSpaceFilterByTeam.value)) {
-    spaces = spaces.filter(space => space.teamId === dialogSpaceFilterByTeam.value.id)
+  if (utils.objectHasKeys(dialogSpaceFilterByGroup.value)) {
+    spaces = spaces.filter(space => space.teamId === dialogSpaceFilterByGroup.value.id)
   }
   // filter by user
   if (utils.objectHasKeys(dialogSpaceFilterByUser.value)) {
@@ -338,7 +338,7 @@ const updateWithRemoteSpaces = async () => {
     state.isLoadingRemoteSpaces = true
     const [userSpaces, teamSpaces] = await Promise.all([
       store.dispatch('api/getUserSpaces'),
-      store.dispatch('api/getUserTeamSpaces')
+      store.dispatch('api/getUserGroupSpaces')
     ])
     let spaces = userSpaces
     if (teamSpaces) {
@@ -415,7 +415,7 @@ dialog.space-details.is-pinnable.wide(v-if="props.visible" :open="props.visible"
       @addSpace="addSpace"
       :resultsSectionHeight="state.resultsSectionHeight"
       :parentDialog="state.parentDialog"
-      :showSpaceTeams="true"
+      :showSpaceGroups="true"
     )
 </template>
 

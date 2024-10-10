@@ -196,7 +196,7 @@ const signUp = async (event) => {
     updateCurrentSpaceWithNewUserId(currentUser, newUser)
     await store.dispatch('api/createSpaces')
     notifySignedIn()
-    store.dispatch('currentUser/checkIfShouldJoinTeam')
+    store.dispatch('currentUser/checkIfShouldJoinGroup')
     addCollaboratorToInvitedSpaces()
     store.commit('triggerUpdateWindowHistory')
     store.dispatch('themes/restore')
@@ -228,7 +228,7 @@ const signIn = async (event) => {
     updateSpacesUserId()
     await store.dispatch('api/createSpaces')
     notifySignedIn()
-    store.dispatch('currentUser/checkIfShouldJoinTeam')
+    store.dispatch('currentUser/checkIfShouldJoinGroup')
     // add new spaces from remote
     const spaces = await store.dispatch('api/getUserSpaces')
     cache.addSpaces(spaces)

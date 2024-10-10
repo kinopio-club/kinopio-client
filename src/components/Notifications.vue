@@ -9,7 +9,7 @@ import utils from '@/utils.js'
 import templates from '@/data/templates.js'
 import PrivacyIcon from '@/components/PrivacyIcon.vue'
 import OfflineBadge from '@/components/OfflineBadge.vue'
-import TeamLabel from '@/components/TeamLabel.vue'
+import GroupLabel from '@/components/GroupLabel.vue'
 import Loader from '@/components/Loader.vue'
 
 import dayjs from 'dayjs'
@@ -158,8 +158,8 @@ const notifyCurrentSpaceIsNowRemoved = computed(() => store.state.notifyCurrentS
 const notifyThanksForDonating = computed(() => store.state.notifyThanksForDonating)
 const notifyThanksForUpgrading = computed(() => store.state.notifyThanksForUpgrading)
 const notifySpaceIsUnavailableOffline = computed(() => store.getters['currentSpace/isUnavailableOffline'])
-const notifyIsJoiningTeam = computed(() => store.state.notifyIsJoiningTeam)
-const notifySignUpToJoinTeam = computed(() => store.state.notifySignUpToJoinTeam)
+const notifyIsJoiningGroup = computed(() => store.state.notifyIsJoiningGroup)
+const notifySignUpToJoinGroup = computed(() => store.state.notifySignUpToJoinGroup)
 const notifificationClasses = (item) => {
   let classes = {
     'danger': item.type === 'danger',
@@ -305,7 +305,7 @@ aside.notifications(@click.left="closeAllDialogs")
         span.badge.info {{ item.badge }}
       span.label-badge(v-if="item.label") {{item.label}}
       template(v-if="item.team")
-        TeamLabel(:team="item.team")
+        GroupLabel(:team="item.team")
       template(v-if="item.icon")
         img.icon(v-if="item.icon === 'open'" src="@/assets/open.svg" class="open")
         img.icon(v-else-if="item.icon === 'press-and-hold'" src="@/assets/press-and-hold.svg" class="press-and-hold")
@@ -482,14 +482,14 @@ aside.notifications(@click.left="closeAllDialogs")
 
   //- team
 
-  .persistent-item(v-if="notifyIsJoiningTeam")
+  .persistent-item(v-if="notifyIsJoiningGroup")
     p
       Loader(:visible="true" :isSmall="true")
-      span Joining Team…
+      span Joining Group…
 
-  .persistent-item(v-if="notifySignUpToJoinTeam" ref="readOnlyElement" :class="{'notification-jiggle': state.readOnlyJiggle}")
+  .persistent-item(v-if="notifySignUpToJoinGroup" ref="readOnlyElement" :class="{'notification-jiggle': state.readOnlyJiggle}")
     p
-      button(@click.left.stop="triggerSignUpOrInIsVisible") Sign Up or In to Join Team
+      button(@click.left.stop="triggerSignUpOrInIsVisible") Sign Up or In to Join Group
 
 </template>
 

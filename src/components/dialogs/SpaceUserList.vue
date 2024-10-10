@@ -3,9 +3,9 @@ import { reactive, computed, onMounted, onBeforeUnmount, defineProps, defineEmit
 import { useStore } from 'vuex'
 
 import utils from '@/utils.js'
-import TeamDetails from '@/components/dialogs/TeamDetails.vue'
+import GroupDetails from '@/components/dialogs/GroupDetails.vue'
 import UserList from '@/components/UserList.vue'
-import TeamLabel from '@/components/TeamLabel.vue'
+import GroupLabel from '@/components/GroupLabel.vue'
 
 import uniqBy from 'lodash-es/uniqBy'
 
@@ -53,8 +53,8 @@ const label = computed(() => {
 
 // team
 
-const spaceTeam = computed(() => store.getters['teams/spaceTeam']())
-const toggleTeamIsVisible = () => {
+const spaceGroup = computed(() => store.getters['teams/spaceGroup']())
+const toggleGroupIsVisible = () => {
   const value = !state.teamIsVisible
   closeDialogs()
   state.teamIsVisible = value
@@ -124,10 +124,10 @@ dialog.space-user-list(
 )
   section
     p {{ label }}
-    .button-wrap(v-if="spaceTeam")
-      button(@click.stop="toggleTeamIsVisible" :class="{ active: state.teamIsVisible }")
-        TeamLabel(:team="spaceTeam" :showName="true")
-      TeamDetails(:visible="state.teamIsVisible" :team="spaceTeam")
+    .button-wrap(v-if="spaceGroup")
+      button(@click.stop="toggleGroupIsVisible" :class="{ active: state.teamIsVisible }")
+        GroupLabel(:team="spaceGroup" :showName="true")
+      GroupDetails(:visible="state.teamIsVisible" :team="spaceGroup")
 
   template(v-if="users.length")
     //- users

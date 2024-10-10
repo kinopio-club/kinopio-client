@@ -9,7 +9,7 @@ import Audio from '@/components/Audio.vue'
 import NameSegment from '@/components/NameSegment.vue'
 import UserLabelInline from '@/components/UserLabelInline.vue'
 import OtherCardPreview from '@/components/OtherCardPreview.vue'
-import TeamInvitePreview from '@/components/TeamInvitePreview.vue'
+import GroupInvitePreview from '@/components/GroupInvitePreview.vue'
 import ItemConnectorButton from '@/components/ItemConnectorButton.vue'
 import consts from '@/consts.js'
 import postMessage from '@/postMessage.js'
@@ -302,7 +302,7 @@ const updateIsPlayingAudio = (value) => {
 
 const teamInviteUrl = computed(() => {
   const urls = urlsInName.value || []
-  return urls.find(url => utils.urlIsTeamInvite(url))
+  return urls.find(url => utils.urlIsGroupInvite(url))
 })
 
 // other card
@@ -1747,14 +1747,14 @@ const updateOtherItems = () => {
   if (!url) { return }
   const urlIsSpace = utils.urlIsSpace(url)
   const urlIsSpaceInvite = utils.urlIsSpaceInvite(url)
-  const urlIsTeamInvite = utils.urlIsTeamInvite(url)
+  const urlIsGroupInvite = utils.urlIsGroupInvite(url)
   url = new URL(url)
   if (urlIsSpaceInvite) {
     updateOtherInviteItems(url)
   } else if (urlIsSpace) {
     updateOtherSpaceOrCardItems(url)
-  } else if (urlIsTeamInvite) {
-    updateOtherTeamItems(url)
+  } else if (urlIsGroupInvite) {
+    updateOtherGroupItems(url)
   }
 }
 const updateOtherSpaceOrCardItems = (url) => {
@@ -1782,9 +1782,9 @@ const updateOtherInviteItems = (url) => {
   }
   store.dispatch('currentSpace/updateOtherItems', { spaceId, collaboratorKey })
 }
-const updateOtherTeamItems = (url) => {
-  const teamFromUrl = utils.teamFromTeamInviteUrl(url)
-  store.dispatch('teams/updateOtherTeams', teamFromUrl)
+const updateOtherGroupItems = (url) => {
+  const teamFromUrl = utils.teamFromGroupInviteUrl(url)
+  store.dispatch('teams/updateOtherGroups', teamFromUrl)
 }
 
 // utils
@@ -1976,7 +1976,7 @@ article.card-wrap#card(
           :backgroundColor="backgroundColor"
         )
       template(v-if="teamInviteUrl")
-        TeamInvitePreview(
+        GroupInvitePreview(
           :card="card"
           :teamInviteUrl="teamInviteUrl"
           :selectedColor="selectedColor"

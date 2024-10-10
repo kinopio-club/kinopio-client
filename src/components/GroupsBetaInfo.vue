@@ -13,7 +13,7 @@ section.teams-beta-info
   p {{ props.message }}
   p Interested in trying teams in your company?
   p
-    a(href="mailto:support@kinopio.club?subject=Kinopio Teams Beta")
+    a(href="mailto:support@kinopio.club?subject=Kinopio Groups Beta")
       button
         img.icon(src="@/assets/mail.svg")
         span Email Support

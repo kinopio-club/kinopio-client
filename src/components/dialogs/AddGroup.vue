@@ -3,7 +3,7 @@ import { reactive, computed, onMounted, onBeforeUnmount, defineProps, defineEmit
 import { useStore } from 'vuex'
 
 import utils from '@/utils.js'
-import TeamLabel from '@/components/TeamLabel.vue'
+import GroupLabel from '@/components/GroupLabel.vue'
 import ColorPicker from '@/components/dialogs/ColorPicker.vue'
 import Loader from '@/components/Loader.vue'
 
@@ -28,7 +28,7 @@ const state = reactive({
   colorPickerIsVisible: false,
   team: null,
   loading: {
-    createTeam: false
+    createGroup: false
   },
   error: {
     missingName: false,
@@ -39,7 +39,7 @@ const state = reactive({
 watch(() => props.visible, (value, prevValue) => {
   if (value) {
     updateDialogHeight()
-    initTeam()
+    initGroup()
     focusNameInput()
   }
 })
@@ -61,7 +61,7 @@ const clearErrors = () => {
 // team color
 
 const teamColor = computed(() => state.team.color)
-const updateTeamColor = (newValue) => {
+const updateGroupColor = (newValue) => {
   state.team.color = newValue
 }
 const toggleColorPicker = () => {
@@ -89,29 +89,29 @@ const teamName = computed({
 
 // team
 
-const initTeam = () => {
+const initGroup = () => {
   let team = {
-    name: 'Team Name',
+    name: 'Group Name',
     color: randomColor()
   }
   state.team = team
 }
-const createTeam = async () => {
-  if (state.loading.createTeam) { return }
+const createGroup = async () => {
+  if (state.loading.createGroup) { return }
   clearErrors()
   if (!state.team.name) {
     state.error.missingName = true
     return
   }
   try {
-    state.loading.createTeam = true
-    await store.dispatch('teams/createTeam', state.team)
+    state.loading.createGroup = true
+    await store.dispatch('teams/createGroup', state.team)
     emit('closeDialogs')
   } catch (error) {
-    console.error('🚒 createTeam', error)
+    console.error('🚒 createGroup', error)
     state.unknownServerError = true
   }
-  state.loading.createTeam = false
+  state.loading.createGroup = false
 }
 
 </script>
@@ -121,19 +121,19 @@ dialog.narrow.add-team(v-if="visible" :open="visible" @click.left.stop="closeDia
   section
     .row
       .button-wrap
-          button.change-color(@click.left.stop="toggleColorPicker" :class="{active: state.colorPickerIsVisible}" title="Change Team Color")
+          button.change-color(@click.left.stop="toggleColorPicker" :class="{active: state.colorPickerIsVisible}" title="Change Group Color")
             .current-color.current-team-color(:style="{ background: teamColor }")
-          ColorPicker(:currentColor="teamColor" :visible="state.colorPickerIsVisible" @selectedColor="updateTeamColor")
-      input.name(placeholder="Team Name" v-model="teamName" name="teamName" maxlength=100 ref="nameInputElement" @keydown.enter.exact.prevent="createTeam")
+          ColorPicker(:currentColor="teamColor" :visible="state.colorPickerIsVisible" @selectedColor="updateGroupColor")
+      input.name(placeholder="Group Name" v-model="teamName" name="teamName" maxlength=100 ref="nameInputElement" @keydown.enter.exact.prevent="createGroup")
     .row
-      button(:class="{ active: state.loading.createTeam }" @click.stop="createTeam")
+      button(:class="{ active: state.loading.createGroup }" @click.stop="createGroup")
         img.icon.add(src="@/assets/add.svg")
-        TeamLabel(:team="state.team")
-        span Create Team
-        Loader(:visible="state.loading.createTeam")
+        GroupLabel(:team="state.team")
+        span Create Group
+        Loader(:visible="state.loading.createGroup")
     //- errors
     .row(v-if="state.error.missingName")
-      .badge.danger Team name missing
+      .badge.danger Group name missing
     .row(v-if="state.unknownServerError")
       .badge.danger (シ_ _)シ Something went wrong, Please try again or contact support
 

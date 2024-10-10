@@ -5,7 +5,7 @@ import { useStore } from 'vuex'
 import UserList from '@/components/UserList.vue'
 import User from '@/components/User.vue'
 import ColorPicker from '@/components/dialogs/ColorPicker.vue'
-import TeamLabel from '@/components/TeamLabel.vue'
+import GroupLabel from '@/components/GroupLabel.vue'
 import utils from '@/utils.js'
 
 import randomColor from 'randomcolor'
@@ -57,13 +57,13 @@ const updateChildDialogIsVisible = (value) => {
 
 // team
 
-const currentUserIsTeamAdmin = computed(() => {
+const currentUserIsGroupAdmin = computed(() => {
   return store.getters['teams/teamUserIsAdmin']({
     userId: store.state.currentUser.id,
     teamId: props.team.id
   })
 })
-const updateTeam = (update) => {
+const updateGroup = (update) => {
   update.id = props.team.id
   store.dispatch('teams/update', update)
 }
@@ -71,8 +71,8 @@ const updateTeam = (update) => {
 // team color
 
 const teamColor = computed(() => props.team.color)
-const updateTeamColor = (newValue) => {
-  updateTeam({ color: newValue })
+const updateGroupColor = (newValue) => {
+  updateGroup({ color: newValue })
 }
 const toggleColorPicker = () => {
   const isVisible = state.colorPickerIsVisible
@@ -87,7 +87,7 @@ const teamName = computed({
     return props.team.name
   },
   set (newValue) {
-    updateTeam({ name: newValue })
+    updateGroup({ name: newValue })
   }
 })
 
@@ -172,31 +172,31 @@ const showUserDetails = (event, user) => {
 dialog.team-details.wide(v-if="visible" :open="visible" @click.left.stop="closeDialogs" ref="dialogElement" :style="{'max-height': state.dialogHeight + 'px'}" :class="{ 'child-dialog-is-visible': childDialogIsVisible }")
   section
     .row
-      template(v-if="currentUserIsTeamAdmin")
+      template(v-if="currentUserIsGroupAdmin")
         .button-wrap
-          button.change-color(@click.left.stop="toggleColorPicker" :class="{active: state.colorPickerIsVisible}" title="Change Team Color")
+          button.change-color(@click.left.stop="toggleColorPicker" :class="{active: state.colorPickerIsVisible}" title="Change Group Color")
             .current-color.current-team-color(:style="{ background: teamColor }")
-          ColorPicker(:currentColor="teamColor" :visible="state.colorPickerIsVisible" @selectedColor="updateTeamColor")
-        input.name(placeholder="Team Name" v-model="teamName" name="teamName" maxlength=100 @mouseup.stop)
+          ColorPicker(:currentColor="teamColor" :visible="state.colorPickerIsVisible" @selectedColor="updateGroupColor")
+        input.name(placeholder="Group Name" v-model="teamName" name="teamName" maxlength=100 @mouseup.stop)
 
       template(v-else)
-        TeamLabel(:team="props.team" :showName="true")
+        GroupLabel(:team="props.team" :showName="true")
 
     //- TODO is billing user
-    //- .row.billing-tips(v-if="currentUserIsTeamAdmin" :class="{ active: state.billingTipsIsVisible} ")
+    //- .row.billing-tips(v-if="currentUserIsGroupAdmin" :class="{ active: state.billingTipsIsVisible} ")
   section(v-if="inviteUrl")
     .row.invite-row
       p
         .users
           User(:user="currentUser" :isClickable="false" :key="currentUser.id" :isSmall="true" :hideYouLabel="true")
           User(:user="randomUser" :isClickable="false" :key="currentUser.id" :isSmall="true" :hideYouLabel="true")
-        span Invite Team Members
-      button.small-button(v-if="currentUserIsTeamAdmin" @click="toggleBillingTipsIsVisible" :class="{ active: state.billingTipsIsVisible} ")
+        span Invite Group Members
+      button.small-button(v-if="currentUserIsGroupAdmin" @click="toggleBillingTipsIsVisible" :class="{ active: state.billingTipsIsVisible} ")
         span Billing
 
     section.subsection(v-if="state.billingTipsIsVisible")
       p Each team user costs 6$/mo or 60$/yr
-      p Team users can create unlimited cards and have all the other benefits of an upgraded account.
+      p Group users can create unlimited cards and have all the other benefits of an upgraded account.
       p If you have a multiple teams with the same user, you will only be billed once for that user.
       button team billing center
       //- p btn settings -> team billing
@@ -208,7 +208,7 @@ dialog.team-details.wide(v-if="visible" :open="visible" @click.left.stop="closeD
       .row
         button(@click.left="copyInviteUrl")
           img.icon.copy(src="@/assets/copy.svg")
-          span Copy Invite to Team URL
+          span Copy Invite to Group URL
       //- .row
       //-   button
       //-     img.icon.mail(src="@/assets/mail.svg")
@@ -218,7 +218,7 @@ dialog.team-details.wide(v-if="visible" :open="visible" @click.left.stop="closeD
     :selectedUser="selectedUser"
     @selectUser="toggleUserDetails"
     :isClickable="true"
-    :showTeamUserActions="true"
+    :showGroupUserActions="true"
     :team="props.team"
     @childDialogIsVisible="updateChildDialogIsVisible"
   )

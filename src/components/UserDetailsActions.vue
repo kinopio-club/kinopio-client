@@ -6,7 +6,7 @@ import SpacePicker from '@/components/dialogs/SpacePicker.vue'
 import Loader from '@/components/Loader.vue'
 import SpaceList from '@/components/SpaceList.vue'
 import User from '@/components/User.vue'
-import TeamLabel from '@/components/TeamLabel.vue'
+import GroupLabel from '@/components/GroupLabel.vue'
 import utils from '@/utils.js'
 import cache from '@/cache.js'
 import postMessage from '@/postMessage.js'
@@ -151,7 +151,7 @@ const updateExploreSpaces = async () => {
 
 // teams
 
-const toggleTeamsIsVisible = () => {
+const toggleGroupsIsVisible = () => {
   store.commit('closeAllDialogs')
   store.commit('teamsIsVisible', true)
 }
@@ -164,9 +164,9 @@ const toggleTeamsIsVisible = () => {
     //- team
     .row
       .button-wrap
-        button(@click.stop="toggleTeamsIsVisible")
+        button(@click.stop="toggleGroupsIsVisible")
           img.icon.team(src="@/assets/team.svg")
-          span Teams
+          span Groups
   section(v-if="isCurrentUser")
     //- settings, sign out
     .row

@@ -3,13 +3,13 @@ import { reactive, computed, onMounted, onBeforeUnmount, defineProps, defineEmit
 import { useStore } from 'vuex'
 
 import Loader from '@/components/Loader.vue'
-import TeamLabel from '@/components/TeamLabel.vue'
+import GroupLabel from '@/components/GroupLabel.vue'
 import utils from '@/utils.js'
 
 const store = useStore()
 
 onMounted(() => {
-  updateTeam()
+  updateGroup()
 })
 
 const props = defineProps({
@@ -31,7 +31,7 @@ const url = computed(() => {
     return props.teamInviteUrl
   }
   const urls = utils.urlsFromString(props.card.name)
-  return urls.find(url => utils.urlIsTeamInvite(url))
+  return urls.find(url => utils.urlIsGroupInvite(url))
 })
 const disableIsActive = () => {
   state.isActive = false
@@ -95,21 +95,21 @@ const colorClasses = computed(() => {
 
 // team info
 
-const updateTeam = async () => {
+const updateGroup = async () => {
   await nextTick()
   state.isLoading = true
   try {
-    const teamFromUrl = utils.teamFromTeamInviteUrl(url.value)
+    const teamFromUrl = utils.teamFromGroupInviteUrl(url.value)
     let team = store.getters['teams/byId'](teamFromUrl.id)
     if (team) {
       state.team = team
     } else {
-      await store.dispatch('teams/updateOtherTeams', teamFromUrl)
+      await store.dispatch('teams/updateOtherGroups', teamFromUrl)
       team = store.getters['teams/byId'](teamFromUrl.id)
       state.team = team
     }
   } catch (error) {
-    console.error('🚒 updateTeam', error)
+    console.error('🚒 updateGroup', error)
   }
   state.isLoading = false
 }
@@ -134,11 +134,11 @@ const updateTeam = async () => {
   )
     .row
       .badge.info.inline-badge
-        span Team Invite
+        span Group Invite
     .row
       Loader(:visible="state.isLoading" :isSmall="true" :isStatic="true")
       template(v-if="!state.isLoading")
-        TeamLabel(:team="state.team" :showName="true")
+        GroupLabel(:team="state.team" :showName="true")
     .row
       .badge.danger Should not be shared publicly
 </template>

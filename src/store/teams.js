@@ -46,14 +46,14 @@ export default {
         console.warn('🚑 could not update team', team)
         return
       }
-      const prevTeam = state.teams[team.id]
-      if (prevTeam) {
+      const prevGroup = state.teams[team.id]
+      if (prevGroup) {
         const keys = Object.keys(team)
-        let updatedTeam = utils.clone(prevTeam)
+        let updatedGroup = utils.clone(prevGroup)
         keys.forEach(key => {
-          updatedTeam[key] = team[key]
+          updatedGroup[key] = team[key]
         })
-        state.teams[team.id] = updatedTeam
+        state.teams[team.id] = updatedGroup
       } else {
         state.ids.push(team.id)
         state.teams[team.id] = team
@@ -61,46 +61,46 @@ export default {
     }
   },
   actions: {
-    createTeam: async (context, team) => {
+    createGroup: async (context, team) => {
       try {
-        const response = await context.dispatch('api/createTeam', team, { root: true })
-        let newTeam = response.team
+        const response = await context.dispatch('api/createGroup', team, { root: true })
+        let newGroup = response.team
         let teamUser = response.teamUser
         teamUser.id = teamUser.userId
-        newTeam.teamUser = teamUser
-        newTeam.users = [response.teamUser]
-        context.commit('create', newTeam)
+        newGroup.teamUser = teamUser
+        newGroup.users = [response.teamUser]
+        context.commit('create', newGroup)
       } catch (error) {
-        console.error('🚒 createTeam', error, team)
+        console.error('🚒 createGroup', error, team)
       }
     },
-    loadTeam: async (context, space) => {
-      context.commit('currentSpace/updateTeamMeta', space, { root: true })
+    loadGroup: async (context, space) => {
+      context.commit('currentSpace/updateGroupMeta', space, { root: true })
       let team = space.team
       if (!team) { return }
       context.commit('update', team)
       const teamUser = context.getters.teamUser({ userId: context.rootState.currentUser.id })
       if (!teamUser) { return }
       try {
-        team = await context.dispatch('api/getTeam', team.id, { root: true })
+        team = await context.dispatch('api/getGroup', team.id, { root: true })
         context.commit('update', team)
       } catch (error) {
-        console.error('🚒 loadTeam', error, team)
+        console.error('🚒 loadGroup', error, team)
       }
     },
-    joinTeam: async (context) => {
+    joinGroup: async (context) => {
       const userId = context.rootState.currentUser.id
       const team = context.rootState.teamToJoinOnLoad
       if (!team) { return }
-      context.commit('notifyIsJoiningTeam', true, { root: true })
+      context.commit('notifyIsJoiningGroup', true, { root: true })
       try {
-        const response = await context.dispatch('api/createTeamUser', {
+        const response = await context.dispatch('api/createGroupUser', {
           teamId: team.teamId,
           collaboratorKey: team.collaboratorKey,
           userId
         }, { root: true })
         context.commit('addNotification', {
-          badge: 'Joined Team',
+          badge: 'Joined Group',
           message: `${response.team.name}`,
           type: 'success',
           isPersistentItem: true,
@@ -108,20 +108,20 @@ export default {
         }, { root: true })
         context.commit('triggerSpaceDetailsVisible', null, { root: true })
       } catch (error) {
-        console.error('🚒 joinTeam', error)
+        console.error('🚒 joinGroup', error)
         context.commit('addNotification', {
-          message: `Failed to Join Team`,
+          message: `Failed to Join Group`,
           type: 'danger',
           icon: 'team',
           isPersistentItem: true
         }, { root: true })
       }
-      context.commit('notifyIsJoiningTeam', false, { root: true })
+      context.commit('notifyIsJoiningGroup', false, { root: true })
       context.commit('teamToJoinOnLoad', null, { root: true })
     },
     update: (context, team) => {
       context.commit('update', team)
-      context.dispatch('api/addToQueue', { name: 'updateTeam', body: team }, { root: true })
+      context.dispatch('api/addToQueue', { name: 'updateGroup', body: team }, { root: true })
     },
     updateUserRole: (context, update) => {
       const { userId, teamId, role } = update
@@ -134,29 +134,29 @@ export default {
         return user
       })
       context.commit('update', team)
-      context.dispatch('api/addToQueue', { name: 'updateTeamUser', body: update }, { root: true })
+      context.dispatch('api/addToQueue', { name: 'updateGroupUser', body: update }, { root: true })
     },
     addCurrentSpace: (context, team) => {
       const user = context.rootState.currentUser
-      context.dispatch('currentSpace/updateSpace', { teamId: team.id, addedToTeamByUserId: user.id }, { root: true })
+      context.dispatch('currentSpace/updateSpace', { teamId: team.id, addedToGroupByUserId: user.id }, { root: true })
     },
     removeCurrentSpace: (context) => {
-      context.dispatch('currentSpace/updateSpace', { teamId: null, addedToTeamByUserId: null }, { root: true })
+      context.dispatch('currentSpace/updateSpace', { teamId: null, addedToGroupByUserId: null }, { root: true })
     },
-    removeTeamUser: (context, { teamId, userId }) => {
+    removeGroupUser: (context, { teamId, userId }) => {
       let team = context.getters.byId(teamId)
       team = utils.clone(team)
       team.users = team.users.filter(user => user.id !== userId)
-      const updatedTeam = {
+      const updatedGroup = {
         id: team.id,
         users: team.users
       }
-      context.commit('update', updatedTeam)
+      context.commit('update', updatedGroup)
     },
-    updateOtherTeams: async (context, otherTeam) => {
-      let team = context.getters.byId(otherTeam.id)
+    updateOtherGroups: async (context, otherGroup) => {
+      let team = context.getters.byId(otherGroup.id)
       if (team) { return }
-      team = await context.dispatch('api/getTeam', otherTeam.id, { root: true })
+      team = await context.dispatch('api/getGroup', otherGroup.id, { root: true })
       context.commit('create', team)
     }
   },
@@ -170,16 +170,16 @@ export default {
     byUser: (state, getters, rootState) => (user) => {
       user = user || rootState.currentUser
       const teams = getters.all
-      let teamUserTeams = teams.filter(team => {
+      let teamUserGroups = teams.filter(team => {
         return team.users.find(teamUser => {
           const teamUserId = teamUser.id || teamUser.userId
           return teamUserId === user.id
         })
       })
-      teamUserTeams = uniqBy(teamUserTeams, 'id')
-      return teamUserTeams
+      teamUserGroups = uniqBy(teamUserGroups, 'id')
+      return teamUserGroups
     },
-    spaceTeam: (state, getters, rootState) => (space) => {
+    spaceGroup: (state, getters, rootState) => (space) => {
       const currentSpace = rootState.currentSpace
       space = space || currentSpace
       return state.teams[space.teamId]
@@ -191,16 +191,16 @@ export default {
       } else {
         const currentSpace = rootState.currentSpace
         space = space || currentSpace
-        team = getters.spaceTeam(space)
+        team = getters.spaceGroup(space)
       }
       if (!team) { return }
       return team.users.find(user => user.id === userId)
     },
-    currentUserIsCurrentSpaceTeamUser: (state, getters, rootState) => {
+    currentUserIsCurrentSpaceGroupUser: (state, getters, rootState) => {
       const userId = rootState.currentUser.id
       const teamId = rootState.currentSpace.teamId
       if (!teamId) { return }
-      const team = getters.spaceTeam()
+      const team = getters.spaceGroup()
       return team.users.find(user => user.id === userId)
     },
     teamUserIsAdmin: (state, getters, rootState) => ({ userId, space, teamId }) => {
