@@ -352,7 +352,6 @@ const updateWithRemoteSpaces = async () => {
     removeRemovedCachedSpaces(state.remoteSpaces)
     state.spaces = state.remoteSpaces
     updateCachedSpaces()
-    store.commit('isLoadingUserGroupsSpaces', false)
   } catch (error) {
     console.error('🚒 updateWithRemoteSpaces', error)
   }

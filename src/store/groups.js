@@ -63,7 +63,7 @@ export default {
   actions: {
     restore: (context, groups) => {
       context.commit('restore', groups)
-      context.commit('isLoadingUserGroupsSpaces', false, { root: true })
+      context.commit('isLoadingGroups', false, { root: true })
     },
     createGroup: async (context, group) => {
       try {

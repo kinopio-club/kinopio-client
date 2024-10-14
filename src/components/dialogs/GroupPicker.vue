@@ -42,12 +42,14 @@ const updateDialogHeight = async () => {
 }
 
 const currentUserIsUpgraded = computed(() => store.state.currentUser.isUpgraded)
-const isLoadingUserGroupsSpaces = computed(() => store.state.isLoadingUserGroupsSpaces)
+const isLoadingGroups = computed(() => store.state.isLoadingGroups)
 const upgradeMessage = computed(() => 'to create and manage Groups')
 
 // groups list
 
-const isGroups = computed(() => Boolean(props.groups.length))
+const isGroups = computed(() => {
+  return Boolean(props.groups.length)
+})
 const groupsListIsVisible = computed(() => currentUserIsUpgraded.value && isGroups.value)
 
 // select group
@@ -69,7 +71,7 @@ dialog.narrow.group-picker(v-if="visible" :open="visible" @click.left.stop ref="
         img.icon.cancel(src="@/assets/add.svg")
         span Clear
     //- loading
-    Loader(:visible="isLoadingUserGroupsSpaces")
+    Loader(:visible="isLoadingGroups && !isGroups")
   //- groups list
   section.results-section(v-if="groupsListIsVisible")
     GroupList(:groups="props.groups" :selectedGroup="props.selectedGroup" @selectGroup="selectGroup")

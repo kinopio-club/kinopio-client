@@ -46,7 +46,7 @@ const closeDialogs = () => {
 }
 
 const currentUserIsUpgraded = computed(() => store.state.currentUser.isUpgraded)
-const isLoadingUserGroupsSpaces = computed(() => store.state.isLoadingUserGroupsSpaces)
+const isLoadingGroups = computed(() => store.state.isLoadingGroups)
 
 // groups picker list
 
@@ -99,7 +99,7 @@ dialog.narrow.groups(v-if="visible" :open="visible" @click.left.stop="closeDialo
           span New Group
         AddGroup(:visible="state.addGroupIsVisible" @closeDialogs="closeDialogs")
   //- group picker
-  template(v-if="isLoadingUserGroupsSpaces")
+  template(v-if="isLoadingGroups")
     section
       Loader(:visible="true")
 

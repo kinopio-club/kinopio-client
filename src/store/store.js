@@ -228,7 +228,7 @@ const store = createStore({
     loadBlogSpace: false,
     shouldResetDimensionsOnLoad: false,
     shouldShowExploreOnLoad: false,
-    isLoadingUserGroupsSpaces: false,
+    isLoadingGroups: false,
 
     // notifications
     notifications: [],
@@ -404,9 +404,10 @@ const store = createStore({
       utils.typeCheck({ value, type: 'boolean' })
       state.shouldShowExploreOnLoad = value
     },
-    isLoadingUserGroupsSpaces: (state, value) => {
+    isLoadingGroups: (state, value) => {
       utils.typeCheck({ value, type: 'boolean' })
-      state.isLoadingUserGroupsSpaces = value
+      console.error('isLoadingGroups', value)
+      state.isLoadingGroups = value
     },
     addUrlPreviewLoadingForCardIds: (state, cardId) => {
       utils.typeCheck({ value: cardId, type: 'string' })

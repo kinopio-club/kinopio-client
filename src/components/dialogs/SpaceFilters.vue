@@ -170,7 +170,7 @@ const filterByUser = (event, user) => {
 }
 
 const isLoading = computed(() => {
-  return props.isLoading || store.state.isLoadingUserGroupsSpaces
+  return props.isLoading || store.state.isLoadingGroups
 })
 
 </script>
