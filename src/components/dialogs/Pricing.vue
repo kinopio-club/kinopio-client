@@ -7,6 +7,7 @@ import UserLabelInline from '@/components/UserLabelInline.vue'
 import CardsCreatedProgress from '@/components/CardsCreatedProgress.vue'
 import AboutMe from '@/components/AboutMe.vue'
 import UpgradeFAQ from '@/components/dialogs/UpgradeFAQ.vue'
+import AboutGroups from '@/components/dialogs/AboutGroups.vue'
 import consts from '@/consts.js'
 import utils from '@/utils.js'
 const store = useStore()
@@ -27,7 +28,8 @@ onMounted(() => {
 
 const state = reactive({
   dialogHeight: null,
-  upgradeFAQIsVisible: false
+  upgradeFAQIsVisible: false,
+  aboutGroupsIsVisible: false
 })
 
 watch(() => props.visible, (value, prevValue) => {
@@ -40,6 +42,12 @@ watch(() => props.visible, (value, prevValue) => {
   }
 })
 
+const updateDialogHeight = async () => {
+  if (!props.visible) { return }
+  await nextTick()
+  state.dialogHeight = utils.elementHeight(dialog.value)
+}
+
 const isSecureAppContextIOS = computed(() => consts.isSecureAppContextIOS)
 const studentDiscountIsAvailable = computed(() => store.state.currentUser.studentDiscountIsAvailable)
 const monthlyPrice = computed(() => consts.price('month').amount)
@@ -49,23 +57,24 @@ const yearlyPrice = computed(() => {
 })
 const lifePrice = computed(() => consts.price('life').amount)
 
+// child dialogs
+
 const toggleUpgradeFAQIsVisible = () => {
   const value = !state.upgradeFAQIsVisible
   closeDialogs()
   state.upgradeFAQIsVisible = value
 }
-
+const toggleAboutGroupsIsVisible = () => {
+  const value = !state.aboutGroupsIsVisible
+  closeDialogs()
+  state.aboutGroupsIsVisible = value
+}
 const closeDialogs = () => {
   store.commit('triggerCloseChildDialogs')
 }
-
 const closeChildDialogs = () => {
   state.upgradeFAQIsVisible = false
-}
-const updateDialogHeight = async () => {
-  if (!props.visible) { return }
-  await nextTick()
-  state.dialogHeight = utils.elementHeight(dialog.value)
+  state.aboutGroupsIsVisible = false
 }
 
 // free cards from space member
@@ -111,7 +120,9 @@ dialog.pricing(v-if="visible" :open="visible" @click.left.stop="closeDialogs" re
           td
             .row
               span Can create groups
-              //- button.small-button(title="About Groups") ?
+              button.small-button(@click.stop="toggleAboutGroupsIsVisible" :class="{ active: state.aboutGroupsIsVisible }" title="About Groups")
+                span ?
+                AboutGroups(:visible="state.aboutGroupsIsVisible")
     CardsCreatedProgress
     //- free cards from space member
     section.subsection(v-if="spaceCreatorIsUpgraded")
