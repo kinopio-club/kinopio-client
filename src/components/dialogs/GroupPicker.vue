@@ -57,6 +57,21 @@ const selectGroup = (event, group) => {
   emit('selectGroup', group)
 }
 
+// const currentUserIsSignedIn = computed(() => store.getters['currentUser/isSignedIn'])
+// const triggerSignUpOrInIsVisible = () => {
+//   store.dispatch('closeAllDialogs')
+//   store.commit('triggerSignUpOrInIsVisible')
+// }
+// const triggerUpgradeUserIsVisible = () => {
+//   store.dispatch('closeAllDialogs')
+//   store.commit('triggerUpgradeUserIsVisible')
+// }
+
+// const actionsIsVisible = computed(() => {
+//   // if (props.hideActions) { return }
+//   return !currentUserIsSignedIn.value || !currentUserIsUpgraded.value
+// })
+
 </script>
 
 <template lang="pug">
@@ -75,6 +90,20 @@ dialog.narrow.group-picker(v-if="visible" :open="visible" @click.left.stop ref="
     GroupList(:groups="props.groups" :selectedGroup="props.selectedGroup" @selectGroup="selectGroup")
   //- about groups
   AboutGroups(v-else)
+
+//- section(v-if="actionsIsVisible")
+//-   //- how to use
+//-   template(v-if="!currentUserIsSignedIn")
+//-     p
+//-       span.badge.info Sign Up or In
+//-       span to create and manage groups
+//-     button(@click.left="triggerSignUpOrInIsVisible") Sign Up or In
+//-   template(v-else-if="!currentUserIsUpgraded")
+//-     p
+//-       span.badge.info Upgrade
+//-       span to create and manage groups
+//-     button(@click.left="triggerUpgradeUserIsVisible") Upgrade for Groups
+
 </template>
 
 <style lang="stylus">

@@ -7,20 +7,6 @@ const store = useStore()
 //   hideActions: Boolean
 // })
 
-const currentUserIsSignedIn = computed(() => store.getters['currentUser/isSignedIn'])
-const currentUserIsUpgraded = computed(() => store.state.currentUser.isUpgraded)
-const actionsIsVisible = computed(() => {
-  // if (props.hideActions) { return }
-  return !currentUserIsSignedIn.value || !currentUserIsUpgraded.value
-})
-const triggerSignUpOrInIsVisible = () => {
-  store.dispatch('closeAllDialogs')
-  store.commit('triggerSignUpOrInIsVisible')
-}
-const triggerUpgradeUserIsVisible = () => {
-  store.dispatch('closeAllDialogs')
-  store.commit('triggerUpgradeUserIsVisible')
-}
 </script>
 
 <template lang="pug">
@@ -28,7 +14,8 @@ section.groups-info
 
   //- what is groups
   //- .row.title-row
-  p Use groups to organize related spaces and share them your closest friends or team. Each member of the group can see and edit all Group spaces.
+  //- p Use groups to organize related spaces and share them your closest friends or team. Each member of the group can see and edit all Group spaces.
+  p Group spaces together and collaborate with group members
   p
     a(href="https://help.kinopio.club/posts/teams")
       button
@@ -46,19 +33,6 @@ section.groups-info
   //-     img.icon.visit(src="@/assets/visit.svg")
 
   img.placeholder(src="@/assets/collaborators.jpg")
-
-section(v-if="actionsIsVisible")
-  //- how to use
-  template(v-if="!currentUserIsSignedIn")
-    p
-      span.badge.info Sign Up or In
-      span to create and manage groups
-    button(@click.left="triggerSignUpOrInIsVisible") Sign Up or In
-  template(v-else-if="!currentUserIsUpgraded")
-    p
-      span.badge.info Upgrade
-      span to create and manage groups
-    button(@click.left="triggerUpgradeUserIsVisible") Upgrade for Groups
 
 </template>
 
