@@ -79,14 +79,13 @@ dialog.narrow.group-picker(v-if="visible" :open="visible" @click.left.stop ref="
   section(:class="{ 'title-section': groupsListIsVisible }")
     .row.title-row
       span Add to Group
-      button.small-button(v-if="isGroups" @click.left="clearGroup")
+      button.small-button(v-if="props.selectedGroup" @click.left="clearGroup")
         img.icon.cancel(src="@/assets/add.svg")
         span Clear
-  //- loading
-  section(v-if="isLoadingUserGroupsSpaces")
-    Loader(:visible="true")
+    //- loading
+    Loader(:visible="isLoadingUserGroupsSpaces")
   //- groups list
-  section.results-section(v-else-if="groupsListIsVisible")
+  section.results-section(v-if="groupsListIsVisible")
     GroupList(:groups="props.groups" :selectedGroup="props.selectedGroup" @selectGroup="selectGroup")
   //- about groups
   AboutGroups(v-else)
