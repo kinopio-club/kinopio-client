@@ -1,3 +1,33 @@
+<script setup>
+import { reactive, computed, onMounted, onBeforeUnmount, defineProps, defineEmits, watch, ref, nextTick } from 'vue'
+import { useStore } from 'vuex'
+
+import utils from '@/utils.js'
+const store = useStore()
+
+const props = defineProps({
+  layer: String // app, space
+})
+
+const items = computed(() => {
+  let itemsInLayer = store.state.notificationsWithPosition.filter(item => item.layer === props.layer)
+  itemsInLayer = utils.clone(itemsInLayer)
+  itemsInLayer = itemsInLayer.map(item => {
+    const isReadOnlyMessage = item.message === 'Space is Read Only'
+    if (currentSpaceIsUnavailableOffline.value && isReadOnlyMessage) {
+      item.message = 'Space is Unavailable Offline'
+      item.icon = 'offline'
+    }
+    return item
+  })
+  return itemsInLayer
+})
+const currentSpaceIsUnavailableOffline = computed(() => store.getters['currentSpace/isUnavailableOffline'])
+const remove = () => {
+  store.commit('removeNotificationWithPosition')
+}
+</script>
+
 <template lang="pug">
 aside.notifications-with-position
   .item.badge(
@@ -15,38 +45,6 @@ aside.notifications-with-position
     img.icon.offline(v-if="item.icon === 'offline'" src="@/assets/offline.svg")
     span {{item.message}}
 </template>
-<script>
-
-import utils from '@/utils.js'
-
-export default {
-  name: 'NotificationsWithPosition',
-  props: {
-    layer: String // app, space
-  },
-  computed: {
-    items () {
-      let itemsInLayer = this.$store.state.notificationsWithPosition.filter(item => item.layer === this.layer)
-      itemsInLayer = utils.clone(itemsInLayer)
-      itemsInLayer = itemsInLayer.map(item => {
-        const isReadOnlyMessage = item.message === 'Space is Read Only'
-        if (this.currentSpaceIsUnavailableOffline && isReadOnlyMessage) {
-          item.message = 'Space is Unavailable Offline'
-          item.icon = 'offline'
-        }
-        return item
-      })
-      return itemsInLayer
-    },
-    currentSpaceIsUnavailableOffline () { return this.$store.getters['currentSpace/isUnavailableOffline'] }
-  },
-  methods: {
-    remove () {
-      this.$store.commit('removeNotificationWithPosition')
-    }
-  }
-}
-</script>
 
 <style lang="stylus">
 .notifications-with-position
