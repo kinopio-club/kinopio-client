@@ -275,6 +275,15 @@ export default {
     return sortedSpaces
   },
 
+  // Groups
+
+  groups () {
+    return this.getLocal('groups') || {}
+  },
+  saveGroups (groups) {
+    this.storeLocal('groups', groups)
+  },
+
   // Tags
 
   allCardsByTagName (name) {

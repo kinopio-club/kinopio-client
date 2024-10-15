@@ -1,4 +1,5 @@
 import utils from '@/utils.js'
+import cache from '@/cache.js'
 
 import uniqBy from 'lodash-es/uniqBy'
 import uniq from 'lodash-es/uniq'
@@ -28,6 +29,7 @@ export default {
       })
       state.ids = state.ids.concat(groupIds)
       console.log('👫 groups', state.groups)
+      cache.saveGroups(state.groups)
     },
 
     // create
@@ -36,7 +38,7 @@ export default {
       utils.typeCheck({ value: group, type: 'object' })
       state.groups[group.id] = group
       state.ids.push(group.id)
-      console.log('👫 groups', state.groups)
+      cache.saveGroups(state.groups)
     },
 
     // update
@@ -58,6 +60,7 @@ export default {
         state.ids.push(group.id)
         state.groups[group.id] = group
       }
+      cache.saveGroups(state.groups)
     },
 
     // remove
@@ -70,9 +73,16 @@ export default {
       ids = ids.filter(id => id !== group.id)
       state.ids = ids
       delete state.groups[groupToRemove.id]
+      cache.saveGroups(state.groups)
     }
   },
   actions: {
+    init: (context) => {
+      let groups = cache.groups()
+      groups = utils.denormalizeItems(groups)
+      context.commit('restore', groups)
+      // remote groups restored in restoreRemoteUser
+    },
     restore: (context, groups) => {
       context.commit('restore', groups)
       context.commit('isLoadingGroups', false, { root: true })
