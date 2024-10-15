@@ -676,6 +676,8 @@ dialog
     width 230px
   &.wide
     width 280px
+  &.overflow-auto
+    overflow auto
   button + button,
   button + input,
   button + label,

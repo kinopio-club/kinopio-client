@@ -4,8 +4,8 @@ import { useStore } from 'vuex'
 
 import GroupList from '@/components/GroupList.vue'
 import AboutGroups from '@/components/subsections/AboutGroups.vue'
-import UpgradedUserRequired from '@/components/UpgradedUserRequired.vue'
 import Loader from '@/components/Loader.vue'
+import AddGroup from '@/components/dialogs/AddGroup.vue'
 import utils from '@/utils.js'
 
 const store = useStore()
@@ -16,7 +16,7 @@ onMounted(() => {
   window.addEventListener('resize', updateDialogHeight)
 })
 
-const emit = defineEmits(['selectGroup', 'clearGroup', 'closeDialogs'])
+const emit = defineEmits(['selectGroup', 'closeDialogs'])
 
 const props = defineProps({
   visible: Boolean,
@@ -31,7 +31,8 @@ watch(() => props.visible, (value, prevValue) => {
 })
 
 const state = reactive({
-  dialogHeight: null
+  dialogHeight: null,
+  addGroupIsVisible: false
 })
 
 const updateDialogHeight = async () => {
@@ -43,7 +44,6 @@ const updateDialogHeight = async () => {
 
 const currentUserIsUpgraded = computed(() => store.state.currentUser.isUpgraded)
 const isLoadingGroups = computed(() => store.state.isLoadingGroups)
-const upgradeMessage = computed(() => 'to create and manage Groups')
 
 // groups list
 
@@ -54,22 +54,36 @@ const groupsListIsVisible = computed(() => currentUserIsUpgraded.value && isGrou
 
 // select group
 
-const clearGroup = () => {
-  emit('clearGroup')
-}
 const selectGroup = (event, group) => {
   emit('selectGroup', group)
 }
+
+// child dialogs
+
+const childDialogIsVisible = computed(() => {
+  return state.addGroupIsVisible
+})
+const closeDialogs = () => {
+  state.addGroupIsVisible = false
+}
+const toggleAddGroupIsVisible = () => {
+  const value = !state.addGroupIsVisible
+  closeDialogs()
+  state.addGroupIsVisible = value
+}
+
 </script>
 
 <template lang="pug">
-dialog.narrow.add-to-group(v-if="visible" :open="visible" @click.left.stop ref="dialogElement" :style="{'max-height': state.dialogHeight + 'px'}")
+dialog.narrow.add-to-group(v-if="visible" :open="visible" @click.left.stop="closeDialogs" ref="dialogElement" :style="{'max-height': state.dialogHeight + 'px'}" :class="{'overflow-auto': !childDialogIsVisible}")
   section(:class="{ 'title-section': groupsListIsVisible }")
     .row.title-row
       span Add to Group
-      button.small-button(v-if="props.selectedGroup" @click.left="clearGroup")
-        img.icon.cancel(src="@/assets/add.svg")
-        span Clear
+      .button-wrap
+        button.small-button(:class="{ active: state.addGroupIsVisible }" @click.stop="toggleAddGroupIsVisible")
+          img.icon.add(src="@/assets/add.svg")
+          span Group
+        AddGroup(:visible="state.addGroupIsVisible" @closeDialogs="closeDialogs")
     //- loading
     Loader(:visible="isLoadingGroups && !isGroups")
   //- groups list
@@ -77,10 +91,8 @@ dialog.narrow.add-to-group(v-if="visible" :open="visible" @click.left.stop ref="
     GroupList(:groups="props.groups" :selectedGroup="props.selectedGroup" @selectGroup="selectGroup")
   //- about groups
   AboutGroups(v-else)
-  UpgradedUserRequired(:message="upgradeMessage")
 </template>
 
 <style lang="stylus">
-dialog.add-to-group
-  overflow auto
+// dialog.add-to-group
 </style>

@@ -6,6 +6,7 @@ import utils from '@/utils.js'
 import GroupLabel from '@/components/GroupLabel.vue'
 import ColorPicker from '@/components/dialogs/ColorPicker.vue'
 import Loader from '@/components/Loader.vue'
+import UpgradedUserRequired from '@/components/UpgradedUserRequired.vue'
 
 import randomColor from 'randomcolor'
 
@@ -57,6 +58,11 @@ const clearErrors = () => {
   state.error.missingName = false
   state.error.unknownServerError = false
 }
+
+// upgrade user required
+
+const currentUserIsUpgraded = computed(() => store.state.currentUser.isUpgraded)
+const upgradeMessage = computed(() => 'to create and manage Groups')
 
 // group color
 
@@ -118,7 +124,8 @@ const createGroup = async () => {
 
 <template lang="pug">
 dialog.narrow.add-group(v-if="visible" :open="visible" @click.left.stop="closeDialogs" ref="dialogElement" :style="{'max-height': state.dialogHeight + 'px'}")
-  section
+  UpgradedUserRequired(:message="upgradeMessage")
+  section(v-if="currentUserIsUpgraded")
     .row
       .button-wrap
           button.change-color(@click.left.stop="toggleColorPicker" :class="{active: state.colorPickerIsVisible}" title="Change Group Color")
@@ -141,6 +148,9 @@ dialog.narrow.add-group(v-if="visible" :open="visible" @click.left.stop="closeDi
 
 <style lang="stylus">
 dialog.add-group
+  left initial
+  right 8px
+  // width 200px !important
   input.name
     margin-bottom 0
   button.change-color
