@@ -548,12 +548,12 @@ const currentSpace = {
         console.warn('🚑 getRemoteSpace', error.status, error)
         if (error.status === 404) {
           context.commit('notifySpaceNotFound', true, { root: true })
-          context.dispatch('loadLastSpace')
+          context.dispatch('loadLastSpace', space)
         }
         if (error.status === 401) {
           context.commit('notifySpaceNotFound', true, { root: true })
           context.dispatch('removeLocalSpaceIfUserIsRemoved', space)
-          context.dispatch('loadLastSpace')
+          context.dispatch('loadLastSpace', space)
           cache.removeInvitedSpace(space)
           context.dispatch('currentUser/updateFavoriteSpace', { space, value: false }, { root: true })
         }
@@ -901,10 +901,13 @@ const currentSpace = {
       context.commit('triggerRestoreSpaceRemoteComplete', null, { root: true })
       console.timeEnd('🎑⏱️ restoreSpaceRemote')
     },
-    loadLastSpace: async (context) => {
+    loadLastSpace: async (context, prevFailedSpace) => {
       let space
       const user = context.rootState.currentUser
       let spaceToRestore = cache.space(user.lastSpaceId)
+      if (spaceToRestore.id === prevFailedSpace?.id) {
+        spaceToRestore = null
+      }
       const cachedHelloSpace = cache.getSpaceByName('Hello Kinopio')
       const cachedSpace = cache.getAllSpaces()[0]
       const newUserSpace = cachedHelloSpace || cachedSpace

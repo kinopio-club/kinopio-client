@@ -114,12 +114,10 @@ button.space-users-button(@click.stop="toggleSpaceUserListIsVisible" :class="{ '
     > .user
         margin-top -1px
     > span + .user
-        margin-left 6px
+        // margin-left 6px
       .anon-avatar
         top 3px
   &.header-button
     border-top-left-radius 0
     border-bottom-left-radius 0
-  .group-label
-    margin-right 6px
 </style>
