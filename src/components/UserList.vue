@@ -205,27 +205,26 @@ const removeGroupUser = async (event, user) => {
 
         //- group user actions
         section.subsection(v-if="props.showGroupUserActions")
-          //- admin actions
-          template(v-if="currentUserIsGroupAdmin")
-            .row
-              img.icon.mail(src="@/assets/mail.svg")
-              span {{ groupUser(user).email }}
-            .row
-              .button-wrap
-                button.small-button(@click.stop="toggleGroupRolePickerUserId(user)" :class="{ active: groupUserRolePickerIsVisibleUser(user) }")
-                  span {{ groupUserRole(user) }}
-                GroupUserRolePicker(:visible="groupUserRolePickerIsVisibleUser(user)" :user="user")
-              .button-wrap
-                button.small-button(@click.stop="removeGroupUser($event, user)" :class="{ active: isLoadingRemoveGroupUser(user) }")
-                  img.icon.cancel(src="@/assets/add.svg")
-                  span Remove
-                  Loader(:visible="isLoadingRemoveGroupUser(user)" :isSmall="true")
-            .row(v-if="isErrorRemoveGroupUser(user)")
-              p.badge.danger
-                span (シ_ _)シ Could not remove group user, Please try again or contact support
-          //- non-admin actions
-          template(v-else)
-            span {{ groupUserRole(user) }}
+          .row
+            img.icon.mail(src="@/assets/mail.svg")
+            span {{ groupUser(user).email }}
+          .row
+            //- role
+            .button-wrap
+              button.small-button(@click.stop="toggleGroupRolePickerUserId(user)" :class="{ active: groupUserRolePickerIsVisibleUser(user) }" :disabled="!currentUserIsGroupAdmin")
+                span {{ groupUserRole(user) }}
+              GroupUserRolePicker(:visible="groupUserRolePickerIsVisibleUser(user)" :user="user")
+            //- remove user
+            .button-wrap(v-if="currentUserIsGroupAdmin || isCurrentUser(user)")
+              button.small-button(@click.stop="removeGroupUser($event, user)" :class="{ active: isLoadingRemoveGroupUser(user) }")
+                img.icon.cancel(src="@/assets/add.svg")
+                span Remove
+                Loader(:visible="isLoadingRemoveGroupUser(user)" :isSmall="true")
+
+          //- error
+          .row(v-if="isErrorRemoveGroupUser(user)")
+            p.badge.danger
+              span (シ_ _)シ Could not remove group user, Please try again or contact support
 </template>
 
 <style lang="stylus">
