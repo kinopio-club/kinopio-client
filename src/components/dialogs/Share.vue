@@ -308,6 +308,6 @@ dialog.share
     label + label
       margin-left 6px
 
-  .import-export-section
+  section:not(.subsection)
     border-top 1px solid var(--primary-border)
 </style>
