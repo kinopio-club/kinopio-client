@@ -62,8 +62,14 @@ export default {
 
     // remove
 
-    remove: (state, group) => {
-
+    remove: (state, groupToRemove) => {
+      if (!groupToRemove) { return }
+      const group = state.groups[groupToRemove.id]
+      if (!group) { return }
+      let ids = utils.clone(state.ids)
+      ids = ids.filter(id => id !== group.id)
+      state.ids = ids
+      delete state.groups[groupToRemove.id]
     }
   },
   actions: {
