@@ -9,6 +9,7 @@ import GroupLabel from '@/components/GroupLabel.vue'
 import utils from '@/utils.js'
 
 import randomColor from 'randomcolor'
+import uniqBy from 'lodash-es/uniqBy'
 
 const store = useStore()
 
@@ -131,6 +132,7 @@ const groupUsers = computed(() => {
     }
     return user
   })
+  users = uniqBy(users, 'id')
   return users
 })
 const selectedUser = computed(() => {
