@@ -25,13 +25,11 @@ const props = defineProps({
 const state = reactive({
   dialogHeight: null,
   colorPickerIsVisible: false,
-  billingTipsIsVisible: false,
   childDialogIsVisible: false
 })
 
 watch(() => props.visible, (value, prevValue) => {
   closeDialogs()
-  state.billingTipsIsVisible = false
   if (value) {
     updateDialogHeight()
   }
@@ -90,12 +88,6 @@ const groupName = computed({
     updateGroup({ name: newValue })
   }
 })
-
-// billing
-
-const toggleBillingTipsIsVisible = () => {
-  state.billingTipsIsVisible = !state.billingTipsIsVisible
-}
 
 // invite
 
@@ -182,33 +174,19 @@ dialog.group-details.wide(v-if="visible" :open="visible" @click.left.stop="close
       template(v-else)
         GroupLabel(:group="props.group" :showName="true")
 
-    //- TODO is billing user
-    //- .row.billing-tips(v-if="currentUserIsGroupAdmin" :class="{ active: state.billingTipsIsVisible} ")
   section(v-if="inviteUrl")
     .row.invite-row
       p
         .users
           User(:user="currentUser" :isClickable="false" :key="currentUser.id" :isSmall="true" :hideYouLabel="true")
           User(:user="randomUser" :isClickable="false" :key="currentUser.id" :isSmall="true" :hideYouLabel="true")
-        span Invite Group Members
-      button.small-button(v-if="currentUserIsGroupAdmin" @click="toggleBillingTipsIsVisible" :class="{ active: state.billingTipsIsVisible} ")
-        span Billing
-
-    section.subsection(v-if="state.billingTipsIsVisible")
-      p Each group user costs 6$/mo or 60$/yr
-      p Group users can create unlimited cards and have all the other benefits of an upgraded account.
-      p If you have a multiple groups with the same user, you will only be billed once for that user.
-      button group billing center
-      //- p btn settings -> group billing
-      //- p next bill cost
-      //- p update group billing info
-      //- p total current cost is $12/mo
+        span Invite Members
 
     section.subsection
       .row
         button(@click.left="copyInviteUrl")
           img.icon.copy(src="@/assets/copy.svg")
-          span Copy Invite to Group URL
+          span Copy Group Invite URL
       //- .row
       //-   button
       //-     img.icon.mail(src="@/assets/mail.svg")
