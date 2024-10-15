@@ -97,7 +97,10 @@ const toggleGroupDetailsIsVisible = (group) => {
 dialog.narrow.groups(v-if="visible" :open="visible" @click.left.stop="closeDialogs" ref="dialogElement" :style="{'max-height': state.dialogHeight + 'px'}")
   section
     .row.title-row
-      span Groups
+      div
+        Loader(:visible="isLoadingGroups" :isSmall="true")
+        span Groups
+      //- add group
       .button-wrap
         button.small-button(:class="{ active: state.addGroupIsVisible }" @click.stop="toggleAddGroupIsVisible")
           img.icon.add(src="@/assets/add.svg")
@@ -105,11 +108,7 @@ dialog.narrow.groups(v-if="visible" :open="visible" @click.left.stop="closeDialo
         AddGroup(:visible="state.addGroupIsVisible" @closeDialogs="closeDialogs")
 
   //- group picker
-  template(v-if="isLoadingGroups")
-    section
-      Loader(:visible="true")
-
-  template(v-else-if="groups.length")
+  template(v-if="groups.length")
     section.results-section
       ul.results-list
         template(v-for="group in groups")
@@ -136,4 +135,7 @@ dialog.groups
     dialog.group-details
       left -30px
       top 30px
+  .loader
+    vertical-align -2px
+    margin-right 4px
 </style>
