@@ -208,15 +208,14 @@ dialog.group-details(v-if="visible" :open="visible" @click.left.stop="closeDialo
           User(:user="randomUser" :isClickable="false" :key="currentUser.id" :isSmall="true" :hideYouLabel="true")
         span Invite Members
 
-    section.subsection
-      .row
-        button(@click.left="copyInviteUrl")
-          img.icon.copy(src="@/assets/copy.svg")
-          span Copy Group Invite URL
-      //- .row
-      //-   button
-      //-     img.icon.mail(src="@/assets/mail.svg")
-      //-     span Email Invites
+    .row
+      button(@click.left="copyInviteUrl")
+        img.icon.copy(src="@/assets/copy.svg")
+        span Copy Group Invite URL
+    //- .row
+    //-   button
+    //-     img.icon.mail(src="@/assets/mail.svg")
+    //-     span Email Invites
 
   UserList(
     :users="groupUsers"
