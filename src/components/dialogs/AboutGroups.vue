@@ -2,7 +2,7 @@
 import { reactive, computed, onMounted, onBeforeUnmount, defineProps, defineEmits, watch, ref, nextTick } from 'vue'
 import { useStore } from 'vuex'
 
-import AboutGroups from '@/components/AboutGroups.vue'
+import AboutGroups from '@/components/subsections/AboutGroups.vue'
 import utils from '@/utils.js'
 
 const store = useStore()

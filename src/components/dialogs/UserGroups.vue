@@ -6,7 +6,7 @@ import utils from '@/utils.js'
 import GroupLabel from '@/components/GroupLabel.vue'
 import GroupDetails from '@/components/dialogs/GroupDetails.vue'
 import AddGroup from '@/components/dialogs/AddGroup.vue'
-import AboutGroups from '@/components/AboutGroups.vue'
+import AboutGroups from '@/components/subsections/AboutGroups.vue'
 import Loader from '@/components/Loader.vue'
 
 import uniqBy from 'lodash-es/uniqBy'

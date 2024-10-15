@@ -3,7 +3,7 @@ import { reactive, computed, onMounted, onBeforeUnmount, defineProps, defineEmit
 import { useStore } from 'vuex'
 
 import GroupList from '@/components/GroupList.vue'
-import AboutGroups from '@/components/AboutGroups.vue'
+import AboutGroups from '@/components/subsections/AboutGroups.vue'
 import UpgradedUserRequired from '@/components/UpgradedUserRequired.vue'
 import Loader from '@/components/Loader.vue'
 import utils from '@/utils.js'
