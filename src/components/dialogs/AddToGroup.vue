@@ -63,7 +63,7 @@ const selectGroup = (event, group) => {
 </script>
 
 <template lang="pug">
-dialog.narrow.group-picker(v-if="visible" :open="visible" @click.left.stop ref="dialogElement" :style="{'max-height': state.dialogHeight + 'px'}")
+dialog.narrow.add-to-group(v-if="visible" :open="visible" @click.left.stop ref="dialogElement" :style="{'max-height': state.dialogHeight + 'px'}")
   section(:class="{ 'title-section': groupsListIsVisible }")
     .row.title-row
       span Add to Group
@@ -81,6 +81,6 @@ dialog.narrow.group-picker(v-if="visible" :open="visible" @click.left.stop ref="
 </template>
 
 <style lang="stylus">
-dialog.group-picker
+dialog.add-to-group
   overflow auto
 </style>

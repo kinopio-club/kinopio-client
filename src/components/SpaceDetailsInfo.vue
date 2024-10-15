@@ -12,7 +12,7 @@ import ReadOnlySpaceInfoBadges from '@/components/ReadOnlySpaceInfoBadges.vue'
 import AddToExplore from '@/components/AddToExplore.vue'
 import AskToAddToExplore from '@/components/AskToAddToExplore.vue'
 import FavoriteSpaceButton from '@/components/FavoriteSpaceButton.vue'
-import GroupPicker from '@/components/dialogs/GroupPicker.vue'
+import AddToGroup from '@/components/dialogs/AddToGroup.vue'
 import GroupLabel from '@/components/GroupLabel.vue'
 import cache from '@/cache.js'
 import utils from '@/utils.js'
@@ -57,7 +57,7 @@ const state = reactive({
   privacyPickerIsVisible: false,
   settingsIsVisible: false,
   exportIsVisible: false,
-  groupPickerIsVisible: false,
+  addToGroupIsVisible: false,
   error: {
     memberAssignGroup: false
   }
@@ -215,17 +215,17 @@ const toggleExportIsVisible = () => {
   state.exportIsVisible = !isVisible
   emit('updateDialogHeight')
 }
-const toggleGroupPickerIsVisible = () => {
-  const isVisible = state.groupPickerIsVisible
+const toggleAddToGroupIsVisible = () => {
+  const isVisible = state.addToGroupIsVisible
   state.error.memberAssignGroup = false
   closeDialogsAndEmit()
-  state.groupPickerIsVisible = !isVisible
+  state.addToGroupIsVisible = !isVisible
 }
 const closeDialogs = () => {
   state.backgroundIsVisible = false
   state.privacyPickerIsVisible = false
   state.exportIsVisible = false
-  state.groupPickerIsVisible = false
+  state.addToGroupIsVisible = false
 }
 const closeDialogsAndEmit = () => {
   closeDialogs()
@@ -317,11 +317,11 @@ template(v-if="isSpaceMember")
       .button-wrap
         .segmented-buttons
           //- Group
-          button.group-button(:title="groupButtonTitle" :class="{active: state.groupPickerIsVisible || spaceGroup}" @click.left.prevent.stop="toggleGroupPickerIsVisible" @keydown.stop.enter="toggleGroupPickerIsVisible")
+          button.group-button(:title="groupButtonTitle" :class="{active: state.addToGroupIsVisible || spaceGroup}" @click.left.prevent.stop="toggleAddToGroupIsVisible" @keydown.stop.enter="toggleAddToGroupIsVisible")
             img.icon.group(src="@/assets/group.svg")
           //- Favorite
           FavoriteSpaceButton(:parentIsDialog="true" @updateLocalSpaces="updateLocalSpaces")
-        GroupPicker(:visible="state.groupPickerIsVisible" @selectGroup="toggleSpaceGroup" @clearGroup="removeSpaceGroup" :groups="userGroups" :selectedGroup="spaceGroup" @closeDialogs="closeDialogs")
+        AddToGroup(:visible="state.addToGroupIsVisible" @selectGroup="toggleSpaceGroup" @clearGroup="removeSpaceGroup" :groups="userGroups" :selectedGroup="spaceGroup" @closeDialogs="closeDialogs")
     template(v-else)
       //- Favorite
       FavoriteSpaceButton(:parentIsDialog="true" @updateLocalSpaces="updateLocalSpaces")
