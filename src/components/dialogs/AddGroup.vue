@@ -81,6 +81,7 @@ const toggleColorPicker = () => {
 const focusNameInput = async () => {
   await nextTick()
   const element = nameInputElement.value
+  if (!element) { return }
   element.focus()
   element.select()
 }
