@@ -196,7 +196,7 @@ const removeGroupUser = async (user) => {
             button.small-button(@click.stop="removeCollaborator(user)")
               img.icon.cancel(src="@/assets/add.svg")
               span(v-if="isCurrentUser(user)") Leave Space
-              span(v-else) Remove Collaborator
+              span(v-else) Remove
 
         //- group user actions
         section.subsection(v-if="props.showGroupUserActions")
@@ -213,7 +213,7 @@ const removeGroupUser = async (user) => {
               .button-wrap
                 button.small-button(@click.stop="removeGroupUser(user)" :class="{ active: isLoadingRemoveGroupUser(user) }")
                   img.icon.cancel(src="@/assets/add.svg")
-                  span Remove from Group
+                  span Remove
                   Loader(:visible="isLoadingRemoveGroupUser(user)" :isSmall="true")
             .row(v-if="isErrorRemoveGroupUser(user)")
               p.badge.danger

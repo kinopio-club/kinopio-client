@@ -91,13 +91,14 @@ const toggleGroupDetailsIsVisible = (group) => {
 <template lang="pug">
 dialog.narrow.groups(v-if="visible" :open="visible" @click.left.stop="closeDialogs" ref="dialogElement" :style="{'max-height': state.dialogHeight + 'px'}")
   section
-    p Groups
-    .row(v-if="currentUserIsUpgraded")
+    .row.title-row
+      span Groups
       .button-wrap
-        button(:class="{ active: state.addGroupIsVisible }" @click.stop="toggleAddGroupIsVisible")
+        button.small-button(:class="{ active: state.addGroupIsVisible }" @click.stop="toggleAddGroupIsVisible")
           img.icon.add(src="@/assets/add.svg")
-          span New Group
+          span Group
         AddGroup(:visible="state.addGroupIsVisible" @closeDialogs="closeDialogs")
+
   //- group picker
   template(v-if="isLoadingGroups")
     section
@@ -128,6 +129,6 @@ dialog.groups
       align-items center
       position relative
     dialog.group-details
-      left -40px
+      left -20px
       top 30px
 </style>

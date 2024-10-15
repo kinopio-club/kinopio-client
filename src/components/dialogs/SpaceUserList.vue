@@ -114,7 +114,7 @@ const closeDialogs = () => {
 </script>
 
 <template lang="pug">
-dialog.space-user-list(
+dialog.narrow.space-user-list(
   v-if="visible"
   :open="visible"
   @click.left.stop="closeDialogs"
@@ -128,27 +128,22 @@ dialog.space-user-list(
       button(@click.stop="toggleGroupIsVisible" :class="{ active: state.groupIsVisible }")
         GroupLabel(:group="spaceGroup" :showName="true")
       GroupDetails(:visible="state.groupIsVisible" :group="spaceGroup")
-
+  //- users
   template(v-if="users.length")
-    //- users
-    section.results-section
-      UserList(
-        :users="users"
-        :selectedUser="selectedUser"
-        @selectUser="toggleUserDetails"
-        :showCollaboratorActions="currentUserCanEditSpace"
-      )
-
-    //- commenters
-    template(v-if="isCollaboratorsList && commenters.length")
-      section
-        p Commenters
-      section.results-section
-        UserList(
-          :users="commenters"
-          :selectedUser="selectedUser"
-          @selectUser="toggleUserDetails"
-        )
+    UserList(
+      :users="users"
+      :selectedUser="selectedUser"
+      @selectUser="toggleUserDetails"
+      :showCollaboratorActions="currentUserCanEditSpace"
+    )
+  //- commenters
+  section(v-if="isCollaboratorsList && commenters.length")
+    p Commenters
+    UserList(
+      :users="commenters"
+      :selectedUser="selectedUser"
+      @selectUser="toggleUserDetails"
+    )
 </template>
 
 <style lang="stylus">

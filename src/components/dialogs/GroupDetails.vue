@@ -161,7 +161,7 @@ const showUserDetails = (event, user) => {
 </script>
 
 <template lang="pug">
-dialog.group-details.wide(v-if="visible" :open="visible" @click.left.stop="closeDialogs" ref="dialogElement" :style="{'max-height': state.dialogHeight + 'px'}" :class="{ 'child-dialog-is-visible': childDialogIsVisible }")
+dialog.narrow.group-details(v-if="visible" :open="visible" @click.left.stop="closeDialogs" ref="dialogElement" :style="{'max-height': state.dialogHeight + 'px'}" :class="{ 'child-dialog-is-visible': childDialogIsVisible }")
   section
     .row
       template(v-if="currentUserIsGroupAdmin")
@@ -191,6 +191,7 @@ dialog.group-details.wide(v-if="visible" :open="visible" @click.left.stop="close
       //-   button
       //-     img.icon.mail(src="@/assets/mail.svg")
       //-     span Email Invites
+
   UserList(
     :users="groupUsers"
     :selectedUser="selectedUser"
