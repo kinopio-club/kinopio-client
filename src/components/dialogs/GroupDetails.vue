@@ -228,14 +228,15 @@ dialog.group-details(v-if="visible" :open="visible" @click.left.stop="closeDialo
     @childDialogIsVisible="updateChildDialogIsVisible"
   )
   section
-    button.danger(v-if="!state.removeGroupConfirmationIsVisible" @click="toggleRemoveGroupConfirmationIsVisible")
-      img.icon(src="@/assets/remove.svg")
-      span Remove Group
+    .row(v-if="!state.removeGroupConfirmationIsVisible")
+      button.danger(@click="toggleRemoveGroupConfirmationIsVisible")
+        img.icon(src="@/assets/remove.svg")
+        span Remove Group
     template(v-if="state.removeGroupConfirmationIsVisible")
       p
         span.badge.danger Permanently delete group?
       p
-        span All spaces in this group will revert to their original owners.
+        span All spaces in this group will revert back to their original owners.
       .segmented-buttons
         button(@click.left="toggleRemoveGroupConfirmationIsVisible")
           img.icon.cancel(src="@/assets/add.svg")
@@ -244,7 +245,7 @@ dialog.group-details(v-if="visible" :open="visible" @click.left.stop="closeDialo
           img.icon(src="@/assets/remove.svg")
           span Delete Group
           Loader(:visible="state.loading.deleteGroupPermanent")
-    .info-container(v-if="state.unknownServerError")
+    .row(v-if="state.unknownServerError")
       .badge.danger (シ_ _)シ Something went wrong, Please try again or contact support
 
 </template>
