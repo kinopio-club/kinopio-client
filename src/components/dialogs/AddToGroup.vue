@@ -42,15 +42,7 @@ const updateDialogHeight = async () => {
   state.dialogHeight = utils.elementHeight(element)
 }
 
-const currentUserIsUpgraded = computed(() => store.state.currentUser.isUpgraded)
 const isLoadingGroups = computed(() => store.state.isLoadingGroups)
-
-// groups list
-
-const isGroups = computed(() => {
-  return Boolean(props.groups.length)
-})
-const groupsListIsVisible = computed(() => currentUserIsUpgraded.value && isGroups.value)
 
 // select group
 
@@ -76,23 +68,27 @@ const toggleAddGroupIsVisible = () => {
 
 <template lang="pug">
 dialog.narrow.add-to-group(v-if="visible" :open="visible" @click.left.stop="closeDialogs" ref="dialogElement" :style="{'max-height': state.dialogHeight + 'px'}" :class="{'overflow-auto': !childDialogIsVisible}")
-  section(:class="{ 'title-section': groupsListIsVisible }")
+  section(:class="{ 'title-section': props.groups.length }")
     .row.title-row
-      span Add to Group
+      div
+        Loader(:visible="isLoadingGroups" :isSmall="true")
+        span Add to Group
       .button-wrap
         button.small-button(:class="{ active: state.addGroupIsVisible }" @click.stop="toggleAddGroupIsVisible")
           img.icon.add(src="@/assets/add.svg")
           span Group
         AddGroup(:visible="state.addGroupIsVisible" @closeDialogs="closeDialogs")
-    //- loading
-    Loader(:visible="isLoadingGroups && !isGroups")
   //- groups list
-  section.results-section(v-if="groupsListIsVisible")
+  section.results-section(v-if="props.groups.length")
     GroupList(:groups="props.groups" :selectedGroup="props.selectedGroup" @selectGroup="selectGroup")
   //- about groups
   AboutGroups(v-else)
 </template>
 
 <style lang="stylus">
-// dialog.add-to-group
+dialog.add-to-group
+  .loader
+    vertical-align -2px
+    margin-right 4px
+
 </style>
