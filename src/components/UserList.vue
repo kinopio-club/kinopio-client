@@ -154,9 +154,14 @@ const isLoadingRemoveGroupUser = (user) => {
 const isErrorRemoveGroupUser = (user) => {
   return state.error.removeGroupUserId === user.id
 }
-const removeGroupUser = async (user) => {
+const removeGroupUser = async (event, user) => {
   state.error.removeGroupUserId = ''
-  console.log('user', user.id, state.loading.removeGroupUserId)
+  console.log('user', user.id, state.loading.removeGroupUserId, props.group.users.length)
+  if (props.group.users.length <= 1) {
+    const position = utils.cursorPositionInViewport(event)
+    store.commit('addNotificationWithPosition', { message: 'Cannot Remove Only Member', position, type: 'danger', layer: 'app', icon: 'cancel' })
+    return
+  }
   if (isLoadingRemoveGroupUser(user)) { return }
   try {
     state.loading.removeGroupUserId = user.id
@@ -211,7 +216,7 @@ const removeGroupUser = async (user) => {
                   span {{ groupUserRole(user) }}
                 GroupUserRolePicker(:visible="groupUserRolePickerIsVisibleUser(user)" :user="user")
               .button-wrap
-                button.small-button(@click.stop="removeGroupUser(user)" :class="{ active: isLoadingRemoveGroupUser(user) }")
+                button.small-button(@click.stop="removeGroupUser($event, user)" :class="{ active: isLoadingRemoveGroupUser(user) }")
                   img.icon.cancel(src="@/assets/add.svg")
                   span Remove
                   Loader(:visible="isLoadingRemoveGroupUser(user)" :isSmall="true")
