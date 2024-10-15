@@ -58,6 +58,12 @@ export default {
         state.ids.push(group.id)
         state.groups[group.id] = group
       }
+    },
+
+    // remove
+
+    remove: (state, group) => {
+
     }
   },
   actions: {
@@ -162,6 +168,10 @@ export default {
       if (group) { return }
       group = await context.dispatch('api/getGroup', otherGroup.id, { root: true })
       context.commit('create', group)
+    },
+    remove: async (context, group) => {
+      await context.dispatch('api/deleteGroupPermanent', group, { root: true })
+      context.commit('remove', group)
     }
   },
   getters: {

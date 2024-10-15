@@ -7,6 +7,7 @@ import User from '@/components/User.vue'
 import ColorPicker from '@/components/dialogs/ColorPicker.vue'
 import GroupLabel from '@/components/GroupLabel.vue'
 import utils from '@/utils.js'
+import Loader from '@/components/Loader.vue'
 
 import randomColor from 'randomcolor'
 import uniqBy from 'lodash-es/uniqBy'
@@ -26,7 +27,12 @@ const props = defineProps({
 const state = reactive({
   dialogHeight: null,
   colorPickerIsVisible: false,
-  childDialogIsVisible: false
+  childDialogIsVisible: false,
+  removeGroupConfirmationIsVisible: false,
+  loading: {
+    deleteGroupPermanent: false
+  },
+  unknownServerError: false
 })
 
 watch(() => props.visible, (value, prevValue) => {
@@ -160,10 +166,28 @@ const showUserDetails = (event, user) => {
   store.commit('userDetailsPosition', position)
   store.commit('userDetailsIsVisible', true)
 }
+
+// remove group
+
+const toggleRemoveGroupConfirmationIsVisible = () => {
+  state.removeGroupConfirmationIsVisible = !state.removeGroupConfirmationIsVisible
+  state.unknownServerError = false
+}
+const deleteGroupPermanent = async () => {
+  state.loading.deleteGroupPermanent = true
+  try {
+    await store.dispatch('groups/remove', props.group)
+    store.commit('triggerCloseGroupDetailsDialog')
+  } catch (error) {
+    state.removeGroupConfirmationIsVisible = false
+    state.unknownServerError = true
+  }
+  state.loading.deleteGroupPermanent = false
+}
 </script>
 
 <template lang="pug">
-dialog.narrow.group-details(v-if="visible" :open="visible" @click.left.stop="closeDialogs" ref="dialogElement" :style="{'max-height': state.dialogHeight + 'px'}" :class="{ 'child-dialog-is-visible': childDialogIsVisible }")
+dialog.group-details(v-if="visible" :open="visible" @click.left.stop="closeDialogs" ref="dialogElement" :style="{'max-height': state.dialogHeight + 'px'}" :class="{ 'child-dialog-is-visible': childDialogIsVisible }")
   section
     .row
       template(v-if="currentUserIsGroupAdmin")
@@ -203,6 +227,26 @@ dialog.narrow.group-details(v-if="visible" :open="visible" @click.left.stop="clo
     :group="props.group"
     @childDialogIsVisible="updateChildDialogIsVisible"
   )
+  section
+    button.danger(v-if="!state.removeGroupConfirmationIsVisible" @click="toggleRemoveGroupConfirmationIsVisible")
+      img.icon(src="@/assets/remove.svg")
+      span Remove Group
+    template(v-if="state.removeGroupConfirmationIsVisible")
+      p
+        span.badge.danger Permanently delete group?
+      p
+        span All spaces in this group will revert to their original owners.
+      .segmented-buttons
+        button(@click.left="toggleRemoveGroupConfirmationIsVisible")
+          img.icon.cancel(src="@/assets/add.svg")
+          span Cancel
+        button.danger(@click.left="deleteGroupPermanent")
+          img.icon(src="@/assets/remove.svg")
+          span Delete Group
+          Loader(:visible="state.loading.deleteGroupPermanent")
+    .info-container(v-if="state.unknownServerError")
+      .badge.danger (シ_ _)シ Something went wrong, Please try again or contact support
+
 </template>
 
 <style lang="stylus">
@@ -216,7 +260,8 @@ dialog.group-details
     margin-right 6px
   .search-wrap
     padding-top 6px
-  .user-list
+  .user-list,
+  .user-list + section
     border-top 1px solid var(--primary-border)
   .invite-row
     justify-content space-between

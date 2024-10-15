@@ -659,6 +659,7 @@ const store = createStore({
     triggerUpdatePathWhileDragging: (state, connections) => {},
     triggerUpdateCardDimensionsAndPaths: (state, cardId) => {},
     triggerUpdateItemCurrentConnections: (state, itemId) => {},
+    triggerCloseGroupDetailsDialog: () => {},
 
     // Used by extensions only
 

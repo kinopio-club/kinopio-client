@@ -1259,8 +1259,19 @@ const self = {
       } catch (error) {
         context.dispatch('handleServerError', { name: 'removeGroupUser', error })
       }
+    },
+    deleteGroupPermanent: async (context, body) => {
+      const apiKey = context.rootState.currentUser.apiKey
+      const isOnline = context.rootState.isOnline
+      if (!shouldRequest({ apiKey, isOnline })) { return }
+      try {
+        const options = await context.dispatch('requestOptions', { body, method: 'DELETE', space: context.rootState.currentSpace })
+        const response = await fetch(`${consts.apiHost()}/group/`, options)
+        return normalizeResponse(response)
+      } catch (error) {
+        context.dispatch('handleServerError', { name: 'deleteGroupPermanent', error })
+      }
     }
-
   }
 }
 

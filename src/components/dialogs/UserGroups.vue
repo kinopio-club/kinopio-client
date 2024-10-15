@@ -17,6 +17,11 @@ const dialogElement = ref(null)
 
 onMounted(() => {
   window.addEventListener('resize', updateDialogHeight)
+  store.subscribe(mutation => {
+    if (mutation.type === 'triggerCloseGroupDetailsDialog') {
+      state.groupDetailsIsVisibleForGroupId = ''
+    }
+  })
 })
 
 const visible = computed(() => store.state.groupsIsVisible)
@@ -129,6 +134,6 @@ dialog.groups
       align-items center
       position relative
     dialog.group-details
-      left -20px
+      left -30px
       top 30px
 </style>
