@@ -142,8 +142,6 @@ watch(() => state.emailInvitesIsVisible, (value, prevValue) => {
 <template lang="pug">
 section.invite-to-space
   .row
-    SpaceUsersButton(:showLabel="true")
-  .row
     p
       .users
         User(:user="currentUser" :isClickable="false" :key="currentUser.id" :isSmall="true" :hideYouLabel="true")
@@ -185,6 +183,9 @@ section.invite-to-space
       .row(v-if="currentUserIsUpgraded")
         p.badge.success
           span Because your account is upgraded, others can create cards here for free
+  .row
+    SpaceUsersButton(:showLabel="true")
+
 EmailInvites(:visible="state.emailInvitesIsVisible")
 
 </template>
