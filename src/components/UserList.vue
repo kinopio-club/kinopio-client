@@ -154,15 +154,27 @@ const isLoadingRemoveGroupUser = (user) => {
 const isErrorRemoveGroupUser = (user) => {
   return state.error.removeGroupUserId === user.id
 }
+const shouldPreventRemoveGroupUser = (user) => {
+  let shouldPrevent
+  const groupUsers = props.group.users
+  const groupAdmins = groupUsers.filter(user => user.role === 'admin')
+  if (user.role === 'admin') {
+    shouldPrevent = groupAdmins.length <= 1
+  } else {
+    shouldPrevent = groupUsers.length <= 1
+  }
+  return shouldPrevent
+}
 const removeGroupUser = async (event, user) => {
   state.error.removeGroupUserId = ''
-  console.log('user', user.id, state.loading.removeGroupUserId, props.group.users.length)
-  if (props.group.users.length <= 1) {
+  if (isLoadingRemoveGroupUser(user)) { return }
+  // check if should prevent
+  if (shouldPreventRemoveGroupUser(user)) {
     const position = utils.cursorPositionInViewport(event)
-    store.commit('addNotificationWithPosition', { message: 'Cannot Remove Only Member', position, type: 'danger', layer: 'app', icon: 'cancel' })
+    store.commit('addNotificationWithPosition', { message: 'Cannot Remove', position, type: 'danger', layer: 'app', icon: 'cancel' })
     return
   }
-  if (isLoadingRemoveGroupUser(user)) { return }
+  // remove user
   try {
     state.loading.removeGroupUserId = user.id
     const options = {
