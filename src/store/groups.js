@@ -22,6 +22,8 @@ export default {
       state.groups = {}
     },
     restore: (state, groups) => {
+      state.ids = []
+      state.groups = {}
       let groupIds = []
       groups.forEach(group => {
         groupIds.push(group.id)
@@ -133,6 +135,8 @@ export default {
           group: response.group
         }, { root: true })
         context.commit('triggerSpaceDetailsVisible', null, { root: true })
+        context.commit('update', response.group)
+        console.log('👫 joined group', response.group)
       } catch (error) {
         console.error('🚒 joinGroup', error)
         context.commit('addNotification', {
