@@ -9,7 +9,7 @@ const store = useStore()
 section.about-groups
   p Group spaces together and collaborate with group members
   p
-    a(href="https://help.kinopio.club/posts/teams")
+    a(href="https://help.kinopio.club/posts/groups")
       button
         span More Info{{' '}}
         img.icon.visit(src="@/assets/visit.svg")
