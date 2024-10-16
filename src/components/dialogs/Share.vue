@@ -4,6 +4,7 @@ import { useStore } from 'vuex'
 
 import PrivacyButton from '@/components/PrivacyButton.vue'
 import InviteToSpace from '@/components/InviteToSpace.vue'
+import InviteToGroup from '@/components/InviteToGroup.vue'
 import RssFeeds from '@/components/dialogs/RssFeeds.vue'
 import Embed from '@/components/dialogs/Embed.vue'
 import utils from '@/utils.js'
@@ -156,6 +157,11 @@ const users = computed(() => {
   items = items.concat(store.state.currentSpace.collaborators)
   return items
 })
+
+// groups
+
+const currentUserIsCurrentSpaceGroupUser = computed(() => store.getters['groups/currentUserIsCurrentSpaceGroupUser'])
+
 </script>
 
 <template lang="pug">
@@ -193,6 +199,7 @@ dialog.share.wide(v-if="props.visible" :open="props.visible" @click.left.stop="c
 
   //- Invite
   InviteToSpace(v-if="isSpaceMember && currentUserIsSignedIn" @closeDialogs="closeDialogs" @emailInvitesIsVisible="emailInvitesIsVisible")
+  InviteToGroup(:visible="currentUserIsCurrentSpaceGroupUser" @closeDialogs="closeDialogs")
 
   section(v-if="!spaceIsRemote")
     p

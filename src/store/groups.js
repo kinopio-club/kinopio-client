@@ -235,7 +235,9 @@ export default {
       const groupId = rootState.currentSpace.groupId
       if (!groupId) { return }
       const group = getters.spaceGroup()
-      return group.users.find(user => user.id === userId)
+      if (!group) { return }
+      const user = group.users.find(user => user.id === userId)
+      return Boolean(user)
     },
     groupUserIsAdmin: (state, getters, rootState) => ({ userId, space, groupId }) => {
       let groupUser
