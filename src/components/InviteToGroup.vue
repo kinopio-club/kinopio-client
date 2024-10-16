@@ -34,7 +34,7 @@ const group = computed(() => store.getters['groups/spaceGroup']())
 </script>
 
 <template lang="pug">
-section.invite-to-group(v-if="visible" @click.stop="closeDialogs")
+section.invite-to-group(v-if="props.visible" @click.stop="closeDialogs")
   .row
     //- p
     GroupLabel(:group="group")

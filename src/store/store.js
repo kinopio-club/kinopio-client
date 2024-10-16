@@ -406,7 +406,6 @@ const store = createStore({
     },
     isLoadingGroups: (state, value) => {
       utils.typeCheck({ value, type: 'boolean' })
-      console.error('isLoadingGroups', value)
       state.isLoadingGroups = value
     },
     addUrlPreviewLoadingForCardIds: (state, cardId) => {

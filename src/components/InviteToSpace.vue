@@ -5,7 +5,6 @@ import { useStore, mapState, mapGetters } from 'vuex'
 import Loader from '@/components/Loader.vue'
 import User from '@/components/User.vue'
 import EmailInvites from '@/components/dialogs/EmailInvites.vue'
-import SpaceUsersButton from '@/components/SpaceUsersButton.vue'
 import utils from '@/utils.js'
 import consts from '@/consts.js'
 
@@ -22,6 +21,10 @@ onMounted(() => {
 })
 
 const emit = defineEmits(['closeDialogs', 'emailInvitesIsVisible'])
+
+const props = defineProps({
+  visible: Boolean
+})
 
 const state = reactive({
   tipsIsVisible: false,
@@ -127,9 +130,7 @@ watch(() => state.emailInvitesIsVisible, (value, prevValue) => {
 </script>
 
 <template lang="pug">
-section(@click.stop="closeDialogs")
-  SpaceUsersButton(:showLabel="true")
-section.invite-to-space(@click.stop="closeDialogs")
+section.invite-to-space(v-if="props.visible" @click.stop="closeDialogs")
   .row
     p
       .users

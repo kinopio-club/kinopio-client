@@ -12,6 +12,7 @@ import ImportExport from '@/components/dialogs/ImportExport.vue'
 import AddToExplore from '@/components/AddToExplore.vue'
 import AskToAddToExplore from '@/components/AskToAddToExplore.vue'
 import ReadOnlySpaceInfoBadges from '@/components/ReadOnlySpaceInfoBadges.vue'
+import SpaceUsersButton from '@/components/SpaceUsersButton.vue'
 import consts from '@/consts.js'
 const store = useStore()
 
@@ -198,10 +199,11 @@ dialog.share.wide(v-if="props.visible" :open="props.visible" @click.left.stop="c
             img.icon(src="@/assets/presentation.svg")
 
   //- collaborators
-
+  section
+    SpaceUsersButton(:showLabel="true")
   //- Invite
   InviteToGroup(:visible="currentUserIsCurrentSpaceGroupUser" @closeDialogs="closeDialogs")
-  InviteToSpace(v-if="isSpaceMember && currentUserIsSignedIn" @closeDialogs="closeDialogs" @emailInvitesIsVisible="emailInvitesIsVisible")
+  InviteToSpace(:visible="isSpaceMember && currentUserIsSignedIn" @closeDialogs="closeDialogs" @emailInvitesIsVisible="emailInvitesIsVisible")
 
   section(v-if="!spaceIsRemote")
     p
