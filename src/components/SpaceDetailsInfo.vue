@@ -327,7 +327,7 @@ template(v-if="isSpaceMember")
       FavoriteSpaceButton(:parentIsDialog="true" @updateLocalSpaces="updateLocalSpaces")
     //- Settings
     .button-wrap
-      button(@click="toggleSettingsIsVisible" :class="{active: state.settingsIsVisible}")
+      button(@click="toggleSettingsIsVisible" :class="{active: state.settingsIsVisible}" title="Space Settings")
         img.icon.settings(src="@/assets/settings.svg")
   .row(v-if="state.error.memberAssignGroup")
     .badge.danger

@@ -59,7 +59,12 @@ const updateLocalSpaces = () => {
 
 <template lang="pug">
 .button-wrap.privacy-button(v-if="isSpaceMember || isInvitedButCannotEditSpace" :class="privacyState.name")
-  button(@click.left.stop="togglePrivacyPickerIsVisible" :disabled="isInvitedButCannotEditSpace" :class="{ active: props.privacyPickerIsVisible }")
+  button(
+    @click.left.stop="togglePrivacyPickerIsVisible"
+    :disabled="isInvitedButCannotEditSpace"
+    :class="{ active: props.privacyPickerIsVisible }"
+    title="Space Privacy Options"
+  )
     template(v-if="props.showShortName")
       PrivacyIcon(:privacy="privacyState.name")
       span {{shortName}}
