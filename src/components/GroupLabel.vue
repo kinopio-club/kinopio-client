@@ -40,8 +40,6 @@ span.group-label(v-if="isVisible" :title="props.group.name")
     padding 0 6px
     display inline
     word-break keep-all
-    .icon.group
-      vertical-align 1px
     span
       vertical-align 1.5px
       font-size 12px
