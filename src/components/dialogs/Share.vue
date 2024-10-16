@@ -319,7 +319,4 @@ dialog.share
       margin-top 0
     label + label
       margin-left 6px
-
-  section:not(.subsection)
-    border-top 1px solid var(--primary-border)
 </style>
