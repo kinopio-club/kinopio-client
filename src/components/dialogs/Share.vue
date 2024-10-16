@@ -162,6 +162,7 @@ const users = computed(() => {
 // groups
 
 const currentUserIsCurrentSpaceGroupUser = computed(() => store.getters['groups/currentUserIsCurrentSpaceGroupUser'])
+const spaceGroup = computed(() => store.getters['groups/spaceGroup']())
 
 </script>
 
@@ -178,7 +179,7 @@ dialog.share.wide(v-if="props.visible" :open="props.visible" @click.left.stop="c
 
   section(v-if="spaceIsRemote")
     ReadOnlySpaceInfoBadges
-    PrivacyButton(:privacyPickerIsVisible="state.privacyPickerIsVisible" :showDescription="true" @togglePrivacyPickerIsVisible="togglePrivacyPickerIsVisible" @closeDialogs="closeDialogs")
+    PrivacyButton(:privacyPickerIsVisible="state.privacyPickerIsVisible" @togglePrivacyPickerIsVisible="togglePrivacyPickerIsVisible" @closeDialogs="closeDialogs")
 
     //- Copy URL
     section.subsection(:class="{'share-url-subsection-member': isSpaceMember}")
@@ -202,7 +203,7 @@ dialog.share.wide(v-if="props.visible" :open="props.visible" @click.left.stop="c
   section
     SpaceUsersButton(:showLabel="true")
   //- Invite
-  InviteToGroup(:visible="currentUserIsCurrentSpaceGroupUser" @closeDialogs="closeDialogs")
+  InviteToGroup(:visible="currentUserIsCurrentSpaceGroupUser" :group="spaceGroup" @closeDialogs="closeDialogs")
   InviteToSpace(:visible="isSpaceMember && currentUserIsSignedIn" @closeDialogs="closeDialogs" @emailInvitesIsVisible="emailInvitesIsVisible")
 
   section(v-if="!spaceIsRemote")

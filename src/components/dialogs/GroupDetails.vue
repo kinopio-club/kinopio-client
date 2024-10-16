@@ -8,8 +8,8 @@ import ColorPicker from '@/components/dialogs/ColorPicker.vue'
 import GroupLabel from '@/components/GroupLabel.vue'
 import utils from '@/utils.js'
 import Loader from '@/components/Loader.vue'
+import InviteToGroup from '@/components/InviteToGroup.vue'
 
-import randomColor from 'randomcolor'
 import uniqBy from 'lodash-es/uniqBy'
 
 const store = useStore()
@@ -59,6 +59,7 @@ const childDialogIsVisible = computed(() => {
 const updateChildDialogIsVisible = (value) => {
   state.childDialogIsVisible = value
 }
+const currentUser = computed(() => store.state.currentUser)
 
 // group
 
@@ -95,36 +96,6 @@ const groupName = computed({
     updateGroup({ name: newValue })
   }
 })
-
-// invite
-
-const currentUser = computed(() => store.state.currentUser)
-const randomUser = computed(() => {
-  const luminosity = store.state.currentUser.theme
-  const color = randomColor({ luminosity })
-  return { color }
-})
-const inviteUrl = computed(() => {
-  if (!props.group.collaboratorKey) { return }
-  const url = utils.groupInviteUrl({
-    groupId: props.group.id,
-    groupName: props.group.name,
-    collaboratorKey: props.group.collaboratorKey
-  })
-  return url
-})
-const copyInviteUrl = async (event) => {
-  store.commit('clearNotificationsWithPosition')
-  const position = utils.cursorPositionInPage(event)
-  console.log('🍇 group invite url', inviteUrl.value)
-  try {
-    await navigator.clipboard.writeText(inviteUrl.value)
-    store.commit('addNotificationWithPosition', { message: 'Copied', position, type: 'success', layer: 'app', icon: 'checkmark' })
-  } catch (error) {
-    console.warn('🚑 copyInviteUrl', error, inviteUrl.value)
-    store.commit('addNotificationWithPosition', { message: 'Copy Error', position, type: 'danger', layer: 'app', icon: 'cancel' })
-  }
-}
 
 // select user
 
@@ -188,6 +159,7 @@ const deleteGroupPermanent = async () => {
 
 <template lang="pug">
 dialog.group-details(v-if="visible" :open="visible" @click.left.stop="closeDialogs" ref="dialogElement" :style="{'max-height': state.dialogHeight + 'px'}" :class="{ 'child-dialog-is-visible': childDialogIsVisible }")
+  //- group info
   section
     .row
       template(v-if="currentUserIsGroupAdmin")
@@ -196,26 +168,10 @@ dialog.group-details(v-if="visible" :open="visible" @click.left.stop="closeDialo
             .current-color.current-group-color(:style="{ background: groupColor }")
           ColorPicker(:currentColor="groupColor" :visible="state.colorPickerIsVisible" @selectedColor="updateGroupColor")
         input.name(placeholder="Group Name" v-model="groupName" name="groupName" maxlength=100 @mouseup.stop)
-
       template(v-else)
         GroupLabel(:group="props.group" :showName="true")
 
-  section(v-if="inviteUrl")
-    .row.invite-row
-      p
-        .users
-          User(:user="currentUser" :isClickable="false" :key="currentUser.id" :isSmall="true" :hideYouLabel="true")
-          User(:user="randomUser" :isClickable="false" :key="currentUser.id" :isSmall="true" :hideYouLabel="true")
-        span Invite Members
-
-    .row
-      button(@click.left="copyInviteUrl")
-        img.icon.copy(src="@/assets/copy.svg")
-        span Copy Group Invite URL
-    //- .row
-    //-   button
-    //-     img.icon.mail(src="@/assets/mail.svg")
-    //-     span Email Invites
+  InviteToGroup(:visible="true" :group="props.group" @closeDialogs="closeDialogs")
 
   UserList(
     :users="groupUsers"
@@ -246,7 +202,6 @@ dialog.group-details(v-if="visible" :open="visible" @click.left.stop="closeDialo
           Loader(:visible="state.loading.deleteGroupPermanent")
     .row(v-if="state.unknownServerError")
       .badge.danger (シ_ _)シ Something went wrong, Please try again or contact support
-
 </template>
 
 <style lang="stylus">
@@ -263,16 +218,6 @@ dialog.group-details
   .user-list,
   .user-list + section
     border-top 1px solid var(--primary-border)
-  .invite-row
-    justify-content space-between
-    button
-      margin 0
-    .users
-      margin-right 5px
-      .user
-        vertical-align -3px
-        .anon-avatar
-          top 6px
   .change-color
     .current-group-color
       border-radius 10px
