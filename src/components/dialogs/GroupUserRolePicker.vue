@@ -4,6 +4,7 @@ import { useStore } from 'vuex'
 
 import utils from '@/utils.js'
 import groupUserRoles from '@/data/groupUserRoles.js'
+import User from '@/components/User.vue'
 
 const store = useStore()
 
@@ -90,6 +91,10 @@ const updateRole = (role) => {
 
 <template lang="pug">
 dialog.narrow.group-user-role-picker(v-if="visible" :open="visible" @click.left.stop ref="dialogElement" :style="{'max-height': state.dialogHeight + 'px'}" :class="{'position-bottom': state.isPositionBottom}")
+  section
+    .row
+      User(:user="props.user" :isClickable="false" :hideYouLabel="true" :isSmall="true" :shouldBounceIn="true")
+      span {{ props.user.email }}
   section(v-if="state.error.isRemovingSoleAdmin")
     .badge.danger Group must have at least one admin
   section.results-section
@@ -109,4 +114,6 @@ dialog.group-user-role-picker
   &.position-bottom
     top initial
     bottom 10px
+  .user
+    margin-right 4px
 </style>

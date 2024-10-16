@@ -43,9 +43,6 @@ const closeDialogs = () => {
   store.commit('userDetailsIsVisible', false)
   state.groupUserRolePickerUserId = ''
 }
-const actionsSectionIsVisible = computed(() => {
-  return props.showCollaboratorActions || props.showGroupUserActions
-})
 
 // users
 
@@ -197,11 +194,10 @@ const removeGroupUser = async (event, user) => {
   ul.results-list
     template(v-for="user in usersFiltered" :key="user.id")
       li(@click.left.stop="selectUser($event, user)" tabindex="0" v-on:keyup.stop.enter="selectUser($event, user)" :class="{ active: userIsSelected(user) }")
-        .user-info(:class="{'actions-section-is-visible': actionsSectionIsVisible }")
+        .user-info
           UserLabelInline(:user="user")
-
         //- collaborator actions
-        section.subsection(v-if="props.showCollaboratorActions")
+        .row.actions-row(v-if="props.showCollaboratorActions")
           //- group user
           template(v-if="groupUser(user)")
             GroupLabel(:group="group")
@@ -212,31 +208,26 @@ const removeGroupUser = async (event, user) => {
           template(v-else-if="currentUserIsMember")
             button.small-button(@click.stop="removeCollaborator(user)")
               img.icon.cancel(src="@/assets/add.svg")
-              span(v-if="isCurrentUser(user)") Leave Space
-              span(v-else) Remove
+              span Remove
 
         //- group user actions
-        section.subsection(v-if="props.showGroupUserActions")
-          .row
-            img.icon.mail(src="@/assets/mail.svg")
-            span {{ groupUser(user).email }}
-          .row
-            //- role
-            .button-wrap
-              button.small-button(@click.stop="toggleGroupRolePickerUserId(user)" :class="{ active: groupUserRolePickerIsVisibleUser(user) }" :disabled="!currentUserIsGroupAdmin")
-                span {{ groupUserRole(user) }}
-              GroupUserRolePicker(:visible="groupUserRolePickerIsVisibleUser(user)" :user="user")
-            //- remove user
-            .button-wrap(v-if="currentUserIsGroupAdmin || isCurrentUser(user)")
-              button.small-button(@click.stop="removeGroupUser($event, user)" :class="{ active: isLoadingRemoveGroupUser(user) }")
-                img.icon.cancel(src="@/assets/add.svg")
-                span Remove
-                Loader(:visible="isLoadingRemoveGroupUser(user)" :isSmall="true")
+        .row.actions-row(v-if="props.showGroupUserActions")
+          //- role
+          .button-wrap
+            button.small-button(@click.stop="toggleGroupRolePickerUserId(user)" :class="{ active: groupUserRolePickerIsVisibleUser(user) }" :disabled="!currentUserIsGroupAdmin")
+              span {{ groupUserRole(user) }}
+            GroupUserRolePicker(:visible="groupUserRolePickerIsVisibleUser(user)" :user="user")
+          //- remove user
+          .button-wrap(v-if="currentUserIsGroupAdmin || isCurrentUser(user)")
+            button.small-button(@click.stop="removeGroupUser($event, user)" :class="{ active: isLoadingRemoveGroupUser(user) }")
+              img.icon.cancel(src="@/assets/add.svg")
+              span Remove
+              Loader(:visible="isLoadingRemoveGroupUser(user)" :isSmall="true")
 
-          //- error
-          .row(v-if="isErrorRemoveGroupUser(user)")
-            p.badge.danger
-              span (シ_ _)シ Could not remove group user, Please try again or contact support
+        //- error
+        .row(v-if="isErrorRemoveGroupUser(user)")
+          p.badge.danger
+            span (シ_ _)シ Could not remove group user, Please try again or contact support
 </template>
 
 <style lang="stylus">
@@ -259,8 +250,6 @@ const removeGroupUser = async (event, user) => {
   .subsection
     width 100%
     border-top-left-radius 0
-  .actions-section-is-visible
-    .user-label-inline
-      border-bottom-left-radius 0
-      border-bottom-right-radius 0
+  .row.actions-row
+    margin-top 5px
 </style>
