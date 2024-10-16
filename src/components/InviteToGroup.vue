@@ -1,51 +1,58 @@
 <script setup>
 import { reactive, computed, onMounted, onBeforeUnmount, defineProps, defineEmits, watch, ref, nextTick } from 'vue'
 import { useStore } from 'vuex'
-const store = useStore()
 
 // import utils from '@/utils.js'
+import GroupLabel from '@/components/GroupLabel.vue'
+// import User from '@/components/User.vue'
 
-onMounted(() => {
-  console.log(`🐴 the component is now mounted.`, store.state.currentSpace)
-  // store.subscribe(mutation => {
-  //   if (mutation.type === 'triggerUpdateOtherCard') {
-  //     mutation.payload
-  //   }
-  // })
-})
+// import randomColor from 'randomcolor'
 
-const emit = defineEmits(['updateCount'])
+const store = useStore()
+
+const emit = defineEmits(['closeDialogs'])
 
 const props = defineProps({
   visible: Boolean
 })
-const state = reactive({
-  count: 0
-})
+// const state = reactive({
+//   count: 0
+// })
 
-watch(() => props.visible, (value, prevValue) => {
-  if (value) {
-    console.log('💁‍♀️', value)
-  }
-})
-
-const themeName = computed(() => store.state.currentUser.theme)
-const incrementBy = () => {
-  const theme = themeName.value
-  console.log('🧢', theme)
-  state.count = state.count + 1
-  emit('updateCount', state.count)
-  // store.dispatch('themes/isSystem', false)
+// const currentUser = computed(() => store.state.currentUser)
+// const randomUser = computed(() => {
+//   const luminosity = store.state.currentUser.theme
+//   const color = randomColor({ luminosity })
+//   return { color }
+// })
+const closeDialogs = () => {
+  emit('closeDialogs')
 }
+
+const group = computed(() => store.getters['groups/spaceGroup']())
+
 </script>
 
 <template lang="pug">
-.component-name(v-if="visible")
-  button(@click="incrementBy")
-    span Count is: {{ state.count }}
-  p Current theme is: {{ themeName }}, prop is {{ visible }}
+section.invite-to-group(v-if="visible" @click.stop="closeDialogs")
+  .row
+    //- p
+    GroupLabel(:group="group")
+    //- .users
+    //-   User(:user="currentUser" :isClickable="false" :key="currentUser.id" :isSmall="true" :hideYouLabel="true")
+    //-   User(:user="randomUser" :isClickable="false" :key="currentUser.id" :isSmall="true" :hideYouLabel="true")
+    span Invite to Group
+
+  //- p alsdkfj
 </template>
 
 <style lang="stylus">
-// .component-name
+section.invite-to-group
+  // .users
+  //   margin-right 5px
+  //   .user
+  //     vertical-align -3px
+  //     .anon-avatar
+  //       top 6px
+
 </style>

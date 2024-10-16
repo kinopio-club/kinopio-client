@@ -44,7 +44,9 @@ const toggleTipsIsVisible = () => {
 }
 const isSecureAppContextIOS = computed(() => consts.isSecureAppContextIOS)
 const spaceIsPrivate = computed(() => store.state.currentSpace.privacy === 'private')
-
+const closeDialogs = () => {
+  emit('closeDialogs')
+}
 // invite types
 
 const inviteTypeIsEdit = computed(() => state.inviteType === 'edit')
@@ -117,7 +119,6 @@ const closeChildDialogs = () => {
 }
 const toggleEmailInvitesIsVisible = () => {
   const value = !state.emailInvitesIsVisible
-  emit('closeDialogs')
   state.emailInvitesIsVisible = value
 }
 watch(() => state.emailInvitesIsVisible, (value, prevValue) => {
@@ -126,9 +127,9 @@ watch(() => state.emailInvitesIsVisible, (value, prevValue) => {
 </script>
 
 <template lang="pug">
-section
+section(@click.stop="closeDialogs")
   SpaceUsersButton(:showLabel="true")
-section.invite-to-space
+section.invite-to-space(@click.stop="closeDialogs")
   .row
     p
       .users
