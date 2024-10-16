@@ -246,13 +246,6 @@ export default {
         groupUser = getters.groupUser({ userId, space })
       }
       return groupUser?.role === 'admin'
-    },
-    bySpaces: (state, getters, rootState) => (spaces) => {
-      let groupIds = spaces.map(space => space.groupId)
-      groupIds = groupIds.filter(id => Boolean(id))
-      groupIds = uniq(groupIds)
-      const groups = groupIds.map(id => getters.byId(id))
-      return groups
     }
   }
 }

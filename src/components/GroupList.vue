@@ -24,8 +24,8 @@ const groupIsSelected = (group) => {
 
 <template lang="pug">
 ul.results-list.group-list
-  template(v-for="group in props.groups")
-    li(:class="{ active: groupIsSelected(group) }" @click.stop="selectGroup($event, group)")
+  template(v-for="group in props.groups" :key="group.id")
+    li(:class="{ active: groupIsSelected(group) }" @click.stop="selectGroup($event, group)" :data-group-id="group.id")
       GroupLabel(:group="group" :showName="true")
 </template>
 
