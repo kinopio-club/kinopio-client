@@ -914,7 +914,7 @@ export default {
       space = space || rootState.currentSpace
       const isSpaceUser = getters.isSpaceUser(space)
       const isSpaceCollaborator = getters.isSpaceCollaborator(space)
-      const isGroupMember = rootGetters['groups/isCurrentSpaceGroupUser']
+      const isGroupMember = rootGetters['groups/currentUserIsCurrentSpaceGroupUser']
       return Boolean(isSpaceUser || isSpaceCollaborator || isGroupMember)
     },
     isSpaceUser: (state, getters, rootState) => (space) => {
