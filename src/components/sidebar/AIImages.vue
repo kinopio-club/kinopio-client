@@ -66,33 +66,34 @@ const toggleSelectedImage = (image) => {
 </script>
 
 <template lang="pug">
-section.ai-images(v-if="visible" @click.stop="clear")
-  p AI Images
-  section.subsection(v-if="!AIImages.length")
-    p AI Images you generate from cards can be found here.
-    p
-      span Card →{{' '}}
-      img.icon.flower(src="@/assets/flower.svg")
-      span → AI
-AIImagesProgress
-section.results-section(v-if="AIImages.length" ref="sectionElement" :style="{'max-height': state.height + 'px'}")
-  ul.results-list.image-list
-    template(v-for="image in AIImages")
-      li
-        div
-          img(:src="image.url" @click.stop="toggleSelectedImage(image)" :class="{ active: isSelectedImage(image) }")
-          //- prompt
-          p.prompt(v-if="isSelectedImage(image)")
-            img.icon.openai(src="@/assets/openai.svg")
-            span {{image.prompt}}
-            //- copy prompt
-            .input-button-wrap.copy-prompt(@click.stop="copy($event, image.prompt, 'Copied Prompt')")
-              button.small-button
-                img.icon.copy(src="@/assets/copy.svg")
-        //- copy url
-        .input-button-wrap.copy-image-url(@click.stop="copy($event, image.url, 'Copied URL')")
-          button.small-button
-            img.icon.copy(src="@/assets/copy.svg")
+template(v-if="visible")
+  section.ai-images(@click.stop="clear")
+    p AI Images
+    section.subsection(v-if="!AIImages.length")
+      p AI Images you generate from cards can be found here.
+      p
+        span Card →{{' '}}
+        img.icon.flower(src="@/assets/flower.svg")
+        span → AI
+  AIImagesProgress
+  section.results-section(v-if="AIImages.length" ref="sectionElement" :style="{'max-height': state.height + 'px'}")
+    ul.results-list.image-list
+      template(v-for="image in AIImages")
+        li
+          div
+            img(:src="image.url" @click.stop="toggleSelectedImage(image)" :class="{ active: isSelectedImage(image) }")
+            //- prompt
+            p.prompt(v-if="isSelectedImage(image)")
+              img.icon.openai(src="@/assets/openai.svg")
+              span {{image.prompt}}
+              //- copy prompt
+              .input-button-wrap.copy-prompt(@click.stop="copy($event, image.prompt, 'Copied Prompt')")
+                button.small-button
+                  img.icon.copy(src="@/assets/copy.svg")
+          //- copy url
+          .input-button-wrap.copy-image-url(@click.stop="copy($event, image.url, 'Copied URL')")
+            button.small-button
+              img.icon.copy(src="@/assets/copy.svg")
 </template>
 
 <style lang="stylus">
