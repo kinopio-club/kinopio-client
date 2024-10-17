@@ -362,7 +362,7 @@ const updateCachedSpaces = () => {
     const cachedSpace = cache.space(space.id)
     const isCachedSpace = utils.objectHasKeys(cachedSpace)
     if (!isCachedSpace) {
-      cache.storeLocal(`space-${space.id}`, space)
+      cache.saveSpace(space)
     }
   })
 }

@@ -148,7 +148,7 @@ export default {
     space[key] = value
     space.clients = []
     space.cacheDate = Date.now()
-    this.storeLocal(`space-${spaceId}`, space)
+    this.saveSpace(space)
   },
   updateSpaceCardsDebounced: debounce(function (cards, spaceId) {
     cards = utils.denormalizeItems(cards)
@@ -160,7 +160,7 @@ export default {
     cards = utils.denormalizeItems(cards)
     space.cards = cards
     space.cacheDate = Date.now()
-    this.storeLocal(`space-${spaceId}`, space)
+    this.saveSpace(space)
   }, 200),
   updateSpaceConnectionsDebounced: debounce(function (connections, spaceId) {
     connections = utils.denormalizeItems(connections)
@@ -171,7 +171,7 @@ export default {
     }
     space.connections = connections
     space.cacheDate = Date.now()
-    this.storeLocal(`space-${spaceId}`, space)
+    this.saveSpace(space)
   }, 200),
   updateSpaceBoxesDebounced: debounce(function (boxes, spaceId) {
     boxes = utils.denormalizeItems(boxes)
@@ -183,7 +183,7 @@ export default {
     boxes = utils.denormalizeItems(boxes)
     space.boxes = boxes
     space.cacheDate = Date.now()
-    this.storeLocal(`space-${spaceId}`, space)
+    this.saveSpace(space)
   }, 200),
   addToSpace ({ cards, connections, connectionTypes, boxes }, spaceId) {
     // space items
@@ -202,11 +202,11 @@ export default {
     connections.forEach(connection => space.connections.push(connection))
     connectionTypes.forEach(connectionType => space.connectionTypes.push(connectionType))
     boxes.forEach(box => space.boxes.push(box))
-    this.storeLocal(`space-${spaceId}`, space)
+    this.saveSpace(space)
   },
   saveSpace (space) {
     if (!space.id) {
-      console.error('☎️ error caching space', space)
+      console.warn('☎️ error caching space. This is expected if currentUser is read only', space)
       return
     }
     space.cacheDate = Date.now()
@@ -232,13 +232,13 @@ export default {
       return tag
     })
     space.boxes = uniqueItems.boxes
-    this.storeLocal(`space-${space.id}`, space)
+    this.saveSpace(space)
     return space
   },
   addSpaces (spaces) {
     spaces.forEach(space => {
       space.cacheDate = utils.normalizeToUnixTime(space.updatedAt)
-      this.storeLocal(`space-${space.id}`, space)
+      this.saveSpace(space)
     })
   },
 
@@ -259,7 +259,7 @@ export default {
     const spaceKey = `removed-space-${space.id}`
     space = this.getLocal(spaceKey)
     if (!space) { return }
-    this.storeLocal(`space-${space.id}`, space)
+    this.saveSpace(space)
     this.removeLocal(spaceKey)
   },
   getAllRemovedSpaces () {
