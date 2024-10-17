@@ -4,9 +4,9 @@ import { useStore } from 'vuex'
 
 import ResultsFilter from '@/components/ResultsFilter.vue'
 import UserLabelInline from '@/components/UserLabelInline.vue'
-import TeamUserRolePicker from '@/components/dialogs/TeamUserRolePicker.vue'
+import GroupUserRolePicker from '@/components/dialogs/GroupUserRolePicker.vue'
 import Loader from '@/components/Loader.vue'
-import TeamLabel from '@/components/TeamLabel.vue'
+import GroupLabel from '@/components/GroupLabel.vue'
 import utils from '@/utils.js'
 const store = useStore()
 
@@ -24,28 +24,25 @@ const props = defineProps({
   users: Array,
   selectedUser: Object,
   showCollaboratorActions: Boolean,
-  showTeamUserActions: Boolean,
-  team: Object
+  showGroupUserActions: Boolean,
+  group: Object
 })
 const state = reactive({
   filter: '',
   filteredUsers: [],
-  teamUserRolePickerUserId: '',
+  groupUserRolePickerUserId: '',
   loading: {
-    removeTeamUserId: ''
+    removeGroupUserId: ''
   },
   error: {
-    removeTeamUserId: ''
+    removeGroupUserId: ''
   }
 })
 
 const closeDialogs = () => {
   store.commit('userDetailsIsVisible', false)
-  state.teamUserRolePickerUserId = ''
+  state.groupUserRolePickerUserId = ''
 }
-const actionsSectionIsVisible = computed(() => {
-  return props.showCollaboratorActions || props.showTeamUserActions
-})
 
 // users
 
@@ -106,71 +103,88 @@ const userIsSpaceCreator = (user) => {
   return user.id === space.userId
 }
 
-// team
+// group
 
-const team = computed(() => {
-  return props.team || store.getters['teams/spaceTeam']()
+const group = computed(() => {
+  return props.group || store.getters['groups/spaceGroup']()
 })
-const teamUser = (user) => {
-  if (!team.value) { return }
-  const teamId = team.value.id
-  return store.getters['teams/teamUser']({ userId: user.id, teamId })
+const groupUser = (user) => {
+  if (!group.value) { return }
+  const groupId = group.value.id
+  return store.getters['groups/groupUser']({ userId: user.id, groupId })
 }
-const teamUserRole = (user) => {
-  const role = teamUser(user).role
+const groupUserRole = (user) => {
+  const role = groupUser(user).role
   return utils.capitalizeFirstLetter(role)
 }
-const currentUserIsTeamAdmin = computed(() => {
-  return store.getters['teams/teamUserIsAdmin']({
+const currentUserIsGroupAdmin = computed(() => {
+  return store.getters['groups/groupUserIsAdmin']({
     userId: store.state.currentUser.id,
-    teamId: team.value.id
+    groupId: group.value.id
   })
 })
 
-// team user role picker
+// group user role picker
 
-watch(() => state.teamUserRolePickerUserId, (value, prevValue) => {
+watch(() => state.groupUserRolePickerUserId, (value, prevValue) => {
   if (value) {
     emit('childDialogIsVisible', true)
   } else {
     emit('childDialogIsVisible', false)
   }
 })
-const teamUserRolePickerIsVisibleUser = (user) => {
-  return user.id === state.teamUserRolePickerUserId
+const groupUserRolePickerIsVisibleUser = (user) => {
+  return user.id === state.groupUserRolePickerUserId
 }
-const toggleTeamRolePickerUserId = (user) => {
-  const isPrevUser = teamUserRolePickerIsVisibleUser(user)
+const toggleGroupRolePickerUserId = (user) => {
+  const isPrevUser = groupUserRolePickerIsVisibleUser(user)
   closeDialogs()
   if (isPrevUser) { return }
-  state.teamUserRolePickerUserId = user.id
+  state.groupUserRolePickerUserId = user.id
 }
 
-// remove team user
+// remove group user
 
-const isLoadingRemoveTeamUser = (user) => {
-  return state.loading.removeTeamUserId === user.id
+const isLoadingRemoveGroupUser = (user) => {
+  return state.loading.removeGroupUserId === user.id
 }
-const isErrorRemoveTeamUser = (user) => {
-  return state.error.removeTeamUserId === user.id
+const isErrorRemoveGroupUser = (user) => {
+  return state.error.removeGroupUserId === user.id
 }
-const removeTeamUser = async (user) => {
-  state.error.removeTeamUserId = ''
-  console.log('user', user.id, state.loading.removeTeamUserId)
-  if (isLoadingRemoveTeamUser(user)) { return }
+const shouldPreventRemoveGroupUser = (user) => {
+  let shouldPrevent
+  const groupUsers = props.group.users
+  const groupAdmins = groupUsers.filter(user => user.role === 'admin')
+  if (user.role === 'admin') {
+    shouldPrevent = groupAdmins.length <= 1
+  } else {
+    shouldPrevent = groupUsers.length <= 1
+  }
+  return shouldPrevent
+}
+const removeGroupUser = async (event, user) => {
+  state.error.removeGroupUserId = ''
+  if (isLoadingRemoveGroupUser(user)) { return }
+  // check if should prevent
+  if (shouldPreventRemoveGroupUser(user)) {
+    const position = utils.cursorPositionInViewport(event)
+    store.commit('addNotificationWithPosition', { message: 'Cannot Remove', position, type: 'danger', layer: 'app', icon: 'cancel' })
+    return
+  }
+  // remove user
   try {
-    state.loading.removeTeamUserId = user.id
+    state.loading.removeGroupUserId = user.id
     const options = {
-      teamId: team.value.id,
+      groupId: group.value.id,
       userId: user.id
     }
-    const response = await store.dispatch('api/removeTeamUser', options, { root: true })
-    store.dispatch('teams/removeTeamUser', options)
+    const response = await store.dispatch('api/removeGroupUser', options, { root: true })
+    store.dispatch('groups/removeGroupUser', options)
   } catch (error) {
-    console.error('🚒 removeTeamUser', user, error)
-    state.error.removeTeamUserId = user.id
+    console.error('🚒 removeGroupUser', user, error)
+    state.error.removeGroupUserId = user.id
   }
-  state.loading.removeTeamUserId = ''
+  state.loading.removeGroupUserId = ''
 }
 </script>
 
@@ -180,14 +194,13 @@ const removeTeamUser = async (user) => {
   ul.results-list
     template(v-for="user in usersFiltered" :key="user.id")
       li(@click.left.stop="selectUser($event, user)" tabindex="0" v-on:keyup.stop.enter="selectUser($event, user)" :class="{ active: userIsSelected(user) }")
-        .user-info(:class="{'actions-section-is-visible': actionsSectionIsVisible }")
+        .user-info
           UserLabelInline(:user="user")
-
         //- collaborator actions
-        section.subsection(v-if="props.showCollaboratorActions")
-          //- team user
-          template(v-if="teamUser(user)")
-            TeamLabel(:team="team")
+        .row.actions-row(v-if="props.showCollaboratorActions")
+          //- group user
+          template(v-if="groupUser(user)")
+            GroupLabel(:group="group")
           //- space creator
           template(v-else-if="userIsSpaceCreator(user)")
             span Space Creator
@@ -195,32 +208,26 @@ const removeTeamUser = async (user) => {
           template(v-else-if="currentUserIsMember")
             button.small-button(@click.stop="removeCollaborator(user)")
               img.icon.cancel(src="@/assets/add.svg")
-              span(v-if="isCurrentUser(user)") Leave Space
-              span(v-else) Remove Collaborator
+              span Remove
 
-        //- team user actions
-        section.subsection(v-if="props.showTeamUserActions")
-          //- admin actions
-          template(v-if="currentUserIsTeamAdmin")
-            .row
-              img.icon.mail(src="@/assets/mail.svg")
-              span {{ teamUser(user).email }}
-            .row
-              .button-wrap
-                button.small-button(@click.stop="toggleTeamRolePickerUserId(user)" :class="{ active: teamUserRolePickerIsVisibleUser(user) }")
-                  span {{ teamUserRole(user) }}
-                TeamUserRolePicker(:visible="teamUserRolePickerIsVisibleUser(user)" :user="user")
-              .button-wrap
-                button.small-button(@click.stop="removeTeamUser(user)" :class="{ active: isLoadingRemoveTeamUser(user) }")
-                  img.icon.cancel(src="@/assets/add.svg")
-                  span Remove from Team
-                  Loader(:visible="isLoadingRemoveTeamUser(user)" :isSmall="true")
-            .row(v-if="isErrorRemoveTeamUser(user)")
-              p.badge.danger
-                span (シ_ _)シ Could not remove team user, Please try again or contact support
-          //- non-admin actions
-          template(v-else)
-            span {{ teamUserRole(user) }}
+        //- group user actions
+        .row.actions-row(v-if="props.showGroupUserActions")
+          //- role
+          .button-wrap
+            button.small-button(@click.stop="toggleGroupRolePickerUserId(user)" :class="{ active: groupUserRolePickerIsVisibleUser(user) }" :disabled="!currentUserIsGroupAdmin")
+              span {{ groupUserRole(user) }}
+            GroupUserRolePicker(:visible="groupUserRolePickerIsVisibleUser(user)" :user="user")
+          //- remove user
+          .button-wrap(v-if="currentUserIsGroupAdmin || isCurrentUser(user)")
+            button.small-button(@click.stop="removeGroupUser($event, user)" :class="{ active: isLoadingRemoveGroupUser(user) }")
+              img.icon.cancel(src="@/assets/add.svg")
+              span Remove
+              Loader(:visible="isLoadingRemoveGroupUser(user)" :isSmall="true")
+
+        //- error
+        .row(v-if="isErrorRemoveGroupUser(user)")
+          p.badge.danger
+            span (シ_ _)シ Could not remove group user, Please try again or contact support
 </template>
 
 <style lang="stylus">
@@ -243,8 +250,6 @@ const removeTeamUser = async (user) => {
   .subsection
     width 100%
     border-top-left-radius 0
-  .actions-section-is-visible
-    .user-label-inline
-      border-bottom-left-radius 0
-      border-bottom-right-radius 0
+  .row.actions-row
+    margin-top 5px
 </style>

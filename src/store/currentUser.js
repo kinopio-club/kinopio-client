@@ -77,13 +77,12 @@ const initialState = {
   cardSettingsShiftEnterShouldAddChildCard: true,
   cardSettingsMaxCardWidth: consts.normalCardMaxWidth,
   prevSettingsSection: null,
-  betaPermissionCreateTeam: false,
   disabledKeyboardShortcuts: [],
 
   // space filters
 
   dialogSpaceFilterByType: null, // null, journals, spaces
-  dialogSpaceFilterByTeam: {},
+  dialogSpaceFilterByGroup: {},
   dialogSpaceFilterByUser: {},
   dialogSpaceFilterShowHidden: false,
   dialogSpaceFilterSortBy: null // null, updatedAt, createdAt, alphabetical
@@ -309,10 +308,10 @@ export default {
       state.dialogSpaceFilterShowHidden = value
       cache.updateUser('dialogSpaceFilterShowHidden', value)
     },
-    dialogSpaceFilterByTeam: (state, value) => {
+    dialogSpaceFilterByGroup: (state, value) => {
       utils.typeCheck({ value, type: 'object' })
-      state.dialogSpaceFilterByTeam = value
-      cache.updateUser('dialogSpaceFilterByTeam', value)
+      state.dialogSpaceFilterByGroup = value
+      cache.updateUser('dialogSpaceFilterByGroup', value)
     },
     dialogSpaceFilterSortBy: (state, value) => {
       state.dialogSpaceFilterSortBy = value
@@ -471,7 +470,7 @@ export default {
       context.commit('triggerUserIsLoaded', null, { root: true })
       context.dispatch('updateWeather')
       context.dispatch('updateJournalDailyPrompt')
-      context.dispatch('checkIfShouldJoinTeam')
+      context.dispatch('checkIfShouldJoinGroup')
     },
     updateWeather: async (context) => {
       const weather = await context.dispatch('api/weather', null, { root: true })
@@ -483,13 +482,13 @@ export default {
       if (!data) { return }
       context.commit('journalDailyPrompt', data)
     },
-    checkIfShouldJoinTeam: (context) => {
-      if (!context.rootState.teamToJoinOnLoad) { return }
+    checkIfShouldJoinGroup: (context) => {
+      if (!context.rootState.groupToJoinOnLoad) { return }
       const currentUserIsSignedIn = context.getters.isSignedIn
       if (currentUserIsSignedIn) {
-        context.dispatch('teams/joinTeam', null, { root: true })
+        context.dispatch('groups/joinGroup', null, { root: true })
       } else {
-        context.commit('notifySignUpToJoinTeam', true, { root: true })
+        context.commit('notifySignUpToJoinGroup', true, { root: true })
       }
     },
     update: (context, updates) => {
@@ -575,7 +574,10 @@ export default {
       }
       const remoteTags = await context.dispatch('api/getUserTags', null, { root: true }) || []
       context.commit('otherTags', remoteTags, { root: true })
-      context.commit('teams/restore', remoteUser.teams, { root: true })
+      context.dispatch('groups/restore', remoteUser.groups, { root: true })
+      if (context.rootState.shouldNotifyIsJoiningGroup) {
+        context.commit('notifyIsJoiningGroup', true, { root: true })
+      }
     },
     restoreUserFavorites: async (context) => {
       try {
@@ -851,20 +853,14 @@ export default {
     isSignedIn: (state) => {
       return Boolean(state.apiKey)
     },
-    isUpgradedOrOnTeam: (state, getters, rootState, rootGetters) => {
-      if (state.isUpgraded) { return true }
-      const userTeams = rootGetters['teams/byUser']()
-      const isTeamUser = Boolean(userTeams.length)
-      return isTeamUser
-    },
     cardsCreatedIsOverLimit: (state, getters, rootState) => {
       const cardsCreatedLimit = rootState.cardsCreatedLimit
-      if (getters.isUpgradedOrOnTeam) { return }
+      if (state.isUpgraded) { return }
       if (state.cardsCreatedCount >= cardsCreatedLimit) { return true }
     },
     cardsCreatedWillBeOverLimit: (state, getters, rootState) => (count) => {
       const cardsCreatedLimit = rootState.cardsCreatedLimit
-      if (getters.isUpgradedOrOnTeam) { return }
+      if (state.isUpgraded) { return }
       if (state.cardsCreatedCount + count >= cardsCreatedLimit) { return true }
     },
     canEditSpace: (state, getters, rootState, rootGetters) => (space) => {
@@ -921,8 +917,8 @@ export default {
       space = space || rootState.currentSpace
       const isSpaceUser = getters.isSpaceUser(space)
       const isSpaceCollaborator = getters.isSpaceCollaborator(space)
-      const isTeamMember = rootGetters['teams/isCurrentSpaceTeamUser']
-      return Boolean(isSpaceUser || isSpaceCollaborator || isTeamMember)
+      const isGroupMember = rootGetters['groups/currentUserIsCurrentSpaceGroupUser']
+      return Boolean(isSpaceUser || isSpaceCollaborator || isGroupMember)
     },
     isSpaceUser: (state, getters, rootState) => (space) => {
       let userIsInSpace = Boolean(space.users?.find(user => {
@@ -968,9 +964,9 @@ export default {
       return isReadOnlyInvitedToSpace || inviteRequiresSignIn
     },
     shouldPreventCardsCreatedCountUpdate: (state, getters, rootState, rootGetters) => {
-      const spaceUserIsUpgraded = rootGetters['currentSpace/spaceUserIsUpgradedOrOnTeam']
-      const spaceUserIsCurrentUser = rootGetters['currentSpace/spaceUserIsCurrentUser']
-      if (spaceUserIsUpgraded && !spaceUserIsCurrentUser) {
+      const spaceCreatorIsUpgraded = rootGetters['currentSpace/spaceCreatorIsUpgraded']
+      const spaceCreatorIsCurrentUser = rootGetters['currentSpace/spaceCreatorIsCurrentUser']
+      if (spaceCreatorIsUpgraded && !spaceCreatorIsCurrentUser) {
         return true
       }
     },
@@ -1001,7 +997,7 @@ export default {
     // AI Images
 
     AIImagesThisMonth: (state, getters) => {
-      if (getters.isUpgradedOrOnTeam) {
+      if (state.isUpgraded) {
         const currentMonth = dayjs().month()
         const currentYear = dayjs().year()
         return state.AIImages.filter(image => {
@@ -1020,7 +1016,7 @@ export default {
       return Math.floor(images.length / 2)
     },
     AIImagesLimit: (state, getters) => {
-      if (getters.isUpgradedOrOnTeam) {
+      if (state.isUpgraded) {
         return consts.AIImageLimitUpgradedUser
       } else {
         return consts.AIImageLimitFreeUser

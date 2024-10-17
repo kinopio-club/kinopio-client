@@ -7,40 +7,39 @@ import utils from '@/utils.js'
 const store = useStore()
 
 const props = defineProps({
-  team: Object,
+  group: Object,
   showName: Boolean
 })
 
-const isVisible = computed(() => Boolean(props.team))
+const isVisible = computed(() => Boolean(props.group))
 const shortName = computed(() => {
-  let name = props.team.name
+  let name = props.group.name
   name = utils.normalizeString(name)
   return name.charAt(0).toUpperCase()
 })
 const classes = computed(() => {
-  return utils.colorClasses({ backgroundColor: props.team.color })
+  return utils.colorClasses({ backgroundColor: props.group.color })
 })
 </script>
 
 <template lang="pug">
-span.team-label(v-if="isVisible" :title="props.team.name")
-  .badge.team-badge(:style="{ background: props.team.color }" :class="classes")
-    img.icon.team(src="@/assets/team.svg")
+span.group-label(v-if="isVisible" :title="props.group.name")
+  .badge.group-badge(:style="{ background: props.group.color }" :class="classes")
+    img.icon.group(src="@/assets/group.svg")
     span {{ shortName }}
-  span(v-if="props.showName") {{ props.team.name }}
+  span(v-if="props.showName") {{ props.group.name }}
 </template>
 
 <style lang="stylus">
-.team-label
+.group-label
   flex-shrink 0
-  .team-badge
+  .group-badge
     border-radius 100px
     min-width initial
     min-height initial
     padding 0 6px
     display inline
-    .icon.team
-      vertical-align 1px
+    word-break keep-all
     span
       vertical-align 1.5px
       font-size 12px

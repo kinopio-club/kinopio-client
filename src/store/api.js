@@ -327,9 +327,8 @@ const self = {
       if (!shouldRequest({ apiKey, isOnline })) { return }
       try {
         const options = await context.dispatch('requestOptions', { method: 'GET', space: context.rootState.currentSpace })
-        context.commit('isLoadingUserTeamsSpaces', true, { root: true })
+        context.commit('isLoadingGroups', true, { root: true })
         const response = await fetch(`${consts.apiHost()}/user`, options)
-        context.commit('isLoadingUserTeamsSpaces', false, { root: true })
         return normalizeResponse(response)
       } catch (error) {
         context.dispatch('handleServerError', { name: 'getUser', error })
@@ -415,17 +414,15 @@ const self = {
         context.dispatch('handleServerError', { name: 'getUserSpaces', error })
       }
     },
-    getUserTeamSpaces: async (context) => {
-      const teams = context.rootGetters['teams/byUser']()
-      if (!teams.length) { return }
+    getUserGroupSpaces: async (context) => {
+      const groups = context.rootGetters['groups/byUser']()
+      if (!groups.length) { return }
       const apiKey = context.rootState.currentUser.apiKey
       const isOnline = context.rootState.isOnline
       if (!shouldRequest({ apiKey, isOnline })) { return }
       try {
         const options = await context.dispatch('requestOptions', { method: 'GET', space: context.rootState.currentSpace })
-        context.commit('isLoadingUserTeamsSpaces', true, { root: true })
-        const response = await fetch(`${consts.apiHost()}/user/team-spaces`, options)
-        context.commit('isLoadingUserTeamsSpaces', false, { root: true })
+        const response = await fetch(`${consts.apiHost()}/user/group-spaces`, options)
         const currentUser = context.rootState.currentUser
         let spaces = await normalizeResponse(response)
         return utils.AddCurrentUserIsCollaboratorToSpaces(spaces, currentUser)
@@ -1212,58 +1209,69 @@ const self = {
       }
     },
 
-    // Team
+    // Group
 
-    getTeam: async (context, teamId) => {
+    getGroup: async (context, groupId) => {
       const apiKey = context.rootState.currentUser.apiKey
       const isOnline = context.rootState.isOnline
       if (!shouldRequest({ apiKey, isOnline })) { return }
       try {
-        console.log('🛬 getting remote team', teamId)
+        console.log('🛬 getting remote group', groupId)
         const options = await context.dispatch('requestOptions', { method: 'GET', space: context.rootState.currentSpace })
-        const response = await fetch(`${consts.apiHost()}/team/${teamId}`, options)
+        const response = await fetch(`${consts.apiHost()}/group/${groupId}`, options)
         return normalizeResponse(response)
       } catch (error) {
-        context.dispatch('handleServerError', { name: 'getTeam', error })
+        context.dispatch('handleServerError', { name: 'getGroup', error })
       }
     },
-    createTeam: async (context, body) => {
+    createGroup: async (context, body) => {
       const apiKey = context.rootState.currentUser.apiKey
       const isOnline = context.rootState.isOnline
       if (!shouldRequest({ apiKey, isOnline })) { return }
       try {
         const options = await context.dispatch('requestOptions', { body, method: 'POST', space: context.rootState.currentSpace })
-        const response = await fetch(`${consts.apiHost()}/team/`, options)
+        const response = await fetch(`${consts.apiHost()}/group/`, options)
         return normalizeResponse(response)
       } catch (error) {
-        context.dispatch('handleServerError', { name: 'createTeamUser', error })
+        context.dispatch('handleServerError', { name: 'createGroup', error })
       }
     },
-    createTeamUser: async (context, body) => {
+    createGroupUser: async (context, body) => {
       const apiKey = context.rootState.currentUser.apiKey
       const isOnline = context.rootState.isOnline
       if (!shouldRequest({ apiKey, isOnline })) { return }
       try {
         const options = await context.dispatch('requestOptions', { body, method: 'POST', space: context.rootState.currentSpace })
-        const response = await fetch(`${consts.apiHost()}/team/team-user`, options)
+        const response = await fetch(`${consts.apiHost()}/group/group-user`, options)
         return normalizeResponse(response)
       } catch (error) {
-        context.dispatch('handleServerError', { name: 'createTeamUser', error })
+        context.dispatch('handleServerError', { name: 'createGroupUser', error })
       }
     },
-    removeTeamUser: async (context, body) => {
+    removeGroupUser: async (context, body) => {
       const apiKey = context.rootState.currentUser.apiKey
       const isOnline = context.rootState.isOnline
       if (!shouldRequest({ apiKey, isOnline })) { return }
       try {
         const options = await context.dispatch('requestOptions', { body, method: 'DELETE', space: context.rootState.currentSpace })
-        const response = await fetch(`${consts.apiHost()}/team/team-user`, options)
+        const response = await fetch(`${consts.apiHost()}/group/group-user`, options)
         return normalizeResponse(response)
       } catch (error) {
-        context.dispatch('handleServerError', { name: 'removeTeamUser', error })
+        context.dispatch('handleServerError', { name: 'removeGroupUser', error })
+      }
+    },
+    deleteGroupPermanent: async (context, body) => {
+      const apiKey = context.rootState.currentUser.apiKey
+      const isOnline = context.rootState.isOnline
+      if (!shouldRequest({ apiKey, isOnline })) { return }
+      try {
+        const options = await context.dispatch('requestOptions', { body, method: 'DELETE', space: context.rootState.currentSpace })
+        const response = await fetch(`${consts.apiHost()}/group/`, options)
+        return normalizeResponse(response)
+      } catch (error) {
+        context.dispatch('handleServerError', { name: 'deleteGroupPermanent', error })
       }
     }
-
   }
 }
 

@@ -37,7 +37,7 @@ const toggleStudentInfoIsVisible = () => {
 section.subsection(v-if="state.studentInfoIsVisible" @click.stop)
   p If you're a student or teacher,{{' '}}
     a(href="mailto:hi@kinopio.club?subject=Education Discount") email me
-    span {{' '}}for a 50% discount off the yearly plan
+    span {{' '}}for a 50% discount off the yearly plan. Be sure to include your Kinopio account email address.
 </template>
 
 <style lang="stylus">

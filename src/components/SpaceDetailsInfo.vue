@@ -12,8 +12,8 @@ import ReadOnlySpaceInfoBadges from '@/components/ReadOnlySpaceInfoBadges.vue'
 import AddToExplore from '@/components/AddToExplore.vue'
 import AskToAddToExplore from '@/components/AskToAddToExplore.vue'
 import FavoriteSpaceButton from '@/components/FavoriteSpaceButton.vue'
-import TeamPicker from '@/components/dialogs/TeamPicker.vue'
-import TeamLabel from '@/components/TeamLabel.vue'
+import AddToGroup from '@/components/dialogs/AddToGroup.vue'
+import GroupLabel from '@/components/GroupLabel.vue'
 import cache from '@/cache.js'
 import utils from '@/utils.js'
 
@@ -57,9 +57,9 @@ const state = reactive({
   privacyPickerIsVisible: false,
   settingsIsVisible: false,
   exportIsVisible: false,
-  teamPickerIsVisible: false,
+  addToGroupIsVisible: false,
   error: {
-    memberAssignTeam: false
+    memberAssignGroup: false
   }
 })
 
@@ -215,17 +215,17 @@ const toggleExportIsVisible = () => {
   state.exportIsVisible = !isVisible
   emit('updateDialogHeight')
 }
-const toggleTeamPickerIsVisible = () => {
-  const isVisible = state.teamPickerIsVisible
-  state.error.memberAssignTeam = false
+const toggleAddToGroupIsVisible = () => {
+  const isVisible = state.addToGroupIsVisible
+  state.error.memberAssignGroup = false
   closeDialogsAndEmit()
-  state.teamPickerIsVisible = !isVisible
+  state.addToGroupIsVisible = !isVisible
 }
 const closeDialogs = () => {
   state.backgroundIsVisible = false
   state.privacyPickerIsVisible = false
   state.exportIsVisible = false
-  state.teamPickerIsVisible = false
+  state.addToGroupIsVisible = false
 }
 const closeDialogsAndEmit = () => {
   closeDialogs()
@@ -235,35 +235,35 @@ const closeAllDialogs = () => {
   store.dispatch('closeAllDialogs')
 }
 
-// team
+// group
 
-const userTeams = computed(() => store.getters['teams/byUser']())
-const spaceTeam = computed(() => store.getters['teams/spaceTeam']())
-const checkCanAssignTeam = () => {
+const userGroups = computed(() => store.getters['groups/byUser']())
+const spaceGroup = computed(() => store.getters['groups/spaceGroup']())
+const checkCanAssignGroup = () => {
   if (currentUserIsSpaceCreator.value) {
     return true
   } else {
-    state.error.memberAssignTeam = true
+    state.error.memberAssignGroup = true
   }
 }
-const teamButtonTitle = computed(() => {
+const groupButtonTitle = computed(() => {
   let addString = 'Add'
-  if (spaceTeam.value) {
+  if (spaceGroup.value) {
     addString = 'Added'
   }
-  return `${addString} to Team`
+  return `${addString} to Group`
 })
-const toggleSpaceTeam = (team) => {
-  if (!checkCanAssignTeam()) { return }
-  if (currentSpace.value.teamId === team.id) {
-    removeSpaceTeam()
+const toggleSpaceGroup = (group) => {
+  if (!checkCanAssignGroup()) { return }
+  if (currentSpace.value.groupId === group.id) {
+    removeSpaceGroup()
   } else {
-    store.dispatch('teams/addCurrentSpace', team)
+    store.dispatch('groups/addCurrentSpace', group)
     updateLocalSpaces()
   }
 }
-const removeSpaceTeam = () => {
-  store.dispatch('teams/removeCurrentSpace')
+const removeSpaceGroup = () => {
+  store.dispatch('groups/removeCurrentSpace')
   updateLocalSpaces()
 }
 
@@ -305,34 +305,34 @@ const removeSpaceTeam = () => {
       button.small-button(:class="{active: dialogIsPinned}")
         img.icon.pin(src="@/assets/pin.svg")
 
-ReadOnlySpaceInfoBadges(:spaceTeam="spaceTeam")
+ReadOnlySpaceInfoBadges(:spaceGroup="spaceGroup")
 
 //- member options
 template(v-if="isSpaceMember")
   .row
     //- Privacy
     PrivacyButton(:privacyPickerIsVisible="state.privacyPickerIsVisible" :showShortName="true" @togglePrivacyPickerIsVisible="togglePrivacyPickerIsVisible" @closeDialogs="closeDialogs" @updateLocalSpaces="updateLocalSpaces")
-      //- toggle space team | favorite
-    template(v-if="userTeams")
+      //- toggle space group | favorite
+    template(v-if="userGroups")
       .button-wrap
         .segmented-buttons
-          //- Team
-          button.team-button(:title="teamButtonTitle" :class="{active: state.teamPickerIsVisible || spaceTeam}" @click.left.prevent.stop="toggleTeamPickerIsVisible" @keydown.stop.enter="toggleTeamPickerIsVisible")
-            img.icon.team(src="@/assets/team.svg")
+          //- Group
+          button.group-button(:title="groupButtonTitle" :class="{active: state.addToGroupIsVisible || spaceGroup}" @click.left.prevent.stop="toggleAddToGroupIsVisible" @keydown.stop.enter="toggleAddToGroupIsVisible")
+            img.icon.group(src="@/assets/group.svg")
           //- Favorite
           FavoriteSpaceButton(:parentIsDialog="true" @updateLocalSpaces="updateLocalSpaces")
-        TeamPicker(:visible="state.teamPickerIsVisible" @selectTeam="toggleSpaceTeam" @clearTeam="removeSpaceTeam" :teams="userTeams" :selectedTeam="spaceTeam" @closeDialogs="closeDialogs")
+        AddToGroup(:visible="state.addToGroupIsVisible" @selectGroup="toggleSpaceGroup" :groups="userGroups" :selectedGroup="spaceGroup" @closeDialogs="closeDialogs")
     template(v-else)
       //- Favorite
       FavoriteSpaceButton(:parentIsDialog="true" @updateLocalSpaces="updateLocalSpaces")
     //- Settings
     .button-wrap
-      button(@click="toggleSettingsIsVisible" :class="{active: state.settingsIsVisible}")
+      button(@click="toggleSettingsIsVisible" :class="{active: state.settingsIsVisible}" title="Space Settings")
         img.icon.settings(src="@/assets/settings.svg")
-  .row(v-if="state.error.memberAssignTeam")
+  .row(v-if="state.error.memberAssignGroup")
     .badge.danger
       img.icon.cancel(src="@/assets/add.svg")
-      span Only space creator can assign to team
+      span Only space creator can assign to group
 
 //- read only options
 .row(v-if="!isSpaceMember")
@@ -454,7 +454,7 @@ template(v-if="state.settingsIsVisible")
   .background-preview-wrap
     margin-bottom 6px
 
-.team-button
+.group-button
   padding-right 6px
 
 .space-settings

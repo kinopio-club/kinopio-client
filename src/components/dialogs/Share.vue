@@ -4,6 +4,7 @@ import { useStore } from 'vuex'
 
 import PrivacyButton from '@/components/PrivacyButton.vue'
 import InviteToSpace from '@/components/InviteToSpace.vue'
+import InviteToGroup from '@/components/InviteToGroup.vue'
 import RssFeeds from '@/components/dialogs/RssFeeds.vue'
 import Embed from '@/components/dialogs/Embed.vue'
 import utils from '@/utils.js'
@@ -11,6 +12,7 @@ import ImportExport from '@/components/dialogs/ImportExport.vue'
 import AddToExplore from '@/components/AddToExplore.vue'
 import AskToAddToExplore from '@/components/AskToAddToExplore.vue'
 import ReadOnlySpaceInfoBadges from '@/components/ReadOnlySpaceInfoBadges.vue'
+import SpaceUsersButton from '@/components/SpaceUsersButton.vue'
 import consts from '@/consts.js'
 const store = useStore()
 
@@ -156,6 +158,12 @@ const users = computed(() => {
   items = items.concat(store.state.currentSpace.collaborators)
   return items
 })
+
+// groups
+
+const currentUserIsCurrentSpaceGroupUser = computed(() => store.getters['groups/currentUserIsCurrentSpaceGroupUser'])
+const spaceGroup = computed(() => store.getters['groups/spaceGroup']())
+
 </script>
 
 <template lang="pug">
@@ -171,7 +179,7 @@ dialog.share.wide(v-if="props.visible" :open="props.visible" @click.left.stop="c
 
   section(v-if="spaceIsRemote")
     ReadOnlySpaceInfoBadges
-    PrivacyButton(:privacyPickerIsVisible="state.privacyPickerIsVisible" :showDescription="true" @togglePrivacyPickerIsVisible="togglePrivacyPickerIsVisible" @closeDialogs="closeDialogs")
+    PrivacyButton(:privacyPickerIsVisible="state.privacyPickerIsVisible" @togglePrivacyPickerIsVisible="togglePrivacyPickerIsVisible" @closeDialogs="closeDialogs")
 
     //- Copy URL
     section.subsection(:class="{'share-url-subsection-member': isSpaceMember}")
@@ -191,8 +199,12 @@ dialog.share.wide(v-if="props.visible" :open="props.visible" @click.left.stop="c
             input(type="checkbox" :value="state.isShareInPresentationMode")
             img.icon(src="@/assets/presentation.svg")
 
+  //- collaborators
+  section
+    SpaceUsersButton(:showLabel="true")
   //- Invite
-  InviteToSpace(v-if="isSpaceMember && currentUserIsSignedIn" @closeDialogs="closeDialogs" @emailInvitesIsVisible="emailInvitesIsVisible")
+  InviteToGroup(:visible="currentUserIsCurrentSpaceGroupUser" :group="spaceGroup" @closeDialogs="closeDialogs")
+  InviteToSpace(:visible="isSpaceMember && currentUserIsSignedIn" @closeDialogs="closeDialogs" @emailInvitesIsVisible="emailInvitesIsVisible")
 
   section(v-if="!spaceIsRemote")
     p
@@ -203,12 +215,11 @@ dialog.share.wide(v-if="props.visible" :open="props.visible" @click.left.stop="c
 
   //- Explore
   section(v-if="exploreSectionIsVisible")
-    section.subsection
-      .row
-        p Share with the Community
-      .row
-        AddToExplore
-        AskToAddToExplore
+    .row
+      p Share with the Community
+    .row
+      AddToExplore
+      AskToAddToExplore
 
   //- Import, Export, Embed
   section.import-export-section
@@ -308,7 +319,4 @@ dialog.share
       margin-top 0
     label + label
       margin-left 6px
-
-  .import-export-section
-    border-top 1px solid var(--primary-border)
 </style>

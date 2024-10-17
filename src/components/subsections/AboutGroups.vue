@@ -3,27 +3,26 @@ import { reactive, computed, onMounted, onBeforeUnmount, defineProps, defineEmit
 import { useStore } from 'vuex'
 const store = useStore()
 
-const props = defineProps({
-  message: String
-})
 </script>
 
 <template lang="pug">
-section.teams-beta-info
-  p {{ props.message }}
-  p Interested in trying teams in your company?
+section.about-groups
+  p Group spaces together and collaborate with group members
   p
-    a(href="mailto:support@kinopio.club?subject=Kinopio Teams Beta")
+    a(href="https://help.kinopio.club/posts/groups")
       button
-        img.icon(src="@/assets/mail.svg")
-        span Email Support
+        span More Info{{' '}}
+        img.icon.visit(src="@/assets/visit.svg")
   img.placeholder(src="@/assets/collaborators.jpg")
 </template>
 
 <style lang="stylus">
-.teams-beta-info
+section.about-groups
+  .title-row
+    align-items flex-start
+  .small-button
+    margin-top 0
   .placeholder
-    border-radius var(--small-entity-radius)
+    border-radius var(--entity-radius)
     margin-top 10px
-
 </style>

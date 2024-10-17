@@ -11,13 +11,14 @@ const props = defineProps({
 })
 
 const privacyState = computed(() => {
-  return privacy.states().find(state => {
-    return state.name === props.privacy
+  return privacy.states().find(item => {
+    return item.name === props.privacy
   })
 })
 const isOpen = computed(() => privacyState.value.name === 'open')
 const isClosed = computed(() => privacyState.value.name === 'closed' && !props.closedIsNotVisible)
 const isPrivate = computed(() => privacyState.value.name === 'private')
+const friendlyName = computed(() => privacyState.value.friendlyName)
 </script>
 
 <template lang="pug">
@@ -25,16 +26,19 @@ img.icon.privacy-icon(
   v-if="isOpen"
   src="@/assets/comment.svg"
   :class="privacyState.name"
+  :title="friendlyName"
 )
 img.icon.privacy-icon(
   v-else-if="isClosed"
   src="@/assets/unlock.svg"
   :class="privacyState.name"
+  :title="friendlyName"
 )
 img.icon.privacy-icon(
   v-else-if="isPrivate"
   src="@/assets/lock.svg"
   :class="privacyState.name"
+  :title="friendlyName"
 )
 </template>
 

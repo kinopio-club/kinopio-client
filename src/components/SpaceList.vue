@@ -12,7 +12,7 @@ import UserLabelInline from '@/components/UserLabelInline.vue'
 import NameMatch from '@/components/NameMatch.vue'
 import OfflineBadge from '@/components/OfflineBadge.vue'
 import SpaceTodayJournalBadge from '@/components/SpaceTodayJournalBadge.vue'
-import TeamLabel from '@/components/TeamLabel.vue'
+import GroupLabel from '@/components/GroupLabel.vue'
 import utils from '@/utils.js'
 import cache from '@/cache.js'
 
@@ -85,7 +85,7 @@ const props = defineProps({
   search: String,
   parentDialog: String,
   previewImageIsWide: Boolean,
-  showSpaceTeams: Boolean
+  showSpaceGroups: Boolean
 })
 
 const state = reactive({
@@ -376,11 +376,11 @@ const checkmarkSpace = (space) => {
   emit('checkmarkSpace', space)
 }
 
-// team
+// group
 
-const team = (teamId) => {
-  if (!teamId) { return }
-  return store.getters['teams/byId'](teamId)
+const group = (groupId) => {
+  if (!groupId) { return }
+  return store.getters['groups/byId'](groupId)
 }
 </script>
 
@@ -439,9 +439,9 @@ span.space-list-wrap
             //- preview image
             .preview-thumbnail-image-wrap(v-if="space.previewThumbnailImage && isOnline" :class="{wide: previewImageIsWide}")
               img.preview-thumbnail-image(:src="space.previewThumbnailImage" loading="lazy")
-            //- team
-            template(v-if="team(space.teamId) && props.showSpaceTeams")
-              TeamLabel(:team="team(space.teamId)")
+            //- group
+            template(v-if="group(space.groupId) && props.showSpaceGroups")
+              GroupLabel(:group="group(space.groupId)")
             //- offline
             span(v-if="isOffline && isNotCached(space.id)")
               OfflineBadge(:isInline="true" :isDanger="true")
@@ -516,7 +516,7 @@ span.space-list-wrap
       width 12px
       vertical-align -2px
       margin-top 6px
-    .icon.team
+    .icon.group
       width initial
       height 10px
 

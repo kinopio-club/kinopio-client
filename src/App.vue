@@ -676,6 +676,8 @@ dialog
     width 230px
   &.wide
     width 280px
+  &.overflow-auto
+    overflow auto
   button + button,
   button + input,
   button + label,
@@ -727,8 +729,6 @@ dialog
       user-select text
       &:first-child
         margin-top 0
-  section.title-section
-    border-bottom 1px solid var(--primary-border)
   section.subsection
     background-color var(--secondary-background)
     padding var(--subsection-padding)
@@ -897,7 +897,7 @@ button
   dialog
     top calc(100% - 8px)
 
-.icon.team
+.icon.group
   height 11px
 
 .icon.sunglasses

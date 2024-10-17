@@ -9,7 +9,7 @@ import utils from '@/utils.js'
 import templates from '@/data/templates.js'
 import PrivacyIcon from '@/components/PrivacyIcon.vue'
 import OfflineBadge from '@/components/OfflineBadge.vue'
-import TeamLabel from '@/components/TeamLabel.vue'
+import GroupLabel from '@/components/GroupLabel.vue'
 import Loader from '@/components/Loader.vue'
 
 import dayjs from 'dayjs'
@@ -70,7 +70,7 @@ const currentUserIsTiltingCard = computed(() => store.state.currentUserIsTilting
 const currentUserIsPanning = computed(() => store.state.currentUserIsPanning)
 const currentUserIsPanningReady = computed(() => store.state.currentUserIsPanningReady)
 const currentUserIsSignedIn = computed(() => store.getters['currentUser/isSignedIn'])
-const currentUserIsUpgraded = computed(() => store.getters['currentUser/isUpgradedOrOnTeam'])
+const currentUserIsUpgraded = computed(() => store.state.currentUser.isUpgraded)
 const isTouchDevice = computed(() => store.state.isTouchDevice)
 
 // space
@@ -158,8 +158,8 @@ const notifyCurrentSpaceIsNowRemoved = computed(() => store.state.notifyCurrentS
 const notifyThanksForDonating = computed(() => store.state.notifyThanksForDonating)
 const notifyThanksForUpgrading = computed(() => store.state.notifyThanksForUpgrading)
 const notifySpaceIsUnavailableOffline = computed(() => store.getters['currentSpace/isUnavailableOffline'])
-const notifyIsJoiningTeam = computed(() => store.state.notifyIsJoiningTeam)
-const notifySignUpToJoinTeam = computed(() => store.state.notifySignUpToJoinTeam)
+const notifyIsJoiningGroup = computed(() => store.state.notifyIsJoiningGroup)
+const notifySignUpToJoinGroup = computed(() => store.state.notifySignUpToJoinGroup)
 const notifificationClasses = (item) => {
   let classes = {
     'danger': item.type === 'danger',
@@ -304,8 +304,8 @@ aside.notifications(@click.left="closeAllDialogs")
       .row(v-if="item.badge")
         span.badge.info {{ item.badge }}
       span.label-badge(v-if="item.label") {{item.label}}
-      template(v-if="item.team")
-        TeamLabel(:team="item.team")
+      template(v-if="item.group")
+        GroupLabel(:group="item.group")
       template(v-if="item.icon")
         img.icon(v-if="item.icon === 'open'" src="@/assets/open.svg" class="open")
         img.icon(v-else-if="item.icon === 'press-and-hold'" src="@/assets/press-and-hold.svg" class="press-and-hold")
@@ -317,7 +317,7 @@ aside.notifications(@click.left="closeAllDialogs")
         img.icon(v-else-if="item.icon === 'minimap'" src="@/assets/minimap.svg" class="minimap")
         img.icon(v-else-if="item.icon === 'offline'" src="@/assets/offline.svg" class="offline")
         img.icon(v-else-if="item.icon === 'mail'" src="@/assets/mail.svg" class="mail")
-        img.icon(v-else-if="item.icon === 'team'" src="@/assets/team.svg" class="team")
+        img.icon(v-else-if="item.icon === 'group'" src="@/assets/group.svg" class="group")
       span {{item.message}}
     .row(v-if="item.isPersistentItem")
       button.small-button(@click="removeById(item)")
@@ -480,16 +480,21 @@ aside.notifications(@click.left="closeAllDialogs")
     .row
       p Only spaces that you're a member of, and have visited recently, are available offline
 
-  //- team
+  //- group
 
-  .persistent-item(v-if="notifyIsJoiningTeam")
+  .persistent-item(v-if="notifyIsJoiningGroup")
     p
       Loader(:visible="true" :isSmall="true")
-      span Joining Team…
+      span Joining Group…
 
-  .persistent-item(v-if="notifySignUpToJoinTeam" ref="readOnlyElement" :class="{'notification-jiggle': state.readOnlyJiggle}")
-    p
-      button(@click.left.stop="triggerSignUpOrInIsVisible") Sign Up or In to Join Team
+  .persistent-item(v-if="notifySignUpToJoinGroup" ref="readOnlyElement" :class="{'notification-jiggle': state.readOnlyJiggle}")
+    .row
+      p
+        img.icon.group(src="@/assets/group.svg")
+        span You've been invited to a group
+    .row
+      p
+        button(@click.left.stop="triggerSignUpOrInIsVisible") Sign Up or In to Join Group
 
 </template>
 

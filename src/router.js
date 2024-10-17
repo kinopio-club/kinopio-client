@@ -194,16 +194,16 @@ const router = createRouter({
         next()
       }
     }, {
-      path: '/team/invite',
-      name: 'teamInvite',
+      path: '/group/invite',
+      name: 'groupInvite',
       component: Space,
       beforeEnter: (to, from, next) => {
         const urlParams = new URLSearchParams(window.location.search)
-        const teamId = urlParams.get('teamId')
+        const groupId = urlParams.get('groupId')
         const collaboratorKey = urlParams.get('collaboratorKey')
-        pageMeta.team({ teamId, isTeamInvite: true })
-        store.commit('teamToJoinOnLoad', { teamId, collaboratorKey })
-        store.commit('notifyIsJoiningTeam', true)
+        pageMeta.groupInvite({ groupId, isGroupInvite: true })
+        store.commit('groupToJoinOnLoad', { groupId, collaboratorKey })
+        store.commit('shouldNotifyIsJoiningGroup', true)
         next()
       }
     }, {

@@ -18,8 +18,8 @@ const fetchSpacePublicMeta = async (spaceId) => {
     console.warn('🚑 fetchSpacePublicMeta', error)
   }
 }
-const fetchTeamPublicMeta = async (teamId) => {
-  const url = `${consts.apiHost()}/team/${teamId}/public-meta`
+const fetchGroupPublicMeta = async (groupId) => {
+  const url = `${consts.apiHost()}/group/${groupId}/public-meta`
   try {
     const response = await fetch(url)
     if (response.status !== 200) {
@@ -28,7 +28,7 @@ const fetchTeamPublicMeta = async (teamId) => {
     const data = await response.json()
     return data
   } catch (error) {
-    console.warn('🚑 fetchTeamPublicMeta', error)
+    console.warn('🚑 fetchGroupPublicMeta', error)
   }
 }
 
@@ -120,10 +120,10 @@ export default {
     scriptTag.text = jsonLD
     document.head.appendChild(scriptTag)
   },
-  async team ({ teamId, isTeamInvite }) {
-    const meta = await fetchTeamPublicMeta(teamId)
-    let name = `${meta.name} – Kinopio Team`
-    if (isTeamInvite) {
+  async groupInvite ({ groupId, isGroupInvite }) {
+    const meta = await fetchGroupPublicMeta(groupId)
+    let name = `${meta.name} – Kinopio Group`
+    if (isGroupInvite) {
       name = `[Invite] ${name}`
     }
     let description = 'Work together on shared whiteboards, brainstorms, and diagrams'

@@ -5,7 +5,6 @@ import { useStore, mapState, mapGetters } from 'vuex'
 import Loader from '@/components/Loader.vue'
 import User from '@/components/User.vue'
 import EmailInvites from '@/components/dialogs/EmailInvites.vue'
-import SpaceUsersButton from '@/components/SpaceUsersButton.vue'
 import utils from '@/utils.js'
 import consts from '@/consts.js'
 
@@ -23,6 +22,10 @@ onMounted(() => {
 
 const emit = defineEmits(['closeDialogs', 'emailInvitesIsVisible'])
 
+const props = defineProps({
+  visible: Boolean
+})
+
 const state = reactive({
   tipsIsVisible: false,
   emailInvitesIsVisible: false,
@@ -31,7 +34,7 @@ const state = reactive({
 })
 
 const currentUser = computed(() => store.state.currentUser)
-const currentUserIsUpgraded = computed(() => store.getters['currentUser/isUpgradedOrOnTeam'])
+const currentUserIsUpgraded = computed(() => store.state.currentUser.isUpgraded)
 const spaceName = computed(() => store.state.currentSpace.name)
 const randomUser = computed(() => {
   const luminosity = store.state.currentUser.theme
@@ -44,11 +47,14 @@ const toggleTipsIsVisible = () => {
 }
 const isSecureAppContextIOS = computed(() => consts.isSecureAppContextIOS)
 const spaceIsPrivate = computed(() => store.state.currentSpace.privacy === 'private')
-
+const closeDialogs = () => {
+  emit('closeDialogs')
+}
 // invite types
 
 const inviteTypeIsEdit = computed(() => state.inviteType === 'edit')
 const inviteTypeIsReadOnly = computed(() => state.inviteType === 'readOnly')
+const inviteTypeIsCommentOnly = computed(() => state.inviteType === 'commentOnly')
 const toggleInviteType = (type) => {
   state.inviteType = type
 }
@@ -58,7 +64,7 @@ const toggleInviteType = (type) => {
 const editUrl = computed(() => {
   const currentSpace = store.state.currentSpace
   const spaceId = currentSpace.id
-  const url = utils.inviteUrl({ spaceId, spaceName: spaceName.value, collaboratorKey: collaboratorKey.value, isCommentMode: state.isShareInCommentMode })
+  const url = utils.inviteUrl({ spaceId, spaceName: spaceName.value, collaboratorKey: collaboratorKey.value })
   console.log('🍇 invite edit url', url)
   return url
 })
@@ -70,6 +76,13 @@ const readOnlyUrl = computed(() => {
   console.log('🍇 invite read only url', url, 'readOnlyKey:', readOnlyKey)
   return url
 })
+const commentOnlyUrl = computed(() => {
+  const currentSpace = store.state.currentSpace
+  const spaceId = currentSpace.id
+  const url = utils.inviteUrl({ spaceId, spaceName: spaceName.value, collaboratorKey: collaboratorKey.value, isCommentMode: true })
+  console.log('🍇 invite comment only url', url)
+  return url
+})
 
 //  copy invite urls
 
@@ -79,6 +92,8 @@ const copyInviteUrl = async (event) => {
     url = editUrl.value
   } else if (inviteTypeIsReadOnly.value) {
     url = readOnlyUrl.value
+  } else {
+    url = commentOnlyUrl.value
   }
   store.commit('clearNotificationsWithPosition')
   const position = utils.cursorPositionInPage(event)
@@ -93,36 +108,12 @@ const copyInviteUrl = async (event) => {
 const inviteButtonLabel = computed(() => {
   if (inviteTypeIsEdit.value) {
     return 'Copy Invite to Edit URL'
-  } else {
-    // if inviteTypeIsReadOnly.value
+  } else if (inviteTypeIsReadOnly.value) {
     return 'Copy Invite to Read URL'
+  } else {
+    return 'Copy Invite to Comment URL'
   }
 })
-
-// comment mode
-
-const toggleIsShareInCommentMode = () => {
-  emit('closeDialogs')
-  state.isShareInCommentMode = !state.isShareInCommentMode
-}
-
-// native web share
-
-// const webShareIsSupported = computed(() => navigator.share)
-// const webShareInvite = () => {
-//   let title
-//   if (inviteTypeIsEdit.value) {
-//     title = 'Invite to Edit'
-//   } else if (inviteTypeIsReadOnly.value) {
-//     title = 'Invite to Read Only'
-//   }
-//   const data = {
-//     title,
-//     text: spaceName.value,
-//     url: editUrl.value
-//   }
-//   navigator.share(data)
-// }
 
 // email invites
 
@@ -131,7 +122,6 @@ const closeChildDialogs = () => {
 }
 const toggleEmailInvitesIsVisible = () => {
   const value = !state.emailInvitesIsVisible
-  emit('closeDialogs')
   state.emailInvitesIsVisible = value
 }
 watch(() => state.emailInvitesIsVisible, (value, prevValue) => {
@@ -140,9 +130,7 @@ watch(() => state.emailInvitesIsVisible, (value, prevValue) => {
 </script>
 
 <template lang="pug">
-section.invite-to-space
-  .row
-    SpaceUsersButton(:showLabel="true")
+section.invite-to-space(v-if="props.visible" @click.stop="closeDialogs")
   .row
     p
       .users
@@ -158,21 +146,20 @@ section.invite-to-space
         span Can Edit
       button(@click="toggleInviteType('readOnly')" :class="{active: inviteTypeIsReadOnly}")
         span Read Only
+      button(@click="toggleInviteType('commentOnly')" :class="{active: inviteTypeIsCommentOnly}")
+        img.icon.comment(src="@/assets/comment.svg")
+        span Only
 
   section.subsection.invite-url-subsection
-    //- Copy Invite
+    //- comment only warning
+    .row(v-if="inviteTypeIsCommentOnly")
+      .badge.info Comment Only invites are in beta, so only invite people you trust
+    //- copy invite
     .row
-      .segmented-buttons
-        button(@click.left="copyInviteUrl")
-          img.icon.copy(src="@/assets/copy.svg")
-          span {{inviteButtonLabel}}
-        //- button(v-if="webShareIsSupported" @click="webShareInvite")
-        //-   img.icon.share(src="@/assets/share.svg")
-      //- comment mode
-      label.label.small-button.extra-options-button.inline-button(v-if="inviteTypeIsEdit" title="Share in Comment Mode" @mouseup.prevent.stop.left="toggleIsShareInCommentMode" @touchend.prevent.stop="toggleIsShareInCommentMode" :class="{active: state.isShareInCommentMode}")
-        input(type="checkbox" :value="state.isShareInCommentMode")
-        img.icon.comment(src="@/assets/comment.svg")
-
+      button(@click.left="copyInviteUrl")
+        img.icon.copy(src="@/assets/copy.svg")
+        span {{inviteButtonLabel}}
+    //- email invites
     .row(v-if="inviteTypeIsEdit")
       .button-wrap
         button(@click.stop="toggleEmailInvitesIsVisible" :class="{ active: state.emailInvitesIsVisible }")
