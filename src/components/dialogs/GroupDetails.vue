@@ -63,6 +63,12 @@ const currentUser = computed(() => store.state.currentUser)
 
 // group
 
+const groupUser = computed(() => {
+  return store.getters['groups/groupUser']({
+    userId: store.state.currentUser.id,
+    groupId: props.group.id
+  })
+})
 const currentUserIsGroupAdmin = computed(() => {
   return store.getters['groups/groupUserIsAdmin']({
     userId: store.state.currentUser.id,
@@ -171,7 +177,7 @@ dialog.group-details(v-if="visible" :open="visible" @click.left.stop="closeDialo
       template(v-else)
         GroupLabel(:group="props.group" :showName="true")
 
-  InviteToGroup(:visible="true" :group="props.group" @closeDialogs="closeDialogs")
+  InviteToGroup(:visible="groupUser" :group="props.group" @closeDialogs="closeDialogs")
 
   UserList(
     :users="groupUsers"
