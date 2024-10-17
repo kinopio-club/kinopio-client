@@ -53,23 +53,9 @@ const closeDialogs = () => {
 const currentUserIsUpgraded = computed(() => store.state.currentUser.isUpgraded)
 const isLoadingGroups = computed(() => store.state.isLoadingGroups)
 
-// groups picker list
+// groups
 
 const groups = computed(() => store.getters['groups/byUser']())
-
-// const groups = computed(() => {
-//   const user = store.state.currentUser
-//   const groupIds = utils.clone(store.state.groups.ids)
-//   const groups = groupIds.map(id => store.getters['groups/byId'](id))
-//   let groupUserGroups = groups.filter(group => {
-//     return group.users.find(groupUser => {
-//       const groupUserId = groupUser.id || groupUser.userId
-//       return groupUserId === user.id
-//     })
-//   })
-//   groupUserGroups = uniqBy(groupUserGroups, 'id')
-//   return groupUserGroups
-// })
 
 // add group
 
