@@ -248,6 +248,7 @@ const store = createStore({
     notifySpaceIsHidden: false,
     notifyThanksForDonating: false,
     notifyThanksForUpgrading: false,
+    shouldNotifyIsJoiningGroup: false,
     notifyIsJoiningGroup: false,
 
     // notifications with position
@@ -1544,9 +1545,16 @@ const store = createStore({
       utils.typeCheck({ value, type: 'boolean' })
       state.notifyThanksForUpgrading = value
     },
+    shouldNotifyIsJoiningGroup: (state, value) => {
+      utils.typeCheck({ value, type: 'boolean' })
+      state.shouldNotifyIsJoiningGroup = value
+    },
     notifyIsJoiningGroup: (state, value) => {
       utils.typeCheck({ value, type: 'boolean' })
       state.notifyIsJoiningGroup = value
+      if (value) {
+        state.shouldNotifyIsJoiningGroup = false
+      }
     },
 
     // Notifications with Position

@@ -488,8 +488,13 @@ aside.notifications(@click.left="closeAllDialogs")
       span Joining Group…
 
   .persistent-item(v-if="notifySignUpToJoinGroup" ref="readOnlyElement" :class="{'notification-jiggle': state.readOnlyJiggle}")
-    p
-      button(@click.left.stop="triggerSignUpOrInIsVisible") Sign Up or In to Join Group
+    .row
+      p
+        img.icon.group(src="@/assets/group.svg")
+        span You've been invited to a group
+    .row
+      p
+        button(@click.left.stop="triggerSignUpOrInIsVisible") Sign Up or In to Join Group
 
 </template>
 

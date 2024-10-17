@@ -196,6 +196,7 @@ const signUp = async (event) => {
     updateCurrentSpaceWithNewUserId(currentUser, newUser)
     await store.dispatch('api/createSpaces')
     notifySignedIn()
+    notifyIsJoiningGroup()
     store.dispatch('currentUser/checkIfShouldJoinGroup')
     addCollaboratorToInvitedSpaces()
     store.commit('triggerUpdateWindowHistory')
@@ -228,6 +229,7 @@ const signIn = async (event) => {
     updateSpacesUserId()
     await store.dispatch('api/createSpaces')
     notifySignedIn()
+    notifyIsJoiningGroup()
     store.dispatch('currentUser/checkIfShouldJoinGroup')
     // add new spaces from remote
     const spaces = await store.dispatch('api/getUserSpaces')
@@ -260,6 +262,10 @@ const notifySignedIn = () => {
   store.dispatch('closeAllDialogs')
   store.commit('removeNotificationByMessage', 'Signing In…')
   store.commit('addNotification', { message: 'Signed In', type: 'success' })
+}
+const notifyIsJoiningGroup = () => {
+  if (!store.state.shouldNotifyIsJoiningGroup) { return }
+  store.commit('notifyIsJoiningGroup', true)
 }
 
 // update spaces on success

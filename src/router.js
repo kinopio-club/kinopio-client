@@ -203,7 +203,7 @@ const router = createRouter({
         const collaboratorKey = urlParams.get('collaboratorKey')
         pageMeta.groupInvite({ groupId, isGroupInvite: true })
         store.commit('groupToJoinOnLoad', { groupId, collaboratorKey })
-        store.commit('notifyIsJoiningGroup', true)
+        store.commit('shouldNotifyIsJoiningGroup', true)
         next()
       }
     }, {
