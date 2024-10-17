@@ -111,11 +111,6 @@ dialog.groups
   top 20px
   .results-section
     overflow initial
-  ul.results-list
-    overflow initial
-    li
-      align-items center
-      position relative
   .loader
     vertical-align -2px
     margin-right 4px
