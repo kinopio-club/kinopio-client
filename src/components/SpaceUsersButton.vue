@@ -63,7 +63,6 @@ const spaceUsers = computed(() => {
     items = utils.clone(currentSpace.value.users)
     items = items.concat(currentSpace.value.collaborators)
     items = items.concat(groupUsers)
-    // TODO add notifications: notify groupUsers on changes. https://kinopio.club/En9p7INBEpSAhNwFVIwgZ/VelgpXzc5h8Cl1m4RJ41i
   }
   items = items.filter(item => Boolean(item))
   items = items.filter(user => user.id !== currentUser.value.id)
