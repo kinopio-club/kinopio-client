@@ -3,8 +3,7 @@ import { reactive, computed, onMounted, onBeforeUnmount, defineProps, defineEmit
 import { useStore } from 'vuex'
 
 import utils from '@/utils.js'
-import GroupLabel from '@/components/GroupLabel.vue'
-import GroupDetails from '@/components/dialogs/GroupDetails.vue'
+import GroupList from '@/components/GroupList.vue'
 import AddGroup from '@/components/dialogs/AddGroup.vue'
 import AboutGroups from '@/components/subsections/AboutGroups.vue'
 import Loader from '@/components/Loader.vue'
@@ -70,13 +69,16 @@ const toggleAddGroupIsVisible = () => {
 const groupIsVisible = (group) => {
   return state.groupDetailsIsVisibleForGroupId === group.id
 }
-const toggleGroupDetailsIsVisible = (group) => {
+const toggleGroupDetailsIsVisible = (event, group) => {
   if (groupIsVisible(group)) {
     state.groupDetailsIsVisibleForGroupId = ''
   } else {
     state.groupDetailsIsVisibleForGroupId = group.id
   }
 }
+const selectedGroup = computed(() => {
+  return { id: state.groupDetailsIsVisibleForGroupId }
+})
 </script>
 
 <template lang="pug">
@@ -93,14 +95,10 @@ dialog.narrow.groups(v-if="visible" :open="visible" @click.left.stop="closeDialo
           span Group
         AddGroup(:visible="state.addGroupIsVisible" @closeDialogs="closeDialogs")
 
-  //- group picker
+  //- groups
   template(v-if="groups.length")
     section.results-section
-      ul.results-list
-        template(v-for="group in groups")
-          li(:class="{ active: groupIsVisible(group) }" @click.stop="toggleGroupDetailsIsVisible(group)")
-            GroupLabel(:group="group" :showName="true")
-            GroupDetails(:visible="groupIsVisible(group)" :group="group")
+      GroupList(:groups="groups" :selectedGroup="selectedGroup" @selectGroup="toggleGroupDetailsIsVisible" :groupDetailsIsVisibleForGroupId="state.groupDetailsIsVisibleForGroupId")
   //- groups info
   template(v-else)
     AboutGroups
@@ -118,9 +116,6 @@ dialog.groups
     li
       align-items center
       position relative
-    dialog.group-details
-      left -30px
-      top 30px
   .loader
     vertical-align -2px
     margin-right 4px
