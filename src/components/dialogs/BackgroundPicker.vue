@@ -432,7 +432,7 @@ dialog.background-picker.wide(v-if="visible" :open="visible" @click.left.stop="c
         v-model="background"
         data-type="name"
         maxlength="400"
-        :disabled="currentUserIsMember"
+        :disabled="!currentUserIsMember"
       )
 
     template(v-if="!currentUserIsMember")
