@@ -830,7 +830,7 @@ const currentSpace = {
       const isSpaceMember = context.rootGetters['currentUser/isSpaceMember'](context.state)
       const spaceIsOpen = context.state.privacy === 'open'
       if (!isSpaceMember && spaceIsOpen) {
-        context.commit('addNotification', { message: 'This space is open, which means you can add comments', icon: 'open', type: 'success' }, { root: true })
+        context.commit('addNotification', { message: 'This space is open to comments', icon: 'comment', type: 'success' }, { root: true })
       }
     },
     clearStateMeta: (context) => {

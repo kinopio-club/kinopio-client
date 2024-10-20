@@ -318,6 +318,7 @@ aside.notifications(@click.left="closeAllDialogs")
         img.icon(v-else-if="item.icon === 'offline'" src="@/assets/offline.svg" class="offline")
         img.icon(v-else-if="item.icon === 'mail'" src="@/assets/mail.svg" class="mail")
         img.icon(v-else-if="item.icon === 'group'" src="@/assets/group.svg" class="group")
+        img.icon(v-else-if="item.icon === 'comment'" src="@/assets/comment.svg" class="comment")
       span {{item.message}}
     .row(v-if="item.isPersistentItem")
       button.small-button(@click="removeById(item)")
