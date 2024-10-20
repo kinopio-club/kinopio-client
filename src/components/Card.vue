@@ -606,6 +606,8 @@ const urlButtonIsVisible = computed(() => {
   if (isComment.value) { return true }
   if (isUrlPreviewError.value) { return true }
   if (state.formats.file) { return true }
+  const isPreviewImageOnly = props.card.urlPreviewIsVisible && props.card.shouldHideUrlPreviewInfo
+  if (isPreviewImageOnly) { return true }
   return !props.card.urlPreviewIsVisible
 })
 const cardButtonUrl = computed(() => {
