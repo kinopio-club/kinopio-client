@@ -13,13 +13,17 @@ const props = defineProps({
   card: Object
 })
 
+const backgroundColor = computed(() => {
+  return props.card.backgroundColor
+})
 const styles = computed(() => {
   const zoom = store.getters.spaceCounterZoomDecimal
   const offset = 6
   return {
     left: `${props.card.x + offset}px`,
     top: `${props.card.y + offset}px`,
-    transform: `scale(${zoom})`
+    transform: `scale(${zoom})`,
+    backgroundColor: backgroundColor.value
   }
 })
 
@@ -36,6 +40,13 @@ const createdByUser = computed(() => {
   return user
 })
 const relativeDate = computed(() => utils.shortRelativeTime(props.card.nameUpdatedAt || props.card.updatedAt))
+const backgroundColorIsDark = computed(() => {
+  if (backgroundColor.value) {
+    return utils.colorIsDark(backgroundColor.value)
+  } else {
+    return store.getters['themes/isThemeDark']
+  }
+})
 
 // name
 
@@ -63,7 +74,7 @@ const urlPreviewImage = computed(() => {
   template(v-for="segment in normalizedCard.nameSegments")
     img.card-image(v-if="segment.isImage" :src="segment.url")
     img.card-image(v-if="urlPreviewImage" :src="urlPreviewImage")
-    NameSegment(:segment="segment" :isStrikeThrough="isStrikeThrough")
+    NameSegment(:segment="segment" :isStrikeThrough="isStrikeThrough" :backgroundColorIsDark="backgroundColorIsDark")
   .bottom-gradient
 </template>
 
