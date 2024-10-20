@@ -13,7 +13,7 @@ const store = useStore()
 const props = defineProps({
   visible: Boolean,
   connections: Array,
-  canEditAll: Object,
+  canEditAll: Boolean,
   backgroundColor: String,
   label: String,
   hideType: Boolean

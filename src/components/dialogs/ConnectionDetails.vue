@@ -225,6 +225,7 @@ const toggleShouldUseLastConnectionType = () => {
 
 // color
 
+const userColor = computed(() => store.state.currentUser.color)
 const typeColor = computed(() => currentConnectionType.value.color)
 const toggleColorPicker = () => {
   state.colorPickerIsVisible = !state.colorPickerIsVisible
