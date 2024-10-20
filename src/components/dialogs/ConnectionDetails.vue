@@ -117,6 +117,9 @@ const blur = () => {
   store.dispatch('history/add', { connectionTypes: [connectionType], useSnapshot: true })
   state.inputIsFocused = false
 }
+const closeAllDialogs = () => {
+  store.dispatch('closeAllDialogs')
+}
 
 // space
 
@@ -284,7 +287,7 @@ dialog.connection-details.narrow(v-if="visible" :open="visible" :style="styles" 
         button.change-color(:disabled="!canEditConnection" @click.left.stop="toggleColorPicker" :class="{active: state.colorPickerIsVisible}")
           .current-color(:style="{backgroundColor: typeColor}")
         ColorPicker(:currentColor="typeColor" :visible="state.colorPickerIsVisible" @selectedColor="updateTypeColor")
-      input.type-name(:disabled="!canEditConnection" placeholder="Connection Name" v-model="typeName" ref="typeNameElement" @focus="focus" @blur="blur" :class="{'is-dark': typeColorisDark}")
+      input.type-name(:disabled="!canEditConnection" placeholder="Connection Name" v-model="typeName" ref="typeNameElement" @focus="focus" @blur="blur" :class="{'is-dark': typeColorisDark}" @keyup.enter.prevent="closeAllDialogs")
     .row(v-if="canEditConnection")
       //- Remove
       button.danger(@click.left="removeConnection")
