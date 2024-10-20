@@ -800,6 +800,7 @@ const toggleBoxChecked = () => {
 }
 const containingBoxes = computed(() => {
   if (!state.isVisibleInViewport) { return }
+  if (store.state.currentUserIsDraggingBox) { return }
   if (isDragging.value) { return }
   if (isSelected.value) { return }
   if (isResizing.value) { return }
