@@ -212,6 +212,12 @@ dialog.keyboard-shortcuts(v-if="visible" :open="visible" @click.left.stop ref="d
       article
         .row
           .badge.title
+            img.icon(src="@/assets/box.svg")
+            span Surround Selected Cards with Box
+          .badge.keyboard-shortcut B
+      article
+        .row
+          .badge.title
             img.icon(src="@/assets/undo.svg")
             span Undo/Redo
           .badge.keyboard-shortcut {{meta}}-Z/{{meta}}-Shift-Z

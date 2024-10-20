@@ -227,13 +227,6 @@ const containItemsInNewBox = async () => {
   await nextTick()
   store.commit('boxDetailsIsVisibleForBoxId', box.id)
 }
-const boxSurroundTitle = computed(() => {
-  if (isNotCollaborator.value) {
-    return 'Only collaborators can add boxes'
-  } else {
-    return 'Surround with Box'
-  }
-})
 
 // box fill
 
@@ -430,13 +423,6 @@ const toggleIsComment = async () => {
   await updateCardDimensions()
   store.dispatch('currentConnections/updateMultiplePaths', props.cards)
 }
-const commentTitle = computed(() => {
-  if (isNotCollaborator.value) {
-    return 'Only collaborators can toggle comments'
-  } else {
-    return 'Turn into Comment'
-  }
-})
 
 // vote counter
 
@@ -540,11 +526,11 @@ section.subsection.style-actions(v-if="visible" @click.left.stop="closeDialogs" 
       button(:disabled="!canEditAll" @click="toggleIsLocked" :class="{active: isLocked}" title="Lock to Background")
         img.icon(src="@/assets/lock.svg")
     //- Comment
-    .button-wrap(v-if="isCards" :title="commentTitle")
+    .button-wrap(v-if="isCards" title="Turn into Comment")
       button(:disabled="isNotCollaborator" @click="toggleIsComment" :class="{active: isComment}")
         img.icon.comment(src="@/assets/comment.svg")
     //- Surround with Box
-    .button-wrap(v-if="isCards" :title="boxSurroundTitle")
+    .button-wrap(v-if="isCards" title="Surround with Box (B)")
       button(:disabled="isNotCollaborator" @click="containItemsInNewBox")
         img.icon.box-icon(src="@/assets/box.svg")
 

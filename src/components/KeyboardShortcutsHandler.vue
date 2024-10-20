@@ -137,7 +137,20 @@ const handleShortcuts = (event) => {
     store.commit('currentUserIsPanningReady', false)
     spaceKeyIsDown = false
   } else if (key === 'b' && isSpaceScope) {
-    store.dispatch('currentUserToolbar', 'box')
+    let cards
+    const multipleCardIds = store.state.multipleCardsSelectedIds
+    const cardId = store.state.cardDetailsIsVisibleForCardId
+    // Surround Selected Cards with Box
+    if (cardId) {
+      cards = [store.getters['currentCards/byId'](cardId)]
+      containItemsInNewBox(cards)
+    } else if (multipleCardIds.length) {
+      cards = multipleCardIds.map(id => store.getters['currentCards/byId'](id))
+      containItemsInNewBox(cards)
+    // Toolbar Box Mode
+    } else {
+      store.dispatch('currentUserToolbar', 'box')
+    }
   } else if (key === 'c' && isSpaceScope) {
     store.dispatch('currentUserToolbar', 'card')
   }
@@ -853,6 +866,31 @@ const toggleLockCards = () => {
     const update = { id: card.id, isLocked: shouldLock }
     store.dispatch('currentCards/update', { card: update })
   })
+}
+
+// Create Boxes
+
+const containItemsInNewBox = async (cards) => {
+  const isSpaceMember = store.getters['currentUser/isSpaceMember']()
+  if (!isSpaceMember) { return }
+  const rect = utils.boundaryRectFromItems(cards)
+  // box size
+  const padding = consts.spaceBetweenCards
+  const paddingTop = 30 + padding
+  // same as Box shrinkToMinBoxSize
+  const box = {
+    id: nanoid(),
+    x: rect.x - padding,
+    y: rect.y - paddingTop,
+    resizeWidth: rect.width + (padding * 2),
+    resizeHeight: rect.height + (padding + paddingTop)
+  }
+  store.dispatch('currentBoxes/add', { box })
+  store.dispatch('closeAllDialogs')
+  await nextTick()
+  await nextTick()
+  store.commit('boxDetailsIsVisibleForBoxId', box.id)
+  store.commit('clearMultipleSelected')
 }
 </script>
 
