@@ -9,6 +9,9 @@
       maxlength="250"
       :data-id="prompt.id"
 
+      @keydown.enter.exact.prevent
+      @keyup.enter.stop.exact.prevent="addPrompt"
+
       @keyup.alt.enter.exact.stop
       @keyup.ctrl.enter.exact.stop
       @keydown.alt.enter.exact.stop="insertLineBreak"
@@ -66,6 +69,9 @@ export default {
     },
     showPicker () {
       this.$emit('showPicker')
+    },
+    addPrompt () {
+      this.$emit('addPrompt')
     }
   }
 }

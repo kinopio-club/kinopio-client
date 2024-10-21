@@ -204,7 +204,7 @@ dialog.add-space.narrow(
           p {{dailyPrompt}}
       //- prompts
       section.subsection
-        JournalPrompt(v-for="prompt in userPrompts" :prompt="prompt" :key="prompt.id" @showScreenIsShort="showScreenIsShort")
+        JournalPrompt(v-for="prompt in userPrompts" :prompt="prompt" :key="prompt.id" @showScreenIsShort="showScreenIsShort" @addPrompt="addCustomPrompt")
         //- add prompt
         .row
           button(@click.left="addCustomPrompt")
