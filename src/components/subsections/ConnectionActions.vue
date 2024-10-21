@@ -73,20 +73,20 @@ const closeDialogs = () => {
 </script>
 
 <template lang="pug">
-section.subsection.connection-actions(v-if="visible" :class="colorClasses")
-  p.subsection-vertical-label(:style="{ background: backgroundColor }")
-    span.label(:class="colorClasses") {{label}}
+section.subsection.connection-actions(v-if="props.visible" :class="colorClasses")
+  p.subsection-vertical-label(:style="{ background: props.backgroundColor }")
+    span.label(:class="colorClasses") {{ props.label }}
   .row.edit-connection-types
     //- Type Color
     .button-wrap(v-if="!props.hideType")
-      button.change-color(:disabled="!canEditAll.connections" @click.left.stop="toggleMultipleConnectionsPickerVisible" :class="{active: state.multipleConnectionsPickerVisible}")
+      button.change-color(:disabled="!props.canEditAll.connections" @click.left.stop="toggleMultipleConnectionsPickerVisible" :class="{active: state.multipleConnectionsPickerVisible}")
         .segmented-colors.icon
           template(v-for="type in connectionTypes")
             .current-color(:style="{ background: type.color }")
         span Type
-      MultipleConnectionsPicker(:visible="state.multipleConnectionsPickerVisible" :selectedConnections="connections" :selectedConnectionTypes="editableConnectionTypes")
+      MultipleConnectionsPicker(:visible="state.multipleConnectionsPickerVisible" :selectedConnections="props.connections" :selectedConnectionTypes="editableConnectionTypes")
     //- Arrows or Label
-    ConnectionDecorators(:connections="connections")
+    ConnectionDecorators(:connections="props.connections")
 </template>
 
 <style lang="stylus">
