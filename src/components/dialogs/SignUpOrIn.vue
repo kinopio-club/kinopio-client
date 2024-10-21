@@ -188,7 +188,7 @@ const signUp = async (event) => {
   const response = await store.dispatch('api/signUp', { email, password, currentUser, sessionToken })
   const newUser = await response.json()
   if (isSuccess(response)) {
-    store.commit('clearAllNotifications', false)
+    store.commit('clearAllNotifications')
     store.commit('currentUser/replaceState', newUser)
     createSpacesBackup()
     migrationSpacesConnections()
@@ -234,7 +234,7 @@ const signIn = async (event) => {
     // add new spaces from remote
     const spaces = await store.dispatch('api/getUserSpaces')
     cache.addSpaces(spaces)
-    store.commit('clearAllNotifications', false)
+    store.commit('clearAllNotifications')
     addCollaboratorToInvitedSpaces()
     store.commit('triggerSpaceDetailsVisible')
     store.commit('isLoadingFavorites', true)
