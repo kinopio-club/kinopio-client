@@ -13,7 +13,8 @@ const store = useStore()
 const props = defineProps({
   visible: Boolean,
   connections: Array,
-  canEditAll: Boolean,
+  canEditAll: Object,
+  canEdit: Boolean,
   backgroundColor: String,
   label: String,
   hideType: Boolean
@@ -42,6 +43,9 @@ const toggleMultipleConnectionsPickerVisible = () => {
 
 // connection types
 
+const canEditAllConnections = computed(() => {
+  return props.canEdit || props.canEditAll.connections
+})
 const connectionTypes = computed(() => {
   let types = uniq(store.state.multipleConnectionsSelectedIds)
   types = types.map(id => {
@@ -74,12 +78,12 @@ const closeDialogs = () => {
 
 <template lang="pug">
 section.subsection.connection-actions(v-if="props.visible" :class="colorClasses")
-  p.subsection-vertical-label(:style="{ background: props.backgroundColor }")
+  p.subsection-vertical-label(v-if="props.label" :style="{ background: props.backgroundColor }")
     span.label(:class="colorClasses") {{ props.label }}
   .row.edit-connection-types
     //- Type Color
     .button-wrap(v-if="!props.hideType")
-      button.change-color(:disabled="!props.canEditAll.connections" @click.left.stop="toggleMultipleConnectionsPickerVisible" :class="{active: state.multipleConnectionsPickerVisible}")
+      button.change-color(:disabled="!canEditAllConnections" @click.left.stop="toggleMultipleConnectionsPickerVisible" :class="{active: state.multipleConnectionsPickerVisible}")
         .segmented-colors.icon
           template(v-for="type in connectionTypes")
             .current-color(:style="{ background: type.color }")

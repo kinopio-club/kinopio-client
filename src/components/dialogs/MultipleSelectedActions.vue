@@ -504,7 +504,7 @@ dialog.narrow.multiple-selected-actions(
 
       //- :class="{ 'last-row': !connectionsIsSelected }"
 
-    ConnectionActions(:visible="(shouldShowMultipleSelectedLineActions || onlyConnectionsIsSelected) && connectionsIsSelected" :connections="editableConnections" @closeDialogs="closeDialogs" :canEditAll="Boolean(canEditAll)" :backgroundColor="userColor" :label="moreLineOptionsLabel")
+    ConnectionActions(:visible="(shouldShowMultipleSelectedLineActions || onlyConnectionsIsSelected) && connectionsIsSelected" :connections="editableConnections" @closeDialogs="closeDialogs" :canEditAll="canEditAll" :backgroundColor="userColor" :label="moreLineOptionsLabel")
 
   section
     .row(v-if="cardOrBoxIsSelected")
