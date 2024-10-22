@@ -878,6 +878,7 @@ export default {
       return !currentUserIsSignedIn && spaceIsOpen
     },
     cardIsCreatedByCurrentUser: (state, getters, rootState) => (card) => {
+      if (!card) { return }
       const isCreatedByUser = state.id === card.userId
       const isUpdatedByUser = state.id === card.nameUpdatedByUserId
       const isNoUser = !card.userId && !card.nameUpdatedByUserId
