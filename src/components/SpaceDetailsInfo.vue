@@ -59,7 +59,8 @@ const state = reactive({
   exportIsVisible: false,
   addToGroupIsVisible: false,
   error: {
-    memberAssignGroup: false
+    updateSpaceGroup: false,
+    removeSpaceGroup: false
   }
 })
 
@@ -217,15 +218,20 @@ const toggleExportIsVisible = () => {
 }
 const toggleAddToGroupIsVisible = () => {
   const isVisible = state.addToGroupIsVisible
-  state.error.memberAssignGroup = false
+  clearErrors()
   closeDialogsAndEmit()
   state.addToGroupIsVisible = !isVisible
+}
+const clearErrors = () => {
+  state.error.updateSpaceGroup = false
+  state.error.removeSpaceGroup = false
 }
 const closeDialogs = () => {
   state.backgroundIsVisible = false
   state.privacyPickerIsVisible = false
   state.exportIsVisible = false
   state.addToGroupIsVisible = false
+  clearErrors()
 }
 const closeDialogsAndEmit = () => {
   closeDialogs()
@@ -239,34 +245,40 @@ const closeAllDialogs = () => {
 
 const userGroups = computed(() => store.getters['groups/byUser']())
 const spaceGroup = computed(() => store.getters['groups/spaceGroup']())
-const checkCanAssignGroup = () => {
-  if (currentUserIsSpaceCreator.value) {
-    return true
+const currentUserIsGroupAdmin = (group) => {
+  return store.getters['groups/groupUserIsAdmin']({
+    userId: store.state.currentUser.id,
+    groupId: group.id
+  })
+}
+const toggleSpaceGroup = (group) => {
+  clearErrors()
+  const shouldRemoveSpaceGroup = currentSpace.value.groupId === group.id
+  if (shouldRemoveSpaceGroup) {
+    removeSpaceGroup(group)
   } else {
-    state.error.memberAssignGroup = true
+    updateSpaceGroup(group)
   }
 }
-const groupButtonTitle = computed(() => {
-  let addString = 'Add'
-  if (spaceGroup.value) {
-    addString = 'Added'
-  }
-  return `${addString} to Group`
-})
-const toggleSpaceGroup = (group) => {
-  if (!checkCanAssignGroup()) { return }
-  if (currentSpace.value.groupId === group.id) {
-    removeSpaceGroup()
-  } else {
+const updateSpaceGroup = (group) => {
+  const isSpaceCreator = currentUserIsSpaceCreator.value
+  if (isSpaceCreator) {
     store.dispatch('groups/addCurrentSpace', group)
     updateLocalSpaces()
+  } else {
+    state.error.updateSpaceGroup = true
   }
 }
-const removeSpaceGroup = () => {
-  store.dispatch('groups/removeCurrentSpace')
-  updateLocalSpaces()
+const removeSpaceGroup = (group) => {
+  const isGroupAdmin = currentUserIsGroupAdmin(group)
+  const isSpaceCreator = currentUserIsSpaceCreator.value
+  if (isGroupAdmin || isSpaceCreator) {
+    store.dispatch('groups/removeCurrentSpace')
+    updateLocalSpaces()
+  } else {
+    state.error.removeSpaceGroup = true
+  }
 }
-
 </script>
 
 <template lang="pug">
@@ -317,7 +329,7 @@ template(v-if="isSpaceMember")
       .button-wrap
         .segmented-buttons
           //- Group
-          button.group-button(:title="groupButtonTitle" :class="{active: state.addToGroupIsVisible || spaceGroup}" @click.left.prevent.stop="toggleAddToGroupIsVisible" @keydown.stop.enter="toggleAddToGroupIsVisible")
+          button.group-button(title="Add to Group" :class="{active: state.addToGroupIsVisible || spaceGroup}" @click.left.prevent.stop="toggleAddToGroupIsVisible" @keydown.stop.enter="toggleAddToGroupIsVisible")
             img.icon.group(src="@/assets/group.svg")
           //- Favorite
           FavoriteSpaceButton(:parentIsDialog="true" @updateLocalSpaces="updateLocalSpaces")
@@ -329,10 +341,14 @@ template(v-if="isSpaceMember")
     .button-wrap
       button(@click="toggleSettingsIsVisible" :class="{active: state.settingsIsVisible}" title="Space Settings")
         img.icon.settings(src="@/assets/settings.svg")
-  .row(v-if="state.error.memberAssignGroup")
+  .row(v-if="state.error.updateSpaceGroup")
     .badge.danger
       img.icon.cancel(src="@/assets/add.svg")
       span Only space creator can assign to group
+  .row(v-if="state.error.removeSpaceGroup")
+    .badge.danger
+      img.icon.cancel(src="@/assets/add.svg")
+      span Only space creator, or group admin, can remove from group
 
 //- read only options
 .row(v-if="!isSpaceMember")
