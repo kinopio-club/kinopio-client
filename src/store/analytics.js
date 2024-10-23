@@ -10,23 +10,24 @@ import consts from '@/consts.js'
 export default {
   namespaced: true,
   actions: {
-    send: (context, event) => {
+    send: async (context, event) => {
       if (!context.getters.shouldSend) { return }
 
       try {
         // https://plausible.io/docs/events-api
         const apiUrl = 'https://plausible.io/api/event'
-        // POST
+        // await POST
+        // console.log('👻', event.name)
       } catch (error) {
         console.error('🚒 analytics send', error)
       }
     },
     pageview: (context) => {
-      console.log('👻 pageview')
+      // console.log('👻 pageview')
     },
     event: (context, eventName) => {
       utils.typeCheck({ value: eventName, type: 'string' })
-      console.log('👻', eventName)
+      // console.log('👻', eventName)
     }
   },
   getters: {
