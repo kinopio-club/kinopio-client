@@ -4,6 +4,9 @@ import consts from '@/consts.js'
 // TODO add attr user.analyticsIsDisabled
 // TODO add settings -> analytics -> dialog contains description and toggle btn
 
+// TODO udpate help/privacy docs w debugging info
+// TODO update help api docs w user.analyticsIsDisabled bool
+
 export default {
   namespaced: true,
   actions: {
