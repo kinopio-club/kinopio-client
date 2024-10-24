@@ -7,21 +7,18 @@ export default {
     send: async (context, body) => {
       if (!context.getters.shouldSend) { return }
       context.dispatch('api/sendAnalyticsEvent', body, { root: true })
-      console.log('👻 analytics event:', body.event.name)
+      console.log('👻 analytics event:', body.name)
     },
     event: (context, eventName) => {
       utils.typeCheck({ value: eventName, type: 'string' })
       const body = {
-        event: {
-          domain: 'kinopio.club',
-          name: eventName,
-          url: window.location.href,
-          referrer: document.referrer,
-          props: {
-            isSignedIn: context.rootGetters['currentUser/isSignedIn']
-          }
-        },
-        userAgent: navigator.userAgent
+        domain: 'kinopio.club',
+        name: eventName,
+        url: window.location.href,
+        referrer: document.referrer,
+        props: {
+          isSignedIn: context.rootGetters['currentUser/isSignedIn']
+        }
       }
       context.dispatch('send', body)
     }
