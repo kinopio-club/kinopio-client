@@ -33,6 +33,7 @@ store.dispatch('currentUser/init')
 store.dispatch('currentSpace/init')
 store.commit('broadcast/connect')
 store.dispatch('groups/init')
+store.dispatch('analytics/event', 'pageview')
 
 onMounted(() => {
   // bind events to window to receive events when mouse is outside window

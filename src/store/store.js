@@ -15,6 +15,7 @@ import upload from '@/store/upload.js'
 import userNotifications from '@/store/userNotifications.js'
 import groups from '@/store/groups.js'
 import themes from '@/store/themes.js'
+import analytics from '@/store/analytics.js'
 // store plugins
 import websocket from '@/store/plugins/websocket.js'
 
@@ -2088,7 +2089,8 @@ const store = createStore({
     upload,
     userNotifications,
     groups,
-    themes
+    themes,
+    analytics
   },
   plugins: [websocket()]
 })
