@@ -1,39 +1,35 @@
 import utils from '@/utils.js'
 import consts from '@/consts.js'
 
-// TODO add attr user.analyticsIsDisabled
-// TODO add settings -> analytics -> dialog contains description and toggle btn
-
-// TODO udpate help/privacy docs w debugging info
-// TODO update help api docs w user.analyticsIsDisabled bool
-
 export default {
   namespaced: true,
   actions: {
-    send: async (context, event) => {
+    send: async (context, body) => {
       if (!context.getters.shouldSend) { return }
-
-      try {
-        // https://plausible.io/docs/events-api
-        const apiUrl = 'https://plausible.io/api/event'
-        // await POST
-        // console.log('👻', event.name)
-      } catch (error) {
-        console.error('🚒 analytics send', error)
-      }
-    },
-    pageview: (context) => {
-      // console.log('👻 pageview')
+      context.dispatch('api/sendAnalyticsEvent', body, { root: true })
+      console.log('👻 analytics event:', body.event.name)
     },
     event: (context, eventName) => {
       utils.typeCheck({ value: eventName, type: 'string' })
-      // console.log('👻', eventName)
+      const body = {
+        event: {
+          domain: 'kinopio.club',
+          name: eventName,
+          url: window.location.href,
+          referrer: document.referrer,
+          props: {
+            isSignedIn: context.rootGetters['currentUser/isSignedIn']
+          }
+        },
+        userAgent: navigator.userAgent
+      }
+      context.dispatch('send', body)
     }
   },
   getters: {
     shouldSend: (state, getters, rootState) => {
       if (consts.isDevelopment()) { return }
-      if (rootState.currentUser.analyticsIsDisabled) { return }
+      // if (rootState.currentUser.analyticsIsDisabled) { return }
       if (!rootState.isOnline) { return }
       return true
     }

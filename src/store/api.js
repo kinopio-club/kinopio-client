@@ -1271,6 +1271,21 @@ const self = {
       } catch (error) {
         context.dispatch('handleServerError', { name: 'deleteGroupPermanent', error })
       }
+    },
+    sendAnalyticsEvent: async (context, body) => {
+      try {
+        const headers = new Headers({
+          'Content-Type': 'application/json'
+        })
+        const response = await fetch(`${consts.apiHost()}/services/analytics-event`, {
+          headers,
+          method: 'POST',
+          body: JSON.stringify(body)
+        })
+        return normalizeResponse(response)
+      } catch (error) {
+        console.error('🚒 sendAnalyticsEvent', error)
+      }
     }
   }
 }
