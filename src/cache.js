@@ -1,6 +1,7 @@
 // local storage cache interface for currentUser and spaces
 
 import debounce from 'lodash-es/debounce'
+// import indexedDb from 'idb-keyval' // { get, set, delMany, clear, keys }
 
 import utils from '@/utils.js'
 
@@ -17,6 +18,7 @@ export default {
         console.log('🏬 storeLocal', key, value)
       }
       window.localStorage.setItem(key, value)
+      // indexedDb.set(key, value)
     } catch (error) {
       showDebugMessages = true
       console.error('🚒 storeLocal could not save to localStorage', { key, value, valueType: typeof value }, error)
@@ -37,11 +39,13 @@ export default {
         return
       }
       const keys = Object.keys(window.localStorage)
+      // const keys = await indexedDb.keys()
       let spaceKeys = keys.filter(key => {
         const isSpace = key.startsWith('space-') || key.startsWith('removed-space-')
         return isSpace
       })
       spaceKeys = spaceKeys.filter(key => key !== `space-${currentSpaceId}`)
+      // TODO need to prune indexedb?
       console.log('🍾 pruning localStorage spaces', {
         localStorage: window.localStorage,
         length: JSON.stringify(window.localStorage).length,
@@ -52,6 +56,7 @@ export default {
       spaceKeys.forEach(key => {
         this.removeLocal(key)
       })
+      // indexedDb.delMany(spaceKeys) // replaces forEach above
       console.log('🥂 pruned localStorage spaces', {
         localStorage: window.localStorage,
         length: JSON.stringify(window.localStorage).length,
@@ -63,17 +68,21 @@ export default {
   getLocal (key) {
     try {
       return JSON.parse(window.localStorage[key])
+      // const item = await indexedDB.get(key)
+      // return JSON.parse(item)
     } catch (error) {}
   },
   removeLocal (key) {
     try {
       window.localStorage.removeItem(key)
+      // indexedDb.del(key)
     } catch (error) {
       console.warn('removeLocal', error)
     }
   },
   removeAll () {
     window.localStorage.clear()
+    // indexedDB.clear()
     console.log('🚑 localStorage cleared')
   },
 
@@ -100,6 +109,7 @@ export default {
   },
   getInboxSpace () {
     const keys = Object.keys(window.localStorage)
+    // const keys = await indexedDb.keys()
     const spaceKeys = keys.filter(key => key.startsWith('space-'))
     const spaces = spaceKeys.map(key => {
       return this.getLocal(key)
@@ -108,6 +118,7 @@ export default {
   },
   getSpaceByName (name) {
     const keys = Object.keys(window.localStorage)
+    // const keys = await indexedDb.keys()
     const spaceKeys = keys.filter(key => key.startsWith('space-'))
     const spaces = spaceKeys.map(key => {
       return this.getLocal(key)
@@ -120,6 +131,7 @@ export default {
   },
   getAllSpaces () {
     const keys = Object.keys(window.localStorage)
+    // const keys = await indexedDb.keys()
     const spaceKeys = keys.filter(key => key.startsWith('space-'))
     const spaces = spaceKeys.map(key => {
       return this.getLocal(key)
@@ -264,6 +276,7 @@ export default {
   },
   getAllRemovedSpaces () {
     const keys = Object.keys(window.localStorage)
+    // const keys = await indexedDb.keys()
     const spaceKeys = keys.filter(key => key.startsWith('removed-space-'))
     const spaces = spaceKeys.map(key => {
       return this.getLocal(key)
@@ -349,6 +362,8 @@ export default {
   // Add Page
 
   prevAddPageValue () {
+    // const value = await indexedDB.get('prevAddPageValue')
+    // return value || ''
     return window.localStorage['prevAddPageValue'] || ''
   },
   updatePrevAddPageValue (value) {
@@ -415,12 +430,15 @@ export default {
   // Changelog
 
   prevChangelogId () {
+    // return indexedDB.get('prevChangelogId')
     return window.localStorage['prevChangelogId']
   },
   updatePrevChangelogId (id) {
     this.storeLocal('prevChangelogId', id)
   },
   prevReadChangelogId () {
+    // const value = await indexedDB.get('prevReadChangelogId')
+    // return value || ''
     return window.localStorage['prevReadChangelogId'] || ''
   },
   updatePrevReadChangelogId (id) {
