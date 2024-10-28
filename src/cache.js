@@ -18,6 +18,7 @@ export default {
         console.log('🏬 storeLocal', key, value)
       }
       window.localStorage.setItem(key, value)
+      // TEST: does value need to be JSON.stringified and parsed? "Since this is IDB-backed, you can store anything structured-clonable (numbers, arrays, objects, dates, blobs etc),"
       // indexedDb.set(key, value)
     } catch (error) {
       showDebugMessages = true
