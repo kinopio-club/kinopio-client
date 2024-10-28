@@ -1282,7 +1282,6 @@ const self = {
           method: 'POST',
           body: JSON.stringify(body)
         })
-        return normalizeResponse(response)
       } catch (error) {
         console.error('🚒 sendAnalyticsEvent', error)
       }

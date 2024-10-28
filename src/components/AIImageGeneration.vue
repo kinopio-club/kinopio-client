@@ -110,6 +110,7 @@ const generateImage = async () => {
     userId: store.state.currentUser.id
   }
   try {
+    store.dispatch('analytics/event', 'AIImageGenerate')
     state.images = await store.dispatch('api/createAIImage', body)
     updateCurrentUserAIImages()
   } catch (error) {
