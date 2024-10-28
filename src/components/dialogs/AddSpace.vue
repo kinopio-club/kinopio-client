@@ -88,6 +88,7 @@ const addSpace = () => {
     store.dispatch('currentSpace/addSpace')
     store.commit('triggerSpaceDetailsInfoIsVisible')
   }
+  store.dispatch('analytics/event', 'addSpaceButton')
 }
 const addInboxSpace = () => {
   store.commit('isLoadingSpace', true)
@@ -108,6 +109,7 @@ const addJournalSpace = () => {
     store.dispatch('currentSpace/loadJournalSpace')
     store.commit('triggerSpaceDetailsInfoIsVisible')
   }
+  store.dispatch('analytics/event', 'addJournalSpaceButton')
 }
 const shouldCreateJournalsWithDailyPrompt = computed(() => {
   return store.state.currentUser.shouldCreateJournalsWithDailyPrompt
