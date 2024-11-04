@@ -108,7 +108,7 @@ const shuffleColors = () => {
 }
 const throttledUpdateColorFromInput = throttle((color) => {
   updateColorFromInput(color)
-}, 200)
+}, 400)
 
 const updateColorFromInput = (color) => {
   select(color)
