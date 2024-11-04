@@ -453,7 +453,6 @@ export default {
         if (element.dataset.isVisibleInViewport === 'false') { return }
         element.style.left = box.x + 'px'
         element.style.top = box.y + 'px'
-        console.log('🤣', element.style.left, box.x, boxes, box)
       })
     },
     move: (context, { endCursor, prevCursor, delta }) => {
@@ -479,6 +478,8 @@ export default {
       let connections = []
       boxes.forEach(box => {
         if (!box) { return }
+        if (!box.x) { box.y = 0 }
+        if (!box.y) { box.y = 0 }
         if (box.x === 0) { delta.x = Math.max(0, delta.x) }
         if (box.y === 0) { delta.y = Math.max(0, delta.y) }
         connections = connections.concat(context.rootGetters['currentConnections/byItemId'](box.id))
