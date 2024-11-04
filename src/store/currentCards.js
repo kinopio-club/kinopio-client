@@ -602,6 +602,10 @@ const currentCards = {
         x: endCursor.x * zoom,
         y: endCursor.y * zoom
       }
+      if (context.rootState.shouldSnapToGrid) {
+        prevCursor = utils.cursorPositionSnapToGrid(prevCursor)
+        endCursor = utils.cursorPositionSnapToGrid(endCursor)
+      }
       delta = delta || {
         x: endCursor.x - prevCursor.x,
         y: endCursor.y - prevCursor.y

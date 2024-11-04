@@ -402,7 +402,7 @@ const startBoxInfoInteraction = (event) => {
     userId: store.state.currentUser.id
   }
   store.commit('broadcast/updateStore', { updates, type: 'addToRemoteBoxesDragging' })
-  if (event.shiftKey) { return } // should not select contained items if shift key
+  if (event.altKey) { return } // should not select contained items if alt/option key
   selectContainedCards()
   selectContainedBoxes()
 }

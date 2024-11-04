@@ -1325,6 +1325,7 @@ const showCardDetails = (event) => {
   if (isMultiTouch) { return }
   if (store.state.currentUserIsPanningReady || store.state.currentUserIsPanning) { return }
   if (store.state.currentUserIsResizingBox || store.state.currentUserIsDraggingBox) { return }
+  if (store.state.shouldSnapToGrid) { return }
   if (!canEditCard.value) { store.commit('triggerReadOnlyJiggle') }
   const shouldToggleSelected = event.shiftKey && !store.state.cardsWereDragged && !isConnectingTo.value
   if (shouldToggleSelected) {

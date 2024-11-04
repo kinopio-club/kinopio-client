@@ -222,7 +222,12 @@ const stopTiltingCards = () => {
 const resizeCards = () => {
   if (!prevCursor) { return }
   const cardIds = store.state.currentUserIsResizingCardIds
-  const deltaX = endCursor.x - prevCursor.x
+  let deltaX = endCursor.x - prevCursor.x
+  if (store.state.shouldSnapToGrid) {
+    const prevResizeCursor = utils.cursorPositionSnapToGrid(prevCursor)
+    const endResizeCursor = utils.cursorPositionSnapToGrid(endCursor)
+    deltaX = endResizeCursor.x - prevResizeCursor.x
+  }
   store.dispatch('currentCards/resize', { cardIds, deltaX })
 }
 const stopResizingCards = () => {
@@ -254,6 +259,14 @@ const resizeBoxes = () => {
   let delta = {
     x: endCursor.x - prevCursor.x,
     y: endCursor.y - prevCursor.y
+  }
+  if (store.state.shouldSnapToGrid) {
+    const prevResizeCursor = utils.cursorPositionSnapToGrid(prevCursor)
+    const endResizeCursor = utils.cursorPositionSnapToGrid(endCursor)
+    delta = {
+      x: endResizeCursor.x - prevResizeCursor.x,
+      y: endResizeCursor.y - prevResizeCursor.y
+    }
   }
   delta = {
     x: Math.round(delta.x * zoom),
@@ -390,23 +403,13 @@ const initInteractions = (event) => {
   if (spaceIsReadOnly.value) { return }
   state.startCursor = utils.cursorPositionInViewport(event)
 }
-const constrainCursorToAxis = (event) => {
-  if (store.state.currentUserIsDraggingBox) { return }
-  if (!event.shiftKey) { return }
-  const delta = {
-    x: Math.abs(endCursor.x - state.startCursor.x),
-    y: Math.abs(endCursor.y - state.startCursor.y)
-  }
-  if (delta.x > delta.y) {
-    endCursor.y = prevCursor.y
-  } else {
-    endCursor.x = prevCursor.x
-  }
+const updateShouldSnapToGrid = (event) => {
+  store.commit('shouldSnapToGrid', event.shiftKey)
 }
 const interact = (event) => {
   endCursor = utils.cursorPositionInViewport(event)
+  updateShouldSnapToGrid(event)
   if (isDraggingCard.value || isDraggingBox.value) {
-    constrainCursorToAxis(event)
     dragItems()
   }
   if (isResizingCard.value) {
@@ -441,6 +444,7 @@ const cursor = () => {
     x: cursor.x * zoom,
     y: cursor.y * zoom
   }
+  // if shift key held down
   return cursor
 }
 const eventIsFromTextarea = (event) => {
@@ -491,6 +495,7 @@ const stopInteractions = async (event) => {
   checkIfShouldHideFooter(event)
   checkIfShouldSnapBoxes()
   checkIfShouldExpandBoxes()
+  store.commit('shouldSnapToGrid', false)
   if (shouldCancelInteraction(event)) { return }
   addOrCloseCard(event)
   unselectCardsInDraggedBox()

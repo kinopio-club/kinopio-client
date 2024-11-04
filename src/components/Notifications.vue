@@ -72,6 +72,7 @@ const currentUserIsPanningReady = computed(() => store.state.currentUserIsPannin
 const currentUserIsSignedIn = computed(() => store.getters['currentUser/isSignedIn'])
 const currentUserIsUpgraded = computed(() => store.state.currentUser.isUpgraded)
 const isTouchDevice = computed(() => store.state.isTouchDevice)
+const shouldSnapToGrid = computed(() => store.state.shouldSnapToGrid)
 
 // space
 
@@ -346,6 +347,10 @@ aside.notifications(@click.left="closeAllDialogs")
   .persistent-item.info(v-if="currentUserIsPanningReady || currentUserIsPanning")
     img.icon(src="@/assets/hand.svg")
     span Hold and drag to pan
+
+  .persistent-item.info(v-if="shouldSnapToGrid")
+    img.icon(src="@/assets/constrain-axis.svg")
+    span Hold and drag items to snap to grid
 
   .persistent-item.success(v-if="notifyThanksForDonating")
     p Thank you for being a

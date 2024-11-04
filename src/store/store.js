@@ -159,6 +159,9 @@ const store = createStore({
     userDetailsPosition: {}, // x, y, shouldIgnoreZoom
     userDetailsUser: {},
 
+    // draggingItems
+    shouldSnapToGrid: false,
+
     // multiple selection
     multipleSelectedActionsIsVisible: false,
     preventMultipleSelectedActionsIsVisible: false,
@@ -365,6 +368,7 @@ const store = createStore({
       state.spaceUserListIsVisible = false
       state.importArenaChannelIsVisible = false
       state.groupsIsVisible = false
+      state.shouldSnapToGrid = false
     },
     isOnline: (state, value) => {
       utils.typeCheck({ value, type: 'boolean' })
@@ -1020,6 +1024,13 @@ const store = createStore({
     preventDraggedBoxFromShowingDetails: (state, value) => {
       utils.typeCheck({ value, type: 'boolean' })
       state.preventDraggedBoxFromShowingDetails = value
+    },
+
+    // Dragging Items
+
+    shouldSnapToGrid: (state, value) => {
+      utils.typeCheck({ value, type: 'boolean' })
+      state.shouldSnapToGrid = value
     },
 
     // User Details
