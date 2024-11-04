@@ -516,6 +516,11 @@ export default {
           height: box.resizeHeight,
           id: box.id
         }
+        if (context.rootState.shouldSnapToGrid) {
+          const snapPosition = utils.cursorPositionSnapToGrid(box)
+          box.x = snapPosition.x
+          box.y = snapPosition.y
+        }
         prevMovePositions[box.id] = box
         return box
       })
