@@ -289,14 +289,13 @@ export default {
       if (context.rootState.shouldSnapToGrid) { return }
       const snapThreshold = 6
       const spaceEdgeThreshold = 100
-      let targetBoxes = utils.clone(context.getters.all)
+      let targetBoxes = utils.clone(context.getters.isSelectableInViewport)
       let snapGuides = []
       let items
       if (cards) {
         cards = utils.clone(cards)
         cards = [ utils.boundaryRectFromItems(cards) ] // combine multiple selected cards
         items = cards
-        targetBoxes = targetBoxes.filter(box => !box.isLocked)
       } else if (boxes) {
         items = utils.clone(boxes)
       }
