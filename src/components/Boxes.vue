@@ -3,6 +3,7 @@ import { reactive, computed, onMounted, onBeforeUnmount, defineProps, defineEmit
 import { useStore } from 'vuex'
 
 import Box from '@/components/Box.vue'
+import BoxSnapGuide from '@/components/BoxSnapGuide.vue'
 const store = useStore()
 
 const isPainting = computed(() => store.state.currentUserIsPainting)
@@ -15,6 +16,7 @@ const spaceZoomDecimal = computed(() => store.getters.spaceZoomDecimal)
   //- locked boxes rendered in ItemsLocked
   template(v-for="box in unlockedBoxes")
     Box(:box="box")
+    BoxSnapGuide(:box="box")
 </template>
 
 <style lang="stylus">

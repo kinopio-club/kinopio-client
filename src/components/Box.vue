@@ -162,7 +162,6 @@ const styles = computed(() => {
     height: height + 'px',
     border: `${borderWidth}px solid ${color.value}`
   }
-  styles = updateBoxBorderRadiusStyles(styles, otherBoxes.value)
   return styles
 })
 const userColor = computed(() => store.state.currentUser.color)
@@ -198,103 +197,6 @@ const infoClasses = computed(() => {
   }
   return classes
 })
-
-// edge snapping
-
-const otherBoxes = computed(() => {
-  const boxes = store.getters['currentBoxes/isSelectableInViewport']
-  return boxes.filter(box => box?.id !== props.box.id)
-})
-const snapGuideStyles = computed(() => {
-  if (currentBoxIsBeingDragged.value) {
-    return { background: userColor.value }
-  } else {
-    return { background: props.box.color }
-  }
-})
-const snapGuideSide = computed(() => {
-  const isDraggingItem = store.state.currentUserIsDraggingBox || store.state.currentUserIsDraggingCard
-  if (!isDraggingItem) { return null }
-  let guides = store.state.currentBoxes.snapGuides
-  const snapGuide = guides.find(guide => {
-    const isTarget = guide.target.id === props.box.id
-    const isOrigin = guide.origin.id === props.box.id
-    return isTarget || isOrigin
-  })
-  if (!snapGuide) { return null }
-  if (snapGuide.target.id === props.box.id) {
-    return snapGuide.side
-  } else if (snapGuide.origin.id === props.box.id) {
-    return oppositeSide(snapGuide.side)
-  } else {
-    return null
-  }
-})
-const oppositeSide = (side) => {
-  if (side === 'left') {
-    return 'right'
-  }
-  if (side === 'right') {
-    return 'left'
-  }
-  if (side === 'top') {
-    return 'bottom'
-  }
-  if (side === 'bottom') {
-    return 'top'
-  }
-}
-const updateBoxBorderRadiusStyles = (styles, otherBoxes) => {
-  // ┌─────────────┐
-  // │  x is same  │
-  // ├─────────────┤
-  //
-  // ├─────────────┼ ─ ─┌────┐
-  // │             │    │    │
-  // │             │    │    │
-  // │ Current Box │    │y is│
-  // │             │    │same│
-  // │             │    │    │
-  // │             │    │    │
-  // └─────────────┴ ─ ─└────┴
-  const borderWidth = 2
-  const box = normalizedBox.value
-  otherBoxes = utils.clone(otherBoxes)
-  otherBoxes.forEach(otherBox => {
-    if (!otherBox) { return }
-    otherBox = normalizeBox(otherBox)
-    // x
-    const xStartIsSame = otherBox.x === box.x
-    const xEndIsSame = otherBox.x + otherBox.width === box.x + box.width
-    const xIsSame = xStartIsSame && xEndIsSame
-    // y
-    const yStartIsSame = otherBox.y === box.y
-    const yEndIsSame = otherBox.y + otherBox.height === box.y + box.height
-    const yIsSame = yStartIsSame && yEndIsSame
-    // sides
-    const isTop = xIsSame && (box.y === otherBox.y + otherBox.height - borderWidth)
-    const isBottom = xIsSame && (box.y + box.height - borderWidth === otherBox.y)
-    const isLeft = yIsSame && (box.x === otherBox.x + otherBox.width - borderWidth)
-    const isRight = yIsSame && (box.x + box.width - borderWidth === otherBox.x)
-    if (isTop || snapGuideSide.value === 'top') {
-      styles.borderTopRightRadius = 0
-      styles.borderTopLeftRadius = 0
-    }
-    if (isBottom || snapGuideSide.value === 'bottom') {
-      styles.borderBottomRightRadius = 0
-      styles.borderBottomLeftRadius = 0
-    }
-    if (isRight || snapGuideSide.value === 'right') {
-      styles.borderTopRightRadius = 0
-      styles.borderBottomRightRadius = 0
-    }
-    if (isLeft || snapGuideSide.value === 'left') {
-      styles.borderTopLeftRadius = 0
-      styles.borderBottomLeftRadius = 0
-    }
-  })
-  return styles
-}
 
 // resize
 
@@ -921,11 +823,6 @@ const isInCheckedBox = computed(() => {
 
   //- fill
   .background.filled(v-if="hasFill" :style="{background: color}")
-  //- snap guides
-  .snap-guide.right(v-if="snapGuideSide === 'right'" :style="snapGuideStyles")
-  .snap-guide.left(v-if="snapGuideSide === 'left'" :style="snapGuideStyles")
-  .snap-guide.top(v-if="snapGuideSide === 'top'" :style="snapGuideStyles")
-  .snap-guide.bottom(v-if="snapGuideSide === 'bottom'" :style="snapGuideStyles")
 </template>
 
 <style lang="stylus">
@@ -1116,56 +1013,6 @@ const isInCheckedBox = computed(() => {
     pointer-events all
     button
       z-index 1
-
-  .snap-guide
-    --snap-guide-width 6px
-    --snap-guide-duration 1s
-    position absolute
-    &.left
-      left calc(-1 * var(--snap-guide-width))
-      width var(--snap-guide-width)
-      top -2px
-      height calc(100% + 4px)
-      animation guideLeft var(--snap-guide-duration) infinite ease-in-out forwards
-      border-top-left-radius var(--entity-radius)
-      border-bottom-left-radius var(--entity-radius)
-    &.right
-      right calc(-1 * var(--snap-guide-width))
-      width var(--snap-guide-width)
-      top -2px
-      height calc(100% + 4px)
-      animation guideRight var(--snap-guide-duration) infinite ease-in-out forwards
-      border-top-right-radius var(--entity-radius)
-      border-bottom-right-radius var(--entity-radius)
-    &.top
-      top calc(-1 * var(--snap-guide-width))
-      height var(--snap-guide-width)
-      left -2px
-      width calc(100% + 4px)
-      animation guideTop var(--snap-guide-duration) infinite ease-in-out forwards
-      border-top-left-radius var(--entity-radius)
-      border-top-right-radius var(--entity-radius)
-    &.bottom
-      bottom calc(-1 * var(--snap-guide-width))
-      height var(--snap-guide-width)
-      left -2px
-      width calc(100% + 4px)
-      animation guideBottom var(--snap-guide-duration) infinite ease-in-out forwards
-      border-bottom-left-radius var(--entity-radius)
-      border-bottom-right-radius var(--entity-radius)
-
-@keyframes guideRight
-  50%
-    transform translateX(2px)
-@keyframes guideLeft
-  50%
-    transform translateX(-2px)
-@keyframes guideTop
-  50%
-    transform translateY(-2px)
-@keyframes guideBottom
-  50%
-    transform translateY(2px)
 
 .box-jiggle
   animation boxJiggle 0.5s infinite ease-out forwards
