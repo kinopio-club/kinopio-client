@@ -120,12 +120,18 @@ watch(() => store.state.currentUserIsDraggingCard, (value, prevValue) => {
 })
 watch(() => store.state.currentUserIsResizingCard, (value, prevValue) => {
   updatePageSizeFromMutation(value)
+  if (prevValue && !value) {
+    afterResizeCards()
+  }
 })
 watch(() => store.state.currentUserIsDraggingBox, (value, prevValue) => {
   updatePageSizeFromMutation(value)
 })
 watch(() => store.state.currentUserIsResizingBox, (value, prevValue) => {
   updatePageSizeFromMutation(value)
+  if (prevValue && !value) {
+    afterResizeBoxes()
+  }
 })
 const updatePageSizeFromMutation = (value) => {
   if (!value) {
@@ -223,11 +229,6 @@ const resizeCards = () => {
   if (!prevCursor) { return }
   const cardIds = store.state.currentUserIsResizingCardIds
   let deltaX = endCursor.x - prevCursor.x
-  if (store.state.shouldSnapToGrid) {
-    const prevResizeCursor = utils.cursorPositionSnapToGrid(prevCursor)
-    const endResizeCursor = utils.cursorPositionSnapToGrid(endCursor)
-    deltaX = endResizeCursor.x - prevResizeCursor.x
-  }
   store.dispatch('currentCards/resize', { cardIds, deltaX })
 }
 const stopResizingCards = () => {
@@ -239,6 +240,16 @@ const stopResizingCards = () => {
   store.commit('currentUserIsResizingCard', false)
   store.dispatch('currentCards/updateDimensions', { cards })
   store.commit('broadcast/updateStore', { updates: { userId: currentUser.value.id }, type: 'removeRemoteUserResizingCards' })
+}
+const afterResizeCards = () => {
+  if (!store.state.shouldSnapToGrid) { return }
+  const cardIds = store.state.currentUserIsResizingCardIds
+  const cards = cardIds.map(cardId => {
+    let { id, resizeWidth } = store.getters['currentCards/byId'](cardId)
+    resizeWidth = utils.roundToNearest(resizeWidth)
+    return { id, resizeWidth }
+  })
+  store.dispatch('currentCards/updateMultiple', cards)
 }
 const addCardFromOutsideAppContext = (event) => {
   if (!consts.isSecureAppContext) { return }
@@ -260,14 +271,6 @@ const resizeBoxes = () => {
     x: endCursor.x - prevCursor.x,
     y: endCursor.y - prevCursor.y
   }
-  if (store.state.shouldSnapToGrid) {
-    const prevResizeCursor = utils.cursorPositionSnapToGrid(prevCursor)
-    const endResizeCursor = utils.cursorPositionSnapToGrid(endCursor)
-    delta = {
-      x: endResizeCursor.x - prevResizeCursor.x,
-      y: endResizeCursor.y - prevResizeCursor.y
-    }
-  }
   delta = {
     x: Math.round(delta.x * zoom),
     y: Math.round(delta.y * zoom)
@@ -285,6 +288,17 @@ const stopResizingBoxes = () => {
   store.dispatch('currentUserToolbar', 'card')
   store.commit('broadcast/updateStore', { updates: { userId: currentUser.value.id }, type: 'removeRemoteUserResizingBoxes' })
   store.dispatch('checkIfItemShouldIncreasePageSize', boxes[0])
+}
+const afterResizeBoxes = () => {
+  if (!store.state.shouldSnapToGrid) { return }
+  const boxIds = store.state.currentUserIsResizingBoxIds
+  const boxes = boxIds.map(boxId => {
+    let { id, resizeWidth, resizeHeight } = store.getters['currentBoxes/byId'](boxId)
+    resizeWidth = utils.roundToNearest(resizeWidth)
+    resizeHeight = utils.roundToNearest(resizeHeight)
+    return { id, resizeWidth, resizeHeight }
+  })
+  store.dispatch('currentBoxes/updateMultiple', boxes)
 }
 const checkIfShouldSnapBoxes = () => {
   if (!store.state.boxesWereDragged) { return }
@@ -495,7 +509,6 @@ const stopInteractions = async (event) => {
   checkIfShouldHideFooter(event)
   checkIfShouldSnapBoxes()
   checkIfShouldExpandBoxes()
-  store.commit('shouldSnapToGrid', false)
   if (shouldCancelInteraction(event)) { return }
   addOrCloseCard(event)
   unselectCardsInDraggedBox()
@@ -521,6 +534,7 @@ const stopInteractions = async (event) => {
   await nextTick()
   await nextTick()
   store.commit('clearShouldExplicitlyRenderCardIds', null, { root: true })
+  store.commit('shouldSnapToGrid', false)
 }
 
 </script>

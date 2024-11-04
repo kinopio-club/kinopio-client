@@ -381,6 +381,7 @@ export default {
     return Math.round(number * 100) / 100
   },
   roundToNearest (value, divider) {
+    divider = divider || consts.spaceBetweenCards
     value = value || 1
     const increment = Math.round(value / divider)
     return increment * divider
