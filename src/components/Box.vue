@@ -150,8 +150,12 @@ const removeViewportObserver = () => {
 
 const styles = computed(() => {
   let { x, y, resizeWidth, resizeHeight } = normalizedBox.value
-  const width = resizeWidth
-  const height = resizeHeight
+  let width = resizeWidth
+  let height = resizeHeight
+  if (store.state.shouldSnapToGrid && currentBoxIsBeingResized.value) {
+    width = utils.roundToNearest(width)
+    height = utils.roundToNearest(height)
+  }
   let styles = {
     left: x + 'px',
     top: y + 'px',
@@ -323,6 +327,10 @@ const startResizing = (event) => {
 const resizeColorClass = computed(() => {
   const colorClass = utils.colorClasses({ backgroundColorIsDark: colorIsDark.value })
   return [colorClass]
+})
+const currentBoxIsBeingResized = computed(() => {
+  const boxIds = store.state.currentUserIsResizingBoxIds
+  return boxIds.includes(props.box.id)
 })
 
 // shrink
