@@ -80,10 +80,9 @@ const normalizedBox = computed(() => {
   return normalizeBox(props.box)
 })
 const normalizeBox = (box) => {
-  const init = 200
   box = utils.clone(box)
-  box.resizeWidth = box.resizeWidth || init
-  box.resizeHeight = box.resizeHeight || init
+  box.resizeWidth = box.resizeWidth || consts.minItemXY
+  box.resizeHeight = box.resizeHeight || consts.minItemXY
   box.width = box.resizeWidth
   box.height = box.resizeHeight
   box.color = box.color || randomColor({ luminosity: 'light' })
