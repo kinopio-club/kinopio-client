@@ -171,7 +171,7 @@ const color = computed(() => {
   const remoteColor = remoteBoxDetailsVisibleColor.value || remoteSelectedColor.value || remoteUserResizingBoxesColor.value || remoteBoxDraggingColor.value
   if (remoteColor) {
     return remoteColor
-  } else if (isSelected.value) {
+  } else if (currentBoxIsSelected.value) {
     return userColor.value
   } else {
     return normalizedBox.value.color
@@ -207,15 +207,15 @@ const otherBoxes = computed(() => {
   return boxes.filter(box => box?.id !== props.box.id)
 })
 const snapGuideStyles = computed(() => {
-  if (isDragging.value) {
+  if (currentBoxIsBeingDragged.value) {
     return { background: userColor.value }
   } else {
     return { background: props.box.color }
   }
 })
 const snapGuideSide = computed(() => {
-  const isDragging = store.state.currentUserIsDraggingBox || store.state.currentUserIsDraggingCard
-  if (!isDragging) { return null }
+  const isDraggingItem = store.state.currentUserIsDraggingBox || store.state.currentUserIsDraggingCard
+  if (!isDraggingItem) { return null }
   let guides = store.state.currentBoxes.snapGuides
   const snapGuide = guides.find(guide => {
     const isTarget = guide.target.id === props.box.id
@@ -385,12 +385,12 @@ const canEditSpace = computed(() => store.getters['currentUser/canEditSpace']())
 const shouldJiggle = computed(() => {
   const isMultipleItemsSelected = store.getters.isMultipleItemsSelected
   if (isMultipleItemsSelected) { return }
-  return isDragging.value
+  return currentBoxIsBeingDragged.value
 })
-const isDragging = computed(() => {
+const currentBoxIsBeingDragged = computed(() => {
   const isDragging = store.state.currentUserIsDraggingBox
   const isCurrent = store.state.currentDraggingBoxId === props.box.id
-  return isDragging && (isCurrent || isSelected.value)
+  return isDragging && (isCurrent || currentBoxIsSelected.value)
 })
 const isResizing = computed(() => {
   const isResizing = store.state.currentUserIsResizingBox
@@ -415,7 +415,7 @@ const startBoxInfoInteraction = (event) => {
   selectContainedBoxes()
 }
 const updateIsHover = (value) => {
-  if (isDragging.value) { return }
+  if (store.state.currentUserIsDraggingBox) { return }
   if (isPainting.value) { return }
   state.isHover = value
   if (value) {
@@ -455,10 +455,6 @@ const currentBoxDetailsIsVisible = computed(() => {
 
 // select
 
-const isSelected = computed(() => {
-  const selectedIds = store.state.multipleBoxesSelectedIds
-  return selectedIds.includes(props.box.id)
-})
 const multipleBoxesIsSelected = computed(() => Boolean(store.state.multipleBoxesSelectedIds.length))
 const currentBoxIsSelected = computed(() => {
   const selected = store.state.multipleBoxesSelectedIds
@@ -712,7 +708,7 @@ const updateTouchPosition = (event) => {
 }
 const updateCurrentTouchPosition = (event) => {
   currentTouchPosition = utils.cursorPositionInViewport(event)
-  if (isDragging.value || isResizing.value) {
+  if (currentBoxIsBeingDragged.value || isResizing.value) {
     event.preventDefault() // allows dragging boxes without scrolling
   }
 }
@@ -809,8 +805,8 @@ const toggleBoxChecked = () => {
 const containingBoxes = computed(() => {
   if (!state.isVisibleInViewport) { return }
   if (store.state.currentUserIsDraggingBox) { return }
-  if (isDragging.value) { return }
-  if (isSelected.value) { return }
+  if (currentBoxIsBeingDragged.value) { return }
+  if (currentBoxIsSelected.value) { return }
   if (isResizing.value) { return }
   let boxes = store.getters['currentBoxes/all']
   boxes = boxes.filter(box => {
@@ -844,7 +840,7 @@ const isInCheckedBox = computed(() => {
   :data-should-render="shouldRender"
 
   :style="styles"
-  :class="{hover: state.isHover, active: isDragging, 'box-jiggle': shouldJiggle, 'is-resizing': isResizing, 'is-selected': isSelected, 'is-checked': isChecked || isInCheckedBox}"
+  :class="{hover: state.isHover, active: currentBoxIsBeingDragged, 'box-jiggle': shouldJiggle, 'is-resizing': isResizing, 'is-selected': currentBoxIsSelected, 'is-checked': isChecked || isInCheckedBox}"
   ref="boxElement"
 )
 
