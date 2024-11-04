@@ -447,14 +447,16 @@ export default {
 
     // move
 
-    // moveWhileDragging: (context, boxes) => {
-    //   boxes.forEach(box => {
-    //     const element = document.querySelector(`.box[data-box-id="${box.id}"]`)
-    //     element.style.left = box.x + 'px'
-    //     element.style.top = box.y + 'px'
-    //   })
-    //   context.dispatch('currentConnections/updatePathsWhileDragging', { connections }, { root: true })
-    // },
+    moveWhileDragging: (context, { boxes }) => {
+      boxes.forEach(box => {
+        const element = document.querySelector(`.box[data-box-id="${box.id}"]`)
+        if (!element) { return }
+        if (element.dataset.isVisibleInViewport === 'false') { return }
+        element.style.left = box.x + 'px'
+        element.style.top = box.y + 'px'
+        console.log('🤣', element.style.left, box.x, boxes, box)
+      })
+    },
     move: (context, { endCursor, prevCursor, delta }) => {
       const zoom = context.rootGetters.spaceCounterZoomDecimal
       if (!endCursor || !prevCursor) { return }
@@ -526,7 +528,7 @@ export default {
         return box
       })
       // update
-      context.commit('move', { boxes })
+      context.dispatch('moveWhileDragging', { boxes })
       context.commit('boxesWereDragged', true, { root: true })
       context.dispatch('currentConnections/updatePathsWhileDragging', { connections }, { root: true })
       context.dispatch('broadcast/update', { updates: { boxes }, type: 'moveBoxes', handler: 'currentBoxes/moveWhileDraggingBroadcast' }, { root: true })
@@ -590,6 +592,7 @@ export default {
       let boxes = []
       elements.forEach(box => {
         if (box.dataset.isVisibleInViewport === 'false') { return }
+        if (box.dataset.isLocked === 'true') { return }
         boxes.push(box)
       })
       boxes = boxes.map(box => getters.byId(box.dataset.boxId))
