@@ -6,8 +6,15 @@ import utils from '@/utils.js'
 import consts from '@/consts.js'
 const store = useStore()
 
+const boxSnapGuideWaitingDuration = 500
+let waitingAnimationTimer, shouldCancelWaiting, waitingStartTime
+
 const props = defineProps({
   box: Object
+})
+
+const state = reactive({
+  snapStatus: null // waiting, ready
 })
 
 const currentBoxIsSelected = computed(() => {
@@ -91,33 +98,71 @@ const snapGuideStyles = computed(() => {
     styles.left = rect.x + 'px'
     styles.top = (rect.y + rect.height - offset) + 'px'
   }
+  if (snapGuideSide.value) {
+    startWaiting()
+  }
   return styles
 })
-const status = (side) => {
+
+// waiting to snap
+
+const cancelWaiting = () => {
+  shouldCancelWaiting = true
+}
+const cancelWaitingAnimationFrame = () => {
+  window.cancelAnimationFrame(waitingAnimationTimer)
+  shouldCancelWaiting = false
+  waitingAnimationTimer = null
+  waitingStartTime = null
+}
+const startWaiting = () => {
+  console.log('startWaiting')
+  shouldCancelWaiting = false
+  if (!waitingAnimationTimer) {
+    waitingAnimationTimer = window.requestAnimationFrame(waitingAnimationFrame)
+  }
+}
+const waitingAnimationFrame = (timestamp) => {
+  if (!waitingStartTime) {
+    waitingStartTime = timestamp
+  }
+
   const snapGuide = currentBoxSnapGuide.value
-  const timeDelta = Date.now() - snapGuide.time
-  console.log('🌺', props.box.name, side, snapGuide.time, snapGuideSide.value, '💐💐', timeDelta)
-  // TODO rewrite in RAF
-  if (timeDelta <= consts.boxSnapGuideWaitingTime) {
-    return 'waiting'
+  if (!snapGuide) {
+    cancelWaitingAnimationFrame()
+    return
+  }
+  const elaspedTime = timestamp - waitingStartTime
+  const percentComplete = (elaspedTime / boxSnapGuideWaitingDuration) // between 0 and 1
+  // waiting
+  if (percentComplete < 1) {
+    state.snapStatus = 'waiting'
+    window.requestAnimationFrame(waitingAnimationFrame)
+  // complete
   } else {
-    return 'ready'
+    console.log('🔒🐢 boxSnapGuide waitingAnimationFrame ready')
+    state.snapStatus = 'ready'
+    cancelWaitingAnimationFrame()
+  }
+  // cancel
+  if (shouldCancelWaiting) {
+    cancelWaitingAnimationFrame()
   }
 }
 </script>
 
 <template lang="pug">
-.box-snap-guide.right(v-if="snapGuideSide === 'right'" :style="snapGuideStyles" :class="status('right')")
-.box-snap-guide.left(v-if="snapGuideSide === 'left'" :style="snapGuideStyles" :class="status('left')")
-.box-snap-guide.top(v-if="snapGuideSide === 'top'" :style="snapGuideStyles" :class="status('top')")
-.box-snap-guide.bottom(v-if="snapGuideSide === 'bottom'" :style="snapGuideStyles" :class="status('bottom')")
+.box-snap-guide.right(v-if="snapGuideSide === 'right'" :style="snapGuideStyles" :class="state.snapStatus")
+.box-snap-guide.left(v-if="snapGuideSide === 'left'" :style="snapGuideStyles" :class="state.snapStatus")
+.box-snap-guide.top(v-if="snapGuideSide === 'top'" :style="snapGuideStyles" :class="state.snapStatus")
+.box-snap-guide.bottom(v-if="snapGuideSide === 'bottom'" :style="snapGuideStyles" :class="state.snapStatus")
 </template>
 
 <style lang="stylus">
 .box-snap-guide
   --snap-guide-width 6px
-  --snap-guide-waiting-duration 0.5s // same as consts.boxSnapGuideWaitingTime
-  --snap-guide-ready-duration 0.2s
+  --snap-guide-waiting-duration 0.5s // same as boxSnapGuideWaitingDuration ms
+  --snap-guide-ready-duration 0.4s
   position absolute
   &.left
     left calc(-1 * var(--snap-guide-width))
