@@ -60,8 +60,7 @@ const oppositeSide = (side) => {
 }
 const snapGuideStyles = computed(() => {
   let styles = {}
-  let rect = utils.boxRectFromId(props.box.id)
-  rect = utils.rectDimensions(rect)
+  let rect = utils.boxElementDimensions({ id: props.box.id })
   if (currentBoxIsBeingDragged.value) {
     styles.background = userColor.value
   } else {
@@ -70,23 +69,23 @@ const snapGuideStyles = computed(() => {
   // left
   if (snapGuideSide.value === 'left') {
     styles.height = rect.height + 'px'
-    styles.left = rect.x + 'px'
+    styles.left = (rect.x - 2) + 'px'
     styles.top = rect.y + 'px'
   // right
   } else if (snapGuideSide.value === 'right') {
     styles.height = rect.height + 'px'
-    styles.left = rect.x + rect.width + 'px'
+    styles.left = (rect.x + rect.width - 4) + 'px'
     styles.top = rect.y + 'px'
   // top
   } else if (snapGuideSide.value === 'top') {
     styles.width = rect.width + 'px'
     styles.left = rect.x + 'px'
-    styles.top = rect.y + 'px'
+    styles.top = (rect.y - 2) + 'px'
   // bottom
   } else if (snapGuideSide.value === 'bottom') {
     styles.width = rect.width + 'px'
     styles.left = rect.x + 'px'
-    styles.top = rect.y + rect.height + 'px'
+    styles.top = (rect.y + rect.height - 4) + 'px'
   }
   return styles
 })
@@ -102,37 +101,29 @@ const snapGuideStyles = computed(() => {
 <style lang="stylus">
 .box-snap-guide
   --snap-guide-width 6px
-  --snap-guide-duration 1s
+  --snap-guide-duration 0.2s
   position absolute
   &.left
     left calc(-1 * var(--snap-guide-width))
     width var(--snap-guide-width)
-    // top -2px
-    // height calc(100% + 4px)
     animation guideLeft var(--snap-guide-duration) infinite ease-in-out forwards
     border-top-left-radius var(--entity-radius)
     border-bottom-left-radius var(--entity-radius)
   &.right
     right calc(-1 * var(--snap-guide-width))
     width var(--snap-guide-width)
-    // top -2px
-    // height calc(100% + 4px)
     animation guideRight var(--snap-guide-duration) infinite ease-in-out forwards
     border-top-right-radius var(--entity-radius)
     border-bottom-right-radius var(--entity-radius)
   &.top
     top calc(-1 * var(--snap-guide-width))
     height var(--snap-guide-width)
-    // left -2px
-    // width calc(100% + 4px)
     animation guideTop var(--snap-guide-duration) infinite ease-in-out forwards
     border-top-left-radius var(--entity-radius)
     border-top-right-radius var(--entity-radius)
   &.bottom
     bottom calc(-1 * var(--snap-guide-width))
     height var(--snap-guide-width)
-    // left -2px
-    // width calc(100% + 4px)
     animation guideBottom var(--snap-guide-duration) infinite ease-in-out forwards
     border-bottom-left-radius var(--entity-radius)
     border-bottom-right-radius var(--entity-radius)
