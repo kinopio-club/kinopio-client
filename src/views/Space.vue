@@ -290,13 +290,14 @@ const stopResizingBoxes = () => {
   store.dispatch('checkIfItemShouldIncreasePageSize', boxes[0])
 }
 const afterResizeBoxes = () => {
-  if (!store.state.shouldSnapToGrid) { return }
   const boxIds = store.state.currentUserIsResizingBoxIds
   const boxes = boxIds.map(boxId => {
-    let { id, resizeWidth, resizeHeight } = store.getters['currentBoxes/byId'](boxId)
-    resizeWidth = utils.roundToNearest(resizeWidth)
-    resizeHeight = utils.roundToNearest(resizeHeight)
-    return { id, resizeWidth, resizeHeight }
+    let { resizeWidth, resizeHeight } = utils.boxElementDimensions({ id: boxId })
+    if (store.state.shouldSnapToGrid) {
+      resizeWidth = utils.roundToNearest(resizeWidth)
+      resizeHeight = utils.roundToNearest(resizeHeight)
+    }
+    return { id: boxId, resizeWidth, resizeHeight }
   })
   store.dispatch('currentBoxes/updateMultiple', boxes)
 }

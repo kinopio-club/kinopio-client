@@ -256,17 +256,20 @@ export default {
       let connections = []
       let boxes = []
       boxIds.forEach(boxId => {
-        const element = utils.boxElementFromId(boxId)
-        if (!element) { return }
-        let rect = element.getBoundingClientRect()
-        rect = utils.rectDimensions(rect)
+        const rect = utils.boxElementDimensions({ id: boxId })
         let width = rect.width
         let height = rect.height
         width = width + delta.x
         height = height + delta.y
+        if (context.rootState.shouldSnapToGrid) {
+          width = utils.roundToNearest(width)
+          height = utils.roundToNearest(height)
+        }
         const box = { id: boxId, resizeWidth: width, resizeHeight: height }
         boxes.push(box)
         connections = connections.concat(context.rootGetters['currentConnections/byItemId'](box.id))
+        context.commit('currentUserIsResizingBox', true, { root: true })
+        context.commit('currentUserIsResizingBoxIds', [box.id], { root: true })
       })
       context.dispatch('resizeWhileDragging', { boxes })
       context.dispatch('currentConnections/updatePathsWhileDragging', { connections }, { root: true })
