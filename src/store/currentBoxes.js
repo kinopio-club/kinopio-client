@@ -308,6 +308,7 @@ export default {
       const snapThreshold = 6
       const spaceEdgeThreshold = 100
       let targetBoxes = utils.clone(context.getters.isSelectableInViewport)
+      const prevSnapGuides = context.state.snapGuides
       let snapGuides = []
       let items
       if (cards) {
@@ -337,6 +338,7 @@ export default {
             min: targetBox.y + snapThreshold,
             max: targetBox.y + targetBox.height - snapThreshold
           })
+          // let time = 1
           // item sides
           const itemLeft = item.x
           const itemRight = item.x + item.width
@@ -353,25 +355,29 @@ export default {
           const isSnapLeftFromItemRight = Math.abs(itemRight - targetBoxLeft) <= snapThreshold
           const isSnapLeftFromItemLeft = Math.abs(itemLeft - targetBoxLeft) <= snapThreshold
           if (!targetBoxIsMinX && isBetweenTargetBoxPointsY && (isSnapLeftFromItemRight || isSnapLeftFromItemLeft)) {
-            snapGuides.push({ side: 'left', origin: item, target: targetBox })
+            const newSnapGuide = context.getters.newSnapGuide({ side: 'left', item, targetBox })
+            snapGuides.push(newSnapGuide)
           }
           // snap right
           const isSnapRightFromItemLeft = Math.abs(itemLeft - targetBoxRight) <= snapThreshold
           const isSnapRightFromItemRight = Math.abs(itemRight - targetBoxRight) <= snapThreshold
           if (isBetweenTargetBoxPointsY && (isSnapRightFromItemLeft || isSnapRightFromItemRight)) {
-            snapGuides.push({ side: 'right', origin: item, target: targetBox })
+            const newSnapGuide = context.getters.newSnapGuide({ side: 'right', item, targetBox })
+            snapGuides.push(newSnapGuide)
           }
           // snap top
           const isSnapTopFromItemBottom = Math.abs(itemBottom - targetBoxTop) <= snapThreshold
           const isSnapTopFromItemTop = Math.abs(itemTop - targetBoxTop) <= snapThreshold
           if (!targetBoxIsMinY && isBetweenTargetBoxPointsX && (isSnapTopFromItemBottom || isSnapTopFromItemTop)) {
-            snapGuides.push({ side: 'top', origin: item, target: targetBox })
+            const newSnapGuide = context.getters.newSnapGuide({ side: 'top', item, targetBox })
+            snapGuides.push(newSnapGuide)
           }
           // snap bottom
           const isSnapBottomFromItemTop = Math.abs(itemTop - targetBoxBottom) <= snapThreshold
           const isSnapBottomFromItemBottom = Math.abs(itemBottom - targetBoxBottom) <= snapThreshold
           if (isBetweenTargetBoxPointsX && (isSnapBottomFromItemTop || isSnapBottomFromItemBottom)) {
-            snapGuides.push({ side: 'bottom', origin: item, target: targetBox })
+            const newSnapGuide = context.getters.newSnapGuide({ side: 'bottom', item, targetBox })
+            snapGuides.push(newSnapGuide)
           }
         })
       })
@@ -633,6 +639,14 @@ export default {
       let colors = boxes.map(box => box.color)
       colors = colors.filter(color => Boolean(color))
       return uniq(colors)
+    },
+    newSnapGuide: (state) => ({ side, item, targetBox }) => {
+      let time = Date.now()
+      const prevGuide = state.snapGuides.find(guide => guide.side === side)
+      if (prevGuide) {
+        time = prevGuide.time
+      }
+      return { side, origin: item, target: targetBox, time }
     }
   }
 }
