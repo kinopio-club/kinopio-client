@@ -65,21 +65,31 @@ export default {
     snapGuides: (state, value) => {
       state.snapGuides = value
     },
+    resizeWhileDragging: (state, { boxes }) => {
+      boxes.forEach(box => {
+        const element = utils.boxElementFromId(box.id)
+        if (!element) { return }
+        if (element.dataset.isVisibleInViewport === 'false') { return }
+        element.style.width = box.resizeWidth + 'px'
+        element.style.height = box.resizeHeight + 'px'
+        element.dataset.resizeWidth = box.resizeWidth
+        element.dataset.resizeHeight = box.resizeHeight
+      })
+    },
+    moveWhileDragging: (state, { boxes }) => {
+      boxes.forEach(box => {
+        const element = document.querySelector(`.box[data-box-id="${box.id}"]`)
+        if (!element) { return }
+        if (element.dataset.isVisibleInViewport === 'false') { return }
+        element.style.left = box.x + 'px'
+        element.style.top = box.y + 'px'
+        element.dataset.x = box.x
+        element.dataset.y = box.y
+      })
+    },
 
     // broadcast
 
-    // resizeBroadcast: (state, { box }) => {
-    //   const element = document.querySelector(`.box[data-box-id="${box.id}"]`)
-    //   element.style.width = box.resizeWidth + 'px'
-    //   element.style.height = box.resizeHeight + 'px'
-    // },
-    moveWhileDraggingBroadcast: (state, { boxes }) => {
-      boxes.forEach(box => {
-        const element = document.querySelector(`.box[data-box-id="${box.id}"]`)
-        element.style.left = box.x + 'px'
-        element.style.top = box.y + 'px'
-      })
-    },
     moveBroadcast: (state, { boxes }) => {
       boxes.forEach(updated => {
         const box = state.boxes[updated.id]
@@ -241,17 +251,6 @@ export default {
 
     // resize
 
-    resizeWhileDragging: (context, { boxes }) => {
-      boxes.forEach(box => {
-        const element = utils.boxElementFromId(box.id)
-        if (!element) { return }
-        if (element.dataset.isVisibleInViewport === 'false') { return }
-        element.style.width = box.resizeWidth + 'px'
-        element.style.height = box.resizeHeight + 'px'
-        element.dataset.resizeWidth = box.resizeWidth
-        element.dataset.resizeHeight = box.resizeHeight
-      })
-    },
     resize: (context, { boxIds, delta }) => {
       let connections = []
       let boxes = []
@@ -271,11 +270,9 @@ export default {
         context.commit('currentUserIsResizingBox', true, { root: true })
         context.commit('currentUserIsResizingBoxIds', [box.id], { root: true })
       })
-      context.dispatch('resizeWhileDragging', { boxes })
+      context.commit('resizeWhileDragging', { boxes })
       context.dispatch('currentConnections/updatePathsWhileDragging', { connections }, { root: true })
-
-      // TODO handler currentBoxes/resizeWhileDraggingBroadcast
-      // context.dispatch('broadcast/update', { updates: { boxes }, type: 'resizeBoxes', handler: 'currentBoxes/resizeWhileDraggingBroadcast' }, { root: true })
+      context.dispatch('broadcast/update', { updates: { boxes }, type: 'resizeBoxes', handler: 'currentBoxes/resizeWhileDragging' }, { root: true })
     },
 
     // dimensions
@@ -467,17 +464,6 @@ export default {
 
     // move
 
-    moveWhileDragging: (context, { boxes }) => {
-      boxes.forEach(box => {
-        const element = document.querySelector(`.box[data-box-id="${box.id}"]`)
-        if (!element) { return }
-        if (element.dataset.isVisibleInViewport === 'false') { return }
-        element.style.left = box.x + 'px'
-        element.style.top = box.y + 'px'
-        element.dataset.x = box.x
-        element.dataset.y = box.y
-      })
-    },
     move: (context, { endCursor, prevCursor, delta }) => {
       const zoom = context.rootGetters.spaceCounterZoomDecimal
       if (!endCursor || !prevCursor) { return }
@@ -551,10 +537,10 @@ export default {
         return box
       })
       // update
-      context.dispatch('moveWhileDragging', { boxes })
+      context.commit('moveWhileDragging', { boxes })
       context.commit('boxesWereDragged', true, { root: true })
       context.dispatch('currentConnections/updatePathsWhileDragging', { connections }, { root: true })
-      context.dispatch('broadcast/update', { updates: { boxes }, type: 'moveBoxes', handler: 'currentBoxes/moveWhileDraggingBroadcast' }, { root: true })
+      context.dispatch('broadcast/update', { updates: { boxes }, type: 'moveBoxes', handler: 'currentBoxes/moveWhileDragging' }, { root: true })
       context.dispatch('updateSnapGuides', { boxes })
     },
     afterMove: (context) => {
