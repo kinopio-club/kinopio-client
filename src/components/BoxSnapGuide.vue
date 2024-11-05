@@ -26,38 +26,6 @@ const otherBoxes = computed(() => {
 // styles
 
 const userColor = computed(() => store.state.currentUser.color)
-const snapGuideStyles = computed(() => {
-  let styles = {}
-  let rect = utils.boxRectFromId(props.box.id)
-  rect = utils.rectDimensions(rect)
-  if (currentBoxIsBeingDragged.value) {
-    styles.background = userColor.value
-  } else {
-    styles.background = props.box.color
-  }
-  // left
-  if (snapGuideSide.value === 'left') {
-    styles.height = rect.height + 'px'
-    styles.left = rect.x + 'px'
-    styles.top = rect.y + 'px'
-  // right
-  } else if (snapGuideSide.value === 'right') {
-    styles.height = rect.height + 'px'
-    styles.left = rect.x + rect.width + 'px'
-    styles.top = rect.y + 'px'
-  // top
-  } else if (snapGuideSide.value === 'top') {
-    styles.width = rect.width + 'px'
-    styles.left = rect.x + 'px'
-    styles.top = rect.y + 'px'
-  // bottom
-  } else if (snapGuideSide.value === 'bottom') {
-    styles.width = rect.width + 'px'
-    styles.left = rect.x + 'px'
-    styles.top = rect.y + rect.height + 'px'
-  }
-  return styles
-})
 const snapGuideSide = computed(() => {
   const isDraggingItem = store.state.currentUserIsDraggingBox || store.state.currentUserIsDraggingCard
   if (!isDraggingItem) { return null }
@@ -90,6 +58,38 @@ const oppositeSide = (side) => {
     return 'top'
   }
 }
+const snapGuideStyles = computed(() => {
+  let styles = {}
+  let rect = utils.boxRectFromId(props.box.id)
+  rect = utils.rectDimensions(rect)
+  if (currentBoxIsBeingDragged.value) {
+    styles.background = userColor.value
+  } else {
+    styles.background = props.box.color
+  }
+  // left
+  if (snapGuideSide.value === 'left') {
+    styles.height = rect.height + 'px'
+    styles.left = rect.x + 'px'
+    styles.top = rect.y + 'px'
+  // right
+  } else if (snapGuideSide.value === 'right') {
+    styles.height = rect.height + 'px'
+    styles.left = rect.x + rect.width + 'px'
+    styles.top = rect.y + 'px'
+  // top
+  } else if (snapGuideSide.value === 'top') {
+    styles.width = rect.width + 'px'
+    styles.left = rect.x + 'px'
+    styles.top = rect.y + 'px'
+  // bottom
+  } else if (snapGuideSide.value === 'bottom') {
+    styles.width = rect.width + 'px'
+    styles.left = rect.x + 'px'
+    styles.top = rect.y + rect.height + 'px'
+  }
+  return styles
+})
 </script>
 
 <template lang="pug">
