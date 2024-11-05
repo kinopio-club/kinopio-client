@@ -241,20 +241,38 @@ export default {
 
     // resize
 
+    resizeWhileDragging: (context, { boxes }) => {
+      boxes.forEach(box => {
+        const element = utils.boxElementFromId(box.id)
+        if (!element) { return }
+        if (element.dataset.isVisibleInViewport === 'false') { return }
+        element.style.width = box.resizeWidth + 'px'
+        element.style.height = box.resizeHeight + 'px'
+        element.dataset.resizeWidth = box.resizeWidth
+        element.dataset.resizeHeight = box.resizeHeight
+      })
+    },
     resize: (context, { boxIds, delta }) => {
       let connections = []
+      let boxes = []
       boxIds.forEach(boxId => {
-        const box = context.getters.byId(boxId)
-        let width = box.resizeWidth
-        let height = box.resizeHeight
+        const element = utils.boxElementFromId(boxId)
+        if (!element) { return }
+        let rect = element.getBoundingClientRect()
+        rect = utils.rectDimensions(rect)
+        let width = rect.width
+        let height = rect.height
         width = width + delta.x
         height = height + delta.y
-        const updates = { id: boxId, resizeWidth: width, resizeHeight: height }
-        context.dispatch('update', updates)
-        context.dispatch('broadcast/update', { updates, type: 'resizeBox', handler: 'currentBoxes/update' }, { root: true })
+        const box = { id: boxId, resizeWidth: width, resizeHeight: height }
+        boxes.push(box)
         connections = connections.concat(context.rootGetters['currentConnections/byItemId'](box.id))
       })
+      context.dispatch('resizeWhileDragging', { boxes })
       context.dispatch('currentConnections/updatePathsWhileDragging', { connections }, { root: true })
+
+      // TODO handler currentBoxes/resizeWhileDraggingBroadcast
+      // context.dispatch('broadcast/update', { updates: { boxes }, type: 'resizeBoxes', handler: 'currentBoxes/resizeWhileDraggingBroadcast' }, { root: true })
     },
 
     // dimensions
@@ -453,6 +471,8 @@ export default {
         if (element.dataset.isVisibleInViewport === 'false') { return }
         element.style.left = box.x + 'px'
         element.style.top = box.y + 'px'
+        element.dataset.x = box.x
+        element.dataset.y = box.y
       })
     },
     move: (context, { endCursor, prevCursor, delta }) => {

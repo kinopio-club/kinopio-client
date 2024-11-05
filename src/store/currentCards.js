@@ -153,6 +153,8 @@ const currentCards = {
         if (element.dataset.isVisibleInViewport === 'false') { return }
         element.style.left = card.x + 'px'
         element.style.top = card.y + 'px'
+        element.dataset.x = card.x
+        element.dataset.y = card.y
       })
     },
 
