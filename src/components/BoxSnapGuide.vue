@@ -26,19 +26,21 @@ const otherBoxes = computed(() => {
 // styles
 
 const userColor = computed(() => store.state.currentUser.color)
-const snapGuideSide = computed(() => {
-  const isDraggingItem = store.state.currentUserIsDraggingBox || store.state.currentUserIsDraggingCard
-  if (!isDraggingItem) { return null }
+const currentBoxSnapGuide = computed(() => {
   let guides = store.state.currentBoxes.snapGuides
-  const snapGuide = guides.find(guide => {
+  return guides.find(guide => {
     const isTarget = guide.target.id === props.box.id
     const isOrigin = guide.origin.id === props.box.id
     return isTarget || isOrigin
   })
-  if (!snapGuide) { return null }
-  if (snapGuide.target.id === props.box.id) {
+})
+const snapGuideSide = computed(() => {
+  const isDraggingItem = store.state.currentUserIsDraggingBox || store.state.currentUserIsDraggingCard
+  if (!isDraggingItem) { return }
+  const snapGuide = currentBoxSnapGuide.value
+  if (snapGuide?.target.id === props.box.id) {
     return snapGuide.side
-  } else if (snapGuide.origin.id === props.box.id) {
+  } else if (snapGuide?.origin.id === props.box.id) {
     return oppositeSide(snapGuide.side)
   } else {
     return null
@@ -59,6 +61,7 @@ const oppositeSide = (side) => {
   }
 }
 const snapGuideStyles = computed(() => {
+  const offset = 2
   let styles = {}
   let rect = utils.boxElementDimensions({ id: props.box.id })
   if (currentBoxIsBeingDragged.value) {
@@ -69,33 +72,38 @@ const snapGuideStyles = computed(() => {
   // left
   if (snapGuideSide.value === 'left') {
     styles.height = rect.height + 'px'
-    styles.left = (rect.x - 2) + 'px'
+    styles.left = (rect.x - offset) + 'px'
     styles.top = rect.y + 'px'
   // right
   } else if (snapGuideSide.value === 'right') {
     styles.height = rect.height + 'px'
-    styles.left = (rect.x + rect.width - 4) + 'px'
+    styles.left = (rect.x + rect.width - offset) + 'px'
     styles.top = rect.y + 'px'
   // top
   } else if (snapGuideSide.value === 'top') {
     styles.width = rect.width + 'px'
     styles.left = rect.x + 'px'
-    styles.top = (rect.y - 2) + 'px'
+    styles.top = (rect.y - offset) + 'px'
   // bottom
   } else if (snapGuideSide.value === 'bottom') {
     styles.width = rect.width + 'px'
     styles.left = rect.x + 'px'
-    styles.top = (rect.y + rect.height - 4) + 'px'
+    styles.top = (rect.y + rect.height - offset) + 'px'
   }
   return styles
 })
+const isSnapReady = (side) => {
+  const snapGuide = currentBoxSnapGuide.value
+  console.log('🌺', props.box.name, side, snapGuide, snapGuideSide.value)
+  return true
+}
 </script>
 
 <template lang="pug">
-.box-snap-guide.right(v-if="snapGuideSide === 'right'" :style="snapGuideStyles")
-.box-snap-guide.left(v-if="snapGuideSide === 'left'" :style="snapGuideStyles")
-.box-snap-guide.top(v-if="snapGuideSide === 'top'" :style="snapGuideStyles")
-.box-snap-guide.bottom(v-if="snapGuideSide === 'bottom'" :style="snapGuideStyles")
+.box-snap-guide.right(v-if="snapGuideSide === 'right'" :style="snapGuideStyles" :class="{ 'snap-ready': isSnapReady('right') }")
+.box-snap-guide.left(v-if="snapGuideSide === 'left'" :style="snapGuideStyles" :class="{ 'snap-ready': isSnapReady('left') }")
+.box-snap-guide.top(v-if="snapGuideSide === 'top'" :style="snapGuideStyles" :class="{ 'snap-ready': isSnapReady('top') }")
+.box-snap-guide.bottom(v-if="snapGuideSide === 'bottom'" :style="snapGuideStyles" :class="{ 'snap-ready': isSnapReady('bottom') }")
 </template>
 
 <style lang="stylus">
@@ -106,27 +114,31 @@ const snapGuideStyles = computed(() => {
   &.left
     left calc(-1 * var(--snap-guide-width))
     width var(--snap-guide-width)
-    animation guideLeft var(--snap-guide-duration) infinite ease-in-out forwards
     border-top-left-radius var(--entity-radius)
     border-bottom-left-radius var(--entity-radius)
+    &.snap-ready
+      animation guideLeft var(--snap-guide-duration) infinite ease-in-out forwards
   &.right
     right calc(-1 * var(--snap-guide-width))
     width var(--snap-guide-width)
-    animation guideRight var(--snap-guide-duration) infinite ease-in-out forwards
     border-top-right-radius var(--entity-radius)
     border-bottom-right-radius var(--entity-radius)
+    &.snap-ready
+      animation guideRight var(--snap-guide-duration) infinite ease-in-out forwards
   &.top
     top calc(-1 * var(--snap-guide-width))
     height var(--snap-guide-width)
-    animation guideTop var(--snap-guide-duration) infinite ease-in-out forwards
     border-top-left-radius var(--entity-radius)
     border-top-right-radius var(--entity-radius)
+    &.snap-ready
+      animation guideTop var(--snap-guide-duration) infinite ease-in-out forwards
   &.bottom
     bottom calc(-1 * var(--snap-guide-width))
     height var(--snap-guide-width)
-    animation guideBottom var(--snap-guide-duration) infinite ease-in-out forwards
     border-bottom-left-radius var(--entity-radius)
     border-bottom-right-radius var(--entity-radius)
+    &.snap-ready
+      animation guideBottom var(--snap-guide-duration) infinite ease-in-out forwards
 
 @keyframes guideRight
   50%
