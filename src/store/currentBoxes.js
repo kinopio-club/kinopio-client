@@ -621,6 +621,13 @@ export default {
       boxIds = boxIds.filter(id => Boolean(id))
       return boxIds
     },
+    isResizingIds: (state, getters, rootState) => {
+      let boxIds = rootState.currentUserIsResizingBoxIds
+      if (getters.isSelectedIds.length) {
+        boxIds = getters.isSelectedIds
+      }
+      return boxIds
+    },
     isSelected: (state, getters) => {
       const boxIds = getters.isSelectedIds
       const boxes = boxIds.map(id => getters.byId(id))

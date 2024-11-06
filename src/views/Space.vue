@@ -265,7 +265,7 @@ const addCardFromOutsideAppContext = (event) => {
 
 const resizeBoxes = () => {
   if (!prevCursor) { return }
-  const boxIds = store.state.currentUserIsResizingBoxIds
+  const boxIds = store.getters['currentBoxes/isResizingIds']
   const zoom = store.getters.spaceCounterZoomDecimal
   let delta = {
     x: endCursor.x - prevCursor.x,
@@ -280,7 +280,7 @@ const resizeBoxes = () => {
 const stopResizingBoxes = () => {
   if (!store.state.currentUserIsResizingBox) { return }
   store.dispatch('history/resume')
-  const boxIds = store.state.currentUserIsResizingBoxIds
+  const boxIds = store.getters['currentBoxes/isResizingIds']
   const boxes = boxIds.map(id => store.getters['currentBoxes/byId'](id))
   store.dispatch('currentConnections/updateMultiplePaths', boxes)
   store.dispatch('history/add', { boxes, useSnapshot: true })
@@ -290,7 +290,7 @@ const stopResizingBoxes = () => {
   store.dispatch('checkIfItemShouldIncreasePageSize', boxes[0])
 }
 const afterResizeBoxes = () => {
-  const boxIds = store.state.currentUserIsResizingBoxIds
+  const boxIds = store.getters['currentBoxes/isResizingIds']
   const boxes = boxIds.map(boxId => {
     let { resizeWidth, resizeHeight } = utils.boxElementDimensions({ id: boxId })
     if (store.state.shouldSnapToGrid) {
