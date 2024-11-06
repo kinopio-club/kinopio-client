@@ -66,6 +66,7 @@ const closeAllDialogs = () => {
 
 const currentUserIsPaintingLocked = computed(() => store.state.currentUserIsPaintingLocked)
 const currentUserIsResizingCard = computed(() => store.state.currentUserIsResizingCard)
+const currentUserIsResizingBox = computed(() => store.state.currentUserIsResizingBox)
 const currentUserIsTiltingCard = computed(() => store.state.currentUserIsTiltingCard)
 const currentUserIsPanning = computed(() => store.state.currentUserIsPanning)
 const currentUserIsPanningReady = computed(() => store.state.currentUserIsPanningReady)
@@ -333,7 +334,7 @@ aside.notifications(@click.left="closeAllDialogs")
           img.refresh.icon(src="@/assets/refresh.svg")
           span Refresh
 
-  .persistent-item.info(v-if="currentUserIsResizingCard")
+  .persistent-item.info(v-if="currentUserIsResizingCard || currentUserIsResizingBox")
     img.icon.resize(src="@/assets/resize.svg")
     span Drag to Resize
   .persistent-item.info(v-if="currentUserIsTiltingCard")
@@ -349,11 +350,8 @@ aside.notifications(@click.left="closeAllDialogs")
     span Drag to pan
 
   .persistent-item.info(v-if="shouldSnapToGrid")
-    img.icon(src="@/assets/box-select.svg")
-    span Drag to box select
-  .persistent-item.info(v-if="shouldSnapToGrid")
     img.icon(src="@/assets/constrain-axis.svg")
-    span Items snap to grid
+    span Box select, snap to grid
 
   .persistent-item.success(v-if="notifyThanksForDonating")
     p Thank you for being a
