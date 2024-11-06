@@ -285,6 +285,8 @@ const changeSpaceAndSelectItems = (spaceId, items) => {
   store.commit('multipleSelectedItemsToLoad', items)
   changeSpace(spaceId)
 }
+const dragToResizeIsVisible = computed(() => currentUserIsResizingCard.value || currentUserIsResizingBox.value)
+const snapToGridIsVisible = computed(() => shouldSnapToGrid.value && !dragToResizeIsVisible.value)
 
 // read-only jiggle
 
@@ -334,7 +336,7 @@ aside.notifications(@click.left="closeAllDialogs")
           img.refresh.icon(src="@/assets/refresh.svg")
           span Refresh
 
-  .persistent-item.info(v-if="currentUserIsResizingCard || currentUserIsResizingBox")
+  .persistent-item.info(v-if="dragToResizeIsVisible")
     img.icon.resize(src="@/assets/resize.svg")
     span Drag to Resize
   .persistent-item.info(v-if="currentUserIsTiltingCard")
@@ -349,7 +351,7 @@ aside.notifications(@click.left="closeAllDialogs")
     img.icon(src="@/assets/hand.svg")
     span Drag to pan
 
-  .persistent-item.info(v-if="shouldSnapToGrid")
+  .persistent-item.info(v-if="snapToGridIsVisible")
     img.icon(src="@/assets/constrain-axis.svg")
     span Box select, snap to grid
 
