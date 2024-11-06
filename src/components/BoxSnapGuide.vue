@@ -8,11 +8,16 @@ const store = useStore()
 
 let waitingAnimationTimer, shouldCancelWaiting, waitingStartTime
 
+onMounted(() => {
+  updateRect()
+})
+
 const props = defineProps({
   box: Object
 })
 
 const state = reactive({
+  rect: null,
   snapStatus: null // waiting, ready
 })
 
@@ -67,10 +72,13 @@ const oppositeSide = (side) => {
     return 'top'
   }
 }
+const updateRect = () => {
+  state.rect = utils.boxElementDimensions({ id: props.box.id })
+}
 const snapGuideStyles = computed(() => {
   const offset = 4
   let styles = {}
-  let rect = utils.boxElementDimensions({ id: props.box.id })
+  let rect = state.rect
   styles.background = props.box.color
   // left
   if (snapGuideSide.value === 'left') {
@@ -121,7 +129,6 @@ const waitingAnimationFrame = (timestamp) => {
   if (!waitingStartTime) {
     waitingStartTime = timestamp
   }
-
   const snapGuide = currentBoxSnapGuide.value
   if (!snapGuide) {
     cancelWaitingAnimationFrame()
@@ -129,6 +136,7 @@ const waitingAnimationFrame = (timestamp) => {
   }
   const elaspedTime = timestamp - waitingStartTime
   const percentComplete = (elaspedTime / consts.boxSnapGuideWaitingDuration) // between 0 and 1
+  updateRect()
   // waiting
   if (percentComplete < 1) {
     state.snapStatus = 'waiting'
@@ -137,7 +145,7 @@ const waitingAnimationFrame = (timestamp) => {
   } else {
     console.log('🔒🐢 boxSnapGuide waitingAnimationFrame ready')
     state.snapStatus = 'ready'
-    cancelWaitingAnimationFrame()
+    window.requestAnimationFrame(waitingAnimationFrame)
   }
   // cancel
   if (shouldCancelWaiting) {
