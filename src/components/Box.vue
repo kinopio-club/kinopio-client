@@ -201,7 +201,7 @@ const classes = computed(() => {
     'is-resizing': isResizing.value,
     'is-selected': currentBoxIsSelected.value,
     'is-checked': isChecked.value || isInCheckedBox.value,
-    transition: !store.state.currentBoxIsNew
+    transition: !store.state.currentBoxIsNew || !store.state.currentUserIsResizingBox
   }
 })
 
