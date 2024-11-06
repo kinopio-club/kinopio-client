@@ -430,16 +430,16 @@ const updateShouldSnapToGrid = (event) => {
 const interact = (event) => {
   endCursor = utils.cursorPositionInViewport(event)
   updateShouldSnapToGrid(event)
-  if (isDraggingCard.value || isDraggingBox.value) {
+  if (isDraggingCard.value) {
     dragItems()
-  }
-  if (isResizingCard.value) {
+  } else if (isDraggingBox.value) {
+    store.commit('currentDraggingCardId', '')
+    dragItems()
+  } else if (isResizingCard.value) {
     resizeCards()
-  }
-  if (isTiltingCard.value) {
+  } else if (isTiltingCard.value) {
     tiltCards()
-  }
-  if (isResizingBox.value) {
+  } else if (isResizingBox.value) {
     resizeBoxes()
   }
   prevCursor = utils.cursorPositionInViewport(event)
