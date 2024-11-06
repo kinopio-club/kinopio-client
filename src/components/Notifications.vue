@@ -342,15 +342,18 @@ aside.notifications(@click.left="closeAllDialogs")
 
   .persistent-item.info(v-if="currentUserIsPaintingLocked && isTouchDevice")
     img.icon(src="@/assets/brush.svg")
-    span Hold and drag to paint
+    span Drag to paint
 
   .persistent-item.info(v-if="currentUserIsPanningReady || currentUserIsPanning")
     img.icon(src="@/assets/hand.svg")
-    span Hold and drag to pan
+    span Drag to pan
 
   .persistent-item.info(v-if="shouldSnapToGrid")
+    img.icon(src="@/assets/box-select.svg")
+    span Drag to box select
+  .persistent-item.info(v-if="shouldSnapToGrid")
     img.icon(src="@/assets/constrain-axis.svg")
-    span Hold and drag items to snap to grid
+    span Items snap to grid
 
   .persistent-item.success(v-if="notifyThanksForDonating")
     p Thank you for being a
