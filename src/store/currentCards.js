@@ -153,6 +153,8 @@ const currentCards = {
         if (element.dataset.isVisibleInViewport === 'false') { return }
         element.style.left = card.x + 'px'
         element.style.top = card.y + 'px'
+        element.dataset.x = card.x
+        element.dataset.y = card.y
       })
     },
 
@@ -602,10 +604,6 @@ const currentCards = {
         x: endCursor.x * zoom,
         y: endCursor.y * zoom
       }
-      if (context.rootState.shouldSnapToGrid) {
-        prevCursor = utils.cursorPositionSnapToGrid(prevCursor)
-        endCursor = utils.cursorPositionSnapToGrid(endCursor)
-      }
       delta = delta || {
         x: endCursor.x - prevCursor.x,
         y: endCursor.y - prevCursor.y
@@ -630,7 +628,6 @@ const currentCards = {
         y: prevMoveDelta.y + delta.y
       }
       cards = cards.map(card => {
-        let position
         // x
         const isNoX = card.x === undefined || card.x === null
         if (isNoX) {
@@ -654,6 +651,11 @@ const currentCards = {
           id: card.id,
           width: card.width,
           height: card.height
+        }
+        if (context.rootState.shouldSnapToGrid) {
+          const position = utils.cursorPositionSnapToGrid(card)
+          card.x = position.x
+          card.y = position.y
         }
         utils.updateCardDimensionsDataWhileDragging(card)
         return card
@@ -693,7 +695,7 @@ const currentCards = {
       cards = cards.filter(card => card)
       if (!cards.length) { return }
       cards = cards.map(id => {
-        let card = context.getters.byId(id)
+        let card = utils.cardElementDimensions({ id })
         if (!card) { return }
         card = utils.clone(card)
         if (!card) { return }
@@ -701,15 +703,6 @@ const currentCards = {
         return { id, x, y, z }
       })
       cards = cards.filter(card => Boolean(card))
-      cards = cards.map(card => {
-        card.x = Math.max(card.x + prevMoveDelta.x, 0)
-        card.x = Math.round(card.x)
-        card.y = Math.max(card.y + prevMoveDelta.y, 0)
-        card.y = Math.round(card.y)
-        card.y = Math.max(consts.minItemXY, card.y)
-        card.userId = context.rootState.currentUser.id
-        return card
-      })
       cards = incrementCardsZ(context, cards)
       context.commit('move', { cards, spaceId })
       cards = cards.filter(card => card)
