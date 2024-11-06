@@ -1,6 +1,6 @@
 <template lang="pug">
 .audio(v-if="visible" :class="{'card-has-no-name': !normalizedName}")
-  audio.hidden(ref="audioElement" controls="controls" :src="url" type="audio/mpeg" preload="metadata")
+  audio.hidden(ref="audioElement" controls="controls" :src="url" type="audio/mpeg" preload="metadata" loop="true")
   //- use controls to playback <audio>
   .controls(
     @keyup.prevent="cancelClick"
