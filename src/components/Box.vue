@@ -151,10 +151,6 @@ const styles = computed(() => {
   let { x, y, resizeWidth, resizeHeight } = normalizedBox.value
   let width = resizeWidth
   let height = resizeHeight
-  if (store.state.shouldSnapToGrid && currentBoxIsBeingResized.value) {
-    width = utils.roundToNearest(width)
-    height = utils.roundToNearest(height)
-  }
   let styles = {
     left: x + 'px',
     top: y + 'px',

@@ -65,13 +65,18 @@ export default {
     snapGuides: (state, value) => {
       state.snapGuides = value
     },
-    resizeWhileDragging: (state, { boxes }) => {
+    resizeWhileDragging: (state, { boxes, shouldSnapToGrid }) => {
       boxes.forEach(box => {
         const element = utils.boxElementFromId(box.id)
         if (!element) { return }
         if (element.dataset.isVisibleInViewport === 'false') { return }
-        element.style.width = box.resizeWidth + 'px'
-        element.style.height = box.resizeHeight + 'px'
+        if (shouldSnapToGrid) {
+          element.style.width = utils.roundToNearest(box.resizeWidth) + 'px'
+          element.style.height = utils.roundToNearest(box.resizeHeight) + 'px'
+        } else {
+          element.style.width = box.resizeWidth + 'px'
+          element.style.height = box.resizeHeight + 'px'
+        }
         element.dataset.resizeWidth = box.resizeWidth
         element.dataset.resizeHeight = box.resizeHeight
       })
@@ -260,17 +265,13 @@ export default {
         let height = rect.height
         width = width + delta.x
         height = height + delta.y
-        if (context.rootState.shouldSnapToGrid) {
-          width = utils.roundToNearest(width)
-          height = utils.roundToNearest(height)
-        }
         const box = { id: boxId, resizeWidth: width, resizeHeight: height }
         boxes.push(box)
         connections = connections.concat(context.rootGetters['currentConnections/byItemId'](box.id))
         context.commit('currentUserIsResizingBox', true, { root: true })
         context.commit('currentUserIsResizingBoxIds', [box.id], { root: true })
       })
-      context.commit('resizeWhileDragging', { boxes })
+      context.commit('resizeWhileDragging', { boxes, shouldSnapToGrid: context.rootState.shouldSnapToGrid })
       context.dispatch('currentConnections/updatePathsWhileDragging', { connections }, { root: true })
       context.dispatch('broadcast/update', { updates: { boxes }, type: 'resizeBoxes', handler: 'currentBoxes/resizeWhileDragging' }, { root: true })
     },
@@ -304,7 +305,6 @@ export default {
     // snapping
 
     updateSnapGuides: (context, { boxes, cards }) => {
-      if (context.rootState.shouldSnapToGrid) { return }
       const snapThreshold = 6
       const spaceEdgeThreshold = 100
       let targetBoxes = utils.clone(context.getters.isSelectableInViewport)
