@@ -1314,9 +1314,9 @@ const store = createStore({
 
     // multiple boxes
 
-    multipleBoxesSelectedIds: (state, cardIds) => {
-      utils.typeCheck({ value: cardIds, type: 'array' })
-      state.multipleBoxesSelectedIds = cardIds
+    multipleBoxesSelectedIds: (state, boxIds) => {
+      utils.typeCheck({ value: boxIds, type: 'array' })
+      state.multipleBoxesSelectedIds = boxIds
     },
     addToMultipleBoxesSelected: (state, boxId) => {
       utils.typeCheck({ value: boxId, type: 'string' })
