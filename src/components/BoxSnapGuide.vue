@@ -211,25 +211,25 @@ const waitingAnimationFrame = (timestamp) => {
     opacity 0
   100%
     transform translateX(2px)
-    opacity 0.9
+    opacity 0.75
 @keyframes guideLeftWaiting
   0%
     opacity 0
   100%
     transform translateX(-2px)
-    opacity 0.9
+    opacity 0.75
 @keyframes guideTopWaiting
   0%
     opacity 0
   100%
     transform translateY(-2px)
-    opacity 0.9
+    opacity 0.75
 @keyframes guideBottomWaiting
   0%
     opacity 0
   100%
     transform translateY(2px)
-    opacity 0.9
+    opacity 0.75
 
 // ready animations
 
