@@ -201,7 +201,7 @@ const classes = computed(() => {
     'is-resizing': isResizing.value,
     'is-selected': currentBoxIsSelected.value,
     'is-checked': isChecked.value || isInCheckedBox.value,
-    transition: !store.state.currentUserIsResizingBox && !isMinBoxSide.value
+    transition: !store.state.currentBoxIsNew
   }
 })
 
@@ -243,12 +243,6 @@ const currentBoxIsBeingResized = computed(() => {
 
 // shrink
 
-const isMinBoxSide = computed(() => {
-  const minBoxSize = consts.minBoxSize
-  const isWidth = props.box.resizeWidth === minBoxSize
-  const isHeight = props.box.resizeHeight === minBoxSize
-  return isWidth && isHeight
-})
 const shrinkToMinBoxSize = () => {
   const minBoxSize = consts.minBoxSize
   let updated = { id: props.box.id }
