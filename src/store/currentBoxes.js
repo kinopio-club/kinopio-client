@@ -85,9 +85,10 @@ export default {
       boxes.forEach(box => {
         const element = document.querySelector(`.box[data-box-id="${box.id}"]`)
         if (!element) { return }
-        if (element.dataset.isVisibleInViewport === 'false') { return }
-        element.style.left = box.x + 'px'
-        element.style.top = box.y + 'px'
+        if (element.dataset.isVisibleInViewport !== 'false') {
+          element.style.left = box.x + 'px'
+          element.style.top = box.y + 'px'
+        }
         element.dataset.x = box.x
         element.dataset.y = box.y
       })
@@ -562,7 +563,7 @@ export default {
         if (!box) { return }
         box = utils.clone(box)
         if (!box) { return }
-        const position = utils.boxPositionFromElement(id)
+        const position = utils.boxElementDimensions({ id })
         box.x = position.x
         box.y = position.y
         const { x, y } = box
@@ -571,12 +572,7 @@ export default {
       boxes = boxes.filter(box => Boolean(box))
       context.commit('move', { boxes, spaceId })
       boxes = boxes.filter(box => box)
-      boxes.forEach(box => {
-        context.dispatch('api/addToQueue', {
-          name: 'updateBox',
-          body: box
-        }, { root: true })
-      })
+      context.dispatch('updateMultiple', boxes)
       const box = context.getters.byId(currentDraggingBoxId)
       context.dispatch('checkIfItemShouldIncreasePageSize', box, { root: true })
       context.dispatch('broadcast/update', { updates: { boxes }, type: 'moveBoxes', handler: 'currentBoxes/moveBroadcast' }, { root: true })
