@@ -6,7 +6,6 @@ import utils from '@/utils.js'
 import consts from '@/consts.js'
 const store = useStore()
 
-const boxSnapGuideWaitingDuration = 500
 let waitingAnimationTimer, shouldCancelWaiting, waitingStartTime
 
 const props = defineProps({
@@ -69,14 +68,10 @@ const oppositeSide = (side) => {
   }
 }
 const snapGuideStyles = computed(() => {
-  const offset = 2
+  const offset = 4
   let styles = {}
   let rect = utils.boxElementDimensions({ id: props.box.id })
-  if (currentBoxIsBeingDragged.value) {
-    styles.background = userColor.value
-  } else {
-    styles.background = props.box.color
-  }
+  styles.background = props.box.color
   // left
   if (snapGuideSide.value === 'left') {
     styles.height = rect.height + 'px'
@@ -133,7 +128,7 @@ const waitingAnimationFrame = (timestamp) => {
     return
   }
   const elaspedTime = timestamp - waitingStartTime
-  const percentComplete = (elaspedTime / boxSnapGuideWaitingDuration) // between 0 and 1
+  const percentComplete = (elaspedTime / consts.boxSnapGuideWaitingDuration) // between 0 and 1
   // waiting
   if (percentComplete < 1) {
     state.snapStatus = 'waiting'
@@ -161,7 +156,7 @@ const waitingAnimationFrame = (timestamp) => {
 <style lang="stylus">
 .box-snap-guide
   --snap-guide-width 6px
-  --snap-guide-waiting-duration 0.5s // same as boxSnapGuideWaitingDuration ms
+  --snap-guide-waiting-duration 0.5s // same as consts.boxSnapGuideWaitingDuration ms
   --snap-guide-ready-duration 0.4s
   position absolute
   &.left
@@ -208,25 +203,25 @@ const waitingAnimationFrame = (timestamp) => {
     opacity 0
   100%
     transform translateX(2px)
-    opacity 1
+    opacity 0.9
 @keyframes guideLeftWaiting
   0%
     opacity 0
   100%
     transform translateX(-2px)
-    opacity 1
+    opacity 0.9
 @keyframes guideTopWaiting
   0%
     opacity 0
   100%
     transform translateY(-2px)
-    opacity 1
+    opacity 0.9
 @keyframes guideBottomWaiting
   0%
     opacity 0
   100%
     transform translateY(2px)
-    opacity 1
+    opacity 0.9
 
 // ready animations
 
