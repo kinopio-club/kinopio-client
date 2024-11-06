@@ -119,9 +119,9 @@ const cancelWaitingAnimationFrame = () => {
   waitingStartTime = null
 }
 const startWaiting = () => {
-  console.log('startWaiting')
   shouldCancelWaiting = false
   if (!waitingAnimationTimer) {
+    console.log('startWaiting')
     waitingAnimationTimer = window.requestAnimationFrame(waitingAnimationFrame)
   }
 }

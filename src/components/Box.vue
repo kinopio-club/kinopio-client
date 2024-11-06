@@ -175,23 +175,34 @@ const colorIsDark = computed(() => utils.colorIsDark(color.value))
 const fill = computed(() => normalizedBox.value.fill)
 const hasFill = computed(() => fill.value !== 'empty')
 const infoClasses = computed(() => {
-  const classes = []
+  const classList = []
   if (isPainting.value) {
-    classes.push('unselectable')
+    classList.push('unselectable')
   }
   if (colorIsDark.value) {
-    classes.push('is-dark')
+    classList.push('is-dark')
   }
   const fontId = props.box.headerFontId || 0
-  classes.push(`header-font-${fontId}`)
+  classList.push(`header-font-${fontId}`)
   const fontSize = props.box.headerFontSize || 's'
-  classes.push(`header-font-size-${fontSize}`)
+  classList.push(`header-font-size-${fontSize}`)
   const font = fonts.find(item => item.id === fontId)
   const fontSizeModifier = font?.size || ''
   if (fontSizeModifier) {
-    classes.push(`header-font-size-modifier-${fontSizeModifier}`)
+    classList.push(`header-font-size-modifier-${fontSizeModifier}`)
   }
-  return classes
+  return classList
+})
+const classes = computed(() => {
+  return {
+    hover: state.isHover,
+    active: currentBoxIsBeingDragged.value,
+    'box-jiggle': shouldJiggle.value,
+    'is-resizing': isResizing.value,
+    'is-selected': currentBoxIsSelected.value,
+    'is-checked': isChecked.value || isInCheckedBox.value,
+    transition: !store.state.currentUserIsResizingBox && !isMinBoxSide.value
+  }
 })
 
 // resize
@@ -232,6 +243,12 @@ const currentBoxIsBeingResized = computed(() => {
 
 // shrink
 
+const isMinBoxSide = computed(() => {
+  const minBoxSize = consts.minBoxSize
+  const isWidth = props.box.resizeWidth === minBoxSize
+  const isHeight = props.box.resizeHeight === minBoxSize
+  return isWidth && isHeight
+})
 const shrinkToMinBoxSize = () => {
   const minBoxSize = consts.minBoxSize
   let updated = { id: props.box.id }
@@ -737,7 +754,7 @@ const isInCheckedBox = computed(() => {
   :data-should-render="shouldRender"
 
   :style="styles"
-  :class="{hover: state.isHover, active: currentBoxIsBeingDragged, 'box-jiggle': shouldJiggle, 'is-resizing': isResizing, 'is-selected': currentBoxIsSelected, 'is-checked': isChecked || isInCheckedBox}"
+  :class="classes"
   ref="boxElement"
 )
 
@@ -831,10 +848,11 @@ const isInCheckedBox = computed(() => {
   min-width var(--min-box-size)
   pointer-events none
   // animate box expand and shrink
-  transition width 0.2s var(--ease-out-circ),
-    height 0.2s var(--ease-out-circ),
-    left 0.2s var(--ease-out-circ),
-    top 0.2s var(--ease-out-circ)
+  &.transition
+    transition width 0.2s var(--ease-out-circ),
+      height 0.2s var(--ease-out-circ),
+      left 0.2s var(--ease-out-circ),
+      top 0.2s var(--ease-out-circ)
   &.hover
     box-shadow var(--hover-shadow)
   &.active
