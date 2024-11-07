@@ -121,10 +121,6 @@ const spacesFiltered = computed(() => {
 const isNotCached = (spaceId) => {
   return store.getters['spaceIsNotCached'](spaceId)
 }
-// const duplicateSpace = () => {
-//   store.dispatch('currentSpace/duplicateSpace')
-//   store.dispatch('closeAllDialogs')
-// }
 const isNew = (space) => {
   if (props.readSpaceIds?.includes(space.id)) { return }
   if (props.userShowInExploreDate) {

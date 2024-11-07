@@ -356,7 +356,6 @@ template(v-if="isSpaceMember")
 //- Space Settings
 template(v-if="state.settingsIsVisible")
   section.subsection.space-settings
-    //- (v-if="isSpaceMember")
     .row(v-if="!isSpaceMember && !showInExplore")
       AskToAddToExplore
     .row(v-if="isSpaceMember")
