@@ -395,6 +395,7 @@ const showMultipleSelectedActions = (event) => {
 
 const isInteracting = computed(() => {
   if (isDraggingCard.value || isDrawingConnection.value || isResizingCard.value || isResizingBox.value || isDraggingBox.value) {
+    store.commit('preventMultipleSelectedActionsIsVisible', true)
     return true
   } else { return false }
 })

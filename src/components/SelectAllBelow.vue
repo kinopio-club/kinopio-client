@@ -94,9 +94,6 @@ const handleMouseUp = (event) => {
   updateIsSelectingY(false)
   debouncedSelectAllBelow(event)
   state.isVisible = false
-  setTimeout(() => {
-    store.commit('preventMultipleSelectedActionsIsVisible', false)
-  }, 100)
 }
 const debouncedSelectAllBelow = debounce((event) => {
   selectAllBelow(event)
