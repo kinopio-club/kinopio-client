@@ -5,7 +5,7 @@ import { useStore } from 'vuex'
 import ImportExport from '@/components/dialogs/ImportExport.vue'
 const store = useStore()
 
-const emit = defineEmits(['closeDialogs'])
+const emit = defineEmits(['childDialogIsVisible'])
 
 onMounted(() => {
   store.subscribe(async (mutation) => {
@@ -23,17 +23,22 @@ const state = reactive({
 const closeDialogs = () => {
   state.exportIsVisible = false
   state.importIsVisible = false
-  emit('closeDialogs')
 }
+const emitChildDialogIsVisible = (value) => {
+  emit('childDialogIsVisible', value)
+}
+
 const toggleExportIsVisible = () => {
   const isVisible = state.exportIsVisible
   closeDialogs()
   state.exportIsVisible = !isVisible
+  emitChildDialogIsVisible(state.exportIsVisible)
 }
 const toggleImportIsVisible = () => {
   const isVisible = state.importIsVisible
   closeDialogs()
   state.importIsVisible = !isVisible
+  emitChildDialogIsVisible(state.importIsVisible)
 }
 
 </script>
