@@ -368,7 +368,7 @@ template(v-if="state.settingsIsVisible")
       //- Duplicate
       .button-wrap
         button(@click.left="duplicateSpace")
-          img.icon.add(src="@/assets/add.svg")
+          img.icon.add(src="@/assets/duplicate.svg")
           span Duplicate
       //- Export
       .button-wrap(:class="{'dialog-is-pinned': dialogIsPinned}")
@@ -394,8 +394,8 @@ template(v-if="state.settingsIsVisible")
     .row(v-if="currentSpaceIsUserTemplate")
       //- Duplicate
       .button-wrap
-        button(@click.left="duplicateSpace")
-          img.icon.add(src="@/assets/add.svg")
+        button(@click.left="duplicateSpace" title="Duplicate this Space")
+          img.icon.add(src="@/assets/duplicate.svg")
           span Duplicate
     .row
       .button-wrap(v-if="isSpaceMember")

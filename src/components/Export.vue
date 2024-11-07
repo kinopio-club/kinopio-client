@@ -174,7 +174,7 @@ template(v-if="visible")
   section.export
     .row
       button(@click.left="duplicateSpace")
-        img.icon(src="@/assets/add.svg")
+        img.icon(src="@/assets/duplicate.svg")
         span Duplicate this Space
     .row
       button(@click.left="copyText")
