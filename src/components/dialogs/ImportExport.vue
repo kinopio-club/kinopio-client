@@ -9,7 +9,7 @@ const store = useStore()
 
 const dialogElement = ref(null)
 
-const emit = defineEmits(['updateSpaces', 'closeDialog'])
+const emit = defineEmits(['updateSpaces'])
 
 onMounted(() => {
   window.addEventListener('resize', updateDialogHeight)
@@ -50,9 +50,6 @@ const updateDialogHeight = async () => {
 const updateSpaces = () => {
   emit('updateSpaces')
 }
-const closeDialog = () => {
-  // emit('closeDialog')
-}
 </script>
 
 <template lang="pug">
@@ -60,7 +57,7 @@ dialog.narrow.import-export(v-if="visible" :open="visible" @click.left.stop ref=
   section
     span(v-if="state.isImport") Import
     span(v-if="state.isExport") Export
-  Import(:visible="state.isImport" @updateSpaces="updateSpaces" @closeDialog="closeDialog")
+  Import(:visible="state.isImport" @updateSpaces="updateSpaces")
   Export(:visible="!state.isImport" @updateSpaces="updateSpaces")
 </template>
 
