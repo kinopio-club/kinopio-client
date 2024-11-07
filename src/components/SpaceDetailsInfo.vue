@@ -7,7 +7,7 @@ import BackgroundPreview from '@/components/BackgroundPreview.vue'
 import Loader from '@/components/Loader.vue'
 import PrivacyButton from '@/components/PrivacyButton.vue'
 import templates from '@/data/templates.js'
-import ImportExport from '@/components/dialogs/ImportExport.vue'
+import ImportExportButton from '@/components/ImportExportButton.vue'
 import ReadOnlySpaceInfoBadges from '@/components/ReadOnlySpaceInfoBadges.vue'
 import AddToExplore from '@/components/AddToExplore.vue'
 import AskToAddToExplore from '@/components/AskToAddToExplore.vue'
@@ -56,8 +56,6 @@ const state = reactive({
   backgroundIsVisible: false,
   privacyPickerIsVisible: false,
   settingsIsVisible: false,
-  exportIsVisible: false,
-  importIsVisible: false,
   addToGroupIsVisible: false,
   error: {
     updateSpaceGroup: false,
@@ -224,8 +222,6 @@ const clearErrors = () => {
 const closeDialogs = () => {
   state.backgroundIsVisible = false
   state.privacyPickerIsVisible = false
-  state.exportIsVisible = false
-  state.importIsVisible = false
   state.addToGroupIsVisible = false
   clearErrors()
 }
@@ -235,21 +231,6 @@ const closeDialogsAndEmit = () => {
 }
 const closeAllDialogs = () => {
   store.dispatch('closeAllDialogs')
-}
-
-// import export
-
-const toggleExportIsVisible = () => {
-  const isVisible = state.exportIsVisible
-  closeDialogsAndEmit()
-  state.exportIsVisible = !isVisible
-  emit('updateDialogHeight')
-}
-const toggleImportIsVisible = () => {
-  const isVisible = state.importIsVisible
-  closeDialogsAndEmit()
-  state.importIsVisible = !isVisible
-  emit('updateDialogHeight')
 }
 
 // group
@@ -382,14 +363,7 @@ template(v-if="state.settingsIsVisible")
       AddToExplore
     .row
       //- Import / Export
-      //- ImportExportButtons(@updateDialogHeight="updateDialogHeight" @closeChildDialogs="closeDialogsAndEmit")
-      .button-wrap
-        .segmented-buttons
-          button(@click.left.stop="toggleImportIsVisible" :class="{ active: state.importIsVisible }")
-            span Import
-          button(@click.left.stop="toggleExportIsVisible" :class="{ active: state.exportIsVisible }")
-            span Export
-        ImportExport(:visible="state.exportIsVisible || state.importIsVisible" :isExport="state.exportIsVisible" :isImport="state.importIsVisible")
+      ImportExportButton(@closeDialogs="closeDialogsAndEmit")
       //- Duplicate
       .button-wrap
         button(@click.left="duplicateSpace" title="Duplicate this Space")
