@@ -331,6 +331,9 @@ template(v-if="isSpaceMember")
           //- Group
           button.group-button(title="Add to Group" :class="{active: state.addToGroupIsVisible || spaceGroup}" @click.left.prevent.stop="toggleAddToGroupIsVisible" @keydown.stop.enter="toggleAddToGroupIsVisible")
             img.icon.group(src="@/assets/group.svg")
+          //- Template
+          button(:class="{ active: currentSpaceIsUserTemplate }" @click.left.prevent="toggleCurrentSpaceIsUserTemplate" @keydown.stop.enter="toggleCurrentSpaceIsUserTemplate" title="Mark as Template")
+            img.icon.templates(src="@/assets/templates.svg")
           //- Favorite
           FavoriteSpaceButton(:parentIsDialog="true" @updateLocalSpaces="updateLocalSpaces")
         AddToGroup(:visible="state.addToGroupIsVisible" @selectGroup="toggleSpaceGroup" :groups="userGroups" :selectedGroup="spaceGroup" @closeDialogs="closeDialogs")
@@ -381,17 +384,14 @@ template(v-if="state.settingsIsVisible")
     .row
       AddToExplore
     .row
-      //- Template
-      .button-wrap(@click.left.prevent="toggleCurrentSpaceIsUserTemplate" @keydown.stop.enter="toggleCurrentSpaceIsUserTemplate")
-        button(:class="{ active: currentSpaceIsUserTemplate }")
-          img.icon.templates(src="@/assets/templates.svg")
-          span Mark as Template
-      //- Export
+      //- Import / Export
       .button-wrap(:class="{'dialog-is-pinned': dialogIsPinned}")
-        button(@click.left.stop="toggleExportIsVisible" :class="{ active: state.exportIsVisible }")
-          span Export
-          ImportExport(:visible="state.exportIsVisible" :isExport="true")
-    .row(v-if="currentSpaceIsUserTemplate")
+        .segmented-buttons
+          button
+            span Import
+          button(@click.left.stop="toggleExportIsVisible" :class="{ active: state.exportIsVisible }")
+            span Export
+            ImportExport(:visible="state.exportIsVisible" :isExport="true")
       //- Duplicate
       .button-wrap
         button(@click.left="duplicateSpace" title="Duplicate this Space")
@@ -484,10 +484,6 @@ template(v-if="state.settingsIsVisible")
       border-radius 4px
   p
     white-space normal
-
-  dialog.import-export
-    left initial
-    right 8px
 
 .dialog-is-pinned
   dialog.import-export
