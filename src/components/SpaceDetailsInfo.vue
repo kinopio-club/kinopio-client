@@ -57,6 +57,7 @@ const state = reactive({
   privacyPickerIsVisible: false,
   settingsIsVisible: false,
   exportIsVisible: false,
+  importIsVisible: false,
   addToGroupIsVisible: false,
   error: {
     updateSpaceGroup: false,
@@ -210,12 +211,6 @@ const toggleSettingsIsVisible = () => {
   state.settingsIsVisible = !isVisible
   emit('updateDialogHeight')
 }
-const toggleExportIsVisible = () => {
-  const isVisible = state.exportIsVisible
-  closeDialogsAndEmit()
-  state.exportIsVisible = !isVisible
-  emit('updateDialogHeight')
-}
 const toggleAddToGroupIsVisible = () => {
   const isVisible = state.addToGroupIsVisible
   clearErrors()
@@ -230,6 +225,7 @@ const closeDialogs = () => {
   state.backgroundIsVisible = false
   state.privacyPickerIsVisible = false
   state.exportIsVisible = false
+  state.importIsVisible = false
   state.addToGroupIsVisible = false
   clearErrors()
 }
@@ -239,6 +235,21 @@ const closeDialogsAndEmit = () => {
 }
 const closeAllDialogs = () => {
   store.dispatch('closeAllDialogs')
+}
+
+// import export
+
+const toggleExportIsVisible = () => {
+  const isVisible = state.exportIsVisible
+  closeDialogsAndEmit()
+  state.exportIsVisible = !isVisible
+  emit('updateDialogHeight')
+}
+const toggleImportIsVisible = () => {
+  const isVisible = state.importIsVisible
+  closeDialogsAndEmit()
+  state.importIsVisible = !isVisible
+  emit('updateDialogHeight')
 }
 
 // group
@@ -363,42 +374,29 @@ template(v-if="isSpaceMember")
 
 //- Space Settings
 template(v-if="state.settingsIsVisible")
-  //- read only space settings
-  section.subsection.space-settings(v-if="!isSpaceMember")
-    .row(v-if="!showInExplore")
+  section.subsection.space-settings
+    //- (v-if="isSpaceMember")
+    .row(v-if="!isSpaceMember && !showInExplore")
       AskToAddToExplore
-    .row
-      //- Duplicate
-      .button-wrap
-        button(@click.left="duplicateSpace")
-          img.icon.add(src="@/assets/duplicate.svg")
-          span Duplicate
-      //- Export
-      .button-wrap(:class="{'dialog-is-pinned': dialogIsPinned}")
-        button(@click.left.stop="toggleExportIsVisible" :class="{ active: state.exportIsVisible }")
-          span Export
-        ImportExport(:visible="state.exportIsVisible" :isExport="true")
-
-  //- member space settings
-  section.subsection.space-settings(v-if="isSpaceMember")
-    .row
+    .row(v-if="isSpaceMember")
       AddToExplore
     .row
       //- Import / Export
-      .button-wrap(:class="{'dialog-is-pinned': dialogIsPinned}")
+      //- ImportExportButtons(@updateDialogHeight="updateDialogHeight" @closeChildDialogs="closeDialogsAndEmit")
+      .button-wrap
         .segmented-buttons
-          button
+          button(@click.left.stop="toggleImportIsVisible" :class="{ active: state.importIsVisible }")
             span Import
           button(@click.left.stop="toggleExportIsVisible" :class="{ active: state.exportIsVisible }")
             span Export
-            ImportExport(:visible="state.exportIsVisible" :isExport="true")
+        ImportExport(:visible="state.exportIsVisible || state.importIsVisible" :isExport="state.exportIsVisible" :isImport="state.importIsVisible")
       //- Duplicate
       .button-wrap
         button(@click.left="duplicateSpace" title="Duplicate this Space")
           img.icon.add(src="@/assets/duplicate.svg")
           span Duplicate
-    .row
-      .button-wrap(v-if="isSpaceMember")
+    .row(v-if="isSpaceMember")
+      .button-wrap
         .segmented-buttons
           //- Remove
           button.danger(@click.left="removeCurrentSpace" :class="{ disabled: currentSpaceIsTemplate }")
@@ -485,7 +483,4 @@ template(v-if="state.settingsIsVisible")
   p
     white-space normal
 
-.dialog-is-pinned
-  dialog.import-export
-    right -50px
 </style>
