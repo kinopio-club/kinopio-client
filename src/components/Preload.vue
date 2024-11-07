@@ -58,6 +58,7 @@
     img.icon(src="@/assets/dark.svg")
     img.icon(src="@/assets/distribute-horizontally.svg")
     img.icon(src="@/assets/down-arrow.svg")
+    img.icon(src="@/assets/duplicate.svg")
     img.icon(src="@/assets/export.svg")
     img.icon(src="@/assets/file.svg")
     img.icon(src="@/assets/filter.svg")
