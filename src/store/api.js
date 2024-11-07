@@ -155,8 +155,10 @@ const self = {
 
     addToQueue: (context, { name, body, spaceId }) => {
       body = utils.clone(body)
-      body.spaceId = spaceId || context.rootState.currentSpace.id
       body.operationId = nanoid()
+      body.spaceId = spaceId || context.rootState.currentSpace.id
+      body.userId = context.rootState.currentUser.id
+      body.clientCreatedAt = new Date()
       const isSignedIn = context.rootGetters['currentUser/isSignedIn']
       const canEditSpace = context.rootGetters['currentUser/canEditSpace']()
       if (!isSignedIn) { return }
