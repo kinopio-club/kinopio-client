@@ -44,6 +44,10 @@ const updateResultsSectionHeight = async () => {
   let element = resultsSectionElement.value
   state.resultsSectionHeight = utils.elementHeight(element, true)
 }
+const triggerTemplatesIsVisible = () => {
+  store.dispatch('closeAllDialogs')
+  store.commit('triggerTemplatesIsVisible')
+}
 
 // spaces
 
@@ -81,18 +85,28 @@ const templateSpaces = computed(() => {
 </script>
 
 <template lang="pug">
-section.results-section.user-template-space-list(v-if="templateSpaces.length" ref="resultsSectionElement" :style="{'max-height': state.resultsSectionHeight + 'px'}")
-  SpaceList(
-    :spaces="templateSpaces"
-    @selectSpace="selectSpace"
-    :isLoading="state.isLoading"
-    :parentDialog="parentDialog"
-  )
+section.results-section.user-template-space-list(ref="resultsSectionElement" :style="{'max-height': state.resultsSectionHeight + 'px'}")
+  template(v-if="templateSpaces.length")
+    SpaceList(
+      :spaces="templateSpaces"
+      @selectSpace="selectSpace"
+      :isLoading="state.isLoading"
+      :parentDialog="parentDialog"
+    )
+  .button-wrap
+    button(@click="triggerTemplatesIsVisible")
+      img.icon.templates(src="@/assets/templates.svg")
+      span Templates
+    //- Loader(:visible="state.templatesIsLoading" :isSmall="true")
+
 </template>
 
 <style lang="stylus">
 .user-template-space-list
   position relative
+  .button-wrap
+    margin-left 4px
+    margin-bottom 4px
   .loader
     position absolute
     top 4px

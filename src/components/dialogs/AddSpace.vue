@@ -154,11 +154,6 @@ const checkIfUserHasInboxSpace = async () => {
 const updateTemplatesIsLoading = (value) => {
   state.templatesIsLoading = value
 }
-const triggerTemplatesIsVisible = () => {
-  closeAll()
-  store.dispatch('closeAllDialogs')
-  store.commit('triggerTemplatesIsVisible')
-}
 const triggerImportIsVisible = () => {
   closeAll()
   store.dispatch('closeAllDialogs')
@@ -224,13 +219,6 @@ dialog.add-space.narrow(
       span Inbox
     p For collecting ideas to figure out later
   //- Templates
-  section
-    .row
-      .button-wrap
-        button(@click="triggerTemplatesIsVisible")
-          img.icon.templates(src="@/assets/templates.svg")
-          span Templates
-        //- Loader(:visible="state.templatesIsLoading" :isSmall="true")
   UserTemplateSpaceList(@updateDialogHeight="updateDialogHeight" @isLoading="updateTemplatesIsLoading")
   //- Import
   section
