@@ -16,9 +16,11 @@ const props = defineProps({
 })
 
 const isCreatedToday = computed(() => {
+  if (!props.space.createdAt) { return }
   return dayjs(props.space.createdAt).isToday()
 })
 const isCreatedYesterday = computed(() => {
+  if (!props.space.createdAt) { return }
   return dayjs(props.space.createdAt).isYesterday()
 })
 
