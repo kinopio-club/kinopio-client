@@ -19,7 +19,6 @@ import KeyboardShortcuts from '@/components/dialogs/KeyboardShortcuts.vue'
 import AppsAndExtensions from '@/components/dialogs/AppsAndExtensions.vue'
 import UpgradeUser from '@/components/dialogs/UpgradeUser.vue'
 import Search from '@/components/dialogs/Search.vue'
-import AddSpace from '@/components/dialogs/AddSpace.vue'
 import Templates from '@/components/dialogs/Templates.vue'
 import Sidebar from '@/components/dialogs/Sidebar.vue'
 import PrivacyIcon from '@/components/PrivacyIcon.vue'
@@ -38,6 +37,7 @@ import SpaceUserList from '@/components/dialogs/SpaceUserList.vue'
 import CommentButton from '@/components/CommentButton.vue'
 import FavoriteSpaceButton from '@/components/FavoriteSpaceButton.vue'
 import GroupLabel from '@/components/GroupLabel.vue'
+import AddSpaceButton from '@/components/AddSpaceButton.vue'
 import UserGroups from '@/components/dialogs/UserGroups.vue'
 import consts from '@/consts.js'
 
@@ -100,8 +100,6 @@ onMounted(() => {
       updateSidebarIsVisible(true)
     } else if (mutation.type === 'triggerImportIsVisible') {
       updateImportIsVisible(true)
-    } else if (mutation.type === 'triggerAddSpaceIsVisible') {
-      updateAddSpaceIsVisible(true)
     }
   })
 })
@@ -126,7 +124,6 @@ const state = reactive({
   readOnlyJiggle: false,
   notifications: [],
   notificationsIsLoading: true,
-  addSpaceIsVisible: false,
   isHidden: false,
   templatesIsVisible: false,
   sidebarIsVisible: false,
@@ -335,7 +332,6 @@ const closeAllDialogs = () => {
   state.donateIsVisible = false
   state.spaceStatusIsVisible = false
   state.notificationsIsVisible = false
-  state.addSpaceIsVisible = false
   state.templatesIsVisible = false
   state.importIsVisible = false
   if (!store.state.spaceDetailsIsPinned) {
@@ -402,14 +398,6 @@ const toggleNotificationsIsVisible = () => {
   if (state.notificationsIsVisible) {
     updateNotifications()
   }
-}
-const updateAddSpaceIsVisible = (value) => {
-  state.addSpaceIsVisible = value
-}
-const toggleAddSpaceIsVisible = () => {
-  const isVisible = state.addSpaceIsVisible
-  store.dispatch('closeAllDialogs')
-  state.addSpaceIsVisible = !isVisible
 }
 const updateSidebarIsVisible = (value) => {
   state.sidebarIsVisible = value
@@ -601,14 +589,8 @@ header(v-if="isVisible" :style="state.position" :class="{'fade-out': isFadingOut
             AppsAndExtensions(:visible="state.appsAndExtensionsIsVisible")
         .space-meta-rows
           .space-functions-row
-            .segmented-buttons
-              //- Add Space
-              .button-wrap
-                button.success(@click.left.stop="toggleAddSpaceIsVisible" :class="{ active: state.addSpaceIsVisible }")
-                  img.icon.add(src="@/assets/add.svg")
-                  span New
-                AddSpace(:visible="state.addSpaceIsVisible" :shouldAddSpaceDirectly="true")
-                Templates(:visible="state.templatesIsVisible")
+            //- Add Space
+            AddSpaceButton
             //- Search
             .segmented-buttons
               .button-wrap
@@ -674,6 +656,7 @@ header(v-if="isVisible" :style="state.position" :class="{'fade-out': isFadingOut
               ImportArenaChannel(:visible="importArenaChannelIsVisible")
               SpaceDetailsInfo(:visible="state.spaceDetailsInfoIsVisible")
               ImportExport(:visible="state.importIsVisible" :isImport="true")
+              Templates(:visible="state.templatesIsVisible")
 
               //- read only badge
               .label-badge.space-name-badge-wrap(v-if="!userCanEditSpace")

@@ -4,11 +4,10 @@ import { useStore } from 'vuex'
 
 import cache from '@/cache.js'
 import SpaceDetailsInfo from '@/components/SpaceDetailsInfo.vue'
-import AddSpace from '@/components/dialogs/AddSpace.vue'
 import SpaceFilters from '@/components/dialogs/SpaceFilters.vue'
 import SpaceList from '@/components/SpaceList.vue'
+import AddSpaceButton from '@/components/AddSpaceButton.vue'
 import utils from '@/utils.js'
-import Loader from '@/components/Loader.vue'
 
 import debounce from 'lodash-es/debounce'
 import uniqBy from 'lodash-es/uniqBy'
@@ -61,7 +60,6 @@ watch(() => props.visible, (value, prevValue) => {
 const state = reactive({
   spaces: [],
   favoriteSpaces: [],
-  addSpaceIsVisible: false,
   isLoadingRemoteSpaces: false,
   remoteSpaces: [],
   resultsSectionHeight: null,
@@ -87,7 +85,6 @@ const backButtonIsVisible = computed(() => {
   return spaceId && spaceId !== store.state.currentSpace.id
 })
 const closeDialogs = () => {
-  state.addSpaceIsVisible = false
   state.spaceFiltersIsVisible = false
   store.commit('triggerCloseChildDialogs')
 }
@@ -273,11 +270,6 @@ const addJournalSpace = () => {
   store.dispatch('currentSpace/loadJournalSpace') // triggers updateLocalSpaces in addJournalSpace
   store.commit('triggerFocusSpaceDetailsName')
 }
-const toggleAddSpaceIsVisible = () => {
-  const isVisible = state.addSpaceIsVisible
-  closeDialogs()
-  state.addSpaceIsVisible = !isVisible
-}
 
 // select space
 
@@ -381,12 +373,7 @@ dialog.space-details.is-pinnable.wide(v-if="props.visible" :open="props.visible"
     .row.title-row
       div
         //- New Space
-        .button-wrap
-          button.success(@click.left.stop="toggleAddSpaceIsVisible" :class="{ active: state.addSpaceIsVisible }")
-            img.icon.add(src="@/assets/add.svg")
-            span New
-            Loader(:visible="isLoadingSpace")
-          AddSpace(:visible="state.addSpaceIsVisible" @closeDialogs="closeDialogs" @addSpace="addSpace" @addJournalSpace="addJournalSpace")
+        AddSpaceButton(:parentIsInDialog="true" @closeDialogs="closeDialogs" @addSpace="addSpace")
       //- Filters
       .button-wrap
         // no filters

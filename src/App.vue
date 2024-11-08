@@ -643,7 +643,8 @@ p
     vertical-align middle
 
 .segmented-buttons + .segmented-buttons,
-.button-wrap + .button-wrap
+.button-wrap + .button-wrap,
+.button-wrap + .segmented-buttons
   margin-left 6px
 .segmented-buttons
   > .button-wrap + .button-wrap
