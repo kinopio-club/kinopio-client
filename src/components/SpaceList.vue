@@ -442,9 +442,6 @@ span.space-list-wrap
               OfflineBadge(:isInline="true" :isDanger="true")
             //- template category
             .badge.info.inline-badge(v-if="showCategory && space.category" :class="categoryClassName(space)") {{space.category}}
-            //- tweet space
-            span(v-if="space.isFromTweet" title="Tweet space")
-              img.icon.tweet(src="@/assets/twitter.svg")
             //- space meta
             template(v-if="space.isFavorite")
               img.icon.favorite-icon(src="@/assets/heart.svg")
@@ -482,11 +479,6 @@ span.space-list-wrap
 
     .sunglasses
       width 16px
-
-    .icon.tweet
-      min-width 12px
-      margin-right 4px
-      vertical-align -1px
 
     .icon
       flex-shrink 0

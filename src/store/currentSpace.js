@@ -769,7 +769,6 @@ const currentSpace = {
         context.dispatch('checkIfShouldResetDimensions')
         nextTick(() => {
           context.dispatch('checkIfShouldPauseConnectionDirections')
-          context.dispatch('checkIfShouldUpdateNewTweetCards', space)
           context.dispatch('api/addToQueue', {
             name: 'incrementVisits',
             body: { spaceId: space.id }
@@ -1051,17 +1050,6 @@ const currentSpace = {
       } else if (currentSpaceIsRemote && isRemote) {
         context.commit('isLoadingSpace', false, { root: true })
       }
-    },
-    checkIfShouldUpdateNewTweetCards: (context, space) => {
-      if (!space.isFromTweet) { return }
-      if (space.updateHash) { return }
-      const cards = space.cards.reverse()
-      console.log('🕊 updating tweet space', cards)
-      const isUrlPreviews = cards.find(card => utils.urlFromString(card.name))
-      if (isUrlPreviews) {
-        context.commit('isLoadingSpace', true, { root: true })
-      }
-      context.commit('newTweetCards', cards, { root: true })
     },
     pauseConnectionDirections: (context, space) => {
       const svgs = document.querySelectorAll('svg.connection')

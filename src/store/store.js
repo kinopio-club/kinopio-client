@@ -136,8 +136,6 @@ const store = createStore({
     remoteCardDetailsVisible: [],
     preventCardDetailsOpeningAnimation: true,
     multipleCardsSelectedIds: [],
-    newTweetCards: [],
-    prevNewTweetCards: [],
     iframeIsVisibleForCardId: '',
     // resizing card
     currentUserIsResizingCard: false,
@@ -1168,14 +1166,6 @@ const store = createStore({
     clearDraggingItems: (state) => {
       state.currentDraggingCardId = ''
       state.currentDraggingBoxId = ''
-    },
-    newTweetCards: (state, cards) => {
-      utils.typeCheck({ value: cards, type: 'array' })
-      state.newTweetCards = cards
-    },
-    clearNewTweetCards: (state) => {
-      state.prevNewTweetCards = state.newTweetCards
-      state.newTweetCards = []
     },
     multipleSelectedItemsToLoad: (state, items) => {
       utils.typeCheck({ value: items, type: 'object' })

@@ -10,15 +10,6 @@ const store = useStore()
 
 let position
 
-onMounted(() => {
-  store.subscribe((mutation, state) => {
-    if (mutation.type === 'triggerUpdateUrlPreviewComplete') {
-      const cards = store.state.prevNewTweetCards
-      store.commit('addNotificationWithPosition', { message: `Thread Created (${cards.length})`, position, type: 'success', layer: 'app', icon: 'add' })
-    }
-  })
-})
-
 const emit = defineEmits(['toggleUrlsIsVisible'])
 
 const props = defineProps({

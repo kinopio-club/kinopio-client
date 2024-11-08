@@ -925,9 +925,6 @@ button
   transform rotate(-45deg)
   vertical-align -2px
 
-.icon.tweet
-  height 10px
-
 .icon.stats
   vertical-align -1px
 

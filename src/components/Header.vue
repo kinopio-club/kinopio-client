@@ -835,11 +835,8 @@ header
       text-overflow ellipsis
     .space-name-button
       max-width 100%
-      .icon.templates,
-      .icon.tweet
+      .icon.templates
         margin-right 4px
-      .icon.tweet
-        vertical-align -1px
     dialog
       max-width initial
     .space-name-button-wrap

@@ -1777,7 +1777,6 @@ export default {
     space.connections = []
     space.isTemplate = false
     space.isHidden = false
-    space.isFromTweet = false
     space.collaboratorKey = nanoid()
     space = this.newSpaceBackground(space, currentUser)
     space.background = space.background || consts.defaultSpaceBackground
