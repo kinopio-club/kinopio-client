@@ -1,6 +1,5 @@
 // functional methods that can see dom, but can't access components or store
 import cache from '@/cache.js'
-import moonphase from '@/moonphase.js'
 import consts from '@/consts.js'
 import codeLanguages from '@/data/codeLanguages.json'
 import helloSpace from '@/data/hello.json'
@@ -1432,7 +1431,6 @@ export default {
     return {
       id: spaceId,
       name: 'Loading…',
-      moonPhase: '',
       background: '',
       backgroundTint: '',
       backgroundGradient: null,
@@ -1768,13 +1766,11 @@ export default {
     if (isTomorrow) {
       date = date.add(1, 'day')
     }
-    const moonPhase = moonphase(date)
     // space
     const spaceId = nanoid()
     let space = this.emptySpace(spaceId)
     space.name = this.journalSpaceName({ isTomorrow })
     space.privacy = 'private'
-    space.moonPhase = moonPhase.name
     space.removedCards = []
     space.userId = currentUser.id
     space.connectionTypes = []

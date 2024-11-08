@@ -4,7 +4,6 @@ import { useStore } from 'vuex'
 
 import templates from '@/data/templates.js'
 import ResultsFilter from '@/components/ResultsFilter.vue'
-import MoonPhase from '@/components/MoonPhase.vue'
 import PrivacyIcon from '@/components/PrivacyIcon.vue'
 import Loader from '@/components/Loader.vue'
 import User from '@/components/User.vue'
@@ -452,8 +451,6 @@ span.space-list-wrap
             template(v-if="space.name === 'Inbox'")
               img.icon.inbox-icon(src="@/assets/inbox.svg")
             SpaceTodayJournalBadge(:space="space")
-            //- journal
-            MoonPhase(v-if="space.moonPhase" :moonPhase="space.moonPhase")
             //- template
             img.icon.templates(v-if="space.isTemplate" src="@/assets/templates.svg" title="Template")
             //- space details

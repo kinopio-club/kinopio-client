@@ -7,7 +7,6 @@ import SpaceDetails from '@/components/dialogs/SpaceDetails.vue'
 import SpaceDetailsInfo from '@/components/dialogs/SpaceDetailsInfo.vue'
 import SpaceStatus from '@/components/dialogs/SpaceStatus.vue'
 import Offline from '@/components/dialogs/Offline.vue'
-import MoonPhase from '@/components/MoonPhase.vue'
 import User from '@/components/User.vue'
 import SignUpOrIn from '@/components/dialogs/SignUpOrIn.vue'
 import UpdatePassword from '@/components/dialogs/UpdatePassword.vue'
@@ -575,7 +574,6 @@ header(v-if="isVisible" :style="state.position" :class="{'fade-out': isFadingOut
       button(:class="{ 'translucent-button': !shouldIncreaseUIContrast }")
         .logo
           .logo-image
-        MoonPhase(v-if="currentSpace.moonPhase" :moonPhase="currentSpace.moonPhase")
         GroupLabel(:group="spaceGroup")
         span {{currentSpaceName}}{{' '}}
         img.icon.visit(src="@/assets/visit.svg")
@@ -669,7 +667,6 @@ header(v-if="isVisible" :style="state.position" :class="{'fade-out': isFadingOut
                   span(v-if="currentSpaceIsTemplate")
                     img.icon.templates(src="@/assets/templates.svg")
                   SpaceTodayJournalBadge(:space="currentSpace")
-                  MoonPhase(v-if="currentSpace.moonPhase" :moonPhase="currentSpace.moonPhase")
                   span {{currentSpaceName}}
                     PrivacyIcon(:privacy="currentSpace.privacy" :closedIsNotVisible="true")
                   img.icon.sunglasses.explore(src="@/assets/sunglasses.svg" v-if="shouldShowInExplore" title="Shown in Explore")

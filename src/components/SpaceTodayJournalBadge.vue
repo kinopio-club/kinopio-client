@@ -10,7 +10,6 @@ const props = defineProps({
 })
 
 const isToday = computed(() => {
-  if (!props.space.moonPhase) { return }
   const createdAt = utils.journalSpaceDateFromName(props.space.name)
   if (!createdAt) { return }
   const today = utils.journalSpaceName({})
@@ -18,7 +17,6 @@ const isToday = computed(() => {
 })
 
 const isYesterday = computed(() => {
-  if (!props.space.moonPhase) { return }
   const createdAt = utils.journalSpaceDateFromName(props.space.name)
   if (!createdAt) { return }
   const yesterday = utils.journalSpaceName({ isYesterday: true })
@@ -26,7 +24,6 @@ const isYesterday = computed(() => {
 })
 
 const isTomorrow = computed(() => {
-  if (!props.space.moonPhase) { return }
   const createdAt = utils.journalSpaceDateFromName(props.space.name)
   if (!createdAt) { return }
   const tomorrow = utils.journalSpaceName({ isTomorrow: true })

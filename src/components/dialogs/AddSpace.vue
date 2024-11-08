@@ -3,8 +3,6 @@ import { reactive, computed, onMounted, onBeforeUnmount, onUnmounted, defineProp
 import { useStore } from 'vuex'
 
 import JournalPrompt from '@/components/JournalPrompt.vue'
-import moonphase from '@/moonphase.js'
-import MoonPhase from '@/components/MoonPhase.vue'
 import Weather from '@/components/Weather.vue'
 import utils from '@/utils.js'
 import cache from '@/cache.js'
@@ -30,7 +28,6 @@ watch(() => props.visible, (value, prevValue) => {
   closeAll()
   shouldHideFooter(false)
   if (value) {
-    state.moonPhase = moonphase()
     checkIfUserHasInboxSpace()
     store.commit('shouldExplicitlyHideFooter', true)
     updateDialogHeight()
@@ -40,7 +37,6 @@ watch(() => props.visible, (value, prevValue) => {
 })
 
 const state = reactive({
-  moonPhase: {},
   journalSettingsIsVisible: false,
   urlIsCopied: false,
   screenIsShort: false,
@@ -200,7 +196,6 @@ dialog.add-space.narrow(
           .button-wrap
             button(@click.left.prevent="toggleShouldCreateJournalsWithDailyPrompt" @keydown.stop.enter="toggleShouldCreateJournalsWithDailyPrompt" :class="{ active: shouldCreateJournalsWithDailyPrompt }")
               //- img.icon.today(src="@/assets/today.svg")
-              MoonPhase(:moonPhase="state.moonPhase.name")
               span Prompt of the Day
         .row(v-if="shouldCreateJournalsWithDailyPrompt")
           p {{dailyPrompt}}
