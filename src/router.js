@@ -85,28 +85,6 @@ const router = createRouter({
         next()
       }
     }, {
-      path: '/journal',
-      component: Space,
-      beforeEnter: (to, from, next) => {
-        store.commit('loadJournalSpace', true)
-        next()
-      }
-    }, {
-      path: '/new/today',
-      component: Space,
-      beforeEnter: (to, from, next) => {
-        store.commit('loadJournalSpace', true)
-        next()
-      }
-    }, {
-      path: '/new/tomorrow',
-      component: Space,
-      beforeEnter: (to, from, next) => {
-        store.commit('loadJournalSpace', true)
-        store.commit('loadJournalSpaceTomorrow', true)
-        next()
-      }
-    }, {
       path: '/new',
       component: Space,
       beforeEnter: (to, from, next) => {
