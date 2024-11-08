@@ -183,7 +183,7 @@ const currentSpace = {
         await context.dispatch('addSpace')
         context.commit('loadNewSpace', false, { root: true })
       // restore last space
-      } else if (user.lastSpaceId) {
+      } else if (user?.lastSpaceId) {
         console.log('🚃 Restore last space', user.lastSpaceId)
         await context.dispatch('loadLastSpace')
       // hello kinopio
