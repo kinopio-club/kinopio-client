@@ -4,6 +4,8 @@ import { useStore } from 'vuex'
 
 import JournalPrompt from '@/components/JournalPrompt.vue'
 import Weather from '@/components/Weather.vue'
+import UserTemplateSpaceList from '@/components/UserTemplateSpaceList.vue'
+import Loader from '@/components/Loader.vue'
 import utils from '@/utils.js'
 import cache from '@/cache.js'
 
@@ -41,7 +43,8 @@ const state = reactive({
   urlIsCopied: false,
   screenIsShort: false,
   dialogHeight: null,
-  hasInboxSpace: true
+  hasInboxSpace: true,
+  templatesIsLoading: true
 })
 
 const currentUserId = computed(() => store.state.currentUser.id)
@@ -91,6 +94,9 @@ const addInboxSpace = () => {
   store.dispatch('closeAllDialogs')
   window.scrollTo(0, 0)
   store.dispatch('currentSpace/addInboxSpace')
+}
+const duplicateSpace = () => {
+  store.dispatch('currentSpace/duplicateSpace')
 }
 
 // journal
@@ -145,6 +151,9 @@ const checkIfUserHasInboxSpace = async () => {
 
 // templates, import
 
+const updateTemplatesIsLoading = (value) => {
+  state.templatesIsLoading = value
+}
 const triggerTemplatesIsVisible = () => {
   closeAll()
   store.dispatch('closeAllDialogs')
@@ -155,7 +164,6 @@ const triggerImportIsVisible = () => {
   store.dispatch('closeAllDialogs')
   store.commit('triggerImportIsVisible')
 }
-
 </script>
 
 <template lang="pug">
@@ -177,36 +185,36 @@ dialog.add-space.narrow(
           span New Space
 
     //- Add Journal
-    .row
-      .segmented-buttons
-        button(@click="addJournalSpace")
-          img.icon(src="@/assets/add.svg")
-          span Daily Journal Space
-        button(@click.left.stop="toggleJournalSettingsIsVisible" :class="{ active: state.journalSettingsIsVisible }")
-          img.icon.down-arrow.button-down-arrow(src="@/assets/down-arrow.svg")
+    //- .row
+    //-   .segmented-buttons
+    //-     button(@click="addJournalSpace")
+    //-       img.icon(src="@/assets/add.svg")
+    //-       span Daily Journal Space
+    //-     button(@click.left.stop="toggleJournalSettingsIsVisible" :class="{ active: state.journalSettingsIsVisible }")
+    //-       img.icon.down-arrow.button-down-arrow(src="@/assets/down-arrow.svg")
 
-    //- Journal Settings
-    template(v-if="state.journalSettingsIsVisible")
-      //- weather
-      section.subsection
-        Weather
-      //- daily prompt
-      section.subsection
-        .row.daily-prompt-row
-          .button-wrap
-            button(@click.left.prevent="toggleShouldCreateJournalsWithDailyPrompt" @keydown.stop.enter="toggleShouldCreateJournalsWithDailyPrompt" :class="{ active: shouldCreateJournalsWithDailyPrompt }")
-              //- img.icon.today(src="@/assets/today.svg")
-              span Prompt of the Day
-        .row(v-if="shouldCreateJournalsWithDailyPrompt")
-          p {{dailyPrompt}}
-      //- prompts
-      section.subsection
-        JournalPrompt(v-for="prompt in userPrompts" :prompt="prompt" :key="prompt.id" @showScreenIsShort="showScreenIsShort" @addPrompt="addCustomPrompt")
-        //- add prompt
-        .row
-          button(@click.left="addCustomPrompt")
-            img.icon(src="@/assets/add.svg")
-            span Prompt
+    //- //- Journal Settings
+    //- template(v-if="state.journalSettingsIsVisible")
+    //-   //- weather
+    //-   section.subsection
+    //-     Weather
+    //-   //- daily prompt
+    //-   section.subsection
+    //-     .row.daily-prompt-row
+    //-       .button-wrap
+    //-         button(@click.left.prevent="toggleShouldCreateJournalsWithDailyPrompt" @keydown.stop.enter="toggleShouldCreateJournalsWithDailyPrompt" :class="{ active: shouldCreateJournalsWithDailyPrompt }")
+    //-           //- img.icon.today(src="@/assets/today.svg")
+    //-           span Prompt of the Day
+    //-     .row(v-if="shouldCreateJournalsWithDailyPrompt")
+    //-       p {{dailyPrompt}}
+    //-   //- prompts
+    //-   section.subsection
+    //-     JournalPrompt(v-for="prompt in userPrompts" :prompt="prompt" :key="prompt.id" @showScreenIsShort="showScreenIsShort" @addPrompt="addCustomPrompt")
+    //-     //- add prompt
+    //-     .row
+    //-       button(@click.left="addCustomPrompt")
+    //-         img.icon(src="@/assets/add.svg")
+    //-         span Prompt
 
   //- Inbox
   section(v-if="!state.hasInboxSpace")
@@ -215,17 +223,26 @@ dialog.add-space.narrow(
       img.icon.inbox-icon(src="@/assets/inbox.svg")
       span Inbox
     p For collecting ideas to figure out later
-
-  //- Templates and Import
+  //- Templates
   section
-    //- templates
-    .button-wrap
-      button(@click="triggerTemplatesIsVisible")
-        img.icon.templates(src="@/assets/templates.svg")
-        span Templates
-    //- import
-    .button-wrap
-      button(@click="triggerImportIsVisible") Import
+    .row
+      .button-wrap
+        button(@click="triggerTemplatesIsVisible")
+          img.icon.templates(src="@/assets/templates.svg")
+          span Templates
+        //- Loader(:visible="state.templatesIsLoading" :isSmall="true")
+  UserTemplateSpaceList(@updateDialogHeight="updateDialogHeight" @isLoading="updateTemplatesIsLoading")
+  //- Import
+  section
+    .row
+      //- import
+      .button-wrap
+        button(@click="triggerImportIsVisible") Import
+      //- Duplicate
+      .button-wrap
+        button(@click.left="duplicateSpace" title="Duplicate this Space")
+          img.icon.add(src="@/assets/duplicate.svg")
+          span Duplicate
 </template>
 <style lang="stylus">
 dialog.add-space

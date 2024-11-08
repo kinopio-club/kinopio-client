@@ -486,8 +486,9 @@ const currentSpace = {
       context.dispatch('updateModulesSpaceId', space)
       context.dispatch('incrementCardsCreatedCountFromSpace', space)
     },
-    duplicateSpace: (context) => {
-      let space = utils.clone(context.state)
+    duplicateSpace: (context, space) => {
+      space = space || context.state
+      space = utils.clone(space)
       const user = { id: context.rootState.currentUser.id }
       context.commit('broadcast/leaveSpaceRoom', { user, type: 'userLeftRoom' }, { root: true })
       let uniqueNewSpace = utils.clearSpaceMeta(space, 'copy')
