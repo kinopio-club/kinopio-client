@@ -10,7 +10,7 @@ import User from '@/components/User.vue'
 import UserLabelInline from '@/components/UserLabelInline.vue'
 import NameMatch from '@/components/NameMatch.vue'
 import OfflineBadge from '@/components/OfflineBadge.vue'
-import SpaceTodayJournalBadge from '@/components/SpaceTodayJournalBadge.vue'
+import SpaceTodayBadge from '@/components/SpaceTodayBadge.vue'
 import GroupLabel from '@/components/GroupLabel.vue'
 import utils from '@/utils.js'
 import cache from '@/cache.js'
@@ -447,7 +447,7 @@ span.space-list-wrap
               img.icon.favorite-icon(src="@/assets/heart.svg")
             template(v-if="space.name === 'Inbox'")
               img.icon.inbox-icon(src="@/assets/inbox.svg")
-            SpaceTodayJournalBadge(:space="space")
+            SpaceTodayBadge(:space="space")
             //- template
             img.icon.templates(v-if="space.isTemplate" src="@/assets/templates.svg" title="Template")
             //- space details

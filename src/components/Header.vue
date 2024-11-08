@@ -31,7 +31,7 @@ import Donate from '@/components/dialogs/Donate.vue'
 import Toolbar from '@/components/Toolbar.vue'
 import ImportExport from '@/components/dialogs/ImportExport.vue'
 import Pricing from '@/components/dialogs/Pricing.vue'
-import SpaceTodayJournalBadge from '@/components/SpaceTodayJournalBadge.vue'
+import SpaceTodayBadge from '@/components/SpaceTodayBadge.vue'
 import DiscoveryButtons from '@/components/DiscoveryButtons.vue'
 import UserSettings from '@/components/dialogs/UserSettings.vue'
 import SpaceUserList from '@/components/dialogs/SpaceUserList.vue'
@@ -666,7 +666,7 @@ header(v-if="isVisible" :style="state.position" :class="{'fade-out': isFadingOut
                     img.icon.inbox-icon(src="@/assets/inbox.svg")
                   span(v-if="currentSpaceIsTemplate")
                     img.icon.templates(src="@/assets/templates.svg")
-                  SpaceTodayJournalBadge(:space="currentSpace")
+                  SpaceTodayBadge(:space="currentSpace")
                   span {{currentSpaceName}}
                     PrivacyIcon(:privacy="currentSpace.privacy" :closedIsNotVisible="true")
                   img.icon.sunglasses.explore(src="@/assets/sunglasses.svg" v-if="shouldShowInExplore" title="Shown in Explore")
