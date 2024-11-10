@@ -71,8 +71,9 @@ const systemTemplates = computed(() => {
 
 // user templates
 
-const updateWithLocalSpaces = () => {
-  let localSpaces = cache.getAllSpaces().filter(space => {
+const updateWithLocalSpaces = async () => {
+  const spaces = await cache.getAllSpaces()
+  let localSpaces = spaces.filter(space => {
     return space.isTemplate
   })
   localSpaces = sortSpacesByEditedAt(localSpaces)

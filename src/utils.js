@@ -1527,10 +1527,10 @@ export default {
     }
     return userId
   },
-  uniqueSpaceItems (items, nullItemUsers) {
+  async uniqueSpaceItems (items, nullItemUsers) {
     const itemIdDeltas = []
     const connectionTypeIdDeltas = []
-    const user = cache.user()
+    const user = await cache.user()
     let { cards, connections, connectionTypes, boxes, tags } = items
     tags = tags || []
     boxes = boxes || []

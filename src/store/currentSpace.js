@@ -1395,9 +1395,10 @@ const currentSpace = {
     newItems: (state, getters) => ({ items, spaceId }) => {
       items = items || getters.selectedItems
       spaceId = spaceId || state.id
-      let newItems = utils.uniqueSpaceItems(utils.clone(items))
-      newItems = utils.updateSpaceItemsSpaceId(newItems, spaceId)
-      return newItems
+      utils.uniqueSpaceItems(utils.clone(items)).then(newItems => {
+        newItems = utils.updateSpaceItemsSpaceId(newItems, spaceId)
+        return newItems
+      })
     },
 
     // items

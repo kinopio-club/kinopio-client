@@ -30,7 +30,7 @@ export default {
     element.classList.remove('hidden')
   },
   async pruneLocal () {
-    const user = this.user()
+    const user = await this.user()
     if (user?.apiKey) {
       const currentSpaceId = utils.spaceIdFromUrl()
       if (!currentSpaceId) {
@@ -63,7 +63,6 @@ export default {
     }
     this.notifyCouldNotSave()
   },
-  // TODO convert all cache.getLocal to use await
   async getLocal (key) {
     try {
       const item = await idb.get(key)
@@ -87,7 +86,8 @@ export default {
 
   // TODO convert all cache.user to use await
   async user () {
-    return this.getLocal('user') || {}
+    const user = await this.getLocal('user')
+    return user || {}
   },
   async updateUser (key, value) {
     let user = await this.user()
@@ -110,9 +110,11 @@ export default {
   async getInboxSpace () {
     const keys = await idb.keys()
     const spaceKeys = keys.filter(key => key.startsWith('space-'))
-    const spaces = spaceKeys.map(key => {
-      return this.getLocal(key)
-    })
+    let spaces
+    for (const key of spaceKeys) {
+      const space = await this.getLocal(key)
+      spaces.push(space)
+    }
     return spaces.find(space => space.name === 'Inbox')
   },
   // TODO convert to await
@@ -231,7 +233,7 @@ export default {
       tags: space.tags,
       boxes: space.boxes
     }
-    const uniqueItems = utils.uniqueSpaceItems(items, nullCardUsers)
+    const uniqueItems = await utils.uniqueSpaceItems(items, nullCardUsers)
     space.cards = uniqueItems.cards.map(card => {
       card.spaceId = space.id
       return card
@@ -259,7 +261,7 @@ export default {
   async removeSpace (space) {
     await this.updateSpace('removeDate', Date.now(), space.id)
     const spaceKey = `space-${space.id}`
-    space = this.getLocal(spaceKey)
+    space = await this.getLocal(spaceKey)
     await this.storeLocal(`removed-${spaceKey}`, space)
     await this.removeLocal(spaceKey)
   },
@@ -292,7 +294,8 @@ export default {
   // Groups
 
   async groups () {
-    return this.getLocal('groups') || {}
+    const groups = await this.getLocal('groups')
+    return groups || {}
   },
   async saveGroups (groups) {
     await this.storeLocal('groups', groups)
