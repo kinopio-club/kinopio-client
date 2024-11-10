@@ -252,7 +252,7 @@ const handleMouseDownEvents = (event) => {
   const isPanScope = checkIsPanScope(event)
   const toolbarIsBox = store.state.currentUserToolbar === 'box'
   const isNotConnecting = !store.state.currentUserIsDrawingConnection
-  const shouldBoxSelect = event.shiftKey && isPanScope && !toolbarIsBox && isNotConnecting
+  const shouldBoxSelect = event.shiftKey && isPanScope && !toolbarIsBox && isNotConnecting && !store.state.currentUserIsResizingBox
   const userDisablePan = store.state.currentUser.shouldDisableRightClickToPan
   const shouldPan = (isRightClick || isMiddleClick) && isPanScope && !userDisablePan
   const position = utils.cursorPositionInPage(event)

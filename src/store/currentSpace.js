@@ -183,7 +183,7 @@ const currentSpace = {
         await context.dispatch('addSpace')
         context.commit('loadNewSpace', false, { root: true })
       // restore last space
-      } else if (user.lastSpaceId) {
+      } else if (user?.lastSpaceId) {
         console.log('🚃 Restore last space', user.lastSpaceId)
         await context.dispatch('loadLastSpace')
       // hello kinopio
@@ -359,7 +359,7 @@ const currentSpace = {
         const nullCardUsers = true
         cache.updateIdsInSpace(space, nullCardUsers)
       }
-      pageMeta.update(space)
+      pageMeta.space(space)
     },
     createNewSpace: (context, space) => {
       const currentUser = context.rootState.currentUser
@@ -802,7 +802,7 @@ const currentSpace = {
         let remoteSpace = remoteData
         console.log('🎑 remoteSpace', remoteSpace)
         if (!remoteSpace) { return }
-        pageMeta.update(remoteSpace)
+        pageMeta.space(remoteSpace)
         context.dispatch('groups/loadGroup', remoteSpace, { root: true })
         context.commit('updateSpace', { collaboratorKey: remoteSpace.collaboratorKey })
         const spaceIsUnchanged = utils.spaceIsUnchanged(cachedSpace, remoteSpace)

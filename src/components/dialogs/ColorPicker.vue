@@ -8,6 +8,7 @@ import utils from '@/utils.js'
 import randomColor from 'randomcolor'
 import shader from 'shader'
 import { colord } from 'colord'
+import throttle from 'lodash-es/throttle'
 
 const store = useStore()
 
@@ -84,9 +85,9 @@ const color = computed({
   },
   set (color) {
     if (utils.colorIsValid(color)) {
-      updateColorFromInput(color)
+      throttledUpdateColorFromInput(color)
     } else if (utils.colorIsValid(`#${color}`)) {
-      updateColorFromInput('#' + color)
+      throttledUpdateColorFromInput('#' + color)
     }
   }
 })
@@ -105,6 +106,10 @@ const shuffleColors = () => {
   }
   state.colors.unshift(props.currentColor)
 }
+const throttledUpdateColorFromInput = throttle((color) => {
+  updateColorFromInput(color)
+}, 400)
+
 const updateColorFromInput = (color) => {
   select(color)
   state.colors.pop()

@@ -7,7 +7,7 @@ import BackgroundPreview from '@/components/BackgroundPreview.vue'
 import Loader from '@/components/Loader.vue'
 import PrivacyButton from '@/components/PrivacyButton.vue'
 import templates from '@/data/templates.js'
-import ImportExport from '@/components/dialogs/ImportExport.vue'
+import ImportExportButton from '@/components/ImportExportButton.vue'
 import ReadOnlySpaceInfoBadges from '@/components/ReadOnlySpaceInfoBadges.vue'
 import AddToExplore from '@/components/AddToExplore.vue'
 import AskToAddToExplore from '@/components/AskToAddToExplore.vue'
@@ -56,7 +56,6 @@ const state = reactive({
   backgroundIsVisible: false,
   privacyPickerIsVisible: false,
   settingsIsVisible: false,
-  exportIsVisible: false,
   addToGroupIsVisible: false,
   error: {
     updateSpaceGroup: false,
@@ -210,12 +209,6 @@ const toggleSettingsIsVisible = () => {
   state.settingsIsVisible = !isVisible
   emit('updateDialogHeight')
 }
-const toggleExportIsVisible = () => {
-  const isVisible = state.exportIsVisible
-  closeDialogsAndEmit()
-  state.exportIsVisible = !isVisible
-  emit('updateDialogHeight')
-}
 const toggleAddToGroupIsVisible = () => {
   const isVisible = state.addToGroupIsVisible
   clearErrors()
@@ -229,7 +222,6 @@ const clearErrors = () => {
 const closeDialogs = () => {
   state.backgroundIsVisible = false
   state.privacyPickerIsVisible = false
-  state.exportIsVisible = false
   state.addToGroupIsVisible = false
   clearErrors()
 }
@@ -331,6 +323,9 @@ template(v-if="isSpaceMember")
           //- Group
           button.group-button(title="Add to Group" :class="{active: state.addToGroupIsVisible || spaceGroup}" @click.left.prevent.stop="toggleAddToGroupIsVisible" @keydown.stop.enter="toggleAddToGroupIsVisible")
             img.icon.group(src="@/assets/group.svg")
+          //- Template
+          button(:class="{ active: currentSpaceIsUserTemplate }" @click.left.prevent="toggleCurrentSpaceIsUserTemplate" @keydown.stop.enter="toggleCurrentSpaceIsUserTemplate" title="Mark as Template")
+            img.icon.templates(src="@/assets/templates.svg")
           //- Favorite
           FavoriteSpaceButton(:parentIsDialog="true" @updateLocalSpaces="updateLocalSpaces")
         AddToGroup(:visible="state.addToGroupIsVisible" @selectGroup="toggleSpaceGroup" :groups="userGroups" :selectedGroup="spaceGroup" @closeDialogs="closeDialogs")
@@ -360,45 +355,21 @@ template(v-if="isSpaceMember")
 
 //- Space Settings
 template(v-if="state.settingsIsVisible")
-  //- read only space settings
-  section.subsection.space-settings(v-if="!isSpaceMember")
-    .row(v-if="!showInExplore")
+  section.subsection.space-settings
+    .row(v-if="!isSpaceMember && !showInExplore")
       AskToAddToExplore
-    .row
-      //- Duplicate
-      .button-wrap
-        button(@click.left="duplicateSpace")
-          img.icon.add(src="@/assets/add.svg")
-          span Duplicate
-      //- Export
-      .button-wrap(:class="{'dialog-is-pinned': dialogIsPinned}")
-        button(@click.left.stop="toggleExportIsVisible" :class="{ active: state.exportIsVisible }")
-          span Export
-        ImportExport(:visible="state.exportIsVisible" :isExport="true")
-
-  //- member space settings
-  section.subsection.space-settings(v-if="isSpaceMember")
-    .row
+    .row(v-if="isSpaceMember")
       AddToExplore
     .row
-      //- Template
-      .button-wrap(@click.left.prevent="toggleCurrentSpaceIsUserTemplate" @keydown.stop.enter="toggleCurrentSpaceIsUserTemplate")
-        button(:class="{ active: currentSpaceIsUserTemplate }")
-          img.icon.templates(src="@/assets/templates.svg")
-          span Mark as Template
-      //- Export
-      .button-wrap(:class="{'dialog-is-pinned': dialogIsPinned}")
-        button(@click.left.stop="toggleExportIsVisible" :class="{ active: state.exportIsVisible }")
-          span Export
-          ImportExport(:visible="state.exportIsVisible" :isExport="true")
-    .row(v-if="currentSpaceIsUserTemplate")
+      //- Import / Export
+      ImportExportButton(@closeDialogs="closeDialogsAndEmit")
       //- Duplicate
       .button-wrap
-        button(@click.left="duplicateSpace")
-          img.icon.add(src="@/assets/add.svg")
+        button(@click.left="duplicateSpace" title="Duplicate this Space")
+          img.icon.add(src="@/assets/duplicate.svg")
           span Duplicate
-    .row
-      .button-wrap(v-if="isSpaceMember")
+    .row(v-if="isSpaceMember")
+      .button-wrap
         .segmented-buttons
           //- Remove
           button.danger(@click.left="removeCurrentSpace" :class="{ disabled: currentSpaceIsTemplate }")
@@ -485,11 +456,4 @@ template(v-if="state.settingsIsVisible")
   p
     white-space normal
 
-  dialog.import-export
-    left initial
-    right 8px
-
-.dialog-is-pinned
-  dialog.import-export
-    right -50px
 </style>

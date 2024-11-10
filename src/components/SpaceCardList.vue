@@ -33,7 +33,7 @@ const selectCard = (card) => {
 
 <template lang="pug">
 ul.results-list
-  template(v-for="group in props.groupedItems" :key="index")
+  template(v-for="group in props.groupedItems")
     //- space
     hr
     li.space-name(v-if="group.spaceId" :data-space-id="group.spaceId" @click="selectSpace(group.spaceId)" :class="{ active: spaceIsCurrentSpace(group.spaceId), hover: spaceIsFocused(group.spaceId) }")

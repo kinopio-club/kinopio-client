@@ -80,10 +80,9 @@ const normalizedBox = computed(() => {
   return normalizeBox(props.box)
 })
 const normalizeBox = (box) => {
-  const init = 200
   box = utils.clone(box)
-  box.resizeWidth = box.resizeWidth || init
-  box.resizeHeight = box.resizeHeight || init
+  box.resizeWidth = box.resizeWidth || consts.minItemXY
+  box.resizeHeight = box.resizeHeight || consts.minItemXY
   box.width = box.resizeWidth
   box.height = box.resizeHeight
   box.color = box.color || randomColor({ luminosity: 'light' })
@@ -150,8 +149,8 @@ const removeViewportObserver = () => {
 
 const styles = computed(() => {
   let { x, y, resizeWidth, resizeHeight } = normalizedBox.value
-  const width = resizeWidth
-  const height = resizeHeight
+  let width = resizeWidth
+  let height = resizeHeight
   let styles = {
     left: x + 'px',
     top: y + 'px',
@@ -159,7 +158,11 @@ const styles = computed(() => {
     height: height + 'px',
     border: `${borderWidth}px solid ${color.value}`
   }
-  styles = updateBoxBorderRadiusStyles(styles, otherBoxes.value)
+  // dimensions set by currentBoxes/resize while resizing
+  if (isResizing.value) {
+    styles.width = normalizedBox.value.resizeWidth
+    styles.height = normalizedBox.value.resizeHeight
+  }
   return styles
 })
 const userColor = computed(() => store.state.currentUser.color)
@@ -167,7 +170,7 @@ const color = computed(() => {
   const remoteColor = remoteBoxDetailsVisibleColor.value || remoteSelectedColor.value || remoteUserResizingBoxesColor.value || remoteBoxDraggingColor.value
   if (remoteColor) {
     return remoteColor
-  } else if (isSelected.value) {
+  } else if (currentBoxIsSelected.value) {
     return userColor.value
   } else {
     return normalizedBox.value.color
@@ -177,121 +180,35 @@ const colorIsDark = computed(() => utils.colorIsDark(color.value))
 const fill = computed(() => normalizedBox.value.fill)
 const hasFill = computed(() => fill.value !== 'empty')
 const infoClasses = computed(() => {
-  const classes = []
+  const classList = []
   if (isPainting.value) {
-    classes.push('unselectable')
+    classList.push('unselectable')
   }
   if (colorIsDark.value) {
-    classes.push('is-dark')
+    classList.push('is-dark')
   }
   const fontId = props.box.headerFontId || 0
-  classes.push(`header-font-${fontId}`)
+  classList.push(`header-font-${fontId}`)
   const fontSize = props.box.headerFontSize || 's'
-  classes.push(`header-font-size-${fontSize}`)
+  classList.push(`header-font-size-${fontSize}`)
   const font = fonts.find(item => item.id === fontId)
   const fontSizeModifier = font?.size || ''
   if (fontSizeModifier) {
-    classes.push(`header-font-size-modifier-${fontSizeModifier}`)
+    classList.push(`header-font-size-modifier-${fontSizeModifier}`)
   }
-  return classes
+  return classList
 })
-
-// edge snapping
-
-const otherBoxes = computed(() => {
-  const boxes = store.getters['currentBoxes/isSelectableInViewport']
-  return boxes.filter(box => box?.id !== props.box.id)
-})
-const snapGuideStyles = computed(() => {
-  if (isDragging.value) {
-    return { background: userColor.value }
-  } else {
-    return { background: props.box.color }
+const classes = computed(() => {
+  return {
+    hover: state.isHover,
+    active: currentBoxIsBeingDragged.value,
+    'box-jiggle': shouldJiggle.value,
+    'is-resizing': isResizing.value,
+    'is-selected': currentBoxIsSelected.value,
+    'is-checked': isChecked.value || isInCheckedBox.value,
+    transition: !store.state.currentBoxIsNew || !store.state.currentUserIsResizingBox
   }
 })
-const snapGuideSide = computed(() => {
-  const isDragging = store.state.currentUserIsDraggingBox || store.state.currentUserIsDraggingCard
-  if (!isDragging) { return null }
-  let guides = store.state.currentBoxes.snapGuides
-  const snapGuide = guides.find(guide => {
-    const isTarget = guide.target.id === props.box.id
-    const isOrigin = guide.origin.id === props.box.id
-    return isTarget || isOrigin
-  })
-  if (!snapGuide) { return null }
-  if (snapGuide.target.id === props.box.id) {
-    return snapGuide.side
-  } else if (snapGuide.origin.id === props.box.id) {
-    return oppositeSide(snapGuide.side)
-  } else {
-    return null
-  }
-})
-const oppositeSide = (side) => {
-  if (side === 'left') {
-    return 'right'
-  }
-  if (side === 'right') {
-    return 'left'
-  }
-  if (side === 'top') {
-    return 'bottom'
-  }
-  if (side === 'bottom') {
-    return 'top'
-  }
-}
-const updateBoxBorderRadiusStyles = (styles, otherBoxes) => {
-  // ┌─────────────┐
-  // │  x is same  │
-  // ├─────────────┤
-  //
-  // ├─────────────┼ ─ ─┌────┐
-  // │             │    │    │
-  // │             │    │    │
-  // │ Current Box │    │y is│
-  // │             │    │same│
-  // │             │    │    │
-  // │             │    │    │
-  // └─────────────┴ ─ ─└────┴
-  const borderWidth = 2
-  const box = normalizedBox.value
-  otherBoxes = utils.clone(otherBoxes)
-  otherBoxes.forEach(otherBox => {
-    if (!otherBox) { return }
-    otherBox = normalizeBox(otherBox)
-    // x
-    const xStartIsSame = otherBox.x === box.x
-    const xEndIsSame = otherBox.x + otherBox.width === box.x + box.width
-    const xIsSame = xStartIsSame && xEndIsSame
-    // y
-    const yStartIsSame = otherBox.y === box.y
-    const yEndIsSame = otherBox.y + otherBox.height === box.y + box.height
-    const yIsSame = yStartIsSame && yEndIsSame
-    // sides
-    const isTop = xIsSame && (box.y === otherBox.y + otherBox.height - borderWidth)
-    const isBottom = xIsSame && (box.y + box.height - borderWidth === otherBox.y)
-    const isLeft = yIsSame && (box.x === otherBox.x + otherBox.width - borderWidth)
-    const isRight = yIsSame && (box.x + box.width - borderWidth === otherBox.x)
-    if (isTop || snapGuideSide.value === 'top') {
-      styles.borderTopRightRadius = 0
-      styles.borderTopLeftRadius = 0
-    }
-    if (isBottom || snapGuideSide.value === 'bottom') {
-      styles.borderBottomRightRadius = 0
-      styles.borderBottomLeftRadius = 0
-    }
-    if (isRight || snapGuideSide.value === 'right') {
-      styles.borderTopRightRadius = 0
-      styles.borderBottomRightRadius = 0
-    }
-    if (isLeft || snapGuideSide.value === 'left') {
-      styles.borderTopLeftRadius = 0
-      styles.borderBottomLeftRadius = 0
-    }
-  })
-  return styles
-}
 
 // resize
 
@@ -377,12 +294,12 @@ const canEditSpace = computed(() => store.getters['currentUser/canEditSpace']())
 const shouldJiggle = computed(() => {
   const isMultipleItemsSelected = store.getters.isMultipleItemsSelected
   if (isMultipleItemsSelected) { return }
-  return isDragging.value
+  return currentBoxIsBeingDragged.value
 })
-const isDragging = computed(() => {
+const currentBoxIsBeingDragged = computed(() => {
   const isDragging = store.state.currentUserIsDraggingBox
   const isCurrent = store.state.currentDraggingBoxId === props.box.id
-  return isDragging && (isCurrent || isSelected.value)
+  return isDragging && (isCurrent || currentBoxIsSelected.value)
 })
 const isResizing = computed(() => {
   const isResizing = store.state.currentUserIsResizingBox
@@ -402,12 +319,12 @@ const startBoxInfoInteraction = (event) => {
     userId: store.state.currentUser.id
   }
   store.commit('broadcast/updateStore', { updates, type: 'addToRemoteBoxesDragging' })
-  if (event.shiftKey) { return } // should not select contained items if shift key
+  if (event.altKey) { return } // should not select contained items if alt/option key
   selectContainedCards()
   selectContainedBoxes()
 }
 const updateIsHover = (value) => {
-  if (isDragging.value) { return }
+  if (store.state.currentUserIsDraggingBox) { return }
   if (isPainting.value) { return }
   state.isHover = value
   if (value) {
@@ -447,10 +364,6 @@ const currentBoxDetailsIsVisible = computed(() => {
 
 // select
 
-const isSelected = computed(() => {
-  const selectedIds = store.state.multipleBoxesSelectedIds
-  return selectedIds.includes(props.box.id)
-})
 const multipleBoxesIsSelected = computed(() => Boolean(store.state.multipleBoxesSelectedIds.length))
 const currentBoxIsSelected = computed(() => {
   const selected = store.state.multipleBoxesSelectedIds
@@ -704,7 +617,7 @@ const updateTouchPosition = (event) => {
 }
 const updateCurrentTouchPosition = (event) => {
   currentTouchPosition = utils.cursorPositionInViewport(event)
-  if (isDragging.value || isResizing.value) {
+  if (currentBoxIsBeingDragged.value || isResizing.value) {
     event.preventDefault() // allows dragging boxes without scrolling
   }
 }
@@ -801,8 +714,8 @@ const toggleBoxChecked = () => {
 const containingBoxes = computed(() => {
   if (!state.isVisibleInViewport) { return }
   if (store.state.currentUserIsDraggingBox) { return }
-  if (isDragging.value) { return }
-  if (isSelected.value) { return }
+  if (currentBoxIsBeingDragged.value) { return }
+  if (currentBoxIsSelected.value) { return }
   if (isResizing.value) { return }
   let boxes = store.getters['currentBoxes/all']
   boxes = boxes.filter(box => {
@@ -836,7 +749,7 @@ const isInCheckedBox = computed(() => {
   :data-should-render="shouldRender"
 
   :style="styles"
-  :class="{hover: state.isHover, active: isDragging, 'box-jiggle': shouldJiggle, 'is-resizing': isResizing, 'is-selected': isSelected, 'is-checked': isChecked || isInCheckedBox}"
+  :class="classes"
   ref="boxElement"
 )
 
@@ -918,11 +831,6 @@ const isInCheckedBox = computed(() => {
 
   //- fill
   .background.filled(v-if="hasFill" :style="{background: color}")
-  //- snap guides
-  .snap-guide.right(v-if="snapGuideSide === 'right'" :style="snapGuideStyles")
-  .snap-guide.left(v-if="snapGuideSide === 'left'" :style="snapGuideStyles")
-  .snap-guide.top(v-if="snapGuideSide === 'top'" :style="snapGuideStyles")
-  .snap-guide.bottom(v-if="snapGuideSide === 'bottom'" :style="snapGuideStyles")
 </template>
 
 <style lang="stylus">
@@ -935,10 +843,11 @@ const isInCheckedBox = computed(() => {
   min-width var(--min-box-size)
   pointer-events none
   // animate box expand and shrink
-  transition width 0.2s var(--ease-out-circ),
-    height 0.2s var(--ease-out-circ),
-    left 0.2s var(--ease-out-circ),
-    top 0.2s var(--ease-out-circ)
+  &.transition
+    transition width 0.2s var(--ease-out-circ),
+      height 0.2s var(--ease-out-circ),
+      left 0.2s var(--ease-out-circ),
+      top 0.2s var(--ease-out-circ)
   &.hover
     box-shadow var(--hover-shadow)
   &.active
@@ -1113,56 +1022,6 @@ const isInCheckedBox = computed(() => {
     pointer-events all
     button
       z-index 1
-
-  .snap-guide
-    --snap-guide-width 6px
-    --snap-guide-duration 1s
-    position absolute
-    &.left
-      left calc(-1 * var(--snap-guide-width))
-      width var(--snap-guide-width)
-      top -2px
-      height calc(100% + 4px)
-      animation guideLeft var(--snap-guide-duration) infinite ease-in-out forwards
-      border-top-left-radius var(--entity-radius)
-      border-bottom-left-radius var(--entity-radius)
-    &.right
-      right calc(-1 * var(--snap-guide-width))
-      width var(--snap-guide-width)
-      top -2px
-      height calc(100% + 4px)
-      animation guideRight var(--snap-guide-duration) infinite ease-in-out forwards
-      border-top-right-radius var(--entity-radius)
-      border-bottom-right-radius var(--entity-radius)
-    &.top
-      top calc(-1 * var(--snap-guide-width))
-      height var(--snap-guide-width)
-      left -2px
-      width calc(100% + 4px)
-      animation guideTop var(--snap-guide-duration) infinite ease-in-out forwards
-      border-top-left-radius var(--entity-radius)
-      border-top-right-radius var(--entity-radius)
-    &.bottom
-      bottom calc(-1 * var(--snap-guide-width))
-      height var(--snap-guide-width)
-      left -2px
-      width calc(100% + 4px)
-      animation guideBottom var(--snap-guide-duration) infinite ease-in-out forwards
-      border-bottom-left-radius var(--entity-radius)
-      border-bottom-right-radius var(--entity-radius)
-
-@keyframes guideRight
-  50%
-    transform translateX(2px)
-@keyframes guideLeft
-  50%
-    transform translateX(-2px)
-@keyframes guideTop
-  50%
-    transform translateY(-2px)
-@keyframes guideBottom
-  50%
-    transform translateY(2px)
 
 .box-jiggle
   animation boxJiggle 0.5s infinite ease-out forwards

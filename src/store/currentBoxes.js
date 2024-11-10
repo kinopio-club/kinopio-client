@@ -65,21 +65,37 @@ export default {
     snapGuides: (state, value) => {
       state.snapGuides = value
     },
+    resizeWhileDragging: (state, { boxes, shouldSnapToGrid }) => {
+      boxes.forEach(box => {
+        const element = utils.boxElementFromId(box.id)
+        if (!element) { return }
+        if (element.dataset.isVisibleInViewport === 'false') { return }
+        if (shouldSnapToGrid) {
+          element.style.width = utils.roundToNearest(box.resizeWidth) + 'px'
+          element.style.height = utils.roundToNearest(box.resizeHeight) + 'px'
+        } else {
+          element.style.width = box.resizeWidth + 'px'
+          element.style.height = box.resizeHeight + 'px'
+        }
+        element.dataset.resizeWidth = box.resizeWidth
+        element.dataset.resizeHeight = box.resizeHeight
+      })
+    },
+    moveWhileDragging: (state, { boxes }) => {
+      boxes.forEach(box => {
+        const element = document.querySelector(`.box[data-box-id="${box.id}"]`)
+        if (!element) { return }
+        if (element.dataset.isVisibleInViewport !== 'false') {
+          element.style.left = box.x + 'px'
+          element.style.top = box.y + 'px'
+        }
+        element.dataset.x = box.x
+        element.dataset.y = box.y
+      })
+    },
 
     // broadcast
 
-    // resizeBroadcast: (state, { box }) => {
-    //   const element = document.querySelector(`.box[data-box-id="${box.id}"]`)
-    //   element.style.width = box.resizeWidth + 'px'
-    //   element.style.height = box.resizeHeight + 'px'
-    // },
-    moveWhileDraggingBroadcast: (state, { boxes }) => {
-      boxes.forEach(box => {
-        const element = document.querySelector(`.box[data-box-id="${box.id}"]`)
-        element.style.left = box.x + 'px'
-        element.style.top = box.y + 'px'
-      })
-    },
     moveBroadcast: (state, { boxes }) => {
       boxes.forEach(updated => {
         const box = state.boxes[updated.id]
@@ -243,18 +259,22 @@ export default {
 
     resize: (context, { boxIds, delta }) => {
       let connections = []
+      let boxes = []
       boxIds.forEach(boxId => {
-        const box = context.getters.byId(boxId)
-        let width = box.resizeWidth
-        let height = box.resizeHeight
+        const rect = utils.boxElementDimensions({ id: boxId })
+        let width = rect.width
+        let height = rect.height
         width = width + delta.x
         height = height + delta.y
-        const updates = { id: boxId, resizeWidth: width, resizeHeight: height }
-        context.dispatch('update', updates)
-        context.dispatch('broadcast/update', { updates, type: 'resizeBox', handler: 'currentBoxes/update' }, { root: true })
+        const box = { id: boxId, resizeWidth: width, resizeHeight: height }
+        boxes.push(box)
         connections = connections.concat(context.rootGetters['currentConnections/byItemId'](box.id))
+        context.commit('currentUserIsResizingBox', true, { root: true })
+        context.commit('currentUserIsResizingBoxIds', [box.id], { root: true })
       })
+      context.commit('resizeWhileDragging', { boxes, shouldSnapToGrid: context.rootState.shouldSnapToGrid })
       context.dispatch('currentConnections/updatePathsWhileDragging', { connections }, { root: true })
+      context.dispatch('broadcast/update', { updates: { boxes }, type: 'resizeBoxes', handler: 'currentBoxes/resizeWhileDragging' }, { root: true })
     },
 
     // dimensions
@@ -286,16 +306,17 @@ export default {
     // snapping
 
     updateSnapGuides: (context, { boxes, cards }) => {
+      if (context.rootState.shouldSnapToGrid) { return }
       const snapThreshold = 6
       const spaceEdgeThreshold = 100
-      let targetBoxes = utils.clone(context.getters.all)
+      let targetBoxes = utils.clone(context.getters.isSelectableInViewport)
+      const prevSnapGuides = context.state.snapGuides
       let snapGuides = []
       let items
       if (cards) {
         cards = utils.clone(cards)
         cards = [ utils.boundaryRectFromItems(cards) ] // combine multiple selected cards
         items = cards
-        targetBoxes = targetBoxes.filter(box => !box.isLocked)
       } else if (boxes) {
         items = utils.clone(boxes)
       }
@@ -319,6 +340,7 @@ export default {
             min: targetBox.y + snapThreshold,
             max: targetBox.y + targetBox.height - snapThreshold
           })
+          // let time = 1
           // item sides
           const itemLeft = item.x
           const itemRight = item.x + item.width
@@ -335,25 +357,29 @@ export default {
           const isSnapLeftFromItemRight = Math.abs(itemRight - targetBoxLeft) <= snapThreshold
           const isSnapLeftFromItemLeft = Math.abs(itemLeft - targetBoxLeft) <= snapThreshold
           if (!targetBoxIsMinX && isBetweenTargetBoxPointsY && (isSnapLeftFromItemRight || isSnapLeftFromItemLeft)) {
-            snapGuides.push({ side: 'left', origin: item, target: targetBox })
+            const newSnapGuide = context.getters.newSnapGuide({ side: 'left', item, targetBox })
+            snapGuides.push(newSnapGuide)
           }
           // snap right
           const isSnapRightFromItemLeft = Math.abs(itemLeft - targetBoxRight) <= snapThreshold
           const isSnapRightFromItemRight = Math.abs(itemRight - targetBoxRight) <= snapThreshold
           if (isBetweenTargetBoxPointsY && (isSnapRightFromItemLeft || isSnapRightFromItemRight)) {
-            snapGuides.push({ side: 'right', origin: item, target: targetBox })
+            const newSnapGuide = context.getters.newSnapGuide({ side: 'right', item, targetBox })
+            snapGuides.push(newSnapGuide)
           }
           // snap top
           const isSnapTopFromItemBottom = Math.abs(itemBottom - targetBoxTop) <= snapThreshold
           const isSnapTopFromItemTop = Math.abs(itemTop - targetBoxTop) <= snapThreshold
           if (!targetBoxIsMinY && isBetweenTargetBoxPointsX && (isSnapTopFromItemBottom || isSnapTopFromItemTop)) {
-            snapGuides.push({ side: 'top', origin: item, target: targetBox })
+            const newSnapGuide = context.getters.newSnapGuide({ side: 'top', item, targetBox })
+            snapGuides.push(newSnapGuide)
           }
           // snap bottom
           const isSnapBottomFromItemTop = Math.abs(itemTop - targetBoxBottom) <= snapThreshold
           const isSnapBottomFromItemBottom = Math.abs(itemBottom - targetBoxBottom) <= snapThreshold
           if (isBetweenTargetBoxPointsX && (isSnapBottomFromItemTop || isSnapBottomFromItemBottom)) {
-            snapGuides.push({ side: 'bottom', origin: item, target: targetBox })
+            const newSnapGuide = context.getters.newSnapGuide({ side: 'bottom', item, targetBox })
+            snapGuides.push(newSnapGuide)
           }
         })
       })
@@ -446,20 +472,16 @@ export default {
 
     // move
 
-    // moveWhileDragging: (context, boxes) => {
-    //   boxes.forEach(box => {
-    //     const element = document.querySelector(`.box[data-box-id="${box.id}"]`)
-    //     element.style.left = box.x + 'px'
-    //     element.style.top = box.y + 'px'
-    //   })
-    //   context.dispatch('currentConnections/updatePathsWhileDragging', { connections }, { root: true })
-    // },
     move: (context, { endCursor, prevCursor, delta }) => {
       const zoom = context.rootGetters.spaceCounterZoomDecimal
       if (!endCursor || !prevCursor) { return }
       endCursor = {
         x: endCursor.x * zoom,
         y: endCursor.y * zoom
+      }
+      if (context.rootState.shouldSnapToGrid) {
+        prevCursor = utils.cursorPositionSnapToGrid(prevCursor)
+        endCursor = utils.cursorPositionSnapToGrid(endCursor)
       }
       delta = delta || {
         x: endCursor.x - prevCursor.x,
@@ -473,6 +495,8 @@ export default {
       let connections = []
       boxes.forEach(box => {
         if (!box) { return }
+        if (!box.x) { box.y = 0 }
+        if (!box.y) { box.y = 0 }
         if (box.x === 0) { delta.x = Math.max(0, delta.x) }
         if (box.y === 0) { delta.y = Math.max(0, delta.y) }
         connections = connections.concat(context.rootGetters['currentConnections/byItemId'](box.id))
@@ -512,14 +536,19 @@ export default {
           height: box.resizeHeight,
           id: box.id
         }
+        if (context.rootState.shouldSnapToGrid) {
+          const snapPosition = utils.cursorPositionSnapToGrid(box)
+          box.x = snapPosition.x
+          box.y = snapPosition.y
+        }
         prevMovePositions[box.id] = box
         return box
       })
       // update
-      context.commit('move', { boxes })
+      context.commit('moveWhileDragging', { boxes })
       context.commit('boxesWereDragged', true, { root: true })
       context.dispatch('currentConnections/updatePathsWhileDragging', { connections }, { root: true })
-      context.dispatch('broadcast/update', { updates: { boxes }, type: 'moveBoxes', handler: 'currentBoxes/moveWhileDraggingBroadcast' }, { root: true })
+      context.dispatch('broadcast/update', { updates: { boxes }, type: 'moveBoxes', handler: 'currentBoxes/moveWhileDragging' }, { root: true })
       context.dispatch('updateSnapGuides', { boxes })
     },
     afterMove: (context) => {
@@ -534,7 +563,7 @@ export default {
         if (!box) { return }
         box = utils.clone(box)
         if (!box) { return }
-        const position = utils.boxPositionFromElement(id)
+        const position = utils.boxElementDimensions({ id })
         box.x = position.x
         box.y = position.y
         const { x, y } = box
@@ -543,12 +572,7 @@ export default {
       boxes = boxes.filter(box => Boolean(box))
       context.commit('move', { boxes, spaceId })
       boxes = boxes.filter(box => box)
-      boxes.forEach(box => {
-        context.dispatch('api/addToQueue', {
-          name: 'updateBox',
-          body: box
-        }, { root: true })
-      })
+      context.dispatch('updateMultiple', boxes)
       const box = context.getters.byId(currentDraggingBoxId)
       context.dispatch('checkIfItemShouldIncreasePageSize', box, { root: true })
       context.dispatch('broadcast/update', { updates: { boxes }, type: 'moveBoxes', handler: 'currentBoxes/moveBroadcast' }, { root: true })
@@ -580,6 +604,7 @@ export default {
       let boxes = []
       elements.forEach(box => {
         if (box.dataset.isVisibleInViewport === 'false') { return }
+        if (box.dataset.isLocked === 'true') { return }
         boxes.push(box)
       })
       boxes = boxes.map(box => getters.byId(box.dataset.boxId))
@@ -591,6 +616,13 @@ export default {
       let boxIds = multipleSelectedIds.concat(currentDraggingId)
       boxIds = uniq(boxIds)
       boxIds = boxIds.filter(id => Boolean(id))
+      return boxIds
+    },
+    isResizingIds: (state, getters, rootState) => {
+      let boxIds = rootState.currentUserIsResizingBoxIds
+      if (getters.isSelectedIds.length) {
+        boxIds = getters.isSelectedIds
+      }
       return boxIds
     },
     isSelected: (state, getters) => {
@@ -611,6 +643,14 @@ export default {
       let colors = boxes.map(box => box.color)
       colors = colors.filter(color => Boolean(color))
       return uniq(colors)
+    },
+    newSnapGuide: (state) => ({ side, item, targetBox }) => {
+      let time = Date.now()
+      const prevGuide = state.snapGuides.find(guide => guide.side === side)
+      if (prevGuide) {
+        time = prevGuide.time
+      }
+      return { side, origin: item, target: targetBox, time }
     }
   }
 }

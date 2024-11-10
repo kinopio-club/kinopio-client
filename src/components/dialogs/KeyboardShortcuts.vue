@@ -33,6 +33,7 @@ const updateDialogHeight = async () => {
 
 const categories = computed(() => keyboardShortcutsCategories)
 const meta = computed(() => utils.metaKey())
+const option = computed(() => utils.optionKey())
 const currentUser = computed(() => store.state.currentUser)
 const isMobile = computed(() => utils.isMobile())
 const shouldUseLastConnectionType = computed(() => store.state.currentUser.shouldUseLastConnectionType)
@@ -197,8 +198,9 @@ dialog.keyboard-shortcuts(v-if="visible" :open="visible" @click.left.stop ref="d
         .row
           .badge.title
             img.icon(src="@/assets/constrain-axis.svg")
-            span Constrain Card Move to Axis
-          .badge.keyboard-shortcut Shift-Drag Card
+            span Snap Card or Box to Grid
+          .badge.keyboard-shortcut Shift-Drag Drag or Resize Item
+
       //- article
       //-   .row
       //-     .badge.title Focus Nearest Card
@@ -261,7 +263,7 @@ dialog.keyboard-shortcuts(v-if="visible" :open="visible" @click.left.stop ref="d
           .badge.title
             img.icon.box-icon(src="@/assets/box.svg")
             span Move Box Without Moving Cards
-          .badge.keyboard-shortcut Shift-Drag on Box
+          .badge.keyboard-shortcut {{option}}-Drag on Box
       article
         .row
           .badge.title

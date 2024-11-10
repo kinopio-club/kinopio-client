@@ -466,6 +466,10 @@ const updateStylesWithWidth = (styles) => {
   const cardHasUrlsOrMedia = cardHasMedia.value || cardHasUrls.value
   let cardMaxWidth = resizeWidth.value || props.card.maxWidth || consts.normalCardMaxWidth
   let cardWidth = resizeWidth.value
+  if (store.state.shouldSnapToGrid && currentCardIsBeingResized.value && cardWidth) {
+    cardMaxWidth = utils.roundToNearest(cardMaxWidth)
+    cardWidth = utils.roundToNearest(cardWidth)
+  }
   if (isComment.value) { return styles }
   styles.maxWidth = cardMaxWidth + 'px'
   styles.width = cardWidth + 'px'
@@ -1158,6 +1162,13 @@ const notifyPressAndHoldToDrag = () => {
   store.commit('hasNotifiedPressAndHoldToDrag', true)
 }
 
+// resize cards
+
+const currentCardIsBeingResized = computed(() => {
+  const cardIds = store.state.currentUserIsResizingCardIds
+  return cardIds.includes(props.card.id)
+})
+
 // touch locking to drag card
 
 const cancelLocking = () => {
@@ -1325,6 +1336,7 @@ const showCardDetails = (event) => {
   if (isMultiTouch) { return }
   if (store.state.currentUserIsPanningReady || store.state.currentUserIsPanning) { return }
   if (store.state.currentUserIsResizingBox || store.state.currentUserIsDraggingBox) { return }
+  if (store.state.shouldSnapToGrid) { return }
   if (!canEditCard.value) { store.commit('triggerReadOnlyJiggle') }
   const shouldToggleSelected = event.shiftKey && !store.state.cardsWereDragged && !isConnectingTo.value
   if (shouldToggleSelected) {

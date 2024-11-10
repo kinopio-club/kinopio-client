@@ -66,12 +66,14 @@ const closeAllDialogs = () => {
 
 const currentUserIsPaintingLocked = computed(() => store.state.currentUserIsPaintingLocked)
 const currentUserIsResizingCard = computed(() => store.state.currentUserIsResizingCard)
+const currentUserIsResizingBox = computed(() => store.state.currentUserIsResizingBox)
 const currentUserIsTiltingCard = computed(() => store.state.currentUserIsTiltingCard)
 const currentUserIsPanning = computed(() => store.state.currentUserIsPanning)
 const currentUserIsPanningReady = computed(() => store.state.currentUserIsPanningReady)
 const currentUserIsSignedIn = computed(() => store.getters['currentUser/isSignedIn'])
 const currentUserIsUpgraded = computed(() => store.state.currentUser.isUpgraded)
 const isTouchDevice = computed(() => store.state.isTouchDevice)
+const shouldSnapToGrid = computed(() => store.state.shouldSnapToGrid)
 
 // space
 
@@ -283,6 +285,8 @@ const changeSpaceAndSelectItems = (spaceId, items) => {
   store.commit('multipleSelectedItemsToLoad', items)
   changeSpace(spaceId)
 }
+const dragToResizeIsVisible = computed(() => currentUserIsResizingCard.value || currentUserIsResizingBox.value)
+const snapToGridIsVisible = computed(() => shouldSnapToGrid.value && !dragToResizeIsVisible.value)
 
 // read-only jiggle
 
@@ -332,7 +336,7 @@ aside.notifications(@click.left="closeAllDialogs")
           img.refresh.icon(src="@/assets/refresh.svg")
           span Refresh
 
-  .persistent-item.info(v-if="currentUserIsResizingCard")
+  .persistent-item.info(v-if="dragToResizeIsVisible")
     img.icon.resize(src="@/assets/resize.svg")
     span Drag to Resize
   .persistent-item.info(v-if="currentUserIsTiltingCard")
@@ -341,11 +345,15 @@ aside.notifications(@click.left="closeAllDialogs")
 
   .persistent-item.info(v-if="currentUserIsPaintingLocked && isTouchDevice")
     img.icon(src="@/assets/brush.svg")
-    span Hold and drag to paint
+    span Drag to paint
 
   .persistent-item.info(v-if="currentUserIsPanningReady || currentUserIsPanning")
     img.icon(src="@/assets/hand.svg")
-    span Hold and drag to pan
+    span Drag to pan
+
+  .persistent-item.info(v-if="snapToGridIsVisible")
+    img.icon(src="@/assets/constrain-axis.svg")
+    span Box select, snap to grid
 
   .persistent-item.success(v-if="notifyThanksForDonating")
     p Thank you for being a
@@ -464,8 +472,8 @@ aside.notifications(@click.left="closeAllDialogs")
 
   .persistent-item.info(v-if="currentSpaceIsTemplate" ref="templateElement" :class="{'notification-jiggle': state.readOnlyJiggle}")
     button.button-only(@click.left="duplicateSpace")
-      img.icon(src="@/assets/add.svg")
-      span Duplicate to Edit
+      img.icon(src="@/assets/duplicate.svg")
+      span Duplicate Space
 
   .item.success(v-if="notifyMoveOrCopyToSpace" @animationend="resetNotifyMoveOrCopyToSpace")
     p {{notifyMoveOrCopyToSpaceDetails.message}}

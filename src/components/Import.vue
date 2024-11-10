@@ -14,7 +14,7 @@ const store = useStore()
 
 const inputElement = ref(null)
 
-const emit = defineEmits(['updateSpaces', 'closeDialog'])
+const emit = defineEmits(['updateSpaces'])
 
 const props = defineProps({
   visible: Boolean
@@ -237,7 +237,6 @@ const importSpace = async (space) => {
 }
 const updateSpaces = () => {
   emit('updateSpaces')
-  emit('closeDialog')
 }
 </script>
 

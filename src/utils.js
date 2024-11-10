@@ -211,6 +211,13 @@ export default {
     }
     return position
   },
+  cursorPositionSnapToGrid (position) {
+    const gridSpacing = consts.spaceBetweenCards
+    return {
+      x: this.roundToNearest(position.x, gridSpacing),
+      y: this.roundToNearest(position.y, gridSpacing)
+    }
+  },
   rectDimensions (rect) {
     const zoom = this.spaceCounterZoomDecimal() || 1
     rect.x = rect.x + window.scrollX
@@ -373,6 +380,12 @@ export default {
     // returns 1.23
     return Math.round(number * 100) / 100
   },
+  roundToNearest (value, divider) {
+    divider = divider || consts.spaceBetweenCards
+    value = value || 1
+    const increment = Math.round(value / divider)
+    return increment * divider
+  },
   pointIsEmpty (point) {
     if (!point) { return }
     if (point.x === 0 && point.y === 0) { return true }
@@ -521,6 +534,13 @@ export default {
       return '⌘'
     } else {
       return 'Ctrl'
+    }
+  },
+  optionKey () {
+    if (this.isMacOrIpad() || this.isIPhone()) {
+      return 'Option'
+    } else {
+      return 'Alt'
     }
   },
   splitCardNameByParagraphAndSentence (prevName) {

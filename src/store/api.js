@@ -155,8 +155,10 @@ const self = {
 
     addToQueue: (context, { name, body, spaceId }) => {
       body = utils.clone(body)
-      body.spaceId = spaceId || context.rootState.currentSpace.id
       body.operationId = nanoid()
+      body.spaceId = spaceId || context.rootState.currentSpace.id
+      body.userId = context.rootState.currentUser.id
+      body.clientCreatedAt = new Date()
       const isSignedIn = context.rootGetters['currentUser/isSignedIn']
       const canEditSpace = context.rootGetters['currentUser/canEditSpace']()
       if (!isSignedIn) { return }
@@ -1270,6 +1272,20 @@ const self = {
         return normalizeResponse(response)
       } catch (error) {
         context.dispatch('handleServerError', { name: 'deleteGroupPermanent', error })
+      }
+    },
+    sendAnalyticsEvent: async (context, body) => {
+      try {
+        const headers = new Headers({
+          'Content-Type': 'application/json'
+        })
+        const response = await fetch(`${consts.apiHost()}/services/analytics-event`, {
+          headers,
+          method: 'POST',
+          body: JSON.stringify(body)
+        })
+      } catch (error) {
+        console.error('🚒 sendAnalyticsEvent', error)
       }
     }
   }

@@ -33,6 +33,7 @@ store.dispatch('currentUser/init')
 store.dispatch('currentSpace/init')
 store.commit('broadcast/connect')
 store.dispatch('groups/init')
+store.dispatch('analytics/event', 'pageview')
 
 onMounted(() => {
   // bind events to window to receive events when mouse is outside window
@@ -119,12 +120,18 @@ watch(() => store.state.currentUserIsDraggingCard, (value, prevValue) => {
 })
 watch(() => store.state.currentUserIsResizingCard, (value, prevValue) => {
   updatePageSizeFromMutation(value)
+  if (prevValue && !value) {
+    afterResizeCards()
+  }
 })
 watch(() => store.state.currentUserIsDraggingBox, (value, prevValue) => {
   updatePageSizeFromMutation(value)
 })
 watch(() => store.state.currentUserIsResizingBox, (value, prevValue) => {
   updatePageSizeFromMutation(value)
+  if (prevValue && !value) {
+    afterResizeBoxes()
+  }
 })
 const updatePageSizeFromMutation = (value) => {
   if (!value) {
@@ -221,7 +228,7 @@ const stopTiltingCards = () => {
 const resizeCards = () => {
   if (!prevCursor) { return }
   const cardIds = store.state.currentUserIsResizingCardIds
-  const deltaX = endCursor.x - prevCursor.x
+  let deltaX = endCursor.x - prevCursor.x
   store.dispatch('currentCards/resize', { cardIds, deltaX })
 }
 const stopResizingCards = () => {
@@ -233,6 +240,16 @@ const stopResizingCards = () => {
   store.commit('currentUserIsResizingCard', false)
   store.dispatch('currentCards/updateDimensions', { cards })
   store.commit('broadcast/updateStore', { updates: { userId: currentUser.value.id }, type: 'removeRemoteUserResizingCards' })
+}
+const afterResizeCards = () => {
+  if (!store.state.shouldSnapToGrid) { return }
+  const cardIds = store.state.currentUserIsResizingCardIds
+  const cards = cardIds.map(cardId => {
+    let { id, resizeWidth } = store.getters['currentCards/byId'](cardId)
+    resizeWidth = utils.roundToNearest(resizeWidth)
+    return { id, resizeWidth }
+  })
+  store.dispatch('currentCards/updateMultiple', cards)
 }
 const addCardFromOutsideAppContext = (event) => {
   if (!consts.isSecureAppContext) { return }
@@ -248,7 +265,7 @@ const addCardFromOutsideAppContext = (event) => {
 
 const resizeBoxes = () => {
   if (!prevCursor) { return }
-  const boxIds = store.state.currentUserIsResizingBoxIds
+  const boxIds = store.getters['currentBoxes/isResizingIds']
   const zoom = store.getters.spaceCounterZoomDecimal
   let delta = {
     x: endCursor.x - prevCursor.x,
@@ -263,7 +280,7 @@ const resizeBoxes = () => {
 const stopResizingBoxes = () => {
   if (!store.state.currentUserIsResizingBox) { return }
   store.dispatch('history/resume')
-  const boxIds = store.state.currentUserIsResizingBoxIds
+  const boxIds = store.getters['currentBoxes/isResizingIds']
   const boxes = boxIds.map(id => store.getters['currentBoxes/byId'](id))
   store.dispatch('currentConnections/updateMultiplePaths', boxes)
   store.dispatch('history/add', { boxes, useSnapshot: true })
@@ -272,11 +289,29 @@ const stopResizingBoxes = () => {
   store.commit('broadcast/updateStore', { updates: { userId: currentUser.value.id }, type: 'removeRemoteUserResizingBoxes' })
   store.dispatch('checkIfItemShouldIncreasePageSize', boxes[0])
 }
+const afterResizeBoxes = () => {
+  const boxIds = store.getters['currentBoxes/isResizingIds']
+  const boxes = boxIds.map(boxId => {
+    let { resizeWidth, resizeHeight } = utils.boxElementDimensions({ id: boxId })
+    if (store.state.shouldSnapToGrid) {
+      resizeWidth = utils.roundToNearest(resizeWidth)
+      resizeHeight = utils.roundToNearest(resizeHeight)
+    }
+    return { id: boxId, resizeWidth, resizeHeight }
+  })
+  store.dispatch('currentBoxes/updateMultiple', boxes)
+}
 const checkIfShouldSnapBoxes = () => {
   if (!store.state.boxesWereDragged) { return }
   const snapGuides = store.state.currentBoxes.snapGuides
   if (!snapGuides.length) { return }
-  snapGuides.forEach(snapGuide => store.dispatch('currentBoxes/snap', snapGuide))
+
+  snapGuides.forEach(snapGuide => {
+    const elapsedTime = Date.now() - snapGuide.time
+    const shouldSnap = elapsedTime >= consts.boxSnapGuideWaitingDuration
+    if (!shouldSnap) { return }
+    store.dispatch('currentBoxes/snap', snapGuide)
+  })
 }
 const checkIfShouldExpandBoxes = () => {
   if (!store.state.cardsWereDragged) { return }
@@ -360,6 +395,7 @@ const showMultipleSelectedActions = (event) => {
 
 const isInteracting = computed(() => {
   if (isDraggingCard.value || isDrawingConnection.value || isResizingCard.value || isResizingBox.value || isDraggingBox.value) {
+    store.commit('preventMultipleSelectedActionsIsVisible', true)
     return true
   } else { return false }
 })
@@ -389,32 +425,22 @@ const initInteractions = (event) => {
   if (spaceIsReadOnly.value) { return }
   state.startCursor = utils.cursorPositionInViewport(event)
 }
-const constrainCursorToAxis = (event) => {
-  if (store.state.currentUserIsDraggingBox) { return }
-  if (!event.shiftKey) { return }
-  const delta = {
-    x: Math.abs(endCursor.x - state.startCursor.x),
-    y: Math.abs(endCursor.y - state.startCursor.y)
-  }
-  if (delta.x > delta.y) {
-    endCursor.y = prevCursor.y
-  } else {
-    endCursor.x = prevCursor.x
-  }
+const updateShouldSnapToGrid = (event) => {
+  store.commit('shouldSnapToGrid', event.shiftKey)
 }
 const interact = (event) => {
   endCursor = utils.cursorPositionInViewport(event)
-  if (isDraggingCard.value || isDraggingBox.value) {
-    constrainCursorToAxis(event)
+  updateShouldSnapToGrid(event)
+  if (isDraggingCard.value) {
     dragItems()
-  }
-  if (isResizingCard.value) {
+  } else if (isDraggingBox.value) {
+    store.commit('currentDraggingCardId', '')
+    dragItems()
+  } else if (isResizingCard.value) {
     resizeCards()
-  }
-  if (isTiltingCard.value) {
+  } else if (isTiltingCard.value) {
     tiltCards()
-  }
-  if (isResizingBox.value) {
+  } else if (isResizingBox.value) {
     resizeBoxes()
   }
   prevCursor = utils.cursorPositionInViewport(event)
@@ -440,6 +466,7 @@ const cursor = () => {
     x: cursor.x * zoom,
     y: cursor.y * zoom
   }
+  // if shift key held down
   return cursor
 }
 const eventIsFromTextarea = (event) => {
@@ -515,6 +542,7 @@ const stopInteractions = async (event) => {
   await nextTick()
   await nextTick()
   store.commit('clearShouldExplicitlyRenderCardIds', null, { root: true })
+  store.commit('shouldSnapToGrid', false)
 }
 
 </script>

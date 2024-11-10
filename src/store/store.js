@@ -15,6 +15,7 @@ import upload from '@/store/upload.js'
 import userNotifications from '@/store/userNotifications.js'
 import groups from '@/store/groups.js'
 import themes from '@/store/themes.js'
+import analytics from '@/store/analytics.js'
 // store plugins
 import websocket from '@/store/plugins/websocket.js'
 
@@ -157,6 +158,9 @@ const store = createStore({
     userDetailsIsVisible: false,
     userDetailsPosition: {}, // x, y, shouldIgnoreZoom
     userDetailsUser: {},
+
+    // draggingItems
+    shouldSnapToGrid: false,
 
     // multiple selection
     multipleSelectedActionsIsVisible: false,
@@ -364,6 +368,7 @@ const store = createStore({
       state.spaceUserListIsVisible = false
       state.importArenaChannelIsVisible = false
       state.groupsIsVisible = false
+      state.shouldSnapToGrid = false
     },
     isOnline: (state, value) => {
       utils.typeCheck({ value, type: 'boolean' })
@@ -1021,6 +1026,13 @@ const store = createStore({
       state.preventDraggedBoxFromShowingDetails = value
     },
 
+    // Dragging Items
+
+    shouldSnapToGrid: (state, value) => {
+      utils.typeCheck({ value, type: 'boolean' })
+      state.shouldSnapToGrid = value
+    },
+
     // User Details
 
     userDetailsIsVisible: (state, value) => {
@@ -1302,9 +1314,9 @@ const store = createStore({
 
     // multiple boxes
 
-    multipleBoxesSelectedIds: (state, cardIds) => {
-      utils.typeCheck({ value: cardIds, type: 'array' })
-      state.multipleBoxesSelectedIds = cardIds
+    multipleBoxesSelectedIds: (state, boxIds) => {
+      utils.typeCheck({ value: boxIds, type: 'array' })
+      state.multipleBoxesSelectedIds = boxIds
     },
     addToMultipleBoxesSelected: (state, boxId) => {
       utils.typeCheck({ value: boxId, type: 'string' })
@@ -2088,7 +2100,8 @@ const store = createStore({
     upload,
     userNotifications,
     groups,
-    themes
+    themes,
+    analytics
   },
   plugins: [websocket()]
 })

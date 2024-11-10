@@ -9,7 +9,7 @@ const store = useStore()
 
 const dialogElement = ref(null)
 
-const emit = defineEmits(['updateSpaces', 'closeDialog'])
+const emit = defineEmits(['updateSpaces'])
 
 onMounted(() => {
   window.addEventListener('resize', updateDialogHeight)
@@ -23,12 +23,18 @@ const props = defineProps({
 watch(() => props.visible, (value, prevValue) => {
   if (value) {
     updateDialogHeight()
-    init()
   }
+})
+watch(() => props.isExport, (value, prevValue) => {
+  state.isExport = value
+})
+watch(() => props.isImport, (value, prevValue) => {
+  state.isImport = value
 })
 
 const state = reactive({
   isImport: true,
+  isExport: false,
   dialogHeight: null
 })
 
@@ -41,35 +47,17 @@ const updateDialogHeight = async () => {
 // const closeChildDialogs = () => {
 //   store.commit('triggerCloseChildDialogs')
 // }
-const init = () => {
-  if (props.isExport) {
-    state.isImport = false
-  }
-  console.log(props.isImport)
-  if (props.isImport) {
-    state.isImport = true
-  }
-}
-const updateIsImport = (value) => {
-  state.isImport = value
-}
 const updateSpaces = () => {
   emit('updateSpaces')
-}
-const closeDialog = () => {
-  // emit('closeDialog')
 }
 </script>
 
 <template lang="pug">
 dialog.narrow.import-export(v-if="visible" :open="visible" @click.left.stop ref="dialogElement" :style="{'max-height': state.dialogHeight + 'px'}")
   section
-    .segmented-buttons
-      button(:class="{active: state.isImport}" @click="updateIsImport(true)")
-        span Import
-      button(:class="{active: !state.isImport}" @click="updateIsImport(false)")
-        span Export
-  Import(:visible="state.isImport" @updateSpaces="updateSpaces" @closeDialog="closeDialog")
+    span(v-if="state.isImport") Import
+    span(v-if="state.isExport") Export
+  Import(:visible="state.isImport" @updateSpaces="updateSpaces")
   Export(:visible="!state.isImport" @updateSpaces="updateSpaces")
 </template>
 
