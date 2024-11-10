@@ -63,13 +63,13 @@ const normalizeDisplayItems = (items, shouldShowUsersButton) => {
 
 const members = computed(() => {
   const groupUsers = store.getters['currentCards/groupUsersWhoAddedCards']
-  let items = utils.clone(currentSpace.value.users)
-  items = items.concat(currentSpace.value.collaborators)
+  let members = utils.clone(currentSpace.value.users)
+  members = members.concat(currentSpace.value.collaborators)
   if (groupUsers) {
-    items = items.concat(groupUsers)
+    members = members.concat(groupUsers)
   }
-  items = appendCurrentUser(items)
-  return items
+  members = appendCurrentUser(members)
+  return members
 })
 watch(() => members.value, (value, prevValue) => {
   updateShouldShowUsersButton()
@@ -82,21 +82,21 @@ const membersDisplay = computed(() => {
 
 const spectators = computed(() => {
   const groupUsers = store.getters['currentCards/groupUsersWhoAddedCards']
-  let items = utils.clone(currentSpace.value.spectators)
+  let spectators = utils.clone(currentSpace.value.spectators)
   // if not a space member, currentUser is specatator
   if (!currentUserIsSpaceMember.value) {
     const user = utils.clone(store.state.currentUser)
-    items.push(user)
-    items = appendCurrentUser(items)
+    spectators.push(user)
+    spectators = appendCurrentUser(spectators)
   }
   // group users who's added cards show as members, not spectators
   if (groupUsers) {
-    items = items.filter(item => {
+    spectators = spectators.filter(item => {
       const isContributor = groupUsers.find(contributor => contributor.id === item.id)
       return !isContributor
     })
   }
-  return items
+  return spectators
 })
 watch(() => spectators.value, (value, prevValue) => {
   updateShouldShowUsersButton()
