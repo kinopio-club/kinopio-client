@@ -1,7 +1,7 @@
 // local storage cache interface for currentUser and spaces
 
 import debounce from 'lodash-es/debounce'
-import idb from 'idb-keyval' // { get, set, delMany, clear, keys }
+import * as idb from 'idb-keyval'
 
 import utils from '@/utils.js'
 
@@ -17,7 +17,6 @@ export default {
       if (showDebugMessages) {
         console.log('🏬 storeLocal', key, value)
       }
-      // window.localStorage.setItem(key, value)
       await idb.set(key, value)
     } catch (error) {
       showDebugMessages = true
