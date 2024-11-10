@@ -160,8 +160,8 @@ const styles = computed(() => {
   }
   // dimensions set by currentBoxes/resize while resizing
   if (isResizing.value) {
-    delete normalizedBox.value.resizeWidth // eslint-disable-line vue/no-side-effects-in-computed-properties
-    delete normalizedBox.value.resizeHeight // eslint-disable-line vue/no-side-effects-in-computed-properties
+    styles.width = normalizedBox.value.resizeWidth
+    styles.height = normalizedBox.value.resizeHeight
   }
   return styles
 })
