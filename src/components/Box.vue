@@ -158,6 +158,11 @@ const styles = computed(() => {
     height: height + 'px',
     border: `${borderWidth}px solid ${color.value}`
   }
+  // dimensions set by currentBoxes/resize while resizing
+  if (isResizing.value) {
+    delete normalizedBox.value.resizeWidth // eslint-disable-line vue/no-side-effects-in-computed-properties
+    delete normalizedBox.value.resizeHeight // eslint-disable-line vue/no-side-effects-in-computed-properties
+  }
   return styles
 })
 const userColor = computed(() => store.state.currentUser.color)
@@ -235,10 +240,6 @@ const startResizing = (event) => {
 const resizeColorClass = computed(() => {
   const colorClass = utils.colorClasses({ backgroundColorIsDark: colorIsDark.value })
   return [colorClass]
-})
-const currentBoxIsBeingResized = computed(() => {
-  const boxIds = store.state.currentUserIsResizingBoxIds
-  return boxIds.includes(props.box.id)
 })
 
 // shrink
