@@ -68,6 +68,8 @@ export default {
       if (!userCanEdit) { return }
       const userId = context.rootState.currentUser.id
       let recipientUserIds = context.getters.recipientUserIds
+      console.error('☎️☎️recipientUserIds', recipientUserIds)
+
       if (!recipientUserIds.length) { return }
       const notification = {
         type, // 'createCard' or 'updateCard'
@@ -76,7 +78,7 @@ export default {
         recipientUserIds,
         spaceId: context.state.id
       }
-      console.error('recipientUserIds', recipientUserIds, notification)
+      console.error('☎️☎️☎️', recipientUserIds, notification)
 
       context.dispatch('api/addToQueue', { name: 'createUserNotification', body: notification }, { root: true })
       notifiedCardIds.push(cardId)
@@ -122,6 +124,8 @@ export default {
       // exclude currently connected recipients
       recipients = recipients.filter(userId => userId !== currentUserId)
       recipients = recipients.filter(userId => Boolean(userId))
+      console.error('☎️recipientUserIds', recipients, groupUsers)
+
       return recipients
     }
   }
