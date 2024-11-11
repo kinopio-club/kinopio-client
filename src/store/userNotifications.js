@@ -117,7 +117,7 @@ export default {
       // group users who added cards
       let groupUsers = rootGetters['currentCards/groupUsersWhoAddedCards'] || []
       groupUsers = groupUsers.map(user => user.id)
-      recipients.concat(groupUsers)
+      recipients = recipients.concat(groupUsers)
 
       recipients = uniq(recipients)
       console.error('🐸🐸recipientUserIds', recipients, groupUsers)
