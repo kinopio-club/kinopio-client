@@ -120,6 +120,7 @@ export default {
       // exclude currently connected recipients
       recipients = recipients.filter(userId => userId !== currentUserId)
       recipients = recipients.filter(userId => Boolean(userId))
+      console.error('recipientUserIds', groupUsers, recipients)
       return recipients
     }
   }
