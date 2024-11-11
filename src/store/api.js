@@ -154,6 +154,7 @@ const self = {
     // Queue Operations
 
     addToQueue: (context, { name, body, spaceId }) => {
+      console.log('🌺addToQueue', name)
       body = utils.clone(body)
       body.operationId = nanoid()
       body.spaceId = spaceId || context.rootState.currentSpace.id
@@ -175,7 +176,7 @@ const self = {
       } else {
         queue.push(request)
       }
-      console.log('addToQueue', name, body, spaceId, queue, 'request🎃', request)
+      console.log('🌺🌺 addToQueue', name, body, spaceId, queue, 'request🎃', request)
       cache.saveQueue(queue)
       context.dispatch('debouncedSendQueue')
     },
