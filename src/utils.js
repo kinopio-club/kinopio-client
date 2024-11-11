@@ -1370,7 +1370,10 @@ export default {
 
   spaceIsUnchanged (prevSpace, newSpace) {
     if (!prevSpace.cards || !prevSpace.connections) { return false }
-    return prevSpace.editedAt === newSpace.editedAt
+    const cardsCountIsUnchanged = prevSpace.cards.length === newSpace.cards.length
+    const boxesCountIsUnchanged = prevSpace.boxes.length === newSpace.boxes.length
+    const editedAtIsUnchanged = prevSpace.editedAt === newSpace.editedAt
+    return cardsCountIsUnchanged && boxesCountIsUnchanged && editedAtIsUnchanged
   },
   mergeSpaceKeyValues ({ prevItems, newItems, selectedItemIds }) {
     prevItems = prevItems.filter(item => Boolean(item))
