@@ -115,14 +115,12 @@ export default {
         recipients = members.concat(contributors)
       }
       // group users who added cards
-      let groupUsers = rootGetters['currentCards/groupUsersWhoAddedCards']
-      if (groupUsers) {
-        groupUsers = groupUsers.map(user => user.id)
-        recipients.concat(groupUsers)
-      }
+      let groupUsers = rootGetters['currentCards/groupUsersWhoAddedCards'] || []
+      groupUsers = groupUsers.map(user => user.id)
+      recipients.concat(groupUsers)
 
       recipients = uniq(recipients)
-      console.error('🐸🐸recipientUserIds', recipients)
+      console.error('🐸🐸recipientUserIds', recipients, groupUsers)
 
       // exclude currently connected recipients
       recipients = recipients.filter(userId => userId !== currentUserId)
