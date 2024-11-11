@@ -175,6 +175,7 @@ const self = {
       } else {
         queue.push(request)
       }
+      console.log('addToQueue', name, body, spaceId, queue, 'request🎃', request)
       cache.saveQueue(queue)
       context.dispatch('debouncedSendQueue')
     },
