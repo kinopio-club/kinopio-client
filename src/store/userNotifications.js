@@ -120,7 +120,10 @@ export default {
         groupUsers = groupUsers.map(user => user.id)
         recipients.concat(groupUsers)
       }
+
       recipients = uniq(recipients)
+      console.error('🐸🐸recipientUserIds', recipients)
+
       // exclude currently connected recipients
       recipients = recipients.filter(userId => userId !== currentUserId)
       recipients = recipients.filter(userId => Boolean(userId))
