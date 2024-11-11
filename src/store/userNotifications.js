@@ -76,6 +76,8 @@ export default {
         recipientUserIds,
         spaceId: context.state.id
       }
+      console.error('recipientUserIds', recipientUserIds, notification)
+
       context.dispatch('api/addToQueue', { name: 'createUserNotification', body: notification }, { root: true })
       notifiedCardIds.push(cardId)
     },
@@ -120,7 +122,6 @@ export default {
       // exclude currently connected recipients
       recipients = recipients.filter(userId => userId !== currentUserId)
       recipients = recipients.filter(userId => Boolean(userId))
-      console.error('recipientUserIds', groupUsers, recipients)
       return recipients
     }
   }
