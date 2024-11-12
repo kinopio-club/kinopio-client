@@ -85,6 +85,7 @@ const props = defineProps({
   search: String,
   parentDialog: String,
   previewImageIsWide: Boolean,
+  hidePreviewImage: Boolean,
   showSpaceGroups: Boolean
 })
 
@@ -433,8 +434,9 @@ span.space-list-wrap
               User(:user="user(space)" :isClickable="false" :key="user(space).id" :isMedium="true")
 
             //- preview image
-            .preview-thumbnail-image-wrap(v-if="space.previewThumbnailImage && isOnline" :class="{wide: previewImageIsWide}")
-              img.preview-thumbnail-image(:src="space.previewThumbnailImage" loading="lazy")
+            template(v-if="!props.hidePreviewImage")
+              .preview-thumbnail-image-wrap(v-if="space.previewThumbnailImage && isOnline" :class="{wide: previewImageIsWide}")
+                img.preview-thumbnail-image(:src="space.previewThumbnailImage" loading="lazy")
             //- group
             template(v-if="group(space.groupId) && props.showSpaceGroups")
               GroupLabel(:group="group(space.groupId)")

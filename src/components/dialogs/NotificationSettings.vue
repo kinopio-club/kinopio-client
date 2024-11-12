@@ -119,6 +119,7 @@ dialog.narrow.notification-settings(v-if="props.visible" :open="props.visible" @
           @checkmarkSpace="resubscribeToSpace"
           :disableListOptimizations="true"
           :parentDialog="parentDialog"
+          :hidePreviewImage="true"
         )
 </template>
 
