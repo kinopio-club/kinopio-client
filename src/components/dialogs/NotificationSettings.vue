@@ -4,6 +4,7 @@ import { useStore } from 'vuex'
 
 import Loader from '@/components/Loader.vue'
 import SpaceList from '@/components/SpaceList.vue'
+import GroupList from '@/components/GroupList.vue'
 import utils from '@/utils.js'
 
 const store = useStore()
@@ -20,13 +21,14 @@ const props = defineProps({
 const state = reactive({
   dialogHeight: null,
   unsubscribedSpaces: [],
+  unsubscribedGroups: [],
   isLoading: true
 })
 
 watch(() => props.visible, (value, prevValue) => {
   if (value) {
     updateDialogHeight()
-    updateUnsubscribedSpaces()
+    updateUnsubscribed()
     // updateUnsubscribedGroups()
   }
 })
@@ -62,11 +64,17 @@ const triggerSignUpOrInIsVisible = () => {
   store.commit('triggerSignUpOrInIsVisible')
 }
 
-// spaces
+// items
 
-const updateUnsubscribedSpaces = async () => {
-  state.isLoading = true
-  state.unsubscribedSpaces = await store.dispatch('api/getSpacesNotificationUnsubscribed')
+const updateUnsubscribed = async () => {
+  try {
+    state.isLoading = true
+    state.unsubscribedSpaces = await store.dispatch('api/getSpacesNotificationUnsubscribed')
+    state.unsubscribedGroups = await store.dispatch('api/getGroupsNotificationUnsubscribed')
+    console.log(state.unsubscribedGroups)
+  } catch (error) {
+    console.error('🚒 updateUnsubscribed', error)
+  }
   state.isLoading = false
 }
 const resubscribeToSpace = (space) => {
@@ -74,8 +82,10 @@ const resubscribeToSpace = (space) => {
   store.dispatch('api/spaceNotificationResubscribe', space)
   store.commit('addNotification', { message: `Resubscribed to notifications from ${space.name}`, type: 'success' })
 }
-const changeSpace = (space) => {
-  store.dispatch('currentSpace/changeSpace', space)
+const resubscribeToGroup = (event, group) => {
+  state.unsubscribedGroups = state.unsubscribedGroups.filter(item => item.id !== group.id)
+  store.dispatch('api/groupNotificationResubscribe', group)
+  store.commit('addNotification', { message: `Resubscribed to notifications from ${group.name}`, type: 'success' })
 }
 </script>
 
@@ -109,17 +119,19 @@ dialog.narrow.notification-settings(v-if="props.visible" :open="props.visible" @
           span Email Notifications
       Loader(:visible="state.isLoading")
 
-      template(v-if="state.unsubscribedSpaces.length")
+      template(v-if="state.unsubscribedSpaces.length || state.unsubscribedGroups.length")
         .row Resubscribe to:
         SpaceList(
           :spaces="state.unsubscribedSpaces"
           :showUser="true"
-          @selectSpace="changeSpace"
-          :showCheckmarkSpace="true"
-          @checkmarkSpace="resubscribeToSpace"
+          @selectSpace="resubscribeToSpace"
           :disableListOptimizations="true"
           :parentDialog="parentDialog"
           :hidePreviewImage="true"
+        )
+        GroupList(
+          :groups="state.unsubscribedGroups"
+          @selectGroup="resubscribeToGroup"
         )
 </template>
 

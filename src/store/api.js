@@ -468,6 +468,18 @@ const self = {
         context.dispatch('handleServerError', { name: 'getSpacesNotificationUnsubscribed', error })
       }
     },
+    getGroupsNotificationUnsubscribed: async (context) => {
+      const apiKey = context.rootState.currentUser.apiKey
+      const isOnline = context.rootState.isOnline
+      if (!shouldRequest({ apiKey, isOnline })) { return }
+      try {
+        const options = await context.dispatch('requestOptions', { method: 'GET', space: context.rootState.currentSpace })
+        const response = await fetch(`${consts.apiHost()}/user/groups-notification-unsubscribed`, options)
+        return normalizeResponse(response)
+      } catch (error) {
+        context.dispatch('handleServerError', { name: 'getGroupsNotificationUnsubscribed', error })
+      }
+    },
     spaceNotificationResubscribe: async (context, space) => {
       const apiKey = context.rootState.currentUser.apiKey
       const user = context.rootState.currentUser
@@ -479,6 +491,19 @@ const self = {
         return normalizeResponse(response)
       } catch (error) {
         context.dispatch('handleServerError', { name: 'spaceNotificationResubscribe', error })
+      }
+    },
+    groupNotificationResubscribe: async (context, group) => {
+      const apiKey = context.rootState.currentUser.apiKey
+      const user = context.rootState.currentUser
+      const isOnline = context.rootState.isOnline
+      if (!shouldRequest({ apiKey, isOnline })) { return }
+      try {
+        const options = await context.dispatch('requestOptions', { method: 'GET', space: context.rootState.currentSpace })
+        const response = await fetch(`${consts.apiHost()}/group/${group.id}/notification-resubscribe?userId=${user.id}`, options)
+        return normalizeResponse(response)
+      } catch (error) {
+        context.dispatch('handleServerError', { name: 'groupNotificationResubscribe', error })
       }
     },
     deleteUserPermanent: async (context) => {

@@ -60,7 +60,7 @@ onBeforeUnmount(() => {
   spaceListElement.value.closest('section').removeEventListener('scroll', updateScroll)
 })
 
-const emit = defineEmits(['focusBeforeFirstItem', 'closeDialog', 'selectSpace', 'checkmarkSpace'])
+const emit = defineEmits(['focusBeforeFirstItem', 'closeDialog', 'selectSpace'])
 
 const props = defineProps({
   spaces: Array,
@@ -75,7 +75,6 @@ const props = defineProps({
   isLoading: Boolean,
   parentIsSpaceDetails: Boolean,
   parentIsPinned: Boolean,
-  showCheckmarkSpace: Boolean,
   userShowInExploreDate: String,
   readSpaceIds: Array,
   spaceReadDateType: String,
@@ -368,10 +367,6 @@ const selectItemFromFilter = () => {
   store.commit('shouldPreventNextEnterKey', true)
   selectSpace(null, space)
 }
-const checkmarkSpace = (space) => {
-  shouldPreventSelectSpace = true
-  emit('checkmarkSpace', space)
-}
 
 // group
 
@@ -467,8 +462,6 @@ span.space-list-wrap
               template(v-if='space.privacy')
                 PrivacyIcon(:privacy="space.privacy" :closedIsNotVisible="true")
               img.icon.sunglasses(src="@/assets/sunglasses.svg" v-if="showInExplore(space)" title="Shown in Explore")
-            button.button-checkmark.small-button(v-if="showCheckmarkSpace" @mousedown.left.stop="checkmarkSpace(space)" @touchstart.stop="checkmarkSpace(space)")
-              img.icon.checkmark(src="@/assets/checkmark.svg")
             //- new
             .badge.info.inline-badge.new-unread-badge(v-if="isNew(space)")
 </template>
@@ -544,13 +537,6 @@ span.space-list-wrap
       padding 0
       min-width initial
       min-height initial
-
-    .button-checkmark
-      margin-left auto
-
-    .checkmark
-      vertical-align 3px
-      width 12px
 
     li
       position relative

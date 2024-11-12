@@ -25,7 +25,6 @@ const groupIsSelected = (group) => {
 const groupDetailsIsVisible = (group) => {
   return group.id === props.groupDetailsIsVisibleForGroupId
 }
-
 </script>
 
 <template lang="pug">
