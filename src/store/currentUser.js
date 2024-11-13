@@ -992,7 +992,8 @@ export default {
       const tagNames = rootState.filteredTagNames
       const connections = rootState.filteredConnectionTypeIds
       const frames = rootState.filteredFrameIds
-      return userFilters + tagNames.length + connections.length + frames.length
+      const boxes = rootState.filteredBoxIds
+      return userFilters + tagNames.length + connections.length + frames.length + boxes.length
     },
 
     // AI Images
