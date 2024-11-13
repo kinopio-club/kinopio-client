@@ -1457,12 +1457,13 @@ export default {
       groupId: null
     }
   },
-  clearSpaceMeta (space, type) {
+  resetSpaceMeta ({ space, user, type }) {
     space.originSpaceId = space.id
     space.id = nanoid()
     space.name = `${space.name} ${type}`
     space.removedCards = []
-    space.users = []
+    space.users = [user]
+    space.userId = user.id
     space.collaborators = []
     space.showInExplore = false
     space.proposedShowInExplore = false
@@ -1473,16 +1474,16 @@ export default {
     space.previewImage = null
     space.previewThumbnailImage = null
     space.groupId = null
+    space.createdAt = new Date()
+    space.editedAt = new Date()
+    space.collaboratorKey = nanoid()
+    space.readOnlyKey = nanoid()
     space.cards = space.cards.map(card => {
-      card.userId = null
-      if (card.nameUpdatedByUserId) {
-        card.nameUpdatedByUserId = null
-        card.nameUpdatedAt = null
-      }
       card.width = Math.ceil(card.width)
       card.height = Math.ceil(card.height)
       return card
     })
+    space = this.updateSpaceItemsUserId(space, user.id)
     return space
   },
   // migration added oct 2019
@@ -1642,20 +1643,21 @@ export default {
   },
   updateSpacesUserId (userId, spaces) {
     spaces = spaces.map(space => {
-      space = this.updateSpaceItemsUser(space, userId)
+      space = this.updateSpaceItemsUserId(space, userId)
       space = this.updateSpaceUserId(space, userId)
       delete space.users
       return space
     })
     return spaces
   },
-  updateSpaceItemsUser (space, userId) {
-    const itemNames = ['boxes', 'cards', 'connections', 'connectionTypes']
-    itemNames.forEach(itemName => {
-      if (!space[itemName]) { return }
-      space[itemName] = space[itemName].map(item => {
+  updateSpaceItemsUserId (space, userId) {
+    const itemTypes = ['boxes', 'cards', 'connections', 'connectionTypes']
+    itemTypes.forEach(itemType => {
+      if (!space[itemType]) { return }
+      space[itemType] = space[itemType].map(item => {
         item.userId = userId
-        item.nameUpdatedByUserId = userId
+        item.nameUpdatedByUserId = null
+        item.nameUpdatedAt = new Date()
         return item
       })
     })
@@ -1682,7 +1684,7 @@ export default {
     deleteKeys.forEach(key => {
       delete space[key]
     })
-    this.updateSpaceItemsUser(space, userId)
+    this.updateSpaceItemsUserId(space, userId)
     space.userId = userId
     return space
   },

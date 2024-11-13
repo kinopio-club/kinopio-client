@@ -490,8 +490,7 @@ const currentSpace = {
       let space = utils.clone(context.state)
       const user = { id: context.rootState.currentUser.id }
       context.commit('broadcast/leaveSpaceRoom', { user, type: 'userLeftRoom' }, { root: true })
-      let uniqueNewSpace = utils.clearSpaceMeta(space, 'copy')
-      uniqueNewSpace.originSpaceId = space.id
+      let uniqueNewSpace = utils.resetSpaceMeta({ space, user: context.rootState.currentUser, type: 'copy' })
       uniqueNewSpace = cache.updateIdsInSpace(space)
       context.commit('clearSearch', null, { root: true })
       isLoadingRemoteSpace = false
