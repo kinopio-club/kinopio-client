@@ -972,7 +972,7 @@ export default {
       }
     },
     totalFiltersActive: (state, getters) => {
-      let userFilters = getters.totalCardFadingFiltersActive
+      let userFilters = getters.totalItemFadingFiltersActive
       if (state.filterShowUsers) {
         userFilters += 1
       }
@@ -984,7 +984,7 @@ export default {
       }
       return userFilters
     },
-    totalCardFadingFiltersActive: (state, getters, rootState) => {
+    totalItemFadingFiltersActive: (state, getters, rootState) => {
       let userFilters = 0
       if (state.filterUnchecked) {
         userFilters += 1
