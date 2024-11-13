@@ -65,7 +65,10 @@ const spaceFrames = computed(() => {
   return framesInUse.map(frame => frames[frame])
 })
 const tags = computed(() => utils.clone(store.getters['currentSpace/spaceTags']))
-// TODO const boxes
+const boxes = computed(() => utils.clone(store.getters['currentBoxes/all']))
+
+// all items
+
 const allItems = computed(() => {
   // tags
   const tagsItems = tags.value.map(tag => {
@@ -82,8 +85,12 @@ const allItems = computed(() => {
     frame.isFrame = true
     return frame
   })
-  // TODO boxes
-  return tagsItems.concat(connectionTypesItems, framesItems) // , boxes
+  // boxes
+  const boxesItems = boxes.value.map(box => {
+    box.isBox = true
+    return box
+  })
+  return tagsItems.concat(connectionTypesItems, framesItems, boxesItems)
 })
 const items = computed(() => {
   if (state.filter) {
@@ -94,19 +101,20 @@ const items = computed(() => {
       frames: []
     }
     state.filteredItems.forEach(item => {
-      // TODO boxes
       if (item.isTag) {
         items.tags.push(item)
       } else if (item.isConnectionType) {
         items.connectionTypes.push(item)
       } else if (item.isFrame) {
         items.frames.push(item)
+      } else if (item.isBox) {
+        items.boxes.push(item)
       }
     })
     return items
   } else {
     return {
-      // TODO boxes
+      boxes: boxes.value,
       tags: tags.value,
       connectionTypes: connectionTypes.value,
       frames: spaceFrames.value
@@ -114,8 +122,7 @@ const items = computed(() => {
   }
 })
 const currentFilteredItemsIds = computed(() => {
-  return store.state.filteredConnectionTypeIds.concat(store.state.filteredFrameIds, store.state.filteredTagNames)
-  // TODO boxes / store
+  return store.state.filteredConnectionTypeIds.concat(store.state.filteredFrameIds, store.state.filteredTagNames, store.state.filteredBoxIds)
 })
 
 // update filter
@@ -141,7 +148,14 @@ const clearAllFilters = () => {
 
 // Toggle filters
 
-// TODO boxes
+const toggleFilteredBox = (box) => {
+  const filtered = store.state.filteredBoxIds
+  if (filtered.includes(box.id)) {
+    store.commit('removeFromFilteredBoxId', box.id)
+  } else {
+    store.commit('addToFilteredBoxId', box.id)
+  }
+}
 const toggleFilteredTag = (tag) => {
   const tags = store.state.filteredTagNames
   if (tags.includes(tag.name)) {
@@ -172,7 +186,10 @@ const toggleFilteredCardFrame = (frame) => {
 const isSelected = (item) => {
   return currentFilteredItemsIds.value.includes(item.id)
 }
-// TODO boxes
+const boxIsActive = (box) => {
+  const boxes = store.state.filteredBoxIds
+  return boxes.includes(box.id)
+}
 const tagIsActive = (tag) => {
   const tags = store.state.filteredTagNames
   return tags.includes(tag.name)
@@ -199,7 +216,12 @@ dialog.more-filters.narrow(v-if="props.visible" :open="props.visible" ref="dialo
   section.results-section.connection-types(ref="resultsElement" :style="{'max-height': state.resultsSectionHeight + 'px'}")
     ResultsFilter(:items="allItems" @updateFilter="updateFilter" @updateFilteredItems="updateFilteredItems")
     ul.results-list
-      //- TODO Boxes
+      //- Boxes
+      template(v-for="box in items.boxes" :key="box.id")
+        li(:class="{ active: boxIsActive(box) }" @click.left="toggleFilteredBox(box)" tabindex="0" v-on:keyup.enter="toggleFilteredBox(box)")
+          input(type="checkbox" :checked="isSelected(box)")
+          .badge(:style="{backgroundColor: box.color}")
+          .name {{box.name}}
       //- Tags
       template(v-for="tag in items.tags" :key="tag.id")
         li(:class="{ active: tagIsActive(tag) }" @click.left="toggleFilteredTag(tag)" tabindex="0" v-on:keyup.enter="toggleFilteredTag(tag)")
