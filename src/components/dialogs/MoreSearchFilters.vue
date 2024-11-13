@@ -124,6 +124,12 @@ const items = computed(() => {
 const currentFilteredItemsIds = computed(() => {
   return store.state.filteredConnectionTypeIds.concat(store.state.filteredFrameIds, store.state.filteredTagNames, store.state.filteredBoxIds)
 })
+const boxBadgeStyles = (box) => {
+  return {
+    border: `1px solid ${box.color}`,
+    borderTop: `8px solid ${box.color}`
+  }
+}
 
 // update filter
 
@@ -220,7 +226,9 @@ dialog.more-filters.narrow(v-if="props.visible" :open="props.visible" ref="dialo
       template(v-for="box in items.boxes" :key="box.id")
         li(:class="{ active: boxIsActive(box) }" @click.left="toggleFilteredBox(box)" tabindex="0" v-on:keyup.enter="toggleFilteredBox(box)")
           input(type="checkbox" :checked="isSelected(box)")
-          .badge(:style="{backgroundColor: box.color}")
+          .box-badge.badge(:style="boxBadgeStyles(box)")
+            .box-info(:style="{backgroundColor: box.color}")
+            .box-fill(:style="{backgroundColor: box.color}")
           .name {{box.name}}
       //- Tags
       template(v-for="tag in items.tags" :key="tag.id")
@@ -272,4 +280,14 @@ dialog.more-filters
     margin-left 5px
     margin-top -8px
     transform translateY(2px)
+  .box-badge
+    padding 1px 4px
+    overflow hidden
+    .box-fill
+      top 0
+      left 0
+      width 100%
+      height 100%
+      position absolute
+      opacity 0.5
 </style>
