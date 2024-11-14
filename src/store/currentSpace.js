@@ -473,6 +473,7 @@ const currentSpace = {
       context.dispatch('updateModulesSpaceId', space)
       context.dispatch('incrementCardsCreatedCountFromSpace', space)
       context.commit('isLoadingSpace', false, { root: true })
+      context.commit('triggerUpdateWindowHistory', null, { root: true })
     },
     saveSpace: async (context, space) => {
       const user = context.rootState.currentUser
@@ -506,7 +507,6 @@ const currentSpace = {
       context.dispatch('saveNewSpace')
       context.dispatch('updateUserLastSpaceId')
       context.commit('notifySignUpToEditSpace', false, { root: true })
-      context.commit('triggerUpdateWindowHistory', null, { root: true })
     },
     addJournalSpace: async (context) => {
       const user = { id: context.rootState.currentUser.id }
@@ -515,7 +515,6 @@ const currentSpace = {
       context.dispatch('saveNewSpace')
       context.dispatch('updateUserLastSpaceId')
       context.commit('notifySignUpToEditSpace', false, { root: true })
-      context.commit('triggerUpdateWindowHistory', null, { root: true })
     },
 
     addInboxSpace: (context) => {
@@ -525,7 +524,6 @@ const currentSpace = {
       context.dispatch('saveNewSpace')
       context.dispatch('updateUserLastSpaceId')
       context.commit('notifySignUpToEditSpace', false, { root: true })
-      context.commit('triggerUpdateWindowHistory', null, { root: true })
     },
     getRemoteSpace: async (context, space) => {
       const collaboratorKey = context.rootState.spaceCollaboratorKeys.find(key => key.spaceId === space.id)
