@@ -1,5 +1,5 @@
 <script setup>
-import { reactive, computed, onMounted, onUnmounted, defineProps, defineEmits, watch, ref, nextTick } from 'vue'
+import { reactive, computed, onMounted, onBeforeUnmount, onUnmounted, defineProps, defineEmits, watch, ref, nextTick } from 'vue'
 import { useStore } from 'vuex'
 
 import Slider from '@/components/Slider.vue'
@@ -8,9 +8,10 @@ import utils from '@/utils.js'
 const store = useStore()
 
 const increment = 10
+let unsubscribe
 
 onMounted(() => {
-  store.subscribe((mutation, state) => {
+  unsubscribe = store.subscribe((mutation, state) => {
     if (mutation.type === 'triggerSpaceZoomReset') {
       updateSpaceZoomFromTrigger(max.value)
       window.scrollTo(0, 0)
@@ -20,6 +21,10 @@ onMounted(() => {
       zoomOutOrInMax()
     }
   })
+})
+
+onBeforeUnmount(() => {
+  unsubscribe()
 })
 
 const state = reactive({
