@@ -972,7 +972,7 @@ export default {
       }
     },
     totalFiltersActive: (state, getters) => {
-      let userFilters = getters.totalCardFadingFiltersActive
+      let userFilters = getters.totalItemFadingFiltersActive
       if (state.filterShowUsers) {
         userFilters += 1
       }
@@ -984,7 +984,7 @@ export default {
       }
       return userFilters
     },
-    totalCardFadingFiltersActive: (state, getters, rootState) => {
+    totalItemFadingFiltersActive: (state, getters, rootState) => {
       let userFilters = 0
       if (state.filterUnchecked) {
         userFilters += 1
@@ -992,7 +992,8 @@ export default {
       const tagNames = rootState.filteredTagNames
       const connections = rootState.filteredConnectionTypeIds
       const frames = rootState.filteredFrameIds
-      return userFilters + tagNames.length + connections.length + frames.length
+      const boxes = rootState.filteredBoxIds
+      return userFilters + tagNames.length + connections.length + frames.length + boxes.length
     },
 
     // AI Images
