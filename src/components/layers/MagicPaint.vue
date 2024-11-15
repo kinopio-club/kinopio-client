@@ -158,7 +158,7 @@ const spaceZoomDecimal = computed(() => store.getters.spaceZoomDecimal)
 // selectable items
 
 const updateSelectableCardsInViewport = () => {
-  const selectableCards = store.getters['currentCards/isSelectableInViewport']()
+  const selectableCards = store.getters['currentCards/isSelectableInViewport']
   if (!selectableCards) { return }
   selectableCardsInViewport = selectableCards
   selectableCardsGrid = collisionDetection.createGrid(selectableCards)

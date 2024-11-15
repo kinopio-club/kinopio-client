@@ -106,7 +106,7 @@ const store = createStore({
     // box-selecting
     currentUserIsBoxSelecting: false,
     currentUserBoxSelectStart: {},
-    currentUserBoxSelectEnd: {},
+    currentUserBoxSelectMove: {},
     remoteUserBoxSelectStyles: [],
     remotePreviousUserBoxSelectStyles: [],
 
@@ -828,9 +828,9 @@ const store = createStore({
       utils.typeCheck({ value: object, type: 'object' })
       state.currentUserBoxSelectStart = object
     },
-    currentUserBoxSelectEnd: (state, object) => {
+    currentUserBoxSelectMove: (state, object) => {
       utils.typeCheck({ value: object, type: 'object' })
-      state.currentUserBoxSelectEnd = object
+      state.currentUserBoxSelectMove = object
     },
     updateRemoteUserBoxSelectStyles: (state, object) => {
       utils.typeCheck({ value: object, type: 'object' })
