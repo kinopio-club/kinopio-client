@@ -57,7 +57,6 @@ const state = reactive({
   privacyPickerIsVisible: false,
   settingsIsVisible: false,
   addToGroupIsVisible: false,
-  textareaIsFocused: false,
   error: {
     updateSpaceGroup: false,
     removeSpaceGroup: false
@@ -106,7 +105,7 @@ const remotePendingUpload = computed(() => {
   })
 })
 
-// space name textarea
+// space name
 
 const spaceName = computed({
   get () {
@@ -123,12 +122,6 @@ const textareaSize = () => {
   const element = nameElement.value
   const modifier = 1
   element.style.height = element.scrollHeight + modifier + 'px'
-}
-const textareaFocus = () => {
-  state.textareaIsFocused = true
-}
-const textareaBlur = () => {
-  state.textareaIsFocused = false
 }
 
 // show in explore
@@ -306,8 +299,6 @@ const removeSpaceGroup = (group) => {
         placeholder="name"
         v-model="spaceName"
         @keydown.enter.stop.prevent="closeAllDialogs"
-        @focus="textareaFocus"
-        @blur="textareaBlur"
       )
       .textarea-loader(v-if="isLoadingSpace")
         Loader(:visible="true")
