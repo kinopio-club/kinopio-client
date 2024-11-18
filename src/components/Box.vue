@@ -12,6 +12,8 @@ import postMessage from '@/postMessage.js'
 import randomColor from 'randomcolor'
 const store = useStore()
 
+let unsubscribe
+
 const borderWidth = 2
 
 // locking
@@ -31,7 +33,7 @@ let prevSelectedBox
 const boxElement = ref(null)
 
 onMounted(() => {
-  store.subscribe((mutation, state) => {
+  unsubscribe = store.subscribe((mutation, state) => {
     const { type, payload } = mutation
     if (type === 'updateRemoteCurrentConnection' || type === 'removeRemoteCurrentConnection') {
       updateRemoteConnections()
@@ -51,6 +53,7 @@ onUpdated(() => {
 })
 onBeforeUnmount(() => {
   removeViewportObserver()
+  unsubscribe()
 })
 
 const props = defineProps({
