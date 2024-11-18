@@ -44,6 +44,8 @@ import consts from '@/consts.js'
 import sortBy from 'lodash-es/sortBy'
 const store = useStore()
 
+let unsubscribe
+
 let updateNotificationsIntervalTimer
 
 const fadeOutDuration = 10
@@ -61,7 +63,7 @@ onMounted(() => {
   updateNotificationsIntervalTimer = setInterval(() => {
     updateNotifications()
   }, 1000 * 60 * 10) // 10 minutes
-  store.subscribe((mutation, state) => {
+  unsubscribe = store.subscribe((mutation, state) => {
     if (mutation.type === 'closeAllDialogs') {
       closeAllDialogs()
     } else if (mutation.type === 'triggerSpaceDetailsVisible') {
@@ -106,6 +108,7 @@ onMounted(() => {
 onBeforeUnmount(() => {
   window.removeEventListener('scroll', updatePosition)
   clearInterval(updateNotificationsIntervalTimer)
+  unsubscribe()
 })
 
 const state = reactive({

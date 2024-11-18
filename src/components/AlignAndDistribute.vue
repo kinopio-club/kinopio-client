@@ -9,12 +9,17 @@ import uniqBy from 'lodash-es/uniqBy'
 
 const store = useStore()
 
+let unsubscribe
+
 onMounted(() => {
-  store.subscribe(mutation => {
+  unsubscribe = store.subscribe((mutation, state) => {
     if (mutation.type === 'triggerSelectedItemsAlignLeft') {
       alignLeft()
     }
   })
+})
+onMounted(() => {
+  unsubscribe()
 })
 
 const props = defineProps({

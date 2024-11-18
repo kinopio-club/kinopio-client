@@ -33,7 +33,7 @@ const fetchGroupPublicMeta = async (groupId) => {
 }
 
 export default {
-  async space ({ spaceId, isSpaceInvite }) {
+  async spaceFromId ({ spaceId, isSpaceInvite }) {
     let path = window.document.location.pathname
     if (!spaceId) {
       const ids = utils.spaceAndCardIdFromPath(path)
@@ -56,15 +56,28 @@ export default {
     document.querySelector('meta[property="og:description"]').content = description
     document.querySelector('meta[name="description"]').content = description
   },
-  update (space) {
+  spaceTitle (space) {
+    let title
+    if (space.name === 'Hello Kinopio') {
+      title = 'Kinopio'
+    } else if (space.name) {
+      title = `${space.name} – Kinopio`
+    } else {
+      title = 'Kinopio'
+    }
+    document.title = title
+  },
+  space (space) {
     const isHelloSpace = space.name === 'Hello Kinopio'
+    // image
+    document.querySelector('meta[property="og:image"]').content = `${consts.cdnHost}/${space.id}/preview-image-${space.id}.jpg`
+    // description
     const origin = { x: 0, y: 0 }
     let cards = space.cards.map(card => {
       card.distanceFromOrigin = utils.distanceBetweenTwoPoints(card, origin)
       return card
     })
     cards = cards.filter(card => card.name)
-
     let boxes = space.boxes.map(box => {
       box.distanceFromOrigin = utils.distanceBetweenTwoPoints(box, origin)
       return box
@@ -82,7 +95,7 @@ export default {
     }
     // noscript tag
     document.querySelector('noscript').innerHTML = utils.truncated(description, 1000)
-    // json-ld
+    // json-ld for search robots
     let user = {}
     if (space.users) {
       user = space.users[0]

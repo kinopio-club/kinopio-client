@@ -259,7 +259,7 @@ const handleMouseDownEvents = (event) => {
   if (shouldBoxSelect) {
     event.preventDefault()
     store.commit('currentUserIsBoxSelecting', true)
-    store.commit('currentUserBoxSelectEnd', position)
+    store.commit('currentUserBoxSelectMove', position)
     store.commit('currentUserBoxSelectStart', position)
   } else if (shouldPan) {
     prevRightClickPosition = utils.cursorPositionInPage(event)
@@ -285,7 +285,7 @@ const handleMouseMoveEvents = (event) => {
   currentCursorPosition = position
   // box selection
   if (store.state.currentUserIsBoxSelecting) {
-    store.commit('currentUserBoxSelectEnd', position)
+    store.commit('currentUserBoxSelectMove', position)
   // panning
   } else if (store.state.currentUserIsPanning) {
     event.preventDefault()

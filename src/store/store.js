@@ -106,7 +106,7 @@ const store = createStore({
     // box-selecting
     currentUserIsBoxSelecting: false,
     currentUserBoxSelectStart: {},
-    currentUserBoxSelectEnd: {},
+    currentUserBoxSelectMove: {},
     remoteUserBoxSelectStyles: [],
     remotePreviousUserBoxSelectStyles: [],
 
@@ -258,6 +258,7 @@ const store = createStore({
 
     // filters
     filteredConnectionTypeIds: [],
+    filteredBoxIds: [],
     filteredFrameIds: [],
     filteredTagNames: [],
     spaceListFilterInfo: {},
@@ -825,9 +826,9 @@ const store = createStore({
       utils.typeCheck({ value: object, type: 'object' })
       state.currentUserBoxSelectStart = object
     },
-    currentUserBoxSelectEnd: (state, object) => {
+    currentUserBoxSelectMove: (state, object) => {
       utils.typeCheck({ value: object, type: 'object' })
-      state.currentUserBoxSelectEnd = object
+      state.currentUserBoxSelectMove = object
     },
     updateRemoteUserBoxSelectStyles: (state, object) => {
       utils.typeCheck({ value: object, type: 'object' })
@@ -1582,6 +1583,7 @@ const store = createStore({
       state.filteredConnectionTypeIds = []
       state.filteredFrameIds = []
       state.filteredTagNames = []
+      state.filteredBoxIds = []
     },
     addToFilteredConnectionTypeId: (state, id) => {
       utils.typeCheck({ value: id, type: 'string' })
@@ -1610,6 +1612,14 @@ const store = createStore({
     spaceListFilterInfo: (state, value) => {
       utils.typeCheck({ value, type: 'object' })
       state.spaceListFilterInfo = value
+    },
+    addToFilteredBoxId: (state, id) => {
+      utils.typeCheck({ value: id, type: 'string' })
+      state.filteredBoxIds.push(id)
+    },
+    removeFromFilteredBoxId: (state, id) => {
+      utils.typeCheck({ value: id, type: 'string' })
+      state.filteredBoxIds = state.filteredBoxIds.filter(typeId => typeId !== id)
     },
 
     // Session Data

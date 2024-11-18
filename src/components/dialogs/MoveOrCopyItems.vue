@@ -214,7 +214,7 @@ const notifyNewSpaceSuccess = (newSpace) => {
 
 <template lang="pug">
 dialog.narrow.more-or-copy-cards(v-if="visible" :open="visible" ref="dialogElement" @click.left.stop="closeDialogs")
-  section(v-if="!actionIsMove")
+  section(v-if="!actionIsMove && text")
     //- Copy Card Names
     button(@click.left="copyText")
       img.icon.copy(src="@/assets/copy.svg")

@@ -80,6 +80,27 @@ export default {
       notifiedCardIds.push(cardId)
     },
 
+    // Group
+
+    addSpaceToGroup: (context, { groupId, addedToGroupByUserId }) => {
+      const userCanEdit = context.rootGetters['currentUser/canEditSpace']()
+      if (!userCanEdit) { return }
+      const group = context.rootGetters['groups/byId'](groupId)
+      // recipients are all other group users
+      const recipients = group.users.filter(user => user.id !== addedToGroupByUserId)
+      let recipientUserIds = recipients.map(recipient => recipient.id)
+      recipientUserIds = uniq(recipientUserIds)
+      if (!recipientUserIds.length) { return }
+      const notification = {
+        type: 'addSpaceToGroup',
+        userId: addedToGroupByUserId,
+        recipientUserIds,
+        spaceId: context.state.id,
+        groupId
+      }
+      context.dispatch('api/addToQueue', { name: 'createUserNotification', body: notification }, { root: true })
+    },
+
     // Ask to Add Space to Explore
 
     addAskToAddToExplore: (context) => {
@@ -111,11 +132,9 @@ export default {
         recipients = members.concat(contributors)
       }
       // group users who added cards
-      let groupUsers = rootGetters['currentCards/groupUsersWhoAddedCards']
-      if (groupUsers) {
-        groupUsers = groupUsers.map(user => user.id)
-        recipients.concat(groupUsers)
-      }
+      let groupUsers = rootGetters['currentCards/groupUsersWhoAddedCards'] || []
+      groupUsers = groupUsers.map(user => user.id)
+      recipients = recipients.concat(groupUsers)
       recipients = uniq(recipients)
       // exclude currently connected recipients
       recipients = recipients.filter(userId => userId !== currentUserId)

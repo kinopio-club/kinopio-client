@@ -183,7 +183,7 @@ const currentSpace = {
         await context.dispatch('addSpace')
         context.commit('loadNewSpace', false, { root: true })
       // restore last space
-      } else if (user.lastSpaceId) {
+      } else if (user?.lastSpaceId) {
         console.log('🚃 Restore last space', user.lastSpaceId)
         await context.dispatch('loadLastSpace')
       // hello kinopio
@@ -359,7 +359,7 @@ const currentSpace = {
         const nullCardUsers = true
         cache.updateIdsInSpace(space, nullCardUsers)
       }
-      pageMeta.update(space)
+      pageMeta.space(space)
     },
     createNewSpace: (context, space) => {
       const currentUser = context.rootState.currentUser
@@ -473,6 +473,7 @@ const currentSpace = {
       context.dispatch('updateModulesSpaceId', space)
       context.dispatch('incrementCardsCreatedCountFromSpace', space)
       context.commit('isLoadingSpace', false, { root: true })
+      context.commit('triggerUpdateWindowHistory', null, { root: true })
     },
     saveSpace: async (context, space) => {
       const user = context.rootState.currentUser
@@ -491,8 +492,7 @@ const currentSpace = {
       space = utils.clone(space)
       const user = { id: context.rootState.currentUser.id }
       context.commit('broadcast/leaveSpaceRoom', { user, type: 'userLeftRoom' }, { root: true })
-      let uniqueNewSpace = utils.clearSpaceMeta(space, 'copy')
-      uniqueNewSpace.originSpaceId = space.id
+      let uniqueNewSpace = utils.resetSpaceMeta({ space, user: context.rootState.currentUser, type: 'copy' })
       uniqueNewSpace = cache.updateIdsInSpace(space)
       context.commit('clearSearch', null, { root: true })
       isLoadingRemoteSpace = false
@@ -508,7 +508,6 @@ const currentSpace = {
       context.dispatch('saveNewSpace')
       context.dispatch('updateUserLastSpaceId')
       context.commit('notifySignUpToEditSpace', false, { root: true })
-      context.commit('triggerUpdateWindowHistory', null, { root: true })
     },
     addJournalSpace: async (context) => {
       const user = { id: context.rootState.currentUser.id }
@@ -517,7 +516,6 @@ const currentSpace = {
       context.dispatch('saveNewSpace')
       context.dispatch('updateUserLastSpaceId')
       context.commit('notifySignUpToEditSpace', false, { root: true })
-      context.commit('triggerUpdateWindowHistory', null, { root: true })
     },
 
     addInboxSpace: (context) => {
@@ -527,7 +525,6 @@ const currentSpace = {
       context.dispatch('saveNewSpace')
       context.dispatch('updateUserLastSpaceId')
       context.commit('notifySignUpToEditSpace', false, { root: true })
-      context.commit('triggerUpdateWindowHistory', null, { root: true })
     },
     getRemoteSpace: async (context, space) => {
       const collaboratorKey = context.rootState.spaceCollaboratorKeys.find(key => key.spaceId === space.id)
@@ -802,7 +799,7 @@ const currentSpace = {
         let remoteSpace = remoteData
         console.log('🎑 remoteSpace', remoteSpace)
         if (!remoteSpace) { return }
-        pageMeta.update(remoteSpace)
+        pageMeta.space(remoteSpace)
         context.dispatch('groups/loadGroup', remoteSpace, { root: true })
         context.commit('updateSpace', { collaboratorKey: remoteSpace.collaboratorKey })
         const spaceIsUnchanged = utils.spaceIsUnchanged(cachedSpace, remoteSpace)

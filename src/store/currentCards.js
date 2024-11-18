@@ -933,7 +933,7 @@ const currentCards = {
       } while (prevAlignedCard)
       return alignedCards
     },
-    isSelectableInViewport: (state, getters, rootState, rootGetters) => () => {
+    isSelectableInViewport: (state, getters, rootState, rootGetters) => {
       const elements = document.querySelectorAll(`article#card`)
       let cards = []
       elements.forEach(element => {

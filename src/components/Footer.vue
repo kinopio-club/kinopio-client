@@ -8,6 +8,8 @@ import Loader from '@/components/Loader.vue'
 import utils from '@/utils.js'
 const store = useStore()
 
+let unsubscribe
+
 const footerElement = ref(null)
 
 const hiddenOnTouchDuration = 20
@@ -18,7 +20,7 @@ onMounted(() => {
   window.addEventListener('scroll', updatePosition)
   window.addEventListener('resize', updatePosition)
   updatePosition()
-  store.subscribe((mutation, state) => {
+  unsubscribe = store.subscribe((mutation, state) => {
     if (mutation.type === 'triggerUpdateHeaderAndFooterPosition') {
       updatePosition()
     } else if (mutation.type === 'triggerHideTouchInterface') {
@@ -32,6 +34,8 @@ onMounted(() => {
 })
 onBeforeUnmount(() => {
   window.removeEventListener('scroll', updatePosition)
+  window.removeEventListener('resize', updatePosition)
+  unsubscribe()
 })
 
 const state = reactive({

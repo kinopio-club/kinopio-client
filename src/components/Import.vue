@@ -212,16 +212,14 @@ const convertFromCanvas = (space) => {
 
 const importSpace = async (space) => {
   try {
+    const user = store.state.currentUser
     store.commit('isLoadingSpace', true)
-    const currentUserId = store.state.currentUser.id
     validate(space)
     if (state.format === 'canvas') {
       space = convertFromCanvas(space)
     }
-    space = utils.clearSpaceMeta(space, 'import')
-    space = utils.updateSpaceItemsUser(space, currentUserId)
+    space = utils.resetSpaceMeta({ space, user, type: 'import' })
     space.connections = utils.migrationConnections(space.connections)
-    space.userId = currentUserId
     const uniqueNewSpace = cache.updateIdsInSpace(space)
     console.log('🧚 space to import', uniqueNewSpace)
     await store.dispatch('currentSpace/saveSpace', uniqueNewSpace)

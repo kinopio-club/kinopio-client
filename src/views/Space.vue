@@ -305,7 +305,6 @@ const checkIfShouldSnapBoxes = () => {
   if (!store.state.boxesWereDragged) { return }
   const snapGuides = store.state.currentBoxes.snapGuides
   if (!snapGuides.length) { return }
-
   snapGuides.forEach(snapGuide => {
     const elapsedTime = Date.now() - snapGuide.time
     const shouldSnap = elapsedTime >= consts.boxSnapGuideWaitingDuration
@@ -317,7 +316,12 @@ const checkIfShouldExpandBoxes = () => {
   if (!store.state.cardsWereDragged) { return }
   const snapGuides = store.state.currentBoxes.snapGuides
   if (!snapGuides.length) { return }
-  snapGuides.forEach(snapGuide => store.dispatch('currentBoxes/expand', snapGuide))
+  snapGuides.forEach(snapGuide => {
+    const elapsedTime = Date.now() - snapGuide.time
+    const shouldSnap = elapsedTime >= consts.boxSnapGuideWaitingDuration
+    if (!shouldSnap) { return }
+    store.dispatch('currentBoxes/expand', snapGuide)
+  })
 }
 const unselectCardsInDraggedBox = () => {
   if (!store.state.currentDraggingBoxId) { return }
