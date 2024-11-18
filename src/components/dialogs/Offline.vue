@@ -28,12 +28,19 @@ const pluralChanges = computed(() => {
   const condition = state.queue.length !== 1
   return utils.pluralize('change', condition)
 })
+const refreshBrowser = () => {
+  window.location.reload()
+}
 </script>
 
 <template lang="pug">
 dialog.narrow.offline(v-if="visible" :open="visible" ref="dialogElement")
   section
-    p Offline
+    .row.title-row
+      p Offline
+      span
+        button.small-button(@click.left="refreshBrowser" title="Refresh")
+          img.refresh.icon(src="@/assets/refresh.svg")
   section
     .row
       p Kinopio works offline
