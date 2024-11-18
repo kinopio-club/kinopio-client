@@ -37,6 +37,7 @@
     img.icon(src="@/assets/brush-x.svg")
     img.icon(src="@/assets/brush.svg")
     img.icon(src="@/assets/camera.svg")
+    img.icon(src="@/assets/cal.svg")
     img.icon(src="@/assets/card.svg")
     img.icon(src="@/assets/center-horizontally.svg")
     img.icon(src="@/assets/checkmark-invert.svg")
