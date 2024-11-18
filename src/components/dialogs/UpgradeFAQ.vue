@@ -39,6 +39,16 @@ dialog.narrow.upgrade-faq(v-if="visible" :open="visible" @click.left.stop ref="d
       summary(@click="closeOtherDetails") What is the life plan?
       section.subsection
         p The lifetime plan is a perpetual licence for as long as Kinopio operates. Which is planned for many years, likely decades.
+
+    details
+      summary(@click="closeOtherDetails") Will Kinopio ever shut down?
+      section.subsection
+        p
+          span Kinopio is around for the long-term.
+        p From{{' '}}
+          a(href="http://pketh.org/kinopio-plans.html") the start
+          span , the system was designed with resiliency and low-cost in mind, so I can afford to keep it running indefinetely.
+        p However, if it somehow became untenable I would open-source the server and provide instructions for self-hosting.
 </template>
 
 <style lang="stylus">
