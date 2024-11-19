@@ -258,14 +258,6 @@ const self = {
         context.dispatch('handleServerError', { name: 'getDate', error })
       }
     },
-    getCountries: async (context) => {
-      try {
-        const response = await fetch(`${consts.apiHost()}/meta/countries`)
-        return normalizeResponse(response)
-      } catch (error) {
-        context.dispatch('handleServerError', { name: 'getCountries', error })
-      }
-    },
     getChangelog: async (context) => {
       const isOnline = context.rootState.isOnline
       if (!shouldRequest({ shouldRequestRemote: true, isOnline })) { return }
@@ -276,6 +268,16 @@ const self = {
         return normalizeResponse(response)
       } catch (error) {
         context.dispatch('handleServerError', { name: 'getChangelog', error })
+      }
+    },
+    updateDateImage: async (context) => {
+      try {
+        const response = await fetch(`${consts.apiHost()}/space/date-image`)
+        const data = await normalizeResponse(response)
+        context.commit('dateImageUrl', data.url, { root: true })
+        return data.url
+      } catch (error) {
+        context.dispatch('handleServerError', { name: 'updateDateImage', error })
       }
     },
 

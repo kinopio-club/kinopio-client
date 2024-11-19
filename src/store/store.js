@@ -64,6 +64,7 @@ const store = createStore({
     prevSpaceIdInSessionPagePosition: {},
     outsideSpaceBackgroundColor: '',
     groupsIsVisible: false,
+    dateImageUrl: null,
 
     // zoom and scroll
     spaceZoomPercent: 100,
@@ -543,6 +544,10 @@ const store = createStore({
     groupsIsVisible: (state, value) => {
       utils.typeCheck({ value, type: 'boolean' })
       state.groupsIsVisible = value
+    },
+    dateImageUrl: (state, value) => {
+      utils.typeCheck({ value, type: 'string' })
+      state.dateImageUrl = value
     },
     searchIsVisible: (state, value) => {
       utils.typeCheck({ value, type: 'boolean' })
