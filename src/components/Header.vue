@@ -712,6 +712,13 @@ header(v-if="isVisible" :style="state.position" :class="{'fade-out': isFadingOut
           button(@click.left.stop="toggleUpgradeUserIsVisible" :class="{active: state.upgradeUserIsVisible, 'translucent-button': !shouldIncreaseUIContrast}")
             span Upgrade
           UpgradeUser(:visible="state.upgradeUserIsVisible" @closeDialog="closeAllDialogs")
+        //- Donate
+        //- .button-wrap
+        //-   .segmented-buttons
+        //-     button Donate
+        //-     button
+        //-       img.icon.cancel(src="@/assets/add.svg")
+
         //- comments
         //- CommentButton
 
