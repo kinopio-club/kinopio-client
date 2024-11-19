@@ -370,6 +370,7 @@ const currentSpace = {
       space.editedAt = new Date()
       space.collaboratorKey = nanoid()
       space.readOnlyKey = nanoid()
+      space.moonPhase = utils.moonPhase()
       const newSpacesAreBlank = currentUser.newSpacesAreBlank
       if (newSpacesAreBlank) {
         space.connectionTypes = []
