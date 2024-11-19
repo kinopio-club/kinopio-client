@@ -17,6 +17,8 @@ import GroupLabel from '@/components/GroupLabel.vue'
 import cache from '@/cache.js'
 import utils from '@/utils.js'
 
+import dayjs from 'dayjs'
+
 const store = useStore()
 
 const nameElement = ref(null)
@@ -130,23 +132,28 @@ const textareaFocus = () => {
 const textareaBlur = () => {
   state.textareaIsFocused = false
 }
-const toggleSpaceNameDate = () => {
-  let newName = spaceName.value
-  // if (name has date)
-  //   remove it
-
-  // get selectionrange
-  // append date at end
-  // or if selection, replace selection range
-  // newName =
-
-  // spaceName.value = newName // invokes spaceName setter
-
-  // refocus on field
+const toggleSpaceNameDate = async () => {
   const element = nameElement.value
-  if (!element) { return }
+  const nameIsSelected = element.selectionStart === 0 && element.selectionEnd === element.value.length
+  let newName = spaceName.value.trim()
+  let date = dayjs(new Date())
+  date = date.format('ddd MMM D, YYYY') // Wed Nov 13, 2024
+  if (newName.includes(date)) {
+    newName = newName.replace(date, '')
+  } else if (nameIsSelected) {
+    newName = newName.slice(0, element.selectionStart) + newName.slice(element.selectionEnd)
+    newName = `${newName} ${date}`
+  } else {
+    newName = `${newName} ${date}`
+  }
+  spaceName.value = newName // spaceName set()
+  // refocus textarea
   element.focus()
   element.setSelectionRange(element.value.length, element.value.length)
+  setTimeout(() => {
+    textareaFocus()
+    textareaSize()
+  }, 20) // focus after all closeDialog events
 }
 
 // show in explore
