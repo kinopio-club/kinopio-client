@@ -124,7 +124,7 @@ const validateSchema = (space, schema) => {
 const convertFromCanvas = (space) => {
   const minPositionValue = 150
   let date = dayjs(new Date())
-  date = date.format('ddd MMM D, YYYY') // Wed Nov 13, 2024
+  date = date.format(consts.nameDateFormat)
   let newSpace = {}
   try {
     newSpace.name = `Canvas ${date}`

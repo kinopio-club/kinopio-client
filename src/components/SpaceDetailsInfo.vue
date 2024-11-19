@@ -16,6 +16,7 @@ import AddToGroup from '@/components/dialogs/AddToGroup.vue'
 import GroupLabel from '@/components/GroupLabel.vue'
 import cache from '@/cache.js'
 import utils from '@/utils.js'
+import consts from '@/consts.js'
 
 import dayjs from 'dayjs'
 
@@ -137,7 +138,7 @@ const textareaBlur = () => {
 
 const spaceNameDate = computed(() => {
   const date = dayjs(new Date())
-  return date.format('ddd MMM D, YYYY') // Wed Nov 13, 2024
+  return date.format(consts.nameDateFormat)
 })
 const spaceNameHasDate = computed(() => {
   const date = spaceNameDate.value
