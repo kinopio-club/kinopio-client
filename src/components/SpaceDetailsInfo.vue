@@ -132,13 +132,23 @@ const textareaFocus = () => {
 const textareaBlur = () => {
   state.textareaIsFocused = false
 }
+
+// space name date
+
+const spaceNameDate = computed(() => {
+  const date = dayjs(new Date())
+  return date.format('ddd MMM D, YYYY') // Wed Nov 13, 2024
+})
+const spaceNameHasDate = computed(() => {
+  const date = spaceNameDate.value
+  return spaceName.value.includes(date)
+})
 const toggleSpaceNameDate = async () => {
   const element = nameElement.value
   const nameIsSelected = element.selectionStart === 0 && element.selectionEnd === element.value.length
   let newName = spaceName.value.trim()
-  let date = dayjs(new Date())
-  date = date.format('ddd MMM D, YYYY') // Wed Nov 13, 2024
-  if (newName.includes(date)) {
+  const date = spaceNameDate.value
+  if (spaceNameHasDate.value) {
     newName = newName.replace(date, '')
   } else if (nameIsSelected) {
     newName = newName.slice(0, element.selectionStart) + newName.slice(element.selectionEnd)
@@ -341,7 +351,7 @@ const removeSpaceGroup = (group) => {
   //- Append date
   .title-row(v-if="state.textareaIsFocused")
     .button-wrap.title-row-small-button-wrap(@click.left="toggleSpaceNameDate" title="Add date to name")
-      button.small-button.cal-button
+      button.small-button.cal-button(:class="{ active: spaceNameHasDate }")
         img.icon.cal(src="@/assets/cal.svg")
 
   //- Pin Dialog
