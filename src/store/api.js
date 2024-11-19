@@ -1176,29 +1176,6 @@ const self = {
       }
     },
 
-    weather: async (context) => {
-      const showWeather = context.rootState.currentUser.showWeather
-      if (!showWeather) { return }
-      const body = { weatherLocation: context.rootState.currentUser.weatherLocation }
-      try {
-        const options = await context.dispatch('requestOptions', { body, method: 'POST', space: context.rootState.currentSpace })
-        const response = await fetch(`${consts.apiHost()}/services/weather`, options)
-        const data = await normalizeResponse(response)
-        return data.weather
-      } catch (error) {
-        context.dispatch('handleServerError', { name: 'weather', error })
-      }
-    },
-    journalDailyPrompt: async (context) => {
-      try {
-        const options = await context.dispatch('requestOptions', { method: 'GET', space: context.rootState.currentSpace })
-        const response = await fetch(`${consts.apiHost()}/journal-daily-prompt`, options)
-        const data = await normalizeResponse(response)
-        return data
-      } catch (error) {
-        console.error('🚒 journalDailyPrompt', error)
-      }
-    },
     createAIImage: async (context, body) => {
       try {
         const options = await context.dispatch('requestOptions', { body, method: 'POST', space: context.rootState.currentSpace })

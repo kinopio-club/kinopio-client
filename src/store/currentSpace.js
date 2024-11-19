@@ -154,7 +154,6 @@ const currentSpace = {
     init: async (context) => {
       context.commit('isLoadingSpace', true, { root: true })
       const spaceUrl = context.rootState.spaceUrlToLoad
-      const loadJournalSpace = context.rootState.loadJournalSpace
       const loadInboxSpace = context.rootState.loadInboxSpace
       const loadBlogSpace = context.rootState.loadBlogSpace
       const loadNewSpace = context.rootState.loadNewSpace
@@ -165,10 +164,6 @@ const currentSpace = {
         const spaceId = utils.spaceIdFromUrl(spaceUrl)
         const space = { id: spaceId }
         await context.dispatch('loadSpace', { space })
-      // restore or create journal space
-      } else if (loadJournalSpace) {
-        console.log('🚃 Restore journal space')
-        await context.dispatch('loadJournalSpace')
       // restore inbox space
       } else if (loadInboxSpace) {
         console.log('🚃 Restore inbox space')
@@ -399,37 +394,6 @@ const currentSpace = {
       context.commit('resetPageSizes', null, { root: true })
       context.dispatch('restoreSpaceInChunks', { space: uniqueNewSpace })
     },
-    createNewJournalSpace: async (context) => {
-      const isOnline = context.rootState.isOnline
-      const isTomorrow = context.rootState.loadJournalSpaceTomorrow
-      const currentUser = utils.clone(context.rootState.currentUser)
-      context.commit('isLoadingSpace', true, { root: true })
-      // weather
-      let weather = context.rootState.currentUser.weather || ''
-      const shouldUpdateWeather = !weather && isOnline
-      if (shouldUpdateWeather) {
-        weather = await context.dispatch('api/weather', null, { root: true }) || ''
-        weather = `${weather}`
-      }
-      if (!weather) {
-        weather = ''
-      }
-      // daily prompt
-      let options = { currentUser, isTomorrow, weather }
-      options.journalDailyDateImage = currentUser.journalDailyDateImage
-      if (currentUser.shouldCreateJournalsWithDailyPrompt) {
-        options.journalDailyPrompt = currentUser.journalDailyPrompt
-      }
-      // create space
-      let space = utils.journalSpace(options)
-      space = utils.updateSpaceCardsCreatedThroughPublicApi(space)
-      context.commit('clearSearch', null, { root: true })
-      context.commit('shouldResetDimensionsOnLoad', true, { root: true })
-      // load space
-      isLoadingRemoteSpace = false
-      context.commit('resetPageSizes', null, { root: true })
-      context.dispatch('restoreSpaceInChunks', { space })
-    },
     createNewInboxSpace: (context, shouldCreateWithoutLoading) => {
       let space = utils.clone(inboxSpace)
       space.id = nanoid()
@@ -509,15 +473,6 @@ const currentSpace = {
       context.dispatch('updateUserLastSpaceId')
       context.commit('notifySignUpToEditSpace', false, { root: true })
     },
-    addJournalSpace: async (context) => {
-      const user = { id: context.rootState.currentUser.id }
-      context.commit('broadcast/leaveSpaceRoom', { user, type: 'userLeftRoom' }, { root: true })
-      await context.dispatch('createNewJournalSpace')
-      context.dispatch('saveNewSpace')
-      context.dispatch('updateUserLastSpaceId')
-      context.commit('notifySignUpToEditSpace', false, { root: true })
-    },
-
     addInboxSpace: (context) => {
       const user = { id: context.rootState.currentUser.id }
       context.commit('broadcast/leaveSpaceRoom', { user, type: 'userLeftRoom' }, { root: true })
@@ -600,20 +555,6 @@ const currentSpace = {
       const cardIds = context.rootState.currentCards.ids
       context.dispatch('currentCards/resetDimensions', { cardIds }, { root: true })
       context.commit('shouldResetDimensionsOnLoad', false, { root: true })
-    },
-    loadJournalSpace: async (context) => {
-      const spaces = cache.getAllSpaces()
-      const journalName = utils.journalSpaceName({ isTomorrow: context.rootState.loadJournalSpaceTomorrow })
-      const journalSpace = spaces.find(space => space.name === journalName && !space.isRemoved)
-      if (journalSpace) {
-        const space = { id: journalSpace.id }
-        context.dispatch('changeSpace', space)
-      } else {
-        await context.dispatch('addJournalSpace')
-        context.commit('triggerSpaceDetailsUpdateLocalSpaces', null, { root: true })
-      }
-      context.commit('loadJournalSpace', false, { root: true })
-      context.commit('loadJournalSpaceTomorrow', false, { root: true })
     },
     loadInboxSpace: async (context) => {
       const inboxSpace = await context.dispatch('currentUser/inboxSpace', null, { root: true })

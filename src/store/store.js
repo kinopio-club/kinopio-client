@@ -222,8 +222,6 @@ const store = createStore({
     remotePendingUploads: [],
     isLoadingFavorites: false,
     loadSpaceShowDetailsForCardId: '',
-    loadJournalSpace: false,
-    loadJournalSpaceTomorrow: false,
     loadNewSpace: false,
     urlPreviewLoadingForCardIds: [],
     loadInboxSpace: false,
@@ -380,14 +378,6 @@ const store = createStore({
     isBeta: (state, value) => {
       utils.typeCheck({ value, type: 'boolean' })
       state.isBeta = value
-    },
-    loadJournalSpace: (state, value) => {
-      utils.typeCheck({ value, type: 'boolean' })
-      state.loadJournalSpace = value
-    },
-    loadJournalSpaceTomorrow: (state, value) => {
-      utils.typeCheck({ value, type: 'boolean' })
-      state.loadJournalSpaceTomorrow = value
     },
     loadNewSpace: (state, value) => {
       utils.typeCheck({ value, type: 'boolean' })

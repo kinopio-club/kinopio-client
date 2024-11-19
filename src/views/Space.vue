@@ -26,7 +26,7 @@ import debounce from 'lodash-es/debounce'
 const store = useStore()
 
 let prevCursor, endCursor, shouldCancel
-let processQueueIntervalTimer, updateJournalDailyPromptTimer, updateInboxCache
+let processQueueIntervalTimer, updateInboxCache
 
 // init user and space app state
 store.dispatch('currentUser/init')
@@ -67,10 +67,6 @@ onMounted(() => {
   processQueueIntervalTimer = setInterval(() => {
     store.dispatch('api/sendQueue')
   }, 5000) // every 5 seconds
-  // update journal daily prompt
-  updateJournalDailyPromptTimer = setInterval(() => {
-    store.dispatch('currentUser/updateJournalDailyPrompt')
-  }, 1000 * 60 * 60 * 1) // every hour
   // update inbox space in local storage
   setTimeout(() => {
     store.dispatch('currentSpace/updateInboxCache')
@@ -93,7 +89,6 @@ onBeforeUnmount(() => {
   window.removeEventListener('gesturecancel', updateViewportSizes)
   window.removeEventListener('resize', updateViewportSizes)
   clearInterval(processQueueIntervalTimer)
-  clearInterval(updateJournalDailyPromptTimer)
   clearInterval(updateInboxCache)
 })
 

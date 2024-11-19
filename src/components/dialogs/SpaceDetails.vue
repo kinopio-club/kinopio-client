@@ -123,23 +123,16 @@ const updateResultsSectionHeight = async () => {
 // filters
 
 const dialogSpaceFilterSortBy = computed(() => store.state.currentUser.dialogSpaceFilterSortBy)
-const dialogSpaceFilterByType = computed(() => store.state.currentUser.dialogSpaceFilterByType)
 const dialogSpaceFilterByUser = computed(() => store.state.currentUser.dialogSpaceFilterByUser)
 const dialogSpaceFilterShowHidden = computed(() => store.state.currentUser.dialogSpaceFilterShowHidden)
 const dialogSpaceFilterByGroup = computed(() => store.state.currentUser.dialogSpaceFilterByGroup)
 
 const spaceFiltersIsActive = computed(() => {
-  return Boolean(dialogSpaceFilterShowHidden.value || dialogSpaceFilterByType.value || utils.objectHasKeys(dialogSpaceFilterByUser.value) || dialogSpaceFilterSortByIsActive.value) || utils.objectHasKeys(dialogSpaceFilterByGroup.value)
+  return Boolean(dialogSpaceFilterShowHidden.value || utils.objectHasKeys(dialogSpaceFilterByUser.value) || dialogSpaceFilterSortByIsActive.value) || utils.objectHasKeys(dialogSpaceFilterByGroup.value)
 })
 const filteredSpaces = computed(() => {
   let spaces = state.spaces
   spaces = spaces.filter(space => space.id)
-  // filter by space type
-  if (dialogSpaceFilterByType.value === 'journals') {
-    spaces = spaces.filter(space => space.moonPhase)
-  } else if (dialogSpaceFilterByType.value === 'spaces') {
-    spaces = spaces.filter(space => !space.moonPhase)
-  }
   // hide by hidden spaces unless filter active
   if (!dialogSpaceFilterShowHidden.value) {
     spaces = spaces.filter(space => !space.isHidden)
@@ -263,11 +256,6 @@ const addSpace = () => {
   window.scrollTo(0, 0)
   store.dispatch('currentSpace/addSpace')
   updateLocalSpaces()
-  store.commit('triggerFocusSpaceDetailsName')
-}
-const addJournalSpace = () => {
-  window.scrollTo(0, 0)
-  store.dispatch('currentSpace/loadJournalSpace') // triggers updateLocalSpaces in addJournalSpace
   store.commit('triggerFocusSpaceDetailsName')
 }
 
