@@ -73,8 +73,15 @@ const triggerUpdateHeaderAndFooterPosition = () => {
 
 // colors
 
-const colorIsCurrent = (color) => {
-  return color === props.currentColor
+const normalizeColor = (newColor) => {
+  if (utils.colorIsValid(newColor)) {
+    return newColor
+  } else if (utils.colorIsValid(`#${newColor}`)) {
+    return '#' + newColor
+  }
+}
+const colorIsCurrent = (newColor) => {
+  return newColor === props.currentColor
 }
 const removeColor = () => {
   emit('removeColor')
@@ -83,19 +90,16 @@ const color = computed({
   get () {
     return props.currentColor
   },
-  set (color) {
-    if (utils.colorIsValid(color)) {
-      throttledUpdateColorFromInput(color)
-    } else if (utils.colorIsValid(`#${color}`)) {
-      throttledUpdateColorFromInput('#' + color)
-    }
+  set (newColor) {
+    newColor = normalizeColor(newColor)
+    throttledUpdateColor(newColor)
   }
 })
-const select = (color, isFavorite) => {
-  const alpha = colord(color).alpha()
+const select = (newColor, isFavorite) => {
+  const alpha = colord(newColor).alpha()
   const opacity = alpha * 100
   state.opacity = Math.round(opacity)
-  emit('selectedColor', color)
+  color.value = newColor
 }
 const shuffleColors = () => {
   const luminosity = state.luminosity
@@ -106,14 +110,12 @@ const shuffleColors = () => {
   }
   state.colors.unshift(props.currentColor)
 }
-const throttledUpdateColorFromInput = throttle((color) => {
-  updateColorFromInput(color)
+const throttledUpdateColor = throttle((color) => {
+  updateColor(color)
 }, 400)
 
-const updateColorFromInput = (color) => {
-  select(color)
-  state.colors.pop()
-  state.colors.unshift(color)
+const updateColor = (newColor) => {
+  emit('selectedColor', newColor)
 }
 
 // luminosity
@@ -191,7 +193,7 @@ const isTransparent = computed(() => {
 const updateOpacity = (value) => {
   state.opacity = Math.round(value)
   const color = colord(props.currentColor).alpha(state.opacity / 100).toRgbString()
-  emit('selectedColor', color)
+  select(color)
 }
 const resetOpacity = () => {
   updateOpacity(100)
