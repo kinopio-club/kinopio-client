@@ -17,7 +17,7 @@
     {
       "id": "1",
       "x": 70,
-      "y": 140,
+      "y": 308,
       "z": 0,
       "name": "Get your thoughts, ideas and feelings out",
       "width": 200,
@@ -25,8 +25,8 @@
     },
     {
       "id": "wQ9-NzxQyWoIGGKEgHRMF",
-      "x": 180,
-      "y": 220,
+      "x": 127,
+      "y": 385,
       "name": "Connect them together\n\n[Help and Tutorials](https://help.kinopio.club)",
       "z": 3,
       "width": 193,
@@ -37,7 +37,7 @@
     {
       "startItemId": "1",
       "endItemId": "wQ9-NzxQyWoIGGKEgHRMF",
-      "path": "m255,156 q90,40 103,80",
+      "path": "m255,323 q90,40 48,77",
       "id": "gg7DEsxy0n3syEkxfKKS4",
       "connectionTypeId": "TDbVDxv4cebeN_99XAz8T"
     }

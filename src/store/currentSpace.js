@@ -384,8 +384,8 @@ const currentSpace = {
       const date = dayjs().format('ddd MMM D') // Wed Nov 20
       const dateCard = {
         id: nanoid(),
-        x: 85,
-        y: 125,
+        x: 49,
+        y: 137,
         z: 0,
         name: `${date} ${context.rootGetters.dateImageUrl}`,
         width: 138,
