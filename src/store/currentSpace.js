@@ -17,6 +17,7 @@ import uniq from 'lodash-es/uniq'
 import sortBy from 'lodash-es/sortBy'
 import defer from 'lodash-es/defer'
 import debounce from 'lodash-es/debounce'
+import dayjs from 'dayjs'
 
 let idleClientTimers = []
 let isLoadingRemoteSpace, shouldLoadNewHelloSpace
@@ -380,6 +381,18 @@ const currentSpace = {
       } else {
         space.connectionTypes[0].color = randomColor({ luminosity: 'light' })
       }
+      const date = dayjs().format('ddd MMM D') // Wed Nov 20
+      const dateCard = {
+        id: nanoid(),
+        x: 85,
+        y: 125,
+        z: 0,
+        name: `${date} ${context.rootGetters.dateImageUrl}`,
+        width: 138,
+        height: 138,
+        resizeWidth: 138
+      }
+      space.cards.push(dateCard)
       space = utils.updateSpaceCardsCreatedThroughPublicApi(space)
       space.userId = currentUser.id
       space = utils.newSpaceBackground(space, currentUser)

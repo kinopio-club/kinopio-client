@@ -24,6 +24,7 @@ import { nextTick } from 'vue'
 import { nanoid } from 'nanoid'
 import uniqBy from 'lodash-es/uniqBy'
 import last from 'lodash-es/last'
+import dayjs from 'dayjs'
 
 const store = createStore({
   strict: consts.isDevelopment(),
@@ -2080,6 +2081,14 @@ const store = createStore({
       const isNativeApp = consts.isSecureAppContext
       const isZoomedOut = state.spaceZoomPercent !== 100
       if (isNativeApp || isZoomedOut) { return true }
+    },
+    dateImageUrl: (state) => {
+      if (state.dateImageUrl) {
+        return state.dateImageUrl
+      } else {
+        const date = dayjs().format('MM-DD-YYYY') // 11-19-2024
+        return `${consts.cdnHost}/date/${date}.jpg` // https://cdn.kinopio.club/date/11-19-24.jpg
+      }
     }
   },
 
