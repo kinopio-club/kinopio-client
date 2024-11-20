@@ -604,6 +604,10 @@ const currentCards = {
         x: endCursor.x * zoom,
         y: endCursor.y * zoom
       }
+      if (context.rootState.shouldSnapToGrid) {
+        prevCursor = utils.cursorPositionSnapToGrid(prevCursor)
+        endCursor = utils.cursorPositionSnapToGrid(endCursor)
+      }
       delta = delta || {
         x: endCursor.x - prevCursor.x,
         y: endCursor.y - prevCursor.y
@@ -651,11 +655,6 @@ const currentCards = {
           id: card.id,
           width: card.width,
           height: card.height
-        }
-        if (context.rootState.shouldSnapToGrid) {
-          const position = utils.cursorPositionSnapToGrid(card)
-          card.x = position.x
-          card.y = position.y
         }
         utils.updateCardDimensionsDataWhileDragging(card)
         return card
