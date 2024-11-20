@@ -301,8 +301,9 @@ const afterResizeBoxes = () => {
   })
   store.dispatch('currentBoxes/updateMultiple', boxes)
 }
-const checkIfShouldSnapBoxes = () => {
+const checkIfShouldSnapBoxes = (event) => {
   if (!store.state.boxesWereDragged) { return }
+  if (event.shiftKey) { return }
   const snapGuides = store.state.currentBoxes.snapGuides
   if (!snapGuides.length) { return }
   snapGuides.forEach(snapGuide => {
@@ -312,8 +313,9 @@ const checkIfShouldSnapBoxes = () => {
     store.dispatch('currentBoxes/snap', snapGuide)
   })
 }
-const checkIfShouldExpandBoxes = () => {
+const checkIfShouldExpandBoxes = (event) => {
   if (!store.state.cardsWereDragged) { return }
+  if (event.shiftKey) { return }
   const snapGuides = store.state.currentBoxes.snapGuides
   if (!snapGuides.length) { return }
   snapGuides.forEach(snapGuide => {
@@ -519,8 +521,8 @@ const stopInteractions = async (event) => {
     store.commit('triggerUpdateHeaderAndFooterPosition')
   }
   checkIfShouldHideFooter(event)
-  checkIfShouldSnapBoxes()
-  checkIfShouldExpandBoxes()
+  checkIfShouldSnapBoxes(event)
+  checkIfShouldExpandBoxes(event)
   if (shouldCancelInteraction(event)) { return }
   addOrCloseCard(event)
   unselectCardsInDraggedBox()
