@@ -30,10 +30,10 @@ const toggleShouldDisableHapticFeedback = () => {
 
 // new spaces are blank
 
-const newSpacesAreBlank = computed(() => { return store.state.currentUser.newSpacesAreBlank })
-const toggleNewSpacesAreBlank = () => {
-  const value = !newSpacesAreBlank.value
-  store.dispatch('currentUser/newSpacesAreBlank', value)
+const shouldHideTutorialCards = computed(() => { return store.state.currentUser.shouldHideTutorialCards })
+const toggleShouldHideTutorialCards = () => {
+  const value = !shouldHideTutorialCards.value
+  store.dispatch('currentUser/shouldHideTutorialCards', value)
 }
 
 // panning
@@ -118,8 +118,8 @@ const clearTips = () => {
     .row
       p New Spaces
     .row
-      label(:class="{active: newSpacesAreBlank}" @click.left.prevent="toggleNewSpacesAreBlank" @keydown.stop.enter="toggleNewSpacesAreBlank")
-        input(type="checkbox" v-model="newSpacesAreBlank")
+      label(:class="{active: shouldHideTutorialCards}" @click.left.prevent="toggleShouldHideTutorialCards" @keydown.stop.enter="toggleShouldHideTutorialCards")
+        input(type="checkbox" v-model="shouldHideTutorialCards")
         span New Spaces Are Blank
 
   section

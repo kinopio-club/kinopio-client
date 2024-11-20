@@ -30,7 +30,7 @@ const initialState = {
   filterShowAbsoluteDates: false,
   filterUnchecked: false,
   filterComments: false,
-  newSpacesAreBlank: false,
+  shouldHideTutorialCards: false,
   shouldEmailNotifications: true,
   shouldEmailBulletin: true,
   shouldEmailWeeklyReview: true,
@@ -214,9 +214,9 @@ export default {
       state.filterComments = value
       cache.updateUser('filterComments', value)
     },
-    newSpacesAreBlank: (state, value) => {
-      state.newSpacesAreBlank = value
-      cache.updateUser('newSpacesAreBlank', value)
+    shouldHideTutorialCards: (state, value) => {
+      state.shouldHideTutorialCards = value
+      cache.updateUser('shouldHideTutorialCards', value)
     },
     shouldEmailNotifications: (state, value) => {
       state.shouldEmailNotifications = value
@@ -625,12 +625,12 @@ export default {
       context.dispatch('toggleFilterUnchecked', false)
       context.dispatch('toggleFilterComments', false)
     },
-    newSpacesAreBlank: (context, value) => {
+    shouldHideTutorialCards: (context, value) => {
       utils.typeCheck({ value, type: 'boolean' })
-      context.commit('newSpacesAreBlank', value)
+      context.commit('shouldHideTutorialCards', value)
       context.dispatch('api/addToQueue', { name: 'updateUser',
         body: {
-          newSpacesAreBlank: value
+          shouldHideTutorialCards: value
         } }, { root: true })
     },
     shouldEmailNotifications: (context, value) => {

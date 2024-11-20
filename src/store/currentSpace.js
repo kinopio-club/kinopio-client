@@ -372,8 +372,8 @@ const currentSpace = {
       space.collaboratorKey = nanoid()
       space.readOnlyKey = nanoid()
       space.moonPhase = utils.moonPhase()
-      const newSpacesAreBlank = currentUser.newSpacesAreBlank
-      if (newSpacesAreBlank) {
+      const shouldHideTutorialCards = currentUser.shouldHideTutorialCards
+      if (shouldHideTutorialCards) {
         space.connectionTypes = []
         space.connections = []
         space.cards = []
