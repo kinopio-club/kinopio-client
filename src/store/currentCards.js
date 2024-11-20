@@ -656,11 +656,6 @@ const currentCards = {
           width: card.width,
           height: card.height
         }
-        if (context.rootState.shouldSnapToGrid) {
-          const position = utils.cursorPositionSnapToGrid(card)
-          card.x = position.x
-          card.y = position.y
-        }
         utils.updateCardDimensionsDataWhileDragging(card)
         return card
       })
