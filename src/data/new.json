@@ -16,8 +16,8 @@
   "cards": [
     {
       "id": "1",
-      "x": 70,
-      "y": 308,
+      "x": 94,
+      "y": 296,
       "z": 0,
       "name": "Get your thoughts, ideas and feelings out",
       "width": 200,
@@ -25,8 +25,8 @@
     },
     {
       "id": "wQ9-NzxQyWoIGGKEgHRMF",
-      "x": 127,
-      "y": 385,
+      "x": 151,
+      "y": 373,
       "name": "Connect them together\n\n[Help and Tutorials](https://help.kinopio.club)",
       "z": 3,
       "width": 193,
