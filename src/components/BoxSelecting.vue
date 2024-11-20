@@ -179,10 +179,15 @@ const orderedPoints = (start, end) => {
 const updateItems = (items) => {
   const origin = startPoint.value
   let selectable = { topLeft: [], topRight: [], bottomLeft: [], bottomRight: [] }
+  items = items.map(item => {
+    item.width = item.width || item.resizeWidth
+    item.height = item.height || item.resizeHeight
+    return item
+  })
   items.forEach(item => {
     const { x, y } = item
-    const width = item.width || item.resizeWidth
-    const height = item.height || item.resizeHeight
+    const width = item.width
+    const height = item.height
     const isTop = y <= origin.y
     const isBottom = (y >= origin.y || y + height >= origin.y)
     const isLeft = x <= origin.x
