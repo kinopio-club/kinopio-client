@@ -1492,7 +1492,7 @@ export default {
     return space
   },
   updateSpaceUserId (space, userId) {
-    space.cards = space.cards.map(card => {
+    space.cards = space.cards?.map(card => {
       if (card.userId === consts.rootUserId) {
         card.userId = null
         return card
@@ -1504,15 +1504,15 @@ export default {
       card.userId = userId
       return card
     })
-    space.boxes = space.boxes.map(box => {
+    space.boxes = space.boxes?.map(box => {
       box.userId = userId
       return box
     })
-    space.connectionTypes = space.connectionTypes.map(type => {
+    space.connectionTypes = space.connectionTypes?.map(type => {
       type.userId = userId
       return type
     })
-    space.connections = space.connections.map(connection => {
+    space.connections = space.connections?.map(connection => {
       connection.userId = userId
       return connection
     })
