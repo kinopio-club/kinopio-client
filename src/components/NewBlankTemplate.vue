@@ -1,18 +1,24 @@
 <script setup>
 import { reactive, computed, onMounted, onBeforeUnmount, defineProps, defineEmits, watch, ref, nextTick } from 'vue'
 import { useStore } from 'vuex'
-const store = useStore()
 
 // import utils from '@/utils.js'
 
+const store = useStore()
+
+// let unsubscribe
+
 onMounted(() => {
   console.log(`🐴 the component is now mounted.`, store.state.currentSpace)
-  // store.subscribe(mutation => {
+  // unsubscribe = store.subscribe(mutation => {
   //   if (mutation.type === 'triggerUpdateOtherCard') {
   //     mutation.payload
   //   }
   // })
 })
+// onBeforeUnmount(() => {
+//   unsubscribe()
+// })
 
 const emit = defineEmits(['updateCount'])
 
