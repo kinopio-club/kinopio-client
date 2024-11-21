@@ -382,15 +382,16 @@ const currentSpace = {
         space.connectionTypes[0].color = randomColor({ luminosity: 'light' })
       }
       const date = dayjs().format('ddd MMM D') // Wed Nov 20
+      const moonPhaseSystemCommandIcon = `::systemCommand=moonPhase`
       const dateCard = {
         id: nanoid(),
         x: 73,
         y: 125,
         z: 0,
-        name: `${date} ${context.rootGetters.dateImageUrl}`,
-        width: 138,
-        height: 138,
-        resizeWidth: 138
+        name: `${moonPhaseSystemCommandIcon} ${date} ${context.rootGetters.dateImageUrl}`,
+        width: 144,
+        height: 144,
+        resizeWidth: 144
       }
       space.cards.push(dateCard)
       space = utils.updateSpaceCardsCreatedThroughPublicApi(space)
