@@ -28,7 +28,7 @@ const toggleShouldDisableHapticFeedback = () => {
   store.commit('currentUser/shouldDisableHapticFeedback', value)
 }
 
-// new spaces are blank
+// hide tutorial cards
 
 const shouldHideTutorialCards = computed(() => { return store.state.currentUser.shouldHideTutorialCards })
 const toggleShouldHideTutorialCards = () => {
@@ -120,7 +120,7 @@ const clearTips = () => {
     .row
       label(:class="{active: shouldHideTutorialCards}" @click.left.prevent="toggleShouldHideTutorialCards" @keydown.stop.enter="toggleShouldHideTutorialCards")
         input(type="checkbox" v-model="shouldHideTutorialCards")
-        span New Spaces Are Blank
+        span Hide Tutorial Cards
 
   section
     .row
