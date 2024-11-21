@@ -20,7 +20,9 @@ import last from 'lodash-es/last'
 
 const store = useStore()
 
-let unsubscribe, shouldPreventSelectSpace
+let unsubscribe
+
+let shouldPreventSelectSpace
 
 const itemsPerPage = 60
 

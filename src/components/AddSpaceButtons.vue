@@ -15,8 +15,6 @@ onMounted(() => {
       closeAllDialogs()
     } else if (mutation.type === 'triggerCloseChildDialogs') {
       closeAllDialogs()
-    } else if (mutation.type === 'triggerAddSpaceIsVisible') {
-      updateAddSpaceIsVisible(true)
     }
   })
 })
@@ -31,9 +29,6 @@ const state = reactive({
 
 const closeAllDialogs = () => {
   state.addSpaceIsVisible = false
-}
-const updateAddSpaceIsVisible = (value) => {
-  state.addSpaceIsVisible = value
 }
 const toggleAddSpaceIsVisible = () => {
   const isVisible = state.addSpaceIsVisible

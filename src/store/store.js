@@ -648,7 +648,6 @@ const store = createStore({
     triggerUpdateOtherCard: (state, cardId) => {},
     triggerUpdateCardDetailsCardName: (state, options) => {},
     triggerCloseChildDialogs: () => {},
-    triggerAddSpaceIsVisible: () => {},
     triggerOfflineIsVisible: () => {},
     triggerAppsAndExtensionsIsVisible: () => {},
     triggerUpdateWindowTitle: () => {},
