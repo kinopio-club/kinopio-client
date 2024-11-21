@@ -25,7 +25,7 @@ const clickCommand = () => {
     store.commit('triggerTemplatesIsVisible')
   } else if (newSpace) {
     store.dispatch('currentSpace/addSpace')
-    store.commit('addNotification', { message: 'New space created', icon: 'add', type: 'success', label: 'N' })
+    store.commit('addNotification', { message: 'New space created (N)', icon: 'add', type: 'success' })
     store.commit('triggerSpaceDetailsInfoIsVisible')
   } else if (apps) {
     store.commit('triggerAppsAndExtensionsIsVisible')

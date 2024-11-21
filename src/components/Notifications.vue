@@ -307,7 +307,6 @@ aside.notifications(@click.left="closeAllDialogs")
     p
       .row(v-if="item.badge")
         span.badge.info {{ item.badge }}
-      span.label-badge(v-if="item.label") {{item.label}}
       template(v-if="item.group")
         GroupLabel(:group="item.group")
       template(v-if="item.icon")
