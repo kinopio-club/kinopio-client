@@ -644,7 +644,7 @@ header(v-if="isVisible" :style="state.position" :class="{'fade-out': isFadingOut
                 img.icon.left-arrow(src="@/assets/down-arrow.svg")
             //- Current Space Name and Info
             .button-wrap.space-name-button-wrap(:class="{ 'back-button-is-visible': backButtonIsVisible }")
-              button.space-name-button(@click.left.stop="toggleSpaceDetailsIsVisible" :class="{ active: state.spaceDetailsIsVisible, 'translucent-button': !shouldIncreaseUIContrast }")
+              button.space-name-button(@click.left.stop="toggleSpaceDetailsIsVisible" :class="{ active: state.spaceDetailsIsVisible, 'translucent-button': !shouldIncreaseUIContrast }" title="Space Details and Spaces List")
                 .button-contents(:class="{'space-is-hidden': currentSpaceIsHidden}")
                   GroupLabel(:group="spaceGroup")
                   span(v-if="currentSpaceIsInbox")

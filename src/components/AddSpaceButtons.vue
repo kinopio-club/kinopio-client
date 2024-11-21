@@ -77,9 +77,9 @@ const addSpace = () => {
 <template lang="pug">
 .button-wrap
   .segmented-buttons.add-space-buttons
-    button.success(@click.left.stop="addNewSpace")
+    button.success(@click.left.stop="addNewSpace" title="New Space (N)")
       img.icon.add(src="@/assets/add.svg")
-    button.success(@click.left.stop="toggleAddSpaceIsVisible" :class="{ active: state.addSpaceIsVisible }")
+    button.success(@click.left.stop="toggleAddSpaceIsVisible" :class="{ active: state.addSpaceIsVisible }" title="New Space Options")
       img.icon.down-arrow(src="@/assets/down-arrow.svg")
   AddSpace(:visible="state.addSpaceIsVisible" :shouldAddSpaceDirectly="shouldAddSpaceDirectly" @closeDialogs="closeDialogs" @addSpace="addSpace")
 </template>
