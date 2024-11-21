@@ -140,7 +140,7 @@ const isFavoriteUser = computed(() => {
 
 // explore spaces
 
-const exploreSpacesIsVisible = computed(() => state.exploreSpaces.length && !state.loading.exploreSpaces && !isCurrentUser.value)
+const exploreSpacesIsVisible = computed(() => state.exploreSpaces?.length && !state.loading.exploreSpaces && !isCurrentUser.value)
 const updateExploreSpaces = async () => {
   if (!props.showExploreSpaces) { return }
   state.loading.exploreSpaces = true
