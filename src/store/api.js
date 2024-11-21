@@ -200,7 +200,7 @@ const self = {
         } else {
           console.warn('🚑 non-critical serverOperationsError operation', operation)
         }
-        cache.moveFailedSendingQueueOperationBackIntoQueue(operation)
+        // context.dispatch('moveFailedSendingQueueOperationBackIntoQueue', operation, { root: true })
       })
       // clear sending queue
       context.commit('clearSendingQueue', null, { root: true })

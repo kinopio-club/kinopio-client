@@ -121,6 +121,7 @@ const handleErrors = async (response) => {
   } else {
     state.error.unknownServerError = true
   }
+  console.error('🚒', response)
 }
 
 // reset password

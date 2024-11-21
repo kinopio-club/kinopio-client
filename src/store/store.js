@@ -1681,16 +1681,16 @@ const store = createStore({
   },
 
   actions: {
-    moveFailedSendingQueueOperationBackIntoQueue: (context, operation) => {
-      // save to queue
-      let queue = cache.queue()
-      queue.unshift(operation)
-      cache.saveQueue(queue)
-      // remove from sending queue
-      let sendingQueue = context.state.sendingQueue
-      sendingQueue = sendingQueue.filter(queueItem => queueItem.body.operationId !== operation.operationId)
-      context.commit('sendingQueue', sendingQueue)
-    },
+    // moveFailedSendingQueueOperationBackIntoQueue: (context, operation) => {
+    //   // save to queue
+    //   let queue = cache.queue()
+    //   queue.unshift(operation)
+    //   cache.saveQueue(queue)
+    //   // remove from sending queue
+    //   let sendingQueue = context.state.sendingQueue
+    //   sendingQueue = sendingQueue.filter(queueItem => queueItem.body.operationId !== operation.operationId)
+    //   context.commit('sendingQueue', sendingQueue)
+    // },
     prevSpaceIdInSession: (context, id) => {
       utils.typeCheck({ value: id, type: 'string' })
       const position = {
