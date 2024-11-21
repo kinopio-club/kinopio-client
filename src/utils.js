@@ -2466,6 +2466,18 @@ export default {
     })
     return commands
   },
+  commandIconsFromString (string) {
+    const allowedCommands = Object.keys(consts.systemCommandIcons)
+    // https://regexr.com/7h3ia
+    const commandPattern = new RegExp(/::systemCommand=\w+/gm)
+    let commands = string.match(commandPattern)
+    if (!commands) { return }
+    commands = commands.filter(command => {
+      const name = this.commandNameFromCommand(command)
+      return allowedCommands.includes(name)
+    })
+    return commands
+  },
   commandNameFromCommand (string) {
     // https://regexr.com/7h3ig
     // ::system_command=xyz → matches xyz
@@ -2507,6 +2519,7 @@ export default {
     const tags = this.tagsFromString(name) || []
     const urls = this.urlsFromString(name) || []
     const commands = this.commandsFromString(name) || []
+    const commandIcons = this.commandIconsFromString(name) || []
     const markdownLinks = name.match(this.markdown().linkPattern) || []
     const links = urls.filter(url => {
       const linkIsMarkdown = markdownLinks.find(markdownLink => markdownLink.includes(url))
@@ -2551,6 +2564,12 @@ export default {
       const endPosition = startPosition + command.length
       const commandName = this.commandNameFromCommand(command)
       segments.push({ startPosition, endPosition, command: commandName, name: consts.systemCommands[commandName], isCommand: true })
+    })
+    commandIcons.forEach(command => {
+      const startPosition = name.indexOf(command)
+      const endPosition = startPosition + command.length
+      const commandName = this.commandNameFromCommand(command)
+      segments.push({ startPosition, endPosition, commandIcon: commandName, name: consts.systemCommandIcons[commandName], isCommandIcon: true })
     })
     segments = this.segmentsWithTextSegments(name, segments)
     return segments

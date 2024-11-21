@@ -26,6 +26,7 @@ export default {
   sidebarWidth: 250,
   minBoxSize: 70,
   systemCommands: { explore: 'Explore', newSpace: 'New Space', templates: 'Templates', apps: 'Apps and Extensions' },
+  systemCommandIcons: { moonPhase: 'moonPhase' },
   isSecureAppContextIOS: navigator.isSecureAppContextIOS, // true = iOS app
   isSecureAppContext: navigator.isSecureAppContext, // true = iOS app
   cdnHost: 'https://cdn.kinopio.club',
