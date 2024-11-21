@@ -4,12 +4,23 @@ import { useStore } from 'vuex'
 
 import utils from '@/utils.js'
 import consts from '@/consts.js'
+
 const store = useStore()
+
+let unsubscribe
 
 let waitingAnimationTimer, shouldCancelWaiting, waitingStartTime
 
 onMounted(() => {
   updateRect()
+  unsubscribe = store.subscribe(mutation => {
+    if (mutation.type === 'clearDraggingItems') {
+      cancelWaitingAnimationFrame()
+    }
+  })
+})
+onBeforeUnmount(() => {
+  unsubscribe()
 })
 
 const props = defineProps({
@@ -121,7 +132,6 @@ const cancelWaitingAnimationFrame = () => {
 const startWaiting = () => {
   shouldCancelWaiting = false
   if (!waitingAnimationTimer) {
-    console.log('startWaiting')
     waitingAnimationTimer = window.requestAnimationFrame(waitingAnimationFrame)
   }
 }
