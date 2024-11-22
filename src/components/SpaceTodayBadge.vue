@@ -27,9 +27,9 @@ const isCreatedYesterday = computed(() => {
 </script>
 
 <template lang="pug">
-span.badge.info.inline-badge.space-today-badge(v-if="isCreatedToday" title="Created today")
+span.badge.info.inline-badge.space-today-badge(v-if="isCreatedToday" title="Created Today")
   img.icon.today(src="@/assets/today.svg")
-span.badge.info.inline-badge.space-today-badge.yesterday(v-if="isCreatedYesterday" title="Created yesterday")
+span.badge.info.inline-badge.space-today-badge.yesterday(v-if="isCreatedYesterday" title="Created Yesterday")
   img.icon.today(src="@/assets/today.svg")
   </template>
 
