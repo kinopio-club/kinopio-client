@@ -359,7 +359,7 @@ const removeSpaceGroup = (group) => {
   .title-row(v-if="!props.shouldHidePin && !state.textareaIsFocused")
     .button-wrap.title-row-small-button-wrap(@click.left="toggleDialogIsPinned" title="Pin dialog")
       button.small-button(:class="{active: dialogIsPinned}")
-        img.icon.cal(src="@/assets/pin.svg")
+        img.icon.pin(src="@/assets/pin.svg")
 
 ReadOnlySpaceInfoBadges(:spaceGroup="spaceGroup")
 

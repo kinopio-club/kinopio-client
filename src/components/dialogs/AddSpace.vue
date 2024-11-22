@@ -77,7 +77,7 @@ const addSpace = () => {
     store.dispatch('currentSpace/addSpace')
     store.commit('triggerSpaceDetailsInfoIsVisible')
   }
-  store.dispatch('analytics/event', 'AddSpaceButtons')
+  store.dispatch('analytics/event', 'addSpaceButtons')
 }
 const addInboxSpace = () => {
   store.commit('isLoadingSpace', true)
