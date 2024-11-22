@@ -5,6 +5,8 @@ import { useStore } from 'vuex'
 import utils from '@/utils.js'
 const store = useStore()
 
+let unsubscribe
+
 let animationTimer, isMultiTouch, startCursor, currentCursor
 
 let observer
@@ -13,7 +15,7 @@ const connectionElement = ref(null)
 const connectionPathElement = ref(null)
 
 onMounted(() => {
-  store.subscribe((mutation, state) => {
+  unsubscribe = store.subscribe((mutation, state) => {
     if (mutation.type === 'clearMultipleSelected') {
       const selectedIds = store.state.multipleConnectionsSelectedIds
       const selected = selectedIds.includes(props.connection.id) || store.state.connectionDetailsIsVisibleForConnectionId === props.connection.id
@@ -42,6 +44,7 @@ onMounted(() => {
 })
 onBeforeUnmount(() => {
   removeViewportObserver()
+  unsubscribe()
 })
 
 const props = defineProps({
