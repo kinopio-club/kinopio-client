@@ -604,7 +604,7 @@ const currentCards = {
         x: endCursor.x * zoom,
         y: endCursor.y * zoom
       }
-      if (context.rootState.shouldSnapToGrid) {
+      if (context.getters.shouldSnapToGrid) {
         prevCursor = utils.cursorPositionSnapToGrid(prevCursor)
         endCursor = utils.cursorPositionSnapToGrid(endCursor)
       }
@@ -655,6 +655,11 @@ const currentCards = {
           id: card.id,
           width: card.width,
           height: card.height
+        }
+        if (context.getters.shouldSnapToGrid) {
+          const position = utils.cursorPositionSnapToGrid(card)
+          card.x = position.x
+          card.y = position.y
         }
         utils.updateCardDimensionsDataWhileDragging(card)
         return card
@@ -1121,6 +1126,10 @@ const currentCards = {
       } else {
         return rootState.currentUser.color
       }
+    },
+    shouldSnapToGrid: (state, getters, rootState, rootGetters) => {
+      if (rootState.currentDraggingBoxId) { return }
+      return rootState.shouldSnapToGrid
     }
   }
 }
