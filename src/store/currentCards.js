@@ -490,8 +490,8 @@ const currentCards = {
           if (isMissingDimensions) { return }
           const body = {
             id: card.id,
-            width: card.width,
-            height: card.height,
+            width: Math.round(card.width),
+            height: Math.round(card.height),
             userId: context.rootState.currentUser.id
           }
           context.commit('update', body)
@@ -537,6 +537,7 @@ const currentCards = {
         let width = card.resizeWidth || card.width
         width = width + deltaX
         width = Math.max(minImageWidth, width)
+        width = Math.round(width)
         const updates = { id: cardId, resizeWidth: width }
         context.dispatch('update', { card: updates })
         context.dispatch('broadcast/update', { updates, type: 'resizeCard', handler: 'currentCards/update' }, { root: true })
