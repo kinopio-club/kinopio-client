@@ -27,17 +27,21 @@ const isCreatedYesterday = computed(() => {
 </script>
 
 <template lang="pug">
-span.badge.info.inline-badge(v-if="isCreatedToday" title="Created today")
-  img.icon(src="@/assets/today.svg")
-span.badge.info.inline-badge.yesterday(v-if="isCreatedYesterday" title="Created yesterday")
-  img.icon(src="@/assets/today.svg")
-</template>
+span.badge.info.inline-badge.space-today-badge(v-if="isCreatedToday" title="Created today")
+  img.icon.today(src="@/assets/today.svg")
+span.badge.info.inline-badge.space-today-badge.yesterday(v-if="isCreatedYesterday" title="Created yesterday")
+  img.icon.today(src="@/assets/today.svg")
+  </template>
 
-<style lang="stylus" scoped>
-.icon
-  width 12px
-  height 12px
-  vertical-align -1px
-.yesterday
-  opacity 0.5
+<style lang="stylus">
+.badge.space-today-badge
+  margin-left 0
+  padding 1px 5px
+  margin-right 4px
+  .icon.today
+    width 11px
+    height 11px
+    vertical-align 0
+  &.yesterday
+    opacity 0.5
 </style>
