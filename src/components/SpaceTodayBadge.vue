@@ -15,12 +15,17 @@ const props = defineProps({
   space: Object
 })
 
+const shouldHide = computed(() => {
+  if (!props.space.createdAt) { return true }
+  const name = props.space.name
+  return name === 'Inbox' || name === 'Hello Kinopio'
+})
 const isCreatedToday = computed(() => {
-  if (!props.space.createdAt) { return }
+  if (shouldHide.value) { return }
   return dayjs(props.space.createdAt).isToday()
 })
 const isCreatedYesterday = computed(() => {
-  if (!props.space.createdAt) { return }
+  if (shouldHide.value) { return }
   return dayjs(props.space.createdAt).isYesterday()
 })
 
