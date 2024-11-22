@@ -51,8 +51,10 @@ let prevIsLoadingUrlPreview
 
 let observer
 
+let unsubscribe
+
 onMounted(async () => {
-  store.subscribe((mutation, state) => {
+  unsubscribe = store.subscribe((mutation, state) => {
     const { type, payload } = mutation
     if (type === 'updateRemoteCurrentConnection' || type === 'removeRemoteCurrentConnection') {
       updateRemoteConnections()
@@ -94,6 +96,7 @@ onMounted(async () => {
 
 onBeforeUnmount(() => {
   removeViewportObserver()
+  unsubscribe()
 })
 
 const props = defineProps({
