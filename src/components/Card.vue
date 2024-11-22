@@ -22,7 +22,10 @@ import UrlPreviewCard from '@/components/UrlPreviewCard.vue'
 import ImageOrVideo from '@/components/ImageOrVideo.vue'
 
 import dayjs from 'dayjs'
+import isToday from 'dayjs/plugin/isToday'
 import qs from '@aguezz/qs-parse'
+
+dayjs.extend(isToday)
 
 const store = useStore()
 
@@ -678,6 +681,11 @@ const dateUpdatedAt = computed(() => {
   } else {
     return 'Just now'
   }
+})
+const dateIsToday = computed(() => {
+  const date = updatedAt.value
+  if (!date) { return }
+  return dayjs(date).isToday()
 })
 const toggleFilterShowAbsoluteDates = () => {
   store.dispatch('currentCards/incrementZ', props.card.id)
@@ -2063,7 +2071,7 @@ article.card-wrap#card(
     .badge-wrap(v-if="filterShowUsers")
       UserLabelInline(:user="createdByUser" :isClickable="true")
     //- Date
-    .badge.secondary.button-badge(v-if="filterShowDateUpdated" @click.left.prevent.stop="toggleFilterShowAbsoluteDates" @touchend.prevent.stop="toggleFilterShowAbsoluteDates")
+    .badge.secondary.button-badge(v-if="filterShowDateUpdated" @click.left.prevent.stop="toggleFilterShowAbsoluteDates" @touchend.prevent.stop="toggleFilterShowAbsoluteDates" :class="{'date-is-today': dateIsToday}")
       img.icon.time(src="@/assets/time.svg")
       .name {{dateUpdatedAt}}
 
@@ -2345,6 +2353,8 @@ article.card-wrap
     .badge + .badge,
     .badge-wrap + .badge
       margin-left 6px
+    .date-is-today
+      background-color var(--info-background)
 
   .comment-user-badge
     display inline
