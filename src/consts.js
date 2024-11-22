@@ -16,6 +16,9 @@ export default {
   normalCardMaxWidth: 200,
   wideCardMaxWidth: 390,
   minCardIframeWidth: 260,
+  emptyCard () {
+    return { width: this.defaultCardWidth, height: 32 }
+  },
   boxSnapGuideWaitingDuration: 1000,
   maxInviteEmailsAllowedToSend: 15,
   defaultConnectionPathCurveControlPoint: 'q90,40',

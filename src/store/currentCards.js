@@ -228,8 +228,8 @@ const currentCards = {
       card.frameId = 0
       card.userId = context.rootState.currentUser.id
       card.urlPreviewIsVisible = true
-      card.width = width || utils.emptyCard().width
-      card.height = height || utils.emptyCard().height
+      card.width = Math.round(width) || consts.emptyCard().width
+      card.height = Math.round(height) || consts.emptyCard().height
       card.isLocked = false
       card.backgroundColor = backgroundColor || defaultBackgroundColor
       card.isRemoved = false
@@ -266,8 +266,8 @@ const currentCards = {
           z: card.z || context.state.ids.length + 1,
           name: card.name,
           frameId: card.frameId || 0,
-          width: card.width,
-          height: card.height,
+          width: Math.round(card.width),
+          height: Math.round(card.height),
           userId: context.rootState.currentUser.id,
           backgroundColor: card.backgroundColor,
           shouldUpdateUrlPreview: true,
@@ -277,7 +277,7 @@ const currentCards = {
           urlPreviewImage: card.urlPreviewImage,
           urlPreviewTitle: card.urlPreviewTitle,
           urlPreviewUrl: card.urlPreviewUrl,
-          maxWidth: card.maxWidth || context.rootState.currentUser.cardSettingsMaxCardWidth
+          maxWidth: Math.round(card.maxWidth) || context.rootState.currentUser.cardSettingsMaxCardWidth
         }
       })
       cards.forEach(card => {
@@ -577,6 +577,7 @@ const currentCards = {
         tilt = tilt + delta
         tilt = Math.min(maxDegrees, tilt)
         tilt = Math.max(-maxDegrees, tilt)
+        tilt = Math.round(tilt)
         const updates = { id: cardId, tilt }
         context.dispatch('update', { card: updates })
         context.dispatch('broadcast/update', { updates, type: 'tiltCard', handler: 'currentCards/update' }, { root: true })

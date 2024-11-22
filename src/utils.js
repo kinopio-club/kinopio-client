@@ -939,9 +939,6 @@ export default {
 
   // Cards
 
-  emptyCard () {
-    return { width: consts.defaultCardWidth, height: 32 }
-  },
   cardElementDimensions (card) {
     if (!card) { return }
     card = this.clone(card)
