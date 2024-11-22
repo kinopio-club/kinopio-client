@@ -418,7 +418,7 @@ template(v-if="state.settingsIsVisible")
       //- Duplicate
       .button-wrap
         button(@click.left="duplicateSpace" title="Duplicate this Space")
-          img.icon.add(src="@/assets/duplicate.svg")
+          img.icon.duplicate(src="@/assets/duplicate.svg")
           span Duplicate
     .row(v-if="isSpaceMember")
       .button-wrap

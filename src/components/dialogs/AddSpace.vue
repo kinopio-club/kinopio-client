@@ -143,7 +143,7 @@ dialog.add-space.narrow(
       //- Duplicate
       .button-wrap
         button(@click.left="duplicateSpace" title="Duplicate this Space")
-          img.icon.add(src="@/assets/duplicate.svg")
+          img.icon.duplicate(src="@/assets/duplicate.svg")
           span Duplicate
 </template>
 <style lang="stylus">

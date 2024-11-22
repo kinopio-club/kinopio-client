@@ -951,6 +951,9 @@ button
   width 11px
   vertical-align 1px
 
+.icon.duplicate
+  vertical-align 1px
+
 label,
 li
   position relative
