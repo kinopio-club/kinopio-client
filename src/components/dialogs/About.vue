@@ -89,8 +89,14 @@ const updateChangelog = async () => {
 const checkChangelogIsUpdated = () => {
   const newId = changelog.value[0].id
   const prevId = cache.prevReadChangelogId()
-  const isUpdated = prevId !== newId
-  store.commit('changelogIsUpdated', isUpdated)
+  if (!prevId) {
+    // first time visitors are updated to latest changelog
+    cache.updatePrevReadChangelogId(newId)
+    store.commit('changelogIsUpdated', false)
+  } else {
+    const isUpdated = prevId !== newId
+    store.commit('changelogIsUpdated', isUpdated)
+  }
 }
 
 // changelog

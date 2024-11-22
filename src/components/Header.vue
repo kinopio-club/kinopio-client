@@ -177,7 +177,7 @@ const toolbarIsVisible = computed(() => {
 
 // new stuff
 
-const shouldChangelogIsUpdated = computed(() => {
+const shouldShowChangelogIsUpdated = computed(() => {
   const isNotDefaultSpace = !store.getters['currentSpace/isHelloKinopio']
   return store.state.changelogIsUpdated && isNotDefaultSpace && userCanEditSpace.value
 })
@@ -582,7 +582,7 @@ header(v-if="isVisible" :style="state.position" :class="{'fade-out': isFadingOut
           .button-wrap
             .logo(alt="kinopio logo" @click.left.stop="toggleAboutIsVisible" @touchend.stop @mouseup.left.stop :class="{active: state.aboutIsVisible}" tabindex="0")
               .logo-image
-                .label-badge.small-badge(v-if="shouldChangelogIsUpdated")
+                .label-badge.small-badge(v-if="shouldShowChangelogIsUpdated")
                   span NEW
               img.down-arrow(src="@/assets/down-arrow.svg")
             About(:visible="state.aboutIsVisible")
