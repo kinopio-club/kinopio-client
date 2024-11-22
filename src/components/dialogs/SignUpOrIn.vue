@@ -191,7 +191,7 @@ const signUp = async (event) => {
   if (isSuccess(response)) {
     store.commit('clearAllNotifications')
     store.commit('currentUser/replaceState', newUser)
-    createSpacesBackup()
+    backupLocalSpaces()
     migrationSpacesConnections()
     updateSpacesUserId()
     updateCurrentSpaceWithNewUserId(currentUser, newUser)
@@ -271,7 +271,7 @@ const notifyIsJoiningGroup = () => {
 
 // update spaces on success
 
-const createSpacesBackup = () => {
+const backupLocalSpaces = () => {
   const spaces = cache.getAllSpaces()
   cache.storeLocal('spacesBackup', spaces)
 }

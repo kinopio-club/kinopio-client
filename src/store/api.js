@@ -97,7 +97,7 @@ const normalizeResponse = async (response) => {
 
 // normalize data
 
-const normalizeSpaceToRemote = (space) => {
+const normalizeRemovedCards = (space) => {
   if (!space.removedCards) { return space }
   space.removedCards.forEach(card => {
     card.isRemoved = true
@@ -698,7 +698,7 @@ const self = {
       try {
         let spaces = cache.getAllSpaces()
         if (!spaces.length) { return }
-        spaces = spaces.map(space => normalizeSpaceToRemote(space))
+        spaces = spaces.map(space => normalizeRemovedCards(space))
         let removedSpaces = cache.getAllRemovedSpaces()
         removedSpaces = removedSpaces.map(space => {
           space.isRemoved = true
@@ -717,7 +717,7 @@ const self = {
     },
     createSpace: async (context, space) => {
       try {
-        space = normalizeSpaceToRemote(space)
+        space = normalizeRemovedCards(space)
         const body = space
         const options = await context.dispatch('requestOptions', { body, method: 'POST', space: context.rootState.currentSpace })
         const response = await fetch(`${consts.apiHost()}/space`, options)
