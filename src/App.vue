@@ -643,7 +643,8 @@ p
     vertical-align middle
 
 .segmented-buttons + .segmented-buttons,
-.button-wrap + .button-wrap
+.button-wrap + .button-wrap,
+.button-wrap + .segmented-buttons
   margin-left 6px
 .segmented-buttons
   > .button-wrap + .button-wrap
@@ -925,9 +926,6 @@ button
   transform rotate(-45deg)
   vertical-align -2px
 
-.icon.tweet
-  height 10px
-
 .icon.stats
   vertical-align -1px
 
@@ -951,6 +949,9 @@ button
 
 .icon.mail
   width 11px
+  vertical-align 1px
+
+.icon.duplicate
   vertical-align 1px
 
 label,

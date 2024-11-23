@@ -100,11 +100,11 @@ const handleShortcuts = (event) => {
     if (store.state.isAddPage) { return }
     if (isDisabledKeyboardShortcut('newSpace')) { return }
     store.dispatch('currentSpace/addSpace')
-    store.commit('addNotification', { message: 'New space created', icon: 'add', type: 'success', label: 'N' })
+    store.commit('addNotification', { message: 'New space created (N)', icon: 'add', type: 'success' })
     store.commit('triggerSpaceDetailsInfoIsVisible')
   // t
   } else if (key === 't' && isSpaceScope) {
-    store.commit('addNotification', { message: 'Theme toggled', type: 'info', label: 'T' })
+    store.commit('addNotification', { message: 'Theme toggled (T)', type: 'info' })
     store.dispatch('themes/toggle')
     store.dispatch('themes/isSystem', false)
   // Backspace, Clear, Delete

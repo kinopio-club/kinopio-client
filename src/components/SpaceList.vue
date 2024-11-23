@@ -4,14 +4,13 @@ import { useStore } from 'vuex'
 
 import templates from '@/data/templates.js'
 import ResultsFilter from '@/components/ResultsFilter.vue'
-import MoonPhase from '@/components/MoonPhase.vue'
 import PrivacyIcon from '@/components/PrivacyIcon.vue'
 import Loader from '@/components/Loader.vue'
 import User from '@/components/User.vue'
 import UserLabelInline from '@/components/UserLabelInline.vue'
 import NameMatch from '@/components/NameMatch.vue'
 import OfflineBadge from '@/components/OfflineBadge.vue'
-import SpaceTodayJournalBadge from '@/components/SpaceTodayJournalBadge.vue'
+import SpaceTodayBadge from '@/components/SpaceTodayBadge.vue'
 import GroupLabel from '@/components/GroupLabel.vue'
 import utils from '@/utils.js'
 import cache from '@/cache.js'
@@ -21,7 +20,9 @@ import last from 'lodash-es/last'
 
 const store = useStore()
 
-let unsubscribe, shouldPreventSelectSpace
+let unsubscribe
+
+let shouldPreventSelectSpace
 
 const itemsPerPage = 60
 
@@ -440,17 +441,12 @@ span.space-list-wrap
               OfflineBadge(:isInline="true" :isDanger="true")
             //- template category
             .badge.info.inline-badge(v-if="showCategory && space.category" :class="categoryClassName(space)") {{space.category}}
-            //- tweet space
-            span(v-if="space.isFromTweet" title="Tweet space")
-              img.icon.tweet(src="@/assets/twitter.svg")
             //- space meta
             template(v-if="space.isFavorite")
               img.icon.favorite-icon(src="@/assets/heart.svg")
             template(v-if="space.name === 'Inbox'")
               img.icon.inbox-icon(src="@/assets/inbox.svg")
-            SpaceTodayJournalBadge(:space="space")
-            //- journal
-            MoonPhase(v-if="space.moonPhase" :moonPhase="space.moonPhase")
+            SpaceTodayBadge(:space="space")
             //- template
             img.icon.templates(v-if="space.isTemplate" src="@/assets/templates.svg" title="Template")
             //- space details
@@ -480,11 +476,6 @@ span.space-list-wrap
 
     .sunglasses
       width 16px
-
-    .icon.tweet
-      min-width 12px
-      margin-right 4px
-      vertical-align -1px
 
     .icon
       flex-shrink 0

@@ -4,11 +4,10 @@ import { useStore } from 'vuex'
 
 import cache from '@/cache.js'
 import SpaceDetailsInfo from '@/components/SpaceDetailsInfo.vue'
-import AddSpace from '@/components/dialogs/AddSpace.vue'
 import SpaceFilters from '@/components/dialogs/SpaceFilters.vue'
 import SpaceList from '@/components/SpaceList.vue'
+import AddSpaceButtons from '@/components/AddSpaceButtons.vue'
 import utils from '@/utils.js'
-import Loader from '@/components/Loader.vue'
 
 import debounce from 'lodash-es/debounce'
 import uniqBy from 'lodash-es/uniqBy'
@@ -61,7 +60,6 @@ watch(() => props.visible, (value, prevValue) => {
 const state = reactive({
   spaces: [],
   favoriteSpaces: [],
-  addSpaceIsVisible: false,
   isLoadingRemoteSpaces: false,
   remoteSpaces: [],
   resultsSectionHeight: null,
@@ -87,7 +85,6 @@ const backButtonIsVisible = computed(() => {
   return spaceId && spaceId !== store.state.currentSpace.id
 })
 const closeDialogs = () => {
-  state.addSpaceIsVisible = false
   state.spaceFiltersIsVisible = false
   store.commit('triggerCloseChildDialogs')
 }
@@ -126,23 +123,16 @@ const updateResultsSectionHeight = async () => {
 // filters
 
 const dialogSpaceFilterSortBy = computed(() => store.state.currentUser.dialogSpaceFilterSortBy)
-const dialogSpaceFilterByType = computed(() => store.state.currentUser.dialogSpaceFilterByType)
 const dialogSpaceFilterByUser = computed(() => store.state.currentUser.dialogSpaceFilterByUser)
 const dialogSpaceFilterShowHidden = computed(() => store.state.currentUser.dialogSpaceFilterShowHidden)
 const dialogSpaceFilterByGroup = computed(() => store.state.currentUser.dialogSpaceFilterByGroup)
 
 const spaceFiltersIsActive = computed(() => {
-  return Boolean(dialogSpaceFilterShowHidden.value || dialogSpaceFilterByType.value || utils.objectHasKeys(dialogSpaceFilterByUser.value) || dialogSpaceFilterSortByIsActive.value) || utils.objectHasKeys(dialogSpaceFilterByGroup.value)
+  return Boolean(dialogSpaceFilterShowHidden.value || utils.objectHasKeys(dialogSpaceFilterByUser.value) || dialogSpaceFilterSortByIsActive.value) || utils.objectHasKeys(dialogSpaceFilterByGroup.value)
 })
 const filteredSpaces = computed(() => {
   let spaces = state.spaces
   spaces = spaces.filter(space => space.id)
-  // filter by space type
-  if (dialogSpaceFilterByType.value === 'journals') {
-    spaces = spaces.filter(space => space.moonPhase)
-  } else if (dialogSpaceFilterByType.value === 'spaces') {
-    spaces = spaces.filter(space => !space.moonPhase)
-  }
   // hide by hidden spaces unless filter active
   if (!dialogSpaceFilterShowHidden.value) {
     spaces = spaces.filter(space => !space.isHidden)
@@ -268,16 +258,6 @@ const addSpace = () => {
   updateLocalSpaces()
   store.commit('triggerFocusSpaceDetailsName')
 }
-const addJournalSpace = () => {
-  window.scrollTo(0, 0)
-  store.dispatch('currentSpace/loadJournalSpace') // triggers updateLocalSpaces in addJournalSpace
-  store.commit('triggerFocusSpaceDetailsName')
-}
-const toggleAddSpaceIsVisible = () => {
-  const isVisible = state.addSpaceIsVisible
-  closeDialogs()
-  state.addSpaceIsVisible = !isVisible
-}
 
 // select space
 
@@ -381,12 +361,7 @@ dialog.space-details.is-pinnable.wide(v-if="props.visible" :open="props.visible"
     .row.title-row
       div
         //- New Space
-        .button-wrap
-          button.success(@click.left.stop="toggleAddSpaceIsVisible" :class="{ active: state.addSpaceIsVisible }")
-            img.icon.add(src="@/assets/add.svg")
-            span New
-            Loader(:visible="isLoadingSpace")
-          AddSpace(:visible="state.addSpaceIsVisible" @closeDialogs="closeDialogs" @addSpace="addSpace" @addJournalSpace="addJournalSpace")
+        AddSpaceButtons(:parentIsInDialog="true" @closeDialogs="closeDialogs" @addSpace="addSpace")
       //- Filters
       .button-wrap
         // no filters

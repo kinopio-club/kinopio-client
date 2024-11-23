@@ -1,6 +1,5 @@
 // functional methods that can see dom, but can't access components or store
 import cache from '@/cache.js'
-import moonphase from '@/moonphase.js'
 import consts from '@/consts.js'
 import codeLanguages from '@/data/codeLanguages.json'
 import helloSpace from '@/data/hello.json'
@@ -940,9 +939,6 @@ export default {
 
   // Cards
 
-  emptyCard () {
-    return { width: consts.defaultCardWidth, height: 32 }
-  },
   cardElementDimensions (card) {
     if (!card) { return }
     card = this.clone(card)
@@ -1435,7 +1431,6 @@ export default {
     return {
       id: spaceId,
       name: 'Loading…',
-      moonPhase: '',
       background: '',
       backgroundTint: '',
       backgroundGradient: null,
@@ -1494,7 +1489,7 @@ export default {
     return space
   },
   updateSpaceUserId (space, userId) {
-    space.cards = space.cards.map(card => {
+    space.cards = space.cards?.map(card => {
       if (card.userId === consts.rootUserId) {
         card.userId = null
         return card
@@ -1506,15 +1501,15 @@ export default {
       card.userId = userId
       return card
     })
-    space.boxes = space.boxes.map(box => {
+    space.boxes = space.boxes?.map(box => {
       box.userId = userId
       return box
     })
-    space.connectionTypes = space.connectionTypes.map(type => {
+    space.connectionTypes = space.connectionTypes?.map(type => {
       type.userId = userId
       return type
     })
-    space.connections = space.connections.map(connection => {
+    space.connections = space.connections?.map(connection => {
       connection.userId = userId
       return connection
     })
@@ -1765,107 +1760,33 @@ export default {
     }
     return dayjs(date)
   },
-
-  // Journal Space 🌚
-
-  journalSpace ({ currentUser, isTomorrow, weather, journalDailyPrompt, journalDailyDateImage }) {
-    let date = dayjs(new Date())
-    if (isTomorrow) {
-      date = date.add(1, 'day')
+  moonPhase (date) {
+    // adapted from https://github.com/t1mwillis/simple-moonphase-js/blob/master/index.js
+    if (!date) {
+      date = dayjs(new Date())
     }
-    const moonPhase = moonphase(date)
-    // space
-    const spaceId = nanoid()
-    let space = this.emptySpace(spaceId)
-    space.name = this.journalSpaceName({ isTomorrow })
-    space.privacy = 'private'
-    space.moonPhase = moonPhase.name
-    space.removedCards = []
-    space.userId = currentUser.id
-    space.connectionTypes = []
-    space.connections = []
-    space.isTemplate = false
-    space.isHidden = false
-    space.isFromTweet = false
-    space.collaboratorKey = nanoid()
-    space = this.newSpaceBackground(space, currentUser)
-    space.background = space.background || consts.defaultSpaceBackground
-    // date
-    let dateCard = {
-      id: nanoid(),
-      name: `${journalDailyDateImage} ${date.format('dddd, MMM D')}`,
-      x: 86,
-      y: 157,
-      resizeWidth: 260,
-      frameId: 0
+    const phases = ['new-moon', 'waxing-crescent', 'waxing-quarter', 'waxing-gibbous', 'full-moon', 'waning-gibbous', 'waning-quarter', 'waning-crescent']
+    let day = date.get('date')
+    let month = date.get('month') + 1 // January is 0!
+    let year = dayjs().get('year')
+    let c = 0
+    let e = 0
+    let jd = 0
+    let phase = 0
+    if (month < 3) {
+      year--
+      month += 12
     }
-    if (weather) {
-      dateCard.name += weather
-    }
-    space.cards.push(dateCard)
-    // daily prompt
-    if (journalDailyPrompt) {
-      let card = { id: nanoid() }
-      card.name = journalDailyPrompt
-      const position = this.promptCardPosition(space.cards, card.name)
-      card.x = position.x
-      card.y = 467
-      card.z = 0
-      card.spaceId = spaceId
-      card.frameId = 5
-      space.cards.push(card)
-    }
-    // user prompts
-    const userPrompts = currentUser.journalPrompts
-    userPrompts.forEach(prompt => {
-      if (!prompt.name) { return }
-      let card = { id: nanoid() }
-      card.name = prompt.name
-      const position = this.promptCardPosition(space.cards, card.name)
-      card.x = position.x
-      card.y = position.y
-      card.z = 0
-      card.spaceId = spaceId
-      space.cards.push(card)
-    })
-    return space
-  },
-
-  journalSpaceName ({ isTomorrow, isYesterday }) {
-    let date = dayjs(new Date())
-    if (isTomorrow) {
-      date = date.add(1, 'day')
-    } else if (isYesterday) {
-      date = date.subtract(1, 'day')
-    }
-    return `${date.format('ddd MMM D/YY')}` // Thu Oct 8/20
-  },
-  journalSpaceDateFromName (name) {
-    // https://regexr.com/6471p
-    const datePattern = new RegExp(/^['A-Za-z]+ ['A-Za-z]+ [0-9]+\/[0-9]{2}/g)
-    let matches = name.match(datePattern)
-    if (matches) {
-      return matches[0]
-    }
-  },
-  promptCardPosition (cards, newCardName) {
-    const lastCard = last(cards)
-    const lastCardY = lastCard.y
-    let lastCardName = lastCard.name.replaceAll('[', '')
-    lastCardName = lastCardName.replaceAll(']', '')
-    const averageCharactersPerLine = 25
-    const lines = Math.ceil(lastCardName.length / averageCharactersPerLine)
-    const lineHeight = 14
-    const padding = 26
-    const lastCardHeight = (lines * lineHeight) + padding + lines
-    let distanceBetween = 50
-    let x = 120
-    if (this.checkboxFromString(newCardName)) {
-      distanceBetween = 12
-      x = 120
-    }
-    const y = lastCardY + lastCardHeight + distanceBetween
-    return { x, y }
+    ++month
+    c = 365.25 * year
+    e = 30.6 * month
+    jd = c + e + day - 694039.09 // jd is total days elapsed
+    jd /= 29.5305882 // divide by the moon cycle
+    phase = parseInt(jd) // int(jd) -> phase, take integer part of jd
+    jd -= phase // subtract integer part to leave fractional part of original jd
+    phase = Math.round(jd * 8) // scale fraction from 0-8 and round
+    if (phase >= 8) phase = 0 // 0 and 8 are the same so turn 8 into 0
+    return phases[phase] // 'new-moon', ...
   },
 
   // urls 🌍
@@ -2542,6 +2463,18 @@ export default {
     })
     return commands
   },
+  commandIconsFromString (string) {
+    const allowedCommands = Object.keys(consts.systemCommandIcons)
+    // https://regexr.com/7h3ia
+    const commandPattern = new RegExp(/::systemCommand=\w+/gm)
+    let commands = string.match(commandPattern)
+    if (!commands) { return }
+    commands = commands.filter(command => {
+      const name = this.commandNameFromCommand(command)
+      return allowedCommands.includes(name)
+    })
+    return commands
+  },
   commandNameFromCommand (string) {
     // https://regexr.com/7h3ig
     // ::system_command=xyz → matches xyz
@@ -2583,6 +2516,7 @@ export default {
     const tags = this.tagsFromString(name) || []
     const urls = this.urlsFromString(name) || []
     const commands = this.commandsFromString(name) || []
+    const commandIcons = this.commandIconsFromString(name) || []
     const markdownLinks = name.match(this.markdown().linkPattern) || []
     const links = urls.filter(url => {
       const linkIsMarkdown = markdownLinks.find(markdownLink => markdownLink.includes(url))
@@ -2627,6 +2561,12 @@ export default {
       const endPosition = startPosition + command.length
       const commandName = this.commandNameFromCommand(command)
       segments.push({ startPosition, endPosition, command: commandName, name: consts.systemCommands[commandName], isCommand: true })
+    })
+    commandIcons.forEach(command => {
+      const startPosition = name.indexOf(command)
+      const endPosition = startPosition + command.length
+      const commandName = this.commandNameFromCommand(command)
+      segments.push({ startPosition, endPosition, commandIcon: commandName, name: consts.systemCommandIcons[commandName], isCommandIcon: true })
     })
     segments = this.segmentsWithTextSegments(name, segments)
     return segments

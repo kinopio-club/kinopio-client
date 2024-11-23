@@ -25,8 +25,10 @@ import debounce from 'lodash-es/debounce'
 
 const store = useStore()
 
+let unsubscribe
+
 let prevCursor, endCursor, shouldCancel
-let processQueueIntervalTimer, updateJournalDailyPromptTimer, updateInboxCache
+let processQueueIntervalTimer, hourlyTasks
 
 // init user and space app state
 store.dispatch('currentUser/init')
@@ -34,6 +36,7 @@ store.dispatch('currentSpace/init')
 store.commit('broadcast/connect')
 store.dispatch('groups/init')
 store.dispatch('analytics/event', 'pageview')
+store.dispatch('api/updateDateImage')
 
 onMounted(() => {
   // bind events to window to receive events when mouse is outside window
@@ -56,45 +59,44 @@ onMounted(() => {
     store.commit('webfontIsLoaded', true)
   })
   store.dispatch('currentUser/restoreUserFavorites')
-  store.subscribe((mutation, state) => {
+  unsubscribe = store.subscribe((mutation, state) => {
     if (mutation.type === 'triggerRestoreSpaceRemoteComplete') {
       dragItemsOnNextTick()
     }
   })
   updateIconsNotDraggable()
+
+  setTimeout(() => {
+    store.dispatch('currentSpace/updateInboxCache')
+  }, 15000) // 15 seconds after mounted
+
   // ⏰ scheduled tasks
   // retry failed sync operations
   processQueueIntervalTimer = setInterval(() => {
     store.dispatch('api/sendQueue')
   }, 5000) // every 5 seconds
-  // update journal daily prompt
-  updateJournalDailyPromptTimer = setInterval(() => {
-    store.dispatch('currentUser/updateJournalDailyPrompt')
-  }, 1000 * 60 * 60 * 1) // every hour
-  // update inbox space in local storage
-  setTimeout(() => {
+  // update inbox space in local storage, one time
+  hourlyTasks = setInterval(() => {
     store.dispatch('currentSpace/updateInboxCache')
-  }, 15000) // 15 seconds after mounted, one-time
-  updateInboxCache = setInterval(() => {
-    store.dispatch('currentSpace/updateInboxCache')
+    store.dispatch('api/updateDateImage')
   }, 1000 * 60 * 60 * 1) // every 1 hour
 })
 
 onBeforeUnmount(() => {
+  unsubscribe()
   window.removeEventListener('mousemove', interact)
   window.removeEventListener('touchmove', interact)
   window.removeEventListener('mouseup', stopInteractions)
   window.removeEventListener('touchend', handleTouchEnd)
   window.removeEventListener('visibilitychange', handleTouchEnd)
-  window.removeEventListener('unload', unloadPage)
+  window.removeEventListener('beforeunload', unloadPage)
   window.removeEventListener('message', addCardFromOutsideAppContext)
   window.removeEventListener('popstate', loadSpaceOnBackOrForward)
   window.removeEventListener('touchend', updateViewportSizes)
   window.removeEventListener('gesturecancel', updateViewportSizes)
   window.removeEventListener('resize', updateViewportSizes)
   clearInterval(processQueueIntervalTimer)
-  clearInterval(updateJournalDailyPromptTimer)
-  clearInterval(updateInboxCache)
+  clearInterval(hourlyTasks)
 })
 
 const state = reactive({

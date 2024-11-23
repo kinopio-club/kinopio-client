@@ -7,7 +7,6 @@ import SpaceDetails from '@/components/dialogs/SpaceDetails.vue'
 import SpaceDetailsInfo from '@/components/dialogs/SpaceDetailsInfo.vue'
 import SpaceStatus from '@/components/dialogs/SpaceStatus.vue'
 import Offline from '@/components/dialogs/Offline.vue'
-import MoonPhase from '@/components/MoonPhase.vue'
 import User from '@/components/User.vue'
 import SignUpOrIn from '@/components/dialogs/SignUpOrIn.vue'
 import UpdatePassword from '@/components/dialogs/UpdatePassword.vue'
@@ -20,7 +19,6 @@ import KeyboardShortcuts from '@/components/dialogs/KeyboardShortcuts.vue'
 import AppsAndExtensions from '@/components/dialogs/AppsAndExtensions.vue'
 import UpgradeUser from '@/components/dialogs/UpgradeUser.vue'
 import Search from '@/components/dialogs/Search.vue'
-import AddSpace from '@/components/dialogs/AddSpace.vue'
 import Templates from '@/components/dialogs/Templates.vue'
 import Sidebar from '@/components/dialogs/Sidebar.vue'
 import PrivacyIcon from '@/components/PrivacyIcon.vue'
@@ -32,13 +30,13 @@ import Donate from '@/components/dialogs/Donate.vue'
 import Toolbar from '@/components/Toolbar.vue'
 import ImportExport from '@/components/dialogs/ImportExport.vue'
 import Pricing from '@/components/dialogs/Pricing.vue'
-import SpaceTodayJournalBadge from '@/components/SpaceTodayJournalBadge.vue'
 import DiscoveryButtons from '@/components/DiscoveryButtons.vue'
 import UserSettings from '@/components/dialogs/UserSettings.vue'
 import SpaceUserList from '@/components/dialogs/SpaceUserList.vue'
 import CommentButton from '@/components/CommentButton.vue'
 import FavoriteSpaceButton from '@/components/FavoriteSpaceButton.vue'
 import GroupLabel from '@/components/GroupLabel.vue'
+import AddSpaceButtons from '@/components/AddSpaceButtons.vue'
 import UserGroups from '@/components/dialogs/UserGroups.vue'
 import consts from '@/consts.js'
 
@@ -103,8 +101,6 @@ onMounted(() => {
       updateSidebarIsVisible(true)
     } else if (mutation.type === 'triggerImportIsVisible') {
       updateImportIsVisible(true)
-    } else if (mutation.type === 'triggerAddSpaceIsVisible') {
-      updateAddSpaceIsVisible(true)
     }
   })
 })
@@ -130,7 +126,6 @@ const state = reactive({
   readOnlyJiggle: false,
   notifications: [],
   notificationsIsLoading: true,
-  addSpaceIsVisible: false,
   isHidden: false,
   templatesIsVisible: false,
   sidebarIsVisible: false,
@@ -182,7 +177,7 @@ const toolbarIsVisible = computed(() => {
 
 // new stuff
 
-const shouldChangelogIsUpdated = computed(() => {
+const shouldShowChangelogIsUpdated = computed(() => {
   const isNotDefaultSpace = !store.getters['currentSpace/isHelloKinopio']
   return store.state.changelogIsUpdated && isNotDefaultSpace && userCanEditSpace.value
 })
@@ -339,7 +334,6 @@ const closeAllDialogs = () => {
   state.donateIsVisible = false
   state.spaceStatusIsVisible = false
   state.notificationsIsVisible = false
-  state.addSpaceIsVisible = false
   state.templatesIsVisible = false
   state.importIsVisible = false
   if (!store.state.spaceDetailsIsPinned) {
@@ -406,14 +400,6 @@ const toggleNotificationsIsVisible = () => {
   if (state.notificationsIsVisible) {
     updateNotifications()
   }
-}
-const updateAddSpaceIsVisible = (value) => {
-  state.addSpaceIsVisible = value
-}
-const toggleAddSpaceIsVisible = () => {
-  const isVisible = state.addSpaceIsVisible
-  store.dispatch('closeAllDialogs')
-  state.addSpaceIsVisible = !isVisible
 }
 const updateSidebarIsVisible = (value) => {
   state.sidebarIsVisible = value
@@ -578,7 +564,6 @@ header(v-if="isVisible" :style="state.position" :class="{'fade-out': isFadingOut
       button(:class="{ 'translucent-button': !shouldIncreaseUIContrast }")
         .logo
           .logo-image
-        MoonPhase(v-if="currentSpace.moonPhase" :moonPhase="currentSpace.moonPhase")
         GroupLabel(:group="spaceGroup")
         span {{currentSpaceName}}{{' '}}
         img.icon.visit(src="@/assets/visit.svg")
@@ -597,7 +582,7 @@ header(v-if="isVisible" :style="state.position" :class="{'fade-out': isFadingOut
           .button-wrap
             .logo(alt="kinopio logo" @click.left.stop="toggleAboutIsVisible" @touchend.stop @mouseup.left.stop :class="{active: state.aboutIsVisible}" tabindex="0")
               .logo-image
-                .label-badge.small-badge(v-if="shouldChangelogIsUpdated")
+                .label-badge.small-badge(v-if="shouldShowChangelogIsUpdated")
                   span NEW
               img.down-arrow(src="@/assets/down-arrow.svg")
             About(:visible="state.aboutIsVisible")
@@ -606,14 +591,8 @@ header(v-if="isVisible" :style="state.position" :class="{'fade-out': isFadingOut
             AppsAndExtensions(:visible="state.appsAndExtensionsIsVisible")
         .space-meta-rows
           .space-functions-row
-            .segmented-buttons
-              //- Add Space
-              .button-wrap
-                button.success(@click.left.stop="toggleAddSpaceIsVisible" :class="{ active: state.addSpaceIsVisible }")
-                  img.icon.add(src="@/assets/add.svg")
-                  span New
-                AddSpace(:visible="state.addSpaceIsVisible" :shouldAddSpaceDirectly="true")
-                Templates(:visible="state.templatesIsVisible")
+            //- Add Space
+            AddSpaceButtons
             //- Search
             .segmented-buttons
               .button-wrap
@@ -664,15 +643,13 @@ header(v-if="isVisible" :style="state.position" :class="{'fade-out': isFadingOut
                 img.icon.left-arrow(src="@/assets/down-arrow.svg")
             //- Current Space Name and Info
             .button-wrap.space-name-button-wrap(:class="{ 'back-button-is-visible': backButtonIsVisible }")
-              button.space-name-button(@click.left.stop="toggleSpaceDetailsIsVisible" :class="{ active: state.spaceDetailsIsVisible, 'translucent-button': !shouldIncreaseUIContrast }")
+              button.space-name-button(@click.left.stop="toggleSpaceDetailsIsVisible" :class="{ active: state.spaceDetailsIsVisible, 'translucent-button': !shouldIncreaseUIContrast }" title="Space Details and Spaces List")
                 .button-contents(:class="{'space-is-hidden': currentSpaceIsHidden}")
                   GroupLabel(:group="spaceGroup")
                   span(v-if="currentSpaceIsInbox")
                     img.icon.inbox-icon(src="@/assets/inbox.svg")
                   span(v-if="currentSpaceIsTemplate")
                     img.icon.templates(src="@/assets/templates.svg")
-                  SpaceTodayJournalBadge(:space="currentSpace")
-                  MoonPhase(v-if="currentSpace.moonPhase" :moonPhase="currentSpace.moonPhase")
                   span {{currentSpaceName}}
                     PrivacyIcon(:privacy="currentSpace.privacy" :closedIsNotVisible="true")
                   img.icon.sunglasses.explore(src="@/assets/sunglasses.svg" v-if="shouldShowInExplore" title="Shown in Explore")
@@ -680,6 +657,7 @@ header(v-if="isVisible" :style="state.position" :class="{'fade-out': isFadingOut
               ImportArenaChannel(:visible="importArenaChannelIsVisible")
               SpaceDetailsInfo(:visible="state.spaceDetailsInfoIsVisible")
               ImportExport(:visible="state.importIsVisible" :isImport="true")
+              Templates(:visible="state.templatesIsVisible")
 
               //- read only badge
               .label-badge.space-name-badge-wrap(v-if="!userCanEditSpace")
@@ -732,6 +710,13 @@ header(v-if="isVisible" :style="state.position" :class="{'fade-out': isFadingOut
           button(@click.left.stop="toggleUpgradeUserIsVisible" :class="{active: state.upgradeUserIsVisible, 'translucent-button': !shouldIncreaseUIContrast}")
             span Upgrade
           UpgradeUser(:visible="state.upgradeUserIsVisible" @closeDialog="closeAllDialogs")
+        //- Donate
+        //- .button-wrap
+        //-   .segmented-buttons
+        //-     button Donate
+        //-     button
+        //-       img.icon.cancel(src="@/assets/add.svg")
+
         //- comments
         //- CommentButton
 
@@ -841,11 +826,8 @@ header
       text-overflow ellipsis
     .space-name-button
       max-width 100%
-      .icon.templates,
-      .icon.tweet
+      .icon.templates
         margin-right 4px
-      .icon.tweet
-        vertical-align -1px
     dialog
       max-width initial
     .space-name-button-wrap

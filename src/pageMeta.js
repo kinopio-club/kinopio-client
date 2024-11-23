@@ -78,7 +78,7 @@ export default {
       return card
     })
     cards = cards.filter(card => card.name)
-    let boxes = space.boxes.map(box => {
+    let boxes = space.boxes?.map(box => {
       box.distanceFromOrigin = utils.distanceBetweenTwoPoints(box, origin)
       return box
     })

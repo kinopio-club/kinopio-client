@@ -8,6 +8,11 @@ import Loader from '@/components/Loader.vue'
 import utils from '@/utils.js'
 import cache from '@/cache.js'
 
+import dayjs from 'dayjs'
+import isToday from 'dayjs/plugin/isToday'
+
+dayjs.extend(isToday)
+
 const store = useStore()
 
 const itemsPerPage = 15
@@ -79,11 +84,12 @@ const cardIsActive = (card) => {
 const cardIsFocused = (card) => {
   return store.state.previousResultItem.id === card.id
 }
+const cardDate = (card) => {
+  return props.dateIsCreatedAt || card.nameUpdatedAt || card.updatedAt
+}
 const relativeDate = (card) => {
-  if (props.dateIsCreatedAt) {
-    return utils.shortRelativeTime(card.createdAt)
-  }
-  return utils.shortRelativeTime(card.nameUpdatedAt || card.updatedAt)
+  const date = cardDate(card)
+  return utils.shortRelativeTime(date)
 }
 const userIsNotCurrentUser = (userId) => {
   return store.state.currentUser.id !== userId
@@ -102,6 +108,11 @@ const styles = (card) => {
   return {
     backgroundColor: card.backgroundColor
   }
+}
+const dateIsToday = (card) => {
+  const date = cardDate(card)
+  if (!date) { return }
+  return dayjs(date).isToday()
 }
 
 // scroll
@@ -161,7 +172,7 @@ span
     template(v-for="card in itemsRendered" :key="card.id")
       li(@click.stop="selectCard(card)" :data-card-id="card.id" :class="{active: cardIsActive(card), hover: cardIsFocused(card)}")
         //- date
-        span.badge.status.inline-badge
+        span.badge.status.inline-badge(:class="{'date-is-today': dateIsToday(card)}")
           img.icon.time(src="@/assets/time.svg")
           span {{ relativeDate(card) }}
         //- user
@@ -196,6 +207,8 @@ span
       max-width 48px
       border-radius var(--small-entity-radius)
       vertical-align middle
+  .badge.date-is-today
+    background-color var(--info-background)
   .time
     vertical-align 0
     height 11px

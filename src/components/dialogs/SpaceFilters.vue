@@ -47,7 +47,6 @@ const updateDialogHeight = async () => {
 // filters
 
 const dialogSpaceFilterSortBy = computed(() => store.state.currentUser.dialogSpaceFilterSortBy)
-const dialogSpaceFilterByType = computed(() => store.state.currentUser.dialogSpaceFilterByType)
 const dialogSpaceFilterByUser = computed(() => store.state.currentUser.dialogSpaceFilterByUser)
 const dialogSpaceFilterShowHidden = computed(() => store.state.currentUser.dialogSpaceFilterShowHidden)
 const dialogSpaceFilterByGroup = computed(() => store.state.currentUser.dialogSpaceFilterByGroup)
@@ -55,7 +54,6 @@ const dialogSpaceFilterByGroup = computed(() => store.state.currentUser.dialogSp
 // clear all
 
 const clearAllFilters = () => {
-  updateFilterByType(null)
   updateGroupFilter({})
   updateUserFilter({})
   updateSortBy(null)
@@ -63,9 +61,6 @@ const clearAllFilters = () => {
 }
 const totalFiltersActive = computed(() => {
   let count = 0
-  if (dialogSpaceFilterByType.value) {
-    count += 1
-  }
   if (dialogSpaceFilterSortBy.value === 'createdAt') {
     count += 1
   }
@@ -94,20 +89,6 @@ const showHiddenSpace = computed({
 const toggleShowHiddenSpace = () => {
   const value = !dialogSpaceFilterShowHidden.value
   store.dispatch('currentUser/update', { dialogSpaceFilterShowHidden: value })
-}
-
-// by types
-
-const filterByTypeAll = computed(() => Boolean(!dialogSpaceFilterByType.value))
-const filterByTypeSpaces = computed(() => dialogSpaceFilterByType.value === 'spaces')
-const filterByTypeJournals = computed(() => dialogSpaceFilterByType.value === 'journals')
-const updateFilterByType = (value) => {
-  store.dispatch('currentUser/update', { dialogSpaceFilterByType: value })
-  if (value === 'journals') {
-    updateSortBy('createdAt')
-  } else {
-    updateSortBy('updatedAt')
-  }
 }
 
 // sort by
@@ -184,31 +165,9 @@ dialog.narrow.space-filters(v-if="props.visible" :open="props.visible" @click.le
         span.badge.info.filter-is-active(v-if="totalFiltersActive")
 
   section
-    //- types visibile
-    section.subsection
-      .row.title-row
-        span
-          //- img.icon(src="@/assets/view.svg")
-          span Show
-        .checkbox-wrap
-          label.small-button(:class="{active: showHiddenSpace}" title="Show hidden spaces")
-            input(type="checkbox" v-model="showHiddenSpace")
-            //- img.icon(v-if="!showHiddenSpace" src="@/assets/view.svg")
-            //- img.icon(v-if="showHiddenSpace" src="@/assets/view-hidden.svg")
-            span Hidden
-
-      .segmented-buttons
-        button(@click="updateFilterByType(null)" :class="{active: filterByTypeAll}" title="Show all spaces")
-          span All
-        button(@click="updateFilterByType('spaces')" :class="{active: filterByTypeSpaces}" title="Show normal spaces only")
-          span Spaces
-        button(@click="updateFilterByType('journals')" :class="{active: filterByTypeJournals}" title="Show journal spaces only")
-          span Journals
-
     //- sort by
     section.subsection
       p
-        //- img.icon.time(src="@/assets/time.svg")
         span Sort by
       .segmented-buttons
         button(:class="{active: isSortByUpdatedAt}" @click="updateSortBy('updatedAt')" title="Sort spaces by updated at")
@@ -217,6 +176,12 @@ dialog.narrow.space-filters(v-if="props.visible" :open="props.visible" @click.le
           span Created
         button(:class="{active: isSortByAlphabetical}" @click="updateSortBy('alphabetical')" title="Sort spaces alphabetically")
           span ABC
+    //- show hidden
+    .row
+      .checkbox-wrap.button-wrap
+        label(:class="{active: showHiddenSpace}" title="Show hidden spaces")
+          input(type="checkbox" v-model="showHiddenSpace")
+          span Show Hidden
 
   //- loading
   section(v-if="isLoading")

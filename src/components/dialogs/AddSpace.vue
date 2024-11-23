@@ -2,10 +2,8 @@
 import { reactive, computed, onMounted, onBeforeUnmount, onUnmounted, defineProps, defineEmits, watch, ref, nextTick } from 'vue'
 import { useStore } from 'vuex'
 
-import JournalPrompt from '@/components/JournalPrompt.vue'
-import moonphase from '@/moonphase.js'
-import MoonPhase from '@/components/MoonPhase.vue'
-import Weather from '@/components/Weather.vue'
+import UserTemplateSpaceList from '@/components/UserTemplateSpaceList.vue'
+import Loader from '@/components/Loader.vue'
 import utils from '@/utils.js'
 import cache from '@/cache.js'
 
@@ -20,7 +18,7 @@ onMounted(() => {
   window.addEventListener('resize', updateDialogHeight)
 })
 
-const emit = defineEmits(['closeDialogs', 'addJournalSpace', 'addSpace'])
+const emit = defineEmits(['closeDialogs', 'addSpace'])
 
 const props = defineProps({
   visible: Boolean,
@@ -30,7 +28,6 @@ watch(() => props.visible, (value, prevValue) => {
   closeAll()
   shouldHideFooter(false)
   if (value) {
-    state.moonPhase = moonphase()
     checkIfUserHasInboxSpace()
     store.commit('shouldExplicitlyHideFooter', true)
     updateDialogHeight()
@@ -40,17 +37,14 @@ watch(() => props.visible, (value, prevValue) => {
 })
 
 const state = reactive({
-  moonPhase: {},
-  journalSettingsIsVisible: false,
   urlIsCopied: false,
-  screenIsShort: false,
   dialogHeight: null,
-  hasInboxSpace: true
+  hasInboxSpace: true,
+  templatesIsLoading: true
 })
 
 const currentUserId = computed(() => store.state.currentUser.id)
 const closeAll = () => {
-  state.journalSettingsIsVisible = false
   state.urlIsCopied = false
 }
 
@@ -61,11 +55,6 @@ const updateDialogHeight = async () => {
   await nextTick()
   let element = dialogElement.value
   state.dialogHeight = utils.elementHeight(element)
-}
-const showScreenIsShort = (value) => {
-  state.screenIsShort = true
-  shouldHideFooter(true)
-  updateDialogHeight()
 }
 const shouldHideFooter = (value) => {
   store.commit('shouldExplicitlyHideFooter', value)
@@ -88,7 +77,7 @@ const addSpace = () => {
     store.dispatch('currentSpace/addSpace')
     store.commit('triggerSpaceDetailsInfoIsVisible')
   }
-  store.dispatch('analytics/event', 'addSpaceButton')
+  store.dispatch('analytics/event', 'addSpaceButtons')
 }
 const addInboxSpace = () => {
   store.commit('isLoadingSpace', true)
@@ -96,48 +85,8 @@ const addInboxSpace = () => {
   window.scrollTo(0, 0)
   store.dispatch('currentSpace/addInboxSpace')
 }
-
-// journal
-
-const addJournalSpace = () => {
-  store.commit('isLoadingSpace', true)
-  emit('closeDialogs')
-  window.scrollTo(0, 0)
-  emit('addJournalSpace')
-  if (props.shouldAddSpaceDirectly) {
-    store.dispatch('closeAllDialogs')
-    store.dispatch('currentSpace/loadJournalSpace')
-    store.commit('triggerSpaceDetailsInfoIsVisible')
-  }
-  store.dispatch('analytics/event', 'addJournalSpaceButton')
-}
-const shouldCreateJournalsWithDailyPrompt = computed(() => {
-  return store.state.currentUser.shouldCreateJournalsWithDailyPrompt
-})
-const dailyPrompt = computed(() => {
-  return store.state.currentUser.journalDailyPrompt
-})
-
-const toggleShouldCreateJournalsWithDailyPrompt = () => {
-  const value = !shouldCreateJournalsWithDailyPrompt.value
-  store.dispatch('currentUser/update', { shouldCreateJournalsWithDailyPrompt: value })
-}
-const toggleJournalSettingsIsVisible = () => {
-  const value = !state.journalSettingsIsVisible
-  closeAll()
-  state.journalSettingsIsVisible = value
-  updateDialogHeight()
-}
-const userPrompts = computed(() => {
-  let prompts = store.state.currentUser.journalPrompts
-  return prompts
-})
-const addCustomPrompt = async () => {
-  const emptyPrompt = { id: nanoid(), name: '', userId: currentUserId.value }
-  store.dispatch('currentUser/addJournalPrompt', emptyPrompt)
-  await nextTick()
-  const textareas = document.querySelectorAll('.add-space textarea')
-  last(textareas).focus()
+const duplicateSpace = () => {
+  store.dispatch('currentSpace/duplicateSpace')
 }
 
 // inbox space
@@ -149,17 +98,14 @@ const checkIfUserHasInboxSpace = async () => {
 
 // templates, import
 
-const triggerTemplatesIsVisible = () => {
-  closeAll()
-  store.dispatch('closeAllDialogs')
-  store.commit('triggerTemplatesIsVisible')
+const updateTemplatesIsLoading = (value) => {
+  state.templatesIsLoading = value
 }
 const triggerImportIsVisible = () => {
   closeAll()
   store.dispatch('closeAllDialogs')
   store.commit('triggerImportIsVisible')
 }
-
 </script>
 
 <template lang="pug">
@@ -168,7 +114,6 @@ dialog.add-space.narrow(
   :open="visible"
   @touchend.stop
   @click.left.stop
-  :class="{'short': state.screenIsShort}"
   ref="dialogElement"
   :style="{'max-height': state.dialogHeight + 'px'}"
 )
@@ -180,39 +125,6 @@ dialog.add-space.narrow(
           img.icon(src="@/assets/add.svg")
           span New Space
 
-    //- Add Journal
-    .row
-      .segmented-buttons
-        button(@click="addJournalSpace")
-          img.icon(src="@/assets/add.svg")
-          span Daily Journal Space
-        button(@click.left.stop="toggleJournalSettingsIsVisible" :class="{ active: state.journalSettingsIsVisible }")
-          img.icon.down-arrow.button-down-arrow(src="@/assets/down-arrow.svg")
-
-    //- Journal Settings
-    template(v-if="state.journalSettingsIsVisible")
-      //- weather
-      section.subsection
-        Weather
-      //- daily prompt
-      section.subsection
-        .row.daily-prompt-row
-          .button-wrap
-            button(@click.left.prevent="toggleShouldCreateJournalsWithDailyPrompt" @keydown.stop.enter="toggleShouldCreateJournalsWithDailyPrompt" :class="{ active: shouldCreateJournalsWithDailyPrompt }")
-              //- img.icon.today(src="@/assets/today.svg")
-              MoonPhase(:moonPhase="state.moonPhase.name")
-              span Prompt of the Day
-        .row(v-if="shouldCreateJournalsWithDailyPrompt")
-          p {{dailyPrompt}}
-      //- prompts
-      section.subsection
-        JournalPrompt(v-for="prompt in userPrompts" :prompt="prompt" :key="prompt.id" @showScreenIsShort="showScreenIsShort" @addPrompt="addCustomPrompt")
-        //- add prompt
-        .row
-          button(@click.left="addCustomPrompt")
-            img.icon(src="@/assets/add.svg")
-            span Prompt
-
   //- Inbox
   section(v-if="!state.hasInboxSpace")
     button(@click="addInboxSpace")
@@ -220,29 +132,25 @@ dialog.add-space.narrow(
       img.icon.inbox-icon(src="@/assets/inbox.svg")
       span Inbox
     p For collecting ideas to figure out later
-
-  //- Templates and Import
+  //- Templates
+  UserTemplateSpaceList(@updateDialogHeight="updateDialogHeight" @isLoading="updateTemplatesIsLoading")
+  //- Import
   section
-    //- templates
-    .button-wrap
-      button(@click="triggerTemplatesIsVisible")
-        img.icon.templates(src="@/assets/templates.svg")
-        span Templates
-    //- import
-    .button-wrap
-      button(@click="triggerImportIsVisible") Import
+    .row
+      //- import
+      .button-wrap
+        button(@click="triggerImportIsVisible") Import
+      //- Duplicate
+      .button-wrap
+        button(@click.left="duplicateSpace" title="Duplicate this Space")
+          img.icon.duplicate(src="@/assets/duplicate.svg")
+          span Duplicate
 </template>
 <style lang="stylus">
 dialog.add-space
   overflow auto
   max-height calc(100vh - 230px)
-  &.short
-    top -68px !important
   .inbox-icon
     margin 0
     margin-left 5px
-  .daily-prompt-row
-    justify-content space-between
-    .moon-phase
-      vertical-align -1px
 </style>

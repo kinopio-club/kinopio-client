@@ -9,6 +9,7 @@ import consts from '@/consts.js'
 
 import { nanoid } from 'nanoid'
 import randomColor from 'randomcolor'
+import dayjs from 'dayjs'
 
 const store = useStore()
 
@@ -122,9 +123,11 @@ const validateSchema = (space, schema) => {
 
 const convertFromCanvas = (space) => {
   const minPositionValue = 150
+  let date = dayjs(new Date())
+  date = date.format(consts.nameDateFormat)
   let newSpace = {}
   try {
-    newSpace.name = `Canvas ${utils.journalSpaceName({})}`
+    newSpace.name = `Canvas ${date}`
     newSpace.id = nanoid()
     newSpace.background = consts.defaultSpaceBackground
     newSpace.cards = []
