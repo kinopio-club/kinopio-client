@@ -35,9 +35,7 @@ export default {
 
     addFavoriteSpace: (context, favoriteSpace) => {
       const userId = context.rootState.currentUser.id
-      const recipientUserIds = context.getters.recipientUserIds
-      const isCurrentUserSpace = recipientUserIds.includes(userId)
-      if (isCurrentUserSpace) { return }
+      const recipientUserIds = context.getters.recipientMemberIds
       const notification = {
         type: 'addFavoriteSpace',
         userId,
@@ -131,6 +129,22 @@ export default {
         contributors = rootState.currentSpace.cards.map(card => card.userId)
         recipients = members.concat(contributors)
       }
+      // group users who added cards
+      let groupUsers = rootGetters['currentCards/groupUsersWhoAddedCards'] || []
+      groupUsers = groupUsers.map(user => user.id)
+      recipients = recipients.concat(groupUsers)
+      recipients = uniq(recipients)
+      // exclude currently connected recipients
+      recipients = recipients.filter(userId => userId !== currentUserId)
+      recipients = recipients.filter(userId => Boolean(userId))
+      return recipients
+    },
+    recipientMemberIds: (state, getters, rootState, rootGetters) => {
+      const currentUserId = rootState.currentUser.id
+      // space members
+      let members = rootGetters['currentSpace/members'](true)
+      members = members.map(member => member.id)
+      let recipients = members
       // group users who added cards
       let groupUsers = rootGetters['currentCards/groupUsersWhoAddedCards'] || []
       groupUsers = groupUsers.map(user => user.id)
