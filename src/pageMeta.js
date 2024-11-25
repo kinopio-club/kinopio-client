@@ -31,6 +31,21 @@ const fetchGroupPublicMeta = async (groupId) => {
     console.warn('🚑 fetchGroupPublicMeta', error)
   }
 }
+const spacePreviewImageFromId = (spaceId) => {
+  if (!spaceId) { return '' }
+  return `${consts.cdnHost}/${spaceId}/preview-image-${spaceId}.jpg`
+}
+const windowSpaceTitle = (space) => {
+  let title
+  if (space.name === 'Hello Kinopio') {
+    title = 'Kinopio'
+  } else if (space.name) {
+    title = `${space.name} – Kinopio`
+  } else {
+    title = 'Kinopio'
+  }
+  document.title = title
+}
 
 export default {
   async spaceFromId ({ spaceId, isSpaceInvite }) {
@@ -42,6 +57,7 @@ export default {
     if (!spaceId) { return }
     const meta = await fetchSpacePublicMeta(spaceId)
     if (!meta) { return }
+    // title
     let name = `${meta.name} – Kinopio`
     if (isSpaceInvite) {
       name = `[Invite] ${name}`
@@ -52,25 +68,18 @@ export default {
     }
     document.title = name
     document.querySelector('meta[property="og:title"]').content = name
-    document.querySelector('meta[property="og:image"]').content = meta.previewImage || logo
+    // description, image
     document.querySelector('meta[property="og:description"]').content = description
     document.querySelector('meta[name="description"]').content = description
-  },
-  spaceTitle (space) {
-    let title
-    if (space.name === 'Hello Kinopio') {
-      title = 'Kinopio'
-    } else if (space.name) {
-      title = `${space.name} – Kinopio`
-    } else {
-      title = 'Kinopio'
-    }
-    document.title = title
+    document.querySelector('meta[property="og:image"]').content = meta.previewImage || logo || spacePreviewImageFromId(spaceId)
   },
   space (space) {
     const isHelloSpace = space.name === 'Hello Kinopio'
+    // title
+    windowSpaceTitle(space)
     // image
-    document.querySelector('meta[property="og:image"]').content = `${consts.cdnHost}/${space.id}/preview-image-${space.id}.jpg`
+    const imageUrl = space.previewImage || spacePreviewImageFromId(space.id)
+    document.querySelector('meta[property="og:image"]').content = imageUrl
     // description
     const origin = { x: 0, y: 0 }
     let cards = space.cards.map(card => {
