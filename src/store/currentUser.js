@@ -31,6 +31,7 @@ const initialState = {
   filterUnchecked: false,
   filterComments: false,
   shouldHideTutorialCards: false,
+  shouldHideDateCards: false,
   shouldEmailNotifications: true,
   shouldEmailBulletin: true,
   shouldEmailWeeklyReview: true,
@@ -217,6 +218,10 @@ export default {
     shouldHideTutorialCards: (state, value) => {
       state.shouldHideTutorialCards = value
       cache.updateUser('shouldHideTutorialCards', value)
+    },
+    shouldHideDateCards: (state, value) => {
+      state.shouldHideDateCards = value
+      cache.updateUser('shouldHideDateCards', value)
     },
     shouldEmailNotifications: (state, value) => {
       state.shouldEmailNotifications = value
@@ -631,6 +636,14 @@ export default {
       context.dispatch('api/addToQueue', { name: 'updateUser',
         body: {
           shouldHideTutorialCards: value
+        } }, { root: true })
+    },
+    shouldHideDateCards: (context, value) => {
+      utils.typeCheck({ value, type: 'boolean' })
+      context.commit('shouldHideDateCards', value)
+      context.dispatch('api/addToQueue', { name: 'updateUser',
+        body: {
+          shouldHideDateCards: value
         } }, { root: true })
     },
     shouldEmailNotifications: (context, value) => {

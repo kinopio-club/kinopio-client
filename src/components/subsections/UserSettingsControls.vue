@@ -5,6 +5,7 @@ import { useStore } from 'vuex'
 import utils from '@/utils.js'
 import consts from '@/consts.js'
 import BackgroundPreview from '@/components/BackgroundPreview.vue'
+import UserSettingsNewSpaces from '@/components/subsections/UserSettingsNewSpaces.vue'
 const store = useStore()
 
 const props = defineProps({
@@ -26,14 +27,6 @@ const shouldDisableHapticFeedback = computed(() => { return store.state.currentU
 const toggleShouldDisableHapticFeedback = () => {
   const value = !shouldDisableHapticFeedback.value
   store.commit('currentUser/shouldDisableHapticFeedback', value)
-}
-
-// hide tutorial cards
-
-const shouldHideTutorialCards = computed(() => { return store.state.currentUser.shouldHideTutorialCards })
-const toggleShouldHideTutorialCards = () => {
-  const value = !shouldHideTutorialCards.value
-  store.dispatch('currentUser/shouldHideTutorialCards', value)
 }
 
 // panning
@@ -117,11 +110,7 @@ const clearTips = () => {
   section
     .row
       p New Spaces
-    .row
-      label(:class="{active: shouldHideTutorialCards}" @click.left.prevent="toggleShouldHideTutorialCards" @keydown.stop.enter="toggleShouldHideTutorialCards")
-        input(type="checkbox" v-model="shouldHideTutorialCards")
-        span Hide Tutorial Cards
-
+    UserSettingsNewSpaces
   section
     .row
       p Accessibility

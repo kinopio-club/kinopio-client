@@ -381,19 +381,22 @@ const currentSpace = {
       } else {
         space.connectionTypes[0].color = randomColor({ luminosity: 'light' })
       }
-      const date = dayjs().format('ddd MMM D') // Wed Nov 20
-      const moonPhaseSystemCommandIcon = `::systemCommand=moonPhase`
-      const dateCard = {
-        id: nanoid(),
-        x: 73,
-        y: 125,
-        z: 0,
-        name: `${moonPhaseSystemCommandIcon} ${date} ${context.rootGetters.dateImageUrl}`,
-        width: 144,
-        height: 144,
-        resizeWidth: 144
+      const shouldHideDateCards = currentUser.shouldHideDateCards
+      if (!shouldHideDateCards) {
+        const date = dayjs().format('ddd MMM D') // Wed Nov 20
+        const moonPhaseSystemCommandIcon = `::systemCommand=moonPhase`
+        const dateCard = {
+          id: nanoid(),
+          x: 73,
+          y: 125,
+          z: 0,
+          name: `${moonPhaseSystemCommandIcon} ${date} ${context.rootGetters.dateImageUrl}`,
+          width: 144,
+          height: 144,
+          resizeWidth: 144
+        }
+        space.cards.push(dateCard)
       }
-      space.cards.push(dateCard)
       space = utils.updateSpaceCardsCreatedThroughPublicApi(space)
       space.userId = currentUser.id
       space = utils.newSpaceBackground(space, currentUser)
