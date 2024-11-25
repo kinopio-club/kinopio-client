@@ -3,6 +3,7 @@ import { reactive, computed, onMounted, onBeforeUnmount, onUnmounted, defineProp
 import { useStore } from 'vuex'
 
 import UserTemplateSpaceList from '@/components/UserTemplateSpaceList.vue'
+import UserSettingsNewSpaces from '@/components/subsections/UserSettingsNewSpaces.vue'
 import Loader from '@/components/Loader.vue'
 import utils from '@/utils.js'
 import cache from '@/cache.js'
@@ -40,12 +41,14 @@ const state = reactive({
   urlIsCopied: false,
   dialogHeight: null,
   hasInboxSpace: true,
-  templatesIsLoading: true
+  templatesIsLoading: true,
+  settingsIsVisible: false
 })
 
 const currentUserId = computed(() => store.state.currentUser.id)
 const closeAll = () => {
   state.urlIsCopied = false
+  state.settingsIsVisible = false
 }
 
 // styles
@@ -89,6 +92,14 @@ const duplicateSpace = () => {
   store.dispatch('currentSpace/duplicateSpace')
 }
 
+// new space settings
+
+const toggleSettingsIsVisible = () => {
+  const value = state.settingsIsVisible
+  closeAll()
+  state.settingsIsVisible = !value
+}
+
 // inbox space
 
 const checkIfUserHasInboxSpace = async () => {
@@ -119,12 +130,15 @@ dialog.add-space.narrow(
 )
   section
     .row
-      //- Add Space
-      .segmented-buttons
-        button.success(@click="addSpace")
-          img.icon(src="@/assets/add.svg")
-          span New Space
-
+      //- New Space
+      button.success(@click="addSpace")
+        img.icon(src="@/assets/add.svg")
+        span New Space
+      button(@click.stop="toggleSettingsIsVisible" :class="{ active: state.settingsIsVisible }")
+        img.icon.settings(src="@/assets/settings.svg")
+    //- new space settings
+    section.subsection(v-if="state.settingsIsVisible")
+      UserSettingsNewSpaces
   //- Inbox
   section(v-if="!state.hasInboxSpace")
     button(@click="addInboxSpace")
