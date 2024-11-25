@@ -864,7 +864,7 @@ const currentSpace = {
       const cachedHelloSpace = cache.getSpaceByName('Hello Kinopio')
       const cachedSpace = cache.getAllSpaces()[0]
       const newUserSpace = cachedHelloSpace || cachedSpace
-      if (spaceToRestore.id) {
+      if (spaceToRestore?.id) {
         space = spaceToRestore
       } else if (user.lastSpaceId) {
         space = { id: user.lastSpaceId }
