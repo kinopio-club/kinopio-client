@@ -68,10 +68,13 @@ export default {
     }
     document.title = name
     document.querySelector('meta[property="og:title"]').content = name
-    // description, image
+    // description
     document.querySelector('meta[property="og:description"]').content = description
     document.querySelector('meta[name="description"]').content = description
-    document.querySelector('meta[property="og:image"]').content = meta.previewImage || logo || spacePreviewImageFromId(spaceId)
+    // iamge
+    const imageUrl = meta.previewImage || logo || spacePreviewImageFromId(spaceId)
+    document.querySelector('meta[property="og:image"]').content = imageUrl
+    document.querySelector('meta[property="og:image:secure_url"]').content = imageUrl
   },
   space (space) {
     const isHelloSpace = space.name === 'Hello Kinopio'
@@ -81,6 +84,7 @@ export default {
     const imageUrl = space.previewImage || spacePreviewImageFromId(space.id)
     console.log('🍍 pageMeta.space image', imageUrl, space)
     document.querySelector('meta[property="og:image"]').content = imageUrl
+    document.querySelector('meta[property="og:image:secure_url"]').content = imageUrl
     // description
     const origin = { x: 0, y: 0 }
     let cards = space.cards.map(card => {
