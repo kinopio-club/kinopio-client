@@ -132,6 +132,7 @@ export default {
       name: `${space.name} – Kinopio`,
       description: defaultDescription,
       dateCreated: space.createdAt,
+      contentUrl: imageUrl,
       author: {
         '@type': 'Person',
         name: user.name
