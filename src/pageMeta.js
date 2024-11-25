@@ -79,6 +79,7 @@ export default {
     windowSpaceTitle(space)
     // image
     const imageUrl = space.previewImage || spacePreviewImageFromId(space.id)
+    console.log('🍍 pageMeta.space image', imageUrl, space)
     document.querySelector('meta[property="og:image"]').content = imageUrl
     // description
     const origin = { x: 0, y: 0 }
