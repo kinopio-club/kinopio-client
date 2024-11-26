@@ -313,7 +313,6 @@ export default {
     })
     return cards
   },
-  // TODO await
   async allTags () {
     const spaces = await this.getAllSpaces()
     let tags = []

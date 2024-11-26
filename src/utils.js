@@ -2409,9 +2409,10 @@ export default {
     tags = tags.map(tag => tag.substring(2, tag.length - 2))
     return tags
   },
-  newTag ({ name, defaultColor, cardId, spaceId }) {
+  async newTag ({ name, defaultColor, cardId, spaceId }) {
     let color
-    const existingTag = cache.allTags().find(tag => tag.name === name)
+    const allTags = await cache.allTags()
+    const existingTag = allTags.find(tag => tag.name === name)
     if (existingTag) {
       color = existingTag.color
     }

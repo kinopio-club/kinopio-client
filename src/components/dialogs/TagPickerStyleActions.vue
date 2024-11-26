@@ -53,7 +53,7 @@ const currentTags = computed(() => {
 const updateTags = async () => {
   const spaceTags = store.getters['currentSpace/spaceTags']
   state.tags = spaceTags || []
-  const cachedTags = cache.allTags()
+  const cachedTags = await cache.allTags()
   const mergedTags = utils.mergeArrays({ previous: spaceTags, updated: cachedTags, key: 'name' })
   state.tags = mergedTags
   await updateRemoteTags()
