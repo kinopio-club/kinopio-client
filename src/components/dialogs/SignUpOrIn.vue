@@ -224,8 +224,8 @@ const signIn = async (event) => {
     // update user to remote user
     store.commit('currentUser/updateUser', result)
     // update local spaces to remote user
-    removeUneditedSpace('Hello Kinopio')
-    removeUneditedSpace('Inbox')
+    await removeUneditedSpace('Hello Kinopio')
+    await removeUneditedSpace('Inbox')
     migrationSpacesConnections()
     updateSpacesUserId()
     await store.dispatch('api/createSpaces')
@@ -300,8 +300,8 @@ const updateCurrentSpaceWithNewUserId = (previousUser, newUser) => {
   store.commit('currentSpace/removeUserFromSpace', previousUser)
   store.commit('currentSpace/addUserToSpace', newUser)
 }
-const removeUneditedSpace = (spaceName) => {
-  let currentSpace = cache.getSpaceByName(spaceName)
+const removeUneditedSpace = async (spaceName) => {
+  let currentSpace = await cache.getSpaceByName(spaceName)
   let space
   if (spaceName === 'Hello Kinopio') {
     space = helloSpace

@@ -114,7 +114,6 @@ export default {
     }
     return spaces.find(space => space.name === 'Inbox')
   },
-  // TODO convert to await
   async getSpaceByName (name) {
     name = utils.normalizeString(name)
     const space = await idb.get(name)
