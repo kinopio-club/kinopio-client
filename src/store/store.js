@@ -1685,9 +1685,9 @@ const store = createStore({
   },
 
   actions: {
-    // moveFailedSendingQueueOperationBackIntoQueue: (context, operation) => {
+    // moveFailedSendingQueueOperationBackIntoQueue: async (context, operation) => {
     //   // save to queue
-    //   let queue = cache.queue()
+    //   let queue = await cache.queue()
     //   queue.unshift(operation)
     //   cache.saveQueue(queue)
     //   // remove from sending queue

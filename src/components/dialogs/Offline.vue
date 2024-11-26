@@ -11,15 +11,19 @@ const dialogElement = ref(null)
 const props = defineProps({
   visible: Boolean
 })
+
 watch(() => props.visible, (value, prevValue) => {
   if (value) {
-    state.queue = cache.queue()
+    updateQueue()
   }
 })
-
 const state = reactive({
   queue: []
 })
+const updateQueue = async () => {
+  const queue = await cache.queue()
+  state.queue = queue
+}
 
 const currentUserIsSignedIn = computed(() => {
   return Boolean(store.getters['currentUser/isSignedIn'])
