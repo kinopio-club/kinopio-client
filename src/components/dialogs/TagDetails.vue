@@ -159,17 +159,6 @@ const cachedOrOtherSpaceById = async (spaceId) => {
     return store.getters.otherSpaceById(spaceId)
   }
 }
-watch(() => filteredItems.value, async (items, prevValue) => {
-  let spaces
-  for (const item of items) {
-    const spaceId = item.spaceId || currentSpaceId.value
-    const space = await cachedOrOtherSpaceById(spaceId)
-    if (space) {
-      spaces.push(space)
-    }
-  }
-  state.cachedSpaces = spaces
-})
 
 // current card
 
@@ -386,6 +375,18 @@ const filteredItems = computed(() => {
     return state.cards
   }
 })
+watch(() => filteredItems.value, async (items, prevValue) => {
+  let spaces
+  for (const item of items) {
+    const spaceId = item.spaceId || currentSpaceId.value
+    const space = await cachedOrOtherSpaceById(spaceId)
+    if (space) {
+      spaces.push(space)
+    }
+  }
+  state.cachedSpaces = spaces
+})
+
 const shouldHideResultsFilter = computed(() => {
   if (state.cards.length < 5) {
     return true
