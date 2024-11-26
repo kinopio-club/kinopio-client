@@ -1660,11 +1660,11 @@ const store = createStore({
     sendingQueue: (state, value) => {
       utils.typeCheck({ value, type: 'array' })
       state.sendingQueue = value
-      cache.saveSendingQueue(value)
+      // cache.saveSendingQueue(value)
     },
     clearSendingQueue: (state) => {
       state.sendingQueue = []
-      cache.clearSendingQueue()
+      // cache.clearSendingQueue()
     },
 
     // Code Blocks

@@ -361,7 +361,6 @@ export default {
 
   // API Queue
 
-  // TODO await
   async queue () {
     const queue = await this.getLocal('queue')
     return queue || []
@@ -376,17 +375,16 @@ export default {
   // API Sending in Progress Queue
   // queue items are moved here at api.sendQueue
 
-  // TODO await
-  async sendingQueue () {
-    const queue = await this.getLocal('sendingQueue')
-    return queue || []
-  },
-  async saveSendingQueue (queue) {
-    await this.storeLocal('sendingQueue', queue)
-  },
-  async clearSendingQueue () {
-    await this.storeLocal('sendingQueue', [])
-  },
+  // async sendingQueue () {
+  //   const queue = await this.getLocal('sendingQueue')
+  //   return queue || []
+  // },
+  // async saveSendingQueue (queue) {
+  //   await this.storeLocal('sendingQueue', queue)
+  // },
+  // async clearSendingQueue () {
+  //   await this.storeLocal('sendingQueue', [])
+  // },
 
   // Invited Spaces
 
