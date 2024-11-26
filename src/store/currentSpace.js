@@ -17,6 +17,7 @@ import uniq from 'lodash-es/uniq'
 import sortBy from 'lodash-es/sortBy'
 import defer from 'lodash-es/defer'
 import debounce from 'lodash-es/debounce'
+import dayjs from 'dayjs'
 
 let idleClientTimers = []
 let isLoadingRemoteSpace, shouldLoadNewHelloSpace
@@ -154,7 +155,6 @@ const currentSpace = {
     init: async (context) => {
       context.commit('isLoadingSpace', true, { root: true })
       const spaceUrl = context.rootState.spaceUrlToLoad
-      const loadJournalSpace = context.rootState.loadJournalSpace
       const loadInboxSpace = context.rootState.loadInboxSpace
       const loadBlogSpace = context.rootState.loadBlogSpace
       const loadNewSpace = context.rootState.loadNewSpace
@@ -165,10 +165,6 @@ const currentSpace = {
         const spaceId = utils.spaceIdFromUrl(spaceUrl)
         const space = { id: spaceId }
         await context.dispatch('loadSpace', { space })
-      // restore or create journal space
-      } else if (loadJournalSpace) {
-        console.log('🚃 Restore journal space')
-        await context.dispatch('loadJournalSpace')
       // restore inbox space
       } else if (loadInboxSpace) {
         console.log('🚃 Restore inbox space')
@@ -375,14 +371,31 @@ const currentSpace = {
       space.editedAt = new Date()
       space.collaboratorKey = nanoid()
       space.readOnlyKey = nanoid()
-      const newSpacesAreBlank = currentUser.newSpacesAreBlank
-      if (newSpacesAreBlank) {
+      space.moonPhase = utils.moonPhase()
+      const shouldHideTutorialCards = currentUser.shouldHideTutorialCards
+      if (shouldHideTutorialCards) {
         space.connectionTypes = []
         space.connections = []
         space.cards = []
         space.boxes = []
       } else {
         space.connectionTypes[0].color = randomColor({ luminosity: 'light' })
+      }
+      const shouldHideDateCards = currentUser.shouldHideDateCards
+      if (!shouldHideDateCards) {
+        const date = dayjs().format('ddd MMM D') // Wed Nov 20
+        const moonPhaseSystemCommandIcon = `::systemCommand=moonPhase`
+        const dateCard = {
+          id: nanoid(),
+          x: 73,
+          y: 125,
+          z: 0,
+          name: `${moonPhaseSystemCommandIcon} ${date} ${context.rootGetters.dateImageUrl}`,
+          width: 144,
+          height: 144,
+          resizeWidth: 144
+        }
+        space.cards.push(dateCard)
       }
       space = utils.updateSpaceCardsCreatedThroughPublicApi(space)
       space.userId = currentUser.id
@@ -398,37 +411,6 @@ const currentSpace = {
       isLoadingRemoteSpace = false
       context.commit('resetPageSizes', null, { root: true })
       context.dispatch('restoreSpaceInChunks', { space: uniqueNewSpace })
-    },
-    createNewJournalSpace: async (context) => {
-      const isOnline = context.rootState.isOnline
-      const isTomorrow = context.rootState.loadJournalSpaceTomorrow
-      const currentUser = utils.clone(context.rootState.currentUser)
-      context.commit('isLoadingSpace', true, { root: true })
-      // weather
-      let weather = context.rootState.currentUser.weather || ''
-      const shouldUpdateWeather = !weather && isOnline
-      if (shouldUpdateWeather) {
-        weather = await context.dispatch('api/weather', null, { root: true }) || ''
-        weather = `${weather}`
-      }
-      if (!weather) {
-        weather = ''
-      }
-      // daily prompt
-      let options = { currentUser, isTomorrow, weather }
-      options.journalDailyDateImage = currentUser.journalDailyDateImage
-      if (currentUser.shouldCreateJournalsWithDailyPrompt) {
-        options.journalDailyPrompt = currentUser.journalDailyPrompt
-      }
-      // create space
-      let space = utils.journalSpace(options)
-      space = utils.updateSpaceCardsCreatedThroughPublicApi(space)
-      context.commit('clearSearch', null, { root: true })
-      context.commit('shouldResetDimensionsOnLoad', true, { root: true })
-      // load space
-      isLoadingRemoteSpace = false
-      context.commit('resetPageSizes', null, { root: true })
-      context.dispatch('restoreSpaceInChunks', { space })
     },
     createNewInboxSpace: (context, shouldCreateWithoutLoading) => {
       let space = utils.clone(inboxSpace)
@@ -473,6 +455,7 @@ const currentSpace = {
       context.dispatch('updateModulesSpaceId', space)
       context.dispatch('incrementCardsCreatedCountFromSpace', space)
       context.commit('isLoadingSpace', false, { root: true })
+      context.commit('triggerUpdateWindowHistory', null, { root: true })
     },
     saveSpace: async (context, space) => {
       const user = context.rootState.currentUser
@@ -486,12 +469,12 @@ const currentSpace = {
       context.dispatch('updateModulesSpaceId', space)
       context.dispatch('incrementCardsCreatedCountFromSpace', space)
     },
-    duplicateSpace: (context) => {
-      let space = utils.clone(context.state)
+    duplicateSpace: (context, space) => {
+      space = space || context.state
+      space = utils.clone(space)
       const user = { id: context.rootState.currentUser.id }
       context.commit('broadcast/leaveSpaceRoom', { user, type: 'userLeftRoom' }, { root: true })
-      let uniqueNewSpace = utils.clearSpaceMeta(space, 'copy')
-      uniqueNewSpace.originSpaceId = space.id
+      let uniqueNewSpace = utils.resetSpaceMeta({ space, user: context.rootState.currentUser, type: 'copy' })
       uniqueNewSpace = cache.updateIdsInSpace(space)
       context.commit('clearSearch', null, { root: true })
       isLoadingRemoteSpace = false
@@ -507,18 +490,7 @@ const currentSpace = {
       context.dispatch('saveNewSpace')
       context.dispatch('updateUserLastSpaceId')
       context.commit('notifySignUpToEditSpace', false, { root: true })
-      context.commit('triggerUpdateWindowHistory', null, { root: true })
     },
-    addJournalSpace: async (context) => {
-      const user = { id: context.rootState.currentUser.id }
-      context.commit('broadcast/leaveSpaceRoom', { user, type: 'userLeftRoom' }, { root: true })
-      await context.dispatch('createNewJournalSpace')
-      context.dispatch('saveNewSpace')
-      context.dispatch('updateUserLastSpaceId')
-      context.commit('notifySignUpToEditSpace', false, { root: true })
-      context.commit('triggerUpdateWindowHistory', null, { root: true })
-    },
-
     addInboxSpace: (context) => {
       const user = { id: context.rootState.currentUser.id }
       context.commit('broadcast/leaveSpaceRoom', { user, type: 'userLeftRoom' }, { root: true })
@@ -526,7 +498,6 @@ const currentSpace = {
       context.dispatch('saveNewSpace')
       context.dispatch('updateUserLastSpaceId')
       context.commit('notifySignUpToEditSpace', false, { root: true })
-      context.commit('triggerUpdateWindowHistory', null, { root: true })
     },
     getRemoteSpace: async (context, space) => {
       const collaboratorKey = context.rootState.spaceCollaboratorKeys.find(key => key.spaceId === space.id)
@@ -602,20 +573,6 @@ const currentSpace = {
       const cardIds = context.rootState.currentCards.ids
       context.dispatch('currentCards/resetDimensions', { cardIds }, { root: true })
       context.commit('shouldResetDimensionsOnLoad', false, { root: true })
-    },
-    loadJournalSpace: async (context) => {
-      const spaces = cache.getAllSpaces()
-      const journalName = utils.journalSpaceName({ isTomorrow: context.rootState.loadJournalSpaceTomorrow })
-      const journalSpace = spaces.find(space => space.name === journalName && !space.isRemoved)
-      if (journalSpace) {
-        const space = { id: journalSpace.id }
-        context.dispatch('changeSpace', space)
-      } else {
-        await context.dispatch('addJournalSpace')
-        context.commit('triggerSpaceDetailsUpdateLocalSpaces', null, { root: true })
-      }
-      context.commit('loadJournalSpace', false, { root: true })
-      context.commit('loadJournalSpaceTomorrow', false, { root: true })
     },
     loadInboxSpace: async (context) => {
       const inboxSpace = await context.dispatch('currentUser/inboxSpace', null, { root: true })
@@ -769,7 +726,6 @@ const currentSpace = {
         context.dispatch('checkIfShouldResetDimensions')
         nextTick(() => {
           context.dispatch('checkIfShouldPauseConnectionDirections')
-          context.dispatch('checkIfShouldUpdateNewTweetCards', space)
           context.dispatch('api/addToQueue', {
             name: 'incrementVisits',
             body: { spaceId: space.id }
@@ -911,7 +867,7 @@ const currentSpace = {
       const cachedHelloSpace = cache.getSpaceByName('Hello Kinopio')
       const cachedSpace = cache.getAllSpaces()[0]
       const newUserSpace = cachedHelloSpace || cachedSpace
-      if (spaceToRestore.id) {
+      if (spaceToRestore?.id) {
         space = spaceToRestore
       } else if (user.lastSpaceId) {
         space = { id: user.lastSpaceId }
@@ -1051,17 +1007,6 @@ const currentSpace = {
       } else if (currentSpaceIsRemote && isRemote) {
         context.commit('isLoadingSpace', false, { root: true })
       }
-    },
-    checkIfShouldUpdateNewTweetCards: (context, space) => {
-      if (!space.isFromTweet) { return }
-      if (space.updateHash) { return }
-      const cards = space.cards.reverse()
-      console.log('🕊 updating tweet space', cards)
-      const isUrlPreviews = cards.find(card => utils.urlFromString(card.name))
-      if (isUrlPreviews) {
-        context.commit('isLoadingSpace', true, { root: true })
-      }
-      context.commit('newTweetCards', cards, { root: true })
     },
     pauseConnectionDirections: (context, space) => {
       const svgs = document.querySelectorAll('svg.connection')

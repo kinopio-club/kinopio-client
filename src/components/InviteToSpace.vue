@@ -136,7 +136,7 @@ section.invite-to-space(v-if="props.visible" @click.stop="closeDialogs")
       .users
         User(:user="currentUser" :isClickable="false" :key="currentUser.id" :isSmall="true" :hideYouLabel="true")
         User(:user="randomUser" :isClickable="false" :key="currentUser.id" :isSmall="true" :hideYouLabel="true")
-      span Invite Collaborators
+      span Invite New Collaborators
     button.small-button.extra-options-button(@click="toggleTipsIsVisible" :class="{active: state.tipsIsVisible}")
       span ?
 

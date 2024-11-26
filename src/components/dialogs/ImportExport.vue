@@ -27,9 +27,11 @@ watch(() => props.visible, (value, prevValue) => {
 })
 watch(() => props.isExport, (value, prevValue) => {
   state.isExport = value
+  state.isImport = !value
 })
 watch(() => props.isImport, (value, prevValue) => {
   state.isImport = value
+  state.isExport = !value
 })
 
 const state = reactive({

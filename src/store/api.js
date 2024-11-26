@@ -97,7 +97,7 @@ const normalizeResponse = async (response) => {
 
 // normalize data
 
-const normalizeSpaceToRemote = (space) => {
+const normalizeRemovedCards = (space) => {
   if (!space.removedCards) { return space }
   space.removedCards.forEach(card => {
     card.isRemoved = true
@@ -200,7 +200,7 @@ const self = {
         } else {
           console.warn('🚑 non-critical serverOperationsError operation', operation)
         }
-        cache.moveFailedSendingQueueOperationBackIntoQueue(operation)
+        // context.dispatch('moveFailedSendingQueueOperationBackIntoQueue', operation, { root: true })
       })
       // clear sending queue
       context.commit('clearSendingQueue', null, { root: true })
@@ -258,14 +258,6 @@ const self = {
         context.dispatch('handleServerError', { name: 'getDate', error })
       }
     },
-    getCountries: async (context) => {
-      try {
-        const response = await fetch(`${consts.apiHost()}/meta/countries`)
-        return normalizeResponse(response)
-      } catch (error) {
-        context.dispatch('handleServerError', { name: 'getCountries', error })
-      }
-    },
     getChangelog: async (context) => {
       const isOnline = context.rootState.isOnline
       if (!shouldRequest({ shouldRequestRemote: true, isOnline })) { return }
@@ -276,6 +268,16 @@ const self = {
         return normalizeResponse(response)
       } catch (error) {
         context.dispatch('handleServerError', { name: 'getChangelog', error })
+      }
+    },
+    updateDateImage: async (context) => {
+      try {
+        const response = await fetch(`${consts.apiHost()}/space/date-image`)
+        const data = await normalizeResponse(response)
+        context.commit('dateImageUrl', data.url, { root: true })
+        return data.url
+      } catch (error) {
+        context.dispatch('handleServerError', { name: 'updateDateImage', error })
       }
     },
 
@@ -468,6 +470,18 @@ const self = {
         context.dispatch('handleServerError', { name: 'getSpacesNotificationUnsubscribed', error })
       }
     },
+    getGroupsNotificationUnsubscribed: async (context) => {
+      const apiKey = context.rootState.currentUser.apiKey
+      const isOnline = context.rootState.isOnline
+      if (!shouldRequest({ apiKey, isOnline })) { return }
+      try {
+        const options = await context.dispatch('requestOptions', { method: 'GET', space: context.rootState.currentSpace })
+        const response = await fetch(`${consts.apiHost()}/user/groups-notification-unsubscribed`, options)
+        return normalizeResponse(response)
+      } catch (error) {
+        context.dispatch('handleServerError', { name: 'getGroupsNotificationUnsubscribed', error })
+      }
+    },
     spaceNotificationResubscribe: async (context, space) => {
       const apiKey = context.rootState.currentUser.apiKey
       const user = context.rootState.currentUser
@@ -479,6 +493,19 @@ const self = {
         return normalizeResponse(response)
       } catch (error) {
         context.dispatch('handleServerError', { name: 'spaceNotificationResubscribe', error })
+      }
+    },
+    groupNotificationResubscribe: async (context, group) => {
+      const apiKey = context.rootState.currentUser.apiKey
+      const user = context.rootState.currentUser
+      const isOnline = context.rootState.isOnline
+      if (!shouldRequest({ apiKey, isOnline })) { return }
+      try {
+        const options = await context.dispatch('requestOptions', { method: 'GET', space: context.rootState.currentSpace })
+        const response = await fetch(`${consts.apiHost()}/group/${group.id}/notification-resubscribe?userId=${user.id}`, options)
+        return normalizeResponse(response)
+      } catch (error) {
+        context.dispatch('handleServerError', { name: 'groupNotificationResubscribe', error })
       }
     },
     deleteUserPermanent: async (context) => {
@@ -672,7 +699,7 @@ const self = {
       try {
         let spaces = await cache.getAllSpaces()
         if (!spaces.length) { return }
-        spaces = spaces.map(space => normalizeSpaceToRemote(space))
+        spaces = spaces.map(space => normalizeRemovedCards(space))
         let removedSpaces = await cache.getAllRemovedSpaces()
         removedSpaces = removedSpaces.map(space => {
           space.isRemoved = true
@@ -691,7 +718,7 @@ const self = {
     },
     createSpace: async (context, space) => {
       try {
-        space = normalizeSpaceToRemote(space)
+        space = normalizeRemovedCards(space)
         const body = space
         const options = await context.dispatch('requestOptions', { body, method: 'POST', space: context.rootState.currentSpace })
         const response = await fetch(`${consts.apiHost()}/space`, options)
@@ -1152,29 +1179,6 @@ const self = {
       }
     },
 
-    weather: async (context) => {
-      const showWeather = context.rootState.currentUser.showWeather
-      if (!showWeather) { return }
-      const body = { weatherLocation: context.rootState.currentUser.weatherLocation }
-      try {
-        const options = await context.dispatch('requestOptions', { body, method: 'POST', space: context.rootState.currentSpace })
-        const response = await fetch(`${consts.apiHost()}/services/weather`, options)
-        const data = await normalizeResponse(response)
-        return data.weather
-      } catch (error) {
-        context.dispatch('handleServerError', { name: 'weather', error })
-      }
-    },
-    journalDailyPrompt: async (context) => {
-      try {
-        const options = await context.dispatch('requestOptions', { method: 'GET', space: context.rootState.currentSpace })
-        const response = await fetch(`${consts.apiHost()}/journal-daily-prompt`, options)
-        const data = await normalizeResponse(response)
-        return data
-      } catch (error) {
-        console.error('🚒 journalDailyPrompt', error)
-      }
-    },
     createAIImage: async (context, body) => {
       try {
         const options = await context.dispatch('requestOptions', { body, method: 'POST', space: context.rootState.currentSpace })

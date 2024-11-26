@@ -30,9 +30,8 @@ const initialState = {
   filterShowAbsoluteDates: false,
   filterUnchecked: false,
   filterComments: false,
-  journalPrompts: [],
-  shouldCreateJournalsWithDailyPrompt: true,
-  newSpacesAreBlank: false,
+  shouldHideTutorialCards: false,
+  shouldHideDateCards: false,
   shouldEmailNotifications: true,
   shouldEmailBulletin: true,
   shouldEmailWeeklyReview: true,
@@ -50,9 +49,6 @@ const initialState = {
   defaultCardBackgroundColor: undefined,
   defaultConnectionControlPoint: null, // null, 'q00,00'
   downgradeAt: null,
-  showWeather: false,
-  weatherLocation: undefined,
-  weatherUnitIsCelcius: false,
   shouldUseStickyCards: true,
   shouldIncreaseUIContrast: false,
   shouldPauseConnectionDirections: false,
@@ -61,9 +57,6 @@ const initialState = {
   AIImages: [],
   theme: null,
   themeIsSystem: false,
-  weather: '',
-  journalDailyPrompt: '',
-  journalDailyDateImage: '',
   panSpeedIsFast: false,
   outsideSpaceBackgroundIsStatic: false,
   shouldDisableHapticFeedback: false,
@@ -81,7 +74,6 @@ const initialState = {
 
   // space filters
 
-  dialogSpaceFilterByType: null, // null, journals, spaces
   dialogSpaceFilterByGroup: {},
   dialogSpaceFilterByUser: {},
   dialogSpaceFilterShowHidden: false,
@@ -223,33 +215,13 @@ export default {
       state.filterComments = value
       cache.updateUser('filterComments', value)
     },
-    addJournalPrompt: (state, newPrompt) => {
-      let prompts = utils.clone(state.journalPrompts) || []
-      prompts.push(newPrompt)
-      state.journalPrompts = prompts
-      cache.updateUser('journalPrompts', prompts)
+    shouldHideTutorialCards: (state, value) => {
+      state.shouldHideTutorialCards = value
+      cache.updateUser('shouldHideTutorialCards', value)
     },
-    removeJournalPrompt: (state, removePrompt) => {
-      let prompts = utils.clone(state.journalPrompts) || []
-      prompts = prompts.filter(prompt => {
-        return prompt.id !== removePrompt.id
-      })
-      state.journalPrompts = prompts
-      cache.updateUser('journalPrompts', prompts)
-    },
-    updateJournalPrompt: (state, updatedPrompt) => {
-      let prompts = state.journalPrompts.map(prompt => {
-        if (prompt.id === updatedPrompt.id) {
-          prompt = updatedPrompt
-        }
-        return prompt
-      })
-      state.journalPrompts = prompts
-      cache.updateUser('journalPrompts', prompts)
-    },
-    newSpacesAreBlank: (state, value) => {
-      state.newSpacesAreBlank = value
-      cache.updateUser('newSpacesAreBlank', value)
+    shouldHideDateCards: (state, value) => {
+      state.shouldHideDateCards = value
+      cache.updateUser('shouldHideDateCards', value)
     },
     shouldEmailNotifications: (state, value) => {
       state.shouldEmailNotifications = value
@@ -294,10 +266,6 @@ export default {
     shouldUseLastConnectionType: (state, value) => {
       state.shouldUseLastConnectionType = value
       cache.updateUser('shouldUseLastConnectionType', value)
-    },
-    dialogSpaceFilterByType: (state, value) => {
-      state.dialogSpaceFilterByType = value
-      cache.updateUser('dialogSpaceFilterByType', value)
     },
     dialogSpaceFilterByUser: (state, value) => {
       utils.typeCheck({ value, type: 'object' })
@@ -349,30 +317,6 @@ export default {
       state.shouldDisableHapticFeedback = value
       cache.updateUser('shouldDisableHapticFeedback', value)
     },
-    shouldCreateJournalsWithDailyPrompt: (state, value) => {
-      state.shouldCreateJournalsWithDailyPrompt = value
-      cache.updateUser('shouldCreateJournalsWithDailyPrompt', value)
-    },
-    showWeather: (state, value) => {
-      state.showWeather = value
-      cache.updateUser('showWeather', value)
-    },
-    weatherLocation: (state, value) => {
-      state.weatherLocation = value
-      cache.updateUser('weatherLocation', value)
-    },
-    weatherUnitIsCelcius: (state, value) => {
-      state.weatherUnitIsCelcius = value
-      cache.updateUser('weatherUnitIsCelcius', value)
-    },
-    journalDailyPrompt: (state, data) => {
-      utils.typeCheck({ value: data, type: 'object' })
-      const { name, dateImage } = data
-      state.journalDailyPrompt = name
-      cache.updateUser('journalDailyPrompt', name)
-      state.journalDailyDateImage = dateImage
-      cache.updateUser('journalDailyDateImage', dateImage)
-    },
     shouldUseStickyCards: (state, value) => {
       state.shouldUseStickyCards = value
       cache.updateUser('shouldUseStickyCards', value)
@@ -405,12 +349,6 @@ export default {
       utils.typeCheck({ value, type: 'boolean' })
       state.themeIsSystem = value
       cache.updateUser('themeIsSystem', value)
-    },
-    weather: (state, value) => {
-      state.weather = value
-    },
-    appleAppAccountToken: (state, value) => {
-      state.weather = value
     },
     appleSubscriptionIsActive: (state, value) => {
       state.appleSubscriptionIsActive = value
@@ -468,19 +406,7 @@ export default {
       }
       context.dispatch('themes/restore', null, { root: true })
       context.commit('triggerUserIsLoaded', null, { root: true })
-      context.dispatch('updateWeather')
-      context.dispatch('updateJournalDailyPrompt')
       context.dispatch('checkIfShouldJoinGroup')
-    },
-    updateWeather: async (context) => {
-      const weather = await context.dispatch('api/weather', null, { root: true })
-      if (!weather) { return }
-      context.commit('weather', weather)
-    },
-    updateJournalDailyPrompt: async (context) => {
-      const data = await context.dispatch('api/journalDailyPrompt', null, { root: true })
-      if (!data) { return }
-      context.commit('journalDailyPrompt', data)
     },
     checkIfShouldJoinGroup: (context) => {
       if (!context.rootState.groupToJoinOnLoad) { return }
@@ -519,26 +445,10 @@ export default {
       context.commit('isUpgraded', value)
       context.commit('notifyCardsCreatedIsOverLimit', false, { root: true })
     },
-    createNewUserJournalPrompts: (context) => {
-      if (utils.arrayHasItems(context.state.journalPrompts)) { return }
-      let prompts = [
-        { name: 'How am I feeling?' },
-        { name: 'What do I have to do today?' }
-      ]
-      prompts = prompts.map(prompt => {
-        prompt.id = nanoid()
-        prompt.userId = context.state.id
-        return prompt
-      })
-      prompts.forEach(prompt => {
-        context.dispatch('addJournalPrompt', prompt)
-      })
-    },
     createNewUser: (context) => {
       context.commit('themeIsSystem', true)
       context.commit('updateAppleAppAccountToken')
       cache.saveUser(context.state)
-      context.dispatch('createNewUserJournalPrompts')
     },
     broadcastUpdate: (context, updates) => {
       const space = context.rootState.currentSpace
@@ -720,27 +630,20 @@ export default {
       context.dispatch('toggleFilterUnchecked', false)
       context.dispatch('toggleFilterComments', false)
     },
-    addJournalPrompt: (context, prompt) => {
-      utils.typeCheck({ value: prompt, type: 'object' })
-      context.dispatch('api/addToQueue', { name: 'addJournalPrompt', body: prompt }, { root: true })
-      context.commit('addJournalPrompt', prompt)
-    },
-    removeJournalPrompt: (context, prompt) => {
-      utils.typeCheck({ value: prompt, type: 'object' })
-      context.dispatch('api/addToQueue', { name: 'removeJournalPrompt', body: prompt }, { root: true })
-      context.commit('removeJournalPrompt', prompt)
-    },
-    updateJournalPrompt: (context, prompt) => {
-      utils.typeCheck({ value: prompt, type: 'object' })
-      context.dispatch('api/addToQueue', { name: 'updateJournalPrompt', body: prompt }, { root: true })
-      context.commit('updateJournalPrompt', prompt)
-    },
-    newSpacesAreBlank: (context, value) => {
+    shouldHideTutorialCards: (context, value) => {
       utils.typeCheck({ value, type: 'boolean' })
-      context.commit('newSpacesAreBlank', value)
+      context.commit('shouldHideTutorialCards', value)
       context.dispatch('api/addToQueue', { name: 'updateUser',
         body: {
-          newSpacesAreBlank: value
+          shouldHideTutorialCards: value
+        } }, { root: true })
+    },
+    shouldHideDateCards: (context, value) => {
+      utils.typeCheck({ value, type: 'boolean' })
+      context.commit('shouldHideDateCards', value)
+      context.dispatch('api/addToQueue', { name: 'updateUser',
+        body: {
+          shouldHideDateCards: value
         } }, { root: true })
     },
     shouldEmailNotifications: (context, value) => {
@@ -974,7 +877,7 @@ export default {
       }
     },
     totalFiltersActive: (state, getters) => {
-      let userFilters = getters.totalCardFadingFiltersActive
+      let userFilters = getters.totalItemFadingFiltersActive
       if (state.filterShowUsers) {
         userFilters += 1
       }
@@ -986,7 +889,7 @@ export default {
       }
       return userFilters
     },
-    totalCardFadingFiltersActive: (state, getters, rootState) => {
+    totalItemFadingFiltersActive: (state, getters, rootState) => {
       let userFilters = 0
       if (state.filterUnchecked) {
         userFilters += 1
@@ -994,7 +897,8 @@ export default {
       const tagNames = rootState.filteredTagNames
       const connections = rootState.filteredConnectionTypeIds
       const frames = rootState.filteredFrameIds
-      return userFilters + tagNames.length + connections.length + frames.length
+      const boxes = rootState.filteredBoxIds
+      return userFilters + tagNames.length + connections.length + frames.length + boxes.length
     },
 
     // AI Images

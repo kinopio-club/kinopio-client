@@ -228,8 +228,8 @@ const currentCards = {
       card.frameId = 0
       card.userId = context.rootState.currentUser.id
       card.urlPreviewIsVisible = true
-      card.width = width || utils.emptyCard().width
-      card.height = height || utils.emptyCard().height
+      card.width = Math.round(width) || consts.emptyCard().width
+      card.height = Math.round(height) || consts.emptyCard().height
       card.isLocked = false
       card.backgroundColor = backgroundColor || defaultBackgroundColor
       card.isRemoved = false
@@ -266,8 +266,8 @@ const currentCards = {
           z: card.z || context.state.ids.length + 1,
           name: card.name,
           frameId: card.frameId || 0,
-          width: card.width,
-          height: card.height,
+          width: Math.round(card.width),
+          height: Math.round(card.height),
           userId: context.rootState.currentUser.id,
           backgroundColor: card.backgroundColor,
           shouldUpdateUrlPreview: true,
@@ -277,7 +277,7 @@ const currentCards = {
           urlPreviewImage: card.urlPreviewImage,
           urlPreviewTitle: card.urlPreviewTitle,
           urlPreviewUrl: card.urlPreviewUrl,
-          maxWidth: card.maxWidth || context.rootState.currentUser.cardSettingsMaxCardWidth
+          maxWidth: Math.round(card.maxWidth) || context.rootState.currentUser.cardSettingsMaxCardWidth
         }
       })
       cards.forEach(card => {
@@ -490,8 +490,8 @@ const currentCards = {
           if (isMissingDimensions) { return }
           const body = {
             id: card.id,
-            width: card.width,
-            height: card.height,
+            width: Math.round(card.width),
+            height: Math.round(card.height),
             userId: context.rootState.currentUser.id
           }
           context.commit('update', body)
@@ -537,6 +537,7 @@ const currentCards = {
         let width = card.resizeWidth || card.width
         width = width + deltaX
         width = Math.max(minImageWidth, width)
+        width = Math.round(width)
         const updates = { id: cardId, resizeWidth: width }
         context.dispatch('update', { card: updates })
         context.dispatch('broadcast/update', { updates, type: 'resizeCard', handler: 'currentCards/update' }, { root: true })
@@ -577,6 +578,7 @@ const currentCards = {
         tilt = tilt + delta
         tilt = Math.min(maxDegrees, tilt)
         tilt = Math.max(-maxDegrees, tilt)
+        tilt = Math.round(tilt)
         const updates = { id: cardId, tilt }
         context.dispatch('update', { card: updates })
         context.dispatch('broadcast/update', { updates, type: 'tiltCard', handler: 'currentCards/update' }, { root: true })
@@ -603,6 +605,10 @@ const currentCards = {
       endCursor = {
         x: endCursor.x * zoom,
         y: endCursor.y * zoom
+      }
+      if (context.getters.shouldSnapToGrid) {
+        prevCursor = utils.cursorPositionSnapToGrid(prevCursor)
+        endCursor = utils.cursorPositionSnapToGrid(endCursor)
       }
       delta = delta || {
         x: endCursor.x - prevCursor.x,
@@ -652,7 +658,7 @@ const currentCards = {
           width: card.width,
           height: card.height
         }
-        if (context.rootState.shouldSnapToGrid) {
+        if (context.getters.shouldSnapToGrid) {
           const position = utils.cursorPositionSnapToGrid(card)
           card.x = position.x
           card.y = position.y
@@ -871,64 +877,6 @@ const currentCards = {
       context.commit('cardDetailsIsVisibleForCardId', cardId, { root: true })
       context.commit('parentCardId', cardId, { root: true })
       context.commit('loadSpaceShowDetailsForCardId', '', { root: true })
-    },
-
-    // tweet cards
-
-    checkIfShouldUpdateNewTweetCards: (context) => {
-      const newCards = context.rootState.newTweetCards
-      if (!newCards.length) { return }
-      const cards = utils.clone(newCards)
-      context.commit('clearNewTweetCards', null, { root: true })
-      context.commit('isLoadingSpace', true, { root: true })
-      console.log('🕊 addTweetCards', cards)
-      context.dispatch('addTweetCardsComplete', cards)
-    },
-    addTweetCardsComplete: (context, cards) => {
-      context.dispatch('history/pause', null, { root: true })
-      context.dispatch('closeAllDialogs', null, { root: true })
-      // position cards
-      context.dispatch('currentCards/distributeVertically', cards, { root: true })
-      nextTick(() => {
-        nextTick(() => {
-          context.dispatch('addAndSelectConnectionsBetweenTweetCards', cards)
-          // select cards
-          const cardIds = cards.map(card => card.id)
-          context.commit('multipleCardsSelectedIds', cardIds, { root: true })
-          // ⏺ history
-          cards = cardIds.map(cardId => context.getters.byId(cardId))
-          context.dispatch('history/resume', null, { root: true })
-          context.dispatch('history/add', { cards, useSnapshot: true }, { root: true })
-          // wait for images to load
-          setTimeout(() => {
-            context.dispatch('currentCards/distributeVertically', cards, { root: true })
-            context.commit('isLoadingSpace', false, { root: true })
-            console.log('🕊 addTweetCardsComplete', cards)
-          }, 1000)
-        })
-      })
-    },
-    addAndSelectConnectionsBetweenTweetCards: (context, cards) => {
-      const type = context.rootGetters['currentConnections/typeForNewConnections']
-      if (!type) {
-        context.dispatch('currentConnections/addType', null, { root: true })
-      }
-      let connections = []
-      cards.forEach((card, index) => {
-        if (index === 0) { return }
-        const startItemId = cards[index - 1].id
-        const endItemId = cards[index].id
-        connections.push({
-          id: nanoid(),
-          startItemId,
-          endItemId,
-          path: this.$store.getters['currentConnections/connectionPathBetweenItems']({ startItemId, endItemId })
-        })
-      })
-      connections.forEach(connection => {
-        context.dispatch('currentConnections/add', { connection, type, shouldNotRecordHistory: true }, { root: true })
-        context.dispatch('addToMultipleConnectionsSelected', connection.id, { root: true })
-      })
     }
   },
   getters: {
@@ -991,7 +939,7 @@ const currentCards = {
       } while (prevAlignedCard)
       return alignedCards
     },
-    isSelectableInViewport: (state, getters, rootState, rootGetters) => () => {
+    isSelectableInViewport: (state, getters, rootState, rootGetters) => {
       const elements = document.querySelectorAll(`article#card`)
       let cards = []
       elements.forEach(element => {
@@ -1180,6 +1128,10 @@ const currentCards = {
       } else {
         return rootState.currentUser.color
       }
+    },
+    shouldSnapToGrid: (state, getters, rootState, rootGetters) => {
+      if (rootState.currentDraggingBoxId) { return }
+      return rootState.shouldSnapToGrid
     }
   }
 }

@@ -22,7 +22,10 @@ import UrlPreviewCard from '@/components/UrlPreviewCard.vue'
 import ImageOrVideo from '@/components/ImageOrVideo.vue'
 
 import dayjs from 'dayjs'
+import isToday from 'dayjs/plugin/isToday'
 import qs from '@aguezz/qs-parse'
+
+dayjs.extend(isToday)
 
 const store = useStore()
 
@@ -51,8 +54,10 @@ let prevIsLoadingUrlPreview
 
 let observer
 
+let unsubscribe
+
 onMounted(async () => {
-  store.subscribe((mutation, state) => {
+  unsubscribe = store.subscribe((mutation, state) => {
     const { type, payload } = mutation
     if (type === 'updateRemoteCurrentConnection' || type === 'removeRemoteCurrentConnection') {
       updateRemoteConnections()
@@ -94,6 +99,7 @@ onMounted(async () => {
 
 onBeforeUnmount(() => {
   removeViewportObserver()
+  unsubscribe()
 })
 
 const props = defineProps({
@@ -429,7 +435,7 @@ const articleClasses = computed(() => {
   let classes = {
     'is-resizing': store.state.currentUserIsResizingCard,
     'is-tilting': store.state.currentUserIsTiltingCard,
-    'is-hidden-by-opacity': isCardHiddenByCommentFilter.value,
+    'is-hidden-by-opacity': isHiddenByCommentFilter.value,
     'jiggle': shouldJiggle.value
   }
   classes = addSizeClasses(classes)
@@ -675,6 +681,11 @@ const dateUpdatedAt = computed(() => {
   } else {
     return 'Just now'
   }
+})
+const dateIsToday = computed(() => {
+  const date = updatedAt.value
+  if (!date) { return }
+  return dayjs(date).isToday()
 })
 const toggleFilterShowAbsoluteDates = () => {
   store.dispatch('currentCards/incrementZ', props.card.id)
@@ -1394,9 +1405,9 @@ const touchIsNearTouchPosition = (event) => {
 // space filters
 
 const filtersIsActive = computed(() => {
-  return Boolean(store.getters['currentUser/totalCardFadingFiltersActive'])
+  return Boolean(store.getters['currentUser/totalItemFadingFiltersActive'])
 })
-const isCardFilteredByTags = computed(() => {
+const isFilteredByTags = computed(() => {
   const tagNames = store.state.filteredTagNames
   if (!tagNames.length) { return }
   const hasTag = tags.value.find(tag => {
@@ -1406,7 +1417,7 @@ const isCardFilteredByTags = computed(() => {
   })
   return hasTag
 })
-const isConnectionFilteredByType = computed(() => {
+const isFilteredByConnectionType = computed(() => {
   const typeIds = store.state.filteredConnectionTypeIds
   if (!typeIds) { return }
   const filteredTypes = connectedConnectionTypes.value.filter(type => {
@@ -1414,25 +1425,31 @@ const isConnectionFilteredByType = computed(() => {
   })
   return Boolean(filteredTypes.length)
 })
-const isCardFilteredByFrame = computed(() => {
+const isFilteredByFrame = computed(() => {
   const frameIds = store.state.filteredFrameIds
   if (!frameIds.length) { return }
   const hasFrame = frameIds.includes(props.card.frameId)
   return hasFrame
 })
-const isCardFilteredByUnchecked = computed(() => {
+const isFilteredByUnchecked = computed(() => {
   const filterUncheckedIsActive = store.state.currentUser.filterUnchecked
   if (!filterUncheckedIsActive) { return }
   return !isChecked.value && hasCheckbox.value
 })
-const isCardHiddenByCommentFilter = computed(() => {
+const isHiddenByCommentFilter = computed(() => {
   const filterCommentsIsActive = store.state.currentUser.filterComments
   if (!filterCommentsIsActive) { return }
   return isComment.value
 })
+const isFilteredByBox = computed(() => {
+  const boxIds = store.state.filteredBoxIds
+  const boxes = containingBoxes.value || []
+  const isInBox = boxes.find(box => boxIds.includes(box.id))
+  return isInBox
+})
 const isFiltered = computed(() => {
   if (!filtersIsActive.value) { return }
-  const isInFilter = isCardFilteredByTags.value || isConnectionFilteredByType.value || isCardFilteredByFrame.value || isCardFilteredByUnchecked.value
+  const isInFilter = isFilteredByTags.value || isFilteredByConnectionType.value || isFilteredByFrame.value || isFilteredByUnchecked.value || isFilteredByBox.value
   return !isInFilter
 })
 
@@ -1847,7 +1864,7 @@ const isInCheckedBox = computed(() => {
 article.card-wrap#card(
   :style="articleStyle"
   :data-card-id="card.id"
-  :data-is-hidden-by-comment-filter="isCardHiddenByCommentFilter"
+  :data-is-hidden-by-comment-filter="isHiddenByCommentFilter"
   :data-is-visible-in-viewport="state.isVisibleInViewport"
   :data-should-render="shouldRender"
   :data-is-locked="isLocked"
@@ -2054,7 +2071,7 @@ article.card-wrap#card(
     .badge-wrap(v-if="filterShowUsers")
       UserLabelInline(:user="createdByUser" :isClickable="true")
     //- Date
-    .badge.secondary.button-badge(v-if="filterShowDateUpdated" @click.left.prevent.stop="toggleFilterShowAbsoluteDates" @touchend.prevent.stop="toggleFilterShowAbsoluteDates")
+    .badge.secondary.button-badge(v-if="filterShowDateUpdated" @click.left.prevent.stop="toggleFilterShowAbsoluteDates" @touchend.prevent.stop="toggleFilterShowAbsoluteDates" :class="{'date-is-today': dateIsToday}")
       img.icon.time(src="@/assets/time.svg")
       .name {{dateUpdatedAt}}
 
@@ -2336,6 +2353,8 @@ article.card-wrap
     .badge + .badge,
     .badge-wrap + .badge
       margin-left 6px
+    .date-is-today
+      background-color var(--info-background)
 
   .comment-user-badge
     display inline

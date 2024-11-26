@@ -9,6 +9,7 @@ import consts from '@/consts.js'
 
 import { nanoid } from 'nanoid'
 import randomColor from 'randomcolor'
+import dayjs from 'dayjs'
 
 const store = useStore()
 
@@ -122,9 +123,11 @@ const validateSchema = (space, schema) => {
 
 const convertFromCanvas = (space) => {
   const minPositionValue = 150
+  let date = dayjs(new Date())
+  date = date.format(consts.nameDateFormat)
   let newSpace = {}
   try {
-    newSpace.name = `Canvas ${utils.journalSpaceName({})}`
+    newSpace.name = `Canvas ${date}`
     newSpace.id = nanoid()
     newSpace.background = consts.defaultSpaceBackground
     newSpace.cards = []
@@ -212,16 +215,14 @@ const convertFromCanvas = (space) => {
 
 const importSpace = async (space) => {
   try {
+    const user = store.state.currentUser
     store.commit('isLoadingSpace', true)
-    const currentUserId = store.state.currentUser.id
     validate(space)
     if (state.format === 'canvas') {
       space = convertFromCanvas(space)
     }
-    space = utils.clearSpaceMeta(space, 'import')
-    space = utils.updateSpaceItemsUser(space, currentUserId)
+    space = utils.resetSpaceMeta({ space, user, type: 'import' })
     space.connections = utils.migrationConnections(space.connections)
-    space.userId = currentUserId
     const uniqueNewSpace = cache.updateIdsInSpace(space)
     console.log('🧚 space to import', uniqueNewSpace)
     await store.dispatch('currentSpace/saveSpace', uniqueNewSpace)

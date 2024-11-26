@@ -16,7 +16,10 @@ export default {
   normalCardMaxWidth: 200,
   wideCardMaxWidth: 390,
   minCardIframeWidth: 260,
-  boxSnapGuideWaitingDuration: 500,
+  emptyCard () {
+    return { width: this.defaultCardWidth, height: 32 }
+  },
+  boxSnapGuideWaitingDuration: 1000,
   maxInviteEmailsAllowedToSend: 15,
   defaultConnectionPathCurveControlPoint: 'q90,40',
   defaultTimeout: 40000,
@@ -26,6 +29,7 @@ export default {
   sidebarWidth: 250,
   minBoxSize: 70,
   systemCommands: { explore: 'Explore', newSpace: 'New Space', templates: 'Templates', apps: 'Apps and Extensions' },
+  systemCommandIcons: { moonPhase: 'moonPhase' },
   isSecureAppContextIOS: navigator.isSecureAppContextIOS, // true = iOS app
   isSecureAppContext: navigator.isSecureAppContext, // true = iOS app
   cdnHost: 'https://cdn.kinopio.club',
@@ -33,6 +37,7 @@ export default {
   moderatorUserId: 'euGhpBrR9eBcjKnK16C_g',
   uploadPlaceholder: '⬬⬭',
   itemTypesWithPositions: ['boxes', 'cards'],
+  nameDateFormat: 'ddd MMM D, YYYY', // Wed Nov 13, 2024
   isDevelopment () {
     if (env.VITE_PROD_SERVER === 'true') {
       return false

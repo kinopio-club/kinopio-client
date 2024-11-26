@@ -5,6 +5,7 @@ import { useStore } from 'vuex'
 import utils from '@/utils.js'
 import consts from '@/consts.js'
 import BackgroundPreview from '@/components/BackgroundPreview.vue'
+import UserSettingsNewSpaces from '@/components/subsections/UserSettingsNewSpaces.vue'
 const store = useStore()
 
 const props = defineProps({
@@ -26,14 +27,6 @@ const shouldDisableHapticFeedback = computed(() => { return store.state.currentU
 const toggleShouldDisableHapticFeedback = () => {
   const value = !shouldDisableHapticFeedback.value
   store.commit('currentUser/shouldDisableHapticFeedback', value)
-}
-
-// new spaces are blank
-
-const newSpacesAreBlank = computed(() => { return store.state.currentUser.newSpacesAreBlank })
-const toggleNewSpacesAreBlank = () => {
-  const value = !newSpacesAreBlank.value
-  store.dispatch('currentUser/newSpacesAreBlank', value)
 }
 
 // panning
@@ -117,11 +110,7 @@ const clearTips = () => {
   section
     .row
       p New Spaces
-    .row
-      label(:class="{active: newSpacesAreBlank}" @click.left.prevent="toggleNewSpacesAreBlank" @keydown.stop.enter="toggleNewSpacesAreBlank")
-        input(type="checkbox" v-model="newSpacesAreBlank")
-        span New Spaces Are Blank
-
+    UserSettingsNewSpaces
   section
     .row
       p Accessibility

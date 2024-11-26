@@ -168,7 +168,9 @@ export default {
     },
     addCurrentSpace: (context, group) => {
       const user = context.rootState.currentUser
-      context.dispatch('currentSpace/updateSpace', { groupId: group.id, addedToGroupByUserId: user.id }, { root: true })
+      const body = { groupId: group.id, addedToGroupByUserId: user.id }
+      context.dispatch('currentSpace/updateSpace', body, { root: true })
+      context.dispatch('userNotifications/addSpaceToGroup', body, { root: true })
     },
     removeCurrentSpace: (context) => {
       context.dispatch('currentSpace/updateSpace', { groupId: null, addedToGroupByUserId: null }, { root: true })

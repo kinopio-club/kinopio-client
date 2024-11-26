@@ -3,17 +3,24 @@ import { reactive, computed, onMounted, onBeforeUnmount, defineProps, defineEmit
 import { useStore } from 'vuex'
 
 import utils from '@/utils.js'
+
 const store = useStore()
+
+// let unsubscribe
 
 const dialogElement = ref(null)
 
 onMounted(() => {
   window.addEventListener('resize', updateDialogHeight)
-  // store.subscribe(mutation => {
+  // unsubscribe = store.subscribe(mutation => {
   //   if (mutation.type === 'abc') {
   //     xyz()
   //   }
   // })
+})
+onBeforeUnmount(() => {
+  window.removeEventListener('resize', updateDialogHeight)
+//   unsubscribe()
 })
 
 const emit = defineEmits(['updateCount'])

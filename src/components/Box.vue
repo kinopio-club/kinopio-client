@@ -12,6 +12,8 @@ import postMessage from '@/postMessage.js'
 import randomColor from 'randomcolor'
 const store = useStore()
 
+let unsubscribe
+
 const borderWidth = 2
 
 // locking
@@ -31,7 +33,7 @@ let prevSelectedBox
 const boxElement = ref(null)
 
 onMounted(() => {
-  store.subscribe((mutation, state) => {
+  unsubscribe = store.subscribe((mutation, state) => {
     const { type, payload } = mutation
     if (type === 'updateRemoteCurrentConnection' || type === 'removeRemoteCurrentConnection') {
       updateRemoteConnections()
@@ -51,6 +53,7 @@ onUpdated(() => {
 })
 onBeforeUnmount(() => {
   removeViewportObserver()
+  unsubscribe()
 })
 
 const props = defineProps({
@@ -206,8 +209,29 @@ const classes = computed(() => {
     'is-resizing': isResizing.value,
     'is-selected': currentBoxIsSelected.value,
     'is-checked': isChecked.value || isInCheckedBox.value,
+    'filtered': isFiltered.value,
     transition: !store.state.currentBoxIsNew || !store.state.currentUserIsResizingBox
   }
+})
+
+// space filters
+
+const filtersIsActive = computed(() => {
+  return Boolean(store.getters['currentUser/totalItemFadingFiltersActive'])
+})
+const isFilteredByUnchecked = computed(() => {
+  const filterUncheckedIsActive = store.state.currentUser.filterUnchecked
+  if (!filterUncheckedIsActive) { return }
+  return !isChecked.value && hasCheckbox.value
+})
+const isFilteredByBox = computed(() => {
+  const boxIds = store.state.filteredBoxIds
+  return boxIds.includes(props.box.id)
+})
+const isFiltered = computed(() => {
+  if (!filtersIsActive.value) { return }
+  const isInFilter = isFilteredByUnchecked.value || isFilteredByBox.value
+  return !isInFilter
 })
 
 // resize

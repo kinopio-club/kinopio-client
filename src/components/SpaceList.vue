@@ -4,14 +4,13 @@ import { useStore } from 'vuex'
 
 import templates from '@/data/templates.js'
 import ResultsFilter from '@/components/ResultsFilter.vue'
-import MoonPhase from '@/components/MoonPhase.vue'
 import PrivacyIcon from '@/components/PrivacyIcon.vue'
 import Loader from '@/components/Loader.vue'
 import User from '@/components/User.vue'
 import UserLabelInline from '@/components/UserLabelInline.vue'
 import NameMatch from '@/components/NameMatch.vue'
 import OfflineBadge from '@/components/OfflineBadge.vue'
-import SpaceTodayJournalBadge from '@/components/SpaceTodayJournalBadge.vue'
+import SpaceTodayBadge from '@/components/SpaceTodayBadge.vue'
 import GroupLabel from '@/components/GroupLabel.vue'
 import utils from '@/utils.js'
 import cache from '@/cache.js'
@@ -21,7 +20,9 @@ import last from 'lodash-es/last'
 
 const store = useStore()
 
-let unsubscribe, shouldPreventSelectSpace
+let unsubscribe
+
+let shouldPreventSelectSpace
 
 const itemsPerPage = 60
 
@@ -60,7 +61,7 @@ onBeforeUnmount(() => {
   spaceListElement.value.closest('section').removeEventListener('scroll', updateScroll)
 })
 
-const emit = defineEmits(['focusBeforeFirstItem', 'closeDialog', 'selectSpace', 'checkmarkSpace'])
+const emit = defineEmits(['focusBeforeFirstItem', 'closeDialog', 'selectSpace'])
 
 const props = defineProps({
   spaces: Array,
@@ -75,7 +76,6 @@ const props = defineProps({
   isLoading: Boolean,
   parentIsSpaceDetails: Boolean,
   parentIsPinned: Boolean,
-  showCheckmarkSpace: Boolean,
   userShowInExploreDate: String,
   readSpaceIds: Array,
   spaceReadDateType: String,
@@ -85,6 +85,7 @@ const props = defineProps({
   search: String,
   parentDialog: String,
   previewImageIsWide: Boolean,
+  hidePreviewImage: Boolean,
   showSpaceGroups: Boolean
 })
 
@@ -367,10 +368,6 @@ const selectItemFromFilter = () => {
   store.commit('shouldPreventNextEnterKey', true)
   selectSpace(null, space)
 }
-const checkmarkSpace = (space) => {
-  shouldPreventSelectSpace = true
-  emit('checkmarkSpace', space)
-}
 
 // group
 
@@ -433,8 +430,9 @@ span.space-list-wrap
               User(:user="user(space)" :isClickable="false" :key="user(space).id" :isMedium="true")
 
             //- preview image
-            .preview-thumbnail-image-wrap(v-if="space.previewThumbnailImage && isOnline" :class="{wide: previewImageIsWide}")
-              img.preview-thumbnail-image(:src="space.previewThumbnailImage" loading="lazy")
+            template(v-if="!props.hidePreviewImage")
+              .preview-thumbnail-image-wrap(v-if="space.previewThumbnailImage && isOnline" :class="{wide: previewImageIsWide}")
+                img.preview-thumbnail-image(:src="space.previewThumbnailImage" loading="lazy")
             //- group
             template(v-if="group(space.groupId) && props.showSpaceGroups")
               GroupLabel(:group="group(space.groupId)")
@@ -443,17 +441,12 @@ span.space-list-wrap
               OfflineBadge(:isInline="true" :isDanger="true")
             //- template category
             .badge.info.inline-badge(v-if="showCategory && space.category" :class="categoryClassName(space)") {{space.category}}
-            //- tweet space
-            span(v-if="space.isFromTweet" title="Tweet space")
-              img.icon.tweet(src="@/assets/twitter.svg")
             //- space meta
             template(v-if="space.isFavorite")
               img.icon.favorite-icon(src="@/assets/heart.svg")
             template(v-if="space.name === 'Inbox'")
               img.icon.inbox-icon(src="@/assets/inbox.svg")
-            SpaceTodayJournalBadge(:space="space")
-            //- journal
-            MoonPhase(v-if="space.moonPhase" :moonPhase="space.moonPhase")
+            SpaceTodayBadge(:space="space")
             //- template
             img.icon.templates(v-if="space.isTemplate" src="@/assets/templates.svg" title="Template")
             //- space details
@@ -465,8 +458,6 @@ span.space-list-wrap
               template(v-if='space.privacy')
                 PrivacyIcon(:privacy="space.privacy" :closedIsNotVisible="true")
               img.icon.sunglasses(src="@/assets/sunglasses.svg" v-if="showInExplore(space)" title="Shown in Explore")
-            button.button-checkmark.small-button(v-if="showCheckmarkSpace" @mousedown.left.stop="checkmarkSpace(space)" @touchstart.stop="checkmarkSpace(space)")
-              img.icon.checkmark(src="@/assets/checkmark.svg")
             //- new
             .badge.info.inline-badge.new-unread-badge(v-if="isNew(space)")
 </template>
@@ -485,11 +476,6 @@ span.space-list-wrap
 
     .sunglasses
       width 16px
-
-    .icon.tweet
-      min-width 12px
-      margin-right 4px
-      vertical-align -1px
 
     .icon
       flex-shrink 0
@@ -542,13 +528,6 @@ span.space-list-wrap
       padding 0
       min-width initial
       min-height initial
-
-    .button-checkmark
-      margin-left auto
-
-    .checkmark
-      vertical-align 3px
-      width 12px
 
     li
       position relative

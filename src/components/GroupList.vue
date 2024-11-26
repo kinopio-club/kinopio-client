@@ -4,6 +4,9 @@ import { useStore } from 'vuex'
 
 import GroupLabel from '@/components/GroupLabel.vue'
 import GroupDetails from '@/components/dialogs/GroupDetails.vue'
+
+import sortBy from 'lodash-es/sortBy'
+
 const store = useStore()
 
 const emit = defineEmits(['selectGroup'])
@@ -25,12 +28,12 @@ const groupIsSelected = (group) => {
 const groupDetailsIsVisible = (group) => {
   return group.id === props.groupDetailsIsVisibleForGroupId
 }
-
+const sortedGroups = computed(() => sortBy(props.groups, 'name'))
 </script>
 
 <template lang="pug">
 ul.results-list.group-list
-  template(v-for="group in props.groups" :key="group.id")
+  template(v-for="group in sortedGroups" :key="group.id")
     li(:class="{ active: groupIsSelected(group) }" @click.stop="selectGroup($event, group)" :data-group-id="group.id")
       GroupLabel(:group="group" :showName="true")
       GroupDetails(:visible="groupDetailsIsVisible(group)" :group="group")

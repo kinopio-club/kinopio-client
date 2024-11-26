@@ -24,6 +24,7 @@ import { nextTick } from 'vue'
 import { nanoid } from 'nanoid'
 import uniqBy from 'lodash-es/uniqBy'
 import last from 'lodash-es/last'
+import dayjs from 'dayjs'
 
 const store = createStore({
   strict: consts.isDevelopment(),
@@ -64,6 +65,7 @@ const store = createStore({
     prevSpaceIdInSessionPagePosition: {},
     outsideSpaceBackgroundColor: '',
     groupsIsVisible: false,
+    dateImageUrl: null,
 
     // zoom and scroll
     spaceZoomPercent: 100,
@@ -106,7 +108,7 @@ const store = createStore({
     // box-selecting
     currentUserIsBoxSelecting: false,
     currentUserBoxSelectStart: {},
-    currentUserBoxSelectEnd: {},
+    currentUserBoxSelectMove: {},
     remoteUserBoxSelectStyles: [],
     remotePreviousUserBoxSelectStyles: [],
 
@@ -136,8 +138,6 @@ const store = createStore({
     remoteCardDetailsVisible: [],
     preventCardDetailsOpeningAnimation: true,
     multipleCardsSelectedIds: [],
-    newTweetCards: [],
-    prevNewTweetCards: [],
     iframeIsVisibleForCardId: '',
     // resizing card
     currentUserIsResizingCard: false,
@@ -224,8 +224,6 @@ const store = createStore({
     remotePendingUploads: [],
     isLoadingFavorites: false,
     loadSpaceShowDetailsForCardId: '',
-    loadJournalSpace: false,
-    loadJournalSpaceTomorrow: false,
     loadNewSpace: false,
     urlPreviewLoadingForCardIds: [],
     loadInboxSpace: false,
@@ -260,6 +258,7 @@ const store = createStore({
 
     // filters
     filteredConnectionTypeIds: [],
+    filteredBoxIds: [],
     filteredFrameIds: [],
     filteredTagNames: [],
     spaceListFilterInfo: {},
@@ -381,14 +380,6 @@ const store = createStore({
     isBeta: (state, value) => {
       utils.typeCheck({ value, type: 'boolean' })
       state.isBeta = value
-    },
-    loadJournalSpace: (state, value) => {
-      utils.typeCheck({ value, type: 'boolean' })
-      state.loadJournalSpace = value
-    },
-    loadJournalSpaceTomorrow: (state, value) => {
-      utils.typeCheck({ value, type: 'boolean' })
-      state.loadJournalSpaceTomorrow = value
     },
     loadNewSpace: (state, value) => {
       utils.typeCheck({ value, type: 'boolean' })
@@ -555,6 +546,10 @@ const store = createStore({
       utils.typeCheck({ value, type: 'boolean' })
       state.groupsIsVisible = value
     },
+    dateImageUrl: (state, value) => {
+      utils.typeCheck({ value, type: 'string' })
+      state.dateImageUrl = value
+    },
     searchIsVisible: (state, value) => {
       utils.typeCheck({ value, type: 'boolean' })
       state.searchIsVisible = value
@@ -653,7 +648,6 @@ const store = createStore({
     triggerUpdateOtherCard: (state, cardId) => {},
     triggerUpdateCardDetailsCardName: (state, options) => {},
     triggerCloseChildDialogs: () => {},
-    triggerAddSpaceIsVisible: () => {},
     triggerOfflineIsVisible: () => {},
     triggerAppsAndExtensionsIsVisible: () => {},
     triggerUpdateWindowTitle: () => {},
@@ -827,9 +821,9 @@ const store = createStore({
       utils.typeCheck({ value: object, type: 'object' })
       state.currentUserBoxSelectStart = object
     },
-    currentUserBoxSelectEnd: (state, object) => {
+    currentUserBoxSelectMove: (state, object) => {
       utils.typeCheck({ value: object, type: 'object' })
-      state.currentUserBoxSelectEnd = object
+      state.currentUserBoxSelectMove = object
     },
     updateRemoteUserBoxSelectStyles: (state, object) => {
       utils.typeCheck({ value: object, type: 'object' })
@@ -1168,14 +1162,6 @@ const store = createStore({
     clearDraggingItems: (state) => {
       state.currentDraggingCardId = ''
       state.currentDraggingBoxId = ''
-    },
-    newTweetCards: (state, cards) => {
-      utils.typeCheck({ value: cards, type: 'array' })
-      state.newTweetCards = cards
-    },
-    clearNewTweetCards: (state) => {
-      state.prevNewTweetCards = state.newTweetCards
-      state.newTweetCards = []
     },
     multipleSelectedItemsToLoad: (state, items) => {
       utils.typeCheck({ value: items, type: 'object' })
@@ -1592,6 +1578,7 @@ const store = createStore({
       state.filteredConnectionTypeIds = []
       state.filteredFrameIds = []
       state.filteredTagNames = []
+      state.filteredBoxIds = []
     },
     addToFilteredConnectionTypeId: (state, id) => {
       utils.typeCheck({ value: id, type: 'string' })
@@ -1620,6 +1607,14 @@ const store = createStore({
     spaceListFilterInfo: (state, value) => {
       utils.typeCheck({ value, type: 'object' })
       state.spaceListFilterInfo = value
+    },
+    addToFilteredBoxId: (state, id) => {
+      utils.typeCheck({ value: id, type: 'string' })
+      state.filteredBoxIds.push(id)
+    },
+    removeFromFilteredBoxId: (state, id) => {
+      utils.typeCheck({ value: id, type: 'string' })
+      state.filteredBoxIds = state.filteredBoxIds.filter(typeId => typeId !== id)
     },
 
     // Session Data
@@ -1686,16 +1681,16 @@ const store = createStore({
   },
 
   actions: {
-    moveFailedSendingQueueOperationBackIntoQueue: (context, operation) => {
-      // save to queue
-      let queue = cache.queue()
-      queue.unshift(operation)
-      cache.saveQueue(queue)
-      // remove from sending queue
-      let sendingQueue = context.state.sendingQueue
-      sendingQueue = sendingQueue.filter(queueItem => queueItem.body.operationId !== operation.operationId)
-      context.commit('sendingQueue', sendingQueue)
-    },
+    // moveFailedSendingQueueOperationBackIntoQueue: (context, operation) => {
+    //   // save to queue
+    //   let queue = cache.queue()
+    //   queue.unshift(operation)
+    //   cache.saveQueue(queue)
+    //   // remove from sending queue
+    //   let sendingQueue = context.state.sendingQueue
+    //   sendingQueue = sendingQueue.filter(queueItem => queueItem.body.operationId !== operation.operationId)
+    //   context.commit('sendingQueue', sendingQueue)
+    // },
     prevSpaceIdInSession: (context, id) => {
       utils.typeCheck({ value: id, type: 'string' })
       const position = {
@@ -2085,6 +2080,14 @@ const store = createStore({
       const isNativeApp = consts.isSecureAppContext
       const isZoomedOut = state.spaceZoomPercent !== 100
       if (isNativeApp || isZoomedOut) { return true }
+    },
+    dateImageUrl: (state) => {
+      if (state.dateImageUrl) {
+        return state.dateImageUrl
+      } else {
+        const date = dayjs().format('MM-DD-YYYY') // 11-19-2024
+        return `${consts.cdnHost}/date/${date}.jpg` // https://cdn.kinopio.club/date/11-19-24.jpg
+      }
     }
   },
 

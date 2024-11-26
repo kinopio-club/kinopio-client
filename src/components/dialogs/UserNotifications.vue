@@ -10,6 +10,7 @@ import consts from '@/consts.js'
 import cache from '@/cache.js'
 import AddToExplore from '@/components/AddToExplore.vue'
 import OfflineBadge from '@/components/OfflineBadge.vue'
+import GroupLabel from '@/components/GroupLabel.vue'
 
 const store = useStore()
 
@@ -207,6 +208,9 @@ dialog.narrow.user-notifications(v-if="props.visible" :open="props.visible" ref=
                 UserLabelInline(:user="notification.user")
               //- message
               span {{notification.message}}
+              //- group
+              template(v-if="notification.type === 'addSpaceToGroup'")
+                GroupLabel(:group="notification.group")
               //- space
               span.space-name-wrap(v-if="notification.spaceId" :data-space-id="notification.spaceId" @click.stop.prevent="changeSpace(notification.spaceId)" :class="{ active: isCurrentSpace(notification.spaceId) }")
                 img.preview-thumbnail-image(v-if="notification.space.previewThumbnailImage" :src="notification.space.previewThumbnailImage")
@@ -326,4 +330,8 @@ dialog.narrow.user-notifications(v-if="props.visible" :open="props.visible" ref=
     flex-shrink 0
     margin-right 3px
     vertical-align middle
+  .group-label
+    margin-left 4px
+    .group-badge
+      margin-right 0
 </style>

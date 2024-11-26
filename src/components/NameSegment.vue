@@ -5,6 +5,7 @@ import { useStore } from 'vuex'
 import NameMatch from '@/components/NameMatch.vue'
 import Tag from '@/components/Tag.vue'
 import SystemCommand from '@/components/SystemCommand.vue'
+import SystemCommandIcon from '@/components/SystemCommandIcon.vue'
 import CodeBlock from '@/components/CodeBlock.vue'
 import utils from '@/utils.js'
 import fonts from '@/data/fonts.js'
@@ -180,6 +181,10 @@ span.name-segment(:data-segment-types="dataMarkdownType" :data-tag-color="dataTa
   //- System Command
   template(v-if="props.segment.isCommand")
     SystemCommand(:command="props.segment.command" :name="props.segment.name")
+  //- System Command Icon
+  template(v-if="props.segment.isCommandIcon")
+    SystemCommandIcon(:command="props.segment.commandIcon")
+
 </template>
 
 <style lang="stylus">

@@ -7,15 +7,12 @@ import templates from '@/data/templates.js'
 import cache from '@/cache.js'
 import utils from '@/utils.js'
 
-import dayjs from 'dayjs'
-
 const store = useStore()
 
 const dialogElement = ref(null)
 const resultsSectionElement = ref(null)
 
 onMounted(() => {
-  initUserTemplates()
   window.addEventListener('resize', updateDialogHeight)
 })
 
@@ -24,9 +21,6 @@ const props = defineProps({
 })
 watch(() => props.visible, (value, prevValue) => {
   updateHeight()
-  if (value) {
-    initUserTemplates()
-  }
 })
 
 const state = reactive({
@@ -44,20 +38,6 @@ const changeSpace = (space) => {
 
 // templates
 
-const templatesList = computed(() => {
-  const templates = state.localSpaces.concat(systemTemplates.value)
-  return templates.map(template => {
-    template.previewThumbnailImage = `https://us-east-1.linodeobjects.com/kinopio-uploads/${template.id}/preview-image-thumbnail-${template.id}.jpg`
-    return template
-  })
-})
-const initUserTemplates = () => {
-  updateWithLocalSpaces()
-  updateWithRemoteSpaces()
-}
-
-// system templates
-
 const systemTemplates = computed(() => {
   let spaces = templates.spaces()
   return spaces.map(space => {
@@ -68,38 +48,6 @@ const systemTemplates = computed(() => {
     return space
   })
 })
-
-// user templates
-
-const updateWithLocalSpaces = async () => {
-  const spaces = await cache.getAllSpaces()
-  let localSpaces = spaces.filter(space => {
-    return space.isTemplate
-  })
-  localSpaces = sortSpacesByEditedAt(localSpaces)
-  state.localSpaces = localSpaces || []
-  updateHeight()
-}
-const updateWithRemoteSpaces = async () => {
-  const currentUserIsSignedIn = store.getters['currentUser/isSignedIn']
-  if (!currentUserIsSignedIn) { return }
-  state.isLoadingRemoteSpaces = true
-  let remoteSpaces = await store.dispatch('api/getUserSpaces')
-  remoteSpaces = remoteSpaces.filter(space => space.isTemplate)
-  remoteSpaces = sortSpacesByEditedAt(remoteSpaces)
-  state.localSpaces = remoteSpaces
-  state.isLoadingRemoteSpaces = false
-  updateHeight()
-}
-// copied from SpaceDetails.vue
-const sortSpacesByEditedAt = (spaces) => {
-  const sortedSpaces = spaces.sort((a, b) => {
-    const bEditedAt = dayjs(b.editedAt).unix()
-    const aEditedAt = dayjs(a.editedAt).unix()
-    return bEditedAt - aEditedAt
-  })
-  return sortedSpaces
-}
 
 // dialog height
 
@@ -119,7 +67,6 @@ const updateDialogHeight = async () => {
   let element = dialogElement.value
   state.dialogHeight = utils.elementHeight(element)
 }
-
 </script>
 
 <template lang="pug">
@@ -133,10 +80,9 @@ dialog.templates.narrow(
 )
   section
     p Templates
-  section.add-to-templates
   section.results-section(ref="resultsSectionElement" :style="{'max-height': state.resultsSectionHeight + 'px'}")
     SpaceList(
-      :spaces="templatesList"
+      :spaces="systemTemplates"
       :showCategory="true"
       @selectSpace="changeSpace"
       :isLoading="state.isLoadingRemoteSpaces"
@@ -147,8 +93,9 @@ dialog.templates.narrow(
 <style lang="stylus">
 dialog.templates
   overflow auto
-  .icon
-    display inline-block
+  hr
+    margin-top 0
+    margin-bottom 4px
   .results-section
     .inline-badge
       &.learning
@@ -163,6 +110,4 @@ dialog.templates
       &.product
         background-color #ee83ee
         color var(--primary-on-light-background)
-  section.add-to-templates
-    padding-bottom 0
 </style>
