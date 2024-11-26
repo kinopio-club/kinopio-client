@@ -331,11 +331,11 @@ const currentSpace = {
       const spaces = await cache.getAllSpaces()
       if (currentUserIsSignedIn) { return }
       if (spaces.length) { return }
-      context.dispatch('createNewInboxSpace', true)
-      context.dispatch('createNewHelloSpace')
+      await context.dispatch('createNewInboxSpace', true)
+      await context.dispatch('createNewHelloSpace')
       context.dispatch('updateUserLastSpaceId')
     },
-    createNewHelloSpace: (context) => {
+    createNewHelloSpace: async (context) => {
       const user = context.rootState.currentUser
       let space = utils.newHelloSpace(user)
       space = utils.updateSpaceCardsCreatedThroughPublicApi(space)
@@ -343,7 +343,7 @@ const currentSpace = {
       space.collaboratorKey = nanoid()
       space.readOnlyKey = nanoid()
       if (shouldLoadNewHelloSpace) {
-        space = cache.updateIdsInSpace(space)
+        space = await cache.updateIdsInSpace(space)
         context.commit('clearSearch', null, { root: true })
         context.commit('resetPageSizes', null, { root: true })
         context.dispatch('restoreSpaceInChunks', { space })
@@ -353,11 +353,11 @@ const currentSpace = {
       } else {
         space.users = [context.rootState.currentUser]
         const nullCardUsers = true
-        cache.updateIdsInSpace(space, nullCardUsers)
+        await cache.updateIdsInSpace(space, nullCardUsers)
       }
       pageMeta.space(space)
     },
-    createNewSpace: (context, space) => {
+    createNewSpace: async (context, space) => {
       const currentUser = context.rootState.currentUser
       context.commit('triggerSpaceZoomReset', null, { root: true })
       let name
@@ -406,13 +406,13 @@ const currentSpace = {
       space.previewImage = null
       space.previewThumbnailImage = null
       const nullCardUsers = true
-      const uniqueNewSpace = cache.updateIdsInSpace(space, nullCardUsers)
+      const uniqueNewSpace = await cache.updateIdsInSpace(space, nullCardUsers)
       context.commit('clearSearch', null, { root: true })
       isLoadingRemoteSpace = false
       context.commit('resetPageSizes', null, { root: true })
       context.dispatch('restoreSpaceInChunks', { space: uniqueNewSpace })
     },
-    createNewInboxSpace: (context, shouldCreateWithoutLoading) => {
+    createNewInboxSpace: async (context, shouldCreateWithoutLoading) => {
       let space = utils.clone(inboxSpace)
       space.id = nanoid()
       space.createdAt = new Date()
@@ -427,7 +427,7 @@ const currentSpace = {
       if (shouldCreateWithoutLoading) {
         space.users = [context.rootState.currentUser]
         const nullCardUsers = true
-        cache.updateIdsInSpace(space, nullCardUsers) // saves space
+        await cache.updateIdsInSpace(space, nullCardUsers) // saves space
       } else {
         context.commit('isLoadingSpace', true, { root: true })
         context.commit('clearSearch', null, { root: true })
@@ -469,13 +469,13 @@ const currentSpace = {
       context.dispatch('updateModulesSpaceId', space)
       context.dispatch('incrementCardsCreatedCountFromSpace', space)
     },
-    duplicateSpace: (context, space) => {
+    duplicateSpace: async (context, space) => {
       space = space || context.state
       space = utils.clone(space)
       const user = { id: context.rootState.currentUser.id }
       context.commit('broadcast/leaveSpaceRoom', { user, type: 'userLeftRoom' }, { root: true })
       let uniqueNewSpace = utils.resetSpaceMeta({ space, user: context.rootState.currentUser, type: 'copy' })
-      uniqueNewSpace = cache.updateIdsInSpace(space)
+      uniqueNewSpace = await cache.updateIdsInSpace(space)
       context.commit('clearSearch', null, { root: true })
       isLoadingRemoteSpace = false
       context.commit('resetPageSizes', null, { root: true })
@@ -483,18 +483,18 @@ const currentSpace = {
       context.dispatch('saveNewSpace')
       context.commit('addNotification', { message: `Space duplicated`, type: 'success' }, { root: true })
     },
-    addSpace: (context, space) => {
+    addSpace: async (context, space) => {
       const user = { id: context.rootState.currentUser.id }
       context.commit('broadcast/leaveSpaceRoom', { user, type: 'userLeftRoom' }, { root: true })
-      context.dispatch('createNewSpace', space)
+      await context.dispatch('createNewSpace', space)
       context.dispatch('saveNewSpace')
       context.dispatch('updateUserLastSpaceId')
       context.commit('notifySignUpToEditSpace', false, { root: true })
     },
-    addInboxSpace: (context) => {
+    addInboxSpace: async (context) => {
       const user = { id: context.rootState.currentUser.id }
       context.commit('broadcast/leaveSpaceRoom', { user, type: 'userLeftRoom' }, { root: true })
-      context.dispatch('createNewInboxSpace')
+      await context.dispatch('createNewInboxSpace')
       context.dispatch('saveNewSpace')
       context.dispatch('updateUserLastSpaceId')
       context.commit('notifySignUpToEditSpace', false, { root: true })

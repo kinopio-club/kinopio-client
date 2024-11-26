@@ -219,7 +219,6 @@ export default {
     space.cacheDate = Date.now()
     await this.storeLocal(`space-${space.id}`, space)
   },
-  // TODO await
   async updateIdsInSpace (space, nullCardUsers) {
     const items = {
       cards: space.cards,

@@ -78,19 +78,19 @@ const addSpace = async () => {
   }
   if (props.shouldAddSpaceDirectly) {
     store.dispatch('closeAllDialogs')
-    store.dispatch('currentSpace/addSpace')
+    await store.dispatch('currentSpace/addSpace')
     store.commit('triggerSpaceDetailsInfoIsVisible')
   }
   store.dispatch('analytics/event', 'addSpaceButtons')
 }
-const addInboxSpace = () => {
+const addInboxSpace = async () => {
   store.commit('isLoadingSpace', true)
   store.dispatch('closeAllDialogs')
   window.scrollTo(0, 0)
-  store.dispatch('currentSpace/addInboxSpace')
+  await store.dispatch('currentSpace/addInboxSpace')
 }
-const duplicateSpace = () => {
-  store.dispatch('currentSpace/duplicateSpace')
+const duplicateSpace = async () => {
+  await store.dispatch('currentSpace/duplicateSpace')
 }
 
 // new space settings

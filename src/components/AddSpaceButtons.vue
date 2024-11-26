@@ -55,7 +55,7 @@ const addNewSpace = async () => {
   }
   if (shouldAddSpaceDirectly.value) {
     store.dispatch('closeAllDialogs')
-    store.dispatch('currentSpace/addSpace')
+    await store.dispatch('currentSpace/addSpace')
     store.commit('triggerSpaceDetailsInfoIsVisible')
   }
   store.dispatch('analytics/event', 'AddSpaceButtons')

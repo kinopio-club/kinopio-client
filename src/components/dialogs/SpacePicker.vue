@@ -191,7 +191,7 @@ const createNewSpace = async () => {
   space.connectionTypes = []
   space = utils.newSpaceBackground(space, currentUser)
   space.background = space.background || consts.defaultSpaceBackground
-  space = cache.updateIdsInSpace(space)
+  space = await cache.updateIdsInSpace(space)
   console.log('🚚 create new space', space)
   if (currentUserIsSignedIn.value) {
     await store.dispatch('api/createSpace', space)

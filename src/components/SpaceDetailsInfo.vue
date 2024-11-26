@@ -182,8 +182,8 @@ const toggleCurrentSpaceIsUserTemplate = () => {
 
 // duplicate
 
-const duplicateSpace = () => {
-  store.dispatch('currentSpace/duplicateSpace')
+const duplicateSpace = async () => {
+  await store.dispatch('currentSpace/duplicateSpace')
   updateLocalSpaces()
 }
 

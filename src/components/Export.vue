@@ -80,8 +80,8 @@ const downloadAllSpacesRemote = async () => {
   }
   state.isLoadingAllSpaces = false
 }
-const duplicateSpace = () => {
-  store.dispatch('currentSpace/duplicateSpace')
+const duplicateSpace = async () => {
+  await store.dispatch('currentSpace/duplicateSpace')
   state.spaceIsDuplicated = true
   emit('updateSpaces')
 }
