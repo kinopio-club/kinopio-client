@@ -314,17 +314,6 @@ export default {
     return cards
   },
   // TODO await
-  async tagByName (name) {
-    let spaces = await this.getAllSpaces()
-    let tags = []
-    spaces.forEach(space => {
-      if (!utils.arrayHasItems(space.tags)) { return }
-      tags = tags.concat(space.tags)
-    })
-    const tag = tags.find(tag => tag.name === name)
-    return tag
-  },
-  // TODO await
   async allTags () {
     const spaces = await this.getAllSpaces()
     let tags = []

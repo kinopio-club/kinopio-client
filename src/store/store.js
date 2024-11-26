@@ -1651,9 +1651,8 @@ const store = createStore({
         card.name = name
       }
     },
-    otherTags: (state, remoteTags) => {
-      remoteTags = uniqBy(remoteTags, 'name')
-      state.otherTags = remoteTags
+    otherTags: (state, tags) => {
+      state.otherTags = tags
     },
 
     // Sync Session Data
@@ -2014,6 +2013,15 @@ const store = createStore({
       const canOnlyComment = context.getters['currentUser/canOnlyComment']()
       if (canOnlyComment) { return }
       context.commit('currentUserToolbar', value)
+    },
+
+    // other tags (session)
+
+    updateOtherTags: async (context, tags) => {
+      const cachedTags = await cache.allTags()
+      tags = tags.concat(cachedTags)
+      tags = uniqBy(tags, 'name')
+      return tags
     }
   },
   getters: {
@@ -2085,6 +2093,9 @@ const store = createStore({
         const date = dayjs().format('MM-DD-YYYY') // 11-19-2024
         return `${consts.cdnHost}/date/${date}.jpg` // https://cdn.kinopio.club/date/11-19-24.jpg
       }
+    },
+    otherTagByName: (state, getters) => (name) => {
+      return state.otherTags.find(otherTag => otherTag.name === name)
     }
   },
 

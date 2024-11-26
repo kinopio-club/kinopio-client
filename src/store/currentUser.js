@@ -482,7 +482,7 @@ export default {
         context.commit('isUpgraded', false)
       }
       const remoteTags = await context.dispatch('api/getUserTags', null, { root: true }) || []
-      context.commit('otherTags', remoteTags, { root: true })
+      context.dispatch('updateOtherTags', remoteTags, { root: true })
       context.dispatch('groups/restore', remoteUser.groups, { root: true })
       if (context.rootState.shouldNotifyIsJoiningGroup) {
         context.commit('notifyIsJoiningGroup', true, { root: true })
