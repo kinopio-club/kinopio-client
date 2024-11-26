@@ -77,6 +77,7 @@ export default {
     document.querySelector('meta[property="og:image:secure_url"]').content = imageUrl
   },
   space (space) {
+    space = utils.clone(space)
     const isHelloSpace = space.name === 'Hello Kinopio'
     // title
     windowSpaceTitle(space)

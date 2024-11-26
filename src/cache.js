@@ -115,12 +115,8 @@ export default {
     return spaces.find(space => space.name === 'Inbox')
   },
   async getSpaceByName (name) {
-    name = utils.normalizeString(name)
-    const space = await idb.get(name)
-    if (space) {
-      space.clients = []
-    }
-    return space
+    const spaces = await this.getAllSpaces()
+    return spaces.find(space => space.name === name)
   },
   async getAllSpaces () {
     const keys = await idb.keys()

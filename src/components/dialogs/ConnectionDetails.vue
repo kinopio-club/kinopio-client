@@ -126,7 +126,7 @@ const closeAllDialogs = () => {
 const canEditSpace = computed(() => store.getters['currentUser/canEditSpace']())
 const spacePrivacyIsOpen = computed(() => store.state.currentSpace.privacy === 'open')
 const spacePrivacyIsClosed = computed(() => store.state.currentSpace.privacy === 'closed')
-const isInvitedButCannotEditSpace = computed(() => store.getters['currentUser/isInvitedButCannotEditSpace']())
+const isInvitedButCannotEditSpace = computed(() => store.state.currentUserIsInvitedButCannotEditCurrentSpace)
 const spaceCounterZoomDecimal = computed(() => store.getters.spaceCounterZoomDecimal)
 const pinchCounterZoomDecimal = computed(() => store.state.pinchCounterZoomDecimal)
 
