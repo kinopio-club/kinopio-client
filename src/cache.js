@@ -242,7 +242,6 @@ export default {
     await this.saveSpace(space)
     return space
   },
-  // TODO await
   async addSpaces (spaces) {
     for (const space of spaces) {
       space.cacheDate = utils.normalizeToUnixTime(space.updatedAt)

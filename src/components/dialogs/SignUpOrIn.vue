@@ -234,7 +234,7 @@ const signIn = async (event) => {
     store.dispatch('currentUser/checkIfShouldJoinGroup')
     // add new spaces from remote
     const spaces = await store.dispatch('api/getUserSpaces')
-    cache.addSpaces(spaces)
+    await cache.addSpaces(spaces)
     store.commit('clearAllNotifications')
     addCollaboratorToInvitedSpaces()
     store.commit('triggerSpaceDetailsVisible')
