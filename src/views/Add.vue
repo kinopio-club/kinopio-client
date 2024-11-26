@@ -105,7 +105,7 @@ const focusAndSelectName = () => {
 
 const restoreValue = async (value) => {
   await nextTick()
-  value = value || cache.prevAddPageValue()
+  value = value || await cache.prevAddPageValue()
   state.newName = value
   console.log('🏬 restored value', value)
   await nextTick()

@@ -348,7 +348,6 @@ export default {
 
   // Add Page
 
-  // TODO await
   async prevAddPageValue () {
     const value = await idb.get('prevAddPageValue') || ''
     return value
