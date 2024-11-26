@@ -211,7 +211,7 @@ const remoteCards = async () => {
 const updateCards = async () => {
   state.cards = []
   const cardsInCurrentSpace = utils.clone(store.getters['currentCards/withTagName'](name.value))
-  const cardsInCachedSpaces = cache.allCardsByTagName(name.value)
+  const cardsInCachedSpaces = await cache.allCardsByTagName(name.value)
   // cache cards
   let cacheCards = cardsInCurrentSpace.concat(cardsInCachedSpaces)
   cacheCards = addCardNameSegments(cacheCards)

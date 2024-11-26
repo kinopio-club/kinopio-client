@@ -296,7 +296,6 @@ export default {
 
   // Tags
 
-  // TODO await
   async allCardsByTagName (name) {
     let spaces = await this.getAllSpaces()
     let cards = [] // card name, id, spaceid
