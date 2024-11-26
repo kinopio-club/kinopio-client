@@ -774,6 +774,7 @@ const currentSpace = {
         console.error('🚒 Error fetching remoteSpace', error)
       }
       context.dispatch('updateCurrentSpaceIsUnavailableOffline', space.id, { root: true })
+      context.dispatch('updateCurrentUserIsInvitedButCannotEditCurrentSpace', space, { root: true })
     },
     saveCurrentSpaceToCache: (context) => {
       const space = utils.clone(context.state)
@@ -1022,10 +1023,11 @@ const currentSpace = {
         svg.unpauseAnimations()
       })
     },
-    checkIfShouldNotifySignUpToEditSpace: (context, space) => {
+    checkIfShouldNotifySignUpToEditSpace: async (context, space) => {
       const spaceIsOpen = space.privacy === 'open'
       const currentUserIsSignedIn = context.rootGetters['currentUser/isSignedIn']
-      const currentUserIsInvitedButCannotEditSpace = context.rootGetters['currentUser/isInvitedButCannotEditSpace'](space)
+      await context.dispatch('updateCurrentUserIsInvitedButCannotEditCurrentSpace', space, { root: true })
+      const currentUserIsInvitedButCannotEditSpace = context.state.currentUserIsInvitedButCannotEditCurrentSpace
       const currentUserIsReadOnlyInvitedToSpace = context.rootGetters['currentUser/isReadOnlyInvitedToSpace'](space)
       const currentUserIsInvitedToEdit = currentUserIsInvitedButCannotEditSpace && !currentUserIsSignedIn && !currentUserIsReadOnlyInvitedToSpace
       if (spaceIsOpen && !currentUserIsSignedIn) {

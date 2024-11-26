@@ -80,15 +80,14 @@ const updateChangelog = async () => {
     if (!posts) { return }
     posts = posts.slice(0, 20)
     store.commit('changelog', posts)
-    cache.updatePrevChangelogId(posts[0].id)
     checkChangelogIsUpdated()
   } catch (error) {
     console.error('🚒 updateChangelog', error)
   }
 }
-const checkChangelogIsUpdated = () => {
+const checkChangelogIsUpdated = async () => {
   const newId = changelog.value[0].id
-  const prevId = cache.prevReadChangelogId()
+  const prevId = await cache.prevReadChangelogId()
   if (!prevId) {
     // first time visitors are updated to latest changelog
     cache.updatePrevReadChangelogId(newId)

@@ -388,7 +388,6 @@ export default {
 
   // Invited Spaces
 
-  // TODO await
   async invitedSpaces () {
     const spaces = await this.getLocal('invitedSpaces')
     return spaces || []
@@ -419,13 +418,6 @@ export default {
 
   // Changelog
 
-  // TODO await
-  async prevChangelogId () {
-    return idb.get('prevChangelogId')
-  },
-  async updatePrevChangelogId (id) {
-    await this.storeLocal('prevChangelogId', id)
-  },
   async prevReadChangelogId () {
     const value = await idb.get('prevReadChangelogId')
     return value || ''
@@ -433,5 +425,4 @@ export default {
   async updatePrevReadChangelogId (id) {
     await this.storeLocal('prevReadChangelogId', id)
   }
-
 }

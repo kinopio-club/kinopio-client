@@ -269,6 +269,7 @@ const store = createStore({
     otherItems: { spaces: [], cards: [] },
     otherTags: [],
     sendingQueue: [],
+    currentUserIsInvitedButCannotEditCurrentSpace: false,
 
     // codeblocks
     codeLanguagePickerIsVisible: false,
@@ -1654,6 +1655,9 @@ const store = createStore({
     otherTags: (state, tags) => {
       state.otherTags = tags
     },
+    currentUserIsInvitedButCannotEditCurrentSpace: (state, value) => {
+      state.currentUserIsInvitedButCannotEditCurrentSpace = value
+    },
 
     // Sync Session Data
 
@@ -1961,6 +1965,19 @@ const store = createStore({
       ping.color = store.state.currentUser.color
       context.commit('triggerSonarPing', ping)
       context.commit('broadcast/updateStore', { updates: ping, type: 'triggerSonarPing' })
+    },
+
+    // current space
+
+    updateCurrentUserIsInvitedButCannotEditCurrentSpace: async (context, space) => {
+      space = space || context.state.currentSpace
+      const currentUserIsSignedIn = context.getters['currentUser/isSignedIn']
+      const invitedSpaces = await cache.invitedSpaces()
+      const isInvitedToSpace = Boolean(invitedSpaces.find(invitedSpace => invitedSpace.id === space.id))
+      const isReadOnlyInvitedToSpace = context.getters['currentUser/isReadOnlyInvitedToSpace'](space)
+      const inviteRequiresSignIn = !currentUserIsSignedIn && isInvitedToSpace
+      const value = isReadOnlyInvitedToSpace || inviteRequiresSignIn
+      context.commit('currentUserIsInvitedButCannotEditCurrentSpace', value)
     },
 
     // Pinned Dialogs

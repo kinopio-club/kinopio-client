@@ -251,7 +251,7 @@ const isInSearchResultsCards = computed(() => {
   return Boolean(results.find(cardResult => card.value.id === cardResult.id))
 })
 const canEditSpace = computed(() => store.getters['currentUser/canEditSpace']())
-const isInvitedButCannotEditSpace = computed(() => store.getters['currentUser/isInvitedButCannotEditSpace']())
+const isInvitedButCannotEditSpace = computed(() => store.state.currentUserIsInvitedButCannotEditCurrentSpace)
 
 // user
 

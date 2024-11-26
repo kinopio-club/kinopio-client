@@ -858,16 +858,6 @@ export default {
     isReadOnlyInvitedToSpace: (state, getters, rootState) => (space) => {
       return rootState.spaceReadOnlyKey.spaceId === space.id
     },
-    isInvitedButCannotEditSpace: (state, getters, rootState) => (space) => {
-      space = space || rootState.currentSpace
-      const currentUserIsSignedIn = getters.isSignedIn
-      cache.invitedSpaces().then(invitedSpaces => {
-        const isInvitedToSpace = Boolean(invitedSpaces.find(invitedSpace => invitedSpace.id === space.id))
-        const isReadOnlyInvitedToSpace = getters.isReadOnlyInvitedToSpace(space)
-        const inviteRequiresSignIn = !currentUserIsSignedIn && isInvitedToSpace
-        return isReadOnlyInvitedToSpace || inviteRequiresSignIn
-      })
-    },
     shouldPreventCardsCreatedCountUpdate: (state, getters, rootState, rootGetters) => {
       const spaceCreatorIsUpgraded = rootGetters['currentSpace/spaceCreatorIsUpgraded']
       const spaceCreatorIsCurrentUser = rootGetters['currentSpace/spaceCreatorIsCurrentUser']

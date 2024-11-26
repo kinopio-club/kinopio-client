@@ -199,7 +199,7 @@ const signUp = async (event) => {
     notifySignedIn()
     notifyIsJoiningGroup()
     store.dispatch('currentUser/checkIfShouldJoinGroup')
-    addCollaboratorToInvitedSpaces()
+    await addCollaboratorToInvitedSpaces()
     store.commit('triggerUpdateWindowHistory')
     store.dispatch('themes/restore')
   } else {
@@ -236,7 +236,7 @@ const signIn = async (event) => {
     const spaces = await store.dispatch('api/getUserSpaces')
     await cache.addSpaces(spaces)
     store.commit('clearAllNotifications')
-    addCollaboratorToInvitedSpaces()
+    await addCollaboratorToInvitedSpaces()
     store.commit('triggerSpaceDetailsVisible')
     store.commit('isLoadingFavorites', true)
     store.dispatch('currentUser/restoreUserFavorites')
@@ -325,8 +325,9 @@ const removeUneditedSpace = async (spaceName) => {
 
 // update user on success
 
-const addCollaboratorToCurrentSpace = () => {
-  const invitedSpaceIds = cache.invitedSpaces().map(space => space?.id)
+const addCollaboratorToCurrentSpace = async () => {
+  const invitedSpaces = await cache.invitedSpaces()
+  const invitedSpaceIds = invitedSpaces.map(space => space?.id)
   const currentSpace = store.state.currentSpace
   const currentUser = store.state.currentUser
   if (invitedSpaceIds.includes(currentSpace?.id)) {
@@ -335,14 +336,14 @@ const addCollaboratorToCurrentSpace = () => {
     store.commit('broadcast/joinSpaceRoom')
   }
 }
-const addCollaboratorToInvitedSpaces = () => {
-  let invitedSpaces = cache.invitedSpaces()
+const addCollaboratorToInvitedSpaces = async () => {
+  let invitedSpaces = await cache.invitedSpaces()
   invitedSpaces = invitedSpaces.map(space => {
     space.userId = store.state.currentUser.id
     return space
   })
   store.dispatch('api/addToQueue', { name: 'addCollaboratorToSpaces', body: invitedSpaces })
-  addCollaboratorToCurrentSpace()
+  await addCollaboratorToCurrentSpace()
 }
 </script>
 
