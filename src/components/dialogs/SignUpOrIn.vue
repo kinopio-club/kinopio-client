@@ -191,9 +191,9 @@ const signUp = async (event) => {
   if (isSuccess(response)) {
     store.commit('clearAllNotifications')
     store.commit('currentUser/replaceState', newUser)
-    backupLocalSpaces()
-    migrationSpacesConnections()
-    updateSpacesUserId()
+    await backupLocalSpaces()
+    await migrationSpacesConnections()
+    await updateSpacesUserId()
     updateCurrentSpaceWithNewUserId(currentUser, newUser)
     await store.dispatch('api/createSpaces')
     notifySignedIn()
@@ -226,8 +226,8 @@ const signIn = async (event) => {
     // update local spaces to remote user
     await removeUneditedSpace('Hello Kinopio')
     await removeUneditedSpace('Inbox')
-    migrationSpacesConnections()
-    updateSpacesUserId()
+    await migrationSpacesConnections()
+    await updateSpacesUserId()
     await store.dispatch('api/createSpaces')
     notifySignedIn()
     notifyIsJoiningGroup()
@@ -271,12 +271,12 @@ const notifyIsJoiningGroup = () => {
 
 // update spaces on success
 
-const backupLocalSpaces = () => {
-  const spaces = cache.getAllSpaces()
+const backupLocalSpaces = async () => {
+  const spaces = await cache.getAllSpaces()
   cache.storeLocal('spacesBackup', spaces)
 }
-const migrationSpacesConnections = () => {
-  const spaces = cache.getAllSpaces()
+const migrationSpacesConnections = async () => {
+  const spaces = await cache.getAllSpaces()
   const newSpaces = spaces.map(space => {
     space.connections = utils.migrationConnections(space.connections)
     return space
@@ -285,9 +285,9 @@ const migrationSpacesConnections = () => {
     cache.saveSpace(space)
   })
 }
-const updateSpacesUserId = () => {
+const updateSpacesUserId = async () => {
   const userId = store.state.currentUser.id
-  const spaces = cache.getAllSpaces()
+  const spaces = await cache.getAllSpaces()
   const newSpaces = utils.updateSpacesUserId(userId, spaces)
   newSpaces.forEach(space => {
     cache.saveSpace(space)

@@ -338,8 +338,8 @@ const removeBackgroundTint = async () => {
 
 // recent
 
-const recentImagesFromCacheSpaces = () => {
-  let spaces = cache.getAllSpaces()
+const recentImagesFromCacheSpaces = async () => {
+  let spaces = await cache.getAllSpaces()
   let images = []
   spaces.forEach(space => {
     if (!space.background) { return }
@@ -364,12 +364,12 @@ const recentImagesFromCacheSpaces = () => {
 const serviceIsPexels = computed(() => state.service === 'pexels')
 const serviceIsRecent = computed(() => state.service === 'recent')
 const serviceIsBackground = computed(() => state.service === 'background')
-const updateService = (service) => {
+const updateService = async (service) => {
   state.service = service
   if (service === 'background') {
     state.selectedImages = backgroundImages.value
   } else if (service === 'recent') {
-    const images = recentImagesFromCacheSpaces()
+    const images = await recentImagesFromCacheSpaces()
     state.selectedImages = images
   } else if (service === 'pexels') {
     searchPexels()

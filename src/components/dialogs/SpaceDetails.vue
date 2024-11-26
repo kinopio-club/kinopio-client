@@ -283,7 +283,8 @@ const updateLocalSpaces = () => {
 }
 const debouncedUpdateLocalSpaces = debounce(async () => {
   await nextTick()
-  let cacheSpaces = cache.getAllSpaces().filter(space => {
+  let cacheSpaces = await cache.getAllSpaces()
+  cacheSpaces = cacheSpaces.filter(space => {
     return store.getters['currentUser/canEditSpace'](space)
   })
   let spaces = updateWithExistingRemoteSpaces(cacheSpaces)

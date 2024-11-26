@@ -118,16 +118,6 @@ export default {
       state.lastSpaceId = spaceId
       cache.updateUser('lastSpaceId', spaceId)
     },
-    resetLastSpaceId: (state) => {
-      const spaces = cache.getAllSpaces()
-      const lastSpace = spaces[1]
-      if (lastSpace) {
-        state.lastSpaceId = lastSpace.id
-      } else {
-        state.lastSpaceId = ''
-      }
-      cache.updateUser('lastSpaceId', state.lastSpaceId)
-    },
     favoriteUsers: (state, users) => {
       utils.typeCheck({ value: users, type: 'array' })
       state.favoriteUsers = users
@@ -468,6 +458,15 @@ export default {
         body: {
           lastSpaceId: spaceId
         } }, { root: true })
+    },
+    resetLastSpaceId: async (context) => {
+      const spaces = await cache.getAllSpaces()
+      const lastSpace = spaces[1]
+      if (lastSpace) {
+        context.dispatch('lastSpaceId', lastSpace.id)
+      } else {
+        context.dispatch('lastSpaceId', '')
+      }
     },
     restoreRemoteUser: async (context, cachedUser) => {
       if (!context.getters.isSignedIn) { return }

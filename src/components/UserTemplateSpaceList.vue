@@ -19,11 +19,13 @@ onMounted(() => {
 const emit = defineEmits(['updateDialogHeight', 'isLoading'])
 
 const state = reactive({
-  remoteSpaces: []
+  remoteSpaces: [],
+  localSpaces: []
 })
 
 const init = async () => {
-  await updateRemoteSpaces()
+  updateRemoteSpaces()
+  updateLocalSpaces()
 }
 const updateHeight = () => {
   emit('updateDialogHeight')
@@ -54,12 +56,13 @@ const triggerTemplatesIsVisible = () => {
 const selectSpace = (space) => {
   store.dispatch('currentSpace/changeSpace', space)
 }
-const localSpaces = () => {
-  const spaces = cache.getAllSpaces().filter(space => {
+const updateLocalSpaces = async () => {
+  const cachedSpaces = await cache.getAllSpaces()
+  const spaces = cachedSpaces.filter(space => {
     const isUser = store.state.currentUser.id === space.userId
     return space.isTemplate && isUser
   })
-  return spaces
+  state.localSpaces = spaces
 }
 const updateRemoteSpaces = async () => {
   const currentUserIsSignedIn = store.getters['currentUser/isSignedIn']
@@ -74,7 +77,7 @@ const updateRemoteSpaces = async () => {
   emit('isLoading', false)
 }
 const templateSpaces = computed(() => {
-  let spaces = localSpaces()
+  let spaces = state.localSpaces
   if (state.remoteSpaces.length) {
     spaces = state.remoteSpaces
   }

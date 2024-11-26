@@ -65,9 +65,10 @@ const shouldHideFooter = (value) => {
 
 // space
 
-const addSpace = () => {
+const addSpace = async () => {
   store.commit('isLoadingSpace', true)
-  const noUserSpaces = !cache.getAllSpaces().length
+  const cachedSpaces = await cache.getAllSpaces()
+  const noUserSpaces = !cachedSpaces.length
   window.scrollTo(0, 0)
   if (noUserSpaces) {
     window.location.href = '/'

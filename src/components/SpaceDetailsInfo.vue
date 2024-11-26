@@ -208,12 +208,13 @@ const removeCurrentSpace = async () => {
     store.commit('notifyCurrentSpaceIsNowRemoved', true)
   }
   emit('removeSpaceId', currentSpaceId)
-  changeToPrevSpace()
+  await changeToPrevSpace()
   await nextTick()
   updateLocalSpaces()
 }
-const changeToPrevSpace = () => {
-  let spaces = cache.getAllSpaces().filter(space => {
+const changeToPrevSpace = async () => {
+  const cachedSpaces = await cache.getAllSpaces()
+  let spaces = cachedSpaces.filter(space => {
     return store.getters['currentUser/canEditSpace'](space)
   })
   spaces = spaces.filter(space => space.id !== currentSpace.value.id)

@@ -133,11 +133,11 @@ const excludeCurrentSpace = () => {
   const currentSpace = store.state.currentSpace
   state.spaces = state.spaces.filter(space => space.id !== currentSpace.id)
 }
-const updateSpaces = () => {
+const updateSpaces = async () => {
   if (props.userSpaces) {
     state.spaces = props.userSpaces
   } else {
-    state.spaces = cache.getAllSpaces()
+    state.spaces = await cache.getAllSpaces()
     updateWithRemoteSpaces()
   }
   excludeCurrentSpace()

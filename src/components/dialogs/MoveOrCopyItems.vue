@@ -46,8 +46,8 @@ const closeDialogs = () => {
 // spaces
 
 const currentSpace = computed(() => store.state.currentSpace)
-const updateSpaces = () => {
-  const spaces = cache.getAllSpaces()
+const updateSpaces = async () => {
+  const spaces = await cache.getAllSpaces()
   state.spaces = spaces.filter(space => {
     const spaceIsNotCurrent = space.id !== currentSpace.value.id
     const spaceHasId = Boolean(space.id)

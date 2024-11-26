@@ -230,11 +230,12 @@ const restoreSpace = () => {
   store.dispatch('currentSpace/restoreRemovedSpace', space)
   store.commit('notifySpaceIsRemoved', false)
 }
-const deleteSpace = () => {
+const deleteSpace = async () => {
   const space = store.state.currentSpace
   store.dispatch('currentSpace/deleteSpace', space)
   store.commit('notifySpaceIsRemoved', false)
-  const firstSpace = cache.getAllSpaces()[0]
+  const cachedSpaces = await cache.getAllSpaces()
+  const firstSpace = cachedSpaces[0]
   store.dispatch('currentSpace/loadSpace', { space: firstSpace })
 }
 const resetNotifySpaceIsHidden = () => {

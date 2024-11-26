@@ -155,18 +155,18 @@ const signIn = async (event) => {
 
 // spaces
 
-const updateSpaces = () => {
+const updateSpaces = async () => {
   try {
     state.loading.updateSpaces = true
-    updateSpacesLocal()
-    updateSpacesRemote()
+    await updateSpacesLocal()
+    await updateSpacesRemote()
   } catch (error) {
     console.error('🚒', error)
   }
   state.loading.updateSpaces = false
 }
-const updateSpacesLocal = () => {
-  let spaces = cache.getAllSpaces()
+const updateSpacesLocal = async () => {
+  let spaces = await cache.getAllSpaces()
   spaces = spaces.filter(space => space.name !== 'Inbox')
   state.spaces = spaces
 }

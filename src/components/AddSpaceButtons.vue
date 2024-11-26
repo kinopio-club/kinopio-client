@@ -43,9 +43,10 @@ const toggleAddSpaceIsVisible = () => {
 // add space
 
 const shouldAddSpaceDirectly = computed(() => !props.parentIsInDialog)
-const addNewSpace = () => {
+const addNewSpace = async () => {
   store.commit('isLoadingSpace', true)
-  const noUserSpaces = !cache.getAllSpaces().length
+  const cachedSpaces = await cache.getAllSpaces()
+  const noUserSpaces = !cachedSpaces.length
   window.scrollTo(0, 0)
   if (noUserSpaces) {
     window.location.href = '/'

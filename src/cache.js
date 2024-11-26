@@ -122,7 +122,6 @@ export default {
     }
     return space
   },
-  // TODO convert to await
   async getAllSpaces () {
     const keys = await idb.keys()
     const spaceKeys = keys.filter(key => key.startsWith('space-'))

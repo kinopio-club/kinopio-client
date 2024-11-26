@@ -187,7 +187,7 @@ const currentSpace = {
         console.log('🚃 Create and restore hello space')
         shouldLoadNewHelloSpace = true
       }
-      context.dispatch('checkIfShouldCreateNewUserSpaces')
+      await context.dispatch('checkIfShouldCreateNewUserSpaces')
       context.dispatch('updateModulesSpaceId')
       context.commit('triggerUpdateWindowHistory', null, { root: true })
       context.dispatch('checkIfShouldShowExploreOnLoad')
@@ -326,9 +326,9 @@ const currentSpace = {
 
     // Space
 
-    checkIfShouldCreateNewUserSpaces: (context) => {
+    checkIfShouldCreateNewUserSpaces: async (context) => {
       const currentUserIsSignedIn = context.rootGetters['currentUser/isSignedIn']
-      const spaces = cache.getAllSpaces()
+      const spaces = await cache.getAllSpaces()
       if (currentUserIsSignedIn) { return }
       if (spaces.length) { return }
       context.dispatch('createNewInboxSpace', true)
@@ -545,7 +545,7 @@ const currentSpace = {
       const currentUserIsRemovedFromSpace = utils.objectHasKeys(cachedSpace)
       context.dispatch('currentUser/updateFavoriteSpace', { space, value: false }, { root: true })
       if (currentUserIsRemovedFromSpace) {
-        context.commit('currentUser/resetLastSpaceId', null, { root: true })
+        context.dispatch('currentUser/resetLastSpaceId', null, { root: true })
         cache.deleteSpace(space)
         const emptySpace = utils.emptySpace(space.id)
         context.commit('restoreSpace', emptySpace)
