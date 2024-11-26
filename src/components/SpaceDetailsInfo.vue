@@ -335,7 +335,7 @@ const removeSpaceGroup = (group) => {
           span {{remotePendingUpload.percentComplete}}%
       BackgroundPicker(:visible="state.backgroundIsVisible" @updateLocalSpaces="updateLocalSpaces")
     //- Name
-    .textarea-wrap(:class="{'full-width': props.shouldHidePin && !state.textareaIsFocused, 'space-is-hidden': props.currentSpaceIsHidden}")
+    .textarea-wrap(:class="{'full-width': props.shouldHidePin && !state.textareaIsFocused }")
       textarea.name(
         :readonly="!isSpaceMember"
         ref="nameElement"
