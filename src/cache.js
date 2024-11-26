@@ -84,7 +84,6 @@ export default {
 
   // User
 
-  // TODO convert all cache.user to use await
   async user () {
     const user = await this.getLocal('user')
     return user || {}

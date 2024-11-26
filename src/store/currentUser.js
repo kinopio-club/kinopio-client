@@ -394,7 +394,7 @@ export default {
   },
   actions: {
     init: async (context) => {
-      const cachedUser = cache.user()
+      const cachedUser = await cache.user()
       if (utils.objectHasKeys(cachedUser)) {
         console.log('🌸 Restore user from cache', cachedUser.id)
         context.commit('restoreUser', cachedUser)

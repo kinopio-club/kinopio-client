@@ -88,7 +88,7 @@ export default {
   computed: {
     currentUserIsSignedIn () { return this.$store.getters['currentUser/isSignedIn'] },
     userId () { return this.$store.state.currentUser.id },
-    apiKey () { return cache.user().apiKey }
+    apiKey () { return this.$store.state.currentUser.apiKey }
   },
   methods: {
     updateDialogHeight () {
