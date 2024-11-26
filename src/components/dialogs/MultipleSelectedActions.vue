@@ -27,6 +27,9 @@ const state = reactive({
   shareCardIsVisible: false
 })
 
+const closeAllDialogs = () => {
+  store.dispatch('closeAllDialogs')
+}
 const closeDialogs = () => {
   state.copyItemsIsVisible = false
   state.moveItemsIsVisible = false
@@ -479,6 +482,9 @@ dialog.narrow.multiple-selected-actions(
   :class="colorClasses"
 )
   .dark-theme-background-layer(v-if="isThemeDarkAndUserColorLight")
+  .close-button-wrap.inline-button-wrap(@click="closeAllDialogs")
+    button.small-button.inline-button
+      img.icon.cancel(src="@/assets/add.svg")
   section
 
     //- Edit Cards
@@ -605,4 +611,17 @@ dialog.narrow.multiple-selected-actions(
       border-color var(--primary-border-on-dark-background)
     section.subsection + section.subsection
       border-top 1px solid var(--primary-border-on-dark-background)
+  .close-button-wrap
+    cursor pointer
+    position absolute
+    left initial
+    right 0
+    top 0
+    padding-right 6px
+    padding-left 2px
+    padding-bottom 2px
+    z-index 1
+    button
+      cursor pointer
+      background-color var(--primary-background)
 </style>
