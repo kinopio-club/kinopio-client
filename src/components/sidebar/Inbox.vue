@@ -47,9 +47,12 @@ const loadInboxSpace = () => {
 
 // list cards
 
-const updateInboxCardsLocal = () => {
-  state.cards = cache.getInboxSpace()?.cards
-  sortCards()
+const updateInboxCardsLocal = async () => {
+  const inboxSpace = await cache.getInboxSpace()
+  if (inboxSpace) {
+    state.cards = inboxSpace.cards
+    sortCards()
+  }
 }
 const updateInboxCardsRemote = async () => {
   if (!store.state.isOnline) { return }

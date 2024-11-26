@@ -99,13 +99,11 @@ export default {
 
   // Space
 
-  // TODO convert all cache.space(id) to use await
   async space (spaceId) {
     const space = await this.getLocal(`space-${spaceId}`) || {}
     space.clients = []
     return space
   },
-  // TODO convert to await
   async getInboxSpace () {
     const keys = await idb.keys()
     const spaceKeys = keys.filter(key => key.startsWith('space-'))

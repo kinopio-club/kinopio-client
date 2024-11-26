@@ -337,14 +337,14 @@ const updateWithRemoteSpaces = async () => {
   }
   state.isLoadingRemoteSpaces = false
 }
-const updateCachedSpaces = () => {
-  state.spaces.forEach(space => {
-    const cachedSpace = cache.space(space.id)
+const updateCachedSpaces = async () => {
+  for (const space of state.spaces) {
+    const cachedSpace = await cache.space(space.id)
     const isCachedSpace = utils.objectHasKeys(cachedSpace)
     if (!isCachedSpace) {
       cache.saveSpace(space)
     }
-  })
+  }
 }
 const updateFavorites = async () => {
   if (!shouldUpdateFavorites) { return }

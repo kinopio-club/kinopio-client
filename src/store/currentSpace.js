@@ -540,8 +540,8 @@ const currentSpace = {
       if (remoteSpace.id !== context.state.id) { return }
       return utils.normalizeRemoteSpace(remoteSpace)
     },
-    removeLocalSpaceIfUserIsRemoved: (context, space) => {
-      const cachedSpace = cache.space(space.id)
+    removeLocalSpaceIfUserIsRemoved: async (context, space) => {
+      const cachedSpace = await cache.space(space.id)
       const currentUserIsRemovedFromSpace = utils.objectHasKeys(cachedSpace)
       context.dispatch('currentUser/updateFavoriteSpace', { space, value: false }, { root: true })
       if (currentUserIsRemovedFromSpace) {
@@ -743,7 +743,7 @@ const currentSpace = {
         context.commit('triggerSpaceZoomReset', null, { root: true })
       }
       context.commit('isAddPage', false, { root: true })
-      const cachedSpace = cache.space(space.id) || space
+      const cachedSpace = await cache.space(space.id) || space
       cachedSpace.id = cachedSpace.id || space.id
       space = utils.normalizeSpace(cachedSpace)
       context.dispatch('clearStateMeta')
@@ -773,6 +773,7 @@ const currentSpace = {
       } catch (error) {
         console.error('🚒 Error fetching remoteSpace', error)
       }
+      context.dispatch('updateCurrentSpaceIsUnavailableOffline', space.id, { root: true })
     },
     saveCurrentSpaceToCache: (context) => {
       const space = utils.clone(context.state)
@@ -860,7 +861,7 @@ const currentSpace = {
     loadLastSpace: async (context, prevFailedSpace) => {
       let space
       const user = context.rootState.currentUser
-      let spaceToRestore = cache.space(user.lastSpaceId)
+      let spaceToRestore = await cache.space(user.lastSpaceId)
       if (spaceToRestore.id === prevFailedSpace?.id) {
         spaceToRestore = null
       }
@@ -886,7 +887,7 @@ const currentSpace = {
       const prevSpaceIdInSession = context.rootState.prevSpaceIdInSession
       const prevSpacePosition = context.rootState.prevSpaceIdInSessionPagePosition
       if (!prevSpaceIdInSession) { return }
-      let space = cache.space(prevSpaceIdInSession)
+      let space = await cache.space(prevSpaceIdInSession)
       if (space.id) {
         await context.dispatch('changeSpace', space)
       } else if (prevSpaceIdInSession) {
@@ -1171,6 +1172,13 @@ const currentSpace = {
         context.dispatch('currentConnections/add', { connection, type }, { root: true })
       })
       tags.forEach(tag => context.dispatch('addTag', tag))
+    },
+
+    // async getters
+
+    spaceIsNotCached: async (context, spaceId) => {
+      const spaceCardsCount = await cache.space(spaceId).cards?.length
+      return Boolean(!spaceCardsCount)
     }
   },
 
@@ -1225,13 +1233,6 @@ const currentSpace = {
       const boxColors = rootGetters['currentBoxes/colors']
       const colors = cardColors.concat(boxColors)
       return uniq(colors)
-    },
-    isUnavailableOffline: (state, getters, rootState, rootGetters) => {
-      const spaceId = rootState.currentSpace.id
-      const isOffline = !rootState.isOnline
-      const isNotCached = rootGetters['spaceIsNotCached'](spaceId)
-      const currentSpaceIsRemote = getters.isRemote
-      return isOffline && isNotCached && currentSpaceIsRemote
     },
 
     // tags

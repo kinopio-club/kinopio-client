@@ -66,6 +66,7 @@ const store = createStore({
     outsideSpaceBackgroundColor: '',
     groupsIsVisible: false,
     dateImageUrl: null,
+    currentSpaceIsUnavailableOffline: false,
 
     // zoom and scroll
     spaceZoomPercent: 100,
@@ -549,6 +550,10 @@ const store = createStore({
     dateImageUrl: (state, value) => {
       utils.typeCheck({ value, type: 'string' })
       state.dateImageUrl = value
+    },
+    currentSpaceIsUnavailableOffline: (state, value) => {
+      utils.typeCheck({ value, type: 'boolean' })
+      state.currentSpaceIsUnavailableOffline = value
     },
     searchIsVisible: (state, value) => {
       utils.typeCheck({ value, type: 'boolean' })
@@ -1714,6 +1719,13 @@ const store = createStore({
       }
       context.commit('isOnline', isOnline)
     },
+    updateCurrentSpaceIsUnavailableOffline: async (context, spaceId) => {
+      const isOffline = !context.state.isOnline
+      const isNotCached = await context.dispatch('currentSpace/spaceIsNotCached', spaceId)
+      const currentSpaceIsRemote = context.getters['currentSpace/isRemote']
+      const value = isOffline && isNotCached && currentSpaceIsRemote
+      context.commit('currentSpaceIsUnavailableOffline', value)
+    },
     updateSpaceAndCardUrlToLoad: (context, path) => {
       const matches = utils.spaceAndCardIdFromPath(path)
       if (!matches) { return }
@@ -1767,8 +1779,8 @@ const store = createStore({
     closeAllDialogs: (context, origin) => {
       origin = origin || 'Store.closeAllDialogs'
       context.commit('closeAllDialogs', origin)
-      const space = context.rootState.currentSpace
-      const user = context.rootState.currentUser
+      const space = context.state.currentSpace
+      const user = context.state.currentUser
       context.commit('broadcast/updateUser', { user: utils.userMeta(user, space), type: 'updateUserPresence' })
       context.commit('broadcast/updateStore', { updates: { userId: user.id }, type: 'clearRemoteCardDetailsVisible' })
       context.commit('broadcast/updateStore', { updates: { userId: user.id }, type: 'clearRemoteConnectionDetailsVisible' })
@@ -1789,7 +1801,7 @@ const store = createStore({
       if (context.state.multipleCardsSelectedIds.includes(cardId)) { return }
       context.commit('addToMultipleCardsSelected', cardId)
       const updates = {
-        userId: context.rootState.currentUser.id,
+        userId: context.state.currentUser.id,
         cardId
       }
       context.commit('broadcast/updateStore', { updates, type: 'addToRemoteCardsSelected' })
@@ -1799,7 +1811,7 @@ const store = createStore({
       if (!context.state.multipleCardsSelectedIds.includes(cardId)) { return }
       context.commit('removeFromMultipleCardsSelected', cardId)
       const updates = {
-        userId: context.rootState.currentUser.id,
+        userId: context.state.currentUser.id,
         cardId
       }
       context.commit('broadcast/updateStore', { updates, type: 'removeFromRemoteCardsSelected' })
@@ -1815,7 +1827,7 @@ const store = createStore({
       cardIds = [...combinedSet]
       context.commit('multipleCardsSelectedIds', cardIds)
       const updates = {
-        userId: context.rootState.currentUser.id,
+        userId: context.state.currentUser.id,
         cardIds
       }
       context.commit('broadcast/updateStore', { updates, type: 'updateRemoteCardsSelected' })
@@ -1824,7 +1836,7 @@ const store = createStore({
       utils.typeCheck({ value: cardIds, type: 'array' })
       context.commit('multipleCardsSelectedIds', cardIds)
       const updates = {
-        userId: context.rootState.currentUser.id,
+        userId: context.state.currentUser.id,
         cardIds
       }
       context.commit('broadcast/updateStore', { updates, type: 'updateRemoteCardsSelected' })
@@ -1833,7 +1845,7 @@ const store = createStore({
       utils.typeCheck({ value: boxIds, type: 'array' })
       context.commit('multipleBoxesSelectedIds', boxIds)
       const updates = {
-        userId: context.rootState.currentUser.id,
+        userId: context.state.currentUser.id,
         boxIds
       }
       context.commit('broadcast/updateStore', { updates, type: 'updateRemoteBoxesSelected' })
@@ -1842,8 +1854,8 @@ const store = createStore({
       if (context.state.multipleCardsSelectedIds.length || context.state.multipleConnectionsSelectedIds.length || context.state.multipleBoxesSelectedIds.length) {
         context.commit('clearMultipleSelected')
       }
-      const space = context.rootState.currentSpace
-      const user = context.rootState.currentUser
+      const space = context.state.currentSpace
+      const user = context.state.currentUser
       context.commit('broadcast/updateStore', { user: utils.userMeta(user, space), type: 'clearRemoteMultipleSelected' })
     },
     toggleMultipleConnectionsSelected: (context, connectionId) => {
@@ -1861,7 +1873,7 @@ const store = createStore({
       if (context.state.multipleConnectionsSelectedIds.includes(connectionId)) { return }
       context.commit('addToMultipleConnectionsSelected', connectionId)
       const updates = {
-        userId: context.rootState.currentUser.id,
+        userId: context.state.currentUser.id,
         connectionId
       }
       context.commit('broadcast/updateStore', { updates, type: 'addToRemoteConnectionsSelected' })
@@ -1871,7 +1883,7 @@ const store = createStore({
       if (!context.state.multipleConnectionsSelectedIds.includes(connectionId)) { return }
       context.commit('removeFromMultipleConnectionsSelected', connectionId)
       const updates = {
-        userId: context.rootState.currentUser.id,
+        userId: context.state.currentUser.id,
         connectionId
       }
       context.commit('broadcast/updateStore', { updates, type: 'removeFromRemoteConnectionsSelected' })
@@ -1880,7 +1892,7 @@ const store = createStore({
       utils.typeCheck({ value: connectionIds, type: 'array' })
       context.commit('multipleConnectionsSelectedIds', connectionIds)
       const updates = {
-        userId: context.rootState.currentUser.id,
+        userId: context.state.currentUser.id,
         connectionIds
       }
       context.commit('broadcast/updateStore', { updates, type: 'updateRemoteConnectionsSelected' })
@@ -1896,7 +1908,7 @@ const store = createStore({
       connectionIds = [...combinedSet]
       context.commit('multipleConnectionsSelectedIds', connectionIds)
       const updates = {
-        userId: context.rootState.currentUser.id,
+        userId: context.state.currentUser.id,
         connectionIds
       }
       context.commit('broadcast/updateStore', { updates, type: 'updateRemoteConnectionsSelected' })
@@ -1904,7 +1916,7 @@ const store = createStore({
     connectionDetailsIsVisibleForConnectionId: (context, connectionId) => {
       context.commit('connectionDetailsIsVisibleForConnectionId', connectionId)
       const updates = {
-        userId: context.rootState.currentUser.id,
+        userId: context.state.currentUser.id,
         connectionId
       }
       context.commit('broadcast/updateStore', { updates, type: 'addToRemoteConnectionDetailsVisible' })
@@ -1914,7 +1926,7 @@ const store = createStore({
       if (context.state.multipleBoxesSelectedIds.includes(boxId)) { return }
       context.commit('addToMultipleBoxesSelected', boxId)
       const updates = {
-        userId: context.rootState.currentUser.id,
+        userId: context.state.currentUser.id,
         boxId
       }
       context.commit('broadcast/updateStore', { updates, type: 'addToRemoteBoxesSelected' })
@@ -1930,7 +1942,7 @@ const store = createStore({
       boxIds = [...combinedSet]
       context.commit('multipleBoxesSelectedIds', boxIds)
       const updates = {
-        userId: context.rootState.currentUser.id,
+        userId: context.state.currentUser.id,
         boxIds
       }
       context.commit('broadcast/updateStore', { updates, type: 'updateRemoteBoxesSelected' })
@@ -1940,7 +1952,7 @@ const store = createStore({
       if (!context.state.multipleBoxesSelectedIds.includes(boxId)) { return }
       context.commit('removeFromMultipleBoxesSelected', boxId)
       const updates = {
-        userId: context.rootState.currentUser.id,
+        userId: context.state.currentUser.id,
         boxId
       }
       context.commit('broadcast/updateStore', { updates, type: 'removeFromRemoteBoxesSelected' })
@@ -2035,21 +2047,6 @@ const store = createStore({
       const otherCards = state.otherItems.cards.filter(Boolean)
       const card = otherCards.find(otherCard => otherCard.id === cardId)
       return card
-    },
-    cachedOrOtherSpaceById: (state, getters) => (spaceId) => {
-      const currentSpace = state.currentSpace
-      const cachedSpace = cache.space(spaceId)
-      if (spaceId === currentSpace.id) {
-        return utils.clone(currentSpace)
-      } else if (utils.objectHasKeys(cachedSpace)) {
-        return cachedSpace
-      } else {
-        return getters.otherSpaceById(spaceId)
-      }
-    },
-    spaceIsNotCached: (state) => (spaceId) => {
-      const spaceCardsCount = cache.space(spaceId).cards?.length
-      return Boolean(!spaceCardsCount)
     },
     spaceZoomDecimal: (state) => {
       return state.spaceZoomPercent / 100

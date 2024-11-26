@@ -727,7 +727,7 @@ export default {
         } }, { root: true })
     },
     inboxSpace: async (context) => {
-      let space = cache.getInboxSpace()
+      let space = await cache.getInboxSpace()
       if (!space) {
         try {
           space = await context.dispatch('api/getUserInboxSpace', null, { root: true })

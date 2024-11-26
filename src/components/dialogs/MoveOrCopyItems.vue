@@ -123,17 +123,18 @@ const copyText = async () => {
 
 // copy or move
 
-const copyToSelectedSpace = (items) => {
+const copyToSelectedSpace = async (items) => {
   state.loading = true
   const selectedSpaceId = state.selectedSpace.id
   const selectedSpaceisCurrentSpace = selectedSpaceId === store.state.currentSpace.id
   newItems = store.getters['currentSpace/newItems']({ items, selectedSpaceId })
   // update cache
-  const spaceIsCached = Boolean(cache.space(selectedSpaceId).cards)
+  const space = await cache.space(selectedSpaceId).cards
+  const spaceIsCached = Boolean(space)
   if (!spaceIsCached) {
-    cache.saveSpace({ id: selectedSpaceId })
+    await cache.saveSpace({ id: selectedSpaceId })
   }
-  cache.addToSpace(newItems, selectedSpaceId)
+  await cache.addToSpace(newItems, selectedSpaceId)
   // update current space
   if (selectedSpaceisCurrentSpace) {
     store.dispatch('currentCards/addMultiple', { cards: newItems.cards, shouldOffsetPosition: true })
@@ -156,7 +157,7 @@ const moveOrCopyToSpace = async () => {
     state.cardsCreatedIsOverLimit = true
     return
   }
-  copyToSelectedSpace(items)
+  await copyToSelectedSpace(items)
   notifySuccess()
   if (props.actionIsMove) {
     removeCards(items.cards)

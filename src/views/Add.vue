@@ -233,8 +233,8 @@ const addCard = async () => {
   postMessage.send({ name: 'addCardFromAddPage', value: card })
   postMessage.send({ name: 'onAdded', value: true })
 }
-const addCardToSpaceLocal = (card, space) => {
-  space = cache.space(space.id)
+const addCardToSpaceLocal = async (card, space) => {
+  space = await cache.space(space.id)
   if (!space) { return }
   if (!space.cards) { return }
   const cards = space.cards.push(card)
