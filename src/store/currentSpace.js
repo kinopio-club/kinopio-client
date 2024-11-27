@@ -717,8 +717,8 @@ const currentSpace = {
       if (isRemote) {
         context.dispatch('checkIfShouldNotifySignUpToEditSpace', space)
         context.dispatch('checkIfShouldNotifySpaceIsRemoved', space)
+        context.commit('broadcast/joinSpaceRoom', null, { root: true })
       }
-      context.commit('broadcast/joinSpaceRoom', null, { root: true })
       nextTick(() => {
         context.dispatch('scrollCardsIntoView')
         // deferrable async tasks
@@ -729,12 +729,13 @@ const currentSpace = {
         })
       })
       context.dispatch('checkIfIsLoadingSpace', isRemote)
+      if (!isRemote) { return }
+      // increment visits
       await context.dispatch('api/addToQueue', {
         name: 'incrementVisits',
         body: { spaceId: space.id }
       }, { root: true })
       // preview image
-      if (!isRemote) { return }
       context.dispatch('createSpacePreviewImage')
     },
     loadSpace: async (context, { space }) => {
