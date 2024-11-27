@@ -67,8 +67,8 @@ Use the [Vue devtools](https://github.com/vuejs/vue-devtools) for Firefox and Ch
 
 | State | Description |
 | ------------- |-------------|
-| `offline` | localstorage and API queue operations only |
-| `not signed in` | localstorage only |
+| `offline` | indexeddb and API queue operations only |
+| `not signed in` | indexeddb only |
 | `space is read only` | cannot add cards or edit |
 | `space is open` | can add cards, can only edit cards they created |
 | `mobile` | touch handlers, no hover, small screen |

@@ -20,7 +20,7 @@ export default {
       await idb.set(key, value)
     } catch (error) {
       showDebugMessages = true
-      console.error('🚒 storeLocal could not save to localStorage', { key, value, valueType: typeof value }, error)
+      console.error('🚒 storeLocal could not save to idb', { key, value, valueType: typeof value }, error)
       this.notifyCouldNotSave()
       this.pruneLocal()
     }
@@ -45,18 +45,16 @@ export default {
       })
       spaceKeys = spaceKeys.filter(key => key !== `space-${currentSpaceId}`)
       console.log('🍾 pruning idb spaces', {
-        localStorage: window.localStorage,
-        length: JSON.stringify(window.localStorage).length,
         currentSpaceId,
         keys,
         spaceKeysToRemove: spaceKeys
       })
-      // spaceKeys.forEach(key => {
-      //   this.removeLocal(key)
-      // })
-      await idb.delMany(spaceKeys)
+      spaceKeys.forEach(key => {
+        this.removeLocal(key)
+      })
+      // await idb.delMany(spaceKeys)
       const newKeys = await idb.keys()
-      console.log('🥂 pruned localStorage spaces', {
+      console.log('🥂 pruned idb spaces', {
         prevKeys: keys.length,
         newKeys: newKeys
       })
