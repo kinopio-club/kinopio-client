@@ -342,8 +342,8 @@ const addCollaboratorToInvitedSpaces = async () => {
     space.userId = store.state.currentUser.id
     return space
   })
-  store.dispatch('api/addToQueue', { name: 'addCollaboratorToSpaces', body: invitedSpaces })
   await addCollaboratorToCurrentSpace()
+  await store.dispatch('api/addToQueue', { name: 'addCollaboratorToSpaces', body: invitedSpaces })
 }
 </script>
 

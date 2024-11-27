@@ -149,11 +149,11 @@ export default {
       context.commit('notifyIsJoiningGroup', false, { root: true })
       context.commit('groupToJoinOnLoad', null, { root: true })
     },
-    update: (context, group) => {
+    update: async (context, group) => {
       context.commit('update', group)
-      context.dispatch('api/addToQueue', { name: 'updateGroup', body: group }, { root: true })
+      await context.dispatch('api/addToQueue', { name: 'updateGroup', body: group }, { root: true })
     },
-    updateUserRole: (context, update) => {
+    updateUserRole: async (context, update) => {
       const { userId, groupId, role } = update
       let group = context.getters.byId(groupId)
       group = utils.clone(group)
@@ -164,7 +164,7 @@ export default {
         return user
       })
       context.commit('update', group)
-      context.dispatch('api/addToQueue', { name: 'updateGroupUser', body: update }, { root: true })
+      await context.dispatch('api/addToQueue', { name: 'updateGroupUser', body: update }, { root: true })
     },
     addCurrentSpace: (context, group) => {
       const user = context.rootState.currentUser

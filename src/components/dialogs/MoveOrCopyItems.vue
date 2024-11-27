@@ -143,10 +143,18 @@ const copyToSelectedSpace = async (items) => {
     newItems.boxes.forEach(box => store.dispatch('currentBoxes/add', { box }))
   }
   // update server
-  newItems.cards.forEach(card => store.dispatch('api/addToQueue', { name: 'createCard', body: card, spaceId: selectedSpaceId }))
-  newItems.connectionTypes.forEach(connectionType => store.dispatch('api/addToQueue', { name: 'createConnectionType', body: connectionType, spaceId: selectedSpaceId }))
-  newItems.connections.forEach(connection => store.dispatch('api/addToQueue', { name: 'createConnection', body: connection, spaceId: selectedSpaceId }))
-  newItems.boxes.forEach(box => store.dispatch('api/addToQueue', { name: 'createBox', body: box, spaceId: selectedSpaceId }))
+  for (const card of newItems.cards) {
+    await store.dispatch('api/addToQueue', { name: 'createCard', body: card, spaceId: selectedSpaceId })
+  }
+  for (const connectionType of newItems.connectionTypes) {
+    await store.dispatch('api/addToQueue', { name: 'createConnectionType', body: connectionType, spaceId: selectedSpaceId })
+  }
+  for (const connection of newItems.connections) {
+    await store.dispatch('api/addToQueue', { name: 'createConnection', body: connection, spaceId: selectedSpaceId })
+  }
+  for (const box of newItems.boxes) {
+    await store.dispatch('api/addToQueue', { name: 'createBox', body: box, spaceId: selectedSpaceId })
+  }
   console.log('🚚 copies created', newItems)
   state.loading = false
 }

@@ -407,15 +407,15 @@ export default {
         context.commit('notifySignUpToJoinGroup', true, { root: true })
       }
     },
-    update: (context, updates) => {
+    update: async (context, updates) => {
       const keys = Object.keys(updates)
       keys.forEach(key => {
         context.commit(key, updates[key])
         context.dispatch('broadcastUpdate', { [key]: updates[key] })
       })
-      context.dispatch('api/addToQueue', { name: 'updateUser', body: updates }, { root: true })
+      await context.dispatch('api/addToQueue', { name: 'updateUser', body: updates }, { root: true })
     },
-    cardsCreatedCountUpdateBy: (context, { cards, shouldDecrement }) => {
+    cardsCreatedCountUpdateBy: async (context, { cards, shouldDecrement }) => {
       cards = cards.filter(card => !card.isCreatedThroughPublicApi)
       cards = cards.filter(card => card.userId === context.state.id)
       let delta = cards.length
@@ -424,11 +424,11 @@ export default {
       }
       const count = context.state.cardsCreatedCount + delta
       // update raw vanity count
-      context.dispatch('api/addToQueue', { name: 'updateUserCardsCreatedCountRaw', body: { delta } }, { root: true })
       context.commit('cardsCreatedCountRaw', count)
+      await context.dispatch('api/addToQueue', { name: 'updateUserCardsCreatedCountRaw', body: { delta } }, { root: true })
       // update count
       if (context.getters.shouldPreventCardsCreatedCountUpdate) { return }
-      context.dispatch('api/addToQueue', { name: 'updateUserCardsCreatedCount', body: { delta } }, { root: true })
+      await context.dispatch('api/addToQueue', { name: 'updateUserCardsCreatedCount', body: { delta } }, { root: true })
       context.commit('cardsCreatedCount', count)
     },
     isUpgraded: (context, value) => {
@@ -451,10 +451,10 @@ export default {
       context.commit('currentSpace/updateUser', user, { root: true })
       context.commit('currentSpace/updateCollaborator', user, { root: true })
     },
-    lastSpaceId: (context, spaceId) => {
+    lastSpaceId: async (context, spaceId) => {
       context.commit('lastSpaceId', spaceId)
       cache.updateUser('lastSpaceId', spaceId)
-      context.dispatch('api/addToQueue', { name: 'updateUser',
+      await context.dispatch('api/addToQueue', { name: 'updateUser',
         body: {
           lastSpaceId: spaceId
         } }, { root: true })
@@ -514,7 +514,7 @@ export default {
         console.error('🚒 restoreUserFavorites', error)
       }
     },
-    updateFavoriteSpace: (context, { space, value }) => {
+    updateFavoriteSpace: async (context, { space, value }) => {
       let favoriteSpaces = utils.clone(context.state.favoriteSpaces)
       // add space
       if (value) {
@@ -530,9 +530,9 @@ export default {
       }
       context.commit('favoriteSpaces', favoriteSpaces)
       const body = { spaceId: space.id, value }
-      context.dispatch('api/addToQueue', { name: 'updateFavoriteSpace', body, spaceId: space.id }, { root: true })
+      await context.dispatch('api/addToQueue', { name: 'updateFavoriteSpace', body, spaceId: space.id }, { root: true })
     },
-    updateFavoriteUser: (context, { user, value }) => {
+    updateFavoriteUser: async (context, { user, value }) => {
       let favoriteUsers = utils.clone(context.state.favoriteUsers)
       // add user
       if (value) {
@@ -547,9 +547,9 @@ export default {
       }
       context.commit('favoriteUsers', favoriteUsers)
       const body = { favoriteUserId: user.id, value }
-      context.dispatch('api/addToQueue', { name: 'updateFavoriteUser', body }, { root: true })
+      await context.dispatch('api/addToQueue', { name: 'updateFavoriteUser', body }, { root: true })
     },
-    updateFavoriteColor: (context, { color, value }) => {
+    updateFavoriteColor: async (context, { color, value }) => {
       color = color.color
       let favoriteColors = utils.clone(context.state.favoriteColors)
       if (value) {
@@ -561,18 +561,18 @@ export default {
       }
       context.commit('favoriteColors', favoriteColors)
       const body = { color, value }
-      context.dispatch('api/addToQueue', { name: 'updateFavoriteColor', body }, { root: true })
+      await context.dispatch('api/addToQueue', { name: 'updateFavoriteColor', body }, { root: true })
     },
-    confirmEmail: (context) => {
-      context.dispatch('api/addToQueue', { name: 'updateUser',
+    confirmEmail: async (context) => {
+      await context.dispatch('api/addToQueue', { name: 'updateUser',
         body: {
           emailIsVerified: true
         }
       }, { root: true })
     },
-    arenaAccessToken: (context, token) => {
+    arenaAccessToken: async (context, token) => {
       context.commit('arenaAccessToken', token)
-      context.dispatch('api/addToQueue', { name: 'updateUser',
+      await context.dispatch('api/addToQueue', { name: 'updateUser',
         body: {
           arenaAccessToken: token
         }
@@ -587,40 +587,45 @@ export default {
       context.commit('importArenaChannelIsVisible', true, { root: true })
       context.commit('isAuthenticatingWithArena', false, { root: true })
     },
-    toggleFilterShowUsers: (context, value) => {
+    toggleFilterShowUsers: async (context, value) => {
       context.commit('filterShowUsers', value)
-      context.dispatch('api/addToQueue', { name: 'updateUser',
+      await context.dispatch('api/addToQueue', { name: 'updateUser',
         body: {
           filterShowUsers: value
-        } }, { root: true })
+        }
+      }, { root: true })
     },
-    toggleFilterShowDateUpdated: (context, value) => {
+    toggleFilterShowDateUpdated: async (context, value) => {
       context.commit('filterShowDateUpdated', value)
-      context.dispatch('api/addToQueue', { name: 'updateUser',
+      await context.dispatch('api/addToQueue', { name: 'updateUser',
         body: {
           filterShowDateUpdated: value
-        } }, { root: true })
+        }
+      }, { root: true })
     },
-    toggleFilterShowAbsoluteDates: (context, value) => {
+    toggleFilterShowAbsoluteDates: async (context, value) => {
       context.commit('filterShowAbsoluteDates', value)
-      context.dispatch('api/addToQueue', { name: 'updateUser',
+      await context.dispatch('api/addToQueue', { name: 'updateUser',
         body: {
           filterShowAbsoluteDates: value
-        } }, { root: true })
+        }
+      }, { root: true })
     },
-    toggleFilterUnchecked: (context, value) => {
+    toggleFilterUnchecked: async (context, value) => {
       context.commit('filterUnchecked', value)
-      context.dispatch('api/addToQueue', { name: 'updateUser',
+      await context.dispatch('api/addToQueue', { name: 'updateUser',
         body: {
           filterUnchecked: value
-        } }, { root: true })
+        }
+      }, { root: true })
     },
-    toggleFilterComments: (context, value) => {
+    toggleFilterComments: async (context, value) => {
       context.commit('filterComments', value)
-      context.dispatch('api/addToQueue', { name: 'updateUser',
+      await context.dispatch('api/addToQueue', { name: 'updateUser',
         body: {
           filterComments: value
-        } }, { root: true })
+        }
+      }, { root: true })
     },
     clearUserFilters: (context) => {
       context.dispatch('toggleFilterShowUsers', false)
@@ -629,18 +634,18 @@ export default {
       context.dispatch('toggleFilterUnchecked', false)
       context.dispatch('toggleFilterComments', false)
     },
-    shouldHideTutorialCards: (context, value) => {
+    shouldHideTutorialCards: async (context, value) => {
       utils.typeCheck({ value, type: 'boolean' })
       context.commit('shouldHideTutorialCards', value)
-      context.dispatch('api/addToQueue', { name: 'updateUser',
+      await context.dispatch('api/addToQueue', { name: 'updateUser',
         body: {
           shouldHideTutorialCards: value
         } }, { root: true })
     },
-    shouldHideDateCards: (context, value) => {
+    shouldHideDateCards: async (context, value) => {
       utils.typeCheck({ value, type: 'boolean' })
       context.commit('shouldHideDateCards', value)
-      context.dispatch('api/addToQueue', { name: 'updateUser',
+      await context.dispatch('api/addToQueue', { name: 'updateUser',
         body: {
           shouldHideDateCards: value
         } }, { root: true })
@@ -661,69 +666,77 @@ export default {
           shouldEmailBulletin: value
         } }, { root: true })
     },
-    shouldEmailWeeklyReview: (context, value) => {
+    shouldEmailWeeklyReview: async (context, value) => {
       utils.typeCheck({ value, type: 'boolean' })
       context.commit('shouldEmailWeeklyReview', value)
-      context.dispatch('api/addToQueue', { name: 'updateUser',
+      await context.dispatch('api/addToQueue', { name: 'updateUser',
         body: {
           shouldEmailWeeklyReview: value
-        } }, { root: true })
+        }
+      }, { root: true })
     },
-    shouldShowMoreAlignOptions: (context, value) => {
+    shouldShowMoreAlignOptions: async (context, value) => {
       utils.typeCheck({ value, type: 'boolean' })
       context.commit('shouldShowMoreAlignOptions', value)
-      context.dispatch('api/addToQueue', { name: 'updateUser',
+      await context.dispatch('api/addToQueue', { name: 'updateUser',
         body: {
           shouldShowMoreAlignOptions: value
-        } }, { root: true })
+        }
+      }, { root: true })
     },
-    shouldShowItemActions: (context, value) => {
+    shouldShowItemActions: async (context, value) => {
       utils.typeCheck({ value, type: 'boolean' })
       context.commit('shouldShowItemActions', value)
-      context.dispatch('api/addToQueue', { name: 'updateUser',
+      await context.dispatch('api/addToQueue', { name: 'updateUser',
         body: {
           shouldShowItemActions: value
-        } }, { root: true })
+        }
+      }, { root: true })
     },
-    shouldShowMultipleSelectedLineActions: (context, value) => {
+    shouldShowMultipleSelectedLineActions: async (context, value) => {
       utils.typeCheck({ value, type: 'boolean' })
       context.commit('shouldShowMultipleSelectedLineActions', value)
-      context.dispatch('api/addToQueue', { name: 'updateUser',
+      await context.dispatch('api/addToQueue', { name: 'updateUser',
         body: {
           shouldShowMultipleSelectedLineActions: value
-        } }, { root: true })
+        }
+      }, { root: true })
     },
-    shouldShowMultipleSelectedBoxActions: (context, value) => {
+    shouldShowMultipleSelectedBoxActions: async (context, value) => {
       utils.typeCheck({ value, type: 'boolean' })
       context.commit('shouldShowMultipleSelectedBoxActions', value)
-      context.dispatch('api/addToQueue', { name: 'updateUser',
+      await context.dispatch('api/addToQueue', { name: 'updateUser',
         body: {
           shouldShowMultipleSelectedBoxActions: value
-        } }, { root: true })
+        }
+      }, { root: true })
     },
-    showInExploreUpdatedAt: (context, value) => {
+    showInExploreUpdatedAt: async (context, value) => {
       utils.typeCheck({ value, type: 'string' })
       context.commit('showInExploreUpdatedAt', value)
-      context.dispatch('api/addToQueue', { name: 'updateUser',
+      await context.dispatch('api/addToQueue', { name: 'updateUser',
         body: {
           showInExploreUpdatedAt: value
-        } }, { root: true })
+        }
+      }, { root: true })
     },
-    shouldDisableRightClickToPan: (context, value) => {
+    shouldDisableRightClickToPan: async (context, value) => {
       utils.typeCheck({ value, type: 'boolean' })
       context.commit('shouldDisableRightClickToPan', value)
-      context.dispatch('api/addToQueue', { name: 'updateUser',
+      await context.dispatch('api/addToQueue', { name: 'updateUser',
         body: {
           shouldDisableRightClickToPan: value
-        } }, { root: true })
+        }
+      }, { root: true })
     },
-    shouldUseLastConnectionType: (context, value) => {
+    shouldUseLastConnectionType: async (context, value) => {
       utils.typeCheck({ value, type: 'boolean' })
       context.commit('shouldUseLastConnectionType', value)
-      context.dispatch('api/addToQueue', { name: 'updateUser',
+      await context.dispatch('api/addToQueue', { name: 'updateUser',
         body: {
           shouldUseLastConnectionType: value
-        } }, { root: true })
+        }
+      }, { root: true })
     },
     inboxSpace: async (context) => {
       let space = await cache.getInboxSpace()

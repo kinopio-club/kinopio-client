@@ -541,7 +541,7 @@ const markAllAsRead = () => {
 const markAsRead = (notificationId) => {
   updateNotificationsIsRead([notificationId])
 }
-const updateNotificationsIsRead = (notificationIds) => {
+const updateNotificationsIsRead = async (notificationIds) => {
   if (!notificationIds.length) { return }
   state.notifications = state.notifications.map(notification => {
     if (notificationIds.includes(notification.id)) {
@@ -549,7 +549,7 @@ const updateNotificationsIsRead = (notificationIds) => {
     }
     return notification
   })
-  store.dispatch('api/addToQueue', {
+  await store.dispatch('api/addToQueue', {
     name: 'updateNotificationsIsRead',
     body: notificationIds
   })

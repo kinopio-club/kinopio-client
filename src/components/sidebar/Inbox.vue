@@ -82,9 +82,9 @@ const removeFromCardList = (removedCard) => {
   // update cache
   cache.updateSpace('cards', state.cards, removedCard.spaceId)
 }
-const removeCardFromInbox = (card) => {
-  store.dispatch('api/addToQueue', { name: 'removeCard', body: card, spaceId: card.spaceId })
+const removeCardFromInbox = async (card) => {
   removeFromCardList(card)
+  await store.dispatch('api/addToQueue', { name: 'removeCard', body: card, spaceId: card.spaceId })
 }
 
 // update card

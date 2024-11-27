@@ -208,7 +208,7 @@ const currentCards = {
 
     // create
 
-    add: (context, card) => {
+    add: async (context, card) => {
       if (context.rootGetters['currentSpace/shouldPreventAddCard']) {
         context.commit('notifyCardsCreatedIsOverLimit', true, { root: true })
         return
@@ -239,7 +239,6 @@ const currentCards = {
       card.isComment = isComment
       // create card
       context.commit('cardDetailsIsVisibleForCardId', card.id, { root: true })
-      context.dispatch('api/addToQueue', { name: 'createCard', body: card }, { root: true })
       context.dispatch('broadcast/update', { updates: { card }, type: 'createCard', handler: 'currentCards/create' }, { root: true })
       context.commit('create', { card })
       if (isParentCard) { context.commit('parentCardId', card.id, { root: true }) }
@@ -248,8 +247,9 @@ const currentCards = {
       }, { root: true })
       context.dispatch('currentSpace/checkIfShouldNotifyCardsCreatedIsNearLimit', null, { root: true })
       context.dispatch('userNotifications/addCardUpdated', { cardId: card.id, type: 'createCard' }, { root: true })
+      await context.dispatch('api/addToQueue', { name: 'createCard', body: card }, { root: true })
     },
-    addMultiple: (context, { cards, shouldOffsetPosition }) => {
+    addMultiple: async (context, { cards, shouldOffsetPosition }) => {
       const spaceId = context.rootState.currentSpace.id
       cards = cards.map(card => {
         let x = card.x
@@ -284,12 +284,12 @@ const currentCards = {
         context.dispatch('broadcast/update', { updates: { card }, type: 'createCard', handler: 'currentCards/create' }, { root: true })
         context.commit('create', { card })
       })
-      context.dispatch('api/addToQueue', { name: 'createMultipleCards', body: { cards, spaceId } }, { root: true })
       context.dispatch('currentUser/cardsCreatedCountUpdateBy', {
         cards
       }, { root: true })
+      await context.dispatch('api/addToQueue', { name: 'createMultipleCards', body: { cards, spaceId } }, { root: true })
     },
-    paste: (context, { card, cardId }) => {
+    paste: async (context, { card, cardId }) => {
       utils.typeCheck({ value: card, type: 'object' })
       card.id = cardId || nanoid()
       card.spaceId = currentSpaceId
@@ -308,18 +308,18 @@ const currentCards = {
           context.dispatch('currentSpace/addTag', tag, { root: true }) // TODO to tag module?
         })
       }
-      context.dispatch('api/addToQueue', { name: 'createCard', body: card }, { root: true })
       context.dispatch('broadcast/update', { updates: { card }, type: 'createCard', handler: 'currentCards/create' }, { root: true })
       context.dispatch('currentUser/cardsCreatedCountUpdateBy', {
         cards: [card]
       }, { root: true })
       context.dispatch('history/add', { cards: [card] }, { root: true })
       context.commit('create', { card })
+      await context.dispatch('api/addToQueue', { name: 'createCard', body: card }, { root: true })
     },
 
     // update
 
-    update: (context, { card, shouldPreventUpdateDimensionsAndPaths }) => {
+    update: async (context, { card, shouldPreventUpdateDimensionsAndPaths }) => {
       if (!card) { return }
       // prevent null position
       const keys = Object.keys(card)
@@ -332,7 +332,6 @@ const currentCards = {
         }
       }
       delete card.userId
-      context.dispatch('api/addToQueue', { name: 'updateCard', body: card }, { root: true })
       context.dispatch('broadcast/update', { updates: card, type: 'updateCard', handler: 'currentCards/update' }, { root: true })
       context.dispatch('history/add', { cards: [card] }, { root: true })
       context.commit('update', card)
@@ -341,10 +340,12 @@ const currentCards = {
         context.commit('triggerUpdateOtherCard', card.id, { root: true })
       }
       cache.updateSpace('editedByUserId', context.rootState.currentUser.id, currentSpaceId)
-      if (shouldPreventUpdateDimensionsAndPaths) { return }
-      context.commit('triggerUpdateCardDimensionsAndPaths', card.id, { root: true })
+      if (!shouldPreventUpdateDimensionsAndPaths) {
+        context.commit('triggerUpdateCardDimensionsAndPaths', card.id, { root: true })
+      }
+      await context.dispatch('api/addToQueue', { name: 'updateCard', body: card }, { root: true })
     },
-    updateMultiple: (context, cards) => {
+    updateMultiple: async (context, cards) => {
       const spaceId = context.rootState.currentSpace.id
       let updates = {
         cards,
@@ -354,7 +355,6 @@ const currentCards = {
         delete card.userId
         return card
       })
-      context.dispatch('api/addToQueue', { name: 'updateMultipleCards', body: updates }, { root: true })
       context.dispatch('history/add', { cards }, { root: true })
       cards.forEach(card => {
         context.dispatch('broadcast/update', { updates: card, type: 'updateCard', handler: 'currentCards/update' }, { root: true })
@@ -365,11 +365,11 @@ const currentCards = {
         }
       })
       cache.updateSpace('editedByUserId', context.rootState.currentUser.id, currentSpaceId)
+      await context.dispatch('api/addToQueue', { name: 'updateMultipleCards', body: updates }, { root: true })
     },
-    updateCounter: (context, { card, shouldIncrement, shouldDecrement }) => {
+    updateCounter: async (context, { card, shouldIncrement, shouldDecrement }) => {
       const isSignedIn = context.rootGetters['currentUser/isSignedIn']
       context.commit('update', card)
-      context.dispatch('api/addToQueue', { name: 'updateCardCounter', body: card }, { root: true })
       context.dispatch('broadcast/update', { updates: card, type: 'updateCard', handler: 'currentCards/update' }, { root: true })
       if (!isSignedIn) {
         const body = {
@@ -379,6 +379,7 @@ const currentCards = {
         }
         context.dispatch('api/updateCardCounter', body, { root: true })
       }
+      await context.dispatch('api/addToQueue', { name: 'updateCardCounter', body: card }, { root: true })
     },
     updateName (context, { card, newName }) {
       const canEditCard = context.rootGetters['currentUser/canEditCard'](card)
@@ -448,17 +449,17 @@ const currentCards = {
 
     // dimensions
 
-    updateDimensions: (context, { cards }) => {
+    updateDimensions: async (context, { cards }) => {
       const canEditSpace = context.rootGetters['currentUser/canEditSpace']()
       const zoom = context.rootGetters.spaceCounterZoomDecimal
       if (!cards) {
         cards = context.getters.all
       }
+      let updates = {
+        cards: [],
+        spaceId: context.rootState.currentSpace.id
+      }
       nextTick(() => {
-        let updates = {
-          cards: [],
-          spaceId: context.rootState.currentSpace.id
-        }
         cards = cards.filter(card => Boolean(card))
         let cardIds = cards.map(newCard => newCard.id)
         cardIds = cardIds.filter(cardId => Boolean(cardId))
@@ -504,10 +505,10 @@ const currentCards = {
             cardId: card.id
           })
         })
-        if (canEditSpace) {
-          context.dispatch('api/addToQueue', { name: 'updateMultipleCards', body: updates }, { root: true })
-        }
       })
+      if (canEditSpace) {
+        await context.dispatch('api/addToQueue', { name: 'updateMultipleCards', body: updates }, { root: true })
+      }
     },
     resetDimensions: (context, { cardIds, cardId }) => {
       if (cardId) {
@@ -686,7 +687,7 @@ const currentCards = {
         context.commit('pageHeight', cardEnd, { root: true })
       }
     },
-    afterMove: (context) => {
+    afterMove: async (context) => {
       const spaceId = context.rootState.currentSpace.id
       // update cards
       const currentDraggingCardId = context.rootState.currentDraggingCardId
@@ -712,7 +713,7 @@ const currentCards = {
       cards = incrementCardsZ(context, cards)
       context.commit('move', { cards, spaceId })
       cards = cards.filter(card => card)
-      context.dispatch('api/addToQueue', {
+      await context.dispatch('api/addToQueue', {
         name: 'updateMultipleCards',
         body: { cards, spaceId }
       }, { root: true })
@@ -775,16 +776,16 @@ const currentCards = {
 
     // z-index
 
-    clearAllZs: (context) => {
+    clearAllZs: async (context) => {
       let cards = context.getters.all
-      cards.forEach(card => {
+      for (const card of cards) {
         const body = { id: card.id, z: 0 }
         context.commit('update', body)
-        context.dispatch('api/addToQueue', { name: 'updateCard', body }, { root: true })
         context.dispatch('broadcast/update', { updates: body, type: 'updateCard', handler: 'currentCards/update' }, { root: true })
-      })
+        await context.dispatch('api/addToQueue', { name: 'updateCard', body }, { root: true })
+      }
     },
-    incrementZ: (context, id) => {
+    incrementZ: async (context, id) => {
       const card = context.getters.byId(id)
       if (!card) { return }
       if (card.isLocked) { return }
@@ -799,13 +800,13 @@ const currentCards = {
       const body = { id, z: highestCardZ + 1 }
       context.commit('update', body)
       if (!canEditSpace) { return }
-      context.dispatch('api/addToQueue', { name: 'updateCard', body }, { root: true })
       context.dispatch('broadcast/update', { updates: body, type: 'updateCard', handler: 'currentCards/update' }, { root: true })
+      await context.dispatch('api/addToQueue', { name: 'updateCard', body }, { root: true })
     },
 
     // remove
 
-    remove: (context, card) => {
+    remove: async (context, card) => {
       if (!card) { return }
       card = context.getters.byId(card.id)
       const cardHasContent = Boolean(card.name)
@@ -814,7 +815,7 @@ const currentCards = {
         card.isRemoved = true
         context.dispatch('history/add', { cards: [card], isRemoved: true }, { root: true })
         context.commit('remove', card)
-        context.dispatch('api/addToQueue', { name: 'removeCard', body: card }, { root: true })
+        await context.dispatch('api/addToQueue', { name: 'removeCard', body: card }, { root: true })
       } else {
         context.dispatch('deleteCard', card)
       }
@@ -832,21 +833,21 @@ const currentCards = {
         context.commit('notifyCardsCreatedIsOverLimit', false, { root: true })
       }
     },
-    deleteCard: (context, card) => {
+    deleteCard: async (context, card) => {
       context.commit('deleteCard', card)
-      context.dispatch('api/addToQueue', { name: 'deleteCard', body: card }, { root: true })
+      await context.dispatch('api/addToQueue', { name: 'deleteCard', body: card }, { root: true })
     },
-    deleteAllRemoved: (context) => {
+    deleteAllRemoved: async (context) => {
       const spaceId = context.rootState.currentSpace.id
       const userId = context.rootState.currentUser.id
       const removedCards = context.state.removedCards
       removedCards.forEach(card => context.commit('deleteCard', card))
-      context.dispatch('api/addToQueue', { name: 'deleteAllRemovedCards', body: { userId, spaceId } }, { root: true })
+      await context.dispatch('api/addToQueue', { name: 'deleteAllRemovedCards', body: { userId, spaceId } }, { root: true })
     },
-    restoreRemoved: (context, card) => {
+    restoreRemoved: async (context, card) => {
       context.commit('restoreRemoved', card)
-      context.dispatch('api/addToQueue', { name: 'restoreRemovedCard', body: card }, { root: true })
       context.dispatch('broadcast/update', { updates: card, type: 'restoreRemovedCard', handler: 'currentCards/restoreRemoved' }, { root: true })
+      await context.dispatch('api/addToQueue', { name: 'restoreRemovedCard', body: card }, { root: true })
     },
 
     // select

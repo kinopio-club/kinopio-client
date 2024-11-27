@@ -439,15 +439,11 @@ const currentSpace = {
         })
       }
     },
-    saveNewSpace: (context) => {
+    saveNewSpace: async (context) => {
       const space = utils.clone(context.state)
       const user = context.rootState.currentUser
       console.log('✨ saveNewSpace', space, user)
       cache.saveSpace(space)
-      context.dispatch('api/addToQueue', {
-        name: 'createSpace',
-        body: space
-      }, { root: true })
       context.commit('addUserToSpace', user)
       nextTick(() => {
         context.dispatch('currentCards/updateDimensions', {}, { root: true })
@@ -456,6 +452,10 @@ const currentSpace = {
       context.dispatch('incrementCardsCreatedCountFromSpace', space)
       context.commit('isLoadingSpace', false, { root: true })
       context.commit('triggerUpdateWindowHistory', null, { root: true })
+      await context.dispatch('api/addToQueue', {
+        name: 'createSpace',
+        body: space
+      }, { root: true })
     },
     saveSpace: async (context, space) => {
       const user = context.rootState.currentUser
@@ -694,7 +694,7 @@ const currentSpace = {
         })
       })
     },
-    restoreSpaceComplete: (context, { space, isRemote, timeStart }) => {
+    restoreSpaceComplete: async (context, { space, isRemote, timeStart }) => {
       context.dispatch('history/reset', null, { root: true })
       postMessage.send({ name: 'restoreSpaceComplete', value: true })
       const timeEnd = utils.normalizeToUnixTime(new Date())
@@ -726,13 +726,13 @@ const currentSpace = {
         context.dispatch('checkIfShouldResetDimensions')
         nextTick(() => {
           context.dispatch('checkIfShouldPauseConnectionDirections')
-          context.dispatch('api/addToQueue', {
-            name: 'incrementVisits',
-            body: { spaceId: space.id }
-          }, { root: true })
         })
       })
       context.dispatch('checkIfIsLoadingSpace', isRemote)
+      await context.dispatch('api/addToQueue', {
+        name: 'incrementVisits',
+        body: { spaceId: space.id }
+      }, { root: true })
       // preview image
       if (!isRemote) { return }
       context.dispatch('createSpacePreviewImage')
@@ -905,7 +905,7 @@ const currentSpace = {
       updates.id = context.state.id
       context.commit('updateSpace', updates)
       context.dispatch('broadcast/update', { updates, type: 'updateSpace' }, { root: true })
-      context.dispatch('api/addToQueue', {
+      await context.dispatch('api/addToQueue', {
         name: 'updateSpace',
         body: updates
       }, { root: true })
@@ -922,10 +922,6 @@ const currentSpace = {
       context.commit('triggerUpdateWindowHistory', space, { root: true })
       const userIsMember = context.rootGetters['currentUser/isSpaceMember']()
       if (!userIsMember) { return }
-      context.dispatch('api/addToQueue', {
-        name: 'updateSpace',
-        body: { id: space.id, updatedAt: new Date() }
-      }, { root: true })
       context.commit('parentCardId', '', { root: true })
       context.dispatch('updateUserLastSpaceId')
       const cardId = context.rootState.loadSpaceShowDetailsForCardId
@@ -933,6 +929,10 @@ const currentSpace = {
         context.dispatch('currentCards/showCardDetails', cardId, { root: true })
       }
       context.commit('restoreMultipleSelectedItemsToLoad', null, { root: true })
+      await context.dispatch('api/addToQueue', {
+        name: 'updateSpace',
+        body: { id: space.id, updatedAt: new Date() }
+      }, { root: true })
     },
     updateUserLastSpaceId: (context) => {
       const isPrivate = context.state.privacy === 'private'
@@ -942,23 +942,23 @@ const currentSpace = {
       const space = context.state
       context.dispatch('currentUser/lastSpaceId', space.id, { root: true })
     },
-    removeCurrentSpace: (context) => {
+    removeCurrentSpace: async (context) => {
       const space = utils.clone(context.state)
       context.dispatch('decrementCardsCreatedCountFromSpace', space)
       cache.removeSpace(space)
-      context.dispatch('api/addToQueue', {
+      context.commit('prevSpaceIdInSession', '', { root: true })
+      await context.dispatch('api/addToQueue', {
         name: 'removeSpace',
         body: { id: space.id }
       }, { root: true })
-      context.commit('prevSpaceIdInSession', '', { root: true })
     },
-    deleteSpace: (context, space) => {
+    deleteSpace: async (context, space) => {
       cache.deleteSpace(space)
-      context.dispatch('api/addToQueue', {
+      context.commit('prevSpaceIdInSession', '', { root: true })
+      await context.dispatch('api/addToQueue', {
         name: 'deleteSpace',
         body: space
       }, { root: true })
-      context.commit('prevSpaceIdInSession', '', { root: true })
     },
     restoreRemovedSpace: async (context, space) => {
       cache.restoreRemovedSpace(space)
@@ -967,11 +967,11 @@ const currentSpace = {
       context.dispatch('incrementCardsCreatedCountFromSpace', space)
       context.dispatch('changeSpace', space)
     },
-    deleteAllRemovedSpaces: (context) => {
+    deleteAllRemovedSpaces: async (context) => {
       const userId = context.rootState.currentUser.id
       const removedSpaces = cache.getAllRemovedSpaces()
       removedSpaces.forEach(space => cache.deleteSpace(space))
-      context.dispatch('api/addToQueue', { name: 'deleteAllRemovedSpaces', body: { userId } }, { root: true })
+      await context.dispatch('api/addToQueue', { name: 'deleteAllRemovedSpaces', body: { userId } }, { root: true })
     },
     checkIfShouldNotifySpaceIsRemoved: (context, space) => {
       const canEdit = context.rootGetters['currentUser/canEditSpace']()
@@ -1117,38 +1117,38 @@ const currentSpace = {
 
     // Tags
 
-    addTag: (context, tag) => {
+    addTag: async (context, tag) => {
       let tagsInCard = context.getters.tagsInCard({ id: tag.cardId })
       tagsInCard = tagsInCard.map(card => card.name)
       if (tagsInCard.includes(tag.name)) { return }
       context.commit('addTag', tag)
       const update = { name: 'addTag', body: tag }
       const broadcastUpdate = { updates: tag, type: 'addTag' }
-      context.dispatch('api/addToQueue', update, { root: true })
       context.dispatch('broadcast/update', broadcastUpdate, { root: true })
       context.commit('remoteTagsIsFetched', false, { root: true })
+      await context.dispatch('api/addToQueue', update, { root: true })
     },
-    removeTag: (context, tag) => {
+    removeTag: async (context, tag) => {
       context.commit('removeTag', tag)
       const update = { name: 'removeTag', body: tag }
       const broadcastUpdate = { updates: tag, type: 'removeTag' }
-      context.dispatch('api/addToQueue', update, { root: true })
       context.dispatch('broadcast/update', broadcastUpdate, { root: true })
       context.commit('remoteTagsIsFetched', false, { root: true })
+      await context.dispatch('api/addToQueue', update, { root: true })
     },
-    removeTags: (context, tag) => {
+    removeTags: async (context, tag) => {
       context.commit('removeTags', tag)
       const update = { name: 'removeTags', body: tag }
-      context.dispatch('api/addToQueue', update, { root: true })
       context.commit('remoteTagsIsFetched', false, { root: true })
+      await context.dispatch('api/addToQueue', update, { root: true })
     },
-    updateTagNameColor: (context, tag) => {
+    updateTagNameColor: async (context, tag) => {
       context.commit('updateTagNameColor', tag)
       const update = { name: 'updateTagNameColor', body: tag }
       const broadcastUpdate = { updates: tag, type: 'updateTagNameColor' }
-      context.dispatch('api/addToQueue', update, { root: true })
       context.dispatch('broadcast/update', broadcastUpdate, { root: true })
       context.commit('remoteTagsIsFetched', false, { root: true })
+      await context.dispatch('api/addToQueue', update, { root: true })
     },
     removeUnusedTagsFromCard: (context, cardId) => {
       const card = context.rootGetters['currentCards/byId'](cardId)

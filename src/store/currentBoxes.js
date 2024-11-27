@@ -149,7 +149,7 @@ export default {
 
     // create
 
-    add: (context, { box, shouldResize }) => {
+    add: async (context, { box, shouldResize }) => {
       const count = context.state.ids.length
       const minBoxSize = consts.minBoxSize
       const isThemeDark = context.rootState.currentUser.theme === 'dark'
@@ -171,21 +171,20 @@ export default {
       }
       context.dispatch('history/add', { boxes: [box] }, { root: true })
       context.commit('create', box)
-      context.dispatch('api/addToQueue', { name: 'createBox', body: box }, { root: true })
       context.dispatch('broadcast/update', { updates: box, type: 'createBox', handler: 'currentBoxes/create' }, { root: true })
       if (shouldResize) {
         context.dispatch('history/pause', null, { root: true })
         context.commit('currentUserIsResizingBox', true, { root: true })
         context.commit('currentUserIsResizingBoxIds', [box.id], { root: true })
       }
+      await context.dispatch('api/addToQueue', { name: 'createBox', body: box }, { root: true })
     },
 
     // update
 
-    update: (context, box) => {
+    update: async (context, box) => {
       context.dispatch('history/add', { boxes: [box] }, { root: true })
       context.commit('update', box)
-      context.dispatch('api/addToQueue', { name: 'updateBox', body: box }, { root: true })
       context.dispatch('broadcast/update', { updates: box, type: 'updateBox', handler: 'currentBoxes/update' }, { root: true })
       const keys = Object.keys(box)
       const shouldUpdatePathsKeys = ['x', 'resizeWidth']
@@ -195,6 +194,7 @@ export default {
           context.dispatch('currentConnections/updatePaths', { itemId: box.id }, { root: true })
         })
       }
+      await context.dispatch('api/addToQueue', { name: 'updateBox', body: box }, { root: true })
     },
     updateName (context, { box, newName }) {
       const canEditBox = context.rootGetters['currentUser/canEditBox'](box)
@@ -204,7 +204,7 @@ export default {
         name: newName
       })
     },
-    updateMultiple: (context, boxes) => {
+    updateMultiple: async (context, boxes) => {
       const spaceId = context.rootState.currentSpace.id
       let updates = {
         boxes,
@@ -214,13 +214,13 @@ export default {
         delete box.userId
         return box
       })
-      context.dispatch('api/addToQueue', { name: 'updateMultipleBoxes', body: updates }, { root: true })
       context.dispatch('history/add', { boxes }, { root: true })
       boxes.forEach(box => {
         context.dispatch('broadcast/update', { updates: box, type: 'updateBox', handler: 'currentBoxes/update' }, { root: true })
         context.commit('update', box)
       })
       cache.updateSpace('editedByUserId', context.rootState.currentUser.id, currentSpaceId)
+      await context.dispatch('api/addToQueue', { name: 'updateMultipleBoxes', body: updates }, { root: true })
     },
 
     // checkboxes
@@ -279,9 +279,9 @@ export default {
 
     // dimensions
 
-    updateInfoDimensions: (context, { boxes }) => {
+    updateInfoDimensions: async (context, { boxes }) => {
       boxes = boxes || utils.clone(context.getters.all)
-      boxes.forEach(box => {
+      for (const box of boxes) {
         const prevDimensions = {
           infoWidth: box.infoWidth,
           infoHeight: box.infoHeight
@@ -299,8 +299,8 @@ export default {
         }
         if (!dimensionsChanged) { return }
         context.commit('update', body)
-        context.dispatch('api/addToQueue', { name: 'updateBox', body }, { root: true })
-      })
+        await context.dispatch('api/addToQueue', { name: 'updateBox', body }, { root: true })
+      }
     },
 
     // snapping
@@ -585,11 +585,11 @@ export default {
 
     // remove
 
-    remove: (context, box) => {
-      context.dispatch('api/addToQueue', { name: 'removeBox', body: box }, { root: true })
+    remove: async (context, box) => {
       context.dispatch('broadcast/update', { updates: box, type: 'removeBox', handler: 'currentBoxes/remove' }, { root: true })
       context.commit('remove', box)
       context.dispatch('history/add', { boxes: [box], isRemoved: true }, { root: true })
+      await context.dispatch('api/addToQueue', { name: 'removeBox', body: box }, { root: true })
     }
   },
   getters: {
