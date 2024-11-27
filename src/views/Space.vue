@@ -33,13 +33,13 @@ let processQueueIntervalTimer, hourlyTasks
 
 // init user and space app state
 const init = async () => {
-  await cache.migrateFromLocalStorage()
-  store.dispatch('currentUser/init')
-  store.dispatch('currentSpace/init')
-  store.commit('broadcast/connect')
-  store.dispatch('groups/init')
-  store.dispatch('analytics/event', 'pageview')
   store.dispatch('api/updateDateImage')
+  store.dispatch('analytics/event', 'pageview')
+  await cache.migrateFromLocalStorage()
+  await store.dispatch('currentUser/init')
+  await store.dispatch('currentSpace/init')
+  await store.commit('broadcast/connect')
+  await store.dispatch('groups/init')
 }
 init()
 
