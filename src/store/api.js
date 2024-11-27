@@ -175,7 +175,7 @@ const self = {
       } else {
         queue.push(request)
       }
-      cache.saveQueue(queue)
+      await cache.saveQueue(queue)
       context.dispatch('debouncedSendQueue')
     },
 

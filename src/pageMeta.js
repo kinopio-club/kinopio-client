@@ -83,7 +83,6 @@ export default {
     windowSpaceTitle(space)
     // image
     const imageUrl = space.previewImage || spacePreviewImageFromId(space.id)
-    console.log('🍍 pageMeta.space image', imageUrl, space)
     document.querySelector('meta[property="og:image"]').content = imageUrl
     document.querySelector('meta[property="og:image:secure_url"]').content = imageUrl
     // description

@@ -371,7 +371,9 @@ export default {
     const queue = await this.getLocal('queue')
     return queue || []
   },
-  async saveQueue (queue) {
+  async saveQueue (item) {
+    let queue = await this.queue()
+    queue = queue.concat(item)
     await this.storeLocal('queue', queue)
   },
   async clearQueue () {

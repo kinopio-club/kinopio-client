@@ -480,14 +480,14 @@ const currentSpace = {
       isLoadingRemoteSpace = false
       context.commit('resetPageSizes', null, { root: true })
       context.dispatch('restoreSpaceInChunks', { space: uniqueNewSpace })
-      context.dispatch('saveNewSpace')
+      await context.dispatch('saveNewSpace')
       context.commit('addNotification', { message: `Space duplicated`, type: 'success' }, { root: true })
     },
     addSpace: async (context, space) => {
       const user = { id: context.rootState.currentUser.id }
       context.commit('broadcast/leaveSpaceRoom', { user, type: 'userLeftRoom' }, { root: true })
       await context.dispatch('createNewSpace', space)
-      context.dispatch('saveNewSpace')
+      await context.dispatch('saveNewSpace')
       context.dispatch('updateUserLastSpaceId')
       context.commit('notifySignUpToEditSpace', false, { root: true })
     },
@@ -495,7 +495,7 @@ const currentSpace = {
       const user = { id: context.rootState.currentUser.id }
       context.commit('broadcast/leaveSpaceRoom', { user, type: 'userLeftRoom' }, { root: true })
       await context.dispatch('createNewInboxSpace')
-      context.dispatch('saveNewSpace')
+      await context.dispatch('saveNewSpace')
       context.dispatch('updateUserLastSpaceId')
       context.commit('notifySignUpToEditSpace', false, { root: true })
     },

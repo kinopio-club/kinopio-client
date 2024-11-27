@@ -289,9 +289,9 @@ const updateSpacesUserId = async () => {
   const userId = store.state.currentUser.id
   const spaces = await cache.getAllSpaces()
   const newSpaces = utils.updateSpacesUserId(userId, spaces)
-  newSpaces.forEach(space => {
-    cache.saveSpace(space)
-  })
+  for (const space of newSpaces) {
+    await cache.saveSpace(space)
+  }
 }
 const updateCurrentSpaceWithNewUserId = (previousUser, newUser) => {
   const currentSpace = store.state.currentSpace
