@@ -9,6 +9,18 @@ const updateErrorMessage = '🚑 could not updateSpace cache because cachedSpace
 let showDebugMessages = false
 
 export default {
+  async migrateFromLocalStorage () {
+    const lsKeys = Object.keys(window.localStorage)
+    let idbKeys = await idb.keys()
+    if (idbKeys.length) { return }
+    // port keys
+    for (const lsKey of lsKeys) {
+      const lsValue = window.localStorage[lsKey]
+      await idb.set(lsKey, lsValue)
+    }
+    idbKeys = await idb.keys()
+    console.log('🥂 migrated from ls to idb', lsKeys, idbKeys)
+  },
   async storeLocal (key, value) {
     try {
       if (typeof value !== 'string') {

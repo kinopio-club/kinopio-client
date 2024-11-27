@@ -17,6 +17,7 @@ import Cards from '@/components/Cards.vue'
 import Connections from '@/components/Connections.vue'
 import ItemUnlockButtons from '@/components/ItemUnlockButtons.vue'
 import utils from '@/utils.js'
+import cache from '@/cache.js'
 import consts from '@/consts.js'
 
 import sortBy from 'lodash-es/sortBy'
@@ -31,12 +32,16 @@ let prevCursor, endCursor, shouldCancel
 let processQueueIntervalTimer, hourlyTasks
 
 // init user and space app state
-store.dispatch('currentUser/init')
-store.dispatch('currentSpace/init')
-store.commit('broadcast/connect')
-store.dispatch('groups/init')
-store.dispatch('analytics/event', 'pageview')
-store.dispatch('api/updateDateImage')
+const init = async () => {
+  await cache.migrateFromLocalStorage()
+  store.dispatch('currentUser/init')
+  store.dispatch('currentSpace/init')
+  store.commit('broadcast/connect')
+  store.dispatch('groups/init')
+  store.dispatch('analytics/event', 'pageview')
+  store.dispatch('api/updateDateImage')
+}
+init()
 
 onMounted(() => {
   // bind events to window to receive events when mouse is outside window

@@ -136,7 +136,7 @@ export default {
       contentUrl: imageUrl,
       author: {
         '@type': 'Person',
-        name: user.name
+        name: user?.name
       },
       hasPart: {
         '@type': 'ItemList',
