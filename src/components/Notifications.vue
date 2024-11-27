@@ -13,7 +13,10 @@ import GroupLabel from '@/components/GroupLabel.vue'
 import Loader from '@/components/Loader.vue'
 
 import dayjs from 'dayjs'
+
 const store = useStore()
+
+let unsubscribe
 
 let checkIfShouldNotifySpaceOutOfSyncIntervalTimer
 
@@ -23,7 +26,7 @@ const templateElement = ref(null)
 
 onMounted(() => {
   update()
-  store.subscribe((mutation, state) => {
+  unsubscribe = store.subscribe((mutation, state) => {
     if (mutation.type === 'addNotification') {
       update()
     } else if (mutation.type === 'currentUserIsPainting') {
@@ -50,6 +53,7 @@ onBeforeUnmount(() => {
   window.removeEventListener('visibilitychange', updatePageVisibilityChange)
   window.removeEventListener('focus', updatePageVisibilityChangeOnFocus)
   clearInterval(checkIfShouldNotifySpaceOutOfSyncIntervalTimer)
+  unsubscribe()
 })
 
 const state = reactive({
