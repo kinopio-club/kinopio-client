@@ -943,6 +943,12 @@ const showTagDetailsIsVisible = ({ event, tag }) => {
   store.commit('currentUserIsDraggingCard', false)
 }
 
+// all previews
+
+const previewIsVisible = computed(() => {
+  return Boolean(cardUrlPreviewIsVisible.value || groupInviteUrl.value || otherCardIsVisible.value || otherSpaceIsVisible.value)
+})
+
 // url preview
 
 const urls = computed(() => {
@@ -968,7 +974,7 @@ const urlPreviewImageIsVisible = computed(() => {
 const cardUrlPreviewIsVisible = computed(() => {
   if (!props.card) { return }
   if (!props.card.name) { return }
-  let cardHasUrlPreviewInfo = Boolean(props.card.urlPreviewTitle || props.card.urlPreviewDescription || props.card.urlPreviewImage)
+  let cardHasUrlPreviewInfo = Boolean(props.card.urlPreviewTitle || props.card.urlPreviewDescription || props.card.urlPreviewImage || props.card.urlPreviewUrl)
   // TEMP experiment: remove card.urlPreviewErrorUrl checking to eliminate false positives. Observe if there's a downside irl and if this attribute should be removed entirely?
   // const isErrorUrl = props.card.urlPreviewErrorUrl && (props.card.urlPreviewUrl === props.card.urlPreviewErrorUrl)
   let url = props.card.urlPreviewUrl
@@ -1993,7 +1999,7 @@ article.card-wrap#card(
             :parentDetailsIsVisible="currentCardDetailsIsVisible"
             @shouldRenderParent="updateShouldRenderParent"
           )
-    .url-preview-wrap(v-if="cardUrlPreviewIsVisible || groupInviteUrl || otherCardIsVisible || otherSpaceIsVisible" :class="{'is-image-card': isImageCard}")
+    .url-preview-wrap(v-if="previewIsVisible" :class="{'is-image-card': isImageCard}")
       template(v-if="cardUrlPreviewIsVisible")
         UrlPreviewCard(
           :visible="true"

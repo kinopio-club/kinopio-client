@@ -183,7 +183,9 @@ const handleImageError = (event) => {
 
 const title = computed(() => {
   let title = props.card.urlPreviewTitle
-  if (!title) { return }
+  if (!title) {
+    return props.card.urlPreviewUrl
+  }
   title = title.replace('on Twitter', '')
   return title
 })
