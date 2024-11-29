@@ -77,12 +77,12 @@ export default {
     document.querySelector('meta[property="og:image:secure_url"]').content = imageUrl
   },
   space (space) {
+    space = utils.clone(space)
     const isHelloSpace = space.name === 'Hello Kinopio'
     // title
     windowSpaceTitle(space)
     // image
     const imageUrl = space.previewImage || spacePreviewImageFromId(space.id)
-    console.log('🍍 pageMeta.space image', imageUrl, space)
     document.querySelector('meta[property="og:image"]').content = imageUrl
     document.querySelector('meta[property="og:image:secure_url"]').content = imageUrl
     // description
@@ -135,7 +135,7 @@ export default {
       contentUrl: imageUrl,
       author: {
         '@type': 'Person',
-        name: user.name
+        name: user?.name
       },
       hasPart: {
         '@type': 'ItemList',
