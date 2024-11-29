@@ -64,6 +64,7 @@ const updateDescription = (description) => {
 }
 
 export default {
+  // called by routes
   async spaceFromId ({ spaceId, isSpaceInvite }) {
     let path = window.document.location.pathname
     if (!spaceId) {
@@ -86,7 +87,8 @@ export default {
     updateImage(space)
   },
 
-  space (space) {
+  // called when loading space
+  updateSpace (space) {
     space = utils.clone(space)
     const isHelloSpace = space.name === 'Hello Kinopio'
     const imageUrl = space.previewImage || spacePreviewImageFromId(space.id) || logo
