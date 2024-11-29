@@ -35,7 +35,14 @@ const spacePreviewImageFromId = (spaceId) => {
   if (!spaceId) { return '' }
   return `${consts.cdnHost}/${spaceId}/preview-image-${spaceId}.jpeg`
 }
-const windowSpaceTitle = (space) => {
+
+// update tags
+
+const updateTitle = (title) => {
+  document.title = title
+  document.querySelector('meta[property="og:title"]').content = title
+}
+const updateSpaceTitle = (space) => {
   let title
   if (space.name === 'Hello Kinopio') {
     title = 'Kinopio'
@@ -44,7 +51,16 @@ const windowSpaceTitle = (space) => {
   } else {
     title = 'Kinopio'
   }
-  document.title = title
+  updateTitle(title)
+}
+const updateImage = (space) => {
+  const imageUrl = space.previewImage || spacePreviewImageFromId(space.id) || logo
+  document.querySelector('meta[property="og:image"]').content = imageUrl
+  document.querySelector('meta[property="og:image:secure_url"]').content = imageUrl
+}
+const updateDescription = (description) => {
+  document.querySelector('meta[property="og:description"]').content = description
+  document.querySelector('meta[name="description"]').content = description
 }
 
 export default {
@@ -55,36 +71,27 @@ export default {
       spaceId = ids?.spaceId
     }
     if (!spaceId) { return }
-    const meta = await fetchSpacePublicMeta(spaceId)
-    if (!meta) { return }
-    // title
-    let name = `${meta.name} – Kinopio`
+    const space = await fetchSpacePublicMeta(spaceId)
+    if (!space) { return }
+    let title = `${space.name} – Kinopio`
     if (isSpaceInvite) {
-      name = `[Invite] ${name}`
+      title = `[Invite] ${title}`
     }
+    updateTitle(title)
     let description = defaultDescription
-    if (meta.privacy === 'private') {
+    if (space.privacy === 'private') {
       description = `[Private] ${description}`
     }
-    document.title = name
-    document.querySelector('meta[property="og:title"]').content = name
-    // description
-    document.querySelector('meta[property="og:description"]').content = description
-    document.querySelector('meta[name="description"]').content = description
-    // iamge
-    const imageUrl = meta.previewImage || logo || spacePreviewImageFromId(spaceId)
-    document.querySelector('meta[property="og:image"]').content = imageUrl
-    document.querySelector('meta[property="og:image:secure_url"]').content = imageUrl
+    updateDescription(description)
+    updateImage(space)
   },
+
   space (space) {
     space = utils.clone(space)
     const isHelloSpace = space.name === 'Hello Kinopio'
-    // title
-    windowSpaceTitle(space)
-    // image
-    const imageUrl = space.previewImage || spacePreviewImageFromId(space.id)
-    document.querySelector('meta[property="og:image"]').content = imageUrl
-    document.querySelector('meta[property="og:image:secure_url"]').content = imageUrl
+    const imageUrl = space.previewImage || spacePreviewImageFromId(space.id) || logo
+    updateSpaceTitle(space)
+    updateImage(space)
     // description
     const origin = { x: 0, y: 0 }
     let cards = space.cards.map(card => {
@@ -104,8 +111,7 @@ export default {
     // description tags
     if (!isHelloSpace) {
       const truncatedDescription = utils.truncated(description, 150)
-      document.querySelector('meta[property="og:description"]').content = truncatedDescription
-      document.querySelector('meta[name="description"]').content = truncatedDescription
+      updateDescription(truncatedDescription)
     }
     // noscript tag
     document.querySelector('noscript').innerHTML = utils.truncated(description, 1000)
@@ -148,17 +154,16 @@ export default {
     scriptTag.text = jsonLD
     document.head.appendChild(scriptTag)
   },
+
   async groupInvite ({ groupId, isGroupInvite }) {
     const meta = await fetchGroupPublicMeta(groupId)
-    let name = `${meta.name} – Kinopio Group`
+    let title = `${meta.name} – Kinopio Group`
     if (isGroupInvite) {
-      name = `[Invite] ${name}`
+      title = `[Invite] ${title}`
     }
-    let description = 'Work together on shared whiteboards, brainstorms, and diagrams'
-    document.title = name
-    document.querySelector('meta[property="og:title"]').content = name
+    updateTitle(title)
     document.querySelector('meta[property="og:image"]').content = logo
-    document.querySelector('meta[property="og:description"]').content = description
-    document.querySelector('meta[name="description"]').content = description
+    let description = 'Work together on shared whiteboards, brainstorms, and diagrams'
+    updateDescription(description)
   }
 }
