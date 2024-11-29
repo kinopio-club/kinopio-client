@@ -54,14 +54,24 @@ const updateSpaceTitle = (space) => {
   updateTitle(title)
 }
 const updateImage = (space) => {
+  const head = document.querySelector('head')
+
   const imageUrl = space.previewImage || spacePreviewImageFromId(space.id) || logo
-  document.querySelector('meta[property="og:image"]').content = imageUrl
-  document.querySelector('meta[property="og:image:secure_url"]').content = imageUrl
+  let ogImage = document.createElement(`meta`)
+  ogImage.setAttribute('property', 'og:image')
+  ogImage.setAttribute('content', imageUrl)
+  head.appendChild(ogImage)
+  // ogImage.setAttribute('property', 'og:image:secure_url')
+  // head.appendChild(ogImage)
 }
 const updateDescription = (description) => {
   document.querySelector('meta[property="og:description"]').content = description
   document.querySelector('meta[name="description"]').content = description
 }
+// const updateOembed = (space) => {
+// create tag     <link rel="alternate" type="application/json+oembed" href="" />
+//   document.querySelector('type[property="application/json+oembed"]').href = `${apiHost}/services/oembed/${space.id}`
+// }
 
 export default {
   // called by routes
