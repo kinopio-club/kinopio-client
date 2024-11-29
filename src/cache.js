@@ -369,15 +369,22 @@ export default {
 
   async queue () {
     const queue = await this.getLocal('queue')
+    // const queue = await idb.get('queue')
     return queue || []
   },
-  async saveQueue (item) {
-    let queue = await this.queue()
-    queue = queue.concat(item)
-    await this.storeLocal('queue', queue)
+  async appendToQueue (item) {
+    await idb.update('queue', (value) => {
+      if (value) {
+        value = JSON.parse(value)
+      } else {
+        value = []
+      }
+      const newValue = value.concat(item)
+      return JSON.stringify(newValue)
+    })
   },
   async clearQueue () {
-    await this.storeLocal('queue', [])
+    await idb.update('queue', (value) => '[]')
   },
 
   // API Sending in Progress Queue

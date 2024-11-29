@@ -162,20 +162,20 @@ const self = {
       const isSignedIn = context.rootGetters['currentUser/isSignedIn']
       const canEditSpace = context.rootGetters['currentUser/canEditSpace']()
       if (!isSignedIn) { return }
-      let queue = await cache.queue()
+      // let queue = await cache.queue()
       const request = {
         name,
         body
       }
-      if (name === 'updateMultipleCards' && !canEditSpace) { return }
-      if (name === 'updateUserCardsCreatedCount') {
-        queue = squashCardsCreatedCount(queue, request)
-      } else if (name === 'updateUserCardsCreatedCountRaw') {
-        queue = squashCardsCreatedCount(queue, request, true)
-      } else {
-        queue.push(request)
-      }
-      await cache.saveQueue(queue)
+      // if (name === 'updateMultipleCards' && !canEditSpace) { return }
+      // if (name === 'updateUserCardsCreatedCount') {
+      //   queue = squashCardsCreatedCount(queue, request)
+      // } else if (name === 'updateUserCardsCreatedCountRaw') {
+      //   queue = squashCardsCreatedCount(queue, request, true)
+      // } else {
+      //   queue.push(request)
+      // }
+      await cache.appendToQueue(request)
       context.dispatch('debouncedSendQueue')
     },
 
