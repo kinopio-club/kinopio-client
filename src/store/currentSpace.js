@@ -355,7 +355,7 @@ const currentSpace = {
         const nullCardUsers = true
         await cache.updateIdsInSpace(space, nullCardUsers)
       }
-      pageMeta.space(space)
+      pageMeta.updateSpace(space)
     },
     createNewSpace: async (context, space) => {
       const currentUser = context.rootState.currentUser
@@ -759,7 +759,7 @@ const currentSpace = {
         let remoteSpace = remoteData
         console.log('🎑 remoteSpace', remoteSpace)
         if (!remoteSpace) { return }
-        pageMeta.space(remoteSpace)
+        pageMeta.updateSpace(remoteSpace)
         context.dispatch('groups/loadGroup', remoteSpace, { root: true })
         context.commit('updateSpace', { collaboratorKey: remoteSpace.collaboratorKey })
         const spaceIsUnchanged = utils.spaceIsUnchanged(cachedSpace, remoteSpace)

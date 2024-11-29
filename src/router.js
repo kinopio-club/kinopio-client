@@ -222,27 +222,6 @@ const router = createRouter({
           next()
         }
       }
-
-    // legacy referral routes Mar 2024
-    }, {
-      path: '/refer/:userId',
-      component: Space,
-      beforeEnter: (to, from, next) => {
-        next()
-      }
-
-    }, {
-      path: '/for/:name',
-      component: Space,
-      beforeEnter: (to, from, next) => {
-        next()
-      }
-    }, {
-      path: '/from/:name',
-      component: Space,
-      beforeEnter: (to, from, next) => {
-        next()
-      }
     }
   ]
 })
