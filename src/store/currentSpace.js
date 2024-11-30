@@ -1182,6 +1182,14 @@ const currentSpace = {
     spaceIsNotCached: async (context, spaceId) => {
       const spaceCardsCount = await cache.space(spaceId).cards?.length
       return Boolean(!spaceCardsCount)
+    },
+    newItems: async (context, { items, spaceId }) => {
+      items = items || context.getters.selectedItems
+      items = utils.clone(items)
+      spaceId = spaceId || context.state.id
+      let newItems = await utils.uniqueSpaceItems(items)
+      newItems = await utils.updateSpaceItemsSpaceId(newItems, spaceId)
+      return newItems
     }
   },
 
@@ -1340,14 +1348,6 @@ const currentSpace = {
       const connectionTypeIds = connections.map(connection => connection.connectionTypeId)
       const connectionTypes = connectionTypeIds.map(id => rootGetters['currentConnections/typeByTypeId'](id))
       return { cards, connectionTypes, connections, boxes }
-    },
-    newItems: (state, getters) => ({ items, spaceId }) => {
-      items = items || getters.selectedItems
-      spaceId = spaceId || state.id
-      utils.uniqueSpaceItems(utils.clone(items)).then(newItems => {
-        newItems = utils.updateSpaceItemsSpaceId(newItems, spaceId)
-        return newItems
-      })
     },
 
     // items

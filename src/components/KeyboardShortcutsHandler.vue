@@ -703,7 +703,7 @@ const handlePasteEvent = async (event) => {
   // add kinopio items
   } else if (data.kinopio) {
     items = utils.updateSpaceItemsAddPosition(data.kinopio, position)
-    items = store.getters['currentSpace/newItems']({ items })
+    items = await store.dispatch('currentSpace/newItems', { items })
     store.dispatch('currentSpace/addItems', items)
     // select new items
     await nextTick()
