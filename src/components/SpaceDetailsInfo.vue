@@ -174,9 +174,9 @@ const dialogIsPinned = computed(() => store.state.spaceDetailsIsPinned)
 
 // template
 
-const toggleCurrentSpaceIsUserTemplate = () => {
+const toggleCurrentSpaceIsUserTemplate = async () => {
   const value = !currentSpaceIsUserTemplate.value
-  store.dispatch('currentSpace/updateSpace', { isTemplate: value })
+  await store.dispatch('currentSpace/updateSpace', { isTemplate: value })
   updateLocalSpaces()
 }
 
@@ -189,11 +189,11 @@ const duplicateSpace = async () => {
 
 // hide
 
-const toggleHideSpace = () => {
+const toggleHideSpace = async () => {
   const value = !props.currentSpaceIsHidden
-  store.dispatch('currentSpace/updateSpace', { isHidden: value })
-  updateLocalSpaces()
+  await store.dispatch('currentSpace/updateSpace', { isHidden: value })
   store.commit('notifySpaceIsHidden', value)
+  updateLocalSpaces()
 }
 
 // remove
@@ -288,14 +288,15 @@ const currentUserIsGroupAdmin = (group) => {
     groupId: group.id
   })
 }
-const toggleSpaceGroup = (group) => {
+const toggleSpaceGroup = async (group) => {
   clearErrors()
   const shouldRemoveSpaceGroup = currentSpace.value.groupId === group.id
   if (shouldRemoveSpaceGroup) {
-    removeSpaceGroup(group)
+    await removeSpaceGroup(group)
   } else {
-    updateSpaceGroup(group)
+    await updateSpaceGroup(group)
   }
+  updateLocalSpaces()
 }
 const updateSpaceGroup = (group) => {
   const isSpaceCreator = currentUserIsSpaceCreator.value

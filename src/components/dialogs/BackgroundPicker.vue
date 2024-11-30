@@ -169,13 +169,13 @@ const refreshGradients = () => {
   }
   state.gradients = gradients
 }
-const selectGradient = (index) => {
+const selectGradient = async (index) => {
   const gradient = state.gradients[index]
   const updates = {
     backgroundIsGradient: true,
     backgroundGradient: gradient
   }
-  store.dispatch('currentSpace/updateSpace', updates)
+  await store.dispatch('currentSpace/updateSpace', updates)
   updatePreviewImage()
 }
 const gradientIsActive = (gradient) => {
@@ -215,7 +215,7 @@ const backgroundImages = computed(() => {
   images = images.filter(image => !image.isArchived)
   return images
 })
-const updateSpaceBackground = (url) => {
+const updateSpaceBackground = async (url) => {
   url = url.url || url
   if (url === background.value) {
     url = ''
@@ -224,7 +224,7 @@ const updateSpaceBackground = (url) => {
     backgroundIsGradient: false,
     background: url
   }
-  store.dispatch('currentSpace/updateSpace', updates)
+  await store.dispatch('currentSpace/updateSpace', updates)
   updatePreviewImage()
 }
 const removeBackgroundAll = async () => {
@@ -233,7 +233,7 @@ const removeBackgroundAll = async () => {
   updatePreviewImage()
 }
 const removeBackground = async () => {
-  updateSpaceBackground('')
+  await updateSpaceBackground('')
   closeDialogs()
   updatePreviewImage()
 }
@@ -323,14 +323,14 @@ const backgroundTintBadgeColor = computed(() => {
   }
   return state.backgroundTint
 })
-const updateBackgroundTint = (value) => {
+const updateBackgroundTint = async (value) => {
   state.backgroundTint = value
-  store.dispatch('currentSpace/updateSpace', { backgroundTint: value })
+  await store.dispatch('currentSpace/updateSpace', { backgroundTint: value })
   emit('updateSpaces')
   updatePreviewImage()
 }
 const removeBackgroundTint = async () => {
-  updateBackgroundTint('')
+  await updateBackgroundTint('')
   closeDialogs()
   emit('updateSpaces')
   updatePreviewImage()

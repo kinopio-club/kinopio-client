@@ -162,7 +162,7 @@ const changeSpace = (spaceId) => {
 const isAskToAddToExplore = (notification) => {
   return notification.type === 'askToAddToExplore'
 }
-const updateAddToExplore = (space) => {
+const updateAddToExplore = async (space) => {
   const isCurrentSpace = space.id === store.state.currentSpace.id
   state.filteredNotifications = state.filteredNotifications.map(notification => {
     if (!notification.space) {
@@ -174,7 +174,7 @@ const updateAddToExplore = (space) => {
     return notification
   })
   if (isCurrentSpace) {
-    store.dispatch('currentSpace/updateSpace', { showInExplore: space.showInExplore })
+    await store.dispatch('currentSpace/updateSpace', { showInExplore: space.showInExplore })
   } else {
     space = { id: space.id, showInExplore: space.showInExplore }
     store.dispatch('api/updateSpace', space)

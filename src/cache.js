@@ -147,6 +147,12 @@ export default {
     })
     return sortedSpaces
   },
+  async updateSpaceByUpdates (updates, spaceId) {
+    const keys = Object.keys(updates)
+    for (const key of keys) {
+      await this.updateSpace(key, updates[key], spaceId)
+    }
+  },
   async updateSpace (key, value, spaceId) {
     let space = await this.space(spaceId)
     if (!utils.objectHasKeys(space)) {

@@ -109,7 +109,6 @@ const currentSpace = {
       const updates = Object.keys(updatedSpace)
       updates.forEach(key => {
         state[key] = updatedSpace[key]
-        cache.updateSpace(key, state[key], state.id)
       })
     },
 
@@ -761,7 +760,7 @@ const currentSpace = {
         if (!remoteSpace) { return }
         pageMeta.updateSpace(remoteSpace)
         context.dispatch('groups/loadGroup', remoteSpace, { root: true })
-        context.commit('updateSpace', { collaboratorKey: remoteSpace.collaboratorKey })
+        context.dispatch('updateSpace', { collaboratorKey: remoteSpace.collaboratorKey })
         const spaceIsUnchanged = utils.spaceIsUnchanged(cachedSpace, remoteSpace)
         if (spaceIsUnchanged) {
           context.commit('isLoadingSpace', false, { root: true })
@@ -905,6 +904,7 @@ const currentSpace = {
     updateSpace: async (context, updates) => {
       updates.id = context.state.id
       context.commit('updateSpace', updates)
+      await cache.updateSpaceByUpdates(updates, context.state.id)
       context.dispatch('broadcast/update', { updates, type: 'updateSpace' }, { root: true })
       await context.dispatch('api/addToQueue', {
         name: 'updateSpace',
