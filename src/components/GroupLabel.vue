@@ -23,7 +23,7 @@ const classes = computed(() => {
 </script>
 
 <template lang="pug">
-span.group-label(v-if="isVisible" :title="props.group.name")
+span.group-label(v-if="isVisible" :title="props.group.name" :data-group-id="props.group.id")
   .badge.group-badge(:style="{ background: props.group.color }" :class="classes")
     img.icon.group(src="@/assets/group.svg")
     span {{ shortName }}

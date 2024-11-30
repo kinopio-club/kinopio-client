@@ -79,8 +79,8 @@ export default {
     }
   },
   actions: {
-    init: (context) => {
-      let groups = cache.groups()
+    init: async (context) => {
+      let groups = await cache.groups()
       groups = utils.denormalizeItems(groups)
       context.commit('restore', groups)
       // remote groups restored in restoreRemoteUser

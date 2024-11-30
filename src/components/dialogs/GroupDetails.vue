@@ -174,7 +174,7 @@ dialog.group-details(v-if="visible" :open="visible" @click.left.stop="closeDialo
           button.change-color(@click.left.stop="toggleColorPicker" :class="{active: state.colorPickerIsVisible}" title="Change Group Color")
             .current-color.current-group-color(:style="{ background: groupColor }")
           ColorPicker(:currentColor="groupColor" :visible="state.colorPickerIsVisible" @selectedColor="updateGroupColor")
-        input.name(placeholder="Group Name" v-model="groupName" name="groupName" maxlength=100 @mouseup.stop)
+        input.name(placeholder="Group Name" v-model="groupName" name="groupName" maxlength=100 @mouseup.stop @keydown.stop)
       template(v-else)
         GroupLabel(:group="props.group" :showName="true")
 
