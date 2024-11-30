@@ -1128,6 +1128,7 @@ const currentSpace = {
       context.dispatch('broadcast/update', broadcastUpdate, { root: true })
       context.commit('remoteTagsIsFetched', false, { root: true })
       await context.dispatch('api/addToQueue', update, { root: true })
+      await context.dispatch('updateTags', null, { root: true })
     },
     removeTag: async (context, tag) => {
       context.commit('removeTag', tag)
@@ -1136,12 +1137,14 @@ const currentSpace = {
       context.dispatch('broadcast/update', broadcastUpdate, { root: true })
       context.commit('remoteTagsIsFetched', false, { root: true })
       await context.dispatch('api/addToQueue', update, { root: true })
+      await context.dispatch('updateTags', null, { root: true })
     },
     removeTags: async (context, tag) => {
       context.commit('removeTags', tag)
       const update = { name: 'removeTags', body: tag }
       context.commit('remoteTagsIsFetched', false, { root: true })
       await context.dispatch('api/addToQueue', update, { root: true })
+      await context.dispatch('updateTags', null, { root: true })
     },
     updateTagNameColor: async (context, tag) => {
       context.commit('updateTagNameColor', tag)
@@ -1150,14 +1153,17 @@ const currentSpace = {
       context.dispatch('broadcast/update', broadcastUpdate, { root: true })
       context.commit('remoteTagsIsFetched', false, { root: true })
       await context.dispatch('api/addToQueue', update, { root: true })
+      await context.dispatch('updateTags', null, { root: true })
     },
-    removeUnusedTagsFromCard: (context, cardId) => {
+    removeUnusedTagsFromCard: async (context, cardId) => {
       const card = context.rootGetters['currentCards/byId'](cardId)
       if (!card) { return }
       const cardTagNames = utils.tagsFromStringWithoutBrackets(card.name) || []
       const tagsInCard = context.getters.tagsInCard({ id: cardId })
       const tagsToRemove = tagsInCard.filter(tag => !cardTagNames.includes(tag.name))
-      tagsToRemove.forEach(tag => context.dispatch('removeTag', tag))
+      for (const tag of tagsToRemove) {
+        await context.dispatch('removeTag', tag)
+      }
     },
 
     // items

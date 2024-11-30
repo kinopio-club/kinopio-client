@@ -1694,7 +1694,7 @@ const store = createStore({
   },
 
   actions: {
-    initTags: async (context) => {
+    updateTags: async (context) => {
       const tags = await cache.allTags()
       context.commit('tags', tags)
     },
