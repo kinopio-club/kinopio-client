@@ -9,24 +9,6 @@ import { nanoid } from 'nanoid'
 
 // process queue
 
-const squashCardsCreatedCount = (queue, request, isRaw) => {
-  let isSquashed
-  let name = 'updateUserCardsCreatedCount'
-  if (isRaw) {
-    name = 'updateUserCardsCreatedCountRaw'
-  }
-  queue = queue.map(queueItem => {
-    if (queueItem.name === name) {
-      queueItem.body.delta += request.body.delta
-      isSquashed = true
-    }
-    return queueItem
-  })
-  if (!isSquashed) {
-    queue.push(request)
-  }
-  return queue
-}
 const sortQueueItems = (queue) => {
   // sort create connectiontype operations first
   let createConnectionTypes = []
@@ -162,19 +144,11 @@ const self = {
       const isSignedIn = context.rootGetters['currentUser/isSignedIn']
       const canEditSpace = context.rootGetters['currentUser/canEditSpace']()
       if (!isSignedIn) { return }
-      // let queue = await cache.queue()
       const request = {
         name,
         body
       }
       if (!canEditSpace) { return }
-      // if (name === 'updateUserCardsCreatedCount') {
-      //   queue = squashCardsCreatedCount(queue, request)
-      // } else if (name === 'updateUserCardsCreatedCountRaw') {
-      //   queue = squashCardsCreatedCount(queue, request, true)
-      // } else {
-      //   queue.push(request)
-      // }
       await cache.appendToQueue(request)
       context.dispatch('debouncedSendQueue')
     },
