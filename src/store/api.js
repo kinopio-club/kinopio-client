@@ -167,7 +167,7 @@ const self = {
         name,
         body
       }
-      // if (name === 'updateMultipleCards' && !canEditSpace) { return }
+      if (!canEditSpace) { return }
       // if (name === 'updateUserCardsCreatedCount') {
       //   queue = squashCardsCreatedCount(queue, request)
       // } else if (name === 'updateUserCardsCreatedCountRaw') {
