@@ -1098,11 +1098,11 @@ const currentSpace = {
     },
     incrementCardsCreatedCountFromSpace (context, space) {
       const user = context.rootState.currentUser
-      space.cards = space.cards.filter(card => {
+      const updatedCards = space.cards.filter(card => {
         return card.userId === user.id
       })
       context.dispatch('currentUser/cardsCreatedCountUpdateBy', {
-        cards: space.cards
+        cards: updatedCards
       }, { root: true })
     },
     decrementCardsCreatedCountFromSpace (context, space) {
