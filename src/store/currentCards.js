@@ -299,12 +299,12 @@ const currentCards = {
       const tags = utils.tagsFromStringWithoutBrackets(card.name)
       if (tags) {
         tags.forEach(tag => {
-          tag = utils.newTag({
+          tag = context.getters.newTag({
             name: tag,
             defaultColor: context.rootState.currentUser.color,
             cardId: card.id,
             spaceId: context.state.id
-          })
+          }, { root: true })
           context.dispatch('currentSpace/addTag', tag, { root: true }) // TODO to tag module?
         })
       }

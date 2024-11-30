@@ -40,6 +40,7 @@ const init = async () => {
   await store.dispatch('currentSpace/init')
   await store.commit('broadcast/connect')
   await store.dispatch('groups/init')
+  await store.dispatch('initTags')
 }
 init()
 

@@ -202,6 +202,7 @@ const store = createStore({
     currentSelectedTag: {},
     remoteTags: [],
     remoteTagsIsFetched: false,
+    tags: [],
 
     // other items (links)
     otherCardDetailsIsVisible: false,
@@ -1078,6 +1079,10 @@ const store = createStore({
       utils.typeCheck({ value, type: 'boolean' })
       state.remoteTagsIsFetched = value
     },
+    tags: (state, tags) => {
+      utils.typeCheck({ value: tags, type: 'array' })
+      state.tags = tags
+    },
 
     // Link Details
 
@@ -1689,6 +1694,10 @@ const store = createStore({
   },
 
   actions: {
+    initTags: async (context) => {
+      const tags = await cache.allTags()
+      context.commit('tags', tags)
+    },
     // moveFailedSendingQueueOperationBackIntoQueue: async (context, operation) => {
     //   // save to queue
     //   let queue = await cache.queue()
@@ -2113,6 +2122,21 @@ const store = createStore({
     },
     otherTagByName: (state, getters) => (name) => {
       return state.otherTags.find(otherTag => otherTag.name === name)
+    },
+    newTag: (state) => ({ name, defaultColor, cardId, spaceId }) => {
+      let color
+      const allTags = state.tags
+      const existingTag = allTags.find(tag => tag.name === name)
+      if (existingTag) {
+        color = existingTag.color
+      }
+      return {
+        name,
+        id: nanoid(),
+        color: color || defaultColor,
+        cardId: cardId,
+        spaceId: spaceId
+      }
     }
   },
 

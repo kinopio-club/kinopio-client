@@ -2409,21 +2409,6 @@ export default {
     tags = tags.map(tag => tag.substring(2, tag.length - 2))
     return tags
   },
-  async newTag ({ name, defaultColor, cardId, spaceId }) {
-    let color
-    const allTags = await cache.allTags()
-    const existingTag = allTags.find(tag => tag.name === name)
-    if (existingTag) {
-      color = existingTag.color
-    }
-    return {
-      name,
-      id: nanoid(),
-      color: color || defaultColor,
-      cardId: cardId,
-      spaceId: spaceId
-    }
-  },
   indexesOf (string, search) {
     // adapted from https://stackoverflow.com/a/3410549
     search = search.replaceAll('[', '\\[')

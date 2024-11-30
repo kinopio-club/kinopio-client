@@ -697,7 +697,7 @@ const addNewTags = async (newTagNames) => {
   const addTagsNames = newTagNames.filter(newTagName => !previousTagNames.includes(newTagName))
   for (const tagName of addTagsNames) {
     let tag
-    tag = await utils.newTag({
+    tag = store.getters.newTag({
       name: tagName,
       defaultColor: state.newTagColor || store.state.currentUser.color,
       cardId: card.value.id,

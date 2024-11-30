@@ -877,7 +877,7 @@ const nameSegments = computed(() => {
     if (segment.isTag) {
       let tag = store.getters['currentSpace/tagByName'](segment.name)
       if (!tag) {
-        tag = utils.newTag({
+        tag = store.getters.newTag({
           name: segment.name,
           defaultColor: store.state.currentUser.color,
           cardId: props.card.id,
