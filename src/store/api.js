@@ -149,7 +149,7 @@ const self = {
         body
       }
       if (!canEditSpace) { return }
-      await cache.appendToQueue(request)
+      await cache.addToQueue(request)
       context.dispatch('debouncedSendQueue')
     },
 
@@ -387,7 +387,7 @@ const self = {
         const response = await fetch(`${consts.apiHost()}/user/spaces`, options)
         const currentUser = context.rootState.currentUser
         let spaces = await normalizeResponse(response)
-        return utils.AddCurrentUserIsCollaboratorToSpaces(spaces, currentUser)
+        return utils.addCurrentUserIsCollaboratorToSpaces(spaces, currentUser)
       } catch (error) {
         context.dispatch('handleServerError', { name: 'getUserSpaces', error })
       }
@@ -403,7 +403,7 @@ const self = {
         const response = await fetch(`${consts.apiHost()}/user/group-spaces`, options)
         const currentUser = context.rootState.currentUser
         let spaces = await normalizeResponse(response)
-        return utils.AddCurrentUserIsCollaboratorToSpaces(spaces, currentUser)
+        return utils.addCurrentUserIsCollaboratorToSpaces(spaces, currentUser)
       } catch (error) {
         context.dispatch('handleServerError', { name: 'getUserSpaces', error })
       }

@@ -342,7 +342,7 @@ export default {
   isUndefinedOrNull (value) {
     return value === undefined || value === null
   },
-  typeCheck ({ value, type, allowUndefined, origin }) {
+  typeCheck ({ value, type, allowUndefined, origin, silenceWarning }) {
     if (allowUndefined && this.isUndefinedOrNull(value)) {
       return true
     }
@@ -350,7 +350,9 @@ export default {
       return true
     }
     if (typeof value !== type) { // eslint-disable-line valid-typeof
-      console.error(`🚑 passed value is not ${type}`, value, origin)
+      if (!silenceWarning) {
+        console.error(`🚑 passed value is not ${type}`, value, origin)
+      }
       return false
     } else {
       return true
@@ -1708,7 +1710,7 @@ export default {
     remoteSpace.removedCards = removedCards
     return remoteSpace
   },
-  AddCurrentUserIsCollaboratorToSpaces (spaces, currentUser) {
+  addCurrentUserIsCollaboratorToSpaces (spaces, currentUser) {
     if (!spaces) { return }
     return spaces.map(space => {
       let userId

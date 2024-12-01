@@ -930,10 +930,12 @@ const currentSpace = {
         context.dispatch('currentCards/showCardDetails', cardId, { root: true })
       }
       context.commit('restoreMultipleSelectedItemsToLoad', null, { root: true })
+      const body = { id: space.id, updatedAt: new Date() }
       await context.dispatch('api/addToQueue', {
         name: 'updateSpace',
-        body: { id: space.id, updatedAt: new Date() }
+        body
       }, { root: true })
+      await cache.updateSpace('updatedAt', body.updatedAt, space.id)
     },
     updateUserLastSpaceId: (context) => {
       const isPrivate = context.state.privacy === 'private'

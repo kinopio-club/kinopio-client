@@ -15,7 +15,8 @@ export default {
     if (idbKeys.length) { return }
     // port keys
     for (const lsKey of lsKeys) {
-      const lsValue = window.localStorage[lsKey]
+      let lsValue = window.localStorage[lsKey]
+      lsValue = JSON.parse(lsValue)
       await idb.set(lsKey, lsValue)
     }
     idbKeys = await idb.keys()
@@ -23,9 +24,6 @@ export default {
   },
   async storeLocal (key, value) {
     try {
-      if (typeof value !== 'string') {
-        value = JSON.stringify(value)
-      }
       if (showDebugMessages) {
         console.log('🏬 storeLocal', key, value)
       }
@@ -76,7 +74,7 @@ export default {
   async getLocal (key) {
     try {
       const item = await idb.get(key)
-      return JSON.parse(item)
+      return item
     } catch (error) {}
   },
   async removeLocal (key) {
@@ -147,6 +145,7 @@ export default {
     })
     return sortedSpaces
   },
+
   async updateSpaceByUpdates (updates, spaceId) {
     const keys = Object.keys(updates)
     for (const key of keys) {
@@ -224,6 +223,7 @@ export default {
     await this.saveSpace(space)
   },
   async saveSpace (space) {
+    space = utils.clone(space)
     if (!space.id) {
       console.warn('☎️ error caching space. This is expected if currentUser is read only', space)
       return
@@ -303,6 +303,8 @@ export default {
     return groups || {}
   },
   async saveGroups (groups) {
+    groups = utils.clone(groups)
+    groups = utils.denormalizeItems(groups)
     await this.storeLocal('groups', groups)
   },
 
@@ -378,19 +380,22 @@ export default {
     // const queue = await idb.get('queue')
     return queue || []
   },
-  async appendToQueue (item) {
+  async addToQueue (item) {
     await idb.update('queue', (value) => {
-      if (value) {
-        value = JSON.parse(value)
-      } else {
+      if (!value) {
         value = []
       }
-      const newValue = value.concat(item)
-      return JSON.stringify(newValue)
+      const isArray = utils.typeCheck({ value: item, type: 'array', silenceWarning: true })
+      if (isArray) {
+        value = value.concat(item)
+      } else {
+        value.push(item)
+      }
+      return value
     })
   },
   async clearQueue () {
-    await idb.update('queue', (value) => '[]')
+    await idb.update('queue', (value) => [])
   },
 
   // API Sending in Progress Queue

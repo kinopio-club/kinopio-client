@@ -148,7 +148,7 @@ const updateWithRemoteSpaces = async () => {
   }
   const currentUser = store.state.currentUser
   let spaces = await store.dispatch('api/getUserSpaces')
-  spaces = utils.AddCurrentUserIsCollaboratorToSpaces(spaces, currentUser)
+  spaces = utils.addCurrentUserIsCollaboratorToSpaces(spaces, currentUser)
   state.isLoading = false
   if (!spaces) { return }
   state.spaces = spaces
