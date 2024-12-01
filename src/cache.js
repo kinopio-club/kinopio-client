@@ -16,7 +16,9 @@ export default {
     // port keys
     for (const lsKey of lsKeys) {
       let lsValue = window.localStorage[lsKey]
-      lsValue = JSON.parse(lsValue)
+      if (utils.isStringJSON(lsValue)) {
+        lsValue = JSON.parse(lsValue)
+      }
       await idb.set(lsKey, lsValue)
     }
     idbKeys = await idb.keys()
@@ -93,7 +95,7 @@ export default {
   // User
 
   async user () {
-    const user = await this.getLocal('user')
+    let user = await this.getLocal('user')
     return user || {}
   },
   async updateUser (key, value) {
@@ -102,6 +104,7 @@ export default {
     await this.storeLocal('user', user)
   },
   async saveUser (user) {
+    user = utils.clone(user)
     await this.storeLocal('user', user)
   },
 
