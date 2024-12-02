@@ -275,7 +275,7 @@ const removeSpaceFromSpaces = (spaceId) => {
   state.remoteSpaces = state.remoteSpaces.filter(space => space.id !== spaceId)
 }
 
-// list spaces
+// update local spaces
 
 const updateLocalSpaces = () => {
   if (!props.visible) { return }
@@ -289,26 +289,9 @@ const debouncedUpdateLocalSpaces = debounce(async () => {
   })
   state.spaces = utils.addCurrentUserIsCollaboratorToSpaces(cacheSpaces, store.state.currentUser)
 }, 350, { leading: true })
-const updateSpaces = async () => {
-  const cachedSpaces = state.spaces
-  const cachedSpaceIds = cachedSpaces.map(space => space.id)
-  const remoteSpaces = state.remoteSpaces
-  for (let space of remoteSpaces) {
-    const isCachedSpace = cachedSpaceIds.includes(space.id)
-    if (isCachedSpace) {
-      const cachedSpace = await cache.space(space.id)
-      const isUpdated = dayjs(space.updatedAt).valueOf() > dayjs(cachedSpace.updatedAt).valueOf()
-      if (!isUpdated) { continue }
-      space.cards = cachedSpace.cards
-      space.boxes = cachedSpace.boxes
-      space.connections = cachedSpace.connections
-      space.connectionTypes = cachedSpace.connectionTypes
-      await cache.saveSpace(space)
-    } else {
-      await cache.saveSpace(space)
-    }
-  }
-}
+
+// update space list
+
 const updateWithRemoteSpaces = async () => {
   const currentUserIsSignedIn = store.getters['currentUser/isSignedIn']
   const isOffline = computed(() => !store.state.isOnline)
@@ -328,11 +311,31 @@ const updateWithRemoteSpaces = async () => {
     state.remoteSpaces = spaces
     state.isLoadingRemoteSpaces = false
     if (!state.remoteSpaces) { return }
-    await updateSpaces()
+    await updateLocalSpacesWithRemote()
   } catch (error) {
     console.error('🚒 updateWithRemoteSpaces', error)
   }
   state.isLoadingRemoteSpaces = false
+}
+const updateLocalSpacesWithRemote = async () => {
+  const cachedSpaces = state.spaces
+  const cachedSpaceIds = cachedSpaces.map(space => space.id)
+  const remoteSpaces = state.remoteSpaces
+  for (let space of remoteSpaces) {
+    const isCachedSpace = cachedSpaceIds.includes(space.id)
+    if (isCachedSpace) {
+      const cachedSpace = await cache.space(space.id)
+      const isUpdated = dayjs(space.updatedAt).valueOf() > dayjs(cachedSpace.updatedAt).valueOf()
+      if (!isUpdated) { continue }
+      space.cards = cachedSpace.cards
+      space.boxes = cachedSpace.boxes
+      space.connections = cachedSpace.connections
+      space.connectionTypes = cachedSpace.connectionTypes
+      await cache.saveSpace(space)
+    } else {
+      await cache.saveSpace(space)
+    }
+  }
 }
 const updateFavorites = async () => {
   if (!shouldUpdateFavorites) { return }
