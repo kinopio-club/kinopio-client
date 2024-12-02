@@ -877,7 +877,7 @@ const nameSegments = computed(() => {
     if (segment.isTag) {
       let tag = store.getters['currentSpace/tagByName'](segment.name)
       if (!tag) {
-        tag = utils.newTag({
+        tag = store.getters.newTag({
           name: segment.name,
           defaultColor: store.state.currentUser.color,
           cardId: props.card.id,
@@ -1055,7 +1055,7 @@ const updateUrlPreviewOnline = async () => {
     updateUrlPreviewErrorUrl(url)
   }
 }
-const updateUrlPreviewSuccess = (url, data) => {
+const updateUrlPreviewSuccess = async (url, data) => {
   if (!nameIncludesUrl(url)) { return }
   const cardId = data.id || props.card.id
   if (!cardId) {
@@ -1066,7 +1066,7 @@ const updateUrlPreviewSuccess = (url, data) => {
   data.name = utils.addHiddenQueryStringToURLs(props.card.name)
   store.dispatch('currentCards/update', { card: data })
   store.commit('removeUrlPreviewLoadingForCardIds', cardId)
-  store.dispatch('api/addToQueue', { name: 'updateUrlPreviewImage', body: data })
+  await store.dispatch('api/addToQueue', { name: 'updateUrlPreviewImage', body: data })
 }
 const retryUrlPreview = () => {
   const update = {

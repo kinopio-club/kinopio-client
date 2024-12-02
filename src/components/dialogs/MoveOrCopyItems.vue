@@ -46,8 +46,8 @@ const closeDialogs = () => {
 // spaces
 
 const currentSpace = computed(() => store.state.currentSpace)
-const updateSpaces = () => {
-  const spaces = cache.getAllSpaces()
+const updateSpaces = async () => {
+  const spaces = await cache.getAllSpaces()
   state.spaces = spaces.filter(space => {
     const spaceIsNotCurrent = space.id !== currentSpace.value.id
     const spaceHasId = Boolean(space.id)
@@ -123,17 +123,18 @@ const copyText = async () => {
 
 // copy or move
 
-const copyToSelectedSpace = (items) => {
+const copyToSelectedSpace = async (items) => {
   state.loading = true
   const selectedSpaceId = state.selectedSpace.id
   const selectedSpaceisCurrentSpace = selectedSpaceId === store.state.currentSpace.id
-  newItems = store.getters['currentSpace/newItems']({ items, selectedSpaceId })
+  newItems = await store.dispatch('currentSpace/newItems', { items, spaceId: selectedSpaceId })
   // update cache
-  const spaceIsCached = Boolean(cache.space(selectedSpaceId).cards)
+  const space = await cache.space(selectedSpaceId).cards
+  const spaceIsCached = Boolean(space)
   if (!spaceIsCached) {
-    cache.saveSpace({ id: selectedSpaceId })
+    await cache.saveSpace({ id: selectedSpaceId })
   }
-  cache.addToSpace(newItems, selectedSpaceId)
+  await cache.addToSpace(newItems, selectedSpaceId)
   // update current space
   if (selectedSpaceisCurrentSpace) {
     store.dispatch('currentCards/addMultiple', { cards: newItems.cards, shouldOffsetPosition: true })
@@ -142,10 +143,18 @@ const copyToSelectedSpace = (items) => {
     newItems.boxes.forEach(box => store.dispatch('currentBoxes/add', { box }))
   }
   // update server
-  newItems.cards.forEach(card => store.dispatch('api/addToQueue', { name: 'createCard', body: card, spaceId: selectedSpaceId }))
-  newItems.connectionTypes.forEach(connectionType => store.dispatch('api/addToQueue', { name: 'createConnectionType', body: connectionType, spaceId: selectedSpaceId }))
-  newItems.connections.forEach(connection => store.dispatch('api/addToQueue', { name: 'createConnection', body: connection, spaceId: selectedSpaceId }))
-  newItems.boxes.forEach(box => store.dispatch('api/addToQueue', { name: 'createBox', body: box, spaceId: selectedSpaceId }))
+  for (const card of newItems.cards) {
+    await store.dispatch('api/addToQueue', { name: 'createCard', body: card, spaceId: selectedSpaceId })
+  }
+  for (const connectionType of newItems.connectionTypes) {
+    await store.dispatch('api/addToQueue', { name: 'createConnectionType', body: connectionType, spaceId: selectedSpaceId })
+  }
+  for (const connection of newItems.connections) {
+    await store.dispatch('api/addToQueue', { name: 'createConnection', body: connection, spaceId: selectedSpaceId })
+  }
+  for (const box of newItems.boxes) {
+    await store.dispatch('api/addToQueue', { name: 'createBox', body: box, spaceId: selectedSpaceId })
+  }
   console.log('🚚 copies created', newItems)
   state.loading = false
 }
@@ -156,7 +165,7 @@ const moveOrCopyToSpace = async () => {
     state.cardsCreatedIsOverLimit = true
     return
   }
-  copyToSelectedSpace(items)
+  await copyToSelectedSpace(items)
   notifySuccess()
   if (props.actionIsMove) {
     removeCards(items.cards)

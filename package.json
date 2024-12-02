@@ -16,6 +16,7 @@
     "adaptive-quadratic-curve": "^1.0.2",
     "colord": "^2.9.3",
     "dayjs": "^1.9.1",
+    "idb-keyval": "^6.2.1",
     "lodash-es": "^4.17.15",
     "macrolight": "^1.5.0",
     "nanoid": "^3.1.31",

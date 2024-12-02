@@ -100,10 +100,10 @@ export default {
       this.tags = tags
       this.$store.commit('remoteTagsIsFetched', false)
     },
-    updateTags () {
+    async updateTags () {
       const spaceTags = this.$store.getters['currentSpace/spaceTags']
       this.tags = spaceTags || []
-      const cachedTags = cache.allTags()
+      const cachedTags = await cache.allTags()
       const mergedTags = utils.mergeArrays({ previous: spaceTags, updated: cachedTags, key: 'name' })
       this.tags = mergedTags
       this.debouncedUpdateRemoteTags()

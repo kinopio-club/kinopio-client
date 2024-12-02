@@ -174,26 +174,26 @@ const dialogIsPinned = computed(() => store.state.spaceDetailsIsPinned)
 
 // template
 
-const toggleCurrentSpaceIsUserTemplate = () => {
+const toggleCurrentSpaceIsUserTemplate = async () => {
   const value = !currentSpaceIsUserTemplate.value
-  store.dispatch('currentSpace/updateSpace', { isTemplate: value })
+  await store.dispatch('currentSpace/updateSpace', { isTemplate: value })
   updateLocalSpaces()
 }
 
 // duplicate
 
-const duplicateSpace = () => {
-  store.dispatch('currentSpace/duplicateSpace')
+const duplicateSpace = async () => {
+  await store.dispatch('currentSpace/duplicateSpace')
   updateLocalSpaces()
 }
 
 // hide
 
-const toggleHideSpace = () => {
+const toggleHideSpace = async () => {
   const value = !props.currentSpaceIsHidden
-  store.dispatch('currentSpace/updateSpace', { isHidden: value })
-  updateLocalSpaces()
+  await store.dispatch('currentSpace/updateSpace', { isHidden: value })
   store.commit('notifySpaceIsHidden', value)
+  updateLocalSpaces()
 }
 
 // remove
@@ -208,12 +208,13 @@ const removeCurrentSpace = async () => {
     store.commit('notifyCurrentSpaceIsNowRemoved', true)
   }
   emit('removeSpaceId', currentSpaceId)
-  changeToPrevSpace()
+  await changeToPrevSpace()
   await nextTick()
   updateLocalSpaces()
 }
-const changeToPrevSpace = () => {
-  let spaces = cache.getAllSpaces().filter(space => {
+const changeToPrevSpace = async () => {
+  const cachedSpaces = await cache.getAllSpaces()
+  let spaces = cachedSpaces.filter(space => {
     return store.getters['currentUser/canEditSpace'](space)
   })
   spaces = spaces.filter(space => space.id !== currentSpace.value.id)
@@ -287,14 +288,15 @@ const currentUserIsGroupAdmin = (group) => {
     groupId: group.id
   })
 }
-const toggleSpaceGroup = (group) => {
+const toggleSpaceGroup = async (group) => {
   clearErrors()
   const shouldRemoveSpaceGroup = currentSpace.value.groupId === group.id
   if (shouldRemoveSpaceGroup) {
-    removeSpaceGroup(group)
+    await removeSpaceGroup(group)
   } else {
-    updateSpaceGroup(group)
+    await updateSpaceGroup(group)
   }
+  updateLocalSpaces()
 }
 const updateSpaceGroup = (group) => {
   const isSpaceCreator = currentUserIsSpaceCreator.value

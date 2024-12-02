@@ -9,24 +9,6 @@ import { nanoid } from 'nanoid'
 
 // process queue
 
-const squashCardsCreatedCount = (queue, request, isRaw) => {
-  let isSquashed
-  let name = 'updateUserCardsCreatedCount'
-  if (isRaw) {
-    name = 'updateUserCardsCreatedCountRaw'
-  }
-  queue = queue.map(queueItem => {
-    if (queueItem.name === name) {
-      queueItem.body.delta += request.body.delta
-      isSquashed = true
-    }
-    return queueItem
-  })
-  if (!isSquashed) {
-    queue.push(request)
-  }
-  return queue
-}
 const sortQueueItems = (queue) => {
   // sort create connectiontype operations first
   let createConnectionTypes = []
@@ -153,7 +135,7 @@ const self = {
 
     // Queue Operations
 
-    addToQueue: (context, { name, body, spaceId }) => {
+    addToQueue: async (context, { name, body, spaceId }) => {
       body = utils.clone(body)
       body.operationId = nanoid()
       body.spaceId = spaceId || context.rootState.currentSpace.id
@@ -162,20 +144,12 @@ const self = {
       const isSignedIn = context.rootGetters['currentUser/isSignedIn']
       const canEditSpace = context.rootGetters['currentUser/canEditSpace']()
       if (!isSignedIn) { return }
-      let queue = cache.queue()
       const request = {
         name,
         body
       }
-      if (name === 'updateMultipleCards' && !canEditSpace) { return }
-      if (name === 'updateUserCardsCreatedCount') {
-        queue = squashCardsCreatedCount(queue, request)
-      } else if (name === 'updateUserCardsCreatedCountRaw') {
-        queue = squashCardsCreatedCount(queue, request, true)
-      } else {
-        queue.push(request)
-      }
-      cache.saveQueue(queue)
+      if (!canEditSpace) { return }
+      await cache.addToQueue(request)
       context.dispatch('debouncedSendQueue')
     },
 
@@ -208,7 +182,7 @@ const self = {
     sendQueue: async (context) => {
       const apiKey = context.rootState.currentUser.apiKey
       const isOnline = context.rootState.isOnline
-      const queue = cache.queue()
+      const queue = await cache.queue()
       if (!shouldRequest({ apiKey, isOnline }) || !queue.length) { return } // offline check
       // empty queue into sendingQueue
       let body = squashQueue(queue)
@@ -413,7 +387,7 @@ const self = {
         const response = await fetch(`${consts.apiHost()}/user/spaces`, options)
         const currentUser = context.rootState.currentUser
         let spaces = await normalizeResponse(response)
-        return utils.AddCurrentUserIsCollaboratorToSpaces(spaces, currentUser)
+        return utils.addCurrentUserIsCollaboratorToSpaces(spaces, currentUser)
       } catch (error) {
         context.dispatch('handleServerError', { name: 'getUserSpaces', error })
       }
@@ -429,7 +403,7 @@ const self = {
         const response = await fetch(`${consts.apiHost()}/user/group-spaces`, options)
         const currentUser = context.rootState.currentUser
         let spaces = await normalizeResponse(response)
-        return utils.AddCurrentUserIsCollaboratorToSpaces(spaces, currentUser)
+        return utils.addCurrentUserIsCollaboratorToSpaces(spaces, currentUser)
       } catch (error) {
         context.dispatch('handleServerError', { name: 'getUserSpaces', error })
       }
@@ -672,7 +646,8 @@ const self = {
     getSpaceAnonymously: async (context, space) => {
       const isOnline = context.rootState.isOnline
       if (!isOnline) { return }
-      const invite = cache.invitedSpaces().find(invitedSpace => invitedSpace.id === space.id) || {}
+      const invitedSpaces = await cache.invitedSpaces()
+      const invite = invitedSpaces.find(invitedSpace => invitedSpace.id === space.id) || {}
       space.collaboratorKey = space.collaboratorKey || invite.collaboratorKey
       let spaceReadOnlyKey = context.rootGetters['currentSpace/readOnlyKey'](space)
       try {
@@ -696,10 +671,10 @@ const self = {
     },
     createSpaces: async (context) => {
       try {
-        let spaces = cache.getAllSpaces()
+        let spaces = await cache.getAllSpaces()
         if (!spaces.length) { return }
         spaces = spaces.map(space => normalizeRemovedCards(space))
-        let removedSpaces = cache.getAllRemovedSpaces()
+        let removedSpaces = await cache.getAllRemovedSpaces()
         removedSpaces = removedSpaces.map(space => {
           space.isRemoved = true
           space.removedByUserId = context.rootState.currentUser.id

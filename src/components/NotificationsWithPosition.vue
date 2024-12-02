@@ -15,7 +15,7 @@ const items = computed(() => {
   itemsInLayer = utils.clone(itemsInLayer)
   itemsInLayer = itemsInLayer.map(item => {
     const isReadOnlyMessage = item.message === 'Space is Read Only'
-    if (currentSpaceIsUnavailableOffline.value && isReadOnlyMessage) {
+    if (store.state.currentSpaceIsUnavailableOffline && isReadOnlyMessage) {
       item.message = 'Space is Unavailable Offline'
       item.icon = 'offline'
     }
@@ -23,7 +23,6 @@ const items = computed(() => {
   })
   return itemsInLayer
 })
-const currentSpaceIsUnavailableOffline = computed(() => store.getters['currentSpace/isUnavailableOffline'])
 const remove = () => {
   store.commit('removeNotificationWithPosition')
 }

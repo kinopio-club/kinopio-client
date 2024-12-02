@@ -244,6 +244,9 @@ const updateBoxFill = (fill) => {
   props.boxes.forEach(box => {
     updateBox(box, { fill })
   })
+  if (fill === 'empty') {
+    store.dispatch('analytics/event', 'UpdateBoxFillToEmpty')
+  }
 }
 
 // color

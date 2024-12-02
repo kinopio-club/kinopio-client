@@ -37,9 +37,9 @@ const self = {
   },
 
   // https://www.notion.so/kinopio/JS-Bridge-Documentation-35ab7038df63439592b525b918d3acfa
-  sendHaptics (body) {
+  async sendHaptics (body) {
     if (shouldPrevent()) { return }
-    const shouldDisable = cache.getLocal('user').shouldDisableHapticFeedback
+    const shouldDisable = await cache.user().shouldDisableHapticFeedback
     if (shouldDisable) { return }
     const name = utils.capitalizeFirstLetter(body.name)
     body.name = `on${name}Feedback`

@@ -66,6 +66,7 @@ const store = createStore({
     outsideSpaceBackgroundColor: '',
     groupsIsVisible: false,
     dateImageUrl: null,
+    currentSpaceIsUnavailableOffline: false,
 
     // zoom and scroll
     spaceZoomPercent: 100,
@@ -201,6 +202,7 @@ const store = createStore({
     currentSelectedTag: {},
     remoteTags: [],
     remoteTagsIsFetched: false,
+    tags: [],
 
     // other items (links)
     otherCardDetailsIsVisible: false,
@@ -268,6 +270,7 @@ const store = createStore({
     otherItems: { spaces: [], cards: [] },
     otherTags: [],
     sendingQueue: [],
+    currentUserIsInvitedButCannotEditCurrentSpace: false,
 
     // codeblocks
     codeLanguagePickerIsVisible: false,
@@ -549,6 +552,10 @@ const store = createStore({
     dateImageUrl: (state, value) => {
       utils.typeCheck({ value, type: 'string' })
       state.dateImageUrl = value
+    },
+    currentSpaceIsUnavailableOffline: (state, value) => {
+      utils.typeCheck({ value, type: 'boolean' })
+      state.currentSpaceIsUnavailableOffline = value
     },
     searchIsVisible: (state, value) => {
       utils.typeCheck({ value, type: 'boolean' })
@@ -1071,6 +1078,10 @@ const store = createStore({
     remoteTagsIsFetched: (state, value) => {
       utils.typeCheck({ value, type: 'boolean' })
       state.remoteTagsIsFetched = value
+    },
+    tags: (state, tags) => {
+      utils.typeCheck({ value: tags, type: 'array' })
+      state.tags = tags
     },
 
     // Link Details
@@ -1646,9 +1657,11 @@ const store = createStore({
         card.name = name
       }
     },
-    otherTags: (state, remoteTags) => {
-      remoteTags = uniqBy(remoteTags, 'name')
-      state.otherTags = remoteTags
+    otherTags: (state, tags) => {
+      state.otherTags = tags
+    },
+    currentUserIsInvitedButCannotEditCurrentSpace: (state, value) => {
+      state.currentUserIsInvitedButCannotEditCurrentSpace = value
     },
 
     // Sync Session Data
@@ -1656,11 +1669,11 @@ const store = createStore({
     sendingQueue: (state, value) => {
       utils.typeCheck({ value, type: 'array' })
       state.sendingQueue = value
-      cache.saveSendingQueue(value)
+      // cache.saveSendingQueue(value)
     },
     clearSendingQueue: (state) => {
       state.sendingQueue = []
-      cache.clearSendingQueue()
+      // cache.clearSendingQueue()
     },
 
     // Code Blocks
@@ -1681,9 +1694,13 @@ const store = createStore({
   },
 
   actions: {
-    // moveFailedSendingQueueOperationBackIntoQueue: (context, operation) => {
+    updateTags: async (context) => {
+      const tags = await cache.allTags()
+      context.commit('tags', tags)
+    },
+    // moveFailedSendingQueueOperationBackIntoQueue: async (context, operation) => {
     //   // save to queue
-    //   let queue = cache.queue()
+    //   let queue = await cache.queue()
     //   queue.unshift(operation)
     //   cache.saveQueue(queue)
     //   // remove from sending queue
@@ -1713,6 +1730,13 @@ const store = createStore({
         // context.commit('addNotification', { icon: 'offline', message: 'Offline mode', type: 'info' })
       }
       context.commit('isOnline', isOnline)
+    },
+    updateCurrentSpaceIsUnavailableOffline: async (context, spaceId) => {
+      const isOffline = !context.state.isOnline
+      const isNotCached = await context.dispatch('currentSpace/spaceIsNotCached', spaceId)
+      const currentSpaceIsRemote = context.getters['currentSpace/isRemote']
+      const value = isOffline && isNotCached && currentSpaceIsRemote
+      context.commit('currentSpaceIsUnavailableOffline', value)
     },
     updateSpaceAndCardUrlToLoad: (context, path) => {
       const matches = utils.spaceAndCardIdFromPath(path)
@@ -1767,8 +1791,8 @@ const store = createStore({
     closeAllDialogs: (context, origin) => {
       origin = origin || 'Store.closeAllDialogs'
       context.commit('closeAllDialogs', origin)
-      const space = context.rootState.currentSpace
-      const user = context.rootState.currentUser
+      const space = context.state.currentSpace
+      const user = context.state.currentUser
       context.commit('broadcast/updateUser', { user: utils.userMeta(user, space), type: 'updateUserPresence' })
       context.commit('broadcast/updateStore', { updates: { userId: user.id }, type: 'clearRemoteCardDetailsVisible' })
       context.commit('broadcast/updateStore', { updates: { userId: user.id }, type: 'clearRemoteConnectionDetailsVisible' })
@@ -1789,7 +1813,7 @@ const store = createStore({
       if (context.state.multipleCardsSelectedIds.includes(cardId)) { return }
       context.commit('addToMultipleCardsSelected', cardId)
       const updates = {
-        userId: context.rootState.currentUser.id,
+        userId: context.state.currentUser.id,
         cardId
       }
       context.commit('broadcast/updateStore', { updates, type: 'addToRemoteCardsSelected' })
@@ -1799,7 +1823,7 @@ const store = createStore({
       if (!context.state.multipleCardsSelectedIds.includes(cardId)) { return }
       context.commit('removeFromMultipleCardsSelected', cardId)
       const updates = {
-        userId: context.rootState.currentUser.id,
+        userId: context.state.currentUser.id,
         cardId
       }
       context.commit('broadcast/updateStore', { updates, type: 'removeFromRemoteCardsSelected' })
@@ -1815,7 +1839,7 @@ const store = createStore({
       cardIds = [...combinedSet]
       context.commit('multipleCardsSelectedIds', cardIds)
       const updates = {
-        userId: context.rootState.currentUser.id,
+        userId: context.state.currentUser.id,
         cardIds
       }
       context.commit('broadcast/updateStore', { updates, type: 'updateRemoteCardsSelected' })
@@ -1824,7 +1848,7 @@ const store = createStore({
       utils.typeCheck({ value: cardIds, type: 'array' })
       context.commit('multipleCardsSelectedIds', cardIds)
       const updates = {
-        userId: context.rootState.currentUser.id,
+        userId: context.state.currentUser.id,
         cardIds
       }
       context.commit('broadcast/updateStore', { updates, type: 'updateRemoteCardsSelected' })
@@ -1833,7 +1857,7 @@ const store = createStore({
       utils.typeCheck({ value: boxIds, type: 'array' })
       context.commit('multipleBoxesSelectedIds', boxIds)
       const updates = {
-        userId: context.rootState.currentUser.id,
+        userId: context.state.currentUser.id,
         boxIds
       }
       context.commit('broadcast/updateStore', { updates, type: 'updateRemoteBoxesSelected' })
@@ -1842,8 +1866,8 @@ const store = createStore({
       if (context.state.multipleCardsSelectedIds.length || context.state.multipleConnectionsSelectedIds.length || context.state.multipleBoxesSelectedIds.length) {
         context.commit('clearMultipleSelected')
       }
-      const space = context.rootState.currentSpace
-      const user = context.rootState.currentUser
+      const space = context.state.currentSpace
+      const user = context.state.currentUser
       context.commit('broadcast/updateStore', { user: utils.userMeta(user, space), type: 'clearRemoteMultipleSelected' })
     },
     toggleMultipleConnectionsSelected: (context, connectionId) => {
@@ -1861,7 +1885,7 @@ const store = createStore({
       if (context.state.multipleConnectionsSelectedIds.includes(connectionId)) { return }
       context.commit('addToMultipleConnectionsSelected', connectionId)
       const updates = {
-        userId: context.rootState.currentUser.id,
+        userId: context.state.currentUser.id,
         connectionId
       }
       context.commit('broadcast/updateStore', { updates, type: 'addToRemoteConnectionsSelected' })
@@ -1871,7 +1895,7 @@ const store = createStore({
       if (!context.state.multipleConnectionsSelectedIds.includes(connectionId)) { return }
       context.commit('removeFromMultipleConnectionsSelected', connectionId)
       const updates = {
-        userId: context.rootState.currentUser.id,
+        userId: context.state.currentUser.id,
         connectionId
       }
       context.commit('broadcast/updateStore', { updates, type: 'removeFromRemoteConnectionsSelected' })
@@ -1880,7 +1904,7 @@ const store = createStore({
       utils.typeCheck({ value: connectionIds, type: 'array' })
       context.commit('multipleConnectionsSelectedIds', connectionIds)
       const updates = {
-        userId: context.rootState.currentUser.id,
+        userId: context.state.currentUser.id,
         connectionIds
       }
       context.commit('broadcast/updateStore', { updates, type: 'updateRemoteConnectionsSelected' })
@@ -1896,7 +1920,7 @@ const store = createStore({
       connectionIds = [...combinedSet]
       context.commit('multipleConnectionsSelectedIds', connectionIds)
       const updates = {
-        userId: context.rootState.currentUser.id,
+        userId: context.state.currentUser.id,
         connectionIds
       }
       context.commit('broadcast/updateStore', { updates, type: 'updateRemoteConnectionsSelected' })
@@ -1904,7 +1928,7 @@ const store = createStore({
     connectionDetailsIsVisibleForConnectionId: (context, connectionId) => {
       context.commit('connectionDetailsIsVisibleForConnectionId', connectionId)
       const updates = {
-        userId: context.rootState.currentUser.id,
+        userId: context.state.currentUser.id,
         connectionId
       }
       context.commit('broadcast/updateStore', { updates, type: 'addToRemoteConnectionDetailsVisible' })
@@ -1914,7 +1938,7 @@ const store = createStore({
       if (context.state.multipleBoxesSelectedIds.includes(boxId)) { return }
       context.commit('addToMultipleBoxesSelected', boxId)
       const updates = {
-        userId: context.rootState.currentUser.id,
+        userId: context.state.currentUser.id,
         boxId
       }
       context.commit('broadcast/updateStore', { updates, type: 'addToRemoteBoxesSelected' })
@@ -1930,7 +1954,7 @@ const store = createStore({
       boxIds = [...combinedSet]
       context.commit('multipleBoxesSelectedIds', boxIds)
       const updates = {
-        userId: context.rootState.currentUser.id,
+        userId: context.state.currentUser.id,
         boxIds
       }
       context.commit('broadcast/updateStore', { updates, type: 'updateRemoteBoxesSelected' })
@@ -1940,7 +1964,7 @@ const store = createStore({
       if (!context.state.multipleBoxesSelectedIds.includes(boxId)) { return }
       context.commit('removeFromMultipleBoxesSelected', boxId)
       const updates = {
-        userId: context.rootState.currentUser.id,
+        userId: context.state.currentUser.id,
         boxId
       }
       context.commit('broadcast/updateStore', { updates, type: 'removeFromRemoteBoxesSelected' })
@@ -1950,6 +1974,19 @@ const store = createStore({
       ping.color = store.state.currentUser.color
       context.commit('triggerSonarPing', ping)
       context.commit('broadcast/updateStore', { updates: ping, type: 'triggerSonarPing' })
+    },
+
+    // current space
+
+    updateCurrentUserIsInvitedButCannotEditCurrentSpace: async (context, space) => {
+      space = space || context.state.currentSpace
+      const currentUserIsSignedIn = context.getters['currentUser/isSignedIn']
+      const invitedSpaces = await cache.invitedSpaces()
+      const isInvitedToSpace = Boolean(invitedSpaces.find(invitedSpace => invitedSpace.id === space.id))
+      const isReadOnlyInvitedToSpace = context.getters['currentUser/isReadOnlyInvitedToSpace'](space)
+      const inviteRequiresSignIn = !currentUserIsSignedIn && isInvitedToSpace
+      const value = isReadOnlyInvitedToSpace || inviteRequiresSignIn
+      context.commit('currentUserIsInvitedButCannotEditCurrentSpace', value)
     },
 
     // Pinned Dialogs
@@ -2002,6 +2039,15 @@ const store = createStore({
       const canOnlyComment = context.getters['currentUser/canOnlyComment']()
       if (canOnlyComment) { return }
       context.commit('currentUserToolbar', value)
+    },
+
+    // other tags (session)
+
+    updateOtherTags: async (context, tags) => {
+      const cachedTags = await cache.allTags()
+      tags = tags.concat(cachedTags)
+      tags = uniqBy(tags, 'name')
+      return tags
     }
   },
   getters: {
@@ -2035,21 +2081,6 @@ const store = createStore({
       const otherCards = state.otherItems.cards.filter(Boolean)
       const card = otherCards.find(otherCard => otherCard.id === cardId)
       return card
-    },
-    cachedOrOtherSpaceById: (state, getters) => (spaceId) => {
-      const currentSpace = state.currentSpace
-      const cachedSpace = cache.space(spaceId)
-      if (spaceId === currentSpace.id) {
-        return utils.clone(currentSpace)
-      } else if (utils.objectHasKeys(cachedSpace)) {
-        return cachedSpace
-      } else {
-        return getters.otherSpaceById(spaceId)
-      }
-    },
-    spaceIsNotCached: (state) => (spaceId) => {
-      const spaceCardsCount = cache.space(spaceId).cards?.length
-      return Boolean(!spaceCardsCount)
     },
     spaceZoomDecimal: (state) => {
       return state.spaceZoomPercent / 100
@@ -2087,6 +2118,24 @@ const store = createStore({
       } else {
         const date = dayjs().format('MM-DD-YYYY') // 11-19-2024
         return `${consts.cdnHost}/date/${date}.jpg` // https://cdn.kinopio.club/date/11-19-24.jpg
+      }
+    },
+    otherTagByName: (state, getters) => (name) => {
+      return state.otherTags.find(otherTag => otherTag.name === name)
+    },
+    newTag: (state) => ({ name, defaultColor, cardId, spaceId }) => {
+      let color
+      const allTags = state.tags
+      const existingTag = allTags.find(tag => tag.name === name)
+      if (existingTag) {
+        color = existingTag.color
+      }
+      return {
+        name,
+        id: nanoid(),
+        color: color || defaultColor,
+        cardId: cardId,
+        spaceId: spaceId
       }
     }
   },

@@ -252,9 +252,9 @@ const sort = (spaces) => {
 
 // add space
 
-const addSpace = () => {
+const addSpace = async () => {
   window.scrollTo(0, 0)
-  store.dispatch('currentSpace/addSpace')
+  await store.dispatch('currentSpace/addSpace')
   updateLocalSpaces()
   store.commit('triggerFocusSpaceDetailsName')
 }
@@ -283,32 +283,31 @@ const updateLocalSpaces = () => {
 }
 const debouncedUpdateLocalSpaces = debounce(async () => {
   await nextTick()
-  let cacheSpaces = cache.getAllSpaces().filter(space => {
+  let cacheSpaces = await cache.getAllSpaces()
+  cacheSpaces = cacheSpaces.filter(space => {
     return store.getters['currentUser/canEditSpace'](space)
   })
-  let spaces = updateWithExistingRemoteSpaces(cacheSpaces)
-  spaces = utils.clone(spaces)
-  state.spaces = utils.AddCurrentUserIsCollaboratorToSpaces(spaces, store.state.currentUser)
+  state.spaces = utils.addCurrentUserIsCollaboratorToSpaces(cacheSpaces, store.state.currentUser)
 }, 350, { leading: true })
-
-const removeRemovedCachedSpaces = (remoteSpaces) => {
-  const remoteSpaceIds = remoteSpaces.map(space => space.id)
-  const spacesToRemove = state.spaces.filter(space => !remoteSpaceIds.includes(space.id))
-  spacesToRemove.forEach(spaceToRemove => {
-    cache.deleteSpace(spaceToRemove)
-  })
-}
-const updateWithExistingRemoteSpaces = (cacheSpaces) => {
-  if (!utils.arrayHasItems(state.remoteSpaces)) { return cacheSpaces }
-  let spaces = cacheSpaces
-  state.remoteSpaces.forEach(space => {
-    const spaceExists = cacheSpaces.find(userSpace => userSpace.id === space.id)
-    if (!spaceExists) {
-      spaces.push(space)
+const updateSpaces = async () => {
+  const cachedSpaces = state.spaces
+  const cachedSpaceIds = cachedSpaces.map(space => space.id)
+  const remoteSpaces = state.remoteSpaces
+  for (let space of remoteSpaces) {
+    const isCachedSpace = cachedSpaceIds.includes(space.id)
+    if (isCachedSpace) {
+      const cachedSpace = await cache.space(space.id)
+      const isUpdated = dayjs(space.updatedAt).valueOf() > dayjs(cachedSpace.updatedAt).valueOf()
+      if (!isUpdated) { continue }
+      space.cards = cachedSpace.cards
+      space.boxes = cachedSpace.boxes
+      space.connections = cachedSpace.connections
+      space.connectionTypes = cachedSpace.connectionTypes
+      await cache.saveSpace(space)
+    } else {
+      await cache.saveSpace(space)
     }
-  })
-  updateCachedSpaces()
-  return spaces
+  }
 }
 const updateWithRemoteSpaces = async () => {
   const currentUserIsSignedIn = store.getters['currentUser/isSignedIn']
@@ -329,22 +328,11 @@ const updateWithRemoteSpaces = async () => {
     state.remoteSpaces = spaces
     state.isLoadingRemoteSpaces = false
     if (!state.remoteSpaces) { return }
-    removeRemovedCachedSpaces(state.remoteSpaces)
-    state.spaces = state.remoteSpaces
-    updateCachedSpaces()
+    await updateSpaces()
   } catch (error) {
     console.error('🚒 updateWithRemoteSpaces', error)
   }
   state.isLoadingRemoteSpaces = false
-}
-const updateCachedSpaces = () => {
-  state.spaces.forEach(space => {
-    const cachedSpace = cache.space(space.id)
-    const isCachedSpace = utils.objectHasKeys(cachedSpace)
-    if (!isCachedSpace) {
-      cache.saveSpace(space)
-    }
-  })
 }
 const updateFavorites = async () => {
   if (!shouldUpdateFavorites) { return }

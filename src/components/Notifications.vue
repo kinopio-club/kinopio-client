@@ -13,7 +13,10 @@ import GroupLabel from '@/components/GroupLabel.vue'
 import Loader from '@/components/Loader.vue'
 
 import dayjs from 'dayjs'
+
 const store = useStore()
+
+let unsubscribe
 
 let checkIfShouldNotifySpaceOutOfSyncIntervalTimer
 
@@ -23,7 +26,7 @@ const templateElement = ref(null)
 
 onMounted(() => {
   update()
-  store.subscribe((mutation, state) => {
+  unsubscribe = store.subscribe((mutation, state) => {
     if (mutation.type === 'addNotification') {
       update()
     } else if (mutation.type === 'currentUserIsPainting') {
@@ -50,6 +53,7 @@ onBeforeUnmount(() => {
   window.removeEventListener('visibilitychange', updatePageVisibilityChange)
   window.removeEventListener('focus', updatePageVisibilityChangeOnFocus)
   clearInterval(checkIfShouldNotifySpaceOutOfSyncIntervalTimer)
+  unsubscribe()
 })
 
 const state = reactive({
@@ -159,7 +163,7 @@ const notifySpaceIsHidden = computed(() => store.state.notifySpaceIsHidden)
 const notifyCurrentSpaceIsNowRemoved = computed(() => store.state.notifyCurrentSpaceIsNowRemoved)
 const notifyThanksForDonating = computed(() => store.state.notifyThanksForDonating)
 const notifyThanksForUpgrading = computed(() => store.state.notifyThanksForUpgrading)
-const notifySpaceIsUnavailableOffline = computed(() => store.getters['currentSpace/isUnavailableOffline'])
+const notifySpaceIsUnavailableOffline = computed(() => store.state.currentSpaceIsUnavailableOffline)
 const notifyIsJoiningGroup = computed(() => store.state.notifyIsJoiningGroup)
 const notifySignUpToJoinGroup = computed(() => store.state.notifySignUpToJoinGroup)
 const notifificationClasses = (item) => {
@@ -230,11 +234,12 @@ const restoreSpace = () => {
   store.dispatch('currentSpace/restoreRemovedSpace', space)
   store.commit('notifySpaceIsRemoved', false)
 }
-const deleteSpace = () => {
+const deleteSpace = async () => {
   const space = store.state.currentSpace
   store.dispatch('currentSpace/deleteSpace', space)
   store.commit('notifySpaceIsRemoved', false)
-  const firstSpace = cache.getAllSpaces()[0]
+  const cachedSpaces = await cache.getAllSpaces()
+  const firstSpace = cachedSpaces[0]
   store.dispatch('currentSpace/loadSpace', { space: firstSpace })
 }
 const resetNotifySpaceIsHidden = () => {
@@ -273,8 +278,8 @@ const updateChangelogAndRefreshBrowser = () => {
   cache.updatePrevReadChangelogId(latestChangelogPost.value.id)
   refreshBrowser()
 }
-const duplicateSpace = () => {
-  store.dispatch('currentSpace/duplicateSpace')
+const duplicateSpace = async () => {
+  await store.dispatch('currentSpace/duplicateSpace')
 }
 const changeSpace = (spaceId) => {
   const space = { id: spaceId }

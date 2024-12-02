@@ -79,8 +79,8 @@ export default {
     }
   },
   actions: {
-    init: (context) => {
-      let groups = cache.groups()
+    init: async (context) => {
+      let groups = await cache.groups()
       groups = utils.denormalizeItems(groups)
       context.commit('restore', groups)
       // remote groups restored in restoreRemoteUser
@@ -149,11 +149,11 @@ export default {
       context.commit('notifyIsJoiningGroup', false, { root: true })
       context.commit('groupToJoinOnLoad', null, { root: true })
     },
-    update: (context, group) => {
+    update: async (context, group) => {
       context.commit('update', group)
-      context.dispatch('api/addToQueue', { name: 'updateGroup', body: group }, { root: true })
+      await context.dispatch('api/addToQueue', { name: 'updateGroup', body: group }, { root: true })
     },
-    updateUserRole: (context, update) => {
+    updateUserRole: async (context, update) => {
       const { userId, groupId, role } = update
       let group = context.getters.byId(groupId)
       group = utils.clone(group)
@@ -164,16 +164,16 @@ export default {
         return user
       })
       context.commit('update', group)
-      context.dispatch('api/addToQueue', { name: 'updateGroupUser', body: update }, { root: true })
+      await context.dispatch('api/addToQueue', { name: 'updateGroupUser', body: update }, { root: true })
     },
-    addCurrentSpace: (context, group) => {
+    addCurrentSpace: async (context, group) => {
       const user = context.rootState.currentUser
       const body = { groupId: group.id, addedToGroupByUserId: user.id }
-      context.dispatch('currentSpace/updateSpace', body, { root: true })
-      context.dispatch('userNotifications/addSpaceToGroup', body, { root: true })
+      await context.dispatch('currentSpace/updateSpace', body, { root: true })
+      await context.dispatch('userNotifications/addSpaceToGroup', body, { root: true })
     },
-    removeCurrentSpace: (context) => {
-      context.dispatch('currentSpace/updateSpace', { groupId: null, addedToGroupByUserId: null }, { root: true })
+    removeCurrentSpace: async (context) => {
+      await context.dispatch('currentSpace/updateSpace', { groupId: null, addedToGroupByUserId: null }, { root: true })
     },
     removeGroupUser: (context, { groupId, userId }) => {
       let group = context.getters.byId(groupId)

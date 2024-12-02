@@ -251,7 +251,7 @@ const isInSearchResultsCards = computed(() => {
   return Boolean(results.find(cardResult => card.value.id === cardResult.id))
 })
 const canEditSpace = computed(() => store.getters['currentUser/canEditSpace']())
-const isInvitedButCannotEditSpace = computed(() => store.getters['currentUser/isInvitedButCannotEditSpace']())
+const isInvitedButCannotEditSpace = computed(() => store.state.currentUserIsInvitedButCannotEditCurrentSpace)
 
 // user
 
@@ -354,7 +354,7 @@ const showCard = async (cardId) => {
   clearErrors()
   updatePinchCounterZoomDecimal()
   scrollIntoViewAndFocus()
-  updatePreviousTags()
+  await updatePreviousTags()
   updateNameSplitIntoCardsCount()
   resetTextareaHeight()
   await nextTick()
@@ -466,7 +466,7 @@ const updateCardName = async (newName) => {
   }
   store.dispatch('currentCards/update', { card: item, shouldPreventUpdateDimensionsAndPaths: true })
   updateMediaUrls()
-  updateTags()
+  await updateTags()
   updateDimensionsAndPathsDebounced()
   if (createdByUser.value.id !== store.state.currentUser.id) { return }
   if (state.notifiedMembers) { return } // send card update notifications only once per card, per session
@@ -669,21 +669,21 @@ const moveCursorPastTagEnd = async () => {
   newCursorPosition = cursorStart + newCursorPosition + 2
   setSelectionRange(newCursorPosition, newCursorPosition)
 }
-const updatePreviousTags = () => {
+const updatePreviousTags = async () => {
   if (!card.value.name) {
     previousTags = []
     return
   }
   previousTags = utils.tagsFromStringWithoutBrackets(card.value.name) || []
-  previousTags = previousTags.map(tagName => {
+  previousTags = previousTags.map(async (tagName) => {
     let tag
     if (state.previousSelectedTag.name === tagName) {
       tag = state.previousSelectedTag
     } else if (state.currentSearchTag.name === tagName) {
       tag = state.currentSearchTag
     } else {
-      tag = store.getters['currentSpace/tagByName'](tagName)
-      tag = utils.clone(tag)
+      tag = await store.getters['currentSpace/tagByName'](tagName)
+      tag = utils.clone(tag, state.previousSelectedTag, tagName)
       tag.color = state.previousSelectedTag.color || tag.color
     }
     return tag
@@ -692,12 +692,12 @@ const updatePreviousTags = () => {
 const updateNewTagColor = (color) => {
   state.newTagColor = color
 }
-const addNewTags = (newTagNames) => {
+const addNewTags = async (newTagNames) => {
   const previousTagNames = previousTags.map(tag => tag.name)
   const addTagsNames = newTagNames.filter(newTagName => !previousTagNames.includes(newTagName))
-  addTagsNames.forEach(tagName => {
+  for (const tagName of addTagsNames) {
     let tag
-    tag = utils.newTag({
+    tag = store.getters.newTag({
       name: tagName,
       defaultColor: state.newTagColor || store.state.currentUser.color,
       cardId: card.value.id,
@@ -708,26 +708,26 @@ const addNewTags = (newTagNames) => {
     } else if (state.currentSearchTag.name === tagName) {
       tag.color = state.currentSearchTag.color
     }
-    store.dispatch('currentSpace/addTag', tag)
-  })
+    await store.dispatch('currentSpace/addTag', tag)
+  }
 }
-const updateTags = () => {
+const updateTags = async () => {
   if (!card.value.name) { return }
   const newTagNames = utils.tagsFromStringWithoutBrackets(card.value.name) || []
-  addNewTags(newTagNames)
-  updatePreviousTags()
+  await addNewTags(newTagNames)
+  await updatePreviousTags()
 }
 const hideTagDetailsIsVisible = () => {
   store.commit('currentSelectedTag', {})
   store.commit('tagDetailsIsVisible', false)
 }
-const updateCurrentSearchTag = (tag) => {
+const updateCurrentSearchTag = async (tag) => {
   state.currentSearchTag = tag
-  updatePreviousTags()
+  await updatePreviousTags()
 }
-const updateTagBracketsWithTag = (tag) => {
+const updateTagBracketsWithTag = async (tag) => {
   state.previousSelectedTag = tag
-  updatePreviousTags()
+  await updatePreviousTags()
   const cursorStart = selectionStartPosition()
   const text = tagStartText() + tagEndText()
   let newName

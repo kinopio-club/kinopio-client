@@ -342,7 +342,7 @@ export default {
   isUndefinedOrNull (value) {
     return value === undefined || value === null
   },
-  typeCheck ({ value, type, allowUndefined, origin }) {
+  typeCheck ({ value, type, allowUndefined, origin, silenceWarning }) {
     if (allowUndefined && this.isUndefinedOrNull(value)) {
       return true
     }
@@ -350,7 +350,9 @@ export default {
       return true
     }
     if (typeof value !== type) { // eslint-disable-line valid-typeof
-      console.error(`🚑 passed value is not ${type}`, value, origin)
+      if (!silenceWarning) {
+        console.error(`🚑 passed value is not ${type}`, value, origin)
+      }
       return false
     } else {
       return true
@@ -1526,10 +1528,10 @@ export default {
     }
     return userId
   },
-  uniqueSpaceItems (items, nullItemUsers) {
+  async uniqueSpaceItems (items, nullItemUsers) {
     const itemIdDeltas = []
     const connectionTypeIdDeltas = []
-    const user = cache.user()
+    const user = await cache.user()
     let { cards, connections, connectionTypes, boxes, tags } = items
     tags = tags || []
     boxes = boxes || []
@@ -1708,7 +1710,7 @@ export default {
     remoteSpace.removedCards = removedCards
     return remoteSpace
   },
-  AddCurrentUserIsCollaboratorToSpaces (spaces, currentUser) {
+  addCurrentUserIsCollaboratorToSpaces (spaces, currentUser) {
     if (!spaces) { return }
     return spaces.map(space => {
       let userId
@@ -2408,20 +2410,6 @@ export default {
     if (!tags) { return }
     tags = tags.map(tag => tag.substring(2, tag.length - 2))
     return tags
-  },
-  newTag ({ name, defaultColor, cardId, spaceId }) {
-    let color
-    const existingTag = cache.allTags().find(tag => tag.name === name)
-    if (existingTag) {
-      color = existingTag.color
-    }
-    return {
-      name,
-      id: nanoid(),
-      color: color || defaultColor,
-      cardId: cardId,
-      spaceId: spaceId
-    }
   },
   indexesOf (string, search) {
     // adapted from https://stackoverflow.com/a/3410549

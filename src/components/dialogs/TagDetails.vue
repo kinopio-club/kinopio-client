@@ -146,6 +146,20 @@ const updateDialogHeight = async () => {
   updateResultsSectionHeight()
 }
 
+// spaces
+
+const cachedOrOtherSpaceById = async (spaceId) => {
+  const currentSpace = store.state.currentSpace
+  const cachedSpace = await cache.space(spaceId)
+  if (spaceId === currentSpace.id) {
+    return utils.clone(currentSpace)
+  } else if (utils.objectHasKeys(cachedSpace)) {
+    return cachedSpace
+  } else {
+    return store.getters.otherSpaceById(spaceId)
+  }
+}
+
 // current card
 
 const cardDetailsIsVisibleForCardId = computed(() => store.state.cardDetailsIsVisibleForCardId)
@@ -156,7 +170,7 @@ const currentCard = computed(() => {
   return currentCard || tagCard
 })
 const showEditCard = computed(() => !cardDetailsIsVisibleForCardId.value.valye && !visibleFromTagList.value)
-const showCardDetails = (card) => {
+const showCardDetails = async (card) => {
   card = card || currentCard.value
   store.dispatch('closeAllDialogs')
   if (currentSpaceId.value !== card.spaceId) {
@@ -165,7 +179,7 @@ const showCardDetails = (card) => {
     if (card.spaceId) {
       space = { id: card.spaceId }
     } else {
-      space = cache.space(card.spaceId)
+      space = await cache.space(card.spaceId)
     }
     store.dispatch('currentSpace/changeSpace', space)
   } else {
@@ -197,7 +211,7 @@ const remoteCards = async () => {
 const updateCards = async () => {
   state.cards = []
   const cardsInCurrentSpace = utils.clone(store.getters['currentCards/withTagName'](name.value))
-  const cardsInCachedSpaces = cache.allCardsByTagName(name.value)
+  const cardsInCachedSpaces = await cache.allCardsByTagName(name.value)
   // cache cards
   let cacheCards = cardsInCurrentSpace.concat(cardsInCachedSpaces)
   cacheCards = addCardNameSegments(cacheCards)
@@ -249,7 +263,7 @@ const groupedItems = computed(() => {
     } else {
       let spaceName, background, backgroundTint
       const spaceId = item.spaceId || currentSpaceId.value
-      const space = store.getters.cachedOrOtherSpaceById(spaceId)
+      const space = state.cachedSpaces.find(cachedspace => cachedspace.id === spaceId)
       if (space) {
         spaceName = space.name
         background = space.background
@@ -298,11 +312,11 @@ const segmentTagColor = (segment) => {
     return color.value
   }
   const spaceTag = store.getters['currentSpace/tagByName'](segment.name)
-  const cachedTag = cache.tagByName(segment.name)
+  const otherTag = store.getters.otherTagByName(segment.name)
   if (spaceTag) {
     return spaceTag.color
-  } else if (cachedTag) {
-    return cachedTag.color
+  } else if (otherTag) {
+    return otherTag.color
   } else {
     return currentUser.value.color
   }
@@ -361,6 +375,18 @@ const filteredItems = computed(() => {
     return state.cards
   }
 })
+watch(() => filteredItems.value, async (items, prevValue) => {
+  let spaces
+  for (const item of items) {
+    const spaceId = item.spaceId || currentSpaceId.value
+    const space = await cachedOrOtherSpaceById(spaceId)
+    if (space) {
+      spaces.push(space)
+    }
+  }
+  state.cachedSpaces = spaces
+})
+
 const shouldHideResultsFilter = computed(() => {
   if (state.cards.length < 5) {
     return true

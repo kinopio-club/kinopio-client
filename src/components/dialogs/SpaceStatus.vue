@@ -13,8 +13,7 @@ const props = defineProps({
 
 watch(() => props.visible, (value, prevValue) => {
   if (value) {
-    const cachedSpace = cache.space(currentSpace.value.id)
-    state.spaceIsCached = utils.arrayHasItems(cachedSpace.cards)
+    updateSpaceIsCached()
   }
 })
 
@@ -26,6 +25,11 @@ const currentSpace = computed(() => store.state.currentSpace)
 
 const refreshBrowser = () => {
   window.location.reload()
+}
+
+const updateSpaceIsCached = async () => {
+  const cachedSpace = await cache.space(currentSpace.value.id)
+  state.spaceIsCached = utils.arrayHasItems(cachedSpace.cards)
 }
 
 // loading

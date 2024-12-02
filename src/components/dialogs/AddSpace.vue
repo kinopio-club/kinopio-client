@@ -65,9 +65,10 @@ const shouldHideFooter = (value) => {
 
 // space
 
-const addSpace = () => {
+const addSpace = async () => {
   store.commit('isLoadingSpace', true)
-  const noUserSpaces = !cache.getAllSpaces().length
+  const cachedSpaces = await cache.getAllSpaces()
+  const noUserSpaces = !cachedSpaces.length
   window.scrollTo(0, 0)
   if (noUserSpaces) {
     window.location.href = '/'
@@ -77,19 +78,19 @@ const addSpace = () => {
   }
   if (props.shouldAddSpaceDirectly) {
     store.dispatch('closeAllDialogs')
-    store.dispatch('currentSpace/addSpace')
+    await store.dispatch('currentSpace/addSpace')
     store.commit('triggerSpaceDetailsInfoIsVisible')
   }
   store.dispatch('analytics/event', 'addSpaceButtons')
 }
-const addInboxSpace = () => {
+const addInboxSpace = async () => {
   store.commit('isLoadingSpace', true)
   store.dispatch('closeAllDialogs')
   window.scrollTo(0, 0)
-  store.dispatch('currentSpace/addInboxSpace')
+  await store.dispatch('currentSpace/addInboxSpace')
 }
-const duplicateSpace = () => {
-  store.dispatch('currentSpace/duplicateSpace')
+const duplicateSpace = async () => {
+  await store.dispatch('currentSpace/duplicateSpace')
 }
 
 // new space settings
