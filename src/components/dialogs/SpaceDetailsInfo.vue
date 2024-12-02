@@ -1,5 +1,5 @@
 <template lang="pug">
-dialog.wide(v-if="visible" :open="visible" @click.left="closeDialogs" ref="dialog")
+dialog.wide.space-details-info(v-if="visible" :open="visible" @click.left="closeDialogs" ref="dialog")
   section
     SpaceDetailsInfo(:shouldHidePin="true" @closeDialogs="closeDialogs")
 </template>
@@ -37,4 +37,7 @@ export default {
 }
 </script>
 <style lang="stylus">
+dialog.space-details-info
+  top 60px
+  left 60px
 </style>

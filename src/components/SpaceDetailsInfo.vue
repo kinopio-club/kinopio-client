@@ -116,10 +116,7 @@ const spaceName = computed({
     return store.state.currentSpace.name
   },
   set (newName) {
-    textareaSize()
-    store.dispatch('currentSpace/updateSpace', { name: newName })
-    updateLocalSpaces()
-    store.commit('triggerUpdateWindowTitle')
+    updateSpaceName(newName)
   }
 })
 const textareaSize = () => {
@@ -132,6 +129,12 @@ const textareaFocus = () => {
 }
 const textareaBlur = () => {
   state.textareaIsFocused = false
+}
+const updateSpaceName = async (newName) => {
+  textareaSize()
+  await store.dispatch('currentSpace/updateSpace', { name: newName })
+  updateLocalSpaces()
+  store.commit('triggerUpdateWindowTitle')
 }
 
 // space name date
@@ -443,7 +446,6 @@ template(v-if="state.settingsIsVisible")
   align-items flex-start !important
   justify-content space-between
   margin-bottom 0 !important
-
   .space-info-wrap
     align-items flex-start
     margin 0

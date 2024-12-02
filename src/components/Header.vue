@@ -653,11 +653,6 @@ header(v-if="isVisible" :style="state.position" :class="{'fade-out': isFadingOut
                   span {{currentSpaceName}}
                     PrivacyIcon(:privacy="currentSpace.privacy" :closedIsNotVisible="true")
                   img.icon.sunglasses.explore(src="@/assets/sunglasses.svg" v-if="shouldShowInExplore" title="Shown in Explore")
-              SpaceDetails(:visible="state.spaceDetailsIsVisible")
-              ImportArenaChannel(:visible="importArenaChannelIsVisible")
-              SpaceDetailsInfo(:visible="state.spaceDetailsInfoIsVisible")
-              ImportExport(:visible="state.importIsVisible" :isImport="true")
-              Templates(:visible="state.templatesIsVisible")
 
               //- read only badge
               .label-badge.space-name-badge-wrap(v-if="!userCanEditSpace")
@@ -683,6 +678,13 @@ header(v-if="isVisible" :style="state.position" :class="{'fade-out': isFadingOut
               button(@click.left.stop="toggleOfflineIsVisible" :class="{ active: offlineIsVisible, 'translucent-button': !shouldIncreaseUIContrast}")
                 img.icon.offline(src="@/assets/offline.svg")
               Offline(:visible="offlineIsVisible")
+
+          SpaceDetails(:visible="state.spaceDetailsIsVisible")
+          ImportArenaChannel(:visible="importArenaChannelIsVisible")
+          SpaceDetailsInfo(:visible="state.spaceDetailsInfoIsVisible")
+          ImportExport(:visible="state.importIsVisible" :isImport="true")
+          Templates(:visible="state.templatesIsVisible")
+
       .right
         DiscoveryButtons
         //- Sidebar
