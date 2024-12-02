@@ -42,6 +42,7 @@ const updateDialogHeight = async () => {
   state.dialogHeight = utils.elementHeight(element)
 }
 
+const currentUserIsSpaceCreator = computed(() => store.getters['currentUser/isSpaceCreator']())
 const isLoadingGroups = computed(() => store.state.isLoadingGroups)
 
 // select group
@@ -78,8 +79,10 @@ dialog.narrow.add-to-group(v-if="visible" :open="visible" @click.left.stop="clos
           img.icon.add(src="@/assets/add.svg")
           span Group
         AddGroup(:visible="state.addGroupIsVisible" @closeDialogs="closeDialogs")
+  section(v-if="!currentUserIsSpaceCreator")
+    p.badge.danger Only the original space creator can add this space to a group
   //- groups list
-  section.results-section(v-if="props.groups.length")
+  section.results-section(v-if="props.groups.length" :class="{ disabled: !currentUserIsSpaceCreator }")
     GroupList(:groups="props.groups" :selectedGroup="props.selectedGroup" @selectGroup="selectGroup")
   //- about groups
   AboutGroups(v-else)
@@ -90,5 +93,7 @@ dialog.add-to-group
   .loader
     vertical-align -2px
     margin-right 4px
-
+  .disabled
+    opacity 0.5
+    pointer-events none
 </style>
