@@ -228,7 +228,8 @@ const router = createRouter({
 
 export default router
 
-const inviteToEdit = ({ next, store, spaceId, collaboratorKey }) => {
+const inviteToEdit = async ({ next, store, spaceId, collaboratorKey }) => {
+  await store.dispatch('currentUser/init')
   const apiKey = store.state.currentUser.apiKey
   if (apiKey) {
     store.dispatch('api/addSpaceCollaborator', { spaceId, collaboratorKey })
