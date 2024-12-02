@@ -691,6 +691,8 @@ const handlePasteEvent = async (event) => {
   }
   // check read only
   store.dispatch('currentUser/notifyReadOnly', position)
+  const canEditSpace = store.getters['currentUser/canEditSpace']()
+  if (!canEditSpace) { return }
   // get clipboard data
   let data = await getClipboardData()
   console.log('🎊 pasteData', data, position)
