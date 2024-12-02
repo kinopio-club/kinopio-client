@@ -11,6 +11,7 @@ import utils from '@/utils.js'
 
 import debounce from 'lodash-es/debounce'
 import uniqBy from 'lodash-es/uniqBy'
+import isEqual from 'lodash-es/isEqual'
 import dayjs from 'dayjs'
 
 const store = useStore()
@@ -79,10 +80,6 @@ const spaceName = computed(() => store.state.currentSpace.name)
 const spaceDetailsIsPinned = computed(() => store.state.spaceDetailsIsPinned)
 const style = computed(() => {
   return { maxHeight: state.dialogHeight + 'px' }
-})
-const backButtonIsVisible = computed(() => {
-  const spaceId = store.state.prevSpaceIdInSession
-  return spaceId && spaceId !== store.state.currentSpace.id
 })
 const closeDialogs = () => {
   state.spaceFiltersIsVisible = false
@@ -275,44 +272,25 @@ const removeSpaceFromSpaces = (spaceId) => {
   state.remoteSpaces = state.remoteSpaces.filter(space => space.id !== spaceId)
 }
 
-// list spaces
+// list spaces, local
 
+const debouncedUpdateLocalSpaces = debounce(async () => {
+  await nextTick()
+  const cacheSpaces = await cache.spaceList()
+  state.spaces = cacheSpaces
+}, 200, { leading: true })
 const updateLocalSpaces = () => {
   if (!props.visible) { return }
   debouncedUpdateLocalSpaces()
 }
-const debouncedUpdateLocalSpaces = debounce(async () => {
-  await nextTick()
-  let cacheSpaces = await cache.getAllSpaces()
-  cacheSpaces = cacheSpaces.filter(space => {
-    return store.getters['currentUser/canEditSpace'](space)
-  })
-  state.spaces = utils.addCurrentUserIsCollaboratorToSpaces(cacheSpaces, store.state.currentUser)
-}, 350, { leading: true })
-const updateSpaces = async () => {
-  const cachedSpaces = state.spaces
-  const cachedSpaceIds = cachedSpaces.map(space => space.id)
-  const remoteSpaces = state.remoteSpaces
-  for (let space of remoteSpaces) {
-    const isCachedSpace = cachedSpaceIds.includes(space.id)
-    if (isCachedSpace) {
-      const cachedSpace = await cache.space(space.id)
-      const isUpdated = dayjs(space.updatedAt).valueOf() > dayjs(cachedSpace.updatedAt).valueOf()
-      if (!isUpdated) { continue }
-      space.cards = cachedSpace.cards
-      space.boxes = cachedSpace.boxes
-      space.connections = cachedSpace.connections
-      space.connectionTypes = cachedSpace.connectionTypes
-      await cache.saveSpace(space)
-    } else {
-      await cache.saveSpace(space)
-    }
-  }
-}
+
+// list spaces, remote
+
 const updateWithRemoteSpaces = async () => {
   const currentUserIsSignedIn = store.getters['currentUser/isSignedIn']
-  const isOffline = computed(() => !store.state.isOnline)
-  if (!currentUserIsSignedIn || isOffline.value) { return }
+  const isOffline = !store.state.isOnline
+  const cacheSpaces = await cache.spaceList()
+  if (!currentUserIsSignedIn || isOffline) { return }
   try {
     state.isLoadingRemoteSpaces = true
     const [userSpaces, groupSpaces] = await Promise.all([
@@ -327,8 +305,11 @@ const updateWithRemoteSpaces = async () => {
     spaces = uniqBy(spaces, 'id')
     state.remoteSpaces = spaces
     state.isLoadingRemoteSpaces = false
-    if (!state.remoteSpaces) { return }
-    await updateSpaces()
+    const isUnchanged = isEqual(spaces, cacheSpaces)
+    if (!isUnchanged) {
+      cache.saveSpaceList(spaces)
+      updateLocalSpaces()
+    }
   } catch (error) {
     console.error('🚒 updateWithRemoteSpaces', error)
   }
@@ -342,7 +323,7 @@ const updateFavorites = async () => {
 </script>
 
 <template lang="pug">
-dialog.space-details.is-pinnable.wide(v-if="props.visible" :open="props.visible" @click.left="closeDialogs" ref="dialogElement" :style="style" :data-is-pinned="spaceDetailsIsPinned" :class="{'is-pinned': spaceDetailsIsPinned, 'back-button-is-visible': backButtonIsVisible}")
+dialog.space-details.is-pinnable.wide(v-if="props.visible" :open="props.visible" @click.left="closeDialogs" ref="dialogElement" :style="style" :data-is-pinned="spaceDetailsIsPinned" :class="{'is-pinned': spaceDetailsIsPinned }")
   section
     SpaceDetailsInfo(@updateLocalSpaces="updateLocalSpaces" @removeSpaceId="removeSpaceFromSpaces" @closeDialogs="closeDialogs" @updateDialogHeight="updateHeights" :currentSpaceIsHidden="currentSpaceIsHidden" @addSpace="addSpace")
   section.results-actions
@@ -384,8 +365,8 @@ dialog.space-details.is-pinnable.wide(v-if="props.visible" :open="props.visible"
 
 <style lang="stylus">
 dialog.space-details
-  &.back-button-is-visible
-    left -18px
+  top 60px
+  left 60px
   button.disabled
     opacity 0.5
     pointer-events none
@@ -400,10 +381,9 @@ dialog.space-details
     border-radius 100px
     margin-left 3px
   &.is-pinned
-    left -45px
-    top -13px
+    left 10px
+    top 10px
   .space-list
     .inline-favorite-wrap
       padding-top 4px
-
 </style>

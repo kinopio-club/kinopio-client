@@ -233,6 +233,7 @@ export default {
     }
     space.cacheDate = Date.now()
     await this.storeLocal(`space-${space.id}`, space)
+    await this.replaceSpaceInSpaceList(space)
   },
   async updateIdsInSpace (space, nullCardUsers) {
     const items = {
@@ -272,6 +273,7 @@ export default {
     space = await this.getLocal(spaceKey)
     await this.storeLocal(`removed-${spaceKey}`, space)
     await this.removeLocal(spaceKey)
+    await this.removeSpaceFromSpaceList(space)
   },
   async deleteSpace (space) {
     await this.removeLocal(`removed-space-${space.id}`)
@@ -297,6 +299,31 @@ export default {
     })
     sortedSpaces = sortedSpaces.filter(space => Boolean(space))
     return sortedSpaces
+  },
+
+  // Space List
+
+  async spaceList () {
+    const spaces = await this.getLocal('spaceList') || []
+    return spaces
+  },
+  async saveSpaceList (spaces) {
+    await this.storeLocal('spaceList', spaces)
+  },
+  async replaceSpaceInSpaceList (newSpace) {
+    let prevSpaceList = await this.spaceList()
+    let newSpaceList = prevSpaceList.filter(space => {
+      return space.id !== newSpace.id
+    })
+    newSpaceList.push(newSpace)
+    await this.saveSpaceList(newSpaceList)
+  },
+  async removeSpaceFromSpaceList (newSpace) {
+    let prevSpaceList = await this.spaceList()
+    let newSpaceList = prevSpaceList.filter(space => {
+      return space.id !== newSpace.id
+    })
+    await this.saveSpaceList(newSpaceList)
   },
 
   // Groups

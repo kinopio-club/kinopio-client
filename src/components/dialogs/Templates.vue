@@ -93,6 +93,8 @@ dialog.templates.narrow(
 <style lang="stylus">
 dialog.templates
   overflow auto
+  top 22px
+  left 60px
   hr
     margin-top 0
     margin-bottom 4px
