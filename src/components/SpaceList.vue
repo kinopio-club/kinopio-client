@@ -407,6 +407,18 @@ span.space-list-wrap
             :data-updated-at="space.updatedAt"
           )
             Loader(:visible="isLoadingSpace(space)")
+            //- offline
+            span(v-if="isOffline && isNotCached(space.id)")
+              OfflineBadge(:isInline="true" :isDanger="true")
+            //- favorite
+            template(v-if="space.isFavorite")
+              img.icon.favorite-icon(src="@/assets/heart.svg")
+            //- inbox
+            template(v-if="space.name === 'Inbox'")
+              img.icon.inbox-icon(src="@/assets/inbox.svg")
+            //- template
+            img.icon.templates(v-if="space.isTemplate" src="@/assets/templates.svg" title="Template")
+
             //- Users
             //- show spectators
             template(v-if="showOtherUsers && isMultipleUsers(space)")
@@ -436,19 +448,10 @@ span.space-list-wrap
             //- group
             template(v-if="group(space.groupId) && props.showSpaceGroups")
               GroupLabel(:group="group(space.groupId)")
-            //- offline
-            span(v-if="isOffline && isNotCached(space.id)")
-              OfflineBadge(:isInline="true" :isDanger="true")
             //- template category
             .badge.info.inline-badge(v-if="showCategory && space.category" :class="categoryClassName(space)") {{space.category}}
-            //- space meta
-            template(v-if="space.isFavorite")
-              img.icon.favorite-icon(src="@/assets/heart.svg")
-            template(v-if="space.name === 'Inbox'")
-              img.icon.inbox-icon(src="@/assets/inbox.svg")
+            //- today
             SpaceTodayBadge(:space="space")
-            //- template
-            img.icon.templates(v-if="space.isTemplate" src="@/assets/templates.svg" title="Template")
             //- space details
             .name
               span(v-if="state.filter")
