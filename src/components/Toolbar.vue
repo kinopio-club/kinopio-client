@@ -39,14 +39,16 @@ const shouldIncreaseUIContrast = computed(() => store.state.currentUser.shouldIn
 nav.toolbar(v-if="visible")
   //- Box
   .segmented-buttons
-    .button-wrap(:title="boxBadgeLabel")
-      button(
-        :class="{ active: currentUserToolbarIsBox, 'translucent-button': !shouldIncreaseUIContrast }"
-        @click="toggleToolbar('box')"
-      )
-        img.icon.box-icon(src="@/assets/box.svg")
-        .label-badge.toolbar-badge-wrap.jiggle(v-if="currentUserToolbarIsBox")
-          span {{boxBadgeLabel}}
+    button(
+      :title="boxBadgeLabel"
+      :class="{ active: currentUserToolbarIsBox, 'translucent-button': !shouldIncreaseUIContrast }"
+      @click="toggleToolbar('box')"
+    )
+      img.icon.box-icon(src="@/assets/box.svg")
+      .label-badge.toolbar-badge-wrap.jiggle(v-if="currentUserToolbarIsBox")
+        span {{boxBadgeLabel}}
+    button
+      span A
 </template>
 
 <style lang="stylus">
@@ -64,4 +66,22 @@ nav.toolbar(v-if="visible")
     span
       width 100%
       color var(--primary)
+  .segmented-buttons
+    display flex
+    flex-flow column
+    > button
+      border-radius 0
+      width 32px
+      &:first-child
+        border-radius 0
+        border-top-left-radius var(--entity-radius)
+        border-top-right-radius var(--entity-radius)
+      &:last-child
+        border-radius 0
+        border-bottom-left-radius var(--entity-radius)
+        border-bottom-right-radius var(--entity-radius)
+    > button + button
+      margin 0
+      margin-top -1px
+
 </style>
