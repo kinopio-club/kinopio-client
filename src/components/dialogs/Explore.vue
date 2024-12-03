@@ -7,6 +7,7 @@ import Loader from '@/components/Loader.vue'
 import UserLabelInline from '@/components/UserLabelInline.vue'
 import utils from '@/utils.js'
 import OfflineBadge from '@/components/OfflineBadge.vue'
+import ResultsFilter from '@/components/ResultsFilter.vue'
 
 import randomColor from 'randomcolor'
 
@@ -45,10 +46,11 @@ const state = reactive({
   dialogHeight: null,
   resultsSectionHeight: null,
   userShowInExploreDate: null,
-  filteredSpaces: undefined,
   currentSection: 'explore', // 'explore', 'following', 'everyone'
   isReadSections: [], // 'explore', 'following', 'everyone'
-  readSpaceIds: []
+  readSpaceIds: [],
+  isLoadingExploreSearchResults: false,
+  exploreSearchResults: []
 })
 
 const currentSpace = computed(() => store.state.currentSpace)
@@ -140,6 +142,20 @@ const updateUserShowInExploreUpdatedAt = async () => {
   store.dispatch('currentUser/showInExploreUpdatedAt', serverDate)
 }
 
+// search explore spaces
+
+const updateFilter = (value) => {
+  try {
+    state.isLoadingExploreSearchResults = true
+    state.exploreSearchResults = []
+    console.log('🐻‍❄️', value)
+    // TODO api search the server here
+  } catch (error) {
+    console.error('🚒 updateFilter', error, value)
+  }
+  state.isLoadingExploreSearchResults = false
+}
+
 // blank slate info
 
 const followUsersInfoIsVisible = computed(() => {
@@ -190,6 +206,12 @@ dialog.explore.wide(v-if="visible" :open="visible" ref="dialogElement" :style="{
   hr
 
   section.results-section(ref="resultsElement" :style="{'max-height': state.resultsSectionHeight + 'px'}")
+    ResultsFilter(
+      :hideFilter="!currentSectionIsExplore"
+      :items="currentSpaces"
+      @updateFilter="updateFilter"
+      :isLoading="state.isLoadingExploreSearchResults"
+    )
     SpaceList(
       :spaces="currentSpaces"
       :showUser="true"
@@ -201,6 +223,7 @@ dialog.explore.wide(v-if="visible" :open="visible" ref="dialogElement" :style="{
       :parentDialog="parentDialog"
       :previewImageIsWide="true"
       :showCollaborators="true"
+      :hideFilter="currentSectionIsExplore"
     )
 </template>
 
