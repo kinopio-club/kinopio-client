@@ -7,6 +7,7 @@ import Loader from '@/components/Loader.vue'
 import UserLabelInline from '@/components/UserLabelInline.vue'
 import utils from '@/utils.js'
 import OfflineBadge from '@/components/OfflineBadge.vue'
+import ResultsFilter from '@/components/ResultsFilter.vue'
 
 import randomColor from 'randomcolor'
 
@@ -45,10 +46,11 @@ const state = reactive({
   dialogHeight: null,
   resultsSectionHeight: null,
   userShowInExploreDate: null,
-  filteredSpaces: undefined,
   currentSection: 'explore', // 'explore', 'following', 'everyone'
   isReadSections: [], // 'explore', 'following', 'everyone'
-  readSpaceIds: []
+  readSpaceIds: [],
+  isLoadingExploreSearchResults: false,
+  exploreSearchResults: []
 })
 
 const currentSpace = computed(() => store.state.currentSpace)
@@ -121,7 +123,7 @@ const currentSectionIsEveryone = computed(() => state.currentSection === 'everyo
 const currentSpaces = computed(() => {
   let spaces
   if (currentSectionIsExplore.value) {
-    spaces = props.exploreSpaces
+    spaces = exploreSpaces.value
   } else if (currentSectionIsFollowing.value) {
     spaces = props.followingSpaces
   } else if (currentSectionIsEveryone.value) {
@@ -138,6 +140,43 @@ const updateUserShowInExploreUpdatedAt = async () => {
   let serverDate = await store.dispatch('api/getDate')
   serverDate = serverDate.date
   store.dispatch('currentUser/showInExploreUpdatedAt', serverDate)
+}
+
+// search explore spaces
+
+const exploreSpaces = computed(() => {
+  if (state.exploreSearchResults.length) {
+    return state.exploreSearchResults
+  } else {
+    return props.exploreSpaces
+  }
+})
+const updateFilter = async (value) => {
+  if (!value) {
+    state.exploreSearchResults = []
+    state.isLoadingExploreSearchResults = false
+    return
+  }
+  try {
+    state.isLoadingExploreSearchResults = true
+    const results = await store.dispatch('api/searchExploreSpaces', { query: value })
+    state.exploreSearchResults = results
+  } catch (error) {
+    console.error('🚒 updateFilter', error, value)
+  }
+  state.isLoadingExploreSearchResults = false
+}
+const focusPreviousItem = () => {
+  store.commit('triggerPickerNavigationKey', 'ArrowUp')
+}
+const focusNextItem = () => {
+  store.commit('triggerPickerNavigationKey', 'ArrowDown')
+}
+const selectItem = () => {
+  const liElement = resultsElement.value.querySelector('li.hover')
+  if (!liElement) { return }
+  const spaceId = liElement.dataset.spaceId
+  changeSpace({ id: spaceId })
 }
 
 // blank slate info
@@ -190,6 +229,17 @@ dialog.explore.wide(v-if="visible" :open="visible" ref="dialogElement" :style="{
   hr
 
   section.results-section(ref="resultsElement" :style="{'max-height': state.resultsSectionHeight + 'px'}")
+    ResultsFilter(
+      :hideFilter="!currentSectionIsExplore"
+      :showFilter="currentSectionIsExplore"
+      :items="currentSpaces"
+      :isLoading="state.isLoadingExploreSearchResults"
+
+      @updateFilter="updateFilter"
+      @focusPreviousItem="focusPreviousItem"
+      @focusNextItem="focusNextItem"
+      @selectItem="selectItem"
+    )
     SpaceList(
       :spaces="currentSpaces"
       :showUser="true"
@@ -201,6 +251,7 @@ dialog.explore.wide(v-if="visible" :open="visible" ref="dialogElement" :style="{
       :parentDialog="parentDialog"
       :previewImageIsWide="true"
       :showCollaborators="true"
+      :hideFilter="currentSectionIsExplore"
     )
 </template>
 

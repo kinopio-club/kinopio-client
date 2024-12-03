@@ -41,12 +41,13 @@ onMounted(() => {
       } else if (key === 'ArrowDown') {
         focusNextItem(currentIndex)
       }
-    }
-    if (mutation.type === 'triggerPickerSelect') {
+    } else if (mutation.type === 'triggerPickerSelect') {
       const spaces = props.spaces
       const currentSpace = spaces.find(space => space.id === state.focusOnId)
       selectSpace(null, currentSpace)
       store.commit('shouldPreventNextEnterKey', true)
+    } else if (mutation.type === 'currentSpace/restoreSpace') {
+      state.focusOnId = store.state.currentSpace.id
     }
   })
   updateScroll()
@@ -405,6 +406,7 @@ span.space-list-wrap
             @keyup.enter="selectSpace(null, space)"
             :data-created-at="space.createdAt"
             :data-updated-at="space.updatedAt"
+            :data-space-id="space.id"
           )
             Loader(:visible="isLoadingSpace(space)")
             //- offline
