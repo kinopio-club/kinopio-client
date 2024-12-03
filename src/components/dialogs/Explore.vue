@@ -123,7 +123,7 @@ const currentSectionIsEveryone = computed(() => state.currentSection === 'everyo
 const currentSpaces = computed(() => {
   let spaces
   if (currentSectionIsExplore.value) {
-    spaces = props.exploreSpaces
+    spaces = exploreSpaces.value
   } else if (currentSectionIsFollowing.value) {
     spaces = props.followingSpaces
   } else if (currentSectionIsEveryone.value) {
@@ -144,16 +144,39 @@ const updateUserShowInExploreUpdatedAt = async () => {
 
 // search explore spaces
 
-const updateFilter = (value) => {
+const exploreSpaces = computed(() => {
+  if (state.exploreSearchResults.length) {
+    return state.exploreSearchResults
+  } else {
+    return props.exploreSpaces
+  }
+})
+const updateFilter = async (value) => {
+  if (!value) {
+    state.exploreSearchResults = []
+    state.isLoadingExploreSearchResults = false
+    return
+  }
   try {
     state.isLoadingExploreSearchResults = true
-    state.exploreSearchResults = []
-    console.log('🐻‍❄️', value)
-    // TODO api search the server here
+    const results = await store.dispatch('api/searchExploreSpaces', { query: value })
+    state.exploreSearchResults = results
   } catch (error) {
     console.error('🚒 updateFilter', error, value)
   }
   state.isLoadingExploreSearchResults = false
+}
+const focusPreviousItem = () => {
+  store.commit('triggerPickerNavigationKey', 'ArrowUp')
+}
+const focusNextItem = () => {
+  store.commit('triggerPickerNavigationKey', 'ArrowDown')
+}
+const selectItem = () => {
+  const liElement = resultsElement.value.querySelector('li.hover')
+  if (!liElement) { return }
+  const spaceId = liElement.dataset.spaceId
+  changeSpace({ id: spaceId })
 }
 
 // blank slate info
@@ -208,9 +231,14 @@ dialog.explore.wide(v-if="visible" :open="visible" ref="dialogElement" :style="{
   section.results-section(ref="resultsElement" :style="{'max-height': state.resultsSectionHeight + 'px'}")
     ResultsFilter(
       :hideFilter="!currentSectionIsExplore"
+      :showFilter="currentSectionIsExplore"
       :items="currentSpaces"
-      @updateFilter="updateFilter"
       :isLoading="state.isLoadingExploreSearchResults"
+
+      @updateFilter="updateFilter"
+      @focusPreviousItem="focusPreviousItem"
+      @focusNextItem="focusNextItem"
+      @selectItem="selectItem"
     )
     SpaceList(
       :spaces="currentSpaces"
