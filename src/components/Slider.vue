@@ -1,3 +1,172 @@
+<script setup>
+import { reactive, computed, onMounted, onBeforeUnmount, defineProps, defineEmits, watch, ref, nextTick } from 'vue'
+import { useStore } from 'vuex'
+
+import utils from '@/utils.js'
+import consts from '@/consts.js'
+
+const store = useStore()
+
+const badgeElement = ref(null)
+const progressElement = ref(null)
+const buttonElement = ref(null)
+
+let unsubscribe
+
+onMounted(() => {
+  // bind events to window to receive events when mouse is outside window
+  window.addEventListener('mousemove', dragPlayhead)
+  window.addEventListener('mouseup', endMovePlayhead)
+  window.addEventListener('touchend', endMovePlayhead)
+  updateButtonPosition()
+  unsubscribe = store.subscribe(mutation => {
+    if (mutation.type === 'spaceZoomPercent') {
+      updateButtonPosition()
+    }
+  })
+})
+onBeforeUnmount(() => {
+  unsubscribe()
+  window.removeEventListener('mousemove', dragPlayhead)
+  window.removeEventListener('mouseup', endMovePlayhead)
+  window.removeEventListener('touchend', endMovePlayhead)
+})
+
+const emit = defineEmits(['updatePlayhead', 'resetPlayhead', 'removeAnimations'])
+
+const props = defineProps({
+  minValue: Number,
+  maxValue: Number,
+  value: Number,
+  animateJiggleRight: Boolean,
+  animateJiggleLeft: Boolean,
+  minKeyboardShortcut: String,
+  shouldHideBadge: Boolean
+})
+watch(() => props.value, (value, prevValue) => {
+  updateButtonPosition()
+})
+
+const state = reactive({
+  playheadIsBeingDragged: false,
+  buttonPosition: 100
+})
+
+// badge
+
+const zoomPercentBadgeIsVisible = computed(() => {
+  if (props.shouldHideBadge) { return }
+  if (props.value !== props.maxValue) {
+    return true
+  } else {
+    return false
+  }
+})
+const zoomPercentBadgePosition = computed(() => {
+  const max = 40
+  const badgeWidth = 45
+  let position = state.buttonPosition - (badgeWidth / 2)
+  position = Math.min(position, max)
+  return position
+})
+const removeAnimations = () => {
+  emit('removeAnimations')
+}
+
+// current value
+
+const integerValue = computed(() => Math.round(props.value))
+const currentValueIsMin = computed(() => integerValue.value === props.minValue)
+const sliderValue = computed(() => {
+  const value = utils.percentageBetween({
+    value: props.value,
+    min: props.minValue,
+    max: props.maxValue
+  })
+  return value
+})
+
+// update value
+
+const movePlayhead = (event) => {
+  const rect = progressElement.value.getBoundingClientRect()
+  const progressStartX = rect.x + window.scrollX
+  const progressWidth = rect.width - 2
+  const clickX = utils.cursorPositionInViewport(event).x + window.scrollX
+  const progressX = clickX - progressStartX
+  let percent = (progressX / progressWidth) * 100
+  percent = Math.min(percent, 100)
+  percent = Math.max(percent, 0)
+  updateButtonPosition()
+  emit('updatePlayhead', percent)
+}
+const updateButtonPosition = () => {
+  if (!progressElement.value) { return }
+  const buttonWidth = buttonElement.value.getBoundingClientRect().width + 2
+  let position = sliderValue.value - (buttonWidth / 2)
+  position = Math.min(position, 86)
+  position = Math.max(position, -1)
+  state.buttonPosition = position
+}
+const dragPlayheadWheel = (event) => {
+  // ported from SpaceZoom
+  const min = consts.spaceZoom.min
+  const max = consts.spaceZoom.max
+  const maxSpeed = 10 // windows deltaY fix
+  event.preventDefault()
+  // speed and direction
+  const deltaY = event.deltaY
+  let speed = Math.max(Math.abs(deltaY), 1)
+  speed = Math.min(maxSpeed, speed)
+  let shouldZoomIn = deltaY < 0
+  let shouldZoomOut = deltaY > 0
+  let invertZoom = event.webkitDirectionInvertedFromDevice
+  if (store.state.currentUser.shouldInvertZoom) {
+    invertZoom = !invertZoom
+  }
+  if (invertZoom) {
+    shouldZoomIn = deltaY > 0
+    shouldZoomOut = deltaY < 0
+  }
+  if (shouldZoomOut) {
+    speed = -speed
+  }
+  // percent change
+  let percent = sliderValue.value
+  percent += speed
+  percent = Math.min(percent, 100)
+  percent = Math.max(percent, 0)
+  emit('updatePlayhead', percent)
+}
+const dragPlayhead = (event) => {
+  if (!state.playheadIsBeingDragged) { return }
+  movePlayhead(event)
+}
+const startMovePlayhead = (event) => {
+  state.playheadIsBeingDragged = true
+  movePlayhead(event)
+}
+const endMovePlayhead = (event) => {
+  if (!state.playheadIsBeingDragged) { return }
+  state.playheadIsBeingDragged = false
+  movePlayhead(event)
+}
+
+const stopMovingPlayhead = () => {
+  state.playheadIsBeingDragged = false
+}
+
+// reset value
+
+const resetPlayhead = async () => {
+  state.playheadIsBeingDragged = false
+  emit('updatePlayhead', props.maxValue)
+  emit('resetPlayhead')
+  await nextTick()
+  updateButtonPosition()
+}
+</script>
+
 <template lang="pug">
 .slider(
   @mousedown.left.stop.prevent="startMovePlayhead"
@@ -9,202 +178,40 @@
 
   @mouseup.left="endMovePlayhead"
   @touchend="endMovePlayhead"
-  :class="{'is-dragging': playheadIsBeingDragged, 'jiggle-right': animateJiggleRight, 'jiggle-left': animateJiggleLeft}"
+  :class="{'is-dragging': state.playheadIsBeingDragged, 'jiggle-right': props.animateJiggleRight, 'jiggle-left': props.animateJiggleLeft}"
   @animationend="removeAnimations"
 
-  :data-value="value"
+  :data-value="props.value"
   :data-slider-value="sliderValue"
-  :data-max="maxValue"
-  :data-min="minValue"
+  :data-max="props.maxValue"
+  :data-min="props.minValue"
 )
   span.badge.info.zoom-percent-badge(
-    ref="badge"
+    ref="badgeElement"
     v-if="zoomPercentBadgeIsVisible"
     :style="{left: zoomPercentBadgePosition + 'px'}"
   )
     span {{ integerValue }}%
-    template(v-if="currentValueIsMin && minKeyboardShortcut")
-      span &nbsp;({{minKeyboardShortcut}})
+    template(v-if="currentValueIsMin && props.minKeyboardShortcut")
+      span &nbsp;({{props.minKeyboardShortcut}})
     button.inline-button(@mousedown.left.stop @click.left.stop="resetPlayhead")
       img.icon.close(src="@/assets/add.svg")
 
   progress(
     :value="sliderValue"
-    :max="maxValue"
-    :min="minValue"
-    ref="progress"
+    :max="props.maxValue"
+    :min="props.minValue"
+    ref="progressElement"
   )
   img.vertical-line.first-child(src="@/assets/vertical-line.svg")
   img.vertical-line.second-child(src="@/assets/vertical-line.svg")
   img.vertical-line.last-child(src="@/assets/vertical-line.svg")
   button.slider-button(
-    ref="button"
-    :style="{left: buttonPosition + 'px'}"
-    :class="{'is-dragging': playheadIsBeingDragged, active: playheadIsBeingDragged}"
+    ref="buttonElement"
+    :style="{left: state.buttonPosition + 'px'}"
+    :class="{'is-dragging': state.playheadIsBeingDragged, active: state.playheadIsBeingDragged}"
   )
 </template>
-
-<script>
-import utils from '@/utils.js'
-import consts from '@/consts.js'
-
-export default {
-  name: 'EditableSlider',
-  props: {
-    minValue: Number,
-    maxValue: Number,
-    value: Number,
-    animateJiggleRight: Boolean,
-    animateJiggleLeft: Boolean,
-    minKeyboardShortcut: String,
-    shouldHideBadge: Boolean
-  },
-  data () {
-    return {
-      playheadIsBeingDragged: false,
-      buttonPosition: 100
-    }
-  },
-  created () {
-    this.$store.subscribe((mutation, state) => {
-      if (mutation.type === 'spaceZoomPercent') {
-        this.$nextTick(() => {
-          this.updateButtonPosition()
-        })
-      }
-    })
-  },
-  mounted () {
-    // bind events to window to receive events when mouse is outside window
-    window.addEventListener('mousemove', this.dragPlayhead)
-    window.addEventListener('mouseup', this.endMovePlayhead)
-    window.addEventListener('touchend', this.endMovePlayhead)
-    this.updateButtonPosition()
-  },
-  beforeUnmount () {
-    window.removeEventListener('mousemove', this.dragPlayhead)
-    window.removeEventListener('mouseup', this.endMovePlayhead)
-    window.removeEventListener('touchend', this.endMovePlayhead)
-  },
-  computed: {
-    integerValue () {
-      return Math.round(this.value)
-    },
-    zoomPercentBadgeIsVisible () {
-      if (this.shouldHideBadge) { return }
-      if (this.value !== this.maxValue) {
-        return true
-      } else {
-        return false
-      }
-    },
-    zoomPercentBadgePosition () {
-      const max = 40
-      const badgeWidth = 45
-      let position = this.buttonPosition - (badgeWidth / 2)
-      position = Math.min(position, max)
-      return position
-    },
-    sliderValue () {
-      const value = utils.percentageBetween({
-        value: this.value,
-        min: this.minValue,
-        max: this.maxValue
-      })
-      return value
-    },
-    currentValueIsMin () {
-      return this.integerValue === this.minValue
-    }
-  },
-  methods: {
-    resetPlayhead () {
-      this.playheadIsBeingDragged = false
-      this.$emit('updatePlayhead', this.maxValue)
-      this.$emit('resetPlayhead')
-      this.$nextTick(() => {
-        this.updateButtonPosition()
-      })
-    },
-    movePlayhead (event) {
-      const progress = this.$refs.progress
-      const rect = progress.getBoundingClientRect()
-      const progressStartX = rect.x + window.scrollX
-      const progressWidth = rect.width - 2
-      const clickX = utils.cursorPositionInViewport(event).x + window.scrollX
-      const progressX = clickX - progressStartX
-      let percent = (progressX / progressWidth) * 100
-      percent = Math.min(percent, 100)
-      percent = Math.max(percent, 0)
-      this.updateButtonPosition()
-      this.$emit('updatePlayhead', percent)
-    },
-    updateButtonPosition () {
-      if (!this.$refs.progress) { return }
-      const buttonElement = this.$refs.button
-      const buttonWidth = buttonElement.getBoundingClientRect().width + 2
-      let position = this.sliderValue - (buttonWidth / 2)
-      position = Math.min(position, 86)
-      position = Math.max(position, -1)
-      this.buttonPosition = position
-    },
-    dragPlayheadWheel (event) {
-      // ported from SpaceZoom
-      const min = consts.spaceZoom.min
-      const max = consts.spaceZoom.max
-      const maxSpeed = 10 // windows deltaY fix
-      event.preventDefault()
-      // speed and direction
-      const deltaY = event.deltaY
-      let speed = Math.max(Math.abs(deltaY), 1)
-      speed = Math.min(maxSpeed, speed)
-      let shouldZoomIn = deltaY < 0
-      let shouldZoomOut = deltaY > 0
-      let invertZoom = event.webkitDirectionInvertedFromDevice
-      if (this.$store.state.currentUser.shouldInvertZoom) {
-        invertZoom = !invertZoom
-      }
-      if (invertZoom) {
-        shouldZoomIn = deltaY > 0
-        shouldZoomOut = deltaY < 0
-      }
-      if (shouldZoomOut) {
-        speed = -speed
-      }
-      // percent change
-      let percent = this.sliderValue
-      percent += speed
-      percent = Math.min(percent, 100)
-      percent = Math.max(percent, 0)
-      this.$emit('updatePlayhead', percent)
-    },
-    dragPlayhead (event) {
-      if (!this.playheadIsBeingDragged) { return }
-      this.movePlayhead(event)
-    },
-    startMovePlayhead (event) {
-      this.playheadIsBeingDragged = true
-      this.movePlayhead(event)
-    },
-    endMovePlayhead (event) {
-      if (!this.playheadIsBeingDragged) { return }
-      this.playheadIsBeingDragged = false
-      this.movePlayhead(event)
-    },
-    stopMovingPlayhead () {
-      this.playheadIsBeingDragged = false
-    },
-    removeAnimations () {
-      this.$emit('removeAnimations')
-    }
-  },
-  watch: {
-    value (value) {
-      this.updateButtonPosition()
-    }
-  }
-}
-</script>
 
 <style lang="stylus">
 .slider
