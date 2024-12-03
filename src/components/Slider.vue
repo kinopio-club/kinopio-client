@@ -5,6 +5,7 @@
 
   @mousemove.prevent="dragPlayhead"
   @touchmove.prevent="dragPlayhead"
+  @wheel.prevent.stop="dragPlayheadWheel"
 
   @mouseup.left="endMovePlayhead"
   @touchend="endMovePlayhead"
@@ -45,6 +46,7 @@
 
 <script>
 import utils from '@/utils.js'
+import consts from '@/consts.js'
 
 export default {
   name: 'EditableSlider',
@@ -145,6 +147,36 @@ export default {
       position = Math.min(position, 86)
       position = Math.max(position, -1)
       this.buttonPosition = position
+    },
+    dragPlayheadWheel (event) {
+      // ported from SpaceZoom
+      const min = consts.spaceZoom.min
+      const max = consts.spaceZoom.max
+      const maxSpeed = 10 // windows deltaY fix
+      event.preventDefault()
+      // speed and direction
+      const deltaY = event.deltaY
+      let speed = Math.max(Math.abs(deltaY), 1)
+      speed = Math.min(maxSpeed, speed)
+      let shouldZoomIn = deltaY < 0
+      let shouldZoomOut = deltaY > 0
+      let invertZoom = event.webkitDirectionInvertedFromDevice
+      if (this.$store.state.currentUser.shouldInvertZoom) {
+        invertZoom = !invertZoom
+      }
+      if (invertZoom) {
+        shouldZoomIn = deltaY > 0
+        shouldZoomOut = deltaY < 0
+      }
+      if (shouldZoomOut) {
+        speed = -speed
+      }
+      // percent change
+      let percent = this.sliderValue
+      percent += speed
+      percent = Math.min(percent, 100)
+      percent = Math.max(percent, 0)
+      this.$emit('updatePlayhead', percent)
     },
     dragPlayhead (event) {
       if (!this.playheadIsBeingDragged) { return }

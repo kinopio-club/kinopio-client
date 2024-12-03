@@ -330,7 +330,7 @@ export default {
     if (min <= value && value <= max) { return true }
   },
   percentageBetween ({ value, min, max }) {
-    return ((value - min) * 100) / (max - min)
+    return ((value - min) / (max - min)) * 100
   },
   clone (object) {
     if (!object) { return }
