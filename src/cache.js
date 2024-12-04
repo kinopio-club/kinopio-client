@@ -100,6 +100,7 @@ export default {
   },
   async updateUser (key, value) {
     let user = await this.user()
+    user = utils.normalizeToObject(user)
     user[key] = value
     await this.storeLocal('user', user)
   },
@@ -111,7 +112,8 @@ export default {
   // Space
 
   async space (spaceId) {
-    const space = await this.getLocal(`space-${spaceId}`) || {}
+    let space = await this.getLocal(`space-${spaceId}`) || {}
+    space = utils.normalizeToObject(space)
     space.clients = []
     return space
   },
@@ -138,6 +140,7 @@ export default {
       spaces.push(space)
     }
     let spacesWithNames = spaces.map(space => {
+      space = utils.normalizeToObject(space)
       if (!space) { return }
       space.name = space.name || `space-${space.id}`
       return space

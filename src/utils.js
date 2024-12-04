@@ -429,6 +429,12 @@ export default {
     }
     return isString
   },
+  normalizeToObject (item) {
+    if (typeof item === 'string') {
+      item = JSON.parse(item)
+    }
+    return item
+  },
   updateObject (object, updates) {
     this.typeCheck({ value: updates, type: 'object', origin: 'updateObject' })
     const keys = Object.keys(updates)
