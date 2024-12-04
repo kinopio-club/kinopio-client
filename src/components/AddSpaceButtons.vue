@@ -43,7 +43,15 @@ const toggleAddSpaceIsVisible = () => {
 // add space
 
 const shouldAddSpaceDirectly = computed(() => !props.parentIsInDialog)
-const addNewSpace = async () => {
+const addNewSpace = async (event) => {
+  if (event.metaKey || event.ctrlKey) {
+    window.open('/new') // opens url in new tab
+    store.commit('preventDraggedCardFromShowingDetails', true)
+    return
+  } else {
+    event.preventDefault()
+    event.stopPropagation()
+  }
   store.commit('isLoadingSpace', true)
   const cachedSpaces = await cache.getAllSpaces()
   const noUserSpaces = !cachedSpaces.length
@@ -78,8 +86,9 @@ const addSpace = () => {
 <template lang="pug">
 .button-wrap
   .segmented-buttons.add-space-buttons
-    button.success(@click.left.stop="addNewSpace" title="New Space (N)")
-      img.icon.add(src="@/assets/add.svg")
+    a(href="/new" @click.left.stop.prevent="addNewSpace" title="New Space (N)")
+      button.success
+        img.icon.add(src="@/assets/add.svg")
     button.success(@click.left.stop="toggleAddSpaceIsVisible" :class="{ active: state.addSpaceIsVisible }" title="New Space Options")
       img.icon.down-arrow(src="@/assets/down-arrow.svg")
   AddSpace(:visible="state.addSpaceIsVisible" :shouldAddSpaceDirectly="shouldAddSpaceDirectly" @closeDialogs="closeDialogs" @addSpace="addSpace")

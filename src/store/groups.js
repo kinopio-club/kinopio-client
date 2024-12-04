@@ -207,6 +207,7 @@ export default {
       user = user || rootState.currentUser
       const groups = getters.all
       let groupUserGroups = groups.filter(group => {
+        if (!group.users) { return }
         return group.users.find(groupUser => {
           const groupUserId = groupUser.id || groupUser.userId
           return groupUserId === user.id

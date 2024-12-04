@@ -809,12 +809,19 @@ button
   > .button-wrap > button,
   > button,
   > label,
-  > select
+  > select,
+  > a
     margin 0
     border-radius 0
+    > button
+      margin 0
+      border-radius 0
     &:first-child
       border-top-left-radius var(--entity-radius)
       border-bottom-left-radius var(--entity-radius)
+      > button
+        border-top-left-radius var(--entity-radius)
+        border-bottom-left-radius var(--entity-radius)
     &:last-child
       border-top-right-radius var(--entity-radius)
       border-bottom-right-radius var(--entity-radius)
@@ -840,7 +847,8 @@ button
   button + label,
   label + label,
   select + button,
-  button + select
+  button + select,
+  a + button
     margin-left -1px
 
 .segmented-buttons-wrap
