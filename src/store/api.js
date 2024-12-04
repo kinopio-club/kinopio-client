@@ -334,9 +334,7 @@ const self = {
       try {
         const options = await context.dispatch('requestOptions', { method: 'GET', space: context.rootState.currentSpace })
         const response = await fetch(`${consts.apiHost()}/user/favorite-spaces`, options)
-        const spaces = await normalizeResponse(response)
-        console.log('🅰️🅰️🅰️🅰️🅰️🅰️🅰️ getUserFavoriteSpaces', spaces)
-        return spaces
+        return normalizeResponse(response)
       } catch (error) {
         context.dispatch('handleServerError', { name: 'getUserFavoriteSpaces', error })
       }

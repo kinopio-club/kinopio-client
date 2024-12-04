@@ -504,7 +504,6 @@ export default {
           context.commit('favoriteUsers', favoriteUsers)
         }
         if (favoriteSpaces) {
-          console.log('🅱️🅱️🅱️🅱️🅱️ favoriteSpaces', favoriteSpaces)
           context.commit('favoriteSpaces', favoriteSpaces)
         }
         if (favoriteColors) {
