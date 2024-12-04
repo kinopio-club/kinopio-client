@@ -122,7 +122,8 @@ export default {
     const spaceKeys = keys.filter(key => key.startsWith('space-'))
     let spaces
     for (const key of spaceKeys) {
-      const space = await this.getLocal(key)
+      let space = await this.getLocal(key)
+      space = utils.normalizeToObject(space)
       spaces.push(space)
     }
     if (!spaces) { return }
