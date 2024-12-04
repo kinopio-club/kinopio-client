@@ -163,11 +163,11 @@ const showSpaces = async () => {
   state.deleteAllConfirmationIsVisible = false
   await updateRemovedSpaces()
 }
-const updateLocalRemovedSpaces = () => {
-  state.removedSpaces = cache.getAllRemovedSpaces()
+const updateLocalRemovedSpaces = async () => {
+  state.removedSpaces = await cache.getAllRemovedSpaces()
 }
 const updateRemovedSpaces = async () => {
-  updateLocalRemovedSpaces()
+  await updateLocalRemovedSpaces()
   await loadRemoteRemovedSpaces()
 }
 const removeRemovedSpace = (space) => {
@@ -180,7 +180,7 @@ const loadRemoteRemovedSpaces = async () => {
   state.loading.spaces = false
   if (!removedSpaces) { return }
   removedSpaces = removedSpaces.map(remote => {
-    const localSpace = state.removedSpaces.find(local => {
+    const localSpace = state.removedSpaces?.find(local => {
       if (local) {
         return local.id === remote.id
       }
