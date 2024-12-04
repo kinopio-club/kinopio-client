@@ -125,6 +125,7 @@ export default {
       const space = await this.getLocal(key)
       spaces.push(space)
     }
+    if (!spaces) { return }
     return spaces.find(space => space.name === 'Inbox')
   },
   async getSpaceByName (name) {
