@@ -85,6 +85,10 @@ const checkIsPanScope = (event) => {
   const isFromDialog = event.target.closest('dialog')
   return !isFromDialog
 }
+const checkIsButtonScope = (event) => {
+  const isFromButton = event.target.closest('button')
+  return isFromButton
+}
 
 // on key up
 const handleShortcuts = (event) => {
@@ -256,6 +260,8 @@ const handleMouseDownEvents = (event) => {
   const userDisablePan = store.state.currentUser.shouldDisableRightClickToPan
   const shouldPan = (isRightClick || isMiddleClick) && isPanScope && !userDisablePan
   const position = utils.cursorPositionInPage(event)
+  const isButtonScope = checkIsButtonScope(event)
+  if (isButtonScope) { return }
   if (shouldBoxSelect) {
     event.preventDefault()
     store.commit('currentUserIsBoxSelecting', true)
@@ -304,14 +310,17 @@ const handleMouseMoveEvents = (event) => {
 const handleMouseUpEvents = (event) => {
   const shouldPan = store.state.currentUserIsPanning
   const cursorsAreClose = utils.cursorsAreClose(prevRightClickPosition, utils.cursorPositionInPage(event))
+  // sonar ping
   if (shouldPan && cursorsAreClose && !store.state.multipleSelectedActionsIsVisible) {
     store.dispatch('triggerSonarPing', event)
   }
+  // handle outside window
   const isFromOutsideWindow = event.target.nodeType === Node.DOCUMENT_NODE
   let isFromCard
   if (!isFromOutsideWindow) {
     isFromCard = event.target.closest('article#card')
   }
+  // end panning
   const position = utils.cursorPositionInPage(event)
   prevCursorPosition = undefined
   store.commit('currentUserIsPanning', false)
