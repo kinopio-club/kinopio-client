@@ -182,7 +182,7 @@ const selectItem = () => {
 // blank slate info
 
 const followInfoIsVisible = computed(() => {
-  const isFavorites = Boolean(store.state.currentUser.favoriteUsers.length || props.followingSpaces.length)
+  const isFavorites = Boolean(store.state.currentUser.favoriteUsers.length || props.followingSpaces?.length)
   return !props.loading && !isFavorites && currentSectionIsFollowing.value
 })
 const randomUser = computed(() => {
