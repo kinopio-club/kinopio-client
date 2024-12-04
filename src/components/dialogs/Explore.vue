@@ -181,9 +181,9 @@ const selectItem = () => {
 
 // blank slate info
 
-const followUsersInfoIsVisible = computed(() => {
-  const isFavoriteUsers = Boolean(store.state.currentUser.favoriteUsers.length)
-  return !props.loading && !isFavoriteUsers && currentSectionIsFollowing.value
+const followInfoIsVisible = computed(() => {
+  const isFavorites = Boolean(store.state.currentUser.favoriteUsers.length || props.followingSpaces.length)
+  return !props.loading && !isFavorites && currentSectionIsFollowing.value
 })
 const randomUser = computed(() => {
   const luminosity = store.state.currentUser.theme
@@ -220,7 +220,7 @@ dialog.explore.wide(v-if="visible" :open="visible" ref="dialogElement" :style="{
             span Refresh
 
     //- follow users blank slate
-    section.subsection(v-if="followUsersInfoIsVisible")
+    section.subsection(v-if="followInfoIsVisible")
       p Follow other people to see their latest updates here
       p.badge.secondary
         UserLabelInline(:user="randomUser" :isClickable="false" :key="randomUser.id" :isSmall="true" :hideYouLabel="true")
