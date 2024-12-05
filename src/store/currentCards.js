@@ -237,6 +237,7 @@ const currentCards = {
       card.maxWidth = context.rootState.currentUser.cardSettingsMaxCardWidth
       card.spaceId = currentSpaceId
       card.isComment = isComment
+      card.shouldShowOtherSpacePreviewImage = true
       // create card
       context.commit('cardDetailsIsVisibleForCardId', card.id, { root: true })
       context.dispatch('broadcast/update', { updates: { card }, type: 'createCard', handler: 'currentCards/create' }, { root: true })
