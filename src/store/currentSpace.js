@@ -304,23 +304,12 @@ const currentSpace = {
         cardIds = otherItemIds.cardIds
         spaceIds = otherItemIds.spaceIds
       }
-      if (!cardIds.length && !spaceIds.length && !invites.length) { return }
-      if (options) { context.commit('isLoadingOtherItems', true, { root: true }) }
-      try {
-        // get items
-        const data = await context.dispatch('api/getOtherItems', { spaceIds, cardIds, invites }, { root: true })
-        console.log('👯‍♀️ otherItems', { spaceIds, cardIds, invites }, data)
-        if (!data) {
-          context.commit('isLoadingOtherItems', false, { root: true })
-          return
-        }
-        // update items
-        context.commit('updateOtherItems', data, { root: true })
-      } catch (error) {
-        console.error('🚒 updateOtherItems', error, { spaceIds, cardIds, invites })
-        context.commit('isLoadingOtherItems', false, { root: true })
-      }
-      context.commit('isLoadingOtherItems', false, { root: true })
+      spaceIds = spaceIds || []
+      cardIds = cardIds || []
+      invites = invites || []
+      const isEmpty = !cardIds.length && !spaceIds.length && !invites.length
+      if (isEmpty) { return }
+      await context.dispatch('api/addToGetOtherItemsQueue', { spaceIds, cardIds, invites }, { root: true })
     },
 
     // Space

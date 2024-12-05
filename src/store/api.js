@@ -7,6 +7,19 @@ import merge from 'lodash-es/merge'
 import uniq from 'lodash-es/uniq'
 import { nanoid } from 'nanoid'
 
+let otherItemsQueue
+
+// other items queue
+
+const clearOtherItemsQueue = () => {
+  otherItemsQueue = {
+    cardIds: [],
+    spaceIds: [],
+    invites: []
+  }
+}
+clearOtherItemsQueue()
+
 // process queue
 
 const sortQueueItems = (queue) => {
@@ -623,26 +636,6 @@ const self = {
         context.dispatch('handleServerError', { name: 'getSpaceFavorites', error })
       }
     },
-    getOtherItems: async (context, { cardIds, spaceIds, invites }) => {
-      const max = 60
-      try {
-        const isOnline = context.rootState.isOnline
-        if (!isOnline) { return }
-        // normalize
-        cardIds = uniq(cardIds)
-        cardIds = cardIds.slice(0, max)
-        spaceIds = uniq(spaceIds)
-        spaceIds = spaceIds.slice(0, max)
-        console.log('🛬🛬 getting remote other items', { cardIds, spaceIds, invites })
-        // request
-        const body = { cardIds, spaceIds, invites }
-        const options = await context.dispatch('requestOptions', { body, method: 'POST', space: context.rootState.currentSpace })
-        const response = await utils.timeout(consts.defaultTimeout, fetch(`${consts.apiHost()}/item/multiple`, options))
-        return normalizeResponse(response)
-      } catch (error) {
-        context.dispatch('handleServerError', { name: 'getSpaces', error })
-      }
-    },
     getSpaceAnonymously: async (context, space) => {
       const isOnline = context.rootState.isOnline
       if (!isOnline) { return }
@@ -813,6 +806,43 @@ const self = {
       } catch (error) {
         context.dispatch('handleServerError', { name: 'sendSpaceInviteEmails', error })
       }
+    },
+
+    // Other Items Queue
+
+    addToGetOtherItemsQueue: async (context, { cardIds, spaceIds, invites }) => {
+      const isOnline = context.rootState.isOnline
+      if (!isOnline) { return }
+      otherItemsQueue = {
+        cardIds: uniq(otherItemsQueue.cardIds.concat(cardIds)),
+        spaceIds: uniq(otherItemsQueue.spaceIds.concat(spaceIds)),
+        invites: uniq(otherItemsQueue.invites.concat(invites))
+      }
+      context.dispatch('debouncedSendOtherItemsQueue')
+    },
+
+    debouncedSendOtherItemsQueue: debounce(({ dispatch }) => {
+      dispatch('sendOtherItemsQueue')
+    }, 500),
+
+    // Get Other Items Queue
+
+    sendOtherItemsQueue: async (context) => {
+      context.commit('isLoadingOtherItems', true, { root: true })
+      const { cardIds, spaceIds, invites } = otherItemsQueue
+      clearOtherItemsQueue()
+      const body = { cardIds, spaceIds, invites }
+      try {
+        console.log('🛬🛬 getting remote other items', { cardIds, spaceIds, invites })
+        const options = await context.dispatch('requestOptions', { body, method: 'POST', space: context.rootState.currentSpace })
+        const response = await utils.timeout(consts.defaultTimeout, fetch(`${consts.apiHost()}/item/multiple`, options))
+        const data = await normalizeResponse(response)
+        context.commit('updateOtherItems', data, { root: true })
+      } catch (error) {
+        context.dispatch('handleServerError', { name: 'getSpaces', error })
+      }
+      clearOtherItemsQueue()
+      context.commit('isLoadingOtherItems', false, { root: true })
     },
 
     // Card
