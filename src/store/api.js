@@ -135,14 +135,14 @@ const self = {
 
     // Queue Operations
 
-    addToQueue: async (context, { name, body, spaceId }) => {
+    addToQueue: async (context, { name, body, spaceId, canEditSpace }) => {
       body = utils.clone(body)
       body.operationId = nanoid()
       body.spaceId = spaceId || context.rootState.currentSpace.id
       body.userId = context.rootState.currentUser.id
       body.clientCreatedAt = new Date()
       const isSignedIn = context.rootGetters['currentUser/isSignedIn']
-      const canEditSpace = context.rootGetters['currentUser/canEditSpace']()
+      canEditSpace = canEditSpace || context.rootGetters['currentUser/canEditSpace']()
       if (!isSignedIn) { return }
       const request = {
         name,
