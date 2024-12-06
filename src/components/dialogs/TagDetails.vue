@@ -33,7 +33,8 @@ const state = reactive({
   cards: [],
   dialogHeight: null,
   resultsSectionHeight: null,
-  newPosition: {}
+  newPosition: {},
+  cachedSpaces: []
 })
 
 const visible = computed(() => store.state.tagDetailsIsVisible)
@@ -376,7 +377,7 @@ const filteredItems = computed(() => {
   }
 })
 watch(() => filteredItems.value, async (items, prevValue) => {
-  let spaces
+  let spaces = []
   for (const item of items) {
     const spaceId = item.spaceId || currentSpaceId.value
     const space = await cachedOrOtherSpaceById(spaceId)
