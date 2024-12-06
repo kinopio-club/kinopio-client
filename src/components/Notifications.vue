@@ -154,7 +154,9 @@ const notifyServerCouldNotSave = computed(() => {
   return store.state.notifyServerCouldNotSave
 })
 const notifySpaceIsRemoved = computed(() => store.state.notifySpaceIsRemoved)
-const notifySignUpToEditSpace = computed(() => store.state.notifySignUpToEditSpace)
+const notifySignUpToEditSpace = computed(() => {
+  return store.state.notifySignUpToEditSpace || store.state.currentUserIsInvitedButCannotEditCurrentSpace
+})
 const notifyCardsCreatedIsNearLimit = computed(() => store.state.notifyCardsCreatedIsNearLimit)
 const notifyCardsCreatedIsOverLimit = computed(() => store.state.notifyCardsCreatedIsOverLimit)
 const notifyMoveOrCopyToSpace = computed(() => store.state.notifyMoveOrCopyToSpace)
