@@ -167,11 +167,6 @@ const toggleSpaceNameDate = async () => {
   }, 20) // focus after all closeDialog events
 }
 
-// show in explore
-
-const showInExplore = computed(() => store.state.currentSpace.showInExplore)
-const dialogIsPinned = computed(() => store.state.spaceDetailsIsPinned)
-
 // template
 
 const toggleCurrentSpaceIsUserTemplate = async () => {
@@ -230,6 +225,7 @@ const changeToPrevSpace = async () => {
 
 // dialog
 
+const dialogIsPinned = computed(() => store.state.spaceDetailsIsPinned)
 const updateDialogHeight = () => {
   emit('updateDialogHeight')
 }
@@ -410,9 +406,8 @@ template(v-if="isSpaceMember")
 //- Space Settings
 template(v-if="state.settingsIsVisible")
   section.subsection.space-settings
-    .row(v-if="!isSpaceMember && !showInExplore")
+    .row
       AskToAddToExplore
-    .row(v-if="isSpaceMember")
       AddToExplore
     .row
       //- Import / Export

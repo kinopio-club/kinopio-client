@@ -8,6 +8,8 @@ import UserLabelInline from '@/components/UserLabelInline.vue'
 import utils from '@/utils.js'
 import OfflineBadge from '@/components/OfflineBadge.vue'
 import ResultsFilter from '@/components/ResultsFilter.vue'
+import AddToExplore from '@/components/AddToExplore.vue'
+import AskToAddToExplore from '@/components/AskToAddToExplore.vue'
 
 import randomColor from 'randomcolor'
 
@@ -33,6 +35,7 @@ const props = defineProps({
 })
 watch(() => props.visible, (value, prevValue) => {
   store.commit('clearNotificationsWithPosition')
+  state.tipsIsVisible = false
   if (value) {
     updateHeights()
     updateUserShowInExploreUpdatedAt()
@@ -50,7 +53,8 @@ const state = reactive({
   isReadSections: [], // 'explore', 'following', 'everyone'
   readSpaceIds: [],
   isLoadingExploreSearchResults: false,
-  exploreSearchResults: []
+  exploreSearchResults: [],
+  tipsIsVisible: false
 })
 
 const currentSpace = computed(() => store.state.currentSpace)
@@ -191,6 +195,12 @@ const randomUser = computed(() => {
   return { color, id: '123' }
 })
 
+// tips
+
+const toggleTipsIsVisible = () => {
+  state.tipsIsVisible = !state.tipsIsVisible
+}
+
 </script>
 
 <template lang="pug">
@@ -208,6 +218,8 @@ dialog.explore.wide(v-if="visible" :open="visible" ref="dialogElement" :style="{
         button(:class="{active: currentSectionIsEveryone}" @click="updateCurrentSection('everyone')")
           span Everyone
           .badge.new-unread-badge.notification-button-badge(v-if="isUnreadEveryone")
+      button.small-button.extra-options-button(@click="toggleTipsIsVisible" :class="{active: state.tipsIsVisible}")
+        span ?
     OfflineBadge
     .row(v-if="props.loading")
       Loader(:isSmall="true" :visible="props.loading")
@@ -218,6 +230,18 @@ dialog.explore.wide(v-if="visible" :open="visible" ref="dialogElement" :style="{
           button(@click.left="refreshBrowser")
             img.refresh.icon(src="@/assets/refresh.svg")
             span Refresh
+
+    //- tips
+    section.subsection(v-if="state.tipsIsVisible")
+      template(v-if="currentSectionIsExplore")
+        p Explore is a list of cool spaces explicitly shared with the Kinopio community.
+        p You can share your own spaces in Explore, or ask others to share theirs.
+        AskToAddToExplore
+        AddToExplore
+      template(v-if="currentSectionIsFollowing")
+        p Following lists recently updated public spaces created by people you Follow.
+      template(v-if="currentSectionIsEveryone")
+        p Everyone lists new public spaces created by the community.
 
     //- follow users blank slate
     section.subsection(v-if="followInfoIsVisible")
@@ -260,8 +284,8 @@ dialog.explore
   left initial
   right -35px
   overflow auto
-  // &.wide
-  //   width 330px
+  &.wide
+    width 320px
   .loader
     margin-right 5px
     vertical-align -2px

@@ -260,6 +260,7 @@ export default {
     dialogSpaceFilterByUser: (state, value) => {
       utils.typeCheck({ value, type: 'object' })
       state.dialogSpaceFilterByUser = value
+      value = utils.clone(value)
       cache.updateUser('dialogSpaceFilterByUser', value)
     },
     dialogSpaceFilterShowHidden: (state, value) => {
@@ -269,6 +270,7 @@ export default {
     dialogSpaceFilterByGroup: (state, value) => {
       utils.typeCheck({ value, type: 'object' })
       state.dialogSpaceFilterByGroup = value
+      value = utils.clone(value)
       cache.updateUser('dialogSpaceFilterByGroup', value)
     },
     dialogSpaceFilterSortBy: (state, value) => {
