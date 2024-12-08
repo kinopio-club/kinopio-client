@@ -320,6 +320,8 @@ const removeUneditedSpace = async (spaceName) => {
     console.log('signIn removeUneditedSpace', spaceName)
     cache.deleteSpace(currentSpace)
     shouldLoadLastSpace = true
+  } else {
+    console.log('🌹 signIn removeUneditedSpace isEdited: keep space', spaceIsEdited, spaceName, cardNames, currentSpace?.cards)
   }
 }
 
