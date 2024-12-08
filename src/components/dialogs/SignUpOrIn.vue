@@ -311,6 +311,7 @@ const removeUneditedSpace = async (spaceName) => {
   const cardNames = space.cards.map(card => card.name)
   let spaceIsEdited
   currentSpace?.cards.forEach(card => {
+    if (!card.name.trim()) { return }
     const cardIsNew = !cardNames.includes(card.name)
     if (cardIsNew) {
       spaceIsEdited = true
@@ -318,7 +319,7 @@ const removeUneditedSpace = async (spaceName) => {
   })
   if (!spaceIsEdited) {
     console.log('signIn removeUneditedSpace', spaceName)
-    cache.deleteSpace(currentSpace)
+    await cache.deleteSpace(currentSpace)
     shouldLoadLastSpace = true
   } else {
     console.log('🌹 signIn removeUneditedSpace isEdited: keep space', spaceIsEdited, spaceName, cardNames, currentSpace?.cards)
