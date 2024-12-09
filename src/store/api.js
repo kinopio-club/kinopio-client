@@ -174,6 +174,11 @@ const self = {
     // Send Queue Operations
 
     handleServerOperationsError: async (context, { error, response }) => {
+      if (!response) {
+        console.error('🚒 handleServerOperationsError', error, response)
+        context.commit('notifyServerCouldNotSave', true, { root: true })
+        return
+      }
       const data = await response.json()
       const operations = data.operations
       console.warn('🚑 serverOperationsError', data)

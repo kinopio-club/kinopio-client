@@ -223,6 +223,7 @@ export default {
     await this.saveSpace(space)
   },
   async saveSpace (space) {
+    if (!space) { return }
     space = utils.clone(space)
     if (!space.id) {
       console.warn('☎️ error caching space. This is expected if currentUser is read only', space)

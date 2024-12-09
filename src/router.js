@@ -231,25 +231,27 @@ export default router
 const inviteToEdit = async ({ next, store, spaceId, collaboratorKey }) => {
   await store.dispatch('currentUser/init')
   const apiKey = store.state.currentUser.apiKey
-  if (apiKey) {
-    store.dispatch('api/addSpaceCollaborator', { spaceId, collaboratorKey })
-      .then(response => {
-        store.commit('spaceUrlToLoad', spaceId)
-        store.commit('addNotification', { message: 'You can now edit this space', type: 'success' })
-        next()
-      }).catch(error => {
-        console.error('🚒', error)
-        if (error.status === 401) {
-          store.commit('addNotification', { message: 'Space could not be found, or your invite was invalid', type: 'danger' })
-        } else {
-          store.commit('addNotification', { message: '(シ_ _)シ Something went wrong, Please try again or contact support', type: 'danger' })
-        }
-      })
-  } else {
+  if (!apiKey) {
     store.commit('spaceUrlToLoad', spaceId)
     next()
+    return
   }
-  store.commit('addToSpaceCollaboratorKeys', { spaceId, collaboratorKey })
+  // join
+  try {
+    await store.dispatch('api/addSpaceCollaborator', { spaceId, collaboratorKey })
+    store.commit('spaceUrlToLoad', spaceId)
+    store.commit('addNotification', { message: 'You can now edit this space', type: 'success' })
+    store.commit('addToSpaceCollaboratorKeys', { spaceId, collaboratorKey })
+  } catch (error) {
+    console.error('🚒 inviteToEdit', error)
+    if (error.status === 401) {
+      store.commit('addNotification', { message: 'Space could not be found, or your invite was invalid', type: 'danger' })
+    } else {
+      store.commit('addNotification', { message: '(シ_ _)シ Something went wrong, Please try again or contact support', type: 'danger' })
+    }
+  }
+  // load
+  next()
 }
 
 const inviteToReadOnly = ({ next, store, spaceId, readOnlyKey }) => {

@@ -302,7 +302,7 @@ const updateWithRemoteSpaces = async () => {
       store.dispatch('api/getUserSpaces'),
       store.dispatch('api/getUserGroupSpaces')
     ])
-    let spaces = userSpaces
+    let spaces = userSpaces || []
     if (groupSpaces) {
       spaces = spaces.concat(groupSpaces)
     }
