@@ -504,7 +504,7 @@ const currentSpace = {
           remoteSpace = await context.dispatch('api/getSpaceAnonymously', space, { root: true })
         }
       } catch (error) {
-        console.warn('🚑 getRemoteSpace', error.status, error)
+        console.warn('🚑 getRemoteSpace', error.status, error, space.id)
         if (error.status === 404) {
           context.commit('notifySpaceNotFound', true, { root: true })
           context.dispatch('loadLastSpace', space)
