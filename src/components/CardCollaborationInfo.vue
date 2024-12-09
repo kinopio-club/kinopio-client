@@ -95,10 +95,10 @@ const userDetailsIsUser = (user) => {
   .users(v-if="shouldShowItemActions")
     //- created by
     template(v-if="createdByUserIsNotEmpty")
-      UserLabelInline(:user="createdByUser" :isClickable="true" :title="'Created by'" :isOnDarkBackground="true" :nameIsTruncated="true")
+      UserLabelInline(:user="createdByUser" :isClickable="true" :title="'Created by'" :isOnDarkBackground="true" :truncateNameToLength="15")
     //- updated by
     template(v-if="isUpdatedByDifferentUser")
-      UserLabelInline(:user="updatedByUser" :isClickable="true" :title="'Updated by'" :isOnDarkBackground="true" :nameIsTruncated="true")
+      UserLabelInline(:user="updatedByUser" :isClickable="true" :title="'Updated by'" :isOnDarkBackground="true" :truncateNameToLength="15")
     //- created through api
     .badge.status.system-badge(v-if="card.isCreatedThroughPublicApi" title="Created via public API")
       img.icon.system(src="@/assets/system.svg")

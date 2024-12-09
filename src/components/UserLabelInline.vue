@@ -13,7 +13,7 @@ const props = defineProps({
   user: Object,
   isClickable: Boolean,
   shouldHideName: Boolean,
-  nameIsTruncated: Boolean,
+  truncateNameToLength: Number,
   title: String,
   isOnDarkBackground: Boolean
 })
@@ -24,8 +24,8 @@ const userHasName = computed(() => Boolean(props.user.name))
 const colorIsDark = computed(() => utils.colorIsDark(props.user.color))
 const userName = computed(() => {
   let name = props.user.name
-  if (props.nameIsTruncated) {
-    name = utils.truncated(name, 15)
+  if (props.truncateNameToLength) {
+    name = utils.truncated(name, props.truncateNameToLength)
   }
   return name
 })

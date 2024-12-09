@@ -428,14 +428,14 @@ span.space-list-wrap
                 template(v-for="user in users(space)" :key="user.id")
                   User(:user="user" :isClickable="false" :isMedium="true")
             template(v-else-if="showOtherUsers")
-              UserLabelInline(:user="user(space)" :isClickable="false" :key="user(space).id" :isMedium="true")
+              UserLabelInline(:user="user(space)" :isClickable="false" :key="user(space).id" :isMedium="true" :truncateNameToLength="7")
             //- show collaborators
             template(v-else-if="showCollaborators && isMultipleUsers(space)")
               .users.multiple-users
                 template(v-for="user in users(space)" :key="user.id")
                   User(:user="user" :isClickable="false" :isMedium="true")
             template(v-else-if="showCollaborators")
-              UserLabelInline(:user="user(space)" :isClickable="false" :key="user(space).id" :isMedium="true")
+              UserLabelInline(:user="user(space)" :isClickable="false" :key="user(space).id" :isMedium="true" :truncateNameToLength="7")
             //- show user badge only
             template(v-else-if="showUser")
               User(:user="user(space)" :isClickable="false" :key="user(space).id" :isMedium="true")
