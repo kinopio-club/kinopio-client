@@ -138,6 +138,7 @@ const self = {
       if (options.spaceReadOnlyKey) {
         headers.append('Read-Only-Authorization', options.spaceReadOnlyKey)
       }
+      headers.append('Request-Id', nanoid())
       headers.append('User-Id', context.rootState.currentUser.id)
       return {
         method: options.method,
