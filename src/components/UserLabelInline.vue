@@ -66,24 +66,28 @@ const title = computed(() => {
 </script>
 
 <template lang="pug">
-.user-label-inline.badge(
-  v-if="props.user"
-  :key="props.user.id"
-  :data-id="props.user.id"
-  :style="{ background: props.user.color }"
-  :class="{ 'button-badge': props.isClickable }"
-  @mouseup="toggleUserDetailsIsVisible"
-  @touchend="toggleUserDetailsIsVisible"
-  ref="labelElement"
-  :title="title"
-  @click.stop
-)
-  img.anon-avatar(src="@/assets/anon-avatar.svg" :class="{ 'is-dark': colorIsDark, 'should-hide-name': shouldHideName }")
-  img.icon.camera(v-if="props.user.isOnline" src="@/assets/camera.svg" title="Online" :class="{ 'is-dark': colorIsDark }")
-  span.user-name(v-if="userHasName && !shouldHideName" :class="{ 'is-dark': colorIsDark }") {{ userName }}
+span.user-label-inline-wrap(:title="title")
+  .user-label-inline.badge(
+    v-if="props.user"
+    :key="props.user.id"
+    :data-id="props.user.id"
+    :style="{ background: props.user.color }"
+    :class="{ 'button-badge': props.isClickable }"
+    @mouseup="toggleUserDetailsIsVisible"
+    @touchend="toggleUserDetailsIsVisible"
+    ref="labelElement"
+    :title="title"
+    @click.stop
+  )
+    img.anon-avatar(src="@/assets/anon-avatar.svg" :class="{ 'is-dark': colorIsDark, 'should-hide-name': shouldHideName }")
+    img.icon.camera(v-if="props.user.isOnline" src="@/assets/camera.svg" title="Online" :class="{ 'is-dark': colorIsDark }")
+    span.user-name(v-if="userHasName && !shouldHideName" :class="{ 'is-dark': colorIsDark }") {{ userName }}
 </template>
 
 <style lang="stylus">
+.user-label-inline-wrap
+  flex-shrink 0
+  width max-content
 .user-label-inline
   display inline-block
   min-height initial
