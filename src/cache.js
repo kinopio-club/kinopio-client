@@ -90,6 +90,8 @@ export default {
     const keys = await idb.keys()
     keys.forEach(key => this.removeLocal(key))
     console.log('🚑 idb cleared')
+    localStorage.clear()
+    console.log('🚑 ls cleared')
   },
 
   // User
