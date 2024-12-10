@@ -456,11 +456,8 @@ const currentCards = {
       if (!cards) {
         cards = context.getters.all
       }
-      let updates = {
-        cards: [],
-        spaceId: context.rootState.currentSpace.id
-      }
       nextTick(() => {
+        let newCards = []
         cards = cards.filter(card => Boolean(card))
         let cardIds = cards.map(newCard => newCard.id)
         cardIds = cardIds.filter(cardId => Boolean(cardId))
@@ -485,31 +482,37 @@ const currentCards = {
           } else {
             card = utils.cardElementDimensions(card)
           }
+
           if (!card) { return }
-          const dimensionsChanged = card.width !== prevDimensions.width || card.height !== prevDimensions.height
+          const isUnchanged = card.width === prevDimensions.width && card.height === prevDimensions.height
           const isMissingDimensions = utils.isMissingDimensions(card)
-          if (!dimensionsChanged) { return }
+          if (isUnchanged) { return }
           if (isMissingDimensions) { return }
           const body = {
             id: card.id,
             width: Math.round(card.width),
-            height: Math.round(card.height),
-            userId: context.rootState.currentUser.id
+            height: Math.round(card.height)
           }
           context.commit('update', body)
           context.dispatch('updateTallestCardHeight', card)
           context.dispatch('broadcast/update', { updates: body, type: 'updateCard', handler: 'currentCards/update' }, { root: true })
-          updates.cards.push(body)
+          newCards.push(body)
           context.dispatch('updateBelowCardsPosition', {
             prevCardHeight: prevDimensions.height,
             newCardHeight: card.height,
             cardId: card.id
           })
         })
+        if (canEditSpace && newCards.length) {
+          context.dispatch('api/addToQueue', {
+            name: 'updateMultipleCards',
+            body: {
+              cards: newCards,
+              spaceId: context.rootState.currentSpace.id
+            }
+          }, { root: true })
+        }
       })
-      if (canEditSpace) {
-        await context.dispatch('api/addToQueue', { name: 'updateMultipleCards', body: updates }, { root: true })
-      }
     },
     resetDimensions: (context, { cardIds, cardId }) => {
       if (cardId) {

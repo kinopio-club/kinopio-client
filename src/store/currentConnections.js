@@ -238,6 +238,8 @@ export default {
           endItem,
           controlPoint: connection.controlPoint
         })
+        const isPathUnchanged = path === connection.path
+        if (isPathUnchanged) { return }
         const newConnection = {
           id: connection.id,
           path
@@ -251,6 +253,7 @@ export default {
         await context.dispatch('api/addToQueue', { name: 'updateConnection', body: newConnection }, { root: true })
         return newConnection
       })
+      connections = connections.filter(connection => Boolean(connection))
       context.commit('clearShouldExplicitlyRenderCardIds', null, { root: true })
       context.dispatch('history/add', { connections }, { root: true })
     },
