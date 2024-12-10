@@ -216,13 +216,13 @@ const addCard = async () => {
     // save to inbox
     if (state.selectedSpaceId === 'inbox') {
       console.log('🛫 create card in inbox space', card)
-      await store.dispatch('api/addToQueue', { name: 'createCardInInbox', body: card, canEditSpace: true })
+      await store.dispatch('api/addToQueue', { name: 'createCardInInbox', body: card })
     // save to space
     } else {
       spaceId = state.selectedSpaceId
       card.spaceId = spaceId
       console.log('🛫 create card in space', card, state.selectedSpaceId)
-      await store.dispatch('api/addToQueue', { name: 'createCard', body: card, spaceId, canEditSpace: true })
+      await store.dispatch('api/addToQueue', { name: 'createCard', body: card, spaceId })
     }
     space = { id: spaceId }
   } catch (error) {

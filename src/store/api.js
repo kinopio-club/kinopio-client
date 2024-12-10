@@ -149,20 +149,18 @@ const self = {
 
     // Queue Operations
 
-    addToQueue: async (context, { name, body, spaceId, canEditSpace }) => {
+    addToQueue: async (context, { name, body, spaceId }) => {
       body = utils.clone(body)
       body.operationId = nanoid()
       body.spaceId = spaceId || context.rootState.currentSpace.id
       body.userId = context.rootState.currentUser.id
       body.clientCreatedAt = new Date()
       const isSignedIn = context.rootGetters['currentUser/isSignedIn']
-      canEditSpace = canEditSpace || context.rootGetters['currentUser/canEditSpace']()
       if (!isSignedIn) { return }
       const request = {
         name,
         body
       }
-      if (!canEditSpace) { return }
       await cache.addToQueue(request)
       context.dispatch('debouncedSendQueue')
     },
