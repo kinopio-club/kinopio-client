@@ -45,13 +45,7 @@ const props = defineProps({
 watch(() => props.visible, (value, prevValue) => {
   store.commit('clearNotificationsWithPosition')
   if (value) {
-    updateLocalSpaces()
-    updateWithRemoteSpaces()
-    closeDialogs()
-    updateFavorites()
-    updateHeights()
-    store.commit('shouldExplicitlyHideFooter', true)
-    store.dispatch('currentSpace/createSpacePreviewImage')
+    init()
   } else {
     store.commit('shouldExplicitlyHideFooter', false)
   }
@@ -67,6 +61,17 @@ const state = reactive({
   spaceFiltersIsVisible: false,
   parentDialog: 'spaceDetails'
 })
+
+const init = async () => {
+  updateLocalSpaces()
+  await updateWithRemoteSpaces()
+  await updateCachedSpaces()
+  closeDialogs()
+  updateFavorites()
+  updateHeights()
+  store.commit('shouldExplicitlyHideFooter', true)
+  store.dispatch('currentSpace/createSpacePreviewImage')
+}
 
 // current space
 
@@ -271,11 +276,9 @@ const changeSpace = (space) => {
 
 const removeSpaceFromSpaces = (spaceId) => {
   state.spaces = state.spaces.filter(space => space.id !== spaceId)
-  if (!utils.arrayHasItems(state.remoteSpaces)) { return }
-  state.remoteSpaces = state.remoteSpaces.filter(space => space.id !== spaceId)
 }
 
-// update local spaces
+// update space list
 
 const updateLocalSpaces = () => {
   if (!props.visible) { return }
@@ -289,8 +292,6 @@ const debouncedUpdateLocalSpaces = debounce(async () => {
   })
   state.spaces = utils.addCurrentUserIsCollaboratorToSpaces(cacheSpaces, store.state.currentUser)
 }, 350, { leading: true })
-
-// update space list
 
 const updateWithRemoteSpaces = async () => {
   const currentUserIsSignedIn = store.getters['currentUser/isSignedIn']
@@ -308,29 +309,27 @@ const updateWithRemoteSpaces = async () => {
     }
     spaces = spaces.filter(space => Boolean(space))
     spaces = uniqBy(spaces, 'id')
-    state.remoteSpaces = spaces
+    state.spaces = spaces
     state.isLoadingRemoteSpaces = false
-    if (!state.remoteSpaces) { return }
-    await updateLocalSpacesWithRemote()
   } catch (error) {
     console.error('🚒 updateWithRemoteSpaces', error)
   }
   state.isLoadingRemoteSpaces = false
 }
-const updateLocalSpacesWithRemote = async () => {
-  const cachedSpaces = state.spaces
-  const cachedSpaceIds = cachedSpaces.map(space => space.id)
-  const remoteSpaces = state.remoteSpaces
-  for (let space of remoteSpaces) {
-    const isCachedSpace = cachedSpaceIds.includes(space.id)
-    if (isCachedSpace) {
-      const cachedSpace = await cache.space(space.id)
-      const isUpdated = dayjs(space.updatedAt).valueOf() > dayjs(cachedSpace.updatedAt).valueOf()
+const updateCachedSpaces = async () => {
+  if (!state.spaces) { return }
+  const cacheSpaces = await cache.getAllSpaces()
+  const cacheSpaceIds = cacheSpaces.map(space => space.id)
+  for (let space of state.spaces) {
+    const isCacheSpace = cacheSpaceIds.includes(space.id)
+    if (isCacheSpace) {
+      const cacheSpace = await cache.space(space.id)
+      const isUpdated = dayjs(space.updatedAt).valueOf() > dayjs(cacheSpace.updatedAt).valueOf()
       if (!isUpdated) { continue }
-      space.cards = cachedSpace.cards
-      space.boxes = cachedSpace.boxes
-      space.connections = cachedSpace.connections
-      space.connectionTypes = cachedSpace.connectionTypes
+      space.cards = cacheSpace.cards
+      space.boxes = cacheSpace.boxes
+      space.connections = cacheSpace.connections
+      space.connectionTypes = cacheSpace.connectionTypes
       await cache.saveSpace(space)
     } else {
       await cache.saveSpace(space)
