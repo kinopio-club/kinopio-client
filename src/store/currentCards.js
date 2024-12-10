@@ -283,7 +283,7 @@ const currentCards = {
       })
       cards.forEach(card => {
         context.dispatch('broadcast/update', { updates: { card }, type: 'createCard', handler: 'currentCards/create' }, { root: true })
-        context.commit('create', { card })
+        context.dispatch('add', card)
       })
       context.dispatch('currentUser/cardsCreatedCountUpdateBy', {
         cards
