@@ -116,7 +116,9 @@ const card = computed(() => {
 })
 const visible = computed(() => utils.objectHasKeys(card.value))
 watch(() => visible.value, (value, prevValue) => {
-  if (!value) {
+  if (value) {
+    store.commit('preventMultipleSelectedActionsIsVisible', false)
+  } else {
     closeCard()
   }
 })
