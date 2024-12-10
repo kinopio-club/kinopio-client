@@ -1114,7 +1114,6 @@ const splitCards = (event, isPreview) => {
 const addSplitCards = async (newCards) => {
   const spaceBetweenCards = 12
   let prevCard = utils.clone(card.value)
-  store.dispatch('currentCards/addMultiple', { cards: newCards })
   store.dispatch('closeAllDialogs')
   // update y positions
   // wait for cards to be added to dom
@@ -1123,7 +1122,7 @@ const addSplitCards = async (newCards) => {
       const element = document.querySelector(`article [data-card-id="${prevCard.id}"]`)
       const prevCardRect = element.getBoundingClientRect()
       newCard.y = prevCard.y + (prevCardRect.height * store.getters.spaceCounterZoomDecimal) + spaceBetweenCards
-      store.dispatch('currentCards/update', { card: newCard })
+      store.dispatch('currentCards/add', newCard)
       store.commit('triggerUpdateUrlPreview', newCard.id)
       prevCard = newCard
     }
