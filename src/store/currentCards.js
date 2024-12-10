@@ -346,6 +346,7 @@ const currentCards = {
       await context.dispatch('api/addToQueue', { name: 'updateCard', body: card }, { root: true })
     },
     updateMultiple: async (context, cards) => {
+      if (!cards.length) { return }
       const spaceId = context.rootState.currentSpace.id
       let updates = {
         cards,
