@@ -287,9 +287,6 @@ const updateLocalSpaces = () => {
 const debouncedUpdateLocalSpaces = debounce(async () => {
   await nextTick()
   let cacheSpaces = await cache.getAllSpaces()
-  cacheSpaces = cacheSpaces.filter(space => {
-    return store.getters['currentUser/canEditSpace'](space)
-  })
   state.spaces = utils.addCurrentUserIsCollaboratorToSpaces(cacheSpaces, store.state.currentUser)
 }, 350, { leading: true })
 
