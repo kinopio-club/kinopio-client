@@ -182,7 +182,7 @@ const self = {
       const data = await response.json()
       const operations = data.operations
       console.warn('🚑 serverOperationsError', data)
-      const nonCriticalErrorStatusCodes = [400, 401, 404, 422]
+      const nonCriticalErrorStatusCodes = [400, 401, 404]
       operations.forEach(operation => {
         const error = operation.error
         if (!error) { return }
