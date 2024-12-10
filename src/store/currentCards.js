@@ -288,7 +288,6 @@ const currentCards = {
       context.dispatch('currentUser/cardsCreatedCountUpdateBy', {
         cards
       }, { root: true })
-      await context.dispatch('api/addToQueue', { name: 'createMultipleCards', body: { cards, spaceId } }, { root: true })
     },
     paste: async (context, { card, cardId }) => {
       utils.typeCheck({ value: card, type: 'object' })
