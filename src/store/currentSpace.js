@@ -1291,7 +1291,8 @@ const currentSpace = {
     },
     memberById: (state, getters, rootState) => (userId) => {
       const members = getters.members()
-      return members.find(member => member.id === userId)
+      const member = members.find(member => member.id === userId)
+      return member
     },
     userById: (state, getters, rootState, rootGetters) => (userId) => {
       // current user
