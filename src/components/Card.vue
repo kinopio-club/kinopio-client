@@ -1461,7 +1461,7 @@ const isFiltered = computed(() => {
 
 // user
 
-const createdByUser = computed(() => {
+const cardCreatedByUser = computed(() => {
   // same as userDetailsWrap.cardCreatedByUser
   const userId = props.card.userId
   if (!userId) { return }
@@ -1476,7 +1476,7 @@ const createdByUser = computed(() => {
 })
 const userDetailsIsUser = computed(() => {
   if (!store.state.userDetailsIsVisible) { return }
-  const user = createdByUser.value
+  const user = cardCreatedByUser.value
   return user.id === store.state.userDetailsUser.id
 })
 
@@ -1947,7 +1947,7 @@ article.card-wrap#card(
         .badge.comment-badge(:class="{'is-light-in-dark-theme': isLightInDarkTheme, 'is-dark-in-light-theme': isDarkInLightTheme}")
           img.icon.view(src="@/assets/comment.svg")
           //- User
-          UserLabelInline(:user="createdByUser" :shouldHideName="true")
+          UserLabelInline(:user="cardCreatedByUser" :shouldHideName="true")
           //- Url →
         a.url-wrap(v-if="urlButtonIsVisible" :href="cardButtonUrl" @mouseup.exact.prevent="closeAllDialogs" @click.stop="openUrl($event, cardButtonUrl)" @touchend.prevent="openUrl($event, cardButtonUrl)" target="_blank" @mouseenter="handleMouseEnterUrlButton" @mouseleave="handleMouseLeaveUrlButton")
           .url.inline-button-wrap
@@ -2004,7 +2004,7 @@ article.card-wrap#card(
         UrlPreviewCard(
           :visible="true"
           :card="card"
-          :user="createdByUser"
+          :user="cardCreatedByUser"
           :isImageCard="isImageCard"
           :isSelected="isSelectedOrDragging"
           :urlPreviewImageIsVisible="urlPreviewImageIsVisible"
@@ -2075,7 +2075,7 @@ article.card-wrap#card(
       img.icon.system(src="@/assets/system.svg")
     //- User
     .badge-wrap(v-if="filterShowUsers")
-      UserLabelInline(:user="createdByUser" :isClickable="true")
+      UserLabelInline(:user="cardCreatedByUser" :isClickable="true")
     //- Date
     .badge.secondary.button-badge(v-if="filterShowDateUpdated" @click.left.prevent.stop="toggleFilterShowAbsoluteDates" @touchend.prevent.stop="toggleFilterShowAbsoluteDates" :class="{'date-is-today': dateIsToday}")
       img.icon.time(src="@/assets/time.svg")

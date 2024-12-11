@@ -1294,17 +1294,23 @@ const currentSpace = {
       return members.find(member => member.id === userId)
     },
     userById: (state, getters, rootState, rootGetters) => (userId) => {
-      const otherUser = rootState.otherUsers[userId]
+      // current user
+      if (rootState.currentUser.id === userId) {
+        return rootState.currentUser
+      }
+      // collaborators
+      const user = getters.memberById(userId)
+      if (user.id === userId) {
+        return user
+      }
+      // commenters
+      const otherUser = rootGetters.otherUserById(userId)
       if (otherUser) {
         return otherUser
       }
-      const space = utils.clone(state)
-      const groupUser = rootGetters['groups/groupUser']({ userId, space })
-      let user = getters.memberById(userId) || rootGetters.otherUserById(userId) || groupUser
-      if (rootState.currentUser.id === userId) {
-        user = rootState.currentUser
-      }
-      return user
+      // group user
+      const groupUser = rootGetters['groups/groupUser']({ userId })
+      return groupUser
     },
     spaceCreatorIsUpgraded: (state, getters, rootState, rootGetters) => {
       const creatorUser = getters.creator

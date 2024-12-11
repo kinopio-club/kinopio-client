@@ -2068,9 +2068,7 @@ const store = createStore({
       return isPainting || isDrawingConnection || isDraggingCard || isDraggingBox
     },
     otherUserById: (state, getters) => (userId) => {
-      const otherUsers = state.otherUsers.filter(Boolean)
-      const user = otherUsers.find(otherUser => otherUser.id === userId)
-      return user
+      return state.otherUsers[userId]
     },
     otherSpaceById: (state, getters) => (spaceId) => {
       const otherSpaces = state.otherItems.spaces.filter(Boolean)
