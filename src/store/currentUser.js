@@ -8,6 +8,7 @@ import { nanoid } from 'nanoid'
 import { nextTick } from 'vue'
 import dayjs from 'dayjs'
 import { v4 as uuidv4 } from 'uuid' // polyfill for self.crypto.randomUUID(), for legacy todesktop support
+import uniqBy from 'lodash-es/uniqBy'
 
 const initialState = {
   id: nanoid(),
@@ -77,7 +78,11 @@ const initialState = {
   dialogSpaceFilterByGroup: {},
   dialogSpaceFilterByUser: {},
   dialogSpaceFilterShowHidden: false,
-  dialogSpaceFilterSortBy: null // null, updatedAt, createdAt, alphabetical
+  dialogSpaceFilterSortBy: null, // null, updatedAt, createdAt, alphabetical
+
+  // user tags
+
+  tags: []
 }
 
 export default {
@@ -382,6 +387,10 @@ export default {
       utils.typeCheck({ value, type: 'string' })
       state.disabledKeyboardShortcuts = state.disabledKeyboardShortcuts.filter(shortcutName => value !== shortcutName)
       cache.updateUser('disabledKeyboardShortcuts', state.disabledKeyboardShortcuts)
+    },
+    tags: (state, value) => {
+      utils.typeCheck({ value, type: 'array' })
+      state.tags = value
     }
   },
   actions: {
@@ -484,7 +493,7 @@ export default {
         context.commit('isUpgraded', false)
       }
       const remoteTags = await context.dispatch('api/getUserTags', null, { root: true }) || []
-      context.dispatch('updateOtherTags', remoteTags, { root: true })
+      context.dispatch('tags', remoteTags)
       context.dispatch('groups/restore', remoteUser.groups, { root: true })
       if (context.rootState.shouldNotifyIsJoiningGroup) {
         context.commit('notifyIsJoiningGroup', true, { root: true })
@@ -761,6 +770,10 @@ export default {
       } else {
         context.commit('addNotificationWithPosition', { message: 'Space is Read Only', position, type: 'info', layer: 'space', icon: 'cancel' }, { root: true })
       }
+    },
+    tags: async (context, tags) => {
+      tags = uniqBy(tags, 'name')
+      context.commit('tags', tags)
     }
   },
   getters: {
@@ -951,6 +964,12 @@ export default {
     subscriptionIsFree: (state) => {
       const strings = ['🌷free', '🌷 free', '🫧free']
       return strings.includes(state.stripeSubscriptionId)
+    },
+
+    // user tags
+
+    tagByName: (state, getters) => (name) => {
+      return state.tags.find(tag => tag.name === name)
     }
   }
 }

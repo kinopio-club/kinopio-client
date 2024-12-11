@@ -1120,11 +1120,11 @@ const currentCards = {
     },
     segmentTagColor: (state, getters, rootState, rootGetters) => (segment) => {
       const spaceTag = rootGetters['currentSpace/tagByName'](segment.name)
-      const otherTag = rootGetters['otherTagByName'](segment.name)
+      const userTag = rootGetters['currentUser/tagByName'](segment.name)
       if (spaceTag) {
         return spaceTag.color
-      } else if (otherTag) {
-        return otherTag.color
+      } else if (userTag) {
+        return userTag.color
       } else {
         return rootState.currentUser.color
       }

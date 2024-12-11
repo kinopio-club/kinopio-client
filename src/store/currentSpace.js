@@ -1173,7 +1173,10 @@ const currentSpace = {
         connection.connectionTypeId = type.id
         context.dispatch('currentConnections/add', { connection, type }, { root: true })
       })
-      tags.forEach(tag => context.dispatch('addTag', tag))
+      tags.forEach(tag => {
+        tag.userId = context.rootState.currentUser.id
+        context.dispatch('addTag', tag)
+      })
     },
 
     // async getters
@@ -1247,18 +1250,15 @@ const currentSpace = {
 
     // tags
 
-    tags: (state, getters, rootState) => {
-      const mergedTags = utils.mergeArrays({ previous: rootState.otherTags, updated: state.tags, key: 'name' })
-      return mergedTags
-    },
-    tagByName: (state, getters) => (name) => {
-      const tags = getters.tags
-      return tags.find(tag => {
+    tagByName: (state, getters, rootState, rootGetters) => (name) => {
+      let tags = rootGetters.allTags
+      tags = tags.find(tag => {
         return tag.name === name
       })
+      return tags
     },
-    tagsInCard: (state, getters) => (card) => {
-      const tags = getters.tags
+    tagsInCard: (state, getters, rootState, rootGetters) => (card) => {
+      const tags = rootGetters.allTags
       return tags.filter(tag => tag.cardId === card.id)
     },
     spaceTags: (state, getters) => {
@@ -1300,7 +1300,7 @@ const currentSpace = {
       }
       // collaborators
       const user = getters.memberById(userId)
-      if (user.id === userId) {
+      if (user?.id === userId) {
         return user
       }
       // commenters
