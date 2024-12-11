@@ -48,7 +48,7 @@ const scrollIntoView = async () => {
 // tags list
 
 const currentTags = computed(() => {
-  return props.tagNamesInCard || store.getters['currentSpace/tags'] || []
+  return props.tagNamesInCard || store.getters.allTags
 })
 const updateTags = async () => {
   const spaceTags = store.getters['currentSpace/spaceTags']

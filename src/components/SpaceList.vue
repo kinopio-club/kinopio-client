@@ -74,6 +74,7 @@ const props = defineProps({
   showUserIfCurrentUserIsCollaborator: Boolean,
   hideExploreBadge: Boolean,
   hideFilter: Boolean,
+  showFilter: Boolean,
   isLoading: Boolean,
   parentIsSpaceDetails: Boolean,
   parentIsPinned: Boolean,
@@ -382,6 +383,7 @@ const group = (groupId) => {
 span.space-list-wrap
   ResultsFilter(
     :hideFilter="hideFilter"
+    :showFilter="showFilter"
     :items="spaces"
     :placeholder="placeholder"
     :isLoading="isLoading"

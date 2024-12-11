@@ -268,7 +268,6 @@ const store = createStore({
     // session data
     otherUsers: [], // { id, name color }
     otherItems: { spaces: [], cards: [] },
-    otherTags: [],
     sendingQueue: [],
     currentUserIsInvitedButCannotEditCurrentSpace: false,
 
@@ -1657,9 +1656,6 @@ const store = createStore({
         card.name = name
       }
     },
-    otherTags: (state, tags) => {
-      state.otherTags = tags
-    },
     currentUserIsInvitedButCannotEditCurrentSpace: (state, value) => {
       state.currentUserIsInvitedButCannotEditCurrentSpace = value
     },
@@ -2039,15 +2035,6 @@ const store = createStore({
       const canOnlyComment = context.getters['currentUser/canOnlyComment']()
       if (canOnlyComment) { return }
       context.commit('currentUserToolbar', value)
-    },
-
-    // other tags (session)
-
-    updateOtherTags: async (context, tags) => {
-      const cachedTags = await cache.allTags()
-      tags = tags.concat(cachedTags)
-      tags = uniqBy(tags, 'name')
-      return tags
     }
   },
   getters: {
@@ -2068,9 +2055,7 @@ const store = createStore({
       return isPainting || isDrawingConnection || isDraggingCard || isDraggingBox
     },
     otherUserById: (state, getters) => (userId) => {
-      const otherUsers = state.otherUsers.filter(Boolean)
-      const user = otherUsers.find(otherUser => otherUser.id === userId)
-      return user
+      return state.otherUsers[userId]
     },
     otherSpaceById: (state, getters) => (spaceId) => {
       const otherSpaces = state.otherItems.spaces.filter(Boolean)
@@ -2120,9 +2105,6 @@ const store = createStore({
         return `${consts.cdnHost}/date/${date}.jpg` // https://cdn.kinopio.club/date/11-19-24.jpg
       }
     },
-    otherTagByName: (state, getters) => (name) => {
-      return state.otherTags.find(otherTag => otherTag.name === name)
-    },
     newTag: (state) => ({ name, defaultColor, cardId, spaceId }) => {
       let color
       const allTags = state.tags
@@ -2137,6 +2119,12 @@ const store = createStore({
         cardId: cardId,
         spaceId: spaceId
       }
+    },
+    allTags: (state) => {
+      const userTags = state.currentUser.tags
+      const spaceTags = state.currentSpace.tags
+      const tags = utils.mergeArrays({ previous: userTags, updated: spaceTags, key: 'name' })
+      return tags || []
     }
   },
 

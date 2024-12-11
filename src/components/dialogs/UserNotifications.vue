@@ -89,11 +89,11 @@ const showCardDetails = (notification) => {
 }
 const segmentTagColor = (segment) => {
   const spaceTag = store.getters['currentSpace/tagByName'](segment.name)
-  const otherTag = store.getters.otherTagByName(segment.name)
+  const userTag = store.getters['currentUser/tagByName'](segment.name)
   if (spaceTag) {
     return spaceTag.color
-  } else if (otherTag) {
-    return otherTag.color
+  } else if (userTag) {
+    return userTag.color
   } else {
     return currentUser.value.color
   }
