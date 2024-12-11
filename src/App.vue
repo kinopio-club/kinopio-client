@@ -354,6 +354,19 @@ const updateMetaRSSFeed = () => {
   src url("https://bk.kinopio.club/fonts/migra/PPMigra-Regular.woff2") format("woff2")
   font-weight normal
   font-style normal
+// header-font-8
+:root
+  --header-font-8 eiko, var(--sans-serif-font)
+@font-face
+  font-family 'eiko'
+  src url("https://bk.kinopio.club/fonts/eiko/PPEiko-Medium.woff2") format("woff2")
+  font-weight bold
+  font-style normal
+@font-face
+  font-family 'eiko'
+  src url("https://bk.kinopio.club/fonts/eiko/PPEiko-LightItalic.woff2") format("woff2")
+  font-weight normal
+  font-style normal
 
 *
   // -webkit-overflow-scrolling touch

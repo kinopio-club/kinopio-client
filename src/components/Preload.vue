@@ -126,6 +126,7 @@
 
     //- font previews
     img(src="https://updates.kinopio.club/font-preview/apris.webp")
+    img(src="https://updates.kinopio.club/font-preview/eiko.webp")
     img(src="https://updates.kinopio.club/font-preview/gaya.webp")
     img(src="https://updates.kinopio.club/font-preview/grotesk-remix.webp")
     img(src="https://updates.kinopio.club/font-preview/gt-america.webp")
