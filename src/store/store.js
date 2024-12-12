@@ -274,8 +274,11 @@ const store = createStore({
     // codeblocks
     codeLanguagePickerIsVisible: false,
     codeLanguagePickerPosition: {}, // x, y
-    codeLanguagePickerCardId: ''
+    codeLanguagePickerCardId: '',
 
+    // snap guide lines
+    snapGuideLinesIsVisible: false,
+    snapGuideLinesOrigin: {}
   },
   mutations: {
     resetPageSizes: (state) => {
@@ -1685,8 +1688,19 @@ const store = createStore({
     codeLanguagePickerCardId: (state, cardId) => {
       utils.typeCheck({ value: cardId, type: 'string' })
       state.codeLanguagePickerCardId = cardId
-    }
+    },
 
+    // Snap Guide Lines
+
+    snapGuideLinesIsVisible: (state, value) => {
+      state.snapGuideLinesIsVisible = value
+    },
+    snapGuideLinesOrigin: (state, position) => {
+      utils.typeCheck({ value: position, type: 'object' })
+      position = utils.cursorPositionSnapToGrid(position)
+      console.log(position)
+      state.snapGuideLinesOrigin = position
+    }
   },
 
   actions: {
