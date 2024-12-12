@@ -1069,6 +1069,7 @@ const updateUrlPreviewSuccess = async (url, data) => {
   await store.dispatch('api/addToQueue', { name: 'updateUrlPreviewImage', body: data })
 }
 const retryUrlPreview = () => {
+  if (!canEditSpace.value) { return }
   const update = {
     id: props.card.id,
     shouldUpdateUrlPreview: true
