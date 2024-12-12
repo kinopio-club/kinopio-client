@@ -1693,8 +1693,6 @@ const store = createStore({
 
     snapGuideLinesOrigin: (state, position) => {
       utils.typeCheck({ value: position, type: 'object' })
-      position = utils.cursorPositionSnapToGrid(position)
-      console.log('♥️♥️♥️', position)
       state.snapGuideLinesOrigin = position
     }
   },
@@ -2135,6 +2133,16 @@ const store = createStore({
       const spaceTags = state.currentSpace.tags
       const tags = utils.mergeArrays({ previous: userTags, updated: spaceTags, key: 'name' })
       return tags || []
+    },
+    currentDraggingItem: (state, getters, rootState, rootGetters) => {
+      const boxId = state.currentDraggingBoxId
+      const cardId = state.currentDraggingCardId
+      if (boxId) {
+        return rootGetters['currentBoxes/byId'](boxId)
+      }
+      if (cardId) {
+        return rootGetters['currentCards/byId'](cardId)
+      }
     }
   },
 
