@@ -442,6 +442,12 @@ const initInteractions = (event) => {
 const updateShouldSnapToGrid = (event) => {
   let shouldSnap = isDraggingCard.value || isDraggingBox.value || isResizingCard.value || isResizingBox.value
   shouldSnap = shouldSnap && event.shiftKey
+  // update snap guide line origin
+  if (!store.state.shouldSnapToGrid && shouldSnap) {
+    const position = utils.cursorPositionInSpace(event)
+    store.commit('snapGuideLinesOrigin', position)
+  }
+  // should snap to grid
   store.commit('shouldSnapToGrid', shouldSnap)
 }
 const interact = (event) => {

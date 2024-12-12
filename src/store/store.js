@@ -277,7 +277,6 @@ const store = createStore({
     codeLanguagePickerCardId: '',
 
     // snap guide lines
-    snapGuideLinesIsVisible: false,
     snapGuideLinesOrigin: {}
   },
   mutations: {
@@ -1692,13 +1691,10 @@ const store = createStore({
 
     // Snap Guide Lines
 
-    snapGuideLinesIsVisible: (state, value) => {
-      state.snapGuideLinesIsVisible = value
-    },
     snapGuideLinesOrigin: (state, position) => {
       utils.typeCheck({ value: position, type: 'object' })
       position = utils.cursorPositionSnapToGrid(position)
-      console.log(position)
+      console.log('♥️♥️♥️', position)
       state.snapGuideLinesOrigin = position
     }
   },
