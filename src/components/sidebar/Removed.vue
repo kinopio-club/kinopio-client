@@ -129,13 +129,17 @@ const removeRemovedCard = (card) => {
 }
 const loadRemoteRemovedCards = async () => {
   if (!currentUserCanEditSpace.value) { return }
-  state.loading.cards = true
-  const space = store.state.currentSpace
-  const remoteCards = await store.dispatch('api/getSpaceRemovedCards', space)
-  state.loading.cards = false
-  if (!utils.arrayHasItems(remoteCards)) { return }
-  state.removedCards = remoteCards
-  store.commit('currentCards/removedCards', remoteCards)
+  try {
+    state.loading.cards = true
+    const space = store.state.currentSpace
+    const remoteCards = await store.dispatch('api/getSpaceRemovedCards', space)
+    state.loading.cards = false
+    if (!utils.arrayHasItems(remoteCards)) { return }
+    state.removedCards = remoteCards
+    store.commit('currentCards/removedCards', remoteCards)
+  } catch (error) {
+    console.error('🚒 loadRemoteRemovedCards', error)
+  }
 }
 const restoreCard = async (card) => {
   store.dispatch('currentCards/restoreRemoved', card)
