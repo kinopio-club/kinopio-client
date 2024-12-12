@@ -137,7 +137,7 @@ const handleShortcuts = (event) => {
     value = !value
     store.dispatch('currentUser/toggleFilterComments', value)
   } else if (key === ' ' && isSpaceScope) {
-    store.commit('currentUserIsPanning', false)
+    store.dispatch('currentUserIsPanning', false)
     store.commit('currentUserIsPanningReady', false)
     spaceKeyIsDown = false
   } else if (key === 'b' && isSpaceScope) {
@@ -270,11 +270,11 @@ const handleMouseDownEvents = (event) => {
   } else if (shouldPan) {
     prevRightClickPosition = utils.cursorPositionInPage(event)
     event.preventDefault()
-    store.commit('currentUserIsPanning', true)
+    store.dispatch('currentUserIsPanning', true)
     disableContextMenu = true
   } else if (store.state.currentUserIsPanningReady) {
     event.preventDefault()
-    store.commit('currentUserIsPanning', true)
+    store.dispatch('currentUserIsPanning', true)
   }
   if (isRightClick && userDisablePan) {
     store.dispatch('triggerSonarPing', event)
@@ -307,7 +307,7 @@ const handleMouseUpEvents = (event) => {
   // end panning
   const position = utils.cursorPositionInPage(event)
   prevCursorPosition = undefined
-  store.commit('currentUserIsPanning', false)
+  store.dispatch('currentUserIsPanning', false)
   store.commit('currentUserIsBoxSelecting', false)
 }
 // on scroll

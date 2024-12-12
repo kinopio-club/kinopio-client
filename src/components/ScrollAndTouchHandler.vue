@@ -11,6 +11,10 @@ let multiTouchAction, shouldCancelUndo
 
 let inertiaScrollEndIntervalTimer, prevPosition
 
+let nextEventIsStartPanning, startPanningPosition
+
+let unsubscribe
+
 onMounted(() => {
   window.addEventListener('wheel', handleMouseWheelEvents, { passive: false })
   // use timer to prevent being fired from page reload scroll
@@ -21,14 +25,19 @@ onMounted(() => {
   window.addEventListener('touchstart', touchStart)
   window.addEventListener('touchmove', touchMove)
   window.addEventListener('touchend', touchEnd)
-  window.addEventListener('mousemove', handleMouseMoveEvents)
+  window.addEventListener('mousemove', mouseMove)
+  unsubscribe = store.subscribe(mutation => {
+    if (mutation.type === 'triggerPanningStart') {
+      nextEventIsStartPanning = true
+    }
+  })
 })
 onBeforeUnmount(() => {
   window.removeEventListener('wheel', handleMouseWheelEvents, { passive: false })
   window.removeEventListener('touchstart', touchStart)
   window.removeEventListener('touchmove', touchMove)
   window.removeEventListener('touchend', touchEnd)
-  window.removeEventListener('mousemove', handleMouseMoveEvents)
+  window.removeEventListener('mousemove', mouseMove)
 })
 
 const isSpacePage = computed(() => store.getters.isSpacePage)
@@ -152,8 +161,9 @@ const toggleIsPinchZooming = (event) => {
 
 // mouse move
 
-const handleMouseMoveEvents = (event) => {
-  const panSpeedIsFast = store.state.currentUser.panSpeedIsFast
+const mouseMove = (event) => {
+  // panning triggered in KeyboardShortcutsHandler
+  const panSpeedIsFast = store.state.currentUser.panSpeedIsFast // TODO remove attr, and settings ui
   let speed = 1
   if (panSpeedIsFast) {
     speed = 5
@@ -161,7 +171,14 @@ const handleMouseMoveEvents = (event) => {
   const position = utils.cursorPositionInPage(event)
   if (store.state.currentUserIsPanning) {
     event.preventDefault()
+    if (nextEventIsStartPanning) {
+      console.log('start panning')
+      nextEventIsStartPanning = false
+      // ...
+      return
+    }
     console.log('panning...')
+
     // if (!prevCursorPosition) {
     //   prevCursorPosition = position
     // }
