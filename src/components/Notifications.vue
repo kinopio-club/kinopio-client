@@ -359,7 +359,7 @@ aside.notifications(@click.left="closeAllDialogs")
 
   .persistent-item.info(v-if="snapToGridIsVisible")
     img.icon(src="@/assets/constrain-axis.svg")
-    span Box select, snap to grid
+    span Snap to grid
 
   .persistent-item.success(v-if="notifyThanksForDonating")
     p Thank you for being a

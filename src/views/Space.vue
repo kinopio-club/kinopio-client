@@ -440,7 +440,9 @@ const initInteractions = (event) => {
   state.startCursor = utils.cursorPositionInViewport(event)
 }
 const updateShouldSnapToGrid = (event) => {
-  store.commit('shouldSnapToGrid', event.shiftKey)
+  let shouldSnap = isDraggingCard.value || isDraggingBox.value || isResizingCard.value || isResizingBox.value
+  shouldSnap = shouldSnap && event.shiftKey
+  store.commit('shouldSnapToGrid', shouldSnap)
 }
 const interact = (event) => {
   endCursor = utils.cursorPositionInViewport(event)
