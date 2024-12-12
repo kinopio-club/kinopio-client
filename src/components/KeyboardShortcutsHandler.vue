@@ -282,27 +282,11 @@ const handleMouseDownEvents = (event) => {
 }
 // on mouse move
 const handleMouseMoveEvents = (event) => {
-  const panSpeedIsFast = store.state.currentUser.panSpeedIsFast
-  let speed = 1
-  if (panSpeedIsFast) {
-    speed = 5
-  }
   const position = utils.cursorPositionInPage(event)
   currentCursorPosition = position
   // box selection
   if (store.state.currentUserIsBoxSelecting) {
     store.commit('currentUserBoxSelectMove', position)
-  // panning
-  } else if (store.state.currentUserIsPanning) {
-    event.preventDefault()
-    if (!prevCursorPosition) {
-      prevCursorPosition = position
-    }
-    let delta = {
-      x: Math.round((prevCursorPosition.x - position.x) * speed),
-      y: Math.round((prevCursorPosition.y - position.y) * speed)
-    }
-    window.scrollBy(delta.x, delta.y, 'instant')
   }
 }
 // on mouse up

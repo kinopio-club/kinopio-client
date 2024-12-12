@@ -21,12 +21,14 @@ onMounted(() => {
   window.addEventListener('touchstart', touchStart)
   window.addEventListener('touchmove', touchMove)
   window.addEventListener('touchend', touchEnd)
+  window.addEventListener('mousemove', handleMouseMoveEvents)
 })
 onBeforeUnmount(() => {
   window.removeEventListener('wheel', handleMouseWheelEvents, { passive: false })
   window.removeEventListener('touchstart', touchStart)
   window.removeEventListener('touchmove', touchMove)
   window.removeEventListener('touchend', touchEnd)
+  window.removeEventListener('mousemove', handleMouseMoveEvents)
 })
 
 const isSpacePage = computed(() => store.getters.isSpacePage)
@@ -147,6 +149,30 @@ const toggleIsPinchZooming = (event) => {
   if (utils.shouldIgnoreTouchInteraction(event)) { return }
   store.commit('isPinchZooming', true)
 }
+
+// mouse move
+
+const handleMouseMoveEvents = (event) => {
+  const panSpeedIsFast = store.state.currentUser.panSpeedIsFast
+  let speed = 1
+  if (panSpeedIsFast) {
+    speed = 5
+  }
+  const position = utils.cursorPositionInPage(event)
+  if (store.state.currentUserIsPanning) {
+    event.preventDefault()
+    console.log('panning...')
+    // if (!prevCursorPosition) {
+    //   prevCursorPosition = position
+    // }
+    // let delta = {
+    //   x: Math.round((prevCursorPosition.x - position.x) * speed),
+    //   y: Math.round((prevCursorPosition.y - position.y) * speed)
+    // }
+    // window.scrollBy(delta.x, delta.y, 'instant')
+  }
+}
+
 </script>
 
 <template lang="pug">
