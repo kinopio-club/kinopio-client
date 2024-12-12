@@ -16,6 +16,7 @@ import Boxes from '@/components/Boxes.vue'
 import Cards from '@/components/Cards.vue'
 import Connections from '@/components/Connections.vue'
 import ItemUnlockButtons from '@/components/ItemUnlockButtons.vue'
+import SnapGuideLines from '@/components/SnapGuideLines.vue'
 import utils from '@/utils.js'
 import cache from '@/cache.js'
 import consts from '@/consts.js'
@@ -440,7 +441,18 @@ const initInteractions = (event) => {
   state.startCursor = utils.cursorPositionInViewport(event)
 }
 const updateShouldSnapToGrid = (event) => {
-  store.commit('shouldSnapToGrid', event.shiftKey)
+  let shouldSnap = isDraggingCard.value || isDraggingBox.value || isResizingCard.value || isResizingBox.value
+  shouldSnap = shouldSnap && event.shiftKey
+  // update snap guide line origin
+  if (!store.state.shouldSnapToGrid && shouldSnap) {
+    const item = store.getters.currentDraggingItem
+    store.commit('snapGuideLinesOrigin', {
+      x: item.x,
+      y: item.y
+    })
+  }
+  // should snap to grid
+  store.commit('shouldSnapToGrid', shouldSnap)
 }
 const interact = (event) => {
   endCursor = utils.cursorPositionInViewport(event)
@@ -582,6 +594,7 @@ main#space.space(
   ScrollAtEdgesHandler
   NotificationsWithPosition(layer="space")
   BoxSelecting
+  SnapGuideLines
 </template>
 
 <style lang="stylus">

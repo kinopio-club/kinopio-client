@@ -274,8 +274,10 @@ const store = createStore({
     // codeblocks
     codeLanguagePickerIsVisible: false,
     codeLanguagePickerPosition: {}, // x, y
-    codeLanguagePickerCardId: ''
+    codeLanguagePickerCardId: '',
 
+    // snap guide lines
+    snapGuideLinesOrigin: {}
   },
   mutations: {
     resetPageSizes: (state) => {
@@ -1685,8 +1687,14 @@ const store = createStore({
     codeLanguagePickerCardId: (state, cardId) => {
       utils.typeCheck({ value: cardId, type: 'string' })
       state.codeLanguagePickerCardId = cardId
-    }
+    },
 
+    // Snap Guide Lines
+
+    snapGuideLinesOrigin: (state, position) => {
+      utils.typeCheck({ value: position, type: 'object' })
+      state.snapGuideLinesOrigin = position
+    }
   },
 
   actions: {
@@ -2125,6 +2133,16 @@ const store = createStore({
       const spaceTags = state.currentSpace.tags
       const tags = utils.mergeArrays({ previous: userTags, updated: spaceTags, key: 'name' })
       return tags || []
+    },
+    currentDraggingItem: (state, getters, rootState, rootGetters) => {
+      const boxId = state.currentDraggingBoxId
+      const cardId = state.currentDraggingCardId
+      if (boxId) {
+        return rootGetters['currentBoxes/byId'](boxId)
+      }
+      if (cardId) {
+        return rootGetters['currentCards/byId'](cardId)
+      }
     }
   },
 
