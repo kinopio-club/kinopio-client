@@ -176,7 +176,7 @@ const mouseMove = (event) => {
 
 // panning
 
-let shouldStartPanning, startPosition, currentPosition, panningTimer, shouldCancelPanningTimer, panningDelta
+let shouldStartPanning, startPosition, currentPosition, panningTimer, shouldCancelPanningTimer, panningDelta, shouldPanNextFrame
 
 const updatePanningPosition = (event) => {
   const position = utils.cursorPositionInPage(event)
@@ -185,6 +185,7 @@ const updatePanningPosition = (event) => {
       x: startPosition.x - position.x,
       y: startPosition.y - position.y
     }
+    shouldPanNextFrame = true
   }
 }
 const initPanning = (event) => {
@@ -197,7 +198,10 @@ const initPanning = (event) => {
   }
 }
 const panningFrame = () => {
-  window.scrollBy(panningDelta.x, panningDelta.y, 'instant')
+  if (shouldPanNextFrame) {
+    window.scrollBy(panningDelta.x, panningDelta.y, 'instant')
+    shouldPanNextFrame = false
+  }
   panningTimer = window.requestAnimationFrame(panningFrame)
   if (shouldCancelPanningTimer) {
     window.cancelAnimationFrame(panningTimer)
