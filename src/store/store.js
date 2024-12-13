@@ -2142,9 +2142,15 @@ const store = createStore({
       const tags = utils.mergeArrays({ previous: userTags, updated: spaceTags, key: 'name' })
       return tags || []
     },
-    currentDraggingItem: (state, getters, rootState, rootGetters) => {
-      const boxId = state.currentDraggingBoxId
-      const cardId = state.currentDraggingCardId
+    currentInteractingItem: (state, getters, rootState, rootGetters) => {
+      let boxId = state.currentDraggingBoxId
+      if (state.currentUserIsResizingBox) {
+        boxId = state.currentUserIsResizingBoxIds[0]
+      }
+      let cardId = state.currentDraggingCardId
+      if (state.currentUserIsResizingCard) {
+        cardId = state.currentUserIsResizingCardIds[0]
+      }
       if (boxId) {
         return rootGetters['currentBoxes/byId'](boxId)
       }

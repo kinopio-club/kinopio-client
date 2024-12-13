@@ -465,7 +465,7 @@ const updateShouldSnapToGrid = (event) => {
   shouldSnap = shouldSnap && event.shiftKey
   // update snap guide line origin
   if (!store.state.shouldSnapToGrid && shouldSnap) {
-    const item = store.getters.currentDraggingItem
+    const item = store.getters.currentInteractingItem
     store.commit('snapGuideLinesOrigin', {
       x: item.x,
       y: item.y
