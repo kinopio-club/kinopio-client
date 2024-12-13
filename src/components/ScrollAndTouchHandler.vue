@@ -11,8 +11,6 @@ let multiTouchAction, shouldCancelUndo
 
 let inertiaScrollEndIntervalTimer, prevPosition
 
-let shouldStartPanning, startPosition, currentPosition, panningTimer, shouldCancelPanningTimer, panningDelta
-
 let unsubscribe
 
 onMounted(() => {
@@ -171,29 +169,36 @@ const mouseMove = (event) => {
   // panning triggered in KeyboardShortcutsHandler
   if (store.state.currentUserIsPanning) {
     event.preventDefault()
-    const position = utils.cursorPositionInPage(event)
-    if (startPosition) {
-      panningDelta = {
-        x: startPosition.x - position.x,
-        y: startPosition.y - position.y
-      }
-    }
-    if (shouldStartPanning) {
-      startPosition = position
-      shouldStartPanning = false
-      shouldCancelPanningTimer = false
-      panningTimer = window.requestAnimationFrame(panningFrame)
-    }
+    updatePanningPosition(event)
+    initPanning(event)
   }
 }
 
 // panning
 
+let shouldStartPanning, startPosition, currentPosition, panningTimer, shouldCancelPanningTimer, panningDelta
+
+const updatePanningPosition = (event) => {
+  const position = utils.cursorPositionInPage(event)
+  if (startPosition) {
+    panningDelta = {
+      x: startPosition.x - position.x,
+      y: startPosition.y - position.y
+    }
+  }
+}
+const initPanning = (event) => {
+  const position = utils.cursorPositionInPage(event)
+  if (shouldStartPanning) {
+    startPosition = position
+    shouldStartPanning = false
+    shouldCancelPanningTimer = false
+    panningTimer = window.requestAnimationFrame(panningFrame)
+  }
+}
 const panningFrame = () => {
   window.scrollBy(panningDelta.x, panningDelta.y, 'instant')
-  // repeat
   panningTimer = window.requestAnimationFrame(panningFrame)
-  // cancel
   if (shouldCancelPanningTimer) {
     window.cancelAnimationFrame(panningTimer)
     panningTimer = null
