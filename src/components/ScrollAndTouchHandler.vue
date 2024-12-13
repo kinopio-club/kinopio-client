@@ -11,7 +11,7 @@ let multiTouchAction, shouldCancelUndo
 
 let inertiaScrollEndIntervalTimer, prevPosition
 
-let nextEventIsStartPanning, prevCursorPosition, panningTimer, shouldCancelPanningTimer
+let nextEventIsStartPanning, prevCursorPosition, currentCursorPosition, panningTimer, shouldCancelPanningTimer
 
 let unsubscribe
 
@@ -177,39 +177,32 @@ const mouseMove = (event) => {
   // start panning
   if (store.state.currentUserIsPanning) {
     event.preventDefault()
-    prevCursorPosition = utils.cursorPositionInPage(event)
+    const position = utils.cursorPositionInPage(event)
+    currentCursorPosition = position
     if (nextEventIsStartPanning) {
+      prevCursorPosition = position
       nextEventIsStartPanning = false
       shouldCancelPanningTimer = false
-      console.log('🌷🌷🌷v start panning')
       panningTimer = window.requestAnimationFrame(panningFrame)
-      // startPanning(event)
     }
-    // console.log('panning...')
-
-    // if (!prevCursorPosition) {
-    //   prevCursorPosition = position
-    // }
-    // let delta = {
-    //   x: Math.round((prevCursorPosition.x - position.x) * speed),
-    //   y: Math.round((prevCursorPosition.y - position.y) * speed)
-    // }
-    // window.scrollBy(delta.x, delta.y, 'instant')
   }
 }
 
 // panning
 
 const panningFrame = () => {
-  // scroll by delta
-  console.log('🍇panningFrame', prevCursorPosition)
-
+  // scroll by
+  const delta = {
+    x: Math.round(currentCursorPosition.x - prevCursorPosition.x),
+    y: Math.round(currentCursorPosition.y - prevCursorPosition.y)
+  }
+  window.scrollBy(delta.x, delta.y, 'instant')
+  prevCursorPosition = currentCursorPosition
   // repeat
   panningTimer = window.requestAnimationFrame(panningFrame)
-  // end panning
+  // end
   if (shouldCancelPanningTimer) {
     window.cancelAnimationFrame(panningTimer)
-    console.log('💐💐💐💐', panningTimer)
     panningTimer = undefined
   }
 }
