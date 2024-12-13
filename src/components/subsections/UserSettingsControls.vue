@@ -13,7 +13,6 @@ const props = defineProps({
 })
 
 const state = reactive({
-  panningTipsIsVisible: false,
   outsideSpaceColorTipsIsVisible: false
 })
 
@@ -32,18 +31,9 @@ const toggleShouldDisableHapticFeedback = () => {
 // panning
 
 const shouldDisableRightClickToPan = computed(() => store.state.currentUser.shouldDisableRightClickToPan)
-const panSpeedIsFast = computed(() => store.state.currentUser.panSpeedIsFast)
-const updatePanSpeedIsFast = (value) => {
-  store.dispatch('currentUser/update', { panSpeedIsFast: value })
-}
 const toggleShouldDisableRightClickToPan = () => {
   const value = !shouldDisableRightClickToPan.value
   store.dispatch('currentUser/update', { shouldDisableRightClickToPan: value })
-}
-const togglePanningTipsIsVisible = () => {
-  const value = !state.panningTipsIsVisible
-  clearTips()
-  state.panningTipsIsVisible = value
 }
 
 // zoom
@@ -151,20 +141,7 @@ const clearTips = () => {
 
   section
     .row.title-row
-      p Panning and Zoom
-      .button-wrap
-        button.small-button(@click="togglePanningTipsIsVisible" :class="{ active: state.panningTipsIsVisible }")
-          span ?
-    section.subsection(v-if="state.panningTipsIsVisible")
-      p Hold and drag space key, or right/middle mouse button, to Pan
-    .row
-      .segmented-buttons
-        button(:class="{ active: !panSpeedIsFast }" @click="updatePanSpeedIsFast(false)")
-          span Pan Slow
-        button(:class="{ active: panSpeedIsFast }" @click="updatePanSpeedIsFast(true)")
-          span Pan Fast
-    .row(v-if="panSpeedIsFast")
-      .badge.danger Fast panning is experimental. If panning is not smooth for you then switch back to slow
+      p Zoom
     .row
       label(:class="{ active: shouldDisableRightClickToPan }" @click.left.prevent="toggleShouldDisableRightClickToPan" @keydown.stop.enter="toggleShouldDisableRightClickToPan")
         input(type="checkbox" v-model="shouldDisableRightClickToPan")

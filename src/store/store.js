@@ -667,6 +667,7 @@ const store = createStore({
     triggerUpdateCardDimensionsAndPaths: (state, cardId) => {},
     triggerUpdateItemCurrentConnections: (state, itemId) => {},
     triggerCloseGroupDetailsDialog: () => {},
+    triggerPanningStart: () => {},
 
     // Used by extensions only
 
@@ -1978,6 +1979,13 @@ const store = createStore({
       ping.color = store.state.currentUser.color
       context.commit('triggerSonarPing', ping)
       context.commit('broadcast/updateStore', { updates: ping, type: 'triggerSonarPing' })
+    },
+    currentUserIsPanning: (context, value) => {
+      const prevValue = context.state.currentUserIsPanning
+      if (!prevValue && value) {
+        context.commit('triggerPanningStart')
+      }
+      context.commit('currentUserIsPanning', value)
     },
 
     // current space

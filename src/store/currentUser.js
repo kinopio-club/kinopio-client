@@ -58,7 +58,6 @@ const initialState = {
   AIImages: [],
   theme: null,
   themeIsSystem: false,
-  panSpeedIsFast: false,
   outsideSpaceBackgroundIsStatic: false,
   shouldDisableHapticFeedback: false,
   appleAppAccountToken: null,
@@ -301,10 +300,6 @@ export default {
     defaultConnectionControlPoint: (state, value) => {
       state.defaultConnectionControlPoint = value
       cache.updateUser('defaultConnectionControlPoint', value)
-    },
-    panSpeedIsFast: (state, value) => {
-      state.panSpeedIsFast = value
-      cache.updateUser('panSpeedIsFast', value)
     },
     outsideSpaceBackgroundIsStatic: (state, value) => {
       state.outsideSpaceBackgroundIsStatic = value

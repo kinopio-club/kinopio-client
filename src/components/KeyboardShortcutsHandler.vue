@@ -137,7 +137,7 @@ const handleShortcuts = (event) => {
     value = !value
     store.dispatch('currentUser/toggleFilterComments', value)
   } else if (key === ' ' && isSpaceScope) {
-    store.commit('currentUserIsPanning', false)
+    store.dispatch('currentUserIsPanning', false)
     store.commit('currentUserIsPanningReady', false)
     spaceKeyIsDown = false
   } else if (key === 'b' && isSpaceScope) {
@@ -270,11 +270,11 @@ const handleMouseDownEvents = (event) => {
   } else if (shouldPan) {
     prevRightClickPosition = utils.cursorPositionInPage(event)
     event.preventDefault()
-    store.commit('currentUserIsPanning', true)
+    store.dispatch('currentUserIsPanning', true)
     disableContextMenu = true
   } else if (store.state.currentUserIsPanningReady) {
     event.preventDefault()
-    store.commit('currentUserIsPanning', true)
+    store.dispatch('currentUserIsPanning', true)
   }
   if (isRightClick && userDisablePan) {
     store.dispatch('triggerSonarPing', event)
@@ -282,27 +282,11 @@ const handleMouseDownEvents = (event) => {
 }
 // on mouse move
 const handleMouseMoveEvents = (event) => {
-  const panSpeedIsFast = store.state.currentUser.panSpeedIsFast
-  let speed = 1
-  if (panSpeedIsFast) {
-    speed = 5
-  }
   const position = utils.cursorPositionInPage(event)
   currentCursorPosition = position
   // box selection
   if (store.state.currentUserIsBoxSelecting) {
     store.commit('currentUserBoxSelectMove', position)
-  // panning
-  } else if (store.state.currentUserIsPanning) {
-    event.preventDefault()
-    if (!prevCursorPosition) {
-      prevCursorPosition = position
-    }
-    let delta = {
-      x: Math.round((prevCursorPosition.x - position.x) * speed),
-      y: Math.round((prevCursorPosition.y - position.y) * speed)
-    }
-    window.scrollBy(delta.x, delta.y, 'instant')
   }
 }
 // on mouse up
@@ -323,7 +307,7 @@ const handleMouseUpEvents = (event) => {
   // end panning
   const position = utils.cursorPositionInPage(event)
   prevCursorPosition = undefined
-  store.commit('currentUserIsPanning', false)
+  store.dispatch('currentUserIsPanning', false)
   store.commit('currentUserIsBoxSelecting', false)
 }
 // on scroll
