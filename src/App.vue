@@ -2,21 +2,6 @@
 import { reactive, computed, onMounted, onBeforeUnmount, onUnmounted, defineProps, defineEmits, watch, ref, nextTick } from 'vue'
 import { useStore } from 'vuex'
 
-import Header from '@/components/Header.vue'
-import MagicPaint from '@/components/layers/MagicPaint.vue'
-import UserLabelCursor from '@/components/UserLabelCursor.vue'
-import Footer from '@/components/Footer.vue'
-import WindowHistoryHandler from '@/components/WindowHistoryHandler.vue'
-import KeyboardShortcutsHandler from '@/components/KeyboardShortcutsHandler.vue'
-import ScrollAndTouchHandler from '@/components/ScrollAndTouchHandler.vue'
-import TagDetails from '@/components/dialogs/TagDetails.vue'
-import ItemsLocked from '@/components/ItemsLocked.vue'
-import UserDetails from '@/components/dialogs/UserDetails.vue'
-import NotificationsWithPosition from '@/components/NotificationsWithPosition.vue'
-import SpaceBackground from '@/components/SpaceBackground.vue'
-import SpaceBackgroundTint from '@/components/SpaceBackgroundTint.vue'
-import OutsideSpaceBackground from '@/components/OutsideSpaceBackground.vue'
-import Preload from '@/components/Preload.vue'
 import utils from '@/utils.js'
 import consts from '@/consts.js'
 const store = useStore()
@@ -72,17 +57,9 @@ const pageCursor = computed(() => {
   return undefined
 })
 const spaceZoomDecimal = computed(() => store.getters.spaceZoomDecimal)
-const isDevelpmentBadgeVisible = computed(() => {
-  if (store.state.isPresentationMode) { return }
-  return consts.isDevelopment()
-})
 
 // users
 
-const users = computed(() => {
-  const excludeCurrentUser = true
-  return store.getters['currentSpace/allUsers'](excludeCurrentUser)
-})
 const currentUserId = computed(() => store.state.currentUser.id)
 
 // online
@@ -179,7 +156,6 @@ const updateMetaRSSFeed = () => {
   link.href = url
   head.appendChild(link)
 }
-
 </script>
 
 <template lang='pug'>
@@ -190,31 +166,8 @@ const updateMetaRSSFeed = () => {
   :class="{ 'no-background': !isSpacePage, 'is-dark-theme': isThemeDark }"
   :data-current-user-id="currentUserId"
 )
-  base(v-if="!isSpacePage" target="_blank")
-  template(v-if="isSpacePage")
-    OutsideSpaceBackground
-    SpaceBackground
-    SpaceBackgroundTint
-    ItemsLocked
-    MagicPaint
-    //- Presence
-    template(v-for="user in users")
-      UserLabelCursor(:user="user")
-
   //- router-view is Space or Add
   router-view
-  template(v-if="isSpacePage")
-    Header
-    Footer
-    TagDetails
-    UserDetails
-    WindowHistoryHandler
-    KeyboardShortcutsHandler
-    ScrollAndTouchHandler
-    NotificationsWithPosition(layer="app")
-    Preload
-    .badge.label-badge.development-badge(v-if="isDevelpmentBadgeVisible")
-      span DEV
 </template>
 
 <style lang="stylus">

@@ -17,6 +17,22 @@ import Cards from '@/components/Cards.vue'
 import Connections from '@/components/Connections.vue'
 import ItemUnlockButtons from '@/components/ItemUnlockButtons.vue'
 import SnapGuideLines from '@/components/SnapGuideLines.vue'
+
+import Header from '@/components/Header.vue'
+import MagicPaint from '@/components/layers/MagicPaint.vue'
+import UserLabelCursor from '@/components/UserLabelCursor.vue'
+import Footer from '@/components/Footer.vue'
+import WindowHistoryHandler from '@/components/WindowHistoryHandler.vue'
+import KeyboardShortcutsHandler from '@/components/KeyboardShortcutsHandler.vue'
+import ScrollAndTouchHandler from '@/components/ScrollAndTouchHandler.vue'
+import TagDetails from '@/components/dialogs/TagDetails.vue'
+import ItemsLocked from '@/components/ItemsLocked.vue'
+import UserDetails from '@/components/dialogs/UserDetails.vue'
+import SpaceBackground from '@/components/SpaceBackground.vue'
+import SpaceBackgroundTint from '@/components/SpaceBackgroundTint.vue'
+import OutsideSpaceBackground from '@/components/OutsideSpaceBackground.vue'
+import Preload from '@/components/Preload.vue'
+
 import utils from '@/utils.js'
 import cache from '@/cache.js'
 import consts from '@/consts.js'
@@ -154,6 +170,10 @@ const updateViewportSizes = () => {
 // user
 
 const currentUser = computed(() => store.state.currentUser)
+const users = computed(() => {
+  const excludeCurrentUser = true
+  return store.getters['currentSpace/allUsers'](excludeCurrentUser)
+})
 
 // styles
 
@@ -520,6 +540,10 @@ const shouldCancelInteraction = (event) => {
 
 // 💣 stopInteractions and Space/stopPainting are run after all mouse and touch end events
 
+const isDevelpmentBadgeVisible = computed(() => {
+  if (store.state.isPresentationMode) { return }
+  return consts.isDevelopment()
+})
 const handleTouchEnd = (event) => {
   store.commit('isPinchZooming', false)
   store.commit('isTouchScrolling', false)
@@ -570,10 +594,19 @@ const stopInteractions = async (event) => {
   store.commit('clearShouldExplicitlyRenderCardIds', null, { root: true })
   store.commit('shouldSnapToGrid', false)
 }
-
 </script>
 
 <template lang="pug">
+//- page
+OutsideSpaceBackground
+SpaceBackground
+SpaceBackgroundTint
+ItemsLocked
+MagicPaint
+//- user presence cursors
+template(v-for="user in users")
+  UserLabelCursor(:user="user")
+//- space
 main#space.space(
   :class="{'is-interacting': isInteracting, 'is-not-interacting': isPainting || isPanningReady}"
   @mousedown.left="initInteractions"
@@ -595,6 +628,19 @@ main#space.space(
   NotificationsWithPosition(layer="space")
   BoxSelecting
   SnapGuideLines
+//- page ui, dialogs
+Header
+Footer
+TagDetails
+UserDetails
+//- handlers
+WindowHistoryHandler
+KeyboardShortcutsHandler
+ScrollAndTouchHandler
+NotificationsWithPosition(layer="app")
+Preload
+.badge.label-badge.development-badge(v-if="isDevelpmentBadgeVisible")
+  span DEV
 </template>
 
 <style lang="stylus">
