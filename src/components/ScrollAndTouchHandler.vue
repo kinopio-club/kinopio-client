@@ -11,7 +11,7 @@ let multiTouchAction, shouldCancelUndo
 
 let inertiaScrollEndIntervalTimer, prevPosition
 
-let nextEventIsStartPanning, prevCursorPosition, currentCursorPosition, panningTimer, shouldCancelPanningTimer
+let shouldStartPanning, startPosition, currentPosition, panningTimer, shouldCancelPanningTimer, panningDelta
 
 let unsubscribe
 
@@ -27,10 +27,9 @@ onMounted(() => {
   window.addEventListener('touchend', touchEnd)
   window.addEventListener('mousemove', mouseMove)
   window.addEventListener('mouseup', mouseUp)
-
   unsubscribe = store.subscribe(mutation => {
     if (mutation.type === 'triggerPanningStart') {
-      nextEventIsStartPanning = true
+      shouldStartPanning = true
     }
   })
 })
@@ -41,6 +40,7 @@ onBeforeUnmount(() => {
   window.removeEventListener('touchend', touchEnd)
   window.removeEventListener('mousemove', mouseMove)
   window.removeEventListener('mouseup', mouseUp)
+  unsubscribe()
 })
 
 const isSpacePage = computed(() => store.getters.isSpacePage)
@@ -74,7 +74,7 @@ const handleMouseWheelEvents = (event) => {
 // scroll
 
 const updateZoomOrigin = (event) => {
-  const cursor = utils.cursorPositionInPage(event)
+  const cursor = utils.PositionInPage(event)
   store.dispatch('zoomOrigin', cursor)
 }
 const scroll = () => {
@@ -168,15 +168,19 @@ const mouseUp = () => {
   shouldCancelPanningTimer = true
 }
 const mouseMove = (event) => {
-  // start panning
-  // triggered in KeyboardShortcutsHandler
+  // panning triggered in KeyboardShortcutsHandler
   if (store.state.currentUserIsPanning) {
     event.preventDefault()
     const position = utils.cursorPositionInPage(event)
-    currentCursorPosition = position
-    if (nextEventIsStartPanning) {
-      prevCursorPosition = position
-      nextEventIsStartPanning = false
+    if (startPosition) {
+      panningDelta = {
+        x: startPosition.x - position.x,
+        y: startPosition.y - position.y
+      }
+    }
+    if (shouldStartPanning) {
+      startPosition = position
+      shouldStartPanning = false
       shouldCancelPanningTimer = false
       panningTimer = window.requestAnimationFrame(panningFrame)
     }
@@ -186,19 +190,14 @@ const mouseMove = (event) => {
 // panning
 
 const panningFrame = () => {
-  // scroll by position delta
-  const delta = {
-    x: Math.round(currentCursorPosition.x - prevCursorPosition.x),
-    y: Math.round(currentCursorPosition.y - prevCursorPosition.y)
-  }
-  window.scrollBy(delta.x, delta.y, 'instant')
-  prevCursorPosition = currentCursorPosition
+  window.scrollBy(panningDelta.x, panningDelta.y, 'instant')
   // repeat
   panningTimer = window.requestAnimationFrame(panningFrame)
-  // end
+  // cancel
   if (shouldCancelPanningTimer) {
     window.cancelAnimationFrame(panningTimer)
-    panningTimer = undefined
+    panningTimer = null
+    startPosition = null
   }
 }
 
