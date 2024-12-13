@@ -1315,12 +1315,12 @@ const currentSpace = {
     },
     spaceCreatorIsUpgraded: (state, getters, rootState, rootGetters) => {
       const creatorUser = getters.creator
-      return creatorUser.isUpgraded
+      return creatorUser?.isUpgraded
     },
     spaceCreatorIsCurrentUser: (state, getters, rootState) => {
       const currentUser = rootState.currentUser
       const creatorUser = getters.creator
-      return currentUser.id === creatorUser.id
+      return currentUser.id === creatorUser?.id
     },
     shouldPreventAddCard: (state, getters, rootState, rootGetters) => {
       const cardsCreatedIsOverLimit = rootGetters['currentUser/cardsCreatedIsOverLimit']
