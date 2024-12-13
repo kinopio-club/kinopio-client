@@ -186,7 +186,7 @@ const mouseMove = (event) => {
 // panning
 
 const panningFrame = () => {
-  // scroll by
+  // scroll by position delta
   const delta = {
     x: Math.round(currentCursorPosition.x - prevCursorPosition.x),
     y: Math.round(currentCursorPosition.y - prevCursorPosition.y)
