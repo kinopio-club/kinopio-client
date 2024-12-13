@@ -168,13 +168,8 @@ const mouseUp = () => {
   shouldCancelPanningTimer = true
 }
 const mouseMove = (event) => {
-  // panning triggered in KeyboardShortcutsHandler
-  const panSpeedIsFast = store.state.currentUser.panSpeedIsFast // TODO remove attr, and settings ui
-  let speed = 1
-  if (panSpeedIsFast) {
-    speed = 5
-  }
   // start panning
+  // triggered in KeyboardShortcutsHandler
   if (store.state.currentUserIsPanning) {
     event.preventDefault()
     const position = utils.cursorPositionInPage(event)
