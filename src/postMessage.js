@@ -32,7 +32,7 @@ const self = {
       const value = body.value || ''
       window.webkit.messageHandlers[body.name].postMessage(value)
     } catch (error) {
-      console.error(error)
+      console.error('🚒 send postMessage', error, body)
     }
   },
 
