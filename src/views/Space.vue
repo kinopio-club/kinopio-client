@@ -630,8 +630,8 @@ main#space.space(
   BoxSelecting
   SnapGuideLines
 //- page ui, dialogs
-//- Header
-//- Footer
+Header
+Footer
 TagDetails
 UserDetails
 //- handlers

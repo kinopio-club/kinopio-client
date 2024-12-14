@@ -14,21 +14,17 @@ The `kinopio-client` is the client web app that users use to read and update spa
 
 ## Install
 
-```
-git clone https://github.com/pketh/kinopio-client.git
-cd kinopio-client
-npm install
-npm install -g @vue/cli
-npm install -g hostile
-hostile set localhost kinopio.local
-```
+    git clone https://github.com/pketh/kinopio-client.git
+    cd kinopio-client
+    npm install
+    npm install -g @vue/cli
+    npm install -g hostile
+    hostile set localhost kinopio.local
 
 ## Run
 
-```
-npm run serve
-https://kinopio.local:8080
-```
+    npm run serve --host
+    https://kinopio.local:8080
 
 ## Run with Production API Server
 
@@ -36,7 +32,7 @@ You can force the local app to use the prod API by editing `.env.local` so that 
 
 When the app starts up, the `🐸 kinopio-server URL` will be displayed in the browser logs.
 
-## Debugging
+## Linting
 
 	npm run lint
 
@@ -96,26 +92,9 @@ To update it, create the space and export its json. Replace the contents of`hell
 
 To work with code that only works on https (e.g. clipboard copy and paste), [mkcert](https://github.com/FiloSottile/mkcert) was used to create a local ssl certificate
 
-    $ brew install mkcert
-    $ mkcert -install
-	$ mkdir -p .cert && mkcert -key-file ./.cert/key.pem -cert-file ./.cert/cert.pem 'kinopio.local'
-
-## Ngrok tunnelling
-
-Use Ngrok to pipe your localhost through an external https server. Helpful for debugging on mobile.
-
-(Note that dev kinopio-server connections won't work through Ngrok)
-
-### Setup Ngrok
-
-[login](http://ngrok.com), install ngrok, then connect ngrok to the kinopio ngrok account
-
-    brew install ngrok/ngrok/ngrok
-    ngrok authtoken NGROK_TOKEN
-
-### Run Ngrok
-
-    ngrok http https://localhost:8080
+    brew install mkcert
+    mkcert -install
+	mkdir -p .cert && mkcert -key-file ./.cert/key.pem -cert-file ./.cert/cert.pem 'kinopio.local'
 
 ## See Also
 
