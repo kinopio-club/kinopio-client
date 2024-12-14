@@ -30,7 +30,9 @@ const self = {
     try {
       this.logSend(body)
       const value = body.value || ''
-      window.webkit?.messageHandlers[body.name].postMessage(value)
+      const messageHandler = window.webkit.messageHandlers[body.name]
+      if (!messageHandler) { return }
+      messageHandler.postMessage(value)
     } catch (error) {
       console.error('🚒 send postMessage', error, body)
     }
