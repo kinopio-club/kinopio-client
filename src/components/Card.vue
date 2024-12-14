@@ -1094,6 +1094,7 @@ const nameIncludesUrl = (url) => {
 const updateUrlPreviewImage = (update) => {
   if (!currentUserIsSignedIn.value) { return }
   if (!update.urlPreviewImage) { return }
+  if (!canEditSpace.value) { return }
   update.cardId = update.id
   update.spaceId = store.state.currentSpace.id
   delete update.id
