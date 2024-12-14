@@ -59,7 +59,7 @@ Use the [Vue devtools](https://github.com/vuejs/vue-devtools) for Firefox and Ch
 | `components/Connection.vue` | Displays connections from `store.state.currentConnections`, and shows `ConnectionDetails` |
 | `components/Box.vue` | Displays boxes from `store.state.currentBoxes`, and shows `ConnectionDetails` |
 | `components/Header.vue` | Used for moving between spaces, searching/filter, shows user presence, changing user prefs, and Kinopio meta options. Shown on all routes |
-| `components/layers/MagicPaint.vue` | The layers used for animating painting, scroll locking on touch, and more with `<canvas>`. As well as for multiple card and connection selection which reveals `MultipleSelectedActions` |
+| `components/layers/PaintSelect.vue` | The layers used for drawing the paint strokes for multiple card and connection selection which reveals `MultipleSelectedActions`, scroll locking on touch, and other related `<canvas>` elements |
 | `components/NewBlankTemplate.vue` | Template file for new components |
 | `components/NewBlankDialogTemplate.vue` | Template file for new dialog components |
 

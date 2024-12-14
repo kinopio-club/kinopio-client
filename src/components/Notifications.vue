@@ -460,8 +460,7 @@ aside.notifications(@click.left="closeAllDialogs")
 
   .persistent-item.danger(v-if="notifyServerCouldNotSave")
     p
-      Loader(:visible="true" :isSmall="true")
-      span Error saving changes to server, retrying…
+      span Error saving changes to server
     .row
       .button-wrap
         button(@click.left="refreshBrowser")

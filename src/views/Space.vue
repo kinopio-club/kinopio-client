@@ -19,7 +19,7 @@ import ItemUnlockButtons from '@/components/ItemUnlockButtons.vue'
 import SnapGuideLines from '@/components/SnapGuideLines.vue'
 
 import Header from '@/components/Header.vue'
-import MagicPaint from '@/components/layers/MagicPaint.vue'
+import PaintSelect from '@/components/layers/PaintSelect.vue'
 import UserLabelCursor from '@/components/UserLabelCursor.vue'
 import Footer from '@/components/Footer.vue'
 import WindowHistoryHandler from '@/components/WindowHistoryHandler.vue'
@@ -603,7 +603,7 @@ OutsideSpaceBackground
 SpaceBackground
 SpaceBackgroundTint
 ItemsLocked
-MagicPaint
+PaintSelect
 //- user presence cursors
 template(v-for="user in users")
   UserLabelCursor(:user="user")

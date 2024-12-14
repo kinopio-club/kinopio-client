@@ -554,7 +554,7 @@ const remoteBoxDraggingColor = computed(() => {
 // touch locking
 
 const lockingFrameStyle = computed(() => {
-  const initialPadding = 65 // matches initialLockCircleRadius in magicPaint
+  const initialPadding = 65 // matches initialLockCircleRadius in paintSelect
   const initialBorderRadius = 50
   const padding = initialPadding * state.lockingPercent
   const borderRadius = Math.max((state.lockingPercent * initialBorderRadius), 5) + 'px'

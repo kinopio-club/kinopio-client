@@ -1751,7 +1751,7 @@ const unlockCard = (event) => {
   store.dispatch('currentCards/update', { card: update })
 }
 const lockingFrameStyle = computed(() => {
-  const initialPadding = 65 // matches initialLockCircleRadius in magicPaint
+  const initialPadding = 65 // matches initialLockCircleRadius in paintSelect
   const initialBorderRadius = 50
   const padding = initialPadding * state.lockingPercent
   const userColor = store.state.currentUser.color

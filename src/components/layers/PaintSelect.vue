@@ -62,7 +62,7 @@ onMounted(() => {
       const position = utils.cursorPositionInSpace(event)
       createPaintingCircle(event)
       selectItems([position])
-    } else if (mutation.type === 'triggerUpdateMagicPaintPositionOffset') {
+    } else if (mutation.type === 'triggerUpdatePaintSelectPositionOffset') {
       updateCirclesWithScroll()
     } else if (mutation.type === 'triggerAddRemotePaintingCircle') {
       let circle = mutation.payload
@@ -88,7 +88,7 @@ onMounted(() => {
     }
   })
   // init canvases
-  paintingCanvas = document.getElementById('magic-painting')
+  paintingCanvas = document.getElementById('paint-select')
   paintingContext = paintingCanvas.getContext('2d')
   paintingContext.scale(window.devicePixelRatio, window.devicePixelRatio)
   remotePaintingCanvas = document.getElementById('remote-painting')
@@ -774,7 +774,7 @@ const addCardsAndUploadFiles = (event) => {
 <template lang="pug">
 aside
   //- Magic painting is ephemeral brush strokes that select items
-  canvas#magic-painting(
+  canvas#paint-select(
     @mousedown.left="startPainting"
     @touchstart="startPainting"
     @mousemove="painting"

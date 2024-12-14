@@ -208,11 +208,11 @@ const scrollIntoViewAndFocus = async () => {
   await nextTick()
   scrollIntoView(behavior)
   focusName()
-  triggerUpdateMagicPaintPositionOffset()
+  triggerUpdatePaintSelectPositionOffset()
   triggerUpdateHeaderAndFooterPosition()
 }
-const triggerUpdateMagicPaintPositionOffset = () => {
-  store.commit('triggerUpdateMagicPaintPositionOffset')
+const triggerUpdatePaintSelectPositionOffset = () => {
+  store.commit('triggerUpdatePaintSelectPositionOffset')
   triggerUpdateHeaderAndFooterPosition()
 }
 
@@ -486,7 +486,7 @@ const normalizedName = computed(() => {
   return newName.trim()
 })
 const clickName = (event) => {
-  triggerUpdateMagicPaintPositionOffset()
+  triggerUpdatePaintSelectPositionOffset()
   store.commit('searchIsVisible', false)
   if (isCursorInsideTagBrackets()) {
     showTagPicker()
