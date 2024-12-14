@@ -75,6 +75,17 @@ const handleSuccess = (event) => {
 }
 const handleError = (event) => {
 }
+
+// pause video during pinch zoom
+const isPinchZooming = computed(() => store.state.isPinchZooming)
+watch(() => isPinchZooming.value, (value) => {
+  if (value) {
+    pause()
+  } else {
+    play()
+  }
+})
+
 </script>
 
 <template lang="pug">
