@@ -559,7 +559,6 @@ dialog.background-picker.wide(v-if="visible" :open="visible" @click.left.stop="c
 
 <style lang="stylus">
 dialog.background-picker
-  width 255px
   overflow auto
   max-height calc(100vh - 120px) //- todesktop chromium fix
   max-height calc(100dvh - 120px)
