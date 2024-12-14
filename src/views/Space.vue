@@ -25,6 +25,7 @@ import Footer from '@/components/Footer.vue'
 import WindowHistoryHandler from '@/components/WindowHistoryHandler.vue'
 import KeyboardShortcutsHandler from '@/components/KeyboardShortcutsHandler.vue'
 import ScrollAndTouchHandler from '@/components/ScrollAndTouchHandler.vue'
+import Panning from '@/components/Panning.vue'
 import TagDetails from '@/components/dialogs/TagDetails.vue'
 import ItemsLocked from '@/components/ItemsLocked.vue'
 import UserDetails from '@/components/dialogs/UserDetails.vue'
@@ -637,6 +638,7 @@ UserDetails
 WindowHistoryHandler
 KeyboardShortcutsHandler
 ScrollAndTouchHandler
+Panning
 NotificationsWithPosition(layer="app")
 Preload
 .badge.label-badge.development-badge(v-if="isDevelpmentBadgeVisible")

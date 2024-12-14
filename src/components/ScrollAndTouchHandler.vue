@@ -11,8 +11,6 @@ let multiTouchAction, shouldCancelUndo
 
 let inertiaScrollEndIntervalTimer, prevPosition
 
-let unsubscribe
-
 onMounted(() => {
   window.addEventListener('wheel', handleMouseWheelEvents, { passive: false })
   // use timer to prevent being fired from page reload scroll
@@ -23,22 +21,12 @@ onMounted(() => {
   window.addEventListener('touchstart', touchStart)
   window.addEventListener('touchmove', touchMove)
   window.addEventListener('touchend', touchEnd)
-  window.addEventListener('mousemove', mouseMove)
-  window.addEventListener('mouseup', mouseUp)
-  unsubscribe = store.subscribe(mutation => {
-    if (mutation.type === 'triggerPanningStart') {
-      shouldStartPanning = true
-    }
-  })
 })
 onBeforeUnmount(() => {
   window.removeEventListener('wheel', handleMouseWheelEvents, { passive: false })
   window.removeEventListener('touchstart', touchStart)
   window.removeEventListener('touchmove', touchMove)
   window.removeEventListener('touchend', touchEnd)
-  window.removeEventListener('mousemove', mouseMove)
-  window.removeEventListener('mouseup', mouseUp)
-  unsubscribe()
 })
 
 const isSpacePage = computed(() => store.getters.isSpacePage)
@@ -159,57 +147,6 @@ const toggleIsPinchZooming = (event) => {
   if (utils.shouldIgnoreTouchInteraction(event)) { return }
   store.commit('isPinchZooming', true)
 }
-
-// mouse events
-
-const mouseUp = () => {
-  shouldCancelPanningTimer = true
-}
-const mouseMove = (event) => {
-  // panning triggered in KeyboardShortcutsHandler
-  if (store.state.currentUserIsPanning) {
-    event.preventDefault()
-    updatePanningPosition(event)
-    initPanning(event)
-  }
-}
-
-// panning
-
-let shouldStartPanning, startPosition, currentPosition, panningTimer, shouldCancelPanningTimer, panningDelta, shouldPanNextFrame
-
-const updatePanningPosition = (event) => {
-  const position = utils.cursorPositionInPage(event)
-  if (startPosition) {
-    panningDelta = {
-      x: startPosition.x - position.x,
-      y: startPosition.y - position.y
-    }
-    shouldPanNextFrame = true
-  }
-}
-const initPanning = (event) => {
-  const position = utils.cursorPositionInPage(event)
-  if (shouldStartPanning) {
-    startPosition = position
-    shouldStartPanning = false
-    shouldCancelPanningTimer = false
-    panningTimer = window.requestAnimationFrame(panningFrame)
-  }
-}
-const panningFrame = () => {
-  if (shouldPanNextFrame) {
-    window.scrollBy(panningDelta.x, panningDelta.y, 'instant')
-    shouldPanNextFrame = false
-  }
-  panningTimer = window.requestAnimationFrame(panningFrame)
-  if (shouldCancelPanningTimer) {
-    window.cancelAnimationFrame(panningTimer)
-    panningTimer = null
-    startPosition = null
-  }
-}
-
 </script>
 
 <template lang="pug">
