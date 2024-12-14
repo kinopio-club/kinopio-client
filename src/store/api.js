@@ -151,9 +151,8 @@ const self = {
 
     addToQueue: async (context, { name, body, spaceId }) => {
       const canEditSpace = context.rootGetters['currentUser/canEditSpace']()
-      if (name === 'updateCard' && !canEditSpace) { return }
-      console.error('🌹🌹🌹 addToQueue', name, body, spaceId, canEditSpace)
-
+      const editOperations = ['updateUrlPreviewImage', 'updateCard', 'updateConnection']
+      if (editOperations.includes(name) && !canEditSpace) { return }
       body = utils.clone(body)
       body.operationId = nanoid()
       body.spaceId = spaceId || context.rootState.currentSpace.id
