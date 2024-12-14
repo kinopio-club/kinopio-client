@@ -53,8 +53,10 @@ let selectableBoxes = []
 let selectableConnectionsInViewport = []
 let selectableCardsGrid
 
+let unsubscribe
+
 onMounted(() => {
-  store.subscribe((mutation, state) => {
+  unsubscribe = store.subscribe((mutation, state) => {
     if (mutation.type === 'triggerPaintFramePosition') {
       const event = mutation.payload
       const position = utils.cursorPositionInSpace(event)
@@ -121,6 +123,7 @@ onBeforeUnmount(() => {
   window.removeEventListener('touchmove', userScroll)
   window.removeEventListener('load', clearCircles)
   window.removeEventListener('visibilitychange', clearRects)
+  unsubscribe()
 })
 
 const state = reactive({
