@@ -60,7 +60,7 @@ const handleMouseWheelEvents = (event) => {
 // scroll
 
 const updateZoomOrigin = (event) => {
-  const cursor = utils.PositionInPage(event)
+  const cursor = utils.cursorPositionInPage(event)
   store.dispatch('zoomOrigin', cursor)
 }
 const scroll = () => {
