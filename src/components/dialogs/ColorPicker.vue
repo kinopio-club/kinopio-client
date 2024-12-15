@@ -295,8 +295,10 @@ dialog.narrow.color-picker(v-if="visible" :open="visible" ref="dialogElement" @c
     margin-bottom 5px
     margin-right 5px
     position relative
-  button + button
+  button.color + button.color
     margin 0
+    margin-bottom 5px
+    margin-right 5px
   .refresh
     margin 0
     height 11px
@@ -311,6 +313,7 @@ dialog.narrow.color-picker(v-if="visible" :open="visible" ref="dialogElement" @c
   input[type="color"]
     width 32px
     height 30px
+    border-color var(--primary-border)
     &::-moz-color-swatch
       display none
   .spectrum
