@@ -467,7 +467,7 @@ const circlesAnimationFrame = () => {
     drawCircle(circle, context, shouldDrawOffscreen)
   })
   // continue
-  const nextFrame = paintSelectCircles.length > 0 && initialCircles.length > 0 && remotePaintingCircles.length > 0
+  const nextFrame = paintSelectCircles.length > 0 || initialCircles.length > 0 || remotePaintingCircles.length > 0
   if (nextFrame) {
     window.requestAnimationFrame(circlesAnimationFrame)
   } else {
