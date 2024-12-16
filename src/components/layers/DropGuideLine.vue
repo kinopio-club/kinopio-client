@@ -2,6 +2,8 @@
 import { reactive, computed, onMounted, onBeforeUnmount, defineProps, defineEmits, watch, ref, nextTick } from 'vue'
 import { useStore } from 'vuex'
 
+import utils from '@/utils.js'
+
 import { nanoid } from 'nanoid'
 const store = useStore()
 
@@ -206,10 +208,12 @@ const broadcastStopPaintingGuide = () => {
   store.commit('broadcast/update', { updates, type: 'updateStopRemoteUserDropGuideLine', handler: 'triggerUpdateStopRemoteUserDropGuideLine' })
 }
 
+const isMobile = computed(() => utils.isMobile())
+
 </script>
 
 <template lang="pug">
-aside
+template(v-if="!isMobile")
   canvas#drop-guide-line.drop-guide-line(
     :width="props.viewportWidth"
     :height="props.viewportHeight"
