@@ -8,18 +8,18 @@ import postMessage from '@/postMessage.js'
 import DropGuideLine from '@/components/layers/DropGuideLine.vue'
 const store = useStore()
 
+// a sequence of circles that's broadcasted to others and is used for multi-card selection
 const circleRadius = 20
 const circleSelectionRadius = circleRadius - 10 // magnitude of sensitivity
-
-// painting
-// a sequence of circles that's broadcasted to others and is used for multi-card selection
 const maxIterations = 300 // higher is longer tail
 const rateOfIterationDecay = 0.08 // higher is faster tail decay
 const rateOfIterationDecaySlow = 0.03
-let paintingCircles = []
-let paintingCanvas, paintingContext, startCursor, paintingCirclesTimer
 let prevScroll
 let prevPosition, prevCursor
+
+// paint select
+let paintingCircles = []
+let paintingCanvas, paintingContext, startCursor, paintingCirclesTimer
 
 // remote painting
 let remotePaintingCircles = []
