@@ -27,16 +27,15 @@ let paintSelectCircles = []
 // shows immediate feedback without having to move cursor
 let initialCircles = []
 
+// remote paint strokes
+let remotePaintingCircles = []
+
 // locking
 // long press to lock scrolling
 const lockingPreDuration = 100 // ms
 const lockingDuration = 150 // ms
 const initialLockCircleRadius = 65
 let lockingCanvas, lockingContext, lockingAnimationTimer, currentUserIsLocking, lockingStartTime, shouldCancelLocking
-
-// remote painting
-let remotePaintingCircles = []
-let remotePaintingCanvas, remotePaintingContext, remotePaintingCirclesTimer
 
 // notify offscreen cards
 // similar to initial circle feedback
@@ -71,7 +70,6 @@ onMounted(() => {
       circle.x = position.x
       circle.y = position.y
       createRemotePaintingCircle(circle)
-      remotePainting()
     } else if (mutation.type === 'triggerNotifyOffscreenCardCreated') {
       const card = mutation.payload
       const user = store.getters['currentSpace/userById'](card.userId)
@@ -92,12 +90,10 @@ onMounted(() => {
   context = canvas.getContext('2d')
   context.scale(window.devicePixelRatio, window.devicePixelRatio)
 
-  remotePaintingCanvas = document.getElementById('remote-painting')
-  remotePaintingContext = remotePaintingCanvas.getContext('2d')
-  remotePaintingContext.scale(window.devicePixelRatio, window.devicePixelRatio)
   lockingCanvas = document.getElementById('locking')
   lockingContext = lockingCanvas.getContext('2d')
   lockingContext.scale(window.devicePixelRatio, window.devicePixelRatio)
+
   notifyOffscreenCircleCanvas = document.getElementById('notify-offscreen-circle')
   notifyOffscreenCircleContext = notifyOffscreenCircleCanvas.getContext('2d')
   notifyOffscreenCircleContext.scale(window.devicePixelRatio, window.devicePixelRatio)
@@ -132,9 +128,12 @@ const state = reactive({
 
 const clearRects = () => {
   context.clearRect(0, 0, pageWidth.value, pageHeight.value)
-  remotePaintingContext.clearRect(0, 0, pageWidth.value, pageHeight.value)
   lockingContext.clearRect(0, 0, pageWidth.value, pageHeight.value)
   notifyOffscreenCircleContext.clearRect(0, 0, pageWidth.value, pageHeight.value)
+}
+const triggerHideTouchInterface = () => {
+  if (!store.state.currentUserIsPaintingLocked) { return }
+  store.commit('triggerHideTouchInterface')
 }
 
 // current user
@@ -369,37 +368,8 @@ const endPostScroll = () => {
   postScrollStartTime = undefined
 }
 
-// Paint select
+// paint circles
 
-const startPaintingCirclesTimer = () => {
-  if (!timer) {
-    timer = window.requestAnimationFrame(circlesAnimationFrame)
-  }
-}
-
-const painting = (event) => {
-  const isPainting = store.state.currentUserIsPainting
-  if (isPanning.value) { return }
-  if (isBoxSelecting.value) { return }
-  if (!toolbarIsCard.value) { return }
-  if (!isPainting) { return }
-  if (store.state.isPinchZooming) { return }
-  if (store.getters.shouldScrollAtEdges(event) && event.cancelable) {
-    event.preventDefault() // prevents touch swipe viewport scrolling
-  }
-  startPaintingCirclesTimer()
-  if (event.getCoalescedEvents) {
-    const events = event.getCoalescedEvents()
-    events.forEach(event => createPaintingCircle(event))
-  } else {
-    createPaintingCircle(event)
-  }
-  triggerHideTouchInterface()
-}
-const triggerHideTouchInterface = () => {
-  if (!store.state.currentUserIsPaintingLocked) { return }
-  store.commit('triggerHideTouchInterface')
-}
 const createPaintingCircle = (event) => {
   const isTouch = Boolean(event.touches)
   const isPaintingLocked = store.state.currentUserIsPaintingLocked
@@ -447,14 +417,18 @@ const startPainting = (event) => {
     createInitialCircle()
   }
   const shouldAdd = !multipleCardsIsSelected && !utils.unpinnedDialogIsVisible()
+
+  // TODO move to space touchstart, mousedown
   // add card
   if (shouldAdd && toolbarIsCard.value) {
     store.commit('shouldAddCard', true)
+
   // add box
   } else if (shouldAdd && toolbarIsBox.value) {
     addBox(event)
     return
   }
+
   // clear selected
   if (!event.shiftKey) {
     store.dispatch('clearMultipleSelected')
@@ -482,8 +456,19 @@ const circlesAnimationFrame = () => {
     const circle = JSON.parse(JSON.stringify(item))
     drawCircle(circle, context)
   })
-  const shouldStop = paintSelectCircles.length > 0 && initialCircles.length > 0
-  if (shouldStop) {
+  // remote paint
+  remotePaintingCircles = utils.filterCircles(remotePaintingCircles, maxIterations)
+  remotePaintingCircles.forEach(item => {
+    item.iteration++
+    let circle = JSON.parse(JSON.stringify(item))
+    circle.x = circle.x - window.scrollX
+    circle.y = circle.y - window.scrollY
+    const shouldDrawOffscreen = true
+    drawCircle(circle, context, shouldDrawOffscreen)
+  })
+  // continue
+  const nextFrame = paintSelectCircles.length > 0 && initialCircles.length > 0 && remotePaintingCircles.length > 0
+  if (nextFrame) {
     window.requestAnimationFrame(circlesAnimationFrame)
   } else {
     setTimeout(() => {
@@ -491,6 +476,48 @@ const circlesAnimationFrame = () => {
       timer = undefined
     }, 0)
   }
+}
+const broadcastCircle = (event, circle) => {
+  const position = utils.cursorPositionInSpace(event)
+  store.commit('broadcast/update', {
+    updates: {
+      userId: store.state.currentUser.id,
+      x: position.x,
+      y: position.y,
+      color: circle.color,
+      iteration: circle.iteration,
+      zoom: spaceZoomDecimal.value
+    },
+    type: 'addRemotePaintingCircle',
+    handler: 'triggerAddRemotePaintingCircle'
+  })
+}
+
+// Paint select
+
+const startPaintingCirclesTimer = () => {
+  if (!timer) {
+    timer = window.requestAnimationFrame(circlesAnimationFrame)
+  }
+}
+const painting = (event) => {
+  const isPainting = store.state.currentUserIsPainting
+  if (isPanning.value) { return }
+  if (isBoxSelecting.value) { return }
+  if (!toolbarIsCard.value) { return }
+  if (!isPainting) { return }
+  if (store.state.isPinchZooming) { return }
+  if (store.getters.shouldScrollAtEdges(event) && event.cancelable) {
+    event.preventDefault() // prevents touch swipe viewport scrolling
+  }
+  startPaintingCirclesTimer()
+  if (event.getCoalescedEvents) {
+    const events = event.getCoalescedEvents()
+    events.forEach(event => createPaintingCircle(event))
+  } else {
+    createPaintingCircle(event)
+  }
+  triggerHideTouchInterface()
 }
 
 // Initial Circles
@@ -507,8 +534,27 @@ const createInitialCircle = (circle) => {
   drawCircle(initialCircle, context)
 }
 
+// Remote Paint Strokes
+
+const createRemotePaintingCircle = (circle) => {
+  const { color, zoom } = circle
+  const prevCircle = remotePaintingCircles.findLast(item => item.userId === circle.userId)
+  if (prevCircle) {
+    const points = utils.pointsBetweenTwoPoints(prevCircle, circle)
+    points.forEach(point => {
+      point = { x: point.x, y: point.y, color, zoom, iteration: 0 }
+      remotePaintingCircles.push(point)
+    })
+    remotePaintingCircles.push(circle)
+  } else {
+    remotePaintingCircles.push(circle)
+  }
+  startPaintingCirclesTimer()
+}
+
 // Boxes
 
+// TODO move this to space
 const addBox = (event) => {
   let position = utils.cursorPositionInSpace(event)
   if (utils.isPositionOutsideOfSpace(position)) {
@@ -569,63 +615,6 @@ const selectConnections = (points) => {
     const connectionIds = matches.map(match => match.id)
     store.dispatch('addMultipleToMultipleConnectionsSelected', connectionIds)
   })
-}
-
-// Remote Painting
-
-const broadcastCircle = (event, circle) => {
-  const position = utils.cursorPositionInSpace(event)
-  store.commit('broadcast/update', {
-    updates: {
-      userId: store.state.currentUser.id,
-      x: position.x,
-      y: position.y,
-      color: circle.color,
-      iteration: circle.iteration,
-      zoom: spaceZoomDecimal.value
-    },
-    type: 'addRemotePaintingCircle',
-    handler: 'triggerAddRemotePaintingCircle'
-  })
-}
-const createRemotePaintingCircle = (circle) => {
-  const { color, zoom } = circle
-  const prevCircle = remotePaintingCircles.findLast(item => item.userId === circle.userId)
-  if (prevCircle) {
-    const points = utils.pointsBetweenTwoPoints(prevCircle, circle)
-    points.forEach(point => {
-      point = { x: point.x, y: point.y, color, zoom, iteration: 0 }
-      remotePaintingCircles.push(point)
-    })
-    remotePaintingCircles.push(circle)
-  } else {
-    remotePaintingCircles.push(circle)
-  }
-}
-const remotePainting = () => {
-  if (!remotePaintingCirclesTimer) {
-    remotePaintingCirclesTimer = window.requestAnimationFrame(remotePaintCirclesAnimationFrame)
-  }
-}
-const remotePaintCirclesAnimationFrame = () => {
-  remotePaintingCircles = utils.filterCircles(remotePaintingCircles, maxIterations)
-  remotePaintingContext.clearRect(0, 0, pageWidth.value, pageHeight.value)
-  remotePaintingCircles.forEach(item => {
-    item.iteration++
-    let circle = JSON.parse(JSON.stringify(item))
-    circle.x = circle.x - window.scrollX
-    circle.y = circle.y - window.scrollY
-    const shouldDrawOffscreen = true
-    drawCircle(circle, remotePaintingContext, shouldDrawOffscreen)
-  })
-  if (remotePaintingCircles.length > 0) {
-    window.requestAnimationFrame(remotePaintCirclesAnimationFrame)
-  } else {
-    setTimeout(() => {
-      window.cancelAnimationFrame(remotePaintingCirclesTimer)
-      remotePaintingCirclesTimer = undefined
-    }, 0)
-  }
 }
 
 // Locking
