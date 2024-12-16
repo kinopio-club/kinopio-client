@@ -602,7 +602,6 @@ const stopInteractions = async (event) => {
 OutsideSpaceBackground
 SpaceBackground
 SpaceBackgroundTint
-ItemsLocked
 PaintSelect
 //- user presence cursors
 template(v-for="user in users")
@@ -618,6 +617,7 @@ main#space.space(
   Connections
   Boxes
   Cards
+  ItemsLocked
   ItemUnlockButtons
   BoxDetails
   CardDetails
