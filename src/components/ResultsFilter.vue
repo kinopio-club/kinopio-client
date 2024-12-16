@@ -205,7 +205,7 @@ const selectItem = () => {
   template(v-else)
     img.icon.search(src="@/assets/search.svg" @click.left="focusFilterInput")
   input(
-    name="state.filter"
+    name="filter"
     type="text"
     autocomplete="off"
     :placeholder="inputPlaceholder"
