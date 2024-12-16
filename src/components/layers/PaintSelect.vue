@@ -94,7 +94,7 @@ onMounted(() => {
   window.addEventListener('load', clearCircles)
   startPostScroll()
   state.dropGuideLineIsVisible = !utils.isMobile()
-  window.addEventListener('visibilitychange', clearRects)
+  window.addEventListener('visibilitychange', clearRect)
 })
 
 onBeforeUnmount(() => {
@@ -103,7 +103,7 @@ onBeforeUnmount(() => {
   window.removeEventListener('scroll', userScroll)
   window.removeEventListener('touchmove', userScroll)
   window.removeEventListener('load', clearCircles)
-  window.removeEventListener('visibilitychange', clearRects)
+  window.removeEventListener('visibilitychange', clearRect)
   unsubscribe()
 })
 
@@ -113,7 +113,7 @@ const state = reactive({
   uploadIsDraggedOver: false
 })
 
-const clearRects = () => {
+const clearRect = () => {
   context.clearRect(0, 0, pageWidth.value, pageHeight.value)
 }
 const triggerHideTouchInterface = () => {
@@ -420,7 +420,7 @@ const startPainting = (event) => {
 }
 
 const circlesAnimationFrame = (timestamp) => {
-  context.clearRect(0, 0, pageWidth.value, pageHeight.value) // todo 'context'
+  clearRect()
   // paint select
   paintSelectCircles = utils.filterCircles(paintSelectCircles, maxIterations)
   paintSelectCircles = paintSelectCircles.map(item => {
