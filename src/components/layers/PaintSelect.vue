@@ -17,9 +17,10 @@ const rateOfIterationDecaySlow = 0.03
 let prevScroll
 let prevPosition, prevCursor
 
-// paint select
-let paintingCircles = []
-let paintingCanvas, paintingContext, startCursor, paintingCirclesTimer
+let canvas, context, startCursor, timer
+
+let paintSelectCircles = []
+let initialCircles = [] // shows immediate feedback without having to move cursor
 
 // remote painting
 let remotePaintingCircles = []
@@ -31,11 +32,6 @@ const lockingPreDuration = 100 // ms
 const lockingDuration = 150 // ms
 const initialLockCircleRadius = 65
 let lockingCanvas, lockingContext, lockingAnimationTimer, currentUserIsLocking, lockingStartTime, shouldCancelLocking
-
-// initial
-// shows immediate feedback without having to move cursor
-let initialCircles = []
-let initialCircleCanvas, initialCircleContext, initialCirclesTimer
 
 // notify offscreen cards
 // similar to initial circle feedback
@@ -87,18 +83,16 @@ onMounted(() => {
     }
   })
   // init canvases
-  paintingCanvas = document.getElementById('paint-select')
-  paintingContext = paintingCanvas.getContext('2d')
-  paintingContext.scale(window.devicePixelRatio, window.devicePixelRatio)
+  canvas = document.getElementById('paint-select')
+  context = canvas.getContext('2d')
+  context.scale(window.devicePixelRatio, window.devicePixelRatio)
+
   remotePaintingCanvas = document.getElementById('remote-painting')
   remotePaintingContext = remotePaintingCanvas.getContext('2d')
   remotePaintingContext.scale(window.devicePixelRatio, window.devicePixelRatio)
   lockingCanvas = document.getElementById('locking')
   lockingContext = lockingCanvas.getContext('2d')
   lockingContext.scale(window.devicePixelRatio, window.devicePixelRatio)
-  initialCircleCanvas = document.getElementById('initial-circle')
-  initialCircleContext = initialCircleCanvas.getContext('2d')
-  initialCircleContext.scale(window.devicePixelRatio, window.devicePixelRatio)
   notifyOffscreenCircleCanvas = document.getElementById('notify-offscreen-circle')
   notifyOffscreenCircleContext = notifyOffscreenCircleCanvas.getContext('2d')
   notifyOffscreenCircleContext.scale(window.devicePixelRatio, window.devicePixelRatio)
@@ -132,10 +126,9 @@ const state = reactive({
 })
 
 const clearRects = () => {
-  paintingContext.clearRect(0, 0, pageWidth.value, pageHeight.value)
+  context.clearRect(0, 0, pageWidth.value, pageHeight.value)
   remotePaintingContext.clearRect(0, 0, pageWidth.value, pageHeight.value)
   lockingContext.clearRect(0, 0, pageWidth.value, pageHeight.value)
-  initialCircleContext.clearRect(0, 0, pageWidth.value, pageHeight.value)
   notifyOffscreenCircleContext.clearRect(0, 0, pageWidth.value, pageHeight.value)
 }
 
@@ -222,7 +215,7 @@ const scroll = () => {
 }
 const clearCircles = () => {
   initialCircles = []
-  paintingCircles = []
+  paintSelectCircles = []
   remotePaintingCircles = []
 }
 const updatePrevScrollPosition = () => {
@@ -246,8 +239,8 @@ const updateCirclesWithScroll = () => {
   if (initialCircles.length) {
     initialCircles = updateCirclePositions(initialCircles, scrollDelta) // covers locking circles of varialbe radius/
   }
-  if (paintingCircles.length) {
-    paintingCircles = updateCirclePositions(paintingCircles, scrollDelta)
+  if (paintSelectCircles.length) {
+    paintSelectCircles = updateCirclePositions(paintSelectCircles, scrollDelta)
   }
   updatePrevScrollPosition()
 }
@@ -371,7 +364,13 @@ const endPostScroll = () => {
   postScrollStartTime = undefined
 }
 
-// Painting
+// Paint select
+
+const startPaintingCirclesTimer = () => {
+  if (!timer) {
+    timer = window.requestAnimationFrame(circlesAnimationFrame)
+  }
+}
 
 const painting = (event) => {
   const isPainting = store.state.currentUserIsPainting
@@ -383,9 +382,7 @@ const painting = (event) => {
   if (store.getters.shouldScrollAtEdges(event) && event.cancelable) {
     event.preventDefault() // prevents touch swipe viewport scrolling
   }
-  if (!paintingCirclesTimer) {
-    paintingCirclesTimer = window.requestAnimationFrame(paintCirclesAnimationFrame)
-  }
+  startPaintingCirclesTimer()
   if (event.getCoalescedEvents) {
     const events = event.getCoalescedEvents()
     events.forEach(event => createPaintingCircle(event))
@@ -419,7 +416,7 @@ const createPaintingCircles = (event) => {
   const points = utils.pointsBetweenTwoPoints(prevCursor, state.currentCursor)
   points.forEach(point => {
     const circle = { x: point.x, y: point.y, color, iteration: 0 }
-    paintingCircles.push(circle)
+    paintSelectCircles.push(circle)
   })
   const circle = { x: state.currentCursor.x, y: state.currentCursor.y, color, iteration: 0 }
   broadcastCircle(event, circle)
@@ -463,22 +460,46 @@ const startPainting = (event) => {
   store.commit('previousMultipleConnectionsSelectedIds', store.state.multipleConnectionsSelectedIds)
   store.dispatch('closeAllDialogs')
 }
-const paintCirclesAnimationFrame = () => {
-  paintingCircles = utils.filterCircles(paintingCircles, maxIterations)
-  paintingContext.clearRect(0, 0, pageWidth.value, pageHeight.value)
-  paintingCircles.forEach(item => {
+
+const circlesAnimationFrame = () => {
+  context.clearRect(0, 0, pageWidth.value, pageHeight.value) // todo 'context'
+  // paint select
+  paintSelectCircles = utils.filterCircles(paintSelectCircles, maxIterations)
+  paintSelectCircles.forEach(item => {
     item.iteration++
-    let circle = JSON.parse(JSON.stringify(item))
-    drawCircle(circle, paintingContext)
+    const circle = JSON.parse(JSON.stringify(item))
+    drawCircle(circle, context)
   })
-  if (paintingCircles.length > 0) {
-    window.requestAnimationFrame(paintCirclesAnimationFrame)
+  // initial circles
+  initialCircles = utils.filterCircles(initialCircles, maxIterations)
+  initialCircles.forEach(item => {
+    item.iteration++
+    const circle = JSON.parse(JSON.stringify(item))
+    drawCircle(circle, context)
+  })
+  const shouldStop = paintSelectCircles.length > 0 && initialCircles.length > 0
+  if (shouldStop) {
+    window.requestAnimationFrame(circlesAnimationFrame)
   } else {
     setTimeout(() => {
-      window.cancelAnimationFrame(paintingCirclesTimer)
-      paintingCirclesTimer = undefined
+      window.cancelAnimationFrame(timer)
+      timer = undefined
     }, 0)
   }
+}
+
+// Initial Circles
+
+const createInitialCircle = (circle) => {
+  if (toolbarIsBox.value) { return }
+  const initialCircle = {
+    x: startCursor.x,
+    y: startCursor.y,
+    color: currentUserColor.value,
+    iteration: 1
+  }
+  initialCircles.push(initialCircle)
+  drawCircle(initialCircle, context)
 }
 
 // Boxes
@@ -701,47 +722,6 @@ const notifyOffscreenCirclesAnimationFrame = () => {
   } else {
     window.cancelAnimationFrame(notifyOffscreenCirclesTimer)
     notifyOffscreenCirclesTimer = undefined
-  }
-}
-
-// Initial Circles
-
-const createInitialCircle = (circle) => {
-  if (toolbarIsBox.value) { return }
-  const initialCircle = {
-    x: startCursor.x,
-    y: startCursor.y,
-    color: currentUserColor.value,
-    iteration: 1,
-    persistent: true
-  }
-  initialCircles.push(initialCircle)
-  drawCircle(initialCircle, initialCircleContext)
-  startInitialCircles()
-}
-const startInitialCircles = () => {
-  initialCircles.map(circle => {
-    circle.persistent = false
-  })
-  if (!initialCirclesTimer) {
-    initialCirclesTimer = window.requestAnimationFrame(initialCirclesAnimationFrame)
-  }
-}
-const initialCirclesAnimationFrame = () => {
-  initialCircles = utils.filterCircles(initialCircles, maxIterations)
-  initialCircleContext.clearRect(0, 0, pageWidth.value, pageHeight.value)
-  initialCircles.forEach(item => {
-    if (!item.persistent) {
-      item.iteration++
-    }
-    let circle = JSON.parse(JSON.stringify(item))
-    drawCircle(circle, initialCircleContext)
-  })
-  if (initialCircles.length) {
-    window.requestAnimationFrame(initialCirclesAnimationFrame)
-  } else {
-    window.cancelAnimationFrame(initialCirclesTimer)
-    initialCirclesTimer = undefined
   }
 }
 
