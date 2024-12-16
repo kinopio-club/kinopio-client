@@ -738,11 +738,4 @@ canvas
   background transparent
   top 0
   opacity 1
-.locking,
-.initial-circle,
-.remote-painting,
-.notify-offscreen-circle
-  pointer-events none
-.notify-offscreen-circle
-  z-index 1
 </style>
