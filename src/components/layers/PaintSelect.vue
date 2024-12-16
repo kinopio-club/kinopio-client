@@ -137,6 +137,10 @@ const triggerHideTouchInterface = () => {
   if (!store.state.currentUserIsPaintingLocked) { return }
   store.commit('triggerHideTouchInterface')
 }
+const isCanvasScope = (event) => {
+  const tagName = event.target.tagName
+  return tagName === 'CANVAS'
+}
 
 // current user
 
@@ -398,6 +402,7 @@ const createPaintingCircles = (event) => {
   prevCursor = state.currentCursor
 }
 const startPainting = (event) => {
+  if (!isCanvasScope(event)) { return }
   if (isPanning.value) { return }
   if (isBoxSelecting.value) { return }
   if (store.state.isPinchZooming) { return }
