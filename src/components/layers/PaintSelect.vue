@@ -87,6 +87,19 @@ onMounted(() => {
   // trigger stopPainting even if mouse is outside window
   window.addEventListener('mouseup', stopPainting)
   window.addEventListener('touchend', stopPainting)
+  // mousedown
+  window.addEventListener('mousedown', startPainting)
+  window.addEventListener('touchstart', startPainting)
+  // mousemove
+  window.addEventListener('mousemove', painting)
+  window.addEventListener('touchmove', painting)
+  // drag over
+  window.addEventListener('dragenter', checkIfUploadIsDraggedOver)
+  window.addEventListener('dragover', checkIfUploadIsDraggedOver)
+  window.addEventListener('dragleave', removeUploadIsDraggedOver)
+  window.addEventListener('dragend', removeUploadIsDraggedOver)
+  window.addEventListener('drop', addCardsAndUploadFiles)
+
   // shift circle positions with scroll to simulate full size canvas
   updatePrevScrollPosition()
   window.addEventListener('scroll', userScroll)
@@ -104,6 +117,10 @@ onBeforeUnmount(() => {
   window.removeEventListener('touchmove', userScroll)
   window.removeEventListener('load', clearCircles)
   window.removeEventListener('visibilitychange', clearRect)
+  window.removeEventListener('mousedown', startPainting)
+  window.removeEventListener('touchstart', startPainting)
+  window.removeEventListener('mousemove', painting)
+  window.removeEventListener('touchmove', painting)
   unsubscribe()
 })
 
@@ -685,6 +702,7 @@ const selectConnections = (points) => {
 // Upload Files
 
 const checkIfUploadIsDraggedOver = (event) => {
+  event.preventDefault()
   const uploadIsFiles = event.dataTransfer.types.find(type => type === 'Files')
   if (!event.dataTransfer) { return }
   if (!uploadIsFiles) { return }
@@ -696,6 +714,8 @@ const removeUploadIsDraggedOver = () => {
   state.uploadIsDraggedOver = false
 }
 const addCardsAndUploadFiles = (event) => {
+  event.preventDefault()
+  event.stopPropagation()
   let files = event.dataTransfer.files
   files = Array.from(files)
   removeUploadIsDraggedOver()
@@ -710,18 +730,20 @@ const addCardsAndUploadFiles = (event) => {
 <template lang="pug">
 //- Paint select is ephemeral brush strokes that select items
 canvas#paint-select(
-  @mousedown.left="startPainting"
-  @touchstart="startPainting"
-  @mousemove="painting"
-  @touchmove="painting"
   :width="viewportWidth"
   :height="viewportHeight"
-  @dragenter="checkIfUploadIsDraggedOver"
-  @dragover.prevent="checkIfUploadIsDraggedOver"
-  @dragleave="removeUploadIsDraggedOver"
-  @dragend="removeUploadIsDraggedOver"
-  @drop.prevent.stop="addCardsAndUploadFiles"
 )
+  //- @mousedown.left="startPainting"
+  //- @touchstart="startPainting"
+  //- @mousemove="painting"
+  //- @touchmove="painting"
+
+  //- @dragenter="checkIfUploadIsDraggedOver"
+  //- @dragover.prevent="checkIfUploadIsDraggedOver"
+  //- @dragleave="removeUploadIsDraggedOver"
+  //- @dragend="removeUploadIsDraggedOver"
+  //- @drop.prevent.stop="addCardsAndUploadFiles"
+
 DropGuideLine(
   v-if="state.dropGuideLineIsVisible"
   :currentCursor="state.currentCursor"
@@ -738,4 +760,5 @@ canvas
   background transparent
   top 0
   opacity 1
+  pointer-events none
 </style>
