@@ -406,7 +406,6 @@ const startPainting = (event) => {
   updateSelectableConnectionsInViewport()
   startCursor = utils.cursorPositionInViewport(event)
   state.currentCursor = startCursor
-  const multipleCardsIsSelected = Boolean(store.state.multipleCardsSelectedIds.length)
   store.dispatch('currentCards/updateCanBeSelectedSortedByY')
   if (utils.isMultiTouch(event)) { return }
   startLocking()
@@ -416,19 +415,16 @@ const startPainting = (event) => {
     store.commit('currentUserIsPainting', true)
     createInitialCircle()
   }
+  const multipleCardsIsSelected = Boolean(store.state.multipleCardsSelectedIds.length)
   const shouldAdd = !multipleCardsIsSelected && !utils.unpinnedDialogIsVisible()
-
-  // TODO move to space touchstart, mousedown
   // add card
   if (shouldAdd && toolbarIsCard.value) {
     store.commit('shouldAddCard', true)
-
   // add box
   } else if (shouldAdd && toolbarIsBox.value) {
     addBox(event)
     return
   }
-
   // clear selected
   if (!event.shiftKey) {
     store.dispatch('clearMultipleSelected')
