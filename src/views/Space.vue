@@ -20,6 +20,7 @@ import SnapGuideLines from '@/components/SnapGuideLines.vue'
 
 import Header from '@/components/Header.vue'
 import PaintSelect from '@/components/layers/PaintSelect.vue'
+import SonarPing from '@/components/layers/SonarPing.vue'
 import UserLabelCursor from '@/components/UserLabelCursor.vue'
 import Footer from '@/components/Footer.vue'
 import WindowHistoryHandler from '@/components/WindowHistoryHandler.vue'
@@ -602,7 +603,9 @@ const stopInteractions = async (event) => {
 OutsideSpaceBackground
 SpaceBackground
 SpaceBackgroundTint
-PaintSelect
+aside
+  PaintSelect
+  SonarPing
 //- user presence cursors
 template(v-for="user in users")
   UserLabelCursor(:user="user")

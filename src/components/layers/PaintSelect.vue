@@ -6,7 +6,6 @@ import utils from '@/utils.js'
 import collisionDetection from '@/collisionDetection.js'
 import postMessage from '@/postMessage.js'
 import DropGuideLine from '@/components/layers/DropGuideLine.vue'
-import SonarPing from '@/components/layers/SonarPing.vue'
 const store = useStore()
 
 const circleRadius = 20
@@ -772,50 +771,48 @@ const addCardsAndUploadFiles = (event) => {
 </script>
 
 <template lang="pug">
-aside
-  //- Magic painting is ephemeral brush strokes that select items
-  canvas#paint-select(
-    @mousedown.left="startPainting"
-    @touchstart="startPainting"
-    @mousemove="painting"
-    @touchmove="painting"
-    :width="viewportWidth"
-    :height="viewportHeight"
-    @dragenter="checkIfUploadIsDraggedOver"
-    @dragover.prevent="checkIfUploadIsDraggedOver"
-    @dragleave="removeUploadIsDraggedOver"
-    @dragend="removeUploadIsDraggedOver"
-    @drop.prevent.stop="addCardsAndUploadFiles"
-  )
-  canvas#remote-painting.remote-painting(
-    :width="viewportWidth"
-    :height="viewportHeight"
-    :data-should-decay-slow="true"
-  )
-  canvas#locking.locking(
-    :width="viewportWidth"
-    :height="viewportHeight"
-    :data-should-decay-slow="true"
-  )
-  canvas#initial-circle.initial-circle(
-    :width="viewportWidth"
-    :height="viewportHeight"
-    :data-should-decay-slow="true"
-  )
-  canvas#notify-offscreen-circle.notify-offscreen-circle(
-    :width="viewportWidth"
-    :height="viewportHeight"
-    :data-should-decay-slow="true"
-  )
-  template(v-if="state.dropGuideLineIsVisible")
-    DropGuideLine(
-      :currentCursor="state.currentCursor"
-      :currentCursorInSpace="state.currentCursorInSpace"
-      :uploadIsDraggedOver="state.uploadIsDraggedOver"
-      :viewportWidth="viewportWidth"
-      :viewportHeight="viewportHeight"
-    )
-  SonarPing
+//- Magic painting is ephemeral brush strokes that select items
+canvas#paint-select(
+  @mousedown.left="startPainting"
+  @touchstart="startPainting"
+  @mousemove="painting"
+  @touchmove="painting"
+  :width="viewportWidth"
+  :height="viewportHeight"
+  @dragenter="checkIfUploadIsDraggedOver"
+  @dragover.prevent="checkIfUploadIsDraggedOver"
+  @dragleave="removeUploadIsDraggedOver"
+  @dragend="removeUploadIsDraggedOver"
+  @drop.prevent.stop="addCardsAndUploadFiles"
+)
+canvas#remote-painting.remote-painting(
+  :width="viewportWidth"
+  :height="viewportHeight"
+  :data-should-decay-slow="true"
+)
+canvas#locking.locking(
+  :width="viewportWidth"
+  :height="viewportHeight"
+  :data-should-decay-slow="true"
+)
+canvas#initial-circle.initial-circle(
+  :width="viewportWidth"
+  :height="viewportHeight"
+  :data-should-decay-slow="true"
+)
+canvas#notify-offscreen-circle.notify-offscreen-circle(
+  :width="viewportWidth"
+  :height="viewportHeight"
+  :data-should-decay-slow="true"
+)
+DropGuideLine(
+  v-if="state.dropGuideLineIsVisible"
+  :currentCursor="state.currentCursor"
+  :currentCursorInSpace="state.currentCursorInSpace"
+  :uploadIsDraggedOver="state.uploadIsDraggedOver"
+  :viewportWidth="viewportWidth"
+  :viewportHeight="viewportHeight"
+)
 </template>
 
 <style lang="stylus" scoped>
