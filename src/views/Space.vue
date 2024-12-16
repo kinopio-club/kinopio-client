@@ -601,8 +601,6 @@ const stopInteractions = async (event) => {
 <template lang="pug">
 //- page
 OutsideSpaceBackground
-SpaceBackground
-SpaceBackgroundTint
 aside
   PaintSelect
   SonarPing
@@ -617,6 +615,8 @@ main#space.space(
   :style="styles"
   :data-zoom="spaceZoomDecimal"
 )
+  SpaceBackground
+  SpaceBackgroundTint
   Connections
   Boxes
   Cards
