@@ -1087,6 +1087,18 @@ export default {
       rectA.y + rectA.height > rectB.y
     )
   },
+  isRectACompletelyInsideRectB (rectA, rectB) {
+    // udpate rects to support space zoom
+    rectA = this.rectDimensions(rectA)
+    rectB = this.rectDimensions(rectB)
+    // is rectA completely inside rectB
+    return (
+      rectA.x >= rectB.x &&
+      rectA.y >= rectB.y &&
+      (rectA.x + rectA.width) <= (rectB.x + rectB.width) &&
+      (rectA.y + rectA.height) <= (rectB.y + rectB.height)
+    )
+  },
   nameStringFromItems (items) {
     items = items.filter(item => Boolean(item))
     const data = items.map(item => item.name)

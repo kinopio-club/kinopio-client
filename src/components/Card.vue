@@ -1856,7 +1856,7 @@ const containingBoxes = computed(() => {
   boxes = boxes.filter(box => {
     box = utils.clone(box)
     const card = utils.clone(props.card)
-    return utils.isRectAInsideRectB(card, box)
+    return utils.isRectACompletelyInsideRectB(card, box)
   })
   return boxes
 })
