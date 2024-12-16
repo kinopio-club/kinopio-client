@@ -221,6 +221,10 @@ const updateCirclePositions = (circles, scrollDelta) => {
   })
 }
 const updateCirclesWithScroll = () => {
+  if (store.state.isPinchZooming) {
+    updatePrevScrollPosition()
+    return
+  }
   const scrollDelta = {
     x: window.scrollX - prevScroll.x,
     y: window.scrollY - prevScroll.y
