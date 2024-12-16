@@ -19,6 +19,8 @@ const isSpacePage = computed(() => {
 const isThemeDark = computed(() => store.state.currentUser.theme === 'dark')
 const currentSpace = computed(() => store.state.currentSpace)
 const backgroundIsDefault = computed(() => !currentSpace.value.background)
+const pageHeight = computed(() => store.state.pageHeight)
+const pageWidth = computed(() => store.state.pageWidth)
 
 // Styles
 
@@ -38,6 +40,8 @@ const backgroundStyles = computed(() => {
     backgroundImage = `image-set(${backgroundImage} 2x)`
   }
   styles.backgroundImage = backgroundImage
+  styles.width = `${pageWidth.value}px`
+  styles.height = `${pageHeight.value}px`
   return styles
 })
 
@@ -86,8 +90,6 @@ template(v-else)
 <style lang="stylus">
 .space-background-image
   position absolute
-  width 100%
-  height 100%
   pointer-events none
   z-index 0
   transform-origin top left
