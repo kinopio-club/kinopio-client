@@ -80,14 +80,10 @@ onMounted(() => {
       createNotifyOffscreenCircle(circle)
     }
   })
-  // init canvases
+  // init canvas
   canvas = document.getElementById('paint-select')
   context = canvas.getContext('2d')
   context.scale(window.devicePixelRatio, window.devicePixelRatio)
-
-  notifyOffscreenCircleCanvas = document.getElementById('notify-offscreen-circle')
-  notifyOffscreenCircleContext = notifyOffscreenCircleCanvas.getContext('2d')
-  notifyOffscreenCircleContext.scale(window.devicePixelRatio, window.devicePixelRatio)
   // trigger stopPainting even if mouse is outside window
   window.addEventListener('mouseup', stopPainting)
   window.addEventListener('touchend', stopPainting)
@@ -119,7 +115,6 @@ const state = reactive({
 
 const clearRects = () => {
   context.clearRect(0, 0, pageWidth.value, pageHeight.value)
-  notifyOffscreenCircleContext.clearRect(0, 0, pageWidth.value, pageHeight.value)
 }
 const triggerHideTouchInterface = () => {
   if (!store.state.currentUserIsPaintingLocked) { return }
@@ -428,7 +423,7 @@ const circlesAnimationFrame = (timestamp) => {
   context.clearRect(0, 0, pageWidth.value, pageHeight.value) // todo 'context'
   // paint select
   paintSelectCircles = utils.filterCircles(paintSelectCircles, maxIterations)
-  paintSelectCircles.map(item => {
+  paintSelectCircles = paintSelectCircles.map(item => {
     item.iteration++
     const circle = JSON.parse(JSON.stringify(item))
     drawCircle(circle, context)
@@ -436,7 +431,7 @@ const circlesAnimationFrame = (timestamp) => {
   })
   // initial circles
   initialCircles = utils.filterCircles(initialCircles, 60)
-  initialCircles.map(item => {
+  initialCircles = initialCircles.map(item => {
     item.iteration++
     const circle = JSON.parse(JSON.stringify(item))
     drawCircle(circle, context)
@@ -444,7 +439,7 @@ const circlesAnimationFrame = (timestamp) => {
   })
   // remote paint
   remotePaintingCircles = utils.filterCircles(remotePaintingCircles, maxIterations)
-  remotePaintingCircles.map(item => {
+  remotePaintingCircles = remotePaintingCircles.map(item => {
     item.iteration++
     let circle = JSON.parse(JSON.stringify(item))
     circle.x = circle.x - window.scrollX
@@ -453,12 +448,20 @@ const circlesAnimationFrame = (timestamp) => {
     drawCircle(circle, context, shouldDrawOffscreen)
     return item
   })
+  // notify offscreen
+  notifyOffscreenCircles = utils.filterCircles(notifyOffscreenCircles, maxIterations)
+  notifyOffscreenCircles = notifyOffscreenCircles.map(item => {
+    item.iteration++
+    const circle = JSON.parse(JSON.stringify(item))
+    const shouldDrawOffscreen = true
+    drawCircle(circle, context, shouldDrawOffscreen)
+    return item
+  })
   // locking
   lockingAnimationFrame(timestamp)
   // continue
   const isLocking = currentUserIsLocking && lockingPercentComplete < 1
-  const nextFrame = paintSelectCircles.length > 0 || initialCircles.length > 0 || remotePaintingCircles.length > 0 || isLocking
-  // console.log(paintSelectCircles.length , initialCircles.length , remotePaintingCircles.length , isLocking, '🍇', nextFrame, '🌺', paintSelectCircles.length > 0 , initialCircles.length > 0 , remotePaintingCircles.length > 0, initialCircles, paintSelectCircles[0])
+  const nextFrame = paintSelectCircles.length || initialCircles.length || remotePaintingCircles.length || notifyOffscreenCircles.length || isLocking
   if (nextFrame) {
     window.requestAnimationFrame(circlesAnimationFrame)
   } else {
@@ -543,6 +546,77 @@ const createRemotePaintingCircle = (circle) => {
   startPaintingCirclesTimer()
 }
 
+// Notify Offscreen Circles
+
+const createNotifyOffscreenCircle = (circle) => {
+  circle.x = circle.x - window.scrollX
+  circle.y = circle.y - window.scrollY
+  const notifyOffscreenCircle = {
+    x: circle.x,
+    y: circle.y,
+    color: circle.color,
+    iteration: 1
+  }
+  notifyOffscreenCircles.push(notifyOffscreenCircle)
+  drawCircle(notifyOffscreenCircle, context, true)
+  startPaintingCirclesTimer()
+}
+
+// Locking
+
+const cancelLocking = () => {
+  shouldCancelLocking = true
+}
+const startLocking = () => {
+  if (toolbarIsBox.value) { return }
+  currentUserIsLocking = true
+  shouldCancelLocking = false
+  setTimeout(() => {
+    startPaintingCirclesTimer()
+  }, lockingPreDuration)
+}
+const lockingAnimationFrame = (timestamp) => {
+  if (!lockingStartTime) {
+    lockingStartTime = timestamp
+  }
+  const elaspedTime = timestamp - lockingStartTime
+  lockingPercentComplete = (elaspedTime / lockingDuration) // between 0 and 1
+  if (!utils.cursorsAreClose(startCursor, state.currentCursor)) {
+    currentUserIsLocking = false
+  }
+  if (shouldCancelLocking) {
+    currentUserIsLocking = false
+    shouldCancelLocking = false
+  }
+  if (!currentUserIsLocking) {
+    lockingStartTime = undefined
+    return
+  }
+  if (lockingPercentComplete <= 1) {
+    const minSize = circleRadius
+    const percentRemaining = Math.abs(lockingPercentComplete - 1)
+    const circleRadiusDelta = initialLockCircleRadius - minSize
+    const radius = (circleRadiusDelta * percentRemaining) + minSize
+    const alpha = utils.easeOut(lockingPercentComplete, elaspedTime, lockingDuration)
+    const circle = {
+      x: startCursor.x,
+      y: startCursor.y,
+      color: currentUserColor.value,
+      radius,
+      alpha: alpha || 0.01, // to ensure truthyness
+      iteration: 1
+    }
+    drawCircle(circle, context)
+  } else if (lockingPercentComplete >= 1) {
+    store.commit('currentUserIsPainting', true)
+    store.commit('currentUserIsPaintingLocked', true)
+    console.log('🔒 lockingAnimationFrame locked')
+    postMessage.sendHaptics({ name: 'softImpact' })
+    cancelLocking()
+    lockingStartTime = undefined
+  }
+}
+
 // Boxes
 
 // TODO move this to space , trigger
@@ -608,108 +682,6 @@ const selectConnections = (points) => {
   })
 }
 
-// Locking
-
-const cancelLocking = () => {
-  shouldCancelLocking = true
-}
-const startLockingAnimationTimer = () => {
-  if (!timer) {
-    timer = window.requestAnimationFrame(circlesAnimationFrame)
-  }
-}
-const startLocking = () => {
-  if (toolbarIsBox.value) { return }
-  currentUserIsLocking = true
-  shouldCancelLocking = false
-  setTimeout(() => {
-    startLockingAnimationTimer()
-  }, lockingPreDuration)
-}
-const lockingAnimationFrame = (timestamp) => {
-  if (!lockingStartTime) {
-    lockingStartTime = timestamp
-  }
-  const elaspedTime = timestamp - lockingStartTime
-  lockingPercentComplete = (elaspedTime / lockingDuration) // between 0 and 1
-  if (!utils.cursorsAreClose(startCursor, state.currentCursor)) {
-    currentUserIsLocking = false
-  }
-  if (shouldCancelLocking) {
-    currentUserIsLocking = false
-    shouldCancelLocking = false
-  }
-  if (!currentUserIsLocking) {
-    lockingStartTime = undefined
-    return
-  }
-  if (lockingPercentComplete <= 1) {
-    const minSize = circleRadius
-    const percentRemaining = Math.abs(lockingPercentComplete - 1)
-    const circleRadiusDelta = initialLockCircleRadius - minSize
-    const radius = (circleRadiusDelta * percentRemaining) + minSize
-    const alpha = utils.easeOut(lockingPercentComplete, elaspedTime, lockingDuration)
-    const circle = {
-      x: startCursor.x,
-      y: startCursor.y,
-      color: currentUserColor.value,
-      radius,
-      alpha: alpha || 0.01, // to ensure truthyness
-      iteration: 1
-    }
-    drawCircle(circle, context)
-  } else if (lockingPercentComplete >= 1) {
-    store.commit('currentUserIsPainting', true)
-    store.commit('currentUserIsPaintingLocked', true)
-    console.log('🔒 lockingAnimationFrame locked')
-    postMessage.sendHaptics({ name: 'softImpact' })
-    cancelLocking()
-    lockingStartTime = undefined
-  }
-}
-
-// Notify Offscreen Circles
-
-const createNotifyOffscreenCircle = (circle) => {
-  circle.x = circle.x - window.scrollX
-  circle.y = circle.y - window.scrollY
-  const notifyOffscreenCircle = {
-    x: circle.x,
-    y: circle.y,
-    color: circle.color,
-    iteration: 1,
-    persistent: true
-  }
-  notifyOffscreenCircles.push(notifyOffscreenCircle)
-  drawCircle(notifyOffscreenCircle, notifyOffscreenCircleContext, true)
-  startNotifyOffscreenCircles()
-}
-const startNotifyOffscreenCircles = () => {
-  notifyOffscreenCircles.map(circle => {
-    circle.persistent = false
-  })
-  if (!notifyOffscreenCirclesTimer) {
-    notifyOffscreenCirclesTimer = window.requestAnimationFrame(notifyOffscreenCirclesAnimationFrame)
-  }
-}
-const notifyOffscreenCirclesAnimationFrame = () => {
-  notifyOffscreenCircles = utils.filterCircles(notifyOffscreenCircles, maxIterations)
-  notifyOffscreenCircleContext.clearRect(0, 0, pageWidth.value, pageHeight.value)
-  notifyOffscreenCircles.forEach(item => {
-    if (!item.persistent) {
-      item.iteration++
-    }
-    let circle = JSON.parse(JSON.stringify(item))
-    drawCircle(circle, notifyOffscreenCircleContext, true)
-  })
-  if (notifyOffscreenCircles.length) {
-    window.requestAnimationFrame(notifyOffscreenCirclesAnimationFrame)
-  } else {
-    window.cancelAnimationFrame(notifyOffscreenCirclesTimer)
-    notifyOffscreenCirclesTimer = undefined
-  }
-}
-
 // Upload Files
 
 const checkIfUploadIsDraggedOver = (event) => {
@@ -749,11 +721,6 @@ canvas#paint-select(
   @dragleave="removeUploadIsDraggedOver"
   @dragend="removeUploadIsDraggedOver"
   @drop.prevent.stop="addCardsAndUploadFiles"
-)
-canvas#notify-offscreen-circle.notify-offscreen-circle(
-  :width="viewportWidth"
-  :height="viewportHeight"
-  :data-should-decay-slow="true"
 )
 DropGuideLine(
   v-if="state.dropGuideLineIsVisible"
