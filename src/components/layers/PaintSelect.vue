@@ -771,7 +771,7 @@ const addCardsAndUploadFiles = (event) => {
 </script>
 
 <template lang="pug">
-//- Magic painting is ephemeral brush strokes that select items
+//- Paint select is ephemeral brush strokes that select items
 canvas#paint-select(
   @mousedown.left="startPainting"
   @touchstart="startPainting"
