@@ -16,26 +16,21 @@ const rateOfIterationDecay = 0.08 // higher is faster tail decay
 const rateOfIterationDecaySlow = 0.03
 let prevScroll
 let prevPosition, prevCursor
-
 let canvas, context, startCursor, timer
-
 // paint select
 // ephemeral brush strokes that select items
 let paintSelectCircles = []
-
 // initial circles
 // shows immediate feedback without having to move cursor
 let initialCircles = []
-
 // remote paint strokes
 let remotePaintingCircles = []
-
 // locking
 // long press to lock scrolling
 const lockingPreDuration = 100 // ms
 const lockingDuration = 150 // ms
 const initialLockCircleRadius = 65
-let lockingCanvas, lockingContext, lockingAnimationTimer, currentUserIsLocking, lockingStartTime, shouldCancelLocking
+let currentUserIsLocking, lockingStartTime, shouldCancelLocking, lockingPercentComplete
 
 // notify offscreen cards
 // similar to initial circle feedback
@@ -90,10 +85,6 @@ onMounted(() => {
   context = canvas.getContext('2d')
   context.scale(window.devicePixelRatio, window.devicePixelRatio)
 
-  lockingCanvas = document.getElementById('locking')
-  lockingContext = lockingCanvas.getContext('2d')
-  lockingContext.scale(window.devicePixelRatio, window.devicePixelRatio)
-
   notifyOffscreenCircleCanvas = document.getElementById('notify-offscreen-circle')
   notifyOffscreenCircleContext = notifyOffscreenCircleCanvas.getContext('2d')
   notifyOffscreenCircleContext.scale(window.devicePixelRatio, window.devicePixelRatio)
@@ -128,7 +119,6 @@ const state = reactive({
 
 const clearRects = () => {
   context.clearRect(0, 0, pageWidth.value, pageHeight.value)
-  lockingContext.clearRect(0, 0, pageWidth.value, pageHeight.value)
   notifyOffscreenCircleContext.clearRect(0, 0, pageWidth.value, pageHeight.value)
 }
 const triggerHideTouchInterface = () => {
@@ -322,9 +312,7 @@ const stopPainting = (event) => {
   const endCursor = utils.cursorPositionInViewport(event)
   const shouldAddCard = store.state.shouldAddCard
   currentUserIsLocking = false
-  window.cancelAnimationFrame(lockingAnimationTimer)
-  lockingAnimationTimer = undefined
-  lockingContext.clearRect(0, 0, pageWidth.value, pageHeight.value)
+  shouldCancelLocking = false
   store.commit('currentUserIsPaintingLocked', false)
   store.commit('currentUserIsPainting', false)
   if (utils.cursorsAreClose(startCursor, endCursor) && shouldAddCard && event.cancelable) {
@@ -436,34 +424,41 @@ const startPainting = (event) => {
   store.dispatch('closeAllDialogs')
 }
 
-const circlesAnimationFrame = () => {
+const circlesAnimationFrame = (timestamp) => {
   context.clearRect(0, 0, pageWidth.value, pageHeight.value) // todo 'context'
   // paint select
   paintSelectCircles = utils.filterCircles(paintSelectCircles, maxIterations)
-  paintSelectCircles.forEach(item => {
+  paintSelectCircles.map(item => {
     item.iteration++
     const circle = JSON.parse(JSON.stringify(item))
     drawCircle(circle, context)
+    return item
   })
   // initial circles
-  initialCircles = utils.filterCircles(initialCircles, maxIterations)
-  initialCircles.forEach(item => {
+  initialCircles = utils.filterCircles(initialCircles, 60)
+  initialCircles.map(item => {
     item.iteration++
     const circle = JSON.parse(JSON.stringify(item))
     drawCircle(circle, context)
+    return item
   })
   // remote paint
   remotePaintingCircles = utils.filterCircles(remotePaintingCircles, maxIterations)
-  remotePaintingCircles.forEach(item => {
+  remotePaintingCircles.map(item => {
     item.iteration++
     let circle = JSON.parse(JSON.stringify(item))
     circle.x = circle.x - window.scrollX
     circle.y = circle.y - window.scrollY
     const shouldDrawOffscreen = true
     drawCircle(circle, context, shouldDrawOffscreen)
+    return item
   })
+  // locking
+  lockingAnimationFrame(timestamp)
   // continue
-  const nextFrame = paintSelectCircles.length > 0 || initialCircles.length > 0 || remotePaintingCircles.length > 0
+  const isLocking = currentUserIsLocking && lockingPercentComplete < 1
+  const nextFrame = paintSelectCircles.length > 0 || initialCircles.length > 0 || remotePaintingCircles.length > 0 || isLocking
+  // console.log(paintSelectCircles.length , initialCircles.length , remotePaintingCircles.length , isLocking, '🍇', nextFrame, '🌺', paintSelectCircles.length > 0 , initialCircles.length > 0 , remotePaintingCircles.length > 0, initialCircles, paintSelectCircles[0])
   if (nextFrame) {
     window.requestAnimationFrame(circlesAnimationFrame)
   } else {
@@ -550,7 +545,7 @@ const createRemotePaintingCircle = (circle) => {
 
 // Boxes
 
-// TODO move this to space
+// TODO move this to space , trigger
 const addBox = (event) => {
   let position = utils.cursorPositionInSpace(event)
   if (utils.isPositionOutsideOfSpace(position)) {
@@ -618,14 +613,17 @@ const selectConnections = (points) => {
 const cancelLocking = () => {
   shouldCancelLocking = true
 }
+const startLockingAnimationTimer = () => {
+  if (!timer) {
+    timer = window.requestAnimationFrame(circlesAnimationFrame)
+  }
+}
 const startLocking = () => {
   if (toolbarIsBox.value) { return }
   currentUserIsLocking = true
   shouldCancelLocking = false
   setTimeout(() => {
-    if (!lockingAnimationTimer) {
-      lockingAnimationTimer = window.requestAnimationFrame(lockingAnimationFrame)
-    }
+    startLockingAnimationTimer()
   }, lockingPreDuration)
 }
 const lockingAnimationFrame = (timestamp) => {
@@ -633,7 +631,7 @@ const lockingAnimationFrame = (timestamp) => {
     lockingStartTime = timestamp
   }
   const elaspedTime = timestamp - lockingStartTime
-  const percentComplete = (elaspedTime / lockingDuration) // between 0 and 1
+  lockingPercentComplete = (elaspedTime / lockingDuration) // between 0 and 1
   if (!utils.cursorsAreClose(startCursor, state.currentCursor)) {
     currentUserIsLocking = false
   }
@@ -641,12 +639,16 @@ const lockingAnimationFrame = (timestamp) => {
     currentUserIsLocking = false
     shouldCancelLocking = false
   }
-  if (currentUserIsLocking && percentComplete <= 1) {
+  if (!currentUserIsLocking) {
+    lockingStartTime = undefined
+    return
+  }
+  if (lockingPercentComplete <= 1) {
     const minSize = circleRadius
-    const percentRemaining = Math.abs(percentComplete - 1)
+    const percentRemaining = Math.abs(lockingPercentComplete - 1)
     const circleRadiusDelta = initialLockCircleRadius - minSize
     const radius = (circleRadiusDelta * percentRemaining) + minSize
-    const alpha = utils.easeOut(percentComplete, elaspedTime, lockingDuration)
+    const alpha = utils.easeOut(lockingPercentComplete, elaspedTime, lockingDuration)
     const circle = {
       x: startCursor.x,
       y: startCursor.y,
@@ -655,20 +657,13 @@ const lockingAnimationFrame = (timestamp) => {
       alpha: alpha || 0.01, // to ensure truthyness
       iteration: 1
     }
-    lockingContext.clearRect(0, 0, pageWidth.value, pageHeight.value)
-    drawCircle(circle, lockingContext)
-    window.requestAnimationFrame(lockingAnimationFrame)
-  } else {
-    window.cancelAnimationFrame(lockingAnimationTimer)
-    lockingContext.clearRect(0, 0, pageWidth.value, pageHeight.value)
-    lockingAnimationTimer = undefined
-    lockingStartTime = undefined
-  }
-  if (currentUserIsLocking && percentComplete > 1) {
+    drawCircle(circle, context)
+  } else if (lockingPercentComplete >= 1) {
     store.commit('currentUserIsPainting', true)
     store.commit('currentUserIsPaintingLocked', true)
     console.log('🔒 lockingAnimationFrame locked')
     postMessage.sendHaptics({ name: 'softImpact' })
+    cancelLocking()
     lockingStartTime = undefined
   }
 }
@@ -754,21 +749,6 @@ canvas#paint-select(
   @dragleave="removeUploadIsDraggedOver"
   @dragend="removeUploadIsDraggedOver"
   @drop.prevent.stop="addCardsAndUploadFiles"
-)
-canvas#remote-painting.remote-painting(
-  :width="viewportWidth"
-  :height="viewportHeight"
-  :data-should-decay-slow="true"
-)
-canvas#locking.locking(
-  :width="viewportWidth"
-  :height="viewportHeight"
-  :data-should-decay-slow="true"
-)
-canvas#initial-circle.initial-circle(
-  :width="viewportWidth"
-  :height="viewportHeight"
-  :data-should-decay-slow="true"
 )
 canvas#notify-offscreen-circle.notify-offscreen-circle(
   :width="viewportWidth"
