@@ -1,5 +1,5 @@
 <script setup>
-import { reactive, computed, onMounted, onUnmounted, defineProps, defineEmits, watch, ref, nextTick } from 'vue'
+import { reactive, computed, onMounted, onUnmounted, onBeforeUnmount, defineProps, defineEmits, watch, ref, nextTick } from 'vue'
 import { useStore } from 'vuex'
 
 import Loader from '@/components/Loader.vue'
@@ -13,11 +13,13 @@ const store = useStore()
 const resultsFilterElement = ref(null)
 const filterInputElement = ref(null)
 
+let unsubscribe
+
 onMounted(() => {
   if (props.initialValue) {
     state.filter = props.initialValue
   }
-  store.subscribe(async (mutation, state) => {
+  unsubscribe = store.subscribe(async (mutation, state) => {
     if (mutation.type === 'closeAllDialogs') {
       const element = resultsFilterElement.value
       if (!element) { return }
@@ -36,6 +38,9 @@ onMounted(() => {
   })
   clearExpiredFilter()
   autoFocus()
+})
+onBeforeUnmount(() => {
+  unsubscribe()
 })
 
 const emit = defineEmits([
