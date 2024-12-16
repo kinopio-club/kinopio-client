@@ -19,12 +19,13 @@ let prevPosition, prevCursor
 
 let canvas, context, startCursor, timer
 
+// paint select
+// ephemeral brush strokes that select items
 let paintSelectCircles = []
-let initialCircles = [] // shows immediate feedback without having to move cursor
 
-// remote painting
-let remotePaintingCircles = []
-let remotePaintingCanvas, remotePaintingContext, remotePaintingCirclesTimer
+// initial circles
+// shows immediate feedback without having to move cursor
+let initialCircles = []
 
 // locking
 // long press to lock scrolling
@@ -32,6 +33,10 @@ const lockingPreDuration = 100 // ms
 const lockingDuration = 150 // ms
 const initialLockCircleRadius = 65
 let lockingCanvas, lockingContext, lockingAnimationTimer, currentUserIsLocking, lockingStartTime, shouldCancelLocking
+
+// remote painting
+let remotePaintingCircles = []
+let remotePaintingCanvas, remotePaintingContext, remotePaintingCirclesTimer
 
 // notify offscreen cards
 // similar to initial circle feedback
