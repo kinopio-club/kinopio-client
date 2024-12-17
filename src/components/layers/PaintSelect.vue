@@ -383,8 +383,7 @@ const createPaintingCircle = (event) => {
   const isPaintingLocked = store.state.currentUserIsPaintingLocked
   if (isTouch && !isPaintingLocked) { return }
   if (isBoxSelecting.value) { return }
-  const currentUserIsPaintingLocked = store.state.currentUserIsPaintingLocked
-  if (isTouch && !currentUserIsPaintingLocked) { return }
+  if (isTouch && !isPaintingLocked) { return }
   createPaintingCircles(event)
   const position = utils.cursorPositionInSpace(event)
   selectItemsBetweenCurrentAndPrevPosition(position)
