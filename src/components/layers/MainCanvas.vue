@@ -56,7 +56,7 @@ onMounted(() => {
       const position = utils.cursorPositionInSpace(event)
       createPaintingCircle(event)
       selectItems([position])
-    } else if (mutation.type === 'triggerUpdatePaintSelectPositionOffset') {
+    } else if (mutation.type === 'triggerUpdateMainCanvasPositionOffset') {
       updateCirclesWithScroll()
     } else if (mutation.type === 'triggerAddRemotePaintingCircle') {
       let circle = mutation.payload
@@ -81,7 +81,7 @@ onMounted(() => {
     }
   })
   // init canvas
-  canvas = document.getElementById('paint-select')
+  canvas = document.getElementById('main-canvas')
   context = canvas.getContext('2d')
   context.scale(window.devicePixelRatio, window.devicePixelRatio)
   // trigger stopPainting even if mouse is outside window
@@ -738,7 +738,7 @@ const addCardsAndUploadFiles = (event) => {
 
 <template lang="pug">
 //- Paint select is ephemeral brush strokes that select items
-canvas#paint-select(
+canvas#main-canvas(
   :width="viewportWidth"
   :height="viewportHeight"
 )
