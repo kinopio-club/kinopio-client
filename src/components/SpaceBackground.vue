@@ -94,4 +94,5 @@ template(v-else)
   z-index 0
   transform-origin top left
   background var(--primary-background)
+  pointer-events none
 </style>
