@@ -308,9 +308,13 @@ const isLocked = computed(() => props.box.isLocked)
 // label
 
 const infoStyles = computed(() => {
-  return {
+  let styles = {
     backgroundColor: color.value
   }
+  if (isLocked.value) {
+    styles.pointerEvents = 'none'
+  }
+  return styles
 })
 
 // interacting
