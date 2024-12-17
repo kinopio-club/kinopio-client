@@ -226,35 +226,6 @@ export default {
       await context.dispatch('api/addToQueue', { name: 'updateMultipleBoxes', body: updates }, { root: true })
     },
 
-    // z-index
-
-    clearAllZs: async (context) => {
-      let boxes = context.getters.all
-      for (const box of boxes) {
-        const body = { id: box.id, z: 0 }
-        context.commit('update', body)
-        context.dispatch('broadcast/update', { updates: body, type: 'updateBox', handler: 'currentBoxes/update' }, { root: true })
-        await context.dispatch('api/addToQueue', { name: 'updateBox', body }, { root: true })
-      }
-    },
-    incrementZ: async (context, id) => {
-      const box = context.getters.byId(id)
-      if (!box) { return }
-      const boxes = context.getters.all
-      const maxInt = Number.MAX_SAFE_INTEGER - 1000
-      let highestCardZ = utils.highestItemZ(boxes)
-      if (highestCardZ > maxInt) {
-        context.dispatch('clearAllZs')
-        highestCardZ = 1
-      }
-      const canEditSpace = context.rootGetters['currentUser/canEditSpace']()
-      const body = { id, z: highestCardZ + 1 }
-      context.commit('update', body)
-      if (!canEditSpace) { return }
-      context.dispatch('broadcast/update', { updates: body, type: 'updateBox', handler: 'currentBoxes/update' }, { root: true })
-      await context.dispatch('api/addToQueue', { name: 'updateBox', body }, { root: true })
-    },
-
     // checkboxes
 
     toggleChecked (context, { boxId, value }) {
@@ -595,12 +566,7 @@ export default {
         box.x = position.x
         box.y = position.y
         const { x, y } = box
-        // z
-        let z = box.z
-        if (id !== currentDraggingBoxId) {
-          z = currentDraggingBox.z + 1
-        }
-        return { id, x, y, z }
+        return { id, x, y }
       })
       boxes = boxes.filter(box => Boolean(box))
       context.commit('move', { boxes, spaceId })
