@@ -521,7 +521,6 @@ export default {
       }
       let boxes = context.getters.isSelected
       if (!boxes.length) { return }
-      boxes = boxes.filter(box => !box.isLocked)
       boxes = boxes.filter(box => context.rootGetters['currentUser/canEditBox'](box))
       // prevent boxes bunching up at 0
       let connections = []
