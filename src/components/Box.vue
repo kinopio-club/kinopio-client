@@ -177,6 +177,9 @@ const styles = computed(() => {
   if (currentBoxDetailsIsVisible.value || currentBoxIsBeingDragged.value) {
     z = 2147483646 // max z
   }
+  if (isLocked.value) {
+    z = 0
+  }
   styles.zIndex = z
   return styles
 })

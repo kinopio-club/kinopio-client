@@ -615,9 +615,9 @@ main#space.space(
   SpaceBackground
   SpaceBackgroundTint
   Connections
+  ItemsLocked
   Boxes
   Cards
-  ItemsLocked
   ItemUnlockButtons
   BoxDetails
   CardDetails

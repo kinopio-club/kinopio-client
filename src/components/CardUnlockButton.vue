@@ -49,7 +49,8 @@ const positionStyles = computed(() => {
   const x = props.card.x + width - buttonWidth
   return {
     left: x + 'px',
-    top: props.card.y + 'px'
+    top: props.card.y + 'px',
+    zIndex: props.card.z
   }
 })
 const backgroundStyles = computed(() => {
