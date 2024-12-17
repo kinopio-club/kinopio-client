@@ -533,6 +533,14 @@ export default {
       return event.touches.length > 1
     }
   },
+  isEventTouchOrMouseLeftButton (event) {
+    const isMouseEvent = event.type.includes('mouse')
+    if (!isMouseEvent) {
+      // ignore touch events
+      return true
+    }
+    return event.button === 0
+  },
   isMacOrIpad () {
     return window.navigator.platform === 'MacIntel'
   },

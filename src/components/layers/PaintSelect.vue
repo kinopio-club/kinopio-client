@@ -410,6 +410,7 @@ const startPainting = (event) => {
   if (isPanning.value) { return }
   if (isBoxSelecting.value) { return }
   if (store.state.isPinchZooming) { return }
+  if (!utils.isEventTouchOrMouseLeftButton(event)) { return }
   updateSelectableCardsInViewport()
   updateSelectableBoxesInViewport()
   updateSelectableConnectionsInViewport()
