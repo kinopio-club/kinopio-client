@@ -904,6 +904,8 @@ const isInCheckedBox = computed(() => {
     opacity var(--is-checked-opacity)
   .box-info
     --header-font var(--header-font-0)
+    z-index 1
+    border-radius 4px
     &.header-font-1
       --header-font var(--header-font-1)
     &.header-font-2
