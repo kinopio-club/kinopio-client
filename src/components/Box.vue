@@ -172,6 +172,12 @@ const styles = computed(() => {
     fillColor = colord(fillColor).alpha(0.5).toRgbString()
     styles.backgroundColor = fillColor
   }
+  // z
+  let z = props.box.z
+  if (currentBoxDetailsIsVisible.value || currentBoxIsBeingDragged.value) {
+    z = 2147483646 // max z
+  }
+  styles.zIndex = z
   return styles
 })
 const userColor = computed(() => store.state.currentUser.color)
@@ -356,6 +362,7 @@ const startBoxInfoInteraction = (event) => {
   if (event.altKey) { return } // should not select contained items if alt/option key
   selectContainedCards()
   selectContainedBoxes()
+  store.dispatch('currentBoxes/incrementZ', props.box.id)
 }
 const updateIsHover = (value) => {
   if (store.state.currentUserIsDraggingBox) { return }
@@ -776,6 +783,7 @@ const isInCheckedBox = computed(() => {
   :data-box-id="box.id"
   :data-x="normalizedBox.x"
   :data-y="normalizedBox.y"
+  :data-z="box.z"
   :data-resize-width="normalizedBox.resizeWidth"
   :data-resize-height="normalizedBox.resizeHeight"
   :data-is-locked="isLocked"
