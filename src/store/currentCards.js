@@ -21,7 +21,7 @@ const incrementCardsZ = (context, cards) => {
     if (card.isLocked) { return card }
     const cards = context.getters.all
     const maxInt = Number.MAX_SAFE_INTEGER - 1000
-    let highestCardZ = utils.highestCardZ(cards)
+    let highestCardZ = utils.highestItemZ(cards)
     if (highestCardZ > maxInt) {
       context.dispatch('clearAllZs')
       highestCardZ = 1
@@ -217,7 +217,7 @@ const currentCards = {
       utils.typeCheck({ value: position, type: 'object', allowUndefined: true })
       let cards = context.getters.all
       // new card values
-      const highestCardZ = utils.highestCardZ(cards)
+      const highestCardZ = utils.highestItemZ(cards)
       const defaultBackgroundColor = context.rootState.currentUser.defaultCardBackgroundColor
       const isComment = context.rootState.isCommentMode || context.rootGetters['currentUser/canOnlyComment']()
       card.id = id || nanoid()
@@ -790,7 +790,7 @@ const currentCards = {
       if (card.isLocked) { return }
       const cards = context.getters.all
       const maxInt = Number.MAX_SAFE_INTEGER - 1000
-      let highestCardZ = utils.highestCardZ(cards)
+      let highestCardZ = utils.highestItemZ(cards)
       if (highestCardZ > maxInt) {
         context.dispatch('clearAllZs')
         highestCardZ = 1

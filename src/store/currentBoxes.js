@@ -154,12 +154,15 @@ export default {
       const minBoxSize = consts.minBoxSize
       const isThemeDark = context.rootState.currentUser.theme === 'dark'
       const color = randomColor({ luminosity: 'dark' })
+      const boxes = context.getters.all
+      const highestBoxZ = utils.highestItemZ(boxes)
       box = {
         id: box.id || nanoid(),
         spaceId: currentSpaceId,
         userId: context.rootState.currentUser.id,
         x: box.x,
         y: box.y,
+        z: highestBoxZ + 1,
         resizeWidth: box.resizeWidth || minBoxSize,
         resizeHeight: box.resizeHeight || minBoxSize,
         color: box.color || color,
@@ -221,6 +224,35 @@ export default {
       })
       cache.updateSpace('editedByUserId', context.rootState.currentUser.id, currentSpaceId)
       await context.dispatch('api/addToQueue', { name: 'updateMultipleBoxes', body: updates }, { root: true })
+    },
+
+    // z-index
+
+    clearAllZs: async (context) => {
+      let boxes = context.getters.all
+      for (const box of boxes) {
+        const body = { id: box.id, z: 0 }
+        context.commit('update', body)
+        context.dispatch('broadcast/update', { updates: body, type: 'updateBox', handler: 'currentBoxes/update' }, { root: true })
+        await context.dispatch('api/addToQueue', { name: 'updateBox', body }, { root: true })
+      }
+    },
+    incrementZ: async (context, id) => {
+      const box = context.getters.byId(id)
+      if (!box) { return }
+      const boxes = context.getters.all
+      const maxInt = Number.MAX_SAFE_INTEGER - 1000
+      let highestCardZ = utils.highestItemZ(boxes)
+      if (highestCardZ > maxInt) {
+        context.dispatch('clearAllZs')
+        highestCardZ = 1
+      }
+      const canEditSpace = context.rootGetters['currentUser/canEditSpace']()
+      const body = { id, z: highestCardZ + 1 }
+      context.commit('update', body)
+      if (!canEditSpace) { return }
+      context.dispatch('broadcast/update', { updates: body, type: 'updateBox', handler: 'currentBoxes/update' }, { root: true })
+      await context.dispatch('api/addToQueue', { name: 'updateBox', body }, { root: true })
     },
 
     // checkboxes
@@ -489,7 +521,6 @@ export default {
       }
       let boxes = context.getters.isSelected
       if (!boxes.length) { return }
-      boxes = boxes.filter(box => !box.isLocked)
       boxes = boxes.filter(box => context.rootGetters['currentUser/canEditBox'](box))
       // prevent boxes bunching up at 0
       let connections = []
@@ -549,10 +580,12 @@ export default {
     afterMove: (context) => {
       prevMovePositions = {}
       const currentDraggingBoxId = context.rootState.currentDraggingBoxId
+      const currentDraggingBox = context.getters.byId(currentDraggingBoxId)
       const spaceId = context.rootState.currentSpace.id
       let boxIds = context.getters.isSelectedIds
       boxIds = boxIds.filter(box => Boolean(box))
       if (!boxIds.length) { return }
+      // boxes
       let boxes = boxIds.map(id => {
         let box = context.getters.byId(id)
         if (!box) { return }
@@ -562,11 +595,17 @@ export default {
         box.x = position.x
         box.y = position.y
         const { x, y } = box
-        return { id, x, y }
+        // z
+        let z = box.z
+        if (id !== currentDraggingBoxId) {
+          z = currentDraggingBox.z + 1
+        }
+        return { id, x, y, z }
       })
       boxes = boxes.filter(box => Boolean(box))
       context.commit('move', { boxes, spaceId })
       boxes = boxes.filter(box => box)
+      // update
       context.dispatch('updateMultiple', boxes)
       const box = context.getters.byId(currentDraggingBoxId)
       context.dispatch('checkIfItemShouldIncreasePageSize', box, { root: true })

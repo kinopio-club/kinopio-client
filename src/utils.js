@@ -1377,9 +1377,9 @@ export default {
     const endValue = 1
     return -endValue * (elaspedTime /= duration) * (elaspedTime - 2) + startValue
   },
-  highestCardZ (cards) {
-    let highestCardZ = Math.max(...cards.map(card => card.z)) + 1
-    return highestCardZ
+  highestItemZ (items) {
+    let highestZ = Math.max(...items.map(item => item.z || 0)) + 1
+    return highestZ
   },
 
   // Spaces 🌙

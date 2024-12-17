@@ -20,10 +20,10 @@ const props = defineProps({
 
 // user
 
-const userHasName = computed(() => Boolean(props.user.name))
-const colorIsDark = computed(() => utils.colorIsDark(props.user.color))
+const userHasName = computed(() => Boolean(props.user?.name))
+const colorIsDark = computed(() => utils.colorIsDark(props.user?.color))
 const userName = computed(() => {
-  let name = props.user.name
+  let name = props.user?.name
   if (props.truncateNameToLength) {
     name = utils.truncated(name, props.truncateNameToLength)
   }
@@ -35,7 +35,7 @@ const userName = computed(() => {
 const userDetailsIsVisible = computed(() => store.state.userDetailsIsVisible)
 const userDetailsIsUser = computed(() => {
   const userDetailsUser = store.state.userDetailsUser
-  return props.user.id === userDetailsUser.id
+  return props.user?.id === userDetailsUser.id
 })
 const userDetailsIsVisibleForUser = computed(() => userDetailsIsVisible.value && userDetailsIsUser.value)
 const toggleUserDetailsIsVisible = () => {
@@ -60,7 +60,7 @@ const showUserDetails = () => {
   store.commit('userDetailsIsVisible', true)
 }
 const title = computed(() => {
-  return props.title || props.user.name
+  return props.title || props.user?.name
 })
 
 </script>

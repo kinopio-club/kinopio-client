@@ -10,6 +10,7 @@ import smartquotes from 'smartquotes'
 import postMessage from '@/postMessage.js'
 
 import randomColor from 'randomcolor'
+import { colord, extend } from 'colord'
 const store = useStore()
 
 let unsubscribe
@@ -166,6 +167,20 @@ const styles = computed(() => {
     styles.width = normalizedBox.value.resizeWidth
     styles.height = normalizedBox.value.resizeHeight
   }
+  if (hasFill.value) {
+    let fillColor = color.value
+    fillColor = colord(fillColor).alpha(0.5).toRgbString()
+    styles.backgroundColor = fillColor
+  }
+  // z
+  let z = props.box.z
+  if (currentBoxDetailsIsVisible.value || currentBoxIsBeingDragged.value) {
+    z = 2147483646 // max z
+  }
+  if (isLocked.value) {
+    z = 0
+  }
+  styles.zIndex = z
   return styles
 })
 const userColor = computed(() => store.state.currentUser.color)
@@ -301,10 +316,14 @@ const isLocked = computed(() => props.box.isLocked)
 
 // label
 
-const labelStyles = computed(() => {
-  return {
+const infoStyles = computed(() => {
+  let styles = {
     backgroundColor: color.value
   }
+  if (isLocked.value) {
+    styles.pointerEvents = 'none'
+  }
+  return styles
 })
 
 // interacting
@@ -346,6 +365,7 @@ const startBoxInfoInteraction = (event) => {
   if (event.altKey) { return } // should not select contained items if alt/option key
   selectContainedCards()
   selectContainedBoxes()
+  store.dispatch('currentBoxes/incrementZ', props.box.id)
 }
 const updateIsHover = (value) => {
   if (store.state.currentUserIsDraggingBox) { return }
@@ -766,6 +786,7 @@ const isInCheckedBox = computed(() => {
   :data-box-id="box.id"
   :data-x="normalizedBox.x"
   :data-y="normalizedBox.y"
+  :data-z="box.z"
   :data-resize-width="normalizedBox.resizeWidth"
   :data-resize-height="normalizedBox.resizeHeight"
   :data-is-locked="isLocked"
@@ -782,7 +803,7 @@ const isInCheckedBox = computed(() => {
     v-if="shouldRender"
     :data-box-id="box.id"
     :data-is-visible-in-viewport="state.isVisibleInViewport"
-    :style="labelStyles"
+    :style="infoStyles"
     :class="infoClasses"
     tabindex="0"
 
@@ -852,9 +873,6 @@ const isInCheckedBox = computed(() => {
         tabindex="-1"
       )
         img.resize-icon.icon(src="@/assets/resize-corner.svg" :class="resizeColorClass")
-
-  //- fill
-  .background.filled(v-if="hasFill" :style="{background: color}")
 </template>
 
 <style lang="stylus">
@@ -1008,16 +1026,6 @@ const isInCheckedBox = computed(() => {
       .resize-icon
         top 0
         left 0
-
-  .background
-    position absolute
-    left 0px
-    top 0px
-    width 100%
-    height 100%
-    z-index -1
-    &.filled
-      opacity 0.5
 
   .locking-frame
     position absolute

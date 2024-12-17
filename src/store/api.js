@@ -138,7 +138,8 @@ const self = {
       if (options.spaceReadOnlyKey) {
         headers.append('Read-Only-Authorization', options.spaceReadOnlyKey)
       }
-      headers.append('Request-Id', nanoid())
+      const requestId = options.requestId || nanoid()
+      headers.append('Request-Id', requestId)
       headers.append('User-Id', context.rootState.currentUser.id)
       return {
         method: options.method,
@@ -211,10 +212,11 @@ const self = {
       // send
       let response
       try {
-        console.warn(`🛫 sending operations`, body)
+        const requestId = nanoid()
+        console.warn(`🛫 sending operations`, body, `●requestId=${requestId}`)
         const space = context.rootState.currentSpace
         if (!space.id) { throw 'operation missing spaceId' }
-        const options = await context.dispatch('requestOptions', { body, method: 'POST', space })
+        const options = await context.dispatch('requestOptions', { body, method: 'POST', space, requestId })
         response = await fetch(`${consts.apiHost()}/operations`, options)
         if (response.ok) {
           console.log('🛬 operations ok', body)

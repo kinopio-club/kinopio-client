@@ -601,11 +601,6 @@ const stopInteractions = async (event) => {
 <template lang="pug">
 //- page
 OutsideSpaceBackground
-SpaceBackground
-SpaceBackgroundTint
-aside
-  PaintSelect
-  SonarPing
 //- user presence cursors
 template(v-for="user in users")
   UserLabelCursor(:user="user")
@@ -617,10 +612,12 @@ main#space.space(
   :style="styles"
   :data-zoom="spaceZoomDecimal"
 )
+  SpaceBackground
+  SpaceBackgroundTint
   Connections
+  ItemsLocked
   Boxes
   Cards
-  ItemsLocked
   ItemUnlockButtons
   BoxDetails
   CardDetails
@@ -632,6 +629,9 @@ main#space.space(
   NotificationsWithPosition(layer="space")
   BoxSelecting
   SnapGuideLines
+aside
+  PaintSelect
+  SonarPing
 //- page ui, dialogs
 Header
 Footer

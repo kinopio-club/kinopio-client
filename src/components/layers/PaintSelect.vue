@@ -87,6 +87,19 @@ onMounted(() => {
   // trigger stopPainting even if mouse is outside window
   window.addEventListener('mouseup', stopPainting)
   window.addEventListener('touchend', stopPainting)
+  // mousedown
+  window.addEventListener('mousedown', startPainting)
+  window.addEventListener('touchstart', startPainting)
+  // mousemove
+  window.addEventListener('mousemove', painting)
+  window.addEventListener('touchmove', painting)
+  // drag over
+  window.addEventListener('dragenter', checkIfUploadIsDraggedOver)
+  window.addEventListener('dragover', checkIfUploadIsDraggedOver)
+  window.addEventListener('dragleave', removeUploadIsDraggedOver)
+  window.addEventListener('dragend', removeUploadIsDraggedOver)
+  window.addEventListener('drop', addCardsAndUploadFiles)
+
   // shift circle positions with scroll to simulate full size canvas
   updatePrevScrollPosition()
   window.addEventListener('scroll', userScroll)
@@ -94,7 +107,7 @@ onMounted(() => {
   window.addEventListener('load', clearCircles)
   startPostScroll()
   state.dropGuideLineIsVisible = !utils.isMobile()
-  window.addEventListener('visibilitychange', clearRects)
+  window.addEventListener('visibilitychange', clearRect)
 })
 
 onBeforeUnmount(() => {
@@ -103,7 +116,11 @@ onBeforeUnmount(() => {
   window.removeEventListener('scroll', userScroll)
   window.removeEventListener('touchmove', userScroll)
   window.removeEventListener('load', clearCircles)
-  window.removeEventListener('visibilitychange', clearRects)
+  window.removeEventListener('visibilitychange', clearRect)
+  window.removeEventListener('mousedown', startPainting)
+  window.removeEventListener('touchstart', startPainting)
+  window.removeEventListener('mousemove', painting)
+  window.removeEventListener('touchmove', painting)
   unsubscribe()
 })
 
@@ -113,12 +130,16 @@ const state = reactive({
   uploadIsDraggedOver: false
 })
 
-const clearRects = () => {
+const clearRect = () => {
   context.clearRect(0, 0, pageWidth.value, pageHeight.value)
 }
 const triggerHideTouchInterface = () => {
   if (!store.state.currentUserIsPaintingLocked) { return }
   store.commit('triggerHideTouchInterface')
+}
+const isCanvasScope = (event) => {
+  const tagName = event.target.tagName
+  return tagName === 'CANVAS'
 }
 
 // current user
@@ -385,6 +406,7 @@ const createPaintingCircles = (event) => {
   prevCursor = state.currentCursor
 }
 const startPainting = (event) => {
+  if (!isCanvasScope(event)) { return }
   if (isPanning.value) { return }
   if (isBoxSelecting.value) { return }
   if (store.state.isPinchZooming) { return }
@@ -424,7 +446,7 @@ const startPainting = (event) => {
 }
 
 const circlesAnimationFrame = (timestamp) => {
-  context.clearRect(0, 0, pageWidth.value, pageHeight.value) // todo 'context'
+  clearRect()
   // paint select
   paintSelectCircles = utils.filterCircles(paintSelectCircles, maxIterations)
   paintSelectCircles = paintSelectCircles.map(item => {
@@ -689,6 +711,7 @@ const selectConnections = (points) => {
 // Upload Files
 
 const checkIfUploadIsDraggedOver = (event) => {
+  event.preventDefault()
   const uploadIsFiles = event.dataTransfer.types.find(type => type === 'Files')
   if (!event.dataTransfer) { return }
   if (!uploadIsFiles) { return }
@@ -700,6 +723,8 @@ const removeUploadIsDraggedOver = () => {
   state.uploadIsDraggedOver = false
 }
 const addCardsAndUploadFiles = (event) => {
+  event.preventDefault()
+  event.stopPropagation()
   let files = event.dataTransfer.files
   files = Array.from(files)
   removeUploadIsDraggedOver()
@@ -714,18 +739,20 @@ const addCardsAndUploadFiles = (event) => {
 <template lang="pug">
 //- Paint select is ephemeral brush strokes that select items
 canvas#paint-select(
-  @mousedown.left="startPainting"
-  @touchstart="startPainting"
-  @mousemove="painting"
-  @touchmove="painting"
   :width="viewportWidth"
   :height="viewportHeight"
-  @dragenter="checkIfUploadIsDraggedOver"
-  @dragover.prevent="checkIfUploadIsDraggedOver"
-  @dragleave="removeUploadIsDraggedOver"
-  @dragend="removeUploadIsDraggedOver"
-  @drop.prevent.stop="addCardsAndUploadFiles"
 )
+  //- @mousedown.left="startPainting"
+  //- @touchstart="startPainting"
+  //- @mousemove="painting"
+  //- @touchmove="painting"
+
+  //- @dragenter="checkIfUploadIsDraggedOver"
+  //- @dragover.prevent="checkIfUploadIsDraggedOver"
+  //- @dragleave="removeUploadIsDraggedOver"
+  //- @dragend="removeUploadIsDraggedOver"
+  //- @drop.prevent.stop="addCardsAndUploadFiles"
+
 DropGuideLine(
   v-if="state.dropGuideLineIsVisible"
   :currentCursor="state.currentCursor"
@@ -742,11 +769,5 @@ canvas
   background transparent
   top 0
   opacity 1
-.locking,
-.initial-circle,
-.remote-painting,
-.notify-offscreen-circle
   pointer-events none
-.notify-offscreen-circle
-  z-index 1
 </style>
