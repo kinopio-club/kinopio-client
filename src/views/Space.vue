@@ -237,8 +237,9 @@ const addOrCloseCard = (event) => {
     store.dispatch('closeAllDialogs')
   }
 }
-const tiltCards = () => {
+const tiltCards = (event) => {
   if (!prevCursor) { return }
+  if (utils.isMultiTouch(event)) { return }
   const cardIds = store.state.currentUserIsTiltingCardIds
   let delta = utils.distanceBetweenTwoPoints(endCursor, prevCursor)
   if (endCursor.x - prevCursor.x > 0 || endCursor.y - prevCursor.y > 0) {
@@ -256,8 +257,9 @@ const stopTiltingCards = () => {
   store.commit('currentUserIsTiltingCard', false)
   store.commit('broadcast/updateStore', { updates: { userId: currentUser.value.id }, type: 'removeRemoteUserTiltingCards' })
 }
-const resizeCards = () => {
+const resizeCards = (event) => {
   if (!prevCursor) { return }
+  if (utils.isMultiTouch(event)) { return }
   const cardIds = store.state.currentUserIsResizingCardIds
   let deltaX = endCursor.x - prevCursor.x
   store.dispatch('currentCards/resize', { cardIds, deltaX })
@@ -485,9 +487,9 @@ const interact = (event) => {
     store.commit('currentDraggingCardId', '')
     dragItems()
   } else if (isResizingCard.value) {
-    resizeCards()
+    resizeCards(event)
   } else if (isTiltingCard.value) {
-    tiltCards()
+    tiltCards(event)
   } else if (isResizingBox.value) {
     resizeBoxes()
   }

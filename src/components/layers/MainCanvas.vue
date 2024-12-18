@@ -746,17 +746,6 @@ canvas#main-canvas(
   :width="viewportWidth"
   :height="viewportHeight"
 )
-  //- @mousedown.left="startPainting"
-  //- @touchstart="startPainting"
-  //- @mousemove="painting"
-  //- @touchmove="painting"
-
-  //- @dragenter="checkIfUploadIsDraggedOver"
-  //- @dragover.prevent="checkIfUploadIsDraggedOver"
-  //- @dragleave="removeUploadIsDraggedOver"
-  //- @dragend="removeUploadIsDraggedOver"
-  //- @drop.prevent.stop="addCardsAndUploadFiles"
-
 DropGuideLine(
   v-if="state.dropGuideLineIsVisible"
   :currentCursor="state.currentCursor"
