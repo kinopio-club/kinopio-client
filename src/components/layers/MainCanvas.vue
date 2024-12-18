@@ -782,6 +782,9 @@ canvas
   position fixed
   background transparent
   top 0
+  left 0
+  width 100dvw
+  height 100dvh
   opacity 1
   pointer-events none
 #main-canvas
