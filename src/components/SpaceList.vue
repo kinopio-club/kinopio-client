@@ -423,7 +423,7 @@ span.space-list-wrap
               img.icon.inbox-icon(src="@/assets/inbox.svg")
             //- template
             template(v-if="space.isTemplate")
-              img.icon.templates(v-if="showDuplicateTemplateIcon" src="@/assets/templates-dupe.svg" title="Duplicate Template")
+              img.icon.templates.duplicate-template(v-if="showDuplicateTemplateIcon" src="@/assets/duplicate.svg" title="Duplicate Template")
               img.icon.templates(v-else src="@/assets/templates.svg" title="Template")
             //- Users
             //- show spectators
@@ -552,6 +552,8 @@ span.space-list-wrap
       .icon.templates
         margin-right 5px
         margin-top 3px
+      .icon.duplicate-template
+        margin-top 5px
 
     .space-wrap
       position relative
