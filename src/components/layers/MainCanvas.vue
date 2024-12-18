@@ -607,7 +607,9 @@ const lockingAnimationFrame = (timestamp) => {
   }
   const elaspedTime = timestamp - lockingStartTime
   lockingPercentComplete = (elaspedTime / lockingDuration) // between 0 and 1
-  if (!utils.cursorsAreClose(startCursor, state.currentCursor)) {
+  const zoom = Math.min(utils.pinchCounterZoomDecimal(), 1)
+  const cursorsAreClose = utils.cursorsAreClose(startCursor, state.currentCursor, zoom)
+  if (!cursorsAreClose) {
     currentUserIsLocking = false
   }
   if (shouldCancelLocking) {

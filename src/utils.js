@@ -485,10 +485,12 @@ export default {
   findInArrayOfObjects (array, key, value) {
     return array.find(item => item[key] === value)
   },
-  cursorsAreClose (startCursor, endCursor) {
+  cursorsAreClose (startCursor, endCursor, zoom) {
     if (!startCursor) { return }
     if (!endCursor) { return }
-    const threshold = 5
+    zoom = zoom || this.spaceCounterZoomDecimal()
+    let threshold = 5
+    threshold = threshold * zoom
     const xRange = {
       value: endCursor.x,
       min: startCursor.x - threshold,
