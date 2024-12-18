@@ -16,7 +16,7 @@ const rateOfIterationDecay = 0.08 // higher is faster tail decay
 const rateOfIterationDecaySlow = 0.03
 let prevScroll
 let prevPosition, prevCursor
-let canvas, context, startCursor, timer
+let canvas, context, startCursor, startCirclePosition, timer
 // paint select
 // ephemeral brush strokes that select items
 let paintSelectCircles = []
@@ -378,6 +378,13 @@ const endPostScroll = () => {
 
 // paint circles
 
+const circlePosition = (event) => {
+  let position = utils.cursorPositionInViewport(event)
+  const canvasRect = context.canvas.getBoundingClientRect()
+  position.x = position.x - canvasRect.x
+  position.y = position.y - canvasRect.y
+  return position
+}
 const createPaintingCircle = (event) => {
   const isTouch = Boolean(event.touches)
   const isPaintingLocked = store.state.currentUserIsPaintingLocked
@@ -390,7 +397,8 @@ const createPaintingCircle = (event) => {
   selectItemsBetweenCurrentAndPrevPosition(position)
 }
 const createPaintingCircles = (event) => {
-  state.currentCursor = utils.cursorPositionInViewport(event)
+  const position = circlePosition(event)
+  state.currentCursor = position
   if (!prevCursor) {
     prevCursor = state.currentCursor
     return
@@ -416,6 +424,7 @@ const startPainting = (event) => {
   updateSelectableBoxesInViewport()
   updateSelectableConnectionsInViewport()
   startCursor = utils.cursorPositionInViewport(event)
+  startCirclePosition = circlePosition(event)
   state.currentCursor = startCursor
   store.dispatch('currentCards/updateCanBeSelectedSortedByY')
   if (utils.isMultiTouch(event)) { return }
@@ -424,7 +433,7 @@ const startPainting = (event) => {
     store.commit('currentUserIsPainting', false)
   } else {
     store.commit('currentUserIsPainting', true)
-    createInitialCircle()
+    createInitialCircle(event)
   }
   const multipleCardsIsSelected = Boolean(store.state.multipleCardsSelectedIds.length)
   const shouldAdd = !multipleCardsIsSelected && !utils.unpinnedDialogIsVisible()
@@ -544,11 +553,12 @@ const painting = (event) => {
 
 // Initial Circles
 
-const createInitialCircle = (circle) => {
+const createInitialCircle = (event) => {
   if (toolbarIsBox.value) { return }
+  const position = circlePosition(event)
   const initialCircle = {
-    x: startCursor.x,
-    y: startCursor.y,
+    x: position.x,
+    y: position.y,
     color: currentUserColor.value,
     iteration: 1
   }
@@ -629,8 +639,8 @@ const lockingAnimationFrame = (timestamp) => {
     const radius = (circleRadiusDelta * percentRemaining) + minSize
     const alpha = utils.easeOut(lockingPercentComplete, elaspedTime, lockingDuration)
     const circle = {
-      x: startCursor.x,
-      y: startCursor.y,
+      x: startCirclePosition.x,
+      y: startCirclePosition.y,
       color: currentUserColor.value,
       radius,
       alpha: alpha || 0.01, // to ensure truthyness
@@ -774,4 +784,6 @@ canvas
   top 0
   opacity 1
   pointer-events none
+#main-canvas
+  background-color rgba(227, 61, 148, 0.5) // pink
 </style>
