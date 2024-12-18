@@ -172,15 +172,6 @@ const styles = computed(() => {
     fillColor = colord(fillColor).alpha(0.5).toRgbString()
     styles.backgroundColor = fillColor
   }
-  // z
-  let z = props.box.z
-  if (currentBoxDetailsIsVisible.value || currentBoxIsBeingDragged.value) {
-    z = 2147483646 // max z
-  }
-  if (isLocked.value) {
-    z = 0
-  }
-  styles.zIndex = z
   return styles
 })
 const userColor = computed(() => store.state.currentUser.color)
@@ -365,7 +356,6 @@ const startBoxInfoInteraction = (event) => {
   if (event.altKey) { return } // should not select contained items if alt/option key
   selectContainedCards()
   selectContainedBoxes()
-  store.dispatch('currentBoxes/incrementZ', props.box.id)
 }
 const updateIsHover = (value) => {
   if (store.state.currentUserIsDraggingBox) { return }
@@ -786,7 +776,6 @@ const isInCheckedBox = computed(() => {
   :data-box-id="box.id"
   :data-x="normalizedBox.x"
   :data-y="normalizedBox.y"
-  :data-z="box.z"
   :data-resize-width="normalizedBox.resizeWidth"
   :data-resize-height="normalizedBox.resizeHeight"
   :data-is-locked="isLocked"
@@ -895,6 +884,7 @@ const isInCheckedBox = computed(() => {
   &.active
     box-shadow var(--active-shadow)
     transition none
+    z-index 1
   &.is-resizing
     box-shadow var(--active-shadow)
     transition none
@@ -904,6 +894,8 @@ const isInCheckedBox = computed(() => {
     opacity var(--is-checked-opacity)
   .box-info
     --header-font var(--header-font-0)
+    z-index 1
+    border-radius 4px
     &.header-font-1
       --header-font var(--header-font-1)
     &.header-font-2
