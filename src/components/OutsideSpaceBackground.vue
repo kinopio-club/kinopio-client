@@ -163,4 +163,5 @@ canvas#outside-space-background(
   width 10px
   height 10px
   transform-origin left top
+  user-select none
 </style>
