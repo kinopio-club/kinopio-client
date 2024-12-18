@@ -2059,6 +2059,7 @@ const store = createStore({
       return !state.isAddPage
     },
     shouldScrollAtEdges: (state, getters) => (event) => {
+      if (window.visualViewport.scale > 1) { return }
       let isPainting
       if (event.touches) {
         isPainting = state.currentUserIsPaintingLocked
