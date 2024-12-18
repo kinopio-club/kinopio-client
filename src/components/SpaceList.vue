@@ -88,7 +88,8 @@ const props = defineProps({
   parentDialog: String,
   previewImageIsWide: Boolean,
   hidePreviewImage: Boolean,
-  showSpaceGroups: Boolean
+  showSpaceGroups: Boolean,
+  showDuplicateTemplateIcon: Boolean
 })
 
 const state = reactive({
@@ -421,8 +422,9 @@ span.space-list-wrap
             template(v-if="space.name === 'Inbox'")
               img.icon.inbox-icon(src="@/assets/inbox.svg")
             //- template
-            img.icon.templates(v-if="space.isTemplate" src="@/assets/templates.svg" title="Template")
-
+            template(v-if="space.isTemplate")
+              img.icon.templates(v-if="showDuplicateTemplateIcon" src="@/assets/templates-dupe.svg" title="Duplicate Template")
+              img.icon.templates(v-else src="@/assets/templates.svg" title="Template")
             //- Users
             //- show spectators
             template(v-if="showOtherUsers && isMultipleUsers(space)")
