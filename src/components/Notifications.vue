@@ -92,6 +92,7 @@ const cardsCreatedCountFromLimit = computed(() => {
   return Math.max(cardsCreatedLimit - cardsCreatedCount, 0)
 })
 const currentSpaceIsTemplate = computed(() => {
+  if (store.state.isLoadingSpace) { return }
   const currentSpace = store.state.currentSpace
   if (currentSpace.isTemplate) { return true }
   const templateSpaceIds = templates.spaces().map(space => space.id)
@@ -168,6 +169,7 @@ const notifyThanksForUpgrading = computed(() => store.state.notifyThanksForUpgra
 const notifySpaceIsUnavailableOffline = computed(() => store.state.currentSpaceIsUnavailableOffline)
 const notifyIsJoiningGroup = computed(() => store.state.notifyIsJoiningGroup)
 const notifySignUpToJoinGroup = computed(() => store.state.notifySignUpToJoinGroup)
+const notifyIsDuplicatingSpace = computed(() => store.state.notifyIsDuplicatingSpace)
 const notifificationClasses = (item) => {
   let classes = {
     'danger': item.type === 'danger',
@@ -493,6 +495,11 @@ aside.notifications(@click.left="closeAllDialogs")
         span Space is unavailable offline.
     .row
       p Only spaces that you're a member of, and have visited recently, are available offline
+
+  .persistent-item.info(v-if="notifyIsDuplicatingSpace")
+    p
+      Loader(:visible="true" :isSmall="true")
+      span Duplicating Space…
 
   //- group
 

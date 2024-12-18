@@ -254,6 +254,7 @@ const store = createStore({
     notifyThanksForUpgrading: false,
     shouldNotifyIsJoiningGroup: false,
     notifyIsJoiningGroup: false,
+    notifyIsDuplicatingSpace: false,
 
     // notifications with position
     notificationsWithPosition: [],
@@ -1566,6 +1567,10 @@ const store = createStore({
       if (value) {
         state.shouldNotifyIsJoiningGroup = false
       }
+    },
+    notifyIsDuplicatingSpace: (state, value) => {
+      utils.typeCheck({ value, type: 'boolean' })
+      state.notifyIsDuplicatingSpace = value
     },
 
     // Notifications with Position

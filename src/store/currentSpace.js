@@ -472,7 +472,7 @@ const currentSpace = {
       context.commit('resetPageSizes', null, { root: true })
       context.dispatch('restoreSpaceInChunks', { space: uniqueNewSpace })
       await context.dispatch('saveNewSpace')
-      context.commit('addNotification', { message: `Space duplicated`, type: 'success' }, { root: true })
+      context.commit('addNotification', { message: `Duplicated Space`, type: 'success' }, { root: true })
     },
     addSpace: async (context, space) => {
       const user = { id: context.rootState.currentUser.id }
