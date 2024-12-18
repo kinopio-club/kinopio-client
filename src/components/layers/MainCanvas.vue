@@ -384,6 +384,7 @@ const createPaintingCircle = (event) => {
   if (isTouch && !isPaintingLocked) { return }
   if (isBoxSelecting.value) { return }
   if (isTouch && !isPaintingLocked) { return }
+  if (utils.isMultiTouch(event)) { return }
   createPaintingCircles(event)
   const position = utils.cursorPositionInSpace(event)
   selectItemsBetweenCurrentAndPrevPosition(position)
@@ -409,6 +410,7 @@ const startPainting = (event) => {
   if (isPanning.value) { return }
   if (isBoxSelecting.value) { return }
   if (store.state.isPinchZooming) { return }
+  if (utils.isMultiTouch(event)) { return }
   if (!utils.isEventTouchOrMouseLeftButton(event)) { return }
   updateSelectableCardsInViewport()
   updateSelectableBoxesInViewport()
