@@ -57,7 +57,8 @@ watch(() => props.visible, (value, prevValue) => {
     state.backgroundTint = store.state.currentSpace.backgroundTint
     closeDialogs()
     clearErrors()
-    updateCommunityBackgroundImages()
+    // delay fetching community backgrounds to prevent render blocking
+    setTimeout(updateCommunityBackgroundImages, 200)
   } else {
     if (state.error.isNotImageUrl) {
       removeBackground()
