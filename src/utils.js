@@ -485,10 +485,12 @@ export default {
   findInArrayOfObjects (array, key, value) {
     return array.find(item => item[key] === value)
   },
-  cursorsAreClose (startCursor, endCursor) {
+  cursorsAreClose (startCursor, endCursor, zoom) {
     if (!startCursor) { return }
     if (!endCursor) { return }
-    const threshold = 5
+    zoom = zoom || this.spaceCounterZoomDecimal()
+    let threshold = 5
+    threshold = threshold * zoom
     const xRange = {
       value: endCursor.x,
       min: startCursor.x - threshold,
@@ -532,6 +534,14 @@ export default {
     if (event.touches) {
       return event.touches.length > 1
     }
+  },
+  isEventTouchOrMouseLeftButton (event) {
+    const isMouseEvent = event.type.includes('mouse')
+    if (!isMouseEvent) {
+      // ignore touch events
+      return true
+    }
+    return event.button === 0
   },
   isMacOrIpad () {
     return window.navigator.platform === 'MacIntel'
@@ -1377,9 +1387,9 @@ export default {
     const endValue = 1
     return -endValue * (elaspedTime /= duration) * (elaspedTime - 2) + startValue
   },
-  highestCardZ (cards) {
-    let highestCardZ = Math.max(...cards.map(card => card.z)) + 1
-    return highestCardZ
+  highestItemZ (items) {
+    let highestZ = Math.max(...items.map(item => item.z || 0)) + 1
+    return highestZ
   },
 
   // Spaces 🌙
@@ -2099,7 +2109,7 @@ export default {
   urlIsFile (url) {
     if (!url) { return }
     url = url + ' '
-    const fileUrlPattern = new RegExp(/(?:\.txt|\.md|\.markdown|\.pdf|\.log|\.ppt|\.pptx|\.doc|\.docx|\.csv|\.xsl|\.xslx|\.rtf|\.zip|\.tar|\.xml|\.psd|\.ai|\.ind|\.sketch|\.mov|\.heic|\.7z|\.woff|\.woff2|\.otf|\.ttf|\.wav|\.flac\.pla)(?:\n| |\?|&)/igm)
+    const fileUrlPattern = new RegExp(/(?:\.txt|\.md|\.markdown|\.pdf|\.log|\.ppt|\.pptx|\.doc|\.docx|\.csv|\.xsl|\.xslx|\.rtf|\.zip|\.tar|\.xml|\.psd|\.ai|\.ind|\.sketch|\.mov|\.heic|\.7z|\.woff|\.woff2|\.otf|\.ttf|\.wav|\.flac\.pla\.json)(?:\n| |\?|&)/igm)
     const isFile = url.toLowerCase().match(fileUrlPattern)
     return Boolean(isFile)
   },

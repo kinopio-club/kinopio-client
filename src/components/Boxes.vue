@@ -23,4 +23,5 @@ const spaceZoomDecimal = computed(() => store.getters.spaceZoomDecimal)
 .boxes
   position absolute
   top 0
+  z-index 0
 </style>

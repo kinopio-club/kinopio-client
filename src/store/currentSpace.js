@@ -472,7 +472,7 @@ const currentSpace = {
       context.commit('resetPageSizes', null, { root: true })
       context.dispatch('restoreSpaceInChunks', { space: uniqueNewSpace })
       await context.dispatch('saveNewSpace')
-      context.commit('addNotification', { message: `Space duplicated`, type: 'success' }, { root: true })
+      context.commit('addNotification', { message: `Duplicated Space`, type: 'success' }, { root: true })
     },
     addSpace: async (context, space) => {
       const user = { id: context.rootState.currentUser.id }
@@ -506,8 +506,18 @@ const currentSpace = {
         } else if (currentSpaceIsRemote) {
           remoteSpace = await context.dispatch('api/getSpaceAnonymously', space, { root: true })
         }
+        return remoteSpace
       } catch (error) {
-        console.warn('🚑 getRemoteSpace', error.status, error, space.id)
+        console.error('🚒 getRemoteSpace', error)
+        throw Error(error)
+      }
+    },
+    loadRemoteSpace: async (context, space) => {
+      let remoteSpace
+      try {
+        remoteSpace = await context.dispatch('getRemoteSpace', space)
+      } catch (error) {
+        console.warn('🚑 loadRemoteSpace', error.status, error, space.id)
         if (error.status === 404) {
           context.commit('notifySpaceNotFound', true, { root: true })
           context.dispatch('loadLastSpace', space)
@@ -744,7 +754,7 @@ const currentSpace = {
       try {
         const [localData, remoteData] = await Promise.all([
           context.dispatch('restoreSpaceLocal', space),
-          context.dispatch('getRemoteSpace', space)
+          context.dispatch('loadRemoteSpace', space)
         ])
         // restore remote space
         let remoteSpace = remoteData

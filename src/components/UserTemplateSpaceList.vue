@@ -16,7 +16,7 @@ onMounted(() => {
   init()
 })
 
-const emit = defineEmits(['updateDialogHeight', 'isLoading'])
+const emit = defineEmits(['updateDialogHeight', 'isLoading', 'selectSpace'])
 
 const state = reactive({
   remoteSpaces: [],
@@ -54,7 +54,7 @@ const triggerTemplatesIsVisible = () => {
 // spaces
 
 const selectSpace = (space) => {
-  store.dispatch('currentSpace/changeSpace', space)
+  emit('selectSpace', space)
 }
 const updateLocalSpaces = async () => {
   const cachedSpaces = await cache.getAllSpaces()
@@ -95,6 +95,7 @@ section.results-section.user-template-space-list(ref="resultsSectionElement" :st
       @selectSpace="selectSpace"
       :isLoading="state.isLoading"
       :parentDialog="parentDialog"
+      :showDuplicateTemplateIcon="true"
     )
   .button-wrap
     button(@click="triggerTemplatesIsVisible")

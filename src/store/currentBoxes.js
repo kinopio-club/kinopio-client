@@ -489,7 +489,6 @@ export default {
       }
       let boxes = context.getters.isSelected
       if (!boxes.length) { return }
-      boxes = boxes.filter(box => !box.isLocked)
       boxes = boxes.filter(box => context.rootGetters['currentUser/canEditBox'](box))
       // prevent boxes bunching up at 0
       let connections = []
@@ -549,10 +548,12 @@ export default {
     afterMove: (context) => {
       prevMovePositions = {}
       const currentDraggingBoxId = context.rootState.currentDraggingBoxId
+      const currentDraggingBox = context.getters.byId(currentDraggingBoxId)
       const spaceId = context.rootState.currentSpace.id
       let boxIds = context.getters.isSelectedIds
       boxIds = boxIds.filter(box => Boolean(box))
       if (!boxIds.length) { return }
+      // boxes
       let boxes = boxIds.map(id => {
         let box = context.getters.byId(id)
         if (!box) { return }
@@ -567,6 +568,7 @@ export default {
       boxes = boxes.filter(box => Boolean(box))
       context.commit('move', { boxes, spaceId })
       boxes = boxes.filter(box => box)
+      // update
       context.dispatch('updateMultiple', boxes)
       const box = context.getters.byId(currentDraggingBoxId)
       context.dispatch('checkIfItemShouldIncreasePageSize', box, { root: true })

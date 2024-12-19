@@ -42,7 +42,6 @@ const styles = computed(() => {
   return {
     width: `${pageWidth.value}px`,
     height: `${pageHeight.value}px`,
-    transform: store.getters.zoomTransform,
     background: backgroundTint.value
   }
 })

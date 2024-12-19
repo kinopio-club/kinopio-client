@@ -23,7 +23,8 @@ const positionStyles = computed(() => {
   const x = props.box.x + width - buttonWidth
   return {
     left: x + 'px',
-    top: props.box.y + 'px'
+    top: props.box.y + 'px',
+    zIndex: props.box.z
   }
 })
 const backgroundStyles = computed(() => {

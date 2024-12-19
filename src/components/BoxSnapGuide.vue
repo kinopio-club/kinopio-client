@@ -50,6 +50,8 @@ const otherBoxes = computed(() => {
 
 const userColor = computed(() => store.state.currentUser.color)
 const currentBoxSnapGuide = computed(() => {
+  const isMultipleBoxesSelectedIds = store.state.multipleBoxesSelectedIds.length > 1
+  if (isMultipleBoxesSelectedIds) { return }
   let guides = store.state.currentBoxes.snapGuides
   return guides.find(guide => {
     const isTarget = guide.target.id === props.box.id
@@ -61,6 +63,7 @@ const snapGuideSide = computed(() => {
   const isDraggingItem = store.state.currentUserIsDraggingBox || store.state.currentUserIsDraggingCard
   if (!isDraggingItem) { return }
   const snapGuide = currentBoxSnapGuide.value
+  if (!snapGuide) { return null }
   if (snapGuide?.target.id === props.box.id) {
     return snapGuide.side
   } else if (snapGuide?.origin.id === props.box.id) {

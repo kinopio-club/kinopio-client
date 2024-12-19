@@ -1,5 +1,5 @@
 <script setup>
-import { reactive, computed, onMounted, onUpdated, defineProps, defineEmits, watch, ref, nextTick } from 'vue'
+import { reactive, computed, onMounted, onBeforeUnmount, defineProps, defineEmits, watch, ref, nextTick } from 'vue'
 import { useStore } from 'vuex'
 
 import ColorPicker from '@/components/dialogs/ColorPicker.vue'
@@ -22,6 +22,8 @@ const store = useStore()
 const searchInputElement = ref(null)
 const inputElement = ref(null)
 
+let unsubscribe
+
 const props = defineProps({
   visible: Boolean
 })
@@ -30,7 +32,7 @@ const emit = defineEmits(['updateSpaces'])
 onMounted(() => {
   refreshGradients()
   updateDefaultColor()
-  store.subscribe((mutation, state) => {
+  unsubscribe = store.subscribe((mutation, state) => {
     if (mutation.type === 'triggerUploadComplete') {
       let { spaceId, url, cardId } = mutation.payload
       if (cardId) { return }
@@ -41,12 +43,8 @@ onMounted(() => {
     }
   })
 })
-
-onUpdated(async () => {
-  await nextTick()
-  if (props.visible) {
-    checkIfImageIsUrl()
-  }
+onBeforeUnmount(() => {
+  unsubscribe()
 })
 
 watch(() => props.visible, (value, prevValue) => {
@@ -57,7 +55,8 @@ watch(() => props.visible, (value, prevValue) => {
     state.backgroundTint = store.state.currentSpace.backgroundTint
     closeDialogs()
     clearErrors()
-    updateCommunityBackgroundImages()
+    // delay fetching community backgrounds to prevent render blocking
+    setTimeout(updateCommunityBackgroundImages, 200)
   } else {
     if (state.error.isNotImageUrl) {
       removeBackground()
@@ -153,6 +152,9 @@ const focusAndSelectSearchInput = async () => {
 const resetPinchCounterZoomDecimal = () => {
   store.commit('pinchCounterZoomDecimal', 1)
 }
+const toggleSpaceBackgroundInputIsVisible = () => {
+  state.spaceBackgroundInputIsVisible = !state.spaceBackgroundInputIsVisible
+}
 
 // background gradients
 
@@ -183,11 +185,40 @@ const gradientIsActive = (gradient) => {
   return currentSpace.value.backgroundGradient.id === gradient.id
 }
 
-// background images
+// background images list
 
 const isCurrentSpaceBackground = (image) => {
   return image.url === background.value
 }
+const currentBackgroundUrl = computed(() => {
+  if (currentSpace.value.backgroundIsGradient) { return }
+  return background.value
+})
+const backgroundImages = computed(() => {
+  let images = backgroundImagesJSON
+  images = images.filter(image => !image.isArchived)
+  return images
+})
+const updateCommunityBackgroundImages = async () => {
+  state.communityBackgroundsIsLoading = true
+  if (state.communityBackgroundImages.length) {
+    state.communityBackgroundsIsLoading = false
+    return
+  }
+  let images = await store.dispatch('api/communityBackgrounds')
+  images = images.map(image => {
+    return {
+      url: image.original,
+      thumbnailUrl: image.thumb,
+      previewUrl: image.preview
+    }
+  })
+  state.communityBackgroundImages = images
+  state.communityBackgroundsIsLoading = false
+}
+
+// update background
+
 const checkIfImageIsUrl = () => {
   const url = background.value
   if (!url) {
@@ -206,15 +237,6 @@ const background = computed({
     updateSpaceBackground(url)
   }
 })
-const activeBackgroundUrl = computed(() => {
-  if (currentSpace.value.backgroundIsGradient) { return }
-  return background.value
-})
-const backgroundImages = computed(() => {
-  let images = backgroundImagesJSON
-  images = images.filter(image => !image.isArchived)
-  return images
-})
 const updateSpaceBackground = async (url) => {
   url = url.url || url
   if (url === background.value) {
@@ -226,6 +248,7 @@ const updateSpaceBackground = async (url) => {
   }
   await store.dispatch('currentSpace/updateSpace', updates)
   updatePreviewImage()
+  checkIfImageIsUrl()
 }
 const removeBackgroundAll = async () => {
   removeBackground()
@@ -236,26 +259,6 @@ const removeBackground = async () => {
   await updateSpaceBackground('')
   closeDialogs()
   updatePreviewImage()
-}
-const updateCommunityBackgroundImages = async () => {
-  state.communityBackgroundsIsLoading = true
-  if (state.communityBackgroundImages.length) {
-    state.communityBackgroundsIsLoading = false
-    return
-  }
-  let images = await store.dispatch('api/communityBackgrounds')
-  images = images.map(image => {
-    return {
-      url: image.original,
-      thumbnailUrl: image.thumb,
-      previewUrl: image.preview
-    }
-  })
-  state.communityBackgroundImages = images
-  state.communityBackgroundsIsLoading = false
-}
-const toggleSpaceBackgroundInputIsVisible = () => {
-  state.spaceBackgroundInputIsVisible = !state.spaceBackgroundInputIsVisible
 }
 
 // upload
@@ -434,7 +437,6 @@ dialog.background-picker.wide(v-if="visible" :open="visible" @click.left.stop="c
         maxlength="400"
         :disabled="!currentUserIsMember"
       )
-
     template(v-if="!currentUserIsMember")
       .row
         span.badge.info
@@ -511,7 +513,7 @@ dialog.background-picker.wide(v-if="visible" :open="visible" @click.left.stop="c
             img.refresh.icon(src="@/assets/refresh.svg")
       //- built-in backgrounds
       section.results-section
-        ImageList(:images="state.selectedImages" :activeUrl="activeBackgroundUrl" @selectImage="updateSpaceBackground")
+        ImageList(:images="state.selectedImages" :activeUrl="currentBackgroundUrl" @selectImage="updateSpaceBackground")
       //- community backgrounds
       section.results-section.community-backgrounds-section
         .row.title-row

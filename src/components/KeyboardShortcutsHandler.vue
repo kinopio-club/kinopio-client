@@ -89,6 +89,10 @@ const checkIsButtonScope = (event) => {
   const isFromButton = event.target.closest('button')
   return isFromButton
 }
+const isCanvasScope = (event) => {
+  const tagName = event.target.tagName
+  return tagName === 'CANVAS'
+}
 
 // on key up
 const handleShortcuts = (event) => {
@@ -277,6 +281,7 @@ const handleMouseDownEvents = (event) => {
     store.dispatch('currentUserIsPanning', true)
   }
   if (isRightClick && userDisablePan) {
+    if (!isCanvasScope(event)) { return }
     store.dispatch('triggerSonarPing', event)
   }
 }

@@ -254,6 +254,7 @@ const store = createStore({
     notifyThanksForUpgrading: false,
     shouldNotifyIsJoiningGroup: false,
     notifyIsJoiningGroup: false,
+    notifyIsDuplicatingSpace: false,
 
     // notifications with position
     notificationsWithPosition: [],
@@ -605,7 +606,7 @@ const store = createStore({
     triggerKeyboardShortcutsIsVisible: () => {},
     triggerReadOnlyJiggle: () => {},
     triggerSelectTemplateCategory: () => {},
-    triggerUpdatePaintSelectPositionOffset: () => {},
+    triggerUpdateMainCanvasPositionOffset: () => {},
     triggerPaintFramePosition: (state, event) => {},
     triggerAddRemotePaintingCircle: () => {},
     triggerUpdateRemoteUserCursor: () => {},
@@ -1567,6 +1568,10 @@ const store = createStore({
         state.shouldNotifyIsJoiningGroup = false
       }
     },
+    notifyIsDuplicatingSpace: (state, value) => {
+      utils.typeCheck({ value, type: 'boolean' })
+      state.notifyIsDuplicatingSpace = value
+    },
 
     // Notifications with Position
 
@@ -2059,6 +2064,7 @@ const store = createStore({
       return !state.isAddPage
     },
     shouldScrollAtEdges: (state, getters) => (event) => {
+      if (window.visualViewport.scale > 1) { return }
       let isPainting
       if (event.touches) {
         isPainting = state.currentUserIsPaintingLocked

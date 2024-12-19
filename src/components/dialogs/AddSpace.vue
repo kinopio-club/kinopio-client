@@ -89,8 +89,32 @@ const addInboxSpace = async () => {
   window.scrollTo(0, 0)
   await store.dispatch('currentSpace/addInboxSpace')
 }
-const duplicateSpace = async () => {
+
+// duplicate space
+
+const duplicateCurrentSpace = async () => {
   await store.dispatch('currentSpace/duplicateSpace')
+}
+const duplicateSpace = async (space) => {
+  emit('closeDialogs')
+  store.commit('closeAllDialogs')
+  try {
+    store.commit('notifyIsDuplicatingSpace', true)
+    // get space
+    const cachedSpace = await cache.space(space.id)
+    const remoteSpace = await store.dispatch('currentSpace/getRemoteSpace', space)
+    const spaceToDuplicate = remoteSpace || cachedSpace
+    // dupelicate
+    await store.dispatch('currentSpace/duplicateSpace', spaceToDuplicate)
+    // show space details info
+    store.commit('triggerSpaceDetailsInfoIsVisible')
+    await nextTick()
+    store.commit('triggerFocusSpaceDetailsName')
+  } catch (error) {
+    console.error('🚒 duplicateSpace', error)
+    store.commit('addNotification', { message: '(シ_ _)シ Something went wrong duplicating space, Please try again or contact support', type: 'danger' })
+  }
+  store.commit('notifyIsDuplicatingSpace', false)
 }
 
 // new space settings
@@ -148,7 +172,11 @@ dialog.add-space.narrow(
       span Inbox
     p For collecting ideas to figure out later
   //- Templates
-  UserTemplateSpaceList(@updateDialogHeight="updateDialogHeight" @isLoading="updateTemplatesIsLoading")
+  UserTemplateSpaceList(
+    @updateDialogHeight="updateDialogHeight"
+    @isLoading="updateTemplatesIsLoading"
+    @selectSpace="duplicateSpace"
+  )
   //- Import
   section
     .row
@@ -157,7 +185,7 @@ dialog.add-space.narrow(
         button(@click="triggerImportIsVisible") Import
       //- Duplicate
       .button-wrap
-        button(@click.left="duplicateSpace" title="Duplicate this Space")
+        button(@click.left="duplicateCurrentSpace" title="Duplicate this Space")
           img.icon.duplicate(src="@/assets/duplicate.svg")
           span Duplicate
 </template>

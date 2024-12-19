@@ -63,10 +63,10 @@ const state = reactive({
 })
 
 const init = async () => {
+  closeDialogs()
   updateLocalSpaces()
   await updateWithRemoteSpaces()
   await updateCachedSpaces()
-  closeDialogs()
   updateFavorites()
   updateHeights()
   store.commit('shouldExplicitlyHideFooter', true)
