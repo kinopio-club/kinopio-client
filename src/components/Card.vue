@@ -2131,8 +2131,7 @@ article.card-wrap
       .user-label-inline
         transform translateY(-1px)
         margin 0
-        height 18px
-        min-height 17px
+        height 15px
         img
           vertical-align 4px
 
@@ -2376,6 +2375,8 @@ article.card-wrap
     .user-badge,
     .user
       margin-right 0
+    .user-label-inline-wrap
+      margin 0
 
   .url-preview-wrap
     margin-top -2px

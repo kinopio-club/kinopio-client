@@ -108,7 +108,8 @@ const connectionPathClasses = computed(() => {
     hover: isHovered.value,
     'hide-connection-outline': store.state.shouldHideConnectionOutline,
     'is-hidden-by-opacity': isHiddenByCommentFilter.value,
-    'is-connected-to-comment': isConnectedToCommentCard.value
+    'is-connected-to-comment': isConnectedToCommentCard.value,
+    'is-connected-to-checked-item': isConnectedToCheckedItem.value
   }
   if (!state.isVisibleInViewport) { return }
   return styles
@@ -155,6 +156,14 @@ const isHoveredOverConnectedItem = computed(() => {
 })
 const isCurrentItemConnection = computed(() => {
   return store.state.currentItemConnections.includes(props.connection.id)
+})
+const isConnectedToCheckedItem = computed(() => {
+  const { startItem, endItem } = items.value
+  if (!startItem || !endItem) { return }
+  const isStartItemChecked = utils.nameIsChecked(startItem.name)
+  const isEndItemChecked = utils.nameIsChecked(endItem.name)
+  console.log(startItem.name, isStartItemChecked, endItem.name)
+  return isStartItemChecked || isEndItemChecked
 })
 
 // upload
@@ -579,6 +588,7 @@ svg.connection
       stroke-width 7
     &.hide-connection-outline
       outline none
-    &.is-connected-to-comment
+    &.is-connected-to-comment,
+    &.is-connected-to-checked-item
       opacity 0.5
 </style>
