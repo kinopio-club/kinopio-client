@@ -154,15 +154,12 @@ export default {
       const minBoxSize = consts.minBoxSize
       const isThemeDark = context.rootState.currentUser.theme === 'dark'
       const color = randomColor({ luminosity: 'dark' })
-      const boxes = context.getters.all
-      const highestBoxZ = utils.highestItemZ(boxes)
       box = {
         id: box.id || nanoid(),
         spaceId: currentSpaceId,
         userId: context.rootState.currentUser.id,
         x: box.x,
         y: box.y,
-        z: highestBoxZ + 1,
         resizeWidth: box.resizeWidth || minBoxSize,
         resizeHeight: box.resizeHeight || minBoxSize,
         color: box.color || color,
