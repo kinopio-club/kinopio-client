@@ -495,19 +495,24 @@ const currentSpace = {
       const currentUserIsSignedIn = context.rootGetters['currentUser/isSignedIn']
       const currentSpaceIsRemote = context.rootGetters['currentSpace/isRemote']
       let remoteSpace
+      if (currentUserIsSignedIn) {
+        remoteSpace = await context.dispatch('api/getSpace', { space }, { root: true })
+      } else if (collaboratorKey) {
+        space.collaboratorKey = collaboratorKey
+        remoteSpace = await context.dispatch('api/getSpaceAnonymously', space, { root: true })
+        cache.saveInvitedSpace(remoteSpace)
+        context.commit('clearSpaceCollaboratorKeys', null, { root: true })
+      } else if (currentSpaceIsRemote) {
+        remoteSpace = await context.dispatch('api/getSpaceAnonymously', space, { root: true })
+      }
+      return remoteSpace
+    },
+    loadRemoteSpace: async (context, space) => {
+      let remoteSpace
       try {
-        if (currentUserIsSignedIn) {
-          remoteSpace = await context.dispatch('api/getSpace', { space }, { root: true })
-        } else if (collaboratorKey) {
-          space.collaboratorKey = collaboratorKey
-          remoteSpace = await context.dispatch('api/getSpaceAnonymously', space, { root: true })
-          cache.saveInvitedSpace(remoteSpace)
-          context.commit('clearSpaceCollaboratorKeys', null, { root: true })
-        } else if (currentSpaceIsRemote) {
-          remoteSpace = await context.dispatch('api/getSpaceAnonymously', space, { root: true })
-        }
+        remoteSpace = await context.dispatch('getRemoteSpace', space)
       } catch (error) {
-        console.warn('🚑 getRemoteSpace', error.status, error, space.id)
+        console.warn('🚑 loadRemoteSpace', error.status, error, space.id)
         if (error.status === 404) {
           context.commit('notifySpaceNotFound', true, { root: true })
           context.dispatch('loadLastSpace', space)
@@ -744,7 +749,7 @@ const currentSpace = {
       try {
         const [localData, remoteData] = await Promise.all([
           context.dispatch('restoreSpaceLocal', space),
-          context.dispatch('getRemoteSpace', space)
+          context.dispatch('loadRemoteSpace', space)
         ])
         // restore remote space
         let remoteSpace = remoteData

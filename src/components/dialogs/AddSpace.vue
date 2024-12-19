@@ -98,15 +98,11 @@ const duplicateCurrentSpace = async () => {
 const duplicateSpace = async (space) => {
   emit('closeDialogs')
   store.commit('closeAllDialogs')
-  const currentUserIsSignedIn = store.getters['currentUser/isSignedIn']
   try {
     store.commit('notifyIsDuplicatingSpace', true)
     // get space
     const cachedSpace = await cache.space(space.id)
-    let remoteSpace
-    if (currentUserIsSignedIn) {
-      remoteSpace = await store.dispatch('api/getSpace', { space })
-    }
+    const remoteSpace = await store.dispatch('currentSpace/getRemoteSpace', space)
     const spaceToDuplicate = remoteSpace || cachedSpace
     // dupelicate
     await store.dispatch('currentSpace/duplicateSpace', spaceToDuplicate)
