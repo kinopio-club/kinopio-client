@@ -97,13 +97,20 @@ const duplicateCurrentSpace = async () => {
 }
 const duplicateSpace = async (space) => {
   emit('closeDialogs')
+  store.commit('closeAllDialogs')
   try {
     store.commit('notifyIsDuplicatingSpace', true)
+    // get space
     const cachedSpace = await cache.space(space.id)
-    const remoteSpace = await store.dispatch('currentSpace/getRemoteSpace', space)
+    const remoteSpace = await store.dispatch('api/getSpace', { space })
     const spaceToDuplicate = remoteSpace || cachedSpace
     store.commit('notifyIsDuplicatingSpace', false)
+    // dupelicate
     await store.dispatch('currentSpace/duplicateSpace', spaceToDuplicate)
+    // show space details info
+    store.commit('triggerSpaceDetailsInfoIsVisible')
+    await nextTick()
+    store.commit('triggerFocusSpaceDetailsName')
   } catch (error) {
     console.error('🚒 duplicateSpace', error)
     store.commit('addNotification', { message: '(シ_ _)シ Something went wrong duplicating space, Please try again or contact support', type: 'danger' })
