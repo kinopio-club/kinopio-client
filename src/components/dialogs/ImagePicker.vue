@@ -237,7 +237,7 @@ const normalizeResults = async (data, service) => {
           isVideo: true,
           id: image.id,
           previewUrl: image.images.fixed_height_small.url,
-          url: utils.urlWithoutQueryString(image.images.original_mp4.mp4)
+          url: utils.urlWithoutQueryString(image.images.original.url)
         }
       // gifs
       } else {
@@ -245,7 +245,7 @@ const normalizeResults = async (data, service) => {
           isVideo: true,
           id: image.id,
           previewUrl: image.images.fixed_height.url,
-          url: utils.urlWithoutQueryString(image.images.original_mp4.mp4)
+          url: utils.urlWithoutQueryString(image.images.original.mp4)
         }
       }
     })
