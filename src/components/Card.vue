@@ -452,7 +452,8 @@ const cardClasses = computed(() => {
     'is-dark': backgroundColorIsDark.value,
     'child-is-hovered': currentUserIsHoveringOverUrlButton.value && !currentCardIsBeingDragged.value,
     'is-in-checked-box': isInCheckedBox.value,
-    'is-checked': isChecked.value
+    'is-checked': isChecked.value,
+    'is-comment': isComment.value
   }
   classes = addSizeClasses(classes)
   return classes
@@ -2118,6 +2119,9 @@ article.card-wrap
         color var(--primary-on-dark-background)
     &:focus
       outline 2px solid var(--primary-border)
+
+    &.is-comment
+      opacity 0.5
 
     .card-comment
       > .badge
