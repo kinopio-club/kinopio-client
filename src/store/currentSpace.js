@@ -495,17 +495,22 @@ const currentSpace = {
       const currentUserIsSignedIn = context.rootGetters['currentUser/isSignedIn']
       const currentSpaceIsRemote = context.rootGetters['currentSpace/isRemote']
       let remoteSpace
-      if (currentUserIsSignedIn) {
-        remoteSpace = await context.dispatch('api/getSpace', { space }, { root: true })
-      } else if (collaboratorKey) {
-        space.collaboratorKey = collaboratorKey
-        remoteSpace = await context.dispatch('api/getSpaceAnonymously', space, { root: true })
-        cache.saveInvitedSpace(remoteSpace)
-        context.commit('clearSpaceCollaboratorKeys', null, { root: true })
-      } else if (currentSpaceIsRemote) {
-        remoteSpace = await context.dispatch('api/getSpaceAnonymously', space, { root: true })
+      try {
+        if (currentUserIsSignedIn) {
+          remoteSpace = await context.dispatch('api/getSpace', { space }, { root: true })
+        } else if (collaboratorKey) {
+          space.collaboratorKey = collaboratorKey
+          remoteSpace = await context.dispatch('api/getSpaceAnonymously', space, { root: true })
+          cache.saveInvitedSpace(remoteSpace)
+          context.commit('clearSpaceCollaboratorKeys', null, { root: true })
+        } else if (currentSpaceIsRemote) {
+          remoteSpace = await context.dispatch('api/getSpaceAnonymously', space, { root: true })
+        }
+        return remoteSpace
+      } catch (error) {
+        console.error('🚒 getRemoteSpace', error)
+        throw Error(error)
       }
-      return remoteSpace
     },
     loadRemoteSpace: async (context, space) => {
       let remoteSpace
