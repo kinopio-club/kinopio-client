@@ -65,6 +65,7 @@ init()
 
 onMounted(() => {
   // bind events to window to receive events when mouse is outside window
+  window.addEventListener('touchstart', handleTouchStart)
   window.addEventListener('mousemove', interact)
   window.addEventListener('touchmove', interact)
   window.addEventListener('mouseup', stopInteractions)
@@ -454,6 +455,9 @@ const updateIconsNotDraggable = () => {
   iconElements.forEach(element => {
     element.draggable = false
   })
+}
+const handleTouchStart = (event) => {
+  prevCursor = utils.cursorPositionInViewport(event)
 }
 const initInteractions = (event) => {
   if (eventIsFromTextarea(event)) {
