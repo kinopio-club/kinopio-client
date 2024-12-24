@@ -162,7 +162,6 @@ const isConnectedToCheckedItem = computed(() => {
   if (!startItem || !endItem) { return }
   const isStartItemChecked = utils.nameIsChecked(startItem.name)
   const isEndItemChecked = utils.nameIsChecked(endItem.name)
-  console.log(startItem.name, isStartItemChecked, endItem.name)
   return isStartItemChecked || isEndItemChecked
 })
 
