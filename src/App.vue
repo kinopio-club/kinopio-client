@@ -156,12 +156,27 @@ const updateMetaRSSFeed = () => {
   link.href = url
   head.appendChild(link)
 }
+
+// prevent native touch scrolling
+
+const preventTouchScrolling = (event) => {
+  const isDialogScope = event.target.closest('dialog')
+  if (isDialogScope) { return }
+  event.preventDefault()
+  store.commit('currentUserIsPanning', true)
+}
 </script>
 
 <template lang='pug'>
 .app(
   @pointermove="broadcastUserLabelCursor"
   @touchstart="isTouchDevice"
+
+  @touchmove="preventTouchScrolling"
+  @gesturestart="preventTouchScrolling"
+  @gesturechange="preventTouchScrolling"
+  @gestureend="preventTouchScrolling"
+
   :style="{ width: pageWidth, height: pageHeight, cursor: pageCursor }"
   :class="{ 'no-background': !isSpacePage, 'is-dark-theme': isThemeDark }"
   :data-current-user-id="currentUserId"

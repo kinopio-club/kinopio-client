@@ -9,8 +9,13 @@ const store = useStore()
 let unsubscribe
 
 onMounted(() => {
-  window.addEventListener('mousemove', mouseMove)
-  window.addEventListener('mouseup', mouseUp)
+  window.addEventListener('mousemove', handleMoveEvent)
+  window.addEventListener('mouseup', handleEndEvent)
+
+  window.addEventListener('touchstart', touchStart)
+  window.addEventListener('touchmove', handleMoveEvent)
+  window.addEventListener('touchend', handleEndEvent)
+
   unsubscribe = store.subscribe(mutation => {
     if (mutation.type === 'triggerPanningStart') {
       shouldStartPanning = true
@@ -18,23 +23,31 @@ onMounted(() => {
   })
 })
 onBeforeUnmount(() => {
-  window.removeEventListener('mousemove', mouseMove)
-  window.removeEventListener('mouseup', mouseUp)
+  window.removeEventListener('mousemove', handleMoveEvent)
+  window.removeEventListener('mouseup', handleEndEvent)
+
+  window.removeEventListener('touchmove', handleMoveEvent)
+  window.removeEventListener('touchend', handleEndEvent)
+
   unsubscribe()
 })
 
-// mouse events
+// handle pointer events
 
-const mouseUp = () => {
-  shouldCancelPanningTimer = true
+const touchStart = (event) => {
+  shouldStartPanning = true
+  initPanning(event)
 }
-const mouseMove = (event) => {
-  // panning triggered in KeyboardShortcutsHandler
+const handleMoveEvent = (event) => {
+  // mouse panning triggered in KeyboardShortcutsHandler
   if (store.state.currentUserIsPanning) {
     event.preventDefault()
     updatePanningPosition(event)
     initPanning(event)
   }
+}
+const handleEndEvent = () => {
+  shouldCancelPanningTimer = true
 }
 
 // panning
