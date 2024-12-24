@@ -39,7 +39,6 @@ const touchStart = (event) => {
   initPanning(event)
 }
 const handleMoveEvent = (event) => {
-  // mouse panning triggered in KeyboardShortcutsHandler
   if (store.state.currentUserIsPanning) {
     event.preventDefault()
     updatePanningPosition(event)
@@ -47,23 +46,24 @@ const handleMoveEvent = (event) => {
   }
 }
 const handleEndEvent = () => {
+  if (panningDelta) {
+    startMomentum()
+  }
   shouldCancelPanningTimer = true
 }
 
 // panning
 
-let shouldStartPanning, startPosition, currentPosition, panningTimer, shouldCancelPanningTimer, panningDelta, shouldPanNextFrame
+let shouldStartPanning,
+  startPosition,
+  currentPosition,
+  panningTimer,
+  shouldCancelPanningTimer,
+  panningDelta,
+  shouldPanNextFrame,
+  velocity,
+  momentumTimer
 
-const updatePanningPosition = (event) => {
-  const position = utils.cursorPositionInPage(event)
-  if (startPosition) {
-    panningDelta = {
-      x: startPosition.x - position.x,
-      y: startPosition.y - position.y
-    }
-    shouldPanNextFrame = true
-  }
-}
 const initPanning = (event) => {
   const position = utils.cursorPositionInPage(event)
   if (shouldStartPanning) {
@@ -73,17 +73,53 @@ const initPanning = (event) => {
     panningTimer = window.requestAnimationFrame(panningFrame)
   }
 }
+const updatePanningPosition = (event) => {
+  const position = utils.cursorPositionInPage(event)
+  if (startPosition) {
+    const delta = {
+      x: startPosition.x - position.x,
+      y: startPosition.y - position.y
+    }
+    velocity = { x: delta.x, y: delta.y }
+    panningDelta = delta
+    shouldPanNextFrame = true
+  }
+}
 const panningFrame = () => {
+  // scroll frame
   if (shouldPanNextFrame) {
     window.scrollBy(panningDelta.x, panningDelta.y, 'instant')
     shouldPanNextFrame = false
   }
   panningTimer = window.requestAnimationFrame(panningFrame)
+  // cancel panning
   if (shouldCancelPanningTimer) {
     window.cancelAnimationFrame(panningTimer)
     panningTimer = null
     startPosition = null
   }
+}
+
+// momentum scrolling, after panning
+
+const startMomentum = () => {
+  const deceleration = 0.95 // Adjust this value to change the momentum decay
+  const threshold = 0.5 // Stop when velocity is low
+
+  const momentumFrame = () => {
+    // cancel momentum scrolling
+    const velocityIsLow = Math.abs(velocity.x) < threshold && Math.abs(velocity.y) < threshold
+    if (velocityIsLow || shouldPanNextFrame) {
+      window.cancelAnimationFrame(momentumTimer)
+      return
+    }
+    // scroll frame
+    velocity.x *= deceleration
+    velocity.y *= deceleration
+    window.scrollBy(velocity.x, velocity.y, 'instant')
+    momentumTimer = window.requestAnimationFrame(momentumFrame)
+  }
+  momentumTimer = window.requestAnimationFrame(momentumFrame)
 }
 </script>
 

@@ -160,6 +160,7 @@ const updateMetaRSSFeed = () => {
 // prevent native touch scrolling
 
 const preventTouchScrolling = (event) => {
+  if (!isSpacePage.value) { return }
   const isDialogScope = event.target.closest('dialog')
   if (isDialogScope) { return }
   event.preventDefault()
