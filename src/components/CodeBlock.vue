@@ -120,6 +120,7 @@ const copy = async (event) => {
     position absolute
     right 0
     bottom -6px
+    width max-content
     .button-wrap
       padding 8px
       padding-left 8px
