@@ -103,8 +103,8 @@ const panningFrame = () => {
 // momentum scrolling, after panning
 
 const startMomentum = () => {
-  const deceleration = 0.95 // Adjust this value to change the momentum decay
-  const threshold = 0.5 // Stop when velocity is low
+  const deceleration = 0.97 // Adjust this value to change the momentum decay
+  const threshold = 0.3 // Stop when velocity is low
 
   const momentumFrame = () => {
     // cancel momentum scrolling
