@@ -4,13 +4,15 @@ import { useStore } from 'vuex'
 
 import PrivacyButton from '@/components/PrivacyButton.vue'
 import InviteToSpace from '@/components/InviteToSpace.vue'
+import InviteToGroup from '@/components/InviteToGroup.vue'
 import RssFeeds from '@/components/dialogs/RssFeeds.vue'
 import Embed from '@/components/dialogs/Embed.vue'
 import utils from '@/utils.js'
-import ImportExport from '@/components/dialogs/ImportExport.vue'
+import ImportExportButton from '@/components/ImportExportButton.vue'
 import AddToExplore from '@/components/AddToExplore.vue'
 import AskToAddToExplore from '@/components/AskToAddToExplore.vue'
 import ReadOnlySpaceInfoBadges from '@/components/ReadOnlySpaceInfoBadges.vue'
+import SpaceUsersButton from '@/components/SpaceUsersButton.vue'
 import consts from '@/consts.js'
 const store = useStore()
 
@@ -42,9 +44,9 @@ const state = reactive({
   dialogHeight: null,
   rssFeedsIsVisible: false,
   embedIsVisible: false,
-  importExportIsVisible: false,
   isShareInPresentationMode: false,
-  emailInvitesIsVisible: false
+  emailInvitesIsVisible: false,
+  childDialogIsVisible: false
 })
 
 const isSecureAppContextIOS = computed(() => consts.isSecureAppContextIOS)
@@ -104,15 +106,18 @@ const updateDialogHeight = () => {
   })
 }
 const dialogIsVisible = computed(() => {
-  return state.privacyPickerIsVisible || state.rssFeedsIsVisible || state.embedIsVisible || state.importExportIsVisible || state.emailInvitesIsVisible
+  return state.privacyPickerIsVisible || state.rssFeedsIsVisible || state.embedIsVisible || state.emailInvitesIsVisible || state.childDialogIsVisible
 })
 const closeDialogs = () => {
   state.privacyPickerIsVisible = false
   state.rssFeedsIsVisible = false
   state.embedIsVisible = false
-  state.importExportIsVisible = false
   state.emailInvitesIsVisible = false
+  state.childDialogIsVisible = false
   store.commit('triggerCloseChildDialogs')
+}
+const childDialogIsVisible = (value) => {
+  state.childDialogIsVisible = true
 }
 
 // toggles
@@ -136,11 +141,6 @@ const toggleEmbedIsVisible = () => {
   closeDialogs()
   state.embedIsVisible = !isVisible
 }
-const toggleImportExportIsVisible = () => {
-  const isVisible = state.importExportIsVisible
-  closeDialogs()
-  state.importExportIsVisible = !isVisible
-}
 const toggleIsShareInPresentationMode = () => {
   closeDialogs()
   state.isShareInPresentationMode = !state.isShareInPresentationMode
@@ -156,6 +156,12 @@ const users = computed(() => {
   items = items.concat(store.state.currentSpace.collaborators)
   return items
 })
+
+// groups
+
+const currentUserIsCurrentSpaceGroupUser = computed(() => store.getters['groups/currentUserIsCurrentSpaceGroupUser'])
+const spaceGroup = computed(() => store.getters['groups/spaceGroup']())
+
 </script>
 
 <template lang="pug">
@@ -171,7 +177,7 @@ dialog.share.wide(v-if="props.visible" :open="props.visible" @click.left.stop="c
 
   section(v-if="spaceIsRemote")
     ReadOnlySpaceInfoBadges
-    PrivacyButton(:privacyPickerIsVisible="state.privacyPickerIsVisible" :showDescription="true" @togglePrivacyPickerIsVisible="togglePrivacyPickerIsVisible" @closeDialogs="closeDialogs")
+    PrivacyButton(:privacyPickerIsVisible="state.privacyPickerIsVisible" @togglePrivacyPickerIsVisible="togglePrivacyPickerIsVisible" @closeDialogs="closeDialogs")
 
     //- Copy URL
     section.subsection(:class="{'share-url-subsection-member': isSpaceMember}")
@@ -191,8 +197,12 @@ dialog.share.wide(v-if="props.visible" :open="props.visible" @click.left.stop="c
             input(type="checkbox" :value="state.isShareInPresentationMode")
             img.icon(src="@/assets/presentation.svg")
 
+  //- collaborators
+  section
+    SpaceUsersButton(:showLabel="true")
   //- Invite
-  InviteToSpace(v-if="isSpaceMember && currentUserIsSignedIn" @closeDialogs="closeDialogs" @emailInvitesIsVisible="emailInvitesIsVisible")
+  InviteToGroup(:visible="currentUserIsCurrentSpaceGroupUser" :group="spaceGroup" @closeDialogs="closeDialogs")
+  InviteToSpace(:visible="isSpaceMember && currentUserIsSignedIn" @closeDialogs="closeDialogs" @emailInvitesIsVisible="emailInvitesIsVisible")
 
   section(v-if="!spaceIsRemote")
     p
@@ -203,20 +213,16 @@ dialog.share.wide(v-if="props.visible" :open="props.visible" @click.left.stop="c
 
   //- Explore
   section(v-if="exploreSectionIsVisible")
-    section.subsection
-      .row
-        p Share with the Community
-      .row
-        AddToExplore
-        AskToAddToExplore
+    .row
+      p Share with the Community
+    .row
+      AddToExplore
+      AskToAddToExplore
 
   //- Import, Export, Embed
   section.import-export-section
     .row
-      .segmented-buttons(@click.stop)
-        button(@click.left.stop="toggleImportExportIsVisible" :class="{ active: state.importExportIsVisible }")
-          span Import or Export
-          ImportExport(:visible="state.importExportIsVisible")
+      ImportExportButton(@closeDialogs="closeDialogs" @childDialogIsVisible="childDialogIsVisible")
       //- Embed
       .button-wrap
         button(@click.left.stop="toggleEmbedIsVisible" :class="{ active: state.embedIsVisible }")
@@ -308,7 +314,4 @@ dialog.share
       margin-top 0
     label + label
       margin-left 6px
-
-  .import-export-section
-    border-top 1px solid var(--primary-border)
 </style>

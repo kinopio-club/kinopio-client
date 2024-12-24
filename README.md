@@ -9,26 +9,22 @@ Kinopio is a spatial thinking canvas for your new ideas and hard problems.
 The `kinopio-client` is the client web app that users use to read and update spaces, cards, connections, etc. – which is saved to localStorage and to the `kinopio-server` via API requests, queued API operations, and websocket broadcasts.
 
 - [Kinopio Architecture and Costs](https://kinopio.club/JOGXFJ0FEMpS3crbh6U9k)
-- [How Kinopio is Made](https://pketh.org/how-kinopio-is-made.html)
-
+- [How Kinopio is Made](https://pketh.org/how-kinopio-is-made.html) (How data is saved)
+- [Discord](https://kinopio.club/discord)
 
 ## Install
 
-```
-git clone https://github.com/pketh/kinopio-client.git
-cd kinopio-client
-npm install
-npm install -g @vue/cli
-npm install -g hostile
-hostile set localhost kinopio.local
-```
+    git clone https://github.com/pketh/kinopio-client.git
+    cd kinopio-client
+    npm install
+    npm install -g @vue/cli
+    npm install -g hostile
+    hostile set localhost kinopio.local
 
 ## Run
 
-```
-npm run serve
-https://kinopio.local:8080
-```
+    npm run serve --host
+    https://kinopio.local:8080
 
 ## Run with Production API Server
 
@@ -36,7 +32,7 @@ You can force the local app to use the prod API by editing `.env.local` so that 
 
 When the app starts up, the `🐸 kinopio-server URL` will be displayed in the browser logs.
 
-## Debugging
+## Linting
 
 	npm run lint
 
@@ -59,7 +55,7 @@ Use the [Vue devtools](https://github.com/vuejs/vue-devtools) for Firefox and Ch
 | `components/Connection.vue` | Displays connections from `store.state.currentConnections`, and shows `ConnectionDetails` |
 | `components/Box.vue` | Displays boxes from `store.state.currentBoxes`, and shows `ConnectionDetails` |
 | `components/Header.vue` | Used for moving between spaces, searching/filter, shows user presence, changing user prefs, and Kinopio meta options. Shown on all routes |
-| `components/layers/MagicPaint.vue` | The layers used for animating painting, scroll locking on touch, and more with `<canvas>`. As well as for multiple card and connection selection which reveals `MultipleSelectedActions` |
+| `components/layers/MainCanvas.vue` | The layers used for drawing the paint strokes for multiple card and connection selection which reveals `MultipleSelectedActions`, scroll locking on touch, and other related `<canvas>` elements |
 | `components/NewBlankTemplate.vue` | Template file for new components |
 | `components/NewBlankDialogTemplate.vue` | Template file for new dialog components |
 
@@ -67,14 +63,14 @@ Use the [Vue devtools](https://github.com/vuejs/vue-devtools) for Firefox and Ch
 
 | State | Description |
 | ------------- |-------------|
-| `offline` | localstorage and API queue operations only |
-| `not signed in` | localstorage only |
+| `offline` | indexedDB and API queue operations only |
+| `not signed in` | indexedDB only |
 | `space is read only` | cannot add cards or edit |
 | `space is open` | can add cards, can only edit cards they created |
 | `mobile` | touch handlers, no hover, small screen |
 | `desktop zoom out` | using the zoom bar or cmd+/- |
 | `pinch zoom out/in` | using native touch gesture on mobile |
-| `team member or admin` | can see and edit all spaces in the team |
+| `group member or admin` | can see and edit all spaces in the group |
 
 ## Post Messages
 
@@ -86,9 +82,9 @@ The hello space serves as the entry point and marketing page for new users. It's
 
 To update it, create the space and export its json. Replace the contents of`hello.json` with the new json file.
 
-## How to update the Blog and "What's New"
+## How to update the Changelog and "What's New"
 
-[Instructions here](https://kinopio.club/-kinopio-team-how-to-update-blog-oi4jZTSI_eAEvov9XbjJM)
+[Instructions here](https://kinopio.club/how-to-update-changelog-oi4jZTSI_eAEvov9XbjJM)
 
 ## HTTPS Signing
 
@@ -96,30 +92,13 @@ To update it, create the space and export its json. Replace the contents of`hell
 
 To work with code that only works on https (e.g. clipboard copy and paste), [mkcert](https://github.com/FiloSottile/mkcert) was used to create a local ssl certificate
 
-    $ brew install mkcert
-    $ mkcert -install
-	$ mkdir -p .cert && mkcert -key-file ./.cert/key.pem -cert-file ./.cert/cert.pem 'kinopio.local'
-
-## Ngrok tunnelling
-
-Use Ngrok to pipe your localhost through an external https server. Helpful for debugging on mobile.
-
-(Note that dev kinopio-server connections won't work through Ngrok)
-
-### Setup Ngrok
-
-[login](http://ngrok.com), install ngrok, then connect ngrok to the kinopio ngrok account
-
-    brew install ngrok/ngrok/ngrok
-    ngrok authtoken NGROK_TOKEN
-
-### Run Ngrok
-
-    ngrok http https://localhost:8080
+    brew install mkcert
+    mkcert -install
+	mkdir -p .cert && mkcert -key-file ./.cert/key.pem -cert-file ./.cert/cert.pem 'kinopio.local'
 
 ## See Also
 
 - [are.na/kinopio/kinopio-design](https://www.are.na/kinopio/kinopio-design)
 - [github.com/kinopio-club](https://github.com/kinopio-club)
-- [User Forums](https://club.kinopio.club)
+- [User Forums](https://forum.kinopio.club)
 - [Discord](https://discord.gg/h2sR45Nby8)

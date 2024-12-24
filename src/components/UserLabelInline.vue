@@ -13,19 +13,19 @@ const props = defineProps({
   user: Object,
   isClickable: Boolean,
   shouldHideName: Boolean,
-  nameIsTruncated: Boolean,
+  truncateNameToLength: Number,
   title: String,
   isOnDarkBackground: Boolean
 })
 
 // user
 
-const userHasName = computed(() => Boolean(props.user.name))
-const colorIsDark = computed(() => utils.colorIsDark(props.user.color))
+const userHasName = computed(() => Boolean(props.user?.name))
+const colorIsDark = computed(() => utils.colorIsDark(props.user?.color))
 const userName = computed(() => {
-  let name = props.user.name
-  if (props.nameIsTruncated) {
-    name = utils.truncated(name, 15)
+  let name = props.user?.name
+  if (props.truncateNameToLength) {
+    name = utils.truncated(name, props.truncateNameToLength)
   }
   return name
 })
@@ -35,7 +35,7 @@ const userName = computed(() => {
 const userDetailsIsVisible = computed(() => store.state.userDetailsIsVisible)
 const userDetailsIsUser = computed(() => {
   const userDetailsUser = store.state.userDetailsUser
-  return props.user.id === userDetailsUser.id
+  return props.user?.id === userDetailsUser.id
 })
 const userDetailsIsVisibleForUser = computed(() => userDetailsIsVisible.value && userDetailsIsUser.value)
 const toggleUserDetailsIsVisible = () => {
@@ -60,30 +60,34 @@ const showUserDetails = () => {
   store.commit('userDetailsIsVisible', true)
 }
 const title = computed(() => {
-  return props.title || props.user.name
+  return props.title || props.user?.name
 })
 
 </script>
 
 <template lang="pug">
-.user-label-inline.badge(
-  v-if="props.user"
-  :key="props.user.id"
-  :data-id="props.user.id"
-  :style="{ background: props.user.color }"
-  :class="{ 'button-badge': props.isClickable }"
-  @mouseup="toggleUserDetailsIsVisible"
-  @touchend="toggleUserDetailsIsVisible"
-  ref="labelElement"
-  :title="title"
-  @click.stop
-)
-  img.anon-avatar(src="@/assets/anon-avatar.svg" :class="{ 'is-dark': colorIsDark, 'should-hide-name': shouldHideName }")
-  img.icon.camera(v-if="props.user.isOnline" src="@/assets/camera.svg" title="Online" :class="{ 'is-dark': colorIsDark }")
-  span.user-name(v-if="userHasName && !shouldHideName" :class="{ 'is-dark': colorIsDark }") {{ userName }}
+span.user-label-inline-wrap(:title="title")
+  .user-label-inline.badge(
+    v-if="props.user"
+    :key="props.user.id"
+    :data-id="props.user.id"
+    :style="{ background: props.user.color }"
+    :class="{ 'button-badge': props.isClickable }"
+    @mouseup="toggleUserDetailsIsVisible"
+    @touchend="toggleUserDetailsIsVisible"
+    ref="labelElement"
+    :title="title"
+    @click.stop
+  )
+    img.anon-avatar(src="@/assets/anon-avatar.svg" :class="{ 'is-dark': colorIsDark, 'should-hide-name': shouldHideName }")
+    img.icon.camera(v-if="props.user.isOnline" src="@/assets/camera.svg" title="Online" :class="{ 'is-dark': colorIsDark }")
+    span.user-name(v-if="userHasName && !shouldHideName" :class="{ 'is-dark': colorIsDark }") {{ userName }}
 </template>
 
 <style lang="stylus">
+.user-label-inline-wrap
+  flex-shrink 0
+  width max-content
 .user-label-inline
   display inline-block
   min-height initial

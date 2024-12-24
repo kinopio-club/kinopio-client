@@ -4,6 +4,7 @@ import { useStore } from 'vuex'
 
 import UserLabelInline from '@/components/UserLabelInline.vue'
 import keyboardShortcutsCategories from '@/data/keyboardShortcutsCategories.js'
+import postMessage from '@/postMessage.js'
 import utils from '@/utils.js'
 
 const store = useStore()
@@ -32,6 +33,7 @@ const updateDialogHeight = async () => {
 
 const categories = computed(() => keyboardShortcutsCategories)
 const meta = computed(() => utils.metaKey())
+const option = computed(() => utils.optionKey())
 const currentUser = computed(() => store.state.currentUser)
 const isMobile = computed(() => utils.isMobile())
 const shouldUseLastConnectionType = computed(() => store.state.currentUser.shouldUseLastConnectionType)
@@ -63,6 +65,31 @@ const closeDialogs = () => {
   // this.keyboardShortcutsCategoriesIsVisible = false
 }
 
+// [.] disable checkboxes
+
+const checkboxStateNewSpace = computed({
+  get () {
+    return isChecked('newSpace')
+  },
+  set () {
+    toggleChecked('newSpace')
+  }
+})
+const isChecked = (value) => {
+  const disabledKeyboardShortcuts = store.state.currentUser.disabledKeyboardShortcuts
+  const isEnabled = !disabledKeyboardShortcuts.includes(value)
+  return isEnabled
+}
+const toggleChecked = (name) => {
+  const prevValue = isChecked(name)
+  if (prevValue) {
+    store.commit('currentUser/addToDisabledKeyboardShortcuts', name)
+  } else {
+    store.commit('currentUser/removeFromDisabledKeyboardShortcuts', name)
+  }
+  postMessage.sendHaptics({ name: 'heavyImpact' })
+  event.stopPropagation()
+}
 </script>
 
 <template lang="pug">
@@ -82,9 +109,13 @@ dialog.keyboard-shortcuts(v-if="visible" :open="visible" @click.left.stop ref="d
       article
         .row
           .badge.title
-            img.icon(src="@/assets/add.svg")
-            span New Space
-          .badge.keyboard-shortcut N
+            //- [.]
+            .checkbox-wrap(title="Uncheck to disable N shortcut")
+              label(:class="{active: checkboxStateNewSpace }")
+                input(name="checkbox" type="checkbox" v-model="checkboxStateNewSpace")
+            img.icon(src="@/assets/add.svg" :class="{'is-disabled': !isChecked('newSpace')}")
+            span(:class="{'is-disabled': !isChecked('newSpace')}") New Space
+          .badge.keyboard-shortcut(:class="{'is-disabled': !isChecked('newSpace')}") N
       article
         .row
           .badge.title
@@ -167,8 +198,9 @@ dialog.keyboard-shortcuts(v-if="visible" :open="visible" @click.left.stop ref="d
         .row
           .badge.title
             img.icon(src="@/assets/constrain-axis.svg")
-            span Constrain Card Move to Axis
-          .badge.keyboard-shortcut Shift-Drag Card
+            span Snap Card or Box to Grid
+          .badge.keyboard-shortcut Shift-Drag Drag or Resize Item
+
       //- article
       //-   .row
       //-     .badge.title Focus Nearest Card
@@ -179,6 +211,12 @@ dialog.keyboard-shortcuts(v-if="visible" :open="visible" @click.left.stop ref="d
             img.icon(src="@/assets/lock.svg")
             span Toggle Lock Cards
           .badge.keyboard-shortcut {{meta}}-Shift-L
+      article
+        .row
+          .badge.title
+            img.icon(src="@/assets/box.svg")
+            span Surround Selected Cards with Box
+          .badge.keyboard-shortcut B
       article
         .row
           .badge.title
@@ -225,7 +263,7 @@ dialog.keyboard-shortcuts(v-if="visible" :open="visible" @click.left.stop ref="d
           .badge.title
             img.icon.box-icon(src="@/assets/box.svg")
             span Move Box Without Moving Cards
-          .badge.keyboard-shortcut Shift-Drag on Box
+          .badge.keyboard-shortcut {{option}}-Drag on Box
       article
         .row
           .badge.title
@@ -385,4 +423,14 @@ dialog.keyboard-shortcuts(v-if="visible" :open="visible" @click.left.stop ref="d
   .icon.presentation
     width 12px
     vertical-align -1px
+
+  .checkbox-wrap
+    display inline-block
+    label
+      padding 0
+      padding-left 5px
+    margin-right 6px
+
+  .is-disabled
+    opacity 0.5
 </style>

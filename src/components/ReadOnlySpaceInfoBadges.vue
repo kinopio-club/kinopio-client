@@ -2,12 +2,12 @@
 import { reactive, computed, onMounted, defineProps, defineEmits, watch } from 'vue'
 import { useStore } from 'vuex'
 
-import TeamLabel from '@/components/TeamLabel.vue'
+import GroupLabel from '@/components/GroupLabel.vue'
 
 const store = useStore()
 
 const props = defineProps({
-  spaceTeam: Object
+  spaceGroup: Object
 })
 
 const isSpaceMember = computed(() => store.getters['currentUser/isSpaceMember']())
@@ -21,18 +21,20 @@ template(v-if="!isSpaceMember")
     .badge.info(v-if="!spacePrivacyIsOpen")
       span Read Only
     .badge.success(v-if="spacePrivacyIsOpen")
-      span Open to All
+      img.icon.comment(src="@/assets/comment.svg")
+      span Open to Comments
     .badge.status(v-if="showInExplore")
       img.icon.sunglasses(src="@/assets/sunglasses.svg")
       span In Explore
-  .row(v-if="props.spaceTeam")
+  .row(v-if="props.spaceGroup")
     .badge.secondary
-      TeamLabel(:team="props.spaceTeam" :showName="true")
+      GroupLabel(:group="props.spaceGroup" :showName="true")
 </template>
 
 <style lang="stylus">
 .read-only-space-info-badges
   align-items flex-start
+  flex-wrap wrap
   .sunglasses
     margin-left 1px
 </style>

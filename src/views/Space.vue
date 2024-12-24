@@ -16,7 +16,27 @@ import Boxes from '@/components/Boxes.vue'
 import Cards from '@/components/Cards.vue'
 import Connections from '@/components/Connections.vue'
 import ItemUnlockButtons from '@/components/ItemUnlockButtons.vue'
+import SnapGuideLines from '@/components/SnapGuideLines.vue'
+
+import Header from '@/components/Header.vue'
+import MainCanvas from '@/components/layers/MainCanvas.vue'
+import SonarPing from '@/components/layers/SonarPing.vue'
+import UserLabelCursor from '@/components/UserLabelCursor.vue'
+import Footer from '@/components/Footer.vue'
+import WindowHistoryHandler from '@/components/WindowHistoryHandler.vue'
+import KeyboardShortcutsHandler from '@/components/KeyboardShortcutsHandler.vue'
+import ScrollAndTouchHandler from '@/components/ScrollAndTouchHandler.vue'
+import Panning from '@/components/Panning.vue'
+import TagDetails from '@/components/dialogs/TagDetails.vue'
+import ItemsLocked from '@/components/ItemsLocked.vue'
+import UserDetails from '@/components/dialogs/UserDetails.vue'
+import SpaceBackground from '@/components/SpaceBackground.vue'
+import SpaceBackgroundTint from '@/components/SpaceBackgroundTint.vue'
+import OutsideSpaceBackground from '@/components/OutsideSpaceBackground.vue'
+import Preload from '@/components/Preload.vue'
+
 import utils from '@/utils.js'
+import cache from '@/cache.js'
 import consts from '@/consts.js'
 
 import sortBy from 'lodash-es/sortBy'
@@ -25,16 +45,27 @@ import debounce from 'lodash-es/debounce'
 
 const store = useStore()
 
+let unsubscribe
+
 let prevCursor, endCursor, shouldCancel
-let processQueueIntervalTimer, updateJournalDailyPromptTimer, updateInboxCache
+let processQueueIntervalTimer, hourlyTasks
 
 // init user and space app state
-store.dispatch('currentUser/init')
-store.dispatch('currentSpace/init')
-store.commit('broadcast/connect')
+const init = async () => {
+  store.dispatch('api/updateDateImage')
+  store.dispatch('analytics/event', 'pageview')
+  await cache.migrateFromLocalStorage()
+  await store.dispatch('currentUser/init')
+  await store.dispatch('currentSpace/init')
+  await store.commit('broadcast/connect')
+  await store.dispatch('groups/init')
+  await store.dispatch('updateTags')
+}
+init()
 
 onMounted(() => {
   // bind events to window to receive events when mouse is outside window
+  window.addEventListener('touchstart', handleTouchStart)
   window.addEventListener('mousemove', interact)
   window.addEventListener('touchmove', interact)
   window.addEventListener('mouseup', stopInteractions)
@@ -54,45 +85,44 @@ onMounted(() => {
     store.commit('webfontIsLoaded', true)
   })
   store.dispatch('currentUser/restoreUserFavorites')
-  store.subscribe((mutation, state) => {
+  unsubscribe = store.subscribe((mutation, state) => {
     if (mutation.type === 'triggerRestoreSpaceRemoteComplete') {
       dragItemsOnNextTick()
     }
   })
   updateIconsNotDraggable()
+
+  setTimeout(() => {
+    store.dispatch('currentSpace/updateInboxCache')
+  }, 15000) // 15 seconds after mounted
+
   // ⏰ scheduled tasks
   // retry failed sync operations
   processQueueIntervalTimer = setInterval(() => {
     store.dispatch('api/sendQueue')
   }, 5000) // every 5 seconds
-  // update journal daily prompt
-  updateJournalDailyPromptTimer = setInterval(() => {
-    store.dispatch('currentUser/updateJournalDailyPrompt')
-  }, 1000 * 60 * 60 * 1) // every hour
-  // update inbox space in local storage
-  setTimeout(() => {
+  // update inbox space in local storage, one time
+  hourlyTasks = setInterval(() => {
     store.dispatch('currentSpace/updateInboxCache')
-  }, 15000) // 15 seconds after mounted, one-time
-  updateInboxCache = setInterval(() => {
-    store.dispatch('currentSpace/updateInboxCache')
+    store.dispatch('api/updateDateImage')
   }, 1000 * 60 * 60 * 1) // every 1 hour
 })
 
 onBeforeUnmount(() => {
+  unsubscribe()
   window.removeEventListener('mousemove', interact)
   window.removeEventListener('touchmove', interact)
   window.removeEventListener('mouseup', stopInteractions)
   window.removeEventListener('touchend', handleTouchEnd)
   window.removeEventListener('visibilitychange', handleTouchEnd)
-  window.removeEventListener('unload', unloadPage)
+  window.removeEventListener('beforeunload', unloadPage)
   window.removeEventListener('message', addCardFromOutsideAppContext)
   window.removeEventListener('popstate', loadSpaceOnBackOrForward)
   window.removeEventListener('touchend', updateViewportSizes)
   window.removeEventListener('gesturecancel', updateViewportSizes)
   window.removeEventListener('resize', updateViewportSizes)
   clearInterval(processQueueIntervalTimer)
-  clearInterval(updateJournalDailyPromptTimer)
-  clearInterval(updateInboxCache)
+  clearInterval(hourlyTasks)
 })
 
 const state = reactive({
@@ -118,12 +148,18 @@ watch(() => store.state.currentUserIsDraggingCard, (value, prevValue) => {
 })
 watch(() => store.state.currentUserIsResizingCard, (value, prevValue) => {
   updatePageSizeFromMutation(value)
+  if (prevValue && !value) {
+    afterResizeCards()
+  }
 })
 watch(() => store.state.currentUserIsDraggingBox, (value, prevValue) => {
   updatePageSizeFromMutation(value)
 })
 watch(() => store.state.currentUserIsResizingBox, (value, prevValue) => {
   updatePageSizeFromMutation(value)
+  if (prevValue && !value) {
+    afterResizeBoxes()
+  }
 })
 const updatePageSizeFromMutation = (value) => {
   if (!value) {
@@ -137,6 +173,10 @@ const updateViewportSizes = () => {
 // user
 
 const currentUser = computed(() => store.state.currentUser)
+const users = computed(() => {
+  const excludeCurrentUser = true
+  return store.getters['currentSpace/allUsers'](excludeCurrentUser)
+})
 
 // styles
 
@@ -198,8 +238,9 @@ const addOrCloseCard = (event) => {
     store.dispatch('closeAllDialogs')
   }
 }
-const tiltCards = () => {
+const tiltCards = (event) => {
   if (!prevCursor) { return }
+  if (utils.isMultiTouch(event)) { return }
   const cardIds = store.state.currentUserIsTiltingCardIds
   let delta = utils.distanceBetweenTwoPoints(endCursor, prevCursor)
   if (endCursor.x - prevCursor.x > 0 || endCursor.y - prevCursor.y > 0) {
@@ -217,10 +258,11 @@ const stopTiltingCards = () => {
   store.commit('currentUserIsTiltingCard', false)
   store.commit('broadcast/updateStore', { updates: { userId: currentUser.value.id }, type: 'removeRemoteUserTiltingCards' })
 }
-const resizeCards = () => {
+const resizeCards = (event) => {
   if (!prevCursor) { return }
+  if (utils.isMultiTouch(event)) { return }
   const cardIds = store.state.currentUserIsResizingCardIds
-  const deltaX = endCursor.x - prevCursor.x
+  let deltaX = endCursor.x - prevCursor.x
   store.dispatch('currentCards/resize', { cardIds, deltaX })
 }
 const stopResizingCards = () => {
@@ -232,6 +274,16 @@ const stopResizingCards = () => {
   store.commit('currentUserIsResizingCard', false)
   store.dispatch('currentCards/updateDimensions', { cards })
   store.commit('broadcast/updateStore', { updates: { userId: currentUser.value.id }, type: 'removeRemoteUserResizingCards' })
+}
+const afterResizeCards = () => {
+  if (!store.state.shouldSnapToGrid) { return }
+  const cardIds = store.state.currentUserIsResizingCardIds
+  const cards = cardIds.map(cardId => {
+    let { id, resizeWidth } = store.getters['currentCards/byId'](cardId)
+    resizeWidth = utils.roundToNearest(resizeWidth)
+    return { id, resizeWidth }
+  })
+  store.dispatch('currentCards/updateMultiple', cards)
 }
 const addCardFromOutsideAppContext = (event) => {
   if (!consts.isSecureAppContext) { return }
@@ -247,7 +299,7 @@ const addCardFromOutsideAppContext = (event) => {
 
 const resizeBoxes = () => {
   if (!prevCursor) { return }
-  const boxIds = store.state.currentUserIsResizingBoxIds
+  const boxIds = store.getters['currentBoxes/isResizingIds']
   const zoom = store.getters.spaceCounterZoomDecimal
   let delta = {
     x: endCursor.x - prevCursor.x,
@@ -262,7 +314,7 @@ const resizeBoxes = () => {
 const stopResizingBoxes = () => {
   if (!store.state.currentUserIsResizingBox) { return }
   store.dispatch('history/resume')
-  const boxIds = store.state.currentUserIsResizingBoxIds
+  const boxIds = store.getters['currentBoxes/isResizingIds']
   const boxes = boxIds.map(id => store.getters['currentBoxes/byId'](id))
   store.dispatch('currentConnections/updateMultiplePaths', boxes)
   store.dispatch('history/add', { boxes, useSnapshot: true })
@@ -271,17 +323,41 @@ const stopResizingBoxes = () => {
   store.commit('broadcast/updateStore', { updates: { userId: currentUser.value.id }, type: 'removeRemoteUserResizingBoxes' })
   store.dispatch('checkIfItemShouldIncreasePageSize', boxes[0])
 }
-const checkIfShouldSnapBoxes = () => {
-  if (!store.state.boxesWereDragged) { return }
-  const snapGuides = store.state.currentBoxes.snapGuides
-  if (!snapGuides.length) { return }
-  snapGuides.forEach(snapGuide => store.dispatch('currentBoxes/snap', snapGuide))
+const afterResizeBoxes = () => {
+  const boxIds = store.getters['currentBoxes/isResizingIds']
+  const boxes = boxIds.map(boxId => {
+    let { resizeWidth, resizeHeight } = utils.boxElementDimensions({ id: boxId })
+    if (store.state.shouldSnapToGrid) {
+      resizeWidth = utils.roundToNearest(resizeWidth)
+      resizeHeight = utils.roundToNearest(resizeHeight)
+    }
+    return { id: boxId, resizeWidth, resizeHeight }
+  })
+  store.dispatch('currentBoxes/updateMultiple', boxes)
 }
-const checkIfShouldExpandBoxes = () => {
-  if (!store.state.cardsWereDragged) { return }
+const checkIfShouldSnapBoxes = (event) => {
+  if (!store.state.boxesWereDragged) { return }
+  if (event.shiftKey) { return }
   const snapGuides = store.state.currentBoxes.snapGuides
   if (!snapGuides.length) { return }
-  snapGuides.forEach(snapGuide => store.dispatch('currentBoxes/expand', snapGuide))
+  snapGuides.forEach(snapGuide => {
+    const elapsedTime = Date.now() - snapGuide.time
+    const shouldSnap = elapsedTime >= consts.boxSnapGuideWaitingDuration
+    if (!shouldSnap) { return }
+    store.dispatch('currentBoxes/snap', snapGuide)
+  })
+}
+const checkIfShouldExpandBoxes = (event) => {
+  if (!store.state.cardsWereDragged) { return }
+  if (event.shiftKey) { return }
+  const snapGuides = store.state.currentBoxes.snapGuides
+  if (!snapGuides.length) { return }
+  snapGuides.forEach(snapGuide => {
+    const elapsedTime = Date.now() - snapGuide.time
+    const shouldSnap = elapsedTime >= consts.boxSnapGuideWaitingDuration
+    if (!shouldSnap) { return }
+    store.dispatch('currentBoxes/expand', snapGuide)
+  })
 }
 const unselectCardsInDraggedBox = () => {
   if (!store.state.currentDraggingBoxId) { return }
@@ -359,6 +435,7 @@ const showMultipleSelectedActions = (event) => {
 
 const isInteracting = computed(() => {
   if (isDraggingCard.value || isDrawingConnection.value || isResizingCard.value || isResizingBox.value || isDraggingBox.value) {
+    store.commit('preventMultipleSelectedActionsIsVisible', true)
     return true
   } else { return false }
 })
@@ -379,6 +456,9 @@ const updateIconsNotDraggable = () => {
     element.draggable = false
   })
 }
+const handleTouchStart = (event) => {
+  prevCursor = utils.cursorPositionInViewport(event)
+}
 const initInteractions = (event) => {
   if (eventIsFromTextarea(event)) {
     shouldCancel = true
@@ -388,32 +468,33 @@ const initInteractions = (event) => {
   if (spaceIsReadOnly.value) { return }
   state.startCursor = utils.cursorPositionInViewport(event)
 }
-const constrainCursorToAxis = (event) => {
-  if (store.state.currentUserIsDraggingBox) { return }
-  if (!event.shiftKey) { return }
-  const delta = {
-    x: Math.abs(endCursor.x - state.startCursor.x),
-    y: Math.abs(endCursor.y - state.startCursor.y)
+const updateShouldSnapToGrid = (event) => {
+  let shouldSnap = isDraggingCard.value || isDraggingBox.value || isResizingCard.value || isResizingBox.value
+  shouldSnap = shouldSnap && event.shiftKey
+  // update snap guide line origin
+  if (!store.state.shouldSnapToGrid && shouldSnap) {
+    const item = store.getters.currentInteractingItem
+    store.commit('snapGuideLinesOrigin', {
+      x: item.x,
+      y: item.y
+    })
   }
-  if (delta.x > delta.y) {
-    endCursor.y = prevCursor.y
-  } else {
-    endCursor.x = prevCursor.x
-  }
+  // should snap to grid
+  store.commit('shouldSnapToGrid', shouldSnap)
 }
 const interact = (event) => {
   endCursor = utils.cursorPositionInViewport(event)
-  if (isDraggingCard.value || isDraggingBox.value) {
-    constrainCursorToAxis(event)
+  updateShouldSnapToGrid(event)
+  if (isDraggingCard.value) {
     dragItems()
-  }
-  if (isResizingCard.value) {
-    resizeCards()
-  }
-  if (isTiltingCard.value) {
-    tiltCards()
-  }
-  if (isResizingBox.value) {
+  } else if (isDraggingBox.value) {
+    store.commit('currentDraggingCardId', '')
+    dragItems()
+  } else if (isResizingCard.value) {
+    resizeCards(event)
+  } else if (isTiltingCard.value) {
+    tiltCards(event)
+  } else if (isResizingBox.value) {
     resizeBoxes()
   }
   prevCursor = utils.cursorPositionInViewport(event)
@@ -439,6 +520,7 @@ const cursor = () => {
     x: cursor.x * zoom,
     y: cursor.y * zoom
   }
+  // if shift key held down
   return cursor
 }
 const eventIsFromTextarea = (event) => {
@@ -466,6 +548,10 @@ const shouldCancelInteraction = (event) => {
 
 // 💣 stopInteractions and Space/stopPainting are run after all mouse and touch end events
 
+const isDevelpmentBadgeVisible = computed(() => {
+  if (store.state.isPresentationMode) { return }
+  return consts.isDevelopment()
+})
 const handleTouchEnd = (event) => {
   store.commit('isPinchZooming', false)
   store.commit('isTouchScrolling', false)
@@ -487,8 +573,8 @@ const stopInteractions = async (event) => {
     store.commit('triggerUpdateHeaderAndFooterPosition')
   }
   checkIfShouldHideFooter(event)
-  checkIfShouldSnapBoxes()
-  checkIfShouldExpandBoxes()
+  checkIfShouldSnapBoxes(event)
+  checkIfShouldExpandBoxes(event)
   if (shouldCancelInteraction(event)) { return }
   addOrCloseCard(event)
   unselectCardsInDraggedBox()
@@ -514,11 +600,17 @@ const stopInteractions = async (event) => {
   await nextTick()
   await nextTick()
   store.commit('clearShouldExplicitlyRenderCardIds', null, { root: true })
+  store.commit('shouldSnapToGrid', false)
 }
-
 </script>
 
 <template lang="pug">
+//- page
+OutsideSpaceBackground
+//- user presence cursors
+template(v-for="user in users")
+  UserLabelCursor(:user="user")
+//- space
 main#space.space(
   :class="{'is-interacting': isInteracting, 'is-not-interacting': isPainting || isPanningReady}"
   @mousedown.left="initInteractions"
@@ -526,7 +618,10 @@ main#space.space(
   :style="styles"
   :data-zoom="spaceZoomDecimal"
 )
+  SpaceBackground
+  SpaceBackgroundTint
   Connections
+  ItemsLocked
   Boxes
   Cards
   ItemUnlockButtons
@@ -539,6 +634,24 @@ main#space.space(
   ScrollAtEdgesHandler
   NotificationsWithPosition(layer="space")
   BoxSelecting
+  SnapGuideLines
+aside
+  MainCanvas
+  SonarPing
+//- page ui, dialogs
+Header
+Footer
+TagDetails
+UserDetails
+//- handlers
+WindowHistoryHandler
+KeyboardShortcutsHandler
+ScrollAndTouchHandler
+Panning
+NotificationsWithPosition(layer="app")
+Preload
+.badge.label-badge.development-badge(v-if="isDevelpmentBadgeVisible")
+  span DEV
 </template>
 
 <style lang="stylus">

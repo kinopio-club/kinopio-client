@@ -57,14 +57,14 @@ const background = computed(() => {
   return utils.alternateColor(color, isThemeDark.value)
 })
 
-const textColorClasses = computed(() => {
+const colorClasses = computed(() => {
   const defaultColor = utils.cssVariable('secondary-background')
   let color
   color = background.value || defaultColor
   if (isThemeDark.value) {
     color = background.value || defaultColor
   }
-  let classes = utils.textColorClasses({ backgroundColor: color })
+  let classes = utils.colorClasses({ backgroundColor: color })
   if (props.isImageCard) {
     classes.push('is-image-card')
   }
@@ -108,17 +108,13 @@ const openUrl = async (event) => {
       event.stopPropagation()
     }
   }
-  store.dispatch('closeAllDialogs')
-  if (store.state.cardsWereDragged) {
-    return
-  }
   store.dispatch('currentSpace/changeSpace', props.otherSpace)
   store.dispatch('closeAllDialogs')
 }
 </script>
 
 <template lang="pug">
-.other-space-preview-card(:class="textColorClasses")
+.other-space-preview-card(:class="colorClasses")
   //- preview image
   .preview-image-wrap(v-if="previewImageIsVisible")
     img.preview-image(:src="previewImage" :class="{selected: props.isSelected}" ref="image")

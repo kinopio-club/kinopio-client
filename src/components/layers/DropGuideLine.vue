@@ -2,6 +2,8 @@
 import { reactive, computed, onMounted, onBeforeUnmount, defineProps, defineEmits, watch, ref, nextTick } from 'vue'
 import { useStore } from 'vuex'
 
+import utils from '@/utils.js'
+
 import { nanoid } from 'nanoid'
 const store = useStore()
 
@@ -15,8 +17,10 @@ let controlPointOddY = lineMaxHeight / 2
 const centerLineY = lineMaxHeight / 2
 let isReverse = false
 
+let unsubscribe
+
 onMounted(() => {
-  store.subscribe((mutation, state) => {
+  unsubscribe = store.subscribe((mutation, state) => {
     if (mutation.type === 'triggerUpdateRemoteDropGuideLine') {
       let update = mutation.payload
       update.startPoint = updateRemotePosition(update.startPoint)
@@ -33,6 +37,9 @@ onMounted(() => {
   remoteCanvas = document.getElementById('remote-drop-guide-line')
   context = canvas.getContext('2d')
   remoteContext = remoteCanvas.getContext('2d')
+})
+onBeforeUnmount(() => {
+  unsubscribe()
 })
 
 const props = defineProps({
@@ -206,10 +213,12 @@ const broadcastStopPaintingGuide = () => {
   store.commit('broadcast/update', { updates, type: 'updateStopRemoteUserDropGuideLine', handler: 'triggerUpdateStopRemoteUserDropGuideLine' })
 }
 
+const isMobile = computed(() => utils.isMobile())
+
 </script>
 
 <template lang="pug">
-aside
+template(v-if="!isMobile")
   canvas#drop-guide-line.drop-guide-line(
     :width="props.viewportWidth"
     :height="props.viewportHeight"

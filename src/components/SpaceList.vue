@@ -4,15 +4,14 @@ import { useStore } from 'vuex'
 
 import templates from '@/data/templates.js'
 import ResultsFilter from '@/components/ResultsFilter.vue'
-import MoonPhase from '@/components/MoonPhase.vue'
 import PrivacyIcon from '@/components/PrivacyIcon.vue'
 import Loader from '@/components/Loader.vue'
 import User from '@/components/User.vue'
 import UserLabelInline from '@/components/UserLabelInline.vue'
 import NameMatch from '@/components/NameMatch.vue'
 import OfflineBadge from '@/components/OfflineBadge.vue'
-import SpaceTodayJournalBadge from '@/components/SpaceTodayJournalBadge.vue'
-import TeamLabel from '@/components/TeamLabel.vue'
+import SpaceTodayBadge from '@/components/SpaceTodayBadge.vue'
+import GroupLabel from '@/components/GroupLabel.vue'
 import utils from '@/utils.js'
 import cache from '@/cache.js'
 
@@ -21,7 +20,9 @@ import last from 'lodash-es/last'
 
 const store = useStore()
 
-let unsubscribe, shouldPreventSelectSpace
+let unsubscribe
+
+let shouldPreventSelectSpace
 
 const itemsPerPage = 60
 
@@ -40,12 +41,13 @@ onMounted(() => {
       } else if (key === 'ArrowDown') {
         focusNextItem(currentIndex)
       }
-    }
-    if (mutation.type === 'triggerPickerSelect') {
+    } else if (mutation.type === 'triggerPickerSelect') {
       const spaces = props.spaces
       const currentSpace = spaces.find(space => space.id === state.focusOnId)
       selectSpace(null, currentSpace)
       store.commit('shouldPreventNextEnterKey', true)
+    } else if (mutation.type === 'currentSpace/restoreSpace') {
+      state.focusOnId = store.state.currentSpace.id
     }
   })
   updateScroll()
@@ -60,7 +62,7 @@ onBeforeUnmount(() => {
   spaceListElement.value.closest('section').removeEventListener('scroll', updateScroll)
 })
 
-const emit = defineEmits(['focusBeforeFirstItem', 'closeDialog', 'selectSpace', 'checkmarkSpace'])
+const emit = defineEmits(['focusBeforeFirstItem', 'closeDialog', 'selectSpace'])
 
 const props = defineProps({
   spaces: Array,
@@ -72,10 +74,10 @@ const props = defineProps({
   showUserIfCurrentUserIsCollaborator: Boolean,
   hideExploreBadge: Boolean,
   hideFilter: Boolean,
+  showFilter: Boolean,
   isLoading: Boolean,
   parentIsSpaceDetails: Boolean,
   parentIsPinned: Boolean,
-  showCheckmarkSpace: Boolean,
   userShowInExploreDate: String,
   readSpaceIds: Array,
   spaceReadDateType: String,
@@ -85,7 +87,9 @@ const props = defineProps({
   search: String,
   parentDialog: String,
   previewImageIsWide: Boolean,
-  showSpaceTeams: Boolean
+  hidePreviewImage: Boolean,
+  showSpaceGroups: Boolean,
+  showDuplicateTemplateIcon: Boolean
 })
 
 const state = reactive({
@@ -119,11 +123,7 @@ const spacesFiltered = computed(() => {
   return spaces
 })
 const isNotCached = (spaceId) => {
-  return store.getters['spaceIsNotCached'](spaceId)
-}
-const duplicateSpace = () => {
-  store.dispatch('currentSpace/duplicateSpace')
-  store.dispatch('closeAllDialogs')
+  return store.dispatch('currentSpace/spaceIsNotCached', spaceId)
 }
 const isNew = (space) => {
   if (props.readSpaceIds?.includes(space.id)) { return }
@@ -252,22 +252,23 @@ const updateScroll = async () => {
 
 const updateCurrentPage = () => {
   const zoom = utils.pinchCounterZoomDecimal()
-  const threshold = 400
+  const threshold = 600
   const nearBottomY = state.pageHeight - (threshold * state.currentPage)
-  if ((state.scrollY * zoom) > nearBottomY) {
+  const isNextPage = (state.scrollY * zoom) > nearBottomY
+  if (isNextPage) {
     state.currentPage = Math.min(state.currentPage + 1, totalPages.value)
   }
 }
 const totalPages = computed(() => {
-  const spaces = spacesFiltered.value
-  const total = Math.ceil(spaces.length / itemsPerPage)
+  const items = spacesFiltered.value
+  const total = Math.ceil(items.length / itemsPerPage)
   return total
 })
-const spacesRendered = computed(() => {
-  let spaces = spacesFiltered.value
+const itemsRendered = computed(() => {
+  let items = spacesFiltered.value
   const max = state.currentPage * itemsPerPage
-  spaces = spaces.slice(0, max)
-  return spaces
+  items = items.slice(0, max)
+  return items
 })
 
 // results filter
@@ -370,16 +371,12 @@ const selectItemFromFilter = () => {
   store.commit('shouldPreventNextEnterKey', true)
   selectSpace(null, space)
 }
-const checkmarkSpace = (space) => {
-  shouldPreventSelectSpace = true
-  emit('checkmarkSpace', space)
-}
 
-// team
+// group
 
-const team = (teamId) => {
-  if (!teamId) { return }
-  return store.getters['teams/byId'](teamId)
+const group = (groupId) => {
+  if (!groupId) { return }
+  return store.getters['groups/byId'](groupId)
 }
 </script>
 
@@ -387,6 +384,7 @@ const team = (teamId) => {
 span.space-list-wrap
   ResultsFilter(
     :hideFilter="hideFilter"
+    :showFilter="showFilter"
     :items="spaces"
     :placeholder="placeholder"
     :isLoading="isLoading"
@@ -401,18 +399,32 @@ span.space-list-wrap
   )
   ul.results-list.space-list(ref="spaceListElement")
     .prev-scroll-area-height(:style="{height: state.prevScrollAreaHeight + 'px'}")
-    template(v-for="(space, index) in spacesRendered" :key="space.id")
+    template(v-for="(space, index) in itemsRendered" :key="space.id")
       .space-wrap(:data-space-id="space.id")
         a(:href="space.url")
           li(
             @click.left="selectSpace($event, space)"
-            :class="{ active: spaceIsActive(space), hover: state.focusOnId === space.id }"
+            :class="{ active: spaceIsActive(space), hover: state.focusOnId === space.id, 'space-is-hidden': space.isHidden }"
             tabindex="0"
             @keyup.enter="selectSpace(null, space)"
             :data-created-at="space.createdAt"
             :data-updated-at="space.updatedAt"
+            :data-space-id="space.id"
           )
             Loader(:visible="isLoadingSpace(space)")
+            //- offline
+            span(v-if="isOffline && isNotCached(space.id)")
+              OfflineBadge(:isInline="true" :isDanger="true")
+            //- favorite
+            template(v-if="space.isFavorite")
+              img.icon.favorite-icon(src="@/assets/heart.svg")
+            //- inbox
+            template(v-if="space.name === 'Inbox'")
+              img.icon.inbox-icon(src="@/assets/inbox.svg")
+            //- template
+            template(v-if="space.isTemplate")
+              img.icon.templates.duplicate-template(v-if="showDuplicateTemplateIcon" src="@/assets/duplicate.svg" title="Duplicate Template")
+              img.icon.templates(v-else src="@/assets/templates.svg" title="Template")
             //- Users
             //- show spectators
             template(v-if="showOtherUsers && isMultipleUsers(space)")
@@ -420,14 +432,14 @@ span.space-list-wrap
                 template(v-for="user in users(space)" :key="user.id")
                   User(:user="user" :isClickable="false" :isMedium="true")
             template(v-else-if="showOtherUsers")
-              UserLabelInline(:user="user(space)" :isClickable="false" :key="user(space).id" :isMedium="true")
+              UserLabelInline(:user="user(space)" :isClickable="false" :key="user(space).id" :isMedium="true" :truncateNameToLength="7")
             //- show collaborators
             template(v-else-if="showCollaborators && isMultipleUsers(space)")
               .users.multiple-users
                 template(v-for="user in users(space)" :key="user.id")
                   User(:user="user" :isClickable="false" :isMedium="true")
             template(v-else-if="showCollaborators")
-              UserLabelInline(:user="user(space)" :isClickable="false" :key="user(space).id" :isMedium="true")
+              UserLabelInline(:user="user(space)" :isClickable="false" :key="user(space).id" :isMedium="true" :truncateNameToLength="7")
             //- show user badge only
             template(v-else-if="showUser")
               User(:user="user(space)" :isClickable="false" :key="user(space).id" :isMedium="true")
@@ -436,29 +448,16 @@ span.space-list-wrap
               User(:user="user(space)" :isClickable="false" :key="user(space).id" :isMedium="true")
 
             //- preview image
-            .preview-thumbnail-image-wrap(v-if="space.previewThumbnailImage && isOnline" :class="{wide: previewImageIsWide}")
-              img.preview-thumbnail-image(:src="space.previewThumbnailImage")
-            //- team
-            template(v-if="team(space.teamId) && props.showSpaceTeams")
-              TeamLabel(:team="team(space.teamId)")
-            //- offline
-            span(v-if="isOffline && isNotCached(space.id)")
-              OfflineBadge(:isInline="true" :isDanger="true")
+            template(v-if="!props.hidePreviewImage")
+              .preview-thumbnail-image-wrap(v-if="space.previewThumbnailImage && isOnline" :class="{wide: previewImageIsWide}")
+                img.preview-thumbnail-image(:src="space.previewThumbnailImage" loading="lazy")
+            //- group
+            template(v-if="group(space.groupId) && props.showSpaceGroups")
+              GroupLabel(:group="group(space.groupId)")
             //- template category
             .badge.info.inline-badge(v-if="showCategory && space.category" :class="categoryClassName(space)") {{space.category}}
-            //- tweet space
-            span(v-if="space.isFromTweet" title="Tweet space")
-              img.icon.tweet(src="@/assets/twitter.svg")
-            //- space meta
-            template(v-if="space.isFavorite")
-              img.icon.favorite-icon(src="@/assets/heart.svg")
-            template(v-if="space.name === 'Inbox'")
-              img.icon.inbox-icon(src="@/assets/inbox.svg")
-            SpaceTodayJournalBadge(:space="space")
-            //- journal
-            MoonPhase(v-if="space.moonPhase" :moonPhase="space.moonPhase")
-            //- template
-            img.icon.templates(v-if="space.isTemplate" src="@/assets/templates.svg" title="Template")
+            //- today
+            SpaceTodayBadge(:space="space")
             //- space details
             .name
               span(v-if="state.filter")
@@ -468,8 +467,6 @@ span.space-list-wrap
               template(v-if='space.privacy')
                 PrivacyIcon(:privacy="space.privacy" :closedIsNotVisible="true")
               img.icon.sunglasses(src="@/assets/sunglasses.svg" v-if="showInExplore(space)" title="Shown in Explore")
-            button.button-checkmark.small-button(v-if="showCheckmarkSpace" @mousedown.left.stop="checkmarkSpace(space)" @touchstart.stop="checkmarkSpace(space)")
-              img.icon.checkmark(src="@/assets/checkmark.svg")
             //- new
             .badge.info.inline-badge.new-unread-badge(v-if="isNew(space)")
 </template>
@@ -488,11 +485,6 @@ span.space-list-wrap
 
     .sunglasses
       width 16px
-
-    .icon.tweet
-      min-width 12px
-      margin-right 4px
-      vertical-align -1px
 
     .icon
       flex-shrink 0
@@ -515,7 +507,7 @@ span.space-list-wrap
       width 12px
       vertical-align -2px
       margin-top 6px
-    .icon.team
+    .icon.group
       width initial
       height 10px
 
@@ -546,13 +538,6 @@ span.space-list-wrap
       min-width initial
       min-height initial
 
-    .button-checkmark
-      margin-left auto
-
-    .checkmark
-      vertical-align 3px
-      width 12px
-
     li
       position relative
       width 100%
@@ -567,6 +552,8 @@ span.space-list-wrap
       .icon.templates
         margin-right 5px
         margin-top 3px
+      .icon.duplicate-template
+        margin-top 5px
 
     .space-wrap
       position relative
@@ -598,4 +585,5 @@ span.space-list-wrap
         .preview-thumbnail-image
           width 100%
           height 100%
+
 </style>

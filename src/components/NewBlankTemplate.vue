@@ -1,18 +1,24 @@
 <script setup>
 import { reactive, computed, onMounted, onBeforeUnmount, defineProps, defineEmits, watch, useTemplateRef, nextTick } from 'vue'
 import { useStore } from 'vuex'
-const store = useStore()
 
 // import utils from '@/utils.js'
 
+const store = useStore()
+
+// let unsubscribe
+
 onMounted(() => {
   console.log(`🐴 the component is now mounted.`, store.state.currentSpace)
-  // store.subscribe(mutation => {
+  // unsubscribe = store.subscribe(mutation => {
   //   if (mutation.type === 'triggerUpdateOtherCard') {
   //     mutation.payload
   //   }
   // })
 })
+// onBeforeUnmount(() => {
+//   unsubscribe()
+// })
 
 const emit = defineEmits(['updateCount'])
 
@@ -40,7 +46,7 @@ const incrementBy = () => {
 </script>
 
 <template lang="pug">
-.component-name(v-if="visible")
+.component-name(v-if="props.visible")
   button(@click="incrementBy")
     span Count is: {{ state.count }}
   p Current theme is: {{ themeName }}, prop is {{ visible }}

@@ -3,6 +3,7 @@
 
 <script>
 import utils from '@/utils.js'
+import pageMeta from '@/pageMeta.js'
 
 export default {
   name: 'WindowHistoryHandler',
@@ -17,8 +18,7 @@ export default {
     })
   },
   computed: {
-    currentSpace () { return this.$store.state.currentSpace },
-    currentSpaceName () { return this.currentSpace.name }
+    currentSpace () { return this.$store.state.currentSpace }
   },
   methods: {
     async updateWindowHistory (space) {
@@ -35,16 +35,8 @@ export default {
       history.replaceState({ ...history.state, ...state }, '')
     },
     updateWindowTitle () {
-      const spaceName = this.currentSpaceName
-      let title
-      if (spaceName === 'Hello Kinopio') {
-        title = 'Kinopio'
-      } else if (spaceName) {
-        title = `${spaceName} – Kinopio`
-      } else {
-        title = 'Kinopio'
-      }
-      document.title = title
+      const space = this.$store.state.currentSpace
+      pageMeta.updateSpace(space)
     }
   }
 }

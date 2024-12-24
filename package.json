@@ -16,6 +16,7 @@
     "adaptive-quadratic-curve": "^1.0.2",
     "colord": "^2.9.3",
     "dayjs": "^1.9.1",
+    "idb-keyval": "^6.2.1",
     "lodash-es": "^4.17.15",
     "macrolight": "^1.5.0",
     "nanoid": "^3.1.31",
@@ -42,7 +43,7 @@
     "pug": "^3.0.3",
     "stylus": "^0.63",
     "stylus-loader": "^3.0.2",
-    "vite": "^5.4.3",
+    "vite": "^5.4.6",
     "vite-plugin-pwa": "^0.17.4",
     "vite-plugin-sitemap": "^0.7.1",
     "yorkie": "^2.0.0"

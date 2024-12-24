@@ -62,14 +62,14 @@ const normalizeDisplayItems = (items, shouldShowUsersButton) => {
 // members
 
 const members = computed(() => {
-  const teamUsers = store.getters['currentCards/teamUsersWhoAddedCards']
-  let items = utils.clone(currentSpace.value.users)
-  items = items.concat(currentSpace.value.collaborators)
-  if (teamUsers) {
-    items = items.concat(teamUsers)
+  const groupUsers = store.getters['currentCards/groupUsersWhoAddedCards']
+  let members = utils.clone(currentSpace.value.users)
+  members = members.concat(currentSpace.value.collaborators)
+  if (groupUsers) {
+    members = members.concat(groupUsers)
   }
-  items = appendCurrentUser(items)
-  return items
+  members = appendCurrentUser(members)
+  return members
 })
 watch(() => members.value, (value, prevValue) => {
   updateShouldShowUsersButton()
@@ -81,22 +81,22 @@ const membersDisplay = computed(() => {
 // spectators
 
 const spectators = computed(() => {
-  const teamUsers = store.getters['currentCards/teamUsersWhoAddedCards']
-  let items = utils.clone(currentSpace.value.spectators)
+  const groupUsers = store.getters['currentCards/groupUsersWhoAddedCards']
+  let spectators = utils.clone(currentSpace.value.spectators)
   // if not a space member, currentUser is specatator
   if (!currentUserIsSpaceMember.value) {
     const user = utils.clone(store.state.currentUser)
-    items.push(user)
-    items = appendCurrentUser(items)
+    spectators.push(user)
+    spectators = appendCurrentUser(spectators)
   }
-  // team users who's added cards show as members, not spectators
-  if (teamUsers) {
-    items = items.filter(item => {
-      const isContributor = teamUsers.find(contributor => contributor.id === item.id)
+  // group users who's added cards show as members, not spectators
+  if (groupUsers) {
+    spectators = spectators.filter(item => {
+      const isContributor = groupUsers.find(contributor => contributor.id === item.id)
       return !isContributor
     })
   }
-  return items
+  return spectators
 })
 watch(() => spectators.value, (value, prevValue) => {
   updateShouldShowUsersButton()

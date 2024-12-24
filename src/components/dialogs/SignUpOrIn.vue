@@ -82,7 +82,7 @@ const focusEmail = async () => {
   if (!element) { return }
   element.focus()
 }
-const teamToJoinOnLoad = computed(() => store.state.teamToJoinOnLoad)
+const groupToJoinOnLoad = computed(() => store.state.groupToJoinOnLoad)
 
 // errors
 
@@ -121,6 +121,7 @@ const handleErrors = async (response) => {
   } else {
     state.error.unknownServerError = true
   }
+  console.error('🚒', response)
 }
 
 // reset password
@@ -188,16 +189,17 @@ const signUp = async (event) => {
   const response = await store.dispatch('api/signUp', { email, password, currentUser, sessionToken })
   const newUser = await response.json()
   if (isSuccess(response)) {
-    store.commit('clearAllNotifications', false)
+    store.commit('clearAllNotifications')
     store.commit('currentUser/replaceState', newUser)
-    migrationSpacesConnections()
-    updateSpacesUserId()
+    await backupLocalSpaces()
+    await migrationSpacesConnections()
+    await updateSpacesUserId()
     updateCurrentSpaceWithNewUserId(currentUser, newUser)
     await store.dispatch('api/createSpaces')
     notifySignedIn()
-    store.dispatch('currentUser/checkIfShouldJoinTeam')
-    addCollaboratorToInvitedSpaces()
-    const currentSpace = store.state.currentSpace
+    notifyIsJoiningGroup()
+    store.dispatch('currentUser/checkIfShouldJoinGroup')
+    await addCollaboratorToInvitedSpaces()
     store.commit('triggerUpdateWindowHistory')
     store.dispatch('themes/restore')
   } else {
@@ -222,18 +224,19 @@ const signIn = async (event) => {
     // update user to remote user
     store.commit('currentUser/updateUser', result)
     // update local spaces to remote user
-    removeUneditedSpace('Hello Kinopio')
-    removeUneditedSpace('Inbox')
-    migrationSpacesConnections()
-    updateSpacesUserId()
+    await removeUneditedSpace('Hello Kinopio')
+    await removeUneditedSpace('Inbox')
+    await migrationSpacesConnections()
+    await updateSpacesUserId()
     await store.dispatch('api/createSpaces')
     notifySignedIn()
-    store.dispatch('currentUser/checkIfShouldJoinTeam')
+    notifyIsJoiningGroup()
+    store.dispatch('currentUser/checkIfShouldJoinGroup')
     // add new spaces from remote
     const spaces = await store.dispatch('api/getUserSpaces')
-    cache.addSpaces(spaces)
-    store.commit('clearAllNotifications', false)
-    addCollaboratorToInvitedSpaces()
+    await cache.addSpaces(spaces)
+    store.commit('clearAllNotifications')
+    await addCollaboratorToInvitedSpaces()
     store.commit('triggerSpaceDetailsVisible')
     store.commit('isLoadingFavorites', true)
     store.dispatch('currentUser/restoreUserFavorites')
@@ -261,11 +264,19 @@ const notifySignedIn = () => {
   store.commit('removeNotificationByMessage', 'Signing In…')
   store.commit('addNotification', { message: 'Signed In', type: 'success' })
 }
+const notifyIsJoiningGroup = () => {
+  if (!store.state.shouldNotifyIsJoiningGroup) { return }
+  store.commit('notifyIsJoiningGroup', true)
+}
 
 // update spaces on success
 
-const migrationSpacesConnections = () => {
-  const spaces = cache.getAllSpaces()
+const backupLocalSpaces = async () => {
+  const spaces = await cache.getAllSpaces()
+  await cache.storeLocal('spacesBackup', spaces)
+}
+const migrationSpacesConnections = async () => {
+  const spaces = await cache.getAllSpaces()
   const newSpaces = spaces.map(space => {
     space.connections = utils.migrationConnections(space.connections)
     return space
@@ -274,13 +285,13 @@ const migrationSpacesConnections = () => {
     cache.saveSpace(space)
   })
 }
-const updateSpacesUserId = () => {
+const updateSpacesUserId = async () => {
   const userId = store.state.currentUser.id
-  const spaces = cache.getAllSpaces()
+  const spaces = await cache.getAllSpaces()
   const newSpaces = utils.updateSpacesUserId(userId, spaces)
-  newSpaces.forEach(space => {
-    cache.saveSpace(space)
-  })
+  for (const space of newSpaces) {
+    await cache.saveSpace(space)
+  }
 }
 const updateCurrentSpaceWithNewUserId = (previousUser, newUser) => {
   const currentSpace = store.state.currentSpace
@@ -289,8 +300,8 @@ const updateCurrentSpaceWithNewUserId = (previousUser, newUser) => {
   store.commit('currentSpace/removeUserFromSpace', previousUser)
   store.commit('currentSpace/addUserToSpace', newUser)
 }
-const removeUneditedSpace = (spaceName) => {
-  let currentSpace = cache.getSpaceByName(spaceName)
+const removeUneditedSpace = async (spaceName) => {
+  let currentSpace = await cache.getSpaceByName(spaceName)
   let space
   if (spaceName === 'Hello Kinopio') {
     space = helloSpace
@@ -300,6 +311,7 @@ const removeUneditedSpace = (spaceName) => {
   const cardNames = space.cards.map(card => card.name)
   let spaceIsEdited
   currentSpace?.cards.forEach(card => {
+    if (!card.name.trim()) { return }
     const cardIsNew = !cardNames.includes(card.name)
     if (cardIsNew) {
       spaceIsEdited = true
@@ -307,15 +319,18 @@ const removeUneditedSpace = (spaceName) => {
   })
   if (!spaceIsEdited) {
     console.log('signIn removeUneditedSpace', spaceName)
-    cache.deleteSpace(currentSpace)
+    await cache.deleteSpace(currentSpace)
     shouldLoadLastSpace = true
+  } else {
+    console.log('🌹 signIn removeUneditedSpace isEdited: keep space', spaceIsEdited, spaceName, cardNames, currentSpace?.cards)
   }
 }
 
 // update user on success
 
-const addCollaboratorToCurrentSpace = () => {
-  const invitedSpaceIds = cache.invitedSpaces().map(space => space?.id)
+const addCollaboratorToCurrentSpace = async () => {
+  const invitedSpaces = await cache.invitedSpaces()
+  const invitedSpaceIds = invitedSpaces.map(space => space?.id)
   const currentSpace = store.state.currentSpace
   const currentUser = store.state.currentUser
   if (invitedSpaceIds.includes(currentSpace?.id)) {
@@ -324,14 +339,14 @@ const addCollaboratorToCurrentSpace = () => {
     store.commit('broadcast/joinSpaceRoom')
   }
 }
-const addCollaboratorToInvitedSpaces = () => {
-  let invitedSpaces = cache.invitedSpaces()
+const addCollaboratorToInvitedSpaces = async () => {
+  let invitedSpaces = await cache.invitedSpaces()
   invitedSpaces = invitedSpaces.map(space => {
     space.userId = store.state.currentUser.id
     return space
   })
-  store.dispatch('api/addToQueue', { name: 'addCollaboratorToSpaces', body: invitedSpaces })
-  addCollaboratorToCurrentSpace()
+  await addCollaboratorToCurrentSpace()
+  await store.dispatch('api/addToQueue', { name: 'addCollaboratorToSpaces', body: invitedSpaces })
 }
 </script>
 
@@ -345,8 +360,8 @@ dialog.narrow.sign-up-or-in(v-if="props.visible" :open="props.visible")
   //- Sign Up
   section(v-if="state.signUpVisible")
     p Create an account to share your spaces and access them anywhere
-    p(v-if="teamToJoinOnLoad")
-      span.badge.info Sign up to join team
+    p(v-if="groupToJoinOnLoad")
+      span.badge.info Sign up to join group
     form(@submit.prevent="signUp")
       input(ref="emailElement" name="email" type="email" autocomplete="email" placeholder="Email" required v-model="state.email" @input="clearErrors")
       .badge.info(v-if="state.error.accountAlreadyExists") An account with this email already exists, Sign In instead
@@ -364,8 +379,8 @@ dialog.narrow.sign-up-or-in(v-if="props.visible" :open="props.visible")
   //- Sign In
   section(v-else)
     p Welcome back
-    p(v-if="teamToJoinOnLoad")
-      span.badge.info Sign in to join team
+    p(v-if="groupToJoinOnLoad")
+      span.badge.info Sign in to join group
     form(@submit.prevent="signIn")
       input.email(ref="emailElement" name="email" type="email" autocomplete="email" placeholder="Email" required v-model="state.email" @input="clearErrors")
       input(type="password" name="password" placeholder="Password" required v-model="state.password" @input="clearErrors")

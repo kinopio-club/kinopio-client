@@ -16,9 +16,9 @@ const props = defineProps({
   showShortName: Boolean
 })
 
-const spaceTeam = computed(() => store.getters['teams/spaceTeam']())
+const spaceGroup = computed(() => store.getters['groups/spaceGroup']())
 const isSpaceMember = computed(() => store.getters['currentUser/isSpaceMember']())
-const isInvitedButCannotEditSpace = computed(() => store.getters['currentUser/isInvitedButCannotEditSpace']())
+const isInvitedButCannotEditSpace = computed(() => store.state.currentUserIsInvitedButCannotEditCurrentSpace)
 
 // privacy state
 
@@ -30,8 +30,8 @@ const privacyState = computed(() => {
 })
 const description = computed(() => {
   let description = privacyState.value.description
-  if (spaceTeam.value) {
-    description = privacyState.value.descriptionTeam
+  if (spaceGroup.value) {
+    description = privacyState.value.descriptionGroup
   }
   return utils.capitalizeFirstLetter(description)
 })
@@ -59,7 +59,12 @@ const updateLocalSpaces = () => {
 
 <template lang="pug">
 .button-wrap.privacy-button(v-if="isSpaceMember || isInvitedButCannotEditSpace" :class="privacyState.name")
-  button(@click.left.stop="togglePrivacyPickerIsVisible" :disabled="isInvitedButCannotEditSpace" :class="{ active: props.privacyPickerIsVisible }")
+  button(
+    @click.left.stop="togglePrivacyPickerIsVisible"
+    :disabled="isInvitedButCannotEditSpace"
+    :class="{ active: props.privacyPickerIsVisible }"
+    title="Space Privacy Options"
+  )
     template(v-if="props.showShortName")
       PrivacyIcon(:privacy="privacyState.name")
       span {{shortName}}

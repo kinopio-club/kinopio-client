@@ -8,6 +8,7 @@ import { nanoid } from 'nanoid'
 import { nextTick } from 'vue'
 import dayjs from 'dayjs'
 import { v4 as uuidv4 } from 'uuid' // polyfill for self.crypto.randomUUID(), for legacy todesktop support
+import uniqBy from 'lodash-es/uniqBy'
 
 const initialState = {
   id: nanoid(),
@@ -30,9 +31,8 @@ const initialState = {
   filterShowAbsoluteDates: false,
   filterUnchecked: false,
   filterComments: false,
-  journalPrompts: [],
-  shouldCreateJournalsWithDailyPrompt: true,
-  newSpacesAreBlank: false,
+  shouldHideTutorialCards: false,
+  shouldHideDateCards: false,
   shouldEmailNotifications: true,
   shouldEmailBulletin: true,
   shouldEmailWeeklyReview: true,
@@ -40,6 +40,7 @@ const initialState = {
   shouldUseLastConnectionType: true,
   shouldShowItemActions: false,
   shouldShowMultipleSelectedLineActions: false,
+  shouldShowMultipleSelectedBoxActions: false,
   shouldDisableRightClickToPan: false,
   shouldShowCurrentSpaceTags: false,
   showInExploreUpdatedAt: null, // date
@@ -49,9 +50,6 @@ const initialState = {
   defaultCardBackgroundColor: undefined,
   defaultConnectionControlPoint: null, // null, 'q00,00'
   downgradeAt: null,
-  showWeather: false,
-  weatherLocation: undefined,
-  weatherUnitIsCelcius: false,
   shouldUseStickyCards: true,
   shouldIncreaseUIContrast: false,
   shouldPauseConnectionDirections: false,
@@ -60,10 +58,6 @@ const initialState = {
   AIImages: [],
   theme: null,
   themeIsSystem: false,
-  weather: '',
-  journalDailyPrompt: '',
-  journalDailyDateImage: '',
-  panSpeedIsFast: false,
   outsideSpaceBackgroundIsStatic: false,
   shouldDisableHapticFeedback: false,
   appleAppAccountToken: null,
@@ -76,15 +70,18 @@ const initialState = {
   cardSettingsShiftEnterShouldAddChildCard: true,
   cardSettingsMaxCardWidth: consts.normalCardMaxWidth,
   prevSettingsSection: null,
-  betaPermissionCreateTeam: false,
+  disabledKeyboardShortcuts: [],
 
   // space filters
 
-  dialogSpaceFilterByType: null, // null, journals, spaces
-  dialogSpaceFilterByTeam: {},
+  dialogSpaceFilterByGroup: {},
   dialogSpaceFilterByUser: {},
   dialogSpaceFilterShowHidden: false,
-  dialogSpaceFilterSortByDate: null // null, updatedAt, createdAt
+  dialogSpaceFilterSortBy: null, // null, updatedAt, createdAt, alphabetical
+
+  // user tags
+
+  tags: []
 }
 
 export default {
@@ -124,16 +121,6 @@ export default {
     lastSpaceId: (state, spaceId) => {
       state.lastSpaceId = spaceId
       cache.updateUser('lastSpaceId', spaceId)
-    },
-    resetLastSpaceId: (state) => {
-      const spaces = cache.getAllSpaces()
-      const lastSpace = spaces[1]
-      if (lastSpace) {
-        state.lastSpaceId = lastSpace.id
-      } else {
-        state.lastSpaceId = ''
-      }
-      cache.updateUser('lastSpaceId', state.lastSpaceId)
     },
     favoriteUsers: (state, users) => {
       utils.typeCheck({ value: users, type: 'array' })
@@ -222,33 +209,13 @@ export default {
       state.filterComments = value
       cache.updateUser('filterComments', value)
     },
-    addJournalPrompt: (state, newPrompt) => {
-      let prompts = utils.clone(state.journalPrompts) || []
-      prompts.push(newPrompt)
-      state.journalPrompts = prompts
-      cache.updateUser('journalPrompts', prompts)
+    shouldHideTutorialCards: (state, value) => {
+      state.shouldHideTutorialCards = value
+      cache.updateUser('shouldHideTutorialCards', value)
     },
-    removeJournalPrompt: (state, removePrompt) => {
-      let prompts = utils.clone(state.journalPrompts) || []
-      prompts = prompts.filter(prompt => {
-        return prompt.id !== removePrompt.id
-      })
-      state.journalPrompts = prompts
-      cache.updateUser('journalPrompts', prompts)
-    },
-    updateJournalPrompt: (state, updatedPrompt) => {
-      let prompts = state.journalPrompts.map(prompt => {
-        if (prompt.id === updatedPrompt.id) {
-          prompt = updatedPrompt
-        }
-        return prompt
-      })
-      state.journalPrompts = prompts
-      cache.updateUser('journalPrompts', prompts)
-    },
-    newSpacesAreBlank: (state, value) => {
-      state.newSpacesAreBlank = value
-      cache.updateUser('newSpacesAreBlank', value)
+    shouldHideDateCards: (state, value) => {
+      state.shouldHideDateCards = value
+      cache.updateUser('shouldHideDateCards', value)
     },
     shouldEmailNotifications: (state, value) => {
       state.shouldEmailNotifications = value
@@ -274,6 +241,10 @@ export default {
       state.shouldShowMultipleSelectedLineActions = value
       cache.updateUser('shouldShowMultipleSelectedLineActions', value)
     },
+    shouldShowMultipleSelectedBoxActions: (state, value) => {
+      state.shouldShowMultipleSelectedBoxActions = value
+      cache.updateUser('shouldShowMultipleSelectedBoxActions', value)
+    },
     showInExploreUpdatedAt: (state, value) => {
       state.showInExploreUpdatedAt = value
       cache.updateUser('showInExploreUpdatedAt', value)
@@ -290,27 +261,25 @@ export default {
       state.shouldUseLastConnectionType = value
       cache.updateUser('shouldUseLastConnectionType', value)
     },
-    dialogSpaceFilterByType: (state, value) => {
-      state.dialogSpaceFilterByType = value
-      cache.updateUser('dialogSpaceFilterByType', value)
-    },
     dialogSpaceFilterByUser: (state, value) => {
       utils.typeCheck({ value, type: 'object' })
       state.dialogSpaceFilterByUser = value
+      value = utils.clone(value)
       cache.updateUser('dialogSpaceFilterByUser', value)
     },
     dialogSpaceFilterShowHidden: (state, value) => {
       state.dialogSpaceFilterShowHidden = value
       cache.updateUser('dialogSpaceFilterShowHidden', value)
     },
-    dialogSpaceFilterByTeam: (state, value) => {
+    dialogSpaceFilterByGroup: (state, value) => {
       utils.typeCheck({ value, type: 'object' })
-      state.dialogSpaceFilterByTeam = value
-      cache.updateUser('dialogSpaceFilterByTeam', value)
+      state.dialogSpaceFilterByGroup = value
+      value = utils.clone(value)
+      cache.updateUser('dialogSpaceFilterByGroup', value)
     },
-    dialogSpaceFilterSortByDate: (state, value) => {
-      state.dialogSpaceFilterSortByDate = value
-      cache.updateUser('dialogSpaceFilterSortByDate', value)
+    dialogSpaceFilterSortBy: (state, value) => {
+      state.dialogSpaceFilterSortBy = value
+      cache.updateUser('dialogSpaceFilterSortBy', value)
     },
     defaultSpaceBackground: (state, value) => {
       state.defaultSpaceBackground = value
@@ -332,10 +301,6 @@ export default {
       state.defaultConnectionControlPoint = value
       cache.updateUser('defaultConnectionControlPoint', value)
     },
-    panSpeedIsFast: (state, value) => {
-      state.panSpeedIsFast = value
-      cache.updateUser('panSpeedIsFast', value)
-    },
     outsideSpaceBackgroundIsStatic: (state, value) => {
       state.outsideSpaceBackgroundIsStatic = value
       cache.updateUser('outsideSpaceBackgroundIsStatic', value)
@@ -343,30 +308,6 @@ export default {
     shouldDisableHapticFeedback: (state, value) => {
       state.shouldDisableHapticFeedback = value
       cache.updateUser('shouldDisableHapticFeedback', value)
-    },
-    shouldCreateJournalsWithDailyPrompt: (state, value) => {
-      state.shouldCreateJournalsWithDailyPrompt = value
-      cache.updateUser('shouldCreateJournalsWithDailyPrompt', value)
-    },
-    showWeather: (state, value) => {
-      state.showWeather = value
-      cache.updateUser('showWeather', value)
-    },
-    weatherLocation: (state, value) => {
-      state.weatherLocation = value
-      cache.updateUser('weatherLocation', value)
-    },
-    weatherUnitIsCelcius: (state, value) => {
-      state.weatherUnitIsCelcius = value
-      cache.updateUser('weatherUnitIsCelcius', value)
-    },
-    journalDailyPrompt: (state, data) => {
-      utils.typeCheck({ value: data, type: 'object' })
-      const { name, dateImage } = data
-      state.journalDailyPrompt = name
-      cache.updateUser('journalDailyPrompt', name)
-      state.journalDailyDateImage = dateImage
-      cache.updateUser('journalDailyDateImage', dateImage)
     },
     shouldUseStickyCards: (state, value) => {
       state.shouldUseStickyCards = value
@@ -401,12 +342,6 @@ export default {
       state.themeIsSystem = value
       cache.updateUser('themeIsSystem', value)
     },
-    weather: (state, value) => {
-      state.weather = value
-    },
-    appleAppAccountToken: (state, value) => {
-      state.weather = value
-    },
     appleSubscriptionIsActive: (state, value) => {
       state.appleSubscriptionIsActive = value
     },
@@ -437,11 +372,25 @@ export default {
     prevSettingsSection: (state, value) => {
       utils.typeCheck({ value, type: 'string' })
       state.prevSettingsSection = value
+    },
+    addToDisabledKeyboardShortcuts: (state, value) => {
+      utils.typeCheck({ value, type: 'string' })
+      state.disabledKeyboardShortcuts.push(value)
+      cache.updateUser('disabledKeyboardShortcuts', state.disabledKeyboardShortcuts)
+    },
+    removeFromDisabledKeyboardShortcuts: (state, value) => {
+      utils.typeCheck({ value, type: 'string' })
+      state.disabledKeyboardShortcuts = state.disabledKeyboardShortcuts.filter(shortcutName => value !== shortcutName)
+      cache.updateUser('disabledKeyboardShortcuts', state.disabledKeyboardShortcuts)
+    },
+    tags: (state, value) => {
+      utils.typeCheck({ value, type: 'array' })
+      state.tags = value
     }
   },
   actions: {
     init: async (context) => {
-      const cachedUser = cache.user()
+      const cachedUser = await cache.user()
       if (utils.objectHasKeys(cachedUser)) {
         console.log('🌸 Restore user from cache', cachedUser.id)
         context.commit('restoreUser', cachedUser)
@@ -453,38 +402,26 @@ export default {
       }
       context.dispatch('themes/restore', null, { root: true })
       context.commit('triggerUserIsLoaded', null, { root: true })
-      context.dispatch('updateWeather')
-      context.dispatch('updateJournalDailyPrompt')
-      context.dispatch('checkIfShouldJoinTeam')
+      context.dispatch('checkIfShouldJoinGroup')
     },
-    updateWeather: async (context) => {
-      const weather = await context.dispatch('api/weather', null, { root: true })
-      if (!weather) { return }
-      context.commit('weather', weather)
-    },
-    updateJournalDailyPrompt: async (context) => {
-      const data = await context.dispatch('api/journalDailyPrompt', null, { root: true })
-      if (!data) { return }
-      context.commit('journalDailyPrompt', data)
-    },
-    checkIfShouldJoinTeam: (context) => {
-      if (!context.rootState.teamToJoinOnLoad) { return }
+    checkIfShouldJoinGroup: (context) => {
+      if (!context.rootState.groupToJoinOnLoad) { return }
       const currentUserIsSignedIn = context.getters.isSignedIn
       if (currentUserIsSignedIn) {
-        context.dispatch('teams/joinTeam', null, { root: true })
+        context.dispatch('groups/joinGroup', null, { root: true })
       } else {
-        context.commit('notifySignUpToJoinTeam', true, { root: true })
+        context.commit('notifySignUpToJoinGroup', true, { root: true })
       }
     },
-    update: (context, updates) => {
+    update: async (context, updates) => {
       const keys = Object.keys(updates)
       keys.forEach(key => {
         context.commit(key, updates[key])
         context.dispatch('broadcastUpdate', { [key]: updates[key] })
       })
-      context.dispatch('api/addToQueue', { name: 'updateUser', body: updates }, { root: true })
+      await context.dispatch('api/addToQueue', { name: 'updateUser', body: updates }, { root: true })
     },
-    cardsCreatedCountUpdateBy: (context, { cards, shouldDecrement }) => {
+    cardsCreatedCountUpdateBy: async (context, { cards, shouldDecrement }) => {
       cards = cards.filter(card => !card.isCreatedThroughPublicApi)
       cards = cards.filter(card => card.userId === context.state.id)
       let delta = cards.length
@@ -493,37 +430,21 @@ export default {
       }
       const count = context.state.cardsCreatedCount + delta
       // update raw vanity count
-      context.dispatch('api/addToQueue', { name: 'updateUserCardsCreatedCountRaw', body: { delta } }, { root: true })
       context.commit('cardsCreatedCountRaw', count)
+      await context.dispatch('api/addToQueue', { name: 'updateUserCardsCreatedCountRaw', body: { delta } }, { root: true })
       // update count
       if (context.getters.shouldPreventCardsCreatedCountUpdate) { return }
-      context.dispatch('api/addToQueue', { name: 'updateUserCardsCreatedCount', body: { delta } }, { root: true })
+      await context.dispatch('api/addToQueue', { name: 'updateUserCardsCreatedCount', body: { delta } }, { root: true })
       context.commit('cardsCreatedCount', count)
     },
     isUpgraded: (context, value) => {
       context.commit('isUpgraded', value)
       context.commit('notifyCardsCreatedIsOverLimit', false, { root: true })
     },
-    createNewUserJournalPrompts: (context) => {
-      if (utils.arrayHasItems(context.state.journalPrompts)) { return }
-      let prompts = [
-        { name: 'How am I feeling?' },
-        { name: 'What do I have to do today?' }
-      ]
-      prompts = prompts.map(prompt => {
-        prompt.id = nanoid()
-        prompt.userId = context.state.id
-        return prompt
-      })
-      prompts.forEach(prompt => {
-        context.dispatch('addJournalPrompt', prompt)
-      })
-    },
     createNewUser: (context) => {
       context.commit('themeIsSystem', true)
       context.commit('updateAppleAppAccountToken')
       cache.saveUser(context.state)
-      context.dispatch('createNewUserJournalPrompts')
     },
     broadcastUpdate: (context, updates) => {
       const space = context.rootState.currentSpace
@@ -536,13 +457,22 @@ export default {
       context.commit('currentSpace/updateUser', user, { root: true })
       context.commit('currentSpace/updateCollaborator', user, { root: true })
     },
-    lastSpaceId: (context, spaceId) => {
+    lastSpaceId: async (context, spaceId) => {
       context.commit('lastSpaceId', spaceId)
       cache.updateUser('lastSpaceId', spaceId)
-      context.dispatch('api/addToQueue', { name: 'updateUser',
+      await context.dispatch('api/addToQueue', { name: 'updateUser',
         body: {
           lastSpaceId: spaceId
         } }, { root: true })
+    },
+    resetLastSpaceId: async (context) => {
+      const spaces = await cache.getAllSpaces()
+      const lastSpace = spaces[1]
+      if (lastSpace) {
+        context.dispatch('lastSpaceId', lastSpace.id)
+      } else {
+        context.dispatch('lastSpaceId', '')
+      }
     },
     restoreRemoteUser: async (context, cachedUser) => {
       if (!context.getters.isSignedIn) { return }
@@ -558,8 +488,11 @@ export default {
         context.commit('isUpgraded', false)
       }
       const remoteTags = await context.dispatch('api/getUserTags', null, { root: true }) || []
-      context.commit('otherTags', remoteTags, { root: true })
-      context.commit('teams/restore', remoteUser.teams, { root: true })
+      context.dispatch('tags', remoteTags)
+      context.dispatch('groups/restore', remoteUser.groups, { root: true })
+      if (context.rootState.shouldNotifyIsJoiningGroup) {
+        context.commit('notifyIsJoiningGroup', true, { root: true })
+      }
     },
     restoreUserFavorites: async (context) => {
       try {
@@ -587,7 +520,7 @@ export default {
         console.error('🚒 restoreUserFavorites', error)
       }
     },
-    updateFavoriteSpace: (context, { space, value }) => {
+    updateFavoriteSpace: async (context, { space, value }) => {
       let favoriteSpaces = utils.clone(context.state.favoriteSpaces)
       // add space
       if (value) {
@@ -603,9 +536,9 @@ export default {
       }
       context.commit('favoriteSpaces', favoriteSpaces)
       const body = { spaceId: space.id, value }
-      context.dispatch('api/addToQueue', { name: 'updateFavoriteSpace', body, spaceId: space.id }, { root: true })
+      await context.dispatch('api/addToQueue', { name: 'updateFavoriteSpace', body, spaceId: space.id }, { root: true })
     },
-    updateFavoriteUser: (context, { user, value }) => {
+    updateFavoriteUser: async (context, { user, value }) => {
       let favoriteUsers = utils.clone(context.state.favoriteUsers)
       // add user
       if (value) {
@@ -620,9 +553,9 @@ export default {
       }
       context.commit('favoriteUsers', favoriteUsers)
       const body = { favoriteUserId: user.id, value }
-      context.dispatch('api/addToQueue', { name: 'updateFavoriteUser', body }, { root: true })
+      await context.dispatch('api/addToQueue', { name: 'updateFavoriteUser', body }, { root: true })
     },
-    updateFavoriteColor: (context, { color, value }) => {
+    updateFavoriteColor: async (context, { color, value }) => {
       color = color.color
       let favoriteColors = utils.clone(context.state.favoriteColors)
       if (value) {
@@ -634,18 +567,18 @@ export default {
       }
       context.commit('favoriteColors', favoriteColors)
       const body = { color, value }
-      context.dispatch('api/addToQueue', { name: 'updateFavoriteColor', body }, { root: true })
+      await context.dispatch('api/addToQueue', { name: 'updateFavoriteColor', body }, { root: true })
     },
-    confirmEmail: (context) => {
-      context.dispatch('api/addToQueue', { name: 'updateUser',
+    confirmEmail: async (context) => {
+      await context.dispatch('api/addToQueue', { name: 'updateUser',
         body: {
           emailIsVerified: true
         }
       }, { root: true })
     },
-    arenaAccessToken: (context, token) => {
+    arenaAccessToken: async (context, token) => {
       context.commit('arenaAccessToken', token)
-      context.dispatch('api/addToQueue', { name: 'updateUser',
+      await context.dispatch('api/addToQueue', { name: 'updateUser',
         body: {
           arenaAccessToken: token
         }
@@ -660,40 +593,45 @@ export default {
       context.commit('importArenaChannelIsVisible', true, { root: true })
       context.commit('isAuthenticatingWithArena', false, { root: true })
     },
-    toggleFilterShowUsers: (context, value) => {
+    toggleFilterShowUsers: async (context, value) => {
       context.commit('filterShowUsers', value)
-      context.dispatch('api/addToQueue', { name: 'updateUser',
+      await context.dispatch('api/addToQueue', { name: 'updateUser',
         body: {
           filterShowUsers: value
-        } }, { root: true })
+        }
+      }, { root: true })
     },
-    toggleFilterShowDateUpdated: (context, value) => {
+    toggleFilterShowDateUpdated: async (context, value) => {
       context.commit('filterShowDateUpdated', value)
-      context.dispatch('api/addToQueue', { name: 'updateUser',
+      await context.dispatch('api/addToQueue', { name: 'updateUser',
         body: {
           filterShowDateUpdated: value
-        } }, { root: true })
+        }
+      }, { root: true })
     },
-    toggleFilterShowAbsoluteDates: (context, value) => {
+    toggleFilterShowAbsoluteDates: async (context, value) => {
       context.commit('filterShowAbsoluteDates', value)
-      context.dispatch('api/addToQueue', { name: 'updateUser',
+      await context.dispatch('api/addToQueue', { name: 'updateUser',
         body: {
           filterShowAbsoluteDates: value
-        } }, { root: true })
+        }
+      }, { root: true })
     },
-    toggleFilterUnchecked: (context, value) => {
+    toggleFilterUnchecked: async (context, value) => {
       context.commit('filterUnchecked', value)
-      context.dispatch('api/addToQueue', { name: 'updateUser',
+      await context.dispatch('api/addToQueue', { name: 'updateUser',
         body: {
           filterUnchecked: value
-        } }, { root: true })
+        }
+      }, { root: true })
     },
-    toggleFilterComments: (context, value) => {
+    toggleFilterComments: async (context, value) => {
       context.commit('filterComments', value)
-      context.dispatch('api/addToQueue', { name: 'updateUser',
+      await context.dispatch('api/addToQueue', { name: 'updateUser',
         body: {
           filterComments: value
-        } }, { root: true })
+        }
+      }, { root: true })
     },
     clearUserFilters: (context) => {
       context.dispatch('toggleFilterShowUsers', false)
@@ -702,27 +640,20 @@ export default {
       context.dispatch('toggleFilterUnchecked', false)
       context.dispatch('toggleFilterComments', false)
     },
-    addJournalPrompt: (context, prompt) => {
-      utils.typeCheck({ value: prompt, type: 'object' })
-      context.dispatch('api/addToQueue', { name: 'addJournalPrompt', body: prompt }, { root: true })
-      context.commit('addJournalPrompt', prompt)
-    },
-    removeJournalPrompt: (context, prompt) => {
-      utils.typeCheck({ value: prompt, type: 'object' })
-      context.dispatch('api/addToQueue', { name: 'removeJournalPrompt', body: prompt }, { root: true })
-      context.commit('removeJournalPrompt', prompt)
-    },
-    updateJournalPrompt: (context, prompt) => {
-      utils.typeCheck({ value: prompt, type: 'object' })
-      context.dispatch('api/addToQueue', { name: 'updateJournalPrompt', body: prompt }, { root: true })
-      context.commit('updateJournalPrompt', prompt)
-    },
-    newSpacesAreBlank: (context, value) => {
+    shouldHideTutorialCards: async (context, value) => {
       utils.typeCheck({ value, type: 'boolean' })
-      context.commit('newSpacesAreBlank', value)
-      context.dispatch('api/addToQueue', { name: 'updateUser',
+      context.commit('shouldHideTutorialCards', value)
+      await context.dispatch('api/addToQueue', { name: 'updateUser',
         body: {
-          newSpacesAreBlank: value
+          shouldHideTutorialCards: value
+        } }, { root: true })
+    },
+    shouldHideDateCards: async (context, value) => {
+      utils.typeCheck({ value, type: 'boolean' })
+      context.commit('shouldHideDateCards', value)
+      await context.dispatch('api/addToQueue', { name: 'updateUser',
+        body: {
+          shouldHideDateCards: value
         } }, { root: true })
     },
     shouldEmailNotifications: (context, value) => {
@@ -741,64 +672,80 @@ export default {
           shouldEmailBulletin: value
         } }, { root: true })
     },
-    shouldEmailWeeklyReview: (context, value) => {
+    shouldEmailWeeklyReview: async (context, value) => {
       utils.typeCheck({ value, type: 'boolean' })
       context.commit('shouldEmailWeeklyReview', value)
-      context.dispatch('api/addToQueue', { name: 'updateUser',
+      await context.dispatch('api/addToQueue', { name: 'updateUser',
         body: {
           shouldEmailWeeklyReview: value
-        } }, { root: true })
+        }
+      }, { root: true })
     },
-    shouldShowMoreAlignOptions: (context, value) => {
+    shouldShowMoreAlignOptions: async (context, value) => {
       utils.typeCheck({ value, type: 'boolean' })
       context.commit('shouldShowMoreAlignOptions', value)
-      context.dispatch('api/addToQueue', { name: 'updateUser',
+      await context.dispatch('api/addToQueue', { name: 'updateUser',
         body: {
           shouldShowMoreAlignOptions: value
-        } }, { root: true })
+        }
+      }, { root: true })
     },
-    shouldShowItemActions: (context, value) => {
+    shouldShowItemActions: async (context, value) => {
       utils.typeCheck({ value, type: 'boolean' })
       context.commit('shouldShowItemActions', value)
-      context.dispatch('api/addToQueue', { name: 'updateUser',
+      await context.dispatch('api/addToQueue', { name: 'updateUser',
         body: {
           shouldShowItemActions: value
-        } }, { root: true })
+        }
+      }, { root: true })
     },
-    shouldShowMultipleSelectedLineActions: (context, value) => {
+    shouldShowMultipleSelectedLineActions: async (context, value) => {
       utils.typeCheck({ value, type: 'boolean' })
       context.commit('shouldShowMultipleSelectedLineActions', value)
-      context.dispatch('api/addToQueue', { name: 'updateUser',
+      await context.dispatch('api/addToQueue', { name: 'updateUser',
         body: {
           shouldShowMultipleSelectedLineActions: value
-        } }, { root: true })
+        }
+      }, { root: true })
     },
-    showInExploreUpdatedAt: (context, value) => {
+    shouldShowMultipleSelectedBoxActions: async (context, value) => {
+      utils.typeCheck({ value, type: 'boolean' })
+      context.commit('shouldShowMultipleSelectedBoxActions', value)
+      await context.dispatch('api/addToQueue', { name: 'updateUser',
+        body: {
+          shouldShowMultipleSelectedBoxActions: value
+        }
+      }, { root: true })
+    },
+    showInExploreUpdatedAt: async (context, value) => {
       utils.typeCheck({ value, type: 'string' })
       context.commit('showInExploreUpdatedAt', value)
-      context.dispatch('api/addToQueue', { name: 'updateUser',
+      await context.dispatch('api/addToQueue', { name: 'updateUser',
         body: {
           showInExploreUpdatedAt: value
-        } }, { root: true })
+        }
+      }, { root: true })
     },
-    shouldDisableRightClickToPan: (context, value) => {
+    shouldDisableRightClickToPan: async (context, value) => {
       utils.typeCheck({ value, type: 'boolean' })
       context.commit('shouldDisableRightClickToPan', value)
-      context.dispatch('api/addToQueue', { name: 'updateUser',
+      await context.dispatch('api/addToQueue', { name: 'updateUser',
         body: {
           shouldDisableRightClickToPan: value
-        } }, { root: true })
+        }
+      }, { root: true })
     },
-    shouldUseLastConnectionType: (context, value) => {
+    shouldUseLastConnectionType: async (context, value) => {
       utils.typeCheck({ value, type: 'boolean' })
       context.commit('shouldUseLastConnectionType', value)
-      context.dispatch('api/addToQueue', { name: 'updateUser',
+      await context.dispatch('api/addToQueue', { name: 'updateUser',
         body: {
           shouldUseLastConnectionType: value
-        } }, { root: true })
+        }
+      }, { root: true })
     },
     inboxSpace: async (context) => {
-      let space = cache.getInboxSpace()
+      let space = await cache.getInboxSpace()
       if (!space) {
         try {
           space = await context.dispatch('api/getUserInboxSpace', null, { root: true })
@@ -818,6 +765,10 @@ export default {
       } else {
         context.commit('addNotificationWithPosition', { message: 'Space is Read Only', position, type: 'info', layer: 'space', icon: 'cancel' }, { root: true })
       }
+    },
+    tags: async (context, tags) => {
+      tags = uniqBy(tags, 'name')
+      context.commit('tags', tags)
     }
   },
   getters: {
@@ -827,20 +778,14 @@ export default {
     isSignedIn: (state) => {
       return Boolean(state.apiKey)
     },
-    isUpgradedOrOnTeam: (state, getters, rootState, rootGetters) => {
-      if (state.isUpgraded) { return true }
-      const userTeams = rootGetters['teams/byUser']()
-      const isTeamUser = Boolean(userTeams.length)
-      return isTeamUser
-    },
     cardsCreatedIsOverLimit: (state, getters, rootState) => {
       const cardsCreatedLimit = rootState.cardsCreatedLimit
-      if (getters.isUpgradedOrOnTeam) { return }
+      if (state.isUpgraded) { return }
       if (state.cardsCreatedCount >= cardsCreatedLimit) { return true }
     },
     cardsCreatedWillBeOverLimit: (state, getters, rootState) => (count) => {
       const cardsCreatedLimit = rootState.cardsCreatedLimit
-      if (getters.isUpgradedOrOnTeam) { return }
+      if (state.isUpgraded) { return }
       if (state.cardsCreatedCount + count >= cardsCreatedLimit) { return true }
     },
     canEditSpace: (state, getters, rootState, rootGetters) => (space) => {
@@ -849,8 +794,7 @@ export default {
       const currentUserIsSignedIn = getters.isSignedIn
       const canEditOpenSpace = spaceIsOpen && currentUserIsSignedIn
       const isSpaceMember = getters.isSpaceMember(space)
-      const teamUser = rootGetters['teams/isCurrentSpaceTeamUser']
-      return canEditOpenSpace || isSpaceMember || teamUser
+      return canEditOpenSpace || isSpaceMember
     },
     cannotEditUnlessSignedIn: (state, getters, rootState) => (space) => {
       space = space || rootState.currentSpace
@@ -859,6 +803,7 @@ export default {
       return !currentUserIsSignedIn && spaceIsOpen
     },
     cardIsCreatedByCurrentUser: (state, getters, rootState) => (card) => {
+      if (!card) { return }
       const isCreatedByUser = state.id === card.userId
       const isUpdatedByUser = state.id === card.nameUpdatedByUserId
       const isNoUser = !card.userId && !card.nameUpdatedByUserId
@@ -871,8 +816,7 @@ export default {
     },
     canEditCard: (state, getters, rootState, rootGetters) => (card) => {
       const isSpaceMember = getters.isSpaceMember()
-      const teamUser = rootGetters['teams/isCurrentSpaceTeamUser']
-      if (isSpaceMember || teamUser) { return true }
+      if (isSpaceMember) { return true }
       const canEditSpace = getters.canEditSpace()
       const cardIsCreatedByCurrentUser = getters.cardIsCreatedByCurrentUser(card)
       if (canEditSpace && cardIsCreatedByCurrentUser) { return true }
@@ -881,13 +825,11 @@ export default {
     canOnlyComment: (state, getters, rootState, rootGetters) => () => {
       const canEditSpace = getters.canEditSpace()
       const isSpaceMember = getters.isSpaceMember()
-      const teamUser = rootGetters['teams/isCurrentSpaceTeamUser']
-      return canEditSpace && !isSpaceMember && !teamUser
+      return canEditSpace && !isSpaceMember
     },
     canEditBox: (state, getters, rootState, rootGetters) => (box) => {
       const isSpaceMember = getters.isSpaceMember()
-      const teamUser = rootGetters['teams/isCurrentSpaceTeamUser']
-      if (isSpaceMember || teamUser) { return true }
+      if (isSpaceMember) { return true }
       const canEditSpace = getters.canEditSpace()
       const boxIsCreatedByCurrentUser = getters.boxIsCreatedByCurrentUser(box)
       if (canEditSpace && boxIsCreatedByCurrentUser) { return true }
@@ -896,12 +838,13 @@ export default {
     connectionIsCreatedByCurrentUser: (state, getters, rootState) => (connection) => {
       return state.id === connection.userId
     },
-    isSpaceMember: (state, getters, rootState) => (space) => {
-      // a member is a user or collaborator
+    isSpaceMember: (state, getters, rootState, rootGetters) => (space) => {
+      // a member is a user, collaborator, or group member
       space = space || rootState.currentSpace
       const isSpaceUser = getters.isSpaceUser(space)
       const isSpaceCollaborator = getters.isSpaceCollaborator(space)
-      return isSpaceUser || isSpaceCollaborator
+      const isGroupMember = rootGetters['groups/currentUserIsCurrentSpaceGroupUser']
+      return Boolean(isSpaceUser || isSpaceCollaborator || isGroupMember)
     },
     isSpaceUser: (state, getters, rootState) => (space) => {
       let userIsInSpace = Boolean(space.users?.find(user => {
@@ -938,23 +881,15 @@ export default {
     isReadOnlyInvitedToSpace: (state, getters, rootState) => (space) => {
       return rootState.spaceReadOnlyKey.spaceId === space.id
     },
-    isInvitedButCannotEditSpace: (state, getters, rootState) => (space) => {
-      space = space || rootState.currentSpace
-      const currentUserIsSignedIn = getters.isSignedIn
-      const isInvitedToSpace = Boolean(cache.invitedSpaces().find(invitedSpace => invitedSpace.id === space.id))
-      const isReadOnlyInvitedToSpace = getters.isReadOnlyInvitedToSpace(space)
-      const inviteRequiresSignIn = !currentUserIsSignedIn && isInvitedToSpace
-      return isReadOnlyInvitedToSpace || inviteRequiresSignIn
-    },
     shouldPreventCardsCreatedCountUpdate: (state, getters, rootState, rootGetters) => {
-      const spaceUserIsUpgraded = rootGetters['currentSpace/spaceUserIsUpgradedOrOnTeam']
-      const spaceUserIsCurrentUser = rootGetters['currentSpace/spaceUserIsCurrentUser']
-      if (spaceUserIsUpgraded && !spaceUserIsCurrentUser) {
+      const spaceCreatorIsUpgraded = rootGetters['currentSpace/spaceCreatorIsUpgraded']
+      const spaceCreatorIsCurrentUser = rootGetters['currentSpace/spaceCreatorIsCurrentUser']
+      if (spaceCreatorIsUpgraded && !spaceCreatorIsCurrentUser) {
         return true
       }
     },
     totalFiltersActive: (state, getters) => {
-      let userFilters = getters.totalCardFadingFiltersActive
+      let userFilters = getters.totalItemFadingFiltersActive
       if (state.filterShowUsers) {
         userFilters += 1
       }
@@ -966,7 +901,7 @@ export default {
       }
       return userFilters
     },
-    totalCardFadingFiltersActive: (state, getters, rootState) => {
+    totalItemFadingFiltersActive: (state, getters, rootState) => {
       let userFilters = 0
       if (state.filterUnchecked) {
         userFilters += 1
@@ -974,13 +909,14 @@ export default {
       const tagNames = rootState.filteredTagNames
       const connections = rootState.filteredConnectionTypeIds
       const frames = rootState.filteredFrameIds
-      return userFilters + tagNames.length + connections.length + frames.length
+      const boxes = rootState.filteredBoxIds
+      return userFilters + tagNames.length + connections.length + frames.length + boxes.length
     },
 
     // AI Images
 
     AIImagesThisMonth: (state, getters) => {
-      if (getters.isUpgradedOrOnTeam) {
+      if (state.isUpgraded) {
         const currentMonth = dayjs().month()
         const currentYear = dayjs().year()
         return state.AIImages.filter(image => {
@@ -999,7 +935,7 @@ export default {
       return Math.floor(images.length / 2)
     },
     AIImagesLimit: (state, getters) => {
-      if (getters.isUpgradedOrOnTeam) {
+      if (state.isUpgraded) {
         return consts.AIImageLimitUpgradedUser
       } else {
         return consts.AIImageLimitFreeUser
@@ -1023,6 +959,12 @@ export default {
     subscriptionIsFree: (state) => {
       const strings = ['🌷free', '🌷 free', '🫧free']
       return strings.includes(state.stripeSubscriptionId)
+    },
+
+    // user tags
+
+    tagByName: (state, getters) => (name) => {
+      return state.tags.find(tag => tag.name === name)
     }
   }
 }

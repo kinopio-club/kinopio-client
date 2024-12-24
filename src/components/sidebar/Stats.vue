@@ -162,8 +162,7 @@ section.stats(v-if="visible")
 section(v-if="visible")
   p
     img.icon(src="@/assets/heart.svg")
-    span(v-if="!state.isLoadingFavorites") {{state.favoriteUsers.length}}{{' '}}
-    span Favorites{{' '}}
+    span Favorited by
     Loader(:visible="state.isLoadingFavorites" :isSmall="true")
 
 section.results-section(v-if="!state.isLoadingFavorites && visible")

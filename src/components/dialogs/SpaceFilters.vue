@@ -2,11 +2,10 @@
 import { reactive, computed, onMounted, onBeforeUnmount, defineProps, defineEmits, watch, ref, nextTick } from 'vue'
 import { useStore } from 'vuex'
 
-import MoonPhase from '@/components/MoonPhase.vue'
-import moonphase from '@/moonphase.js'
 import UserList from '@/components/UserList.vue'
 import utils from '@/utils.js'
-import TeamList from '@/components/TeamList.vue'
+import GroupList from '@/components/GroupList.vue'
+import Loader from '@/components/Loader.vue'
 
 import uniqBy from 'lodash-es/uniqBy'
 
@@ -21,12 +20,12 @@ onMounted(() => {
       clearAllFilters()
     }
   })
-  state.moonPhase = moonphase()
 })
 
 const props = defineProps({
   visible: Boolean,
-  spaces: Array
+  spaces: Array,
+  isLoading: Boolean
 })
 watch(() => props.visible, (value, prevValue) => {
   if (value) {
@@ -35,7 +34,6 @@ watch(() => props.visible, (value, prevValue) => {
 })
 
 const state = reactive({
-  moonPhase: {},
   dialogHeight: null
 })
 
@@ -48,33 +46,28 @@ const updateDialogHeight = async () => {
 
 // filters
 
-const dialogSpaceFilterSortByDate = computed(() => store.state.currentUser.dialogSpaceFilterSortByDate)
-const dialogSpaceFilterByType = computed(() => store.state.currentUser.dialogSpaceFilterByType)
+const dialogSpaceFilterSortBy = computed(() => store.state.currentUser.dialogSpaceFilterSortBy)
 const dialogSpaceFilterByUser = computed(() => store.state.currentUser.dialogSpaceFilterByUser)
 const dialogSpaceFilterShowHidden = computed(() => store.state.currentUser.dialogSpaceFilterShowHidden)
-const dialogSpaceFilterByTeam = computed(() => store.state.currentUser.dialogSpaceFilterByTeam)
+const dialogSpaceFilterByGroup = computed(() => store.state.currentUser.dialogSpaceFilterByGroup)
 
 // clear all
 
 const clearAllFilters = () => {
-  updateFilterByType(null)
-  updateTeamFilter({})
+  updateGroupFilter({})
   updateUserFilter({})
   updateSortBy(null)
   store.dispatch('currentUser/update', { dialogSpaceFilterShowHidden: false })
 }
 const totalFiltersActive = computed(() => {
   let count = 0
-  if (dialogSpaceFilterByType.value) {
-    count += 1
-  }
-  if (dialogSpaceFilterSortByDate.value === 'createdAt') {
+  if (dialogSpaceFilterSortBy.value === 'createdAt') {
     count += 1
   }
   if (dialogSpaceFilterShowHidden.value) {
     count += 1
   }
-  if (utils.objectHasKeys(dialogSpaceFilterByTeam.value)) {
+  if (utils.objectHasKeys(dialogSpaceFilterByGroup.value)) {
     count += 1
   }
   if (utils.objectHasKeys(dialogSpaceFilterByUser.value)) {
@@ -98,48 +91,40 @@ const toggleShowHiddenSpace = () => {
   store.dispatch('currentUser/update', { dialogSpaceFilterShowHidden: value })
 }
 
-// by types
-
-const filterByTypeAll = computed(() => Boolean(!dialogSpaceFilterByType.value))
-const filterByTypeSpaces = computed(() => dialogSpaceFilterByType.value === 'spaces')
-const filterByTypeJournals = computed(() => dialogSpaceFilterByType.value === 'journals')
-const updateFilterByType = (value) => {
-  store.dispatch('currentUser/update', { dialogSpaceFilterByType: value })
-  if (value === 'journals') {
-    updateSortBy('createdAt')
-  } else {
-    updateSortBy('updatedAt')
-  }
-}
-
 // sort by
 
 const isSortByUpdatedAt = computed(() => {
-  const value = dialogSpaceFilterSortByDate.value
+  const value = dialogSpaceFilterSortBy.value
   return !value || value === 'updatedAt'
 })
 const isSortByCreatedAt = computed(() => {
-  const value = dialogSpaceFilterSortByDate.value
+  const value = dialogSpaceFilterSortBy.value
   return value === 'createdAt'
 })
+const isSortByAlphabetical = computed(() => {
+  const value = dialogSpaceFilterSortBy.value
+  return value === 'alphabetical'
+})
 const updateSortBy = (value) => {
-  store.dispatch('currentUser/update', { dialogSpaceFilterSortByDate: value })
+  store.dispatch('currentUser/update', { dialogSpaceFilterSortBy: value })
 }
 
-// teams
+// groups
 
-const teams = computed(() => {
-  return store.getters['teams/bySpaces'](props.spaces)
+const isGroups = computed(() => {
+  if (!groups.value) { return }
+  return groups.value.length
 })
-const filterByTeam = (event, team) => {
-  if (team.id === dialogSpaceFilterByTeam.value.id) {
-    updateTeamFilter({})
+const groups = computed(() => store.getters['groups/byUser']())
+const filterByGroup = (event, group) => {
+  if (group.id === dialogSpaceFilterByGroup.value.id) {
+    updateGroupFilter({})
   } else {
-    updateTeamFilter(team)
+    updateGroupFilter(group)
   }
 }
-const updateTeamFilter = (value) => {
-  store.dispatch('currentUser/update', { dialogSpaceFilterByTeam: value })
+const updateGroupFilter = (value) => {
+  store.dispatch('currentUser/update', { dialogSpaceFilterByGroup: value })
 }
 
 // collaborators
@@ -162,56 +147,53 @@ const filterByUser = (event, user) => {
     updateUserFilter(user)
   }
 }
+
+const isLoading = computed(() => {
+  return props.isLoading || store.state.isLoadingGroups
+})
+
 </script>
 
 <template lang="pug">
 dialog.narrow.space-filters(v-if="props.visible" :open="props.visible" @click.left.stop ref="dialogElement" :style="{'max-height': state.dialogHeight + 'px'}")
-  section
-    p Space Filters
-  section
-    .row
-      //- clear all
-      button(@click.left="clearAllFilters")
+  section.section-title
+    .row.title-row
+      span Space Filters
+      button.small-button(@click.left="clearAllFilters" title="Clear all space filters")
         img.icon.cancel(src="@/assets/add.svg")
-        span Clear all
-        span.badge.info.total-filters-active(v-if="totalFiltersActive") {{totalFiltersActive}}
+        span Clear
+        span.badge.info.filter-is-active(v-if="totalFiltersActive")
 
-    //- types visibile
-    section.subsection
-      p Filter by Type
-
-      .segmented-buttons
-        button(@click="updateFilterByType(null)" :class="{active: filterByTypeAll}")
-          span All
-        button(@click="updateFilterByType('spaces')" :class="{active: filterByTypeSpaces}")
-          span Normal
-        button(@click="updateFilterByType('journals')" :class="{active: filterByTypeJournals}")
-          MoonPhase(:moonPhase="state.moonPhase.name")
-          span Journals
+  section
     //- sort by
     section.subsection
-      p Sort by Date
+      p
+        span Sort by
       .segmented-buttons
-        button(:class="{active: isSortByUpdatedAt}" @click="updateSortBy('updatedAt')")
-          img.icon.time(src="@/assets/time.svg")
+        button(:class="{active: isSortByUpdatedAt}" @click="updateSortBy('updatedAt')" title="Sort spaces by updated at")
           span Updated
-        button(:class="{active: isSortByCreatedAt}" @click="updateSortBy('createdAt')")
-          img.icon.time(src="@/assets/time.svg")
+        button(:class="{active: isSortByCreatedAt}" @click="updateSortBy('createdAt')" title="Sort spaces by created at")
           span Created
+        button(:class="{active: isSortByAlphabetical}" @click="updateSortBy('alphabetical')" title="Sort spaces alphabetically")
+          span ABC
     //- show hidden
     .row
-      .checkbox-wrap
-        label(:class="{active: showHiddenSpace}")
+      .checkbox-wrap.button-wrap
+        label(:class="{active: showHiddenSpace}" title="Show hidden spaces")
           input(type="checkbox" v-model="showHiddenSpace")
-          img.icon(v-if="!showHiddenSpace" src="@/assets/view.svg")
-          img.icon(v-if="showHiddenSpace" src="@/assets/view-hidden.svg")
           span Show Hidden
-  //- teams
-  section.results-section.teams(v-if="teams.length")
-    TeamList(:teams="teams" :selectedTeam="dialogSpaceFilterByTeam" @selectTeam="filterByTeam")
+
+  //- loading
+  section(v-if="isLoading")
+    Loader(:visible="true")
+
+  //- groups
+  section.results-section.groups(v-if="isGroups")
+    GroupList(:groups="groups" :selectedGroup="dialogSpaceFilterByGroup" @selectGroup="filterByGroup")
   //- collaborators
   section.results-section.collaborators(v-if="spaceUsers.length")
     UserList(:users="spaceUsers" :selectedUser="dialogSpaceFilterByUser" @selectUser="filterByUser")
+
 </template>
 
 <style lang="stylus">

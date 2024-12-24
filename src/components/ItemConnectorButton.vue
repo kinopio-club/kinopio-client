@@ -35,8 +35,20 @@ const backgroundColorIsDark = computed(() => {
 // user
 
 const isThemeDark = computed(() => store.state.currentUser.theme === 'dark')
-const isDarkInLightTheme = computed(() => backgroundColorIsDark.value && !isThemeDark.value)
-const isLightInDarkTheme = computed(() => !backgroundColorIsDark.value && isThemeDark.value)
+const isDarkInLightTheme = computed(() => {
+  if (props.box?.fill === 'empty') {
+    return isThemeDark.value
+  } else {
+    return backgroundColorIsDark.value && !isThemeDark.value
+  }
+})
+const isLightInDarkTheme = computed(() => {
+  if (props.box?.fill === 'empty') {
+    return !isThemeDark.value
+  } else {
+    return !backgroundColorIsDark.value && isThemeDark.value
+  }
+})
 
 // connections
 

@@ -2,20 +2,6 @@
 import { reactive, computed, onMounted, onBeforeUnmount, onUnmounted, defineProps, defineEmits, watch, ref, nextTick } from 'vue'
 import { useStore } from 'vuex'
 
-import Header from '@/components/Header.vue'
-import MagicPaint from '@/components/layers/MagicPaint.vue'
-import UserLabelCursor from '@/components/UserLabelCursor.vue'
-import Footer from '@/components/Footer.vue'
-import WindowHistoryHandler from '@/components/WindowHistoryHandler.vue'
-import KeyboardShortcutsHandler from '@/components/KeyboardShortcutsHandler.vue'
-import ScrollAndTouchHandler from '@/components/ScrollAndTouchHandler.vue'
-import TagDetails from '@/components/dialogs/TagDetails.vue'
-import ItemsLocked from '@/components/ItemsLocked.vue'
-import UserDetails from '@/components/dialogs/UserDetails.vue'
-import NotificationsWithPosition from '@/components/NotificationsWithPosition.vue'
-import SpaceBackground from '@/components/SpaceBackground.vue'
-import OutsideSpaceBackground from '@/components/OutsideSpaceBackground.vue'
-import Preload from '@/components/Preload.vue'
 import utils from '@/utils.js'
 import consts from '@/consts.js'
 const store = useStore()
@@ -71,17 +57,9 @@ const pageCursor = computed(() => {
   return undefined
 })
 const spaceZoomDecimal = computed(() => store.getters.spaceZoomDecimal)
-const isDevelpmentBadgeVisible = computed(() => {
-  if (store.state.isPresentationMode) { return }
-  return consts.isDevelopment()
-})
 
 // users
 
-const users = computed(() => {
-  const excludeCurrentUser = true
-  return store.getters['currentSpace/allUsers'](excludeCurrentUser)
-})
 const currentUserId = computed(() => store.state.currentUser.id)
 
 // online
@@ -178,7 +156,6 @@ const updateMetaRSSFeed = () => {
   link.href = url
   head.appendChild(link)
 }
-
 </script>
 
 <template lang='pug'>
@@ -189,30 +166,8 @@ const updateMetaRSSFeed = () => {
   :class="{ 'no-background': !isSpacePage, 'is-dark-theme': isThemeDark }"
   :data-current-user-id="currentUserId"
 )
-  base(v-if="!isSpacePage" target="_blank")
-  template(v-if="isSpacePage")
-    OutsideSpaceBackground
-    SpaceBackground
-    ItemsLocked
-    MagicPaint
-    //- Presence
-    template(v-for="user in users")
-      UserLabelCursor(:user="user")
-
   //- router-view is Space or Add
   router-view
-  template(v-if="isSpacePage")
-    Header
-    Footer
-    TagDetails
-    UserDetails
-    WindowHistoryHandler
-    KeyboardShortcutsHandler
-    ScrollAndTouchHandler
-    NotificationsWithPosition(layer="app")
-    Preload
-    .badge.label-badge.development-badge(v-if="isDevelpmentBadgeVisible")
-      span DEV
 </template>
 
 <style lang="stylus">
@@ -222,6 +177,8 @@ const updateMetaRSSFeed = () => {
   // non-theme vars
   --primary-on-dark-background white
   --primary-on-light-background black
+  --primary-border-on-light-background rgba(0,0,0,0.3)
+  --primary-border-on-dark-background rgba(255,255,255,0.3)
   --dark-background-tint-on-light-background rgba(0,0,0,0.3)
   --hover-shadow 3px 3px 0 var(--heavy-shadow)
   --active-shadow 5px 5px 0 var(--light-shadow)
@@ -238,6 +195,7 @@ const updateMetaRSSFeed = () => {
   --mono-font Menlo, Monaco, monospace
   --serif-font georgia, serif
   --glyphs-font GoodGlyphs, wingdings
+  --is-checked-opacity 0.6
 
 @font-face
   font-family 'GoodGlyphs'
@@ -347,6 +305,19 @@ const updateMetaRSSFeed = () => {
 @font-face
   font-family 'migra'
   src url("https://bk.kinopio.club/fonts/migra/PPMigra-Regular.woff2") format("woff2")
+  font-weight normal
+  font-style normal
+// header-font-8
+:root
+  --header-font-8 eiko, var(--sans-serif-font)
+@font-face
+  font-family 'eiko'
+  src url("https://bk.kinopio.club/fonts/eiko/PPEiko-Medium.woff2") format("woff2")
+  font-weight bold
+  font-style normal
+@font-face
+  font-family 'eiko'
+  src url("https://bk.kinopio.club/fonts/eiko/PPEiko-LightItalic.woff2") format("woff2")
   font-weight normal
   font-style normal
 
@@ -638,7 +609,8 @@ p
     vertical-align middle
 
 .segmented-buttons + .segmented-buttons,
-.button-wrap + .button-wrap
+.button-wrap + .button-wrap,
+.button-wrap + .segmented-buttons
   margin-left 6px
 .segmented-buttons
   > .button-wrap + .button-wrap
@@ -671,6 +643,8 @@ dialog
     width 230px
   &.wide
     width 280px
+  &.overflow-auto
+    overflow auto
   button + button,
   button + input,
   button + label,
@@ -801,12 +775,19 @@ button
   > .button-wrap > button,
   > button,
   > label,
-  > select
+  > select,
+  > a
     margin 0
     border-radius 0
+    > button
+      margin 0
+      border-radius 0
     &:first-child
       border-top-left-radius var(--entity-radius)
       border-bottom-left-radius var(--entity-radius)
+      > button
+        border-top-left-radius var(--entity-radius)
+        border-bottom-left-radius var(--entity-radius)
     &:last-child
       border-top-right-radius var(--entity-radius)
       border-bottom-right-radius var(--entity-radius)
@@ -832,7 +813,8 @@ button
   button + label,
   label + label,
   select + button,
-  button + select
+  button + select,
+  a + button
     margin-left -1px
 
 .segmented-buttons-wrap
@@ -863,10 +845,13 @@ button
 .is-dark-theme
   .icon
     filter invert()
-
 .icon
   user-drag none
   -webkit-user-drag none
+  &.is-background-light
+    filter none
+  &.is-background-dark
+    filter invert(1)
 
 .icon + span,
 .icon + .icon
@@ -887,7 +872,7 @@ button
   dialog
     top calc(100% - 8px)
 
-.icon.team
+.icon.group
   height 11px
 
 .icon.sunglasses
@@ -908,18 +893,12 @@ button
   transform rotate(-90deg)
   vertical-align 2px
 
-.icon.box-icon
-  vertical-align -1px
-
 .icon.comment
   vertical-align -1px
 
 .icon.leave
   transform rotate(-45deg)
   vertical-align -2px
-
-.icon.tweet
-  height 10px
 
 .icon.stats
   vertical-align -1px
@@ -946,6 +925,9 @@ button
   width 11px
   vertical-align 1px
 
+.icon.duplicate
+  vertical-align 1px
+
 label,
 li
   position relative
@@ -970,11 +952,6 @@ li
       background-image url('assets/checkmark.svg')
       background-repeat no-repeat
       background-position center
-    &.add
-      background-image url('assets/add.svg')
-      background-repeat no-repeat
-      background-position center
-      background-size 69%
 
 details
   summary
@@ -1138,7 +1115,6 @@ code
     padding 0px 7px
     vertical-align 0
     margin-right 5px
-    border-radius var(--small-entity-radius)
   &.badge-card-button
     box-shadow none
     text-decoration none
@@ -1237,8 +1213,11 @@ code
   display none
 
 .is-hidden-by-opacity
-  opacity 0
+  opacity 0 !important
   pointer-events none !important
+
+.space-is-hidden
+  opacity 0.5
 
 .fade-out
   opacity 0

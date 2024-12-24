@@ -9,11 +9,14 @@ import utils from '@/utils.js'
 import templates from '@/data/templates.js'
 import PrivacyIcon from '@/components/PrivacyIcon.vue'
 import OfflineBadge from '@/components/OfflineBadge.vue'
-import TeamLabel from '@/components/TeamLabel.vue'
+import GroupLabel from '@/components/GroupLabel.vue'
 import Loader from '@/components/Loader.vue'
 
 import dayjs from 'dayjs'
+
 const store = useStore()
+
+let unsubscribe
 
 let checkIfShouldNotifySpaceOutOfSyncIntervalTimer
 
@@ -23,7 +26,7 @@ const templateElement = ref(null)
 
 onMounted(() => {
   update()
-  store.subscribe((mutation, state) => {
+  unsubscribe = store.subscribe((mutation, state) => {
     if (mutation.type === 'addNotification') {
       update()
     } else if (mutation.type === 'currentUserIsPainting') {
@@ -50,6 +53,7 @@ onBeforeUnmount(() => {
   window.removeEventListener('visibilitychange', updatePageVisibilityChange)
   window.removeEventListener('focus', updatePageVisibilityChangeOnFocus)
   clearInterval(checkIfShouldNotifySpaceOutOfSyncIntervalTimer)
+  unsubscribe()
 })
 
 const state = reactive({
@@ -66,12 +70,14 @@ const closeAllDialogs = () => {
 
 const currentUserIsPaintingLocked = computed(() => store.state.currentUserIsPaintingLocked)
 const currentUserIsResizingCard = computed(() => store.state.currentUserIsResizingCard)
+const currentUserIsResizingBox = computed(() => store.state.currentUserIsResizingBox)
 const currentUserIsTiltingCard = computed(() => store.state.currentUserIsTiltingCard)
 const currentUserIsPanning = computed(() => store.state.currentUserIsPanning)
 const currentUserIsPanningReady = computed(() => store.state.currentUserIsPanningReady)
 const currentUserIsSignedIn = computed(() => store.getters['currentUser/isSignedIn'])
-const currentUserIsUpgraded = computed(() => store.getters['currentUser/isUpgradedOrOnTeam'])
+const currentUserIsUpgraded = computed(() => store.state.currentUser.isUpgraded)
 const isTouchDevice = computed(() => store.state.isTouchDevice)
+const shouldSnapToGrid = computed(() => store.state.shouldSnapToGrid)
 
 // space
 
@@ -86,6 +92,7 @@ const cardsCreatedCountFromLimit = computed(() => {
   return Math.max(cardsCreatedLimit - cardsCreatedCount, 0)
 })
 const currentSpaceIsTemplate = computed(() => {
+  if (store.state.isLoadingSpace) { return }
   const currentSpace = store.state.currentSpace
   if (currentSpace.isTemplate) { return true }
   const templateSpaceIds = templates.spaces().map(space => space.id)
@@ -148,19 +155,21 @@ const notifyServerCouldNotSave = computed(() => {
   return store.state.notifyServerCouldNotSave
 })
 const notifySpaceIsRemoved = computed(() => store.state.notifySpaceIsRemoved)
-const notifySignUpToEditSpace = computed(() => store.state.notifySignUpToEditSpace)
+const notifySignUpToEditSpace = computed(() => {
+  return store.state.notifySignUpToEditSpace || store.state.currentUserIsInvitedButCannotEditCurrentSpace
+})
 const notifyCardsCreatedIsNearLimit = computed(() => store.state.notifyCardsCreatedIsNearLimit)
 const notifyCardsCreatedIsOverLimit = computed(() => store.state.notifyCardsCreatedIsOverLimit)
-const notifyKinopioUpdatesAreAvailable = computed(() => store.state.notifyKinopioUpdatesAreAvailable)
 const notifyMoveOrCopyToSpace = computed(() => store.state.notifyMoveOrCopyToSpace)
 const notifyMoveOrCopyToSpaceDetails = computed(() => store.state.notifyMoveOrCopyToSpaceDetails)
 const notifySpaceIsHidden = computed(() => store.state.notifySpaceIsHidden)
 const notifyCurrentSpaceIsNowRemoved = computed(() => store.state.notifyCurrentSpaceIsNowRemoved)
 const notifyThanksForDonating = computed(() => store.state.notifyThanksForDonating)
 const notifyThanksForUpgrading = computed(() => store.state.notifyThanksForUpgrading)
-const notifySpaceIsUnavailableOffline = computed(() => store.getters['currentSpace/isUnavailableOffline'])
-const notifyIsJoiningTeam = computed(() => store.state.notifyIsJoiningTeam)
-const notifySignUpToJoinTeam = computed(() => store.state.notifySignUpToJoinTeam)
+const notifySpaceIsUnavailableOffline = computed(() => store.state.currentSpaceIsUnavailableOffline)
+const notifyIsJoiningGroup = computed(() => store.state.notifyIsJoiningGroup)
+const notifySignUpToJoinGroup = computed(() => store.state.notifySignUpToJoinGroup)
+const notifyIsDuplicatingSpace = computed(() => store.state.notifyIsDuplicatingSpace)
 const notifificationClasses = (item) => {
   let classes = {
     'danger': item.type === 'danger',
@@ -175,6 +184,21 @@ const removePrevious = () => {
 }
 const removeById = (item) => {
   store.commit('removeNotificationById', item.id)
+}
+
+// new stuff
+
+const changelogIsUpdated = computed(() => {
+  if (!currentUserIsSignedIn.value) { return }
+  return store.state.changelogIsUpdated
+})
+const latestChangelogPost = computed(() => {
+  return store.state.changelog[0]
+})
+const changeSpaceToChangelog = () => {
+  const space = { id: consts.changelogSpaceId() }
+  store.dispatch('currentSpace/changeSpace', space)
+  store.commit('addNotification', { message: 'Changelog space opened', type: 'success' })
 }
 
 // toggle notifications
@@ -214,11 +238,12 @@ const restoreSpace = () => {
   store.dispatch('currentSpace/restoreRemovedSpace', space)
   store.commit('notifySpaceIsRemoved', false)
 }
-const deleteSpace = () => {
+const deleteSpace = async () => {
   const space = store.state.currentSpace
   store.dispatch('currentSpace/deleteSpace', space)
   store.commit('notifySpaceIsRemoved', false)
-  const firstSpace = cache.getAllSpaces()[0]
+  const cachedSpaces = await cache.getAllSpaces()
+  const firstSpace = cachedSpaces[0]
   store.dispatch('currentSpace/loadSpace', { space: firstSpace })
 }
 const resetNotifySpaceIsHidden = () => {
@@ -253,8 +278,12 @@ const triggerUpgradeUserIsVisible = () => {
 const refreshBrowser = () => {
   window.location.reload()
 }
-const duplicateSpace = () => {
-  store.dispatch('currentSpace/duplicateSpace')
+const updateChangelogAndRefreshBrowser = () => {
+  cache.updatePrevReadChangelogId(latestChangelogPost.value.id)
+  refreshBrowser()
+}
+const duplicateSpace = async () => {
+  await store.dispatch('currentSpace/duplicateSpace')
 }
 const changeSpace = (spaceId) => {
   const space = { id: spaceId }
@@ -265,6 +294,8 @@ const changeSpaceAndSelectItems = (spaceId, items) => {
   store.commit('multipleSelectedItemsToLoad', items)
   changeSpace(spaceId)
 }
+const dragToResizeIsVisible = computed(() => currentUserIsResizingCard.value || currentUserIsResizingBox.value)
+const snapToGridIsVisible = computed(() => shouldSnapToGrid.value && !dragToResizeIsVisible.value)
 
 // read-only jiggle
 
@@ -285,9 +316,8 @@ aside.notifications(@click.left="closeAllDialogs")
     p
       .row(v-if="item.badge")
         span.badge.info {{ item.badge }}
-      span.label-badge(v-if="item.label") {{item.label}}
-      template(v-if="item.team")
-        TeamLabel(:team="item.team")
+      template(v-if="item.group")
+        GroupLabel(:group="item.group")
       template(v-if="item.icon")
         img.icon(v-if="item.icon === 'open'" src="@/assets/open.svg" class="open")
         img.icon(v-else-if="item.icon === 'press-and-hold'" src="@/assets/press-and-hold.svg" class="press-and-hold")
@@ -299,7 +329,8 @@ aside.notifications(@click.left="closeAllDialogs")
         img.icon(v-else-if="item.icon === 'minimap'" src="@/assets/minimap.svg" class="minimap")
         img.icon(v-else-if="item.icon === 'offline'" src="@/assets/offline.svg" class="offline")
         img.icon(v-else-if="item.icon === 'mail'" src="@/assets/mail.svg" class="mail")
-        img.icon(v-else-if="item.icon === 'team'" src="@/assets/team.svg" class="team")
+        img.icon(v-else-if="item.icon === 'group'" src="@/assets/group.svg" class="group")
+        img.icon(v-else-if="item.icon === 'comment'" src="@/assets/comment.svg" class="comment")
       span {{item.message}}
     .row(v-if="item.isPersistentItem")
       button.small-button(@click="removeById(item)")
@@ -313,7 +344,7 @@ aside.notifications(@click.left="closeAllDialogs")
           img.refresh.icon(src="@/assets/refresh.svg")
           span Refresh
 
-  .persistent-item.info(v-if="currentUserIsResizingCard")
+  .persistent-item.info(v-if="dragToResizeIsVisible")
     img.icon.resize(src="@/assets/resize.svg")
     span Drag to Resize
   .persistent-item.info(v-if="currentUserIsTiltingCard")
@@ -322,11 +353,15 @@ aside.notifications(@click.left="closeAllDialogs")
 
   .persistent-item.info(v-if="currentUserIsPaintingLocked && isTouchDevice")
     img.icon(src="@/assets/brush.svg")
-    span Hold and drag to paint
+    span Drag to paint
 
   .persistent-item.info(v-if="currentUserIsPanningReady || currentUserIsPanning")
     img.icon(src="@/assets/hand.svg")
-    span Hold and drag to pan
+    span Drag to pan
+
+  .persistent-item.info(v-if="snapToGridIsVisible")
+    img.icon(src="@/assets/constrain-axis.svg")
+    span Snap to grid
 
   .persistent-item.success(v-if="notifyThanksForDonating")
     p Thank you for being a
@@ -408,20 +443,26 @@ aside.notifications(@click.left="closeAllDialogs")
         button(@click="removeNotifyConnectionError")
           img.icon.cancel(src="@/assets/add.svg")
 
-  .persistent-item(v-if="notifyKinopioUpdatesAreAvailable")
+  .persistent-item(v-if="changelogIsUpdated")
     p
       span.label-badge NEW
       span Kinopio updates are available
     .row
+      span.badge.secondary {{latestChangelogPost.title}}
+    .row
+      //- .button-wrap
+      //-   a(href="/changelog")
+      //-     button(@click.left.stop.prevent="changeSpaceToChangelog")
+      //-       span Changelog
       .button-wrap
-        button(@click.left="refreshBrowser")
+        button(@click.left="updateChangelogAndRefreshBrowser")
+          //- TODO update changelog and refresh browser
           img.refresh.icon(src="@/assets/refresh.svg")
           span Update
 
   .persistent-item.danger(v-if="notifyServerCouldNotSave")
     p
-      Loader(:visible="true" :isSmall="true")
-      span Error saving changes to server, retrying…
+      span Error saving changes to server
     .row
       .button-wrap
         button(@click.left="refreshBrowser")
@@ -438,8 +479,8 @@ aside.notifications(@click.left="closeAllDialogs")
 
   .persistent-item.info(v-if="currentSpaceIsTemplate" ref="templateElement" :class="{'notification-jiggle': state.readOnlyJiggle}")
     button.button-only(@click.left="duplicateSpace")
-      img.icon(src="@/assets/add.svg")
-      span Duplicate to Edit
+      img.icon.duplicate(src="@/assets/duplicate.svg")
+      span Duplicate Space
 
   .item.success(v-if="notifyMoveOrCopyToSpace" @animationend="resetNotifyMoveOrCopyToSpace")
     p {{notifyMoveOrCopyToSpaceDetails.message}}
@@ -455,16 +496,26 @@ aside.notifications(@click.left="closeAllDialogs")
     .row
       p Only spaces that you're a member of, and have visited recently, are available offline
 
-  //- team
-
-  .persistent-item(v-if="notifyIsJoiningTeam")
+  .persistent-item.info(v-if="notifyIsDuplicatingSpace")
     p
       Loader(:visible="true" :isSmall="true")
-      span Joining Team…
+      span Duplicating Space…
 
-  .persistent-item(v-if="notifySignUpToJoinTeam" ref="readOnlyElement" :class="{'notification-jiggle': state.readOnlyJiggle}")
+  //- group
+
+  .persistent-item(v-if="notifyIsJoiningGroup")
     p
-      button(@click.left.stop="triggerSignUpOrInIsVisible") Sign Up or In to Join Team
+      Loader(:visible="true" :isSmall="true")
+      span Joining Group…
+
+  .persistent-item(v-if="notifySignUpToJoinGroup" ref="readOnlyElement" :class="{'notification-jiggle': state.readOnlyJiggle}")
+    .row
+      p
+        img.icon.group(src="@/assets/group.svg")
+        span You've been invited to a group
+    .row
+      p
+        button(@click.left.stop="triggerSignUpOrInIsVisible") Sign Up or In to Join Group
 
 </template>
 

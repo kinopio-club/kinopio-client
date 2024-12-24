@@ -18,8 +18,8 @@ const fetchSpacePublicMeta = async (spaceId) => {
     console.warn('🚑 fetchSpacePublicMeta', error)
   }
 }
-const fetchTeamPublicMeta = async (teamId) => {
-  const url = `${consts.apiHost()}/team/${teamId}/public-meta`
+const fetchGroupPublicMeta = async (groupId) => {
+  const url = `${consts.apiHost()}/group/${groupId}/public-meta`
   try {
     const response = await fetch(url)
     if (response.status !== 200) {
@@ -28,44 +28,90 @@ const fetchTeamPublicMeta = async (teamId) => {
     const data = await response.json()
     return data
   } catch (error) {
-    console.warn('🚑 fetchTeamPublicMeta', error)
+    console.warn('🚑 fetchGroupPublicMeta', error)
   }
 }
+const spacePreviewImageFromId = (spaceId) => {
+  if (!spaceId) { return '' }
+  return `${consts.cdnHost}/${spaceId}/preview-image-${spaceId}.jpeg`
+}
+
+// update tags
+
+const updateTitle = (title) => {
+  document.title = title
+  document.querySelector('meta[property="og:title"]').content = title
+}
+const updateSpaceTitle = (space) => {
+  let title
+  if (space.name === 'Hello Kinopio') {
+    title = 'Kinopio'
+  } else if (space.name) {
+    title = `${space.name} – Kinopio`
+  } else {
+    title = 'Kinopio'
+  }
+  updateTitle(title)
+}
+const updateImage = (space) => {
+  const head = document.querySelector('head')
+
+  const imageUrl = space.previewImage || spacePreviewImageFromId(space.id) || logo
+  let ogImage = document.createElement(`meta`)
+  ogImage.setAttribute('property', 'og:image')
+  ogImage.setAttribute('content', imageUrl)
+  head.appendChild(ogImage)
+  // ogImage.setAttribute('property', 'og:image:secure_url')
+  // head.appendChild(ogImage)
+}
+const updateDescription = (description) => {
+  document.querySelector('meta[property="og:description"]').content = description
+  document.querySelector('meta[name="description"]').content = description
+}
+// const updateOembed = (space) => {
+// create tag     <link rel="alternate" type="application/json+oembed" href="" />
+//   document.querySelector('type[property="application/json+oembed"]').href = `${apiHost}/services/oembed/${space.id}`
+// }
 
 export default {
-  async space ({ spaceId, isSpaceInvite }) {
+  // called by routes
+  async spaceFromId ({ spaceId, isSpaceInvite }) {
     let path = window.document.location.pathname
     if (!spaceId) {
       const ids = utils.spaceAndCardIdFromPath(path)
       spaceId = ids?.spaceId
     }
     if (!spaceId) { return }
-    const meta = await fetchSpacePublicMeta(spaceId)
-    if (!meta) { return }
-    let name = `${meta.name} – Kinopio`
+    const space = await fetchSpacePublicMeta(spaceId)
+    if (!space) { return }
+    let title = `${space.name} – Kinopio`
     if (isSpaceInvite) {
-      name = `[Invite] ${name}`
+      title = `[Invite] ${title}`
     }
+    updateTitle(title)
     let description = defaultDescription
-    if (meta.privacy === 'private') {
+    if (space.privacy === 'private') {
       description = `[Private] ${description}`
     }
-    document.title = name
-    document.querySelector('meta[property="og:title"]').content = name
-    document.querySelector('meta[property="og:image"]').content = meta.previewImage || logo
-    document.querySelector('meta[property="og:description"]').content = description
-    document.querySelector('meta[name="description"]').content = description
+    updateDescription(description)
+    updateImage(space)
   },
-  update (space) {
+
+  // called when loading space
+  updateSpace (space) {
+    space = utils.clone(space)
     const isHelloSpace = space.name === 'Hello Kinopio'
+    const imageUrl = space.previewImage || spacePreviewImageFromId(space.id) || logo
+    updateSpaceTitle(space)
+    updateImage(space)
+    // description
     const origin = { x: 0, y: 0 }
     let cards = space.cards.map(card => {
       card.distanceFromOrigin = utils.distanceBetweenTwoPoints(card, origin)
       return card
     })
     cards = cards.filter(card => card.name)
-
-    let boxes = space.boxes.map(box => {
+    let boxes = space.boxes?.map(box => {
       box.distanceFromOrigin = utils.distanceBetweenTwoPoints(box, origin)
       return box
     })
@@ -77,12 +123,11 @@ export default {
     // description tags
     if (!isHelloSpace) {
       const truncatedDescription = utils.truncated(description, 150)
-      document.querySelector('meta[property="og:description"]').content = truncatedDescription
-      document.querySelector('meta[name="description"]').content = truncatedDescription
+      updateDescription(truncatedDescription)
     }
     // noscript tag
     document.querySelector('noscript').innerHTML = utils.truncated(description, 1000)
-    // json-ld
+    // json-ld for search robots
     let user = {}
     if (space.users) {
       user = space.users[0]
@@ -105,9 +150,10 @@ export default {
       name: `${space.name} – Kinopio`,
       description: defaultDescription,
       dateCreated: space.createdAt,
+      contentUrl: imageUrl,
       author: {
         '@type': 'Person',
-        name: user.name
+        name: user?.name
       },
       hasPart: {
         '@type': 'ItemList',
@@ -120,17 +166,16 @@ export default {
     scriptTag.text = jsonLD
     document.head.appendChild(scriptTag)
   },
-  async team ({ teamId, isTeamInvite }) {
-    const meta = await fetchTeamPublicMeta(teamId)
-    let name = `${meta.name} – Kinopio Team`
-    if (isTeamInvite) {
-      name = `[Invite] ${name}`
+
+  async groupInvite ({ groupId, isGroupInvite }) {
+    const meta = await fetchGroupPublicMeta(groupId)
+    let title = `${meta.name} – Kinopio Group`
+    if (isGroupInvite) {
+      title = `[Invite] ${title}`
     }
-    let description = 'Work together on shared whiteboards, brainstorms, and diagrams'
-    document.title = name
-    document.querySelector('meta[property="og:title"]').content = name
+    updateTitle(title)
     document.querySelector('meta[property="og:image"]').content = logo
-    document.querySelector('meta[property="og:description"]').content = description
-    document.querySelector('meta[name="description"]').content = description
+    let description = 'Work together on shared whiteboards, brainstorms, and diagrams'
+    updateDescription(description)
   }
 }

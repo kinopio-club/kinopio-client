@@ -4,11 +4,10 @@ import { useStore } from 'vuex'
 
 import cache from '@/cache.js'
 import SpaceDetailsInfo from '@/components/SpaceDetailsInfo.vue'
-import AddSpace from '@/components/dialogs/AddSpace.vue'
 import SpaceFilters from '@/components/dialogs/SpaceFilters.vue'
 import SpaceList from '@/components/SpaceList.vue'
+import AddSpaceButtons from '@/components/AddSpaceButtons.vue'
 import utils from '@/utils.js'
-import Loader from '@/components/Loader.vue'
 
 import debounce from 'lodash-es/debounce'
 import uniqBy from 'lodash-es/uniqBy'
@@ -46,13 +45,7 @@ const props = defineProps({
 watch(() => props.visible, (value, prevValue) => {
   store.commit('clearNotificationsWithPosition')
   if (value) {
-    updateLocalSpaces()
-    updateWithRemoteSpaces()
-    closeDialogs()
-    updateFavorites()
-    updateHeights()
-    store.commit('shouldExplicitlyHideFooter', true)
-    store.dispatch('currentSpace/createSpacePreviewImage')
+    init()
   } else {
     store.commit('shouldExplicitlyHideFooter', false)
   }
@@ -61,7 +54,6 @@ watch(() => props.visible, (value, prevValue) => {
 const state = reactive({
   spaces: [],
   favoriteSpaces: [],
-  addSpaceIsVisible: false,
   isLoadingRemoteSpaces: false,
   remoteSpaces: [],
   resultsSectionHeight: null,
@@ -69,6 +61,17 @@ const state = reactive({
   spaceFiltersIsVisible: false,
   parentDialog: 'spaceDetails'
 })
+
+const init = async () => {
+  closeDialogs()
+  updateLocalSpaces()
+  await updateWithRemoteSpaces()
+  await updateCachedSpaces()
+  updateFavorites()
+  updateHeights()
+  store.commit('shouldExplicitlyHideFooter', true)
+  store.dispatch('currentSpace/createSpacePreviewImage')
+}
 
 // current space
 
@@ -87,7 +90,6 @@ const backButtonIsVisible = computed(() => {
   return spaceId && spaceId !== store.state.currentSpace.id
 })
 const closeDialogs = () => {
-  state.addSpaceIsVisible = false
   state.spaceFiltersIsVisible = false
   store.commit('triggerCloseChildDialogs')
 }
@@ -125,33 +127,24 @@ const updateResultsSectionHeight = async () => {
 
 // filters
 
-const dialogSpaceFilterSortByDate = computed(() => store.state.currentUser.dialogSpaceFilterSortByDate)
-const dialogSpaceFilterByType = computed(() => store.state.currentUser.dialogSpaceFilterByType)
+const dialogSpaceFilterSortBy = computed(() => store.state.currentUser.dialogSpaceFilterSortBy)
 const dialogSpaceFilterByUser = computed(() => store.state.currentUser.dialogSpaceFilterByUser)
 const dialogSpaceFilterShowHidden = computed(() => store.state.currentUser.dialogSpaceFilterShowHidden)
-const dialogSpaceFilterByTeam = computed(() => store.state.currentUser.dialogSpaceFilterByTeam)
+const dialogSpaceFilterByGroup = computed(() => store.state.currentUser.dialogSpaceFilterByGroup)
 
 const spaceFiltersIsActive = computed(() => {
-  return Boolean(dialogSpaceFilterShowHidden.value || dialogSpaceFilterByType.value || utils.objectHasKeys(dialogSpaceFilterByUser.value) || dialogSpaceFilterSortByDateIsActive.value) || utils.objectHasKeys(dialogSpaceFilterByTeam.value)
+  return Boolean(dialogSpaceFilterShowHidden.value || utils.objectHasKeys(dialogSpaceFilterByUser.value) || dialogSpaceFilterSortByIsActive.value) || utils.objectHasKeys(dialogSpaceFilterByGroup.value)
 })
 const filteredSpaces = computed(() => {
   let spaces = state.spaces
   spaces = spaces.filter(space => space.id)
-  // filter by space type
-  if (dialogSpaceFilterByType.value === 'journals') {
-    spaces = spaces.filter(space => space.moonPhase)
-  } else if (dialogSpaceFilterByType.value === 'spaces') {
-    spaces = spaces.filter(space => !space.moonPhase)
-  }
-  // filter by hidden spaces
-  if (dialogSpaceFilterShowHidden.value) {
-    spaces = spaces.filter(space => space.isHidden)
-  } else {
+  // hide by hidden spaces unless filter active
+  if (!dialogSpaceFilterShowHidden.value) {
     spaces = spaces.filter(space => !space.isHidden)
   }
   // filter by user
-  if (utils.objectHasKeys(dialogSpaceFilterByTeam.value)) {
-    spaces = spaces.filter(space => space.teamId === dialogSpaceFilterByTeam.value.id)
+  if (utils.objectHasKeys(dialogSpaceFilterByGroup.value)) {
+    spaces = spaces.filter(space => space.groupId === dialogSpaceFilterByGroup.value.id)
   }
   // filter by user
   if (utils.objectHasKeys(dialogSpaceFilterByUser.value)) {
@@ -189,10 +182,16 @@ const toggleSpaceFiltersIsVisible = () => {
 
 // sort
 
-const dialogSpaceFilterSortByDateIsActive = computed(() => dialogSpaceFilterSortByDate.value === 'createdAt')
+const dialogSpaceFilterSortByIsActive = computed(() => {
+  return isSortByCreatedAt.value || isSortByAlphabetical.value
+})
 const isSortByCreatedAt = computed(() => {
-  const value = dialogSpaceFilterSortByDate.value
+  const value = dialogSpaceFilterSortBy.value
   return value === 'createdAt'
+})
+const isSortByAlphabetical = computed(() => {
+  const value = dialogSpaceFilterSortBy.value
+  return value === 'alphabetical'
 })
 const prependFavoriteSpaces = (spaces) => {
   let favoriteSpaces = []
@@ -240,9 +239,14 @@ const sortByUpdatedAt = (spaces) => {
   })
   return sortedSpaces
 }
+const sortByAlphabetical = (spaces) => {
+  return utils.sortItemsAlphabeticallyBy(spaces, 'name')
+}
 const sort = (spaces) => {
   if (isSortByCreatedAt.value) {
     spaces = sortByCreatedAt(spaces)
+  } else if (isSortByAlphabetical.value) {
+    spaces = sortByAlphabetical(spaces)
   } else {
     spaces = sortByUpdatedAt(spaces)
   }
@@ -253,21 +257,11 @@ const sort = (spaces) => {
 
 // add space
 
-const addSpace = () => {
+const addSpace = async () => {
   window.scrollTo(0, 0)
-  store.dispatch('currentSpace/addSpace')
+  await store.dispatch('currentSpace/addSpace')
   updateLocalSpaces()
   store.commit('triggerFocusSpaceDetailsName')
-}
-const addJournalSpace = () => {
-  window.scrollTo(0, 0)
-  store.dispatch('currentSpace/loadJournalSpace') // triggers updateLocalSpaces in addJournalSpace
-  store.commit('triggerFocusSpaceDetailsName')
-}
-const toggleAddSpaceIsVisible = () => {
-  const isVisible = state.addSpaceIsVisible
-  closeDialogs()
-  state.addSpaceIsVisible = !isVisible
 }
 
 // select space
@@ -282,11 +276,9 @@ const changeSpace = (space) => {
 
 const removeSpaceFromSpaces = (spaceId) => {
   state.spaces = state.spaces.filter(space => space.id !== spaceId)
-  if (!utils.arrayHasItems(state.remoteSpaces)) { return }
-  state.remoteSpaces = state.remoteSpaces.filter(space => space.id !== spaceId)
 }
 
-// list spaces
+// update space list
 
 const updateLocalSpaces = () => {
   if (!props.visible) { return }
@@ -294,68 +286,52 @@ const updateLocalSpaces = () => {
 }
 const debouncedUpdateLocalSpaces = debounce(async () => {
   await nextTick()
-  let cacheSpaces = cache.getAllSpaces().filter(space => {
-    return store.getters['currentUser/canEditSpace'](space)
-  })
-  let spaces = updateWithExistingRemoteSpaces(cacheSpaces)
-  spaces = utils.clone(spaces)
-  state.spaces = utils.AddCurrentUserIsCollaboratorToSpaces(spaces, store.state.currentUser)
+  let cacheSpaces = await cache.getAllSpaces()
+  state.spaces = utils.addCurrentUserIsCollaboratorToSpaces(cacheSpaces, store.state.currentUser)
 }, 350, { leading: true })
 
-const removeRemovedCachedSpaces = (remoteSpaces) => {
-  const remoteSpaceIds = remoteSpaces.map(space => space.id)
-  const spacesToRemove = state.spaces.filter(space => !remoteSpaceIds.includes(space.id))
-  spacesToRemove.forEach(spaceToRemove => {
-    cache.deleteSpace(spaceToRemove)
-  })
-}
-const updateWithExistingRemoteSpaces = (cacheSpaces) => {
-  if (!utils.arrayHasItems(state.remoteSpaces)) { return cacheSpaces }
-  let spaces = cacheSpaces
-  state.remoteSpaces.forEach(space => {
-    const spaceExists = cacheSpaces.find(userSpace => userSpace.id === space.id)
-    if (!spaceExists) {
-      spaces.push(space)
-    }
-  })
-  updateCachedSpaces()
-  return spaces
-}
 const updateWithRemoteSpaces = async () => {
   const currentUserIsSignedIn = store.getters['currentUser/isSignedIn']
   const isOffline = computed(() => !store.state.isOnline)
   if (!currentUserIsSignedIn || isOffline.value) { return }
   try {
     state.isLoadingRemoteSpaces = true
-    const [userSpaces, teamSpaces] = await Promise.all([
+    const [userSpaces, groupSpaces] = await Promise.all([
       store.dispatch('api/getUserSpaces'),
-      store.dispatch('api/getUserTeamSpaces')
+      store.dispatch('api/getUserGroupSpaces')
     ])
-    let spaces = userSpaces
-    if (teamSpaces) {
-      spaces = spaces.concat(teamSpaces)
+    let spaces = userSpaces || []
+    if (groupSpaces) {
+      spaces = spaces.concat(groupSpaces)
     }
     spaces = spaces.filter(space => Boolean(space))
     spaces = uniqBy(spaces, 'id')
-    state.remoteSpaces = spaces
+    state.spaces = spaces
     state.isLoadingRemoteSpaces = false
-    if (!state.remoteSpaces) { return }
-    removeRemovedCachedSpaces(state.remoteSpaces)
-    state.spaces = state.remoteSpaces
-    updateCachedSpaces()
   } catch (error) {
     console.error('🚒 updateWithRemoteSpaces', error)
   }
   state.isLoadingRemoteSpaces = false
 }
-const updateCachedSpaces = () => {
-  state.spaces.forEach(space => {
-    const cachedSpace = cache.space(space.id)
-    const isCachedSpace = utils.objectHasKeys(cachedSpace)
-    if (!isCachedSpace) {
-      cache.storeLocal(`space-${space.id}`, space)
+const updateCachedSpaces = async () => {
+  if (!state.spaces) { return }
+  const cacheSpaces = await cache.getAllSpaces()
+  const cacheSpaceIds = cacheSpaces.map(space => space.id)
+  for (let space of state.spaces) {
+    const isCacheSpace = cacheSpaceIds.includes(space.id)
+    if (isCacheSpace) {
+      const cacheSpace = await cache.space(space.id)
+      const isUpdated = dayjs(space.updatedAt).valueOf() > dayjs(cacheSpace.updatedAt).valueOf()
+      if (!isUpdated) { continue }
+      space.cards = cacheSpace.cards
+      space.boxes = cacheSpace.boxes
+      space.connections = cacheSpace.connections
+      space.connectionTypes = cacheSpace.connectionTypes
+      await cache.saveSpace(space)
+    } else {
+      await cache.saveSpace(space)
     }
-  })
+  }
 }
 const updateFavorites = async () => {
   if (!shouldUpdateFavorites) { return }
@@ -372,12 +348,7 @@ dialog.space-details.is-pinnable.wide(v-if="props.visible" :open="props.visible"
     .row.title-row
       div
         //- New Space
-        .button-wrap
-          button.success(@click.left.stop="toggleAddSpaceIsVisible" :class="{ active: state.addSpaceIsVisible }")
-            img.icon.add(src="@/assets/add.svg")
-            span New
-            Loader(:visible="isLoadingSpace")
-          AddSpace(:visible="state.addSpaceIsVisible" @closeDialogs="closeDialogs" @addSpace="addSpace" @addJournalSpace="addJournalSpace")
+        AddSpaceButtons(:parentIsInDialog="true" @closeDialogs="closeDialogs" @addSpace="addSpace")
       //- Filters
       .button-wrap
         // no filters
@@ -393,7 +364,7 @@ dialog.space-details.is-pinnable.wide(v-if="props.visible" :open="props.visible"
               .badge.info.filter-is-active
             button.small-button(@click.left.stop="clearAllFilters")
               img.icon.cancel(src="@/assets/add.svg")
-        SpaceFilters(:visible="state.spaceFiltersIsVisible" :spaces="filteredSpaces")
+        SpaceFilters(:visible="state.spaceFiltersIsVisible" :spaces="filteredSpaces" :isLoading="state.isLoadingRemoteSpaces")
 
   section.results-section(ref="resultsElement" :style="{'max-height': state.resultsSectionHeight + 'px'}")
     SpaceList(
@@ -406,7 +377,8 @@ dialog.space-details.is-pinnable.wide(v-if="props.visible" :open="props.visible"
       @addSpace="addSpace"
       :resultsSectionHeight="state.resultsSectionHeight"
       :parentDialog="state.parentDialog"
-      :showSpaceTeams="true"
+      :showSpaceGroups="true"
+      :showFilter="true"
     )
 </template>
 

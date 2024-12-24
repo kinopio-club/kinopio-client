@@ -4,7 +4,7 @@ import { useStore } from 'vuex'
 
 import ResultsFilter from '@/components/ResultsFilter.vue'
 import ConnectionTypeList from '@/components/ConnectionTypeList.vue'
-import ConnectionDecorators from '@/components/ConnectionDecorators.vue'
+import ConnectionActions from '@/components/subsections/ConnectionActions.vue'
 import ColorPicker from '@/components/dialogs/ColorPicker.vue'
 import utils from '@/utils.js'
 
@@ -117,13 +117,16 @@ const blur = () => {
   store.dispatch('history/add', { connectionTypes: [connectionType], useSnapshot: true })
   state.inputIsFocused = false
 }
+const closeAllDialogs = () => {
+  store.dispatch('closeAllDialogs')
+}
 
 // space
 
 const canEditSpace = computed(() => store.getters['currentUser/canEditSpace']())
 const spacePrivacyIsOpen = computed(() => store.state.currentSpace.privacy === 'open')
 const spacePrivacyIsClosed = computed(() => store.state.currentSpace.privacy === 'closed')
-const isInvitedButCannotEditSpace = computed(() => store.getters['currentUser/isInvitedButCannotEditSpace']())
+const isInvitedButCannotEditSpace = computed(() => store.state.currentUserIsInvitedButCannotEditCurrentSpace)
 const spaceCounterZoomDecimal = computed(() => store.getters.spaceCounterZoomDecimal)
 const pinchCounterZoomDecimal = computed(() => store.state.pinchCounterZoomDecimal)
 
@@ -225,6 +228,7 @@ const toggleShouldUseLastConnectionType = () => {
 
 // color
 
+const userColor = computed(() => store.state.currentUser.color)
 const typeColor = computed(() => currentConnectionType.value.color)
 const toggleColorPicker = () => {
   state.colorPickerIsVisible = !state.colorPickerIsVisible
@@ -277,15 +281,21 @@ const focusName = async () => {
 dialog.connection-details.narrow(v-if="visible" :open="visible" :style="styles" @click.left="closeColorPicker" ref="dialogElement")
   section.info-section(:style="{backgroundColor: typeColor}" ref="infoSectionElement")
     .dark-theme-background-layer(v-if="isThemeDarkAndTypeColorLight")
+    //- color, name
     .row
       .button-wrap
         button.change-color(:disabled="!canEditConnection" @click.left.stop="toggleColorPicker" :class="{active: state.colorPickerIsVisible}")
           .current-color(:style="{backgroundColor: typeColor}")
         ColorPicker(:currentColor="typeColor" :visible="state.colorPickerIsVisible" @selectedColor="updateTypeColor")
-      input.type-name(:disabled="!canEditConnection" placeholder="Connection Name" v-model="typeName" ref="typeNameElement" @focus="focus" @blur="blur" :class="{'is-dark': typeColorisDark}")
+      input.type-name(:disabled="!canEditConnection" placeholder="Connection Name" v-model="typeName" ref="typeNameElement" @focus="focus" @blur="blur" :class="{'is-dark': typeColorisDark}" @keyup.enter.prevent="closeAllDialogs")
     .row(v-if="canEditConnection")
-      //- Arrows or Label
-      ConnectionDecorators(:connections="[currentConnection]")
+      //- Remove
+      button.danger(@click.left="removeConnection")
+        img.icon(src="@/assets/remove.svg")
+
+    //- label etc.
+    ConnectionActions(:hideType="true" :visible="canEditConnection" :connections="[currentConnection]" :canEdit="canEditConnection" :backgroundColor="userColor")
+
     p.edit-message.badge.info(v-if="!canEditConnection")
       template(v-if="spacePrivacyIsOpen")
         img.icon.open(src="@/assets/open.svg")
@@ -299,10 +309,6 @@ dialog.connection-details.narrow(v-if="visible" :open="visible" :style="styles" 
       template(v-else-if="spacePrivacyIsClosed")
         img.icon(src="@/assets/unlock.svg")
         span Read Only
-    .row(v-if="canEditConnection")
-      //- Remove
-      button.danger(@click.left="removeConnection")
-        img.icon(src="@/assets/remove.svg")
   section.results-actions(v-if="canEditConnection" ref="resultsActionsElement")
     //- Use Last Type
     .row.title-row

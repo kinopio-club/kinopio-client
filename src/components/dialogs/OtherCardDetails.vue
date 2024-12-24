@@ -30,8 +30,8 @@ const url = computed(() => utils.urlFromSpaceAndCard({ spaceId: otherSpace.value
 const canEditOtherCard = computed(() => {
   const canEditCard = store.getters['currentUser/cardIsCreatedByCurrentUser'](otherCard.value)
   if (canEditCard) { return true }
-  const canEditSpace = store.getters['currentUser/canEditSpace'](otherSpace.value)
-  return canEditSpace
+  const isMemberOfOtherSpace = store.getters['currentUser/isSpaceMember'](otherSpace.value)
+  return isMemberOfOtherSpace
 })
 const isLoadingOtherItems = computed(() => store.state.isLoadingOtherItems)
 const otherSpace = computed(() => store.getters.otherSpaceById(otherCard.value.spaceId))
@@ -93,19 +93,19 @@ const showCardDetails = () => {
 // edit card
 
 const maxCardCharacterLimit = () => { return consts.defaultCharacterLimit }
-const updateName = (newName) => {
+const updateName = async (newName) => {
   const spaceId = otherCard.value.spaceId
   const card = { id: otherCard.value.id, name: newName }
   // update local
   store.commit('updateCardNameInOtherItems', card)
   store.commit('triggerUpdateOtherCard', card.id)
   updateOtherNameInCurrentSpace({ card, spaceId })
-  // update remote
-  store.dispatch('api/addToQueue', { name: 'updateCard', body: card, spaceId })
   // update input
   textareaStyles()
   updateErrorMaxCharacterLimit(newName)
   store.dispatch('currentCards/updateDimensions', { cards: [card] })
+  // update remote
+  await store.dispatch('api/addToQueue', { name: 'updateCard', body: card, spaceId })
 }
 const updateOtherNameInCurrentSpace = ({ card, spaceId }) => {
   const currentSpaceId = store.state.currentSpace.id

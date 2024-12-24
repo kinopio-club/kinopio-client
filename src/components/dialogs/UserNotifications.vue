@@ -10,6 +10,7 @@ import consts from '@/consts.js'
 import cache from '@/cache.js'
 import AddToExplore from '@/components/AddToExplore.vue'
 import OfflineBadge from '@/components/OfflineBadge.vue'
+import GroupLabel from '@/components/GroupLabel.vue'
 
 const store = useStore()
 
@@ -88,11 +89,11 @@ const showCardDetails = (notification) => {
 }
 const segmentTagColor = (segment) => {
   const spaceTag = store.getters['currentSpace/tagByName'](segment.name)
-  const cachedTag = cache.tagByName(segment.name)
+  const userTag = store.getters['currentUser/tagByName'](segment.name)
   if (spaceTag) {
     return spaceTag.color
-  } else if (cachedTag) {
-    return cachedTag.color
+  } else if (userTag) {
+    return userTag.color
   } else {
     return currentUser.value.color
   }
@@ -161,7 +162,7 @@ const changeSpace = (spaceId) => {
 const isAskToAddToExplore = (notification) => {
   return notification.type === 'askToAddToExplore'
 }
-const updateAddToExplore = (space) => {
+const updateAddToExplore = async (space) => {
   const isCurrentSpace = space.id === store.state.currentSpace.id
   state.filteredNotifications = state.filteredNotifications.map(notification => {
     if (!notification.space) {
@@ -173,7 +174,7 @@ const updateAddToExplore = (space) => {
     return notification
   })
   if (isCurrentSpace) {
-    store.dispatch('currentSpace/updateSpace', { showInExplore: space.showInExplore })
+    await store.dispatch('currentSpace/updateSpace', { showInExplore: space.showInExplore })
   } else {
     space = { id: space.id, showInExplore: space.showInExplore }
     store.dispatch('api/updateSpace', space)
@@ -207,6 +208,9 @@ dialog.narrow.user-notifications(v-if="props.visible" :open="props.visible" ref=
                 UserLabelInline(:user="notification.user")
               //- message
               span {{notification.message}}
+              //- group
+              template(v-if="notification.type === 'addSpaceToGroup'")
+                GroupLabel(:group="notification.group")
               //- space
               span.space-name-wrap(v-if="notification.spaceId" :data-space-id="notification.spaceId" @click.stop.prevent="changeSpace(notification.spaceId)" :class="{ active: isCurrentSpace(notification.spaceId) }")
                 img.preview-thumbnail-image(v-if="notification.space.previewThumbnailImage" :src="notification.space.previewThumbnailImage")
@@ -326,4 +330,8 @@ dialog.narrow.user-notifications(v-if="props.visible" :open="props.visible" ref=
     flex-shrink 0
     margin-right 3px
     vertical-align middle
+  .group-label
+    margin-left 4px
+    .group-badge
+      margin-right 0
 </style>

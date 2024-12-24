@@ -7,13 +7,11 @@
   "users": [],
   "collaborators": [],
   "spectators": [],
-  "background": "https://bk.kinopio.club/grid-small-boxes-2x.png",
+  "background": "https://bk.kinopio.club/squiggle-background-2x.png",
   "backgroundTint": "",
   "backgroundGradient": null,
   "backgroundIsGradient": false,
-  "moonPhase": "",
   "isTemplate": false,
-  "isFromTweet": false,
   "cards": [
     {
       "id": "2sSu3ifT5Rz1MsDfP3WE4",
@@ -728,7 +726,7 @@
       "x": 120,
       "y": 1396,
       "z": 2235,
-      "name": "Hi, my name is Pirijan, and I make Kinopio",
+      "name": "Hi, you can call me Piri, and I make Kinopio",
       "frameId": 0,
       "userId": "AzKMP4VR4hD_RIc-pC7wZ",
       "urlPreviewIsVisible": true,
@@ -747,7 +745,7 @@
       "x": 725,
       "y": 1230,
       "z": 2236,
-      "name": "`Share → Invite` to collaborate with your friends or team ",
+      "name": "`Share → Invite` to collaborate with your friends or group ",
       "frameId": null,
       "isRemoved": false,
       "nameUpdatedAt": "2023-07-15T23:15:36.071Z",
@@ -1165,7 +1163,9 @@
       "directionIsVisible": false,
       "createdAt": "2023-07-15T22:49:19.750Z",
       "updatedAt": "2023-07-17T03:15:19.328Z",
-      "path": "m334,870 q90,40 144,232"
+      "path": "m334,869 q90,40 37,167",
+      "labelRelativePositionX": 0.66,
+      "labelRelativePositionY": 0.05
     },
     {
       "startItemId": "eMCYdsjvHQ2Og2fPa9Bts",

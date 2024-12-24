@@ -8,6 +8,7 @@ import utils from '@/utils.js'
 import randomColor from 'randomcolor'
 import shader from 'shader'
 import { colord } from 'colord'
+import throttle from 'lodash-es/throttle'
 
 const store = useStore()
 
@@ -24,7 +25,8 @@ const props = defineProps({
   visible: Boolean,
   removeIsVisible: Boolean,
   shouldLightenColors: Boolean,
-  recentColors: Array
+  recentColors: Array,
+  luminosityIsDark: Boolean
 })
 watch(() => props.visible, (value, prevValue) => {
   if (value) {
@@ -71,8 +73,15 @@ const triggerUpdateHeaderAndFooterPosition = () => {
 
 // colors
 
-const colorIsCurrent = (color) => {
-  return color === props.currentColor
+const normalizeColor = (newColor) => {
+  if (utils.colorIsValid(newColor)) {
+    return newColor
+  } else if (utils.colorIsValid(`#${newColor}`)) {
+    return '#' + newColor
+  }
+}
+const colorIsCurrent = (newColor) => {
+  return newColor === props.currentColor
 }
 const removeColor = () => {
   emit('removeColor')
@@ -81,19 +90,16 @@ const color = computed({
   get () {
     return props.currentColor
   },
-  set (color) {
-    if (utils.colorIsValid(color)) {
-      updateColorFromInput(color)
-    } else if (utils.colorIsValid(`#${color}`)) {
-      updateColorFromInput('#' + color)
-    }
+  set (newColor) {
+    newColor = normalizeColor(newColor)
+    throttledUpdateColor(newColor)
   }
 })
-const select = (color, isFavorite) => {
-  const alpha = colord(color).alpha()
+const select = (newColor, isFavorite) => {
+  const alpha = colord(newColor).alpha()
   const opacity = alpha * 100
   state.opacity = Math.round(opacity)
-  emit('selectedColor', color)
+  color.value = newColor
 }
 const shuffleColors = () => {
   const luminosity = state.luminosity
@@ -104,10 +110,12 @@ const shuffleColors = () => {
   }
   state.colors.unshift(props.currentColor)
 }
-const updateColorFromInput = (color) => {
-  select(color)
-  state.colors.pop()
-  state.colors.unshift(color)
+const throttledUpdateColor = throttle((color) => {
+  updateColor(color)
+}, 400)
+
+const updateColor = (newColor) => {
+  emit('selectedColor', newColor)
 }
 
 // luminosity
@@ -118,6 +126,10 @@ const updateLuminosity = (value) => {
   shuffleColors()
 }
 const updateLuminosityFromTheme = () => {
+  if (props.luminosityIsDark) {
+    updateLuminosity('dark')
+    return
+  }
   const isThemeDark = store.state.currentUser.theme === 'dark'
   if (isThemeDark) {
     updateLuminosity('dark')
@@ -181,7 +193,7 @@ const isTransparent = computed(() => {
 const updateOpacity = (value) => {
   state.opacity = Math.round(value)
   const color = colord(props.currentColor).alpha(state.opacity / 100).toRgbString()
-  emit('selectedColor', color)
+  select(color)
 }
 const resetOpacity = () => {
   updateOpacity(100)
@@ -209,7 +221,7 @@ dialog.narrow.color-picker(v-if="visible" :open="visible" ref="dialogElement" @c
         input(v-model="color" @focus="resetPinchCounterZoomDecimal" @blur="triggerUpdateHeaderAndFooterPosition" @keyup.stop.backspace :class="{ 'is-dark': isDark }" @mouseup.stop)
           //- Remove
         button.small-button.remove-button(v-if="removeIsVisible" title="remove" @click="removeColor")
-          img.icon(src="@/assets/remove.svg")
+          img.icon.cancel(src="@/assets/add.svg")
   section
     //- Colors
     .recent-colors(v-if="recentColors")
@@ -283,8 +295,10 @@ dialog.narrow.color-picker(v-if="visible" :open="visible" ref="dialogElement" @c
     margin-bottom 5px
     margin-right 5px
     position relative
-  button + button
+  button.color + button.color
     margin 0
+    margin-bottom 5px
+    margin-right 5px
   .refresh
     margin 0
     height 11px
@@ -299,6 +313,7 @@ dialog.narrow.color-picker(v-if="visible" :open="visible" ref="dialogElement" @c
   input[type="color"]
     width 32px
     height 30px
+    border-color var(--primary-border)
     &::-moz-color-swatch
       display none
   .spectrum

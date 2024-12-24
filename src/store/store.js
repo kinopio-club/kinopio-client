@@ -13,8 +13,9 @@ import currentConnections from '@/store/currentConnections.js'
 import currentBoxes from '@/store/currentBoxes.js'
 import upload from '@/store/upload.js'
 import userNotifications from '@/store/userNotifications.js'
-import teams from '@/store/teams.js'
+import groups from '@/store/groups.js'
 import themes from '@/store/themes.js'
+import analytics from '@/store/analytics.js'
 // store plugins
 import websocket from '@/store/plugins/websocket.js'
 
@@ -23,6 +24,7 @@ import { nextTick } from 'vue'
 import { nanoid } from 'nanoid'
 import uniqBy from 'lodash-es/uniqBy'
 import last from 'lodash-es/last'
+import dayjs from 'dayjs'
 
 const store = createStore({
   strict: consts.isDevelopment(),
@@ -36,6 +38,7 @@ const store = createStore({
     isBeta: false,
     shouldHideConnectionOutline: false,
     changelogIsUpdated: false,
+    changelog: [],
     stripeIsLoaded: false,
     shouldHideFooter: false,
     shouldExplicitlyHideFooter: false,
@@ -61,7 +64,9 @@ const store = createStore({
     prevSpaceIdInSession: '',
     prevSpaceIdInSessionPagePosition: {},
     outsideSpaceBackgroundColor: '',
-    teamsIsVisible: false,
+    groupsIsVisible: false,
+    dateImageUrl: null,
+    currentSpaceIsUnavailableOffline: false,
 
     // zoom and scroll
     spaceZoomPercent: 100,
@@ -99,12 +104,12 @@ const store = createStore({
     currentUserIsPanning: false,
     currentUserToolbar: 'card', // card, box
     currentUserIsDraggingConnectionIdLabel: '',
-    clipboardDataPolyfill: {}, // for firefox pasting
+    clipboardData: {}, // for kinopio data pasting
 
     // box-selecting
     currentUserIsBoxSelecting: false,
     currentUserBoxSelectStart: {},
-    currentUserBoxSelectEnd: {},
+    currentUserBoxSelectMove: {},
     remoteUserBoxSelectStyles: [],
     remotePreviousUserBoxSelectStyles: [],
 
@@ -134,8 +139,6 @@ const store = createStore({
     remoteCardDetailsVisible: [],
     preventCardDetailsOpeningAnimation: true,
     multipleCardsSelectedIds: [],
-    newTweetCards: [],
-    prevNewTweetCards: [],
     iframeIsVisibleForCardId: '',
     // resizing card
     currentUserIsResizingCard: false,
@@ -156,6 +159,9 @@ const store = createStore({
     userDetailsIsVisible: false,
     userDetailsPosition: {}, // x, y, shouldIgnoreZoom
     userDetailsUser: {},
+
+    // draggingItems
+    shouldSnapToGrid: false,
 
     // multiple selection
     multipleSelectedActionsIsVisible: false,
@@ -196,6 +202,7 @@ const store = createStore({
     currentSelectedTag: {},
     remoteTags: [],
     remoteTagsIsFetched: false,
+    tags: [],
 
     // other items (links)
     otherCardDetailsIsVisible: false,
@@ -213,20 +220,19 @@ const store = createStore({
     isJoiningSpace: false, // broadcast
     isLoadingOtherItems: false,
     spaceUrlToLoad: '',
-    teamToJoinOnLoad: null, // { teamId, collaboratorKey }
+    groupToJoinOnLoad: null, // { groupId, collaboratorKey }
     spaceReadOnlyKey: {}, //  { spaceId, key }
     spaceCollaboratorKeys: [],
     remotePendingUploads: [],
     isLoadingFavorites: false,
     loadSpaceShowDetailsForCardId: '',
-    loadJournalSpace: false,
-    loadJournalSpaceTomorrow: false,
     loadNewSpace: false,
     urlPreviewLoadingForCardIds: [],
     loadInboxSpace: false,
     loadBlogSpace: false,
     shouldResetDimensionsOnLoad: false,
     shouldShowExploreOnLoad: false,
+    isLoadingGroups: false,
 
     // notifications
     notifications: [],
@@ -237,23 +243,25 @@ const store = createStore({
     notifySpaceIsRemoved: false,
     notifyCurrentSpaceIsNowRemoved: false,
     notifySignUpToEditSpace: false,
-    notifySignUpToJoinTeam: false,
+    notifySignUpToJoinGroup: false,
     notifyCardsCreatedIsNearLimit: false,
     notifyCardsCreatedIsOverLimit: false,
-    notifyKinopioUpdatesAreAvailable: false,
     notifyMoveOrCopyToSpace: false,
     notifyMoveOrCopyToSpaceDetails: {},
     hasNotifiedPressAndHoldToDrag: false,
     notifySpaceIsHidden: false,
     notifyThanksForDonating: false,
     notifyThanksForUpgrading: false,
-    notifyIsJoiningTeam: false,
+    shouldNotifyIsJoiningGroup: false,
+    notifyIsJoiningGroup: false,
+    notifyIsDuplicatingSpace: false,
 
     // notifications with position
     notificationsWithPosition: [],
 
     // filters
     filteredConnectionTypeIds: [],
+    filteredBoxIds: [],
     filteredFrameIds: [],
     filteredTagNames: [],
     spaceListFilterInfo: {},
@@ -261,13 +269,16 @@ const store = createStore({
     // session data
     otherUsers: [], // { id, name color }
     otherItems: { spaces: [], cards: [] },
-    otherTags: [],
+    sendingQueue: [],
+    currentUserIsInvitedButCannotEditCurrentSpace: false,
 
     // codeblocks
     codeLanguagePickerIsVisible: false,
     codeLanguagePickerPosition: {}, // x, y
-    codeLanguagePickerCardId: ''
+    codeLanguagePickerCardId: '',
 
+    // snap guide lines
+    snapGuideLinesOrigin: {}
   },
   mutations: {
     resetPageSizes: (state) => {
@@ -360,7 +371,8 @@ const store = createStore({
       state.offlineIsVisible = false
       state.spaceUserListIsVisible = false
       state.importArenaChannelIsVisible = false
-      state.teamsIsVisible = false
+      state.groupsIsVisible = false
+      state.shouldSnapToGrid = false
     },
     isOnline: (state, value) => {
       utils.typeCheck({ value, type: 'boolean' })
@@ -373,14 +385,6 @@ const store = createStore({
     isBeta: (state, value) => {
       utils.typeCheck({ value, type: 'boolean' })
       state.isBeta = value
-    },
-    loadJournalSpace: (state, value) => {
-      utils.typeCheck({ value, type: 'boolean' })
-      state.loadJournalSpace = value
-    },
-    loadJournalSpaceTomorrow: (state, value) => {
-      utils.typeCheck({ value, type: 'boolean' })
-      state.loadJournalSpaceTomorrow = value
     },
     loadNewSpace: (state, value) => {
       utils.typeCheck({ value, type: 'boolean' })
@@ -402,6 +406,10 @@ const store = createStore({
       utils.typeCheck({ value, type: 'boolean' })
       state.shouldShowExploreOnLoad = value
     },
+    isLoadingGroups: (state, value) => {
+      utils.typeCheck({ value, type: 'boolean' })
+      state.isLoadingGroups = value
+    },
     addUrlPreviewLoadingForCardIds: (state, cardId) => {
       utils.typeCheck({ value: cardId, type: 'string' })
       state.urlPreviewLoadingForCardIds.push(cardId)
@@ -419,6 +427,10 @@ const store = createStore({
     changelogIsUpdated: (state, value) => {
       utils.typeCheck({ value, type: 'boolean' })
       state.changelogIsUpdated = value
+    },
+    changelog: (state, value) => {
+      utils.typeCheck({ value, type: 'array' })
+      state.changelog = value
     },
     stripeIsLoaded: (state, value) => {
       utils.typeCheck({ value, type: 'boolean' })
@@ -535,9 +547,17 @@ const store = createStore({
       utils.typeCheck({ value, type: 'string' })
       state.outsideSpaceBackgroundColor = value
     },
-    teamsIsVisible: (state, value) => {
+    groupsIsVisible: (state, value) => {
       utils.typeCheck({ value, type: 'boolean' })
-      state.teamsIsVisible = value
+      state.groupsIsVisible = value
+    },
+    dateImageUrl: (state, value) => {
+      utils.typeCheck({ value, type: 'string' })
+      state.dateImageUrl = value
+    },
+    currentSpaceIsUnavailableOffline: (state, value) => {
+      utils.typeCheck({ value, type: 'boolean' })
+      state.currentSpaceIsUnavailableOffline = value
     },
     searchIsVisible: (state, value) => {
       utils.typeCheck({ value, type: 'boolean' })
@@ -586,7 +606,7 @@ const store = createStore({
     triggerKeyboardShortcutsIsVisible: () => {},
     triggerReadOnlyJiggle: () => {},
     triggerSelectTemplateCategory: () => {},
-    triggerUpdateMagicPaintPositionOffset: () => {},
+    triggerUpdateMainCanvasPositionOffset: () => {},
     triggerPaintFramePosition: (state, event) => {},
     triggerAddRemotePaintingCircle: () => {},
     triggerUpdateRemoteUserCursor: () => {},
@@ -637,7 +657,6 @@ const store = createStore({
     triggerUpdateOtherCard: (state, cardId) => {},
     triggerUpdateCardDetailsCardName: (state, options) => {},
     triggerCloseChildDialogs: () => {},
-    triggerAddSpaceIsVisible: () => {},
     triggerOfflineIsVisible: () => {},
     triggerAppsAndExtensionsIsVisible: () => {},
     triggerUpdateWindowTitle: () => {},
@@ -648,6 +667,8 @@ const store = createStore({
     triggerUpdatePathWhileDragging: (state, connections) => {},
     triggerUpdateCardDimensionsAndPaths: (state, cardId) => {},
     triggerUpdateItemCurrentConnections: (state, itemId) => {},
+    triggerCloseGroupDetailsDialog: () => {},
+    triggerPanningStart: () => {},
 
     // Used by extensions only
 
@@ -810,9 +831,9 @@ const store = createStore({
       utils.typeCheck({ value: object, type: 'object' })
       state.currentUserBoxSelectStart = object
     },
-    currentUserBoxSelectEnd: (state, object) => {
+    currentUserBoxSelectMove: (state, object) => {
       utils.typeCheck({ value: object, type: 'object' })
-      state.currentUserBoxSelectEnd = object
+      state.currentUserBoxSelectMove = object
     },
     updateRemoteUserBoxSelectStyles: (state, object) => {
       utils.typeCheck({ value: object, type: 'object' })
@@ -931,9 +952,9 @@ const store = createStore({
       utils.typeCheck({ value, type: 'string' })
       state.currentUserIsDraggingConnectionIdLabel = value
     },
-    clipboardDataPolyfill: (state, data) => {
+    clipboardData: (state, data) => {
       utils.typeCheck({ value: data, type: 'object' })
-      state.clipboardDataPolyfill = data
+      state.clipboardData = data
     },
 
     // Dragging Cards
@@ -1009,6 +1030,13 @@ const store = createStore({
       state.preventDraggedBoxFromShowingDetails = value
     },
 
+    // Dragging Items
+
+    shouldSnapToGrid: (state, value) => {
+      utils.typeCheck({ value, type: 'boolean' })
+      state.shouldSnapToGrid = value
+    },
+
     // User Details
 
     userDetailsIsVisible: (state, value) => {
@@ -1053,6 +1081,10 @@ const store = createStore({
     remoteTagsIsFetched: (state, value) => {
       utils.typeCheck({ value, type: 'boolean' })
       state.remoteTagsIsFetched = value
+    },
+    tags: (state, tags) => {
+      utils.typeCheck({ value: tags, type: 'array' })
+      state.tags = tags
     },
 
     // Link Details
@@ -1144,14 +1176,6 @@ const store = createStore({
     clearDraggingItems: (state) => {
       state.currentDraggingCardId = ''
       state.currentDraggingBoxId = ''
-    },
-    newTweetCards: (state, cards) => {
-      utils.typeCheck({ value: cards, type: 'array' })
-      state.newTweetCards = cards
-    },
-    clearNewTweetCards: (state) => {
-      state.prevNewTweetCards = state.newTweetCards
-      state.newTweetCards = []
     },
     multipleSelectedItemsToLoad: (state, items) => {
       utils.typeCheck({ value: items, type: 'object' })
@@ -1290,9 +1314,9 @@ const store = createStore({
 
     // multiple boxes
 
-    multipleBoxesSelectedIds: (state, cardIds) => {
-      utils.typeCheck({ value: cardIds, type: 'array' })
-      state.multipleBoxesSelectedIds = cardIds
+    multipleBoxesSelectedIds: (state, boxIds) => {
+      utils.typeCheck({ value: boxIds, type: 'array' })
+      state.multipleBoxesSelectedIds = boxIds
     },
     addToMultipleBoxesSelected: (state, boxId) => {
       utils.typeCheck({ value: boxId, type: 'string' })
@@ -1410,9 +1434,9 @@ const store = createStore({
       utils.typeCheck({ value, type: 'object' })
       state.spaceReadOnlyKey = value
     },
-    teamToJoinOnLoad: (state, value) => {
+    groupToJoinOnLoad: (state, value) => {
       utils.typeCheck({ value, type: 'object' })
-      state.teamToJoinOnLoad = value
+      state.groupToJoinOnLoad = value
     },
 
     // Notifications
@@ -1438,7 +1462,7 @@ const store = createStore({
       state.notifyConnectionError = false
       state.notifyServerCouldNotSave = false
       state.notifySignUpToEditSpace = false
-      state.notifySignUpToJoinTeam = false
+      state.notifySignUpToJoinGroup = false
       state.notifyCardsCreatedIsNearLimit = false
       state.notifyCardsCreatedIsOverLimit = false
       state.notifyMoveOrCopyToSpace = false
@@ -1494,9 +1518,9 @@ const store = createStore({
       utils.typeCheck({ value, type: 'boolean' })
       state.notifySignUpToEditSpace = value
     },
-    notifySignUpToJoinTeam: (state, value) => {
+    notifySignUpToJoinGroup: (state, value) => {
       utils.typeCheck({ value, type: 'boolean' })
-      state.notifySignUpToJoinTeam = value
+      state.notifySignUpToJoinGroup = value
     },
     notifyCardsCreatedIsNearLimit: (state, value) => {
       utils.typeCheck({ value, type: 'boolean' })
@@ -1508,10 +1532,6 @@ const store = createStore({
       if (value === true) {
         state.notifyCardsCreatedIsNearLimit = false
       }
-    },
-    notifyKinopioUpdatesAreAvailable: (state, value) => {
-      utils.typeCheck({ value, type: 'boolean' })
-      state.notifyKinopioUpdatesAreAvailable = value
     },
     notifyMoveOrCopyToSpace: (state, value) => {
       utils.typeCheck({ value, type: 'boolean' })
@@ -1537,9 +1557,20 @@ const store = createStore({
       utils.typeCheck({ value, type: 'boolean' })
       state.notifyThanksForUpgrading = value
     },
-    notifyIsJoiningTeam: (state, value) => {
+    shouldNotifyIsJoiningGroup: (state, value) => {
       utils.typeCheck({ value, type: 'boolean' })
-      state.notifyIsJoiningTeam = value
+      state.shouldNotifyIsJoiningGroup = value
+    },
+    notifyIsJoiningGroup: (state, value) => {
+      utils.typeCheck({ value, type: 'boolean' })
+      state.notifyIsJoiningGroup = value
+      if (value) {
+        state.shouldNotifyIsJoiningGroup = false
+      }
+    },
+    notifyIsDuplicatingSpace: (state, value) => {
+      utils.typeCheck({ value, type: 'boolean' })
+      state.notifyIsDuplicatingSpace = value
     },
 
     // Notifications with Position
@@ -1565,6 +1596,7 @@ const store = createStore({
       state.filteredConnectionTypeIds = []
       state.filteredFrameIds = []
       state.filteredTagNames = []
+      state.filteredBoxIds = []
     },
     addToFilteredConnectionTypeId: (state, id) => {
       utils.typeCheck({ value: id, type: 'string' })
@@ -1594,21 +1626,21 @@ const store = createStore({
       utils.typeCheck({ value, type: 'object' })
       state.spaceListFilterInfo = value
     },
+    addToFilteredBoxId: (state, id) => {
+      utils.typeCheck({ value: id, type: 'string' })
+      state.filteredBoxIds.push(id)
+    },
+    removeFromFilteredBoxId: (state, id) => {
+      utils.typeCheck({ value: id, type: 'string' })
+      state.filteredBoxIds = state.filteredBoxIds.filter(typeId => typeId !== id)
+    },
 
     // Session Data
 
     updateOtherUsers: (state, updatedUser) => {
       if (!updatedUser) { return }
       utils.typeCheck({ value: updatedUser, type: 'object' })
-      let users = utils.clone(state.otherUsers)
-      users = users.filter(Boolean)
-      users = users.filter(user => {
-        if (user.id !== updatedUser.id) {
-          return user
-        }
-      })
-      users.push(updatedUser)
-      state.otherUsers = users
+      state.otherUsers[updatedUser.id] = updatedUser
     },
     updateOtherItems: (state, { cards, spaces }) => {
       utils.typeCheck({ value: cards, type: 'array' })
@@ -1632,9 +1664,20 @@ const store = createStore({
         card.name = name
       }
     },
-    otherTags: (state, remoteTags) => {
-      remoteTags = uniqBy(remoteTags, 'name')
-      state.otherTags = remoteTags
+    currentUserIsInvitedButCannotEditCurrentSpace: (state, value) => {
+      state.currentUserIsInvitedButCannotEditCurrentSpace = value
+    },
+
+    // Sync Session Data
+
+    sendingQueue: (state, value) => {
+      utils.typeCheck({ value, type: 'array' })
+      state.sendingQueue = value
+      // cache.saveSendingQueue(value)
+    },
+    clearSendingQueue: (state) => {
+      state.sendingQueue = []
+      // cache.clearSendingQueue()
     },
 
     // Code Blocks
@@ -1650,11 +1693,31 @@ const store = createStore({
     codeLanguagePickerCardId: (state, cardId) => {
       utils.typeCheck({ value: cardId, type: 'string' })
       state.codeLanguagePickerCardId = cardId
-    }
+    },
 
+    // Snap Guide Lines
+
+    snapGuideLinesOrigin: (state, position) => {
+      utils.typeCheck({ value: position, type: 'object' })
+      state.snapGuideLinesOrigin = position
+    }
   },
 
   actions: {
+    updateTags: async (context) => {
+      const tags = await cache.allTags()
+      context.commit('tags', tags)
+    },
+    // moveFailedSendingQueueOperationBackIntoQueue: async (context, operation) => {
+    //   // save to queue
+    //   let queue = await cache.queue()
+    //   queue.unshift(operation)
+    //   cache.saveQueue(queue)
+    //   // remove from sending queue
+    //   let sendingQueue = context.state.sendingQueue
+    //   sendingQueue = sendingQueue.filter(queueItem => queueItem.body.operationId !== operation.operationId)
+    //   context.commit('sendingQueue', sendingQueue)
+    // },
     prevSpaceIdInSession: (context, id) => {
       utils.typeCheck({ value: id, type: 'string' })
       const position = {
@@ -1677,6 +1740,13 @@ const store = createStore({
         // context.commit('addNotification', { icon: 'offline', message: 'Offline mode', type: 'info' })
       }
       context.commit('isOnline', isOnline)
+    },
+    updateCurrentSpaceIsUnavailableOffline: async (context, spaceId) => {
+      const isOffline = !context.state.isOnline
+      const isNotCached = await context.dispatch('currentSpace/spaceIsNotCached', spaceId)
+      const currentSpaceIsRemote = context.getters['currentSpace/isRemote']
+      const value = isOffline && isNotCached && currentSpaceIsRemote
+      context.commit('currentSpaceIsUnavailableOffline', value)
     },
     updateSpaceAndCardUrlToLoad: (context, path) => {
       const matches = utils.spaceAndCardIdFromPath(path)
@@ -1731,8 +1801,8 @@ const store = createStore({
     closeAllDialogs: (context, origin) => {
       origin = origin || 'Store.closeAllDialogs'
       context.commit('closeAllDialogs', origin)
-      const space = context.rootState.currentSpace
-      const user = context.rootState.currentUser
+      const space = context.state.currentSpace
+      const user = context.state.currentUser
       context.commit('broadcast/updateUser', { user: utils.userMeta(user, space), type: 'updateUserPresence' })
       context.commit('broadcast/updateStore', { updates: { userId: user.id }, type: 'clearRemoteCardDetailsVisible' })
       context.commit('broadcast/updateStore', { updates: { userId: user.id }, type: 'clearRemoteConnectionDetailsVisible' })
@@ -1753,7 +1823,7 @@ const store = createStore({
       if (context.state.multipleCardsSelectedIds.includes(cardId)) { return }
       context.commit('addToMultipleCardsSelected', cardId)
       const updates = {
-        userId: context.rootState.currentUser.id,
+        userId: context.state.currentUser.id,
         cardId
       }
       context.commit('broadcast/updateStore', { updates, type: 'addToRemoteCardsSelected' })
@@ -1763,7 +1833,7 @@ const store = createStore({
       if (!context.state.multipleCardsSelectedIds.includes(cardId)) { return }
       context.commit('removeFromMultipleCardsSelected', cardId)
       const updates = {
-        userId: context.rootState.currentUser.id,
+        userId: context.state.currentUser.id,
         cardId
       }
       context.commit('broadcast/updateStore', { updates, type: 'removeFromRemoteCardsSelected' })
@@ -1779,7 +1849,7 @@ const store = createStore({
       cardIds = [...combinedSet]
       context.commit('multipleCardsSelectedIds', cardIds)
       const updates = {
-        userId: context.rootState.currentUser.id,
+        userId: context.state.currentUser.id,
         cardIds
       }
       context.commit('broadcast/updateStore', { updates, type: 'updateRemoteCardsSelected' })
@@ -1788,7 +1858,7 @@ const store = createStore({
       utils.typeCheck({ value: cardIds, type: 'array' })
       context.commit('multipleCardsSelectedIds', cardIds)
       const updates = {
-        userId: context.rootState.currentUser.id,
+        userId: context.state.currentUser.id,
         cardIds
       }
       context.commit('broadcast/updateStore', { updates, type: 'updateRemoteCardsSelected' })
@@ -1797,7 +1867,7 @@ const store = createStore({
       utils.typeCheck({ value: boxIds, type: 'array' })
       context.commit('multipleBoxesSelectedIds', boxIds)
       const updates = {
-        userId: context.rootState.currentUser.id,
+        userId: context.state.currentUser.id,
         boxIds
       }
       context.commit('broadcast/updateStore', { updates, type: 'updateRemoteBoxesSelected' })
@@ -1806,8 +1876,8 @@ const store = createStore({
       if (context.state.multipleCardsSelectedIds.length || context.state.multipleConnectionsSelectedIds.length || context.state.multipleBoxesSelectedIds.length) {
         context.commit('clearMultipleSelected')
       }
-      const space = context.rootState.currentSpace
-      const user = context.rootState.currentUser
+      const space = context.state.currentSpace
+      const user = context.state.currentUser
       context.commit('broadcast/updateStore', { user: utils.userMeta(user, space), type: 'clearRemoteMultipleSelected' })
     },
     toggleMultipleConnectionsSelected: (context, connectionId) => {
@@ -1825,7 +1895,7 @@ const store = createStore({
       if (context.state.multipleConnectionsSelectedIds.includes(connectionId)) { return }
       context.commit('addToMultipleConnectionsSelected', connectionId)
       const updates = {
-        userId: context.rootState.currentUser.id,
+        userId: context.state.currentUser.id,
         connectionId
       }
       context.commit('broadcast/updateStore', { updates, type: 'addToRemoteConnectionsSelected' })
@@ -1835,7 +1905,7 @@ const store = createStore({
       if (!context.state.multipleConnectionsSelectedIds.includes(connectionId)) { return }
       context.commit('removeFromMultipleConnectionsSelected', connectionId)
       const updates = {
-        userId: context.rootState.currentUser.id,
+        userId: context.state.currentUser.id,
         connectionId
       }
       context.commit('broadcast/updateStore', { updates, type: 'removeFromRemoteConnectionsSelected' })
@@ -1844,7 +1914,7 @@ const store = createStore({
       utils.typeCheck({ value: connectionIds, type: 'array' })
       context.commit('multipleConnectionsSelectedIds', connectionIds)
       const updates = {
-        userId: context.rootState.currentUser.id,
+        userId: context.state.currentUser.id,
         connectionIds
       }
       context.commit('broadcast/updateStore', { updates, type: 'updateRemoteConnectionsSelected' })
@@ -1860,7 +1930,7 @@ const store = createStore({
       connectionIds = [...combinedSet]
       context.commit('multipleConnectionsSelectedIds', connectionIds)
       const updates = {
-        userId: context.rootState.currentUser.id,
+        userId: context.state.currentUser.id,
         connectionIds
       }
       context.commit('broadcast/updateStore', { updates, type: 'updateRemoteConnectionsSelected' })
@@ -1868,7 +1938,7 @@ const store = createStore({
     connectionDetailsIsVisibleForConnectionId: (context, connectionId) => {
       context.commit('connectionDetailsIsVisibleForConnectionId', connectionId)
       const updates = {
-        userId: context.rootState.currentUser.id,
+        userId: context.state.currentUser.id,
         connectionId
       }
       context.commit('broadcast/updateStore', { updates, type: 'addToRemoteConnectionDetailsVisible' })
@@ -1878,7 +1948,7 @@ const store = createStore({
       if (context.state.multipleBoxesSelectedIds.includes(boxId)) { return }
       context.commit('addToMultipleBoxesSelected', boxId)
       const updates = {
-        userId: context.rootState.currentUser.id,
+        userId: context.state.currentUser.id,
         boxId
       }
       context.commit('broadcast/updateStore', { updates, type: 'addToRemoteBoxesSelected' })
@@ -1894,7 +1964,7 @@ const store = createStore({
       boxIds = [...combinedSet]
       context.commit('multipleBoxesSelectedIds', boxIds)
       const updates = {
-        userId: context.rootState.currentUser.id,
+        userId: context.state.currentUser.id,
         boxIds
       }
       context.commit('broadcast/updateStore', { updates, type: 'updateRemoteBoxesSelected' })
@@ -1904,7 +1974,7 @@ const store = createStore({
       if (!context.state.multipleBoxesSelectedIds.includes(boxId)) { return }
       context.commit('removeFromMultipleBoxesSelected', boxId)
       const updates = {
-        userId: context.rootState.currentUser.id,
+        userId: context.state.currentUser.id,
         boxId
       }
       context.commit('broadcast/updateStore', { updates, type: 'removeFromRemoteBoxesSelected' })
@@ -1914,6 +1984,26 @@ const store = createStore({
       ping.color = store.state.currentUser.color
       context.commit('triggerSonarPing', ping)
       context.commit('broadcast/updateStore', { updates: ping, type: 'triggerSonarPing' })
+    },
+    currentUserIsPanning: (context, value) => {
+      const prevValue = context.state.currentUserIsPanning
+      if (!prevValue && value) {
+        context.commit('triggerPanningStart')
+      }
+      context.commit('currentUserIsPanning', value)
+    },
+
+    // current space
+
+    updateCurrentUserIsInvitedButCannotEditCurrentSpace: async (context, space) => {
+      space = space || context.state.currentSpace
+      const currentUserIsSignedIn = context.getters['currentUser/isSignedIn']
+      const invitedSpaces = await cache.invitedSpaces()
+      const isInvitedToSpace = Boolean(invitedSpaces.find(invitedSpace => invitedSpace.id === space.id))
+      const isReadOnlyInvitedToSpace = context.getters['currentUser/isReadOnlyInvitedToSpace'](space)
+      const inviteRequiresSignIn = !currentUserIsSignedIn && isInvitedToSpace
+      const value = isReadOnlyInvitedToSpace || inviteRequiresSignIn
+      context.commit('currentUserIsInvitedButCannotEditCurrentSpace', value)
     },
 
     // Pinned Dialogs
@@ -1974,6 +2064,7 @@ const store = createStore({
       return !state.isAddPage
     },
     shouldScrollAtEdges: (state, getters) => (event) => {
+      if (window.visualViewport.scale > 1) { return }
       let isPainting
       if (event.touches) {
         isPainting = state.currentUserIsPaintingLocked
@@ -1986,9 +2077,7 @@ const store = createStore({
       return isPainting || isDrawingConnection || isDraggingCard || isDraggingBox
     },
     otherUserById: (state, getters) => (userId) => {
-      const otherUsers = state.otherUsers.filter(Boolean)
-      const user = otherUsers.find(otherUser => otherUser.id === userId)
-      return user
+      return state.otherUsers[userId]
     },
     otherSpaceById: (state, getters) => (spaceId) => {
       const otherSpaces = state.otherItems.spaces.filter(Boolean)
@@ -1999,21 +2088,6 @@ const store = createStore({
       const otherCards = state.otherItems.cards.filter(Boolean)
       const card = otherCards.find(otherCard => otherCard.id === cardId)
       return card
-    },
-    cachedOrOtherSpaceById: (state, getters) => (spaceId) => {
-      const currentSpace = state.currentSpace
-      const cachedSpace = cache.space(spaceId)
-      if (spaceId === currentSpace.id) {
-        return utils.clone(currentSpace)
-      } else if (utils.objectHasKeys(cachedSpace)) {
-        return cachedSpace
-      } else {
-        return getters.otherSpaceById(spaceId)
-      }
-    },
-    spaceIsNotCached: (state) => (spaceId) => {
-      const spaceCardsCount = cache.space(spaceId).cards?.length
-      return Boolean(!spaceCardsCount)
     },
     spaceZoomDecimal: (state) => {
       return state.spaceZoomPercent / 100
@@ -2044,6 +2118,51 @@ const store = createStore({
       const isNativeApp = consts.isSecureAppContext
       const isZoomedOut = state.spaceZoomPercent !== 100
       if (isNativeApp || isZoomedOut) { return true }
+    },
+    dateImageUrl: (state) => {
+      if (state.dateImageUrl) {
+        return state.dateImageUrl
+      } else {
+        const date = dayjs().format('MM-DD-YYYY') // 11-19-2024
+        return `${consts.cdnHost}/date/${date}.jpg` // https://cdn.kinopio.club/date/11-19-24.jpg
+      }
+    },
+    newTag: (state) => ({ name, defaultColor, cardId, spaceId }) => {
+      let color
+      const allTags = state.tags
+      const existingTag = allTags.find(tag => tag.name === name)
+      if (existingTag) {
+        color = existingTag.color
+      }
+      return {
+        name,
+        id: nanoid(),
+        color: color || defaultColor,
+        cardId: cardId,
+        spaceId: spaceId
+      }
+    },
+    allTags: (state) => {
+      const userTags = state.currentUser.tags
+      const spaceTags = state.currentSpace.tags
+      const tags = utils.mergeArrays({ previous: userTags, updated: spaceTags, key: 'name' })
+      return tags || []
+    },
+    currentInteractingItem: (state, getters, rootState, rootGetters) => {
+      let boxId = state.currentDraggingBoxId
+      if (state.currentUserIsResizingBox) {
+        boxId = state.currentUserIsResizingBoxIds[0]
+      }
+      let cardId = state.currentDraggingCardId
+      if (state.currentUserIsResizingCard) {
+        cardId = state.currentUserIsResizingCardIds[0]
+      }
+      if (boxId) {
+        return rootGetters['currentBoxes/byId'](boxId)
+      }
+      if (cardId) {
+        return rootGetters['currentCards/byId'](cardId)
+      }
     }
   },
 
@@ -2058,8 +2177,9 @@ const store = createStore({
     currentBoxes,
     upload,
     userNotifications,
-    teams,
-    themes
+    groups,
+    themes,
+    analytics
   },
   plugins: [websocket()]
 })

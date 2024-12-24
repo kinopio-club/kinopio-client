@@ -174,7 +174,7 @@ export default {
 
     // create
 
-    add: (context, { connection, type, shouldNotRecordHistory }) => {
+    add: async (context, { connection, type, shouldNotRecordHistory }) => {
       const isExistingPath = context.getters.isExistingPath({
         startItemId: connection.startItemId,
         endItemId: connection.endItemId
@@ -186,15 +186,15 @@ export default {
       connection.spaceId = currentSpaceId
       connection.userId = context.rootState.currentUser.id
       connection.connectionTypeId = type.id
-      context.dispatch('api/addToQueue', { name: 'createConnection', body: connection }, { root: true })
       context.dispatch('broadcast/update', { updates: connection, type: 'addConnection', handler: 'currentConnections/create' }, { root: true })
       if (!shouldNotRecordHistory) {
         context.dispatch('history/add', { connections: [connection] }, { root: true })
       }
       context.commit('create', connection)
       context.commit('triggerUpdateItemCurrentConnections', connection.endItemId, { root: true })
+      await context.dispatch('api/addToQueue', { name: 'createConnection', body: connection }, { root: true })
     },
-    addType: (context, type) => {
+    addType: async (context, type) => {
       const isThemeDark = context.rootState.currentUser.theme === 'dark'
       let color = randomColor({ luminosity: 'light' })
       if (isThemeDark) {
@@ -216,21 +216,21 @@ export default {
       context.commit('createType', connectionType)
       context.commit('lastTypeId', connectionType.id)
       context.dispatch('broadcast/update', { updates: connectionType, type: 'addConnectionType', handler: 'currentConnections/createType' }, { root: true })
-      context.dispatch('api/addToQueue', { name: 'createConnectionType', body: connectionType }, { root: true })
+      await context.dispatch('api/addToQueue', { name: 'createConnectionType', body: connectionType }, { root: true })
     },
 
     // update
 
-    update: (context, connection) => {
+    update: async (context, connection) => {
       context.dispatch('history/add', { connections: [connection] }, { root: true })
       context.commit('update', connection)
-      context.dispatch('api/addToQueue', { name: 'updateConnection', body: connection }, { root: true })
       context.dispatch('broadcast/update', { updates: connection, type: 'updateConnectionTypeForConnection', handler: 'currentConnections/update' }, { root: true })
+      await context.dispatch('api/addToQueue', { name: 'updateConnection', body: connection }, { root: true })
     },
-    updatePaths: (context, { itemId, connections }) => {
+    updatePaths: async (context, { itemId, connections }) => {
       const canEditSpace = context.rootGetters['currentUser/canEditSpace']()
       connections = connections || context.getters.byItemId(itemId)
-      connections.map(connection => {
+      connections = connections.map(async (connection) => {
         const startItem = utils.itemElementDimensions({ id: connection.startItemId })
         const endItem = utils.itemElementDimensions({ id: connection.endItemId })
         const path = context.getters.connectionPathBetweenItems({
@@ -238,24 +238,30 @@ export default {
           endItem,
           controlPoint: connection.controlPoint
         })
+        const isPathUnchanged = path === connection.path
+        if (isPathUnchanged) { return }
         const newConnection = {
           id: connection.id,
           path
         }
-        context.dispatch('api/addToQueue', { name: 'updateConnection', body: newConnection }, { root: true })
         if (canEditSpace) {
           context.dispatch('broadcast/update', { updates: newConnection, type: 'updateConnection', handler: 'currentConnections/update' }, { root: true })
           context.commit('update', newConnection)
         } else {
           context.commit('updateReadOnly', newConnection)
         }
+        await context.dispatch('api/addToQueue', { name: 'updateConnection', body: newConnection }, { root: true })
+        return newConnection
       })
+      connections = connections.filter(connection => Boolean(connection))
       context.commit('clearShouldExplicitlyRenderCardIds', null, { root: true })
+      context.dispatch('history/add', { connections }, { root: true })
     },
-    updateMultiplePaths: (context, items) => {
+    updateMultiplePaths: async (context, items) => {
       const canEditSpace = context.rootGetters['currentUser/canEditSpace']()
       const itemIds = items.map(item => item.id)
       const connections = context.getters.byMultipleItemIds(itemIds)
+
       if (!connections.length) { return }
       let newConnections = []
       // update state
@@ -282,7 +288,7 @@ export default {
       })
       // update api
       if (canEditSpace) {
-        context.dispatch('api/addToQueue', {
+        await context.dispatch('api/addToQueue', {
           name: 'updateMultipleConnections',
           body: {
             connections: newConnections,
@@ -290,6 +296,7 @@ export default {
           }
         }, { root: true })
       }
+      context.dispatch('history/add', { connections: newConnections, useSnapshot: true }, { root: true })
       context.commit('clearShouldExplicitlyRenderCardIds', null, { root: true })
     },
     updatePathsWhileDragging: (context, { connections }) => {
@@ -329,13 +336,13 @@ export default {
       })
       context.dispatch('updatePaths', { connections })
     },
-    updateType: (context, type) => {
+    updateType: async (context, type) => {
       context.dispatch('history/add', { connectionTypes: [type] }, { root: true })
       context.commit('updateType', type)
       context.dispatch('broadcast/update', { updates: type, type: 'updateConnectionType', handler: 'currentConnections/updateType' }, { root: true })
-      context.dispatch('api/addToQueue', { name: 'updateConnectionType', body: type }, { root: true })
+      await context.dispatch('api/addToQueue', { name: 'updateConnectionType', body: type }, { root: true })
     },
-    updateLabelPosition: (context, { connection, labelRelativePositionX, labelRelativePositionY }) => {
+    updateLabelPosition: async (context, { connection, labelRelativePositionX, labelRelativePositionY }) => {
       const prevConnection = context.getters.byId(connection.id)
       // normalize
       if (utils.isUndefinedOrNull(labelRelativePositionX)) {
@@ -352,7 +359,7 @@ export default {
       }
       context.commit('update', item)
       context.dispatch('broadcast/update', { updates: item, type: 'updateConnection', handler: 'currentConnections/update' }, { root: true })
-      context.dispatch('api/addToQueue', { name: 'updateConnection', body: item }, { root: true })
+      await context.dispatch('api/addToQueue', { name: 'updateConnection', body: item }, { root: true })
     },
     clearLabelPosition: (context, connection) => {
       context.dispatch('updateLabelPosition', {
@@ -385,16 +392,16 @@ export default {
         }
       })
     },
-    remove: (context, connection) => {
-      context.dispatch('api/addToQueue', { name: 'removeConnection', body: connection }, { root: true })
+    remove: async (context, connection) => {
       context.dispatch('broadcast/update', { updates: connection, type: 'removeConnection', handler: 'currentConnections/remove' }, { root: true })
       context.commit('remove', connection)
       context.dispatch('history/add', { connections: [connection], isRemoved: true }, { root: true })
+      await context.dispatch('api/addToQueue', { name: 'removeConnection', body: connection }, { root: true })
     },
-    removeType: (context, type) => {
-      context.dispatch('api/addToQueue', { name: 'removeConnectionType', body: type }, { root: true })
+    removeType: async (context, type) => {
       context.dispatch('broadcast/update', { updates: type, type: 'removeConnectionType', handler: 'currentConnections/removeType' }, { root: true })
       context.commit('removeType', type)
+      await context.dispatch('api/addToQueue', { name: 'removeConnectionType', body: type }, { root: true })
     },
     removeUnusedTypes: (context) => {
       const connections = context.getters.all
@@ -422,6 +429,10 @@ export default {
     allTypes: (state) => {
       const typeIds = uniq(state.typeIds)
       return typeIds.map(id => state.types[id])
+    },
+    typeByName: (state, getters) => (name) => {
+      const types = getters.allTypes
+      return types.find(type => type.name === name)
     },
     byItemId: (state, getters, rootState, rootGetters) => (itemId) => {
       let connections = getters.all

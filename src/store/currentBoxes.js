@@ -65,21 +65,37 @@ export default {
     snapGuides: (state, value) => {
       state.snapGuides = value
     },
+    resizeWhileDragging: (state, { boxes, shouldSnapToGrid }) => {
+      boxes.forEach(box => {
+        const element = utils.boxElementFromId(box.id)
+        if (!element) { return }
+        if (element.dataset.isVisibleInViewport === 'false') { return }
+        if (shouldSnapToGrid) {
+          element.style.width = utils.roundToNearest(box.resizeWidth) + 'px'
+          element.style.height = utils.roundToNearest(box.resizeHeight) + 'px'
+        } else {
+          element.style.width = box.resizeWidth + 'px'
+          element.style.height = box.resizeHeight + 'px'
+        }
+        element.dataset.resizeWidth = box.resizeWidth
+        element.dataset.resizeHeight = box.resizeHeight
+      })
+    },
+    moveWhileDragging: (state, { boxes }) => {
+      boxes.forEach(box => {
+        const element = document.querySelector(`.box[data-box-id="${box.id}"]`)
+        if (!element) { return }
+        if (element.dataset.isVisibleInViewport !== 'false') {
+          element.style.left = box.x + 'px'
+          element.style.top = box.y + 'px'
+        }
+        element.dataset.x = box.x
+        element.dataset.y = box.y
+      })
+    },
 
     // broadcast
 
-    // resizeBroadcast: (state, { box }) => {
-    //   const element = document.querySelector(`.box[data-box-id="${box.id}"]`)
-    //   element.style.width = box.resizeWidth + 'px'
-    //   element.style.height = box.resizeHeight + 'px'
-    // },
-    moveWhileDraggingBroadcast: (state, { boxes }) => {
-      boxes.forEach(box => {
-        const element = document.querySelector(`.box[data-box-id="${box.id}"]`)
-        element.style.left = box.x + 'px'
-        element.style.top = box.y + 'px'
-      })
-    },
     moveBroadcast: (state, { boxes }) => {
       boxes.forEach(updated => {
         const box = state.boxes[updated.id]
@@ -133,14 +149,11 @@ export default {
 
     // create
 
-    add: (context, { box, shouldResize }) => {
+    add: async (context, { box, shouldResize }) => {
       const count = context.state.ids.length
       const minBoxSize = consts.minBoxSize
       const isThemeDark = context.rootState.currentUser.theme === 'dark'
-      let color = randomColor({ luminosity: 'light' })
-      if (isThemeDark) {
-        color = randomColor({ luminosity: 'dark' })
-      }
+      const color = randomColor({ luminosity: 'dark' })
       box = {
         id: box.id || nanoid(),
         spaceId: currentSpaceId,
@@ -158,21 +171,20 @@ export default {
       }
       context.dispatch('history/add', { boxes: [box] }, { root: true })
       context.commit('create', box)
-      context.dispatch('api/addToQueue', { name: 'createBox', body: box }, { root: true })
       context.dispatch('broadcast/update', { updates: box, type: 'createBox', handler: 'currentBoxes/create' }, { root: true })
       if (shouldResize) {
         context.dispatch('history/pause', null, { root: true })
         context.commit('currentUserIsResizingBox', true, { root: true })
         context.commit('currentUserIsResizingBoxIds', [box.id], { root: true })
       }
+      await context.dispatch('api/addToQueue', { name: 'createBox', body: box }, { root: true })
     },
 
     // update
 
-    update: (context, box) => {
+    update: async (context, box) => {
       context.dispatch('history/add', { boxes: [box] }, { root: true })
       context.commit('update', box)
-      context.dispatch('api/addToQueue', { name: 'updateBox', body: box }, { root: true })
       context.dispatch('broadcast/update', { updates: box, type: 'updateBox', handler: 'currentBoxes/update' }, { root: true })
       const keys = Object.keys(box)
       const shouldUpdatePathsKeys = ['x', 'resizeWidth']
@@ -182,6 +194,7 @@ export default {
           context.dispatch('currentConnections/updatePaths', { itemId: box.id }, { root: true })
         })
       }
+      await context.dispatch('api/addToQueue', { name: 'updateBox', body: box }, { root: true })
     },
     updateName (context, { box, newName }) {
       const canEditBox = context.rootGetters['currentUser/canEditBox'](box)
@@ -191,30 +204,84 @@ export default {
         name: newName
       })
     },
+    updateMultiple: async (context, boxes) => {
+      const spaceId = context.rootState.currentSpace.id
+      let updates = {
+        boxes,
+        spaceId: context.rootState.currentSpace.id
+      }
+      updates.boxes.map(box => {
+        delete box.userId
+        return box
+      })
+      context.dispatch('history/add', { boxes }, { root: true })
+      boxes.forEach(box => {
+        context.dispatch('broadcast/update', { updates: box, type: 'updateBox', handler: 'currentBoxes/update' }, { root: true })
+        context.commit('update', box)
+      })
+      cache.updateSpace('editedByUserId', context.rootState.currentUser.id, currentSpaceId)
+      await context.dispatch('api/addToQueue', { name: 'updateMultipleBoxes', body: updates }, { root: true })
+    },
+
+    // checkboxes
+
+    toggleChecked (context, { boxId, value }) {
+      utils.typeCheck({ value, type: 'boolean' })
+      utils.typeCheck({ value: boxId, type: 'string' })
+      const box = context.getters.byId(boxId)
+      let name = box.name
+      const checkbox = utils.checkboxFromString(name)
+      name = name.replace(checkbox, '')
+      if (value) {
+        name = `[x] ${name}`
+      } else {
+        name = `[] ${name}`
+      }
+      const update = {
+        id: boxId,
+        name
+      }
+      context.dispatch('update', update)
+    },
+    removeChecked: (context, boxId) => {
+      utils.typeCheck({ value: boxId, type: 'string' })
+      const box = context.getters.byId(boxId)
+      let name = box.name
+      name = name.replace('[x]', '').trim()
+      const update = {
+        id: boxId,
+        name
+      }
+      context.dispatch('update', update)
+    },
 
     // resize
 
     resize: (context, { boxIds, delta }) => {
       let connections = []
+      let boxes = []
       boxIds.forEach(boxId => {
-        const box = context.getters.byId(boxId)
-        let width = box.resizeWidth
-        let height = box.resizeHeight
+        const rect = utils.boxElementDimensions({ id: boxId })
+        let width = rect.width
+        let height = rect.height
         width = width + delta.x
         height = height + delta.y
-        const updates = { id: boxId, resizeWidth: width, resizeHeight: height }
-        context.dispatch('update', updates)
-        context.dispatch('broadcast/update', { updates, type: 'resizeBox', handler: 'currentBoxes/update' }, { root: true })
+        const box = { id: boxId, resizeWidth: width, resizeHeight: height }
+        boxes.push(box)
         connections = connections.concat(context.rootGetters['currentConnections/byItemId'](box.id))
+        context.commit('currentUserIsResizingBox', true, { root: true })
+        context.commit('currentUserIsResizingBoxIds', [box.id], { root: true })
       })
+      context.commit('resizeWhileDragging', { boxes, shouldSnapToGrid: context.rootState.shouldSnapToGrid })
       context.dispatch('currentConnections/updatePathsWhileDragging', { connections }, { root: true })
+      context.dispatch('broadcast/update', { updates: { boxes }, type: 'resizeBoxes', handler: 'currentBoxes/resizeWhileDragging' }, { root: true })
     },
 
     // dimensions
 
-    updateInfoDimensions: (context, { boxes }) => {
+    updateInfoDimensions: async (context, { boxes }) => {
       boxes = boxes || utils.clone(context.getters.all)
-      boxes.forEach(box => {
+      for (const box of boxes) {
         const prevDimensions = {
           infoWidth: box.infoWidth,
           infoHeight: box.infoHeight
@@ -232,23 +299,24 @@ export default {
         }
         if (!dimensionsChanged) { return }
         context.commit('update', body)
-        context.dispatch('api/addToQueue', { name: 'updateBox', body }, { root: true })
-      })
+        await context.dispatch('api/addToQueue', { name: 'updateBox', body }, { root: true })
+      }
     },
 
     // snapping
 
     updateSnapGuides: (context, { boxes, cards }) => {
+      if (context.rootState.shouldSnapToGrid) { return }
       const snapThreshold = 6
       const spaceEdgeThreshold = 100
-      let targetBoxes = utils.clone(context.getters.all)
+      let targetBoxes = utils.clone(context.getters.isSelectableInViewport)
+      const prevSnapGuides = context.state.snapGuides
       let snapGuides = []
       let items
       if (cards) {
         cards = utils.clone(cards)
         cards = [ utils.boundaryRectFromItems(cards) ] // combine multiple selected cards
         items = cards
-        targetBoxes = targetBoxes.filter(box => !box.isLocked)
       } else if (boxes) {
         items = utils.clone(boxes)
       }
@@ -264,14 +332,15 @@ export default {
           targetBox.height = targetBox.resizeHeight
           const isBetweenTargetBoxPointsX = utils.isBetween({
             value: item.x,
-            min: targetBox.x,
-            max: targetBox.x + targetBox.width
+            min: targetBox.x + snapThreshold,
+            max: targetBox.x + targetBox.width - snapThreshold
           })
           const isBetweenTargetBoxPointsY = utils.isBetween({
             value: item.y,
-            min: targetBox.y,
-            max: targetBox.y + targetBox.height
+            min: targetBox.y + snapThreshold,
+            max: targetBox.y + targetBox.height - snapThreshold
           })
+          // let time = 1
           // item sides
           const itemLeft = item.x
           const itemRight = item.x + item.width
@@ -288,25 +357,29 @@ export default {
           const isSnapLeftFromItemRight = Math.abs(itemRight - targetBoxLeft) <= snapThreshold
           const isSnapLeftFromItemLeft = Math.abs(itemLeft - targetBoxLeft) <= snapThreshold
           if (!targetBoxIsMinX && isBetweenTargetBoxPointsY && (isSnapLeftFromItemRight || isSnapLeftFromItemLeft)) {
-            snapGuides.push({ side: 'left', origin: item, target: targetBox })
+            const newSnapGuide = context.getters.newSnapGuide({ side: 'left', item, targetBox })
+            snapGuides.push(newSnapGuide)
           }
           // snap right
           const isSnapRightFromItemLeft = Math.abs(itemLeft - targetBoxRight) <= snapThreshold
           const isSnapRightFromItemRight = Math.abs(itemRight - targetBoxRight) <= snapThreshold
           if (isBetweenTargetBoxPointsY && (isSnapRightFromItemLeft || isSnapRightFromItemRight)) {
-            snapGuides.push({ side: 'right', origin: item, target: targetBox })
+            const newSnapGuide = context.getters.newSnapGuide({ side: 'right', item, targetBox })
+            snapGuides.push(newSnapGuide)
           }
           // snap top
           const isSnapTopFromItemBottom = Math.abs(itemBottom - targetBoxTop) <= snapThreshold
           const isSnapTopFromItemTop = Math.abs(itemTop - targetBoxTop) <= snapThreshold
           if (!targetBoxIsMinY && isBetweenTargetBoxPointsX && (isSnapTopFromItemBottom || isSnapTopFromItemTop)) {
-            snapGuides.push({ side: 'top', origin: item, target: targetBox })
+            const newSnapGuide = context.getters.newSnapGuide({ side: 'top', item, targetBox })
+            snapGuides.push(newSnapGuide)
           }
           // snap bottom
           const isSnapBottomFromItemTop = Math.abs(itemTop - targetBoxBottom) <= snapThreshold
           const isSnapBottomFromItemBottom = Math.abs(itemBottom - targetBoxBottom) <= snapThreshold
           if (isBetweenTargetBoxPointsX && (isSnapBottomFromItemTop || isSnapBottomFromItemBottom)) {
-            snapGuides.push({ side: 'bottom', origin: item, target: targetBox })
+            const newSnapGuide = context.getters.newSnapGuide({ side: 'bottom', item, targetBox })
+            snapGuides.push(newSnapGuide)
           }
         })
       })
@@ -399,14 +472,6 @@ export default {
 
     // move
 
-    // moveWhileDragging: (context, boxes) => {
-    //   boxes.forEach(box => {
-    //     const element = document.querySelector(`.box[data-box-id="${box.id}"]`)
-    //     element.style.left = box.x + 'px'
-    //     element.style.top = box.y + 'px'
-    //   })
-    //   context.dispatch('currentConnections/updatePathsWhileDragging', { connections }, { root: true })
-    // },
     move: (context, { endCursor, prevCursor, delta }) => {
       const zoom = context.rootGetters.spaceCounterZoomDecimal
       if (!endCursor || !prevCursor) { return }
@@ -414,18 +479,23 @@ export default {
         x: endCursor.x * zoom,
         y: endCursor.y * zoom
       }
+      if (context.rootState.shouldSnapToGrid) {
+        prevCursor = utils.cursorPositionSnapToGrid(prevCursor)
+        endCursor = utils.cursorPositionSnapToGrid(endCursor)
+      }
       delta = delta || {
         x: endCursor.x - prevCursor.x,
         y: endCursor.y - prevCursor.y
       }
       let boxes = context.getters.isSelected
       if (!boxes.length) { return }
-      boxes = boxes.filter(box => !box.isLocked)
       boxes = boxes.filter(box => context.rootGetters['currentUser/canEditBox'](box))
       // prevent boxes bunching up at 0
       let connections = []
       boxes.forEach(box => {
         if (!box) { return }
+        if (!box.x) { box.y = 0 }
+        if (!box.y) { box.y = 0 }
         if (box.x === 0) { delta.x = Math.max(0, delta.x) }
         if (box.y === 0) { delta.y = Math.max(0, delta.y) }
         connections = connections.concat(context.rootGetters['currentConnections/byItemId'](box.id))
@@ -455,7 +525,7 @@ export default {
         } else {
           box.y = Math.max(0, box.y + delta.y)
           box.y = Math.round(box.y)
-          box.y = Math.max(consts.minItemY, box.y)
+          box.y = Math.max(consts.minItemXY, box.y)
         }
         box = {
           name: box.name,
@@ -469,25 +539,27 @@ export default {
         return box
       })
       // update
-      context.commit('move', { boxes })
+      context.commit('moveWhileDragging', { boxes })
       context.commit('boxesWereDragged', true, { root: true })
       context.dispatch('currentConnections/updatePathsWhileDragging', { connections }, { root: true })
-      context.dispatch('broadcast/update', { updates: { boxes }, type: 'moveBoxes', handler: 'currentBoxes/moveWhileDraggingBroadcast' }, { root: true })
+      context.dispatch('broadcast/update', { updates: { boxes }, type: 'moveBoxes', handler: 'currentBoxes/moveWhileDragging' }, { root: true })
       context.dispatch('updateSnapGuides', { boxes })
     },
     afterMove: (context) => {
       prevMovePositions = {}
       const currentDraggingBoxId = context.rootState.currentDraggingBoxId
+      const currentDraggingBox = context.getters.byId(currentDraggingBoxId)
       const spaceId = context.rootState.currentSpace.id
       let boxIds = context.getters.isSelectedIds
       boxIds = boxIds.filter(box => Boolean(box))
       if (!boxIds.length) { return }
+      // boxes
       let boxes = boxIds.map(id => {
         let box = context.getters.byId(id)
         if (!box) { return }
         box = utils.clone(box)
         if (!box) { return }
-        const position = utils.boxPositionFromElement(id)
+        const position = utils.boxElementDimensions({ id })
         box.x = position.x
         box.y = position.y
         const { x, y } = box
@@ -496,12 +568,8 @@ export default {
       boxes = boxes.filter(box => Boolean(box))
       context.commit('move', { boxes, spaceId })
       boxes = boxes.filter(box => box)
-      boxes.forEach(box => {
-        context.dispatch('api/addToQueue', {
-          name: 'updateBox',
-          body: box
-        }, { root: true })
-      })
+      // update
+      context.dispatch('updateMultiple', boxes)
       const box = context.getters.byId(currentDraggingBoxId)
       context.dispatch('checkIfItemShouldIncreasePageSize', box, { root: true })
       context.dispatch('broadcast/update', { updates: { boxes }, type: 'moveBoxes', handler: 'currentBoxes/moveBroadcast' }, { root: true })
@@ -514,11 +582,11 @@ export default {
 
     // remove
 
-    remove: (context, box) => {
-      context.dispatch('api/addToQueue', { name: 'removeBox', body: box }, { root: true })
+    remove: async (context, box) => {
       context.dispatch('broadcast/update', { updates: box, type: 'removeBox', handler: 'currentBoxes/remove' }, { root: true })
       context.commit('remove', box)
       context.dispatch('history/add', { boxes: [box], isRemoved: true }, { root: true })
+      await context.dispatch('api/addToQueue', { name: 'removeBox', body: box }, { root: true })
     }
   },
   getters: {
@@ -533,6 +601,7 @@ export default {
       let boxes = []
       elements.forEach(box => {
         if (box.dataset.isVisibleInViewport === 'false') { return }
+        if (box.dataset.isLocked === 'true') { return }
         boxes.push(box)
       })
       boxes = boxes.map(box => getters.byId(box.dataset.boxId))
@@ -544,6 +613,13 @@ export default {
       let boxIds = multipleSelectedIds.concat(currentDraggingId)
       boxIds = uniq(boxIds)
       boxIds = boxIds.filter(id => Boolean(id))
+      return boxIds
+    },
+    isResizingIds: (state, getters, rootState) => {
+      let boxIds = rootState.currentUserIsResizingBoxIds
+      if (getters.isSelectedIds.length) {
+        boxIds = getters.isSelectedIds
+      }
       return boxIds
     },
     isSelected: (state, getters) => {
@@ -564,6 +640,14 @@ export default {
       let colors = boxes.map(box => box.color)
       colors = colors.filter(color => Boolean(color))
       return uniq(colors)
+    },
+    newSnapGuide: (state) => ({ side, item, targetBox }) => {
+      let time = Date.now()
+      const prevGuide = state.snapGuides.find(guide => guide.side === side)
+      if (prevGuide) {
+        time = prevGuide.time
+      }
+      return { side, origin: item, target: targetBox, time }
     }
   }
 }

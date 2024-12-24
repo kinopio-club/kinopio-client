@@ -6,10 +6,14 @@ import utils from '@/utils.js'
 import consts from '@/consts.js'
 import fonts from '@/data/fonts.js'
 import ItemConnectorButton from '@/components/ItemConnectorButton.vue'
+import smartquotes from 'smartquotes'
 import postMessage from '@/postMessage.js'
 
 import randomColor from 'randomcolor'
+import { colord, extend } from 'colord'
 const store = useStore()
+
+let unsubscribe
 
 const borderWidth = 2
 
@@ -30,7 +34,7 @@ let prevSelectedBox
 const boxElement = ref(null)
 
 onMounted(() => {
-  store.subscribe((mutation, state) => {
+  unsubscribe = store.subscribe((mutation, state) => {
     const { type, payload } = mutation
     if (type === 'updateRemoteCurrentConnection' || type === 'removeRemoteCurrentConnection') {
       updateRemoteConnections()
@@ -50,6 +54,7 @@ onUpdated(() => {
 })
 onBeforeUnmount(() => {
   removeViewportObserver()
+  unsubscribe()
 })
 
 const props = defineProps({
@@ -71,6 +76,7 @@ const state = reactive({
 const spaceCounterZoomDecimal = computed(() => store.getters.spaceCounterZoomDecimal)
 const canEditBox = computed(() => store.getters['currentUser/canEditBox'](props.box))
 const currentUserIsSignedIn = computed(() => store.getters['currentUser/isSignedIn'])
+const name = computed(() => props.box.name)
 
 // normalize
 
@@ -78,15 +84,31 @@ const normalizedBox = computed(() => {
   return normalizeBox(props.box)
 })
 const normalizeBox = (box) => {
-  const init = 200
   box = utils.clone(box)
-  box.resizeWidth = box.resizeWidth || init
-  box.resizeHeight = box.resizeHeight || init
+  box.resizeWidth = box.resizeWidth || consts.minItemXY
+  box.resizeHeight = box.resizeHeight || consts.minItemXY
   box.width = box.resizeWidth
   box.height = box.resizeHeight
   box.color = box.color || randomColor({ luminosity: 'light' })
   box.fill = box.fill || 'filled'
   return box
+}
+const normalizedName = computed(() => {
+  // name without checkbox text
+  let newName = name.value
+  if (!newName) { return }
+  const checkbox = utils.checkboxFromString(newName)
+  if (checkbox) {
+    newName = newName.replace(checkbox, '')
+  }
+  return newName.trim()
+})
+const nameSegments = computed(() => {
+  let markdownSegments = utils.markdownSegments(normalizedName.value)
+  return markdownSegments
+})
+const smartQuotes = (string) => {
+  return smartquotes(string)
 }
 
 // should render
@@ -131,8 +153,8 @@ const removeViewportObserver = () => {
 
 const styles = computed(() => {
   let { x, y, resizeWidth, resizeHeight } = normalizedBox.value
-  const width = resizeWidth
-  const height = resizeHeight
+  let width = resizeWidth
+  let height = resizeHeight
   let styles = {
     left: x + 'px',
     top: y + 'px',
@@ -140,7 +162,16 @@ const styles = computed(() => {
     height: height + 'px',
     border: `${borderWidth}px solid ${color.value}`
   }
-  styles = updateBoxBorderRadiusStyles(styles, otherBoxes.value)
+  // dimensions set by currentBoxes/resize while resizing
+  if (isResizing.value) {
+    styles.width = normalizedBox.value.resizeWidth
+    styles.height = normalizedBox.value.resizeHeight
+  }
+  if (hasFill.value) {
+    let fillColor = color.value
+    fillColor = colord(fillColor).alpha(0.5).toRgbString()
+    styles.backgroundColor = fillColor
+  }
   return styles
 })
 const userColor = computed(() => store.state.currentUser.color)
@@ -148,7 +179,7 @@ const color = computed(() => {
   const remoteColor = remoteBoxDetailsVisibleColor.value || remoteSelectedColor.value || remoteUserResizingBoxesColor.value || remoteBoxDraggingColor.value
   if (remoteColor) {
     return remoteColor
-  } else if (isSelected.value) {
+  } else if (currentBoxIsSelected.value) {
     return userColor.value
   } else {
     return normalizedBox.value.color
@@ -158,121 +189,56 @@ const colorIsDark = computed(() => utils.colorIsDark(color.value))
 const fill = computed(() => normalizedBox.value.fill)
 const hasFill = computed(() => fill.value !== 'empty')
 const infoClasses = computed(() => {
-  const classes = []
+  const classList = []
   if (isPainting.value) {
-    classes.push('unselectable')
+    classList.push('unselectable')
   }
   if (colorIsDark.value) {
-    classes.push('is-dark')
+    classList.push('is-dark')
   }
   const fontId = props.box.headerFontId || 0
-  classes.push(`header-font-${fontId}`)
+  classList.push(`header-font-${fontId}`)
   const fontSize = props.box.headerFontSize || 's'
-  classes.push(`header-font-size-${fontSize}`)
+  classList.push(`header-font-size-${fontSize}`)
   const font = fonts.find(item => item.id === fontId)
   const fontSizeModifier = font?.size || ''
   if (fontSizeModifier) {
-    classes.push(`header-font-size-modifier-${fontSizeModifier}`)
+    classList.push(`header-font-size-modifier-${fontSizeModifier}`)
   }
-  return classes
+  return classList
+})
+const classes = computed(() => {
+  return {
+    hover: state.isHover,
+    active: currentBoxIsBeingDragged.value,
+    'box-jiggle': shouldJiggle.value,
+    'is-resizing': isResizing.value,
+    'is-selected': currentBoxIsSelected.value,
+    'is-checked': isChecked.value || isInCheckedBox.value,
+    'filtered': isFiltered.value,
+    transition: !store.state.currentBoxIsNew || !store.state.currentUserIsResizingBox
+  }
 })
 
-// edge snapping
+// space filters
 
-const otherBoxes = computed(() => {
-  const boxes = store.getters['currentBoxes/isSelectableInViewport']
-  return boxes.filter(box => box?.id !== props.box.id)
+const filtersIsActive = computed(() => {
+  return Boolean(store.getters['currentUser/totalItemFadingFiltersActive'])
 })
-const snapGuideStyles = computed(() => {
-  if (isDragging.value) {
-    return { background: userColor.value }
-  } else {
-    return { background: props.box.color }
-  }
+const isFilteredByUnchecked = computed(() => {
+  const filterUncheckedIsActive = store.state.currentUser.filterUnchecked
+  if (!filterUncheckedIsActive) { return }
+  return !isChecked.value && hasCheckbox.value
 })
-const snapGuideSide = computed(() => {
-  const isDragging = store.state.currentUserIsDraggingBox || store.state.currentUserIsDraggingCard
-  if (!isDragging) { return null }
-  let guides = store.state.currentBoxes.snapGuides
-  const snapGuide = guides.find(guide => {
-    const isTarget = guide.target.id === props.box.id
-    const isOrigin = guide.origin.id === props.box.id
-    return isTarget || isOrigin
-  })
-  if (!snapGuide) { return null }
-  if (snapGuide.target.id === props.box.id) {
-    return snapGuide.side
-  } else if (snapGuide.origin.id === props.box.id) {
-    return oppositeSide(snapGuide.side)
-  } else {
-    return null
-  }
+const isFilteredByBox = computed(() => {
+  const boxIds = store.state.filteredBoxIds
+  return boxIds.includes(props.box.id)
 })
-const oppositeSide = (side) => {
-  if (side === 'left') {
-    return 'right'
-  }
-  if (side === 'right') {
-    return 'left'
-  }
-  if (side === 'top') {
-    return 'bottom'
-  }
-  if (side === 'bottom') {
-    return 'top'
-  }
-}
-const updateBoxBorderRadiusStyles = (styles, otherBoxes) => {
-  // ┌─────────────┐
-  // │  x is same  │
-  // ├─────────────┤
-  //
-  // ├─────────────┼ ─ ─┌────┐
-  // │             │    │    │
-  // │             │    │    │
-  // │ Current Box │    │y is│
-  // │             │    │same│
-  // │             │    │    │
-  // │             │    │    │
-  // └─────────────┴ ─ ─└────┴
-  const borderWidth = 2
-  const box = normalizedBox.value
-  otherBoxes = utils.clone(otherBoxes)
-  otherBoxes.forEach(otherBox => {
-    if (!otherBox) { return }
-    otherBox = normalizeBox(otherBox)
-    // x
-    const xStartIsSame = otherBox.x === box.x
-    const xEndIsSame = otherBox.x + otherBox.width === box.x + box.width
-    const xIsSame = xStartIsSame && xEndIsSame
-    // y
-    const yStartIsSame = otherBox.y === box.y
-    const yEndIsSame = otherBox.y + otherBox.height === box.y + box.height
-    const yIsSame = yStartIsSame && yEndIsSame
-    // sides
-    const isTop = xIsSame && (box.y === otherBox.y + otherBox.height - borderWidth)
-    const isBottom = xIsSame && (box.y + box.height - borderWidth === otherBox.y)
-    const isLeft = yIsSame && (box.x === otherBox.x + otherBox.width - borderWidth)
-    const isRight = yIsSame && (box.x + box.width - borderWidth === otherBox.x)
-    if (isTop || snapGuideSide.value === 'top') {
-      styles.borderTopRightRadius = 0
-      styles.borderTopLeftRadius = 0
-    }
-    if (isBottom || snapGuideSide.value === 'bottom') {
-      styles.borderBottomRightRadius = 0
-      styles.borderBottomLeftRadius = 0
-    }
-    if (isRight || snapGuideSide.value === 'right') {
-      styles.borderTopRightRadius = 0
-      styles.borderBottomRightRadius = 0
-    }
-    if (isLeft || snapGuideSide.value === 'left') {
-      styles.borderTopLeftRadius = 0
-      styles.borderBottomLeftRadius = 0
-    }
-  })
-  return styles
-}
+const isFiltered = computed(() => {
+  if (!filtersIsActive.value) { return }
+  const isInFilter = isFilteredByUnchecked.value || isFilteredByBox.value
+  return !isInFilter
+})
 
 // resize
 
@@ -301,6 +267,10 @@ const startResizing = (event) => {
   store.commit('broadcast/updateStore', { updates, type: 'updateRemoteUserResizingBoxes' })
   event.preventDefault() // allows resizing box without scrolling on mobile
 }
+const resizeColorClass = computed(() => {
+  const colorClass = utils.colorClasses({ backgroundColorIsDark: colorIsDark.value })
+  return [colorClass]
+})
 
 // shrink
 
@@ -337,10 +307,14 @@ const isLocked = computed(() => props.box.isLocked)
 
 // label
 
-const labelStyles = computed(() => {
-  return {
+const infoStyles = computed(() => {
+  let styles = {
     backgroundColor: color.value
   }
+  if (isLocked.value) {
+    styles.pointerEvents = 'none'
+  }
+  return styles
 })
 
 // interacting
@@ -354,12 +328,12 @@ const canEditSpace = computed(() => store.getters['currentUser/canEditSpace']())
 const shouldJiggle = computed(() => {
   const isMultipleItemsSelected = store.getters.isMultipleItemsSelected
   if (isMultipleItemsSelected) { return }
-  return isDragging.value
+  return currentBoxIsBeingDragged.value
 })
-const isDragging = computed(() => {
+const currentBoxIsBeingDragged = computed(() => {
   const isDragging = store.state.currentUserIsDraggingBox
   const isCurrent = store.state.currentDraggingBoxId === props.box.id
-  return isDragging && (isCurrent || isSelected.value)
+  return isDragging && (isCurrent || currentBoxIsSelected.value)
 })
 const isResizing = computed(() => {
   const isResizing = store.state.currentUserIsResizingBox
@@ -379,12 +353,12 @@ const startBoxInfoInteraction = (event) => {
     userId: store.state.currentUser.id
   }
   store.commit('broadcast/updateStore', { updates, type: 'addToRemoteBoxesDragging' })
-  if (event.shiftKey) { return } // should not select contained items if shift key
+  if (event.altKey) { return } // should not select contained items if alt/option key
   selectContainedCards()
   selectContainedBoxes()
 }
 const updateIsHover = (value) => {
-  if (isDragging.value) { return }
+  if (store.state.currentUserIsDraggingBox) { return }
   if (isPainting.value) { return }
   state.isHover = value
   if (value) {
@@ -411,12 +385,12 @@ const endBoxInfoInteraction = (event) => {
   } else {
     store.dispatch('clearMultipleSelected')
   }
-  if (!store.state.boxesWereDragged && !isMeta) {
-    store.commit('boxDetailsIsVisibleForBoxId', props.box.id)
-    event.stopPropagation() // prevent stopInteractions() from closing boxDetails
-    store.commit('currentUserIsDraggingBox', false)
-    store.commit('boxesWereDragged', false)
-  }
+  if (store.state.preventDraggedBoxFromShowingDetails) { return }
+  if (isMeta) { return }
+  store.commit('boxDetailsIsVisibleForBoxId', props.box.id)
+  event.stopPropagation() // prevent stopInteractions() from closing boxDetails
+  store.commit('currentUserIsDraggingBox', false)
+  store.commit('boxesWereDragged', false)
 }
 const currentBoxDetailsIsVisible = computed(() => {
   return props.box.id === store.state.boxDetailsIsVisibleForBoxId
@@ -424,10 +398,6 @@ const currentBoxDetailsIsVisible = computed(() => {
 
 // select
 
-const isSelected = computed(() => {
-  const selectedIds = store.state.multipleBoxesSelectedIds
-  return selectedIds.includes(props.box.id)
-})
 const multipleBoxesIsSelected = computed(() => Boolean(store.state.multipleBoxesSelectedIds.length))
 const currentBoxIsSelected = computed(() => {
   const selected = store.state.multipleBoxesSelectedIds
@@ -591,27 +561,10 @@ const remoteBoxDraggingColor = computed(() => {
   }
 })
 
-// header fonts
-
-const isH1 = computed(() => {
-  const pattern = 'h1Pattern'
-  return nameHasPattern(pattern)
-})
-const isH2 = computed(() => {
-  const pattern = 'h2Pattern'
-  return nameHasPattern(pattern)
-})
-const h1Name = computed(() => props.box.name.replace('# ', ''))
-const h2Name = computed(() => props.box.name.replace('## ', ''))
-const nameHasPattern = (pattern) => {
-  const result = utils.markdown()[pattern].exec(props.box.name)
-  return Boolean(result)
-}
-
 // touch locking
 
 const lockingFrameStyle = computed(() => {
-  const initialPadding = 65 // matches initialLockCircleRadius in magicPaint
+  const initialPadding = 65 // matches initialLockCircleRadius in paintSelect
   const initialBorderRadius = 50
   const padding = initialPadding * state.lockingPercent
   const borderRadius = Math.max((state.lockingPercent * initialBorderRadius), 5) + 'px'
@@ -698,7 +651,7 @@ const updateTouchPosition = (event) => {
 }
 const updateCurrentTouchPosition = (event) => {
   currentTouchPosition = utils.cursorPositionInViewport(event)
-  if (isDragging.value || isResizing.value) {
+  if (currentBoxIsBeingDragged.value || isResizing.value) {
     event.preventDefault() // allows dragging boxes without scrolling
   }
 }
@@ -763,6 +716,58 @@ const updateRemoteConnections = () => {
     state.isRemoteConnecting = false
   }
 }
+
+// checkbox
+
+const isChecked = computed(() => utils.nameIsChecked(name.value))
+const hasCheckbox = computed(() => {
+  return utils.checkboxFromString(name.value)
+})
+const checkboxState = computed({
+  get () {
+    return isChecked.value
+  }
+})
+const toggleBoxChecked = () => {
+  if (store.state.preventDraggedBoxFromShowingDetails) { return }
+  if (!canEditBox.value) { return }
+  const value = !isChecked.value
+  store.dispatch('closeAllDialogs')
+  store.dispatch('currentBoxes/toggleChecked', { boxId: props.box.id, value })
+  postMessage.sendHaptics({ name: 'heavyImpact' })
+  cancelLocking()
+  store.commit('currentUserIsDraggingBox', false)
+  const userId = store.state.currentUser.id
+  store.commit('broadcast/updateStore', { updates: { userId }, type: 'clearRemoteBoxesDragging' })
+  event.stopPropagation()
+  store.commit('preventMultipleSelectedActionsIsVisible', false)
+  store.dispatch('clearMultipleSelected')
+  store.commit('currentDraggingBoxId', '')
+  store.dispatch('multipleBoxesSelectedIds', [])
+}
+const containingBoxes = computed(() => {
+  if (!state.isVisibleInViewport) { return }
+  if (store.state.currentUserIsDraggingBox) { return }
+  if (currentBoxIsBeingDragged.value) { return }
+  if (currentBoxIsSelected.value) { return }
+  if (isResizing.value) { return }
+  let boxes = store.getters['currentBoxes/all']
+  boxes = boxes.filter(box => {
+    box = utils.clone(box)
+    const currentBox = utils.clone(props.box)
+    const isInsideBox = utils.isRectACompletelyInsideRectB(currentBox, box)
+    const boxArea = box.resizeWidth * box.resizeHeight
+    const currentBoxArea = currentBox.resizeWidth * currentBox.resizeHeight
+    const boxIsParent = boxArea > currentBoxArea
+    return isInsideBox && boxIsParent
+  })
+  return boxes
+})
+const isInCheckedBox = computed(() => {
+  if (!containingBoxes.value) { return }
+  const checkedBox = containingBoxes.value.find(box => utils.nameIsChecked(box.name))
+  return Boolean(checkedBox)
+})
 </script>
 
 <template lang="pug">
@@ -778,7 +783,7 @@ const updateRemoteConnections = () => {
   :data-should-render="shouldRender"
 
   :style="styles"
-  :class="{hover: state.isHover, active: isDragging, 'box-jiggle': shouldJiggle, 'is-resizing': isResizing, 'is-selected': isSelected}"
+  :class="classes"
   ref="boxElement"
 )
 
@@ -787,7 +792,7 @@ const updateRemoteConnections = () => {
     v-if="shouldRender"
     :data-box-id="box.id"
     :data-is-visible-in-viewport="state.isVisibleInViewport"
-    :style="labelStyles"
+    :style="infoStyles"
     :class="infoClasses"
     tabindex="0"
 
@@ -803,14 +808,31 @@ const updateRemoteConnections = () => {
     @touchend="endBoxInfoInteractionTouch"
   )
     .locking-frame(v-if="state.isLocking" :style="lockingFrameStyle")
-    template(v-if="isH1")
-      h1 {{h1Name}}
-    template(v-else-if="isH2")
-      h2 {{h2Name}}
-    template(v-else)
-      span {{box.name}}
-    .selected-user-avatar(v-if="isRemoteSelected || isRemoteBoxDetailsVisible" :style="{backgroundColor: remoteSelectedColor || remoteBoxDetailsVisibleColor}")
-      img(src="@/assets/anon-avatar.svg")
+    //- [·]
+    .checkbox-wrap(v-if="hasCheckbox" @mouseup.left="toggleBoxChecked" @touchend.prevent="toggleBoxChecked")
+      label(:class="{active: isChecked, disabled: !canEditBox}")
+        input(name="checkbox" type="checkbox" v-model="checkboxState")
+    .name-wrap(:class="{'is-checked': isChecked}")
+      //- simplified nameSegments
+      template(v-for="segment in nameSegments")
+        template(v-if="segment.type === 'text'")
+          span {{smartQuotes(segment.content)}}
+        template(v-else-if="segment.type === 'bold'")
+          strong {{smartQuotes(segment.content)}}
+        template(v-else-if="segment.type === 'h1'")
+          h1 {{smartQuotes(segment.content)}}
+        template(v-else-if="segment.type === 'h2'")
+          h2 {{smartQuotes(segment.content)}}
+        template(v-else-if="segment.type === 'h3'")
+          h3 {{smartQuotes(segment.content)}}
+        template(v-else-if="segment.type === 'h4'")
+          h4 {{segment.content}}
+        template(v-else-if="segment.type === 'emphasis'")
+          em {{smartQuotes(segment.content)}}
+        template(v-else-if="segment.type === 'strikethrough'")
+          del {{smartQuotes(segment.content)}}
+      .selected-user-avatar(v-if="isRemoteSelected || isRemoteBoxDetailsVisible" :style="{backgroundColor: remoteSelectedColor || remoteBoxDetailsVisibleColor}")
+        img(src="@/assets/anon-avatar.svg")
 
   ItemConnectorButton(
     :visible="connectorIsVisible"
@@ -839,15 +861,7 @@ const updateRemoteConnections = () => {
       button.inline-button(
         tabindex="-1"
       )
-        img.resize-icon.icon(src="@/assets/resize-corner.svg")
-
-  //- fill
-  .background.filled(v-if="hasFill" :style="{background: color}")
-  //- snap guides
-  .snap-guide.right(v-if="snapGuideSide === 'right'" :style="snapGuideStyles")
-  .snap-guide.left(v-if="snapGuideSide === 'left'" :style="snapGuideStyles")
-  .snap-guide.top(v-if="snapGuideSide === 'top'" :style="snapGuideStyles")
-  .snap-guide.bottom(v-if="snapGuideSide === 'bottom'" :style="snapGuideStyles")
+        img.resize-icon.icon(src="@/assets/resize-corner.svg" :class="resizeColorClass")
 </template>
 
 <style lang="stylus">
@@ -860,22 +874,28 @@ const updateRemoteConnections = () => {
   min-width var(--min-box-size)
   pointer-events none
   // animate box expand and shrink
-  transition width 0.2s var(--ease-out-circ),
-    height 0.2s var(--ease-out-circ),
-    left 0.2s var(--ease-out-circ),
-    top 0.2s var(--ease-out-circ)
+  &.transition
+    transition width 0.2s var(--ease-out-circ),
+      height 0.2s var(--ease-out-circ),
+      left 0.2s var(--ease-out-circ),
+      top 0.2s var(--ease-out-circ)
   &.hover
     box-shadow var(--hover-shadow)
   &.active
     box-shadow var(--active-shadow)
     transition none
+    z-index 1
   &.is-resizing
     box-shadow var(--active-shadow)
     transition none
   &.is-selected
     transition none
+  &.is-checked
+    opacity var(--is-checked-opacity)
   .box-info
     --header-font var(--header-font-0)
+    z-index 1
+    border-radius 4px
     &.header-font-1
       --header-font var(--header-font-1)
     &.header-font-2
@@ -916,8 +936,6 @@ const updateRemoteConnections = () => {
     pointer-events all
     position absolute
     cursor pointer
-    padding 6px 8px
-    padding-right 10px
     border-bottom-right-radius var(--entity-radius)
     word-break break-word
     color var(--primary-on-light-background)
@@ -928,18 +946,68 @@ const updateRemoteConnections = () => {
     &.is-dark
       color var(--primary-on-dark-background)
 
+  .checkbox-wrap
+    padding-left 8px
+    padding-top 5px
+    padding-bottom 6px
+    display inline-block
+    label
+      pointer-events none
+      width 20px
+      height 16px
+      display flex
+      align-items center
+      padding-left 4px
+      padding-right 4px
+      input
+        margin 0
+        margin-top -1px
+        width 10px
+        height 10px
+        background-size contain
+    &:hover
+      label
+        box-shadow 3px 3px 0 var(--heavy-shadow)
+        background-color var(--secondary-hover-background)
+        input
+          background-color var(--secondary-hover-background)
+      label.active
+        box-shadow var(--active-inset-shadow)
+        background-color var(--secondary-active-background)
+        input
+          background-color var(--secondary-active-background)
+    &:active
+      label
+        box-shadow none
+        color var(--primary)
+        background-color var(--secondary-active-background)
+      input
+        background-color var(--secondary-active-background)
+
+  .name-wrap
+    padding 6px 8px
+    padding-top 4px
+    padding-right 10px
+    display inline-block
+    &.is-checked
+      text-decoration line-through
   h1
     font-family var(--header-font)
     font-size 20px
     font-weight bold
-    margin 0
     display inline-block
   h2
     font-family var(--header-font)
     font-weight normal
     font-size 20px
-    margin 0
     display inline-block
+  h1,
+  h2,
+  h3,
+  h4
+    margin 0
+    margin-top 2px
+    vertical-align sub // to align with checkboxes
 
   // resize
   .bottom-button-wrap
@@ -950,16 +1018,6 @@ const updateRemoteConnections = () => {
       .resize-icon
         top 0
         left 0
-
-  .background
-    position absolute
-    left 0px
-    top 0px
-    width 100%
-    height 100%
-    z-index -1
-    &.filled
-      opacity 0.5
 
   .locking-frame
     position absolute
@@ -988,56 +1046,6 @@ const updateRemoteConnections = () => {
     pointer-events all
     button
       z-index 1
-
-  .snap-guide
-    --snap-guide-width 6px
-    --snap-guide-duration 1s
-    position absolute
-    &.left
-      left calc(-1 * var(--snap-guide-width))
-      width var(--snap-guide-width)
-      top -2px
-      height calc(100% + 4px)
-      animation guideLeft var(--snap-guide-duration) infinite ease-in-out forwards
-      border-top-left-radius var(--entity-radius)
-      border-bottom-left-radius var(--entity-radius)
-    &.right
-      right calc(-1 * var(--snap-guide-width))
-      width var(--snap-guide-width)
-      top -2px
-      height calc(100% + 4px)
-      animation guideRight var(--snap-guide-duration) infinite ease-in-out forwards
-      border-top-right-radius var(--entity-radius)
-      border-bottom-right-radius var(--entity-radius)
-    &.top
-      top calc(-1 * var(--snap-guide-width))
-      height var(--snap-guide-width)
-      left -2px
-      width calc(100% + 4px)
-      animation guideTop var(--snap-guide-duration) infinite ease-in-out forwards
-      border-top-left-radius var(--entity-radius)
-      border-top-right-radius var(--entity-radius)
-    &.bottom
-      bottom calc(-1 * var(--snap-guide-width))
-      height var(--snap-guide-width)
-      left -2px
-      width calc(100% + 4px)
-      animation guideBottom var(--snap-guide-duration) infinite ease-in-out forwards
-      border-bottom-left-radius var(--entity-radius)
-      border-bottom-right-radius var(--entity-radius)
-
-@keyframes guideRight
-  50%
-    transform translateX(2px)
-@keyframes guideLeft
-  50%
-    transform translateX(-2px)
-@keyframes guideTop
-  50%
-    transform translateY(-2px)
-@keyframes guideBottom
-  50%
-    transform translateY(2px)
 
 .box-jiggle
   animation boxJiggle 0.5s infinite ease-out forwards

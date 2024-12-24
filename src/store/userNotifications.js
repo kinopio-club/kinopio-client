@@ -10,7 +10,7 @@ export default {
 
     // User
 
-    addFavoriteUser: (context, favoriteUser) => {
+    addFavoriteUser: async (context, favoriteUser) => {
       const userId = context.rootState.currentUser.id
       const recipientUserIds = [favoriteUser.id]
       const notification = {
@@ -18,9 +18,9 @@ export default {
         userId,
         recipientUserIds
       }
-      context.dispatch('api/addToQueue', { name: 'createUserNotification', body: notification }, { root: true })
+      await context.dispatch('api/addToQueue', { name: 'createUserNotification', body: notification }, { root: true })
     },
-    removeFavoriteUser: (context, favoriteUser) => {
+    removeFavoriteUser: async (context, favoriteUser) => {
       const userId = context.rootState.currentUser.id
       const recipientUserIds = [favoriteUser.id]
       const notification = {
@@ -28,25 +28,23 @@ export default {
         userId,
         recipientUserIds
       }
-      context.dispatch('api/addToQueue', { name: 'removeUserNotification', body: notification }, { root: true })
+      await context.dispatch('api/addToQueue', { name: 'removeUserNotification', body: notification }, { root: true })
     },
 
     // Space
 
-    addFavoriteSpace: (context, favoriteSpace) => {
+    addFavoriteSpace: async (context, favoriteSpace) => {
       const userId = context.rootState.currentUser.id
-      const recipientUserIds = context.getters.recipientUserIds
-      const isCurrentUserSpace = recipientUserIds.includes(userId)
-      if (isCurrentUserSpace) { return }
+      const recipientUserIds = context.getters.recipientMemberIds
       const notification = {
         type: 'addFavoriteSpace',
         userId,
         recipientUserIds,
         spaceId: favoriteSpace.id
       }
-      context.dispatch('api/addToQueue', { name: 'createUserNotification', body: notification }, { root: true })
+      await context.dispatch('api/addToQueue', { name: 'createUserNotification', body: notification }, { root: true })
     },
-    removeFavoriteSpace: (context, favoriteSpace) => {
+    removeFavoriteSpace: async (context, favoriteSpace) => {
       const userId = context.rootState.currentUser.id
       const recipientUserIds = context.getters.recipientUserIds
       const notification = {
@@ -55,12 +53,12 @@ export default {
         recipientUserIds,
         spaceId: favoriteSpace.id
       }
-      context.dispatch('api/addToQueue', { name: 'removeUserNotification', body: notification }, { root: true })
+      await context.dispatch('api/addToQueue', { name: 'removeUserNotification', body: notification }, { root: true })
     },
 
     // Card
 
-    addCardUpdated: (context, { cardId, type }) => {
+    addCardUpdated: async (context, { cardId, type }) => {
       if (!cardId) { return }
       if (context.state.name === 'Hello Kinopio') { return }
       if (notifiedCardIds.includes(cardId)) { return }
@@ -76,13 +74,34 @@ export default {
         recipientUserIds,
         spaceId: context.state.id
       }
-      context.dispatch('api/addToQueue', { name: 'createUserNotification', body: notification }, { root: true })
       notifiedCardIds.push(cardId)
+      await context.dispatch('api/addToQueue', { name: 'createUserNotification', body: notification }, { root: true })
+    },
+
+    // Group
+
+    addSpaceToGroup: async (context, { groupId, addedToGroupByUserId }) => {
+      const userCanEdit = context.rootGetters['currentUser/canEditSpace']()
+      if (!userCanEdit) { return }
+      const group = context.rootGetters['groups/byId'](groupId)
+      // recipients are all other group users
+      const recipients = group.users.filter(user => user.id !== addedToGroupByUserId)
+      let recipientUserIds = recipients.map(recipient => recipient.id)
+      recipientUserIds = uniq(recipientUserIds)
+      if (!recipientUserIds.length) { return }
+      const notification = {
+        type: 'addSpaceToGroup',
+        userId: addedToGroupByUserId,
+        recipientUserIds,
+        spaceId: context.state.id,
+        groupId
+      }
+      await context.dispatch('api/addToQueue', { name: 'createUserNotification', body: notification }, { root: true })
     },
 
     // Ask to Add Space to Explore
 
-    addAskToAddToExplore: (context) => {
+    addAskToAddToExplore: async (context) => {
       const userId = context.rootState.currentUser.id
       const spaceId = context.rootState.currentSpace.id
       let recipientUserIds = context.getters.recipientUserIds
@@ -93,7 +112,7 @@ export default {
         spaceId,
         recipientUserIds
       }
-      context.dispatch('api/addToQueue', { name: 'createUserNotification', body: notification }, { root: true })
+      await context.dispatch('api/addToQueue', { name: 'createUserNotification', body: notification }, { root: true })
     }
 
   },
@@ -110,12 +129,26 @@ export default {
         contributors = rootState.currentSpace.cards.map(card => card.userId)
         recipients = members.concat(contributors)
       }
-      // team users who added cards
-      let teamUsers = rootGetters['currentCards/teamUsersWhoAddedCards']
-      if (teamUsers) {
-        teamUsers = teamUsers.map(user => user.id)
-        recipients.concat(teamUsers)
-      }
+      // group users who added cards
+      let groupUsers = rootGetters['currentCards/groupUsersWhoAddedCards'] || []
+      groupUsers = groupUsers.map(user => user.id)
+      recipients = recipients.concat(groupUsers)
+      recipients = uniq(recipients)
+      // exclude currently connected recipients
+      recipients = recipients.filter(userId => userId !== currentUserId)
+      recipients = recipients.filter(userId => Boolean(userId))
+      return recipients
+    },
+    recipientMemberIds: (state, getters, rootState, rootGetters) => {
+      const currentUserId = rootState.currentUser.id
+      // space members
+      let members = rootGetters['currentSpace/members'](true)
+      members = members.map(member => member.id)
+      let recipients = members
+      // group users who added cards
+      let groupUsers = rootGetters['currentCards/groupUsersWhoAddedCards'] || []
+      groupUsers = groupUsers.map(user => user.id)
+      recipients = recipients.concat(groupUsers)
       recipients = uniq(recipients)
       // exclude currently connected recipients
       recipients = recipients.filter(userId => userId !== currentUserId)

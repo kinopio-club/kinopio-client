@@ -7,15 +7,18 @@ import BackgroundPreview from '@/components/BackgroundPreview.vue'
 import Loader from '@/components/Loader.vue'
 import PrivacyButton from '@/components/PrivacyButton.vue'
 import templates from '@/data/templates.js'
-import ImportExport from '@/components/dialogs/ImportExport.vue'
+import ImportExportButton from '@/components/ImportExportButton.vue'
 import ReadOnlySpaceInfoBadges from '@/components/ReadOnlySpaceInfoBadges.vue'
 import AddToExplore from '@/components/AddToExplore.vue'
 import AskToAddToExplore from '@/components/AskToAddToExplore.vue'
 import FavoriteSpaceButton from '@/components/FavoriteSpaceButton.vue'
-import TeamPicker from '@/components/dialogs/TeamPicker.vue'
-import TeamLabel from '@/components/TeamLabel.vue'
+import AddToGroup from '@/components/dialogs/AddToGroup.vue'
+import GroupLabel from '@/components/GroupLabel.vue'
 import cache from '@/cache.js'
 import utils from '@/utils.js'
+import consts from '@/consts.js'
+
+import dayjs from 'dayjs'
 
 const store = useStore()
 
@@ -56,10 +59,11 @@ const state = reactive({
   backgroundIsVisible: false,
   privacyPickerIsVisible: false,
   settingsIsVisible: false,
-  exportIsVisible: false,
-  teamPickerIsVisible: false,
+  addToGroupIsVisible: false,
+  textareaIsFocused: false,
   error: {
-    memberAssignTeam: false
+    updateSpaceGroup: false,
+    removeSpaceGroup: false
   }
 })
 
@@ -105,7 +109,7 @@ const remotePendingUpload = computed(() => {
   })
 })
 
-// space name
+// space name textarea
 
 const spaceName = computed({
   get () {
@@ -123,34 +127,68 @@ const textareaSize = () => {
   const modifier = 1
   element.style.height = element.scrollHeight + modifier + 'px'
 }
+const textareaFocus = () => {
+  state.textareaIsFocused = true
+}
+const textareaBlur = () => {
+  state.textareaIsFocused = false
+}
 
-// show in explore
+// space name date
 
-const showInExplore = computed(() => store.state.currentSpace.showInExplore)
-const dialogIsPinned = computed(() => store.state.spaceDetailsIsPinned)
+const spaceNameDate = computed(() => {
+  const date = dayjs(new Date())
+  return date.format(consts.nameDateFormat)
+})
+const spaceNameHasDate = computed(() => {
+  const date = spaceNameDate.value
+  return spaceName.value.includes(date)
+})
+const toggleSpaceNameDate = async () => {
+  const element = nameElement.value
+  const nameIsSelected = element.selectionStart === 0 && element.selectionEnd === element.value.length
+  let newName = spaceName.value.trim()
+  const date = spaceNameDate.value
+  if (spaceNameHasDate.value) {
+    newName = newName.replace(date, '')
+  } else if (nameIsSelected) {
+    newName = newName.slice(0, element.selectionStart) + newName.slice(element.selectionEnd)
+    newName = `${newName} ${date}`
+  } else {
+    newName = `${newName} ${date}`
+  }
+  spaceName.value = newName // spaceName set()
+  // refocus textarea
+  element.focus()
+  element.setSelectionRange(element.value.length, element.value.length)
+  setTimeout(() => {
+    textareaFocus()
+    textareaSize()
+  }, 20) // focus after all closeDialog events
+}
 
 // template
 
-const toggleCurrentSpaceIsUserTemplate = () => {
+const toggleCurrentSpaceIsUserTemplate = async () => {
   const value = !currentSpaceIsUserTemplate.value
-  store.dispatch('currentSpace/updateSpace', { isTemplate: value })
+  await store.dispatch('currentSpace/updateSpace', { isTemplate: value })
   updateLocalSpaces()
 }
 
 // duplicate
 
-const duplicateSpace = () => {
-  store.dispatch('currentSpace/duplicateSpace')
+const duplicateSpace = async () => {
+  await store.dispatch('currentSpace/duplicateSpace')
   updateLocalSpaces()
 }
 
 // hide
 
-const toggleHideSpace = () => {
+const toggleHideSpace = async () => {
   const value = !props.currentSpaceIsHidden
-  store.dispatch('currentSpace/updateSpace', { isHidden: value })
-  updateLocalSpaces()
+  await store.dispatch('currentSpace/updateSpace', { isHidden: value })
   store.commit('notifySpaceIsHidden', value)
+  updateLocalSpaces()
 }
 
 // remove
@@ -165,12 +203,13 @@ const removeCurrentSpace = async () => {
     store.commit('notifyCurrentSpaceIsNowRemoved', true)
   }
   emit('removeSpaceId', currentSpaceId)
-  changeToPrevSpace()
+  await changeToPrevSpace()
   await nextTick()
   updateLocalSpaces()
 }
-const changeToPrevSpace = () => {
-  let spaces = cache.getAllSpaces().filter(space => {
+const changeToPrevSpace = async () => {
+  const cachedSpaces = await cache.getAllSpaces()
+  let spaces = cachedSpaces.filter(space => {
     return store.getters['currentUser/canEditSpace'](space)
   })
   spaces = spaces.filter(space => space.id !== currentSpace.value.id)
@@ -186,6 +225,7 @@ const changeToPrevSpace = () => {
 
 // dialog
 
+const dialogIsPinned = computed(() => store.state.spaceDetailsIsPinned)
 const updateDialogHeight = () => {
   emit('updateDialogHeight')
 }
@@ -209,23 +249,22 @@ const toggleSettingsIsVisible = () => {
   state.settingsIsVisible = !isVisible
   emit('updateDialogHeight')
 }
-const toggleExportIsVisible = () => {
-  const isVisible = state.exportIsVisible
+const toggleAddToGroupIsVisible = () => {
+  const isVisible = state.addToGroupIsVisible
+  clearErrors()
   closeDialogsAndEmit()
-  state.exportIsVisible = !isVisible
-  emit('updateDialogHeight')
+  state.addToGroupIsVisible = !isVisible
 }
-const toggleTeamPickerIsVisible = () => {
-  const isVisible = state.teamPickerIsVisible
-  state.error.memberAssignTeam = false
-  closeDialogsAndEmit()
-  state.teamPickerIsVisible = !isVisible
+const clearErrors = () => {
+  state.error.updateSpaceGroup = false
+  state.error.removeSpaceGroup = false
 }
 const closeDialogs = () => {
   state.backgroundIsVisible = false
   state.privacyPickerIsVisible = false
-  state.exportIsVisible = false
-  state.teamPickerIsVisible = false
+  state.addToGroupIsVisible = false
+  textareaBlur()
+  clearErrors()
 }
 const closeDialogsAndEmit = () => {
   closeDialogs()
@@ -235,38 +274,45 @@ const closeAllDialogs = () => {
   store.dispatch('closeAllDialogs')
 }
 
-// team
+// group
 
-const userTeams = computed(() => store.getters['teams/byUser']())
-const spaceTeam = computed(() => store.getters['teams/spaceTeam']())
-const checkCanAssignTeam = () => {
-  if (currentUserIsSpaceCreator.value) {
-    return true
-  } else {
-    state.error.memberAssignTeam = true
-  }
+const userGroups = computed(() => store.getters['groups/byUser']())
+const spaceGroup = computed(() => store.getters['groups/spaceGroup']())
+const currentUserIsGroupAdmin = (group) => {
+  return store.getters['groups/groupUserIsAdmin']({
+    userId: store.state.currentUser.id,
+    groupId: group.id
+  })
 }
-const teamButtonTitle = computed(() => {
-  let addString = 'Add'
-  if (spaceTeam.value) {
-    addString = 'Added'
-  }
-  return `${addString} to Team`
-})
-const toggleSpaceTeam = (team) => {
-  if (!checkCanAssignTeam()) { return }
-  if (currentSpace.value.teamId === team.id) {
-    removeSpaceTeam()
+const toggleSpaceGroup = async (group) => {
+  clearErrors()
+  const shouldRemoveSpaceGroup = currentSpace.value.groupId === group.id
+  if (shouldRemoveSpaceGroup) {
+    await removeSpaceGroup(group)
   } else {
-    store.dispatch('teams/addCurrentSpace', team)
-    updateLocalSpaces()
+    await updateSpaceGroup(group)
   }
-}
-const removeSpaceTeam = () => {
-  store.dispatch('teams/removeCurrentSpace')
   updateLocalSpaces()
 }
-
+const updateSpaceGroup = (group) => {
+  const isSpaceCreator = currentUserIsSpaceCreator.value
+  if (isSpaceCreator) {
+    store.dispatch('groups/addCurrentSpace', group)
+    updateLocalSpaces()
+  } else {
+    state.error.updateSpaceGroup = true
+  }
+}
+const removeSpaceGroup = (group) => {
+  const isGroupAdmin = currentUserIsGroupAdmin(group)
+  const isSpaceCreator = currentUserIsSpaceCreator.value
+  if (isGroupAdmin || isSpaceCreator) {
+    store.dispatch('groups/removeCurrentSpace')
+    updateLocalSpaces()
+  } else {
+    state.error.removeSpaceGroup = true
+  }
+}
 </script>
 
 <template lang="pug">
@@ -287,7 +333,7 @@ const removeSpaceTeam = () => {
           span {{remotePendingUpload.percentComplete}}%
       BackgroundPicker(:visible="state.backgroundIsVisible" @updateLocalSpaces="updateLocalSpaces")
     //- Name
-    .textarea-wrap(:class="{'full-width': props.shouldHidePin}")
+    .textarea-wrap(:class="{'full-width': props.shouldHidePin && !state.textareaIsFocused }")
       textarea.name(
         :readonly="!isSpaceMember"
         ref="nameElement"
@@ -295,45 +341,59 @@ const removeSpaceTeam = () => {
         placeholder="name"
         v-model="spaceName"
         @keydown.enter.stop.prevent="closeAllDialogs"
+        @focus="textareaFocus"
+        @click.stop
       )
       .textarea-loader(v-if="isLoadingSpace")
         Loader(:visible="true")
 
+  //- Append date
+  .title-row(v-if="state.textareaIsFocused")
+    .button-wrap.title-row-small-button-wrap(@click.left="toggleSpaceNameDate" title="Add date to name")
+      button.small-button.cal-button(:class="{ active: spaceNameHasDate }")
+        img.icon.cal(src="@/assets/cal.svg")
+
   //- Pin Dialog
-  .title-row(v-if="!props.shouldHidePin")
+  .title-row(v-if="!props.shouldHidePin && !state.textareaIsFocused")
     .button-wrap.title-row-small-button-wrap(@click.left="toggleDialogIsPinned" title="Pin dialog")
       button.small-button(:class="{active: dialogIsPinned}")
         img.icon.pin(src="@/assets/pin.svg")
 
-ReadOnlySpaceInfoBadges(:spaceTeam="spaceTeam")
+ReadOnlySpaceInfoBadges(:spaceGroup="spaceGroup")
 
 //- member options
 template(v-if="isSpaceMember")
   .row
     //- Privacy
     PrivacyButton(:privacyPickerIsVisible="state.privacyPickerIsVisible" :showShortName="true" @togglePrivacyPickerIsVisible="togglePrivacyPickerIsVisible" @closeDialogs="closeDialogs" @updateLocalSpaces="updateLocalSpaces")
-      //- toggle space team | favorite
-    template(v-if="userTeams")
+      //- toggle space group | favorite
+    template(v-if="userGroups")
       .button-wrap
         .segmented-buttons
-          //- Team
-          button.team-button(:title="teamButtonTitle" :class="{active: state.teamPickerIsVisible || spaceTeam}" @click.left.prevent.stop="toggleTeamPickerIsVisible" @keydown.stop.enter="toggleTeamPickerIsVisible")
-            img.icon.team(src="@/assets/team.svg")
+          //- Group
+          button.group-button(title="Add to Group" :class="{active: state.addToGroupIsVisible || spaceGroup}" @click.left.prevent.stop="toggleAddToGroupIsVisible" @keydown.stop.enter="toggleAddToGroupIsVisible")
+            img.icon.group(src="@/assets/group.svg")
+          //- Template
+          button(:class="{ active: currentSpaceIsUserTemplate }" @click.left.prevent="toggleCurrentSpaceIsUserTemplate" @keydown.stop.enter="toggleCurrentSpaceIsUserTemplate" title="Mark as Template")
+            img.icon.templates(src="@/assets/templates.svg")
           //- Favorite
           FavoriteSpaceButton(:parentIsDialog="true" @updateLocalSpaces="updateLocalSpaces")
-        TeamPicker(:visible="state.teamPickerIsVisible" @selectTeam="toggleSpaceTeam" @clearTeam="removeSpaceTeam" :teams="userTeams" :selectedTeam="spaceTeam" @closeDialogs="closeDialogs")
+        AddToGroup(:visible="state.addToGroupIsVisible" @selectGroup="toggleSpaceGroup" :groups="userGroups" :selectedGroup="spaceGroup" @closeDialogs="closeDialogs")
     template(v-else)
       //- Favorite
       FavoriteSpaceButton(:parentIsDialog="true" @updateLocalSpaces="updateLocalSpaces")
     //- Settings
     .button-wrap
-      button(@click="toggleSettingsIsVisible" :class="{active: state.settingsIsVisible}")
+      button(@click="toggleSettingsIsVisible" :class="{active: state.settingsIsVisible}" title="Space Settings")
         img.icon.settings(src="@/assets/settings.svg")
-        span Settings
-  .row(v-if="state.error.memberAssignTeam")
+  .row(v-if="state.error.updateSpaceGroup")
     .badge.danger
       img.icon.cancel(src="@/assets/add.svg")
-      span Only space creator can assign to team
+      span Only space creator can assign to group
+  .row(v-if="state.error.removeSpaceGroup")
+    .badge.danger
+      img.icon.cancel(src="@/assets/add.svg")
+      span Only space creator, or group admin, can remove from group
 
 //- read only options
 .row(v-if="!isSpaceMember")
@@ -345,45 +405,20 @@ template(v-if="isSpaceMember")
 
 //- Space Settings
 template(v-if="state.settingsIsVisible")
-  //- read only space settings
-  section.subsection.space-settings(v-if="!isSpaceMember")
-    .row(v-if="!showInExplore")
+  section.subsection.space-settings
+    .row
       AskToAddToExplore
-    .row
-      //- Duplicate
-      .button-wrap
-        button(@click.left="duplicateSpace")
-          img.icon.add(src="@/assets/add.svg")
-          span Duplicate
-      //- Export
-      .button-wrap(:class="{'dialog-is-pinned': dialogIsPinned}")
-        button(@click.left.stop="toggleExportIsVisible" :class="{ active: state.exportIsVisible }")
-          span Export
-        ImportExport(:visible="state.exportIsVisible" :isExport="true")
-
-  //- member space settings
-  section.subsection.space-settings(v-if="isSpaceMember")
-    .row
       AddToExplore
     .row
-      //- Template
-      .button-wrap(@click.left.prevent="toggleCurrentSpaceIsUserTemplate" @keydown.stop.enter="toggleCurrentSpaceIsUserTemplate")
-        button(:class="{ active: currentSpaceIsUserTemplate }")
-          img.icon.templates(src="@/assets/templates.svg")
-          span Mark as Template
-      //- Export
-      .button-wrap(:class="{'dialog-is-pinned': dialogIsPinned}")
-        button(@click.left.stop="toggleExportIsVisible" :class="{ active: state.exportIsVisible }")
-          span Export
-          ImportExport(:visible="state.exportIsVisible" :isExport="true")
-    .row(v-if="currentSpaceIsUserTemplate")
+      //- Import / Export
+      ImportExportButton(@closeDialogs="closeDialogsAndEmit")
       //- Duplicate
       .button-wrap
-        button(@click.left="duplicateSpace")
-          img.icon.add(src="@/assets/add.svg")
+        button(@click.left="duplicateSpace" title="Duplicate this Space")
+          img.icon.duplicate(src="@/assets/duplicate.svg")
           span Duplicate
-    .row
-      .button-wrap(v-if="isSpaceMember")
+    .row(v-if="isSpaceMember")
+      .button-wrap
         .segmented-buttons
           //- Remove
           button.danger(@click.left="removeCurrentSpace" :class="{ disabled: currentSpaceIsTemplate }")
@@ -395,8 +430,6 @@ template(v-if="state.settingsIsVisible")
               span Remove
           //- Hide
           button(@click.stop="toggleHideSpace" :class="{ active: props.currentSpaceIsHidden }")
-            img.icon(v-if="!props.currentSpaceIsHidden" src="@/assets/view.svg")
-            img.icon(v-if="props.currentSpaceIsHidden" src="@/assets/view-hidden.svg")
             span Hide
 </template>
 
@@ -457,8 +490,11 @@ template(v-if="state.settingsIsVisible")
   .background-preview-wrap
     margin-bottom 6px
 
-.team-button
+.group-button
   padding-right 6px
+
+.icon.cal
+  vertical-align 1px
 
 .space-settings
   .background-preview
@@ -472,11 +508,4 @@ template(v-if="state.settingsIsVisible")
   p
     white-space normal
 
-  dialog.import-export
-    left initial
-    right 8px
-
-.dialog-is-pinned
-  dialog.import-export
-    right -50px
 </style>

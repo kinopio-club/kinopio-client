@@ -1,6 +1,5 @@
 // functional methods that can see dom, but can't access components or store
 import cache from '@/cache.js'
-import moonphase from '@/moonphase.js'
 import consts from '@/consts.js'
 import codeLanguages from '@/data/codeLanguages.json'
 import helloSpace from '@/data/hello.json'
@@ -211,6 +210,13 @@ export default {
     }
     return position
   },
+  cursorPositionSnapToGrid (position) {
+    const gridSpacing = consts.spaceBetweenCards
+    return {
+      x: this.roundToNearest(position.x, gridSpacing),
+      y: this.roundToNearest(position.y, gridSpacing)
+    }
+  },
   rectDimensions (rect) {
     const zoom = this.spaceCounterZoomDecimal() || 1
     rect.x = rect.x + window.scrollX
@@ -219,8 +225,8 @@ export default {
     return {
       x: Math.round(rectPosition.x * zoom),
       y: Math.round(rectPosition.y * zoom),
-      width: Math.round(rect.width * zoom),
-      height: Math.round(rect.height * zoom)
+      width: Math.round(rect.width || rect.resizeWidth * zoom),
+      height: Math.round(rect.height || rect.resizeHeight * zoom)
     }
   },
   isPositionOutsideOfSpace (position) {
@@ -324,7 +330,7 @@ export default {
     if (min <= value && value <= max) { return true }
   },
   percentageBetween ({ value, min, max }) {
-    return ((value - min) * 100) / (max - min)
+    return ((value - min) / (max - min)) * 100
   },
   clone (object) {
     if (!object) { return }
@@ -336,7 +342,7 @@ export default {
   isUndefinedOrNull (value) {
     return value === undefined || value === null
   },
-  typeCheck ({ value, type, allowUndefined, origin }) {
+  typeCheck ({ value, type, allowUndefined, origin, silenceWarning }) {
     if (allowUndefined && this.isUndefinedOrNull(value)) {
       return true
     }
@@ -344,7 +350,9 @@ export default {
       return true
     }
     if (typeof value !== type) { // eslint-disable-line valid-typeof
-      console.error(`🚑 passed value is not ${type}`, value, origin)
+      if (!silenceWarning) {
+        console.error(`🚑 passed value is not ${type}`, value, origin)
+      }
       return false
     } else {
       return true
@@ -372,6 +380,12 @@ export default {
     // https://stackoverflow.com/a/9453447
     // returns 1.23
     return Math.round(number * 100) / 100
+  },
+  roundToNearest (value, divider) {
+    divider = divider || consts.spaceBetweenCards
+    value = value || 1
+    const increment = Math.round(value / divider)
+    return increment * divider
   },
   pointIsEmpty (point) {
     if (!point) { return }
@@ -414,6 +428,12 @@ export default {
       isString = false
     }
     return isString
+  },
+  normalizeToObject (item) {
+    if (typeof item === 'string') {
+      item = JSON.parse(item)
+    }
+    return item
   },
   updateObject (object, updates) {
     this.typeCheck({ value: updates, type: 'object', origin: 'updateObject' })
@@ -465,10 +485,12 @@ export default {
   findInArrayOfObjects (array, key, value) {
     return array.find(item => item[key] === value)
   },
-  cursorsAreClose (startCursor, endCursor) {
+  cursorsAreClose (startCursor, endCursor, zoom) {
     if (!startCursor) { return }
     if (!endCursor) { return }
-    const threshold = 5
+    zoom = zoom || this.spaceCounterZoomDecimal()
+    let threshold = 5
+    threshold = threshold * zoom
     const xRange = {
       value: endCursor.x,
       min: startCursor.x - threshold,
@@ -513,6 +535,14 @@ export default {
       return event.touches.length > 1
     }
   },
+  isEventTouchOrMouseLeftButton (event) {
+    const isMouseEvent = event.type.includes('mouse')
+    if (!isMouseEvent) {
+      // ignore touch events
+      return true
+    }
+    return event.button === 0
+  },
   isMacOrIpad () {
     return window.navigator.platform === 'MacIntel'
   },
@@ -521,6 +551,13 @@ export default {
       return '⌘'
     } else {
       return 'Ctrl'
+    }
+  },
+  optionKey () {
+    if (this.isMacOrIpad() || this.isIPhone()) {
+      return 'Option'
+    } else {
+      return 'Alt'
     }
   },
   splitCardNameByParagraphAndSentence (prevName) {
@@ -655,7 +692,7 @@ export default {
   truncated (string, limit) {
     if (!string) { return '' }
     limit = limit || 60
-    if (string.length < limit) { return string }
+    if (string.length <= limit) { return string }
     string = string.substring(0, limit) + '…'
     return string
   },
@@ -815,7 +852,7 @@ export default {
     }
     return color
   },
-  textColorClasses ({ backgroundColor, backgroundColorIsDark }) {
+  colorClasses ({ backgroundColor, backgroundColorIsDark }) {
     backgroundColorIsDark = backgroundColorIsDark || this.colorIsDark(backgroundColor)
     let classes = []
     if (backgroundColorIsDark) {
@@ -865,18 +902,64 @@ export default {
     }
     return rect
   },
+  sortItemsAlphabeticallyBy (items, property) {
+    const sorted = items.sort((a, b) => {
+      // Case-insensitive comparison, ignore emojis
+      let propA = this.normalizeString(a[property]).trim()
+      let propB = this.normalizeString(b[property]).trim()
+      // remove leading dashes
+      propA = this.removeLeadingDashes(propA)
+      propB = this.removeLeadingDashes(propB)
+      if (propA === propB) {
+        // If stripped values are equal, fall back to comparing the original strings
+        return a[property] < b[property] ? -1 : 1
+      }
+      return propA < propB ? -1 : 1
+    })
+    return sorted
+  },
+  sortByY (items) {
+    return items.sort((a, b) => {
+      return a.y - b.y
+    })
+  },
+  sortByX (items) {
+    return items.sort((a, b) => {
+      return a.x - b.x
+    })
+  },
+  nameTextEditAction ({ action, startPosition, endPosition, name }) {
+    let newName, offset
+    let md = ''
+    if (action === 'bold') {
+      md = '**'
+    } else if (action === 'italic') {
+      md = '_'
+    }
+    const length = md.length
+    const before = name.slice(0, startPosition)
+    const selected = name.slice(startPosition, endPosition)
+    const after = name.slice(endPosition)
+    const start = before.endsWith(md)
+    const end = after.startsWith(md)
+
+    if (start && end) {
+      // remove md
+      newName = before.slice(0, -length) + selected + after.slice(length)
+      offset = -length
+    } else {
+      // add md
+      newName = before + `${md}${selected}${md}` + after
+      offset = length
+    }
+    return { newName, offset }
+  },
 
   // Cards
 
-  emptyCard () {
-    return { width: consts.defaultCardWidth, height: 32 }
-  },
-  spaceBetweenCards () {
-    let spaceBetween = 12
-    return this.spaceCounterZoomDecimal() * spaceBetween
-  },
   cardElementDimensions (card) {
     if (!card) { return }
+    card = this.clone(card)
     const element = document.querySelector(`article#card[data-card-id="${card.id}"]`)
     if (!element) { return }
     const cardId = card.id
@@ -979,16 +1062,16 @@ export default {
     const y = parseInt(element.style.top)
     return { x, y }
   },
-  isPointInsideCard (point, card) {
+  isPointInsideRect (point, rect) {
     const xIsInside = this.isBetween({
       value: point.x,
-      min: card.x,
-      max: card.x + card.width
+      min: rect.x,
+      max: rect.x + rect.width
     })
     const yIsInside = this.isBetween({
       value: point.y,
-      min: card.y,
-      max: card.y + card.height
+      min: rect.y,
+      max: rect.y + rect.height
     })
     return xIsInside && yIsInside
   },
@@ -1014,21 +1097,21 @@ export default {
       rectA.y + rectA.height > rectB.y
     )
   },
-  itemsPositionsShifted (items, position) {
-    const origin = this.topLeftItem(items)
-    const delta = {
-      x: position.x - origin.x,
-      y: position.y - origin.y
-    }
-    return items.map(item => {
-      item.x = item.x + delta.x
-      item.y = item.y + delta.y
-      return item
-    })
+  isRectACompletelyInsideRectB (rectA, rectB) {
+    // udpate rects to support space zoom
+    rectA = this.rectDimensions(rectA)
+    rectB = this.rectDimensions(rectB)
+    // is rectA completely inside rectB
+    return (
+      rectA.x >= rectB.x &&
+      rectA.y >= rectB.y &&
+      (rectA.x + rectA.width) <= (rectB.x + rectB.width) &&
+      (rectA.y + rectA.height) <= (rectB.y + rectB.height)
+    )
   },
-  textFromCardNames (cards) {
-    cards = cards.filter(card => Boolean(card))
-    const data = cards.map(card => card.name)
+  nameStringFromItems (items) {
+    items = items.filter(item => Boolean(item))
+    const data = items.map(item => item.name)
     return join(data, '\n\n')
   },
   trim (string) {
@@ -1304,21 +1387,19 @@ export default {
     const endValue = 1
     return -endValue * (elaspedTime /= duration) * (elaspedTime - 2) + startValue
   },
-  highestCardZ (cards) {
-    let highestCardZ = 0
-    cards.forEach(card => {
-      if (card.z > highestCardZ) {
-        highestCardZ = card.z
-      }
-    })
-    return highestCardZ
+  highestItemZ (items) {
+    let highestZ = Math.max(...items.map(item => item.z || 0)) + 1
+    return highestZ
   },
 
   // Spaces 🌙
 
   spaceIsUnchanged (prevSpace, newSpace) {
     if (!prevSpace.cards || !prevSpace.connections) { return false }
-    return prevSpace.editedAt === newSpace.editedAt
+    const cardsCountIsUnchanged = prevSpace.cards?.length === newSpace.cards.length
+    const boxesCountIsUnchanged = prevSpace.boxes?.length === newSpace.boxes.length
+    const editedAtIsUnchanged = prevSpace.editedAt === newSpace.editedAt
+    return cardsCountIsUnchanged && boxesCountIsUnchanged && editedAtIsUnchanged
   },
   mergeSpaceKeyValues ({ prevItems, newItems, selectedItemIds }) {
     prevItems = prevItems.filter(item => Boolean(item))
@@ -1380,7 +1461,6 @@ export default {
     return {
       id: spaceId,
       name: 'Loading…',
-      moonPhase: '',
       background: '',
       backgroundTint: '',
       backgroundGradient: null,
@@ -1399,15 +1479,16 @@ export default {
       visits: 0,
       showInExplore: false,
       proposedShowInExplore: false,
-      teamId: null
+      groupId: null
     }
   },
-  clearSpaceMeta (space, type) {
+  resetSpaceMeta ({ space, user, type }) {
     space.originSpaceId = space.id
     space.id = nanoid()
     space.name = `${space.name} ${type}`
     space.removedCards = []
-    space.users = []
+    space.users = [user]
+    space.userId = user.id
     space.collaborators = []
     space.showInExplore = false
     space.proposedShowInExplore = false
@@ -1417,17 +1498,17 @@ export default {
     space.collaboratorKey = nanoid()
     space.previewImage = null
     space.previewThumbnailImage = null
-    space.teamId = null
+    space.groupId = null
+    space.createdAt = new Date()
+    space.editedAt = new Date()
+    space.collaboratorKey = nanoid()
+    space.readOnlyKey = nanoid()
     space.cards = space.cards.map(card => {
-      card.userId = null
-      if (card.nameUpdatedByUserId) {
-        card.nameUpdatedByUserId = null
-        card.nameUpdatedAt = null
-      }
       card.width = Math.ceil(card.width)
       card.height = Math.ceil(card.height)
       return card
     })
+    space = this.updateSpaceItemsUserId(space, user.id)
     return space
   },
   // migration added oct 2019
@@ -1438,7 +1519,7 @@ export default {
     return space
   },
   updateSpaceUserId (space, userId) {
-    space.cards = space.cards.map(card => {
+    space.cards = space.cards?.map(card => {
       if (card.userId === consts.rootUserId) {
         card.userId = null
         return card
@@ -1450,15 +1531,15 @@ export default {
       card.userId = userId
       return card
     })
-    space.boxes = space.boxes.map(box => {
+    space.boxes = space.boxes?.map(box => {
       box.userId = userId
       return box
     })
-    space.connectionTypes = space.connectionTypes.map(type => {
+    space.connectionTypes = space.connectionTypes?.map(type => {
       type.userId = userId
       return type
     })
-    space.connections = space.connections.map(connection => {
+    space.connections = space.connections?.map(connection => {
       connection.userId = userId
       return connection
     })
@@ -1475,23 +1556,34 @@ export default {
     }
     return userId
   },
-  uniqueSpaceItems (items, nullItemUsers) {
-    const cardIdDeltas = []
+  async uniqueSpaceItems (items, nullItemUsers) {
+    const itemIdDeltas = []
     const connectionTypeIdDeltas = []
-    const user = cache.user()
+    const user = await cache.user()
     let { cards, connections, connectionTypes, boxes, tags } = items
     tags = tags || []
     boxes = boxes || []
     cards = cards.map(card => {
       const userId = this.itemUserId(user, card, nullItemUsers)
       const newId = nanoid()
-      cardIdDeltas.push({
+      itemIdDeltas.push({
         prevId: card.id,
         newId
       })
       card.id = newId
       card.userId = userId
       return card
+    })
+    boxes = boxes.map(box => {
+      const userId = this.itemUserId(user, box, nullItemUsers)
+      const newId = nanoid()
+      itemIdDeltas.push({
+        prevId: box.id,
+        newId
+      })
+      box.id = newId
+      box.userId = userId
+      return box
     })
     connectionTypes = connectionTypes.map(type => {
       const userId = this.itemUserId(user, type, nullItemUsers)
@@ -1508,23 +1600,24 @@ export default {
       const userId = this.itemUserId(user, connection, nullItemUsers)
       connection.id = nanoid()
       connection.connectionTypeId = this.updateAllIds(connection, 'connectionTypeId', connectionTypeIdDeltas)
-      connection.startItemId = this.updateAllIds(connection, 'startItemId', cardIdDeltas)
-      connection.endItemId = this.updateAllIds(connection, 'endItemId', cardIdDeltas)
+      connection.startItemId = this.updateAllIds(connection, 'startItemId', itemIdDeltas)
+      connection.endItemId = this.updateAllIds(connection, 'endItemId', itemIdDeltas)
       connection.userId = userId
       return connection
     })
-    boxes = boxes.map(box => {
-      const userId = this.itemUserId(user, box, nullItemUsers)
-      box.id = nanoid()
-      box.userId = userId
-      return box
-    })
     tags = tags.map(tag => {
       tag.id = nanoid()
-      tag.cardId = this.updateAllIds(tag, 'cardId', cardIdDeltas)
+      tag.cardId = this.updateAllIds(tag, 'cardId', itemIdDeltas)
       return tag
     })
     items = { cards, connections, connectionTypes, boxes, tags }
+    return items
+  },
+  updateSpaceItemsSpaceId (items, spaceId) {
+    const keys = Object.keys(items)
+    keys.forEach(key => {
+      items[key] = this.updateItemsSpaceId(items[key], spaceId)
+    })
     return items
   },
   updateItemsSpaceId (items, spaceId) {
@@ -1532,6 +1625,38 @@ export default {
       item.spaceId = spaceId
       return item
     })
+  },
+  updateSpaceItemsRelativeToOrigin (items) {
+    items = this.clone(items)
+    // offset
+    let positionItems = []
+    consts.itemTypesWithPositions.forEach(itemName => {
+      items[itemName].forEach(item => positionItems.push(item))
+    })
+    const offset = this.topLeftItem(positionItems)
+    console.log(positionItems, offset)
+    // update positions
+    consts.itemTypesWithPositions.forEach(itemName => {
+      items[itemName] = items[itemName].map(item => {
+        item.x = item.x - offset.x
+        item.y = item.y - offset.y
+        return item
+      })
+    })
+    return items
+  },
+  updateSpaceItemsAddPosition (items, position) {
+    items = this.clone(items)
+    consts.itemTypesWithPositions.forEach(itemName => {
+      items[itemName] = items[itemName].map(item => {
+        item.x = item.x + position.x
+        item.y = item.y + position.y
+        item.x = Math.max(consts.minItemXY, item.x)
+        item.y = Math.max(consts.minItemXY, item.y)
+        return item
+      })
+    })
+    return items
   },
   updateConnectionsType ({ connections, prevTypeId, newTypeId }) {
     return connections.map(connection => {
@@ -1543,20 +1668,21 @@ export default {
   },
   updateSpacesUserId (userId, spaces) {
     spaces = spaces.map(space => {
-      space = this.updateSpaceItemsUser(space, userId)
+      space = this.updateSpaceItemsUserId(space, userId)
       space = this.updateSpaceUserId(space, userId)
       delete space.users
       return space
     })
     return spaces
   },
-  updateSpaceItemsUser (space, userId) {
-    const itemNames = ['boxes', 'cards', 'connections', 'connectionTypes']
-    itemNames.forEach(itemName => {
-      if (!space[itemName]) { return }
-      space[itemName] = space[itemName].map(item => {
+  updateSpaceItemsUserId (space, userId) {
+    const itemTypes = ['boxes', 'cards', 'connections', 'connectionTypes']
+    itemTypes.forEach(itemType => {
+      if (!space[itemType]) { return }
+      space[itemType] = space[itemType].map(item => {
         item.userId = userId
-        item.nameUpdatedByUserId = userId
+        item.nameUpdatedByUserId = null
+        item.nameUpdatedAt = new Date()
         return item
       })
     })
@@ -1583,7 +1709,7 @@ export default {
     deleteKeys.forEach(key => {
       delete space[key]
     })
-    this.updateSpaceItemsUser(space, userId)
+    this.updateSpaceItemsUserId(space, userId)
     space.userId = userId
     return space
   },
@@ -1612,7 +1738,7 @@ export default {
     remoteSpace.removedCards = removedCards
     return remoteSpace
   },
-  AddCurrentUserIsCollaboratorToSpaces (spaces, currentUser) {
+  addCurrentUserIsCollaboratorToSpaces (spaces, currentUser) {
     if (!spaces) { return }
     return spaces.map(space => {
       let userId
@@ -1664,115 +1790,47 @@ export default {
     }
     return dayjs(date)
   },
-
-  // Journal Space 🌚
-
-  journalSpace ({ currentUser, isTomorrow, weather, journalDailyPrompt, journalDailyDateImage }) {
-    let date = dayjs(new Date())
-    if (isTomorrow) {
-      date = date.add(1, 'day')
+  moonPhase (date) {
+    // adapted from https://github.com/t1mwillis/simple-moonphase-js/blob/master/index.js
+    if (!date) {
+      date = dayjs(new Date())
     }
-    const moonPhase = moonphase(date)
-    // space
-    const spaceId = nanoid()
-    let space = this.emptySpace(spaceId)
-    space.name = this.journalSpaceName({ isTomorrow })
-    space.privacy = 'private'
-    space.moonPhase = moonPhase.name
-    space.removedCards = []
-    space.userId = currentUser.id
-    space.connectionTypes = []
-    space.connections = []
-    space.isTemplate = false
-    space.isHidden = false
-    space.isFromTweet = false
-    space.collaboratorKey = nanoid()
-    space = this.newSpaceBackground(space, currentUser)
-    space.background = space.background || consts.defaultSpaceBackground
-    // date
-    let dateCard = {
-      id: nanoid(),
-      name: `${journalDailyDateImage} ${date.format('dddd, MMM D')}`,
-      x: 86,
-      y: 157,
-      resizeWidth: 260,
-      frameId: 0
+    const phases = ['new-moon', 'waxing-crescent', 'waxing-quarter', 'waxing-gibbous', 'full-moon', 'waning-gibbous', 'waning-quarter', 'waning-crescent']
+    let day = date.get('date')
+    let month = date.get('month') + 1 // January is 0!
+    let year = dayjs().get('year')
+    let c = 0
+    let e = 0
+    let jd = 0
+    let phase = 0
+    if (month < 3) {
+      year--
+      month += 12
     }
-    if (weather) {
-      dateCard.name += weather
-    }
-    space.cards.push(dateCard)
-    // daily prompt
-    if (journalDailyPrompt) {
-      let card = { id: nanoid() }
-      card.name = journalDailyPrompt
-      const position = this.promptCardPosition(space.cards, card.name)
-      card.x = position.x
-      card.y = 467
-      card.z = 0
-      card.spaceId = spaceId
-      card.frameId = 5
-      space.cards.push(card)
-    }
-    // user prompts
-    const userPrompts = currentUser.journalPrompts
-    userPrompts.forEach(prompt => {
-      if (!prompt.name) { return }
-      let card = { id: nanoid() }
-      card.name = prompt.name
-      const position = this.promptCardPosition(space.cards, card.name)
-      card.x = position.x
-      card.y = position.y
-      card.z = 0
-      card.spaceId = spaceId
-      space.cards.push(card)
-    })
-    return space
-  },
-
-  journalSpaceName ({ isTomorrow, isYesterday }) {
-    let date = dayjs(new Date())
-    if (isTomorrow) {
-      date = date.add(1, 'day')
-    } else if (isYesterday) {
-      date = date.subtract(1, 'day')
-    }
-    return `${date.format('ddd MMM D/YY')}` // Thu Oct 8/20
-  },
-  journalSpaceDateFromName (name) {
-    // https://regexr.com/6471p
-    const datePattern = new RegExp(/^['A-Za-z]+ ['A-Za-z]+ [0-9]+\/[0-9]{2}/g)
-    let matches = name.match(datePattern)
-    if (matches) {
-      return matches[0]
-    }
-  },
-  promptCardPosition (cards, newCardName) {
-    const lastCard = last(cards)
-    const lastCardY = lastCard.y
-    let lastCardName = lastCard.name.replaceAll('[', '')
-    lastCardName = lastCardName.replaceAll(']', '')
-    const averageCharactersPerLine = 25
-    const lines = Math.ceil(lastCardName.length / averageCharactersPerLine)
-    const lineHeight = 14
-    const padding = 26
-    const lastCardHeight = (lines * lineHeight) + padding + lines
-    let distanceBetween = 50
-    let x = 120
-    if (this.checkboxFromString(newCardName)) {
-      distanceBetween = 12
-      x = 120
-    }
-    const y = lastCardY + lastCardHeight + distanceBetween
-    return { x, y }
+    ++month
+    c = 365.25 * year
+    e = 30.6 * month
+    jd = c + e + day - 694039.09 // jd is total days elapsed
+    jd /= 29.5305882 // divide by the moon cycle
+    phase = parseInt(jd) // int(jd) -> phase, take integer part of jd
+    jd -= phase // subtract integer part to leave fractional part of original jd
+    phase = Math.round(jd * 8) // scale fraction from 0-8 and round
+    if (phase >= 8) phase = 0 // 0 and 8 are the same so turn 8 into 0
+    return phases[phase] // 'new-moon', ...
   },
 
   // urls 🌍
 
   // same as server util
   normalizeString (string) {
+    // remove punctuation characters, what's → whats
+    string = string.replace(/'|"|‘|’|“|”/ig, '')
     // replaces non alphanumeric (spaces, emojis, $%&, etc.) characters with '-'s
     return string.replace(/([^a-z0-9-]+)/ig, '-').toLowerCase()
+  },
+  removeLeadingDashes (string) {
+    // -123-abc -> 123-abc
+    return string.replace(/^-+/, '')
   },
   normalizeFileUrl (string) {
     // same as normalizeString^, but keeps '.' and case
@@ -1823,11 +1881,11 @@ export default {
     const url = `${consts.kinopioDomain()}/invite?spaceId=${spaceId}&${invite}&name=${spaceName}${comment}`
     return url
   },
-  teamInviteUrl ({ teamId, teamName, collaboratorKey }) {
-    if (!teamId || !collaboratorKey) { return }
-    teamName = this.normalizeString(teamName)
+  groupInviteUrl ({ groupId, groupName, collaboratorKey }) {
+    if (!groupId || !collaboratorKey) { return }
+    groupName = this.normalizeString(groupName)
     const invite = `collaboratorKey=${collaboratorKey}`
-    const url = `${consts.kinopioDomain()}/team/invite?teamId=${teamId}&${invite}&name=${teamName}`
+    const url = `${consts.kinopioDomain()}/group/invite?groupId=${groupId}&${invite}&name=${groupName}`
     return url
   },
   urlSearchParamsToObject (searchParams) {
@@ -1837,13 +1895,13 @@ export default {
     }
     return object
   },
-  teamFromTeamInviteUrl (url) {
+  groupFromGroupInviteUrl (url) {
     if (!url) { return }
     url = new URL(url)
     const params = url.searchParams
-    let team = this.urlSearchParamsToObject(params)
-    team.id = team.teamId
-    return team
+    let group = this.urlSearchParamsToObject(params)
+    group.id = group.groupId
+    return group
   },
   spaceAndCardIdFromPath (path) {
     // https://regexr.com/5kr4g
@@ -2051,7 +2109,7 @@ export default {
   urlIsFile (url) {
     if (!url) { return }
     url = url + ' '
-    const fileUrlPattern = new RegExp(/(?:\.txt|\.md|\.markdown|\.pdf|\.log|\.ppt|\.pptx|\.doc|\.docx|\.csv|\.xsl|\.xslx|\.rtf|\.zip|\.tar|\.xml|\.psd|\.ai|\.ind|\.sketch|\.mov|\.heic|\.7z|\.woff|\.woff2|\.otf|\.ttf|\.wav|\.flac)(?:\n| |\?|&)/igm)
+    const fileUrlPattern = new RegExp(/(?:\.txt|\.md|\.markdown|\.pdf|\.log|\.ppt|\.pptx|\.doc|\.docx|\.csv|\.xsl|\.xslx|\.rtf|\.zip|\.tar|\.xml|\.psd|\.ai|\.ind|\.sketch|\.mov|\.heic|\.7z|\.woff|\.woff2|\.otf|\.ttf|\.wav|\.flac\.pla\.json)(?:\n| |\?|&)/igm)
     const isFile = url.toLowerCase().match(fileUrlPattern)
     return Boolean(isFile)
   },
@@ -2065,15 +2123,15 @@ export default {
       console.warn('🚑 urlIsSpaceInvite', error)
     }
   },
-  urlIsTeamInvite (url) {
+  urlIsGroupInvite (url) {
     const hostIsKinopio = this.hostIsKinopio(url)
     if (!hostIsKinopio) { return }
     url = new URL(url)
-    return url.pathname === '/team/invite'
+    return url.pathname === '/group/invite'
   },
   urlIsSpace (url) {
     if (!url) { return }
-    if (this.urlIsTeamInvite(url)) { return }
+    if (this.urlIsGroupInvite(url)) { return }
     if (this.urlIsSpaceInvite(url)) { return true }
     let spaceUrlPattern
     if (consts.isDevelopment()) {
@@ -2320,8 +2378,8 @@ export default {
 
   // Upload
 
-  isFileTooBig ({ file, userIsUpgraded, spaceUserIsUpgraded }) {
-    const isUpgraded = userIsUpgraded || spaceUserIsUpgraded
+  isFileTooBig ({ file, userIsUpgraded, spaceCreatorIsUpgraded }) {
+    const isUpgraded = userIsUpgraded || spaceCreatorIsUpgraded
     const sizeLimit = 1024 * 1024 * 5 // 5mb
     if (file.size > sizeLimit && !isUpgraded) {
       return true
@@ -2330,7 +2388,7 @@ export default {
   async dataFromClipboard () {
     let text, file
     const items = await navigator.clipboard.read()
-    console.log('🍇 clipboard paste', items)
+    console.log('🎊 dataFromClipboard', items)
     for (const item of items) {
       const imageMatch = 'image/'
       const imageType = item.types.find(type => {
@@ -2381,20 +2439,6 @@ export default {
     tags = tags.map(tag => tag.substring(2, tag.length - 2))
     return tags
   },
-  newTag ({ name, defaultColor, cardId, spaceId }) {
-    let color
-    const existingTag = cache.allTags().find(tag => tag.name === name)
-    if (existingTag) {
-      color = existingTag.color
-    }
-    return {
-      name,
-      id: nanoid(),
-      color: color || defaultColor,
-      cardId: cardId,
-      spaceId: spaceId
-    }
-  },
   indexesOf (string, search) {
     // adapted from https://stackoverflow.com/a/3410549
     search = search.replaceAll('[', '\\[')
@@ -2425,6 +2469,18 @@ export default {
 
   commandsFromString (string) {
     const allowedCommands = Object.keys(consts.systemCommands)
+    // https://regexr.com/7h3ia
+    const commandPattern = new RegExp(/::systemCommand=\w+/gm)
+    let commands = string.match(commandPattern)
+    if (!commands) { return }
+    commands = commands.filter(command => {
+      const name = this.commandNameFromCommand(command)
+      return allowedCommands.includes(name)
+    })
+    return commands
+  },
+  commandIconsFromString (string) {
+    const allowedCommands = Object.keys(consts.systemCommandIcons)
     // https://regexr.com/7h3ia
     const commandPattern = new RegExp(/::systemCommand=\w+/gm)
     let commands = string.match(commandPattern)
@@ -2476,11 +2532,12 @@ export default {
     const tags = this.tagsFromString(name) || []
     const urls = this.urlsFromString(name) || []
     const commands = this.commandsFromString(name) || []
+    const commandIcons = this.commandIconsFromString(name) || []
     const markdownLinks = name.match(this.markdown().linkPattern) || []
     const links = urls.filter(url => {
       const linkIsMarkdown = markdownLinks.find(markdownLink => markdownLink.includes(url))
       if (linkIsMarkdown) { return }
-      return this.urlIsSpace(url) || this.urlIsSpaceInvite(url) || this.urlIsTeamInvite(url)
+      return this.urlIsSpace(url) || this.urlIsSpaceInvite(url) || this.urlIsGroupInvite(url)
     })
     const files = urls.filter(url => this.urlIsFile(url))
     let segments = []
@@ -2520,6 +2577,12 @@ export default {
       const endPosition = startPosition + command.length
       const commandName = this.commandNameFromCommand(command)
       segments.push({ startPosition, endPosition, command: commandName, name: consts.systemCommands[commandName], isCommand: true })
+    })
+    commandIcons.forEach(command => {
+      const startPosition = name.indexOf(command)
+      const endPosition = startPosition + command.length
+      const commandName = this.commandNameFromCommand(command)
+      segments.push({ startPosition, endPosition, commandIcon: commandName, name: consts.systemCommandIcons[commandName], isCommandIcon: true })
     })
     segments = this.segmentsWithTextSegments(name, segments)
     return segments

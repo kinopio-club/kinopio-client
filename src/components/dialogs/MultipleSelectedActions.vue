@@ -7,6 +7,7 @@ import MoveOrCopyItems from '@/components/dialogs/MoveOrCopyItems.vue'
 import CardOrBoxActions from '@/components/subsections/CardOrBoxActions.vue'
 import ConnectionActions from '@/components/subsections/ConnectionActions.vue'
 import AlignAndDistribute from '@/components/AlignAndDistribute.vue'
+import ItemCheckboxButton from '@/components/ItemCheckboxButton.vue'
 import ShareCard from '@/components/dialogs/ShareCard.vue'
 
 import { nanoid } from 'nanoid'
@@ -23,11 +24,12 @@ const state = reactive({
   copyItemsIsVisible: false,
   moveItemsIsVisible: false,
   cardsIsConnected: false,
-  cardsHaveCheckboxes: false,
-  cardsCheckboxIsChecked: false,
   shareCardIsVisible: false
 })
 
+const closeAllDialogs = () => {
+  store.dispatch('closeAllDialogs')
+}
 const closeDialogs = () => {
   state.copyItemsIsVisible = false
   state.moveItemsIsVisible = false
@@ -44,8 +46,6 @@ const visible = computed(() => {
 })
 watch(() => visible.value, async (value, prevValue) => {
   if (value) {
-    checkCardsHaveCheckboxes()
-    checkCardsCheckboxIsChecked()
     await nextTick()
     store.commit('pinchCounterZoomDecimal', utils.pinchCounterZoomDecimal())
     checkIsCardsConnected()
@@ -70,15 +70,14 @@ const isThemeDarkAndUserColorLight = computed(() => {
   const userColorIsLight = !utils.colorIsDark(userColor.value)
   return isThemeDark && userColorIsLight
 })
-const maxCardCharacterLimit = computed(() => consts.defaultCharacterLimit)
+const colorClasses = computed(() => {
+  return utils.colorClasses({ backgroundColor: userColor.value })
+})
+const maxCardCharacterLimit = computed(() => store.state.currentUser.cardSettingsDefaultCharacterLimit || consts.defaultCharacterLimit)
 const userColor = computed(() => store.state.currentUser.color)
 const spaceCounterZoomDecimal = computed(() => store.getters.spaceCounterZoomDecimal)
 const pinchCounterZoomDecimal = computed(() => store.state.pinchCounterZoomDecimal)
 const spaceZoomDecimal = computed(() => store.getters.spaceZoomDecimal)
-
-const shouldShowMultipleSelectedCardActions = computed(() => store.state.currentUser.shouldShowMultipleSelectedCardActions)
-const shouldShowMultipleSelectedLineActions = computed(() => store.state.currentUser.shouldShowMultipleSelectedLineActions)
-const moreOptionsIsVisible = computed(() => store.state.currentUser.shouldShowMoreAlignOptions)
 
 const cardOrBoxIsSelected = computed(() => cards.value.length || boxes.value.length)
 
@@ -186,60 +185,6 @@ const editableCards = computed(() => {
     })
   }
 })
-const updateDimensionsAndPaths = async () => {
-  store.dispatch('currentCards/updateDimensions', { cards: cards.value })
-  await nextTick()
-  await nextTick()
-  store.dispatch('currentConnections/updateMultiplePaths', cards.value)
-}
-
-// card checkboxes
-
-const cardCheckboxes = computed({
-  get () {
-    return state.cardsCheckboxIsChecked
-  },
-  set (value) {
-    if (state.cardsCheckboxIsChecked) {
-      cards.value.forEach(card => {
-        store.dispatch('currentCards/removeChecked', card.id)
-      })
-    } else {
-      cards.value.forEach(card => {
-        store.dispatch('currentCards/toggleChecked', { cardId: card.id, value })
-      })
-    }
-    checkCardsHaveCheckboxes()
-    checkCardsCheckboxIsChecked()
-    updateDimensionsAndPaths()
-  }
-})
-const checkCardsHaveCheckboxes = () => {
-  const cardsWithCheckboxes = cards.value.filter(card => {
-    if (!card) { return }
-    return utils.checkboxFromString(card.name)
-  })
-  state.cardsHaveCheckboxes = cardsWithCheckboxes.length === cards.value.length
-}
-const checkCardsCheckboxIsChecked = () => {
-  const cardsChecked = cards.value.filter(card => utils.nameIsChecked(card.name))
-  state.cardsCheckboxIsChecked = cardsChecked.length === cards.value.length
-}
-const addCheckboxToCards = async () => {
-  let updatedCards = []
-  cards.value.forEach(card => {
-    if (!utils.checkboxFromString(card.name)) {
-      const update = {
-        id: card.id,
-        name: `[] ${card.name}`
-      }
-      updatedCards.push(update)
-    }
-  })
-  store.dispatch('currentCards/updateMultiple', updatedCards)
-  state.cardsHaveCheckboxes = true
-  updateDimensionsAndPaths()
-}
 
 // connect cards
 
@@ -276,7 +221,11 @@ const connectCards = (event) => {
       const endItemId = cardIds[index + 1]
       if (connectionAlreadyExists(startItemId, endItemId)) { return }
       const id = nanoid()
-      const path = store.getters['currentConnections/connectionPathBetweenItems']({ startItemId, endItemId })
+      const path = store.getters['currentConnections/connectionPathBetweenItems']({
+        startItemId,
+        endItemId,
+        controlPoint: 'q00,00' // straight line
+      })
       return {
         id, startItemId, endItemId, path
       }
@@ -306,7 +255,7 @@ const moreLineOptionsLabel = computed(() => {
     return 'LINE'
   }
 })
-const onlyConnectionsIsSelected = computed(() => connectionsIsSelected.value && !cardsIsSelected.value)
+const onlyConnectionsIsSelected = computed(() => connectionsIsSelected.value && !cardsIsSelected.value && !boxesIsSelected.value)
 const connectionsIsSelected = computed(() => Boolean(multipleConnectionsSelectedIds.value.length))
 const connections = computed(() => {
   let connections = multipleConnectionsSelectedIds.value.map(id => {
@@ -347,6 +296,7 @@ const connectionAlreadyExists = (startItemId, endItemId) => {
 
 // boxes
 
+const onlyBoxesIsSelected = computed(() => boxesIsSelected.value && !cardsIsSelected.value && !connectionsIsSelected.value)
 const boxesIsSelected = computed(() => multipleBoxesSelectedIds.value.length > 0)
 const boxes = computed(() => {
   let boxes = multipleBoxesSelectedIds.value.map(boxId => {
@@ -383,9 +333,8 @@ const positionNewCards = async (newCards) => {
   newCards = newCards.map((card, index) => {
     if (index === 0) { return card }
     const prevCard = newCards[index - 1]
-    const element = document.querySelector(`article [data-card-id="${prevCard.id}"]`)
-    const prevCardRect = element.getBoundingClientRect()
-    card.y = prevCard.y + (prevCardRect.height * spaceCounterZoomDecimal.value) + spaceBetweenCards
+    const rect = utils.cardElementDimensions(prevCard)
+    card.y = rect.y + rect.height + spaceBetweenCards
     return card
   })
   newCards = newCards.map(card => {
@@ -411,7 +360,6 @@ const mergeSelectedCards = () => {
   const urlPreview = {}
   cards.forEach(card => {
     name = `${name}\n\n${card.name.trim()}`
-
     Object.keys(card).forEach(key => {
       if (key.startsWith('urlPreview') && card[key] && !urlPreview[key]) {
         urlPreview[key] = card[key]
@@ -419,10 +367,9 @@ const mergeSelectedCards = () => {
     })
   })
   name = name.trim()
-  let newNames = []
-  // split names while > maxCardCharacterLimit
+  let newName
   do {
-    let newName = name.substring(0, maxCardCharacterLimit.value)
+    newName = name.substring(0, maxCardCharacterLimit.value)
     const lastSpace = newName.lastIndexOf(' ')
     const lastLineBreak = newName.lastIndexOf('\n')
     const shouldSplitByMaxLength = lastSpace === -1 && lastLineBreak === -1
@@ -430,7 +377,6 @@ const mergeSelectedCards = () => {
       newName = name
       name = ''
     } else if (shouldSplitByMaxLength) {
-      // newName = newName
       name = name.substring(maxCardCharacterLimit.value)
     } else if (lastSpace >= lastLineBreak) {
       newName = name.substring(0, lastSpace)
@@ -439,28 +385,21 @@ const mergeSelectedCards = () => {
       newName = name.substring(0, lastLineBreak)
       name = name.substring(lastLineBreak)
     }
-    newNames.push(newName)
   } while (name.length > maxCardCharacterLimit.value)
-
-  newNames.push(name)
-  newNames = newNames.filter(name => Boolean(name))
   let position = { x: cards[0].x, y: cards[0].y }
-  let newCards = []
   remove({ shouldRemoveCardsOnly: true })
-  // create merged cards
-  newNames.forEach((newName, index) => {
-    let newCard = {
-      id: nanoid(),
-      name: newName,
-      x: position.x,
-      y: position.y,
-      ...urlPreview
-    }
-    newCards.push(newCard)
-  })
-  store.dispatch('currentCards/addMultiple', { cards: newCards })
-  prevCards = newCards // for history
-  positionNewCards(newCards)
+  const newCard = {
+    id: nanoid(),
+    name: newName,
+    x: position.x,
+    y: position.y,
+    ...urlPreview
+  }
+  store.dispatch('currentCards/add', newCard)
+  prevCards = [ newCard ] // for history
+  setTimeout(() => {
+    positionNewCards([ newCard ])
+  }, 100)
 }
 
 // copy and move
@@ -486,10 +425,21 @@ const toggleMoveItemsIsVisible = () => {
 
 // more options
 
+const moreOptionsIsVisible = computed(() => store.state.currentUser.shouldShowMoreAlignOptions)
+const shouldShowMultipleSelectedLineActions = computed(() => store.state.currentUser.shouldShowMultipleSelectedLineActions)
+const shouldShowMultipleSelectedBoxActions = computed(() => store.state.currentUser.shouldShowMultipleSelectedBoxActions)
 const toggleShouldShowMultipleSelectedLineActions = () => {
   closeDialogs()
   const isVisible = !shouldShowMultipleSelectedLineActions.value
   store.dispatch('currentUser/shouldShowMultipleSelectedLineActions', isVisible)
+  nextTick(() => {
+    scrollIntoView()
+  })
+}
+const toggleShouldShowMultipleSelectedBoxActions = () => {
+  closeDialogs()
+  const isVisible = !shouldShowMultipleSelectedBoxActions.value
+  store.dispatch('currentUser/shouldShowMultipleSelectedBoxActions', isVisible)
   nextTick(() => {
     scrollIntoView()
   })
@@ -517,65 +467,68 @@ dialog.narrow.multiple-selected-actions(
   ref="dialogElement"
   @click.left="closeDialogs"
   :style="styles"
+  :class="colorClasses"
 )
   .dark-theme-background-layer(v-if="isThemeDarkAndUserColorLight")
+  .close-button-wrap.inline-button-wrap(@click="closeAllDialogs")
+    button.small-button.inline-button
+      img.icon.cancel(src="@/assets/add.svg")
   section
+
     //- Edit Cards
-    .row(v-if="cardsIsSelected")
+    .row(v-if="cardOrBoxIsSelected")
       //- [·]
-      .button-wrap.cards-checkboxes(:class="{ disabled: !canEditAll.cards }" title="Card Checkboxes")
-        label.fixed-height(v-if="state.cardsHaveCheckboxes" :class="{active: state.cardsCheckboxIsChecked}" tabindex="0")
-          input(type="checkbox" v-model="cardCheckboxes" tabindex="-1")
-        label(v-if="!state.cardsHaveCheckboxes" @click.left.prevent="addCheckboxToCards" @keydown.stop.enter="addCheckboxToCards" tabindex="0")
-          input.add(type="checkbox" tabindex="-1")
+      ItemCheckboxButton(:boxes="boxes" :cards="cards" :isDisabled="!canEditAll.cards && !canEditAll.boxes")
       //- Connect
       button(v-if="multipleCardsIsSelected" :class="{active: state.cardsIsConnected}" @click.left.prevent="toggleConnectCards" @keydown.stop.enter="toggleConnectCards" :disabled="!canEditAll.cards" title="Connect/Disconnect Cards")
-        img.connector-icon.icon(src="@/assets/connector-closed.svg" v-if="state.cardsIsConnected")
-        img.connector-icon.icon(src="@/assets/connector-open.svg" v-else)
-        span Connect
-      //- Share Card
-      //- .button-wrap(v-if="oneCardIsSelected" @click.left.stop="toggleShareCardIsVisible")
-      //-   button(:class="{active: state.shareCardIsVisible}")
-      //-     span Share
-      //-   ShareCard(:visible="state.shareCardIsVisible" :card="cards[0]")
-
+        img.connect-items.icon(src="@/assets/connect-items.svg")
       //- LINE Options
       .button-wrap(v-if="connectionsIsSelected && !onlyConnectionsIsSelected")
         button(:disabled="!canEditAll.cards && !canEditAll.boxes" @click.left.stop="toggleShouldShowMultipleSelectedLineActions" :class="{active : shouldShowMultipleSelectedLineActions}" title="More Line Options")
           span Line
           img.icon.down-arrow(src="@/assets/down-arrow.svg")
+      //- BOX options
+      .button-wrap(v-if="boxesIsSelected && !onlyBoxesIsSelected")
+        button(:disabled="!canEditAll.cards && !canEditAll.boxes" @click.left.stop="toggleShouldShowMultipleSelectedBoxActions" :class="{active : shouldShowMultipleSelectedBoxActions}" title="More Box Options")
+          span Box
+          img.icon.down-arrow(src="@/assets/down-arrow.svg")
 
-    CardOrBoxActions(:visible="cardsIsSelected || boxesIsSelected" :cards="cards" :boxes="boxes" @closeDialogs="closeDialogs" :class="{ 'last-row': !connectionsIsSelected }" :backgroundColor="userColor")
+    CardOrBoxActions(:visible="cardsIsSelected" :cards="cards" @closeDialogs="closeDialogs" :backgroundColor="userColor")
+    CardOrBoxActions(:labelIsVisible="true" :visible="(shouldShowMultipleSelectedBoxActions || onlyBoxesIsSelected) && boxesIsSelected" :boxes="boxes" @closeDialogs="closeDialogs" :backgroundColor="userColor")
+
+      //- :class="{ 'last-row': !connectionsIsSelected }"
+
     ConnectionActions(:visible="(shouldShowMultipleSelectedLineActions || onlyConnectionsIsSelected) && connectionsIsSelected" :connections="editableConnections" @closeDialogs="closeDialogs" :canEditAll="canEditAll" :backgroundColor="userColor" :label="moreLineOptionsLabel")
 
   section
-    template(v-if="cardOrBoxIsSelected")
-      .row
-        //- Align And Distribute
-        AlignAndDistribute(:visible="multipleCardOrBoxesIsSelected" :shouldHideMoreOptions="true" :shouldDistributeWithAlign="true" :numberOfSelectedItemsCreatedByCurrentUser="numberOfSelectedItemsCreatedByCurrentUser" :canEditAll="canEditAll" :cards="cards" :editableCards="cards" :connections="connections" :boxes="boxes" :editableBoxes="editableBoxes")
-        //- Move/Copy
-        .segmented-buttons.move-or-copy-wrap
-          button(@click.left.stop="toggleCopyItemsIsVisible" :class="{ active: state.copyItemsIsVisible }")
-            span Copy
-            MoveOrCopyItems(:visible="state.copyItemsIsVisible" :actionIsMove="false")
-          button(@click.left.stop="toggleMoveItemsIsVisible" :class="{ active: state.moveItemsIsVisible }" :disabled="!canEditAll.cards")
-            span Move
-            MoveOrCopyItems(:visible="state.moveItemsIsVisible" :actionIsMove="true")
-      //- More Options
-      AlignAndDistribute(:visible="multipleCardOrBoxesIsSelected && moreOptionsIsVisible" :numberOfSelectedItemsCreatedByCurrentUser="numberOfSelectedItemsCreatedByCurrentUser" :canEditAll="canEditAll" :cards="cards" :editableCards="cards" :connections="connections" :boxes="boxes" :editableBoxes="editableBoxes")
+    .row(v-if="cardOrBoxIsSelected")
+      //- Align And Distribute
+      AlignAndDistribute(:visible="multipleCardOrBoxesIsSelected" :shouldHideMoreOptions="true" :shouldDistributeWithAlign="true" :numberOfSelectedItemsCreatedByCurrentUser="numberOfSelectedItemsCreatedByCurrentUser" :canEditAll="canEditAll" :cards="cards" :editableCards="cards" :connections="connections" :boxes="boxes" :editableBoxes="editableBoxes")
+      //- Move/Copy
+      .segmented-buttons.move-or-copy-wrap
+        button(@click.left.stop="toggleCopyItemsIsVisible" :class="{ active: state.copyItemsIsVisible }")
+          span Copy
+          MoveOrCopyItems(:visible="state.copyItemsIsVisible" :actionIsMove="false")
+        button(@click.left.stop="toggleMoveItemsIsVisible" :class="{ active: state.moveItemsIsVisible }" :disabled="!canEditAll.cards")
+          span Move
+          MoveOrCopyItems(:visible="state.moveItemsIsVisible" :actionIsMove="true")
+    //- More Options
+    AlignAndDistribute(:visible="multipleCardOrBoxesIsSelected && moreOptionsIsVisible" :numberOfSelectedItemsCreatedByCurrentUser="numberOfSelectedItemsCreatedByCurrentUser" :canEditAll="canEditAll" :cards="cards" :editableCards="cards" :connections="connections" :boxes="boxes" :editableBoxes="editableBoxes")
 
     .row
       //- Remove
       button.danger(:disabled="!canEditAll.all" @click.left="remove")
         img.icon(src="@/assets/remove.svg")
-      //- Merge
-      button(v-if="multipleCardsIsSelected" @click="mergeSelectedCards" :disabled="!canEditAll.cards")
-        img.icon(src="@/assets/merge.svg")
-        span Merge
-      //- Split
-      button(v-if="cardCanBeSplit" @click="splitCard" :disabled="!canEditAll.cards")
-        img.icon(src="@/assets/split.svg")
-        span Split
+
+      template(v-if="multipleCardsIsSelected")
+        //- Merge
+        button(@click="mergeSelectedCards" :disabled="!canEditAll.cards")
+          img.icon(src="@/assets/merge.svg")
+          span Merge
+        //- Split
+        button(v-if="cardCanBeSplit" @click="splitCard" :disabled="!canEditAll.cards")
+          img.icon(src="@/assets/split.svg")
+          span Split
 
     p.badge.info(v-if="canEditAsNonMember && !selectedItemsIsEditableByCurrentUser")
       img.icon.open(src="@/assets/open.svg")
@@ -599,7 +552,7 @@ dialog.narrow.multiple-selected-actions(
         border-top-right-radius var(--small-entity-radius)
         border-bottom-right-radius var(--small-entity-radius)
         margin-right 0
-  .cards-checkboxes
+  .items-checkboxes
     input
       margin 0
     vertical-align 1px
@@ -631,4 +584,32 @@ dialog.narrow.multiple-selected-actions(
 
   .segmented-buttons + .segmented-buttons
     margin-left 0
+
+  .icon.connect-items
+    height 12px
+    vertical-align -1px
+
+  &.is-background-light
+    section
+      border-color var(--primary-border-on-light-background)
+    section.subsection + section.subsection
+      border-top 1px solid var(--primary-border-on-light-background)
+  &.is-background-dark
+    section
+      border-color var(--primary-border-on-dark-background)
+    section.subsection + section.subsection
+      border-top 1px solid var(--primary-border-on-dark-background)
+  .close-button-wrap
+    cursor pointer
+    position absolute
+    left initial
+    right 0
+    top 0
+    padding-right 6px
+    padding-left 2px
+    padding-bottom 2px
+    z-index 1
+    button
+      cursor pointer
+      background-color var(--primary-background)
 </style>

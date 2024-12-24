@@ -8,14 +8,6 @@ import utils from '@/utils.js'
 
 const store = useStore()
 
-onMounted(() => {
-  store.subscribe((mutation, state) => {
-    if (mutation.type === 'triggerUpdateUrlPreviewComplete') {
-      store.dispatch('currentCards/checkIfShouldUpdateNewTweetCards')
-    }
-  })
-})
-
 const unlockedCards = computed(() => store.getters['currentCards/isNotLocked'])
 
 // card comment preview

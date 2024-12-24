@@ -52,13 +52,13 @@ const background = computed(() => {
   return utils.alternateColor(color, isThemeDark.value)
 })
 const backgroundColorIsDark = computed(() => utils.colorIsDark(background.value))
-const textColorClasses = computed(() => {
+const colorClasses = computed(() => {
   const recomputeOnThemeChange = isThemeDark.value // used to force recompute
   let color = background.value
   if (!color) {
     color = utils.cssVariable('secondary-background')
   }
-  return utils.textColorClasses({ backgroundColor: color })
+  return utils.colorClasses({ backgroundColor: color })
 })
 
 // preview image
@@ -112,16 +112,6 @@ const iframeHeight = computed(() => {
   }
   let height = Math.round(width * aspectRatio)
   return height
-})
-const iframeSandbox = computed(() => {
-  const url = props.card.urlPreviewIframeUrl
-  let sandbox = 'allow-scripts allow-forms'
-  if (utils.urlIsYoutube(url)) {
-    // youtube embeds require allow-same-origin, presumably for ad tracking
-    // https://stackoverflow.com/questions/59827851/embedding-youtube-iframe-fails-within-sandbox-iframe
-    sandbox = 'allow-same-origin allow-scripts allow-forms'
-  }
-  return sandbox
 })
 
 // autoplay
@@ -183,7 +173,9 @@ const handleImageError = (event) => {
 
 const title = computed(() => {
   let title = props.card.urlPreviewTitle
-  if (!title) { return }
+  if (!title) {
+    return props.card.urlPreviewUrl
+  }
   title = title.replace('on Twitter', '')
   return title
 })
@@ -216,6 +208,8 @@ const handleTouchMove = () => {
   disableIsActive()
 }
 const openUrl = async (event, url) => {
+  const userIsConnecting = store.state.currentConnectionStartItemIds.length
+  if (userIsConnecting) { return }
   state.isActive = false
   store.commit('clearAllInteractingWithAndSelected')
   if (store.state.currentUserIsDraggingConnectionIdLabel) { return }
@@ -231,9 +225,6 @@ const openUrl = async (event, url) => {
     }
   }
   store.dispatch('closeAllDialogs')
-  if (store.state.cardsWereDragged) {
-    return
-  }
   if (event.type === 'touchend') {
     window.location = url
   } else {
@@ -248,11 +239,11 @@ const openUrl = async (event, url) => {
   //- image
   template(v-if="!shouldDisplayIframe")
     .preview-image-wrap(v-if="previewImageIsVisible")
-      img.preview-image(:src="props.card.urlPreviewImage" :class="{selected: isSelected, 'border-bottom-radius': shouldHideInfo}" ref="image" @error="handleImageError")
+      img.preview-image(:src="props.card.urlPreviewImage" :class="{selected: isSelected, 'border-bottom-radius': shouldHideInfo}" ref="image" @error="handleImageError" loading="lazy")
 
   //- embed
   template(v-if="shouldDisplayIframe")
-    iframe(:src="props.card.urlPreviewIframeUrl" :class="{ ignore: isInteractingWithItem }" :style="{ height: iframeHeight + 'px' }" :sandbox="iframeSandbox")
+    iframe(:src="props.card.urlPreviewIframeUrl" :class="{ ignore: isInteractingWithItem }" :style="{ height: iframeHeight + 'px' }" sandbox="allow-same-origin allow-scripts allow-forms")
   //- url
   a.row.info.badge.status.button-badge.badge-card-button(
     v-if="!shouldHideInfo"
@@ -291,9 +282,9 @@ const openUrl = async (event, url) => {
         template(v-if="!props.card.urlPreviewIframeUrl")
           img.favicon(v-if="props.card.urlPreviewFavicon" :src="props.card.urlPreviewFavicon")
           img.icon.favicon.open(v-else src="@/assets/open.svg")
-        .title(:class="textColorClasses")
+        .title(:class="colorClasses")
           span {{title}}
-      .description(v-if="description" :class="textColorClasses")
+      .description(v-if="description" :class="colorClasses")
         span {{description}}
 </template>
 

@@ -66,8 +66,8 @@ const toggleSelectedImage = (image) => {
 </script>
 
 <template lang="pug">
-.ai-images(v-if="visible" @click.stop="clear")
-  section
+template(v-if="visible")
+  section.ai-images(@click.stop="clear")
     p AI Images
     section.subsection(v-if="!AIImages.length")
       p AI Images you generate from cards can be found here.
@@ -97,7 +97,7 @@ const toggleSelectedImage = (image) => {
 </template>
 
 <style lang="stylus">
-.ai-images
+section.ai-images
   overflow auto
   border-top 1px solid var(--primary-border)
   .prompt-row

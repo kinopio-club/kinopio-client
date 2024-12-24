@@ -3,17 +3,23 @@ import { reactive, computed, onMounted, onBeforeUnmount, defineProps, defineEmit
 import { useStore } from 'vuex'
 
 import utils from '@/utils.js'
+
 const store = useStore()
 
 const dialogElement = useTemplateRef('dialogElement')
+// let unsubscribe
 
 onMounted(() => {
   window.addEventListener('resize', updateDialogHeight)
-  // store.subscribe(mutation => {
+  // unsubscribe = store.subscribe(mutation => {
   //   if (mutation.type === 'abc') {
   //     xyz()
   //   }
   // })
+})
+onBeforeUnmount(() => {
+  window.removeEventListener('resize', updateDialogHeight)
+//   unsubscribe()
 })
 
 const emit = defineEmits(['updateCount'])
@@ -48,7 +54,7 @@ const incrementBy = () => {
 </script>
 
 <template lang="pug">
-dialog.narrow.dialog-name(v-if="visible" :open="visible" @click.left.stop ref="dialogElement" :style="{'max-height': state.dialogHeight + 'px'}")
+dialog.narrow.dialog-name(v-if="props.visible" :open="props.visible" @click.left.stop ref="dialogElement" :style="{'max-height': state.dialogHeight + 'px'}")
   section
     p blank dialog, please duplicate
   section

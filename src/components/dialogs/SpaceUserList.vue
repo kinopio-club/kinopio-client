@@ -3,9 +3,9 @@ import { reactive, computed, onMounted, onBeforeUnmount, defineProps, defineEmit
 import { useStore } from 'vuex'
 
 import utils from '@/utils.js'
-import TeamDetails from '@/components/dialogs/TeamDetails.vue'
+import GroupDetails from '@/components/dialogs/GroupDetails.vue'
 import UserList from '@/components/UserList.vue'
-import TeamLabel from '@/components/TeamLabel.vue'
+import GroupLabel from '@/components/GroupLabel.vue'
 
 import uniqBy from 'lodash-es/uniqBy'
 
@@ -18,12 +18,12 @@ onMounted(() => {
 })
 const state = reactive({
   dialogHeight: null,
-  teamIsVisible: false
+  groupIsVisible: false
 })
 
 const visible = computed(() => store.state.spaceUserListIsVisible)
 watch(() => visible.value, (value, prevValue) => {
-  state.teamIsVisible = false
+  state.groupIsVisible = false
   if (value) {
     updateDialogHeight()
   }
@@ -51,13 +51,13 @@ const label = computed(() => {
   return string
 })
 
-// team
+// group
 
-const spaceTeam = computed(() => store.getters['teams/spaceTeam']())
-const toggleTeamIsVisible = () => {
-  const value = !state.teamIsVisible
+const spaceGroup = computed(() => store.getters['groups/spaceGroup']())
+const toggleGroupIsVisible = () => {
+  const value = !state.groupIsVisible
   closeDialogs()
-  state.teamIsVisible = value
+  state.groupIsVisible = value
 }
 
 // users
@@ -68,10 +68,10 @@ const users = computed(() => {
   if (isSpectatorsList.value) {
     items = currentSpace.value.spectators
   } else {
-    const teamUsers = store.getters['currentCards/teamUsersWhoAddedCards']
+    const groupUsers = store.getters['currentCards/groupUsersWhoAddedCards']
     items = utils.clone(currentSpace.value.users)
     items = items.concat(currentSpace.value.collaborators)
-    items = items.concat(teamUsers)
+    items = items.concat(groupUsers)
   }
   items = items.filter(item => Boolean(item))
   items = uniqBy(items, 'id')
@@ -109,46 +109,41 @@ const showUserDetails = (event, user) => {
 }
 const closeDialogs = () => {
   store.commit('userDetailsIsVisible', false)
-  state.teamIsVisible = false
+  state.groupIsVisible = false
 }
 </script>
 
 <template lang="pug">
-dialog.space-user-list(
+dialog.narrow.space-user-list(
   v-if="visible"
   :open="visible"
   @click.left.stop="closeDialogs"
   ref="dialogElement"
   :style="{'max-height': state.dialogHeight + 'px'}"
-  :class="{'child-is-visible': state.teamIsVisible }"
+  :class="{'child-is-visible': state.groupIsVisible }"
 )
   section
     p {{ label }}
-    .button-wrap(v-if="spaceTeam")
-      button(@click.stop="toggleTeamIsVisible" :class="{ active: state.teamIsVisible }")
-        TeamLabel(:team="spaceTeam" :showName="true")
-      TeamDetails(:visible="state.teamIsVisible" :team="spaceTeam")
-
+    .button-wrap(v-if="spaceGroup")
+      button(@click.stop="toggleGroupIsVisible" :class="{ active: state.groupIsVisible }")
+        GroupLabel(:group="spaceGroup" :showName="true")
+      GroupDetails(:visible="state.groupIsVisible" :group="spaceGroup")
+  //- users
   template(v-if="users.length")
-    //- users
-    section.results-section
-      UserList(
-        :users="users"
-        :selectedUser="selectedUser"
-        @selectUser="toggleUserDetails"
-        :showCollaboratorActions="currentUserCanEditSpace"
-      )
-
-    //- commenters
-    template(v-if="isCollaboratorsList && commenters.length")
-      section
-        p Commenters
-      section.results-section
-        UserList(
-          :users="commenters"
-          :selectedUser="selectedUser"
-          @selectUser="toggleUserDetails"
-        )
+    UserList(
+      :users="users"
+      :selectedUser="selectedUser"
+      @selectUser="toggleUserDetails"
+      :showCollaboratorActions="currentUserCanEditSpace"
+    )
+  //- commenters
+  section(v-if="isCollaboratorsList && commenters.length")
+    p Commenters
+    UserList(
+      :users="commenters"
+      :selectedUser="selectedUser"
+      @selectUser="toggleUserDetails"
+    )
 </template>
 
 <style lang="stylus">
@@ -159,6 +154,6 @@ dialog.space-user-list
   top 20px
   &.child-is-visible
     overflow initial
-  dialog.team-details
+  dialog.group-details
     left -45px
 </style>

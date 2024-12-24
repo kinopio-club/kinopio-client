@@ -4,6 +4,7 @@ import { useStore } from 'vuex'
 
 import ColorPicker from '@/components/dialogs/ColorPicker.vue'
 import CardOrBoxActions from '@/components/subsections/CardOrBoxActions.vue'
+import ItemCheckboxButton from '@/components/ItemCheckboxButton.vue'
 import utils from '@/utils.js'
 
 import { colord, extend } from 'colord'
@@ -20,7 +21,6 @@ const state = reactive({
   isUpdated: false
 })
 
-const visible = computed(() => utils.objectHasKeys(currentBox.value))
 const spaceCounterZoomDecimal = computed(() => store.getters.spaceCounterZoomDecimal)
 const canEditBox = computed(() => store.getters['currentUser/canEditBox'](currentBox.value))
 
@@ -51,6 +51,17 @@ watch(() => currentBox.value, async (value, prevValue) => {
     store.dispatch('history/add', { boxes: [box], useSnapshot: true })
   }
 })
+
+const visible = computed(() => utils.objectHasKeys(currentBox.value))
+watch(() => visible.value, async (value, prevValue) => {
+  await nextTick()
+  if (!value) {
+    store.commit('currentDraggingBoxId', '')
+    store.dispatch('multipleBoxesSelectedIds', [])
+    store.commit('preventMultipleSelectedActionsIsVisible', false)
+  }
+})
+
 const broadcastShowBoxDetails = () => {
   const updates = {
     boxId: currentBox.value.id,
@@ -107,12 +118,8 @@ const selectName = () => {
   const currentBoxIsNew = store.state.currentBoxIsNew
   const element = nameElement.value
   const length = name.value.length
-  let start = length
-  if (currentBoxIsNew) {
-    start = 0
-  }
   if (length && element) {
-    element.setSelectionRange(start, length)
+    element.setSelectionRange(0, length)
   }
   store.commit('currentBoxIsNew', false)
 }
@@ -124,6 +131,39 @@ const textareaSizes = () => {
     modifier = 1
   }
   textarea.style.height = textarea.scrollHeight + modifier + 'px'
+}
+
+// text edit actions
+
+const selectionStartPosition = () => {
+  if (!nameElement.value) { return }
+  const startPosition = nameElement.value.selectionStart
+  return startPosition
+}
+const selectionEndPosition = () => {
+  if (!nameElement.value) { return }
+  const endPosition = nameElement.value.selectionEnd
+  return endPosition
+}
+const setSelectionRange = (start, end) => {
+  if (nameElement.value) {
+    nameElement.value.setSelectionRange(start, end)
+  }
+}
+const toggleTextEditAction = async (action) => {
+  if (!visible.value) { return }
+  const startPosition = selectionStartPosition()
+  const endPosition = selectionEndPosition()
+  const { newName, offset } = utils.nameTextEditAction({
+    action,
+    startPosition,
+    endPosition,
+    name: nameElement.value.value
+  })
+  update({ name: newName })
+  textareaSizes()
+  await nextTick()
+  setSelectionRange(startPosition + offset, endPosition + offset)
 }
 
 // colors
@@ -175,6 +215,27 @@ const scrollIntoViewAndFocus = async () => {
   focusName()
   selectName()
 }
+
+// filter
+
+const isFilteredInSpace = computed({
+  get () {
+    const boxIds = store.state.filteredBoxIds
+    return boxIds.includes(currentBox.value.id)
+  },
+  set () {
+    toggleFilteredInSpace()
+  }
+})
+const toggleFilteredInSpace = () => {
+  const filtered = store.state.filteredBoxIds
+  const boxId = currentBox.value.id
+  if (filtered.includes(boxId)) {
+    store.commit('removeFromFilteredBoxId', boxId)
+  } else {
+    store.commit('addToFilteredBoxId', boxId)
+  }
+}
 </script>
 
 <template lang="pug">
@@ -190,6 +251,7 @@ dialog.narrow.box-details(v-if="visible" :open="visible" @click.left.stop="close
           :currentColor="currentBox.color"
           :visible="state.colorPickerIsVisible"
           :recentColors="itemColors"
+          :luminosityIsDark="true"
           @selectedColor="updateColor"
         )
       //- name
@@ -203,13 +265,24 @@ dialog.narrow.box-details(v-if="visible" :open="visible" @click.left.stop="close
           @keydown.enter.stop.prevent="closeAllDialogs"
           maxLength="600"
           :class="{'is-dark': colorisDark, 'is-light': !colorisDark}"
+          @keydown.meta.b.exact.stop.prevent="toggleTextEditAction('bold')"
+          @keydown.ctrl.b.exact.stop.prevent="toggleTextEditAction('bold')"
+          @keydown.meta.i.exact.stop.prevent="toggleTextEditAction('italic')"
+          @keydown.ctrl.i.exact.stop.prevent="toggleTextEditAction('italic')"
         )
-    CardOrBoxActions(:visible="canEditBox" :boxes="[currentBox]" @closeDialogs="closeDialogs" :colorIsHidden="true")
+      //- Filter
+      .button-wrap.filter-button-wrap
+        button.small-button(@click.left.prevent="toggleFilteredInSpace" @keydown.stop.enter="toggleFilteredInSpace" :class="{active: isFilteredInSpace}")
+          img.icon(src="@/assets/filter.svg")
+
     .row(v-if="canEditBox")
       //- remove
       .button-wrap
         button.danger(@click.left="removeBox")
           img.icon(src="@/assets/remove.svg")
+      //- [·]
+      ItemCheckboxButton(:boxes="[currentBox]" :isDisabled="!canEditBox")
+    CardOrBoxActions(:visible="canEditBox" :boxes="[currentBox]" @closeDialogs="closeDialogs" :colorIsHidden="true")
     .row(v-if="!canEditBox")
       span.badge.info
         img.icon(src="@/assets/unlock.svg")
@@ -231,4 +304,7 @@ dialog.narrow.box-details(v-if="visible" :open="visible" @click.left.stop="close
       color var(--primary-on-light-background)
   .info-row
     align-items flex-start
+  .filter-button-wrap
+    padding-left 5px
+    padding-top 1px
 </style>

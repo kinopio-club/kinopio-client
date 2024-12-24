@@ -30,7 +30,7 @@ const state = reactive({
 
 const currentUserIsSignedIn = computed(() => store.getters['currentUser/isSignedIn'])
 const currentSpace = computed(() => store.getters['currentSpace/all'])
-const text = computed(() => utils.textFromCardNames(currentSpace.value.cards))
+const text = computed(() => utils.nameStringFromItems(currentSpace.value.cards))
 
 const fileName = () => {
   const spaceName = store.state.currentSpace.name
@@ -80,8 +80,8 @@ const downloadAllSpacesRemote = async () => {
   }
   state.isLoadingAllSpaces = false
 }
-const duplicateSpace = () => {
-  store.dispatch('currentSpace/duplicateSpace')
+const duplicateSpace = async () => {
+  await store.dispatch('currentSpace/duplicateSpace')
   state.spaceIsDuplicated = true
   emit('updateSpaces')
 }
@@ -174,7 +174,7 @@ template(v-if="visible")
   section.export
     .row
       button(@click.left="duplicateSpace")
-        img.icon(src="@/assets/add.svg")
+        img.icon.duplicate(src="@/assets/duplicate.svg")
         span Duplicate this Space
     .row
       button(@click.left="copyText")

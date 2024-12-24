@@ -7,7 +7,6 @@ import SpaceDetails from '@/components/dialogs/SpaceDetails.vue'
 import SpaceDetailsInfo from '@/components/dialogs/SpaceDetailsInfo.vue'
 import SpaceStatus from '@/components/dialogs/SpaceStatus.vue'
 import Offline from '@/components/dialogs/Offline.vue'
-import MoonPhase from '@/components/MoonPhase.vue'
 import User from '@/components/User.vue'
 import SignUpOrIn from '@/components/dialogs/SignUpOrIn.vue'
 import UpdatePassword from '@/components/dialogs/UpdatePassword.vue'
@@ -20,7 +19,6 @@ import KeyboardShortcuts from '@/components/dialogs/KeyboardShortcuts.vue'
 import AppsAndExtensions from '@/components/dialogs/AppsAndExtensions.vue'
 import UpgradeUser from '@/components/dialogs/UpgradeUser.vue'
 import Search from '@/components/dialogs/Search.vue'
-import AddSpace from '@/components/dialogs/AddSpace.vue'
 import Templates from '@/components/dialogs/Templates.vue'
 import Sidebar from '@/components/dialogs/Sidebar.vue'
 import PrivacyIcon from '@/components/PrivacyIcon.vue'
@@ -32,18 +30,20 @@ import Donate from '@/components/dialogs/Donate.vue'
 import Toolbar from '@/components/Toolbar.vue'
 import ImportExport from '@/components/dialogs/ImportExport.vue'
 import Pricing from '@/components/dialogs/Pricing.vue'
-import SpaceTodayJournalBadge from '@/components/SpaceTodayJournalBadge.vue'
 import DiscoveryButtons from '@/components/DiscoveryButtons.vue'
 import UserSettings from '@/components/dialogs/UserSettings.vue'
 import SpaceUserList from '@/components/dialogs/SpaceUserList.vue'
 import CommentButton from '@/components/CommentButton.vue'
 import FavoriteSpaceButton from '@/components/FavoriteSpaceButton.vue'
-import TeamLabel from '@/components/TeamLabel.vue'
-import Teams from '@/components/dialogs/Teams.vue'
+import GroupLabel from '@/components/GroupLabel.vue'
+import AddSpaceButtons from '@/components/AddSpaceButtons.vue'
+import UserGroups from '@/components/dialogs/UserGroups.vue'
 import consts from '@/consts.js'
 
 import sortBy from 'lodash-es/sortBy'
 const store = useStore()
+
+let unsubscribe
 
 let updateNotificationsIntervalTimer
 
@@ -62,7 +62,7 @@ onMounted(() => {
   updateNotificationsIntervalTimer = setInterval(() => {
     updateNotifications()
   }, 1000 * 60 * 10) // 10 minutes
-  store.subscribe((mutation, state) => {
+  unsubscribe = store.subscribe((mutation, state) => {
     if (mutation.type === 'closeAllDialogs') {
       closeAllDialogs()
     } else if (mutation.type === 'triggerSpaceDetailsVisible') {
@@ -101,14 +101,13 @@ onMounted(() => {
       updateSidebarIsVisible(true)
     } else if (mutation.type === 'triggerImportIsVisible') {
       updateImportIsVisible(true)
-    } else if (mutation.type === 'triggerAddSpaceIsVisible') {
-      updateAddSpaceIsVisible(true)
     }
   })
 })
 onBeforeUnmount(() => {
   window.removeEventListener('scroll', updatePosition)
   clearInterval(updateNotificationsIntervalTimer)
+  unsubscribe()
 })
 
 const state = reactive({
@@ -127,7 +126,6 @@ const state = reactive({
   readOnlyJiggle: false,
   notifications: [],
   notificationsIsLoading: true,
-  addSpaceIsVisible: false,
   isHidden: false,
   templatesIsVisible: false,
   sidebarIsVisible: false,
@@ -166,15 +164,20 @@ const isSpace = computed(() => {
 })
 const userCanEditSpace = computed(() => store.getters['currentUser/canEditSpace']())
 const userCanOnlyComment = computed(() => store.getters['currentUser/canOnlyComment']())
-const isUpgradedOrOnTeam = computed(() => store.getters['currentUser/isUpgradedOrOnTeam'])
+const isUpgraded = computed(() => store.state.currentUser.isUpgraded)
 const isOnline = computed(() => store.state.isOnline)
 const currentUserIsSignedIn = computed(() => store.getters['currentUser/isSignedIn'])
 const shouldIncreaseUIContrast = computed(() => store.state.currentUser.shouldIncreaseUIContrast)
 const isMobile = computed(() => utils.isMobile())
+const toolbarIsVisible = computed(() => {
+  if (!isSpace.value) { return }
+  if (userCanOnlyComment.value) { return }
+  return userCanEditSpace.value
+})
 
 // new stuff
 
-const shouldChangelogIsUpdated = computed(() => {
+const shouldShowChangelogIsUpdated = computed(() => {
   const isNotDefaultSpace = !store.getters['currentSpace/isHelloKinopio']
   return store.state.changelogIsUpdated && isNotDefaultSpace && userCanEditSpace.value
 })
@@ -193,10 +196,10 @@ const currentSpaceName = computed(() => {
     return `Space ${id}`
   }
 })
-const spaceTeam = computed(() => store.getters['teams/spaceTeam']())
+const spaceGroup = computed(() => store.getters['groups/spaceGroup']())
 const spaceHasStatus = computed(() => {
   if (!isOnline.value) { return }
-  return store.state.isLoadingSpace || store.state.isJoiningSpace || store.state.isReconnectingToBroadcast || store.state.isLoadingOtherItems
+  return Boolean(store.state.isLoadingSpace || store.state.isJoiningSpace || store.state.isReconnectingToBroadcast || store.state.isLoadingOtherItems || store.state.sendingQueue.length)
 })
 const spaceHasStatusAndStatusDialogIsNotVisible = computed(() => {
   if (spaceHasStatus.value) {
@@ -331,7 +334,6 @@ const closeAllDialogs = () => {
   state.donateIsVisible = false
   state.spaceStatusIsVisible = false
   state.notificationsIsVisible = false
-  state.addSpaceIsVisible = false
   state.templatesIsVisible = false
   state.importIsVisible = false
   if (!store.state.spaceDetailsIsPinned) {
@@ -398,14 +400,6 @@ const toggleNotificationsIsVisible = () => {
   if (state.notificationsIsVisible) {
     updateNotifications()
   }
-}
-const updateAddSpaceIsVisible = (value) => {
-  state.addSpaceIsVisible = value
-}
-const toggleAddSpaceIsVisible = () => {
-  const isVisible = state.addSpaceIsVisible
-  store.dispatch('closeAllDialogs')
-  state.addSpaceIsVisible = !isVisible
 }
 const updateSidebarIsVisible = (value) => {
   state.sidebarIsVisible = value
@@ -547,7 +541,7 @@ const markAllAsRead = () => {
 const markAsRead = (notificationId) => {
   updateNotificationsIsRead([notificationId])
 }
-const updateNotificationsIsRead = (notificationIds) => {
+const updateNotificationsIsRead = async (notificationIds) => {
   if (!notificationIds.length) { return }
   state.notifications = state.notifications.map(notification => {
     if (notificationIds.includes(notification.id)) {
@@ -555,7 +549,7 @@ const updateNotificationsIsRead = (notificationIds) => {
     }
     return notification
   })
-  store.dispatch('api/addToQueue', {
+  await store.dispatch('api/addToQueue', {
     name: 'updateNotificationsIsRead',
     body: notificationIds
   })
@@ -570,8 +564,7 @@ header(v-if="isVisible" :style="state.position" :class="{'fade-out': isFadingOut
       button(:class="{ 'translucent-button': !shouldIncreaseUIContrast }")
         .logo
           .logo-image
-        MoonPhase(v-if="currentSpace.moonPhase" :moonPhase="currentSpace.moonPhase")
-        TeamLabel(:team="spaceTeam")
+        GroupLabel(:group="spaceGroup")
         span {{currentSpaceName}}{{' '}}
         img.icon.visit(src="@/assets/visit.svg")
         //- embed badge
@@ -589,7 +582,7 @@ header(v-if="isVisible" :style="state.position" :class="{'fade-out': isFadingOut
           .button-wrap
             .logo(alt="kinopio logo" @click.left.stop="toggleAboutIsVisible" @touchend.stop @mouseup.left.stop :class="{active: state.aboutIsVisible}" tabindex="0")
               .logo-image
-                .label-badge.small-badge(v-if="shouldChangelogIsUpdated")
+                .label-badge.small-badge(v-if="shouldShowChangelogIsUpdated")
                   span NEW
               img.down-arrow(src="@/assets/down-arrow.svg")
             About(:visible="state.aboutIsVisible")
@@ -598,14 +591,8 @@ header(v-if="isVisible" :style="state.position" :class="{'fade-out': isFadingOut
             AppsAndExtensions(:visible="state.appsAndExtensionsIsVisible")
         .space-meta-rows
           .space-functions-row
-            .segmented-buttons
-              //- Add Space
-              .button-wrap
-                button.success(@click.left.stop="toggleAddSpaceIsVisible" :class="{ active: state.addSpaceIsVisible }")
-                  img.icon.add(src="@/assets/add.svg")
-                  span New
-                AddSpace(:visible="state.addSpaceIsVisible" :shouldAddSpaceDirectly="true")
-                Templates(:visible="state.templatesIsVisible")
+            //- Add Space
+            AddSpaceButtons
             //- Search
             .segmented-buttons
               .button-wrap
@@ -632,7 +619,7 @@ header(v-if="isVisible" :style="state.position" :class="{'fade-out': isFadingOut
         UserSettings
         UpdatePassword
         SpaceUserList
-        Teams
+        UserGroups
         //- Share
         .button-wrap
           button(@click.left.stop="toggleShareIsVisible" :class="{active: state.shareIsVisible, 'translucent-button': !shouldIncreaseUIContrast}")
@@ -656,22 +643,21 @@ header(v-if="isVisible" :style="state.position" :class="{'fade-out': isFadingOut
                 img.icon.left-arrow(src="@/assets/down-arrow.svg")
             //- Current Space Name and Info
             .button-wrap.space-name-button-wrap(:class="{ 'back-button-is-visible': backButtonIsVisible }")
-              button.space-name-button(@click.left.stop="toggleSpaceDetailsIsVisible" :class="{ active: state.spaceDetailsIsVisible, 'translucent-button': !shouldIncreaseUIContrast }")
-                TeamLabel(:team="spaceTeam")
-                span(v-if="currentSpaceIsInbox")
-                  img.icon.inbox-icon(src="@/assets/inbox.svg")
-                span(v-if="currentSpaceIsTemplate")
-                  img.icon.templates(src="@/assets/templates.svg")
-                SpaceTodayJournalBadge(:space="currentSpace")
-                MoonPhase(v-if="currentSpace.moonPhase" :moonPhase="currentSpace.moonPhase")
-                span {{currentSpaceName}}
-                  PrivacyIcon(:privacy="currentSpace.privacy" :closedIsNotVisible="true")
-                img.icon.sunglasses.explore(src="@/assets/sunglasses.svg" v-if="shouldShowInExplore" title="Shown in Explore")
-                img.icon.view-hidden(v-if="currentSpaceIsHidden" src="@/assets/view-hidden.svg")
+              button.space-name-button(@click.left.stop="toggleSpaceDetailsIsVisible" :class="{ active: state.spaceDetailsIsVisible, 'translucent-button': !shouldIncreaseUIContrast }" title="Space Details and Spaces List")
+                .button-contents(:class="{'space-is-hidden': currentSpaceIsHidden}")
+                  GroupLabel(:group="spaceGroup")
+                  span(v-if="currentSpaceIsInbox")
+                    img.icon.inbox-icon(src="@/assets/inbox.svg")
+                  span(v-if="currentSpaceIsTemplate")
+                    img.icon.templates(src="@/assets/templates.svg")
+                  span {{currentSpaceName}}
+                    PrivacyIcon(:privacy="currentSpace.privacy" :closedIsNotVisible="true")
+                  img.icon.sunglasses.explore(src="@/assets/sunglasses.svg" v-if="shouldShowInExplore" title="Shown in Explore")
               SpaceDetails(:visible="state.spaceDetailsIsVisible")
               ImportArenaChannel(:visible="importArenaChannelIsVisible")
               SpaceDetailsInfo(:visible="state.spaceDetailsInfoIsVisible")
               ImportExport(:visible="state.importIsVisible" :isImport="true")
+              Templates(:visible="state.templatesIsVisible")
 
               //- read only badge
               .label-badge.space-name-badge-wrap(v-if="!userCanEditSpace")
@@ -680,14 +666,14 @@ header(v-if="isVisible" :style="state.position" :class="{'fade-out': isFadingOut
                 span.invisible-badge(ref="readOnlyElement" :class="{'badge-jiggle': state.readOnlyJiggle, 'invisible': !state.readOnlyJiggle}")
                   span Read Only
               //- comment only badge
-              .label-badge.space-name-badge-wrap(v-else-if="userCanOnlyComment")
+              .label-badge.space-name-badge-wrap.success(v-else-if="userCanOnlyComment")
                 span(:class="{'invisible': state.readOnlyJiggle}")
                   span Comment Only
 
               //- Loading State
               .button-wrap.space-status-button-wrap(v-if="spaceHasStatusAndStatusDialogIsNotVisible")
                 button.small-button(@click.left.stop="toggleSpaceStatusIsVisible" :class="{active: state.spaceStatusIsVisible, 'translucent-button': !shouldIncreaseUIContrast}")
-                  Loader(:visible="spaceHasStatus")
+                  Loader(:visible="spaceHasStatus" :isStatic="true")
                   .badge.success.space-status-success(v-if="!spaceHasStatus")
                 SpaceStatus(:visible="state.spaceStatusIsVisible")
             //- favorite
@@ -709,7 +695,7 @@ header(v-if="isVisible" :style="state.position" :class="{'fade-out': isFadingOut
       .left
       .right
         //- Pricing
-        .button-wrap.pricing-button-wrap(v-if="!isUpgradedOrOnTeam")
+        .button-wrap.pricing-button-wrap(v-if="!isUpgraded")
           button(@click.left.stop="togglePricingIsVisible" :class="{active: pricingIsVisible, 'translucent-button': !shouldIncreaseUIContrast}")
             span Pricing
           Pricing(:visible="pricingIsVisible")
@@ -720,14 +706,21 @@ header(v-if="isVisible" :style="state.position" :class="{'fade-out': isFadingOut
             Loader(:visible="state.loadingSignUpOrIn")
           SignUpOrIn(:visible="state.signUpOrInIsVisible" @loading="setLoadingSignUpOrIn")
         //- Upgrade
-        .button-wrap(v-if="!isUpgradedOrOnTeam && isOnline && currentUserIsSignedIn")
+        .button-wrap(v-if="!isUpgraded && isOnline && currentUserIsSignedIn")
           button(@click.left.stop="toggleUpgradeUserIsVisible" :class="{active: state.upgradeUserIsVisible, 'translucent-button': !shouldIncreaseUIContrast}")
             span Upgrade
           UpgradeUser(:visible="state.upgradeUserIsVisible" @closeDialog="closeAllDialogs")
+        //- Donate
+        //- .button-wrap
+        //-   .segmented-buttons
+        //-     button Donate
+        //-     button
+        //-       img.icon.cancel(src="@/assets/add.svg")
+
         //- comments
         //- CommentButton
 
-  Toolbar(:visible="isSpace")
+  Toolbar(:visible="toolbarIsVisible")
   SelectAllBelow
   SelectAllRight
 </template>
@@ -833,11 +826,8 @@ header
       text-overflow ellipsis
     .space-name-button
       max-width 100%
-      .icon.templates,
-      .icon.tweet
+      .icon.templates
         margin-right 4px
-      .icon.tweet
-        vertical-align -1px
     dialog
       max-width initial
     .space-name-button-wrap
@@ -901,6 +891,8 @@ header
     span
       width 100%
       color var(--primary)
+    &.success
+      background-color var(--success-background)
 
   .invisible
     visibility hidden
@@ -922,8 +914,8 @@ header
     vertical-align -1px
 
   .badge.space-status-success
-    width 16px
-    height 16px
+    width 14px
+    height 14px
     border-radius 10px
     vertical-align 0
     margin 2px 2px

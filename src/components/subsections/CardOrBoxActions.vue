@@ -7,6 +7,7 @@ import TagPickerStyleActions from '@/components/dialogs/TagPickerStyleActions.vu
 import ColorPicker from '@/components/dialogs/ColorPicker.vue'
 import FontPicker from '@/components/dialogs/FontPicker.vue'
 import utils from '@/utils.js'
+import consts from '@/consts.js'
 
 import uniq from 'lodash-es/uniq'
 import { nanoid } from 'nanoid'
@@ -208,15 +209,17 @@ const toggleTagPickerIsVisible = () => {
 
 const containItemsInNewBox = async () => {
   if (isNotCollaborator.value) { return }
-  let box = utils.boundaryRectFromItems(items.value)
-  // add box margins
-  const margin = 20
-  box = {
+  const rect = utils.boundaryRectFromItems(items.value)
+  // box size
+  const padding = consts.spaceBetweenCards
+  const paddingTop = 30 + padding
+  // same as Box shrinkToMinBoxSize
+  const box = {
     id: nanoid(),
-    x: box.x - margin,
-    resizeWidth: box.width + (margin * 2),
-    y: box.y - (margin * 2.5),
-    resizeHeight: box.height + (margin * 3.5)
+    x: rect.x - padding,
+    y: rect.y - paddingTop,
+    resizeWidth: rect.width + (padding * 2),
+    resizeHeight: rect.height + (padding + paddingTop)
   }
   store.dispatch('currentBoxes/add', { box })
   store.dispatch('closeAllDialogs')
@@ -224,13 +227,6 @@ const containItemsInNewBox = async () => {
   await nextTick()
   store.commit('boxDetailsIsVisibleForBoxId', box.id)
 }
-const boxSurroundTitle = computed(() => {
-  if (isNotCollaborator.value) {
-    return 'Only collaborators can add boxes'
-  } else {
-    return 'Surround with Box'
-  }
-})
 
 // box fill
 
@@ -248,6 +244,9 @@ const updateBoxFill = (fill) => {
   props.boxes.forEach(box => {
     updateBox(box, { fill })
   })
+  if (fill === 'empty') {
+    store.dispatch('analytics/event', 'UpdateBoxFillToEmpty')
+  }
 }
 
 // color
@@ -291,6 +290,9 @@ const toggleColorPickerIsVisible = () => {
   closeDialogs()
   state.colorPickerIsVisible = !isVisible
 }
+const colorClasses = computed(() => {
+  return utils.colorClasses({ backgroundColor: background.value })
+})
 
 // frames
 
@@ -424,13 +426,6 @@ const toggleIsComment = async () => {
   await updateCardDimensions()
   store.dispatch('currentConnections/updateMultiplePaths', props.cards)
 }
-const commentTitle = computed(() => {
-  if (isNotCollaborator.value) {
-    return 'Only collaborators can toggle comments'
-  } else {
-    return 'Turn into Comment'
-  }
-})
 
 // vote counter
 
@@ -485,7 +480,7 @@ const updateBox = (box, updates) => {
 </script>
 
 <template lang="pug">
-section.subsection.style-actions(v-if="visible" @click.left.stop="closeDialogs")
+section.subsection.style-actions(v-if="visible" @click.left.stop="closeDialogs" :class="colorClasses")
   p.subsection-vertical-label(v-if="labelIsVisible" :style="{ background: background }")
     span {{label}}
   .row
@@ -534,11 +529,11 @@ section.subsection.style-actions(v-if="visible" @click.left.stop="closeDialogs")
       button(:disabled="!canEditAll" @click="toggleIsLocked" :class="{active: isLocked}" title="Lock to Background")
         img.icon(src="@/assets/lock.svg")
     //- Comment
-    .button-wrap(v-if="isCards" :title="commentTitle")
+    .button-wrap(v-if="isCards" title="Turn into Comment")
       button(:disabled="isNotCollaborator" @click="toggleIsComment" :class="{active: isComment}")
         img.icon.comment(src="@/assets/comment.svg")
     //- Surround with Box
-    .button-wrap(v-if="isCards" :title="boxSurroundTitle")
+    .button-wrap(v-if="isCards" title="Surround with Box (B)")
       button(:disabled="isNotCollaborator" @click="containItemsInNewBox")
         img.icon.box-icon(src="@/assets/box.svg")
 
@@ -552,12 +547,14 @@ section.subsection.style-actions(v-if="visible" @click.left.stop="closeDialogs")
 .style-actions
   position relative
   padding var(--subsection-padding)
-  padding-bottom 0
   background-color transparent
-  &.subsection
-    border 1px solid var(--primary-border)
-    padding var(--subsection-padding)
-    padding-bottom 0
+  border 1px solid var(--primary-border)
+  padding var(--subsection-padding)
+  &.is-background-light
+    border-color var(--primary-border-on-light-background)
+  &.is-background-dark
+    border-color var(--primary-border-on-dark-background)
+
   .row
     max-width 203px
     display block
@@ -568,7 +565,7 @@ section.subsection.style-actions(v-if="visible" @click.left.stop="closeDialogs")
     margin-left 0
     margin-right 4px
     vertical-align top
-    margin-bottom 10px
+    margin-bottom var(--subsection-padding)
   .segmented-buttons
     display inline-flex
   .header-buttons-wrap

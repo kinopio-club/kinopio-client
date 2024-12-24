@@ -47,9 +47,12 @@ const loadInboxSpace = () => {
 
 // list cards
 
-const updateInboxCardsLocal = () => {
-  state.cards = cache.getInboxSpace()?.cards
-  sortCards()
+const updateInboxCardsLocal = async () => {
+  const inboxSpace = await cache.getInboxSpace()
+  if (inboxSpace) {
+    state.cards = inboxSpace.cards
+    sortCards()
+  }
 }
 const updateInboxCardsRemote = async () => {
   if (!store.state.isOnline) { return }
@@ -79,9 +82,9 @@ const removeFromCardList = (removedCard) => {
   // update cache
   cache.updateSpace('cards', state.cards, removedCard.spaceId)
 }
-const removeCardFromInbox = (card) => {
-  store.dispatch('api/addToQueue', { name: 'removeCard', body: card, spaceId: card.spaceId })
+const removeCardFromInbox = async (card) => {
   removeFromCardList(card)
+  await store.dispatch('api/addToQueue', { name: 'removeCard', body: card, spaceId: card.spaceId })
 }
 
 // update card

@@ -133,11 +133,11 @@ const excludeCurrentSpace = () => {
   const currentSpace = store.state.currentSpace
   state.spaces = state.spaces.filter(space => space.id !== currentSpace.id)
 }
-const updateSpaces = () => {
+const updateSpaces = async () => {
   if (props.userSpaces) {
     state.spaces = props.userSpaces
   } else {
-    state.spaces = cache.getAllSpaces()
+    state.spaces = await cache.getAllSpaces()
     updateWithRemoteSpaces()
   }
   excludeCurrentSpace()
@@ -148,7 +148,7 @@ const updateWithRemoteSpaces = async () => {
   }
   const currentUser = store.state.currentUser
   let spaces = await store.dispatch('api/getUserSpaces')
-  spaces = utils.AddCurrentUserIsCollaboratorToSpaces(spaces, currentUser)
+  spaces = utils.addCurrentUserIsCollaboratorToSpaces(spaces, currentUser)
   state.isLoading = false
   if (!spaces) { return }
   state.spaces = spaces
@@ -191,7 +191,7 @@ const createNewSpace = async () => {
   space.connectionTypes = []
   space = utils.newSpaceBackground(space, currentUser)
   space.background = space.background || consts.defaultSpaceBackground
-  space = cache.updateIdsInSpace(space)
+  space = await cache.updateIdsInSpace(space)
   console.log('🚚 create new space', space)
   if (currentUserIsSignedIn.value) {
     await store.dispatch('api/createSpace', space)

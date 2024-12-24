@@ -56,6 +56,12 @@ onBeforeUnmount(() => {
   window.removeEventListener('paste', handlePasteEvent)
 })
 
+const isDisabledKeyboardShortcut = (value) => {
+  const disabledKeyboardShortcuts = store.state.currentUser.disabledKeyboardShortcuts
+  const isDisabled = disabledKeyboardShortcuts.includes(value)
+  return isDisabled
+}
+
 // check scope
 
 const checkIsSpaceScope = (event) => {
@@ -67,7 +73,8 @@ const checkIsSpaceScope = (event) => {
   const nodeList = event.target.classList
   const classes = [ ...nodeList ]
   const isFocusedCard = classes.includes('card')
-  return isBody || isMain || isFocusedCard
+  const isSpaceNameButton = classes.includes('space-name-button-wrap') // for paste in empty spaces
+  return isBody || isMain || isFocusedCard || isSpaceNameButton
 }
 const checkIsCardScope = (event) => {
   const isFromCardName = event.target.closest('dialog.card-details')
@@ -77,6 +84,14 @@ const checkIsCardScope = (event) => {
 const checkIsPanScope = (event) => {
   const isFromDialog = event.target.closest('dialog')
   return !isFromDialog
+}
+const checkIsButtonScope = (event) => {
+  const isFromButton = event.target.closest('button')
+  return isFromButton
+}
+const isCanvasScope = (event) => {
+  const tagName = event.target.tagName
+  return tagName === 'CANVAS'
 }
 
 // on key up
@@ -91,12 +106,13 @@ const handleShortcuts = (event) => {
   // n
   } else if (key === 'n' && isSpaceScope) {
     if (store.state.isAddPage) { return }
+    if (isDisabledKeyboardShortcut('newSpace')) { return }
     store.dispatch('currentSpace/addSpace')
-    store.commit('addNotification', { message: 'New space created', icon: 'add', type: 'success', label: 'N' })
+    store.commit('addNotification', { message: 'New space created (N)', icon: 'add', type: 'success' })
     store.commit('triggerSpaceDetailsInfoIsVisible')
   // t
   } else if (key === 't' && isSpaceScope) {
-    store.commit('addNotification', { message: 'Theme toggled', type: 'info', label: 'T' })
+    store.commit('addNotification', { message: 'Theme toggled (T)', type: 'info' })
     store.dispatch('themes/toggle')
     store.dispatch('themes/isSystem', false)
   // Backspace, Clear, Delete
@@ -125,11 +141,24 @@ const handleShortcuts = (event) => {
     value = !value
     store.dispatch('currentUser/toggleFilterComments', value)
   } else if (key === ' ' && isSpaceScope) {
-    store.commit('currentUserIsPanning', false)
+    store.dispatch('currentUserIsPanning', false)
     store.commit('currentUserIsPanningReady', false)
     spaceKeyIsDown = false
   } else if (key === 'b' && isSpaceScope) {
-    store.dispatch('currentUserToolbar', 'box')
+    let cards
+    const multipleCardIds = store.state.multipleCardsSelectedIds
+    const cardId = store.state.cardDetailsIsVisibleForCardId
+    // Surround Selected Cards with Box
+    if (cardId) {
+      cards = [store.getters['currentCards/byId'](cardId)]
+      containItemsInNewBox(cards)
+    } else if (multipleCardIds.length) {
+      cards = multipleCardIds.map(id => store.getters['currentCards/byId'](id))
+      containItemsInNewBox(cards)
+    // Toolbar Box Mode
+    } else {
+      store.dispatch('currentUserToolbar', 'box')
+    }
   } else if (key === 'c' && isSpaceScope) {
     store.dispatch('currentUserToolbar', 'card')
   }
@@ -231,51 +260,38 @@ const handleMouseDownEvents = (event) => {
   const isPanScope = checkIsPanScope(event)
   const toolbarIsBox = store.state.currentUserToolbar === 'box'
   const isNotConnecting = !store.state.currentUserIsDrawingConnection
-  const shouldBoxSelect = event.shiftKey && isPanScope && !toolbarIsBox && isNotConnecting
+  const shouldBoxSelect = event.shiftKey && isPanScope && !toolbarIsBox && isNotConnecting && !store.state.currentUserIsResizingBox
   const userDisablePan = store.state.currentUser.shouldDisableRightClickToPan
   const shouldPan = (isRightClick || isMiddleClick) && isPanScope && !userDisablePan
   const position = utils.cursorPositionInPage(event)
+  const isButtonScope = checkIsButtonScope(event)
+  if (isButtonScope) { return }
   if (shouldBoxSelect) {
     event.preventDefault()
     store.commit('currentUserIsBoxSelecting', true)
-    store.commit('currentUserBoxSelectEnd', position)
+    store.commit('currentUserBoxSelectMove', position)
     store.commit('currentUserBoxSelectStart', position)
   } else if (shouldPan) {
     prevRightClickPosition = utils.cursorPositionInPage(event)
     event.preventDefault()
-    store.commit('currentUserIsPanning', true)
+    store.dispatch('currentUserIsPanning', true)
     disableContextMenu = true
   } else if (store.state.currentUserIsPanningReady) {
     event.preventDefault()
-    store.commit('currentUserIsPanning', true)
+    store.dispatch('currentUserIsPanning', true)
   }
   if (isRightClick && userDisablePan) {
+    if (!isCanvasScope(event)) { return }
     store.dispatch('triggerSonarPing', event)
   }
 }
 // on mouse move
 const handleMouseMoveEvents = (event) => {
-  const panSpeedIsFast = store.state.currentUser.panSpeedIsFast
-  let speed = 1
-  if (panSpeedIsFast) {
-    speed = 5
-  }
   const position = utils.cursorPositionInPage(event)
   currentCursorPosition = position
   // box selection
   if (store.state.currentUserIsBoxSelecting) {
-    store.commit('currentUserBoxSelectEnd', position)
-  // panning
-  } else if (store.state.currentUserIsPanning) {
-    event.preventDefault()
-    if (!prevCursorPosition) {
-      prevCursorPosition = position
-    }
-    let delta = {
-      x: Math.round((prevCursorPosition.x - position.x) * speed),
-      y: Math.round((prevCursorPosition.y - position.y) * speed)
-    }
-    window.scrollBy(delta.x, delta.y, 'instant')
+    store.commit('currentUserBoxSelectMove', position)
   }
 }
 // on mouse up
@@ -283,17 +299,20 @@ const handleMouseMoveEvents = (event) => {
 const handleMouseUpEvents = (event) => {
   const shouldPan = store.state.currentUserIsPanning
   const cursorsAreClose = utils.cursorsAreClose(prevRightClickPosition, utils.cursorPositionInPage(event))
+  // sonar ping
   if (shouldPan && cursorsAreClose && !store.state.multipleSelectedActionsIsVisible) {
     store.dispatch('triggerSonarPing', event)
   }
+  // handle outside window
   const isFromOutsideWindow = event.target.nodeType === Node.DOCUMENT_NODE
   let isFromCard
   if (!isFromOutsideWindow) {
     isFromCard = event.target.closest('article#card')
   }
+  // end panning
   const position = utils.cursorPositionInPage(event)
   prevCursorPosition = undefined
-  store.commit('currentUserIsPanning', false)
+  store.dispatch('currentUserIsPanning', false)
   store.commit('currentUserIsBoxSelecting', false)
 }
 // on scroll
@@ -329,7 +348,7 @@ const addCard = async (options) => {
   let childCard = document.querySelector(`.card[data-card-id="${childCardId}"]`)
   const childCardData = store.getters['currentCards/byId'](childCardId)
   const shouldOutdentChildToParent = childCard && !childCardData
-  const spaceBetweenCards = utils.spaceBetweenCards()
+  const spaceBetweenCards = consts.spaceBetweenCards
   let position = {}
   let isParentCard = true
   if (shouldOutdentChildToParent) {
@@ -377,7 +396,8 @@ const addCard = async (options) => {
 const addChildCard = async (options) => {
   options = options || {}
   useSiblingConnectionType = false
-  const spaceBetweenCards = utils.spaceBetweenCards()
+  const spaceBetweenCards = consts.spaceBetweenCards
+
   const parentCardId = store.state.parentCardId
   const childCardId = store.state.childCardId
   let parentCardElement = document.querySelector(`.card[data-card-id="${parentCardId}"]`)
@@ -409,7 +429,7 @@ const addChildCard = async (options) => {
 
 // recursive
 const nonOverlappingCardPosition = (position) => {
-  const spaceBetweenCards = utils.spaceBetweenCards()
+  const spaceBetweenCards = consts.spaceBetweenCards
   const cards = store.getters['currentCards/isSelectable'](position)
   if (!utils.arrayHasItems(cards)) { return position }
   const overlappingCard = cards.find(card => {
@@ -534,6 +554,29 @@ const remove = () => {
 
 // Copy, Cut
 
+const writeSelectedToClipboard = async (position) => {
+  const selectedItems = store.getters['currentSpace/selectedItems']
+  let { cards, connectionTypes, connections, boxes } = selectedItems
+  // data
+  cards = utils.sortByY(cards)
+  boxes = utils.sortByY(boxes)
+  let data = { cards, connections, connectionTypes, boxes }
+  data = utils.updateSpaceItemsRelativeToOrigin(data, position)
+  store.commit('clipboardData', data)
+  // text
+  let items = cards.concat(boxes)
+  items = utils.sortByY(items)
+  const text = utils.nameStringFromItems(items)
+  // clipboard
+  try {
+    console.log('🎊 copyData', data, text)
+    await navigator.clipboard.writeText(text)
+  } catch (error) {
+    console.warn('🚑 writeSelectedToClipboard', error)
+    throw { error }
+  }
+}
+
 const handleCopyCutEvent = async (event) => {
   const isSpaceScope = checkIsSpaceScope(event)
   if (!isSpaceScope) { return }
@@ -541,7 +584,7 @@ const handleCopyCutEvent = async (event) => {
   const position = currentCursorPosition || prevCursorPosition
   event.preventDefault()
   try {
-    await writeSelectedToClipboard()
+    await writeSelectedToClipboard(position)
     if (event.type === 'cut') { remove() }
     store.commit('addNotificationWithPosition', { message: utils.pastTense(event.type), position, type: 'success', layer: 'app', icon: 'cut' })
   } catch (error) {
@@ -552,10 +595,6 @@ const handleCopyCutEvent = async (event) => {
 }
 
 // Paste
-
-const notifyPasted = (position) => {
-  store.commit('addNotificationWithPosition', { message: 'Pasted', position, type: 'success', layer: 'app', icon: 'cut' })
-}
 
 const normalizePasteData = (data) => {
   data.cards = data.cards.map(card => {
@@ -592,9 +631,6 @@ const handlePastePlainText = async (data, position) => {
     cards = cardIds.map(cardId => store.getters['currentCards/byId'](cardId))
     store.dispatch('history/resume')
     store.dispatch('history/add', { cards, useSnapshot: true })
-    // update page size
-    await nextTick()
-    afterPaste({ cards, boxes: [] })
   }, 100)
 }
 
@@ -607,22 +643,30 @@ const afterPaste = ({ cards, boxes }) => {
     store.dispatch('checkIfItemShouldIncreasePageSize', box)
   })
 }
-
+const kinopioClipboardDataFromData = (data) => {
+  if (!data.text) { return }
+  if (data.file) { return }
+  // match text with names
+  let isKinopioClipboardData
+  const names = data.text.split('\n\n') // "xyz\n\nabc" -> ["xyz", "abc"]
+  names.forEach(name => {
+    const card = store.state.clipboardData?.cards?.find(card => card.name === name)
+    const box = store.state.clipboardData?.boxes?.find(box => box.name === name)
+    if (card || box) {
+      isKinopioClipboardData = true
+    }
+  })
+  if (!isKinopioClipboardData) { return }
+  return utils.clone(store.state.clipboardData)
+}
 const getClipboardData = async () => {
   store.commit('clearNotificationsWithPosition')
   let position = currentCursorPosition || prevCursorPosition
   try {
-    if (!navigator.clipboard.read) { // firefox
-      const data = utils.clone(store.state.clipboardDataPolyfill)
-      const emptyData = utils.objectHasKeys(data)
-      if (!emptyData) {
-        throw new Error('Firefox does not support paste')
-      }
-      return data
-    }
-    const data = await utils.dataFromClipboard()
-    if (data.text || data.file) {
-      notifyPasted(position)
+    let data = await utils.dataFromClipboard()
+    data.kinopio = kinopioClipboardDataFromData(data, position)
+    if (data.text || data.file || data.kinopio) {
+      store.commit('addNotificationWithPosition', { message: 'Pasted', position, type: 'success', layer: 'app', icon: 'cut' })
       return data
     }
   } catch (error) {
@@ -635,6 +679,7 @@ const handlePasteEvent = async (event) => {
   const isSpaceScope = checkIsSpaceScope(event)
   if (!isSpaceScope) { return }
   event.preventDefault()
+  let items
   let position = currentCursorPosition || prevCursorPosition
   position = utils.cursorPositionInSpace(null, position)
   // check card limits
@@ -644,6 +689,8 @@ const handlePasteEvent = async (event) => {
   }
   // check read only
   store.dispatch('currentUser/notifyReadOnly', position)
+  const canEditSpace = store.getters['currentUser/canEditSpace']()
+  if (!canEditSpace) { return }
   // get clipboard data
   let data = await getClipboardData()
   console.log('🎊 pasteData', data, position)
@@ -653,26 +700,28 @@ const handlePasteEvent = async (event) => {
   // add data items
   if (data.file) {
     store.dispatch('upload/addCardsAndUploadFiles', { files: [data.file], position })
+  // add kinopio items
+  } else if (data.kinopio) {
+    items = utils.updateSpaceItemsAddPosition(data.kinopio, position)
+    items = await store.dispatch('currentSpace/newItems', { items })
+    store.dispatch('currentSpace/addItems', items)
+    // select new items
+    await nextTick()
+    store.dispatch('closeAllDialogs')
+    const cardIds = items.cards.map(card => card.id)
+    const boxIds = items.boxes.map(box => box.id)
+    store.dispatch('addMultipleToMultipleCardsSelected', cardIds)
+    store.dispatch('addMultipleToMultipleBoxesSelected', boxIds)
+    await nextTick()
+    store.dispatch('currentConnections/updatePaths', { connections: items.connections })
   // add plain text cards
   } else {
     data.text = utils.decodeEntitiesFromHTML(data.text)
     handlePastePlainText(data, position)
   }
-}
-
-const writeSelectedToClipboard = async () => {
-  const selectedItems = store.getters['currentSpace/selectedItems']
-  const { cards, connectionTypes, connections, boxes } = selectedItems
-  let data = { isKinopioData: true, cards, connections, connectionTypes, boxes }
-  const text = utils.textFromCardNames(cards)
-  console.log('🎊 copyData', data, text)
-  try {
-    store.commit('clipboardDataPolyfill', data)
-    await navigator.clipboard.writeText(text)
-  } catch (error) {
-    console.warn('🚑 writeSelectedToClipboard', error)
-    throw { error }
-  }
+  // update page size
+  await nextTick()
+  afterPaste(items)
 }
 
 // Select All Cards Below Cursor
@@ -775,9 +824,9 @@ const selectAllItems = () => {
 const focusOnSpaceDetailsFilter = async () => {
   store.dispatch('closeAllDialogs')
   store.commit('triggerSpaceDetailsVisible')
-  nextTick()
-  nextTick()
-  nextTick()
+  await nextTick()
+  await nextTick()
+  await nextTick()
   store.commit('triggerFocusResultsFilter')
 }
 const focusOnSearchCardFilter = async (event) => {
@@ -788,9 +837,9 @@ const focusOnSearchCardFilter = async (event) => {
   } else {
     store.commit('triggerSearchScopeIsLocal')
   }
-  nextTick()
-  nextTick()
-  nextTick()
+  await nextTick()
+  await nextTick()
+  await nextTick()
   store.commit('triggerFocusResultsFilter')
 }
 
@@ -806,7 +855,7 @@ const toggleLockCards = () => {
     cards = [store.getters['currentCards/byId'](cardId)]
   } else {
     cards = store.getters['currentCards/all']
-    cards = cards.filter(card => utils.isPointInsideCard(currentCursorPosition, card))
+    cards = cards.filter(card => utils.isPointInsideRect(currentCursorPosition, card))
   }
   cards = cards.filter(card => Boolean(card))
   if (!cards) { return }
@@ -817,6 +866,31 @@ const toggleLockCards = () => {
     const update = { id: card.id, isLocked: shouldLock }
     store.dispatch('currentCards/update', { card: update })
   })
+}
+
+// Create Boxes
+
+const containItemsInNewBox = async (cards) => {
+  const isSpaceMember = store.getters['currentUser/isSpaceMember']()
+  if (!isSpaceMember) { return }
+  const rect = utils.boundaryRectFromItems(cards)
+  // box size
+  const padding = consts.spaceBetweenCards
+  const paddingTop = 30 + padding
+  // same as Box shrinkToMinBoxSize
+  const box = {
+    id: nanoid(),
+    x: rect.x - padding,
+    y: rect.y - paddingTop,
+    resizeWidth: rect.width + (padding * 2),
+    resizeHeight: rect.height + (padding + paddingTop)
+  }
+  store.dispatch('currentBoxes/add', { box })
+  store.dispatch('closeAllDialogs')
+  await nextTick()
+  await nextTick()
+  store.commit('boxDetailsIsVisibleForBoxId', box.id)
+  store.commit('clearMultipleSelected')
 }
 </script>
 

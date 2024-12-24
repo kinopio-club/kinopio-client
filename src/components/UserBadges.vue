@@ -3,7 +3,7 @@ import { reactive, computed, onMounted, onBeforeUnmount, defineProps, defineEmit
 import { useStore } from 'vuex'
 
 import userBadges from '@/data/userBadges.json'
-import TeamLabel from '@/components/TeamLabel.vue'
+import GroupLabel from '@/components/GroupLabel.vue'
 const store = useStore()
 
 const props = defineProps({
@@ -41,10 +41,6 @@ const cardsCreatedCount = computed(() => {
   count = Math.max(0, count || 0)
   return count
 })
-
-// teams
-
-const userTeams = computed(() => store.getters['teams/byUser'](props.user))
 </script>
 
 <template lang="pug">
@@ -76,11 +72,6 @@ const userTeams = computed(() => store.getters['teams/byUser'](props.user))
   .badge.secondary
     img.icon.card(src="@/assets/card.svg")
     span {{cardsCreatedCount}} Cards Created
-
-//- team badges list
-.row(v-if="!props.isCurrentUser && userTeams.length")
-  .badge.secondary(v-for="team in userTeams")
-    TeamLabel(:team="team" :showIcon="true" :showName="true")
 </template>
 
 <style lang="stylus">

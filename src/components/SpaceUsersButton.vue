@@ -4,7 +4,7 @@ import { useStore } from 'vuex'
 
 import User from '@/components/User.vue'
 import utils from '@/utils.js'
-import TeamLabel from '@/components/TeamLabel.vue'
+import GroupLabel from '@/components/GroupLabel.vue'
 
 import uniqBy from 'lodash-es/uniqBy'
 import last from 'lodash-es/last'
@@ -48,9 +48,9 @@ const isActive = computed(() => {
   }
 })
 
-// team
+// group
 
-const team = computed(() => store.getters['teams/spaceTeam'](currentSpace.value))
+const group = computed(() => store.getters['groups/spaceGroup'](currentSpace.value))
 
 // users
 
@@ -59,11 +59,10 @@ const spaceUsers = computed(() => {
   if (props.users) {
     items = props.users
   } else {
-    const teamUsers = store.getters['currentCards/teamUsersWhoAddedCards']
+    const groupUsers = store.getters['currentCards/groupUsersWhoAddedCards']
     items = utils.clone(currentSpace.value.users)
     items = items.concat(currentSpace.value.collaborators)
-    items = items.concat(teamUsers)
-    // TODO add notifications: notify teamUsers on changes. https://kinopio.club/En9p7INBEpSAhNwFVIwgZ/VelgpXzc5h8Cl1m4RJ41i
+    items = items.concat(groupUsers)
   }
   items = items.filter(item => Boolean(item))
   items = items.filter(user => user.id !== currentUser.value.id)
@@ -80,8 +79,11 @@ const isCommenters = computed(() => Boolean(commenters.value.length))
 const commenters = computed(() => store.getters['currentCards/commenters'])
 const spaceUsersLabel = computed(() => {
   let condition = spaceUsers.value.length !== 1
-  const CollaboratorsString = utils.pluralize('Collaborator', condition)
-  let string = `${spaceUsers.value.length} ${CollaboratorsString}`
+  let collaboratorsString = utils.pluralize('Collaborator', condition)
+  if (spaceUsers.value.length === 0) {
+    collaboratorsString = 'Other Collaborators'
+  }
+  let string = `${spaceUsers.value.length} ${collaboratorsString}`
   if (isCommenters.value) {
     string = string + ` + ${commenters.value.length}`
   }
@@ -97,8 +99,8 @@ const isTranslucentButton = computed(() => {
 <template lang="pug">
 button.space-users-button(@click.stop="toggleSpaceUserListIsVisible" :class="{ 'header-button': props.isParentSpaceUsers, active: isActive, 'translucent-button': isTranslucentButton }" ref="buttonElement")
   span.label(v-if="props.showLabel")
-    template(v-if="team")
-      TeamLabel(:team="team")
+    template(v-if="group")
+      GroupLabel(:group="group")
     template(v-if="spaceUsers.length")
       User(:user="recentUser" :isClickable="false" :hideYouLabel="true" :isSmall="true" :shouldBounceIn="props.isParentSpaceUsers")
     span {{ spaceUsersLabel }}
@@ -114,12 +116,10 @@ button.space-users-button(@click.stop="toggleSpaceUserListIsVisible" :class="{ '
     > .user
         margin-top -1px
     > span + .user
-        margin-left 6px
+        // margin-left 6px
       .anon-avatar
         top 3px
   &.header-button
     border-top-left-radius 0
     border-bottom-left-radius 0
-  .team-label
-    margin-right 6px
 </style>

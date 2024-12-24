@@ -4,6 +4,11 @@ import { useStore } from 'vuex'
 
 import postMessage from '@/postMessage.js'
 import utils from '@/utils.js'
+
+import { colord, extend } from 'colord'
+import mixPlugin from 'colord/plugins/mix'
+extend([mixPlugin])
+
 const store = useStore()
 
 // adapted from https://gist.github.com/pketh/3f62b807db3835d564c1
@@ -33,17 +38,26 @@ let shouldNotUpdate
 
 let canvas, context
 
+let unsubscribe
+
 // start, stop
 
 onMounted(() => {
   canvas = document.getElementById('outside-space-background')
   context = canvas.getContext('2d')
   context.scale(window.devicePixelRatio, window.devicePixelRatio)
-
+  unsubscribe = store.subscribe(mutation => {
+    if (mutation.type === 'currentSpace/updateSpace') {
+      if (mutation.payload.backgroundTint) {
+        updateBackgroundColor()
+      }
+    }
+  })
   start()
 })
 onBeforeUnmount(() => {
   cancel()
+  unsubscribe()
 })
 const isTouching = computed(() => store.state.isPinchZooming || store.state.isTouchScrolling)
 watch(() => isTouching.value, (value, prevValue) => {
@@ -65,6 +79,14 @@ const cancel = () => {
 }
 const spaceZoomDecimal = computed(() => store.getters.spaceZoomDecimal)
 const outsideSpaceBackgroundIsStatic = computed(() => store.state.currentUser.outsideSpaceBackgroundIsStatic)
+const backgroundTintColor = computed(() => store.state.currentSpace.backgroundTint)
+const isThemeDark = computed(() => store.getters['themes/isThemeDark'])
+const preventTouchScrolling = (event) => {
+  const shouldPrevent = store.state.currentUserIsResizingBox || store.state.currentUserIsPaintingLocked
+  if (shouldPrevent) {
+    event.preventDefault()
+  }
+}
 
 // update color
 
@@ -85,6 +107,18 @@ const updateBackgroundColor = () => {
   if (outsideSpaceBackgroundIsStatic.value) {
     backgroundColor = utils.cssVariable('secondary-active-background')
   }
+  // darken
+  let darkness = 0.6
+  if (isThemeDark.value) {
+    darkness = 0.8
+  }
+  backgroundColor = colord(backgroundColor).darken(darkness).toHex()
+  // mix in tint color
+  if (backgroundTintColor.value) {
+    let tint = backgroundTintColor.value
+    backgroundColor = colord(backgroundColor).mix(tint, 0.5).toHex()
+  }
+  // save color
   store.commit('outsideSpaceBackgroundColor', backgroundColor)
   updateMetaThemeColor(backgroundColor)
   // update canvas bk
@@ -111,13 +145,18 @@ const updateMetaThemeColor = (color) => {
 }
 const styles = computed(() => {
   const canvasSize = 10
-  const scale = store.state.viewportWidth / canvasSize
+  const widthScale = store.state.viewportWidth / canvasSize
+  const heightScale = store.state.viewportHeight / canvasSize
+  const scale = Math.max(widthScale, heightScale)
   return { transform: `scale(${scale})` }
 })
 </script>
 
 <template lang="pug">
-canvas#outside-space-background(:style="styles")
+canvas#outside-space-background(
+  :style="styles"
+  @touchmove="preventTouchScrolling"
+)
 </template>
 
 <style lang="stylus">
@@ -128,4 +167,5 @@ canvas#outside-space-background(:style="styles")
   width 10px
   height 10px
   transform-origin left top
+  user-select none
 </style>

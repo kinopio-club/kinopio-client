@@ -16,7 +16,8 @@ import CardCollaborationInfo from '@/components/CardCollaborationInfo.vue'
 import ShareCard from '@/components/dialogs/ShareCard.vue'
 import OtherCardPreview from '@/components/OtherCardPreview.vue'
 import OtherSpacePreview from '@/components/OtherSpacePreview.vue'
-import TeamInvitePreview from '@/components/TeamInvitePreview.vue'
+import GroupInvitePreview from '@/components/GroupInvitePreview.vue'
+import ItemCheckboxButton from '@/components/ItemCheckboxButton.vue'
 import utils from '@/utils.js'
 import consts from '@/consts.js'
 
@@ -115,7 +116,9 @@ const card = computed(() => {
 })
 const visible = computed(() => utils.objectHasKeys(card.value))
 watch(() => visible.value, (value, prevValue) => {
-  if (!value) {
+  if (value) {
+    store.commit('preventMultipleSelectedActionsIsVisible', false)
+  } else {
     closeCard()
   }
 })
@@ -205,21 +208,24 @@ const scrollIntoViewAndFocus = async () => {
   await nextTick()
   scrollIntoView(behavior)
   focusName()
-  triggerUpdateMagicPaintPositionOffset()
+  triggerUpdateMainCanvasPositionOffset()
   triggerUpdateHeaderAndFooterPosition()
 }
-const triggerUpdateMagicPaintPositionOffset = () => {
-  store.commit('triggerUpdateMagicPaintPositionOffset')
+const triggerUpdateMainCanvasPositionOffset = () => {
+  store.commit('triggerUpdateMainCanvasPositionOffset')
   triggerUpdateHeaderAndFooterPosition()
 }
 
 // dimensions and connection paths
 
 const updateDimensions = async (cardId) => {
-  cardId = cardId || card.value.id
-  const item = { id: cardId }
+  let cards = [card.value]
+  if (cardId) {
+    const item = store.getters['currentCards/byId'](cardId)
+    cards = [item]
+  }
   await nextTick()
-  store.dispatch('currentCards/updateDimensions', { cards: [item] })
+  store.dispatch('currentCards/updateDimensions', { cards })
   await nextTick()
   await nextTick()
 }
@@ -247,7 +253,7 @@ const isInSearchResultsCards = computed(() => {
   return Boolean(results.find(cardResult => card.value.id === cardResult.id))
 })
 const canEditSpace = computed(() => store.getters['currentUser/canEditSpace']())
-const isInvitedButCannotEditSpace = computed(() => store.getters['currentUser/isInvitedButCannotEditSpace']())
+const isInvitedButCannotEditSpace = computed(() => store.state.currentUserIsInvitedButCannotEditCurrentSpace)
 
 // user
 
@@ -350,7 +356,7 @@ const showCard = async (cardId) => {
   clearErrors()
   updatePinchCounterZoomDecimal()
   scrollIntoViewAndFocus()
-  updatePreviousTags()
+  await updatePreviousTags()
   updateNameSplitIntoCardsCount()
   resetTextareaHeight()
   await nextTick()
@@ -462,7 +468,7 @@ const updateCardName = async (newName) => {
   }
   store.dispatch('currentCards/update', { card: item, shouldPreventUpdateDimensionsAndPaths: true })
   updateMediaUrls()
-  updateTags()
+  await updateTags()
   updateDimensionsAndPathsDebounced()
   if (createdByUser.value.id !== store.state.currentUser.id) { return }
   if (state.notifiedMembers) { return } // send card update notifications only once per card, per session
@@ -480,7 +486,7 @@ const normalizedName = computed(() => {
   return newName.trim()
 })
 const clickName = (event) => {
-  triggerUpdateMagicPaintPositionOffset()
+  triggerUpdateMainCanvasPositionOffset()
   store.commit('searchIsVisible', false)
   if (isCursorInsideTagBrackets()) {
     showTagPicker()
@@ -490,29 +496,6 @@ const clickName = (event) => {
     updateSpacePickerSearch()
     event.stopPropagation()
   }
-}
-
-// checkbox
-
-const checkbox = computed(() => Boolean(utils.checkboxFromString(name.value)))
-const checkboxIsChecked = computed({
-  get () {
-    return utils.nameIsChecked(name.value)
-  },
-  set (value) {
-    if (utils.nameIsChecked(name.value)) {
-      store.dispatch('currentCards/removeChecked', card.value.id)
-    } else {
-      store.dispatch('currentCards/toggleChecked', { cardId: card.value.id, value })
-    }
-  }
-})
-const addCheckbox = () => {
-  const update = {
-    id: card.value.id,
-    name: `[] ${card.value.name}`
-  }
-  store.dispatch('currentCards/update', { card: update })
 }
 
 // character limit
@@ -688,21 +671,21 @@ const moveCursorPastTagEnd = async () => {
   newCursorPosition = cursorStart + newCursorPosition + 2
   setSelectionRange(newCursorPosition, newCursorPosition)
 }
-const updatePreviousTags = () => {
+const updatePreviousTags = async () => {
   if (!card.value.name) {
     previousTags = []
     return
   }
   previousTags = utils.tagsFromStringWithoutBrackets(card.value.name) || []
-  previousTags = previousTags.map(tagName => {
+  previousTags = previousTags.map(async (tagName) => {
     let tag
     if (state.previousSelectedTag.name === tagName) {
       tag = state.previousSelectedTag
     } else if (state.currentSearchTag.name === tagName) {
       tag = state.currentSearchTag
     } else {
-      tag = store.getters['currentSpace/tagByName'](tagName)
-      tag = utils.clone(tag)
+      tag = await store.getters['currentSpace/tagByName'](tagName)
+      tag = utils.clone(tag, state.previousSelectedTag, tagName)
       tag.color = state.previousSelectedTag.color || tag.color
     }
     return tag
@@ -711,12 +694,12 @@ const updatePreviousTags = () => {
 const updateNewTagColor = (color) => {
   state.newTagColor = color
 }
-const addNewTags = (newTagNames) => {
+const addNewTags = async (newTagNames) => {
   const previousTagNames = previousTags.map(tag => tag.name)
   const addTagsNames = newTagNames.filter(newTagName => !previousTagNames.includes(newTagName))
-  addTagsNames.forEach(tagName => {
+  for (const tagName of addTagsNames) {
     let tag
-    tag = utils.newTag({
+    tag = store.getters.newTag({
       name: tagName,
       defaultColor: state.newTagColor || store.state.currentUser.color,
       cardId: card.value.id,
@@ -727,26 +710,26 @@ const addNewTags = (newTagNames) => {
     } else if (state.currentSearchTag.name === tagName) {
       tag.color = state.currentSearchTag.color
     }
-    store.dispatch('currentSpace/addTag', tag)
-  })
+    await store.dispatch('currentSpace/addTag', tag)
+  }
 }
-const updateTags = () => {
+const updateTags = async () => {
   if (!card.value.name) { return }
   const newTagNames = utils.tagsFromStringWithoutBrackets(card.value.name) || []
-  addNewTags(newTagNames)
-  updatePreviousTags()
+  await addNewTags(newTagNames)
+  await updatePreviousTags()
 }
 const hideTagDetailsIsVisible = () => {
   store.commit('currentSelectedTag', {})
   store.commit('tagDetailsIsVisible', false)
 }
-const updateCurrentSearchTag = (tag) => {
+const updateCurrentSearchTag = async (tag) => {
   state.currentSearchTag = tag
-  updatePreviousTags()
+  await updatePreviousTags()
 }
-const updateTagBracketsWithTag = (tag) => {
+const updateTagBracketsWithTag = async (tag) => {
   state.previousSelectedTag = tag
-  updatePreviousTags()
+  await updatePreviousTags()
   const cursorStart = selectionStartPosition()
   const text = tagStartText() + tagEndText()
   let newName
@@ -836,6 +819,29 @@ const updatePickerSearch = () => {
   } else if (state.space.pickerIsVisible) {
     updateSpacePickerSearch()
   }
+}
+
+// text edit actions
+
+const selectionEndPosition = () => {
+  if (!nameElement.value) { return }
+  const position = nameElement.value.selectionEnd
+  const endPosition = position
+  return endPosition
+}
+const toggleTextEditAction = async (action) => {
+  if (!visible.value) { return }
+  const startPosition = selectionStartPosition()
+  const endPosition = selectionEndPosition()
+  const { newName, offset } = utils.nameTextEditAction({
+    action,
+    startPosition,
+    endPosition,
+    name: nameElement.value.value
+  })
+  updateCardName(newName)
+  await nextTick()
+  setSelectionRange(startPosition + offset, endPosition + offset)
 }
 
 // card tips
@@ -981,11 +987,11 @@ const removeUrlPreview = async () => {
   store.dispatch('currentCards/update', { card: update })
 }
 
-// team invite preview
+// group invite preview
 
-const teamInviteUrl = computed(() => {
+const groupInviteUrl = computed(() => {
   const urls = validUrls.value
-  return urls.find(url => utils.urlIsTeamInvite(url))
+  return urls.find(url => utils.urlIsGroupInvite(url))
 })
 
 // media
@@ -1110,8 +1116,9 @@ const splitCards = (event, isPreview) => {
 const addSplitCards = async (newCards) => {
   const spaceBetweenCards = 12
   let prevCard = utils.clone(card.value)
-  store.dispatch('currentCards/addMultiple', { cards: newCards })
   store.dispatch('closeAllDialogs')
+  // create new cards
+  store.dispatch('currentCards/addMultiple', { cards: newCards })
   // update y positions
   // wait for cards to be added to dom
   setTimeout(() => {
@@ -1343,6 +1350,11 @@ dialog.card-details(v-if="visible" :open="visible" ref="dialogElement" @click.le
 
         @keydown.tab.exact="triggerPickerSelectItem"
 
+        @keydown.meta.b.exact.stop.prevent="toggleTextEditAction('bold')"
+        @keydown.ctrl.b.exact.stop.prevent="toggleTextEditAction('bold')"
+        @keydown.meta.i.exact.stop.prevent="toggleTextEditAction('italic')"
+        @keydown.ctrl.i.exact.stop.prevent="toggleTextEditAction('italic')"
+
         @focus="resetPinchCounterZoomDecimal"
       )
 
@@ -1385,11 +1397,7 @@ dialog.card-details(v-if="visible" :open="visible" ref="dialogElement" @click.le
             img.icon.remove(src="@/assets/remove.svg")
             //- span Remove
         //- [·]
-        .button-wrap.cards-checkboxes
-          label.fixed-height(v-if="checkbox" :class="{active: checkboxIsChecked, disabled: !canEditCard}" tabindex="0" title="Checkbox")
-            input(type="checkbox" v-model="checkboxIsChecked" tabindex="-1")
-          label.fixed-height(v-else @click.left.prevent="addCheckbox" @keydown.stop.enter="addCheckbox" :class="{disabled: !canEditCard}" tabindex="0")
-            input.add(type="checkbox" tabindex="-1")
+        ItemCheckboxButton(:cards="[card]" :isDisabled="!canEditCard")
         //- Image
         .button-wrap
           button(@click.left.stop="toggleImagePickerIsVisible" :class="{active : state.imagePickerIsVisible}" title="Image")
@@ -1428,10 +1436,10 @@ dialog.card-details(v-if="visible" :open="visible" ref="dialogElement" @click.le
 
     MediaPreview(:visible="cardHasMedia" :card="card" :formats="state.formats")
 
-    template(v-if="teamInviteUrl")
-      TeamInvitePreview(
+    template(v-if="groupInviteUrl")
+      GroupInvitePreview(
         :card="card"
-        :teamInviteUrl="teamInviteUrl"
+        :groupInviteUrl="groupInviteUrl"
         :parentIsCardDetails="true"
       )
     template(v-else-if="urlPreviewIsVisible")
@@ -1516,13 +1524,6 @@ dialog.card-details(v-if="visible" :open="visible" ref="dialogElement" @click.le
   .edit-message
     button
       margin-top 10px
-  .cards-checkboxes
-    label
-      display flex
-      align-items center
-    input
-      margin 0
-      vertical-align -1px
   .badges-row
     display flex
     flex-wrap wrap

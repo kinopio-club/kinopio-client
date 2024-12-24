@@ -9,20 +9,15 @@ const store = useStore()
 const spaceZoomDecimal = computed(() => store.getters.spaceZoomDecimal)
 const lockedCards = computed(() => store.getters['currentCards/isLocked'])
 const lockedBoxes = computed(() => store.getters['currentBoxes/isLocked'])
-const positionStyles = computed(() => {
-  return {
-    transform: store.getters.zoomTransform
-  }
-})
 </script>
 
 <template lang="pug">
 //- boxes
-#locked-boxes.locked-boxes(:style="positionStyles")
+#locked-boxes.locked-boxes
   template(v-for="box in lockedBoxes" :key="box.id")
     Box(:box="box")
 //- cards
-#locked-cards.locked-cards(:style="positionStyles")
+#locked-cards.locked-cards
   template(v-for="card in lockedCards" :key="card.id")
     Card(:card="card")
 </template>

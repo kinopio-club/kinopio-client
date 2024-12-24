@@ -3,9 +3,10 @@ import { reactive, computed, onMounted, onBeforeUnmount, defineProps, defineEmit
 import { useStore } from 'vuex'
 
 import utils from '@/utils.js'
-import TeamLabel from '@/components/TeamLabel.vue'
+import GroupLabel from '@/components/GroupLabel.vue'
 import ColorPicker from '@/components/dialogs/ColorPicker.vue'
 import Loader from '@/components/Loader.vue'
+import UpgradedUserRequired from '@/components/UpgradedUserRequired.vue'
 
 import randomColor from 'randomcolor'
 
@@ -26,9 +27,9 @@ const props = defineProps({
 const state = reactive({
   dialogHeight: null,
   colorPickerIsVisible: false,
-  team: null,
+  group: null,
   loading: {
-    createTeam: false
+    createGroup: false
   },
   error: {
     missingName: false,
@@ -39,7 +40,7 @@ const state = reactive({
 watch(() => props.visible, (value, prevValue) => {
   if (value) {
     updateDialogHeight()
-    initTeam()
+    initGroup()
     focusNameInput()
   }
 })
@@ -58,11 +59,16 @@ const clearErrors = () => {
   state.error.unknownServerError = false
 }
 
-// team color
+// upgrade user required
 
-const teamColor = computed(() => state.team.color)
-const updateTeamColor = (newValue) => {
-  state.team.color = newValue
+const currentUserIsUpgraded = computed(() => store.state.currentUser.isUpgraded)
+const upgradeMessage = computed(() => 'to create and manage Groups')
+
+// group color
+
+const groupColor = computed(() => state.group.color)
+const updateGroupColor = (newValue) => {
+  state.group.color = newValue
 }
 const toggleColorPicker = () => {
   const isVisible = state.colorPickerIsVisible
@@ -70,77 +76,82 @@ const toggleColorPicker = () => {
   state.colorPickerIsVisible = !isVisible
 }
 
-// team name
+// group name
 
 const focusNameInput = async () => {
   await nextTick()
   const element = nameInputElement.value
+  if (!element) { return }
   element.focus()
   element.select()
 }
-const teamName = computed({
+const groupName = computed({
   get () {
-    return state.team.name
+    return state.group.name
   },
   set (newValue) {
-    state.team.name = newValue
+    state.group.name = newValue
   }
 })
 
-// team
+// group
 
-const initTeam = () => {
-  let team = {
-    name: 'Team Name',
+const initGroup = () => {
+  let group = {
+    name: 'Group Name',
     color: randomColor()
   }
-  state.team = team
+  state.group = group
 }
-const createTeam = async () => {
-  if (state.loading.createTeam) { return }
+const createGroup = async () => {
+  if (state.loading.createGroup) { return }
   clearErrors()
-  if (!state.team.name) {
+  if (!state.group.name) {
     state.error.missingName = true
     return
   }
   try {
-    state.loading.createTeam = true
-    await store.dispatch('teams/createTeam', state.team)
+    state.loading.createGroup = true
+    await store.dispatch('groups/createGroup', state.group)
     emit('closeDialogs')
   } catch (error) {
-    console.error('🚒 createTeam', error)
+    console.error('🚒 createGroup', error)
     state.unknownServerError = true
   }
-  state.loading.createTeam = false
+  state.loading.createGroup = false
 }
 
 </script>
 
 <template lang="pug">
-dialog.narrow.add-team(v-if="visible" :open="visible" @click.left.stop="closeDialogs" ref="dialogElement" :style="{'max-height': state.dialogHeight + 'px'}")
-  section
+dialog.narrow.add-group(v-if="visible" :open="visible" @click.left.stop="closeDialogs" ref="dialogElement" :style="{'max-height': state.dialogHeight + 'px'}")
+  UpgradedUserRequired(:message="upgradeMessage")
+  section(v-if="currentUserIsUpgraded")
     .row
       .button-wrap
-          button.change-color(@click.left.stop="toggleColorPicker" :class="{active: state.colorPickerIsVisible}" title="Change Team Color")
-            .current-color.current-team-color(:style="{ background: teamColor }")
-          ColorPicker(:currentColor="teamColor" :visible="state.colorPickerIsVisible" @selectedColor="updateTeamColor")
-      input.name(placeholder="Team Name" v-model="teamName" name="teamName" maxlength=100 ref="nameInputElement" @keydown.enter.exact.prevent="createTeam")
+          button.change-color(@click.left.stop="toggleColorPicker" :class="{active: state.colorPickerIsVisible}" title="Change Group Color")
+            .current-color.current-group-color(:style="{ background: groupColor }")
+          ColorPicker(:currentColor="groupColor" :visible="state.colorPickerIsVisible" @selectedColor="updateGroupColor")
+      input.name(placeholder="Group Name" v-model="groupName" name="groupName" maxlength=100 ref="nameInputElement" @keydown.enter.exact.prevent="createGroup")
     .row
-      button(:class="{ active: state.loading.createTeam }" @click.stop="createTeam")
+      button(:class="{ active: state.loading.createGroup }" @click.stop="createGroup")
         img.icon.add(src="@/assets/add.svg")
-        TeamLabel(:team="state.team")
-        span Create Team
-        Loader(:visible="state.loading.createTeam")
+        GroupLabel(:group="state.group")
+        span Create Group
+        Loader(:visible="state.loading.createGroup")
     //- errors
     .row(v-if="state.error.missingName")
-      .badge.danger Team name missing
+      .badge.danger Group name missing
     .row(v-if="state.unknownServerError")
       .badge.danger (シ_ _)シ Something went wrong, Please try again or contact support
 
 </template>
 
 <style lang="stylus">
-dialog.add-team
+dialog.add-group
+  left initial
+  right 8px
+  // width 200px !important
   input.name
     margin-bottom 0
   button.change-color

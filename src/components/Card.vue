@@ -9,7 +9,7 @@ import Audio from '@/components/Audio.vue'
 import NameSegment from '@/components/NameSegment.vue'
 import UserLabelInline from '@/components/UserLabelInline.vue'
 import OtherCardPreview from '@/components/OtherCardPreview.vue'
-import TeamInvitePreview from '@/components/TeamInvitePreview.vue'
+import GroupInvitePreview from '@/components/GroupInvitePreview.vue'
 import ItemConnectorButton from '@/components/ItemConnectorButton.vue'
 import consts from '@/consts.js'
 import postMessage from '@/postMessage.js'
@@ -22,7 +22,10 @@ import UrlPreviewCard from '@/components/UrlPreviewCard.vue'
 import ImageOrVideo from '@/components/ImageOrVideo.vue'
 
 import dayjs from 'dayjs'
+import isToday from 'dayjs/plugin/isToday'
 import qs from '@aguezz/qs-parse'
+
+dayjs.extend(isToday)
 
 const store = useStore()
 
@@ -45,13 +48,16 @@ const stickyTimerDuration = 250
 let preventSticking = false
 let stickyTimerComplete = false
 let stickyTimer
+let stickyMap
 
 let prevIsLoadingUrlPreview
 
 let observer
 
+let unsubscribe
+
 onMounted(async () => {
-  store.subscribe((mutation, state) => {
+  unsubscribe = store.subscribe((mutation, state) => {
     const { type, payload } = mutation
     if (type === 'updateRemoteCurrentConnection' || type === 'removeRemoteCurrentConnection') {
       updateRemoteConnections()
@@ -93,6 +99,7 @@ onMounted(async () => {
 
 onBeforeUnmount(() => {
   removeViewportObserver()
+  unsubscribe()
 })
 
 const props = defineProps({
@@ -228,7 +235,6 @@ const removeCommentBrackets = (name) => {
 
 const isChecked = computed(() => utils.nameIsChecked(name.value))
 const hasCheckbox = computed(() => {
-  if (isLocked.value) { return }
   return utils.checkboxFromString(name.value)
 })
 const checkboxState = computed({
@@ -239,7 +245,7 @@ const checkboxState = computed({
 const toggleCardChecked = () => {
   if (store.state.currentUserIsDraggingConnectionIdLabel) { return }
   if (store.state.preventDraggedCardFromShowingDetails) { return }
-  if (!canEditSpace.value) { return }
+  if (!canEditCard.value) { return }
   const value = !isChecked.value
   store.dispatch('closeAllDialogs')
   store.dispatch('currentCards/toggleChecked', { cardId: props.card.id, value })
@@ -298,11 +304,11 @@ const updateIsPlayingAudio = (value) => {
   cancelLocking()
 }
 
-// team invite
+// group invite
 
-const teamInviteUrl = computed(() => {
+const groupInviteUrl = computed(() => {
   const urls = urlsInName.value || []
-  return urls.find(url => utils.urlIsTeamInvite(url))
+  return urls.find(url => utils.urlIsGroupInvite(url))
 })
 
 // other card
@@ -368,7 +374,6 @@ const articleStyle = computed(() => {
   if (currentCardDetailsIsVisible.value || currentCardIsBeingDragged.value) {
     z = 2147483646 // max z
   } else if (isLocked.value) {
-    z = 0
     pointerEvents = 'none'
   }
   let styles = {
@@ -429,7 +434,7 @@ const articleClasses = computed(() => {
   let classes = {
     'is-resizing': store.state.currentUserIsResizingCard,
     'is-tilting': store.state.currentUserIsTiltingCard,
-    'is-hidden-by-opacity': isCardHiddenByCommentFilter.value,
+    'is-hidden-by-opacity': isHiddenByCommentFilter.value,
     'jiggle': shouldJiggle.value
   }
   classes = addSizeClasses(classes)
@@ -445,7 +450,10 @@ const cardClasses = computed(() => {
     'is-locked': isLocked.value,
     'has-url-preview': cardUrlPreviewIsVisible.value,
     'is-dark': backgroundColorIsDark.value,
-    'child-is-hovered': currentUserIsHoveringOverUrlButton.value && !currentCardIsBeingDragged.value
+    'child-is-hovered': currentUserIsHoveringOverUrlButton.value && !currentCardIsBeingDragged.value,
+    'is-in-checked-box': isInCheckedBox.value,
+    'is-checked': isChecked.value,
+    'is-comment': isComment.value
   }
   classes = addSizeClasses(classes)
   return classes
@@ -464,6 +472,10 @@ const updateStylesWithWidth = (styles) => {
   const cardHasUrlsOrMedia = cardHasMedia.value || cardHasUrls.value
   let cardMaxWidth = resizeWidth.value || props.card.maxWidth || consts.normalCardMaxWidth
   let cardWidth = resizeWidth.value
+  if (store.state.shouldSnapToGrid && currentCardIsBeingResized.value && cardWidth) {
+    cardMaxWidth = utils.roundToNearest(cardMaxWidth)
+    cardWidth = utils.roundToNearest(cardWidth)
+  }
   if (isComment.value) { return styles }
   styles.maxWidth = cardMaxWidth + 'px'
   styles.width = cardWidth + 'px'
@@ -523,7 +535,7 @@ const tiltResizeIsVisible = computed(() => {
   if (!canEditSpace.value) { return }
   if (!canEditCard.value) { return }
   if (cardPendingUpload.value || remoteCardPendingUpload.value) { return }
-  if (utils.isMobile()) { return }
+  if (store.state.spaceZoomPercent < 50 || store.state.pinchCounterZoomDecimal < 0.5) { return }
   return true
 })
 const x = computed(() => {
@@ -604,6 +616,8 @@ const urlButtonIsVisible = computed(() => {
   if (isComment.value) { return true }
   if (isUrlPreviewError.value) { return true }
   if (state.formats.file) { return true }
+  const isPreviewImageOnly = props.card.urlPreviewIsVisible && props.card.shouldHideUrlPreviewInfo
+  if (isPreviewImageOnly) { return true }
   return !props.card.urlPreviewIsVisible
 })
 const cardButtonUrl = computed(() => {
@@ -667,6 +681,11 @@ const dateUpdatedAt = computed(() => {
   } else {
     return 'Just now'
   }
+})
+const dateIsToday = computed(() => {
+  const date = updatedAt.value
+  if (!date) { return }
+  return dayjs(date).isToday()
 })
 const toggleFilterShowAbsoluteDates = () => {
   store.dispatch('currentCards/incrementZ', props.card.id)
@@ -858,7 +877,7 @@ const nameSegments = computed(() => {
     if (segment.isTag) {
       let tag = store.getters['currentSpace/tagByName'](segment.name)
       if (!tag) {
-        tag = utils.newTag({
+        tag = store.getters.newTag({
           name: segment.name,
           defaultColor: store.state.currentUser.color,
           cardId: props.card.id,
@@ -924,6 +943,12 @@ const showTagDetailsIsVisible = ({ event, tag }) => {
   store.commit('currentUserIsDraggingCard', false)
 }
 
+// all previews
+
+const previewIsVisible = computed(() => {
+  return Boolean(cardUrlPreviewIsVisible.value || groupInviteUrl.value || otherCardIsVisible.value || otherSpaceIsVisible.value)
+})
+
 // url preview
 
 const urls = computed(() => {
@@ -949,7 +974,7 @@ const urlPreviewImageIsVisible = computed(() => {
 const cardUrlPreviewIsVisible = computed(() => {
   if (!props.card) { return }
   if (!props.card.name) { return }
-  let cardHasUrlPreviewInfo = Boolean(props.card.urlPreviewTitle || props.card.urlPreviewDescription || props.card.urlPreviewImage)
+  let cardHasUrlPreviewInfo = Boolean(props.card.urlPreviewTitle || props.card.urlPreviewDescription || props.card.urlPreviewImage || props.card.urlPreviewUrl)
   // TEMP experiment: remove card.urlPreviewErrorUrl checking to eliminate false positives. Observe if there's a downside irl and if this attribute should be removed entirely?
   // const isErrorUrl = props.card.urlPreviewErrorUrl && (props.card.urlPreviewUrl === props.card.urlPreviewErrorUrl)
   let url = props.card.urlPreviewUrl
@@ -1030,7 +1055,7 @@ const updateUrlPreviewOnline = async () => {
     updateUrlPreviewErrorUrl(url)
   }
 }
-const updateUrlPreviewSuccess = (url, data) => {
+const updateUrlPreviewSuccess = async (url, data) => {
   if (!nameIncludesUrl(url)) { return }
   const cardId = data.id || props.card.id
   if (!cardId) {
@@ -1041,9 +1066,10 @@ const updateUrlPreviewSuccess = (url, data) => {
   data.name = utils.addHiddenQueryStringToURLs(props.card.name)
   store.dispatch('currentCards/update', { card: data })
   store.commit('removeUrlPreviewLoadingForCardIds', cardId)
-  store.dispatch('api/addToQueue', { name: 'updateUrlPreviewImage', body: data })
+  await store.dispatch('api/addToQueue', { name: 'updateUrlPreviewImage', body: data })
 }
 const retryUrlPreview = () => {
+  if (!canEditSpace.value) { return }
   const update = {
     id: props.card.id,
     shouldUpdateUrlPreview: true
@@ -1068,6 +1094,7 @@ const nameIncludesUrl = (url) => {
 const updateUrlPreviewImage = (update) => {
   if (!currentUserIsSignedIn.value) { return }
   if (!update.urlPreviewImage) { return }
+  if (!canEditSpace.value) { return }
   update.cardId = update.id
   update.spaceId = store.state.currentSpace.id
   delete update.id
@@ -1153,6 +1180,13 @@ const notifyPressAndHoldToDrag = () => {
   }
   store.commit('hasNotifiedPressAndHoldToDrag', true)
 }
+
+// resize cards
+
+const currentCardIsBeingResized = computed(() => {
+  const cardIds = store.state.currentUserIsResizingCardIds
+  return cardIds.includes(props.card.id)
+})
 
 // touch locking to drag card
 
@@ -1321,6 +1355,7 @@ const showCardDetails = (event) => {
   if (isMultiTouch) { return }
   if (store.state.currentUserIsPanningReady || store.state.currentUserIsPanning) { return }
   if (store.state.currentUserIsResizingBox || store.state.currentUserIsDraggingBox) { return }
+  if (store.state.shouldSnapToGrid) { return }
   if (!canEditCard.value) { store.commit('triggerReadOnlyJiggle') }
   const shouldToggleSelected = event.shiftKey && !store.state.cardsWereDragged && !isConnectingTo.value
   if (shouldToggleSelected) {
@@ -1378,9 +1413,9 @@ const touchIsNearTouchPosition = (event) => {
 // space filters
 
 const filtersIsActive = computed(() => {
-  return Boolean(store.getters['currentUser/totalCardFadingFiltersActive'])
+  return Boolean(store.getters['currentUser/totalItemFadingFiltersActive'])
 })
-const isCardFilteredByTags = computed(() => {
+const isFilteredByTags = computed(() => {
   const tagNames = store.state.filteredTagNames
   if (!tagNames.length) { return }
   const hasTag = tags.value.find(tag => {
@@ -1390,7 +1425,7 @@ const isCardFilteredByTags = computed(() => {
   })
   return hasTag
 })
-const isConnectionFilteredByType = computed(() => {
+const isFilteredByConnectionType = computed(() => {
   const typeIds = store.state.filteredConnectionTypeIds
   if (!typeIds) { return }
   const filteredTypes = connectedConnectionTypes.value.filter(type => {
@@ -1398,31 +1433,37 @@ const isConnectionFilteredByType = computed(() => {
   })
   return Boolean(filteredTypes.length)
 })
-const isCardFilteredByFrame = computed(() => {
+const isFilteredByFrame = computed(() => {
   const frameIds = store.state.filteredFrameIds
   if (!frameIds.length) { return }
   const hasFrame = frameIds.includes(props.card.frameId)
   return hasFrame
 })
-const isCardFilteredByUnchecked = computed(() => {
+const isFilteredByUnchecked = computed(() => {
   const filterUncheckedIsActive = store.state.currentUser.filterUnchecked
   if (!filterUncheckedIsActive) { return }
   return !isChecked.value && hasCheckbox.value
 })
-const isCardHiddenByCommentFilter = computed(() => {
+const isHiddenByCommentFilter = computed(() => {
   const filterCommentsIsActive = store.state.currentUser.filterComments
   if (!filterCommentsIsActive) { return }
   return isComment.value
 })
+const isFilteredByBox = computed(() => {
+  const boxIds = store.state.filteredBoxIds
+  const boxes = containingBoxes.value || []
+  const isInBox = boxes.find(box => boxIds.includes(box.id))
+  return isInBox
+})
 const isFiltered = computed(() => {
   if (!filtersIsActive.value) { return }
-  const isInFilter = isCardFilteredByTags.value || isConnectionFilteredByType.value || isCardFilteredByFrame.value || isCardFilteredByUnchecked.value
+  const isInFilter = isFilteredByTags.value || isFilteredByConnectionType.value || isFilteredByFrame.value || isFilteredByUnchecked.value || isFilteredByBox.value
   return !isInFilter
 })
 
 // user
 
-const createdByUser = computed(() => {
+const cardCreatedByUser = computed(() => {
   // same as userDetailsWrap.cardCreatedByUser
   const userId = props.card.userId
   if (!userId) { return }
@@ -1437,7 +1478,7 @@ const createdByUser = computed(() => {
 })
 const userDetailsIsUser = computed(() => {
   if (!store.state.userDetailsIsVisible) { return }
-  const user = createdByUser.value
+  const user = cardCreatedByUser.value
   return user.id === store.state.userDetailsUser.id
 })
 
@@ -1528,6 +1569,32 @@ const shouldNotStick = computed(() => {
   const currentUserIsPanning = store.state.currentUserIsPanningReady || store.state.currentUserIsPanning
   return userIsConnecting || store.state.currentUserIsDraggingBox || store.state.currentUserIsResizingBox || currentUserIsPanning || currentCardDetailsIsVisible.value || isRemoteCardDetailsVisible.value || isRemoteCardDragging.value || currentCardIsBeingDragged.value || store.state.currentUserIsResizingCard || store.state.currentUserIsTiltingCard || isLocked.value
 })
+const updateShouldNotStickMap = () => {
+  stickyMap = []
+  const element = cardElement.value
+  let rect
+  // connector
+  const connector = element.querySelector('.connector')
+  if (connector) {
+    rect = connector.getBoundingClientRect()
+    rect = utils.rectDimensions(rect)
+    stickyMap.push(rect)
+  }
+  // checkbox
+  const checkbox = element.querySelector('.checkbox-wrap')
+  if (checkbox) {
+    rect = checkbox.getBoundingClientRect()
+    rect = utils.rectDimensions(rect)
+    stickyMap.push(rect)
+  }
+  // tilt resize buttons
+  const tiltResizeButtons = element.querySelectorAll('.bottom-button-wrap')
+  tiltResizeButtons.forEach(button => {
+    rect = button.getBoundingClientRect()
+    rect = utils.rectDimensions(rect)
+    stickyMap.push(rect)
+  })
+}
 const initStickToCursor = () => {
   preventSticking = false
   if (shouldNotStick.value || consts.userPrefersReducedMotion()) {
@@ -1537,10 +1604,15 @@ const initStickToCursor = () => {
     stickyTimerComplete = true
   }, stickyTimerDuration)
   updateStickyStretchResistance()
+  updateShouldNotStickMap()
 }
 const clearStickyTimer = () => {
   clearTimeout(stickyTimer)
   stickyTimerComplete = false
+}
+const stopSticking = () => {
+  clearStickyPositionOffsets()
+  preventSticking = true
 }
 const isValidStickySize = (width, height, min) => {
   const isWidth = width > min
@@ -1575,27 +1647,34 @@ const stickToCursor = (event) => {
   if (state.isAnimationUnsticking) { return }
   if (preventSticking) { return }
   if (!stickyTimerComplete) { return }
+  const position = utils.cursorPositionInSpace(event)
+  // stop sticking by map
+  const positionIsInsideMap = stickyMap.find(rect => utils.isPointInsideRect(position, rect))
+  if (positionIsInsideMap) {
+    stopSticking()
+    return
+  }
+  // stop sticking by element
   const classes = ['checkbox-wrap', 'button-wrap', 'progress-wrap', 'inline-button', 'badge']
   const elements = ['button', 'progress', 'iframe']
   const isOverAction = classes.includes(event.target.className) || elements.includes(event.target.nodeName.toLowerCase())
   const isOverTag = event.target.className.includes('button-badge')
   if (shouldNotStick.value || isOverAction || isOverTag) {
-    clearStickyPositionOffsets()
-    preventSticking = true
+    stopSticking()
     return
   }
   const isButtonHover = event.target.closest('.inline-button-wrap') || event.target.closest('.button-wrap')
   if (isButtonHover) {
-    clearStickyPositionOffsets()
+    stopSticking()
     return
   }
+  // position
   const stretchResistance = state.stickyStretchResistance
   const { height, width } = props.card
   const halfWidth = width / 2
   const halfHeight = height / 2
   let centerX = x.value + halfWidth
   let centerY = y.value + halfHeight
-  let position = utils.cursorPositionInSpace(event)
   // position from card center
   const xFromCenter = position.x - centerX
   const yFromCenter = position.y - centerY
@@ -1672,7 +1751,7 @@ const unlockCard = (event) => {
   store.dispatch('currentCards/update', { card: update })
 }
 const lockingFrameStyle = computed(() => {
-  const initialPadding = 65 // matches initialLockCircleRadius in magicPaint
+  const initialPadding = 65 // matches initialLockCircleRadius in paintSelect
   const initialBorderRadius = 50
   const padding = initialPadding * state.lockingPercent
   const userColor = store.state.currentUser.color
@@ -1707,14 +1786,14 @@ const updateOtherItems = () => {
   if (!url) { return }
   const urlIsSpace = utils.urlIsSpace(url)
   const urlIsSpaceInvite = utils.urlIsSpaceInvite(url)
-  const urlIsTeamInvite = utils.urlIsTeamInvite(url)
+  const urlIsGroupInvite = utils.urlIsGroupInvite(url)
   url = new URL(url)
   if (urlIsSpaceInvite) {
     updateOtherInviteItems(url)
   } else if (urlIsSpace) {
     updateOtherSpaceOrCardItems(url)
-  } else if (urlIsTeamInvite) {
-    updateOtherTeamItems(url)
+  } else if (urlIsGroupInvite) {
+    updateOtherGroupItems(url)
   }
 }
 const updateOtherSpaceOrCardItems = (url) => {
@@ -1742,9 +1821,9 @@ const updateOtherInviteItems = (url) => {
   }
   store.dispatch('currentSpace/updateOtherItems', { spaceId, collaboratorKey })
 }
-const updateOtherTeamItems = (url) => {
-  const teamFromUrl = utils.teamFromTeamInviteUrl(url)
-  store.dispatch('teams/updateOtherTeams', teamFromUrl)
+const updateOtherGroupItems = (url) => {
+  const groupFromUrl = utils.groupFromGroupInviteUrl(url)
+  store.dispatch('groups/updateOtherGroups', groupFromUrl)
 }
 
 // utils
@@ -1767,13 +1846,33 @@ const checkIfShouldUpdateIframeUrl = () => {
   }
 }
 
+// containing box
+
+const containingBoxes = computed(() => {
+  if (!state.isVisibleInViewport) { return }
+  if (isSelectedOrDragging.value) { return }
+  if (currentCardIsBeingDragged.value) { return }
+  let boxes = store.getters['currentBoxes/all']
+  boxes = boxes.filter(box => {
+    box = utils.clone(box)
+    const card = utils.clone(props.card)
+    return utils.isRectACompletelyInsideRectB(card, box)
+  })
+  return boxes
+})
+const isInCheckedBox = computed(() => {
+  if (!containingBoxes.value) { return }
+  const checkedBox = containingBoxes.value.find(box => utils.nameIsChecked(box.name))
+  return Boolean(checkedBox)
+})
+
 </script>
 
 <template lang="pug">
 article.card-wrap#card(
   :style="articleStyle"
   :data-card-id="card.id"
-  :data-is-hidden-by-comment-filter="isCardHiddenByCommentFilter"
+  :data-is-hidden-by-comment-filter="isHiddenByCommentFilter"
   :data-is-visible-in-viewport="state.isVisibleInViewport"
   :data-should-render="shouldRender"
   :data-is-locked="isLocked"
@@ -1844,13 +1943,13 @@ article.card-wrap#card(
       .card-comment(v-if="isComment")
         //- [·]
         .checkbox-wrap(v-if="hasCheckbox" @mouseup.left="toggleCardChecked" @touchend.prevent="toggleCardChecked" @mouseenter="handleMouseEnterCheckbox" @mouseleave="handleMouseLeaveCheckbox")
-          label(:class="{active: isChecked, disabled: !canEditSpace}")
+          label(:class="{active: isChecked, disabled: !canEditCard}")
             input(name="checkbox" type="checkbox" v-model="checkboxState")
         //- Name
         .badge.comment-badge(:class="{'is-light-in-dark-theme': isLightInDarkTheme, 'is-dark-in-light-theme': isDarkInLightTheme}")
           img.icon.view(src="@/assets/comment.svg")
           //- User
-          UserLabelInline(:user="createdByUser" :shouldHideName="true")
+          UserLabelInline(:user="cardCreatedByUser" :shouldHideName="true")
           //- Url →
         a.url-wrap(v-if="urlButtonIsVisible" :href="cardButtonUrl" @mouseup.exact.prevent="closeAllDialogs" @click.stop="openUrl($event, cardButtonUrl)" @touchend.prevent="openUrl($event, cardButtonUrl)" target="_blank" @mouseenter="handleMouseEnterUrlButton" @mouseleave="handleMouseLeaveUrlButton")
           .url.inline-button-wrap
@@ -1865,7 +1964,7 @@ article.card-wrap#card(
         .name-wrap
           //- [·]
           .checkbox-wrap(v-if="hasCheckbox" @mouseup.left="toggleCardChecked" @touchend.prevent="toggleCardChecked")
-            label(:class="{active: isChecked, disabled: !canEditSpace}")
+            label(:class="{active: isChecked, disabled: !canEditCard}")
               input(name="checkbox" type="checkbox" v-model="checkboxState")
           //- Name
           p.name.name-segments(v-if="isNormalizedNameOrHiddenUrl" :style="nameSegmentsStyles" :class="{'is-checked': isChecked, 'has-checkbox': hasCheckbox, 'badge badge-status': isImageCard && hasTextSegments}")
@@ -1902,12 +2001,12 @@ article.card-wrap#card(
             :parentDetailsIsVisible="currentCardDetailsIsVisible"
             @shouldRenderParent="updateShouldRenderParent"
           )
-    .url-preview-wrap(v-if="cardUrlPreviewIsVisible || teamInviteUrl || otherCardIsVisible || otherSpaceIsVisible" :class="{'is-image-card': isImageCard}")
+    .url-preview-wrap(v-if="previewIsVisible" :class="{'is-image-card': isImageCard}")
       template(v-if="cardUrlPreviewIsVisible")
         UrlPreviewCard(
           :visible="true"
           :card="card"
-          :user="createdByUser"
+          :user="cardCreatedByUser"
           :isImageCard="isImageCard"
           :isSelected="isSelectedOrDragging"
           :urlPreviewImageIsVisible="urlPreviewImageIsVisible"
@@ -1915,10 +2014,10 @@ article.card-wrap#card(
           @retryUrlPreview="retryUrlPreview"
           :backgroundColor="backgroundColor"
         )
-      template(v-if="teamInviteUrl")
-        TeamInvitePreview(
+      template(v-if="groupInviteUrl")
+        GroupInvitePreview(
           :card="card"
-          :teamInviteUrl="teamInviteUrl"
+          :groupInviteUrl="groupInviteUrl"
           :selectedColor="selectedColor"
         )
       template(v-else-if="otherCardIsVisible")
@@ -1978,9 +2077,9 @@ article.card-wrap#card(
       img.icon.system(src="@/assets/system.svg")
     //- User
     .badge-wrap(v-if="filterShowUsers")
-      UserLabelInline(:user="createdByUser" :isClickable="true")
+      UserLabelInline(:user="cardCreatedByUser" :isClickable="true")
     //- Date
-    .badge.secondary.button-badge(v-if="filterShowDateUpdated" @click.left.prevent.stop="toggleFilterShowAbsoluteDates" @touchend.prevent.stop="toggleFilterShowAbsoluteDates")
+    .badge.secondary.button-badge(v-if="filterShowDateUpdated" @click.left.prevent.stop="toggleFilterShowAbsoluteDates" @touchend.prevent.stop="toggleFilterShowAbsoluteDates" :class="{'date-is-today': dateIsToday}")
       img.icon.time(src="@/assets/time.svg")
       .name {{dateUpdatedAt}}
 
@@ -2021,6 +2120,9 @@ article.card-wrap
     &:focus
       outline 2px solid var(--primary-border)
 
+    &.is-comment
+      opacity 0.5
+
     .card-comment
       > .badge
         margin 0
@@ -2033,8 +2135,7 @@ article.card-wrap
       .user-label-inline
         transform translateY(-1px)
         margin 0
-        height 18px
-        min-height 17px
+        height 15px
         img
           vertical-align 4px
 
@@ -2262,6 +2363,8 @@ article.card-wrap
     .badge + .badge,
     .badge-wrap + .badge
       margin-left 6px
+    .date-is-today
+      background-color var(--info-background)
 
   .comment-user-badge
     display inline
@@ -2276,6 +2379,8 @@ article.card-wrap
     .user-badge,
     .user
       margin-right 0
+    .user-label-inline-wrap
+      margin 0
 
   .url-preview-wrap
     margin-top -2px
@@ -2303,6 +2408,10 @@ article.card-wrap
     img
       width 10px
       height 10px
+
+  .is-in-checked-box,
+  .is-checked
+    opacity var(--is-checked-opacity)
 
 @keyframes bounce
   0%

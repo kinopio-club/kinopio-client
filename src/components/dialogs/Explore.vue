@@ -7,6 +7,9 @@ import Loader from '@/components/Loader.vue'
 import UserLabelInline from '@/components/UserLabelInline.vue'
 import utils from '@/utils.js'
 import OfflineBadge from '@/components/OfflineBadge.vue'
+import ResultsFilter from '@/components/ResultsFilter.vue'
+import AddToExplore from '@/components/AddToExplore.vue'
+import AskToAddToExplore from '@/components/AskToAddToExplore.vue'
 
 import randomColor from 'randomcolor'
 
@@ -32,6 +35,7 @@ const props = defineProps({
 })
 watch(() => props.visible, (value, prevValue) => {
   store.commit('clearNotificationsWithPosition')
+  state.tipsIsVisible = false
   if (value) {
     updateHeights()
     updateUserShowInExploreUpdatedAt()
@@ -45,10 +49,12 @@ const state = reactive({
   dialogHeight: null,
   resultsSectionHeight: null,
   userShowInExploreDate: null,
-  filteredSpaces: undefined,
   currentSection: 'explore', // 'explore', 'following', 'everyone'
   isReadSections: [], // 'explore', 'following', 'everyone'
-  readSpaceIds: []
+  readSpaceIds: [],
+  isLoadingExploreSearchResults: false,
+  exploreSearchResults: [],
+  tipsIsVisible: false
 })
 
 const currentSpace = computed(() => store.state.currentSpace)
@@ -121,7 +127,7 @@ const currentSectionIsEveryone = computed(() => state.currentSection === 'everyo
 const currentSpaces = computed(() => {
   let spaces
   if (currentSectionIsExplore.value) {
-    spaces = props.exploreSpaces
+    spaces = exploreSpaces.value
   } else if (currentSectionIsFollowing.value) {
     spaces = props.followingSpaces
   } else if (currentSectionIsEveryone.value) {
@@ -140,17 +146,60 @@ const updateUserShowInExploreUpdatedAt = async () => {
   store.dispatch('currentUser/showInExploreUpdatedAt', serverDate)
 }
 
+// search explore spaces
+
+const exploreSpaces = computed(() => {
+  if (state.exploreSearchResults.length) {
+    return state.exploreSearchResults
+  } else {
+    return props.exploreSpaces
+  }
+})
+const updateFilter = async (value) => {
+  if (!value) {
+    state.exploreSearchResults = []
+    state.isLoadingExploreSearchResults = false
+    return
+  }
+  try {
+    state.isLoadingExploreSearchResults = true
+    const results = await store.dispatch('api/searchExploreSpaces', { query: value })
+    state.exploreSearchResults = results
+  } catch (error) {
+    console.error('🚒 updateFilter', error, value)
+  }
+  state.isLoadingExploreSearchResults = false
+}
+const focusPreviousItem = () => {
+  store.commit('triggerPickerNavigationKey', 'ArrowUp')
+}
+const focusNextItem = () => {
+  store.commit('triggerPickerNavigationKey', 'ArrowDown')
+}
+const selectItem = () => {
+  const liElement = resultsElement.value.querySelector('li.hover')
+  if (!liElement) { return }
+  const spaceId = liElement.dataset.spaceId
+  changeSpace({ id: spaceId })
+}
+
 // blank slate info
 
-const followUsersInfoIsVisible = computed(() => {
-  const isFavoriteUsers = Boolean(store.state.currentUser.favoriteUsers.length)
-  return !props.loading && !isFavoriteUsers && currentSectionIsFollowing.value
+const followInfoIsVisible = computed(() => {
+  const isFavorites = Boolean(store.state.currentUser.favoriteUsers.length || props.followingSpaces?.length)
+  return !props.loading && !isFavorites && currentSectionIsFollowing.value
 })
 const randomUser = computed(() => {
   const luminosity = store.state.currentUser.theme
   const color = randomColor({ luminosity })
   return { color, id: '123' }
 })
+
+// tips
+
+const toggleTipsIsVisible = () => {
+  state.tipsIsVisible = !state.tipsIsVisible
+}
 
 </script>
 
@@ -169,6 +218,8 @@ dialog.explore.wide(v-if="visible" :open="visible" ref="dialogElement" :style="{
         button(:class="{active: currentSectionIsEveryone}" @click="updateCurrentSection('everyone')")
           span Everyone
           .badge.new-unread-badge.notification-button-badge(v-if="isUnreadEveryone")
+      button.small-button.extra-options-button(@click="toggleTipsIsVisible" :class="{active: state.tipsIsVisible}")
+        span ?
     OfflineBadge
     .row(v-if="props.loading")
       Loader(:isSmall="true" :visible="props.loading")
@@ -180,8 +231,20 @@ dialog.explore.wide(v-if="visible" :open="visible" ref="dialogElement" :style="{
             img.refresh.icon(src="@/assets/refresh.svg")
             span Refresh
 
+    //- tips
+    section.subsection(v-if="state.tipsIsVisible")
+      template(v-if="currentSectionIsExplore")
+        p Explore is a list of cool spaces explicitly shared with the Kinopio community.
+        p You can share your own spaces in Explore, or ask others to share theirs.
+        AskToAddToExplore
+        AddToExplore
+      template(v-if="currentSectionIsFollowing")
+        p Following lists recently updated public spaces created by people you Follow.
+      template(v-if="currentSectionIsEveryone")
+        p Everyone lists new public spaces created by the community.
+
     //- follow users blank slate
-    section.subsection(v-if="followUsersInfoIsVisible")
+    section.subsection(v-if="followInfoIsVisible")
       p Follow other people to see their latest updates here
       p.badge.secondary
         UserLabelInline(:user="randomUser" :isClickable="false" :key="randomUser.id" :isSmall="true" :hideYouLabel="true")
@@ -190,6 +253,17 @@ dialog.explore.wide(v-if="visible" :open="visible" ref="dialogElement" :style="{
   hr
 
   section.results-section(ref="resultsElement" :style="{'max-height': state.resultsSectionHeight + 'px'}")
+    ResultsFilter(
+      :hideFilter="!currentSectionIsExplore"
+      :showFilter="currentSectionIsExplore"
+      :items="currentSpaces"
+      :isLoading="state.isLoadingExploreSearchResults"
+
+      @updateFilter="updateFilter"
+      @focusPreviousItem="focusPreviousItem"
+      @focusNextItem="focusNextItem"
+      @selectItem="selectItem"
+    )
     SpaceList(
       :spaces="currentSpaces"
       :showUser="true"
@@ -201,6 +275,7 @@ dialog.explore.wide(v-if="visible" :open="visible" ref="dialogElement" :style="{
       :parentDialog="parentDialog"
       :previewImageIsWide="true"
       :showCollaborators="true"
+      :hideFilter="currentSectionIsExplore"
     )
 </template>
 
@@ -209,8 +284,8 @@ dialog.explore
   left initial
   right -35px
   overflow auto
-  // &.wide
-  //   width 330px
+  &.wide
+    width 320px
   .loader
     margin-right 5px
     vertical-align -2px

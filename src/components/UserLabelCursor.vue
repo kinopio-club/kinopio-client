@@ -6,7 +6,7 @@ import utils from '@/utils.js'
 
 const store = useStore()
 
-const maxIterations = 200 // 👀 MagicPaint maxIterations
+const maxIterations = 200 // 👀 MainCanvas maxIterations
 let visibleTimer, currentIteration
 
 onMounted(() => {
