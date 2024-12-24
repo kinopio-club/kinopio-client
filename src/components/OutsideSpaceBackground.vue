@@ -79,7 +79,7 @@ const outsideSpaceBackgroundIsStatic = computed(() => store.state.currentUser.ou
 const backgroundTintColor = computed(() => store.state.currentSpace.backgroundTint)
 const isThemeDark = computed(() => store.getters['themes/isThemeDark'])
 const preventTouchScrolling = (event) => {
-  const shouldPrevent = store.state.currentUserIsResizingBox || store.state.currentUserIsPaintingLocked || store.state.currentBoxIsNew
+  const shouldPrevent = store.state.currentUserIsResizingBox || store.state.currentUserIsPaintingLocked
   if (shouldPrevent) {
     event.preventDefault()
   }
