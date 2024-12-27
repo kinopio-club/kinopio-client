@@ -824,13 +824,13 @@ button
   //         border-bottom-left-radius var(--small-entity-radius)
   //         border-bottom-right-radius var(--small-entity-radius)
 
-  button + button,
-  label + button,
-  button + label,
-  label + label,
-  select + button,
-  button + select,
-  a + button
+  > button + button,
+  > label + button,
+  > button + label,
+  > label + label,
+  > select + button,
+  > button + select,
+  > a + button
     margin-left -1px
 
 .segmented-buttons-wrap

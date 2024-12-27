@@ -1,5 +1,5 @@
 import { defineConfig } from 'vite'
-import createVuePlugin from '@vitejs/plugin-vue'
+import vue from '@vitejs/plugin-vue'
 import { VitePWA } from 'vite-plugin-pwa'
 import Sitemap from 'vite-plugin-sitemap'
 import path from 'path'
@@ -44,7 +44,10 @@ export default defineConfig(async ({ command, mode }) => {
     },
     plugins: [
       // .vue support
-      createVuePlugin(),
+      vue({
+        // Disable SSR warnings
+        ssr: false
+      }),
       // offline support
       VitePWA({
         registerType: 'autoUpdate',
