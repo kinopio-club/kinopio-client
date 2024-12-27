@@ -6,6 +6,17 @@ import utils from '@/utils.js'
 
 const store = useStore()
 
+let shouldStartPanning,
+  startPosition,
+  currentPosition,
+  panningTimer,
+  shouldCancelPanningTimer,
+  panningDelta,
+  shouldPanNextFrame,
+  velocity,
+  momentumTimer,
+  shouldCancelMomentumTimer
+
 let unsubscribe
 
 onMounted(() => {
@@ -15,6 +26,8 @@ onMounted(() => {
   window.addEventListener('touchstart', touchStart)
   window.addEventListener('touchmove', handleMoveEvent)
   window.addEventListener('touchend', handleEndEvent)
+
+  window.addEventListener('pointerdown', handlePointerDown)
 
   unsubscribe = store.subscribe(mutation => {
     if (mutation.type === 'triggerPanningStart') {
@@ -28,6 +41,8 @@ onBeforeUnmount(() => {
 
   window.removeEventListener('touchmove', handleMoveEvent)
   window.removeEventListener('touchend', handleEndEvent)
+
+  window.removeEventListener('pointerdown', handlePointerDown)
 
   unsubscribe()
 })
@@ -52,17 +67,11 @@ const handleEndEvent = () => {
   shouldCancelPanningTimer = true
 }
 
-// panning
+const handlePointerDown = () => {
+  shouldCancelMomentumTimer = true
+}
 
-let shouldStartPanning,
-  startPosition,
-  currentPosition,
-  panningTimer,
-  shouldCancelPanningTimer,
-  panningDelta,
-  shouldPanNextFrame,
-  velocity,
-  momentumTimer
+// panning
 
 const initPanning = (event) => {
   const position = utils.cursorPositionInPage(event)
@@ -70,6 +79,7 @@ const initPanning = (event) => {
     startPosition = position
     shouldStartPanning = false
     shouldCancelPanningTimer = false
+    shouldCancelMomentumTimer = false
     panningTimer = window.requestAnimationFrame(panningFrame)
   }
 }
@@ -109,7 +119,7 @@ const startMomentum = () => {
   const momentumFrame = () => {
     // cancel momentum scrolling
     const velocityIsLow = Math.abs(velocity.x) < threshold && Math.abs(velocity.y) < threshold
-    if (velocityIsLow || shouldPanNextFrame) {
+    if (velocityIsLow || shouldPanNextFrame || shouldCancelMomentumTimer) {
       window.cancelAnimationFrame(momentumTimer)
       return
     }
