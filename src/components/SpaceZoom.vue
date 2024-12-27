@@ -13,7 +13,7 @@ let unsubscribe
 onMounted(() => {
   unsubscribe = store.subscribe((mutation, state) => {
     if (mutation.type === 'triggerSpaceZoomReset') {
-      updateSpaceZoomFromTrigger(max.value)
+      updateSpaceZoomFromTrigger(consts.spaceZoom.default) // 100
       window.scrollTo(0, 0)
     } else if (mutation.type === 'triggerCenterZoomOrigin') {
       centerZoomOrigin()
@@ -32,9 +32,9 @@ const state = reactive({
   animateJiggleLeft: false
 })
 
-const max = computed(() => consts.spaceZoom.max) // 100
+const max = computed(() => consts.spaceZoom.max) // 200~
 const min = computed(() => consts.spaceZoom.min) // 20
-const spaceZoomPercent = computed(() => store.state.spaceZoomPercent)
+const spaceZoomPercent = computed(() => store.state.spaceZoomPercent) // 100
 const minKeyboardShortcut = computed(() => 'Z')
 
 const isMobileOrTouch = computed(() => {
@@ -61,6 +61,8 @@ const updateSpaceZoomFromTrigger = (percent) => {
 const updateSpaceZoomPercent = (percent) => {
   percent = percent / 100
   percent = Math.round(min.value + (max.value - min.value) * percent)
+  const isPrev = percent === store.state.spaceZoomPercent
+  if (isPrev) { return }
   store.commit('spaceZoomPercent', percent)
 }
 const centerZoomOrigin = () => {
@@ -103,6 +105,7 @@ const removeAnimations = () => {
     :minValue="min"
     :value="spaceZoomPercent"
     :maxValue="max"
+    :defaultValue="consts.spaceZoom.default"
     :animateJiggleRight="state.animateJiggleRight"
     :animateJiggleLeft="state.animateJiggleLeft"
     @removeAnimations="removeAnimations"

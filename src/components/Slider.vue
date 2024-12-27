@@ -5,29 +5,31 @@ import { useStore } from 'vuex'
 import utils from '@/utils.js'
 import consts from '@/consts.js'
 
+import throttle from 'lodash-es/throttle'
+
 const store = useStore()
 
 const badgeElement = ref(null)
 const progressElement = ref(null)
 const buttonElement = ref(null)
 
-let unsubscribe
+// let unsubscribe
 
 onMounted(() => {
   // bind events to window to receive events when mouse is outside window
-  window.addEventListener('mousemove', dragPlayhead)
+  // window.addEventListener('mousemove', dragPlayhead)
   window.addEventListener('mouseup', endMovePlayhead)
   window.addEventListener('touchend', endMovePlayhead)
   updateButtonPosition()
-  unsubscribe = store.subscribe(mutation => {
-    if (mutation.type === 'spaceZoomPercent') {
-      updateButtonPosition()
-    }
-  })
+  // unsubscribe = store.subscribe(mutation => {
+  //   if (mutation.type === 'spaceZoomPercent') {
+  //     updateButtonPosition()
+  //   }
+  // })
 })
 onBeforeUnmount(() => {
-  unsubscribe()
-  window.removeEventListener('mousemove', dragPlayhead)
+  // unsubscribe()
+  // window.removeEventListener('mousemove', dragPlayhead)
   window.removeEventListener('mouseup', endMovePlayhead)
   window.removeEventListener('touchend', endMovePlayhead)
 })
@@ -38,14 +40,16 @@ const props = defineProps({
   minValue: Number,
   maxValue: Number,
   value: Number,
+  defaultValue: Number,
   animateJiggleRight: Boolean,
   animateJiggleLeft: Boolean,
   minKeyboardShortcut: String,
   shouldHideBadge: Boolean
 })
-watch(() => props.value, (value, prevValue) => {
-  updateButtonPosition()
-})
+// watch(() => props.value, (value, prevValue) => {
+//   console.log('🎃🎃spaceZoomPercent',value, props.defaultValue)
+//   // updateButtonPosition()
+// })
 
 const state = reactive({
   playheadIsBeingDragged: false,
@@ -54,9 +58,10 @@ const state = reactive({
 
 // badge
 
+const defaultValue = computed(() => props.defaultValue || props.maxValue)
 const zoomPercentBadgeIsVisible = computed(() => {
   if (props.shouldHideBadge) { return }
-  if (props.value !== props.maxValue) {
+  if (props.value !== defaultValue.value) {
     return true
   } else {
     return false
@@ -78,11 +83,12 @@ const removeAnimations = () => {
 const integerValue = computed(() => Math.round(props.value))
 const currentValueIsMin = computed(() => integerValue.value === props.minValue)
 const sliderValue = computed(() => {
-  const value = utils.percentageBetween({
+  let value = utils.percentageBetween({
     value: props.value,
     min: props.minValue,
     max: props.maxValue
   })
+  value = Math.round(value)
   return value
 })
 
@@ -98,7 +104,7 @@ const movePlayhead = (event) => {
   percent = Math.min(percent, 100)
   percent = Math.max(percent, 0)
   updateButtonPosition()
-  emit('updatePlayhead', percent)
+  updatePlayhead(percent)
 }
 const updateButtonPosition = () => {
   if (!progressElement.value) { return }
@@ -136,7 +142,7 @@ const dragPlayheadWheel = (event) => {
   percent += speed
   percent = Math.min(percent, 100)
   percent = Math.max(percent, 0)
-  emit('updatePlayhead', percent)
+  updatePlayhead(percent)
 }
 const dragPlayhead = (event) => {
   if (!state.playheadIsBeingDragged) { return }
@@ -160,11 +166,21 @@ const stopMovingPlayhead = () => {
 
 const resetPlayhead = async () => {
   state.playheadIsBeingDragged = false
-  emit('updatePlayhead', props.maxValue)
+  const value = utils.percentageBetween({
+    value: defaultValue.value,
+    min: props.minValue,
+    max: props.maxValue
+  })
+  updatePlayhead(value)
   emit('resetPlayhead')
   await nextTick()
   updateButtonPosition()
 }
+
+const updatePlayhead = throttle((value) => {
+  emit('updatePlayhead', value)
+}, 16) // 60fps 1 frame
+
 </script>
 
 <template lang="pug">
@@ -186,6 +202,7 @@ const resetPlayhead = async () => {
   :data-max="props.maxValue"
   :data-min="props.minValue"
 )
+  //- percent badge
   span.badge.info.zoom-percent-badge(
     ref="badgeElement"
     v-if="zoomPercentBadgeIsVisible"
@@ -198,7 +215,7 @@ const resetPlayhead = async () => {
       img.icon.close(src="@/assets/add.svg")
 
   progress(
-    :value="sliderValue"
+    :value="props.value"
     :max="props.maxValue"
     :min="props.minValue"
     ref="progressElement"
