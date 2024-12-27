@@ -185,11 +185,15 @@ const pageHeight = computed(() => store.state.pageHeight)
 const pageWidth = computed(() => store.state.pageWidth)
 const styles = computed(() => {
   const zoom = 1 / spaceZoomDecimal.value
-  return {
+  let styles = {
     width: `${pageWidth.value * zoom}px`,
     height: `${pageHeight.value * zoom}px`,
     transform: store.getters.zoomTransform
   }
+  if (zoom !== 1) {
+    styles.willChange = 'transform'
+  }
+  return styles
 })
 
 // page history
