@@ -16,7 +16,7 @@ onMounted(() => {
       updateSpaceZoomFromTrigger(consts.spaceZoom.default) // 100
       window.scrollTo(0, 0)
     } else if (mutation.type === 'triggerCenterZoomOrigin') {
-      centerZoomOrigin()
+      updateZoomOriginToCenter()
     } else if (mutation.type === 'triggerSpaceZoomOutMax') {
       zoomOutOrInMax()
     }
@@ -42,7 +42,7 @@ const isMobileOrTouch = computed(() => {
   return store.isTouchDevice || isMobile
 })
 const closeAllDialogs = () => {
-  centerZoomOrigin()
+  updateZoomOriginToCenter()
   store.dispatch('clearMultipleSelected')
   store.dispatch('closeAllDialogs')
 }
@@ -66,21 +66,24 @@ const updateSpaceZoomPercent = (percent) => {
   if (isPrev) { return }
   store.commit('spaceZoomPercent', percent)
 }
-const centerZoomOrigin = () => {
-  const scroll = { x: window.scrollX, y: window.scrollY }
-  const origin = {
-    x: scroll.x + (store.state.viewportWidth / 6),
-    y: scroll.y + (store.state.viewportHeight / 6)
-  }
-  store.dispatch('zoomOrigin', origin)
-}
 const zoomOutOrInMax = () => {
-  centerZoomOrigin()
+  updateZoomOriginToCenter()
   if (store.state.spaceZoomPercent === min.value) {
     store.commit('spaceZoomPercent', max.value)
   } else {
     store.commit('spaceZoomPercent', min.value)
   }
+}
+
+// zoom origin
+
+const updateZoomOriginToCenter = () => {
+  const scroll = { x: window.scrollX, y: window.scrollY }
+  const origin = {
+    x: scroll.x + (store.state.viewportWidth / 2),
+    y: scroll.y + (store.state.viewportHeight / 2)
+  }
+  store.commit('zoomOrigin', origin)
 }
 
 // slider
