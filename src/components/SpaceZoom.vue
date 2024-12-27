@@ -42,6 +42,7 @@ const isMobileOrTouch = computed(() => {
   return store.isTouchDevice || isMobile
 })
 const closeAllDialogs = () => {
+  centerZoomOrigin()
   store.dispatch('clearMultipleSelected')
   store.dispatch('closeAllDialogs')
 }
@@ -85,7 +86,6 @@ const zoomOutOrInMax = () => {
 // slider
 
 const updateSpaceZoom = (percent) => {
-  centerZoomOrigin()
   updateSpaceZoomPercent(percent)
 }
 const resetZoom = () => {

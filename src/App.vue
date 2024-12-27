@@ -33,16 +33,6 @@ const isSpacePage = computed(() => store.getters.isSpacePage)
 
 // styles and position
 
-const pageWidth = computed(() => {
-  if (!isSpacePage.value) { return }
-  const size = Math.max(store.state.pageWidth, store.state.viewportWidth)
-  return size + 'px'
-})
-const pageHeight = computed(() => {
-  if (!isSpacePage.value) { return }
-  const size = Math.max(store.state.pageHeight, store.state.viewportHeight)
-  return size + 'px'
-})
 const pageCursor = computed(() => {
   const isPanning = store.state.currentUserIsPanning
   const isPanningReady = store.state.currentUserIsPanningReady
@@ -55,6 +45,21 @@ const pageCursor = computed(() => {
     return 'crosshair'
   }
   return undefined
+})
+const styles = computed(() => {
+  if (!isSpacePage.value) { return }
+  let width = Math.max(store.state.pageWidth, store.state.viewportWidth)
+  let height = Math.max(store.state.pageHeight, store.state.viewportHeight)
+  const zoom = store.state.spaceZoomPercent / 100
+  if (zoom > 1) {
+    width = Math.round(width * zoom)
+    height = Math.round(height * zoom)
+  }
+  return {
+    width: width + 'px',
+    height: height + 'px',
+    cursor: pageCursor.value
+  }
 })
 const spaceZoomDecimal = computed(() => store.getters.spaceZoomDecimal)
 
@@ -178,7 +183,7 @@ const preventTouchScrolling = (event) => {
   @gesturechange="preventTouchScrolling"
   @gestureend="preventTouchScrolling"
 
-  :style="{ width: pageWidth, height: pageHeight, cursor: pageCursor }"
+  :style="styles"
   :class="{ 'no-background': !isSpacePage, 'is-dark-theme': isThemeDark }"
   :data-current-user-id="currentUserId"
 )
