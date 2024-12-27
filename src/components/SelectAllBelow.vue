@@ -4,7 +4,7 @@ import { useStore } from 'vuex'
 
 import utils from '@/utils.js'
 
-import debounce from 'lodash-es/debounce'
+import throttle from 'lodash-es/throttle'
 
 const store = useStore()
 
@@ -79,7 +79,7 @@ const handleMouseMove = (event) => {
     state.isVisible = false
   }
   if (isSelectingY.value) {
-    debouncedSelectAllBelow(event)
+    throttledSelectAllBelow(event)
   }
 }
 
@@ -87,17 +87,17 @@ const handleMouseMove = (event) => {
 
 const handleMouseDown = (event) => {
   updateIsSelectingY(true)
-  debouncedSelectAllBelow(event)
+  throttledSelectAllBelow(event)
 }
 const handleMouseUp = (event) => {
   if (!isSelectingY.value) { return }
   updateIsSelectingY(false)
-  debouncedSelectAllBelow(event)
+  throttledSelectAllBelow(event)
   state.isVisible = false
 }
-const debouncedSelectAllBelow = debounce((event) => {
+const throttledSelectAllBelow = throttle((event) => {
   selectAllBelow(event)
-}, 10, { leading: true })
+}, 20)
 
 const selectAllBelow = (event) => {
   let position = utils.cursorPositionInSpace(event)
