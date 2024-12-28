@@ -259,7 +259,7 @@ export default {
   },
   async addSpaces (spaces) {
     for (const space of spaces) {
-      space.cacheDate = utils.normalizeToUnixTime(space.updatedAt)
+      space.cacheDate = utils.unixTime(space.updatedAt)
       await this.saveSpace(space)
     }
   },

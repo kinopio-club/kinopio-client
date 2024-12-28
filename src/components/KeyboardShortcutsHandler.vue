@@ -14,7 +14,7 @@ let browserZoomLevel = 0
 let disableContextMenu = false
 let spaceKeyIsDown = false
 
-let prevCursorPosition, currentCursorPosition, prevRightClickPosition
+let prevCursorPosition, currentCursorPosition, prevRightClickPosition, prevRightClickTime
 
 onMounted(() => {
   store.subscribe(mutation => {
@@ -272,7 +272,8 @@ const handleMouseDownEvents = (event) => {
     store.commit('currentUserBoxSelectMove', position)
     store.commit('currentUserBoxSelectStart', position)
   } else if (shouldPan) {
-    prevRightClickPosition = utils.cursorPositionInPage(event)
+    prevRightClickPosition = utils.cursorPositionInViewport(event)
+    prevRightClickTime = utils.unixTime()
     event.preventDefault()
     store.dispatch('currentUserIsPanning', true)
     disableContextMenu = true
@@ -296,13 +297,8 @@ const handleMouseMoveEvents = (event) => {
 }
 // on mouse up
 // right clicks don't trigger mouse up
-const handleMouseUpEvents = (event) => {
+const handleMouseUpEvents = async (event) => {
   const shouldPan = store.state.currentUserIsPanning
-  const cursorsAreClose = utils.cursorsAreClose(prevRightClickPosition, utils.cursorPositionInPage(event))
-  // sonar ping
-  if (shouldPan && cursorsAreClose && !store.state.multipleSelectedActionsIsVisible) {
-    store.dispatch('triggerSonarPing', event)
-  }
   // handle outside window
   const isFromOutsideWindow = event.target.nodeType === Node.DOCUMENT_NODE
   let isFromCard
@@ -314,6 +310,17 @@ const handleMouseUpEvents = (event) => {
   prevCursorPosition = undefined
   store.dispatch('currentUserIsPanning', false)
   store.commit('currentUserIsBoxSelecting', false)
+
+  // sonar ping
+  await nextTick()
+  const currentPosition = utils.cursorPositionInViewport(event)
+  const currentTime = utils.unixTime()
+  const cursorsAreClose = utils.cursorsAreClose(prevRightClickPosition, currentPosition)
+  const timeDelta = currentTime - prevRightClickTime
+  const timesAreClose = timeDelta < 400 // ms
+  if (shouldPan && cursorsAreClose && timesAreClose && !store.state.multipleSelectedActionsIsVisible) {
+    store.dispatch('triggerSonarPing', event)
+  }
 }
 // on scroll
 const handleScrollEvents = (event) => {

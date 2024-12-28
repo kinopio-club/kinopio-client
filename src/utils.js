@@ -719,7 +719,8 @@ export default {
     }
     return rangeArray
   },
-  normalizeToUnixTime (date) {
+  unixTime (date) {
+    date = date || new Date()
     return new Date(date).getTime()
   },
   shortRelativeTime (date) {
