@@ -853,6 +853,18 @@ export default {
     }
     return color
   },
+  safeColor (color) {
+    const brightnessThreshold = 0.5
+    const brightness = colord(color).brightness()
+    const isTooBright = brightness > 0.8
+    const isTooDark = brightness < 0.2
+    if (isTooBright) {
+      color = colord(color).darken(brightnessThreshold).toHex()
+    } else if (isTooDark) {
+      color = colord(color).lighten(brightnessThreshold).toHex()
+    }
+    return color
+  },
   colorClasses ({ backgroundColor, backgroundColorIsDark }) {
     backgroundColorIsDark = backgroundColorIsDark || this.colorIsDark(backgroundColor)
     let classes = []
