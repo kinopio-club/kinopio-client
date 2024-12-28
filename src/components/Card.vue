@@ -416,7 +416,7 @@ const cardStyle = computed(() => {
   if (props.card.tilt) {
     styles.transform = `rotate(${props.card.tilt}deg)`
   }
-  if (isImageCard.value) {
+  if (isImageCard.value && isSelectedOrDragging.value) {
     color = safeColor(color)
     styles.background = color
   }
