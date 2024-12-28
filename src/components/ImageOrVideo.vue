@@ -7,6 +7,7 @@ import utils from '@/utils.js'
 const store = useStore()
 
 const videoElement = ref(null)
+const imageElement = ref(null)
 
 onMounted(() => {
   state.imageUrl = props.image || props.pendingUploadDataUrl
@@ -45,8 +46,7 @@ const state = reactive({
   imageUrl: null
 })
 
-// video
-
+const isTouching = computed(() => store.state.isPinchZooming || store.state.isTouchScrolling)
 const isInteracting = computed(() => {
   const isInteractingWithItem = store.getters.isInteractingWithItem
   const isPainting = store.state.currentUserIsPainting
@@ -54,7 +54,13 @@ const isInteracting = computed(() => {
   return isInteractingWithItem || isPainting || isPanning
 })
 watch(() => isInteracting.value, (value) => {
-  if (utils.isSafari()) { return } // fixes: safari hides video when pausing
+  if (value) {
+    pause()
+  } else {
+    play()
+  }
+})
+watch(() => isTouching.value, (value) => {
   if (value) {
     pause()
   } else {
@@ -62,14 +68,67 @@ watch(() => isInteracting.value, (value) => {
   }
 })
 const pause = () => {
+  pauseVideo()
+  pauseGif()
+}
+const play = () => {
+  playVideo()
+  playGif()
+}
+
+// video
+
+const pauseVideo = () => {
   if (!props.video) { return }
   const element = videoElement.value
   element.pause()
 }
-const play = () => {
+const playVideo = () => {
   if (!props.video) { return }
   const element = videoElement.value
   element.play()
+}
+
+// gif
+
+const imageIsGif = computed(() => {
+  const url = state.imageUrl
+  if (!url) { return }
+  return url.includes('.gif')
+})
+const pauseGif = () => {
+  // adapted from https://stackoverflow.com/a/24707088
+  // create canvas element from first frame of video
+  if (!imageIsGif.value) { return }
+  const image = imageElement.value
+  const width = image.width
+  const height = image.height
+  const canvas = document.createElement('canvas', function (clone) {
+    clone.width = width
+    clone.height = height
+  })
+  canvas.getContext('2d').drawImage(image, 0, 0, width, height)
+  let attr
+  let i = 0
+  for (i = 0; i < image.attributes.length; i++) {
+    attr = image.attributes[i]
+    if (attr.name !== '"') { // test for invalid attributes
+      canvas.setAttribute(attr.name, attr.value)
+    }
+  }
+  canvas.style.position = 'absolute'
+  canvas.classList.add('pause')
+  image.parentNode.insertBefore(canvas, image)
+  image.style.display = 'none'
+}
+const playGif = () => {
+  // remove pause canvas
+  if (!imageIsGif.value) { return }
+  const canvasElement = imageElement.value.previousElementSibling
+  const isCanvas = canvasElement.nodeName === 'CANVAS'
+  if (!isCanvas) { return }
+  canvasElement.remove()
+  imageElement.value.style.display = 'initial'
 }
 
 // events
@@ -80,15 +139,6 @@ const handleSuccess = (event) => {
 const handleError = (event) => {
 }
 
-const isTouching = computed(() => store.state.isPinchZooming || store.state.isTouchScrolling)
-watch(() => isTouching.value, (value) => {
-  if (value) {
-    pause()
-  } else {
-    play()
-  }
-})
-
 </script>
 
 <template lang="pug">
@@ -96,7 +146,7 @@ watch(() => isTouching.value, (value) => {
 video(v-if="Boolean(video)" autoplay loop muted playsinline :key="video" :class="{selected: isSelectedOrDragging}" @canplay="handleSuccess" ref="videoElement" @load="handleSuccess")
   source(:src="video")
 //- Image
-img.image(v-if="state.imageUrl" :src="state.imageUrl" :class="{selected: isSelectedOrDragging}" @load="handleSuccess" @error="handleError" loading="lazy")
+img.image(v-if="state.imageUrl" ref="imageElement" :src="state.imageUrl" :class="{selected: isSelectedOrDragging}" @load="handleSuccess" @error="handleError" loading="lazy")
 </template>
 
 <style lang="stylus">
