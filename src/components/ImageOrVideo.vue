@@ -11,6 +11,12 @@ const imageElement = ref(null)
 
 onMounted(() => {
   state.imageUrl = props.image || props.pendingUploadDataUrl
+  window.addEventListener('mousemove', updateCanvasSelectedClass)
+  window.addEventListener('touchmove', updateCanvasSelectedClass)
+})
+onBeforeUnmount(() => {
+  window.removeEventListener('mousemove', updateCanvasSelectedClass)
+  window.removeEventListener('touchmove', updateCanvasSelectedClass)
 })
 
 const emit = defineEmits(['loadSuccess'])
@@ -19,7 +25,8 @@ const props = defineProps({
   isSelectedOrDragging: Boolean,
   pendingUploadDataUrl: String,
   image: String,
-  video: String
+  video: String,
+  cardId: String
 })
 watch(() => props.image, (url) => {
   if (!url && !props.pendingUploadDataUrl) {
@@ -118,13 +125,12 @@ const pauseGif = () => {
   }
   canvas.style.position = 'absolute'
   canvas.classList.add('pause')
-  canvas.classList.add('selected')
   image.parentNode.insertBefore(canvas, image)
   image.style.opacity = 0
 }
 const canvasElement = () => {
-  const canvasElement = imageElement.value.previousElementSibling
-  const isCanvas = canvasElement.nodeName === 'CANVAS'
+  const canvasElement = imageElement.value?.previousElementSibling
+  const isCanvas = canvasElement?.nodeName === 'CANVAS'
   if (!isCanvas) { return }
   return canvasElement
 }
@@ -135,6 +141,15 @@ const playGif = () => {
   canvas.remove()
   imageElement.value.style.opacity = 1
 }
+const updateCanvasSelectedClass = () => {
+  if (!store.state.currentUserIsPainting) { return }
+  const canvas = canvasElement()
+  if (!canvas) { return }
+  const multipleCardsSelectedIds = store.state.multipleCardsSelectedIds
+  const isSelected = multipleCardsSelectedIds.includes(props.cardId)
+  if (!isSelected) { return }
+  canvas.classList.add('selected')
+}
 
 // events
 
@@ -143,7 +158,6 @@ const handleSuccess = (event) => {
 }
 const handleError = (event) => {
 }
-
 </script>
 
 <template lang="pug">
