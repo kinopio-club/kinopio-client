@@ -188,16 +188,24 @@ const updateStylesWithZoomTransform = (styles) => {
   const origin = store.state.zoomOrigin
   styles.transform = `translate(${origin.x}px, ${origin.y}px) scale(${zoom}) translate(-${origin.x}px, -${origin.y}px)`
   if (zoom > 1) {
+    // window.scrollBy(origin.x, origin.y, 'instant')
+
+    // TODO get current page/prev zoom value from rel data , - new zoom value  = delta
+    // use delta to calc window.scrollby
     styles.transform = `scale(${zoom})`
-    styles.transformOrigin = `${origin.x}px ${origin.y}px`
+
+    // styles.transform = `scale(${zoom})`
+    // translate(${origin.x}px, ${origin.y}px
+    // styles.transformOrigin = `${origin.x}px ${origin.y}px`
+    // console.log(styles.transformOrigin, origin)
   }
   return styles
 }
 const styles = computed(() => {
   const zoom = 1 / spaceZoomDecimal.value
   let styles = {
-    width: `${pageWidth.value * zoom}px`,
-    height: `${pageHeight.value * zoom}px`
+    // width: `${pageWidth.value * zoom}px`,
+    // height: `${pageHeight.value * zoom}px`
   }
   if (zoom !== 1) {
     styles.willChange = 'transform'

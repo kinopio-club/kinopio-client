@@ -50,7 +50,7 @@ const styles = computed(() => {
   if (!isSpacePage.value) { return }
   let width = Math.max(store.state.pageWidth, store.state.viewportWidth)
   let height = Math.max(store.state.pageHeight, store.state.viewportHeight)
-  const zoom = store.state.spaceZoomPercent / 100
+  const zoom = spaceZoomDecimal.value
   if (zoom > 1) {
     width = Math.round(width * zoom)
     height = Math.round(height * zoom)
