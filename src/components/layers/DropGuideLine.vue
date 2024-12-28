@@ -37,20 +37,59 @@ onMounted(() => {
   remoteCanvas = document.getElementById('remote-drop-guide-line')
   context = canvas.getContext('2d')
   remoteContext = remoteCanvas.getContext('2d')
+  // drag over
+  window.addEventListener('dragenter', checkIfUploadIsDraggedOver)
+  window.addEventListener('dragover', checkIfUploadIsDraggedOver)
+  window.addEventListener('dragleave', removeUploadIsDraggedOver)
+  window.addEventListener('dragend', removeUploadIsDraggedOver)
+  window.addEventListener('drop', addCardsAndUploadFiles)
 })
 onBeforeUnmount(() => {
   unsubscribe()
+  window.removeEventListener('dragenter', checkIfUploadIsDraggedOver)
+  window.removeEventListener('dragover', checkIfUploadIsDraggedOver)
+  window.removeEventListener('dragleave', removeUploadIsDraggedOver)
+  window.removeEventListener('dragend', removeUploadIsDraggedOver)
+  window.removeEventListener('drop', addCardsAndUploadFiles)
 })
 
 const props = defineProps({
-  currentCursor: Object,
-  currentCursorInSpace: Object,
-  uploadIsDraggedOver: Boolean,
   viewportWidth: Number,
   viewportHeight: Number
 })
 
+const state = reactive({
+  uploadIsDraggedOver: false,
+  currentCursorInSpace: {}
+})
+
 const currentUserColor = computed(() => store.state.currentUser.color)
+
+// Upload Files
+
+const checkIfUploadIsDraggedOver = (event) => {
+  event.preventDefault()
+  const uploadIsFiles = event.dataTransfer.types.find(type => type === 'Files')
+  if (!event.dataTransfer) { return }
+  if (!uploadIsFiles) { return }
+  state.currentCursor = utils.cursorPositionInViewport(event)
+  state.currentCursorInSpace = utils.cursorPositionInSpace(event)
+  state.uploadIsDraggedOver = true
+}
+const removeUploadIsDraggedOver = () => {
+  state.uploadIsDraggedOver = false
+}
+const addCardsAndUploadFiles = (event) => {
+  event.preventDefault()
+  event.stopPropagation()
+  let files = event.dataTransfer.files
+  files = Array.from(files)
+  removeUploadIsDraggedOver()
+  store.dispatch('upload/addCardsAndUploadFiles', {
+    files,
+    event
+  })
+}
 
 // curve
 
@@ -151,7 +190,7 @@ const remotePaintGuidesFrame = () => {
 
 // Painting
 
-watch(() => props.uploadIsDraggedOver, (value, prevValue) => {
+watch(() => state.uploadIsDraggedOver, (value, prevValue) => {
   if (value) {
     startPaintingGuides()
   } else {
@@ -165,16 +204,16 @@ const paintGuides = () => {
   context.lineCap = 'round'
   // paint curve
   let startPoint = {
-    x: props.currentCursor.x,
-    y: props.currentCursor.y
+    x: state.currentCursor.x,
+    y: state.currentCursor.y
   }
   let curve = createCurve(startPoint)
   paintCurve(context, curve)
   // broadcast curve
   const scroll = { x: window.scrollX, y: window.scrollY }
   startPoint = {
-    x: props.currentCursor.x + scroll.x,
-    y: props.currentCursor.y + scroll.y
+    x: state.currentCursor.x + scroll.x,
+    y: state.currentCursor.y + scroll.y
   }
   broadcastCursorAndCurve({ startPoint, color: currentUserColor.value })
   if (paintingGuidesTimer) {
@@ -198,8 +237,8 @@ const broadcastCursorAndCurve = ({ startPoint, color }) => {
   const canEditSpace = store.getters['currentUser/canEditSpace']()
   if (!canEditSpace) { return }
   let updates = {}
-  updates.x = props.currentCursorInSpace.x
-  updates.y = props.currentCursorInSpace.y
+  updates.x = state.currentCursorInSpace.x
+  updates.y = state.currentCursorInSpace.y
   updates.color = color
   updates.userId = store.state.currentUser.id
   store.commit('broadcast/update', { updates, type: 'updateRemoteUserCursor', handler: 'triggerUpdateRemoteUserCursor' })
