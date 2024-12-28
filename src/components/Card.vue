@@ -393,6 +393,9 @@ const articleStyle = computed(() => {
     zIndex: z,
     pointerEvents
   }
+  if (props.card.isLocked) {
+    delete styles.zIndex
+  }
   if (!store.state.currentUserIsDraggingCard) {
     styles.transform = `translate(${state.stickyTranslateX}, ${state.stickyTranslateY})`
   }
