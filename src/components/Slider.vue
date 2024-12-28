@@ -5,8 +5,6 @@ import { useStore } from 'vuex'
 import utils from '@/utils.js'
 import consts from '@/consts.js'
 
-import throttle from 'lodash-es/throttle'
-
 const store = useStore()
 
 const badgeElement = ref(null)
@@ -177,9 +175,9 @@ const resetPlayhead = async () => {
   updateButtonPosition()
 }
 
-const updatePlayhead = throttle((value) => {
+const updatePlayhead = (value) => {
   emit('updatePlayhead', value)
-}, 16) // 60fps 1 frame
+}
 
 </script>
 
