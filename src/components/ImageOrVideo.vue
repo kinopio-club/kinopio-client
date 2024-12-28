@@ -118,17 +118,22 @@ const pauseGif = () => {
   }
   canvas.style.position = 'absolute'
   canvas.classList.add('pause')
+  canvas.classList.add('selected')
   image.parentNode.insertBefore(canvas, image)
-  image.style.display = 'none'
+  image.style.opacity = 0
+}
+const canvasElement = () => {
+  const canvasElement = imageElement.value.previousElementSibling
+  const isCanvas = canvasElement.nodeName === 'CANVAS'
+  if (!isCanvas) { return }
+  return canvasElement
 }
 const playGif = () => {
   // remove pause canvas
   if (!imageIsGif.value) { return }
-  const canvasElement = imageElement.value.previousElementSibling
-  const isCanvas = canvasElement.nodeName === 'CANVAS'
-  if (!isCanvas) { return }
-  canvasElement.remove()
-  imageElement.value.style.display = 'initial'
+  const canvas = canvasElement()
+  canvas.remove()
+  imageElement.value.style.opacity = 1
 }
 
 // events
