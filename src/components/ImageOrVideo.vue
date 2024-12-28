@@ -47,8 +47,13 @@ const state = reactive({
 
 // video
 
-const isInteractingWithItem = computed(() => store.getters.isInteractingWithItem)
-watch(() => isInteractingWithItem.value, (value) => {
+const isInteracting = computed(() => {
+  const isInteractingWithItem = store.getters.isInteractingWithItem
+  const isPainting = store.state.currentUserIsPainting
+  const isPanning = store.state.currentUserIsPanningReady
+  return isInteractingWithItem || isPainting || isPanning
+})
+watch(() => isInteracting.value, (value) => {
   if (utils.isSafari()) { return } // fixes: safari hides video when pausing
   if (value) {
     pause()
@@ -56,7 +61,6 @@ watch(() => isInteractingWithItem.value, (value) => {
     play()
   }
 })
-
 const pause = () => {
   if (!props.video) { return }
   const element = videoElement.value
