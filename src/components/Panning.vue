@@ -23,6 +23,7 @@ onMounted(() => {
   window.addEventListener('mousedown', cancelMomentum)
   window.addEventListener('mousemove', checkIfShouldStartPanning)
   window.addEventListener('mouseup', checkIfShouldStartMomentum)
+  window.addEventListener('wheel', cancelMomentum)
   unsubscribe = store.subscribe(mutation => {
     if (mutation.type === 'triggerPanningStart') {
       shouldStartPanning = true
@@ -33,6 +34,7 @@ onBeforeUnmount(() => {
   window.removeEventListener('mousedown', cancelMomentum)
   window.removeEventListener('mousemove', checkIfShouldStartPanning)
   window.removeEventListener('mouseup', checkIfShouldStartMomentum)
+  window.removeEventListener('wheel', cancelMomentum)
   unsubscribe()
 })
 
