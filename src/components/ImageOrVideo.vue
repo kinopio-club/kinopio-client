@@ -83,6 +83,11 @@ const play = () => {
   playGif()
 }
 
+watch(() => store.state.multipleSelectedActionsIsVisible, (value) => {
+  if (value) { return }
+  removeCanvasSelectedClass()
+})
+
 // video
 
 const pauseVideo = () => {
@@ -149,6 +154,11 @@ const updateCanvasSelectedClass = () => {
   const isSelected = multipleCardsSelectedIds.includes(props.cardId)
   if (!isSelected) { return }
   canvas.classList.add('selected')
+}
+const removeCanvasSelectedClass = () => {
+  const canvas = canvasElement()
+  if (!canvas) { return }
+  canvas.classList.remove('selected')
 }
 
 // events
