@@ -88,9 +88,6 @@ const updateZoomOriginToCenter = () => {
 
 // slider
 
-const updateSpaceZoom = (percent) => {
-  updateSpaceZoomPercent(percent)
-}
 const resetZoom = () => {
   store.commit('zoomOrigin', { x: 0, y: 0 })
 }
@@ -103,7 +100,7 @@ const removeAnimations = () => {
 <template lang="pug">
 .space-zoom(v-if="!isMobileOrTouch")
   Slider(
-    @updatePlayhead="updateSpaceZoom"
+    @updatePlayhead="updateSpaceZoomPercent"
     @resetPlayhead="resetZoom"
     :minValue="min"
     :value="spaceZoomPercent"
