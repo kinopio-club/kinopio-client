@@ -6,6 +6,15 @@ import utils from '@/utils.js'
 
 const store = useStore()
 
+// Adjust this value to change the momentum decay
+// Lower values (closer to 0.92) make the scrolling slower and smoother
+// Higher values (closer to 0.96) make the scrolling faster and more abrupt
+const momentumDeceleration = 0.95
+
+// Threshold for stopping when velocity is low
+// A smaller threshold ensures the scrolling stops only when it's very slow.
+const momentumThreshold = 0.5
+
 let shouldStartPanning,
   startPosition,
   currentPosition,
@@ -100,19 +109,16 @@ const panningFrame = () => {
 // momentum scrolling, post-panning
 
 const startMomentum = () => {
-  const deceleration = 0.97 // Adjust this value to change the momentum decay
-  const threshold = 0.3 // Stop when velocity is low
-
   const momentumFrame = () => {
     // cancel
-    const velocityIsLow = Math.abs(velocity.x) < threshold && Math.abs(velocity.y) < threshold
+    const velocityIsLow = Math.abs(velocity.x) < momentumThreshold && Math.abs(velocity.y) < momentumThreshold
     if (velocityIsLow || shouldPanNextFrame || shouldCancelMomentumTimer) {
       window.cancelAnimationFrame(momentumTimer)
       return
     }
     // scroll frame
-    velocity.x *= deceleration
-    velocity.y *= deceleration
+    velocity.x *= momentumDeceleration
+    velocity.y *= momentumDeceleration
     window.scrollBy(velocity.x, velocity.y, 'instant')
     momentumTimer = window.requestAnimationFrame(momentumFrame)
   }
