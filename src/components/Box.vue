@@ -2,6 +2,7 @@
 import { reactive, computed, onMounted, onBeforeUnmount, onUpdated, onUnmounted, defineProps, defineEmits, watch, ref, nextTick } from 'vue'
 import { useStore } from 'vuex'
 
+import BoxSnapGuide from '@/components/BoxSnapGuide.vue'
 import utils from '@/utils.js'
 import consts from '@/consts.js'
 import fonts from '@/data/fonts.js'
@@ -862,6 +863,7 @@ const isInCheckedBox = computed(() => {
         tabindex="-1"
       )
         img.resize-icon.icon(src="@/assets/resize-corner.svg" :class="resizeColorClass")
+  BoxSnapGuide(:box="props.box")
 </template>
 
 <style lang="stylus">
