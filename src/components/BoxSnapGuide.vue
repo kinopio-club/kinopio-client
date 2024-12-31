@@ -27,7 +27,6 @@ const props = defineProps({
 })
 
 const state = reactive({
-  rect: null,
   snapStatus: null // waiting, ready
 })
 
@@ -50,9 +49,12 @@ const otherBoxes = computed(() => {
 const userColor = computed(() => store.state.currentUser.color)
 const currentBoxSnapGuide = computed(() => {
   const isMultipleBoxesSelectedIds = store.state.multipleBoxesSelectedIds.length > 1
+  const cardSnapGuide = store.state.currentCards.snapGuide
   if (isMultipleBoxesSelectedIds) { return }
+  if (cardSnapGuide) { return }
   let guides = store.state.currentBoxes.snapGuides
   return guides.find(guide => {
+    if (!guide) { return }
     const isTarget = guide.target.id === props.box.id
     const isOrigin = guide.origin.id === props.box.id
     return isTarget || isOrigin
@@ -63,9 +65,9 @@ const snapGuideSide = computed(() => {
   if (!isDraggingItem) { return }
   const snapGuide = currentBoxSnapGuide.value
   if (!snapGuide) { return null }
-  if (snapGuide?.target.id === props.box.id) {
+  if (snapGuide?.target?.id === props.box.id) {
     return snapGuide.side
-  } else if (snapGuide?.origin.id === props.box.id) {
+  } else if (snapGuide?.origin?.id === props.box.id) {
     return oppositeSide(snapGuide.side)
   } else {
     return null
@@ -192,46 +194,4 @@ const waitingAnimationFrame = (timestamp) => {
       animation guideBottomWaiting var(--snap-guide-waiting-duration) 1 ease-in-out forwards
     &.ready
       animation guideBottomReady var(--snap-guide-ready-duration) infinite ease-in-out forwards
-
-// waiting animations
-
-@keyframes guideRightWaiting
-  0%
-    opacity 0
-  100%
-    transform translateX(2px)
-    opacity 0.75
-@keyframes guideLeftWaiting
-  0%
-    opacity 0
-  100%
-    transform translateX(-2px)
-    opacity 0.75
-@keyframes guideTopWaiting
-  0%
-    opacity 0
-  100%
-    transform translateY(-2px)
-    opacity 0.75
-@keyframes guideBottomWaiting
-  0%
-    opacity 0
-  100%
-    transform translateY(2px)
-    opacity 0.75
-
-// ready animations
-
-@keyframes guideRightReady
-  50%
-    transform translateX(2px)
-@keyframes guideLeftReady
-  50%
-    transform translateX(-2px)
-@keyframes guideTopReady
-  50%
-    transform translateY(-2px)
-@keyframes guideBottomReady
-  50%
-    transform translateY(2px)
 </style>

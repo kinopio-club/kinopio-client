@@ -307,7 +307,7 @@ export default {
 
     updateSnapGuides: (context, { boxes, cards }) => {
       if (context.rootState.shouldSnapToGrid) { return }
-      const snapThreshold = 6
+      const snapThreshold = 10
       const spaceEdgeThreshold = 100
       let targetBoxes = utils.clone(context.getters.isSelectableInViewport)
       const prevSnapGuides = context.state.snapGuides

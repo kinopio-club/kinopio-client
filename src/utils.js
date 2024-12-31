@@ -1137,7 +1137,7 @@ export default {
   },
   boundaryRectFromItems (items) {
     items = this.clone(items)
-    items = items.filter(item => item.x && item.y)
+    items = items.filter(item => item?.x && item?.y)
     items = items.map(item => {
       const defaultSize = 200
       item.width = item.resizeWidth || item.width || defaultSize

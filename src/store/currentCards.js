@@ -38,7 +38,8 @@ const currentCards = {
     ids: [],
     cards: {}, // {id, {card}}
     removedCards: [], // denormalized
-    tallestCardHeight: 0
+    tallestCardHeight: 0,
+    snapGuide: null // { side, origin, target }, { ... }
   },
   mutations: {
 
@@ -156,6 +157,9 @@ const currentCards = {
         element.dataset.x = card.x
         element.dataset.y = card.y
       })
+    },
+    snapGuide: (state, value) => {
+      state.snapGuide = value
     },
 
     // broadcast
@@ -673,6 +677,7 @@ const currentCards = {
       context.dispatch('currentConnections/updatePathsWhileDragging', { connections }, { root: true })
       context.dispatch('currentBoxes/updateSnapGuides', { cards }, { root: true })
       context.dispatch('broadcast/update', { updates: { cards }, type: 'moveCards', handler: 'currentCards/moveWhileDragging' }, { root: true })
+      context.dispatch('updateSnapGuide')
     },
     checkIfShouldIncreasePageWidthWhileDragging: (context, card) => {
       const cardEnd = card.x + card.width
@@ -728,6 +733,44 @@ const currentCards = {
         context.dispatch('history/add', { cards, useSnapshot: true }, { root: true })
         prevMoveDelta = { x: 0, y: 0 }
       })
+    },
+
+    // snapping
+
+    updateSnapGuide: (context) => {
+      const cardId = context.rootState.currentDraggingCardId
+      if (!cardId) { return }
+      const snapThreshold = 10
+      const spaceEdgeThreshold = 100
+      let targetCards = context.getters.isSelectableInViewport
+      let newSnapGuide = null
+      const card = utils.cardElementDimensions({ id: cardId })
+      targetCards.find(targetCard => {
+        if (targetCard.id === card.id) { return }
+        const isBetweenTargetCardPointsX = utils.isBetween({
+          value: card.x,
+          min: targetCard.x - snapThreshold,
+          max: targetCard.x + targetCard.width + snapThreshold
+        })
+        // card sides
+        const cardTop = card.y
+        const cardBottom = card.y + card.height
+        // target sides
+        const targetCardTop = targetCard.y
+        const targetCardBottom = targetCard.y + targetCard.height
+        // snap top
+        const isSnapTopFromCardBottom = Math.abs(cardBottom - targetCardTop) <= snapThreshold
+        if (isBetweenTargetCardPointsX && isSnapTopFromCardBottom) {
+          newSnapGuide = context.getters.newSnapGuide({ side: 'top', card, targetCard })
+        }
+        // snap bottom
+        const isSnapBottomFromCardTop = Math.abs(cardTop - targetCardBottom) <= snapThreshold
+        if (isBetweenTargetCardPointsX && isSnapBottomFromCardTop) {
+          newSnapGuide = context.getters.newSnapGuide({ side: 'bottom', card, targetCard })
+        }
+        return newSnapGuide
+      })
+      context.commit('snapGuide', newSnapGuide)
     },
 
     // distribute position
@@ -1132,6 +1175,14 @@ const currentCards = {
     shouldSnapToGrid: (state, getters, rootState, rootGetters) => {
       if (rootState.currentDraggingBoxId) { return }
       return rootState.shouldSnapToGrid
+    },
+    newSnapGuide: (state) => ({ side, card, targetCard }) => {
+      let time = Date.now()
+      const prevGuide = state.snapGuide
+      if (prevGuide) {
+        time = prevGuide.time
+      }
+      return { side, origin: card, target: targetCard, time }
     }
   }
 }
