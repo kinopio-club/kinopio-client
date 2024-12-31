@@ -67,8 +67,7 @@ const oppositeSide = (side) => {
 const snapGuideStyles = computed(() => {
   let styles = {}
   // TODO color should be current list color, or new list color
-  styles.background = 'pink'
-  // styles.background = currentCardSnapGuide.value.color
+  styles.background = currentCardSnapGuide.value.color
   return styles
 })
 </script>
@@ -80,7 +79,7 @@ const snapGuideStyles = computed(() => {
 
 <style lang="stylus">
 .card-snap-guide
-  --snap-guide-width 6px
+  --snap-guide-width 8px
   --snap-guide-ready-duration 0.4s
   position absolute
   &.top
@@ -99,4 +98,12 @@ const snapGuideStyles = computed(() => {
     border-bottom-right-radius var(--entity-radius)
     &.ready
       animation guideBottomReady var(--snap-guide-ready-duration) infinite ease-in-out forwards
+
+@keyframes guideTopReady
+  50%
+    transform translateY(2px)
+@keyframes guideBottomReady
+  50%
+    transform translateY(-2px)
+
 </style>

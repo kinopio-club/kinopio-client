@@ -243,7 +243,7 @@ const currentCards = {
       card.isComment = isComment
       card.shouldShowOtherSpacePreviewImage = true
       card.listId = null
-      card.listPosition = null
+      card.listRank = null
       // create card
       context.commit('cardDetailsIsVisibleForCardId', card.id, { root: true })
       context.dispatch('broadcast/update', { updates: { card }, type: 'createCard', handler: 'currentCards/create' }, { root: true })
@@ -764,13 +764,13 @@ const currentCards = {
         const isSnapTopFromCardBottom = Math.abs(cardBottom - targetCardTop) <= snapThreshold
         if (isBetweenTargetCardPointsX && isSnapTopFromCardBottom) {
           newSnapGuide = context.getters.newSnapGuide({ side: 'top', card, targetCard })
-          // newSnapGuide.color = randomColor({ luminosity: 'dark' }) light?
+          newSnapGuide.color = context.rootState.currentLists.newListColor
         }
         // snap bottom
         const isSnapBottomFromCardTop = Math.abs(cardTop - targetCardBottom) <= snapThreshold
         if (isBetweenTargetCardPointsX && isSnapBottomFromCardTop) {
           newSnapGuide = context.getters.newSnapGuide({ side: 'bottom', card, targetCard })
-          // newSnapGuide.color = randomColor({ luminosity: 'dark' }) light?
+          newSnapGuide.color = context.rootState.currentLists.newListColor
         }
         return newSnapGuide
       })
@@ -779,20 +779,22 @@ const currentCards = {
     snap: (context, { snapGuide }) => {
       if (context.rootState.cardDetailsIsVisibleForCardId) { return }
       const cards = context.getters.isSelected
-      console.log('🪲🪲🪲🪲🪲', snapGuide.side, snapGuide.target, cards)
+      const target = context.getters.byId(snapGuide.target.id)
+      console.log('🪲🪲🪲🪲🪲', snapGuide.side, snapGuide.target, target, '🐻‍❄️', cards)
       context.commit('currentCards/snapGuide', null, { root: true })
-      // TODO create new module lists
+
+      // TODO create new module currentLists
       // lists getter isCardInList card.listId?
       // getter listById
       // getter cardsByListId
 
       // if target card is not in a list then create a new list w targetCard + list
 
-      // new list
-
+      // dispatch currentLists/new , ordered cards
       // update card.listId
-      // cards .listPosition
+      // cards .listRank (lexorank)
 
+      // dispatch currentLists/addCards (target, cards)
       // if target is in list
       // append or prepend to existing list
     },

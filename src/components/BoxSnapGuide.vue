@@ -150,7 +150,7 @@ const waitingAnimationFrame = (timestamp) => {
 
 <style lang="stylus">
 .box-snap-guide
-  --snap-guide-width 6px
+  --snap-guide-width 8px
   --snap-guide-waiting-duration 0.5s // same as consts.boxSnapGuideWaitingDuration ms
   --snap-guide-ready-duration 0.4s
   position absolute
