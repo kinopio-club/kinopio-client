@@ -11,6 +11,7 @@ import UserLabelInline from '@/components/UserLabelInline.vue'
 import OtherCardPreview from '@/components/OtherCardPreview.vue'
 import GroupInvitePreview from '@/components/GroupInvitePreview.vue'
 import ItemConnectorButton from '@/components/ItemConnectorButton.vue'
+import CardSnapGuide from '@/components/CardSnapGuide.vue'
 import consts from '@/consts.js'
 import postMessage from '@/postMessage.js'
 
@@ -2101,6 +2102,7 @@ article.card-wrap#card(
       img.icon.time(src="@/assets/time.svg")
       .name {{dateUpdatedAt}}
 
+  CardSnapGuide(:card="card")
 </template>
 
 <style lang="stylus">

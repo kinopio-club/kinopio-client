@@ -1349,4 +1349,48 @@ progress::-moz-progress-bar
   100%
     opacity 1
 
+// Item Snap Guides
+
+// waiting animations
+
+@keyframes guideRightWaiting
+  0%
+    opacity 0
+  100%
+    transform translateX(2px)
+    opacity 0.75
+@keyframes guideLeftWaiting
+  0%
+    opacity 0
+  100%
+    transform translateX(-2px)
+    opacity 0.75
+@keyframes guideTopWaiting
+  0%
+    opacity 0
+  100%
+    transform translateY(-2px)
+    opacity 0.75
+@keyframes guideBottomWaiting
+  0%
+    opacity 0
+  100%
+    transform translateY(2px)
+    opacity 0.75
+
+// ready animations
+
+@keyframes guideRightReady
+  50%
+    transform translateX(2px)
+@keyframes guideLeftReady
+  50%
+    transform translateX(-2px)
+@keyframes guideTopReady
+  50%
+    transform translateY(-2px)
+@keyframes guideBottomReady
+  50%
+    transform translateY(2px)
+
 </style>

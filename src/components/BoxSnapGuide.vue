@@ -12,7 +12,6 @@ let unsubscribe
 let waitingAnimationTimer, shouldCancelWaiting, waitingStartTime
 
 onMounted(() => {
-  updateRect()
   unsubscribe = store.subscribe(mutation => {
     if (mutation.type === 'clearDraggingItems') {
       cancelWaitingAnimationFrame()
@@ -28,7 +27,6 @@ const props = defineProps({
 })
 
 const state = reactive({
-  rect: null,
   snapStatus: null // waiting, ready
 })
 
@@ -51,9 +49,12 @@ const otherBoxes = computed(() => {
 const userColor = computed(() => store.state.currentUser.color)
 const currentBoxSnapGuide = computed(() => {
   const isMultipleBoxesSelectedIds = store.state.multipleBoxesSelectedIds.length > 1
+  const cardSnapGuide = store.state.currentCards.snapGuide
   if (isMultipleBoxesSelectedIds) { return }
+  if (cardSnapGuide) { return }
   let guides = store.state.currentBoxes.snapGuides
   return guides.find(guide => {
+    if (!guide) { return }
     const isTarget = guide.target.id === props.box.id
     const isOrigin = guide.origin.id === props.box.id
     return isTarget || isOrigin
@@ -64,9 +65,9 @@ const snapGuideSide = computed(() => {
   if (!isDraggingItem) { return }
   const snapGuide = currentBoxSnapGuide.value
   if (!snapGuide) { return null }
-  if (snapGuide?.target.id === props.box.id) {
+  if (snapGuide?.target?.id === props.box.id) {
     return snapGuide.side
-  } else if (snapGuide?.origin.id === props.box.id) {
+  } else if (snapGuide?.origin?.id === props.box.id) {
     return oppositeSide(snapGuide.side)
   } else {
     return null
@@ -86,35 +87,9 @@ const oppositeSide = (side) => {
     return 'top'
   }
 }
-const updateRect = () => {
-  state.rect = utils.boxElementDimensions({ id: props.box.id })
-}
 const snapGuideStyles = computed(() => {
-  const offset = 4
   let styles = {}
-  let rect = state.rect
   styles.background = props.box.color
-  // left
-  if (snapGuideSide.value === 'left') {
-    styles.height = rect.height + 'px'
-    styles.left = (rect.x - offset) + 'px'
-    styles.top = rect.y + 'px'
-  // right
-  } else if (snapGuideSide.value === 'right') {
-    styles.height = rect.height + 'px'
-    styles.left = (rect.x + rect.width - offset) + 'px'
-    styles.top = rect.y + 'px'
-  // top
-  } else if (snapGuideSide.value === 'top') {
-    styles.width = rect.width + 'px'
-    styles.left = rect.x + 'px'
-    styles.top = (rect.y - offset) + 'px'
-  // bottom
-  } else if (snapGuideSide.value === 'bottom') {
-    styles.width = rect.width + 'px'
-    styles.left = rect.x + 'px'
-    styles.top = (rect.y + rect.height - offset) + 'px'
-  }
   if (snapGuideSide.value) {
     startWaiting()
   }
@@ -149,7 +124,6 @@ const waitingAnimationFrame = (timestamp) => {
   }
   const elaspedTime = timestamp - waitingStartTime
   const percentComplete = (elaspedTime / consts.boxSnapGuideWaitingDuration) // between 0 and 1
-  updateRect()
   // waiting
   if (percentComplete < 1) {
     state.snapStatus = 'waiting'
@@ -183,6 +157,7 @@ const waitingAnimationFrame = (timestamp) => {
   &.left
     left calc(-1 * var(--snap-guide-width))
     width var(--snap-guide-width)
+    height 100%
     border-top-left-radius var(--entity-radius)
     border-bottom-left-radius var(--entity-radius)
     &.waiting
@@ -192,6 +167,7 @@ const waitingAnimationFrame = (timestamp) => {
   &.right
     right calc(-1 * var(--snap-guide-width))
     width var(--snap-guide-width)
+    height 100%
     border-top-right-radius var(--entity-radius)
     border-bottom-right-radius var(--entity-radius)
     &.waiting
@@ -201,6 +177,7 @@ const waitingAnimationFrame = (timestamp) => {
   &.top
     top calc(-1 * var(--snap-guide-width))
     height var(--snap-guide-width)
+    width 100%
     border-top-left-radius var(--entity-radius)
     border-top-right-radius var(--entity-radius)
     &.waiting
@@ -210,52 +187,11 @@ const waitingAnimationFrame = (timestamp) => {
   &.bottom
     bottom calc(-1 * var(--snap-guide-width))
     height var(--snap-guide-width)
+    width 100%
     border-bottom-left-radius var(--entity-radius)
     border-bottom-right-radius var(--entity-radius)
     &.waiting
       animation guideBottomWaiting var(--snap-guide-waiting-duration) 1 ease-in-out forwards
     &.ready
       animation guideBottomReady var(--snap-guide-ready-duration) infinite ease-in-out forwards
-
-// waiting animations
-
-@keyframes guideRightWaiting
-  0%
-    opacity 0
-  100%
-    transform translateX(2px)
-    opacity 0.75
-@keyframes guideLeftWaiting
-  0%
-    opacity 0
-  100%
-    transform translateX(-2px)
-    opacity 0.75
-@keyframes guideTopWaiting
-  0%
-    opacity 0
-  100%
-    transform translateY(-2px)
-    opacity 0.75
-@keyframes guideBottomWaiting
-  0%
-    opacity 0
-  100%
-    transform translateY(2px)
-    opacity 0.75
-
-// ready animations
-
-@keyframes guideRightReady
-  50%
-    transform translateX(2px)
-@keyframes guideLeftReady
-  50%
-    transform translateX(-2px)
-@keyframes guideTopReady
-  50%
-    transform translateY(-2px)
-@keyframes guideBottomReady
-  50%
-    transform translateY(2px)
 </style>
