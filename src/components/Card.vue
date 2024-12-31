@@ -140,7 +140,8 @@ const state = reactive({
   pathIsUpdated: false,
   isVisibleInViewport: false,
   currentConnections: [],
-  shouldRenderParent: false
+  shouldRenderParent: false,
+  safeColors: {}
 })
 watch(() => state.linkToPreview, (value, prevValue) => {
   updateUrlData()
@@ -366,6 +367,16 @@ const isInSearchResultsCards = computed(() => {
 })
 const filterShowUsers = computed(() => store.state.currentUser.filterShowUsers)
 const filterShowDateUpdated = computed(() => store.state.currentUser.filterShowDateUpdated)
+const safeColor = (color) => {
+  let newColor = state.safeColors[color]
+  if (newColor) {
+    return newColor
+  } else {
+    newColor = utils.safeColor(color)
+    state.safeColors[color] = newColor
+    return newColor
+  }
+}
 
 // styles
 
@@ -382,6 +393,9 @@ const articleStyle = computed(() => {
     top: `${y.value}px`,
     zIndex: z,
     pointerEvents
+  }
+  if (props.card.isLocked) {
+    delete styles.zIndex
   }
   if (!store.state.currentUserIsDraggingCard) {
     styles.transform = `translate(${state.stickyTranslateX}, ${state.stickyTranslateY})`
@@ -405,6 +419,10 @@ const cardStyle = computed(() => {
   }
   if (props.card.tilt) {
     styles.transform = `rotate(${props.card.tilt}deg)`
+  }
+  if (isImageCard.value && isSelectedOrDragging.value) {
+    color = safeColor(color)
+    styles.background = color
   }
   styles = updateStylesWithWidth(styles)
   return styles
@@ -1934,7 +1952,7 @@ article.card-wrap#card(
     Frames(:card="card")
 
     template(v-if="!isComment")
-      ImageOrVideo(:isSelectedOrDragging="isSelectedOrDragging" :pendingUploadDataUrl="pendingUploadDataUrl" :image="state.formats.image" :video="state.formats.video" @loadSuccess="updateDimensionsAndPaths")
+      ImageOrVideo(:isSelectedOrDragging="isSelectedOrDragging" :pendingUploadDataUrl="pendingUploadDataUrl" :image="state.formats.image" :video="state.formats.video" @loadSuccess="updateDimensionsAndPaths" :cardId="card.id" )
 
     TiltResize(:card="card" :visible="tiltResizeIsVisible")
 

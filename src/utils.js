@@ -719,7 +719,8 @@ export default {
     }
     return rangeArray
   },
-  normalizeToUnixTime (date) {
+  unixTime (date) {
+    date = date || new Date()
     return new Date(date).getTime()
   },
   shortRelativeTime (date) {
@@ -849,6 +850,18 @@ export default {
       color = colord(color).lighten(colorDelta).toHex()
     } else {
       color = colord(color).darken(colorDelta).toHex()
+    }
+    return color
+  },
+  safeColor (color) {
+    const brightnessThreshold = 0.5
+    const brightness = colord(color).brightness()
+    const isTooBright = brightness > 0.8
+    const isTooDark = brightness < 0.2
+    if (isTooBright) {
+      color = colord(color).darken(brightnessThreshold).toHex()
+    } else if (isTooDark) {
+      color = colord(color).lighten(brightnessThreshold).toHex()
     }
     return color
   },

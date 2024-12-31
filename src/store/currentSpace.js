@@ -604,7 +604,7 @@ const currentSpace = {
       console.log('🌱 Restoring space', space, { 'isRemote': isRemote, addCards, addConnections, addConnectionTypes, addBoxes })
       context.commit('isLoadingSpace', true, { root: true })
       const chunkSize = 50
-      const timeStart = utils.normalizeToUnixTime(new Date())
+      const timeStart = utils.unixTime()
       const origin = { x: window.scrollX, y: window.scrollY }
       // init items
       let cards = addCards || space.cards || []
@@ -698,7 +698,7 @@ const currentSpace = {
     restoreSpaceComplete: async (context, { space, isRemote, timeStart }) => {
       context.dispatch('history/reset', null, { root: true })
       postMessage.send({ name: 'restoreSpaceComplete', value: true })
-      const timeEnd = utils.normalizeToUnixTime(new Date())
+      const timeEnd = utils.unixTime()
       let emoji = '🌳'
       if (isRemote) {
         emoji = '🌳🌏'

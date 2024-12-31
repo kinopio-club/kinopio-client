@@ -479,7 +479,7 @@ export default {
       const remoteUser = await context.dispatch('api/getUser', null, { root: true })
       if (!remoteUser) { return }
       remoteUser.AIImages = await context.dispatch('api/getUserAIImages', null, { root: true }) || []
-      remoteUser.updatedAt = utils.normalizeToUnixTime(remoteUser.updatedAt)
+      remoteUser.updatedAt = utils.unixTime(remoteUser.updatedAt)
       console.log('🌸 Restore user from remote', remoteUser)
       context.commit('updateUser', remoteUser)
       if (utils.userIsUpgraded(remoteUser)) {
