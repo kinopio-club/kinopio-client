@@ -242,6 +242,8 @@ const currentCards = {
       card.spaceId = currentSpaceId
       card.isComment = isComment
       card.shouldShowOtherSpacePreviewImage = true
+      card.listId = null
+      card.listPosition = null
       // create card
       context.commit('cardDetailsIsVisibleForCardId', card.id, { root: true })
       context.dispatch('broadcast/update', { updates: { card }, type: 'createCard', handler: 'currentCards/create' }, { root: true })
@@ -762,15 +764,37 @@ const currentCards = {
         const isSnapTopFromCardBottom = Math.abs(cardBottom - targetCardTop) <= snapThreshold
         if (isBetweenTargetCardPointsX && isSnapTopFromCardBottom) {
           newSnapGuide = context.getters.newSnapGuide({ side: 'top', card, targetCard })
+          // newSnapGuide.color = randomColor({ luminosity: 'dark' }) light?
         }
         // snap bottom
         const isSnapBottomFromCardTop = Math.abs(cardTop - targetCardBottom) <= snapThreshold
         if (isBetweenTargetCardPointsX && isSnapBottomFromCardTop) {
           newSnapGuide = context.getters.newSnapGuide({ side: 'bottom', card, targetCard })
+          // newSnapGuide.color = randomColor({ luminosity: 'dark' }) light?
         }
         return newSnapGuide
       })
       context.commit('snapGuide', newSnapGuide)
+    },
+    snap: (context, { snapGuide }) => {
+      if (context.rootState.cardDetailsIsVisibleForCardId) { return }
+      const cards = context.getters.isSelected
+      console.log('🪲🪲🪲🪲🪲', snapGuide.side, snapGuide.target, cards)
+      context.commit('currentCards/snapGuide', null, { root: true })
+      // TODO create new module lists
+      // lists getter isCardInList card.listId?
+      // getter listById
+      // getter cardsByListId
+
+      // if target card is not in a list then create a new list w targetCard + list
+
+      // new list
+
+      // update card.listId
+      // cards .listPosition
+
+      // if target is in list
+      // append or prepend to existing list
     },
 
     // distribute position

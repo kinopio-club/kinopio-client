@@ -332,13 +332,13 @@ export default {
           targetBox.height = targetBox.resizeHeight
           const isBetweenTargetBoxPointsX = utils.isBetween({
             value: item.x,
-            min: targetBox.x + snapThreshold,
-            max: targetBox.x + targetBox.width - snapThreshold
+            min: targetBox.x - snapThreshold,
+            max: targetBox.x + targetBox.width + snapThreshold
           })
           const isBetweenTargetBoxPointsY = utils.isBetween({
             value: item.y,
-            min: targetBox.y + snapThreshold,
-            max: targetBox.y + targetBox.height - snapThreshold
+            min: targetBox.y - snapThreshold,
+            max: targetBox.y + targetBox.height + snapThreshold
           })
           // let time = 1
           // item sides

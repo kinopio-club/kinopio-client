@@ -33,11 +33,8 @@ const otherCards = computed(() => {
 
 const userColor = computed(() => store.state.currentUser.color)
 const currentCardSnapGuide = computed(() => {
-  const isMultipleCardsSelectedIds = store.state.multipleCardsSelectedIds.length > 1
-  if (isMultipleCardsSelectedIds) { return }
   let snapGuide = store.state.currentCards.snapGuide
   if (!snapGuide) { return }
-  console.log('🍊', snapGuide.side)
   const isTarget = snapGuide.target.id === props.card.id
   const isOrigin = snapGuide.origin.id === props.card.id
   if (isTarget || isOrigin) {
@@ -51,8 +48,6 @@ const snapGuideSide = computed(() => {
   if (!isDraggingItem) { return }
   const snapGuide = currentCardSnapGuide.value
   if (!snapGuide) { return null }
-  console.log('🐔', snapGuide.side, snapGuide)
-
   if (snapGuide?.target?.id === props.card.id) {
     return snapGuide.side
   } else if (snapGuide?.origin?.id === props.card.id) {
@@ -72,7 +67,8 @@ const oppositeSide = (side) => {
 const snapGuideStyles = computed(() => {
   let styles = {}
   // TODO color should be current list color, or new list color
-  styles.background = 'red'
+  styles.background = 'pink'
+  // styles.background = currentCardSnapGuide.value.color
   return styles
 })
 </script>
