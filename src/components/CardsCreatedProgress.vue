@@ -18,7 +18,7 @@ const state = reactive({
   freeLimitFAQIsVisible: false
 })
 
-const cardsCreatedCount = computed(() => store.state.currentUser.cardsCreatedCount || 0)
+const cardsCreatedCount = computed(() => Math.min(0, store.state.currentUser.cardsCreatedCount || 0))
 const cardsCreatedLimit = computed(() => store.state.cardsCreatedLimit)
 
 const triggerUpgradeUserIsVisible = () => {
