@@ -484,7 +484,7 @@ dialog.background-picker.wide(v-if="visible" :open="visible" @click.left.stop="c
           button.change-color(@click.left.stop="toggleColorPicker" :class="{active: state.colorPickerIsVisible}")
             span.current-color(:style="{ background: backgroundTintBadgeColor }")
             span Tint
-          ColorPicker(:currentColor="state.backgroundTint || '#fff'" :visible="state.colorPickerIsVisible" @selectedColor="updateBackgroundTint" :removeIsVisible="true" @removeColor="removeBackgroundTint" :shouldLightenColors="true")
+          ColorPicker(:currentColor="state.backgroundTint || '#fff'" :visible="state.colorPickerIsVisible" @selectedColor="updateBackgroundTint" :removeIsVisible="true" @removeColor="removeBackgroundTint" :shouldLightenColors="true" :luminosityIsLight="true")
         //- Type
         .segmented-buttons
           button(@click.left.stop="updateService('background')" :class="{ active: state.service === 'background'}")
