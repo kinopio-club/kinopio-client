@@ -174,7 +174,7 @@ span
         //- date
         span.badge.status.inline-badge(:class="{'date-is-today': dateIsToday(card)}")
           img.icon.time(src="@/assets/time.svg")
-          span {{ relativeDate(card) }}
+          span(v-if="cardDate(card)") {{ relativeDate(card) }}
         //- user
         UserLabelInline(v-if="card.user.id && userIsNotCurrentUser(card.user.id)" :user="card.user")
         //- name
