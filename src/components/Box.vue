@@ -683,10 +683,11 @@ const endBoxInfoInteractionTouch = (event) => {
 
 const isConnectingTo = computed(() => {
   const connectingToId = store.state.currentConnectionSuccess.id
-  if (connectingToId) {
+  const isConnecting = connectingToId === props.box.id
+  if (isConnecting) {
     postMessage.sendHaptics({ name: 'softImpact' })
   }
-  return connectingToId === props.box.id
+  return isConnecting
 })
 const isConnectingFrom = computed(() => {
   return store.state.currentConnectionStartItemIds.includes(props.box.id)
