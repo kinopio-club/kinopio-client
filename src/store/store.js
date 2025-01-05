@@ -11,6 +11,7 @@ import currentSpace from '@/store/currentSpace.js'
 import currentCards from '@/store/currentCards.js'
 import currentConnections from '@/store/currentConnections.js'
 import currentBoxes from '@/store/currentBoxes.js'
+import currentLists from '@/store/currentLists.js'
 import upload from '@/store/upload.js'
 import userNotifications from '@/store/userNotifications.js'
 import groups from '@/store/groups.js'
@@ -2175,6 +2176,7 @@ const store = createStore({
     currentCards,
     currentConnections,
     currentBoxes,
+    currentLists,
     upload,
     userNotifications,
     groups,
