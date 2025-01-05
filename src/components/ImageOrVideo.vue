@@ -115,10 +115,9 @@ const pauseGif = () => {
   const image = imageElement.value
   const width = image.width
   const height = image.height
-  const canvas = document.createElement('canvas', function (clone) {
-    clone.width = width
-    clone.height = height
-  })
+  const canvas = document.createElement('canvas')
+  canvas.width = width
+  canvas.height = height
   canvas.getContext('2d').drawImage(image, 0, 0, width, height)
   let attr
   let i = 0
