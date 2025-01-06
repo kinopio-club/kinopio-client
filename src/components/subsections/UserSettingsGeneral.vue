@@ -91,7 +91,7 @@ const deleteUserPermanent = async () => {
     })
   }
   await store.dispatch('api/deleteUserPermanent')
-  cache.removeAll()
+  await cache.removeAll()
   // clear history wipe state from vue-router
   window.history.replaceState({}, 'Kinopio', '/')
   location.reload()
