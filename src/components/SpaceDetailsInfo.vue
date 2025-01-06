@@ -186,7 +186,8 @@ const duplicateSpace = async () => {
 
 const toggleHideSpace = async () => {
   const value = !props.currentSpaceIsHidden
-  await store.dispatch('currentSpace/updateSpace', { isHidden: value })
+  const currentSpaceId = store.state.currentSpace.id
+  await store.dispatch('currentSpace/updateSpaceIsHidden', { spaceId: currentSpaceId, isHidden: value })
   store.commit('notifySpaceIsHidden', value)
   updateLocalSpaces()
 }

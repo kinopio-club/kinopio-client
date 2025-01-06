@@ -912,6 +912,17 @@ const currentSpace = {
         body: updates
       }, { root: true })
     },
+    updateSpaceIsHidden: async (context, { spaceId, isHidden }) => {
+      context.commit('updateSpace', { isHidden })
+      await cache.updateSpace('isHidden', isHidden, spaceId)
+      await context.dispatch('api/addToQueue', {
+        name: 'updateSpaceIsHidden',
+        body: {
+          spaceId: spaceId,
+          isHidden
+        }
+      }, { root: true })
+    },
     changeSpace: async (context, space) => {
       context.dispatch('prevSpaceIdInSession', context.state.id, { root: true })
       context.commit('clearAllInteractingWithAndSelected', null, { root: true })
