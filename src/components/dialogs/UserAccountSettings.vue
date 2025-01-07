@@ -1,5 +1,123 @@
+<script setup>
+import { reactive, computed, onMounted, onBeforeUnmount, defineProps, defineEmits, watch, ref, nextTick } from 'vue'
+import { useStore } from 'vuex'
+
+import utils from '@/utils.js'
+import UpdatePassword from '@/components/UpdatePassword.vue'
+import Loader from '@/components/Loader.vue'
+import cache from '@/cache.js'
+
+const store = useStore()
+
+const dialogElement = ref(null)
+
+onMounted(() => {
+  window.addEventListener('resize', updateDialogHeight)
+})
+onBeforeUnmount(() => {
+  window.removeEventListener('resize', updateDialogHeight)
+})
+
+const props = defineProps({
+  visible: Boolean
+})
+const state = reactive({
+  dialogHeight: null,
+  email: '',
+  loading: false,
+  success: false,
+  error: {
+    unknownServerError: false,
+    accountAlreadyExists: false
+  },
+  developerInfoIsVisible: false
+})
+
+watch(() => props.visible, (value, prevValue) => {
+  if (value) {
+    updateDialogHeight()
+    state.email = store.state.currentUser.email
+    clearStatus()
+  }
+})
+
+const updateDialogHeight = async () => {
+  if (!props.visible) { return }
+  await nextTick()
+  let element = dialogElement.value
+  state.dialogHeight = utils.elementHeight(element)
+}
+const currentUserIsSignedIn = computed(() => store.getters['currentUser/isSignedIn'])
+const triggerSignUpOrInIsVisible = () => {
+  store.dispatch('closeAllDialogs')
+  store.commit('triggerSignUpOrInIsVisible')
+}
+const updateEmail = async () => {
+  if (state.loading) { return }
+  if (!state.email) { return }
+  if (state.email === store.state.currentUser.email) { return }
+  clearStatus()
+  state.loading = true
+  const response = await store.dispatch('api/updateEmail', state.email)
+  const result = await response.json()
+  if (isSuccess(response)) {
+    state.success = true
+    store.commit('currentUser/email', state.email)
+  } else {
+    await handleErrors(result)
+  }
+  state.loading = false
+}
+const isSuccess = (response) => {
+  const success = [200, 201, 202, 204]
+  return Boolean(success.includes(response.status))
+}
+const handleErrors = async (response) => {
+  if (!response) {
+    state.error.unknownServerError = true
+    return
+  }
+  if (response.type === 'unique violation') {
+    state.error.accountAlreadyExists = true
+  } else {
+    state.error.unknownServerError = true
+  }
+}
+const clearStatus = () => {
+  state.error.unknownServerError = false
+  state.error.accountAlreadyExists = false
+  state.success = false
+}
+
+// developer info
+
+const toggleDeveloperInfoIsVisible = () => {
+  const isVisible = state.developerInfoIsVisible
+  state.developerInfoIsVisible = !isVisible
+  updateDialogHeight()
+}
+const userId = computed(() => store.state.currentUser.id)
+const copy = async (event, type) => {
+  store.commit('clearNotificationsWithPosition')
+  const position = utils.cursorPositionInPage(event)
+  const apiKey = store.state.currentUser.apiKey
+  let text = userId.value
+  if (type === 'apiKey') {
+    text = apiKey
+  }
+  try {
+    await navigator.clipboard.writeText(text)
+    store.commit('addNotificationWithPosition', { message: 'Copied', position, type: 'success', layer: 'app', icon: 'checkmark' })
+    console.log(`🍇 copied ${type}`)
+  } catch (error) {
+    console.warn('🚑 copyText', error)
+    store.commit('addNotificationWithPosition', { message: 'Copy Error', position, type: 'danger', layer: 'app', icon: 'cancel' })
+  }
+}
+</script>
+
 <template lang="pug">
-dialog.narrow.update-email(v-if="visible" :open="visible" @click.left.stop ref="dialog" :style="{'max-height': dialogHeight + 'px'}")
+dialog.narrow.update-email(v-if="props.visible" :open="props.visible" @click.left.stop ref="dialogElement" :style="{'max-height': state.dialogHeight + 'px'}")
   section
     p Account
   template(v-if="!currentUserIsSignedIn")
@@ -9,15 +127,15 @@ dialog.narrow.update-email(v-if="visible" :open="visible" @click.left.stop ref="
   template(v-else)
     section
       form(@submit.prevent="updateEmail")
-        input(type="text" placeholder="Email" required autocomplete="email" v-model="email")
-        button(type="submit" :class="{active : loading}")
+        input(type="text" placeholder="Email" required autocomplete="email" v-model="state.email")
+        button(type="submit" :class="{active : state.loading}")
           span Update Email
-          Loader(:visible="loading")
-      p.badge.success(v-if="success")
+          Loader(:visible="state.loading")
+      p.badge.success(v-if="state.success")
         span Email Updated. A confirmation email has been sent to both your new and previous addresses
-      p.badge.danger(v-if="error.unknownServerError.email")
+      p.badge.danger(v-if="state.error.unknownServerError.email")
         span (シ_ _)シ Something went wrong, Please try again or contact support
-      p.badge.danger(v-else-if="error.accountAlreadyExists")
+      p.badge.danger(v-else-if="state.error.accountAlreadyExists")
         span An account with this email already exists
     UpdatePassword
 
@@ -26,11 +144,13 @@ dialog.narrow.update-email(v-if="visible" :open="visible" @click.left.stop ref="
       section.subsection
         .row
           .button-wrap
-            button(@click.left.stop="toggleDeveloperInfoIsVisible" :class="{active: developerInfoIsVisible}")
+            button(@click.left.stop="toggleDeveloperInfoIsVisible" :class="{active: state.developerInfoIsVisible}")
               img.icon.key(src="@/assets/key.svg")
               span Developer Info
-        template(v-if="developerInfoIsVisible")
+        template(v-if="state.developerInfoIsVisible")
           //- copy user id
+          .row
+            p {{ userId }}
           .row
             .button-wrap
               button(@click.left="copy($event, 'userId')")
@@ -51,126 +171,7 @@ dialog.narrow.update-email(v-if="visible" :open="visible" @click.left.stop ref="
                 button.small-button
                   span API Docs{{' '}}
                   img.icon.visit(src="@/assets/visit.svg")
-
 </template>
-
-<script>
-import utils from '@/utils.js'
-import UpdatePassword from '@/components/UpdatePassword.vue'
-import Loader from '@/components/Loader.vue'
-import cache from '@/cache.js'
-
-export default {
-  name: 'UpdateEmail',
-  components: {
-    Loader,
-    UpdatePassword
-  },
-  props: {
-    visible: Boolean
-  },
-  created () {
-    window.addEventListener('resize', this.updateDialogHeight)
-  },
-  data () {
-    return {
-      dialogHeight: null,
-      email: '',
-      loading: false,
-      success: false,
-      error: {
-        unknownServerError: false,
-        accountAlreadyExists: false
-      },
-      developerInfoIsVisible: false
-    }
-  },
-  computed: {
-    currentUserIsSignedIn () { return this.$store.getters['currentUser/isSignedIn'] },
-    userId () { return this.$store.state.currentUser.id },
-    apiKey () { return this.$store.state.currentUser.apiKey }
-  },
-  methods: {
-    updateDialogHeight () {
-      if (!this.visible) { return }
-      this.$nextTick(() => {
-        let element = this.$refs.dialog
-        this.dialogHeight = utils.elementHeight(element)
-      })
-    },
-    triggerSignUpOrInIsVisible () {
-      this.$store.dispatch('closeAllDialogs')
-      this.$store.commit('triggerSignUpOrInIsVisible')
-    },
-    async updateEmail () {
-      if (this.loading) { return }
-      if (!this.email) { return }
-      if (this.email === this.$store.state.currentUser.email) { return }
-      this.clearStatus()
-      this.loading = true
-      const response = await this.$store.dispatch('api/updateEmail', this.email)
-      const result = await response.json()
-      if (this.isSuccess(response)) {
-        this.success = true
-        this.$store.commit('currentUser/email', this.email)
-      } else {
-        await this.handleErrors(result)
-      }
-      this.loading = false
-    },
-    isSuccess (response) {
-      const success = [200, 201, 202, 204]
-      return Boolean(success.includes(response.status))
-    },
-    async handleErrors (response) {
-      if (!response) {
-        this.error.unknownServerError = true
-        return
-      }
-      if (response.type === 'unique violation') {
-        this.error.accountAlreadyExists = true
-      } else {
-        this.error.unknownServerError = true
-      }
-    },
-    clearStatus () {
-      this.error.unknownServerError = false
-      this.error.accountAlreadyExists = false
-      this.success = false
-    },
-    toggleDeveloperInfoIsVisible () {
-      const isVisible = this.developerInfoIsVisible
-      this.developerInfoIsVisible = !isVisible
-      this.updateDialogHeight()
-    },
-    async copy (event, type) {
-      this.$store.commit('clearNotificationsWithPosition')
-      const position = utils.cursorPositionInPage(event)
-      let text = this.userId
-      if (type === 'apiKey') {
-        text = this.apiKey
-      }
-      try {
-        await navigator.clipboard.writeText(text)
-        this.$store.commit('addNotificationWithPosition', { message: 'Copied', position, type: 'success', layer: 'app', icon: 'checkmark' })
-        console.log(`🍇 copied ${type}`)
-      } catch (error) {
-        console.warn('🚑 copyText', error)
-        this.$store.commit('addNotificationWithPosition', { message: 'Copy Error', position, type: 'danger', layer: 'app', icon: 'cancel' })
-      }
-    }
-  },
-  watch: {
-    visible (visible) {
-      if (visible) {
-        this.updateDialogHeight()
-        this.email = this.$store.state.currentUser.email
-        this.clearStatus()
-      }
-    }
-  }
-}
-</script>
 
 <style lang="stylus">
 .update-email
