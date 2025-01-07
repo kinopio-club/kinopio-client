@@ -29,8 +29,7 @@ const state = reactive({
   error: {
     unknownServerError: false,
     accountAlreadyExists: false
-  },
-  developerInfoIsVisible: false
+  }
 })
 
 watch(() => props.visible, (value, prevValue) => {
@@ -91,29 +90,6 @@ const clearStatus = () => {
 
 // developer info
 
-const toggleDeveloperInfoIsVisible = () => {
-  const isVisible = state.developerInfoIsVisible
-  state.developerInfoIsVisible = !isVisible
-  updateDialogHeight()
-}
-const userId = computed(() => store.state.currentUser.id)
-const copy = async (event, type) => {
-  store.commit('clearNotificationsWithPosition')
-  const position = utils.cursorPositionInPage(event)
-  const apiKey = store.state.currentUser.apiKey
-  let text = userId.value
-  if (type === 'apiKey') {
-    text = apiKey
-  }
-  try {
-    await navigator.clipboard.writeText(text)
-    store.commit('addNotificationWithPosition', { message: 'Copied', position, type: 'success', layer: 'app', icon: 'checkmark' })
-    console.log(`🍇 copied ${type}`)
-  } catch (error) {
-    console.warn('🚑 copyText', error)
-    store.commit('addNotificationWithPosition', { message: 'Copy Error', position, type: 'danger', layer: 'app', icon: 'cancel' })
-  }
-}
 </script>
 
 <template lang="pug">
@@ -138,39 +114,6 @@ dialog.narrow.update-email(v-if="props.visible" :open="props.visible" @click.lef
       p.badge.danger(v-else-if="state.error.accountAlreadyExists")
         span An account with this email already exists
     UpdatePassword
-
-    section
-      //- developer info
-      section.subsection
-        .row
-          .button-wrap
-            button(@click.left.stop="toggleDeveloperInfoIsVisible" :class="{active: state.developerInfoIsVisible}")
-              img.icon.key(src="@/assets/key.svg")
-              span Developer Info
-        template(v-if="state.developerInfoIsVisible")
-          //- copy user id
-          .row
-            p {{ userId }}
-          .row
-            .button-wrap
-              button(@click.left="copy($event, 'userId')")
-                img.icon.copy(src="@/assets/copy.svg")
-                span Copy UserId
-          .row
-            //- copy api key
-            p.badge.danger.copy-api-keys
-              .button-wrap
-                button(@click.left="copy($event, 'apiKey')")
-                  img.icon.copy(src="@/assets/copy.svg")
-                  span Copy API Key
-              p Keep your API key secret. Anyone with your key can read, edit, and remove your cards and spaces
-          //- api docs
-          .row
-            .button-wrap
-              a(href="https://help.kinopio.club/api")
-                button.small-button
-                  span API Docs{{' '}}
-                  img.icon.visit(src="@/assets/visit.svg")
 </template>
 
 <style lang="stylus">
@@ -178,7 +121,4 @@ dialog.narrow.update-email(v-if="props.visible" :open="props.visible" @click.lef
   overflow auto
   @media(max-height 650px)
     top -100px !important
-  .copy-api-keys
-    padding-top 4px
-    padding-bottom 4px
 </style>
