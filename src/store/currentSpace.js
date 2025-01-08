@@ -509,7 +509,7 @@ const currentSpace = {
         return remoteSpace
       } catch (error) {
         console.error('🚒 getRemoteSpace', error)
-        throw Error(error)
+        throw error
       }
     },
     loadRemoteSpace: async (context, space) => {
