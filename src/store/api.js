@@ -223,7 +223,7 @@ const self = {
           // clear sendingQueue on success
           context.commit('clearSendingQueue', null, { root: true })
         } else {
-          throw Error(response.statusText)
+          throw response.statusText
         }
         if (context.rootState.notifyServerCouldNotSave) {
           context.commit('addNotification', { message: 'Reconnected to server', type: 'success' }, { root: true })
