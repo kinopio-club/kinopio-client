@@ -458,10 +458,7 @@ const currentSpace = {
       context.dispatch('incrementCardsCreatedCountFromSpace', space)
     },
     duplicateSpace: async (context, space) => {
-      if (!space) {
-        const spaceId = context.state.id
-        space = await cache.space(spaceId)
-      }
+      space = space || context.state
       space = utils.clone(space)
       const user = { id: context.rootState.currentUser.id }
       context.commit('broadcast/leaveSpaceRoom', { user, type: 'userLeftRoom' }, { root: true })

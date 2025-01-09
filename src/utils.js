@@ -1529,7 +1529,6 @@ export default {
     space.editedAt = new Date()
     space.collaboratorKey = nanoid()
     space.readOnlyKey = nanoid()
-    console.log('♥️♥️♥️♥️♥️♥️', space, space.cards)
     space.cards = space.cards.map(card => {
       card.width = Math.ceil(card.width)
       card.height = Math.ceil(card.height)
