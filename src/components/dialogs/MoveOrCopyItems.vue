@@ -51,7 +51,8 @@ const updateSpaces = async () => {
   state.spaces = spaces.filter(space => {
     const spaceIsNotCurrent = space.id !== currentSpace.value.id
     const spaceHasId = Boolean(space.id)
-    return spaceIsNotCurrent && spaceHasId
+    const spaceHasName = Boolean(space.name)
+    return spaceIsNotCurrent && spaceHasId && spaceHasName
   })
   state.selectedSpace = state.spaces[0]
 }
