@@ -200,7 +200,8 @@ const router = createRouter({
         const collaboratorKey = urlParams.get('collaboratorKey')
         const readOnlyKey = urlParams.get('readOnlyKey')
         const isPresentationMode = urlParams.get('present') || false
-        store.commit('disableViewportOptimizations', urlParams.get('disableViewportOptimizations'))
+        const isDisableViewportOptimizations = Boolean(urlParams.get('disableViewportOptimizations'))
+        store.commit('disableViewportOptimizations', isDisableViewportOptimizations)
         pageMeta.spaceFromId({ spaceId, isSpaceInvite: true })
         store.dispatch('currentUser/init')
         store.commit('isLoadingSpace', true)
