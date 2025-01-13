@@ -58,7 +58,6 @@ const init = async () => {
   closeDialogs()
   updateLocalSpaces()
   await updateWithRemoteSpaces()
-  await updateCachedSpaces()
   updateHeights()
   store.commit('shouldExplicitlyHideFooter', true)
   store.dispatch('currentSpace/createSpacePreviewImage')
@@ -295,31 +294,41 @@ const updateWithRemoteSpaces = async () => {
     }
     spaces = spaces.filter(space => Boolean(space))
     spaces = uniqBy(spaces, 'id')
-    console.error('🌎 remoteSpaces', spaces)
     state.spaces = spaces
     state.isLoadingRemoteSpaces = false
+
+    console.error('🌎 remoteSpaces', spaces)
+
+    await updateCachedSpacesWithRemoteSpaces(spaces)
   } catch (error) {
     console.error('🚒 updateWithRemoteSpaces', error)
   }
   state.isLoadingRemoteSpaces = false
 }
-const updateCachedSpaces = async () => {
+const updateCachedSpacesWithRemoteSpaces = async (remoteSpaces) => {
   if (!state.spaces) { return }
   const cacheSpaces = await cache.getAllSpaces()
   const cacheSpaceIds = cacheSpaces.map(space => space.id)
-  for (let space of state.spaces) {
-    const isCacheSpace = cacheSpaceIds.includes(space.id)
+  for (let newSpace of remoteSpaces) {
+    const isCacheSpace = cacheSpaceIds.includes(newSpace.id)
     if (isCacheSpace) {
-      const cacheSpace = await cache.space(space.id)
-      const isUpdated = dayjs(space.updatedAt).valueOf() > dayjs(cacheSpace.updatedAt).valueOf()
-      if (!isUpdated) { continue }
-      space.cards = cacheSpace.cards
-      space.boxes = cacheSpace.boxes
-      space.connections = cacheSpace.connections
-      space.connectionTypes = cacheSpace.connectionTypes
-      await cache.saveSpace(space)
+      const cacheSpace = await cache.space(newSpace.id)
+      const isUpdated = dayjs(newSpace.updatedAt).valueOf() > dayjs(cacheSpace.updatedAt).valueOf()
+      console.log('☀️☀️☀️☀️☀️', cacheSpace.name, isUpdated)
+      if (!isUpdated) {
+        await cache.updateSpace('updatedAt', newSpace.updatedAt, cacheSpace.id)
+        continue
+      }
+      // TODO instead always update array: updatedat ishidden (isfavorite?)
+      // keep cached items
+      newSpace.cards = cacheSpace.cards
+      newSpace.boxes = cacheSpace.boxes
+      newSpace.connections = cacheSpace.connections
+      newSpace.connectionTypes = cacheSpace.connectionTypes
+      newSpace.tags = cacheSpace.tags
+      await cache.saveSpace(newSpace)
     } else {
-      await cache.saveSpace(space)
+      await cache.saveSpace(newSpace)
     }
   }
 }
