@@ -287,7 +287,9 @@ const updateLocalSpaces = () => {
 const debouncedUpdateLocalSpaces = debounce(async () => {
   await nextTick()
   let cacheSpaces = await cache.getAllSpaces()
-  state.spaces = utils.addCurrentUserIsCollaboratorToSpaces(cacheSpaces, store.state.currentUser)
+  cacheSpaces = utils.addCurrentUserIsCollaboratorToSpaces(cacheSpaces, store.state.currentUser)
+  console.log('🌎 cacheSpaces', cacheSpaces)
+  state.spaces = cacheSpaces
 }, 350, { leading: true })
 
 const updateWithRemoteSpaces = async () => {
@@ -306,6 +308,7 @@ const updateWithRemoteSpaces = async () => {
     }
     spaces = spaces.filter(space => Boolean(space))
     spaces = uniqBy(spaces, 'id')
+    console.log('🌎 removeSpaces', spaces)
     state.spaces = spaces
     state.isLoadingRemoteSpaces = false
   } catch (error) {
