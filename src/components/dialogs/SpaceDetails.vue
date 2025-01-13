@@ -15,7 +15,6 @@ import dayjs from 'dayjs'
 
 const store = useStore()
 
-let shouldUpdateFavorites = true
 const maxIterations = 30
 let currentIteration, updatePositionTimer
 
@@ -25,15 +24,8 @@ const resultsElement = ref(null)
 onMounted(() => {
   window.addEventListener('resize', updateHeights)
   store.subscribe(mutation => {
+    // on resultsFilter addSpace
     if (mutation.type === 'triggerSpaceDetailsUpdateLocalSpaces') {
-      updateLocalSpaces()
-    } else if (mutation.type === 'currentUser/favoriteSpaces') {
-      if (!props.visible) { return }
-      updateLocalSpaces()
-    } else if (mutation.type === 'isLoadingSpace') {
-      const isLoading = mutation.payload
-      if (!props.visible) { return }
-      if (isLoading) { return }
       updateLocalSpaces()
     }
   })
@@ -67,7 +59,6 @@ const init = async () => {
   updateLocalSpaces()
   await updateWithRemoteSpaces()
   await updateCachedSpaces()
-  updateFavorites()
   updateHeights()
   store.commit('shouldExplicitlyHideFooter', true)
   store.dispatch('currentSpace/createSpacePreviewImage')
@@ -280,17 +271,13 @@ const removeSpaceFromSpaces = (spaceId) => {
 
 // update space list
 
-const updateLocalSpaces = () => {
+const updateLocalSpaces = async () => {
   if (!props.visible) { return }
-  debouncedUpdateLocalSpaces()
-}
-const debouncedUpdateLocalSpaces = debounce(async () => {
-  await nextTick()
   let cacheSpaces = await cache.getAllSpaces()
   cacheSpaces = utils.addCurrentUserIsCollaboratorToSpaces(cacheSpaces, store.state.currentUser)
-  console.log('🌎 cacheSpaces', cacheSpaces)
+  console.error('🌎 cacheSpaces', cacheSpaces)
   state.spaces = cacheSpaces
-}, 350, { leading: true })
+}
 
 const updateWithRemoteSpaces = async () => {
   const currentUserIsSignedIn = store.getters['currentUser/isSignedIn']
@@ -308,7 +295,7 @@ const updateWithRemoteSpaces = async () => {
     }
     spaces = spaces.filter(space => Boolean(space))
     spaces = uniqBy(spaces, 'id')
-    console.log('🌎 removeSpaces', spaces)
+    console.error('🌎 remoteSpaces', spaces)
     state.spaces = spaces
     state.isLoadingRemoteSpaces = false
   } catch (error) {
@@ -335,11 +322,6 @@ const updateCachedSpaces = async () => {
       await cache.saveSpace(space)
     }
   }
-}
-const updateFavorites = async () => {
-  if (!shouldUpdateFavorites) { return }
-  shouldUpdateFavorites = false
-  await store.dispatch('currentUser/restoreUserFavorites')
 }
 </script>
 

@@ -84,7 +84,6 @@ onMounted(() => {
   document.fonts.ready.then(event => {
     store.commit('webfontIsLoaded', true)
   })
-  store.dispatch('currentUser/restoreUserFavorites')
   unsubscribe = store.subscribe((mutation, state) => {
     if (mutation.type === 'triggerRestoreSpaceRemoteComplete') {
       dragItemsOnNextTick()

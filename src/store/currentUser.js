@@ -396,6 +396,7 @@ export default {
         context.commit('restoreUser', cachedUser)
         context.dispatch('themes/restore', null, { root: true })
         await context.dispatch('restoreRemoteUser', cachedUser)
+        await context.dispatch('restoreUserFavorites')
       } else {
         console.log('🌸 Create new user')
         context.dispatch('createNewUser')
