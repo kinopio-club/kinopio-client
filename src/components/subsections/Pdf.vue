@@ -1,85 +1,77 @@
+<script setup>
+import { reactive, computed, onMounted, onBeforeUnmount, defineProps, defineEmits, watch, ref, nextTick } from 'vue'
+import { useStore } from 'vuex'
+
+import Loader from '@/components/Loader.vue'
+
+const store = useStore()
+
+const props = defineProps({
+  visible: Boolean
+})
+const state = reactive({
+  isLoading: false,
+  unknownServerError: false
+})
+
+watch(() => props.visible, (value, prevValue) => {
+  if (value) {
+    init()
+  }
+})
+const init = () => {
+  state.unknownServerError = false
+  state.isLoading = false
+  pdf()
+}
+
+const fileName = () => {
+  const spaceName = store.state.currentSpace.name
+  const spaceId = store.state.currentSpace.id
+  let fileName = spaceName || `kinopio-space-${spaceId}`
+  return fileName
+}
+const downloadBlob = (blob) => {
+  try {
+    const blobUrl = window.URL.createObjectURL(blob)
+    const downloadAnchor = document.getElementById('pdf-downlaod-anchor')
+    downloadAnchor.setAttribute('href', blobUrl)
+    const name = fileName()
+    downloadAnchor.setAttribute('download', `${name}.pdf`)
+    downloadAnchor.click()
+  } catch (error) {
+    console.error('🚒 downloadBlob', error)
+  }
+}
+const pdf = async () => {
+  state.isLoading = true
+  try {
+    const url = await store.dispatch('api/pdf')
+    const response = await fetch(url, { method: 'GET' })
+    const blob = await response.blob()
+    downloadBlob(blob)
+  } catch (error) {
+    console.error('🚒 pdf', error)
+    state.unknownServerError = true
+  }
+  state.isLoading = false
+}
+</script>
+
 <template lang="pug">
-section.subsection.pdf(v-if="visible")
+section.subsection.pdf(v-if="props.visible")
   a#pdf-downlaod-anchor.hidden
-  template(v-if="isLoading")
+  template(v-if="state.isLoading")
     span
       Loader(:visible="true")
       span Creating space PDF…
-  .row(v-if="unknownServerError")
+  div(v-if="state.unknownServerError")
     .badge.danger
       span (シ_ _)シ Something went wrong, Please try again or contact support
-  .row(v-if="!isLoading && !unknownServerError")
-    .badge.success Downloaded
+  div(v-if="!state.isLoading && !state.unknownServerError")
+    p.badge.success Downloaded
     p {{fileName()}}.pdf
 </template>
-
-<script>
-import Loader from '@/components/Loader.vue'
-
-export default {
-  name: 'Pdf',
-  components: {
-    Loader
-  },
-  props: {
-    visible: Boolean
-  },
-  mounted () {
-    if (!this.visible) { return }
-    this.init()
-  },
-  data () {
-    return {
-      isLoading: false,
-      unknownServerError: false
-    }
-  },
-  computed: {
-    spaceName () { return this.$store.state.currentSpace.name }
-  },
-  methods: {
-    fileName () {
-      const spaceName = this.$store.state.currentSpace.name
-      const spaceId = this.$store.state.currentSpace.id
-      let fileName = spaceName || `kinopio-space-${spaceId}`
-      return fileName
-    },
-    downloadBlob (blob) {
-      const blobUrl = window.URL.createObjectURL(blob)
-      const fileName = this.fileName()
-      const downloadAnchor = document.getElementById('pdf-downlaod-anchor')
-      downloadAnchor.setAttribute('href', blobUrl)
-      downloadAnchor.setAttribute('download', `${fileName}.pdf`)
-      downloadAnchor.click()
-    },
-    async pdf () {
-      this.isLoading = true
-      try {
-        const url = await this.$store.dispatch('api/pdf')
-        const response = await fetch(url, { method: 'GET' })
-        const blob = await response.blob()
-        this.downloadBlob(blob)
-      } catch (error) {
-        console.error('🚒', error)
-        this.unknownServerError = true
-      }
-      this.isLoading = false
-    },
-    init () {
-      this.unknownServerError = false
-      this.isLoading = false
-      this.pdf()
-    }
-  },
-  watch: {
-    visible (visible) {
-      if (visible) {
-        this.init()
-      }
-    }
-  }
-}
-</script>
 
 <style lang="stylus">
 section.pdf
@@ -95,5 +87,5 @@ section.pdf
   .badge
     max-width stretch
     display block
-    margin 0
+    margin-top 0 !important
 </style>
