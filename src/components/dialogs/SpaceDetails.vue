@@ -274,10 +274,8 @@ const updateLocalSpaces = async () => {
   if (!props.visible) { return }
   let cacheSpaces = await cache.getAllSpaces()
   cacheSpaces = utils.addCurrentUserIsCollaboratorToSpaces(cacheSpaces, store.state.currentUser)
-  console.error('🌎 cacheSpaces', cacheSpaces)
   state.spaces = cacheSpaces
 }
-
 const updateWithRemoteSpaces = async () => {
   const currentUserIsSignedIn = store.getters['currentUser/isSignedIn']
   const isOffline = computed(() => !store.state.isOnline)
@@ -295,42 +293,28 @@ const updateWithRemoteSpaces = async () => {
     spaces = spaces.filter(space => Boolean(space))
     spaces = uniqBy(spaces, 'id')
     state.spaces = spaces
-    state.isLoadingRemoteSpaces = false
-
-    console.error('🌎 remoteSpaces', spaces)
-
     await updateCachedSpacesWithRemoteSpaces(spaces)
+    state.isLoadingRemoteSpaces = false
   } catch (error) {
     console.error('🚒 updateWithRemoteSpaces', error)
   }
   state.isLoadingRemoteSpaces = false
 }
 const updateCachedSpacesWithRemoteSpaces = async (remoteSpaces) => {
-  if (!state.spaces) { return }
   const cacheSpaces = await cache.getAllSpaces()
   const cacheSpaceIds = cacheSpaces.map(space => space.id)
-  for (let newSpace of remoteSpaces) {
-    const isCacheSpace = cacheSpaceIds.includes(newSpace.id)
+  for (let remoteSpace of remoteSpaces) {
+    const isCacheSpace = cacheSpaceIds.includes(remoteSpace.id)
     if (isCacheSpace) {
-      const cacheSpace = await cache.space(newSpace.id)
-      const isUpdated = dayjs(newSpace.updatedAt).valueOf() > dayjs(cacheSpace.updatedAt).valueOf()
-      console.log('☀️☀️☀️☀️☀️', cacheSpace.name, isUpdated)
-      if (!isUpdated) {
-        await cache.updateSpace('updatedAt', newSpace.updatedAt, cacheSpace.id)
-        continue
-      }
-      // TODO instead always update array: updatedat ishidden (isfavorite?)
-      // metaKeys = ['name', 'privacy', 'isHidden', 'updatedAt'] // fav? , istemplate
-
-      // keep cached items
-      newSpace.cards = cacheSpace.cards
-      newSpace.boxes = cacheSpace.boxes
-      newSpace.connections = cacheSpace.connections
-      newSpace.connectionTypes = cacheSpace.connectionTypes
-      newSpace.tags = cacheSpace.tags
-      await cache.saveSpace(newSpace)
+      let updates = {}
+      const metaKeys = ['name', 'privacy', 'isHidden', 'updatedAt', 'editedAt', 'isRemoved', 'groupId', 'showInExplore', 'updateHash', 'isTemplate', 'previewImage', 'previewThumbnailImage']
+      metaKeys.forEach(key => {
+        if (!remoteSpace[key]) { return }
+        updates[key] = remoteSpace[key]
+      })
+      await cache.updateSpaceByUpdates(updates, remoteSpace.id)
     } else {
-      await cache.saveSpace(newSpace)
+      await cache.saveSpace(remoteSpace)
     }
   }
 }
