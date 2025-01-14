@@ -320,6 +320,8 @@ const updateCachedSpacesWithRemoteSpaces = async (remoteSpaces) => {
         continue
       }
       // TODO instead always update array: updatedat ishidden (isfavorite?)
+      // metaKeys = ['name', 'privacy', 'isHidden', 'updatedAt'] // fav? , istemplate
+
       // keep cached items
       newSpace.cards = cacheSpace.cards
       newSpace.boxes = cacheSpace.boxes
