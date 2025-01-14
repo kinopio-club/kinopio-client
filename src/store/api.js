@@ -427,7 +427,7 @@ const self = {
         let spaces = await normalizeResponse(response)
         return utils.addCurrentUserIsCollaboratorToSpaces(spaces, currentUser)
       } catch (error) {
-        context.dispatch('handleServerError', { name: 'getUserSpaces', error })
+        context.dispatch('handleServerError', { name: 'getUserGroupSpaces', error })
       }
     },
     getUserRemovedSpaces: async (context) => {

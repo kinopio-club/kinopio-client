@@ -185,14 +185,6 @@ const isSortByAlphabetical = computed(() => {
 })
 const prependFavoriteSpaces = (spaces) => {
   let favoriteSpaces = []
-  const userFavoriteSpaces = store.state.currentUser.favoriteSpaces || []
-  const favoriteSpaceIds = userFavoriteSpaces.map(space => space.id)
-  spaces = spaces.map(space => {
-    if (favoriteSpaceIds.includes(space.id)) {
-      space.isFavorite = true
-    }
-    return space
-  })
   spaces = spaces.filter(space => {
     if (space.isFavorite) {
       favoriteSpaces.push(space)
@@ -307,7 +299,7 @@ const updateCachedSpacesWithRemoteSpaces = async (remoteSpaces) => {
     const isCacheSpace = cacheSpaceIds.includes(remoteSpace.id)
     if (isCacheSpace) {
       let updates = {}
-      const metaKeys = ['name', 'privacy', 'isHidden', 'updatedAt', 'editedAt', 'isRemoved', 'groupId', 'showInExplore', 'updateHash', 'isTemplate', 'previewImage', 'previewThumbnailImage']
+      const metaKeys = ['name', 'privacy', 'isHidden', 'updatedAt', 'editedAt', 'isRemoved', 'groupId', 'showInExplore', 'updateHash', 'isTemplate', 'previewImage', 'previewThumbnailImage', 'isFavorite']
       metaKeys.forEach(key => {
         if (!remoteSpace[key]) { return }
         updates[key] = remoteSpace[key]
