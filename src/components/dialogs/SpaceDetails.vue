@@ -294,20 +294,26 @@ const updateWithRemoteSpaces = async () => {
 }
 const updateCachedSpacesWithRemoteSpaces = async (remoteSpaces) => {
   const cacheSpaces = await cache.getAllSpaces()
-  const cacheSpaceIds = cacheSpaces.map(space => space.id)
+  let cacheSpaceIds = cacheSpaces.map(space => space.id)
   for (let remoteSpace of remoteSpaces) {
-    const isCacheSpace = cacheSpaceIds.includes(remoteSpace.id)
-    if (isCacheSpace) {
+    const isCached = cacheSpaceIds.includes(remoteSpace.id)
+    // update spaces with remote metadata
+    if (isCached) {
+      cacheSpaceIds = cacheSpaceIds.filter(id => id !== remoteSpace.id)
       let updates = {}
       const metaKeys = ['name', 'privacy', 'isHidden', 'updatedAt', 'editedAt', 'isRemoved', 'groupId', 'showInExplore', 'updateHash', 'isTemplate', 'previewImage', 'previewThumbnailImage', 'isFavorite']
       metaKeys.forEach(key => {
-        if (!remoteSpace[key]) { return }
         updates[key] = remoteSpace[key]
       })
       await cache.updateSpaceByUpdates(updates, remoteSpace.id)
+    // cache new space
     } else {
       await cache.saveSpace(remoteSpace)
     }
+  }
+  // update removed spaces
+  for (let cacheSpaceId of cacheSpaceIds) {
+    await cache.removeSpace({ id: cacheSpaceId })
   }
 }
 </script>
