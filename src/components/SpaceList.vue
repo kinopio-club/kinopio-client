@@ -113,16 +113,17 @@ const init = () => {
   updateScroll()
 }
 const initMinItemHeight = () => {
-  state.minItemHeight = 38
+  state.minItemHeight = 32
   if (props.previewImageIsWide) {
     state.minItemHeight = 42
   }
 }
 const initItemsPerPage = () => {
+  const footerThreshold = 20
   const element = spaceListWrapElement.value
   const parentDialogElement = element.closest('dialog')
-  const parentDialogMaxHeight = parseInt(parentDialogElement.style.maxHeight)
-  const pageSize = parentDialogMaxHeight
+  const parentDialogRect = parentDialogElement.getBoundingClientRect()
+  const pageSize = store.state.viewportHeight - parentDialogRect.y - parentDialogRect.height - footerThreshold
   state.itemsPerPage = Math.ceil(pageSize / state.minItemHeight)
 }
 
@@ -259,8 +260,7 @@ const updateScroll = async () => {
   if (!parentSectionElement) {
     console.error('scroll element not found', parentSectionElement)
   }
-  const zoom = utils.pinchCounterZoomDecimal()
-  state.scrollY = parentSectionElement.scrollTop * zoom
+  state.scrollY = parentSectionElement.scrollTop
   const parentSectionRect = parentSectionElement.getBoundingClientRect()
   const scrollHeight = parentSectionRect.height
   console.log('🌷', parentSectionElement, parentSectionRect, parentSectionElement.scrollTop)
@@ -271,10 +271,11 @@ const updateScroll = async () => {
 // list render optimization
 
 const updateCurrentPage = () => {
-  // const threshold = 1
-  const scrollYEnd = state.scrollY + state.pageHeight // + threshold
+  const threshold = 400
+  const zoom = utils.pinchCounterZoomDecimal()
+  const scrollYEnd = (state.scrollY * zoom) + state.pageHeight + threshold
   state.currentPage = Math.ceil(scrollYEnd / state.pageHeight)
-  console.warn(state.currentPage, scrollYEnd, state.pageHeight, state.itemsPerPage, state.minItemHeight)
+  console.warn(state.currentPage, scrollYEnd, state.itemsPerPage, state.minItemHeight)
 }
 const totalPages = computed(() => {
   const items = spacesFiltered.value
