@@ -254,16 +254,14 @@ watch(() => props.isLoading, async (value, prevValue) => {
 })
 const updateScroll = async () => {
   await nextTick()
-  const element = spaceListElement.value
+  let element = spaceListElement.value
   if (!element) { return }
-  const parentSectionElement = element.closest('section')
-  if (!parentSectionElement) {
-    console.error('scroll element not found', parentSectionElement)
+  element = element.closest('section')
+  if (!element) {
+    console.error('scroll element not found', element)
   }
-  state.scrollY = parentSectionElement.scrollTop
-  const parentSectionRect = parentSectionElement.getBoundingClientRect()
-  const scrollHeight = parentSectionRect.height
-  console.log('🌷', parentSectionElement, parentSectionRect, parentSectionElement.scrollTop)
+  state.scrollY = element.scrollTop
+  const scrollHeight = element.getBoundingClientRect().height
   state.pageHeight = state.itemsPerPage * state.minItemHeight * state.currentPage
   updateCurrentPage()
 }
@@ -271,9 +269,8 @@ const updateScroll = async () => {
 // list render optimization
 
 const updateCurrentPage = () => {
-  const threshold = 400
   const zoom = utils.pinchCounterZoomDecimal()
-  const scrollYEnd = (state.scrollY * zoom) + state.pageHeight + threshold
+  const scrollYEnd = (state.scrollY * zoom) + state.pageHeight
   state.currentPage = Math.ceil(scrollYEnd / state.pageHeight)
   console.warn(state.currentPage, scrollYEnd, state.itemsPerPage, state.minItemHeight)
 }
