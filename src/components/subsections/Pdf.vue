@@ -81,7 +81,7 @@ section.pdf
   .loader
     height 14px
     width 14px
-    vertical-align -1px
+    vertical-align -2px
     margin 0
     margin-right 6px
   .badge
