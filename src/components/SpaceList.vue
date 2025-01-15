@@ -272,6 +272,7 @@ const updateCurrentPage = () => {
   const zoom = utils.pinchCounterZoomDecimal()
   const scrollYEnd = (state.scrollY * zoom) + state.pageHeight
   state.currentPage = Math.ceil(scrollYEnd / state.pageHeight)
+  console.warn(state.currentPage, scrollYEnd, state.itemsPerPage, state.minItemHeight)
 }
 const totalPages = computed(() => {
   const items = spacesFiltered.value
