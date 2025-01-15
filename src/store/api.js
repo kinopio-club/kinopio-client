@@ -1118,18 +1118,6 @@ const self = {
         context.dispatch('handleServerError', { name: 'createMultiplePresignedPosts', error })
       }
     },
-    pdf: async (context) => {
-      const spaceId = context.rootState.currentSpace.id
-      try {
-        const options = await context.dispatch('requestOptions', { method: 'POST', space: context.rootState.currentSpace })
-        const response = await fetch(`${consts.apiHost()}/space/pdf/${spaceId}`, options)
-        let url = await normalizeResponse(response)
-        url = url.url
-        return url
-      } catch (error) {
-        context.dispatch('handleServerError', { name: 'pdf', error })
-      }
-    },
 
     // Notifications
 
@@ -1223,6 +1211,18 @@ const self = {
         return data
       } catch (error) {
         console.error('🚒 communityBackgrounds', error)
+      }
+    },
+    pdf: async (context) => {
+      const spaceId = context.rootState.currentSpace.id
+      try {
+        const options = await context.dispatch('requestOptions', { method: 'POST', space: context.rootState.currentSpace })
+        const response = await fetch(`${consts.apiHost()}/services/pdf/${spaceId}`, options)
+        let url = await normalizeResponse(response)
+        url = url.url
+        return url
+      } catch (error) {
+        context.dispatch('handleServerError', { name: 'pdf', error })
       }
     },
 
