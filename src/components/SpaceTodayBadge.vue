@@ -24,10 +24,12 @@ const shouldHide = computed(() => {
 })
 const isCreatedToday = computed(() => {
   if (shouldHide.value) { return }
+  if (isCreatedYesterday.value) { return }
   return dayjs(props.space.createdAt).isToday()
 })
 const isCreatedYesterday = computed(() => {
   if (shouldHide.value) { return }
+  if (isCreatedToday.value) { return }
   return dayjs(props.space.createdAt).isYesterday()
 })
 
