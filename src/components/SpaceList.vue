@@ -50,7 +50,7 @@ onMounted(() => {
     }
   })
   init()
-  spaceListElement.value.closest('section').addEventListener('scroll', updateCurrentPage)
+  spaceListElement.value.closest('section').addEventListener('scroll', updateScroll)
   if (props.disableListOptimizations) {
     state.currentPage = totalPages.value
   }
@@ -58,7 +58,7 @@ onMounted(() => {
 
 onBeforeUnmount(() => {
   unsubscribe()
-  spaceListElement.value.closest('section').removeEventListener('scroll', updateCurrentPage)
+  spaceListElement.value.closest('section').removeEventListener('scroll', updateScroll)
 })
 
 const emit = defineEmits(['focusBeforeFirstItem', 'closeDialog', 'selectSpace'])
@@ -95,6 +95,7 @@ const state = reactive({
   filter: '',
   filteredSpaces: [],
   focusOnId: '',
+  scrollY: 0,
   currentPage: 1,
   prevScrollAreaHeight: 0,
   itemsPerPage: 0
@@ -109,7 +110,7 @@ const currentUser = computed(() => store.state.currentUser)
 const init = () => {
   initMinItemHeight()
   initItemsPerPage()
-  updateCurrentPage()
+  updateScroll()
 }
 const initMinItemHeight = () => {
   state.minItemHeight = 38
@@ -244,49 +245,47 @@ const isFavorite = (space) => {
 
 watch(() => props.resultsSectionHeight, async (value, prevValue) => {
   await nextTick()
-  updateCurrentPage()
+  updateScroll()
 })
 watch(() => props.isLoading, async (value, prevValue) => {
   await nextTick()
-  updateCurrentPage()
+  updateScroll()
 })
-// const updateCurrentPage = async () => {
-//   updateCurrentPage()
-// }
-
-// list render optimization
-
-const updateCurrentPage = async () => {
+const updateScroll = async () => {
   await nextTick()
   const element = spaceListElement.value
   if (!element) { return }
   const parentSectionElement = element.closest('section')
-  // if (!parentSectionElement) {
-  //   console.error('scroll element not found', parentSectionElement)
-  // }
-  const parentSectionRect = parentSectionElement.getBoundingClientRect()
-  const pageHeight = parentSectionRect.height
-
-  console.log('🌷', state.itemsPerPage, pageHeight)
-
-  // const threshold = 1
+  if (!parentSectionElement) {
+    console.error('scroll element not found', parentSectionElement)
+  }
   const zoom = utils.pinchCounterZoomDecimal()
-  const scrollY = parentSectionElement.scrollTop * zoom
-
-  const scrollYEnd = scrollY + pageHeight // + threshold
-  state.currentPage = Math.ceil(scrollYEnd / pageHeight)
-  console.warn(state.currentPage, scrollYEnd, pageHeight, state.itemsPerPage, state.minItemHeight)
+  state.scrollY = parentSectionElement.scrollTop * zoom
+  const parentSectionRect = parentSectionElement.getBoundingClientRect()
+  const scrollHeight = parentSectionRect.height
+  console.log('🌷', parentSectionElement, parentSectionRect, parentSectionElement.scrollTop)
+  state.pageHeight = state.itemsPerPage * state.minItemHeight * state.currentPage
+  updateCurrentPage()
 }
+
+// list render optimization
+
+const updateCurrentPage = () => {
+  // const threshold = 1
+  const scrollYEnd = state.scrollY + state.pageHeight // + threshold
+  state.currentPage = Math.ceil(scrollYEnd / state.pageHeight)
+  console.warn(state.currentPage, scrollYEnd, state.pageHeight, state.itemsPerPage, state.minItemHeight)
+}
+const totalPages = computed(() => {
+  const items = spacesFiltered.value
+  const total = Math.ceil(items.length / state.itemsPerPage)
+  return total
+})
 const itemsRendered = computed(() => {
   let items = spacesFiltered.value
   const max = state.currentPage * state.itemsPerPage
   items = items.slice(0, max)
   return items
-})
-const totalPages = computed(() => {
-  const items = spacesFiltered.value
-  const total = Math.ceil(items.length / state.itemsPerPage)
-  return total
 })
 
 // results filter
@@ -328,7 +327,7 @@ const updateFilter = async (filter, isClearFilter) => {
   if (!filter) {
     state.focusOnId = ''
     await nextTick()
-    updateCurrentPage()
+    updateScroll()
     return
   }
   state.focusOnId = spaces[0].id
