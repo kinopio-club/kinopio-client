@@ -249,6 +249,7 @@ const currentCards = {
       context.dispatch('currentSpace/checkIfShouldNotifyCardsCreatedIsNearLimit', null, { root: true })
       context.dispatch('userNotifications/addCardUpdated', { cardId: card.id, type: 'createCard' }, { root: true })
       await context.dispatch('api/addToQueue', { name: 'createCard', body: card }, { root: true })
+      cache.updateSpace('editedAt', utils.unixTime(), currentSpaceId)
     },
     addMultiple: async (context, { cards, shouldOffsetPosition }) => {
       const spaceId = context.rootState.currentSpace.id
@@ -340,6 +341,7 @@ const currentCards = {
         context.commit('triggerUpdateOtherCard', card.id, { root: true })
       }
       cache.updateSpace('editedByUserId', context.rootState.currentUser.id, currentSpaceId)
+      cache.updateSpace('editedAt', utils.unixTime(), currentSpaceId)
       if (!shouldPreventUpdateDimensionsAndPaths) {
         context.commit('triggerUpdateCardDimensionsAndPaths', card.id, { root: true })
       }

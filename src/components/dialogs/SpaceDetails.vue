@@ -15,7 +15,6 @@ import dayjs from 'dayjs'
 
 const store = useStore()
 
-let shouldUpdateFavorites = true
 const maxIterations = 30
 let currentIteration, updatePositionTimer
 
@@ -25,15 +24,8 @@ const resultsElement = ref(null)
 onMounted(() => {
   window.addEventListener('resize', updateHeights)
   store.subscribe(mutation => {
+    // on resultsFilter addSpace
     if (mutation.type === 'triggerSpaceDetailsUpdateLocalSpaces') {
-      updateLocalSpaces()
-    } else if (mutation.type === 'currentUser/favoriteSpaces') {
-      if (!props.visible) { return }
-      updateLocalSpaces()
-    } else if (mutation.type === 'isLoadingSpace') {
-      const isLoading = mutation.payload
-      if (!props.visible) { return }
-      if (isLoading) { return }
       updateLocalSpaces()
     }
   })
@@ -66,8 +58,6 @@ const init = async () => {
   closeDialogs()
   updateLocalSpaces()
   await updateWithRemoteSpaces()
-  await updateCachedSpaces()
-  updateFavorites()
   updateHeights()
   store.commit('shouldExplicitlyHideFooter', true)
   store.dispatch('currentSpace/createSpacePreviewImage')
@@ -195,14 +185,6 @@ const isSortByAlphabetical = computed(() => {
 })
 const prependFavoriteSpaces = (spaces) => {
   let favoriteSpaces = []
-  const userFavoriteSpaces = store.state.currentUser.favoriteSpaces || []
-  const favoriteSpaceIds = userFavoriteSpaces.map(space => space.id)
-  spaces = spaces.map(space => {
-    if (favoriteSpaceIds.includes(space.id)) {
-      space.isFavorite = true
-    }
-    return space
-  })
   spaces = spaces.filter(space => {
     if (space.isFavorite) {
       favoriteSpaces.push(space)
@@ -280,18 +262,12 @@ const removeSpaceFromSpaces = (spaceId) => {
 
 // update space list
 
-const updateLocalSpaces = () => {
+const updateLocalSpaces = async () => {
   if (!props.visible) { return }
-  debouncedUpdateLocalSpaces()
-}
-const debouncedUpdateLocalSpaces = debounce(async () => {
-  await nextTick()
   let cacheSpaces = await cache.getAllSpaces()
   cacheSpaces = utils.addCurrentUserIsCollaboratorToSpaces(cacheSpaces, store.state.currentUser)
-  console.log('🌎 cacheSpaces', cacheSpaces)
   state.spaces = cacheSpaces
-}, 350, { leading: true })
-
+}
 const updateWithRemoteSpaces = async () => {
   const currentUserIsSignedIn = store.getters['currentUser/isSignedIn']
   const isOffline = computed(() => !store.state.isOnline)
@@ -308,38 +284,41 @@ const updateWithRemoteSpaces = async () => {
     }
     spaces = spaces.filter(space => Boolean(space))
     spaces = uniqBy(spaces, 'id')
-    console.log('🌎 removeSpaces', spaces)
     state.spaces = spaces
-    state.isLoadingRemoteSpaces = false
+    await updateCachedSpacesWithRemoteSpaces(spaces)
   } catch (error) {
     console.error('🚒 updateWithRemoteSpaces', error)
   }
   state.isLoadingRemoteSpaces = false
 }
-const updateCachedSpaces = async () => {
-  if (!state.spaces) { return }
-  const cacheSpaces = await cache.getAllSpaces()
-  const cacheSpaceIds = cacheSpaces.map(space => space.id)
-  for (let space of state.spaces) {
-    const isCacheSpace = cacheSpaceIds.includes(space.id)
-    if (isCacheSpace) {
-      const cacheSpace = await cache.space(space.id)
-      const isUpdated = dayjs(space.updatedAt).valueOf() > dayjs(cacheSpace.updatedAt).valueOf()
-      if (!isUpdated) { continue }
-      space.cards = cacheSpace.cards
-      space.boxes = cacheSpace.boxes
-      space.connections = cacheSpace.connections
-      space.connectionTypes = cacheSpace.connectionTypes
-      await cache.saveSpace(space)
-    } else {
-      await cache.saveSpace(space)
+const updateCachedSpacesWithRemoteSpaces = async (remoteSpaces) => {
+  try {
+    if (!remoteSpaces.length) { throw Error }
+    const cacheSpaces = await cache.getAllSpaces()
+    let cacheSpaceIds = cacheSpaces.map(space => space.id)
+    for (let remoteSpace of remoteSpaces) {
+      const isCached = cacheSpaceIds.includes(remoteSpace.id)
+      // update spaces with remote metadata
+      if (isCached) {
+        cacheSpaceIds = cacheSpaceIds.filter(id => id !== remoteSpace.id)
+        let updates = {}
+        const metaKeys = ['name', 'privacy', 'isHidden', 'updatedAt', 'editedAt', 'isRemoved', 'groupId', 'showInExplore', 'updateHash', 'isTemplate', 'previewImage', 'previewThumbnailImage', 'isFavorite']
+        metaKeys.forEach(key => {
+          updates[key] = remoteSpace[key]
+        })
+        await cache.updateSpaceByUpdates(updates, remoteSpace.id)
+      // cache new space
+      } else {
+        await cache.saveSpace(remoteSpace)
+      }
     }
+    // update removed spaces
+    for (let cacheSpaceId of cacheSpaceIds) {
+      await cache.removeSpace({ id: cacheSpaceId })
+    }
+  } catch (error) {
+    console.error('🚒 updateCachedSpacesWithRemoteSpaces', error)
   }
-}
-const updateFavorites = async () => {
-  if (!shouldUpdateFavorites) { return }
-  shouldUpdateFavorites = false
-  await store.dispatch('currentUser/restoreUserFavorites')
 }
 </script>
 
