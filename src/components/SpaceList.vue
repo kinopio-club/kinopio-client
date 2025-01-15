@@ -24,7 +24,8 @@ let unsubscribe
 
 let shouldPreventSelectSpace
 
-const spaceListWrapElement = ref(null)
+const itemsPerPage = 60
+
 const spaceListElement = ref(null)
 
 onMounted(() => {
@@ -49,7 +50,7 @@ onMounted(() => {
       state.focusOnId = store.state.currentSpace.id
     }
   })
-  init()
+  updateScroll()
   spaceListElement.value.closest('section').addEventListener('scroll', updateScroll)
   if (props.disableListOptimizations) {
     state.currentPage = totalPages.value
@@ -97,35 +98,12 @@ const state = reactive({
   focusOnId: '',
   scrollY: 0,
   currentPage: 1,
-  prevScrollAreaHeight: 0,
-  itemsPerPage: 0
+  prevScrollAreaHeight: 0
 })
 
 const isOnline = computed(() => store.state.isOnline)
 const isOffline = computed(() => !isOnline.value)
 const currentUser = computed(() => store.state.currentUser)
-
-// init
-
-const init = () => {
-  initMinItemHeight()
-  initItemsPerPage()
-  updateScroll()
-}
-const initMinItemHeight = () => {
-  state.minItemHeight = 32
-  if (props.previewImageIsWide) {
-    state.minItemHeight = 42
-  }
-}
-const initItemsPerPage = () => {
-  const footerThreshold = 20
-  const element = spaceListWrapElement.value
-  const parentDialogElement = element.closest('dialog')
-  const parentDialogRect = parentDialogElement.getBoundingClientRect()
-  const pageSize = store.state.viewportHeight - parentDialogRect.y - parentDialogRect.height - footerThreshold
-  state.itemsPerPage = Math.ceil(pageSize / state.minItemHeight)
-}
 
 // spaces
 
@@ -262,7 +240,11 @@ const updateScroll = async () => {
   }
   state.scrollY = element.scrollTop
   const scrollHeight = element.getBoundingClientRect().height
-  state.pageHeight = state.itemsPerPage * state.minItemHeight * state.currentPage
+  let minItemHeight = 32
+  if (props.previewImageIsWide) {
+    minItemHeight = 42
+  }
+  state.pageHeight = itemsPerPage * minItemHeight * state.currentPage
   updateCurrentPage()
 }
 
@@ -270,18 +252,21 @@ const updateScroll = async () => {
 
 const updateCurrentPage = () => {
   const zoom = utils.pinchCounterZoomDecimal()
-  const scrollYEnd = (state.scrollY * zoom) + state.pageHeight
-  state.currentPage = Math.ceil(scrollYEnd / state.pageHeight)
-  console.warn(state.currentPage, scrollYEnd, state.itemsPerPage, state.minItemHeight)
+  const threshold = 600
+  const nearBottomY = state.pageHeight - (threshold * state.currentPage)
+  const isNextPage = (state.scrollY * zoom) >= nearBottomY
+  if (isNextPage) {
+    state.currentPage = Math.min(state.currentPage + 1, totalPages.value)
+  }
 }
 const totalPages = computed(() => {
   const items = spacesFiltered.value
-  const total = Math.ceil(items.length / state.itemsPerPage)
+  const total = Math.ceil(items.length / itemsPerPage)
   return total
 })
 const itemsRendered = computed(() => {
   let items = spacesFiltered.value
-  const max = state.currentPage * state.itemsPerPage
+  const max = state.currentPage * itemsPerPage
   items = items.slice(0, max)
   return items
 })
@@ -396,7 +381,7 @@ const group = (groupId) => {
 </script>
 
 <template lang="pug">
-span.space-list-wrap(ref="spaceListWrapElement")
+span.space-list-wrap
   ResultsFilter(
     :hideFilter="hideFilter"
     :showFilter="showFilter"
