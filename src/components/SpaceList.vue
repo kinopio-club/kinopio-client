@@ -240,7 +240,7 @@ const updateScroll = async () => {
   }
   state.scrollY = element.scrollTop
   const scrollHeight = element.getBoundingClientRect().height
-  let minItemHeight = 32
+  let minItemHeight = 37.5
   if (props.previewImageIsWide) {
     minItemHeight = 42
   }
@@ -254,7 +254,7 @@ const updateCurrentPage = () => {
   const zoom = utils.pinchCounterZoomDecimal()
   const threshold = 600
   const nearBottomY = state.pageHeight - (threshold * state.currentPage)
-  const isNextPage = (state.scrollY * zoom) >= nearBottomY
+  const isNextPage = (state.scrollY * zoom) > nearBottomY
   if (isNextPage) {
     state.currentPage = Math.min(state.currentPage + 1, totalPages.value)
   }
