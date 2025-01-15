@@ -58,6 +58,7 @@ const init = async () => {
   closeDialogs()
   if (!state.spaces.length) {
     updateLocalSpaces()
+    updateHeights()
   }
   await updateWithRemoteSpaces()
   updateHeights()
@@ -85,6 +86,9 @@ const closeDialogs = () => {
   state.spaceFiltersIsVisible = false
   store.commit('triggerCloseChildDialogs')
 }
+
+// dialog heights
+
 const updateHeights = () => {
   if (!props.visible) {
     window.cancelAnimationFrame(updatePositionTimer)
@@ -93,14 +97,14 @@ const updateHeights = () => {
   }
   currentIteration = 0
   if (updatePositionTimer) { return }
-  updatePositionTimer = window.requestAnimationFrame(updatePositionFrame)
+  updatePositionTimer = window.requestAnimationFrame(updateHeightsFrame)
 }
-const updatePositionFrame = () => {
+const updateHeightsFrame = () => {
   currentIteration++
   updateDialogHeight()
   updateResultsSectionHeight()
   if (currentIteration < maxIterations) {
-    window.requestAnimationFrame(updatePositionFrame)
+    window.requestAnimationFrame(updateHeightsFrame)
   } else {
     window.cancelAnimationFrame(updatePositionTimer)
     updatePositionTimer = undefined
