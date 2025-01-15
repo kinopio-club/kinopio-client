@@ -97,7 +97,8 @@ const state = reactive({
   focusOnId: '',
   currentPage: 1,
   prevScrollAreaHeight: 0,
-  itemsPerPage: 0
+  itemsPerPage: 0,
+  minItemHeight: 38
 })
 
 const isOnline = computed(() => store.state.isOnline)
