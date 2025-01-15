@@ -56,7 +56,9 @@ const state = reactive({
 
 const init = async () => {
   closeDialogs()
-  updateLocalSpaces()
+  if (!state.spaces.length) {
+    updateLocalSpaces()
+  }
   await updateWithRemoteSpaces()
   updateHeights()
   store.commit('shouldExplicitlyHideFooter', true)
