@@ -117,7 +117,8 @@ const closeDialogs = () => {
   store.commit('triggerCloseChildDialogs')
 }
 const childDialogIsVisible = (value) => {
-  state.childDialogIsVisible = true
+  state.childDialogIsVisible = value
+  state.embedIsVisible = false
 }
 
 // toggles
@@ -222,7 +223,7 @@ dialog.share.wide(v-if="props.visible" :open="props.visible" @click.left.stop="c
   //- Import, Export, Embed
   section.import-export-section
     .row
-      ImportExportButton(@closeDialogs="closeDialogs" @childDialogIsVisible="childDialogIsVisible")
+      ImportExportButton(@childDialogIsVisible="childDialogIsVisible")
       //- Embed
       .button-wrap
         button(@click.left.stop="toggleEmbedIsVisible" :class="{ active: state.embedIsVisible }")
