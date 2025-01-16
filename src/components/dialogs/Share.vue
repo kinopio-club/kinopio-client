@@ -314,4 +314,7 @@ dialog.share
       margin-top 0
     label + label
       margin-left 6px
+
+  dialog.import-export
+    left 20px
 </style>

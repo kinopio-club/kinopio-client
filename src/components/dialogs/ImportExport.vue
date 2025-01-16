@@ -67,8 +67,6 @@ dialog.narrow.import-export(v-if="visible" :open="visible" @click.left.stop ref=
 dialog.import-export
   max-height calc(100vh - 140px)
   overflow auto
-  @media(max-width 350px)
-    right -50px
   .row
     white-space initial
 </style>
