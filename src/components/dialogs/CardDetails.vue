@@ -12,7 +12,7 @@ import UserLabelInline from '@/components/UserLabelInline.vue'
 import Loader from '@/components/Loader.vue'
 import UrlPreview from '@/components/UrlPreview.vue'
 import MediaPreview from '@/components/MediaPreview.vue'
-import CardCollaborationInfo from '@/components/CardCollaborationInfo.vue'
+import CardDetailsMeta from '@/components/CardDetailsMeta.vue'
 import ShareCard from '@/components/dialogs/ShareCard.vue'
 import OtherCardPreview from '@/components/OtherCardPreview.vue'
 import OtherSpacePreview from '@/components/OtherSpacePreview.vue'
@@ -1414,7 +1414,7 @@ dialog.card-details(v-if="visible" :open="visible" ref="dialogElement" @click.le
         ShareCard(:visible="state.shareCardIsVisible" :card="card" :isReadOnly="!canEditCard")
 
     CardOrBoxActions(:visible="shouldShowItemActions && canEditCard" :cards="[card]" @closeDialogs="closeDialogs" :class="{ 'last-row': !rowIsBelowItemActions }" :tagsInCard="tagsInCard")
-    CardCollaborationInfo(:visible="shouldShowItemActions || isComment" :createdByUser="createdByUser" :updatedByUser="updatedByUser" :card="card" :parentElement="parentElement" @closeDialogs="closeDialogs" :isComment="isComment")
+    CardDetailsMeta(:visible="shouldShowItemActions || isComment" :createdByUser="createdByUser" :updatedByUser="updatedByUser" :card="card" :parentElement="parentElement" @closeDialogs="closeDialogs" :isComment="isComment")
 
     .row(v-if="nameMetaRowIsVisible")
       //- Split by Line Breaks
@@ -1461,7 +1461,7 @@ dialog.card-details(v-if="visible" :open="visible" ref="dialogElement" @click.le
 
     //- Read Only
     template(v-if="!canEditCard")
-      CardCollaborationInfo(:visible="!shouldShowItemActions" :createdByUser="createdByUser" :updatedByUser="updatedByUser" :card="card" :parentElement="parentElement" @closeDialogs="closeDialogs")
+      CardDetailsMeta(:visible="!shouldShowItemActions" :createdByUser="createdByUser" :updatedByUser="updatedByUser" :card="card" :parentElement="parentElement" @closeDialogs="closeDialogs")
       .row.edit-message
         template(v-if="spacePrivacyIsOpen")
           span.badge.info
