@@ -1,5 +1,5 @@
 <script setup>
-import { reactive, computed, onMounted, onUnmounted, defineProps, defineEmits, watch, ref, nextTick } from 'vue'
+import { reactive, computed, onMounted, onBeforeUnmount, defineProps, defineEmits, watch, ref, nextTick } from 'vue'
 import { useStore } from 'vuex'
 
 import Loader from '@/components/Loader.vue'
@@ -12,10 +12,22 @@ const store = useStore()
 
 let prevPosition
 
+let unsubscribe
+
 onMounted(() => {
   updateHistory()
   window.addEventListener('pointerdown', updatePrevPosition)
+  unsubscribe = store.subscribe(mutation => {
+    if (mutation.type === 'currentSpace/changeSpace') {
+      clearOperations()
+    }
+  })
 })
+onBeforeUnmount(() => {
+  window.removeEventListener('pointerdown', updatePrevPosition)
+  unsubscribe()
+})
+
 const props = defineProps({
   visible: Boolean
 })
@@ -26,7 +38,7 @@ watch(() => props.visible, (value, prevValue) => {
 })
 
 const state = reactive({
-  history: [],
+  operations: [],
   isLoading: false,
   unknownServerError: false
 })
@@ -37,6 +49,9 @@ const updatePrevPosition = (event) => {
   if (!props.visible) { return }
   prevPosition = utils.cursorPositionInPage(event)
 }
+const clearOperations = () => {
+  state.operations = []
+}
 
 // list cards
 
@@ -45,8 +60,8 @@ const updateHistory = async () => {
   if (state.isLoading) { return }
   try {
     state.isLoading = true
-    console.log('🍇🍇🍇')
-    // await store.dispatch('api/')
+    state.operations = await store.dispatch('api/getSpaceHistory')
+    console.log('🍇🍇🍇', state.operations)
     // api/
   } catch (error) {
     console.error('🚒 updateHistory', error)
