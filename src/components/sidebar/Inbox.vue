@@ -70,7 +70,7 @@ const restoreInboxCards = async () => {
     updateInboxCardsLocal()
     updateInboxCardsRemote()
   } catch (error) {
-    console.error('🚒 restoreInboxCards')
+    console.error('🚒 restoreInboxCards', error)
   }
   state.isLoading = false
 }
