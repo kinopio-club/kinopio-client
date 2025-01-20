@@ -81,10 +81,22 @@ const userDetailsIsUser = (user) => {
   const userDetailsUser = store.state.userDetailsUser
   return user.id === userDetailsUser.id
 }
+
+// settings
+
+const showCardSettings = () => {
+  store.dispatch('currentUser/update', { prevSettingsSection: 'cards' })
+  // store.dispatch('closeAllDialogs')
+  store.commit('userSettingsIsVisible', true)
+}
 </script>
 
 <template lang="pug">
 .row.card-collaboration-info(v-if="visible" @click.left.stop="closeDialogs")
+  //- settings
+  .button-wrap
+    button.small-button.settings-button(@click="showCardSettings" title="Card Settings")
+      img.settings.icon(src="@/assets/settings.svg")
   //- comment
   .badge.info.is-comment-badge(v-if="isComment")
     img.icon.comment(src="@/assets/comment.svg")
@@ -117,4 +129,6 @@ const userDetailsIsUser = (user) => {
     color var(--primary)
   .is-comment-badge
     flex-shrink 0
+  .settings-button
+    margin-right 5px
 </style>
