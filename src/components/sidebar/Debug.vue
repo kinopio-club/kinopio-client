@@ -4,6 +4,7 @@ import { useStore } from 'vuex'
 
 import Loader from '@/components/Loader.vue'
 import OfflineBadge from '@/components/OfflineBadge.vue'
+import User from '@/components/User.vue'
 import utils from '@/utils.js'
 
 import dayjs from 'dayjs'
@@ -85,6 +86,17 @@ const isSelected = (operation) => {
   return Boolean(state.selectedOperationIds[operation.id])
 }
 
+// meta
+
+const user = (operation) => {
+  const user = store.getters['currentSpace/userById'](operation.userId)
+  return user
+}
+const relativeDate = (operation) => {
+  const date = operation.receivedAt
+  return utils.shortRelativeTime(date)
+}
+
 // copy
 
 const copyOperations = async (event) => {
@@ -137,7 +149,17 @@ section.debug(v-if="visible")
 section.results-section.debug
   ul.results-list
     template(v-for="operation in state.operations" :key="operation.id")
-      li(@click="select(operation)" :class="{active: isSelected(operation)}") {{operation.name}}
+      li(@click="select(operation)" :class="{active: isSelected(operation)}")
+        //- time
+        template(v-if="relativeDate(operation)")
+          span.badge.status.inline-badge
+            img.icon.time(src="@/assets/time.svg")
+            span {{ relativeDate(operation) }}
+        //- user
+        template(v-if="user(operation)")
+          User(:user="user(operation)" :isClickable="false" :isSmall="true" :hideYouLabel="true")
+        //- operation
+        span {{operation.name}}
         template(v-if="isSelected(operation)")
           p(@click.stop) {{operation}}
           .button-wrap.copy-button
@@ -158,4 +180,7 @@ section.debug
       top 0
       left initial
       right 4px
+    .user
+      vertical-align -4px
+      margin-right 5px
 </style>

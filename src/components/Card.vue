@@ -2370,6 +2370,7 @@ article.card-wrap
       .label-badge
         padding 0 10px
     .badge
+      width max-content
       &.secondary
         display flex
         .icon
