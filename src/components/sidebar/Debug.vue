@@ -15,7 +15,7 @@ let prevPosition
 let unsubscribe
 
 onMounted(() => {
-  updateHistory()
+  updateOperations()
   window.addEventListener('pointerdown', updatePrevPosition)
   unsubscribe = store.subscribe(mutation => {
     if (mutation.type === 'currentSpace/changeSpace') {
@@ -33,12 +33,13 @@ const props = defineProps({
 })
 watch(() => props.visible, (value, prevValue) => {
   if (value) {
-    updateHistory()
+    updateOperations()
   }
 })
 
 const state = reactive({
   operations: [],
+  selectedOperationIds: {},
   isLoading: false,
   unknownServerError: false
 })
@@ -53,9 +54,9 @@ const clearOperations = () => {
   state.operations = []
 }
 
-// list cards
+// operations
 
-const updateHistory = async () => {
+const updateOperations = async () => {
   state.unknownServerError = false
   if (state.isLoading) { return }
   try {
@@ -64,51 +65,28 @@ const updateHistory = async () => {
     console.log('🍇🍇🍇', state.operations)
     // api/
   } catch (error) {
-    console.error('🚒 updateHistory', error)
+    console.error('🚒 updateOperations', error)
     state.unknownServerError = true
   }
   state.isLoading = false
 }
 
-// update card
+const select = (operation) => {
+  console.log(operation)
+  state.selectedOperationIds[operation.id] = true
+  // const isSelected = state.selectedOperationIds.includes(operation.id)
+  // if (isSelected) {
+  // }
+}
 
-// const updateCardIsLoading = (newCard) => {
-//   state.cards = state.cards.map(card => {
-//     if (card.id === newCard.id) {
-//       card.isLoading = true
-//     }
-//     return card
-//   })
-// }
-// const selectCard = async (card) => {
-//   if (card.isLoading) { return }
-//   if (!canEditSpace.value) {
-//     store.commit('addNotificationWithPosition', { message: 'Space is Read Only', position: prevPosition, type: 'info', layer: 'app', icon: 'cancel' })
-//     return
-//   }
-//   updateCardIsLoading(card)
-//   const scroll = store.getters.windowScrollWithSpaceOffset()
-//   let newCard = utils.clone(card)
-//   newCard.id = nanoid()
-//   newCard.spaceId = store.state.currentSpace.id
-//   newCard.x = scroll.x + 100 // matches KeyboardShortcutsHandler.addCard
-//   newCard.y = scroll.y + 120 // matches KeyboardShortcutsHandler.addCard
-//   const spaceCards = store.getters['currentCards/all']
-//   newCard = utils.uniqueCardPosition(newCard, spaceCards)
-//   store.dispatch('currentCards/add', newCard)
-//   store.commit('cardDetailsIsVisibleForCardId', newCard.id)
-//   removeCardFromInbox(card)
-// }
-// const removeCard = (card) => {
-//   if (card.isLoading) { return }
-//   updateCardIsLoading(card)
-//   removeCardFromInbox(card)
-// }
+const isSelected = (operation) => {
+  return Boolean(state.selectedOperationIds[operation.id])
+}
 
 </script>
 
 <template lang="pug">
-section.inbox(v-if="visible")
+section.debug(v-if="visible")
   .row.title-row
     div
       span.badge.info Beta
@@ -120,19 +98,19 @@ section.inbox(v-if="visible")
     //-     span Inbox
   OfflineBadge
 
-//- section.results-section.inbox(v-if="visible && isOnline")
-//-   ul.results-list(v-if="state.cards.length")
-//-     CardList(:cards="state.cards" @selectCard="selectCard" :cardsShowRemoveButton="true" @removeCard="removeCard")
-//-   section.subsection(v-else)
-//-     p Cards added to your inbox can be moved into this space
+section.results-section
+  ul.results-list
+    template(v-for="operation in state.operations" :key="operation.id")
+      li(@click="select(operation)") {{operation.name}}
+        template(v-if="isSelected(operation)")
+          p {{operation}}
 </template>
 
 <style lang="stylus">
-section.inbox
+section.debug
   .loader
     margin-left 6px
     vertical-align -2px
-  .subsection
-    margin 4px
-    margin-top 0
+  li
+    flex-direction column
 </style>
