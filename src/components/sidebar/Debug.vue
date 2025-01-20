@@ -7,8 +7,6 @@ import OfflineBadge from '@/components/OfflineBadge.vue'
 import User from '@/components/User.vue'
 import utils from '@/utils.js'
 
-import dayjs from 'dayjs'
-import { nanoid } from 'nanoid'
 const store = useStore()
 
 let prevPosition
