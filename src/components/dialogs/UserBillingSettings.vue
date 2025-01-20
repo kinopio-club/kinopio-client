@@ -114,5 +114,7 @@ dialog.narrow.user-billing(v-if="visible" :open="visible" @click.left.stop ref="
 
 <style lang="stylus">
 dialog.user-billing
+  left initial
+  right 6px
   overflow auto
 </style>

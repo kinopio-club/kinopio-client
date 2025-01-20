@@ -9,6 +9,7 @@ import utils from '@/utils.js'
 const store = useStore()
 
 const unlockedCards = computed(() => store.getters['currentCards/isNotLocked'])
+const lockedCards = computed(() => store.getters['currentCards/isLocked'])
 
 // card comment preview
 
@@ -42,10 +43,13 @@ const shouldPrevent = computed(() => {
 
 <template lang="pug">
 .cards
-  //- locked cards rendered in ItemsLocked
   template(v-for="card in unlockedCards" :key="card.id")
     Card(:card="card")
   CardCommentPreview(:visible="cardCommentPreviewIsVisible" :card="currentHoveredCard")
+  //- locked cards rendered in ItemsLocked
+  template(v-for="card in lockedCards" :key="card.id")
+    teleport(to="#locked-cards")
+      Card(:card="card")
 </template>
 
 <style lang="stylus">

@@ -1061,6 +1061,19 @@ export default {
     const y = parseInt(element.style.top)
     return { x, y }
   },
+  boxElementFromConnectorPosition (x, y) {
+    let elements = document.elementsFromPoint(x, y)
+    let boxFromConnector
+    const boxElement = elements.find(element => {
+      const classes = Array.from(element.classList)
+      if (classes.includes('connector')) {
+        boxFromConnector = element.closest('.box')
+        return element.closest('.box')
+      }
+      return classes.includes('box-info')
+    })
+    return boxFromConnector || boxElement
+  },
   boxElementFromId (boxId) {
     return document.querySelector(`.box[data-box-id="${boxId}"]`)
   },

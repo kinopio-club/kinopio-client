@@ -376,12 +376,12 @@ export default {
     addToDisabledKeyboardShortcuts: (state, value) => {
       utils.typeCheck({ value, type: 'string' })
       state.disabledKeyboardShortcuts.push(value)
-      cache.updateUser('disabledKeyboardShortcuts', state.disabledKeyboardShortcuts)
+      cache.updateUser('disabledKeyboardShortcuts', value)
     },
     removeFromDisabledKeyboardShortcuts: (state, value) => {
       utils.typeCheck({ value, type: 'string' })
       state.disabledKeyboardShortcuts = state.disabledKeyboardShortcuts.filter(shortcutName => value !== shortcutName)
-      cache.updateUser('disabledKeyboardShortcuts', state.disabledKeyboardShortcuts)
+      cache.updateUser('disabledKeyboardShortcuts', value)
     },
     tags: (state, value) => {
       utils.typeCheck({ value, type: 'array' })
@@ -396,6 +396,7 @@ export default {
         context.commit('restoreUser', cachedUser)
         context.dispatch('themes/restore', null, { root: true })
         await context.dispatch('restoreRemoteUser', cachedUser)
+        await context.dispatch('restoreUserFavorites')
       } else {
         console.log('🌸 Create new user')
         context.dispatch('createNewUser')

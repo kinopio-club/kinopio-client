@@ -7,7 +7,7 @@ const store = useStore()
 
 <template lang="pug">
 section.about-groups
-  p Group spaces together and collaborate with group members
+  p Group spaces together and collaborate with Group members
   p
     a(href="https://help.kinopio.club/posts/groups")
       button

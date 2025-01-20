@@ -458,10 +458,7 @@ const currentSpace = {
       context.dispatch('incrementCardsCreatedCountFromSpace', space)
     },
     duplicateSpace: async (context, space) => {
-      if (!space) {
-        const spaceId = context.state.id
-        space = await cache.space(spaceId)
-      }
+      space = space || context.state
       space = utils.clone(space)
       const user = { id: context.rootState.currentUser.id }
       context.commit('broadcast/leaveSpaceRoom', { user, type: 'userLeftRoom' }, { root: true })
@@ -509,7 +506,7 @@ const currentSpace = {
         return remoteSpace
       } catch (error) {
         console.error('🚒 getRemoteSpace', error)
-        throw Error(error)
+        throw error
       }
     },
     loadRemoteSpace: async (context, space) => {
@@ -910,6 +907,17 @@ const currentSpace = {
       await context.dispatch('api/addToQueue', {
         name: 'updateSpace',
         body: updates
+      }, { root: true })
+    },
+    updateSpaceIsHidden: async (context, { spaceId, isHidden }) => {
+      context.commit('updateSpace', { isHidden })
+      await cache.updateSpace('isHidden', isHidden, spaceId)
+      await context.dispatch('api/addToQueue', {
+        name: 'updateSpaceIsHidden',
+        body: {
+          spaceId: spaceId,
+          isHidden
+        }
       }, { root: true })
     },
     changeSpace: async (context, space) => {
