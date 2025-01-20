@@ -62,7 +62,6 @@ const updateOperations = async () => {
   try {
     state.isLoading = true
     state.operations = await store.dispatch('api/getSpaceHistory')
-    console.log('🍇🍇🍇', state.operations)
     // api/
   } catch (error) {
     console.error('🚒 updateOperations', error)
@@ -70,17 +69,46 @@ const updateOperations = async () => {
   }
   state.isLoading = false
 }
-
 const select = (operation) => {
   console.log(operation)
-  state.selectedOperationIds[operation.id] = true
-  // const isSelected = state.selectedOperationIds.includes(operation.id)
-  // if (isSelected) {
-  // }
+  if (isSelected(operation)) {
+    state.selectedOperationIds[operation.id] = false
+  } else {
+    state.selectedOperationIds[operation.id] = true
+  }
 }
-
 const isSelected = (operation) => {
   return Boolean(state.selectedOperationIds[operation.id])
+}
+
+// copy
+
+const copyOperations = async (event) => {
+  store.commit('clearNotificationsWithPosition')
+  let position = utils.cursorPositionInPage(event)
+  position.x = position.x - 60
+  try {
+    let text = utils.clone(state.operations)
+    text = JSON.stringify(text)
+    await navigator.clipboard.writeText(text)
+    store.commit('addNotificationWithPosition', { message: 'Copied', position, type: 'success', layer: 'app', icon: 'checkmark' })
+  } catch (error) {
+    console.warn('🚑 copyText', error)
+    store.commit('addNotificationWithPosition', { message: 'Copy Error', position, type: 'danger', layer: 'app', icon: 'cancel' })
+  }
+}
+const copyOperation = async (event, operation) => {
+  store.commit('clearNotificationsWithPosition')
+  let position = utils.cursorPositionInPage(event)
+  position.x = position.x - 60
+  try {
+    operation = JSON.stringify(operation)
+    await navigator.clipboard.writeText(operation)
+    store.commit('addNotificationWithPosition', { message: 'Copied', position, type: 'success', layer: 'app', icon: 'checkmark' })
+  } catch (error) {
+    console.warn('🚑 copyText', error)
+    store.commit('addNotificationWithPosition', { message: 'Copy Error', position, type: 'danger', layer: 'app', icon: 'cancel' })
+  }
 }
 
 </script>
@@ -92,18 +120,22 @@ section.debug(v-if="visible")
       span.badge.info Beta
       span Space History Log
       Loader(:visible="state.isLoading" :isSmall="true")
-    //- .button-wrap
-    //-   button.small-button(@click="loadInboxSpace")
-    //-     img.icon(src="@/assets/inbox.svg")
+    .button-wrap(v-if="!state.isLoading")
+      button.small-button(@click="copyOperations")
+        img.icon(src="@/assets/copy.svg")
     //-     span Inbox
   OfflineBadge
 
-section.results-section
+section.results-section.debug
   ul.results-list
     template(v-for="operation in state.operations" :key="operation.id")
-      li(@click="select(operation)") {{operation.name}}
+      li(@click="select(operation)" :class="{active: isSelected(operation)}") {{operation.name}}
         template(v-if="isSelected(operation)")
-          p {{operation}}
+          p(@click.stop) {{operation}}
+          .button-wrap.copy-button
+            button.small-button(@click.stop="copyOperation($event, operation)")
+              img.icon(src="@/assets/copy.svg")
+
 </template>
 
 <style lang="stylus">
@@ -112,5 +144,10 @@ section.debug
     margin-left 6px
     vertical-align -2px
   li
-    flex-direction column
+    display block
+    .copy-button
+      position absolute
+      top 0
+      left initial
+      right 4px
 </style>
