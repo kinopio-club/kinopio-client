@@ -190,6 +190,10 @@ dialog#sidebar.sidebar.is-pinnable(v-if="visible" :open="visible" @click.left.st
           button(@click.left="toggleRemovedIsVisible" :class="{ active: state.removedIsVisible}")
             img.icon(src="@/assets/remove.svg")
             img.icon.remove-undo(src="@/assets/undo.svg")
+        .segmented-buttons
+          //- Favorites
+          button(@click.left="toggleFavoritesIsVisible" :class="{ active: state.favoritesIsVisible}")
+            span Debug
 
       //- Pin
       .title-row
@@ -241,6 +245,17 @@ dialog#sidebar.sidebar.is-pinnable(v-if="visible" :open="visible" @click.left.st
       //   label
       //     &:last-child
       //       border-bottom-right-radius 0
+      // middle row
+      &:nth-child(2)
+        margin-top -1px
+        button,
+        label
+          &:first-child
+            border-top-left-radius 0
+            border-bottom-left-radius 0
+          &:last-child
+            border-top-right-radius 0
+      // last row
       &:last-child
         button,
         label
