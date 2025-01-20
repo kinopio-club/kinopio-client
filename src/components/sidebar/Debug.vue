@@ -50,12 +50,12 @@ const updatePrevPosition = (event) => {
   if (!props.visible) { return }
   prevPosition = utils.cursorPositionInPage(event)
 }
-const clearOperations = () => {
-  state.operations = []
-}
 
 // operations
 
+const clearOperations = () => {
+  state.operations = []
+}
 const updateOperations = async () => {
   state.unknownServerError = false
   if (state.isLoading) { return }
@@ -68,6 +68,10 @@ const updateOperations = async () => {
     state.unknownServerError = true
   }
   state.isLoading = false
+}
+const refreshOperations = async () => {
+  clearOperations()
+  await updateOperations()
 }
 const select = (operation) => {
   console.log(operation)
@@ -120,9 +124,13 @@ section.debug(v-if="visible")
       span.badge.info Beta
       span Space History Log
       Loader(:visible="state.isLoading" :isSmall="true")
-    .button-wrap(v-if="!state.isLoading")
-      button.small-button(@click="copyOperations")
-        img.icon(src="@/assets/copy.svg")
+    div
+      .button-wrap(v-if="!state.isLoading")
+        button.small-button(@click="refreshOperations")
+          img.icon(src="@/assets/refresh.svg")
+      .button-wrap(v-if="!state.isLoading")
+        button.small-button(@click="copyOperations")
+          img.icon(src="@/assets/copy.svg")
     //-     span Inbox
   OfflineBadge
 
