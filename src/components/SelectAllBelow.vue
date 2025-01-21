@@ -79,7 +79,7 @@ const handleMouseMove = (event) => {
     state.isVisible = false
   }
   if (isSelectingY.value) {
-    throttledSelectAllBelow(event)
+    throttledSelectItems(event)
   }
 }
 
@@ -87,22 +87,27 @@ const handleMouseMove = (event) => {
 
 const handleMouseDown = (event) => {
   updateIsSelectingY(true)
-  throttledSelectAllBelow(event)
+  throttledSelectItems(event)
 }
 const handleMouseUp = (event) => {
   if (!isSelectingY.value) { return }
   updateIsSelectingY(false)
-  throttledSelectAllBelow(event)
+  throttledSelectItems(event)
   state.isVisible = false
 }
-const throttledSelectAllBelow = throttle((event) => {
-  selectAllBelow(event)
+const throttledSelectItems = throttle((event) => {
+  selectItems(event)
 }, 20)
 
-const selectAllBelow = (event) => {
+const selectItems = (event) => {
   let position = utils.cursorPositionInSpace(event)
   store.commit('preventMultipleSelectedActionsIsVisible', true)
-  store.commit('triggerSelectAllItemsBelowCursor', position)
+  const isMetaKey = event.metaKey || event.ctrlKey
+  if (isMetaKey) {
+    store.commit('triggerSelectAllItemsAboveCursor', position)
+  } else {
+    store.commit('triggerSelectAllItemsBelowCursor', position)
+  }
 }
 </script>
 

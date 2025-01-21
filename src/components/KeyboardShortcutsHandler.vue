@@ -27,9 +27,15 @@ onMounted(() => {
     } else if (mutation.type === 'triggerSelectAllItemsBelowCursor') {
       const position = mutation.payload
       selectAllItemsBelowCursor(position)
+    } else if (mutation.type === 'triggerSelectAllItemsAboveCursor') {
+      const position = mutation.payload
+      selectAllItemsAboveCursor(position)
     } else if (mutation.type === 'triggerSelectAllItemsRightOfCursor') {
       const position = mutation.payload
       selectAllItemsRightOfCursor(position)
+    } else if (mutation.type === 'triggerSelectAllItemsLeftOfCursor') {
+      const position = mutation.payload
+      selectAllItemsLeftOfCursor(position)
     }
   })
   window.addEventListener('keyup', handleShortcuts)
@@ -731,10 +737,9 @@ const handlePasteEvent = async (event) => {
   afterPaste(items)
 }
 
-// Select All Cards Below Cursor
+// Select Items Relative to cursor
 
 const selectAllItemsBelowCursor = (position) => {
-  const preventMultipleSelectedActionsIsVisible = store.state.preventMultipleSelectedActionsIsVisible
   let zoom
   if (position) {
     zoom = 1
@@ -750,27 +755,27 @@ const selectAllItemsBelowCursor = (position) => {
   let boxes = utils.clone(store.getters['currentBoxes/all'])
   boxes = boxes.filter(box => (box.y * zoom) > position.y)
   const boxIds = boxes.map(box => box.id)
-  const isItemIds = Boolean(cardIds.length || boxIds.length)
-  // select
-  if (isItemIds && preventMultipleSelectedActionsIsVisible) {
-    store.commit('multipleCardsSelectedIds', cardIds)
-    store.commit('multipleBoxesSelectedIds', boxIds)
-  } else if (isItemIds) {
-    store.commit('multipleSelectedActionsPosition', position)
-    store.commit('multipleSelectedActionsIsVisible', true)
-    store.commit('multipleCardsSelectedIds', cardIds)
-    store.commit('multipleBoxesSelectedIds', boxIds)
-  } else {
-    store.commit('multipleSelectedActionsIsVisible', false)
-    store.commit('multipleCardsSelectedIds', [])
-    store.commit('multipleBoxesSelectedIds', [])
-  }
+  selectItemIds({ position, cardIds, boxIds })
 }
-
-// Select All Cards Right Of Cursor
-
+const selectAllItemsAboveCursor = (position) => {
+  let zoom
+  if (position) {
+    zoom = 1
+  } else {
+    // is from keyboard shortcut
+    position = currentCursorPosition
+    zoom = store.getters.spaceZoomDecimal
+  }
+  // cards
+  const cards = store.getters['currentCards/isAboveY'](position.y, zoom)
+  const cardIds = cards.map(card => card.id)
+  // boxes
+  let boxes = utils.clone(store.getters['currentBoxes/all'])
+  boxes = boxes.filter(box => (box.y * zoom) < position.y)
+  const boxIds = boxes.map(box => box.id)
+  selectItemIds({ position, cardIds, boxIds })
+}
 const selectAllItemsRightOfCursor = (position) => {
-  const preventMultipleSelectedActionsIsVisible = store.state.preventMultipleSelectedActionsIsVisible
   let zoom
   if (position) {
     zoom = 1
@@ -788,8 +793,34 @@ const selectAllItemsRightOfCursor = (position) => {
     return (box.x * zoom) >= position.x
   })
   const boxIds = boxes.map(box => box.id)
+  selectItemIds({ position, cardIds, boxIds })
+}
+const selectAllItemsLeftOfCursor = (position) => {
+  let zoom
+  if (position) {
+    zoom = 1
+  } else {
+    // is from keyboard shortcut
+    position = currentCursorPosition
+    zoom = store.getters.spaceZoomDecimal
+  }
+  // cards
+  const cards = store.getters['currentCards/isLeftOfX'](position.x, zoom)
+  const cardIds = cards.map(card => card.id)
+  // boxes
+  let boxes = utils.clone(store.getters['currentBoxes/all'])
+  boxes = boxes.filter(box => {
+    return (box.x * zoom) <= position.x
+  })
+  const boxIds = boxes.map(box => box.id)
+  selectItemIds({ position, cardIds, boxIds })
+}
+
+// Select All Cards, Connections, and Boxes
+
+const selectItemIds = ({ position, cardIds, boxIds }) => {
+  const preventMultipleSelectedActionsIsVisible = store.state.preventMultipleSelectedActionsIsVisible
   const isItemIds = Boolean(cardIds.length || boxIds.length)
-  // select
   if (isItemIds && preventMultipleSelectedActionsIsVisible) {
     store.commit('multipleCardsSelectedIds', cardIds)
     store.commit('multipleBoxesSelectedIds', boxIds)
@@ -804,9 +835,6 @@ const selectAllItemsRightOfCursor = (position) => {
     store.commit('multipleBoxesSelectedIds', [])
   }
 }
-
-// Select All Cards, Connections, and Boxes
-
 const selectAllItems = () => {
   const cardIds = utils.clone(store.state.currentCards.ids)
   const connectionIds = utils.clone(store.state.currentConnections.ids)

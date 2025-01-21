@@ -906,10 +906,20 @@ const currentCards = {
       const cards = getters.all
       return cards.filter(card => (card.y * zoom) > y)
     },
+    isAboveY: (state, getters) => (y, zoom) => {
+      zoom = zoom || 1
+      const cards = getters.all
+      return cards.filter(card => (card.y * zoom) < y)
+    },
     isRightOfX: (state, getters) => (x, zoom) => {
       zoom = zoom || 1
       const cards = getters.all
       return cards.filter(card => (card.x * zoom) > x)
+    },
+    isLeftOfX: (state, getters) => (x, zoom) => {
+      zoom = zoom || 1
+      const cards = getters.all
+      return cards.filter(card => (card.x * zoom) < x)
     },
     canBeSelectedSortedByY: (state, getters) => {
       return canBeSelectedSortedByY

@@ -86,7 +86,7 @@ const handleMouseMove = (event) => {
     state.isVisible = false
   }
   if (isSelectingX.value) {
-    throttledSelectAllRight(event)
+    throttledSelectItems(event)
   }
 }
 
@@ -94,22 +94,27 @@ const handleMouseMove = (event) => {
 
 const handleMouseDown = (event) => {
   updateIsSelectingX(true)
-  throttledSelectAllRight(event)
+  throttledSelectItems(event)
 }
 const handleMouseUp = (event) => {
   if (!isSelectingX.value) { return }
   updateIsSelectingX(false)
-  throttledSelectAllRight(event)
+  throttledSelectItems(event)
   state.isVisible = false
 }
-const throttledSelectAllRight = throttle((event) => {
-  selectAllRight(event)
+const throttledSelectItems = throttle((event) => {
+  selectItems(event)
 }, 20)
 
-const selectAllRight = (event) => {
+const selectItems = (event) => {
   let position = utils.cursorPositionInSpace(event)
   store.commit('preventMultipleSelectedActionsIsVisible', true)
-  store.commit('triggerSelectAllItemsRightOfCursor', position)
+  const isMetaKey = event.metaKey || event.ctrlKey
+  if (isMetaKey) {
+    store.commit('triggerSelectAllItemsLeftOfCursor', position)
+  } else {
+    store.commit('triggerSelectAllItemsRightOfCursor', position)
+  }
 }
 </script>
 

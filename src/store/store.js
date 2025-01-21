@@ -634,8 +634,6 @@ const store = createStore({
     triggerAddChildCard: (state, options) => {},
     triggerTemplatesIsVisible: () => {},
     triggerImportIsVisible: () => {},
-    triggerSelectAllItemsBelowCursor: (state, position) => {},
-    triggerSelectAllItemsRightOfCursor: (state, position) => {},
     triggerSplitCard: (state, cardId) => {},
     triggerUpdateUrlPreview: (state, cardId) => {},
     triggerUpdateUrlPreviewComplete: (state, cardId) => {},
@@ -669,6 +667,15 @@ const store = createStore({
     triggerUpdateItemCurrentConnections: (state, itemId) => {},
     triggerCloseGroupDetailsDialog: () => {},
     triggerPanningStart: () => {},
+
+    // select all below
+    triggerSelectAllItemsBelowCursor: (state, position) => {},
+    triggerSelectAllItemsAboveCursor: (state, position) => {},
+
+    // select all right
+
+    triggerSelectAllItemsLeftOfCursor: (state, position) => {},
+    triggerSelectAllItemsRightOfCursor: (state, position) => {},
 
     // Used by extensions only
 
