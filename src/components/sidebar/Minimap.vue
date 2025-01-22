@@ -2,7 +2,7 @@
 import { reactive, computed, onMounted, onBeforeUnmount, defineProps, defineEmits, watch, ref, nextTick } from 'vue'
 import { useStore } from 'vuex'
 
-import Minimap from '@/components/Minimap.vue'
+import MinimapCanvas from '@/components/MinimapCanvas.vue'
 
 const rowElement = ref(null)
 
@@ -28,6 +28,7 @@ const state = reactive({
 const updateSize = async () => {
   await nextTick()
   const element = rowElement.value
+  if (!element) { return }
   const rect = element.getBoundingClientRect()
   state.size = rect.width
 }
@@ -41,7 +42,7 @@ template(v-if="props.visible")
     .row
       p {{state.size}}
     .row
-      Minimap(:visible="Boolean(state.size)" :size="state.size")
+      MinimapCanvas(:visible="Boolean(state.size)" :size="state.size")
 </template>
 
 <style lang="stylus">
