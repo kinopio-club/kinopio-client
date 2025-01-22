@@ -121,36 +121,36 @@ dialog#sidebar.sidebar.is-pinnable(v-if="visible" :open="visible" @click.left.st
         //- first row
         .segmented-buttons
           //- Inbox
-          button(@click.left="toggleSection('inbox')" :class="{ active: state.inboxIsVisible}")
+          button(@click.left="toggleSection('inbox')" :class="{ active: state.inboxIsVisible}" title="Move from Inbox")
             img.icon(src="@/assets/inbox.svg")
           //- Text
-          button(@click.left="toggleSection('text')" :class="{active: state.textIsVisible}")
+          button(@click.left="toggleSection('text')" :class="{active: state.textIsVisible}" title="Card Text Editor")
             span Text
           //- Tags
-          button(@click.left="toggleSection('tags')" :class="{ active: state.tagsIsVisible}")
+          button(@click.left="toggleSection('tags')" :class="{ active: state.tagsIsVisible}" title="Space Tags")
             span Tags
           //- Links
-          button(@click.left="toggleSection('links')" :class="{ active: state.linksIsVisible}")
+          button(@click.left="toggleSection('links')" :class="{ active: state.linksIsVisible}" title="Backlinks")
             span Links
         //- second row
         .segmented-buttons
           //- Favorites
-          button(@click.left="toggleSection('favorites')" :class="{ active: state.favoritesIsVisible}")
+          button(@click.left="toggleSection('favorites')" :class="{ active: state.favoritesIsVisible}" title="Favorites")
             img.icon(src="@/assets/heart-empty.svg")
           //- Stats
-          button(@click.left="toggleSection('stats')" :class="{active: state.statsIsVisible}")
+          button(@click.left="toggleSection('stats')" :class="{active: state.statsIsVisible}" title="Stats")
             img.icon.stats(src="@/assets/stats.svg")
           //- AI Images
-          button(@click.left="toggleSection('AIImages')" :class="{ active: state.AIImagesIsVisible}")
+          button(@click.left="toggleSection('AIImages')" :class="{ active: state.AIImagesIsVisible}" title="AI Images")
             img.icon.flower(src="@/assets/flower.svg")
             span AI
           //- Removed
-          button(@click.left="toggleSection('removed')" :class="{ active: state.removedIsVisible}")
+          button(@click.left="toggleSection('removed')" :class="{ active: state.removedIsVisible}" title="Removed Cards and Spaces")
             img.icon(src="@/assets/remove.svg")
             img.icon.remove-undo(src="@/assets/undo.svg")
         .segmented-buttons
           //- Favorites
-          button(@click.left="toggleSection('debug')" :class="{ active: state.debugIsVisible}")
+          button(@click.left="toggleSection('debug')" :class="{ active: state.debugIsVisible}" title="Debug Space History")
             span Debug
 
       //- Pin
