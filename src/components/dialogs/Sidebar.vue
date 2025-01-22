@@ -157,7 +157,7 @@ dialog#sidebar.sidebar.is-pinnable(v-if="visible" :open="visible" @click.left.st
         .segmented-buttons
           //- Favorites
           button(@click.left="toggleSection('history')" :class="{ active: state.historyIsVisible}" title="Space History")
-            img.icon(src="@/assets/time.svg")
+            img.icon.time(src="@/assets/time.svg")
 
       //- Pin
       .title-row
@@ -202,6 +202,8 @@ dialog#sidebar.sidebar.is-pinnable(v-if="visible" :open="visible" @click.left.st
     height 11px
   .icon.minimap
     vertical-align -2px
+  .icon.time
+    vertical-align -1px
 
   .segmented-buttons + .segmented-buttons
     margin-left 0
