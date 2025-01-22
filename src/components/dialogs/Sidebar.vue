@@ -12,7 +12,7 @@ import Stats from '@/components/sidebar/Stats.vue'
 import Text from '@/components/sidebar/Text.vue'
 import Inbox from '@/components/sidebar/Inbox.vue'
 import Favorites from '@/components/sidebar/Favorites.vue'
-import Debug from '@/components/sidebar/Debug.vue'
+import History from '@/components/sidebar/History.vue'
 
 const store = useStore()
 
@@ -52,7 +52,7 @@ const state = reactive({
   statsIsVisible: false,
   textIsVisible: false,
   favoritesIsVisible: false,
-  debugIsVisible: false
+  historyIsVisible: false
 })
 
 const clearVisible = () => {
@@ -64,7 +64,7 @@ const clearVisible = () => {
   state.statsIsVisible = false
   state.textIsVisible = false
   state.favoritesIsVisible = false
-  state.debugIsVisible = false
+  state.historyIsVisible = false
 }
 
 const updateDialogHeight = async () => {
@@ -99,7 +99,7 @@ const toggleSection = (value) => {
 const restoreUserLastSidebarSection = () => {
   clearVisible()
   const section = store.state.currentUser.lastSidebarSection
-  const values = ['text', 'stats', 'AIImages', 'inbox', 'removed', 'links', 'tags', 'favorites', 'debug'] // listed in api docs
+  const values = ['text', 'stats', 'AIImages', 'inbox', 'removed', 'links', 'tags', 'favorites', 'history'] // listed in api docs
   const isValid = values.includes(section)
   if (section && isValid) {
     state[section + 'IsVisible'] = true
@@ -150,8 +150,8 @@ dialog#sidebar.sidebar.is-pinnable(v-if="visible" :open="visible" @click.left.st
             img.icon.remove-undo(src="@/assets/undo.svg")
         .segmented-buttons
           //- Favorites
-          button(@click.left="toggleSection('debug')" :class="{ active: state.debugIsVisible}" title="Debug Space History")
-            span Debug
+          button(@click.left="toggleSection('history')" :class="{ active: state.historyIsVisible}" title="Space History")
+            img.icon(src="@/assets/time.svg")
 
       //- Pin
       .title-row
@@ -167,7 +167,7 @@ dialog#sidebar.sidebar.is-pinnable(v-if="visible" :open="visible" @click.left.st
   Text(:visible="state.textIsVisible")
   Inbox(:visible="state.inboxIsVisible")
   Favorites(:visible="state.favoritesIsVisible")
-  Debug(:visible="state.debugIsVisible")
+  History(:visible="state.historyIsVisible")
 
 </template>
 

@@ -128,46 +128,46 @@ const copyOperation = async (event, operation) => {
 </script>
 
 <template lang="pug">
-section.debug(v-if="props.visible")
-  .row.title-row
-    div
-      span.badge.info Beta
-      span Space History Log
-      Loader(:visible="state.isLoading" :isSmall="true")
-    div
-      .button-wrap(v-if="!state.isLoading")
-        button.small-button(@click="refreshOperations")
-          img.icon(src="@/assets/refresh.svg")
-      .button-wrap(v-if="!state.isLoading")
-        button.small-button(@click="copyOperations")
-          img.icon(src="@/assets/copy.svg")
-    //-     span Inbox
-  OfflineBadge
+template(v-if="props.visible")
+  section.history
+    .row.title-row
+      div
+        span Space History
+        Loader(:visible="state.isLoading" :isSmall="true")
+      div
+        .button-wrap(v-if="!state.isLoading")
+          button.small-button(@click="refreshOperations")
+            img.icon(src="@/assets/refresh.svg")
+        .button-wrap(v-if="!state.isLoading")
+          button.small-button(@click="copyOperations")
+            img.icon(src="@/assets/copy.svg")
+    .row
+      .badge.info While History is in Beta, it is mainly for debugging sync issues
+    OfflineBadge
 
-section.results-section.debug(v-if="props.visible")
-  ul.results-list
-    template(v-for="operation in state.operations" :key="operation.id")
-      li(@click="select(operation)" :class="{active: isSelected(operation)}")
-        //- time
-        template(v-if="relativeDate(operation)")
-          span.badge.status.inline-badge
-            img.icon.time(src="@/assets/time.svg")
-            span {{ relativeDate(operation) }}
-        //- user
-        template(v-if="user(operation)")
-          User(:user="user(operation)" :isClickable="false" :isSmall="true" :hideYouLabel="true")
-        //- operation
-        span {{operation.name}}
-        template(v-if="isSelected(operation)")
-          p(@click.stop) {{operation}}
-          .button-wrap.copy-button
-            button.small-button(@click.stop="copyOperation($event, operation)")
-              img.icon(src="@/assets/copy.svg")
-
+  section.results-section.history
+    ul.results-list
+      template(v-for="operation in state.operations" :key="operation.id")
+        li(@click="select(operation)" :class="{active: isSelected(operation)}")
+          //- time
+          template(v-if="relativeDate(operation)")
+            span.badge.status.inline-badge
+              img.icon.time(src="@/assets/time.svg")
+              span {{ relativeDate(operation) }}
+          //- user
+          template(v-if="user(operation)")
+            User(:user="user(operation)" :isClickable="false" :isSmall="true" :hideYouLabel="true")
+          //- operation
+          span {{operation.name}}
+          template(v-if="isSelected(operation)")
+            p(@click.stop) {{operation}}
+            .button-wrap.copy-button
+              button.small-button(@click.stop="copyOperation($event, operation)")
+                img.icon(src="@/assets/copy.svg")
 </template>
 
 <style lang="stylus">
-section.debug
+section.history
   .loader
     margin-left 6px
     vertical-align -2px
