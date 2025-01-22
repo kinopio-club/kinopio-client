@@ -2,22 +2,12 @@
 import { reactive, computed, onMounted, onBeforeUnmount, defineProps, defineEmits, watch, ref, nextTick } from 'vue'
 import { useStore } from 'vuex'
 
-// import utils from '@/utils.js'
+const rowElement = ref(null)
 
 const store = useStore()
 
-let unsubscribe
-
 onMounted(() => {
-  // updateOperations()
-  // unsubscribe = store.subscribe(mutation => {
-  //   if (mutation.type === 'currentSpace/changeSpace') {
-  //     clearOperations()
-  //   }
-  // })
-})
-onBeforeUnmount(() => {
-  // unsubscribe()
+  updateSize()
 })
 
 const props = defineProps({
@@ -25,24 +15,29 @@ const props = defineProps({
 })
 watch(() => props.visible, (value, prevValue) => {
   if (value) {
-    // update()
+    updateSize()
   }
 })
 
 const state = reactive({
+  size: null
 })
 
-const update = async () => {
+const updateSize = async () => {
+  const element = rowElement.value
+  const rect = element.getBoundingClientRect()
+  state.size = rect.width
 }
 </script>
 
 <template lang="pug">
 template(v-if="props.visible")
   section.minimap
-    .row.title-row
-      div
-        span Minimap
-  //- section.results-section.minimap
+    .row.title-row(ref="rowElement")
+      span Minimap
+    .row
+      p {{state.size}}
+      //- Minimap(:visible="props.visible" :size="state.size")
 </template>
 
 <style lang="stylus">
