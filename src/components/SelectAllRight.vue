@@ -11,17 +11,20 @@ const store = useStore()
 const xCenterOffset = 12
 
 onMounted(() => {
+  window.addEventListener('mousedown', updateIsMetaKey)
   window.addEventListener('mousemove', handleMouseMove)
   window.addEventListener('mouseup', handleMouseUp)
 })
 onBeforeUnmount(() => {
+  window.removeEventListener('mousedown', updateIsMetaKey)
   window.removeEventListener('mousemove', handleMouseMove)
   window.removeEventListener('mouseup', handleMouseUp)
 })
 
 const state = reactive({
   isVisible: false,
-  positionX: 250
+  positionX: 250,
+  isMetaKey: false
 })
 
 const canEditSpace = computed(() => store.getters['currentUser/canEditSpace']())
@@ -41,10 +44,16 @@ const isVisible = computed(() => {
 // style
 
 const userColor = computed(() => store.state.currentUser.color)
-const colorClasses = computed(() => {
+const iconClasses = computed(() => {
   let classes = utils.colorClasses({ backgroundColor: userColor.value })
+  if (state.isMetaKey) {
+    classes.push('reverse')
+  }
   return classes
 })
+const updateIsMetaKey = (event) => {
+  state.isMetaKey = event.metaKey || event.ctrlKey
+}
 
 // position
 
@@ -73,6 +82,7 @@ const handleMouseMove = (event) => {
   if (store.state.currentUserIsDraggingCard) { return }
   if (store.state.currentUserIsDraggingBox) { return }
   if (store.state.isEmbedMode) { return }
+  updateIsMetaKey(event)
   const edgeThreshold = 30
   const position = utils.cursorPositionInViewport(event)
   const isInThreshold = position.y <= edgeThreshold
@@ -95,11 +105,13 @@ const handleMouseMove = (event) => {
 const handleMouseDown = (event) => {
   updateIsSelectingX(true)
   throttledSelectItems(event)
+  updateIsMetaKey(event)
 }
 const handleMouseUp = (event) => {
   if (!isSelectingX.value) { return }
   updateIsSelectingX(false)
   throttledSelectItems(event)
+  updateIsMetaKey(event)
   state.isVisible = false
 }
 const throttledSelectItems = throttle((event) => {
@@ -109,8 +121,7 @@ const throttledSelectItems = throttle((event) => {
 const selectItems = (event) => {
   let position = utils.cursorPositionInSpace(event)
   store.commit('preventMultipleSelectedActionsIsVisible', true)
-  const isMetaKey = event.metaKey || event.ctrlKey
-  if (isMetaKey) {
+  if (state.isMetaKey) {
     store.commit('triggerSelectAllItemsLeftOfCursor', position)
   } else {
     store.commit('triggerSelectAllItemsRightOfCursor', position)
@@ -121,7 +132,7 @@ const selectItems = (event) => {
 <template lang="pug">
 .select-all-right(v-if="isVisible" :style="{ left: state.positionX + 'px' }")
   .badge.label-badge(:style="{ 'background-color': userColor }" @mousedown="handleMouseDown")
-    img.icon(src="@/assets/brush-x.svg" :class="colorClasses")
+    img.icon(src="@/assets/brush-x.svg" :class="iconClasses")
     .pointer(:style="{ 'background-color': userColor }" :class="{ 'is-selecting': isSelectingX }")
 </template>
 
@@ -154,6 +165,8 @@ const selectItems = (event) => {
     margin-left 6px
     margin-right 8px
     pointer-events none
+    &.reverse
+      transform scaleX(-1)
 
   .pointer
     position absolute
