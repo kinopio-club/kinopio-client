@@ -128,7 +128,7 @@ const copyOperation = async (event, operation) => {
 </script>
 
 <template lang="pug">
-section.debug(v-if="visible")
+section.debug(v-if="props.visible")
   .row.title-row
     div
       span.badge.info Beta
@@ -144,7 +144,7 @@ section.debug(v-if="visible")
     //-     span Inbox
   OfflineBadge
 
-section.results-section.debug
+section.results-section.debug(v-if="props.visible")
   ul.results-list
     template(v-for="operation in state.operations" :key="operation.id")
       li(@click="select(operation)" :class="{active: isSelected(operation)}")
