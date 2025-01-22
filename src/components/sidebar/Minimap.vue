@@ -40,9 +40,9 @@ template(v-if="props.visible")
     .row.title-row(ref="rowElement")
       span Minimap
     .row
-      p {{state.size}}
-    .row
       MinimapCanvas(:visible="Boolean(state.size)" :size="state.size")
+  //- TODO section jump to box
+  //- list boxes
 </template>
 
 <style lang="stylus">
