@@ -148,18 +148,22 @@ const viewportStyle = computed(() => {
 
 // TODO
 const scrollToPosition = (event) => {
-  if (state.wasPanned) { return }
+  if (state.wasPanned) {
+    state.wasPanned = false
+    return
+  }
   state.wasPanned = false
-  console.log(event)
+  console.log('🍇🍇🍇', event)
 }
 const startPanningViewport = (event) => {
   state.isPanningViewport = true
   // startPanningPosition = utils.cursorPositionInPage(event)
   // jump to pos
   // hold and drag to pan , via window.scrollBy
-  console.log('🌺', state.isPanningViewport)
+  // console.log('🌺 state.isPanningViewport', state.isPanningViewport)
 }
 const panViewport = (event) => {
+  if (!state.isPanningViewport) { return }
   state.wasPanned = true
 }
 const endPanningViewport = (event) => {
