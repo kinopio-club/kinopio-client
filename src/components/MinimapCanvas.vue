@@ -6,7 +6,7 @@ import utils from '@/utils.js'
 
 const store = useStore()
 
-// let unsubscribe
+let unsubscribe
 
 const canvasElement = ref(null)
 
@@ -20,9 +20,15 @@ onMounted(() => {
   window.addEventListener('scroll', updateScroll)
   window.addEventListener('resize', init)
   window.addEventListener('pointerup', endPanningViewport)
+  // TODO subscriber to when card/box commit create , move/update => init()
+  unsubscribe = store.subscribe(mutation => {
+    // if (mutation.type === 'triggerUpdateOtherCard') {
+    //   mutation.payload
+    // }
+  })
 })
 onBeforeUnmount(() => {
-  // unsubscribe()
+  unsubscribe()
   window.removeEventListener('scroll', updateScroll)
   window.removeEventListener('resize', init)
 })
@@ -63,11 +69,13 @@ const styles = computed(() => {
 // canvas
 
 const init = async () => {
+  if (!props.visible) { return }
   await initCanvas()
   if (!canvas) { return }
-  drawCards()
-  // drawboxes
+  drawBoxes()
   // drawConnections?
+
+  drawCards()
 }
 const initCanvas = async () => {
   await nextTick()
@@ -88,9 +96,36 @@ const initCanvas = async () => {
   context.clearRect(0, 0, canvas.width, canvas.height)
 }
 
+// boxes
+
+const drawBoxes = () => {
+  let boxes = store.getters['currentBoxes/all']
+  boxes = utils.clone(boxes)
+  boxes = boxes.map(box => {
+    box.x = box.x * ratio.value
+    box.y = box.y * ratio.value
+    box.width = box.resizeWidth * ratio.value
+    box.height = box.resizeHeight * ratio.value
+    return box
+  })
+  boxes.forEach(box => {
+    let rect = new Path2D()
+    rect.roundRect(box.x, box.y, box.width, box.height, itemRadius)
+    context.strokeStyle = box.color
+    context.lineWidth = 1
+    context.stroke(rect)
+    if (box.fill === 'filled') {
+      context.fillStyle = box.color
+      context.globalAlpha = 0.5
+      context.fill(rect)
+      context.globalAlpha = 1
+    }
+  })
+}
+
 // cards
 
-const drawCards = async () => {
+const drawCards = () => {
   const defaultColor = utils.cssVariable('secondary-background')
   let cards = store.getters['currentCards/all']
   cards = utils.clone(cards)
@@ -102,9 +137,10 @@ const drawCards = async () => {
     return card
   })
   cards.forEach(card => {
-    context.roundRect(card.x, card.y, card.width, card.height, itemRadius)
+    let rect = new Path2D()
+    rect.roundRect(card.x, card.y, card.width, card.height, itemRadius)
     context.fillStyle = card.backgroundColor || defaultColor
-    context.fill()
+    context.fill(rect)
   })
 }
 
