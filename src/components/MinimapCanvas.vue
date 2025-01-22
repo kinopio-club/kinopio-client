@@ -73,8 +73,7 @@ const init = async () => {
   await initCanvas()
   if (!canvas) { return }
   drawBoxes()
-  // drawConnections?
-
+  drawConnections()
   drawCards()
 }
 const initCanvas = async () => {
@@ -94,6 +93,36 @@ const initCanvas = async () => {
   canvas.style.height = state.pageHeight + 'px'
   context.scale(window.devicePixelRatio, window.devicePixelRatio)
   context.clearRect(0, 0, canvas.width, canvas.height)
+}
+
+// connections
+
+const updatePointWithRatio = (point) => {
+  point.x = point.x * ratio.value
+  point.y = point.y * ratio.value
+  return point
+}
+const drawConnections = () => {
+  const connectionTypes = store.getters['currentConnections/allTypes']
+  const connections = store.getters['currentConnections/all']
+  for (const connection of connections) {
+    context.lineWidth = 1
+    context.lineCap = 'round'
+    const type = connectionTypes.find(connectionType => connectionType.id === connection.connectionTypeId)
+    if (!type) { continue }
+    context.strokeStyle = type.color
+    // update path with ratio
+    let path = connection.path
+    let startCoords = utils.startCoordsFromConnectionPath(path)
+    let endCoords = utils.endCoordsFromConnectionPath(path)
+    let controlPoint = utils.curveControlPointFromPath(path)
+    startCoords = updatePointWithRatio(startCoords)
+    endCoords = updatePointWithRatio(endCoords)
+    controlPoint = updatePointWithRatio(controlPoint)
+    path = `m${startCoords.x},${startCoords.y} q${controlPoint.x},${controlPoint.y} ${endCoords.x},${endCoords.y}`
+    path = new Path2D(path)
+    context.stroke(path)
+  }
 }
 
 // boxes
