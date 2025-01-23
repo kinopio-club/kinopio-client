@@ -20,6 +20,7 @@ onMounted(() => {
   window.addEventListener('scroll', updateScroll)
   window.addEventListener('resize', init)
   window.addEventListener('pointerup', endPanningViewport)
+  window.addEventListener('pointermove', panViewport)
   // TODO subscriber to when card/box commit create , move/update => init()
   unsubscribe = store.subscribe(mutation => {
     // if (mutation.type === 'triggerUpdateOtherCard') {
@@ -31,6 +32,8 @@ onBeforeUnmount(() => {
   unsubscribe()
   window.removeEventListener('scroll', updateScroll)
   window.removeEventListener('resize', init)
+  window.removeEventListener('pointerup', endPanningViewport)
+  window.removeEventListener('pointermove', panViewport)
 })
 
 const emit = defineEmits(['updateCount'])
@@ -213,6 +216,7 @@ const viewportStyle = computed(() => {
 
 const minimapPosition = (event) => {
   const element = event.target.closest('.minimap-canvas')
+  if (!element) { return }
   const rect = element.getBoundingClientRect()
   let x = event.clientX - rect.left
   let y = event.clientY - rect.top
@@ -241,6 +245,7 @@ const startPanningViewport = (event) => {
 const panViewport = (event) => {
   if (!state.isPanningViewport) { return }
   const position = minimapPosition(event)
+  if (!position) { return }
   const delta = {
     x: position.x - state.prevPosition.x,
     y: position.y - state.prevPosition.y
@@ -254,7 +259,7 @@ const endPanningViewport = (event) => {
 </script>
 
 <template lang="pug">
-.minimap-canvas(v-if="props.visible" :style="styles" @pointerdown="startPanningViewport" @pointermove="panViewport")
+.minimap-canvas(v-if="props.visible" :style="styles" @pointerdown="startPanningViewport")
   canvas#minimap-canvas(ref="canvasElement")
   .viewport.blink(:style="viewportStyle")
 </template>

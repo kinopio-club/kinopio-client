@@ -3,6 +3,7 @@ import { reactive, computed, onMounted, onBeforeUnmount, defineProps, defineEmit
 import { useStore } from 'vuex'
 
 import MinimapCanvas from '@/components/MinimapCanvas.vue'
+import utils from '@/utils.js'
 
 const rowElement = ref(null)
 
@@ -32,6 +33,22 @@ const updateSize = async () => {
   const rect = element.getBoundingClientRect()
   state.size = rect.width
 }
+
+// boxes
+
+const boxes = computed(() => {
+  let items = store.getters['currentBoxes/all']
+  items = utils.sortByY(items)
+  return items
+})
+const boxColorClasses = (box) => {
+  console.log(utils.colorClasses({ backgroundColor: box.color }))
+  return utils.colorClasses({ backgroundColor: box.color })
+}
+const scrollIntoView = (box) => {
+  const element = utils.boxElementFromId(box.id)
+  store.commit('scrollElementIntoView', { element })
+}
 </script>
 
 <template lang="pug">
@@ -41,8 +58,13 @@ template(v-if="props.visible")
       span Minimap
     .row
       MinimapCanvas(:visible="Boolean(state.size)" :size="state.size")
-  //- TODO section jump to box
-  //- list boxes
+  section(v-if="boxes.length")
+    .row
+      p Jump to Box
+    .row
+      template(v-for="box in boxes" :key="box.id")
+        .badge.button-badge(:style="{background: box.color}" :class="boxColorClasses(box)" @click="scrollIntoView(box)")
+          span {{box.name}}
 </template>
 
 <style lang="stylus">
