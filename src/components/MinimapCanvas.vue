@@ -15,17 +15,39 @@ const itemRadius = 1
 let canvas, context
 let startPanningPosition
 
-onMounted(() => {
+onMounted(async () => {
   init()
   window.addEventListener('scroll', updateScroll)
   window.addEventListener('resize', init)
   window.addEventListener('pointerup', endPanningViewport)
   window.addEventListener('pointermove', panViewport)
-  // TODO subscriber to when card/box commit create , move/update => init()
-  unsubscribe = store.subscribe(mutation => {
-    // if (mutation.type === 'triggerUpdateOtherCard') {
-    //   mutation.payload
-    // }
+  unsubscribe = store.subscribe(async mutation => {
+    const type = mutation.type
+    const mutations = [
+      'isLoadingSpace',
+      'currentSpace/loadSpace',
+      'currentCards/update',
+      'currentCards/updateMultiple',
+      'currentCards/remove',
+      'currentCards/removeResize',
+      'currentCards/move',
+      'currentCards/resize',
+      'currentCards/paste',
+      'currentCards/add',
+      'currentBoxes/add',
+      'currentBoxes/update',
+      'currentBoxes/resize',
+      'currentBoxes/move',
+      'currentConnections/add',
+      'currentConnections/update',
+      'currentConnections/updatePaths',
+      'currentConnections/updateMultiplePaths',
+      'currentConnections/remove'
+    ]
+    if (mutations.includes(mutation.type)) {
+      await nextTick()
+      init()
+    }
   })
 })
 onBeforeUnmount(() => {

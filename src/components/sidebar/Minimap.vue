@@ -42,7 +42,6 @@ const boxes = computed(() => {
   return items
 })
 const boxColorClasses = (box) => {
-  console.log(utils.colorClasses({ backgroundColor: box.color }))
   return utils.colorClasses({ backgroundColor: box.color })
 }
 const scrollIntoView = (box) => {
