@@ -236,7 +236,7 @@ const viewportStyle = computed(() => {
 
 // pan viewport
 
-const minimapPosition = (event) => {
+const positionInSpace = (event) => {
   const element = event.target.closest('.minimap-canvas')
   if (!element) { return }
   const rect = element.getBoundingClientRect()
@@ -255,7 +255,7 @@ const positionInViewportCenter = (position) => {
 }
 const startPanningViewport = (event) => {
   state.isPanningViewport = true
-  const position = minimapPosition(event)
+  const position = positionInSpace(event)
   const centerPosition = positionInViewportCenter(position)
   window.scrollTo({
     top: centerPosition.y,
@@ -266,7 +266,7 @@ const startPanningViewport = (event) => {
 }
 const panViewport = (event) => {
   if (!state.isPanningViewport) { return }
-  const position = minimapPosition(event)
+  const position = positionInSpace(event)
   if (!position) { return }
   const delta = {
     x: position.x - state.prevPosition.x,
