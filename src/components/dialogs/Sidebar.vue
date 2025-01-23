@@ -28,7 +28,6 @@ onMounted(() => {
       toggleSection('AIImages')
     } else if (mutation.type === 'triggerMinimapIsVisible') {
       toggleSection('minimap')
-      console.log('🌺🌺🌺')
     }
   })
 })
