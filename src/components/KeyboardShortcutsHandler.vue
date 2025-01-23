@@ -260,6 +260,9 @@ const handleMetaKeyShortcuts = (event) => {
   }
 }
 // on mouse down
+const isOnMinimap = (event) => {
+  return Boolean(event.target.closest('#space-minimap'))
+}
 const handleMouseDownEvents = (event) => {
   const rightMouseButton = 2
   const middleMouseButton = 1
@@ -283,11 +286,15 @@ const handleMouseDownEvents = (event) => {
     prevRightClickPosition = utils.cursorPositionInViewport(event)
     prevRightClickTime = utils.unixTime()
     event.preventDefault()
-    store.dispatch('currentUserIsPanning', true)
+    if (!isOnMinimap(event)) {
+      store.dispatch('currentUserIsPanning', true)
+    }
     disableContextMenu = true
   } else if (store.state.currentUserIsPanningReady) {
     event.preventDefault()
-    store.dispatch('currentUserIsPanning', true)
+    if (!isOnMinimap(event)) {
+      store.dispatch('currentUserIsPanning', true)
+    }
   }
   if (isRightClick && userDisablePan) {
     if (!isCanvasScope(event)) { return }

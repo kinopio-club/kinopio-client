@@ -34,6 +34,7 @@ import SpaceBackground from '@/components/SpaceBackground.vue'
 import SpaceBackgroundTint from '@/components/SpaceBackgroundTint.vue'
 import OutsideSpaceBackground from '@/components/OutsideSpaceBackground.vue'
 import Preload from '@/components/Preload.vue'
+import MinimapCanvas from '@/components/MinimapCanvas.vue'
 
 import utils from '@/utils.js'
 import cache from '@/cache.js'
@@ -131,6 +132,7 @@ const state = reactive({
 const unlockedCards = computed(() => store.getters['currentCards/isNotLocked'])
 const isPainting = computed(() => store.state.currentUserIsPainting)
 const isPanningReady = computed(() => store.state.currentUserIsPanningReady)
+const isPanning = computed(() => store.state.currentUserIsPanning)
 const spaceIsReadOnly = computed(() => !store.getters['currentUser/canEditSpace']())
 const canEditSpace = computed(() => store.getters['currentUser/canEditSpace']())
 const isDrawingConnection = computed(() => store.state.currentUserIsDrawingConnection)
@@ -430,6 +432,10 @@ const showMultipleSelectedActions = (event) => {
   }
 }
 
+// minimap
+
+const minimapIsVisible = computed(() => isPanningReady.value || isPanning.value)
+
 // interactions
 
 const isInteracting = computed(() => {
@@ -642,6 +648,8 @@ Header
 Footer
 TagDetails
 UserDetails
+#space-minimap.minimap-canvas-wrap(v-if="minimapIsVisible")
+  MinimapCanvas(:visible="true" :size="200")
 //- handlers
 WindowHistoryHandler
 KeyboardShortcutsHandler
@@ -676,4 +684,8 @@ Preload
     pointer-events none !important
     cursor default
 
+.minimap-canvas-wrap
+  position fixed
+  right 8px
+  top 120px
 </style>
