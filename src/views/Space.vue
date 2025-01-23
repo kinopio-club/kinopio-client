@@ -687,5 +687,5 @@ Preload
 .minimap-canvas-wrap
   position fixed
   right 8px
-  top 120px
+  bottom 50px
 </style>
