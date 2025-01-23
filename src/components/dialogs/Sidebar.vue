@@ -26,6 +26,9 @@ onMounted(() => {
       toggleSection('removed')
     } else if (mutation.type === 'triggerAIImagesIsVisible') {
       toggleSection('AIImages')
+    } else if (mutation.type === 'triggerMinimapIsVisible') {
+      toggleSection('minimap')
+      console.log('🌺🌺🌺')
     }
   })
 })

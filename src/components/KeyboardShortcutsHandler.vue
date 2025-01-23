@@ -118,6 +118,9 @@ const handleShortcuts = (event) => {
     store.dispatch('currentSpace/addSpace')
     store.commit('addNotification', { message: 'New space created (N)', icon: 'add', type: 'success' })
     store.commit('triggerSpaceDetailsInfoIsVisible')
+  // m
+  } else if (key === 'm' && isSpaceScope) {
+    store.commit('triggerMinimapIsVisible')
   // t
   } else if (key === 't' && isSpaceScope) {
     store.commit('addNotification', { message: 'Theme toggled (T)', type: 'info' })

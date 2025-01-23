@@ -639,6 +639,7 @@ const store = createStore({
     triggerUpdateUrlPreviewComplete: (state, cardId) => {},
     triggerRemovedIsVisible: () => {},
     triggerAIImagesIsVisible: () => {},
+    triggerMinimapIsVisible: () => {},
     triggerClearAllSpaceFilters: () => {},
     triggerScrollUserDetailsIntoView: () => {},
     triggerUpdateLockedItemButtonPositionCardId: (state, cardId) => {},
