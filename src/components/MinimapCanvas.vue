@@ -214,12 +214,12 @@ const viewportStyle = computed(() => {
   let top = (state.scrollY * zoom) * ratio.value
   // constraints
   if (Math.round(left + width) > state.pageWidth) {
-    left = 0
-    width = state.pageWidth
+    left = Math.min(left, state.pageWidth)
+    width = state.pageWidth - left
   }
   if (Math.round(top + height) > state.pageHeight) {
-    top = 0
-    height = state.pageHeight
+    top = Math.min(top, state.pageHeight)
+    height = state.pageHeight - top
   }
   let styles = {
     left: `${left}px`,
