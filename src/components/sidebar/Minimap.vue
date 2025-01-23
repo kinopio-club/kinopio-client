@@ -58,13 +58,17 @@ template(v-if="props.visible")
       span Minimap
     .row
       MinimapCanvas(:visible="Boolean(state.size)" :size="state.size")
-  section.minimap(v-if="boxes.length")
+  section.minimap
     .row
       p Jump to Box
-    .row.boxes-row
+    .row.boxes-row(v-if="boxes.length")
       template(v-for="box in boxes" :key="box.id")
         .badge.button-badge(:style="{background: box.color}" :class="boxColorClasses(box)" @click="scrollIntoView(box)")
           span {{box.name}}
+    .row(v-else)
+      .badge.secondary
+        img.icon.box-icon(src="@/assets/box.svg")
+        span No boxes in this space yet
 </template>
 
 <style lang="stylus">
