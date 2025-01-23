@@ -43,7 +43,7 @@ const state = reactive({
   scrollX: 0,
   scrollY: 0,
   isPanningViewport: false,
-  wasPanned: false
+  prevPosition: {}
 })
 
 watch(() => props.visible, (value, prevValue) => {
@@ -211,25 +211,42 @@ const viewportStyle = computed(() => {
 
 // pan viewport
 
-// TODO
-const scrollToPosition = (event) => {
-  if (state.wasPanned) {
-    state.wasPanned = false
-    return
-  }
-  state.wasPanned = false
-  console.log('🍇🍇🍇', event)
+const minimapPosition = (event) => {
+  const element = event.target.closest('.minimap-canvas')
+  const rect = element.getBoundingClientRect()
+  let x = event.clientX - rect.left
+  let y = event.clientY - rect.top
+  x = x / ratio.value
+  y = y / ratio.value
+  return { x, y }
+}
+const positionInViewportCenter = (position) => {
+  let x = position.x - (store.state.viewportWidth / 2)
+  let y = position.y - (store.state.viewportHeight / 2)
+  x = Math.max(0, x)
+  y = Math.max(0, y)
+  return { x, y }
 }
 const startPanningViewport = (event) => {
   state.isPanningViewport = true
-  // startPanningPosition = utils.cursorPositionInPage(event)
-  // jump to pos
-  // hold and drag to pan , via window.scrollBy
-  // console.log('🌺 state.isPanningViewport', state.isPanningViewport)
+  const position = minimapPosition(event)
+  const centerPosition = positionInViewportCenter(position)
+  window.scrollTo({
+    top: centerPosition.y,
+    left: centerPosition.x,
+    behavior: 'smooth'
+  })
+  state.prevPosition = position
 }
 const panViewport = (event) => {
   if (!state.isPanningViewport) { return }
-  state.wasPanned = true
+  const position = minimapPosition(event)
+  const delta = {
+    x: position.x - state.prevPosition.x,
+    y: position.y - state.prevPosition.y
+  }
+  window.scrollBy(delta.x, delta.y, 'instant')
+  state.prevPosition = position
 }
 const endPanningViewport = (event) => {
   state.isPanningViewport = false
@@ -237,9 +254,9 @@ const endPanningViewport = (event) => {
 </script>
 
 <template lang="pug">
-.minimap-canvas(v-if="props.visible" :style="styles" @click.stop="scrollToPosition")
+.minimap-canvas(v-if="props.visible" :style="styles" @pointerdown="startPanningViewport" @pointermove="panViewport")
   canvas#minimap-canvas(ref="canvasElement")
-  .viewport.blink(:style="viewportStyle" @pointerdown="startPanningViewport" @pointermove="panViewport")
+  .viewport.blink(:style="viewportStyle")
 </template>
 
 <style lang="stylus">
