@@ -58,15 +58,19 @@ template(v-if="props.visible")
       span Minimap
     .row
       MinimapCanvas(:visible="Boolean(state.size)" :size="state.size")
-  section(v-if="boxes.length")
+  section.minimap(v-if="boxes.length")
     .row
       p Jump to Box
-    .row
+    .row.boxes-row
       template(v-for="box in boxes" :key="box.id")
         .badge.button-badge(:style="{background: box.color}" :class="boxColorClasses(box)" @click="scrollIntoView(box)")
           span {{box.name}}
 </template>
 
 <style lang="stylus">
-// section.minimap
+section.minimap
+  .row.boxes-row
+    flex-wrap wrap
+    .badge
+      margin-bottom 10px
 </style>
