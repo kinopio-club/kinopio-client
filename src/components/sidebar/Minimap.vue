@@ -72,6 +72,7 @@ template(v-if="props.visible")
 
 <style lang="stylus">
 section.minimap
+  user-select none
   .row.boxes-row
     flex-wrap wrap
     .badge
