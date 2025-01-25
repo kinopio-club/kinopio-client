@@ -218,19 +218,19 @@ const toggleOpacity = () => {
 </script>
 
 <template lang="pug">
-dialog.narrow.color-picker(v-if="visible" :open="visible" ref="dialogElement" @click.left.stop :style="{'max-height': state.dialogHeight + 'px'}")
+dialog.narrow.color-picker(v-if="props.visible" :open="props.visible" ref="dialogElement" @click.left.stop :style="{'max-height': state.dialogHeight + 'px'}")
   section
     .row
-      .badge.full-width-color-badge(:style="{backgroundColor: currentColor}")
+      .badge.full-width-color-badge(:style="{backgroundColor: props.currentColor}")
         //- Input
         input(v-model="color" @focus="resetPinchCounterZoomDecimal" @blur="triggerUpdateHeaderAndFooterPosition" @keyup.stop.backspace :class="{ 'is-dark': isDark }" @mouseup.stop)
           //- Remove
-        button.small-button.remove-button(v-if="removeIsVisible" title="remove" @click="removeColor")
+        button.small-button.remove-button(v-if="props.removeIsVisible" title="remove" @click="removeColor")
           img.icon.cancel(src="@/assets/add.svg")
   section
     //- Colors
-    .recent-colors(v-if="recentColors")
-      template(v-for="color in recentColors")
+    .recent-colors(v-if="props.recentColors")
+      template(v-for="color in props.recentColors")
         button.color(:style="{backgroundColor: color}" :class="{active: colorIsCurrent(color)}" @click.left="select(color)" :title="color")
     .colors
       template(v-for="color in state.colors")
