@@ -60,7 +60,14 @@ const copy = async (event, type) => {
 <template lang="pug">
 dialog.narrow.user-developer-info(v-if="props.visible" :open="props.visible" @click.left.stop ref="dialogElement" :style="{'max-height': state.dialogHeight + 'px'}")
   section
-    p Developer
+    .row.title-row
+      span Developer
+      .button-wrap
+        a(href="https://help.kinopio.club/api")
+          button.small-button
+            span API Docs{{' '}}
+            img.icon.visit(src="@/assets/visit.svg")
+
   //- user id
   section
     p User Id
@@ -84,19 +91,11 @@ dialog.narrow.user-developer-info(v-if="props.visible" :open="props.visible" @cl
             img.icon.copy(src="@/assets/copy.svg")
             span Copy API Key
         p Anyone with your key can read, edit, and remove your cards and spaces
-
-  //- api docs
-  section
-    .row
-      .button-wrap
-        a(href="https://help.kinopio.club/api")
-          button
-            span API Docs{{' '}}
-            img.icon.visit(src="@/assets/visit.svg")
 </template>
 
 <style lang="stylus">
 dialog.user-developer-info
+  overflow auto
   .copy-api-keys
     padding-top 4px
     padding-bottom 4px
