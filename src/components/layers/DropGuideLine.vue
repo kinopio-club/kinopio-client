@@ -27,10 +27,11 @@ onMounted(() => {
       update.curve = createCurve(update.startPoint)
       addRemoteCurve(update)
       remotePainting()
-    }
-    if (mutation.type === 'triggerUpdateStopRemoteUserDropGuideLine') {
+    } else if (mutation.type === 'triggerUpdateStopRemoteUserDropGuideLine') {
       removeRemoteFramesByUser(mutation.payload.userId)
       remoteContext.clearRect(0, 0, remoteCanvas.width, remoteCanvas.height)
+    } else if (mutation.type === 'triggerUploadComplete') {
+      removeUploadIsDraggedOver()
     }
   })
   canvas = document.getElementById('drop-guide-line')
