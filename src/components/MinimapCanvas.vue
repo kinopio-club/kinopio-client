@@ -266,7 +266,8 @@ const startPanningViewport = (event) => {
 }
 const panViewport = (event) => {
   if (!state.isPanningViewport) { return }
-  if (utils.isMobile(event)) { return }
+  if (utils.isMobile(event)) { return } // disable touch pan because jittery
+  if (event.touches) { return } // ^
   const position = positionInSpace(event)
   if (!position) { return }
   const delta = {
@@ -289,6 +290,7 @@ const endPanningViewport = (event) => {
 
 <style lang="stylus">
 .minimap-canvas
+  touch-action none
   border-radius var(--entity-radius)
   position relative
   margin 0
