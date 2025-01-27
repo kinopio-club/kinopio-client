@@ -266,6 +266,7 @@ const startPanningViewport = (event) => {
 }
 const panViewport = (event) => {
   if (!state.isPanningViewport) { return }
+  if (utils.isMobile(event)) { return }
   const position = positionInSpace(event)
   if (!position) { return }
   const delta = {
