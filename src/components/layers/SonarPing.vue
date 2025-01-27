@@ -176,4 +176,5 @@ canvas#sonar
   position fixed
   top 0
   left 0
+  background transparent
 </style>
