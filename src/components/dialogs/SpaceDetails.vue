@@ -37,6 +37,7 @@ const props = defineProps({
 watch(() => props.visible, (value, prevValue) => {
   store.commit('clearNotificationsWithPosition')
   if (value) {
+    store.commit('shouldExplicitlyHideFooter', true)
     init()
   } else {
     store.commit('shouldExplicitlyHideFooter', false)
@@ -62,7 +63,6 @@ const init = async () => {
   }
   await updateWithRemoteSpaces()
   updateHeights()
-  store.commit('shouldExplicitlyHideFooter', true)
   store.dispatch('currentSpace/createSpacePreviewImage')
 }
 

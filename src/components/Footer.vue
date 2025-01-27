@@ -103,6 +103,12 @@ const togglePresentationMode = () => {
   store.commit('isPresentationMode', value)
 }
 
+// minimap
+
+const toggleMinimap = () => {
+  store.commit('triggerMinimapIsVisible')
+}
+
 // hide
 
 const hideOnTouch = (event) => {
@@ -178,6 +184,10 @@ const updatePositionInVisualViewport = () => {
 
   .right(v-if="controlsIsVisible" :class="{'is-embed': isEmbedMode}")
     SpaceZoom(v-if="!isPresentationMode")
+    //- minimap
+    .button-wrap.input-button-wrap.footer-button-wrap(@click.stop="toggleMinimap" @touchend.stop :class="{'hidden': state.isHiddenOnTouch}")
+      button.small-button(:class="{active: isPresentationMode, 'translucent-button': !shouldIncreaseUIContrast}" title="Toggle Minimap (M)")
+        img.icon.minimap(src="@/assets/minimap.svg")
     //- presentation mode
     .button-wrap.input-button-wrap.footer-button-wrap(@click="togglePresentationMode" @touchend.stop :class="{'hidden': state.isHiddenOnTouch}")
       button.small-button(:class="{active: isPresentationMode, 'translucent-button': !shouldIncreaseUIContrast}" title="Focus/Presentation Mode (P)")
@@ -238,6 +248,13 @@ const updatePositionInVisualViewport = () => {
     display inline-block
     button
       font-size 1rem
+
+  .footer-button-wrap + .footer-button-wrap
+    margin-left 4px
+
+  .icon.minimap
+    width 13px
+    vertical-align -1px
 
 footer
   .is-mobile-icon

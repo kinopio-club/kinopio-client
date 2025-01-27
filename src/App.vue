@@ -1087,6 +1087,10 @@ code
     &.notification-button-badge
       right -3px
       top -3px
+  &.is-background-light
+    color var(--primary-on-light-background)
+  &.is-background-dark
+    color var(--primary-on-dark-background)
 
   input
     margin 0

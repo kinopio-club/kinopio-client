@@ -77,6 +77,7 @@
     img.icon(src="@/assets/key.svg")
     img.icon(src="@/assets/mail.svg")
     img.icon(src="@/assets/magnifying-glass.svg")
+    img.icon(src="@/assets/magnifying-glass-negative.svg")
     img.icon(src="@/assets/marker.svg")
     img.icon(src="@/assets/merge.svg")
     img.icon(src="@/assets/minimap.svg")

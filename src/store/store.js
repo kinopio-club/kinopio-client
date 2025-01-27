@@ -74,6 +74,7 @@ const store = createStore({
     zoomOrigin: { x: 0, y: 0 },
     isPinchZooming: false,
     isTouchScrolling: false,
+    minimapIsExplicitlyVisible: false,
 
     // search
     searchIsVisible: false,
@@ -468,6 +469,9 @@ const store = createStore({
     isTouchScrolling: (state, value) => {
       state.isTouchScrolling = value
     },
+    minimapIsExplicitlyVisible: (state, value) => {
+      state.minimapIsExplicitlyVisible = value
+    },
     currentSpacePath: (state, value) => {
       utils.typeCheck({ value, type: 'string' })
       state.currentSpacePath = value
@@ -639,6 +643,7 @@ const store = createStore({
     triggerUpdateUrlPreviewComplete: (state, cardId) => {},
     triggerRemovedIsVisible: () => {},
     triggerAIImagesIsVisible: () => {},
+    triggerMinimapIsVisible: () => {},
     triggerClearAllSpaceFilters: () => {},
     triggerScrollUserDetailsIntoView: () => {},
     triggerUpdateLockedItemButtonPositionCardId: (state, cardId) => {},

@@ -29,8 +29,8 @@ let prevCardId, prevCardName
 let previousTags = []
 let compositionEventEndTime = 0
 
-const openingPreDuration = 250 // ms
-const openingDuration = 250 // ms
+const openingPreDuration = 5 // ms
+const openingDuration = 400 // ms
 let openingAnimationTimer, openingStartTime, shouldCancelOpening
 
 const store = useStore()

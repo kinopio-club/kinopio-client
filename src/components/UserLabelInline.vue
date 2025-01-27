@@ -91,7 +91,7 @@ span.user-label-inline-wrap(:title="title")
 .user-label-inline
   display inline-block
   min-height initial
-  padding 0 2px
+  padding 0 4px
   background var(--secondary-background)
   .icon.camera,
   .anon-avatar

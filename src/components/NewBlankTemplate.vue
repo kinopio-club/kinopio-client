@@ -49,7 +49,7 @@ const incrementBy = () => {
 .component-name(v-if="props.visible")
   button(@click="incrementBy")
     span Count is: {{ state.count }}
-  p Current theme is: {{ themeName }}, prop is {{ visible }}
+  p Current theme is: {{ themeName }}, prop is {{ props.visible }}
 </template>
 
 <style lang="stylus">

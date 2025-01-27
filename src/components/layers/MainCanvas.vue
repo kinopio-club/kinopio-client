@@ -128,6 +128,8 @@ const triggerHideTouchInterface = () => {
   store.commit('triggerHideTouchInterface')
 }
 const isCanvasScope = (event) => {
+  const fromDialog = event.target.closest('dialog')
+  if (fromDialog) { return }
   const tagName = event.target.tagName
   return tagName === 'CANVAS'
 }

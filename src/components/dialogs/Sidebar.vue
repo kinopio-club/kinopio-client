@@ -13,6 +13,7 @@ import Text from '@/components/sidebar/Text.vue'
 import Inbox from '@/components/sidebar/Inbox.vue'
 import Favorites from '@/components/sidebar/Favorites.vue'
 import History from '@/components/sidebar/History.vue'
+import Minimap from '@/components/sidebar/Minimap.vue'
 
 const store = useStore()
 
@@ -25,6 +26,8 @@ onMounted(() => {
       toggleSection('removed')
     } else if (mutation.type === 'triggerAIImagesIsVisible') {
       toggleSection('AIImages')
+    } else if (mutation.type === 'triggerMinimapIsVisible') {
+      toggleSection('minimap')
     }
   })
 })
@@ -52,7 +55,8 @@ const state = reactive({
   statsIsVisible: false,
   textIsVisible: false,
   favoritesIsVisible: false,
-  historyIsVisible: false
+  historyIsVisible: false,
+  minimapIsVisible: false
 })
 
 const clearVisible = () => {
@@ -65,6 +69,7 @@ const clearVisible = () => {
   state.textIsVisible = false
   state.favoritesIsVisible = false
   state.historyIsVisible = false
+  state.minimapIsVisible = false
 }
 
 const updateDialogHeight = async () => {
@@ -99,7 +104,7 @@ const toggleSection = (value) => {
 const restoreUserLastSidebarSection = () => {
   clearVisible()
   const section = store.state.currentUser.lastSidebarSection
-  const values = ['text', 'stats', 'AIImages', 'inbox', 'removed', 'links', 'tags', 'favorites', 'history'] // listed in api docs
+  const values = ['text', 'stats', 'AIImages', 'inbox', 'removed', 'links', 'tags', 'favorites', 'history', 'minimap'] // listed in api docs
   const isValid = values.includes(section)
   if (section && isValid) {
     state[section + 'IsVisible'] = true
@@ -134,6 +139,9 @@ dialog#sidebar.sidebar.is-pinnable(v-if="visible" :open="visible" @click.left.st
             span Links
         //- second row
         .segmented-buttons
+          //- Minimap
+          button(@click.left="toggleSection('minimap')" :class="{ active: state.minimapIsVisible}" title="Minimap")
+            img.icon.minimap(src="@/assets/minimap.svg")
           //- Favorites
           button(@click.left="toggleSection('favorites')" :class="{ active: state.favoritesIsVisible}" title="Favorites")
             img.icon(src="@/assets/heart-empty.svg")
@@ -151,7 +159,7 @@ dialog#sidebar.sidebar.is-pinnable(v-if="visible" :open="visible" @click.left.st
         .segmented-buttons
           //- Favorites
           button(@click.left="toggleSection('history')" :class="{ active: state.historyIsVisible}" title="Space History")
-            img.icon(src="@/assets/time.svg")
+            img.icon.time(src="@/assets/time.svg")
 
       //- Pin
       .title-row
@@ -168,6 +176,7 @@ dialog#sidebar.sidebar.is-pinnable(v-if="visible" :open="visible" @click.left.st
   Inbox(:visible="state.inboxIsVisible")
   Favorites(:visible="state.favoritesIsVisible")
   History(:visible="state.historyIsVisible")
+  Minimap(:visible="state.minimapIsVisible")
 
 </template>
 
@@ -193,6 +202,10 @@ dialog#sidebar.sidebar.is-pinnable(v-if="visible" :open="visible" @click.left.st
   .icon.flower
     vertical-align -1px
     height 11px
+  .icon.minimap
+    vertical-align -2px
+  .icon.time
+    vertical-align -1px
 
   .segmented-buttons + .segmented-buttons
     margin-left 0
@@ -212,8 +225,8 @@ dialog#sidebar.sidebar.is-pinnable(v-if="visible" :open="visible" @click.left.st
           &:first-child
             border-top-left-radius 0
             border-bottom-left-radius 0
-          &:last-child
-            border-top-right-radius 0
+          // &:last-child
+            // border-top-right-radius 0
       // last row
       &:last-child
         button,
