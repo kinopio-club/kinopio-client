@@ -434,7 +434,7 @@ const showMultipleSelectedActions = (event) => {
 
 // minimap
 
-const minimapIsVisible = computed(() => isPanningReady.value || isPanning.value || store.state.isTouchScrolling || store.state.isPinchZooming || store.state.minimapIsExplicitlyVisible)
+const minimapIsVisible = computed(() => isPanningReady.value || isPanning.value || store.state.minimapIsExplicitlyVisible)
 
 // interactions
 
