@@ -14,7 +14,7 @@ let browserZoomLevel = 0
 let disableContextMenu = false
 let spaceKeyIsDown = false
 
-let prevCursorPosition, currentCursorPosition, prevRightClickPosition
+let prevCursorPosition, currentCursorPosition, prevRightClickPosition, prevRightClickTime
 
 onMounted(() => {
   store.subscribe(mutation => {
@@ -27,9 +27,15 @@ onMounted(() => {
     } else if (mutation.type === 'triggerSelectAllItemsBelowCursor') {
       const position = mutation.payload
       selectAllItemsBelowCursor(position)
+    } else if (mutation.type === 'triggerSelectAllItemsAboveCursor') {
+      const position = mutation.payload
+      selectAllItemsAboveCursor(position)
     } else if (mutation.type === 'triggerSelectAllItemsRightOfCursor') {
       const position = mutation.payload
       selectAllItemsRightOfCursor(position)
+    } else if (mutation.type === 'triggerSelectAllItemsLeftOfCursor') {
+      const position = mutation.payload
+      selectAllItemsLeftOfCursor(position)
     }
   })
   window.addEventListener('keyup', handleShortcuts)
@@ -90,6 +96,8 @@ const checkIsButtonScope = (event) => {
   return isFromButton
 }
 const isCanvasScope = (event) => {
+  const fromDialog = event.target.closest('dialog')
+  if (fromDialog) { return }
   const tagName = event.target.tagName
   return tagName === 'CANVAS'
 }
@@ -110,6 +118,9 @@ const handleShortcuts = (event) => {
     store.dispatch('currentSpace/addSpace')
     store.commit('addNotification', { message: 'New space created (N)', icon: 'add', type: 'success' })
     store.commit('triggerSpaceDetailsInfoIsVisible')
+  // m
+  } else if (key === 'm' && isSpaceScope) {
+    store.commit('triggerMinimapIsVisible')
   // t
   } else if (key === 't' && isSpaceScope) {
     store.commit('addNotification', { message: 'Theme toggled (T)', type: 'info' })
@@ -252,6 +263,9 @@ const handleMetaKeyShortcuts = (event) => {
   }
 }
 // on mouse down
+const isOnMinimap = (event) => {
+  return Boolean(event.target.closest('#space-minimap'))
+}
 const handleMouseDownEvents = (event) => {
   const rightMouseButton = 2
   const middleMouseButton = 1
@@ -272,13 +286,18 @@ const handleMouseDownEvents = (event) => {
     store.commit('currentUserBoxSelectMove', position)
     store.commit('currentUserBoxSelectStart', position)
   } else if (shouldPan) {
-    prevRightClickPosition = utils.cursorPositionInPage(event)
+    prevRightClickPosition = utils.cursorPositionInViewport(event)
+    prevRightClickTime = utils.unixTime()
     event.preventDefault()
-    store.dispatch('currentUserIsPanning', true)
+    if (!isOnMinimap(event)) {
+      store.dispatch('currentUserIsPanning', true)
+    }
     disableContextMenu = true
   } else if (store.state.currentUserIsPanningReady) {
     event.preventDefault()
-    store.dispatch('currentUserIsPanning', true)
+    if (!isOnMinimap(event)) {
+      store.dispatch('currentUserIsPanning', true)
+    }
   }
   if (isRightClick && userDisablePan) {
     if (!isCanvasScope(event)) { return }
@@ -296,13 +315,8 @@ const handleMouseMoveEvents = (event) => {
 }
 // on mouse up
 // right clicks don't trigger mouse up
-const handleMouseUpEvents = (event) => {
+const handleMouseUpEvents = async (event) => {
   const shouldPan = store.state.currentUserIsPanning
-  const cursorsAreClose = utils.cursorsAreClose(prevRightClickPosition, utils.cursorPositionInPage(event))
-  // sonar ping
-  if (shouldPan && cursorsAreClose && !store.state.multipleSelectedActionsIsVisible) {
-    store.dispatch('triggerSonarPing', event)
-  }
   // handle outside window
   const isFromOutsideWindow = event.target.nodeType === Node.DOCUMENT_NODE
   let isFromCard
@@ -314,6 +328,17 @@ const handleMouseUpEvents = (event) => {
   prevCursorPosition = undefined
   store.dispatch('currentUserIsPanning', false)
   store.commit('currentUserIsBoxSelecting', false)
+
+  // sonar ping
+  await nextTick()
+  const currentPosition = utils.cursorPositionInViewport(event)
+  const currentTime = utils.unixTime()
+  const cursorsAreClose = utils.cursorsAreClose(prevRightClickPosition, currentPosition)
+  const timeDelta = currentTime - prevRightClickTime
+  const timesAreClose = timeDelta < 400 // ms
+  if (shouldPan && cursorsAreClose && timesAreClose && !store.state.multipleSelectedActionsIsVisible) {
+    store.dispatch('triggerSonarPing', event)
+  }
 }
 // on scroll
 const handleScrollEvents = (event) => {
@@ -724,10 +749,9 @@ const handlePasteEvent = async (event) => {
   afterPaste(items)
 }
 
-// Select All Cards Below Cursor
+// Select Items Relative to cursor
 
 const selectAllItemsBelowCursor = (position) => {
-  const preventMultipleSelectedActionsIsVisible = store.state.preventMultipleSelectedActionsIsVisible
   let zoom
   if (position) {
     zoom = 1
@@ -743,27 +767,27 @@ const selectAllItemsBelowCursor = (position) => {
   let boxes = utils.clone(store.getters['currentBoxes/all'])
   boxes = boxes.filter(box => (box.y * zoom) > position.y)
   const boxIds = boxes.map(box => box.id)
-  const isItemIds = Boolean(cardIds.length || boxIds.length)
-  // select
-  if (isItemIds && preventMultipleSelectedActionsIsVisible) {
-    store.commit('multipleCardsSelectedIds', cardIds)
-    store.commit('multipleBoxesSelectedIds', boxIds)
-  } else if (isItemIds) {
-    store.commit('multipleSelectedActionsPosition', position)
-    store.commit('multipleSelectedActionsIsVisible', true)
-    store.commit('multipleCardsSelectedIds', cardIds)
-    store.commit('multipleBoxesSelectedIds', boxIds)
-  } else {
-    store.commit('multipleSelectedActionsIsVisible', false)
-    store.commit('multipleCardsSelectedIds', [])
-    store.commit('multipleBoxesSelectedIds', [])
-  }
+  selectItemIds({ position, cardIds, boxIds })
 }
-
-// Select All Cards Right Of Cursor
-
+const selectAllItemsAboveCursor = (position) => {
+  let zoom
+  if (position) {
+    zoom = 1
+  } else {
+    // is from keyboard shortcut
+    position = currentCursorPosition
+    zoom = store.getters.spaceZoomDecimal
+  }
+  // cards
+  const cards = store.getters['currentCards/isAboveY'](position.y, zoom)
+  const cardIds = cards.map(card => card.id)
+  // boxes
+  let boxes = utils.clone(store.getters['currentBoxes/all'])
+  boxes = boxes.filter(box => (box.y * zoom) < position.y)
+  const boxIds = boxes.map(box => box.id)
+  selectItemIds({ position, cardIds, boxIds })
+}
 const selectAllItemsRightOfCursor = (position) => {
-  const preventMultipleSelectedActionsIsVisible = store.state.preventMultipleSelectedActionsIsVisible
   let zoom
   if (position) {
     zoom = 1
@@ -781,8 +805,34 @@ const selectAllItemsRightOfCursor = (position) => {
     return (box.x * zoom) >= position.x
   })
   const boxIds = boxes.map(box => box.id)
+  selectItemIds({ position, cardIds, boxIds })
+}
+const selectAllItemsLeftOfCursor = (position) => {
+  let zoom
+  if (position) {
+    zoom = 1
+  } else {
+    // is from keyboard shortcut
+    position = currentCursorPosition
+    zoom = store.getters.spaceZoomDecimal
+  }
+  // cards
+  const cards = store.getters['currentCards/isLeftOfX'](position.x, zoom)
+  const cardIds = cards.map(card => card.id)
+  // boxes
+  let boxes = utils.clone(store.getters['currentBoxes/all'])
+  boxes = boxes.filter(box => {
+    return (box.x * zoom) <= position.x
+  })
+  const boxIds = boxes.map(box => box.id)
+  selectItemIds({ position, cardIds, boxIds })
+}
+
+// Select All Cards, Connections, and Boxes
+
+const selectItemIds = ({ position, cardIds, boxIds }) => {
+  const preventMultipleSelectedActionsIsVisible = store.state.preventMultipleSelectedActionsIsVisible
   const isItemIds = Boolean(cardIds.length || boxIds.length)
-  // select
   if (isItemIds && preventMultipleSelectedActionsIsVisible) {
     store.commit('multipleCardsSelectedIds', cardIds)
     store.commit('multipleBoxesSelectedIds', boxIds)
@@ -797,9 +847,6 @@ const selectAllItemsRightOfCursor = (position) => {
     store.commit('multipleBoxesSelectedIds', [])
   }
 }
-
-// Select All Cards, Connections, and Boxes
-
 const selectAllItems = () => {
   const cardIds = utils.clone(store.state.currentCards.ids)
   const connectionIds = utils.clone(store.state.currentConnections.ids)

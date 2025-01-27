@@ -189,6 +189,14 @@ section.invite-to-space
       vertical-align -3px
       .anon-avatar
         top 6px
+      &:first-child
+        .user-avatar
+          border-top-right-radius 0
+          border-bottom-right-radius 0
+      &:last-child
+        .user-avatar
+          border-top-left-radius 0
+          border-bottom-left-radius 0
   .invite-url-segmented-buttons
     margin-bottom 0
     button

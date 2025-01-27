@@ -78,7 +78,7 @@ const checkCurrentConnectionSuccess = (event) => {
   if (!event) { return }
   const position = utils.cursorPositionInViewport(event)
   const cardElement = utils.cardElementFromPosition(position.x, position.y)
-  const boxElement = event.target.closest('.box')
+  const boxElement = utils.boxElementFromConnectorPosition(position.x, position.y)
   let updates = { userId: store.state.currentUser.id }
   let isCurrentConnectionConnected
   if (cardElement) {

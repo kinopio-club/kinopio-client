@@ -719,7 +719,8 @@ export default {
     }
     return rangeArray
   },
-  normalizeToUnixTime (date) {
+  unixTime (date) {
+    date = date || new Date()
     return new Date(date).getTime()
   },
   shortRelativeTime (date) {
@@ -849,6 +850,18 @@ export default {
       color = colord(color).lighten(colorDelta).toHex()
     } else {
       color = colord(color).darken(colorDelta).toHex()
+    }
+    return color
+  },
+  safeColor (color) {
+    const brightnessThreshold = 0.5
+    const brightness = colord(color).brightness()
+    const isTooBright = brightness > 0.8
+    const isTooDark = brightness < 0.2
+    if (isTooBright) {
+      color = colord(color).darken(brightnessThreshold).toHex()
+    } else if (isTooDark) {
+      color = colord(color).lighten(brightnessThreshold).toHex()
     }
     return color
   },
@@ -1047,6 +1060,19 @@ export default {
     const x = parseInt(element.style.left)
     const y = parseInt(element.style.top)
     return { x, y }
+  },
+  boxElementFromConnectorPosition (x, y) {
+    let elements = document.elementsFromPoint(x, y)
+    let boxFromConnector
+    const boxElement = elements.find(element => {
+      const classes = Array.from(element.classList)
+      if (classes.includes('connector')) {
+        boxFromConnector = element.closest('.box')
+        return element.closest('.box')
+      }
+      return classes.includes('box-info')
+    })
+    return boxFromConnector || boxElement
   },
   boxElementFromId (boxId) {
     return document.querySelector(`.box[data-box-id="${boxId}"]`)

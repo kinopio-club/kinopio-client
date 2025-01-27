@@ -2,7 +2,6 @@
 import { reactive, computed, onMounted, onUnmounted, defineProps, defineEmits, watch, ref, nextTick } from 'vue'
 import { useStore } from 'vuex'
 
-import Pdf from '@/components/subsections/Pdf.vue'
 import Loader from '@/components/Loader.vue'
 import utils from '@/utils.js'
 const store = useStore()
@@ -89,9 +88,24 @@ const triggerSignUpOrInIsVisible = () => {
   store.dispatch('closeAllDialogs')
   store.commit('triggerSignUpOrInIsVisible')
 }
+
+// pdf
+
 const togglePdfIsVisible = () => {
   const isVisible = state.pdfIsVisible
   state.pdfIsVisible = !isVisible
+  if (state.pdfIsVisible) {
+    pdf()
+  }
+}
+const pdf = async () => {
+  try {
+    const url = await store.dispatch('api/pdf')
+    console.log('🌎 pdf url', url)
+  } catch (error) {
+    console.error('🚒 pdf', error)
+    state.unknownServerError = true
+  }
 }
 
 // json canvas
@@ -195,8 +209,8 @@ template(v-if="visible")
         button(@click.left="downloadLocalCanvas")
           img.icon.json-canvas(src="@/assets/json-canvas.svg")
           span Canvas
-
-    Pdf(:visible="state.pdfIsVisible")
+    p(v-if="state.pdfIsVisible")
+      span.badge.success PDF Sent to your Email
     .row
       .button-wrap
         button(@click.left="downloadLocalJson")
@@ -238,8 +252,6 @@ section.export
     margin-left 0
     white-space initial
   button + button
-    margin-top 10px
-  .badge.success
     margin-top 10px
   .hidden
     display none

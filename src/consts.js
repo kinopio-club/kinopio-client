@@ -20,7 +20,7 @@ export default {
   emptyCard () {
     return { width: this.defaultCardWidth, height: 32 }
   },
-  boxSnapGuideWaitingDuration: 1000,
+  boxSnapGuideWaitingDuration: 600,
   maxInviteEmailsAllowedToSend: 15,
   defaultConnectionPathCurveControlPoint: 'q90,40',
   defaultTimeout: 40000,

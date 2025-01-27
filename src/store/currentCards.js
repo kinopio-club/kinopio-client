@@ -76,7 +76,7 @@ const currentCards = {
 
     // update
 
-    update: (state, card) => {
+    update: async (state, card) => {
       if (!utils.objectHasKeys(card)) { return }
       if (!card.id) {
         console.warn('🚑 could not update card', card)
@@ -97,9 +97,9 @@ const currentCards = {
         updatedCard[key] = card[key]
       })
       state.cards[card.id] = updatedCard
-      cache.updateSpaceCardsDebounced(state.cards, currentSpaceId)
+      await cache.updateSpaceCardsDebounced(state.cards, currentSpaceId)
     },
-    move: (state, { cards, spaceId }) => {
+    move: async (state, { cards, spaceId }) => {
       cards.forEach(card => {
         state.cards[card.id].x = card.x
         state.cards[card.id].y = card.y
@@ -107,20 +107,20 @@ const currentCards = {
       })
       cache.updateSpaceCardsDebounced(state.cards, currentSpaceId)
     },
-    remove: (state, cardToRemove) => {
+    remove: async (state, cardToRemove) => {
       if (!cardToRemove) { return }
       const card = state.cards[cardToRemove.id]
       const idIndex = state.ids.indexOf(card.id)
       state.ids.splice(idIndex, 1)
       delete state.cards[card.id]
       state.removedCards.unshift(card)
-      cache.updateSpace('removedCards', state.removedCards, currentSpaceId)
-      cache.updateSpace('cards', state.cards, currentSpaceId)
+      await cache.updateSpace('removedCards', state.removedCards, currentSpaceId)
+      await cache.updateSpace('cards', state.cards, currentSpaceId)
     },
     removedCards: (state, removedCards) => {
       state.removedCards = removedCards
     },
-    deleteCard: (state, cardToDelete) => {
+    deleteCard: async (state, cardToDelete) => {
       if (!cardToDelete) { return }
       const card = state.cards[cardToDelete.id]
       if (card) {
@@ -131,20 +131,20 @@ const currentCards = {
       const shouldDelete = state.removedCards.find(removedCard => cardToDelete.id === removedCard.id)
       if (shouldDelete) {
         state.removedCards = state.removedCards.filter(removedCard => cardToDelete.id !== removedCard.id)
-        cache.updateSpace('removedCards', state.removedCards, currentSpaceId)
+        await cache.updateSpace('removedCards', state.removedCards, currentSpaceId)
       } else {
-        cache.updateSpace('cards', state.cards, currentSpaceId)
+        await cache.updateSpace('cards', state.cards, currentSpaceId)
       }
     },
-    restoreRemoved: (state, card) => {
+    restoreRemoved: async (state, card) => {
       // restore
       const cardId = card.id
       state.ids.push(cardId)
       state.cards[cardId] = card
-      cache.updateSpace('cards', state.cards, currentSpaceId)
+      await cache.updateSpace('cards', state.cards, currentSpaceId)
       // update removed
       state.removedCards = state.removedCards.filter(removedCard => removedCard.id !== cardId)
-      cache.updateSpace('removedCards', state.removedCards, currentSpaceId)
+      await cache.updateSpace('removedCards', state.removedCards, currentSpaceId)
     },
     moveWhileDragging: (state, { cards }) => {
       cards.forEach(card => {
@@ -160,14 +160,14 @@ const currentCards = {
 
     // broadcast
 
-    moveBroadcast: (state, { cards }) => {
+    moveBroadcast: async (state, { cards }) => {
       cards.forEach(updated => {
         const card = state.cards[updated.id]
         if (!card) { return }
         card.x = updated.x
         card.y = updated.y
       })
-      cache.updateSpaceCardsDebounced(state.cards, currentSpaceId)
+      await cache.updateSpaceCardsDebounced(state.cards, currentSpaceId)
     },
 
     // dimensions
@@ -249,6 +249,7 @@ const currentCards = {
       context.dispatch('currentSpace/checkIfShouldNotifyCardsCreatedIsNearLimit', null, { root: true })
       context.dispatch('userNotifications/addCardUpdated', { cardId: card.id, type: 'createCard' }, { root: true })
       await context.dispatch('api/addToQueue', { name: 'createCard', body: card }, { root: true })
+      await cache.updateSpace('editedAt', utils.unixTime(), currentSpaceId)
     },
     addMultiple: async (context, { cards, shouldOffsetPosition }) => {
       const spaceId = context.rootState.currentSpace.id
@@ -334,12 +335,13 @@ const currentCards = {
       delete card.userId
       context.dispatch('broadcast/update', { updates: card, type: 'updateCard', handler: 'currentCards/update' }, { root: true })
       context.dispatch('history/add', { cards: [card] }, { root: true })
-      context.commit('update', card)
+      await context.commit('update', card)
       if (card.name) {
         context.commit('updateCardNameInOtherItems', card, { root: true })
         context.commit('triggerUpdateOtherCard', card.id, { root: true })
       }
-      cache.updateSpace('editedByUserId', context.rootState.currentUser.id, currentSpaceId)
+      await cache.updateSpace('editedByUserId', context.rootState.currentUser.id, currentSpaceId)
+      await cache.updateSpace('editedAt', utils.unixTime(), currentSpaceId)
       if (!shouldPreventUpdateDimensionsAndPaths) {
         context.commit('triggerUpdateCardDimensionsAndPaths', card.id, { root: true })
       }
@@ -732,34 +734,35 @@ const currentCards = {
 
     // distribute position
 
-    distributeVertically: (context, cards) => {
+    distributeVertically: async (context, cards) => {
       cards = utils.clone(cards)
-      nextTick(() => {
-        const spaceBetweenCards = 12
-        const zoom = context.rootGetters.spaceCounterZoomDecimal
-        let prevCard
-        cards.forEach((card, index) => {
-          if (index === 0) {
-            prevCard = card
-          } else {
-            const prevCardElement = document.querySelector(`article [data-card-id="${prevCard.id}"]`)
-            const prevCardRect = prevCardElement.getBoundingClientRect()
-            card.y = prevCard.y + (prevCardRect.height * zoom) + spaceBetweenCards
-            prevCard = card
-          }
-          const rect = utils.cardRectFromId(card.id)
-          card = {
-            name: card.name,
-            id: card.id,
-            y: card.y,
-            width: rect.width,
-            height: rect.height
-          }
-          context.dispatch('update', { card })
-        })
-      })
+      const spaceBetweenCards = 12
+      const zoom = context.rootGetters.spaceCounterZoomDecimal
+      let prevCard
+      let index = 0
+      for (let card of cards) {
+        if (index === 0) {
+          prevCard = card
+        } else {
+          const prevCardElement = document.querySelector(`article [data-card-id="${prevCard.id}"]`)
+          const prevCardRect = prevCardElement.getBoundingClientRect()
+          card.y = prevCard.y + (prevCardRect.height * zoom) + spaceBetweenCards
+          prevCard = card
+        }
+        const rect = utils.cardRectFromId(card.id)
+        card = {
+          name: card.name,
+          id: card.id,
+          y: card.y,
+          width: rect.width,
+          height: rect.height
+        }
+        console.log(card.height)
+        await context.dispatch('update', { card })
+        index += 1
+      }
     },
-    updateBelowCardsPosition: (context, { prevCardHeight, newCardHeight, cardId }) => {
+    updateBelowCardsPosition: async (context, { prevCardHeight, newCardHeight, cardId }) => {
       // calc height delta
       const card = context.getters.byId(cardId)
       if (!card) { return }
@@ -770,7 +773,8 @@ const currentCards = {
       const alignedCards = context.getters['verticallyAlignedCardsBelowId'](cardId, deltaHeight)
       if (!alignedCards.length) { return }
       alignedCards.unshift(card)
-      context.dispatch('distributeVertically', alignedCards)
+      await context.dispatch('distributeVertically', alignedCards)
+      await context.dispatch('currentConnections/updateMultiplePaths', alignedCards, { root: true })
     },
 
     // z-index
@@ -902,10 +906,20 @@ const currentCards = {
       const cards = getters.all
       return cards.filter(card => (card.y * zoom) > y)
     },
+    isAboveY: (state, getters) => (y, zoom) => {
+      zoom = zoom || 1
+      const cards = getters.all
+      return cards.filter(card => (card.y * zoom) < y)
+    },
     isRightOfX: (state, getters) => (x, zoom) => {
       zoom = zoom || 1
       const cards = getters.all
       return cards.filter(card => (card.x * zoom) > x)
+    },
+    isLeftOfX: (state, getters) => (x, zoom) => {
+      zoom = zoom || 1
+      const cards = getters.all
+      return cards.filter(card => (card.x * zoom) < x)
     },
     canBeSelectedSortedByY: (state, getters) => {
       return canBeSelectedSortedByY

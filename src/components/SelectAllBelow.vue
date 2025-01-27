@@ -9,17 +9,20 @@ import throttle from 'lodash-es/throttle'
 const store = useStore()
 
 onMounted(() => {
+  window.addEventListener('mousedown', updateIsMetaKey)
   window.addEventListener('mousemove', handleMouseMove)
   window.addEventListener('mouseup', handleMouseUp)
 })
 onBeforeUnmount(() => {
+  window.removeEventListener('mousedown', updateIsMetaKey)
   window.removeEventListener('mousemove', handleMouseMove)
   window.removeEventListener('mouseup', handleMouseUp)
 })
 
 const state = reactive({
   isVisible: false,
-  positionY: 250
+  positionY: 250,
+  isMetaKey: false
 })
 
 const canEditSpace = computed(() => store.getters['currentUser/canEditSpace']())
@@ -39,10 +42,16 @@ const isVisible = computed(() => {
 // style
 
 const userColor = computed(() => store.state.currentUser.color)
-const colorClasses = computed(() => {
+const iconClasses = computed(() => {
   let classes = utils.colorClasses({ backgroundColor: userColor.value })
+  if (state.isMetaKey) {
+    classes.push('reverse')
+  }
   return classes
 })
+const updateIsMetaKey = (event) => {
+  state.isMetaKey = event.metaKey || event.ctrlKey
+}
 
 // position
 
@@ -53,6 +62,7 @@ const handleMouseMove = (event) => {
   if (store.state.currentUserIsDraggingCard) { return }
   if (store.state.currentUserIsDraggingBox) { return }
   if (store.state.isEmbedMode) { return }
+  updateIsMetaKey(event)
   const edgeThreshold = 30
   let header = document.querySelector('header').getBoundingClientRect().height
   let footer = document.querySelector('.footer-wrap footer')
@@ -79,7 +89,7 @@ const handleMouseMove = (event) => {
     state.isVisible = false
   }
   if (isSelectingY.value) {
-    throttledSelectAllBelow(event)
+    throttledSelectItems(event)
   }
 }
 
@@ -87,29 +97,35 @@ const handleMouseMove = (event) => {
 
 const handleMouseDown = (event) => {
   updateIsSelectingY(true)
-  throttledSelectAllBelow(event)
+  throttledSelectItems(event)
+  updateIsMetaKey(event)
 }
 const handleMouseUp = (event) => {
   if (!isSelectingY.value) { return }
   updateIsSelectingY(false)
-  throttledSelectAllBelow(event)
+  throttledSelectItems(event)
+  updateIsMetaKey(event)
   state.isVisible = false
 }
-const throttledSelectAllBelow = throttle((event) => {
-  selectAllBelow(event)
+const throttledSelectItems = throttle((event) => {
+  selectItems(event)
 }, 20)
 
-const selectAllBelow = (event) => {
+const selectItems = (event) => {
   let position = utils.cursorPositionInSpace(event)
   store.commit('preventMultipleSelectedActionsIsVisible', true)
-  store.commit('triggerSelectAllItemsBelowCursor', position)
+  if (state.isMetaKey) {
+    store.commit('triggerSelectAllItemsAboveCursor', position)
+  } else {
+    store.commit('triggerSelectAllItemsBelowCursor', position)
+  }
 }
 </script>
 
 <template lang="pug">
 .select-all-below(v-if="isVisible" :style="{ top: state.positionY + 'px' }")
   .badge.label-badge(:style="{ 'background-color': userColor }" @mousedown="handleMouseDown")
-    img.icon(src="@/assets/brush-y.svg" :class="colorClasses")
+    img.icon(src="@/assets/brush-y.svg" :class="iconClasses")
     .pointer(:style="{ 'background-color': userColor }" :class="{ 'is-selecting': isSelectingY }")
 </template>
 
@@ -139,6 +155,8 @@ const selectAllBelow = (event) => {
     margin-left 6px
     margin-right 8px
     pointer-events none
+    &.reverse
+      transform scaleY(-1)
 
   .pointer
     position absolute

@@ -39,6 +39,9 @@ const spacePreviewImageFromId = (spaceId) => {
 // update tags
 
 const updateTitle = (title) => {
+  if (consts.isDevelopment()) {
+    title = `DEV ${title}`
+  }
   document.title = title
   document.querySelector('meta[property="og:title"]').content = title
 }

@@ -12,6 +12,8 @@ import Stats from '@/components/sidebar/Stats.vue'
 import Text from '@/components/sidebar/Text.vue'
 import Inbox from '@/components/sidebar/Inbox.vue'
 import Favorites from '@/components/sidebar/Favorites.vue'
+import History from '@/components/sidebar/History.vue'
+import Minimap from '@/components/sidebar/Minimap.vue'
 
 const store = useStore()
 
@@ -21,9 +23,11 @@ onMounted(() => {
   window.addEventListener('resize', updateDialogHeight)
   store.subscribe((mutation, state) => {
     if (mutation.type === 'triggerRemovedIsVisible') {
-      triggerRemovedIsVisible()
+      toggleSection('removed')
     } else if (mutation.type === 'triggerAIImagesIsVisible') {
-      triggerAIImagesIsVisible()
+      toggleSection('AIImages')
+    } else if (mutation.type === 'triggerMinimapIsVisible') {
+      toggleSection('minimap')
     }
   })
 })
@@ -50,7 +54,9 @@ const state = reactive({
   inboxIsVisible: false,
   statsIsVisible: false,
   textIsVisible: false,
-  favoritesIsVisible: false
+  favoritesIsVisible: false,
+  historyIsVisible: false,
+  minimapIsVisible: false
 })
 
 const clearVisible = () => {
@@ -62,6 +68,8 @@ const clearVisible = () => {
   state.statsIsVisible = false
   state.textIsVisible = false
   state.favoritesIsVisible = false
+  state.historyIsVisible = false
+  state.minimapIsVisible = false
 }
 
 const updateDialogHeight = async () => {
@@ -85,55 +93,10 @@ const closeDialogs = () => {
 
 // current section
 
-const triggerRemovedIsVisible = async () => {
-  await nextTick()
+const toggleSection = (value) => {
   clearVisible()
-  state.removedIsVisible = true
-}
-const triggerAIImagesIsVisible = async () => {
-  await nextTick()
-  clearVisible()
-  state.AIImagesIsVisible = true
-}
-const toggleTagsIsVisible = () => {
-  clearVisible()
-  state.tagsIsVisible = true
-  updateUserLastSidebarSection('tags')
-}
-const toggleLinksIsVisible = () => {
-  clearVisible()
-  state.linksIsVisible = true
-  updateUserLastSidebarSection('links')
-}
-const toggleRemovedIsVisible = () => {
-  clearVisible()
-  state.removedIsVisible = true
-  updateUserLastSidebarSection('removed')
-}
-const toggleInboxIsVisible = () => {
-  clearVisible()
-  state.inboxIsVisible = true
-  updateUserLastSidebarSection('inbox')
-}
-const toggleAIImagesIsVisible = () => {
-  clearVisible()
-  state.AIImagesIsVisible = true
-  updateUserLastSidebarSection('AIImages')
-}
-const toggleStatsIsVisible = () => {
-  clearVisible()
-  state.statsIsVisible = true
-  updateUserLastSidebarSection('stats')
-}
-const toggleTextIsVisible = () => {
-  clearVisible()
-  state.textIsVisible = true
-  updateUserLastSidebarSection('text')
-}
-const toggleFavoritesIsVisible = () => {
-  clearVisible()
-  state.favoritesIsVisible = true
-  updateUserLastSidebarSection('favorites')
+  state[`${value}IsVisible`] = true
+  updateUserLastSidebarSection(value)
 }
 
 // last sidebar section
@@ -141,7 +104,7 @@ const toggleFavoritesIsVisible = () => {
 const restoreUserLastSidebarSection = () => {
   clearVisible()
   const section = store.state.currentUser.lastSidebarSection
-  const values = ['text', 'stats', 'AIImages', 'inbox', 'removed', 'links', 'tags', 'favorites'] // listed in api docs
+  const values = ['text', 'stats', 'AIImages', 'inbox', 'removed', 'links', 'tags', 'favorites', 'history', 'minimap'] // listed in api docs
   const isValid = values.includes(section)
   if (section && isValid) {
     state[section + 'IsVisible'] = true
@@ -163,33 +126,40 @@ dialog#sidebar.sidebar.is-pinnable(v-if="visible" :open="visible" @click.left.st
         //- first row
         .segmented-buttons
           //- Inbox
-          button(@click.left="toggleInboxIsVisible" :class="{ active: state.inboxIsVisible}")
+          button(@click.left="toggleSection('inbox')" :class="{ active: state.inboxIsVisible}" title="Move from Inbox")
             img.icon(src="@/assets/inbox.svg")
           //- Text
-          button(@click.left="toggleTextIsVisible" :class="{active: state.textIsVisible}")
+          button(@click.left="toggleSection('text')" :class="{active: state.textIsVisible}" title="Card Text Editor")
             span Text
           //- Tags
-          button(@click.left="toggleTagsIsVisible" :class="{ active: state.tagsIsVisible}")
+          button(@click.left="toggleSection('tags')" :class="{ active: state.tagsIsVisible}" title="Space Tags")
             span Tags
           //- Links
-          button(@click.left="toggleLinksIsVisible" :class="{ active: state.linksIsVisible}")
+          button(@click.left="toggleSection('links')" :class="{ active: state.linksIsVisible}" title="Backlinks")
             span Links
         //- second row
         .segmented-buttons
+          //- Minimap
+          button(@click.left="toggleSection('minimap')" :class="{ active: state.minimapIsVisible}" title="Minimap")
+            img.icon.minimap(src="@/assets/minimap.svg")
           //- Favorites
-          button(@click.left="toggleFavoritesIsVisible" :class="{ active: state.favoritesIsVisible}")
+          button(@click.left="toggleSection('favorites')" :class="{ active: state.favoritesIsVisible}" title="Favorites")
             img.icon(src="@/assets/heart-empty.svg")
           //- Stats
-          button(@click.left="toggleStatsIsVisible" :class="{active: state.statsIsVisible}")
+          button(@click.left="toggleSection('stats')" :class="{active: state.statsIsVisible}" title="Stats")
             img.icon.stats(src="@/assets/stats.svg")
           //- AI Images
-          button(@click.left="toggleAIImagesIsVisible" :class="{ active: state.AIImagesIsVisible}")
+          button(@click.left="toggleSection('AIImages')" :class="{ active: state.AIImagesIsVisible}" title="AI Images")
             img.icon.flower(src="@/assets/flower.svg")
             span AI
           //- Removed
-          button(@click.left="toggleRemovedIsVisible" :class="{ active: state.removedIsVisible}")
+          button(@click.left="toggleSection('removed')" :class="{ active: state.removedIsVisible}" title="Removed Cards and Spaces")
             img.icon(src="@/assets/remove.svg")
             img.icon.remove-undo(src="@/assets/undo.svg")
+        .segmented-buttons
+          //- Favorites
+          button(@click.left="toggleSection('history')" :class="{ active: state.historyIsVisible}" title="Space History")
+            img.icon.time(src="@/assets/time.svg")
 
       //- Pin
       .title-row
@@ -205,6 +175,8 @@ dialog#sidebar.sidebar.is-pinnable(v-if="visible" :open="visible" @click.left.st
   Text(:visible="state.textIsVisible")
   Inbox(:visible="state.inboxIsVisible")
   Favorites(:visible="state.favoritesIsVisible")
+  History(:visible="state.historyIsVisible")
+  Minimap(:visible="state.minimapIsVisible")
 
 </template>
 
@@ -230,6 +202,10 @@ dialog#sidebar.sidebar.is-pinnable(v-if="visible" :open="visible" @click.left.st
   .icon.flower
     vertical-align -1px
     height 11px
+  .icon.minimap
+    vertical-align -2px
+  .icon.time
+    vertical-align -1px
 
   .segmented-buttons + .segmented-buttons
     margin-left 0
@@ -241,6 +217,17 @@ dialog#sidebar.sidebar.is-pinnable(v-if="visible" :open="visible" @click.left.st
       //   label
       //     &:last-child
       //       border-bottom-right-radius 0
+      // middle row
+      &:nth-child(2)
+        margin-top -1px
+        button,
+        label
+          &:first-child
+            border-top-left-radius 0
+            border-bottom-left-radius 0
+          // &:last-child
+            // border-top-right-radius 0
+      // last row
       &:last-child
         button,
         label

@@ -223,7 +223,7 @@ const self = {
           // clear sendingQueue on success
           context.commit('clearSendingQueue', null, { root: true })
         } else {
-          throw Error(response.statusText)
+          throw response.statusText
         }
         if (context.rootState.notifyServerCouldNotSave) {
           context.commit('addNotification', { message: 'Reconnected to server', type: 'success' }, { root: true })
@@ -427,7 +427,7 @@ const self = {
         let spaces = await normalizeResponse(response)
         return utils.addCurrentUserIsCollaboratorToSpaces(spaces, currentUser)
       } catch (error) {
-        context.dispatch('handleServerError', { name: 'getUserSpaces', error })
+        context.dispatch('handleServerError', { name: 'getUserGroupSpaces', error })
       }
     },
     getUserRemovedSpaces: async (context) => {
@@ -640,6 +640,19 @@ const self = {
         console.log('🛬 getting remote space favorites', spaceId)
         const options = await context.dispatch('requestOptions', { method: 'GET', space: context.rootState.currentSpace })
         const response = await utils.timeout(consts.defaultTimeout, fetch(`${consts.apiHost()}/space/${spaceId}/favorites`, options))
+        return normalizeResponse(response)
+      } catch (error) {
+        context.dispatch('handleServerError', { name: 'getSpaceFavorites', error })
+      }
+    },
+    getSpaceHistory: async (context) => {
+      try {
+        const isOnline = context.rootState.isOnline
+        if (!isOnline) { return }
+        const spaceId = context.rootState.currentSpace.id
+        console.log('🛬 getting remote space history', spaceId)
+        const options = await context.dispatch('requestOptions', { method: 'GET', space: context.rootState.currentSpace })
+        const response = await utils.timeout(consts.defaultTimeout, fetch(`${consts.apiHost()}/space/${spaceId}/history`, options))
         return normalizeResponse(response)
       } catch (error) {
         context.dispatch('handleServerError', { name: 'getSpaceFavorites', error })
@@ -1118,18 +1131,6 @@ const self = {
         context.dispatch('handleServerError', { name: 'createMultiplePresignedPosts', error })
       }
     },
-    pdf: async (context) => {
-      const spaceId = context.rootState.currentSpace.id
-      try {
-        const options = await context.dispatch('requestOptions', { method: 'POST', space: context.rootState.currentSpace })
-        const response = await fetch(`${consts.apiHost()}/space/pdf/${spaceId}`, options)
-        let url = await normalizeResponse(response)
-        url = url.url
-        return url
-      } catch (error) {
-        context.dispatch('handleServerError', { name: 'pdf', error })
-      }
-    },
 
     // Notifications
 
@@ -1223,6 +1224,18 @@ const self = {
         return data
       } catch (error) {
         console.error('🚒 communityBackgrounds', error)
+      }
+    },
+    pdf: async (context) => {
+      const spaceId = context.rootState.currentSpace.id
+      try {
+        const options = await context.dispatch('requestOptions', { method: 'POST', space: context.rootState.currentSpace })
+        const response = await fetch(`${consts.apiHost()}/services/pdf/${spaceId}`, options)
+        let url = await normalizeResponse(response)
+        url = url.url
+        return url
+      } catch (error) {
+        context.dispatch('handleServerError', { name: 'pdf', error })
       }
     },
 

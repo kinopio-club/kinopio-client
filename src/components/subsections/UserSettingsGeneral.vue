@@ -4,6 +4,7 @@ import { useStore } from 'vuex'
 
 import UserBillingSettings from '@/components/dialogs/UserBillingSettings.vue'
 import UserAccountSettings from '@/components/dialogs/UserAccountSettings.vue'
+import UserDeveloperInfo from '@/components/dialogs/UserDeveloperInfo.vue'
 import NotificationSettings from '@/components/dialogs/NotificationSettings.vue'
 import ThemeSettings from '@/components/dialogs/ThemeSettings.vue'
 import ThemeToggle from '@/components/ThemeToggle.vue'
@@ -17,7 +18,7 @@ const store = useStore()
 onMounted(() => {
   store.subscribe((mutation, state) => {
     if (mutation.type === 'triggerCloseChildDialogs') {
-      closeChildDialogs()
+      closeDialogs()
     }
   })
 })
@@ -35,6 +36,7 @@ const state = reactive({
   userBillingSettingsIsVisible: false,
   userAccountSettingsIsVisible: false,
   deleteAllConfirmationVisible: false,
+  userDeveloperInfoIsVisible: false,
   loading: {
     deleteUserPermanent: false
   },
@@ -44,41 +46,51 @@ const state = reactive({
 
 // dialog
 
-const closeChildDialogs = () => {
+const closeDialogs = () => {
   state.userBillingSettingsIsVisible = false
   state.userAccountSettingsIsVisible = false
   state.notificationSettingsIsVisible = false
   state.themeSettingsIsVisible = false
+  state.userDeveloperInfoIsVisible = false
 }
 
 // child dialog state
 
+const closeConfirmations = () => {
+  state.deleteAllConfirmationVisible = false
+}
 const toggleDeleteAllConfirmationVisible = () => {
   state.deleteAllConfirmationVisible = !state.deleteAllConfirmationVisible
 }
 const toggleUserBillingSettingsIsVisible = () => {
   const isVisible = state.userBillingSettingsIsVisible
-  closeChildDialogs()
-  state.deleteAllConfirmationVisible = false
+  closeDialogs()
+
   state.userBillingSettingsIsVisible = !isVisible
 }
 const toggleUserAccountSettingsIsVisible = () => {
   const isVisible = state.userAccountSettingsIsVisible
-  closeChildDialogs()
-  state.deleteAllConfirmationVisible = false
+  closeDialogs()
+  closeConfirmations()
   state.userAccountSettingsIsVisible = !isVisible
 }
 const toggleNotificationSettingsIsVisible = () => {
   const isVisible = state.notificationSettingsIsVisible
-  closeChildDialogs()
-  state.deleteAllConfirmationVisible = false
+  closeDialogs()
+  closeConfirmations()
   state.notificationSettingsIsVisible = !isVisible
 }
 const toggleThemeSettingsIsVisible = () => {
   const isVisible = state.themeSettingsIsVisible
-  closeChildDialogs()
-  state.deleteAllConfirmationVisible = false
+  closeDialogs()
+  closeConfirmations()
   state.themeSettingsIsVisible = !isVisible
+}
+const toggleUserDeveloperInfoIsVisible = () => {
+  const isVisible = state.userDeveloperInfoIsVisible
+  closeDialogs()
+  closeConfirmations()
+  state.userDeveloperInfoIsVisible = !isVisible
 }
 
 // delete user
@@ -91,7 +103,7 @@ const deleteUserPermanent = async () => {
     })
   }
   await store.dispatch('api/deleteUserPermanent')
-  cache.removeAll()
+  await cache.removeAll()
   // clear history wipe state from vue-router
   window.history.replaceState({}, 'Kinopio', '/')
   location.reload()
@@ -100,7 +112,7 @@ const deleteUserPermanent = async () => {
 </script>
 
 <template lang="pug">
-.user-settings-general(v-if="visible")
+.user-settings-general(v-if="visible" @click="closeDialogs")
   section
     //- Notifications
     .row
@@ -120,17 +132,26 @@ const deleteUserPermanent = async () => {
   //- Account Settings
   section
     .row
+      //- Account
       .button-wrap
         button(@click.left.stop="toggleUserAccountSettingsIsVisible" :class="{active: state.userAccountSettingsIsVisible}")
           User(:user="currentUser" :isClickable="false" :hideYouLabel="true" :key="currentUser.id" :isSmall="true")
           span Account
         UserAccountSettings(:visible="state.userAccountSettingsIsVisible")
-    .row
+      //- Billing
       .button-wrap
         button(@click.left.stop="toggleUserBillingSettingsIsVisible" :class="{active: state.userBillingSettingsIsVisible}")
           span(v-if="isSecureAppContextIOS") Billing
           span(v-else) Billing
         UserBillingSettings(:visible="state.userBillingSettingsIsVisible")
+    .row
+      //- Developer Info
+      .button-wrap
+        button(@click.left.stop="toggleUserDeveloperInfoIsVisible" :class="{active: state.userDeveloperInfoIsVisible}")
+          img.icon.key(src="@/assets/key.svg")
+          span Developer
+        UserDeveloperInfo(:visible="state.userDeveloperInfoIsVisible")
+
   //- Delete Account
   section.delete-account
     .row
@@ -138,10 +159,12 @@ const deleteUserPermanent = async () => {
         img.icon(src="@/assets/remove.svg")
         span Delete All Your Data
       span(v-if="state.deleteAllConfirmationVisible")
-        p
-          span.badge.danger Permanently delete
-          span(v-if="isSignedIn") all your spaces and user data from this computer and Kinopio's servers?
+        p.badge.danger
+          span(v-if="isSignedIn") Permanently Delete all your spaces and user data from this computer and Kinopio's servers?
           span(v-else) all your spaces and user data from this computer?
+          br
+          br
+          span There is no going back. Please be certain.
         section.subsection(v-if="isUpgraded")
           span Or cancel paid subscription
           .row.billing-cancel

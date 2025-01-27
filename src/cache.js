@@ -61,9 +61,9 @@ export default {
         keys,
         spaceKeysToRemove: spaceKeys
       })
-      spaceKeys.forEach(key => {
-        this.removeLocal(key)
-      })
+      for (const key of spaceKeys) {
+        await this.removeLocal(key)
+      }
       // await idb.delMany(spaceKeys)
       const newKeys = await idb.keys()
       console.log('🥂 pruned idb spaces', {
@@ -88,8 +88,10 @@ export default {
   },
   async removeAll () {
     const keys = await idb.keys()
-    keys.forEach(key => this.removeLocal(key))
-    console.log('🚑 idb cleared')
+    for (const key of keys) {
+      await this.removeLocal(key)
+    }
+    console.log('🚑 idb cleared', keys)
     localStorage.clear()
     console.log('🚑 ls cleared')
   },
@@ -259,7 +261,7 @@ export default {
   },
   async addSpaces (spaces) {
     for (const space of spaces) {
-      space.cacheDate = utils.normalizeToUnixTime(space.updatedAt)
+      space.cacheDate = utils.unixTime(space.updatedAt)
       await this.saveSpace(space)
     }
   },

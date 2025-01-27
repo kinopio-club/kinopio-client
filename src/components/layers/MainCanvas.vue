@@ -93,13 +93,6 @@ onMounted(() => {
   // mousemove
   window.addEventListener('mousemove', painting)
   window.addEventListener('touchmove', painting)
-  // drag over
-  window.addEventListener('dragenter', checkIfUploadIsDraggedOver)
-  window.addEventListener('dragover', checkIfUploadIsDraggedOver)
-  window.addEventListener('dragleave', removeUploadIsDraggedOver)
-  window.addEventListener('dragend', removeUploadIsDraggedOver)
-  window.addEventListener('drop', addCardsAndUploadFiles)
-
   // shift circle positions with scroll to simulate full size canvas
   updatePrevScrollPosition()
   window.addEventListener('scroll', userScroll)
@@ -109,7 +102,6 @@ onMounted(() => {
   state.dropGuideLineIsVisible = !utils.isMobile()
   window.addEventListener('visibilitychange', clearRect)
 })
-
 onBeforeUnmount(() => {
   window.removeEventListener('mouseup', stopPainting)
   window.removeEventListener('touchend', stopPainting)
@@ -125,9 +117,7 @@ onBeforeUnmount(() => {
 })
 
 const state = reactive({
-  currentCursor: {},
-  currentCursorInSpace: {},
-  uploadIsDraggedOver: false
+  currentCursor: {}
 })
 
 const clearRect = () => {
@@ -138,6 +128,8 @@ const triggerHideTouchInterface = () => {
   store.commit('triggerHideTouchInterface')
 }
 const isCanvasScope = (event) => {
+  const fromDialog = event.target.closest('dialog')
+  if (fromDialog) { return }
   const tagName = event.target.tagName
   return tagName === 'CANVAS'
 }
@@ -711,33 +703,6 @@ const selectConnections = (points) => {
     store.dispatch('addMultipleToMultipleConnectionsSelected', connectionIds)
   })
 }
-
-// Upload Files
-
-const checkIfUploadIsDraggedOver = (event) => {
-  event.preventDefault()
-  const uploadIsFiles = event.dataTransfer.types.find(type => type === 'Files')
-  if (!event.dataTransfer) { return }
-  if (!uploadIsFiles) { return }
-  state.currentCursor = utils.cursorPositionInViewport(event)
-  state.currentCursorInSpace = utils.cursorPositionInSpace(event)
-  state.uploadIsDraggedOver = true
-}
-const removeUploadIsDraggedOver = () => {
-  state.uploadIsDraggedOver = false
-}
-const addCardsAndUploadFiles = (event) => {
-  event.preventDefault()
-  event.stopPropagation()
-  let files = event.dataTransfer.files
-  files = Array.from(files)
-  removeUploadIsDraggedOver()
-  store.dispatch('upload/addCardsAndUploadFiles', {
-    files,
-    event
-  })
-}
-
 </script>
 
 <template lang="pug">
@@ -748,9 +713,6 @@ canvas#main-canvas(
 )
 DropGuideLine(
   v-if="state.dropGuideLineIsVisible"
-  :currentCursor="state.currentCursor"
-  :currentCursorInSpace="state.currentCursorInSpace"
-  :uploadIsDraggedOver="state.uploadIsDraggedOver"
   :viewportWidth="viewportWidth"
   :viewportHeight="viewportHeight"
 )

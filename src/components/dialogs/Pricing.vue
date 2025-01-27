@@ -116,10 +116,10 @@ dialog.pricing(v-if="visible" :open="visible" @click.left.stop="closeDialogs" re
           td 10 AI images
           td 50 AI images/mo
         tr
-          td Can only join groups
+          td Can only join Groups
           td
             .row
-              span Can create groups
+              span Can create Groups
               button.small-button(@click.stop="toggleAboutGroupsIsVisible" :class="{ active: state.aboutGroupsIsVisible }" title="About Groups")
                 span ?
                 AboutGroups(:visible="state.aboutGroupsIsVisible")

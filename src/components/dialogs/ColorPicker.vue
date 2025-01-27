@@ -7,8 +7,11 @@ import utils from '@/utils.js'
 
 import randomColor from 'randomcolor'
 import shader from 'shader'
-import { colord } from 'colord'
 import throttle from 'lodash-es/throttle'
+
+import { colord, extend } from 'colord'
+import labPlugin from 'colord/plugins/lab'
+extend([labPlugin])
 
 const store = useStore()
 
@@ -26,7 +29,8 @@ const props = defineProps({
   removeIsVisible: Boolean,
   shouldLightenColors: Boolean,
   recentColors: Array,
-  luminosityIsDark: Boolean
+  luminosityIsDark: Boolean,
+  luminosityIsLight: Boolean
 })
 watch(() => props.visible, (value, prevValue) => {
   if (value) {
@@ -70,6 +74,24 @@ const resetPinchCounterZoomDecimal = () => {
 const triggerUpdateHeaderAndFooterPosition = () => {
   store.commit('triggerUpdateHeaderAndFooterPosition')
 }
+
+// recent colors
+
+const uniqueRecentColors = computed(() => {
+  let newColors = []
+  const minDelta = 0.08
+  const colors = props.recentColors.map(color => colord(color).toHex())
+  colors.forEach((newColor, index) => {
+    const isSimilar = newColors.some(color => {
+      const delta = colord(color).delta(newColor) // 0 (colors are equal) to 1 (entirely different)
+      return delta < minDelta
+    })
+    if (!isSimilar) {
+      newColors.push(newColor)
+    }
+  })
+  return newColors
+})
 
 // colors
 
@@ -128,6 +150,10 @@ const updateLuminosity = (value) => {
 const updateLuminosityFromTheme = () => {
   if (props.luminosityIsDark) {
     updateLuminosity('dark')
+    return
+  }
+  if (props.luminosityIsLight) {
+    updateLuminosity('light')
     return
   }
   const isThemeDark = store.state.currentUser.theme === 'dark'
@@ -213,19 +239,19 @@ const toggleOpacity = () => {
 </script>
 
 <template lang="pug">
-dialog.narrow.color-picker(v-if="visible" :open="visible" ref="dialogElement" @click.left.stop :style="{'max-height': state.dialogHeight + 'px'}")
+dialog.narrow.color-picker(v-if="props.visible" :open="props.visible" ref="dialogElement" @click.left.stop :style="{'max-height': state.dialogHeight + 'px'}")
   section
     .row
-      .badge.full-width-color-badge(:style="{backgroundColor: currentColor}")
+      .badge.full-width-color-badge(:style="{backgroundColor: props.currentColor}")
         //- Input
         input(v-model="color" @focus="resetPinchCounterZoomDecimal" @blur="triggerUpdateHeaderAndFooterPosition" @keyup.stop.backspace :class="{ 'is-dark': isDark }" @mouseup.stop)
           //- Remove
-        button.small-button.remove-button(v-if="removeIsVisible" title="remove" @click="removeColor")
+        button.small-button.remove-button(v-if="props.removeIsVisible" title="remove" @click="removeColor")
           img.icon.cancel(src="@/assets/add.svg")
   section
     //- Colors
-    .recent-colors(v-if="recentColors")
-      template(v-for="color in recentColors")
+    .recent-colors(v-if="uniqueRecentColors")
+      template(v-for="color in uniqueRecentColors")
         button.color(:style="{backgroundColor: color}" :class="{active: colorIsCurrent(color)}" @click.left="select(color)" :title="color")
     .colors
       template(v-for="color in state.colors")
