@@ -141,10 +141,8 @@ const currentCards = {
       const cardId = card.id
       state.ids.push(cardId)
       state.cards[cardId] = card
-      await cache.updateSpace('cards', state.cards, currentSpaceId)
       // update removed
       state.removedCards = state.removedCards.filter(removedCard => removedCard.id !== cardId)
-      await cache.updateSpace('removedCards', state.removedCards, currentSpaceId)
     },
     moveWhileDragging: (state, { cards }) => {
       cards.forEach(card => {
@@ -849,8 +847,13 @@ const currentCards = {
     },
     restoreRemoved: async (context, card) => {
       context.commit('restoreRemoved', card)
+      await cache.updateSpace('cards', context.state.cards, currentSpaceId)
+      await cache.updateSpace('removedCards', context.state.removedCards, currentSpaceId)
       context.dispatch('broadcast/update', { updates: card, type: 'restoreRemovedCard', handler: 'currentCards/restoreRemoved' }, { root: true })
       await context.dispatch('api/addToQueue', { name: 'restoreRemovedCard', body: card }, { root: true })
+      // increment card count
+      await context.dispatch('api/addToQueue', { name: 'updateUserCardsCreatedCountRaw', body: { delta: 1 } }, { root: true })
+      await context.dispatch('api/addToQueue', { name: 'updateUserCardsCreatedCount', body: { delta: 1 } }, { root: true })
     },
 
     // select
