@@ -94,18 +94,10 @@ const removeAnimations = () => {
   state.animateJiggleLeft = false
 }
 
-// hover
-
-const handleMouseEnter = (event) => {
-  store.commit('minimapIsExplicitlyVisible', true)
-}
-const handleMouseLeave = (event) => {
-  store.commit('minimapIsExplicitlyVisible', false)
-}
 </script>
 
 <template lang="pug">
-.space-zoom(v-if="!isMobileOrTouch" @mouseenter="handleMouseEnter" @mouseleave="handleMouseLeave")
+.space-zoom(v-if="!isMobileOrTouch")
   Slider(
     @updatePlayhead="updateSpaceZoom"
     @resetPlayhead="resetZoom"
