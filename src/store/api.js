@@ -57,8 +57,17 @@ const squashQueue = (queue) => {
     const matches = queue.filter(queueItem => {
       return queueItem.name === request.name && queueItem.body.id === request.body.id
     })
-    // merge({a: 1, a: 2}, {b: 4, c: 5}) = {a: 1, b: 4, c:5}
-    const reduced = matches.reduce((accumulator, currentValue) => merge(accumulator, currentValue))
+    const reduced = matches.reduce((accumulator, currentValue) => {
+      const cumulativeDeltaOperations = ['updateUserCardsCreatedCount', 'updateUserCardsCreatedCountRaw']
+      if (cumulativeDeltaOperations.includes(accumulator.name)) {
+        // {delta: 1}, {delta: 1} = {delta: 2}
+        accumulator.body.delta += currentValue.body.delta
+        return accumulator
+      } else {
+        // merge({a: 1, a: 2}, {b: 4, c: 5}) = {a: 1, b: 4, c:5}
+        return merge(accumulator, currentValue)
+      }
+    })
     reduced.name = request.name
     squashed.push(reduced)
   })
