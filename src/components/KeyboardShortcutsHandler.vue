@@ -263,14 +263,16 @@ const handleMetaKeyShortcuts = (event) => {
   }
 }
 // on mouse down
-const isOnMinimap = (event) => {
+const checkIsOnMinimap = (event) => {
   return Boolean(event.target.closest('#space-minimap'))
 }
 const handleMouseDownEvents = (event) => {
   const rightMouseButton = 2
   const middleMouseButton = 1
+  const rightAndLeftButtons = 3
   const isRightClick = rightMouseButton === event.button
   const isMiddleClick = middleMouseButton === event.button
+  const isRightAndLeftClick = rightAndLeftButtons === event.buttons
   const isPanScope = checkIsPanScope(event)
   const toolbarIsBox = store.state.currentUserToolbar === 'box'
   const isNotConnecting = !store.state.currentUserIsDrawingConnection
@@ -279,7 +281,13 @@ const handleMouseDownEvents = (event) => {
   const shouldPan = (isRightClick || isMiddleClick) && isPanScope && !userDisablePan
   const position = utils.cursorPositionInPage(event)
   const isButtonScope = checkIsButtonScope(event)
+  const isMinimap = checkIsOnMinimap(event)
+  console.log(shouldPan, isRightClick, shouldBoxSelect, event, isMinimap, event.button, event.buttons)
   if (isButtonScope) { return }
+  if (isRightAndLeftClick && isMinimap) {
+    store.commit('shouldCancelNextMouseUpInteraction', true)
+    return
+  }
   if (shouldBoxSelect) {
     event.preventDefault()
     store.commit('currentUserIsBoxSelecting', true)
@@ -289,13 +297,13 @@ const handleMouseDownEvents = (event) => {
     prevRightClickPosition = utils.cursorPositionInViewport(event)
     prevRightClickTime = utils.unixTime()
     event.preventDefault()
-    if (!isOnMinimap(event)) {
+    if (!isMinimap) {
       store.dispatch('currentUserIsPanning', true)
     }
     disableContextMenu = true
   } else if (store.state.currentUserIsPanningReady) {
     event.preventDefault()
-    if (!isOnMinimap(event)) {
+    if (!isMinimap) {
       store.dispatch('currentUserIsPanning', true)
     }
   }
@@ -316,6 +324,7 @@ const handleMouseMoveEvents = (event) => {
 // on mouse up
 // right clicks don't trigger mouse up
 const handleMouseUpEvents = async (event) => {
+  if (store.state.shouldCancelNextMouseUpInteraction) { return }
   const shouldPan = store.state.currentUserIsPanning
   // handle outside window
   const isFromOutsideWindow = event.target.nodeType === Node.DOCUMENT_NODE

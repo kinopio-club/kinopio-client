@@ -544,6 +544,10 @@ const shouldCancelInteraction = (event) => {
     return true
   }
   if (eventIsFromTextarea(event)) { return true }
+  if (store.state.shouldCancelNextMouseUpInteraction) {
+    store.commit('shouldCancelNextMouseUpInteraction', false)
+    return true
+  }
   if (!event.target.closest) { return } // event is outside window
   const fromDialog = event.target.closest('dialog')
   const fromHeader = event.target.closest('header')

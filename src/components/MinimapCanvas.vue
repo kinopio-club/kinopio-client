@@ -253,8 +253,17 @@ const positionInViewportCenter = (position) => {
   y = Math.max(0, y)
   return { x, y }
 }
+const panToPositionRightLeftClick = (event) => {
+  const rightAndLeftButtons = 3
+  const isRightAndLeftClick = rightAndLeftButtons === event.buttons
+  if (!isRightAndLeftClick) { return }
+  panToPosition(event)
+}
 const startPanningViewport = (event) => {
   state.isPanningViewport = true
+  panToPosition(event)
+}
+const panToPosition = (event) => {
   const position = positionInSpace(event)
   const centerPosition = positionInViewportCenter(position)
   window.scrollTo({
@@ -283,7 +292,7 @@ const endPanningViewport = (event) => {
 </script>
 
 <template lang="pug">
-.minimap-canvas(v-if="props.visible" :style="styles" @pointerdown="startPanningViewport")
+.minimap-canvas(v-if="props.visible" :style="styles" @pointerdown="startPanningViewport" @mousedown="panToPositionRightLeftClick")
   canvas#minimap-canvas(ref="canvasElement")
   .viewport.blink(:style="viewportStyle")
 </template>
