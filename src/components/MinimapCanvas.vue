@@ -237,7 +237,7 @@ const viewportStyle = computed(() => {
 // pan viewport
 
 const positionInSpace = (event) => {
-  const element = event.target.closest('.minimap-canvas')
+  const element = document.querySelector('#minimap-canvas')
   if (!element) { return }
   const rect = element.getBoundingClientRect()
   let x = event.clientX - rect.left
