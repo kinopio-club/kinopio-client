@@ -247,7 +247,7 @@ const handleMetaKeyShortcuts = (event) => {
   } else if (key === 'z' && isSpaceScope) {
     event.preventDefault()
     store.commit('triggerSpaceZoomOutMax')
-  } else if (key === 'p' && isSpaceScope) {
+  } else if (key === 'p' && isSpaceScope && !isMeta) {
     const value = !store.state.isPresentationMode
     store.commit('isPresentationMode', value)
     event.preventDefault()
