@@ -226,6 +226,7 @@ const containItemsInNewBox = async () => {
   await nextTick()
   await nextTick()
   store.commit('boxDetailsIsVisibleForBoxId', box.id)
+  store.dispatch('analytics/event', 'containItemsInNewBox')
 }
 
 // box fill
