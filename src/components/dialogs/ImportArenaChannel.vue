@@ -61,6 +61,8 @@ if (consts.isDevelopment()) {
   }
 }
 
+const cardSize = 350
+
 export default {
   name: 'ImportArenaChannel',
   components: {
@@ -195,6 +197,9 @@ export default {
         console.error('🚒 importSpace', error)
       }
     },
+
+    // cards
+
     createCard (block, position) {
       let card = { id: nanoid() }
       const type = block.class
@@ -220,28 +225,27 @@ export default {
         card.name = `${title} ${type}`
       }
       card.name = this.trimName(card.name)
-      const { x, y, z } = this.cardPositions(position)
+      const { x, y, z } = this.cardPosition(position)
       card.x = x
       card.y = y
       card.z = z
+      card.resizeWidth = cardSize
       return card
     },
 
-    cardPositions ({ currentIndex, lastCard }) {
+    cardPosition ({ currentIndex, lastCard }) {
       let x, y, z
       const startX = 40
       const startY = 50
-      const cardWidth = 235
-      let cardHeight = 235
-      const cardMargin = 20
-      const viewportWidth = this.$store.state.viewportWidth - (cardWidth + cardMargin)
+      const cardMargin = 35
+      const viewportWidth = this.$store.state.viewportWidth - (cardSize + cardMargin)
       x = startX
       y = startY
       if (lastCard) {
-        const currentRow = Math.floor((currentIndex * (cardWidth + cardMargin)) / viewportWidth)
-        const lastCardRow = Math.floor(((currentIndex - 1) * (cardWidth + cardMargin)) / viewportWidth)
-        x = lastCard.x + cardWidth + cardMargin + startX
-        y = ((cardHeight + cardMargin) * currentRow) + startY
+        const currentRow = Math.floor((currentIndex * (cardSize + cardMargin)) / viewportWidth)
+        const lastCardRow = Math.floor(((currentIndex - 1) * (cardSize + cardMargin)) / viewportWidth)
+        x = lastCard.x + cardSize + cardMargin + startX
+        y = ((cardSize + cardMargin) * currentRow) + startY
         if (lastCardRow !== currentRow) {
           x = startX
         }
