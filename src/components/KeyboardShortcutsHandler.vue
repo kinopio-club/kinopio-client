@@ -282,7 +282,6 @@ const handleMouseDownEvents = (event) => {
   const position = utils.cursorPositionInPage(event)
   const isButtonScope = checkIsButtonScope(event)
   const isMinimap = checkIsOnMinimap(event)
-  console.log(shouldPan, isRightClick, shouldBoxSelect, event, isMinimap, event.button, event.buttons)
   if (isButtonScope) { return }
   if (isRightAndLeftClick && isMinimap) {
     store.commit('shouldCancelNextMouseUpInteraction', true)
