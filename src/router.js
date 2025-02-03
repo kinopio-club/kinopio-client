@@ -234,6 +234,7 @@ const inviteToEdit = async ({ next, store, spaceId, collaboratorKey }) => {
   const apiKey = store.state.currentUser.apiKey
   if (!apiKey) {
     store.commit('spaceUrlToLoad', spaceId)
+    store.commit('addToSpaceCollaboratorKeys', { spaceId, collaboratorKey })
     next()
     return
   }
