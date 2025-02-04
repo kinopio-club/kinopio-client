@@ -211,7 +211,6 @@ const classes = computed(() => {
   return {
     hover: state.isHover,
     active: currentBoxIsBeingDragged.value,
-    'box-jiggle': shouldJiggle.value,
     'is-resizing': isResizing.value,
     'is-selected': currentBoxIsSelected.value,
     'is-checked': isChecked.value || isInCheckedBox.value,
@@ -325,11 +324,6 @@ const updateCurrentConnections = async () => {
 }
 const isPainting = computed(() => store.state.currentUserIsPainting)
 const canEditSpace = computed(() => store.getters['currentUser/canEditSpace']())
-const shouldJiggle = computed(() => {
-  const isMultipleItemsSelected = store.getters.isMultipleItemsSelected
-  if (isMultipleItemsSelected) { return }
-  return currentBoxIsBeingDragged.value
-})
 const currentBoxIsBeingDragged = computed(() => {
   const isDragging = store.state.currentUserIsDraggingBox
   const isCurrent = store.state.currentDraggingBoxId === props.box.id
@@ -1047,24 +1041,4 @@ const isInCheckedBox = computed(() => {
     pointer-events all
     button
       z-index 1
-
-.box-jiggle
-  animation boxJiggle 0.5s infinite ease-out forwards
-
-@media (prefers-reduced-motion)
-  .box-jiggle
-    animation none
-
-@keyframes boxJiggle
-  0%
-    transform rotate(0deg)
-  25%
-    transform rotate(-0.5deg)
-  50%
-    transform rotate(0.5deg)
-  75%
-    transform rotate(-0.5deg)
-  100%
-    transform rotate(0deg)
-
 </style>
