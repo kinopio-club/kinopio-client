@@ -630,8 +630,8 @@ main#space.space(
   SpaceBackground
   SpaceBackgroundTint
   ItemsLocked
-  Boxes
   Connections
+  Boxes
   Cards
   ItemUnlockButtons
   BoxDetails
