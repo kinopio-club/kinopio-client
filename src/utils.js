@@ -915,7 +915,7 @@ export default {
     }
     return rect
   },
-  sortItemsAlphabeticallyBy (items, property) {
+  sortByAlphabetical (items, property) {
     const sorted = items.sort((a, b) => {
       // Case-insensitive comparison, ignore emojis
       let propA = this.normalizeString(a[property]).trim()
@@ -941,6 +941,27 @@ export default {
       return a.x - b.x
     })
   },
+  sortByCreatedAt (items) {
+    const sortedItems = items.sort((a, b) => {
+      const bCreatedAt = dayjs(b.createdAt).unix()
+      const aCreatedAt = dayjs(a.createdAt).unix()
+      return bCreatedAt - aCreatedAt
+    })
+    return sortedItems
+  },
+  sortByUpdatedAt (items) {
+    items = items.map(space => {
+      space.editedAt = space.editedAt || space.createdAt
+      return space
+    })
+    const sortedItems = items.sort((a, b) => {
+      const bEditedAt = dayjs(b.editedAt).unix()
+      const aEditedAt = dayjs(a.editedAt).unix()
+      return bEditedAt - aEditedAt
+    })
+    return sortedItems
+  },
+
   nameTextEditAction ({ action, startPosition, endPosition, name }) {
     let newName, offset
     let md = ''

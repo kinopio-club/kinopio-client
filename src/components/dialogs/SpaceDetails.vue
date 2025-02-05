@@ -179,13 +179,13 @@ const toggleSpaceFiltersIsVisible = () => {
 // sort
 
 const dialogSpaceFilterSortByIsActive = computed(() => {
-  return isSortByCreatedAt.value || isSortByAlphabetical.value
+  return shouldSortByCreatedAt.value || shouldSortByAlphabetical.value
 })
-const isSortByCreatedAt = computed(() => {
+const shouldSortByCreatedAt = computed(() => {
   const value = dialogSpaceFilterSortBy.value
   return value === 'createdAt'
 })
-const isSortByAlphabetical = computed(() => {
+const shouldSortByAlphabetical = computed(() => {
   const value = dialogSpaceFilterSortBy.value
   return value === 'alphabetical'
 })
@@ -207,36 +207,13 @@ const prependInboxSpace = (spaces) => {
   spaces = inboxSpaces.concat(spaces)
   return spaces
 }
-const sortByCreatedAt = (spaces) => {
-  const sortedSpaces = spaces.sort((a, b) => {
-    const bCreatedAt = dayjs(b.createdAt).unix()
-    const aCreatedAt = dayjs(a.createdAt).unix()
-    return bCreatedAt - aCreatedAt
-  })
-  return sortedSpaces
-}
-const sortByUpdatedAt = (spaces) => {
-  spaces = spaces.map(space => {
-    space.editedAt = space.editedAt || space.createdAt
-    return space
-  })
-  const sortedSpaces = spaces.sort((a, b) => {
-    const bEditedAt = dayjs(b.editedAt).unix()
-    const aEditedAt = dayjs(a.editedAt).unix()
-    return bEditedAt - aEditedAt
-  })
-  return sortedSpaces
-}
-const sortByAlphabetical = (spaces) => {
-  return utils.sortItemsAlphabeticallyBy(spaces, 'name')
-}
 const sort = (spaces) => {
-  if (isSortByCreatedAt.value) {
-    spaces = sortByCreatedAt(spaces)
-  } else if (isSortByAlphabetical.value) {
-    spaces = sortByAlphabetical(spaces)
+  if (shouldSortByCreatedAt.value) {
+    spaces = utils.sortByCreatedAt(spaces)
+  } else if (shouldSortByAlphabetical.value) {
+    spaces = utils.sortByAlphabetical(spaces, 'name')(spaces)
   } else {
-    spaces = sortByUpdatedAt(spaces)
+    spaces = utils.sortByUpdatedAt(spaces)
   }
   spaces = prependFavoriteSpaces(spaces)
   spaces = prependInboxSpace(spaces)
