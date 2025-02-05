@@ -63,7 +63,10 @@ const toggleAddGroupIsVisible = () => {
   closeDialogs()
   state.addGroupIsVisible = value
 }
-
+const toggleGroupsIsVisible = () => {
+  store.commit('closeAllDialogs')
+  store.commit('groupsIsVisible', true)
+}
 </script>
 
 <template lang="pug">
@@ -73,11 +76,15 @@ dialog.narrow.add-to-group(v-if="visible" :open="visible" @click.left.stop="clos
       div
         Loader(:visible="isLoadingGroups" :isSmall="true")
         span Add to Group
-      .button-wrap
-        button.small-button(:class="{ active: state.addGroupIsVisible }" @click.stop="toggleAddGroupIsVisible")
-          img.icon.add(src="@/assets/add.svg")
-          span Group
-        AddGroup(:visible="state.addGroupIsVisible" @closeDialogs="closeDialogs")
+      div
+        .button-wrap
+          button.small-button(@click.stop="toggleGroupsIsVisible")
+            span Edit
+        .button-wrap
+          button.small-button(:class="{ active: state.addGroupIsVisible }" @click.stop="toggleAddGroupIsVisible")
+            img.icon.add(src="@/assets/add.svg")
+            span Group
+          AddGroup(:visible="state.addGroupIsVisible" @closeDialogs="closeDialogs")
   //- groups list
   section.results-section(v-if="props.groups.length")
     GroupList(:groups="props.groups" :selectedGroup="props.selectedGroup" @selectGroup="selectGroup")
