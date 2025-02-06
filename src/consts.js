@@ -81,7 +81,7 @@ export default {
     if (this.isDevelopment()) {
       return 'FiM7akGos18Sfx4yKrwjF'
     } else {
-      return '6TRE21gchHI7alHLuwzd5'
+      return '3CBHtivu7X7nTzrcaTFQV'
     }
   },
   changelogSpaceId () {
