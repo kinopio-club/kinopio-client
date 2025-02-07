@@ -393,6 +393,7 @@ const mergeSelectedCards = () => {
     name: newName,
     x: position.x,
     y: position.y,
+    backgroundColor: cards[0].backgroundColor,
     ...urlPreview
   }
   store.dispatch('currentCards/add', newCard)
