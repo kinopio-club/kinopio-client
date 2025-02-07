@@ -295,6 +295,13 @@ const addCardFromOutsideAppContext = (event) => {
   if (card.spaceId !== currentSpace.id) { return }
   store.commit('currentCards/create', { card, shouldPreventCache: true })
 }
+const checkIfShouldSnapCards = (event) => {
+  if (!store.state.cardsWereDragged) { return }
+  if (event.shiftKey) { return }
+  const snapGuide = store.state.currentCards.snapGuide
+  if (!snapGuide) { return }
+  store.dispatch('currentCards/snap', { snapGuide })
+}
 
 // boxes
 
@@ -582,6 +589,7 @@ const stopInteractions = async (event) => {
     store.commit('triggerUpdateHeaderAndFooterPosition')
   }
   checkIfShouldHideFooter(event)
+  checkIfShouldSnapCards(event)
   checkIfShouldSnapBoxes(event)
   checkIfShouldExpandBoxes(event)
   if (shouldCancelInteraction(event)) { return }

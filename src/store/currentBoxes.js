@@ -1,4 +1,3 @@
-// import utils from '@/utils.js'
 import cache from '@/cache.js'
 import utils from '@/utils.js'
 import consts from '@/consts.js'
@@ -307,7 +306,7 @@ export default {
 
     updateSnapGuides: (context, { boxes, cards }) => {
       if (context.rootState.shouldSnapToGrid) { return }
-      const snapThreshold = 6
+      const snapThreshold = 10
       const spaceEdgeThreshold = 100
       let targetBoxes = utils.clone(context.getters.isSelectableInViewport)
       const prevSnapGuides = context.state.snapGuides
@@ -332,13 +331,13 @@ export default {
           targetBox.height = targetBox.resizeHeight
           const isBetweenTargetBoxPointsX = utils.isBetween({
             value: item.x,
-            min: targetBox.x + snapThreshold,
-            max: targetBox.x + targetBox.width - snapThreshold
+            min: targetBox.x - snapThreshold,
+            max: targetBox.x + targetBox.width + snapThreshold
           })
           const isBetweenTargetBoxPointsY = utils.isBetween({
             value: item.y,
-            min: targetBox.y + snapThreshold,
-            max: targetBox.y + targetBox.height - snapThreshold
+            min: targetBox.y - snapThreshold,
+            max: targetBox.y + targetBox.height + snapThreshold
           })
           // let time = 1
           // item sides

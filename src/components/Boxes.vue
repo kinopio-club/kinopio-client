@@ -3,7 +3,6 @@ import { reactive, computed, onMounted, onBeforeUnmount, defineProps, defineEmit
 import { useStore } from 'vuex'
 
 import Box from '@/components/Box.vue'
-import BoxSnapGuide from '@/components/BoxSnapGuide.vue'
 const store = useStore()
 
 const isPainting = computed(() => store.state.currentUserIsPainting)
