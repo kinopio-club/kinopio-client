@@ -861,7 +861,9 @@ const currentSpace = {
       let space
       const user = context.rootState.currentUser
       let spaceToRestore = await cache.space(user.lastSpaceId)
-      if (spaceToRestore.id === prevFailedSpace?.id) {
+      if (!spaceToRestore.id) {
+        spaceToRestore = null
+      } else if (spaceToRestore?.id === prevFailedSpace?.id) {
         spaceToRestore = null
       }
       const cachedHelloSpace = await cache.getSpaceByName('Hello Kinopio')
