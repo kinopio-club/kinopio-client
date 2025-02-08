@@ -28,7 +28,10 @@ const props = defineProps({
   visible: Boolean,
   removeIsVisible: Boolean,
   shouldLightenColors: Boolean,
-  recentColors: Array,
+  recentColors: {
+    type: Array,
+    default: () => []
+  },
   luminosityIsDark: Boolean,
   luminosityIsLight: Boolean
 })
