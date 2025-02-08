@@ -388,11 +388,15 @@ const mergeSelectedCards = () => {
   } while (name.length > maxCardCharacterLimit.value)
   let position = { x: cards[0].x, y: cards[0].y }
   remove({ shouldRemoveCardsOnly: true })
+  const cardWithBackgroundColor = cards.find(card => card.backgroundColor)
+  const cardBackgroundColor = cardWithBackgroundColor?.backgroundColor
+  const userCardBackgroundColor = store.state.currentUser.defaultCardBackgroundColor
   const newCard = {
     id: nanoid(),
     name: newName,
     x: position.x,
     y: position.y,
+    backgroundColor: cardBackgroundColor || userCardBackgroundColor,
     ...urlPreview
   }
   store.dispatch('currentCards/add', newCard)
