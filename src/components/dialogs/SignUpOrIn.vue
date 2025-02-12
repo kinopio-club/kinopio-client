@@ -263,6 +263,7 @@ const notifySignedIn = () => {
   store.dispatch('closeAllDialogs')
   store.commit('removeNotificationByMessage', 'Signing In…')
   store.commit('addNotification', { message: 'Signed In', type: 'success' })
+  store.commit('currentUserIsInvitedButCannotEditCurrentSpace', false)
 }
 const notifyIsJoiningGroup = () => {
   if (!store.state.shouldNotifyIsJoiningGroup) { return }
@@ -302,6 +303,8 @@ const updateCurrentSpaceWithNewUserId = (previousUser, newUser) => {
 }
 const removeUneditedSpace = async (spaceName) => {
   let currentSpace = await cache.getSpaceByName(spaceName)
+  let isInvitedSpaces = await cache.invitedSpaces()
+  isInvitedSpaces = Boolean(isInvitedSpaces.length)
   let space
   if (spaceName === 'Hello Kinopio') {
     space = helloSpace
@@ -320,7 +323,9 @@ const removeUneditedSpace = async (spaceName) => {
   if (!spaceIsEdited) {
     console.log('🌹 signIn removeUneditedSpace', spaceName)
     await cache.deleteSpace(currentSpace)
-    shouldLoadLastSpace = true
+    if (!isInvitedSpaces) {
+      shouldLoadLastSpace = true
+    }
   } else {
     console.log('🌹 signIn removeUneditedSpace isEdited: keep space', spaceName, spaceIsEdited, cardNames, currentSpace?.cards)
   }
