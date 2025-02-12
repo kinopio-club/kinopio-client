@@ -1445,8 +1445,17 @@ export default {
     if (!prevSpace.cards || !prevSpace.connections) { return false }
     const cardsCountIsUnchanged = prevSpace.cards?.length === newSpace.cards.length
     const boxesCountIsUnchanged = prevSpace.boxes?.length === newSpace.boxes.length
-    const editedAtIsUnchanged = prevSpace.editedAt === newSpace.editedAt
-    return cardsCountIsUnchanged && boxesCountIsUnchanged && editedAtIsUnchanged
+    const metaKeys = ['name', 'editedAt', 'collaboratorKey']
+    let metaIsUpdated
+    metaKeys.forEach(key => {
+      if (prevSpace[key] !== newSpace[key]) {
+        metaIsUpdated = true
+      }
+    })
+    if (metaIsUpdated) {
+      return false
+    }
+    return cardsCountIsUnchanged && boxesCountIsUnchanged // && editedAtIsUnchanged
   },
   mergeSpaceKeyValues ({ prevItems, newItems, selectedItemIds }) {
     prevItems = prevItems.filter(item => Boolean(item))
