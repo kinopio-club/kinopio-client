@@ -183,10 +183,11 @@ export default {
     // update
 
     update: async (context, box) => {
+      context.dispatch('broadcast/update', { updates: box, type: 'updateBox', handler: 'currentBoxes/update' }, { root: true })
       context.dispatch('history/add', { boxes: [box] }, { root: true })
       context.commit('update', box)
-      context.dispatch('broadcast/update', { updates: box, type: 'updateBox', handler: 'currentBoxes/update' }, { root: true })
       const keys = Object.keys(box)
+      delete box.userId
       const shouldUpdatePathsKeys = ['x', 'resizeWidth']
       let shouldUpdatePaths = keys.find(key => shouldUpdatePathsKeys.includes(key))
       if (shouldUpdatePaths) {
@@ -194,6 +195,7 @@ export default {
           context.dispatch('currentConnections/updatePaths', { itemId: box.id }, { root: true })
         })
       }
+      await cache.updateSpace('editedAt', utils.unixTime(), currentSpaceId)
       await context.dispatch('api/addToQueue', { name: 'updateBox', body: box }, { root: true })
     },
     updateName (context, { box, newName }) {
