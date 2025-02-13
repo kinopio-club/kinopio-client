@@ -391,7 +391,19 @@ const showBoxDetails = async (event) => {
   const boxId = store.state.currentUserIsResizingBoxIds[0]
   await nextTick()
   await nextTick()
+  updateSizeForNewBox(boxId)
   store.commit('boxDetailsIsVisibleForBoxId', boxId)
+}
+const updateSizeForNewBox = (boxId) => {
+  const box = store.getters['currentBoxes/byId'](boxId)
+  const isMinSize = box.resizeWidth === consts.minBoxSize && box.resizeHeight === consts.minBoxSize
+  if (!isMinSize) { return }
+  const newBox = {
+    id: box.id,
+    resizeWidth: consts.defaultBoxWidth,
+    resizeHeight: consts.defaultBoxHeight
+  }
+  store.dispatch('currentBoxes/update', newBox)
 }
 
 // drag items
