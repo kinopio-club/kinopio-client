@@ -152,7 +152,6 @@ export default {
     add: async (context, { box, shouldResize }) => {
       const count = context.state.ids.length
       const defaultBoxWidth = consts.defaultBoxWidth
-      console.log('🎃🎃🎃🎃🎃🎃', defaultBoxWidth)
       const defaultBoxHeight = consts.defaultBoxHeight
       const isThemeDark = context.rootState.currentUser.theme === 'dark'
       const color = randomColor({ luminosity: 'dark' })
@@ -265,8 +264,6 @@ export default {
       boxIds.forEach(boxId => {
         const rect = utils.boxElementDimensions({ id: boxId })
         let width = rect.width
-        console.log('🌷🌷🌷🌷', width)
-
         let height = rect.height
         width = width + delta.x
         height = height + delta.y
