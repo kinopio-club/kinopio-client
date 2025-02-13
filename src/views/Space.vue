@@ -145,24 +145,24 @@ const isDraggingBox = computed(() => store.state.currentUserIsDraggingBox)
 // page size
 
 watch(() => store.state.currentUserIsDraggingCard, (value, prevValue) => {
-  updatePageSizeFromMutation(value)
+  checkIfShouldUpdatePageSize(value)
 })
 watch(() => store.state.currentUserIsResizingCard, (value, prevValue) => {
-  updatePageSizeFromMutation(value)
+  checkIfShouldUpdatePageSize(value)
   if (prevValue && !value) {
     afterResizeCards()
   }
 })
 watch(() => store.state.currentUserIsDraggingBox, (value, prevValue) => {
-  updatePageSizeFromMutation(value)
+  checkIfShouldUpdatePageSize(value)
 })
 watch(() => store.state.currentUserIsResizingBox, (value, prevValue) => {
-  updatePageSizeFromMutation(value)
+  checkIfShouldUpdatePageSize(value)
   if (prevValue && !value) {
     afterResizeBoxes()
   }
 })
-const updatePageSizeFromMutation = (value) => {
+const checkIfShouldUpdatePageSize = (value) => {
   if (!value) {
     store.dispatch('updatePageSizes')
   }
