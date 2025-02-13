@@ -53,6 +53,12 @@ const backgroundColorIsDark = computed(() => {
 const normalizedCard = computed(() => {
   let card = utils.clone(props.card)
   card = store.getters['currentCards/nameSegments'](card)
+  card.nameSegments = card.nameSegments.map(segment => {
+    if (segment.isText) {
+      segment.markdown = utils.markdownSegments(segment.content)
+    }
+    return segment
+  })
   return card
 })
 const isStrikeThrough = computed(() => {
