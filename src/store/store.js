@@ -1657,6 +1657,7 @@ const store = createStore({
       state.otherUsers[updatedUser.id] = updatedUser
     },
     updateOtherItems: (state, { cards, spaces }) => {
+      console.error('🌹🌹🌹🌹🌹🌹updateOtherItems', cards, spaces)
       utils.typeCheck({ value: cards, type: 'array' })
       utils.typeCheck({ value: spaces, type: 'array' })
       let otherItems = utils.clone(state.otherItems)
