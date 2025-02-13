@@ -655,6 +655,7 @@ const addBox = (event) => {
     store.dispatch('currentUserToolbar', 'card')
     return
   }
+  console.log('📈📈📈📈📈📈', position)
   store.dispatch('currentBoxes/add', { box: position, shouldResize: true })
   store.commit('currentBoxIsNew', true)
   event.preventDefault() // allows dragging boxes without scrolling on touch

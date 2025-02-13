@@ -12,6 +12,8 @@ export default {
   highCharacterLimit: 4000,
   defaultCardWidth: 58,
   defaultCardHeight: 70,
+  defaultBoxWidth: 224,
+  defaultBoxHeight: 105,
   minItemXY: 70,
   normalCardMaxWidth: 200,
   wideCardMaxWidth: 390,
@@ -27,8 +29,6 @@ export default {
   AIImageLimitFreeUser: 10,
   rootUserId: 'euGhpBrR9eBcjKnK16C_g',
   sidebarWidth: 250,
-  defaultBoxWidth: 224,
-  defaultBoxHeight: 105,
   systemCommands: { explore: 'Explore', newSpace: 'New Space', templates: 'Templates', apps: 'Apps and Extensions' },
   systemCommandIcons: { moonPhase: 'moonPhase' },
   isSecureAppContextIOS: navigator.isSecureAppContextIOS, // true = iOS app
