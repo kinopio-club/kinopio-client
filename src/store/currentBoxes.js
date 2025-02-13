@@ -151,7 +151,8 @@ export default {
 
     add: async (context, { box, shouldResize }) => {
       const count = context.state.ids.length
-      const minBoxSize = consts.minBoxSize
+      const defaultBoxWidth = consts.defaultBoxWidth
+      const defaultBoxHeight = consts.defaultBoxHeight
       const isThemeDark = context.rootState.currentUser.theme === 'dark'
       const color = randomColor({ luminosity: 'dark' })
       box = {
@@ -160,8 +161,8 @@ export default {
         userId: context.rootState.currentUser.id,
         x: box.x,
         y: box.y,
-        resizeWidth: box.resizeWidth || minBoxSize,
-        resizeHeight: box.resizeHeight || minBoxSize,
+        resizeWidth: box.resizeWidth || defaultBoxWidth,
+        resizeHeight: box.resizeHeight || defaultBoxHeight,
         color: box.color || color,
         fill: box.fill || 'filled', // empty, filled
         name: box.name || `Box ${count}`,

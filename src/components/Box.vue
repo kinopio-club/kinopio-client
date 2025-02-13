@@ -274,10 +274,11 @@ const resizeColorClass = computed(() => {
 // shrink
 
 const shrinkToMinBoxSize = () => {
-  const minBoxSize = consts.minBoxSize
+  const defaultBoxWidth = consts.defaultBoxWidth
+  const defaultBoxHeight = consts.defaultBoxHeight
   let updated = { id: props.box.id }
-  updated.resizeWidth = minBoxSize
-  updated.resizeHeight = minBoxSize
+  updated.resizeWidth = defaultBoxWidth
+  updated.resizeHeight = defaultBoxHeight
   store.dispatch('currentBoxes/update', updated)
 }
 const shrink = () => {
