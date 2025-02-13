@@ -669,6 +669,7 @@ const store = createStore({
     triggerUpdateItemCurrentConnections: (state, itemId) => {},
     triggerCloseGroupDetailsDialog: () => {},
     triggerPanningStart: () => {},
+    triggerAddBox: (state, event) => {},
 
     // select all below
     triggerSelectAllItemsBelowCursor: (state, position) => {},

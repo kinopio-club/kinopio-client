@@ -88,6 +88,9 @@ onMounted(() => {
   unsubscribe = store.subscribe((mutation, state) => {
     if (mutation.type === 'triggerRestoreSpaceRemoteComplete') {
       dragItemsOnNextTick()
+    } else if (mutation.type === 'triggerAddBox') {
+      const event = mutation.payload
+      addBox(event)
     }
   })
   updateIconsNotDraggable()
@@ -298,6 +301,23 @@ const addCardFromOutsideAppContext = (event) => {
 
 // boxes
 
+const addBox = (event) => {
+  let position = utils.cursorPositionInSpace(event)
+  if (utils.isPositionOutsideOfSpace(position)) {
+    position = utils.cursorPositionInPage(event)
+    store.commit('addNotificationWithPosition', { message: 'Outside Space', position, type: 'info', icon: 'cancel', layer: 'app' })
+    return
+  }
+  store.dispatch('currentUser/notifyReadOnly', position)
+  const shouldPrevent = !store.getters['currentUser/canEditSpace']()
+  if (shouldPrevent) {
+    store.dispatch('currentUserToolbar', 'card')
+    return
+  }
+  store.dispatch('currentBoxes/add', { box: position, shouldResize: true })
+  store.commit('currentBoxIsNew', true)
+  event.preventDefault() // allows dragging boxes without scrolling on touch
+}
 const resizeBoxes = () => {
   if (!prevCursor) { return }
   const boxIds = store.getters['currentBoxes/isResizingIds']
