@@ -273,11 +273,12 @@ const resizeColorClass = computed(() => {
 
 // shrink
 
-const shrinkToMinBoxSize = () => {
-  const minBoxSize = consts.minBoxSize
+const shrinkToDefaultBoxSize = () => {
+  const defaultBoxWidth = consts.defaultBoxWidth
+  const defaultBoxHeight = consts.defaultBoxHeight
   let updated = { id: props.box.id }
-  updated.resizeWidth = minBoxSize
-  updated.resizeHeight = minBoxSize
+  updated.resizeWidth = defaultBoxWidth
+  updated.resizeHeight = defaultBoxHeight
   store.dispatch('currentBoxes/update', updated)
 }
 const shrink = () => {
@@ -286,7 +287,7 @@ const shrink = () => {
   prevSelectedBox = null
   const items = cards.concat(boxes)
   if (!items.length) {
-    shrinkToMinBoxSize()
+    shrinkToDefaultBoxSize()
     return
   }
   const rect = utils.boundaryRectFromItems(items)
