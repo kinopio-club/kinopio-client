@@ -24,6 +24,8 @@ import ImageOrVideo from '@/components/ImageOrVideo.vue'
 import dayjs from 'dayjs'
 import isToday from 'dayjs/plugin/isToday'
 import qs from '@aguezz/qs-parse'
+import randomColor from 'randomcolor'
+import { nanoid } from 'nanoid'
 
 dayjs.extend(isToday)
 
@@ -895,12 +897,13 @@ const nameSegments = computed(() => {
     if (segment.isTag) {
       let tag = store.getters['currentSpace/tagByName'](segment.name)
       if (!tag) {
-        tag = store.getters.newTag({
+        tag = {
+          id: nanoid(),
           name: segment.name,
-          defaultColor: store.state.currentUser.color,
+          color: newTagColor(),
           cardId: props.card.id,
           spaceId: store.state.currentSpace.id
-        })
+        }
         console.warn('🦋 create missing tag', segment.name, tag, props.card)
         store.dispatch('currentSpace/addTag', tag)
       }
@@ -926,6 +929,14 @@ const nameSegments = computed(() => {
 
 // tags
 
+const newTagColor = () => {
+  const isThemeDark = store.state.currentUser.theme === 'dark'
+  let color = randomColor({ luminosity: 'light' })
+  if (isThemeDark) {
+    color = randomColor({ luminosity: 'dark' })
+  }
+  return color
+}
 const tags = computed(() => {
   return nameSegments.value.filter(segment => {
     if (segment.isTag) {

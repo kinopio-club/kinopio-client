@@ -2157,9 +2157,11 @@ const store = createStore({
       }
     },
     allTags: (state) => {
+      const allTags = state.tags
       const userTags = state.currentUser.tags
       const spaceTags = state.currentSpace.tags
-      const tags = utils.mergeArrays({ previous: userTags, updated: spaceTags, key: 'name' })
+      let tags = spaceTags.concat(userTags).concat(allTags)
+      // tags = uniqBy(tags, 'name') // removed for perf reasons
       return tags || []
     },
     currentInteractingItem: (state, getters, rootState, rootGetters) => {
