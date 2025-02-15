@@ -86,24 +86,27 @@ const groupName = computed({
 
 <template lang="pug">
 .row.group-details-info(@click="closeDialogs")
-  .segmented-buttons
-    //- color
-    button.change-color(@click.left.stop="toggleColorPicker" :class="{active: state.colorPickerIsVisible}" title="Change Group Color")
-      .current-color.current-group-color(:style="{ background: groupColor }")
-    //- emoji
-    button.change-emoji(@click.left.stop="toggleEmojiPicker" :class="{active: state.emojiPickerIsVisible}" title="Change Emoji")
-      span.emoji(v-if="groupEmoji") 🍇
-      img.icon.group(v-else src="@/assets/group.svg")
+  .button-wrap
+    .segmented-buttons
+      //- color
+      button.change-color(@click.left.stop="toggleColorPicker" :class="{active: state.colorPickerIsVisible}" title="Change Group Color")
+        .current-color.current-group-color(:style="{ background: groupColor }")
+      //- emoji
+      button.change-emoji(@click.left.stop="toggleEmojiPicker" :class="{active: state.emojiPickerIsVisible}" title="Change Emoji")
+        span.emoji(v-if="groupEmoji") {{ groupEmoji }}
+        img.icon.group(v-else src="@/assets/group.svg")
     ColorPicker(:currentColor="groupColor" :visible="state.colorPickerIsVisible" @selectedColor="updateGroupColor")
+    //- EmojiPicker(:currentEmoji="groupEmoji" :visible="state.emojiPickerIsVisible" @selectedEmoji="updateGroupEmoji")
+
   //- name
   input.name(placeholder="Group Name" v-model="groupName" name="groupName" maxlength=100 ref="nameInputElement" @keydown.enter.exact.prevent="createGroup")
 </template>
 
 <style lang="stylus">
 .group-details-info
-  .change-color
-    margin 0
-  // .change-emoji
-  //   margin-left 0
-  //   margin-right 6px
+  button.change-emoji
+    transform translateY(-1.5px)
+  input.name
+    margin-left 6px
+    margin-bottom 0
 </style>

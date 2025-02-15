@@ -125,10 +125,4 @@ dialog.narrow.add-group(v-if="visible" :open="visible" @click.left.stop="closeDi
 dialog.add-group
   left initial
   right 8px
-  // width 200px !important
-  input.name
-    margin-bottom 0
-  button.change-color
-    margin-right 6px
-
 </style>
