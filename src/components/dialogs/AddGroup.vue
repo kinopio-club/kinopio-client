@@ -26,8 +26,15 @@ const props = defineProps({
 })
 const state = reactive({
   dialogHeight: null,
+
   colorPickerIsVisible: false,
-  group: null,
+  emojiPickerIsVisible: false,
+  group: {
+    name: null,
+    color: null,
+    emoji: null
+  },
+
   loading: {
     createGroup: false
   },
@@ -52,7 +59,9 @@ const updateDialogHeight = async () => {
 }
 
 const closeDialogs = () => {
+  // store.commit('triggerCloseChildDialogs')
   state.colorPickerIsVisible = false
+  state.emojiPickerIsVisible = false
 }
 const clearErrors = () => {
   state.error.missingName = false
@@ -71,9 +80,18 @@ const updateGroupColor = (newValue) => {
   state.group.color = newValue
 }
 const toggleColorPicker = () => {
-  const isVisible = state.colorPickerIsVisible
+  const isVisible = state.emojiPickerIsVisible
   closeDialogs()
-  state.colorPickerIsVisible = !isVisible
+  state.emojiPickerIsVisible = !isVisible
+}
+
+// group emoji
+
+const groupEmoji = computed(() => state.group.emoji)
+const toggleEmojiPicker = () => {
+  const isVisible = state.emojiPickerIsVisible
+  closeDialogs()
+  state.emojiPickerIsVisible = !isVisible
 }
 
 // group name
@@ -99,10 +117,14 @@ const groupName = computed({
 const initGroup = () => {
   let group = {
     name: 'Group Name',
-    color: randomColor()
+    color: randomColor(),
+    emoji: null
   }
   state.group = group
 }
+// const updateGroup = (updates) => {
+// apply update keys to state.group
+// }
 const createGroup = async () => {
   if (state.loading.createGroup) { return }
   clearErrors()
@@ -128,11 +150,22 @@ dialog.narrow.add-group(v-if="visible" :open="visible" @click.left.stop="closeDi
   UpgradedUserRequired(:message="upgradeMessage")
   section(v-if="currentUserIsUpgraded")
     .row
+
+      //- GroupDetailsInfo(group="state.group" @updateGroup="updateGroup")
+
+      //- color
       .button-wrap
-          button.change-color(@click.left.stop="toggleColorPicker" :class="{active: state.colorPickerIsVisible}" title="Change Group Color")
-            .current-color.current-group-color(:style="{ background: groupColor }")
-          ColorPicker(:currentColor="groupColor" :visible="state.colorPickerIsVisible" @selectedColor="updateGroupColor")
+        button.change-color(@click.left.stop="toggleColorPicker" :class="{active: state.colorPickerIsVisible}" title="Change Group Color")
+          .current-color.current-group-color(:style="{ background: groupColor }")
+        ColorPicker(:currentColor="groupColor" :visible="state.colorPickerIsVisible" @selectedColor="updateGroupColor")
+      //- emoji
+      .button-wrap
+        button.change-emoji(@click.left.stop="toggleEmojiPicker" :class="{active: state.emojiPickerIsVisible}" title="Change Emoji")
+          span.emoji(v-if="groupEmoji") 🍇
+          img.icon.group(v-else src="@/assets/group.svg")
+      //- name
       input.name(placeholder="Group Name" v-model="groupName" name="groupName" maxlength=100 ref="nameInputElement" @keydown.enter.exact.prevent="createGroup")
+
     .row
       button(:class="{ active: state.loading.createGroup }" @click.stop="createGroup")
         img.icon.add(src="@/assets/add.svg")
