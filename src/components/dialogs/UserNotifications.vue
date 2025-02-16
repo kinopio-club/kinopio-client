@@ -42,6 +42,10 @@ watch(() => props.loading, (value, prevValue) => {
   updateDialogHeight()
 })
 
+watch(() => props.notifications, (value, prevValue) => {
+  state.filteredNotifications = props.notifications
+})
+
 const state = reactive({
   filteredNotifications: null,
   dialogHeight: null
@@ -142,6 +146,10 @@ const userName = (notification) => {
     return notification.user.name
   }
 }
+const deleteUserNotifications = async () => {
+  store.commit('triggerClearUserNotifications')
+  await store.dispatch('api/deleteAllNotifications')
+}
 
 // actions
 
@@ -186,13 +194,20 @@ const updateAddToExplore = async (space) => {
 <template lang="pug">
 dialog.narrow.user-notifications(v-if="props.visible" :open="props.visible" ref="dialogElement" :style="{'max-height': state.dialogHeight -50 + 'px'}")
   section
-    p
-      span Notifications
-      Loader(:visible="props.loading")
+    .row.title-row
+      div
+        span Notifications
+        Loader(:visible="props.loading")
+      .button-wrwap
+        button.small-button.remove-button.danger(@click.left.stop="deleteUserNotifications")
+            img.icon(src="@/assets/remove.svg")
+
     OfflineBadge
+
+  section(v-if="!props.loading && !state.filteredNotifications.length")
+    p Cards added to your spaces by collaborators can be found here
+
   section.results-section(v-if="state.filteredNotifications.length" :style="{'max-height': state.dialogHeight + 'px'}")
-    p(v-if="!props.loading && !state.filteredNotifications.length")
-      span Cards added to your spaces by collaborators can be found here
     ul.results-list(v-if="state.filteredNotifications.length")
       template(v-for="notification in state.filteredNotifications")
         a(:href="spaceUrl(notification)")
@@ -271,6 +286,8 @@ dialog.narrow.user-notifications(v-if="props.visible" :open="props.visible" ref=
       border-radius var(--small-entity-radius)
   .row
     margin-top 10px
+    &.title-row
+      margin-top 0
   .card-details
     background-color var(--secondary-background)
     border-radius var(--entity-radius)

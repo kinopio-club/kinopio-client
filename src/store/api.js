@@ -1155,6 +1155,18 @@ const self = {
         context.dispatch('handleServerError', { name: 'getNotifications', error })
       }
     },
+    deleteAllNotifications: async (context) => {
+      const apiKey = context.rootState.currentUser.apiKey
+      const isOnline = context.rootState.isOnline
+      if (!shouldRequest({ apiKey, isOnline })) { return }
+      try {
+        const options = await context.dispatch('requestOptions', { method: 'DELETE', space: context.rootState.currentSpace })
+        const response = await fetch(`${consts.apiHost()}/notification/all`, options)
+        return normalizeResponse(response)
+      } catch (error) {
+        context.dispatch('handleServerError', { name: 'deleteGroupPermanent', error })
+      }
+    },
 
     // Services
 
