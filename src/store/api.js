@@ -809,7 +809,9 @@ const self = {
         }
         const options = await context.dispatch('requestOptions', { body, method: 'DELETE', space: context.rootState.currentSpace })
         const response = await fetch(`${consts.apiHost()}/space/collaborator`, options)
-        return normalizeResponse(response)
+        const data = await normalizeResponse(response)
+        const collaboratorKey = data.collaboratorKey
+        context.dispatch('currentSpace/updateSpace', { collaboratorKey }, { root: true })
       } catch (error) {
         context.dispatch('handleServerError', { name: 'removeSpaceCollaborator', error })
       }

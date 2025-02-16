@@ -425,7 +425,7 @@ const startPainting = (event) => {
     store.commit('shouldAddCard', true)
   // add box
   } else if (shouldAdd && toolbarIsBox.value) {
-    addBox(event)
+    store.commit('triggerAddBox', event)
     return
   }
   // clear selected
@@ -637,27 +637,6 @@ const lockingAnimationFrame = (timestamp) => {
     cancelLocking()
     lockingStartTime = undefined
   }
-}
-
-// Boxes
-
-// TODO move this to space , trigger
-const addBox = (event) => {
-  let position = utils.cursorPositionInSpace(event)
-  if (utils.isPositionOutsideOfSpace(position)) {
-    position = utils.cursorPositionInPage(event)
-    store.commit('addNotificationWithPosition', { message: 'Outside Space', position, type: 'info', icon: 'cancel', layer: 'app' })
-    return
-  }
-  store.dispatch('currentUser/notifyReadOnly', position)
-  const shouldPrevent = !store.getters['currentUser/canEditSpace']()
-  if (shouldPrevent) {
-    store.dispatch('currentUserToolbar', 'card')
-    return
-  }
-  store.dispatch('currentBoxes/add', { box: position, shouldResize: true })
-  store.commit('currentBoxIsNew', true)
-  event.preventDefault() // allows dragging boxes without scrolling on touch
 }
 
 // Selecting

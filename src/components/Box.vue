@@ -273,11 +273,10 @@ const resizeColorClass = computed(() => {
 
 // shrink
 
-const shrinkToMinBoxSize = () => {
-  const minBoxSize = consts.minBoxSize
+const shrinkToDefaultBoxSize = () => {
   let updated = { id: props.box.id }
-  updated.resizeWidth = minBoxSize
-  updated.resizeHeight = minBoxSize
+  updated.resizeWidth = consts.defaultBoxWidth
+  updated.resizeHeight = consts.defaultBoxHeight
   store.dispatch('currentBoxes/update', updated)
 }
 const shrink = () => {
@@ -286,7 +285,7 @@ const shrink = () => {
   prevSelectedBox = null
   const items = cards.concat(boxes)
   if (!items.length) {
-    shrinkToMinBoxSize()
+    shrinkToDefaultBoxSize()
     return
   }
   const rect = utils.boundaryRectFromItems(items)
@@ -746,9 +745,10 @@ const containingBoxes = computed(() => {
   if (currentBoxIsBeingDragged.value) { return }
   if (currentBoxIsSelected.value) { return }
   if (isResizing.value) { return }
+  if (store.state.boxDetailsIsVisibleForBoxId) { return }
   let boxes = store.getters['currentBoxes/all']
+  boxes = utils.clone(boxes)
   boxes = boxes.filter(box => {
-    box = utils.clone(box)
     const currentBox = utils.clone(props.box)
     const isInsideBox = utils.isRectACompletelyInsideRectB(currentBox, box)
     const boxArea = box.resizeWidth * box.resizeHeight

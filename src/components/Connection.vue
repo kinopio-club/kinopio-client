@@ -53,13 +53,13 @@ const props = defineProps({
 })
 
 const state = reactive({
-  path: '',
+  pathWhileSelected: '',
   pathWhileDragging: '',
   frameCount: 0,
   isVisibleInViewport: true
 })
 watch(() => props.connection.path, (value, prevValue) => {
-  state.path = value
+  state.pathWhileSelected = value
 })
 
 const visible = computed(() => {
@@ -367,14 +367,14 @@ const controlPointPosition = ({ x, y }) => {
 // line jiggling animation
 const animationFrame = () => {
   if (state.frameCount === 0) {
-    state.path = props.connection.path
+    state.pathWhileSelected = props.connection.path
   }
   state.frameCount++
   const curvePattern = new RegExp(/(q[-0-9]*),([-0-9]*)\w+/)
   // "q90,40" from "m747,148 q90,40 -85,75"
   // "q-90,-40" from "m747,148 q-90,-40 -85,75" (negative)
   // "q-200,-0" from "m217,409 q200,1 492,-78" (variable length)
-  const curveMatch = state.path?.match(curvePattern)
+  const curveMatch = state.pathWhileSelected?.match(curvePattern)
   if (!curveMatch) { return }
   const points = curveMatch[0].substring(1, curveMatch[0].length).split(',')
   // ["90", "40"] from "q90,40"
@@ -385,10 +385,10 @@ const animationFrame = () => {
     y: parseInt(points[1])
   })
   const controlPoint = curveMatch[0]
-  state.path = updatedPath(state.path, controlPoint, x, y)
+  state.pathWhileSelected = updatedPath(state.pathWhileSelected, controlPoint, x, y)
   const element = connectionPathElement.value
   if (!element) { return }
-  element.setAttribute('d', state.path)
+  element.setAttribute('d', state.pathWhileSelected)
   if (shouldAnimate.value) {
     window.requestAnimationFrame(animationFrame)
   }
@@ -396,7 +396,7 @@ const animationFrame = () => {
 const cancelAnimation = () => {
   window.cancelAnimationFrame(animationTimer)
   animationTimer = undefined
-  state.path = undefined
+  state.pathWhileSelected = undefined
   state.frameCount = 0
 }
 const shouldAnimate = computed(() => {
@@ -410,7 +410,8 @@ watch(() => shouldAnimate.value, (value, prevValue) => {
 })
 const relativePath = computed(() => {
   if (!directionIsVisible.value) { return }
-  const path = state.pathWhileDragging || props.connection.path
+
+  const path = state.pathWhileDragging || state.pathWhileSelected || props.connection.path // jiggling
   const pathStart = utils.startCoordsFromConnectionPath(path)
   const pathEndRelative = utils.endCoordsFromConnectionPath(path)
   const controlPoint = utils.curveControlPointFromPath(path)
