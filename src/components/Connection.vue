@@ -410,7 +410,6 @@ watch(() => shouldAnimate.value, (value, prevValue) => {
 })
 const relativePath = computed(() => {
   if (!directionIsVisible.value) { return }
-
   const path = state.pathWhileDragging || state.pathWhileSelected || props.connection.path // jiggling
   const pathStart = utils.startCoordsFromConnectionPath(path)
   const pathEndRelative = utils.endCoordsFromConnectionPath(path)
