@@ -14,11 +14,6 @@ const props = defineProps({
 dialog.help.narrow(v-if="visible" :open="visible" @click.left.stop ref="dialog")
   section
     .row
-      a(href="mailto:support@kinopio.club")
-        button
-          img.icon(src="@/assets/mail.svg")
-          span Email Support
-    .row
       a(href="https://help.kinopio.club")
         button
           span Help and Tutorials{{' '}}
@@ -41,6 +36,13 @@ dialog.help.narrow(v-if="visible" :open="visible" @click.left.stop ref="dialog")
     //-       button
     //-         span Blog{{' '}}
     //-         img.icon.visit(src="@/assets/visit.svg")
+
+  section
+    .row
+      a(href="mailto:support@kinopio.club")
+        button
+          img.icon(src="@/assets/mail.svg")
+          span Email Support
 
     //- section.subsection
     //-   .row

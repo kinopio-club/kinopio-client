@@ -455,5 +455,16 @@ export default {
   },
   async updatePrevReadChangelogId (id) {
     await this.storeLocal('prevReadChangelogId', id)
+  },
+
+  // emoji
+
+  async emojis () {
+    const emojis = await this.getLocal('emojis')
+    return emojis || []
+  },
+  async updateEmojis ({ emojis, version }) {
+    await this.storeLocal('emojis', emojis)
+    await this.storeLocal('emojiUnicodeVersion', version)
   }
 }

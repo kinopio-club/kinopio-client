@@ -4,6 +4,7 @@ import { useStore } from 'vuex'
 
 // import utils from '@/utils.js'
 import ColorPicker from '@/components/dialogs/ColorPicker.vue'
+import EmojiPicker from '@/components/dialogs/EmojiPicker.vue'
 
 const store = useStore()
 
@@ -56,7 +57,7 @@ const toggleColorPicker = () => {
 // emoji
 
 const groupEmoji = computed(() => props.group.emoji)
-const updateEmoji = (newValue) => {
+const updateGroupEmoji = (newValue) => {
   updateGroup({ emoji: newValue })
 }
 const toggleEmojiPicker = () => {
@@ -96,7 +97,7 @@ const groupName = computed({
         span.emoji(v-if="groupEmoji") {{ groupEmoji }}
         img.icon.group(v-else src="@/assets/group.svg")
     ColorPicker(:currentColor="groupColor" :visible="state.colorPickerIsVisible" @selectedColor="updateGroupColor")
-    //- EmojiPicker(:currentEmoji="groupEmoji" :visible="state.emojiPickerIsVisible" @selectedEmoji="updateGroupEmoji")
+    EmojiPicker(:currentEmoji="groupEmoji" :visible="state.emojiPickerIsVisible" @selectedEmoji="updateGroupEmoji")
 
   //- name
   input.name(placeholder="Group Name" v-model="groupName" name="groupName" maxlength=100 ref="nameInputElement" @keydown.enter.exact.prevent="createGroup")
