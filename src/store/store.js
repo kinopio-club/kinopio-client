@@ -669,6 +669,7 @@ const store = createStore({
     triggerUpdateItemCurrentConnections: (state, itemId) => {},
     triggerCloseGroupDetailsDialog: () => {},
     triggerPanningStart: () => {},
+    triggerClearUserNotifications: () => {},
     triggerAddBox: (state, event) => {},
 
     // select all below

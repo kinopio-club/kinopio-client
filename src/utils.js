@@ -1312,9 +1312,9 @@ export default {
     return { x, y }
   },
   curveControlPointFromPath (path) {
-    // https://regexr.com/6mptt
+    // https://regexr.com/8c6t6
     // matches 'q'-digits-,-digits-space: m295,284 q90,40 87,57 → "q90,40"
-    const pathCoordsPattern = new RegExp(/q([\d.]{1,}),([\d.]{1,})/)
+    const pathCoordsPattern = new RegExp(/q([-?\d.]{1,}),([-?\d.]{1,})/)
     let coords = path.match(pathCoordsPattern)
     coords = {
       x: coords[1],

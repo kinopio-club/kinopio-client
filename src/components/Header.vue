@@ -104,6 +104,8 @@ onMounted(() => {
       updateImportIsVisible(true)
     } else if (type === 'triggerMinimapIsVisible') {
       toggleSidebarIsVisible()
+    } else if (type === 'triggerClearUserNotifications') {
+      clearNotifications()
     }
   })
 })
@@ -556,6 +558,9 @@ const updateNotificationsIsRead = async (notificationIds) => {
     name: 'updateNotificationsIsRead',
     body: notificationIds
   })
+}
+const clearNotifications = () => {
+  state.notifications = []
 }
 </script>
 
