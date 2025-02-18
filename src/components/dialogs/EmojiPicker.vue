@@ -40,6 +40,7 @@ const state = reactive({
 
 watch(() => props.visible, (value, prevValue) => {
   if (value) {
+    clearFocus()
     initEmojis()
     updateDialogHeight()
   }
