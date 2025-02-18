@@ -6,7 +6,7 @@ import utils from '@/utils.js'
 import cache from '@/cache.js'
 import ResultsFilter from '@/components/ResultsFilter.vue'
 
-// import fuzzy from '@/libs/fuzzy.js'
+import fuzzy from '@/libs/fuzzy.js'
 
 const store = useStore()
 
@@ -86,21 +86,39 @@ const isCurrentEmoji = (emoji) => {
 // filter
 
 const updateFilter = (newValue) => {
-  console.log('♥️♥️ updateFilter', newValue)
   state.filter = newValue.toLowerCase()
 }
 const updateFilteredEmojis = () => {
   if (!state.filter) {
     state.filteredEmojis = state.emojis
   } else {
-    // TODO fuzzy filter on emoji names
-    state.filteredEmojis = []
+    // fuzzy
+    let emojis = state.emojis.map(category => {
+      let filteredCategoryEmojis = fuzzy.filter(
+        state.filter,
+        category.emojis,
+        {
+          extract: (emoji) => {
+            return emoji.name
+          }
+        }
+      )
+      filteredCategoryEmojis = filteredCategoryEmojis.map(item => item.original)
+      category.emojis = filteredCategoryEmojis
+      return category
+    })
+    // remove empty
+    emojis = emojis.filter(category => category.emojis.length)
+    // save
+    state.filteredEmojis = emojis
   }
 }
 watch(() => state.filter, (value, prevValue) => {
   updateFilteredEmojis()
-  console.log('☀️☀️ state.filteredEmojis', state.filteredEmojis)
 })
+
+// list actions
+
 const focusNextItemFromFilter = () => {
   console.log('🅰️🅰️ focusNextItemFromFilter')
 }
