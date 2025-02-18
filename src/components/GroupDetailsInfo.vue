@@ -58,7 +58,11 @@ const toggleColorPicker = () => {
 
 const groupEmoji = computed(() => props.group.emoji)
 const updateGroupEmoji = (newValue) => {
-  updateGroup({ emoji: newValue })
+  if (newValue === groupEmoji.value) {
+    updateGroup({ emoji: '' })
+  } else {
+    updateGroup({ emoji: newValue })
+  }
 }
 const toggleEmojiPicker = () => {
   const isVisible = state.emojiPickerIsVisible

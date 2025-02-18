@@ -20,7 +20,7 @@ onBeforeUnmount(() => {
   window.removeEventListener('resize', updateDialogHeight)
 })
 
-const emit = defineEmits(['updateGroupEmoji'])
+const emit = defineEmits(['selectedEmoji'])
 
 const props = defineProps({
   visible: Boolean,
@@ -46,6 +46,9 @@ const updateDialogHeight = async () => {
   let element = dialogElement.value
   state.dialogHeight = utils.elementHeight(element)
 }
+
+// emojis
+
 const initEmojis = async () => {
   const cachedEmojis = await cache.emojis()
   console.log('🍇🍇🍇', cachedEmojis)
@@ -58,7 +61,6 @@ const initEmojis = async () => {
   updateFilteredEmojis()
   state.isLoadingEmojis = false
 }
-
 const remoteEmojis = async () => {
   try {
     const newEmojis = await store.dispatch('api/getEmojis')
@@ -71,6 +73,17 @@ const remoteEmojis = async () => {
     console.error('🚒')
   }
 }
+const categoryClassIndex = (index) => {
+  return `category-${index}`
+}
+const selectItem = (emoji) => {
+  emit('selectedEmoji', emoji)
+}
+const isCurrentEmoji = (emoji) => {
+  return emoji === props.currentEmoji
+}
+
+// filter
 
 const updateFilter = (newValue) => {
   console.log('♥️♥️ updateFilter', newValue)
@@ -88,7 +101,6 @@ watch(() => state.filter, (value, prevValue) => {
   updateFilteredEmojis()
   console.log('☀️☀️ state.filteredEmojis', state.filteredEmojis)
 })
-
 const focusNextItemFromFilter = () => {
   console.log('🅰️🅰️ focusNextItemFromFilter')
 }
@@ -97,10 +109,6 @@ const focusPreviousItemFromFilter = () => {
 }
 const selectItemFromFilter = () => {
   console.log('💐💐 selectItemFromFilter')
-}
-
-const categoryClassIndex = (index) => {
-  return `category-${index}`
 }
 
 </script>
@@ -120,7 +128,7 @@ dialog.narrow.emoji-picker(v-if="props.visible" :open="props.visible" @click.lef
       span {{ category.name }}
     .row
       template(v-for="emoji in category.emojis")
-        span.emoji(:data-emoji="emoji.name") {{emoji.emoji}}
+        span.emoji(:data-emoji="emoji.name" @click="selectItem(emoji.emoji)" :class="{active: isCurrentEmoji(emoji.emoji)}") {{emoji.emoji}}
 </template>
 
 <style lang="stylus">
@@ -144,9 +152,9 @@ dialog.emoji-picker
       padding 3px
       font-size 20px
       cursor pointer
+      border-radius var(--entity-radius)
       &:hover
         background-color var(--secondary-hover-background)
-        border-radius var(--entity-radius)
       &:active,
       &.active
         background-color var(--secondary-active-background)
