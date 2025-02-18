@@ -99,7 +99,7 @@ const groupName = computed({
       //- emoji
       button.change-emoji(@click.left.stop="toggleEmojiPicker" :class="{active: state.emojiPickerIsVisible}" title="Change Emoji")
         span.emoji(v-if="groupEmoji") {{ groupEmoji }}
-        img.icon.group(v-else src="@/assets/group.svg")
+        img.icon.emoji(v-else src="@/assets/emoji.svg")
     ColorPicker(:currentColor="groupColor" :visible="state.colorPickerIsVisible" @selectedColor="updateGroupColor")
     EmojiPicker(:currentEmoji="groupEmoji" :visible="state.emojiPickerIsVisible" @selectedEmoji="updateGroupEmoji")
 
@@ -114,4 +114,6 @@ const groupName = computed({
   input.name
     margin-left 6px
     margin-bottom 0
+  .icon.emoji
+    vertical-align -1.5px
 </style>

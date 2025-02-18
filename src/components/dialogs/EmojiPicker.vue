@@ -229,6 +229,7 @@ dialog.narrow.emoji-picker(v-if="props.visible" :open="props.visible" @click.lef
             :data-emoji-index="emojiIndex"
             @click="selectItem(emoji.emoji)"
             :class="{active: isCurrentEmoji(emoji.emoji), hover: isCurrentFocus(emoji.emoji)}"
+            :title="emoji.name"
           ) {{emoji.emoji}}
 </template>
 
