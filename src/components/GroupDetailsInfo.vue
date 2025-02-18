@@ -16,7 +16,7 @@ onMounted(() => {
   focusNameInput()
   unsubscribe = store.subscribe(mutation => {
     if (mutation.type === 'triggerCloseChildDialogs') {
-      // closeDialogs()
+      closeDialogs()
     }
   })
 })
@@ -24,7 +24,7 @@ onBeforeUnmount(() => {
   unsubscribe()
 })
 
-const emit = defineEmits(['updateGroup'])
+const emit = defineEmits(['updateGroup', 'childDialogIsVisible'])
 
 const props = defineProps({
   group: Object
@@ -34,9 +34,12 @@ const state = reactive({
   emojiPickerIsVisible: false
 })
 
-const closeDialogs = () => {
+const closeDialogs = (shouldEmit) => {
   state.colorPickerIsVisible = false
   state.emojiPickerIsVisible = false
+  if (shouldEmit) {
+    emit('childDialogIsVisible', false)
+  }
 }
 const updateGroup = (updates) => {
   emit('updateGroup', updates)
@@ -50,8 +53,9 @@ const updateGroupColor = (newValue) => {
 }
 const toggleColorPicker = () => {
   const isVisible = state.colorPickerIsVisible
-  closeDialogs()
+  closeDialogs(true)
   state.colorPickerIsVisible = !isVisible
+  emit('childDialogIsVisible', !isVisible)
 }
 
 // emoji
@@ -66,8 +70,9 @@ const updateGroupEmoji = (newValue) => {
 }
 const toggleEmojiPicker = () => {
   const isVisible = state.emojiPickerIsVisible
-  closeDialogs()
+  closeDialogs(true)
   state.emojiPickerIsVisible = !isVisible
+  emit('childDialogIsVisible', !isVisible)
 }
 
 // name
@@ -90,7 +95,7 @@ const groupName = computed({
 </script>
 
 <template lang="pug">
-.row.group-details-info(@click="closeDialogs")
+.row.group-details-info(@click.stop="closeDialogs")
   .button-wrap
     .segmented-buttons
       //- color
@@ -104,7 +109,18 @@ const groupName = computed({
     EmojiPicker(:currentEmoji="groupEmoji" :visible="state.emojiPickerIsVisible" @selectedEmoji="updateGroupEmoji")
 
   //- name
-  input.name(placeholder="Group Name" v-model="groupName" name="groupName" maxlength=100 ref="nameInputElement" @keydown.enter.exact.prevent="createGroup")
+  input.name(
+    placeholder="Group Name"
+    v-model="groupName"
+    name="groupName"
+    maxlength=100
+    ref="nameInputElement"
+    @keydown.enter.exact.prevent="createGroup"
+    @keyup.stop.backspace
+    @keyup.stop.enter
+    @mouseup.stop
+    @touchend.stop
+  )
 </template>
 
 <style lang="stylus">

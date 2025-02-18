@@ -146,7 +146,7 @@ dialog.group-details(v-if="visible" :open="visible" @click.left.stop="closeDialo
   section
     .row
       template(v-if="currentUserIsGroupAdmin")
-        GroupDetailsInfo(:group="props.group" @updateGroup="updateGroup")
+        GroupDetailsInfo(:group="props.group" @updateGroup="updateGroup" @childDialogIsVisible="updateChildDialogIsVisible")
       template(v-else)
         GroupLabel(:group="props.group" :showName="true")
   InviteToGroup(:visible="isGroupUser" :group="props.group" @closeDialogs="closeDialogs")
