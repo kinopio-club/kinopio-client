@@ -25,7 +25,7 @@ const classes = computed(() => {
 <template lang="pug">
 span.group-label(v-if="isVisible" :title="props.group.name" :data-group-id="props.group.id")
   .badge.group-badge(:style="{ background: props.group.color }" :class="classes")
-    span.emoji(v-if="props.group.emoji") 🍇
+    span.emoji(v-if="props.group.emoji") {{props.group.emoji}}
     img.icon.group(v-else src="@/assets/group.svg")
     span {{ shortName }}
   span(v-if="props.showName") {{ props.group.name }}
