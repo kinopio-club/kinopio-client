@@ -878,7 +878,7 @@ const currentSpace = {
       }
       // load space
       if (space) {
-        context.dispatch('loadSpace', { space })
+        await context.dispatch('loadSpace', { space })
         context.dispatch('updateUserLastSpaceId')
       } else {
         context.dispatch('init')
