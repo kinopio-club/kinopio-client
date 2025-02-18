@@ -1445,7 +1445,7 @@ export default {
     if (!prevSpace.cards || !prevSpace.connections) { return false }
     const cardsCountIsUnchanged = prevSpace.cards?.length === newSpace.cards.length
     const boxesCountIsUnchanged = prevSpace.boxes?.length === newSpace.boxes.length
-    const metaKeys = ['name', 'editedAt', 'collaboratorKey']
+    const metaKeys = ['name', 'editedAt', 'collaboratorKey', 'background', 'backgroundGradient', 'backgroundIsGradient', 'backgroundTint']
     let metaIsUpdated
     metaKeys.forEach(key => {
       if (prevSpace[key] !== newSpace[key]) {
