@@ -11,6 +11,7 @@ import fuzzy from '@/libs/fuzzy.js'
 const store = useStore()
 
 const dialogElement = ref(null)
+const resultsListElement = ref(null)
 
 onMounted(() => {
   window.addEventListener('resize', updateDialogHeight)
@@ -30,7 +31,11 @@ const state = reactive({
   dialogHeight: null,
   emojis: [], // { name: 'group', [emojis] }
   filteredEmojis: [], // ^
-  filter: ''
+  filter: '',
+  // focus
+  currentFocusEmoji: '',
+  currentCategoryIndex: null,
+  currentEmojiIndex: null
 })
 
 watch(() => props.visible, (value, prevValue) => {
@@ -51,7 +56,6 @@ const updateDialogHeight = async () => {
 
 const initEmojis = async () => {
   const cachedEmojis = await cache.emojis()
-  console.log('🍇🍇🍇', cachedEmojis)
   if (cachedEmojis.length) {
     state.emojis = cachedEmojis
   } else {
@@ -74,16 +78,21 @@ const remoteEmojis = async () => {
   }
 }
 const categoryClassIndex = (index) => {
-  return `category-${index}`
+  return `index-${index}`
 }
 const selectItem = (emoji) => {
+  emoji = emoji || state.currentFocusEmoji
   emit('selectedEmoji', emoji)
+  updateCurrentFocus(emoji)
 }
 const isCurrentEmoji = (emoji) => {
   return emoji === props.currentEmoji
 }
+const isCurrentFocus = (emoji) => {
+  return emoji === state.currentFocusEmoji
+}
 
-// filter
+// results filter
 
 const updateFilter = (newValue) => {
   state.filter = newValue.toLowerCase()
@@ -93,7 +102,8 @@ const updateFilteredEmojis = () => {
     state.filteredEmojis = state.emojis
   } else {
     // fuzzy
-    let emojis = state.emojis.map(category => {
+    let emojis = utils.clone(state.emojis)
+    emojis = emojis.map(category => {
       let filteredCategoryEmojis = fuzzy.filter(
         state.filter,
         category.emojis,
@@ -109,26 +119,90 @@ const updateFilteredEmojis = () => {
     })
     // remove empty
     emojis = emojis.filter(category => category.emojis.length)
-    // save
+    // update
     state.filteredEmojis = emojis
   }
 }
 watch(() => state.filter, (value, prevValue) => {
   updateFilteredEmojis()
+  clearFocus()
 })
 
-// list actions
+// focus
 
-const focusNextItemFromFilter = () => {
-  console.log('🅰️🅰️ focusNextItemFromFilter')
+const clearFocus = () => {
+  state.currentFocusEmoji = ''
+  state.currentCategoryIndex = null
+  state.currentEmojiIndex = null
 }
-const focusPreviousItemFromFilter = () => {
-  console.log('🎃🎃 focusPreviousItemFromFilter')
+const focusItem = (categoryIndex, emojiIndex) => {
+  const emoji = findEmojiByIndex(categoryIndex, emojiIndex)
+  if (!emoji) { return }
+  state.currentFocusEmoji = emoji
+  state.currentCategoryIndex = parseInt(categoryIndex)
+  state.currentEmojiIndex = parseInt(emojiIndex)
+  return emoji
+}
+const focusNextItem = () => {
+  let emoji
+  if (!state.currentFocusEmoji) {
+    emoji = focusItem(0, 0)
+  } else {
+    // next emoji
+    emoji = focusItem(state.currentCategoryIndex, state.currentEmojiIndex + 1)
+    // or next category
+    if (!emoji) {
+      emoji = focusItem(state.currentCategoryIndex + 1, 0)
+    }
+    // first emoji
+    if (!emoji) {
+      emoji = focusItem(0, 0)
+    }
+  }
+}
+const focusPreviousItem = () => {
+  let emoji
+  if (!state.currentFocusEmoji) {
+    emoji = focusItem(0, 0)
+  } else {
+    // prev emoji
+    emoji = focusItem(state.currentCategoryIndex, state.currentEmojiIndex - 1)
+    // or prev category
+    if (!emoji) {
+      emoji = focusItem(state.currentCategoryIndex - 1, 0)
+    }
+    // first emoji
+    if (!emoji) {
+      emoji = focusItem(0, 0)
+    }
+  }
 }
 const selectItemFromFilter = () => {
-  console.log('💐💐 selectItemFromFilter')
+  if (!state.currentFocusEmoji) {
+    focusItem(0, 0)
+  }
+  selectItem(state.currentFocusEmoji)
 }
 
+const updateCurrentFocus = (emoji) => {
+  const { categoryIndex, emojiIndex } = findIndexByEmoji(emoji)
+  state.currentFocusEmoji = emoji
+  state.currentCategoryIndex = parseInt(categoryIndex)
+  state.currentEmojiIndex = parseInt(emojiIndex)
+}
+// index
+
+const findEmojiByIndex = (categoryIndex, emojiIndex) => {
+  const element = resultsListElement.value
+  const emojiElement = element.querySelector(`[data-category-index="${categoryIndex}"][data-emoji-index="${emojiIndex}"]`)
+  return emojiElement?.innerText
+}
+const findIndexByEmoji = (emoji) => {
+  const element = resultsListElement.value
+  const emojiElement = element.querySelector(`[data-emoji="${emoji}"]`)
+  const data = emojiElement.dataset
+  return { emoji, categoryIndex: data.categoryIndex, emojiIndex: data.emojiIndex }
+}
 </script>
 
 <template lang="pug">
@@ -136,17 +210,25 @@ dialog.narrow.emoji-picker(v-if="props.visible" :open="props.visible" @click.lef
   ResultsFilter(
     :items="state.emojis"
     @updateFilter="updateFilter"
-    @focusNextItem="focusNextItemFromFilter"
-    @focusPreviousItem="focusPreviousItemFromFilter"
+    @focusNextItem="focusNextItem"
+    @focusPreviousItem="focusPreviousItem"
     @selectItem="selectItemFromFilter"
     :showFilter="true"
+    :isLoading="state.isLoadingEmojis"
   )
-  ul.results-list(v-for="(category, index) in state.filteredEmojis" :isLoading="state.isLoadingEmojis")
-    .badge.secondary.category(:class="categoryClassIndex(index)")
-      span {{ category.name }}
-    .row
-      template(v-for="emoji in category.emojis")
-        span.emoji(:data-emoji="emoji.name" @click="selectItem(emoji.emoji)" :class="{active: isCurrentEmoji(emoji.emoji)}") {{emoji.emoji}}
+  ul.results-list(ref="resultsListElement")
+    template(v-for="(category, categoryIndex) in state.filteredEmojis")
+      .badge.secondary.category(:class="categoryClassIndex(categoryIndex)")
+        span {{ category.name }}
+      .row
+        template(v-for="(emoji, emojiIndex) in category.emojis")
+          span.emoji(
+            :data-emoji="emoji.emoji"
+            :data-category-index="categoryIndex"
+            :data-emoji-index="emojiIndex"
+            @click="selectItem(emoji.emoji)"
+            :class="{active: isCurrentEmoji(emoji.emoji), hover: isCurrentFocus(emoji.emoji)}"
+          ) {{emoji.emoji}}
 </template>
 
 <style lang="stylus">
@@ -171,7 +253,8 @@ dialog.emoji-picker
       font-size 20px
       cursor pointer
       border-radius var(--entity-radius)
-      &:hover
+      &:hover,
+      &.hover
         background-color var(--secondary-hover-background)
       &:active,
       &.active
