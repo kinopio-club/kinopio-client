@@ -243,7 +243,7 @@ const signIn = async (event) => {
     store.commit('triggerUpdateNotifications')
     store.dispatch('themes/restore')
     if (shouldLoadLastSpace) {
-      store.dispatch('currentSpace/loadLastSpace')
+      await store.dispatch('currentSpace/loadLastSpace')
       store.commit('triggerUpdateWindowHistory')
     }
     store.commit('isLoadingSpace', false)
