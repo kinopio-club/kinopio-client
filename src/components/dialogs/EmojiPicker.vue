@@ -5,10 +5,8 @@ import { useStore } from 'vuex'
 import utils from '@/utils.js'
 import cache from '@/cache.js'
 import ResultsFilter from '@/components/ResultsFilter.vue'
-// import Loader from '@/components/Loader.vue'
 
 // import fuzzy from '@/libs/fuzzy.js'
-// virtua
 
 const store = useStore()
 
@@ -49,12 +47,12 @@ const updateDialogHeight = async () => {
   state.dialogHeight = utils.elementHeight(element)
 }
 const initEmojis = async () => {
-  state.isLoadingEmojis = true
   const cachedEmojis = await cache.emojis()
   console.log('🍇🍇🍇', cachedEmojis)
   if (cachedEmojis.length) {
     state.emojis = cachedEmojis
   } else {
+    state.isLoadingEmojis = true
     await remoteEmojis()
   }
   updateFilteredEmojis()
@@ -69,8 +67,6 @@ const remoteEmojis = async () => {
       version: newEmojis.version
     })
     state.emojis = newEmojis.emojis
-
-    console.log('🌹🌹🌹🌹🌹', newEmojis, state.emojis)
   } catch (error) {
     console.error('🚒')
   }
@@ -90,8 +86,7 @@ const updateFilteredEmojis = () => {
 }
 watch(() => state.filter, (value, prevValue) => {
   updateFilteredEmojis()
-  console.log('state.filteredEmojis', state.filteredEmojis)
-  //   updateDialogHeight()
+  console.log('☀️☀️ state.filteredEmojis', state.filteredEmojis)
 })
 
 const focusNextItemFromFilter = () => {
@@ -104,15 +99,14 @@ const selectItemFromFilter = () => {
   console.log('💐💐 selectItemFromFilter')
 }
 
+const categoryClassIndex = (index) => {
+  return `category-${index}`
+}
+
 </script>
 
 <template lang="pug">
-dialog.narrow.emoji-picker(v-if="props.visible" :open="props.visible" @click.left.stop ref="dialogElement" :style="{'max-height': state.dialogHeight + 'px'}")
-  //- section
-  //-   input(v-model="filter")
-
-    :placeholder="placeholder"
-
+dialog.narrow.emoji-picker(v-if="props.visible" :open="props.visible" @click.left.stop ref="dialogElement" :style="{'height': state.dialogHeight + 'px'}")
   ResultsFilter(
     :items="state.emojis"
     @updateFilter="updateFilter"
@@ -121,15 +115,40 @@ dialog.narrow.emoji-picker(v-if="props.visible" :open="props.visible" @click.lef
     @selectItem="selectItemFromFilter"
     :showFilter="true"
   )
-  ul.results-list(v-for="(emoji, index) in state.filteredEmojis")
-    //- v-for w :data-alases filteredEmojis
-    .emoji 1
-    .emoji 2
-    .emoji 3
+  ul.results-list(v-for="(category, index) in state.filteredEmojis" :isLoading="state.isLoadingEmojis")
+    .badge.secondary.category(:class="categoryClassIndex(index)")
+      span {{ category.name }}
+    .row
+      template(v-for="emoji in category.emojis")
+        span.emoji(:data-emoji="emoji.name") {{emoji.emoji}}
 </template>
 
 <style lang="stylus">
 dialog.emoji-picker
+  overflow auto
+  max-height 350px
   .input
     margin-bottom 0
+  ul.results-list
+    padding-left 8px
+    padding-right 8px
+  .category
+    margin-top 10px
+    width fit-content
+    &.category-0
+      margin-top 0
+  .row
+    max-width 100%
+    flex-wrap wrap
+    .emoji
+      padding 3px
+      font-size 20px
+      cursor pointer
+      &:hover
+        background-color var(--secondary-hover-background)
+        border-radius var(--entity-radius)
+      &:active,
+      &.active
+        background-color var(--secondary-active-background)
+        box-shadow var(--button-active-inset-shadow)
 </style>
