@@ -61,6 +61,7 @@
     img.icon(src="@/assets/down-arrow.svg")
     img.icon.duplicate(src="@/assets/duplicate.svg")
     img.icon(src="@/assets/export.svg")
+    img.icon(src="@/assets/emoji.svg")
     img.icon(src="@/assets/file.svg")
     img.icon(src="@/assets/filter.svg")
     img.icon(src="@/assets/flower.svg")

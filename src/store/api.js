@@ -285,6 +285,14 @@ const self = {
         context.dispatch('handleServerError', { name: 'updateDateImage', error })
       }
     },
+    getEmojis: async (context) => {
+      try {
+        const response = await fetch(`${consts.apiHost()}/meta/emojis`)
+        return normalizeResponse(response)
+      } catch (error) {
+        context.dispatch('handleServerError', { name: 'getEmojis', error })
+      }
+    },
 
     // Session Token (sign up spam mitigation)
 

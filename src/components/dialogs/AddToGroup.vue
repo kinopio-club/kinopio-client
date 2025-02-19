@@ -27,6 +27,7 @@ const props = defineProps({
 watch(() => props.visible, (value, prevValue) => {
   if (value) {
     updateDialogHeight()
+    state.addGroupIsVisible = false
   }
 })
 

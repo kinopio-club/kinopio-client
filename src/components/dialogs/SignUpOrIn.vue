@@ -223,6 +223,7 @@ const signIn = async (event) => {
     store.commit('addNotification', { message: 'Signing In…' })
     // update user to remote user
     store.commit('currentUser/updateUser', result)
+    await store.dispatch('currentUser/restoreRemoteUser', result)
     // update local spaces to remote user
     await removeUneditedSpace('Hello Kinopio')
     await removeUneditedSpace('Inbox')

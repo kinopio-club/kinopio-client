@@ -9,6 +9,7 @@ import GroupLabel from '@/components/GroupLabel.vue'
 import utils from '@/utils.js'
 import Loader from '@/components/Loader.vue'
 import InviteToGroup from '@/components/InviteToGroup.vue'
+import GroupDetailsInfo from '@/components/GroupDetailsInfo.vue'
 
 import uniqBy from 'lodash-es/uniqBy'
 
@@ -26,7 +27,6 @@ const props = defineProps({
 })
 const state = reactive({
   dialogHeight: null,
-  colorPickerIsVisible: false,
   childDialogIsVisible: false,
   removeGroupConfirmationIsVisible: false,
   loading: {
@@ -49,12 +49,11 @@ const updateDialogHeight = async () => {
   state.dialogHeight = utils.elementHeight(element)
 }
 const closeDialogs = () => {
-  state.colorPickerIsVisible = false
   store.commit('userDetailsIsVisible', false)
   store.commit('triggerCloseChildDialogs')
 }
 const childDialogIsVisible = computed(() => {
-  return state.colorPickerIsVisible || state.childDialogIsVisible
+  return state.childDialogIsVisible
 })
 const updateChildDialogIsVisible = (value) => {
   state.childDialogIsVisible = value
@@ -80,29 +79,6 @@ const updateGroup = (update) => {
   update.id = props.group.id
   store.dispatch('groups/update', update)
 }
-
-// group color
-
-const groupColor = computed(() => props.group.color)
-const updateGroupColor = (newValue) => {
-  updateGroup({ color: newValue })
-}
-const toggleColorPicker = () => {
-  const isVisible = state.colorPickerIsVisible
-  closeDialogs()
-  state.colorPickerIsVisible = !isVisible
-}
-
-// group name
-
-const groupName = computed({
-  get () {
-    return props.group.name
-  },
-  set (newValue) {
-    updateGroup({ name: newValue })
-  }
-})
 
 // select user
 
@@ -170,14 +146,9 @@ dialog.group-details(v-if="visible" :open="visible" @click.left.stop="closeDialo
   section
     .row
       template(v-if="currentUserIsGroupAdmin")
-        .button-wrap
-          button.change-color(@click.left.stop="toggleColorPicker" :class="{active: state.colorPickerIsVisible}" title="Change Group Color")
-            .current-color.current-group-color(:style="{ background: groupColor }")
-          ColorPicker(:currentColor="groupColor" :visible="state.colorPickerIsVisible" @selectedColor="updateGroupColor")
-        input.name(placeholder="Group Name" v-model="groupName" name="groupName" maxlength=100 @mouseup.stop @keydown.stop)
+        GroupDetailsInfo(:group="props.group" @updateGroup="updateGroup" @childDialogIsVisible="updateChildDialogIsVisible")
       template(v-else)
         GroupLabel(:group="props.group" :showName="true")
-
   InviteToGroup(:visible="isGroupUser" :group="props.group" @closeDialogs="closeDialogs")
 
   UserList(
@@ -218,14 +189,9 @@ dialog.group-details
     overflow initial
   input.name
     margin-bottom 0
-  button.change-color
-    margin-right 6px
   .search-wrap
     padding-top 6px
   .user-list,
   .user-list + section
     border-top 1px solid var(--primary-border)
-  .change-color
-    .current-group-color
-      border-radius 10px
 </style>

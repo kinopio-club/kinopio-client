@@ -39,7 +39,7 @@ export default {
     create: (state, group) => {
       utils.typeCheck({ value: group, type: 'object' })
       state.groups[group.id] = group
-      state.ids.push(group.id)
+      state.ids.unshift(group.id)
       cache.saveGroups(state.groups)
     },
 
