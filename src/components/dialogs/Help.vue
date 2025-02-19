@@ -18,43 +18,20 @@ dialog.help.narrow(v-if="visible" :open="visible" @click.left.stop ref="dialog")
         button
           span Help and Tutorials{{' '}}
           img.icon.visit(src="@/assets/visit.svg")
-    .row
-      //- .button-wrap
-      //-   a(href="https://help.kinopio.club/about")
-      //-     button
-      //-       span About{{' '}}
-      //-       img.icon.visit(src="@/assets/visit.svg")
-      .button-wrap
-        a(href="https://help.kinopio.club/api/")
-          button
-            img.icon(src="@/assets/system.svg")
-            span API Docs{{' '}}
-            img.icon.visit(src="@/assets/visit.svg")
-    //- .row
-    //-   .button-wrap
-    //-     a(href="https://help.kinopio.club/api/")
-    //-       button
-    //-         span Blog{{' '}}
-    //-         img.icon.visit(src="@/assets/visit.svg")
-
   section
     .row
       a(href="mailto:support@kinopio.club")
         button
           img.icon(src="@/assets/mail.svg")
           span Email Support
-
-    //- section.subsection
-    //-   .row
-    //-     a(href="https://help.kinopio.club/posts/terms-of-service/")
-    //-       button
-    //-         span Instagram{{' '}}
-    //-         img.icon.visit(src="@/assets/visit.svg")
-    //-   .row
-    //-     a(href="https://help.kinopio.club/posts/terms-of-service/")
-    //-       button
-    //-         span Mastodon{{' '}}
-    //-         img.icon.visit(src="@/assets/visit.svg")
+  section
+    .row
+      .button-wrap
+        a(href="https://help.kinopio.club/api/")
+          button
+            img.icon(src="@/assets/system.svg")
+            span API Docs{{' '}}
+            img.icon.visit(src="@/assets/visit.svg")
   section
     .row
       a(href="https://help.kinopio.club/posts/privacy-policy")

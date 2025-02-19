@@ -198,8 +198,20 @@ dialog.about.narrow(v-if="visible" :open="visible" @click.left="closeDialogs" re
   section
     .row
       p 100% funded and made possible by people like you
+      //- The best way to support Kinopio is by spreading the word
     .row
       AboutMe
+    //- .row
+    //-   .button-wrap
+    //-     a(href="https://kinopio.club/blog")
+    //-       button
+    //-         span Help Spread the Word →
+    .row
+      .button-wrap(v-if="!isSecureAppContextIOS")
+        button(@click.left.stop="triggerDonateIsVisible")
+          img.icon(src="@/assets/heart-empty.svg")
+          span Donate
+  section
     .row
       .button-wrap
         a(href="https://kinopio.club/discord")
@@ -211,15 +223,6 @@ dialog.about.narrow(v-if="visible" :open="visible" @click.left="closeDialogs" re
           button
             span Forum{{' '}}
             img.icon.visit(src="@/assets/visit.svg")
-    .row
-      //- .button-wrap
-      //-   a(href="https://kinopio.club/blog")
-      //-     button
-      //-       span Blog →
-      .button-wrap(v-if="!isSecureAppContextIOS")
-        button(@click.left.stop="triggerDonateIsVisible")
-          img.icon(src="@/assets/heart-empty.svg")
-          span Donate
 </template>
 
 <style lang="stylus">
