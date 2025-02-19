@@ -38,19 +38,10 @@ const state = reactive({
     unknownServerError: false
   }
 })
-const initGroup = () => {
-  // let group = {
-  //   name: 'Group Name',
-  //   color: randomColor(),
-  //   emoji: null
-  // }
-  // state.group = group
-}
 
 watch(() => props.visible, (value, prevValue) => {
   if (value) {
     updateDialogHeight()
-    initGroup()
   }
 })
 const updateDialogHeight = async () => {
