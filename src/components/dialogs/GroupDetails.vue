@@ -189,14 +189,9 @@ dialog.group-details
     overflow initial
   input.name
     margin-bottom 0
-  button.change-color
-    margin-right 6px
   .search-wrap
     padding-top 6px
   .user-list,
   .user-list + section
     border-top 1px solid var(--primary-border)
-  .change-color
-    .current-group-color
-      border-radius 10px
 </style>

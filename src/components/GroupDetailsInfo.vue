@@ -100,7 +100,7 @@ const groupName = computed({
     .segmented-buttons
       //- color
       button.change-color(@click.left.stop="toggleColorPicker" :class="{active: state.colorPickerIsVisible}" title="Change Group Color")
-        .current-color.current-group-color(:style="{ background: groupColor }")
+        .current-color(:style="{ background: groupColor }")
       //- emoji
       button.change-emoji(@click.left.stop="toggleEmojiPicker" :class="{active: state.emojiPickerIsVisible}" title="Change Emoji")
         span.emoji(v-if="groupEmoji") {{ groupEmoji }}
@@ -125,6 +125,9 @@ const groupName = computed({
 
 <style lang="stylus">
 .group-details-info
+  button.change-color
+    .current-color
+      border-radius 10px
   button.change-emoji
     transform translateY(-1.5px)
   input.name
