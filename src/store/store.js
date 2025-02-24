@@ -1772,7 +1772,7 @@ const store = createStore({
       const matches = utils.spaceAndCardIdFromPath(path)
       if (!matches) { return }
       if (matches.cardId) {
-        context.commit('loadSpaceShowDetailsForCardId', matches.cardId)
+        context.commit('focusingFrameIsVisibleForCardId', matches.cardId)
       }
       context.commit('spaceUrlToLoad', matches.spaceUrl)
     },
@@ -1828,6 +1828,7 @@ const store = createStore({
       context.commit('broadcast/updateStore', { updates: { userId: user.id }, type: 'clearRemoteConnectionDetailsVisible' })
       context.commit('broadcast/updateStore', { updates: { userId: user.id }, type: 'clearRemoteBoxDetailsVisible' })
       context.commit('passwordResetIsVisible', false)
+      context.commit('focusingFrameIsVisibleForCardId', '')
     },
     toggleCardSelected: (context, cardId) => {
       const previousMultipleCardsSelectedIds = context.state.previousMultipleCardsSelectedIds

@@ -773,6 +773,11 @@ const currentSpace = {
       }
       context.dispatch('updateCurrentSpaceIsUnavailableOffline', space.id, { root: true })
       context.dispatch('updateCurrentUserIsInvitedButCannotEditCurrentSpace', space, { root: true })
+      // focus card
+      const cardId = context.rootState.focusingFrameIsVisibleForCardId
+      if (cardId) {
+        context.commit('triggerScrollCardIntoView', cardId, { root: true })
+      }
     },
     saveCurrentSpaceToCache: (context) => {
       const space = utils.clone(context.state)
