@@ -40,7 +40,7 @@ onMounted(() => {
     if (mutation.type === 'triggerUploadComplete') {
       let { spaceId, url, cardId } = mutation.payload
       if (cardId) { return }
-      if (spaceId !== props.space.id) { return }
+      if (spaceId !== props.space?.id) { return }
       updateBackground(url)
     } else if (mutation.type === 'triggerUpdateTheme') {
       updateDefaultColor()
@@ -83,7 +83,7 @@ watch(() => props.visible, (value, prevValue) => {
     if (state.service === 'background') {
       state.selectedImages = backgroundImages.value
     }
-    state.backgroundTint = props.space.backgroundTint
+    state.backgroundTint = props.space?.backgroundTint
     closeDialogs()
     clearErrors()
     // delay fetching community backgrounds to prevent render blocking
@@ -107,6 +107,13 @@ const updateDialogHeight = async () => {
 const currentUserIsSignedIn = computed(() => store.getters['currentUser/isSignedIn'])
 const currentUser = computed(() => store.state.currentUser)
 const currentUserIsMember = computed(() => store.getters['currentUser/isSpaceMember']())
+const itemTypeString = computed(() => {
+  if (props.space) {
+    return 'Space'
+  } else {
+    return 'Box'
+  }
+})
 
 // dialog
 
@@ -182,8 +189,8 @@ const refreshGradients = () => {
     gradient.id = nanoid()
     gradients.push(gradient)
   })
-  if (props.space.backgroundGradient) {
-    gradients[0] = props.space.backgroundGradient
+  if (props.space?.backgroundGradient) {
+    gradients[0] = props.space?.backgroundGradient
   }
   state.gradients = gradients
 }
@@ -197,8 +204,8 @@ const selectGradient = async (index) => {
   updatePreviewImage()
 }
 const gradientIsActive = (gradient) => {
-  if (!props.space.backgroundIsGradient) { return }
-  return props.space.backgroundGradient.id === gradient.id
+  if (!props.space?.backgroundIsGradient) { return }
+  return props.space?.backgroundGradient.id === gradient.id
 }
 
 // background images list
@@ -207,7 +214,7 @@ const isCurrentBackground = (image) => {
   return image.url === background.value
 }
 const currentBackgroundUrl = computed(() => {
-  if (props.space.backgroundIsGradient) { return }
+  if (props.space?.backgroundIsGradient) { return }
   return background.value
 })
 const backgroundImages = computed(() => {
@@ -247,7 +254,7 @@ const checkIfImageIsUrl = () => {
 }
 const background = computed({
   get () {
-    return props.space.background
+    return props.space?.background
   },
   set (url) {
     updateBackground(url)
@@ -296,7 +303,7 @@ const isFileTooBig = (file) => {
 }
 const uploadFile = async () => {
   clearErrors()
-  const spaceId = props.space.id
+  const spaceId = props.space?.id
   const input = inputElement.value
   const file = input.files[0]
   if (isFileTooBig(file)) {
@@ -317,7 +324,7 @@ const uploadFile = async () => {
 const pendingUpload = computed(() => {
   const pendingUploads = store.state.upload.pendingUploads
   return pendingUploads.find(upload => {
-    const isCurrentSpace = upload.spaceId === props.space.id
+    const isCurrentSpace = upload.spaceId === props.space?.id
     const isInProgress = upload.percentComplete < 100
     return isCurrentSpace && isInProgress
   })
@@ -326,7 +333,7 @@ const remotePendingUpload = computed(() => {
   let remotePendingUploads = store.state.remotePendingUploads
   return remotePendingUploads.find(upload => {
     const isInProgress = upload.percentComplete < 100
-    const isSpace = upload.spaceId === props.space.id
+    const isSpace = upload.spaceId === props.space?.id
     return isInProgress && isSpace
   })
 })
@@ -458,7 +465,7 @@ dialog.background-picker.wide(v-if="visible" :open="visible" @click.left.stop="c
       .row
         span.badge.info
           img.icon.cancel(src="@/assets/add.svg")
-          span Space is Read Only
+          span {{itemTypeString}} is Read Only
 
     //- upload progress
     .uploading-container(v-if="pendingUpload")
