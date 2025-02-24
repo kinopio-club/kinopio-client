@@ -1897,6 +1897,10 @@ const isInCheckedBox = computed(() => {
   return Boolean(checkedBox)
 })
 
+// focusing frame
+
+const isFocusingFrameVisible = computed(() => props.card.id === store.state.focusingFrameIsVisibleForCardId)
+
 </script>
 
 <template lang="pug">
@@ -1921,7 +1925,7 @@ article.card-wrap#card(
   ref="cardElement"
   :class="articleClasses"
 )
-  .focusing-frame
+  .focusing-frame(v-if="isFocusingFrameVisible" :style="{backgroundColor: currentUserColor}")
   .card(
     v-show="shouldRender"
     @mousedown.left.prevent="startDraggingCard"

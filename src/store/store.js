@@ -141,6 +141,7 @@ const store = createStore({
     preventCardDetailsOpeningAnimation: true,
     multipleCardsSelectedIds: [],
     iframeIsVisibleForCardId: '',
+    focusingFrameIsVisibleForCardId: '',
     // resizing card
     currentUserIsResizingCard: false,
     currentUserIsResizingCardIds: [],
@@ -749,6 +750,10 @@ const store = createStore({
     iframeIsVisibleForCardId: (state, cardId) => {
       utils.typeCheck({ value: cardId, type: 'string' })
       state.iframeIsVisibleForCardId = cardId
+    },
+    focusingFrameIsVisibleForCardId: (state, cardId) => {
+      utils.typeCheck({ value: cardId, type: 'string' })
+      state.focusingFrameIsVisibleForCardId = cardId
     },
 
     // Connections
