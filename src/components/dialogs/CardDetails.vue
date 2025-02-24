@@ -337,10 +337,11 @@ const toggleShouldShowItemActions = async () => {
   await nextTick()
   scrollIntoView()
 }
-const toggleShareCardIsVisible = () => {
+const toggleShareCardIsVisible = (event) => {
   const isVisible = state.shareCardIsVisible
   closeDialogs()
   state.shareCardIsVisible = !isVisible
+  copyCardUrl(event)
 }
 const scrollIntoView = async (behavior) => {
   // wait for element to be rendered before getting position
@@ -394,6 +395,30 @@ const closeCard = async () => {
   store.dispatch('history/resume')
   if (item.name || prevCardName) {
     store.dispatch('history/add', { cards: [item], useSnapshot: true })
+  }
+}
+
+// share url
+
+const cardUrl = () => {
+  const domain = consts.kinopioDomain()
+  const url = `${domain}/${card.value.spaceId}/${card.value.id}`
+  console.log('🍇 card url', url)
+  return url
+}
+const copyCardUrl = async (event) => {
+  if (!state.shareCardIsVisible) { return }
+  const canShare = store.getters['currentSpace/isRemote']
+  if (!canShare) { return }
+  store.commit('clearNotificationsWithPosition')
+  const position = utils.cursorPositionInPage(event)
+  const url = cardUrl()
+  try {
+    await navigator.clipboard.writeText(url)
+    store.commit('addNotificationWithPosition', { message: 'Copied Card URL', position, type: 'success', layer: 'app', icon: 'checkmark' })
+  } catch (error) {
+    console.warn('🚑 copyText', error)
+    store.commit('addNotificationWithPosition', { message: 'Copy Error', position, type: 'danger', layer: 'app', icon: 'cancel' })
   }
 }
 
