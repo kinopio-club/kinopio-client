@@ -33,7 +33,7 @@ onMounted(() => {
     } else if (mutation.type === 'closeAllDialogs') {
       hideMinimap()
     } else if (mutation.type === 'triggerMinimapIsVisible') {
-      showMinimap()
+      toggleMinimap()
     }
   })
 })
@@ -113,9 +113,6 @@ const togglePresentationMode = () => {
 
 const hideMinimap = () => {
   state.minimapIsVisible = false
-}
-const showMinimap = () => {
-  state.minimapIsVisible = true
 }
 const toggleMinimap = () => {
   state.minimapIsVisible = !state.minimapIsVisible
