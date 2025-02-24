@@ -171,6 +171,12 @@ dialog.keyboard-shortcuts(v-if="visible" :open="visible" @click.left.stop ref="d
       article
         .row
           .badge.title
+            img.icon.magnifying-glass(src="@/assets/magnifying-glass-dot.svg")
+            span Zoom to Percent
+          .badge.keyboard-shortcut Z + Number
+      article
+        .row
+          .badge.title
             img.icon.minimap(src="@/assets/minimap.svg")
             span Toggle Minimap
           .badge.keyboard-shortcut M
