@@ -157,6 +157,7 @@ const isSelectedOrDragging = computed(() => {
   return Boolean(isSelected.value || isRemoteSelected.value || isRemoteCardDetailsVisible.value || isRemoteCardDragging.value || state.uploadIsDraggedOver || remoteUploadDraggedOverCardColor.value || remoteUserResizingCardsColor.value || remoteUserTiltingCardsColor.value)
 })
 const currentUserIsSignedIn = computed(() => store.getters['currentUser/isSignedIn'])
+const currentUserColor = computed(() => store.state.currentUser.color)
 
 // current space
 
@@ -745,7 +746,7 @@ const pendingUploadDataUrl = computed(() => {
   return cardPendingUpload.value.imageDataUrl
 })
 const selectedColorUpload = computed(() => {
-  const color = store.state.currentUser.color
+  const color = currentUserColor.value
   if (state.uploadIsDraggedOver) {
     return color
   } else {
@@ -1306,7 +1307,7 @@ const isSelected = computed(() => {
   return multipleCardsSelectedIds.includes(props.card.id)
 })
 const selectedColor = computed(() => {
-  const color = store.state.currentUser.color
+  const color = currentUserColor.value
   if (isSelected.value) {
     return color
   } else {
@@ -1783,7 +1784,7 @@ const lockingFrameStyle = computed(() => {
   const initialPadding = 65 // matches initialLockCircleRadius in paintSelect
   const initialBorderRadius = 50
   const padding = initialPadding * state.lockingPercent
-  const userColor = store.state.currentUser.color
+  const userColor = currentUserColor.value
   const borderRadius = Math.max((state.lockingPercent * initialBorderRadius), 5) + 'px'
   const size = `calc(100% + ${padding}px)`
   const position = -(padding / 2) + 'px'
