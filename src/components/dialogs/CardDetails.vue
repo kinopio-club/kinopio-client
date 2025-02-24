@@ -1123,7 +1123,7 @@ const addSplitCards = async (newCards) => {
   // wait for cards to be added to dom
   setTimeout(() => {
     for (let newCard of newCards) {
-      const element = document.querySelector(`article [data-card-id="${prevCard.id}"]`)
+      const element = document.querySelector(`.card-wrap [data-card-id="${prevCard.id}"]`)
       const prevCardRect = element.getBoundingClientRect()
       newCard.y = prevCard.y + (prevCardRect.height * store.getters.spaceCounterZoomDecimal) + spaceBetweenCards
       store.dispatch('currentCards/update', { card: newCard })
