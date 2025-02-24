@@ -13,8 +13,14 @@ const props = defineProps({
   space: Object
 })
 
+const backgroundTint = computed(() => props.space?.backgroundTint)
+const backgroundColor = computed(() => props.space?.backgroundColor)
+const background = computed(() => props.space?.background)
+const backgroundIsGradient = computed(() => props.space?.backgroundIsGradient)
+const backgroundGradient = computed(() => props.space?.backgroundGradient)
+
 const backgroundTintStyles = computed(() => {
-  const color = props.space.backgroundTint
+  const color = backgroundTint.value
   if (color) {
     return {
       background: color
@@ -24,21 +30,22 @@ const backgroundTintStyles = computed(() => {
   }
 })
 const backgroundStyles = computed(() => {
-  if (props.space.backgroundIsGradient) { return }
-  let background = props.space.background
+  if (backgroundIsGradient.value) { return }
+  let backgroundImageUrl = background.value
   const backgroundImage = backgroundImages.find(image => {
-    if (!background) {
+    if (!backgroundImageUrl) {
       return image.isBlank
     }
-    const isImage = image.url === background
+    const isImage = image.url === backgroundImageUrl
     const hasThumbnailUrl = image.thumbnailUrl
     return isImage && hasThumbnailUrl
   })
   if (backgroundImage) {
-    background = backgroundImage.thumbnailUrl || background
+    backgroundImageUrl = backgroundImage.thumbnailUrl || backgroundImageUrl
   }
+  console.log(backgroundImageUrl, background.value, backgroundImage)
   return {
-    backgroundImage: `url(${background})`
+    backgroundImage: `url(${backgroundImageUrl})`
   }
 })
 </script>
@@ -49,12 +56,12 @@ const backgroundStyles = computed(() => {
   .preview-button(v-if="isButton")
     .background-tint(:style="backgroundTintStyles")
     button.background-button.fixed-height(:style="backgroundStyles" :class="{ active: buttonIsActive }")
-      SpaceBackgroundGradients(:visible="space.backgroundIsGradient" :layers="space.backgroundGradient")
+      SpaceBackgroundGradients(:visible="backgroundIsGradient" :layers="backgroundGradient")
   //- thumbnail
   .preview-wrap(v-else)
     .background-tint(:style="backgroundTintStyles")
     .background-image(:style="backgroundStyles")
-    SpaceBackgroundGradients(:visible="space.backgroundIsGradient" :layers="space.backgroundGradient")
+    SpaceBackgroundGradients(:visible="backgroundIsGradient" :layers="backgroundGradient")
 </template>
 
 <style lang="stylus">
