@@ -311,14 +311,14 @@ const store = createStore({
       utils.typeCheck({ value: width, type: 'number' })
       state.pageWidth = width
     },
-    scrollElementIntoView (state, { element, behavior }) {
+    scrollElementIntoView (state, { element, behavior, positionIsCenter }) {
       behavior = behavior || 'smooth'
       if (!element) { return }
       const sidebarIsVisible = document.querySelector('dialog#sidebar')
       const isViewportNarrow = state.viewportWidth < (consts.defaultCharacterLimit * 2)
       let horizontal = 'nearest'
       let vertical = 'nearest'
-      if (sidebarIsVisible) {
+      if (sidebarIsVisible || positionIsCenter) {
         horizontal = 'center'
         vertical = 'center'
       }

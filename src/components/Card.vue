@@ -66,7 +66,7 @@ onMounted(async () => {
     } else if (type === 'triggerScrollCardIntoView') {
       if (payload === props.card.id) {
         const element = cardElement.value
-        store.commit('scrollElementIntoView', { element })
+        store.commit('scrollElementIntoView', { element, positionIsCenter: true })
       }
     } else if (type === 'triggerUploadComplete') {
       let { cardId, url } = payload
