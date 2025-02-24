@@ -21,6 +21,7 @@ const store = useStore()
 
 const searchInputElement = ref(null)
 const inputElement = ref(null)
+const dialogElement = ref(null)
 
 let unsubscribe
 
@@ -30,6 +31,7 @@ const props = defineProps({
 const emit = defineEmits(['updateSpaces'])
 
 onMounted(() => {
+  window.addEventListener('resize', updateDialogHeight)
   refreshGradients()
   updateDefaultColor()
   unsubscribe = store.subscribe((mutation, state) => {
@@ -44,28 +46,12 @@ onMounted(() => {
   })
 })
 onBeforeUnmount(() => {
+  window.removeEventListener('resize', updateDialogHeight)
   unsubscribe()
 })
 
-watch(() => props.visible, (value, prevValue) => {
-  if (value) {
-    if (state.service === 'background') {
-      state.selectedImages = backgroundImages.value
-    }
-    state.backgroundTint = store.state.currentSpace.backgroundTint
-    closeDialogs()
-    clearErrors()
-    // delay fetching community backgrounds to prevent render blocking
-    setTimeout(updateCommunityBackgroundImages, 200)
-  } else {
-    if (state.error.isNotImageUrl) {
-      removeBackground()
-    }
-    store.commit('clearNotificationsWithPosition')
-  }
-})
-
 const state = reactive({
+  dialogHeight: null,
   colorPickerIsVisible: false,
   spaceBackgroundInputIsVisible: false,
   initialSearch: '',
@@ -89,6 +75,32 @@ const state = reactive({
   gradients: [],
   service: 'background' // background, recent, pexels
 })
+
+watch(() => props.visible, (value, prevValue) => {
+  if (value) {
+    if (state.service === 'background') {
+      state.selectedImages = backgroundImages.value
+    }
+    state.backgroundTint = store.state.currentSpace.backgroundTint
+    closeDialogs()
+    clearErrors()
+    // delay fetching community backgrounds to prevent render blocking
+    setTimeout(updateCommunityBackgroundImages, 200)
+    updateDialogHeight()
+  } else {
+    if (state.error.isNotImageUrl) {
+      removeBackground()
+    }
+    store.commit('clearNotificationsWithPosition')
+  }
+})
+
+const updateDialogHeight = async () => {
+  if (!props.visible) { return }
+  await nextTick()
+  let element = dialogElement.value
+  state.dialogHeight = utils.elementHeight(element)
+}
 
 const currentSpace = computed(() => store.state.currentSpace)
 const currentUserIsSignedIn = computed(() => store.getters['currentUser/isSignedIn'])
@@ -412,7 +424,7 @@ const searchService = debounce(searchPexels, 350)
 </script>
 
 <template lang="pug">
-dialog.background-picker.wide(v-if="visible" :open="visible" @click.left.stop="closeDialogs")
+dialog.background-picker.wide(v-if="visible" :open="visible" @click.left.stop="closeDialogs" ref='dialogElement' :style="{'max-height': state.dialogHeight + 'px'}")
   section
     .row.title-row
       div
@@ -562,8 +574,7 @@ dialog.background-picker.wide(v-if="visible" :open="visible" @click.left.stop="c
 <style lang="stylus">
 dialog.background-picker
   overflow auto
-  max-height calc(100vh - 120px) //- todesktop chromium fix
-  max-height calc(100dvh - 120px)
+  min-height 400px
   .title-row
     margin-left 0 !important
     .background-preview
