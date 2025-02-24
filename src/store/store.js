@@ -141,6 +141,7 @@ const store = createStore({
     preventCardDetailsOpeningAnimation: true,
     multipleCardsSelectedIds: [],
     iframeIsVisibleForCardId: '',
+    focusingFrameIsVisibleForCardId: '',
     // resizing card
     currentUserIsResizingCard: false,
     currentUserIsResizingCardIds: [],
@@ -310,14 +311,14 @@ const store = createStore({
       utils.typeCheck({ value: width, type: 'number' })
       state.pageWidth = width
     },
-    scrollElementIntoView (state, { element, behavior }) {
+    scrollElementIntoView (state, { element, behavior, positionIsCenter }) {
       behavior = behavior || 'smooth'
       if (!element) { return }
       const sidebarIsVisible = document.querySelector('dialog#sidebar')
       const isViewportNarrow = state.viewportWidth < (consts.defaultCharacterLimit * 2)
       let horizontal = 'nearest'
       let vertical = 'nearest'
-      if (sidebarIsVisible) {
+      if (sidebarIsVisible || positionIsCenter) {
         horizontal = 'center'
         vertical = 'center'
       }
@@ -749,6 +750,10 @@ const store = createStore({
     iframeIsVisibleForCardId: (state, cardId) => {
       utils.typeCheck({ value: cardId, type: 'string' })
       state.iframeIsVisibleForCardId = cardId
+    },
+    focusingFrameIsVisibleForCardId: (state, cardId) => {
+      utils.typeCheck({ value: cardId, type: 'string' })
+      state.focusingFrameIsVisibleForCardId = cardId
     },
 
     // Connections
@@ -1767,7 +1772,7 @@ const store = createStore({
       const matches = utils.spaceAndCardIdFromPath(path)
       if (!matches) { return }
       if (matches.cardId) {
-        context.commit('loadSpaceShowDetailsForCardId', matches.cardId)
+        context.commit('focusingFrameIsVisibleForCardId', matches.cardId)
       }
       context.commit('spaceUrlToLoad', matches.spaceUrl)
     },
@@ -1823,6 +1828,7 @@ const store = createStore({
       context.commit('broadcast/updateStore', { updates: { userId: user.id }, type: 'clearRemoteConnectionDetailsVisible' })
       context.commit('broadcast/updateStore', { updates: { userId: user.id }, type: 'clearRemoteBoxDetailsVisible' })
       context.commit('passwordResetIsVisible', false)
+      context.commit('focusingFrameIsVisibleForCardId', '')
     },
     toggleCardSelected: (context, cardId) => {
       const previousMultipleCardsSelectedIds = context.state.previousMultipleCardsSelectedIds

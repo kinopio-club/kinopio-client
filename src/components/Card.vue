@@ -66,7 +66,7 @@ onMounted(async () => {
     } else if (type === 'triggerScrollCardIntoView') {
       if (payload === props.card.id) {
         const element = cardElement.value
-        store.commit('scrollElementIntoView', { element })
+        store.commit('scrollElementIntoView', { element, positionIsCenter: true })
       }
     } else if (type === 'triggerUploadComplete') {
       let { cardId, url } = payload
@@ -157,6 +157,7 @@ const isSelectedOrDragging = computed(() => {
   return Boolean(isSelected.value || isRemoteSelected.value || isRemoteCardDetailsVisible.value || isRemoteCardDragging.value || state.uploadIsDraggedOver || remoteUploadDraggedOverCardColor.value || remoteUserResizingCardsColor.value || remoteUserTiltingCardsColor.value)
 })
 const currentUserIsSignedIn = computed(() => store.getters['currentUser/isSignedIn'])
+const currentUserColor = computed(() => store.state.currentUser.color)
 
 // current space
 
@@ -745,7 +746,7 @@ const pendingUploadDataUrl = computed(() => {
   return cardPendingUpload.value.imageDataUrl
 })
 const selectedColorUpload = computed(() => {
-  const color = store.state.currentUser.color
+  const color = currentUserColor.value
   if (state.uploadIsDraggedOver) {
     return color
   } else {
@@ -1306,7 +1307,7 @@ const isSelected = computed(() => {
   return multipleCardsSelectedIds.includes(props.card.id)
 })
 const selectedColor = computed(() => {
-  const color = store.state.currentUser.color
+  const color = currentUserColor.value
   if (isSelected.value) {
     return color
   } else {
@@ -1783,7 +1784,7 @@ const lockingFrameStyle = computed(() => {
   const initialPadding = 65 // matches initialLockCircleRadius in paintSelect
   const initialBorderRadius = 50
   const padding = initialPadding * state.lockingPercent
-  const userColor = store.state.currentUser.color
+  const userColor = currentUserColor.value
   const borderRadius = Math.max((state.lockingPercent * initialBorderRadius), 5) + 'px'
   const size = `calc(100% + ${padding}px)`
   const position = -(padding / 2) + 'px'
@@ -1897,6 +1898,10 @@ const isInCheckedBox = computed(() => {
   return Boolean(checkedBox)
 })
 
+// focusing frame
+
+const isFocusingFrameVisible = computed(() => props.card.id === store.state.focusingFrameIsVisibleForCardId)
+
 </script>
 
 <template lang="pug">
@@ -1921,6 +1926,7 @@ article.card-wrap#card(
   ref="cardElement"
   :class="articleClasses"
 )
+  .focusing-frame(v-if="isFocusingFrameVisible" :style="{backgroundColor: currentUserColor}")
   .card(
     v-show="shouldRender"
     @mousedown.left.prevent="startDraggingCard"
@@ -2118,6 +2124,7 @@ article.card-wrap#card(
 
 <style lang="stylus">
 article.card-wrap
+  --focus-padding 20px
   --card-width 200px // consts.normalCardMaxWidth
   pointer-events all
   position absolute
@@ -2444,6 +2451,28 @@ article.card-wrap
   .is-in-checked-box,
   .is-checked
     opacity var(--is-checked-opacity)
+
+  .focusing-frame
+    position absolute
+    z-index -1
+    left 0px
+    top 0px
+    width 100%
+    height 100%
+    background-color pink
+    transform-origin center
+    animation: focusing .5s infinite alternate ease-out;
+    // filter blur(10px)
+    border-radius var(--entity-radius)
+    pointer-events none
+
+@keyframes focusing
+  100%
+    left calc(-1 * var(--focus-padding) / 2)
+    top calc(-1 * var(--focus-padding) / 2)
+    width calc(100% + var(--focus-padding))
+    height: calc(100% + var(--focus-padding))
+    border-radius calc(2 * var(--entity-radius))
 
 @keyframes bounce
   0%
