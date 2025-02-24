@@ -125,11 +125,12 @@ const groupName = computed({
 
 <style lang="stylus">
 .group-details-info
+  .segmented-buttons
+    display flex
+    align-items flex-start
   button.change-color
     .current-color
       border-radius 10px
-  button.change-emoji
-    transform translateY(-1.5px)
   input.name
     margin-left 6px
     margin-bottom 0
