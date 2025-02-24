@@ -10,12 +10,13 @@ const store = useStore()
 const props = defineProps({
   isButton: Boolean,
   buttonIsActive: Boolean,
-  space: Object
+  space: Object,
+  box: Object
 })
 
-const backgroundTint = computed(() => props.space?.backgroundTint)
-const backgroundColor = computed(() => props.space?.backgroundColor)
-const background = computed(() => props.space?.background)
+const backgroundTint = computed(() => props.space?.backgroundTint || props.box?.backgroundTint)
+const backgroundColor = computed(() => props.space?.backgroundColor || props.box?.backgroundColor)
+const background = computed(() => props.space?.background || props.box?.background)
 const backgroundIsGradient = computed(() => props.space?.backgroundIsGradient)
 const backgroundGradient = computed(() => props.space?.backgroundGradient)
 
@@ -85,7 +86,7 @@ const backgroundStyles = computed(() => {
     top 0
     left 0
     mix-blend-mode multiply
-    border-radius calc(var(--entity-radius) + 1)
+    border-radius calc(var(--entity-radius) + 1px)
     z-index 1
   .background-image
     height 100%
@@ -98,7 +99,7 @@ const backgroundStyles = computed(() => {
   .preview-button
     position relative
     cursor pointer
-    border-radius var(--entity-radius)
+    border-radius calc(var(--entity-radius) + 1px)
     overflow hidden
     background-color white
     &:hover,
@@ -113,8 +114,6 @@ const backgroundStyles = computed(() => {
     &:active
       box-shadow var(--button-active-inset-shadow)
       background var(--secondary-active-background)
-    .background-tint
-      border-radius 4px
   button
     width 28px
     background-size cover

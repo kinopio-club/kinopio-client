@@ -5,6 +5,8 @@ import { useStore } from 'vuex'
 import ColorPicker from '@/components/dialogs/ColorPicker.vue'
 import CardOrBoxActions from '@/components/subsections/CardOrBoxActions.vue'
 import ItemCheckboxButton from '@/components/ItemCheckboxButton.vue'
+import BackgroundPicker from '@/components/dialogs/BackgroundPicker.vue'
+import BackgroundPreview from '@/components/BackgroundPreview.vue'
 import utils from '@/utils.js'
 
 import { colord, extend } from 'colord'
@@ -282,6 +284,7 @@ dialog.narrow.box-details(v-if="visible" :open="visible" @click.left.stop="close
           img.icon(src="@/assets/remove.svg")
       //- [·]
       ItemCheckboxButton(:boxes="[currentBox]" :isDisabled="!canEditBox")
+      BackgroundPreview(:box="currentBox" :isButton="true" :buttonIsActive="state.backgroundIsVisible")
     CardOrBoxActions(:visible="canEditBox" :boxes="[currentBox]" @closeDialogs="closeDialogs" :colorIsHidden="true")
     .row(v-if="!canEditBox")
       span.badge.info
@@ -307,4 +310,6 @@ dialog.narrow.box-details(v-if="visible" :open="visible" @click.left.stop="close
   .filter-button-wrap
     padding-left 5px
     padding-top 1px
+  .background-preview
+    margin-left 6px
 </style>
