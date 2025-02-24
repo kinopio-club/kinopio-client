@@ -13,6 +13,7 @@ let useSiblingConnectionType
 let browserZoomLevel = 0
 let disableContextMenu = false
 let spaceKeyIsDown = false
+let isCurrentlyZooming = false
 
 let prevCursorPosition, currentCursorPosition, prevRightClickPosition, prevRightClickTime
 
@@ -134,27 +135,34 @@ const handleShortcuts = (event) => {
     store.dispatch('closeAllDialogs')
     store.dispatch('currentUserToolbar', 'card')
   } else if (key === '1' && isSpaceScope) {
+    if (isCurrentlyZooming) { return }
     let value = store.state.currentUser.filterShowUsers
     value = !value
     store.dispatch('currentUser/toggleFilterShowUsers', value)
   // 2
   } else if (key === '2' && isSpaceScope) {
+    if (isCurrentlyZooming) { return }
     let value = store.state.currentUser.filterShowDateUpdated
     value = !value
     store.dispatch('currentUser/toggleFilterShowDateUpdated', value)
   // 3
   } else if (key === '3' && isSpaceScope) {
+    if (isCurrentlyZooming) { return }
     let value = store.state.currentUser.filterUnchecked
     value = !value
     store.dispatch('currentUser/toggleFilterUnchecked', value)
+  // 4
   } else if (key === '4' && isSpaceScope) {
+    if (isCurrentlyZooming) { return }
     let value = store.state.currentUser.filterComments
     value = !value
     store.dispatch('currentUser/toggleFilterComments', value)
+  // ' '
   } else if (key === ' ' && isSpaceScope) {
     store.dispatch('currentUserIsPanning', false)
     store.commit('currentUserIsPanningReady', false)
     spaceKeyIsDown = false
+  // b
   } else if (key === 'b' && isSpaceScope) {
     let cards
     const multipleCardIds = store.state.multipleCardsSelectedIds
@@ -170,8 +178,12 @@ const handleShortcuts = (event) => {
     } else {
       store.dispatch('currentUserToolbar', 'box')
     }
+  // c
   } else if (key === 'c' && isSpaceScope) {
     store.dispatch('currentUserToolbar', 'card')
+  // z
+  } else if (key === 'z') {
+    isCurrentlyZooming = false
   }
 }
 // on key down
@@ -181,6 +193,7 @@ const handleMetaKeyShortcuts = (event) => {
   const isCardScope = checkIsCardScope(event)
   const isSpaceScope = checkIsSpaceScope(event)
   const isFromInput = event.target.closest('input') || event.target.closest('textarea')
+  const isNumberKey = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'].includes(key)
   // Add Child Card
   if (event.shiftKey && key === 'enter' && (isSpaceScope || isCardScope)) {
     const shouldAddChildCard = store.state.currentUser.cardSettingsShiftEnterShouldAddChildCard
@@ -243,10 +256,6 @@ const handleMetaKeyShortcuts = (event) => {
     event.preventDefault()
     store.commit('triggerCenterZoomOrigin')
     store.dispatch('zoomSpace', { shouldZoomIn: true, speed: 10 })
-    // Toggle Zoom Out
-  } else if (key === 'z' && isSpaceScope) {
-    event.preventDefault()
-    store.commit('triggerSpaceZoomOutMax')
   } else if (key === 'p' && isSpaceScope && !isMeta) {
     const value = !store.state.isPresentationMode
     store.commit('isPresentationMode', value)
@@ -260,6 +269,23 @@ const handleMetaKeyShortcuts = (event) => {
   } else if (event.shiftKey && isMeta && key === 'l') {
     event.preventDefault()
     toggleLockCards()
+  // z Toggle Zoom Out
+  } else if (key === 'z' && isSpaceScope) {
+    event.preventDefault()
+    if (!isCurrentlyZooming) {
+      store.commit('triggerSpaceZoomOutMax')
+      isCurrentlyZooming = true
+    }
+  // z + number zoom
+  } else if (isNumberKey && isCurrentlyZooming) {
+    const number = parseInt(key)
+    let percent = number * 10
+    percent = Math.max(percent, consts.spaceZoom.min)
+    percent = Math.min(percent, consts.spaceZoom.max)
+    if (number === 0) {
+      percent = 100
+    }
+    store.commit('spaceZoomPercent', percent)
   }
 }
 // on mouse down

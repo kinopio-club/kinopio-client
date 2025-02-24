@@ -13,7 +13,6 @@ import Text from '@/components/sidebar/Text.vue'
 import Inbox from '@/components/sidebar/Inbox.vue'
 import Favorites from '@/components/sidebar/Favorites.vue'
 import History from '@/components/sidebar/History.vue'
-import Minimap from '@/components/sidebar/Minimap.vue'
 
 const store = useStore()
 
@@ -26,8 +25,6 @@ onMounted(() => {
       toggleSection('removed')
     } else if (mutation.type === 'triggerAIImagesIsVisible') {
       toggleSection('AIImages')
-    } else if (mutation.type === 'triggerMinimapIsVisible') {
-      toggleSection('minimap')
     }
   })
 })
@@ -176,7 +173,9 @@ dialog#sidebar.sidebar.is-pinnable(v-if="visible" :open="visible" @click.left.st
   Inbox(:visible="state.inboxIsVisible")
   Favorites(:visible="state.favoritesIsVisible")
   History(:visible="state.historyIsVisible")
-  Minimap(:visible="state.minimapIsVisible")
+  section.minimap(v-if="state.minimapIsVisible")
+    .badge.info
+      span Minimap has been moved from Sidebar to the footer button
 
 </template>
 

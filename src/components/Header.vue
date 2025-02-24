@@ -102,8 +102,6 @@ onMounted(() => {
       updateSidebarIsVisible(true)
     } else if (type === 'triggerImportIsVisible') {
       updateImportIsVisible(true)
-    } else if (type === 'triggerMinimapIsVisible') {
-      toggleSidebarIsVisible()
     } else if (type === 'triggerClearUserNotifications') {
       clearNotifications()
     }
