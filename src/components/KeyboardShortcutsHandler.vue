@@ -147,14 +147,17 @@ const handleShortcuts = (event) => {
     let value = store.state.currentUser.filterUnchecked
     value = !value
     store.dispatch('currentUser/toggleFilterUnchecked', value)
+  // 4
   } else if (key === '4' && isSpaceScope) {
     let value = store.state.currentUser.filterComments
     value = !value
     store.dispatch('currentUser/toggleFilterComments', value)
+  // ' '
   } else if (key === ' ' && isSpaceScope) {
     store.dispatch('currentUserIsPanning', false)
     store.commit('currentUserIsPanningReady', false)
     spaceKeyIsDown = false
+  // b
   } else if (key === 'b' && isSpaceScope) {
     let cards
     const multipleCardIds = store.state.multipleCardsSelectedIds
@@ -170,6 +173,7 @@ const handleShortcuts = (event) => {
     } else {
       store.dispatch('currentUserToolbar', 'box')
     }
+  // c
   } else if (key === 'c' && isSpaceScope) {
     store.dispatch('currentUserToolbar', 'card')
   }
