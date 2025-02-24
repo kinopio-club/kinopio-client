@@ -1537,6 +1537,7 @@ dialog.card-details(v-if="visible" :open="visible" ref="dialogElement" @click.le
       padding-top 0
   .media-preview + .url-preview
     margin-top 10px
+
   .opening-frame
     position absolute
     z-index -1

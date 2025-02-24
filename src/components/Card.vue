@@ -1921,6 +1921,7 @@ article.card-wrap#card(
   ref="cardElement"
   :class="articleClasses"
 )
+  .focusing-frame
   .card(
     v-show="shouldRender"
     @mousedown.left.prevent="startDraggingCard"
@@ -2118,6 +2119,7 @@ article.card-wrap#card(
 
 <style lang="stylus">
 article.card-wrap
+  --focus-padding 20px
   --card-width 200px // consts.normalCardMaxWidth
   pointer-events all
   position absolute
@@ -2444,6 +2446,28 @@ article.card-wrap
   .is-in-checked-box,
   .is-checked
     opacity var(--is-checked-opacity)
+
+  .focusing-frame
+    position absolute
+    z-index -1
+    left 0px
+    top 0px
+    width 100%
+    height 100%
+    background-color pink
+    transform-origin center
+    animation: focusing .5s infinite alternate ease-out;
+    // filter blur(10px)
+    border-radius var(--entity-radius)
+    pointer-events none
+
+@keyframes focusing
+  100%
+    left calc(-1 * var(--focus-padding) / 2)
+    top calc(-1 * var(--focus-padding) / 2)
+    width calc(100% + var(--focus-padding))
+    height: calc(100% + var(--focus-padding))
+    border-radius calc(2 * var(--entity-radius))
 
 @keyframes bounce
   0%
