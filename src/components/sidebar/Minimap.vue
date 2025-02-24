@@ -9,6 +9,8 @@ const rowElement = ref(null)
 
 const store = useStore()
 
+const emit = defineEmits(['updateDialogHeight'])
+
 onMounted(() => {
   updateSize()
 })
@@ -32,6 +34,7 @@ const updateSize = async () => {
   if (!element) { return }
   const rect = element.getBoundingClientRect()
   state.size = rect.width
+  emit('updateDialogHeight')
 }
 
 // boxes
