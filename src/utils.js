@@ -1062,8 +1062,13 @@ export default {
   },
   cardElementFromPosition (x, y) {
     let elements = document.elementsFromPoint(x, y)
-    const cardElement = elements.find(element => {
-      return element.className === 'card-wrap'
+    let cardElement
+    elements.find(element => {
+      const match = element.closest('.card-wrap')
+      if (match) {
+        cardElement = match
+      }
+      return match
     })
     return cardElement
   },
