@@ -488,8 +488,10 @@ const currentSpace = {
       context.commit('notifySignUpToEditSpace', false, { root: true })
     },
     getRemoteSpace: async (context, space) => {
-      const collaboratorKey = context.rootState.spaceCollaboratorKeys.find(key => key.spaceId === space.id)
-      space.collaboratorKey = collaboratorKey
+      let collaboratorKey = context.rootState.spaceCollaboratorKeys.find(key => key.spaceId === space.id)
+      if (collaboratorKey) {
+        space.collaboratorKey = collaboratorKey.collaboratorKey
+      }
       const currentUserIsSignedIn = context.rootGetters['currentUser/isSignedIn']
       const currentSpaceIsRemote = context.rootGetters['currentSpace/isRemote']
       let remoteSpace
