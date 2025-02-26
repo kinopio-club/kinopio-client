@@ -121,19 +121,6 @@ const router = createRouter({
         next()
       }
     }, {
-      path: '/:space',
-      component: Space,
-      beforeEnter: (to, from, next) => {
-        pageMeta.spaceFromId({})
-        const path = window.location.pathname
-        const urlParams = new URLSearchParams(window.location.search)
-        if (urlParams.get('present')) {
-          store.commit('isPresentationMode', true)
-        }
-        store.dispatch('updateSpaceAndCardUrlToLoad', path)
-        next()
-      }
-    }, {
       path: '/embed',
       component: Space,
       beforeEnter: (to, from, next) => {
@@ -222,6 +209,19 @@ const router = createRouter({
           store.commit('addNotification', { message: 'Invalid invite URL', type: 'danger' })
           next()
         }
+      }
+    }, {
+      path: '/:space',
+      component: Space,
+      beforeEnter: (to, from, next) => {
+        pageMeta.spaceFromId({})
+        const path = window.location.pathname
+        const urlParams = new URLSearchParams(window.location.search)
+        if (urlParams.get('present')) {
+          store.commit('isPresentationMode', true)
+        }
+        store.dispatch('updateSpaceAndCardUrlToLoad', path)
+        next()
       }
     }
   ]
