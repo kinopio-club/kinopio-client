@@ -225,10 +225,8 @@ template(v-if="visible")
       button(@click.left="triggerSignUpOrInIsVisible") Sign Up or In
     // signed in user
     template(v-if="currentUserIsSignedIn")
-      p
-        span Backup All (JSON and TXT)
       button(@click.left="downloadAllSpacesRemote" :class="{ active: state.isLoadingAllSpaces }")
-        span Download All Spaces
+        span Download All Spaces Backup (JSON and TXT)
         Loader(:visible="state.isLoadingAllSpaces")
     a#export-downlaod-anchor.hidden
     .info-container(v-if="state.isLoadingAllSpaces")
