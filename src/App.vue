@@ -33,16 +33,6 @@ const isSpacePage = computed(() => store.getters.isSpacePage)
 
 // styles and position
 
-const pageWidth = computed(() => {
-  if (!isSpacePage.value) { return }
-  const size = Math.max(store.state.pageWidth, store.state.viewportWidth)
-  return size + 'px'
-})
-const pageHeight = computed(() => {
-  if (!isSpacePage.value) { return }
-  const size = Math.max(store.state.pageHeight, store.state.viewportHeight)
-  return size + 'px'
-})
 const pageCursor = computed(() => {
   const isPanning = store.state.currentUserIsPanning
   const isPanningReady = store.state.currentUserIsPanningReady
@@ -55,6 +45,21 @@ const pageCursor = computed(() => {
     return 'crosshair'
   }
   return undefined
+})
+const styles = computed(() => {
+  if (!isSpacePage.value) { return }
+  let width = Math.max(store.state.pageWidth, store.state.viewportWidth)
+  let height = Math.max(store.state.pageHeight, store.state.viewportHeight)
+  const zoom = spaceZoomDecimal.value
+  if (zoom > 1) {
+    width = Math.round(width * zoom)
+    height = Math.round(height * zoom)
+  }
+  return {
+    width: width + 'px',
+    height: height + 'px',
+    cursor: pageCursor.value
+  }
 })
 const spaceZoomDecimal = computed(() => store.getters.spaceZoomDecimal)
 
@@ -156,13 +161,29 @@ const updateMetaRSSFeed = () => {
   link.href = url
   head.appendChild(link)
 }
+
+// prevent native touch scrolling
+
+const preventTouchScrolling = (event) => {
+  if (!isSpacePage.value) { return }
+  const isDialogScope = event.target.closest('dialog')
+  if (isDialogScope) { return }
+  event.preventDefault()
+  store.commit('currentUserIsPanning', true)
+}
 </script>
 
 <template lang='pug'>
 .app(
   @pointermove="broadcastUserLabelCursor"
   @touchstart="isTouchDevice"
-  :style="{ width: pageWidth, height: pageHeight, cursor: pageCursor }"
+
+  @touchmove="preventTouchScrolling"
+  @gesturestart="preventTouchScrolling"
+  @gesturechange="preventTouchScrolling"
+  @gestureend="preventTouchScrolling"
+
+  :style="styles"
   :class="{ 'no-background': !isSpacePage, 'is-dark-theme': isThemeDark }"
   :data-current-user-id="currentUserId"
 )
