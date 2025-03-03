@@ -2,10 +2,6 @@
 
 const frames = [
   {
-    id: 0,
-    name: 'None'
-  },
-  {
     id: 4,
     name: 'Dead to Me',
     badge: 'frames/dead-to-me/tombstone.png'

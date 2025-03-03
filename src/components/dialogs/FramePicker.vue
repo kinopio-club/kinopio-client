@@ -46,6 +46,18 @@ const scrollIntoView = () => {
 // frames
 
 const changeCardFrame = (frame) => {
+  let shouldClear
+  props.cards.forEach(card => {
+    if (card.frameId === frame.id) {
+      shouldClear = true
+    }
+  })
+  if (shouldClear) {
+    frame = {
+      id: 0,
+      name: 'None'
+    }
+  }
   props.cards.forEach(card => {
     card = {
       frameId: frame.id,
