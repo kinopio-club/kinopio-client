@@ -49,7 +49,7 @@ const boxColorClasses = (box) => {
 }
 const scrollIntoView = (box) => {
   const element = utils.boxElementFromId(box.id)
-  store.commit('scrollElementIntoView', { element })
+  store.commit('scrollElementIntoView', { element, positionIsCenter: true })
 }
 </script>
 
