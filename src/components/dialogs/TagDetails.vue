@@ -171,11 +171,12 @@ const currentCard = computed(() => {
   return currentCard || tagCard
 })
 const showEditCard = computed(() => !cardDetailsIsVisibleForCardId.value.valye && !visibleFromTagList.value)
-const showCardDetails = async (card) => {
+const focusOnCard = async (card) => {
   card = card || currentCard.value
   store.dispatch('closeAllDialogs')
-  if (currentSpaceId.value !== card.spaceId) {
-    store.commit('loadSpaceShowDetailsForCardId', card.id)
+  const isCurrentSpace = currentSpaceId.value !== card.spaceId
+  if (isCurrentSpace) {
+    store.commit('loadSpaceFocusOnCardId', card.id)
     let space
     if (card.spaceId) {
       space = { id: card.spaceId }
@@ -185,8 +186,7 @@ const showCardDetails = async (card) => {
     store.dispatch('currentSpace/changeSpace', space)
   } else {
     const cardId = card.id || currentTag.value.cardId
-    store.commit('preventCardDetailsOpeningAnimation', false)
-    store.dispatch('currentCards/showCardDetails', cardId)
+    store.dispatch('focusOnCardId', cardId)
   }
 }
 
@@ -437,7 +437,7 @@ const changeSpace = (spaceId) => {
 <template lang="pug">
 dialog.tag-details(v-if="visible" :open="visible" :style="styles" ref="dialogElement" @click.left.stop="closeDialogs")
   section.edit-card(v-if="showEditCard")
-    button(@click="showCardDetails(null)")
+    button(@click="focusOnCard(null)")
       span Edit Card
     button.change-color.select-all(@click="selectCardsWithTag")
       .current-color(:style="{backgroundColor: color}")
@@ -469,7 +469,7 @@ dialog.tag-details(v-if="visible" :open="visible" :style="styles" ref="dialogEle
   //- cards found, or loading with cached cards
   section.results-section(v-if="state.cards.length" ref="resultsElement" :style="{'max-height': state.resultsSectionHeight + 'px'}")
     ResultsFilter(:hideFilter="shouldHideResultsFilter" :items="state.cards" @updateFilter="updateFilter" @updateFilteredItems="updateFilteredCards")
-    SpaceCardList(:groupedItems="groupedItems" :isLoading="state.loading" @selectSpace="changeSpace" @selectCard="showCardDetails")
+    SpaceCardList(:groupedItems="groupedItems" :isLoading="state.loading" @selectSpace="changeSpace" @selectCard="focusOnCard" :currentCard="currentCard")
 </template>
 
 <style lang="stylus">

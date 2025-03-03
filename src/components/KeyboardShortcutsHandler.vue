@@ -444,7 +444,8 @@ const addCard = async (options) => {
     backgroundColor = parentCard.backgroundColor
   }
   store.commit('shouldPreventNextEnterKey', true)
-  store.dispatch('currentCards/add', { position, isParentCard, backgroundColor, id: options.id })
+  const newCard = { position, isParentCard, backgroundColor, id: options.id }
+  store.dispatch('currentCards/add', { card: newCard })
   if (childCard) {
     store.commit('childCardId', store.state.cardDetailsIsVisibleForCardId)
     await nextTick()
@@ -480,7 +481,8 @@ const addChildCard = async (options) => {
   const position = nonOverlappingCardPosition(initialPosition)
   const parentCard = store.getters['currentCards/byId'](parentCardId)
   const newChildCardId = options.id || nanoid()
-  store.dispatch('currentCards/add', { position, backgroundColor: parentCard.backgroundColor, id: newChildCardId })
+  const newCard = { position, backgroundColor: parentCard.backgroundColor, id: newChildCardId }
+  store.dispatch('currentCards/add', { card: newCard })
   store.commit('childCardId', store.state.cardDetailsIsVisibleForCardId)
   await nextTick()
   addConnection(baseCardId, position)

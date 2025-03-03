@@ -774,7 +774,7 @@ const currentSpace = {
       context.dispatch('updateCurrentSpaceIsUnavailableOffline', space.id, { root: true })
       context.dispatch('updateCurrentUserIsInvitedButCannotEditCurrentSpace', space, { root: true })
       // focus card
-      const cardId = context.rootState.focusingFrameIsVisibleForCardId
+      const cardId = context.rootState.focusOnCardId
       if (cardId) {
         context.commit('triggerScrollCardIntoView', cardId, { root: true })
       }
@@ -941,9 +941,9 @@ const currentSpace = {
       if (!userIsMember) { return }
       context.commit('parentCardId', '', { root: true })
       context.dispatch('updateUserLastSpaceId')
-      const cardId = context.rootState.loadSpaceShowDetailsForCardId
+      const cardId = context.rootState.loadSpaceFocusOnCardId
       if (cardId) {
-        context.dispatch('currentCards/showCardDetails', cardId, { root: true })
+        context.dispatch('focusOnCardId', cardId, { root: true })
       }
       context.commit('restoreMultipleSelectedItemsToLoad', null, { root: true })
       const body = { id: space.id, updatedAt: new Date() }
@@ -1190,7 +1190,7 @@ const currentSpace = {
 
     addItems: (context, items) => {
       const { cards, boxes, connections, connectionTypes, tags } = items
-      cards.forEach(card => context.dispatch('currentCards/add', card, { root: true }))
+      cards.forEach(card => context.dispatch('currentCards/add', { card }, { root: true }))
       boxes.forEach(box => context.dispatch('currentBoxes/add', { box }, { root: true }))
       connections.forEach(connection => {
         let type = connectionTypes.find(connectionType => connectionType.id === connection.connectionTypeId)

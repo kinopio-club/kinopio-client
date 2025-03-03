@@ -141,7 +141,7 @@ const store = createStore({
     preventCardDetailsOpeningAnimation: true,
     multipleCardsSelectedIds: [],
     iframeIsVisibleForCardId: '',
-    focusingFrameIsVisibleForCardId: '',
+    focusOnCardId: '',
     // resizing card
     currentUserIsResizingCard: false,
     currentUserIsResizingCardIds: [],
@@ -227,7 +227,7 @@ const store = createStore({
     spaceCollaboratorKeys: [],
     remotePendingUploads: [],
     isLoadingFavorites: false,
-    loadSpaceShowDetailsForCardId: '',
+    loadSpaceFocusOnCardId: '',
     loadNewSpace: false,
     urlPreviewLoadingForCardIds: [],
     loadInboxSpace: false,
@@ -751,9 +751,9 @@ const store = createStore({
       utils.typeCheck({ value: cardId, type: 'string' })
       state.iframeIsVisibleForCardId = cardId
     },
-    focusingFrameIsVisibleForCardId: (state, cardId) => {
+    focusOnCardId: (state, cardId) => {
       utils.typeCheck({ value: cardId, type: 'string' })
-      state.focusingFrameIsVisibleForCardId = cardId
+      state.focusOnCardId = cardId
     },
 
     // Connections
@@ -1442,9 +1442,9 @@ const store = createStore({
       utils.typeCheck({ value, type: 'boolean' })
       state.isLoadingFavorites = value
     },
-    loadSpaceShowDetailsForCardId: (state, cardId) => {
+    loadSpaceFocusOnCardId: (state, cardId) => {
       utils.typeCheck({ value: cardId, type: 'string' })
-      state.loadSpaceShowDetailsForCardId = cardId
+      state.loadSpaceFocusOnCardId = cardId
     },
     spaceUrlToLoad: (state, spaceUrl) => {
       utils.typeCheck({ value: spaceUrl, type: 'string' })
@@ -1772,12 +1772,12 @@ const store = createStore({
       const matches = utils.spaceAndCardIdFromPath(path)
       if (!matches) { return }
       if (matches.cardId) {
-        context.dispatch('focusingFrameIsVisibleForCardId', matches.cardId)
+        context.dispatch('focusOnCardId', matches.cardId)
       }
       context.commit('spaceUrlToLoad', matches.spaceUrl)
     },
-    focusingFrameIsVisibleForCardId: (context, cardId) => {
-      context.commit('focusingFrameIsVisibleForCardId', cardId)
+    focusOnCardId: (context, cardId) => {
+      context.commit('focusOnCardId', cardId)
       if (cardId) {
         context.commit('triggerScrollCardIntoView', cardId)
       }
@@ -1834,7 +1834,7 @@ const store = createStore({
       context.commit('broadcast/updateStore', { updates: { userId: user.id }, type: 'clearRemoteConnectionDetailsVisible' })
       context.commit('broadcast/updateStore', { updates: { userId: user.id }, type: 'clearRemoteBoxDetailsVisible' })
       context.commit('passwordResetIsVisible', false)
-      context.dispatch('focusingFrameIsVisibleForCardId', '')
+      context.dispatch('focusOnCardId', '')
     },
     toggleCardSelected: (context, cardId) => {
       const previousMultipleCardsSelectedIds = context.state.previousMultipleCardsSelectedIds

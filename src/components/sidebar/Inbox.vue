@@ -105,6 +105,7 @@ const selectCard = async (card) => {
   }
   updateCardIsLoading(card)
   const scroll = store.getters.windowScrollWithSpaceOffset()
+  const skipCardDetailsIsVisible = true
   let newCard = utils.clone(card)
   newCard.id = nanoid()
   newCard.spaceId = store.state.currentSpace.id
@@ -112,8 +113,8 @@ const selectCard = async (card) => {
   newCard.y = scroll.y + 120 // matches KeyboardShortcutsHandler.addCard
   const spaceCards = store.getters['currentCards/all']
   newCard = utils.uniqueCardPosition(newCard, spaceCards)
-  store.dispatch('currentCards/add', newCard)
-  store.commit('cardDetailsIsVisibleForCardId', newCard.id)
+  store.dispatch('currentCards/add', { card: newCard, skipCardDetailsIsVisible })
+  store.dispatch('focusOnCardId', newCard.id)
   removeCardFromInbox(card)
 }
 const removeCard = (card) => {

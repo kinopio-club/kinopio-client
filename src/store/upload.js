@@ -162,14 +162,15 @@ export default {
         const positionOffset = 20
         const cardId = nanoid()
         cardIds.push(cardId)
-        context.dispatch('currentCards/add', {
+        const newCard = {
           position: {
             x: position.x + (index * positionOffset),
             y: position.y + (index * positionOffset)
           },
           name: consts.uploadPlaceholder,
           id: cardId
-        }, { root: true })
+        }
+        context.dispatch('currentCards/add', { card: newCard }, { root: true })
         const fileName = utils.normalizeFileUrl(file.name)
         const key = `${cardIds[index]}/${fileName}`
         filesPostData.push({

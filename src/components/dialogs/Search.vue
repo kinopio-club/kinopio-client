@@ -163,7 +163,7 @@ const recentlyUpdatedCards = computed(() => {
 
 const selectCard = (card) => {
   store.dispatch('closeAllDialogs')
-  store.dispatch('focusingFrameIsVisibleForCardId', card.id)
+  store.dispatch('focusOnCardId', card.id)
   focusItem(card)
 }
 const changeSpace = (spaceId) => {
@@ -179,7 +179,7 @@ const selectSpaceCard = (card) => {
   if (isCardInCurrentSpace) {
     selectCard(card)
   } else {
-    store.commit('loadSpaceShowDetailsForCardId', card.id)
+    store.commit('loadSpaceFocusOnCardId', card.id)
     changeSpace(card.spaceId)
   }
 }

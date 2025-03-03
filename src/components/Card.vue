@@ -88,10 +88,9 @@ onMounted(async () => {
     }
   })
   updateDefaultBackgroundColor(utils.cssVariable('secondary-background'))
-  const shouldShowDetails = store.state.loadSpaceShowDetailsForCardId === props.card.id
-  if (shouldShowDetails) {
-    store.commit('preventCardDetailsOpeningAnimation', false)
-    store.dispatch('currentCards/showCardDetails', props.card.id)
+  const shouldFocus = store.state.loadSpaceFocusOnCardId === props.card.id
+  if (shouldFocus) {
+    store.dispatch('focusOnCardId', props.card.id)
   }
   await updateUrlPreviewOnload()
   checkIfShouldUpdateIframeUrl()
@@ -176,7 +175,7 @@ const changeSpaceAndCard = async (spaceId, cardId) => {
   const currentSpaceId = store.state.currentSpace.id
   // space and card
   if (currentSpaceId !== spaceId) {
-    store.commit('loadSpaceShowDetailsForCardId', cardId)
+    store.commit('loadSpaceFocusOnCardId', cardId)
     const space = { id: spaceId }
     store.dispatch('currentSpace/changeSpace', space)
   // card in current space
@@ -411,7 +410,7 @@ const cardStyle = computed(() => {
   if (nameIsColor.value) {
     nameColor = props.card.name
   }
-  let color = selectedColor.value || remoteCardDetailsVisibleColor.value || remoteSelectedColor.value || selectedColorUpload.value || remoteCardDraggingColor.value || remoteUploadDraggedOverCardColor.value || remoteUserResizingCardsColor.value || remoteUserTiltingCardsColor.value || nameColor || backgroundColor
+  let color = focusColor.value || selectedColor.value || remoteCardDetailsVisibleColor.value || remoteSelectedColor.value || selectedColorUpload.value || remoteCardDraggingColor.value || remoteUploadDraggedOverCardColor.value || remoteUserResizingCardsColor.value || remoteUserTiltingCardsColor.value || nameColor || backgroundColor
   let styles = {
     background: color
   }
@@ -1900,8 +1899,14 @@ const isInCheckedBox = computed(() => {
 
 // focusing frame
 
-const isFocusingFrameVisible = computed(() => props.card.id === store.state.focusingFrameIsVisibleForCardId)
-
+const isFocusing = computed(() => props.card.id === store.state.focusOnCardId)
+const focusColor = computed(() => {
+  if (isFocusing.value) {
+    return currentUserColor.value
+  } else {
+    return null
+  }
+})
 </script>
 
 <template lang="pug">
@@ -1926,7 +1931,7 @@ article.card-wrap#card(
   ref="cardElement"
   :class="articleClasses"
 )
-  .focusing-frame(v-if="isFocusingFrameVisible" :style="{backgroundColor: currentUserColor}")
+  .focusing-frame(v-if="isFocusing" :style="{backgroundColor: currentUserColor}")
   .card(
     v-show="shouldRender"
     @mousedown.left.prevent="startDraggingCard"
@@ -2461,7 +2466,7 @@ article.card-wrap
     height 100%
     background-color pink
     transform-origin center
-    animation: focusing .5s infinite alternate ease-out;
+    animation: focusing .3s infinite alternate ease-out;
     // filter blur(10px)
     border-radius var(--entity-radius)
     pointer-events none

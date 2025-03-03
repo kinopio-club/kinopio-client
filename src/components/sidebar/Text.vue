@@ -60,6 +60,7 @@ const toggleCardTipsIsVisible = () => {
 // sort
 
 const updateSortedCards = () => {
+  if (!props.visible) { return }
   let sorted = sortBy(cards.value, card => dayjs(card.nameUpdatedAt || card.updatedAt).valueOf())
   if (state.sortOrderIsDesc) {
     sorted.reverse()
@@ -205,9 +206,7 @@ const imageUrl = (card) => {
 // actions
 
 const focus = (card, index) => {
-  store.commit('triggerScrollCardIntoView', card.id)
-  store.commit('shouldPreventNextFocusOnName', true)
-  store.commit('cardDetailsIsVisibleForCardId', card.id)
+  store.dispatch('focusOnCardId', card.id)
   prevIndex = index
 }
 const focusTextarea = async (card, index) => {
