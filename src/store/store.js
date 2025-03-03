@@ -115,6 +115,7 @@ const store = createStore({
     remotePreviousUserBoxSelectStyles: [],
 
     // boxes
+    focusOnBoxId: '',
     boxDetailsIsVisibleForBoxId: '',
     multipleBoxesSelectedIds: [],
     currentBoxIsNew: false,
@@ -907,6 +908,10 @@ const store = createStore({
     currentUserIsHoveringOverBoxId: (state, boxId) => {
       utils.typeCheck({ value: boxId, type: 'string' })
       state.currentUserIsHoveringOverBoxId = boxId
+    },
+    focusOnBoxId: (state, boxId) => {
+      utils.typeCheck({ value: boxId, type: 'string' })
+      state.focusOnBoxId = boxId
     },
     boxDetailsIsVisibleForBoxId: (state, value) => {
       utils.typeCheck({ value, type: 'string' })
@@ -1782,6 +1787,13 @@ const store = createStore({
         context.commit('triggerScrollCardIntoView', cardId)
       }
     },
+    focusOnBoxId: (context, boxId) => {
+      context.commit('focusOnBoxId', boxId)
+      if (boxId) {
+        const element = utils.boxElementFromId(boxId)
+        store.commit('scrollElementIntoView', { element, positionIsCenter: true })
+      }
+    },
     updatePageSizes: (context) => {
       const cards = context.getters['currentCards/all']
       const boxes = context.getters['currentBoxes/all']
@@ -1835,6 +1847,7 @@ const store = createStore({
       context.commit('broadcast/updateStore', { updates: { userId: user.id }, type: 'clearRemoteBoxDetailsVisible' })
       context.commit('passwordResetIsVisible', false)
       context.dispatch('focusOnCardId', '')
+      context.dispatch('focusOnBoxId', '')
     },
     toggleCardSelected: (context, cardId) => {
       const previousMultipleCardsSelectedIds = context.state.previousMultipleCardsSelectedIds
