@@ -382,7 +382,7 @@ const safeColor = (color) => {
 
 // styles
 
-const articleStyle = computed(() => {
+const cardWrapStyle = computed(() => {
   let z = props.card.z
   let pointerEvents = 'auto'
   if (currentCardDetailsIsVisible.value || currentCardIsBeingDragged.value) {
@@ -451,7 +451,7 @@ const addSizeClasses = (classes) => {
   classes['l-width'] = width.value > l
   return classes
 }
-const articleClasses = computed(() => {
+const cardWrapClasses = computed(() => {
   let classes = {
     'is-resizing': store.state.currentUserIsResizingCard,
     'is-tilting': store.state.currentUserIsTiltingCard,
@@ -1905,8 +1905,8 @@ const isFocusingFrameVisible = computed(() => props.card.id === store.state.focu
 </script>
 
 <template lang="pug">
-article.card-wrap#card(
-  :style="articleStyle"
+.card-wrap(
+  :style="cardWrapStyle"
   :data-card-id="card.id"
   :data-is-hidden-by-comment-filter="isHiddenByCommentFilter"
   :data-is-visible-in-viewport="state.isVisibleInViewport"
@@ -1924,7 +1924,7 @@ article.card-wrap#card(
 
   :key="card.id"
   ref="cardElement"
-  :class="articleClasses"
+  :class="cardWrapClasses"
 )
   .focusing-frame(v-if="isFocusingFrameVisible" :style="{backgroundColor: currentUserColor}")
   .card(
@@ -2123,7 +2123,7 @@ article.card-wrap#card(
 </template>
 
 <style lang="stylus">
-article.card-wrap
+.card-wrap
   --focus-padding 20px
   --card-width 200px // consts.normalCardMaxWidth
   pointer-events all

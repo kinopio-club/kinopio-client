@@ -146,7 +146,7 @@ const currentCards = {
     },
     moveWhileDragging: (state, { cards }) => {
       cards.forEach(card => {
-        const element = document.querySelector(`article[data-card-id="${card.id}"]`)
+        const element = document.querySelector(`.card-wrap[data-card-id="${card.id}"]`)
         if (!element) { return }
         if (element.dataset.isVisibleInViewport === 'false') { return }
         element.style.left = card.x + 'px'
@@ -469,7 +469,7 @@ const currentCards = {
             width: card.width,
             height: card.height
           }
-          const element = document.querySelector(`article#card[data-card-id="${card.id}"]`)
+          const element = document.querySelector(`.card-wrap[data-card-id="${card.id}"]`)
           if (!element) { return }
           const isCardRenderedInDOM = element.dataset.shouldRender === 'true'
           if (isCardRenderedInDOM) {
@@ -742,7 +742,7 @@ const currentCards = {
         if (index === 0) {
           prevCard = card
         } else {
-          const prevCardElement = document.querySelector(`article [data-card-id="${prevCard.id}"]`)
+          const prevCardElement = document.querySelector(`.card-wrap [data-card-id="${prevCard.id}"]`)
           const prevCardRect = prevCardElement.getBoundingClientRect()
           card.y = prevCard.y + (prevCardRect.height * zoom) + spaceBetweenCards
           prevCard = card
@@ -957,7 +957,7 @@ const currentCards = {
       return alignedCards
     },
     isSelectableInViewport: (state, getters, rootState, rootGetters) => {
-      const elements = document.querySelectorAll(`article#card`)
+      const elements = document.querySelectorAll(`.card-wrap`)
       let cards = []
       elements.forEach(element => {
         if (element.dataset.isVisibleInViewport === 'false') { return }

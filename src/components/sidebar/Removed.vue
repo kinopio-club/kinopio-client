@@ -156,7 +156,7 @@ const deleteAllCards = () => {
   state.removedCards = []
 }
 const scrollIntoView = (card) => {
-  const element = document.querySelector(`article [data-card-id="${card.id}"]`)
+  const element = document.querySelector(`.card-wrap [data-card-id="${card.id}"]`)
   store.commit('scrollElementIntoView', { element })
 }
 
