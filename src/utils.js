@@ -994,7 +994,7 @@ export default {
   cardElementDimensions (card) {
     if (!card) { return }
     card = this.clone(card)
-    const element = document.querySelector(`article#card[data-card-id="${card.id}"]`)
+    const element = document.querySelector(`.card-wrap[data-card-id="${card.id}"]`)
     if (!element) { return }
     const cardId = card.id
     card.shouldRender = element.dataset.shouldRender
@@ -1022,7 +1022,7 @@ export default {
   },
   updateCardDimensionsDataWhileDragging (card) {
     if (!card) { return }
-    const element = document.querySelector(`article#card[data-card-id="${card.id}"]`)
+    const element = document.querySelector(`.card-wrap[data-card-id="${card.id}"]`)
     if (!element) { return }
     element.dataset.x = card.x
     element.dataset.y = card.y
@@ -1030,19 +1030,19 @@ export default {
     element.dataset.height = card.height
   },
   removeAllCardDimensions (card) {
-    const articleElement = document.querySelector(`article#card[data-card-id="${card.id}"]`)
+    const cardWrapElement = document.querySelector(`.card-wrap[data-card-id="${card.id}"]`)
     const cardElement = document.querySelector(`.card[data-card-id="${card.id}"]`)
-    const contentWrapElement = articleElement.querySelector(`.card-content-wrap`)
-    const cardMediaElement = articleElement.querySelector(`.media-card`)
-    articleElement.style.width = null
-    articleElement.style.height = null
+    const contentWrapElement = cardWrapElement.querySelector(`.card-content-wrap`)
+    const cardMediaElement = cardWrapElement.querySelector(`.media-card`)
+    cardWrapElement.style.width = null
+    cardWrapElement.style.height = null
     cardElement.style.width = null
     contentWrapElement.style.width = null
     contentWrapElement.style.height = null
     if (cardMediaElement) {
       cardMediaElement.style.width = null
     }
-    articleElement.style.maxWidth = null
+    cardWrapElement.style.maxWidth = null
   },
   isMissingDimensions (item) {
     return !item.width || !item.height
@@ -1062,13 +1062,18 @@ export default {
   },
   cardElementFromPosition (x, y) {
     let elements = document.elementsFromPoint(x, y)
-    const cardElement = elements.find(element => {
-      return element.nodeName === 'ARTICLE' // cards are <article>s
+    let cardElement
+    elements.find(element => {
+      const match = element.closest('.card-wrap')
+      if (match) {
+        cardElement = match
+      }
+      return match
     })
     return cardElement
   },
   cardElementFromId (cardId) {
-    return document.querySelector(`article[data-card-id="${cardId}"]`)
+    return document.querySelector(`.card-wrap[data-card-id="${cardId}"]`)
   },
   cardRectFromId (cardId) {
     const element = this.cardElementFromId(cardId)
