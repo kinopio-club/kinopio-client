@@ -1897,7 +1897,7 @@ const isInCheckedBox = computed(() => {
   return Boolean(checkedBox)
 })
 
-// focusing frame
+// card focus
 
 const isFocusing = computed(() => props.card.id === store.state.focusOnCardId)
 const focusColor = computed(() => {
@@ -2129,7 +2129,6 @@ const focusColor = computed(() => {
 
 <style lang="stylus">
 .card-wrap
-  --focus-padding 20px
   --card-width 200px // consts.normalCardMaxWidth
   pointer-events all
   position absolute
@@ -2456,28 +2455,6 @@ const focusColor = computed(() => {
   .is-in-checked-box,
   .is-checked
     opacity var(--is-checked-opacity)
-
-  .focusing-frame
-    position absolute
-    z-index -1
-    left 0px
-    top 0px
-    width 100%
-    height 100%
-    background-color pink
-    transform-origin center
-    animation: focusing .3s infinite alternate ease-out;
-    // filter blur(10px)
-    border-radius var(--entity-radius)
-    pointer-events none
-
-@keyframes focusing
-  100%
-    left calc(-1 * var(--focus-padding) / 2)
-    top calc(-1 * var(--focus-padding) / 2)
-    width calc(100% + var(--focus-padding))
-    height: calc(100% + var(--focus-padding))
-    border-radius calc(2 * var(--entity-radius))
 
 @keyframes bounce
   0%
