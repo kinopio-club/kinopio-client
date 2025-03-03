@@ -116,7 +116,7 @@ const dateIsToday = (card) => {
   return dayjs(date).isToday()
 }
 const isCurrentCard = (card) => {
-  return props.currentCard.id === card.id
+  return props.currentCard?.id === card.id
 }
 
 // scroll
