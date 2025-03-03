@@ -1772,9 +1772,15 @@ const store = createStore({
       const matches = utils.spaceAndCardIdFromPath(path)
       if (!matches) { return }
       if (matches.cardId) {
-        context.commit('focusingFrameIsVisibleForCardId', matches.cardId)
+        context.dispatch('focusingFrameIsVisibleForCardId', matches.cardId)
       }
       context.commit('spaceUrlToLoad', matches.spaceUrl)
+    },
+    focusingFrameIsVisibleForCardId: (context, cardId) => {
+      context.commit('focusingFrameIsVisibleForCardId', cardId)
+      if (cardId) {
+        context.commit('triggerScrollCardIntoView', cardId)
+      }
     },
     updatePageSizes: (context) => {
       const cards = context.getters['currentCards/all']
@@ -1828,7 +1834,7 @@ const store = createStore({
       context.commit('broadcast/updateStore', { updates: { userId: user.id }, type: 'clearRemoteConnectionDetailsVisible' })
       context.commit('broadcast/updateStore', { updates: { userId: user.id }, type: 'clearRemoteBoxDetailsVisible' })
       context.commit('passwordResetIsVisible', false)
-      context.commit('focusingFrameIsVisibleForCardId', '')
+      context.dispatch('focusingFrameIsVisibleForCardId', '')
     },
     toggleCardSelected: (context, cardId) => {
       const previousMultipleCardsSelectedIds = context.state.previousMultipleCardsSelectedIds
