@@ -122,7 +122,7 @@ const updateErrorMaxCharacterLimit = (newName) => {
 
 const selectCard = (card) => {
   store.dispatch('closeAllDialogs')
-  store.dispatch('currentCards/showCardDetails', card.id)
+  store.dispatch('focusingFrameIsVisibleForCardId', card.id)
 }
 const changeSpace = (spaceId) => {
   if (store.state.currentSpace.id === spaceId) { return }
