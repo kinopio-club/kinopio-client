@@ -1103,6 +1103,9 @@ export default {
   boxElementFromId (boxId) {
     return document.querySelector(`.box[data-box-id="${boxId}"]`)
   },
+  boxBackgroundElementFromId (boxId) {
+    return document.querySelector(`.box-background[data-box-id="${boxId}"]`)
+  },
   boxRectFromId (boxId) {
     const element = this.boxElementFromId(boxId)
     if (!element) { return }
