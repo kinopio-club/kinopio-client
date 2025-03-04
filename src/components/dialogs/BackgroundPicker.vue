@@ -115,6 +115,7 @@ const itemTypeString = computed(() => {
   }
 })
 const imageListIsSmall = computed(() => Boolean(props.box))
+const stretchIsVisible = computed(() => Boolean(props.box))
 
 // dialog
 
@@ -439,6 +440,15 @@ const searchPexels = async () => {
 }
 const searchService = debounce(searchPexels, 350)
 
+// stretch
+
+const backgroundIsStretch = computed(() => props.box.backgroundIsStretch)
+const toggleBackgroundIsStretch = () => {
+  console.log('🐸🐸🐸')
+  // const value = !filterShowUsers.value
+  // store.dispatch('currentUser/toggleFilterShowUsers', value)
+}
+
 </script>
 
 <template lang="pug">
@@ -457,6 +467,7 @@ dialog.background-picker.wide(v-if="visible" :open="visible" @click.left.stop="c
             img.icon.cancel(src="@/assets/add.svg")
             span Clear
 
+  //- url input
   section(@mouseup.stop @touchend.stop)
     .row(v-if="state.urlInputIsVisible")
       input(
@@ -528,6 +539,11 @@ dialog.background-picker.wide(v-if="visible" :open="visible" @click.left.stop="c
           button(@click.left.stop="selectFile")
             span Upload
           input.hidden(type="file" ref="inputElement" @change="uploadFile" accept="image/*")
+        //- Stretch
+        .button-wrap(v-if="stretchIsVisible")
+          label.show-users(title="Stretch Background" :class="{active: backgroundIsStretch}" @click.left.prevent.stop="toggleBackgroundIsStretch" @keydown.stop.enter="toggleBackgroundIsStretch")
+            input(type="checkbox" v-model="backgroundIsStretch")
+            span Stretch
 
   //- results
   template(v-if="currentUserIsMember")
