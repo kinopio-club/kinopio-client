@@ -34,7 +34,7 @@ const backgroundStyles = computed(() => {
   if (!url) {
     return styles
   }
-  const isRetina = url.includes('-2x.') || url.includes('@2x.')
+  const isRetina = utils.urlIsRetina(url)
   let backgroundImage = `url('${url}')`
   if (isRetina) {
     backgroundImage = `image-set(${backgroundImage} 2x)`

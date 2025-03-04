@@ -1999,6 +1999,10 @@ export default {
     }
     return url
   },
+  urlIsRetina (url) {
+    const isRetina = url.includes('-2x.') || url.includes('@2x.')
+    return isRetina
+  },
   urlIsFloatOrIp (url) {
     // https://regexr.com/58ii6
     // matches numbers '.'' numbers ...

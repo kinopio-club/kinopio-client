@@ -176,10 +176,16 @@ const styles = computed(() => {
   return styles
 })
 const backgroundStyles = computed(() => {
+  if (!props.box.background) { return }
   let newStyles = utils.clone(styles.value)
   delete newStyles.border
   delete newStyles.backgroundColor
-  newStyles.backgroundImage = `url(${props.box.background})`
+  const isRetina = utils.urlIsRetina(props.box.background)
+  if (isRetina) {
+    newStyles.backgroundImage = `image-set("${props.box.background}" 2x)`
+  } else {
+    newStyles.backgroundImage = `url("${props.box.background}")`
+  }
   return newStyles
 })
 const userColor = computed(() => store.state.currentUser.color)
