@@ -1877,13 +1877,12 @@ const checkIfShouldUpdateIframeUrl = () => {
 
 // containing box
 
-const currentCardCloned = computed(() => utils.clone(props.card))
 const containingBoxes = computed(() => {
   if (!state.isVisibleInViewport) { return }
   if (isSelectedOrDragging.value) { return }
   if (currentCardIsBeingDragged.value) { return }
   if (store.state.boxDetailsIsVisibleForBoxId) { return }
-  const card = currentCardCloned.value
+  const card = utils.clone(props.card)
   let boxes = store.getters['currentBoxes/all']
   boxes = utils.clone(boxes)
   boxes = boxes.filter(box => {
