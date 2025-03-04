@@ -168,15 +168,19 @@ const styles = computed(() => {
     styles.width = normalizedBox.value.resizeWidth
     styles.height = normalizedBox.value.resizeHeight
   }
-  if (hasFill.value) {
+  if (hasFill.value && !background) {
     let fillColor = color.value
     fillColor = colord(fillColor).alpha(0.5).toRgbString()
     styles.backgroundColor = fillColor
   }
-  if (background) {
-    styles.backgroundImage = `url(${background})`
-  }
   return styles
+})
+const backgroundStyles = computed(() => {
+  let newStyles = utils.clone(styles.value)
+  delete newStyles.border
+  delete newStyles.backgroundColor
+  newStyles.backgroundImage = `url(${props.box.background})`
+  return newStyles
 })
 const userColor = computed(() => store.state.currentUser.color)
 const color = computed(() => {
@@ -798,6 +802,8 @@ const focusColor = computed(() => {
   ref="boxElement"
 )
   .focusing-frame(v-if="isFocusing" :style="{backgroundColor: currentUserColor}")
+  teleport(to="#box-backgrounds")
+    .box-background(v-if="box.background && state.isVisibleInViewport" :data-box-id="box.id" :style="backgroundStyles")
   //- name
   .box-info(
     v-if="shouldRender"
