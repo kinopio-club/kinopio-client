@@ -97,6 +97,7 @@ export default {
     },
     moveWhileDragging: (state, { boxes }) => {
       boxes.forEach(box => {
+        // box
         const element = document.querySelector(`.box[data-box-id="${box.id}"]`)
         if (!element) { return }
         if (element.dataset.isVisibleInViewport !== 'false') {
@@ -105,6 +106,16 @@ export default {
         }
         element.dataset.x = box.x
         element.dataset.y = box.y
+        // box background
+        const background = element.dataset.background
+        if (!element.dataset.background) { return }
+        const backgroundElement = utils.boxBackgroundElementFromId(box.id)
+        if (element.dataset.isVisibleInViewport !== 'false') {
+          backgroundElement.style.left = box.x + 'px'
+          backgroundElement.style.top = box.y + 'px'
+        }
+        backgroundElement.dataset.x = box.x
+        backgroundElement.dataset.y = box.y
       })
     },
 
