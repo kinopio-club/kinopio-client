@@ -785,6 +785,7 @@ const focusColor = computed(() => {
   :data-y="normalizedBox.y"
   :data-resize-width="normalizedBox.resizeWidth"
   :data-resize-height="normalizedBox.resizeHeight"
+  :data-background="normalizedBox.background"
   :data-is-locked="isLocked"
   :data-is-visible-in-viewport="state.isVisibleInViewport"
   :data-should-render="shouldRender"

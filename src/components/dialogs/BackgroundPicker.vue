@@ -130,11 +130,9 @@ const closeDialogs = async () => {
   state.colorPickerIsVisible = false
 }
 const updatePreviewImage = async () => {
+  if (props.box) { return }
   await nextTick()
-  if (props.space) {
-    store.dispatch('currentSpace/createSpacePreviewImage')
-  }
-  // TODO handle if BOX, what does preview img do?
+  store.dispatch('currentSpace/createSpacePreviewImage')
 }
 const clearErrors = () => {
   state.error.isNotImageUrl = false
@@ -265,12 +263,19 @@ const updateBackground = async (url) => {
   if (url === background.value) {
     url = ''
   }
-  const updates = {
-    backgroundIsGradient: false,
-    background: url
+  if (props.box) {
+    const updates = {
+      id: props.box.id,
+      background: url
+    }
+    await store.dispatch('currentBoxes/update', updates)
+  } else {
+    const updates = {
+      backgroundIsGradient: false,
+      background: url
+    }
+    await store.dispatch('currentSpace/updateSpace', updates)
   }
-
-  await store.dispatch('currentSpace/updateSpace', updates)
   updatePreviewImage()
   checkIfImageIsUrl()
 }
@@ -504,7 +509,7 @@ dialog.background-picker.wide(v-if="visible" :open="visible" @click.left.stop="c
     template(v-if="currentUserIsMember")
       .row
         //- Tint
-        .button-wrap
+        .button-wrap(v-if="!props.box")
           button.change-color(@click.left.stop="toggleColorPicker" :class="{active: state.colorPickerIsVisible}")
             span.current-color(:style="{ background: backgroundTintBadgeColor }")
             span Tint
@@ -528,7 +533,7 @@ dialog.background-picker.wide(v-if="visible" :open="visible" @click.left.stop="c
     //- backgrounds
     template(v-if="serviceIsBackground")
       //- gradient backgrounds
-      section.results-section.title-row
+      section.results-section.title-row(v-if="!props.box")
         ul.results-list.gradients-list
           li.gradient-li(v-for="(gradient, index) in state.gradients" @click="selectGradient(index)" :key="gradient.id" :class="{ active: gradientIsActive(gradient) }")
             SpaceBackgroundGradients(:visible="true" :layers="gradient")
