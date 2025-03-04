@@ -114,6 +114,7 @@ const itemTypeString = computed(() => {
     return 'Box'
   }
 })
+const imageListIsSmall = computed(() => Boolean(props.box))
 
 // dialog
 
@@ -542,7 +543,7 @@ dialog.background-picker.wide(v-if="visible" :open="visible" @click.left.stop="c
             img.refresh.icon(src="@/assets/refresh.svg")
       //- built-in backgrounds
       section.results-section
-        ImageList(:images="state.selectedImages" :activeUrl="currentBackgroundUrl" @selectImage="updateBackground")
+        ImageList(:images="state.selectedImages" :activeUrl="currentBackgroundUrl" @selectImage="updateBackground" :isSmall="imageListIsSmall")
       //- community backgrounds
       section.results-section.community-backgrounds-section
         .row.title-row
@@ -551,14 +552,14 @@ dialog.background-picker.wide(v-if="visible" :open="visible" @click.left.stop="c
             button.small-button
               img.icon.arena(src="@/assets/arena.svg")
         Loader(:visible="state.communityBackgroundsIsLoading")
-        ImageList(v-if="!state.communityBackgroundsIsLoading" :images="state.communityBackgroundImages" :activeUrl="background" @selectImage="updateBackground")
+        ImageList(v-if="!state.communityBackgroundsIsLoading" :images="state.communityBackgroundImages" :activeUrl="background" @selectImage="updateBackground" :isSmall="imageListIsSmall")
 
     //- recent
     template(v-else-if="serviceIsRecent")
       section.results-section
         .row
           p.row-title Recently Used
-        ImageList(:images="state.selectedImages" :activeUrl="background" @selectImage="updateBackground")
+        ImageList(:images="state.selectedImages" :activeUrl="background" @selectImage="updateBackground" :isSmall="imageListIsSmall")
 
     //- search results
     template(v-else-if="serviceIsPexels")

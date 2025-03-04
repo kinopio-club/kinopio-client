@@ -153,7 +153,7 @@ const removeViewportObserver = () => {
 // styles
 
 const styles = computed(() => {
-  let { x, y, resizeWidth, resizeHeight } = normalizedBox.value
+  let { x, y, resizeWidth, resizeHeight, background } = normalizedBox.value
   let width = resizeWidth
   let height = resizeHeight
   let styles = {
@@ -172,6 +172,9 @@ const styles = computed(() => {
     let fillColor = color.value
     fillColor = colord(fillColor).alpha(0.5).toRgbString()
     styles.backgroundColor = fillColor
+  }
+  if (background) {
+    styles.backgroundImage = `url(${background})`
   }
   return styles
 })
