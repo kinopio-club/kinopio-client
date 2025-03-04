@@ -322,13 +322,13 @@ const removeUneditedSpace = async (spaceName) => {
     }
   })
   if (!spaceIsEdited) {
-    console.log('🌹 signIn removeUneditedSpace', spaceName)
+    console.info('🌹 signIn removeUneditedSpace', spaceName)
     await cache.deleteSpace(currentSpace)
     if (!isInvitedSpaces) {
       shouldLoadLastSpace = true
     }
   } else {
-    console.log('🌹 signIn removeUneditedSpace isEdited: keep space', spaceName, spaceIsEdited, cardNames, currentSpace?.cards)
+    console.info('🌹 signIn removeUneditedSpace isEdited: keep space', spaceName, spaceIsEdited, cardNames, currentSpace?.cards)
   }
 }
 

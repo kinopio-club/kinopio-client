@@ -32,7 +32,7 @@ const copyUrl = async (event, url) => {
   try {
     await navigator.clipboard.writeText(url)
     store.commit('addNotificationWithPosition', { message: 'Copied', position, type: 'success', layer: 'app', icon: 'checkmark' })
-    console.log('🍇 copy rss url', url)
+    console.info('🍇 copy rss url', url)
   } catch (error) {
     console.warn('🚑 copyText', error)
     store.commit('addNotificationWithPosition', { message: 'Copy Error', position, type: 'danger', layer: 'app', icon: 'cancel' })

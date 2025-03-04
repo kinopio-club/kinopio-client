@@ -206,7 +206,7 @@ const currentCards = {
 
     // create
 
-    add: async (context, card) => {
+    add: async (context, { card, skipCardDetailsIsVisible }) => {
       if (context.rootGetters['currentSpace/shouldPreventAddCard']) {
         context.commit('notifyCardsCreatedIsOverLimit', true, { root: true })
         return
@@ -237,7 +237,9 @@ const currentCards = {
       card.isComment = isComment
       card.shouldShowOtherSpacePreviewImage = true
       // create card
-      context.commit('cardDetailsIsVisibleForCardId', card.id, { root: true })
+      if (!skipCardDetailsIsVisible) {
+        context.commit('cardDetailsIsVisibleForCardId', card.id, { root: true })
+      }
       context.dispatch('broadcast/update', { updates: { card }, type: 'createCard', handler: 'currentCards/create' }, { root: true })
       context.commit('create', { card })
       if (isParentCard) { context.commit('parentCardId', card.id, { root: true }) }
@@ -282,7 +284,7 @@ const currentCards = {
       })
       cards.forEach(card => {
         context.dispatch('broadcast/update', { updates: { card }, type: 'createCard', handler: 'currentCards/create' }, { root: true })
-        context.dispatch('add', card)
+        context.dispatch('add', { card })
       })
       context.dispatch('currentUser/cardsCreatedCountUpdateBy', {
         cards
@@ -755,7 +757,7 @@ const currentCards = {
           width: rect.width,
           height: rect.height
         }
-        console.log(card.height)
+        console.info(card.height)
         await context.dispatch('update', { card })
         index += 1
       }
@@ -883,7 +885,7 @@ const currentCards = {
       context.dispatch('incrementZ', cardId)
       context.commit('cardDetailsIsVisibleForCardId', cardId, { root: true })
       context.commit('parentCardId', cardId, { root: true })
-      context.commit('loadSpaceShowDetailsForCardId', '', { root: true })
+      context.commit('loadSpaceFocusOnCardId', '', { root: true })
     }
   },
   getters: {

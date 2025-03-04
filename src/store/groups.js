@@ -30,7 +30,7 @@ export default {
         state.groups[group.id] = group
       })
       state.ids = state.ids.concat(groupIds)
-      console.log('👫 groups', state.groups)
+      console.info('👫 groups', state.groups)
       cache.saveGroups(state.groups)
     },
 
@@ -136,7 +136,7 @@ export default {
         }, { root: true })
         context.commit('triggerSpaceDetailsVisible', null, { root: true })
         context.commit('update', response.group)
-        console.log('👫 joined group', response.group)
+        console.info('👫 joined group', response.group)
       } catch (error) {
         console.error('🚒 joinGroup', error)
         context.commit('addNotification', {

@@ -632,7 +632,7 @@ const lockingAnimationFrame = (timestamp) => {
   } else if (lockingPercentComplete >= 1) {
     store.commit('currentUserIsPainting', true)
     store.commit('currentUserIsPaintingLocked', true)
-    console.log('🔒 lockingAnimationFrame locked')
+    console.info('🔒 lockingAnimationFrame locked')
     postMessage.sendHaptics({ name: 'softImpact' })
     cancelLocking()
     lockingStartTime = undefined

@@ -6,11 +6,11 @@ import debounce from 'lodash-es/debounce'
 let showDebugMessages = false
 
 window.addEventListener('message', (event) => {
-  console.log('🛫 received postmessage', event)
+  console.info('🛫 received postmessage', event)
   const isAddPage = window.location.pathname === '/add'
   if (isAddPage) {
     cache.updatePrevAddPageValue(event.data)
-    console.log('🛫 cache.updatePrevAddPageValue', event.data)
+    console.info('🛫 cache.updatePrevAddPageValue', event.data)
   }
 })
 
@@ -52,7 +52,7 @@ const self = {
     const isBackgroundColor = body.name === 'setBackgroundColor'
     if (!showDebugMessages && isBackgroundColor) {
     } else {
-      console.log('🛫 sending postmessage', body)
+      console.info('🛫 sending postmessage', body)
     }
   }
 }

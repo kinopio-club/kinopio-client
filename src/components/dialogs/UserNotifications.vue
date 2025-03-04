@@ -84,7 +84,7 @@ const showCardDetails = (notification) => {
   let space = utils.clone(notification.space)
   const card = utils.clone(notification.card)
   if (currentSpaceId.value !== space.id) {
-    store.commit('loadSpaceShowDetailsForCardId', card.id)
+    store.commit('loadSpaceFocusOnCardId', card.id)
     store.dispatch('currentSpace/changeSpace', space)
   } else {
     store.dispatch('currentCards/showCardDetails', card.id)

@@ -41,7 +41,7 @@ const scrollIntoView = async () => {
 const cardUrl = () => {
   const domain = consts.kinopioDomain()
   const url = `${domain}/${props.card.spaceId}/${props.card.id}`
-  console.log('🍇 card url', url)
+  console.info('🍇 card url', url)
   return url
 }
 const copyUrl = async (event) => {
@@ -50,7 +50,7 @@ const copyUrl = async (event) => {
   const url = cardUrl()
   try {
     await navigator.clipboard.writeText(url)
-    store.commit('addNotificationWithPosition', { message: 'Copied', position, type: 'success', layer: 'app', icon: 'checkmark' })
+    store.commit('addNotificationWithPosition', { message: 'Copied Card URL', position, type: 'success', layer: 'app', icon: 'checkmark' })
   } catch (error) {
     console.warn('🚑 copyText', error)
     store.commit('addNotificationWithPosition', { message: 'Copy Error', position, type: 'danger', layer: 'app', icon: 'cancel' })

@@ -88,14 +88,14 @@ const self = {
       patches.splice(pointer, 0, patch)
       pointer = pointer + 1
       if (showLogMessages) {
-        console.log('⏺ add history patch', { newPatch: patch, pointer })
+        console.info('⏺ add history patch', { newPatch: patch, pointer })
       }
     },
     addToPrevPatch: (state, patch) => {
       const prevPatch = patches[patches.length - 1]
       const updatedPatch = prevPatch.concat(patch)
       patches[patches.length - 1] = updatedPatch
-      console.log('⏺ updated prev history patch', { updatedPatch, pointer })
+      console.info('⏺ updated prev history patch', { updatedPatch, pointer })
     },
     trim: (state) => {
       const max = 60
@@ -109,13 +109,13 @@ const self = {
       pointer = 0
       snapshots = { cards: {}, connections: {}, connectionTypes: {} }
       if (showLogMessages) {
-        console.log('⏹ clear history')
+        console.info('⏹ clear history')
       }
     },
     isPaused: (state, value) => {
       isPaused = value
       if (showDebugMessages && showLogMessages) {
-        console.log('⏸ history is paused', isPaused)
+        console.info('⏸ history is paused', isPaused)
       }
     },
     pointer: (state, { increment, decrement, value }) => {
@@ -232,7 +232,7 @@ const self = {
       const patch = patches[index]
       context.commit('isPaused', true)
       patch.forEach(item => {
-        console.log('⏪ undo', item, { pointer, totalPatches: patches.length })
+        console.info('⏪ undo', item, { pointer, totalPatches: patches.length })
         const { action } = item
         let card, connection, type, box
         switch (action) {
@@ -305,7 +305,7 @@ const self = {
       }
       context.commit('isPaused', true)
       patch.forEach(item => {
-        console.log('⏩ redo', item, { pointer, totalPatches: patches.length })
+        console.info('⏩ redo', item, { pointer, totalPatches: patches.length })
         const { action } = item
         let card, connection, type, box
         switch (action) {

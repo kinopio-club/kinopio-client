@@ -27,7 +27,7 @@ const props = defineProps({
 watch(() => props.visible, (value, prevValue) => {
   state.upgradeFAQIsVisible = false
   if (value) {
-    console.log('🎡', 'isSecureAppContext', consts.isSecureAppContext, 'isSecureAppContextIOS', consts.isSecureAppContextIOS)
+    console.info('🎡', 'isSecureAppContext', consts.isSecureAppContext, 'isSecureAppContextIOS', consts.isSecureAppContextIOS)
     updateDialogHeight()
     store.commit('shouldExplicitlyHideFooter', true)
   } else {

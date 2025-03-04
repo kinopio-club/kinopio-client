@@ -49,7 +49,7 @@ const copy = async (event, type) => {
   try {
     await navigator.clipboard.writeText(text)
     store.commit('addNotificationWithPosition', { message: 'Copied', position, type: 'success', layer: 'app', icon: 'checkmark' })
-    console.log(`🍇 copied ${type}`)
+    console.info(`🍇 copied ${type}`)
   } catch (error) {
     console.warn('🚑 copyText', error)
     store.commit('addNotificationWithPosition', { message: 'Copy Error', position, type: 'danger', layer: 'app', icon: 'cancel' })

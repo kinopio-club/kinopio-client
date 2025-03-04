@@ -45,6 +45,7 @@ dialog.narrow.minimap(v-if="props.visible" :open="props.visible" @click.left.sto
 
 <style lang="stylus">
 dialog.minimap
+  overflow auto
   right 8px
   bottom 28px
   top initial

@@ -422,7 +422,8 @@ const addCard = async (options) => {
     backgroundColor = parentCard.backgroundColor
   }
   store.commit('shouldPreventNextEnterKey', true)
-  store.dispatch('currentCards/add', { position, isParentCard, backgroundColor, id: options.id })
+  const newCard = { position, isParentCard, backgroundColor, id: options.id }
+  store.dispatch('currentCards/add', { card: newCard })
   if (childCard) {
     store.commit('childCardId', store.state.cardDetailsIsVisibleForCardId)
     await nextTick()
@@ -458,7 +459,8 @@ const addChildCard = async (options) => {
   const position = nonOverlappingCardPosition(initialPosition)
   const parentCard = store.getters['currentCards/byId'](parentCardId)
   const newChildCardId = options.id || nanoid()
-  store.dispatch('currentCards/add', { position, backgroundColor: parentCard.backgroundColor, id: newChildCardId })
+  const newCard = { position, backgroundColor: parentCard.backgroundColor, id: newChildCardId }
+  store.dispatch('currentCards/add', { card: newCard })
   store.commit('childCardId', store.state.cardDetailsIsVisibleForCardId)
   await nextTick()
   addConnection(baseCardId, position)
@@ -606,7 +608,7 @@ const writeSelectedToClipboard = async (position) => {
   const text = utils.nameStringFromItems(items)
   // clipboard
   try {
-    console.log('🎊 copyData', data, text)
+    console.info('🎊 copyData', data, text)
     await navigator.clipboard.writeText(text)
   } catch (error) {
     console.warn('🚑 writeSelectedToClipboard', error)
@@ -730,7 +732,7 @@ const handlePasteEvent = async (event) => {
   if (!canEditSpace) { return }
   // get clipboard data
   let data = await getClipboardData()
-  console.log('🎊 pasteData', data, position)
+  console.info('🎊 pasteData', data, position)
   if (!data) { return }
   store.commit('closeAllDialogs')
   store.commit('clearMultipleSelected')

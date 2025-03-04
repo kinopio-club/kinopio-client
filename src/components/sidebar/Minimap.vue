@@ -48,8 +48,7 @@ const boxColorClasses = (box) => {
   return utils.colorClasses({ backgroundColor: box.color })
 }
 const scrollIntoView = (box) => {
-  const element = utils.boxElementFromId(box.id)
-  store.commit('scrollElementIntoView', { element })
+  store.dispatch('focusOnBoxId', box.id)
 }
 </script>
 

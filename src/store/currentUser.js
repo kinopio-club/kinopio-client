@@ -392,13 +392,13 @@ export default {
     init: async (context) => {
       const cachedUser = await cache.user()
       if (utils.objectHasKeys(cachedUser)) {
-        console.log('🌸 Restore user from cache', cachedUser.id)
+        console.info('🌸 Restore user from cache', cachedUser.id)
         context.commit('restoreUser', cachedUser)
         context.dispatch('themes/restore', null, { root: true })
         await context.dispatch('restoreRemoteUser', cachedUser)
         await context.dispatch('restoreUserFavorites')
       } else {
-        console.log('🌸 Create new user')
+        console.info('🌸 Create new user')
         context.dispatch('createNewUser')
       }
       context.dispatch('themes/restore', null, { root: true })
@@ -481,7 +481,7 @@ export default {
       if (!remoteUser) { return }
       remoteUser.AIImages = await context.dispatch('api/getUserAIImages', null, { root: true }) || []
       remoteUser.updatedAt = utils.unixTime(remoteUser.updatedAt)
-      console.log('🌸 Restore user from remote', remoteUser)
+      console.info('🌸 Restore user from remote', remoteUser)
       context.commit('updateUser', remoteUser)
       if (utils.userIsUpgraded(remoteUser)) {
         context.commit('isUpgraded', true)
@@ -586,7 +586,7 @@ export default {
       }, { root: true })
     },
     updateArenaAccessToken: async (context, arenaReturnedCode) => {
-      console.log('updateArenaAccessToken')
+      console.info('updateArenaAccessToken')
       context.commit('importArenaChannelIsVisible', true, { root: true })
       context.commit('isAuthenticatingWithArena', true, { root: true })
       const response = await context.dispatch('api/updateArenaAccessToken', arenaReturnedCode, { root: true })

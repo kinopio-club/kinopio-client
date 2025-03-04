@@ -201,7 +201,7 @@ const triggerPickerSelect = () => {
   }
   const currentIndex = tags.findIndex(tag => tag.name === state.focusOnName)
   const currentTag = tags[currentIndex]
-  console.log('🎹 triggerPickerSelect', {
+  console.info('🎹 triggerPickerSelect', {
     search: props.search,
     focusOnName: state.focusOnName,
     currentTag,

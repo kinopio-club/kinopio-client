@@ -9,8 +9,8 @@ const store = useStore()
 let statusRetryCount = 0
 
 onMounted(() => {
-  console.log('🐢 kinopio-client build mode', import.meta.env.MODE)
-  console.log('🐸 kinopio-server URL', consts.apiHost())
+  console.info('🐢 kinopio-client build mode', import.meta.env.MODE)
+  console.info('🐸 kinopio-server URL', consts.apiHost())
   store.subscribe((mutation, state) => {
     if (mutation.type === 'broadcast/joinSpaceRoom') {
       updateMetaRSSFeed()
@@ -76,7 +76,7 @@ const updateServerIsOnline = async () => {
   const maxIterations = 10
   const initialDelay = 1000 // 1 second
   const serverStatus = await store.dispatch('api/getStatus')
-  console.log('server online status', serverStatus)
+  console.info('server online status', serverStatus)
   if (serverStatus) {
     store.dispatch('isOnline', true)
   // error offline
@@ -196,6 +196,7 @@ const updateMetaRSSFeed = () => {
   --serif-font georgia, serif
   --glyphs-font GoodGlyphs, wingdings
   --is-checked-opacity 0.6
+  --focus-padding 20px
 
 @font-face
   font-family 'GoodGlyphs'
@@ -1353,4 +1354,25 @@ progress::-moz-progress-bar
   100%
     opacity 1
 
+.focusing-frame
+  position absolute
+  z-index -1
+  left 0px
+  top 0px
+  width 100%
+  height 100%
+  background-color pink
+  transform-origin center
+  animation: focusing .3s infinite alternate ease-out;
+  // filter blur(10px)
+  border-radius var(--entity-radius)
+  pointer-events none
+
+@keyframes focusing
+  100%
+    left calc(-1 * var(--focus-padding) / 2)
+    top calc(-1 * var(--focus-padding) / 2)
+    width calc(100% + var(--focus-padding))
+    height: calc(100% + var(--focus-padding))
+    border-radius calc(2 * var(--entity-radius))
 </style>

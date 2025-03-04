@@ -245,15 +245,15 @@ const searchResultsOrFilters = computed(() => {
     return false
   }
 })
-const showCardDetails = (card) => {
-  store.dispatch('currentCards/showCardDetails', card.id)
+const focusOnCard = (card) => {
+  store.dispatch('focusOnCardId', card.id)
   store.commit('previousResultItem', card)
 }
 const showNextSearchCard = () => {
   if (!store.state.search) { return }
   const cards = store.state.searchResultsCards
   if (!store.state.previousResultItem.id) {
-    showCardDetails(cards[0])
+    focusOnCard(cards[0])
     return
   }
   const currentIndex = cards.findIndex(card => card.id === store.state.previousResultItem.id)
@@ -261,13 +261,13 @@ const showNextSearchCard = () => {
   if (cards.length === index) {
     index = 0
   }
-  showCardDetails(cards[index])
+  focusOnCard(cards[index])
 }
 const showPreviousSearchCard = () => {
   if (!store.state.search) { return }
   const cards = store.state.searchResultsCards
   if (!store.state.previousResultItem.id) {
-    showCardDetails(cards[0])
+    focusOnCard(cards[0])
     return
   }
   const currentIndex = cards.findIndex(card => card.id === store.state.previousResultItem.id)
@@ -275,7 +275,7 @@ const showPreviousSearchCard = () => {
   if (index < 0) {
     index = cards.length - 1
   }
-  showCardDetails(cards[index])
+  focusOnCard(cards[index])
 }
 const clearSearchAndFilters = () => {
   store.dispatch('closeAllDialogs')

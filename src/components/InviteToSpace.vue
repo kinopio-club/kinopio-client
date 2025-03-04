@@ -65,7 +65,7 @@ const editUrl = computed(() => {
   const currentSpace = store.state.currentSpace
   const spaceId = currentSpace.id
   const url = utils.inviteUrl({ spaceId, spaceName: spaceName.value, collaboratorKey: collaboratorKey.value })
-  console.log('🍇 invite edit url', url)
+  console.info('🍇 invite edit url', url)
   return url
 })
 const readOnlyUrl = computed(() => {
@@ -73,14 +73,14 @@ const readOnlyUrl = computed(() => {
   const spaceId = currentSpace.id
   const readOnlyKey = currentSpace.readOnlyKey
   const url = utils.inviteUrl({ spaceId, spaceName: spaceName.value, readOnlyKey })
-  console.log('🍇 invite read only url', url, 'readOnlyKey:', readOnlyKey)
+  console.info('🍇 invite read only url', url, 'readOnlyKey:', readOnlyKey)
   return url
 })
 const commentOnlyUrl = computed(() => {
   const currentSpace = store.state.currentSpace
   const spaceId = currentSpace.id
   const url = utils.inviteUrl({ spaceId, spaceName: spaceName.value, collaboratorKey: collaboratorKey.value, isCommentMode: true })
-  console.log('🍇 invite comment only url', url)
+  console.info('🍇 invite comment only url', url)
   return url
 })
 

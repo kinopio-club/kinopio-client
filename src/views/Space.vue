@@ -222,7 +222,8 @@ const addCard = (event) => {
   }
   store.dispatch('currentUser/notifyReadOnly', position)
   if (spaceIsReadOnly.value) { return }
-  store.dispatch('currentCards/add', { position, isParentCard })
+  const newCard = { position, isParentCard }
+  store.dispatch('currentCards/add', { card: newCard })
   store.commit('childCardId', '')
 }
 const addOrCloseCard = (event) => {
@@ -599,7 +600,7 @@ const handleTouchEnd = (event) => {
   stopInteractions(event)
 }
 const stopInteractions = async (event) => {
-  console.log('💣 stopInteractions')
+  console.info('💣 stopInteractions')
   const isCardsSelected = store.state.currentDraggingCardId || store.state.multipleCardsSelectedIds.length
   const isBoxesSelected = store.state.multipleBoxesSelectedIds
   if (isCardsSelected && store.state.cardsWereDragged) {

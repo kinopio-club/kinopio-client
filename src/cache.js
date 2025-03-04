@@ -22,12 +22,12 @@ export default {
       await idb.set(lsKey, lsValue)
     }
     idbKeys = await idb.keys()
-    console.log('🥂 migrated from ls to idb', lsKeys, idbKeys)
+    console.info('🥂 migrated from ls to idb', lsKeys, idbKeys)
   },
   async storeLocal (key, value) {
     try {
       if (showDebugMessages) {
-        console.log('🏬 storeLocal', key, value)
+        console.info('🏬 storeLocal', key, value)
       }
       await idb.set(key, value)
     } catch (error) {
@@ -56,7 +56,7 @@ export default {
         return isSpace
       })
       spaceKeys = spaceKeys.filter(key => key !== `space-${currentSpaceId}`)
-      console.log('🍾 pruning idb spaces', {
+      console.info('🍾 pruning idb spaces', {
         currentSpaceId,
         keys,
         spaceKeysToRemove: spaceKeys
@@ -66,7 +66,7 @@ export default {
       }
       // await idb.delMany(spaceKeys)
       const newKeys = await idb.keys()
-      console.log('🥂 pruned idb spaces', {
+      console.info('🥂 pruned idb spaces', {
         prevKeys: keys.length,
         newKeys: newKeys
       })
@@ -91,9 +91,9 @@ export default {
     for (const key of keys) {
       await this.removeLocal(key)
     }
-    console.log('🚑 idb cleared', keys)
+    console.info('🚑 idb cleared', keys)
     localStorage.clear()
-    console.log('🚑 ls cleared')
+    console.info('🚑 ls cleared')
   },
 
   // User
