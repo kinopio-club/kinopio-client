@@ -196,6 +196,7 @@ const updateMetaRSSFeed = () => {
   --serif-font georgia, serif
   --glyphs-font GoodGlyphs, wingdings
   --is-checked-opacity 0.6
+  --focus-padding 20px
 
 @font-face
   font-family 'GoodGlyphs'
@@ -1353,4 +1354,25 @@ progress::-moz-progress-bar
   100%
     opacity 1
 
+.focusing-frame
+  position absolute
+  z-index -1
+  left 0px
+  top 0px
+  width 100%
+  height 100%
+  background-color pink
+  transform-origin center
+  animation: focusing .3s infinite alternate ease-out;
+  // filter blur(10px)
+  border-radius var(--entity-radius)
+  pointer-events none
+
+@keyframes focusing
+  100%
+    left calc(-1 * var(--focus-padding) / 2)
+    top calc(-1 * var(--focus-padding) / 2)
+    width calc(100% + var(--focus-padding))
+    height: calc(100% + var(--focus-padding))
+    border-radius calc(2 * var(--entity-radius))
 </style>

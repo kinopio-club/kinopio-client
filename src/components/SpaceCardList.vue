@@ -11,7 +11,8 @@ const store = useStore()
 const props = defineProps({
   groupedItems: Array,
   isLoading: Boolean,
-  search: String
+  search: String,
+  currentCard: Object
 })
 const emit = defineEmits(['selectSpace', 'selectCard'])
 
@@ -28,7 +29,6 @@ const selectSpace = (spaceId) => {
 const selectCard = (card) => {
   emit('selectCard', card)
 }
-
 </script>
 
 <template lang="pug">
@@ -40,7 +40,7 @@ ul.results-list
       BackgroundPreview(v-if="group.space" :space="group.space")
       span {{group.spaceName}}
     //- cards
-    CardList(:cards="group.cards" :search="props.search" @selectCard="selectCard")
+    CardList(:cards="group.cards" :search="props.search" :currentCard="props.currentCard" @selectCard="selectCard")
 Loader(:visible="props.isLoading")
 </template>
 

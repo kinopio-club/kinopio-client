@@ -115,6 +115,7 @@ const store = createStore({
     remotePreviousUserBoxSelectStyles: [],
 
     // boxes
+    focusOnBoxId: '',
     boxDetailsIsVisibleForBoxId: '',
     multipleBoxesSelectedIds: [],
     currentBoxIsNew: false,
@@ -141,6 +142,7 @@ const store = createStore({
     preventCardDetailsOpeningAnimation: true,
     multipleCardsSelectedIds: [],
     iframeIsVisibleForCardId: '',
+    focusOnCardId: '',
     // resizing card
     currentUserIsResizingCard: false,
     currentUserIsResizingCardIds: [],
@@ -226,7 +228,7 @@ const store = createStore({
     spaceCollaboratorKeys: [],
     remotePendingUploads: [],
     isLoadingFavorites: false,
-    loadSpaceShowDetailsForCardId: '',
+    loadSpaceFocusOnCardId: '',
     loadNewSpace: false,
     urlPreviewLoadingForCardIds: [],
     loadInboxSpace: false,
@@ -310,14 +312,14 @@ const store = createStore({
       utils.typeCheck({ value: width, type: 'number' })
       state.pageWidth = width
     },
-    scrollElementIntoView (state, { element, behavior }) {
+    scrollElementIntoView (state, { element, behavior, positionIsCenter }) {
       behavior = behavior || 'smooth'
       if (!element) { return }
       const sidebarIsVisible = document.querySelector('dialog#sidebar')
       const isViewportNarrow = state.viewportWidth < (consts.defaultCharacterLimit * 2)
       let horizontal = 'nearest'
       let vertical = 'nearest'
-      if (sidebarIsVisible) {
+      if (sidebarIsVisible || positionIsCenter) {
         horizontal = 'center'
         vertical = 'center'
       }
@@ -750,6 +752,10 @@ const store = createStore({
       utils.typeCheck({ value: cardId, type: 'string' })
       state.iframeIsVisibleForCardId = cardId
     },
+    focusOnCardId: (state, cardId) => {
+      utils.typeCheck({ value: cardId, type: 'string' })
+      state.focusOnCardId = cardId
+    },
 
     // Connections
 
@@ -902,6 +908,10 @@ const store = createStore({
     currentUserIsHoveringOverBoxId: (state, boxId) => {
       utils.typeCheck({ value: boxId, type: 'string' })
       state.currentUserIsHoveringOverBoxId = boxId
+    },
+    focusOnBoxId: (state, boxId) => {
+      utils.typeCheck({ value: boxId, type: 'string' })
+      state.focusOnBoxId = boxId
     },
     boxDetailsIsVisibleForBoxId: (state, value) => {
       utils.typeCheck({ value, type: 'string' })
@@ -1437,9 +1447,9 @@ const store = createStore({
       utils.typeCheck({ value, type: 'boolean' })
       state.isLoadingFavorites = value
     },
-    loadSpaceShowDetailsForCardId: (state, cardId) => {
+    loadSpaceFocusOnCardId: (state, cardId) => {
       utils.typeCheck({ value: cardId, type: 'string' })
-      state.loadSpaceShowDetailsForCardId = cardId
+      state.loadSpaceFocusOnCardId = cardId
     },
     spaceUrlToLoad: (state, spaceUrl) => {
       utils.typeCheck({ value: spaceUrl, type: 'string' })
@@ -1767,9 +1777,22 @@ const store = createStore({
       const matches = utils.spaceAndCardIdFromPath(path)
       if (!matches) { return }
       if (matches.cardId) {
-        context.commit('loadSpaceShowDetailsForCardId', matches.cardId)
+        context.dispatch('focusOnCardId', matches.cardId)
       }
       context.commit('spaceUrlToLoad', matches.spaceUrl)
+    },
+    focusOnCardId: (context, cardId) => {
+      context.commit('focusOnCardId', cardId)
+      if (cardId) {
+        context.commit('triggerScrollCardIntoView', cardId)
+      }
+    },
+    focusOnBoxId: (context, boxId) => {
+      context.commit('focusOnBoxId', boxId)
+      if (boxId) {
+        const element = utils.boxElementFromId(boxId)
+        store.commit('scrollElementIntoView', { element, positionIsCenter: true })
+      }
     },
     updatePageSizes: (context) => {
       const cards = context.getters['currentCards/all']
@@ -1823,6 +1846,8 @@ const store = createStore({
       context.commit('broadcast/updateStore', { updates: { userId: user.id }, type: 'clearRemoteConnectionDetailsVisible' })
       context.commit('broadcast/updateStore', { updates: { userId: user.id }, type: 'clearRemoteBoxDetailsVisible' })
       context.commit('passwordResetIsVisible', false)
+      context.dispatch('focusOnCardId', '')
+      context.dispatch('focusOnBoxId', '')
     },
     toggleCardSelected: (context, cardId) => {
       const previousMultipleCardsSelectedIds = context.state.previousMultipleCardsSelectedIds

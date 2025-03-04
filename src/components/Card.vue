@@ -66,7 +66,7 @@ onMounted(async () => {
     } else if (type === 'triggerScrollCardIntoView') {
       if (payload === props.card.id) {
         const element = cardElement.value
-        store.commit('scrollElementIntoView', { element })
+        store.commit('scrollElementIntoView', { element, positionIsCenter: true })
       }
     } else if (type === 'triggerUploadComplete') {
       let { cardId, url } = payload
@@ -88,10 +88,9 @@ onMounted(async () => {
     }
   })
   updateDefaultBackgroundColor(utils.cssVariable('secondary-background'))
-  const shouldShowDetails = store.state.loadSpaceShowDetailsForCardId === props.card.id
-  if (shouldShowDetails) {
-    store.commit('preventCardDetailsOpeningAnimation', false)
-    store.dispatch('currentCards/showCardDetails', props.card.id)
+  const shouldFocus = store.state.loadSpaceFocusOnCardId === props.card.id
+  if (shouldFocus) {
+    store.dispatch('focusOnCardId', props.card.id)
   }
   await updateUrlPreviewOnload()
   checkIfShouldUpdateIframeUrl()
@@ -157,6 +156,7 @@ const isSelectedOrDragging = computed(() => {
   return Boolean(isSelected.value || isRemoteSelected.value || isRemoteCardDetailsVisible.value || isRemoteCardDragging.value || state.uploadIsDraggedOver || remoteUploadDraggedOverCardColor.value || remoteUserResizingCardsColor.value || remoteUserTiltingCardsColor.value)
 })
 const currentUserIsSignedIn = computed(() => store.getters['currentUser/isSignedIn'])
+const currentUserColor = computed(() => store.state.currentUser.color)
 
 // current space
 
@@ -175,7 +175,7 @@ const changeSpaceAndCard = async (spaceId, cardId) => {
   const currentSpaceId = store.state.currentSpace.id
   // space and card
   if (currentSpaceId !== spaceId) {
-    store.commit('loadSpaceShowDetailsForCardId', cardId)
+    store.commit('loadSpaceFocusOnCardId', cardId)
     const space = { id: spaceId }
     store.dispatch('currentSpace/changeSpace', space)
   // card in current space
@@ -410,7 +410,7 @@ const cardStyle = computed(() => {
   if (nameIsColor.value) {
     nameColor = props.card.name
   }
-  let color = selectedColor.value || remoteCardDetailsVisibleColor.value || remoteSelectedColor.value || selectedColorUpload.value || remoteCardDraggingColor.value || remoteUploadDraggedOverCardColor.value || remoteUserResizingCardsColor.value || remoteUserTiltingCardsColor.value || nameColor || backgroundColor
+  let color = focusColor.value || selectedColor.value || remoteCardDetailsVisibleColor.value || remoteSelectedColor.value || selectedColorUpload.value || remoteCardDraggingColor.value || remoteUploadDraggedOverCardColor.value || remoteUserResizingCardsColor.value || remoteUserTiltingCardsColor.value || nameColor || backgroundColor
   let styles = {
     background: color
   }
@@ -745,7 +745,7 @@ const pendingUploadDataUrl = computed(() => {
   return cardPendingUpload.value.imageDataUrl
 })
 const selectedColorUpload = computed(() => {
-  const color = store.state.currentUser.color
+  const color = currentUserColor.value
   if (state.uploadIsDraggedOver) {
     return color
   } else {
@@ -1306,7 +1306,7 @@ const isSelected = computed(() => {
   return multipleCardsSelectedIds.includes(props.card.id)
 })
 const selectedColor = computed(() => {
-  const color = store.state.currentUser.color
+  const color = currentUserColor.value
   if (isSelected.value) {
     return color
   } else {
@@ -1783,7 +1783,7 @@ const lockingFrameStyle = computed(() => {
   const initialPadding = 65 // matches initialLockCircleRadius in paintSelect
   const initialBorderRadius = 50
   const padding = initialPadding * state.lockingPercent
-  const userColor = store.state.currentUser.color
+  const userColor = currentUserColor.value
   const borderRadius = Math.max((state.lockingPercent * initialBorderRadius), 5) + 'px'
   const size = `calc(100% + ${padding}px)`
   const position = -(padding / 2) + 'px'
@@ -1897,6 +1897,16 @@ const isInCheckedBox = computed(() => {
   return Boolean(checkedBox)
 })
 
+// card focus
+
+const isFocusing = computed(() => props.card.id === store.state.focusOnCardId)
+const focusColor = computed(() => {
+  if (isFocusing.value) {
+    return currentUserColor.value
+  } else {
+    return null
+  }
+})
 </script>
 
 <template lang="pug">
@@ -1921,6 +1931,7 @@ const isInCheckedBox = computed(() => {
   ref="cardElement"
   :class="cardWrapClasses"
 )
+  .focusing-frame(v-if="isFocusing" :style="{backgroundColor: currentUserColor}")
   .card(
     v-show="shouldRender"
     @mousedown.left.prevent="startDraggingCard"

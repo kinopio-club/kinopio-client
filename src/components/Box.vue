@@ -76,6 +76,7 @@ const state = reactive({
 const spaceCounterZoomDecimal = computed(() => store.getters.spaceCounterZoomDecimal)
 const canEditBox = computed(() => store.getters['currentUser/canEditBox'](props.box))
 const currentUserIsSignedIn = computed(() => store.getters['currentUser/isSignedIn'])
+const currentUserColor = computed(() => store.state.currentUser.color)
 const name = computed(() => props.box.name)
 
 // normalize
@@ -763,6 +764,17 @@ const isInCheckedBox = computed(() => {
   const checkedBox = containingBoxes.value.find(box => utils.nameIsChecked(box.name))
   return Boolean(checkedBox)
 })
+
+// box focus
+
+const isFocusing = computed(() => props.box.id === store.state.focusOnBoxId)
+const focusColor = computed(() => {
+  if (isFocusing.value) {
+    return currentUserColor.value
+  } else {
+    return null
+  }
+})
 </script>
 
 <template lang="pug">
@@ -781,7 +793,7 @@ const isInCheckedBox = computed(() => {
   :class="classes"
   ref="boxElement"
 )
-
+  .focusing-frame(v-if="isFocusing" :style="{backgroundColor: currentUserColor}")
   //- name
   .box-info(
     v-if="shouldRender"

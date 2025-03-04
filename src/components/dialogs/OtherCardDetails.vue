@@ -122,7 +122,7 @@ const updateErrorMaxCharacterLimit = (newName) => {
 
 const selectCard = (card) => {
   store.dispatch('closeAllDialogs')
-  store.dispatch('currentCards/showCardDetails', card.id)
+  store.dispatch('focusOnCardId', card.id)
 }
 const changeSpace = (spaceId) => {
   if (store.state.currentSpace.id === spaceId) { return }
@@ -135,11 +135,10 @@ const selectSpaceCard = () => {
   if (isCardInCurrentSpace) {
     selectCard(otherCard.value)
   } else {
-    store.commit('loadSpaceShowDetailsForCardId', otherCard.value.id)
+    store.commit('loadSpaceFocusOnCardId', otherCard.value.id)
     changeSpace(otherCard.value.spaceId)
   }
 }
-
 </script>
 
 <template lang="pug">

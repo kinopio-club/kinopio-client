@@ -222,7 +222,8 @@ const addCard = (event) => {
   }
   store.dispatch('currentUser/notifyReadOnly', position)
   if (spaceIsReadOnly.value) { return }
-  store.dispatch('currentCards/add', { position, isParentCard })
+  const newCard = { position, isParentCard }
+  store.dispatch('currentCards/add', { card: newCard })
   store.commit('childCardId', '')
 }
 const addOrCloseCard = (event) => {

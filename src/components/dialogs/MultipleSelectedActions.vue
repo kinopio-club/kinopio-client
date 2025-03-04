@@ -399,7 +399,7 @@ const mergeSelectedCards = () => {
     backgroundColor: cardBackgroundColor || userCardBackgroundColor,
     ...urlPreview
   }
-  store.dispatch('currentCards/add', newCard)
+  store.dispatch('currentCards/add', { card: newCard })
   prevCards = [ newCard ] // for history
   setTimeout(() => {
     positionNewCards([ newCard ])
