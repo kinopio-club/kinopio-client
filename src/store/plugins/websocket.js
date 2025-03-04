@@ -13,11 +13,11 @@ import consts from '@/consts.js'
 let websocket, currentSpaceRoom, currentUserIsConnected
 const clientId = nanoid()
 
-console.log('🌳 websocket clientId', clientId)
+console.info('🌳 websocket clientId', clientId)
 let showDebugMessages = false
 
 const joinSpaceRoom = (store, mutation) => {
-  console.log('🌙 joining', websocket)
+  console.info('🌙 joining', websocket)
   if (!websocket) { return }
   const space = store.state.currentSpace
   const user = store.state.currentUser
@@ -47,7 +47,7 @@ const joinSpaceRoom = (store, mutation) => {
     user: utils.userMeta(user, space),
     clientId
   }))
-  console.log('🌜 joinSpaceRoom', space.name)
+  console.info('🌜 joinSpaceRoom', space.name)
   store.commit('isJoiningSpace', false)
 }
 
@@ -58,7 +58,7 @@ const sendEvent = (store, mutation, type) => {
   const { message, handler, updates } = utils.normalizeBroadcastUpdates(mutation.payload)
   const hidden = ['updateRemoteUserCursor', 'addRemotePaintingCircle', 'clearRemoteCardDetailsVisible', 'clearRemoteConnectionDetailsVisible']
   if (showDebugMessages && !hidden.includes(updates.type)) {
-    console.log('🌜 sent', message, handler, updates, { clientId })
+    console.info('🌜 sent', message, handler, updates, { clientId })
   }
   const space = store.state.currentSpace
   websocket.send(JSON.stringify({
@@ -128,7 +128,7 @@ export default function createWebSocketPlugin () {
           data = JSON.parse(data)
           if (data.clientId === clientId) { return }
           if (data.message !== 'updateRemoteUserCursor' && showDebugMessages) {
-            console.log('🌛 received', data, data.clientId)
+            console.info('🌛 received', data, data.clientId)
           }
           if (data.space) {
             if (data.space.id !== store.state.currentSpace.id) { return }
@@ -185,7 +185,7 @@ export default function createWebSocketPlugin () {
       } else if (mutation.type === 'broadcast/close') {
         closeWebsocket(store)
       } else if (mutation.type === 'broadcast/reconnect') {
-        console.log('🌝 reconnecting')
+        console.info('🌝 reconnecting')
         closeWebsocket(store)
         currentUserIsConnected = false
         currentSpaceRoom = null

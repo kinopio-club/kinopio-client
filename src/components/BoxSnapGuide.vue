@@ -156,7 +156,7 @@ const waitingAnimationFrame = (timestamp) => {
     window.requestAnimationFrame(waitingAnimationFrame)
   // complete
   } else {
-    console.log('🔒🐢 boxSnapGuide waitingAnimationFrame ready')
+    console.info('🔒🐢 boxSnapGuide waitingAnimationFrame ready')
     state.snapStatus = 'ready'
     window.requestAnimationFrame(waitingAnimationFrame)
   }

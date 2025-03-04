@@ -73,7 +73,7 @@ const refreshOperations = async () => {
   await updateOperations()
 }
 const select = (operation) => {
-  console.log(operation)
+  console.info(operation)
   if (isSelected(operation)) {
     state.selectedOperationIds[operation.id] = false
   } else {

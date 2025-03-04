@@ -41,7 +41,7 @@ const scrollIntoView = async () => {
 const cardUrl = () => {
   const domain = consts.kinopioDomain()
   const url = `${domain}/${props.card.spaceId}/${props.card.id}`
-  console.log('🍇 card url', url)
+  console.info('🍇 card url', url)
   return url
 }
 const copyUrl = async (event) => {

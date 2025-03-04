@@ -151,7 +151,7 @@ const removeTrailingTweetText = (description) => {
 }
 
 const handleImageError = (event) => {
-  console.log('🚑 urlPreviewCard handleImageError', event)
+  console.info('🚑 urlPreviewCard handleImageError', event)
   const url = props.card.urlPreviewUrl
   const isInstagram = url.includes('instagram')
   // generic image error

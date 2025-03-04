@@ -584,7 +584,7 @@ const cancelLockingAnimationFrame = () => {
   shouldCancelLocking = false
 }
 const startLocking = (event) => {
-  console.log('startLocking', event)
+  console.info('startLocking', event)
   updateTouchPosition(event)
   updateCurrentTouchPosition(event)
   state.isLocking = true
@@ -615,7 +615,7 @@ const lockingAnimationFrame = (timestamp) => {
     state.lockingAlpha = alpha
     window.requestAnimationFrame(lockingAnimationFrame)
   } else if (state.isLocking && percentComplete > 1) {
-    console.log('🔒🐢 box lockingAnimationFrame locked')
+    console.info('🔒🐢 box lockingAnimationFrame locked')
     lockingAnimationTimer = undefined
     lockingStartTime = undefined
     state.isLocking = false

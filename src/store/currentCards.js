@@ -757,7 +757,7 @@ const currentCards = {
           width: rect.width,
           height: rect.height
         }
-        console.log(card.height)
+        console.info(card.height)
         await context.dispatch('update', { card })
         index += 1
       }

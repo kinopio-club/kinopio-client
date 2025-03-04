@@ -600,7 +600,7 @@ const handleTouchEnd = (event) => {
   stopInteractions(event)
 }
 const stopInteractions = async (event) => {
-  console.log('💣 stopInteractions')
+  console.info('💣 stopInteractions')
   const isCardsSelected = store.state.currentDraggingCardId || store.state.multipleCardsSelectedIds.length
   const isBoxesSelected = store.state.multipleBoxesSelectedIds
   if (isCardsSelected && store.state.cardsWereDragged) {

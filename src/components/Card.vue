@@ -1077,7 +1077,7 @@ const updateUrlPreviewOnline = async () => {
     if (!response) { throw 'api/urlPreview request failed' }
 
     let { data, host } = response
-    console.log('🚗 link preview', url, data)
+    console.info('🚗 link preview', url, data)
     updateUrlPreviewSuccess(url, data)
   } catch (error) {
     console.warn('🚑', error, url)
@@ -1266,7 +1266,7 @@ const lockingAnimationFrame = (timestamp) => {
     state.lockingAlpha = alpha
     window.requestAnimationFrame(lockingAnimationFrame)
   } else if (state.isLocking && percentComplete > 1) {
-    console.log('🔒🐢 card lockingAnimationFrame locked')
+    console.info('🔒🐢 card lockingAnimationFrame locked')
     lockingAnimationTimer = undefined
     lockingStartTime = undefined
     state.isLocking = false

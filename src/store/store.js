@@ -1204,7 +1204,7 @@ const store = createStore({
     },
     multipleSelectedItemsToLoad: (state, items) => {
       utils.typeCheck({ value: items, type: 'object' })
-      console.log('multipleSelectedItemsToLoad', items)
+      console.info('multipleSelectedItemsToLoad', items)
       state.multipleCardsSelectedIdsToLoad = items.cards.map(card => card.id)
       state.multipleConnectionsSelectedIdsToLoad = items.connections.map(connection => connection.id)
       state.multipleBoxesSelectedIdsToLoad = items.boxes.map(box => box.id)
@@ -1432,7 +1432,7 @@ const store = createStore({
       })
       if (existingUpload) {
         state.remotePendingUploads = state.remotePendingUploads.map(item => {
-          console.log('item', item, item.id, existingUpload.id, item.id === existingUpload.id)
+          console.info('item', item, item.id, existingUpload.id, item.id === existingUpload.id)
           if (item.id === existingUpload.id) {
             item.percentComplete = update.percentComplete
           }

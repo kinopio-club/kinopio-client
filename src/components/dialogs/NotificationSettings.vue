@@ -71,7 +71,7 @@ const updateUnsubscribed = async () => {
     state.isLoading = true
     state.unsubscribedSpaces = await store.dispatch('api/getSpacesNotificationUnsubscribed')
     state.unsubscribedGroups = await store.dispatch('api/getGroupsNotificationUnsubscribed')
-    console.log(state.unsubscribedGroups)
+    console.info(state.unsubscribedGroups)
   } catch (error) {
     console.error('🚒 updateUnsubscribed', error)
   }

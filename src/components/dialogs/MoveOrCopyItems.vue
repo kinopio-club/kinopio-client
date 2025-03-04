@@ -164,7 +164,7 @@ const copyToSelectedSpace = async (items) => {
   for (const box of newItems.boxes) {
     await store.dispatch('api/addToQueue', { name: 'createBox', body: box, spaceId: selectedSpaceId })
   }
-  console.log('🚚 copies created', newItems)
+  console.info('🚚 copies created', newItems)
   state.loading = false
 }
 const moveOrCopyToSpace = async () => {

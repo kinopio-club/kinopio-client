@@ -101,7 +101,7 @@ const togglePdfIsVisible = () => {
 const pdf = async () => {
   try {
     const url = await store.dispatch('api/pdf')
-    console.log('🌎 pdf url', url)
+    console.info('🌎 pdf url', url)
   } catch (error) {
     console.error('🚒 pdf', error)
     state.unknownServerError = true
@@ -115,7 +115,7 @@ const downloadLocalCanvas = () => {
   let space = utils.clone(currentSpace.value)
   delete space.clients
   const canvas = convertToCanvas(space)
-  console.log('🧚 canvas to download', canvas)
+  console.info('🧚 canvas to download', canvas)
   const json = 'data:text/json;charset=utf-8,' + encodeURIComponent(JSON.stringify(canvas))
   const name = fileName()
   const downloadAnchor = document.getElementById('export-downlaod-anchor')

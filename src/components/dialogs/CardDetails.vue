@@ -303,7 +303,7 @@ const updateCompositionEventEndTime = (event) => {
 const handleEnterKey = (event) => {
   const isCompositionEvent = event.timeStamp && Math.abs(event.timeStamp - compositionEventEndTime) < 1000
   const pickersIsVisible = state.tag.pickerIsVisible || state.space.pickerIsVisible
-  console.log('🎹 enter', {
+  console.info('🎹 enter', {
     shouldPreventNextEnterKey: store.state.shouldPreventNextEnterKey,
     pickersIsVisible
   })
@@ -403,7 +403,7 @@ const closeCard = async () => {
 const cardUrl = () => {
   const domain = consts.kinopioDomain()
   const url = `${domain}/${card.value.spaceId}/${card.value.id}`
-  console.log('🍇 card url', url)
+  console.info('🍇 card url', url)
   return url
 }
 const copyCardUrl = async (event) => {
@@ -608,7 +608,7 @@ const openingAnimationFrame = (timestamp) => {
     state.openingAlpha = alpha
     window.requestAnimationFrame(openingAnimationFrame)
   } else if (state.isOpening && percentComplete > 1) {
-    console.log('🐢 cardDetails openingAnimationFrame complete')
+    console.info('🐢 cardDetails openingAnimationFrame complete')
     openingAnimationTimer = undefined
     openingStartTime = undefined
     state.isOpening = false

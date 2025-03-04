@@ -87,7 +87,7 @@ export default {
         request.upload.onprogress = (event) => {
           const percentComplete = event.loaded / event.total * 100
           const percentCompleteDisplay = Math.floor(percentComplete)
-          console.log(`🛫 Uploading ${fileName} for ${cardId || spaceId}, percent: ${percentCompleteDisplay}`)
+          console.info(`🛫 Uploading ${fileName} for ${cardId || spaceId}, percent: ${percentCompleteDisplay}`)
           const updates = {
             cardId,
             spaceId,
@@ -104,7 +104,7 @@ export default {
               spaceId,
               url: `${consts.cdnHost}/${key}`
             }
-            console.log('🛬 Upload completed or failed', event, complete)
+            console.info('🛬 Upload completed or failed', event, complete)
             context.commit('triggerUploadComplete', complete, { root: true })
             context.commit('removePendingUpload', { cardId, spaceId })
             resolve(request.response)
@@ -177,7 +177,7 @@ export default {
           key,
           type: file.type
         })
-        console.log('🍡 addCardsAndUploadFiles', file.type, file)
+        console.info('🍡 addCardsAndUploadFiles', file.type, file)
       }
       // add presignedPostData to files
       const multiplePresignedPostData = await context.dispatch('api/createMultiplePresignedPosts', { files: filesPostData, userIsUpgraded, spaceCreatorIsUpgraded }, { root: true })

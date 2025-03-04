@@ -228,7 +228,7 @@ const self = {
         const options = await context.dispatch('requestOptions', { body, method: 'POST', space, requestId })
         response = await fetch(`${consts.apiHost()}/operations`, options)
         if (response.ok) {
-          console.log('🛬 operations ok', body)
+          console.info('🛬 operations ok', body)
           // clear sendingQueue on success
           context.commit('clearSendingQueue', null, { root: true })
         } else {
@@ -251,7 +251,7 @@ const self = {
         const response = await fetch(`${consts.apiHost()}/`)
         return normalizeResponse(response)
       } catch (error) {
-        console.log('🚒 getStatus', error)
+        console.info('🚒 getStatus', error)
         return false
       }
     },
@@ -409,7 +409,7 @@ const self = {
       if (!shouldRequest({ apiKey, isOnline })) { return }
       if (!isSpacePage) { return }
       try {
-        console.log('🛬 getting following users spaces')
+        console.info('🛬 getting following users spaces')
         const options = await context.dispatch('requestOptions', { method: 'GET', space: context.rootState.currentSpace })
         const response = await fetch(`${consts.apiHost()}/user/favorite-users-spaces`, options)
         return normalizeResponse(response)
@@ -547,7 +547,7 @@ const self = {
       try {
         userIds = userIds.slice(0, max)
         userIds = userIds.join(',')
-        console.log('🛬🛬 getting remote public users', userIds)
+        console.info('🛬🛬 getting remote public users', userIds)
         const options = await context.dispatch('requestOptions', { method: 'GET', space: context.rootState.currentSpace })
         const response = await utils.timeout(consts.defaultTimeout, fetch(`${consts.apiHost()}/user/public/multiple?userIds=${userIds}`, options))
         // notifyConnectionError
@@ -586,7 +586,7 @@ const self = {
       if (!shouldRequest({ shouldRequestRemote: true, isOnline })) { return }
       if (!isSpacePage) { return }
       try {
-        console.log('🛬 getting explore spaces')
+        console.info('🛬 getting explore spaces')
         const options = await context.dispatch('requestOptions', { method: 'GET', space: context.rootState.currentSpace })
         const response = await utils.timeout(consts.defaultTimeout, fetch(`${consts.apiHost()}/space/explore-spaces`, options))
         return normalizeResponse(response)
@@ -601,7 +601,7 @@ const self = {
       if (!shouldRequest({ shouldRequestRemote: true, isOnline })) { return }
       if (!isSpacePage) { return }
       try {
-        console.log('🛬 getting everyone spaces')
+        console.info('🛬 getting everyone spaces')
         const options = await context.dispatch('requestOptions', { method: 'GET', space: context.rootState.currentSpace })
         const response = await utils.timeout(consts.defaultTimeout, fetch(`${consts.apiHost()}/space/everyone-spaces`, options))
         return normalizeResponse(response)
@@ -615,7 +615,7 @@ const self = {
       if (!shouldRequest({ shouldRequestRemote: true, isOnline })) { return }
       if (!isSpacePage) { return }
       try {
-        console.log('🛬 getting live spaces')
+        console.info('🛬 getting live spaces')
         const options = await context.dispatch('requestOptions', { method: 'GET', space: context.rootState.currentSpace })
         const response = await utils.timeout(consts.defaultTimeout, fetch(`${consts.apiHost()}/space/live-spaces`, options))
         return normalizeResponse(response)
@@ -629,7 +629,7 @@ const self = {
         const isOnline = context.rootState.isOnline
         if (!shouldRequest({ shouldRequestRemote, apiKey, isOnline })) { return }
         let spaceReadOnlyKey = context.rootGetters['currentSpace/readOnlyKey'](space)
-        console.log('🛬 getting remote space', space.id)
+        console.info('🛬 getting remote space', space.id)
         const options = await context.dispatch('requestOptions', { method: 'GET', space: context.rootState.currentSpace, spaceReadOnlyKey })
         const response = await utils.timeout(consts.defaultTimeout, fetch(`${consts.apiHost()}/space/${space.id}`, options))
         return normalizeResponse(response)
@@ -641,7 +641,7 @@ const self = {
       try {
         const isOnline = context.rootState.isOnline
         if (!isOnline) { return }
-        // console.log('🛬 getting remote space updatedAt', space.id)
+        // console.info('🛬 getting remote space updatedAt', space.id)
         const options = await context.dispatch('requestOptions', { method: 'GET', space: context.rootState.currentSpace })
         const response = await utils.timeout(consts.defaultTimeout, fetch(`${consts.apiHost()}/space/updated-at/${space.id}`, options))
         return normalizeResponse(response)
@@ -654,7 +654,7 @@ const self = {
         const isOnline = context.rootState.isOnline
         if (!isOnline) { return }
         const spaceId = context.rootState.currentSpace.id
-        console.log('🛬 getting remote space favorites', spaceId)
+        console.info('🛬 getting remote space favorites', spaceId)
         const options = await context.dispatch('requestOptions', { method: 'GET', space: context.rootState.currentSpace })
         const response = await utils.timeout(consts.defaultTimeout, fetch(`${consts.apiHost()}/space/${spaceId}/favorites`, options))
         return normalizeResponse(response)
@@ -667,7 +667,7 @@ const self = {
         const isOnline = context.rootState.isOnline
         if (!isOnline) { return }
         const spaceId = context.rootState.currentSpace.id
-        console.log('🛬 getting remote space history', spaceId)
+        console.info('🛬 getting remote space history', spaceId)
         const options = await context.dispatch('requestOptions', { method: 'GET', space: context.rootState.currentSpace })
         const response = await utils.timeout(consts.defaultTimeout, fetch(`${consts.apiHost()}/space/${spaceId}/history`, options))
         return normalizeResponse(response)
@@ -683,7 +683,7 @@ const self = {
       space.collaboratorKey = space.collaboratorKey || invite.collaboratorKey
       let spaceReadOnlyKey = context.rootGetters['currentSpace/readOnlyKey'](space)
       try {
-        console.log('🛬 getting remote space anonymously', space.id, space.collaboratorKey, spaceReadOnlyKey)
+        console.info('🛬 getting remote space anonymously', space.id, space.collaboratorKey, spaceReadOnlyKey)
         const options = await context.dispatch('requestOptions', { method: 'GET', space: space, spaceReadOnlyKey })
         const response = await utils.timeout(consts.defaultTimeout, fetch(`${consts.apiHost()}/space/${space.id}`, options))
         return normalizeResponse(response)
@@ -693,7 +693,7 @@ const self = {
     },
     getInboxSpace: async (context) => {
       try {
-        console.log('🛬 getting inbox space')
+        console.info('🛬 getting inbox space')
         const options = await context.dispatch('requestOptions', { method: 'GET', space: context.rootState.currentSpace })
         const response = await utils.timeout(consts.defaultTimeout, fetch(`${consts.apiHost()}/space/inbox`, options))
         return normalizeResponse(response)
@@ -874,7 +874,7 @@ const self = {
       clearOtherItemsQueue()
       const body = { cardIds, spaceIds, invites }
       try {
-        console.log('🛬🛬 getting remote other items', { cardIds, spaceIds, invites })
+        console.info('🛬🛬 getting remote other items', { cardIds, spaceIds, invites })
         const options = await context.dispatch('requestOptions', { body, method: 'POST', space: context.rootState.currentSpace })
         const response = await utils.timeout(consts.defaultTimeout, fetch(`${consts.apiHost()}/item/multiple`, options))
         const data = await normalizeResponse(response)
@@ -1292,7 +1292,7 @@ const self = {
       const isOnline = context.rootState.isOnline
       if (!shouldRequest({ apiKey, isOnline })) { return }
       try {
-        console.log('🛬 getting remote group', groupId)
+        console.info('🛬 getting remote group', groupId)
         const options = await context.dispatch('requestOptions', { method: 'GET', space: context.rootState.currentSpace })
         const response = await fetch(`${consts.apiHost()}/group/${groupId}`, options)
         return normalizeResponse(response)

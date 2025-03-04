@@ -1695,7 +1695,7 @@ export default {
       items[itemName].forEach(item => positionItems.push(item))
     })
     const offset = this.topLeftItem(positionItems)
-    console.log(positionItems, offset)
+    console.info(positionItems, offset)
     // update positions
     consts.itemTypesWithPositions.forEach(itemName => {
       items[itemName] = items[itemName].map(item => {
@@ -2298,7 +2298,7 @@ export default {
         })
       })
       if (!keysToRemove.length) { return }
-      console.log('🫧 trackingKeysToRemove', keysToRemove)
+      console.info('🫧 trackingKeysToRemove', keysToRemove)
       keysToRemove.forEach(key => delete queryObject[key])
       const newUrl = qs.encode(domain, queryObject)
       name = name.replace(url, newUrl)
@@ -2449,7 +2449,7 @@ export default {
   async dataFromClipboard () {
     let text, file
     const items = await navigator.clipboard.read()
-    console.log('🎊 dataFromClipboard', items)
+    console.info('🎊 dataFromClipboard', items)
     for (const item of items) {
       const imageMatch = 'image/'
       const imageType = item.types.find(type => {

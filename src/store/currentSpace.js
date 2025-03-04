@@ -160,30 +160,30 @@ const currentSpace = {
       const user = context.rootState.currentUser
       // restore from url
       if (spaceUrl) {
-        console.log('🚃 Restore space from url', spaceUrl)
+        console.info('🚃 Restore space from url', spaceUrl)
         const spaceId = utils.spaceIdFromUrl(spaceUrl)
         const space = { id: spaceId }
         await context.dispatch('loadSpace', { space })
       // restore inbox space
       } else if (loadInboxSpace) {
-        console.log('🚃 Restore inbox space')
+        console.info('🚃 Restore inbox space')
         await context.dispatch('loadInboxSpace')
       // load blog space
       } else if (loadBlogSpace) {
-        console.log('🚃 Load blog space')
+        console.info('🚃 Load blog space')
         await context.dispatch('loadBlogSpace')
       // create new space
       } else if (loadNewSpace) {
-        console.log('🚃 Create new space')
+        console.info('🚃 Create new space')
         await context.dispatch('addSpace')
         context.commit('loadNewSpace', false, { root: true })
       // restore last space
       } else if (user?.lastSpaceId) {
-        console.log('🚃 Restore last space', user.lastSpaceId)
+        console.info('🚃 Restore last space', user.lastSpaceId)
         await context.dispatch('loadLastSpace')
       // hello kinopio
       } else {
-        console.log('🚃 Create and restore hello space')
+        console.info('🚃 Create and restore hello space')
         shouldLoadNewHelloSpace = true
       }
       await context.dispatch('checkIfShouldCreateNewUserSpaces')
@@ -198,7 +198,7 @@ const currentSpace = {
       if (!canEditSpace) { return }
       try {
         const response = await context.dispatch('api/createSpacePreviewImage', context.state.id, { root: true })
-        console.log('🙈 updated space preview image', response.urls)
+        console.info('🙈 updated space preview image', response.urls)
       } catch (error) {
         console.warn('🚑 createSpacePreviewImage', error)
       }
@@ -211,7 +211,7 @@ const currentSpace = {
       if (!currentUserIsSignedIn) { return }
       if (isOffline) { return }
       const inbox = await context.dispatch('api/getUserInboxSpace', null, { root: true })
-      console.log('🌍 updateInboxCache')
+      console.info('🌍 updateInboxCache')
       cache.saveSpace(inbox)
     },
 
@@ -430,7 +430,7 @@ const currentSpace = {
     saveNewSpace: async (context) => {
       const space = utils.clone(context.state)
       const user = context.rootState.currentUser
-      console.log('✨ saveNewSpace', space, user)
+      console.info('✨ saveNewSpace', space, user)
       cache.saveSpace(space)
       context.commit('addUserToSpace', user)
       nextTick(() => {
@@ -592,7 +592,7 @@ const currentSpace = {
     },
     updateModulesSpaceId: (context, space) => {
       space = space || context.state
-      console.log('💕 update modules space id', space.id)
+      console.info('💕 update modules space id', space.id)
       context.dispatch('currentCards/updateSpaceId', space.id, { root: true })
       context.dispatch('currentConnections/updateSpaceId', space.id, { root: true })
       context.dispatch('currentBoxes/updateSpaceId', space.id, { root: true })
@@ -601,7 +601,7 @@ const currentSpace = {
       if (!utils.objectHasKeys(space)) { return }
       space.connections = utils.migrationConnections(space.connections)
       addConnections = utils.migrationConnections(addConnections)
-      console.log('🌱 Restoring space', space, { 'isRemote': isRemote, addCards, addConnections, addConnectionTypes, addBoxes })
+      console.info('🌱 Restoring space', space, { 'isRemote': isRemote, addCards, addConnections, addConnectionTypes, addBoxes })
       context.commit('isLoadingSpace', true, { root: true })
       const chunkSize = 50
       const timeStart = utils.unixTime()
@@ -706,7 +706,7 @@ const currentSpace = {
       let cards = context.rootState.currentCards.ids.length
       let connections = context.rootState.currentConnections.ids.length
       let boxes = context.rootState.currentBoxes.ids.length
-      console.log(`${emoji} Restore space complete in ${timeEnd - timeStart}ms,`, {
+      console.info(`${emoji} Restore space complete in ${timeEnd - timeStart}ms,`, {
         cards,
         connections,
         boxes,
@@ -758,7 +758,7 @@ const currentSpace = {
         ])
         // restore remote space
         let remoteSpace = remoteData
-        console.log('🎑 remoteSpace', remoteSpace)
+        console.info('🎑 remoteSpace', remoteSpace)
         if (!remoteSpace) { return }
         pageMeta.updateSpace(remoteSpace)
         context.dispatch('groups/loadGroup', remoteSpace, { root: true })
@@ -815,7 +815,7 @@ const currentSpace = {
       context.commit('restoreSpace', emptySpace)
       context.dispatch('history/reset', null, { root: true })
       context.dispatch('restoreSpaceInChunks', { space })
-      console.log('🎑 local space', space)
+      console.info('🎑 local space', space)
       console.timeEnd('🎑⏱️ restoreSpaceLocal')
       return space
     },
@@ -848,7 +848,7 @@ const currentSpace = {
       context.dispatch('currentBoxes/mergeUnique', { newItems: boxResults.updateItems, itemType: 'box' }, { root: true })
       context.dispatch('currentBoxes/mergeRemove', { removeItems: boxResults.removeItems, itemType: 'box' }, { root: true })
       context.dispatch('history/redoLocalUpdates', null, { root: true })
-      console.log('🎑 merged remote space', {
+      console.info('🎑 merged remote space', {
         cards: cardResults,
         types: connectionTypeReults,
         connections: connectionResults,
@@ -933,7 +933,7 @@ const currentSpace = {
     changeSpace: async (context, space) => {
       context.dispatch('prevSpaceIdInSession', context.state.id, { root: true })
       context.commit('clearAllInteractingWithAndSelected', null, { root: true })
-      console.log('🚟 Change space', space)
+      console.info('🚟 Change space', space)
       context.commit('isLoadingSpace', true, { root: true })
       context.commit('notifySpaceIsRemoved', false, { root: true })
       space = utils.clone(space)

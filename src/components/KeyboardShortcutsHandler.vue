@@ -608,7 +608,7 @@ const writeSelectedToClipboard = async (position) => {
   const text = utils.nameStringFromItems(items)
   // clipboard
   try {
-    console.log('🎊 copyData', data, text)
+    console.info('🎊 copyData', data, text)
     await navigator.clipboard.writeText(text)
   } catch (error) {
     console.warn('🚑 writeSelectedToClipboard', error)
@@ -732,7 +732,7 @@ const handlePasteEvent = async (event) => {
   if (!canEditSpace) { return }
   // get clipboard data
   let data = await getClipboardData()
-  console.log('🎊 pasteData', data, position)
+  console.info('🎊 pasteData', data, position)
   if (!data) { return }
   store.commit('closeAllDialogs')
   store.commit('clearMultipleSelected')

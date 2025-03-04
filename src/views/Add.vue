@@ -42,7 +42,7 @@ const textareaElement = ref(null)
 // init
 
 window.addEventListener('message', (event) => {
-  console.log('🛫 add page: received postmessage', event)
+  console.info('🛫 add page: received postmessage', event)
   restoreValue(event.data)
 })
 
@@ -107,7 +107,7 @@ const restoreValue = async (value) => {
   await nextTick()
   value = value || await cache.prevAddPageValue()
   state.newName = value
-  console.log('🏬 restored value', value)
+  console.info('🏬 restored value', value)
   await nextTick()
   updateTextareaSize()
   focusAndSelectName()
@@ -215,13 +215,13 @@ const addCard = async () => {
     let spaceId
     // save to inbox
     if (state.selectedSpaceId === 'inbox') {
-      console.log('🛫 create card in inbox space', card)
+      console.info('🛫 create card in inbox space', card)
       await store.dispatch('api/addToQueue', { name: 'createCardInInbox', body: card })
     // save to space
     } else {
       spaceId = state.selectedSpaceId
       card.spaceId = spaceId
-      console.log('🛫 create card in space', card, state.selectedSpaceId)
+      console.info('🛫 create card in space', card, state.selectedSpaceId)
       await store.dispatch('api/addToQueue', { name: 'createCard', body: card, spaceId })
     }
     space = { id: spaceId }

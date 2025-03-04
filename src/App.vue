@@ -9,8 +9,8 @@ const store = useStore()
 let statusRetryCount = 0
 
 onMounted(() => {
-  console.log('🐢 kinopio-client build mode', import.meta.env.MODE)
-  console.log('🐸 kinopio-server URL', consts.apiHost())
+  console.info('🐢 kinopio-client build mode', import.meta.env.MODE)
+  console.info('🐸 kinopio-server URL', consts.apiHost())
   store.subscribe((mutation, state) => {
     if (mutation.type === 'broadcast/joinSpaceRoom') {
       updateMetaRSSFeed()
@@ -76,7 +76,7 @@ const updateServerIsOnline = async () => {
   const maxIterations = 10
   const initialDelay = 1000 // 1 second
   const serverStatus = await store.dispatch('api/getStatus')
-  console.log('server online status', serverStatus)
+  console.info('server online status', serverStatus)
   if (serverStatus) {
     store.dispatch('isOnline', true)
   // error offline

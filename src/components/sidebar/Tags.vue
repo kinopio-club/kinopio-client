@@ -78,7 +78,7 @@ const filteredTags = computed(() => {
   if (shouldShowCurrentSpaceTags.value) {
     tags = store.getters['currentSpace/spaceTags']
   }
-  console.log('♠︎ filteredTags', tags)
+  console.info('♠︎ filteredTags', tags)
   return tags
 })
 

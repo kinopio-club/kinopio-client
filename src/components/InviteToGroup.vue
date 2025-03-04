@@ -32,7 +32,7 @@ const inviteUrl = computed(() => {
 const copyInviteUrl = async (event) => {
   store.commit('clearNotificationsWithPosition')
   const position = utils.cursorPositionInPage(event)
-  console.log('🍇 group invite url', inviteUrl.value)
+  console.info('🍇 group invite url', inviteUrl.value)
   try {
     await navigator.clipboard.writeText(inviteUrl.value)
     store.commit('addNotificationWithPosition', { message: 'Copied', position, type: 'success', layer: 'app', icon: 'checkmark' })
