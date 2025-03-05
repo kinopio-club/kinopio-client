@@ -318,7 +318,11 @@ const uploadFile = async () => {
     return
   }
   try {
-    await store.dispatch('upload/uploadFile', { file, spaceId })
+    if (props.box) {
+      await store.dispatch('upload/uploadFile', { file, boxId: props.box.id })
+    } else {
+      await store.dispatch('upload/uploadFile', { file, spaceId })
+    }
   } catch (error) {
     console.warn('🚒', error)
     if (error.type === 'sizeLimit') {

@@ -36,8 +36,8 @@ export default {
       })
       state.pendingUploads = state.pendingUploads.filter(item => item.percentComplete !== 100)
     },
-    removePendingUpload: (state, { cardId, spaceId }) => {
-      state.pendingUploads = state.pendingUploads.filter(item => (item.cardId !== cardId || item.spaceId === spaceId))
+    removePendingUpload: (state, { cardId, spaceId, boxId }) => {
+      state.pendingUploads = state.pendingUploads.filter(item => (item.cardId !== cardId || item.spaceId === spaceId || item.boxId !== boxId))
     }
   },
   actions: {
@@ -61,10 +61,11 @@ export default {
         imageDataUrl: URL.createObjectURL(file)
       })
     },
-    uploadFile: async (context, { file, cardId, spaceId }) => {
+    uploadFile: async (context, { file, cardId, spaceId, boxId }) => {
       const uploadId = nanoid()
       const fileName = utils.normalizeFileUrl(file.name)
-      let key = `${cardId || spaceId}/${fileName}`
+      const id = cardId || spaceId || boxId
+      let key = `${id}/${fileName}`
       const userIsUpgraded = context.rootState.currentUser.isUpgraded
       const spaceCreatorIsUpgraded = context.rootGetters['currentSpace/spaceCreatorIsUpgraded']
       context.dispatch('checkIfFileTooBig', file)
@@ -87,10 +88,11 @@ export default {
         request.upload.onprogress = (event) => {
           const percentComplete = event.loaded / event.total * 100
           const percentCompleteDisplay = Math.floor(percentComplete)
-          console.info(`🛫 Uploading ${fileName} for ${cardId || spaceId}, percent: ${percentCompleteDisplay}`)
+          console.info(`🛫 Uploading ${fileName} for ${id}, percent: ${percentCompleteDisplay}`)
           const updates = {
             cardId,
             spaceId,
+            boxId,
             percentComplete: percentCompleteDisplay,
             userId: context.rootState.currentUser.id,
             id: uploadId
@@ -102,11 +104,12 @@ export default {
             const complete = {
               cardId,
               spaceId,
+              boxId,
               url: `${consts.cdnHost}/${key}`
             }
             console.info('🛬 Upload completed or failed', event, complete)
             context.commit('triggerUploadComplete', complete, { root: true })
-            context.commit('removePendingUpload', { cardId, spaceId })
+            context.commit('removePendingUpload', { cardId, spaceId, boxId })
             resolve(request.response)
             nextTick(() => {
               nextTick(() => {
@@ -119,8 +122,8 @@ export default {
         // start
         request.open('POST', presignedPostData.url)
         request.send(formData)
-        context.commit('addPendingUpload', { key, fileName, cardId, spaceId })
-        context.dispatch('addImageDataUrl', { file, cardId, spaceId })
+        context.commit('addPendingUpload', { key, fileName, cardId, spaceId, boxId })
+        context.dispatch('addImageDataUrl', { file, cardId, spaceId, boxId })
       })
     },
     addCardsAndUploadFiles: async (context, { files, event, position }) => {
