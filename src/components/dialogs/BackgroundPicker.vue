@@ -254,7 +254,11 @@ const checkIfImageIsUrl = () => {
 }
 const background = computed({
   get () {
-    return props.space?.background
+    if (props.box) {
+      return props.box.background
+    } else {
+      return props.space?.background
+    }
   },
   set (url) {
     updateBackground(url)
