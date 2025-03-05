@@ -444,9 +444,12 @@ const searchService = debounce(searchPexels, 350)
 
 const backgroundIsStretch = computed(() => props.box.backgroundIsStretch)
 const toggleBackgroundIsStretch = () => {
-  console.log('🐸🐸🐸')
-  // const value = !filterShowUsers.value
-  // store.dispatch('currentUser/toggleFilterShowUsers', value)
+  const value = !backgroundIsStretch.value
+  const update = {
+    id: props.box.id,
+    backgroundIsStretch: value
+  }
+  store.dispatch('currentBoxes/update', update)
 }
 
 </script>
