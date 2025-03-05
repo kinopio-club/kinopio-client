@@ -186,6 +186,9 @@ const backgroundStyles = computed(() => {
   } else {
     newStyles.backgroundImage = `url("${props.box.background}")`
   }
+  if (props.box.backgroundIsStretch) {
+    newStyles.backgroundSize = 'cover'
+  }
   return newStyles
 })
 const userColor = computed(() => store.state.currentUser.color)
