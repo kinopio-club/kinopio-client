@@ -663,6 +663,7 @@ main#space.space(
   SpaceBackground
   SpaceBackgroundTint
   ItemsLocked
+  #box-backgrounds
   Connections
   Boxes
   Cards
@@ -725,4 +726,10 @@ Preload
   position fixed
   right 8px
   bottom 50px
+
+#box-backgrounds
+  position absolute
+  .box-background
+    border-radius var(--entity-radius)
+    position absolute
 </style>

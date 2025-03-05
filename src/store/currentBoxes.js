@@ -67,6 +67,7 @@ export default {
     },
     resizeWhileDragging: (state, { boxes, shouldSnapToGrid }) => {
       boxes.forEach(box => {
+        // box
         const element = utils.boxElementFromId(box.id)
         if (!element) { return }
         if (element.dataset.isVisibleInViewport === 'false') { return }
@@ -79,10 +80,24 @@ export default {
         }
         element.dataset.resizeWidth = box.resizeWidth
         element.dataset.resizeHeight = box.resizeHeight
+        // box background
+        const background = element.dataset.background
+        if (!element.dataset.background) { return }
+        const backgroundElement = utils.boxBackgroundElementFromId(box.id)
+        if (shouldSnapToGrid) {
+          backgroundElement.style.width = utils.roundToNearest(box.resizeWidth) + 'px'
+          backgroundElement.style.height = utils.roundToNearest(box.resizeHeight) + 'px'
+        } else {
+          backgroundElement.style.width = box.resizeWidth + 'px'
+          backgroundElement.style.height = box.resizeHeight + 'px'
+        }
+        backgroundElement.dataset.resizeWidth = box.resizeWidth
+        backgroundElement.dataset.resizeHeight = box.resizeHeight
       })
     },
     moveWhileDragging: (state, { boxes }) => {
       boxes.forEach(box => {
+        // box
         const element = document.querySelector(`.box[data-box-id="${box.id}"]`)
         if (!element) { return }
         if (element.dataset.isVisibleInViewport !== 'false') {
@@ -91,6 +106,16 @@ export default {
         }
         element.dataset.x = box.x
         element.dataset.y = box.y
+        // box background
+        const background = element.dataset.background
+        if (!element.dataset.background) { return }
+        const backgroundElement = utils.boxBackgroundElementFromId(box.id)
+        if (element.dataset.isVisibleInViewport !== 'false') {
+          backgroundElement.style.left = box.x + 'px'
+          backgroundElement.style.top = box.y + 'px'
+        }
+        backgroundElement.dataset.x = box.x
+        backgroundElement.dataset.y = box.y
       })
     },
 
