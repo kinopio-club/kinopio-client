@@ -1202,7 +1202,7 @@ const self = {
     },
     urlPreview: async (context, { url, card }) => {
       try {
-        const body = { url, card }
+        const body = { url, card, spaceId: context.rootState.currentSpace.id }
         const options = await context.dispatch('requestOptions', { body, method: 'POST', space: context.rootState.currentSpace })
         const response = await fetch(`${consts.apiHost()}/services/url-preview`, options)
         if (response.status !== 200) {
