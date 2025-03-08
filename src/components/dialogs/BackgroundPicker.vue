@@ -543,8 +543,8 @@ dialog.background-picker.wide(v-if="visible" :open="visible" @click.left.stop="c
             img.icon.flower(src="@/assets/flower.svg")
           button(@click.left.stop="updateService('pexels')" :class="{ active: serviceIsPexels}")
             img.icon(src="@/assets/search.svg")
-          button(@click.left.stop="updateService('recent')" :class="{ active: serviceIsRecent}")
-            img.icon.time(src="@/assets/time.svg")
+          //- button(@click.left.stop="updateService('recent')" :class="{ active: serviceIsRecent}")
+          //-   img.icon.time(src="@/assets/time.svg")
         //- Upload
         .button-wrap
           button(@click.left.stop="selectFile")
@@ -582,11 +582,11 @@ dialog.background-picker.wide(v-if="visible" :open="visible" @click.left.stop="c
         ImageList(v-if="!state.communityBackgroundsIsLoading" :images="state.communityBackgroundImages" :activeUrl="background" @selectImage="updateBackground" :isSmall="imageListIsSmall")
 
     //- recent
-    template(v-else-if="serviceIsRecent")
-      section.results-section
-        .row
-          p.row-title Recently Used
-        ImageList(:images="state.selectedImages" :activeUrl="background" @selectImage="updateBackground" :isSmall="imageListIsSmall")
+    //- template(v-else-if="serviceIsRecent")
+    //-   section.results-section
+    //-     .row
+    //-       p.row-title Recently Used
+    //-     ImageList(:images="state.selectedImages" :activeUrl="background" @selectImage="updateBackground" :isSmall="imageListIsSmall")
 
     //- search results
     template(v-else-if="serviceIsPexels")
