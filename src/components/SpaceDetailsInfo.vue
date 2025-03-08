@@ -332,7 +332,7 @@ const removeSpaceGroup = (group) => {
         .badge.info
           Loader(:visible="true")
           span {{remotePendingUpload.percentComplete}}%
-      BackgroundPicker(:visible="state.backgroundIsVisible" @updateLocalSpaces="updateLocalSpaces")
+      BackgroundPicker(:visible="state.backgroundIsVisible" :space="currentSpace" @updateLocalSpaces="updateLocalSpaces")
     //- Name
     .textarea-wrap(:class="{'full-width': props.shouldHidePin && !state.textareaIsFocused }")
       textarea.name(

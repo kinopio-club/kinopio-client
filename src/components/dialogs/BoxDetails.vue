@@ -5,6 +5,8 @@ import { useStore } from 'vuex'
 import ColorPicker from '@/components/dialogs/ColorPicker.vue'
 import CardOrBoxActions from '@/components/subsections/CardOrBoxActions.vue'
 import ItemCheckboxButton from '@/components/ItemCheckboxButton.vue'
+import BackgroundPicker from '@/components/dialogs/BackgroundPicker.vue'
+import BackgroundPreview from '@/components/BackgroundPreview.vue'
 import utils from '@/utils.js'
 
 import { colord, extend } from 'colord'
@@ -18,7 +20,8 @@ let prevBoxId
 
 const state = reactive({
   colorPickerIsVisible: false,
-  isUpdated: false
+  isUpdated: false,
+  backgroundPickerIsVisible: false
 })
 
 const spaceCounterZoomDecimal = computed(() => store.getters.spaceCounterZoomDecimal)
@@ -174,7 +177,9 @@ const colorisDark = computed(() => {
   return utils.colorIsDark(color)
 })
 const toggleColorPicker = () => {
-  state.colorPickerIsVisible = !state.colorPickerIsVisible
+  const value = !state.colorPickerIsVisible
+  closeDialogs()
+  state.colorPickerIsVisible = value
 }
 const updateColor = (color) => {
   update({ color })
@@ -183,6 +188,14 @@ const isThemeDarkAndUserColorLight = computed(() => {
   const isThemeDark = store.state.currentUser.theme === 'dark'
   return isThemeDark && !colorisDark.value
 })
+
+// background
+
+const toggleBackgroundPickerIsVisible = () => {
+  const value = !state.backgroundPickerIsVisible
+  closeDialogs()
+  state.backgroundPickerIsVisible = value
+}
 
 // remove
 
@@ -195,6 +208,7 @@ const removeBox = () => {
 
 const closeDialogs = () => {
   state.colorPickerIsVisible = false
+  state.backgroundPickerIsVisible = false
 }
 const closeAllDialogs = () => {
   store.dispatch('closeAllDialogs')
@@ -282,6 +296,9 @@ dialog.narrow.box-details(v-if="visible" :open="visible" @click.left.stop="close
           img.icon(src="@/assets/remove.svg")
       //- [·]
       ItemCheckboxButton(:boxes="[currentBox]" :isDisabled="!canEditBox")
+      .button-wrap.background-preview-wrap(@click.left.stop="toggleBackgroundPickerIsVisible")
+        BackgroundPreview(:box="currentBox" :isButton="true" :buttonIsActive="state.backgroundPickerIsVisible")
+        BackgroundPicker(:visible="state.backgroundPickerIsVisible" :box="currentBox")
     CardOrBoxActions(:visible="canEditBox" :boxes="[currentBox]" @closeDialogs="closeDialogs" :colorIsHidden="true")
     .row(v-if="!canEditBox")
       span.badge.info
@@ -307,4 +324,6 @@ dialog.narrow.box-details(v-if="visible" :open="visible" @click.left.stop="close
   .filter-button-wrap
     padding-left 5px
     padding-top 1px
+  .background-preview-wrap
+    height var(--button-fixed-height)
 </style>

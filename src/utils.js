@@ -1103,6 +1103,9 @@ export default {
   boxElementFromId (boxId) {
     return document.querySelector(`.box[data-box-id="${boxId}"]`)
   },
+  boxBackgroundElementFromId (boxId) {
+    return document.querySelector(`.box-background[data-box-id="${boxId}"]`)
+  },
   boxRectFromId (boxId) {
     const element = this.boxElementFromId(boxId)
     if (!element) { return }
@@ -1998,6 +2001,10 @@ export default {
       return url.slice(0, lastCharacterPosition)
     }
     return url
+  },
+  urlIsRetina (url) {
+    const isRetina = url.includes('-2x.') || url.includes('@2x.')
+    return isRetina
   },
   urlIsFloatOrIp (url) {
     // https://regexr.com/58ii6

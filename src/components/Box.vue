@@ -153,7 +153,7 @@ const removeViewportObserver = () => {
 // styles
 
 const styles = computed(() => {
-  let { x, y, resizeWidth, resizeHeight } = normalizedBox.value
+  let { x, y, resizeWidth, resizeHeight, background } = normalizedBox.value
   let width = resizeWidth
   let height = resizeHeight
   let styles = {
@@ -168,12 +168,28 @@ const styles = computed(() => {
     styles.width = normalizedBox.value.resizeWidth
     styles.height = normalizedBox.value.resizeHeight
   }
-  if (hasFill.value) {
+  if (hasFill.value && !background) {
     let fillColor = color.value
     fillColor = colord(fillColor).alpha(0.5).toRgbString()
     styles.backgroundColor = fillColor
   }
   return styles
+})
+const backgroundStyles = computed(() => {
+  if (!props.box.background) { return }
+  let newStyles = utils.clone(styles.value)
+  delete newStyles.border
+  delete newStyles.backgroundColor
+  const isRetina = utils.urlIsRetina(props.box.background)
+  if (isRetina) {
+    newStyles.backgroundImage = `image-set("${props.box.background}" 2x)`
+  } else {
+    newStyles.backgroundImage = `url("${props.box.background}")`
+  }
+  if (props.box.backgroundIsStretch) {
+    newStyles.backgroundSize = 'cover'
+  }
+  return newStyles
 })
 const userColor = computed(() => store.state.currentUser.color)
 const color = computed(() => {
@@ -785,6 +801,7 @@ const focusColor = computed(() => {
   :data-y="normalizedBox.y"
   :data-resize-width="normalizedBox.resizeWidth"
   :data-resize-height="normalizedBox.resizeHeight"
+  :data-background="normalizedBox.background"
   :data-is-locked="isLocked"
   :data-is-visible-in-viewport="state.isVisibleInViewport"
   :data-should-render="shouldRender"
@@ -794,6 +811,8 @@ const focusColor = computed(() => {
   ref="boxElement"
 )
   .focusing-frame(v-if="isFocusing" :style="{backgroundColor: currentUserColor}")
+  teleport(to="#box-backgrounds")
+    .box-background(v-if="box.background && state.isVisibleInViewport" :data-box-id="box.id" :style="backgroundStyles")
   //- name
   .box-info(
     v-if="shouldRender"
