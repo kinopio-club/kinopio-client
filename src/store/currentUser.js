@@ -78,6 +78,7 @@ const initialState = {
   dialogSpaceFilterByUser: {},
   dialogSpaceFilterShowHidden: false,
   dialogSpaceFilterSortBy: null, // null, updatedAt, createdAt, alphabetical
+  dialogSpaceFilterByTemplates: false,
 
   // user tags
 
@@ -270,6 +271,10 @@ export default {
     dialogSpaceFilterShowHidden: (state, value) => {
       state.dialogSpaceFilterShowHidden = value
       cache.updateUser('dialogSpaceFilterShowHidden', value)
+    },
+    dialogSpaceFilterByTemplates: (state, value) => {
+      state.dialogSpaceFilterByTemplates = value
+      cache.updateUser('dialogSpaceFilterByTemplates', value)
     },
     dialogSpaceFilterByGroup: (state, value) => {
       utils.typeCheck({ value, type: 'object' })
