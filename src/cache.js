@@ -106,6 +106,7 @@ export default {
     let user = await this.user()
     user = utils.normalizeToObject(user)
     user[key] = value
+    user = utils.clone(user)
     await this.storeLocal('user', user)
   },
   async saveUser (user) {
