@@ -192,6 +192,7 @@ export default {
       }
       context.commit('create', connection)
       context.commit('triggerUpdateItemCurrentConnections', connection.endItemId, { root: true })
+      context.commit('triggerUpdateItemCurrentConnections', connection.startItemId, { root: true })
       await context.dispatch('api/addToQueue', { name: 'createConnection', body: connection }, { root: true })
     },
     addType: async (context, type) => {
