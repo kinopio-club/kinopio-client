@@ -1088,4 +1088,11 @@ const focusColor = computed(() => {
     display inline-block
     button
       z-index 1
+  .connector-glow
+    left -9px
+    top -5px
+  .connected-colors
+    left 1px
+    top 5px
+
 </style>
