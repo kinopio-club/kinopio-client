@@ -1119,6 +1119,14 @@ export default {
     const y = parseInt(element.style.top)
     return { x, y }
   },
+  boxInfoPositionFromId (boxId) {
+    const element = document.querySelector(`.box-info[data-box-id="${boxId}"]`)
+    // if (!element) { return }
+    const boxInfoRect = element.getBoundingClientRect()
+    const infoWidth = Math.round(boxInfoRect.width + 4)
+    const infoHeight = Math.round(boxInfoRect.height)
+    return { infoWidth, infoHeight }
+  },
   isPointInsideRect (point, rect) {
     const xIsInside = this.isBetween({
       value: point.x,

@@ -80,6 +80,8 @@ export default {
         }
         element.dataset.resizeWidth = box.resizeWidth
         element.dataset.resizeHeight = box.resizeHeight
+        element.dataset.infoWidth = box.infoWidth
+        element.dataset.infoHeight = box.infoHeight
         // box background
         const background = element.dataset.background
         if (!element.dataset.background) { return }
@@ -293,7 +295,8 @@ export default {
         let height = rect.height
         width = width + delta.x
         height = height + delta.y
-        const box = { id: boxId, resizeWidth: width, resizeHeight: height }
+        const { infoWidth, infoHeight } = utils.boxInfoPositionFromId(boxId)
+        const box = { id: boxId, resizeWidth: width, resizeHeight: height, infoWidth, infoHeight }
         boxes.push(box)
         connections = connections.concat(context.rootGetters['currentConnections/byItemId'](box.id))
         context.commit('currentUserIsResizingBox', true, { root: true })
@@ -313,11 +316,7 @@ export default {
           infoWidth: box.infoWidth,
           infoHeight: box.infoHeight
         }
-        const element = document.querySelector(`.box-info[data-box-id="${box.id}"]`)
-        if (!element) { return }
-        const DOMRect = element.getBoundingClientRect()
-        const infoWidth = Math.round(DOMRect.width + 4)
-        const infoHeight = Math.round(DOMRect.height)
+        const { infoWidth, infoHeight } = utils.boxInfoPositionFromId(box.id)
         const dimensionsChanged = infoWidth !== prevDimensions.infoWidth || infoHeight !== prevDimensions.infoHeight
         const body = {
           id: box.id,
@@ -327,6 +326,9 @@ export default {
         if (!dimensionsChanged) { return }
         context.commit('update', body)
         await context.dispatch('api/addToQueue', { name: 'updateBox', body }, { root: true })
+        nextTick(() => {
+          context.dispatch('currentConnections/updatePaths', { itemId: box.id }, { root: true })
+        })
       }
     },
 

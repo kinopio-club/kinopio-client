@@ -49,7 +49,7 @@ watch(() => currentBox.value, async (value, prevValue) => {
     if (!state.isUpdated) { return }
     state.isUpdated = false
     const box = store.getters['currentBoxes/byId'](prevBoxId)
-    store.dispatch('currentBoxes/updateInfoDimensions', {})
+    store.dispatch('currentBoxes/updateInfoDimensions', { boxes: [box] })
     if (!box) { return }
     store.dispatch('history/add', { boxes: [box], useSnapshot: true })
   }
@@ -62,6 +62,7 @@ watch(() => visible.value, async (value, prevValue) => {
     store.commit('currentDraggingBoxId', '')
     store.dispatch('multipleBoxesSelectedIds', [])
     store.commit('preventMultipleSelectedActionsIsVisible', false)
+    store.dispatch('currentBoxes/updateInfoDimensions', { boxes: [{ id: prevBoxId }] })
   }
 })
 
