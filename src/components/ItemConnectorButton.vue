@@ -10,6 +10,7 @@ const emit = defineEmits(['shouldRenderParent'])
 
 const props = defineProps({
   visible: Boolean,
+  isTransparent: Boolean,
   card: Object,
   box: Object,
   itemConnections: Array,
@@ -257,6 +258,7 @@ const handleMouseLeaveConnector = () => {
   @touchstart="startConnecting"
   @mouseenter="handleMouseEnterConnector"
   @mouseleave="handleMouseLeaveConnector"
+  :class="{ 'is-hidden-by-opacity': props.isTransparent }"
 )
   .connector-glow(:style="connectorGlowStyle" tabindex="-1")
   .connected-colors

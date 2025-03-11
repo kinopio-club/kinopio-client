@@ -624,6 +624,13 @@ const connectorIsVisible = computed(() => {
   }
   return isVisible
 })
+const connectorIsTransparent = computed(() => {
+  updateCurrentConnections()
+  const isPresentationMode = store.state.isPresentationMode
+  const isNotHovering = store.state.currentUserIsHoveringOverCardId !== props.card.id
+  const isNotConnected = !isConnectingTo.value && !isConnectingTo.value && !state.currentConnections.length
+  return isPresentationMode && isNotHovering && isNotConnected
+})
 const isCardButtonsVisible = computed(() => {
   return isLocked.value || (cardButtonUrl.value && !isComment.value) || connectorIsVisible.value
 })
@@ -2030,6 +2037,7 @@ const focusColor = computed(() => {
           //- connector
           ItemConnectorButton(
             :visible="connectorIsVisible"
+            :isTransparent="connectorIsTransparent"
             :card="card"
             :itemConnections="state.currentConnections"
             :isConnectingTo="isConnectingTo"
