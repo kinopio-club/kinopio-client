@@ -1018,6 +1018,8 @@ export default {
     box.resizeHeight = parseInt(element.dataset.resizeHeight)
     box.width = parseInt(element.dataset.resizeWidth)
     box.height = parseInt(element.dataset.resizeHeight)
+    box.infoWidth = parseInt(element.dataset.infoWidth)
+    box.infoHeight = parseInt(element.dataset.infoHeight)
     return box
   },
   updateCardDimensionsDataWhileDragging (card) {
@@ -1261,7 +1263,7 @@ export default {
   },
   estimatedItemConnectorPosition (item) {
     const offset = 15
-    const width = item.resizeWidth || item.width
+    const width = item.infoWidth || item.resizeWidth || item.width
     let rightSide = item.x + width
     let x = rightSide
     x = x - offset

@@ -351,7 +351,9 @@ const isResizing = computed(() => {
   return isResizing && isCurrent
 })
 const startBoxInfoInteraction = (event) => {
-  if (event.target.closest('.connector-button')) { return }
+  if (event.target.closest('.connector')) {
+    return
+  }
   if (!currentBoxIsSelected.value) {
     store.dispatch('clearMultipleSelected')
   }
@@ -810,6 +812,8 @@ const focusColor = computed(() => {
   :data-y="normalizedBox.y"
   :data-resize-width="normalizedBox.resizeWidth"
   :data-resize-height="normalizedBox.resizeHeight"
+  :data-info-width="normalizedBox.infoWidth"
+  :data-info-height="normalizedBox.infoHeight"
   :data-background="normalizedBox.background"
   :data-is-locked="isLocked"
   :data-is-visible-in-viewport="state.isVisibleInViewport"
