@@ -189,7 +189,8 @@ const toggleGroupsIsVisible = () => {
       SpacePicker(:visible="state.spacePickerIsVisible" :loading="state.loading.userSpaces" :user="props.user" :userSpaces="state.userSpaces" @selectSpace="changeSpace")
     .button-wrap
       button(:class="{active: isFavoriteUser}" @click.left.prevent="updateFavoriteUser" @keydown.stop.enter="updateFavoriteUser")
-        span Follow
+        span(v-if="!isFavoriteUser") Follow
+        span(v-if="isFavoriteUser") Unfollow
         Loader(:visible="isLoadingFavorites")
     .badge.danger.error-message(v-if="state.error.unknownServerError") (シ_ _)シ Something went wrong, Please try again or contact support
   //- Explore Spaces

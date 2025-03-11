@@ -127,6 +127,7 @@ const dialogSpaceFilterSortBy = computed(() => store.state.currentUser.dialogSpa
 const dialogSpaceFilterByUser = computed(() => store.state.currentUser.dialogSpaceFilterByUser)
 const dialogSpaceFilterShowHidden = computed(() => store.state.currentUser.dialogSpaceFilterShowHidden)
 const dialogSpaceFilterByGroup = computed(() => store.state.currentUser.dialogSpaceFilterByGroup)
+const dialogSpaceFilterByTemplates = computed(() => store.state.currentUser.dialogSpaceFilterByTemplates)
 
 const spaceFiltersIsActive = computed(() => {
   return Boolean(dialogSpaceFilterShowHidden.value || utils.objectHasKeys(dialogSpaceFilterByUser.value) || dialogSpaceFilterSortByIsActive.value) || utils.objectHasKeys(dialogSpaceFilterByGroup.value)
@@ -145,6 +146,10 @@ const filteredSpaces = computed(() => {
   // filter by user
   if (utils.objectHasKeys(dialogSpaceFilterByUser.value)) {
     spaces = spaces.filter(space => space.userId === dialogSpaceFilterByUser.value.id)
+  }
+  // filter by templates
+  if (dialogSpaceFilterByTemplates.value) {
+    spaces = spaces.filter(space => space.isTemplate)
   }
   // sort
   spaces = sort(spaces)

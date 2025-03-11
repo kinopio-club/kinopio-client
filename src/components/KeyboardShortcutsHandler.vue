@@ -87,6 +87,10 @@ const checkIsCardScope = (event) => {
   const isFromCard = event.target.classList[0] === 'card'
   return isFromCard || isFromCardName
 }
+const checkIsMinimapDialogScope = (event) => {
+  const isFromDialog = event.target.closest('dialog.minimap')
+  return isFromDialog
+}
 const checkIsPanScope = (event) => {
   const isFromDialog = event.target.closest('dialog')
   return !isFromDialog
@@ -108,6 +112,7 @@ const handleShortcuts = (event) => {
   // console.warn('🎹', key)
   // const isFromCard = event.target.classList[0] === 'card'
   const isSpaceScope = checkIsSpaceScope(event)
+  const isMinimapDialogScope = checkIsMinimapDialogScope(event)
   // ?
   if (key === '?' && isSpaceScope) {
     store.commit('triggerKeyboardShortcutsIsVisible')
@@ -119,7 +124,7 @@ const handleShortcuts = (event) => {
     store.commit('addNotification', { message: 'New space created (N)', icon: 'add', type: 'success' })
     store.commit('triggerSpaceDetailsInfoIsVisible')
   // m
-  } else if (key === 'm' && isSpaceScope) {
+  } else if (key === 'm' && (isSpaceScope || isMinimapDialogScope)) {
     store.commit('triggerMinimapIsVisible')
   // t
   } else if (key === 't' && isSpaceScope) {

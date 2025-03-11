@@ -50,6 +50,7 @@ const dialogSpaceFilterSortBy = computed(() => store.state.currentUser.dialogSpa
 const dialogSpaceFilterByUser = computed(() => store.state.currentUser.dialogSpaceFilterByUser)
 const dialogSpaceFilterShowHidden = computed(() => store.state.currentUser.dialogSpaceFilterShowHidden)
 const dialogSpaceFilterByGroup = computed(() => store.state.currentUser.dialogSpaceFilterByGroup)
+const dialogSpaceFilterByTemplates = computed(() => store.state.currentUser.dialogSpaceFilterByTemplates)
 
 // clear all
 
@@ -57,7 +58,10 @@ const clearAllFilters = () => {
   updateGroupFilter({})
   updateUserFilter({})
   updateSortBy(null)
-  store.dispatch('currentUser/update', { dialogSpaceFilterShowHidden: false })
+  store.dispatch('currentUser/update', {
+    dialogSpaceFilterShowHidden: false,
+    dialogSpaceFilterByTemplates: false
+  })
 }
 const totalFiltersActive = computed(() => {
   let count = 0
@@ -71,6 +75,9 @@ const totalFiltersActive = computed(() => {
     count += 1
   }
   if (utils.objectHasKeys(dialogSpaceFilterByUser.value)) {
+    count += 1
+  }
+  if (dialogSpaceFilterByTemplates.value) {
     count += 1
   }
   return count
@@ -107,6 +114,17 @@ const isSortByAlphabetical = computed(() => {
 })
 const updateSortBy = (value) => {
   store.dispatch('currentUser/update', { dialogSpaceFilterSortBy: value })
+}
+
+// templates
+
+const isTemplates = computed(() => {
+  const templateSpace = props.spaces.find(space => space.isTemplate)
+  return Boolean(templateSpace)
+})
+const toggleFilterByTemplates = () => {
+  const value = !dialogSpaceFilterByTemplates.value
+  store.dispatch('currentUser/update', { dialogSpaceFilterByTemplates: value })
 }
 
 // groups
@@ -187,6 +205,12 @@ dialog.narrow.space-filters(v-if="props.visible" :open="props.visible" @click.le
   section(v-if="isLoading")
     Loader(:visible="true")
 
+  //- other space filter types
+  section.results-section.other(v-if="isTemplates")
+    ul.results-list
+      li(@click="toggleFilterByTemplates" :class="{active: dialogSpaceFilterByTemplates}")
+        img.icon.templates(src="@/assets/templates.svg")
+        span Templates
   //- groups
   section.results-section.groups(v-if="isGroups")
     GroupList(:groups="groups" :selectedGroup="dialogSpaceFilterByGroup" @selectGroup="filterByGroup")

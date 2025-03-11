@@ -1879,7 +1879,6 @@ const checkIfShouldUpdateIframeUrl = () => {
 // containing box
 
 const containingBoxes = computed(() => {
-  if (!state.isVisibleInViewport) { return }
   if (isSelectedOrDragging.value) { return }
   if (currentCardIsBeingDragged.value) { return }
   if (store.state.boxDetailsIsVisibleForBoxId) { return }
