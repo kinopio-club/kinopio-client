@@ -2265,6 +2265,8 @@ const focusColor = computed(() => {
       cursor cell
       button
         z-index 1
+    .connector
+      padding-top 9px
 
     .url-wrap
       padding 0

@@ -284,8 +284,6 @@ const handleMouseLeaveConnector = () => {
 <style lang="stylus">
 .connector
   position relative
-  height 32px
-  padding-top 9px !important
   z-index 2
   padding 8px
   align-self right

@@ -351,6 +351,7 @@ const isResizing = computed(() => {
   return isResizing && isCurrent
 })
 const startBoxInfoInteraction = (event) => {
+  if (event.target.closest('.connector-button')) { return }
   if (!currentBoxIsSelected.value) {
     store.dispatch('clearMultipleSelected')
   }
@@ -868,21 +869,21 @@ const focusColor = computed(() => {
       .selected-user-avatar(v-if="isRemoteSelected || isRemoteBoxDetailsVisible" :style="{backgroundColor: remoteSelectedColor || remoteBoxDetailsVisibleColor}")
         img(src="@/assets/anon-avatar.svg")
 
-  ItemConnectorButton(
-    :visible="connectorIsVisible"
-    :isTransparent="connectorIsTransparent"
-    :box="box"
-    :itemConnections="state.currentConnections"
-    :isConnectingTo="isConnectingTo"
-    :isConnectingFrom="isConnectingFrom"
-    :isVisibleInViewport="state.isVisibleInViewport"
-    :isRemoteConnecting="state.isRemoteConnecting"
-    :remoteConnectionColor="state.remoteConnectionColor"
-    :currentBackgroundColor="color"
-    :backgroundIsTransparent="true"
-    :parentDetailsIsVisible="currentBoxDetailsIsVisible"
-    @shouldRenderParent="updateShouldRenderParent"
-  )
+    ItemConnectorButton(
+      :visible="connectorIsVisible"
+      :isTransparent="connectorIsTransparent"
+      :box="box"
+      :itemConnections="state.currentConnections"
+      :isConnectingTo="isConnectingTo"
+      :isConnectingFrom="isConnectingFrom"
+      :isVisibleInViewport="state.isVisibleInViewport"
+      :isRemoteConnecting="state.isRemoteConnecting"
+      :remoteConnectionColor="state.remoteConnectionColor"
+      :currentBackgroundColor="color"
+      :backgroundIsTransparent="true"
+      :parentDetailsIsVisible="currentBoxDetailsIsVisible"
+      @shouldRenderParent="updateShouldRenderParent"
+    )
 
   //- resize
   .bottom-button-wrap(v-if="resizeIsVisible" :class="{unselectable: isPainting}")
@@ -931,6 +932,8 @@ const focusColor = computed(() => {
     --header-font var(--header-font-0)
     z-index 1
     border-radius 4px
+    display flex
+    align-items center
     &.header-font-1
       --header-font var(--header-font-1)
     &.header-font-2
@@ -1022,7 +1025,7 @@ const focusColor = computed(() => {
   .name-wrap
     padding 6px 8px
     padding-top 4px
-    padding-right 10px
+    // padding-right 4px
     display inline-block
     &.is-checked
       text-decoration line-through
@@ -1074,11 +1077,15 @@ const focusColor = computed(() => {
 
   .connector
     padding 8px
+    padding-top 4px
+    padding-bottom 3px
+    padding-left 0
     align-self right
     cursor cell
-    position absolute
     right 0
     pointer-events all
+    position relative
+    display inline-block
     button
       z-index 1
 </style>
