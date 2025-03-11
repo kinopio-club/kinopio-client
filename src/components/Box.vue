@@ -714,6 +714,14 @@ const connectorIsVisible = computed(() => {
   }
   return isVisible
 })
+const connectorIsTransparent = computed(() => {
+  // updateCurrentConnections()
+  const isPresentationMode = store.state.isPresentationMode
+  const isNotHovering = !state.isHover
+  const isNotConnected = !isConnectingTo.value && !isConnectingTo.value && !state.currentConnections.length
+  return isPresentationMode && isNotHovering && isNotConnected
+})
+
 const updateRemoteConnections = () => {
   const connection = store.state.remoteCurrentConnections.find(remoteConnection => {
     const isConnectedToStart = remoteConnection.startItemId === props.box.id
@@ -862,6 +870,7 @@ const focusColor = computed(() => {
 
   ItemConnectorButton(
     :visible="connectorIsVisible"
+    :isTransparent="connectorIsTransparent"
     :box="box"
     :itemConnections="state.currentConnections"
     :isConnectingTo="isConnectingTo"
