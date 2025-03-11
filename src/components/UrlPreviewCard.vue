@@ -17,6 +17,7 @@ watch(() => store.state.preventDraggedCardFromShowingDetails, (value, prevValue)
   disableIsActive()
 })
 
+// remove retryUrlPreview after 2025
 const emit = defineEmits(['retryUrlPreview'])
 
 const props = defineProps({
@@ -152,6 +153,7 @@ const removeTrailingTweetText = (description) => {
 
 const handleImageError = (event) => {
   console.info('🚑 urlPreviewCard handleImageError', event)
+  // remove after 2025
   const url = props.card.urlPreviewUrl
   const isInstagram = url.includes('instagram')
   // generic image error
