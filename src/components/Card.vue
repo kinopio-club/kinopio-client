@@ -625,10 +625,10 @@ const connectorIsVisible = computed(() => {
   return isVisible
 })
 const connectorIsTransparent = computed(() => {
-  updateCurrentConnections()
+  if (utils.isMobile()) { return }
   const isPresentationMode = store.state.isPresentationMode
   const isNotHovering = store.state.currentUserIsHoveringOverCardId !== props.card.id
-  const isNotConnected = !isConnectingTo.value && !isConnectingTo.value && !state.currentConnections.length
+  const isNotConnected = !isConnectingFrom.value && !isConnectingTo.value && !state.currentConnections.length
   return isPresentationMode && isNotHovering && isNotConnected
 })
 const isCardButtonsVisible = computed(() => {

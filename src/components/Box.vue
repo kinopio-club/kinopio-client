@@ -718,6 +718,7 @@ const connectorIsVisible = computed(() => {
   return isVisible
 })
 const connectorIsTransparent = computed(() => {
+  if (utils.isMobile()) { return }
   const isPresentationMode = store.state.isPresentationMode
   const isNotHovering = !state.isHover
   const isNotConnected = !isConnectingFrom.value && !isConnectingTo.value && !state.currentConnections.length
