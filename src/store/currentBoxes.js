@@ -14,6 +14,22 @@ import { nextTick } from 'vue'
 let currentSpaceId
 let prevMovePositions = {}
 
+const incrementBoxesZ = (context, boxes) => {
+  boxes = boxes.map(box => {
+    if (box.isLocked) { return box }
+    const boxes = context.getters.all
+    const maxInt = Number.MAX_SAFE_INTEGER - 1000
+    let highestBoxZ = utils.highestItemZ(boxes)
+    if (highestBoxZ > maxInt) {
+      context.dispatch('clearAllZs')
+      highestBoxZ = 1
+    }
+    box.z = highestBoxZ
+    return box
+  })
+  return boxes
+}
+
 export default {
   namespaced: true,
   state: {
@@ -605,6 +621,36 @@ export default {
       nextTick(() => {
         context.dispatch('currentConnections/updateMultiplePaths', boxes, { root: true })
       })
+    },
+
+    // z-index
+
+    clearAllZs: async (context) => {
+      let boxes = context.getters.all
+      for (const box of boxes) {
+        const body = { id: box.id, z: 0 }
+        context.commit('update', body)
+        context.dispatch('broadcast/update', { updates: body, type: 'updateBox', handler: 'currentBoxes/update' }, { root: true })
+        await context.dispatch('api/addToQueue', { name: 'updateBox', body }, { root: true })
+      }
+    },
+    incrementZ: async (context, id) => {
+      const box = context.getters.byId(id)
+      if (!box) { return }
+      if (box.isLocked) { return }
+      const boxes = context.getters.all
+      const maxInt = Number.MAX_SAFE_INTEGER - 1000
+      let highestBoxZ = utils.highestItemZ(boxes)
+      if (highestBoxZ > maxInt) {
+        context.dispatch('clearAllZs')
+        highestBoxZ = 1
+      }
+      const canEditSpace = context.rootGetters['currentUser/canEditSpace']()
+      const body = { id, z: highestBoxZ + 1 }
+      context.commit('update', body)
+      if (!canEditSpace) { return }
+      context.dispatch('broadcast/update', { updates: body, type: 'updateBox', handler: 'currentBoxes/update' }, { root: true })
+      await context.dispatch('api/addToQueue', { name: 'updateBox', body }, { root: true })
     },
 
     // remove
