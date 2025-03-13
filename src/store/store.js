@@ -215,6 +215,7 @@ const store = createStore({
     // pinned dialogs
     spaceDetailsIsPinned: false,
     sidebarIsPinned: false,
+    minimapIsPinned: false,
     searchIsPinned: false,
     userSettingsIsPinned: false,
 
@@ -1132,6 +1133,10 @@ const store = createStore({
     sidebarIsPinned: (state, value) => {
       utils.typeCheck({ value, type: 'boolean' })
       state.sidebarIsPinned = value
+    },
+    minimapIsPinned: (state, value) => {
+      utils.typeCheck({ value, type: 'boolean' })
+      state.minimapIsPinned = value
     },
     spaceDetailsIsPinned: (state, value) => {
       utils.typeCheck({ value, type: 'boolean' })
@@ -2051,6 +2056,10 @@ const store = createStore({
     sidebarIsPinned: (context, value) => {
       utils.typeCheck({ value, type: 'boolean' })
       context.commit('sidebarIsPinned', value)
+    },
+    minimapIsPinned: (context, value) => {
+      utils.typeCheck({ value, type: 'boolean' })
+      context.commit('minimapIsPinned', value)
     },
     spaceDetailsIsPinned: (context, value) => {
       utils.typeCheck({ value, type: 'boolean' })
