@@ -156,7 +156,6 @@ dialog#sidebar.sidebar.is-pinnable(
           button(@click.left="toggleSection('removed')" :class="{ active: state.removedIsVisible}" title="Removed Cards and Spaces")
             img.icon(src="@/assets/remove.svg")
             img.icon.remove-undo(src="@/assets/undo.svg")
-        .segmented-buttons
           //- Favorites
           button(@click.left="toggleSection('history')" :class="{ active: state.historyIsVisible}" title="Space History")
             img.icon.time(src="@/assets/time.svg")
@@ -209,28 +208,28 @@ dialog#sidebar.sidebar.is-pinnable(
 
   .segmented-buttons-wrap
     .segmented-buttons
-      // &:first-child
-      //   button,
-      //   label
-      //     &:last-child
-      //       border-bottom-right-radius 0
-      // middle row
-      &:nth-child(2)
-        margin-top -1px
+      &:first-child
         button,
         label
-          &:first-child
-            border-top-left-radius 0
-            border-bottom-left-radius 0
-          // &:last-child
-            // border-top-right-radius 0
+          &:last-child
+            border-bottom-right-radius 0
+      // middle row
+      // &:nth-child(2)
+      //   margin-top -1px
+      //   button,
+      //   label
+      //     &:first-child
+      //       border-top-left-radius 0
+      //       border-bottom-left-radius 0
+      //     // &:last-child
+      //       // border-top-right-radius 0
       // last row
       &:last-child
         button,
         label
           &:first-child
             border-top-left-radius 0
-          // &:last-child
-          //   border-top-right-radius var(--entity-radius)
+          &:last-child
+            border-top-right-radius var(--entity-radius)
 
 </style>
