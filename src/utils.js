@@ -1018,6 +1018,8 @@ export default {
     box.resizeHeight = parseInt(element.dataset.resizeHeight)
     box.width = parseInt(element.dataset.resizeWidth)
     box.height = parseInt(element.dataset.resizeHeight)
+    box.infoWidth = parseInt(element.dataset.infoWidth)
+    box.infoHeight = parseInt(element.dataset.infoHeight)
     return box
   },
   updateCardDimensionsDataWhileDragging (card) {
@@ -1116,6 +1118,14 @@ export default {
     const x = parseInt(element.style.left)
     const y = parseInt(element.style.top)
     return { x, y }
+  },
+  boxInfoPositionFromId (boxId) {
+    const element = document.querySelector(`.box-info[data-box-id="${boxId}"]`)
+    // if (!element) { return }
+    const boxInfoRect = element.getBoundingClientRect()
+    const infoWidth = Math.round(boxInfoRect.width + 4)
+    const infoHeight = Math.round(boxInfoRect.height)
+    return { infoWidth, infoHeight }
   },
   isPointInsideRect (point, rect) {
     const xIsInside = this.isBetween({
@@ -1261,7 +1271,7 @@ export default {
   },
   estimatedItemConnectorPosition (item) {
     const offset = 15
-    const width = item.resizeWidth || item.width
+    const width = item.infoWidth || item.resizeWidth || item.width
     let rightSide = item.x + width
     let x = rightSide
     x = x - offset
