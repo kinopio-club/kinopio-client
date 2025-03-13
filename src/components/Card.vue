@@ -624,7 +624,7 @@ const connectorIsVisible = computed(() => {
   }
   return isVisible
 })
-const connectorIsTransparent = computed(() => {
+const connectorIsHiddenByOpacity = computed(() => {
   if (utils.isMobile()) { return }
   const isPresentationMode = store.state.isPresentationMode
   const isNotHovering = store.state.currentUserIsHoveringOverCardId !== props.card.id
@@ -2037,7 +2037,7 @@ const focusColor = computed(() => {
           //- connector
           ItemConnectorButton(
             :visible="connectorIsVisible"
-            :isTransparent="connectorIsTransparent"
+            :isHiddenByOpacity="connectorIsHiddenByOpacity"
             :card="card"
             :itemConnections="state.currentConnections"
             :isConnectingTo="isConnectingTo"

@@ -717,7 +717,7 @@ const connectorIsVisible = computed(() => {
   }
   return isVisible
 })
-const connectorIsTransparent = computed(() => {
+const connectorIsHiddenByOpacity = computed(() => {
   if (utils.isMobile()) { return }
   const isPresentationMode = store.state.isPresentationMode
   const isNotHovering = !state.isHover
@@ -875,7 +875,7 @@ const focusColor = computed(() => {
 
     ItemConnectorButton(
       :visible="connectorIsVisible"
-      :isTransparent="connectorIsTransparent"
+      :isHiddenByOpacity="connectorIsHiddenByOpacity"
       :box="box"
       :itemConnections="state.currentConnections"
       :isConnectingTo="isConnectingTo"
