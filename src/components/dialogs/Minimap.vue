@@ -2,7 +2,7 @@
 import { reactive, computed, onMounted, onBeforeUnmount, defineProps, defineEmits, watch, ref, nextTick } from 'vue'
 import { useStore } from 'vuex'
 
-import Minimap from '@/components/sidebar/Minimap.vue'
+import Minimap from '@/components/Minimap.vue'
 import utils from '@/utils.js'
 
 const store = useStore()
