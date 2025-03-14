@@ -39,13 +39,20 @@ const updateDialogHeight = async () => {
   let element = dialogElement.value
   state.dialogHeight = utils.elementHeightFromHeader(element)
 }
-
 const updateSize = async () => {
   await nextTick()
   const element = rowElement.value
   if (!element) { return }
   const rect = element.getBoundingClientRect()
   state.size = rect.width
+}
+
+// pin dialog
+
+const dialogIsPinned = computed(() => store.state.minimapIsPinned)
+const toggleDialogIsPinned = () => {
+  const isPinned = !dialogIsPinned.value
+  store.dispatch('minimapIsPinned', isPinned)
 }
 
 // boxes
@@ -64,13 +71,24 @@ const scrollIntoView = (box) => {
 </script>
 
 <template lang="pug">
-dialog.narrow.minimap(v-if="props.visible" :open="props.visible" @click.left.stop ref="dialogElement" :style="{'max-height': state.dialogHeight + 'px'}")
-  section.minimap
+dialog.narrow.minimap.is-pinnable(
+  v-if="props.visible"
+  :open="props.visible"
+  @click.left.stop
+  ref="dialogElement"
+  :style="{'max-height': state.dialogHeight + 'px'}"
+  :data-is-pinned="dialogIsPinned"
+  :class="{'is-pinned': dialogIsPinned}"
+)
+  section.minimap-section
     .row.title-row(ref="rowElement")
       span Minimap
+      .button-wrap(@click.left.stop="toggleDialogIsPinned" title="Pin dialog")
+        button.small-button(:class="{active: dialogIsPinned}")
+          img.icon.pin.right-pin(src="@/assets/pin.svg")
     .row
       MinimapCanvas(:visible="Boolean(state.size)" :size="state.size")
-  section.minimap
+  section.boxes-section
     .row
       p Jump to Box
     .row.boxes-row(v-if="boxes.length")
@@ -90,7 +108,11 @@ dialog.minimap
   bottom 28px
   top initial
   left initial
-  section.minimap
+  &.is-pinned
+    right -32px
+  section.minimap-section
+    user-select none
+  section.boxes-section
     user-select none
     .row.boxes-row
       flex-wrap wrap
