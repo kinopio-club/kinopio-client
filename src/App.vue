@@ -558,17 +558,17 @@ label
   position absolute
   right 0
   top 0
-  button
+  > button
     padding 0
     padding-left 6px
     padding-right 6px
     font-size 12px
   &:hover
-    button
+    > button
       box-shadow var(--button-hover-shadow)
       background-color var(--secondary-hover-background)
   &:active
-    button
+    > button
       box-shadow var(--button-active-inset-shadow)
       background-color var(--secondary-active-background)
 
@@ -639,7 +639,7 @@ dialog
   textarea
     color var(--primary)
   &.is-pinnable
-    transition left 0.1s, top 0.1s
+    transition left 0.1s, top 0.1s, right 0.1s
   &.narrow
     width 230px
   &.wide

@@ -52,8 +52,7 @@ const state = reactive({
   statsIsVisible: false,
   textIsVisible: false,
   favoritesIsVisible: false,
-  historyIsVisible: false,
-  minimapIsVisible: false
+  historyIsVisible: false
 })
 
 const clearVisible = () => {
@@ -66,7 +65,6 @@ const clearVisible = () => {
   state.textIsVisible = false
   state.favoritesIsVisible = false
   state.historyIsVisible = false
-  state.minimapIsVisible = false
 }
 
 const updateDialogHeight = async () => {
@@ -101,7 +99,7 @@ const toggleSection = (value) => {
 const restoreUserLastSidebarSection = () => {
   clearVisible()
   const section = store.state.currentUser.lastSidebarSection
-  const values = ['text', 'stats', 'AIImages', 'inbox', 'removed', 'links', 'tags', 'favorites', 'history', 'minimap'] // listed in api docs
+  const values = ['text', 'stats', 'AIImages', 'inbox', 'removed', 'links', 'tags', 'favorites', 'history'] // listed in api docs
   const isValid = values.includes(section)
   if (section && isValid) {
     state[section + 'IsVisible'] = true
@@ -116,7 +114,15 @@ const updateUserLastSidebarSection = (name) => {
 </script>
 
 <template lang="pug">
-dialog#sidebar.sidebar.is-pinnable(v-if="visible" :open="visible" @click.left.stop="closeDialogs" ref="dialogElement" :style="{'max-height': state.dialogHeight + 'px'}" :data-is-pinned="dialogIsPinned" :class="{'is-pinned': dialogIsPinned}")
+dialog#sidebar.sidebar.is-pinnable(
+  v-if="visible"
+  :open="visible"
+  @click.left.stop="closeDialogs"
+  ref="dialogElement"
+  :style="{'max-height': state.dialogHeight + 'px'}"
+  :data-is-pinned="dialogIsPinned"
+  :class="{'is-pinned': dialogIsPinned}"
+)
   section
     .row.title-row-flex
       .button-wrap.segmented-buttons-wrap
@@ -136,9 +142,6 @@ dialog#sidebar.sidebar.is-pinnable(v-if="visible" :open="visible" @click.left.st
             span Links
         //- second row
         .segmented-buttons
-          //- Minimap
-          button(@click.left="toggleSection('minimap')" :class="{ active: state.minimapIsVisible}" title="Minimap")
-            img.icon.minimap(src="@/assets/minimap.svg")
           //- Favorites
           button(@click.left="toggleSection('favorites')" :class="{ active: state.favoritesIsVisible}" title="Favorites")
             img.icon(src="@/assets/heart-empty.svg")
@@ -153,7 +156,6 @@ dialog#sidebar.sidebar.is-pinnable(v-if="visible" :open="visible" @click.left.st
           button(@click.left="toggleSection('removed')" :class="{ active: state.removedIsVisible}" title="Removed Cards and Spaces")
             img.icon(src="@/assets/remove.svg")
             img.icon.remove-undo(src="@/assets/undo.svg")
-        .segmented-buttons
           //- Favorites
           button(@click.left="toggleSection('history')" :class="{ active: state.historyIsVisible}" title="Space History")
             img.icon.time(src="@/assets/time.svg")
@@ -173,9 +175,6 @@ dialog#sidebar.sidebar.is-pinnable(v-if="visible" :open="visible" @click.left.st
   Inbox(:visible="state.inboxIsVisible")
   Favorites(:visible="state.favoritesIsVisible")
   History(:visible="state.historyIsVisible")
-  section.minimap(v-if="state.minimapIsVisible")
-    .badge.info
-      span Minimap has been moved from Sidebar to the footer button
 
 </template>
 
@@ -201,8 +200,6 @@ dialog#sidebar.sidebar.is-pinnable(v-if="visible" :open="visible" @click.left.st
   .icon.flower
     vertical-align -1px
     height 11px
-  .icon.minimap
-    vertical-align -2px
   .icon.time
     vertical-align -1px
 
@@ -211,28 +208,28 @@ dialog#sidebar.sidebar.is-pinnable(v-if="visible" :open="visible" @click.left.st
 
   .segmented-buttons-wrap
     .segmented-buttons
-      // &:first-child
-      //   button,
-      //   label
-      //     &:last-child
-      //       border-bottom-right-radius 0
-      // middle row
-      &:nth-child(2)
-        margin-top -1px
+      &:first-child
         button,
         label
-          &:first-child
-            border-top-left-radius 0
-            border-bottom-left-radius 0
-          // &:last-child
-            // border-top-right-radius 0
+          &:last-child
+            border-bottom-right-radius 0
+      // middle row
+      // &:nth-child(2)
+      //   margin-top -1px
+      //   button,
+      //   label
+      //     &:first-child
+      //       border-top-left-radius 0
+      //       border-bottom-left-radius 0
+      //     // &:last-child
+      //       // border-top-right-radius 0
       // last row
       &:last-child
         button,
         label
           &:first-child
             border-top-left-radius 0
-          // &:last-child
-          //   border-top-right-radius var(--entity-radius)
+          &:last-child
+            border-top-right-radius var(--entity-radius)
 
 </style>

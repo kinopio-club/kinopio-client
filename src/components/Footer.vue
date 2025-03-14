@@ -31,7 +31,9 @@ onMounted(() => {
         store.commit('shouldExplicitlyHideFooter', false)
       }
     } else if (mutation.type === 'closeAllDialogs') {
-      hideMinimap()
+      if (!store.state.minimapIsPinned) {
+        hideMinimap()
+      }
     } else if (mutation.type === 'triggerMinimapIsVisible') {
       toggleMinimap()
     }
@@ -92,6 +94,7 @@ const leftIsVisble = computed(() => {
 })
 const controlsIsVisible = computed(() => {
   // if (isPresentationMode.value) { return }
+  if (store.state.minimapIsPinned) { return true }
   if (shouldExplicitlyHideFooter.value) { return }
   const isTouchDevice = store.state.isTouchDevice
   if (!isTouchDevice) { return true }
