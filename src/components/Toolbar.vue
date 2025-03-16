@@ -38,7 +38,7 @@ const toggleToolbar = (value) => {
 
 <template lang="pug">
 nav#toolbar.toolbar(v-if="visible")
-  DrawingToolbar(:visible="true")
+  DrawingToolbar(:visible="currentUserToolbarIsDrawing")
   .toolbar-items
     //- Box
     .segmented-buttons
@@ -59,7 +59,7 @@ nav#toolbar.toolbar(v-if="visible")
           :class="{ active: currentUserToolbarIsDrawing, 'translucent-button': !shouldIncreaseUIContrast }"
           @click="toggleToolbar('drawing')"
         )
-          span A
+          span D
         .label-badge.toolbar-badge-wrap.jiggle(v-if="currentUserToolbarIsDrawing")
           span Drawing (D)
 </template>

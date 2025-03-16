@@ -27,9 +27,7 @@ const xyz = () => {
 </script>
 
 <template lang="pug">
-
-//- Drawing toolbar
-.segmented-buttons.tool-toolbar-buttons(v-if="props.visible")
+.segmented-buttons.drawing-toolbar(v-if="props.visible")
   button(
     title="Size (S)"
     :class="{ active: state.sizePickerIsVisible, 'translucent-button': !shouldIncreaseUIContrast }"
@@ -51,7 +49,7 @@ const xyz = () => {
 </template>
 
 <style lang="stylus">
-.tool-toolbar-buttons
+.drawing-toolbar
   position absolute
   top 29px
   left 36px
