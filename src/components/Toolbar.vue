@@ -54,12 +54,12 @@ nav#toolbar.toolbar(v-if="visible")
 
       //- Drawing
       .button-wrap
-        button(
+        button.drawing-button(
           title="Drawing (D)"
           :class="{ active: currentUserToolbarIsDrawing, 'translucent-button': !shouldIncreaseUIContrast }"
           @click="toggleToolbar('drawing')"
         )
-          span D
+          img.icon.pencil-icon(src="@/assets/pencil.svg")
         .label-badge.toolbar-badge-wrap.jiggle(v-if="currentUserToolbarIsDrawing")
           span Drawing (D)
 </template>

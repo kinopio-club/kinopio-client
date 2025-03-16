@@ -88,6 +88,7 @@
     img.icon(src="@/assets/open.svg")
     img.icon(src="@/assets/openai.svg")
     img.icon(src="@/assets/pause.svg")
+    img.icon(src="@/assets/pencil.svg")
     img.icon(src="@/assets/phone.svg")
     img.icon(src="@/assets/pin.svg")
     img.icon(src="@/assets/play.svg")
