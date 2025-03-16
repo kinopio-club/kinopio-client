@@ -712,13 +712,6 @@ dialog
   section.subsection + section.subsection
     border-top 0
 
-  .change-color
-    height var(--button-fixed-height)
-    .current-color
-      height 14px
-      width 14px
-      border-radius var(--small-entity-radius)
-
   a
     text-decoration-thickness 1px
     color var(--text-link)
@@ -760,7 +753,15 @@ button
     vertical-align -4px
     margin-right 6px
 
+.change-color
+  height var(--button-fixed-height)
+  .current-color
+    height 14px
+    width 14px
+    border-radius var(--small-entity-radius)
+
 .segmented-buttons
+  display flex
   &.first-row
     button
       margin-bottom -1px

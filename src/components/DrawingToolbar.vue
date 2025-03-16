@@ -26,16 +26,25 @@ const shouldIncreaseUIContrast = computed(() => store.state.currentUser.shouldIn
 const closeAllDialogs = () => {
   state.colorPickerIsVisible = false
 }
+const toggleColorPickerIsVisible = () => {
+  const value = !state.colorPickerIsVisible
+  closeAllDialogs()
+  state.colorPickerIsVisible = value
+}
+const drawingColor = computed(() => {
+  return store.state.currentUser.color
+})
 </script>
 
 <template lang="pug">
 .drawing-toolbar(v-if="props.visible")
   .segmented-buttons
-    button(
+    button.change-color(
       title="Color (C)"
       :class="{ active: state.colorPickerIsVisible, 'translucent-button': !shouldIncreaseUIContrast }"
+      @click.left="toggleColorPickerIsVisible"
     )
-      span C
+      .current-color(:style="{backgroundColor: drawingColor}")
     button(
       title="Eraser (E)"
       :class="{ active: state.eraserIsActive, 'translucent-button': !shouldIncreaseUIContrast }"
