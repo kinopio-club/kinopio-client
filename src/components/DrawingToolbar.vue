@@ -35,12 +35,9 @@ const toggleBrushSizePickerIsVisible = () => {
   state.brushSizePickerIsVisible = value
 }
 const updateBrushSize = (value) => {
-  console.log('updateBrushSize', value)
+  store.commit('currentUser/drawingBrushSize', value)
 }
-const currentBrushSize = computed(() => {
-  console.log('🌷currentBrushSize') // currentuser.current or prev drawingbrushsize // store.currentDrawingBrushSize
-  return 'M'
-})
+const currentBrushSize = computed(() => store.state.currentUser.drawingBrushSize)
 </script>
 
 <template lang="pug">
@@ -52,6 +49,7 @@ const currentBrushSize = computed(() => {
       :class="{ active: state.brushSizePickerIsVisible, 'translucent-button': !shouldIncreaseUIContrast }"
       @click.left="toggleBrushSizePickerIsVisible"
     )
+      span.badge.info {{currentBrushSize.toUpperCase()}}
       span S
     button(
       title="Color (C)"
