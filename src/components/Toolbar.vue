@@ -38,32 +38,30 @@ const toggleToolbar = (value) => {
 
 <template lang="pug">
 nav#toolbar.toolbar(v-if="visible")
-  //- active labels
-  .label-badge.toolbar-badge-wrap.jiggle.label-badge-box(v-if="currentUserToolbarIsBox")
-    span Draw Box (B)
-  .label-badge.toolbar-badge-wrap.jiggle(v-if="currentUserToolbarIsDrawing")
-    span Drawing (D)
+  DrawingToolbar(:visible="true")
+  .toolbar-items
+    //- Box
+    .segmented-buttons
+      .button-wrap
+        button(
+          title="Draw Box (B)"
+          :class="{ active: currentUserToolbarIsBox, 'translucent-button': !shouldIncreaseUIContrast }"
+          @click="toggleToolbar('box')"
+        )
+          img.icon.box-icon(src="@/assets/box.svg")
+        .label-badge.toolbar-badge-wrap.jiggle.label-badge-box(v-if="currentUserToolbarIsBox")
+          span Draw Box (B)
 
-  //- Box
-  .segmented-buttons
-    .button-wrap
-      button(
-        title="Draw Box (B)"
-        :class="{ active: currentUserToolbarIsBox, 'translucent-button': !shouldIncreaseUIContrast }"
-        @click="toggleToolbar('box')"
-      )
-        img.icon.box-icon(src="@/assets/box.svg")
-
-    //- Drawing
-    .button-wrap
-      button(
-        title="Drawing (D)"
-        :class="{ active: currentUserToolbarIsDrawing, 'translucent-button': !shouldIncreaseUIContrast }"
-        @click="toggleToolbar('drawing')"
-      )
-        span A
-      DrawingToolbar(:visible="true")
-
+      //- Drawing
+      .button-wrap
+        button(
+          title="Drawing (D)"
+          :class="{ active: currentUserToolbarIsDrawing, 'translucent-button': !shouldIncreaseUIContrast }"
+          @click="toggleToolbar('drawing')"
+        )
+          span A
+        .label-badge.toolbar-badge-wrap.jiggle(v-if="currentUserToolbarIsDrawing")
+          span Drawing (D)
 </template>
 
 <style lang="stylus">
@@ -77,32 +75,30 @@ nav.toolbar
     bottom -8px
     left 5px
     z-index 1
-    width fit-content
+    width max-content
     span
       width 100%
       color var(--primary)
-  .segmented-buttons
-    display flex
-    flex-flow column
-    > .button-wrap
-      button
-        border-radius 0
-        width 32px
-        z-index -1
-      &:first-child
+  .toolbar-items
+    .segmented-buttons
+      display flex
+      flex-flow column
+      > .button-wrap
         button
           border-radius 0
-          border-top-left-radius var(--entity-radius)
-          border-top-right-radius var(--entity-radius)
-      &:last-child
-        button
-          border-radius 0
-          border-bottom-left-radius var(--entity-radius)
-          border-bottom-right-radius var(--entity-radius)
-    > .button-wrap + .button-wrap
-      margin 0
-      margin-top -1px
-
-  .label-badge-box
-    top 24px
+          width 32px
+          z-index -1
+        &:first-child
+          button
+            border-radius 0
+            border-top-left-radius var(--entity-radius)
+            border-top-right-radius var(--entity-radius)
+        &:last-child
+          button
+            border-radius 0
+            border-bottom-left-radius var(--entity-radius)
+            border-bottom-right-radius var(--entity-radius)
+      > .button-wrap + .button-wrap
+        margin 0
+        margin-top -1px
 </style>

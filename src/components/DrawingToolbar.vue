@@ -10,24 +10,49 @@ const props = defineProps({
   visible: Boolean
 })
 const state = reactive({
-  count: 0
+  sizePickerIsVisible: false,
+  colorPickerIsVisible: false,
+  eraserIsActive: false
 })
+
+const closeDialogs = () => {
+  state.sizePickerIsVisible = false
+  state.colorPickerIsVisible = false
+}
+
+const xyz = () => {
+  closeDialogs()
+}
+
 </script>
 
 <template lang="pug">
 
 //- Drawing toolbar
 .segmented-buttons.tool-toolbar-buttons(v-if="props.visible")
-  button
-    span B
-  button
+  button(
+    title="Size (S)"
+    :class="{ active: state.sizePickerIsVisible, 'translucent-button': !shouldIncreaseUIContrast }"
+    @click="xyz"
+  )
+    span S
+  button(
+    title="Color (C)"
+    :class="{ active: state.colorPickerIsVisible, 'translucent-button': !shouldIncreaseUIContrast }"
+    @click="xyz"
+  )
     span C
-
+  button(
+    title="Eraser (E)"
+    :class="{ active: state.eraserIsActive, 'translucent-button': !shouldIncreaseUIContrast }"
+    @click="xyz"
+  )
+    span E
 </template>
 
-<style lang="stylus" scoped>
+<style lang="stylus">
 .tool-toolbar-buttons
   position absolute
-  top 0
-  left 20px
+  top 29px
+  left 36px
 </style>
