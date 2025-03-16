@@ -7,6 +7,14 @@ import BrushSizePicker from '@/components/dialogs/BrushSizePicker.vue'
 
 const store = useStore()
 
+onMounted(() => {
+  store.subscribe(mutation => {
+    if (mutation.type === 'closeAllDialogs') {
+      closeAllDialogs()
+    }
+  })
+})
+
 const props = defineProps({
   visible: Boolean
 })
@@ -17,23 +25,27 @@ const state = reactive({
 })
 
 const shouldIncreaseUIContrast = computed(() => store.state.currentUser.shouldIncreaseUIContrast)
-const closeDialogs = () => {
+const closeAllDialogs = () => {
   state.brushSizePickerIsVisible = false
   state.colorPickerIsVisible = false
 }
 const toggleBrushSizePickerIsVisible = () => {
   const value = !state.brushSizePickerIsVisible
-  closeDialogs()
+  closeAllDialogs()
   state.brushSizePickerIsVisible = value
 }
 const updateBrushSize = (value) => {
   console.log('updateBrushSize', value)
 }
+const currentBrushSize = computed(() => {
+  console.log('🌷currentBrushSize') // currentuser.current or prev drawingbrushsize // store.currentDrawingBrushSize
+  return 'M'
+})
 </script>
 
 <template lang="pug">
 .drawing-toolbar(v-if="props.visible")
-  BrushSizePicker(:visible="state.brushSizePickerIsVisible" @updateBrushSize="updateBrushSize")
+  BrushSizePicker(:visible="state.brushSizePickerIsVisible" @updateBrushSize="updateBrushSize" :currentBrushSize="currentBrushSize")
   .segmented-buttons
     button(
       title="Size (S)"
