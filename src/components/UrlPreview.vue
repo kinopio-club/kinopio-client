@@ -43,7 +43,9 @@ const previewHasInfo = computed(() => Boolean(props.card.urlPreviewTitle || prop
 const isTextOnly = computed(() => shouldHideImage.value || !props.card.urlPreviewImage)
 const filteredTitle = computed(() => {
   let title = props.card.urlPreviewTitle
-  if (!title) { return }
+  if (!title) {
+    return props.card.urlPreviewUrl
+  }
   title = title.replace('on Twitter', '')
   return title
 })

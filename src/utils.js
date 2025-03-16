@@ -330,7 +330,7 @@ export default {
     if (min <= value && value <= max) { return true }
   },
   percentageBetween ({ value, min, max }) {
-    return ((value - min) * 100) / (max - min)
+    return ((value - min) / (max - min)) * 100
   },
   clone (object) {
     if (!object) { return }
@@ -342,7 +342,7 @@ export default {
   isUndefinedOrNull (value) {
     return value === undefined || value === null
   },
-  typeCheck ({ value, type, allowUndefined, origin }) {
+  typeCheck ({ value, type, allowUndefined, origin, silenceWarning }) {
     if (allowUndefined && this.isUndefinedOrNull(value)) {
       return true
     }
@@ -350,7 +350,9 @@ export default {
       return true
     }
     if (typeof value !== type) { // eslint-disable-line valid-typeof
-      console.error(`🚑 passed value is not ${type}`, value, origin)
+      if (!silenceWarning) {
+        console.error(`🚑 passed value is not ${type}`, value, origin)
+      }
       return false
     } else {
       return true
@@ -427,6 +429,12 @@ export default {
     }
     return isString
   },
+  normalizeToObject (item) {
+    if (typeof item === 'string') {
+      item = JSON.parse(item)
+    }
+    return item
+  },
   updateObject (object, updates) {
     this.typeCheck({ value: updates, type: 'object', origin: 'updateObject' })
     const keys = Object.keys(updates)
@@ -477,10 +485,12 @@ export default {
   findInArrayOfObjects (array, key, value) {
     return array.find(item => item[key] === value)
   },
-  cursorsAreClose (startCursor, endCursor) {
+  cursorsAreClose (startCursor, endCursor, zoom) {
     if (!startCursor) { return }
     if (!endCursor) { return }
-    const threshold = 5
+    zoom = zoom || this.spaceCounterZoomDecimal()
+    let threshold = 5
+    threshold = threshold * zoom
     const xRange = {
       value: endCursor.x,
       min: startCursor.x - threshold,
@@ -524,6 +534,14 @@ export default {
     if (event.touches) {
       return event.touches.length > 1
     }
+  },
+  isEventTouchOrMouseLeftButton (event) {
+    const isMouseEvent = event.type.includes('mouse')
+    if (!isMouseEvent) {
+      // ignore touch events
+      return true
+    }
+    return event.button === 0
   },
   isMacOrIpad () {
     return window.navigator.platform === 'MacIntel'
@@ -674,7 +692,7 @@ export default {
   truncated (string, limit) {
     if (!string) { return '' }
     limit = limit || 60
-    if (string.length < limit) { return string }
+    if (string.length <= limit) { return string }
     string = string.substring(0, limit) + '…'
     return string
   },
@@ -701,7 +719,8 @@ export default {
     }
     return rangeArray
   },
-  normalizeToUnixTime (date) {
+  unixTime (date) {
+    date = date || new Date()
     return new Date(date).getTime()
   },
   shortRelativeTime (date) {
@@ -834,6 +853,18 @@ export default {
     }
     return color
   },
+  safeColor (color) {
+    const brightnessThreshold = 0.5
+    const brightness = colord(color).brightness()
+    const isTooBright = brightness > 0.8
+    const isTooDark = brightness < 0.2
+    if (isTooBright) {
+      color = colord(color).darken(brightnessThreshold).toHex()
+    } else if (isTooDark) {
+      color = colord(color).lighten(brightnessThreshold).toHex()
+    }
+    return color
+  },
   colorClasses ({ backgroundColor, backgroundColorIsDark }) {
     backgroundColorIsDark = backgroundColorIsDark || this.colorIsDark(backgroundColor)
     let classes = []
@@ -884,7 +915,7 @@ export default {
     }
     return rect
   },
-  sortItemsAlphabeticallyBy (items, property) {
+  sortByAlphabetical (items, property) {
     const sorted = items.sort((a, b) => {
       // Case-insensitive comparison, ignore emojis
       let propA = this.normalizeString(a[property]).trim()
@@ -910,6 +941,27 @@ export default {
       return a.x - b.x
     })
   },
+  sortByCreatedAt (items) {
+    const sortedItems = items.sort((a, b) => {
+      const bCreatedAt = dayjs(b.createdAt).unix()
+      const aCreatedAt = dayjs(a.createdAt).unix()
+      return bCreatedAt - aCreatedAt
+    })
+    return sortedItems
+  },
+  sortByUpdatedAt (items) {
+    items = items.map(space => {
+      space.editedAt = space.editedAt || space.createdAt
+      return space
+    })
+    const sortedItems = items.sort((a, b) => {
+      const bEditedAt = dayjs(b.editedAt).unix()
+      const aEditedAt = dayjs(a.editedAt).unix()
+      return bEditedAt - aEditedAt
+    })
+    return sortedItems
+  },
+
   nameTextEditAction ({ action, startPosition, endPosition, name }) {
     let newName, offset
     let md = ''
@@ -942,7 +994,7 @@ export default {
   cardElementDimensions (card) {
     if (!card) { return }
     card = this.clone(card)
-    const element = document.querySelector(`article#card[data-card-id="${card.id}"]`)
+    const element = document.querySelector(`.card-wrap[data-card-id="${card.id}"]`)
     if (!element) { return }
     const cardId = card.id
     card.shouldRender = element.dataset.shouldRender
@@ -966,11 +1018,13 @@ export default {
     box.resizeHeight = parseInt(element.dataset.resizeHeight)
     box.width = parseInt(element.dataset.resizeWidth)
     box.height = parseInt(element.dataset.resizeHeight)
+    box.infoWidth = parseInt(element.dataset.infoWidth)
+    box.infoHeight = parseInt(element.dataset.infoHeight)
     return box
   },
   updateCardDimensionsDataWhileDragging (card) {
     if (!card) { return }
-    const element = document.querySelector(`article#card[data-card-id="${card.id}"]`)
+    const element = document.querySelector(`.card-wrap[data-card-id="${card.id}"]`)
     if (!element) { return }
     element.dataset.x = card.x
     element.dataset.y = card.y
@@ -978,19 +1032,19 @@ export default {
     element.dataset.height = card.height
   },
   removeAllCardDimensions (card) {
-    const articleElement = document.querySelector(`article#card[data-card-id="${card.id}"]`)
+    const cardWrapElement = document.querySelector(`.card-wrap[data-card-id="${card.id}"]`)
     const cardElement = document.querySelector(`.card[data-card-id="${card.id}"]`)
-    const contentWrapElement = articleElement.querySelector(`.card-content-wrap`)
-    const cardMediaElement = articleElement.querySelector(`.media-card`)
-    articleElement.style.width = null
-    articleElement.style.height = null
+    const contentWrapElement = cardWrapElement.querySelector(`.card-content-wrap`)
+    const cardMediaElement = cardWrapElement.querySelector(`.media-card`)
+    cardWrapElement.style.width = null
+    cardWrapElement.style.height = null
     cardElement.style.width = null
     contentWrapElement.style.width = null
     contentWrapElement.style.height = null
     if (cardMediaElement) {
       cardMediaElement.style.width = null
     }
-    articleElement.style.maxWidth = null
+    cardWrapElement.style.maxWidth = null
   },
   isMissingDimensions (item) {
     return !item.width || !item.height
@@ -1010,13 +1064,18 @@ export default {
   },
   cardElementFromPosition (x, y) {
     let elements = document.elementsFromPoint(x, y)
-    const cardElement = elements.find(element => {
-      return element.nodeName === 'ARTICLE' // cards are <article>s
+    let cardElement
+    elements.find(element => {
+      const match = element.closest('.card-wrap')
+      if (match) {
+        cardElement = match
+      }
+      return match
     })
     return cardElement
   },
   cardElementFromId (cardId) {
-    return document.querySelector(`article[data-card-id="${cardId}"]`)
+    return document.querySelector(`.card-wrap[data-card-id="${cardId}"]`)
   },
   cardRectFromId (cardId) {
     const element = this.cardElementFromId(cardId)
@@ -1030,8 +1089,24 @@ export default {
     const y = parseInt(element.style.top)
     return { x, y }
   },
+  boxElementFromConnectorPosition (x, y) {
+    let elements = document.elementsFromPoint(x, y)
+    let boxFromConnector
+    const boxElement = elements.find(element => {
+      const classes = Array.from(element.classList)
+      if (classes.includes('connector')) {
+        boxFromConnector = element.closest('.box')
+        return element.closest('.box')
+      }
+      return classes.includes('box-info')
+    })
+    return boxFromConnector || boxElement
+  },
   boxElementFromId (boxId) {
     return document.querySelector(`.box[data-box-id="${boxId}"]`)
+  },
+  boxBackgroundElementFromId (boxId) {
+    return document.querySelector(`.box-background[data-box-id="${boxId}"]`)
   },
   boxRectFromId (boxId) {
     const element = this.boxElementFromId(boxId)
@@ -1043,6 +1118,14 @@ export default {
     const x = parseInt(element.style.left)
     const y = parseInt(element.style.top)
     return { x, y }
+  },
+  boxInfoPositionFromId (boxId) {
+    const element = document.querySelector(`.box-info[data-box-id="${boxId}"]`)
+    // if (!element) { return }
+    const boxInfoRect = element.getBoundingClientRect()
+    const infoWidth = Math.round(boxInfoRect.width + 4)
+    const infoHeight = Math.round(boxInfoRect.height)
+    return { infoWidth, infoHeight }
   },
   isPointInsideRect (point, rect) {
     const xIsInside = this.isBetween({
@@ -1077,6 +1160,18 @@ export default {
       rectA.x + rectA.width > rectB.x &&
       rectA.y < rectB.y + rectB.height &&
       rectA.y + rectA.height > rectB.y
+    )
+  },
+  isRectACompletelyInsideRectB (rectA, rectB) {
+    // udpate rects to support space zoom
+    rectA = this.rectDimensions(rectA)
+    rectB = this.rectDimensions(rectB)
+    // is rectA completely inside rectB
+    return (
+      rectA.x >= rectB.x &&
+      rectA.y >= rectB.y &&
+      (rectA.x + rectA.width) <= (rectB.x + rectB.width) &&
+      (rectA.y + rectA.height) <= (rectB.y + rectB.height)
     )
   },
   nameStringFromItems (items) {
@@ -1176,7 +1271,7 @@ export default {
   },
   estimatedItemConnectorPosition (item) {
     const offset = 15
-    const width = item.resizeWidth || item.width
+    const width = item.infoWidth || item.resizeWidth || item.width
     let rightSide = item.x + width
     let x = rightSide
     x = x - offset
@@ -1235,9 +1330,9 @@ export default {
     return { x, y }
   },
   curveControlPointFromPath (path) {
-    // https://regexr.com/6mptt
+    // https://regexr.com/8c6t6
     // matches 'q'-digits-,-digits-space: m295,284 q90,40 87,57 → "q90,40"
-    const pathCoordsPattern = new RegExp(/q([\d.]{1,}),([\d.]{1,})/)
+    const pathCoordsPattern = new RegExp(/q([-?\d.]{1,}),([-?\d.]{1,})/)
     let coords = path.match(pathCoordsPattern)
     coords = {
       x: coords[1],
@@ -1357,19 +1452,28 @@ export default {
     const endValue = 1
     return -endValue * (elaspedTime /= duration) * (elaspedTime - 2) + startValue
   },
-  highestCardZ (cards) {
-    let highestCardZ = Math.max(...cards.map(card => card.z)) + 1
-    return highestCardZ
+  highestItemZ (items) {
+    let highestZ = Math.max(...items.map(item => item.z || 0)) + 1
+    return highestZ
   },
 
   // Spaces 🌙
 
   spaceIsUnchanged (prevSpace, newSpace) {
     if (!prevSpace.cards || !prevSpace.connections) { return false }
-    const cardsCountIsUnchanged = prevSpace.cards.length === newSpace.cards.length
-    const boxesCountIsUnchanged = prevSpace.boxes.length === newSpace.boxes.length
-    const editedAtIsUnchanged = prevSpace.editedAt === newSpace.editedAt
-    return cardsCountIsUnchanged && boxesCountIsUnchanged && editedAtIsUnchanged
+    const cardsCountIsUnchanged = prevSpace.cards?.length === newSpace.cards.length
+    const boxesCountIsUnchanged = prevSpace.boxes?.length === newSpace.boxes.length
+    const metaKeys = ['name', 'editedAt', 'collaboratorKey', 'background', 'backgroundGradient', 'backgroundIsGradient', 'backgroundTint']
+    let metaIsUpdated
+    metaKeys.forEach(key => {
+      if (prevSpace[key] !== newSpace[key]) {
+        metaIsUpdated = true
+      }
+    })
+    if (metaIsUpdated) {
+      return false
+    }
+    return cardsCountIsUnchanged && boxesCountIsUnchanged // && editedAtIsUnchanged
   },
   mergeSpaceKeyValues ({ prevItems, newItems, selectedItemIds }) {
     prevItems = prevItems.filter(item => Boolean(item))
@@ -1526,10 +1630,10 @@ export default {
     }
     return userId
   },
-  uniqueSpaceItems (items, nullItemUsers) {
+  async uniqueSpaceItems (items, nullItemUsers) {
     const itemIdDeltas = []
     const connectionTypeIdDeltas = []
-    const user = cache.user()
+    const user = await cache.user()
     let { cards, connections, connectionTypes, boxes, tags } = items
     tags = tags || []
     boxes = boxes || []
@@ -1604,7 +1708,7 @@ export default {
       items[itemName].forEach(item => positionItems.push(item))
     })
     const offset = this.topLeftItem(positionItems)
-    console.log(positionItems, offset)
+    console.info(positionItems, offset)
     // update positions
     consts.itemTypesWithPositions.forEach(itemName => {
       items[itemName] = items[itemName].map(item => {
@@ -1708,7 +1812,7 @@ export default {
     remoteSpace.removedCards = removedCards
     return remoteSpace
   },
-  AddCurrentUserIsCollaboratorToSpaces (spaces, currentUser) {
+  addCurrentUserIsCollaboratorToSpaces (spaces, currentUser) {
     if (!spaces) { return }
     return spaces.map(space => {
       let userId
@@ -1908,6 +2012,10 @@ export default {
     }
     return url
   },
+  urlIsRetina (url) {
+    const isRetina = url.includes('-2x.') || url.includes('@2x.')
+    return isRetina
+  },
   urlIsFloatOrIp (url) {
     // https://regexr.com/58ii6
     // matches numbers '.'' numbers ...
@@ -2079,7 +2187,7 @@ export default {
   urlIsFile (url) {
     if (!url) { return }
     url = url + ' '
-    const fileUrlPattern = new RegExp(/(?:\.txt|\.md|\.markdown|\.pdf|\.log|\.ppt|\.pptx|\.doc|\.docx|\.csv|\.xsl|\.xslx|\.rtf|\.zip|\.tar|\.xml|\.psd|\.ai|\.ind|\.sketch|\.mov|\.heic|\.7z|\.woff|\.woff2|\.otf|\.ttf|\.wav|\.flac\.pla)(?:\n| |\?|&)/igm)
+    const fileUrlPattern = new RegExp(/(?:\.txt|\.md|\.markdown|\.pdf|\.log|\.ppt|\.pptx|\.doc|\.docx|\.csv|\.xls|\.xlsx|\.rtf|\.zip|\.tar|\.xml|\.psd|\.ai|\.ind|\.sketch|\.mov|\.heic|\.7z|\.woff|\.woff2|\.otf|\.ttf|\.wav|\.flac\.pla\.json)(?:\n| |\?|&)/igm)
     const isFile = url.toLowerCase().match(fileUrlPattern)
     return Boolean(isFile)
   },
@@ -2207,7 +2315,7 @@ export default {
         })
       })
       if (!keysToRemove.length) { return }
-      console.log('🫧 trackingKeysToRemove', keysToRemove)
+      console.info('🫧 trackingKeysToRemove', keysToRemove)
       keysToRemove.forEach(key => delete queryObject[key])
       const newUrl = qs.encode(domain, queryObject)
       name = name.replace(url, newUrl)
@@ -2358,7 +2466,7 @@ export default {
   async dataFromClipboard () {
     let text, file
     const items = await navigator.clipboard.read()
-    console.log('🎊 dataFromClipboard', items)
+    console.info('🎊 dataFromClipboard', items)
     for (const item of items) {
       const imageMatch = 'image/'
       const imageType = item.types.find(type => {
@@ -2408,20 +2516,6 @@ export default {
     if (!tags) { return }
     tags = tags.map(tag => tag.substring(2, tag.length - 2))
     return tags
-  },
-  newTag ({ name, defaultColor, cardId, spaceId }) {
-    let color
-    const existingTag = cache.allTags().find(tag => tag.name === name)
-    if (existingTag) {
-      color = existingTag.color
-    }
-    return {
-      name,
-      id: nanoid(),
-      color: color || defaultColor,
-      cardId: cardId,
-      spaceId: spaceId
-    }
   },
   indexesOf (string, search) {
     // adapted from https://stackoverflow.com/a/3410549

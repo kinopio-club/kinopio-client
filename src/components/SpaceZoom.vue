@@ -93,6 +93,7 @@ const removeAnimations = () => {
   state.animateJiggleRight = false
   state.animateJiggleLeft = false
 }
+
 </script>
 
 <template lang="pug">

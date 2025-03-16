@@ -2,21 +2,6 @@
 import { reactive, computed, onMounted, onBeforeUnmount, onUnmounted, defineProps, defineEmits, watch, ref, nextTick } from 'vue'
 import { useStore } from 'vuex'
 
-import Header from '@/components/Header.vue'
-import MagicPaint from '@/components/layers/MagicPaint.vue'
-import UserLabelCursor from '@/components/UserLabelCursor.vue'
-import Footer from '@/components/Footer.vue'
-import WindowHistoryHandler from '@/components/WindowHistoryHandler.vue'
-import KeyboardShortcutsHandler from '@/components/KeyboardShortcutsHandler.vue'
-import ScrollAndTouchHandler from '@/components/ScrollAndTouchHandler.vue'
-import TagDetails from '@/components/dialogs/TagDetails.vue'
-import ItemsLocked from '@/components/ItemsLocked.vue'
-import UserDetails from '@/components/dialogs/UserDetails.vue'
-import NotificationsWithPosition from '@/components/NotificationsWithPosition.vue'
-import SpaceBackground from '@/components/SpaceBackground.vue'
-import SpaceBackgroundTint from '@/components/SpaceBackgroundTint.vue'
-import OutsideSpaceBackground from '@/components/OutsideSpaceBackground.vue'
-import Preload from '@/components/Preload.vue'
 import utils from '@/utils.js'
 import consts from '@/consts.js'
 const store = useStore()
@@ -24,8 +9,8 @@ const store = useStore()
 let statusRetryCount = 0
 
 onMounted(() => {
-  console.log('🐢 kinopio-client build mode', import.meta.env.MODE)
-  console.log('🐸 kinopio-server URL', consts.apiHost())
+  console.info('🐢 kinopio-client build mode', import.meta.env.MODE)
+  console.info('🐸 kinopio-server URL', consts.apiHost())
   store.subscribe((mutation, state) => {
     if (mutation.type === 'broadcast/joinSpaceRoom') {
       updateMetaRSSFeed()
@@ -72,17 +57,9 @@ const pageCursor = computed(() => {
   return undefined
 })
 const spaceZoomDecimal = computed(() => store.getters.spaceZoomDecimal)
-const isDevelpmentBadgeVisible = computed(() => {
-  if (store.state.isPresentationMode) { return }
-  return consts.isDevelopment()
-})
 
 // users
 
-const users = computed(() => {
-  const excludeCurrentUser = true
-  return store.getters['currentSpace/allUsers'](excludeCurrentUser)
-})
 const currentUserId = computed(() => store.state.currentUser.id)
 
 // online
@@ -99,7 +76,7 @@ const updateServerIsOnline = async () => {
   const maxIterations = 10
   const initialDelay = 1000 // 1 second
   const serverStatus = await store.dispatch('api/getStatus')
-  console.log('server online status', serverStatus)
+  console.info('server online status', serverStatus)
   if (serverStatus) {
     store.dispatch('isOnline', true)
   // error offline
@@ -179,7 +156,6 @@ const updateMetaRSSFeed = () => {
   link.href = url
   head.appendChild(link)
 }
-
 </script>
 
 <template lang='pug'>
@@ -190,31 +166,8 @@ const updateMetaRSSFeed = () => {
   :class="{ 'no-background': !isSpacePage, 'is-dark-theme': isThemeDark }"
   :data-current-user-id="currentUserId"
 )
-  base(v-if="!isSpacePage" target="_blank")
-  template(v-if="isSpacePage")
-    OutsideSpaceBackground
-    SpaceBackground
-    SpaceBackgroundTint
-    ItemsLocked
-    MagicPaint
-    //- Presence
-    template(v-for="user in users")
-      UserLabelCursor(:user="user")
-
   //- router-view is Space or Add
   router-view
-  template(v-if="isSpacePage")
-    Header
-    Footer
-    TagDetails
-    UserDetails
-    WindowHistoryHandler
-    KeyboardShortcutsHandler
-    ScrollAndTouchHandler
-    NotificationsWithPosition(layer="app")
-    Preload
-    .badge.label-badge.development-badge(v-if="isDevelpmentBadgeVisible")
-      span DEV
 </template>
 
 <style lang="stylus">
@@ -243,6 +196,7 @@ const updateMetaRSSFeed = () => {
   --serif-font georgia, serif
   --glyphs-font GoodGlyphs, wingdings
   --is-checked-opacity 0.6
+  --focus-padding 20px
 
 @font-face
   font-family 'GoodGlyphs'
@@ -352,6 +306,19 @@ const updateMetaRSSFeed = () => {
 @font-face
   font-family 'migra'
   src url("https://bk.kinopio.club/fonts/migra/PPMigra-Regular.woff2") format("woff2")
+  font-weight normal
+  font-style normal
+// header-font-8
+:root
+  --header-font-8 eiko, var(--sans-serif-font)
+@font-face
+  font-family 'eiko'
+  src url("https://bk.kinopio.club/fonts/eiko/PPEiko-Medium.woff2") format("woff2")
+  font-weight bold
+  font-style normal
+@font-face
+  font-family 'eiko'
+  src url("https://bk.kinopio.club/fonts/eiko/PPEiko-LightItalic.woff2") format("woff2")
   font-weight normal
   font-style normal
 
@@ -591,17 +558,17 @@ label
   position absolute
   right 0
   top 0
-  button
+  > button
     padding 0
     padding-left 6px
     padding-right 6px
     font-size 12px
   &:hover
-    button
+    > button
       box-shadow var(--button-hover-shadow)
       background-color var(--secondary-hover-background)
   &:active
-    button
+    > button
       box-shadow var(--button-active-inset-shadow)
       background-color var(--secondary-active-background)
 
@@ -672,7 +639,7 @@ dialog
   textarea
     color var(--primary)
   &.is-pinnable
-    transition left 0.1s, top 0.1s
+    transition left 0.1s, top 0.1s, right 0.1s
   &.narrow
     width 230px
   &.wide
@@ -809,12 +776,19 @@ button
   > .button-wrap > button,
   > button,
   > label,
-  > select
+  > select,
+  > a
     margin 0
     border-radius 0
+    > button
+      margin 0
+      border-radius 0
     &:first-child
       border-top-left-radius var(--entity-radius)
       border-bottom-left-radius var(--entity-radius)
+      > button
+        border-top-left-radius var(--entity-radius)
+        border-bottom-left-radius var(--entity-radius)
     &:last-child
       border-top-right-radius var(--entity-radius)
       border-bottom-right-radius var(--entity-radius)
@@ -835,12 +809,13 @@ button
   //         border-bottom-left-radius var(--small-entity-radius)
   //         border-bottom-right-radius var(--small-entity-radius)
 
-  button + button,
-  label + button,
-  button + label,
-  label + label,
-  select + button,
-  button + select
+  > button + button,
+  > label + button,
+  > button + label,
+  > label + label,
+  > select + button,
+  > button + select,
+  > a + button
     margin-left -1px
 
 .segmented-buttons-wrap
@@ -1113,6 +1088,10 @@ code
     &.notification-button-badge
       right -3px
       top -3px
+  &.is-background-light
+    color var(--primary-on-light-background)
+  &.is-background-dark
+    color var(--primary-on-dark-background)
 
   input
     margin 0
@@ -1375,4 +1354,25 @@ progress::-moz-progress-bar
   100%
     opacity 1
 
+.focusing-frame
+  position absolute
+  z-index -1
+  left 0px
+  top 0px
+  width 100%
+  height 100%
+  background-color pink
+  transform-origin center
+  animation: focusing .3s infinite alternate ease-out;
+  // filter blur(10px)
+  border-radius var(--entity-radius)
+  pointer-events none
+
+@keyframes focusing
+  100%
+    left calc(-1 * var(--focus-padding) / 2)
+    top calc(-1 * var(--focus-padding) / 2)
+    width calc(100% + var(--focus-padding))
+    height: calc(100% + var(--focus-padding))
+    border-radius calc(2 * var(--entity-radius))
 </style>

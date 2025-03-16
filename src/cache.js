@@ -1,6 +1,7 @@
 // local storage cache interface for currentUser and spaces
 
 import debounce from 'lodash-es/debounce'
+import * as idb from 'idb-keyval'
 
 import utils from '@/utils.js'
 
@@ -8,18 +9,30 @@ const updateErrorMessage = '🚑 could not updateSpace cache because cachedSpace
 let showDebugMessages = false
 
 export default {
-  storeLocal (key, value) {
+  async migrateFromLocalStorage () {
+    const lsKeys = Object.keys(window.localStorage)
+    let idbKeys = await idb.keys()
+    if (idbKeys.length) { return }
+    // port keys
+    for (const lsKey of lsKeys) {
+      let lsValue = window.localStorage[lsKey]
+      if (utils.isStringJSON(lsValue)) {
+        lsValue = JSON.parse(lsValue)
+      }
+      await idb.set(lsKey, lsValue)
+    }
+    idbKeys = await idb.keys()
+    console.info('🥂 migrated from ls to idb', lsKeys, idbKeys)
+  },
+  async storeLocal (key, value) {
     try {
-      if (typeof value !== 'string') {
-        value = JSON.stringify(value)
-      }
       if (showDebugMessages) {
-        console.log('🏬 storeLocal', key, value)
+        console.info('🏬 storeLocal', key, value)
       }
-      window.localStorage.setItem(key, value)
+      await idb.set(key, value)
     } catch (error) {
       showDebugMessages = true
-      console.error('🚒 storeLocal could not save to localStorage', { key, value, valueType: typeof value }, error)
+      console.error('🚒 storeLocal could not save to idb', { key, value, valueType: typeof value }, error)
       this.notifyCouldNotSave()
       this.pruneLocal()
     }
@@ -28,103 +41,105 @@ export default {
     const element = document.getElementById('notify-cache-is-full')
     element.classList.remove('hidden')
   },
-  pruneLocal () {
-    if (this.user().apiKey) {
+  async pruneLocal () {
+    const user = await this.user()
+    if (user?.apiKey) {
       const currentSpaceId = utils.spaceIdFromUrl()
       if (!currentSpaceId) {
         console.error('🚒 prune error could not get currentSpaceId', currentSpaceId)
         this.notifyCouldNotSave()
         return
       }
-      const keys = Object.keys(window.localStorage)
+      const keys = await idb.keys()
       let spaceKeys = keys.filter(key => {
         const isSpace = key.startsWith('space-') || key.startsWith('removed-space-')
         return isSpace
       })
       spaceKeys = spaceKeys.filter(key => key !== `space-${currentSpaceId}`)
-      console.log('🍾 pruning localStorage spaces', {
-        localStorage: window.localStorage,
-        length: JSON.stringify(window.localStorage).length,
+      console.info('🍾 pruning idb spaces', {
         currentSpaceId,
         keys,
         spaceKeysToRemove: spaceKeys
       })
-      spaceKeys.forEach(key => {
-        this.removeLocal(key)
-      })
-      console.log('🥂 pruned localStorage spaces', {
-        localStorage: window.localStorage,
-        length: JSON.stringify(window.localStorage).length,
-        currentLocalStorageKeys: Object.keys(window.localStorage)
+      for (const key of spaceKeys) {
+        await this.removeLocal(key)
+      }
+      // await idb.delMany(spaceKeys)
+      const newKeys = await idb.keys()
+      console.info('🥂 pruned idb spaces', {
+        prevKeys: keys.length,
+        newKeys: newKeys
       })
     }
     this.notifyCouldNotSave()
   },
-  getLocal (key) {
+  async getLocal (key) {
     try {
-      return JSON.parse(window.localStorage[key])
+      const item = await idb.get(key)
+      return item
     } catch (error) {}
   },
-  removeLocal (key) {
+  async removeLocal (key) {
     try {
-      window.localStorage.removeItem(key)
+      await idb.del(key)
     } catch (error) {
       console.warn('removeLocal', error)
     }
   },
-  removeAll () {
-    window.localStorage.clear()
-    console.log('🚑 localStorage cleared')
+  async removeAll () {
+    const keys = await idb.keys()
+    for (const key of keys) {
+      await this.removeLocal(key)
+    }
+    console.info('🚑 idb cleared', keys)
+    localStorage.clear()
+    console.info('🚑 ls cleared')
   },
 
   // User
 
-  user () {
-    return this.getLocal('user') || {}
+  async user () {
+    let user = await this.getLocal('user')
+    return user || {}
   },
-  updateUser (key, value) {
-    let user = this.user()
+  async updateUser (key, value) {
+    let user = await this.user()
+    user = utils.normalizeToObject(user)
     user[key] = value
-    this.storeLocal('user', user)
+    user = utils.clone(user)
+    await this.storeLocal('user', user)
   },
-  saveUser (user) {
-    this.storeLocal('user', user)
+  async saveUser (user) {
+    user = utils.clone(user)
+    await this.storeLocal('user', user)
   },
 
   // Space
 
-  space (spaceId) {
-    const space = this.getLocal(`space-${spaceId}`) || {}
+  async space (spaceId) {
+    let space = await this.getLocal(`space-${spaceId}`) || {}
+    space = utils.normalizeToObject(space)
     space.clients = []
     return space
   },
-  getInboxSpace () {
-    const keys = Object.keys(window.localStorage)
-    const spaceKeys = keys.filter(key => key.startsWith('space-'))
-    const spaces = spaceKeys.map(key => {
-      return this.getLocal(key)
-    })
+  async getInboxSpace () {
+    const spaces = await this.getAllSpaces()
     return spaces.find(space => space.name === 'Inbox')
   },
-  getSpaceByName (name) {
-    const keys = Object.keys(window.localStorage)
-    const spaceKeys = keys.filter(key => key.startsWith('space-'))
-    const spaces = spaceKeys.map(key => {
-      return this.getLocal(key)
-    })
-    const space = spaces.find(space => space.name === name)
-    if (space) {
-      space.clients = []
-    }
-    return space
+  async getSpaceByName (name) {
+    const spaces = await this.getAllSpaces()
+    return spaces.find(space => space.name === name)
   },
-  getAllSpaces () {
-    const keys = Object.keys(window.localStorage)
+  async getAllSpaces () {
+    const keys = await idb.keys()
     const spaceKeys = keys.filter(key => key.startsWith('space-'))
-    const spaces = spaceKeys.map(key => {
-      return this.getLocal(key)
-    })
+    let spaces = []
+    for (const key of spaceKeys) {
+      const space = await this.getLocal(key)
+      spaces.push(space)
+    }
     let spacesWithNames = spaces.map(space => {
+      space = utils.normalizeToObject(space)
       if (!space) { return }
       space.name = space.name || `space-${space.id}`
       return space
@@ -135,8 +150,15 @@ export default {
     })
     return sortedSpaces
   },
-  updateSpace (key, value, spaceId) {
-    let space = this.space(spaceId)
+
+  async updateSpaceByUpdates (updates, spaceId) {
+    const keys = Object.keys(updates)
+    for (const key of keys) {
+      await this.updateSpace(key, updates[key], spaceId)
+    }
+  },
+  async updateSpace (key, value, spaceId) {
+    let space = await this.space(spaceId)
     if (!utils.objectHasKeys(space)) {
       console.warn(updateErrorMessage)
       return
@@ -148,11 +170,11 @@ export default {
     space[key] = value
     space.clients = []
     space.cacheDate = Date.now()
-    this.saveSpace(space)
+    await this.saveSpace(space)
   },
-  updateSpaceCardsDebounced: debounce(function (cards, spaceId) {
+  updateSpaceCardsDebounced: debounce(async function (cards, spaceId) {
     cards = utils.denormalizeItems(cards)
-    let space = this.space(spaceId)
+    let space = await this.space(spaceId)
     if (!utils.objectHasKeys(space)) {
       console.warn(updateErrorMessage)
       return
@@ -160,22 +182,22 @@ export default {
     cards = utils.denormalizeItems(cards)
     space.cards = cards
     space.cacheDate = Date.now()
-    this.saveSpace(space)
+    await this.saveSpace(space)
   }, 200),
-  updateSpaceConnectionsDebounced: debounce(function (connections, spaceId) {
+  updateSpaceConnectionsDebounced: debounce(async function (connections, spaceId) {
     connections = utils.denormalizeItems(connections)
-    let space = this.space(spaceId)
+    let space = await this.space(spaceId)
     if (!utils.objectHasKeys(space)) {
       console.warn(updateErrorMessage)
       return
     }
     space.connections = connections
     space.cacheDate = Date.now()
-    this.saveSpace(space)
+    await this.saveSpace(space)
   }, 200),
-  updateSpaceBoxesDebounced: debounce(function (boxes, spaceId) {
+  updateSpaceBoxesDebounced: debounce(async function (boxes, spaceId) {
     boxes = utils.denormalizeItems(boxes)
-    let space = this.space(spaceId)
+    let space = await this.space(spaceId)
     if (!utils.objectHasKeys(space)) {
       console.warn(updateErrorMessage)
       return
@@ -183,11 +205,12 @@ export default {
     boxes = utils.denormalizeItems(boxes)
     space.boxes = boxes
     space.cacheDate = Date.now()
-    this.saveSpace(space)
+    await this.saveSpace(space)
   }, 200),
-  addToSpace ({ cards, connections, connectionTypes, boxes }, spaceId) {
+
+  async addToSpace ({ cards, connections, connectionTypes, boxes }, spaceId) {
     // space items
-    let space = this.space(spaceId)
+    let space = await this.space(spaceId)
     space.cards = space.cards || []
     space.connections = space.connections || []
     space.connectionTypes = space.connectionTypes || []
@@ -202,17 +225,19 @@ export default {
     connections.forEach(connection => space.connections.push(connection))
     connectionTypes.forEach(connectionType => space.connectionTypes.push(connectionType))
     boxes.forEach(box => space.boxes.push(box))
-    this.saveSpace(space)
+    await this.saveSpace(space)
   },
-  saveSpace (space) {
+  async saveSpace (space) {
+    if (!space) { return }
+    space = utils.clone(space)
     if (!space.id) {
       console.warn('☎️ error caching space. This is expected if currentUser is read only', space)
       return
     }
     space.cacheDate = Date.now()
-    this.storeLocal(`space-${space.id}`, space)
+    await this.storeLocal(`space-${space.id}`, space)
   },
-  updateIdsInSpace (space, nullCardUsers) {
+  async updateIdsInSpace (space, nullCardUsers) {
     const items = {
       cards: space.cards,
       connectionTypes: space.connectionTypes,
@@ -220,7 +245,7 @@ export default {
       tags: space.tags,
       boxes: space.boxes
     }
-    const uniqueItems = utils.uniqueSpaceItems(items, nullCardUsers)
+    const uniqueItems = await utils.uniqueSpaceItems(items, nullCardUsers)
     space.cards = uniqueItems.cards.map(card => {
       card.spaceId = space.id
       return card
@@ -232,42 +257,44 @@ export default {
       return tag
     })
     space.boxes = uniqueItems.boxes
-    this.saveSpace(space)
+    await this.saveSpace(space)
     return space
   },
-  addSpaces (spaces) {
-    spaces.forEach(space => {
-      space.cacheDate = utils.normalizeToUnixTime(space.updatedAt)
-      this.saveSpace(space)
-    })
+  async addSpaces (spaces) {
+    for (const space of spaces) {
+      space.cacheDate = utils.unixTime(space.updatedAt)
+      await this.saveSpace(space)
+    }
   },
 
   // Removed Spaces
 
-  removeSpace (space) {
-    this.updateSpace('removeDate', Date.now(), space.id)
+  async removeSpace (space) {
+    await this.updateSpace('removeDate', Date.now(), space.id)
     const spaceKey = `space-${space.id}`
-    space = this.getLocal(spaceKey)
-    this.storeLocal(`removed-${spaceKey}`, space)
-    this.removeLocal(spaceKey)
+    space = await this.getLocal(spaceKey)
+    await this.storeLocal(`removed-${spaceKey}`, space)
+    await this.removeLocal(spaceKey)
   },
-  deleteSpace (space) {
-    this.removeLocal(`removed-space-${space.id}`)
-    this.removeLocal(`space-${space.id}`)
+  async deleteSpace (space) {
+    await this.removeLocal(`removed-space-${space.id}`)
+    await this.removeLocal(`space-${space.id}`)
   },
-  restoreRemovedSpace (space) {
+  async restoreRemovedSpace (space) {
     const spaceKey = `removed-space-${space.id}`
-    space = this.getLocal(spaceKey)
+    space = await this.getLocal(spaceKey)
     if (!space) { return }
-    this.saveSpace(space)
-    this.removeLocal(spaceKey)
+    await this.saveSpace(space)
+    await this.removeLocal(spaceKey)
   },
-  getAllRemovedSpaces () {
-    const keys = Object.keys(window.localStorage)
+  async getAllRemovedSpaces () {
+    const keys = await idb.keys()
     const spaceKeys = keys.filter(key => key.startsWith('removed-space-'))
-    const spaces = spaceKeys.map(key => {
-      return this.getLocal(key)
-    })
+    let spaces = []
+    for (const key of spaceKeys) {
+      const space = await this.getLocal(key)
+      spaces.push(space)
+    }
     let sortedSpaces = spaces.sort((a, b) => {
       return b.removeDate - a.removeDate
     })
@@ -277,17 +304,20 @@ export default {
 
   // Groups
 
-  groups () {
-    return this.getLocal('groups') || {}
+  async groups () {
+    const groups = await this.getLocal('groups')
+    return groups || {}
   },
-  saveGroups (groups) {
-    this.storeLocal('groups', groups)
+  async saveGroups (groups) {
+    groups = utils.clone(groups)
+    groups = utils.denormalizeItems(groups)
+    await this.storeLocal('groups', groups)
   },
 
   // Tags
 
-  allCardsByTagName (name) {
-    let spaces = this.getAllSpaces()
+  async allCardsByTagName (name) {
+    let spaces = await this.getAllSpaces()
     let cards = [] // card name, id, spaceid
     spaces.forEach(space => {
       if (!space.tags) { return }
@@ -303,18 +333,8 @@ export default {
     })
     return cards
   },
-  tagByName (name) {
-    let spaces = this.getAllSpaces()
-    let tags = []
-    spaces.forEach(space => {
-      if (!utils.arrayHasItems(space.tags)) { return }
-      tags = tags.concat(space.tags)
-    })
-    const tag = tags.find(tag => tag.name === name)
-    return tag
-  },
-  allTags () {
-    const spaces = this.getAllSpaces()
+  async allTags () {
+    const spaces = await this.getAllSpaces()
     let tags = []
     spaces.forEach(space => {
       if (utils.arrayHasItems(space.tags)) {
@@ -324,9 +344,9 @@ export default {
     tags.reverse()
     return tags
   },
-  updateTagColorInAllSpaces (tag) {
-    const spaces = this.getAllSpaces()
-    spaces.forEach(space => {
+  async updateTagColorInAllSpaces (tag) {
+    const spaces = await this.getAllSpaces()
+    for (const space of spaces) {
       if (!space.tags) { return }
       const newSpaceTags = space.tags.map(spaceTag => {
         if (spaceTag.name === tag.name) {
@@ -334,61 +354,77 @@ export default {
         }
         return spaceTag
       })
-      this.updateSpace('tags', newSpaceTags, space.id)
-    })
+      await this.updateSpace('tags', newSpaceTags, space.id)
+    }
   },
-  removeTagsByNameInAllSpaces (tag) {
-    const spaces = this.getAllSpaces()
-    spaces.forEach(space => {
+  async removeTagsByNameInAllSpaces (tag) {
+    const spaces = await this.getAllSpaces()
+    for (const space of spaces) {
       if (!space.tags) { return }
       const newSpaceTags = space.tags.filter(spaceTag => spaceTag.name !== tag.name)
-      this.updateSpace('tags', newSpaceTags, space.id)
-    })
+      await this.updateSpace('tags', newSpaceTags, space.id)
+    }
   },
 
   // Add Page
 
-  prevAddPageValue () {
-    return window.localStorage['prevAddPageValue'] || ''
+  async prevAddPageValue () {
+    const value = await idb.get('prevAddPageValue') || ''
+    return value
   },
-  updatePrevAddPageValue (value) {
-    this.storeLocal(`prevAddPageValue`, value)
+  async updatePrevAddPageValue (value) {
+    await this.storeLocal(`prevAddPageValue`, value)
   },
-  clearPrevAddPageValue (value) {
-    this.storeLocal(`prevAddPageValue`, '')
+  async clearPrevAddPageValue (value) {
+    await this.storeLocal(`prevAddPageValue`, '')
   },
 
   // API Queue
 
-  queue () {
-    return this.getLocal('queue') || []
+  async queue () {
+    const queue = await this.getLocal('queue')
+    // const queue = await idb.get('queue')
+    return queue || []
   },
-  saveQueue (queue) {
-    this.storeLocal('queue', queue)
+  async addToQueue (item) {
+    await idb.update('queue', (value) => {
+      if (!value) {
+        value = []
+      }
+      const isArray = utils.typeCheck({ value: item, type: 'array', silenceWarning: true })
+      if (isArray) {
+        value = value.concat(item)
+      } else {
+        value.push(item)
+      }
+      return value
+    })
   },
-  clearQueue () {
-    this.storeLocal('queue', [])
+  async clearQueue () {
+    await idb.update('queue', (value) => [])
   },
 
   // API Sending in Progress Queue
   // queue items are moved here at api.sendQueue
 
-  sendingQueue () {
-    return this.getLocal('sendingQueue') || []
-  },
-  saveSendingQueue (queue) {
-    this.storeLocal('sendingQueue', queue)
-  },
-  clearSendingQueue () {
-    this.storeLocal('sendingQueue', [])
-  },
+  // async sendingQueue () {
+  //   const queue = await this.getLocal('sendingQueue')
+  //   return queue || []
+  // },
+  // async saveSendingQueue (queue) {
+  //   await this.storeLocal('sendingQueue', queue)
+  // },
+  // async clearSendingQueue () {
+  //   await this.storeLocal('sendingQueue', [])
+  // },
 
   // Invited Spaces
 
-  invitedSpaces () {
-    return this.getLocal('invitedSpaces') || []
+  async invitedSpaces () {
+    const spaces = await this.getLocal('invitedSpaces')
+    return spaces || []
   },
-  saveInvitedSpace (space) {
+  async saveInvitedSpace (space) {
     space = {
       id: space.id,
       name: space.name,
@@ -397,34 +433,39 @@ export default {
       updatedAt: space.updatedAt,
       cacheDate: Date.now()
     }
-    let invitedSpaces = this.invitedSpaces()
+    let invitedSpaces = await this.invitedSpaces()
     invitedSpaces = invitedSpaces.filter(invitedSpace => {
       return invitedSpace.id !== space.id
     })
     invitedSpaces.push(space)
-    this.storeLocal('invitedSpaces', invitedSpaces)
+    await this.storeLocal('invitedSpaces', invitedSpaces)
   },
-  removeInvitedSpace (space) {
-    let invitedSpaces = this.invitedSpaces()
+  async removeInvitedSpace (space) {
+    let invitedSpaces = await this.invitedSpaces()
     invitedSpaces = invitedSpaces.filter(invitedSpace => {
       return invitedSpace.id !== space.id
     })
-    this.storeLocal('invitedSpaces', invitedSpaces)
+    await this.storeLocal('invitedSpaces', invitedSpaces)
   },
 
   // Changelog
 
-  prevChangelogId () {
-    return window.localStorage['prevChangelogId']
+  async prevReadChangelogId () {
+    const value = await idb.get('prevReadChangelogId')
+    return value || ''
   },
-  updatePrevChangelogId (id) {
-    this.storeLocal('prevChangelogId', id)
+  async updatePrevReadChangelogId (id) {
+    await this.storeLocal('prevReadChangelogId', id)
   },
-  prevReadChangelogId () {
-    return window.localStorage['prevReadChangelogId'] || ''
-  },
-  updatePrevReadChangelogId (id) {
-    this.storeLocal('prevReadChangelogId', id)
-  }
 
+  // emoji
+
+  async emojis () {
+    const emojis = await this.getLocal('emojis')
+    return emojis || []
+  },
+  async updateEmojis ({ emojis, version }) {
+    await this.storeLocal('emojis', emojis)
+    await this.storeLocal('emojiUnicodeVersion', version)
+  }
 }

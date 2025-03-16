@@ -16,14 +16,16 @@ onMounted(() => {
   init()
 })
 
-const emit = defineEmits(['updateDialogHeight', 'isLoading'])
+const emit = defineEmits(['updateDialogHeight', 'isLoading', 'selectSpace'])
 
 const state = reactive({
-  remoteSpaces: []
+  remoteSpaces: [],
+  localSpaces: []
 })
 
 const init = async () => {
-  await updateRemoteSpaces()
+  updateRemoteSpaces()
+  updateLocalSpaces()
 }
 const updateHeight = () => {
   emit('updateDialogHeight')
@@ -52,14 +54,15 @@ const triggerTemplatesIsVisible = () => {
 // spaces
 
 const selectSpace = (space) => {
-  store.dispatch('currentSpace/changeSpace', space)
+  emit('selectSpace', space)
 }
-const localSpaces = () => {
-  const spaces = cache.getAllSpaces().filter(space => {
+const updateLocalSpaces = async () => {
+  const cachedSpaces = await cache.getAllSpaces()
+  const spaces = cachedSpaces.filter(space => {
     const isUser = store.state.currentUser.id === space.userId
     return space.isTemplate && isUser
   })
-  return spaces
+  state.localSpaces = spaces
 }
 const updateRemoteSpaces = async () => {
   const currentUserIsSignedIn = store.getters['currentUser/isSignedIn']
@@ -74,7 +77,7 @@ const updateRemoteSpaces = async () => {
   emit('isLoading', false)
 }
 const templateSpaces = computed(() => {
-  let spaces = localSpaces()
+  let spaces = state.localSpaces
   if (state.remoteSpaces.length) {
     spaces = state.remoteSpaces
   }
@@ -92,6 +95,7 @@ section.results-section.user-template-space-list(ref="resultsSectionElement" :st
       @selectSpace="selectSpace"
       :isLoading="state.isLoading"
       :parentDialog="parentDialog"
+      :showDuplicateTemplateIcon="true"
     )
   .button-wrap
     button(@click="triggerTemplatesIsVisible")

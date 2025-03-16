@@ -12,7 +12,7 @@ import UserLabelInline from '@/components/UserLabelInline.vue'
 import Loader from '@/components/Loader.vue'
 import UrlPreview from '@/components/UrlPreview.vue'
 import MediaPreview from '@/components/MediaPreview.vue'
-import CardCollaborationInfo from '@/components/CardCollaborationInfo.vue'
+import CardDetailsMeta from '@/components/CardDetailsMeta.vue'
 import ShareCard from '@/components/dialogs/ShareCard.vue'
 import OtherCardPreview from '@/components/OtherCardPreview.vue'
 import OtherSpacePreview from '@/components/OtherSpacePreview.vue'
@@ -29,8 +29,8 @@ let prevCardId, prevCardName
 let previousTags = []
 let compositionEventEndTime = 0
 
-const openingPreDuration = 250 // ms
-const openingDuration = 250 // ms
+const openingPreDuration = 5 // ms
+const openingDuration = 400 // ms
 let openingAnimationTimer, openingStartTime, shouldCancelOpening
 
 const store = useStore()
@@ -116,7 +116,9 @@ const card = computed(() => {
 })
 const visible = computed(() => utils.objectHasKeys(card.value))
 watch(() => visible.value, (value, prevValue) => {
-  if (!value) {
+  if (value) {
+    store.commit('preventMultipleSelectedActionsIsVisible', false)
+  } else {
     closeCard()
   }
 })
@@ -206,11 +208,11 @@ const scrollIntoViewAndFocus = async () => {
   await nextTick()
   scrollIntoView(behavior)
   focusName()
-  triggerUpdateMagicPaintPositionOffset()
+  triggerUpdateMainCanvasPositionOffset()
   triggerUpdateHeaderAndFooterPosition()
 }
-const triggerUpdateMagicPaintPositionOffset = () => {
-  store.commit('triggerUpdateMagicPaintPositionOffset')
+const triggerUpdateMainCanvasPositionOffset = () => {
+  store.commit('triggerUpdateMainCanvasPositionOffset')
   triggerUpdateHeaderAndFooterPosition()
 }
 
@@ -251,7 +253,7 @@ const isInSearchResultsCards = computed(() => {
   return Boolean(results.find(cardResult => card.value.id === cardResult.id))
 })
 const canEditSpace = computed(() => store.getters['currentUser/canEditSpace']())
-const isInvitedButCannotEditSpace = computed(() => store.getters['currentUser/isInvitedButCannotEditSpace']())
+const isInvitedButCannotEditSpace = computed(() => store.state.currentUserIsInvitedButCannotEditCurrentSpace)
 
 // user
 
@@ -301,7 +303,7 @@ const updateCompositionEventEndTime = (event) => {
 const handleEnterKey = (event) => {
   const isCompositionEvent = event.timeStamp && Math.abs(event.timeStamp - compositionEventEndTime) < 1000
   const pickersIsVisible = state.tag.pickerIsVisible || state.space.pickerIsVisible
-  console.log('🎹 enter', {
+  console.info('🎹 enter', {
     shouldPreventNextEnterKey: store.state.shouldPreventNextEnterKey,
     pickersIsVisible
   })
@@ -335,10 +337,11 @@ const toggleShouldShowItemActions = async () => {
   await nextTick()
   scrollIntoView()
 }
-const toggleShareCardIsVisible = () => {
+const toggleShareCardIsVisible = (event) => {
   const isVisible = state.shareCardIsVisible
   closeDialogs()
   state.shareCardIsVisible = !isVisible
+  copyCardUrl(event)
 }
 const scrollIntoView = async (behavior) => {
   // wait for element to be rendered before getting position
@@ -354,7 +357,7 @@ const showCard = async (cardId) => {
   clearErrors()
   updatePinchCounterZoomDecimal()
   scrollIntoViewAndFocus()
-  updatePreviousTags()
+  await updatePreviousTags()
   updateNameSplitIntoCardsCount()
   resetTextareaHeight()
   await nextTick()
@@ -392,6 +395,30 @@ const closeCard = async () => {
   store.dispatch('history/resume')
   if (item.name || prevCardName) {
     store.dispatch('history/add', { cards: [item], useSnapshot: true })
+  }
+}
+
+// share url
+
+const cardUrl = () => {
+  const domain = consts.kinopioDomain()
+  const url = `${domain}/${card.value.spaceId}/${card.value.id}`
+  console.info('🍇 card url', url)
+  return url
+}
+const copyCardUrl = async (event) => {
+  if (!state.shareCardIsVisible) { return }
+  const canShare = store.getters['currentSpace/isRemote']
+  if (!canShare) { return }
+  store.commit('clearNotificationsWithPosition')
+  const position = utils.cursorPositionInPage(event)
+  const url = cardUrl()
+  try {
+    await navigator.clipboard.writeText(url)
+    store.commit('addNotificationWithPosition', { message: 'Copied Card URL', position, type: 'success', layer: 'app', icon: 'checkmark' })
+  } catch (error) {
+    console.warn('🚑 copyText', error)
+    store.commit('addNotificationWithPosition', { message: 'Copy Error', position, type: 'danger', layer: 'app', icon: 'cancel' })
   }
 }
 
@@ -466,7 +493,7 @@ const updateCardName = async (newName) => {
   }
   store.dispatch('currentCards/update', { card: item, shouldPreventUpdateDimensionsAndPaths: true })
   updateMediaUrls()
-  updateTags()
+  await updateTags()
   updateDimensionsAndPathsDebounced()
   if (createdByUser.value.id !== store.state.currentUser.id) { return }
   if (state.notifiedMembers) { return } // send card update notifications only once per card, per session
@@ -484,7 +511,7 @@ const normalizedName = computed(() => {
   return newName.trim()
 })
 const clickName = (event) => {
-  triggerUpdateMagicPaintPositionOffset()
+  triggerUpdateMainCanvasPositionOffset()
   store.commit('searchIsVisible', false)
   if (isCursorInsideTagBrackets()) {
     showTagPicker()
@@ -581,7 +608,7 @@ const openingAnimationFrame = (timestamp) => {
     state.openingAlpha = alpha
     window.requestAnimationFrame(openingAnimationFrame)
   } else if (state.isOpening && percentComplete > 1) {
-    console.log('🐢 cardDetails openingAnimationFrame complete')
+    console.info('🐢 cardDetails openingAnimationFrame complete')
     openingAnimationTimer = undefined
     openingStartTime = undefined
     state.isOpening = false
@@ -669,21 +696,21 @@ const moveCursorPastTagEnd = async () => {
   newCursorPosition = cursorStart + newCursorPosition + 2
   setSelectionRange(newCursorPosition, newCursorPosition)
 }
-const updatePreviousTags = () => {
+const updatePreviousTags = async () => {
   if (!card.value.name) {
     previousTags = []
     return
   }
   previousTags = utils.tagsFromStringWithoutBrackets(card.value.name) || []
-  previousTags = previousTags.map(tagName => {
+  previousTags = previousTags.map(async (tagName) => {
     let tag
     if (state.previousSelectedTag.name === tagName) {
       tag = state.previousSelectedTag
     } else if (state.currentSearchTag.name === tagName) {
       tag = state.currentSearchTag
     } else {
-      tag = store.getters['currentSpace/tagByName'](tagName)
-      tag = utils.clone(tag)
+      tag = await store.getters['currentSpace/tagByName'](tagName)
+      tag = utils.clone(tag, state.previousSelectedTag, tagName)
       tag.color = state.previousSelectedTag.color || tag.color
     }
     return tag
@@ -692,12 +719,12 @@ const updatePreviousTags = () => {
 const updateNewTagColor = (color) => {
   state.newTagColor = color
 }
-const addNewTags = (newTagNames) => {
+const addNewTags = async (newTagNames) => {
   const previousTagNames = previousTags.map(tag => tag.name)
   const addTagsNames = newTagNames.filter(newTagName => !previousTagNames.includes(newTagName))
-  addTagsNames.forEach(tagName => {
+  for (const tagName of addTagsNames) {
     let tag
-    tag = utils.newTag({
+    tag = store.getters.newTag({
       name: tagName,
       defaultColor: state.newTagColor || store.state.currentUser.color,
       cardId: card.value.id,
@@ -708,26 +735,26 @@ const addNewTags = (newTagNames) => {
     } else if (state.currentSearchTag.name === tagName) {
       tag.color = state.currentSearchTag.color
     }
-    store.dispatch('currentSpace/addTag', tag)
-  })
+    await store.dispatch('currentSpace/addTag', tag)
+  }
 }
-const updateTags = () => {
+const updateTags = async () => {
   if (!card.value.name) { return }
   const newTagNames = utils.tagsFromStringWithoutBrackets(card.value.name) || []
-  addNewTags(newTagNames)
-  updatePreviousTags()
+  await addNewTags(newTagNames)
+  await updatePreviousTags()
 }
 const hideTagDetailsIsVisible = () => {
   store.commit('currentSelectedTag', {})
   store.commit('tagDetailsIsVisible', false)
 }
-const updateCurrentSearchTag = (tag) => {
+const updateCurrentSearchTag = async (tag) => {
   state.currentSearchTag = tag
-  updatePreviousTags()
+  await updatePreviousTags()
 }
-const updateTagBracketsWithTag = (tag) => {
+const updateTagBracketsWithTag = async (tag) => {
   state.previousSelectedTag = tag
-  updatePreviousTags()
+  await updatePreviousTags()
   const cursorStart = selectionStartPosition()
   const text = tagStartText() + tagEndText()
   let newName
@@ -1114,13 +1141,14 @@ const splitCards = (event, isPreview) => {
 const addSplitCards = async (newCards) => {
   const spaceBetweenCards = 12
   let prevCard = utils.clone(card.value)
-  store.dispatch('currentCards/addMultiple', { cards: newCards })
   store.dispatch('closeAllDialogs')
+  // create new cards
+  store.dispatch('currentCards/addMultiple', { cards: newCards })
   // update y positions
   // wait for cards to be added to dom
   setTimeout(() => {
     for (let newCard of newCards) {
-      const element = document.querySelector(`article [data-card-id="${prevCard.id}"]`)
+      const element = document.querySelector(`.card-wrap [data-card-id="${prevCard.id}"]`)
       const prevCardRect = element.getBoundingClientRect()
       newCard.y = prevCard.y + (prevCardRect.height * store.getters.spaceCounterZoomDecimal) + spaceBetweenCards
       store.dispatch('currentCards/update', { card: newCard })
@@ -1411,7 +1439,7 @@ dialog.card-details(v-if="visible" :open="visible" ref="dialogElement" @click.le
         ShareCard(:visible="state.shareCardIsVisible" :card="card" :isReadOnly="!canEditCard")
 
     CardOrBoxActions(:visible="shouldShowItemActions && canEditCard" :cards="[card]" @closeDialogs="closeDialogs" :class="{ 'last-row': !rowIsBelowItemActions }" :tagsInCard="tagsInCard")
-    CardCollaborationInfo(:visible="shouldShowItemActions || isComment" :createdByUser="createdByUser" :updatedByUser="updatedByUser" :card="card" :parentElement="parentElement" @closeDialogs="closeDialogs" :isComment="isComment")
+    CardDetailsMeta(:visible="shouldShowItemActions || isComment" :createdByUser="createdByUser" :updatedByUser="updatedByUser" :card="card" :parentElement="parentElement" @closeDialogs="closeDialogs" :isComment="isComment")
 
     .row(v-if="nameMetaRowIsVisible")
       //- Split by Line Breaks
@@ -1458,7 +1486,7 @@ dialog.card-details(v-if="visible" :open="visible" ref="dialogElement" @click.le
 
     //- Read Only
     template(v-if="!canEditCard")
-      CardCollaborationInfo(:visible="!shouldShowItemActions" :createdByUser="createdByUser" :updatedByUser="updatedByUser" :card="card" :parentElement="parentElement" @closeDialogs="closeDialogs")
+      CardDetailsMeta(:visible="!shouldShowItemActions" :createdByUser="createdByUser" :updatedByUser="updatedByUser" :card="card" :parentElement="parentElement" @closeDialogs="closeDialogs")
       .row.edit-message
         template(v-if="spacePrivacyIsOpen")
           span.badge.info
@@ -1534,6 +1562,7 @@ dialog.card-details(v-if="visible" :open="visible" ref="dialogElement" @click.le
       padding-top 0
   .media-preview + .url-preview
     margin-top 10px
+
   .opening-frame
     position absolute
     z-index -1

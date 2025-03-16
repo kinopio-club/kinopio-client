@@ -37,7 +37,7 @@ const clearErrors = () => {
 }
 
 const subscribe = async () => {
-  console.log('💰 appleAppAccountToken', appleAppAccountToken.value)
+  console.info('💰 appleAppAccountToken', appleAppAccountToken.value)
   clearErrors()
   if (state.loading.subscriptionIsBeingCreated) { return }
   state.loading.subscriptionIsBeingCreated = true
@@ -52,7 +52,7 @@ const subscribe = async () => {
         appleSubscriptionId: props.price.applePriceId
       }
     }
-    console.log('🎡', body)
+    console.info('🎡', body)
     postMessage.send(body)
   } catch (error) {
     console.error('🚒', error)
@@ -64,7 +64,7 @@ const handleSubscriptionSuccess = (event) => {
   if (!consts.isSecureAppContext) { return }
   const data = event.data
   state.loading.subscriptionIsBeingCreated = false
-  console.log('🎡 handleSubscriptionSuccess', data)
+  console.info('🎡 handleSubscriptionSuccess', data)
   if (data.name !== 'upgradedUser') { return }
   if (!data.isSuccess) {
     state.error.subscriptionError = true

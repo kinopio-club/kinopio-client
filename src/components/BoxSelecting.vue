@@ -207,10 +207,24 @@ const updateSelectableItems = () => {
     card.isCard = true
     return card
   })
-  boxes = boxes.map(box => {
-    box.isBox = true
-    return box
+  let array = []
+  boxes.forEach(box => {
+    const element = document.querySelector(`.box-info[data-box-id="${box.id}"]`)
+    if (!element) { return }
+    if (element.dataset.isVisibleInViewport === 'false') { return }
+    const rect = element.getBoundingClientRect()
+    box = {
+      id: box.id,
+      name: box.name,
+      x: box.x,
+      y: box.y,
+      width: rect.width,
+      height: rect.height,
+      isBox: true
+    }
+    array.push(box)
   })
+  boxes = array
   boxes = boxes.filter(box => Boolean(box))
   const items = cards.concat(boxes)
   selectableItems = updateItems(items)
@@ -275,7 +289,7 @@ const selectItems = (selection, relativePosition) => {
   })
   selectedItems = uniqBy(selectedItems, 'id')
   const cards = selectedItems.filter(item => item.isCard)
-  const boxes = selectedItems.filter(item => item.isBox)
+  let boxes = selectedItems.filter(item => item.isBox)
   selectItemsByType(cards, 'cards')
   selectItemsByType(boxes, 'boxes')
 }
@@ -347,7 +361,6 @@ const selectconnections = (selection, relativePosition) => {
 
 <style lang="stylus">
 .box-selecting
-  z-index -1
   pointer-events none
   position absolute
   top 0

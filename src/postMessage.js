@@ -6,11 +6,11 @@ import debounce from 'lodash-es/debounce'
 let showDebugMessages = false
 
 window.addEventListener('message', (event) => {
-  console.log('🛫 received postmessage', event)
+  console.info('🛫 received postmessage', event)
   const isAddPage = window.location.pathname === '/add'
   if (isAddPage) {
     cache.updatePrevAddPageValue(event.data)
-    console.log('🛫 cache.updatePrevAddPageValue', event.data)
+    console.info('🛫 cache.updatePrevAddPageValue', event.data)
   }
 })
 
@@ -30,16 +30,18 @@ const self = {
     try {
       this.logSend(body)
       const value = body.value || ''
-      window.webkit.messageHandlers[body.name].postMessage(value)
+      const messageHandler = window.webkit.messageHandlers[body.name]
+      if (!messageHandler) { return }
+      messageHandler.postMessage(value)
     } catch (error) {
-      console.error(error)
+      console.error('🚒 send postMessage', error, body)
     }
   },
 
   // https://www.notion.so/kinopio/JS-Bridge-Documentation-35ab7038df63439592b525b918d3acfa
-  sendHaptics (body) {
+  async sendHaptics (body) {
     if (shouldPrevent()) { return }
-    const shouldDisable = cache.getLocal('user').shouldDisableHapticFeedback
+    const shouldDisable = await cache.user().shouldDisableHapticFeedback
     if (shouldDisable) { return }
     const name = utils.capitalizeFirstLetter(body.name)
     body.name = `on${name}Feedback`
@@ -50,7 +52,7 @@ const self = {
     const isBackgroundColor = body.name === 'setBackgroundColor'
     if (!showDebugMessages && isBackgroundColor) {
     } else {
-      console.log('🛫 sending postmessage', body)
+      console.info('🛫 sending postmessage', body)
     }
   }
 }

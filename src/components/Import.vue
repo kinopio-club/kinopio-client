@@ -223,8 +223,8 @@ const importSpace = async (space) => {
     }
     space = utils.resetSpaceMeta({ space, user, type: 'import' })
     space.connections = utils.migrationConnections(space.connections)
-    const uniqueNewSpace = cache.updateIdsInSpace(space)
-    console.log('🧚 space to import', uniqueNewSpace)
+    const uniqueNewSpace = await cache.updateIdsInSpace(space)
+    console.info('🧚 space to import', uniqueNewSpace)
     await store.dispatch('currentSpace/saveSpace', uniqueNewSpace)
     await store.dispatch('currentSpace/loadSpace', { space: uniqueNewSpace })
     updateSpaces()

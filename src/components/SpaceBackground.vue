@@ -19,28 +19,29 @@ const isSpacePage = computed(() => {
 const isThemeDark = computed(() => store.state.currentUser.theme === 'dark')
 const currentSpace = computed(() => store.state.currentSpace)
 const backgroundIsDefault = computed(() => !currentSpace.value.background)
+const pageHeight = computed(() => store.state.pageHeight)
+const pageWidth = computed(() => store.state.pageWidth)
 
 // Styles
 
 const backgroundStyles = computed(() => {
-  if (!isSpacePage.value) { return }
   const url = backgroundUrl.value
   const tintColor = currentSpace.value.backgroundTint
-  let styles = {
-    transform: store.getters.zoomTransform
-  }
+  let styles = {}
   if (tintColor) {
     styles.background = 'transparent'
   }
   if (!url) {
     return styles
   }
-  const isRetina = url.includes('-2x.') || url.includes('@2x.')
+  const isRetina = utils.urlIsRetina(url)
   let backgroundImage = `url('${url}')`
   if (isRetina) {
     backgroundImage = `image-set(${backgroundImage} 2x)`
   }
   styles.backgroundImage = backgroundImage
+  styles.width = `${pageWidth.value}px`
+  styles.height = `${pageHeight.value}px`
   return styles
 })
 
@@ -89,10 +90,9 @@ template(v-else)
 <style lang="stylus">
 .space-background-image
   position absolute
-  width 100%
-  height 100%
   pointer-events none
   z-index 0
   transform-origin top left
   background var(--primary-background)
+  pointer-events none
 </style>

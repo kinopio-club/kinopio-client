@@ -10,6 +10,7 @@ import smartquotes from 'smartquotes'
 import postMessage from '@/postMessage.js'
 
 import randomColor from 'randomcolor'
+import { colord, extend } from 'colord'
 const store = useStore()
 
 let unsubscribe
@@ -75,6 +76,7 @@ const state = reactive({
 const spaceCounterZoomDecimal = computed(() => store.getters.spaceCounterZoomDecimal)
 const canEditBox = computed(() => store.getters['currentUser/canEditBox'](props.box))
 const currentUserIsSignedIn = computed(() => store.getters['currentUser/isSignedIn'])
+const currentUserColor = computed(() => store.state.currentUser.color)
 const name = computed(() => props.box.name)
 
 // normalize
@@ -151,7 +153,7 @@ const removeViewportObserver = () => {
 // styles
 
 const styles = computed(() => {
-  let { x, y, resizeWidth, resizeHeight } = normalizedBox.value
+  let { x, y, resizeWidth, resizeHeight, background } = normalizedBox.value
   let width = resizeWidth
   let height = resizeHeight
   let styles = {
@@ -166,7 +168,28 @@ const styles = computed(() => {
     styles.width = normalizedBox.value.resizeWidth
     styles.height = normalizedBox.value.resizeHeight
   }
+  if (hasFill.value && !background) {
+    let fillColor = color.value
+    fillColor = colord(fillColor).alpha(0.5).toRgbString()
+    styles.backgroundColor = fillColor
+  }
   return styles
+})
+const backgroundStyles = computed(() => {
+  if (!props.box.background) { return }
+  let newStyles = utils.clone(styles.value)
+  delete newStyles.border
+  delete newStyles.backgroundColor
+  const isRetina = utils.urlIsRetina(props.box.background)
+  if (isRetina) {
+    newStyles.backgroundImage = `image-set("${props.box.background}" 2x)`
+  } else {
+    newStyles.backgroundImage = `url("${props.box.background}")`
+  }
+  if (props.box.backgroundIsStretch) {
+    newStyles.backgroundSize = 'cover'
+  }
+  return newStyles
 })
 const userColor = computed(() => store.state.currentUser.color)
 const color = computed(() => {
@@ -205,7 +228,6 @@ const classes = computed(() => {
   return {
     hover: state.isHover,
     active: currentBoxIsBeingDragged.value,
-    'box-jiggle': shouldJiggle.value,
     'is-resizing': isResizing.value,
     'is-selected': currentBoxIsSelected.value,
     'is-checked': isChecked.value || isInCheckedBox.value,
@@ -268,11 +290,10 @@ const resizeColorClass = computed(() => {
 
 // shrink
 
-const shrinkToMinBoxSize = () => {
-  const minBoxSize = consts.minBoxSize
+const shrinkToDefaultBoxSize = () => {
   let updated = { id: props.box.id }
-  updated.resizeWidth = minBoxSize
-  updated.resizeHeight = minBoxSize
+  updated.resizeWidth = consts.defaultBoxWidth
+  updated.resizeHeight = consts.defaultBoxHeight
   store.dispatch('currentBoxes/update', updated)
 }
 const shrink = () => {
@@ -281,7 +302,7 @@ const shrink = () => {
   prevSelectedBox = null
   const items = cards.concat(boxes)
   if (!items.length) {
-    shrinkToMinBoxSize()
+    shrinkToDefaultBoxSize()
     return
   }
   const rect = utils.boundaryRectFromItems(items)
@@ -301,10 +322,14 @@ const isLocked = computed(() => props.box.isLocked)
 
 // label
 
-const labelStyles = computed(() => {
-  return {
+const infoStyles = computed(() => {
+  let styles = {
     backgroundColor: color.value
   }
+  if (isLocked.value) {
+    styles.pointerEvents = 'none'
+  }
+  return styles
 })
 
 // interacting
@@ -315,11 +340,6 @@ const updateCurrentConnections = async () => {
 }
 const isPainting = computed(() => store.state.currentUserIsPainting)
 const canEditSpace = computed(() => store.getters['currentUser/canEditSpace']())
-const shouldJiggle = computed(() => {
-  const isMultipleItemsSelected = store.getters.isMultipleItemsSelected
-  if (isMultipleItemsSelected) { return }
-  return currentBoxIsBeingDragged.value
-})
 const currentBoxIsBeingDragged = computed(() => {
   const isDragging = store.state.currentUserIsDraggingBox
   const isCurrent = store.state.currentDraggingBoxId === props.box.id
@@ -331,6 +351,9 @@ const isResizing = computed(() => {
   return isResizing && isCurrent
 })
 const startBoxInfoInteraction = (event) => {
+  if (event.target.closest('.connector')) {
+    return
+  }
   if (!currentBoxIsSelected.value) {
     store.dispatch('clearMultipleSelected')
   }
@@ -554,7 +577,7 @@ const remoteBoxDraggingColor = computed(() => {
 // touch locking
 
 const lockingFrameStyle = computed(() => {
-  const initialPadding = 65 // matches initialLockCircleRadius in magicPaint
+  const initialPadding = 65 // matches initialLockCircleRadius in paintSelect
   const initialBorderRadius = 50
   const padding = initialPadding * state.lockingPercent
   const borderRadius = Math.max((state.lockingPercent * initialBorderRadius), 5) + 'px'
@@ -580,7 +603,7 @@ const cancelLockingAnimationFrame = () => {
   shouldCancelLocking = false
 }
 const startLocking = (event) => {
-  console.log('startLocking', event)
+  console.info('startLocking', event)
   updateTouchPosition(event)
   updateCurrentTouchPosition(event)
   state.isLocking = true
@@ -611,7 +634,7 @@ const lockingAnimationFrame = (timestamp) => {
     state.lockingAlpha = alpha
     window.requestAnimationFrame(lockingAnimationFrame)
   } else if (state.isLocking && percentComplete > 1) {
-    console.log('🔒🐢 box lockingAnimationFrame locked')
+    console.info('🔒🐢 box lockingAnimationFrame locked')
     lockingAnimationTimer = undefined
     lockingStartTime = undefined
     state.isLocking = false
@@ -673,10 +696,11 @@ const endBoxInfoInteractionTouch = (event) => {
 
 const isConnectingTo = computed(() => {
   const connectingToId = store.state.currentConnectionSuccess.id
-  if (connectingToId) {
+  const isConnecting = connectingToId === props.box.id
+  if (isConnecting) {
     postMessage.sendHaptics({ name: 'softImpact' })
   }
-  return connectingToId === props.box.id
+  return isConnecting
 })
 const isConnectingFrom = computed(() => {
   return store.state.currentConnectionStartItemIds.includes(props.box.id)
@@ -693,6 +717,14 @@ const connectorIsVisible = computed(() => {
   }
   return isVisible
 })
+const connectorIsHiddenByOpacity = computed(() => {
+  if (utils.isMobile()) { return }
+  const isPresentationMode = store.state.isPresentationMode
+  const isNotHovering = !state.isHover
+  const isNotConnected = !isConnectingFrom.value && !isConnectingTo.value && !state.currentConnections.length
+  return isPresentationMode && isNotHovering && isNotConnected
+})
+
 const updateRemoteConnections = () => {
   const connection = store.state.remoteCurrentConnections.find(remoteConnection => {
     const isConnectedToStart = remoteConnection.startItemId === props.box.id
@@ -741,11 +773,12 @@ const containingBoxes = computed(() => {
   if (currentBoxIsBeingDragged.value) { return }
   if (currentBoxIsSelected.value) { return }
   if (isResizing.value) { return }
+  if (store.state.boxDetailsIsVisibleForBoxId) { return }
   let boxes = store.getters['currentBoxes/all']
+  boxes = utils.clone(boxes)
   boxes = boxes.filter(box => {
-    box = utils.clone(box)
     const currentBox = utils.clone(props.box)
-    const isInsideBox = utils.isRectAInsideRectB(currentBox, box)
+    const isInsideBox = utils.isRectACompletelyInsideRectB(currentBox, box)
     const boxArea = box.resizeWidth * box.resizeHeight
     const currentBoxArea = currentBox.resizeWidth * currentBox.resizeHeight
     const boxIsParent = boxArea > currentBoxArea
@@ -758,6 +791,17 @@ const isInCheckedBox = computed(() => {
   const checkedBox = containingBoxes.value.find(box => utils.nameIsChecked(box.name))
   return Boolean(checkedBox)
 })
+
+// box focus
+
+const isFocusing = computed(() => props.box.id === store.state.focusOnBoxId)
+const focusColor = computed(() => {
+  if (isFocusing.value) {
+    return currentUserColor.value
+  } else {
+    return null
+  }
+})
 </script>
 
 <template lang="pug">
@@ -768,6 +812,9 @@ const isInCheckedBox = computed(() => {
   :data-y="normalizedBox.y"
   :data-resize-width="normalizedBox.resizeWidth"
   :data-resize-height="normalizedBox.resizeHeight"
+  :data-info-width="normalizedBox.infoWidth"
+  :data-info-height="normalizedBox.infoHeight"
+  :data-background="normalizedBox.background"
   :data-is-locked="isLocked"
   :data-is-visible-in-viewport="state.isVisibleInViewport"
   :data-should-render="shouldRender"
@@ -776,13 +823,15 @@ const isInCheckedBox = computed(() => {
   :class="classes"
   ref="boxElement"
 )
-
+  .focusing-frame(v-if="isFocusing" :style="{backgroundColor: currentUserColor}")
+  teleport(to="#box-backgrounds")
+    .box-background(v-if="box.background && state.isVisibleInViewport" :data-box-id="box.id" :style="backgroundStyles")
   //- name
   .box-info(
     v-if="shouldRender"
     :data-box-id="box.id"
     :data-is-visible-in-viewport="state.isVisibleInViewport"
-    :style="labelStyles"
+    :style="infoStyles"
     :class="infoClasses"
     tabindex="0"
 
@@ -824,20 +873,21 @@ const isInCheckedBox = computed(() => {
       .selected-user-avatar(v-if="isRemoteSelected || isRemoteBoxDetailsVisible" :style="{backgroundColor: remoteSelectedColor || remoteBoxDetailsVisibleColor}")
         img(src="@/assets/anon-avatar.svg")
 
-  ItemConnectorButton(
-    :visible="connectorIsVisible"
-    :box="box"
-    :itemConnections="state.currentConnections"
-    :isConnectingTo="isConnectingTo"
-    :isConnectingFrom="isConnectingFrom"
-    :isVisibleInViewport="state.isVisibleInViewport"
-    :isRemoteConnecting="state.isRemoteConnecting"
-    :remoteConnectionColor="state.remoteConnectionColor"
-    :currentBackgroundColor="color"
-    :backgroundIsTransparent="true"
-    :parentDetailsIsVisible="currentBoxDetailsIsVisible"
-    @shouldRenderParent="updateShouldRenderParent"
-  )
+    ItemConnectorButton(
+      :visible="connectorIsVisible"
+      :isHiddenByOpacity="connectorIsHiddenByOpacity"
+      :box="box"
+      :itemConnections="state.currentConnections"
+      :isConnectingTo="isConnectingTo"
+      :isConnectingFrom="isConnectingFrom"
+      :isVisibleInViewport="state.isVisibleInViewport"
+      :isRemoteConnecting="state.isRemoteConnecting"
+      :remoteConnectionColor="state.remoteConnectionColor"
+      :currentBackgroundColor="color"
+      :backgroundIsTransparent="true"
+      :parentDetailsIsVisible="currentBoxDetailsIsVisible"
+      @shouldRenderParent="updateShouldRenderParent"
+    )
 
   //- resize
   .bottom-button-wrap(v-if="resizeIsVisible" :class="{unselectable: isPainting}")
@@ -852,9 +902,6 @@ const isInCheckedBox = computed(() => {
         tabindex="-1"
       )
         img.resize-icon.icon(src="@/assets/resize-corner.svg" :class="resizeColorClass")
-
-  //- fill
-  .background.filled(v-if="hasFill" :style="{background: color}")
 </template>
 
 <style lang="stylus">
@@ -865,7 +912,7 @@ const isInCheckedBox = computed(() => {
   border-radius var(--entity-radius)
   min-height var(--min-box-size)
   min-width var(--min-box-size)
-  pointer-events none
+  // pointer-events none
   // animate box expand and shrink
   &.transition
     transition width 0.2s var(--ease-out-circ),
@@ -877,6 +924,7 @@ const isInCheckedBox = computed(() => {
   &.active
     box-shadow var(--active-shadow)
     transition none
+    z-index 1
   &.is-resizing
     box-shadow var(--active-shadow)
     transition none
@@ -886,6 +934,10 @@ const isInCheckedBox = computed(() => {
     opacity var(--is-checked-opacity)
   .box-info
     --header-font var(--header-font-0)
+    z-index 1
+    border-radius 4px
+    display flex
+    align-items center
     &.header-font-1
       --header-font var(--header-font-1)
     &.header-font-2
@@ -977,7 +1029,7 @@ const isInCheckedBox = computed(() => {
   .name-wrap
     padding 6px 8px
     padding-top 4px
-    padding-right 10px
+    // padding-right 4px
     display inline-block
     &.is-checked
       text-decoration line-through
@@ -1009,16 +1061,6 @@ const isInCheckedBox = computed(() => {
         top 0
         left 0
 
-  .background
-    position absolute
-    left 0px
-    top 0px
-    width 100%
-    height 100%
-    z-index -1
-    &.filled
-      opacity 0.5
-
   .locking-frame
     position absolute
     z-index -1
@@ -1039,31 +1081,22 @@ const isInCheckedBox = computed(() => {
 
   .connector
     padding 8px
+    padding-top 4px
+    padding-bottom 3px
+    padding-left 0
     align-self right
     cursor cell
-    position absolute
     right 0
     pointer-events all
+    position relative
+    display inline-block
     button
       z-index 1
-
-.box-jiggle
-  animation boxJiggle 0.5s infinite ease-out forwards
-
-@media (prefers-reduced-motion)
-  .box-jiggle
-    animation none
-
-@keyframes boxJiggle
-  0%
-    transform rotate(0deg)
-  25%
-    transform rotate(-0.5deg)
-  50%
-    transform rotate(0.5deg)
-  75%
-    transform rotate(-0.5deg)
-  100%
-    transform rotate(0deg)
+  .connector-glow
+    left -9px
+    top -5px
+  .connected-colors
+    left 1px
+    top 5px
 
 </style>

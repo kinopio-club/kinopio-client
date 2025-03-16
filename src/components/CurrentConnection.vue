@@ -78,7 +78,7 @@ const checkCurrentConnectionSuccess = (event) => {
   if (!event) { return }
   const position = utils.cursorPositionInViewport(event)
   const cardElement = utils.cardElementFromPosition(position.x, position.y)
-  const boxElement = event.target.closest('.box')
+  const boxElement = utils.boxElementFromConnectorPosition(position.x, position.y)
   let updates = { userId: store.state.currentUser.id }
   let isCurrentConnectionConnected
   if (cardElement) {
@@ -134,7 +134,8 @@ const addConnections = async (event) => {
     const startItem = store.getters['currentSpace/itemById'](startItemIds[0])
     const color = startItem.color || startItem.backgroundColor
     endItemId = nanoid()
-    store.dispatch('currentCards/add', { position, id: endItemId, isParentCard: true, backgroundColor: color })
+    const newCard = { position, id: endItemId, isParentCard: true, backgroundColor: color }
+    store.dispatch('currentCards/add', { card: newCard })
     store.commit('childCardId', '')
     estimatedEndItemConnectorPosition = utils.estimatedNewCardConnectorPosition(position)
   }

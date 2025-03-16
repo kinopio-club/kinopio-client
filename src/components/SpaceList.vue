@@ -41,12 +41,13 @@ onMounted(() => {
       } else if (key === 'ArrowDown') {
         focusNextItem(currentIndex)
       }
-    }
-    if (mutation.type === 'triggerPickerSelect') {
+    } else if (mutation.type === 'triggerPickerSelect') {
       const spaces = props.spaces
       const currentSpace = spaces.find(space => space.id === state.focusOnId)
       selectSpace(null, currentSpace)
       store.commit('shouldPreventNextEnterKey', true)
+    } else if (mutation.type === 'currentSpace/restoreSpace') {
+      state.focusOnId = store.state.currentSpace.id
     }
   })
   updateScroll()
@@ -73,6 +74,7 @@ const props = defineProps({
   showUserIfCurrentUserIsCollaborator: Boolean,
   hideExploreBadge: Boolean,
   hideFilter: Boolean,
+  showFilter: Boolean,
   isLoading: Boolean,
   parentIsSpaceDetails: Boolean,
   parentIsPinned: Boolean,
@@ -86,7 +88,8 @@ const props = defineProps({
   parentDialog: String,
   previewImageIsWide: Boolean,
   hidePreviewImage: Boolean,
-  showSpaceGroups: Boolean
+  showSpaceGroups: Boolean,
+  showDuplicateTemplateIcon: Boolean
 })
 
 const state = reactive({
@@ -120,7 +123,7 @@ const spacesFiltered = computed(() => {
   return spaces
 })
 const isNotCached = (spaceId) => {
-  return store.getters['spaceIsNotCached'](spaceId)
+  return store.dispatch('currentSpace/spaceIsNotCached', spaceId)
 }
 const isNew = (space) => {
   if (props.readSpaceIds?.includes(space.id)) { return }
@@ -381,6 +384,7 @@ const group = (groupId) => {
 span.space-list-wrap
   ResultsFilter(
     :hideFilter="hideFilter"
+    :showFilter="showFilter"
     :items="spaces"
     :placeholder="placeholder"
     :isLoading="isLoading"
@@ -405,8 +409,22 @@ span.space-list-wrap
             @keyup.enter="selectSpace(null, space)"
             :data-created-at="space.createdAt"
             :data-updated-at="space.updatedAt"
+            :data-space-id="space.id"
           )
             Loader(:visible="isLoadingSpace(space)")
+            //- offline
+            span(v-if="isOffline && isNotCached(space.id)")
+              OfflineBadge(:isInline="true" :isDanger="true")
+            //- favorite
+            template(v-if="space.isFavorite")
+              img.icon.favorite-icon(src="@/assets/heart.svg")
+            //- inbox
+            template(v-if="space.name === 'Inbox'")
+              img.icon.inbox-icon(src="@/assets/inbox.svg")
+            //- template
+            template(v-if="space.isTemplate")
+              img.icon.templates.duplicate-template(v-if="showDuplicateTemplateIcon" src="@/assets/duplicate.svg" title="Duplicate Template")
+              img.icon.templates(v-else src="@/assets/templates.svg" title="Template")
             //- Users
             //- show spectators
             template(v-if="showOtherUsers && isMultipleUsers(space)")
@@ -414,14 +432,14 @@ span.space-list-wrap
                 template(v-for="user in users(space)" :key="user.id")
                   User(:user="user" :isClickable="false" :isMedium="true")
             template(v-else-if="showOtherUsers")
-              UserLabelInline(:user="user(space)" :isClickable="false" :key="user(space).id" :isMedium="true")
+              UserLabelInline(:user="user(space)" :isClickable="false" :key="user(space).id" :isMedium="true" :truncateNameToLength="7")
             //- show collaborators
             template(v-else-if="showCollaborators && isMultipleUsers(space)")
               .users.multiple-users
                 template(v-for="user in users(space)" :key="user.id")
                   User(:user="user" :isClickable="false" :isMedium="true")
             template(v-else-if="showCollaborators")
-              UserLabelInline(:user="user(space)" :isClickable="false" :key="user(space).id" :isMedium="true")
+              UserLabelInline(:user="user(space)" :isClickable="false" :key="user(space).id" :isMedium="true" :truncateNameToLength="7")
             //- show user badge only
             template(v-else-if="showUser")
               User(:user="user(space)" :isClickable="false" :key="user(space).id" :isMedium="true")
@@ -436,19 +454,10 @@ span.space-list-wrap
             //- group
             template(v-if="group(space.groupId) && props.showSpaceGroups")
               GroupLabel(:group="group(space.groupId)")
-            //- offline
-            span(v-if="isOffline && isNotCached(space.id)")
-              OfflineBadge(:isInline="true" :isDanger="true")
             //- template category
             .badge.info.inline-badge(v-if="showCategory && space.category" :class="categoryClassName(space)") {{space.category}}
-            //- space meta
-            template(v-if="space.isFavorite")
-              img.icon.favorite-icon(src="@/assets/heart.svg")
-            template(v-if="space.name === 'Inbox'")
-              img.icon.inbox-icon(src="@/assets/inbox.svg")
+            //- today
             SpaceTodayBadge(:space="space")
-            //- template
-            img.icon.templates(v-if="space.isTemplate" src="@/assets/templates.svg" title="Template")
             //- space details
             .name
               span(v-if="state.filter")
@@ -543,6 +552,8 @@ span.space-list-wrap
       .icon.templates
         margin-right 5px
         margin-top 3px
+      .icon.duplicate-template
+        margin-top 5px
 
     .space-wrap
       position relative

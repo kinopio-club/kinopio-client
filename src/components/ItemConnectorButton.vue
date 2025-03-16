@@ -10,6 +10,7 @@ const emit = defineEmits(['shouldRenderParent'])
 
 const props = defineProps({
   visible: Boolean,
+  isHiddenByOpacity: Boolean,
   card: Object,
   box: Object,
   itemConnections: Array,
@@ -35,8 +36,20 @@ const backgroundColorIsDark = computed(() => {
 // user
 
 const isThemeDark = computed(() => store.state.currentUser.theme === 'dark')
-const isDarkInLightTheme = computed(() => backgroundColorIsDark.value && !isThemeDark.value)
-const isLightInDarkTheme = computed(() => !backgroundColorIsDark.value && isThemeDark.value)
+const isDarkInLightTheme = computed(() => {
+  if (props.box?.fill === 'empty') {
+    return isThemeDark.value
+  } else {
+    return backgroundColorIsDark.value && !isThemeDark.value
+  }
+})
+const isLightInDarkTheme = computed(() => {
+  if (props.box?.fill === 'empty') {
+    return !isThemeDark.value
+  } else {
+    return !backgroundColorIsDark.value && isThemeDark.value
+  }
+})
 
 // connections
 
@@ -245,6 +258,7 @@ const handleMouseLeaveConnector = () => {
   @touchstart="startConnecting"
   @mouseenter="handleMouseEnterConnector"
   @mouseleave="handleMouseLeaveConnector"
+  :class="{ 'is-hidden-by-opacity': props.isHiddenByOpacity }"
 )
   .connector-glow(:style="connectorGlowStyle" tabindex="-1")
   .connected-colors
@@ -270,8 +284,6 @@ const handleMouseLeaveConnector = () => {
 <style lang="stylus">
 .connector
   position relative
-  height 32px
-  padding-top 9px !important
   z-index 2
   padding 8px
   align-self right

@@ -8,6 +8,7 @@ import { nanoid } from 'nanoid'
 import { nextTick } from 'vue'
 import dayjs from 'dayjs'
 import { v4 as uuidv4 } from 'uuid' // polyfill for self.crypto.randomUUID(), for legacy todesktop support
+import uniqBy from 'lodash-es/uniqBy'
 
 const initialState = {
   id: nanoid(),
@@ -31,6 +32,7 @@ const initialState = {
   filterUnchecked: false,
   filterComments: false,
   shouldHideTutorialCards: false,
+  shouldHideDateCards: false,
   shouldEmailNotifications: true,
   shouldEmailBulletin: true,
   shouldEmailWeeklyReview: true,
@@ -56,7 +58,6 @@ const initialState = {
   AIImages: [],
   theme: null,
   themeIsSystem: false,
-  panSpeedIsFast: false,
   outsideSpaceBackgroundIsStatic: false,
   shouldDisableHapticFeedback: false,
   appleAppAccountToken: null,
@@ -76,7 +77,12 @@ const initialState = {
   dialogSpaceFilterByGroup: {},
   dialogSpaceFilterByUser: {},
   dialogSpaceFilterShowHidden: false,
-  dialogSpaceFilterSortBy: null // null, updatedAt, createdAt, alphabetical
+  dialogSpaceFilterSortBy: null, // null, updatedAt, createdAt, alphabetical
+  dialogSpaceFilterByTemplates: false,
+
+  // user tags
+
+  tags: []
 }
 
 export default {
@@ -116,16 +122,6 @@ export default {
     lastSpaceId: (state, spaceId) => {
       state.lastSpaceId = spaceId
       cache.updateUser('lastSpaceId', spaceId)
-    },
-    resetLastSpaceId: (state) => {
-      const spaces = cache.getAllSpaces()
-      const lastSpace = spaces[1]
-      if (lastSpace) {
-        state.lastSpaceId = lastSpace.id
-      } else {
-        state.lastSpaceId = ''
-      }
-      cache.updateUser('lastSpaceId', state.lastSpaceId)
     },
     favoriteUsers: (state, users) => {
       utils.typeCheck({ value: users, type: 'array' })
@@ -218,6 +214,10 @@ export default {
       state.shouldHideTutorialCards = value
       cache.updateUser('shouldHideTutorialCards', value)
     },
+    shouldHideDateCards: (state, value) => {
+      state.shouldHideDateCards = value
+      cache.updateUser('shouldHideDateCards', value)
+    },
     shouldEmailNotifications: (state, value) => {
       state.shouldEmailNotifications = value
       cache.updateUser('shouldEmailNotifications', value)
@@ -265,15 +265,21 @@ export default {
     dialogSpaceFilterByUser: (state, value) => {
       utils.typeCheck({ value, type: 'object' })
       state.dialogSpaceFilterByUser = value
+      value = utils.clone(value)
       cache.updateUser('dialogSpaceFilterByUser', value)
     },
     dialogSpaceFilterShowHidden: (state, value) => {
       state.dialogSpaceFilterShowHidden = value
       cache.updateUser('dialogSpaceFilterShowHidden', value)
     },
+    dialogSpaceFilterByTemplates: (state, value) => {
+      state.dialogSpaceFilterByTemplates = value
+      cache.updateUser('dialogSpaceFilterByTemplates', value)
+    },
     dialogSpaceFilterByGroup: (state, value) => {
       utils.typeCheck({ value, type: 'object' })
       state.dialogSpaceFilterByGroup = value
+      value = utils.clone(value)
       cache.updateUser('dialogSpaceFilterByGroup', value)
     },
     dialogSpaceFilterSortBy: (state, value) => {
@@ -299,10 +305,6 @@ export default {
     defaultConnectionControlPoint: (state, value) => {
       state.defaultConnectionControlPoint = value
       cache.updateUser('defaultConnectionControlPoint', value)
-    },
-    panSpeedIsFast: (state, value) => {
-      state.panSpeedIsFast = value
-      cache.updateUser('panSpeedIsFast', value)
     },
     outsideSpaceBackgroundIsStatic: (state, value) => {
       state.outsideSpaceBackgroundIsStatic = value
@@ -379,24 +381,29 @@ export default {
     addToDisabledKeyboardShortcuts: (state, value) => {
       utils.typeCheck({ value, type: 'string' })
       state.disabledKeyboardShortcuts.push(value)
-      cache.updateUser('disabledKeyboardShortcuts', state.disabledKeyboardShortcuts)
+      cache.updateUser('disabledKeyboardShortcuts', value)
     },
     removeFromDisabledKeyboardShortcuts: (state, value) => {
       utils.typeCheck({ value, type: 'string' })
       state.disabledKeyboardShortcuts = state.disabledKeyboardShortcuts.filter(shortcutName => value !== shortcutName)
-      cache.updateUser('disabledKeyboardShortcuts', state.disabledKeyboardShortcuts)
+      cache.updateUser('disabledKeyboardShortcuts', value)
+    },
+    tags: (state, value) => {
+      utils.typeCheck({ value, type: 'array' })
+      state.tags = value
     }
   },
   actions: {
     init: async (context) => {
-      const cachedUser = cache.user()
+      const cachedUser = await cache.user()
       if (utils.objectHasKeys(cachedUser)) {
-        console.log('🌸 Restore user from cache', cachedUser.id)
+        console.info('🌸 Restore user from cache', cachedUser.id)
         context.commit('restoreUser', cachedUser)
         context.dispatch('themes/restore', null, { root: true })
         await context.dispatch('restoreRemoteUser', cachedUser)
+        await context.dispatch('restoreUserFavorites')
       } else {
-        console.log('🌸 Create new user')
+        console.info('🌸 Create new user')
         context.dispatch('createNewUser')
       }
       context.dispatch('themes/restore', null, { root: true })
@@ -412,15 +419,15 @@ export default {
         context.commit('notifySignUpToJoinGroup', true, { root: true })
       }
     },
-    update: (context, updates) => {
+    update: async (context, updates) => {
       const keys = Object.keys(updates)
       keys.forEach(key => {
         context.commit(key, updates[key])
         context.dispatch('broadcastUpdate', { [key]: updates[key] })
       })
-      context.dispatch('api/addToQueue', { name: 'updateUser', body: updates }, { root: true })
+      await context.dispatch('api/addToQueue', { name: 'updateUser', body: updates }, { root: true })
     },
-    cardsCreatedCountUpdateBy: (context, { cards, shouldDecrement }) => {
+    cardsCreatedCountUpdateBy: async (context, { cards, shouldDecrement }) => {
       cards = cards.filter(card => !card.isCreatedThroughPublicApi)
       cards = cards.filter(card => card.userId === context.state.id)
       let delta = cards.length
@@ -429,11 +436,11 @@ export default {
       }
       const count = context.state.cardsCreatedCount + delta
       // update raw vanity count
-      context.dispatch('api/addToQueue', { name: 'updateUserCardsCreatedCountRaw', body: { delta } }, { root: true })
       context.commit('cardsCreatedCountRaw', count)
+      await context.dispatch('api/addToQueue', { name: 'updateUserCardsCreatedCountRaw', body: { delta } }, { root: true })
       // update count
       if (context.getters.shouldPreventCardsCreatedCountUpdate) { return }
-      context.dispatch('api/addToQueue', { name: 'updateUserCardsCreatedCount', body: { delta } }, { root: true })
+      await context.dispatch('api/addToQueue', { name: 'updateUserCardsCreatedCount', body: { delta } }, { root: true })
       context.commit('cardsCreatedCount', count)
     },
     isUpgraded: (context, value) => {
@@ -456,21 +463,30 @@ export default {
       context.commit('currentSpace/updateUser', user, { root: true })
       context.commit('currentSpace/updateCollaborator', user, { root: true })
     },
-    lastSpaceId: (context, spaceId) => {
+    lastSpaceId: async (context, spaceId) => {
       context.commit('lastSpaceId', spaceId)
       cache.updateUser('lastSpaceId', spaceId)
-      context.dispatch('api/addToQueue', { name: 'updateUser',
+      await context.dispatch('api/addToQueue', { name: 'updateUser',
         body: {
           lastSpaceId: spaceId
         } }, { root: true })
+    },
+    resetLastSpaceId: async (context) => {
+      const spaces = await cache.getAllSpaces()
+      const lastSpace = spaces[1]
+      if (lastSpace) {
+        context.dispatch('lastSpaceId', lastSpace.id)
+      } else {
+        context.dispatch('lastSpaceId', '')
+      }
     },
     restoreRemoteUser: async (context, cachedUser) => {
       if (!context.getters.isSignedIn) { return }
       const remoteUser = await context.dispatch('api/getUser', null, { root: true })
       if (!remoteUser) { return }
       remoteUser.AIImages = await context.dispatch('api/getUserAIImages', null, { root: true }) || []
-      remoteUser.updatedAt = utils.normalizeToUnixTime(remoteUser.updatedAt)
-      console.log('🌸 Restore user from remote', remoteUser)
+      remoteUser.updatedAt = utils.unixTime(remoteUser.updatedAt)
+      console.info('🌸 Restore user from remote', remoteUser)
       context.commit('updateUser', remoteUser)
       if (utils.userIsUpgraded(remoteUser)) {
         context.commit('isUpgraded', true)
@@ -478,7 +494,7 @@ export default {
         context.commit('isUpgraded', false)
       }
       const remoteTags = await context.dispatch('api/getUserTags', null, { root: true }) || []
-      context.commit('otherTags', remoteTags, { root: true })
+      context.dispatch('tags', remoteTags)
       context.dispatch('groups/restore', remoteUser.groups, { root: true })
       if (context.rootState.shouldNotifyIsJoiningGroup) {
         context.commit('notifyIsJoiningGroup', true, { root: true })
@@ -510,7 +526,7 @@ export default {
         console.error('🚒 restoreUserFavorites', error)
       }
     },
-    updateFavoriteSpace: (context, { space, value }) => {
+    updateFavoriteSpace: async (context, { space, value }) => {
       let favoriteSpaces = utils.clone(context.state.favoriteSpaces)
       // add space
       if (value) {
@@ -526,9 +542,9 @@ export default {
       }
       context.commit('favoriteSpaces', favoriteSpaces)
       const body = { spaceId: space.id, value }
-      context.dispatch('api/addToQueue', { name: 'updateFavoriteSpace', body, spaceId: space.id }, { root: true })
+      await context.dispatch('api/addToQueue', { name: 'updateFavoriteSpace', body, spaceId: space.id }, { root: true })
     },
-    updateFavoriteUser: (context, { user, value }) => {
+    updateFavoriteUser: async (context, { user, value }) => {
       let favoriteUsers = utils.clone(context.state.favoriteUsers)
       // add user
       if (value) {
@@ -543,9 +559,9 @@ export default {
       }
       context.commit('favoriteUsers', favoriteUsers)
       const body = { favoriteUserId: user.id, value }
-      context.dispatch('api/addToQueue', { name: 'updateFavoriteUser', body }, { root: true })
+      await context.dispatch('api/addToQueue', { name: 'updateFavoriteUser', body }, { root: true })
     },
-    updateFavoriteColor: (context, { color, value }) => {
+    updateFavoriteColor: async (context, { color, value }) => {
       color = color.color
       let favoriteColors = utils.clone(context.state.favoriteColors)
       if (value) {
@@ -557,25 +573,25 @@ export default {
       }
       context.commit('favoriteColors', favoriteColors)
       const body = { color, value }
-      context.dispatch('api/addToQueue', { name: 'updateFavoriteColor', body }, { root: true })
+      await context.dispatch('api/addToQueue', { name: 'updateFavoriteColor', body }, { root: true })
     },
-    confirmEmail: (context) => {
-      context.dispatch('api/addToQueue', { name: 'updateUser',
+    confirmEmail: async (context) => {
+      await context.dispatch('api/addToQueue', { name: 'updateUser',
         body: {
           emailIsVerified: true
         }
       }, { root: true })
     },
-    arenaAccessToken: (context, token) => {
+    arenaAccessToken: async (context, token) => {
       context.commit('arenaAccessToken', token)
-      context.dispatch('api/addToQueue', { name: 'updateUser',
+      await context.dispatch('api/addToQueue', { name: 'updateUser',
         body: {
           arenaAccessToken: token
         }
       }, { root: true })
     },
     updateArenaAccessToken: async (context, arenaReturnedCode) => {
-      console.log('updateArenaAccessToken')
+      console.info('updateArenaAccessToken')
       context.commit('importArenaChannelIsVisible', true, { root: true })
       context.commit('isAuthenticatingWithArena', true, { root: true })
       const response = await context.dispatch('api/updateArenaAccessToken', arenaReturnedCode, { root: true })
@@ -583,40 +599,45 @@ export default {
       context.commit('importArenaChannelIsVisible', true, { root: true })
       context.commit('isAuthenticatingWithArena', false, { root: true })
     },
-    toggleFilterShowUsers: (context, value) => {
+    toggleFilterShowUsers: async (context, value) => {
       context.commit('filterShowUsers', value)
-      context.dispatch('api/addToQueue', { name: 'updateUser',
+      await context.dispatch('api/addToQueue', { name: 'updateUser',
         body: {
           filterShowUsers: value
-        } }, { root: true })
+        }
+      }, { root: true })
     },
-    toggleFilterShowDateUpdated: (context, value) => {
+    toggleFilterShowDateUpdated: async (context, value) => {
       context.commit('filterShowDateUpdated', value)
-      context.dispatch('api/addToQueue', { name: 'updateUser',
+      await context.dispatch('api/addToQueue', { name: 'updateUser',
         body: {
           filterShowDateUpdated: value
-        } }, { root: true })
+        }
+      }, { root: true })
     },
-    toggleFilterShowAbsoluteDates: (context, value) => {
+    toggleFilterShowAbsoluteDates: async (context, value) => {
       context.commit('filterShowAbsoluteDates', value)
-      context.dispatch('api/addToQueue', { name: 'updateUser',
+      await context.dispatch('api/addToQueue', { name: 'updateUser',
         body: {
           filterShowAbsoluteDates: value
-        } }, { root: true })
+        }
+      }, { root: true })
     },
-    toggleFilterUnchecked: (context, value) => {
+    toggleFilterUnchecked: async (context, value) => {
       context.commit('filterUnchecked', value)
-      context.dispatch('api/addToQueue', { name: 'updateUser',
+      await context.dispatch('api/addToQueue', { name: 'updateUser',
         body: {
           filterUnchecked: value
-        } }, { root: true })
+        }
+      }, { root: true })
     },
-    toggleFilterComments: (context, value) => {
+    toggleFilterComments: async (context, value) => {
       context.commit('filterComments', value)
-      context.dispatch('api/addToQueue', { name: 'updateUser',
+      await context.dispatch('api/addToQueue', { name: 'updateUser',
         body: {
           filterComments: value
-        } }, { root: true })
+        }
+      }, { root: true })
     },
     clearUserFilters: (context) => {
       context.dispatch('toggleFilterShowUsers', false)
@@ -625,12 +646,20 @@ export default {
       context.dispatch('toggleFilterUnchecked', false)
       context.dispatch('toggleFilterComments', false)
     },
-    shouldHideTutorialCards: (context, value) => {
+    shouldHideTutorialCards: async (context, value) => {
       utils.typeCheck({ value, type: 'boolean' })
       context.commit('shouldHideTutorialCards', value)
-      context.dispatch('api/addToQueue', { name: 'updateUser',
+      await context.dispatch('api/addToQueue', { name: 'updateUser',
         body: {
           shouldHideTutorialCards: value
+        } }, { root: true })
+    },
+    shouldHideDateCards: async (context, value) => {
+      utils.typeCheck({ value, type: 'boolean' })
+      context.commit('shouldHideDateCards', value)
+      await context.dispatch('api/addToQueue', { name: 'updateUser',
+        body: {
+          shouldHideDateCards: value
         } }, { root: true })
     },
     shouldEmailNotifications: (context, value) => {
@@ -649,72 +678,80 @@ export default {
           shouldEmailBulletin: value
         } }, { root: true })
     },
-    shouldEmailWeeklyReview: (context, value) => {
+    shouldEmailWeeklyReview: async (context, value) => {
       utils.typeCheck({ value, type: 'boolean' })
       context.commit('shouldEmailWeeklyReview', value)
-      context.dispatch('api/addToQueue', { name: 'updateUser',
+      await context.dispatch('api/addToQueue', { name: 'updateUser',
         body: {
           shouldEmailWeeklyReview: value
-        } }, { root: true })
+        }
+      }, { root: true })
     },
-    shouldShowMoreAlignOptions: (context, value) => {
+    shouldShowMoreAlignOptions: async (context, value) => {
       utils.typeCheck({ value, type: 'boolean' })
       context.commit('shouldShowMoreAlignOptions', value)
-      context.dispatch('api/addToQueue', { name: 'updateUser',
+      await context.dispatch('api/addToQueue', { name: 'updateUser',
         body: {
           shouldShowMoreAlignOptions: value
-        } }, { root: true })
+        }
+      }, { root: true })
     },
-    shouldShowItemActions: (context, value) => {
+    shouldShowItemActions: async (context, value) => {
       utils.typeCheck({ value, type: 'boolean' })
       context.commit('shouldShowItemActions', value)
-      context.dispatch('api/addToQueue', { name: 'updateUser',
+      await context.dispatch('api/addToQueue', { name: 'updateUser',
         body: {
           shouldShowItemActions: value
-        } }, { root: true })
+        }
+      }, { root: true })
     },
-    shouldShowMultipleSelectedLineActions: (context, value) => {
+    shouldShowMultipleSelectedLineActions: async (context, value) => {
       utils.typeCheck({ value, type: 'boolean' })
       context.commit('shouldShowMultipleSelectedLineActions', value)
-      context.dispatch('api/addToQueue', { name: 'updateUser',
+      await context.dispatch('api/addToQueue', { name: 'updateUser',
         body: {
           shouldShowMultipleSelectedLineActions: value
-        } }, { root: true })
+        }
+      }, { root: true })
     },
-    shouldShowMultipleSelectedBoxActions: (context, value) => {
+    shouldShowMultipleSelectedBoxActions: async (context, value) => {
       utils.typeCheck({ value, type: 'boolean' })
       context.commit('shouldShowMultipleSelectedBoxActions', value)
-      context.dispatch('api/addToQueue', { name: 'updateUser',
+      await context.dispatch('api/addToQueue', { name: 'updateUser',
         body: {
           shouldShowMultipleSelectedBoxActions: value
-        } }, { root: true })
+        }
+      }, { root: true })
     },
-    showInExploreUpdatedAt: (context, value) => {
+    showInExploreUpdatedAt: async (context, value) => {
       utils.typeCheck({ value, type: 'string' })
       context.commit('showInExploreUpdatedAt', value)
-      context.dispatch('api/addToQueue', { name: 'updateUser',
+      await context.dispatch('api/addToQueue', { name: 'updateUser',
         body: {
           showInExploreUpdatedAt: value
-        } }, { root: true })
+        }
+      }, { root: true })
     },
-    shouldDisableRightClickToPan: (context, value) => {
+    shouldDisableRightClickToPan: async (context, value) => {
       utils.typeCheck({ value, type: 'boolean' })
       context.commit('shouldDisableRightClickToPan', value)
-      context.dispatch('api/addToQueue', { name: 'updateUser',
+      await context.dispatch('api/addToQueue', { name: 'updateUser',
         body: {
           shouldDisableRightClickToPan: value
-        } }, { root: true })
+        }
+      }, { root: true })
     },
-    shouldUseLastConnectionType: (context, value) => {
+    shouldUseLastConnectionType: async (context, value) => {
       utils.typeCheck({ value, type: 'boolean' })
       context.commit('shouldUseLastConnectionType', value)
-      context.dispatch('api/addToQueue', { name: 'updateUser',
+      await context.dispatch('api/addToQueue', { name: 'updateUser',
         body: {
           shouldUseLastConnectionType: value
-        } }, { root: true })
+        }
+      }, { root: true })
     },
     inboxSpace: async (context) => {
-      let space = cache.getInboxSpace()
+      let space = await cache.getInboxSpace()
       if (!space) {
         try {
           space = await context.dispatch('api/getUserInboxSpace', null, { root: true })
@@ -734,6 +771,10 @@ export default {
       } else {
         context.commit('addNotificationWithPosition', { message: 'Space is Read Only', position, type: 'info', layer: 'space', icon: 'cancel' }, { root: true })
       }
+    },
+    tags: async (context, tags) => {
+      tags = uniqBy(tags, 'name')
+      context.commit('tags', tags)
     }
   },
   getters: {
@@ -846,14 +887,6 @@ export default {
     isReadOnlyInvitedToSpace: (state, getters, rootState) => (space) => {
       return rootState.spaceReadOnlyKey.spaceId === space.id
     },
-    isInvitedButCannotEditSpace: (state, getters, rootState) => (space) => {
-      space = space || rootState.currentSpace
-      const currentUserIsSignedIn = getters.isSignedIn
-      const isInvitedToSpace = Boolean(cache.invitedSpaces().find(invitedSpace => invitedSpace.id === space.id))
-      const isReadOnlyInvitedToSpace = getters.isReadOnlyInvitedToSpace(space)
-      const inviteRequiresSignIn = !currentUserIsSignedIn && isInvitedToSpace
-      return isReadOnlyInvitedToSpace || inviteRequiresSignIn
-    },
     shouldPreventCardsCreatedCountUpdate: (state, getters, rootState, rootGetters) => {
       const spaceCreatorIsUpgraded = rootGetters['currentSpace/spaceCreatorIsUpgraded']
       const spaceCreatorIsCurrentUser = rootGetters['currentSpace/spaceCreatorIsCurrentUser']
@@ -932,6 +965,12 @@ export default {
     subscriptionIsFree: (state) => {
       const strings = ['🌷free', '🌷 free', '🫧free']
       return strings.includes(state.stripeSubscriptionId)
+    },
+
+    // user tags
+
+    tagByName: (state, getters) => (name) => {
+      return state.tags.find(tag => tag.name === name)
     }
   }
 }

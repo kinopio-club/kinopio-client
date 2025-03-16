@@ -85,10 +85,10 @@ const toggleUserSettingsIsVisible = () => {
   store.commit('userSettingsIsVisible', value)
 }
 const currentUserIsSignedIn = computed(() => store.getters['currentUser/isSignedIn'])
-const signOut = () => {
+const signOut = async () => {
   postMessage.send({ name: 'onLogout' })
-  store.commit('currentUser/resetLastSpaceId')
-  cache.removeAll()
+  await store.dispatch('currentUser/resetLastSpaceId')
+  await cache.removeAll()
   // clear history wipe state from vue-router
   window.history.replaceState({}, 'Kinopio', '/')
   location.reload()
@@ -189,7 +189,8 @@ const toggleGroupsIsVisible = () => {
       SpacePicker(:visible="state.spacePickerIsVisible" :loading="state.loading.userSpaces" :user="props.user" :userSpaces="state.userSpaces" @selectSpace="changeSpace")
     .button-wrap
       button(:class="{active: isFavoriteUser}" @click.left.prevent="updateFavoriteUser" @keydown.stop.enter="updateFavoriteUser")
-        span Follow
+        span(v-if="!isFavoriteUser") Follow
+        span(v-if="isFavoriteUser") Unfollow
         Loader(:visible="isLoadingFavorites")
     .badge.danger.error-message(v-if="state.error.unknownServerError") (シ_ _)シ Something went wrong, Please try again or contact support
   //- Explore Spaces

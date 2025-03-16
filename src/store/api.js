@@ -7,26 +7,21 @@ import merge from 'lodash-es/merge'
 import uniq from 'lodash-es/uniq'
 import { nanoid } from 'nanoid'
 
+let otherItemsQueue
+
+// other items queue
+
+const clearOtherItemsQueue = () => {
+  otherItemsQueue = {
+    cardIds: [],
+    spaceIds: [],
+    invites: []
+  }
+}
+clearOtherItemsQueue()
+
 // process queue
 
-const squashCardsCreatedCount = (queue, request, isRaw) => {
-  let isSquashed
-  let name = 'updateUserCardsCreatedCount'
-  if (isRaw) {
-    name = 'updateUserCardsCreatedCountRaw'
-  }
-  queue = queue.map(queueItem => {
-    if (queueItem.name === name) {
-      queueItem.body.delta += request.body.delta
-      isSquashed = true
-    }
-    return queueItem
-  })
-  if (!isSquashed) {
-    queue.push(request)
-  }
-  return queue
-}
 const sortQueueItems = (queue) => {
   // sort create connectiontype operations first
   let createConnectionTypes = []
@@ -62,8 +57,17 @@ const squashQueue = (queue) => {
     const matches = queue.filter(queueItem => {
       return queueItem.name === request.name && queueItem.body.id === request.body.id
     })
-    // merge({a: 1, a: 2}, {b: 4, c: 5}) = {a: 1, b: 4, c:5}
-    const reduced = matches.reduce((accumulator, currentValue) => merge(accumulator, currentValue))
+    const reduced = matches.reduce((accumulator, currentValue) => {
+      const cumulativeDeltaOperations = ['updateUserCardsCreatedCount', 'updateUserCardsCreatedCountRaw']
+      if (cumulativeDeltaOperations.includes(accumulator.name)) {
+        // {delta: 1}, {delta: 1} = {delta: 2}
+        accumulator.body.delta += currentValue.body.delta
+        return accumulator
+      } else {
+        // merge({a: 1, a: 2}, {b: 4, c: 5}) = {a: 1, b: 4, c:5}
+        return merge(accumulator, currentValue)
+      }
+    })
     reduced.name = request.name
     squashed.push(reduced)
   })
@@ -143,6 +147,8 @@ const self = {
       if (options.spaceReadOnlyKey) {
         headers.append('Read-Only-Authorization', options.spaceReadOnlyKey)
       }
+      const requestId = options.requestId || nanoid()
+      headers.append('Request-Id', requestId)
       headers.append('User-Id', context.rootState.currentUser.id)
       return {
         method: options.method,
@@ -153,29 +159,22 @@ const self = {
 
     // Queue Operations
 
-    addToQueue: (context, { name, body, spaceId }) => {
+    addToQueue: async (context, { name, body, spaceId }) => {
+      const canEditSpace = context.rootGetters['currentUser/canEditSpace']()
+      const editOperations = ['updateUrlPreviewImage', 'updateCard', 'updateConnection']
+      if (editOperations.includes(name) && !canEditSpace) { return }
       body = utils.clone(body)
       body.operationId = nanoid()
       body.spaceId = spaceId || context.rootState.currentSpace.id
       body.userId = context.rootState.currentUser.id
       body.clientCreatedAt = new Date()
       const isSignedIn = context.rootGetters['currentUser/isSignedIn']
-      const canEditSpace = context.rootGetters['currentUser/canEditSpace']()
       if (!isSignedIn) { return }
-      let queue = cache.queue()
       const request = {
         name,
         body
       }
-      if (name === 'updateMultipleCards' && !canEditSpace) { return }
-      if (name === 'updateUserCardsCreatedCount') {
-        queue = squashCardsCreatedCount(queue, request)
-      } else if (name === 'updateUserCardsCreatedCountRaw') {
-        queue = squashCardsCreatedCount(queue, request, true)
-      } else {
-        queue.push(request)
-      }
-      cache.saveQueue(queue)
+      await cache.addToQueue(request)
       context.dispatch('debouncedSendQueue')
     },
 
@@ -186,10 +185,15 @@ const self = {
     // Send Queue Operations
 
     handleServerOperationsError: async (context, { error, response }) => {
+      if (!response) {
+        console.error('🚒 handleServerOperationsError', error, response)
+        context.commit('notifyServerCouldNotSave', true, { root: true })
+        return
+      }
       const data = await response.json()
       const operations = data.operations
       console.warn('🚑 serverOperationsError', data)
-      const nonCriticalErrorStatusCodes = [400, 401, 404, 422]
+      const nonCriticalErrorStatusCodes = [400, 401, 404]
       operations.forEach(operation => {
         const error = operation.error
         if (!error) { return }
@@ -208,7 +212,7 @@ const self = {
     sendQueue: async (context) => {
       const apiKey = context.rootState.currentUser.apiKey
       const isOnline = context.rootState.isOnline
-      const queue = cache.queue()
+      const queue = await cache.queue()
       if (!shouldRequest({ apiKey, isOnline }) || !queue.length) { return } // offline check
       // empty queue into sendingQueue
       let body = squashQueue(queue)
@@ -217,17 +221,18 @@ const self = {
       // send
       let response
       try {
-        console.warn(`🛫 sending operations`, body)
+        const requestId = nanoid()
+        console.warn(`🛫 sending operations`, body, `●requestId=${requestId}`)
         const space = context.rootState.currentSpace
         if (!space.id) { throw 'operation missing spaceId' }
-        const options = await context.dispatch('requestOptions', { body, method: 'POST', space })
+        const options = await context.dispatch('requestOptions', { body, method: 'POST', space, requestId })
         response = await fetch(`${consts.apiHost()}/operations`, options)
         if (response.ok) {
-          console.log('🛬 operations ok', body)
+          console.info('🛬 operations ok', body)
           // clear sendingQueue on success
           context.commit('clearSendingQueue', null, { root: true })
         } else {
-          throw Error(response.statusText)
+          throw response.statusText
         }
         if (context.rootState.notifyServerCouldNotSave) {
           context.commit('addNotification', { message: 'Reconnected to server', type: 'success' }, { root: true })
@@ -246,7 +251,7 @@ const self = {
         const response = await fetch(`${consts.apiHost()}/`)
         return normalizeResponse(response)
       } catch (error) {
-        console.log('🚒 getStatus', error)
+        console.info('🚒 getStatus', error)
         return false
       }
     },
@@ -278,6 +283,14 @@ const self = {
         return data.url
       } catch (error) {
         context.dispatch('handleServerError', { name: 'updateDateImage', error })
+      }
+    },
+    getEmojis: async (context) => {
+      try {
+        const response = await fetch(`${consts.apiHost()}/meta/emojis`)
+        return normalizeResponse(response)
+      } catch (error) {
+        context.dispatch('handleServerError', { name: 'getEmojis', error })
       }
     },
 
@@ -396,7 +409,7 @@ const self = {
       if (!shouldRequest({ apiKey, isOnline })) { return }
       if (!isSpacePage) { return }
       try {
-        console.log('🛬 getting following users spaces')
+        console.info('🛬 getting following users spaces')
         const options = await context.dispatch('requestOptions', { method: 'GET', space: context.rootState.currentSpace })
         const response = await fetch(`${consts.apiHost()}/user/favorite-users-spaces`, options)
         return normalizeResponse(response)
@@ -413,7 +426,7 @@ const self = {
         const response = await fetch(`${consts.apiHost()}/user/spaces`, options)
         const currentUser = context.rootState.currentUser
         let spaces = await normalizeResponse(response)
-        return utils.AddCurrentUserIsCollaboratorToSpaces(spaces, currentUser)
+        return utils.addCurrentUserIsCollaboratorToSpaces(spaces, currentUser)
       } catch (error) {
         context.dispatch('handleServerError', { name: 'getUserSpaces', error })
       }
@@ -429,9 +442,9 @@ const self = {
         const response = await fetch(`${consts.apiHost()}/user/group-spaces`, options)
         const currentUser = context.rootState.currentUser
         let spaces = await normalizeResponse(response)
-        return utils.AddCurrentUserIsCollaboratorToSpaces(spaces, currentUser)
+        return utils.addCurrentUserIsCollaboratorToSpaces(spaces, currentUser)
       } catch (error) {
-        context.dispatch('handleServerError', { name: 'getUserSpaces', error })
+        context.dispatch('handleServerError', { name: 'getUserGroupSpaces', error })
       }
     },
     getUserRemovedSpaces: async (context) => {
@@ -534,7 +547,7 @@ const self = {
       try {
         userIds = userIds.slice(0, max)
         userIds = userIds.join(',')
-        console.log('🛬🛬 getting remote public users', userIds)
+        console.info('🛬🛬 getting remote public users', userIds)
         const options = await context.dispatch('requestOptions', { method: 'GET', space: context.rootState.currentSpace })
         const response = await utils.timeout(consts.defaultTimeout, fetch(`${consts.apiHost()}/user/public/multiple?userIds=${userIds}`, options))
         // notifyConnectionError
@@ -573,7 +586,7 @@ const self = {
       if (!shouldRequest({ shouldRequestRemote: true, isOnline })) { return }
       if (!isSpacePage) { return }
       try {
-        console.log('🛬 getting explore spaces')
+        console.info('🛬 getting explore spaces')
         const options = await context.dispatch('requestOptions', { method: 'GET', space: context.rootState.currentSpace })
         const response = await utils.timeout(consts.defaultTimeout, fetch(`${consts.apiHost()}/space/explore-spaces`, options))
         return normalizeResponse(response)
@@ -588,7 +601,7 @@ const self = {
       if (!shouldRequest({ shouldRequestRemote: true, isOnline })) { return }
       if (!isSpacePage) { return }
       try {
-        console.log('🛬 getting everyone spaces')
+        console.info('🛬 getting everyone spaces')
         const options = await context.dispatch('requestOptions', { method: 'GET', space: context.rootState.currentSpace })
         const response = await utils.timeout(consts.defaultTimeout, fetch(`${consts.apiHost()}/space/everyone-spaces`, options))
         return normalizeResponse(response)
@@ -602,7 +615,7 @@ const self = {
       if (!shouldRequest({ shouldRequestRemote: true, isOnline })) { return }
       if (!isSpacePage) { return }
       try {
-        console.log('🛬 getting live spaces')
+        console.info('🛬 getting live spaces')
         const options = await context.dispatch('requestOptions', { method: 'GET', space: context.rootState.currentSpace })
         const response = await utils.timeout(consts.defaultTimeout, fetch(`${consts.apiHost()}/space/live-spaces`, options))
         return normalizeResponse(response)
@@ -616,7 +629,7 @@ const self = {
         const isOnline = context.rootState.isOnline
         if (!shouldRequest({ shouldRequestRemote, apiKey, isOnline })) { return }
         let spaceReadOnlyKey = context.rootGetters['currentSpace/readOnlyKey'](space)
-        console.log('🛬 getting remote space', space.id)
+        console.info('🛬 getting remote space', space.id)
         const options = await context.dispatch('requestOptions', { method: 'GET', space: context.rootState.currentSpace, spaceReadOnlyKey })
         const response = await utils.timeout(consts.defaultTimeout, fetch(`${consts.apiHost()}/space/${space.id}`, options))
         return normalizeResponse(response)
@@ -628,7 +641,7 @@ const self = {
       try {
         const isOnline = context.rootState.isOnline
         if (!isOnline) { return }
-        // console.log('🛬 getting remote space updatedAt', space.id)
+        // console.info('🛬 getting remote space updatedAt', space.id)
         const options = await context.dispatch('requestOptions', { method: 'GET', space: context.rootState.currentSpace })
         const response = await utils.timeout(consts.defaultTimeout, fetch(`${consts.apiHost()}/space/updated-at/${space.id}`, options))
         return normalizeResponse(response)
@@ -641,7 +654,7 @@ const self = {
         const isOnline = context.rootState.isOnline
         if (!isOnline) { return }
         const spaceId = context.rootState.currentSpace.id
-        console.log('🛬 getting remote space favorites', spaceId)
+        console.info('🛬 getting remote space favorites', spaceId)
         const options = await context.dispatch('requestOptions', { method: 'GET', space: context.rootState.currentSpace })
         const response = await utils.timeout(consts.defaultTimeout, fetch(`${consts.apiHost()}/space/${spaceId}/favorites`, options))
         return normalizeResponse(response)
@@ -649,34 +662,28 @@ const self = {
         context.dispatch('handleServerError', { name: 'getSpaceFavorites', error })
       }
     },
-    getOtherItems: async (context, { cardIds, spaceIds, invites }) => {
-      const max = 60
+    getSpaceHistory: async (context) => {
       try {
         const isOnline = context.rootState.isOnline
         if (!isOnline) { return }
-        // normalize
-        cardIds = uniq(cardIds)
-        cardIds = cardIds.slice(0, max)
-        spaceIds = uniq(spaceIds)
-        spaceIds = spaceIds.slice(0, max)
-        console.log('🛬🛬 getting remote other items', { cardIds, spaceIds, invites })
-        // request
-        const body = { cardIds, spaceIds, invites }
-        const options = await context.dispatch('requestOptions', { body, method: 'POST', space: context.rootState.currentSpace })
-        const response = await utils.timeout(consts.defaultTimeout, fetch(`${consts.apiHost()}/item/multiple`, options))
+        const spaceId = context.rootState.currentSpace.id
+        console.info('🛬 getting remote space history', spaceId)
+        const options = await context.dispatch('requestOptions', { method: 'GET', space: context.rootState.currentSpace })
+        const response = await utils.timeout(consts.defaultTimeout, fetch(`${consts.apiHost()}/space/${spaceId}/history`, options))
         return normalizeResponse(response)
       } catch (error) {
-        context.dispatch('handleServerError', { name: 'getSpaces', error })
+        context.dispatch('handleServerError', { name: 'getSpaceFavorites', error })
       }
     },
     getSpaceAnonymously: async (context, space) => {
       const isOnline = context.rootState.isOnline
       if (!isOnline) { return }
-      const invite = cache.invitedSpaces().find(invitedSpace => invitedSpace.id === space.id) || {}
+      const invitedSpaces = await cache.invitedSpaces()
+      const invite = invitedSpaces.find(invitedSpace => invitedSpace.id === space.id) || {}
       space.collaboratorKey = space.collaboratorKey || invite.collaboratorKey
       let spaceReadOnlyKey = context.rootGetters['currentSpace/readOnlyKey'](space)
       try {
-        console.log('🛬 getting remote space anonymously', space.id, space.collaboratorKey, spaceReadOnlyKey)
+        console.info('🛬 getting remote space anonymously', space.id, space.collaboratorKey, spaceReadOnlyKey)
         const options = await context.dispatch('requestOptions', { method: 'GET', space: space, spaceReadOnlyKey })
         const response = await utils.timeout(consts.defaultTimeout, fetch(`${consts.apiHost()}/space/${space.id}`, options))
         return normalizeResponse(response)
@@ -686,7 +693,7 @@ const self = {
     },
     getInboxSpace: async (context) => {
       try {
-        console.log('🛬 getting inbox space')
+        console.info('🛬 getting inbox space')
         const options = await context.dispatch('requestOptions', { method: 'GET', space: context.rootState.currentSpace })
         const response = await utils.timeout(consts.defaultTimeout, fetch(`${consts.apiHost()}/space/inbox`, options))
         return normalizeResponse(response)
@@ -694,12 +701,24 @@ const self = {
         context.dispatch('handleServerError', { name: 'getInboxSpace', error })
       }
     },
+    searchExploreSpaces: async (context, body) => {
+      const apiKey = context.rootState.currentUser.apiKey
+      const isOnline = context.rootState.isOnline
+      if (!shouldRequest({ apiKey, isOnline })) { return }
+      try {
+        const options = await context.dispatch('requestOptions', { body, method: 'POST', space: context.rootState.currentSpace })
+        const response = await fetch(`${consts.apiHost()}/space/search-explore-spaces`, options)
+        return normalizeResponse(response)
+      } catch (error) {
+        context.dispatch('handleServerError', { name: 'search', error })
+      }
+    },
     createSpaces: async (context) => {
       try {
-        let spaces = cache.getAllSpaces()
+        let spaces = await cache.getAllSpaces()
         if (!spaces.length) { return }
         spaces = spaces.map(space => normalizeRemovedCards(space))
-        let removedSpaces = cache.getAllRemovedSpaces()
+        let removedSpaces = await cache.getAllRemovedSpaces()
         removedSpaces = removedSpaces.map(space => {
           space.isRemoved = true
           space.removedByUserId = context.rootState.currentUser.id
@@ -798,7 +817,9 @@ const self = {
         }
         const options = await context.dispatch('requestOptions', { body, method: 'DELETE', space: context.rootState.currentSpace })
         const response = await fetch(`${consts.apiHost()}/space/collaborator`, options)
-        return normalizeResponse(response)
+        const data = await normalizeResponse(response)
+        const collaboratorKey = data.collaboratorKey
+        context.dispatch('currentSpace/updateSpace', { collaboratorKey }, { root: true })
       } catch (error) {
         context.dispatch('handleServerError', { name: 'removeSpaceCollaborator', error })
       }
@@ -826,6 +847,43 @@ const self = {
       } catch (error) {
         context.dispatch('handleServerError', { name: 'sendSpaceInviteEmails', error })
       }
+    },
+
+    // Other Items Queue
+
+    addToGetOtherItemsQueue: async (context, { cardIds, spaceIds, invites }) => {
+      const isOnline = context.rootState.isOnline
+      if (!isOnline) { return }
+      otherItemsQueue = {
+        cardIds: uniq(otherItemsQueue.cardIds.concat(cardIds)),
+        spaceIds: uniq(otherItemsQueue.spaceIds.concat(spaceIds)),
+        invites: uniq(otherItemsQueue.invites.concat(invites))
+      }
+      context.dispatch('debouncedSendOtherItemsQueue')
+    },
+
+    debouncedSendOtherItemsQueue: debounce(({ dispatch }) => {
+      dispatch('sendOtherItemsQueue')
+    }, 500),
+
+    // Get Other Items Queue
+
+    sendOtherItemsQueue: async (context) => {
+      context.commit('isLoadingOtherItems', true, { root: true })
+      const { cardIds, spaceIds, invites } = otherItemsQueue
+      clearOtherItemsQueue()
+      const body = { cardIds, spaceIds, invites }
+      try {
+        console.info('🛬🛬 getting remote other items', { cardIds, spaceIds, invites })
+        const options = await context.dispatch('requestOptions', { body, method: 'POST', space: context.rootState.currentSpace })
+        const response = await utils.timeout(consts.defaultTimeout, fetch(`${consts.apiHost()}/item/multiple`, options))
+        const data = await normalizeResponse(response)
+        context.commit('updateOtherItems', data, { root: true })
+      } catch (error) {
+        context.dispatch('handleServerError', { name: 'getSpaces', error })
+      }
+      clearOtherItemsQueue()
+      context.commit('isLoadingOtherItems', false, { root: true })
     },
 
     // Card
@@ -1092,18 +1150,6 @@ const self = {
         context.dispatch('handleServerError', { name: 'createMultiplePresignedPosts', error })
       }
     },
-    pdf: async (context) => {
-      const spaceId = context.rootState.currentSpace.id
-      try {
-        const options = await context.dispatch('requestOptions', { method: 'POST', space: context.rootState.currentSpace })
-        const response = await fetch(`${consts.apiHost()}/space/pdf/${spaceId}`, options)
-        let url = await normalizeResponse(response)
-        url = url.url
-        return url
-      } catch (error) {
-        context.dispatch('handleServerError', { name: 'pdf', error })
-      }
-    },
 
     // Notifications
 
@@ -1117,6 +1163,18 @@ const self = {
         return normalizeResponse(response)
       } catch (error) {
         context.dispatch('handleServerError', { name: 'getNotifications', error })
+      }
+    },
+    deleteAllNotifications: async (context) => {
+      const apiKey = context.rootState.currentUser.apiKey
+      const isOnline = context.rootState.isOnline
+      if (!shouldRequest({ apiKey, isOnline })) { return }
+      try {
+        const options = await context.dispatch('requestOptions', { method: 'DELETE', space: context.rootState.currentSpace })
+        const response = await fetch(`${consts.apiHost()}/notification/all`, options)
+        return normalizeResponse(response)
+      } catch (error) {
+        context.dispatch('handleServerError', { name: 'deleteGroupPermanent', error })
       }
     },
 
@@ -1199,6 +1257,18 @@ const self = {
         console.error('🚒 communityBackgrounds', error)
       }
     },
+    pdf: async (context) => {
+      const spaceId = context.rootState.currentSpace.id
+      try {
+        const options = await context.dispatch('requestOptions', { method: 'POST', space: context.rootState.currentSpace })
+        const response = await fetch(`${consts.apiHost()}/services/pdf/${spaceId}`, options)
+        let url = await normalizeResponse(response)
+        url = url.url
+        return url
+      } catch (error) {
+        context.dispatch('handleServerError', { name: 'pdf', error })
+      }
+    },
 
     // Downloads
 
@@ -1222,7 +1292,7 @@ const self = {
       const isOnline = context.rootState.isOnline
       if (!shouldRequest({ apiKey, isOnline })) { return }
       try {
-        console.log('🛬 getting remote group', groupId)
+        console.info('🛬 getting remote group', groupId)
         const options = await context.dispatch('requestOptions', { method: 'GET', space: context.rootState.currentSpace })
         const response = await fetch(`${consts.apiHost()}/group/${groupId}`, options)
         return normalizeResponse(response)

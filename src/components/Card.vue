@@ -24,6 +24,8 @@ import ImageOrVideo from '@/components/ImageOrVideo.vue'
 import dayjs from 'dayjs'
 import isToday from 'dayjs/plugin/isToday'
 import qs from '@aguezz/qs-parse'
+import randomColor from 'randomcolor'
+import { nanoid } from 'nanoid'
 
 dayjs.extend(isToday)
 
@@ -64,7 +66,7 @@ onMounted(async () => {
     } else if (type === 'triggerScrollCardIntoView') {
       if (payload === props.card.id) {
         const element = cardElement.value
-        store.commit('scrollElementIntoView', { element })
+        store.commit('scrollElementIntoView', { element, positionIsCenter: true })
       }
     } else if (type === 'triggerUploadComplete') {
       let { cardId, url } = payload
@@ -86,10 +88,9 @@ onMounted(async () => {
     }
   })
   updateDefaultBackgroundColor(utils.cssVariable('secondary-background'))
-  const shouldShowDetails = store.state.loadSpaceShowDetailsForCardId === props.card.id
-  if (shouldShowDetails) {
-    store.commit('preventCardDetailsOpeningAnimation', false)
-    store.dispatch('currentCards/showCardDetails', props.card.id)
+  const shouldFocus = store.state.loadSpaceFocusOnCardId === props.card.id
+  if (shouldFocus) {
+    store.dispatch('focusOnCardId', props.card.id)
   }
   await updateUrlPreviewOnload()
   checkIfShouldUpdateIframeUrl()
@@ -139,7 +140,8 @@ const state = reactive({
   pathIsUpdated: false,
   isVisibleInViewport: false,
   currentConnections: [],
-  shouldRenderParent: false
+  shouldRenderParent: false,
+  safeColors: {}
 })
 watch(() => state.linkToPreview, (value, prevValue) => {
   updateUrlData()
@@ -154,6 +156,7 @@ const isSelectedOrDragging = computed(() => {
   return Boolean(isSelected.value || isRemoteSelected.value || isRemoteCardDetailsVisible.value || isRemoteCardDragging.value || state.uploadIsDraggedOver || remoteUploadDraggedOverCardColor.value || remoteUserResizingCardsColor.value || remoteUserTiltingCardsColor.value)
 })
 const currentUserIsSignedIn = computed(() => store.getters['currentUser/isSignedIn'])
+const currentUserColor = computed(() => store.state.currentUser.color)
 
 // current space
 
@@ -172,7 +175,7 @@ const changeSpaceAndCard = async (spaceId, cardId) => {
   const currentSpaceId = store.state.currentSpace.id
   // space and card
   if (currentSpaceId !== spaceId) {
-    store.commit('loadSpaceShowDetailsForCardId', cardId)
+    store.commit('loadSpaceFocusOnCardId', cardId)
     const space = { id: spaceId }
     store.dispatch('currentSpace/changeSpace', space)
   // card in current space
@@ -365,16 +368,25 @@ const isInSearchResultsCards = computed(() => {
 })
 const filterShowUsers = computed(() => store.state.currentUser.filterShowUsers)
 const filterShowDateUpdated = computed(() => store.state.currentUser.filterShowDateUpdated)
+const safeColor = (color) => {
+  let newColor = state.safeColors[color]
+  if (newColor) {
+    return newColor
+  } else {
+    newColor = utils.safeColor(color)
+    state.safeColors[color] = newColor
+    return newColor
+  }
+}
 
 // styles
 
-const articleStyle = computed(() => {
+const cardWrapStyle = computed(() => {
   let z = props.card.z
   let pointerEvents = 'auto'
   if (currentCardDetailsIsVisible.value || currentCardIsBeingDragged.value) {
     z = 2147483646 // max z
   } else if (isLocked.value) {
-    z = 0
     pointerEvents = 'none'
   }
   let styles = {
@@ -382,6 +394,9 @@ const articleStyle = computed(() => {
     top: `${y.value}px`,
     zIndex: z,
     pointerEvents
+  }
+  if (props.card.isLocked) {
+    delete styles.zIndex
   }
   if (!store.state.currentUserIsDraggingCard) {
     styles.transform = `translate(${state.stickyTranslateX}, ${state.stickyTranslateY})`
@@ -395,7 +410,7 @@ const cardStyle = computed(() => {
   if (nameIsColor.value) {
     nameColor = props.card.name
   }
-  let color = selectedColor.value || remoteCardDetailsVisibleColor.value || remoteSelectedColor.value || selectedColorUpload.value || remoteCardDraggingColor.value || remoteUploadDraggedOverCardColor.value || remoteUserResizingCardsColor.value || remoteUserTiltingCardsColor.value || nameColor || backgroundColor
+  let color = focusColor.value || selectedColor.value || remoteCardDetailsVisibleColor.value || remoteSelectedColor.value || selectedColorUpload.value || remoteCardDraggingColor.value || remoteUploadDraggedOverCardColor.value || remoteUserResizingCardsColor.value || remoteUserTiltingCardsColor.value || nameColor || backgroundColor
   let styles = {
     background: color
   }
@@ -405,6 +420,10 @@ const cardStyle = computed(() => {
   }
   if (props.card.tilt) {
     styles.transform = `rotate(${props.card.tilt}deg)`
+  }
+  if (isImageCard.value && isSelectedOrDragging.value) {
+    color = safeColor(color)
+    styles.background = color
   }
   styles = updateStylesWithWidth(styles)
   return styles
@@ -431,7 +450,7 @@ const addSizeClasses = (classes) => {
   classes['l-width'] = width.value > l
   return classes
 }
-const articleClasses = computed(() => {
+const cardWrapClasses = computed(() => {
   let classes = {
     'is-resizing': store.state.currentUserIsResizingCard,
     'is-tilting': store.state.currentUserIsTiltingCard,
@@ -453,7 +472,8 @@ const cardClasses = computed(() => {
     'is-dark': backgroundColorIsDark.value,
     'child-is-hovered': currentUserIsHoveringOverUrlButton.value && !currentCardIsBeingDragged.value,
     'is-in-checked-box': isInCheckedBox.value,
-    'is-checked': isChecked.value
+    'is-checked': isChecked.value,
+    'is-comment': isComment.value
   }
   classes = addSizeClasses(classes)
   return classes
@@ -604,6 +624,13 @@ const connectorIsVisible = computed(() => {
   }
   return isVisible
 })
+const connectorIsHiddenByOpacity = computed(() => {
+  if (utils.isMobile()) { return }
+  const isPresentationMode = store.state.isPresentationMode
+  const isNotHovering = store.state.currentUserIsHoveringOverCardId !== props.card.id
+  const isNotConnected = !isConnectingFrom.value && !isConnectingTo.value && !state.currentConnections.length
+  return isPresentationMode && isNotHovering && isNotConnected
+})
 const isCardButtonsVisible = computed(() => {
   return isLocked.value || (cardButtonUrl.value && !isComment.value) || connectorIsVisible.value
 })
@@ -725,7 +752,7 @@ const pendingUploadDataUrl = computed(() => {
   return cardPendingUpload.value.imageDataUrl
 })
 const selectedColorUpload = computed(() => {
-  const color = store.state.currentUser.color
+  const color = currentUserColor.value
   if (state.uploadIsDraggedOver) {
     return color
   } else {
@@ -877,12 +904,13 @@ const nameSegments = computed(() => {
     if (segment.isTag) {
       let tag = store.getters['currentSpace/tagByName'](segment.name)
       if (!tag) {
-        tag = utils.newTag({
+        tag = {
+          id: nanoid(),
           name: segment.name,
-          defaultColor: store.state.currentUser.color,
+          color: newTagColor(),
           cardId: props.card.id,
           spaceId: store.state.currentSpace.id
-        })
+        }
         console.warn('🦋 create missing tag', segment.name, tag, props.card)
         store.dispatch('currentSpace/addTag', tag)
       }
@@ -908,6 +936,14 @@ const nameSegments = computed(() => {
 
 // tags
 
+const newTagColor = () => {
+  const isThemeDark = store.state.currentUser.theme === 'dark'
+  let color = randomColor({ luminosity: 'light' })
+  if (isThemeDark) {
+    color = randomColor({ luminosity: 'dark' })
+  }
+  return color
+}
 const tags = computed(() => {
   return nameSegments.value.filter(segment => {
     if (segment.isTag) {
@@ -943,6 +979,12 @@ const showTagDetailsIsVisible = ({ event, tag }) => {
   store.commit('currentUserIsDraggingCard', false)
 }
 
+// all previews
+
+const previewIsVisible = computed(() => {
+  return Boolean(cardUrlPreviewIsVisible.value || groupInviteUrl.value || otherCardIsVisible.value || otherSpaceIsVisible.value)
+})
+
 // url preview
 
 const urls = computed(() => {
@@ -968,7 +1010,7 @@ const urlPreviewImageIsVisible = computed(() => {
 const cardUrlPreviewIsVisible = computed(() => {
   if (!props.card) { return }
   if (!props.card.name) { return }
-  let cardHasUrlPreviewInfo = Boolean(props.card.urlPreviewTitle || props.card.urlPreviewDescription || props.card.urlPreviewImage)
+  let cardHasUrlPreviewInfo = Boolean(props.card.urlPreviewTitle || props.card.urlPreviewDescription || props.card.urlPreviewImage || props.card.urlPreviewUrl)
   // TEMP experiment: remove card.urlPreviewErrorUrl checking to eliminate false positives. Observe if there's a downside irl and if this attribute should be removed entirely?
   // const isErrorUrl = props.card.urlPreviewErrorUrl && (props.card.urlPreviewUrl === props.card.urlPreviewErrorUrl)
   let url = props.card.urlPreviewUrl
@@ -1042,14 +1084,14 @@ const updateUrlPreviewOnline = async () => {
     if (!response) { throw 'api/urlPreview request failed' }
 
     let { data, host } = response
-    console.log('🚗 link preview', url, data)
+    console.info('🚗 link preview', url, data)
     updateUrlPreviewSuccess(url, data)
   } catch (error) {
     console.warn('🚑', error, url)
     updateUrlPreviewErrorUrl(url)
   }
 }
-const updateUrlPreviewSuccess = (url, data) => {
+const updateUrlPreviewSuccess = async (url, data) => {
   if (!nameIncludesUrl(url)) { return }
   const cardId = data.id || props.card.id
   if (!cardId) {
@@ -1060,9 +1102,11 @@ const updateUrlPreviewSuccess = (url, data) => {
   data.name = utils.addHiddenQueryStringToURLs(props.card.name)
   store.dispatch('currentCards/update', { card: data })
   store.commit('removeUrlPreviewLoadingForCardIds', cardId)
-  store.dispatch('api/addToQueue', { name: 'updateUrlPreviewImage', body: data })
+  await store.dispatch('api/addToQueue', { name: 'updateUrlPreviewImage', body: data })
 }
+// remove after 2025
 const retryUrlPreview = () => {
+  if (!canEditSpace.value) { return }
   const update = {
     id: props.card.id,
     shouldUpdateUrlPreview: true
@@ -1087,6 +1131,7 @@ const nameIncludesUrl = (url) => {
 const updateUrlPreviewImage = (update) => {
   if (!currentUserIsSignedIn.value) { return }
   if (!update.urlPreviewImage) { return }
+  if (!canEditSpace.value) { return }
   update.cardId = update.id
   update.spaceId = store.state.currentSpace.id
   delete update.id
@@ -1229,7 +1274,7 @@ const lockingAnimationFrame = (timestamp) => {
     state.lockingAlpha = alpha
     window.requestAnimationFrame(lockingAnimationFrame)
   } else if (state.isLocking && percentComplete > 1) {
-    console.log('🔒🐢 card lockingAnimationFrame locked')
+    console.info('🔒🐢 card lockingAnimationFrame locked')
     lockingAnimationTimer = undefined
     lockingStartTime = undefined
     state.isLocking = false
@@ -1269,7 +1314,7 @@ const isSelected = computed(() => {
   return multipleCardsSelectedIds.includes(props.card.id)
 })
 const selectedColor = computed(() => {
-  const color = store.state.currentUser.color
+  const color = currentUserColor.value
   if (isSelected.value) {
     return color
   } else {
@@ -1455,7 +1500,7 @@ const isFiltered = computed(() => {
 
 // user
 
-const createdByUser = computed(() => {
+const cardCreatedByUser = computed(() => {
   // same as userDetailsWrap.cardCreatedByUser
   const userId = props.card.userId
   if (!userId) { return }
@@ -1470,7 +1515,7 @@ const createdByUser = computed(() => {
 })
 const userDetailsIsUser = computed(() => {
   if (!store.state.userDetailsIsVisible) { return }
-  const user = createdByUser.value
+  const user = cardCreatedByUser.value
   return user.id === store.state.userDetailsUser.id
 })
 
@@ -1743,10 +1788,10 @@ const unlockCard = (event) => {
   store.dispatch('currentCards/update', { card: update })
 }
 const lockingFrameStyle = computed(() => {
-  const initialPadding = 65 // matches initialLockCircleRadius in magicPaint
+  const initialPadding = 65 // matches initialLockCircleRadius in paintSelect
   const initialBorderRadius = 50
   const padding = initialPadding * state.lockingPercent
-  const userColor = store.state.currentUser.color
+  const userColor = currentUserColor.value
   const borderRadius = Math.max((state.lockingPercent * initialBorderRadius), 5) + 'px'
   const size = `calc(100% + ${padding}px)`
   const position = -(padding / 2) + 'px'
@@ -1841,14 +1886,14 @@ const checkIfShouldUpdateIframeUrl = () => {
 // containing box
 
 const containingBoxes = computed(() => {
-  if (!state.isVisibleInViewport) { return }
   if (isSelectedOrDragging.value) { return }
   if (currentCardIsBeingDragged.value) { return }
+  if (store.state.boxDetailsIsVisibleForBoxId) { return }
+  const card = utils.clone(props.card)
   let boxes = store.getters['currentBoxes/all']
+  boxes = utils.clone(boxes)
   boxes = boxes.filter(box => {
-    box = utils.clone(box)
-    const card = utils.clone(props.card)
-    return utils.isRectAInsideRectB(card, box)
+    return utils.isRectACompletelyInsideRectB(card, box)
   })
   return boxes
 })
@@ -1858,11 +1903,21 @@ const isInCheckedBox = computed(() => {
   return Boolean(checkedBox)
 })
 
+// card focus
+
+const isFocusing = computed(() => props.card.id === store.state.focusOnCardId)
+const focusColor = computed(() => {
+  if (isFocusing.value) {
+    return currentUserColor.value
+  } else {
+    return null
+  }
+})
 </script>
 
 <template lang="pug">
-article.card-wrap#card(
-  :style="articleStyle"
+.card-wrap(
+  :style="cardWrapStyle"
   :data-card-id="card.id"
   :data-is-hidden-by-comment-filter="isHiddenByCommentFilter"
   :data-is-visible-in-viewport="state.isVisibleInViewport"
@@ -1880,8 +1935,9 @@ article.card-wrap#card(
 
   :key="card.id"
   ref="cardElement"
-  :class="articleClasses"
+  :class="cardWrapClasses"
 )
+  .focusing-frame(v-if="isFocusing" :style="{backgroundColor: currentUserColor}")
   .card(
     v-show="shouldRender"
     @mousedown.left.prevent="startDraggingCard"
@@ -1925,7 +1981,7 @@ article.card-wrap#card(
     Frames(:card="card")
 
     template(v-if="!isComment")
-      ImageOrVideo(:isSelectedOrDragging="isSelectedOrDragging" :pendingUploadDataUrl="pendingUploadDataUrl" :image="state.formats.image" :video="state.formats.video" @loadSuccess="updateDimensionsAndPaths")
+      ImageOrVideo(:isSelectedOrDragging="isSelectedOrDragging" :pendingUploadDataUrl="pendingUploadDataUrl" :image="state.formats.image" :video="state.formats.video" @loadSuccess="updateDimensionsAndPaths" :cardId="card.id" )
 
     TiltResize(:card="card" :visible="tiltResizeIsVisible")
 
@@ -1941,7 +1997,7 @@ article.card-wrap#card(
         .badge.comment-badge(:class="{'is-light-in-dark-theme': isLightInDarkTheme, 'is-dark-in-light-theme': isDarkInLightTheme}")
           img.icon.view(src="@/assets/comment.svg")
           //- User
-          UserLabelInline(:user="createdByUser" :shouldHideName="true")
+          UserLabelInline(:user="cardCreatedByUser" :shouldHideName="true")
           //- Url →
         a.url-wrap(v-if="urlButtonIsVisible" :href="cardButtonUrl" @mouseup.exact.prevent="closeAllDialogs" @click.stop="openUrl($event, cardButtonUrl)" @touchend.prevent="openUrl($event, cardButtonUrl)" target="_blank" @mouseenter="handleMouseEnterUrlButton" @mouseleave="handleMouseLeaveUrlButton")
           .url.inline-button-wrap
@@ -1981,6 +2037,7 @@ article.card-wrap#card(
           //- connector
           ItemConnectorButton(
             :visible="connectorIsVisible"
+            :isHiddenByOpacity="connectorIsHiddenByOpacity"
             :card="card"
             :itemConnections="state.currentConnections"
             :isConnectingTo="isConnectingTo"
@@ -1993,12 +2050,12 @@ article.card-wrap#card(
             :parentDetailsIsVisible="currentCardDetailsIsVisible"
             @shouldRenderParent="updateShouldRenderParent"
           )
-    .url-preview-wrap(v-if="cardUrlPreviewIsVisible || groupInviteUrl || otherCardIsVisible || otherSpaceIsVisible" :class="{'is-image-card': isImageCard}")
+    .url-preview-wrap(v-if="previewIsVisible" :class="{'is-image-card': isImageCard}")
       template(v-if="cardUrlPreviewIsVisible")
         UrlPreviewCard(
           :visible="true"
           :card="card"
-          :user="createdByUser"
+          :user="cardCreatedByUser"
           :isImageCard="isImageCard"
           :isSelected="isSelectedOrDragging"
           :urlPreviewImageIsVisible="urlPreviewImageIsVisible"
@@ -2069,7 +2126,7 @@ article.card-wrap#card(
       img.icon.system(src="@/assets/system.svg")
     //- User
     .badge-wrap(v-if="filterShowUsers")
-      UserLabelInline(:user="createdByUser" :isClickable="true")
+      UserLabelInline(:user="cardCreatedByUser" :isClickable="true")
     //- Date
     .badge.secondary.button-badge(v-if="filterShowDateUpdated" @click.left.prevent.stop="toggleFilterShowAbsoluteDates" @touchend.prevent.stop="toggleFilterShowAbsoluteDates" :class="{'date-is-today': dateIsToday}")
       img.icon.time(src="@/assets/time.svg")
@@ -2078,7 +2135,7 @@ article.card-wrap#card(
 </template>
 
 <style lang="stylus">
-article.card-wrap
+.card-wrap
   --card-width 200px // consts.normalCardMaxWidth
   pointer-events all
   position absolute
@@ -2112,6 +2169,9 @@ article.card-wrap
     &:focus
       outline 2px solid var(--primary-border)
 
+    &.is-comment
+      opacity 0.5
+
     .card-comment
       > .badge
         margin 0
@@ -2124,8 +2184,7 @@ article.card-wrap
       .user-label-inline
         transform translateY(-1px)
         margin 0
-        height 18px
-        min-height 17px
+        height 15px
         img
           vertical-align 4px
 
@@ -2206,6 +2265,8 @@ article.card-wrap
       cursor cell
       button
         z-index 1
+    .connector
+      padding-top 9px
 
     .url-wrap
       padding 0
@@ -2342,6 +2403,7 @@ article.card-wrap
       .label-badge
         padding 0 10px
     .badge
+      width max-content
       &.secondary
         display flex
         .icon
@@ -2369,6 +2431,8 @@ article.card-wrap
     .user-badge,
     .user
       margin-right 0
+    .user-label-inline-wrap
+      margin 0
 
   .url-preview-wrap
     margin-top -2px

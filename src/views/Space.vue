@@ -16,7 +16,28 @@ import Boxes from '@/components/Boxes.vue'
 import Cards from '@/components/Cards.vue'
 import Connections from '@/components/Connections.vue'
 import ItemUnlockButtons from '@/components/ItemUnlockButtons.vue'
+import SnapGuideLines from '@/components/SnapGuideLines.vue'
+
+import Header from '@/components/Header.vue'
+import MainCanvas from '@/components/layers/MainCanvas.vue'
+import SonarPing from '@/components/layers/SonarPing.vue'
+import UserLabelCursor from '@/components/UserLabelCursor.vue'
+import Footer from '@/components/Footer.vue'
+import WindowHistoryHandler from '@/components/WindowHistoryHandler.vue'
+import KeyboardShortcutsHandler from '@/components/KeyboardShortcutsHandler.vue'
+import ScrollAndTouchHandler from '@/components/ScrollAndTouchHandler.vue'
+import Panning from '@/components/Panning.vue'
+import TagDetails from '@/components/dialogs/TagDetails.vue'
+import ItemsLocked from '@/components/ItemsLocked.vue'
+import UserDetails from '@/components/dialogs/UserDetails.vue'
+import SpaceBackground from '@/components/SpaceBackground.vue'
+import SpaceBackgroundTint from '@/components/SpaceBackgroundTint.vue'
+import OutsideSpaceBackground from '@/components/OutsideSpaceBackground.vue'
+import Preload from '@/components/Preload.vue'
+import MinimapCanvas from '@/components/MinimapCanvas.vue'
+
 import utils from '@/utils.js'
+import cache from '@/cache.js'
 import consts from '@/consts.js'
 
 import sortBy from 'lodash-es/sortBy'
@@ -31,15 +52,21 @@ let prevCursor, endCursor, shouldCancel
 let processQueueIntervalTimer, hourlyTasks
 
 // init user and space app state
-store.dispatch('currentUser/init')
-store.dispatch('currentSpace/init')
-store.commit('broadcast/connect')
-store.dispatch('groups/init')
-store.dispatch('analytics/event', 'pageview')
-store.dispatch('api/updateDateImage')
+const init = async () => {
+  store.dispatch('api/updateDateImage')
+  store.dispatch('analytics/event', 'pageview')
+  await cache.migrateFromLocalStorage()
+  await store.dispatch('currentUser/init')
+  await store.dispatch('currentSpace/init')
+  await store.commit('broadcast/connect')
+  await store.dispatch('groups/init')
+  await store.dispatch('updateTags')
+}
+init()
 
 onMounted(() => {
   // bind events to window to receive events when mouse is outside window
+  window.addEventListener('touchstart', handleTouchStart)
   window.addEventListener('mousemove', interact)
   window.addEventListener('touchmove', interact)
   window.addEventListener('mouseup', stopInteractions)
@@ -58,10 +85,12 @@ onMounted(() => {
   document.fonts.ready.then(event => {
     store.commit('webfontIsLoaded', true)
   })
-  store.dispatch('currentUser/restoreUserFavorites')
   unsubscribe = store.subscribe((mutation, state) => {
     if (mutation.type === 'triggerRestoreSpaceRemoteComplete') {
       dragItemsOnNextTick()
+    } else if (mutation.type === 'triggerAddBox') {
+      const event = mutation.payload
+      addBox(event)
     }
   })
   updateIconsNotDraggable()
@@ -106,6 +135,7 @@ const state = reactive({
 const unlockedCards = computed(() => store.getters['currentCards/isNotLocked'])
 const isPainting = computed(() => store.state.currentUserIsPainting)
 const isPanningReady = computed(() => store.state.currentUserIsPanningReady)
+const isPanning = computed(() => store.state.currentUserIsPanning)
 const spaceIsReadOnly = computed(() => !store.getters['currentUser/canEditSpace']())
 const canEditSpace = computed(() => store.getters['currentUser/canEditSpace']())
 const isDrawingConnection = computed(() => store.state.currentUserIsDrawingConnection)
@@ -147,6 +177,10 @@ const updateViewportSizes = () => {
 // user
 
 const currentUser = computed(() => store.state.currentUser)
+const users = computed(() => {
+  const excludeCurrentUser = true
+  return store.getters['currentSpace/allUsers'](excludeCurrentUser)
+})
 
 // styles
 
@@ -188,7 +222,8 @@ const addCard = (event) => {
   }
   store.dispatch('currentUser/notifyReadOnly', position)
   if (spaceIsReadOnly.value) { return }
-  store.dispatch('currentCards/add', { position, isParentCard })
+  const newCard = { position, isParentCard }
+  store.dispatch('currentCards/add', { card: newCard })
   store.commit('childCardId', '')
 }
 const addOrCloseCard = (event) => {
@@ -208,8 +243,9 @@ const addOrCloseCard = (event) => {
     store.dispatch('closeAllDialogs')
   }
 }
-const tiltCards = () => {
+const tiltCards = (event) => {
   if (!prevCursor) { return }
+  if (utils.isMultiTouch(event)) { return }
   const cardIds = store.state.currentUserIsTiltingCardIds
   let delta = utils.distanceBetweenTwoPoints(endCursor, prevCursor)
   if (endCursor.x - prevCursor.x > 0 || endCursor.y - prevCursor.y > 0) {
@@ -227,8 +263,9 @@ const stopTiltingCards = () => {
   store.commit('currentUserIsTiltingCard', false)
   store.commit('broadcast/updateStore', { updates: { userId: currentUser.value.id }, type: 'removeRemoteUserTiltingCards' })
 }
-const resizeCards = () => {
+const resizeCards = (event) => {
   if (!prevCursor) { return }
+  if (utils.isMultiTouch(event)) { return }
   const cardIds = store.state.currentUserIsResizingCardIds
   let deltaX = endCursor.x - prevCursor.x
   store.dispatch('currentCards/resize', { cardIds, deltaX })
@@ -265,6 +302,23 @@ const addCardFromOutsideAppContext = (event) => {
 
 // boxes
 
+const addBox = (event) => {
+  let position = utils.cursorPositionInSpace(event)
+  if (utils.isPositionOutsideOfSpace(position)) {
+    position = utils.cursorPositionInPage(event)
+    store.commit('addNotificationWithPosition', { message: 'Outside Space', position, type: 'info', icon: 'cancel', layer: 'app' })
+    return
+  }
+  store.dispatch('currentUser/notifyReadOnly', position)
+  const shouldPrevent = !store.getters['currentUser/canEditSpace']()
+  if (shouldPrevent) {
+    store.dispatch('currentUserToolbar', 'card')
+    return
+  }
+  store.dispatch('currentBoxes/add', { box: position, shouldResize: true })
+  store.commit('currentBoxIsNew', true)
+  event.preventDefault() // allows dragging boxes without scrolling on touch
+}
 const resizeBoxes = () => {
   if (!prevCursor) { return }
   const boxIds = store.getters['currentBoxes/isResizingIds']
@@ -338,7 +392,19 @@ const showBoxDetails = async (event) => {
   const boxId = store.state.currentUserIsResizingBoxIds[0]
   await nextTick()
   await nextTick()
+  updateSizeForNewBox(boxId)
   store.commit('boxDetailsIsVisibleForBoxId', boxId)
+}
+const updateSizeForNewBox = (boxId) => {
+  const box = store.getters['currentBoxes/byId'](boxId)
+  const isMinSize = box.resizeWidth === consts.minBoxSize && box.resizeHeight === consts.minBoxSize
+  if (!isMinSize) { return }
+  const newBox = {
+    id: box.id,
+    resizeWidth: consts.defaultBoxWidth,
+    resizeHeight: consts.defaultBoxHeight
+  }
+  store.dispatch('currentBoxes/update', newBox)
 }
 
 // drag items
@@ -399,6 +465,10 @@ const showMultipleSelectedActions = (event) => {
   }
 }
 
+// minimap
+
+const minimapIsVisible = computed(() => isPanningReady.value || isPanning.value)
+
 // interactions
 
 const isInteracting = computed(() => {
@@ -424,6 +494,9 @@ const updateIconsNotDraggable = () => {
     element.draggable = false
   })
 }
+const handleTouchStart = (event) => {
+  prevCursor = utils.cursorPositionInViewport(event)
+}
 const initInteractions = (event) => {
   if (eventIsFromTextarea(event)) {
     shouldCancel = true
@@ -434,7 +507,18 @@ const initInteractions = (event) => {
   state.startCursor = utils.cursorPositionInViewport(event)
 }
 const updateShouldSnapToGrid = (event) => {
-  store.commit('shouldSnapToGrid', event.shiftKey)
+  let shouldSnap = isDraggingCard.value || isDraggingBox.value || isResizingCard.value || isResizingBox.value
+  shouldSnap = shouldSnap && event.shiftKey
+  // update snap guide line origin
+  if (!store.state.shouldSnapToGrid && shouldSnap) {
+    const item = store.getters.currentInteractingItem
+    store.commit('snapGuideLinesOrigin', {
+      x: item.x,
+      y: item.y
+    })
+  }
+  // should snap to grid
+  store.commit('shouldSnapToGrid', shouldSnap)
 }
 const interact = (event) => {
   endCursor = utils.cursorPositionInViewport(event)
@@ -445,9 +529,9 @@ const interact = (event) => {
     store.commit('currentDraggingCardId', '')
     dragItems()
   } else if (isResizingCard.value) {
-    resizeCards()
+    resizeCards(event)
   } else if (isTiltingCard.value) {
-    tiltCards()
+    tiltCards(event)
   } else if (isResizingBox.value) {
     resizeBoxes()
   }
@@ -493,6 +577,10 @@ const shouldCancelInteraction = (event) => {
     return true
   }
   if (eventIsFromTextarea(event)) { return true }
+  if (store.state.shouldCancelNextMouseUpInteraction) {
+    store.commit('shouldCancelNextMouseUpInteraction', false)
+    return true
+  }
   if (!event.target.closest) { return } // event is outside window
   const fromDialog = event.target.closest('dialog')
   const fromHeader = event.target.closest('header')
@@ -502,13 +590,17 @@ const shouldCancelInteraction = (event) => {
 
 // 💣 stopInteractions and Space/stopPainting are run after all mouse and touch end events
 
+const isDevelpmentBadgeVisible = computed(() => {
+  if (store.state.isPresentationMode) { return }
+  return consts.isDevelopment()
+})
 const handleTouchEnd = (event) => {
   store.commit('isPinchZooming', false)
   store.commit('isTouchScrolling', false)
   stopInteractions(event)
 }
 const stopInteractions = async (event) => {
-  console.log('💣 stopInteractions')
+  console.info('💣 stopInteractions')
   const isCardsSelected = store.state.currentDraggingCardId || store.state.multipleCardsSelectedIds.length
   const isBoxesSelected = store.state.multipleBoxesSelectedIds
   if (isCardsSelected && store.state.cardsWereDragged) {
@@ -552,10 +644,15 @@ const stopInteractions = async (event) => {
   store.commit('clearShouldExplicitlyRenderCardIds', null, { root: true })
   store.commit('shouldSnapToGrid', false)
 }
-
 </script>
 
 <template lang="pug">
+//- page
+OutsideSpaceBackground
+//- user presence cursors
+template(v-for="user in users")
+  UserLabelCursor(:user="user")
+//- space
 main#space.space(
   :class="{'is-interacting': isInteracting, 'is-not-interacting': isPainting || isPanningReady}"
   @mousedown.left="initInteractions"
@@ -563,6 +660,10 @@ main#space.space(
   :style="styles"
   :data-zoom="spaceZoomDecimal"
 )
+  SpaceBackground
+  SpaceBackgroundTint
+  ItemsLocked
+  #box-backgrounds
   Connections
   Boxes
   Cards
@@ -576,6 +677,26 @@ main#space.space(
   ScrollAtEdgesHandler
   NotificationsWithPosition(layer="space")
   BoxSelecting
+  SnapGuideLines
+aside
+  MainCanvas
+  SonarPing
+//- page ui, dialogs
+Header
+Footer
+TagDetails
+UserDetails
+#space-minimap.minimap-canvas-wrap(v-if="minimapIsVisible")
+  MinimapCanvas(:visible="true" :size="200")
+//- handlers
+WindowHistoryHandler
+KeyboardShortcutsHandler
+ScrollAndTouchHandler
+Panning
+NotificationsWithPosition(layer="app")
+Preload
+.badge.label-badge.development-badge(v-if="isDevelpmentBadgeVisible")
+  span DEV
 </template>
 
 <style lang="stylus">
@@ -601,4 +722,14 @@ main#space.space(
     pointer-events none !important
     cursor default
 
+.minimap-canvas-wrap
+  position fixed
+  right 8px
+  bottom 50px
+
+#box-backgrounds
+  position absolute
+  .box-background
+    border-radius var(--entity-radius)
+    position absolute
 </style>

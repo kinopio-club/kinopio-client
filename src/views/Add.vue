@@ -42,7 +42,7 @@ const textareaElement = ref(null)
 // init
 
 window.addEventListener('message', (event) => {
-  console.log('🛫 add page: received postmessage', event)
+  console.info('🛫 add page: received postmessage', event)
   restoreValue(event.data)
 })
 
@@ -105,9 +105,9 @@ const focusAndSelectName = () => {
 
 const restoreValue = async (value) => {
   await nextTick()
-  value = value || cache.prevAddPageValue()
+  value = value || await cache.prevAddPageValue()
   state.newName = value
-  console.log('🏬 restored value', value)
+  console.info('🏬 restored value', value)
   await nextTick()
   updateTextareaSize()
   focusAndSelectName()
@@ -155,18 +155,18 @@ const signIn = async (event) => {
 
 // spaces
 
-const updateSpaces = () => {
+const updateSpaces = async () => {
   try {
     state.loading.updateSpaces = true
-    updateSpacesLocal()
-    updateSpacesRemote()
+    await updateSpacesLocal()
+    await updateSpacesRemote()
   } catch (error) {
     console.error('🚒', error)
   }
   state.loading.updateSpaces = false
 }
-const updateSpacesLocal = () => {
-  let spaces = cache.getAllSpaces()
+const updateSpacesLocal = async () => {
+  let spaces = await cache.getAllSpaces()
   spaces = spaces.filter(space => space.name !== 'Inbox')
   state.spaces = spaces
 }
@@ -215,14 +215,14 @@ const addCard = async () => {
     let spaceId
     // save to inbox
     if (state.selectedSpaceId === 'inbox') {
-      console.log('🛫 create card in inbox space', card)
-      store.dispatch('api/addToQueue', { name: 'createCardInInbox', body: card })
+      console.info('🛫 create card in inbox space', card)
+      await store.dispatch('api/addToQueue', { name: 'createCardInInbox', body: card })
     // save to space
     } else {
       spaceId = state.selectedSpaceId
       card.spaceId = spaceId
-      console.log('🛫 create card in space', card, state.selectedSpaceId)
-      store.dispatch('api/addToQueue', { name: 'createCard', body: card, spaceId })
+      console.info('🛫 create card in space', card, state.selectedSpaceId)
+      await store.dispatch('api/addToQueue', { name: 'createCard', body: card, spaceId })
     }
     space = { id: spaceId }
   } catch (error) {
@@ -233,8 +233,8 @@ const addCard = async () => {
   postMessage.send({ name: 'addCardFromAddPage', value: card })
   postMessage.send({ name: 'onAdded', value: true })
 }
-const addCardToSpaceLocal = (card, space) => {
-  space = cache.space(space.id)
+const addCardToSpaceLocal = async (card, space) => {
+  space = await cache.space(space.id)
   if (!space) { return }
   if (!space.cards) { return }
   const cards = space.cards.push(card)

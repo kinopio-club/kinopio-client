@@ -27,6 +27,9 @@ const state = reactive({
   shareCardIsVisible: false
 })
 
+const closeAllDialogs = () => {
+  store.dispatch('closeAllDialogs')
+}
 const closeDialogs = () => {
   state.copyItemsIsVisible = false
   state.moveItemsIsVisible = false
@@ -357,7 +360,6 @@ const mergeSelectedCards = () => {
   const urlPreview = {}
   cards.forEach(card => {
     name = `${name}\n\n${card.name.trim()}`
-
     Object.keys(card).forEach(key => {
       if (key.startsWith('urlPreview') && card[key] && !urlPreview[key]) {
         urlPreview[key] = card[key]
@@ -365,10 +367,9 @@ const mergeSelectedCards = () => {
     })
   })
   name = name.trim()
-  let newNames = []
-  // split names while > maxCardCharacterLimit
+  let newName
   do {
-    let newName = name.substring(0, maxCardCharacterLimit.value)
+    newName = name.substring(0, maxCardCharacterLimit.value)
     const lastSpace = newName.lastIndexOf(' ')
     const lastLineBreak = newName.lastIndexOf('\n')
     const shouldSplitByMaxLength = lastSpace === -1 && lastLineBreak === -1
@@ -376,7 +377,6 @@ const mergeSelectedCards = () => {
       newName = name
       name = ''
     } else if (shouldSplitByMaxLength) {
-      // newName = newName
       name = name.substring(maxCardCharacterLimit.value)
     } else if (lastSpace >= lastLineBreak) {
       newName = name.substring(0, lastSpace)
@@ -385,29 +385,24 @@ const mergeSelectedCards = () => {
       newName = name.substring(0, lastLineBreak)
       name = name.substring(lastLineBreak)
     }
-    newNames.push(newName)
   } while (name.length > maxCardCharacterLimit.value)
-
-  newNames.push(name)
-  newNames = newNames.filter(name => Boolean(name))
   let position = { x: cards[0].x, y: cards[0].y }
-  let newCards = []
   remove({ shouldRemoveCardsOnly: true })
-  // create merged cards
-  newNames.forEach((newName, index) => {
-    let newCard = {
-      id: nanoid(),
-      name: newName,
-      x: position.x,
-      y: position.y,
-      ...urlPreview
-    }
-    newCards.push(newCard)
-  })
-  store.dispatch('currentCards/addMultiple', { cards: newCards })
-  prevCards = newCards // for history
+  const cardWithBackgroundColor = cards.find(card => card.backgroundColor)
+  const cardBackgroundColor = cardWithBackgroundColor?.backgroundColor
+  const userCardBackgroundColor = store.state.currentUser.defaultCardBackgroundColor
+  const newCard = {
+    id: nanoid(),
+    name: newName,
+    x: position.x,
+    y: position.y,
+    backgroundColor: cardBackgroundColor || userCardBackgroundColor,
+    ...urlPreview
+  }
+  store.dispatch('currentCards/add', { card: newCard })
+  prevCards = [ newCard ] // for history
   setTimeout(() => {
-    positionNewCards(newCards)
+    positionNewCards([ newCard ])
   }, 100)
 }
 
@@ -479,6 +474,9 @@ dialog.narrow.multiple-selected-actions(
   :class="colorClasses"
 )
   .dark-theme-background-layer(v-if="isThemeDarkAndUserColorLight")
+  .close-button-wrap.inline-button-wrap(@click="closeAllDialogs")
+    button.small-button.inline-button
+      img.icon.cancel(src="@/assets/add.svg")
   section
 
     //- Edit Cards
@@ -605,4 +603,17 @@ dialog.narrow.multiple-selected-actions(
       border-color var(--primary-border-on-dark-background)
     section.subsection + section.subsection
       border-top 1px solid var(--primary-border-on-dark-background)
+  .close-button-wrap
+    cursor pointer
+    position absolute
+    left initial
+    right 0
+    top 0
+    padding-right 6px
+    padding-left 2px
+    padding-bottom 2px
+    z-index 1
+    button
+      cursor pointer
+      background-color var(--primary-background)
 </style>

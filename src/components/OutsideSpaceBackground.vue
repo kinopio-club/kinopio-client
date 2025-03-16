@@ -38,13 +38,15 @@ let shouldNotUpdate
 
 let canvas, context
 
+let unsubscribe
+
 // start, stop
 
 onMounted(() => {
   canvas = document.getElementById('outside-space-background')
   context = canvas.getContext('2d')
   context.scale(window.devicePixelRatio, window.devicePixelRatio)
-  store.subscribe(mutation => {
+  unsubscribe = store.subscribe(mutation => {
     if (mutation.type === 'currentSpace/updateSpace') {
       if (mutation.payload.backgroundTint) {
         updateBackgroundColor()
@@ -55,6 +57,7 @@ onMounted(() => {
 })
 onBeforeUnmount(() => {
   cancel()
+  unsubscribe()
 })
 const isTouching = computed(() => store.state.isPinchZooming || store.state.isTouchScrolling)
 watch(() => isTouching.value, (value, prevValue) => {
@@ -78,6 +81,12 @@ const spaceZoomDecimal = computed(() => store.getters.spaceZoomDecimal)
 const outsideSpaceBackgroundIsStatic = computed(() => store.state.currentUser.outsideSpaceBackgroundIsStatic)
 const backgroundTintColor = computed(() => store.state.currentSpace.backgroundTint)
 const isThemeDark = computed(() => store.getters['themes/isThemeDark'])
+const preventTouchScrolling = (event) => {
+  const shouldPrevent = store.state.currentUserIsResizingBox || store.state.currentUserIsPaintingLocked
+  if (shouldPrevent) {
+    event.preventDefault()
+  }
+}
 
 // update color
 
@@ -144,7 +153,10 @@ const styles = computed(() => {
 </script>
 
 <template lang="pug">
-canvas#outside-space-background(:style="styles")
+canvas#outside-space-background(
+  :style="styles"
+  @touchmove="preventTouchScrolling"
+)
 </template>
 
 <style lang="stylus">
@@ -155,4 +167,5 @@ canvas#outside-space-background(:style="styles")
   width 10px
   height 10px
   transform-origin left top
+  user-select none
 </style>

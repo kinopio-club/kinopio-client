@@ -42,19 +42,26 @@ const scrollIntoView = () => {
 const closeDialogs = () => {
   state.spacePickerIsVisible = false
 }
+const isOnline = computed(() => state.isOnline)
 
 // spaces
 
 const currentSpace = computed(() => store.state.currentSpace)
-const updateSpaces = () => {
-  const spaces = cache.getAllSpaces()
+const updateSpaces = async () => {
+  const spaces = await cache.getAllSpaces()
   state.spaces = spaces.filter(space => {
     const spaceIsNotCurrent = space.id !== currentSpace.value.id
     const spaceHasId = Boolean(space.id)
-    return spaceIsNotCurrent && spaceHasId
+    const spaceHasName = Boolean(space.name)
+    return spaceIsNotCurrent && spaceHasId && spaceHasName
   })
   state.selectedSpace = state.spaces[0]
 }
+const recentSpaces = computed(() => {
+  let spaces = utils.sortByUpdatedAt(state.spaces)
+  spaces = spaces.slice(0, 4) // 4 most recent spaces
+  return spaces
+})
 const updateSelectedSpace = (space) => {
   state.selectedSpace = space
   state.spacePickerIsVisible = false
@@ -62,7 +69,9 @@ const updateSelectedSpace = (space) => {
 const toggleSpacePickerIsVisible = () => {
   state.spacePickerIsVisible = !state.spacePickerIsVisible
 }
-const isOnline = computed(() => state.isOnline)
+const selectedSpaceIsRecentSpace = (space) => {
+  return state.selectedSpace.id === space.id
+}
 
 // items
 
@@ -123,17 +132,18 @@ const copyText = async () => {
 
 // copy or move
 
-const copyToSelectedSpace = (items) => {
+const copyToSelectedSpace = async (items) => {
   state.loading = true
   const selectedSpaceId = state.selectedSpace.id
   const selectedSpaceisCurrentSpace = selectedSpaceId === store.state.currentSpace.id
-  newItems = store.getters['currentSpace/newItems']({ items, selectedSpaceId })
+  newItems = await store.dispatch('currentSpace/newItems', { items, spaceId: selectedSpaceId })
   // update cache
-  const spaceIsCached = Boolean(cache.space(selectedSpaceId).cards)
+  const space = await cache.space(selectedSpaceId).cards
+  const spaceIsCached = Boolean(space)
   if (!spaceIsCached) {
-    cache.saveSpace({ id: selectedSpaceId })
+    await cache.saveSpace({ id: selectedSpaceId })
   }
-  cache.addToSpace(newItems, selectedSpaceId)
+  await cache.addToSpace(newItems, selectedSpaceId)
   // update current space
   if (selectedSpaceisCurrentSpace) {
     store.dispatch('currentCards/addMultiple', { cards: newItems.cards, shouldOffsetPosition: true })
@@ -142,11 +152,19 @@ const copyToSelectedSpace = (items) => {
     newItems.boxes.forEach(box => store.dispatch('currentBoxes/add', { box }))
   }
   // update server
-  newItems.cards.forEach(card => store.dispatch('api/addToQueue', { name: 'createCard', body: card, spaceId: selectedSpaceId }))
-  newItems.connectionTypes.forEach(connectionType => store.dispatch('api/addToQueue', { name: 'createConnectionType', body: connectionType, spaceId: selectedSpaceId }))
-  newItems.connections.forEach(connection => store.dispatch('api/addToQueue', { name: 'createConnection', body: connection, spaceId: selectedSpaceId }))
-  newItems.boxes.forEach(box => store.dispatch('api/addToQueue', { name: 'createBox', body: box, spaceId: selectedSpaceId }))
-  console.log('🚚 copies created', newItems)
+  for (const card of newItems.cards) {
+    await store.dispatch('api/addToQueue', { name: 'createCard', body: card, spaceId: selectedSpaceId })
+  }
+  for (const connectionType of newItems.connectionTypes) {
+    await store.dispatch('api/addToQueue', { name: 'createConnectionType', body: connectionType, spaceId: selectedSpaceId })
+  }
+  for (const connection of newItems.connections) {
+    await store.dispatch('api/addToQueue', { name: 'createConnection', body: connection, spaceId: selectedSpaceId })
+  }
+  for (const box of newItems.boxes) {
+    await store.dispatch('api/addToQueue', { name: 'createBox', body: box, spaceId: selectedSpaceId })
+  }
+  console.info('🚚 copies created', newItems)
   state.loading = false
 }
 const moveOrCopyToSpace = async () => {
@@ -156,7 +174,7 @@ const moveOrCopyToSpace = async () => {
     state.cardsCreatedIsOverLimit = true
     return
   }
-  copyToSelectedSpace(items)
+  await copyToSelectedSpace(items)
   notifySuccess()
   if (props.actionIsMove) {
     removeCards(items.cards)
@@ -222,18 +240,25 @@ dialog.narrow.more-or-copy-cards(v-if="visible" :open="visible" ref="dialogEleme
   section
     .row
       p {{actionLabelCapitalized}} {{pluralItem}} to space
+    //- recent spaces
+    .row.recent-spaces-row(v-if="recentSpaces.length")
+      .badge.secondary.button-badge(v-for="recentSpace in recentSpaces" :key="recentSpace.id" @click="updateSelectedSpace(recentSpace)" :class="{active: selectedSpaceIsRecentSpace(recentSpace)}")
+        span {{recentSpace.name}}
+    //- space picker
     .row
       .button-wrap
         button(@click.left.stop="toggleSpacePickerIsVisible" :class="{active: state.spacePickerIsVisible}")
           img.preview-thumbnail-image(v-if="state.selectedSpace.previewThumbnailImage && isOnline" :src="state.selectedSpace.previewThumbnailImage")
           span {{state.selectedSpace.name}}
           img.down-arrow(src="@/assets/down-arrow.svg")
-        SpacePicker(:visible="state.spacePickerIsVisible" :selectedSpace="state.selectedSpace" :shouldShowNewSpace="true" @selectSpace="updateSelectedSpace" :showUserIfCurrentUserIsCollaborator="true")
+        SpacePicker(:visible="state.spacePickerIsVisible" :selectedSpace="state.selectedSpace" :shouldShowNewSpace="true" @selectSpace="updateSelectedSpace" :showUserIfCurrentUserIsCollaborator="true" :shouldExcludeCurrentSpace="true")
+    //- submit button
     button(@click.left="moveOrCopyToSpace" :class="{active: state.loading}")
       img.icon.cut(v-if="actionIsMove" src="@/assets/cut.svg")
       img.icon.copy(v-else src="@/assets/copy.svg")
       span {{buttonLabel}}
       Loader(:visible="state.loading")
+  //- error
   .error-card-limit(v-if="state.cardsCreatedIsOverLimit")
     .badge.danger Out of Cards
     p To add more cards you'll need to upgrade
@@ -241,12 +266,18 @@ dialog.narrow.more-or-copy-cards(v-if="visible" :open="visible" ref="dialogEleme
 </template>
 
 <style lang="stylus">
-.more-or-copy-cards
-  top calc(100% - 8px)
+dialog.more-or-copy-cards
+  top -100px
   cursor initial
   .error-card-limit
     margin-top 10px
+  .recent-spaces-row
+    flex-wrap wrap
+    margin-bottom 0px
+    .badge
+      margin-bottom 10px
   dialog.space-picker
+    top -100px
     .results-section
       max-height 250px
 </style>

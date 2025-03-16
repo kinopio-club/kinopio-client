@@ -15,7 +15,6 @@ import dayjs from 'dayjs'
 
 const store = useStore()
 
-let shouldUpdateFavorites = true
 const maxIterations = 30
 let currentIteration, updatePositionTimer
 
@@ -25,15 +24,8 @@ const resultsElement = ref(null)
 onMounted(() => {
   window.addEventListener('resize', updateHeights)
   store.subscribe(mutation => {
+    // on resultsFilter addSpace
     if (mutation.type === 'triggerSpaceDetailsUpdateLocalSpaces') {
-      updateLocalSpaces()
-    } else if (mutation.type === 'currentUser/favoriteSpaces') {
-      if (!props.visible) { return }
-      updateLocalSpaces()
-    } else if (mutation.type === 'isLoadingSpace') {
-      const isLoading = mutation.payload
-      if (!props.visible) { return }
-      if (isLoading) { return }
       updateLocalSpaces()
     }
   })
@@ -45,13 +37,8 @@ const props = defineProps({
 watch(() => props.visible, (value, prevValue) => {
   store.commit('clearNotificationsWithPosition')
   if (value) {
-    updateLocalSpaces()
-    updateWithRemoteSpaces()
-    closeDialogs()
-    updateFavorites()
-    updateHeights()
     store.commit('shouldExplicitlyHideFooter', true)
-    store.dispatch('currentSpace/createSpacePreviewImage')
+    init()
   } else {
     store.commit('shouldExplicitlyHideFooter', false)
   }
@@ -67,6 +54,17 @@ const state = reactive({
   spaceFiltersIsVisible: false,
   parentDialog: 'spaceDetails'
 })
+
+const init = async () => {
+  closeDialogs()
+  if (!state.spaces.length) {
+    updateLocalSpaces()
+    updateHeights()
+  }
+  await updateWithRemoteSpaces()
+  updateHeights()
+  store.dispatch('currentSpace/createSpacePreviewImage')
+}
 
 // current space
 
@@ -88,6 +86,9 @@ const closeDialogs = () => {
   state.spaceFiltersIsVisible = false
   store.commit('triggerCloseChildDialogs')
 }
+
+// dialog heights
+
 const updateHeights = () => {
   if (!props.visible) {
     window.cancelAnimationFrame(updatePositionTimer)
@@ -96,14 +97,14 @@ const updateHeights = () => {
   }
   currentIteration = 0
   if (updatePositionTimer) { return }
-  updatePositionTimer = window.requestAnimationFrame(updatePositionFrame)
+  updatePositionTimer = window.requestAnimationFrame(updateHeightsFrame)
 }
-const updatePositionFrame = () => {
+const updateHeightsFrame = () => {
   currentIteration++
   updateDialogHeight()
   updateResultsSectionHeight()
   if (currentIteration < maxIterations) {
-    window.requestAnimationFrame(updatePositionFrame)
+    window.requestAnimationFrame(updateHeightsFrame)
   } else {
     window.cancelAnimationFrame(updatePositionTimer)
     updatePositionTimer = undefined
@@ -126,6 +127,7 @@ const dialogSpaceFilterSortBy = computed(() => store.state.currentUser.dialogSpa
 const dialogSpaceFilterByUser = computed(() => store.state.currentUser.dialogSpaceFilterByUser)
 const dialogSpaceFilterShowHidden = computed(() => store.state.currentUser.dialogSpaceFilterShowHidden)
 const dialogSpaceFilterByGroup = computed(() => store.state.currentUser.dialogSpaceFilterByGroup)
+const dialogSpaceFilterByTemplates = computed(() => store.state.currentUser.dialogSpaceFilterByTemplates)
 
 const spaceFiltersIsActive = computed(() => {
   return Boolean(dialogSpaceFilterShowHidden.value || utils.objectHasKeys(dialogSpaceFilterByUser.value) || dialogSpaceFilterSortByIsActive.value) || utils.objectHasKeys(dialogSpaceFilterByGroup.value)
@@ -144,6 +146,10 @@ const filteredSpaces = computed(() => {
   // filter by user
   if (utils.objectHasKeys(dialogSpaceFilterByUser.value)) {
     spaces = spaces.filter(space => space.userId === dialogSpaceFilterByUser.value.id)
+  }
+  // filter by templates
+  if (dialogSpaceFilterByTemplates.value) {
+    spaces = spaces.filter(space => space.isTemplate)
   }
   // sort
   spaces = sort(spaces)
@@ -178,26 +184,18 @@ const toggleSpaceFiltersIsVisible = () => {
 // sort
 
 const dialogSpaceFilterSortByIsActive = computed(() => {
-  return isSortByCreatedAt.value || isSortByAlphabetical.value
+  return shouldSortByCreatedAt.value || shouldSortByAlphabetical.value
 })
-const isSortByCreatedAt = computed(() => {
+const shouldSortByCreatedAt = computed(() => {
   const value = dialogSpaceFilterSortBy.value
   return value === 'createdAt'
 })
-const isSortByAlphabetical = computed(() => {
+const shouldSortByAlphabetical = computed(() => {
   const value = dialogSpaceFilterSortBy.value
   return value === 'alphabetical'
 })
 const prependFavoriteSpaces = (spaces) => {
   let favoriteSpaces = []
-  const userFavoriteSpaces = store.state.currentUser.favoriteSpaces || []
-  const favoriteSpaceIds = userFavoriteSpaces.map(space => space.id)
-  spaces = spaces.map(space => {
-    if (favoriteSpaceIds.includes(space.id)) {
-      space.isFavorite = true
-    }
-    return space
-  })
   spaces = spaces.filter(space => {
     if (space.isFavorite) {
       favoriteSpaces.push(space)
@@ -214,36 +212,13 @@ const prependInboxSpace = (spaces) => {
   spaces = inboxSpaces.concat(spaces)
   return spaces
 }
-const sortByCreatedAt = (spaces) => {
-  const sortedSpaces = spaces.sort((a, b) => {
-    const bCreatedAt = dayjs(b.createdAt).unix()
-    const aCreatedAt = dayjs(a.createdAt).unix()
-    return bCreatedAt - aCreatedAt
-  })
-  return sortedSpaces
-}
-const sortByUpdatedAt = (spaces) => {
-  spaces = spaces.map(space => {
-    space.editedAt = space.editedAt || space.createdAt
-    return space
-  })
-  const sortedSpaces = spaces.sort((a, b) => {
-    const bEditedAt = dayjs(b.editedAt).unix()
-    const aEditedAt = dayjs(a.editedAt).unix()
-    return bEditedAt - aEditedAt
-  })
-  return sortedSpaces
-}
-const sortByAlphabetical = (spaces) => {
-  return utils.sortItemsAlphabeticallyBy(spaces, 'name')
-}
 const sort = (spaces) => {
-  if (isSortByCreatedAt.value) {
-    spaces = sortByCreatedAt(spaces)
-  } else if (isSortByAlphabetical.value) {
-    spaces = sortByAlphabetical(spaces)
+  if (shouldSortByCreatedAt.value) {
+    spaces = utils.sortByCreatedAt(spaces)
+  } else if (shouldSortByAlphabetical.value) {
+    spaces = utils.sortByAlphabetical(spaces, 'name')(spaces)
   } else {
-    spaces = sortByUpdatedAt(spaces)
+    spaces = utils.sortByUpdatedAt(spaces)
   }
   spaces = prependFavoriteSpaces(spaces)
   spaces = prependInboxSpace(spaces)
@@ -252,9 +227,9 @@ const sort = (spaces) => {
 
 // add space
 
-const addSpace = () => {
+const addSpace = async () => {
   window.scrollTo(0, 0)
-  store.dispatch('currentSpace/addSpace')
+  await store.dispatch('currentSpace/addSpace')
   updateLocalSpaces()
   store.commit('triggerFocusSpaceDetailsName')
 }
@@ -271,44 +246,15 @@ const changeSpace = (space) => {
 
 const removeSpaceFromSpaces = (spaceId) => {
   state.spaces = state.spaces.filter(space => space.id !== spaceId)
-  if (!utils.arrayHasItems(state.remoteSpaces)) { return }
-  state.remoteSpaces = state.remoteSpaces.filter(space => space.id !== spaceId)
 }
 
-// list spaces
+// update space list
 
-const updateLocalSpaces = () => {
+const updateLocalSpaces = async () => {
   if (!props.visible) { return }
-  debouncedUpdateLocalSpaces()
-}
-const debouncedUpdateLocalSpaces = debounce(async () => {
-  await nextTick()
-  let cacheSpaces = cache.getAllSpaces().filter(space => {
-    return store.getters['currentUser/canEditSpace'](space)
-  })
-  let spaces = updateWithExistingRemoteSpaces(cacheSpaces)
-  spaces = utils.clone(spaces)
-  state.spaces = utils.AddCurrentUserIsCollaboratorToSpaces(spaces, store.state.currentUser)
-}, 350, { leading: true })
-
-const removeRemovedCachedSpaces = (remoteSpaces) => {
-  const remoteSpaceIds = remoteSpaces.map(space => space.id)
-  const spacesToRemove = state.spaces.filter(space => !remoteSpaceIds.includes(space.id))
-  spacesToRemove.forEach(spaceToRemove => {
-    cache.deleteSpace(spaceToRemove)
-  })
-}
-const updateWithExistingRemoteSpaces = (cacheSpaces) => {
-  if (!utils.arrayHasItems(state.remoteSpaces)) { return cacheSpaces }
-  let spaces = cacheSpaces
-  state.remoteSpaces.forEach(space => {
-    const spaceExists = cacheSpaces.find(userSpace => userSpace.id === space.id)
-    if (!spaceExists) {
-      spaces.push(space)
-    }
-  })
-  updateCachedSpaces()
-  return spaces
+  let cacheSpaces = await cache.getAllSpaces()
+  cacheSpaces = utils.addCurrentUserIsCollaboratorToSpaces(cacheSpaces, store.state.currentUser)
+  state.spaces = cacheSpaces
 }
 const updateWithRemoteSpaces = async () => {
   const currentUserIsSignedIn = store.getters['currentUser/isSignedIn']
@@ -320,36 +266,47 @@ const updateWithRemoteSpaces = async () => {
       store.dispatch('api/getUserSpaces'),
       store.dispatch('api/getUserGroupSpaces')
     ])
-    let spaces = userSpaces
+    let spaces = userSpaces || []
     if (groupSpaces) {
       spaces = spaces.concat(groupSpaces)
     }
     spaces = spaces.filter(space => Boolean(space))
     spaces = uniqBy(spaces, 'id')
-    state.remoteSpaces = spaces
-    state.isLoadingRemoteSpaces = false
-    if (!state.remoteSpaces) { return }
-    removeRemovedCachedSpaces(state.remoteSpaces)
-    state.spaces = state.remoteSpaces
-    updateCachedSpaces()
+    state.spaces = spaces
+    await updateCachedSpacesWithRemoteSpaces(spaces)
   } catch (error) {
     console.error('🚒 updateWithRemoteSpaces', error)
   }
   state.isLoadingRemoteSpaces = false
 }
-const updateCachedSpaces = () => {
-  state.spaces.forEach(space => {
-    const cachedSpace = cache.space(space.id)
-    const isCachedSpace = utils.objectHasKeys(cachedSpace)
-    if (!isCachedSpace) {
-      cache.saveSpace(space)
+const updateCachedSpacesWithRemoteSpaces = async (remoteSpaces) => {
+  try {
+    if (!remoteSpaces.length) { throw Error }
+    const cacheSpaces = await cache.getAllSpaces()
+    let cacheSpaceIds = cacheSpaces.map(space => space.id)
+    for (let remoteSpace of remoteSpaces) {
+      const isCached = cacheSpaceIds.includes(remoteSpace.id)
+      // update spaces with remote metadata
+      if (isCached) {
+        cacheSpaceIds = cacheSpaceIds.filter(id => id !== remoteSpace.id)
+        let updates = {}
+        const metaKeys = ['name', 'privacy', 'isHidden', 'updatedAt', 'editedAt', 'isRemoved', 'groupId', 'showInExplore', 'updateHash', 'isTemplate', 'previewImage', 'previewThumbnailImage', 'isFavorite']
+        metaKeys.forEach(key => {
+          updates[key] = remoteSpace[key]
+        })
+        await cache.updateSpaceByUpdates(updates, remoteSpace.id)
+      // cache new space
+      } else {
+        await cache.saveSpace(remoteSpace)
+      }
     }
-  })
-}
-const updateFavorites = async () => {
-  if (!shouldUpdateFavorites) { return }
-  shouldUpdateFavorites = false
-  await store.dispatch('currentUser/restoreUserFavorites')
+    // update removed spaces
+    for (let cacheSpaceId of cacheSpaceIds) {
+      await cache.removeSpace({ id: cacheSpaceId })
+    }
+  } catch (error) {
+    console.error('🚒 updateCachedSpacesWithRemoteSpaces', error)
+  }
 }
 </script>
 
@@ -391,6 +348,7 @@ dialog.space-details.is-pinnable.wide(v-if="props.visible" :open="props.visible"
       :resultsSectionHeight="state.resultsSectionHeight"
       :parentDialog="state.parentDialog"
       :showSpaceGroups="true"
+      :showFilter="true"
     )
 </template>
 

@@ -36,7 +36,7 @@ export default {
     },
     updateWindowTitle () {
       const space = this.$store.state.currentSpace
-      pageMeta.spaceTitle(space)
+      pageMeta.updateSpace(space)
     }
   }
 }

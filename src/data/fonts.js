@@ -7,6 +7,11 @@ const fonts = [
     previewImage: 'https://updates.kinopio.club/font-preview/apris.webp'
   },
   {
+    id: 8,
+    name: 'eiko',
+    previewImage: 'https://updates.kinopio.club/font-preview/eiko.webp'
+  },
+  {
     id: 2,
     name: 'gaya',
     previewImage: 'https://updates.kinopio.club/font-preview/gaya.webp'

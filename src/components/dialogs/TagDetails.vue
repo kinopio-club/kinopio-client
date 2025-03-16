@@ -33,7 +33,8 @@ const state = reactive({
   cards: [],
   dialogHeight: null,
   resultsSectionHeight: null,
-  newPosition: {}
+  newPosition: {},
+  cachedSpaces: []
 })
 
 const visible = computed(() => store.state.tagDetailsIsVisible)
@@ -146,6 +147,20 @@ const updateDialogHeight = async () => {
   updateResultsSectionHeight()
 }
 
+// spaces
+
+const cachedOrOtherSpaceById = async (spaceId) => {
+  const currentSpace = store.state.currentSpace
+  const cachedSpace = await cache.space(spaceId)
+  if (spaceId === currentSpace.id) {
+    return utils.clone(currentSpace)
+  } else if (utils.objectHasKeys(cachedSpace)) {
+    return cachedSpace
+  } else {
+    return store.getters.otherSpaceById(spaceId)
+  }
+}
+
 // current card
 
 const cardDetailsIsVisibleForCardId = computed(() => store.state.cardDetailsIsVisibleForCardId)
@@ -156,22 +171,22 @@ const currentCard = computed(() => {
   return currentCard || tagCard
 })
 const showEditCard = computed(() => !cardDetailsIsVisibleForCardId.value.valye && !visibleFromTagList.value)
-const showCardDetails = (card) => {
+const focusOnCard = async (card) => {
   card = card || currentCard.value
   store.dispatch('closeAllDialogs')
-  if (currentSpaceId.value !== card.spaceId) {
-    store.commit('loadSpaceShowDetailsForCardId', card.id)
+  const isCurrentSpace = currentSpaceId.value !== card.spaceId
+  if (isCurrentSpace) {
+    store.commit('loadSpaceFocusOnCardId', card.id)
     let space
     if (card.spaceId) {
       space = { id: card.spaceId }
     } else {
-      space = cache.space(card.spaceId)
+      space = await cache.space(card.spaceId)
     }
     store.dispatch('currentSpace/changeSpace', space)
   } else {
     const cardId = card.id || currentTag.value.cardId
-    store.commit('preventCardDetailsOpeningAnimation', false)
-    store.dispatch('currentCards/showCardDetails', cardId)
+    store.dispatch('focusOnCardId', cardId)
   }
 }
 
@@ -197,7 +212,7 @@ const remoteCards = async () => {
 const updateCards = async () => {
   state.cards = []
   const cardsInCurrentSpace = utils.clone(store.getters['currentCards/withTagName'](name.value))
-  const cardsInCachedSpaces = cache.allCardsByTagName(name.value)
+  const cardsInCachedSpaces = await cache.allCardsByTagName(name.value)
   // cache cards
   let cacheCards = cardsInCurrentSpace.concat(cardsInCachedSpaces)
   cacheCards = addCardNameSegments(cacheCards)
@@ -249,7 +264,7 @@ const groupedItems = computed(() => {
     } else {
       let spaceName, background, backgroundTint
       const spaceId = item.spaceId || currentSpaceId.value
-      const space = store.getters.cachedOrOtherSpaceById(spaceId)
+      const space = state.cachedSpaces.find(cachedspace => cachedspace.id === spaceId)
       if (space) {
         spaceName = space.name
         background = space.background
@@ -298,11 +313,11 @@ const segmentTagColor = (segment) => {
     return color.value
   }
   const spaceTag = store.getters['currentSpace/tagByName'](segment.name)
-  const cachedTag = cache.tagByName(segment.name)
+  const userTag = store.getters['currentUser/tagByName'](segment.name)
   if (spaceTag) {
     return spaceTag.color
-  } else if (cachedTag) {
-    return cachedTag.color
+  } else if (userTag) {
+    return userTag.color
   } else {
     return currentUser.value.color
   }
@@ -361,6 +376,18 @@ const filteredItems = computed(() => {
     return state.cards
   }
 })
+watch(() => filteredItems.value, async (items, prevValue) => {
+  let spaces = []
+  for (const item of items) {
+    const spaceId = item.spaceId || currentSpaceId.value
+    const space = await cachedOrOtherSpaceById(spaceId)
+    if (space) {
+      spaces.push(space)
+    }
+  }
+  state.cachedSpaces = spaces
+})
+
 const shouldHideResultsFilter = computed(() => {
   if (state.cards.length < 5) {
     return true
@@ -410,7 +437,7 @@ const changeSpace = (spaceId) => {
 <template lang="pug">
 dialog.tag-details(v-if="visible" :open="visible" :style="styles" ref="dialogElement" @click.left.stop="closeDialogs")
   section.edit-card(v-if="showEditCard")
-    button(@click="showCardDetails(null)")
+    button(@click="focusOnCard(null)")
       span Edit Card
     button.change-color.select-all(@click="selectCardsWithTag")
       .current-color(:style="{backgroundColor: color}")
@@ -442,7 +469,7 @@ dialog.tag-details(v-if="visible" :open="visible" :style="styles" ref="dialogEle
   //- cards found, or loading with cached cards
   section.results-section(v-if="state.cards.length" ref="resultsElement" :style="{'max-height': state.resultsSectionHeight + 'px'}")
     ResultsFilter(:hideFilter="shouldHideResultsFilter" :items="state.cards" @updateFilter="updateFilter" @updateFilteredItems="updateFilteredCards")
-    SpaceCardList(:groupedItems="groupedItems" :isLoading="state.loading" @selectSpace="changeSpace" @selectCard="showCardDetails")
+    SpaceCardList(:groupedItems="groupedItems" :isLoading="state.loading" @selectSpace="changeSpace" @selectCard="focusOnCard" :currentCard="currentCard")
 </template>
 
 <style lang="stylus">

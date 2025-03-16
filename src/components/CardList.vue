@@ -40,7 +40,8 @@ const props = defineProps({
   search: String,
   cardsShowRemoveButton: Boolean,
   dateIsCreatedAt: Boolean,
-  resultsSectionHeight: Number
+  resultsSectionHeight: Number,
+  currentCard: Object
 })
 
 const state = reactive({
@@ -79,7 +80,7 @@ const removeCard = (card) => {
 }
 const cardIsActive = (card) => {
   const isCardDetailsVisible = store.state.cardDetailsIsVisibleForCardId === card.id
-  return isCardDetailsVisible || card.isLoading
+  return isCardDetailsVisible || card.isLoading || isCurrentCard(card)
 }
 const cardIsFocused = (card) => {
   return store.state.previousResultItem.id === card.id
@@ -113,6 +114,9 @@ const dateIsToday = (card) => {
   const date = cardDate(card)
   if (!date) { return }
   return dayjs(date).isToday()
+}
+const isCurrentCard = (card) => {
+  return props.currentCard?.id === card.id
 }
 
 // scroll

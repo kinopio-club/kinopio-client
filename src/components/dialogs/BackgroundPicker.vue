@@ -1,5 +1,5 @@
 <script setup>
-import { reactive, computed, onMounted, onUpdated, defineProps, defineEmits, watch, ref, nextTick } from 'vue'
+import { reactive, computed, onMounted, onBeforeUnmount, defineProps, defineEmits, watch, ref, nextTick } from 'vue'
 import { useStore } from 'vuex'
 
 import ColorPicker from '@/components/dialogs/ColorPicker.vue'
@@ -21,54 +21,41 @@ const store = useStore()
 
 const searchInputElement = ref(null)
 const inputElement = ref(null)
+const dialogElement = ref(null)
+
+let unsubscribe
 
 const props = defineProps({
-  visible: Boolean
+  visible: Boolean,
+  space: Object,
+  box: Object
 })
 const emit = defineEmits(['updateSpaces'])
 
 onMounted(() => {
+  window.addEventListener('resize', updateDialogHeight)
   refreshGradients()
   updateDefaultColor()
-  store.subscribe((mutation, state) => {
+  unsubscribe = store.subscribe((mutation, state) => {
     if (mutation.type === 'triggerUploadComplete') {
       let { spaceId, url, cardId } = mutation.payload
       if (cardId) { return }
-      if (spaceId !== store.state.currentSpace.id) { return }
-      updateSpaceBackground(url)
+      if (spaceId !== props.space?.id) { return }
+      updateBackground(url)
     } else if (mutation.type === 'triggerUpdateTheme') {
       updateDefaultColor()
     }
   })
 })
-
-onUpdated(async () => {
-  await nextTick()
-  if (props.visible) {
-    checkIfImageIsUrl()
-  }
-})
-
-watch(() => props.visible, (value, prevValue) => {
-  if (value) {
-    if (state.service === 'background') {
-      state.selectedImages = backgroundImages.value
-    }
-    state.backgroundTint = store.state.currentSpace.backgroundTint
-    closeDialogs()
-    clearErrors()
-    updateCommunityBackgroundImages()
-  } else {
-    if (state.error.isNotImageUrl) {
-      removeBackground()
-    }
-    store.commit('clearNotificationsWithPosition')
-  }
+onBeforeUnmount(() => {
+  window.removeEventListener('resize', updateDialogHeight)
+  unsubscribe()
 })
 
 const state = reactive({
+  dialogHeight: null,
   colorPickerIsVisible: false,
-  spaceBackgroundInputIsVisible: false,
+  urlInputIsVisible: false,
   initialSearch: '',
   error: {
     isNotImageUrl: false,
@@ -91,10 +78,44 @@ const state = reactive({
   service: 'background' // background, recent, pexels
 })
 
-const currentSpace = computed(() => store.state.currentSpace)
+watch(() => props.visible, (value, prevValue) => {
+  if (value) {
+    if (state.service === 'background') {
+      state.selectedImages = backgroundImages.value
+    }
+    state.backgroundTint = props.space?.backgroundTint
+    closeDialogs()
+    clearErrors()
+    // delay fetching community backgrounds to prevent render blocking
+    setTimeout(updateCommunityBackgroundImages, 200)
+    updateDialogHeight()
+  } else {
+    if (state.error.isNotImageUrl) {
+      removeBackground()
+    }
+    store.commit('clearNotificationsWithPosition')
+  }
+})
+
+const updateDialogHeight = async () => {
+  if (!props.visible) { return }
+  await nextTick()
+  let element = dialogElement.value
+  state.dialogHeight = utils.elementHeight(element)
+}
+
 const currentUserIsSignedIn = computed(() => store.getters['currentUser/isSignedIn'])
 const currentUser = computed(() => store.state.currentUser)
 const currentUserIsMember = computed(() => store.getters['currentUser/isSpaceMember']())
+const itemTypeString = computed(() => {
+  if (props.space) {
+    return 'Space'
+  } else {
+    return 'Box'
+  }
+})
+const imageListIsSmall = computed(() => Boolean(props.box))
+const stretchIsVisible = computed(() => Boolean(props.box))
 
 // dialog
 
@@ -111,6 +132,7 @@ const closeDialogs = async () => {
   state.colorPickerIsVisible = false
 }
 const updatePreviewImage = async () => {
+  if (props.box) { return }
   await nextTick()
   store.dispatch('currentSpace/createSpacePreviewImage')
 }
@@ -153,6 +175,9 @@ const focusAndSelectSearchInput = async () => {
 const resetPinchCounterZoomDecimal = () => {
   store.commit('pinchCounterZoomDecimal', 1)
 }
+const toggleUrlInputIsVisible = () => {
+  state.urlInputIsVisible = !state.urlInputIsVisible
+}
 
 // background gradients
 
@@ -164,50 +189,32 @@ const refreshGradients = () => {
     gradient.id = nanoid()
     gradients.push(gradient)
   })
-  if (currentSpace.value.backgroundGradient) {
-    gradients[0] = currentSpace.value.backgroundGradient
+  if (props.space?.backgroundGradient) {
+    gradients[0] = props.space?.backgroundGradient
   }
   state.gradients = gradients
 }
-const selectGradient = (index) => {
+const selectGradient = async (index) => {
   const gradient = state.gradients[index]
   const updates = {
     backgroundIsGradient: true,
     backgroundGradient: gradient
   }
-  store.dispatch('currentSpace/updateSpace', updates)
+  await store.dispatch('currentSpace/updateSpace', updates)
   updatePreviewImage()
 }
 const gradientIsActive = (gradient) => {
-  if (!currentSpace.value.backgroundIsGradient) { return }
-  return currentSpace.value.backgroundGradient.id === gradient.id
+  if (!props.space?.backgroundIsGradient) { return }
+  return props.space?.backgroundGradient.id === gradient.id
 }
 
-// background images
+// background images list
 
-const isCurrentSpaceBackground = (image) => {
+const isCurrentBackground = (image) => {
   return image.url === background.value
 }
-const checkIfImageIsUrl = () => {
-  const url = background.value
-  if (!url) {
-    state.error.isNotImageUrl = false
-  } else if (utils.urlIsImage(url)) {
-    state.error.isNotImageUrl = false
-  } else {
-    state.error.isNotImageUrl = true
-  }
-}
-const background = computed({
-  get () {
-    return currentSpace.value.background
-  },
-  set (url) {
-    updateSpaceBackground(url)
-  }
-})
-const activeBackgroundUrl = computed(() => {
-  if (currentSpace.value.backgroundIsGradient) { return }
+const currentBackgroundUrl = computed(() => {
+  if (props.space?.backgroundIsGradient) { return }
   return background.value
 })
 const backgroundImages = computed(() => {
@@ -215,28 +222,6 @@ const backgroundImages = computed(() => {
   images = images.filter(image => !image.isArchived)
   return images
 })
-const updateSpaceBackground = (url) => {
-  url = url.url || url
-  if (url === background.value) {
-    url = ''
-  }
-  const updates = {
-    backgroundIsGradient: false,
-    background: url
-  }
-  store.dispatch('currentSpace/updateSpace', updates)
-  updatePreviewImage()
-}
-const removeBackgroundAll = async () => {
-  removeBackground()
-  removeBackgroundTint()
-  updatePreviewImage()
-}
-const removeBackground = async () => {
-  updateSpaceBackground('')
-  closeDialogs()
-  updatePreviewImage()
-}
 const updateCommunityBackgroundImages = async () => {
   state.communityBackgroundsIsLoading = true
   if (state.communityBackgroundImages.length) {
@@ -254,8 +239,61 @@ const updateCommunityBackgroundImages = async () => {
   state.communityBackgroundImages = images
   state.communityBackgroundsIsLoading = false
 }
-const toggleSpaceBackgroundInputIsVisible = () => {
-  state.spaceBackgroundInputIsVisible = !state.spaceBackgroundInputIsVisible
+
+// update background
+
+const checkIfImageIsUrl = () => {
+  const url = background.value
+  if (!url) {
+    state.error.isNotImageUrl = false
+  } else if (utils.urlIsImage(url)) {
+    state.error.isNotImageUrl = false
+  } else {
+    state.error.isNotImageUrl = true
+  }
+}
+const background = computed({
+  get () {
+    if (props.box) {
+      return props.box.background
+    } else {
+      return props.space?.background
+    }
+  },
+  set (url) {
+    updateBackground(url)
+  }
+})
+const updateBackground = async (url) => {
+  url = url.url || url
+  if (url === background.value) {
+    url = ''
+  }
+  if (props.box) {
+    const updates = {
+      id: props.box.id,
+      background: url
+    }
+    await store.dispatch('currentBoxes/update', updates)
+  } else {
+    const updates = {
+      backgroundIsGradient: false,
+      background: url
+    }
+    await store.dispatch('currentSpace/updateSpace', updates)
+  }
+  updatePreviewImage()
+  checkIfImageIsUrl()
+}
+const removeBackgroundAll = async () => {
+  removeBackground()
+  removeBackgroundTint()
+  updatePreviewImage()
+}
+const removeBackground = async () => {
+  await updateBackground('')
+  closeDialogs()
+  updatePreviewImage()
 }
 
 // upload
@@ -276,7 +314,7 @@ const isFileTooBig = (file) => {
 }
 const uploadFile = async () => {
   clearErrors()
-  const spaceId = currentSpace.value.id
+  const spaceId = props.space?.id
   const input = inputElement.value
   const file = input.files[0]
   if (isFileTooBig(file)) {
@@ -284,7 +322,11 @@ const uploadFile = async () => {
     return
   }
   try {
-    await store.dispatch('upload/uploadFile', { file, spaceId })
+    if (props.box) {
+      await store.dispatch('upload/uploadFile', { file, boxId: props.box.id })
+    } else {
+      await store.dispatch('upload/uploadFile', { file, spaceId })
+    }
   } catch (error) {
     console.warn('🚒', error)
     if (error.type === 'sizeLimit') {
@@ -297,7 +339,7 @@ const uploadFile = async () => {
 const pendingUpload = computed(() => {
   const pendingUploads = store.state.upload.pendingUploads
   return pendingUploads.find(upload => {
-    const isCurrentSpace = upload.spaceId === currentSpace.value.id
+    const isCurrentSpace = upload.spaceId === props.space?.id
     const isInProgress = upload.percentComplete < 100
     return isCurrentSpace && isInProgress
   })
@@ -306,7 +348,7 @@ const remotePendingUpload = computed(() => {
   let remotePendingUploads = store.state.remotePendingUploads
   return remotePendingUploads.find(upload => {
     const isInProgress = upload.percentComplete < 100
-    const isSpace = upload.spaceId === currentSpace.value.id
+    const isSpace = upload.spaceId === props.space?.id
     return isInProgress && isSpace
   })
 })
@@ -323,14 +365,14 @@ const backgroundTintBadgeColor = computed(() => {
   }
   return state.backgroundTint
 })
-const updateBackgroundTint = (value) => {
+const updateBackgroundTint = async (value) => {
   state.backgroundTint = value
-  store.dispatch('currentSpace/updateSpace', { backgroundTint: value })
+  await store.dispatch('currentSpace/updateSpace', { backgroundTint: value })
   emit('updateSpaces')
   updatePreviewImage()
 }
 const removeBackgroundTint = async () => {
-  updateBackgroundTint('')
+  await updateBackgroundTint('')
   closeDialogs()
   emit('updateSpaces')
   updatePreviewImage()
@@ -338,8 +380,8 @@ const removeBackgroundTint = async () => {
 
 // recent
 
-const recentImagesFromCacheSpaces = () => {
-  let spaces = cache.getAllSpaces()
+const recentImagesFromCacheSpaces = async () => {
+  let spaces = await cache.getAllSpaces()
   let images = []
   spaces.forEach(space => {
     if (!space.background) { return }
@@ -364,12 +406,12 @@ const recentImagesFromCacheSpaces = () => {
 const serviceIsPexels = computed(() => state.service === 'pexels')
 const serviceIsRecent = computed(() => state.service === 'recent')
 const serviceIsBackground = computed(() => state.service === 'background')
-const updateService = (service) => {
+const updateService = async (service) => {
   state.service = service
   if (service === 'background') {
     state.selectedImages = backgroundImages.value
   } else if (service === 'recent') {
-    const images = recentImagesFromCacheSpaces()
+    const images = await recentImagesFromCacheSpaces()
     state.selectedImages = images
   } else if (service === 'pexels') {
     searchPexels()
@@ -406,26 +448,39 @@ const searchPexels = async () => {
 }
 const searchService = debounce(searchPexels, 350)
 
+// stretch
+
+const backgroundIsStretch = computed(() => props.box.backgroundIsStretch)
+const toggleBackgroundIsStretch = () => {
+  const value = !backgroundIsStretch.value
+  const update = {
+    id: props.box.id,
+    backgroundIsStretch: value
+  }
+  store.dispatch('currentBoxes/update', update)
+}
+
 </script>
 
 <template lang="pug">
-dialog.background-picker.wide(v-if="visible" :open="visible" @click.left.stop="closeDialogs")
+dialog.background-picker.wide(v-if="visible" :open="visible" @click.left.stop="closeDialogs" ref='dialogElement' :style="{'max-height': state.dialogHeight + 'px'}")
   section
     .row.title-row
       div
-        BackgroundPreview(:space="currentSpace")
+        BackgroundPreview(:space="props.space" :box="props.box")
         span.title Background
       .row
         .button-wrap
-          button.small-button(:class="{active: state.spaceBackgroundInputIsVisible}" @click="toggleSpaceBackgroundInputIsVisible")
+          button.small-button(:class="{active: state.urlInputIsVisible}" @click="toggleUrlInputIsVisible")
             span URL
         .button-wrap(v-if="currentUserIsMember")
           button.small-button(@click.left="removeBackgroundAll")
             img.icon.cancel(src="@/assets/add.svg")
             span Clear
 
+  //- url input
   section(@mouseup.stop @touchend.stop)
-    .row(v-if="state.spaceBackgroundInputIsVisible")
+    .row(v-if="state.urlInputIsVisible")
       input(
         rows="1"
         placeholder="Paste an image URL or upload"
@@ -434,12 +489,11 @@ dialog.background-picker.wide(v-if="visible" :open="visible" @click.left.stop="c
         maxlength="400"
         :disabled="!currentUserIsMember"
       )
-
     template(v-if="!currentUserIsMember")
       .row
         span.badge.info
           img.icon.cancel(src="@/assets/add.svg")
-          span Space is Read Only
+          span {{itemTypeString}} is Read Only
 
     //- upload progress
     .uploading-container(v-if="pendingUpload")
@@ -478,31 +532,36 @@ dialog.background-picker.wide(v-if="visible" :open="visible" @click.left.stop="c
     template(v-if="currentUserIsMember")
       .row
         //- Tint
-        .button-wrap
+        .button-wrap(v-if="!props.box")
           button.change-color(@click.left.stop="toggleColorPicker" :class="{active: state.colorPickerIsVisible}")
             span.current-color(:style="{ background: backgroundTintBadgeColor }")
             span Tint
-          ColorPicker(:currentColor="state.backgroundTint || '#fff'" :visible="state.colorPickerIsVisible" @selectedColor="updateBackgroundTint" :removeIsVisible="true" @removeColor="removeBackgroundTint" :shouldLightenColors="true")
+          ColorPicker(:currentColor="state.backgroundTint || '#fff'" :visible="state.colorPickerIsVisible" @selectedColor="updateBackgroundTint" :removeIsVisible="true" @removeColor="removeBackgroundTint" :shouldLightenColors="true" :luminosityIsLight="true")
         //- Type
         .segmented-buttons
           button(@click.left.stop="updateService('background')" :class="{ active: state.service === 'background'}")
             img.icon.flower(src="@/assets/flower.svg")
           button(@click.left.stop="updateService('pexels')" :class="{ active: serviceIsPexels}")
             img.icon(src="@/assets/search.svg")
-          button(@click.left.stop="updateService('recent')" :class="{ active: serviceIsRecent}")
-            img.icon.time(src="@/assets/time.svg")
+          //- button(@click.left.stop="updateService('recent')" :class="{ active: serviceIsRecent}")
+          //-   img.icon.time(src="@/assets/time.svg")
         //- Upload
         .button-wrap
           button(@click.left.stop="selectFile")
             span Upload
           input.hidden(type="file" ref="inputElement" @change="uploadFile" accept="image/*")
+        //- Stretch
+        .button-wrap(v-if="stretchIsVisible")
+          label.show-users(title="Stretch Background" :class="{active: backgroundIsStretch}" @click.left.prevent.stop="toggleBackgroundIsStretch" @keydown.stop.enter="toggleBackgroundIsStretch")
+            input(type="checkbox" v-model="backgroundIsStretch")
+            span Stretch
 
   //- results
   template(v-if="currentUserIsMember")
     //- backgrounds
     template(v-if="serviceIsBackground")
       //- gradient backgrounds
-      section.results-section.title-row
+      section.results-section.title-row(v-if="!props.box")
         ul.results-list.gradients-list
           li.gradient-li(v-for="(gradient, index) in state.gradients" @click="selectGradient(index)" :key="gradient.id" :class="{ active: gradientIsActive(gradient) }")
             SpaceBackgroundGradients(:visible="true" :layers="gradient")
@@ -511,7 +570,7 @@ dialog.background-picker.wide(v-if="visible" :open="visible" @click.left.stop="c
             img.refresh.icon(src="@/assets/refresh.svg")
       //- built-in backgrounds
       section.results-section
-        ImageList(:images="state.selectedImages" :activeUrl="activeBackgroundUrl" @selectImage="updateSpaceBackground")
+        ImageList(:images="state.selectedImages" :activeUrl="currentBackgroundUrl" @selectImage="updateBackground" :isSmall="imageListIsSmall")
       //- community backgrounds
       section.results-section.community-backgrounds-section
         .row.title-row
@@ -520,14 +579,14 @@ dialog.background-picker.wide(v-if="visible" :open="visible" @click.left.stop="c
             button.small-button
               img.icon.arena(src="@/assets/arena.svg")
         Loader(:visible="state.communityBackgroundsIsLoading")
-        ImageList(v-if="!state.communityBackgroundsIsLoading" :images="state.communityBackgroundImages" :activeUrl="background" @selectImage="updateSpaceBackground")
+        ImageList(v-if="!state.communityBackgroundsIsLoading" :images="state.communityBackgroundImages" :activeUrl="background" @selectImage="updateBackground" :isSmall="imageListIsSmall")
 
     //- recent
-    template(v-else-if="serviceIsRecent")
-      section.results-section
-        .row
-          p.row-title Recently Used
-        ImageList(:images="state.selectedImages" :activeUrl="background" @selectImage="updateSpaceBackground")
+    //- template(v-else-if="serviceIsRecent")
+    //-   section.results-section
+    //-     .row
+    //-       p.row-title Recently Used
+    //-     ImageList(:images="state.selectedImages" :activeUrl="background" @selectImage="updateBackground" :isSmall="imageListIsSmall")
 
     //- search results
     template(v-else-if="serviceIsPexels")
@@ -553,16 +612,14 @@ dialog.background-picker.wide(v-if="visible" :open="visible" @click.left.stop="c
           .badge.danger (シ_ _)シ Something went wrong, Please try again or contact support
         ul.results-list.image-list
           template(v-for="image in state.images" :key="image.id")
-            li(@click.left="updateSpaceBackground(image.url)" tabindex="0" v-on:keydown.enter="updateSpaceBackground(image.url)" :class="{ active: isCurrentSpaceBackground(image)}")
+            li(@click.left="updateBackground(image.url)" tabindex="0" v-on:keydown.enter="updateBackground(image.url)" :class="{ active: isCurrentBackground(image)}")
               img(:src="image.previewUrl")
 </template>
 
 <style lang="stylus">
 dialog.background-picker
-  width 255px
   overflow auto
-  max-height calc(100vh - 120px) //- todesktop chromium fix
-  max-height calc(100dvh - 120px)
+  min-height 400px
   .title-row
     margin-left 0 !important
     .background-preview

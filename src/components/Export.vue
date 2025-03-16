@@ -2,7 +2,6 @@
 import { reactive, computed, onMounted, onUnmounted, defineProps, defineEmits, watch, ref, nextTick } from 'vue'
 import { useStore } from 'vuex'
 
-import Pdf from '@/components/subsections/Pdf.vue'
 import Loader from '@/components/Loader.vue'
 import utils from '@/utils.js'
 const store = useStore()
@@ -80,8 +79,8 @@ const downloadAllSpacesRemote = async () => {
   }
   state.isLoadingAllSpaces = false
 }
-const duplicateSpace = () => {
-  store.dispatch('currentSpace/duplicateSpace')
+const duplicateSpace = async () => {
+  await store.dispatch('currentSpace/duplicateSpace')
   state.spaceIsDuplicated = true
   emit('updateSpaces')
 }
@@ -89,9 +88,24 @@ const triggerSignUpOrInIsVisible = () => {
   store.dispatch('closeAllDialogs')
   store.commit('triggerSignUpOrInIsVisible')
 }
+
+// pdf
+
 const togglePdfIsVisible = () => {
   const isVisible = state.pdfIsVisible
   state.pdfIsVisible = !isVisible
+  if (state.pdfIsVisible) {
+    pdf()
+  }
+}
+const pdf = async () => {
+  try {
+    const url = await store.dispatch('api/pdf')
+    console.info('🌎 pdf url', url)
+  } catch (error) {
+    console.error('🚒 pdf', error)
+    state.unknownServerError = true
+  }
 }
 
 // json canvas
@@ -101,7 +115,7 @@ const downloadLocalCanvas = () => {
   let space = utils.clone(currentSpace.value)
   delete space.clients
   const canvas = convertToCanvas(space)
-  console.log('🧚 canvas to download', canvas)
+  console.info('🧚 canvas to download', canvas)
   const json = 'data:text/json;charset=utf-8,' + encodeURIComponent(JSON.stringify(canvas))
   const name = fileName()
   const downloadAnchor = document.getElementById('export-downlaod-anchor')
@@ -195,8 +209,8 @@ template(v-if="visible")
         button(@click.left="downloadLocalCanvas")
           img.icon.json-canvas(src="@/assets/json-canvas.svg")
           span Canvas
-
-    Pdf(:visible="state.pdfIsVisible")
+    p(v-if="state.pdfIsVisible")
+      span.badge.success PDF Sent to your Email
     .row
       .button-wrap
         button(@click.left="downloadLocalJson")
@@ -211,10 +225,8 @@ template(v-if="visible")
       button(@click.left="triggerSignUpOrInIsVisible") Sign Up or In
     // signed in user
     template(v-if="currentUserIsSignedIn")
-      p
-        span Backup All (JSON and TXT)
       button(@click.left="downloadAllSpacesRemote" :class="{ active: state.isLoadingAllSpaces }")
-        span Download All Spaces
+        span Download All Spaces Backup (JSON and TXT)
         Loader(:visible="state.isLoadingAllSpaces")
     a#export-downlaod-anchor.hidden
     .info-container(v-if="state.isLoadingAllSpaces")
@@ -238,8 +250,6 @@ section.export
     margin-left 0
     white-space initial
   button + button
-    margin-top 10px
-  .badge.success
     margin-top 10px
   .hidden
     display none

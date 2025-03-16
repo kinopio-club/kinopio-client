@@ -343,7 +343,7 @@ const remoteUserDragging = computed(() => {
 // touch dragging
 
 const lockingFrameStyle = computed(() => {
-  const initialPadding = 65 // matches initialLockCircleRadius in magicPaint
+  const initialPadding = 65 // matches initialLockCircleRadius in paintSelect
   const initialBorderRadius = 50
   const padding = initialPadding * state.lockingPercent
   const borderRadius = Math.max((state.lockingPercent * initialBorderRadius), 5) + 'px'
@@ -369,7 +369,7 @@ const cancelLockingAnimationFrame = () => {
   shouldCancelLocking = false
 }
 const startLocking = (event) => {
-  console.log('startLocking', event)
+  console.info('startLocking', event)
   updateTouchPosition(event)
   updateCurrentTouchPosition(event)
   state.isLocking = true
@@ -400,7 +400,7 @@ const lockingAnimationFrame = (timestamp) => {
     state.lockingAlpha = alpha
     window.requestAnimationFrame(lockingAnimationFrame)
   } else if (state.isLocking && percentComplete > 1) {
-    console.log('🔒🐢 label lockingAnimationFrame locked')
+    console.info('🔒🐢 label lockingAnimationFrame locked')
     lockingAnimationTimer = undefined
     lockingStartTime = undefined
     state.isLocking = false

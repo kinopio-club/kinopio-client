@@ -34,7 +34,7 @@ dialog.narrow.free-limit-faq(v-if="visible" :open="visible" @click.left.stop ref
     details
       summary(@click="closeOtherDetails") What happens when I run out of free cards?
       section.subsection
-        p You'll always have access to your cards and spaces. But you won't be able to create new cards unless you remove some to decrease your card count.
+        p You'll always have access to your cards and spaces. But you won't be able to create new cards unless you upgrade or remove cards to decrease your count.
 
 </template>
 

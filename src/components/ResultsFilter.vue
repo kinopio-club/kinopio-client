@@ -1,5 +1,5 @@
 <script setup>
-import { reactive, computed, onMounted, onUnmounted, defineProps, defineEmits, watch, ref, nextTick } from 'vue'
+import { reactive, computed, onMounted, onUnmounted, onBeforeUnmount, defineProps, defineEmits, watch, ref, nextTick } from 'vue'
 import { useStore } from 'vuex'
 
 import Loader from '@/components/Loader.vue'
@@ -13,11 +13,13 @@ const store = useStore()
 const resultsFilterElement = ref(null)
 const filterInputElement = ref(null)
 
+let unsubscribe
+
 onMounted(() => {
   if (props.initialValue) {
     state.filter = props.initialValue
   }
-  store.subscribe(async (mutation, state) => {
+  unsubscribe = store.subscribe(async (mutation, state) => {
     if (mutation.type === 'closeAllDialogs') {
       const element = resultsFilterElement.value
       if (!element) { return }
@@ -36,6 +38,9 @@ onMounted(() => {
   })
   clearExpiredFilter()
   autoFocus()
+})
+onBeforeUnmount(() => {
+  unsubscribe()
 })
 
 const emit = defineEmits([
@@ -81,7 +86,7 @@ const addSpaceIsVisible = computed(() => props.showCreateNewSpaceFromSearch && s
 const addSpace = async () => {
   const name = state.filter
   window.scrollTo(0, 0)
-  store.dispatch('currentSpace/addSpace', { name })
+  await store.dispatch('currentSpace/addSpace', { name })
   await nextTick()
   const shouldClearFilterInfo = true
   clearFilter(shouldClearFilterInfo)
@@ -200,7 +205,7 @@ const selectItem = () => {
   template(v-else)
     img.icon.search(src="@/assets/search.svg" @click.left="focusFilterInput")
   input(
-    name="state.filter"
+    name="filter"
     type="text"
     autocomplete="off"
     :placeholder="inputPlaceholder"

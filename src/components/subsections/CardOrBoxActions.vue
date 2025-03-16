@@ -226,6 +226,7 @@ const containItemsInNewBox = async () => {
   await nextTick()
   await nextTick()
   store.commit('boxDetailsIsVisibleForBoxId', box.id)
+  store.dispatch('analytics/event', 'containItemsInNewBox')
 }
 
 // box fill
@@ -244,6 +245,9 @@ const updateBoxFill = (fill) => {
   props.boxes.forEach(box => {
     updateBox(box, { fill })
   })
+  if (fill === 'empty') {
+    store.dispatch('analytics/event', 'UpdateBoxFillToEmpty')
+  }
 }
 
 // color

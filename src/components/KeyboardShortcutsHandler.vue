@@ -14,7 +14,7 @@ let browserZoomLevel = 0
 let disableContextMenu = false
 let spaceKeyIsDown = false
 
-let prevCursorPosition, currentCursorPosition, prevRightClickPosition
+let prevCursorPosition, currentCursorPosition, prevRightClickPosition, prevRightClickTime
 
 onMounted(() => {
   store.subscribe(mutation => {
@@ -27,9 +27,15 @@ onMounted(() => {
     } else if (mutation.type === 'triggerSelectAllItemsBelowCursor') {
       const position = mutation.payload
       selectAllItemsBelowCursor(position)
+    } else if (mutation.type === 'triggerSelectAllItemsAboveCursor') {
+      const position = mutation.payload
+      selectAllItemsAboveCursor(position)
     } else if (mutation.type === 'triggerSelectAllItemsRightOfCursor') {
       const position = mutation.payload
       selectAllItemsRightOfCursor(position)
+    } else if (mutation.type === 'triggerSelectAllItemsLeftOfCursor') {
+      const position = mutation.payload
+      selectAllItemsLeftOfCursor(position)
     }
   })
   window.addEventListener('keyup', handleShortcuts)
@@ -81,9 +87,23 @@ const checkIsCardScope = (event) => {
   const isFromCard = event.target.classList[0] === 'card'
   return isFromCard || isFromCardName
 }
+const checkIsMinimapDialogScope = (event) => {
+  const isFromDialog = event.target.closest('dialog.minimap')
+  return isFromDialog
+}
 const checkIsPanScope = (event) => {
   const isFromDialog = event.target.closest('dialog')
   return !isFromDialog
+}
+const checkIsButtonScope = (event) => {
+  const isFromButton = event.target.closest('button')
+  return isFromButton
+}
+const isCanvasScope = (event) => {
+  const fromDialog = event.target.closest('dialog')
+  if (fromDialog) { return }
+  const tagName = event.target.tagName
+  return tagName === 'CANVAS'
 }
 
 // on key up
@@ -92,6 +112,7 @@ const handleShortcuts = (event) => {
   // console.warn('🎹', key)
   // const isFromCard = event.target.classList[0] === 'card'
   const isSpaceScope = checkIsSpaceScope(event)
+  const isMinimapDialogScope = checkIsMinimapDialogScope(event)
   // ?
   if (key === '?' && isSpaceScope) {
     store.commit('triggerKeyboardShortcutsIsVisible')
@@ -102,6 +123,9 @@ const handleShortcuts = (event) => {
     store.dispatch('currentSpace/addSpace')
     store.commit('addNotification', { message: 'New space created (N)', icon: 'add', type: 'success' })
     store.commit('triggerSpaceDetailsInfoIsVisible')
+  // m
+  } else if (key === 'm' && (isSpaceScope || isMinimapDialogScope)) {
+    store.commit('triggerMinimapIsVisible')
   // t
   } else if (key === 't' && isSpaceScope) {
     store.commit('addNotification', { message: 'Theme toggled (T)', type: 'info' })
@@ -128,14 +152,17 @@ const handleShortcuts = (event) => {
     let value = store.state.currentUser.filterUnchecked
     value = !value
     store.dispatch('currentUser/toggleFilterUnchecked', value)
+  // 4
   } else if (key === '4' && isSpaceScope) {
     let value = store.state.currentUser.filterComments
     value = !value
     store.dispatch('currentUser/toggleFilterComments', value)
+  // ' '
   } else if (key === ' ' && isSpaceScope) {
-    store.commit('currentUserIsPanning', false)
+    store.dispatch('currentUserIsPanning', false)
     store.commit('currentUserIsPanningReady', false)
     spaceKeyIsDown = false
+  // b
   } else if (key === 'b' && isSpaceScope) {
     let cards
     const multipleCardIds = store.state.multipleCardsSelectedIds
@@ -151,6 +178,7 @@ const handleShortcuts = (event) => {
     } else {
       store.dispatch('currentUserToolbar', 'box')
     }
+  // c
   } else if (key === 'c' && isSpaceScope) {
     store.dispatch('currentUserToolbar', 'card')
   }
@@ -228,7 +256,7 @@ const handleMetaKeyShortcuts = (event) => {
   } else if (key === 'z' && isSpaceScope) {
     event.preventDefault()
     store.commit('triggerSpaceZoomOutMax')
-  } else if (key === 'p' && isSpaceScope) {
+  } else if (key === 'p' && isSpaceScope && !isMeta) {
     const value = !store.state.isPresentationMode
     store.commit('isPresentationMode', value)
     event.preventDefault()
@@ -244,11 +272,16 @@ const handleMetaKeyShortcuts = (event) => {
   }
 }
 // on mouse down
+const checkIsOnMinimap = (event) => {
+  return Boolean(event.target.closest('#space-minimap'))
+}
 const handleMouseDownEvents = (event) => {
   const rightMouseButton = 2
   const middleMouseButton = 1
+  const rightAndLeftButtons = 3
   const isRightClick = rightMouseButton === event.button
   const isMiddleClick = middleMouseButton === event.button
+  const isRightAndLeftClick = rightAndLeftButtons === event.buttons
   const isPanScope = checkIsPanScope(event)
   const toolbarIsBox = store.state.currentUserToolbar === 'box'
   const isNotConnecting = !store.state.currentUserIsDrawingConnection
@@ -256,66 +289,73 @@ const handleMouseDownEvents = (event) => {
   const userDisablePan = store.state.currentUser.shouldDisableRightClickToPan
   const shouldPan = (isRightClick || isMiddleClick) && isPanScope && !userDisablePan
   const position = utils.cursorPositionInPage(event)
+  const isButtonScope = checkIsButtonScope(event)
+  const isMinimap = checkIsOnMinimap(event)
+  if (isButtonScope) { return }
+  if (isRightAndLeftClick && isMinimap) {
+    store.commit('shouldCancelNextMouseUpInteraction', true)
+    return
+  }
   if (shouldBoxSelect) {
     event.preventDefault()
     store.commit('currentUserIsBoxSelecting', true)
     store.commit('currentUserBoxSelectMove', position)
     store.commit('currentUserBoxSelectStart', position)
   } else if (shouldPan) {
-    prevRightClickPosition = utils.cursorPositionInPage(event)
+    prevRightClickPosition = utils.cursorPositionInViewport(event)
+    prevRightClickTime = utils.unixTime()
     event.preventDefault()
-    store.commit('currentUserIsPanning', true)
+    if (!isMinimap) {
+      store.dispatch('currentUserIsPanning', true)
+    }
     disableContextMenu = true
   } else if (store.state.currentUserIsPanningReady) {
     event.preventDefault()
-    store.commit('currentUserIsPanning', true)
+    if (!isMinimap) {
+      store.dispatch('currentUserIsPanning', true)
+    }
   }
   if (isRightClick && userDisablePan) {
+    if (!isCanvasScope(event)) { return }
     store.dispatch('triggerSonarPing', event)
   }
 }
 // on mouse move
 const handleMouseMoveEvents = (event) => {
-  const panSpeedIsFast = store.state.currentUser.panSpeedIsFast
-  let speed = 1
-  if (panSpeedIsFast) {
-    speed = 5
-  }
   const position = utils.cursorPositionInPage(event)
   currentCursorPosition = position
   // box selection
   if (store.state.currentUserIsBoxSelecting) {
     store.commit('currentUserBoxSelectMove', position)
-  // panning
-  } else if (store.state.currentUserIsPanning) {
-    event.preventDefault()
-    if (!prevCursorPosition) {
-      prevCursorPosition = position
-    }
-    let delta = {
-      x: Math.round((prevCursorPosition.x - position.x) * speed),
-      y: Math.round((prevCursorPosition.y - position.y) * speed)
-    }
-    window.scrollBy(delta.x, delta.y, 'instant')
   }
 }
 // on mouse up
 // right clicks don't trigger mouse up
-const handleMouseUpEvents = (event) => {
+const handleMouseUpEvents = async (event) => {
+  if (store.state.shouldCancelNextMouseUpInteraction) { return }
   const shouldPan = store.state.currentUserIsPanning
-  const cursorsAreClose = utils.cursorsAreClose(prevRightClickPosition, utils.cursorPositionInPage(event))
-  if (shouldPan && cursorsAreClose && !store.state.multipleSelectedActionsIsVisible) {
-    store.dispatch('triggerSonarPing', event)
-  }
+  // handle outside window
   const isFromOutsideWindow = event.target.nodeType === Node.DOCUMENT_NODE
   let isFromCard
   if (!isFromOutsideWindow) {
-    isFromCard = event.target.closest('article#card')
+    isFromCard = event.target.closest('.card-wrap')
   }
+  // end panning
   const position = utils.cursorPositionInPage(event)
   prevCursorPosition = undefined
-  store.commit('currentUserIsPanning', false)
+  store.dispatch('currentUserIsPanning', false)
   store.commit('currentUserIsBoxSelecting', false)
+
+  // sonar ping
+  await nextTick()
+  const currentPosition = utils.cursorPositionInViewport(event)
+  const currentTime = utils.unixTime()
+  const cursorsAreClose = utils.cursorsAreClose(prevRightClickPosition, currentPosition)
+  const timeDelta = currentTime - prevRightClickTime
+  const timesAreClose = timeDelta < 400 // ms
+  if (shouldPan && cursorsAreClose && timesAreClose && !store.state.multipleSelectedActionsIsVisible) {
+    store.dispatch('triggerSonarPing', event)
+  }
 }
 // on scroll
 const handleScrollEvents = (event) => {
@@ -330,7 +370,7 @@ const handleContextMenuEvents = (event) => {
 }
 
 const scrollIntoView = (card) => {
-  const element = document.querySelector(`article [data-card-id="${card.id}"]`)
+  const element = document.querySelector(`.card-wrap [data-card-id="${card.id}"]`)
   store.commit('scrollElementIntoView', { element })
 }
 
@@ -387,7 +427,8 @@ const addCard = async (options) => {
     backgroundColor = parentCard.backgroundColor
   }
   store.commit('shouldPreventNextEnterKey', true)
-  store.dispatch('currentCards/add', { position, isParentCard, backgroundColor, id: options.id })
+  const newCard = { position, isParentCard, backgroundColor, id: options.id }
+  store.dispatch('currentCards/add', { card: newCard })
   if (childCard) {
     store.commit('childCardId', store.state.cardDetailsIsVisibleForCardId)
     await nextTick()
@@ -423,7 +464,8 @@ const addChildCard = async (options) => {
   const position = nonOverlappingCardPosition(initialPosition)
   const parentCard = store.getters['currentCards/byId'](parentCardId)
   const newChildCardId = options.id || nanoid()
-  store.dispatch('currentCards/add', { position, backgroundColor: parentCard.backgroundColor, id: newChildCardId })
+  const newCard = { position, backgroundColor: parentCard.backgroundColor, id: newChildCardId }
+  store.dispatch('currentCards/add', { card: newCard })
   store.commit('childCardId', store.state.cardDetailsIsVisibleForCardId)
   await nextTick()
   addConnection(baseCardId, position)
@@ -571,7 +613,7 @@ const writeSelectedToClipboard = async (position) => {
   const text = utils.nameStringFromItems(items)
   // clipboard
   try {
-    console.log('🎊 copyData', data, text)
+    console.info('🎊 copyData', data, text)
     await navigator.clipboard.writeText(text)
   } catch (error) {
     console.warn('🚑 writeSelectedToClipboard', error)
@@ -691,9 +733,11 @@ const handlePasteEvent = async (event) => {
   }
   // check read only
   store.dispatch('currentUser/notifyReadOnly', position)
+  const canEditSpace = store.getters['currentUser/canEditSpace']()
+  if (!canEditSpace) { return }
   // get clipboard data
   let data = await getClipboardData()
-  console.log('🎊 pasteData', data, position)
+  console.info('🎊 pasteData', data, position)
   if (!data) { return }
   store.commit('closeAllDialogs')
   store.commit('clearMultipleSelected')
@@ -703,7 +747,7 @@ const handlePasteEvent = async (event) => {
   // add kinopio items
   } else if (data.kinopio) {
     items = utils.updateSpaceItemsAddPosition(data.kinopio, position)
-    items = store.getters['currentSpace/newItems']({ items })
+    items = await store.dispatch('currentSpace/newItems', { items })
     store.dispatch('currentSpace/addItems', items)
     // select new items
     await nextTick()
@@ -724,10 +768,9 @@ const handlePasteEvent = async (event) => {
   afterPaste(items)
 }
 
-// Select All Cards Below Cursor
+// Select Items Relative to cursor
 
 const selectAllItemsBelowCursor = (position) => {
-  const preventMultipleSelectedActionsIsVisible = store.state.preventMultipleSelectedActionsIsVisible
   let zoom
   if (position) {
     zoom = 1
@@ -743,27 +786,27 @@ const selectAllItemsBelowCursor = (position) => {
   let boxes = utils.clone(store.getters['currentBoxes/all'])
   boxes = boxes.filter(box => (box.y * zoom) > position.y)
   const boxIds = boxes.map(box => box.id)
-  const isItemIds = Boolean(cardIds.length || boxIds.length)
-  // select
-  if (isItemIds && preventMultipleSelectedActionsIsVisible) {
-    store.commit('multipleCardsSelectedIds', cardIds)
-    store.commit('multipleBoxesSelectedIds', boxIds)
-  } else if (isItemIds) {
-    store.commit('multipleSelectedActionsPosition', position)
-    store.commit('multipleSelectedActionsIsVisible', true)
-    store.commit('multipleCardsSelectedIds', cardIds)
-    store.commit('multipleBoxesSelectedIds', boxIds)
-  } else {
-    store.commit('multipleSelectedActionsIsVisible', false)
-    store.commit('multipleCardsSelectedIds', [])
-    store.commit('multipleBoxesSelectedIds', [])
-  }
+  selectItemIds({ position, cardIds, boxIds })
 }
-
-// Select All Cards Right Of Cursor
-
+const selectAllItemsAboveCursor = (position) => {
+  let zoom
+  if (position) {
+    zoom = 1
+  } else {
+    // is from keyboard shortcut
+    position = currentCursorPosition
+    zoom = store.getters.spaceZoomDecimal
+  }
+  // cards
+  const cards = store.getters['currentCards/isAboveY'](position.y, zoom)
+  const cardIds = cards.map(card => card.id)
+  // boxes
+  let boxes = utils.clone(store.getters['currentBoxes/all'])
+  boxes = boxes.filter(box => (box.y * zoom) < position.y)
+  const boxIds = boxes.map(box => box.id)
+  selectItemIds({ position, cardIds, boxIds })
+}
 const selectAllItemsRightOfCursor = (position) => {
-  const preventMultipleSelectedActionsIsVisible = store.state.preventMultipleSelectedActionsIsVisible
   let zoom
   if (position) {
     zoom = 1
@@ -781,8 +824,34 @@ const selectAllItemsRightOfCursor = (position) => {
     return (box.x * zoom) >= position.x
   })
   const boxIds = boxes.map(box => box.id)
+  selectItemIds({ position, cardIds, boxIds })
+}
+const selectAllItemsLeftOfCursor = (position) => {
+  let zoom
+  if (position) {
+    zoom = 1
+  } else {
+    // is from keyboard shortcut
+    position = currentCursorPosition
+    zoom = store.getters.spaceZoomDecimal
+  }
+  // cards
+  const cards = store.getters['currentCards/isLeftOfX'](position.x, zoom)
+  const cardIds = cards.map(card => card.id)
+  // boxes
+  let boxes = utils.clone(store.getters['currentBoxes/all'])
+  boxes = boxes.filter(box => {
+    return (box.x * zoom) <= position.x
+  })
+  const boxIds = boxes.map(box => box.id)
+  selectItemIds({ position, cardIds, boxIds })
+}
+
+// Select All Cards, Connections, and Boxes
+
+const selectItemIds = ({ position, cardIds, boxIds }) => {
+  const preventMultipleSelectedActionsIsVisible = store.state.preventMultipleSelectedActionsIsVisible
   const isItemIds = Boolean(cardIds.length || boxIds.length)
-  // select
   if (isItemIds && preventMultipleSelectedActionsIsVisible) {
     store.commit('multipleCardsSelectedIds', cardIds)
     store.commit('multipleBoxesSelectedIds', boxIds)
@@ -797,9 +866,6 @@ const selectAllItemsRightOfCursor = (position) => {
     store.commit('multipleBoxesSelectedIds', [])
   }
 }
-
-// Select All Cards, Connections, and Boxes
-
 const selectAllItems = () => {
   const cardIds = utils.clone(store.state.currentCards.ids)
   const connectionIds = utils.clone(store.state.currentConnections.ids)

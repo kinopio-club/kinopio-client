@@ -63,44 +63,47 @@ onMounted(() => {
     updateNotifications()
   }, 1000 * 60 * 10) // 10 minutes
   unsubscribe = store.subscribe((mutation, state) => {
-    if (mutation.type === 'closeAllDialogs') {
+    const type = mutation.type
+    if (type === 'closeAllDialogs') {
       closeAllDialogs()
-    } else if (mutation.type === 'triggerSpaceDetailsVisible') {
+    } else if (type === 'triggerSpaceDetailsVisible') {
       updateSpaceDetailsIsVisible(true)
-    } else if (mutation.type === 'triggerUpdateHeaderAndFooterPosition') {
+    } else if (type === 'triggerUpdateHeaderAndFooterPosition') {
       updatePosition()
-    } else if (mutation.type === 'triggerSpaceDetailsInfoIsVisible') {
+    } else if (type === 'triggerSpaceDetailsInfoIsVisible') {
       updateSpaceDetailsInfoIsVisible(true)
-    } else if (mutation.type === 'triggerSignUpOrInIsVisible') {
+    } else if (type === 'triggerSignUpOrInIsVisible') {
       updateSignUpOrInIsVisible(true)
-    } else if (mutation.type === 'triggerAppsAndExtensionsIsVisible') {
+    } else if (type === 'triggerAppsAndExtensionsIsVisible') {
       updateAppsAndExtensionsIsVisible(true)
-    } else if (mutation.type === 'triggerKeyboardShortcutsIsVisible') {
+    } else if (type === 'triggerKeyboardShortcutsIsVisible') {
       updateKeyboardShortcutsIsVisible(true)
-    } else if (mutation.type === 'triggerUpgradeUserIsVisible') {
+    } else if (type === 'triggerUpgradeUserIsVisible') {
       updateUpgradeUserIsVisible(true)
-    } else if (mutation.type === 'triggerDonateIsVisible') {
+    } else if (type === 'triggerDonateIsVisible') {
       updateDonateIsVisible(true)
-    } else if (mutation.type === 'currentUserIsPainting') {
+    } else if (type === 'currentUserIsPainting') {
       if (state.currentUserIsPainting) {
         addReadOnlyJiggle()
       }
-    } else if (mutation.type === 'triggerReadOnlyJiggle') {
+    } else if (type === 'triggerReadOnlyJiggle') {
       addReadOnlyJiggle()
-    } else if (mutation.type === 'triggerUpdateNotifications' || mutation.type === 'triggerUserIsLoaded') {
+    } else if (type === 'triggerUpdateNotifications' || type === 'triggerUserIsLoaded') {
       updateNotifications()
-    } else if (mutation.type === 'triggerShowNextSearchCard') {
+    } else if (type === 'triggerShowNextSearchCard') {
       showNextSearchCard()
-    } else if (mutation.type === 'triggerShowPreviousSearchCard') {
+    } else if (type === 'triggerShowPreviousSearchCard') {
       showPreviousSearchCard()
-    } else if (mutation.type === 'triggerHideTouchInterface') {
+    } else if (type === 'triggerHideTouchInterface') {
       hidden()
-    } else if (mutation.type === 'triggerTemplatesIsVisible') {
+    } else if (type === 'triggerTemplatesIsVisible') {
       updateTemplatesIsVisible(true)
-    } else if (mutation.type === 'triggerRemovedIsVisible' || mutation.type === 'triggerAIImagesIsVisible') {
+    } else if (type === 'triggerRemovedIsVisible' || type === 'triggerAIImagesIsVisible') {
       updateSidebarIsVisible(true)
-    } else if (mutation.type === 'triggerImportIsVisible') {
+    } else if (type === 'triggerImportIsVisible') {
       updateImportIsVisible(true)
+    } else if (type === 'triggerClearUserNotifications') {
+      clearNotifications()
     }
   })
 })
@@ -242,15 +245,15 @@ const searchResultsOrFilters = computed(() => {
     return false
   }
 })
-const showCardDetails = (card) => {
-  store.dispatch('currentCards/showCardDetails', card.id)
+const focusOnCard = (card) => {
+  store.dispatch('focusOnCardId', card.id)
   store.commit('previousResultItem', card)
 }
 const showNextSearchCard = () => {
   if (!store.state.search) { return }
   const cards = store.state.searchResultsCards
   if (!store.state.previousResultItem.id) {
-    showCardDetails(cards[0])
+    focusOnCard(cards[0])
     return
   }
   const currentIndex = cards.findIndex(card => card.id === store.state.previousResultItem.id)
@@ -258,13 +261,13 @@ const showNextSearchCard = () => {
   if (cards.length === index) {
     index = 0
   }
-  showCardDetails(cards[index])
+  focusOnCard(cards[index])
 }
 const showPreviousSearchCard = () => {
   if (!store.state.search) { return }
   const cards = store.state.searchResultsCards
   if (!store.state.previousResultItem.id) {
-    showCardDetails(cards[0])
+    focusOnCard(cards[0])
     return
   }
   const currentIndex = cards.findIndex(card => card.id === store.state.previousResultItem.id)
@@ -272,7 +275,7 @@ const showPreviousSearchCard = () => {
   if (index < 0) {
     index = cards.length - 1
   }
-  showCardDetails(cards[index])
+  focusOnCard(cards[index])
 }
 const clearSearchAndFilters = () => {
   store.dispatch('closeAllDialogs')
@@ -541,7 +544,7 @@ const markAllAsRead = () => {
 const markAsRead = (notificationId) => {
   updateNotificationsIsRead([notificationId])
 }
-const updateNotificationsIsRead = (notificationIds) => {
+const updateNotificationsIsRead = async (notificationIds) => {
   if (!notificationIds.length) { return }
   state.notifications = state.notifications.map(notification => {
     if (notificationIds.includes(notification.id)) {
@@ -549,10 +552,13 @@ const updateNotificationsIsRead = (notificationIds) => {
     }
     return notification
   })
-  store.dispatch('api/addToQueue', {
+  await store.dispatch('api/addToQueue', {
     name: 'updateNotificationsIsRead',
     body: notificationIds
   })
+}
+const clearNotifications = () => {
+  state.notifications = []
 }
 </script>
 

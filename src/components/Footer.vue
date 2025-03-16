@@ -5,6 +5,7 @@ import { useStore } from 'vuex'
 import Notifications from '@/components/Notifications.vue'
 import SpaceZoom from '@/components/SpaceZoom.vue'
 import Loader from '@/components/Loader.vue'
+import Minimap from '@/components/dialogs/Minimap.vue'
 import utils from '@/utils.js'
 const store = useStore()
 
@@ -29,6 +30,12 @@ onMounted(() => {
       if (!mutation.payload) {
         store.commit('shouldExplicitlyHideFooter', false)
       }
+    } else if (mutation.type === 'closeAllDialogs') {
+      if (!store.state.minimapIsPinned) {
+        hideMinimap()
+      }
+    } else if (mutation.type === 'triggerMinimapIsVisible') {
+      toggleMinimap()
     }
   })
 })
@@ -40,7 +47,8 @@ onBeforeUnmount(() => {
 
 const state = reactive({
   position: {},
-  isHiddenOnTouch: false
+  isHiddenOnTouch: false,
+  minimapIsVisible: false
 })
 
 const isPinchZooming = computed(() => store.state.isPinchZooming)
@@ -86,6 +94,7 @@ const leftIsVisble = computed(() => {
 })
 const controlsIsVisible = computed(() => {
   // if (isPresentationMode.value) { return }
+  if (store.state.minimapIsPinned) { return true }
   if (shouldExplicitlyHideFooter.value) { return }
   const isTouchDevice = store.state.isTouchDevice
   if (!isTouchDevice) { return true }
@@ -101,6 +110,15 @@ const isPresentationMode = computed(() => store.state.isPresentationMode)
 const togglePresentationMode = () => {
   const value = !isPresentationMode.value
   store.commit('isPresentationMode', value)
+}
+
+// minimap
+
+const hideMinimap = () => {
+  state.minimapIsVisible = false
+}
+const toggleMinimap = () => {
+  state.minimapIsVisible = !state.minimapIsVisible
 }
 
 // hide
@@ -178,6 +196,11 @@ const updatePositionInVisualViewport = () => {
 
   .right(v-if="controlsIsVisible" :class="{'is-embed': isEmbedMode}")
     SpaceZoom(v-if="!isPresentationMode")
+    //- minimap
+    .button-wrap.input-button-wrap.footer-button-wrap(@click.stop="toggleMinimap" @touchend.stop :class="{'hidden': state.isHiddenOnTouch}")
+      button.small-button(:class="{active: state.minimapIsVisible, 'translucent-button': !shouldIncreaseUIContrast}" title="Toggle Minimap (M)")
+        img.icon.minimap(src="@/assets/minimap.svg")
+      Minimap(:visible="state.minimapIsVisible")
     //- presentation mode
     .button-wrap.input-button-wrap.footer-button-wrap(@click="togglePresentationMode" @touchend.stop :class="{'hidden': state.isHiddenOnTouch}")
       button.small-button(:class="{active: isPresentationMode, 'translucent-button': !shouldIncreaseUIContrast}" title="Focus/Presentation Mode (P)")
@@ -238,6 +261,13 @@ const updatePositionInVisualViewport = () => {
     display inline-block
     button
       font-size 1rem
+
+  .footer-button-wrap + .footer-button-wrap
+    margin-left 4px
+
+  .icon.minimap
+    width 13px
+    vertical-align -1px
 
 footer
   .is-mobile-icon

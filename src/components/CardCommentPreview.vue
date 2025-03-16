@@ -53,6 +53,12 @@ const backgroundColorIsDark = computed(() => {
 const normalizedCard = computed(() => {
   let card = utils.clone(props.card)
   card = store.getters['currentCards/nameSegments'](card)
+  card.nameSegments = card.nameSegments.map(segment => {
+    if (segment.isText) {
+      segment.markdown = utils.markdownSegments(segment.content)
+    }
+    return segment
+  })
   return card
 })
 const isStrikeThrough = computed(() => {
@@ -75,7 +81,6 @@ const urlPreviewImage = computed(() => {
     img.card-image(v-if="segment.isImage" :src="segment.url")
     img.card-image(v-if="urlPreviewImage" :src="urlPreviewImage")
     NameSegment(:segment="segment" :isStrikeThrough="isStrikeThrough" :backgroundColorIsDark="backgroundColorIsDark")
-  .bottom-gradient
 </template>
 
 <style lang="stylus">
@@ -88,7 +93,6 @@ const urlPreviewImage = computed(() => {
   z-index var(--max-z)
   border-radius var(--entity-radius)
   pointer-events none
-  max-height 400px
   overflow hidden
   box-shadow var(--hover-shadow)
   .row
@@ -102,13 +106,6 @@ const urlPreviewImage = computed(() => {
   .tag
     display inline-block
     margin 0
-  .bottom-gradient
-    position absolute
-    width 100%
-    left 0
-    bottom 0
-    background linear-gradient(transparent, var(--secondary-hover-background))
-    height 8px
   .card-image
     border-radius var(--entity-radius)
   .name-segment

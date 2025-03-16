@@ -42,6 +42,10 @@ watch(() => props.loading, (value, prevValue) => {
   updateDialogHeight()
 })
 
+watch(() => props.notifications, (value, prevValue) => {
+  state.filteredNotifications = props.notifications
+})
+
 const state = reactive({
   filteredNotifications: null,
   dialogHeight: null
@@ -80,7 +84,7 @@ const showCardDetails = (notification) => {
   let space = utils.clone(notification.space)
   const card = utils.clone(notification.card)
   if (currentSpaceId.value !== space.id) {
-    store.commit('loadSpaceShowDetailsForCardId', card.id)
+    store.commit('loadSpaceFocusOnCardId', card.id)
     store.dispatch('currentSpace/changeSpace', space)
   } else {
     store.dispatch('currentCards/showCardDetails', card.id)
@@ -89,11 +93,11 @@ const showCardDetails = (notification) => {
 }
 const segmentTagColor = (segment) => {
   const spaceTag = store.getters['currentSpace/tagByName'](segment.name)
-  const cachedTag = cache.tagByName(segment.name)
+  const userTag = store.getters['currentUser/tagByName'](segment.name)
   if (spaceTag) {
     return spaceTag.color
-  } else if (cachedTag) {
-    return cachedTag.color
+  } else if (userTag) {
+    return userTag.color
   } else {
     return currentUser.value.color
   }
@@ -142,6 +146,10 @@ const userName = (notification) => {
     return notification.user.name
   }
 }
+const deleteUserNotifications = async () => {
+  store.commit('triggerClearUserNotifications')
+  await store.dispatch('api/deleteAllNotifications')
+}
 
 // actions
 
@@ -162,7 +170,7 @@ const changeSpace = (spaceId) => {
 const isAskToAddToExplore = (notification) => {
   return notification.type === 'askToAddToExplore'
 }
-const updateAddToExplore = (space) => {
+const updateAddToExplore = async (space) => {
   const isCurrentSpace = space.id === store.state.currentSpace.id
   state.filteredNotifications = state.filteredNotifications.map(notification => {
     if (!notification.space) {
@@ -174,7 +182,7 @@ const updateAddToExplore = (space) => {
     return notification
   })
   if (isCurrentSpace) {
-    store.dispatch('currentSpace/updateSpace', { showInExplore: space.showInExplore })
+    await store.dispatch('currentSpace/updateSpace', { showInExplore: space.showInExplore })
   } else {
     space = { id: space.id, showInExplore: space.showInExplore }
     store.dispatch('api/updateSpace', space)
@@ -186,13 +194,20 @@ const updateAddToExplore = (space) => {
 <template lang="pug">
 dialog.narrow.user-notifications(v-if="props.visible" :open="props.visible" ref="dialogElement" :style="{'max-height': state.dialogHeight -50 + 'px'}")
   section
-    p
-      span Notifications
-      Loader(:visible="props.loading")
+    .row.title-row
+      div
+        span Notifications
+        Loader(:visible="props.loading")
+      .button-wrwap
+        button.small-button.remove-button.danger(@click.left.stop="deleteUserNotifications")
+            img.icon(src="@/assets/remove.svg")
+
     OfflineBadge
+
+  section(v-if="!props.loading && !state.filteredNotifications.length")
+    p Cards added to your spaces by collaborators can be found here
+
   section.results-section(v-if="state.filteredNotifications.length" :style="{'max-height': state.dialogHeight + 'px'}")
-    p(v-if="!props.loading && !state.filteredNotifications.length")
-      span Cards added to your spaces by collaborators can be found here
     ul.results-list(v-if="state.filteredNotifications.length")
       template(v-for="notification in state.filteredNotifications")
         a(:href="spaceUrl(notification)")
@@ -271,6 +286,8 @@ dialog.narrow.user-notifications(v-if="props.visible" :open="props.visible" ref=
       border-radius var(--small-entity-radius)
   .row
     margin-top 10px
+    &.title-row
+      margin-top 0
   .card-details
     background-color var(--secondary-background)
     border-radius var(--entity-radius)

@@ -61,6 +61,7 @@
     img.icon(src="@/assets/down-arrow.svg")
     img.icon.duplicate(src="@/assets/duplicate.svg")
     img.icon(src="@/assets/export.svg")
+    img.icon(src="@/assets/emoji.svg")
     img.icon(src="@/assets/file.svg")
     img.icon(src="@/assets/filter.svg")
     img.icon(src="@/assets/flower.svg")
@@ -77,6 +78,7 @@
     img.icon(src="@/assets/key.svg")
     img.icon(src="@/assets/mail.svg")
     img.icon(src="@/assets/magnifying-glass.svg")
+    img.icon(src="@/assets/magnifying-glass-negative.svg")
     img.icon(src="@/assets/marker.svg")
     img.icon(src="@/assets/merge.svg")
     img.icon(src="@/assets/minimap.svg")
@@ -126,6 +128,7 @@
 
     //- font previews
     img(src="https://updates.kinopio.club/font-preview/apris.webp")
+    img(src="https://updates.kinopio.club/font-preview/eiko.webp")
     img(src="https://updates.kinopio.club/font-preview/gaya.webp")
     img(src="https://updates.kinopio.club/font-preview/grotesk-remix.webp")
     img(src="https://updates.kinopio.club/font-preview/gt-america.webp")

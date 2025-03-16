@@ -47,9 +47,12 @@ const loadInboxSpace = () => {
 
 // list cards
 
-const updateInboxCardsLocal = () => {
-  state.cards = cache.getInboxSpace()?.cards
-  sortCards()
+const updateInboxCardsLocal = async () => {
+  const inboxSpace = await cache.getInboxSpace()
+  if (inboxSpace) {
+    state.cards = inboxSpace.cards
+    sortCards()
+  }
 }
 const updateInboxCardsRemote = async () => {
   if (!store.state.isOnline) { return }
@@ -67,7 +70,7 @@ const restoreInboxCards = async () => {
     updateInboxCardsLocal()
     updateInboxCardsRemote()
   } catch (error) {
-    console.error('🚒 restoreInboxCards')
+    console.error('🚒 restoreInboxCards', error)
   }
   state.isLoading = false
 }
@@ -79,9 +82,9 @@ const removeFromCardList = (removedCard) => {
   // update cache
   cache.updateSpace('cards', state.cards, removedCard.spaceId)
 }
-const removeCardFromInbox = (card) => {
-  store.dispatch('api/addToQueue', { name: 'removeCard', body: card, spaceId: card.spaceId })
+const removeCardFromInbox = async (card) => {
   removeFromCardList(card)
+  await store.dispatch('api/addToQueue', { name: 'removeCard', body: card, spaceId: card.spaceId })
 }
 
 // update card
@@ -102,6 +105,7 @@ const selectCard = async (card) => {
   }
   updateCardIsLoading(card)
   const scroll = store.getters.windowScrollWithSpaceOffset()
+  const skipCardDetailsIsVisible = true
   let newCard = utils.clone(card)
   newCard.id = nanoid()
   newCard.spaceId = store.state.currentSpace.id
@@ -109,8 +113,8 @@ const selectCard = async (card) => {
   newCard.y = scroll.y + 120 // matches KeyboardShortcutsHandler.addCard
   const spaceCards = store.getters['currentCards/all']
   newCard = utils.uniqueCardPosition(newCard, spaceCards)
-  store.dispatch('currentCards/add', newCard)
-  store.commit('cardDetailsIsVisibleForCardId', newCard.id)
+  store.dispatch('currentCards/add', { card: newCard, skipCardDetailsIsVisible })
+  store.dispatch('focusOnCardId', newCard.id)
   removeCardFromInbox(card)
 }
 const removeCard = (card) => {

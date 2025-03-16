@@ -10,6 +10,10 @@ import User from '@/components/User.vue'
 
 const store = useStore()
 
+onMounted(() => {
+  store.dispatch('currentUser/restoreUserFavorites')
+})
+
 const props = defineProps({
   visible: Boolean
 })
@@ -117,13 +121,13 @@ const showUserDetails = async (event, user) => {
 const closeDialogs = () => {
   store.commit('userDetailsIsVisible', false)
 }
-const updateFavoriteSpaceIsEdited = () => {
+const updateFavoriteSpaceIsEdited = async () => {
   const spaces = favoriteSpaces.value.filter(space => space.isEdited)
   if (!spaces.length) { return }
   spaces.forEach(space => {
     store.commit('currentUser/updateFavoriteSpaceIsEdited', space.id)
   })
-  store.dispatch('api/addToQueue', {
+  await store.dispatch('api/addToQueue', {
     name: 'updateUserVisitSpaces',
     body: spaces
   })

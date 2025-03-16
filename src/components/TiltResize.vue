@@ -62,6 +62,7 @@ const colorClass = computed(() => {
 // tilt
 
 const tiltIsVisible = computed(() => {
+  if (utils.isMobile()) { return }
   const minCardWidth = consts.defaultCardWidth + 10
   const cardIsWideEnough = props.card.width >= minCardWidth
   return props.visible && cardIsWideEnough

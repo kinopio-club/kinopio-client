@@ -73,14 +73,14 @@ const checkIfShouldPrevent = (event) => {
   // }
   return shouldPrevent
 }
-const toggleShowInExplore = (event) => {
+const toggleShowInExplore = async (event) => {
   store.commit('clearNotificationsWithPosition')
   const shouldPrevent = checkIfShouldPrevent(event)
   if (shouldPrevent) { return }
   if (props.space) {
     emitUpdateShowInExplore()
   } else {
-    updateShowInExplore()
+    await updateShowInExplore()
   }
   notifyShowInExplore(event)
   store.dispatch('currentSpace/createSpacePreviewImage')
@@ -99,23 +99,23 @@ const emitUpdateShowInExplore = () => {
   space.showInExplore = !space.showInExplore
   emit('updateAddToExplore', space)
 }
-const updateShowInExplore = () => {
-  updateSpacePrivacy()
+const updateShowInExplore = async () => {
+  await updateSpacePrivacy()
   const shouldShow = !showInExplore.value
-  store.dispatch('currentSpace/updateSpace', { showInExplore: shouldShow })
+  await store.dispatch('currentSpace/updateSpace', { showInExplore: shouldShow })
   emit('updateLocalSpaces')
 }
-const updateSpacePrivacy = () => {
+const updateSpacePrivacy = async () => {
   const shouldShow = !showInExplore.value
   const currentPrivacy = store.state.currentSpace.privacy
   if (shouldShow) {
     prevPrivacy = currentPrivacy
     if (currentPrivacy === 'private') {
-      store.dispatch('currentSpace/updateSpace', { privacy: 'closed' })
+      await store.dispatch('currentSpace/updateSpace', { privacy: 'closed' })
     }
   } else {
     prevPrivacy = prevPrivacy || 'closed'
-    store.dispatch('currentSpace/updateSpace', { privacy: prevPrivacy })
+    await store.dispatch('currentSpace/updateSpace', { privacy: prevPrivacy })
   }
 }
 const triggerSignUpOrInIsVisible = () => {

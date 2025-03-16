@@ -3,6 +3,7 @@ import { reactive, computed, onMounted, onBeforeUnmount, onUnmounted, defineProp
 import { useStore } from 'vuex'
 
 import UserTemplateSpaceList from '@/components/UserTemplateSpaceList.vue'
+import UserSettingsNewSpaces from '@/components/subsections/UserSettingsNewSpaces.vue'
 import Loader from '@/components/Loader.vue'
 import utils from '@/utils.js'
 import cache from '@/cache.js'
@@ -40,12 +41,14 @@ const state = reactive({
   urlIsCopied: false,
   dialogHeight: null,
   hasInboxSpace: true,
-  templatesIsLoading: true
+  templatesIsLoading: true,
+  settingsIsVisible: false
 })
 
 const currentUserId = computed(() => store.state.currentUser.id)
 const closeAll = () => {
   state.urlIsCopied = false
+  state.settingsIsVisible = false
 }
 
 // styles
@@ -62,9 +65,10 @@ const shouldHideFooter = (value) => {
 
 // space
 
-const addSpace = () => {
+const addSpace = async () => {
   store.commit('isLoadingSpace', true)
-  const noUserSpaces = !cache.getAllSpaces().length
+  const cachedSpaces = await cache.getAllSpaces()
+  const noUserSpaces = !cachedSpaces.length
   window.scrollTo(0, 0)
   if (noUserSpaces) {
     window.location.href = '/'
@@ -74,19 +78,51 @@ const addSpace = () => {
   }
   if (props.shouldAddSpaceDirectly) {
     store.dispatch('closeAllDialogs')
-    store.dispatch('currentSpace/addSpace')
+    await store.dispatch('currentSpace/addSpace')
     store.commit('triggerSpaceDetailsInfoIsVisible')
   }
   store.dispatch('analytics/event', 'addSpaceButtons')
 }
-const addInboxSpace = () => {
+const addInboxSpace = async () => {
   store.commit('isLoadingSpace', true)
   store.dispatch('closeAllDialogs')
   window.scrollTo(0, 0)
-  store.dispatch('currentSpace/addInboxSpace')
+  await store.dispatch('currentSpace/addInboxSpace')
 }
-const duplicateSpace = () => {
-  store.dispatch('currentSpace/duplicateSpace')
+
+// duplicate space
+
+const duplicateCurrentSpace = async () => {
+  await store.dispatch('currentSpace/duplicateSpace')
+}
+const duplicateSpace = async (space) => {
+  emit('closeDialogs')
+  store.commit('closeAllDialogs')
+  try {
+    store.commit('notifyIsDuplicatingSpace', true)
+    // get space
+    const cachedSpace = await cache.space(space.id)
+    const remoteSpace = await store.dispatch('currentSpace/getRemoteSpace', space)
+    const spaceToDuplicate = remoteSpace || cachedSpace
+    // dupelicate
+    await store.dispatch('currentSpace/duplicateSpace', spaceToDuplicate)
+    // show space details info
+    store.commit('triggerSpaceDetailsInfoIsVisible')
+    await nextTick()
+    store.commit('triggerFocusSpaceDetailsName')
+  } catch (error) {
+    console.error('🚒 duplicateSpace', error)
+    store.commit('addNotification', { message: '(シ_ _)シ Something went wrong duplicating space, Please try again or contact support', type: 'danger' })
+  }
+  store.commit('notifyIsDuplicatingSpace', false)
+}
+
+// new space settings
+
+const toggleSettingsIsVisible = () => {
+  const value = state.settingsIsVisible
+  closeAll()
+  state.settingsIsVisible = !value
 }
 
 // inbox space
@@ -119,12 +155,15 @@ dialog.add-space.narrow(
 )
   section
     .row
-      //- Add Space
-      .segmented-buttons
-        button.success(@click="addSpace")
-          img.icon(src="@/assets/add.svg")
-          span New Space
-
+      //- New Space
+      button.success(@click="addSpace")
+        img.icon(src="@/assets/add.svg")
+        span New Space
+      button(@click.stop="toggleSettingsIsVisible" :class="{ active: state.settingsIsVisible }")
+        img.icon.settings(src="@/assets/settings.svg")
+    //- new space settings
+    section.subsection(v-if="state.settingsIsVisible")
+      UserSettingsNewSpaces
   //- Inbox
   section(v-if="!state.hasInboxSpace")
     button(@click="addInboxSpace")
@@ -133,7 +172,11 @@ dialog.add-space.narrow(
       span Inbox
     p For collecting ideas to figure out later
   //- Templates
-  UserTemplateSpaceList(@updateDialogHeight="updateDialogHeight" @isLoading="updateTemplatesIsLoading")
+  UserTemplateSpaceList(
+    @updateDialogHeight="updateDialogHeight"
+    @isLoading="updateTemplatesIsLoading"
+    @selectSpace="duplicateSpace"
+  )
   //- Import
   section
     .row
@@ -142,7 +185,7 @@ dialog.add-space.narrow(
         button(@click="triggerImportIsVisible") Import
       //- Duplicate
       .button-wrap
-        button(@click.left="duplicateSpace" title="Duplicate this Space")
+        button(@click.left="duplicateCurrentSpace" title="Duplicate this Space")
           img.icon.duplicate(src="@/assets/duplicate.svg")
           span Duplicate
 </template>

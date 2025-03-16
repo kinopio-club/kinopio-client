@@ -80,15 +80,14 @@ const updateChangelog = async () => {
     if (!posts) { return }
     posts = posts.slice(0, 20)
     store.commit('changelog', posts)
-    cache.updatePrevChangelogId(posts[0].id)
     checkChangelogIsUpdated()
   } catch (error) {
     console.error('🚒 updateChangelog', error)
   }
 }
-const checkChangelogIsUpdated = () => {
+const checkChangelogIsUpdated = async () => {
   const newId = changelog.value[0].id
-  const prevId = cache.prevReadChangelogId()
+  const prevId = await cache.prevReadChangelogId()
   if (!prevId) {
     // first time visitors are updated to latest changelog
     cache.updatePrevReadChangelogId(newId)
@@ -199,8 +198,20 @@ dialog.about.narrow(v-if="visible" :open="visible" @click.left="closeDialogs" re
   section
     .row
       p 100% funded and made possible by people like you
+      //- The best way to support Kinopio is by spreading the word
     .row
       AboutMe
+    //- .row
+    //-   .button-wrap
+    //-     a(href="https://kinopio.club/blog")
+    //-       button
+    //-         span Help Spread the Word →
+    .row
+      .button-wrap(v-if="!isSecureAppContextIOS")
+        button(@click.left.stop="triggerDonateIsVisible")
+          img.icon(src="@/assets/heart-empty.svg")
+          span Donate
+  section
     .row
       .button-wrap
         a(href="https://kinopio.club/discord")
@@ -212,15 +223,6 @@ dialog.about.narrow(v-if="visible" :open="visible" @click.left="closeDialogs" re
           button
             span Forum{{' '}}
             img.icon.visit(src="@/assets/visit.svg")
-    .row
-      //- .button-wrap
-      //-   a(href="https://kinopio.club/blog")
-      //-     button
-      //-       span Blog →
-      .button-wrap(v-if="!isSecureAppContextIOS")
-        button(@click.left.stop="triggerDonateIsVisible")
-          img.icon(src="@/assets/heart-empty.svg")
-          span Donate
 </template>
 
 <style lang="stylus">

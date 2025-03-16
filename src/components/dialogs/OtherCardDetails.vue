@@ -93,19 +93,19 @@ const showCardDetails = () => {
 // edit card
 
 const maxCardCharacterLimit = () => { return consts.defaultCharacterLimit }
-const updateName = (newName) => {
+const updateName = async (newName) => {
   const spaceId = otherCard.value.spaceId
   const card = { id: otherCard.value.id, name: newName }
   // update local
   store.commit('updateCardNameInOtherItems', card)
   store.commit('triggerUpdateOtherCard', card.id)
   updateOtherNameInCurrentSpace({ card, spaceId })
-  // update remote
-  store.dispatch('api/addToQueue', { name: 'updateCard', body: card, spaceId })
   // update input
   textareaStyles()
   updateErrorMaxCharacterLimit(newName)
   store.dispatch('currentCards/updateDimensions', { cards: [card] })
+  // update remote
+  await store.dispatch('api/addToQueue', { name: 'updateCard', body: card, spaceId })
 }
 const updateOtherNameInCurrentSpace = ({ card, spaceId }) => {
   const currentSpaceId = store.state.currentSpace.id
@@ -122,7 +122,7 @@ const updateErrorMaxCharacterLimit = (newName) => {
 
 const selectCard = (card) => {
   store.dispatch('closeAllDialogs')
-  store.dispatch('currentCards/showCardDetails', card.id)
+  store.dispatch('focusOnCardId', card.id)
 }
 const changeSpace = (spaceId) => {
   if (store.state.currentSpace.id === spaceId) { return }
@@ -135,11 +135,10 @@ const selectSpaceCard = () => {
   if (isCardInCurrentSpace) {
     selectCard(otherCard.value)
   } else {
-    store.commit('loadSpaceShowDetailsForCardId', otherCard.value.id)
+    store.commit('loadSpaceFocusOnCardId', otherCard.value.id)
     changeSpace(otherCard.value.spaceId)
   }
 }
-
 </script>
 
 <template lang="pug">

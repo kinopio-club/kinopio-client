@@ -184,7 +184,7 @@ export default {
       await this.importSpace(space)
     },
     async importSpace (space) {
-      console.log('🌳 importSpace', space)
+      console.info('🌳 importSpace', space)
       try {
         cache.saveSpace(space)
         await this.$store.dispatch('api/createSpace', space)
@@ -199,7 +199,7 @@ export default {
       let card = { id: nanoid() }
       const type = block.class
       const title = block.title
-      console.log('**', block, type)
+      console.info('**', block, type)
       if (type === 'Link') {
         let url = block.image.display.url
         if (!utils.urlIsImage(url)) {

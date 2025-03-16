@@ -67,6 +67,7 @@ export default {
     },
     resizeWhileDragging: (state, { boxes, shouldSnapToGrid }) => {
       boxes.forEach(box => {
+        // box
         const element = utils.boxElementFromId(box.id)
         if (!element) { return }
         if (element.dataset.isVisibleInViewport === 'false') { return }
@@ -79,10 +80,26 @@ export default {
         }
         element.dataset.resizeWidth = box.resizeWidth
         element.dataset.resizeHeight = box.resizeHeight
+        element.dataset.infoWidth = box.infoWidth
+        element.dataset.infoHeight = box.infoHeight
+        // box background
+        const background = element.dataset.background
+        if (!element.dataset.background) { return }
+        const backgroundElement = utils.boxBackgroundElementFromId(box.id)
+        if (shouldSnapToGrid) {
+          backgroundElement.style.width = utils.roundToNearest(box.resizeWidth) + 'px'
+          backgroundElement.style.height = utils.roundToNearest(box.resizeHeight) + 'px'
+        } else {
+          backgroundElement.style.width = box.resizeWidth + 'px'
+          backgroundElement.style.height = box.resizeHeight + 'px'
+        }
+        backgroundElement.dataset.resizeWidth = box.resizeWidth
+        backgroundElement.dataset.resizeHeight = box.resizeHeight
       })
     },
     moveWhileDragging: (state, { boxes }) => {
       boxes.forEach(box => {
+        // box
         const element = document.querySelector(`.box[data-box-id="${box.id}"]`)
         if (!element) { return }
         if (element.dataset.isVisibleInViewport !== 'false') {
@@ -91,6 +108,16 @@ export default {
         }
         element.dataset.x = box.x
         element.dataset.y = box.y
+        // box background
+        const background = element.dataset.background
+        if (!element.dataset.background) { return }
+        const backgroundElement = utils.boxBackgroundElementFromId(box.id)
+        if (element.dataset.isVisibleInViewport !== 'false') {
+          backgroundElement.style.left = box.x + 'px'
+          backgroundElement.style.top = box.y + 'px'
+        }
+        backgroundElement.dataset.x = box.x
+        backgroundElement.dataset.y = box.y
       })
     },
 
@@ -149,7 +176,7 @@ export default {
 
     // create
 
-    add: (context, { box, shouldResize }) => {
+    add: async (context, { box, shouldResize }) => {
       const count = context.state.ids.length
       const minBoxSize = consts.minBoxSize
       const isThemeDark = context.rootState.currentUser.theme === 'dark'
@@ -171,23 +198,23 @@ export default {
       }
       context.dispatch('history/add', { boxes: [box] }, { root: true })
       context.commit('create', box)
-      context.dispatch('api/addToQueue', { name: 'createBox', body: box }, { root: true })
       context.dispatch('broadcast/update', { updates: box, type: 'createBox', handler: 'currentBoxes/create' }, { root: true })
       if (shouldResize) {
         context.dispatch('history/pause', null, { root: true })
         context.commit('currentUserIsResizingBox', true, { root: true })
         context.commit('currentUserIsResizingBoxIds', [box.id], { root: true })
       }
+      await context.dispatch('api/addToQueue', { name: 'createBox', body: box }, { root: true })
     },
 
     // update
 
-    update: (context, box) => {
+    update: async (context, box) => {
+      context.dispatch('broadcast/update', { updates: box, type: 'updateBox', handler: 'currentBoxes/update' }, { root: true })
       context.dispatch('history/add', { boxes: [box] }, { root: true })
       context.commit('update', box)
-      context.dispatch('api/addToQueue', { name: 'updateBox', body: box }, { root: true })
-      context.dispatch('broadcast/update', { updates: box, type: 'updateBox', handler: 'currentBoxes/update' }, { root: true })
       const keys = Object.keys(box)
+      delete box.userId
       const shouldUpdatePathsKeys = ['x', 'resizeWidth']
       let shouldUpdatePaths = keys.find(key => shouldUpdatePathsKeys.includes(key))
       if (shouldUpdatePaths) {
@@ -195,6 +222,8 @@ export default {
           context.dispatch('currentConnections/updatePaths', { itemId: box.id }, { root: true })
         })
       }
+      await cache.updateSpace('editedAt', utils.unixTime(), currentSpaceId)
+      await context.dispatch('api/addToQueue', { name: 'updateBox', body: box }, { root: true })
     },
     updateName (context, { box, newName }) {
       const canEditBox = context.rootGetters['currentUser/canEditBox'](box)
@@ -204,7 +233,7 @@ export default {
         name: newName
       })
     },
-    updateMultiple: (context, boxes) => {
+    updateMultiple: async (context, boxes) => {
       const spaceId = context.rootState.currentSpace.id
       let updates = {
         boxes,
@@ -214,13 +243,13 @@ export default {
         delete box.userId
         return box
       })
-      context.dispatch('api/addToQueue', { name: 'updateMultipleBoxes', body: updates }, { root: true })
       context.dispatch('history/add', { boxes }, { root: true })
       boxes.forEach(box => {
         context.dispatch('broadcast/update', { updates: box, type: 'updateBox', handler: 'currentBoxes/update' }, { root: true })
         context.commit('update', box)
       })
       cache.updateSpace('editedByUserId', context.rootState.currentUser.id, currentSpaceId)
+      await context.dispatch('api/addToQueue', { name: 'updateMultipleBoxes', body: updates }, { root: true })
     },
 
     // checkboxes
@@ -266,7 +295,8 @@ export default {
         let height = rect.height
         width = width + delta.x
         height = height + delta.y
-        const box = { id: boxId, resizeWidth: width, resizeHeight: height }
+        const { infoWidth, infoHeight } = utils.boxInfoPositionFromId(boxId)
+        const box = { id: boxId, resizeWidth: width, resizeHeight: height, infoWidth, infoHeight }
         boxes.push(box)
         connections = connections.concat(context.rootGetters['currentConnections/byItemId'](box.id))
         context.commit('currentUserIsResizingBox', true, { root: true })
@@ -279,18 +309,14 @@ export default {
 
     // dimensions
 
-    updateInfoDimensions: (context, { boxes }) => {
+    updateInfoDimensions: async (context, { boxes }) => {
       boxes = boxes || utils.clone(context.getters.all)
-      boxes.forEach(box => {
+      for (const box of boxes) {
         const prevDimensions = {
           infoWidth: box.infoWidth,
           infoHeight: box.infoHeight
         }
-        const element = document.querySelector(`.box-info[data-box-id="${box.id}"]`)
-        if (!element) { return }
-        const DOMRect = element.getBoundingClientRect()
-        const infoWidth = Math.round(DOMRect.width + 4)
-        const infoHeight = Math.round(DOMRect.height)
+        const { infoWidth, infoHeight } = utils.boxInfoPositionFromId(box.id)
         const dimensionsChanged = infoWidth !== prevDimensions.infoWidth || infoHeight !== prevDimensions.infoHeight
         const body = {
           id: box.id,
@@ -299,8 +325,11 @@ export default {
         }
         if (!dimensionsChanged) { return }
         context.commit('update', body)
-        context.dispatch('api/addToQueue', { name: 'updateBox', body }, { root: true })
-      })
+        await context.dispatch('api/addToQueue', { name: 'updateBox', body }, { root: true })
+        nextTick(() => {
+          context.dispatch('currentConnections/updatePaths', { itemId: box.id }, { root: true })
+        })
+      }
     },
 
     // snapping
@@ -489,7 +518,6 @@ export default {
       }
       let boxes = context.getters.isSelected
       if (!boxes.length) { return }
-      boxes = boxes.filter(box => !box.isLocked)
       boxes = boxes.filter(box => context.rootGetters['currentUser/canEditBox'](box))
       // prevent boxes bunching up at 0
       let connections = []
@@ -536,11 +564,6 @@ export default {
           height: box.resizeHeight,
           id: box.id
         }
-        if (context.rootState.shouldSnapToGrid) {
-          const snapPosition = utils.cursorPositionSnapToGrid(box)
-          box.x = snapPosition.x
-          box.y = snapPosition.y
-        }
         prevMovePositions[box.id] = box
         return box
       })
@@ -554,10 +577,12 @@ export default {
     afterMove: (context) => {
       prevMovePositions = {}
       const currentDraggingBoxId = context.rootState.currentDraggingBoxId
+      const currentDraggingBox = context.getters.byId(currentDraggingBoxId)
       const spaceId = context.rootState.currentSpace.id
       let boxIds = context.getters.isSelectedIds
       boxIds = boxIds.filter(box => Boolean(box))
       if (!boxIds.length) { return }
+      // boxes
       let boxes = boxIds.map(id => {
         let box = context.getters.byId(id)
         if (!box) { return }
@@ -572,6 +597,7 @@ export default {
       boxes = boxes.filter(box => Boolean(box))
       context.commit('move', { boxes, spaceId })
       boxes = boxes.filter(box => box)
+      // update
       context.dispatch('updateMultiple', boxes)
       const box = context.getters.byId(currentDraggingBoxId)
       context.dispatch('checkIfItemShouldIncreasePageSize', box, { root: true })
@@ -585,11 +611,11 @@ export default {
 
     // remove
 
-    remove: (context, box) => {
-      context.dispatch('api/addToQueue', { name: 'removeBox', body: box }, { root: true })
+    remove: async (context, box) => {
       context.dispatch('broadcast/update', { updates: box, type: 'removeBox', handler: 'currentBoxes/remove' }, { root: true })
       context.commit('remove', box)
       context.dispatch('history/add', { boxes: [box], isRemoved: true }, { root: true })
+      await context.dispatch('api/addToQueue', { name: 'removeBox', body: box }, { root: true })
     }
   },
   getters: {

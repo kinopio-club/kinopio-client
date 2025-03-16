@@ -7,7 +7,7 @@ export default {
     send: async (context, body) => {
       if (!context.getters.shouldSend) { return }
       context.dispatch('api/sendAnalyticsEvent', body, { root: true })
-      console.log('👻 analytics event:', body.name)
+      console.info('👻 analytics event:', body.name)
     },
     event: (context, eventName) => {
       utils.typeCheck({ value: eventName, type: 'string' })

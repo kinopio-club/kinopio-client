@@ -23,7 +23,8 @@ const positionStyles = computed(() => {
   const x = props.box.x + width - buttonWidth
   return {
     left: x + 'px',
-    top: props.box.y + 'px'
+    top: props.box.y + 'px',
+    zIndex: props.box.z
   }
 })
 const backgroundStyles = computed(() => {
@@ -37,8 +38,20 @@ const backgroundColorIsDark = computed(() => {
   return utils.colorIsDark(color)
 })
 const isThemeDark = computed(() => store.state.currentUser.theme === 'dark')
-const isDarkInLightTheme = computed(() => backgroundColorIsDark.value && !isThemeDark.value)
-const isLightInDarkTheme = computed(() => !backgroundColorIsDark.value && isThemeDark.value)
+const isDarkInLightTheme = computed(() => {
+  if (props.box.fill === 'empty') {
+    return isThemeDark.value
+  } else {
+    return backgroundColorIsDark.value && !isThemeDark.value
+  }
+})
+const isLightInDarkTheme = computed(() => {
+  if (props.box.fill === 'empty') {
+    return !isThemeDark.value
+  } else {
+    return !backgroundColorIsDark.value && isThemeDark.value
+  }
+})
 
 // unlock
 

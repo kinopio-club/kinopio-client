@@ -2,6 +2,8 @@
 import { reactive, computed, onMounted, onBeforeUnmount, defineProps, defineEmits, watch, ref, nextTick } from 'vue'
 import { useStore } from 'vuex'
 
+import utils from '@/utils.js'
+
 import { nanoid } from 'nanoid'
 const store = useStore()
 
@@ -15,35 +17,80 @@ let controlPointOddY = lineMaxHeight / 2
 const centerLineY = lineMaxHeight / 2
 let isReverse = false
 
+let unsubscribe
+
 onMounted(() => {
-  store.subscribe((mutation, state) => {
+  unsubscribe = store.subscribe((mutation, state) => {
     if (mutation.type === 'triggerUpdateRemoteDropGuideLine') {
       let update = mutation.payload
       update.startPoint = updateRemotePosition(update.startPoint)
       update.curve = createCurve(update.startPoint)
       addRemoteCurve(update)
       remotePainting()
-    }
-    if (mutation.type === 'triggerUpdateStopRemoteUserDropGuideLine') {
+    } else if (mutation.type === 'triggerUpdateStopRemoteUserDropGuideLine') {
       removeRemoteFramesByUser(mutation.payload.userId)
       remoteContext.clearRect(0, 0, remoteCanvas.width, remoteCanvas.height)
+    } else if (mutation.type === 'triggerUploadComplete') {
+      removeUploadIsDraggedOver()
     }
   })
   canvas = document.getElementById('drop-guide-line')
   remoteCanvas = document.getElementById('remote-drop-guide-line')
   context = canvas.getContext('2d')
   remoteContext = remoteCanvas.getContext('2d')
+  // drag over
+  window.addEventListener('dragenter', checkIfUploadIsDraggedOver)
+  window.addEventListener('dragover', checkIfUploadIsDraggedOver)
+  window.addEventListener('dragleave', removeUploadIsDraggedOver)
+  window.addEventListener('dragend', removeUploadIsDraggedOver)
+  window.addEventListener('drop', addCardsAndUploadFiles)
+})
+onBeforeUnmount(() => {
+  unsubscribe()
+  window.removeEventListener('dragenter', checkIfUploadIsDraggedOver)
+  window.removeEventListener('dragover', checkIfUploadIsDraggedOver)
+  window.removeEventListener('dragleave', removeUploadIsDraggedOver)
+  window.removeEventListener('dragend', removeUploadIsDraggedOver)
+  window.removeEventListener('drop', addCardsAndUploadFiles)
 })
 
 const props = defineProps({
-  currentCursor: Object,
-  currentCursorInSpace: Object,
-  uploadIsDraggedOver: Boolean,
   viewportWidth: Number,
   viewportHeight: Number
 })
 
+const state = reactive({
+  uploadIsDraggedOver: false,
+  currentCursorInSpace: {}
+})
+
 const currentUserColor = computed(() => store.state.currentUser.color)
+
+// Upload Files
+
+const checkIfUploadIsDraggedOver = (event) => {
+  event.preventDefault()
+  const uploadIsFiles = event.dataTransfer.types.find(type => type === 'Files')
+  if (!event.dataTransfer) { return }
+  if (!uploadIsFiles) { return }
+  state.currentCursor = utils.cursorPositionInViewport(event)
+  state.currentCursorInSpace = utils.cursorPositionInSpace(event)
+  state.uploadIsDraggedOver = true
+}
+const removeUploadIsDraggedOver = () => {
+  state.uploadIsDraggedOver = false
+}
+const addCardsAndUploadFiles = (event) => {
+  event.preventDefault()
+  event.stopPropagation()
+  let files = event.dataTransfer.files
+  files = Array.from(files)
+  removeUploadIsDraggedOver()
+  store.dispatch('upload/addCardsAndUploadFiles', {
+    files,
+    event
+  })
+}
 
 // curve
 
@@ -144,7 +191,7 @@ const remotePaintGuidesFrame = () => {
 
 // Painting
 
-watch(() => props.uploadIsDraggedOver, (value, prevValue) => {
+watch(() => state.uploadIsDraggedOver, (value, prevValue) => {
   if (value) {
     startPaintingGuides()
   } else {
@@ -158,16 +205,16 @@ const paintGuides = () => {
   context.lineCap = 'round'
   // paint curve
   let startPoint = {
-    x: props.currentCursor.x,
-    y: props.currentCursor.y
+    x: state.currentCursor.x,
+    y: state.currentCursor.y
   }
   let curve = createCurve(startPoint)
   paintCurve(context, curve)
   // broadcast curve
   const scroll = { x: window.scrollX, y: window.scrollY }
   startPoint = {
-    x: props.currentCursor.x + scroll.x,
-    y: props.currentCursor.y + scroll.y
+    x: state.currentCursor.x + scroll.x,
+    y: state.currentCursor.y + scroll.y
   }
   broadcastCursorAndCurve({ startPoint, color: currentUserColor.value })
   if (paintingGuidesTimer) {
@@ -191,8 +238,8 @@ const broadcastCursorAndCurve = ({ startPoint, color }) => {
   const canEditSpace = store.getters['currentUser/canEditSpace']()
   if (!canEditSpace) { return }
   let updates = {}
-  updates.x = props.currentCursorInSpace.x
-  updates.y = props.currentCursorInSpace.y
+  updates.x = state.currentCursorInSpace.x
+  updates.y = state.currentCursorInSpace.y
   updates.color = color
   updates.userId = store.state.currentUser.id
   store.commit('broadcast/update', { updates, type: 'updateRemoteUserCursor', handler: 'triggerUpdateRemoteUserCursor' })
@@ -206,10 +253,12 @@ const broadcastStopPaintingGuide = () => {
   store.commit('broadcast/update', { updates, type: 'updateStopRemoteUserDropGuideLine', handler: 'triggerUpdateStopRemoteUserDropGuideLine' })
 }
 
+const isMobile = computed(() => utils.isMobile())
+
 </script>
 
 <template lang="pug">
-aside
+template(v-if="!isMobile")
   canvas#drop-guide-line.drop-guide-line(
     :width="props.viewportWidth"
     :height="props.viewportHeight"

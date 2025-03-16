@@ -191,15 +191,15 @@ const signUp = async (event) => {
   if (isSuccess(response)) {
     store.commit('clearAllNotifications')
     store.commit('currentUser/replaceState', newUser)
-    backupLocalSpaces()
-    migrationSpacesConnections()
-    updateSpacesUserId()
+    await backupLocalSpaces()
+    await migrationSpacesConnections()
+    await updateSpacesUserId()
     updateCurrentSpaceWithNewUserId(currentUser, newUser)
     await store.dispatch('api/createSpaces')
     notifySignedIn()
     notifyIsJoiningGroup()
     store.dispatch('currentUser/checkIfShouldJoinGroup')
-    addCollaboratorToInvitedSpaces()
+    await addCollaboratorToInvitedSpaces()
     store.commit('triggerUpdateWindowHistory')
     store.dispatch('themes/restore')
   } else {
@@ -223,27 +223,28 @@ const signIn = async (event) => {
     store.commit('addNotification', { message: 'Signing In…' })
     // update user to remote user
     store.commit('currentUser/updateUser', result)
+    await store.dispatch('currentUser/restoreRemoteUser', result)
     // update local spaces to remote user
-    removeUneditedSpace('Hello Kinopio')
-    removeUneditedSpace('Inbox')
-    migrationSpacesConnections()
-    updateSpacesUserId()
+    await removeUneditedSpace('Hello Kinopio')
+    await removeUneditedSpace('Inbox')
+    await migrationSpacesConnections()
+    await updateSpacesUserId()
     await store.dispatch('api/createSpaces')
     notifySignedIn()
     notifyIsJoiningGroup()
     store.dispatch('currentUser/checkIfShouldJoinGroup')
     // add new spaces from remote
     const spaces = await store.dispatch('api/getUserSpaces')
-    cache.addSpaces(spaces)
+    await cache.addSpaces(spaces)
     store.commit('clearAllNotifications')
-    addCollaboratorToInvitedSpaces()
+    await addCollaboratorToInvitedSpaces()
     store.commit('triggerSpaceDetailsVisible')
     store.commit('isLoadingFavorites', true)
     store.dispatch('currentUser/restoreUserFavorites')
     store.commit('triggerUpdateNotifications')
     store.dispatch('themes/restore')
     if (shouldLoadLastSpace) {
-      store.dispatch('currentSpace/loadLastSpace')
+      await store.dispatch('currentSpace/loadLastSpace')
       store.commit('triggerUpdateWindowHistory')
     }
     store.commit('isLoadingSpace', false)
@@ -263,6 +264,7 @@ const notifySignedIn = () => {
   store.dispatch('closeAllDialogs')
   store.commit('removeNotificationByMessage', 'Signing In…')
   store.commit('addNotification', { message: 'Signed In', type: 'success' })
+  store.commit('currentUserIsInvitedButCannotEditCurrentSpace', false)
 }
 const notifyIsJoiningGroup = () => {
   if (!store.state.shouldNotifyIsJoiningGroup) { return }
@@ -271,12 +273,12 @@ const notifyIsJoiningGroup = () => {
 
 // update spaces on success
 
-const backupLocalSpaces = () => {
-  const spaces = cache.getAllSpaces()
-  cache.storeLocal('spacesBackup', spaces)
+const backupLocalSpaces = async () => {
+  const spaces = await cache.getAllSpaces()
+  await cache.storeLocal('spacesBackup', spaces)
 }
-const migrationSpacesConnections = () => {
-  const spaces = cache.getAllSpaces()
+const migrationSpacesConnections = async () => {
+  const spaces = await cache.getAllSpaces()
   const newSpaces = spaces.map(space => {
     space.connections = utils.migrationConnections(space.connections)
     return space
@@ -285,13 +287,13 @@ const migrationSpacesConnections = () => {
     cache.saveSpace(space)
   })
 }
-const updateSpacesUserId = () => {
+const updateSpacesUserId = async () => {
   const userId = store.state.currentUser.id
-  const spaces = cache.getAllSpaces()
+  const spaces = await cache.getAllSpaces()
   const newSpaces = utils.updateSpacesUserId(userId, spaces)
-  newSpaces.forEach(space => {
-    cache.saveSpace(space)
-  })
+  for (const space of newSpaces) {
+    await cache.saveSpace(space)
+  }
 }
 const updateCurrentSpaceWithNewUserId = (previousUser, newUser) => {
   const currentSpace = store.state.currentSpace
@@ -300,8 +302,10 @@ const updateCurrentSpaceWithNewUserId = (previousUser, newUser) => {
   store.commit('currentSpace/removeUserFromSpace', previousUser)
   store.commit('currentSpace/addUserToSpace', newUser)
 }
-const removeUneditedSpace = (spaceName) => {
-  let currentSpace = cache.getSpaceByName(spaceName)
+const removeUneditedSpace = async (spaceName) => {
+  let currentSpace = await cache.getSpaceByName(spaceName)
+  let isInvitedSpaces = await cache.invitedSpaces()
+  isInvitedSpaces = Boolean(isInvitedSpaces.length)
   let space
   if (spaceName === 'Hello Kinopio') {
     space = helloSpace
@@ -311,22 +315,28 @@ const removeUneditedSpace = (spaceName) => {
   const cardNames = space.cards.map(card => card.name)
   let spaceIsEdited
   currentSpace?.cards.forEach(card => {
+    if (!card.name.trim()) { return }
     const cardIsNew = !cardNames.includes(card.name)
     if (cardIsNew) {
       spaceIsEdited = true
     }
   })
   if (!spaceIsEdited) {
-    console.log('signIn removeUneditedSpace', spaceName)
-    cache.deleteSpace(currentSpace)
-    shouldLoadLastSpace = true
+    console.info('🌹 signIn removeUneditedSpace', spaceName)
+    await cache.deleteSpace(currentSpace)
+    if (!isInvitedSpaces) {
+      shouldLoadLastSpace = true
+    }
+  } else {
+    console.info('🌹 signIn removeUneditedSpace isEdited: keep space', spaceName, spaceIsEdited, cardNames, currentSpace?.cards)
   }
 }
 
 // update user on success
 
-const addCollaboratorToCurrentSpace = () => {
-  const invitedSpaceIds = cache.invitedSpaces().map(space => space?.id)
+const addCollaboratorToCurrentSpace = async () => {
+  const invitedSpaces = await cache.invitedSpaces()
+  const invitedSpaceIds = invitedSpaces.map(space => space?.id)
   const currentSpace = store.state.currentSpace
   const currentUser = store.state.currentUser
   if (invitedSpaceIds.includes(currentSpace?.id)) {
@@ -335,14 +345,14 @@ const addCollaboratorToCurrentSpace = () => {
     store.commit('broadcast/joinSpaceRoom')
   }
 }
-const addCollaboratorToInvitedSpaces = () => {
-  let invitedSpaces = cache.invitedSpaces()
+const addCollaboratorToInvitedSpaces = async () => {
+  let invitedSpaces = await cache.invitedSpaces()
   invitedSpaces = invitedSpaces.map(space => {
     space.userId = store.state.currentUser.id
     return space
   })
-  store.dispatch('api/addToQueue', { name: 'addCollaboratorToSpaces', body: invitedSpaces })
-  addCollaboratorToCurrentSpace()
+  await addCollaboratorToCurrentSpace()
+  await store.dispatch('api/addToQueue', { name: 'addCollaboratorToSpaces', body: invitedSpaces })
 }
 </script>
 

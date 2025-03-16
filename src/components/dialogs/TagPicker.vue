@@ -98,7 +98,7 @@ const filteredTags = computed(() => {
 const updateTags = async () => {
   const spaceTags = store.getters['currentSpace/spaceTags']
   state.tags = spaceTags || []
-  const cachedTags = cache.allTags()
+  const cachedTags = await cache.allTags()
   const mergedTags = utils.mergeArrays({ previous: spaceTags, updated: cachedTags, key: 'name' })
   state.tags = mergedTags
   await updateRemoteTags()
@@ -201,7 +201,7 @@ const triggerPickerSelect = () => {
   }
   const currentIndex = tags.findIndex(tag => tag.name === state.focusOnName)
   const currentTag = tags[currentIndex]
-  console.log('🎹 triggerPickerSelect', {
+  console.info('🎹 triggerPickerSelect', {
     search: props.search,
     focusOnName: state.focusOnName,
     currentTag,

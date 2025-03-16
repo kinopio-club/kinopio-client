@@ -13,7 +13,10 @@ import GroupLabel from '@/components/GroupLabel.vue'
 import Loader from '@/components/Loader.vue'
 
 import dayjs from 'dayjs'
+
 const store = useStore()
+
+let unsubscribe
 
 let checkIfShouldNotifySpaceOutOfSyncIntervalTimer
 
@@ -23,7 +26,7 @@ const templateElement = ref(null)
 
 onMounted(() => {
   update()
-  store.subscribe((mutation, state) => {
+  unsubscribe = store.subscribe((mutation, state) => {
     if (mutation.type === 'addNotification') {
       update()
     } else if (mutation.type === 'currentUserIsPainting') {
@@ -50,6 +53,7 @@ onBeforeUnmount(() => {
   window.removeEventListener('visibilitychange', updatePageVisibilityChange)
   window.removeEventListener('focus', updatePageVisibilityChangeOnFocus)
   clearInterval(checkIfShouldNotifySpaceOutOfSyncIntervalTimer)
+  unsubscribe()
 })
 
 const state = reactive({
@@ -88,6 +92,7 @@ const cardsCreatedCountFromLimit = computed(() => {
   return Math.max(cardsCreatedLimit - cardsCreatedCount, 0)
 })
 const currentSpaceIsTemplate = computed(() => {
+  if (store.state.isLoadingSpace) { return }
   const currentSpace = store.state.currentSpace
   if (currentSpace.isTemplate) { return true }
   const templateSpaceIds = templates.spaces().map(space => space.id)
@@ -110,7 +115,7 @@ const checkIfShouldNotifySpaceOutOfSync = async () => {
   if (document.visibilityState !== 'visible') { return }
   if (state.notifySpaceOutOfSync) { return }
   if (store.state.isLoadingSpace) { return }
-  console.log('☎️ checkIfShouldNotifySpaceOutOfSync…')
+  console.info('☎️ checkIfShouldNotifySpaceOutOfSync…')
   try {
     if (!currentUserIsSignedIn.value) { return }
     store.commit('isLoadingSpace', true)
@@ -118,17 +123,17 @@ const checkIfShouldNotifySpaceOutOfSync = async () => {
     store.commit('isLoadingSpace', false)
     if (!remoteSpace) { return }
     const space = store.state.currentSpace
-    const spaceUpdatedAt = dayjs(space.updatedAt)
-    const remoteSpaceUpdatedAt = dayjs(remoteSpace.updatedAt)
-    const deltaMinutes = spaceUpdatedAt.diff(remoteSpaceUpdatedAt, 'minute')
-    const updatedAtIsChanged = deltaMinutes >= 1
-    // console.log('☎️ checkIfShouldNotifySpaceOutOfSync result', {
-    //   updatedAtIsChanged,
-    //   spaceUpdatedAt: spaceUpdatedAt.fromNow(),
-    //   remoteSpaceUpdatedAt: remoteSpaceUpdatedAt.fromNow(),
-    //   deltaMinutes
-    // })
-    if (updatedAtIsChanged) {
+    const spaceeditedAt = dayjs(space.editedAt)
+    const remoteSpaceeditedAt = dayjs(remoteSpace.editedAt)
+    const deltaMinutes = spaceeditedAt.diff(remoteSpaceeditedAt, 'minute')
+    const editedAtIsChanged = deltaMinutes >= 1
+    console.info('☎️ checkIfShouldNotifySpaceOutOfSync result', {
+      editedAtIsChanged,
+      spaceeditedAt: spaceeditedAt.fromNow(),
+      remoteSpaceeditedAt: remoteSpaceeditedAt.fromNow(),
+      deltaMinutes
+    })
+    if (editedAtIsChanged) {
       state.notifySpaceOutOfSync = true
     }
   } catch (error) {
@@ -150,7 +155,9 @@ const notifyServerCouldNotSave = computed(() => {
   return store.state.notifyServerCouldNotSave
 })
 const notifySpaceIsRemoved = computed(() => store.state.notifySpaceIsRemoved)
-const notifySignUpToEditSpace = computed(() => store.state.notifySignUpToEditSpace)
+const notifySignUpToEditSpace = computed(() => {
+  return store.state.notifySignUpToEditSpace || store.state.currentUserIsInvitedButCannotEditCurrentSpace
+})
 const notifyCardsCreatedIsNearLimit = computed(() => store.state.notifyCardsCreatedIsNearLimit)
 const notifyCardsCreatedIsOverLimit = computed(() => store.state.notifyCardsCreatedIsOverLimit)
 const notifyMoveOrCopyToSpace = computed(() => store.state.notifyMoveOrCopyToSpace)
@@ -159,9 +166,10 @@ const notifySpaceIsHidden = computed(() => store.state.notifySpaceIsHidden)
 const notifyCurrentSpaceIsNowRemoved = computed(() => store.state.notifyCurrentSpaceIsNowRemoved)
 const notifyThanksForDonating = computed(() => store.state.notifyThanksForDonating)
 const notifyThanksForUpgrading = computed(() => store.state.notifyThanksForUpgrading)
-const notifySpaceIsUnavailableOffline = computed(() => store.getters['currentSpace/isUnavailableOffline'])
+const notifySpaceIsUnavailableOffline = computed(() => store.state.currentSpaceIsUnavailableOffline)
 const notifyIsJoiningGroup = computed(() => store.state.notifyIsJoiningGroup)
 const notifySignUpToJoinGroup = computed(() => store.state.notifySignUpToJoinGroup)
+const notifyIsDuplicatingSpace = computed(() => store.state.notifyIsDuplicatingSpace)
 const notifificationClasses = (item) => {
   let classes = {
     'danger': item.type === 'danger',
@@ -230,11 +238,12 @@ const restoreSpace = () => {
   store.dispatch('currentSpace/restoreRemovedSpace', space)
   store.commit('notifySpaceIsRemoved', false)
 }
-const deleteSpace = () => {
+const deleteSpace = async () => {
   const space = store.state.currentSpace
   store.dispatch('currentSpace/deleteSpace', space)
   store.commit('notifySpaceIsRemoved', false)
-  const firstSpace = cache.getAllSpaces()[0]
+  const cachedSpaces = await cache.getAllSpaces()
+  const firstSpace = cachedSpaces[0]
   store.dispatch('currentSpace/loadSpace', { space: firstSpace })
 }
 const resetNotifySpaceIsHidden = () => {
@@ -273,8 +282,8 @@ const updateChangelogAndRefreshBrowser = () => {
   cache.updatePrevReadChangelogId(latestChangelogPost.value.id)
   refreshBrowser()
 }
-const duplicateSpace = () => {
-  store.dispatch('currentSpace/duplicateSpace')
+const duplicateSpace = async () => {
+  await store.dispatch('currentSpace/duplicateSpace')
 }
 const changeSpace = (spaceId) => {
   const space = { id: spaceId }
@@ -352,7 +361,7 @@ aside.notifications(@click.left="closeAllDialogs")
 
   .persistent-item.info(v-if="snapToGridIsVisible")
     img.icon(src="@/assets/constrain-axis.svg")
-    span Box select, snap to grid
+    span Snap to grid
 
   .persistent-item.success(v-if="notifyThanksForDonating")
     p Thank you for being a
@@ -453,8 +462,7 @@ aside.notifications(@click.left="closeAllDialogs")
 
   .persistent-item.danger(v-if="notifyServerCouldNotSave")
     p
-      Loader(:visible="true" :isSmall="true")
-      span Error saving changes to server, retrying…
+      span Error saving changes to server
     .row
       .button-wrap
         button(@click.left="refreshBrowser")
@@ -487,6 +495,11 @@ aside.notifications(@click.left="closeAllDialogs")
         span Space is unavailable offline.
     .row
       p Only spaces that you're a member of, and have visited recently, are available offline
+
+  .persistent-item.info(v-if="notifyIsDuplicatingSpace")
+    p
+      Loader(:visible="true" :isSmall="true")
+      span Duplicating Space…
 
   //- group
 

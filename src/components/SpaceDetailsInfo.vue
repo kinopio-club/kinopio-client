@@ -167,33 +167,29 @@ const toggleSpaceNameDate = async () => {
   }, 20) // focus after all closeDialog events
 }
 
-// show in explore
-
-const showInExplore = computed(() => store.state.currentSpace.showInExplore)
-const dialogIsPinned = computed(() => store.state.spaceDetailsIsPinned)
-
 // template
 
-const toggleCurrentSpaceIsUserTemplate = () => {
+const toggleCurrentSpaceIsUserTemplate = async () => {
   const value = !currentSpaceIsUserTemplate.value
-  store.dispatch('currentSpace/updateSpace', { isTemplate: value })
+  await store.dispatch('currentSpace/updateSpace', { isTemplate: value })
   updateLocalSpaces()
 }
 
 // duplicate
 
-const duplicateSpace = () => {
-  store.dispatch('currentSpace/duplicateSpace')
+const duplicateSpace = async () => {
+  await store.dispatch('currentSpace/duplicateSpace')
   updateLocalSpaces()
 }
 
 // hide
 
-const toggleHideSpace = () => {
+const toggleHideSpace = async () => {
   const value = !props.currentSpaceIsHidden
-  store.dispatch('currentSpace/updateSpace', { isHidden: value })
-  updateLocalSpaces()
+  const currentSpaceId = store.state.currentSpace.id
+  await store.dispatch('currentSpace/updateSpaceIsHidden', { spaceId: currentSpaceId, isHidden: value })
   store.commit('notifySpaceIsHidden', value)
+  updateLocalSpaces()
 }
 
 // remove
@@ -208,12 +204,13 @@ const removeCurrentSpace = async () => {
     store.commit('notifyCurrentSpaceIsNowRemoved', true)
   }
   emit('removeSpaceId', currentSpaceId)
-  changeToPrevSpace()
+  await changeToPrevSpace()
   await nextTick()
   updateLocalSpaces()
 }
-const changeToPrevSpace = () => {
-  let spaces = cache.getAllSpaces().filter(space => {
+const changeToPrevSpace = async () => {
+  const cachedSpaces = await cache.getAllSpaces()
+  let spaces = cachedSpaces.filter(space => {
     return store.getters['currentUser/canEditSpace'](space)
   })
   spaces = spaces.filter(space => space.id !== currentSpace.value.id)
@@ -229,6 +226,7 @@ const changeToPrevSpace = () => {
 
 // dialog
 
+const dialogIsPinned = computed(() => store.state.spaceDetailsIsPinned)
 const updateDialogHeight = () => {
   emit('updateDialogHeight')
 }
@@ -287,14 +285,15 @@ const currentUserIsGroupAdmin = (group) => {
     groupId: group.id
   })
 }
-const toggleSpaceGroup = (group) => {
+const toggleSpaceGroup = async (group) => {
   clearErrors()
   const shouldRemoveSpaceGroup = currentSpace.value.groupId === group.id
   if (shouldRemoveSpaceGroup) {
-    removeSpaceGroup(group)
+    await removeSpaceGroup(group)
   } else {
-    updateSpaceGroup(group)
+    await updateSpaceGroup(group)
   }
+  updateLocalSpaces()
 }
 const updateSpaceGroup = (group) => {
   const isSpaceCreator = currentUserIsSpaceCreator.value
@@ -333,9 +332,9 @@ const removeSpaceGroup = (group) => {
         .badge.info
           Loader(:visible="true")
           span {{remotePendingUpload.percentComplete}}%
-      BackgroundPicker(:visible="state.backgroundIsVisible" @updateLocalSpaces="updateLocalSpaces")
+      BackgroundPicker(:visible="state.backgroundIsVisible" :space="currentSpace" @updateLocalSpaces="updateLocalSpaces")
     //- Name
-    .textarea-wrap(:class="{'full-width': props.shouldHidePin && !state.textareaIsFocused, 'space-is-hidden': props.currentSpaceIsHidden}")
+    .textarea-wrap(:class="{'full-width': props.shouldHidePin && !state.textareaIsFocused }")
       textarea.name(
         :readonly="!isSpaceMember"
         ref="nameElement"
@@ -408,9 +407,8 @@ template(v-if="isSpaceMember")
 //- Space Settings
 template(v-if="state.settingsIsVisible")
   section.subsection.space-settings
-    .row(v-if="!isSpaceMember && !showInExplore")
+    .row
       AskToAddToExplore
-    .row(v-if="isSpaceMember")
       AddToExplore
     .row
       //- Import / Export
