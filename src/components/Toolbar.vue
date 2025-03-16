@@ -7,6 +7,8 @@ const props = defineProps({
   visible: Boolean
 })
 
+const shouldIncreaseUIContrast = computed(() => store.state.currentUser.shouldIncreaseUIContrast)
+
 const currentUserToolbar = computed(() => store.state.currentUserToolbar)
 watch(() => currentUserToolbar.value, (value, prevValue) => {
   if (value) {
@@ -19,40 +21,50 @@ const currentUserToolbarIsBox = computed(() => {
   if (store.state.currentUserIsResizingBox) { return }
   return currentUserToolbar.value === 'box'
 })
-const boxBadgeLabel = computed(() => {
-  let label = 'Draw Box (B)'
-  return label
+const currentUserToolbarIsDrawing = computed(() => {
+  return currentUserToolbar.value === 'drawing'
 })
+
 const toggleToolbar = (value) => {
-  const initialValue = 'card'
-  const shouldToggleOffBox = value === 'box' && currentUserToolbarIsBox.value
-  if (shouldToggleOffBox) {
-    store.dispatch('currentUserToolbar', initialValue)
+  if (value === currentUserToolbar.value) {
+    store.dispatch('currentUserToolbar', 'card')
   } else {
     store.dispatch('currentUserToolbar', value)
   }
 }
-const shouldIncreaseUIContrast = computed(() => store.state.currentUser.shouldIncreaseUIContrast)
 </script>
 
 <template lang="pug">
-nav.toolbar(v-if="visible")
+nav#toolbar.toolbar(v-if="visible")
+  //- active labels
+  .label-badge.toolbar-badge-wrap.jiggle.label-badge-box(v-if="currentUserToolbarIsBox")
+    span Draw Box (B)
+  .label-badge.toolbar-badge-wrap.jiggle(v-if="currentUserToolbarIsDrawing")
+    span Drawing (D)
+
   //- Box
   .segmented-buttons
-    button(
-      :title="boxBadgeLabel"
-      :class="{ active: currentUserToolbarIsBox, 'translucent-button': !shouldIncreaseUIContrast }"
-      @click="toggleToolbar('box')"
-    )
-      img.icon.box-icon(src="@/assets/box.svg")
-      .label-badge.toolbar-badge-wrap.jiggle(v-if="currentUserToolbarIsBox")
-        span {{boxBadgeLabel}}
-    button
-      span A
+    .button-wrap
+      button(
+        title="Draw Box (B)"
+        :class="{ active: currentUserToolbarIsBox, 'translucent-button': !shouldIncreaseUIContrast }"
+        @click="toggleToolbar('box')"
+      )
+        img.icon.box-icon(src="@/assets/box.svg")
+
+    //- Drawing
+    .button-wrap
+      button(
+        title="Drawing (D)"
+        :class="{ active: currentUserToolbarIsDrawing, 'translucent-button': !shouldIncreaseUIContrast }"
+        @click="toggleToolbar('drawing')"
+      )
+        span A
+
 </template>
 
 <style lang="stylus">
-.toolbar
+nav.toolbar
   position absolute
   top 55px
   .toolbar-badge-wrap
@@ -62,26 +74,32 @@ nav.toolbar(v-if="visible")
     bottom -8px
     left 5px
     z-index 1
-    width 77px
+    width fit-content
     span
       width 100%
       color var(--primary)
   .segmented-buttons
     display flex
     flex-flow column
-    > button
-      border-radius 0
-      width 32px
+    > .button-wrap
+      button
+        border-radius 0
+        width 32px
+        z-index -1
       &:first-child
-        border-radius 0
-        border-top-left-radius var(--entity-radius)
-        border-top-right-radius var(--entity-radius)
+        button
+          border-radius 0
+          border-top-left-radius var(--entity-radius)
+          border-top-right-radius var(--entity-radius)
       &:last-child
-        border-radius 0
-        border-bottom-left-radius var(--entity-radius)
-        border-bottom-right-radius var(--entity-radius)
-    > button + button
+        button
+          border-radius 0
+          border-bottom-left-radius var(--entity-radius)
+          border-bottom-right-radius var(--entity-radius)
+    > .button-wrap + .button-wrap
       margin 0
       margin-top -1px
 
+  .label-badge-box
+    top 24px
 </style>
