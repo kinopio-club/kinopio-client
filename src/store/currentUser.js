@@ -82,7 +82,11 @@ const initialState = {
 
   // user tags
 
-  tags: []
+  tags: [],
+
+  // drawing
+
+  drawingColor: undefined
 }
 
 export default {
@@ -391,6 +395,11 @@ export default {
     tags: (state, value) => {
       utils.typeCheck({ value, type: 'array' })
       state.tags = value
+    },
+    drawingColor: (state, value) => {
+      utils.typeCheck({ value, type: 'string' })
+      state.drawingColor = value
+      cache.updateUser('drawingColor', value)
     }
   },
   actions: {

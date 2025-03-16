@@ -2,7 +2,7 @@
 import { reactive, computed, onMounted, onBeforeUnmount, defineProps, defineEmits, watch, ref, nextTick } from 'vue'
 import { useStore } from 'vuex'
 
-// import utils from '@/utils.js'
+import ColorPicker from '@/components/dialogs/ColorPicker.vue'
 
 const store = useStore()
 
@@ -32,12 +32,16 @@ const toggleColorPickerIsVisible = () => {
   state.colorPickerIsVisible = value
 }
 const drawingColor = computed(() => {
-  return store.state.currentUser.color
+  return store.state.currentUser.drawingColor || store.state.currentUser.color
 })
+const updateDrawingColor = (value) => {
+  store.commit('currentUser/drawingColor', value)
+}
 </script>
 
 <template lang="pug">
 .drawing-toolbar(v-if="props.visible")
+  ColorPicker(:currentColor="drawingColor" :visible="state.colorPickerIsVisible" @selectedColor="updateDrawingColor")
   .segmented-buttons
     button.change-color(
       title="Color (C)"
@@ -58,6 +62,6 @@ const drawingColor = computed(() => {
   top 29px
   left 36px
   display block
-  dialog.brush-size-picker
+  dialog.color-picker
     top 23px
 </style>
