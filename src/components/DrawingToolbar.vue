@@ -3,7 +3,6 @@ import { reactive, computed, onMounted, onBeforeUnmount, defineProps, defineEmit
 import { useStore } from 'vuex'
 
 // import utils from '@/utils.js'
-import BrushSizePicker from '@/components/dialogs/BrushSizePicker.vue'
 
 const store = useStore()
 
@@ -19,38 +18,19 @@ const props = defineProps({
   visible: Boolean
 })
 const state = reactive({
-  brushSizePickerIsVisible: false,
   colorPickerIsVisible: false,
   eraserIsActive: false
 })
 
 const shouldIncreaseUIContrast = computed(() => store.state.currentUser.shouldIncreaseUIContrast)
 const closeAllDialogs = () => {
-  state.brushSizePickerIsVisible = false
   state.colorPickerIsVisible = false
 }
-const toggleBrushSizePickerIsVisible = () => {
-  const value = !state.brushSizePickerIsVisible
-  closeAllDialogs()
-  state.brushSizePickerIsVisible = value
-}
-const updateBrushSize = (value) => {
-  store.commit('currentUser/drawingBrushSize', value)
-}
-const currentBrushSize = computed(() => store.state.currentUser.drawingBrushSize)
 </script>
 
 <template lang="pug">
 .drawing-toolbar(v-if="props.visible")
-  BrushSizePicker(:visible="state.brushSizePickerIsVisible" @updateBrushSize="updateBrushSize" :currentBrushSize="currentBrushSize")
   .segmented-buttons
-    button(
-      title="Size (S)"
-      :class="{ active: state.brushSizePickerIsVisible, 'translucent-button': !shouldIncreaseUIContrast }"
-      @click.left="toggleBrushSizePickerIsVisible"
-    )
-      span.badge.info {{currentBrushSize.toUpperCase()}}
-      span S
     button(
       title="Color (C)"
       :class="{ active: state.colorPickerIsVisible, 'translucent-button': !shouldIncreaseUIContrast }"

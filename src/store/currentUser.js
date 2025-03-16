@@ -82,10 +82,7 @@ const initialState = {
 
   // user tags
 
-  tags: [],
-
-  // drawing
-  drawingBrushSize: 'm'
+  tags: []
 }
 
 export default {
@@ -394,11 +391,6 @@ export default {
     tags: (state, value) => {
       utils.typeCheck({ value, type: 'array' })
       state.tags = value
-    },
-    drawingBrushSize: (state, value) => {
-      utils.typeCheck({ value, type: 'string' })
-      state.drawingBrushSize = value
-      cache.updateUser('drawingBrushSize', value)
     }
   },
   actions: {
