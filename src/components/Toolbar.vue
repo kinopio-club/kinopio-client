@@ -1,6 +1,8 @@
 <script setup>
 import { reactive, computed, onMounted, onUnmounted, defineProps, defineEmits, watch, ref, nextTick } from 'vue'
 import { useStore } from 'vuex'
+
+import DrawingToolbar from '@/components/DrawingToolbar.vue'
 const store = useStore()
 
 const props = defineProps({
@@ -60,6 +62,7 @@ nav#toolbar.toolbar(v-if="visible")
         @click="toggleToolbar('drawing')"
       )
         span A
+      DrawingToolbar(:visible="true")
 
 </template>
 
