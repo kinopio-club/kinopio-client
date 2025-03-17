@@ -144,50 +144,12 @@ const updateMetaThemeColor = (color) => {
   metaThemeColor.setAttribute('content', color)
   postMessage.send({ name: 'setBackgroundColor', value: color })
 }
-
-const toolbarIsDrawing = computed(() => store.state.currentUserToolbar === 'drawing')
-const drawingCursorStyles = (styles) => {
-  if (!toolbarIsDrawing.value) { return }
-  let diameter = store.state.currentUser.drawingBrushSize
-  diameter = consts.drawingBrushSizeDiameter[diameter]
-  const strokeWidth = 1
-  const radius = diameter / 2
-  let svg
-  // eraser cursor
-  if (store.state.drawingEraserIsActive) {
-    const crossScale = 0.25
-    const crossSize = diameter * crossScale // Adjust cross size relative to circle size
-    const crossOffset = (diameter - crossSize) / 2 // center the ✕
-    const color = utils.cssVariable('primary')
-    svg = `
-      <svg xmlns='http://www.w3.org/2000/svg' width='${diameter}' height='${diameter}' viewBox='0 0 ${diameter} ${diameter}'>
-        <circle cx='${radius}' cy='${radius}' r='${radius - 2}' fill='none' stroke='${color}' stroke-width='${strokeWidth}'/>
-        <line x1='${crossOffset}' y1='${crossOffset}' x2='${crossOffset + crossSize}' y2='${crossOffset + crossSize}' stroke='${color}' stroke-width='${strokeWidth}'/>
-        <line x1='${crossOffset + crossSize}' y1='${crossOffset}' x2='${crossOffset}' y2='${crossOffset + crossSize}' stroke='${color}' stroke-width='${strokeWidth}'/>
-      </svg>`
-    styles.mixBlendMode = 'difference'
-  // drawing cursor
-  } else {
-    const color = store.getters['currentUser/drawingColor']
-    svg = `
-      <svg xmlns='http://www.w3.org/2000/svg' width='${diameter}' height='${diameter}' viewBox='0 0 ${diameter} ${diameter}'>
-        <circle cx='${radius}' cy='${radius}' r='${radius - 2}' fill='none' stroke='${color}' stroke-width='${strokeWidth}'/>
-      </svg>
-    `
-  }
-  const dataUri = `data:image/svg+xml;charset=utf8,${encodeURIComponent(svg)}`
-  styles.cursor = `url("${dataUri}") ${radius} ${radius}, auto`
-  return styles
-}
 const styles = computed(() => {
   const canvasSize = 10
   const widthScale = store.state.viewportWidth / canvasSize
   const heightScale = store.state.viewportHeight / canvasSize
   const scale = Math.max(widthScale, heightScale)
   let styles = { transform: `scale(${scale})` }
-  if (toolbarIsDrawing.value) {
-    styles = drawingCursorStyles(styles)
-  }
   return styles
 })
 </script>
