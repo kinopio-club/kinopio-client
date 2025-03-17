@@ -78,6 +78,11 @@ export default {
       return false
     }
   },
+  drawingBrushSizeDiameter: {
+    'l': 40,
+    'm': 20,
+    's': 10
+  },
 
   // about
 

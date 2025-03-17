@@ -86,6 +86,7 @@ const initialState = {
 
   // drawing
 
+  drawingBrushSize: 'm',
   drawingColor: undefined
 }
 
@@ -400,6 +401,11 @@ export default {
       utils.typeCheck({ value, type: 'string' })
       state.drawingColor = value
       cache.updateUser('drawingColor', value)
+    },
+    drawingBrushSize: (state, value) => {
+      utils.typeCheck({ value, type: 'string' })
+      state.drawingBrushSize = value
+      cache.updateUser('drawingBrushSize', value)
     }
   },
   actions: {
