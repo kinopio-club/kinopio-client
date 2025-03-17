@@ -7,10 +7,27 @@ import consts from '@/consts.js'
 
 const store = useStore()
 
+let isDrawing
+
+onMounted(() => {
+  window.addEventListener('pointerup', endDrawing)
+})
+onBeforeUnmount(() => {
+  window.removeEventListener('pointerup', endDrawing)
+})
+
 const viewportHeight = computed(() => store.state.viewportHeight)
 const viewportWidth = computed(() => store.state.viewportWidth)
 
 const toolbarIsDrawing = computed(() => store.state.currentUserToolbar === 'drawing')
+
+const preventTouchScrolling = (event) => {
+  if (toolbarIsDrawing.value) {
+    event.preventDefault()
+  }
+}
+
+// styles
 
 const drawingCursorStyles = (styles) => {
   if (!toolbarIsDrawing.value) { return }
@@ -44,7 +61,6 @@ const drawingCursorStyles = (styles) => {
   styles.cursor = `url("${dataUri}") ${radius} ${radius}, auto`
   return styles
 }
-
 const styles = computed(() => {
   let styles = {}
   if (toolbarIsDrawing.value) {
@@ -55,6 +71,19 @@ const styles = computed(() => {
   return styles
 })
 
+// drawing
+
+const startDrawing = (event) => {
+  isDrawing = true
+  console.log('💐')
+}
+const draw = (event) => {
+  console.log('💐💐', isDrawing)
+}
+const endDrawing = (event) => {
+  console.log('💐💐💐')
+  isDrawing = false
+}
 </script>
 
 <template lang="pug">
@@ -62,6 +91,9 @@ canvas#drawing-canvas(
   :width="viewportWidth"
   :height="viewportHeight"
   :style="styles"
+  @touchmove="preventTouchScrolling"
+  @pointerdown="startDrawing"
+  @pointermove="draw"
 )
 </template>
 
