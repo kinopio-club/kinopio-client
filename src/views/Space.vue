@@ -19,7 +19,7 @@ import ItemUnlockButtons from '@/components/ItemUnlockButtons.vue'
 import SnapGuideLines from '@/components/SnapGuideLines.vue'
 
 import Header from '@/components/Header.vue'
-import MainCanvas from '@/components/layers/MainCanvas.vue'
+import PaintSelectCanvas from '@/components/layers/PaintSelectCanvas.vue'
 import SonarPing from '@/components/layers/SonarPing.vue'
 import UserLabelCursor from '@/components/UserLabelCursor.vue'
 import Footer from '@/components/Footer.vue'
@@ -679,7 +679,7 @@ main#space.space(
   BoxSelecting
   SnapGuideLines
 aside
-  MainCanvas
+  PaintSelectCanvas
   SonarPing
 //- page ui, dialogs
 Header
