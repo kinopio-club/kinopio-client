@@ -20,15 +20,13 @@ const props = defineProps({
 })
 const state = reactive({
   brushSizePickerIsVisible: false,
-  colorPickerIsVisible: false,
-  eraserIsActive: false
+  colorPickerIsVisible: false
 })
 
 const shouldIncreaseUIContrast = computed(() => store.state.currentUser.shouldIncreaseUIContrast)
 const closeAllDialogs = () => {
   state.brushSizePickerIsVisible = false
   state.colorPickerIsVisible = false
-  state.eraserIsActive = false
 }
 
 // color
@@ -59,10 +57,11 @@ const currentBrushSize = computed(() => store.state.currentUser.drawingBrushSize
 
 // eraser
 
+const drawingEraserIsActive = computed(() => store.state.drawingEraserIsActive)
 const toggleEraser = () => {
-  const value = !state.eraserIsActive
+  const value = !drawingEraserIsActive.value
   closeAllDialogs()
-  state.eraserIsActive = value
+  store.commit('drawingEraserIsActive', value)
 }
 </script>
 
@@ -90,7 +89,7 @@ const toggleEraser = () => {
     //- eraser
     button(
       title="Eraser (E)"
-      :class="{ active: state.eraserIsActive, 'translucent-button': !shouldIncreaseUIContrast }"
+      :class="{ active: drawingEraserIsActive, 'translucent-button': !shouldIncreaseUIContrast }"
       @click.left="toggleEraser"
     )
       img.icon.eraser-icon(src="@/assets/eraser.svg")

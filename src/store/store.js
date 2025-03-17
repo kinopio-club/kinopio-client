@@ -103,6 +103,7 @@ const store = createStore({
     currentUserIsPanningReady: false,
     currentUserIsPanning: false,
     currentUserToolbar: 'card', // card, box
+    drawingEraserIsActive: false,
     currentUserIsDraggingConnectionIdLabel: '',
     clipboardData: {}, // for kinopio data pasting
     shouldCancelNextMouseUpInteraction: false,
@@ -958,6 +959,10 @@ const store = createStore({
     currentUserToolbar: (state, value) => {
       utils.typeCheck({ value, type: 'string' })
       state.currentUserToolbar = value
+      state.drawingEraserIsActive = false
+    },
+    drawingEraserIsActive: (state, value) => {
+      state.drawingEraserIsActive = value
     },
 
     // Dragging
