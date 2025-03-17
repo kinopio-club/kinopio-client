@@ -4,6 +4,7 @@ import { useStore } from 'vuex'
 
 import postMessage from '@/postMessage.js'
 import utils from '@/utils.js'
+import consts from '@/consts.js'
 
 import { colord, extend } from 'colord'
 import mixPlugin from 'colord/plugins/mix'
@@ -143,12 +144,28 @@ const updateMetaThemeColor = (color) => {
   metaThemeColor.setAttribute('content', color)
   postMessage.send({ name: 'setBackgroundColor', value: color })
 }
+const drawingCursor = computed(() => {
+  const toolbarIsDrawing = store.state.currentUserToolbar === 'drawing'
+  if (!toolbarIsDrawing) { return }
+  let diameter = store.state.currentUser.drawingBrushSize
+  diameter = consts.drawingBrushSizeDiameter[diameter]
+  const radius = diameter / 2
+  const color = store.getters['currentUser/drawingColor']
+  const strokeWidth = 1
+  const svg = `<svg xmlns='http://www.w3.org/2000/svg' width='${diameter}' height='${diameter}' viewBox='0 0 ${diameter} ${diameter}'><circle cx='${radius}' cy='${radius}' r='${radius - 2}' fill='none' stroke='${color}' stroke-width='${strokeWidth}'/></svg>`
+  const dataUri = `data:image/svg+xml;charset=utf8,${encodeURIComponent(svg)}`
+  return `url("${dataUri}") ${radius} ${radius}, auto`
+})
 const styles = computed(() => {
   const canvasSize = 10
   const widthScale = store.state.viewportWidth / canvasSize
   const heightScale = store.state.viewportHeight / canvasSize
   const scale = Math.max(widthScale, heightScale)
-  return { transform: `scale(${scale})` }
+  let styles = { transform: `scale(${scale})` }
+  if (drawingCursor.value) {
+    styles.cursor = drawingCursor.value
+  }
+  return styles
 })
 </script>
 

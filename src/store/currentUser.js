@@ -986,6 +986,12 @@ export default {
 
     tagByName: (state, getters) => (name) => {
       return state.tags.find(tag => tag.name === name)
+    },
+
+    // drawing
+
+    drawingColor: (state) => {
+      return state.drawingColor || state.color
     }
   }
 }

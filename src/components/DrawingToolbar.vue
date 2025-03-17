@@ -37,7 +37,7 @@ const toggleColorPickerIsVisible = () => {
   state.colorPickerIsVisible = value
 }
 const drawingColor = computed(() => {
-  return store.state.currentUser.drawingColor || store.state.currentUser.color
+  return store.getters['currentUser/drawingColor']
 })
 const updateDrawingColor = (value) => {
   store.commit('currentUser/drawingColor', value)
