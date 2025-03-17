@@ -53,7 +53,7 @@ const updateDrawingColor = (value) => {
       title="Eraser (E)"
       :class="{ active: state.eraserIsActive, 'translucent-button': !shouldIncreaseUIContrast }"
     )
-      span E
+      img.icon.eraser-icon(src="@/assets/eraser.svg")
 </template>
 
 <style lang="stylus">
