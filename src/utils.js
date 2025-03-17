@@ -1121,7 +1121,7 @@ export default {
   },
   boxInfoPositionFromId (boxId) {
     const element = document.querySelector(`.box-info[data-box-id="${boxId}"]`)
-    // if (!element) { return }
+    if (!element) { return }
     const boxInfoRect = element.getBoundingClientRect()
     const infoWidth = Math.round(boxInfoRect.width + 4)
     const infoHeight = Math.round(boxInfoRect.height)

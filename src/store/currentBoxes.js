@@ -295,7 +295,9 @@ export default {
         let height = rect.height
         width = width + delta.x
         height = height + delta.y
-        const { infoWidth, infoHeight } = utils.boxInfoPositionFromId(boxId)
+        const infoPosition = utils.boxInfoPositionFromId(boxId)
+        if (!infoPosition) { return }
+        const { infoWidth, infoHeight } = infoPosition
         const box = { id: boxId, resizeWidth: width, resizeHeight: height, infoWidth, infoHeight }
         boxes.push(box)
         connections = connections.concat(context.rootGetters['currentConnections/byItemId'](box.id))
