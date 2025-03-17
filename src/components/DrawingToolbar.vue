@@ -28,7 +28,11 @@ const shouldIncreaseUIContrast = computed(() => store.state.currentUser.shouldIn
 const closeAllDialogs = () => {
   state.brushSizePickerIsVisible = false
   state.colorPickerIsVisible = false
+  state.eraserIsActive = false
 }
+
+// color
+
 const toggleColorPickerIsVisible = () => {
   const value = !state.colorPickerIsVisible
   closeAllDialogs()
@@ -41,6 +45,8 @@ const updateDrawingColor = (value) => {
   store.commit('currentUser/drawingColor', value)
 }
 
+// size
+
 const toggleBrushSizePickerIsVisible = () => {
   const value = !state.brushSizePickerIsVisible
   closeAllDialogs()
@@ -50,6 +56,14 @@ const updateBrushSize = (value) => {
   store.commit('currentUser/drawingBrushSize', value)
 }
 const currentBrushSize = computed(() => store.state.currentUser.drawingBrushSize)
+
+// eraser
+
+const toggleEraser = () => {
+  const value = !state.eraserIsActive
+  closeAllDialogs()
+  state.eraserIsActive = value
+}
 </script>
 
 <template lang="pug">
@@ -65,17 +79,19 @@ const currentBrushSize = computed(() => store.state.currentUser.drawingBrushSize
     )
       .current-color(:style="{backgroundColor: drawingColor}")
     //- size
-    button(
+    button.size-button(
       title="Size (S)"
       :class="{ active: state.brushSizePickerIsVisible, 'translucent-button': !shouldIncreaseUIContrast }"
       @click.left="toggleBrushSizePickerIsVisible"
     )
-      span.badge.info {{currentBrushSize.toUpperCase()}}
-      span S
+      img.icon.brush-size.l(v-if="currentBrushSize === 'l'" src="@/assets/brush-size-l.svg")
+      img.icon.brush-size.m(v-if="currentBrushSize === 'm'" src="@/assets/brush-size-m.svg")
+      img.icon.brush-size.s(v-if="currentBrushSize === 's'" src="@/assets/brush-size-s.svg")
     //- eraser
     button(
       title="Eraser (E)"
       :class="{ active: state.eraserIsActive, 'translucent-button': !shouldIncreaseUIContrast }"
+      @click.left="toggleEraser"
     )
       img.icon.eraser-icon(src="@/assets/eraser.svg")
 </template>
@@ -86,6 +102,13 @@ const currentBrushSize = computed(() => store.state.currentUser.drawingBrushSize
   top 29px
   left 36px
   display block
-  dialog.color-picker
+  dialog
     top 23px
+  .size-button
+    width 34px
+    height auto
+    display flex
+    justify-content center
+    align-items center
+
 </style>
