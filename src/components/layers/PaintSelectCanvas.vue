@@ -102,7 +102,10 @@ onMounted(() => {
   canvas = document.getElementById('paint-select-canvas')
 
   // Initialize WebGL Renderer
-  const useWebGL = webglRenderer.initialize(canvas)
+  const useWebGL = webglRenderer.initialize(canvas, {
+    rateOfIterationDecay: rateOfIterationDecay,
+    rateOfIterationDecaySlow: rateOfIterationDecaySlow
+  })
   if (!useWebGL) {
     console.error('WebGL initialization failed')
     return

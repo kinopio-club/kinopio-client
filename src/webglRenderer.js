@@ -47,6 +47,11 @@ const fragmentShaderSource = `
   }
 `
 
+// Utility functions for circle opacity
+const exponentialDecay = (iteration, rate) => {
+  return Math.exp(-rate * iteration)
+}
+
 export default class WebGLRenderer {
   constructor () {
     this.canvas = null
@@ -57,10 +62,22 @@ export default class WebGLRenderer {
     this.colorBuffer = null
     this.alphaBuffer = null
     this.resizeObserver = null
+
+    // Default decay rates
+    this.rateOfIterationDecay = 0.08 // higher is faster tail decay
+    this.rateOfIterationDecaySlow = 0.03 // slower decay rate
   }
 
-  initialize (canvasElement) {
+  initialize (canvasElement, options = {}) {
     this.canvas = canvasElement
+
+    // Set decay rates if provided
+    if (options.rateOfIterationDecay !== undefined) {
+      this.rateOfIterationDecay = options.rateOfIterationDecay
+    }
+    if (options.rateOfIterationDecaySlow !== undefined) {
+      this.rateOfIterationDecaySlow = options.rateOfIterationDecaySlow
+    }
 
     // Get proper dimensions from the element
     const displayWidth = this.canvas.clientWidth
@@ -200,8 +217,20 @@ export default class WebGLRenderer {
     circles.forEach(circle => {
       if (!circle.color) return
 
+      // Calculate opacity based on iteration if it's not explicitly set
+      let alpha
+      if (circle.alpha !== undefined) {
+        alpha = circle.alpha
+      } else {
+        // Apply decay based on iteration count
+        const decayRate = circle.shouldDecaySlow
+          ? this.rateOfIterationDecaySlow
+          : this.rateOfIterationDecay
+        alpha = exponentialDecay(circle.iteration || 0, decayRate)
+      }
+
       // Skip circles with very low alpha
-      if (circle.alpha !== undefined && circle.alpha < 0.05) return
+      if (alpha < 0.05) return
 
       // Group by color
       if (!colorGroups[circle.color]) {
@@ -216,7 +245,7 @@ export default class WebGLRenderer {
         x: circle.x * dpr,
         y: circle.y * dpr,
         radius: adjustedRadius,
-        alpha: circle.alpha || 1
+        alpha
       })
     })
 
