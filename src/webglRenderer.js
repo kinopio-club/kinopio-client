@@ -187,7 +187,6 @@ export default class WebGLRenderer {
 
       // Update the viewport to match the new canvas size
       this.gl.viewport(0, 0, this.canvas.width, this.canvas.height)
-      console.debug(`Canvas resized to ${this.canvas.width}x${this.canvas.height} (DPR: ${dpr})`)
     }
 
     return needResize

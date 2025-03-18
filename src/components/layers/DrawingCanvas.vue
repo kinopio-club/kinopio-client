@@ -5,15 +5,27 @@ import { useStore } from 'vuex'
 import utils from '@/utils.js'
 import consts from '@/consts.js'
 
+import throttle from 'lodash-es/throttle'
+
 const store = useStore()
 
-let isDrawing
+let canvas, context
+let isDrawing = false
+let currentStroke = []
 
 onMounted(() => {
   window.addEventListener('pointerup', endDrawing)
+  canvas = document.getElementById('drawing-canvas')
+  context = canvas.getContext('2d')
+  context.scale(window.devicePixelRatio, window.devicePixelRatio)
+
+  // TODO handle resize. clear and restore from rasterized
+
+  // TODO subscribe: clear and restore canvas when loading/restoring space
 })
 onBeforeUnmount(() => {
   window.removeEventListener('pointerup', endDrawing)
+  // TODO unsubscribe
 })
 
 const viewportHeight = computed(() => store.state.viewportHeight)
@@ -74,15 +86,29 @@ const styles = computed(() => {
 // drawing
 
 const startDrawing = (event) => {
+  if (!toolbarIsDrawing.value) { return }
+  store.dispatch('closeAllDialogs')
   isDrawing = true
+  currentStroke = []
   console.log('💐')
 }
-const draw = (event) => {
-  console.log('💐💐', isDrawing)
-}
+const draw = throttle((event) => {
+  if (!isDrawing) { return }
+  const drawingEraserIsActive = store.state.drawingEraserIsActive
+  const { x, y } = utils.cursorPositionInPage(event)
+  console.log('💐💐', isDrawing, drawingEraserIsActive, x, y)
+  // addPointTo currentStroke
+
+  // TODO broadcast
+}, 16) // 60fps
 const endDrawing = (event) => {
+  if (!toolbarIsDrawing.value) { return }
   console.log('💐💐💐')
   isDrawing = false
+  if (!currentStroke.length) { }
+  // await? save to api operation (saves strokes, rasterizes and saves latest.
+  // re-rasterize on demand to prevent conflicts??)
+  // await? rasterize and save cached version
 }
 </script>
 
