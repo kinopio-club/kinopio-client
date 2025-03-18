@@ -59,6 +59,9 @@ const startDrawing = (event) => {
   // console.log('💐💐', x, y)
   const color = strokeColor.value
   const radius = strokeDiameter.value / 2
+  // context.globalCompositeOperation = "source-over";
+  // if store.state.drawingEraserIsActive
+  // context.globalCompositeOperation = "destination-out";
   context.beginPath()
   context.arc(x, y, radius, 0, 2 * Math.PI)
   context.closePath()
@@ -67,7 +70,8 @@ const startDrawing = (event) => {
   stroke.push({
     x,
     y,
-    color
+    color,
+    isEraser: store.state.drawingEraserIsActive
     // scrollX: window.scrollX,
     // scrollY: window.scrollY,
     // elapsedTime: Date.now() - recordStartTime,
@@ -88,18 +92,21 @@ const draw = (event) => {
   stroke.push({
     x,
     y,
-    color
+    color,
+    isEraser: store.state.drawingEraserIsActive
     // scrollX: window.scrollX,
     // scrollY: window.scrollY,
     // elapsedTime: Date.now() - recordStartTime,
   })
+  // context.globalCompositeOperation = "source-over";
+  // if store.state.drawingEraserIsActive
+  // context.globalCompositeOperation = "destination-out";
   context.beginPath()
   context.moveTo(stroke[0].x, stroke[0].y)
   stroke.forEach((point) => {
     context.lineTo(point.x, point.y)
   })
   context.stroke()
-
   // TODO broadcast
 }
 
