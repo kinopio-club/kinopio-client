@@ -9,7 +9,7 @@ const store = useStore()
 
 let canvas, context
 let isDrawing = false
-let currentStroke = []
+let stroke = []
 let strokes = []
 
 let unsubscribe
@@ -54,7 +54,24 @@ const startDrawing = (event) => {
   if (!toolbarIsDrawing.value) { return }
   store.dispatch('closeAllDialogs')
   isDrawing = true
-  currentStroke = []
+  stroke = []
+  const { x, y } = utils.cursorPositionInPage(event)
+  // console.log('💐💐', x, y)
+  const color = strokeColor.value
+  const radius = strokeDiameter.value / 2
+  context.beginPath()
+  context.arc(x, y, radius, 0, 2 * Math.PI)
+  context.closePath()
+  context.fillStyle = color
+  context.fill()
+  stroke.push({
+    x,
+    y,
+    color
+    // scrollX: window.scrollX,
+    // scrollY: window.scrollY,
+    // elapsedTime: Date.now() - recordStartTime,
+  })
 }
 
 // draw
@@ -68,7 +85,7 @@ const draw = (event) => {
   context.lineCap = context.lineJoin = 'round'
   context.strokeStyle = color
   context.lineWidth = strokeDiameter.value
-  currentStroke.push({
+  stroke.push({
     x,
     y,
     color
@@ -77,8 +94,8 @@ const draw = (event) => {
     // elapsedTime: Date.now() - recordStartTime,
   })
   context.beginPath()
-  context.moveTo(currentStroke[0].x, currentStroke[0].y)
-  currentStroke.forEach((point) => {
+  context.moveTo(stroke[0].x, stroke[0].y)
+  stroke.forEach((point) => {
     context.lineTo(point.x, point.y)
   })
   context.stroke()
@@ -90,13 +107,13 @@ const draw = (event) => {
 
 const endDrawing = (event) => {
   if (!toolbarIsDrawing.value) { return }
-  strokes.push(currentStroke)
-  currentStroke = []
+  strokes.push(stroke)
+  stroke = []
   isDrawing = false
   // pageCanvas.getContext('2d').drawImage(canvas, prevScroll.x / 2, prevScroll.y / 2, canvas.width / 2, canvas.height / 2)
   // context.clearRect(0,0, canvas.width, canvas.height)
 
-  // if (!currentStroke.length) { }
+  // if (!stroke.length) { }
   // await? save to api operation (saves strokes, rasterizes and saves latest.
   // re-rasterize on demand to prevent conflicts??)
   // await? rasterize and save cached version
