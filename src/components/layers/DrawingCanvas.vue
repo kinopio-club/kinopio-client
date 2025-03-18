@@ -12,6 +12,7 @@ const store = useStore()
 let canvas, context
 let isDrawing = false
 let currentStroke = []
+let strokes = []
 
 onMounted(() => {
   window.addEventListener('pointerup', endDrawing)
@@ -41,13 +42,17 @@ const preventTouchScrolling = (event) => {
 
 // styles
 
+const strokeColor = computed(() => store.getters['currentUser/drawingColor'])
+const strokeDiameter = computed(() => {
+  const diameter = store.state.currentUser.drawingBrushSize
+  return consts.drawingBrushSizeDiameter[diameter]
+})
 const drawingCursorStyles = (styles) => {
   if (!toolbarIsDrawing.value) { return }
-  let diameter = store.state.currentUser.drawingBrushSize
-  diameter = consts.drawingBrushSizeDiameter[diameter]
   const strokeWidth = 1
+  const diameter = strokeDiameter.value
   const radius = diameter / 2
-  const color = store.getters['currentUser/drawingColor']
+  const color = strokeColor.value
   let svg
   // eraser cursor
   if (store.state.drawingEraserIsActive) {
@@ -60,7 +65,6 @@ const drawingCursorStyles = (styles) => {
         <line x1='${crossOffset}' y1='${crossOffset}' x2='${crossOffset + crossSize}' y2='${crossOffset + crossSize}' stroke='${color}' stroke-width='${strokeWidth}'/>
         <line x1='${crossOffset + crossSize}' y1='${crossOffset}' x2='${crossOffset}' y2='${crossOffset + crossSize}' stroke='${color}' stroke-width='${strokeWidth}'/>
       </svg>`
-    styles.mixBlendMode = 'difference'
   // drawing cursor
   } else {
     svg = `
@@ -83,7 +87,7 @@ const styles = computed(() => {
   return styles
 })
 
-// drawing
+// start
 
 const startDrawing = (event) => {
   if (!toolbarIsDrawing.value) { return }
@@ -91,19 +95,47 @@ const startDrawing = (event) => {
   isDrawing = true
   currentStroke = []
 }
+
+// draw
+
 const draw = throttle((event) => {
   if (!isDrawing) { return }
   const drawingEraserIsActive = store.state.drawingEraserIsActive
   const { x, y } = utils.cursorPositionInPage(event)
-  console.log('💐💐', isDrawing, drawingEraserIsActive, x, y)
-  // addPointTo currentStroke
+  // console.log('💐💐', x, y)
+  const color = strokeColor.value
+  context.lineCap = context.lineJoin = 'round'
+  context.strokeStyle = color
+  context.lineWidth = strokeDiameter.value
+  currentStroke.push({
+    x,
+    y,
+    color
+    // scrollX: window.scrollX,
+    // scrollY: window.scrollY,
+    // elapsedTime: Date.now() - recordStartTime,
+  })
+  context.beginPath()
+  context.moveTo(currentStroke[0].x, currentStroke[0].y)
+  currentStroke.forEach((point) => {
+    context.lineTo(point.x, point.y)
+  })
+  context.stroke()
 
   // TODO broadcast
 }, 16) // 60fps
+
+// stop
+
 const endDrawing = (event) => {
   if (!toolbarIsDrawing.value) { return }
+  strokes.push(currentStroke)
+  currentStroke = []
   isDrawing = false
-  if (!currentStroke.length) { }
+  // pageCanvas.getContext('2d').drawImage(canvas, prevScroll.x / 2, prevScroll.y / 2, canvas.width / 2, canvas.height / 2)
+  // context.clearRect(0,0, canvas.width, canvas.height)
+
+  // if (!currentStroke.length) { }
   // await? save to api operation (saves strokes, rasterizes and saves latest.
   // re-rasterize on demand to prevent conflicts??)
   // await? rasterize and save cached version
@@ -130,4 +162,5 @@ canvas
   width 100dvw
   height 100dvh
   opacity 1
+  mix-blend-mode multiply
 </style>
