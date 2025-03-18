@@ -184,6 +184,7 @@ const store = createStore({
     multipleConnectionsSelectedIdsToLoad: [],
     multipleBoxesSelectedIdsToLoad: [],
     multipleConnectionTypesSelectedIdsToLoad: [],
+    highlightedItemIds: [],
 
     // connections
     currentConnectionStartItemIds: [],
@@ -1228,6 +1229,18 @@ const store = createStore({
       state.multipleConnectionsSelectedIdsToLoad = []
       state.multipleConnectionTypesSelectedIdsToLoad = []
       state.multipleBoxesSelectedIdsToLoad = []
+    },
+    highlightedItemIds: (state, value) => {
+      const highlightedItems = value
+      const cardIds = Object.keys(highlightedItems.cardIds)
+      const boxIds = Object.keys(highlightedItems.boxIds)
+      const connectionIds = Object.keys(highlightedItems.connectionIds)
+      const result = {}
+      let ids = cardIds.concat(boxIds).concat(connectionIds)
+      ids.forEach(id => {
+        result[id] = true
+      })
+      state.highlightedItemIds = result
     },
 
     // multiple cards
