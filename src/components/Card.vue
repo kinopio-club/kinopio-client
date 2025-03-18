@@ -1310,7 +1310,6 @@ const updateTouchPosition = (event) => {
 // select cards
 
 const isSelected = computed(() => {
-  if (store.state.highlightedItemIds[props.card.id]) { return true }
   const multipleCardsSelectedIds = store.state.multipleCardsSelectedIds
   return multipleCardsSelectedIds.includes(props.card.id)
 })

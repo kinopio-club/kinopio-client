@@ -157,7 +157,6 @@ const viewportWidth = computed(() => store.state.viewportWidth)
 const spaceZoomDecimal = computed(() => store.getters.spaceZoomDecimal)
 const clearHightlightedItems = () => {
   highlightedItems = { cardIds: {}, boxIds: {}, connectionIds: {} }
-  store.commit('highlightedItemIds', highlightedItems)
 }
 
 // selectable items
@@ -353,7 +352,7 @@ const selectItems = () => {
   store.dispatch('addMultipleToMultipleCardsSelected', cardIds)
   store.dispatch('addMultipleToMultipleBoxesSelected', boxIds)
   store.dispatch('addMultipleToMultipleConnectionsSelected', connectionIds)
-  // clearHighlightedStyles()
+  clearHighlightedStyles()
   clearHightlightedItems()
 }
 
@@ -681,13 +680,45 @@ const highlightItems = (points) => {
   highlightCards(points)
   highlightBoxes(points)
   highlightConnections(points)
-  store.commit('highlightedItemIds', highlightedItems)
 }
 const highlightCards = (points) => {
   const matches = collisionDetection.checkPointsInRects(points, selectableCardsInViewport, selectableCardsGrid)
   const cardIds = matches.map(match => match.id)
   cardIds.forEach(cardId => {
     highlightedItems.cardIds[cardId] = true
+    // apply card styles
+    const cardWrapElement = utils.cardElementFromId(cardId)
+    const cardElement = cardWrapElement.querySelector('.card')
+    const nameSegmentsElement = cardElement.querySelectorAll('.name-segments')
+    const imageElement = cardElement.querySelector('.image')
+    const urlPreviewElement = cardElement.querySelector('.url-preview-card')
+    const previewImageElement = cardElement.querySelector('.preview-image')
+    const connectorButtonElement = cardElement.querySelector('.connector-button')
+    const isMedia = cardElement.classList.contains('media-card')
+    const badgeCardButtons = cardElement.querySelectorAll('.badge-card-button')
+    let color = currentUserColor.value
+    if (imageElement) {
+      imageElement.classList.add('selected')
+    }
+    if (previewImageElement) {
+      previewImageElement.classList.add('selected')
+    }
+    if (urlPreviewElement) {
+      urlPreviewElement.style.backgroundColor = color
+    }
+    if (connectorButtonElement) {
+      connectorButtonElement.style.backgroundColor = color
+    }
+    nameSegmentsElement.forEach(element => {
+      element.style.backgroundColor = color
+    })
+    badgeCardButtons.forEach(element => {
+      element.style.backgroundColor = color
+    })
+    if (isMedia) {
+      color = utils.safeColor(color)
+    }
+    cardElement.style.backgroundColor = color
   })
 }
 const highlightBoxes = (points) => {
@@ -707,6 +738,18 @@ const highlightConnections = (points) => {
     const connectionIds = matches.map(match => match.id)
     connectionIds.forEach(connectionId => {
       highlightedItems.connectionIds[connectionId] = true
+    })
+  })
+}
+const clearHighlightedStyles = () => {
+  const cardIds = Object.keys(highlightedItems.cardIds)
+  const boxIds = Object.keys(highlightedItems.boxIds)
+  const connectionIds = Object.keys(highlightedItems.connectionIds)
+  cardIds.forEach(cardId => {
+    const cardWrapElement = utils.cardElementFromId(cardId)
+    const nameSegmentsElement = cardWrapElement.querySelectorAll('.name-segments')
+    nameSegmentsElement.forEach(element => {
+      element.style.backgroundColor = null
     })
   })
 }
