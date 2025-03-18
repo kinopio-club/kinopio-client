@@ -10,7 +10,7 @@ const store = useStore()
 let canvas, context
 let isDrawing = false
 let stroke = []
-let strokes = []
+let sessionStrokes = []
 
 let unsubscribe
 
@@ -114,7 +114,7 @@ const draw = (event) => {
 
 const endDrawing = (event) => {
   if (!toolbarIsDrawing.value) { return }
-  strokes.push(stroke)
+  sessionStrokes.push(stroke)
   stroke = []
   isDrawing = false
   // pageCanvas.getContext('2d').drawImage(canvas, prevScroll.x / 2, prevScroll.y / 2, canvas.width / 2, canvas.height / 2)
