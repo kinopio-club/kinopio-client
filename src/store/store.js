@@ -690,6 +690,10 @@ const store = createStore({
     triggerSelectedCardsContainInBox: () => {},
     triggerSelectedItemsAlignLeft: () => {},
 
+    // drawing
+    triggerStartDrawing: (state, event) => {},
+    triggerDraw: (state, event) => {},
+
     // Cards
 
     shouldExplicitlyRenderCardIds: (state, cardIds) => {

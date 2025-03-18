@@ -5,6 +5,8 @@ import { useStore } from 'vuex'
 import utils from '@/utils.js'
 import consts from '@/consts.js'
 
+import throttle from 'lodash-es/throttle'
+
 const store = useStore()
 
 // let unsubscribe
@@ -31,6 +33,7 @@ const viewportHeight = computed(() => store.state.viewportHeight)
 const viewportWidth = computed(() => store.state.viewportWidth)
 
 const toolbarIsDrawing = computed(() => store.state.currentUserToolbar === 'drawing')
+// TODO if toolbarIsDrawing, disable select all below, toright, selectall
 
 const strokeColor = computed(() => store.getters['currentUser/drawingColor'])
 const strokeDiameter = computed(() => {
@@ -98,6 +101,13 @@ const preventTouchScrolling = (event) => {
 //   emit('updateCount', state.count)
 //   // store.dispatch('themes/isSystem', false)
 // }
+
+const startDrawing = (event) => {
+  store.commit('triggerStartDrawing', event)
+}
+const draw = throttle((event) => {
+  store.commit('triggerDraw', event)
+}, 16) // 60fps
 </script>
 
 <template lang="pug">
@@ -120,5 +130,4 @@ const preventTouchScrolling = (event) => {
   width 100dvw
   height 100dvh
   opacity 1
-  // `-events none
 </style>

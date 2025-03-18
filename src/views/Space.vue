@@ -664,13 +664,13 @@ main#space.space(
 )
   SpaceBackground
   SpaceBackgroundTint
-  DrawingCanvas
   ItemsLocked
   #box-backgrounds
   Connections
   Boxes
   Cards
   ItemUnlockButtons
+  DrawingCanvas
   BoxDetails
   CardDetails
   OtherCardDetails

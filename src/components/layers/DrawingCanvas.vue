@@ -5,14 +5,14 @@ import { useStore } from 'vuex'
 import utils from '@/utils.js'
 import consts from '@/consts.js'
 
-import throttle from 'lodash-es/throttle'
-
 const store = useStore()
 
 let canvas, context
 let isDrawing = false
 let currentStroke = []
 let strokes = []
+
+let unsubscribe
 
 onMounted(() => {
   window.addEventListener('pointerup', endDrawing)
@@ -22,11 +22,19 @@ onMounted(() => {
 
   // TODO handle resize. clear and restore from rasterized
 
-  // TODO subscribe: clear and restore canvas when loading/restoring space
+  // TODO clear and restore canvas when loading/restoring space
+
+  unsubscribe = store.subscribe(mutation => {
+    if (mutation.type === 'triggerStartDrawing') {
+      startDrawing(mutation.payload)
+    } else if (mutation.type === 'triggerDraw') {
+      draw(mutation.payload)
+    }
+  })
 })
 onBeforeUnmount(() => {
   window.removeEventListener('pointerup', endDrawing)
-  // TODO unsubscribe
+  unsubscribe()
 })
 
 const viewportHeight = computed(() => store.state.viewportHeight)
@@ -51,11 +59,11 @@ const startDrawing = (event) => {
 
 // draw
 
-const draw = throttle((event) => {
+const draw = (event) => {
   if (!isDrawing) { return }
   const drawingEraserIsActive = store.state.drawingEraserIsActive
   const { x, y } = utils.cursorPositionInPage(event)
-  console.log('💐💐', x, y)
+  // console.log('💐💐', x, y)
   const color = strokeColor.value
   context.lineCap = context.lineJoin = 'round'
   context.strokeStyle = color
@@ -76,7 +84,7 @@ const draw = throttle((event) => {
   context.stroke()
 
   // TODO broadcast
-}, 16) // 60fps
+}
 
 // stop
 
@@ -113,5 +121,6 @@ canvas
   height 100dvh
   opacity 1
   pointer-events none
+  z-index var(--max-z) // because card z
   // mix-blend-mode multiply
 </style>
