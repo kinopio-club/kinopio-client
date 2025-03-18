@@ -6,6 +6,11 @@ import utils from '@/utils.js'
 import collisionDetection from '@/collisionDetection.js'
 import postMessage from '@/postMessage.js'
 import DropGuideLine from '@/components/layers/DropGuideLine.vue'
+
+import { colord, extend } from 'colord'
+import namesPlugin from 'colord/plugins/names'
+extend([namesPlugin])
+
 const store = useStore()
 
 // a sequence of circles that's broadcasted to others and is used for multi-card selection
@@ -79,7 +84,6 @@ const fragmentShaderSource = `
   
   uniform vec4 u_color;
   uniform float u_alpha;
-  
   void main() {
     // Calculate distance from center of point (normalized coordinates)
     float distance = length(gl_PointCoord - vec2(0.5));
@@ -99,37 +103,27 @@ const initWebGL = () => {
   // Get proper dimensions from the element
   const displayWidth = canvas.clientWidth
   const displayHeight = canvas.clientHeight
-
   // Set canvas size correctly (important for resolution)
   const dpr = window.devicePixelRatio || 1
   canvas.width = displayWidth * dpr
   canvas.height = displayHeight * dpr
-
-  // Log dimensions for debugging
-  console.debug(`Canvas size: ${canvas.width} x ${canvas.height}, DPR: ${dpr}`)
-  console.debug(`Display size: ${displayWidth} x ${displayHeight}`)
-
   // Try to get WebGL context with proper options
   gl = canvas.getContext('webgl', {
     alpha: true,
     premultipliedAlpha: false,
     antialias: true
   })
-
   if (!gl) {
     console.error('WebGL not supported')
     return false
   }
-
   // Create shader program
   const vertexShader = createShader(gl, gl.VERTEX_SHADER, vertexShaderSource)
   const fragmentShader = createShader(gl, gl.FRAGMENT_SHADER, fragmentShaderSource)
   circleProgram = createProgram(gl, vertexShader, fragmentShader)
-
   // Create buffers
   positionBuffer = gl.createBuffer()
   sizeBuffer = gl.createBuffer()
-
   // Set up WebGL state
   gl.viewport(0, 0, canvas.width, canvas.height)
   gl.clearColor(0, 0, 0, 0)
@@ -144,13 +138,11 @@ const createShader = (gl, type, source) => {
   const shader = gl.createShader(type)
   gl.shaderSource(shader, source)
   gl.compileShader(shader)
-
   if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
     console.error('Shader compile error:', gl.getShaderInfoLog(shader))
     gl.deleteShader(shader)
     return null
   }
-
   return shader
 }
 
@@ -160,37 +152,11 @@ const createProgram = (gl, vertexShader, fragmentShader) => {
   gl.attachShader(program, vertexShader)
   gl.attachShader(program, fragmentShader)
   gl.linkProgram(program)
-
   if (!gl.getProgramParameter(program, gl.LINK_STATUS)) {
     console.error('Program link error:', gl.getProgramInfoLog(program))
     return null
   }
-
   return program
-}
-
-// Convert hex color to RGB values (0-1 range)
-const hexToRgb = (hex) => {
-  // Handle hex colors with or without #
-  const normalizedHex = hex.charAt(0) === '#' ? hex.substring(1) : hex
-
-  // Handle both 3-digit and 6-digit hex
-  const r = normalizedHex.length === 3
-    ? parseInt(normalizedHex.charAt(0) + normalizedHex.charAt(0), 16) / 255
-    : parseInt(normalizedHex.substring(0, 2), 16) / 255
-
-  const g = normalizedHex.length === 3
-    ? parseInt(normalizedHex.charAt(1) + normalizedHex.charAt(1), 16) / 255
-    : parseInt(normalizedHex.substring(2, 4), 16) / 255
-
-  const b = normalizedHex.length === 3
-    ? parseInt(normalizedHex.charAt(2) + normalizedHex.charAt(2), 16) / 255
-    : parseInt(normalizedHex.substring(4, 6), 16) / 255
-
-  // Log color parsing for debugging
-  console.debug(`Color ${hex} parsed as RGB: ${r}, ${g}, ${b}`)
-
-  return { r, g, b }
 }
 
 onMounted(() => {
@@ -513,38 +479,34 @@ const renderCirclesGL = (circles) => {
   // For each color group, render all circles
   Object.entries(colorGroups).forEach(([color, circleGroup]) => {
     if (circleGroup.length === 0) return
-
-    const rgb = hexToRgb(color)
-
+    // Use colord to parse the color
+    const { r, g, b } = colord(color).toRgb()
+    // Normalize to 0-1 range for WebGL
+    const normalizedRgb = { r: r / 255, g: g / 255, b: b / 255 }
     // Prepare position and size arrays
     const positions = []
     const sizes = []
     const alphas = []
-
     circleGroup.forEach(circle => {
       positions.push(circle.x, circle.y)
       sizes.push(circle.radius * 2) // Double the radius for diameter
       alphas.push(circle.alpha)
     })
-
     // Set the color uniform - fixed to ensure color is correctly applied
     const colorUniformLocation = gl.getUniformLocation(circleProgram, 'u_color')
-    gl.uniform4f(colorUniformLocation, rgb.r, rgb.g, rgb.b, 1.0)
-
+    gl.uniform4f(colorUniformLocation, normalizedRgb.r, normalizedRgb.g, normalizedRgb.b, 1.0)
     // Set position attribute
     const positionAttributeLocation = gl.getAttribLocation(circleProgram, 'a_position')
     gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer)
     gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(positions), gl.STATIC_DRAW)
     gl.enableVertexAttribArray(positionAttributeLocation)
     gl.vertexAttribPointer(positionAttributeLocation, 2, gl.FLOAT, false, 0, 0)
-
     // Set size attribute
     const sizeAttributeLocation = gl.getAttribLocation(circleProgram, 'a_size')
     gl.bindBuffer(gl.ARRAY_BUFFER, sizeBuffer)
     gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(sizes), gl.STATIC_DRAW)
     gl.enableVertexAttribArray(sizeAttributeLocation)
     gl.vertexAttribPointer(sizeAttributeLocation, 1, gl.FLOAT, false, 0, 0)
-
     // Draw each circle with its own alpha
     for (let i = 0; i < circleGroup.length; i++) {
       const alphaUniformLocation = gl.getUniformLocation(circleProgram, 'u_alpha')
@@ -692,10 +654,8 @@ const startPainting = (event) => {
 
 const circlesAnimationFrame = (timestamp) => {
   clearRect()
-
   // Prepare WebGL circles for batch rendering
   let webglCircles = []
-
   // paint select
   paintSelectCircles = utils.filterCircles(paintSelectCircles, maxIterations)
   paintSelectCircles = paintSelectCircles.map(item => {
@@ -704,7 +664,6 @@ const circlesAnimationFrame = (timestamp) => {
     webglCircles.push(circle)
     return item
   })
-
   // initial circles
   initialCircles = utils.filterCircles(initialCircles, 60)
   initialCircles = initialCircles.map(item => {
@@ -713,7 +672,6 @@ const circlesAnimationFrame = (timestamp) => {
     webglCircles.push(circle)
     return item
   })
-
   // remote paint
   remotePaintingCircles = utils.filterCircles(remotePaintingCircles, maxIterations)
   remotePaintingCircles = remotePaintingCircles.map(item => {
@@ -725,7 +683,6 @@ const circlesAnimationFrame = (timestamp) => {
     webglCircles.push(circle)
     return item
   })
-
   // notify offscreen
   notifyOffscreenCircles = utils.filterCircles(notifyOffscreenCircles, maxIterations)
   notifyOffscreenCircles = notifyOffscreenCircles.map(item => {
@@ -735,19 +692,15 @@ const circlesAnimationFrame = (timestamp) => {
     webglCircles.push(circle)
     return item
   })
-
   // Batch render all circles with WebGL
   if (webglCircles.length > 0) {
     renderCirclesGL(webglCircles)
   }
-
   // locking
   lockingAnimationFrame(timestamp)
-
   // continue
   const isLocking = currentUserIsLocking && lockingPercentComplete < 1
   const nextFrame = paintSelectCircles.length || initialCircles.length || remotePaintingCircles.length || notifyOffscreenCircles.length || isLocking
-
   if (nextFrame) {
     window.requestAnimationFrame(circlesAnimationFrame)
   } else {

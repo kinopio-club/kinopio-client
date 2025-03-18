@@ -13,19 +13,18 @@ import join from 'lodash-es/join'
 import dayjs from 'dayjs'
 import relativeTime from 'dayjs/plugin/relativeTime'
 import { colord, extend } from 'colord'
-import qs from '@aguezz/qs-parse'
 import namesPlugin from 'colord/plugins/names'
+import qs from '@aguezz/qs-parse'
 import getCurvePoints from '@/libs/curve_calc.js'
 import random from 'lodash-es/random'
 import randomColor from 'randomcolor'
 // https://data.iana.org/TLD/tlds-alpha-by-domain.txt
 // Updated Jun 9 2021 UTC
 import tldsList from '@/data/tlds.json'
+dayjs.extend(relativeTime)
+extend([namesPlugin])
 let tlds = tldsList.join(String.raw`)|(\.`)
 tlds = String.raw`(\.` + tlds + ')'
-
-dayjs.extend(relativeTime)
-extend([namesPlugin]) // colord
 
 const uuidLength = 21
 const randomRGBA = (alpha) => {
