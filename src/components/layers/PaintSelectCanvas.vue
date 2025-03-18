@@ -1,15 +1,12 @@
 <script setup>
-import { reactive, computed, onMounted, onBeforeUnmount, onUnmounted, defineProps, defineEmits, watch, ref, nextTick } from 'vue'
+import { reactive, computed, onMounted, onBeforeUnmount, onUnmounted, watch, ref } from 'vue'
 import { useStore } from 'vuex'
 
 import utils from '@/utils.js'
 import collisionDetection from '@/collisionDetection.js'
 import postMessage from '@/postMessage.js'
 import DropGuideLine from '@/components/layers/DropGuideLine.vue'
-
-import { colord, extend } from 'colord'
-import namesPlugin from 'colord/plugins/names'
-extend([namesPlugin])
+import WebGLRenderer from '@/webglRenderer.js'
 
 const store = useStore()
 
@@ -21,12 +18,9 @@ const rateOfIterationDecay = 0.08 // higher is faster tail decay
 const rateOfIterationDecaySlow = 0.03
 let prevScroll
 let prevPosition, prevCursor
-let canvas, gl, startCursor, timer
-// WebGL variables
-let circleProgram
-let positionBuffer, sizeBuffer, colorBuffer, alphaBuffer
-// Resize handling
-let resizeObserver
+let canvas, startCursor, timer
+// WebGL renderer
+let webglRenderer = new WebGLRenderer()
 // paint select
 // ephemeral brush strokes that select items
 let paintSelectCircles = []
@@ -45,7 +39,7 @@ let currentUserIsLocking, lockingStartTime, shouldCancelLocking, lockingPercentC
 // notify offscreen cards
 // similar to initial circle feedback
 let notifyOffscreenCircles = []
-let notifyOffscreenCircleCanvas, notifyOffscreenCirclesTimer
+let notifyOffscreenCirclesTimer
 
 // post scroll timer
 // runs scroll events after scrollend to compensate for android inertia scrolling
@@ -59,76 +53,9 @@ let selectableCardsGrid
 
 let unsubscribe
 
-// WebGL shaders
-const vertexShaderSource = `
-  attribute vec2 a_position;
-  attribute float a_size;
-  
-  uniform vec2 u_resolution;
-  
-  void main() {
-    // Convert from pixel space to clip space
-    // Fix scaling issues by properly normalizing coordinates
-    vec2 zeroToOne = a_position / u_resolution;
-    vec2 zeroToTwo = zeroToOne * 2.0;
-    vec2 clipSpace = zeroToTwo - 1.0;
-    
-    // Flip Y to match canvas coordinate system
-    gl_Position = vec4(clipSpace.x, -clipSpace.y, 0, 1);
-    
-    // Make sure point size is properly scaled
-    gl_PointSize = a_size;
-  }
-`
-
-const fragmentShaderSource = `
-  precision mediump float;
-  
-  uniform vec4 u_color;
-  uniform float u_alpha;
-  void main() {
-    // Calculate distance from center of point (normalized coordinates)
-    float distance = length(gl_PointCoord - vec2(0.5));
-    
-    // Create a sharp circle
-    if (distance > 0.5) {
-      discard; // Outside of circle
-    }
-    
-    // Apply premultiplied alpha for CSS-like opacity
-    vec4 color = u_color;
-    color.a *= u_alpha;
-    color.rgb *= color.a; // Premultiply RGB by alpha
-    
-    gl_FragColor = color;
-  }
-`
-
-// Utility function to resize canvas to match display size
-const resizeCanvasToDisplaySize = () => {
-  if (!canvas || !gl) return false
-  // Get the browser's computed display size
-  const displayWidth = canvas.clientWidth
-  const displayHeight = canvas.clientHeight
-  // Get device pixel ratio for high-DPI displays
-  const dpr = window.devicePixelRatio || 1
-  // Check if canvas is not the right size
-  const needResize = canvas.width !== displayWidth * dpr ||
-                     canvas.height !== displayHeight * dpr
-  if (needResize) {
-    // Set canvas size accounting for device pixel ratio
-    canvas.width = displayWidth * dpr
-    canvas.height = displayHeight * dpr
-    // Update the viewport to match the new canvas size
-    gl.viewport(0, 0, canvas.width, canvas.height)
-    console.debug(`Canvas resized to ${canvas.width}x${canvas.height} (DPR: ${dpr})`)
-  }
-  return needResize
-}
-
 // Handle window resize
 const handleResize = () => {
-  const resized = resizeCanvasToDisplaySize()
+  const resized = webglRenderer.resizeCanvasToDisplaySize()
   if (resized) {
     // If there are circles to render, redraw them with the new dimensions
     if (paintSelectCircles.length || initialCircles.length ||
@@ -137,69 +64,6 @@ const handleResize = () => {
       startPaintingCirclesTimer()
     }
   }
-}
-
-// Initialize WebGL
-const initWebGL = () => {
-  // Get proper dimensions from the element
-  const displayWidth = canvas.clientWidth
-  const displayHeight = canvas.clientHeight
-  // Set canvas size correctly (important for resolution)
-  const dpr = window.devicePixelRatio || 1
-  canvas.width = displayWidth * dpr
-  canvas.height = displayHeight * dpr
-  // Try to get WebGL context with proper options
-  gl = canvas.getContext('webgl', {
-    alpha: true,
-    premultipliedAlpha: true, // Set to true for CSS-like opacity behavior
-    antialias: true,
-    preserveDrawingBuffer: true
-  })
-  if (!gl) {
-    console.error('WebGL not supported')
-    return false
-  }
-  // Create shader program
-  const vertexShader = createShader(gl, gl.VERTEX_SHADER, vertexShaderSource)
-  const fragmentShader = createShader(gl, gl.FRAGMENT_SHADER, fragmentShaderSource)
-  circleProgram = createProgram(gl, vertexShader, fragmentShader)
-  // Create buffers
-  positionBuffer = gl.createBuffer()
-  sizeBuffer = gl.createBuffer()
-  // Set up WebGL state
-  gl.viewport(0, 0, canvas.width, canvas.height)
-  gl.clearColor(0, 0, 0, 0)
-  gl.enable(gl.BLEND)
-  // Set blend mode to match CSS opacity behavior
-  // This blend mode precisely matches how CSS opacity works
-  gl.blendFunc(gl.ONE, gl.ONE_MINUS_SRC_ALPHA) // Changed from SRC_ALPHA to ONE for premultiplied alpha
-  return true
-}
-
-// Create a shader
-const createShader = (gl, type, source) => {
-  const shader = gl.createShader(type)
-  gl.shaderSource(shader, source)
-  gl.compileShader(shader)
-  if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
-    console.error('Shader compile error:', gl.getShaderInfoLog(shader))
-    gl.deleteShader(shader)
-    return null
-  }
-  return shader
-}
-
-// Create a program
-const createProgram = (gl, vertexShader, fragmentShader) => {
-  const program = gl.createProgram()
-  gl.attachShader(program, vertexShader)
-  gl.attachShader(program, fragmentShader)
-  gl.linkProgram(program)
-  if (!gl.getProgramParameter(program, gl.LINK_STATUS)) {
-    console.error('Program link error:', gl.getProgramInfoLog(program))
-    return null
-  }
-  return program
 }
 
 onMounted(() => {
@@ -233,24 +97,24 @@ onMounted(() => {
       createNotifyOffscreenCircle(circle)
     }
   })
+
   // init canvas
   canvas = document.getElementById('paint-select-canvas')
-  // Initialize WebGL
-  const useWebGL = initWebGL()
+
+  // Initialize WebGL Renderer
+  const useWebGL = webglRenderer.initialize(canvas)
   if (!useWebGL) {
     console.error('WebGL initialization failed')
     return
   }
+
   // Setup resize handling
-  resizeObserver = new ResizeObserver(() => {
-    handleResize()
-  })
-  resizeObserver.observe(canvas)
   window.addEventListener('resize', handleResize)
   window.addEventListener('orientationchange', () => {
     // Slight delay to allow dimension changes to complete
     setTimeout(handleResize, 100)
   })
+
   // trigger stopPainting even if mouse is outside window
   window.addEventListener('mouseup', stopPainting)
   window.addEventListener('touchend', stopPainting)
@@ -284,16 +148,12 @@ onBeforeUnmount(() => {
   // Clean up resize handlers
   window.removeEventListener('resize', handleResize)
   window.removeEventListener('orientationchange', handleResize)
-  if (resizeObserver) {
-    resizeObserver.disconnect()
-  }
+
   unsubscribe()
-  if (gl) {
-    // Clean up WebGL resources
-    gl.deleteProgram(circleProgram)
-    gl.deleteBuffer(positionBuffer)
-    gl.deleteBuffer(sizeBuffer)
-  }
+
+  // Clean up WebGL renderer
+  webglRenderer.dispose()
+  webglRenderer = null
 })
 
 const state = reactive({
@@ -303,9 +163,7 @@ const state = reactive({
 
 // Clear canvas
 const clearRect = () => {
-  if (gl) {
-    gl.clear(gl.COLOR_BUFFER_BIT)
-  }
+  webglRenderer.clearCanvas()
 }
 
 const triggerHideTouchInterface = () => {
@@ -486,96 +344,63 @@ const offscreenCircle = (circle) => {
   return circle
 }
 
-// Render circles using WebGL (batch rendering for performance)
-const renderCirclesGL = (circles) => {
-  if (circles.length === 0) return
-
-  // Make sure canvas size is up-to-date before rendering
-  resizeCanvasToDisplaySize()
-
-  // Use the program
-  gl.useProgram(circleProgram)
-
-  // Set the resolution uniform - IMPORTANT: use actual canvas size for correct scaling
-  const resolutionUniformLocation = gl.getUniformLocation(circleProgram, 'u_resolution')
-  gl.uniform2f(resolutionUniformLocation, canvas.width, canvas.height)
-
-  // For each unique color, batch render circles
-  const colorGroups = {}
-
-  // Browser-specific adjustments
-  const isFirefox = navigator.userAgent.toLowerCase().indexOf('firefox') > -1
-  const firefoxRadiusMultiplier = isFirefox ? 1.75 : 1 // Firefox needs larger circles
-
-  circles.forEach(circle => {
-    if (!circle.color) return
-
-    // Skip circles with very low alpha
-    let decay = circle.shouldDecaySlow ? rateOfIterationDecaySlow : rateOfIterationDecay
-    let alpha = circle.alpha || utils.exponentialDecay(circle.iteration, decay)
-    if (alpha < 0.05) return
-
-    // Group by color
-    if (!colorGroups[circle.color]) {
-      colorGroups[circle.color] = []
-    }
-
-    // Make sure circle is visible or handle offscreen rendering
-    circle = updateCircleForAndroid(circle)
-    const isCircleVisible = checkIsCircleVisible(circle)
-    if (!isCircleVisible && !circle.shouldDrawOffscreen) return
-    if (!isCircleVisible && circle.shouldDrawOffscreen) circle = offscreenCircle(circle)
-
-    // Account for device pixel ratio when setting positions
-    const dpr = window.devicePixelRatio || 1
-    const adjustedRadius = (circle.radius || circleRadius) * dpr * firefoxRadiusMultiplier
-
-    colorGroups[circle.color].push({
-      x: circle.x * dpr,
-      y: circle.y * dpr,
-      radius: adjustedRadius,
-      alpha
-    })
+const circlesAnimationFrame = (timestamp) => {
+  clearRect()
+  // Prepare WebGL circles for batch rendering
+  let webglCircles = []
+  // paint select
+  paintSelectCircles = utils.filterCircles(paintSelectCircles, maxIterations)
+  paintSelectCircles = paintSelectCircles.map(item => {
+    item.iteration++
+    const circle = JSON.parse(JSON.stringify(item))
+    webglCircles.push(circle)
+    return item
   })
-
-  // For each color group, render all circles
-  Object.entries(colorGroups).forEach(([color, circleGroup]) => {
-    if (circleGroup.length === 0) return
-    // Use colord to parse the color
-    const { r, g, b } = colord(color).toRgb()
-    // Normalize to 0-1 range for WebGL
-    const normalizedRgb = { r: r / 255, g: g / 255, b: b / 255 }
-    // Prepare position and size arrays
-    const positions = []
-    const sizes = []
-    const alphas = []
-    circleGroup.forEach(circle => {
-      positions.push(circle.x, circle.y)
-      sizes.push(circle.radius * 2) // Double the radius for diameter
-      alphas.push(circle.alpha)
-    })
-    // Set the color uniform - fixed to ensure color is correctly applied
-    const colorUniformLocation = gl.getUniformLocation(circleProgram, 'u_color')
-    gl.uniform4f(colorUniformLocation, normalizedRgb.r, normalizedRgb.g, normalizedRgb.b, 1.0)
-    // Set position attribute
-    const positionAttributeLocation = gl.getAttribLocation(circleProgram, 'a_position')
-    gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer)
-    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(positions), gl.STATIC_DRAW)
-    gl.enableVertexAttribArray(positionAttributeLocation)
-    gl.vertexAttribPointer(positionAttributeLocation, 2, gl.FLOAT, false, 0, 0)
-    // Set size attribute
-    const sizeAttributeLocation = gl.getAttribLocation(circleProgram, 'a_size')
-    gl.bindBuffer(gl.ARRAY_BUFFER, sizeBuffer)
-    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(sizes), gl.STATIC_DRAW)
-    gl.enableVertexAttribArray(sizeAttributeLocation)
-    gl.vertexAttribPointer(sizeAttributeLocation, 1, gl.FLOAT, false, 0, 0)
-    // Draw each circle with its own alpha
-    for (let i = 0; i < circleGroup.length; i++) {
-      const alphaUniformLocation = gl.getUniformLocation(circleProgram, 'u_alpha')
-      gl.uniform1f(alphaUniformLocation, alphas[i])
-      gl.drawArrays(gl.POINTS, i, 1)
-    }
+  // initial circles
+  initialCircles = utils.filterCircles(initialCircles, 60)
+  initialCircles = initialCircles.map(item => {
+    item.iteration++
+    const circle = JSON.parse(JSON.stringify(item))
+    webglCircles.push(circle)
+    return item
   })
+  // remote paint
+  remotePaintingCircles = utils.filterCircles(remotePaintingCircles, maxIterations)
+  remotePaintingCircles = remotePaintingCircles.map(item => {
+    item.iteration++
+    let circle = JSON.parse(JSON.stringify(item))
+    circle.x = circle.x - window.scrollX
+    circle.y = circle.y - window.scrollY
+    circle.shouldDrawOffscreen = true
+    webglCircles.push(circle)
+    return item
+  })
+  // notify offscreen
+  notifyOffscreenCircles = utils.filterCircles(notifyOffscreenCircles, maxIterations)
+  notifyOffscreenCircles = notifyOffscreenCircles.map(item => {
+    item.iteration++
+    const circle = JSON.parse(JSON.stringify(item))
+    circle.shouldDrawOffscreen = true
+    webglCircles.push(circle)
+    return item
+  })
+  // Batch render all circles with WebGL
+  if (webglCircles.length > 0) {
+    webglRenderer.renderCircles(webglCircles)
+  }
+  // locking
+  lockingAnimationFrame(timestamp)
+  // continue
+  const isLocking = currentUserIsLocking && lockingPercentComplete < 1
+  const nextFrame = paintSelectCircles.length || initialCircles.length || remotePaintingCircles.length || notifyOffscreenCircles.length || isLocking
+  if (nextFrame) {
+    window.requestAnimationFrame(circlesAnimationFrame)
+  } else {
+    setTimeout(() => {
+      window.cancelAnimationFrame(timer)
+      timer = undefined
+    }, 0)
+  }
 }
 
 const shouldCancel = (event) => {
@@ -714,65 +539,6 @@ const startPainting = (event) => {
   store.dispatch('closeAllDialogs')
 }
 
-const circlesAnimationFrame = (timestamp) => {
-  clearRect()
-  // Prepare WebGL circles for batch rendering
-  let webglCircles = []
-  // paint select
-  paintSelectCircles = utils.filterCircles(paintSelectCircles, maxIterations)
-  paintSelectCircles = paintSelectCircles.map(item => {
-    item.iteration++
-    const circle = JSON.parse(JSON.stringify(item))
-    webglCircles.push(circle)
-    return item
-  })
-  // initial circles
-  initialCircles = utils.filterCircles(initialCircles, 60)
-  initialCircles = initialCircles.map(item => {
-    item.iteration++
-    const circle = JSON.parse(JSON.stringify(item))
-    webglCircles.push(circle)
-    return item
-  })
-  // remote paint
-  remotePaintingCircles = utils.filterCircles(remotePaintingCircles, maxIterations)
-  remotePaintingCircles = remotePaintingCircles.map(item => {
-    item.iteration++
-    let circle = JSON.parse(JSON.stringify(item))
-    circle.x = circle.x - window.scrollX
-    circle.y = circle.y - window.scrollY
-    circle.shouldDrawOffscreen = true
-    webglCircles.push(circle)
-    return item
-  })
-  // notify offscreen
-  notifyOffscreenCircles = utils.filterCircles(notifyOffscreenCircles, maxIterations)
-  notifyOffscreenCircles = notifyOffscreenCircles.map(item => {
-    item.iteration++
-    const circle = JSON.parse(JSON.stringify(item))
-    circle.shouldDrawOffscreen = true
-    webglCircles.push(circle)
-    return item
-  })
-  // Batch render all circles with WebGL
-  if (webglCircles.length > 0) {
-    renderCirclesGL(webglCircles)
-  }
-  // locking
-  lockingAnimationFrame(timestamp)
-  // continue
-  const isLocking = currentUserIsLocking && lockingPercentComplete < 1
-  const nextFrame = paintSelectCircles.length || initialCircles.length || remotePaintingCircles.length || notifyOffscreenCircles.length || isLocking
-  if (nextFrame) {
-    window.requestAnimationFrame(circlesAnimationFrame)
-  } else {
-    setTimeout(() => {
-      window.cancelAnimationFrame(timer)
-      timer = undefined
-    }, 0)
-  }
-}
-
 const broadcastCircle = (event, circle) => {
   const position = utils.cursorPositionInSpace(event)
   store.commit('broadcast/update', {
@@ -908,7 +674,7 @@ const lockingAnimationFrame = (timestamp) => {
       alpha: alpha || 0.01, // to ensure truthyness
       iteration: 1
     }
-    renderCirclesGL([circle])
+    webglRenderer.renderCircles([circle])
   } else if (lockingPercentComplete >= 1) {
     store.commit('currentUserIsPainting', true)
     store.commit('currentUserIsPaintingLocked', true)
