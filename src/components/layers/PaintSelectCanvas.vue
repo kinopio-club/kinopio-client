@@ -16,7 +16,10 @@ const rateOfIterationDecay = 0.08 // higher is faster tail decay
 const rateOfIterationDecaySlow = 0.03
 let prevScroll
 let prevPosition, prevCursor
-let canvas, context, startCursor, timer
+let canvas, gl, startCursor, timer
+// WebGL variables
+let circleProgram
+let positionBuffer, sizeBuffer, colorBuffer, alphaBuffer
 // paint select
 // ephemeral brush strokes that select items
 let paintSelectCircles = []
@@ -35,7 +38,7 @@ let currentUserIsLocking, lockingStartTime, shouldCancelLocking, lockingPercentC
 // notify offscreen cards
 // similar to initial circle feedback
 let notifyOffscreenCircles = []
-let notifyOffscreenCircleCanvas, notifyOffscreenCircleContext, notifyOffscreenCirclesTimer
+let notifyOffscreenCircleCanvas, notifyOffscreenCirclesTimer
 
 // post scroll timer
 // runs scroll events after scrollend to compensate for android inertia scrolling
@@ -48,6 +51,147 @@ let selectableConnectionsInViewport = []
 let selectableCardsGrid
 
 let unsubscribe
+
+// WebGL shaders
+const vertexShaderSource = `
+  attribute vec2 a_position;
+  attribute float a_size;
+  
+  uniform vec2 u_resolution;
+  
+  void main() {
+    // Convert from pixel space to clip space
+    // Fix scaling issues by properly normalizing coordinates
+    vec2 zeroToOne = a_position / u_resolution;
+    vec2 zeroToTwo = zeroToOne * 2.0;
+    vec2 clipSpace = zeroToTwo - 1.0;
+    
+    // Flip Y to match canvas coordinate system
+    gl_Position = vec4(clipSpace.x, -clipSpace.y, 0, 1);
+    
+    // Make sure point size is properly scaled
+    gl_PointSize = a_size;
+  }
+`
+
+const fragmentShaderSource = `
+  precision mediump float;
+  
+  uniform vec4 u_color;
+  uniform float u_alpha;
+  
+  void main() {
+    // Calculate distance from center of point (normalized coordinates)
+    float distance = length(gl_PointCoord - vec2(0.5));
+    
+    // Create a sharp circle
+    if (distance > 0.5) {
+      discard; // Outside of circle
+    }
+    
+    // Apply color with alpha
+    gl_FragColor = vec4(u_color.rgb, u_alpha);
+  }
+`
+
+// Initialize WebGL
+const initWebGL = () => {
+  // Get proper dimensions from the element
+  const displayWidth = canvas.clientWidth
+  const displayHeight = canvas.clientHeight
+
+  // Set canvas size correctly (important for resolution)
+  const dpr = window.devicePixelRatio || 1
+  canvas.width = displayWidth * dpr
+  canvas.height = displayHeight * dpr
+
+  // Log dimensions for debugging
+  console.debug(`Canvas size: ${canvas.width} x ${canvas.height}, DPR: ${dpr}`)
+  console.debug(`Display size: ${displayWidth} x ${displayHeight}`)
+
+  // Try to get WebGL context with proper options
+  gl = canvas.getContext('webgl', {
+    alpha: true,
+    premultipliedAlpha: false,
+    antialias: true
+  })
+
+  if (!gl) {
+    console.error('WebGL not supported')
+    return false
+  }
+
+  // Create shader program
+  const vertexShader = createShader(gl, gl.VERTEX_SHADER, vertexShaderSource)
+  const fragmentShader = createShader(gl, gl.FRAGMENT_SHADER, fragmentShaderSource)
+  circleProgram = createProgram(gl, vertexShader, fragmentShader)
+
+  // Create buffers
+  positionBuffer = gl.createBuffer()
+  sizeBuffer = gl.createBuffer()
+
+  // Set up WebGL state
+  gl.viewport(0, 0, canvas.width, canvas.height)
+  gl.clearColor(0, 0, 0, 0)
+  gl.enable(gl.BLEND)
+  gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA)
+
+  return true
+}
+
+// Create a shader
+const createShader = (gl, type, source) => {
+  const shader = gl.createShader(type)
+  gl.shaderSource(shader, source)
+  gl.compileShader(shader)
+
+  if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
+    console.error('Shader compile error:', gl.getShaderInfoLog(shader))
+    gl.deleteShader(shader)
+    return null
+  }
+
+  return shader
+}
+
+// Create a program
+const createProgram = (gl, vertexShader, fragmentShader) => {
+  const program = gl.createProgram()
+  gl.attachShader(program, vertexShader)
+  gl.attachShader(program, fragmentShader)
+  gl.linkProgram(program)
+
+  if (!gl.getProgramParameter(program, gl.LINK_STATUS)) {
+    console.error('Program link error:', gl.getProgramInfoLog(program))
+    return null
+  }
+
+  return program
+}
+
+// Convert hex color to RGB values (0-1 range)
+const hexToRgb = (hex) => {
+  // Handle hex colors with or without #
+  const normalizedHex = hex.charAt(0) === '#' ? hex.substring(1) : hex
+
+  // Handle both 3-digit and 6-digit hex
+  const r = normalizedHex.length === 3
+    ? parseInt(normalizedHex.charAt(0) + normalizedHex.charAt(0), 16) / 255
+    : parseInt(normalizedHex.substring(0, 2), 16) / 255
+
+  const g = normalizedHex.length === 3
+    ? parseInt(normalizedHex.charAt(1) + normalizedHex.charAt(1), 16) / 255
+    : parseInt(normalizedHex.substring(2, 4), 16) / 255
+
+  const b = normalizedHex.length === 3
+    ? parseInt(normalizedHex.charAt(2) + normalizedHex.charAt(2), 16) / 255
+    : parseInt(normalizedHex.substring(4, 6), 16) / 255
+
+  // Log color parsing for debugging
+  console.debug(`Color ${hex} parsed as RGB: ${r}, ${g}, ${b}`)
+
+  return { r, g, b }
+}
 
 onMounted(() => {
   unsubscribe = store.subscribe((mutation, state) => {
@@ -80,10 +224,17 @@ onMounted(() => {
       createNotifyOffscreenCircle(circle)
     }
   })
+
   // init canvas
   canvas = document.getElementById('paint-select-canvas')
-  context = canvas.getContext('2d')
-  context.scale(window.devicePixelRatio, window.devicePixelRatio)
+
+  // Initialize WebGL
+  const useWebGL = initWebGL()
+  if (!useWebGL) {
+    console.error('WebGL initialization failed')
+    return
+  }
+
   // trigger stopPainting even if mouse is outside window
   window.addEventListener('mouseup', stopPainting)
   window.addEventListener('touchend', stopPainting)
@@ -102,6 +253,7 @@ onMounted(() => {
   state.dropGuideLineIsVisible = !utils.isMobile()
   window.addEventListener('visibilitychange', clearRect)
 })
+
 onBeforeUnmount(() => {
   window.removeEventListener('mouseup', stopPainting)
   window.removeEventListener('touchend', stopPainting)
@@ -114,19 +266,30 @@ onBeforeUnmount(() => {
   window.removeEventListener('mousemove', painting)
   window.removeEventListener('touchmove', painting)
   unsubscribe()
+
+  if (gl) {
+    // Clean up WebGL resources
+    gl.deleteProgram(circleProgram)
+    gl.deleteBuffer(positionBuffer)
+    gl.deleteBuffer(sizeBuffer)
+  }
 })
 
 const state = reactive({
-  currentCursor: {}
+  currentCursor: {},
+  dropGuideLineIsVisible: false
 })
 
+// Clear canvas
 const clearRect = () => {
-  context.clearRect(0, 0, pageWidth.value, pageHeight.value)
+  gl.clear(gl.COLOR_BUFFER_BIT)
 }
+
 const triggerHideTouchInterface = () => {
   if (!store.state.currentUserIsPaintingLocked) { return }
   store.commit('triggerHideTouchInterface')
 }
+
 const isCanvasScope = (event) => {
   const fromDialog = event.target.closest('dialog')
   if (fromDialog) { return }
@@ -135,7 +298,6 @@ const isCanvasScope = (event) => {
 }
 
 // current user
-
 const currentUserColor = computed(() => store.state.currentUser.color)
 const userCannotEditSpace = computed(() => !store.getters['currentUser/canEditSpace']())
 const isPanning = computed(() => store.state.currentUserIsPanningReady)
@@ -146,21 +308,29 @@ const toolbarIsDrawing = computed(() => store.state.currentUserToolbar === 'draw
 
 // page size
 // keep canvases updated to viewport size so you can draw on newly created areas
-
 const pageHeight = computed(() => store.state.pageHeight)
 const pageWidth = computed(() => store.state.pageWidth)
 const viewportHeight = computed(() => store.state.viewportHeight)
 const viewportWidth = computed(() => store.state.viewportWidth)
 const spaceZoomDecimal = computed(() => store.getters.spaceZoomDecimal)
 
-// selectable items
+// Watch for canvas size changes to update WebGL viewport
+watch([pageWidth, pageHeight, viewportWidth, viewportHeight], () => {
+  if (gl) {
+    canvas.width = viewportWidth.value * window.devicePixelRatio
+    canvas.height = viewportHeight.value * window.devicePixelRatio
+    gl.viewport(0, 0, canvas.width, canvas.height)
+  }
+})
 
+// selectable items
 const updateSelectableCardsInViewport = () => {
   const selectableCards = store.getters['currentCards/isSelectableInViewport']
   if (!selectableCards) { return }
   selectableCardsInViewport = selectableCards
   selectableCardsGrid = collisionDetection.createGrid(selectableCards)
 }
+
 const updateSelectableBoxesInViewport = () => {
   const boxes = store.getters['currentBoxes/isNotLocked']
   let array = []
@@ -181,6 +351,7 @@ const updateSelectableBoxesInViewport = () => {
   })
   selectableBoxes = array
 }
+
 const updateSelectableConnectionsInViewport = () => {
   const selectableConnections = store.getters['currentConnections/isSelectableInViewport']()
   if (!selectableConnections) { return }
@@ -188,7 +359,6 @@ const updateSelectableConnectionsInViewport = () => {
 }
 
 // position
-
 const updateRemotePosition = (position) => {
   const zoom = spaceZoomDecimal.value
   const scroll = { x: window.scrollX, y: window.scrollY }
@@ -200,6 +370,7 @@ const updateRemotePosition = (position) => {
   }
   return position
 }
+
 const userScroll = () => {
   if (postScrollAnimationTimer) {
     shouldCancelPostScroll = true
@@ -212,21 +383,25 @@ const userScroll = () => {
   }
   scroll()
 }
+
 const scroll = () => {
   updateCirclesWithScroll()
   cancelLocking()
 }
+
 const clearCircles = () => {
   initialCircles = []
   paintSelectCircles = []
   remotePaintingCircles = []
 }
+
 const updatePrevScrollPosition = () => {
   prevScroll = {
     x: window.scrollX,
     y: window.scrollY
   }
 }
+
 const updateCirclePositions = (circles, scrollDelta) => {
   return circles.map(circle => {
     circle.x = circle.x - scrollDelta.x
@@ -234,6 +409,7 @@ const updateCirclePositions = (circles, scrollDelta) => {
     return circle
   })
 }
+
 const updateCirclesWithScroll = () => {
   if (store.state.isPinchZooming) {
     updatePrevScrollPosition()
@@ -251,12 +427,14 @@ const updateCirclesWithScroll = () => {
   }
   updatePrevScrollPosition()
 }
+
 const updateCircleForAndroid = (circle) => {
   if (!utils.isAndroid()) { return circle }
   circle.x = circle.x - window.visualViewport.offsetLeft
   circle.y = circle.y - window.visualViewport.offsetTop
   return circle
 }
+
 const checkIsCircleVisible = (circle) => {
   let { x, y, radius } = circle
   radius = radius || circleRadius
@@ -274,6 +452,7 @@ const checkIsCircleVisible = (circle) => {
   const isCircleVisibleY = utils.isBetween(isBetween)
   return Boolean(isCircleVisibleX && isCircleVisibleY)
 }
+
 const offscreenCircle = (circle) => {
   if (circle.x > viewportWidth.value) {
     circle.x = viewportWidth.value
@@ -287,27 +466,94 @@ const offscreenCircle = (circle) => {
   }
   return circle
 }
-const drawCircle = (circle, context, shouldDrawOffscreen) => {
-  circle = updateCircleForAndroid(circle)
-  const isCircleVisible = checkIsCircleVisible(circle)
-  if (!isCircleVisible && !shouldDrawOffscreen) { return }
-  if (!isCircleVisible && shouldDrawOffscreen) { circle = offscreenCircle(circle) }
-  let { x, y, color, iteration, radius, alpha } = circle
-  radius = radius || circleRadius
-  let decay = rateOfIterationDecay
-  const isSlow = context.canvas.dataset.shouldDecaySlow
-  if (isSlow) {
-    decay = rateOfIterationDecaySlow
-  }
-  alpha = alpha || utils.exponentialDecay(iteration, decay)
-  if (alpha < 0.05) { return }
-  context.beginPath()
-  context.arc(x, y, radius, 0, 2 * Math.PI)
-  context.closePath()
-  context.globalAlpha = alpha
-  context.fillStyle = color
-  context.fill()
+
+// Render circles using WebGL (batch rendering for performance)
+const renderCirclesGL = (circles) => {
+  if (circles.length === 0) return
+
+  // Use the program
+  gl.useProgram(circleProgram)
+
+  // Set the resolution uniform - IMPORTANT: use actual canvas size for correct scaling
+  const resolutionUniformLocation = gl.getUniformLocation(circleProgram, 'u_resolution')
+  gl.uniform2f(resolutionUniformLocation, canvas.width, canvas.height)
+
+  // For each unique color, batch render circles
+  const colorGroups = {}
+
+  circles.forEach(circle => {
+    if (!circle.color) return
+
+    // Skip circles with very low alpha
+    let decay = circle.shouldDecaySlow ? rateOfIterationDecaySlow : rateOfIterationDecay
+    let alpha = circle.alpha || utils.exponentialDecay(circle.iteration, decay)
+    if (alpha < 0.05) return
+
+    // Group by color
+    if (!colorGroups[circle.color]) {
+      colorGroups[circle.color] = []
+    }
+
+    // Make sure circle is visible or handle offscreen rendering
+    circle = updateCircleForAndroid(circle)
+    const isCircleVisible = checkIsCircleVisible(circle)
+    if (!isCircleVisible && !circle.shouldDrawOffscreen) return
+    if (!isCircleVisible && circle.shouldDrawOffscreen) circle = offscreenCircle(circle)
+
+    // Account for device pixel ratio when setting positions
+    const dpr = window.devicePixelRatio || 1
+    colorGroups[circle.color].push({
+      x: circle.x * dpr,
+      y: circle.y * dpr,
+      radius: (circle.radius || circleRadius) * dpr,
+      alpha
+    })
+  })
+
+  // For each color group, render all circles
+  Object.entries(colorGroups).forEach(([color, circleGroup]) => {
+    if (circleGroup.length === 0) return
+
+    const rgb = hexToRgb(color)
+
+    // Prepare position and size arrays
+    const positions = []
+    const sizes = []
+    const alphas = []
+
+    circleGroup.forEach(circle => {
+      positions.push(circle.x, circle.y)
+      sizes.push(circle.radius * 2) // Double the radius for diameter
+      alphas.push(circle.alpha)
+    })
+
+    // Set the color uniform - fixed to ensure color is correctly applied
+    const colorUniformLocation = gl.getUniformLocation(circleProgram, 'u_color')
+    gl.uniform4f(colorUniformLocation, rgb.r, rgb.g, rgb.b, 1.0)
+
+    // Set position attribute
+    const positionAttributeLocation = gl.getAttribLocation(circleProgram, 'a_position')
+    gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer)
+    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(positions), gl.STATIC_DRAW)
+    gl.enableVertexAttribArray(positionAttributeLocation)
+    gl.vertexAttribPointer(positionAttributeLocation, 2, gl.FLOAT, false, 0, 0)
+
+    // Set size attribute
+    const sizeAttributeLocation = gl.getAttribLocation(circleProgram, 'a_size')
+    gl.bindBuffer(gl.ARRAY_BUFFER, sizeBuffer)
+    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(sizes), gl.STATIC_DRAW)
+    gl.enableVertexAttribArray(sizeAttributeLocation)
+    gl.vertexAttribPointer(sizeAttributeLocation, 1, gl.FLOAT, false, 0, 0)
+
+    // Draw each circle with its own alpha
+    for (let i = 0; i < circleGroup.length; i++) {
+      const alphaUniformLocation = gl.getUniformLocation(circleProgram, 'u_alpha')
+      gl.uniform1f(alphaUniformLocation, alphas[i])
+      gl.drawArrays(gl.POINTS, i, 1)
+    }
+  })
 }
+
 const shouldCancel = (event) => {
   let shouldCancelOutsideOfBrowser = !(event.target instanceof Element)
   if (shouldCancelOutsideOfBrowser) {
@@ -318,6 +564,7 @@ const shouldCancel = (event) => {
   const fromFooter = event.target.closest('footer')
   return fromDialog || fromHeader || fromFooter
 }
+
 const stopPainting = (event) => {
   if (store.state.isAddPage) { return }
   if (shouldCancel(event)) { return }
@@ -340,13 +587,13 @@ const stopPainting = (event) => {
 }
 
 // Post Scrolling (for android)
-
 const startPostScroll = () => {
   shouldCancelPostScroll = false
   if (!postScrollAnimationTimer) {
     postScrollAnimationTimer = window.requestAnimationFrame(postScrollFrame)
   }
 }
+
 const postScrollFrame = (timestamp) => {
   if (!postScrollStartTime) {
     postScrollStartTime = timestamp
@@ -362,6 +609,7 @@ const postScrollFrame = (timestamp) => {
     endPostScroll()
   }
 }
+
 const endPostScroll = () => {
   shouldCancelPostScroll = false
   window.cancelAnimationFrame(postScrollAnimationTimer)
@@ -370,7 +618,6 @@ const endPostScroll = () => {
 }
 
 // paint circles
-
 const createPaintingCircle = (event) => {
   const isTouch = Boolean(event.touches)
   const isPaintingLocked = store.state.currentUserIsPaintingLocked
@@ -382,6 +629,7 @@ const createPaintingCircle = (event) => {
   const position = utils.cursorPositionInSpace(event)
   selectItemsBetweenCurrentAndPrevPosition(position)
 }
+
 const createPaintingCircles = (event) => {
   state.currentCursor = utils.cursorPositionInViewport(event)
   if (!prevCursor) {
@@ -398,6 +646,7 @@ const createPaintingCircles = (event) => {
   broadcastCircle(event, circle)
   prevCursor = state.currentCursor
 }
+
 const startPainting = (event) => {
   if (toolbarIsDrawing.value) { return }
   if (!isCanvasScope(event)) { return }
@@ -443,22 +692,28 @@ const startPainting = (event) => {
 
 const circlesAnimationFrame = (timestamp) => {
   clearRect()
+
+  // Prepare WebGL circles for batch rendering
+  let webglCircles = []
+
   // paint select
   paintSelectCircles = utils.filterCircles(paintSelectCircles, maxIterations)
   paintSelectCircles = paintSelectCircles.map(item => {
     item.iteration++
     const circle = JSON.parse(JSON.stringify(item))
-    drawCircle(circle, context)
+    webglCircles.push(circle)
     return item
   })
+
   // initial circles
   initialCircles = utils.filterCircles(initialCircles, 60)
   initialCircles = initialCircles.map(item => {
     item.iteration++
     const circle = JSON.parse(JSON.stringify(item))
-    drawCircle(circle, context)
+    webglCircles.push(circle)
     return item
   })
+
   // remote paint
   remotePaintingCircles = utils.filterCircles(remotePaintingCircles, maxIterations)
   remotePaintingCircles = remotePaintingCircles.map(item => {
@@ -466,24 +721,33 @@ const circlesAnimationFrame = (timestamp) => {
     let circle = JSON.parse(JSON.stringify(item))
     circle.x = circle.x - window.scrollX
     circle.y = circle.y - window.scrollY
-    const shouldDrawOffscreen = true
-    drawCircle(circle, context, shouldDrawOffscreen)
+    circle.shouldDrawOffscreen = true
+    webglCircles.push(circle)
     return item
   })
+
   // notify offscreen
   notifyOffscreenCircles = utils.filterCircles(notifyOffscreenCircles, maxIterations)
   notifyOffscreenCircles = notifyOffscreenCircles.map(item => {
     item.iteration++
     const circle = JSON.parse(JSON.stringify(item))
-    const shouldDrawOffscreen = true
-    drawCircle(circle, context, shouldDrawOffscreen)
+    circle.shouldDrawOffscreen = true
+    webglCircles.push(circle)
     return item
   })
+
+  // Batch render all circles with WebGL
+  if (webglCircles.length > 0) {
+    renderCirclesGL(webglCircles)
+  }
+
   // locking
   lockingAnimationFrame(timestamp)
+
   // continue
   const isLocking = currentUserIsLocking && lockingPercentComplete < 1
   const nextFrame = paintSelectCircles.length || initialCircles.length || remotePaintingCircles.length || notifyOffscreenCircles.length || isLocking
+
   if (nextFrame) {
     window.requestAnimationFrame(circlesAnimationFrame)
   } else {
@@ -493,6 +757,7 @@ const circlesAnimationFrame = (timestamp) => {
     }, 0)
   }
 }
+
 const broadcastCircle = (event, circle) => {
   const position = utils.cursorPositionInSpace(event)
   store.commit('broadcast/update', {
@@ -510,12 +775,12 @@ const broadcastCircle = (event, circle) => {
 }
 
 // Paint select
-
 const startPaintingCirclesTimer = () => {
   if (!timer) {
     timer = window.requestAnimationFrame(circlesAnimationFrame)
   }
 }
+
 const painting = (event) => {
   const isPainting = store.state.currentUserIsPainting
   if (isPanning.value) { return }
@@ -537,7 +802,6 @@ const painting = (event) => {
 }
 
 // Initial Circles
-
 const createInitialCircle = (circle) => {
   if (toolbarIsBox.value) { return }
   const initialCircle = {
@@ -547,11 +811,10 @@ const createInitialCircle = (circle) => {
     iteration: 1
   }
   initialCircles.push(initialCircle)
-  drawCircle(initialCircle, context)
+  startPaintingCirclesTimer()
 }
 
 // Remote Paint Strokes
-
 const createRemotePaintingCircle = (circle) => {
   const { color, zoom } = circle
   const prevCircle = remotePaintingCircles.findLast(item => item.userId === circle.userId)
@@ -569,7 +832,6 @@ const createRemotePaintingCircle = (circle) => {
 }
 
 // Notify Offscreen Circles
-
 const createNotifyOffscreenCircle = (circle) => {
   circle.x = circle.x - window.scrollX
   circle.y = circle.y - window.scrollY
@@ -577,18 +839,18 @@ const createNotifyOffscreenCircle = (circle) => {
     x: circle.x,
     y: circle.y,
     color: circle.color,
-    iteration: 1
+    iteration: 1,
+    shouldDrawOffscreen: true
   }
   notifyOffscreenCircles.push(notifyOffscreenCircle)
-  drawCircle(notifyOffscreenCircle, context, true)
   startPaintingCirclesTimer()
 }
 
 // Locking
-
 const cancelLocking = () => {
   shouldCancelLocking = true
 }
+
 const startLocking = () => {
   if (toolbarIsBox.value) { return }
   currentUserIsLocking = true
@@ -597,6 +859,7 @@ const startLocking = () => {
     startPaintingCirclesTimer()
   }, lockingPreDuration)
 }
+
 const lockingAnimationFrame = (timestamp) => {
   if (!lockingStartTime) {
     lockingStartTime = timestamp
@@ -630,7 +893,7 @@ const lockingAnimationFrame = (timestamp) => {
       alpha: alpha || 0.01, // to ensure truthyness
       iteration: 1
     }
-    drawCircle(circle, context)
+    renderCirclesGL([circle])
   } else if (lockingPercentComplete >= 1) {
     store.commit('currentUserIsPainting', true)
     store.commit('currentUserIsPaintingLocked', true)
@@ -642,12 +905,12 @@ const lockingAnimationFrame = (timestamp) => {
 }
 
 // Selecting
-
 const shouldPreventSelectionOnMobile = () => {
   const isMobile = utils.isMobile()
   const isPaintingLocked = store.state.currentUserIsPaintingLocked
   return isMobile && !isPaintingLocked
 }
+
 const selectItemsBetweenCurrentAndPrevPosition = (position) => {
   if (!prevPosition) {
     prevPosition = position
@@ -657,6 +920,7 @@ const selectItemsBetweenCurrentAndPrevPosition = (position) => {
   selectItems(points)
   prevPosition = position
 }
+
 const selectItems = (points) => {
   if (shouldPreventSelectionOnMobile()) { return }
   if (userCannotEditSpace.value) { return }
@@ -664,16 +928,19 @@ const selectItems = (points) => {
   selectBoxes(points)
   selectConnections(points)
 }
+
 const selectCards = (points) => {
   const matches = collisionDetection.checkPointsInRects(points, selectableCardsInViewport, selectableCardsGrid)
   const cardIds = matches.map(match => match.id)
   store.dispatch('addMultipleToMultipleCardsSelected', cardIds)
 }
+
 const selectBoxes = (points) => {
   const matches = collisionDetection.checkPointsInRects(points, selectableBoxes)
   const boxIds = matches.map(match => match.id)
   store.dispatch('addMultipleToMultipleBoxesSelected', boxIds)
 }
+
 const selectConnections = (points) => {
   selectableConnectionsInViewport.forEach(svg => {
     if (svg.dataset.isVisibleInViewport === 'false') { return }
