@@ -103,6 +103,7 @@ const store = createStore({
     currentUserIsPanningReady: false,
     currentUserIsPanning: false,
     currentUserToolbar: 'card', // card, box
+    drawingEraserIsActive: false,
     currentUserIsDraggingConnectionIdLabel: '',
     clipboardData: {}, // for kinopio data pasting
     shouldCancelNextMouseUpInteraction: false,
@@ -610,7 +611,7 @@ const store = createStore({
     triggerKeyboardShortcutsIsVisible: () => {},
     triggerReadOnlyJiggle: () => {},
     triggerSelectTemplateCategory: () => {},
-    triggerUpdateMainCanvasPositionOffset: () => {},
+    triggerUpdatePaintSelectCanvasPositionOffset: () => {},
     triggerPaintFramePosition: (state, event) => {},
     triggerAddRemotePaintingCircle: () => {},
     triggerUpdateRemoteUserCursor: () => {},
@@ -688,6 +689,10 @@ const store = createStore({
 
     triggerSelectedCardsContainInBox: () => {},
     triggerSelectedItemsAlignLeft: () => {},
+
+    // drawing
+    triggerStartDrawing: (state, event) => {},
+    triggerDraw: (state, event) => {},
 
     // Cards
 
@@ -958,6 +963,10 @@ const store = createStore({
     currentUserToolbar: (state, value) => {
       utils.typeCheck({ value, type: 'string' })
       state.currentUserToolbar = value
+      state.drawingEraserIsActive = false
+    },
+    drawingEraserIsActive: (state, value) => {
+      state.drawingEraserIsActive = value
     },
 
     // Dragging
@@ -2101,11 +2110,29 @@ const store = createStore({
       percent = Math.min(percent, consts.spaceZoom.max)
       context.commit('spaceZoomPercent', percent)
     },
+
+    // drawing
+
     currentUserToolbar: (context, value) => {
       const canOnlyComment = context.getters['currentUser/canOnlyComment']()
       if (canOnlyComment) { return }
       context.commit('currentUserToolbar', value)
+    },
+    toggleCurrentUserToolbar: (context, value) => {
+      const canOnlyComment = context.getters['currentUser/canOnlyComment']()
+      const prevValue = context.state.currentUserToolbar
+      if (canOnlyComment) { return }
+      if (value === prevValue) {
+        context.commit('currentUserToolbar', 'card')
+      } else {
+        context.commit('currentUserToolbar', value)
+      }
+    },
+    toggleDrawingEraserIsActive: (context) => {
+      const value = !context.state.drawingEraserIsActive
+      context.commit('drawingEraserIsActive', value)
     }
+
   },
   getters: {
     isSpacePage: (state) => {

@@ -113,6 +113,7 @@ const handleShortcuts = (event) => {
   // const isFromCard = event.target.classList[0] === 'card'
   const isSpaceScope = checkIsSpaceScope(event)
   const isMinimapDialogScope = checkIsMinimapDialogScope(event)
+  const toolbarIsDrawing = store.state.currentUserToolbar === 'drawing'
   // ?
   if (key === '?' && isSpaceScope) {
     store.commit('triggerKeyboardShortcutsIsVisible')
@@ -176,11 +177,17 @@ const handleShortcuts = (event) => {
       containItemsInNewBox(cards)
     // Toolbar Box Mode
     } else {
-      store.dispatch('currentUserToolbar', 'box')
+      store.dispatch('toggleCurrentUserToolbar', 'box')
     }
-  // c
-  } else if (key === 'c' && isSpaceScope) {
-    store.dispatch('currentUserToolbar', 'card')
+  // d
+  } else if (key === 'd' && isSpaceScope) {
+    store.dispatch('toggleCurrentUserToolbar', 'drawing')
+  // e
+  } else if (key === 'e' && isSpaceScope && toolbarIsDrawing) {
+    store.dispatch('toggleDrawingEraserIsActive')
+  // s
+  } else if (key === 's' && isSpaceScope && toolbarIsDrawing) {
+    store.dispatch('currentUser/cycleDrawingBrushSize')
   }
 }
 // on key down

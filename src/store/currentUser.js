@@ -82,7 +82,12 @@ const initialState = {
 
   // user tags
 
-  tags: []
+  tags: [],
+
+  // drawing
+
+  drawingBrushSize: 'm',
+  drawingColor: undefined
 }
 
 export default {
@@ -391,6 +396,16 @@ export default {
     tags: (state, value) => {
       utils.typeCheck({ value, type: 'array' })
       state.tags = value
+    },
+    drawingColor: (state, value) => {
+      utils.typeCheck({ value, type: 'string' })
+      state.drawingColor = value
+      cache.updateUser('drawingColor', value)
+    },
+    drawingBrushSize: (state, value) => {
+      utils.typeCheck({ value, type: 'string' })
+      state.drawingBrushSize = value
+      cache.updateUser('drawingBrushSize', value)
     }
   },
   actions: {
@@ -775,6 +790,20 @@ export default {
     tags: async (context, tags) => {
       tags = uniqBy(tags, 'name')
       context.commit('tags', tags)
+    },
+    cycleDrawingBrushSize: (context) => {
+      const prevValue = context.state.drawingBrushSize
+      let value
+      if (prevValue === 's') {
+        value = 'm'
+      }
+      if (prevValue === 'm') {
+        value = 'l'
+      }
+      if (prevValue === 'l') {
+        value = 's'
+      }
+      context.commit('drawingBrushSize', value)
     }
   },
   getters: {
@@ -971,6 +1000,12 @@ export default {
 
     tagByName: (state, getters) => (name) => {
       return state.tags.find(tag => tag.name === name)
+    },
+
+    // drawing
+
+    drawingColor: (state) => {
+      return state.drawingColor || state.color
     }
   }
 }
