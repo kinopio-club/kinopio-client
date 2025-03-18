@@ -6,6 +6,8 @@ import utils from '@/utils.js'
 import collisionDetection from '@/collisionDetection.js'
 import postMessage from '@/postMessage.js'
 import DropGuideLine from '@/components/layers/DropGuideLine.vue'
+
+import { colord, extend } from 'colord'
 const store = useStore()
 
 // a sequence of circles that's broadcasted to others and is used for multi-card selection
@@ -140,6 +142,8 @@ const isCanvasScope = (event) => {
 // current user
 
 const currentUserColor = computed(() => store.state.currentUser.color)
+const currentUserColorIsDark = computed(() => utils.colorIsDark(currentUserColor.value))
+const boxFillColor = computed(() => colord(currentUserColor.value).alpha(0.5).toRgbString())
 const userCannotEditSpace = computed(() => !store.getters['currentUser/canEditSpace']())
 const isPanning = computed(() => store.state.currentUserIsPanningReady)
 const isBoxSelecting = computed(() => store.state.currentUserIsBoxSelecting)
@@ -727,6 +731,18 @@ const highlightBoxes = (points) => {
   boxIds.forEach(boxId => {
     highlightedItems.boxIds[boxId] = true
     // apply box styles
+    const boxElement = utils.boxElementFromId(boxId)
+    const boxInfoElement = boxElement.querySelector('.box-info')
+    const connectorButtonElement = boxElement.querySelector('.connector-button')
+    const color = currentUserColor.value
+    boxElement.style.borderColor = color
+    boxElement.style.backgroundColor = boxFillColor.value
+    boxInfoElement.style.backgroundColor = color
+    if (currentUserColorIsDark.value) {
+      boxInfoElement.classList.add('is-dark')
+    } else {
+      boxInfoElement.classList.remove('is-dark')
+    }
   })
 }
 const highlightConnections = (points) => {
