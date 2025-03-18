@@ -34,57 +34,10 @@ const viewportWidth = computed(() => store.state.viewportWidth)
 
 const toolbarIsDrawing = computed(() => store.state.currentUserToolbar === 'drawing')
 
-const preventTouchScrolling = (event) => {
-  if (toolbarIsDrawing.value) {
-    event.preventDefault()
-  }
-}
-
-// styles
-
 const strokeColor = computed(() => store.getters['currentUser/drawingColor'])
 const strokeDiameter = computed(() => {
   const diameter = store.state.currentUser.drawingBrushSize
   return consts.drawingBrushSizeDiameter[diameter]
-})
-const drawingCursorStyles = (styles) => {
-  if (!toolbarIsDrawing.value) { return }
-  const strokeWidth = 1
-  const diameter = strokeDiameter.value
-  const radius = diameter / 2
-  const color = strokeColor.value
-  let svg
-  // eraser cursor
-  if (store.state.drawingEraserIsActive) {
-    const crossScale = 0.25
-    const crossSize = diameter * crossScale // cross size relative to circle size
-    const crossOffset = (diameter - crossSize) / 2 // center the ✕
-    svg = `
-      <svg xmlns='http://www.w3.org/2000/svg' width='${diameter}' height='${diameter}' viewBox='0 0 ${diameter} ${diameter}'>
-        <circle cx='${radius}' cy='${radius}' r='${radius - 2}' fill='none' stroke='${color}' stroke-width='${strokeWidth}'/>
-        <line x1='${crossOffset}' y1='${crossOffset}' x2='${crossOffset + crossSize}' y2='${crossOffset + crossSize}' stroke='${color}' stroke-width='${strokeWidth}'/>
-        <line x1='${crossOffset + crossSize}' y1='${crossOffset}' x2='${crossOffset}' y2='${crossOffset + crossSize}' stroke='${color}' stroke-width='${strokeWidth}'/>
-      </svg>`
-  // drawing cursor
-  } else {
-    svg = `
-      <svg xmlns='http://www.w3.org/2000/svg' width='${diameter}' height='${diameter}' viewBox='0 0 ${diameter} ${diameter}'>
-        <circle cx='${radius}' cy='${radius}' r='${radius - 2}' fill='none' stroke='${color}' stroke-width='${strokeWidth}'/>
-      </svg>
-    `
-  }
-  const dataUri = `data:image/svg+xml;charset=utf8,${encodeURIComponent(svg)}`
-  styles.cursor = `url("${dataUri}") ${radius} ${radius}, auto`
-  return styles
-}
-const styles = computed(() => {
-  let styles = {}
-  if (toolbarIsDrawing.value) {
-    styles = drawingCursorStyles(styles)
-  } else {
-    styles.pointerEvents = 'none'
-  }
-  return styles
 })
 
 // start
@@ -102,7 +55,7 @@ const draw = throttle((event) => {
   if (!isDrawing) { return }
   const drawingEraserIsActive = store.state.drawingEraserIsActive
   const { x, y } = utils.cursorPositionInPage(event)
-  // console.log('💐💐', x, y)
+  console.log('💐💐', x, y)
   const color = strokeColor.value
   context.lineCap = context.lineJoin = 'round'
   context.strokeStyle = color
@@ -146,10 +99,7 @@ const endDrawing = (event) => {
 canvas#drawing-canvas(
   :width="viewportWidth"
   :height="viewportHeight"
-  :style="styles"
-  @touchmove="preventTouchScrolling"
-  @pointerdown="startDrawing"
-  @pointermove="draw"
+
 )
 </template>
 
@@ -162,5 +112,6 @@ canvas
   width 100dvw
   height 100dvh
   opacity 1
-  mix-blend-mode multiply
+  pointer-events none
+  // mix-blend-mode multiply
 </style>

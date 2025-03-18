@@ -21,6 +21,7 @@ import SnapGuideLines from '@/components/SnapGuideLines.vue'
 import Header from '@/components/Header.vue'
 import PaintSelectCanvas from '@/components/layers/PaintSelectCanvas.vue'
 import DrawingCanvas from '@/components/layers/DrawingCanvas.vue'
+import DrawingHandler from '@/components/DrawingHandler.vue'
 import SonarPing from '@/components/layers/SonarPing.vue'
 import UserLabelCursor from '@/components/UserLabelCursor.vue'
 import Footer from '@/components/Footer.vue'
@@ -663,6 +664,7 @@ main#space.space(
 )
   SpaceBackground
   SpaceBackgroundTint
+  DrawingCanvas
   ItemsLocked
   #box-backgrounds
   Connections
@@ -681,7 +683,7 @@ main#space.space(
   SnapGuideLines
 aside
   PaintSelectCanvas
-  DrawingCanvas
+  DrawingHandler
   SonarPing
 //- page ui, dialogs
 Header
