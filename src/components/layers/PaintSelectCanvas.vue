@@ -668,13 +668,11 @@ const lockingAnimationFrame = (timestamp) => {
     const percentRemaining = Math.abs(lockingPercentComplete - 1)
     const circleRadiusDelta = initialLockCircleRadius - minSize
     const radius = (circleRadiusDelta * percentRemaining) + minSize
-    const alpha = utils.easeOut(lockingPercentComplete, elaspedTime, lockingDuration)
     const circle = {
       x: startCursor.x,
       y: startCursor.y,
       color: currentUserColor.value,
       radius,
-      alpha: alpha || 0.01, // to ensure truthyness
       iteration: 1
     }
     webglRenderer.renderCircles([circle])
