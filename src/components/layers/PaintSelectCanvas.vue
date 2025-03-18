@@ -25,6 +25,8 @@ let canvas, gl, startCursor, timer
 // WebGL variables
 let circleProgram
 let positionBuffer, sizeBuffer, colorBuffer, alphaBuffer
+// Resize handling
+let resizeObserver
 // paint select
 // ephemeral brush strokes that select items
 let paintSelectCircles = []
@@ -93,10 +95,49 @@ const fragmentShaderSource = `
       discard; // Outside of circle
     }
     
-    // Apply color with alpha
-    gl_FragColor = vec4(u_color.rgb, u_alpha);
+    // Apply premultiplied alpha for CSS-like opacity
+    vec4 color = u_color;
+    color.a *= u_alpha;
+    color.rgb *= color.a; // Premultiply RGB by alpha
+    
+    gl_FragColor = color;
   }
 `
+
+// Utility function to resize canvas to match display size
+const resizeCanvasToDisplaySize = () => {
+  if (!canvas || !gl) return false
+  // Get the browser's computed display size
+  const displayWidth = canvas.clientWidth
+  const displayHeight = canvas.clientHeight
+  // Get device pixel ratio for high-DPI displays
+  const dpr = window.devicePixelRatio || 1
+  // Check if canvas is not the right size
+  const needResize = canvas.width !== displayWidth * dpr ||
+                     canvas.height !== displayHeight * dpr
+  if (needResize) {
+    // Set canvas size accounting for device pixel ratio
+    canvas.width = displayWidth * dpr
+    canvas.height = displayHeight * dpr
+    // Update the viewport to match the new canvas size
+    gl.viewport(0, 0, canvas.width, canvas.height)
+    console.debug(`Canvas resized to ${canvas.width}x${canvas.height} (DPR: ${dpr})`)
+  }
+  return needResize
+}
+
+// Handle window resize
+const handleResize = () => {
+  const resized = resizeCanvasToDisplaySize()
+  if (resized) {
+    // If there are circles to render, redraw them with the new dimensions
+    if (paintSelectCircles.length || initialCircles.length ||
+        remotePaintingCircles.length || notifyOffscreenCircles.length) {
+      clearRect()
+      startPaintingCirclesTimer()
+    }
+  }
+}
 
 // Initialize WebGL
 const initWebGL = () => {
@@ -110,8 +151,9 @@ const initWebGL = () => {
   // Try to get WebGL context with proper options
   gl = canvas.getContext('webgl', {
     alpha: true,
-    premultipliedAlpha: false,
-    antialias: true
+    premultipliedAlpha: true, // Set to true for CSS-like opacity behavior
+    antialias: true,
+    preserveDrawingBuffer: true
   })
   if (!gl) {
     console.error('WebGL not supported')
@@ -128,8 +170,9 @@ const initWebGL = () => {
   gl.viewport(0, 0, canvas.width, canvas.height)
   gl.clearColor(0, 0, 0, 0)
   gl.enable(gl.BLEND)
-  gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA)
-
+  // Set blend mode to match CSS opacity behavior
+  // This blend mode precisely matches how CSS opacity works
+  gl.blendFunc(gl.ONE, gl.ONE_MINUS_SRC_ALPHA) // Changed from SRC_ALPHA to ONE for premultiplied alpha
   return true
 }
 
@@ -190,17 +233,24 @@ onMounted(() => {
       createNotifyOffscreenCircle(circle)
     }
   })
-
   // init canvas
   canvas = document.getElementById('paint-select-canvas')
-
   // Initialize WebGL
   const useWebGL = initWebGL()
   if (!useWebGL) {
     console.error('WebGL initialization failed')
     return
   }
-
+  // Setup resize handling
+  resizeObserver = new ResizeObserver(() => {
+    handleResize()
+  })
+  resizeObserver.observe(canvas)
+  window.addEventListener('resize', handleResize)
+  window.addEventListener('orientationchange', () => {
+    // Slight delay to allow dimension changes to complete
+    setTimeout(handleResize, 100)
+  })
   // trigger stopPainting even if mouse is outside window
   window.addEventListener('mouseup', stopPainting)
   window.addEventListener('touchend', stopPainting)
@@ -231,8 +281,13 @@ onBeforeUnmount(() => {
   window.removeEventListener('touchstart', startPainting)
   window.removeEventListener('mousemove', painting)
   window.removeEventListener('touchmove', painting)
+  // Clean up resize handlers
+  window.removeEventListener('resize', handleResize)
+  window.removeEventListener('orientationchange', handleResize)
+  if (resizeObserver) {
+    resizeObserver.disconnect()
+  }
   unsubscribe()
-
   if (gl) {
     // Clean up WebGL resources
     gl.deleteProgram(circleProgram)
@@ -248,7 +303,9 @@ const state = reactive({
 
 // Clear canvas
 const clearRect = () => {
-  gl.clear(gl.COLOR_BUFFER_BIT)
+  if (gl) {
+    gl.clear(gl.COLOR_BUFFER_BIT)
+  }
 }
 
 const triggerHideTouchInterface = () => {
@@ -282,11 +339,7 @@ const spaceZoomDecimal = computed(() => store.getters.spaceZoomDecimal)
 
 // Watch for canvas size changes to update WebGL viewport
 watch([pageWidth, pageHeight, viewportWidth, viewportHeight], () => {
-  if (gl) {
-    canvas.width = viewportWidth.value * window.devicePixelRatio
-    canvas.height = viewportHeight.value * window.devicePixelRatio
-    gl.viewport(0, 0, canvas.width, canvas.height)
-  }
+  handleResize()
 })
 
 // selectable items
@@ -437,6 +490,9 @@ const offscreenCircle = (circle) => {
 const renderCirclesGL = (circles) => {
   if (circles.length === 0) return
 
+  // Make sure canvas size is up-to-date before rendering
+  resizeCanvasToDisplaySize()
+
   // Use the program
   gl.useProgram(circleProgram)
 
@@ -446,6 +502,10 @@ const renderCirclesGL = (circles) => {
 
   // For each unique color, batch render circles
   const colorGroups = {}
+
+  // Browser-specific adjustments
+  const isFirefox = navigator.userAgent.toLowerCase().indexOf('firefox') > -1
+  const firefoxRadiusMultiplier = isFirefox ? 1.75 : 1 // Firefox needs larger circles
 
   circles.forEach(circle => {
     if (!circle.color) return
@@ -468,10 +528,12 @@ const renderCirclesGL = (circles) => {
 
     // Account for device pixel ratio when setting positions
     const dpr = window.devicePixelRatio || 1
+    const adjustedRadius = (circle.radius || circleRadius) * dpr * firefoxRadiusMultiplier
+
     colorGroups[circle.color].push({
       x: circle.x * dpr,
       y: circle.y * dpr,
-      radius: (circle.radius || circleRadius) * dpr,
+      radius: adjustedRadius,
       alpha
     })
   })
