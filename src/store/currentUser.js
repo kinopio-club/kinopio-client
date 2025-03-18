@@ -790,6 +790,20 @@ export default {
     tags: async (context, tags) => {
       tags = uniqBy(tags, 'name')
       context.commit('tags', tags)
+    },
+    cycleDrawingBrushSize: (context) => {
+      const prevValue = context.state.drawingBrushSize
+      let value
+      if (prevValue === 's') {
+        value = 'm'
+      }
+      if (prevValue === 'm') {
+        value = 'l'
+      }
+      if (prevValue === 'l') {
+        value = 's'
+      }
+      context.commit('drawingBrushSize', value)
     }
   },
   getters: {

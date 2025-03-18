@@ -2106,11 +2106,29 @@ const store = createStore({
       percent = Math.min(percent, consts.spaceZoom.max)
       context.commit('spaceZoomPercent', percent)
     },
+
+    // drawing
+
     currentUserToolbar: (context, value) => {
       const canOnlyComment = context.getters['currentUser/canOnlyComment']()
       if (canOnlyComment) { return }
       context.commit('currentUserToolbar', value)
+    },
+    toggleCurrentUserToolbar: (context, value) => {
+      const canOnlyComment = context.getters['currentUser/canOnlyComment']()
+      const prevValue = context.state.currentUserToolbar
+      if (canOnlyComment) { return }
+      if (value === prevValue) {
+        context.commit('currentUserToolbar', 'card')
+      } else {
+        context.commit('currentUserToolbar', value)
+      }
+    },
+    toggleDrawingEraserIsActive: (context) => {
+      const value = !context.state.drawingEraserIsActive
+      context.commit('drawingEraserIsActive', value)
     }
+
   },
   getters: {
     isSpacePage: (state) => {

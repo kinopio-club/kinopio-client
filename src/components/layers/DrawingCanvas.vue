@@ -90,7 +90,6 @@ const startDrawing = (event) => {
   store.dispatch('closeAllDialogs')
   isDrawing = true
   currentStroke = []
-  console.log('💐')
 }
 const draw = throttle((event) => {
   if (!isDrawing) { return }
@@ -103,7 +102,6 @@ const draw = throttle((event) => {
 }, 16) // 60fps
 const endDrawing = (event) => {
   if (!toolbarIsDrawing.value) { return }
-  console.log('💐💐💐')
   isDrawing = false
   if (!currentStroke.length) { }
   // await? save to api operation (saves strokes, rasterizes and saves latest.
