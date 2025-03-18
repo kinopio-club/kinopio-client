@@ -1088,6 +1088,9 @@ export default {
     const y = parseInt(element.style.top)
     return { x, y }
   },
+
+  // boxes
+
   boxElementFromConnectorPosition (x, y) {
     let elements = document.elementsFromPoint(x, y)
     let boxFromConnector
@@ -1126,6 +1129,9 @@ export default {
     const infoHeight = Math.round(boxInfoRect.height)
     return { infoWidth, infoHeight }
   },
+
+  // rect
+
   isPointInsideRect (point, rect) {
     const xIsInside = this.isBetween({
       value: point.x,
@@ -1172,32 +1178,6 @@ export default {
       (rectA.x + rectA.width) <= (rectB.x + rectB.width) &&
       (rectA.y + rectA.height) <= (rectB.y + rectB.height)
     )
-  },
-  nameStringFromItems (items) {
-    items = items.filter(item => Boolean(item))
-    const data = items.map(item => item.name)
-    return join(data, '\n\n')
-  },
-  trim (string) {
-    if (!string) { return '' }
-    // https://regexr.com/59m7a
-    // unlike string.trim(), this removes line breaks too
-    return string.replace(/^(\n|\\n|\s)+|(\n|\\n|\s)+$/g, '')
-  },
-  hasBlankCharacters (string) {
-    if (!string) { return true }
-    // https://regexr.com/5i5a3
-    // matches space, enter, tab, whitespace characters
-    const blankPattern = new RegExp(/( |\s|\t)+/gm)
-    if (string.match(blankPattern)) {
-      return true
-    }
-  },
-  splitByBlankCharacters (string) {
-    // https://regexr.com/5i5a3
-    // matches space, enter, tab, whitespace characters
-    const blankPattern = new RegExp(/( |\s|\t)+/gm)
-    return string.split(blankPattern)
   },
   boundaryRectFromItems (items) {
     items = this.clone(items)
@@ -1257,6 +1237,35 @@ export default {
     return { width, height }
   },
 
+  // string
+
+  nameStringFromItems (items) {
+    items = items.filter(item => Boolean(item))
+    const data = items.map(item => item.name)
+    return join(data, '\n\n')
+  },
+  trim (string) {
+    if (!string) { return '' }
+    // https://regexr.com/59m7a
+    // unlike string.trim(), this removes line breaks too
+    return string.replace(/^(\n|\\n|\s)+|(\n|\\n|\s)+$/g, '')
+  },
+  hasBlankCharacters (string) {
+    if (!string) { return true }
+    // https://regexr.com/5i5a3
+    // matches space, enter, tab, whitespace characters
+    const blankPattern = new RegExp(/( |\s|\t)+/gm)
+    if (string.match(blankPattern)) {
+      return true
+    }
+  },
+  splitByBlankCharacters (string) {
+    // https://regexr.com/5i5a3
+    // matches space, enter, tab, whitespace characters
+    const blankPattern = new RegExp(/( |\s|\t)+/gm)
+    return string.split(blankPattern)
+  },
+
   // estimated card connector positions
 
   estimatedNewCardConnectorPosition (position) {
@@ -1285,6 +1294,9 @@ export default {
 
   // Connections 🐙
 
+  connectionElementFromId (connectionId) {
+    return document.querySelector(`.connection[data-id="${connectionId}"]`)
+  },
   migrationConnections (connections) { // migration added July 2024
     if (!connections) { return }
     return connections.map(connection => {

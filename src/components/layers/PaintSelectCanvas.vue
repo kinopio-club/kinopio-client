@@ -754,13 +754,16 @@ const highlightConnections = (points) => {
     const connectionIds = matches.map(match => match.id)
     connectionIds.forEach(connectionId => {
       highlightedItems.connectionIds[connectionId] = true
+      const connectionElement = utils.connectionElementFromId(connectionId)
+      const pathElement = connectionElement.querySelector('path')
+      pathElement.classList.add('active')
     })
   })
 }
 const clearHighlightedStyles = () => {
   const cardIds = Object.keys(highlightedItems.cardIds)
-  const boxIds = Object.keys(highlightedItems.boxIds)
-  const connectionIds = Object.keys(highlightedItems.connectionIds)
+  // const boxIds = Object.keys(highlightedItems.boxIds)
+  // const connectionIds = Object.keys(highlightedItems.connectionIds)
   cardIds.forEach(cardId => {
     const cardWrapElement = utils.cardElementFromId(cardId)
     const nameSegmentsElement = cardWrapElement.querySelectorAll('.name-segments')
