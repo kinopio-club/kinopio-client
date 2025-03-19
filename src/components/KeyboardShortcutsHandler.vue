@@ -197,6 +197,7 @@ const handleMetaKeyShortcuts = (event) => {
   const isCardScope = checkIsCardScope(event)
   const isSpaceScope = checkIsSpaceScope(event)
   const isFromInput = event.target.closest('input') || event.target.closest('textarea')
+  const toolbarIsDrawing = store.state.currentUserToolbar === 'drawing'
   // Add Child Card
   if (event.shiftKey && key === 'enter' && (isSpaceScope || isCardScope)) {
     const shouldAddChildCard = store.state.currentUser.cardSettingsShiftEnterShouldAddChildCard
@@ -214,11 +215,11 @@ const handleMetaKeyShortcuts = (event) => {
     event.preventDefault()
     store.dispatch('history/undo')
   // Select All Cards Below Cursor
-  } else if (isMeta && event.shiftKey && key === 'a' && isSpaceScope) {
+  } else if (isMeta && event.shiftKey && key === 'a' && isSpaceScope && !toolbarIsDrawing) {
     event.preventDefault()
     selectAllItemsBelowCursor()
   // Select All Cards and Connections
-  } else if (isMeta && key === 'a' && isSpaceScope) {
+  } else if (isMeta && key === 'a' && isSpaceScope && !toolbarIsDrawing) {
     event.preventDefault()
     selectAllItems()
   // Search/Jump-to Space

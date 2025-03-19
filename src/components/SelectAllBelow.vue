@@ -33,7 +33,9 @@ const updateIsSelectingY = (value) => {
   }
   store.commit('isSelectingY', value)
 }
+const toolbarIsDrawing = computed(() => store.state.currentUserToolbar === 'drawing')
 const isVisible = computed(() => {
+  if (toolbarIsDrawing.value) { return }
   if (store.state.isSelectingX) { return }
   if (store.state.currentUserIsPanning || store.state.currentUserIsPanningReady) { return }
   return state.isVisible
