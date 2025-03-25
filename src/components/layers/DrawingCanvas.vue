@@ -69,19 +69,27 @@ const createPoint = (event) => {
 
 // render
 
+const viewportPosition = (point) => {
+  return {
+    x: point.x - state.prevScroll.x,
+    y: point.y - state.prevScroll.y
+  }
+}
 const renderPoint = (point) => {
+  const { x, y } = viewportPosition(point)
   context.globalCompositeOperation = 'source-over'
   if (point.isEraser) {
     context.globalCompositeOperation = 'destination-out'
   }
   const radius = point.diameter / 2
   context.beginPath()
-  context.arc(point.x, point.y, radius, 0, 2 * Math.PI)
+  context.arc(x, y, radius, 0, 2 * Math.PI)
   context.closePath()
   context.fillStyle = point.color
   context.fill()
 }
 const renderStroke = (stroke) => {
+  const { x: x0, y: y0 } = viewportPosition(stroke[0])
   context.globalCompositeOperation = 'source-over'
   if (stroke[0].isEraser) {
     context.globalCompositeOperation = 'destination-out'
@@ -89,9 +97,10 @@ const renderStroke = (stroke) => {
   context.strokeStyle = stroke[0].color
   context.lineWidth = stroke[0].diameter
   context.beginPath()
-  context.moveTo(stroke[0].x, stroke[0].y)
+  context.moveTo(x0, y0)
   stroke.forEach((point) => {
-    context.lineTo(point.x, point.y)
+    const { x, y } = viewportPosition(point)
+    context.lineTo(x, y)
   })
   context.stroke()
 }
@@ -157,13 +166,19 @@ const scroll = (event) => {
   redraw()
 }
 
+const styles = computed(() => {
+  return {
+    top: state.prevScroll.y + 'px',
+    left: state.prevScroll.x + 'px'
+  }
+})
 </script>
 
 <template lang="pug">
 canvas#drawing-canvas(
   :width="viewportWidth"
   :height="viewportHeight"
-
+  :style="styles"
 )
 </template>
 
