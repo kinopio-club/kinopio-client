@@ -60,7 +60,7 @@ onMounted(() => {
       createPaintingCircle(event)
       highlightItems([position])
       selectItems()
-    } else if (mutation.type === 'triggerUpdateMainCanvasPositionOffset') {
+    } else if (mutation.type === 'triggerUpdatePaintSelectCanvasPositionOffset') {
       updateCirclesWithScroll()
     } else if (mutation.type === 'triggerAddRemotePaintingCircle') {
       let circle = mutation.payload
