@@ -7,18 +7,22 @@ import consts from '@/consts.js'
 
 const store = useStore()
 
-let canvas, context
+let canvas, context, prevScroll
 let isDrawing = false
 let stroke = []
-let sessionStrokes = []
+let strokes = []
 
 let unsubscribe
 
+// TODO handle remote drawing broadcast received
+
 onMounted(() => {
-  window.addEventListener('pointerup', endDrawing)
   canvas = document.getElementById('drawing-canvas')
   context = canvas.getContext('2d')
   context.scale(window.devicePixelRatio, window.devicePixelRatio)
+  window.addEventListener('pointerup', endDrawing)
+  window.addEventListener('scroll', scroll)
+  updatePrevScroll()
 
   // TODO handle resize. clear and restore from rasterized
 
@@ -34,6 +38,7 @@ onMounted(() => {
 })
 onBeforeUnmount(() => {
   window.removeEventListener('pointerup', endDrawing)
+  window.removeEventListener('scroll', scroll)
   unsubscribe()
 })
 
@@ -55,77 +60,121 @@ const startDrawing = (event) => {
   store.dispatch('closeAllDialogs')
   isDrawing = true
   stroke = []
-  const { x, y } = utils.cursorPositionInPage(event)
-  // console.log('💐💐', x, y)
-  const color = strokeColor.value
-  const radius = strokeDiameter.value / 2
-  context.globalCompositeOperation = 'source-over'
-  if (store.state.drawingEraserIsActive) {
-    context.globalCompositeOperation = 'destination-out'
-  }
-  context.beginPath()
-  context.arc(x, y, radius, 0, 2 * Math.PI)
-  context.closePath()
-  context.fillStyle = color
-  context.fill()
-  stroke.push({
-    x,
-    y,
-    color,
-    isEraser: store.state.drawingEraserIsActive
-    // scrollX: window.scrollX,
-    // scrollY: window.scrollY,
-    // elapsedTime: Date.now() - recordStartTime,
-  })
+  const { x, y } = utils.cursorPositionInViewport(event)
+  const startPoint = createPoint(x, y)
+  drawStartPoint(startPoint)
+  stroke.push(startPoint)
 }
 
 // draw
 
-const draw = (event) => {
-  if (!isDrawing) { return }
-  const drawingEraserIsActive = store.state.drawingEraserIsActive
-  const { x, y } = utils.cursorPositionInPage(event)
-  // console.log('💐💐', x, y)
-  const color = strokeColor.value
-  context.lineCap = context.lineJoin = 'round'
-  context.strokeStyle = color
-  context.lineWidth = strokeDiameter.value
-  stroke.push({
+const createPoint = (x, y) => {
+  return {
     x,
     y,
-    color,
-    isEraser: store.state.drawingEraserIsActive
-    // scrollX: window.scrollX,
-    // scrollY: window.scrollY,
-    // elapsedTime: Date.now() - recordStartTime,
+    color: strokeColor.value,
+    diameter: strokeDiameter.value,
+    isEraser: store.state.drawingEraserIsActive,
+    scrollX: prevScroll.x,
+    scrollY: prevScroll.y
+  }
+}
+const positionWithScroll = (point) => {
+  let { x, y, scrollX, scrollY } = point
+  x = x + scrollX
+  y = y + scrollY
+  return { x, y }
+}
+const drawStartPoint = (point) => {
+  context.globalCompositeOperation = 'source-over'
+  if (point.isEraser) {
+    context.globalCompositeOperation = 'destination-out'
+  }
+  const { x, y } = positionWithScroll(point)
+  const radius = point.diameter.value / 2
+  context.beginPath()
+  context.arc(x, y, radius, 0, 2 * Math.PI)
+  context.closePath()
+  context.fillStyle = point.color
+  context.fill()
+}
+const drawStroke = (stroke) => {
+  context.globalCompositeOperation = 'source-over'
+  if (stroke[0].isEraser) {
+    context.globalCompositeOperation = 'destination-out'
+  }
+  context.strokeStyle = stroke[0].color
+  context.lineWidth = stroke[0].diameter
+  stroke = stroke.map(point => {
+    const { x, y } = positionWithScroll(point)
+    point.x = x
+    point.y = y
+    return point
   })
-  // context.globalCompositeOperation = "source-over";
-  // if store.state.drawingEraserIsActive
-  // context.globalCompositeOperation = "destination-out";
   context.beginPath()
   context.moveTo(stroke[0].x, stroke[0].y)
   stroke.forEach((point) => {
     context.lineTo(point.x, point.y)
   })
   context.stroke()
+}
+const draw = (event) => {
+  if (!isDrawing) { return }
+  const { x, y } = utils.cursorPositionInViewport(event)
+  context.lineCap = context.lineJoin = 'round'
+  stroke.push(createPoint(x, y))
+  drawStroke(stroke)
   // TODO broadcast
+}
+
+const clear = () => {
+  const pageWidth = store.state.pageWidth
+  const pageHeight = store.state.pageHeight
+  context.clearRect(0, 0, pageWidth.value, pageHeight.value)
+}
+const redraw = () => {
+  clear()
+  strokes.forEach(stroke => {
+    console.log('🅰️', stroke)
+
+    //   context.beginPath()
+    //   context.moveTo(stroke[0].x, stroke[0].y)
+    //   stroke.forEach((point) => {
+    //     context.lineTo(point.x, point.y)
+    //   })
+    //   context.stroke()
+  })
 }
 
 // stop
 
 const endDrawing = (event) => {
   if (!toolbarIsDrawing.value) { return }
-  sessionStrokes.push(stroke)
+  strokes.push(stroke)
   stroke = []
   isDrawing = false
-  // pageCanvas.getContext('2d').drawImage(canvas, prevScroll.x / 2, prevScroll.y / 2, canvas.width / 2, canvas.height / 2)
-  // context.clearRect(0,0, canvas.width, canvas.height)
 
-  // if (!stroke.length) { }
   // await? save to api operation (saves strokes, rasterizes and saves latest.
-  // re-rasterize on demand to prevent conflicts??)
-  // await? rasterize and save cached version
+  // re-rasterize on demand to prevent conflicts??) - only rasterize on server to maintain correct order
 }
+
+// scroll
+
+const updatePrevScroll = () => {
+  prevScroll = {
+    x: window.scrollX,
+    y: window.scrollY
+  }
+}
+const scroll = (event) => {
+  const scrollDelta = {
+    x: window.scrollX - prevScroll.x,
+    y: window.scrollY - prevScroll.y
+  }
+  updatePrevScroll()
+  redraw()
+}
+
 </script>
 
 <template lang="pug">
