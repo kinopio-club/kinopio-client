@@ -59,9 +59,10 @@ const startDrawing = (event) => {
   // console.log('💐💐', x, y)
   const color = strokeColor.value
   const radius = strokeDiameter.value / 2
-  // context.globalCompositeOperation = "source-over";
-  // if store.state.drawingEraserIsActive
-  // context.globalCompositeOperation = "destination-out";
+  context.globalCompositeOperation = 'source-over'
+  if (store.state.drawingEraserIsActive) {
+    context.globalCompositeOperation = 'destination-out'
+  }
   context.beginPath()
   context.arc(x, y, radius, 0, 2 * Math.PI)
   context.closePath()
