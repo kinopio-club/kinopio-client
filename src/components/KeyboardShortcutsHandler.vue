@@ -181,6 +181,10 @@ const handleShortcuts = (event) => {
     }
   // d
   } else if (key === 'd' && isSpaceScope) {
+    if (toolbarIsDrawing && store.state.drawingEraserIsActive) {
+      store.commit('drawingEraserIsActive', false)
+      return
+    }
     store.dispatch('toggleCurrentUserToolbar', 'drawing')
   // e
   } else if (key === 'e' && isSpaceScope && toolbarIsDrawing) {
