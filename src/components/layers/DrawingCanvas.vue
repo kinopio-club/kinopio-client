@@ -89,6 +89,10 @@ const renderPoint = (point) => {
   context.fill()
 }
 const renderStroke = (stroke) => {
+  if (stroke.length === 1) {
+    renderPoint(stroke[0])
+    return
+  }
   const { x: x0, y: y0 } = viewportPosition(stroke[0])
   context.globalCompositeOperation = 'source-over'
   if (stroke[0].isEraser) {
