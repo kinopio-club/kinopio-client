@@ -124,14 +124,7 @@ const clear = () => {
 const redraw = () => {
   clear()
   strokes.forEach(stroke => {
-    console.log('🅰️', stroke)
-
-    //   context.beginPath()
-    //   context.moveTo(stroke[0].x, stroke[0].y)
-    //   stroke.forEach((point) => {
-    //     context.lineTo(point.x, point.y)
-    //   })
-    //   context.stroke()
+    renderStroke(stroke)
   })
 }
 
