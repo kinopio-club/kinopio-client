@@ -7,7 +7,7 @@ import consts from '@/consts.js'
 
 const store = useStore()
 
-let canvas, context, prevScroll
+let canvas, context
 let isDrawing = false
 let stroke = []
 let strokes = []
@@ -42,6 +42,10 @@ onBeforeUnmount(() => {
   unsubscribe()
 })
 
+const state = reactive({
+  prevScroll: { x: 0, y: 0 }
+})
+
 const viewportHeight = computed(() => store.state.viewportHeight)
 const viewportWidth = computed(() => store.state.viewportWidth)
 
@@ -52,6 +56,45 @@ const strokeDiameter = computed(() => {
   const diameter = store.state.currentUser.drawingBrushSize
   return consts.drawingBrushSizeDiameter[diameter]
 })
+const createPoint = (event) => {
+  const { x, y } = utils.cursorPositionInPage(event)
+  return {
+    x,
+    y,
+    color: strokeColor.value,
+    diameter: strokeDiameter.value,
+    isEraser: store.state.drawingEraserIsActive
+  }
+}
+
+// render
+
+const renderPoint = (point) => {
+  context.globalCompositeOperation = 'source-over'
+  if (point.isEraser) {
+    context.globalCompositeOperation = 'destination-out'
+  }
+  const radius = point.diameter / 2
+  context.beginPath()
+  context.arc(point.x, point.y, radius, 0, 2 * Math.PI)
+  context.closePath()
+  context.fillStyle = point.color
+  context.fill()
+}
+const renderStroke = (stroke) => {
+  context.globalCompositeOperation = 'source-over'
+  if (stroke[0].isEraser) {
+    context.globalCompositeOperation = 'destination-out'
+  }
+  context.strokeStyle = stroke[0].color
+  context.lineWidth = stroke[0].diameter
+  context.beginPath()
+  context.moveTo(stroke[0].x, stroke[0].y)
+  stroke.forEach((point) => {
+    context.lineTo(point.x, point.y)
+  })
+  context.stroke()
+}
 
 // start
 
@@ -60,77 +103,23 @@ const startDrawing = (event) => {
   store.dispatch('closeAllDialogs')
   isDrawing = true
   stroke = []
-  const { x, y } = utils.cursorPositionInViewport(event)
-  const startPoint = createPoint(x, y)
-  drawStartPoint(startPoint)
-  stroke.push(startPoint)
+  const point = createPoint(event)
+  renderPoint(point)
+  stroke.push(point)
 }
 
 // draw
 
-const createPoint = (x, y) => {
-  return {
-    x,
-    y,
-    color: strokeColor.value,
-    diameter: strokeDiameter.value,
-    isEraser: store.state.drawingEraserIsActive,
-    scrollX: prevScroll.x,
-    scrollY: prevScroll.y
-  }
-}
-const positionWithScroll = (point) => {
-  let { x, y, scrollX, scrollY } = point
-  x = x + scrollX
-  y = y + scrollY
-  return { x, y }
-}
-const drawStartPoint = (point) => {
-  context.globalCompositeOperation = 'source-over'
-  if (point.isEraser) {
-    context.globalCompositeOperation = 'destination-out'
-  }
-  const { x, y } = positionWithScroll(point)
-  const radius = point.diameter.value / 2
-  context.beginPath()
-  context.arc(x, y, radius, 0, 2 * Math.PI)
-  context.closePath()
-  context.fillStyle = point.color
-  context.fill()
-}
-const drawStroke = (stroke) => {
-  context.globalCompositeOperation = 'source-over'
-  if (stroke[0].isEraser) {
-    context.globalCompositeOperation = 'destination-out'
-  }
-  context.strokeStyle = stroke[0].color
-  context.lineWidth = stroke[0].diameter
-  stroke = stroke.map(point => {
-    const { x, y } = positionWithScroll(point)
-    point.x = x
-    point.y = y
-    return point
-  })
-  context.beginPath()
-  context.moveTo(stroke[0].x, stroke[0].y)
-  stroke.forEach((point) => {
-    context.lineTo(point.x, point.y)
-  })
-  context.stroke()
-}
 const draw = (event) => {
   if (!isDrawing) { return }
-  const { x, y } = utils.cursorPositionInViewport(event)
   context.lineCap = context.lineJoin = 'round'
-  stroke.push(createPoint(x, y))
-  drawStroke(stroke)
+  stroke.push(createPoint(event))
+  renderStroke(stroke)
   // TODO broadcast
 }
 
 const clear = () => {
-  const pageWidth = store.state.pageWidth
-  const pageHeight = store.state.pageHeight
-  context.clearRect(0, 0, pageWidth.value, pageHeight.value)
+  context.clearRect(0, 0, canvas.width, canvas.height)
 }
 const redraw = () => {
   clear()
@@ -154,22 +143,22 @@ const endDrawing = (event) => {
   stroke = []
   isDrawing = false
 
-  // await? save to api operation (saves strokes, rasterizes and saves latest.
+  // TODO await? save to api operation (saves strokes, rasterizes and saves latest.
   // re-rasterize on demand to prevent conflicts??) - only rasterize on server to maintain correct order
 }
 
 // scroll
 
 const updatePrevScroll = () => {
-  prevScroll = {
+  state.prevScroll = {
     x: window.scrollX,
     y: window.scrollY
   }
 }
 const scroll = (event) => {
   const scrollDelta = {
-    x: window.scrollX - prevScroll.x,
-    y: window.scrollY - prevScroll.y
+    x: window.scrollX - state.prevScroll.x,
+    y: window.scrollY - state.prevScroll.y
   }
   updatePrevScroll()
   redraw()
