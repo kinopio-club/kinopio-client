@@ -57,7 +57,7 @@ const strokeDiameter = computed(() => {
   return consts.drawingBrushSizeDiameter[diameter]
 })
 const createPoint = (event) => {
-  const { x, y } = utils.cursorPositionInPage(event)
+  const { x, y } = utils.cursorPositionInSpace(event)
   return {
     x,
     y,
