@@ -66,7 +66,9 @@ const currentUserIsBoxSelecting = computed(() => store.state.currentUserIsBoxSel
 const startPoint = computed(() => positionInSpace(store.state.currentUserBoxSelectStart))
 const endPoint = computed(() => positionInSpace(store.state.currentUserBoxSelectMove))
 const userCantEditSpace = computed(() => !store.getters['currentUser/canEditSpace']())
+const toolbarIsDrawing = computed(() => store.state.currentUserToolbar === 'drawing')
 const shouldPreventBoxSelecting = computed(() => {
+  if (toolbarIsDrawing.value) { return true }
   const isDraggingItem = store.state.currentUserIsDraggingCard || store.state.currentUserIsDraggingBox
   return isDraggingItem
 })
