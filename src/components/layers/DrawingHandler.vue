@@ -116,7 +116,8 @@ const draw = throttle((event) => {
   :height="viewportHeight"
   :style="styles"
   @touchmove="preventTouchScrolling"
-  @pointerdown="startDrawing"
+  @mousedown.left="startDrawing"
+  @touchstart="startDrawing"
   @pointermove="draw"
 )
 </template>
