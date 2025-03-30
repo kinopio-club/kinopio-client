@@ -751,13 +751,11 @@ const currentCards = {
         }
         const rect = utils.cardRectFromId(card.id)
         card = {
-          name: card.name,
           id: card.id,
           y: card.y,
           width: rect.width,
           height: rect.height
         }
-        console.info(card.height)
         await context.dispatch('update', { card })
         index += 1
       }
