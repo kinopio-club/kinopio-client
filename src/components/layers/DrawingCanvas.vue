@@ -23,10 +23,10 @@ onMounted(() => {
   context.scale(window.devicePixelRatio, window.devicePixelRatio)
   window.addEventListener('pointerup', endDrawing)
   window.addEventListener('scroll', scroll)
+  window.addEventListener('resize', resize)
   updatePrevScroll()
 
-  // TODO handle resize. clear and restore from rasterized
-
+  // TODO handle zoom, slider
   // TODO clear and restore canvas when loading/restoring space
 
   unsubscribe = store.subscribe(mutation => {
@@ -40,6 +40,7 @@ onMounted(() => {
 onBeforeUnmount(() => {
   window.removeEventListener('pointerup', endDrawing)
   window.removeEventListener('scroll', scroll)
+  window.removeEventListener('resize', resize)
   unsubscribe()
 })
 
@@ -53,8 +54,19 @@ const state = reactive({
 
 const viewportHeight = computed(() => store.state.viewportHeight)
 const viewportWidth = computed(() => store.state.viewportWidth)
-
 const toolbarIsDrawing = computed(() => store.state.currentUserToolbar === 'drawing')
+const styles = computed(() => {
+  let value = {
+    top: state.prevScroll.y + 'px',
+    left: state.prevScroll.x + 'px'
+  }
+  if (props.isTopLayer) {
+    value.mixBlendMode = 'color'
+  } else {
+    value.zIndex = 0
+  }
+  return value
+})
 
 const strokeColor = computed(() => store.getters['currentUser/drawingColor'])
 const strokeDiameter = computed(() => {
@@ -81,6 +93,7 @@ const viewportPosition = (point) => {
   }
 }
 const renderPoint = (point) => {
+  context.lineCap = context.lineJoin = 'round'
   const { x, y } = viewportPosition(point)
   context.globalCompositeOperation = 'source-over'
   if (point.isEraser) {
@@ -94,6 +107,7 @@ const renderPoint = (point) => {
   context.fill()
 }
 const renderStroke = (stroke) => {
+  context.lineCap = context.lineJoin = 'round'
   if (stroke.length === 1) {
     renderPoint(stroke[0])
     return
@@ -130,7 +144,6 @@ const startDrawing = (event) => {
 
 const draw = (event) => {
   if (!isDrawing) { return }
-  context.lineCap = context.lineJoin = 'round'
   stroke.push(createPoint(event))
   renderStroke(stroke)
   // TODO broadcast
@@ -153,12 +166,11 @@ const endDrawing = (event) => {
   store.commit('addToDrawingStrokes', stroke)
   stroke = []
   isDrawing = false
-
   // TODO await? save to api operation (saves strokes, rasterizes and saves latest.
   // re-rasterize on demand to prevent conflicts??) - only rasterize on server to maintain correct order
 }
 
-// scroll
+// scroll and resize
 
 const updatePrevScroll = () => {
   state.prevScroll = {
@@ -167,26 +179,20 @@ const updatePrevScroll = () => {
   }
 }
 const scroll = (event) => {
-  const scrollDelta = {
-    x: window.scrollX - state.prevScroll.x,
-    y: window.scrollY - state.prevScroll.y
-  }
   updatePrevScroll()
   redraw()
 }
-
-const styles = computed(() => {
-  let value = {
-    top: state.prevScroll.y + 'px',
-    left: state.prevScroll.x + 'px'
-  }
-  if (props.isTopLayer) {
-    value.mixBlendMode = 'color'
-  } else {
-    value.zIndex = 0
-  }
-  return value
-})
+const resize = (event) => {
+  scroll()
+  // canvas.width = viewportWidth.value
+  // canvas.height = viewportHeight.value
+  //   canvas = canvasElement.value
+  // context = canvas.getContext('2d')
+  // context.scale(window.devicePixelRatio, window.devicePixelRatio)
+  // updatePrevScroll()
+  // console.log(canvas, canvas.width)
+  // redraw()
+}
 </script>
 
 <template lang="pug">
