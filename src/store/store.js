@@ -2088,7 +2088,7 @@ const store = createStore({
     zoomOrigin: (context, origin) => {
       utils.typeCheck({ value: origin, type: 'object' })
       const prevOrigin = context.state.zoomOrigin
-      const zoomOriginIsZero = !utils.objectHasKeys(prevOrigin) || prevOrigin === { x: 0, y: 0 }
+      const zoomOriginIsZero = !utils.objectHasKeys(prevOrigin) || (prevOrigin.x === 0 && prevOrigin.y === 0)
       if (zoomOriginIsZero) {
         context.commit('zoomOrigin', origin)
       } else {
