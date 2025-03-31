@@ -151,7 +151,9 @@ const redraw = () => {
 
 const endDrawing = (event) => {
   if (!toolbarIsDrawing.value) { return }
-  strokes.push(stroke)
+  if (stroke.length) {
+    strokes.push(stroke)
+  }
   stroke = []
   isDrawing = false
 
