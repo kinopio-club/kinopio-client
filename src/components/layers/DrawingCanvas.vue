@@ -36,6 +36,8 @@ onMounted(() => {
       startDrawing(mutation.payload)
     } else if (mutation.type === 'triggerDraw') {
       draw(mutation.payload)
+    } else if (mutation.type === 'spaceZoomPercent') {
+      updateCanvasSize()
     }
   })
 })
@@ -187,6 +189,12 @@ const scroll = () => {
 const resize = debounce(() => {
   redraw()
 }, 20)
+const updateCanvasSize = debounce(() => {
+  const zoom = store.getters.spaceCounterZoomDecimal
+  canvas.width = viewportWidth.value * zoom
+  canvas.height = viewportHeight.value * zoom
+  redraw()
+}, 20)
 </script>
 
 <template lang="pug">
@@ -205,8 +213,6 @@ canvas.drawing-canvas-layer
   background transparent
   top 0
   left 0
-  width 100dvw
-  height 100dvh
   opacity 1
   pointer-events none
   z-index var(--max-z) // because card z
