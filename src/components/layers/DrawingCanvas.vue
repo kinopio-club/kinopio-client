@@ -14,10 +14,12 @@ let strokes = []
 
 let unsubscribe
 
+const canvasElement = ref(null)
+
 // TODO handle remote drawing broadcast received
 
 onMounted(() => {
-  canvas = document.getElementById('drawing-canvas')
+  canvas = canvasElement.value
   context = canvas.getContext('2d')
   context.scale(window.devicePixelRatio, window.devicePixelRatio)
   window.addEventListener('pointerup', endDrawing)
@@ -40,6 +42,10 @@ onBeforeUnmount(() => {
   window.removeEventListener('pointerup', endDrawing)
   window.removeEventListener('scroll', scroll)
   unsubscribe()
+})
+
+const props = defineProps({
+  isTopLayer: Boolean
 })
 
 const state = reactive({
@@ -171,23 +177,31 @@ const scroll = (event) => {
 }
 
 const styles = computed(() => {
-  return {
+  let value = {
     top: state.prevScroll.y + 'px',
     left: state.prevScroll.x + 'px'
   }
+  if (props.isTopLayer) {
+    value.mixBlendMode = 'color'
+  } else {
+    value.zIndex = 0
+  }
+  return value
 })
 </script>
 
 <template lang="pug">
-canvas#drawing-canvas(
+canvas.drawing-canvas-layer(
+  ref="canvasElement"
   :width="viewportWidth"
   :height="viewportHeight"
   :style="styles"
+  :data-is-top-layer="props.isTopLayer"
 )
 </template>
 
-<style lang="stylus" scoped>
-canvas
+<style lang="stylus">
+canvas.drawing-canvas-layer
   position fixed
   background transparent
   top 0
@@ -197,5 +211,4 @@ canvas
   opacity 1
   pointer-events none
   z-index var(--max-z) // because card z
-  // mix-blend-mode color-dodge
 </style>

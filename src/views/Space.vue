@@ -664,13 +664,14 @@ main#space.space(
 )
   SpaceBackground
   SpaceBackgroundTint
+  DrawingCanvas
   ItemsLocked
   #box-backgrounds
   Connections
   Boxes
   Cards
   ItemUnlockButtons
-  DrawingCanvas
+  DrawingCanvas(:isTopLayer="true")
   BoxDetails
   CardDetails
   OtherCardDetails
