@@ -5,6 +5,8 @@ import { useStore } from 'vuex'
 import utils from '@/utils.js'
 import consts from '@/consts.js'
 
+import debounce from 'lodash-es/debounce'
+
 const store = useStore()
 
 let canvas, context
@@ -178,21 +180,13 @@ const updatePrevScroll = () => {
     y: window.scrollY
   }
 }
-const scroll = (event) => {
+const scroll = () => {
   updatePrevScroll()
   redraw()
 }
-const resize = (event) => {
-  scroll()
-  // canvas.width = viewportWidth.value
-  // canvas.height = viewportHeight.value
-  //   canvas = canvasElement.value
-  // context = canvas.getContext('2d')
-  // context.scale(window.devicePixelRatio, window.devicePixelRatio)
-  // updatePrevScroll()
-  // console.log(canvas, canvas.width)
-  // redraw()
-}
+const resize = debounce(() => {
+  redraw()
+}, 20)
 </script>
 
 <template lang="pug">
