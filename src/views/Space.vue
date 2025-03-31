@@ -190,7 +190,7 @@ const spaceZoomDecimal = computed(() => store.getters.spaceZoomDecimal)
 const pageHeight = computed(() => store.state.pageHeight)
 const pageWidth = computed(() => store.state.pageWidth)
 const styles = computed(() => {
-  const zoom = 1 / spaceZoomDecimal.value
+  const zoom = store.getters.spaceCounterZoomDecimal
   return {
     width: `${pageWidth.value * zoom}px`,
     height: `${pageHeight.value * zoom}px`,
