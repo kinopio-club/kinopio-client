@@ -103,10 +103,13 @@ const store = createStore({
     currentUserIsPanningReady: false,
     currentUserIsPanning: false,
     currentUserToolbar: 'card', // card, box
-    drawingEraserIsActive: false,
     currentUserIsDraggingConnectionIdLabel: '',
     clipboardData: {}, // for kinopio data pasting
     shouldCancelNextMouseUpInteraction: false,
+
+    // drawing
+    drawingEraserIsActive: false,
+    drawingStrokes: [],
 
     // box-selecting
     currentUserIsBoxSelecting: false,
@@ -965,8 +968,15 @@ const store = createStore({
       state.currentUserToolbar = value
       state.drawingEraserIsActive = false
     },
+
+    // drawing
+
     drawingEraserIsActive: (state, value) => {
       state.drawingEraserIsActive = value
+    },
+    addToDrawingStrokes: (state, stroke) => {
+      if (!stroke.length) { return }
+      state.drawingStrokes.push(stroke)
     },
 
     // Dragging
@@ -2132,7 +2142,6 @@ const store = createStore({
       const value = !context.state.drawingEraserIsActive
       context.commit('drawingEraserIsActive', value)
     }
-
   },
   getters: {
     isSpacePage: (state) => {

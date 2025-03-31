@@ -10,7 +10,6 @@ const store = useStore()
 let canvas, context
 let isDrawing = false
 let stroke = []
-let strokes = []
 
 let unsubscribe
 
@@ -142,7 +141,7 @@ const clear = () => {
 }
 const redraw = () => {
   clear()
-  strokes.forEach(stroke => {
+  store.state.drawingStrokes.forEach(stroke => {
     renderStroke(stroke)
   })
 }
@@ -151,9 +150,7 @@ const redraw = () => {
 
 const endDrawing = (event) => {
   if (!toolbarIsDrawing.value) { return }
-  if (stroke.length) {
-    strokes.push(stroke)
-  }
+  store.commit('addToDrawingStrokes', stroke)
   stroke = []
   isDrawing = false
 
