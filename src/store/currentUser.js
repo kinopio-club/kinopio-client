@@ -169,7 +169,7 @@ export default {
       if (user.apiKey) {
         postMessage.send({ name: 'setApiKey', value: user.apiKey })
       }
-      cache.saveUser(user)
+      cache.updateUser(user)
     },
     arenaAccessToken: (state, token) => {
       state.arenaAccessToken = token
