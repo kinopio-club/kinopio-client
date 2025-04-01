@@ -13,6 +13,7 @@ const canvasElement = ref(null)
 let canvas, context
 let isDrawing = false
 let currentStroke = []
+let currentStrokes = []
 let remoteStrokes = []
 
 let unsubscribe
@@ -169,7 +170,11 @@ const clear = () => {
 }
 const redraw = () => {
   clear()
-  store.state.drawingStrokes.forEach(stroke => {
+
+  // TODO BUG render methods are rebroadcasting all strokes
+  // redraw from rasterized imagedata
+
+  currentStrokes.forEach(stroke => {
     renderStroke(stroke)
   })
   remoteStrokes.forEach(stroke => {
@@ -182,8 +187,17 @@ const redraw = () => {
 
 const endDrawing = (event) => {
   if (!toolbarIsDrawing.value) { return }
-  store.commit('addToDrawingStrokes', currentStroke)
+  if (!currentStroke.length) {
+    isDrawing = false
+    return
+  }
+
+  currentStrokes.push(currentStroke)
+  store.commit('addToDrawingStrokeColors', currentStroke[0].color)
   // TODO save to api operation (not await)
+
+  // TODO on drawing end, rasterize drawing canvas from all strokes (return imagedata from offscreen canvas), then replace canvas with the rasterized imagedata
+
   currentStroke = []
   isDrawing = false
 }

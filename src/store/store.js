@@ -110,7 +110,7 @@ const store = createStore({
 
     // drawing
     drawingEraserIsActive: false,
-    drawingStrokes: [],
+    drawingStrokeColors: [],
 
     // box-selecting
     currentUserIsBoxSelecting: false,
@@ -977,10 +977,11 @@ const store = createStore({
     drawingEraserIsActive: (state, value) => {
       state.drawingEraserIsActive = value
     },
-    addToDrawingStrokes: (state, stroke) => {
-      if (!stroke.length) { return }
-      state.drawingStrokes.push(stroke)
+    addToDrawingStrokeColors: (state, color) => {
+      if (state.drawingStrokeColors.includes(color)) { return }
+      state.drawingStrokeColors.push(color)
     },
+    // TODO clear drawingStrokeColors on space change/load
 
     // Dragging
 

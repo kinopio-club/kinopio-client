@@ -5,8 +5,6 @@ import { useStore } from 'vuex'
 import ColorPicker from '@/components/dialogs/ColorPicker.vue'
 import BrushSizePicker from '@/components/dialogs/BrushSizePicker.vue'
 
-import uniq from 'lodash-es/uniq'
-
 const store = useStore()
 
 onMounted(() => {
@@ -44,14 +42,7 @@ const drawingColor = computed(() => {
 const updateDrawingColor = (value) => {
   store.commit('currentUser/drawingColor', value)
 }
-const recentColors = computed(() => {
-  let colors = []
-  store.state.drawingStrokes.forEach(strokePoints => {
-    colors.push(strokePoints[0].color)
-  })
-  colors = uniq(colors)
-  return colors
-})
+const recentColors = computed(() => store.state.drawingStrokeColors)
 
 // size
 
