@@ -106,6 +106,7 @@ const store = createStore({
     currentUserIsDraggingConnectionIdLabel: '',
     clipboardData: {}, // for kinopio data pasting
     shouldCancelNextMouseUpInteraction: false,
+    currentUserIsDrawing: false,
 
     // drawing
     drawingEraserIsActive: false,
@@ -1001,6 +1002,10 @@ const store = createStore({
     shouldCancelNextMouseUpInteraction: (state, value) => {
       utils.typeCheck({ value, type: 'boolean' })
       state.shouldCancelNextMouseUpInteraction = value
+    },
+    currentUserIsDrawing: (state, value) => {
+      utils.typeCheck({ value, type: 'boolean' })
+      state.currentUserIsDrawing = value
     },
 
     // Dragging Cards

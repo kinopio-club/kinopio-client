@@ -17,10 +17,12 @@ onMounted(() => {
   //     mutation.payload
   //   }
   // })
+  window.addEventListener('pointerup', endDrawing)
 })
-// onBeforeUnmount(() => {
+onBeforeUnmount(() => {
+  window.removeEventListener('pointerup', endDrawing)
 //   unsubscribe()
-// })
+})
 
 const props = defineProps({
   visible: Boolean
@@ -103,11 +105,16 @@ const preventTouchScrolling = (event) => {
 // }
 
 const startDrawing = (event) => {
+  store.commit('currentUserIsDrawing', true)
   store.commit('triggerStartDrawing', event)
 }
 const draw = throttle((event) => {
   store.commit('triggerDraw', event)
 }, 16) // 60fps
+
+const endDrawing = () => {
+  store.commit('currentUserIsDrawing', false)
+}
 </script>
 
 <template lang="pug">
