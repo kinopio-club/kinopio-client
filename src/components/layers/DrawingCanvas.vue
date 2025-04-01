@@ -48,10 +48,6 @@ onBeforeUnmount(() => {
   unsubscribe()
 })
 
-const props = defineProps({
-  isTopLayer: Boolean
-})
-
 const state = reactive({
   prevScroll: { x: 0, y: 0 }
 })
@@ -64,11 +60,7 @@ const styles = computed(() => {
     top: state.prevScroll.y + 'px',
     left: state.prevScroll.x + 'px'
   }
-  if (props.isTopLayer) {
-    value.mixBlendMode = 'color'
-  } else {
-    value.zIndex = 0
-  }
+  value.mixBlendMode = 'color'
   return value
 })
 
@@ -142,6 +134,10 @@ const startDrawing = (event) => {
   const point = createPoint(event)
   renderPoint(point)
   stroke.push(point)
+  store.commit('triggerUpdateDrawingBackgroundlayer')
+  // rasterizes and displays like SpaceBackgroudn
+
+  // TODO broadcast
 }
 
 // draw
@@ -150,6 +146,8 @@ const draw = (event) => {
   if (!isDrawing) { return }
   stroke.push(createPoint(event))
   renderStroke(stroke)
+  store.commit('triggerUpdateDrawingBackgroundlayer')
+
   // TODO broadcast
 }
 
@@ -198,17 +196,16 @@ const updateCanvasSize = debounce(() => {
 </script>
 
 <template lang="pug">
-canvas.drawing-canvas-layer(
+canvas#drawing-canvas.drawing-canvas(
   ref="canvasElement"
   :width="viewportWidth"
   :height="viewportHeight"
   :style="styles"
-  :data-is-top-layer="props.isTopLayer"
 )
 </template>
 
 <style lang="stylus">
-canvas.drawing-canvas-layer
+canvas.drawing-canvas
   position fixed
   background transparent
   top 0

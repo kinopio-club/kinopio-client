@@ -21,6 +21,7 @@ import SnapGuideLines from '@/components/SnapGuideLines.vue'
 import Header from '@/components/Header.vue'
 import PaintSelectCanvas from '@/components/layers/PaintSelectCanvas.vue'
 import DrawingCanvas from '@/components/layers/DrawingCanvas.vue'
+import DrawingBackground from '@/components/layers/DrawingBackground.vue'
 import DrawingHandler from '@/components/layers/DrawingHandler.vue'
 import SonarPing from '@/components/layers/SonarPing.vue'
 import UserLabelCursor from '@/components/UserLabelCursor.vue'
@@ -664,14 +665,14 @@ main#space.space(
 )
   SpaceBackground
   SpaceBackgroundTint
-  DrawingCanvas
+  DrawingBackground
   ItemsLocked
   #box-backgrounds
   Connections
   Boxes
   Cards
   ItemUnlockButtons
-  DrawingCanvas(:isTopLayer="true")
+  DrawingCanvas
   BoxDetails
   CardDetails
   OtherCardDetails
