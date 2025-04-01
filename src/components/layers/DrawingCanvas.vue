@@ -63,7 +63,6 @@ const styles = computed(() => {
     top: state.prevScroll.y + 'px',
     left: state.prevScroll.x + 'px'
   }
-  value.mixBlendMode = 'color'
   return value
 })
 
@@ -170,15 +169,11 @@ const clear = () => {
 }
 const redraw = () => {
   clear()
-
-  // TODO BUG render methods are rebroadcasting all strokes
-  // redraw from rasterized imagedata
-
   currentStrokes.forEach(stroke => {
-    renderStroke(stroke)
+    renderStroke(stroke, true)
   })
   remoteStrokes.forEach(stroke => {
-    renderStroke(stroke)
+    renderStroke(stroke, true)
   })
   store.commit('triggerUpdateDrawingBackground')
 }
@@ -191,13 +186,9 @@ const endDrawing = (event) => {
     isDrawing = false
     return
   }
-
   currentStrokes.push(currentStroke)
   store.commit('addToDrawingStrokeColors', currentStroke[0].color)
   // TODO save to api operation (not await)
-
-  // TODO on drawing end, rasterize drawing canvas from all strokes (return imagedata from offscreen canvas), then replace canvas with the rasterized imagedata
-
   currentStroke = []
   isDrawing = false
 }
@@ -243,4 +234,5 @@ canvas.drawing-canvas
   opacity 1
   pointer-events none
   z-index var(--max-z) // because card z
+  mix-blend-mode multiply
 </style>
