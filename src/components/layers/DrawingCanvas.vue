@@ -12,11 +12,10 @@ const store = useStore()
 const canvasElement = ref(null)
 let canvas, context
 let isDrawing = false
-let stroke = []
+let currentStroke = []
+let remoteStrokes = []
 
 let unsubscribe
-
-// TODO handle remote drawing broadcast received: renderpoint, renderstroke
 
 onMounted(() => {
   canvas = canvasElement.value
@@ -36,6 +35,11 @@ onMounted(() => {
       draw(mutation.payload)
     } else if (mutation.type === 'spaceZoomPercent') {
       updateCanvasSize()
+    } else if (mutation.type === 'triggerRenderRemoteDrawingStroke') {
+      const stroke = mutation.payload.stroke
+      remoteStrokes.push(stroke)
+      renderStroke(stroke, true)
+      store.commit('triggerUpdateDrawingBackground')
     }
   })
 })
@@ -78,6 +82,20 @@ const createPoint = (event) => {
   }
 }
 
+// broadcast
+
+const broadcastStroke = (stroke, shouldPreventBroadcast) => {
+  if (shouldPreventBroadcast) { return }
+  store.commit('broadcast/update', {
+    updates: {
+      userId: store.state.currentUser.id,
+      stroke
+    },
+    type: 'renderRemoteDrawingStroke',
+    handler: 'triggerRenderRemoteDrawingStroke'
+  })
+}
+
 // render
 
 const viewportPosition = (point) => {
@@ -86,7 +104,7 @@ const viewportPosition = (point) => {
     y: point.y - state.prevScroll.y
   }
 }
-const renderPoint = (point) => {
+const renderPoint = (point, shouldPreventBroadcast) => {
   context.lineCap = context.lineJoin = 'round'
   const { x, y } = viewportPosition(point)
   context.globalCompositeOperation = 'source-over'
@@ -99,12 +117,12 @@ const renderPoint = (point) => {
   context.closePath()
   context.fillStyle = point.color
   context.fill()
-  // TODO broadcast renderpoint
+  broadcastStroke([point], shouldPreventBroadcast)
 }
-const renderStroke = (stroke) => {
+const renderStroke = (stroke, shouldPreventBroadcast) => {
   context.lineCap = context.lineJoin = 'round'
   if (stroke.length === 1) {
-    renderPoint(stroke[0])
+    renderPoint(stroke[0], shouldPreventBroadcast)
     return
   }
   const { x: x0, y: y0 } = viewportPosition(stroke[0])
@@ -121,7 +139,7 @@ const renderStroke = (stroke) => {
     context.lineTo(x, y)
   })
   context.stroke()
-  // TODO broadcast renderstroke
+  broadcastStroke(stroke, shouldPreventBroadcast)
 }
 
 // start
@@ -130,10 +148,10 @@ const startDrawing = (event) => {
   if (!toolbarIsDrawing.value) { return }
   store.dispatch('closeAllDialogs')
   isDrawing = true
-  stroke = []
+  currentStroke = []
   const point = createPoint(event)
-  renderPoint(point)
-  stroke.push(point)
+  renderStroke([point])
+  currentStroke.push(point)
   store.commit('triggerUpdateDrawingBackground')
 }
 
@@ -141,8 +159,8 @@ const startDrawing = (event) => {
 
 const draw = (event) => {
   if (!isDrawing) { return }
-  stroke.push(createPoint(event))
-  renderStroke(stroke)
+  currentStroke.push(createPoint(event))
+  renderStroke(currentStroke)
   store.commit('triggerUpdateDrawingBackground')
 }
 
@@ -154,6 +172,9 @@ const redraw = () => {
   store.state.drawingStrokes.forEach(stroke => {
     renderStroke(stroke)
   })
+  remoteStrokes.forEach(stroke => {
+    renderStroke(stroke)
+  })
   store.commit('triggerUpdateDrawingBackground')
 }
 
@@ -161,10 +182,10 @@ const redraw = () => {
 
 const endDrawing = (event) => {
   if (!toolbarIsDrawing.value) { return }
-  store.commit('addToDrawingStrokes', stroke)
-  stroke = []
+  store.commit('addToDrawingStrokes', currentStroke)
+  // TODO save to api operation (not await)
+  currentStroke = []
   isDrawing = false
-  // TODO save to api operation
 }
 
 // scroll and resize
