@@ -619,6 +619,7 @@ const store = createStore({
     triggerPaintFramePosition: (state, event) => {},
     triggerAddRemotePaintingCircle: () => {},
     triggerUpdateRemoteUserCursor: () => {},
+    triggerRenderRemoteDrawingStroke: () => {},
     triggerUpdateRemoteDropGuideLine: () => {},
     triggerUpdateStopRemoteUserDropGuideLine: () => {},
     triggerUpdateHeaderAndFooterPosition: () => {},
