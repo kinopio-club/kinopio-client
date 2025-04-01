@@ -234,5 +234,5 @@ canvas.drawing-canvas
   opacity 1
   pointer-events none
   z-index var(--max-z) // because card z
-  mix-blend-mode multiply
+  mix-blend-mode hard-light
 </style>
