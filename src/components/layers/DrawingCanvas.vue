@@ -9,13 +9,12 @@ import debounce from 'lodash-es/debounce'
 
 const store = useStore()
 
+const canvasElement = ref(null)
 let canvas, context
 let isDrawing = false
 let stroke = []
 
 let unsubscribe
-
-const canvasElement = ref(null)
 
 // TODO handle remote drawing broadcast received
 
@@ -28,7 +27,6 @@ onMounted(() => {
   window.addEventListener('resize', resize)
   updatePrevScroll()
 
-  // TODO handle zoom, slider
   // TODO clear and restore canvas when loading/restoring space
 
   unsubscribe = store.subscribe(mutation => {

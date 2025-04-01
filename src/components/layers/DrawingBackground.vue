@@ -2,66 +2,57 @@
 import { reactive, computed, onMounted, onBeforeUnmount, defineProps, defineEmits, watch, ref, nextTick } from 'vue'
 import { useStore } from 'vuex'
 
-// import backgroundImages from '@/data/backgroundImages.json'
-// import SpaceBackgroundGradients from '@/components/SpaceBackgroundGradients.vue'
-// import utils from '@/utils.js'
-// import consts from '@/consts.js'
+import debounce from 'lodash-es/debounce'
 
 const store = useStore()
+
+const canvasElement = ref(null)
+let canvas, context
 
 let unsubscribe
 
 onMounted(() => {
-  // canvas = canvasElement.value
-  // context = canvas.getContext('2d')
-  // context.scale(window.devicePixelRatio, window.devicePixelRatio)
-  // window.addEventListener('pointerup', endDrawing)
-  // window.addEventListener('scroll', scroll)
-  // window.addEventListener('resize', resize)
-  // updatePrevScroll()
+  canvas = canvasElement.value
+  context = canvas.getContext('2d')
+  context.scale(window.devicePixelRatio, window.devicePixelRatio)
+  window.addEventListener('scroll', scroll)
+  window.addEventListener('resize', resize)
+  updatePrevScroll()
 
-  // TODO handle zoom, slider
   // TODO clear and restore canvas when loading/restoring space
 
   unsubscribe = store.subscribe(mutation => {
     if (mutation.type === 'triggerUpdateDrawingBackgroundlayer') {
       update()
+    } else if (mutation.type === 'spaceZoomPercent') {
+      updateCanvasSize()
     }
   })
 })
 onBeforeUnmount(() => {
-  // window.removeEventListener('pointerup', endDrawing)
-  // window.removeEventListener('scroll', scroll)
-  // window.removeEventListener('resize', resize)
+  window.removeEventListener('scroll', scroll)
+  window.removeEventListener('resize', resize)
   unsubscribe()
 })
 
-const update = () => {
-  const canvas = document.querySelector('#drawing-canvas')
-  console.log(canvas)
-}
-// const spaceShouldHaveBorderRadius = computed(() => store.getters.spaceShouldHaveBorderRadius)
-// const isSecureAppContext = computed(() => consts.isSecureAppContext)
-// const isSpacePage = computed(() => {
-//   const isOther = store.state.isAddPage
-//   const isSpace = !isOther
-//   return isSpace
-// })
-// const isThemeDark = computed(() => store.state.currentUser.theme === 'dark')
-// const currentSpace = computed(() => store.state.currentSpace)
-// const backgroundIsDefault = computed(() => !currentSpace.value.background)
-const pageHeight = computed(() => store.state.pageHeight)
-const pageWidth = computed(() => store.state.pageWidth)
+const state = reactive({
+  prevScroll: { x: 0, y: 0 }
+})
 
-// // Styles
-
+const viewportHeight = computed(() => store.state.viewportHeight)
+const viewportWidth = computed(() => store.state.viewportWidth)
 const styles = computed(() => {
-  // styles.backgroundImage = backgroundImage
-  const value = {}
-  value.width = `${pageWidth.value}px`
-  value.height = `${pageHeight.value}px`
+  let value = {
+    top: state.prevScroll.y + 'px',
+    left: state.prevScroll.x + 'px'
+  }
+  value.mixBlendMode = 'color'
   return value
 })
+
+const update = () => {
+  console.log('🔮')
+}
 
 // // Image Url
 
@@ -94,19 +85,45 @@ const styles = computed(() => {
 //   const layers = currentSpace.value.backgroundGradient
 //   return layers
 // })
+
+// scroll and resize
+
+const updatePrevScroll = () => {
+  state.prevScroll = {
+    x: window.scrollX,
+    y: window.scrollY
+  }
+}
+const scroll = () => {
+  updatePrevScroll()
+  update()
+}
+const resize = debounce(() => {
+  update()
+}, 20)
+const updateCanvasSize = debounce(() => {
+  const zoom = store.getters.spaceCounterZoomDecimal
+  canvas.width = viewportWidth.value * zoom
+  canvas.height = viewportHeight.value * zoom
+  update()
+}, 20)
+
 </script>
 
 <template lang="pug">
-//- gradient
-//- SpaceBackgroundGradients(:visible="true" :layers="gradientLayers" :styles="backgroundStyles")
-//- or image
-.drawing-background(:style="styles")
+canvas.drawing-background(
+  ref="canvasElement"
+  :width="viewportWidth"
+  :height="viewportHeight"
+  :style="styles"
+)
 </template>
 
 <style lang="stylus">
-#drawing-background
-  position absolute
+canvas.drawing-background
+  position fixed
+  background pink
   pointer-events none
-  z-index 0
-  // transform-origin top left
+  top 0
+  left 0
 </style>
