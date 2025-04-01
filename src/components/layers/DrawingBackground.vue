@@ -16,13 +16,10 @@ onMounted(() => {
   context = canvas.getContext('2d')
   context.scale(window.devicePixelRatio, window.devicePixelRatio)
   window.addEventListener('scroll', scroll)
-  window.addEventListener('resize', resize)
   updatePrevScroll()
-
   // TODO clear and restore canvas when loading/restoring space
-
   unsubscribe = store.subscribe(mutation => {
-    if (mutation.type === 'triggerUpdateDrawingBackgroundlayer') {
+    if (mutation.type === 'triggerUpdateDrawingBackground') {
       update()
     } else if (mutation.type === 'spaceZoomPercent') {
       updateCanvasSize()
@@ -31,7 +28,6 @@ onMounted(() => {
 })
 onBeforeUnmount(() => {
   window.removeEventListener('scroll', scroll)
-  window.removeEventListener('resize', resize)
   unsubscribe()
 })
 
@@ -52,39 +48,9 @@ const styles = computed(() => {
 
 const update = () => {
   console.log('🔮')
+  // clear
+  // draw from drawingcanvas
 }
-
-// // Image Url
-
-// const kinopioBackgroundImageData = computed(() => {
-//   const data = backgroundImages.find(item => {
-//     const background = currentSpace.value.background
-//     return background === item.url
-//   })
-//   return data
-// })
-// const backgroundUrl = computed(() => {
-//   let data = kinopioBackgroundImageData.value
-//   let url
-//   // darkUrl
-//   if (data && isThemeDark.value) {
-//     url = data.darkUrl || data.url
-//   // url
-//   } else if (data) {
-//     url = data.url
-//   } else {
-//     url = currentSpace.value.background
-//   }
-//   return url
-// })
-
-// Background Gradient
-
-// const gradientLayers = computed(() => {
-//   if (!currentSpace.value.backgroundIsGradient) { return }
-//   const layers = currentSpace.value.backgroundGradient
-//   return layers
-// })
 
 // scroll and resize
 
@@ -96,16 +62,11 @@ const updatePrevScroll = () => {
 }
 const scroll = () => {
   updatePrevScroll()
-  update()
 }
-const resize = debounce(() => {
-  update()
-}, 20)
 const updateCanvasSize = debounce(() => {
   const zoom = store.getters.spaceCounterZoomDecimal
   canvas.width = viewportWidth.value * zoom
   canvas.height = viewportHeight.value * zoom
-  update()
 }, 20)
 
 </script>

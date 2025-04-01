@@ -99,6 +99,7 @@ const renderPoint = (point) => {
   context.closePath()
   context.fillStyle = point.color
   context.fill()
+  // TODO broadcast renderpoint
 }
 const renderStroke = (stroke) => {
   context.lineCap = context.lineJoin = 'round'
@@ -120,6 +121,7 @@ const renderStroke = (stroke) => {
     context.lineTo(x, y)
   })
   context.stroke()
+  // TODO broadcast renderstroke
 }
 
 // start
@@ -132,10 +134,7 @@ const startDrawing = (event) => {
   const point = createPoint(event)
   renderPoint(point)
   stroke.push(point)
-  store.commit('triggerUpdateDrawingBackgroundlayer')
-  // rasterizes and displays like SpaceBackgroudn
-
-  // TODO broadcast
+  store.commit('triggerUpdateDrawingBackground')
 }
 
 // draw
@@ -144,9 +143,7 @@ const draw = (event) => {
   if (!isDrawing) { return }
   stroke.push(createPoint(event))
   renderStroke(stroke)
-  store.commit('triggerUpdateDrawingBackgroundlayer')
-
-  // TODO broadcast
+  store.commit('triggerUpdateDrawingBackground')
 }
 
 const clear = () => {
@@ -157,6 +154,7 @@ const redraw = () => {
   store.state.drawingStrokes.forEach(stroke => {
     renderStroke(stroke)
   })
+  store.commit('triggerUpdateDrawingBackground')
 }
 
 // stop
@@ -166,8 +164,7 @@ const endDrawing = (event) => {
   store.commit('addToDrawingStrokes', stroke)
   stroke = []
   isDrawing = false
-  // TODO await? save to api operation (saves strokes, rasterizes and saves latest.
-  // re-rasterize on demand to prevent conflicts??) - only rasterize on server to maintain correct order
+  // TODO save to api operation
 }
 
 // scroll and resize

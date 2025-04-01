@@ -678,7 +678,7 @@ const store = createStore({
     triggerPanningStart: () => {},
     triggerClearUserNotifications: () => {},
     triggerAddBox: (state, event) => {},
-    triggerUpdateDrawingBackgroundlayer: () => {},
+    triggerUpdateDrawingBackground: () => {},
 
     // select all below
     triggerSelectAllItemsBelowCursor: (state, position) => {},
