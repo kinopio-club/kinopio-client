@@ -6,6 +6,7 @@ import debounce from 'lodash-es/debounce'
 
 const store = useStore()
 
+// this canvas is a rasterized duplicate of DrawingCanvas above it
 const canvasElement = ref(null)
 let canvas, context
 
@@ -42,14 +43,16 @@ const styles = computed(() => {
     top: state.prevScroll.y + 'px',
     left: state.prevScroll.x + 'px'
   }
-  value.mixBlendMode = 'color'
   return value
 })
 
+const clear = () => {
+  context.clearRect(0, 0, canvas.width, canvas.height)
+}
 const update = () => {
-  console.log('🔮')
-  // clear
-  // draw from drawingcanvas
+  const sourceCanvas = document.getElementById('drawing-canvas')
+  clear()
+  context.drawImage(sourceCanvas, 0, 0, canvas.width, canvas.height)
 }
 
 // scroll and resize
@@ -83,7 +86,7 @@ canvas.drawing-background(
 <style lang="stylus">
 canvas.drawing-background
   position fixed
-  background pink
+  background transparent
   pointer-events none
   top 0
   left 0

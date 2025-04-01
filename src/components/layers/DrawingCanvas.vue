@@ -16,7 +16,7 @@ let stroke = []
 
 let unsubscribe
 
-// TODO handle remote drawing broadcast received
+// TODO handle remote drawing broadcast received: renderpoint, renderstroke
 
 onMounted(() => {
   canvas = canvasElement.value
