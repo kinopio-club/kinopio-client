@@ -15,6 +15,7 @@ let isDrawing = false
 let currentStroke = []
 let currentStrokes = []
 let remoteStrokes = []
+let dataUrl
 
 let unsubscribe
 
@@ -57,6 +58,9 @@ const state = reactive({
 
 const viewportHeight = computed(() => store.state.viewportHeight)
 const viewportWidth = computed(() => store.state.viewportWidth)
+const pageHeight = computed(() => store.state.pageHeight)
+const pageWidth = computed(() => store.state.pageWidth)
+
 const toolbarIsDrawing = computed(() => store.state.currentUserToolbar === 'drawing')
 const styles = computed(() => {
   let value = {
@@ -141,6 +145,35 @@ const renderStroke = (stroke, shouldPreventBroadcast) => {
   context.stroke()
   broadcastStroke(stroke, shouldPreventBroadcast)
 }
+const imageDataUrl = async (strokes) => {
+  const offscreenCanvas = new OffscreenCanvas(pageWidth.value, pageHeight.value)
+  const offscreenContext = offscreenCanvas.getContext('2d')
+  offscreenContext.clearRect(0, 0, pageWidth.value, pageHeight.value)
+  strokes.forEach(stroke => {
+    if (!stroke || stroke.length === 0) { return }
+    stroke.forEach((point, index) => {
+      if (index === 0) {
+        offscreenContext.beginPath()
+        offscreenContext.moveTo(point.x, point.y)
+        return
+      }
+      offscreenContext.lineTo(point.x, point.y)
+      offscreenContext.strokeStyle = point.color
+      offscreenContext.lineWidth = point.diameter
+      offscreenContext.lineCap = 'round'
+      offscreenContext.lineJoin = 'round'
+      offscreenContext.stroke()
+      offscreenContext.moveTo(point.x, point.y)
+    })
+  })
+  const blob = await offscreenCanvas.convertToBlob({ type: 'image/png' })
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader()
+    reader.onloadend = () => resolve(reader.result)
+    reader.onerror = reject
+    reader.readAsDataURL(blob)
+  })
+}
 
 // start
 
@@ -180,13 +213,17 @@ const redraw = () => {
 
 // stop
 
-const endDrawing = (event) => {
+const endDrawing = async (event) => {
   if (!toolbarIsDrawing.value) { return }
   if (!currentStroke.length) {
     isDrawing = false
     return
   }
   currentStrokes.push(currentStroke)
+  const strokes = currentStrokes.concat(remoteStrokes)
+  dataUrl = await imageDataUrl(strokes)
+  console.log('🅰️', dataUrl.length, dataUrl)
+  // TODO cache dataUrl space.drawing ?
   store.commit('addToDrawingStrokeColors', currentStroke[0].color)
   // TODO save to api operation (not await)
   currentStroke = []
