@@ -9,24 +9,24 @@ dialog.donate.narrow(v-if="visible" :open="visible" @click.left.stop ref="dialog
       span.badge.success
         span Donor
       span badge on your profile
-    p
-      .segmented-buttons
-        button(@click="updateAmount(5)" :class="{ active: this.currentAmount === 5 }")
-          span $5
-        button(@click="updateAmount(20)" :class="{ active: this.currentAmount === 20 }")
-          span $20
-        button(@click="updateAmount(50)" :class="{ active: this.currentAmount === 50 }")
-          span $50
-        button(@click="toggleCustomAmountIsVisible" :class="{ active: customAmountIsVisible }")
-          span Custom
 
-    p(v-if="customAmountIsVisible")
+    .segmented-buttons
+      button(@click="updateAmount(5)" :class="{ active: this.currentAmount === 5 }")
+        span $5
+      button(@click="updateAmount(20)" :class="{ active: this.currentAmount === 20 }")
+        span $20
+      button(@click="updateAmount(50)" :class="{ active: this.currentAmount === 50 }")
+        span $50
+      button(@click="toggleCustomAmountIsVisible" :class="{ active: customAmountIsVisible }")
+        span Custom
+
+    div(v-if="customAmountIsVisible")
       .row
         span $
         input.name.user-details-name(placeholder="100" v-model="customAmount" ref="input" type="number" @keydown.enter="donate")
 
     template(v-if="currentAmount")
-      p
+      div
         .row
           User(:user="currentUser" :isClickable="false" :hideYouLabel="true" :key="currentUser.id")
           .badge.info
@@ -36,11 +36,11 @@ dialog.donate.narrow(v-if="visible" :open="visible" @click.left.stop ref="dialog
         span Donation Checkout
         Loader(:visible="isLoading")
 
-      p(v-if="error.unknownServerError")
+      div(v-if="error.unknownServerError")
         .badge.danger (シ_ _)シ Something went wrong, Please try again or contact support
-      p(v-if="error.amountIsTooLow")
+      div(v-if="error.amountIsTooLow")
         .badge.danger Because of Stripe fees, the minimum donation amount is $2
-      p
+      div
         img.icon(src="@/assets/lock.svg")
         span You'll be redirected to Stripe to complete checkout
 
