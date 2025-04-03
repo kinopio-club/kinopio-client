@@ -85,7 +85,7 @@ dialog.narrow.user-developer-info(v-if="props.visible" :open="props.visible" @cl
         img.icon.key(src="@/assets/key.svg")
         span Keep your API Key secret
     .row
-      p.badge.danger.copy-api-keys
+      .badge.danger.copy-api-keys
         .button-wrap
           button(@click.left="copy($event, 'apiKey')")
             img.icon.copy(src="@/assets/copy.svg")
