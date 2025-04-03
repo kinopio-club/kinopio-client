@@ -70,7 +70,7 @@ dialog.card-tips.narrow(v-if="visible" @click.stop :open="visible" ref="dialogEl
         span Card Settings
   section
     article
-      p
+      div
         .badge.info Character limit is {{maxCardCharacterLimit}}
     article
       .row
