@@ -80,10 +80,10 @@ template(v-if="visible")
     ul.results-list.image-list
       template(v-for="image in AIImages")
         li
-          div
+          .image-container
             img(:src="image.url" @click.stop="toggleSelectedImage(image)" :class="{ active: isSelectedImage(image) }")
             //- prompt
-            p.prompt(v-if="isSelectedImage(image)")
+            .prompt(v-if="isSelectedImage(image)")
               img.icon.openai(src="@/assets/openai.svg")
               span {{image.prompt}}
               //- copy prompt
