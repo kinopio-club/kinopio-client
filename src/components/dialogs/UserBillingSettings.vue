@@ -97,12 +97,12 @@ dialog.narrow.user-billing(v-if="visible" :open="visible" @click.left.stop ref="
 
   //- apple
   section(v-else-if="subscriptionIsApple")
-    p
+    div
       .badge.success Thanks for supporting Kinopio
-    p
+    div
       img.icon(src="@/assets/apple.svg")
       span Because you upgraded on iOS, you can update or cancel your subscription through Apple
-    p
+    div
       a(href="https://support.apple.com/billing")
         span Apple Billing and Subscriptions Info
 
