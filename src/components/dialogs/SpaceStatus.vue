@@ -75,14 +75,14 @@ dialog.space-status(v-if="visible" :open="visible" ref="dialog")
   section(v-if="isConnected")
     p Updates synced
   section(v-else)
-    p(v-if="(isLoadingSpace || isLoadingOtherItems) && state.spaceIsCached")
+    div(v-if="(isLoadingSpace || isLoadingOtherItems) && state.spaceIsCached")
       span.badge.info You can edit right now
       span and your changes will sync once connected
-    p(v-else-if="isJoiningSpace || isReconnectingToBroadcast")
+    div(v-else-if="isJoiningSpace || isReconnectingToBroadcast")
       span.badge.info You can edit right now
       span {{' '}}
       span but cannot collaborate yet, your changes will sync once connected
-    p(v-else-if="isSavingOperations")
+    div(v-else-if="isSavingOperations")
       span Your changes are saving to the server
       section.subsection.operations-list
         span.badge.info
