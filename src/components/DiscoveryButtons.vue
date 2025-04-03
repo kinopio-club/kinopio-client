@@ -1,5 +1,5 @@
 <script setup>
-import { reactive, computed, onMounted, onUnmounted, onBeforeUnmount, defineProps, defineEmits, watch, ref } from 'vue'
+import { reactive, computed, onMounted, onUnmounted, onBeforeUnmount, watch, ref } from 'vue'
 import { useStore } from 'vuex'
 
 import dayjs from 'dayjs'
