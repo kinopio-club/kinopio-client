@@ -108,7 +108,7 @@ section
     button(type="submit" :class="{active : state.loading.updatePassword}")
       span Update Password
       Loader(:visible="state.loading.updatePassword")
-    p.row(v-if="state.success")
+    div.row(v-if="state.success")
       .badge.success Your password has been changed. You can now use it to Sign In
 </template>
 
