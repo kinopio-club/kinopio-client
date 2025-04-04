@@ -300,11 +300,6 @@ const store = createStore({
       state.viewportWidth = Math.round(viewport.width)
       state.viewportHeight = Math.round(viewport.height)
     },
-    updateSpacePageSize: (state) => {
-      const extraScrollArea = 160
-      state.pageWidth = extraScrollArea
-      state.pageHeight = extraScrollArea
-    },
     pageHeight: (state, height) => {
       utils.typeCheck({ value: height, type: 'number' })
       state.pageHeight = height
