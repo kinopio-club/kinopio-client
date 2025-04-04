@@ -367,9 +367,11 @@ const backgroundTintBadgeColor = computed(() => {
 })
 const updateBackgroundTint = async (value) => {
   state.backgroundTint = value
-  await store.dispatch('currentSpace/updateSpace', { backgroundTint: value })
-  emit('updateSpaces')
-  updatePreviewImage()
+  if (props.space) {
+    await store.dispatch('currentSpace/updateSpace', { backgroundTint: value })
+    emit('updateSpaces')
+    updatePreviewImage()
+  }
 }
 const removeBackgroundTint = async () => {
   await updateBackgroundTint('')
