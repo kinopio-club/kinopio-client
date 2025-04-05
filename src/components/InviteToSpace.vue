@@ -1,5 +1,5 @@
 <script setup>
-import { reactive, computed, onMounted, defineProps, defineEmits, watch, ref, nextTick } from 'vue'
+import { reactive, computed, onMounted, watch, ref, nextTick } from 'vue'
 import { useStore, mapState, mapGetters } from 'vuex'
 
 import Loader from '@/components/Loader.vue'
@@ -132,7 +132,7 @@ watch(() => state.emailInvitesIsVisible, (value, prevValue) => {
 <template lang="pug">
 section.invite-to-space(v-if="props.visible" @click.stop="closeDialogs")
   .row
-    p
+    span
       .users
         User(:user="currentUser" :isClickable="false" :key="currentUser.id" :isSmall="true" :hideYouLabel="true")
         User(:user="randomUser" :isClickable="false" :key="currentUser.id" :isSmall="true" :hideYouLabel="true")

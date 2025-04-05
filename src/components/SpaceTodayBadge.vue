@@ -5,7 +5,7 @@ import dayjs from 'dayjs'
 import isYesterday from 'dayjs/plugin/isYesterday'
 import isToday from 'dayjs/plugin/isToday'
 
-import { reactive, computed, onMounted, defineProps, defineEmits } from 'vue'
+import { reactive, computed, onMounted } from 'vue'
 import { useStore } from 'vuex'
 
 dayjs.extend(isYesterday)

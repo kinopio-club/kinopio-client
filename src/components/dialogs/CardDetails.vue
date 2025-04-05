@@ -1,5 +1,5 @@
 <script setup>
-import { reactive, computed, onMounted, onUpdated, onBeforeUnmount, defineProps, defineEmits, watch, ref, nextTick } from 'vue'
+import { reactive, computed, onMounted, onUpdated, onBeforeUnmount, watch, ref, nextTick } from 'vue'
 import { useStore, mapState, mapGetters } from 'vuex'
 
 import CardOrBoxActions from '@/components/subsections/CardOrBoxActions.vue'

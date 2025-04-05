@@ -1,5 +1,5 @@
 <script setup>
-import { reactive, computed, onMounted, defineProps, defineEmits, watch, ref, nextTick } from 'vue'
+import { reactive, computed, onMounted, watch, ref, nextTick } from 'vue'
 import { useStore } from 'vuex'
 
 import UpdatePassword from '@/components/UpdatePassword.vue'
