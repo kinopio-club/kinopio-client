@@ -1,7 +1,7 @@
 <script setup>
 // import utils from '@/utils.js'
 
-import { reactive, computed, onMounted, defineProps, defineEmits } from 'vue'
+import { reactive, computed, onMounted } from 'vue'
 import { useStore } from 'vuex'
 import FreeLimitFAQ from '@/components/dialogs/FreeLimitFAQ.vue'
 const store = useStore()

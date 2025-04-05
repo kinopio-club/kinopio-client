@@ -1,5 +1,5 @@
 <script setup>
-import { reactive, computed, onMounted, onBeforeUnmount, defineProps, defineEmits, watch, ref, nextTick } from 'vue'
+import { reactive, computed, onMounted, onBeforeUnmount, watch, ref, nextTick } from 'vue'
 import { useStore } from 'vuex'
 
 import utils from '@/utils.js'
@@ -70,7 +70,7 @@ dialog.card-tips.narrow(v-if="visible" @click.stop :open="visible" ref="dialogEl
         span Card Settings
   section
     article
-      p
+      div
         .badge.info Character limit is {{maxCardCharacterLimit}}
     article
       .row

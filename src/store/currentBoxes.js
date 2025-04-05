@@ -194,7 +194,9 @@ export default {
         name: box.name || `Box ${count}`,
         infoHeight: 57,
         infoWidth: 34,
-        headerFontId: context.rootState.currentUser.prevHeaderFontId || 0
+        headerFontId: context.rootState.currentUser.prevHeaderFontId || 0,
+        background: box.background,
+        backgroundIsStretch: box.backgroundIsStretch
       }
       context.dispatch('history/add', { boxes: [box] }, { root: true })
       context.commit('create', box)

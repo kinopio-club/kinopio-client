@@ -1,5 +1,5 @@
 <script setup>
-import { reactive, computed, onMounted, onBeforeUnmount, onUnmounted, defineProps, defineEmits, watch, ref, nextTick } from 'vue'
+import { reactive, computed, onMounted, onBeforeUnmount, onUnmounted, watch, ref, nextTick } from 'vue'
 import { useStore, mapState, mapGetters } from 'vuex'
 
 import utils from '@/utils.js'

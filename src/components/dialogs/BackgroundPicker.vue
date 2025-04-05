@@ -1,5 +1,5 @@
 <script setup>
-import { reactive, computed, onMounted, onBeforeUnmount, defineProps, defineEmits, watch, ref, nextTick } from 'vue'
+import { reactive, computed, onMounted, onBeforeUnmount, watch, ref, nextTick } from 'vue'
 import { useStore } from 'vuex'
 
 import ColorPicker from '@/components/dialogs/ColorPicker.vue'
@@ -367,9 +367,11 @@ const backgroundTintBadgeColor = computed(() => {
 })
 const updateBackgroundTint = async (value) => {
   state.backgroundTint = value
-  await store.dispatch('currentSpace/updateSpace', { backgroundTint: value })
-  emit('updateSpaces')
-  updatePreviewImage()
+  if (props.space) {
+    await store.dispatch('currentSpace/updateSpace', { backgroundTint: value })
+    emit('updateSpaces')
+    updatePreviewImage()
+  }
 }
 const removeBackgroundTint = async () => {
   await updateBackgroundTint('')

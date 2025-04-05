@@ -1,5 +1,5 @@
 <script setup>
-import { reactive, computed, onMounted, defineProps } from 'vue'
+import { reactive, computed, onMounted } from 'vue'
 // https://vuex.vuejs.org/guide/composition-api.html#accessing-state-and-getters
 import { useStore } from 'vuex'
 const store = useStore()

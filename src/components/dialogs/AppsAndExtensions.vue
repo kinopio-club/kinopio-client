@@ -1,7 +1,7 @@
 <script setup>
 import utils from '@/utils.js'
 
-import { reactive, computed, onMounted, defineProps, defineEmits, watch, ref, nextTick } from 'vue'
+import { reactive, computed, onMounted, watch, ref, nextTick } from 'vue'
 import { useStore } from 'vuex'
 const store = useStore()
 
@@ -154,7 +154,7 @@ dialog.apps.narrow(v-if="visible" @click.stop :open="visible" ref="dialog" :styl
           span Android
 
     template(v-if="state.isAndroid")
-      p Kinopio is a web-app which you can add directly,
+      div Kinopio is a web-app which you can add directly,
         ol
           li
             span Tap the Menu button
