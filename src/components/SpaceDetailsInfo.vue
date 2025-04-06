@@ -6,14 +6,11 @@ import BackgroundPicker from '@/components/dialogs/BackgroundPicker.vue'
 import BackgroundPreview from '@/components/BackgroundPreview.vue'
 import Loader from '@/components/Loader.vue'
 import PrivacyButton from '@/components/PrivacyButton.vue'
-import templates from '@/data/templates.js'
-import ImportExportButton from '@/components/ImportExportButton.vue'
 import ReadOnlySpaceInfoBadges from '@/components/ReadOnlySpaceInfoBadges.vue'
-import AddToExplore from '@/components/AddToExplore.vue'
-import AskToAddToExplore from '@/components/AskToAddToExplore.vue'
 import FavoriteSpaceButton from '@/components/FavoriteSpaceButton.vue'
 import AddToGroup from '@/components/dialogs/AddToGroup.vue'
 import GroupLabel from '@/components/GroupLabel.vue'
+import SpaceOptions from '@/components/SpaceOptions.vue'
 import cache from '@/cache.js'
 import utils from '@/utils.js'
 import consts from '@/consts.js'
@@ -58,7 +55,7 @@ const props = defineProps({
 const state = reactive({
   backgroundIsVisible: false,
   privacyPickerIsVisible: false,
-  settingsIsVisible: false,
+  optionsIsVisible: false,
   addToGroupIsVisible: false,
   textareaIsFocused: false,
   error: {
@@ -66,6 +63,13 @@ const state = reactive({
     removeSpaceGroup: false
   }
 })
+
+const addSpace = () => {
+  emit('addSpace')
+}
+const removeSpaceId = (value) => {
+  emit('removeSpaceId', value)
+}
 
 // user
 
@@ -84,11 +88,6 @@ const updateLocalSpaces = () => {
 }
 const currentSpace = computed(() => store.state.currentSpace)
 const isLoadingSpace = computed(() => store.state.isLoadingSpace)
-const currentSpaceIsTemplate = computed(() => {
-  const id = currentSpace.value.id
-  const templateSpaceIds = templates.spaces().map(space => space.id)
-  return templateSpaceIds.includes(id)
-})
 const currentSpaceIsUserTemplate = computed(() => currentSpace.value.isTemplate)
 const pendingUpload = computed(() => {
   const currentSpace = store.state.currentSpace
@@ -175,55 +174,6 @@ const toggleCurrentSpaceIsUserTemplate = async () => {
   updateLocalSpaces()
 }
 
-// duplicate
-
-const duplicateSpace = async () => {
-  await store.dispatch('currentSpace/duplicateSpace')
-  updateLocalSpaces()
-}
-
-// hide
-
-const toggleHideSpace = async () => {
-  const value = !props.currentSpaceIsHidden
-  const currentSpaceId = store.state.currentSpace.id
-  await store.dispatch('currentSpace/updateSpaceIsHidden', { spaceId: currentSpaceId, isHidden: value })
-  store.commit('notifySpaceIsHidden', value)
-  updateLocalSpaces()
-}
-
-// remove
-
-const removeCurrentSpace = async () => {
-  const currentSpaceId = store.state.currentSpace.id
-  const currentUserIsSpaceCollaborator = store.getters['currentUser/isSpaceCollaborator']()
-  if (currentUserIsSpaceCollaborator) {
-    store.dispatch('currentSpace/removeCollaboratorFromSpace', store.state.currentUser)
-  } else {
-    store.dispatch('currentSpace/removeCurrentSpace')
-    store.commit('notifyCurrentSpaceIsNowRemoved', true)
-  }
-  emit('removeSpaceId', currentSpaceId)
-  await changeToPrevSpace()
-  await nextTick()
-  updateLocalSpaces()
-}
-const changeToPrevSpace = async () => {
-  const cachedSpaces = await cache.getAllSpaces()
-  let spaces = cachedSpaces.filter(space => {
-    return store.getters['currentUser/canEditSpace'](space)
-  })
-  spaces = spaces.filter(space => space.id !== currentSpace.value.id)
-  const recentSpace = spaces[0]
-  if (store.state.prevSpaceIdInSession) {
-    store.dispatch('currentSpace/loadPrevSpaceInSession')
-  } else if (recentSpace) {
-    store.dispatch('currentSpace/changeSpace', recentSpace)
-  } else {
-    emit('addSpace')
-  }
-}
-
 // dialog
 
 const dialogIsPinned = computed(() => store.state.spaceDetailsIsPinned)
@@ -244,10 +194,10 @@ const togglePrivacyPickerIsVisible = () => {
   closeDialogsAndEmit()
   state.privacyPickerIsVisible = !isVisible
 }
-const toggleSettingsIsVisible = () => {
-  const isVisible = state.settingsIsVisible
+const toggleOptionsIsVisible = () => {
+  const isVisible = state.optionsIsVisible
   closeDialogsAndEmit()
-  state.settingsIsVisible = !isVisible
+  state.optionsIsVisible = !isVisible
   emit('updateDialogHeight')
 }
 const toggleAddToGroupIsVisible = () => {
@@ -268,6 +218,7 @@ const closeDialogs = () => {
   clearErrors()
 }
 const closeDialogsAndEmit = () => {
+  console.log('☎️')
   closeDialogs()
   emit('closeDialogs')
 }
@@ -362,7 +313,7 @@ const removeSpaceGroup = (group) => {
 
 ReadOnlySpaceInfoBadges(:spaceGroup="spaceGroup")
 
-//- member options
+//- members
 template(v-if="isSpaceMember")
   .row
     //- Privacy
@@ -383,10 +334,10 @@ template(v-if="isSpaceMember")
     template(v-else)
       //- Favorite
       FavoriteSpaceButton(:parentIsDialog="true" @updateLocalSpaces="updateLocalSpaces")
-    //- Settings
+    //- Options
     .button-wrap
-      button(@click="toggleSettingsIsVisible" :class="{active: state.settingsIsVisible}" title="Space Settings")
-        img.icon.settings(src="@/assets/settings.svg")
+      button(@click="toggleOptionsIsVisible" :class="{active: state.optionsIsVisible}" title="Space Options")
+        span Options
   .row(v-if="state.error.updateSpaceGroup")
     .badge.danger
       img.icon.cancel(src="@/assets/add.svg")
@@ -396,42 +347,21 @@ template(v-if="isSpaceMember")
       img.icon.cancel(src="@/assets/add.svg")
       span Only space creator, or group admin, can remove from group
 
-//- read only options
+//- read only users
 .row(v-if="!isSpaceMember")
   FavoriteSpaceButton(:parentIsDialog="true" @updateLocalSpaces="updateLocalSpaces")
   .button-wrap
-    button(@click="toggleSettingsIsVisible" :class="{active: state.settingsIsVisible}")
-      img.icon.settings(src="@/assets/settings.svg")
-      span Settings
+    button(@click="toggleOptionsIsVisible" :class="{active: state.optionsIsVisible}")
+      span Options
 
-//- Space Settings
-template(v-if="state.settingsIsVisible")
-  section.subsection.space-settings
-    .row
-      AskToAddToExplore
-      AddToExplore
-    .row
-      //- Import / Export
-      ImportExportButton(@closeDialogs="closeDialogsAndEmit")
-      //- Duplicate
-      .button-wrap
-        button(@click.left="duplicateSpace" title="Duplicate this Space")
-          img.icon.duplicate(src="@/assets/duplicate.svg")
-          span Duplicate
-    .row(v-if="isSpaceMember")
-      .button-wrap
-        .segmented-buttons
-          //- Remove
-          button.danger(@click.left="removeCurrentSpace" :class="{ disabled: currentSpaceIsTemplate }")
-            template(v-if="currentUserIsSpaceCollaborator")
-              img.icon.cancel(src="@/assets/add.svg")
-              span Leave
-            template(v-else)
-              img.icon.remove(src="@/assets/remove.svg")
-              span Remove
-          //- Hide
-          button(@click.stop="toggleHideSpace" :class="{ active: props.currentSpaceIsHidden }")
-            span Hide
+SpaceOptions(
+  :visible="state.optionsIsVisible"
+  :isSpaceMember="isSpaceMember"
+  :currentSpaceIsHidden="props.currentSpaceIsHidden"
+  @closeDialogsAndEmit="closeDialogsAndEmit"
+  @updateLocalSpaces="updateLocalSpaces"
+  @removeSpaceId="removeSpaceId"
+)
 </template>
 
 <style lang="stylus">
@@ -496,17 +426,4 @@ template(v-if="state.settingsIsVisible")
 
 .icon.cal
   vertical-align 1px
-
-.space-settings
-  .background-preview
-    vertical-align middle
-    margin-right 5px
-    .preview-wrap
-      height 16px
-      width 16px
-      vertical-align 0px
-      border-radius 4px
-  p
-    white-space normal
-
 </style>
