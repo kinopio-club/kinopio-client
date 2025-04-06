@@ -32,6 +32,7 @@ const showLogMessages = true // true
 
 let prevPatchTime = new Date() // unix timestamp ms
 
+const max = 30
 let patches = []
 let pointer = 0
 let isPaused = false
@@ -98,7 +99,6 @@ const self = {
       console.info('⏺ updated prev history patch', { updatedPatch, pointer })
     },
     trim: (state) => {
-      const max = 60
       if (patches.length > max) {
         patches.shift()
         pointer = pointer - 1
