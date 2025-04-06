@@ -311,7 +311,7 @@ const removeSpaceGroup = (group) => {
       button.small-button(:class="{active: dialogIsPinned}")
         img.icon.pin(src="@/assets/pin.svg")
 
-ReadOnlySpaceInfoBadges(:spaceGroup="spaceGroup")
+ReadOnlySpaceInfoBadges(:visible="!dialogIsPinned" :spaceGroup="spaceGroup")
 
 //- members
 template(v-if="isSpaceMember")
