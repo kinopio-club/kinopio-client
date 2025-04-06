@@ -151,22 +151,23 @@ watch(() => store.state.currentUserIsDraggingCard, (value, prevValue) => {
   updatePageSizeFromMutation(value)
 })
 watch(() => store.state.currentUserIsResizingCard, (value, prevValue) => {
-  updatePageSizeFromMutation(value)
   if (prevValue && !value) {
     afterResizeCards()
   }
+  updatePageSizeFromMutation(value)
 })
 watch(() => store.state.currentUserIsDraggingBox, (value, prevValue) => {
   updatePageSizeFromMutation(value)
 })
 watch(() => store.state.currentUserIsResizingBox, (value, prevValue) => {
-  updatePageSizeFromMutation(value)
   if (prevValue && !value) {
     afterResizeBoxes()
   }
+  updatePageSizeFromMutation(value)
 })
-const updatePageSizeFromMutation = (value) => {
+const updatePageSizeFromMutation = async (value) => {
   if (!value) {
+    await nextTick()
     store.dispatch('updatePageSizes')
   }
 }
@@ -270,14 +271,14 @@ const resizeCards = (event) => {
   let deltaX = endCursor.x - prevCursor.x
   store.dispatch('currentCards/resize', { cardIds, deltaX })
 }
-const stopResizingCards = () => {
+const stopResizingCards = async () => {
   if (!store.state.currentUserIsResizingCard) { return }
   store.dispatch('history/resume')
   const cardIds = store.state.currentUserIsResizingCardIds
   const cards = cardIds.map(id => store.getters['currentCards/byId'](id))
   store.dispatch('history/add', { cards, useSnapshot: true })
+  await store.dispatch('currentCards/updateDimensions', { cards })
   store.commit('currentUserIsResizingCard', false)
-  store.dispatch('currentCards/updateDimensions', { cards })
   store.commit('broadcast/updateStore', { updates: { userId: currentUser.value.id }, type: 'removeRemoteUserResizingCards' })
 }
 const afterResizeCards = () => {

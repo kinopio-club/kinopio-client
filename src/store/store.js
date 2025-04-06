@@ -1798,8 +1798,8 @@ const store = createStore({
       const cards = context.getters['currentCards/all']
       const boxes = context.getters['currentBoxes/all']
       let items = cards.concat(boxes)
-      items.shift({
-        x: 0, y: 0, width: 500, height: 500
+      items.push({
+        x: 0, y: 0, width: 500, height: 500 // minimum page size
       })
       let itemsRect = utils.pageSizeFromItems(items)
       context.commit('updatePageSizes', itemsRect)
