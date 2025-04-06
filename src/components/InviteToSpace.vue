@@ -134,8 +134,8 @@ section.invite-to-space(v-if="props.visible" @click.stop="closeDialogs")
   .row
     span
       .users
-        User(:user="currentUser" :isClickable="false" :key="currentUser.id" :isSmall="true" :hideYouLabel="true")
-        User(:user="randomUser" :isClickable="false" :key="currentUser.id" :isSmall="true" :hideYouLabel="true")
+        User(:user="currentUser" :isClickable="false" :key="currentUser.id" :isMedium="true" :hideYouLabel="true")
+        User(:user="randomUser" :isClickable="false" :key="currentUser.id" :isMedium="true" :hideYouLabel="true")
       span Invite New Collaborators
     button.small-button.extra-options-button(@click="toggleTipsIsVisible" :class="{active: state.tipsIsVisible}")
       span ?
@@ -187,8 +187,6 @@ section.invite-to-space
     margin-right 5px
     .user
       vertical-align -3px
-      .anon-avatar
-        top 6px
       &:first-child
         .user-avatar
           border-top-right-radius 0
