@@ -177,7 +177,7 @@ dialog.share.wide(v-if="props.visible" :open="props.visible" @click.left.stop="c
           RssFeeds(:visible="state.rssFeedsIsVisible")
 
   section(v-if="spaceIsRemote")
-    ReadOnlySpaceInfoBadges
+    ReadOnlySpaceInfoBadges(:spaceGroup="spaceGroup")
     PrivacyButton(:privacyPickerIsVisible="state.privacyPickerIsVisible" @togglePrivacyPickerIsVisible="togglePrivacyPickerIsVisible" @closeDialogs="closeDialogs")
 
     //- Copy URL
