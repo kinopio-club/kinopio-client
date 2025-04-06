@@ -13,6 +13,7 @@ const props = defineProps({
 const isSpaceMember = computed(() => store.getters['currentUser/isSpaceMember']())
 const spacePrivacyIsOpen = computed(() => store.state.currentSpace.privacy === 'open')
 const showInExplore = computed(() => store.state.currentSpace.showInExplore)
+const isTemplate = computed(() => store.state.currentSpace.isTemplate)
 </script>
 
 <template lang="pug">
@@ -26,6 +27,10 @@ template(v-if="!isSpaceMember")
     .badge.status(v-if="showInExplore")
       img.icon.sunglasses(src="@/assets/sunglasses.svg")
       span In Explore
+    .badge.secondary(v-if="isTemplate")
+      img.icon.templates(src="@/assets/templates.svg")
+      span Template
+
     GroupLabel(v-if="props.spaceGroup" :group="props.spaceGroup" :showName="true")
 </template>
 
