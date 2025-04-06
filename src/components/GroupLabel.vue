@@ -27,23 +27,20 @@ span.group-label(v-if="isVisible" :title="props.group.name" :data-group-id="prop
   .badge.group-badge(:style="{ background: props.group.color }" :class="classes")
     span.emoji(v-if="props.group.emoji") {{props.group.emoji}}
     img.icon.group(v-else src="@/assets/group.svg")
-    span {{ shortName }}
-  span(v-if="props.showName") {{ props.group.name }}
+    span(v-if="props.showName") {{ props.group.name }}
+    span(v-else) {{ shortName }}
 </template>
 
 <style lang="stylus">
 .group-label
   flex-shrink 0
   .group-badge
+    padding 2px 8px
     border-radius 100px
     min-width initial
     min-height initial
-    padding 0 6px
     display inline
     word-break keep-all
-    span
-      vertical-align 1.5px
-      font-size 12px
     &.is-background-light
       span
         color var(--primary-on-light-background)
