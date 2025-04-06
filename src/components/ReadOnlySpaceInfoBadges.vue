@@ -26,9 +26,7 @@ template(v-if="!isSpaceMember")
     .badge.status(v-if="showInExplore")
       img.icon.sunglasses(src="@/assets/sunglasses.svg")
       span In Explore
-  .row(v-if="props.spaceGroup")
-    .badge.secondary
-      GroupLabel(:group="props.spaceGroup" :showName="true")
+    GroupLabel(v-if="props.spaceGroup" :group="props.spaceGroup" :showName="true")
 </template>
 
 <style lang="stylus">
