@@ -6,7 +6,7 @@ import BackgroundPicker from '@/components/dialogs/BackgroundPicker.vue'
 import BackgroundPreview from '@/components/BackgroundPreview.vue'
 import Loader from '@/components/Loader.vue'
 import PrivacyButton from '@/components/PrivacyButton.vue'
-import ReadOnlySpaceInfoBadges from '@/components/ReadOnlySpaceInfoBadges.vue'
+import SpaceInfoBadges from '@/components/SpaceInfoBadges.vue'
 import FavoriteSpaceButton from '@/components/FavoriteSpaceButton.vue'
 import AddToGroup from '@/components/dialogs/AddToGroup.vue'
 import GroupLabel from '@/components/GroupLabel.vue'
@@ -311,7 +311,7 @@ const removeSpaceGroup = (group) => {
       button.small-button(:class="{active: dialogIsPinned}")
         img.icon.pin(src="@/assets/pin.svg")
 
-ReadOnlySpaceInfoBadges(:visible="!dialogIsPinned" :spaceGroup="spaceGroup")
+SpaceInfoBadges(:visible="!dialogIsPinned" :spaceGroup="spaceGroup")
 
 //- members
 template(v-if="isSpaceMember")

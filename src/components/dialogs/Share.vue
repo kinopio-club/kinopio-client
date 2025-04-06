@@ -11,7 +11,6 @@ import utils from '@/utils.js'
 import ImportExportButton from '@/components/ImportExportButton.vue'
 import AddToExplore from '@/components/AddToExplore.vue'
 import AskToAddToExplore from '@/components/AskToAddToExplore.vue'
-import ReadOnlySpaceInfoBadges from '@/components/ReadOnlySpaceInfoBadges.vue'
 import SpaceUsersButton from '@/components/SpaceUsersButton.vue'
 import consts from '@/consts.js'
 const store = useStore()
@@ -177,7 +176,6 @@ dialog.share.wide(v-if="props.visible" :open="props.visible" @click.left.stop="c
           RssFeeds(:visible="state.rssFeedsIsVisible")
 
   section(v-if="spaceIsRemote")
-    ReadOnlySpaceInfoBadges(:visible="!isSpaceMember" :spaceGroup="spaceGroup")
     PrivacyButton(:privacyPickerIsVisible="state.privacyPickerIsVisible" @togglePrivacyPickerIsVisible="togglePrivacyPickerIsVisible" @closeDialogs="closeDialogs")
 
     //- Copy URL
