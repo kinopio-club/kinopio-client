@@ -234,15 +234,13 @@ const redraw = () => {
 const updateCache = async () => {
   const savedStrokes = currentUserStrokes.concat(remoteStrokes)
   dataUrl = await imageDataUrl(savedStrokes)
-  console.log('🅰️', dataUrl.length)
 }
 const saveStroke = async ({ stroke, isRemovedStroke }) => {
   updateCache()
-  console.log('🅰️🅰️ save', stroke, isRemovedStroke)
   if (isRemovedStroke) {
-    // api operation removeDrawingStroke
+    await store.dispatch('api/addToQueue', { name: 'removeDrawingStroke', body: { stroke } })
   } else {
-    // api operation addDrawingStroke
+    await store.dispatch('api/addToQueue', { name: 'createDrawingStroke', body: { stroke } })
   }
 }
 const endDrawing = async (event) => {
