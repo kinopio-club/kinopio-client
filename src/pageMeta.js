@@ -3,6 +3,7 @@ import consts from '@/consts.js'
 import sortBy from 'lodash-es/sortBy'
 
 const logo = 'https://updates.kinopio.club/logo-social-media-avatar.png'
+const ogImageURL = 'https://kinopio.club/og-image.png'
 const defaultDescription = 'A space to whiteboard, moodboard, brainstorm, and take notes'
 
 const fetchSpacePublicMeta = async (spaceId) => {
@@ -56,16 +57,20 @@ const updateSpaceTitle = (space) => {
   }
   updateTitle(title)
 }
+/// Resets the og:image meta tag to the default image
+const resetImage = () => {
+  document.querySelector('meta[property="og:image"]').content = ogImageURL
+  document.querySelector('meta[property="og:image:width"]').content = 1200
+  document.querySelector('meta[property="og:image:height"]').content = 630
+  document.querySelector('meta[property="og:image:type"]').content = 'image/png'
+}
+/// Updates the og:image meta tag to the space preview image
 const updateImage = (space) => {
-  const head = document.querySelector('head')
-
-  const imageUrl = space.previewImage || spacePreviewImageFromId(space.id) || logo
-  let ogImage = document.createElement(`meta`)
-  ogImage.setAttribute('property', 'og:image')
-  ogImage.setAttribute('content', imageUrl)
-  head.appendChild(ogImage)
-  // ogImage.setAttribute('property', 'og:image:secure_url')
-  // head.appendChild(ogImage)
+  const imageUrl = space.previewImage || spacePreviewImageFromId(space.id) || ogImageURL
+  document.querySelector('meta[property="og:image"]').content = imageUrl
+  document.querySelector('meta[property="og:image:width"]').content = 1180
+  document.querySelector('meta[property="og:image:height"]').content = 670
+  document.querySelector('meta[property="og:image:type"]').content = 'image/jpeg'
 }
 const updateDescription = (description) => {
   document.querySelector('meta[property="og:description"]').content = description
@@ -177,7 +182,7 @@ export default {
       title = `[Invite] ${title}`
     }
     updateTitle(title)
-    document.querySelector('meta[property="og:image"]').content = logo
+    resetImage()
     let description = 'Work together on shared whiteboards, brainstorms, and diagrams'
     updateDescription(description)
   }
