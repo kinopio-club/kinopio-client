@@ -6,6 +6,7 @@ import utils from '@/utils.js'
 import consts from '@/consts.js'
 
 import debounce from 'lodash-es/debounce'
+import { nanoid } from 'nanoid'
 
 const store = useStore()
 
@@ -13,6 +14,7 @@ const canvasElement = ref(null)
 let canvas, context
 let isDrawing = false
 let currentStroke = []
+let currentStrokeId = ''
 let currentStrokes = []
 let remoteStrokes = []
 let dataUrl
@@ -78,6 +80,7 @@ const strokeDiameter = computed(() => {
 const createPoint = (event) => {
   const { x, y } = utils.cursorPositionInSpace(event)
   return {
+    id: currentStrokeId,
     x,
     y,
     color: strokeColor.value,
@@ -145,6 +148,15 @@ const renderStroke = (stroke, shouldPreventBroadcast) => {
   context.stroke()
   broadcastStroke(stroke, shouldPreventBroadcast)
 }
+// const downloadBlob = (blob) => {
+//   let URLObj = window.URL || window.webkitURL
+//   let a = document.createElement("a")
+//   a.href = URLObj.createObjectURL(blob)
+//   a.download = "untitled.png"
+//   document.body.appendChild(a)
+//   a.click()
+//   document.body.removeChild(a)
+// }
 const imageDataUrl = async (strokes) => {
   const offscreenCanvas = new OffscreenCanvas(pageWidth.value, pageHeight.value)
   const offscreenContext = offscreenCanvas.getContext('2d')
@@ -166,12 +178,13 @@ const imageDataUrl = async (strokes) => {
       offscreenContext.moveTo(point.x, point.y)
     })
   })
-  const blob = await offscreenCanvas.convertToBlob({ type: 'image/png' })
+  const blob = await offscreenCanvas.convertToBlob({ type: 'image/webp', quality: 0.5 }) // 35kb ~ 6 strokes
   return new Promise((resolve, reject) => {
     const reader = new FileReader()
     reader.onloadend = () => resolve(reader.result)
     reader.onerror = reject
     reader.readAsDataURL(blob)
+    // downloadBlob(blob)
   })
 }
 
@@ -181,6 +194,7 @@ const startDrawing = (event) => {
   if (!toolbarIsDrawing.value) { return }
   store.dispatch('closeAllDialogs')
   isDrawing = true
+  currentStrokeId = nanoid()
   currentStroke = []
   const point = createPoint(event)
   renderStroke([point])
@@ -223,11 +237,17 @@ const endDrawing = async (event) => {
   const strokes = currentStrokes.concat(remoteStrokes)
   dataUrl = await imageDataUrl(strokes)
   console.log('🅰️', dataUrl.length, dataUrl)
-  // TODO cache dataUrl space.drawing ?
+  console.log('🌺', currentStroke, currentStrokeId)
   store.commit('addToDrawingStrokeColors', currentStroke[0].color)
-  // TODO save to api operation (not await)
+
+  // store.dispatch('history/add', { drawingStrokeId: currentStrokeId }
+
+  const prevStroke = utils.clone(currentStroke)
+
   currentStroke = []
   isDrawing = false
+
+  // TODO await save stroke to api operation prevstroke
 }
 
 // scroll and resize
