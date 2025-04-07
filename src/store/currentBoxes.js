@@ -14,6 +14,26 @@ import { nextTick } from 'vue'
 let currentSpaceId
 let prevMovePositions = {}
 
+const incrementBoxesZ = async (context, boxes) => {
+  const result = []
+  for (const box of boxes) {
+    if (box.isLocked) {
+      result.push(box)
+      continue
+    }
+    const boxes = context.getters.all
+    const maxInt = Number.MAX_SAFE_INTEGER - 1000
+    let highestBoxZ = utils.highestItemZ(boxes)
+    if (highestBoxZ > maxInt) {
+      await context.dispatch('clearAllZs')
+      highestBoxZ = utils.highestItemZ(boxes)
+    }
+    box.z = highestBoxZ
+    result.push(box)
+  }
+  return result
+}
+
 export default {
   namespaced: true,
   state: {
@@ -576,7 +596,7 @@ export default {
       context.dispatch('broadcast/update', { updates: { boxes }, type: 'moveBoxes', handler: 'currentBoxes/moveWhileDragging' }, { root: true })
       context.dispatch('updateSnapGuides', { boxes })
     },
-    afterMove: (context) => {
+    afterMove: async (context) => {
       prevMovePositions = {}
       const currentDraggingBoxId = context.rootState.currentDraggingBoxId
       const currentDraggingBox = context.getters.byId(currentDraggingBoxId)
@@ -593,10 +613,11 @@ export default {
         const position = utils.boxElementDimensions({ id })
         box.x = position.x
         box.y = position.y
-        const { x, y } = box
-        return { id, x, y }
+        const { x, y, z } = box
+        return { id, x, y, z }
       })
       boxes = boxes.filter(box => Boolean(box))
+      boxes = await incrementBoxesZ(context, boxes)
       context.commit('move', { boxes, spaceId })
       boxes = boxes.filter(box => box)
       // update
@@ -609,6 +630,38 @@ export default {
       nextTick(() => {
         context.dispatch('currentConnections/updateMultiplePaths', boxes, { root: true })
       })
+    },
+
+    // z-index
+
+    clearAllZs: async (context) => {
+      let boxes = context.getters.all.sort((a, b) => a.z - b.z)
+      let z = 1
+      for (const box of boxes) {
+        const body = { id: box.id, z }
+        context.commit('update', body)
+        context.dispatch('broadcast/update', { updates: body, type: 'updateBox', handler: 'currentBoxes/update' }, { root: true })
+        await context.dispatch('api/addToQueue', { name: 'updateBox', body }, { root: true })
+        z++
+      }
+    },
+    incrementZ: async (context, id) => {
+      const box = context.getters.byId(id)
+      if (!box) { return }
+      if (box.isLocked) { return }
+      const boxes = context.getters.all
+      const maxInt = Number.MAX_SAFE_INTEGER - 1000
+      let highestBoxZ = utils.highestItemZ(boxes)
+      if (highestBoxZ > maxInt) {
+        context.dispatch('clearAllZs')
+        highestBoxZ = utils.highestItemZ(boxes)
+      }
+      const canEditSpace = context.rootGetters['currentUser/canEditSpace']()
+      const body = { id, z: highestBoxZ + 1 }
+      context.commit('update', body)
+      if (!canEditSpace) { return }
+      context.dispatch('broadcast/update', { updates: body, type: 'updateBox', handler: 'currentBoxes/update' }, { root: true })
+      await context.dispatch('api/addToQueue', { name: 'updateBox', body }, { root: true })
     },
 
     // remove

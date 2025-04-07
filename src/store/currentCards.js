@@ -32,7 +32,7 @@ const incrementCardsZ = (context, cards) => {
   return cards
 }
 
-const currentCards = {
+export default {
   namespaced: true,
   state: {
     ids: [],
@@ -1152,5 +1152,3 @@ const currentCards = {
     }
   }
 }
-
-export default currentCards
