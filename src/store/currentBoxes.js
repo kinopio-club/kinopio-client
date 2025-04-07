@@ -14,20 +14,24 @@ import { nextTick } from 'vue'
 let currentSpaceId
 let prevMovePositions = {}
 
-const incrementBoxesZ = (context, boxes) => {
-  boxes = boxes.map(box => {
-    if (box.isLocked) { return box }
+const incrementBoxesZ = async (context, boxes) => {
+  const result = []
+  for (const box of boxes) {
+    if (box.isLocked) {
+      result.push(box)
+      continue
+    }
     const boxes = context.getters.all
     const maxInt = Number.MAX_SAFE_INTEGER - 1000
     let highestBoxZ = utils.highestItemZ(boxes)
     if (highestBoxZ > maxInt) {
-      context.dispatch('clearAllZs')
+      await context.dispatch('clearAllZs')
       highestBoxZ = utils.highestItemZ(boxes)
     }
     box.z = highestBoxZ
-    return box
-  })
-  return boxes
+    result.push(box)
+  }
+  return result
 }
 
 export default {
@@ -588,7 +592,7 @@ export default {
       context.dispatch('broadcast/update', { updates: { boxes }, type: 'moveBoxes', handler: 'currentBoxes/moveWhileDragging' }, { root: true })
       context.dispatch('updateSnapGuides', { boxes })
     },
-    afterMove: (context) => {
+    afterMove: async (context) => {
       prevMovePositions = {}
       const currentDraggingBoxId = context.rootState.currentDraggingBoxId
       const currentDraggingBox = context.getters.byId(currentDraggingBoxId)
@@ -609,7 +613,7 @@ export default {
         return { id, x, y, z }
       })
       boxes = boxes.filter(box => Boolean(box))
-      boxes = incrementBoxesZ(context, boxes)
+      boxes = await incrementBoxesZ(context, boxes)
       context.commit('move', { boxes, spaceId })
       boxes = boxes.filter(box => box)
       // update
