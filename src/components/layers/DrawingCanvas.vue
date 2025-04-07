@@ -44,6 +44,10 @@ onMounted(() => {
       remoteStrokes.push(stroke)
       renderStroke(stroke, true)
       store.commit('triggerUpdateDrawingBackground')
+    } else if (mutation.type === 'triggerDrawingUndo') {
+      console.log('🅰️ UNDO')
+    } else if (mutation.type === 'triggerDrawingRedo') {
+      console.log('🅰️ REDO')
     }
   })
 })

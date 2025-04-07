@@ -694,6 +694,8 @@ const store = createStore({
     // drawing
     triggerStartDrawing: (state, event) => {},
     triggerDraw: (state, event) => {},
+    triggerDrawingUndo: () => {},
+    triggerDrawingRedo: () => {},
 
     // Cards
 
