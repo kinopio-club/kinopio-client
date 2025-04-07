@@ -153,12 +153,13 @@ const removeViewportObserver = () => {
 // styles
 
 const styles = computed(() => {
-  let { x, y, resizeWidth, resizeHeight, background } = normalizedBox.value
+  let { x, y, z, resizeWidth, resizeHeight, background } = normalizedBox.value
   let width = resizeWidth
   let height = resizeHeight
   let styles = {
     left: x + 'px',
     top: y + 'px',
+    zIndex: z ?? 1,
     width: width + 'px',
     height: height + 'px',
     border: `${borderWidth}px solid ${color.value}`
@@ -361,6 +362,7 @@ const startBoxInfoInteraction = (event) => {
   store.dispatch('closeAllDialogs')
   store.commit('currentUserIsDraggingBox', true)
   store.commit('currentDraggingBoxId', props.box.id)
+  store.dispatch('currentBoxes/incrementZ', props.box.id)
   const updates = {
     boxId: props.box.id,
     userId: store.state.currentUser.id
