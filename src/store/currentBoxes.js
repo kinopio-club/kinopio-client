@@ -605,10 +605,11 @@ export default {
         const position = utils.boxElementDimensions({ id })
         box.x = position.x
         box.y = position.y
-        const { x, y } = box
-        return { id, x, y }
+        const { x, y, z } = box
+        return { id, x, y, z }
       })
       boxes = boxes.filter(box => Boolean(box))
+      boxes = incrementBoxesZ(context, boxes)
       context.commit('move', { boxes, spaceId })
       boxes = boxes.filter(box => box)
       // update
