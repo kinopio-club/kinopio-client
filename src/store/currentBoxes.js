@@ -22,7 +22,7 @@ const incrementBoxesZ = (context, boxes) => {
     let highestBoxZ = utils.highestItemZ(boxes)
     if (highestBoxZ > maxInt) {
       context.dispatch('clearAllZs')
-      highestBoxZ = 1
+      highestBoxZ = utils.highestItemZ(boxes)
     }
     box.z = highestBoxZ
     return box
@@ -627,12 +627,14 @@ export default {
     // z-index
 
     clearAllZs: async (context) => {
-      let boxes = context.getters.all
+      let boxes = context.getters.all.sort((a, b) => a.z - b.z)
+      let z = 1
       for (const box of boxes) {
-        const body = { id: box.id, z: 0 }
+        const body = { id: box.id, z }
         context.commit('update', body)
         context.dispatch('broadcast/update', { updates: body, type: 'updateBox', handler: 'currentBoxes/update' }, { root: true })
         await context.dispatch('api/addToQueue', { name: 'updateBox', body }, { root: true })
+        z++
       }
     },
     incrementZ: async (context, id) => {
@@ -644,7 +646,7 @@ export default {
       let highestBoxZ = utils.highestItemZ(boxes)
       if (highestBoxZ > maxInt) {
         context.dispatch('clearAllZs')
-        highestBoxZ = 1
+        highestBoxZ = utils.highestItemZ(boxes)
       }
       const canEditSpace = context.rootGetters['currentUser/canEditSpace']()
       const body = { id, z: highestBoxZ + 1 }
