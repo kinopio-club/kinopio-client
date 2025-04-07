@@ -359,6 +359,7 @@ const startBoxInfoInteraction = (event) => {
   store.dispatch('closeAllDialogs')
   store.commit('currentUserIsDraggingBox', true)
   store.commit('currentDraggingBoxId', props.box.id)
+  store.dispatch('currentBoxes/incrementZ', props.box.id)
   const updates = {
     boxId: props.box.id,
     userId: store.state.currentUser.id
