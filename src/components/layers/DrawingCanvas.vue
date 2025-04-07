@@ -15,8 +15,9 @@ let canvas, context
 let isDrawing = false
 let currentStroke = []
 let currentStrokeId = ''
-let currentStrokes = []
+let currentUserStrokes = []
 let remoteStrokes = []
+let redoStrokes = []
 let dataUrl
 
 let unsubscribe
@@ -30,7 +31,7 @@ onMounted(() => {
   window.addEventListener('resize', resize)
   updatePrevScroll()
 
-  // TODO clear and restore canvas when loading/restoring space
+  // TODO clear and restore canvas when loading/restoring space, clear redostrokes, currentuserstrokes
 
   unsubscribe = store.subscribe(mutation => {
     if (mutation.type === 'triggerStartDrawing') {
@@ -45,9 +46,9 @@ onMounted(() => {
       renderStroke(stroke, true)
       store.commit('triggerUpdateDrawingBackground')
     } else if (mutation.type === 'triggerDrawingUndo') {
-      console.log('🅰️ UNDO')
+      undo()
     } else if (mutation.type === 'triggerDrawingRedo') {
-      console.log('🅰️ REDO')
+      redo()
     }
   })
 })
@@ -214,13 +215,12 @@ const draw = (event) => {
   renderStroke(currentStroke)
   store.commit('triggerUpdateDrawingBackground')
 }
-
 const clear = () => {
   context.clearRect(0, 0, canvas.width, canvas.height)
 }
 const redraw = () => {
   clear()
-  currentStrokes.forEach(stroke => {
+  currentUserStrokes.forEach(stroke => {
     renderStroke(stroke, true)
   })
   remoteStrokes.forEach(stroke => {
@@ -231,27 +231,48 @@ const redraw = () => {
 
 // stop
 
+const updateCache = async () => {
+  const savedStrokes = currentUserStrokes.concat(remoteStrokes)
+  dataUrl = await imageDataUrl(savedStrokes)
+  console.log('🅰️', dataUrl.length)
+}
+const saveStroke = async ({ stroke, isRemovedStroke }) => {
+  updateCache()
+  console.log('🅰️🅰️ save', stroke, isRemovedStroke)
+  if (isRemovedStroke) {
+    // api operation removeDrawingStroke
+  } else {
+    // api operation addDrawingStroke
+  }
+}
 const endDrawing = async (event) => {
   if (!toolbarIsDrawing.value) { return }
   if (!currentStroke.length) {
     isDrawing = false
     return
   }
-  currentStrokes.push(currentStroke)
-  const strokes = currentStrokes.concat(remoteStrokes)
-  dataUrl = await imageDataUrl(strokes)
-  console.log('🅰️', dataUrl.length, dataUrl)
-  console.log('🌺', currentStroke, currentStrokeId)
   store.commit('addToDrawingStrokeColors', currentStroke[0].color)
-
-  // store.dispatch('history/add', { drawingStrokeId: currentStrokeId }
-
-  const prevStroke = utils.clone(currentStroke)
-
+  currentUserStrokes.push(currentStroke)
+  saveStroke({ stroke: currentStroke })
   currentStroke = []
+  redoStrokes = []
   isDrawing = false
+}
 
-  // TODO await save stroke to api operation prevstroke
+// undo redo
+
+const undo = () => {
+  const prevStroke = currentUserStrokes.pop() // remove last stroke
+  redoStrokes.push(prevStroke) // append to redo stack
+  redraw()
+  saveStroke({ stroke: prevStroke, isRemovedStroke: true })
+}
+const redo = () => {
+  if (!redoStrokes.length) { return }
+  const prevStroke = redoStrokes.pop()
+  currentUserStrokes.push(prevStroke)
+  redraw()
+  saveStroke({ stroke: prevStroke })
 }
 
 // scroll and resize
