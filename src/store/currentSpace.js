@@ -816,6 +816,7 @@ const currentSpace = {
       context.dispatch('history/reset', null, { root: true })
       context.dispatch('restoreSpaceInChunks', { space })
       console.info('🎑 local space', space)
+      context.commit('triggerRestoreSpaceLocalComplete', null, { root: true })
       console.timeEnd('🎑⏱️ restoreSpaceLocal')
       return space
     },

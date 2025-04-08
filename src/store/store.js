@@ -664,6 +664,7 @@ const store = createStore({
     triggerAppsAndExtensionsIsVisible: () => {},
     triggerUpdateWindowTitle: () => {},
     triggerRestoreSpaceRemoteComplete: () => {},
+    triggerRestoreSpaceLocalComplete: () => {},
     triggerCheckIfShouldNotifySpaceOutOfSync: () => {},
     triggerNotifyOffscreenCardCreated: (state, card) => {},
     triggerSonarPing: (state, event) => {},

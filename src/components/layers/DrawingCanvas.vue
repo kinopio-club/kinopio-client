@@ -19,7 +19,7 @@ let currentStrokeId = ''
 let currentUserStrokes = []
 let remoteStrokes = []
 let redoStrokes = []
-let dataUrl
+let spaceDrawingImage = null
 
 let unsubscribe
 
@@ -56,6 +56,9 @@ onMounted(() => {
       undo()
     } else if (mutation.type === 'triggerDrawingRedo') {
       redo()
+    } else if (mutation.type === 'triggerRestoreSpaceLocalComplete' || mutation.type === 'triggerRestoreSpaceRemoteComplete') {
+      clear()
+      restoreSpaceDrawingImage()
     }
   })
 })
@@ -86,6 +89,7 @@ const styles = computed(() => {
 
 const clear = () => {
   context.clearRect(0, 0, canvas.width, canvas.height)
+  spaceDrawingImage = null
   redoStrokes = []
   currentUserStrokes = []
   remoteStrokes = []
@@ -232,6 +236,31 @@ const imageDataUrl = async (strokes) => {
   })
 }
 
+// restore
+
+const renderSpaceDrawingImage = () => {
+  const { x, y } = viewportPosition({ x: 0, y: 0 })
+  context.drawImage(spaceDrawingImage, x, y, pageWidth.value, pageHeight.value)
+  store.commit('triggerUpdateDrawingBackground')
+}
+const restoreSpaceDrawingImage = async () => {
+  let url = store.state.currentSpace.drawingImage
+  if (!url) { return }
+  const isDataUrl = url.startsWith('data:')
+  if (!isDataUrl) {
+    url = `${url}?q=${nanoid()}`
+  }
+  if (spaceDrawingImage) {
+    renderSpaceDrawingImage()
+  } else {
+    spaceDrawingImage = new Image()
+    spaceDrawingImage.onload = () => {
+      renderSpaceDrawingImage()
+    }
+    spaceDrawingImage.src = url
+  }
+}
+
 // start
 
 const startDrawing = (event) => {
@@ -256,6 +285,7 @@ const draw = (event) => {
 }
 const redraw = () => {
   context.clearRect(0, 0, canvas.width, canvas.height)
+  restoreSpaceDrawingImage()
   currentUserStrokes.forEach(stroke => {
     renderStroke(stroke, true)
   })
@@ -268,11 +298,9 @@ const redraw = () => {
 // stop
 
 const updateCache = async (strokes) => {
-  dataUrl = await imageDataUrl(strokes)
+  const dataUrl = await imageDataUrl(strokes)
   const currentSpaceId = store.state.currentSpace.id
   await cache.updateSpace('drawingImage', dataUrl, currentSpaceId)
-
-  // TODO save dataurl to cache space.drawingImage (LOAD check: might be a url or it might be a dataurl)
 }
 const saveStroke = async ({ stroke, isRemovedStroke }) => {
   const strokes = currentUserStrokes.concat(remoteStrokes)
