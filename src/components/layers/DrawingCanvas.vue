@@ -257,7 +257,7 @@ const restoreSpaceDrawingImage = async () => {
   if (!url) { return }
   const isDataUrl = url.startsWith('data:')
   if (!isDataUrl) {
-    url = `${url}?q=${nanoid()}`
+    url = `${url}?q=${nanoid()}` // cache-busting
   }
   if (spaceDrawingImage) {
     renderSpaceDrawingImage()
