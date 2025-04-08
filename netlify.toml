@@ -1,0 +1,7 @@
+[dev]
+    targetPort = 8080
+
+[[edge_functions]]
+  path = "/*"
+  function = "open-graph-html-transform"
+  excludedPath = "/assets/*"
