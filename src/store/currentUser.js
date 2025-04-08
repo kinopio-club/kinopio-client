@@ -48,7 +48,7 @@ const initialState = {
   defaultSpaceBackgroundGradient: undefined,
   defaultSpaceBackgroundTint: undefined,
   defaultCardBackgroundColor: undefined,
-  defaultConnectionControlPoint: null, // null, 'q00,00'
+  defaultConnectionControlPoint: 'q00,00', // null, 'q00,00'
   downgradeAt: null,
   shouldUseStickyCards: true,
   shouldIncreaseUIContrast: false,
