@@ -4,7 +4,7 @@ import { HTMLRewriter } from "https://ghuc.cc/worker-tools/html-rewriter/index.t
 const cdnHost = "https://cdn.kinopio.club";
 
 function getSpaceOgImage(spaceId: string) {
-  return `${cdnHost}/${spaceId}/preview-image-${spaceId}.webp`;
+  return `${cdnHost}/${spaceId}/preview-image-${spaceId}.jpeg`;
 }
 
 export default async function handler(request: Request, context: Context) {
