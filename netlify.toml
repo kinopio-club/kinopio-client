@@ -5,3 +5,5 @@
   path = "/*"
   function = "open-graph-html-transform"
   excludedPath = "/assets/*"
+  cache = "manual"
+  
