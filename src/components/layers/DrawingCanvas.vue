@@ -21,7 +21,7 @@ let remoteStrokes = []
 let redoStrokes = []
 let spaceDrawingImage = null
 
-let unsubscribe
+let unsubscribe, unsubscribeActions
 
 onMounted(() => {
   canvas = canvasElement.value
@@ -32,7 +32,8 @@ onMounted(() => {
   window.addEventListener('resize', resize)
   updatePrevScroll()
   // TODO clear and restore canvas when loading/restoring space, clear redostrokes, currentuserstrokes
-  clear()
+  clearCanvas()
+  clearStrokes()
   unsubscribe = store.subscribe(mutation => {
     if (mutation.type === 'triggerStartDrawing') {
       startDrawing(mutation.payload)
@@ -57,9 +58,15 @@ onMounted(() => {
     } else if (mutation.type === 'triggerDrawingRedo') {
       redo()
     } else if (mutation.type === 'triggerRestoreSpaceLocalComplete' || mutation.type === 'triggerRestoreSpaceRemoteComplete') {
-      clear()
+      clearCanvas()
       restoreSpaceDrawingImage()
     }
+    unsubscribeActions = store.subscribeAction(action => {
+      const actions = ['currentSpace/loadSpace', 'currentSpace/changeSpace', 'currentSpace/addSpace']
+      if (actions.includes(action.type)) {
+        clearStrokes()
+      }
+    })
   })
 })
 onBeforeUnmount(() => {
@@ -67,6 +74,7 @@ onBeforeUnmount(() => {
   window.removeEventListener('scroll', scroll)
   window.removeEventListener('resize', resize)
   unsubscribe()
+  unsubscribeActions()
 })
 
 const state = reactive({
@@ -86,10 +94,11 @@ const styles = computed(() => {
   }
   return value
 })
-
-const clear = () => {
+const clearCanvas = () => {
   context.clearRect(0, 0, canvas.width, canvas.height)
   spaceDrawingImage = null
+}
+const clearStrokes = () => {
   redoStrokes = []
   currentUserStrokes = []
   remoteStrokes = []
