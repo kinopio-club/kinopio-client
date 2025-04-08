@@ -35,6 +35,7 @@ const toggleColorPickerIsVisible = () => {
   const value = !state.colorPickerIsVisible
   closeAllDialogs()
   state.colorPickerIsVisible = value
+  store.commit('drawingEraserIsActive', false)
 }
 const drawingColor = computed(() => {
   return store.getters['currentUser/drawingColor']
