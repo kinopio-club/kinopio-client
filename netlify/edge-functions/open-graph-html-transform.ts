@@ -19,7 +19,11 @@ export default async function handler(request: Request, context: Context) {
     return;
   }
 
-  const spaceId = url.pathname;
+  const spaceId = url.pathname.split('-').pop()
+
+  if (!spaceId) {
+    return;
+  }
 
   const response = await context.next();
   const rewriter = new HTMLRewriter()
