@@ -2502,6 +2502,16 @@ export default {
     }
     return { text, file }
   },
+  // for canvas testing
+  downloadBlob (blob) {
+    let URLObj = window.URL || window.webkitURL
+    let a = document.createElement('a')
+    a.href = URLObj.createObjectURL(blob)
+    a.download = 'untitled.png'
+    document.body.appendChild(a)
+    a.click()
+    document.body.removeChild(a)
+  },
 
   // Tags 🦋
 

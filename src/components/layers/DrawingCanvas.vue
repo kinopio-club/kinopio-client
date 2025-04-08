@@ -4,6 +4,7 @@ import { useStore } from 'vuex'
 
 import utils from '@/utils.js'
 import consts from '@/consts.js'
+import cache from '@/cache.js'
 
 import debounce from 'lodash-es/debounce'
 import { nanoid } from 'nanoid'
@@ -200,15 +201,6 @@ const renderStroke = (stroke, shouldPreventBroadcast) => {
   context.stroke()
   broadcastAddStroke(stroke, shouldPreventBroadcast)
 }
-// const downloadBlob = (blob) => {
-//   let URLObj = window.URL || window.webkitURL
-//   let a = document.createElement("a")
-//   a.href = URLObj.createObjectURL(blob)
-//   a.download = "untitled.png"
-//   document.body.appendChild(a)
-//   a.click()
-//   document.body.removeChild(a)
-// }
 const imageDataUrl = async (strokes) => {
   const offscreenCanvas = new OffscreenCanvas(pageWidth.value, pageHeight.value)
   const offscreenContext = offscreenCanvas.getContext('2d')
@@ -236,7 +228,7 @@ const imageDataUrl = async (strokes) => {
     reader.onloadend = () => resolve(reader.result)
     reader.onerror = reject
     reader.readAsDataURL(blob)
-    // downloadBlob(blob)
+    // utils.downloadBlob(blob)
   })
 }
 
@@ -277,8 +269,10 @@ const redraw = () => {
 
 const updateCache = async (strokes) => {
   dataUrl = await imageDataUrl(strokes)
-  // TODO save dataurl to cache space.drawingImageDataUrl (it might be a url or it might be a dataurl)
-  // TODO clear cache space.drawingImageDataUrl after loading remote space
+  const currentSpaceId = store.state.currentSpace.id
+  await cache.updateSpace('drawingImage', dataUrl, currentSpaceId)
+
+  // TODO save dataurl to cache space.drawingImage (LOAD check: might be a url or it might be a dataurl)
 }
 const saveStroke = async ({ stroke, isRemovedStroke }) => {
   const strokes = currentUserStrokes.concat(remoteStrokes)
