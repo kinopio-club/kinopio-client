@@ -30,9 +30,8 @@ onMounted(() => {
   window.addEventListener('scroll', scroll)
   window.addEventListener('resize', resize)
   updatePrevScroll()
-
   // TODO clear and restore canvas when loading/restoring space, clear redostrokes, currentuserstrokes
-
+  clear()
   unsubscribe = store.subscribe(mutation => {
     if (mutation.type === 'triggerStartDrawing') {
       startDrawing(mutation.payload)
@@ -77,6 +76,12 @@ const styles = computed(() => {
   return value
 })
 
+const clear = () => {
+  context.clearRect(0, 0, canvas.width, canvas.height)
+  redoStrokes = []
+  currentUserStrokes = []
+  remoteStrokes = []
+}
 const strokeColor = computed(() => store.getters['currentUser/drawingColor'])
 const strokeDiameter = computed(() => {
   const diameter = store.state.currentUser.drawingBrushSize
@@ -92,6 +97,30 @@ const createPoint = (event) => {
     diameter: strokeDiameter.value,
     isEraser: store.state.drawingEraserIsActive
   }
+}
+const updatePageSizes = (strokes) => {
+  let x = 0
+  let y = 0
+  const drawingBrushSizeDiameter = consts.drawingBrushSizeDiameter.l // 40
+  strokes.forEach(points => {
+    points.forEach(point => {
+      if (point.x > x) {
+        x = point.x
+      }
+      if (point.y > y) {
+        y = point.y
+      }
+    })
+  })
+  const padding = {
+    width: store.state.viewportWidth / 2,
+    height: store.state.viewportHeight / 2
+  }
+  const rect = {
+    width: x + drawingBrushSizeDiameter + padding.width,
+    height: y + drawingBrushSizeDiameter + padding.height
+  }
+  store.commit('updatePageSizes', rect)
 }
 
 // broadcast
@@ -215,11 +244,8 @@ const draw = (event) => {
   renderStroke(currentStroke)
   store.commit('triggerUpdateDrawingBackground')
 }
-const clear = () => {
-  context.clearRect(0, 0, canvas.width, canvas.height)
-}
 const redraw = () => {
-  clear()
+  context.clearRect(0, 0, canvas.width, canvas.height)
   currentUserStrokes.forEach(stroke => {
     renderStroke(stroke, true)
   })
@@ -231,12 +257,15 @@ const redraw = () => {
 
 // stop
 
-const updateCache = async () => {
-  const savedStrokes = currentUserStrokes.concat(remoteStrokes)
-  dataUrl = await imageDataUrl(savedStrokes)
+const updateCache = async (strokes) => {
+  dataUrl = await imageDataUrl(strokes)
+  // TODO save dataurl to cache space.drawingImageDataUrl (it might be a url or it might be a dataurl)
+  // TODO clear cache space.drawingImageDataUrl after loading remote space
 }
 const saveStroke = async ({ stroke, isRemovedStroke }) => {
-  updateCache()
+  const strokes = currentUserStrokes.concat(remoteStrokes)
+  updateCache(strokes)
+  updatePageSizes(strokes)
   if (isRemovedStroke) {
     await store.dispatch('api/addToQueue', { name: 'removeDrawingStroke', body: { stroke } })
   } else {
