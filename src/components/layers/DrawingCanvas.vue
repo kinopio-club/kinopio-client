@@ -39,10 +39,17 @@ onMounted(() => {
       draw(mutation.payload)
     } else if (mutation.type === 'spaceZoomPercent') {
       updateCanvasSize()
-    } else if (mutation.type === 'triggerRenderRemoteDrawingStroke') {
+    } else if (mutation.type === 'triggerAddRemoteDrawingStroke') {
       const stroke = mutation.payload.stroke
       remoteStrokes.push(stroke)
       renderStroke(stroke, true)
+      store.commit('triggerUpdateDrawingBackground')
+    } else if (mutation.type === 'triggerRemoveRemoteDrawingStroke') {
+      const stroke = mutation.payload.stroke
+      remoteStrokes = remoteStrokes.filter(points => {
+        return points[0].id !== stroke[0].id
+      })
+      redraw()
       store.commit('triggerUpdateDrawingBackground')
     } else if (mutation.type === 'triggerDrawingUndo') {
       undo()
@@ -125,15 +132,26 @@ const updatePageSizes = (strokes) => {
 
 // broadcast
 
-const broadcastStroke = (stroke, shouldPreventBroadcast) => {
+const broadcastAddStroke = (stroke, shouldPreventBroadcast) => {
   if (shouldPreventBroadcast) { return }
   store.commit('broadcast/update', {
     updates: {
       userId: store.state.currentUser.id,
       stroke
     },
-    type: 'renderRemoteDrawingStroke',
-    handler: 'triggerRenderRemoteDrawingStroke'
+    type: 'addRemoteDrawingStroke',
+    handler: 'triggerAddRemoteDrawingStroke'
+  })
+}
+const broadcastRemoveStroke = (stroke, shouldPreventBroadcast) => {
+  if (shouldPreventBroadcast) { return }
+  store.commit('broadcast/update', {
+    updates: {
+      userId: store.state.currentUser.id,
+      stroke
+    },
+    type: 'removeRemoteDrawingStroke',
+    handler: 'triggerRemoveRemoteDrawingStroke'
   })
 }
 
@@ -158,7 +176,7 @@ const renderPoint = (point, shouldPreventBroadcast) => {
   context.closePath()
   context.fillStyle = point.color
   context.fill()
-  broadcastStroke([point], shouldPreventBroadcast)
+  broadcastAddStroke([point], shouldPreventBroadcast)
 }
 const renderStroke = (stroke, shouldPreventBroadcast) => {
   context.lineCap = context.lineJoin = 'round'
@@ -180,7 +198,7 @@ const renderStroke = (stroke, shouldPreventBroadcast) => {
     context.lineTo(x, y)
   })
   context.stroke()
-  broadcastStroke(stroke, shouldPreventBroadcast)
+  broadcastAddStroke(stroke, shouldPreventBroadcast)
 }
 // const downloadBlob = (blob) => {
 //   let URLObj = window.URL || window.webkitURL
@@ -293,6 +311,7 @@ const undo = () => {
   redoStrokes.push(prevStroke) // append to redo stack
   redraw()
   saveStroke({ stroke: prevStroke, isRemovedStroke: true })
+  broadcastRemoveStroke(prevStroke)
 }
 const redo = () => {
   if (!redoStrokes.length) { return }
@@ -300,6 +319,7 @@ const redo = () => {
   currentUserStrokes.push(prevStroke)
   redraw()
   saveStroke({ stroke: prevStroke })
+  broadcastAddStroke(prevStroke)
 }
 
 // scroll and resize

@@ -614,7 +614,6 @@ const store = createStore({
     triggerPaintFramePosition: (state, event) => {},
     triggerAddRemotePaintingCircle: () => {},
     triggerUpdateRemoteUserCursor: () => {},
-    triggerRenderRemoteDrawingStroke: () => {},
     triggerUpdateRemoteDropGuideLine: () => {},
     triggerUpdateStopRemoteUserDropGuideLine: () => {},
     triggerUpdateHeaderAndFooterPosition: () => {},
@@ -696,6 +695,8 @@ const store = createStore({
     triggerDraw: (state, event) => {},
     triggerDrawingUndo: () => {},
     triggerDrawingRedo: () => {},
+    triggerAddRemoteDrawingStroke: () => {},
+    triggerRemoveRemoteDrawingStroke: () => {},
 
     // Cards
 
@@ -1843,8 +1844,8 @@ const store = createStore({
       item.width = item.width || item.resizeWidth
       item.height = item.height || item.resizeHeight
       const zoom = context.getters.spaceZoomDecimal
-      let thresholdHeight = (context.state.viewportHeight * zoom) / 4
-      let thresholdWidth = (context.state.viewportWidth * zoom) / 4
+      let thresholdHeight = (context.state.viewportHeight * zoom) / 2
+      let thresholdWidth = (context.state.viewportWidth * zoom) / 2
       const pageWidth = context.state.pageWidth
       const pageHeight = context.state.pageHeight
       const shouldIncreasePageWidth = (item.x + item.width + thresholdWidth) > pageWidth
