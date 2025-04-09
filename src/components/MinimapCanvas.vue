@@ -64,7 +64,8 @@ const props = defineProps({
   visible: Boolean,
   size: Number,
   backgroundIsTransparent: Boolean,
-  space: Object
+  space: Object,
+  viewportIsHidden: Boolean
 })
 const state = reactive({
   scrollX: 0,
@@ -78,6 +79,8 @@ watch(() => props.visible, (value, prevValue) => {
     init()
   }
 })
+
+// TODO const pageHeight , based on props.space max content size + padding
 
 const ratio = computed(() => {
   const pageWidth = store.state.pageWidth
@@ -308,12 +311,16 @@ const panViewport = (event) => {
 const endPanningViewport = (event) => {
   state.isPanningViewport = false
 }
+const viewportIsVisible = computed(() => {
+  if (props.viewportIsHidden) { return }
+  return true
+})
 </script>
 
 <template lang="pug">
 .minimap-canvas(v-if="props.visible" :style="styles" @pointerdown="startPanningViewport" @mousedown="panToPositionRightLeftClick")
   canvas#minimap-canvas(ref="canvasElement")
-  .viewport.blink(:style="viewportStyle")
+  .viewport.blink(v-if="viewportIsVisible" :style="viewportStyle")
 </template>
 
 <style lang="stylus">
