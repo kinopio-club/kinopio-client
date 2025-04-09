@@ -177,6 +177,9 @@ dialog.add-space.narrow(
     @isLoading="updateTemplatesIsLoading"
     @selectSpace="duplicateSpace"
   )
+  section
+    input(placeholder="Type to generate a space")
+    button Preview
   //- Import
   section
     .row
