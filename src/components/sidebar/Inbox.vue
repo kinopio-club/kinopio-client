@@ -123,11 +123,14 @@ const removeCard = (card) => {
   updateCardIsLoading(card)
   removeCardFromInbox(card)
 }
+const addCard = (card) => {
+  console.log(card)
+}
 </script>
 
 <template lang="pug">
 template(v-if="visible")
-  AddToInbox(:visible="isOnline")
+  AddToInbox(:visible="isOnline" @addCard="addCard")
   section.inbox
     span Move from Inbox
     Loader(:visible="state.isLoading" :isSmall="true")

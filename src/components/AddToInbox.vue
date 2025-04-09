@@ -4,20 +4,43 @@ import { useStore } from 'vuex'
 
 import utils from '@/utils.js'
 import consts from '@/consts.js'
+import cache from '@/cache.js'
+import Loader from '@/components/Loader.vue'
+
+import { nanoid } from 'nanoid'
 
 const store = useStore()
 
 const textareaElement = ref(null)
 
+const emit = defineEmits(['addCard'])
+
 const props = defineProps({
   visible: Boolean
 })
 const state = reactive({
-  newName: ''
+  newName: '',
+  error: {
+    unknownServerError: false,
+    maxLength: false
+  },
+  success: false
 })
 
+const cardsCreatedIsOverLimit = computed(() => store.getters['currentUser/cardsCreatedIsOverLimit'])
 const textareaPlaceholder = computed(() => 'Type here, or paste a URL')
 const maxCardCharacterLimit = computed(() => consts.defaultCharacterLimit)
+const updateMaxLengthError = () => {
+  if (state.newName.length >= consts.defaultCharacterLimit - 1) {
+    state.error.maxLength = true
+  } else {
+    state.error.maxLength = false
+  }
+}
+const clearErrorsAndSuccess = () => {
+  state.error.unknownServerError = false
+  state.success = false
+}
 const name = computed({
   get () {
     return state.newName
@@ -25,8 +48,8 @@ const name = computed({
   set (newName) {
     state.newName = newName
     updateTextareaSize()
-    // clearErrorsAndSuccess()
-    // updateMaxLengthError()
+    clearErrorsAndSuccess()
+    updateMaxLengthError()
   }
 })
 const updateTextareaSize = () => {
@@ -46,6 +69,50 @@ const insertLineBreak = async (event) => {
   updateTextareaSize()
 }
 
+const addCard = async () => {
+  console.log(state.newName)
+  clearErrorsAndSuccess()
+  if (!state.newName) { return }
+  if (cardsCreatedIsOverLimit.value) { return } // todo err/upsell
+  if (state.error.maxLength) { return }
+  // show completion immediately, assume success
+  let newName = state.newName
+  state.success = true
+  state.newName = ''
+  textareaElement.value.style.height = 'initial'
+  const element = textareaElement.value
+  element.focus()
+  const url = utils.urlFromString(newName)
+  // create card
+  let card = {
+    id: nanoid(),
+    name: newName,
+    z: 1,
+    nameUpdatedAt: new Date()
+  }
+  if (url) {
+    card.urlPreviewUrl = url
+    card.shouldUpdateUrlPreview = true
+  }
+  try {
+    const user = store.state.currentUser
+    card.userId = user.id
+    console.info('🛫 create card in inbox space', card)
+    await store.dispatch('api/addToQueue', { name: 'createCardInInbox', body: card })
+  } catch (error) {
+    console.error('🚒 addCard', error)
+    state.error.unknownServerError = true
+  }
+  addCardToSpaceLocal(card)
+  emit('addCard', card)
+}
+const addCardToSpaceLocal = async (card) => {
+  const space = await cache.getInboxSpace()
+  if (!space) { return }
+  if (!space.cards) { return }
+  const cards = space.cards.push(card)
+  cache.updateSpace('cards', cards, space.id)
+}
 </script>
 
 <template lang="pug">
@@ -71,11 +138,10 @@ section.add-to-inbox(v-if="props.visible")
       @keydown.alt.enter.exact.stop="insertLineBreak"
       @keydown.ctrl.enter.exact.stop="insertLineBreak"
     )
-  button
+  button(@click="addCard")
     img.icon.add-icon(src="@/assets/add.svg")
     span Add
 </template>
 
 <style lang="stylus">
-// .component-name
 </style>
