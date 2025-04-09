@@ -26,6 +26,7 @@ export default async function handler(request: Request, context: Context) {
   }
 
   const response = await context.next();
+  response.headers.set("Cache-Control", "public, durable, s-maxage=900");
   const rewriter = new HTMLRewriter()
     .on('meta[property="og:image"]', {
       element: (element) => {
