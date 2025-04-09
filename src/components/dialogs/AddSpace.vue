@@ -4,6 +4,7 @@ import { useStore } from 'vuex'
 
 import UserTemplateSpaceList from '@/components/UserTemplateSpaceList.vue'
 import UserSettingsNewSpaces from '@/components/subsections/UserSettingsNewSpaces.vue'
+import GenerateSpace from '@/components/GenerateSpace.vue'
 import Loader from '@/components/Loader.vue'
 import utils from '@/utils.js'
 import cache from '@/cache.js'
@@ -177,9 +178,7 @@ dialog.add-space.narrow(
     @isLoading="updateTemplatesIsLoading"
     @selectSpace="duplicateSpace"
   )
-  section
-    input(placeholder="Type to generate a space")
-    button Preview
+  GenerateSpace
   //- Import
   section
     .row
