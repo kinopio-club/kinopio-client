@@ -6,6 +6,7 @@ import cache from '@/cache.js'
 import CardList from '@/components/CardList.vue'
 import Loader from '@/components/Loader.vue'
 import OfflineBadge from '@/components/OfflineBadge.vue'
+import AddToInbox from '@/components/AddToInbox.vue'
 import utils from '@/utils.js'
 
 import sortBy from 'lodash-es/sortBy'
@@ -122,26 +123,21 @@ const removeCard = (card) => {
   updateCardIsLoading(card)
   removeCardFromInbox(card)
 }
-
 </script>
 
 <template lang="pug">
-section.inbox(v-if="visible")
-  .row.title-row
-    div
-      span Move from Inbox
-      Loader(:visible="state.isLoading" :isSmall="true")
-    .button-wrap
-      button.small-button(@click="loadInboxSpace")
-        img.icon(src="@/assets/inbox.svg")
-        span Inbox
-  OfflineBadge
+template(v-if="visible")
+  AddToInbox(:visible="isOnline")
+  section.inbox
+    span Move from Inbox
+    Loader(:visible="state.isLoading" :isSmall="true")
+    OfflineBadge
 
-section.results-section.inbox(v-if="visible && isOnline")
-  ul.results-list(v-if="state.cards.length")
-    CardList(:cards="state.cards" @selectCard="selectCard" :cardsShowRemoveButton="true" @removeCard="removeCard")
-  section.subsection(v-else)
-    p Cards added to your inbox can be moved into this space
+  section.results-section.inbox(v-if="isOnline")
+    ul.results-list(v-if="state.cards.length")
+      CardList(:cards="state.cards" @selectCard="selectCard" :cardsShowRemoveButton="true" @removeCard="removeCard")
+    section.subsection(v-else)
+      p Cards added to your inbox can be moved into this space
 </template>
 
 <style lang="stylus">
