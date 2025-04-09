@@ -62,7 +62,9 @@ const emit = defineEmits(['updateCount'])
 
 const props = defineProps({
   visible: Boolean,
-  size: Number
+  size: Number,
+  backgroundIsTransparent: Boolean,
+  space: Object
 })
 const state = reactive({
   scrollX: 0,
@@ -88,7 +90,11 @@ const ratio = computed(() => {
 })
 
 const styles = computed(() => {
-  return { backgroundColor: store.state.outsideSpaceBackgroundColor }
+  let color = store.state.outsideSpaceBackgroundColor
+  if (props.backgroundIsTransparent) {
+    color = 'transparent'
+  }
+  return { backgroundColor: color }
 })
 
 // canvas
@@ -122,14 +128,20 @@ const initCanvas = async () => {
 
 // connections
 
+const mapConnections = computed(() => {
+  return props.space?.connections || store.getters['currentConnections/all']
+})
+const mapConnectionTypes = computed(() => {
+  return props.space?.connectionTypes || store.getters['currentConnections/allTypes']
+})
 const updatePointWithRatio = (point) => {
   point.x = point.x * ratio.value
   point.y = point.y * ratio.value
   return point
 }
 const drawConnections = () => {
-  const connectionTypes = store.getters['currentConnections/allTypes']
-  const connections = store.getters['currentConnections/all']
+  const connectionTypes = mapConnectionTypes.value
+  const connections = mapConnections.value
   for (const connection of connections) {
     context.lineWidth = 1
     context.lineCap = 'round'
@@ -138,6 +150,7 @@ const drawConnections = () => {
     context.strokeStyle = type.color
     // update path with ratio
     let path = connection.path
+    if (!path) { continue }
     let startCoords = utils.startCoordsFromConnectionPath(path)
     let endCoords = utils.endCoordsFromConnectionPath(path)
     let controlPoint = utils.curveControlPointFromPath(path)
@@ -152,8 +165,11 @@ const drawConnections = () => {
 
 // boxes
 
+const mapBoxes = computed(() => {
+  return props.space?.boxes || store.getters['currentBoxes/all']
+})
 const drawBoxes = () => {
-  let boxes = store.getters['currentBoxes/all']
+  let boxes = mapBoxes.value
   boxes = utils.clone(boxes)
   boxes = boxes.map(box => {
     box.x = box.x * ratio.value
@@ -179,9 +195,12 @@ const drawBoxes = () => {
 
 // cards
 
+const mapCards = computed(() => {
+  return props.space?.cards || store.getters['currentCards/all']
+})
 const drawCards = () => {
   const defaultColor = utils.cssVariable('secondary-background')
-  let cards = store.getters['currentCards/all']
+  let cards = mapCards.value
   cards = utils.clone(cards)
   cards = cards.map(card => {
     card.x = card.x * ratio.value
