@@ -297,9 +297,9 @@ section.generate-space(v-if="isOnline")
     Loader(:visible="state.isGeneratingPreview")
   .row(ref="rowElement")
     MinimapCanvas(:visible="minimapCanvasIsVisible" :space="state.newSpace" :size="state.size" :viewportIsHidden="true")
-  //- todo
-  //- show preview using minimapcanvas :space
-  //- Xcancel || create space
+  //- TODO
+  //- show preview of card names
+  //- Xcancel? || create space
 </template>
 
 <style lang="stylus">
