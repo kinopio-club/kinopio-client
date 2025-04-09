@@ -4,6 +4,5 @@
 [[edge_functions]]
   path = "/*"
   function = "open-graph-html-transform"
-  excludedPath = "/assets/*"
+  excludedPath = ["/", "/assets/*", "/*.js", "/*.css", "/*.txt", "/*.png"]
   cache = "manual"
-  
