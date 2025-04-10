@@ -37,6 +37,7 @@ const promptInput = computed({
   }
 })
 const updatePrompt = (prompt) => {
+  state.prompt = prompt
   clear()
   textareaSize()
 }
@@ -219,9 +220,11 @@ const updateSize = (space) => {
 }
 
 const generatePreview = async () => {
+  if (!state.prompt) { return }
   if (state.isGeneratingPreview) { return }
   try {
     state.isGeneratingPreview = true
+    console.log('🍎🍎🍎🍎', state.prompt)
     // TODO await call api w prompt and return canvasJson and spaceName
     isValidCanvas(sample)
     const typeColor = newTypeColor()
@@ -233,6 +236,7 @@ const generatePreview = async () => {
     console.log('🔮 generatePreview', space)
   } catch (error) {
     console.error('🚒 generatePreview', error)
+    state.errors.push('generatePreview')
   }
   state.isGeneratingPreview = false
 }
