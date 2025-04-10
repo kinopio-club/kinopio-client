@@ -216,10 +216,12 @@ const renderStroke = (stroke, shouldPreventBroadcast) => {
   broadcastAddStroke(stroke, shouldPreventBroadcast)
 }
 const imageDataUrl = async (strokes) => {
-  // render
   const offscreenCanvas = new OffscreenCanvas(pageWidth.value, pageHeight.value)
   const offscreenContext = offscreenCanvas.getContext('2d')
   offscreenContext.clearRect(0, 0, pageWidth.value, pageHeight.value)
+  // render prev drawingImage
+  offscreenContext.drawImage(drawingImage, 0, 0)
+  // render strokes
   strokes.forEach(stroke => {
     if (!stroke || stroke.length === 0) { return }
     stroke.forEach((point, index) => {
