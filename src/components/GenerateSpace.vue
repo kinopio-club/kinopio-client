@@ -28,6 +28,9 @@ const isOnline = computed(() => store.state.isOnline)
 // > return the results of the following request in obsidian canvas json format:
 // > Make me a space that maps out the pros and cons of moving to new york if you are trying to have a kid
 
+// create a short title out of the prompt:
+// Make me a space that maps out the pros and cons of moving to new york if you are trying to have a kid. The ids for each item should be a nanoid
+
 const sample = {
   'nodes': [
     {
@@ -259,8 +262,18 @@ const convertFromCanvas = (space) => {
   }
 }
 
+const newTypeColor = () => {
+  const isThemeDark = store.state.currentUser.theme === 'dark'
+  let color = randomColor({ luminosity: 'light' })
+  if (isThemeDark) {
+    color = randomColor({ luminosity: 'dark' })
+  }
+  return color
+}
+
+// -------
+
 const normalizeSpace = async (space) => {
-  // tODO update space name to ai sumary
   const { cards, boxes, connectionTypes, connections } = space
   const spaceItems = await utils.uniqueSpaceItems({ cards, boxes, connectionTypes, connections }, true)
   space.cards = spaceItems.cards
@@ -270,14 +283,6 @@ const normalizeSpace = async (space) => {
   return space
 }
 
-const newTypeColor = () => {
-  const isThemeDark = store.state.currentUser.theme === 'dark'
-  let color = randomColor({ luminosity: 'light' })
-  if (isThemeDark) {
-    color = randomColor({ luminosity: 'dark' })
-  }
-  return color
-}
 const updateSize = (space) => {
   const element = rowElement.value
   const rect = element.getBoundingClientRect()
@@ -292,8 +297,10 @@ const generatePreview = async () => {
   if (state.isGeneratingPreview) { return }
   try {
     state.isGeneratingPreview = true
+    // call api w prompt and return canvasJson and spaceName
     let space = convertFromCanvas(sample)
     space = await normalizeSpace(space)
+    space.name = 'NYC Move with Kids: Pros & Cons Map' // TODO
     updateSize(space)
     state.newSpace = space
     console.log('🔮🔮🔮🔮🔮', state.newSpace)
@@ -322,22 +329,25 @@ section.generate-space(v-if="isOnline")
       :pageWidth="state.pageWidth"
       :viewportIsHidden="true"
       )
-    button(v-if="minimapCanvasIsVisible")
+    button.add-space-button(v-if="minimapCanvasIsVisible")
       img.icon.add(src="@/assets/add.svg")
-      span Create
-  //- TODO
-  //- show preview of card names
-  //- Xcancel? || create space
+      span {{state.newSpace.name}}
 </template>
 
 <style lang="stylus">
 .generate-space
   .minimap-canvas
     margin-top 10px
-  .minimap-canvas-inline-wrap
-    button
-      position absolute
-      bottom -16px
-      left 14px
+    border-bottom-left-radius 0
+    border-bottom-right-radius 0
+  .add-space-button
+    border-top-left-radius 0
+    border-top-right-radius 0
+
+  // .minimap-canvas-inline-wrap
+  //   button
+  //     position absolute
+  //     bottom -16px
+  //     left 14px
 
 </style>
