@@ -70,7 +70,6 @@ const insertLineBreak = async (event) => {
 }
 
 const addCard = async () => {
-  console.log(state.newName)
   clearErrorsAndSuccess()
   if (!state.newName) { return }
   if (cardsCreatedIsOverLimit.value) { return } // todo err/upsell
