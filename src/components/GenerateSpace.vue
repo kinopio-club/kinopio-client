@@ -18,7 +18,9 @@ const rowElement = ref(null)
 const state = reactive({
   isGeneratingPreview: false,
   newSpace: null,
-  size: null
+  size: null,
+  pageWidth: null,
+  pageHeight: null
 })
 
 const isOnline = computed(() => store.state.isOnline)
@@ -229,9 +231,17 @@ const convertFromCanvas = (space) => {
       }
       newSpace.cards.push(newCard)
     })
+
+    // connection type
+    const typeId = nanoid()
+    const newConnetionType = {
+      id: typeId,
+      color: newTypeColor(),
+      name: `Connection Type 0`
+    }
+    newSpace.connectionTypes.push(newConnetionType)
     // edges → connections
     space.edges.forEach((edge, index) => {
-      const typeId = nanoid()
       const newConnection = {
         id: edge.id,
         startItemId: edge.fromNode,
@@ -241,19 +251,25 @@ const convertFromCanvas = (space) => {
         connectionTypeId: typeId,
         labelIsVisible: Boolean(edge.label)
       }
-      const newConnetionType = {
-        id: typeId,
-        color: edge.canvasColor || edge.color || newTypeColor(),
-        name: edge.label || `Connection Type ${index}`
-      }
       newSpace.connections.push(newConnection)
-      newSpace.connectionTypes.push(newConnetionType)
     })
     return newSpace
   } catch (error) {
     console.error('🚒 convertFromCanvas', error)
   }
 }
+
+const normalizeSpace = async (space) => {
+  // tODO update space name to ai sumary
+  const { cards, boxes, connectionTypes, connections } = space
+  const spaceItems = await utils.uniqueSpaceItems({ cards, boxes, connectionTypes, connections }, true)
+  space.cards = spaceItems.cards
+  space.boxes = spaceItems.boxes
+  space.connectionTypes = spaceItems.connectionTypes
+  space.connections = spaceItems.connections
+  return space
+}
+
 const newTypeColor = () => {
   const isThemeDark = store.state.currentUser.theme === 'dark'
   let color = randomColor({ luminosity: 'light' })
@@ -262,23 +278,25 @@ const newTypeColor = () => {
   }
   return color
 }
-const updateSize = async () => {
-  await nextTick()
+const updateSize = (space) => {
   const element = rowElement.value
-  if (!element) { return }
   const rect = element.getBoundingClientRect()
   state.size = rect.width
+  const pageSize = utils.pageSizeFromItems(space.cards)
+  state.pageHeight = pageSize.height
+  state.pageWidth = pageSize.width
 }
 
-const generatePreview = () => {
+const generatePreview = async () => {
   console.log(state.isGeneratingPreview)
   if (state.isGeneratingPreview) { return }
   try {
-    updateSize()
     state.isGeneratingPreview = true
-    const value = convertFromCanvas(sample)
-    console.log('🔮🔮🔮🔮🔮', value)
-    state.newSpace = value
+    let space = convertFromCanvas(sample)
+    space = await normalizeSpace(space)
+    updateSize(space)
+    state.newSpace = space
+    console.log('🔮🔮🔮🔮🔮', state.newSpace)
   } catch (error) {
     console.error('🚒 generatePreview', error)
   }
@@ -295,8 +313,18 @@ section.generate-space(v-if="isOnline")
   button(:class="{active: state.isGeneratingPreview}" @click="generatePreview")
     span Preview
     Loader(:visible="state.isGeneratingPreview")
-  .row(ref="rowElement")
-    MinimapCanvas(:visible="minimapCanvasIsVisible" :space="state.newSpace" :size="state.size" :viewportIsHidden="true")
+  .minimap-canvas-inline-wrap(ref="rowElement")
+    MinimapCanvas(
+      :visible="minimapCanvasIsVisible"
+      :space="state.newSpace"
+      :size="state.size"
+      :pageHeight="state.pageHeight"
+      :pageWidth="state.pageWidth"
+      :viewportIsHidden="true"
+      )
+    button(v-if="minimapCanvasIsVisible")
+      img.icon.add(src="@/assets/add.svg")
+      span Create
   //- TODO
   //- show preview of card names
   //- Xcancel? || create space
@@ -306,4 +334,10 @@ section.generate-space(v-if="isOnline")
 .generate-space
   .minimap-canvas
     margin-top 10px
+  .minimap-canvas-inline-wrap
+    button
+      position absolute
+      bottom -16px
+      left 14px
+
 </style>
