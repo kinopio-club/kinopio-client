@@ -717,18 +717,36 @@ const self = {
       try {
         let spaces = await cache.getAllSpaces()
         if (!spaces.length) { return }
-        spaces = spaces.map(space => normalizeRemovedCards(space))
+        let drawingImages = []
+        spaces = spaces.map(space => {
+          space = normalizeRemovedCards(space)
+          if (space.drawingImage) {
+            drawingImages.push({
+              spaceId: space.id,
+              dataUrl: space.drawingImage
+            })
+            delete space.drawingImage
+          }
+          return space
+        })
         let removedSpaces = await cache.getAllRemovedSpaces()
         removedSpaces = removedSpaces.map(space => {
           space.isRemoved = true
           space.removedByUserId = context.rootState.currentUser.id
+          delete space.drawingImage
           return space
         })
         removedSpaces.forEach(space => spaces.push(space))
         spaces = spaces.filter(space => space)
-        const body = spaces
-        const options = await context.dispatch('requestOptions', { body, method: 'POST', space: context.rootState.currentSpace })
+        const options = await context.dispatch('requestOptions', { body: spaces, method: 'POST', space: context.rootState.currentSpace })
         const response = await fetch(`${consts.apiHost()}/space/multiple`, options)
+        // upload drawing images
+        for (const body of drawingImages) {
+          const imageOptions = await context.dispatch('requestOptions', { body, method: 'POST', space: { id: body.spaceId } })
+          const imageResponse = await fetch(`${consts.apiHost()}/space/drawing-image`, imageOptions)
+          const imageData = await imageResponse.json()
+          console.log('🛬 drawing uploaded', imageData)
+        }
         return normalizeResponse(response)
       } catch (error) {
         context.dispatch('handleServerError', { name: 'createSpaces', error })

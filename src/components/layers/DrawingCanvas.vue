@@ -86,7 +86,7 @@ const viewportHeight = computed(() => store.state.viewportHeight)
 const viewportWidth = computed(() => store.state.viewportWidth)
 const pageHeight = computed(() => store.state.pageHeight)
 const pageWidth = computed(() => store.state.pageWidth)
-
+const currentUserIsSignedIn = computed(() => store.getters['currentUser/isSignedIn'])
 const toolbarIsDrawing = computed(() => store.state.currentUserToolbar === 'drawing')
 const styles = computed(() => {
   let value = {
@@ -240,7 +240,12 @@ const imageDataUrl = async (strokes) => {
       offscreenContext.moveTo(point.x, point.y)
     })
   })
-  return canvas.toDataURL('image/webp', 0.5)
+  if (currentUserIsSignedIn.value) {
+    return canvas.toDataURL('image/webp', 0.5)
+  } else {
+    // anon users use png because dataUrl is saved to server on sign up/in
+    return canvas.toDataURL('image/png')
+  }
 }
 
 // restore
