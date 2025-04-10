@@ -18,7 +18,6 @@ onMounted(() => {
   context.scale(window.devicePixelRatio, window.devicePixelRatio)
   window.addEventListener('scroll', scroll)
   updatePrevScroll()
-  // TODO clear and restore canvas when loading/restoring space
   unsubscribe = store.subscribe(mutation => {
     if (mutation.type === 'triggerUpdateDrawingBackground') {
       update()

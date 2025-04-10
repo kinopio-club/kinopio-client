@@ -101,4 +101,4 @@ To work with code that only works on https (e.g. clipboard copy and paste), [mkc
 - [are.na/kinopio/kinopio-design](https://www.are.na/kinopio/kinopio-design)
 - [github.com/kinopio-club](https://github.com/kinopio-club)
 - [User Forums](https://forum.kinopio.club)
-- [Discord](https://discord.gg/h2sR45Nby8)
+- [Discord](https://kinopio.club/discord)
