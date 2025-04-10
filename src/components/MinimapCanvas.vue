@@ -63,6 +63,8 @@ const emit = defineEmits(['updateCount'])
 const props = defineProps({
   visible: Boolean,
   size: Number,
+  pageHeight: Number,
+  pageWidth: Number,
   backgroundIsTransparent: Boolean,
   space: Object,
   viewportIsHidden: Boolean
@@ -79,16 +81,23 @@ watch(() => props.visible, (value, prevValue) => {
     init()
   }
 })
+watch(() => props.space, (value, prevValue) => {
+  if (value) {
+    init()
+  }
+})
 
-// TODO const pageHeight , based on props.space max content size + padding
-
+const pageHeight = computed(() => {
+  return props.pageHeight || store.state.pageHeight
+})
+const pageWidth = computed(() => {
+  return props.pageWidth || store.state.pageWidth
+})
 const ratio = computed(() => {
-  const pageWidth = store.state.pageWidth
-  const pageHeight = store.state.pageHeight
-  if (pageWidth > pageHeight) {
-    return props.size / pageWidth
+  if (pageWidth.value > pageHeight.value) {
+    return props.size / pageWidth.value
   } else {
-    return props.size / pageHeight
+    return props.size / pageHeight.value
   }
 })
 
@@ -112,11 +121,8 @@ const init = async () => {
 }
 const initCanvas = async () => {
   await nextTick()
-  let pageWidth = store.state.pageWidth
-  let pageHeight = store.state.pageHeight
-  state.pageWidth = Math.round(pageWidth * ratio.value)
-  state.pageHeight = Math.round(pageHeight * ratio.value)
-
+  state.pageWidth = Math.round(pageWidth.value * ratio.value)
+  state.pageHeight = Math.round(pageHeight.value * ratio.value)
   updateScroll()
   canvas = canvasElement.value
   if (!canvas) { return }
@@ -206,10 +212,12 @@ const drawCards = () => {
   let cards = mapCards.value
   cards = utils.clone(cards)
   cards = cards.map(card => {
+    const width = card.width || 200
+    const height = card.height || 50
     card.x = card.x * ratio.value
     card.y = card.y * ratio.value
-    card.width = card.width * ratio.value
-    card.height = card.height * ratio.value
+    card.width = width * ratio.value
+    card.height = height * ratio.value
     return card
   })
   cards.forEach(card => {
@@ -276,12 +284,14 @@ const positionInViewportCenter = (position) => {
   return { x, y }
 }
 const panToPositionRightLeftClick = (event) => {
+  if (props.viewportIsHidden) { return }
   const rightAndLeftButtons = 3
   const isRightAndLeftClick = rightAndLeftButtons === event.buttons
   if (!isRightAndLeftClick) { return }
   panToPosition(event)
 }
 const startPanningViewport = (event) => {
+  if (props.viewportIsHidden) { return }
   state.isPanningViewport = true
   panToPosition(event)
 }
