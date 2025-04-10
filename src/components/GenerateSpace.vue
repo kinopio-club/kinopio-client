@@ -220,7 +220,9 @@ const generatePreview = async () => {
 const minimapCanvasIsVisible = computed(() => Boolean(state.newSpace))
 const clear = () => {
   state.newSpace = null
+  state.errors = []
 }
+const isError = computed(() => Boolean(state.errors.length))
 </script>
 
 <template lang="pug">
@@ -230,6 +232,7 @@ section.generate-space(v-if="isOnline")
     img.icon.openai(src="@/assets/openai.svg")
     span Preview
     Loader(:visible="state.isGeneratingPreview")
+  .badge.danger(v-if="isError") Something went wrong, please try again
   .minimap-canvas-inline-wrap(ref="rowElement")
     MinimapCanvas(
       :visible="minimapCanvasIsVisible"
