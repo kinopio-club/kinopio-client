@@ -7,6 +7,7 @@ import MinimapCanvas from '@/components/MinimapCanvas.vue'
 
 import dayjs from 'dayjs'
 import utils from '@/utils.js'
+import importUtils from '@/importUtils.js'
 import consts from '@/consts.js'
 import { nanoid } from 'nanoid'
 import randomColor from 'randomcolor'
@@ -293,7 +294,6 @@ const updateSize = (space) => {
 }
 
 const generatePreview = async () => {
-  console.log(state.isGeneratingPreview)
   if (state.isGeneratingPreview) { return }
   try {
     state.isGeneratingPreview = true
@@ -303,7 +303,7 @@ const generatePreview = async () => {
     space.name = 'NYC Move with Kids: Pros & Cons Map' // TODO
     updateSize(space)
     state.newSpace = space
-    console.log('🔮🔮🔮🔮🔮', state.newSpace)
+    console.log('🔮🔮🔮🔮🔮 newspace', state.newSpace)
   } catch (error) {
     console.error('🚒 generatePreview', error)
   }
