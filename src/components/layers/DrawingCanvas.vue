@@ -254,7 +254,6 @@ const restoreSpaceDrawingImage = async () => {
       resolve()
       return
     }
-    console.log(url === drawingImageUrl, drawingImageUrl, url)
     if (url === drawingImageUrl) {
       redrawSpaceDrawingImage()
       resolve()
