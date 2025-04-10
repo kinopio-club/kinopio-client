@@ -219,7 +219,9 @@ const imageDataUrl = async (strokes) => {
   const offscreenContext = offscreenCanvas.getContext('2d')
   offscreenContext.clearRect(0, 0, pageWidth.value, pageHeight.value)
   // render prev drawingImage
-  offscreenContext.drawImage(drawingImage, 0, 0)
+  if (drawingImage) {
+    offscreenContext.drawImage(drawingImage, 0, 0)
+  }
   // render strokes
   strokes.forEach(stroke => {
     if (!stroke || stroke.length === 0) { return }
