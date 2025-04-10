@@ -929,6 +929,10 @@ button
 .icon.duplicate
   vertical-align 1px
 
+.icon.openai
+  width 16px
+  vertical-align -3px
+
 label,
 li
   position relative

@@ -2864,5 +2864,99 @@ export default {
     }
     layers.push(backgroundLayer)
     return layers
+  },
+
+  // import
+
+  // https://jsoncanvas.org
+  convertFromJsonCanvas (space, newTypeColor) {
+    const minPositionValue = 150
+    let date = dayjs(new Date())
+    date = date.format(consts.nameDateFormat)
+    let newSpace = {}
+    try {
+      newSpace.name = `Canvas ${date}`
+      newSpace.id = nanoid()
+      newSpace.background = consts.defaultSpaceBackground
+      newSpace.cards = []
+      newSpace.connections = []
+      newSpace.connectionTypes = []
+      // emsure node positions are positive 0,0
+      let negativePositionOffset = {
+        x: 0,
+        y: 0
+      }
+      space.nodes.forEach(node => {
+        if (node.x < negativePositionOffset.x) {
+          negativePositionOffset.x = node.x
+        }
+        if (node.y < negativePositionOffset.y) {
+          negativePositionOffset.y = node.y
+        }
+      })
+      space.nodes = space.nodes.map(node => {
+        node.x = node.x + Math.abs(negativePositionOffset.x)
+        node.y = node.y + Math.abs(negativePositionOffset.y)
+        return node
+      })
+      // nodes → cards
+      const shouldNudgeCardsY = Boolean(space.nodes.find(node => node.y <= minPositionValue))
+      const shouldNudgeCardsX = Boolean(space.nodes.find(node => node.x <= minPositionValue))
+      space.nodes.forEach(node => {
+        // url
+        let shouldUpdateUrlPreview
+        if (node.url) {
+          shouldUpdateUrlPreview = true
+        }
+        // y
+        let y = node.y
+        if (shouldNudgeCardsY) {
+          y += minPositionValue
+        }
+        // x
+        let x = node.x
+        if (shouldNudgeCardsX) {
+          x += minPositionValue
+        }
+        // name
+        let name = node.text || node.url || node.label
+        if (node.file) {
+          name = `\`${node.file}\``
+        }
+        const newCard = {
+          id: node.id,
+          x,
+          y,
+          backgroundColor: node.canvasColor || node.color,
+          name,
+          shouldUpdateUrlPreview
+        }
+        newSpace.cards.push(newCard)
+      })
+      // connection type
+      const typeId = nanoid()
+      const newConnetionType = {
+        id: typeId,
+        color: newTypeColor,
+        name: `Connection Type 0`
+      }
+      newSpace.connectionTypes.push(newConnetionType)
+      // edges → connections
+      space.edges.forEach((edge, index) => {
+        const newConnection = {
+          id: edge.id,
+          startItemId: edge.fromNode,
+          endItemId: edge.toNode,
+          controlPoint: `q00,00`, // straight line
+          directionIsVisible: Boolean(edge.fromEnd === 'arrow' || edge.toEnd === 'arrow'),
+          connectionTypeId: typeId,
+          labelIsVisible: Boolean(edge.label)
+        }
+        newSpace.connections.push(newConnection)
+      })
+      return newSpace
+    } catch (error) {
+      console.error('🚒 convertFromCanvas', error)
+    }
   }
 }

@@ -224,9 +224,6 @@ const updateCurrentUserAIImages = () => {
     border-top 0
     .badge
       margin 0
-  .openai
-    width 16px
-    vertical-align -3px
   .search-wrap
     align-items flex-start
     .openai
