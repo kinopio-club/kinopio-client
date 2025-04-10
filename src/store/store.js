@@ -698,6 +698,7 @@ const store = createStore({
     triggerDrawingRedo: () => {},
     triggerAddRemoteDrawingStroke: () => {},
     triggerRemoveRemoteDrawingStroke: () => {},
+    triggerDrawingRedraw: () => {},
 
     // Cards
 
@@ -980,6 +981,8 @@ const store = createStore({
       if (state.drawingStrokeColors.includes(color)) { return }
       state.drawingStrokeColors.push(color)
     },
+    // TODO restore prev session drawing stroke colors from db on load,
+    // or save to remote, or save them to drawingstroke.color derived from strokes
     // TODO clear drawingStrokeColors on space change/load
 
     // Dragging

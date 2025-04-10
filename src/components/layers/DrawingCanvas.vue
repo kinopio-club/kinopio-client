@@ -19,7 +19,7 @@ let currentStrokeId = ''
 let currentUserStrokes = []
 let remoteStrokes = []
 let redoStrokes = []
-let spaceDrawingImage = null
+let drawingImage, drawingImageUrl
 
 let unsubscribe, unsubscribeActions
 
@@ -57,9 +57,11 @@ onMounted(() => {
       undo()
     } else if (mutation.type === 'triggerDrawingRedo') {
       redo()
-    } else if (mutation.type === 'triggerRestoreSpaceLocalComplete' || mutation.type === 'triggerRestoreSpaceRemoteComplete') {
+    } else if (mutation.type === 'triggerRestoreSpaceLocalComplete') {
       clearCanvas()
-      restoreSpaceDrawingImage()
+      redraw()
+    } else if (mutation.type === 'triggerRestoreSpaceRemoteComplete' || mutation.type === 'triggerDrawingRedraw') {
+      redraw()
     }
     unsubscribeActions = store.subscribeAction(action => {
       const actions = ['currentSpace/loadSpace', 'currentSpace/changeSpace', 'currentSpace/addSpace']
@@ -96,7 +98,6 @@ const styles = computed(() => {
 })
 const clearCanvas = () => {
   context.clearRect(0, 0, canvas.width, canvas.height)
-  spaceDrawingImage = null
 }
 const clearStrokes = () => {
   redoStrokes = []
@@ -215,6 +216,7 @@ const renderStroke = (stroke, shouldPreventBroadcast) => {
   broadcastAddStroke(stroke, shouldPreventBroadcast)
 }
 const imageDataUrl = async (strokes) => {
+  // render
   const offscreenCanvas = new OffscreenCanvas(pageWidth.value, pageHeight.value)
   const offscreenContext = offscreenCanvas.getContext('2d')
   offscreenContext.clearRect(0, 0, pageWidth.value, pageHeight.value)
@@ -247,26 +249,30 @@ const imageDataUrl = async (strokes) => {
 
 // restore
 
-const renderSpaceDrawingImage = () => {
+const redrawSpaceDrawingImage = () => {
   const { x, y } = viewportPosition({ x: 0, y: 0 })
-  context.drawImage(spaceDrawingImage, x, y, pageWidth.value, pageHeight.value)
-  store.commit('triggerUpdateDrawingBackground')
+  context.drawImage(drawingImage, x, y)
 }
 const restoreSpaceDrawingImage = async () => {
   let url = store.state.currentSpace.drawingImage
   if (!url) { return }
-  const isDataUrl = url.startsWith('data:')
-  if (!isDataUrl) {
-    url = `${url}?q=${nanoid()}` // cache-busting
+  if (url === drawingImageUrl) {
+    redrawSpaceDrawingImage()
+    return
   }
-  if (spaceDrawingImage) {
-    renderSpaceDrawingImage()
-  } else {
-    spaceDrawingImage = new Image()
-    spaceDrawingImage.onload = () => {
-      renderSpaceDrawingImage()
+  try {
+    const isDataUrl = url.startsWith('data:')
+    if (!isDataUrl) {
+      url = `${url}?q=${nanoid()}` // cache-busting
     }
-    spaceDrawingImage.src = url
+    drawingImageUrl = url
+    drawingImage = new Image()
+    drawingImage.onload = () => {
+      redrawSpaceDrawingImage()
+    }
+    drawingImage.src = url
+  } catch (error) {
+    console.error('🚒 restoreSpaceDrawingImage', error, url)
   }
 }
 

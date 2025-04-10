@@ -450,13 +450,8 @@ aside.notifications(@click.left="closeAllDialogs")
     .row
       span.badge.secondary {{latestChangelogPost.title}}
     .row
-      //- .button-wrap
-      //-   a(href="/changelog")
-      //-     button(@click.left.stop.prevent="changeSpaceToChangelog")
-      //-       span Changelog
       .button-wrap
         button(@click.left="updateChangelogAndRefreshBrowser")
-          //- TODO update changelog and refresh browser
           img.refresh.icon(src="@/assets/refresh.svg")
           span Update
 

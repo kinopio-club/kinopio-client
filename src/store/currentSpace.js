@@ -766,6 +766,7 @@ const currentSpace = {
         if (spaceIsUnchanged) {
           context.commit('isLoadingSpace', false, { root: true })
           context.dispatch('createSpacePreviewImage')
+          context.commit('triggerDrawingRedraw', null, { root: true })
           return
         }
         context.dispatch('restoreSpaceRemote', remoteSpace)

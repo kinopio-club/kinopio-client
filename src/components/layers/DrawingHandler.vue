@@ -35,7 +35,7 @@ const viewportHeight = computed(() => store.state.viewportHeight)
 const viewportWidth = computed(() => store.state.viewportWidth)
 
 const toolbarIsDrawing = computed(() => store.state.currentUserToolbar === 'drawing')
-// TODO if toolbarIsDrawing, disable select all below, toright, selectall
+// TODO if toolbarIsDrawing, disable select all below, toright, selectall, box select
 
 const strokeColor = computed(() => store.getters['currentUser/drawingColor'])
 const strokeDiameter = computed(() => {
