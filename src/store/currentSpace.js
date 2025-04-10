@@ -766,6 +766,8 @@ const currentSpace = {
         if (spaceIsUnchanged) {
           context.commit('isLoadingSpace', false, { root: true })
           context.dispatch('createSpacePreviewImage')
+          // merge metadata into local
+          await context.dispatch('updateSpaceLocalOnly', { drawingImage: remoteSpace.drawingImage })
           context.commit('triggerDrawingRedraw', null, { root: true })
           return
         }
@@ -920,6 +922,11 @@ const currentSpace = {
         name: 'updateSpace',
         body: updates
       }, { root: true })
+    },
+    updateSpaceLocalOnly: async (context, updates) => {
+      updates.id = context.state.id
+      context.commit('updateSpace', updates)
+      await cache.updateSpaceByUpdates(updates, context.state.id)
     },
     updateSpaceIsHidden: async (context, { spaceId, isHidden }) => {
       context.commit('updateSpace', { isHidden })

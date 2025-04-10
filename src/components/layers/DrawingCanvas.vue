@@ -52,7 +52,6 @@ onMounted(() => {
         return points[0].id !== stroke[0].id
       })
       redraw()
-      store.commit('triggerUpdateDrawingBackground')
     } else if (mutation.type === 'triggerDrawingUndo') {
       undo()
     } else if (mutation.type === 'triggerDrawingRedo') {
@@ -239,14 +238,7 @@ const imageDataUrl = async (strokes) => {
       offscreenContext.moveTo(point.x, point.y)
     })
   })
-  const blob = await offscreenCanvas.convertToBlob({ type: 'image/webp', quality: 0.5 }) // 35kb ~ 6 strokes
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader()
-    reader.onloadend = () => resolve(reader.result)
-    reader.onerror = reject
-    reader.readAsDataURL(blob)
-    // utils.downloadBlob(blob)
-  })
+  return canvas.toDataURL('image/webp', 0.5)
 }
 
 // restore
@@ -256,26 +248,41 @@ const redrawSpaceDrawingImage = () => {
   context.drawImage(drawingImage, x, y)
 }
 const restoreSpaceDrawingImage = async () => {
-  let url = store.state.currentSpace.drawingImage
-  if (!url) { return }
-  if (url === drawingImageUrl) {
-    redrawSpaceDrawingImage()
-    return
-  }
-  try {
-    const isDataUrl = url.startsWith('data:')
-    if (!isDataUrl) {
-      url = `${url}?q=${nanoid()}` // cache-busting
+  return new Promise((resolve, reject) => {
+    let url = store.state.currentSpace.drawingImage
+    if (!url) {
+      resolve()
+      return
     }
-    drawingImageUrl = url
-    drawingImage = new Image()
-    drawingImage.onload = () => {
+    console.log(url === drawingImageUrl, drawingImageUrl, url)
+    if (url === drawingImageUrl) {
       redrawSpaceDrawingImage()
+      resolve()
+      return
     }
-    drawingImage.src = url
-  } catch (error) {
-    console.error('🚒 restoreSpaceDrawingImage', error, url)
-  }
+    try {
+      const isDataUrl = url.startsWith('data:')
+      const prevUrl = url
+      if (!isDataUrl) {
+        url = `${url}?q=${nanoid()}` // cache-busting
+      }
+      drawingImage = new Image()
+      drawingImage.crossOrigin = 'anonymous' // cors
+      drawingImage.onload = () => {
+        redrawSpaceDrawingImage()
+        drawingImageUrl = prevUrl
+        resolve()
+      }
+      drawingImage.onerror = (error) => {
+        console.error('🚒 drawingImage.onerror', error, url)
+        reject(error)
+      }
+      drawingImage.src = url
+    } catch (error) {
+      console.error('🚒 restoreSpaceDrawingImage', error, url)
+      reject(error)
+    }
+  })
 }
 
 // start
@@ -300,9 +307,9 @@ const draw = (event) => {
   renderStroke(currentStroke)
   store.commit('triggerUpdateDrawingBackground')
 }
-const redraw = () => {
+const redraw = async () => {
   context.clearRect(0, 0, canvas.width, canvas.height)
-  restoreSpaceDrawingImage()
+  await restoreSpaceDrawingImage()
   currentUserStrokes.forEach(stroke => {
     renderStroke(stroke, true)
   })
