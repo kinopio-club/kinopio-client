@@ -14,6 +14,7 @@ import randomColor from 'randomcolor'
 const store = useStore()
 
 const rowElement = ref(null)
+const textareaElement = ref(null)
 
 const state = reactive({
   isGeneratingPreview: false,
@@ -21,10 +22,29 @@ const state = reactive({
   size: null,
   pageWidth: null,
   pageHeight: null,
-  errors: []
+  errors: [],
+  prompt: ''
 })
 
 const isOnline = computed(() => store.state.isOnline)
+
+const promptInput = computed({
+  get () {
+    return state.prompt
+  },
+  set (newValue) {
+    updatePrompt(newValue)
+  }
+})
+const updatePrompt = (prompt) => {
+  clear()
+  textareaSize()
+}
+const textareaSize = () => {
+  const textarea = textareaElement.value
+  if (!textarea) { return }
+  textarea.style.height = textarea.scrollHeight + 1 + 'px'
+}
 
 // > return the results of the following request in obsidian canvas json format:
 // > Make me a space that maps out the pros and cons of moving to new york if you are trying to have a kid
@@ -227,7 +247,19 @@ const isError = computed(() => Boolean(state.errors.length))
 
 <template lang="pug">
 section.generate-space(v-if="isOnline")
-  input(placeholder="Type to generate a space")
+  textarea(
+    placeholder="Type to generate a space"
+    v-model="promptInput"
+    ref="textareaElement"
+    @update="textareaSize"
+    @keydown.enter.exact.prevent="generatePreview"
+    @keyup.stop.backspace
+    @keyup.stop.enter
+    @mouseup.stop
+    @touchend.stop
+    rows="1"
+    :maxlength="400"
+  )
   button(:class="{active: state.isGeneratingPreview}" @click="generatePreview")
     img.icon.openai(src="@/assets/openai.svg")
     span Preview
@@ -257,6 +289,7 @@ section.generate-space(v-if="isOnline")
     border-bottom-left-radius 0
     border-bottom-right-radius 0
   .add-space-button
+    margin-left 0
     border-top-left-radius 0
     border-top-right-radius 0
   .minimap-canvas-inline-wrap

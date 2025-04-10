@@ -161,8 +161,9 @@ const updateCurrentUserAIImages = () => {
           @mouseup.stop
           @touchend.stop
           rows="1"
-          :maxlength="400"
+          :maxlength="1000"
         )
+        //- TODO server checks length
         button.borderless.clear-input-wrap(@click.left="clear")
           img.icon.cancel(src="@/assets/add.svg")
       .button-wrap
