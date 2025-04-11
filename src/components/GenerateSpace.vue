@@ -108,12 +108,12 @@ const generatePreview = async () => {
   if (!state.prompt) { return }
   if (state.isGeneratingPreview) { return }
   try {
+    clear()
     state.isGeneratingPreview = true
     const { data, name } = await store.dispatch('api/generateSpace', state.prompt)
-    console.log('🍎🍎🍎🍎', state.prompt, data, name)
     isValidCanvas(data)
     const typeColor = newTypeColor()
-    let space = utils.convertFromJsonCanvas(sample, typeColor)
+    let space = utils.convertFromJsonCanvas(data, typeColor)
     space = await normalizeSpace(space)
     space.name = name
     updateSize(space)
@@ -150,10 +150,11 @@ section.generate-space(v-if="isOnline")
     rows="1"
     :maxlength="1000"
   )
-  button(:class="{active: state.isGeneratingPreview}" @click="generatePreview")
-    span Preview
-    //- TODO this might take up to 30s
-    Loader(:visible="state.isGeneratingPreview")
+  .row.button-row
+    button(:class="{active: state.isGeneratingPreview}" @click="generatePreview")
+      span Preview
+      Loader(:visible="state.isGeneratingPreview")
+    .badge.info(v-if="state.isGeneratingPreview") may take 15s
   .badge.danger(v-if="isError") Something went wrong, please try again
   .minimap-canvas-inline-wrap(ref="rowElement")
     MinimapCanvas(
@@ -182,10 +183,16 @@ section.generate-space(v-if="isOnline")
     margin-left 0
     border-top-left-radius 0
     border-top-right-radius 0
+    width 100%
   .minimap-canvas-inline-wrap
     position relative
     .cancel-minimap
       position absolute
       top 6px
       right 6px
+  .button-row
+    margin-bottom 0
+    .badge
+      margin-left 6px
+      margin-right 0
 </style>
