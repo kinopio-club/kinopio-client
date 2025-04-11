@@ -1235,7 +1235,6 @@ const self = {
         context.dispatch('handleServerError', { name: 'imageSearch', error })
       }
     },
-
     communityBackgrounds: async (context) => {
       try {
         const options = await context.dispatch('requestOptions', { method: 'GET', space: context.rootState.currentSpace })
@@ -1256,6 +1255,18 @@ const self = {
         return url
       } catch (error) {
         context.dispatch('handleServerError', { name: 'pdf', error })
+      }
+    },
+    generateSpace: async (context, prompt) => {
+      try {
+        const body = { prompt }
+        const options = await context.dispatch('requestOptions', { body, method: 'POST', space: context.rootState.currentSpace })
+        const response = await fetch(`${consts.apiHost()}/services/generate-space`, options)
+        const data = await normalizeResponse(response)
+        return data
+      } catch (error) {
+        console.error('🚒 generateSpace', error)
+        throw new Error(error)
       }
     },
 

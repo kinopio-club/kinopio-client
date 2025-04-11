@@ -53,122 +53,7 @@ const textareaSize = () => {
 // create a short title out of the prompt:
 // Make me a space that maps out the pros and cons of moving to new york if you are trying to have a kid. The ids for each item should be a nanoid
 
-const sample = {
-  'nodes': [
-    {
-      'id': 'start',
-      'type': 'text',
-      'x': 0,
-      'y': 0,
-      'width': 300,
-      'height': 50,
-      'text': "Should you move to New York if you're trying to have a kid?"
-    },
-    {
-      'id': 'pros',
-      'type': 'text',
-      'x': -400,
-      'y': 200,
-      'width': 200,
-      'height': 50,
-      'text': 'Pros'
-    },
-    {
-      'id': 'cons',
-      'type': 'text',
-      'x': 400,
-      'y': 200,
-      'width': 200,
-      'height': 50,
-      'text': 'Cons'
-    },
-    {
-      'id': 'pro1',
-      'type': 'text',
-      'x': -400,
-      'y': 300,
-      'width': 280,
-      'height': 50,
-      'text': 'Access to top hospitals and pediatric care'
-    },
-    {
-      'id': 'pro2',
-      'type': 'text',
-      'x': -400,
-      'y': 380,
-      'width': 280,
-      'height': 50,
-      'text': 'Diverse education options (public, private, charter)'
-    },
-    {
-      'id': 'pro3',
-      'type': 'text',
-      'x': -400,
-      'y': 460,
-      'width': 280,
-      'height': 50,
-      'text': 'Cultural exposure and enrichment opportunities'
-    },
-    {
-      'id': 'pro4',
-      'type': 'text',
-      'x': -400,
-      'y': 540,
-      'width': 280,
-      'height': 50,
-      'text': 'Lots of family-friendly parks and activities'
-    },
-    {
-      'id': 'con1',
-      'type': 'text',
-      'x': 400,
-      'y': 300,
-      'width': 280,
-      'height': 50,
-      'text': 'High cost of living (housing, childcare, etc.)'
-    },
-    {
-      'id': 'con2',
-      'type': 'text',
-      'x': 400,
-      'y': 380,
-      'width': 280,
-      'height': 50,
-      'text': 'Limited space and small living areas'
-    },
-    {
-      'id': 'con3',
-      'type': 'text',
-      'x': 400,
-      'y': 460,
-      'width': 280,
-      'height': 50,
-      'text': 'Busy, noisy environment can be stressful'
-    },
-    {
-      'id': 'con4',
-      'type': 'text',
-      'x': 400,
-      'y': 540,
-      'width': 280,
-      'height': 50,
-      'text': 'Public school competition and zoning challenges'
-    }
-  ],
-  'edges': [
-    { 'fromNode': 'start', 'toNode': 'pros' },
-    { 'fromNode': 'start', 'toNode': 'cons' },
-    { 'fromNode': 'pros', 'toNode': 'pro1' },
-    { 'fromNode': 'pros', 'toNode': 'pro2' },
-    { 'fromNode': 'pros', 'toNode': 'pro3' },
-    { 'fromNode': 'pros', 'toNode': 'pro4' },
-    { 'fromNode': 'cons', 'toNode': 'con1' },
-    { 'fromNode': 'cons', 'toNode': 'con2' },
-    { 'fromNode': 'cons', 'toNode': 'con3' },
-    { 'fromNode': 'cons', 'toNode': 'con4' }
-  ]
-}
-
+const sample = { 'nodes': [{ 'id': 'node1', 'type': 'text', 'x': 0, 'y': 0, 'width': 400, 'height': 60, 'text': 'Moving to New York with Plans for Having a Child' }, { 'id': 'node2', 'type': 'text', 'x': -500, 'y': 100, 'width': 350, 'height': 60, 'text': 'PROS' }, { 'id': 'node3', 'type': 'text', 'x': 150, 'y': 100, 'width': 350, 'height': 60, 'text': 'CONS' }, { 'id': 'node4', 'type': 'text', 'x': -500, 'y': 200, 'width': 350, 'height': 80, 'text': 'Excellent Healthcare Options\n- Top-rated hospitals and specialists\n- Advanced fertility treatments available' }, { 'id': 'node5', 'type': 'text', 'x': -500, 'y': 300, 'width': 350, 'height': 80, 'text': 'Educational Opportunities\n- Diverse school options (public, private, charter)\n- Specialized programs and magnet schools' }, { 'id': 'node6', 'type': 'text', 'x': -500, 'y': 400, 'width': 350, 'height': 80, 'text': 'Cultural Exposure\n- Museums, theaters, diverse communities\n- Rich multicultural environment for child development' }, { 'id': 'node7', 'type': 'text', 'x': -500, 'y': 500, 'width': 350, 'height': 80, 'text': 'Family Support Services\n- Abundant childcare options\n- Parenting groups and community resources' }, { 'id': 'node8', 'type': 'text', 'x': -500, 'y': 600, 'width': 350, 'height': 80, 'text': 'Public Transportation\n- Less reliance on cars\n- Accessibility to family-friendly destinations' }, { 'id': 'node9', 'type': 'text', 'x': 150, 'y': 200, 'width': 350, 'height': 80, 'text': 'High Cost of Living\n- Expensive housing market\n- Childcare costs among highest in nation' }, { 'id': 'node10', 'type': 'text', 'x': 150, 'y': 300, 'width': 350, 'height': 80, 'text': 'Space Limitations\n- Smaller living spaces\n- Limited outdoor play areas in many neighborhoods' }, { 'id': 'node11', 'type': 'text', 'x': 150, 'y': 400, 'width': 350, 'height': 80, 'text': 'School Competition\n- Competitive admission processes\n- Overcrowding in desirable public schools' }, { 'id': 'node12', 'type': 'text', 'x': 150, 'y': 500, 'width': 350, 'height': 80, 'text': 'Work-Life Balance Challenges\n- Long commutes\n- Fast-paced lifestyle can limit family time' }, { 'id': 'node13', 'type': 'text', 'x': 150, 'y': 600, 'width': 350, 'height': 80, 'text': 'Environmental Factors\n- Air quality concerns\n- Noise pollution\n- Urban stressors' }, { 'id': 'node14', 'type': 'text', 'x': -175, 'y': 700, 'width': 350, 'height': 100, 'text': 'Key Considerations:\n- Financial readiness\n- Support network\n- Career opportunities\n- Neighborhood selection\n- Long-term family goals' }], 'edges': [{ 'id': 'edge1', 'fromNode': 'node1', 'toNode': 'node2', 'label': 'benefits' }, { 'id': 'edge2', 'fromNode': 'node1', 'toNode': 'node3', 'label': 'challenges' }, { 'id': 'edge3', 'fromNode': 'node2', 'toNode': 'node4', 'label': '' }, { 'id': 'edge4', 'fromNode': 'node2', 'toNode': 'node5', 'label': '' }, { 'id': 'edge5', 'fromNode': 'node2', 'toNode': 'node6', 'label': '' }, { 'id': 'edge6', 'fromNode': 'node2', 'toNode': 'node7', 'label': '' }, { 'id': 'edge7', 'fromNode': 'node2', 'toNode': 'node8', 'label': '' }, { 'id': 'edge8', 'fromNode': 'node3', 'toNode': 'node9', 'label': '' }, { 'id': 'edge9', 'fromNode': 'node3', 'toNode': 'node10', 'label': '' }, { 'id': 'edge10', 'fromNode': 'node3', 'toNode': 'node11', 'label': '' }, { 'id': 'edge11', 'fromNode': 'node3', 'toNode': 'node12', 'label': '' }, { 'id': 'edge12', 'fromNode': 'node3', 'toNode': 'node13', 'label': '' }, { 'id': 'edge13', 'fromNode': 'node1', 'toNode': 'node14', 'label': 'requires' }] }
 const isValidCanvas = (space) => {
   state.errors = []
   const schema = {
@@ -224,15 +109,16 @@ const generatePreview = async () => {
   if (state.isGeneratingPreview) { return }
   try {
     state.isGeneratingPreview = true
-    console.log('🍎🍎🍎🍎', state.prompt)
-    // TODO await call api w prompt and return canvasJson and spaceName
-    isValidCanvas(sample)
+    const { data, name } = await store.dispatch('api/generateSpace', state.prompt)
+    console.log('🍎🍎🍎🍎', state.prompt, data, name)
+    isValidCanvas(data)
     const typeColor = newTypeColor()
     let space = utils.convertFromJsonCanvas(sample, typeColor)
     space = await normalizeSpace(space)
-    space.name = 'NYC Move with Kids: Pros & Cons Map' // TODO
+    space.name = name
     updateSize(space)
     state.newSpace = space
+    // todo space tint color = current color on button click
     console.log('🔮 generatePreview', space)
   } catch (error) {
     console.error('🚒 generatePreview', error)
@@ -262,11 +148,11 @@ section.generate-space(v-if="isOnline")
     @mouseup.stop
     @touchend.stop
     rows="1"
-    :maxlength="400"
+    :maxlength="1000"
   )
   button(:class="{active: state.isGeneratingPreview}" @click="generatePreview")
-    img.icon.openai(src="@/assets/openai.svg")
     span Preview
+    //- TODO this might take up to 30s
     Loader(:visible="state.isGeneratingPreview")
   .badge.danger(v-if="isError") Something went wrong, please try again
   .minimap-canvas-inline-wrap(ref="rowElement")
