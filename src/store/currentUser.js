@@ -70,7 +70,7 @@ const initialState = {
   cardSettingsShiftEnterShouldAddChildCard: true,
   cardSettingsMaxCardWidth: consts.normalCardMaxWidth,
   prevSettingsSection: null,
-  disabledKeyboardShortcuts: [],
+  disabledKeyboardShortcuts: ['newSpace'],
 
   // space filters
 
