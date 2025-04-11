@@ -69,6 +69,7 @@ const toggleSelectedImage = (image) => {
 template(v-if="visible")
   section.ai-images(@click.stop="clear")
     p AI Images
+    p.badge.info AI images is deprecated and will be completely removed after April
     section.subsection(v-if="!AIImages.length")
       p AI Images you generate from cards can be found here.
       p

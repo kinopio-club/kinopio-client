@@ -113,9 +113,6 @@ dialog.pricing(v-if="visible" :open="visible" @click.left.stop="closeDialogs" re
           td 5mb file upload size limit
           td No upload limit
         tr
-          td 10 AI images
-          td 50 AI images/mo
-        tr
           td Can only join Groups
           td
             .row

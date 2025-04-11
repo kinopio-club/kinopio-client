@@ -1236,17 +1236,6 @@ const self = {
       }
     },
 
-    createAIImage: async (context, body) => {
-      try {
-        const options = await context.dispatch('requestOptions', { body, method: 'POST', space: context.rootState.currentSpace })
-        const response = await fetch(`${consts.apiHost()}/services/ai-image`, options)
-        const data = await normalizeResponse(response)
-        return data
-      } catch (error) {
-        console.error('🚒 createAIImage', error)
-        throw new Error(error)
-      }
-    },
     communityBackgrounds: async (context) => {
       try {
         const options = await context.dispatch('requestOptions', { method: 'GET', space: context.rootState.currentSpace })
