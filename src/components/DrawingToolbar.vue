@@ -69,7 +69,7 @@ const toggleEraser = () => {
 
 <template lang="pug">
 .drawing-toolbar(v-if="props.visible")
-  ColorPicker(:currentColor="drawingColor" :visible="state.colorPickerIsVisible" @selectedColor="updateDrawingColor" :recentColors="recentColors")
+  ColorPicker(:currentColor="drawingColor" :visible="state.colorPickerIsVisible" @selectedColor="updateDrawingColor" :recentColors="recentColors" :shouldHideOpacity="true")
   BrushSizePicker(:visible="state.brushSizePickerIsVisible" @updateBrushSize="updateBrushSize" :currentBrushSize="currentBrushSize")
   .segmented-buttons
     //- color
