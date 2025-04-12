@@ -854,7 +854,7 @@ const selectionEndPosition = () => {
   const endPosition = position
   return endPosition
 }
-const toggleTextEditAction = async (action) => {
+const toggleTextEditWrapAction = async (action) => {
   if (!visible.value) { return }
   const startPosition = selectionStartPosition()
   const endPosition = selectionEndPosition()
@@ -867,6 +867,24 @@ const toggleTextEditAction = async (action) => {
   updateCardName(newName)
   await nextTick()
   setSelectionRange(startPosition + offset, endPosition + offset)
+}
+const textEditLinkAction = async () => {
+  // lol → [lol](url)
+  if (!visible.value) { return }
+  const startPosition = selectionStartPosition()
+  const endPosition = selectionEndPosition()
+  const name = nameElement.value.value
+  let before = name.slice(0, startPosition)
+  let selected = name.slice(startPosition, endPosition)
+  let after = name.slice(endPosition)
+  before = before + '['
+  selected = selected + '](url)'
+  const newName = before + selected + after
+  const newStartPosition = endPosition + 3 // [](
+  const newEndPosition = newStartPosition + 3 // url
+  updateCardName(newName)
+  await nextTick()
+  setSelectionRange(newStartPosition, newEndPosition)
 }
 
 // card tips
@@ -1375,10 +1393,12 @@ dialog.card-details(v-if="visible" :open="visible" ref="dialogElement" @click.le
 
         @keydown.tab.exact="triggerPickerSelectItem"
 
-        @keydown.meta.b.exact.stop.prevent="toggleTextEditAction('bold')"
-        @keydown.ctrl.b.exact.stop.prevent="toggleTextEditAction('bold')"
-        @keydown.meta.i.exact.stop.prevent="toggleTextEditAction('italic')"
-        @keydown.ctrl.i.exact.stop.prevent="toggleTextEditAction('italic')"
+        @keydown.meta.b.exact.stop.prevent="toggleTextEditWrapAction('bold')"
+        @keydown.ctrl.b.exact.stop.prevent="toggleTextEditWrapAction('bold')"
+        @keydown.meta.i.exact.stop.prevent="toggleTextEditWrapAction('italic')"
+        @keydown.ctrl.i.exact.stop.prevent="toggleTextEditWrapAction('italic')"
+        @keydown.meta.k.exact.stop.prevent="textEditLinkAction"
+        @keydown.ctrl.k.exact.stop.prevent="textEditLinkAction"
 
         @focus="resetPinchCounterZoomDecimal"
       )

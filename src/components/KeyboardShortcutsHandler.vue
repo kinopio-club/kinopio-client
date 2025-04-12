@@ -215,7 +215,7 @@ const handleMetaKeyShortcuts = (event) => {
     event.preventDefault()
     selectAllItems()
   // Search/Jump-to Space
-  } else if (isMeta && key === 'k') {
+  } else if (isMeta && key === 'k' && isSpaceScope) {
     event.preventDefault()
     focusOnSpaceDetailsFilter()
   // Search/Jump-to Card
