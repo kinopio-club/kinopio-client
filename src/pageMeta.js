@@ -33,7 +33,7 @@ const fetchGroupPublicMeta = async (groupId) => {
 }
 const spacePreviewImageFromId = (spaceId) => {
   if (!spaceId) { return '' }
-  return `${consts.cdnHost}/${spaceId}/preview-image-${spaceId}.webp`
+  return `${consts.cdnHost}/${spaceId}/preview-image-${spaceId}.jpeg`
 }
 
 // update tags
