@@ -214,6 +214,22 @@ const renderStroke = (stroke, shouldPreventBroadcast) => {
   context.stroke()
   broadcastAddStroke(stroke, shouldPreventBroadcast)
 }
+const dataUrlFromOffscreenCanvas = (offscreenCanvas, type, quality) => {
+  type = type || 'image/png'
+  quality = quality || 0.8
+  // cannot use canvas.toDataUrl() with offscreen canvas
+  return new Promise((resolve, reject) => {
+    offscreenCanvas.convertToBlob({ type, quality })
+      .then(blob => {
+        const reader = new FileReader()
+        reader.onload = () => resolve(reader.result)
+        reader.onerror = () => reject(reader.error)
+        reader.readAsDataURL(blob)
+      })
+      .catch(reject)
+  })
+}
+
 const imageDataUrl = async (strokes) => {
   const offscreenCanvas = new OffscreenCanvas(pageWidth.value, pageHeight.value)
   const offscreenContext = offscreenCanvas.getContext('2d')
@@ -240,12 +256,14 @@ const imageDataUrl = async (strokes) => {
       offscreenContext.moveTo(point.x, point.y)
     })
   })
+  let dataUrl
   if (currentUserIsSignedIn.value) {
-    return canvas.toDataURL('image/webp', 0.5)
+    dataUrl = dataUrlFromOffscreenCanvas(offscreenCanvas, 'image/webp', 0.5)
   } else {
     // anon users use png because dataUrl is saved to server on sign up/in
-    return canvas.toDataURL('image/png')
+    dataUrl = dataUrlFromOffscreenCanvas(offscreenCanvas)
   }
+  return dataUrl
 }
 
 // restore
