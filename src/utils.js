@@ -2512,6 +2512,13 @@ export default {
     a.click()
     document.body.removeChild(a)
   },
+  // for canvas testing
+  downloadCanvasImage (dataUrl, filename = 'image.png') {
+    const link = document.createElement('a')
+    link.href = dataUrl
+    link.download = filename
+    link.click()
+  },
 
   // Tags 🦋
 
