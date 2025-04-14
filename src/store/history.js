@@ -223,6 +223,11 @@ const self = {
     // Undo
 
     undo: (context) => {
+      const toolbarIsDrawing = context.rootState.currentUserToolbar === 'drawing'
+      if (toolbarIsDrawing) {
+        context.commit('triggerDrawingUndo', null, { root: true })
+        return
+      }
       if (isPaused) { return }
       if (pointer <= 0) {
         context.commit('pointer', { value: 0 })
@@ -297,6 +302,11 @@ const self = {
     // Redo
 
     redo: (context, patch) => {
+      const toolbarIsDrawing = context.rootState.currentUserToolbar === 'drawing'
+      if (toolbarIsDrawing) {
+        context.commit('triggerDrawingRedo', null, { root: true })
+        return
+      }
       if (!patch) {
         if (isPaused) { return }
         const pointerIsNewest = pointer === patches.length

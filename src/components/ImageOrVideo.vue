@@ -58,7 +58,8 @@ const isInteracting = computed(() => {
   const isInteractingWithItem = store.getters.isInteractingWithItem
   const isPainting = store.state.currentUserIsPainting
   const isPanning = store.state.currentUserIsPanningReady
-  return isInteractingWithItem || isPainting || isPanning
+  const isDrawing = store.state.currentUserIsDrawing
+  return isInteractingWithItem || isPainting || isPanning || isDrawing
 })
 watch(() => isInteracting.value, (value) => {
   if (value) {

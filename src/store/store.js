@@ -106,6 +106,11 @@ const store = createStore({
     currentUserIsDraggingConnectionIdLabel: '',
     clipboardData: {}, // for kinopio data pasting
     shouldCancelNextMouseUpInteraction: false,
+    currentUserIsDrawing: false,
+
+    // drawing
+    drawingEraserIsActive: false,
+    drawingStrokeColors: [],
 
     // box-selecting
     currentUserIsBoxSelecting: false,
@@ -605,7 +610,7 @@ const store = createStore({
     triggerKeyboardShortcutsIsVisible: () => {},
     triggerReadOnlyJiggle: () => {},
     triggerSelectTemplateCategory: () => {},
-    triggerUpdateMainCanvasPositionOffset: () => {},
+    triggerUpdatePaintSelectCanvasPositionOffset: () => {},
     triggerPaintFramePosition: (state, event) => {},
     triggerAddRemotePaintingCircle: () => {},
     triggerUpdateRemoteUserCursor: () => {},
@@ -659,6 +664,7 @@ const store = createStore({
     triggerAppsAndExtensionsIsVisible: () => {},
     triggerUpdateWindowTitle: () => {},
     triggerRestoreSpaceRemoteComplete: () => {},
+    triggerRestoreSpaceLocalComplete: () => {},
     triggerCheckIfShouldNotifySpaceOutOfSync: () => {},
     triggerNotifyOffscreenCardCreated: (state, card) => {},
     triggerSonarPing: (state, event) => {},
@@ -669,6 +675,7 @@ const store = createStore({
     triggerPanningStart: () => {},
     triggerClearUserNotifications: () => {},
     triggerAddBox: (state, event) => {},
+    triggerUpdateDrawingBackground: () => {},
 
     // select all below
     triggerSelectAllItemsBelowCursor: (state, position) => {},
@@ -683,6 +690,15 @@ const store = createStore({
 
     triggerSelectedCardsContainInBox: () => {},
     triggerSelectedItemsAlignLeft: () => {},
+
+    // drawing
+    triggerStartDrawing: (state, event) => {},
+    triggerDraw: (state, event) => {},
+    triggerDrawingUndo: () => {},
+    triggerDrawingRedo: () => {},
+    triggerAddRemoteDrawingStroke: () => {},
+    triggerRemoveRemoteDrawingStroke: () => {},
+    triggerDrawingRedraw: () => {},
 
     // Cards
 
@@ -953,6 +969,17 @@ const store = createStore({
     currentUserToolbar: (state, value) => {
       utils.typeCheck({ value, type: 'string' })
       state.currentUserToolbar = value
+      state.drawingEraserIsActive = false
+    },
+
+    // drawing
+
+    drawingEraserIsActive: (state, value) => {
+      state.drawingEraserIsActive = value
+    },
+    addToDrawingStrokeColors: (state, color) => {
+      if (state.drawingStrokeColors.includes(color)) { return }
+      state.drawingStrokeColors.push(color)
     },
 
     // Dragging
@@ -976,6 +1003,10 @@ const store = createStore({
     shouldCancelNextMouseUpInteraction: (state, value) => {
       utils.typeCheck({ value, type: 'boolean' })
       state.shouldCancelNextMouseUpInteraction = value
+    },
+    currentUserIsDrawing: (state, value) => {
+      utils.typeCheck({ value, type: 'boolean' })
+      state.currentUserIsDrawing = value
     },
 
     // Dragging Cards
@@ -1814,8 +1845,8 @@ const store = createStore({
       item.width = item.width || item.resizeWidth
       item.height = item.height || item.resizeHeight
       const zoom = context.getters.spaceZoomDecimal
-      let thresholdHeight = (context.state.viewportHeight * zoom) / 4
-      let thresholdWidth = (context.state.viewportWidth * zoom) / 4
+      let thresholdHeight = (context.state.viewportHeight * zoom) / 2
+      let thresholdWidth = (context.state.viewportWidth * zoom) / 2
       const pageWidth = context.state.pageWidth
       const pageHeight = context.state.pageHeight
       const shouldIncreasePageWidth = (item.x + item.width + thresholdWidth) > pageWidth
@@ -2096,10 +2127,27 @@ const store = createStore({
       percent = Math.min(percent, consts.spaceZoom.max)
       context.commit('spaceZoomPercent', percent)
     },
+
+    // drawing
+
     currentUserToolbar: (context, value) => {
       const canOnlyComment = context.getters['currentUser/canOnlyComment']()
       if (canOnlyComment) { return }
       context.commit('currentUserToolbar', value)
+    },
+    toggleCurrentUserToolbar: (context, value) => {
+      const canOnlyComment = context.getters['currentUser/canOnlyComment']()
+      const prevValue = context.state.currentUserToolbar
+      if (canOnlyComment) { return }
+      if (value === prevValue) {
+        context.commit('currentUserToolbar', 'card')
+      } else {
+        context.commit('currentUserToolbar', value)
+      }
+    },
+    toggleDrawingEraserIsActive: (context) => {
+      const value = !context.state.drawingEraserIsActive
+      context.commit('drawingEraserIsActive', value)
     }
   },
   getters: {

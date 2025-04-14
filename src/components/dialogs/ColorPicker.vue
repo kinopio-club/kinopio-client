@@ -33,7 +33,8 @@ const props = defineProps({
     default: () => []
   },
   luminosityIsDark: Boolean,
-  luminosityIsLight: Boolean
+  luminosityIsLight: Boolean,
+  shouldHideOpacity: Boolean
 })
 watch(() => props.visible, (value, prevValue) => {
   if (value) {
@@ -260,7 +261,7 @@ dialog.narrow.color-picker(v-if="props.visible" :open="props.visible" ref="dialo
       template(v-for="color in state.colors")
         button.color(:style="{backgroundColor: color}" :class="{active: colorIsCurrent(color)}" @click.left="select(color)" :title="color")
     //- Opacity
-    .row
+    .row(v-if="!props.shouldHideOpacity")
       img.icon.transparent(src="@/assets/transparent.svg" @click="toggleOpacity")
       Slider(
         @updatePlayhead="updateOpacity"

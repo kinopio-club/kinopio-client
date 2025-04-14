@@ -124,7 +124,7 @@ const removeCard = (card) => {
   removeCardFromInbox(card)
 }
 const addCard = (card) => {
-  console.log(card)
+  state.cards.unshift(card)
 }
 </script>
 

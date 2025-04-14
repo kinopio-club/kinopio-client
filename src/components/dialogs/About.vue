@@ -160,7 +160,7 @@ dialog.about.narrow(v-if="visible" :open="visible" @click.left="closeDialogs" re
 
   section
     .row
-      p Thinking canvas for new ideas and hard problems
+      p Collect and connect your thoughts, ideas, and feelings
     .row
       .button-wrap
         button(@click.stop="toggleHelpIsVisible" :class="{active: state.helpIsVisible}")
