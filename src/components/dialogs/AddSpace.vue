@@ -161,7 +161,7 @@ dialog.add-space.narrow(
         img.icon(src="@/assets/add.svg")
         span New Space
       button(@click.stop="toggleSettingsIsVisible" :class="{ active: state.settingsIsVisible }")
-        img.icon.settings(src="@/assets/settings.svg")
+        span Options
     //- new space settings
     section.subsection(v-if="state.settingsIsVisible")
       UserSettingsNewSpaces

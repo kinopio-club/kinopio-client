@@ -177,6 +177,7 @@ section.generate-space(v-if="isOnline")
     )
     .row.button-row
       button(:class="{ active: state.isGeneratingPreview }" @click="generatePreview")
+        img.icon.luck(src="@/assets/luck.svg")
         span Preview
         Loader(:visible="state.isGeneratingPreview")
       .badge.info(v-if="state.isGeneratingPreview") may take 15s
@@ -220,4 +221,6 @@ section.generate-space(v-if="isOnline")
     .badge
       margin-left 6px
       margin-right 0
+  .icon.luck
+    vertical-align -1px
 </style>
