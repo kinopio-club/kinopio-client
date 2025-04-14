@@ -13,10 +13,10 @@ let unsubscribe
 onMounted(() => {
   unsubscribe = store.subscribe((mutation, state) => {
     if (mutation.type === 'triggerSpaceZoomReset') {
-      updateSpaceZoomFromTrigger(max.value)
+      updateSpaceZoomFromTrigger(consts.spaceZoom.default) // 100
       window.scrollTo(0, 0)
     } else if (mutation.type === 'triggerCenterZoomOrigin') {
-      centerZoomOrigin()
+      updateZoomOriginToCenter()
     } else if (mutation.type === 'triggerSpaceZoomOutMax') {
       zoomOutOrInMax()
     }
@@ -32,9 +32,9 @@ const state = reactive({
   animateJiggleLeft: false
 })
 
-const max = computed(() => consts.spaceZoom.max) // 100
+const max = computed(() => consts.spaceZoom.max) // 200~
 const min = computed(() => consts.spaceZoom.min) // 20
-const spaceZoomPercent = computed(() => store.state.spaceZoomPercent)
+const spaceZoomPercent = computed(() => store.state.spaceZoomPercent) // 100
 const minKeyboardShortcut = computed(() => 'Z')
 
 const isMobileOrTouch = computed(() => {
@@ -42,6 +42,7 @@ const isMobileOrTouch = computed(() => {
   return store.isTouchDevice || isMobile
 })
 const closeAllDialogs = () => {
+  updateZoomOriginToCenter()
   store.dispatch('clearMultipleSelected')
   store.dispatch('closeAllDialogs')
 }
@@ -61,18 +62,12 @@ const updateSpaceZoomFromTrigger = (percent) => {
 const updateSpaceZoomPercent = (percent) => {
   percent = percent / 100
   percent = Math.round(min.value + (max.value - min.value) * percent)
+  const isPrev = percent === store.state.spaceZoomPercent
+  if (isPrev) { return }
   store.commit('spaceZoomPercent', percent)
 }
-const centerZoomOrigin = () => {
-  const scroll = { x: window.scrollX, y: window.scrollY }
-  const origin = {
-    x: scroll.x + (store.state.viewportWidth / 6),
-    y: scroll.y + (store.state.viewportHeight / 6)
-  }
-  store.dispatch('zoomOrigin', origin)
-}
 const zoomOutOrInMax = () => {
-  centerZoomOrigin()
+  updateZoomOriginToCenter()
   if (store.state.spaceZoomPercent === min.value) {
     store.commit('spaceZoomPercent', max.value)
   } else {
@@ -80,12 +75,19 @@ const zoomOutOrInMax = () => {
   }
 }
 
+// zoom origin
+
+const updateZoomOriginToCenter = () => {
+  const scroll = { x: window.scrollX, y: window.scrollY }
+  const origin = {
+    x: scroll.x + (store.state.viewportWidth / 2),
+    y: scroll.y + (store.state.viewportHeight / 2)
+  }
+  store.commit('zoomOrigin', origin)
+}
+
 // slider
 
-const updateSpaceZoom = (percent) => {
-  centerZoomOrigin()
-  updateSpaceZoomPercent(percent)
-}
 const resetZoom = () => {
   store.commit('zoomOrigin', { x: 0, y: 0 })
 }
@@ -99,11 +101,12 @@ const removeAnimations = () => {
 <template lang="pug">
 .space-zoom(v-if="!isMobileOrTouch")
   Slider(
-    @updatePlayhead="updateSpaceZoom"
+    @updatePlayhead="updateSpaceZoomPercent"
     @resetPlayhead="resetZoom"
     :minValue="min"
     :value="spaceZoomPercent"
     :maxValue="max"
+    :defaultValue="consts.spaceZoom.default"
     :animateJiggleRight="state.animateJiggleRight"
     :animateJiggleLeft="state.animateJiggleLeft"
     @removeAnimations="removeAnimations"

@@ -81,12 +81,6 @@ const spaceZoomDecimal = computed(() => store.getters.spaceZoomDecimal)
 const outsideSpaceBackgroundIsStatic = computed(() => store.state.currentUser.outsideSpaceBackgroundIsStatic)
 const backgroundTintColor = computed(() => store.state.currentSpace.backgroundTint)
 const isThemeDark = computed(() => store.getters['themes/isThemeDark'])
-const preventTouchScrolling = (event) => {
-  const shouldPrevent = store.state.currentUserIsResizingBox || store.state.currentUserIsPaintingLocked
-  if (shouldPrevent) {
-    event.preventDefault()
-  }
-}
 
 // update color
 
@@ -155,7 +149,6 @@ const styles = computed(() => {
 <template lang="pug">
 canvas#outside-space-background(
   :style="styles"
-  @touchmove="preventTouchScrolling"
 )
 </template>
 

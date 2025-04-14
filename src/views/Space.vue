@@ -188,13 +188,35 @@ const users = computed(() => {
 const spaceZoomDecimal = computed(() => store.getters.spaceZoomDecimal)
 const pageHeight = computed(() => store.state.pageHeight)
 const pageWidth = computed(() => store.state.pageWidth)
+const updateStylesWithZoomTransform = (styles) => {
+  const zoom = spaceZoomDecimal.value
+  const origin = store.state.zoomOrigin
+  styles.transform = `translate(${origin.x}px, ${origin.y}px) scale(${zoom}) translate(-${origin.x}px, -${origin.y}px)`
+  if (zoom > 1) {
+    // window.scrollBy(origin.x, origin.y, 'instant')
+
+    // TODO get current page/prev zoom value from rel data , - new zoom value  = delta
+    // use delta to calc window.scrollby
+    styles.transform = `scale(${zoom})`
+
+    // styles.transform = `scale(${zoom})`
+    // translate(${origin.x}px, ${origin.y}px
+    // styles.transformOrigin = `${origin.x}px ${origin.y}px`
+    // console.log(styles.transformOrigin, origin)
+  }
+  return styles
+}
 const styles = computed(() => {
   const zoom = 1 / spaceZoomDecimal.value
-  return {
-    width: `${pageWidth.value * zoom}px`,
-    height: `${pageHeight.value * zoom}px`,
-    transform: store.getters.zoomTransform
+  let styles = {
+    // width: `${pageWidth.value * zoom}px`,
+    // height: `${pageHeight.value * zoom}px`
   }
+  if (zoom !== 1) {
+    styles.willChange = 'transform'
+  }
+  styles = updateStylesWithZoomTransform(styles)
+  return styles
 })
 
 // page history

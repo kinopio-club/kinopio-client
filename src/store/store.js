@@ -2142,12 +2142,6 @@ const store = createStore({
     isTouchDevice: (state) => {
       return state.isTouchDevice || utils.isMobile() || consts.isSecureAppContext
     },
-    zoomTransform: (state, getters) => {
-      const zoom = getters.spaceZoomDecimal
-      const origin = state.zoomOrigin
-      const transform = `translate(${origin.x}px, ${origin.y}px) scale(${zoom}) translate(-${origin.x}px, -${origin.y}px)`
-      return transform
-    },
     windowScrollWithSpaceOffset: (state) => () => {
       let scroll = { x: window.scrollX, y: window.scrollY }
       return utils.updatePositionWithSpaceOffset(scroll)
