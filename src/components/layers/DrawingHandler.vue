@@ -105,10 +105,12 @@ const preventTouchScrolling = (event) => {
 // }
 
 const startDrawing = (event) => {
+  if (utils.isMultiTouch(event)) { return }
   store.commit('currentUserIsDrawing', true)
   store.commit('triggerStartDrawing', event)
 }
 const draw = throttle((event) => {
+  if (utils.isMultiTouch(event)) { return }
   store.commit('triggerDraw', event)
 }, 16) // 60fps
 
