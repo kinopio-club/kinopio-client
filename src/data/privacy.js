@@ -26,7 +26,16 @@ export default {
         descriptionGroup: 'Only group members and collaborators can view and edit.',
         color: 'danger',
         icon: 'lock'
+      },
+      {
+        name: 'local-only',
+        friendlyName: 'Local Only',
+        description: 'Only you can view and edit. Does not sync.',
+        descriptionGroup: 'Only you can view and edit. Does not sync.',
+        color: 'secondary',
+        icon: 'local'
       }
+
     ]
   }
 
