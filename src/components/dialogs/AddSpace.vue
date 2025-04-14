@@ -155,13 +155,13 @@ dialog.add-space.narrow(
   :style="{'max-height': state.dialogHeight + 'px'}"
 )
   section
-    .row
+    .row.title-row
       //- New Space
       button.success(@click="addSpace")
         img.icon(src="@/assets/add.svg")
         span New Space
-      button(@click.stop="toggleSettingsIsVisible" :class="{ active: state.settingsIsVisible }")
-        span Options
+      button.small-button(@click.stop="toggleSettingsIsVisible" :class="{ active: state.settingsIsVisible }" title="New Space Options")
+        span ⋯
     //- new space settings
     section.subsection(v-if="state.settingsIsVisible")
       UserSettingsNewSpaces
@@ -198,4 +198,6 @@ dialog.add-space
   .inbox-icon
     margin 0
     margin-left 5px
+  .title-row
+    align-items flex-start
 </style>
