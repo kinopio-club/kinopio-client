@@ -9,27 +9,16 @@ import throttle from 'lodash-es/throttle'
 
 const store = useStore()
 
-// let unsubscribe
-
 onMounted(() => {
-  // unsubscribe = store.subscribe(mutation => {
-  //   if (mutation.type === 'triggerUpdateOtherCard') {
-  //     mutation.payload
-  //   }
-  // })
   window.addEventListener('pointerup', endDrawing)
 })
 onBeforeUnmount(() => {
   window.removeEventListener('pointerup', endDrawing)
-//   unsubscribe()
 })
 
 const props = defineProps({
   visible: Boolean
 })
-// const state = reactive({
-//   count: 0
-// })
 
 const viewportHeight = computed(() => store.state.viewportHeight)
 const viewportWidth = computed(() => store.state.viewportWidth)
@@ -88,21 +77,6 @@ const preventTouchScrolling = (event) => {
     event.preventDefault()
   }
 }
-
-// watch(() => props.visible, (value, prevValue) => {
-//   if (value) {
-//     console.info('💁‍♀️', value)
-//   }
-// })
-
-// const themeName = computed(() => store.state.currentUser.theme)
-// const incrementBy = () => {
-//   const theme = themeName.value
-//   console.info('🧢', theme)
-//   state.count = state.count + 1
-//   emit('updateCount', state.count)
-//   // store.dispatch('themes/isSystem', false)
-// }
 
 const startDrawing = (event) => {
   if (utils.isMultiTouch(event)) { return }
