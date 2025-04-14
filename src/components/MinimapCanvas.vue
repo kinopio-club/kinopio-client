@@ -66,7 +66,8 @@ const props = defineProps({
   pageHeight: Number,
   pageWidth: Number,
   space: Object,
-  viewportIsHidden: Boolean
+  viewportIsHidden: Boolean,
+  backgroundColor: String
 })
 const state = reactive({
   scrollX: 0,
@@ -101,7 +102,7 @@ const ratio = computed(() => {
 })
 
 const styles = computed(() => {
-  let color = store.state.outsideSpaceBackgroundColor
+  let color = props.backgroundColor || store.state.outsideSpaceBackgroundColor
   return { backgroundColor: color }
 })
 

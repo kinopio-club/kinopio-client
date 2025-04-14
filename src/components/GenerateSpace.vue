@@ -4,12 +4,14 @@ import { useStore } from 'vuex'
 
 import Loader from '@/components/Loader.vue'
 import MinimapCanvas from '@/components/MinimapCanvas.vue'
+import backgroundImagesJSON from '@/data/backgroundImages.json'
 
 import dayjs from 'dayjs'
 import utils from '@/utils.js'
 import consts from '@/consts.js'
 import { nanoid } from 'nanoid'
 import randomColor from 'randomcolor'
+import sample from 'lodash-es/sample'
 
 const store = useStore()
 
@@ -24,7 +26,9 @@ const state = reactive({
   pageWidth: null,
   pageHeight: null,
   errors: [],
-  prompt: ''
+  prompt: '',
+  backgroundPreview: '',
+  background: ''
 })
 
 const isOnline = computed(() => store.state.isOnline)
@@ -108,7 +112,23 @@ const updateSize = (space) => {
   state.pageWidth = pageSize.width
 }
 
+// background color
+
+const isThemeDark = computed(() => store.state.currentUser.theme === 'dark')
+const updateBackground = () => {
+  let images = backgroundImagesJSON
+  images = images.filter(image => !image.isArchived || !image.shouldSkipInGenerateSpace)
+  const image = sample(images)
+  let url = image.url
+  if (isThemeDark.value) {
+    url = image.darkUrl || url
+  }
+  state.backgroundPreview = image.previewUrl || url
+  state.background = url
+}
+
 const generatePreview = async () => {
+  updateBackground()
   if (!state.prompt) { return }
   if (state.isGeneratingPreview) { return }
   try {
@@ -120,10 +140,22 @@ const generatePreview = async () => {
     let space = utils.convertFromJsonCanvas(data, typeColor)
     space = await normalizeSpace(space)
     space.name = name
+    space.background = state.background
     updateSize(space)
-    state.newSpace = space
-    // todo space tint color = current color on button click
+    space.connections.map(connection => {
+      const { controlPoint, endItemId, startItemId } = connection
+      const width = consts.normalCardMaxWidth - 16
+      let startItem = space.cards.find(card => card.id === startItemId)
+      let endItem = space.cards.find(card => card.id === endItemId)
+      startItem = utils.clone(startItem)
+      endItem = utils.clone(endItem)
+      startItem.x += width
+      endItem.x += width
+      connection.path = store.getters['currentConnections/connectionPathBetweenCoords'](startItem, endItem, controlPoint)
+      return connection
+    })
     console.log('🔮 generatePreview', space)
+    state.newSpace = space
   } catch (error) {
     console.error('🚒 generatePreview', error)
     state.errors.push('generatePreview')
@@ -159,7 +191,6 @@ const importSpace = async () => {
   }
   state.isLoadingSpace = true
 }
-
 </script>
 
 <template lang="pug">
@@ -185,7 +216,7 @@ section.generate-space(v-if="isOnline")
         Loader(:visible="state.isGeneratingPreview")
       .badge.info(v-if="state.isGeneratingPreview") takes 15s
     .badge.danger(v-if="isError") Something went wrong, please try again
-  .minimap-canvas-inline-wrap(ref="rowElement")
+  .minimap-canvas-inline-wrap(ref="rowElement" :style="{ backgroundImage: `url(${state.backgroundPreview})` }")
     MinimapCanvas(
       :visible="minimapCanvasIsVisible"
       :space="state.newSpace"
@@ -193,7 +224,8 @@ section.generate-space(v-if="isOnline")
       :pageHeight="state.pageHeight"
       :pageWidth="state.pageWidth"
       :viewportIsHidden="true"
-      )
+      backgroundColor="transparent"
+    )
     template(v-if="minimapCanvasIsVisible")
       button.cancel-minimap.small-button(title="Cancel" @click="clear")
         img.icon.cancel(src="@/assets/add.svg")
@@ -205,22 +237,20 @@ section.generate-space(v-if="isOnline")
 
 <style lang="stylus">
 .generate-space
-  .minimap-canvas
-    border-bottom-left-radius 0
-    border-bottom-right-radius 0
   .add-space-button
     margin-left 0
     border-top-left-radius 0
     border-top-right-radius 0
     width 100%
   .minimap-canvas-inline-wrap
+    border-radius var(--entity-radius)
     position relative
     .cancel-minimap
       position absolute
       top 6px
       right 6px
   .button-row
-    margin-bottom 0
+    margin-bottom 0 !important
     .badge
       margin-left 6px
       margin-right 0
