@@ -208,11 +208,11 @@ const scrollIntoViewAndFocus = async () => {
   await nextTick()
   scrollIntoView(behavior)
   focusName()
-  triggerUpdateMainCanvasPositionOffset()
+  triggerUpdatePaintSelectCanvasPositionOffset()
   triggerUpdateHeaderAndFooterPosition()
 }
-const triggerUpdateMainCanvasPositionOffset = () => {
-  store.commit('triggerUpdateMainCanvasPositionOffset')
+const triggerUpdatePaintSelectCanvasPositionOffset = () => {
+  store.commit('triggerUpdatePaintSelectCanvasPositionOffset')
   triggerUpdateHeaderAndFooterPosition()
 }
 
@@ -511,7 +511,7 @@ const normalizedName = computed(() => {
   return newName.trim()
 })
 const clickName = (event) => {
-  triggerUpdateMainCanvasPositionOffset()
+  triggerUpdatePaintSelectCanvasPositionOffset()
   store.commit('searchIsVisible', false)
   if (isCursorInsideTagBrackets()) {
     showTagPicker()

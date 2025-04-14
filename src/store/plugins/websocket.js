@@ -56,7 +56,7 @@ const sendEvent = (store, mutation, type) => {
   const shouldBroadcast = store.getters['currentSpace/shouldBroadcast']
   if (!shouldBroadcast) { return }
   const { message, handler, updates } = utils.normalizeBroadcastUpdates(mutation.payload)
-  const hidden = ['updateRemoteUserCursor', 'addRemotePaintingCircle', 'clearRemoteCardDetailsVisible', 'clearRemoteConnectionDetailsVisible']
+  const hidden = ['updateRemoteUserCursor', 'addRemotePaintingCircle', 'clearRemoteCardDetailsVisible', 'clearRemoteConnectionDetailsVisible', 'addRemoteDrawingStroke', 'removeRemoteDrawingStroke']
   if (showDebugMessages && !hidden.includes(updates.type)) {
     console.info('🌜 sent', message, handler, updates, { clientId })
   }

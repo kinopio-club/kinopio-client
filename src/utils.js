@@ -13,19 +13,18 @@ import join from 'lodash-es/join'
 import dayjs from 'dayjs'
 import relativeTime from 'dayjs/plugin/relativeTime'
 import { colord, extend } from 'colord'
-import qs from '@aguezz/qs-parse'
 import namesPlugin from 'colord/plugins/names'
+import qs from '@aguezz/qs-parse'
 import getCurvePoints from '@/libs/curve_calc.js'
 import random from 'lodash-es/random'
 import randomColor from 'randomcolor'
 // https://data.iana.org/TLD/tlds-alpha-by-domain.txt
 // Updated Jun 9 2021 UTC
 import tldsList from '@/data/tlds.json'
+dayjs.extend(relativeTime)
+extend([namesPlugin])
 let tlds = tldsList.join(String.raw`)|(\.`)
 tlds = String.raw`(\.` + tlds + ')'
-
-dayjs.extend(relativeTime)
-extend([namesPlugin]) // colord
 
 const uuidLength = 21
 const randomRGBA = (alpha) => {
@@ -1089,6 +1088,9 @@ export default {
     const y = parseInt(element.style.top)
     return { x, y }
   },
+
+  // boxes
+
   boxElementFromConnectorPosition (x, y) {
     let elements = document.elementsFromPoint(x, y)
     let boxFromConnector
@@ -1121,12 +1123,15 @@ export default {
   },
   boxInfoPositionFromId (boxId) {
     const element = document.querySelector(`.box-info[data-box-id="${boxId}"]`)
-    // if (!element) { return }
+    if (!element) { return }
     const boxInfoRect = element.getBoundingClientRect()
     const infoWidth = Math.round(boxInfoRect.width + 4)
     const infoHeight = Math.round(boxInfoRect.height)
     return { infoWidth, infoHeight }
   },
+
+  // rect
+
   isPointInsideRect (point, rect) {
     const xIsInside = this.isBetween({
       value: point.x,
@@ -1173,32 +1178,6 @@ export default {
       (rectA.x + rectA.width) <= (rectB.x + rectB.width) &&
       (rectA.y + rectA.height) <= (rectB.y + rectB.height)
     )
-  },
-  nameStringFromItems (items) {
-    items = items.filter(item => Boolean(item))
-    const data = items.map(item => item.name)
-    return join(data, '\n\n')
-  },
-  trim (string) {
-    if (!string) { return '' }
-    // https://regexr.com/59m7a
-    // unlike string.trim(), this removes line breaks too
-    return string.replace(/^(\n|\\n|\s)+|(\n|\\n|\s)+$/g, '')
-  },
-  hasBlankCharacters (string) {
-    if (!string) { return true }
-    // https://regexr.com/5i5a3
-    // matches space, enter, tab, whitespace characters
-    const blankPattern = new RegExp(/( |\s|\t)+/gm)
-    if (string.match(blankPattern)) {
-      return true
-    }
-  },
-  splitByBlankCharacters (string) {
-    // https://regexr.com/5i5a3
-    // matches space, enter, tab, whitespace characters
-    const blankPattern = new RegExp(/( |\s|\t)+/gm)
-    return string.split(blankPattern)
   },
   boundaryRectFromItems (items) {
     items = this.clone(items)
@@ -1258,6 +1237,35 @@ export default {
     return { width, height }
   },
 
+  // string
+
+  nameStringFromItems (items) {
+    items = items.filter(item => Boolean(item))
+    const data = items.map(item => item.name)
+    return join(data, '\n\n')
+  },
+  trim (string) {
+    if (!string) { return '' }
+    // https://regexr.com/59m7a
+    // unlike string.trim(), this removes line breaks too
+    return string.replace(/^(\n|\\n|\s)+|(\n|\\n|\s)+$/g, '')
+  },
+  hasBlankCharacters (string) {
+    if (!string) { return true }
+    // https://regexr.com/5i5a3
+    // matches space, enter, tab, whitespace characters
+    const blankPattern = new RegExp(/( |\s|\t)+/gm)
+    if (string.match(blankPattern)) {
+      return true
+    }
+  },
+  splitByBlankCharacters (string) {
+    // https://regexr.com/5i5a3
+    // matches space, enter, tab, whitespace characters
+    const blankPattern = new RegExp(/( |\s|\t)+/gm)
+    return string.split(blankPattern)
+  },
+
   // estimated card connector positions
 
   estimatedNewCardConnectorPosition (position) {
@@ -1286,6 +1294,9 @@ export default {
 
   // Connections 🐙
 
+  connectionElementFromId (connectionId) {
+    return document.querySelector(`.connection[data-id="${connectionId}"]`)
+  },
   migrationConnections (connections) { // migration added July 2024
     if (!connections) { return }
     return connections.map(connection => {
@@ -2490,6 +2501,23 @@ export default {
       text = await navigator.clipboard.readText()
     }
     return { text, file }
+  },
+  // for canvas testing
+  downloadBlob (blob) {
+    let URLObj = window.URL || window.webkitURL
+    let a = document.createElement('a')
+    a.href = URLObj.createObjectURL(blob)
+    a.download = 'untitled.png'
+    document.body.appendChild(a)
+    a.click()
+    document.body.removeChild(a)
+  },
+  // for canvas testing
+  downloadCanvasImage (dataUrl, filename = 'image.png') {
+    const link = document.createElement('a')
+    link.href = dataUrl
+    link.download = filename
+    link.click()
   },
 
   // Tags 🦋

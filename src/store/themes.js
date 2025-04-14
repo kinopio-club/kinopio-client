@@ -161,8 +161,8 @@ export default {
       const isDarkTheme = getters.isThemeDark
       let background = rootState.currentSpace.background
       let backgroundTint = rootState.currentSpace.backgroundTint
-      const backgroundElement = document.querySelector('.space-background-image')
-      const backgroundTintElement = document.querySelector('.space-background-tint')
+      const backgroundElement = document.querySelector('#space-background-image')
+      const backgroundTintElement = document.querySelector('#space-background-tint')
       if (background && backgroundElement) {
         let domBackground = backgroundElement.style.backgroundImage
         domBackground = utils.urlFromCSSBackgroundImage(domBackground)

@@ -33,7 +33,9 @@ const updateIsSelectingY = (value) => {
   }
   store.commit('isSelectingY', value)
 }
+const toolbarIsDrawing = computed(() => store.state.currentUserToolbar === 'drawing')
 const isVisible = computed(() => {
+  if (toolbarIsDrawing.value) { return }
   if (store.state.isSelectingX) { return }
   if (store.state.currentUserIsPanning || store.state.currentUserIsPanningReady) { return }
   return state.isVisible
@@ -64,7 +66,7 @@ const handleMouseMove = (event) => {
   if (store.state.isEmbedMode) { return }
   updateIsMetaKey(event)
   const edgeThreshold = 30
-  let header = document.querySelector('header').getBoundingClientRect().height
+  const toolbar = document.querySelector('#toolbar').getBoundingClientRect()
   let footer = document.querySelector('.footer-wrap footer')
   if (footer) {
     footer = footer.getBoundingClientRect().height + 20
@@ -76,7 +78,7 @@ const handleMouseMove = (event) => {
   const isInThreshold = position.x <= edgeThreshold
   const isBetweenControls = utils.isBetween({
     value: position.y,
-    min: header,
+    min: toolbar.y + toolbar.height,
     max: viewport.height - footer
   })
   const isInPosition = isInThreshold && isBetweenControls

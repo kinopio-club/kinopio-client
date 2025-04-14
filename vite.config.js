@@ -31,7 +31,8 @@ export default defineConfig(async ({ command, mode }) => {
     '/discord',
     '/forum',
     '/help',
-    '/roadmap'
+    '/roadmap',
+    '/survey'
   ]
   const exploreSpaceRoutes = await exploreSpaces() || []
   const dynamicRoutes = routes.concat(exploreSpaceRoutes)
@@ -60,6 +61,7 @@ export default defineConfig(async ({ command, mode }) => {
             /^\/changelog$/,
             /^\/roadmap$/,
             /^\/discord$/,
+            /^\/survey$/,
             // Exclude '/route' and all subpaths (e.g. /route/post)
             /^\/help(?:\/.*)?$/,
             /^\/about(?:\/.*)?$/,

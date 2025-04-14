@@ -84,15 +84,14 @@ template(v-if="currentSpace.backgroundIsGradient")
   SpaceBackgroundGradients(:visible="true" :layers="gradientLayers" :backgroundStyles="backgroundStyles")
 //- or image
 template(v-else)
-  .space-background-image(:style="backgroundStyles" :class="{'space-border-radius': spaceShouldHaveBorderRadius}")
+  #space-background-image(:style="backgroundStyles" :class="{'space-border-radius': spaceShouldHaveBorderRadius}")
 </template>
 
 <style lang="stylus">
-.space-background-image
+#space-background-image
   position absolute
   pointer-events none
   z-index 0
   transform-origin top left
   background var(--primary-background)
-  pointer-events none
 </style>

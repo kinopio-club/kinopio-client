@@ -21,6 +21,9 @@ watch(() => visible.value, (value, prevValue) => {
     closeChildDialogs()
     updateDialogHeight()
     restoreUserPrevSettingsSection()
+    store.commit('shouldExplicitlyHideFooter', true)
+  } else {
+    store.commit('shouldExplicitlyHideFooter', false)
   }
 })
 const closeChildDialogs = () => {
