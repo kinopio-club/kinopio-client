@@ -6,6 +6,8 @@ import utils from '@/utils.js'
 import collisionDetection from '@/collisionDetection.js'
 import postMessage from '@/postMessage.js'
 import DropGuideLine from '@/components/layers/DropGuideLine.vue'
+
+import { colord, extend } from 'colord'
 const store = useStore()
 
 // a sequence of circles that's broadcasted to others and is used for multi-card selection
@@ -46,6 +48,7 @@ let selectableCardsInViewport = []
 let selectableBoxes = []
 let selectableConnectionsInViewport = []
 let selectableCardsGrid
+let highlightedItems
 
 let unsubscribe
 
@@ -55,8 +58,9 @@ onMounted(() => {
       const event = mutation.payload
       const position = utils.cursorPositionInSpace(event)
       createPaintingCircle(event)
-      selectItems([position])
-    } else if (mutation.type === 'triggerUpdateMainCanvasPositionOffset') {
+      highlightItems([position])
+      selectItems()
+    } else if (mutation.type === 'triggerUpdatePaintSelectCanvasPositionOffset') {
       updateCirclesWithScroll()
     } else if (mutation.type === 'triggerAddRemotePaintingCircle') {
       let circle = mutation.payload
@@ -81,7 +85,7 @@ onMounted(() => {
     }
   })
   // init canvas
-  canvas = document.getElementById('main-canvas')
+  canvas = document.getElementById('paint-select-canvas')
   context = canvas.getContext('2d')
   context.scale(window.devicePixelRatio, window.devicePixelRatio)
   // trigger stopPainting even if mouse is outside window
@@ -101,6 +105,7 @@ onMounted(() => {
   startPostScroll()
   state.dropGuideLineIsVisible = !utils.isMobile()
   window.addEventListener('visibilitychange', clearRect)
+  clearHightlightedItems()
 })
 onBeforeUnmount(() => {
   window.removeEventListener('mouseup', stopPainting)
@@ -137,11 +142,14 @@ const isCanvasScope = (event) => {
 // current user
 
 const currentUserColor = computed(() => store.state.currentUser.color)
+const currentUserColorIsDark = computed(() => utils.colorIsDark(currentUserColor.value))
+const boxFillColor = computed(() => colord(currentUserColor.value).alpha(0.5).toRgbString())
 const userCannotEditSpace = computed(() => !store.getters['currentUser/canEditSpace']())
 const isPanning = computed(() => store.state.currentUserIsPanningReady)
 const isBoxSelecting = computed(() => store.state.currentUserIsBoxSelecting)
 const toolbarIsCard = computed(() => store.state.currentUserToolbar === 'card')
 const toolbarIsBox = computed(() => store.state.currentUserToolbar === 'box')
+const toolbarIsDrawing = computed(() => store.state.currentUserToolbar === 'drawing')
 
 // page size
 // keep canvases updated to viewport size so you can draw on newly created areas
@@ -151,6 +159,9 @@ const pageWidth = computed(() => store.state.pageWidth)
 const viewportHeight = computed(() => store.state.viewportHeight)
 const viewportWidth = computed(() => store.state.viewportWidth)
 const spaceZoomDecimal = computed(() => store.getters.spaceZoomDecimal)
+const clearHightlightedItems = () => {
+  highlightedItems = { cardIds: {}, boxIds: {}, connectionIds: {} }
+}
 
 // selectable items
 
@@ -333,9 +344,20 @@ const stopPainting = (event) => {
   } else {
     store.commit('shouldAddCard', false)
   }
+  selectItems()
   // prevent mouse events from firing after touch events on touch device
   if (event.cancelable) { event.preventDefault() }
   startPostScroll()
+}
+const selectItems = () => {
+  const cardIds = Object.keys(highlightedItems.cardIds)
+  const boxIds = Object.keys(highlightedItems.boxIds)
+  const connectionIds = Object.keys(highlightedItems.connectionIds)
+  store.dispatch('addMultipleToMultipleCardsSelected', cardIds)
+  store.dispatch('addMultipleToMultipleBoxesSelected', boxIds)
+  store.dispatch('addMultipleToMultipleConnectionsSelected', connectionIds)
+  clearHighlightedStyles()
+  clearHightlightedItems()
 }
 
 // Post Scrolling (for android)
@@ -379,7 +401,7 @@ const createPaintingCircle = (event) => {
   if (utils.isMultiTouch(event)) { return }
   createPaintingCircles(event)
   const position = utils.cursorPositionInSpace(event)
-  selectItemsBetweenCurrentAndPrevPosition(position)
+  highlightItemsBetweenCurrentAndPrevPosition(position)
 }
 const createPaintingCircles = (event) => {
   state.currentCursor = utils.cursorPositionInViewport(event)
@@ -398,6 +420,7 @@ const createPaintingCircles = (event) => {
   prevCursor = state.currentCursor
 }
 const startPainting = (event) => {
+  if (toolbarIsDrawing.value) { return }
   if (!isCanvasScope(event)) { return }
   if (isPanning.value) { return }
   if (isBoxSelecting.value) { return }
@@ -646,47 +669,114 @@ const shouldPreventSelectionOnMobile = () => {
   const isPaintingLocked = store.state.currentUserIsPaintingLocked
   return isMobile && !isPaintingLocked
 }
-const selectItemsBetweenCurrentAndPrevPosition = (position) => {
+const highlightItemsBetweenCurrentAndPrevPosition = (position) => {
   if (!prevPosition) {
     prevPosition = position
     return
   }
   const points = utils.pointsBetweenTwoPoints(prevPosition, position)
-  selectItems(points)
+  highlightItems(points)
   prevPosition = position
 }
-const selectItems = (points) => {
+const highlightItems = (points) => {
   if (shouldPreventSelectionOnMobile()) { return }
   if (userCannotEditSpace.value) { return }
-  selectCards(points)
-  selectBoxes(points)
-  selectConnections(points)
+  highlightCards(points)
+  highlightBoxes(points)
+  highlightConnections(points)
 }
-const selectCards = (points) => {
+const highlightCards = (points) => {
   const matches = collisionDetection.checkPointsInRects(points, selectableCardsInViewport, selectableCardsGrid)
   const cardIds = matches.map(match => match.id)
-  store.dispatch('addMultipleToMultipleCardsSelected', cardIds)
+  cardIds.forEach(cardId => {
+    highlightedItems.cardIds[cardId] = true
+    // apply card styles
+    const cardWrapElement = utils.cardElementFromId(cardId)
+    const cardElement = cardWrapElement.querySelector('.card')
+    const nameSegmentsElement = cardElement.querySelectorAll('.name-segments')
+    const imageElement = cardElement.querySelector('.image')
+    const urlPreviewElement = cardElement.querySelector('.url-preview-card')
+    const previewImageElement = cardElement.querySelector('.preview-image')
+    const connectorButtonElement = cardElement.querySelector('.connector-button')
+    const isMedia = cardElement.classList.contains('media-card')
+    const badgeCardButtons = cardElement.querySelectorAll('.badge-card-button')
+    let color = currentUserColor.value
+    if (imageElement) {
+      imageElement.classList.add('selected')
+    }
+    if (previewImageElement) {
+      previewImageElement.classList.add('selected')
+    }
+    if (urlPreviewElement) {
+      urlPreviewElement.style.backgroundColor = color
+    }
+    if (connectorButtonElement) {
+      connectorButtonElement.style.backgroundColor = color
+    }
+    nameSegmentsElement.forEach(element => {
+      element.style.backgroundColor = color
+    })
+    badgeCardButtons.forEach(element => {
+      element.style.backgroundColor = color
+    })
+    if (isMedia) {
+      color = utils.safeColor(color)
+    }
+    cardElement.style.backgroundColor = color
+  })
 }
-const selectBoxes = (points) => {
+const highlightBoxes = (points) => {
   const matches = collisionDetection.checkPointsInRects(points, selectableBoxes)
   const boxIds = matches.map(match => match.id)
-  store.dispatch('addMultipleToMultipleBoxesSelected', boxIds)
+  boxIds.forEach(boxId => {
+    highlightedItems.boxIds[boxId] = true
+    // apply box styles
+    const boxElement = utils.boxElementFromId(boxId)
+    const boxInfoElement = boxElement.querySelector('.box-info')
+    const connectorButtonElement = boxElement.querySelector('.connector-button')
+    const color = currentUserColor.value
+    boxElement.style.borderColor = color
+    boxElement.style.backgroundColor = boxFillColor.value
+    boxInfoElement.style.backgroundColor = color
+    if (currentUserColorIsDark.value) {
+      boxInfoElement.classList.add('is-dark')
+    } else {
+      boxInfoElement.classList.remove('is-dark')
+    }
+  })
 }
-const selectConnections = (points) => {
+const highlightConnections = (points) => {
   selectableConnectionsInViewport.forEach(svg => {
     if (svg.dataset.isVisibleInViewport === 'false') { return }
     const path = svg.querySelector('path.connection-path')
     const matches = collisionDetection.checkPointsInsidePath(points, svg, path)
     if (!matches) { return }
     const connectionIds = matches.map(match => match.id)
-    store.dispatch('addMultipleToMultipleConnectionsSelected', connectionIds)
+    connectionIds.forEach(connectionId => {
+      highlightedItems.connectionIds[connectionId] = true
+      const connectionElement = utils.connectionElementFromId(connectionId)
+      const pathElement = connectionElement.querySelector('path')
+      pathElement.classList.add('active')
+    })
+  })
+}
+const clearHighlightedStyles = () => {
+  const cardIds = Object.keys(highlightedItems.cardIds)
+  // const boxIds = Object.keys(highlightedItems.boxIds)
+  // const connectionIds = Object.keys(highlightedItems.connectionIds)
+  cardIds.forEach(cardId => {
+    const cardWrapElement = utils.cardElementFromId(cardId)
+    const nameSegmentsElement = cardWrapElement.querySelectorAll('.name-segments')
+    nameSegmentsElement.forEach(element => {
+      element.style.backgroundColor = null
+    })
   })
 }
 </script>
 
 <template lang="pug">
 //- Paint select is ephemeral brush strokes that select items
-canvas#main-canvas(
+canvas#paint-select-canvas(
   :width="viewportWidth"
   :height="viewportHeight"
 )

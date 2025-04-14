@@ -766,6 +766,9 @@ const currentSpace = {
         if (spaceIsUnchanged) {
           context.commit('isLoadingSpace', false, { root: true })
           context.dispatch('createSpacePreviewImage')
+          // merge metadata into local
+          await context.dispatch('updateSpaceLocalOnly', { drawingImage: remoteSpace.drawingImage })
+          context.commit('triggerDrawingRedraw', null, { root: true })
           return
         }
         context.dispatch('restoreSpaceRemote', remoteSpace)
@@ -816,6 +819,7 @@ const currentSpace = {
       context.dispatch('history/reset', null, { root: true })
       context.dispatch('restoreSpaceInChunks', { space })
       console.info('🎑 local space', space)
+      context.commit('triggerRestoreSpaceLocalComplete', null, { root: true })
       console.timeEnd('🎑⏱️ restoreSpaceLocal')
       return space
     },
@@ -919,6 +923,11 @@ const currentSpace = {
         body: updates
       }, { root: true })
     },
+    updateSpaceLocalOnly: async (context, updates) => {
+      updates.id = context.state.id
+      context.commit('updateSpace', updates)
+      await cache.updateSpaceByUpdates(updates, context.state.id)
+    },
     updateSpaceIsHidden: async (context, { spaceId, isHidden }) => {
       context.commit('updateSpace', { isHidden })
       await cache.updateSpace('isHidden', isHidden, spaceId)
@@ -936,6 +945,7 @@ const currentSpace = {
       console.info('🚟 Change space', space)
       context.commit('isLoadingSpace', true, { root: true })
       context.commit('notifySpaceIsRemoved', false, { root: true })
+      context.commit('currentUserToolbar', 'card', { root: true })
       space = utils.clone(space)
       space = utils.migrationEnsureRemovedCards(space)
       await context.dispatch('loadSpace', { space })

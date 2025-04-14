@@ -314,7 +314,8 @@ const removeUneditedSpace = async (spaceName) => {
   }
   const cardNames = space.cards.map(card => card.name)
   let spaceIsEdited
-  currentSpace?.cards.forEach(card => {
+  const cards = currentSpace?.cards || []
+  cards.forEach(card => {
     if (!card.name.trim()) { return }
     const cardIsNew = !cardNames.includes(card.name)
     if (cardIsNew) {

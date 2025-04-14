@@ -113,6 +113,7 @@ const handleShortcuts = (event) => {
   // const isFromCard = event.target.classList[0] === 'card'
   const isSpaceScope = checkIsSpaceScope(event)
   const isMinimapDialogScope = checkIsMinimapDialogScope(event)
+  const toolbarIsDrawing = store.state.currentUserToolbar === 'drawing'
   // ?
   if (key === '?' && isSpaceScope) {
     store.commit('triggerKeyboardShortcutsIsVisible')
@@ -176,11 +177,21 @@ const handleShortcuts = (event) => {
       containItemsInNewBox(cards)
     // Toolbar Box Mode
     } else {
-      store.dispatch('currentUserToolbar', 'box')
+      store.dispatch('toggleCurrentUserToolbar', 'box')
     }
-  // c
-  } else if (key === 'c' && isSpaceScope) {
-    store.dispatch('currentUserToolbar', 'card')
+  // d
+  } else if (key === 'd' && isSpaceScope) {
+    if (toolbarIsDrawing && store.state.drawingEraserIsActive) {
+      store.commit('drawingEraserIsActive', false)
+      return
+    }
+    store.dispatch('toggleCurrentUserToolbar', 'drawing')
+  // e
+  } else if (key === 'e' && isSpaceScope && toolbarIsDrawing) {
+    store.dispatch('toggleDrawingEraserIsActive')
+  // s
+  } else if (key === 's' && isSpaceScope && toolbarIsDrawing) {
+    store.dispatch('currentUser/cycleDrawingBrushSize')
   }
 }
 // on key down
@@ -190,6 +201,7 @@ const handleMetaKeyShortcuts = (event) => {
   const isCardScope = checkIsCardScope(event)
   const isSpaceScope = checkIsSpaceScope(event)
   const isFromInput = event.target.closest('input') || event.target.closest('textarea')
+  const toolbarIsDrawing = store.state.currentUserToolbar === 'drawing'
   // Add Child Card
   if (event.shiftKey && key === 'enter' && (isSpaceScope || isCardScope)) {
     const shouldAddChildCard = store.state.currentUser.cardSettingsShiftEnterShouldAddChildCard
@@ -207,15 +219,15 @@ const handleMetaKeyShortcuts = (event) => {
     event.preventDefault()
     store.dispatch('history/undo')
   // Select All Cards Below Cursor
-  } else if (isMeta && event.shiftKey && key === 'a' && isSpaceScope) {
+  } else if (isMeta && event.shiftKey && key === 'a' && isSpaceScope && !toolbarIsDrawing) {
     event.preventDefault()
     selectAllItemsBelowCursor()
   // Select All Cards and Connections
-  } else if (isMeta && key === 'a' && isSpaceScope) {
+  } else if (isMeta && key === 'a' && isSpaceScope && !toolbarIsDrawing) {
     event.preventDefault()
     selectAllItems()
   // Search/Jump-to Space
-  } else if (isMeta && key === 'k') {
+  } else if (isMeta && key === 'k' && isSpaceScope) {
     event.preventDefault()
     focusOnSpaceDetailsFilter()
   // Search/Jump-to Card

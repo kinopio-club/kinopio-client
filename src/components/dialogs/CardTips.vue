@@ -114,6 +114,11 @@ dialog.card-tips.narrow(v-if="visible" @click.stop :open="visible" ref="dialogEl
         p
           span Italicize selected
         span.badge.keyboard-shortcut {{meta}}-I
+    article
+      .row
+        p
+          span Link selected
+        span.badge.keyboard-shortcut {{meta}}-K
 
       //- article
       //-   .row
