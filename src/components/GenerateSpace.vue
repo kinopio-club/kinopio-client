@@ -183,7 +183,7 @@ section.generate-space(v-if="isOnline")
         img.icon.luck(src="@/assets/luck.svg")
         span Preview
         Loader(:visible="state.isGeneratingPreview")
-      .badge.info(v-if="state.isGeneratingPreview") may take 15s
+      .badge.info(v-if="state.isGeneratingPreview") takes 15s
     .badge.danger(v-if="isError") Something went wrong, please try again
   .minimap-canvas-inline-wrap(ref="rowElement")
     MinimapCanvas(
