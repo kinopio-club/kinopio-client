@@ -18,6 +18,7 @@ const textareaElement = ref(null)
 
 const state = reactive({
   isGeneratingPreview: false,
+  isLoadingSpace: false,
   newSpace: null,
   size: null,
   pageWidth: null,
@@ -128,34 +129,58 @@ const generatePreview = async () => {
 }
 
 const minimapCanvasIsVisible = computed(() => Boolean(state.newSpace))
+watch(() => minimapCanvasIsVisible.value, (value, prevValue) => {
+  if (value) {
+    textareaSize()
+  }
+})
 const clear = () => {
   state.newSpace = null
   state.errors = []
 }
 const isError = computed(() => Boolean(state.errors.length))
+
+const importSpace = async () => {
+  if (state.isLoadingSpace) { return }
+  try {
+    state.isLoadingSpace = true
+    let space = utils.clone(state.newSpace)
+    const user = store.state.currentUser
+    space = utils.resetSpaceMeta({ space, user, type: 'import' })
+    console.info('🧚 space to import', space)
+    await store.dispatch('currentSpace/saveSpace', space)
+    await store.dispatch('currentSpace/loadSpace', { space })
+    store.dispatch('closeAllDialogs')
+  } catch (error) {
+    console.error('🚒 importSpace', error, state.newSpace)
+  }
+  state.isLoadingSpace = true
+}
+
 </script>
 
 <template lang="pug">
 section.generate-space(v-if="isOnline")
-  textarea(
-    placeholder="Type to generate a space"
-    v-model="promptInput"
-    ref="textareaElement"
-    @update="textareaSize"
-    @keydown.enter.exact.prevent="generatePreview"
-    @keyup.stop.backspace
-    @keyup.stop.enter
-    @mouseup.stop
-    @touchend.stop
-    rows="1"
-    :maxlength="1000"
-  )
-  .row.button-row
-    button(:class="{active: state.isGeneratingPreview}" @click="generatePreview")
-      span Preview
-      Loader(:visible="state.isGeneratingPreview")
-    .badge.info(v-if="state.isGeneratingPreview") may take 15s
-  .badge.danger(v-if="isError") Something went wrong, please try again
+  template(v-if="!minimapCanvasIsVisible")
+    textarea(
+      placeholder="Type to generate a space"
+      v-model="promptInput"
+      ref="textareaElement"
+      @update="textareaSize"
+      @keydown.enter.exact.prevent="generatePreview"
+      @keyup.stop.backspace
+      @keyup.stop.enter
+      @mouseup.stop
+      @touchend.stop
+      rows="1"
+      :maxlength="1000"
+    )
+    .row.button-row
+      button(:class="{ active: state.isGeneratingPreview }" @click="generatePreview")
+        span Preview
+        Loader(:visible="state.isGeneratingPreview")
+      .badge.info(v-if="state.isGeneratingPreview") may take 15s
+    .badge.danger(v-if="isError") Something went wrong, please try again
   .minimap-canvas-inline-wrap(ref="rowElement")
     MinimapCanvas(
       :visible="minimapCanvasIsVisible"
@@ -168,15 +193,15 @@ section.generate-space(v-if="isOnline")
     template(v-if="minimapCanvasIsVisible")
       button.cancel-minimap.small-button(title="Cancel" @click="clear")
         img.icon.cancel(src="@/assets/add.svg")
-      button.add-space-button
+      button.add-space-button(@click="importSpace" :class="{ active: state.isLoadingSpace }")
         img.icon.add(src="@/assets/add.svg")
         span {{state.newSpace.name}}
+        Loader(:visible="state.isLoadingSpace")
 </template>
 
 <style lang="stylus">
 .generate-space
   .minimap-canvas
-    margin-top 10px
     border-bottom-left-radius 0
     border-bottom-right-radius 0
   .add-space-button
