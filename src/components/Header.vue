@@ -581,6 +581,7 @@ header(v-if="isVisible" :style="state.position" :class="{'fade-out': isFadingOut
 
   //- standard
   nav(v-if="!isEmbedMode")
+    //- 1st row
     .row
       .left
         //- About
@@ -593,6 +594,7 @@ header(v-if="isVisible" :style="state.position" :class="{'fade-out': isFadingOut
               img.down-arrow(src="@/assets/down-arrow.svg")
             About(:visible="state.aboutIsVisible")
             KeyboardShortcuts(:visible="state.keyboardShortcutsIsVisible")
+            Templates(:visible="state.templatesIsVisible")
             Donate(:visible="state.donateIsVisible")
             AppsAndExtensions(:visible="state.appsAndExtensionsIsVisible")
         .space-meta-rows
@@ -638,6 +640,7 @@ header(v-if="isVisible" :style="state.position" :class="{'fade-out': isFadingOut
             .badge.new-unread-badge.notification-button-badge(v-if="notificationsUnreadCount")
           UserNotifications(:visible="state.notificationsIsVisible" :loading="state.notificationsIsLoading" :notifications="state.notifications" :unreadCount="notificationsUnreadCount" @markAllAsRead="markAllAsRead" @markAsRead="markAsRead")
 
+    //- 2nd row
     .row
       //- Current Space
       .left
@@ -663,7 +666,6 @@ header(v-if="isVisible" :style="state.position" :class="{'fade-out': isFadingOut
               ImportArenaChannel(:visible="importArenaChannelIsVisible")
               SpaceDetailsInfo(:visible="state.spaceDetailsInfoIsVisible")
               ImportExport(:visible="state.importIsVisible" :isImport="true")
-              Templates(:visible="state.templatesIsVisible")
 
               //- read only badge
               .label-badge.space-name-badge-wrap(v-if="!userCanEditSpace")
@@ -697,6 +699,7 @@ header(v-if="isVisible" :style="state.position" :class="{'fade-out': isFadingOut
             img.icon.sidebar(src="@/assets/sidebar.svg")
           Sidebar(:visible="state.sidebarIsVisible")
 
+    //- 3rd row
     .row
       .left
       .right

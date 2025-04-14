@@ -65,7 +65,6 @@ const props = defineProps({
   size: Number,
   pageHeight: Number,
   pageWidth: Number,
-  backgroundIsTransparent: Boolean,
   space: Object,
   viewportIsHidden: Boolean
 })
@@ -103,9 +102,6 @@ const ratio = computed(() => {
 
 const styles = computed(() => {
   let color = store.state.outsideSpaceBackgroundColor
-  if (props.backgroundIsTransparent) {
-    color = 'transparent'
-  }
   return { backgroundColor: color }
 })
 
