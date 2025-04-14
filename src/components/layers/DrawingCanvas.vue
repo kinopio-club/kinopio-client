@@ -31,7 +31,6 @@ onMounted(() => {
   window.addEventListener('scroll', scroll)
   window.addEventListener('resize', resize)
   updatePrevScroll()
-  // TODO clear and restore canvas when loading/restoring space, clear redostrokes, currentStrokes
   clearCanvas()
   clearStrokes()
   unsubscribe = store.subscribe(mutation => {
@@ -95,6 +94,9 @@ const styles = computed(() => {
   }
   return value
 })
+
+// clear
+
 const clearCanvas = () => {
   context.clearRect(0, 0, canvas.width, canvas.height)
 }
@@ -103,6 +105,9 @@ const clearStrokes = () => {
   currentStrokes = []
   remoteStrokes = []
 }
+
+// points
+
 const strokeColor = computed(() => store.getters['currentUser/drawingColor'])
 const strokeDiameter = computed(() => {
   const diameter = store.state.currentUser.drawingBrushSize
@@ -118,30 +123,6 @@ const createPoint = (event) => {
     diameter: strokeDiameter.value,
     isEraser: store.state.drawingEraserIsActive
   }
-}
-const updatePageSizes = (strokes) => {
-  let x = 0
-  let y = 0
-  const drawingBrushSizeDiameter = consts.drawingBrushSizeDiameter.l // 40
-  strokes.forEach(points => {
-    points.forEach(point => {
-      if (point.x > x) {
-        x = point.x
-      }
-      if (point.y > y) {
-        y = point.y
-      }
-    })
-  })
-  const padding = {
-    width: store.state.viewportWidth / 2,
-    height: store.state.viewportHeight / 2
-  }
-  const rect = {
-    width: x + drawingBrushSizeDiameter + padding.width,
-    height: y + drawingBrushSizeDiameter + padding.height
-  }
-  store.commit('updatePageSizes', rect)
 }
 
 // broadcast
@@ -413,6 +394,30 @@ const updateCanvasSize = debounce(() => {
   canvas.height = viewportHeight.value * zoom
   redraw()
 }, 20)
+const updatePageSizes = (strokes) => {
+  let x = 0
+  let y = 0
+  const drawingBrushSizeDiameter = consts.drawingBrushSizeDiameter.l // 40
+  strokes.forEach(points => {
+    points.forEach(point => {
+      if (point.x > x) {
+        x = point.x
+      }
+      if (point.y > y) {
+        y = point.y
+      }
+    })
+  })
+  const padding = {
+    width: store.state.viewportWidth / 2,
+    height: store.state.viewportHeight / 2
+  }
+  const rect = {
+    width: x + drawingBrushSizeDiameter + padding.width,
+    height: y + drawingBrushSizeDiameter + padding.height
+  }
+  store.commit('updatePageSizes', rect)
+}
 </script>
 
 <template lang="pug">

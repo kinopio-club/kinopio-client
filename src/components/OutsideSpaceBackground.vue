@@ -149,7 +149,7 @@ const styles = computed(() => {
   const widthScale = store.state.viewportWidth / canvasSize
   const heightScale = store.state.viewportHeight / canvasSize
   const scale = Math.max(widthScale, heightScale)
-  let styles = { transform: `scale(${scale})` }
+  const styles = { transform: `scale(${scale})` }
   return styles
 })
 </script>
