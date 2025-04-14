@@ -109,7 +109,7 @@ const updateBackgroundColor = () => {
     backgroundColor = utils.cssVariable('secondary-active-background')
   }
   // darken
-  let darkness = 0.6
+  let darkness = 0.4
   if (isThemeDark.value) {
     darkness = 0.8
   }
