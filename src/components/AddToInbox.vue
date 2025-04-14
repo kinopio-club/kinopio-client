@@ -22,7 +22,8 @@ const state = reactive({
   newName: '',
   error: {
     unknownServerError: false,
-    maxLength: false
+    maxLength: false,
+    cardsCreatedIsOverLimit: false
   },
   success: false
 })
@@ -39,6 +40,7 @@ const updateMaxLengthError = () => {
 }
 const clearErrorsAndSuccess = () => {
   state.error.unknownServerError = false
+  state.error.cardsCreatedIsOverLimit = false
   state.success = false
 }
 const name = computed({
@@ -72,7 +74,10 @@ const insertLineBreak = async (event) => {
 const addCard = async () => {
   clearErrorsAndSuccess()
   if (!state.newName) { return }
-  if (cardsCreatedIsOverLimit.value) { return } // todo err/upsell
+  if (cardsCreatedIsOverLimit.value) {
+    state.error.cardsCreatedIsOverLimit = true
+    return
+  }
   if (state.error.maxLength) { return }
   // show completion immediately, assume success
   let newName = state.newName
@@ -137,10 +142,21 @@ section.add-to-inbox(v-if="props.visible")
       @keydown.alt.enter.exact.stop="insertLineBreak"
       @keydown.ctrl.enter.exact.stop="insertLineBreak"
     )
-  button(@click="addCard")
-    img.icon.add-icon(src="@/assets/add.svg")
-    span Add
+  .row
+    button(@click="addCard")
+      img.icon.add-icon(src="@/assets/add.svg")
+      span Add
+    .badge.error-badge.danger(v-if="state.error.cardsCreatedIsOverLimit")
+      span Upgrade for more cards
+    .badge.error-badge.danger(v-if="state.error.maxLength")
+      span Max Length {{maxCardCharacterLimit}}
+    .badge.error-badge.danger(v-if="state.error.unknownServerError")
+      span (シ_ _)シ Something went wrong, Please try again or contact support
 </template>
 
 <style lang="stylus">
+section.add-to-inbox
+  .error-badge
+    margin-left 6px
+    margin-right 0
 </style>
