@@ -16,7 +16,7 @@ let canvas, context
 let isDrawing = false
 let currentStroke = []
 let currentStrokeId = ''
-let currentUserStrokes = []
+let currentStrokes = []
 let remoteStrokes = []
 let redoStrokes = []
 let drawingImage, drawingImageUrl
@@ -31,7 +31,7 @@ onMounted(() => {
   window.addEventListener('scroll', scroll)
   window.addEventListener('resize', resize)
   updatePrevScroll()
-  // TODO clear and restore canvas when loading/restoring space, clear redostrokes, currentuserstrokes
+  // TODO clear and restore canvas when loading/restoring space, clear redostrokes, currentStrokes
   clearCanvas()
   clearStrokes()
   unsubscribe = store.subscribe(mutation => {
@@ -100,7 +100,7 @@ const clearCanvas = () => {
 }
 const clearStrokes = () => {
   redoStrokes = []
-  currentUserStrokes = []
+  currentStrokes = []
   remoteStrokes = []
 }
 const strokeColor = computed(() => store.getters['currentUser/drawingColor'])
@@ -316,7 +316,7 @@ const draw = (event) => {
 const redraw = async () => {
   context.clearRect(0, 0, canvas.width, canvas.height)
   await restoreSpaceDrawingImage()
-  currentUserStrokes.forEach(stroke => {
+  currentStrokes.forEach(stroke => {
     renderStroke(stroke, true)
   })
   remoteStrokes.forEach(stroke => {
@@ -333,7 +333,7 @@ const updateCache = async (strokes) => {
   await cache.updateSpace('drawingImage', dataUrl, currentSpaceId)
 }
 const saveStroke = async ({ stroke, isRemovedStroke }) => {
-  const strokes = currentUserStrokes.concat(remoteStrokes)
+  const strokes = currentStrokes.concat(remoteStrokes)
   updateCache(strokes)
   updatePageSizes(strokes)
   if (isRemovedStroke) {
@@ -349,7 +349,7 @@ const endDrawing = async (event) => {
     return
   }
   store.commit('addToDrawingStrokeColors', currentStroke[0].color)
-  currentUserStrokes.push(currentStroke)
+  currentStrokes.push(currentStroke)
   saveStroke({ stroke: currentStroke })
   currentStroke = []
   redoStrokes = []
@@ -359,7 +359,7 @@ const endDrawing = async (event) => {
 // undo redo
 
 const undo = () => {
-  const prevStroke = currentUserStrokes.pop() // remove last stroke
+  const prevStroke = currentStrokes.pop() // remove last stroke
   redoStrokes.push(prevStroke) // append to redo stack
   redraw()
   saveStroke({ stroke: prevStroke, isRemovedStroke: true })
@@ -368,7 +368,7 @@ const undo = () => {
 const redo = () => {
   if (!redoStrokes.length) { return }
   const prevStroke = redoStrokes.pop()
-  currentUserStrokes.push(prevStroke)
+  currentStrokes.push(prevStroke)
   redraw()
   saveStroke({ stroke: prevStroke })
   broadcastAddStroke(prevStroke)
