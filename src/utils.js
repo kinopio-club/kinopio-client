@@ -1573,7 +1573,9 @@ export default {
   resetSpaceMeta ({ space, user, type }) {
     space.originSpaceId = space.id
     space.id = nanoid()
-    space.name = `${space.name} ${type}`
+    if (type) {
+      space.name = `${space.name} ${type}`
+    }
     space.removedCards = []
     space.users = [user]
     space.userId = user.id
