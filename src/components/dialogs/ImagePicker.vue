@@ -3,7 +3,6 @@ import { reactive, computed, onMounted, onUnmounted, watch, ref, nextTick } from
 import { useStore } from 'vuex'
 
 import Loader from '@/components/Loader.vue'
-// import AIImageGeneration from '@/components/AIImageGeneration.vue'
 import utils from '@/utils.js'
 import cache from '@/cache.js'
 import consts from '@/consts.js'
@@ -407,9 +406,6 @@ dialog.image-picker(v-if="visible" :open="visible" @click.left.stop ref="dialogE
       .badge.danger
         span (シ_ _)シ Something went wrong, Please try again or contact support
 
-  //- TOOD remove AIImageGeneration
-  //- AIImageGeneration(@selectImage="selectImage" :visible="serviceIsAI" :initialPrompt="state.search" :cardUrl="cardUrl" @updateDialogHeight="updateDialogHeight")
-    //-
   //- search box
   section.results-section.search-input-wrap
     .search-wrap
