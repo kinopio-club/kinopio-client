@@ -1419,7 +1419,7 @@ dialog.card-details(v-if="visible" :open="visible" ref="dialogElement" @click.le
         :position="state.space.pickerPosition"
         :search="state.space.pickerSearch"
         :shouldExcludeCurrentSpace="true"
-        :shouldShowNewSpace="true"
+        :shouldShowNewSpace="currentUserIsSignedIn"
         @closeDialog="hideSpacePicker"
         @selectSpace="replaceSlashCommandWithSpaceUrl"
       )

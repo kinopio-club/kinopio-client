@@ -211,6 +211,13 @@ const focusNewSpaceNameInput = () => {
   element.setSelectionRange(0, 99999)
 }
 
+const spaceListIsVisible = computed(() => {
+  if (props.parentIsCardDetails) {
+    return currentUserIsSignedIn.value.valye
+  } else {
+    return true
+  }
+})
 </script>
 
 <template lang="pug">
@@ -237,12 +244,12 @@ dialog.narrow.space-picker(v-if="visible" :open="visible" @click.left.stop ref="
           Loader(:visible="state.isLoadingNewSpace")
 
   //- Type to Search
-  section.info-section(v-if="parentIsCardDetails && !search")
+  section.info-section(v-if="parentIsCardDetails && !search && currentUserIsSignedIn")
     p
       img.icon.search(src="@/assets/search.svg")
       span Type to search spaces {{search}}
   //- Space List
-  section.results-section
+  section.results-section(v-if="spaceListIsVisible")
     Loader(:visible="loading")
     SpaceList(
       v-if="filteredSpaces.length"
