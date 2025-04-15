@@ -65,8 +65,8 @@ const textareaSize = () => {
 const isValidCanvas = (space) => {
   state.errors = []
   const schema = {
-    'nodes': 'array',
-    'edges': 'array'
+    nodes: 'array',
+    edges: 'array'
   }
   validateSchema(space, schema)
   if (state.errors.length) {
@@ -78,7 +78,7 @@ const validateSchema = (space, schema) => {
   keys.forEach(key => {
     const isValidType = utils.typeCheck({ value: space[key], type: schema[key], origin: 'isValidJson' })
     if (!isValidType) {
-      let error = `Missing '${key}' field`
+      const error = `Missing '${key}' field`
       state.errors.push(error)
     }
   })
@@ -127,6 +127,27 @@ const updateBackground = () => {
   state.background = url
 }
 
+const connectionPaths = (space) => {
+  space.connections = space.connections.map(connection => {
+    const { controlPoint, endItemId, startItemId } = connection
+    const widthOffset = consts.normalCardMaxWidth - 16
+    const heightOffset = 16
+    // cards
+    const startItem = structuredClone(space.cards.find(card => card.id === startItemId))
+    const endItem = structuredClone(space.cards.find(card => card.id === endItemId))
+    // x offset
+    startItem.x += widthOffset
+    endItem.x += widthOffset
+    // y offset
+    startItem.y += heightOffset
+    endItem.y += heightOffset
+    // calc path
+    connection.path = store.getters['currentConnections/connectionPathBetweenCoords'](startItem, endItem, controlPoint)
+    return connection
+  })
+  return space
+}
+
 const generatePreview = async () => {
   updateBackground()
   if (!state.prompt) { return }
@@ -142,18 +163,7 @@ const generatePreview = async () => {
     space.name = name
     space.background = state.background
     updateSize(space)
-    space.connections.map(connection => {
-      const { controlPoint, endItemId, startItemId } = connection
-      const width = consts.normalCardMaxWidth - 16
-      let startItem = space.cards.find(card => card.id === startItemId)
-      let endItem = space.cards.find(card => card.id === endItemId)
-      startItem = utils.clone(startItem)
-      endItem = utils.clone(endItem)
-      startItem.x += width
-      endItem.x += width
-      connection.path = store.getters['currentConnections/connectionPathBetweenCoords'](startItem, endItem, controlPoint)
-      return connection
-    })
+    space = connectionPaths(space)
     console.log('🔮 generatePreview', space)
     state.newSpace = space
   } catch (error) {
@@ -181,7 +191,7 @@ const importSpace = async () => {
     state.isLoadingSpace = true
     let space = utils.clone(state.newSpace)
     const user = store.state.currentUser
-    space = utils.resetSpaceMeta({ space, user, type: 'import' })
+    space = utils.resetSpaceMeta({ space, user })
     console.info('🧚 space to import', space)
     await store.dispatch('currentSpace/saveSpace', space)
     await store.dispatch('currentSpace/loadSpace', { space })

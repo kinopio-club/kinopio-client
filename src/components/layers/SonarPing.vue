@@ -57,7 +57,7 @@ const styles = computed(() => {
 
 const createRipples = (ping) => {
   const rippleCount = 4
-  let { x, y } = ping
+  const { x, y } = ping
   const color = colord(ping.color).toHsl() // { h: 240, s: 100, l: 50, a: 0.5 }
   const shadowColorDelta = 0.2
   let shadowColor
@@ -67,7 +67,7 @@ const createRipples = (ping) => {
     shadowColor = colord(ping.color).darken(shadowColorDelta).toHsl()
   }
   // create initial ripples
-  for (var i = 1; i < rippleCount + 1; i++) {
+  for (let i = 1; i < rippleCount + 1; i++) {
     const decay = Math.pow(0.65, i)
     const ripple = {
       x,
@@ -110,8 +110,8 @@ const updateRippleOrigin = ({ x, y }) => {
 const drawRipples = () => {
   context.clearRect(0, 0, viewportWidth.value, viewportHeight.value)
   ripples.forEach(ripple => {
-    let { lineWidth, shadowRadius, radius, color, shadowColor, opacity } = ripple
-    let { x, y } = updateRippleOrigin(ripple)
+    const { lineWidth, shadowRadius, radius, color, shadowColor, opacity } = ripple
+    const { x, y } = updateRippleOrigin(ripple)
     // draw shadow
     context.beginPath()
     context.lineWidth = lineWidth + 2

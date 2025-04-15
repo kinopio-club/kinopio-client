@@ -46,7 +46,7 @@ const isInteractingWithItem = computed(() => store.getters.isInteractingWithItem
 
 const isThemeDark = computed(() => store.getters['themes/isThemeDark'])
 const background = computed(() => {
-  let color = props.backgroundColor
+  const color = props.backgroundColor
   const defaultColor = utils.cssVariable('secondary-background')
   const colorIsDefaultColor = utils.colorsAreEqual(color, defaultColor)
   if (colorIsDefaultColor || !color) { return }
@@ -111,7 +111,7 @@ const iframeHeight = computed(() => {
   if (utils.urlIsYoutube(url)) {
     aspectRatio = 9 / 15
   }
-  let height = Math.round(width * aspectRatio)
+  const height = Math.round(width * aspectRatio)
   return height
 })
 

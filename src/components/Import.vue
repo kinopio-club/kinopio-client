@@ -85,8 +85,8 @@ const validate = (space) => {
 }
 const isValidCanvas = (space) => {
   const schema = {
-    'nodes': 'array',
-    'edges': 'array'
+    nodes: 'array',
+    edges: 'array'
   }
   validateSchema(space, schema)
   if (state.errors.length) {
@@ -95,12 +95,12 @@ const isValidCanvas = (space) => {
 }
 const isValidJson = (space) => {
   const schema = {
-    'name': 'string',
-    'users': 'array',
-    'cards': 'array',
-    'connections': 'array',
-    'connectionTypes': 'array',
-    'tags': 'array'
+    name: 'string',
+    users: 'array',
+    cards: 'array',
+    connections: 'array',
+    connectionTypes: 'array',
+    tags: 'array'
   }
   validateSchema(space, schema)
   if (state.errors.length) {
@@ -112,7 +112,7 @@ const validateSchema = (space, schema) => {
   keys.forEach(key => {
     const isValidType = utils.typeCheck({ value: space[key], type: schema[key], origin: 'isValidJson' })
     if (!isValidType) {
-      let error = `Missing '${key}' field`
+      const error = `Missing '${key}' field`
       state.errors.push(error)
     }
   })

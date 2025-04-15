@@ -95,7 +95,7 @@ const notifyShowInExplore = (event) => {
   }
 }
 const emitUpdateShowInExplore = () => {
-  let space = props.space
+  const space = props.space
   space.showInExplore = !space.showInExplore
   emit('updateAddToExplore', space)
 }

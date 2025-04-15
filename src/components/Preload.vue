@@ -1,8 +1,36 @@
+<script>
+import { reactive, computed, onMounted, onBeforeUnmount, watch, ref, nextTick } from 'vue'
+import { useStore } from 'vuex'
+
+const store = useStore()
+
+let unsubscribe
+
+onMounted(() => {
+  unsubscribe = store.subscribe(mutation => {
+    if (mutation.type === 'isLoadingSpace') {
+      updateImageUrls()
+    }
+  })
+})
+onBeforeUnmount(() => {
+  unsubscribe()
+})
+
+const state = reactive({
+  imageUrls: []
+})
+
+const updateImageUrls = () => {
+  const cards = store.getters['currentCards/all']
+  let urls = cards.map(card => card.urlPreviewImage)
+  urls = urls.filter(url => Boolean(url))
+  state.imageUrls = urls
+}
+</script>
+
 <template lang="pug">
 .preload
-  //-   .logo-hover
-  //-   .logo-active
-
   template(v-for="url in imageUrls")
     img.hidden(:src="url")
 
@@ -143,43 +171,6 @@
     img(src="https://updates.kinopio.club/font-preview/recoleta.webp")
     img(src="https://updates.kinopio.club/font-preview/shinka-mono.webp")
 </template>
-
-<script>
-// import utils from '@/utils.js'
-
-import { mapState, mapGetters } from 'vuex'
-
-export default {
-  name: 'Preload',
-  created () {
-    this.$store.subscribe((mutation, state) => {
-      if (mutation.type === 'isLoadingSpace') {
-        this.updateImageUrls()
-      }
-    })
-  },
-  data () {
-    return {
-      imageUrls: []
-    }
-  },
-  computed: {
-    ...mapState([
-    ]),
-    ...mapGetters([
-      'currentCards/all'
-    ])
-  },
-  methods: {
-    updateImageUrls () {
-      const cards = this['currentCards/all']
-      let imageUrls = cards.map(card => card.urlPreviewImage)
-      imageUrls = imageUrls.filter(url => Boolean(url))
-      this.imageUrls = imageUrls
-    }
-  }
-}
-</script>
 
 <style lang="stylus">
 </style>

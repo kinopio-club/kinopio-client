@@ -9,7 +9,7 @@ const store = useStore()
 // let unsubscribe
 
 onMounted(() => {
-  console.info(`🐴 the component is now mounted.`, store.state.currentSpace)
+  console.info('🐴 the component is now mounted.', store.state.currentSpace)
   // unsubscribe = store.subscribe(mutation => {
   //   if (mutation.type === 'triggerUpdateOtherCard') {
   //     mutation.payload

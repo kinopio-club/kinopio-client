@@ -38,7 +38,7 @@ const state = reactive({
 const viewportHeight = computed(() => store.state.viewportHeight)
 const viewportWidth = computed(() => store.state.viewportWidth)
 const styles = computed(() => {
-  let value = {
+  const value = {
     top: state.prevScroll.y + 'px',
     left: state.prevScroll.x + 'px'
   }

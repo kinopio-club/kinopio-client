@@ -104,8 +104,8 @@ export default {
     return height
   },
   dialogIsVisible () {
-    let elements = document.querySelectorAll('dialog')
-    let dialogs = []
+    const elements = document.querySelectorAll('dialog')
+    const dialogs = []
     elements.forEach(dialog => {
       if (dialog.className !== 'card-details') {
         dialogs.push(dialog)
@@ -115,9 +115,9 @@ export default {
     return dialogIsVisible
   },
   unpinnedDialogIsVisible () {
-    let dialogs = document.querySelectorAll('dialog')
+    const dialogs = document.querySelectorAll('dialog')
     // ignore pinned dialogs
-    let pinnedDialogs = []
+    const pinnedDialogs = []
     dialogs.forEach(dialog => {
       if (dialog.dataset.isPinned === 'true') {
         pinnedDialogs.push(dialog)
@@ -202,7 +202,7 @@ export default {
       y: position.y + rect.y
     }
     // zoom
-    let zoom = this.spaceCounterZoomDecimal() || 1
+    const zoom = this.spaceCounterZoomDecimal() || 1
     position = {
       x: Math.round(position.x * zoom),
       y: Math.round(position.y * zoom)
@@ -269,8 +269,8 @@ export default {
     if (shouldIgnoreZoom) {
       zoom = 1
     }
-    let indent = 8 * zoom
-    let x = position.x + offsetX + indent
+    const indent = 8 * zoom
+    const x = position.x + offsetX + indent
     let y = position.y + rect.height + offsetY - indent
     if (maxYOffset) {
       const maxY = this.visualViewport().height - maxYOffset + window.scrollY
@@ -331,6 +331,7 @@ export default {
   percentageBetween ({ value, min, max }) {
     return ((value - min) / (max - min)) * 100
   },
+  // TODO replace w native structuredClone method
   clone (object) {
     if (!object) { return }
     this.typeCheck({ value: object, type: 'object' })
@@ -471,8 +472,8 @@ export default {
     return merged
   },
   splitArrayIntoChunks (array, chunkSize) {
-    let numberOfChunks = Math.ceil(array.length / chunkSize)
-    let chunks = []
+    const numberOfChunks = Math.ceil(array.length / chunkSize)
+    const chunks = []
     times(numberOfChunks, function (index) {
       const start = index * chunkSize
       const end = (index + 1) * chunkSize
@@ -573,7 +574,7 @@ export default {
     // split names longer than max card length
     cardNames = cardNames.map(name => {
       // recursive
-      let results = []
+      const results = []
       let shouldSplit, nameToSplit
       do {
         shouldSplit = false
@@ -699,7 +700,7 @@ export default {
     return string.substr(0, index) + insert + string.substr(index)
   },
   insertIntoArray (array, value, index) {
-    let start = array.slice(0, index)
+    const start = array.slice(0, index)
     const end = array.slice(index, array.length)
     start.push(value)
     const newArray = start.concat(end)
@@ -712,7 +713,7 @@ export default {
   },
   generateRange (start, end) {
     // converts 0,2 to [0,1,2]
-    let rangeArray = []
+    const rangeArray = []
     for (let i = start; i <= end; i++) {
       rangeArray.push(i)
     }
@@ -804,7 +805,7 @@ export default {
     return htmlString.replace(htmlTagPattern, '')
   },
   decodeEntitiesFromHTML (string) {
-    var element = document.createElement('textarea')
+    const element = document.createElement('textarea')
     element.innerHTML = string
     const value = element.value
     element.remove()
@@ -866,7 +867,7 @@ export default {
   },
   colorClasses ({ backgroundColor, backgroundColorIsDark }) {
     backgroundColorIsDark = backgroundColorIsDark || this.colorIsDark(backgroundColor)
-    let classes = []
+    const classes = []
     if (backgroundColorIsDark) {
       classes.push('is-background-dark')
     } else {
@@ -880,14 +881,14 @@ export default {
   normalizeItems (items) {
     if (!this.arrayHasItems(items)) { return items }
     items = items.filter(item => Boolean(item))
-    let normalizedItems = {}
+    const normalizedItems = {}
     items.forEach(item => {
       normalizedItems[item.id] = item
     })
     return normalizedItems
   },
   denormalizeItems (normalizedItems) {
-    let items = []
+    const items = []
     const ids = Object.keys(normalizedItems)
     ids.forEach(id => {
       items.push(normalizedItems[id])
@@ -1033,8 +1034,8 @@ export default {
   removeAllCardDimensions (card) {
     const cardWrapElement = document.querySelector(`.card-wrap[data-card-id="${card.id}"]`)
     const cardElement = document.querySelector(`.card[data-card-id="${card.id}"]`)
-    const contentWrapElement = cardWrapElement.querySelector(`.card-content-wrap`)
-    const cardMediaElement = cardWrapElement.querySelector(`.media-card`)
+    const contentWrapElement = cardWrapElement.querySelector('.card-content-wrap')
+    const cardMediaElement = cardWrapElement.querySelector('.media-card')
     cardWrapElement.style.width = null
     cardWrapElement.style.height = null
     cardElement.style.width = null
@@ -1062,7 +1063,7 @@ export default {
     return shortestDistanceItem
   },
   cardElementFromPosition (x, y) {
-    let elements = document.elementsFromPoint(x, y)
+    const elements = document.elementsFromPoint(x, y)
     let cardElement
     elements.find(element => {
       const match = element.closest('.card-wrap')
@@ -1088,11 +1089,13 @@ export default {
     const y = parseInt(element.style.top)
     return { x, y }
   },
+  // TODO estimatedCardHeightByCharacters (name) {
+  // }
 
   // boxes
 
   boxElementFromConnectorPosition (x, y) {
-    let elements = document.elementsFromPoint(x, y)
+    const elements = document.elementsFromPoint(x, y)
     let boxFromConnector
     const boxElement = elements.find(element => {
       const classes = Array.from(element.classList)
@@ -1191,7 +1194,7 @@ export default {
     if (!items.length) {
       return { x: 0, y: 0, width: 0, height: 0 }
     }
-    let rect = {}
+    const rect = {}
     let xEnd = { x: 0, width: 0 }
     let yEnd = { y: 0, height: 0 }
     let xStart = { x: items[0].x }
@@ -1280,7 +1283,7 @@ export default {
   estimatedItemConnectorPosition (item) {
     const offset = 15
     const width = item.infoWidth || item.resizeWidth || item.width
-    let rightSide = item.x + width
+    const rightSide = item.x + width
     let x = rightSide
     x = x - offset
     let y = item.y
@@ -1325,7 +1328,7 @@ export default {
     if (!element) { return }
     const itemElement = this.itemElement(itemId)
     if (!itemElement.dataset.shouldRender) { return }
-    let rect = element.getBoundingClientRect()
+    const rect = element.getBoundingClientRect()
     rect.x = rect.x + window.scrollX
     rect.y = rect.y + window.scrollY
     const center = this.rectCenter(rect)
@@ -1354,14 +1357,14 @@ export default {
   boundingBoxFromPath (d) {
     // from https://stackoverflow.com/a/77749799
     // create temporary and hidden svg
-    let ns = 'http://www.w3.org/2000/svg'
-    let svg = document.createElementNS(ns, 'svg')
-    let path = document.createElementNS(ns, 'path')
+    const ns = 'http://www.w3.org/2000/svg'
+    const svg = document.createElementNS(ns, 'svg')
+    const path = document.createElementNS(ns, 'path')
     svg.setAttribute('style', 'width:0!important; height:0!important; position:fixed!important; overflow:hidden!important; visibility:hidden!important; opacity:0!important')
     path.setAttribute('d', d)
     svg.append(path)
     document.body.append(svg)
-    let bb = path.getBBox()
+    const bb = path.getBBox()
     // remove temporary svg
     svg.remove()
     return bb
@@ -1398,7 +1401,7 @@ export default {
     const pathStart = this.startCoordsFromConnectionPath(path)
     const pathEndRelative = this.endCoordsFromConnectionPath(path)
     if (!pathStart) { return {} }
-    let rect = {
+    const rect = {
       x: pathStart.x,
       y: pathStart.y,
       width: pathEndRelative.x,
@@ -1412,7 +1415,7 @@ export default {
       rect.y = pathStart.y + pathEndRelative.y
       rect.height = Math.abs(pathEndRelative.y)
     }
-    let controlPointMax = this.curveControlPointFromPath(path)
+    const controlPointMax = this.curveControlPointFromPath(path)
     rect.width = rect.width + controlPointMax.x
     rect.height = rect.height + controlPointMax.y
     return rect
@@ -1464,7 +1467,7 @@ export default {
     return -endValue * (elaspedTime /= duration) * (elaspedTime - 2) + startValue
   },
   highestItemZ (items) {
-    let highestZ = Math.max(...items.map(item => item.z || 0)) + 1
+    const highestZ = Math.max(...items.map(item => item.z || 0)) + 1
     return highestZ
   },
 
@@ -1494,15 +1497,15 @@ export default {
     const newIds = newItems.map(item => item.id)
     newItems = this.normalizeItems(newItems)
     prevItems = this.normalizeItems(prevItems)
-    let addItems = []
-    let updateItems = []
-    let removeItems = []
+    const addItems = []
+    const updateItems = []
+    const removeItems = []
     newIds.forEach(id => {
       const selectedItem = selectedItemIds.find(selectedItemId => selectedItemId === id)
       const itemExists = prevIds.includes(id)
       if (selectedItem) {
         const prevItem = prevItems[id]
-        let newItem = newItems[id]
+        const newItem = newItems[id]
         // use prevItem position to avoid ppsition item jumping while selected items dragging
         newItem.x = prevItem.x
         newItem.y = prevItem.y
@@ -1714,7 +1717,7 @@ export default {
   updateSpaceItemsRelativeToOrigin (items) {
     items = this.clone(items)
     // offset
-    let positionItems = []
+    const positionItems = []
     consts.itemTypesWithPositions.forEach(itemName => {
       items[itemName].forEach(item => positionItems.push(item))
     })
@@ -1778,7 +1781,7 @@ export default {
     const emptyArrayKeys = ['users', 'collaborators', 'spectators', 'clients']
     const deleteKeys = ['url', 'originSpaceId', 'editedAt', 'editedByUserId', 'createdAt', 'updatedAt', 'updateHash']
     const userId = user?.id || consts.moderatorUserId
-    let space = this.clone(helloSpace)
+    const space = this.clone(helloSpace)
     space.name = 'Hello Kinopio'
     space.privacy = 'private'
     space.visits = 0
@@ -1840,7 +1843,7 @@ export default {
   },
   removeRemovedCardsFromSpace (space) {
     if (!space.cards) { return }
-    let cards = []
+    const cards = []
     space.cards.forEach(card => {
       if (!card) {
         return
@@ -1881,7 +1884,7 @@ export default {
       date = dayjs(new Date())
     }
     const phases = ['new-moon', 'waxing-crescent', 'waxing-quarter', 'waxing-gibbous', 'full-moon', 'waning-gibbous', 'waning-quarter', 'waning-crescent']
-    let day = date.get('date')
+    const day = date.get('date')
     let month = date.get('month') + 1 // January is 0!
     let year = dayjs().get('year')
     let c = 0
@@ -1974,7 +1977,7 @@ export default {
     return url
   },
   urlSearchParamsToObject (searchParams) {
-    let object = {}
+    const object = {}
     for (const [key, value] of searchParams.entries()) {
       object[key] = value
     }
@@ -1984,7 +1987,7 @@ export default {
     if (!url) { return }
     url = new URL(url)
     const params = url.searchParams
-    let group = this.urlSearchParamsToObject(params)
+    const group = this.urlSearchParamsToObject(params)
     group.id = group.groupId
     return group
   },
@@ -2083,7 +2086,7 @@ export default {
     // https://regexr.com/5vvc4
     // image from `url("image")`
     const urlPattern = new RegExp(/(http[s]?:\/\/)[^\s(["<>]{2,}\.[^\s.[">,<]+\w\/?/igm)
-    let urls = string.match(urlPattern)
+    const urls = string.match(urlPattern)
     return urls[0]
   },
   localhostUrlPattern () {
@@ -2117,7 +2120,7 @@ export default {
     // followed by at least 1 alphanumeric, '=', or '.'
     // then optional trailing '/' or '-'
     const urlPattern = new RegExp(/(^|\n| )(http[s]?:\/\/)[^\s(["<>]{1,}(\.|(:[0-9]+))[^\s."><]+[\w=.]+\/?-?/igm)
-    let localhostUrls = string.match(this.localhostUrlPattern()) || []
+    const localhostUrls = string.match(this.localhostUrlPattern()) || []
     let urls = string.match(urlPattern) || []
     urls = urls.concat(localhostUrls)
     urls = urls.filter(url => Boolean(url))
@@ -2315,9 +2318,9 @@ export default {
       const queryString = this.queryString(url)
       const domain = this.urlWithoutQueryString(url)
       if (!queryString) { return }
-      let queryObject = qs.decode(queryString)
-      let keys = Object.keys(queryObject)
-      let keysToRemove = []
+      const queryObject = qs.decode(queryString)
+      const keys = Object.keys(queryObject)
+      const keysToRemove = []
       trackingKeys.forEach(trackingKey => {
         keys.forEach(key => {
           if (key.startsWith(trackingKey)) {
@@ -2504,8 +2507,8 @@ export default {
   },
   // for canvas testing
   downloadBlob (blob) {
-    let URLObj = window.URL || window.webkitURL
-    let a = document.createElement('a')
+    const URLObj = window.URL || window.webkitURL
+    const a = document.createElement('a')
     a.href = URLObj.createObjectURL(blob)
     a.download = 'untitled.png'
     document.body.appendChild(a)
@@ -2554,7 +2557,7 @@ export default {
     search = search.replaceAll('+', '\\+')
     const extraCharacters = 2 + (search.length - prevSearch.length)
     const searchPattern = new RegExp(search, 'gim')
-    let results = []
+    const results = []
     while (searchPattern.exec(string)) {
       const position = searchPattern.lastIndex - search.length + extraCharacters
       results.push(position)
@@ -2562,7 +2565,7 @@ export default {
     return results
   },
   tagStyle (tag) {
-    let styles = { backgroundColor: tag.color }
+    const styles = { backgroundColor: tag.color }
     const isDark = this.colorIsDark(tag.color)
     if (isDark) {
       const color = this.cssVariable('primary')
@@ -2611,7 +2614,7 @@ export default {
 
   segmentsWithTextSegments (name, segments) {
     let currentStart = 0
-    let textSegments = []
+    const textSegments = []
     segments = sortBy(segments, ['startPosition'])
     segments.forEach(({ startPosition, endPosition }) => {
       if (currentStart < startPosition) {
@@ -2661,7 +2664,7 @@ export default {
       const startPosition = name.indexOf(link)
       const endPosition = startPosition + link.length
       const { spaceId, spaceUrl, cardId } = this.spaceAndCardIdFromUrl(link)
-      let segment = { link, name: link, startPosition, endPosition, spaceId, spaceUrl, cardId, isLink: true }
+      const segment = { link, name: link, startPosition, endPosition, spaceId, spaceUrl, cardId, isLink: true }
       if (this.urlIsSpaceInvite(link)) {
         segment.isInviteLink = true
         const url = new URL(link)
@@ -2726,13 +2729,13 @@ export default {
   },
   markdownSegments (name) {
     this.typeCheck({ value: name, type: 'string', origin: 'markdownSegments' })
-    let segments = []
+    const segments = []
     let currentPosition = 0
     if (!name) { return segments }
     while (currentPosition < name.length) {
       const markdown = this.markdown()
-      let text = name.substring(currentPosition, name.length)
-      let segment = { content: '', type: 'text' }
+      const text = name.substring(currentPosition, name.length)
+      const segment = { content: '', type: 'text' }
       let items = [
         {
           type: 'link',
@@ -2837,11 +2840,11 @@ export default {
     // matches first word on first line
     const languagePattern = /^(\w)+\s/g
     let newString = string
-    let match = string.match(languagePattern)
+    const match = string.match(languagePattern)
     if (!match) { return }
     const name = match[0].trim()
     // match language
-    let language = codeLanguages.find(codeLanguage => {
+    const language = codeLanguages.find(codeLanguage => {
       const isName = codeLanguage.name === name
       let isAlias
       if (codeLanguage.aliases) {
@@ -2876,10 +2879,10 @@ export default {
   // Background Gradient
 
   backgroundGradientLayers () {
-    let layers = []
+    const layers = []
     const numberOfLayers = 6
     times(numberOfLayers, function (index) {
-      let layer = {
+      const layer = {
         x: random(140),
         y: random(140),
         color1: randomRGBA(1),
@@ -2901,7 +2904,7 @@ export default {
     const minPositionValue = 150
     let date = dayjs(new Date())
     date = date.format(consts.nameDateFormat)
-    let newSpace = {}
+    const newSpace = {}
     try {
       newSpace.name = `Canvas ${date}`
       newSpace.id = nanoid()
@@ -2910,7 +2913,7 @@ export default {
       newSpace.connections = []
       newSpace.connectionTypes = []
       // emsure node positions are positive 0,0
-      let negativePositionOffset = {
+      const negativePositionOffset = {
         x: 0,
         y: 0
       }
@@ -2966,7 +2969,7 @@ export default {
       const newConnetionType = {
         id: typeId,
         color: newTypeColor,
-        name: `Connection Type 0`
+        name: 'Connection Type 0'
       }
       newSpace.connectionTypes.push(newConnetionType)
       // edges → connections
@@ -2975,7 +2978,7 @@ export default {
           id: edge.id,
           startItemId: edge.fromNode,
           endItemId: edge.toNode,
-          controlPoint: `q00,00`, // straight line
+          controlPoint: 'q00,00', // straight line
           directionIsVisible: Boolean(edge.fromEnd === 'arrow' || edge.toEnd === 'arrow'),
           connectionTypeId: typeId,
           labelIsVisible: Boolean(edge.label)

@@ -63,7 +63,7 @@ onMounted(() => {
     } else if (mutation.type === 'triggerUpdatePaintSelectCanvasPositionOffset') {
       updateCirclesWithScroll()
     } else if (mutation.type === 'triggerAddRemotePaintingCircle') {
-      let circle = mutation.payload
+      const circle = mutation.payload
       delete circle.type
       const position = updateRemotePosition(circle)
       circle.x = position.x
@@ -74,7 +74,7 @@ onMounted(() => {
       const user = store.getters['currentSpace/userById'](card.userId)
       const color = user.color
       const position = updateRemotePosition(card)
-      let circle = {
+      const circle = {
         x: position.x,
         y: position.y,
         color,
@@ -173,7 +173,7 @@ const updateSelectableCardsInViewport = () => {
 }
 const updateSelectableBoxesInViewport = () => {
   const boxes = store.getters['currentBoxes/isNotLocked']
-  let array = []
+  const array = []
   boxes.forEach(box => {
     const element = document.querySelector(`.box-info[data-box-id="${box.id}"]`)
     if (!element) { return }
@@ -319,7 +319,7 @@ const drawCircle = (circle, context, shouldDrawOffscreen) => {
   context.fill()
 }
 const shouldCancel = (event) => {
-  let shouldCancelOutsideOfBrowser = !(event.target instanceof Element)
+  const shouldCancelOutsideOfBrowser = !(event.target instanceof Element)
   if (shouldCancelOutsideOfBrowser) {
     return false
   }
@@ -484,7 +484,7 @@ const circlesAnimationFrame = (timestamp) => {
   remotePaintingCircles = utils.filterCircles(remotePaintingCircles, maxIterations)
   remotePaintingCircles = remotePaintingCircles.map(item => {
     item.iteration++
-    let circle = JSON.parse(JSON.stringify(item))
+    const circle = JSON.parse(JSON.stringify(item))
     circle.x = circle.x - window.scrollX
     circle.y = circle.y - window.scrollY
     const shouldDrawOffscreen = true

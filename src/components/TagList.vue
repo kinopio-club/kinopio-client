@@ -53,6 +53,11 @@ export default {
     positionTagsOnLeftSide: Boolean,
     canAddTag: Boolean
   },
+  emits: [
+    'addTag',
+    'selectTag',
+    'closeDialogs'
+  ],
   data () {
     return {
       filter: '',
@@ -81,6 +86,22 @@ export default {
       return Boolean(this.filter)
     }
   },
+  watch: {
+    tags: {
+      handler (tags) {
+        const updatedTag = tags.find(tag => tag.name === this.tagDetailsTag.name)
+        if (updatedTag) {
+          this.updateTagDetailsTag(updatedTag)
+        }
+      },
+      deep: true
+    },
+    visible (visible) {
+      if (visible) {
+        this.closeDialogs()
+      }
+    }
+  },
   methods: {
     addTag () {
       this.$emit('addTag', this.filter)
@@ -105,7 +126,7 @@ export default {
         const element = document.querySelector(`li[data-tag-id="${tag.id}"]`)
         rect = element.getBoundingClientRect()
       }
-      let position = {
+      const position = {
         x: rect.x + (rect.width / 2) + window.scrollX,
         y: rect.y + 8 + window.scrollY,
         pageX: window.scrollX,
@@ -160,7 +181,7 @@ export default {
     },
     focusNextItem () {
       const tags = this.tagsFiltered
-      let currentIndex = tags.findIndex(tags => tags.id === this.focusOnId)
+      const currentIndex = tags.findIndex(tags => tags.id === this.focusOnId)
       let index = currentIndex + 1
       if (tags.length === index) {
         index = 0
@@ -169,7 +190,7 @@ export default {
     },
     focusPreviousItem () {
       const tags = this.tagsFiltered
-      let currentIndex = tags.findIndex(tags => tags.id === this.focusOnId)
+      const currentIndex = tags.findIndex(tags => tags.id === this.focusOnId)
       let index = currentIndex - 1
       if (index < 0) {
         index = 0
@@ -183,22 +204,6 @@ export default {
     },
     focusItem (tag) {
       this.focusOnId = tag.id
-    }
-  },
-  watch: {
-    tags: {
-      handler (tags) {
-        const updatedTag = tags.find(tag => tag.name === this.tagDetailsTag.name)
-        if (updatedTag) {
-          this.updateTagDetailsTag(updatedTag)
-        }
-      },
-      deep: true
-    },
-    visible (visible) {
-      if (visible) {
-        this.closeDialogs()
-      }
     }
   }
 }

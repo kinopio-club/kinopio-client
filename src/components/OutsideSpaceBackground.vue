@@ -116,7 +116,7 @@ const updateBackgroundColor = () => {
   backgroundColor = colord(backgroundColor).darken(darkness).toHex()
   // mix in tint color
   if (backgroundTintColor.value) {
-    let tint = backgroundTintColor.value
+    const tint = backgroundTintColor.value
     backgroundColor = colord(backgroundColor).mix(tint, 0.5).toHex()
   }
   // save color

@@ -137,12 +137,12 @@ const scrollIntoView = async () => {
 const updateResultsSectionHeight = async () => {
   if (!visible.value) { return }
   await nextTick()
-  let element = resultsElement.value
+  const element = resultsElement.value
   state.resultsSectionHeight = utils.elementHeight(element) - 2
 }
 const updateDialogHeight = async () => {
   await nextTick()
-  let element = dialogElement.value
+  const element = dialogElement.value
   state.dialogHeight = utils.elementHeight(element)
   updateResultsSectionHeight()
 }
@@ -165,7 +165,7 @@ const cachedOrOtherSpaceById = async (spaceId) => {
 
 const cardDetailsIsVisibleForCardId = computed(() => store.state.cardDetailsIsVisibleForCardId)
 const currentCard = computed(() => {
-  let currentCardId = cardDetailsIsVisibleForCardId.value.valye
+  const currentCardId = cardDetailsIsVisibleForCardId.value.valye
   const currentCard = store.getters['currentCards/byId'](currentCardId)
   const tagCard = store.getters['currentCards/byId'](store.state.currentSelectedTag.cardId)
   return currentCard || tagCard
@@ -238,7 +238,7 @@ const updateCardsWithTagColor = (name, newColor) => {
   updateCardsList(cards)
 }
 const updateTagNameColor = (newColor) => {
-  let tag = utils.clone(currentTag.value)
+  const tag = utils.clone(currentTag.value)
   tag.color = newColor
   store.dispatch('currentSpace/updateTagNameColor', tag)
   updateCardsWithTagColor(tag.name, newColor)
@@ -272,7 +272,7 @@ const groupedItems = computed(() => {
       }
       groups.push({
         spaceName: spaceName || item.spaceName,
-        spaceId: spaceId,
+        spaceId,
         cards: [item],
         space,
         background,
@@ -303,7 +303,7 @@ const sortCurrentCardIsFirst = (groups) => {
   if (!currentCard.value) { return groups }
   const currentCardItem = groups[0].cards.find(card => card.id === currentCard.value.id)
   if (!currentCardItem) { return groups }
-  let cards = groups[0].cards.filter(card => card.id !== currentCardItem.id)
+  const cards = groups[0].cards.filter(card => card.id !== currentCardItem.id)
   cards.unshift(currentCardItem)
   groups[0].cards = cards
   return groups
@@ -329,13 +329,13 @@ const addCardNameSegments = (cards) => {
   })
 }
 const cardNameSegments = (name) => {
-  let url = utils.urlFromString(name)
+  const url = utils.urlFromString(name)
   let imageUrl
   if (utils.urlIsImage(url)) {
     imageUrl = url
     name = name.replace(url, '')
   }
-  let segments = utils.cardNameSegments(name)
+  const segments = utils.cardNameSegments(name)
   if (imageUrl) {
     segments.unshift({
       isImage: true,
@@ -377,7 +377,7 @@ const filteredItems = computed(() => {
   }
 })
 watch(() => filteredItems.value, async (items, prevValue) => {
-  let spaces = []
+  const spaces = []
   for (const item of items) {
     const spaceId = item.spaceId || currentSpaceId.value
     const space = await cachedOrOtherSpaceById(spaceId)

@@ -33,7 +33,7 @@ onMounted(() => {
     if (mutation.type === 'triggerPickerNavigationKey') {
       const key = mutation.payload
       const spaces = props.spaces
-      let currentIndex = spaces.findIndex(space => space.id === state.focusOnId)
+      const currentIndex = spaces.findIndex(space => space.id === state.focusOnId)
       if (!utils.arrayHasItems(spaces)) {
         closeDialog()
       } else if (key === 'ArrowUp') {
@@ -327,12 +327,12 @@ const focusPreviousItem = (currentIndex) => {
   if (firstItemIsFocused) {
     closeDialog()
   } else
-  if (previousItem) {
-    state.focusOnId = previousItem.id
-  } else {
-    state.focusOnId = firstItem.id
-    emit('focusBeforeFirstItem')
-  }
+    if (previousItem) {
+      state.focusOnId = previousItem.id
+    } else {
+      state.focusOnId = firstItem.id
+      emit('focusBeforeFirstItem')
+    }
 }
 const focusNextItem = (currentIndex) => {
   const spaces = spacesFiltered.value

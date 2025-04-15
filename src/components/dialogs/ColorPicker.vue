@@ -64,7 +64,7 @@ const state = reactive({
 const updateDialogHeight = async () => {
   if (!props.visible) { return }
   await nextTick()
-  let element = dialogElement.value
+  const element = dialogElement.value
   state.dialogHeight = utils.elementHeight(element)
 }
 const scrollIntoView = async () => {
@@ -82,7 +82,7 @@ const triggerUpdateHeaderAndFooterPosition = () => {
 // recent colors
 
 const uniqueRecentColors = computed(() => {
-  let newColors = []
+  const newColors = []
   const minDelta = 0.08
   const colors = props.recentColors.map(color => colord(color).toHex())
   colors.forEach((newColor, index) => {

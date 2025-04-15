@@ -102,7 +102,7 @@ const ratio = computed(() => {
 })
 
 const styles = computed(() => {
-  let color = props.backgroundColor || store.state.outsideSpaceBackgroundColor
+  const color = props.backgroundColor || store.state.outsideSpaceBackgroundColor
   return { backgroundColor: color }
 })
 
@@ -185,7 +185,7 @@ const drawBoxes = () => {
     return box
   })
   boxes.forEach(box => {
-    let rect = new Path2D()
+    const rect = new Path2D()
     rect.roundRect(box.x, box.y, box.width, box.height, itemRadius)
     context.strokeStyle = box.color
     context.lineWidth = 1
@@ -218,7 +218,7 @@ const drawCards = () => {
     return card
   })
   cards.forEach(card => {
-    let rect = new Path2D()
+    const rect = new Path2D()
     rect.roundRect(card.x, card.y, card.width, card.height, itemRadius)
     context.fillStyle = card.backgroundColor || defaultColor
     context.fill(rect)
@@ -248,7 +248,7 @@ const viewportStyle = computed(() => {
     top = Math.min(top, state.pageHeight)
     height = state.pageHeight - top
   }
-  let styles = {
+  const styles = {
     left: `${left}px`,
     top: `${top}px`,
     width: `${width}px`,

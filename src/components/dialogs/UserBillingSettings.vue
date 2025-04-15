@@ -47,7 +47,7 @@ const isSecureAppContextIOS = computed(() => consts.isSecureAppContextIOS)
 const updateDialogHeight = async () => {
   if (!props.visible) { return }
   await nextTick()
-  let element = dialog.value
+  const element = dialog.value
   state.dialogHeight = utils.elementHeight(element)
 }
 

@@ -99,7 +99,7 @@ const unreadSpaces = (spaces, type) => {
   return unreadSpaces || []
 }
 const updateUnreadSpacesCounts = () => {
-  let readDate = store.state.currentUser.showInExploreUpdatedAt
+  const readDate = store.state.currentUser.showInExploreUpdatedAt
   if (!readDate) { return maxUnreadCountCharacter }
   state.unreadExploreSpacesCount = unreadSpaces(state.exploreSpaces, 'explore').length
   state.unreadFollowingSpacesCount = unreadSpaces(state.followingSpaces, 'following').length
@@ -185,7 +185,7 @@ const normalizeLiveSpaces = (spaces) => {
   return normalizedSpaces
 }
 const liveSpacesCount = computed(() => {
-  let count = state.liveSpaces.length
+  const count = state.liveSpaces.length
   return normalizeCount(count)
 })
 

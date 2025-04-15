@@ -195,13 +195,13 @@ watch(() => path.value, (value, prevValue) => {
 })
 const updateConnectionRect = () => {
   if (!props.connection.labelIsVisible) { return }
-  let element = document.querySelector(`.connection-path[data-id="${id.value}"]`)
+  const element = document.querySelector(`.connection-path[data-id="${id.value}"]`)
   if (!element) {
     // compute position from path if element isn't rendered yet
     state.connectionRect = utils.rectFromConnectionPath(path.value)
     return
   }
-  let rect = element.getBoundingClientRect()
+  const rect = element.getBoundingClientRect()
   state.connectionRect = utils.rectDimensions(rect)
 }
 const connectionLabelWrapStyles = computed(() => {
@@ -230,7 +230,7 @@ const styles = computed(() => {
     x: Math.round(labelRect.width / 4),
     y: Math.round(labelRect.height / 4)
   }
-  let styles = {
+  const styles = {
     background: typeColor.value,
     left: `calc(${labelRelativePosition.value.x * 100}% - ${labelCenter.x}px)`,
     top: `calc(${labelRelativePosition.value.y * 100}% - ${labelCenter.y}px)`
@@ -298,12 +298,14 @@ const stopDragging = () => {
   cursorStart = {}
   store.commit('broadcast/updateStore', { updates: { userId: store.state.currentUser.id }, type: 'removeRemoteUserDraggingConnectionLabel' })
   if (!labelRelativePosition.value.x) { return }
-  store.dispatch('history/add', { connections: [{
-    id: props.connection.id,
-    labelRelativePositionX: labelRelativePosition.value.x,
-    labelRelativePositionY: labelRelativePosition.value.y
-  }],
-  useSnapshot: true })
+  store.dispatch('history/add', {
+    connections: [{
+      id: props.connection.id,
+      labelRelativePositionX: labelRelativePosition.value.x,
+      labelRelativePositionY: labelRelativePosition.value.y
+    }],
+    useSnapshot: true
+  })
 }
 const drag = (event) => {
   if (!canEditSpace.value) { return }
@@ -336,7 +338,7 @@ const drag = (event) => {
 const remoteUserDragging = computed(() => {
   const remoteUserDraggingConnectionLabel = store.state.remoteUserDraggingConnectionLabel
   if (!remoteUserDraggingConnectionLabel.length) { return }
-  let update = remoteUserDraggingConnectionLabel.find(update => update.connectionId.includes(props.connection.id))
+  const update = remoteUserDraggingConnectionLabel.find(update => update.connectionId.includes(props.connection.id))
   return update
 })
 
@@ -356,7 +358,7 @@ const lockingFrameStyle = computed(() => {
     top: position,
     background: store.state.currentUser.color,
     opacity: state.lockingAlpha,
-    borderRadius: borderRadius
+    borderRadius
   }
 })
 const cancelLocking = () => {

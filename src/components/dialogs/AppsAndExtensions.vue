@@ -66,7 +66,7 @@ const updateCurrentDeviceView = () => {
 const stripUrlPath = () => {
   title = document.title
   pathname = window.location.pathname
-  let url = '/'
+  const url = '/'
   // temporary url change for bookmarking, doesn't update vue-router history
   history.replaceState(history.state, '', url)
 }
@@ -80,7 +80,7 @@ const restoreUrlPath = () => {
 const updateDialogHeight = async () => {
   if (!props.visible) { return }
   await nextTick()
-  let element = dialog.value
+  const element = dialog.value
   state.dialogHeight = utils.elementHeight(element)
 }
 

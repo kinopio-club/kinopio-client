@@ -517,7 +517,7 @@ const updatePositionInVisualViewport = () => {
   const counterScale = utils.roundFloat(1 / viewport.scale)
   const left = Math.round(viewport.offsetLeft)
   const top = Math.round(viewport.offsetTop)
-  let style = {
+  const style = {
     transform: `translate(${left}px, ${top}px) scale(${counterScale})`,
     maxWidth: Math.round(viewport.width * scale) + 'px'
   }

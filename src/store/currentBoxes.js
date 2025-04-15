@@ -50,7 +50,7 @@ export default {
       state.boxes = {}
     },
     restore: (state, boxes) => {
-      let ids = []
+      const ids = []
       boxes.forEach(box => {
         ids.push(box.id)
         state.boxes[box.id] = box
@@ -174,8 +174,8 @@ export default {
     mergeUnique: (context, { newItems, itemType }) => {
       newItems.forEach(newBox => {
         let shouldUpdate
-        let prevBox = context.getters.byId(newBox.id)
-        let box = { id: newBox.id }
+        const prevBox = context.getters.byId(newBox.id)
+        const box = { id: newBox.id }
         let keys = Object.keys(newBox)
         keys = keys.filter(key => key !== 'id')
         keys.forEach(key => {
@@ -238,7 +238,7 @@ export default {
       const keys = Object.keys(box)
       delete box.userId
       const shouldUpdatePathsKeys = ['x', 'resizeWidth']
-      let shouldUpdatePaths = keys.find(key => shouldUpdatePathsKeys.includes(key))
+      const shouldUpdatePaths = keys.find(key => shouldUpdatePathsKeys.includes(key))
       if (shouldUpdatePaths) {
         nextTick(() => {
           context.dispatch('currentConnections/updatePaths', { itemId: box.id }, { root: true })
@@ -257,7 +257,7 @@ export default {
     },
     updateMultiple: async (context, boxes) => {
       const spaceId = context.rootState.currentSpace.id
-      let updates = {
+      const updates = {
         boxes,
         spaceId: context.rootState.currentSpace.id
       }
@@ -310,7 +310,7 @@ export default {
 
     resize: (context, { boxIds, delta }) => {
       let connections = []
-      let boxes = []
+      const boxes = []
       boxIds.forEach(boxId => {
         const rect = utils.boxElementDimensions({ id: boxId })
         let width = rect.width
@@ -362,13 +362,13 @@ export default {
       if (context.rootState.shouldSnapToGrid) { return }
       const snapThreshold = 6
       const spaceEdgeThreshold = 100
-      let targetBoxes = utils.clone(context.getters.isSelectableInViewport)
+      const targetBoxes = utils.clone(context.getters.isSelectableInViewport)
       const prevSnapGuides = context.state.snapGuides
       let snapGuides = []
       let items
       if (cards) {
         cards = utils.clone(cards)
-        cards = [ utils.boundaryRectFromItems(cards) ] // combine multiple selected cards
+        cards = [utils.boundaryRectFromItems(cards)] // combine multiple selected cards
         items = cards
       } else if (boxes) {
         items = utils.clone(boxes)
@@ -437,7 +437,7 @@ export default {
         })
       })
       // limit each origin item to it's closest target
-      let normalizedGuides = {}
+      const normalizedGuides = {}
       snapGuides.forEach(snapGuide => {
         const originGuide = normalizedGuides[snapGuide.origin.id]
         if (originGuide) {
@@ -448,13 +448,13 @@ export default {
           normalizedGuides[snapGuide.origin.id] = snapGuide
         }
       })
-      let normalizedGuideKeys = Object.keys(normalizedGuides)
+      const normalizedGuideKeys = Object.keys(normalizedGuides)
       snapGuides = normalizedGuideKeys.map(key => normalizedGuides[key])
       context.commit('snapGuides', snapGuides)
     },
     snap: (context, { side, origin, target }) => {
       const borderWidth = 2
-      let updated = { id: origin.id }
+      const updated = { id: origin.id }
       origin = context.getters.byId(origin.id)
       const alignWithOriginY = side === 'right' || side === 'left'
       // size
@@ -481,7 +481,7 @@ export default {
     },
     expand: (context, { side, origin, target }) => {
       const padding = consts.spaceBetweenCards
-      let updated = { id: target.id }
+      const updated = { id: target.id }
       const delta = {
         x: origin.x - target.x,
         y: origin.y - target.y
@@ -637,7 +637,7 @@ export default {
     // z-index
 
     clearAllZs: async (context) => {
-      let boxes = context.getters.all.sort((a, b) => a.z - b.z)
+      const boxes = context.getters.all.sort((a, b) => a.z - b.z)
       let z = 1
       for (const box of boxes) {
         const body = { id: box.id, z }
@@ -714,11 +714,11 @@ export default {
       return boxes
     },
     isNotLocked: (state, getters) => {
-      let boxes = getters.all
+      const boxes = getters.all
       return boxes.filter(box => !box.isLocked)
     },
     isLocked: (state, getters) => {
-      let boxes = getters.all
+      const boxes = getters.all
       return boxes.filter(box => box.isLocked)
     },
     colors: (state, getters) => {

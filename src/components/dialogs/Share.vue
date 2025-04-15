@@ -100,7 +100,7 @@ const webShare = () => {
 const updateDialogHeight = () => {
   if (!props.visible) { return }
   nextTick(() => {
-    let element = dialog.value
+    const element = dialog.value
     state.dialogHeight = utils.elementHeight(element)
   })
 }

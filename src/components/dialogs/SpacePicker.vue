@@ -67,7 +67,7 @@ const state = reactive({
 const updateDialogHeight = async () => {
   if (!props.visible) { return }
   await nextTick()
-  let element = dialogElement.value
+  const element = dialogElement.value
   state.dialogHeight = utils.elementHeight(element)
 }
 
@@ -109,13 +109,13 @@ const filteredSpaces = computed(() => {
         pre: '',
         post: '',
         extract: (item) => {
-          let name = item.name || ''
+          const name = item.name || ''
           return name
         }
       }
     )
     spaces = filtered.map(item => {
-      let result = utils.clone(item.original)
+      const result = utils.clone(item.original)
       result.matchIndexes = item.indices
       return result
     })

@@ -1,42 +1,41 @@
+<script>
+import { reactive, computed, onMounted, onBeforeUnmount, watch, ref, nextTick, defineEmits, defineProps } from 'vue'
+import { useStore } from 'vuex'
+
+import utils from '@/utils.js'
+
+const store = useStore()
+
+const emit = defineEmits(['clickTag'])
+
+const props = defineProps({
+  tag: Object,
+  isActive: Boolean,
+  isClickable: Boolean,
+  badgeLabel: String
+})
+
+const tagStyle = computed(() => utils.tagStyle(props.tag))
+const isDark = computed(() => utils.colorIsDark(props.tag.color))
+const clickTag = (event) => {
+  emit('clickTag', event, props.tag)
+}
+</script>
+
 <template lang="pug">
 .tag.badge(
   @click.left.stop="clickTag"
   @touchend.stop="clickTag"
   @keyup.stop.enter="clickTag"
-  :data-tag-id="tag.id"
-  :data-tag-name="tag.name"
-  :class="{ 'button-badge': isClickable, 'active': isActive }"
+  :data-tag-id="props.tag.id"
+  :data-tag-name="props.tag.name"
+  :class="{ 'button-badge': props.isClickable, 'active': props.isActive }"
   :style="tagStyle"
 )
-  span.tag-name(:class="{ 'is-dark': isDark }") {{tag.name}}
-  .badge.label-badge(v-if="badgeLabel")
-    span {{badgeLabel}}
+  span.tag-name(:class="{ 'is-dark': isDark }") {{props.tag.name}}
+  .badge.label-badge(v-if="props.badgeLabel")
+    span {{props.badgeLabel}}
 </template>
-
-<script>
-import utils from '@/utils.js'
-
-export default {
-  name: 'Tag',
-  components: {
-  },
-  props: {
-    tag: Object,
-    isActive: Boolean,
-    isClickable: Boolean,
-    badgeLabel: String
-  },
-  computed: {
-    tagStyle () { return utils.tagStyle(this.tag) },
-    isDark () { return utils.colorIsDark(this.tag.color) }
-  },
-  methods: {
-    clickTag (event) {
-      this.$emit('clickTag', event, this.tag)
-    }
-  }
-}
-</script>
 
 <style lang="stylus">
 .tag

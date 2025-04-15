@@ -162,7 +162,7 @@ const searchAgain = () => {
   searchService()
 }
 const searchPexels = async () => {
-  const defaultSearches = [ 'animals', 'flowers', 'forest', 'ocean' ]
+  const defaultSearches = ['animals', 'flowers', 'forest', 'ocean']
   const defaultSearch = sample(defaultSearches)
   const search = state.search || defaultSearch
   const data = await store.dispatch('api/imageSearch', search)
@@ -177,7 +177,7 @@ const searchGiphy = async (isStickers) => {
   if (state.search) {
     endpoint = 'search'
   }
-  let body = { search: state.search, endpoint, resource }
+  const body = { search: state.search, endpoint, resource }
   if (state.search) {
     body.rating = 'pg-13'
   } else {
@@ -357,7 +357,7 @@ const updateDialogHeight = async () => {
 const updateResultsSectionHeight = async () => {
   if (!props.visible) { return }
   await nextTick()
-  let element = resultsSectionElement.value
+  const element = resultsSectionElement.value
   state.resultsSectionHeight = utils.elementHeight(element, true)
 }
 const resetPinchCounterZoomDecimal = () => {

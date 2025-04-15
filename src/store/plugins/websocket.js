@@ -14,7 +14,7 @@ let websocket, currentSpaceRoom, currentUserIsConnected
 const clientId = nanoid()
 
 console.info('🌳 websocket clientId', clientId)
-let showDebugMessages = false
+const showDebugMessages = false
 
 const joinSpaceRoom = (store, mutation) => {
   console.info('🌙 joining', websocket)
@@ -133,7 +133,7 @@ export default function createWebSocketPlugin () {
           if (data.space) {
             if (data.space.id !== store.state.currentSpace.id) { return }
           }
-          let { message, handler, user, updates } = data
+          const { message, handler, user, updates } = data
           if (message === 'connected') {
           // presence
           } else if (handler) {

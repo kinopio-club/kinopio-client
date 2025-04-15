@@ -172,7 +172,7 @@ const prependToName = ({ pattern, item, nameSegment }) => {
 const prependToItemNames = (pattern) => {
   items.value.forEach(item => {
     const name = normalizedName(item.name) || ''
-    let patternExists = utils.markdown()[pattern].exec(name)
+    const patternExists = utils.markdown()[pattern].exec(name)
     if (patternExists) {
       return // skip
     }
@@ -310,18 +310,18 @@ const toggleFramePickerIsVisible = () => {
 // header h1 h2
 
 const isH1 = computed(() => {
-  let pattern = 'h1Pattern'
-  let matches = itemsWithPattern(pattern)
+  const pattern = 'h1Pattern'
+  const matches = itemsWithPattern(pattern)
   return Boolean(matches.length)
 })
 const isH2 = computed(() => {
-  let pattern = 'h2Pattern'
-  let matches = itemsWithPattern(pattern)
+  const pattern = 'h2Pattern'
+  const matches = itemsWithPattern(pattern)
   return Boolean(matches.length)
 })
 const isH3 = computed(() => {
-  let pattern = 'h3Pattern'
-  let matches = itemsWithPattern(pattern)
+  const pattern = 'h3Pattern'
+  const matches = itemsWithPattern(pattern)
   return Boolean(matches.length)
 })
 const isHeaderSelected = computed(() => {
@@ -345,7 +345,7 @@ const removeHeaderFromItemNames = () => {
 }
 const toggleHeader = async (pattern) => {
   await updateCardDimensions()
-  let matches = itemsWithPattern(pattern)
+  const matches = itemsWithPattern(pattern)
   const shouldPrepend = matches.length < items.value.length
   removeHeaderFromItemNames()
   if (shouldPrepend) {

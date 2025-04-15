@@ -271,7 +271,7 @@ const resizeCards = (event) => {
   if (!prevCursor) { return }
   if (utils.isMultiTouch(event)) { return }
   const cardIds = store.state.currentUserIsResizingCardIds
-  let deltaX = endCursor.x - prevCursor.x
+  const deltaX = endCursor.x - prevCursor.x
   store.dispatch('currentCards/resize', { cardIds, deltaX })
 }
 const stopResizingCards = async () => {
@@ -425,12 +425,12 @@ const dragItems = () => {
   if (shouldPrevent) { return }
   store.dispatch('currentCards/move', {
     endCursor,
-    prevCursor: prevCursor
+    prevCursor
   })
   checkShouldShowDetails()
   store.dispatch('currentBoxes/move', {
     endCursor,
-    prevCursor: prevCursor
+    prevCursor
   })
 }
 

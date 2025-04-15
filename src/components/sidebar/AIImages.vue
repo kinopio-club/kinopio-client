@@ -42,7 +42,7 @@ const AIImages = computed(() => {
 })
 const copy = async (event, text, successMessage) => {
   store.commit('clearNotificationsWithPosition')
-  let position = utils.cursorPositionInPage(event)
+  const position = utils.cursorPositionInPage(event)
   position.x = position.x - 60
   try {
     await navigator.clipboard.writeText(text)

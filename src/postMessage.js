@@ -3,7 +3,7 @@ import consts from '@/consts.js'
 import cache from '@/cache.js'
 import debounce from 'lodash-es/debounce'
 
-let showDebugMessages = false
+const showDebugMessages = false
 
 window.addEventListener('message', (event) => {
   console.info('🛫 received postmessage', event)
@@ -49,11 +49,8 @@ const self = {
   },
 
   logSend (body) {
-    const isBackgroundColor = body.name === 'setBackgroundColor'
-    if (!showDebugMessages && isBackgroundColor) {
-    } else {
-      console.info('🛫 sending postmessage', body)
-    }
+    if (!showDebugMessages) { return }
+    console.info('🛫 sending postmessage', body)
   }
 }
 

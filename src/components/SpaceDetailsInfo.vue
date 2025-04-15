@@ -100,7 +100,7 @@ const pendingUpload = computed(() => {
 })
 const remotePendingUpload = computed(() => {
   const currentSpace = store.state.currentSpace
-  let remotePendingUploads = store.state.remotePendingUploads
+  const remotePendingUploads = store.state.remotePendingUploads
   return remotePendingUploads.find(upload => {
     const inProgress = upload.percentComplete < 100
     const isSpace = upload.spaceId === currentSpace.id

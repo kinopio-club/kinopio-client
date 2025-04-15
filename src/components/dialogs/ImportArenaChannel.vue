@@ -1,3 +1,5 @@
+/* eslint-disable vue/require-explicit-emits */
+
 <template lang="pug">
 dialog.import-arena-channel.narrow(v-if="visible" :open="visible" @click.left.stop ref="dialog")
   section
@@ -69,6 +71,9 @@ export default {
   props: {
     visible: Boolean
   },
+  emits: [
+    'updateSpaces'
+  ],
   data () {
     return {
       channelUrl: '',
@@ -81,13 +86,6 @@ export default {
       }
     }
   },
-  created () {
-    this.$store.subscribe((mutation, state) => {
-      if (mutation.type === 'triggerArenaAuthenticationError') {
-        this.error.unknownServerError = true
-      }
-    })
-  },
 
   computed: {
     authorizeUrl () {
@@ -96,6 +94,13 @@ export default {
     },
     arenaAccessToken () { return this.$store.state.currentUser.arenaAccessToken },
     isAuthenticatingWithArena () { return this.$store.state.isAuthenticatingWithArena }
+  },
+  created () {
+    this.$store.subscribe((mutation, state) => {
+      if (mutation.type === 'triggerArenaAuthenticationError') {
+        this.error.unknownServerError = true
+      }
+    })
   },
   methods: {
     forgetArenaAccessToken () {
@@ -111,7 +116,7 @@ export default {
         this.loading = false
         return
       }
-      let channel = await this.getChannelContents(channelPath)
+      const channel = await this.getChannelContents(channelPath)
       await this.createSpace(channel)
       this.clearForm()
       this.loading = false
@@ -163,7 +168,7 @@ export default {
       return name.substring(0, consts.defaultCharacterLimit)
     },
     async createSpace (channel) {
-      let space = utils.emptySpace(nanoid())
+      const space = utils.emptySpace(nanoid())
       space.cacheDate = new Date().getTime()
       space.name = channel.title
       const metaCard = {
@@ -196,7 +201,7 @@ export default {
       }
     },
     createCard (block, position) {
-      let card = { id: nanoid() }
+      const card = { id: nanoid() }
       const type = block.class
       const title = block.title
       console.info('**', block, type)
@@ -226,13 +231,12 @@ export default {
       card.z = z
       return card
     },
-
     cardPositions ({ currentIndex, lastCard }) {
-      let x, y, z
+      let x, y
       const startX = 40
       const startY = 50
       const cardWidth = 235
-      let cardHeight = 235
+      const cardHeight = 235
       const cardMargin = 20
       const viewportWidth = this.$store.state.viewportWidth - (cardWidth + cardMargin)
       x = startX
@@ -246,7 +250,7 @@ export default {
           x = startX
         }
       }
-      z = currentIndex
+      const z = currentIndex
       return { x, y, z }
     }
   }
