@@ -178,7 +178,7 @@ dialog.add-space.narrow(
     @isLoading="updateTemplatesIsLoading"
     @selectSpace="duplicateSpace"
   )
-  GenerateSpace
+  //- GenerateSpace
   //- Import
   section
     .row
