@@ -17,6 +17,7 @@ import namesPlugin from 'colord/plugins/names'
 import qs from '@aguezz/qs-parse'
 import getCurvePoints from '@/libs/curve_calc.js'
 import random from 'lodash-es/random'
+import cloneDeep from 'lodash-es/cloneDeep'
 import randomColor from 'randomcolor'
 // https://data.iana.org/TLD/tlds-alpha-by-domain.txt
 // Updated Jun 9 2021 UTC
@@ -335,9 +336,7 @@ export default {
   clone (object) {
     if (!object) { return }
     this.typeCheck({ value: object, type: 'object' })
-    let cloned = JSON.stringify(object)
-    cloned = JSON.parse(cloned)
-    return cloned
+    return cloneDeep(object)
   },
   isUndefinedOrNull (value) {
     return value === undefined || value === null
