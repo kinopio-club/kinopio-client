@@ -1,4 +1,4 @@
-<script>
+<script setup>
 import { reactive, computed, onMounted, onBeforeUnmount, watch, ref, nextTick } from 'vue'
 import { useStore } from 'vuex'
 
@@ -31,7 +31,7 @@ const updateImageUrls = () => {
 
 <template lang="pug">
 .preload
-  template(v-for="url in imageUrls")
+  template(v-for="url in state.imageUrls")
     img.hidden(:src="url")
 
   .icons.hidden
