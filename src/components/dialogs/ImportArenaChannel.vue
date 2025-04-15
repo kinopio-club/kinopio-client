@@ -1,5 +1,3 @@
-/* eslint-disable vue/require-explicit-emits */
-
 <template lang="pug">
 dialog.import-arena-channel.narrow(v-if="visible" :open="visible" @click.left.stop ref="dialog")
   section
