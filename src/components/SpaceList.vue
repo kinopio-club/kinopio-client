@@ -326,13 +326,12 @@ const focusPreviousItem = (currentIndex) => {
   const previousItem = spaces[currentIndex - 1]
   if (firstItemIsFocused) {
     closeDialog()
-  } else
-    if (previousItem) {
-      state.focusOnId = previousItem.id
-    } else {
-      state.focusOnId = firstItem.id
-      emit('focusBeforeFirstItem')
-    }
+  } else if (previousItem) {
+    state.focusOnId = previousItem.id
+  } else {
+    state.focusOnId = firstItem.id
+    emit('focusBeforeFirstItem')
+  }
 }
 const focusNextItem = (currentIndex) => {
   const spaces = spacesFiltered.value

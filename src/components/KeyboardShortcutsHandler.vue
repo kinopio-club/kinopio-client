@@ -114,6 +114,7 @@ const handleShortcuts = (event) => {
   const isSpaceScope = checkIsSpaceScope(event)
   const isMinimapDialogScope = checkIsMinimapDialogScope(event)
   const toolbarIsDrawing = store.state.currentUserToolbar === 'drawing'
+  const canEditSpace = store.getters['currentUser/canEditSpace']()
   // ?
   if (key === '?' && isSpaceScope) {
     store.commit('triggerKeyboardShortcutsIsVisible')
@@ -181,6 +182,7 @@ const handleShortcuts = (event) => {
     }
   // d
   } else if (key === 'd' && isSpaceScope) {
+    if (!canEditSpace) { return }
     if (toolbarIsDrawing && store.state.drawingEraserIsActive) {
       store.commit('drawingEraserIsActive', false)
       return
