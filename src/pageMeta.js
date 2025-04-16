@@ -2,8 +2,7 @@ import utils from '@/utils.js'
 import consts from '@/consts.js'
 import sortBy from 'lodash-es/sortBy'
 
-const logo = 'https://updates.kinopio.club/logo-social-media-avatar.png'
-const ogImage = 'https://kinopio.club/og-image.png'
+const defaultImage = 'https://kinopio.club/og-image.png'
 const defaultDescription = 'Kinopio is a spatial note taking tool for visually collecting and connecting your thoughts, ideas, and feelings.'
 
 const fetchSpacePublicMeta = async (spaceId) => {
@@ -64,16 +63,16 @@ const updateImageMeta = (imageUrl) => {
   if (element) {
     element.content = imageUrl
   } else {
-    const ogImage = document.createElement('meta')
-    ogImage.setAttribute('property', 'og:image')
-    ogImage.setAttribute('content', imageUrl)
+    const defaultImage = document.createElement('meta')
+    defaultImage.setAttribute('property', 'og:image')
+    defaultImage.setAttribute('content', imageUrl)
   }
 }
 const resetImage = () => {
-  updateImageMeta(ogImage)
+  updateImageMeta(defaultImage)
 }
 const updateImage = (space) => {
-  const imageUrl = space.previewImage || spacePreviewImageFromId(space.id) || ogImage
+  const imageUrl = space.previewImage || spacePreviewImageFromId(space.id) || defaultImage
   updateImageMeta(imageUrl)
 }
 // description
@@ -110,7 +109,7 @@ export default {
   updateSpace (space) {
     space = utils.clone(space)
     const isHelloSpace = space.name === 'Hello Kinopio'
-    const imageUrl = space.previewImage || spacePreviewImageFromId(space.id) || logo
+    const imageUrl = space.previewImage || spacePreviewImageFromId(space.id)
     updateTitle(space)
     updateImage(space)
     // description
