@@ -51,7 +51,7 @@ const interact = (event) => {
 }
 const isDrawingConnection = computed(() => store.state.currentUserIsDrawingConnection)
 const drawCurrentConnection = (event) => {
-  let end = utils.cursorPositionInSpace(event)
+  const end = utils.cursorPositionInSpace(event)
   let start = utils.connectorCoords(props.startItemId)
   start = utils.cursorPositionInSpace(null, start)
   const controlPoint = store.state.currentUser.defaultConnectionControlPoint
@@ -79,7 +79,7 @@ const checkCurrentConnectionSuccess = (event) => {
   const position = utils.cursorPositionInViewport(event)
   const cardElement = utils.cardElementFromPosition(position.x, position.y)
   const boxElement = utils.boxElementFromConnectorPosition(position.x, position.y)
-  let updates = { userId: store.state.currentUser.id }
+  const updates = { userId: store.state.currentUser.id }
   let isCurrentConnectionConnected
   if (cardElement) {
     isCurrentConnectionConnected = props.startItemId !== cardElement.dataset.cardId
@@ -184,7 +184,7 @@ const normalizedConnectionPathRect = () => {
 const connectionStyles = computed(() => {
   const rect = normalizedConnectionPathRect()
   if (!rect) { return }
-  let styles = {
+  const styles = {
     left: rect.x + 'px',
     top: rect.y + 'px',
     width: rect.width + 'px',

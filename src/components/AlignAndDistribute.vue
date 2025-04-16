@@ -329,7 +329,7 @@ const alignTop = () => {
 }
 const alignTopItems = (items, type) => {
   const zoom = spaceCounterZoomDecimal.value
-  let newItems = []
+  const newItems = []
   const origin = items[0]
   items.forEach((item, index) => {
     if (index > 0) {
@@ -425,7 +425,7 @@ const alignLeft = () => {
 }
 const alignLeftItems = (items, type) => {
   const zoom = spaceCounterZoomDecimal.value
-  let newItems = []
+  const newItems = []
   const origin = items[0]
   items.forEach((item, index) => {
     if (index > 0) {
@@ -516,7 +516,7 @@ const distributeVerticallyItems = (items, type) => {
 // distances between
 
 const xDistancesBetween = (items) => {
-  let xDistances = []
+  const xDistances = []
   items.forEach((item, index) => {
     if (index > 0) {
       const previousItem = items[index - 1]
@@ -528,7 +528,7 @@ const xDistancesBetween = (items) => {
   return xDistances
 }
 const yDistancesBetween = (items) => {
-  let yDistances = []
+  const yDistances = []
   items.forEach((item, index) => {
     if (index > 0) {
       const previousItem = items[index - 1]

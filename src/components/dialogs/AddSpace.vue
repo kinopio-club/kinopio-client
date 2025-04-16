@@ -4,6 +4,7 @@ import { useStore } from 'vuex'
 
 import UserTemplateSpaceList from '@/components/UserTemplateSpaceList.vue'
 import UserSettingsNewSpaces from '@/components/subsections/UserSettingsNewSpaces.vue'
+import GenerateSpace from '@/components/GenerateSpace.vue'
 import Loader from '@/components/Loader.vue'
 import utils from '@/utils.js'
 import cache from '@/cache.js'
@@ -56,7 +57,7 @@ const closeAll = () => {
 const updateDialogHeight = async () => {
   if (!props.visible) { return }
   await nextTick()
-  let element = dialogElement.value
+  const element = dialogElement.value
   state.dialogHeight = utils.elementHeight(element)
 }
 const shouldHideFooter = (value) => {
@@ -154,13 +155,13 @@ dialog.add-space.narrow(
   :style="{'max-height': state.dialogHeight + 'px'}"
 )
   section
-    .row
+    .row.title-row
       //- New Space
       button.success(@click="addSpace")
         img.icon(src="@/assets/add.svg")
         span New Space
-      button(@click.stop="toggleSettingsIsVisible" :class="{ active: state.settingsIsVisible }")
-        img.icon.settings(src="@/assets/settings.svg")
+      button.small-button(@click.stop="toggleSettingsIsVisible" :class="{ active: state.settingsIsVisible }" title="New Space Options")
+        span ⋯
     //- new space settings
     section.subsection(v-if="state.settingsIsVisible")
       UserSettingsNewSpaces
@@ -177,6 +178,7 @@ dialog.add-space.narrow(
     @isLoading="updateTemplatesIsLoading"
     @selectSpace="duplicateSpace"
   )
+  //- GenerateSpace
   //- Import
   section
     .row
@@ -196,4 +198,6 @@ dialog.add-space
   .inbox-icon
     margin 0
     margin-left 5px
+  .title-row
+    align-items flex-start
 </style>

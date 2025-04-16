@@ -15,10 +15,13 @@ const isSpaceMember = computed(() => store.getters['currentUser/isSpaceMember'](
 const spacePrivacyIsOpen = computed(() => store.state.currentSpace.privacy === 'open')
 const showInExplore = computed(() => store.state.currentSpace.showInExplore)
 const isTemplate = computed(() => store.state.currentSpace.isTemplate)
+const isHidden = computed(() => {
+  return isSpaceMember.value && !showInExplore.value && !isTemplate.value && !props.spaceGroup
+})
 </script>
 
 <template lang="pug">
-.row.align-items-top.space-info-badges(v-if="visible")
+.row.align-items-top.space-info-badges(v-if="visible && !isHidden")
   template(v-if="!isSpaceMember")
     .badge.info(v-if="!spacePrivacyIsOpen")
       span Read Only

@@ -14,7 +14,7 @@ const exploreSpaces = async () => {
     const apiHost = 'https://api.kinopio.club'
     const response = await fetch(`${apiHost}/space/explore-spaces`)
     const data = await response.json()
-    let paths = data.map(space => space.url)
+    const paths = data.map(space => space.url)
     return paths.map(path => `/${path}`)
   } catch (error) {
     console.error('🚒 exploreSpaceUrls', error)
@@ -31,7 +31,8 @@ export default defineConfig(async ({ command, mode }) => {
     '/discord',
     '/forum',
     '/help',
-    '/roadmap'
+    '/roadmap',
+    '/survey'
   ]
   const exploreSpaceRoutes = await exploreSpaces() || []
   const dynamicRoutes = routes.concat(exploreSpaceRoutes)
@@ -60,6 +61,7 @@ export default defineConfig(async ({ command, mode }) => {
             /^\/changelog$/,
             /^\/roadmap$/,
             /^\/discord$/,
+            /^\/survey$/,
             // Exclude '/route' and all subpaths (e.g. /route/post)
             /^\/help(?:\/.*)?$/,
             /^\/about(?:\/.*)?$/,

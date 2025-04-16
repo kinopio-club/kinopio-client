@@ -32,7 +32,7 @@ const incrementCardsZ = (context, cards) => {
   return cards
 }
 
-const currentCards = {
+export default {
   namespaced: true,
   state: {
     ids: [],
@@ -51,7 +51,7 @@ const currentCards = {
       tallestCardHeight = 0
     },
     restore: (state, cards) => {
-      let cardIds = []
+      const cardIds = []
       cards.forEach(card => {
         cardIds.push(card.id)
         card.x = card.x || 100
@@ -92,7 +92,7 @@ const currentCards = {
       const keys = Object.keys(card)
       const prevCard = state.cards[card.id]
       if (!prevCard) { return }
-      let updatedCard = utils.clone(prevCard)
+      const updatedCard = utils.clone(prevCard)
       keys.forEach(key => {
         updatedCard[key] = card[key]
       })
@@ -184,8 +184,8 @@ const currentCards = {
     mergeUnique: (context, newCards) => {
       newCards.forEach(newCard => {
         let shouldUpdate
-        let prevCard = context.getters.byId(newCard.id)
-        let card = { id: newCard.id }
+        const prevCard = context.getters.byId(newCard.id)
+        const card = { id: newCard.id }
         let keys = Object.keys(newCard)
         keys = keys.filter(key => key !== 'id')
         keys.forEach(key => {
@@ -213,7 +213,7 @@ const currentCards = {
       }
       const { x, y, position, isParentCard, name, id, backgroundColor, width, height } = card
       utils.typeCheck({ value: position, type: 'object', allowUndefined: true })
-      let cards = context.getters.all
+      const cards = context.getters.all
       // new card values
       const highestCardZ = utils.highestItemZ(cards)
       const defaultBackgroundColor = context.rootState.currentUser.defaultCardBackgroundColor
@@ -346,11 +346,12 @@ const currentCards = {
         context.commit('triggerUpdateCardDimensionsAndPaths', card.id, { root: true })
       }
       await context.dispatch('api/addToQueue', { name: 'updateCard', body: card }, { root: true })
+      context.dispatch('currentSpace/updateSpacePreviewImage', null, { root: true })
     },
     updateMultiple: async (context, cards) => {
       if (!cards.length) { return }
       const spaceId = context.rootState.currentSpace.id
-      let updates = {
+      const updates = {
         cards,
         spaceId: context.rootState.currentSpace.id
       }
@@ -369,6 +370,7 @@ const currentCards = {
       })
       cache.updateSpace('editedByUserId', context.rootState.currentUser.id, currentSpaceId)
       await context.dispatch('api/addToQueue', { name: 'updateMultipleCards', body: updates }, { root: true })
+      context.dispatch('currentSpace/updateSpacePreviewImage', null, { root: true })
     },
     updateCounter: async (context, { card, shouldIncrement, shouldDecrement }) => {
       const isSignedIn = context.rootGetters['currentUser/isSignedIn']
@@ -459,7 +461,7 @@ const currentCards = {
         cards = context.getters.all
       }
       nextTick(() => {
-        let newCards = []
+        const newCards = []
         cards = cards.filter(card => Boolean(card))
         let cardIds = cards.map(newCard => newCard.id)
         cardIds = cardIds.filter(cardId => Boolean(cardId))
@@ -520,7 +522,7 @@ const currentCards = {
       if (cardId) {
         context.dispatch('removeResize', { cardIds: [cardId] })
       } else if (cardIds) {
-        context.dispatch('removeResize', { cardIds: cardIds })
+        context.dispatch('removeResize', { cardIds })
       }
     },
     updateTallestCardHeight: (context, card) => {
@@ -552,9 +554,9 @@ const currentCards = {
       })
     },
     removeResize: (context, { cardIds, shouldRemoveResizeWidth }) => {
-      let updates = []
+      const updates = []
       cardIds.forEach(cardId => {
-        let body = { id: cardId, width: null }
+        const body = { id: cardId, width: null }
         if (shouldRemoveResizeWidth) {
           body.resizeWidth = null
         }
@@ -768,7 +770,7 @@ const currentCards = {
       const deltaHeight = newCardHeight - prevCardHeight
       if (deltaHeight === 0) { return }
       // distributeVertically aligned cards below
-      const alignedCards = context.getters['verticallyAlignedCardsBelowId'](cardId, deltaHeight)
+      const alignedCards = context.getters.verticallyAlignedCardsBelowId(cardId, deltaHeight)
       if (!alignedCards.length) { return }
       alignedCards.unshift(card)
       await context.dispatch('distributeVertically', alignedCards)
@@ -778,7 +780,7 @@ const currentCards = {
     // z-index
 
     clearAllZs: async (context) => {
-      let cards = context.getters.all
+      const cards = context.getters.all
       for (const card of cards) {
         const body = { id: card.id, z: 0 }
         context.commit('update', body)
@@ -868,7 +870,7 @@ const currentCards = {
       }
       // result
       cards = sortBy(cards, ['y'])
-      let yIndex = []
+      const yIndex = []
       cards.forEach(card => yIndex.push(card.y))
       const result = {
         cards,
@@ -929,7 +931,7 @@ const currentCards = {
     },
     verticallyAlignedCardsBelowId: (state, getters) => (cardId, deltaHeight) => {
       deltaHeight = deltaHeight || 0
-      let parentCard = utils.clone(getters.byId(cardId))
+      const parentCard = utils.clone(getters.byId(cardId))
       parentCard.height = parentCard.height - deltaHeight
       let cards = getters.all
       cards = cards.filter(card => {
@@ -938,7 +940,7 @@ const currentCards = {
         return isAlignedX && isBelow
       })
       // recursion: match cards alignedY successively
-      let alignedCards = []
+      const alignedCards = []
       let prevAlignedCard
       do {
         const parent = prevAlignedCard || parentCard
@@ -957,8 +959,8 @@ const currentCards = {
       return alignedCards
     },
     isSelectableInViewport: (state, getters, rootState, rootGetters) => {
-      const elements = document.querySelectorAll(`.card-wrap`)
-      let cards = []
+      const elements = document.querySelectorAll('.card-wrap')
+      const cards = []
       elements.forEach(element => {
         if (element.dataset.isVisibleInViewport === 'false') { return }
         if (element.dataset.isLocked === 'true') { return }
@@ -998,7 +1000,7 @@ const currentCards = {
       yIndex = yIndex.map(y => parseInt(y))
       const min = Math.max(position.y - threshold, 0)
       const max = min + threshold
-      let minIndex = yIndex.findIndex(y => y >= min)
+      const minIndex = yIndex.findIndex(y => y >= min)
       let maxIndex = yIndex.findIndex(y => y >= max)
       if (minIndex === -1) { return }
       if (maxIndex === -1) {
@@ -1026,9 +1028,9 @@ const currentCards = {
       return cardIds
     },
     linkedItems: (state, getters) => {
-      let cardIds = []
-      let spaceIds = []
-      let invites = []
+      const cardIds = []
+      const spaceIds = []
+      const invites = []
       const cards = getters.all
       cards.forEach(card => {
         const cardIdIsValid = utils.idIsValid(card.linkToCardId)
@@ -1045,7 +1047,7 @@ const currentCards = {
       return { cardIds, spaceIds, invites }
     },
     withTagName: (state, getters) => (tagName) => {
-      let cards = getters.all
+      const cards = getters.all
       return cards.filter(card => {
         const tags = utils.tagsFromStringWithoutBrackets(card.name)
         if (tags) {
@@ -1066,7 +1068,7 @@ const currentCards = {
     },
     users: (state, getters, rootState, rootGetters) => {
       let users = getters.userIds.map(id => {
-        let user = rootGetters['currentSpace/userById'](id)
+        const user = rootGetters['currentSpace/userById'](id)
         return user
       })
       users = users.filter(user => Boolean(user))
@@ -1115,13 +1117,13 @@ const currentCards = {
     },
     nameSegments: (state, getters) => (card) => {
       let name = card.name
-      let url = utils.urlFromString(name)
+      const url = utils.urlFromString(name)
       let imageUrl
       if (utils.urlIsImage(url)) {
         imageUrl = url
         name = name.replace(url, '')
       }
-      let segments = utils.cardNameSegments(name)
+      const segments = utils.cardNameSegments(name)
       if (imageUrl) {
         segments.unshift({
           isImage: true,
@@ -1152,5 +1154,3 @@ const currentCards = {
     }
   }
 }
-
-export default currentCards

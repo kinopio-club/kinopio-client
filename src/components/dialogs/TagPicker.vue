@@ -73,7 +73,7 @@ const closeDialog = () => {
   emit('closeDialog')
 }
 const scrollIntoView = () => {
-  let element = dialogElement.value
+  const element = dialogElement.value
   store.commit('scrollElementIntoView', { element })
 }
 
@@ -87,7 +87,7 @@ const filteredTags = computed(() => {
     pre: '',
     post: '',
     extract: (item) => {
-      let name = item.name || ''
+      const name = item.name || ''
       return name
     }
   }
@@ -125,7 +125,7 @@ const updateRemoteTags = async () => {
 // search tags matching
 
 const searchTagMatch = computed(() => {
-  let tag = state.tags.find(tag => {
+  const tag = state.tags.find(tag => {
     return tag.name === props.search
   })
   if (tag) {
@@ -135,7 +135,7 @@ const searchTagMatch = computed(() => {
   }
 })
 const searchTagColor = computed(() => {
-  let tag = searchTagMatch.value
+  const tag = searchTagMatch.value
   if (tag) {
     return tag.color
   } else {
@@ -182,7 +182,7 @@ const triggerPickerNavigationKey = (key) => {
     name: props.search,
     color: searchTagColor.value
   }]
-  let tags = searchTag.concat(filteredTags.value)
+  const tags = searchTag.concat(filteredTags.value)
   const currentIndex = tags.findIndex(tag => tag.name === state.focusOnName)
   if (key === 'ArrowUp') {
     focusPreviousItem(tags, currentIndex)
@@ -239,13 +239,13 @@ const updateHeights = async () => {
 const updateDialogHeight = async () => {
   if (!props.visible) { return }
   await nextTick()
-  let element = dialogElement.value
+  const element = dialogElement.value
   state.dialogHeight = utils.elementHeight(element)
 }
 const updateResultsSectionHeight = async () => {
   if (!props.visible) { return }
   await nextTick()
-  let element = resultsElement.value
+  const element = resultsElement.value
   state.resultsSectionHeight = utils.elementHeight(element, true)
 }
 </script>

@@ -75,7 +75,7 @@ const broadcastShowBoxDetails = () => {
 }
 const update = (updates) => {
   const keys = Object.keys(updates)
-  let box = { id: currentBox.value.id }
+  const box = { id: currentBox.value.id }
   keys.forEach(key => {
     box[key] = updates[key]
   })
@@ -129,7 +129,7 @@ const selectName = () => {
 }
 const textareaSizes = () => {
   const element = dialogElement.value
-  let textarea = element.querySelector('textarea')
+  const textarea = element.querySelector('textarea')
   let modifier = 0
   if (canEditBox.value) {
     modifier = 1

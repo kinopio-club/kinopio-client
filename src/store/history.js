@@ -27,11 +27,12 @@
 import utils from '@/utils.js'
 import { nextTick } from 'vue'
 
-let showDebugMessages = false
+const showDebugMessages = false
 const showLogMessages = true // true
 
 let prevPatchTime = new Date() // unix timestamp ms
 
+const max = 30
 let patches = []
 let pointer = 0
 let isPaused = false
@@ -56,13 +57,13 @@ const normalizeUpdates = ({ item, itemType, previous, isRemoved }) => {
   // updated
   } else {
     const action = `${itemType}Updated`
-    let keys = Object.keys(item)
+    const keys = Object.keys(item)
     const ignoreKeys = ['nameUpdatedAt', 'height', 'width', 'z', 'urlPreviewDescription', 'urlPreviewFavicon', 'urlPreviewImage', 'urlPreviewTitle', 'urlPreviewUrl', 'urlPreviewIframeUrl', 'shouldUpdateUrlPreview']
-    let updatedKeys = keys.filter(key => item[key] !== previous[key] && !ignoreKeys.includes(key))
+    const updatedKeys = keys.filter(key => item[key] !== previous[key] && !ignoreKeys.includes(key))
     if (!updatedKeys.length) { return }
     updatedKeys.unshift('id')
-    let prev = {}
-    let updates = {}
+    const prev = {}
+    const updates = {}
     updatedKeys.forEach(key => {
       prev[key] = previous[key]
       updates[key] = item[key]
@@ -98,7 +99,6 @@ const self = {
       console.info('⏺ updated prev history patch', { updatedPatch, pointer })
     },
     trim: (state) => {
-      const max = 60
       if (patches.length > max) {
         patches.shift()
         pointer = pointer - 1
@@ -171,7 +171,7 @@ const self = {
         cards = cards.map(card => {
           let previous = context.rootGetters['currentCards/byId'](card.id)
           if (useSnapshot) {
-            previous = snapshots['cards'][card.id]
+            previous = snapshots.cards[card.id]
           }
           return normalizeUpdates({ item: card, itemType: 'card', previous, isRemoved })
         })
@@ -182,7 +182,7 @@ const self = {
         connections = connections.map(connection => {
           let previous = context.rootGetters['currentConnections/byId'](connection.id)
           if (useSnapshot) {
-            previous = snapshots['connections'][connection.id]
+            previous = snapshots.connections[connection.id]
           }
           return normalizeUpdates({ item: connection, itemType: 'connection', previous, isRemoved })
         })
@@ -193,7 +193,7 @@ const self = {
         connectionTypes = connectionTypes.map(type => {
           let previous = context.rootGetters['currentConnections/typeByTypeId'](type.id)
           if (useSnapshot) {
-            previous = snapshots['connectionTypes'][type.id]
+            previous = snapshots.connectionTypes[type.id]
           }
           return normalizeUpdates({ item: type, itemType: 'connectionType', previous, isRemoved })
         })
@@ -204,7 +204,7 @@ const self = {
         boxes = boxes.map(box => {
           let previous = context.rootGetters['currentBoxes/byId'](box.id)
           if (useSnapshot) {
-            previous = snapshots['boxes'][box.id]
+            previous = snapshots.boxes[box.id]
           }
           return normalizeUpdates({ item: box, itemType: 'box', previous, isRemoved })
         })
@@ -223,6 +223,11 @@ const self = {
     // Undo
 
     undo: (context) => {
+      const toolbarIsDrawing = context.rootState.currentUserToolbar === 'drawing'
+      if (toolbarIsDrawing) {
+        context.commit('triggerDrawingUndo', null, { root: true })
+        return
+      }
       if (isPaused) { return }
       if (pointer <= 0) {
         context.commit('pointer', { value: 0 })
@@ -297,6 +302,11 @@ const self = {
     // Redo
 
     redo: (context, patch) => {
+      const toolbarIsDrawing = context.rootState.currentUserToolbar === 'drawing'
+      if (toolbarIsDrawing) {
+        context.commit('triggerDrawingRedo', null, { root: true })
+        return
+      }
       if (!patch) {
         if (isPaused) { return }
         const pointerIsNewest = pointer === patches.length

@@ -3,8 +3,8 @@ import consts from '@/consts.js'
 import sortBy from 'lodash-es/sortBy'
 
 const logo = 'https://updates.kinopio.club/logo-social-media-avatar.png'
-const ogImageURL = 'https://kinopio.club/og-image.png'
-const defaultDescription = 'A space to whiteboard, moodboard, brainstorm, and take notes'
+const ogImage = 'https://kinopio.club/og-image.png'
+const defaultDescription = 'Kinopio is a spatial note taking tool for visually collecting and connecting your thoughts, ideas, and feelings.'
 
 const fetchSpacePublicMeta = async (spaceId) => {
   const url = `${consts.apiHost()}/space/${spaceId}/public-meta`
@@ -59,17 +59,17 @@ const updateSpaceTitle = (space) => {
 }
 /// Resets the og:image meta tag to the default image
 const resetImage = () => {
-  document.querySelector('meta[property="og:image"]').content = ogImageURL
+  document.querySelector('meta[property="og:image"]').content = ogImage
   document.querySelector('meta[property="og:image:width"]').content = 1200
   document.querySelector('meta[property="og:image:height"]').content = 630
   document.querySelector('meta[property="og:image:type"]').content = 'image/png'
 }
 /// Updates the og:image meta tag to the space preview image
 const updateImage = (space) => {
-  const imageUrl = space.previewImage || spacePreviewImageFromId(space.id) || ogImageURL
+  const imageUrl = space.previewImage || spacePreviewImageFromId(space.id) || ogImage
   document.querySelector('meta[property="og:image"]').content = imageUrl
-  document.querySelector('meta[property="og:image:width"]').content = 1180
-  document.querySelector('meta[property="og:image:height"]').content = 670
+  document.querySelector('meta[property="og:image:width"]').content = 1200
+  document.querySelector('meta[property="og:image:height"]').content = 630
   document.querySelector('meta[property="og:image:type"]').content = 'image/jpeg'
 }
 const updateDescription = (description) => {
@@ -84,7 +84,7 @@ const updateDescription = (description) => {
 export default {
   // called by routes
   async spaceFromId ({ spaceId, isSpaceInvite }) {
-    let path = window.document.location.pathname
+    const path = window.document.location.pathname
     if (!spaceId) {
       const ids = utils.spaceAndCardIdFromPath(path)
       spaceId = ids?.spaceId
@@ -183,7 +183,7 @@ export default {
     }
     updateTitle(title)
     resetImage()
-    let description = 'Work together on shared whiteboards, brainstorms, and diagrams'
+    const description = defaultDescription
     updateDescription(description)
   }
 }

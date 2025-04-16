@@ -15,6 +15,11 @@ export default {
   props: {
     visible: Boolean
   },
+  watch: {
+    visible (visible) {
+      this.$store.commit('clearNotificationsWithPosition')
+    }
+  },
   created () {
     this.$store.subscribe((mutation, state) => {
       if (mutation.type === 'triggerSpaceDetailsInfoIsVisible') {
@@ -27,11 +32,6 @@ export default {
   methods: {
     closeDialogs () {
       this.$store.commit('triggerCloseChildDialogs')
-    }
-  },
-  watch: {
-    visible (visible) {
-      this.$store.commit('clearNotificationsWithPosition')
     }
   }
 }

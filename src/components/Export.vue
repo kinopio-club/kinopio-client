@@ -34,7 +34,7 @@ const text = computed(() => utils.nameStringFromItems(currentSpace.value.cards))
 const fileName = () => {
   const spaceName = store.state.currentSpace.name
   const spaceId = store.state.currentSpace.id
-  let fileName = spaceName || `kinopio-space-${spaceId}`
+  const fileName = spaceName || `kinopio-space-${spaceId}`
   return fileName
 }
 const copyText = async (event) => {
@@ -49,7 +49,7 @@ const copyText = async (event) => {
   }
 }
 const downloadLocalJson = () => {
-  let space = utils.clone(currentSpace.value)
+  const space = utils.clone(currentSpace.value)
   delete space.clients
   const json = 'data:text/json;charset=utf-8,' + encodeURIComponent(JSON.stringify(space))
   const name = fileName()
@@ -112,7 +112,7 @@ const pdf = async () => {
 // https://jsoncanvas.org/spec/1.0/
 
 const downloadLocalCanvas = () => {
-  let space = utils.clone(currentSpace.value)
+  const space = utils.clone(currentSpace.value)
   delete space.clients
   const canvas = convertToCanvas(space)
   console.info('🧚 canvas to download', canvas)
@@ -124,7 +124,7 @@ const downloadLocalCanvas = () => {
   downloadAnchor.click()
 }
 const convertToCanvas = (space) => {
-  let canvas = {}
+  const canvas = {}
   canvas.nodes = []
   canvas.edges = []
   try {

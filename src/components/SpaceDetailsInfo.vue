@@ -100,7 +100,7 @@ const pendingUpload = computed(() => {
 })
 const remotePendingUpload = computed(() => {
   const currentSpace = store.state.currentSpace
-  let remotePendingUploads = store.state.remotePendingUploads
+  const remotePendingUploads = store.state.remotePendingUploads
   return remotePendingUploads.find(upload => {
     const inProgress = upload.percentComplete < 100
     const isSpace = upload.spaceId === currentSpace.id
@@ -315,29 +315,30 @@ SpaceInfoBadges(:visible="!dialogIsPinned" :spaceGroup="spaceGroup")
 
 //- members
 template(v-if="isSpaceMember")
-  .row
-    //- Privacy
-    PrivacyButton(:privacyPickerIsVisible="state.privacyPickerIsVisible" :showShortName="true" @togglePrivacyPickerIsVisible="togglePrivacyPickerIsVisible" @closeDialogs="closeDialogs" @updateLocalSpaces="updateLocalSpaces")
-      //- toggle space group | favorite
-    template(v-if="userGroups")
-      .button-wrap
-        .segmented-buttons
-          //- Group
-          button.group-button(title="Add to Group" :class="{active: state.addToGroupIsVisible || spaceGroup}" @click.left.prevent.stop="toggleAddToGroupIsVisible" @keydown.stop.enter="toggleAddToGroupIsVisible")
-            img.icon.group(src="@/assets/group.svg")
-          //- Template
-          button(:class="{ active: currentSpaceIsUserTemplate }" @click.left.prevent="toggleCurrentSpaceIsUserTemplate" @keydown.stop.enter="toggleCurrentSpaceIsUserTemplate" title="Mark as Template")
-            img.icon.templates(src="@/assets/templates.svg")
-          //- Favorite
-          FavoriteSpaceButton(:parentIsDialog="true" @updateLocalSpaces="updateLocalSpaces")
-        AddToGroup(:visible="state.addToGroupIsVisible" @selectGroup="toggleSpaceGroup" :groups="userGroups" :selectedGroup="spaceGroup" @closeDialogs="closeDialogs")
-    template(v-else)
-      //- Favorite
-      FavoriteSpaceButton(:parentIsDialog="true" @updateLocalSpaces="updateLocalSpaces")
+  .row.title-row
+    div
+      //- Privacy
+      PrivacyButton(:privacyPickerIsVisible="state.privacyPickerIsVisible" :showShortName="true" @togglePrivacyPickerIsVisible="togglePrivacyPickerIsVisible" @closeDialogs="closeDialogs" @updateLocalSpaces="updateLocalSpaces")
+        //- toggle space group | favorite
+      template(v-if="userGroups")
+        .button-wrap
+          .segmented-buttons
+            //- Group
+            button.group-button(title="Add to Group" :class="{active: state.addToGroupIsVisible || spaceGroup}" @click.left.prevent.stop="toggleAddToGroupIsVisible" @keydown.stop.enter="toggleAddToGroupIsVisible")
+              img.icon.group(src="@/assets/group.svg")
+            //- Template
+            button(:class="{ active: currentSpaceIsUserTemplate }" @click.left.prevent="toggleCurrentSpaceIsUserTemplate" @keydown.stop.enter="toggleCurrentSpaceIsUserTemplate" title="Mark as Template")
+              img.icon.templates(src="@/assets/templates.svg")
+            //- Favorite
+            FavoriteSpaceButton(:parentIsDialog="true" @updateLocalSpaces="updateLocalSpaces")
+          AddToGroup(:visible="state.addToGroupIsVisible" @selectGroup="toggleSpaceGroup" :groups="userGroups" :selectedGroup="spaceGroup" @closeDialogs="closeDialogs")
+      template(v-else)
+        //- Favorite
+        FavoriteSpaceButton(:parentIsDialog="true" @updateLocalSpaces="updateLocalSpaces")
     //- Options
     .button-wrap
       button(@click="toggleOptionsIsVisible" :class="{active: state.optionsIsVisible}" title="Space Options")
-        span Options
+        span ⋯
   .row(v-if="state.error.updateSpaceGroup")
     .badge.danger
       img.icon.cancel(src="@/assets/add.svg")

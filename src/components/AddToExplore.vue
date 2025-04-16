@@ -83,7 +83,7 @@ const toggleShowInExplore = async (event) => {
     await updateShowInExplore()
   }
   notifyShowInExplore(event)
-  store.dispatch('currentSpace/createSpacePreviewImage')
+  store.dispatch('currentSpace/updateSpacePreviewImage')
 }
 const notifyShowInExplore = (event) => {
   const shouldShow = showInExplore.value
@@ -95,7 +95,7 @@ const notifyShowInExplore = (event) => {
   }
 }
 const emitUpdateShowInExplore = () => {
-  let space = props.space
+  const space = props.space
   space.showInExplore = !space.showInExplore
   emit('updateAddToExplore', space)
 }

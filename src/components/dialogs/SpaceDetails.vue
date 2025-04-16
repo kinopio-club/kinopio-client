@@ -63,7 +63,7 @@ const init = async () => {
   }
   await updateWithRemoteSpaces()
   updateHeights()
-  store.dispatch('currentSpace/createSpacePreviewImage')
+  store.dispatch('currentSpace/updateSpacePreviewImage')
 }
 
 // current space
@@ -112,12 +112,12 @@ const updateHeightsFrame = () => {
 }
 const updateDialogHeight = async () => {
   await nextTick()
-  let element = dialogElement.value
+  const element = dialogElement.value
   state.dialogHeight = utils.elementHeight(element)
 }
 const updateResultsSectionHeight = async () => {
   await nextTick()
-  let element = resultsElement.value
+  const element = resultsElement.value
   state.resultsSectionHeight = utils.elementHeight(element) - 2
 }
 
@@ -195,7 +195,7 @@ const shouldSortByAlphabetical = computed(() => {
   return value === 'alphabetical'
 })
 const prependFavoriteSpaces = (spaces) => {
-  let favoriteSpaces = []
+  const favoriteSpaces = []
   spaces = spaces.filter(space => {
     if (space.isFavorite) {
       favoriteSpaces.push(space)
@@ -284,12 +284,12 @@ const updateCachedSpacesWithRemoteSpaces = async (remoteSpaces) => {
     if (!remoteSpaces.length) { throw Error }
     const cacheSpaces = await cache.getAllSpaces()
     let cacheSpaceIds = cacheSpaces.map(space => space.id)
-    for (let remoteSpace of remoteSpaces) {
+    for (const remoteSpace of remoteSpaces) {
       const isCached = cacheSpaceIds.includes(remoteSpace.id)
       // update spaces with remote metadata
       if (isCached) {
         cacheSpaceIds = cacheSpaceIds.filter(id => id !== remoteSpace.id)
-        let updates = {}
+        const updates = {}
         const metaKeys = ['name', 'privacy', 'isHidden', 'updatedAt', 'editedAt', 'isRemoved', 'groupId', 'showInExplore', 'updateHash', 'isTemplate', 'previewImage', 'previewThumbnailImage', 'isFavorite']
         metaKeys.forEach(key => {
           updates[key] = remoteSpace[key]
@@ -301,7 +301,7 @@ const updateCachedSpacesWithRemoteSpaces = async (remoteSpaces) => {
       }
     }
     // update removed spaces
-    for (let cacheSpaceId of cacheSpaceIds) {
+    for (const cacheSpaceId of cacheSpaceIds) {
       await cache.removeSpace({ id: cacheSpaceId })
     }
   } catch (error) {

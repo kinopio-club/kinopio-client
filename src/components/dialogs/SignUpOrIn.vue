@@ -181,7 +181,7 @@ const signUp = async (event) => {
   const password = event.target[1].value
   const confirmPassword = event.target[2].value
   migrationAppleAppAccountToken()
-  let currentUser = utils.clone(store.state.currentUser)
+  const currentUser = utils.clone(store.state.currentUser)
   if (!isPasswordMatchesEmail(email, password)) { return }
   if (!isSignUpPasswordTooShort(password)) { return }
   if (!isSignUpPasswordsMatch(password, confirmPassword)) { return }
@@ -303,7 +303,7 @@ const updateCurrentSpaceWithNewUserId = (previousUser, newUser) => {
   store.commit('currentSpace/addUserToSpace', newUser)
 }
 const removeUneditedSpace = async (spaceName) => {
-  let currentSpace = await cache.getSpaceByName(spaceName)
+  const currentSpace = await cache.getSpaceByName(spaceName)
   let isInvitedSpaces = await cache.invitedSpaces()
   isInvitedSpaces = Boolean(isInvitedSpaces.length)
   let space
@@ -314,7 +314,8 @@ const removeUneditedSpace = async (spaceName) => {
   }
   const cardNames = space.cards.map(card => card.name)
   let spaceIsEdited
-  currentSpace?.cards.forEach(card => {
+  const cards = currentSpace?.cards || []
+  cards.forEach(card => {
     if (!card.name.trim()) { return }
     const cardIsNew = !cardNames.includes(card.name)
     if (cardIsNew) {

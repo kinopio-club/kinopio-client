@@ -55,7 +55,7 @@ Use the [Vue devtools](https://github.com/vuejs/vue-devtools) for Firefox and Ch
 | `components/Connection.vue` | Displays connections from `store.state.currentConnections`, and shows `ConnectionDetails` |
 | `components/Box.vue` | Displays boxes from `store.state.currentBoxes`, and shows `ConnectionDetails` |
 | `components/Header.vue` | Used for moving between spaces, searching/filter, shows user presence, changing user prefs, and Kinopio meta options. Shown on all routes |
-| `components/layers/MainCanvas.vue` | The layers used for drawing the paint strokes for multiple card and connection selection which reveals `MultipleSelectedActions`, scroll locking on touch, and other `<canvas>` elements that need to cover the viewport |
+| `components/layers/PaintSelectCanvas.vue` | The layers used for drawing the paint strokes for multiple card and connection selection which reveals `MultipleSelectedActions`, scroll locking on touch, and other `<canvas>` elements that need to cover the viewport |
 | `components/NewBlankTemplate.vue` | Template file for new components |
 | `components/NewBlankDialogTemplate.vue` | Template file for new dialog components |
 
@@ -101,4 +101,4 @@ To work with code that only works on https (e.g. clipboard copy and paste), [mkc
 - [are.na/kinopio/kinopio-design](https://www.are.na/kinopio/kinopio-design)
 - [github.com/kinopio-club](https://github.com/kinopio-club)
 - [User Forums](https://forum.kinopio.club)
-- [Discord](https://discord.gg/h2sR45Nby8)
+- [Discord](https://kinopio.club/discord)

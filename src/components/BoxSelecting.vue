@@ -66,7 +66,9 @@ const currentUserIsBoxSelecting = computed(() => store.state.currentUserIsBoxSel
 const startPoint = computed(() => positionInSpace(store.state.currentUserBoxSelectStart))
 const endPoint = computed(() => positionInSpace(store.state.currentUserBoxSelectMove))
 const userCantEditSpace = computed(() => !store.getters['currentUser/canEditSpace']())
+const toolbarIsDrawing = computed(() => store.state.currentUserToolbar === 'drawing')
 const shouldPreventBoxSelecting = computed(() => {
+  if (toolbarIsDrawing.value) { return true }
   const isDraggingItem = store.state.currentUserIsDraggingCard || store.state.currentUserIsDraggingBox
   return isDraggingItem
 })
@@ -78,14 +80,14 @@ const currentUserStyles = computed(() => {
   const color1 = colord(color).alpha(0.5).toRgbString()
   const color2 = colord(color).alpha(1).toRgbString()
   const gradient = `radial-gradient(farthest-corner at ${state.direction}, ${color1}, ${color2})`
-  let styles = {
+  const styles = {
     left: left + 'px',
     top: top + 'px',
     width: width + 'px',
     height: height + 'px',
     background: gradient,
     userId: store.state.currentUser.id,
-    currentBoxSelectId: currentBoxSelectId
+    currentBoxSelectId
   }
   return styles
 })
@@ -178,7 +180,7 @@ const orderedPoints = (start, end) => {
 }
 const updateItems = (items) => {
   const origin = startPoint.value
-  let selectable = { topLeft: [], topRight: [], bottomLeft: [], bottomRight: [] }
+  const selectable = { topLeft: [], topRight: [], bottomLeft: [], bottomRight: [] }
   items = items.map(item => {
     item.width = item.width || item.resizeWidth
     item.height = item.height || item.resizeHeight
@@ -207,7 +209,7 @@ const updateSelectableItems = () => {
     card.isCard = true
     return card
   })
-  let array = []
+  const array = []
   boxes.forEach(box => {
     const element = document.querySelector(`.box-info[data-box-id="${box.id}"]`)
     if (!element) { return }
@@ -231,7 +233,7 @@ const updateSelectableItems = () => {
 }
 const updateSelectableConnections = () => {
   const paths = document.querySelectorAll('svg .connection-path')
-  let connections = []
+  const connections = []
   paths.forEach(path => {
     const pathId = path.dataset.id
     const rect = path.getBoundingClientRect()
@@ -281,7 +283,7 @@ const mergePreviouslySelected = (selectedIds, type) => {
 const selectItems = (selection, relativePosition) => {
   if (userCantEditSpace.value) { return }
   const selectionPoints = points(selection)
-  let items = selectableItems[relativePosition]
+  const items = selectableItems[relativePosition]
   if (!items) { return }
   let selectedItems = items.filter(item => {
     const itemPoints = points(item)
@@ -289,7 +291,7 @@ const selectItems = (selection, relativePosition) => {
   })
   selectedItems = uniqBy(selectedItems, 'id')
   const cards = selectedItems.filter(item => item.isCard)
-  let boxes = selectedItems.filter(item => item.isBox)
+  const boxes = selectedItems.filter(item => item.isBox)
   selectItemsByType(cards, 'cards')
   selectItemsByType(boxes, 'boxes')
 }
@@ -324,7 +326,7 @@ const pointsAlongPath = (connection) => {
 }
 const selectconnections = (selection, relativePosition) => {
   if (userCantEditSpace.value) { return }
-  let connections = selectableConnections[relativePosition]
+  const connections = selectableConnections[relativePosition]
   if (!connections) { return }
   let selectedConnections = connections.filter(connection => {
     const points = pointsAlongPath(connection)

@@ -43,7 +43,7 @@ const sortSpacesByEditedAt = (spaces) => {
 const parentDialog = computed(() => 'addSpace')
 const updateResultsSectionHeight = async () => {
   await nextTick()
-  let element = resultsSectionElement.value
+  const element = resultsSectionElement.value
   state.resultsSectionHeight = utils.elementHeight(element, true)
 }
 const triggerTemplatesIsVisible = () => {
@@ -69,7 +69,7 @@ const updateRemoteSpaces = async () => {
   if (!currentUserIsSignedIn) { return }
   emit('isLoading', true)
   try {
-    let remoteSpaces = await store.dispatch('api/getUserSpaces')
+    const remoteSpaces = await store.dispatch('api/getUserSpaces')
     state.remoteSpaces = remoteSpaces.filter(space => space.isTemplate)
   } catch (error) {
     console.error('🚒 updateRemoteSpaces', error)

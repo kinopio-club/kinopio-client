@@ -38,7 +38,7 @@ onMounted(() => {
   updateDefaultColor()
   unsubscribe = store.subscribe((mutation, state) => {
     if (mutation.type === 'triggerUploadComplete') {
-      let { spaceId, url, cardId } = mutation.payload
+      const { spaceId, url, cardId } = mutation.payload
       if (cardId) { return }
       if (spaceId !== props.space?.id) { return }
       updateBackground(url)
@@ -100,7 +100,7 @@ watch(() => props.visible, (value, prevValue) => {
 const updateDialogHeight = async () => {
   if (!props.visible) { return }
   await nextTick()
-  let element = dialogElement.value
+  const element = dialogElement.value
   state.dialogHeight = utils.elementHeight(element)
 }
 
@@ -134,7 +134,7 @@ const closeDialogs = async () => {
 const updatePreviewImage = async () => {
   if (props.box) { return }
   await nextTick()
-  store.dispatch('currentSpace/createSpacePreviewImage')
+  store.dispatch('currentSpace/updateSpacePreviewImage')
 }
 const clearErrors = () => {
   state.error.isNotImageUrl = false
@@ -183,9 +183,9 @@ const toggleUrlInputIsVisible = () => {
 
 const refreshGradients = () => {
   const numberOfGradients = 6
-  let gradients = []
+  const gradients = []
   times(numberOfGradients, (index) => {
-    let gradient = utils.backgroundGradientLayers()
+    const gradient = utils.backgroundGradientLayers()
     gradient.id = nanoid()
     gradients.push(gradient)
   })
@@ -345,7 +345,7 @@ const pendingUpload = computed(() => {
   })
 })
 const remotePendingUpload = computed(() => {
-  let remotePendingUploads = store.state.remotePendingUploads
+  const remotePendingUploads = store.state.remotePendingUploads
   return remotePendingUploads.find(upload => {
     const isInProgress = upload.percentComplete < 100
     const isSpace = upload.spaceId === props.space?.id
@@ -383,7 +383,7 @@ const removeBackgroundTint = async () => {
 // recent
 
 const recentImagesFromCacheSpaces = async () => {
-  let spaces = await cache.getAllSpaces()
+  const spaces = await cache.getAllSpaces()
   let images = []
   spaces.forEach(space => {
     if (!space.background) { return }
@@ -428,7 +428,7 @@ const searchPexels = async () => {
   state.error.isNoSearchResults = false
   state.error.unknownServerError = false
   try {
-    const defaultSearches = [ 'animals', 'flowers', 'forest', 'ocean' ]
+    const defaultSearches = ['animals', 'flowers', 'forest', 'ocean']
     const defaultSearch = sample(defaultSearches)
     const search = state.search || defaultSearch
     const data = await store.dispatch('api/imageSearch', search)

@@ -4,6 +4,7 @@ import { useStore } from 'vuex'
 
 import postMessage from '@/postMessage.js'
 import utils from '@/utils.js'
+import consts from '@/consts.js'
 
 import { colord, extend } from 'colord'
 import mixPlugin from 'colord/plugins/mix'
@@ -108,14 +109,14 @@ const updateBackgroundColor = () => {
     backgroundColor = utils.cssVariable('secondary-active-background')
   }
   // darken
-  let darkness = 0.6
+  let darkness = 0.4
   if (isThemeDark.value) {
     darkness = 0.8
   }
   backgroundColor = colord(backgroundColor).darken(darkness).toHex()
   // mix in tint color
   if (backgroundTintColor.value) {
-    let tint = backgroundTintColor.value
+    const tint = backgroundTintColor.value
     backgroundColor = colord(backgroundColor).mix(tint, 0.5).toHex()
   }
   // save color
@@ -148,7 +149,8 @@ const styles = computed(() => {
   const widthScale = store.state.viewportWidth / canvasSize
   const heightScale = store.state.viewportHeight / canvasSize
   const scale = Math.max(widthScale, heightScale)
-  return { transform: `scale(${scale})` }
+  const styles = { transform: `scale(${scale})` }
+  return styles
 })
 </script>
 

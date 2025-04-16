@@ -31,7 +31,7 @@ watch(() => props.visible, (value, prevValue) => {
   if (value) {
     updateDialogHeight()
     store.commit('shouldExplicitlyHideFooter', true)
-    store.dispatch('currentSpace/createSpacePreviewImage')
+    store.dispatch('currentSpace/updateSpacePreviewImage')
   } else {
     store.commit('shouldExplicitlyHideFooter', false)
   }
@@ -100,7 +100,7 @@ const webShare = () => {
 const updateDialogHeight = () => {
   if (!props.visible) { return }
   nextTick(() => {
-    let element = dialog.value
+    const element = dialog.value
     state.dialogHeight = utils.elementHeight(element)
   })
 }
