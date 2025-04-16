@@ -2,7 +2,7 @@ import utils from '@/utils.js'
 import consts from '@/consts.js'
 import sortBy from 'lodash-es/sortBy'
 
-const defaultImage = 'https://kinopio.club/og-image.png'
+const defaultImage = 'https://updates.kinopio.club/og-image.png'
 const defaultDescription = 'Kinopio is a spatial note taking tool for visually collecting and connecting your thoughts, ideas, and feelings.'
 
 const fetchSpacePublicMeta = async (spaceId) => {
