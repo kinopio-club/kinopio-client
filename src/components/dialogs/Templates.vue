@@ -39,7 +39,7 @@ const changeSpace = (space) => {
 // templates
 
 const systemTemplates = computed(() => {
-  let spaces = templates.spaces()
+  const spaces = templates.spaces()
   return spaces.map(space => {
     if (!space.categoryId) { return }
     const category = templates.categories().find(category => category.id === space.categoryId)
@@ -58,13 +58,13 @@ const updateHeight = () => {
 const updateResultsSectionHeight = async () => {
   if (!props.visible) { return }
   await nextTick()
-  let element = resultsSectionElement.value
+  const element = resultsSectionElement.value
   state.resultsSectionHeight = utils.elementHeight(element, true)
 }
 const updateDialogHeight = async () => {
   if (!props.visible) { return }
   await nextTick()
-  let element = dialogElement.value
+  const element = dialogElement.value
   state.dialogHeight = utils.elementHeight(element)
 }
 </script>

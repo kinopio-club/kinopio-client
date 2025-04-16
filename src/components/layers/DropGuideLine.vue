@@ -22,7 +22,7 @@ let unsubscribe
 onMounted(() => {
   unsubscribe = store.subscribe((mutation, state) => {
     if (mutation.type === 'triggerUpdateRemoteDropGuideLine') {
-      let update = mutation.payload
+      const update = mutation.payload
       update.startPoint = updateRemotePosition(update.startPoint)
       update.curve = createCurve(update.startPoint)
       addRemoteCurve(update)
@@ -208,7 +208,7 @@ const paintGuides = () => {
     x: state.currentCursor.x,
     y: state.currentCursor.y
   }
-  let curve = createCurve(startPoint)
+  const curve = createCurve(startPoint)
   paintCurve(context, curve)
   // broadcast curve
   const scroll = { x: window.scrollX, y: window.scrollY }
@@ -237,7 +237,7 @@ const stopPaintingGuides = () => {
 const broadcastCursorAndCurve = ({ startPoint, color }) => {
   const canEditSpace = store.getters['currentUser/canEditSpace']()
   if (!canEditSpace) { return }
-  let updates = {}
+  const updates = {}
   updates.x = state.currentCursorInSpace.x
   updates.y = state.currentCursorInSpace.y
   updates.color = color

@@ -14,6 +14,26 @@ import { nextTick } from 'vue'
 let currentSpaceId
 let prevMovePositions = {}
 
+const incrementBoxesZ = async (context, boxes) => {
+  const result = []
+  for (const box of boxes) {
+    if (box.isLocked) {
+      result.push(box)
+      continue
+    }
+    const boxes = context.getters.all
+    const maxInt = Number.MAX_SAFE_INTEGER - 1000
+    let highestBoxZ = utils.highestItemZ(boxes)
+    if (highestBoxZ > maxInt) {
+      await context.dispatch('clearAllZs')
+      highestBoxZ = utils.highestItemZ(boxes)
+    }
+    box.z = highestBoxZ
+    result.push(box)
+  }
+  return result
+}
+
 export default {
   namespaced: true,
   state: {
@@ -30,7 +50,7 @@ export default {
       state.boxes = {}
     },
     restore: (state, boxes) => {
-      let ids = []
+      const ids = []
       boxes.forEach(box => {
         ids.push(box.id)
         state.boxes[box.id] = box
@@ -154,8 +174,8 @@ export default {
     mergeUnique: (context, { newItems, itemType }) => {
       newItems.forEach(newBox => {
         let shouldUpdate
-        let prevBox = context.getters.byId(newBox.id)
-        let box = { id: newBox.id }
+        const prevBox = context.getters.byId(newBox.id)
+        const box = { id: newBox.id }
         let keys = Object.keys(newBox)
         keys = keys.filter(key => key !== 'id')
         keys.forEach(key => {
@@ -218,7 +238,7 @@ export default {
       const keys = Object.keys(box)
       delete box.userId
       const shouldUpdatePathsKeys = ['x', 'resizeWidth']
-      let shouldUpdatePaths = keys.find(key => shouldUpdatePathsKeys.includes(key))
+      const shouldUpdatePaths = keys.find(key => shouldUpdatePathsKeys.includes(key))
       if (shouldUpdatePaths) {
         nextTick(() => {
           context.dispatch('currentConnections/updatePaths', { itemId: box.id }, { root: true })
@@ -237,7 +257,7 @@ export default {
     },
     updateMultiple: async (context, boxes) => {
       const spaceId = context.rootState.currentSpace.id
-      let updates = {
+      const updates = {
         boxes,
         spaceId: context.rootState.currentSpace.id
       }
@@ -290,14 +310,16 @@ export default {
 
     resize: (context, { boxIds, delta }) => {
       let connections = []
-      let boxes = []
+      const boxes = []
       boxIds.forEach(boxId => {
         const rect = utils.boxElementDimensions({ id: boxId })
         let width = rect.width
         let height = rect.height
         width = width + delta.x
         height = height + delta.y
-        const { infoWidth, infoHeight } = utils.boxInfoPositionFromId(boxId)
+        const infoPosition = utils.boxInfoPositionFromId(boxId)
+        if (!infoPosition) { return }
+        const { infoWidth, infoHeight } = infoPosition
         const box = { id: boxId, resizeWidth: width, resizeHeight: height, infoWidth, infoHeight }
         boxes.push(box)
         connections = connections.concat(context.rootGetters['currentConnections/byItemId'](box.id))
@@ -340,13 +362,13 @@ export default {
       if (context.rootState.shouldSnapToGrid) { return }
       const snapThreshold = 6
       const spaceEdgeThreshold = 100
-      let targetBoxes = utils.clone(context.getters.isSelectableInViewport)
+      const targetBoxes = utils.clone(context.getters.isSelectableInViewport)
       const prevSnapGuides = context.state.snapGuides
       let snapGuides = []
       let items
       if (cards) {
         cards = utils.clone(cards)
-        cards = [ utils.boundaryRectFromItems(cards) ] // combine multiple selected cards
+        cards = [utils.boundaryRectFromItems(cards)] // combine multiple selected cards
         items = cards
       } else if (boxes) {
         items = utils.clone(boxes)
@@ -415,7 +437,7 @@ export default {
         })
       })
       // limit each origin item to it's closest target
-      let normalizedGuides = {}
+      const normalizedGuides = {}
       snapGuides.forEach(snapGuide => {
         const originGuide = normalizedGuides[snapGuide.origin.id]
         if (originGuide) {
@@ -426,13 +448,13 @@ export default {
           normalizedGuides[snapGuide.origin.id] = snapGuide
         }
       })
-      let normalizedGuideKeys = Object.keys(normalizedGuides)
+      const normalizedGuideKeys = Object.keys(normalizedGuides)
       snapGuides = normalizedGuideKeys.map(key => normalizedGuides[key])
       context.commit('snapGuides', snapGuides)
     },
     snap: (context, { side, origin, target }) => {
       const borderWidth = 2
-      let updated = { id: origin.id }
+      const updated = { id: origin.id }
       origin = context.getters.byId(origin.id)
       const alignWithOriginY = side === 'right' || side === 'left'
       // size
@@ -459,7 +481,7 @@ export default {
     },
     expand: (context, { side, origin, target }) => {
       const padding = consts.spaceBetweenCards
-      let updated = { id: target.id }
+      const updated = { id: target.id }
       const delta = {
         x: origin.x - target.x,
         y: origin.y - target.y
@@ -576,7 +598,7 @@ export default {
       context.dispatch('broadcast/update', { updates: { boxes }, type: 'moveBoxes', handler: 'currentBoxes/moveWhileDragging' }, { root: true })
       context.dispatch('updateSnapGuides', { boxes })
     },
-    afterMove: (context) => {
+    afterMove: async (context) => {
       prevMovePositions = {}
       const currentDraggingBoxId = context.rootState.currentDraggingBoxId
       const currentDraggingBox = context.getters.byId(currentDraggingBoxId)
@@ -593,10 +615,11 @@ export default {
         const position = utils.boxElementDimensions({ id })
         box.x = position.x
         box.y = position.y
-        const { x, y } = box
-        return { id, x, y }
+        const { x, y, z } = box
+        return { id, x, y, z }
       })
       boxes = boxes.filter(box => Boolean(box))
+      boxes = await incrementBoxesZ(context, boxes)
       context.commit('move', { boxes, spaceId })
       boxes = boxes.filter(box => box)
       // update
@@ -609,6 +632,38 @@ export default {
       nextTick(() => {
         context.dispatch('currentConnections/updateMultiplePaths', boxes, { root: true })
       })
+    },
+
+    // z-index
+
+    clearAllZs: async (context) => {
+      const boxes = context.getters.all.sort((a, b) => a.z - b.z)
+      let z = 1
+      for (const box of boxes) {
+        const body = { id: box.id, z }
+        context.commit('update', body)
+        context.dispatch('broadcast/update', { updates: body, type: 'updateBox', handler: 'currentBoxes/update' }, { root: true })
+        await context.dispatch('api/addToQueue', { name: 'updateBox', body }, { root: true })
+        z++
+      }
+    },
+    incrementZ: async (context, id) => {
+      const box = context.getters.byId(id)
+      if (!box) { return }
+      if (box.isLocked) { return }
+      const boxes = context.getters.all
+      const maxInt = Number.MAX_SAFE_INTEGER - 1000
+      let highestBoxZ = utils.highestItemZ(boxes)
+      if (highestBoxZ > maxInt) {
+        context.dispatch('clearAllZs')
+        highestBoxZ = utils.highestItemZ(boxes)
+      }
+      const canEditSpace = context.rootGetters['currentUser/canEditSpace']()
+      const body = { id, z: highestBoxZ + 1 }
+      context.commit('update', body)
+      if (!canEditSpace) { return }
+      context.dispatch('broadcast/update', { updates: body, type: 'updateBox', handler: 'currentBoxes/update' }, { root: true })
+      await context.dispatch('api/addToQueue', { name: 'updateBox', body }, { root: true })
     },
 
     // remove
@@ -659,11 +714,11 @@ export default {
       return boxes
     },
     isNotLocked: (state, getters) => {
-      let boxes = getters.all
+      const boxes = getters.all
       return boxes.filter(box => !box.isLocked)
     },
     isLocked: (state, getters) => {
-      let boxes = getters.all
+      const boxes = getters.all
       return boxes.filter(box => box.isLocked)
     },
     colors: (state, getters) => {

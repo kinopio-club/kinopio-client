@@ -78,6 +78,11 @@ export default {
       return false
     }
   },
+  drawingBrushSizeDiameter: {
+    l: 40,
+    m: 20,
+    s: 10
+  },
 
   // about
 
@@ -108,7 +113,7 @@ export default {
     }
   },
   monthlyPrice () {
-    let price = {
+    const price = {
       amount: 6,
       period: 'month',
       stripePriceId: 'price_1L2GvBDFIr5ywhwobbE35dhA',
@@ -130,7 +135,7 @@ export default {
     }
   },
   yearlyStandardPrice () {
-    let price = {
+    const price = {
       amount: 60,
       period: 'year',
       stripePriceId: 'price_1L2ErWDFIr5ywhwodsKxEEAq',
@@ -148,7 +153,7 @@ export default {
     if (this.isSecureAppContextIOS) {
       return this.yearlyStandardPrice()
     }
-    let price = {
+    const price = {
       amount: 30,
       period: 'year',
       stripePriceId: 'price_1NidyHDFIr5ywhwoVSx6JSpP'
@@ -159,7 +164,7 @@ export default {
     return price
   },
   lifePrice () {
-    let price = {
+    const price = {
       amount: 200,
       period: 'life',
       stripePriceId: 'price_1O6k3UDFIr5ywhwoeCdzdlAM'

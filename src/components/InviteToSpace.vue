@@ -168,7 +168,7 @@ section.invite-to-space(v-if="props.visible" @click.stop="closeDialogs")
     //- Tips
     template(v-if="state.tipsIsVisible")
       .row
-        p No account is needed to read spaces, but editing requires an account
+        p No account is needed to read public spaces, but editing requires an account
       .row(v-if="currentUserIsUpgraded")
         p.badge.success
           span Because your account is upgraded, others can create cards here for free

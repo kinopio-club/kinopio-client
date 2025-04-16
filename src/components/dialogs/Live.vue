@@ -37,9 +37,6 @@ export default {
     spaces: Array,
     loading: Boolean
   },
-  created () {
-    window.addEventListener('resize', this.updateHeights)
-  },
   data () {
     return {
       dialogHeight: null,
@@ -48,6 +45,20 @@ export default {
   },
   computed: {
     parentDialog () { return 'live' }
+  },
+  watch: {
+    visible (visible) {
+      if (visible) {
+        this.updateDialogHeight()
+        this.updateResultsSectionHeight()
+        this.$store.commit('shouldExplicitlyHideFooter', true)
+      } else {
+        this.$store.commit('shouldExplicitlyHideFooter', false)
+      }
+    }
+  },
+  created () {
+    window.addEventListener('resize', this.updateHeights)
   },
   methods: {
     changeSpace (space) {
@@ -60,27 +71,16 @@ export default {
     updateDialogHeight () {
       if (!this.visible) { return }
       this.$nextTick(() => {
-        let element = this.$refs.dialog
+        const element = this.$refs.dialog
         this.dialogHeight = utils.elementHeight(element)
       })
     },
     updateResultsSectionHeight () {
       if (!this.visible) { return }
       this.$nextTick(() => {
-        let element = this.$refs.results
+        const element = this.$refs.results
         this.resultsSectionHeight = utils.elementHeight(element, true)
       })
-    }
-  },
-  watch: {
-    visible (visible) {
-      if (visible) {
-        this.updateDialogHeight()
-        this.updateResultsSectionHeight()
-        this.$store.commit('shouldExplicitlyHideFooter', true)
-      } else {
-        this.$store.commit('shouldExplicitlyHideFooter', false)
-      }
     }
   }
 }

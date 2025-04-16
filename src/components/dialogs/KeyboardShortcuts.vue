@@ -27,7 +27,7 @@ watch(() => props.visible, (value, prevValue) => {
 const updateDialogHeight = async () => {
   if (!props.visible) { return }
   await nextTick()
-  let element = dialogElement.value
+  const element = dialogElement.value
   state.dialogHeight = utils.elementHeight(element)
 }
 
@@ -139,6 +139,21 @@ dialog.keyboard-shortcuts(v-if="visible" :open="visible" @click.left.stop ref="d
             img.icon.box-icon(src="@/assets/box.svg")
             span Box Mode
           .badge.keyboard-shortcut B
+        .row
+          .badge.title
+            img.icon.pencil(src="@/assets/pencil.svg")
+            span Drawing Mode
+          .badge.keyboard-shortcut D
+        .row
+          .badge.title
+            img.icon.brush-size(src="@/assets/brush-size-l.svg")
+            span Cycle Brush Size
+          .badge.keyboard-shortcut S
+        .row
+          .badge.title
+            img.icon.eraser(src="@/assets/eraser.svg")
+            span Toggle Eraser
+          .badge.keyboard-shortcut E
 
     //- Navigate
     template(v-if="categoryIsVisible('Navigate')")
@@ -413,7 +428,11 @@ dialog.keyboard-shortcuts(v-if="visible" :open="visible" @click.left.stop ref="d
 
   .hand
     vertical-align middle
-
+  .pencil
+    vertical-align -2px
+  .brush-size,
+  .eraser
+    vertical-align -1px
   .categories
     margin-top -6px
     .button-badge

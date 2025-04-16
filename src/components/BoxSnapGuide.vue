@@ -52,7 +52,7 @@ const userColor = computed(() => store.state.currentUser.color)
 const currentBoxSnapGuide = computed(() => {
   const isMultipleBoxesSelectedIds = store.state.multipleBoxesSelectedIds.length > 1
   if (isMultipleBoxesSelectedIds) { return }
-  let guides = store.state.currentBoxes.snapGuides
+  const guides = store.state.currentBoxes.snapGuides
   return guides.find(guide => {
     const isTarget = guide.target.id === props.box.id
     const isOrigin = guide.origin.id === props.box.id
@@ -91,8 +91,8 @@ const updateRect = () => {
 }
 const snapGuideStyles = computed(() => {
   const offset = 4
-  let styles = {}
-  let rect = state.rect
+  const styles = {}
+  const rect = state.rect
   styles.background = props.box.color
   // left
   if (snapGuideSide.value === 'left') {

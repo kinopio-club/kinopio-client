@@ -14,7 +14,7 @@ let websocket, currentSpaceRoom, currentUserIsConnected
 const clientId = nanoid()
 
 console.info('🌳 websocket clientId', clientId)
-let showDebugMessages = false
+const showDebugMessages = false
 
 const joinSpaceRoom = (store, mutation) => {
   console.info('🌙 joining', websocket)
@@ -56,7 +56,7 @@ const sendEvent = (store, mutation, type) => {
   const shouldBroadcast = store.getters['currentSpace/shouldBroadcast']
   if (!shouldBroadcast) { return }
   const { message, handler, updates } = utils.normalizeBroadcastUpdates(mutation.payload)
-  const hidden = ['updateRemoteUserCursor', 'addRemotePaintingCircle', 'clearRemoteCardDetailsVisible', 'clearRemoteConnectionDetailsVisible']
+  const hidden = ['updateRemoteUserCursor', 'addRemotePaintingCircle', 'clearRemoteCardDetailsVisible', 'clearRemoteConnectionDetailsVisible', 'addRemoteDrawingStroke', 'removeRemoteDrawingStroke']
   if (showDebugMessages && !hidden.includes(updates.type)) {
     console.info('🌜 sent', message, handler, updates, { clientId })
   }
@@ -133,7 +133,7 @@ export default function createWebSocketPlugin () {
           if (data.space) {
             if (data.space.id !== store.state.currentSpace.id) { return }
           }
-          let { message, handler, user, updates } = data
+          const { message, handler, user, updates } = data
           if (message === 'connected') {
           // presence
           } else if (handler) {

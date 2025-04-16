@@ -32,7 +32,7 @@ export default {
       state.types = {}
     },
     restore: (state, connections) => {
-      let ids = []
+      const ids = []
       connections.forEach(connection => {
         ids.push(connection.id)
         state.connections[connection.id] = connection
@@ -40,7 +40,7 @@ export default {
       state.ids = state.ids.concat(ids)
     },
     restoreTypes: (state, types) => {
-      let typeIds = []
+      const typeIds = []
       types.forEach(type => {
         typeIds.push(type.id)
         state.types[type.id] = type
@@ -145,7 +145,7 @@ export default {
         } else {
           prevItem = context.getters.typeByTypeId(newItem.id)
         }
-        let item = { id: newItem.id }
+        const item = { id: newItem.id }
         let keys = Object.keys(newItem)
         keys = keys.filter(key => key !== 'id')
         keys.forEach(key => {
@@ -201,7 +201,7 @@ export default {
       if (isThemeDark) {
         color = randomColor({ luminosity: 'dark' })
       }
-      let connectionType = {
+      const connectionType = {
         id: nanoid(),
         name: `Connection Type ${context.state.typeIds.length + 1}`,
         color,
@@ -264,7 +264,7 @@ export default {
       const connections = context.getters.byMultipleItemIds(itemIds)
 
       if (!connections.length) { return }
-      let newConnections = []
+      const newConnections = []
       // update state
       connections.forEach(connection => {
         const startItem = utils.itemElementDimensions({ id: connection.startItemId })
@@ -301,7 +301,7 @@ export default {
       context.commit('clearShouldExplicitlyRenderCardIds', null, { root: true })
     },
     updatePathsWhileDragging: (context, { connections }) => {
-      let newConnections = []
+      const newConnections = []
       connections = connections.forEach(connection => {
         const startItem = utils.itemElementDimensions({ id: connection.startItemId })
         const endItem = utils.itemElementDimensions({ id: connection.endItemId })
@@ -324,7 +324,7 @@ export default {
     correctPaths: (context) => {
       if (!context.rootState.webfontIsLoaded) { return }
       if (!context.getters.all.length) { return }
-      let connections = []
+      const connections = []
       context.getters.all.forEach(connection => {
         const path = context.getters.connectionPathBetweenItems({
           startItemId: connection.startItemId,
@@ -407,7 +407,7 @@ export default {
     removeUnusedTypes: (context) => {
       const connections = context.getters.all
       if (!utils.arrayHasItems(connections)) { return }
-      let usedTypes = connections.map(connection => connection.connectionTypeId)
+      const usedTypes = connections.map(connection => connection.connectionTypeId)
       let types = context.getters.allTypes
       types = types.filter(type => Boolean(type))
       const typesToRemove = types.filter(type => !usedTypes.includes(type.id))
@@ -424,7 +424,7 @@ export default {
       return state.ids.map(id => state.connections[id])
     },
     typeByTypeId: (state) => (id) => {
-      let type = state.types[id]
+      const type = state.types[id]
       return type
     },
     allTypes: (state) => {
@@ -438,8 +438,8 @@ export default {
     byItemId: (state, getters, rootState, rootGetters) => (itemId) => {
       let connections = getters.all
       connections = connections.filter(connection => {
-        let start = connection.startItemId === itemId
-        let end = connection.endItemId === itemId
+        const start = connection.startItemId === itemId
+        const end = connection.endItemId === itemId
         return start || end
       })
       connections = getters.connectionsWithValidItems(connections)
@@ -448,8 +448,8 @@ export default {
     byMultipleItemIds: (state, getters, rootState, rootGetters) => (itemIds) => {
       let connections = getters.all
       connections = connections.filter(connection => {
-        let start = itemIds.includes(connection.startItemId)
-        let end = itemIds.includes(connection.endItemId)
+        const start = itemIds.includes(connection.startItemId)
+        const end = itemIds.includes(connection.endItemId)
         return start || end
       })
       return connections
@@ -465,13 +465,13 @@ export default {
       })
     },
     isSelected: (state, getters, rootState) => {
-      let connectionIds = rootState.multipleConnectionsSelectedIds
+      const connectionIds = rootState.multipleConnectionsSelectedIds
       const connections = connectionIds.map(id => getters.byId(id))
       return connections
     },
     isSelectableInViewport: (state, getters) => () => {
       const elements = document.querySelectorAll('svg.connection')
-      let paths = []
+      const paths = []
       elements.forEach(path => {
         if (path.dataset.isVisibleInViewport === 'false') { return }
         if (path.dataset.isHiddenByCommentFilter === 'true') { return }
@@ -510,7 +510,7 @@ export default {
     },
     lastType: (state, getters) => {
       const id = state.lastTypeId || last(state.typeIds)
-      let type = getters.typeByTypeId(id)
+      const type = getters.typeByTypeId(id)
       return type
     },
 
@@ -519,8 +519,8 @@ export default {
     isExistingPath: (state, getters) => ({ startItemId, endItemId }) => {
       const connections = getters.all
       const existing = connections.filter(connection => {
-        let start = connection.startItemId === startItemId
-        let end = connection.endItemId === endItemId
+        const start = connection.startItemId === startItemId
+        const end = connection.endItemId === endItemId
         return start && end
       })
       return Boolean(existing.length)
@@ -536,7 +536,7 @@ export default {
     },
     curveControlPoint: (state, getters, rootState) => {
       // q defines a quadratic curve control point
-      let controlPoint = consts.defaultConnectionPathCurveControlPoint
+      const controlPoint = consts.defaultConnectionPathCurveControlPoint
       return controlPoint
     },
     connectionPathBetweenCoords: (state, getters) => (start, end, controlPoint) => {
@@ -545,7 +545,7 @@ export default {
         x: parseInt(end.x - start.x),
         y: parseInt(end.y - start.y)
       }
-      let curve = controlPoint || getters.curveControlPoint
+      const curve = controlPoint || getters.curveControlPoint
       return `m${start.x},${start.y} ${curve} ${delta.x},${delta.y}`
     }
 

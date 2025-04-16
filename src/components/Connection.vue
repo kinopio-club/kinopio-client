@@ -83,7 +83,7 @@ const normalizedConnectionPathRect = computed(() => {
 })
 const connectionStyles = computed(() => {
   const rect = normalizedConnectionPathRect.value
-  let styles = {
+  const styles = {
     left: rect.x + 'px',
     top: rect.y + 'px',
     width: rect.width + 'px',
@@ -102,7 +102,7 @@ const connectionPathStyles = computed(() => {
   return styles
 })
 const connectionPathClasses = computed(() => {
-  let styles = {
+  const styles = {
     active: isActive.value,
     filtered: isFiltered.value,
     hover: isHovered.value,
@@ -414,14 +414,14 @@ const relativePath = computed(() => {
   const pathStart = utils.startCoordsFromConnectionPath(path)
   const pathEndRelative = utils.endCoordsFromConnectionPath(path)
   const controlPoint = utils.curveControlPointFromPath(path)
-  let origin = { x: 0, y: 0 }
+  const origin = { x: 0, y: 0 }
   if (pathEndRelative.x < 0) {
     origin.x = Math.abs(pathEndRelative.x)
   }
   if (pathEndRelative.y < 0) {
     origin.y = Math.abs(pathEndRelative.y)
   }
-  let relativePath = `m${origin.x},${origin.y} q${controlPoint.x},${controlPoint.y} ${pathEndRelative.x},${pathEndRelative.y}`
+  const relativePath = `m${origin.x},${origin.y} q${controlPoint.x},${controlPoint.y} ${pathEndRelative.x},${pathEndRelative.y}`
   return relativePath
 })
 
@@ -480,7 +480,7 @@ const checkIsMultiTouch = (event) => {
 const initViewportObserver = async () => {
   await nextTick()
   try {
-    let callback = (entries, observer) => {
+    const callback = (entries, observer) => {
       entries.forEach((entry) => {
         if (entry.isIntersecting) {
           state.isVisibleInViewport = true

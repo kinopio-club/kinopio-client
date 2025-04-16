@@ -2,7 +2,7 @@ import utils from '@/utils.js'
 
 import uniq from 'lodash-es/uniq'
 
-let notifiedCardIds = []
+const notifiedCardIds = []
 
 export default {
   namespaced: true,
@@ -65,7 +65,7 @@ export default {
       const userCanEdit = context.rootGetters['currentUser/canEditSpace']()
       if (!userCanEdit) { return }
       const userId = context.rootState.currentUser.id
-      let recipientUserIds = context.getters.recipientUserIds
+      const recipientUserIds = context.getters.recipientUserIds
       if (!recipientUserIds.length) { return }
       const notification = {
         type, // 'createCard' or 'updateCard'
@@ -104,7 +104,7 @@ export default {
     addAskToAddToExplore: async (context) => {
       const userId = context.rootState.currentUser.id
       const spaceId = context.rootState.currentSpace.id
-      let recipientUserIds = context.getters.recipientUserIds
+      const recipientUserIds = context.getters.recipientUserIds
       if (!recipientUserIds.length) { return }
       const notification = {
         type: 'askToAddToExplore',

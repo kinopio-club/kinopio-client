@@ -45,18 +45,6 @@ export default {
     visible: Boolean,
     parentIsPinned: Boolean
   },
-  created () {
-    window.addEventListener('resize', this.updateResultsSectionHeight)
-    this.$store.subscribe((mutation, state) => {
-      if (mutation.type === 'currentSpace/restoreSpace' && this.visible) {
-        this.updateLinks()
-      }
-    })
-  },
-  mounted () {
-    this.updateLinks()
-    this.updateResultsSectionHeight()
-  },
   data () {
     return {
       resultsSectionHeight: null,
@@ -82,7 +70,7 @@ export default {
     },
     userSpacesToggleShouldBeVisible () {
       const otherUserSpaces = this.spaces.filter(space => space.userId !== this.currentUser.id) || []
-      let isOtherUserSpaces = Boolean(otherUserSpaces.length)
+      const isOtherUserSpaces = Boolean(otherUserSpaces.length)
       const shouldForceToggleVisible = !isOtherUserSpaces && this.spaces.length
       if (isOtherUserSpaces || shouldForceToggleVisible) {
         return true
@@ -91,6 +79,29 @@ export default {
       }
     },
     parentDialog () { return 'links' }
+  },
+  watch: {
+    visible (visible) {
+      if (visible) {
+        this.updateLinks()
+        this.updateResultsSectionHeight()
+      }
+    },
+    loading (loading) {
+      this.updateResultsSectionHeight()
+    }
+  },
+  created () {
+    window.addEventListener('resize', this.updateResultsSectionHeight)
+    this.$store.subscribe((mutation, state) => {
+      if (mutation.type === 'currentSpace/restoreSpace' && this.visible) {
+        this.updateLinks()
+      }
+    })
+  },
+  mounted () {
+    this.updateLinks()
+    this.updateResultsSectionHeight()
   },
   methods: {
     toggleCurrentUserSpacesIsVisibleOnly () {
@@ -121,20 +132,9 @@ export default {
     updateResultsSectionHeight () {
       if (!this.visible) { return }
       this.$nextTick(() => {
-        let element = this.$refs.results
+        const element = this.$refs.results
         this.resultsSectionHeight = utils.elementHeight(element, true)
       })
-    }
-  },
-  watch: {
-    visible (visible) {
-      if (visible) {
-        this.updateLinks()
-        this.updateResultsSectionHeight()
-      }
-    },
-    loading (loading) {
-      this.updateResultsSectionHeight()
     }
   }
 }

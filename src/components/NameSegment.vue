@@ -38,7 +38,7 @@ const currentSelectedOtherItem = computed(() => { return store.state.currentSele
 const nameSegmentClasses = computed(() => {
   const fontId = props.headerFontId || 0
   const fontSize = props.headerFontSize || 's'
-  let classes = [
+  const classes = [
     `header-font-${fontId}`,
     `header-font-size-${fontSize}`
   ]
@@ -56,7 +56,7 @@ const colorClasses = computed(() => {
   return utils.colorClasses({ backgroundColorIsDark: props.backgroundColorIsDark })
 })
 const textClasses = computed(() => {
-  let classes = colorClasses.value
+  const classes = colorClasses.value
   classes.strikethrough = props.isStrikeThrough
   return classes
 })
@@ -68,7 +68,7 @@ const dataMarkdownType = computed(() => {
   if (props.segment.isLink) { return 'link' }
   if (props.segment.isInviteLink) { return 'inviteLink' }
   if (!props.segment.markdown) { return 'text' }
-  let markdown = props.segment.markdown.filter(item => Boolean(item.content))
+  const markdown = props.segment.markdown.filter(item => Boolean(item.content))
   const segmentIsEmpty = !utils.arrayHasItems(markdown)
   if (segmentIsEmpty) { return 'text' }
   let types = markdown.map(item => item.type)
@@ -98,11 +98,11 @@ const escapedUrl = (url) => {
 
 const matchIndexes = (name) => {
   if (!name) { return [] }
-  const nameObject = [ { name } ]
+  const nameObject = [{ name }]
   const fuzzySearch = createFuzzySearch(nameObject, {
     getText: (item) => [item.name, item.urlPreviewTitle, item.urlPreviewDescription]
   })
-  let results = fuzzySearch(props.search)
+  const results = fuzzySearch(props.search)
   console.info(results)
   let matchIndexes = []
   results.forEach(result => {

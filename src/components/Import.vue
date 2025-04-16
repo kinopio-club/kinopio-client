@@ -85,8 +85,8 @@ const validate = (space) => {
 }
 const isValidCanvas = (space) => {
   const schema = {
-    'nodes': 'array',
-    'edges': 'array'
+    nodes: 'array',
+    edges: 'array'
   }
   validateSchema(space, schema)
   if (state.errors.length) {
@@ -95,12 +95,12 @@ const isValidCanvas = (space) => {
 }
 const isValidJson = (space) => {
   const schema = {
-    'name': 'string',
-    'users': 'array',
-    'cards': 'array',
-    'connections': 'array',
-    'connectionTypes': 'array',
-    'tags': 'array'
+    name: 'string',
+    users: 'array',
+    cards: 'array',
+    connections: 'array',
+    connectionTypes: 'array',
+    tags: 'array'
   }
   validateSchema(space, schema)
   if (state.errors.length) {
@@ -112,103 +112,10 @@ const validateSchema = (space, schema) => {
   keys.forEach(key => {
     const isValidType = utils.typeCheck({ value: space[key], type: schema[key], origin: 'isValidJson' })
     if (!isValidType) {
-      let error = `Missing '${key}' field`
+      const error = `Missing '${key}' field`
       state.errors.push(error)
     }
   })
-}
-
-// convert json canvas
-// https://jsoncanvas.org
-
-const convertFromCanvas = (space) => {
-  const minPositionValue = 150
-  let date = dayjs(new Date())
-  date = date.format(consts.nameDateFormat)
-  let newSpace = {}
-  try {
-    newSpace.name = `Canvas ${date}`
-    newSpace.id = nanoid()
-    newSpace.background = consts.defaultSpaceBackground
-    newSpace.cards = []
-    newSpace.connections = []
-    newSpace.connectionTypes = []
-    // emsure node positions are positive 0,0
-    let negativePositionOffset = {
-      x: 0,
-      y: 0
-    }
-    space.nodes.forEach(node => {
-      if (node.x < negativePositionOffset.x) {
-        negativePositionOffset.x = node.x
-      }
-      if (node.y < negativePositionOffset.y) {
-        negativePositionOffset.y = node.y
-      }
-    })
-    space.nodes = space.nodes.map(node => {
-      node.x = node.x + Math.abs(negativePositionOffset.x)
-      node.y = node.y + Math.abs(negativePositionOffset.y)
-      return node
-    })
-    // nodes → cards
-    const shouldNudgeCardsY = Boolean(space.nodes.find(node => node.y <= minPositionValue))
-    const shouldNudgeCardsX = Boolean(space.nodes.find(node => node.x <= minPositionValue))
-    space.nodes.forEach(node => {
-      // url
-      let shouldUpdateUrlPreview
-      if (node.url) {
-        shouldUpdateUrlPreview = true
-      }
-      // y
-      let y = node.y
-      if (shouldNudgeCardsY) {
-        y += minPositionValue
-      }
-      // x
-      let x = node.x
-      if (shouldNudgeCardsX) {
-        x += minPositionValue
-      }
-      // name
-      let name = node.text || node.url || node.label
-      if (node.file) {
-        name = `\`${node.file}\``
-      }
-      const newCard = {
-        id: node.id,
-        x,
-        y,
-        backgroundColor: node.canvasColor || node.color,
-        name,
-        shouldUpdateUrlPreview
-      }
-      newSpace.cards.push(newCard)
-    })
-    // edges → connections
-    space.edges.forEach((edge, index) => {
-      const typeId = nanoid()
-      const newConnection = {
-        id: edge.id,
-        startItemId: edge.fromNode,
-        endItemId: edge.toNode,
-        controlPoint: `q00,00`, // straight line
-        directionIsVisible: Boolean(edge.fromEnd === 'arrow' || edge.toEnd === 'arrow'),
-        connectionTypeId: typeId,
-        labelIsVisible: Boolean(edge.label)
-      }
-      const newConnetionType = {
-        id: typeId,
-        color: edge.canvasColor || edge.color || newTypeColor(),
-        name: edge.label || `Connection Type ${index}`
-      }
-      newSpace.connections.push(newConnection)
-      newSpace.connectionTypes.push(newConnetionType)
-    })
-    return newSpace
-  } catch (error) {
-    console.error('🚒 convertFromCanvas', error)
-  }
 }
 
 // import
@@ -219,7 +126,8 @@ const importSpace = async (space) => {
     store.commit('isLoadingSpace', true)
     validate(space)
     if (state.format === 'canvas') {
-      space = convertFromCanvas(space)
+      const typeColor = newTypeColor()
+      space = utils.convertFromJsonCanvas(space, typeColor)
     }
     space = utils.resetSpaceMeta({ space, user, type: 'import' })
     space.connections = utils.migrationConnections(space.connections)

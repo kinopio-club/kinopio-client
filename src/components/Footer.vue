@@ -179,7 +179,7 @@ const updatePositionInVisualViewport = () => {
   if (window.navigator.shouldAddSafeAreaPaddingBottom) {
     bottom = 40
   }
-  let style = {
+  const style = {
     transform: `translate(${left}px, 0px) scale(${counterScale})`,
     maxWidth: Math.round(viewport.width * scale) + 'px',
     bottom: `max(${bottom}px, env(safe-area-inset-bottom))`

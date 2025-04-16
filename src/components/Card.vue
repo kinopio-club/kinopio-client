@@ -69,7 +69,7 @@ onMounted(async () => {
         store.commit('scrollElementIntoView', { element, positionIsCenter: true })
       }
     } else if (type === 'triggerUploadComplete') {
-      let { cardId, url } = payload
+      const { cardId, url } = payload
       if (cardId !== props.card.id) { return }
       addFile({ url })
     } else if (type === 'triggerUpdateUrlPreview') {
@@ -204,7 +204,7 @@ const backgroundColor = computed(() => {
   if (nameIsColor.value) {
     nameColor = props.card.name
   }
-  let color = selectedColor.value || remoteCardDetailsVisibleColor.value || remoteSelectedColor.value || selectedColorUpload.value || remoteCardDraggingColor.value || remoteUploadDraggedOverCardColor.value || remoteUserResizingCardsColor.value || remoteUserTiltingCardsColor.value || nameColor || props.card.backgroundColor
+  const color = selectedColor.value || remoteCardDetailsVisibleColor.value || remoteSelectedColor.value || selectedColorUpload.value || remoteCardDraggingColor.value || remoteUploadDraggedOverCardColor.value || remoteUserResizingCardsColor.value || remoteUserTiltingCardsColor.value || nameColor || props.card.backgroundColor
   return color
 })
 const backgroundColorIsDark = computed(() => {
@@ -334,11 +334,11 @@ const otherCardIsVisible = computed(() => {
 
 const otherSpaceSegment = computed(() => nameSegments.value.find(segment => segment.otherSpace))
 const otherSpace = computed(() => {
-  let nameSegment = otherSpaceSegment.value
+  const nameSegment = otherSpaceSegment.value
   return nameSegment?.otherSpace
 })
 const otherSpaceUrl = computed(() => {
-  let nameSegment = otherSpaceSegment.value
+  const nameSegment = otherSpaceSegment.value
   return nameSegment?.name
 })
 const spaceOrInviteUrl = computed(() => {
@@ -405,8 +405,8 @@ const cardWrapStyle = computed(() => {
   return styles
 })
 const cardStyle = computed(() => {
-  let backgroundColor, nameColor
-  backgroundColor = props.card.backgroundColor
+  let nameColor
+  const backgroundColor = props.card.backgroundColor
   if (nameIsColor.value) {
     nameColor = props.card.name
   }
@@ -439,7 +439,7 @@ const cardContentStyles = computed(() => {
   return styles
 })
 const cardContentWrapStyles = computed(() => {
-  let styles = {}
+  const styles = {}
   return updateStylesWithWidth(styles)
 })
 const addSizeClasses = (classes) => {
@@ -455,15 +455,15 @@ const cardWrapClasses = computed(() => {
     'is-resizing': store.state.currentUserIsResizingCard,
     'is-tilting': store.state.currentUserIsTiltingCard,
     'is-hidden-by-opacity': isHiddenByCommentFilter.value,
-    'jiggle': shouldJiggle.value
+    jiggle: shouldJiggle.value
   }
   classes = addSizeClasses(classes)
   return classes
 })
 const cardClasses = computed(() => {
   let classes = {
-    'active': isConnectingTo.value || isConnectingFrom.value || state.isRemoteConnecting || currentCardIsBeingDragged.value || state.uploadIsDraggedOver,
-    'filtered': isFiltered.value,
+    active: isConnectingTo.value || isConnectingFrom.value || state.isRemoteConnecting || currentCardIsBeingDragged.value || state.uploadIsDraggedOver,
+    filtered: isFiltered.value,
     'media-card': isVisualCard.value || pendingUploadDataUrl.value,
     'audio-card': isAudioCard.value,
     'is-playing-audio': state.isPlayingAudio,
@@ -870,9 +870,9 @@ const normalizedName = computed(() => {
     newName = newName.replace(state.formats.audio, '')
   }
   // link hiding
-  let link = state.formats.link
+  const link = state.formats.link
   let isHidden
-  let markdownLinks = newName.match(utils.markdown().linkPattern)
+  const markdownLinks = newName.match(utils.markdown().linkPattern)
   if (markdownLinks) {
     const linkIsMarkdown = markdownLinks.find(markdownLink => markdownLink.includes(link))
     isHidden = !linkIsMarkdown
@@ -1080,10 +1080,10 @@ const updateUrlPreviewOnline = async () => {
   }
   try {
     url = utils.removeHiddenQueryStringFromURLs(url)
-    let response = await store.dispatch('api/urlPreview', { url, card: props.card })
+    const response = await store.dispatch('api/urlPreview', { url, card: props.card })
     if (!response) { throw 'api/urlPreview request failed' }
 
-    let { data, host } = response
+    const { data, host } = response
     console.info('🚗 link preview', url, data)
     updateUrlPreviewSuccess(url, data)
   } catch (error) {
@@ -1340,7 +1340,7 @@ const selectAllConnectedCards = (event) => {
   if (!canEditSpace.value) { return }
   store.dispatch('closeAllDialogs')
   const connections = store.getters['currentConnections/all']
-  let selectedCards = [props.card.id]
+  const selectedCards = [props.card.id]
   let shouldSearch = true
   while (shouldSearch) {
     let cancelSearch = true
@@ -1524,7 +1524,7 @@ const userDetailsIsUser = computed(() => {
 const initViewportObserver = async () => {
   await nextTick()
   try {
-    let callback = (entries, observer) => {
+    const callback = (entries, observer) => {
       entries.forEach((entry) => {
         if (entry.isIntersecting) {
           state.isVisibleInViewport = true
@@ -1710,8 +1710,8 @@ const stickToCursor = (event) => {
   const { height, width } = props.card
   const halfWidth = width / 2
   const halfHeight = height / 2
-  let centerX = x.value + halfWidth
-  let centerY = y.value + halfHeight
+  const centerX = x.value + halfWidth
+  const centerY = y.value + halfHeight
   // position from card center
   const xFromCenter = position.x - centerX
   const yFromCenter = position.y - centerY
@@ -1731,7 +1731,7 @@ const unstickToCursor = () => {
   state.isAnimationUnsticking = true
   const xOffset = parseInt(state.stickyTranslateX)
   const yOffset = parseInt(state.stickyTranslateY)
-  let timing = {
+  const timing = {
     duration: 0, // sum of keyframe offsets
     easing: 'cubic-bezier(0.45, 0, 0.55, 1)',
     iterations: 1
@@ -1802,7 +1802,7 @@ const lockingFrameStyle = computed(() => {
     top: position,
     background: userColor,
     opacity: state.lockingAlpha,
-    borderRadius: borderRadius
+    borderRadius
   }
 })
 

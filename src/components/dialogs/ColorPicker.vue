@@ -33,7 +33,8 @@ const props = defineProps({
     default: () => []
   },
   luminosityIsDark: Boolean,
-  luminosityIsLight: Boolean
+  luminosityIsLight: Boolean,
+  shouldHideOpacity: Boolean
 })
 watch(() => props.visible, (value, prevValue) => {
   if (value) {
@@ -63,7 +64,7 @@ const state = reactive({
 const updateDialogHeight = async () => {
   if (!props.visible) { return }
   await nextTick()
-  let element = dialogElement.value
+  const element = dialogElement.value
   state.dialogHeight = utils.elementHeight(element)
 }
 const scrollIntoView = async () => {
@@ -81,7 +82,7 @@ const triggerUpdateHeaderAndFooterPosition = () => {
 // recent colors
 
 const uniqueRecentColors = computed(() => {
-  let newColors = []
+  const newColors = []
   const minDelta = 0.08
   const colors = props.recentColors.map(color => colord(color).toHex())
   colors.forEach((newColor, index) => {
@@ -260,7 +261,7 @@ dialog.narrow.color-picker(v-if="props.visible" :open="props.visible" ref="dialo
       template(v-for="color in state.colors")
         button.color(:style="{backgroundColor: color}" :class="{active: colorIsCurrent(color)}" @click.left="select(color)" :title="color")
     //- Opacity
-    .row
+    .row(v-if="!props.shouldHideOpacity")
       img.icon.transparent(src="@/assets/transparent.svg" @click="toggleOpacity")
       Slider(
         @updatePlayhead="updateOpacity"
