@@ -46,7 +46,7 @@
     "pug": "^3.0.3",
     "stylus": "^0.63",
     "stylus-loader": "^3.0.2",
-    "vite": "^5.4.18",
+    "vite": "^6.3.0",
     "vite-plugin-pwa": "^0.17.4",
     "vite-plugin-sitemap": "^0.7.1",
     "yorkie": "^2.0.0"
