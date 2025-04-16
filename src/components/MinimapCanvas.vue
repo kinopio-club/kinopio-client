@@ -41,7 +41,8 @@ onMounted(async () => {
       'currentConnections/update',
       'currentConnections/updatePaths',
       'currentConnections/updateMultiplePaths',
-      'currentConnections/remove'
+      'currentConnections/remove',
+      'triggerEndDrawing'
     ]
     if (mutations.includes(mutation.type)) {
       await nextTick()

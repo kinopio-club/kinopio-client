@@ -699,6 +699,7 @@ const store = createStore({
     triggerAddRemoteDrawingStroke: () => {},
     triggerRemoveRemoteDrawingStroke: () => {},
     triggerDrawingRedraw: () => {},
+    triggerEndDrawing: () => {},
 
     // Cards
 
