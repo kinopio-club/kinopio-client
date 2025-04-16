@@ -197,6 +197,7 @@ const currentSpace = {
       if (!currentUserIsSignedIn) { return }
       if (!canEditSpace) { return }
       try {
+        // TODO upload minimapCanvas iamge w bk and pagemeta size and upload that png, instead of generateing on the server
         const response = await context.dispatch('api/updateSpacePreviewImage', context.state.id, { root: true })
         console.info('🙈 updated space preview image', response.urls)
       } catch (error) {
