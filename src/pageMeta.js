@@ -60,16 +60,12 @@ const updateSpaceTitle = (space) => {
 /// Resets the og:image meta tag to the default image
 const resetImage = () => {
   document.querySelector('meta[property="og:image"]').content = ogImage
-  document.querySelector('meta[property="og:image:width"]').content = 1200
-  document.querySelector('meta[property="og:image:height"]').content = 630
   document.querySelector('meta[property="og:image:type"]').content = 'image/png'
 }
 /// Updates the og:image meta tag to the space preview image
 const updateImage = (space) => {
   const imageUrl = space.previewImage || spacePreviewImageFromId(space.id) || ogImage
   document.querySelector('meta[property="og:image"]').content = imageUrl
-  document.querySelector('meta[property="og:image:width"]').content = 1200
-  document.querySelector('meta[property="og:image:height"]').content = 630
   document.querySelector('meta[property="og:image:type"]').content = 'image/jpeg'
 }
 const updateDescription = (description) => {
