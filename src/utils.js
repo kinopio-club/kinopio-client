@@ -73,6 +73,7 @@ export default {
     const viewport = this.visualViewport()
     const rect = element.getBoundingClientRect()
     let header = document.querySelector('header')
+    if (!header) { return }
     header = header.getBoundingClientRect()
     let height = viewport.height - header.bottom - (viewport.height - rect.bottom)
     if (isChildElement) {

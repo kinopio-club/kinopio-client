@@ -3,17 +3,16 @@ import { reactive, computed, onMounted, onBeforeUnmount, watch, ref, nextTick } 
 import { useStore } from 'vuex'
 
 import utils from '@/utils.js'
+import cache from '@/cache.js'
 
 const store = useStore()
 
-let unsubscribe
-
-const canvasElement = ref(null)
-
-const itemRadius = 1
-
 let canvas, context
 let startPanningPosition
+const itemRadius = 1
+const canvasElement = ref(null)
+
+let unsubscribe
 
 onMounted(async () => {
   init()
@@ -112,6 +111,7 @@ const init = async () => {
   if (!props.visible) { return }
   await initCanvas()
   if (!canvas) { return }
+  await drawDrawing()
   drawBoxes()
   drawConnections()
   drawCards()
@@ -130,6 +130,20 @@ const initCanvas = async () => {
   canvas.style.height = state.pageHeight + 'px'
   context.scale(window.devicePixelRatio, window.devicePixelRatio)
   context.clearRect(0, 0, canvas.width, canvas.height)
+}
+
+// drawing
+
+const drawDrawing = async () => {
+  const space = await cache.space(store.state.currentSpace.id)
+  if (!space.drawingImage) { return }
+  const image = new Image()
+  image.onload = () => {
+    const width = image.width * ratio.value
+    const height = image.height * ratio.value
+    context.drawImage(image, 0, 0, width, height)
+  }
+  image.src = space.drawingImage
 }
 
 // connections
