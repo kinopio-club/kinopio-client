@@ -31,9 +31,9 @@ const fetchGroupPublicMeta = async (groupId) => {
     console.warn('🚑 fetchGroupPublicMeta', error)
   }
 }
-const spacePreviewImageFromId = (spaceId) => {
+const spacePreviewImage = (spaceId) => {
   if (!spaceId) { return '' }
-  return `${consts.cdnHost}/${spaceId}/preview-image-${spaceId}.jpeg`
+  return `${consts.cdnHost}/${spaceId}/preview-image-${spaceId}.png`
 }
 
 // update meta tags
@@ -66,7 +66,7 @@ const resetImage = () => {
   updateImageMeta(defaultImage)
 }
 const updateImage = (space) => {
-  const imageUrl = space.previewImage || spacePreviewImageFromId(space.id) || defaultImage
+  const imageUrl = space.previewImage || spacePreviewImage(space.id) || defaultImage
   updateImageMeta(imageUrl)
 }
 // description
@@ -103,7 +103,7 @@ export default {
   updateSpace (space) {
     space = utils.clone(space)
     const isHelloSpace = space.name === 'Hello Kinopio'
-    const imageUrl = space.previewImage || spacePreviewImageFromId(space.id)
+    const imageUrl = space.previewImage || spacePreviewImage(space.id)
     updateTitle(space)
     updateImage(space)
     // description
