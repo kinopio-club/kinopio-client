@@ -763,7 +763,7 @@ const self = {
         context.dispatch('handleServerError', { name: 'createSpace', error })
       }
     },
-    createSpacePreviewImage: async (context, spaceId) => {
+    updateSpacePreviewImage: async (context, spaceId) => {
       try {
         spaceId = spaceId || context.rootState.currentSpace.id
         const themeOptions = context.rootGetters['themes/previewImageThemeOptions']

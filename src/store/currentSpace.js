@@ -191,16 +191,16 @@ const currentSpace = {
       context.commit('triggerUpdateWindowHistory', null, { root: true })
       context.dispatch('checkIfShouldShowExploreOnLoad')
     },
-    createSpacePreviewImage: debounce(async function (context) {
+    updateSpacePreviewImage: debounce(async function (context) {
       const currentUserIsSignedIn = context.rootGetters['currentUser/isSignedIn']
       const canEditSpace = context.rootGetters['currentUser/canEditSpace']()
       if (!currentUserIsSignedIn) { return }
       if (!canEditSpace) { return }
       try {
-        const response = await context.dispatch('api/createSpacePreviewImage', context.state.id, { root: true })
+        const response = await context.dispatch('api/updateSpacePreviewImage', context.state.id, { root: true })
         console.info('🙈 updated space preview image', response.urls)
       } catch (error) {
-        console.warn('🚑 createSpacePreviewImage', error)
+        console.warn('🚑 updateSpacePreviewImage', error)
       }
     }, 2000), // 2 seconds
     updateInboxCache: async (context) => {
@@ -737,7 +737,7 @@ const currentSpace = {
         body: { spaceId: space.id }
       }, { root: true })
       // preview image
-      context.dispatch('createSpacePreviewImage')
+      context.dispatch('updateSpacePreviewImage')
     },
     loadSpace: async (context, { space }) => {
       space.connections = utils.migrationConnections(space.connections)
@@ -765,7 +765,7 @@ const currentSpace = {
         const spaceIsUnchanged = utils.spaceIsUnchanged(cachedSpace, remoteSpace)
         if (spaceIsUnchanged) {
           context.commit('isLoadingSpace', false, { root: true })
-          context.dispatch('createSpacePreviewImage')
+          context.dispatch('updateSpacePreviewImage')
           // merge metadata into local
           await context.dispatch('updateSpaceLocalOnly', { drawingImage: remoteSpace.drawingImage })
           context.commit('triggerDrawingRedraw', null, { root: true })
