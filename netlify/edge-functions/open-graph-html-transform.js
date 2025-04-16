@@ -1,12 +1,11 @@
 import { HTMLRewriter } from 'https://ghuc.cc/worker-tools/html-rewriter/index.ts'
 
-function spacePreviewImage (spaceId) {
+const spacePreviewImage = (spaceId) => {
   const cdnHost = 'https://cdn.kinopio.club'
   return `${cdnHost}/${spaceId}/preview-image-${spaceId}.png`
 }
 
-// adapted from utils.spaceIdFromUrl
-function spaceIdFromUrl (url) {
+const spaceIdFromUrl = (url) => {
   const uuidLength = 21
   url = url || window.location.href
   url = url.replaceAll('?hidden=true', '')
@@ -16,7 +15,7 @@ function spaceIdFromUrl (url) {
   return id
 }
 
-export default async function handler (request, context) {
+export default async (request, context) => {
   const url = new URL(request.url)
   const spaceId = spaceIdFromUrl(url)
   const isAsset = url.pathname.includes('.')
@@ -24,8 +23,10 @@ export default async function handler (request, context) {
   if (isAsset || isHomepage || !spaceId) {
     return
   }
+
   const response = await context.next()
   response.headers.set('Cache-Control', 'public, durable, s-maxage=900') // 15 mins expiry
+
   const rewriter = new HTMLRewriter()
     .on('meta[property="og:image"]', {
       element: (element) => {
