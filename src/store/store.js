@@ -1826,7 +1826,7 @@ const store = createStore({
         store.commit('scrollElementIntoView', { element, positionIsCenter: true })
       }
     },
-    updatePageSizes: (context) => {
+    updatePageSizes: async (context) => {
       const cards = context.getters['currentCards/all']
       const boxes = context.getters['currentBoxes/all']
       const items = cards.concat(boxes)
@@ -1834,7 +1834,9 @@ const store = createStore({
         x: 0, y: 0, width: 500, height: 500 // minimum page size
       })
       const itemsRect = utils.pageSizeFromItems(items)
-      context.commit('updatePageSizes', itemsRect)
+      const drawingRect = await utils.imageSize(context.state.currentSpace.drawingImage)
+      const rect = utils.mergeRectSizes(itemsRect, drawingRect)
+      context.commit('updatePageSizes', rect)
     },
     updateViewportSizes: (context) => {
       const viewport = utils.visualViewport()

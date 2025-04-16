@@ -1239,6 +1239,30 @@ export default {
     })
     return { width, height }
   },
+  async imageSize (url) {
+    if (!url) { return }
+    try {
+      const image = new Image()
+      const dimensions = await new Promise((resolve, reject) => {
+        image.onload = () => resolve({
+          width: image.width,
+          height: image.height
+        })
+        image.onerror = () => reject(new Error('Failed to load image'))
+        image.src = url
+      })
+      return dimensions
+    } catch (error) {
+      console.error('🚒 imageSize', url, error)
+    }
+  },
+  mergeRectSizes (rect1, rect2) {
+    if (!rect2) { return rect1 }
+    return {
+      width: Math.max(rect1.width, rect2.width),
+      height: Math.max(rect1.height, rect2.height)
+    }
+  },
 
   // string
 
