@@ -134,7 +134,7 @@ const closeDialogs = async () => {
 const updatePreviewImage = async () => {
   if (props.box) { return }
   await nextTick()
-  store.dispatch('currentSpace/createSpacePreviewImage')
+  store.dispatch('currentSpace/updateSpacePreviewImage')
 }
 const clearErrors = () => {
   state.error.isNotImageUrl = false

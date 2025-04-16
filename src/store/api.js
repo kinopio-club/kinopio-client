@@ -772,7 +772,7 @@ const self = {
         const response = await fetch(`${consts.apiHost()}/space/preview-image`, options)
         return normalizeResponse(response)
       } catch (error) {
-        context.dispatch('handleServerError', { name: 'createSpacePreviewImage', error, shouldNotNotifyUser: false })
+        context.dispatch('handleServerError', { name: 'updateSpacePreviewImage', error, shouldNotNotifyUser: false })
       }
     },
     updateSpace: async (context, space) => {

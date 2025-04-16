@@ -63,7 +63,7 @@ const init = async () => {
   }
   await updateWithRemoteSpaces()
   updateHeights()
-  store.dispatch('currentSpace/createSpacePreviewImage')
+  store.dispatch('currentSpace/updateSpacePreviewImage')
 }
 
 // current space

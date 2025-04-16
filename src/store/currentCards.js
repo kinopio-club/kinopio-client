@@ -346,6 +346,7 @@ export default {
         context.commit('triggerUpdateCardDimensionsAndPaths', card.id, { root: true })
       }
       await context.dispatch('api/addToQueue', { name: 'updateCard', body: card }, { root: true })
+      context.dispatch('currentSpace/updateSpacePreviewImage', null, { root: true })
     },
     updateMultiple: async (context, cards) => {
       if (!cards.length) { return }
@@ -369,6 +370,7 @@ export default {
       })
       cache.updateSpace('editedByUserId', context.rootState.currentUser.id, currentSpaceId)
       await context.dispatch('api/addToQueue', { name: 'updateMultipleCards', body: updates }, { root: true })
+      context.dispatch('currentSpace/updateSpacePreviewImage', null, { root: true })
     },
     updateCounter: async (context, { card, shouldIncrement, shouldDecrement }) => {
       const isSignedIn = context.rootGetters['currentUser/isSignedIn']

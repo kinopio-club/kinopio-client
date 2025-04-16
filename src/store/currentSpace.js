@@ -202,7 +202,7 @@ const currentSpace = {
       } catch (error) {
         console.warn('🚑 updateSpacePreviewImage', error)
       }
-    }, 2000), // 2 seconds
+    }, 10 * 1000), // 10 seconds
     updateInboxCache: async (context) => {
       const currentSpaceIsInbox = context.state.name === 'Inbox'
       const currentUserIsSignedIn = context.rootGetters['currentUser/isSignedIn']
