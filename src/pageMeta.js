@@ -60,13 +60,7 @@ const updateTitle = (space) => {
 // image
 const updateImageMeta = (imageUrl) => {
   const element = document.querySelector('meta[property="og:image"]')
-  if (element) {
-    element.content = imageUrl
-  } else {
-    const defaultImage = document.createElement('meta')
-    defaultImage.setAttribute('property', 'og:image')
-    defaultImage.setAttribute('content', imageUrl)
-  }
+  element.content = imageUrl
 }
 const resetImage = () => {
   updateImageMeta(defaultImage)
