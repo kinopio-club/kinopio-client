@@ -50,7 +50,7 @@ const toggleUserDetailsIsVisible = () => {
 }
 const showUserDetails = () => {
   const element = labelElement.value
-  let options = { element, shouldIgnoreZoom: true }
+  const options = { element, shouldIgnoreZoom: true }
   // if (this.detailsOnRight) {
   //   options.offsetX = -190
   // }

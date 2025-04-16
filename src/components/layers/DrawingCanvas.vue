@@ -88,7 +88,7 @@ const pageWidth = computed(() => store.state.pageWidth)
 const currentUserIsSignedIn = computed(() => store.getters['currentUser/isSignedIn'])
 const toolbarIsDrawing = computed(() => store.state.currentUserToolbar === 'drawing')
 const styles = computed(() => {
-  let value = {
+  const value = {
     top: state.prevScroll.y + 'px',
     left: state.prevScroll.x + 'px'
   }

@@ -19,7 +19,7 @@ import defer from 'lodash-es/defer'
 import debounce from 'lodash-es/debounce'
 import dayjs from 'dayjs'
 
-let idleClientTimers = []
+const idleClientTimers = []
 let isLoadingRemoteSpace, shouldLoadNewHelloSpace
 
 const currentSpace = {
@@ -63,8 +63,8 @@ const currentSpace = {
     },
     removeIdleClientFromSpace: (state, oldUser) => {
       utils.typeCheck({ value: oldUser, type: 'object' })
-      let spectators = state.spectators || []
-      let clients = state.clients || []
+      const spectators = state.spectators || []
+      const clients = state.clients || []
       state.spectators = spectators.filter(user => {
         return user.id !== oldUser.id
       })
@@ -284,9 +284,9 @@ const currentSpace = {
         let space, card
         // don't update if item already exists
         if (spaceId) {
-          const space = context.rootGetters['otherSpaceById'](spaceId)
+          const space = context.rootGetters.otherSpaceById(spaceId)
         } else if (cardId) {
-          const card = context.rootGetters['otherCardById'](cardId)
+          const card = context.rootGetters.otherCardById(cardId)
         }
         if (space || card) { return }
         // add options to items to fetch
@@ -372,7 +372,7 @@ const currentSpace = {
       const shouldHideDateCards = currentUser.shouldHideDateCards
       if (!shouldHideDateCards) {
         const date = dayjs().format('ddd MMM D') // Wed Nov 20
-        const moonPhaseSystemCommandIcon = `::systemCommand=moonPhase`
+        const moonPhaseSystemCommandIcon = '::systemCommand=moonPhase'
         const dateCard = {
           id: nanoid(),
           x: 73,
@@ -469,7 +469,7 @@ const currentSpace = {
       context.commit('resetPageSizes', null, { root: true })
       context.dispatch('restoreSpaceInChunks', { space: uniqueNewSpace })
       await context.dispatch('saveNewSpace')
-      context.commit('addNotification', { message: `Duplicated Space`, type: 'success' }, { root: true })
+      context.commit('addNotification', { message: 'Duplicated Space', type: 'success' }, { root: true })
     },
     addSpace: async (context, space) => {
       const user = { id: context.rootState.currentUser.id }
@@ -488,7 +488,7 @@ const currentSpace = {
       context.commit('notifySignUpToEditSpace', false, { root: true })
     },
     getRemoteSpace: async (context, space) => {
-      let collaboratorKey = context.rootState.spaceCollaboratorKeys.find(key => key.spaceId === space.id)
+      const collaboratorKey = context.rootState.spaceCollaboratorKeys.find(key => key.spaceId === space.id)
       if (collaboratorKey) {
         space.collaboratorKey = collaboratorKey.collaboratorKey
       }
@@ -561,7 +561,7 @@ const currentSpace = {
       context.commit('addNotification', { message: `You were removed as a collaborator from ${name}`, type: 'info' }, { root: true })
     },
     removeEmptyCards: (context) => {
-      let cards = context.rootGetters['currentCards/all']
+      const cards = context.rootGetters['currentCards/all']
       cards.forEach(card => {
         if (!card.name) {
           context.dispatch('currentCards/remove', card, { root: true })
@@ -601,7 +601,7 @@ const currentSpace = {
       if (!utils.objectHasKeys(space)) { return }
       space.connections = utils.migrationConnections(space.connections)
       addConnections = utils.migrationConnections(addConnections)
-      console.info('🌱 Restoring space', space, { 'isRemote': isRemote, addCards, addConnections, addConnectionTypes, addBoxes })
+      console.info('🌱 Restoring space', space, { isRemote, addCards, addConnections, addConnectionTypes, addBoxes })
       context.commit('isLoadingSpace', true, { root: true })
       const chunkSize = 50
       const timeStart = utils.unixTime()
@@ -613,7 +613,7 @@ const currentSpace = {
       let connections = addConnections || space.connections || []
       cards = utils.normalizeItems(cards)
       connections = utils.normalizeItems(connections)
-      let boxes = addBoxes || space.boxes || []
+      const boxes = addBoxes || space.boxes || []
       // sort cards
       const cardIds = Object.keys(cards)
       cards = cardIds.map(id => {
@@ -703,9 +703,9 @@ const currentSpace = {
       if (isRemote) {
         emoji = '🌳🌏'
       }
-      let cards = context.rootState.currentCards.ids.length
-      let connections = context.rootState.currentConnections.ids.length
-      let boxes = context.rootState.currentBoxes.ids.length
+      const cards = context.rootState.currentCards.ids.length
+      const connections = context.rootState.currentConnections.ids.length
+      const boxes = context.rootState.currentBoxes.ids.length
       console.info(`${emoji} Restore space complete in ${timeEnd - timeStart}ms,`, {
         cards,
         connections,
@@ -757,7 +757,7 @@ const currentSpace = {
           context.dispatch('loadRemoteSpace', space)
         ])
         // restore remote space
-        let remoteSpace = remoteData
+        const remoteSpace = remoteData
         console.info('🎑 remoteSpace', remoteSpace)
         if (!remoteSpace) { return }
         pageMeta.updateSpace(remoteSpace)
@@ -830,7 +830,7 @@ const currentSpace = {
       // cards
       const cards = context.rootGetters['currentCards/all']
       const selectedCardIds = context.rootState.multipleCardsSelectedIds.concat(context.rootState.multipleCardsSelectedIdsToLoad)
-      let cardResults = utils.mergeSpaceKeyValues({ prevItems: cards, newItems: remoteSpace.cards, selectedItemIds: selectedCardIds })
+      const cardResults = utils.mergeSpaceKeyValues({ prevItems: cards, newItems: remoteSpace.cards, selectedItemIds: selectedCardIds })
       context.dispatch('currentCards/mergeUnique', cardResults.updateItems, { root: true })
       context.dispatch('currentCards/mergeRemove', cardResults.removeItems, { root: true })
       // connectionTypes
@@ -934,7 +934,7 @@ const currentSpace = {
       await context.dispatch('api/addToQueue', {
         name: 'updateSpaceIsHidden',
         body: {
-          spaceId: spaceId,
+          spaceId,
           isHidden
         }
       }, { root: true })
@@ -1237,7 +1237,7 @@ const currentSpace = {
 
   getters: {
     all: (state, getters, rootState, rootGetters) => {
-      let space = utils.clone(state)
+      const space = utils.clone(state)
       space.cards = rootGetters['currentCards/all']
       space.connections = rootGetters['currentConnections/all']
       space.connectionTypes = rootGetters['currentConnections/allTypes']

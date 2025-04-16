@@ -53,11 +53,11 @@ export default {
   checkPointsInRects (points, rects, grid) {
     grid = grid || this.createGrid(rects, gridSize)
     const matchingRects = new Set()
-    for (let point of points) {
+    for (const point of points) {
       const cell = this.getGridCell(point.x, point.y, gridSize)
       const cellKey = `${cell.row},${cell.col}`
       if (grid.has(cellKey)) {
-        for (let rect of grid.get(cellKey)) {
+        for (const rect of grid.get(cellKey)) {
           // rotated rect
           if (rect.tilt) {
             const angleRad = this.degreesToRadians(rect.tilt)
@@ -91,7 +91,7 @@ export default {
     if (!path) { return }
     // Convert points to SVG points
     const svgPoints = Array.from(points).map(point => {
-      let svgPoint = svg.createSVGPoint()
+      const svgPoint = svg.createSVGPoint()
       svgPoint.x = point.x
       svgPoint.y = point.y
       return svgPoint
@@ -104,7 +104,7 @@ export default {
       width: parseInt(data.rectWidth),
       height: parseInt(data.rectHeight)
     }
-    let pointsInsideRect = points.find(point => {
+    const pointsInsideRect = points.find(point => {
       return this.isPointInsideRect(point, rect)
     })
     if (!pointsInsideRect) { return [] }

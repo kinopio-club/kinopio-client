@@ -85,11 +85,11 @@ const updateSearch = async (search) => {
 const searchRemoteCards = async (search) => {
   state.isLoading = true
   const results = await store.dispatch('api/searchCards', { query: search })
-  let groups = results.spaces.map(space => {
+  const groups = results.spaces.map(space => {
     return {
       spaceName: space.name,
       spaceId: space.id,
-      space: space,
+      space,
       background: space.background,
       backgroundTint: space.backgroundTint,
       cards: []
@@ -108,7 +108,7 @@ const searchRemoteCards = async (search) => {
   state.hasSearched = true
 }
 const updateCardsBySpaceFlattened = (groups) => {
-  let items = []
+  const items = []
   groups.forEach(group => {
     group.space.isSpace = true
     items.push(group.space)
@@ -206,7 +206,7 @@ const focusNextItem = () => {
     return
   }
   const currentIndex = items.findIndex(card => card.id === previousResultItem.value.id)
-  let index = currentIndex + 1
+  const index = currentIndex + 1
   if (items.length === index) {
     return
   }
@@ -282,13 +282,13 @@ const updatePositionFrame = () => {
 const updateDialogHeight = async () => {
   if (!props.visible) { return }
   await nextTick()
-  let element = dialogElement.value
+  const element = dialogElement.value
   state.dialogHeight = utils.elementHeight(element)
 }
 
 const updateResultsSectionHeight = async () => {
   await nextTick()
-  let element = resultsElement.value
+  const element = resultsElement.value
   state.resultsSectionHeight = utils.elementHeight(element) - 2
 }
 const triggerSignUpOrInIsVisible = () => {

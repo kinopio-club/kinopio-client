@@ -35,7 +35,7 @@ watch(() => visible.value, (value, prevValue) => {
 const updateDialogHeight = async () => {
   if (!visible.value) { return }
   await nextTick()
-  let element = dialogElement.value
+  const element = dialogElement.value
   state.dialogHeight = utils.elementHeight(element)
 }
 

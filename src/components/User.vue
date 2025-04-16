@@ -78,7 +78,7 @@ const toggleUserDetailsGlobalIsVisible = () => {
 }
 const showUserDetails = () => {
   const element = userElement.value
-  let options = { element, shouldIgnoreZoom: true }
+  const options = { element, shouldIgnoreZoom: true }
   if (props.detailsOnRight) {
     options.offsetX = -190
     options.transformOriginIsTopRight = true

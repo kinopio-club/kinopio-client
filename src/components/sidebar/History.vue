@@ -99,7 +99,7 @@ const relativeDate = (operation) => {
 
 const copyOperations = async (event) => {
   store.commit('clearNotificationsWithPosition')
-  let position = utils.cursorPositionInPage(event)
+  const position = utils.cursorPositionInPage(event)
   position.x = position.x - 60
   try {
     let text = utils.clone(state.operations)
@@ -113,7 +113,7 @@ const copyOperations = async (event) => {
 }
 const copyOperation = async (event, operation) => {
   store.commit('clearNotificationsWithPosition')
-  let position = utils.cursorPositionInPage(event)
+  const position = utils.cursorPositionInPage(event)
   position.x = position.x - 60
   try {
     operation = JSON.stringify(operation)

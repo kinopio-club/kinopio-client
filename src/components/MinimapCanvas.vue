@@ -62,7 +62,12 @@ const emit = defineEmits(['updateCount'])
 
 const props = defineProps({
   visible: Boolean,
-  size: Number
+  size: Number,
+  pageHeight: Number,
+  pageWidth: Number,
+  space: Object,
+  viewportIsHidden: Boolean,
+  backgroundColor: String
 })
 const state = reactive({
   scrollX: 0,
@@ -76,19 +81,29 @@ watch(() => props.visible, (value, prevValue) => {
     init()
   }
 })
+watch(() => props.space, (value, prevValue) => {
+  if (value) {
+    init()
+  }
+})
 
+const pageHeight = computed(() => {
+  return props.pageHeight || store.state.pageHeight
+})
+const pageWidth = computed(() => {
+  return props.pageWidth || store.state.pageWidth
+})
 const ratio = computed(() => {
-  const pageWidth = store.state.pageWidth
-  const pageHeight = store.state.pageHeight
-  if (pageWidth > pageHeight) {
-    return props.size / pageWidth
+  if (pageWidth.value > pageHeight.value) {
+    return props.size / pageWidth.value
   } else {
-    return props.size / pageHeight
+    return props.size / pageHeight.value
   }
 })
 
 const styles = computed(() => {
-  return { backgroundColor: store.state.outsideSpaceBackgroundColor }
+  const color = props.backgroundColor || store.state.outsideSpaceBackgroundColor
+  return { backgroundColor: color }
 })
 
 // canvas
@@ -103,11 +118,8 @@ const init = async () => {
 }
 const initCanvas = async () => {
   await nextTick()
-  let pageWidth = store.state.pageWidth
-  let pageHeight = store.state.pageHeight
-  state.pageWidth = Math.round(pageWidth * ratio.value)
-  state.pageHeight = Math.round(pageHeight * ratio.value)
-
+  state.pageWidth = Math.round(pageWidth.value * ratio.value)
+  state.pageHeight = Math.round(pageHeight.value * ratio.value)
   updateScroll()
   canvas = canvasElement.value
   if (!canvas) { return }
@@ -122,14 +134,20 @@ const initCanvas = async () => {
 
 // connections
 
+const mapConnections = computed(() => {
+  return props.space?.connections || store.getters['currentConnections/all']
+})
+const mapConnectionTypes = computed(() => {
+  return props.space?.connectionTypes || store.getters['currentConnections/allTypes']
+})
 const updatePointWithRatio = (point) => {
   point.x = point.x * ratio.value
   point.y = point.y * ratio.value
   return point
 }
 const drawConnections = () => {
-  const connectionTypes = store.getters['currentConnections/allTypes']
-  const connections = store.getters['currentConnections/all']
+  const connectionTypes = mapConnectionTypes.value
+  const connections = mapConnections.value
   for (const connection of connections) {
     context.lineWidth = 1
     context.lineCap = 'round'
@@ -138,6 +156,7 @@ const drawConnections = () => {
     context.strokeStyle = type.color
     // update path with ratio
     let path = connection.path
+    if (!path) { continue }
     let startCoords = utils.startCoordsFromConnectionPath(path)
     let endCoords = utils.endCoordsFromConnectionPath(path)
     let controlPoint = utils.curveControlPointFromPath(path)
@@ -152,8 +171,11 @@ const drawConnections = () => {
 
 // boxes
 
+const mapBoxes = computed(() => {
+  return props.space?.boxes || store.getters['currentBoxes/all']
+})
 const drawBoxes = () => {
-  let boxes = store.getters['currentBoxes/all']
+  let boxes = mapBoxes.value
   boxes = utils.clone(boxes)
   boxes = boxes.map(box => {
     box.x = box.x * ratio.value
@@ -163,7 +185,7 @@ const drawBoxes = () => {
     return box
   })
   boxes.forEach(box => {
-    let rect = new Path2D()
+    const rect = new Path2D()
     rect.roundRect(box.x, box.y, box.width, box.height, itemRadius)
     context.strokeStyle = box.color
     context.lineWidth = 1
@@ -179,19 +201,24 @@ const drawBoxes = () => {
 
 // cards
 
+const mapCards = computed(() => {
+  return props.space?.cards || store.getters['currentCards/all']
+})
 const drawCards = () => {
   const defaultColor = utils.cssVariable('secondary-background')
-  let cards = store.getters['currentCards/all']
+  let cards = mapCards.value
   cards = utils.clone(cards)
   cards = cards.map(card => {
+    const width = card.width || 200
+    const height = card.height || 50
     card.x = card.x * ratio.value
     card.y = card.y * ratio.value
-    card.width = card.width * ratio.value
-    card.height = card.height * ratio.value
+    card.width = width * ratio.value
+    card.height = height * ratio.value
     return card
   })
   cards.forEach(card => {
-    let rect = new Path2D()
+    const rect = new Path2D()
     rect.roundRect(card.x, card.y, card.width, card.height, itemRadius)
     context.fillStyle = card.backgroundColor || defaultColor
     context.fill(rect)
@@ -221,7 +248,7 @@ const viewportStyle = computed(() => {
     top = Math.min(top, state.pageHeight)
     height = state.pageHeight - top
   }
-  let styles = {
+  const styles = {
     left: `${left}px`,
     top: `${top}px`,
     width: `${width}px`,
@@ -254,12 +281,14 @@ const positionInViewportCenter = (position) => {
   return { x, y }
 }
 const panToPositionRightLeftClick = (event) => {
+  if (props.viewportIsHidden) { return }
   const rightAndLeftButtons = 3
   const isRightAndLeftClick = rightAndLeftButtons === event.buttons
   if (!isRightAndLeftClick) { return }
   panToPosition(event)
 }
 const startPanningViewport = (event) => {
+  if (props.viewportIsHidden) { return }
   state.isPanningViewport = true
   panToPosition(event)
 }
@@ -289,12 +318,16 @@ const panViewport = (event) => {
 const endPanningViewport = (event) => {
   state.isPanningViewport = false
 }
+const viewportIsVisible = computed(() => {
+  if (props.viewportIsHidden) { return }
+  return true
+})
 </script>
 
 <template lang="pug">
 .minimap-canvas(v-if="props.visible" :style="styles" @pointerdown="startPanningViewport" @mousedown="panToPositionRightLeftClick")
   canvas#minimap-canvas(ref="canvasElement")
-  .viewport.blink(:style="viewportStyle")
+  .viewport.blink(v-if="viewportIsVisible" :style="viewportStyle")
 </template>
 
 <style lang="stylus">

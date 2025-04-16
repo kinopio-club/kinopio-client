@@ -24,7 +24,7 @@ const canEditAll = computed(() => {
 // direction
 
 const path = computed(() => 'M0 0 L20 0')
-const gradientIdReference = computed(() => `url('#gradient')`)
+const gradientIdReference = computed(() => 'url(\'#gradient\')')
 const isSomeDirectionsIsVisible = computed(() => {
   const connections = props.connections.filter(connection => connection.directionIsVisible)
   return connections.length
@@ -97,7 +97,7 @@ const allPathsIsStraight = computed(() => {
 const togglePathIsStraight = (isStraight) => {
   let controlPoint = null
   if (isStraight) {
-    controlPoint = `q00,00`
+    controlPoint = 'q00,00'
   }
   props.connections.forEach(connection => {
     store.dispatch('currentConnections/update', {

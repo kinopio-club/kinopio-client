@@ -61,7 +61,7 @@ const toggleCardTipsIsVisible = () => {
 
 const updateSortedCards = () => {
   if (!props.visible) { return }
-  let sorted = sortBy(cards.value, card => dayjs(card.nameUpdatedAt || card.updatedAt).valueOf())
+  const sorted = sortBy(cards.value, card => dayjs(card.nameUpdatedAt || card.updatedAt).valueOf())
   if (state.sortOrderIsDesc) {
     sorted.reverse()
   }
@@ -164,7 +164,7 @@ const updateAllTextareaSizes = async () => {
   })
 }
 const textareaWrapStyles = (card) => {
-  let styles = {
+  const styles = {
     backgroundColor: card.backgroundColor
   }
   if (card.backgroundColor) {
@@ -176,7 +176,7 @@ const textareaWrapStyles = (card) => {
 }
 const textareaStyles = (card) => {
   if (!card.backgroundColor) { return }
-  let styles = {
+  const styles = {
     backgroundColor: card.backgroundColor
   }
   if (utils.colorIsDark(card.backgroundColor)) {
@@ -211,7 +211,7 @@ const focus = (card, index) => {
 }
 const focusTextarea = async (card, index) => {
   closeDialogs()
-  let element = section.value.querySelector(`textarea[data-card-id="${card.id}"]`)
+  const element = section.value.querySelector(`textarea[data-card-id="${card.id}"]`)
   focus(card, index)
   await nextTick()
   await nextTick()

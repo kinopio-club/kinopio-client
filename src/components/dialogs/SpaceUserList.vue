@@ -31,7 +31,7 @@ watch(() => visible.value, (value, prevValue) => {
 const updateDialogHeight = async () => {
   if (!visible.value) { return }
   await nextTick()
-  let element = dialogElement.value
+  const element = dialogElement.value
   state.dialogHeight = utils.elementHeight(element)
 }
 
@@ -100,9 +100,9 @@ const showUserDetails = (event, user) => {
     store.commit('userDetailsUser', {})
     return
   }
-  let element = event.target
-  let options = { element, offsetX: 0, shouldIgnoreZoom: true }
-  let position = utils.childDialogPositionFromParent(options)
+  const element = event.target
+  const options = { element, offsetX: 0, shouldIgnoreZoom: true }
+  const position = utils.childDialogPositionFromParent(options)
   store.commit('userDetailsUser', user)
   store.commit('userDetailsPosition', position)
   store.commit('userDetailsIsVisible', true)

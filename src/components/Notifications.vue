@@ -171,10 +171,10 @@ const notifyIsJoiningGroup = computed(() => store.state.notifyIsJoiningGroup)
 const notifySignUpToJoinGroup = computed(() => store.state.notifySignUpToJoinGroup)
 const notifyIsDuplicatingSpace = computed(() => store.state.notifyIsDuplicatingSpace)
 const notifificationClasses = (item) => {
-  let classes = {
-    'danger': item.type === 'danger',
-    'success': item.type === 'success',
-    'info': item.type === 'info',
+  const classes = {
+    danger: item.type === 'danger',
+    success: item.type === 'success',
+    info: item.type === 'info',
     'persistent-item': item.isPersistentItem
   }
   return classes

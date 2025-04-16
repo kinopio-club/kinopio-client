@@ -296,8 +296,8 @@ const store = createStore({
     },
     updatePageSizes: (state, itemsRect) => {
       if (!itemsRect) { return }
-      let pageWidth = Math.max(state.viewportWidth, itemsRect.width, state.pageWidth)
-      let pageHeight = Math.max(state.viewportHeight, itemsRect.height, state.pageHeight)
+      const pageWidth = Math.max(state.viewportWidth, itemsRect.width, state.pageWidth)
+      const pageHeight = Math.max(state.viewportHeight, itemsRect.height, state.pageHeight)
       state.pageWidth = Math.round(pageWidth)
       state.pageHeight = Math.round(pageHeight)
     },
@@ -346,7 +346,7 @@ const store = createStore({
     },
 
     closeAllDialogs: (state) => {
-      let dialogs = document.querySelectorAll('dialog')
+      const dialogs = document.querySelectorAll('dialog')
       const dialogIsVisible = Boolean(dialogs.length)
       if (!dialogIsVisible) { return }
       if (utils.unpinnedDialogIsVisible()) {
@@ -806,7 +806,7 @@ const store = createStore({
         return isUserId && isStartCardId
       })
       if (index >= 0) {
-        let connection = state.remoteCurrentConnections[index]
+        const connection = state.remoteCurrentConnections[index]
         const keys = Object.keys(updates)
         keys.forEach(key => {
           connection[key] = updates[key]
@@ -1701,7 +1701,7 @@ const store = createStore({
     updateOtherItems: (state, { cards, spaces }) => {
       utils.typeCheck({ value: cards, type: 'array' })
       utils.typeCheck({ value: spaces, type: 'array' })
-      let otherItems = utils.clone(state.otherItems)
+      const otherItems = utils.clone(state.otherItems)
       if (cards.length) {
         otherItems.cards = otherItems.cards.concat(cards)
         otherItems.cards = uniqBy(otherItems.cards, 'id')
@@ -1828,11 +1828,11 @@ const store = createStore({
     updatePageSizes: (context) => {
       const cards = context.getters['currentCards/all']
       const boxes = context.getters['currentBoxes/all']
-      let items = cards.concat(boxes)
+      const items = cards.concat(boxes)
       items.push({
         x: 0, y: 0, width: 500, height: 500 // minimum page size
       })
-      let itemsRect = utils.pageSizeFromItems(items)
+      const itemsRect = utils.pageSizeFromItems(items)
       context.commit('updatePageSizes', itemsRect)
     },
     updateViewportSizes: (context) => {
@@ -1845,8 +1845,8 @@ const store = createStore({
       item.width = item.width || item.resizeWidth
       item.height = item.height || item.resizeHeight
       const zoom = context.getters.spaceZoomDecimal
-      let thresholdHeight = (context.state.viewportHeight * zoom) / 2
-      let thresholdWidth = (context.state.viewportWidth * zoom) / 2
+      const thresholdHeight = (context.state.viewportHeight * zoom) / 2
+      const thresholdWidth = (context.state.viewportWidth * zoom) / 2
       const pageWidth = context.state.pageWidth
       const pageHeight = context.state.pageHeight
       const shouldIncreasePageWidth = (item.x + item.width + thresholdWidth) > pageWidth
@@ -2051,7 +2051,7 @@ const store = createStore({
       context.commit('broadcast/updateStore', { updates, type: 'removeFromRemoteBoxesSelected' })
     },
     triggerSonarPing: (context, event) => {
-      let ping = utils.cursorPositionInSpace(event)
+      const ping = utils.cursorPositionInSpace(event)
       ping.color = store.state.currentUser.color
       context.commit('triggerSonarPing', ping)
       context.commit('broadcast/updateStore', { updates: ping, type: 'triggerSonarPing' })
@@ -2197,7 +2197,7 @@ const store = createStore({
       return transform
     },
     windowScrollWithSpaceOffset: (state) => () => {
-      let scroll = { x: window.scrollX, y: window.scrollY }
+      const scroll = { x: window.scrollX, y: window.scrollY }
       return utils.updatePositionWithSpaceOffset(scroll)
     },
     isInteractingWithItem: (state) => {
@@ -2230,15 +2230,15 @@ const store = createStore({
         name,
         id: nanoid(),
         color: color || defaultColor,
-        cardId: cardId,
-        spaceId: spaceId
+        cardId,
+        spaceId
       }
     },
     allTags: (state) => {
       const allTags = state.tags
       const userTags = state.currentUser.tags
       const spaceTags = state.currentSpace.tags
-      let tags = spaceTags.concat(userTags).concat(allTags)
+      const tags = spaceTags.concat(userTags).concat(allTags)
       // tags = uniqBy(tags, 'name') // removed for perf reasons
       return tags || []
     },

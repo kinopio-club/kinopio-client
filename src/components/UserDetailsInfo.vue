@@ -16,7 +16,7 @@ onMounted(() => {
 })
 const updateTextareaSize = async () => {
   await nextTick()
-  let textarea = descriptionElement.value
+  const textarea = descriptionElement.value
   if (!textarea) { return }
   textarea.style.height = textarea.scrollHeight + 1 + 'px'
 }

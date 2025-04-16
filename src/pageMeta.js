@@ -60,7 +60,7 @@ const updateImage = (space) => {
   const head = document.querySelector('head')
 
   const imageUrl = space.previewImage || spacePreviewImageFromId(space.id) || logo
-  let ogImage = document.createElement(`meta`)
+  const ogImage = document.createElement('meta')
   ogImage.setAttribute('property', 'og:image')
   ogImage.setAttribute('content', imageUrl)
   head.appendChild(ogImage)
@@ -79,7 +79,7 @@ const updateDescription = (description) => {
 export default {
   // called by routes
   async spaceFromId ({ spaceId, isSpaceInvite }) {
-    let path = window.document.location.pathname
+    const path = window.document.location.pathname
     if (!spaceId) {
       const ids = utils.spaceAndCardIdFromPath(path)
       spaceId = ids?.spaceId
@@ -178,7 +178,7 @@ export default {
     }
     updateTitle(title)
     document.querySelector('meta[property="og:image"]').content = logo
-    let description = 'Work together on shared whiteboards, brainstorms, and diagrams'
+    const description = 'Work together on shared whiteboards, brainstorms, and diagrams'
     updateDescription(description)
   }
 }

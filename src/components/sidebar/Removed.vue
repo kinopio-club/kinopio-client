@@ -58,7 +58,7 @@ const currentUserCanEditSpace = computed(() => {
 const updateResultsSectionHeight = async () => {
   if (!props.visible) { return }
   await nextTick()
-  let element = resultsElement.value
+  const element = resultsElement.value
   state.resultsSectionHeight = utils.elementHeight(element)
 }
 const init = async () => {

@@ -27,7 +27,7 @@ const pageWidth = computed(() => store.state.pageWidth)
 const backgroundStyles = computed(() => {
   const url = backgroundUrl.value
   const tintColor = currentSpace.value.backgroundTint
-  let styles = {}
+  const styles = {}
   if (tintColor) {
     styles.background = 'transparent'
   }
@@ -55,7 +55,7 @@ const kinopioBackgroundImageData = computed(() => {
   return data
 })
 const backgroundUrl = computed(() => {
-  let data = kinopioBackgroundImageData.value
+  const data = kinopioBackgroundImageData.value
   let url
   // darkUrl
   if (data && isThemeDark.value) {

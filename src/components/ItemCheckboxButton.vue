@@ -81,8 +81,8 @@ const checkItemsCheckboxIsChecked = () => {
   state.itemsCheckboxIsChecked = itemsChecked.length === items.value.length
 }
 const addCheckboxToItems = async () => {
-  let updatedCards = []
-  let updatedBoxes = []
+  const updatedCards = []
+  const updatedBoxes = []
   // cards
   props.cards.forEach(card => {
     if (!utils.checkboxFromString(card.name)) {

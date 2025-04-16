@@ -24,7 +24,7 @@ clearOtherItemsQueue()
 
 const sortQueueItems = (queue) => {
   // sort create connectiontype operations first
-  let createConnectionTypes = []
+  const createConnectionTypes = []
   queue = queue.filter(request => {
     if (request.name === 'createConnectionType') {
       createConnectionTypes.push(request)
@@ -34,7 +34,7 @@ const sortQueueItems = (queue) => {
   })
   queue = createConnectionTypes.concat(queue)
   // sort createCard operations first
-  let createCards = []
+  const createCards = []
   queue = queue.filter(request => {
     if (request.name === 'createCard') {
       createCards.push(request)
@@ -215,14 +215,14 @@ const self = {
       const queue = await cache.queue()
       if (!shouldRequest({ apiKey, isOnline }) || !queue.length) { return } // offline check
       // empty queue into sendingQueue
-      let body = squashQueue(queue)
+      const body = squashQueue(queue)
       context.commit('sendingQueue', body, { root: true })
       cache.clearQueue()
       // send
       let response
       try {
         const requestId = nanoid()
-        console.warn(`🛫 sending operations`, body, `●requestId=${requestId}`)
+        console.warn('🛫 sending operations', body, `●requestId=${requestId}`)
         const space = context.rootState.currentSpace
         if (!space.id) { throw 'operation missing spaceId' }
         const options = await context.dispatch('requestOptions', { body, method: 'POST', space, requestId })
@@ -314,8 +314,8 @@ const self = {
     },
     signIn: async (context, { email, password }) => {
       const body = {
-        email: email,
-        password: password
+        email,
+        password
       }
       const options = await context.dispatch('requestOptions', { body, method: 'POST', space: context.rootState.currentSpace })
       return fetch(`${consts.apiHost()}/user/sign-in`, options)
@@ -425,7 +425,7 @@ const self = {
         const options = await context.dispatch('requestOptions', { method: 'GET', space: context.rootState.currentSpace })
         const response = await fetch(`${consts.apiHost()}/user/spaces`, options)
         const currentUser = context.rootState.currentUser
-        let spaces = await normalizeResponse(response)
+        const spaces = await normalizeResponse(response)
         return utils.addCurrentUserIsCollaboratorToSpaces(spaces, currentUser)
       } catch (error) {
         context.dispatch('handleServerError', { name: 'getUserSpaces', error })
@@ -441,7 +441,7 @@ const self = {
         const options = await context.dispatch('requestOptions', { method: 'GET', space: context.rootState.currentSpace })
         const response = await fetch(`${consts.apiHost()}/user/group-spaces`, options)
         const currentUser = context.rootState.currentUser
-        let spaces = await normalizeResponse(response)
+        const spaces = await normalizeResponse(response)
         return utils.addCurrentUserIsCollaboratorToSpaces(spaces, currentUser)
       } catch (error) {
         context.dispatch('handleServerError', { name: 'getUserGroupSpaces', error })
@@ -628,7 +628,7 @@ const self = {
         const apiKey = context.rootState.currentUser.apiKey
         const isOnline = context.rootState.isOnline
         if (!shouldRequest({ shouldRequestRemote, apiKey, isOnline })) { return }
-        let spaceReadOnlyKey = context.rootGetters['currentSpace/readOnlyKey'](space)
+        const spaceReadOnlyKey = context.rootGetters['currentSpace/readOnlyKey'](space)
         console.info('🛬 getting remote space', space.id)
         const options = await context.dispatch('requestOptions', { method: 'GET', space: context.rootState.currentSpace, spaceReadOnlyKey })
         const response = await utils.timeout(consts.defaultTimeout, fetch(`${consts.apiHost()}/space/${space.id}`, options))
@@ -681,10 +681,10 @@ const self = {
       const invitedSpaces = await cache.invitedSpaces()
       const invite = invitedSpaces.find(invitedSpace => invitedSpace.id === space.id) || {}
       space.collaboratorKey = space.collaboratorKey || invite.collaboratorKey
-      let spaceReadOnlyKey = context.rootGetters['currentSpace/readOnlyKey'](space)
+      const spaceReadOnlyKey = context.rootGetters['currentSpace/readOnlyKey'](space)
       try {
         console.info('🛬 getting remote space anonymously', space.id, space.collaboratorKey, spaceReadOnlyKey)
-        const options = await context.dispatch('requestOptions', { method: 'GET', space: space, spaceReadOnlyKey })
+        const options = await context.dispatch('requestOptions', { method: 'GET', space, spaceReadOnlyKey })
         const response = await utils.timeout(consts.defaultTimeout, fetch(`${consts.apiHost()}/space/${space.id}`, options))
         return normalizeResponse(response)
       } catch (error) {
@@ -717,7 +717,7 @@ const self = {
       try {
         let spaces = await cache.getAllSpaces()
         if (!spaces.length) { return }
-        let drawingImages = []
+        const drawingImages = []
         spaces = spaces.map(space => {
           space = normalizeRemovedCards(space)
           if (space.drawingImage) {
@@ -1207,7 +1207,7 @@ const self = {
         }
         const body = {
           userId,
-          arenaReturnedCode: arenaReturnedCode
+          arenaReturnedCode
         }
         const options = await context.dispatch('requestOptions', { body, method: 'PATCH', space: context.rootState.currentSpace })
         const response = await fetch(`${consts.apiHost()}/user/update-arena-access-token`, options)
@@ -1253,18 +1253,6 @@ const self = {
         context.dispatch('handleServerError', { name: 'imageSearch', error })
       }
     },
-
-    createAIImage: async (context, body) => {
-      try {
-        const options = await context.dispatch('requestOptions', { body, method: 'POST', space: context.rootState.currentSpace })
-        const response = await fetch(`${consts.apiHost()}/services/ai-image`, options)
-        const data = await normalizeResponse(response)
-        return data
-      } catch (error) {
-        console.error('🚒 createAIImage', error)
-        throw new Error(error)
-      }
-    },
     communityBackgrounds: async (context) => {
       try {
         const options = await context.dispatch('requestOptions', { method: 'GET', space: context.rootState.currentSpace })
@@ -1285,6 +1273,18 @@ const self = {
         return url
       } catch (error) {
         context.dispatch('handleServerError', { name: 'pdf', error })
+      }
+    },
+    generateSpace: async (context, prompt) => {
+      try {
+        const body = { prompt }
+        const options = await context.dispatch('requestOptions', { body, method: 'POST', space: context.rootState.currentSpace })
+        const response = await fetch(`${consts.apiHost()}/services/generate-space`, options)
+        const data = await normalizeResponse(response)
+        return data
+      } catch (error) {
+        console.error('🚒 generateSpace', error)
+        throw new Error(error)
       }
     },
 

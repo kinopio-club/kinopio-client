@@ -7,6 +7,9 @@ import pageMeta from '@/pageMeta.js'
 
 export default {
   name: 'WindowHistoryHandler',
+  computed: {
+    currentSpace () { return this.$store.state.currentSpace }
+  },
   created () {
     this.$store.subscribe(async (mutation, state) => {
       if (mutation.type === 'triggerUpdateWindowHistory') {
@@ -16,9 +19,6 @@ export default {
         this.updateWindowTitle()
       }
     })
-  },
-  computed: {
-    currentSpace () { return this.$store.state.currentSpace }
   },
   methods: {
     async updateWindowHistory (space) {
