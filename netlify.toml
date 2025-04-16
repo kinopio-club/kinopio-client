@@ -1,5 +1,5 @@
 [dev]
-    targetPort = 8080
+  targetPort = 8080
 
 [[edge_functions]]
   path = "/*"
