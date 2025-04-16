@@ -3,6 +3,6 @@
 
 [[edge_functions]]
   path = "/*"
-  function = "open-graph-html-transform"
+  function = "pageMeta"
   excludedPath = ["/", "/assets/*", "/*.js", "/*.css", "/*.txt", "/*.png"]
   cache = "manual"
