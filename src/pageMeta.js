@@ -37,16 +37,17 @@ const spacePreviewImageFromId = (spaceId) => {
   return `${consts.cdnHost}/${spaceId}/preview-image-${spaceId}.jpeg`
 }
 
-// update tags
+// update meta tags
 
-const updateTitle = (title) => {
+// title
+const updateTitleMeta = (title) => {
   if (consts.isDevelopment()) {
     title = `DEV ${title}`
   }
   document.title = title
   document.querySelector('meta[property="og:title"]').content = title
 }
-const updateSpaceTitle = (space) => {
+const updateTitle = (space) => {
   let title
   if (space.name === 'Hello Kinopio') {
     title = 'Kinopio'
@@ -55,27 +56,31 @@ const updateSpaceTitle = (space) => {
   } else {
     title = 'Kinopio'
   }
-  updateTitle(title)
+  updateTitleMeta(title)
 }
-/// Resets the og:image meta tag to the default image
+// image
+const updateImageMeta = (imageUrl) => {
+  const element = document.querySelector('meta[property="og:image"]')
+  if (element) {
+    element.content = imageUrl
+  } else {
+    const ogImage = document.createElement('meta')
+    ogImage.setAttribute('property', 'og:image')
+    ogImage.setAttribute('content', imageUrl)
+  }
+}
 const resetImage = () => {
-  document.querySelector('meta[property="og:image"]').content = ogImage
-  document.querySelector('meta[property="og:image:type"]').content = 'image/png'
+  updateImageMeta(ogImage)
 }
-/// Updates the og:image meta tag to the space preview image
 const updateImage = (space) => {
   const imageUrl = space.previewImage || spacePreviewImageFromId(space.id) || ogImage
-  document.querySelector('meta[property="og:image"]').content = imageUrl
-  document.querySelector('meta[property="og:image:type"]').content = 'image/jpeg'
+  updateImageMeta(imageUrl)
 }
-const updateDescription = (description) => {
+// description
+const updateDescriptionMeta = (description) => {
   document.querySelector('meta[property="og:description"]').content = description
   document.querySelector('meta[name="description"]').content = description
 }
-// const updateOembed = (space) => {
-// create tag     <link rel="alternate" type="application/json+oembed" href="" />
-//   document.querySelector('type[property="application/json+oembed"]').href = `${apiHost}/services/oembed/${space.id}`
-// }
 
 export default {
   // called by routes
@@ -92,12 +97,12 @@ export default {
     if (isSpaceInvite) {
       title = `[Invite] ${title}`
     }
-    updateTitle(title)
+    updateTitleMeta(title)
     let description = defaultDescription
     if (space.privacy === 'private') {
       description = `[Private] ${description}`
     }
-    updateDescription(description)
+    updateDescriptionMeta(description)
     updateImage(space)
   },
 
@@ -106,7 +111,7 @@ export default {
     space = utils.clone(space)
     const isHelloSpace = space.name === 'Hello Kinopio'
     const imageUrl = space.previewImage || spacePreviewImageFromId(space.id) || logo
-    updateSpaceTitle(space)
+    updateTitle(space)
     updateImage(space)
     // description
     const origin = { x: 0, y: 0 }
@@ -127,7 +132,7 @@ export default {
     // description tags
     if (!isHelloSpace) {
       const truncatedDescription = utils.truncated(description, 150)
-      updateDescription(truncatedDescription)
+      updateDescriptionMeta(truncatedDescription)
     }
     // noscript tag
     document.querySelector('noscript').innerHTML = utils.truncated(description, 1000)
@@ -177,9 +182,9 @@ export default {
     if (isGroupInvite) {
       title = `[Invite] ${title}`
     }
-    updateTitle(title)
+    updateTitleMeta(title)
     resetImage()
     const description = defaultDescription
-    updateDescription(description)
+    updateDescriptionMeta(description)
   }
 }
