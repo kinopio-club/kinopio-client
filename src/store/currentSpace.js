@@ -194,8 +194,10 @@ const currentSpace = {
     updateSpacePreviewImage: throttle(async function (context) {
       const currentUserIsSignedIn = context.rootGetters['currentUser/isSignedIn']
       const canEditSpace = context.rootGetters['currentUser/canEditSpace']()
+      const isPrivate = context.state.privacy === 'private'
       if (!currentUserIsSignedIn) { return }
       if (!canEditSpace) { return }
+      if (isPrivate) { return }
       try {
         // TODO upload minimapCanvas iamge w bk and pagemeta size and upload that png, instead of generateing on the server
         const response = await context.dispatch('api/updateSpacePreviewImage', context.state.id, { root: true })
