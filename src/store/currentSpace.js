@@ -16,7 +16,7 @@ import uniqBy from 'lodash-es/uniqBy'
 import uniq from 'lodash-es/uniq'
 import sortBy from 'lodash-es/sortBy'
 import defer from 'lodash-es/defer'
-import debounce from 'lodash-es/debounce'
+import throttle from 'lodash-es/throttle'
 import dayjs from 'dayjs'
 
 const idleClientTimers = []
@@ -191,7 +191,7 @@ const currentSpace = {
       context.commit('triggerUpdateWindowHistory', null, { root: true })
       context.dispatch('checkIfShouldShowExploreOnLoad')
     },
-    updateSpacePreviewImage: debounce(async function (context) {
+    updateSpacePreviewImage: throttle(async function (context) {
       const currentUserIsSignedIn = context.rootGetters['currentUser/isSignedIn']
       const canEditSpace = context.rootGetters['currentUser/canEditSpace']()
       if (!currentUserIsSignedIn) { return }
