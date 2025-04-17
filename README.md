@@ -96,6 +96,21 @@ To work with code that only works on https (e.g. clipboard copy and paste), [mkc
     mkcert -install
 	mkdir -p .cert && mkcert -key-file ./.cert/key.pem -cert-file ./.cert/cert.pem 'kinopio.local'
 
+## Testing pageMeta
+
+`pageMeta.js` is a [netlify function](https://www.netlify.com/platform/core/functions/) that runs server-side before the page loads, fetches public space info from the api, and updates the metatags in `index.html` for link previews and SEO.
+
+?? to test in dev mode
+
+> netlify dev
+> tested if it properly works with the deployment preview links Netlify generates here
+
+https://developers.netlify.com/sdk/edge-functions/debug-and-test/
+https://docs.netlify.com/edge-functions/get-started/
+
+?? how to see console.logs
+
+
 ## See Also
 
 - [are.na/kinopio/kinopio-design](https://www.are.na/kinopio/kinopio-design)
