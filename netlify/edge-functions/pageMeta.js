@@ -113,14 +113,54 @@ const jsonLD = (context, space) => {
   return jsonLD
 }
 
+// invites
+
+// groupFromGroupInviteUrl (url) {
+//   if (!url) { return }
+//   url = new URL(url)
+//   const params = url.searchParams
+//   const group = this.urlSearchParamsToObject(params)
+//   group.id = group.groupId
+//   return group
+// },
+
+const urlIsSpaceInvite = (url) => {
+  url = new URL(url)
+  return url.pathname === '/invite'
+}
+const urlIsGroupInvite = (url) => {
+  url = new URL(url)
+  return url.pathname === '/group/invite'
+}
+// nameFromUrl from qs name for invites
+
+// const isSpaceInvite = urlIsSpaceInvite(url)
+// const isGroupInvite = urlIsGroupInvite(url)
+//   if (isSpaceInvite) {
+// nameFromUrl from qs name for invites
+//   title = `[Invite] ${title}`
+// }
+// if (isGroupInvite) {
+//   const groupname = groupFromGroupInviteUrl(url)
+//   title = `[Group Invite] ${groupName}`
+// }
+
 export default async (request, context) => {
   try {
     const url = new URL(request.url)
 
-    // TODO handle
-    // utils.urlIsSpaceInvite
-    // utils.urlIsGroupInvite
+    // handle group invite url
+    const isGroupInvite = urlIsGroupInvite(url)
+    // if isGroupInvite
+    // const response = await context.next()
+    // response.headers.set('Cache-Control', `public, durable, s-maxage=${cacheExpiry}`)
+    // const rewriter = new HTMLRewriter()...
+    // return rewriter.transform(response)
 
+    // handle space invite url
+    const isSpaceInvite = urlIsSpaceInvite(url)
+
+    // handle space url
     const spaceId = spaceIdFromUrl(url)
     const isAsset = url.pathname.includes('.')
     const isHomepage = url.pathname === '/'
@@ -131,11 +171,8 @@ export default async (request, context) => {
     if (!space) { return }
     const response = await context.next()
     response.headers.set('Cache-Control', `public, durable, s-maxage=${cacheExpiry}`)
-
     const rewriter = new HTMLRewriter()
-
     // og:image
-
       .on('meta[property="og:image"]', {
         element: (element) => {
           element.setAttribute('content', space.previewImage)
@@ -156,9 +193,7 @@ export default async (request, context) => {
           element.setAttribute('content', imageType(space.previewImage))
         }
       })
-
     // title
-
       .on('title', {
         element: (element) => {
           element.innerText = pageTitle(context, space)
@@ -169,9 +204,7 @@ export default async (request, context) => {
           element.setAttribute('content', pageTitle(context, space))
         }
       })
-
     // description
-
       .on('meta[property="og:description"]', {
         element: (element) => {
           element.setAttribute('content', space.description)
@@ -187,15 +220,12 @@ export default async (request, context) => {
           element.innerText = space.description
         }
       })
-
     // json-ld for search robots
-
       .on('script[type="application/ld+json"]', {
         element: (element) => {
           element.setAttribute('text', jsonLD(context, space))
         }
       })
-
     return rewriter.transform(response)
   } catch (error) {
     console.error('🚒 fetchWithTimeout', error)
@@ -205,3 +235,4 @@ export default async (request, context) => {
 // todo # test dev urls
 // space invite: https://kinopio.club/invite?spaceId=ID&collaboratorKey=ID&name=packing-list---
 // group invite: https://kinopio.club/group/invite?groupId=ID&collaboratorKey=ID&name=warecats
+// space url: ...
