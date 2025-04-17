@@ -9,27 +9,10 @@ const imageType = (previewImage) => {
 }
 
 export default {
-  async rewriteIndexHTML ({ context, previewImage, title, description, jsonLD }) {
+  async rewriteIndexHTML ({ context, title, description, previewImage, jsonLD }) {
     const response = await context.next()
     response.headers.set('Cache-Control', `public, durable, s-maxage=${cacheExpiry}`)
-    const transformations = [
-      // og:image
-      {
-        selector: 'meta[property="og:image"]',
-        transform: element => element.setAttribute('content', previewImage)
-      },
-      {
-        selector: 'meta[property="og:image:width"]',
-        transform: element => element.setAttribute('content', '1200')
-      },
-      {
-        selector: 'meta[property="og:image:height"]',
-        transform: element => element.setAttribute('content', '630')
-      },
-      {
-        selector: 'meta[property="og:image:type"]',
-        transform: element => element.setAttribute('content', imageType(previewImage))
-      },
+    let transformations = [
       // title
       {
         selector: 'title',
@@ -38,21 +21,46 @@ export default {
       {
         selector: 'meta[property="og:title"]',
         transform: element => element.setAttribute('content', title)
-      },
-      // description
-      {
-        selector: 'meta[property="og:description"]',
-        transform: element => element.setAttribute('content', description)
-      },
-      {
-        selector: 'meta[name="description"]',
-        transform: element => element.setAttribute('content', description)
-      },
-      {
-        selector: 'noscript',
-        transform: element => { element.innerText = description }
       }
     ]
+    // description
+    if (description) {
+      transformations = transformations.concat([
+        {
+          selector: 'meta[property="og:description"]',
+          transform: element => element.setAttribute('content', description)
+        },
+        {
+          selector: 'meta[name="description"]',
+          transform: element => element.setAttribute('content', description)
+        },
+        {
+          selector: 'noscript',
+          transform: element => { element.innerText = description }
+        }
+      ])
+    }
+    // image
+    if (previewImage) {
+      transformations = transformations.concat([
+        {
+          selector: 'meta[property="og:image"]',
+          transform: element => element.setAttribute('content', previewImage)
+        },
+        {
+          selector: 'meta[property="og:image:width"]',
+          transform: element => element.setAttribute('content', '1200')
+        },
+        {
+          selector: 'meta[property="og:image:height"]',
+          transform: element => element.setAttribute('content', '630')
+        },
+        {
+          selector: 'meta[property="og:image:type"]',
+          transform: element => element.setAttribute('content', imageType(previewImage))
+        }
+      ])
+    }
     // json-ld for search robots
     if (jsonLD) {
       transformations.push({

@@ -1,6 +1,5 @@
 import pageUtils from './pageUtils.js'
 
-// const defaultImage = 'https://updates.kinopio.club/og-image.png'
 const timeout = 600 // 600s = 10 mins
 
 // utils
@@ -122,6 +121,9 @@ const urlIsSpaceInvite = (url) => {
 const urlIsGroupInvite = (url) => {
   return url.pathname === '/group/invite'
 }
+const nameFromUrl = (url) => {
+  const name = url.searchParams.get('name')
+}
 // nameFromUrl from qs name for invites
 
 // const isSpaceInvite = urlIsSpaceInvite(url)
@@ -144,11 +146,13 @@ export default async (request, context) => {
     if (isAsset || isHomepage || !spaceId) {
       return
     }
-
     // handle group invite url
     const isGroupInvite = urlIsGroupInvite(url)
-    // if isGroupInvite
-    // return pageUtils.rewriteIndexHTML({ context, previewImage, title, description, jsonLD })
+    if (isGroupInvite) {
+      const groupName = nameFromUrl(url)
+      const title = `[Group Invite] ${groupName}`
+      return pageUtils.rewriteIndexHTML({ context, title })
+    }
 
     // handle space invite url
     const isSpaceInvite = urlIsSpaceInvite(url)
@@ -156,11 +160,11 @@ export default async (request, context) => {
     // handle space url
     const space = await spacePublicMeta(context, spaceId)
     if (!space) { return }
-    const previewImage = space.previewImage
     const title = pageTitle(context, space)
     const description = space.description
+    const previewImage = space.previewImage
     const jsonLD = pageJsonLD(context, space)
-    return pageUtils.rewriteIndexHTML({ context, previewImage, title, description, jsonLD })
+    return pageUtils.rewriteIndexHTML({ context, title, description, previewImage, jsonLD })
   } catch (error) {
     console.error('🚑 pageMeta', error)
   }
