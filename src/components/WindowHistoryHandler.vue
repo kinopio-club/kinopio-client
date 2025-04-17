@@ -4,6 +4,7 @@ import { useStore } from 'vuex'
 import { useRouter } from 'vue-router'
 
 import utils from '@/utils.js'
+import consts from '@/consts.js'
 
 const store = useStore()
 const router = useRouter()
@@ -42,7 +43,18 @@ const updateWindowHistory = async (space) => {
 }
 const updateWindowTitle = () => {
   const space = store.state.currentSpace
-  // pageMeta.updateSpace(space)
+  let title
+  if (space.name === 'Hello Kinopio') {
+    title = 'Kinopio'
+  } else if (space.name) {
+    title = `${space.name} – Kinopio`
+  } else {
+    title = 'Kinopio'
+  }
+  if (consts.isDevelopment()) {
+    title = `DEV ${title}`
+  }
+  document.title = title
 }
 </script>
 
