@@ -80,6 +80,39 @@ const pageTitle = (context, space) => {
   return title
 }
 
+// json-ld
+
+const jsonLD = (context, space) => {
+  // normalize items
+  let items = space.cards.concat(space.boxes)
+  items = items.map(item => {
+    return {
+      '@type': 'CreativeWork',
+      name: item.name,
+      position: {
+        '@type': 'Place',
+        x: item.x,
+        y: item.y
+      }
+    }
+  })
+  // return
+  let jsonLD = {
+    '@context': 'https://schema.org',
+    '@type': 'CreativeWork',
+    name: pageTitle(context, space),
+    description: space.description,
+    dateCreated: space.createdAt,
+    contentUrl: space.previewImage,
+    hasPart: {
+      '@type': 'ItemList',
+      itemListElement: items
+    }
+  }
+  jsonLD = JSON.stringify(jsonLD)
+  return jsonLD
+}
+
 export default async (request, context) => {
   try {
     const url = new URL(request.url)
@@ -147,6 +180,19 @@ export default async (request, context) => {
       .on('meta[name="description"]', {
         element: (element) => {
           element.setAttribute('content', space.description)
+        }
+      })
+      .on('noscript', {
+        element: (element) => {
+          element.innerText = space.description
+        }
+      })
+
+    // json-ld for search robots
+
+      .on('script[type="application/ld+json"]', {
+        element: (element) => {
+          element.setAttribute('text', jsonLD(context, space))
         }
       })
 
