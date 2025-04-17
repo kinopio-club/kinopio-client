@@ -1,10 +1,11 @@
-import pageUtils from './pageUtils.js'
+import rewriteIndexHtml from './utils/rewriteIndexHtml.js'
 
 const timeout = 600 // 600s = 10 mins
 
 // utils
 
 const isDevelopment = (context) => {
+  console.log('🍎🍎🍎🍎', context.env, process.env)
   if (context.env.VITE_PROD_SERVER === 'true') {
     return false
   } else {
@@ -20,8 +21,6 @@ const apiHost = (context) => {
 }
 const spaceIdFromUrl = (url) => {
   const uuidLength = 21
-  url = url || window.location.href
-  url = url.replaceAll('?hidden=true', '')
   const id = url.substring(url.length - uuidLength, url.length)
   const idIsInvalid = id.includes('/')
   if (!idIsInvalid) { return }
@@ -45,7 +44,7 @@ const spacePublicMeta = async (context, spaceId) => {
   const timeoutId = setTimeout(() => controller.abort(), timeout)
   try {
     const response = await fetch(url, { signal: controller.signal })
-    const space = normalizeResponse(response)
+    const space = await normalizeResponse(response)
     return space
   } catch (error) {
     console.warn('🚑 spacePublicMeta', error)
@@ -112,13 +111,15 @@ const urlIsGroupInvite = (url) => {
   return url.pathname === '/group/invite'
 }
 const nameFromUrl = (url) => {
-  const name = url.searchParams.get('name')
+  return url.searchParams.get('name')
 }
 
 export default async (request, context) => {
   try {
-    const url = new URL(request.url)
-    const spaceId = spaceIdFromUrl(url)
+    let url = request.url
+    url = url.replaceAll('?hidden=true', '')
+    url = new URL(url)
+    const spaceId = spaceIdFromUrl(request.url)
     const isAsset = url.pathname.includes('.')
     const isHomepage = url.pathname === '/'
     if (isAsset || isHomepage || !spaceId) {
@@ -129,14 +130,14 @@ export default async (request, context) => {
     if (isGroupInvite) {
       const groupName = nameFromUrl(url)
       const title = `[Group Invite] ${groupName}`
-      return pageUtils.rewriteIndexHTML({ context, title })
+      return rewriteIndexHtml({ context, title })
     }
     // space invite url
     const isSpaceInvite = urlIsSpaceInvite(url)
     if (isSpaceInvite) {
       const spaceName = nameFromUrl(url)
       const title = `[Invite] ${spaceName}`
-      return pageUtils.rewriteIndexHTML({ context, title })
+      return rewriteIndexHtml({ context, title })
     }
     // space url
     const space = await spacePublicMeta(context, spaceId)
@@ -145,7 +146,7 @@ export default async (request, context) => {
     const description = space.description
     const previewImage = space.previewImage
     const jsonLD = pageJsonLD(context, space)
-    return pageUtils.rewriteIndexHTML({ context, title, description, previewImage, jsonLD })
+    return rewriteIndexHtml({ context, title, description, previewImage, jsonLD })
   } catch (error) {
     console.error('🚑 pageMeta', error)
   }

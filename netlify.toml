@@ -1,8 +1,17 @@
+[build]
+  edge-functions = "netlify/edge-functions"
+
 [dev]
+  framework = "vite"
+  autoLaunch = false
   targetPort = 8080
+  port = 8888
+  [dev.https]
+    certFile = ".cert/cert.pem"
+    keyFile = ".cert/key.pem"
 
 [[edge_functions]]
   path = "/*"
   function = "pageMeta"
   excludedPath = ["/", "/assets/*", "/*.js", "/*.css", "/*.txt", "/*.png"]
-  cache = "manual"
+  # cache = "manual"
