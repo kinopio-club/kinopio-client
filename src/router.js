@@ -1,6 +1,5 @@
 import Space from '@/views/Space.vue'
 import store from '@/store/store.js'
-import pageMeta from '@/pageMeta.js'
 
 import consts from './consts.js'
 
@@ -166,7 +165,6 @@ const router = createRouter({
         const urlParams = new URLSearchParams(window.location.search)
         const groupId = urlParams.get('groupId')
         const collaboratorKey = urlParams.get('collaboratorKey')
-        pageMeta.groupInvite({ groupId, isGroupInvite: true })
         store.commit('groupToJoinOnLoad', { groupId, collaboratorKey })
         store.commit('shouldNotifyIsJoiningGroup', true)
         next()
@@ -189,7 +187,6 @@ const router = createRouter({
         const isPresentationMode = urlParams.get('present') || false
         const isDisableViewportOptimizations = Boolean(urlParams.get('disableViewportOptimizations'))
         store.commit('disableViewportOptimizations', isDisableViewportOptimizations)
-        pageMeta.spaceFromId({ spaceId, isSpaceInvite: true })
         store.dispatch('currentUser/init')
         store.commit('isLoadingSpace', true)
         if (!spaceId) {
@@ -214,7 +211,6 @@ const router = createRouter({
       path: '/:space',
       component: Space,
       beforeEnter: (to, from, next) => {
-        pageMeta.spaceFromId({})
         const path = window.location.pathname
         const urlParams = new URLSearchParams(window.location.search)
         if (urlParams.get('present')) {
