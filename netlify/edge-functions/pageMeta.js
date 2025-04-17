@@ -71,10 +71,10 @@ const pageTitle = (context, space) => {
   return title
 }
 
-// json-ld
+// json-ld for crawlers
+// https://json-ld.org/
 
 const pageJsonLD = (context, space) => {
-  // normalize items
   let items = space.cards.concat(space.boxes)
   items = items.map(item => {
     return {
@@ -87,7 +87,6 @@ const pageJsonLD = (context, space) => {
       }
     }
   })
-  // return
   let jsonLD = {
     '@context': 'https://schema.org',
     '@type': 'CreativeWork',
@@ -106,15 +105,6 @@ const pageJsonLD = (context, space) => {
 
 // invites
 
-// groupFromGroupInviteUrl (url) {
-//   if (!url) { return }
-//   url = new URL(url)
-//   const params = url.searchParams
-//   const group = this.urlSearchParamsToObject(params)
-//   group.id = group.groupId
-//   return group
-// },
-
 const urlIsSpaceInvite = (url) => {
   return url.pathname === '/invite'
 }
@@ -124,18 +114,6 @@ const urlIsGroupInvite = (url) => {
 const nameFromUrl = (url) => {
   const name = url.searchParams.get('name')
 }
-// nameFromUrl from qs name for invites
-
-// const isSpaceInvite = urlIsSpaceInvite(url)
-// const isGroupInvite = urlIsGroupInvite(url)
-//   if (isSpaceInvite) {
-// nameFromUrl from qs name for invites
-//   title = `[Invite] ${title}`
-// }
-// if (isGroupInvite) {
-//   const groupname = groupFromGroupInviteUrl(url)
-//   title = `[Group Invite] ${groupName}`
-// }
 
 export default async (request, context) => {
   try {
@@ -146,18 +124,21 @@ export default async (request, context) => {
     if (isAsset || isHomepage || !spaceId) {
       return
     }
-    // handle group invite url
+    // group invite url
     const isGroupInvite = urlIsGroupInvite(url)
     if (isGroupInvite) {
       const groupName = nameFromUrl(url)
       const title = `[Group Invite] ${groupName}`
       return pageUtils.rewriteIndexHTML({ context, title })
     }
-
-    // handle space invite url
+    // space invite url
     const isSpaceInvite = urlIsSpaceInvite(url)
-
-    // handle space url
+    if (isSpaceInvite) {
+      const spaceName = nameFromUrl(url)
+      const title = `[Invite] ${spaceName}`
+      return pageUtils.rewriteIndexHTML({ context, title })
+    }
+    // space url
     const space = await spacePublicMeta(context, spaceId)
     if (!space) { return }
     const title = pageTitle(context, space)

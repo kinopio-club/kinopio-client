@@ -61,7 +61,7 @@ export default {
         }
       ])
     }
-    // json-ld for search robots
+    // json-ld
     if (jsonLD) {
       transformations.push({
         selector: 'script[type="application/ld+json"]',
