@@ -3,8 +3,6 @@ import { HTMLRewriter } from 'https://ghuc.cc/worker-tools/html-rewriter/index.t
 const cacheExpiry = 3600 // 3600s = 1 hour
 const timeout = 600 // 600s = 10 mins
 
-const cachedSpaces = {} // { id: {name, description, previewImage} }
-
 // utils
 
 const isDevelopment = (context) => {
@@ -42,26 +40,13 @@ const normalizeResponse = async (response) => {
     throw { response, status: response.status }
   }
 }
-const cacheSpace = (space) => {
-  const { name, description, previewImage } = space
-  cachedSpaces[space.id] = {
-    name,
-    description,
-    previewImage
-  }
-}
 const spacePublicMeta = async (context, spaceId) => {
-  const cachedSpace = cachedSpaces[spaceId]
-  if (cachedSpace) {
-    return cachedSpace
-  }
   const url = `${apiHost(context)}/space/${spaceId}/public-meta`
   const controller = new AbortController()
   const timeoutId = setTimeout(() => controller.abort(), timeout)
   try {
     const response = await fetch(url, { signal: controller.signal })
     const space = normalizeResponse(response)
-    cacheSpace(space)
     return space
   } catch (error) {
     console.warn('🚑 spacePublicMeta', error)
