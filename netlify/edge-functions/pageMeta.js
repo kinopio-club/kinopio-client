@@ -1,6 +1,6 @@
-import { HTMLRewriter } from 'https://ghuc.cc/worker-tools/html-rewriter/index.ts'
+import pageUtils from './pageUtils.js'
 
-const cacheExpiry = 3600 // 3600s = 1 hour
+// const defaultImage = 'https://updates.kinopio.club/og-image.png'
 const timeout = 600 // 600s = 10 mins
 
 // utils
@@ -55,14 +55,6 @@ const spacePublicMeta = async (context, spaceId) => {
   }
 }
 
-// image
-
-const imageType = (previewImage) => {
-  // https://cdn.kinopio.club/image.jpg → jpg
-  const extension = previewImage.split('.').pop().toLowerCase()
-  return `image/${extension}`
-}
-
 // title
 
 const pageTitle = (context, space) => {
@@ -82,7 +74,7 @@ const pageTitle = (context, space) => {
 
 // json-ld
 
-const jsonLD = (context, space) => {
+const pageJsonLD = (context, space) => {
   // normalize items
   let items = space.cards.concat(space.boxes)
   items = items.map(item => {
@@ -125,11 +117,9 @@ const jsonLD = (context, space) => {
 // },
 
 const urlIsSpaceInvite = (url) => {
-  url = new URL(url)
   return url.pathname === '/invite'
 }
 const urlIsGroupInvite = (url) => {
-  url = new URL(url)
   return url.pathname === '/group/invite'
 }
 // nameFromUrl from qs name for invites
@@ -148,87 +138,31 @@ const urlIsGroupInvite = (url) => {
 export default async (request, context) => {
   try {
     const url = new URL(request.url)
-
-    // handle group invite url
-    const isGroupInvite = urlIsGroupInvite(url)
-    // if isGroupInvite
-    // const response = await context.next()
-    // response.headers.set('Cache-Control', `public, durable, s-maxage=${cacheExpiry}`)
-    // const rewriter = new HTMLRewriter()...
-    // return rewriter.transform(response)
-
-    // handle space invite url
-    const isSpaceInvite = urlIsSpaceInvite(url)
-
-    // handle space url
     const spaceId = spaceIdFromUrl(url)
     const isAsset = url.pathname.includes('.')
     const isHomepage = url.pathname === '/'
     if (isAsset || isHomepage || !spaceId) {
       return
     }
+
+    // handle group invite url
+    const isGroupInvite = urlIsGroupInvite(url)
+    // if isGroupInvite
+    // return pageUtils.rewriteIndexHTML({ context, previewImage, title, description, jsonLD })
+
+    // handle space invite url
+    const isSpaceInvite = urlIsSpaceInvite(url)
+
+    // handle space url
     const space = await spacePublicMeta(context, spaceId)
     if (!space) { return }
-    const response = await context.next()
-    response.headers.set('Cache-Control', `public, durable, s-maxage=${cacheExpiry}`)
-    const rewriter = new HTMLRewriter()
-    // og:image
-      .on('meta[property="og:image"]', {
-        element: (element) => {
-          element.setAttribute('content', space.previewImage)
-        }
-      })
-      .on('meta[property="og:image:width"]', {
-        element: (element) => {
-          element.setAttribute('content', '1200')
-        }
-      })
-      .on('meta[property="og:image:height"]', {
-        element: (element) => {
-          element.setAttribute('content', '630')
-        }
-      })
-      .on('meta[property="og:image:type"]', {
-        element: (element) => {
-          element.setAttribute('content', imageType(space.previewImage))
-        }
-      })
-    // title
-      .on('title', {
-        element: (element) => {
-          element.innerText = pageTitle(context, space)
-        }
-      })
-      .on('meta[property="og:title"]', {
-        element: (element) => {
-          element.setAttribute('content', pageTitle(context, space))
-        }
-      })
-    // description
-      .on('meta[property="og:description"]', {
-        element: (element) => {
-          element.setAttribute('content', space.description)
-        }
-      })
-      .on('meta[name="description"]', {
-        element: (element) => {
-          element.setAttribute('content', space.description)
-        }
-      })
-      .on('noscript', {
-        element: (element) => {
-          element.innerText = space.description
-        }
-      })
-    // json-ld for search robots
-      .on('script[type="application/ld+json"]', {
-        element: (element) => {
-          element.setAttribute('text', jsonLD(context, space))
-        }
-      })
-    return rewriter.transform(response)
+    const previewImage = space.previewImage
+    const title = pageTitle(context, space)
+    const description = space.description
+    const jsonLD = pageJsonLD(context, space)
+    return pageUtils.rewriteIndexHTML({ context, previewImage, title, description, jsonLD })
   } catch (error) {
-    console.error('🚒 fetchWithTimeout', error)
+    console.error('🚑 pageMeta', error)
   }
 }
 
