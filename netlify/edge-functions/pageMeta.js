@@ -1,51 +1,26 @@
-import utils from '../../src/utils.js'
-import consts from '../../src/consts.js'
-
 import { HTMLRewriter } from 'https://ghuc.cc/worker-tools/html-rewriter/index.ts'
 
 const cacheExpiry = 3600 // 3600s = 1 hour
 const timeout = 600 // 600s = 10 mins
 
-const results = {} // { id: {name, desc, previewImage} }
+const cachedSpaces = {} // { id: {name, description, previewImage} }
 
-// const isDevelopment = (context) => {
-//   if (context.env.VITE_PROD_SERVER === 'true') {
-//     return false
-//   } else {
-//     return (context.env.MODE === 'development')
-//   }
-// }
+// utils
 
-const normalizeResponse = async (response) => {
-  const success = [200, 201, 202, 204]
-  if (success.includes(response.status)) {
-    const data = await response.json()
-    return data
+const isDevelopment = (context) => {
+  if (context.env.VITE_PROD_SERVER === 'true') {
+    return false
   } else {
-    throw { response, status: response.status }
+    return (context.env.MODE === 'development')
   }
 }
-
-const spacePublicMeta = async (spaceId) => {
-  const url = `${consts.apiHost()}/space/${spaceId}/public-meta`
-  const controller = new AbortController()
-  const timeoutId = setTimeout(() => controller.abort(), timeout)
-  try {
-    const response = await fetch(url, { signal: controller.signal })
-    return normalizeResponse(response)
-  } catch (error) {
-    console.warn('🚑 spacePublicMeta', error)
-    clearTimeout(timeoutId)
-    return null
+const apiHost = (context) => {
+  let host = 'https://api.kinopio.club'
+  if (isDevelopment(context)) {
+    host = 'https://kinopio.local:3000'
   }
+  return host
 }
-
-// to utils.spacePreviewImageFromId, as fallback to
-const spacePreviewImage = (spaceId) => {
-  const cdnHost = 'https://cdn.kinopio.club'
-  return `${cdnHost}/${spaceId}/preview-image-${spaceId}.png`
-}
-
 const spaceIdFromUrl = (url) => {
   const uuidLength = 21
   url = url || window.location.href
@@ -56,16 +31,77 @@ const spaceIdFromUrl = (url) => {
   return id
 }
 
+// space
+
+const normalizeResponse = async (response) => {
+  const success = [200, 201, 202, 204]
+  if (success.includes(response.status)) {
+    const data = await response.json()
+    return data
+  } else {
+    throw { response, status: response.status }
+  }
+}
+const cacheSpace = (space) => {
+  const { name, description, previewImage } = space
+  cachedSpaces[space.id] = {
+    name,
+    description,
+    previewImage
+  }
+}
+const spacePublicMeta = async (context, spaceId) => {
+  const cachedSpace = cachedSpaces[spaceId]
+  if (cachedSpace) {
+    return cachedSpace
+  }
+  const url = `${apiHost(context)}/space/${spaceId}/public-meta`
+  const controller = new AbortController()
+  const timeoutId = setTimeout(() => controller.abort(), timeout)
+  try {
+    const response = await fetch(url, { signal: controller.signal })
+    const space = normalizeResponse(response)
+    cacheSpace(space)
+    return space
+  } catch (error) {
+    console.warn('🚑 spacePublicMeta', error)
+    clearTimeout(timeoutId)
+    return null
+  }
+}
+
+// image
+
+const imageType = (previewImage) => {
+  // https://cdn.kinopio.club/image.jpg → jpg
+  const extension = previewImage.split('.').pop().toLowerCase()
+  return `image/${extension}`
+}
+
+// title
+
+const pageTitle = (context, space) => {
+  let title
+  if (space.name === 'Hello Kinopio') {
+    title = 'Kinopio'
+  } else if (space.name) {
+    title = `${space.name} – Kinopio`
+  } else {
+    title = 'Kinopio'
+  }
+  if (isDevelopment(context)) {
+    title = `DEV ${title}`
+  }
+  return title
+}
+
 export default async (request, context) => {
   try {
     const url = new URL(request.url)
 
-    // space invite: https://kinopio.club/invite?spaceId=ID&collaboratorKey=ID&name=packing-list---
-    // group invite: https://kinopio.club/group/invite?groupId=ID&collaboratorKey=ID&name=warecats
-
+    // TODO handle
     // utils.urlIsSpaceInvite
     // utils.urlIsGroupInvite
-    // utils.urlIsSpace
 
     const spaceId = spaceIdFromUrl(url)
     const isAsset = url.pathname.includes('.')
@@ -73,23 +109,18 @@ export default async (request, context) => {
     if (isAsset || isHomepage || !spaceId) {
       return
     }
-
-    const space = await spacePublicMeta(spaceId)
+    const space = await spacePublicMeta(context, spaceId)
     if (!space) { return }
-
-    // const urlIsInvite
-
-    // const space = await API public space meta
-    // fetch w timeout
-
     const response = await context.next()
     response.headers.set('Cache-Control', `public, durable, s-maxage=${cacheExpiry}`)
 
     const rewriter = new HTMLRewriter()
-      // og:image
+
+    // og:image
+
       .on('meta[property="og:image"]', {
         element: (element) => {
-          element.setAttribute('content', spacePreviewImage(spaceId))
+          element.setAttribute('content', space.previewImage)
         }
       })
       .on('meta[property="og:image:width"]', {
@@ -104,14 +135,42 @@ export default async (request, context) => {
       })
       .on('meta[property="og:image:type"]', {
         element: (element) => {
-          element.setAttribute('content', 'image/png')
+          element.setAttribute('content', imageType(space.previewImage))
         }
       })
-      // title
-      // description, if !space = space is private or could not be found
+
+    // title
+
+      .on('title', {
+        element: (element) => {
+          element.innerText = pageTitle(context, space)
+        }
+      })
+      .on('meta[property="og:title"]', {
+        element: (element) => {
+          element.setAttribute('content', pageTitle(context, space))
+        }
+      })
+
+    // description
+
+      .on('meta[property="og:description"]', {
+        element: (element) => {
+          element.setAttribute('content', space.description)
+        }
+      })
+      .on('meta[name="description"]', {
+        element: (element) => {
+          element.setAttribute('content', space.description)
+        }
+      })
 
     return rewriter.transform(response)
   } catch (error) {
     console.error('🚒 fetchWithTimeout', error)
   }
 }
+
+// todo # test dev urls
+// space invite: https://kinopio.club/invite?spaceId=ID&collaboratorKey=ID&name=packing-list---
+// group invite: https://kinopio.club/group/invite?groupId=ID&collaboratorKey=ID&name=warecats
