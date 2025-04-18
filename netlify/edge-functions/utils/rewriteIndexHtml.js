@@ -9,19 +9,23 @@ const imageType = (previewImage) => {
 }
 
 export default async ({ context, title, description, previewImage, jsonLD }) => {
+  console.log('🔮🔮', title, description, previewImage, jsonLD)
   const response = await context.next()
   response.headers.set('Cache-Control', `public, durable, s-maxage=${cacheExpiry}`)
-  let transformations = [
-    // title
-    {
-      selector: 'title',
-      transform: element => { element.innerText = title }
-    },
-    {
-      selector: 'meta[property="og:title"]',
-      transform: element => element.setAttribute('content', title)
-    }
-  ]
+  let transformations = []
+  // title
+  if (title) {
+    transformations = transformations.concat([
+      {
+        selector: 'title',
+        transform: element => { element.innerText = title }
+      },
+      {
+        selector: 'meta[property="og:title"]',
+        transform: element => element.setAttribute('content', title)
+      }
+    ])
+  }
   // description
   if (description) {
     transformations = transformations.concat([

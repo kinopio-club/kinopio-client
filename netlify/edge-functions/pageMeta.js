@@ -2,10 +2,13 @@ import rewriteIndexHtml from './utils/rewriteIndexHtml.js'
 
 const timeout = 600 // 600s = 10 mins
 
+const inviteDescription = 'Work on shared spaces together'
+const privateSpaceDescription = 'Space is private or could not be found'
+
 // utils
 
 const isDevelopment = (context) => {
-  console.log('🍎🍎🍎🍎', context.env, process.env)
+  console.log('🍎🍎🍎🍎', context.env, process.env, context.env.VITE_PROD_SERVER, context.env.MODE)
   if (context.env.VITE_PROD_SERVER === 'true') {
     return false
   } else {
@@ -130,23 +133,28 @@ export default async (request, context) => {
     if (isGroupInvite) {
       const groupName = nameFromUrl(url)
       const title = `[Group Invite] ${groupName}`
-      return rewriteIndexHtml({ context, title })
+      return rewriteIndexHtml({ context, title, description: inviteDescription })
     }
     // space invite url
     const isSpaceInvite = urlIsSpaceInvite(url)
     if (isSpaceInvite) {
       const spaceName = nameFromUrl(url)
       const title = `[Invite] ${spaceName}`
-      return rewriteIndexHtml({ context, title })
+      return rewriteIndexHtml({ context, title, description: inviteDescription })
     }
     // space url
     const space = await spacePublicMeta(context, spaceId)
-    if (!space) { return }
-    const title = pageTitle(context, space)
-    const description = space.description
-    const previewImage = space.previewImage
-    const jsonLD = pageJsonLD(context, space)
-    return rewriteIndexHtml({ context, title, description, previewImage, jsonLD })
+    // public space
+    if (space) {
+      const title = pageTitle(context, space)
+      const description = space.description
+      const previewImage = space.previewImage
+      const jsonLD = pageJsonLD(context, space)
+      return rewriteIndexHtml({ context, title, description, previewImage, jsonLD })
+    // private space
+    } else {
+      return rewriteIndexHtml({ context, description: privateSpaceDescription })
+    }
   } catch (error) {
     console.error('🚑 pageMeta', error)
   }
