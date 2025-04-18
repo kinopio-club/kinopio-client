@@ -691,6 +691,7 @@ const highlightCards = (points) => {
   cardIds.forEach(cardId => {
     highlightedItems.cardIds[cardId] = true
     // apply card styles
+    console.log('🔮🔮🔮 highlightcards', cardId) // temp debug
     const cardWrapElement = utils.cardElementFromId(cardId)
     const cardElement = cardWrapElement.querySelector('.card')
     const nameSegmentsElement = cardElement.querySelectorAll('.name-segments')
