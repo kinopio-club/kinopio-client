@@ -120,12 +120,12 @@ const nameFromUrl = (url) => {
 export default async (request, context) => {
   try {
     let url = request.url
-    console.info('🕊️ edge function request', url)
     url = url.replaceAll('?hidden=true', '')
     url = new URL(url)
     const spaceId = spaceIdFromUrl(request.url)
     const isAsset = url.pathname.includes('.')
     const isHomepage = url.pathname === '/'
+    console.info('🕊️ edge function request', url, spaceId, isAsset, isHomepage, url.pathname)
     if (isAsset || isHomepage || !spaceId) {
       return
     }
