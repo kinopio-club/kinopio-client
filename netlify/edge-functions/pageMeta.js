@@ -118,6 +118,7 @@ const nameFromUrl = (url) => {
 }
 
 export default async (request, context) => {
+  console.info('🕊️ edge function request')
   try {
     let url = request.url
     url = url.replaceAll('?hidden=true', '')
