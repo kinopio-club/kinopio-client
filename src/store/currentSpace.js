@@ -973,7 +973,6 @@ const currentSpace = {
       const canEdit = context.rootGetters['currentUser/canEditSpace']()
       const spaceIsReadOnlyInvite = isPrivate && !canEdit
       if (spaceIsReadOnlyInvite) { return }
-      if (!currentUserIsSignedIn && canEdit) { return }
       const space = context.state
       context.dispatch('currentUser/lastSpaceId', space.id, { root: true })
     },
