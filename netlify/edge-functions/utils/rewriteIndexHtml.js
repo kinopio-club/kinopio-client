@@ -9,7 +9,7 @@ const imageType = (previewImage) => {
 }
 
 export default async ({ context, title, description, previewImage, jsonLD }) => {
-  console.log('🔮🔮', title, description, previewImage, jsonLD)
+  console.log('🔮 rewriteIndexHtml', { title, description, previewImage })
   const response = await context.next()
   response.headers.set('Cache-Control', `public, durable, s-maxage=${cacheExpiry}`)
   let transformations = []

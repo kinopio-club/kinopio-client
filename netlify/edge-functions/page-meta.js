@@ -13,7 +13,7 @@ const spaceIdFromUrl = (url) => {
   const id = path.substring(path.length - uuidLength)
   const idIsInvalid = id.includes('/') || id.includes('.')
   if (idIsInvalid) { return }
-  console.log('🌷 spaceId', id)
+  console.info('🌷 spaceId', id)
   return id
 }
 
@@ -107,7 +107,7 @@ export default async (request, context) => {
     const isHomepage = url.pathname === '/' || url.pathname === 'index.html'
     console.info('🕊️ edge function request', url.href, spaceId, isHomepage)
     if (isHomepage || !spaceId) {
-      console.log('👻 edge function skipped')
+      console.info('👻 edge function skipped')
       return
     }
     // group invite url
@@ -138,7 +138,6 @@ export default async (request, context) => {
       return rewriteIndexHtml({ context, description: privateSpaceDescription })
     }
   } catch (error) {
-    console.error('🚑 pageMeta', error)
-    console.log('👻 edge function skipped')
+    console.error('🚑 pageMeta, 👻 skipped', error)
   }
 }
