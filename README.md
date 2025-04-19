@@ -101,25 +101,11 @@ To work with code that only works on https (e.g. clipboard copy and paste), [mkc
 `pageMeta.js` is a [netlify function](https://www.netlify.com/platform/core/functions/) that runs server-side before the page loads, fetches public space info from the api, and updates the metatags in `index.html` for link previews and SEO.
 
 
-?? to test in dev mode
-
-
-    brew install deno
-    deno --version
-
-
-have the normal dev server running at the time in another terminal tab w 
-    
-    npm run serve
-    netlify dev --debug
-
-> tested if it properly works with the deployment preview links Netlify generates here
-
-https://developers.netlify.com/sdk/edge-functions/debug-and-test/
-https://docs.netlify.com/edge-functions/get-started/
+test in staging 
+couldnt figure it out in dev
 
 ?? how to see console.logs
-
+pr , netlify , deplys, logs
 
 
 ## See Also

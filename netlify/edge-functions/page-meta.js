@@ -1,6 +1,6 @@
 import rewriteIndexHtml from './utils/rewriteIndexHtml.js'
 
-const timeout = 600 // 600s = 10 mins
+const timeout = 10 // 10s
 
 const inviteDescription = 'Work on shared spaces together'
 const privateSpaceDescription = 'Space is private or could not be found'
@@ -24,7 +24,7 @@ const apiHost = (context) => {
 }
 const spaceIdFromUrl = (url) => {
   const uuidLength = 21
-  const id = url.substring(url.length - uuidLength, url.length)
+  const id = url.path.substring(url.length - uuidLength, url.length)
   const idIsInvalid = id.includes('/')
   if (!idIsInvalid) { return }
   return id
@@ -43,11 +43,13 @@ const normalizeResponse = async (response) => {
 }
 const spacePublicMeta = async (context, spaceId) => {
   const url = `${apiHost(context)}/space/${spaceId}/public-meta`
+  console.log('🍆🍆🍆', spaceId, url)
   const controller = new AbortController()
   const timeoutId = setTimeout(() => controller.abort(), timeout)
   try {
     const response = await fetch(url, { signal: controller.signal })
     const space = await normalizeResponse(response)
+    console.log('💐💐💐', space)
     return space
   } catch (error) {
     console.warn('🚑 spacePublicMeta', error)
@@ -122,11 +124,10 @@ export default async (request, context) => {
     let url = request.url
     url = url.replaceAll('?hidden=true', '')
     url = new URL(url)
-    const spaceId = spaceIdFromUrl(request.url)
-    const isAsset = url.pathname.includes('.')
-    const isHomepage = url.pathname === '/'
-    console.info('🕊️ edge function request', url, spaceId, isAsset, isHomepage, url.pathname)
-    if (isAsset || isHomepage || !spaceId) {
+    const spaceId = spaceIdFromUrl(url)
+    const isHomepage = url.pathname === '/' || url.pathname === 'index.html'
+    console.info('🕊️ edge function request', url, spaceId, isHomepage, url.pathname)
+    if (isHomepage || !spaceId) {
       return
     }
     // group invite url
