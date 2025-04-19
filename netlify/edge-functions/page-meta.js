@@ -105,20 +105,22 @@ export default async (request, context) => {
     url = new URL(url)
     const spaceId = spaceIdFromUrl(url)
     const isHomepage = url.pathname === '/' || url.pathname === 'index.html'
-    console.info('🕊️ edge function request', url.href, url.pathname, spaceId, isHomepage)
-    if (isHomepage || !spaceId) {
+    const isGroupInvite = urlIsGroupInvite(url)
+    const isSpaceInvite = urlIsSpaceInvite(url)
+    const isInvite = isGroupInvite || isSpaceInvite
+    console.log('🐥🐥🐥🐥', isGroupInvite, isSpaceInvite)
+    console.info('🕊️ edge function request', url.href, url.pathname, spaceId, isHomepage, isInvite)
+    if (isHomepage || !spaceId || !isInvite) {
       console.info('👻 edge function skipped')
       return
     }
     // group invite url
-    const isGroupInvite = urlIsGroupInvite(url)
     if (isGroupInvite) {
       const groupName = nameFromUrl(url)
       const title = `[Group Invite] ${groupName}`
       return rewriteIndexHtml({ context, title, description: inviteDescription })
     }
     // space invite url
-    const isSpaceInvite = urlIsSpaceInvite(url)
     if (isSpaceInvite) {
       const spaceName = nameFromUrl(url)
       const title = `[Invite] ${spaceName}`
