@@ -12,9 +12,10 @@ const spaceIdFromUrl = (url) => {
   const uuidLength = 21
   const path = url.pathname
   const id = path.substring(path.length - uuidLength)
-  console.log('🐸🐸🐸🐸🐸', url, url.pathname, id)
+  console.log('🌷', id)
   const idIsInvalid = id.includes('/') || id.includes('.')
   if (!idIsInvalid) { return }
+  console.log('🌷🌷', id)
   return id
 }
 
@@ -111,8 +112,9 @@ export default async (request, context) => {
     url = new URL(url)
     const spaceId = spaceIdFromUrl(url)
     const isHomepage = url.pathname === '/' || url.pathname === 'index.html'
-    console.info('🕊️ edge function request', url, spaceId, isHomepage, url.pathname)
+    console.info('🕊️ edge function request', url.href, spaceId, isHomepage)
     if (isHomepage || !spaceId) {
+      console.log('👻 edge function skipped', isHomepage, spaceId)
       return
     }
     // group invite url
