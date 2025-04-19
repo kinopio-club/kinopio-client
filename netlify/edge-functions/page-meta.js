@@ -116,7 +116,7 @@ export default async (request, context) => {
     if (isSpaceInvite) {
       const spaceName = nameFromUrl(url)
       const title = `[Invite] ${spaceName}`
-      return rewriteIndexHtml({ context, title, description: inviteDescription })
+      return rewriteIndexHtml({ context, title })
     }
     // space url
     const spaceId = spaceIdFromUrl(url)
