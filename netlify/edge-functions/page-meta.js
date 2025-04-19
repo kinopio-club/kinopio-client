@@ -1,27 +1,13 @@
 import rewriteIndexHtml from './utils/rewriteIndexHtml.js'
 
-const timeout = 10 // 10s
+const apiHost = 'https://api.kinopio.club'
+const timeout = 10 // seconds
 
 const inviteDescription = 'Work on shared spaces together'
 const privateSpaceDescription = 'Space is private or could not be found'
 
 // utils
 
-const isDevelopment = (context) => {
-  console.log('🍎🍎🍎🍎', context.env, context.env.VITE_PROD_SERVER, context.env.MODE)
-  if (context.env.VITE_PROD_SERVER === 'true') {
-    return false
-  } else {
-    return (context.env.MODE === 'development')
-  }
-}
-const apiHost = (context) => {
-  let host = 'https://api.kinopio.club'
-  if (isDevelopment(context)) {
-    host = 'https://kinopio.local:3000'
-  }
-  return host
-}
 const spaceIdFromUrl = (url) => {
   const uuidLength = 21
   const path = url.pathname
@@ -44,7 +30,7 @@ const normalizeResponse = async (response) => {
   }
 }
 const spacePublicMeta = async (context, spaceId) => {
-  const url = `${apiHost(context)}/space/${spaceId}/public-meta`
+  const url = `${apiHost}/space/${spaceId}/public-meta`
   console.log('🍆🍆🍆', spaceId, url)
   const controller = new AbortController()
   const timeoutId = setTimeout(() => controller.abort(), timeout)
@@ -70,9 +56,6 @@ const pageTitle = (context, space) => {
     title = `${space.name} – Kinopio`
   } else {
     title = 'Kinopio'
-  }
-  if (isDevelopment(context)) {
-    title = `DEV ${title}`
   }
   return title
 }
