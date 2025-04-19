@@ -13,7 +13,7 @@ const spaceIdFromUrl = (url) => {
   const path = url.pathname
   const id = path.substring(path.length - uuidLength)
   console.log('🐸🐸🐸🐸🐸', url, url.pathname, id)
-  const idIsInvalid = id.includes('/')
+  const idIsInvalid = id.includes('/') || id.includes('.')
   if (!idIsInvalid) { return }
   return id
 }
