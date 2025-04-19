@@ -12,10 +12,10 @@ const spaceIdFromUrl = (url) => {
   const uuidLength = 21
   const path = url.pathname
   const id = path.substring(path.length - uuidLength)
-  console.log('🌷', id)
+  console.log('🌷🌷🌷🌷', id)
   const idIsInvalid = id.includes('/') || id.includes('.')
-  if (!idIsInvalid) { return }
-  console.log('🌷🌷', id)
+  if (idIsInvalid) { return }
+  console.log('🌷 spaceId', id)
   return id
 }
 
