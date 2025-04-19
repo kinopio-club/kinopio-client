@@ -8,7 +8,7 @@ const privateSpaceDescription = 'Space is private or could not be found'
 // utils
 
 const isDevelopment = (context) => {
-  console.log('🍎🍎🍎🍎', context.env, process.env, context.env.VITE_PROD_SERVER, context.env.MODE)
+  console.log('🍎🍎🍎🍎', context.env, context.env.VITE_PROD_SERVER, context.env.MODE)
   if (context.env.VITE_PROD_SERVER === 'true') {
     return false
   } else {
