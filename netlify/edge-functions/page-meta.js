@@ -24,7 +24,8 @@ const apiHost = (context) => {
 }
 const spaceIdFromUrl = (url) => {
   const uuidLength = 21
-  const id = url.path.substring(url.length - uuidLength, url.length)
+  const path = url.path
+  const id = path.substring(path.length - uuidLength, path.length)
   const idIsInvalid = id.includes('/')
   if (!idIsInvalid) { return }
   return id
