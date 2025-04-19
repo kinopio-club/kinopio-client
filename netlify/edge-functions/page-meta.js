@@ -102,18 +102,10 @@ export default async (request, context) => {
   try {
     let url = request.url
     url = url.replaceAll('?hidden=true', '')
+    console.info('🕊️ edge function request', url)
     url = new URL(url)
-    const spaceId = spaceIdFromUrl(url)
-    const isHomepage = url.pathname === '/' || url.pathname === 'index.html'
     const isGroupInvite = urlIsGroupInvite(url)
     const isSpaceInvite = urlIsSpaceInvite(url)
-    const isInvite = isGroupInvite || isSpaceInvite
-    console.log('🐥🐥🐥🐥', isGroupInvite, isSpaceInvite)
-    console.info('🕊️ edge function request', url.href, url.pathname, spaceId, isHomepage, isInvite)
-    if (isHomepage || !spaceId || !isInvite) {
-      console.info('👻 edge function skipped')
-      return
-    }
     // group invite url
     if (isGroupInvite) {
       const groupName = nameFromUrl(url)
@@ -127,6 +119,12 @@ export default async (request, context) => {
       return rewriteIndexHtml({ context, title, description: inviteDescription })
     }
     // space url
+    const spaceId = spaceIdFromUrl(url)
+    const isHomepage = url.pathname === '/' || url.pathname === 'index.html'
+    if (isHomepage || !spaceId) {
+      console.info('👻 edge function skipped')
+      return
+    }
     const space = await spacePublicMeta(context, spaceId)
     // public space
     if (space) {
