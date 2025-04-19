@@ -105,7 +105,7 @@ export default async (request, context) => {
     url = new URL(url)
     const spaceId = spaceIdFromUrl(url)
     const isHomepage = url.pathname === '/' || url.pathname === 'index.html'
-    console.info('🕊️ edge function request', url.href, spaceId, isHomepage)
+    console.info('🕊️ edge function request', url.href, url.pathname, spaceId, isHomepage)
     if (isHomepage || !spaceId) {
       console.info('👻 edge function skipped')
       return
