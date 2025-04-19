@@ -333,7 +333,6 @@ export default {
   percentageBetween ({ value, min, max }) {
     return ((value - min) / (max - min)) * 100
   },
-  // TODO replace w native structuredClone method
   clone (object) {
     if (!object) { return }
     this.typeCheck({ value: object, type: 'object' })

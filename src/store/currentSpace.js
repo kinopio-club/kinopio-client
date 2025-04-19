@@ -6,7 +6,6 @@ import utils from '@/utils.js'
 import cache from '@/cache.js'
 import consts from '@/consts.js'
 import postMessage from '@/postMessage.js'
-import pageMeta from '@/pageMeta.js'
 
 import { nextTick } from 'vue'
 import randomColor from 'randomcolor'
@@ -194,10 +193,11 @@ const currentSpace = {
     updateSpacePreviewImage: throttle(async function (context) {
       const currentUserIsSignedIn = context.rootGetters['currentUser/isSignedIn']
       const canEditSpace = context.rootGetters['currentUser/canEditSpace']()
+      const isPrivate = context.state.privacy === 'private'
       if (!currentUserIsSignedIn) { return }
       if (!canEditSpace) { return }
+      if (isPrivate) { return }
       try {
-        // TODO upload minimapCanvas iamge w bk and pagemeta size and upload that png, instead of generateing on the server
         const response = await context.dispatch('api/updateSpacePreviewImage', context.state.id, { root: true })
         console.info('🙈 updated space preview image', response.urls)
       } catch (error) {
@@ -344,7 +344,7 @@ const currentSpace = {
         const nullCardUsers = true
         await cache.updateIdsInSpace(space, nullCardUsers)
       }
-      pageMeta.updateSpace(space)
+      context.commit('triggerUpdateWindowTitle', null, { root: true })
     },
     createNewSpace: async (context, space) => {
       const currentUser = context.rootState.currentUser
@@ -761,7 +761,7 @@ const currentSpace = {
         const remoteSpace = remoteData
         console.info('🎑 remoteSpace', remoteSpace)
         if (!remoteSpace) { return }
-        pageMeta.updateSpace(remoteSpace)
+        context.commit('triggerUpdateWindowTitle', null, { root: true })
         context.dispatch('groups/loadGroup', remoteSpace, { root: true })
         const spaceIsUnchanged = utils.spaceIsUnchanged(cachedSpace, remoteSpace)
         if (spaceIsUnchanged) {
@@ -973,7 +973,6 @@ const currentSpace = {
       const canEdit = context.rootGetters['currentUser/canEditSpace']()
       const spaceIsReadOnlyInvite = isPrivate && !canEdit
       if (spaceIsReadOnlyInvite) { return }
-      if (!currentUserIsSignedIn && canEdit) { return }
       const space = context.state
       context.dispatch('currentUser/lastSpaceId', space.id, { root: true })
     },

@@ -480,7 +480,7 @@ export default {
     },
     lastSpaceId: async (context, spaceId) => {
       context.commit('lastSpaceId', spaceId)
-      cache.updateUser('lastSpaceId', spaceId)
+      await cache.updateUser('lastSpaceId', spaceId)
       await context.dispatch('api/addToQueue', {
         name: 'updateUser',
         body: {

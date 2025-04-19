@@ -94,7 +94,17 @@ To work with code that only works on https (e.g. clipboard copy and paste), [mkc
 
     brew install mkcert
     mkcert -install
-	mkdir -p .cert && mkcert -key-file ./.cert/key.pem -cert-file ./.cert/cert.pem 'kinopio.local'
+	mkcert -key-file ./.cert/key.pem -cert-file ./.cert/cert.pem "kinopio.local" "localhost" "127.0.0.1"
+
+## Testing page-meta
+
+`page-meta.js` is an [edge function](https://www.netlify.com/platform/core/functions/) that runs in an isolated server-side container before page requests. It writes `index.html` metatags for title, description etc. for crawlers.
+
+I couldn't figure out how to run the netlify-cli locally, so instead I test this in staging using PR deploy URLs. 
+
+To view the logs: 
+
+Netlify website → Deploys → Edge Functions
 
 ## See Also
 
