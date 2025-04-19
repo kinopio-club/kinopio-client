@@ -1,7 +1,6 @@
 import rewriteIndexHtml from './utils/rewriteIndexHtml.js'
 
 const apiHost = 'https://api.kinopio.club'
-const timeout = 10 // seconds
 
 const inviteDescription = 'Work on shared spaces together'
 const privateSpaceDescription = 'Space is private or could not be found'
@@ -12,7 +11,6 @@ const spaceIdFromUrl = (url) => {
   const uuidLength = 21
   const path = url.pathname
   const id = path.substring(path.length - uuidLength)
-  console.log('🌷🌷🌷🌷', id)
   const idIsInvalid = id.includes('/') || id.includes('.')
   if (idIsInvalid) { return }
   console.log('🌷 spaceId', id)
@@ -31,19 +29,14 @@ const normalizeResponse = async (response) => {
   }
 }
 const spacePublicMeta = async (context, spaceId) => {
-  const url = `${apiHost}/space/${spaceId}/public-meta`
-  console.log('🍆🍆🍆', spaceId, url)
-  const controller = new AbortController()
-  const timeoutId = setTimeout(() => controller.abort(), timeout)
   try {
-    const response = await fetch(url, { signal: controller.signal })
+    const url = `${apiHost}/space/${spaceId}/public-meta`
+    const response = await fetch(url)
     const space = await normalizeResponse(response)
-    console.log('💐💐💐', space)
     return space
   } catch (error) {
     console.warn('🚑 spacePublicMeta', error)
-    clearTimeout(timeoutId)
-    return null
+    throw { error }
   }
 }
 
@@ -114,7 +107,7 @@ export default async (request, context) => {
     const isHomepage = url.pathname === '/' || url.pathname === 'index.html'
     console.info('🕊️ edge function request', url.href, spaceId, isHomepage)
     if (isHomepage || !spaceId) {
-      console.log('👻 edge function skipped', isHomepage, spaceId)
+      console.log('👻 edge function skipped')
       return
     }
     // group invite url
@@ -146,10 +139,6 @@ export default async (request, context) => {
     }
   } catch (error) {
     console.error('🚑 pageMeta', error)
+    console.log('👻 edge function skipped')
   }
 }
-
-// todo # test dev urls
-// space invite: https://kinopio.club/invite?spaceId=ID&collaboratorKey=ID&name=packing-list---
-// group invite: https://kinopio.club/group/invite?groupId=ID&collaboratorKey=ID&name=warecats
-// space url: ...
