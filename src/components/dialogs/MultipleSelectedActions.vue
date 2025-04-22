@@ -386,7 +386,7 @@ const mergeSelectedCards = () => {
       name = name.substring(lastLineBreak)
     }
   } while (name.length > maxCardCharacterLimit.value)
-  let position = { x: cards[0].x, y: cards[0].y }
+  const position = { x: cards[0].x, y: cards[0].y }
   remove({ shouldRemoveCardsOnly: true })
   const cardWithBackgroundColor = cards.find(card => card.backgroundColor)
   const cardBackgroundColor = cardWithBackgroundColor?.backgroundColor
@@ -400,9 +400,9 @@ const mergeSelectedCards = () => {
     ...urlPreview
   }
   store.dispatch('currentCards/add', { card: newCard })
-  prevCards = [ newCard ] // for history
+  prevCards = [newCard] // for history
   setTimeout(() => {
-    positionNewCards([ newCard ])
+    positionNewCards([newCard])
   }, 100)
 }
 

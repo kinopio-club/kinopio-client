@@ -105,7 +105,7 @@ const normalizedName = computed(() => {
   return newName.trim()
 })
 const nameSegments = computed(() => {
-  let markdownSegments = utils.markdownSegments(normalizedName.value)
+  const markdownSegments = utils.markdownSegments(normalizedName.value)
   return markdownSegments
 })
 const smartQuotes = (string) => {
@@ -127,7 +127,7 @@ const initViewportObserver = async () => {
   removeViewportObserver()
   await nextTick()
   try {
-    let callback = (entries, observer) => {
+    const callback = (entries, observer) => {
       entries.forEach((entry) => {
         if (entry.isIntersecting) {
           state.isVisibleInViewport = true
@@ -153,10 +153,10 @@ const removeViewportObserver = () => {
 // styles
 
 const styles = computed(() => {
-  let { x, y, z, resizeWidth, resizeHeight, background } = normalizedBox.value
-  let width = resizeWidth
-  let height = resizeHeight
-  let styles = {
+  const { x, y, z, resizeWidth, resizeHeight, background } = normalizedBox.value
+  const width = resizeWidth
+  const height = resizeHeight
+  const styles = {
     left: x + 'px',
     top: y + 'px',
     zIndex: z ?? 1,
@@ -178,7 +178,7 @@ const styles = computed(() => {
 })
 const backgroundStyles = computed(() => {
   if (!props.box.background) { return }
-  let newStyles = utils.clone(styles.value)
+  const newStyles = utils.clone(styles.value)
   delete newStyles.border
   delete newStyles.backgroundColor
   const isRetina = utils.urlIsRetina(props.box.background)
@@ -232,7 +232,7 @@ const classes = computed(() => {
     'is-resizing': isResizing.value,
     'is-selected': currentBoxIsSelected.value,
     'is-checked': isChecked.value || isInCheckedBox.value,
-    'filtered': isFiltered.value,
+    filtered: isFiltered.value,
     transition: !store.state.currentBoxIsNew || !store.state.currentUserIsResizingBox
   }
 })
@@ -279,7 +279,7 @@ const startResizing = (event) => {
   store.commit('currentUserIsResizingBoxIds', boxIds)
   const updates = {
     userId: store.state.currentUser.id,
-    boxIds: boxIds
+    boxIds
   }
   store.commit('broadcast/updateStore', { updates, type: 'updateRemoteUserResizingBoxes' })
   event.preventDefault() // allows resizing box without scrolling on mobile
@@ -292,7 +292,7 @@ const resizeColorClass = computed(() => {
 // shrink
 
 const shrinkToDefaultBoxSize = () => {
-  let updated = { id: props.box.id }
+  const updated = { id: props.box.id }
   updated.resizeWidth = consts.defaultBoxWidth
   updated.resizeHeight = consts.defaultBoxHeight
   store.dispatch('currentBoxes/update', updated)
@@ -309,7 +309,7 @@ const shrink = () => {
   const rect = utils.boundaryRectFromItems(items)
   const padding = consts.spaceBetweenCards
   const paddingTop = 30 + padding
-  let updated = { id: props.box.id }
+  const updated = { id: props.box.id }
   updated.x = rect.x - padding
   updated.y = rect.y - paddingTop
   updated.resizeWidth = rect.width + (padding * 2)
@@ -324,7 +324,7 @@ const isLocked = computed(() => props.box.isLocked)
 // label
 
 const infoStyles = computed(() => {
-  let styles = {
+  const styles = {
     backgroundColor: color.value
   }
   if (isLocked.value) {
@@ -420,8 +420,8 @@ const currentBoxIsSelected = computed(() => {
 })
 const selectedBoxes = computed(() => store.getters['currentBoxes/isSelected'])
 const containedItems = () => {
-  let cards = []
-  let boxes = []
+  const cards = []
+  const boxes = []
   // cards
   selectableCards().forEach(card => {
     if (isItemInSelectedBoxes(card, 'card')) {
@@ -468,7 +468,7 @@ const isItemInSelectedBoxes = (item, type) => {
   if (item.isLocked) { return }
   let boxes = selectedBoxes.value
   if (prevSelectedBox) {
-    boxes = [ prevSelectedBox ]
+    boxes = [prevSelectedBox]
   }
   const isInside = boxes.find(box => {
     box = normalizeBox(box)
@@ -592,7 +592,7 @@ const lockingFrameStyle = computed(() => {
     top: position,
     background: userColor.value,
     opacity: state.lockingAlpha,
-    borderRadius: borderRadius
+    borderRadius
   }
 })
 const cancelLocking = () => {

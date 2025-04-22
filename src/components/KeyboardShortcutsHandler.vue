@@ -77,7 +77,7 @@ const checkIsSpaceScope = (event) => {
   const isBody = tagName === 'BODY'
   const isMain = tagName === 'MAIN'
   const nodeList = event.target.classList
-  const classes = [ ...nodeList ]
+  const classes = [...nodeList]
   const isFocusedCard = classes.includes('card')
   const isSpaceNameButton = classes.includes('space-name-button-wrap') // for paste in empty spaces
   return isBody || isMain || isFocusedCard || isSpaceNameButton
@@ -113,6 +113,8 @@ const handleShortcuts = (event) => {
   // const isFromCard = event.target.classList[0] === 'card'
   const isSpaceScope = checkIsSpaceScope(event)
   const isMinimapDialogScope = checkIsMinimapDialogScope(event)
+  const toolbarIsDrawing = store.state.currentUserToolbar === 'drawing'
+  const canEditSpace = store.getters['currentUser/canEditSpace']()
   // ?
   if (key === '?' && isSpaceScope) {
     store.commit('triggerKeyboardShortcutsIsVisible')
@@ -176,11 +178,22 @@ const handleShortcuts = (event) => {
       containItemsInNewBox(cards)
     // Toolbar Box Mode
     } else {
-      store.dispatch('currentUserToolbar', 'box')
+      store.dispatch('toggleCurrentUserToolbar', 'box')
     }
-  // c
-  } else if (key === 'c' && isSpaceScope) {
-    store.dispatch('currentUserToolbar', 'card')
+  // d
+  } else if (key === 'd' && isSpaceScope) {
+    if (!canEditSpace) { return }
+    if (toolbarIsDrawing && store.state.drawingEraserIsActive) {
+      store.commit('drawingEraserIsActive', false)
+      return
+    }
+    store.dispatch('toggleCurrentUserToolbar', 'drawing')
+  // e
+  } else if (key === 'e' && isSpaceScope && toolbarIsDrawing) {
+    store.dispatch('toggleDrawingEraserIsActive')
+  // s
+  } else if (key === 's' && isSpaceScope && toolbarIsDrawing) {
+    store.dispatch('currentUser/cycleDrawingBrushSize')
   }
 }
 // on key down
@@ -190,6 +203,7 @@ const handleMetaKeyShortcuts = (event) => {
   const isCardScope = checkIsCardScope(event)
   const isSpaceScope = checkIsSpaceScope(event)
   const isFromInput = event.target.closest('input') || event.target.closest('textarea')
+  const toolbarIsDrawing = store.state.currentUserToolbar === 'drawing'
   // Add Child Card
   if (event.shiftKey && key === 'enter' && (isSpaceScope || isCardScope)) {
     const shouldAddChildCard = store.state.currentUser.cardSettingsShiftEnterShouldAddChildCard
@@ -207,15 +221,15 @@ const handleMetaKeyShortcuts = (event) => {
     event.preventDefault()
     store.dispatch('history/undo')
   // Select All Cards Below Cursor
-  } else if (isMeta && event.shiftKey && key === 'a' && isSpaceScope) {
+  } else if (isMeta && event.shiftKey && key === 'a' && isSpaceScope && !toolbarIsDrawing) {
     event.preventDefault()
     selectAllItemsBelowCursor()
   // Select All Cards and Connections
-  } else if (isMeta && key === 'a' && isSpaceScope) {
+  } else if (isMeta && key === 'a' && isSpaceScope && !toolbarIsDrawing) {
     event.preventDefault()
     selectAllItems()
   // Search/Jump-to Space
-  } else if (isMeta && key === 'k') {
+  } else if (isMeta && key === 'k' && isSpaceScope) {
     event.preventDefault()
     focusOnSpaceDetailsFilter()
   // Search/Jump-to Card
@@ -443,7 +457,7 @@ const addChildCard = async (options) => {
 
   const parentCardId = store.state.parentCardId
   const childCardId = store.state.childCardId
-  let parentCardElement = document.querySelector(`.card[data-card-id="${parentCardId}"]`)
+  const parentCardElement = document.querySelector(`.card[data-card-id="${parentCardId}"]`)
   const childCardElement = document.querySelector(`.card[data-card-id="${childCardId}"]`)
   let baseCardElement, baseCardId
   if (childCardElement) {
@@ -457,7 +471,7 @@ const addChildCard = async (options) => {
     return
   }
   const rect = utils.cardElementDimensions({ id: baseCardId }) // baseCardElement.getBoundingClientRect()
-  let initialPosition = {
+  const initialPosition = {
     x: rect.x + rect.width + spaceBetweenCards,
     y: rect.y + rect.height + spaceBetweenCards
   }
@@ -516,7 +530,7 @@ const addConnection = (baseCardId, position) => {
   if (!baseCard) { return }
   const controlPoint = store.state.currentUser.defaultConnectionControlPoint
   const estimatedEndItemConnectorPosition = utils.estimatedNewCardConnectorPosition(position)
-  let connection = {
+  const connection = {
     startItemId: baseCardId,
     endItemId: endCurrentCardId,
     path: store.getters['currentConnections/connectionPathBetweenItems']({
@@ -705,9 +719,9 @@ const kinopioClipboardDataFromData = (data) => {
 }
 const getClipboardData = async () => {
   store.commit('clearNotificationsWithPosition')
-  let position = currentCursorPosition || prevCursorPosition
+  const position = currentCursorPosition || prevCursorPosition
   try {
-    let data = await utils.dataFromClipboard()
+    const data = await utils.dataFromClipboard()
     data.kinopio = kinopioClipboardDataFromData(data, position)
     if (data.text || data.file || data.kinopio) {
       store.commit('addNotificationWithPosition', { message: 'Pasted', position, type: 'success', layer: 'app', icon: 'cut' })
@@ -715,7 +729,7 @@ const getClipboardData = async () => {
     }
   } catch (error) {
     console.error('🚑 getClipboardData', error)
-    store.commit('addNotificationWithPosition', { message: `Could not paste`, position, type: 'danger', layer: 'app', icon: 'cut' })
+    store.commit('addNotificationWithPosition', { message: 'Could not paste', position, type: 'danger', layer: 'app', icon: 'cut' })
   }
 }
 
@@ -736,7 +750,7 @@ const handlePasteEvent = async (event) => {
   const canEditSpace = store.getters['currentUser/canEditSpace']()
   if (!canEditSpace) { return }
   // get clipboard data
-  let data = await getClipboardData()
+  const data = await getClipboardData()
   console.info('🎊 pasteData', data, position)
   if (!data) { return }
   store.commit('closeAllDialogs')

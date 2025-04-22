@@ -40,7 +40,7 @@ watch(() => props.visible, (value, prevValue) => {
 const updateDialogHeight = async () => {
   if (!props.visible) { return }
   await nextTick()
-  let element = dialogElement.value
+  const element = dialogElement.value
   state.dialogHeight = utils.elementHeight(element)
 }
 const updateHeights = () => {
@@ -50,7 +50,7 @@ const updateHeights = () => {
 const updateResultsSectionHeight = async () => {
   if (!props.visible) { return }
   await nextTick()
-  let element = resultsElement.value
+  const element = resultsElement.value
   state.resultsSectionHeight = utils.elementHeight(element, true)
 }
 
@@ -94,7 +94,7 @@ const allItems = computed(() => {
 })
 const items = computed(() => {
   if (state.filter) {
-    let items = {
+    const items = {
       boxes: [],
       tags: [],
       connectionTypes: [],

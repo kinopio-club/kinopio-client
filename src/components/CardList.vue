@@ -139,7 +139,7 @@ const updateScroll = async () => {
   }
   state.scrollY = element.scrollTop
   const scrollHeight = element.getBoundingClientRect().height
-  let minItemHeight = 36 // 37.5
+  const minItemHeight = 36 // 37.5
   state.pageHeight = itemsPerPage * minItemHeight * state.currentPage
   updateCurrentPage()
 }

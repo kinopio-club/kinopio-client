@@ -54,7 +54,7 @@ const state = reactive({
 const updateDialogHeight = async () => {
   if (!props.visible) { return }
   await nextTick()
-  let element = dialogElement.value
+  const element = dialogElement.value
   state.dialogHeight = utils.elementHeight(element)
 }
 
@@ -81,7 +81,7 @@ const cardDetailsIsVisible = (cardId) => {
   return store.state.cardDetailsIsVisibleForCardId === cardId
 }
 const showCardDetails = (notification) => {
-  let space = utils.clone(notification.space)
+  const space = utils.clone(notification.space)
   const card = utils.clone(notification.card)
   if (currentSpaceId.value !== space.id) {
     store.commit('loadSpaceFocusOnCardId', card.id)
@@ -103,13 +103,13 @@ const segmentTagColor = (segment) => {
   }
 }
 const cardNameSegments = (name) => {
-  let url = utils.urlFromString(name)
+  const url = utils.urlFromString(name)
   let imageUrl
   if (utils.urlIsImage(url)) {
     imageUrl = url
     name = name.replace(url, '')
   }
-  let segments = utils.cardNameSegments(name)
+  const segments = utils.cardNameSegments(name)
   if (imageUrl) {
     segments.unshift({
       isImage: true,

@@ -69,7 +69,7 @@ watch(() => state.isLoadingRemoteTags, (value, prevValue) => {
 const updateResultsSectionHeight = async () => {
   if (!props.visible) { return }
   await nextTick()
-  let element = resultsElement.value
+  const element = resultsElement.value
   state.resultsSectionHeight = utils.elementHeight(element, true)
 }
 const currentUserIsSignedIn = computed(() => store.getters['currentUser/isSignedIn'])

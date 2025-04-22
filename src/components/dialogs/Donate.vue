@@ -95,6 +95,13 @@ export default {
     currentUser () { return this.$store.state.currentUser },
     currentUserIsUpgraded () { return this.$store.state.currentUser.isUpgraded }
   },
+  watch: {
+    visible (visible) {
+      if (visible) {
+        this.currentAmount = 0
+      }
+    }
+  },
   methods: {
     triggerUpgradeUserIsVisible () {
       this.$store.dispatch('closeAllDialogs')
@@ -143,13 +150,6 @@ export default {
         console.error('🚒', error)
         this.error.unknownServerError = true
         this.isLoading = false
-      }
-    }
-  },
-  watch: {
-    visible (visible) {
-      if (visible) {
-        this.currentAmount = 0
       }
     }
   }

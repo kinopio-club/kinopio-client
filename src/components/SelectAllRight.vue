@@ -35,7 +35,9 @@ const updateIsSelectingX = (value) => {
   }
   store.commit('isSelectingX', value)
 }
+const toolbarIsDrawing = computed(() => store.state.currentUserToolbar === 'drawing')
 const isVisible = computed(() => {
+  if (toolbarIsDrawing.value) { return }
   if (store.state.isSelectingY) { return }
   if (store.state.currentUserIsPanning || store.state.currentUserIsPanningReady) { return }
   return state.isVisible
@@ -45,7 +47,7 @@ const isVisible = computed(() => {
 
 const userColor = computed(() => store.state.currentUser.color)
 const iconClasses = computed(() => {
-  let classes = utils.colorClasses({ backgroundColor: userColor.value })
+  const classes = utils.colorClasses({ backgroundColor: userColor.value })
   if (state.isMetaKey) {
     classes.push('reverse')
   }
@@ -119,7 +121,7 @@ const throttledSelectItems = throttle((event) => {
 }, 20)
 
 const selectItems = (event) => {
-  let position = utils.cursorPositionInSpace(event)
+  const position = utils.cursorPositionInSpace(event)
   store.commit('preventMultipleSelectedActionsIsVisible', true)
   if (state.isMetaKey) {
     store.commit('triggerSelectAllItemsLeftOfCursor', position)

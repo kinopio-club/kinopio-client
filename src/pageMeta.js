@@ -2,8 +2,8 @@ import utils from '@/utils.js'
 import consts from '@/consts.js'
 import sortBy from 'lodash-es/sortBy'
 
-const logo = 'https://updates.kinopio.club/logo-social-media-avatar.png'
-const defaultDescription = 'A space to whiteboard, moodboard, brainstorm, and take notes'
+const defaultImage = 'https://updates.kinopio.club/og-image.png'
+const defaultDescription = 'Kinopio is a spatial note taking tool for visually collecting and connecting your thoughts, ideas, and feelings.'
 
 const fetchSpacePublicMeta = async (spaceId) => {
   const url = `${consts.apiHost()}/space/${spaceId}/public-meta`
@@ -36,16 +36,17 @@ const spacePreviewImageFromId = (spaceId) => {
   return `${consts.cdnHost}/${spaceId}/preview-image-${spaceId}.jpeg`
 }
 
-// update tags
+// update meta tags
 
-const updateTitle = (title) => {
+// title
+const updateTitleMeta = (title) => {
   if (consts.isDevelopment()) {
     title = `DEV ${title}`
   }
   document.title = title
   document.querySelector('meta[property="og:title"]').content = title
 }
-const updateSpaceTitle = (space) => {
+const updateTitle = (space) => {
   let title
   if (space.name === 'Hello Kinopio') {
     title = 'Kinopio'
@@ -54,32 +55,30 @@ const updateSpaceTitle = (space) => {
   } else {
     title = 'Kinopio'
   }
-  updateTitle(title)
+  updateTitleMeta(title)
+}
+// image
+const updateImageMeta = (imageUrl) => {
+  const element = document.querySelector('meta[property="og:image"]')
+  element.content = imageUrl
+}
+const resetImage = () => {
+  updateImageMeta(defaultImage)
 }
 const updateImage = (space) => {
-  const head = document.querySelector('head')
-
-  const imageUrl = space.previewImage || spacePreviewImageFromId(space.id) || logo
-  let ogImage = document.createElement(`meta`)
-  ogImage.setAttribute('property', 'og:image')
-  ogImage.setAttribute('content', imageUrl)
-  head.appendChild(ogImage)
-  // ogImage.setAttribute('property', 'og:image:secure_url')
-  // head.appendChild(ogImage)
+  const imageUrl = space.previewImage || spacePreviewImageFromId(space.id) || defaultImage
+  updateImageMeta(imageUrl)
 }
-const updateDescription = (description) => {
+// description
+const updateDescriptionMeta = (description) => {
   document.querySelector('meta[property="og:description"]').content = description
   document.querySelector('meta[name="description"]').content = description
 }
-// const updateOembed = (space) => {
-// create tag     <link rel="alternate" type="application/json+oembed" href="" />
-//   document.querySelector('type[property="application/json+oembed"]').href = `${apiHost}/services/oembed/${space.id}`
-// }
 
 export default {
   // called by routes
   async spaceFromId ({ spaceId, isSpaceInvite }) {
-    let path = window.document.location.pathname
+    const path = window.document.location.pathname
     if (!spaceId) {
       const ids = utils.spaceAndCardIdFromPath(path)
       spaceId = ids?.spaceId
@@ -91,12 +90,12 @@ export default {
     if (isSpaceInvite) {
       title = `[Invite] ${title}`
     }
-    updateTitle(title)
+    updateTitleMeta(title)
     let description = defaultDescription
     if (space.privacy === 'private') {
       description = `[Private] ${description}`
     }
-    updateDescription(description)
+    updateDescriptionMeta(description)
     updateImage(space)
   },
 
@@ -104,8 +103,8 @@ export default {
   updateSpace (space) {
     space = utils.clone(space)
     const isHelloSpace = space.name === 'Hello Kinopio'
-    const imageUrl = space.previewImage || spacePreviewImageFromId(space.id) || logo
-    updateSpaceTitle(space)
+    const imageUrl = space.previewImage || spacePreviewImageFromId(space.id)
+    updateTitle(space)
     updateImage(space)
     // description
     const origin = { x: 0, y: 0 }
@@ -126,7 +125,7 @@ export default {
     // description tags
     if (!isHelloSpace) {
       const truncatedDescription = utils.truncated(description, 150)
-      updateDescription(truncatedDescription)
+      updateDescriptionMeta(truncatedDescription)
     }
     // noscript tag
     document.querySelector('noscript').innerHTML = utils.truncated(description, 1000)
@@ -176,9 +175,9 @@ export default {
     if (isGroupInvite) {
       title = `[Invite] ${title}`
     }
-    updateTitle(title)
-    document.querySelector('meta[property="og:image"]').content = logo
-    let description = 'Work together on shared whiteboards, brainstorms, and diagrams'
-    updateDescription(description)
+    updateTitleMeta(title)
+    resetImage()
+    const description = defaultDescription
+    updateDescriptionMeta(description)
   }
 }

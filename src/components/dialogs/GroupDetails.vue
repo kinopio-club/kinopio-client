@@ -45,7 +45,7 @@ watch(() => props.visible, (value, prevValue) => {
 const updateDialogHeight = async () => {
   if (!props.visible) { return }
   await nextTick()
-  let element = dialogElement.value
+  const element = dialogElement.value
   state.dialogHeight = utils.elementHeight(element)
 }
 const closeDialogs = () => {
@@ -111,9 +111,9 @@ const showUserDetails = (event, user) => {
     store.commit('userDetailsUser', {})
     return
   }
-  let element = event.target
-  let options = { element, offsetX: 0, shouldIgnoreZoom: true }
-  let position = utils.childDialogPositionFromParent(options)
+  const element = event.target
+  const options = { element, offsetX: 0, shouldIgnoreZoom: true }
+  const position = utils.childDialogPositionFromParent(options)
   const userListBadgeOffsetY = 60
   position.y = position.y - userListBadgeOffsetY
   store.commit('userDetailsUser', user)

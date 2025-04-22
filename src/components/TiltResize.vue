@@ -30,7 +30,7 @@ const start = (event, action) => {
   }
   const updates = {
     userId: store.state.currentUser.id,
-    cardIds: cardIds
+    cardIds
   }
   if (action === 'resize') {
     store.commit('currentUserIsResizingCard', true)

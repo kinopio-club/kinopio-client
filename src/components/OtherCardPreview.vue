@@ -52,7 +52,7 @@ const updatePrimaryBackgroundColor = () => {
 }
 const background = computed(() => props.selectedColor || props.otherCard.backgroundColor)
 const backgroundColorIsDark = computed(() => {
-  let color = background.value || state.primaryBackgroundColor
+  const color = background.value || state.primaryBackgroundColor
   return utils.colorIsDark(color)
 })
 const styles = computed(() => {

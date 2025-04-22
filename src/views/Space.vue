@@ -19,7 +19,10 @@ import ItemUnlockButtons from '@/components/ItemUnlockButtons.vue'
 import SnapGuideLines from '@/components/SnapGuideLines.vue'
 
 import Header from '@/components/Header.vue'
-import MainCanvas from '@/components/layers/MainCanvas.vue'
+import PaintSelectCanvas from '@/components/layers/PaintSelectCanvas.vue'
+import DrawingCanvas from '@/components/layers/DrawingCanvas.vue'
+import DrawingBackground from '@/components/layers/DrawingBackground.vue'
+import DrawingHandler from '@/components/layers/DrawingHandler.vue'
 import SonarPing from '@/components/layers/SonarPing.vue'
 import UserLabelCursor from '@/components/UserLabelCursor.vue'
 import Footer from '@/components/Footer.vue'
@@ -189,7 +192,7 @@ const spaceZoomDecimal = computed(() => store.getters.spaceZoomDecimal)
 const pageHeight = computed(() => store.state.pageHeight)
 const pageWidth = computed(() => store.state.pageWidth)
 const styles = computed(() => {
-  const zoom = 1 / spaceZoomDecimal.value
+  const zoom = store.getters.spaceCounterZoomDecimal
   return {
     width: `${pageWidth.value * zoom}px`,
     height: `${pageHeight.value * zoom}px`,
@@ -268,7 +271,7 @@ const resizeCards = (event) => {
   if (!prevCursor) { return }
   if (utils.isMultiTouch(event)) { return }
   const cardIds = store.state.currentUserIsResizingCardIds
-  let deltaX = endCursor.x - prevCursor.x
+  const deltaX = endCursor.x - prevCursor.x
   store.dispatch('currentCards/resize', { cardIds, deltaX })
 }
 const stopResizingCards = async () => {
@@ -422,12 +425,12 @@ const dragItems = () => {
   if (shouldPrevent) { return }
   store.dispatch('currentCards/move', {
     endCursor,
-    prevCursor: prevCursor
+    prevCursor
   })
   checkShouldShowDetails()
   store.dispatch('currentBoxes/move', {
     endCursor,
-    prevCursor: prevCursor
+    prevCursor
   })
 }
 
@@ -663,12 +666,14 @@ main#space.space(
 )
   SpaceBackground
   SpaceBackgroundTint
+  DrawingBackground
   ItemsLocked
   #box-backgrounds
   Connections
   Boxes
   Cards
   ItemUnlockButtons
+  DrawingCanvas
   BoxDetails
   CardDetails
   OtherCardDetails
@@ -680,7 +685,8 @@ main#space.space(
   BoxSelecting
   SnapGuideLines
 aside
-  MainCanvas
+  PaintSelectCanvas
+  DrawingHandler
   SonarPing
 //- page ui, dialogs
 Header

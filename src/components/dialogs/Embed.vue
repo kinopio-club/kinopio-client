@@ -71,9 +71,6 @@ export default {
   props: {
     visible: Boolean
   },
-  created () {
-    window.addEventListener('resize', this.updateDialogHeight)
-  },
   data () {
     return {
       iframeIsVisible: true,
@@ -103,6 +100,18 @@ export default {
   </iframe>
 </div>`
     }
+  },
+  watch: {
+    visible (visible) {
+      this.$store.commit('clearNotificationsWithPosition')
+      if (visible) {
+        this.toggleIframeIsVisible()
+        this.updateDialogHeight()
+      }
+    }
+  },
+  created () {
+    window.addEventListener('resize', this.updateDialogHeight)
   },
   methods: {
     updateZoom (percent) {
@@ -147,18 +156,9 @@ export default {
     updateDialogHeight () {
       if (!this.visible) { return }
       this.$nextTick(() => {
-        let element = this.$refs.dialog
+        const element = this.$refs.dialog
         this.dialogHeight = utils.elementHeight(element)
       })
-    }
-  },
-  watch: {
-    visible (visible) {
-      this.$store.commit('clearNotificationsWithPosition')
-      if (visible) {
-        this.toggleIframeIsVisible()
-        this.updateDialogHeight()
-      }
     }
   }
 }

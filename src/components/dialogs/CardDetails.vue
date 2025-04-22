@@ -190,7 +190,7 @@ const styles = computed(() => {
 const updateDialogHeight = async () => {
   if (!visible.value) { return }
   await nextTick()
-  let element = dialogElement.value
+  const element = dialogElement.value
   state.dialogHeight = utils.elementHeight(element)
 }
 const shouldShowItemActions = computed(() => store.state.currentUser.shouldShowItemActions)
@@ -208,11 +208,11 @@ const scrollIntoViewAndFocus = async () => {
   await nextTick()
   scrollIntoView(behavior)
   focusName()
-  triggerUpdateMainCanvasPositionOffset()
+  triggerUpdatePaintSelectCanvasPositionOffset()
   triggerUpdateHeaderAndFooterPosition()
 }
-const triggerUpdateMainCanvasPositionOffset = () => {
-  store.commit('triggerUpdateMainCanvasPositionOffset')
+const triggerUpdatePaintSelectCanvasPositionOffset = () => {
+  store.commit('triggerUpdatePaintSelectCanvasPositionOffset')
   triggerUpdateHeaderAndFooterPosition()
 }
 
@@ -263,7 +263,7 @@ const canEditCard = computed(() => store.getters['currentUser/canEditCard'](card
 const currentUserIsSignedIn = computed(() => store.getters['currentUser/isSignedIn'])
 const createdByUser = computed(() => {
   const userId = card.value.userId
-  let user = store.getters['currentSpace/userById'](userId)
+  const user = store.getters['currentSpace/userById'](userId)
   if (user) {
     return user
   } else {
@@ -275,7 +275,7 @@ const createdByUser = computed(() => {
 })
 const updatedByUser = computed(() => {
   const userId = card.value.nameUpdatedByUserId || card.value.userId
-  let user = store.getters['currentSpace/userById'](userId)
+  const user = store.getters['currentSpace/userById'](userId)
   if (user) {
     return user
   } else {
@@ -314,8 +314,8 @@ const handleEnterKey = (event) => {
     hidePickers()
   } else if (state.insertedLineBreak) {
     state.insertedLineBreak = false
+  // eslint-disable-next-line no-empty
   } else if (isCompositionEvent) {
-
   } else {
     closeCard()
     store.dispatch('closeAllDialogs')
@@ -511,7 +511,7 @@ const normalizedName = computed(() => {
   return newName.trim()
 })
 const clickName = (event) => {
-  triggerUpdateMainCanvasPositionOffset()
+  triggerUpdatePaintSelectCanvasPositionOffset()
   store.commit('searchIsVisible', false)
   if (isCursorInsideTagBrackets()) {
     showTagPicker()
@@ -567,7 +567,7 @@ const openingFrameStyle = computed(() => {
     top: position,
     background: userColor,
     opacity: state.openingAlpha,
-    borderRadius: borderRadius
+    borderRadius
   }
 })
 const cancelOpening = () => {
@@ -691,7 +691,7 @@ const addTagClosingBrackets = async () => {
 }
 const moveCursorPastTagEnd = async () => {
   const cursorStart = selectionStartPosition()
-  let endText = name.value.substring(cursorStart)
+  const endText = name.value.substring(cursorStart)
   let newCursorPosition = endText.indexOf(']]')
   newCursorPosition = cursorStart + newCursorPosition + 2
   setSelectionRange(newCursorPosition, newCursorPosition)
@@ -723,8 +723,7 @@ const addNewTags = async (newTagNames) => {
   const previousTagNames = previousTags.map(tag => tag.name)
   const addTagsNames = newTagNames.filter(newTagName => !previousTagNames.includes(newTagName))
   for (const tagName of addTagsNames) {
-    let tag
-    tag = store.getters.newTag({
+    const tag = store.getters.newTag({
       name: tagName,
       defaultColor: state.newTagColor || store.state.currentUser.color,
       cardId: card.value.id,
@@ -854,7 +853,7 @@ const selectionEndPosition = () => {
   const endPosition = position
   return endPosition
 }
-const toggleTextEditAction = async (action) => {
+const toggleTextEditWrapAction = async (action) => {
   if (!visible.value) { return }
   const startPosition = selectionStartPosition()
   const endPosition = selectionEndPosition()
@@ -867,6 +866,24 @@ const toggleTextEditAction = async (action) => {
   updateCardName(newName)
   await nextTick()
   setSelectionRange(startPosition + offset, endPosition + offset)
+}
+const textEditLinkAction = async () => {
+  // lol → [lol](url)
+  if (!visible.value) { return }
+  const startPosition = selectionStartPosition()
+  const endPosition = selectionEndPosition()
+  const name = nameElement.value.value
+  let before = name.slice(0, startPosition)
+  let selected = name.slice(startPosition, endPosition)
+  const after = name.slice(endPosition)
+  before = before + '['
+  selected = selected + '](url)'
+  const newName = before + selected + after
+  const newStartPosition = endPosition + 3 // [](
+  const newEndPosition = newStartPosition + 3 // url
+  updateCardName(newName)
+  await nextTick()
+  setSelectionRange(newStartPosition, newEndPosition)
 }
 
 // card tips
@@ -889,7 +906,7 @@ const isComment = computed(() => card.value.isComment || nameIsComment.value)
 const tagsInCard = computed(() => {
   const tagNames = utils.tagsFromStringWithoutBrackets(name.value)
   if (!tagNames) { return [] }
-  let tags = []
+  const tags = []
   tagNames.forEach(name => {
     const tag = store.getters['currentSpace/tagByName'](name)
     tags.push(tag)
@@ -1110,7 +1127,7 @@ const splitCards = (event, isPreview) => {
   const cardNames = utils.splitCardNameByParagraphAndSentence(prevName)
   const user = store.state.currentUser
   // create new split cards
-  let newCards = cardNames.map((cardName, index) => {
+  const newCards = cardNames.map((cardName, index) => {
     const indentAmount = 50
     const indentLevel = utils.numberOfLeadingTabs(cardName) || utils.numberOfLeadingDoubleSpaces(cardName)
     const indentX = indentLevel * indentAmount
@@ -1147,7 +1164,7 @@ const addSplitCards = async (newCards) => {
   // update y positions
   // wait for cards to be added to dom
   setTimeout(() => {
-    for (let newCard of newCards) {
+    for (const newCard of newCards) {
       const element = document.querySelector(`.card-wrap [data-card-id="${prevCard.id}"]`)
       const prevCardRect = element.getBoundingClientRect()
       newCard.y = prevCard.y + (prevCardRect.height * store.getters.spaceCounterZoomDecimal) + spaceBetweenCards
@@ -1297,7 +1314,7 @@ const slashTextToCursor = () => {
 }
 const slashTextPosition = () => {
   const cursorStart = selectionStartPosition()
-  let text = name.value.substring(0, cursorStart)
+  const text = name.value.substring(0, cursorStart)
   const textPosition = text.lastIndexOf('/')
   if (textPosition === -1) { return }
   return textPosition
@@ -1375,10 +1392,12 @@ dialog.card-details(v-if="visible" :open="visible" ref="dialogElement" @click.le
 
         @keydown.tab.exact="triggerPickerSelectItem"
 
-        @keydown.meta.b.exact.stop.prevent="toggleTextEditAction('bold')"
-        @keydown.ctrl.b.exact.stop.prevent="toggleTextEditAction('bold')"
-        @keydown.meta.i.exact.stop.prevent="toggleTextEditAction('italic')"
-        @keydown.ctrl.i.exact.stop.prevent="toggleTextEditAction('italic')"
+        @keydown.meta.b.exact.stop.prevent="toggleTextEditWrapAction('bold')"
+        @keydown.ctrl.b.exact.stop.prevent="toggleTextEditWrapAction('bold')"
+        @keydown.meta.i.exact.stop.prevent="toggleTextEditWrapAction('italic')"
+        @keydown.ctrl.i.exact.stop.prevent="toggleTextEditWrapAction('italic')"
+        @keydown.meta.k.exact.stop.prevent="textEditLinkAction"
+        @keydown.ctrl.k.exact.stop.prevent="textEditLinkAction"
 
         @focus="resetPinchCounterZoomDecimal"
       )
@@ -1400,7 +1419,7 @@ dialog.card-details(v-if="visible" :open="visible" ref="dialogElement" @click.le
         :position="state.space.pickerPosition"
         :search="state.space.pickerSearch"
         :shouldExcludeCurrentSpace="true"
-        :shouldShowNewSpace="true"
+        :shouldShowNewSpace="currentUserIsSignedIn"
         @closeDialog="hideSpacePicker"
         @selectSpace="replaceSlashCommandWithSpaceUrl"
       )

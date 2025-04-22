@@ -171,10 +171,10 @@ const notifyIsJoiningGroup = computed(() => store.state.notifyIsJoiningGroup)
 const notifySignUpToJoinGroup = computed(() => store.state.notifySignUpToJoinGroup)
 const notifyIsDuplicatingSpace = computed(() => store.state.notifyIsDuplicatingSpace)
 const notifificationClasses = (item) => {
-  let classes = {
-    'danger': item.type === 'danger',
-    'success': item.type === 'success',
-    'info': item.type === 'info',
+  const classes = {
+    danger: item.type === 'danger',
+    success: item.type === 'success',
+    info: item.type === 'info',
     'persistent-item': item.isPersistentItem
   }
   return classes
@@ -450,13 +450,8 @@ aside.notifications(@click.left="closeAllDialogs")
     .row
       span.badge.secondary {{latestChangelogPost.title}}
     .row
-      //- .button-wrap
-      //-   a(href="/changelog")
-      //-     button(@click.left.stop.prevent="changeSpaceToChangelog")
-      //-       span Changelog
       .button-wrap
         button(@click.left="updateChangelogAndRefreshBrowser")
-          //- TODO update changelog and refresh browser
           img.refresh.icon(src="@/assets/refresh.svg")
           span Update
 

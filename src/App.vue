@@ -65,7 +65,7 @@ const currentUserId = computed(() => store.state.currentUser.id)
 // online
 
 const updateIsOnline = () => {
-  let clientStatus = window.navigator.onLine
+  const clientStatus = window.navigator.onLine
   if (!clientStatus) {
     store.dispatch('isOnline', false)
     return
@@ -99,7 +99,7 @@ const isThemeDark = computed(() => store.getters['themes/isThemeDark'])
 const themeFromSystem = () => {
   const themeIsSystem = store.state.currentUser.themeIsSystem
   if (!themeIsSystem) { return }
-  let theme = window.matchMedia('(prefers-color-scheme: dark)')
+  const theme = window.matchMedia('(prefers-color-scheme: dark)')
   let themeName
   if (theme.matches) {
     themeName = 'dark'
@@ -122,7 +122,7 @@ const updateThemeFromSystem = () => {
 
 const broadcastUserLabelCursor = (event) => {
   if (!store.getters.isSpacePage) { return }
-  let updates = utils.cursorPositionInSpace(event)
+  const updates = utils.cursorPositionInSpace(event)
   if (!updates) { return }
   updates.userId = store.state.currentUser.id
   updates.zoom = spaceZoomDecimal.value
@@ -135,7 +135,7 @@ const isTouchDevice = () => {
 // rss
 
 const clearMetaRSSFeed = () => {
-  let link = document.querySelector("link[type='application/rss+xml']")
+  const link = document.querySelector("link[type='application/rss+xml']")
   if (link) {
     link.remove()
   }
@@ -149,7 +149,7 @@ const updateMetaRSSFeed = () => {
   const head = document.querySelector('head')
   const spaceId = store.state.currentSpace.id
   const url = `${consts.apiHost()}/space/${spaceId}/feed.json`
-  let link = document.createElement('link')
+  const link = document.createElement('link')
   link.rel = 'alternative'
   link.type = 'application/rss+xml'
   link.title = 'JSON Feed'
@@ -712,13 +712,6 @@ dialog
   section.subsection + section.subsection
     border-top 0
 
-  .change-color
-    height var(--button-fixed-height)
-    .current-color
-      height 14px
-      width 14px
-      border-radius var(--small-entity-radius)
-
   a
     text-decoration-thickness 1px
     color var(--text-link)
@@ -760,7 +753,15 @@ button
     vertical-align -4px
     margin-right 6px
 
+.change-color
+  height var(--button-fixed-height)
+  .current-color
+    height 14px
+    width 14px
+    border-radius var(--small-entity-radius)
+
 .segmented-buttons
+  display flex
   &.first-row
     button
       margin-bottom -1px
@@ -928,6 +929,10 @@ button
 
 .icon.duplicate
   vertical-align 1px
+
+.icon.openai
+  width 16px
+  vertical-align -3px
 
 label,
 li
