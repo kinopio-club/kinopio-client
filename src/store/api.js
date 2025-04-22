@@ -742,6 +742,12 @@ const self = {
         const response = await fetch(`${consts.apiHost()}/space/multiple`, options)
         // upload drawing images
         for (const body of drawingImages) {
+          // if (typeof body.dataUrl === 'string') { continue }
+          const isDataUrl = body.dataUrl.startsWith('data:')
+          console.log(isDataUrl, body)
+          if (!isDataUrl) { continue }
+
+          // try catch
           const imageOptions = await context.dispatch('requestOptions', { body, method: 'POST', space: { id: body.spaceId } })
           const imageResponse = await fetch(`${consts.apiHost()}/space/drawing-image`, imageOptions)
           const imageData = await imageResponse.json()

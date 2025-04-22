@@ -44,7 +44,6 @@ const backgroundStyles = computed(() => {
   if (backgroundImage) {
     backgroundImageUrl = backgroundImage.thumbnailUrl || backgroundImageUrl
   }
-  console.log(backgroundImageUrl, background.value, backgroundImage)
   return {
     backgroundImage: `url(${backgroundImageUrl})`
   }

@@ -197,12 +197,8 @@ const currentSpace = {
       if (!currentUserIsSignedIn) { return }
       if (!canEditSpace) { return }
       if (isPrivate) { return }
-      try {
-        const response = await context.dispatch('api/updateSpacePreviewImage', context.state.id, { root: true })
-        console.info('🙈 updated space preview image', response.urls)
-      } catch (error) {
-        console.warn('🚑 updateSpacePreviewImage', error)
-      }
+      const response = await context.dispatch('api/updateSpacePreviewImage', context.state.id, { root: true })
+      console.info('🙈 updated space preview image', response?.urls)
     }, 10 * 1000), // 10 seconds
     updateInboxCache: async (context) => {
       const currentSpaceIsInbox = context.state.name === 'Inbox'
