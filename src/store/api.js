@@ -630,7 +630,7 @@ const self = {
         if (!shouldRequest({ shouldRequestRemote, apiKey, isOnline })) { return }
         const spaceReadOnlyKey = context.rootGetters['currentSpace/readOnlyKey'](space)
         console.info('🛬 getting remote space', space.id)
-        const options = await context.dispatch('requestOptions', { method: 'GET', space: context.rootState.currentSpace, spaceReadOnlyKey })
+        const options = await context.dispatch('requestOptions', { method: 'GET', space, spaceReadOnlyKey })
         const response = await utils.timeout(consts.defaultTimeout, fetch(`${consts.apiHost()}/space/${space.id}`, options))
         return normalizeResponse(response)
       } catch (error) {
@@ -744,9 +744,7 @@ const self = {
         for (const body of drawingImages) {
           // if (typeof body.dataUrl === 'string') { continue }
           const isDataUrl = body.dataUrl.startsWith('data:')
-          console.log(isDataUrl, body)
           if (!isDataUrl) { continue }
-
           // try catch
           const imageOptions = await context.dispatch('requestOptions', { body, method: 'POST', space: { id: body.spaceId } })
           const imageResponse = await fetch(`${consts.apiHost()}/space/drawing-image`, imageOptions)
@@ -1184,7 +1182,8 @@ const self = {
       try {
         const options = await context.dispatch('requestOptions', { method: 'GET', space: context.rootState.currentSpace })
         const response = await fetch(`${consts.apiHost()}/notification`, options)
-        return normalizeResponse(response)
+        const notifications = await normalizeResponse(response)
+        return notifications
       } catch (error) {
         context.dispatch('handleServerError', { name: 'getNotifications', error })
       }

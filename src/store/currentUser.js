@@ -94,16 +94,6 @@ export default {
   namespaced: true,
   state: utils.clone(initialState),
   mutations: {
-    replaceState: (state, newUser) => {
-      if (!newUser) { return }
-      Object.keys(state).forEach(key => {
-        state[key] = newUser[key] || initialState[key]
-      })
-      postMessage.send({ name: 'setApiKey', value: newUser.apiKey })
-      cache.removeLocal('user')
-      cache.storeLocal('user', newUser)
-    },
-
     color: (state, value) => {
       state.color = value
       cache.updateUser('color', value)
@@ -169,7 +159,6 @@ export default {
       if (user.apiKey) {
         postMessage.send({ name: 'setApiKey', value: user.apiKey })
       }
-      cache.updateUser(user)
     },
     arenaAccessToken: (state, token) => {
       state.arenaAccessToken = token
@@ -504,6 +493,7 @@ export default {
       remoteUser.AIImages = await context.dispatch('api/getUserAIImages', null, { root: true }) || []
       remoteUser.updatedAt = utils.unixTime(remoteUser.updatedAt)
       console.info('🌸 Restore user from remote', remoteUser)
+      await cache.saveUser(remoteUser)
       context.commit('updateUser', remoteUser)
       if (utils.userIsUpgraded(remoteUser)) {
         context.commit('isUpgraded', true)

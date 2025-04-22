@@ -20,6 +20,7 @@ import dayjs from 'dayjs'
 
 const idleClientTimers = []
 let isLoadingRemoteSpace, shouldLoadNewHelloSpace
+const loadSpaceIdsError = []
 
 const currentSpace = {
   namespaced: true,
@@ -505,7 +506,8 @@ const currentSpace = {
         }
         return remoteSpace
       } catch (error) {
-        console.error('🚒 getRemoteSpace', error)
+        console.error('🚒 getRemoteSpace', space.id, error)
+        loadSpaceIdsError.push(space.id)
         throw error
       }
     },
@@ -515,6 +517,11 @@ const currentSpace = {
         remoteSpace = await context.dispatch('getRemoteSpace', space)
       } catch (error) {
         console.warn('🚑 loadRemoteSpace', error.status, error, space.id)
+        const preventRepeatError = loadSpaceIdsError.includes(space.id)
+        if (preventRepeatError) {
+          context.commit('notifySpaceNotFound', true, { root: true })
+          return
+        }
         if (error.status === 404) {
           context.commit('notifySpaceNotFound', true, { root: true })
           context.dispatch('loadLastSpace', space)
@@ -877,13 +884,14 @@ const currentSpace = {
       }
       const cachedHelloSpace = await cache.getSpaceByName('Hello Kinopio')
       const cachedSpace = await cache.getAllSpaces()[0]
-      const newUserSpace = cachedHelloSpace || cachedSpace
+      const prevSpace = cachedHelloSpace || cachedSpace
       if (spaceToRestore?.id) {
         space = spaceToRestore
       } else if (user.lastSpaceId) {
         space = { id: user.lastSpaceId }
-      } else if (newUserSpace) {
-        space = { id: newUserSpace.id }
+      } else if (prevSpace) {
+        space = prevSpace
+        await cache.saveSpace(space)
       }
       // load space
       if (space) {
