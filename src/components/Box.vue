@@ -1100,5 +1100,4 @@ const focusColor = computed(() => {
   .connected-colors
     left 1px
     top 5px
-
 </style>
