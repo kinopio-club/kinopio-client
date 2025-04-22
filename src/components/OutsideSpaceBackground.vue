@@ -163,6 +163,7 @@ canvas#outside-space-background(
 
 <style lang="stylus">
 #outside-space-background
+  pointer-events none
   position fixed
   top 0
   left 0
