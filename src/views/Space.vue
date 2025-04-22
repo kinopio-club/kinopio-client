@@ -739,4 +739,5 @@ Preload
   .box-background
     border-radius var(--entity-radius)
     position absolute
+    z-index 0 !important
 </style>
