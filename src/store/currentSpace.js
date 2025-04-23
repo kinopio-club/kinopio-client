@@ -1,7 +1,6 @@
 import inboxSpace from '@/data/inbox.json'
 import newSpace from '@/data/new.json'
 
-import words from '@/data/words.js'
 import utils from '@/utils.js'
 import cache from '@/cache.js'
 import consts from '@/consts.js'
@@ -351,7 +350,7 @@ const currentSpace = {
         name = space.name
       }
       space = utils.clone(newSpace)
-      space.name = name || words.randomUniqueName()
+      space.name = name || utils.newSpaceName()
       space.id = nanoid()
       space.createdAt = new Date()
       space.editedAt = new Date()

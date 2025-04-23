@@ -15,8 +15,6 @@ import cache from '@/cache.js'
 import utils from '@/utils.js'
 import consts from '@/consts.js'
 
-import dayjs from 'dayjs'
-
 const store = useStore()
 
 const nameElement = ref(null)
@@ -57,7 +55,6 @@ const state = reactive({
   privacyPickerIsVisible: false,
   optionsIsVisible: false,
   addToGroupIsVisible: false,
-  textareaIsFocused: false,
   error: {
     updateSpaceGroup: false,
     removeSpaceGroup: false
@@ -126,45 +123,6 @@ const textareaSize = () => {
   const modifier = 1
   element.style.height = element.scrollHeight + modifier + 'px'
 }
-const textareaFocus = () => {
-  state.textareaIsFocused = true
-}
-const textareaBlur = () => {
-  state.textareaIsFocused = false
-}
-
-// space name date
-
-const spaceNameDate = computed(() => {
-  const date = dayjs(new Date())
-  return date.format(consts.nameDateFormat)
-})
-const spaceNameHasDate = computed(() => {
-  const date = spaceNameDate.value
-  return spaceName.value.includes(date)
-})
-const toggleSpaceNameDate = async () => {
-  const element = nameElement.value
-  const nameIsSelected = element.selectionStart === 0 && element.selectionEnd === element.value.length
-  let newName = spaceName.value.trim()
-  const date = spaceNameDate.value
-  if (spaceNameHasDate.value) {
-    newName = newName.replace(date, '')
-  } else if (nameIsSelected) {
-    newName = newName.slice(0, element.selectionStart) + newName.slice(element.selectionEnd)
-    newName = `${newName} ${date}`
-  } else {
-    newName = `${newName} ${date}`
-  }
-  spaceName.value = newName // spaceName set()
-  // refocus textarea
-  element.focus()
-  element.setSelectionRange(element.value.length, element.value.length)
-  setTimeout(() => {
-    textareaFocus()
-    textareaSize()
-  }, 20) // focus after all closeDialog events
-}
 
 // template
 
@@ -214,7 +172,6 @@ const closeDialogs = () => {
   state.backgroundIsVisible = false
   state.privacyPickerIsVisible = false
   state.addToGroupIsVisible = false
-  textareaBlur()
   clearErrors()
 }
 const closeDialogsAndEmit = () => {
@@ -285,7 +242,7 @@ const removeSpaceGroup = (group) => {
           span {{remotePendingUpload.percentComplete}}%
       BackgroundPicker(:visible="state.backgroundIsVisible" :space="currentSpace" @updateLocalSpaces="updateLocalSpaces")
     //- Name
-    .textarea-wrap(:class="{'full-width': props.shouldHidePin && !state.textareaIsFocused }")
+    .textarea-wrap(:class="{'full-width': props.shouldHidePin }")
       textarea.name(
         :readonly="!isSpaceMember"
         ref="nameElement"
@@ -293,20 +250,13 @@ const removeSpaceGroup = (group) => {
         placeholder="name"
         v-model="spaceName"
         @keydown.enter.stop.prevent="closeAllDialogs"
-        @focus="textareaFocus"
         @click.stop
       )
       .textarea-loader(v-if="isLoadingSpace")
         Loader(:visible="true")
 
-  //- Append date
-  .title-row(v-if="state.textareaIsFocused")
-    .button-wrap.title-row-small-button-wrap(@click.left="toggleSpaceNameDate" title="Add date to name")
-      button.small-button.cal-button(:class="{ active: spaceNameHasDate }")
-        img.icon.cal(src="@/assets/cal.svg")
-
   //- Pin Dialog
-  .title-row(v-if="!props.shouldHidePin && !state.textareaIsFocused")
+  .title-row(v-if="!props.shouldHidePin")
     .button-wrap.title-row-small-button-wrap(@click.left="toggleDialogIsPinned" title="Pin dialog")
       button.small-button(:class="{active: dialogIsPinned}")
         img.icon.pin(src="@/assets/pin.svg")
@@ -425,6 +375,4 @@ SpaceOptions(
 .group-button
   padding-right 6px
 
-.icon.cal
-  vertical-align 1px
 </style>

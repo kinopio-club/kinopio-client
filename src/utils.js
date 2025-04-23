@@ -1496,6 +1496,9 @@ export default {
 
   // Spaces 🌙
 
+  newSpaceName () {
+    return 'TODO'
+  },
   spaceIsUnchanged (prevSpace, newSpace) {
     if (!prevSpace.cards || !prevSpace.connections) { return false }
     const cardsCountIsUnchanged = prevSpace.cards?.length === newSpace.cards.length
