@@ -333,7 +333,6 @@ export default {
   percentageBetween ({ value, min, max }) {
     return ((value - min) / (max - min)) * 100
   },
-  // TODO replace w native structuredClone method
   clone (object) {
     if (!object) { return }
     this.typeCheck({ value: object, type: 'object' })
@@ -1836,6 +1835,12 @@ export default {
     })
     space.connections = connections
     space.cards = space.cards.filter(card => card.name)
+    space.cards = space.cards.map(card => {
+      if (card.resizeWidth) {
+        card.resizeWidth = Math.round(card.resizeWidth)
+      }
+      return card
+    })
     return space
   },
   normalizeRemoteSpace (remoteSpace) {

@@ -146,6 +146,7 @@ const signIn = async (event) => {
   const result = await response.json()
   state.loading.signIn = false
   if (isSuccess(response)) {
+    await cache.saveUser(result)
     store.commit('currentUser/updateUser', result)
     initUser()
   } else {

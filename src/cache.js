@@ -117,6 +117,7 @@ export default {
   // Space
 
   async space (spaceId) {
+    if (!spaceId) { return {} }
     let space = await this.getLocal(`space-${spaceId}`) || {}
     space = utils.normalizeToObject(space)
     space.clients = []

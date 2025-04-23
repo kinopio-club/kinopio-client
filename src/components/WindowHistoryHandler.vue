@@ -1,43 +1,64 @@
-<template lang='pug'>
-</template>
+<script setup>
+import { reactive, computed, onMounted, onBeforeUnmount, watch, ref, nextTick } from 'vue'
+import { useStore } from 'vuex'
+import { useRouter } from 'vue-router'
 
-<script>
 import utils from '@/utils.js'
-import pageMeta from '@/pageMeta.js'
+import consts from '@/consts.js'
 
-export default {
-  name: 'WindowHistoryHandler',
-  computed: {
-    currentSpace () { return this.$store.state.currentSpace }
-  },
-  created () {
-    this.$store.subscribe(async (mutation, state) => {
-      if (mutation.type === 'triggerUpdateWindowHistory') {
-        await this.updateWindowHistory(mutation.payload)
-        this.updateWindowTitle()
-      } else if (mutation.type === 'triggerUpdateWindowTitle') {
-        this.updateWindowTitle()
-      }
-    })
-  },
-  methods: {
-    async updateWindowHistory (space) {
-      const isEmbedMode = this.$store.state.isEmbedMode
-      space = space || this.currentSpace
-      const spaceUrl = utils.url(space)
-      const preventUpdate = window.location.pathname.includes(spaceUrl)
-      if (preventUpdate) { return }
-      const currentUserIsSignedIn = this.$store.getters['currentUser/isSignedIn']
-      this.$store.commit('currentSpacePath', spaceUrl, { root: true })
-      if (navigator.standalone || isEmbedMode) { return }
-      await this.$router.push('/' + spaceUrl)
-      const state = utils.clone(this.$store.state)
-      history.replaceState({ ...history.state, ...state }, '')
-    },
-    updateWindowTitle () {
-      const space = this.$store.state.currentSpace
-      pageMeta.updateSpace(space)
+const store = useStore()
+const router = useRouter()
+
+let unsubscribe
+
+onMounted(() => {
+  unsubscribe = store.subscribe(mutation => {
+    if (mutation.type === 'triggerUpdateWindowHistory') {
+      update(mutation.payload)
+    } else if (mutation.type === 'triggerUpdateWindowTitle') {
+      updateWindowTitle()
     }
+  })
+})
+onBeforeUnmount(() => {
+  unsubscribe()
+})
+
+const update = async (space) => {
+  await updateWindowHistory(space)
+  updateWindowTitle()
+}
+const updateWindowHistory = async (space) => {
+  const isEmbedMode = store.state.isEmbedMode
+  space = space || store.state.currentSpace
+  const spaceUrl = utils.url(space)
+  const preventUpdate = window.location.pathname.includes(spaceUrl)
+  if (preventUpdate) { return }
+  const currentUserIsSignedIn = store.getters['currentUser/isSignedIn']
+  store.commit('currentSpacePath', spaceUrl, { root: true })
+  if (navigator.standalone || isEmbedMode) { return }
+  await router.push('/' + spaceUrl)
+  const state = utils.clone(store.state)
+  history.replaceState({ ...history.state, ...state }, '')
+}
+const updateWindowTitle = () => {
+  const space = store.state.currentSpace
+  let title
+  if (space.name === 'Hello Kinopio') {
+    title = 'Kinopio'
+  } else if (space.name) {
+    title = `${space.name} – Kinopio`
+  } else {
+    title = 'Kinopio'
   }
+  if (consts.isDevelopment()) {
+    title = `DEV ${title}`
+  }
+  document.title = title
 }
 </script>
+
+<template lang="pug">
+</template>
+<style lang="stylus">
+</style>

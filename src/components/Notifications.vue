@@ -119,6 +119,7 @@ const checkIfShouldNotifySpaceOutOfSync = async () => {
   try {
     if (!currentUserIsSignedIn.value) { return }
     store.commit('isLoadingSpace', true)
+    if (!store.state.currentSpace.updatedAt) { return } // don't check unloaded spaces
     const remoteSpace = await store.dispatch('api/getSpaceUpdatedAt', { id: store.state.currentSpace.id })
     store.commit('isLoadingSpace', false)
     if (!remoteSpace) { return }
