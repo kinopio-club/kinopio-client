@@ -356,6 +356,7 @@ const currentSpace = {
       space.editedAt = new Date()
       space.collaboratorKey = nanoid()
       space.readOnlyKey = nanoid()
+      space.moonPhase = utils.moonPhase()
       const shouldHideTutorialCards = currentUser.shouldHideTutorialCards
       if (shouldHideTutorialCards) {
         space.connectionTypes = []
@@ -368,12 +369,13 @@ const currentSpace = {
       const shouldHideDateCards = currentUser.shouldHideDateCards
       if (!shouldHideDateCards) {
         const date = dayjs().format('dddd') // Sunday
+        const moonPhaseSystemCommandIcon = '::systemCommand=moonPhase'
         const dateCard = {
           id: nanoid(),
           x: 73,
           y: 125,
           z: 0,
-          name: `${date} ${context.rootGetters.dateImageUrl}`,
+          name: `${moonPhaseSystemCommandIcon} ${date} ${context.rootGetters.dateImageUrl}`,
           width: 144,
           height: 144,
           resizeWidth: 144
