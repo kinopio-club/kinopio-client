@@ -41,7 +41,7 @@ export default {
   moderatorUserId: 'euGhpBrR9eBcjKnK16C_g',
   uploadPlaceholder: '⬬⬭',
   itemTypesWithPositions: ['boxes', 'cards'],
-  nameDateFormat: 'ddd MMM D, YYYY', // Wed Nov 13, 2024
+  nameDateFormat: 'MMMM D, YYYY', // August 16, 2025
   isDevelopment () {
     if (env.VITE_PROD_SERVER === 'true') {
       return false

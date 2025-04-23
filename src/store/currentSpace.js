@@ -368,7 +368,7 @@ const currentSpace = {
       }
       const shouldHideDateCards = currentUser.shouldHideDateCards
       if (!shouldHideDateCards) {
-        const date = dayjs().format('ddd MMM D') // Wed Nov 20
+        const date = dayjs().format('dddd') // Sunday
         const moonPhaseSystemCommandIcon = '::systemCommand=moonPhase'
         const dateCard = {
           id: nanoid(),
