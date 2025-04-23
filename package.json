@@ -8,7 +8,8 @@
     "serve": "vite --host",
     "build": "vite build",
     "preview": "vite preview",
-    "lint": "eslint src --ext .js,.vue"
+    "lint": "eslint src --ext .js,.vue",
+    "test": "echo \"Error: no test specified\" && exit 1"
   },
   "dependencies": {
     "@aguezz/qs-parse": "^2.0.0",
