@@ -140,7 +140,6 @@ export default defineConfig(async ({ command, mode }) => {
       })
     ],
     server: {
-      host: '0.0.0.0',
       port: 8080,
       fs: {
         // Allow serving files from one level up to the project root
