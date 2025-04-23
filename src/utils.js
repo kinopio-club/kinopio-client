@@ -1497,7 +1497,8 @@ export default {
   // Spaces 🌙
 
   newSpaceName () {
-    return 'TODO'
+    const date = dayjs(new Date())
+    return date.format(consts.nameDateFormat)
   },
   spaceIsUnchanged (prevSpace, newSpace) {
     if (!prevSpace.cards || !prevSpace.connections) { return false }
