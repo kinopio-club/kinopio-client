@@ -5,7 +5,6 @@ import { useStore } from 'vuex'
 import User from '@/components/User.vue'
 import SpaceList from '@/components/SpaceList.vue'
 import Loader from '@/components/Loader.vue'
-import words from '@/data/words.js'
 import newSpace from '@/data/new.json'
 import cache from '@/cache.js'
 import utils from '@/utils.js'
@@ -98,8 +97,8 @@ const filteredSpaces = computed(() => {
   let spaces = state.spaces
   if (!props.parentIsCardDetails) { return spaces }
   spaces = spaces.filter(space => {
-    const isHidden = space.isHidden
-    return !space.isHidden
+    const isHidden = store.getters['currentSpace/isHidden'](space.id)
+    return !isHidden
   })
   if (props.search) {
     const filtered = fuzzy.filter(
@@ -175,7 +174,7 @@ const toggleNewSpaceIsVisible = async () => {
 const createNewSpace = async () => {
   if (state.isLoadingNewSpace) { return }
   if (!state.newSpaceName) {
-    state.newSpaceName = words.randomUniqueName()
+    state.newSpaceName = utils.newSpaceName()
   }
   const currentUser = store.state.currentUser
   const user = { id: currentUser.id, color: currentUser.color, name: currentUser.name }
@@ -202,7 +201,7 @@ const createNewSpace = async () => {
 
 const clearState = () => {
   state.newSpaceIsVisible = false
-  state.newSpaceName = words.randomUniqueName()
+  state.newSpaceName = utils.newSpaceName()
 }
 const focusNewSpaceNameInput = () => {
   const element = newSpaceNameElement.value
@@ -213,7 +212,7 @@ const focusNewSpaceNameInput = () => {
 
 const spaceListIsVisible = computed(() => {
   if (props.parentIsCardDetails) {
-    return currentUserIsSignedIn.value.valye
+    return currentUserIsSignedIn.value
   } else {
     return true
   }

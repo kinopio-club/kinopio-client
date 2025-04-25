@@ -245,7 +245,7 @@ const signIn = async (event) => {
     await addCollaboratorToInvitedSpaces()
     store.commit('triggerSpaceDetailsVisible')
     store.commit('isLoadingFavorites', true)
-    store.dispatch('currentUser/restoreUserFavorites')
+    store.dispatch('currentUser/restoreUserAssociatedData')
     store.commit('triggerUpdateNotifications')
     store.dispatch('themes/restore')
     if (shouldLoadLastSpace) {

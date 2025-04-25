@@ -940,6 +940,15 @@ export default {
       return a.x - b.x
     })
   },
+  sortByDistanceFromOrigin (items) {
+    items = this.clone(items)
+    items.map(item => {
+      item.distance = Math.sqrt(Math.pow(item.x, 2) + Math.pow(item.y, 2))
+      return item
+    })
+    items = sortBy(items, ['distance'])
+    return items
+  },
   sortByCreatedAt (items) {
     const sortedItems = items.sort((a, b) => {
       const bCreatedAt = dayjs(b.createdAt).unix()
@@ -1496,6 +1505,10 @@ export default {
 
   // Spaces 🌙
 
+  newSpaceName () {
+    const date = dayjs(new Date())
+    return date.format(consts.nameDateFormat)
+  },
   spaceIsUnchanged (prevSpace, newSpace) {
     if (!prevSpace.cards || !prevSpace.connections) { return false }
     const cardsCountIsUnchanged = prevSpace.cards?.length === newSpace.cards.length
@@ -1586,7 +1599,6 @@ export default {
       collaborators: [],
       spectators: [],
       clients: [],
-      isHidden: false,
       visits: 0,
       showInExplore: false,
       proposedShowInExplore: false,
@@ -1607,7 +1619,6 @@ export default {
     space.proposedShowInExplore = false
     space.privacy = 'private'
     space.isTemplate = false
-    space.isHidden = false
     space.collaboratorKey = nanoid()
     space.previewImage = null
     space.previewThumbnailImage = null

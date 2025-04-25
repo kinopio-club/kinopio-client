@@ -1,7 +1,6 @@
 import inboxSpace from '@/data/inbox.json'
 import newSpace from '@/data/new.json'
 
-import words from '@/data/words.js'
 import utils from '@/utils.js'
 import cache from '@/cache.js'
 import consts from '@/consts.js'
@@ -351,7 +350,7 @@ const currentSpace = {
         name = space.name
       }
       space = utils.clone(newSpace)
-      space.name = name || words.randomUniqueName()
+      space.name = name || utils.newSpaceName()
       space.id = nanoid()
       space.createdAt = new Date()
       space.editedAt = new Date()
@@ -369,7 +368,7 @@ const currentSpace = {
       }
       const shouldHideDateCards = currentUser.shouldHideDateCards
       if (!shouldHideDateCards) {
-        const date = dayjs().format('ddd MMM D') // Wed Nov 20
+        const date = dayjs().format('dddd') // Sunday
         const moonPhaseSystemCommandIcon = '::systemCommand=moonPhase'
         const dateCard = {
           id: nanoid(),
@@ -388,7 +387,6 @@ const currentSpace = {
       space = utils.newSpaceBackground(space, currentUser)
       space.background = space.background || consts.defaultSpaceBackground
       space.isTemplate = false
-      space.isHidden = false
       space.previewImage = null
       space.previewThumbnailImage = null
       const nullCardUsers = true
@@ -933,17 +931,6 @@ const currentSpace = {
       context.commit('updateSpace', updates)
       await cache.updateSpaceByUpdates(updates, context.state.id)
     },
-    updateSpaceIsHidden: async (context, { spaceId, isHidden }) => {
-      context.commit('updateSpace', { isHidden })
-      await cache.updateSpace('isHidden', isHidden, spaceId)
-      await context.dispatch('api/addToQueue', {
-        name: 'updateSpaceIsHidden',
-        body: {
-          spaceId,
-          isHidden
-        }
-      }, { root: true })
-    },
     changeSpace: async (context, space) => {
       context.dispatch('prevSpaceIdInSession', context.state.id, { root: true })
       context.commit('clearAllInteractingWithAndSelected', null, { root: true })
@@ -1274,11 +1261,23 @@ const currentSpace = {
       const isSignedIn = rootGetters['currentUser/isSignedIn']
       return isSpaceMember && isSignedIn
     },
-    isFavorite: (state, getters, rootState) => {
+    isFavorite: (state, getters, rootState) => (spaceId) => {
+      spaceId = spaceId || state.id
       const favoriteSpaces = rootState.currentUser.favoriteSpaces
-      let isFavoriteSpace = favoriteSpaces.find(space => space.id === state.id)
-      isFavoriteSpace = Boolean(isFavoriteSpace)
-      return isFavoriteSpace
+      let value = favoriteSpaces.find(favoriteSpace => favoriteSpace.id === spaceId)
+      value = Boolean(value)
+      return value
+    },
+    isHidden: (state, getters, rootState) => (spaceId) => {
+      spaceId = spaceId || state.id
+      const hiddenSpaces = rootState.currentUser.hiddenSpaces
+      let value = hiddenSpaces.find(hiddenSpace => hiddenSpace.id === spaceId)
+      value = Boolean(value)
+      return value
+    },
+    isInbox: (state, getters, rootState) => (spaceName) => {
+      spaceName = spaceName || state.name
+      return spaceName === 'Inbox'
     },
     url: (state) => {
       const domain = consts.kinopioDomain()

@@ -46,9 +46,7 @@ watch(() => props.visible, (value, prevValue) => {
 
 const state = reactive({
   spaces: [],
-  favoriteSpaces: [],
   isLoadingRemoteSpaces: false,
-  remoteSpaces: [],
   resultsSectionHeight: null,
   dialogHeight: null,
   spaceFiltersIsVisible: false,
@@ -69,7 +67,7 @@ const init = async () => {
 // current space
 
 const isLoadingSpace = computed(() => store.state.isLoadingSpace)
-const currentSpaceIsHidden = computed(() => store.state.currentSpace.isHidden)
+const currentSpaceIsHidden = computed(() => store.getters['currentSpace/isHidden']())
 const spaceName = computed(() => store.state.currentSpace.name)
 
 // dialog
@@ -137,7 +135,10 @@ const filteredSpaces = computed(() => {
   spaces = spaces.filter(space => space.id)
   // hide by hidden spaces unless filter active
   if (!dialogSpaceFilterShowHidden.value) {
-    spaces = spaces.filter(space => !space.isHidden)
+    spaces = spaces.filter(space => {
+      const isHidden = store.getters['currentSpace/isHidden'](space.id)
+      return !isHidden
+    })
   }
   // filter by user
   if (utils.objectHasKeys(dialogSpaceFilterByGroup.value)) {
@@ -196,21 +197,29 @@ const shouldSortByAlphabetical = computed(() => {
 })
 const prependFavoriteSpaces = (spaces) => {
   const favoriteSpaces = []
-  spaces = spaces.filter(space => {
-    if (space.isFavorite) {
+  const otherSpaces = []
+  spaces.forEach(space => {
+    const isFavorite = store.getters['currentSpace/isFavorite'](space.id)
+    if (isFavorite) {
       favoriteSpaces.push(space)
     } else {
-      return space
+      otherSpaces.push(space)
     }
   })
-  return favoriteSpaces.concat(spaces)
+  return favoriteSpaces.concat(otherSpaces)
 }
-const prependInboxSpace = (spaces) => {
-  const inboxSpaces = spaces.filter(space => space.name === 'Inbox')
-  if (!inboxSpaces.length) { return spaces }
-  spaces = spaces.filter(space => space.name !== 'Inbox')
-  spaces = inboxSpaces.concat(spaces)
-  return spaces
+const prependInboxSpaces = (spaces) => {
+  const inboxSpaces = []
+  const otherSpaces = []
+  spaces.forEach(space => {
+    const isInbox = store.getters['currentSpace/isInbox'](space.name)
+    if (isInbox) {
+      inboxSpaces.push(space)
+    } else {
+      otherSpaces.push(space)
+    }
+  })
+  return inboxSpaces.concat(otherSpaces)
 }
 const sort = (spaces) => {
   if (shouldSortByCreatedAt.value) {
@@ -221,7 +230,7 @@ const sort = (spaces) => {
     spaces = utils.sortByUpdatedAt(spaces)
   }
   spaces = prependFavoriteSpaces(spaces)
-  spaces = prependInboxSpace(spaces)
+  spaces = prependInboxSpaces(spaces)
   return spaces
 }
 

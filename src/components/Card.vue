@@ -1889,11 +1889,21 @@ const containingBoxes = computed(() => {
   if (isSelectedOrDragging.value) { return }
   if (currentCardIsBeingDragged.value) { return }
   if (store.state.boxDetailsIsVisibleForBoxId) { return }
-  const card = utils.clone(props.card)
+  // check boxes
   let boxes = store.getters['currentBoxes/all']
-  boxes = utils.clone(boxes)
   boxes = boxes.filter(box => {
-    return utils.isRectACompletelyInsideRectB(card, box)
+    const boxRect = {
+      x: box.x,
+      y: box.y,
+      width: box.resizeWidth,
+      height: box.resizeHeight
+    }
+    return (
+      props.card.x >= boxRect.x &&
+      props.card.y >= boxRect.y &&
+      (props.card.x + props.card.width) <= (boxRect.x + boxRect.width) &&
+      (props.card.y + props.card.height) <= (boxRect.y + boxRect.height)
+    )
   })
   return boxes
 })

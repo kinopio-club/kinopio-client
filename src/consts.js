@@ -23,8 +23,7 @@ export default {
   minBoxSize: 70,
   defaultBoxWidth: 224,
   defaultBoxHeight: 105,
-
-  boxSnapGuideWaitingDuration: 600,
+  boxSnapGuideWaitingDuration: 300,
   maxInviteEmailsAllowedToSend: 15,
   defaultConnectionPathCurveControlPoint: 'q90,40',
   defaultTimeout: 40000,
@@ -37,11 +36,11 @@ export default {
   isSecureAppContextIOS: navigator.isSecureAppContextIOS, // true = iOS app
   isSecureAppContext: navigator.isSecureAppContext, // true = iOS app
   cdnHost: 'https://cdn.kinopio.club',
-  defaultSpaceBackground: 'https://bk.kinopio.club/grid-large-boxes-2x.png',
+  defaultSpaceBackground: 'https://bk.kinopio.club/squiggle-background-2x.png',
   moderatorUserId: 'euGhpBrR9eBcjKnK16C_g',
   uploadPlaceholder: '⬬⬭',
   itemTypesWithPositions: ['boxes', 'cards'],
-  nameDateFormat: 'ddd MMM D, YYYY', // Wed Nov 13, 2024
+  nameDateFormat: 'MMMM D, YYYY', // August 16, 2025
   isDevelopment () {
     if (env.VITE_PROD_SERVER === 'true') {
       return false

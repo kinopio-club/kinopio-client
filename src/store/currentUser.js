@@ -22,6 +22,7 @@ const initialState = {
   favoriteUsers: [],
   favoriteSpaces: [],
   favoriteColors: [],
+  hiddenSpaces: [],
   cardsCreatedCount: 0,
   cardsCreatedCountRaw: 0,
   isUpgraded: false,
@@ -132,6 +133,11 @@ export default {
       utils.typeCheck({ value: colors, type: 'array' })
       state.favoriteColors = colors
       cache.updateUser('favoriteColors', colors)
+    },
+    hiddenSpaces: (state, spaces) => {
+      utils.typeCheck({ value: spaces, type: 'array' })
+      state.hiddenSpaces = spaces
+      cache.updateUser('hiddenSpaces', spaces)
     },
     updateFavoriteSpaceIsEdited: (state, spaceId) => {
       utils.typeCheck({ value: spaceId, type: 'string' })
@@ -405,7 +411,7 @@ export default {
         context.commit('restoreUser', cachedUser)
         context.dispatch('themes/restore', null, { root: true })
         await context.dispatch('restoreRemoteUser', cachedUser)
-        await context.dispatch('restoreUserFavorites')
+        await context.dispatch('restoreUserAssociatedData')
       } else {
         console.info('🌸 Create new user')
         context.dispatch('createNewUser')
@@ -507,17 +513,18 @@ export default {
         context.commit('notifyIsJoiningGroup', true, { root: true })
       }
     },
-    restoreUserFavorites: async (context) => {
+    restoreUserAssociatedData: async (context) => {
       try {
         context.commit('isLoadingFavorites', true, { root: true })
         if (!context.getters.isSignedIn) {
           context.commit('isLoadingFavorites', false, { root: true })
           return
         }
-        const [favoriteSpaces, favoriteUsers, favoriteColors] = await Promise.all([
+        const [favoriteSpaces, favoriteUsers, favoriteColors, hiddenSpaces] = await Promise.all([
           context.dispatch('api/getUserFavoriteSpaces', null, { root: true }),
           context.dispatch('api/getUserFavoriteUsers', null, { root: true }),
-          context.dispatch('api/getUserFavoriteColors', null, { root: true })
+          context.dispatch('api/getUserFavoriteColors', null, { root: true }),
+          context.dispatch('api/getUserHiddenSpaces', null, { root: true })
         ])
         if (favoriteUsers) {
           context.commit('favoriteUsers', favoriteUsers)
@@ -528,9 +535,12 @@ export default {
         if (favoriteColors) {
           context.commit('favoriteColors', favoriteColors)
         }
+        if (hiddenSpaces) {
+          context.commit('hiddenSpaces', hiddenSpaces)
+        }
         context.commit('isLoadingFavorites', false, { root: true })
       } catch (error) {
-        console.error('🚒 restoreUserFavorites', error)
+        console.error('🚒 restoreUserAssociatedData', error)
       }
     },
     updateFavoriteSpace: async (context, { space, value }) => {
@@ -581,6 +591,25 @@ export default {
       context.commit('favoriteColors', favoriteColors)
       const body = { color, value }
       await context.dispatch('api/addToQueue', { name: 'updateFavoriteColor', body }, { root: true })
+    },
+    updateHiddenSpace: async (context, { spaceId, isHidden }) => {
+      const space = { id: spaceId }
+      let hiddenSpaces = utils.clone(context.state.hiddenSpaces)
+      if (isHidden) {
+        hiddenSpaces.push(space)
+      } else {
+        hiddenSpaces = hiddenSpaces.filter(hiddenSpace => {
+          return hiddenSpace.id !== spaceId
+        })
+      }
+      context.commit('hiddenSpaces', hiddenSpaces)
+      await context.dispatch('api/addToQueue', {
+        name: 'updateSpaceIsHidden',
+        body: {
+          spaceId,
+          isHidden
+        }
+      }, { root: true })
     },
     confirmEmail: async (context) => {
       await context.dispatch('api/addToQueue', {

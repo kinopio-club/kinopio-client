@@ -223,6 +223,10 @@ const imageDataUrl = async (strokes) => {
   strokes.forEach(stroke => {
     if (!stroke || stroke.length === 0) { return }
     stroke.forEach((point, index) => {
+      offscreenContext.globalCompositeOperation = 'source-over'
+      if (point.isEraser) {
+        offscreenContext.globalCompositeOperation = 'destination-out'
+      }
       if (index === 0) {
         offscreenContext.beginPath()
         offscreenContext.moveTo(point.x, point.y)
