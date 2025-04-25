@@ -940,6 +940,15 @@ export default {
       return a.x - b.x
     })
   },
+  sortByDistanceFromOrigin (items) {
+    items = this.clone(items)
+    items.map(item => {
+      item.distance = Math.sqrt(Math.pow(item.x, 2) + Math.pow(item.y, 2))
+      return item
+    })
+    items = sortBy(items, ['distance'])
+    return items
+  },
   sortByCreatedAt (items) {
     const sortedItems = items.sort((a, b) => {
       const bCreatedAt = dayjs(b.createdAt).unix()

@@ -59,7 +59,7 @@ const toggleDialogIsPinned = () => {
 
 const boxes = computed(() => {
   let items = store.getters['currentBoxes/all']
-  items = utils.sortByY(items)
+  items = utils.sortByDistanceFromOrigin(items)
   return items
 })
 const boxColorClasses = (box) => {
