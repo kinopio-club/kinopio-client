@@ -193,18 +193,30 @@ const shouldSortByAlphabetical = computed(() => {
   return value === 'alphabetical'
 })
 const prependFavoriteSpaces = (spaces) => {
-  const favorites = store.state.currentUser.favoriteSpaces
-  const favoriteIds = favorites.map(space => space.id)
-  const favoriteSpaces = spaces.filter(space => favoriteIds.includes(space.id))
-  spaces = spaces.filter(space => !favoriteIds.includes(space.id))
-  spaces = favoriteSpaces.concat(spaces)
-  return spaces
+  const favoriteSpaces = []
+  const otherSpaces = []
+  spaces.forEach(space => {
+    const isFavorite = store.getters['currentSpace/isFavorite'](space.id)
+    if (isFavorite) {
+      favoriteSpaces.push(space)
+    } else {
+      otherSpaces.push(space)
+    }
+  })
+  return favoriteSpaces.concat(otherSpaces)
 }
-const prependInboxSpace = (spaces) => {
-  const inboxSpaces = spaces.filter(space => space.name === 'Inbox')
-  spaces = spaces.filter(space => space.name !== 'Inbox')
-  spaces = inboxSpaces.concat(spaces)
-  return spaces
+const prependInboxSpaces = (spaces) => {
+  const inboxSpaces = []
+  const otherSpaces = []
+  spaces.forEach(space => {
+    const isInbox = store.getters['currentSpace/isInbox'](space.name)
+    if (isInbox) {
+      inboxSpaces.push(space)
+    } else {
+      otherSpaces.push(space)
+    }
+  })
+  return inboxSpaces.concat(otherSpaces)
 }
 const sort = (spaces) => {
   if (shouldSortByCreatedAt.value) {
@@ -215,7 +227,7 @@ const sort = (spaces) => {
     spaces = utils.sortByUpdatedAt(spaces)
   }
   spaces = prependFavoriteSpaces(spaces)
-  spaces = prependInboxSpace(spaces)
+  spaces = prependInboxSpaces(spaces)
   return spaces
 }
 

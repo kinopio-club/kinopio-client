@@ -1273,11 +1273,16 @@ const currentSpace = {
       const isSignedIn = rootGetters['currentUser/isSignedIn']
       return isSpaceMember && isSignedIn
     },
-    isFavorite: (state, getters, rootState) => {
+    isFavorite: (state, getters, rootState) => (spaceId) => {
+      spaceId = spaceId || state.id
       const favoriteSpaces = rootState.currentUser.favoriteSpaces
-      let isFavoriteSpace = favoriteSpaces.find(space => space.id === state.id)
-      isFavoriteSpace = Boolean(isFavoriteSpace)
-      return isFavoriteSpace
+      let value = favoriteSpaces.find(favoriteSpace => favoriteSpace.id === spaceId)
+      value = Boolean(value)
+      return value
+    },
+    isInbox: (state, getters, rootState) => (spaceName) => {
+      spaceName = spaceName || state.name
+      return spaceName === 'Inbox'
     },
     url: (state) => {
       const domain = consts.kinopioDomain()
