@@ -415,7 +415,7 @@ span.space-list-wrap
             span(v-if="isOffline && isNotCached(space.id)")
               OfflineBadge(:isInline="true" :isDanger="true")
             //- favorite
-            template(v-if="space.isFavorite")
+            template(v-if="isFavorite(space)")
               img.icon.favorite-icon(src="@/assets/heart.svg")
             //- inbox
             template(v-if="space.name === 'Inbox'")

@@ -46,9 +46,7 @@ watch(() => props.visible, (value, prevValue) => {
 
 const state = reactive({
   spaces: [],
-  favoriteSpaces: [],
   isLoadingRemoteSpaces: false,
-  remoteSpaces: [],
   resultsSectionHeight: null,
   dialogHeight: null,
   spaceFiltersIsVisible: false,
@@ -195,19 +193,15 @@ const shouldSortByAlphabetical = computed(() => {
   return value === 'alphabetical'
 })
 const prependFavoriteSpaces = (spaces) => {
-  const favoriteSpaces = []
-  spaces = spaces.filter(space => {
-    if (space.isFavorite) {
-      favoriteSpaces.push(space)
-    } else {
-      return space
-    }
-  })
-  return favoriteSpaces.concat(spaces)
+  const favorites = store.state.currentUser.favoriteSpaces
+  const favoriteIds = favorites.map(space => space.id)
+  const favoriteSpaces = spaces.filter(space => favoriteIds.includes(space.id))
+  spaces = spaces.filter(space => !favoriteIds.includes(space.id))
+  spaces = favoriteSpaces.concat(spaces)
+  return spaces
 }
 const prependInboxSpace = (spaces) => {
   const inboxSpaces = spaces.filter(space => space.name === 'Inbox')
-  if (!inboxSpaces.length) { return spaces }
   spaces = spaces.filter(space => space.name !== 'Inbox')
   spaces = inboxSpaces.concat(spaces)
   return spaces
