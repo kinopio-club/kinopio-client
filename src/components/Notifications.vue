@@ -171,6 +171,7 @@ const notifySpaceIsUnavailableOffline = computed(() => store.state.currentSpaceI
 const notifyIsJoiningGroup = computed(() => store.state.notifyIsJoiningGroup)
 const notifySignUpToJoinGroup = computed(() => store.state.notifySignUpToJoinGroup)
 const notifyIsDuplicatingSpace = computed(() => store.state.notifyIsDuplicatingSpace)
+const notifyBoxSnappingIsReady = computed(() => store.state.notifyBoxSnappingIsReady)
 const notifificationClasses = (item) => {
   const classes = {
     danger: item.type === 'danger',
@@ -354,15 +355,19 @@ aside.notifications(@click.left="closeAllDialogs")
 
   .persistent-item.info(v-if="currentUserIsPaintingLocked && isTouchDevice")
     img.icon(src="@/assets/brush.svg")
-    span Drag to paint
+    span Drag to Paint
 
   .persistent-item.info(v-if="currentUserIsPanningReady || currentUserIsPanning")
     img.icon(src="@/assets/hand.svg")
-    span Drag to pan
+    span Drag to Pan
 
   .persistent-item.info(v-if="snapToGridIsVisible")
     img.icon(src="@/assets/constrain-axis.svg")
-    span Snap to grid
+    span Snap to Grid
+
+  .persistent-item.info(v-if="notifyBoxSnappingIsReady")
+    img.icon(src="@/assets/box-snap.svg")
+    span Snap to Box
 
   .persistent-item.success(v-if="notifyThanksForDonating")
     p Thank you for being a

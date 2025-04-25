@@ -31,6 +31,13 @@ const state = reactive({
   rect: null,
   snapStatus: null // waiting, ready
 })
+watch(() => state.snapStatus, (value, prevValue) => {
+  if (value === 'ready') {
+    store.commit('notifyBoxSnappingIsReady', true)
+  } else {
+    store.commit('notifyBoxSnappingIsReady', false)
+  }
+})
 
 const currentBoxIsSelected = computed(() => {
   const selected = store.state.multipleBoxesSelectedIds
@@ -46,9 +53,8 @@ const otherBoxes = computed(() => {
   return boxes.filter(box => box?.id !== props.box.id)
 })
 
-// styles
+// is snapping
 
-const userColor = computed(() => store.state.currentUser.color)
 const currentBoxSnapGuide = computed(() => {
   const isMultipleBoxesSelectedIds = store.state.multipleBoxesSelectedIds.length > 1
   if (isMultipleBoxesSelectedIds) { return }
@@ -59,6 +65,15 @@ const currentBoxSnapGuide = computed(() => {
     return isTarget || isOrigin
   })
 })
+watch(() => currentBoxSnapGuide.value, (value, prevValue) => {
+  if (!value) {
+    state.snapStatus = null
+  }
+})
+
+// styles
+
+const userColor = computed(() => store.state.currentUser.color)
 const snapGuideSide = computed(() => {
   const isDraggingItem = store.state.currentUserIsDraggingBox || store.state.currentUserIsDraggingCard
   if (!isDraggingItem) { return }

@@ -264,6 +264,7 @@ const store = createStore({
     shouldNotifyIsJoiningGroup: false,
     notifyIsJoiningGroup: false,
     notifyIsDuplicatingSpace: false,
+    notifyBoxSnappingIsReady: false,
 
     // notifications with position
     notificationsWithPosition: [],
@@ -1628,6 +1629,10 @@ const store = createStore({
     notifyIsDuplicatingSpace: (state, value) => {
       utils.typeCheck({ value, type: 'boolean' })
       state.notifyIsDuplicatingSpace = value
+    },
+    notifyBoxSnappingIsReady: (state, value) => {
+      utils.typeCheck({ value, type: 'boolean' })
+      state.notifyBoxSnappingIsReady = value
     },
 
     // Notifications with Position

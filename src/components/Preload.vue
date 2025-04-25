@@ -61,6 +61,7 @@ const updateImageUrls = () => {
     img.icon(src="@/assets/box-filled.svg")
     img.icon(src="@/assets/box-select.svg")
     img.icon(src="@/assets/box.svg")
+    img.icon(src="@/assets/box-snap.svg")
     img.icon(src="@/assets/brush-y.svg")
     img.icon(src="@/assets/brush-x.svg")
     img.icon(src="@/assets/brush.svg")
