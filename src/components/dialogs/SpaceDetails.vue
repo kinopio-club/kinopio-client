@@ -67,7 +67,7 @@ const init = async () => {
 // current space
 
 const isLoadingSpace = computed(() => store.state.isLoadingSpace)
-const currentSpaceIsHidden = computed(() => store.state.currentSpace.isHidden)
+const currentSpaceIsHidden = computed(() => store.getters['currentSpace/isHidden']())
 const spaceName = computed(() => store.state.currentSpace.name)
 
 // dialog
@@ -135,7 +135,10 @@ const filteredSpaces = computed(() => {
   spaces = spaces.filter(space => space.id)
   // hide by hidden spaces unless filter active
   if (!dialogSpaceFilterShowHidden.value) {
-    spaces = spaces.filter(space => !space.isHidden)
+    spaces = spaces.filter(space => {
+      const isHidden = store.getters['currentSpace/isHidden'](space.id)
+      return !isHidden
+    })
   }
   // filter by user
   if (utils.objectHasKeys(dialogSpaceFilterByGroup.value)) {

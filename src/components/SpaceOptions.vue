@@ -72,7 +72,7 @@ const changeToPrevSpace = async () => {
 const toggleHideSpace = async () => {
   const value = !props.currentSpaceIsHidden
   const currentSpaceId = store.state.currentSpace.id
-  await store.dispatch('currentSpace/updateSpaceIsHidden', { spaceId: currentSpaceId, isHidden: value })
+  await store.dispatch('currentUser/updateHiddenSpace', { spaceId: currentSpaceId, isHidden: value })
   store.commit('notifySpaceIsHidden', value)
   emit('updateLocalSpaces')
 }

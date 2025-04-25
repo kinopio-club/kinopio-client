@@ -387,7 +387,6 @@ const currentSpace = {
       space = utils.newSpaceBackground(space, currentUser)
       space.background = space.background || consts.defaultSpaceBackground
       space.isTemplate = false
-      space.isHidden = false
       space.previewImage = null
       space.previewThumbnailImage = null
       const nullCardUsers = true
@@ -932,17 +931,6 @@ const currentSpace = {
       context.commit('updateSpace', updates)
       await cache.updateSpaceByUpdates(updates, context.state.id)
     },
-    updateSpaceIsHidden: async (context, { spaceId, isHidden }) => {
-      context.commit('updateSpace', { isHidden })
-      await cache.updateSpace('isHidden', isHidden, spaceId)
-      await context.dispatch('api/addToQueue', {
-        name: 'updateSpaceIsHidden',
-        body: {
-          spaceId,
-          isHidden
-        }
-      }, { root: true })
-    },
     changeSpace: async (context, space) => {
       context.dispatch('prevSpaceIdInSession', context.state.id, { root: true })
       context.commit('clearAllInteractingWithAndSelected', null, { root: true })
@@ -1277,6 +1265,13 @@ const currentSpace = {
       spaceId = spaceId || state.id
       const favoriteSpaces = rootState.currentUser.favoriteSpaces
       let value = favoriteSpaces.find(favoriteSpace => favoriteSpace.id === spaceId)
+      value = Boolean(value)
+      return value
+    },
+    isHidden: (state, getters, rootState) => (spaceId) => {
+      spaceId = spaceId || state.id
+      const hiddenSpaces = rootState.currentUser.hiddenSpaces
+      let value = hiddenSpaces.find(hiddenSpace => hiddenSpace.id === spaceId)
       value = Boolean(value)
       return value
     },

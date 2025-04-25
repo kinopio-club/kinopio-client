@@ -152,6 +152,10 @@ const spaceIsActive = (space) => {
     return spaceIsCurrentSpace(space)
   }
 }
+const spaceIsHidden = (space) => {
+  const isHidden = store.getters['currentSpace/isHidden'](space.id)
+  return isHidden
+}
 const isLoadingSpace = (space) => {
   const isLoadingSpace = store.state.isLoadingSpace
   return isLoadingSpace && spaceIsCurrentSpace(space)
@@ -401,7 +405,7 @@ span.space-list-wrap
         a(:href="space.url")
           li(
             @click.left="selectSpace($event, space)"
-            :class="{ active: spaceIsActive(space), hover: state.focusOnId === space.id, 'space-is-hidden': space.isHidden }"
+            :class="{ active: spaceIsActive(space), hover: state.focusOnId === space.id, 'space-is-hidden': spaceIsHidden(space) }"
             tabindex="0"
             @keyup.enter="selectSpace(null, space)"
             :data-created-at="space.createdAt"

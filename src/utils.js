@@ -1590,7 +1590,6 @@ export default {
       collaborators: [],
       spectators: [],
       clients: [],
-      isHidden: false,
       visits: 0,
       showInExplore: false,
       proposedShowInExplore: false,
@@ -1611,7 +1610,6 @@ export default {
     space.proposedShowInExplore = false
     space.privacy = 'private'
     space.isTemplate = false
-    space.isHidden = false
     space.collaboratorKey = nanoid()
     space.previewImage = null
     space.previewThumbnailImage = null

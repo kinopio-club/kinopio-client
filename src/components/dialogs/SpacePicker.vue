@@ -97,8 +97,8 @@ const filteredSpaces = computed(() => {
   let spaces = state.spaces
   if (!props.parentIsCardDetails) { return spaces }
   spaces = spaces.filter(space => {
-    const isHidden = space.isHidden
-    return !space.isHidden
+    const isHidden = store.getters['currentSpace/isHidden'](space.id)
+    return !isHidden
   })
   if (props.search) {
     const filtered = fuzzy.filter(

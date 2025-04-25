@@ -11,7 +11,7 @@ import User from '@/components/User.vue'
 const store = useStore()
 
 onMounted(() => {
-  store.dispatch('currentUser/restoreUserFavorites')
+  store.dispatch('currentUser/restoreUserAssociatedData')
 })
 
 const props = defineProps({
