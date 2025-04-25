@@ -212,7 +212,7 @@ const focusNewSpaceNameInput = () => {
 
 const spaceListIsVisible = computed(() => {
   if (props.parentIsCardDetails) {
-    return currentUserIsSignedIn.value.valye
+    return currentUserIsSignedIn.value
   } else {
     return true
   }
