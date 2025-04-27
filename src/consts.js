@@ -56,14 +56,14 @@ export default {
     return domain
   },
   apiHost () {
-    let host = 'https://api.kinopio.club'
+    let host = 'https://kinopio-server-production.up.railway.app' // 'https://api.kinopio.club'
     if (this.isDevelopment()) {
       host = 'https://kinopio.local:3000'
     }
     return host
   },
   websocketHost () {
-    let host = 'wss://api.kinopio.club'
+    let host = 'wss://kinopio-server-production.up.railway.app' // 'wss://api.kinopio.club'
     if (this.isDevelopment()) {
       host = 'wss://kinopio.local:3000'
     }
