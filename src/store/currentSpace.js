@@ -1270,8 +1270,8 @@ const currentSpace = {
     },
     isHidden: (state, getters, rootState) => (spaceId) => {
       spaceId = spaceId || state.id
-      const hiddenSpaces = rootState.currentUser.hiddenSpaces
-      let value = hiddenSpaces.find(hiddenSpace => hiddenSpace.id === spaceId)
+      const hiddenSpaces = rootState.currentUser.hiddenSpaces || []
+      let value = hiddenSpaces.find(hiddenSpace => hiddenSpace?.id === spaceId)
       value = Boolean(value)
       return value
     },

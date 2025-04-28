@@ -594,12 +594,12 @@ export default {
     },
     updateHiddenSpace: async (context, { spaceId, isHidden }) => {
       const space = { id: spaceId }
-      let hiddenSpaces = utils.clone(context.state.hiddenSpaces)
+      let hiddenSpaces = utils.clone(context.state.hiddenSpaces) || []
       if (isHidden) {
         hiddenSpaces.push(space)
       } else {
         hiddenSpaces = hiddenSpaces.filter(hiddenSpace => {
-          return hiddenSpace.id !== spaceId
+          return hiddenSpace?.id !== spaceId
         })
       }
       context.commit('hiddenSpaces', hiddenSpaces)
