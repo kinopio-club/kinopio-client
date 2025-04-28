@@ -85,10 +85,6 @@ export default {
       context.commit('restore', groups)
       // remote groups restored in restoreRemoteUser
     },
-    restore: (context, groups) => {
-      context.commit('restore', groups)
-      context.commit('isLoadingGroups', false, { root: true })
-    },
     createGroup: async (context, group) => {
       try {
         const response = await context.dispatch('api/createGroup', group, { root: true })

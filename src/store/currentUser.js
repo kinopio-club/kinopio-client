@@ -506,12 +506,13 @@ export default {
       } else {
         context.commit('isUpgraded', false)
       }
+
+      // tags
       const remoteTags = await context.dispatch('api/getUserTags', null, { root: true }) || []
       context.dispatch('tags', remoteTags)
-      context.dispatch('groups/restore', remoteUser.groups, { root: true })
-      if (context.rootState.shouldNotifyIsJoiningGroup) {
-        context.commit('notifyIsJoiningGroup', true, { root: true })
-      }
+      // groups
+      const groups = await context.dispatch('api/getUserGroups', null, { root: true })
+      context.commit('groups/restore', groups, { root: true })
     },
     restoreUserAssociatedData: async (context) => {
       try {

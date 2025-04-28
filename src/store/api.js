@@ -1323,6 +1323,20 @@ const self = {
 
     // Group
 
+    getUserGroups: async (context) => {
+      const apiKey = context.rootState.currentUser.apiKey
+      const isOnline = context.rootState.isOnline
+      if (!shouldRequest({ apiKey, isOnline })) { return }
+      try {
+        context.commit('isLoadingGroups', true, { root: true })
+        const options = await context.dispatch('requestOptions', { method: 'GET', space: context.rootState.currentSpace })
+        const response = await fetch(`${consts.apiHost()}/user/groups`, options)
+        return normalizeResponse(response)
+      } catch (error) {
+        context.dispatch('handleServerError', { name: 'getUserGroups', error })
+      }
+      context.commit('isLoadingGroups', false, { root: true })
+    },
     getGroup: async (context, groupId) => {
       const apiKey = context.rootState.currentUser.apiKey
       const isOnline = context.rootState.isOnline

@@ -56,6 +56,9 @@ let processQueueIntervalTimer, hourlyTasks
 
 // init user and space app state
 const init = async () => {
+  if (store.state.shouldNotifyIsJoiningGroup) {
+    store.commit('notifyIsJoiningGroup', true)
+  }
   store.dispatch('api/updateDateImage')
   store.dispatch('analytics/event', 'pageview')
   await cache.migrateFromLocalStorage()
