@@ -52,7 +52,7 @@ const updateWindowTitle = () => {
     title = 'Kinopio'
   }
   if (consts.isDevelopment()) {
-    title = `DEV ${title}`
+    title = `[DEV] ${title}`
   }
   document.title = title
 }
