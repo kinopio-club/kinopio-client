@@ -166,10 +166,6 @@ const filterByUser = (event, user) => {
   }
 }
 
-const isLoading = computed(() => {
-  return props.isLoading || store.state.isLoadingGroups
-})
-
 </script>
 
 <template lang="pug">
@@ -202,7 +198,7 @@ dialog.narrow.space-filters(v-if="props.visible" :open="props.visible" @click.le
           span Show Hidden
 
   //- loading
-  section(v-if="isLoading")
+  section(v-if="props.isLoading")
     Loader(:visible="true")
 
   //- other space filter types
