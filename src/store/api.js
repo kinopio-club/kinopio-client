@@ -3,7 +3,7 @@ import utils from '@/utils.js'
 import consts from '@/consts.js'
 
 import debounce from 'lodash-es/debounce'
-import merge from 'lodash-es/merge'
+import mergeWith from 'lodash-es/mergeWith'
 import uniq from 'lodash-es/uniq'
 import { nanoid } from 'nanoid'
 
@@ -45,6 +45,25 @@ const sortQueueItems = (queue) => {
   queue = createCards.concat(queue)
   return queue
 }
+const merge = (accumulator, currentValue) => {
+  return mergeWith({}, accumulator, currentValue, (objValue, srcValue) => {
+    // Check if both values are arrays AND first item in objValue has an id
+    if (Array.isArray(objValue) && Array.isArray(srcValue) && objValue[0]?.id) {
+      // combine both arrays into one
+      const allEntities = [...objValue, ...srcValue]
+      // Create object using reduce
+      const entityMap = allEntities.reduce((acc, entity) => {
+        // For each entity, add to accumulator using id as key
+        // e.g. { '1': {id: '1'}, '2': {id: '2'}, '3': {id: '3'} }
+        acc[entity.id] = entity
+        return acc
+      }, {}) // Start with empty object
+      // Get array of values from object
+      // e.g. [{id: '1'}, {id: '2'}, {id: '3'}]
+      return Object.values(entityMap)
+    }
+  })
+}
 const squashQueue = (queue) => {
   let squashed = []
   queue.forEach(request => {
@@ -59,10 +78,12 @@ const squashQueue = (queue) => {
     })
     const reduced = matches.reduce((accumulator, currentValue) => {
       const cumulativeDeltaOperations = ['updateUserCardsCreatedCount', 'updateUserCardsCreatedCountRaw']
+      // count operations
       if (cumulativeDeltaOperations.includes(accumulator.name)) {
         // {delta: 1}, {delta: 1} = {delta: 2}
         accumulator.body.delta += currentValue.body.delta
         return accumulator
+      // normal operations
       } else {
         // merge({a: 1, a: 2}, {b: 4, c: 5}) = {a: 1, b: 4, c:5}
         return merge(accumulator, currentValue)
