@@ -506,13 +506,6 @@ export default {
       } else {
         context.commit('isUpgraded', false)
       }
-
-      // tags
-      const remoteTags = await context.dispatch('api/getUserTags', null, { root: true }) || []
-      context.dispatch('tags', remoteTags)
-      // groups
-      const groups = await context.dispatch('api/getUserGroups', null, { root: true })
-      context.commit('groups/restore', groups, { root: true })
     },
     restoreUserAssociatedData: async (context) => {
       try {
@@ -521,11 +514,13 @@ export default {
           context.commit('isLoadingFavorites', false, { root: true })
           return
         }
-        const [favoriteSpaces, favoriteUsers, favoriteColors, hiddenSpaces] = await Promise.all([
+        const [favoriteSpaces, favoriteUsers, favoriteColors, hiddenSpaces, tags, groups] = await Promise.all([
           context.dispatch('api/getUserFavoriteSpaces', null, { root: true }),
           context.dispatch('api/getUserFavoriteUsers', null, { root: true }),
           context.dispatch('api/getUserFavoriteColors', null, { root: true }),
-          context.dispatch('api/getUserHiddenSpaces', null, { root: true })
+          context.dispatch('api/getUserHiddenSpaces', null, { root: true }),
+          context.dispatch('api/getUserTags', null, { root: true }),
+          context.dispatch('api/getUserGroups', null, { root: true })
         ])
         if (favoriteUsers) {
           context.commit('favoriteUsers', favoriteUsers)
@@ -538,6 +533,12 @@ export default {
         }
         if (hiddenSpaces) {
           context.commit('hiddenSpaces', hiddenSpaces)
+        }
+        if (tags) {
+          context.dispatch('tags', tags)
+        }
+        if (groups) {
+          context.commit('groups/restore', groups, { root: true })
         }
         context.commit('isLoadingFavorites', false, { root: true })
       } catch (error) {
