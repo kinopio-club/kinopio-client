@@ -319,6 +319,7 @@ const draw = (event) => {
 }
 const redraw = async () => {
   context.clearRect(0, 0, canvas.width, canvas.height)
+  context.globalCompositeOperation = 'source-over'
   await restoreSpaceDrawingImage()
   currentStrokes.forEach(stroke => {
     renderStroke(stroke, true)
