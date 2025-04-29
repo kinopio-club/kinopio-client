@@ -112,6 +112,10 @@ const isSortByAlphabetical = computed(() => {
   const value = dialogSpaceFilterSortBy.value
   return value === 'alphabetical'
 })
+const isSortByGroups = computed(() => {
+  const value = dialogSpaceFilterSortBy.value
+  return value === 'groups'
+})
 const updateSortBy = (value) => {
   store.dispatch('currentUser/update', { dialogSpaceFilterSortBy: value })
 }
@@ -183,13 +187,17 @@ dialog.narrow.space-filters(v-if="props.visible" :open="props.visible" @click.le
     section.subsection
       p
         span Sort by
-      .segmented-buttons
+      .segmented-buttons.segmented-buttons-row-1
         button(:class="{active: isSortByUpdatedAt}" @click="updateSortBy('updatedAt')" title="Sort spaces by updated at")
           span Updated
         button(:class="{active: isSortByCreatedAt}" @click="updateSortBy('createdAt')" title="Sort spaces by created at")
           span Created
         button(:class="{active: isSortByAlphabetical}" @click="updateSortBy('alphabetical')" title="Sort spaces alphabetically")
           span ABC
+      .segemented-buttons.segmented-buttons-row-2
+        button(:class="{active: isSortByGroups}" @click="updateSortBy('groups')" title="Sort spaces by Group name")
+          span Groups
+
     //- show hidden
     .row
       .checkbox-wrap.button-wrap
@@ -238,4 +246,17 @@ dialog.space-filters
     margin-left 5px
     margin-top -8px
     transform translateY(2px)
+
+  .segmented-buttons
+    position: relative
+  .segmented-buttons-row-1
+    z-index 1
+    button:first-child
+      border-bottom-left-radius 0
+  .segmented-buttons-row-2
+    margin-top -1px
+    button:first-child
+      border-top-left-radius 0
+    button:last-child
+      border-top-right-radius 0
 </style>

@@ -182,10 +182,32 @@ const toggleSpaceFiltersIsVisible = () => {
   state.spaceFiltersIsVisible = !isVisible
 }
 
+// sort by groups
+
+const spaceGroupsByAlphabetical = (spaces) => {
+  const groups = store.getters['groups/all']
+  const spaceGroups = []
+  spaces.forEach(space => {
+    if (!space.groupId) { return }
+    const isPrevGroup = spaceGroups.find(spaceGroup => spaceGroup.id === space.groupId)
+    if (isPrevGroup) { return }
+    const group = groups.find(group => group.id === space.groupId)
+    spaceGroups.push(group)
+  })
+  return utils.sortByAlphabetical(spaceGroups, 'name')
+}
+const sortByGroups = (spaces, groups) => {
+  const spacesWithGroups = groups.flatMap(group =>
+    spaces.filter(space => space.groupId === group.id)
+  )
+  const spacesWithoutGroups = spaces.filter(space => !space.groupId)
+  return [...spacesWithGroups, ...spacesWithoutGroups]
+}
+
 // sort
 
 const dialogSpaceFilterSortByIsActive = computed(() => {
-  return shouldSortByCreatedAt.value || shouldSortByAlphabetical.value
+  return shouldSortByCreatedAt.value || shouldSortByAlphabetical.value || shouldSortByGroups.value
 })
 const shouldSortByCreatedAt = computed(() => {
   const value = dialogSpaceFilterSortBy.value
@@ -194,6 +216,10 @@ const shouldSortByCreatedAt = computed(() => {
 const shouldSortByAlphabetical = computed(() => {
   const value = dialogSpaceFilterSortBy.value
   return value === 'alphabetical'
+})
+const shouldSortByGroups = computed(() => {
+  const value = dialogSpaceFilterSortBy.value
+  return value === 'groups'
 })
 const prependFavoriteSpaces = (spaces) => {
   const favoriteSpaces = []
@@ -225,7 +251,11 @@ const sort = (spaces) => {
   if (shouldSortByCreatedAt.value) {
     spaces = utils.sortByCreatedAt(spaces)
   } else if (shouldSortByAlphabetical.value) {
-    spaces = utils.sortByAlphabetical(spaces, 'name')(spaces)
+    spaces = utils.sortByAlphabetical(spaces, 'name')
+  } else if (shouldSortByGroups.value) {
+    const groups = spaceGroupsByAlphabetical(spaces)
+    spaces = utils.sortByAlphabetical(spaces, 'name')
+    spaces = sortByGroups(spaces, groups)
   } else {
     spaces = utils.sortByUpdatedAt(spaces)
   }
