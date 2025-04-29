@@ -46,9 +46,7 @@ watch(() => props.visible, (value, prevValue) => {
 
 const state = reactive({
   spaces: [],
-  favoriteSpaces: [],
   isLoadingRemoteSpaces: false,
-  remoteSpaces: [],
   resultsSectionHeight: null,
   dialogHeight: null,
   spaceFiltersIsVisible: false,
@@ -63,13 +61,13 @@ const init = async () => {
   }
   await updateWithRemoteSpaces()
   updateHeights()
-  store.dispatch('currentSpace/createSpacePreviewImage')
+  store.dispatch('currentSpace/updateSpacePreviewImage')
 }
 
 // current space
 
 const isLoadingSpace = computed(() => store.state.isLoadingSpace)
-const currentSpaceIsHidden = computed(() => store.state.currentSpace.isHidden)
+const currentSpaceIsHidden = computed(() => store.getters['currentSpace/isHidden']())
 const spaceName = computed(() => store.state.currentSpace.name)
 
 // dialog
@@ -112,12 +110,12 @@ const updateHeightsFrame = () => {
 }
 const updateDialogHeight = async () => {
   await nextTick()
-  let element = dialogElement.value
+  const element = dialogElement.value
   state.dialogHeight = utils.elementHeight(element)
 }
 const updateResultsSectionHeight = async () => {
   await nextTick()
-  let element = resultsElement.value
+  const element = resultsElement.value
   state.resultsSectionHeight = utils.elementHeight(element) - 2
 }
 
@@ -137,7 +135,10 @@ const filteredSpaces = computed(() => {
   spaces = spaces.filter(space => space.id)
   // hide by hidden spaces unless filter active
   if (!dialogSpaceFilterShowHidden.value) {
-    spaces = spaces.filter(space => !space.isHidden)
+    spaces = spaces.filter(space => {
+      const isHidden = store.getters['currentSpace/isHidden'](space.id)
+      return !isHidden
+    })
   }
   // filter by user
   if (utils.objectHasKeys(dialogSpaceFilterByGroup.value)) {
@@ -181,10 +182,32 @@ const toggleSpaceFiltersIsVisible = () => {
   state.spaceFiltersIsVisible = !isVisible
 }
 
+// sort by groups
+
+const spaceGroupsByAlphabetical = (spaces) => {
+  const groups = store.getters['groups/all']
+  const spaceGroups = []
+  spaces.forEach(space => {
+    if (!space.groupId) { return }
+    const isPrevGroup = spaceGroups.find(spaceGroup => spaceGroup.id === space.groupId)
+    if (isPrevGroup) { return }
+    const group = groups.find(group => group.id === space.groupId)
+    spaceGroups.push(group)
+  })
+  return utils.sortByAlphabetical(spaceGroups, 'name')
+}
+const sortByGroups = (spaces, groups) => {
+  const spacesWithGroups = groups.flatMap(group =>
+    spaces.filter(space => space.groupId === group.id)
+  )
+  const spacesWithoutGroups = spaces.filter(space => !space.groupId)
+  return [...spacesWithGroups, ...spacesWithoutGroups]
+}
+
 // sort
 
 const dialogSpaceFilterSortByIsActive = computed(() => {
-  return shouldSortByCreatedAt.value || shouldSortByAlphabetical.value
+  return shouldSortByCreatedAt.value || shouldSortByAlphabetical.value || shouldSortByGroups.value
 })
 const shouldSortByCreatedAt = computed(() => {
   const value = dialogSpaceFilterSortBy.value
@@ -194,34 +217,50 @@ const shouldSortByAlphabetical = computed(() => {
   const value = dialogSpaceFilterSortBy.value
   return value === 'alphabetical'
 })
+const shouldSortByGroups = computed(() => {
+  const value = dialogSpaceFilterSortBy.value
+  return value === 'groups'
+})
 const prependFavoriteSpaces = (spaces) => {
-  let favoriteSpaces = []
-  spaces = spaces.filter(space => {
-    if (space.isFavorite) {
+  const favoriteSpaces = []
+  const otherSpaces = []
+  spaces.forEach(space => {
+    const isFavorite = store.getters['currentSpace/isFavorite'](space.id)
+    if (isFavorite) {
       favoriteSpaces.push(space)
     } else {
-      return space
+      otherSpaces.push(space)
     }
   })
-  return favoriteSpaces.concat(spaces)
+  return favoriteSpaces.concat(otherSpaces)
 }
-const prependInboxSpace = (spaces) => {
-  const inboxSpaces = spaces.filter(space => space.name === 'Inbox')
-  if (!inboxSpaces.length) { return spaces }
-  spaces = spaces.filter(space => space.name !== 'Inbox')
-  spaces = inboxSpaces.concat(spaces)
-  return spaces
+const prependInboxSpaces = (spaces) => {
+  const inboxSpaces = []
+  const otherSpaces = []
+  spaces.forEach(space => {
+    const isInbox = store.getters['currentSpace/isInbox'](space.name)
+    if (isInbox) {
+      inboxSpaces.push(space)
+    } else {
+      otherSpaces.push(space)
+    }
+  })
+  return inboxSpaces.concat(otherSpaces)
 }
 const sort = (spaces) => {
   if (shouldSortByCreatedAt.value) {
     spaces = utils.sortByCreatedAt(spaces)
   } else if (shouldSortByAlphabetical.value) {
-    spaces = utils.sortByAlphabetical(spaces, 'name')(spaces)
+    spaces = utils.sortByAlphabetical(spaces, 'name')
+  } else if (shouldSortByGroups.value) {
+    const groups = spaceGroupsByAlphabetical(spaces)
+    spaces = utils.sortByAlphabetical(spaces, 'name')
+    spaces = sortByGroups(spaces, groups)
   } else {
     spaces = utils.sortByUpdatedAt(spaces)
   }
   spaces = prependFavoriteSpaces(spaces)
-  spaces = prependInboxSpace(spaces)
+  spaces = prependInboxSpaces(spaces)
   return spaces
 }
 
@@ -284,12 +323,12 @@ const updateCachedSpacesWithRemoteSpaces = async (remoteSpaces) => {
     if (!remoteSpaces.length) { throw Error }
     const cacheSpaces = await cache.getAllSpaces()
     let cacheSpaceIds = cacheSpaces.map(space => space.id)
-    for (let remoteSpace of remoteSpaces) {
+    for (const remoteSpace of remoteSpaces) {
       const isCached = cacheSpaceIds.includes(remoteSpace.id)
       // update spaces with remote metadata
       if (isCached) {
         cacheSpaceIds = cacheSpaceIds.filter(id => id !== remoteSpace.id)
-        let updates = {}
+        const updates = {}
         const metaKeys = ['name', 'privacy', 'isHidden', 'updatedAt', 'editedAt', 'isRemoved', 'groupId', 'showInExplore', 'updateHash', 'isTemplate', 'previewImage', 'previewThumbnailImage', 'isFavorite']
         metaKeys.forEach(key => {
           updates[key] = remoteSpace[key]
@@ -301,7 +340,7 @@ const updateCachedSpacesWithRemoteSpaces = async (remoteSpaces) => {
       }
     }
     // update removed spaces
-    for (let cacheSpaceId of cacheSpaceIds) {
+    for (const cacheSpaceId of cacheSpaceIds) {
       await cache.removeSpace({ id: cacheSpaceId })
     }
   } catch (error) {

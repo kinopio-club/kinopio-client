@@ -204,7 +204,7 @@ const scrollSpeed = (cursor, direction) => {
   if (direction === 'down' || direction === 'right') {
     amount = Math.abs(cursor - (viewportSize - threshold))
   }
-  let percent = utils.roundFloat(amount / threshold)
+  const percent = utils.roundFloat(amount / threshold)
   // speed
   let speed = percent * threshold
   speed = Math.max(speed, minSpeed)

@@ -136,7 +136,7 @@ const updateFilter = (newValue) => {
   const fuzzySearch = createFuzzySearch(props.items, {
     getText: (item) => [item.name, item.urlPreviewTitle, item.urlPreviewDescription]
   })
-  let results = fuzzySearch(state.filter)
+  const results = fuzzySearch(state.filter)
   const items = results.map(result => {
     let matchIndexes = []
     result.matches = result.matches.filter(match => Boolean(match))

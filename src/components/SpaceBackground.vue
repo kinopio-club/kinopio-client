@@ -27,7 +27,7 @@ const pageWidth = computed(() => store.state.pageWidth)
 const backgroundStyles = computed(() => {
   const url = backgroundUrl.value
   const tintColor = currentSpace.value.backgroundTint
-  let styles = {}
+  const styles = {}
   if (tintColor) {
     styles.background = 'transparent'
   }
@@ -55,7 +55,7 @@ const kinopioBackgroundImageData = computed(() => {
   return data
 })
 const backgroundUrl = computed(() => {
-  let data = kinopioBackgroundImageData.value
+  const data = kinopioBackgroundImageData.value
   let url
   // darkUrl
   if (data && isThemeDark.value) {
@@ -84,15 +84,14 @@ template(v-if="currentSpace.backgroundIsGradient")
   SpaceBackgroundGradients(:visible="true" :layers="gradientLayers" :backgroundStyles="backgroundStyles")
 //- or image
 template(v-else)
-  .space-background-image(:style="backgroundStyles" :class="{'space-border-radius': spaceShouldHaveBorderRadius}")
+  #space-background-image(:style="backgroundStyles" :class="{'space-border-radius': spaceShouldHaveBorderRadius}")
 </template>
 
 <style lang="stylus">
-.space-background-image
+#space-background-image
   position absolute
   pointer-events none
   z-index 0
   transform-origin top left
   background var(--primary-background)
-  pointer-events none
 </style>

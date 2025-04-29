@@ -68,7 +68,7 @@ export default {
       const newKeys = await idb.keys()
       console.info('🥂 pruned idb spaces', {
         prevKeys: keys.length,
-        newKeys: newKeys
+        newKeys
       })
     }
     this.notifyCouldNotSave()
@@ -99,7 +99,7 @@ export default {
   // User
 
   async user () {
-    let user = await this.getLocal('user')
+    const user = await this.getLocal('user')
     return user || {}
   },
   async updateUser (key, value) {
@@ -117,6 +117,7 @@ export default {
   // Space
 
   async space (spaceId) {
+    if (!spaceId) { return {} }
     let space = await this.getLocal(`space-${spaceId}`) || {}
     space = utils.normalizeToObject(space)
     space.clients = []
@@ -133,7 +134,7 @@ export default {
   async getAllSpaces () {
     const keys = await idb.keys()
     const spaceKeys = keys.filter(key => key.startsWith('space-'))
-    let spaces = []
+    const spaces = []
     for (const key of spaceKeys) {
       const space = await this.getLocal(key)
       spaces.push(space)
@@ -158,7 +159,7 @@ export default {
     }
   },
   async updateSpace (key, value, spaceId) {
-    let space = await this.space(spaceId)
+    const space = await this.space(spaceId)
     if (!utils.objectHasKeys(space)) {
       console.warn(updateErrorMessage)
       return
@@ -174,7 +175,7 @@ export default {
   },
   updateSpaceCardsDebounced: debounce(async function (cards, spaceId) {
     cards = utils.denormalizeItems(cards)
-    let space = await this.space(spaceId)
+    const space = await this.space(spaceId)
     if (!utils.objectHasKeys(space)) {
       console.warn(updateErrorMessage)
       return
@@ -186,7 +187,7 @@ export default {
   }, 200),
   updateSpaceConnectionsDebounced: debounce(async function (connections, spaceId) {
     connections = utils.denormalizeItems(connections)
-    let space = await this.space(spaceId)
+    const space = await this.space(spaceId)
     if (!utils.objectHasKeys(space)) {
       console.warn(updateErrorMessage)
       return
@@ -197,7 +198,7 @@ export default {
   }, 200),
   updateSpaceBoxesDebounced: debounce(async function (boxes, spaceId) {
     boxes = utils.denormalizeItems(boxes)
-    let space = await this.space(spaceId)
+    const space = await this.space(spaceId)
     if (!utils.objectHasKeys(space)) {
       console.warn(updateErrorMessage)
       return
@@ -210,7 +211,7 @@ export default {
 
   async addToSpace ({ cards, connections, connectionTypes, boxes }, spaceId) {
     // space items
-    let space = await this.space(spaceId)
+    const space = await this.space(spaceId)
     space.cards = space.cards || []
     space.connections = space.connections || []
     space.connectionTypes = space.connectionTypes || []
@@ -290,7 +291,7 @@ export default {
   async getAllRemovedSpaces () {
     const keys = await idb.keys()
     const spaceKeys = keys.filter(key => key.startsWith('removed-space-'))
-    let spaces = []
+    const spaces = []
     for (const key of spaceKeys) {
       const space = await this.getLocal(key)
       spaces.push(space)
@@ -317,8 +318,8 @@ export default {
   // Tags
 
   async allCardsByTagName (name) {
-    let spaces = await this.getAllSpaces()
-    let cards = [] // card name, id, spaceid
+    const spaces = await this.getAllSpaces()
+    const cards = [] // card name, id, spaceid
     spaces.forEach(space => {
       if (!space.tags) { return }
       const tags = space.tags.filter(tag => tag.name === name)
@@ -335,7 +336,7 @@ export default {
   },
   async allTags () {
     const spaces = await this.getAllSpaces()
-    let tags = []
+    const tags = []
     spaces.forEach(space => {
       if (utils.arrayHasItems(space.tags)) {
         space.tags.forEach(tag => tags.push(tag))
@@ -373,10 +374,10 @@ export default {
     return value
   },
   async updatePrevAddPageValue (value) {
-    await this.storeLocal(`prevAddPageValue`, value)
+    await this.storeLocal('prevAddPageValue', value)
   },
   async clearPrevAddPageValue (value) {
-    await this.storeLocal(`prevAddPageValue`, '')
+    await this.storeLocal('prevAddPageValue', '')
   },
 
   // API Queue

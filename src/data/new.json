@@ -1,6 +1,6 @@
 {
   "id": "1",
-  "name": "New Space",
+  "name": "Loading… ",
   "privacy": "private",
   "showInExplore": false,
   "collaboratorKey": "",
@@ -50,5 +50,6 @@
   "boxes": [],
   "visits": 0,
   "isRemoved": false,
-  "groupId": null
+  "groupId": null,
+  "drawingImage": null
 }

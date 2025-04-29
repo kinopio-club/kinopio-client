@@ -49,11 +49,11 @@ const styles = computed(() => {
 </script>
 
 <template lang="pug">
-.space-background-tint(v-if="visible" :style="styles" :class="{'space-border-radius': spaceShouldHaveBorderRadius}")
+#space-background-tint(v-if="visible" :style="styles" :class="{'space-border-radius': spaceShouldHaveBorderRadius}")
 </template>
 
 <style lang="stylus">
-.space-background-tint
+#space-background-tint
   position absolute
   pointer-events none
   z-index 0

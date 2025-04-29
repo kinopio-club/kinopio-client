@@ -36,7 +36,7 @@ const otherSpaceIsPrivate = computed(() => {
 })
 const isLoadingOtherItems = computed(() => store.state.isLoadingOtherItems)
 const otherSpaceName = computed(() => {
-  let name = props.otherSpace.name
+  const name = props.otherSpace.name
   return name
 })
 const isRemoved = computed(() => {
@@ -50,7 +50,7 @@ const urlIsSpaceInvite = computed(() => utils.urlIsSpaceInvite(props.url))
 
 const isThemeDark = computed(() => store.getters['themes/isThemeDark'])
 const background = computed(() => {
-  let color = props.selectedColor || props.card.backgroundColor
+  const color = props.selectedColor || props.card.backgroundColor
   const defaultColor = utils.cssVariable('secondary-background')
   const colorIsDefaultColor = utils.colorsAreEqual(color, defaultColor)
   if (colorIsDefaultColor || !color) { return }
@@ -64,7 +64,7 @@ const colorClasses = computed(() => {
   if (isThemeDark.value) {
     color = background.value || defaultColor
   }
-  let classes = utils.colorClasses({ backgroundColor: color })
+  const classes = utils.colorClasses({ backgroundColor: color })
   if (props.isImageCard) {
     classes.push('is-image-card')
   }

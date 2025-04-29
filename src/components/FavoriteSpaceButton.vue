@@ -15,7 +15,7 @@ const isTranslucentButton = computed(() => {
 })
 const isOnline = computed(() => store.state.isOnline)
 
-const isFavoriteSpace = computed(() => store.getters['currentSpace/isFavorite'])
+const isFavoriteSpace = computed(() => store.getters['currentSpace/isFavorite']())
 const toggleIsFavoriteSpace = () => {
   const space = store.state.currentSpace
   const value = !isFavoriteSpace.value

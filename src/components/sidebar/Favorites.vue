@@ -11,7 +11,7 @@ import User from '@/components/User.vue'
 const store = useStore()
 
 onMounted(() => {
-  store.dispatch('currentUser/restoreUserFavorites')
+  store.dispatch('currentUser/restoreUserAssociatedData')
 })
 
 const props = defineProps({
@@ -80,7 +80,7 @@ const showCurrentUserSpaces = computed({
   }
 })
 const currentUserSpacesFilterIsVisible = computed(() => {
-  let spaces = favoriteSpacesOrderedByEdited.value
+  const spaces = favoriteSpacesOrderedByEdited.value
   const spacesIncludeCurrentUserSpace = spaces.find(space => space.userId === currentUser.value.id)
   return state.spacesIsVisible && spacesIncludeCurrentUserSpace
 })
@@ -111,9 +111,9 @@ const toggleUserDetails = (event, user) => {
   }
 }
 const showUserDetails = async (event, user) => {
-  let element = event.target
-  let options = { element, shouldIgnoreZoom: true }
-  let position = utils.childDialogPositionFromParent(options)
+  const element = event.target
+  const options = { element, shouldIgnoreZoom: true }
+  const position = utils.childDialogPositionFromParent(options)
   store.commit('userDetailsUser', user)
   store.commit('userDetailsPosition', position)
   store.commit('userDetailsIsVisible', true)

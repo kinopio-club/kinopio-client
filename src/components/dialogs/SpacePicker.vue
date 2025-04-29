@@ -5,7 +5,6 @@ import { useStore } from 'vuex'
 import User from '@/components/User.vue'
 import SpaceList from '@/components/SpaceList.vue'
 import Loader from '@/components/Loader.vue'
-import words from '@/data/words.js'
 import newSpace from '@/data/new.json'
 import cache from '@/cache.js'
 import utils from '@/utils.js'
@@ -67,7 +66,7 @@ const state = reactive({
 const updateDialogHeight = async () => {
   if (!props.visible) { return }
   await nextTick()
-  let element = dialogElement.value
+  const element = dialogElement.value
   state.dialogHeight = utils.elementHeight(element)
 }
 
@@ -98,8 +97,8 @@ const filteredSpaces = computed(() => {
   let spaces = state.spaces
   if (!props.parentIsCardDetails) { return spaces }
   spaces = spaces.filter(space => {
-    const isHidden = space.isHidden
-    return !space.isHidden
+    const isHidden = store.getters['currentSpace/isHidden'](space.id)
+    return !isHidden
   })
   if (props.search) {
     const filtered = fuzzy.filter(
@@ -109,13 +108,13 @@ const filteredSpaces = computed(() => {
         pre: '',
         post: '',
         extract: (item) => {
-          let name = item.name || ''
+          const name = item.name || ''
           return name
         }
       }
     )
     spaces = filtered.map(item => {
-      let result = utils.clone(item.original)
+      const result = utils.clone(item.original)
       result.matchIndexes = item.indices
       return result
     })
@@ -175,7 +174,7 @@ const toggleNewSpaceIsVisible = async () => {
 const createNewSpace = async () => {
   if (state.isLoadingNewSpace) { return }
   if (!state.newSpaceName) {
-    state.newSpaceName = words.randomUniqueName()
+    state.newSpaceName = utils.newSpaceName()
   }
   const currentUser = store.state.currentUser
   const user = { id: currentUser.id, color: currentUser.color, name: currentUser.name }
@@ -202,7 +201,7 @@ const createNewSpace = async () => {
 
 const clearState = () => {
   state.newSpaceIsVisible = false
-  state.newSpaceName = words.randomUniqueName()
+  state.newSpaceName = utils.newSpaceName()
 }
 const focusNewSpaceNameInput = () => {
   const element = newSpaceNameElement.value
@@ -211,6 +210,13 @@ const focusNewSpaceNameInput = () => {
   element.setSelectionRange(0, 99999)
 }
 
+const spaceListIsVisible = computed(() => {
+  if (props.parentIsCardDetails) {
+    return currentUserIsSignedIn.value
+  } else {
+    return true
+  }
+})
 </script>
 
 <template lang="pug">
@@ -237,12 +243,12 @@ dialog.narrow.space-picker(v-if="visible" :open="visible" @click.left.stop ref="
           Loader(:visible="state.isLoadingNewSpace")
 
   //- Type to Search
-  section.info-section(v-if="parentIsCardDetails && !search")
+  section.info-section(v-if="parentIsCardDetails && !search && currentUserIsSignedIn")
     p
       img.icon.search(src="@/assets/search.svg")
       span Type to search spaces {{search}}
   //- Space List
-  section.results-section
+  section.results-section(v-if="spaceListIsVisible")
     Loader(:visible="loading")
     SpaceList(
       v-if="filteredSpaces.length"

@@ -146,6 +146,7 @@ const signIn = async (event) => {
   const result = await response.json()
   state.loading.signIn = false
   if (isSuccess(response)) {
+    await cache.saveUser(result)
     store.commit('currentUser/updateUser', result)
     initUser()
   } else {
@@ -192,14 +193,14 @@ const addCard = async () => {
   if (state.error.maxLength) { return }
   if (!state.newName) { return }
   // show completion immediately, assume success
-  let newName = state.newName
+  const newName = state.newName
   state.success = true
   state.newName = ''
   textareaElement.value.style.height = 'initial'
   focusAndSelectName()
   const url = utils.urlFromString(newName)
   // create card
-  let card = {
+  const card = {
     id: nanoid(),
     name: newName,
     z: 1
@@ -267,7 +268,7 @@ const updateMaxLengthError = () => {
 
 const updateTextareaSize = () => {
   if (!textareaElement.value) { return }
-  let modifier = 0
+  const modifier = 0
   textareaElement.value.style.height = textareaElement.value.scrollHeight + modifier + 'px'
 }
 const insertLineBreak = async (event) => {

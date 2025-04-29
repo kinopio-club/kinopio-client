@@ -35,8 +35,8 @@ const state = reactive({
 const updateTextareaSize = async () => {
   await nextTick()
   const element = textareaWrapElement.value
-  let textareas = element.querySelectorAll('textarea')
-  let modifier = 1
+  const textareas = element.querySelectorAll('textarea')
+  const modifier = 1
   textareas.forEach(textarea => {
     const highlight = element.querySelector('.textarea-highlight')
     highlight.style.height = textarea.scrollHeight + modifier + 'px'

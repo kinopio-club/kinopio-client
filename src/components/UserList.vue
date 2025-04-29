@@ -25,7 +25,8 @@ const props = defineProps({
   selectedUser: Object,
   showCollaboratorActions: Boolean,
   showGroupUserActions: Boolean,
-  group: Object
+  group: Object,
+  filterPlaceholder: String
 })
 const state = reactive({
   filter: '',
@@ -77,7 +78,9 @@ const isCurrentUser = (user) => {
   return store.state.currentUser.id === user.id
 }
 const currentUserIsMember = computed(() => store.getters['currentUser/isSpaceMember']())
-
+const placeholder = computed(() => {
+  return props.filterPlaceholder || 'Search'
+})
 // handle events
 
 const selectUser = (event, user) => {
@@ -190,7 +193,12 @@ const removeGroupUser = async (event, user) => {
 
 <template lang="pug">
 .user-list(@click.stop="closeDialogs")
-  ResultsFilter(:items="props.users" @updateFilter="updateFilter" @updateFilteredItems="updateFilteredUsers")
+  ResultsFilter(
+    :items="props.users"
+    @updateFilter="updateFilter"
+    @updateFilteredItems="updateFilteredUsers"
+    :placeholder="placeholder"
+  )
   ul.results-list
     template(v-for="user in usersFiltered" :key="user.id")
       li(@click.left.stop="selectUser($event, user)" tabindex="0" v-on:keyup.stop.enter="selectUser($event, user)" :class="{ active: userIsSelected(user) }")

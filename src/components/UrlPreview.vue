@@ -53,7 +53,7 @@ const description = computed(() => {
   const url = props.card.urlPreviewUrl
   const isTwitterUrl = url.includes('twitter.com')
   if (isTwitterUrl) {
-    let description = props.card.urlPreviewDescription
+    const description = props.card.urlPreviewDescription
     return utils.truncated(description, 350)
   }
   return null

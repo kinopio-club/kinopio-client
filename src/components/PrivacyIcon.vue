@@ -2,7 +2,7 @@
 import { reactive, computed, onMounted, onBeforeUnmount, watch, ref, nextTick } from 'vue'
 import { useStore } from 'vuex'
 
-import privacy from '@/data/privacy.js'
+import privacyData from '@/data/privacy.js'
 const store = useStore()
 
 const props = defineProps({
@@ -11,7 +11,7 @@ const props = defineProps({
 })
 
 const privacyState = computed(() => {
-  return privacy.states().find(item => {
+  return privacyData.states().find(item => {
     return item.name === props.privacy
   })
 })

@@ -24,7 +24,7 @@ export default {
     restore: (state, groups) => {
       state.ids = []
       state.groups = {}
-      let groupIds = []
+      const groupIds = []
       groups.forEach(group => {
         groupIds.push(group.id)
         state.groups[group.id] = group
@@ -53,7 +53,7 @@ export default {
       const prevGroup = state.groups[group.id]
       if (prevGroup) {
         const keys = Object.keys(group)
-        let updatedGroup = utils.clone(prevGroup)
+        const updatedGroup = utils.clone(prevGroup)
         keys.forEach(key => {
           updatedGroup[key] = group[key]
         })
@@ -85,15 +85,11 @@ export default {
       context.commit('restore', groups)
       // remote groups restored in restoreRemoteUser
     },
-    restore: (context, groups) => {
-      context.commit('restore', groups)
-      context.commit('isLoadingGroups', false, { root: true })
-    },
     createGroup: async (context, group) => {
       try {
         const response = await context.dispatch('api/createGroup', group, { root: true })
-        let newGroup = response.group
-        let groupUser = response.groupUser
+        const newGroup = response.group
+        const groupUser = response.groupUser
         groupUser.id = groupUser.userId
         newGroup.groupUser = groupUser
         newGroup.users = [response.groupUser]
@@ -140,7 +136,7 @@ export default {
       } catch (error) {
         console.error('🚒 joinGroup', error)
         context.commit('addNotification', {
-          message: `Failed to Join Group`,
+          message: 'Failed to Join Group',
           type: 'danger',
           icon: 'group',
           isPersistentItem: true

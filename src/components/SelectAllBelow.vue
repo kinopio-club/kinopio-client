@@ -33,7 +33,9 @@ const updateIsSelectingY = (value) => {
   }
   store.commit('isSelectingY', value)
 }
+const toolbarIsDrawing = computed(() => store.state.currentUserToolbar === 'drawing')
 const isVisible = computed(() => {
+  if (toolbarIsDrawing.value) { return }
   if (store.state.isSelectingX) { return }
   if (store.state.currentUserIsPanning || store.state.currentUserIsPanningReady) { return }
   return state.isVisible
@@ -43,7 +45,7 @@ const isVisible = computed(() => {
 
 const userColor = computed(() => store.state.currentUser.color)
 const iconClasses = computed(() => {
-  let classes = utils.colorClasses({ backgroundColor: userColor.value })
+  const classes = utils.colorClasses({ backgroundColor: userColor.value })
   if (state.isMetaKey) {
     classes.push('reverse')
   }
@@ -64,7 +66,8 @@ const handleMouseMove = (event) => {
   if (store.state.isEmbedMode) { return }
   updateIsMetaKey(event)
   const edgeThreshold = 30
-  let header = document.querySelector('header').getBoundingClientRect().height
+  const toolbar = document.querySelector('#toolbar').getBoundingClientRect()
+  if (!toolbar) { return }
   let footer = document.querySelector('.footer-wrap footer')
   if (footer) {
     footer = footer.getBoundingClientRect().height + 20
@@ -76,7 +79,7 @@ const handleMouseMove = (event) => {
   const isInThreshold = position.x <= edgeThreshold
   const isBetweenControls = utils.isBetween({
     value: position.y,
-    min: header,
+    min: toolbar.y + toolbar.height,
     max: viewport.height - footer
   })
   const isInPosition = isInThreshold && isBetweenControls
@@ -112,7 +115,7 @@ const throttledSelectItems = throttle((event) => {
 }, 20)
 
 const selectItems = (event) => {
-  let position = utils.cursorPositionInSpace(event)
+  const position = utils.cursorPositionInSpace(event)
   store.commit('preventMultipleSelectedActionsIsVisible', true)
   if (state.isMetaKey) {
     store.commit('triggerSelectAllItemsAboveCursor', position)

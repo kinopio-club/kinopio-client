@@ -28,7 +28,7 @@ span.user-settings-new-spaces
     label(:class="{active: shouldHideDateCards}" @click.left.prevent="toggleShouldHideDateCards" @keydown.stop.enter="toggleShouldHideDateCards")
       input(type="checkbox" v-model="shouldHideDateCards")
       img.date-image(:src="dateImageUrl")
-      span Hide Date Cards
+      span Hide Date Card
   .row
     label(:class="{active: shouldHideTutorialCards}" @click.left.prevent="toggleShouldHideTutorialCards" @keydown.stop.enter="toggleShouldHideTutorialCards")
       input(type="checkbox" v-model="shouldHideTutorialCards")

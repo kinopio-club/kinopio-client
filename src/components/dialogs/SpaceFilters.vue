@@ -40,7 +40,7 @@ const state = reactive({
 const updateDialogHeight = async () => {
   if (!props.visible) { return }
   await nextTick()
-  let element = dialogElement.value
+  const element = dialogElement.value
   state.dialogHeight = utils.elementHeight(element)
 }
 
@@ -112,6 +112,10 @@ const isSortByAlphabetical = computed(() => {
   const value = dialogSpaceFilterSortBy.value
   return value === 'alphabetical'
 })
+const isSortByGroups = computed(() => {
+  const value = dialogSpaceFilterSortBy.value
+  return value === 'groups'
+})
 const updateSortBy = (value) => {
   store.dispatch('currentUser/update', { dialogSpaceFilterSortBy: value })
 }
@@ -165,10 +169,7 @@ const filterByUser = (event, user) => {
     updateUserFilter(user)
   }
 }
-
-const isLoading = computed(() => {
-  return props.isLoading || store.state.isLoadingGroups
-})
+const userListPlaceholder = computed(() => 'Search Collaborators')
 
 </script>
 
@@ -176,7 +177,9 @@ const isLoading = computed(() => {
 dialog.narrow.space-filters(v-if="props.visible" :open="props.visible" @click.left.stop ref="dialogElement" :style="{'max-height': state.dialogHeight + 'px'}")
   section.section-title
     .row.title-row
-      span Space Filters
+      div
+        span Space Filters
+        Loader(:visible="props.isLoading" :isSmall="true")
       button.small-button(@click.left="clearAllFilters" title="Clear all space filters")
         img.icon.cancel(src="@/assets/add.svg")
         span Clear
@@ -187,23 +190,23 @@ dialog.narrow.space-filters(v-if="props.visible" :open="props.visible" @click.le
     section.subsection
       p
         span Sort by
-      .segmented-buttons
+      .segmented-buttons.segmented-buttons-row-1
         button(:class="{active: isSortByUpdatedAt}" @click="updateSortBy('updatedAt')" title="Sort spaces by updated at")
           span Updated
         button(:class="{active: isSortByCreatedAt}" @click="updateSortBy('createdAt')" title="Sort spaces by created at")
           span Created
         button(:class="{active: isSortByAlphabetical}" @click="updateSortBy('alphabetical')" title="Sort spaces alphabetically")
           span ABC
+      .segemented-buttons.segmented-buttons-row-2
+        button(:class="{active: isSortByGroups}" @click="updateSortBy('groups')" title="Sort spaces by Group name")
+          span Groups
+
     //- show hidden
     .row
       .checkbox-wrap.button-wrap
         label(:class="{active: showHiddenSpace}" title="Show hidden spaces")
           input(type="checkbox" v-model="showHiddenSpace")
           span Show Hidden
-
-  //- loading
-  section(v-if="isLoading")
-    Loader(:visible="true")
 
   //- other space filter types
   section.results-section.other(v-if="isTemplates")
@@ -216,7 +219,7 @@ dialog.narrow.space-filters(v-if="props.visible" :open="props.visible" @click.le
     GroupList(:groups="groups" :selectedGroup="dialogSpaceFilterByGroup" @selectGroup="filterByGroup")
   //- collaborators
   section.results-section.collaborators(v-if="spaceUsers.length")
-    UserList(:users="spaceUsers" :selectedUser="dialogSpaceFilterByUser" @selectUser="filterByUser")
+    UserList(:users="spaceUsers" :selectedUser="dialogSpaceFilterByUser" @selectUser="filterByUser" :filterPlaceholder="userListPlaceholder")
 
 </template>
 
@@ -242,4 +245,20 @@ dialog.space-filters
     margin-left 5px
     margin-top -8px
     transform translateY(2px)
+
+  .segmented-buttons
+    position: relative
+  .segmented-buttons-row-1
+    z-index 1
+    button:first-child
+      border-bottom-left-radius 0
+  .segmented-buttons-row-2
+    margin-top -1px
+    button:first-child
+      border-top-left-radius 0
+    button:last-child
+      border-top-right-radius 0
+  .loader
+    vertical-align -2px
+    margin-left 5px
 </style>

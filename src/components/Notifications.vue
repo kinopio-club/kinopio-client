@@ -119,6 +119,7 @@ const checkIfShouldNotifySpaceOutOfSync = async () => {
   try {
     if (!currentUserIsSignedIn.value) { return }
     store.commit('isLoadingSpace', true)
+    if (!store.state.currentSpace.updatedAt) { return } // don't check unloaded spaces
     const remoteSpace = await store.dispatch('api/getSpaceUpdatedAt', { id: store.state.currentSpace.id })
     store.commit('isLoadingSpace', false)
     if (!remoteSpace) { return }
@@ -170,11 +171,12 @@ const notifySpaceIsUnavailableOffline = computed(() => store.state.currentSpaceI
 const notifyIsJoiningGroup = computed(() => store.state.notifyIsJoiningGroup)
 const notifySignUpToJoinGroup = computed(() => store.state.notifySignUpToJoinGroup)
 const notifyIsDuplicatingSpace = computed(() => store.state.notifyIsDuplicatingSpace)
+const notifyBoxSnappingIsReady = computed(() => store.state.notifyBoxSnappingIsReady)
 const notifificationClasses = (item) => {
-  let classes = {
-    'danger': item.type === 'danger',
-    'success': item.type === 'success',
-    'info': item.type === 'info',
+  const classes = {
+    danger: item.type === 'danger',
+    success: item.type === 'success',
+    info: item.type === 'info',
     'persistent-item': item.isPersistentItem
   }
   return classes
@@ -353,15 +355,19 @@ aside.notifications(@click.left="closeAllDialogs")
 
   .persistent-item.info(v-if="currentUserIsPaintingLocked && isTouchDevice")
     img.icon(src="@/assets/brush.svg")
-    span Drag to paint
+    span Drag to Paint
 
   .persistent-item.info(v-if="currentUserIsPanningReady || currentUserIsPanning")
     img.icon(src="@/assets/hand.svg")
-    span Drag to pan
+    span Drag to Pan
 
   .persistent-item.info(v-if="snapToGridIsVisible")
     img.icon(src="@/assets/constrain-axis.svg")
-    span Snap to grid
+    span Snap to Grid
+
+  .persistent-item.info(v-if="notifyBoxSnappingIsReady")
+    img.icon(src="@/assets/box-snap.svg")
+    span Snap to Box
 
   .persistent-item.success(v-if="notifyThanksForDonating")
     p Thank you for being a
@@ -450,13 +456,8 @@ aside.notifications(@click.left="closeAllDialogs")
     .row
       span.badge.secondary {{latestChangelogPost.title}}
     .row
-      //- .button-wrap
-      //-   a(href="/changelog")
-      //-     button(@click.left.stop.prevent="changeSpaceToChangelog")
-      //-       span Changelog
       .button-wrap
         button(@click.left="updateChangelogAndRefreshBrowser")
-          //- TODO update changelog and refresh browser
           img.refresh.icon(src="@/assets/refresh.svg")
           span Update
 

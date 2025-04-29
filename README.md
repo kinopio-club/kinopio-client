@@ -55,7 +55,7 @@ Use the [Vue devtools](https://github.com/vuejs/vue-devtools) for Firefox and Ch
 | `components/Connection.vue` | Displays connections from `store.state.currentConnections`, and shows `ConnectionDetails` |
 | `components/Box.vue` | Displays boxes from `store.state.currentBoxes`, and shows `ConnectionDetails` |
 | `components/Header.vue` | Used for moving between spaces, searching/filter, shows user presence, changing user prefs, and Kinopio meta options. Shown on all routes |
-| `components/layers/MainCanvas.vue` | The layers used for drawing the paint strokes for multiple card and connection selection which reveals `MultipleSelectedActions`, scroll locking on touch, and other `<canvas>` elements that need to cover the viewport |
+| `components/layers/PaintSelectCanvas.vue` | The layers used for drawing the paint strokes for multiple card and connection selection which reveals `MultipleSelectedActions`, scroll locking on touch, and other `<canvas>` elements that need to cover the viewport |
 | `components/NewBlankTemplate.vue` | Template file for new components |
 | `components/NewBlankDialogTemplate.vue` | Template file for new dialog components |
 
@@ -94,11 +94,21 @@ To work with code that only works on https (e.g. clipboard copy and paste), [mkc
 
     brew install mkcert
     mkcert -install
-	mkdir -p .cert && mkcert -key-file ./.cert/key.pem -cert-file ./.cert/cert.pem 'kinopio.local'
+	mkcert -key-file ./.cert/key.pem -cert-file ./.cert/cert.pem "kinopio.local" "localhost" "127.0.0.1"
+
+## Testing page-meta
+
+`page-meta.js` is an [edge function](https://www.netlify.com/platform/core/functions/) that runs in an isolated server-side container before page requests. It writes `index.html` metatags for title, description etc. for crawlers.
+
+I couldn't figure out how to run the netlify-cli locally, so instead I test this in staging using PR deploy URLs. 
+
+To view the logs: 
+
+Netlify website → Deploys → Edge Functions
 
 ## See Also
 
 - [are.na/kinopio/kinopio-design](https://www.are.na/kinopio/kinopio-design)
 - [github.com/kinopio-club](https://github.com/kinopio-club)
 - [User Forums](https://forum.kinopio.club)
-- [Discord](https://discord.gg/h2sR45Nby8)
+- [Discord](https://kinopio.club/discord)

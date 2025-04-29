@@ -106,6 +106,11 @@ const store = createStore({
     currentUserIsDraggingConnectionIdLabel: '',
     clipboardData: {}, // for kinopio data pasting
     shouldCancelNextMouseUpInteraction: false,
+    currentUserIsDrawing: false,
+
+    // drawing
+    drawingEraserIsActive: false,
+    drawingStrokeColors: [],
 
     // box-selecting
     currentUserIsBoxSelecting: false,
@@ -259,6 +264,7 @@ const store = createStore({
     shouldNotifyIsJoiningGroup: false,
     notifyIsJoiningGroup: false,
     notifyIsDuplicatingSpace: false,
+    notifyBoxSnappingIsReady: false,
 
     // notifications with position
     notificationsWithPosition: [],
@@ -291,8 +297,8 @@ const store = createStore({
     },
     updatePageSizes: (state, itemsRect) => {
       if (!itemsRect) { return }
-      let pageWidth = Math.max(state.viewportWidth, itemsRect.width, state.pageWidth)
-      let pageHeight = Math.max(state.viewportHeight, itemsRect.height, state.pageHeight)
+      const pageWidth = Math.max(state.viewportWidth, itemsRect.width, state.pageWidth)
+      const pageHeight = Math.max(state.viewportHeight, itemsRect.height, state.pageHeight)
       state.pageWidth = Math.round(pageWidth)
       state.pageHeight = Math.round(pageHeight)
     },
@@ -341,7 +347,7 @@ const store = createStore({
     },
 
     closeAllDialogs: (state) => {
-      let dialogs = document.querySelectorAll('dialog')
+      const dialogs = document.querySelectorAll('dialog')
       const dialogIsVisible = Boolean(dialogs.length)
       if (!dialogIsVisible) { return }
       if (utils.unpinnedDialogIsVisible()) {
@@ -605,7 +611,7 @@ const store = createStore({
     triggerKeyboardShortcutsIsVisible: () => {},
     triggerReadOnlyJiggle: () => {},
     triggerSelectTemplateCategory: () => {},
-    triggerUpdateMainCanvasPositionOffset: () => {},
+    triggerUpdatePaintSelectCanvasPositionOffset: () => {},
     triggerPaintFramePosition: (state, event) => {},
     triggerAddRemotePaintingCircle: () => {},
     triggerUpdateRemoteUserCursor: () => {},
@@ -659,6 +665,7 @@ const store = createStore({
     triggerAppsAndExtensionsIsVisible: () => {},
     triggerUpdateWindowTitle: () => {},
     triggerRestoreSpaceRemoteComplete: () => {},
+    triggerRestoreSpaceLocalComplete: () => {},
     triggerCheckIfShouldNotifySpaceOutOfSync: () => {},
     triggerNotifyOffscreenCardCreated: (state, card) => {},
     triggerSonarPing: (state, event) => {},
@@ -669,6 +676,7 @@ const store = createStore({
     triggerPanningStart: () => {},
     triggerClearUserNotifications: () => {},
     triggerAddBox: (state, event) => {},
+    triggerUpdateDrawingBackground: () => {},
 
     // select all below
     triggerSelectAllItemsBelowCursor: (state, position) => {},
@@ -683,6 +691,16 @@ const store = createStore({
 
     triggerSelectedCardsContainInBox: () => {},
     triggerSelectedItemsAlignLeft: () => {},
+
+    // drawing
+    triggerStartDrawing: (state, event) => {},
+    triggerDraw: (state, event) => {},
+    triggerDrawingUndo: () => {},
+    triggerDrawingRedo: () => {},
+    triggerAddRemoteDrawingStroke: () => {},
+    triggerRemoveRemoteDrawingStroke: () => {},
+    triggerDrawingRedraw: () => {},
+    triggerEndDrawing: () => {},
 
     // Cards
 
@@ -790,7 +808,7 @@ const store = createStore({
         return isUserId && isStartCardId
       })
       if (index >= 0) {
-        let connection = state.remoteCurrentConnections[index]
+        const connection = state.remoteCurrentConnections[index]
         const keys = Object.keys(updates)
         keys.forEach(key => {
           connection[key] = updates[key]
@@ -953,6 +971,17 @@ const store = createStore({
     currentUserToolbar: (state, value) => {
       utils.typeCheck({ value, type: 'string' })
       state.currentUserToolbar = value
+      state.drawingEraserIsActive = false
+    },
+
+    // drawing
+
+    drawingEraserIsActive: (state, value) => {
+      state.drawingEraserIsActive = value
+    },
+    addToDrawingStrokeColors: (state, color) => {
+      if (state.drawingStrokeColors.includes(color)) { return }
+      state.drawingStrokeColors.push(color)
     },
 
     // Dragging
@@ -976,6 +1005,10 @@ const store = createStore({
     shouldCancelNextMouseUpInteraction: (state, value) => {
       utils.typeCheck({ value, type: 'boolean' })
       state.shouldCancelNextMouseUpInteraction = value
+    },
+    currentUserIsDrawing: (state, value) => {
+      utils.typeCheck({ value, type: 'boolean' })
+      state.currentUserIsDrawing = value
     },
 
     // Dragging Cards
@@ -1597,6 +1630,10 @@ const store = createStore({
       utils.typeCheck({ value, type: 'boolean' })
       state.notifyIsDuplicatingSpace = value
     },
+    notifyBoxSnappingIsReady: (state, value) => {
+      utils.typeCheck({ value, type: 'boolean' })
+      state.notifyBoxSnappingIsReady = value
+    },
 
     // Notifications with Position
 
@@ -1670,7 +1707,7 @@ const store = createStore({
     updateOtherItems: (state, { cards, spaces }) => {
       utils.typeCheck({ value: cards, type: 'array' })
       utils.typeCheck({ value: spaces, type: 'array' })
-      let otherItems = utils.clone(state.otherItems)
+      const otherItems = utils.clone(state.otherItems)
       if (cards.length) {
         otherItems.cards = otherItems.cards.concat(cards)
         otherItems.cards = uniqBy(otherItems.cards, 'id')
@@ -1794,15 +1831,17 @@ const store = createStore({
         store.commit('scrollElementIntoView', { element, positionIsCenter: true })
       }
     },
-    updatePageSizes: (context) => {
+    updatePageSizes: async (context) => {
       const cards = context.getters['currentCards/all']
       const boxes = context.getters['currentBoxes/all']
-      let items = cards.concat(boxes)
+      const items = cards.concat(boxes)
       items.push({
         x: 0, y: 0, width: 500, height: 500 // minimum page size
       })
-      let itemsRect = utils.pageSizeFromItems(items)
-      context.commit('updatePageSizes', itemsRect)
+      const itemsRect = utils.pageSizeFromItems(items)
+      const drawingRect = await utils.imageSize(context.state.currentSpace.drawingImage)
+      const rect = utils.mergeRectSizes(itemsRect, drawingRect)
+      context.commit('updatePageSizes', rect)
     },
     updateViewportSizes: (context) => {
       const viewport = utils.visualViewport()
@@ -1814,8 +1853,8 @@ const store = createStore({
       item.width = item.width || item.resizeWidth
       item.height = item.height || item.resizeHeight
       const zoom = context.getters.spaceZoomDecimal
-      let thresholdHeight = (context.state.viewportHeight * zoom) / 4
-      let thresholdWidth = (context.state.viewportWidth * zoom) / 4
+      const thresholdHeight = (context.state.viewportHeight * zoom) / 2
+      const thresholdWidth = (context.state.viewportWidth * zoom) / 2
       const pageWidth = context.state.pageWidth
       const pageHeight = context.state.pageHeight
       const shouldIncreasePageWidth = (item.x + item.width + thresholdWidth) > pageWidth
@@ -2020,7 +2059,7 @@ const store = createStore({
       context.commit('broadcast/updateStore', { updates, type: 'removeFromRemoteBoxesSelected' })
     },
     triggerSonarPing: (context, event) => {
-      let ping = utils.cursorPositionInSpace(event)
+      const ping = utils.cursorPositionInSpace(event)
       ping.color = store.state.currentUser.color
       context.commit('triggerSonarPing', ping)
       context.commit('broadcast/updateStore', { updates: ping, type: 'triggerSonarPing' })
@@ -2096,10 +2135,27 @@ const store = createStore({
       percent = Math.min(percent, consts.spaceZoom.max)
       context.commit('spaceZoomPercent', percent)
     },
+
+    // drawing
+
     currentUserToolbar: (context, value) => {
       const canOnlyComment = context.getters['currentUser/canOnlyComment']()
       if (canOnlyComment) { return }
       context.commit('currentUserToolbar', value)
+    },
+    toggleCurrentUserToolbar: (context, value) => {
+      const canOnlyComment = context.getters['currentUser/canOnlyComment']()
+      const prevValue = context.state.currentUserToolbar
+      if (canOnlyComment) { return }
+      if (value === prevValue) {
+        context.commit('currentUserToolbar', 'card')
+      } else {
+        context.commit('currentUserToolbar', value)
+      }
+    },
+    toggleDrawingEraserIsActive: (context) => {
+      const value = !context.state.drawingEraserIsActive
+      context.commit('drawingEraserIsActive', value)
     }
   },
   getters: {
@@ -2149,7 +2205,7 @@ const store = createStore({
       return transform
     },
     windowScrollWithSpaceOffset: (state) => () => {
-      let scroll = { x: window.scrollX, y: window.scrollY }
+      const scroll = { x: window.scrollX, y: window.scrollY }
       return utils.updatePositionWithSpaceOffset(scroll)
     },
     isInteractingWithItem: (state) => {
@@ -2182,15 +2238,15 @@ const store = createStore({
         name,
         id: nanoid(),
         color: color || defaultColor,
-        cardId: cardId,
-        spaceId: spaceId
+        cardId,
+        spaceId
       }
     },
     allTags: (state) => {
       const allTags = state.tags
       const userTags = state.currentUser.tags
       const spaceTags = state.currentSpace.tags
-      let tags = spaceTags.concat(userTags).concat(allTags)
+      const tags = spaceTags.concat(userTags).concat(allTags)
       // tags = uniqBy(tags, 'name') // removed for perf reasons
       return tags || []
     },

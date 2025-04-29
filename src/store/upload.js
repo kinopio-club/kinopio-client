@@ -65,7 +65,7 @@ export default {
       const uploadId = nanoid()
       const fileName = utils.normalizeFileUrl(file.name)
       const id = cardId || spaceId || boxId
-      let key = `${id}/${fileName}`
+      const key = `${id}/${fileName}`
       const userIsUpgraded = context.rootState.currentUser.isUpgraded
       const spaceCreatorIsUpgraded = context.rootGetters['currentSpace/spaceCreatorIsUpgraded']
       context.dispatch('checkIfFileTooBig', file)
@@ -136,7 +136,7 @@ export default {
         context.commit('addNotification', { message: 'You can only upload files on spaces you can edit', type: 'info' }, { root: true })
         return
       }
-      let cardIds = []
+      const cardIds = []
       const currentUserIsSignedIn = context.rootGetters['currentUser/isSignedIn']
       if (!currentUserIsSignedIn) {
         context.commit('addNotificationWithPosition', { message: 'Sign Up or In', position, type: 'info', layer: 'space', icon: 'cancel' }, { root: true })
@@ -160,7 +160,7 @@ export default {
         return
       }
       // add cards
-      let filesPostData = []
+      const filesPostData = []
       for (const [index, file] of files.entries()) {
         const positionOffset = 20
         const cardId = nanoid()

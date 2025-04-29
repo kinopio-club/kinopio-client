@@ -36,7 +36,7 @@ watch(() => props.visible, (value, prevValue) => {
 const updateDialogHeight = async () => {
   if (!props.visible) { return }
   await nextTick()
-  let element = dialogElement.value
+  const element = dialogElement.value
   state.dialogHeight = utils.elementHeightFromHeader(element)
 }
 const updateSize = async () => {
@@ -59,7 +59,7 @@ const toggleDialogIsPinned = () => {
 
 const boxes = computed(() => {
   let items = store.getters['currentBoxes/all']
-  items = utils.sortByY(items)
+  items = utils.sortByDistanceFromOrigin(items)
   return items
 })
 const boxColorClasses = (box) => {

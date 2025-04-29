@@ -21,6 +21,9 @@ watch(() => visible.value, (value, prevValue) => {
     closeChildDialogs()
     updateDialogHeight()
     restoreUserPrevSettingsSection()
+    store.commit('shouldExplicitlyHideFooter', true)
+  } else {
+    store.commit('shouldExplicitlyHideFooter', false)
   }
 })
 const closeChildDialogs = () => {
@@ -34,7 +37,7 @@ const state = reactive({
 const updateDialogHeight = async () => {
   if (!visible.value) { return }
   await nextTick()
-  let element = dialogElement.value
+  const element = dialogElement.value
   state.dialogHeight = utils.elementHeight(element)
 }
 

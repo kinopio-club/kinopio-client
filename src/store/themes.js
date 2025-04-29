@@ -5,7 +5,7 @@ const themes = {
     name: 'light',
     colors: {
       'color-scheme': 'light',
-      'primary': 'black',
+      primary: 'black',
       'primary-border': 'rgba(0,0,0,0.3)',
       'primary-background': 'white',
       'text-link': '#143997',
@@ -41,7 +41,7 @@ const themes = {
     name: 'dark',
     colors: {
       'color-scheme': 'dark',
-      'primary': 'white',
+      primary: 'white',
       'primary-border': 'rgba(255,255,255,0.3)',
       'primary-background': 'black',
       'text-link': '#788cc9',
@@ -98,7 +98,7 @@ export default {
       // colors
       const theme = themes[normalizedThemeName]
       const colors = theme.colors
-      let keys = Object.keys(colors)
+      const keys = Object.keys(colors)
       keys.forEach(key => {
         utils.setCssVariable(key, colors[key])
       })
@@ -161,8 +161,8 @@ export default {
       const isDarkTheme = getters.isThemeDark
       let background = rootState.currentSpace.background
       let backgroundTint = rootState.currentSpace.backgroundTint
-      const backgroundElement = document.querySelector('.space-background-image')
-      const backgroundTintElement = document.querySelector('.space-background-tint')
+      const backgroundElement = document.querySelector('#space-background-image')
+      const backgroundTintElement = document.querySelector('#space-background-tint')
       if (background && backgroundElement) {
         let domBackground = backgroundElement.style.backgroundImage
         domBackground = utils.urlFromCSSBackgroundImage(domBackground)

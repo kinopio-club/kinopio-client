@@ -106,9 +106,9 @@ const closeDialogs = () => {
   store.commit('userDetailsIsVisible', false)
 }
 const showUserDetails = async (event, user) => {
-  let element = event.target
-  let options = { element, shouldIgnoreZoom: true, offsetY: -300 }
-  let position = utils.childDialogPositionFromParent(options)
+  const element = event.target
+  const options = { element, shouldIgnoreZoom: true, offsetY: -300 }
+  const position = utils.childDialogPositionFromParent(options)
   store.commit('userDetailsUser', user)
   store.commit('userDetailsPosition', position)
   store.commit('userDetailsIsVisible', true)

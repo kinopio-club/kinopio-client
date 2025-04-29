@@ -33,7 +33,7 @@ onMounted(() => {
     if (mutation.type === 'triggerPickerNavigationKey') {
       const key = mutation.payload
       const spaces = props.spaces
-      let currentIndex = spaces.findIndex(space => space.id === state.focusOnId)
+      const currentIndex = spaces.findIndex(space => space.id === state.focusOnId)
       if (!utils.arrayHasItems(spaces)) {
         closeDialog()
       } else if (key === 'ArrowUp') {
@@ -152,6 +152,10 @@ const spaceIsActive = (space) => {
     return spaceIsCurrentSpace(space)
   }
 }
+const spaceIsHidden = (space) => {
+  const isHidden = store.getters['currentSpace/isHidden'](space.id)
+  return isHidden
+}
 const isLoadingSpace = (space) => {
   const isLoadingSpace = store.state.isLoadingSpace
   return isLoadingSpace && spaceIsCurrentSpace(space)
@@ -215,9 +219,7 @@ const selectSpace = (event, space) => {
 // favorites
 
 const isFavorite = (space) => {
-  const favorites = store.state.currentUser.favoriteSpaces
-  const isFavorite = favorites.find(favorite => favorite.id === space.id)
-  return Boolean(isFavorite)
+  return store.getters['currentSpace/isFavorite'](space.id)
 }
 
 // scroll
@@ -326,8 +328,7 @@ const focusPreviousItem = (currentIndex) => {
   const previousItem = spaces[currentIndex - 1]
   if (firstItemIsFocused) {
     closeDialog()
-  } else
-  if (previousItem) {
+  } else if (previousItem) {
     state.focusOnId = previousItem.id
   } else {
     state.focusOnId = firstItem.id
@@ -404,7 +405,7 @@ span.space-list-wrap
         a(:href="space.url")
           li(
             @click.left="selectSpace($event, space)"
-            :class="{ active: spaceIsActive(space), hover: state.focusOnId === space.id, 'space-is-hidden': space.isHidden }"
+            :class="{ active: spaceIsActive(space), hover: state.focusOnId === space.id, 'space-is-hidden': spaceIsHidden(space) }"
             tabindex="0"
             @keyup.enter="selectSpace(null, space)"
             :data-created-at="space.createdAt"
@@ -416,7 +417,7 @@ span.space-list-wrap
             span(v-if="isOffline && isNotCached(space.id)")
               OfflineBadge(:isInline="true" :isDanger="true")
             //- favorite
-            template(v-if="space.isFavorite")
+            template(v-if="isFavorite(space)")
               img.icon.favorite-icon(src="@/assets/heart.svg")
             //- inbox
             template(v-if="space.name === 'Inbox'")

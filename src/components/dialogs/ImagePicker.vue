@@ -3,7 +3,6 @@ import { reactive, computed, onMounted, onUnmounted, watch, ref, nextTick } from
 import { useStore } from 'vuex'
 
 import Loader from '@/components/Loader.vue'
-import AIImageGeneration from '@/components/AIImageGeneration.vue'
 import utils from '@/utils.js'
 import cache from '@/cache.js'
 import consts from '@/consts.js'
@@ -47,7 +46,7 @@ const emit = defineEmits(['removeImage', 'selectImage'])
 const state = reactive({
   images: [],
   search: '',
-  service: 'stickers', // 'stickers', 'gifs', 'pexels', 'ai'
+  service: 'stickers', // 'stickers', 'gifs', 'pexels'
   loading: true,
   dialogHeight: null,
   resultsSectionHeight: null,
@@ -120,16 +119,11 @@ const provider = computed(() => {
 })
 const serviceIsPexels = computed(() => state.service === 'pexels')
 const serviceIsStickers = computed(() => state.service === 'stickers')
-const serviceIsAI = computed(() => state.service === 'ai')
 const serviceIsGifs = computed(() => state.service === 'gifs')
 const lastUsedImagePickerService = computed(() => store.state.currentUser.lastUsedImagePickerService)
 const toggleServiceIsPexels = () => {
   state.service = 'pexels'
   searchAgain()
-  updateLastUsedImagePickerService()
-}
-const toggleServiceIsAI = () => {
-  state.service = 'ai'
   updateLastUsedImagePickerService()
 }
 const toggleServiceIsStickers = () => {
@@ -167,7 +161,7 @@ const searchAgain = () => {
   searchService()
 }
 const searchPexels = async () => {
-  const defaultSearches = [ 'animals', 'flowers', 'forest', 'ocean' ]
+  const defaultSearches = ['animals', 'flowers', 'forest', 'ocean']
   const defaultSearch = sample(defaultSearches)
   const search = state.search || defaultSearch
   const data = await store.dispatch('api/imageSearch', search)
@@ -182,7 +176,7 @@ const searchGiphy = async (isStickers) => {
   if (state.search) {
     endpoint = 'search'
   }
-  let body = { search: state.search, endpoint, resource }
+  const body = { search: state.search, endpoint, resource }
   if (state.search) {
     body.rating = 'pg-13'
   } else {
@@ -362,7 +356,7 @@ const updateDialogHeight = async () => {
 const updateResultsSectionHeight = async () => {
   if (!props.visible) { return }
   await nextTick()
-  let element = resultsSectionElement.value
+  const element = resultsSectionElement.value
   state.resultsSectionHeight = utils.elementHeight(element, true)
 }
 const resetPinchCounterZoomDecimal = () => {
@@ -378,8 +372,6 @@ dialog.image-picker(v-if="visible" :open="visible" @click.left.stop ref="dialogE
       .segmented-buttons
         button(@click.left.stop="toggleServiceIsStickers" :class="{active : serviceIsStickers}" title="stickers")
           img.icon.sticker(src="@/assets/sticker.svg")
-        button(@click.left.stop="toggleServiceIsAI" :class="{active : serviceIsAI}" title="AI")
-          span AI
         button(@click.left.stop="toggleServiceIsPexels" :class="{active : serviceIsPexels}" title="pexels")
           img.icon(src="@/assets/search.svg")
         button(@click.left.stop="toggleServiceIsGifs" :class="{active : serviceIsGifs}" title="gifs")
@@ -414,43 +406,40 @@ dialog.image-picker(v-if="visible" :open="visible" @click.left.stop ref="dialogE
       .badge.danger
         span (シ_ _)シ Something went wrong, Please try again or contact support
 
-  AIImageGeneration(@selectImage="selectImage" :visible="serviceIsAI" :initialPrompt="state.search" :cardUrl="cardUrl" @updateDialogHeight="updateDialogHeight")
-    //-
-  template(v-if="!serviceIsAI")
-    //- search box
-    section.results-section.search-input-wrap
-      .search-wrap
-        img.icon.search(v-if="!state.loading" src="@/assets/search.svg" @click.left="focusSearchInput")
-        Loader(:visible="state.loading")
-        input(
-          :placeholder="placeholder"
-          v-model="searchInput"
-          ref="searchInputElement"
-          @focus="resetPinchCounterZoomDecimal"
-          @keyup.stop.backspace
-          @keyup.stop.enter
-          @mouseup.stop
-          @touchend.stop
-        )
-        button.borderless.clear-input-wrap(@click.left="clearSearch")
-          img.icon.cancel(src="@/assets/add.svg")
-      .error-container(v-if="isNoSearchResults || state.error.unknownServerError || state.error.userIsOffline")
-        p(v-if="isNoSearchResults") Nothing found on {{state.service}} for {{state.search}}
-        .badge.danger(v-if="state.error.unknownServerError")
-          span (シ_ _)シ Something went wrong, Please try again or contact support
-        .badge.danger(v-if="state.error.userIsOffline")
-          span Can't search {{state.service}} while offline, Please try again later
+  //- search box
+  section.results-section.search-input-wrap
+    .search-wrap
+      img.icon.search(v-if="!state.loading" src="@/assets/search.svg" @click.left="focusSearchInput")
+      Loader(:visible="state.loading")
+      input(
+        :placeholder="placeholder"
+        v-model="searchInput"
+        ref="searchInputElement"
+        @focus="resetPinchCounterZoomDecimal"
+        @keyup.stop.backspace
+        @keyup.stop.enter
+        @mouseup.stop
+        @touchend.stop
+      )
+      button.borderless.clear-input-wrap(@click.left="clearSearch")
+        img.icon.cancel(src="@/assets/add.svg")
+    .error-container(v-if="isNoSearchResults || state.error.unknownServerError || state.error.userIsOffline")
+      p(v-if="isNoSearchResults") Nothing found on {{state.service}} for {{state.search}}
+      .badge.danger(v-if="state.error.unknownServerError")
+        span (シ_ _)シ Something went wrong, Please try again or contact support
+      .badge.danger(v-if="state.error.userIsOffline")
+        span Can't search {{state.service}} while offline, Please try again later
 
-    //- search results
-    section.results-section.search-results(ref="resultsSectionElement" :style="{'max-height': state.resultsSectionHeight + 'px'}")
-      ul.results-list.image-list
-        template(v-for="image in state.images" :key="image.id")
-          li(@click.left="selectImage(image)" tabindex="0" v-on:keydown.enter="selectImage(image)" :class="{ active: isCardUrl(image)}")
-            img(:src="image.previewUrl")
-            a(v-if="image.sourcePageUrl" :href="image.sourcePageUrl" target="_blank" @click.left.stop)
-              button.small-button
-                span(v-if="image.sourceName") {{image.sourceName}}{{' '}}
-                img.icon.visit(src="@/assets/visit.svg")
+  //- search results
+  section.results-section.search-results(ref="resultsSectionElement" :style="{'max-height': state.resultsSectionHeight + 'px'}")
+    ul.results-list.image-list
+      template(v-for="image in state.images" :key="image.id")
+        li(@click.left="selectImage(image)" tabindex="0" v-on:keydown.enter="selectImage(image)" :class="{ active: isCardUrl(image)}")
+          img(:src="image.previewUrl")
+          a(v-if="image.sourcePageUrl" :href="image.sourcePageUrl" target="_blank" @click.left.stop)
+            button.small-button
+              span(v-if="image.sourceName") {{image.sourceName}}{{' '}}
+              img.icon.visit(src="@/assets/visit.svg")
 </template>
 
 <style lang="stylus">
