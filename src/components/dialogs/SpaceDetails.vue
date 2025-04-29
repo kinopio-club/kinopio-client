@@ -182,6 +182,28 @@ const toggleSpaceFiltersIsVisible = () => {
   state.spaceFiltersIsVisible = !isVisible
 }
 
+// sort by groups
+
+const spaceGroupsByAlphabetical = (spaces) => {
+  const groups = store.getters['groups/all']
+  const spaceGroups = []
+  spaces.forEach(space => {
+    if (!space.groupId) { return }
+    const isPrevGroup = spaceGroups.find(spaceGroup => spaceGroup.id === space.groupId)
+    if (isPrevGroup) { return }
+    const group = groups.find(group => group.id === space.groupId)
+    spaceGroups.push(group)
+  })
+  return utils.sortByAlphabetical(spaceGroups, 'name')
+}
+const sortByGroups = (spaces, groups) => {
+  const spacesWithGroups = groups.flatMap(group =>
+    spaces.filter(space => space.groupId === group.id)
+  )
+  const spacesWithoutGroups = spaces.filter(space => !space.groupId)
+  return [...spacesWithGroups, ...spacesWithoutGroups]
+}
+
 // sort
 
 const dialogSpaceFilterSortByIsActive = computed(() => {
@@ -230,6 +252,10 @@ const sort = (spaces) => {
     spaces = utils.sortByCreatedAt(spaces)
   } else if (shouldSortByAlphabetical.value) {
     spaces = utils.sortByAlphabetical(spaces, 'name')
+  } else if (shouldSortByGroups.value) {
+    const groups = spaceGroupsByAlphabetical(spaces)
+    spaces = utils.sortByAlphabetical(spaces, 'name')
+    spaces = sortByGroups(spaces, groups)
   } else {
     spaces = utils.sortByUpdatedAt(spaces)
   }
