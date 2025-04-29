@@ -185,7 +185,7 @@ const toggleSpaceFiltersIsVisible = () => {
 // sort
 
 const dialogSpaceFilterSortByIsActive = computed(() => {
-  return shouldSortByCreatedAt.value || shouldSortByAlphabetical.value
+  return shouldSortByCreatedAt.value || shouldSortByAlphabetical.value || shouldSortByGroups.value
 })
 const shouldSortByCreatedAt = computed(() => {
   const value = dialogSpaceFilterSortBy.value
@@ -194,6 +194,10 @@ const shouldSortByCreatedAt = computed(() => {
 const shouldSortByAlphabetical = computed(() => {
   const value = dialogSpaceFilterSortBy.value
   return value === 'alphabetical'
+})
+const shouldSortByGroups = computed(() => {
+  const value = dialogSpaceFilterSortBy.value
+  return value === 'groups'
 })
 const prependFavoriteSpaces = (spaces) => {
   const favoriteSpaces = []
