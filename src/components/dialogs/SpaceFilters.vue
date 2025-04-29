@@ -177,7 +177,9 @@ const userListPlaceholder = computed(() => 'Search Collaborators')
 dialog.narrow.space-filters(v-if="props.visible" :open="props.visible" @click.left.stop ref="dialogElement" :style="{'max-height': state.dialogHeight + 'px'}")
   section.section-title
     .row.title-row
-      span Space Filters
+      div
+        span Space Filters
+        Loader(:visible="props.isLoading" :isSmall="true")
       button.small-button(@click.left="clearAllFilters" title="Clear all space filters")
         img.icon.cancel(src="@/assets/add.svg")
         span Clear
@@ -205,10 +207,6 @@ dialog.narrow.space-filters(v-if="props.visible" :open="props.visible" @click.le
         label(:class="{active: showHiddenSpace}" title="Show hidden spaces")
           input(type="checkbox" v-model="showHiddenSpace")
           span Show Hidden
-
-  //- loading
-  section(v-if="props.isLoading")
-    Loader(:visible="true")
 
   //- other space filter types
   section.results-section.other(v-if="isTemplates")
@@ -260,4 +258,7 @@ dialog.space-filters
       border-top-left-radius 0
     button:last-child
       border-top-right-radius 0
+  .loader
+    vertical-align -2px
+    margin-left 5px
 </style>
