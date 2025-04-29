@@ -365,7 +365,6 @@ const self = {
       if (!shouldRequest({ apiKey, isOnline })) { return }
       try {
         const options = await context.dispatch('requestOptions', { method: 'GET', space: context.rootState.currentSpace })
-        context.commit('isLoadingGroups', true, { root: true })
         const response = await fetch(`${consts.apiHost()}/user`, options)
         return normalizeResponse(response)
       } catch (error) {
@@ -1352,6 +1351,7 @@ const self = {
         context.commit('isLoadingGroups', true, { root: true })
         const options = await context.dispatch('requestOptions', { method: 'GET', space: context.rootState.currentSpace })
         const response = await fetch(`${consts.apiHost()}/user/groups`, options)
+        context.commit('isLoadingGroups', false, { root: true })
         return normalizeResponse(response)
       } catch (error) {
         context.dispatch('handleServerError', { name: 'getUserGroups', error })
