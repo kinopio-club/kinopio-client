@@ -67,6 +67,7 @@ const handleMouseMove = (event) => {
   updateIsMetaKey(event)
   const edgeThreshold = 30
   const toolbar = document.querySelector('#toolbar').getBoundingClientRect()
+  if (!toolbar) { return }
   let footer = document.querySelector('.footer-wrap footer')
   if (footer) {
     footer = footer.getBoundingClientRect().height + 20
