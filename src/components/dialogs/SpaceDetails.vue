@@ -225,7 +225,7 @@ const sort = (spaces) => {
   if (shouldSortByCreatedAt.value) {
     spaces = utils.sortByCreatedAt(spaces)
   } else if (shouldSortByAlphabetical.value) {
-    spaces = utils.sortByAlphabetical(spaces, 'name')(spaces)
+    spaces = utils.sortByAlphabetical(spaces, 'name')
   } else {
     spaces = utils.sortByUpdatedAt(spaces)
   }
