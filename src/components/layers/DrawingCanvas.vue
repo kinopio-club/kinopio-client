@@ -29,7 +29,7 @@ onMounted(() => {
   context.scale(window.devicePixelRatio, window.devicePixelRatio)
   window.addEventListener('pointerup', endDrawing)
   window.addEventListener('scroll', scroll)
-  window.addEventListener('resize', resize)
+  window.addEventListener('resize', updateCanvasSize)
   updatePrevScroll()
   clearCanvas()
   clearStrokes()
@@ -72,7 +72,7 @@ onMounted(() => {
 onBeforeUnmount(() => {
   window.removeEventListener('pointerup', endDrawing)
   window.removeEventListener('scroll', scroll)
-  window.removeEventListener('resize', resize)
+  window.removeEventListener('resize', updateCanvasSize)
   unsubscribe()
   unsubscribeActions()
 })
@@ -393,9 +393,6 @@ const scroll = () => {
   updatePrevScroll()
   redraw()
 }
-const resize = debounce(() => {
-  redraw()
-}, 20)
 const updateCanvasSize = debounce(() => {
   const zoom = store.getters.spaceCounterZoomDecimal
   canvas.width = viewportWidth.value * zoom
