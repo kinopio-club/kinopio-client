@@ -311,6 +311,7 @@ const startDrawing = (event) => {
 // draw
 
 const draw = (event) => {
+  if (utils.isMultiTouch(event)) { return }
   if (!isDrawing) { return }
   currentStroke.push(createPoint(event))
   renderStroke(currentStroke)
