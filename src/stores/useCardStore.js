@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia'
-import store from '@/store/store.js' // TEMP Import your Vuex store
+import store from '@/store/store.js' // TEMP Import Vuex store
 
 import debounce from 'lodash/debounce'
 
@@ -106,6 +106,14 @@ export const useCardStore = defineStore('cards', {
         updates.push(update)
       })
       this.updateCards(updates)
+    },
+
+    incrementZ (id) {
+      const card = this.getCard(id)
+      this.updateCard({
+        id,
+        z: card.z + 1
+      })
     }
   }
 })

@@ -1209,12 +1209,7 @@ const startDraggingCard = (event) => {
   store.commit('parentCardId', props.card.id)
   store.commit('childCardId', '')
   checkIfShouldDragMultipleCards(event)
-
-  // increment z
-  cardStore.updateCard({
-    id: props.card.id,
-    z: props.card.z + 1
-  })
+  cardStore.incrementZ(props.card.id)
 }
 const notifyPressAndHoldToDrag = () => {
   if (isLocked.value) { return }
