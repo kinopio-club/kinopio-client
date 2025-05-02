@@ -22,6 +22,7 @@
     "macrolight": "^1.5.0",
     "nanoid": "^3.3.8",
     "overlap-area": "^1.0.0",
+    "pinia": "^3.0.2",
     "randomcolor": "^0.5.4",
     "shader": "^1.0.0",
     "smartquotes": "^2.3.2",
