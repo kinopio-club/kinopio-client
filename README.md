@@ -23,7 +23,7 @@ The `kinopio-client` is the client web app that users use to read and update spa
 
 ## Run
 
-    npm run serve --host
+    npm run dev --host
     https://kinopio.local:8080
 
 ## Run with Production API Server
