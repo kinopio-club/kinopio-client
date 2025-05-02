@@ -47,19 +47,18 @@ const sortQueueItems = (queue) => {
 }
 const merge = (accumulator, currentValue) => {
   return mergeWith({}, accumulator, currentValue, (objValue, srcValue) => {
-    // Check if both values are arrays AND first item in objValue has an id
-    if (Array.isArray(objValue) && Array.isArray(srcValue) && objValue[0]?.id) {
-      // combine both arrays into one
+    const isObjectArrays = Array.isArray(objValue) && Array.isArray(srcValue) && objValue[0]?.id
+    if (isObjectArrays) {
       const allEntities = [...objValue, ...srcValue]
-      // Create object using reduce
       const entityMap = allEntities.reduce((acc, entity) => {
-        // For each entity, add to accumulator using id as key
-        // e.g. { '1': {id: '1'}, '2': {id: '2'}, '3': {id: '3'} }
-        acc[entity.id] = entity
+        if (!acc[entity.id]) {
+          acc[entity.id] = entity
+        } else {
+          // Deep merge when entity already exists
+          acc[entity.id] = mergeWith({}, acc[entity.id], entity)
+        }
         return acc
-      }, {}) // Start with empty object
-      // Get array of values from object
-      // e.g. [{id: '1'}, {id: '2'}, {id: '3'}]
+      }, {})
       return Object.values(entityMap)
     }
   })
