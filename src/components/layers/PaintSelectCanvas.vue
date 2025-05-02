@@ -2,12 +2,15 @@
 import { reactive, computed, onMounted, onBeforeUnmount, onUnmounted, watch, ref, nextTick } from 'vue'
 import { useStore } from 'vuex'
 
+import { useCardStore } from '@/stores/useCardStore'
+
 import utils from '@/utils.js'
 import collisionDetection from '@/collisionDetection.js'
 import postMessage from '@/postMessage.js'
 import DropGuideLine from '@/components/layers/DropGuideLine.vue'
 
 import { colord, extend } from 'colord'
+const cardStore = useCardStore()
 const store = useStore()
 
 // a sequence of circles that's broadcasted to others and is used for multi-card selection
@@ -166,7 +169,9 @@ const clearHightlightedItems = () => {
 // selectable items
 
 const updateSelectableCardsInViewport = () => {
-  const selectableCards = store.getters['currentCards/isSelectableInViewport']
+  const selectableCards = cardStore.getAllCards
+  // TODO is isSelectableInViewport not needed anymore?
+  // store.getters['currentCards/isSelectableInViewport']
   if (!selectableCards) { return }
   selectableCardsInViewport = selectableCards
   selectableCardsGrid = collisionDetection.createGrid(selectableCards)
