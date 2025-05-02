@@ -1,6 +1,8 @@
 import { defineStore } from 'pinia'
 import store from '@/store/store.js' // TEMP Import Vuex store
 
+import utils from '@/utils.js'
+
 import debounce from 'lodash/debounce'
 
 export const useCardStore = defineStore('cards', {
@@ -72,7 +74,6 @@ export const useCardStore = defineStore('cards', {
       this.pendingUpdates.clear()
       this.dirtyCardIds.clear()
       this.isUpdating = false
-      // console.log('🍇 card updates complete',this.getAllCards)
     },
 
     initializeCards (cards) {
@@ -87,7 +88,7 @@ export const useCardStore = defineStore('cards', {
       console.log('🍍', cards, this.byId, this.allIds)
     },
 
-    // public
+    // move
 
     moveCards ({ ids, endCursor, prevCursor }) {
       if (!endCursor || !prevCursor) { return }
@@ -108,12 +109,42 @@ export const useCardStore = defineStore('cards', {
       this.updateCards(updates)
     },
 
-    incrementZ (id) {
-      const card = this.getCard(id)
-      this.updateCard({
-        id,
-        z: card.z + 1
+    // z-index
+
+    clearAllCardsZ () {
+      const cards = this.getAllCards
+      const updates = cards.map(card => {
+        return {
+          id: card.id,
+          z: 0
+        }
       })
+      this.updateCards(updates)
+    },
+
+    incrementCardsZ (id) {
+      // highest z
+      const cards = this.getAllCards
+      const maxInt = Number.MAX_SAFE_INTEGER - 1000
+      let highestZ = utils.highestItemZ(cards)
+      if (highestZ > maxInt) {
+        this.clearAllCardsZ()
+        highestZ = 1
+      }
+      // update
+      let ids = store.state.multipleCardsSelectedIds
+      const updates = []
+      if (!ids.length) {
+        ids = [id]
+      }
+      ids.forEach(id => {
+        const update = {
+          id,
+          z: highestZ + 1
+        }
+        updates.push(update)
+      })
+      this.updateCards(updates)
     }
   }
 })
