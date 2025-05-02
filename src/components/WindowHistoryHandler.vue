@@ -32,7 +32,7 @@ const updateWindowHistory = async (space) => {
   const isEmbedMode = store.state.isEmbedMode
   space = space || store.state.currentSpace
   const spaceUrl = utils.url(space)
-  const preventUpdate = window.location.pathname.includes(spaceUrl)
+  const preventUpdate = window.location.pathname.includes(spaceUrl) || spaceUrl.startsWith('loading--')
   if (preventUpdate) { return }
   const currentUserIsSignedIn = store.getters['currentUser/isSignedIn']
   store.commit('currentSpacePath', spaceUrl, { root: true })
@@ -52,7 +52,7 @@ const updateWindowTitle = () => {
     title = 'Kinopio'
   }
   if (consts.isDevelopment()) {
-    title = `DEV ${title}`
+    title = `[DEV] ${title}`
   }
   document.title = title
 }

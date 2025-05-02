@@ -506,12 +506,6 @@ export default {
       } else {
         context.commit('isUpgraded', false)
       }
-      const remoteTags = await context.dispatch('api/getUserTags', null, { root: true }) || []
-      context.dispatch('tags', remoteTags)
-      context.dispatch('groups/restore', remoteUser.groups, { root: true })
-      if (context.rootState.shouldNotifyIsJoiningGroup) {
-        context.commit('notifyIsJoiningGroup', true, { root: true })
-      }
     },
     restoreUserAssociatedData: async (context) => {
       try {
@@ -520,11 +514,13 @@ export default {
           context.commit('isLoadingFavorites', false, { root: true })
           return
         }
-        const [favoriteSpaces, favoriteUsers, favoriteColors, hiddenSpaces] = await Promise.all([
+        const [favoriteSpaces, favoriteUsers, favoriteColors, hiddenSpaces, tags, groups] = await Promise.all([
           context.dispatch('api/getUserFavoriteSpaces', null, { root: true }),
           context.dispatch('api/getUserFavoriteUsers', null, { root: true }),
           context.dispatch('api/getUserFavoriteColors', null, { root: true }),
-          context.dispatch('api/getUserHiddenSpaces', null, { root: true })
+          context.dispatch('api/getUserHiddenSpaces', null, { root: true }),
+          context.dispatch('api/getUserTags', null, { root: true }),
+          context.dispatch('api/getUserGroups', null, { root: true })
         ])
         if (favoriteUsers) {
           context.commit('favoriteUsers', favoriteUsers)
@@ -537,6 +533,12 @@ export default {
         }
         if (hiddenSpaces) {
           context.commit('hiddenSpaces', hiddenSpaces)
+        }
+        if (tags) {
+          context.dispatch('tags', tags)
+        }
+        if (groups) {
+          context.commit('groups/restore', groups, { root: true })
         }
         context.commit('isLoadingFavorites', false, { root: true })
       } catch (error) {
@@ -594,12 +596,12 @@ export default {
     },
     updateHiddenSpace: async (context, { spaceId, isHidden }) => {
       const space = { id: spaceId }
-      let hiddenSpaces = utils.clone(context.state.hiddenSpaces)
+      let hiddenSpaces = utils.clone(context.state.hiddenSpaces) || []
       if (isHidden) {
         hiddenSpaces.push(space)
       } else {
         hiddenSpaces = hiddenSpaces.filter(hiddenSpace => {
-          return hiddenSpace.id !== spaceId
+          return hiddenSpace?.id !== spaceId
         })
       }
       context.commit('hiddenSpaces', hiddenSpaces)

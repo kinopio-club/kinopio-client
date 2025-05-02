@@ -608,8 +608,8 @@ dialog.narrow.multiple-selected-actions(
     position absolute
     left initial
     right 0
-    top 0
-    padding-right 6px
+    top -5px
+    padding-right 2px
     padding-left 2px
     padding-bottom 2px
     z-index 1

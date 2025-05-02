@@ -476,8 +476,10 @@ export default {
         updated.y = target.y + target.resizeHeight - borderWidth
       }
       context.dispatch('history/resume', null, { root: true })
-      context.dispatch('update', updated)
       context.commit('snapGuides', [])
+      nextTick(() => {
+        context.dispatch('update', updated)
+      })
     },
     expand: (context, { side, origin, target }) => {
       const padding = consts.spaceBetweenCards

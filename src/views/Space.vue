@@ -56,6 +56,9 @@ let processQueueIntervalTimer, hourlyTasks
 
 // init user and space app state
 const init = async () => {
+  if (store.state.shouldNotifyIsJoiningGroup) {
+    store.commit('notifyIsJoiningGroup', true)
+  }
   store.dispatch('api/updateDateImage')
   store.dispatch('analytics/event', 'pageview')
   await cache.migrateFromLocalStorage()
@@ -606,11 +609,10 @@ const handleTouchEnd = (event) => {
 const stopInteractions = async (event) => {
   console.info('💣 stopInteractions')
   const isCardsSelected = store.state.currentDraggingCardId || store.state.multipleCardsSelectedIds.length
-  const isBoxesSelected = store.state.multipleBoxesSelectedIds.length
   if (isCardsSelected && store.state.cardsWereDragged) {
     store.dispatch('currentCards/afterMove')
   }
-  if (isBoxesSelected && store.state.boxesWereDragged) {
+  if (store.state.boxesWereDragged) {
     store.dispatch('currentBoxes/afterMove')
   }
   updateIconsNotDraggable()

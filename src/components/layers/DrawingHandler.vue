@@ -82,7 +82,6 @@ const startDrawing = (event) => {
   store.commit('triggerStartDrawing', event)
 }
 const draw = throttle((event) => {
-  if (utils.isMultiTouch(event)) { return }
   store.commit('triggerDraw', event)
 }, 16) // 60fps
 
