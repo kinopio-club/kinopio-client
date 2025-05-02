@@ -1,90 +1,84 @@
-<template lang="pug">
-dialog.live(v-if="visible" :open="visible" ref="dialog" :style="{'max-height': dialogHeight + 'px'}")
-  section
-    p
-      img.icon.camera(src="@/assets/camera.svg")
-      span Live Public Spaces
-      Loader(:visible="loading")
-  section.results-section(v-if="spaces.length" ref="results" :style="{'max-height': resultsSectionHeight + 'px'}")
-    SpaceList(
-      :spaces="spaces"
-      :showOtherUsers="true"
-      :hideExploreBadge="true"
-      @selectSpace="changeSpace"
-      :resultsSectionHeight="resultsSectionHeight"
-      :parentDialog="parentDialog"
-      :previewImageIsWide="true"
-      :hideFilter="true"
-    )
-  section.empty(v-if="!spaces.length")
-    p No public spaces are currently being edited, check back soon
-    img.placeholder(src="@/assets/cat-book.jpg")
-</template>
+<script setup>
+import { reactive, computed, onMounted, onBeforeUnmount, watch, ref, nextTick } from 'vue'
+import { useStore } from 'vuex'
 
-<script>
 import SpaceList from '@/components/SpaceList.vue'
 import Loader from '@/components/Loader.vue'
 import utils from '@/utils.js'
 
-export default {
-  name: 'Live',
-  components: {
-    SpaceList,
-    Loader
-  },
-  props: {
-    visible: Boolean,
-    spaces: Array,
-    loading: Boolean
-  },
-  data () {
-    return {
-      dialogHeight: null,
-      resultsSectionHeight: null
-    }
-  },
-  computed: {
-    parentDialog () { return 'live' }
-  },
-  watch: {
-    visible (visible) {
-      if (visible) {
-        this.updateDialogHeight()
-        this.updateResultsSectionHeight()
-        this.$store.commit('shouldExplicitlyHideFooter', true)
-      } else {
-        this.$store.commit('shouldExplicitlyHideFooter', false)
-      }
-    }
-  },
-  created () {
-    window.addEventListener('resize', this.updateHeights)
-  },
-  methods: {
-    changeSpace (space) {
-      this.$store.dispatch('currentSpace/changeSpace', space)
-    },
-    updateHeights () {
-      this.updateDialogHeight()
-      this.updateResultsSectionHeight()
-    },
-    updateDialogHeight () {
-      if (!this.visible) { return }
-      this.$nextTick(() => {
-        const element = this.$refs.dialog
-        this.dialogHeight = utils.elementHeight(element)
-      })
-    },
-    updateResultsSectionHeight () {
-      if (!this.visible) { return }
-      this.$nextTick(() => {
-        const element = this.$refs.results
-        this.resultsSectionHeight = utils.elementHeight(element, true)
-      })
-    }
+const store = useStore()
+
+const dialogElement = ref(null)
+const resultsElement = ref(null)
+
+onMounted(() => {
+  window.addEventListener('resize', updateDialogHeight)
+})
+onBeforeUnmount(() => {
+  window.removeEventListener('resize', updateDialogHeight)
+})
+
+const props = defineProps({
+  visible: Boolean,
+  spaces: Array,
+  loading: Boolean
+})
+const state = reactive({
+  dialogHeight: null,
+  resultsSectionHeight: null
+})
+
+watch(() => props.visible, (value, prevValue) => {
+  if (value) {
+    updateDialogHeight()
+    updateResultsSectionHeight()
+    store.commit('shouldExplicitlyHideFooter', true)
+  } else {
+    store.commit('shouldExplicitlyHideFooter', false)
   }
+})
+
+const updateDialogHeight = async () => {
+  if (!props.visible) { return }
+  await nextTick()
+  const element = dialogElement.value
+  state.dialogHeight = utils.elementHeight(element)
+}
+const updateResultsSectionHeight = async () => {
+  if (!props.visible) { return }
+  await nextTick()
+  const element = resultsElement.value
+  state.resultsSectionHeight = utils.elementHeight(element, true)
+}
+
+const parentDialog = computed(() => 'live')
+const changeSpace = (space) => {
+  store.dispatch('currentSpace/changeSpace', space)
 }
 </script>
+
+<template lang="pug">
+dialog.live(v-if="props.visible" :open="props.visible" ref="dialog" :style="{'max-height': state.dialogHeight + 'px'}")
+  section
+    p
+      img.icon.camera(src="@/assets/camera.svg")
+      span Live Public Spaces
+      Loader(:visible="props.loading")
+  section.results-section(v-if="props.spaces.length" ref="results" :style="{'max-height': state.resultsSectionHeight + 'px'}")
+    SpaceList(
+      :spaces="props.spaces"
+      :showOtherUsers="true"
+      :hideExploreBadge="true"
+      @selectSpace="changeSpace"
+      :resultsSectionHeight="state.resultsSectionHeight"
+      :parentDialog="parentDialog"
+      :previewImageIsWide="true"
+      :hideFilter="true"
+    )
+  section.empty(v-if="!props.spaces.length")
+    p No public spaces are currently being edited, check back soon
+    img.placeholder(src="@/assets/cat-book.jpg")
+</template>
 
 <style lang="stylus">
 .live
@@ -111,5 +105,4 @@ export default {
       justify-content flex-start
     &.multiple-users
       width 100%
-
 </style>
