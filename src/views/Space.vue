@@ -2,7 +2,6 @@
 import { reactive, computed, onMounted, onBeforeUnmount, onUnmounted, watch, ref, nextTick } from 'vue'
 import { useStore } from 'vuex'
 
-import Card from '@/components/Card.vue'
 import CardDetails from '@/components/dialogs/CardDetails.vue'
 import OtherCardDetails from '@/components/dialogs/OtherCardDetails.vue'
 import BoxDetails from '@/components/dialogs/BoxDetails.vue'
