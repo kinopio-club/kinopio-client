@@ -2,6 +2,8 @@
 import { reactive, computed, onMounted, onUpdated, onBeforeUnmount, watch, ref, nextTick } from 'vue'
 import { useStore, mapState, mapGetters } from 'vuex'
 
+import { useCardStore } from '@/stores/useCardStore'
+
 import CardOrBoxActions from '@/components/subsections/CardOrBoxActions.vue'
 import ImagePicker from '@/components/dialogs/ImagePicker.vue'
 import CardTips from '@/components/dialogs/CardTips.vue'
@@ -24,6 +26,7 @@ import consts from '@/consts.js'
 import debounce from 'lodash-es/debounce'
 import qs from '@aguezz/qs-parse'
 import { nanoid } from 'nanoid'
+const cardStore = useCardStore()
 
 let prevCardId, prevCardName
 let previousTags = []
@@ -112,7 +115,8 @@ const state = reactive({
 
 const card = computed(() => {
   const cardId = store.state.cardDetailsIsVisibleForCardId
-  return store.getters['currentCards/byId'](cardId) || {}
+  return cardStore.getCard(cardId) || {}
+  // return store.getters['currentCards/byId'](cardId) || {}
 })
 const visible = computed(() => utils.objectHasKeys(card.value))
 watch(() => visible.value, (value, prevValue) => {
@@ -485,23 +489,31 @@ const updateCardName = async (newName) => {
     return
   }
   const userId = store.state.currentUser.id
-  const item = {
+  const update = {
+    id: cardId,
     name: newName,
-    id: card.value.id,
     nameUpdatedAt: new Date(),
     nameUpdatedByUserId: userId
   }
-  store.dispatch('currentCards/update', { card: item, shouldPreventUpdateDimensionsAndPaths: true })
+  console.log('🍇', cardId, update)
+  cardStore.updateCards([update])
+
+  // TODO
+  // updateCardsDimensions(ids)
+  // update connectionpaths for item (id)
+  // store.dispatch('currentCards/update', { card: item, shouldPreventUpdateDimensionsAndPaths: true })
+
   updateMediaUrls()
   await updateTags()
   updateDimensionsAndPathsDebounced()
   if (createdByUser.value.id !== store.state.currentUser.id) { return }
   if (state.notifiedMembers) { return } // send card update notifications only once per card, per session
-  if (item.name) {
+  if (newName) {
     store.dispatch('userNotifications/addCardUpdated', { cardId: card.value.id, type: 'updateCard' })
     state.notifiedMembers = true
   }
 }
+
 const normalizedName = computed(() => {
   let newName = name.value
   if (url.value) {

@@ -2,6 +2,8 @@
 import { reactive, computed, onMounted, onBeforeUnmount, onUnmounted, watch, ref, nextTick } from 'vue'
 import { useStore } from 'vuex'
 
+import { useCardStore } from '@/stores/useCardStore'
+
 import CardDetails from '@/components/dialogs/CardDetails.vue'
 import OtherCardDetails from '@/components/dialogs/OtherCardDetails.vue'
 import BoxDetails from '@/components/dialogs/BoxDetails.vue'
@@ -45,6 +47,7 @@ import consts from '@/consts.js'
 import sortBy from 'lodash-es/sortBy'
 import uniq from 'lodash-es/uniq'
 import debounce from 'lodash-es/debounce'
+const cardStore = useCardStore()
 
 const store = useStore()
 
@@ -425,10 +428,16 @@ const dragItems = () => {
   store.dispatch('currentUser/notifyReadOnly', prevCursor)
   const shouldPrevent = !store.getters['currentUser/canEditSpace']()
   if (shouldPrevent) { return }
-  store.dispatch('currentCards/move', {
-    endCursor,
-    prevCursor
-  })
+  // cards
+  let cardIds = store.state.multipleCardsSelectedIds
+  if (!cardIds.length) {
+    cardIds = [store.state.currentDraggingCardId]
+  }
+  cardIds = cardIds.filter(id => Boolean(id))
+  if (!cardIds.length) { return }
+  cardStore.moveCards({ ids: cardIds, endCursor, prevCursor })
+
+  // boxes
   checkShouldShowDetails()
   store.dispatch('currentBoxes/move', {
     endCursor,
@@ -608,9 +617,10 @@ const handleTouchEnd = (event) => {
 const stopInteractions = async (event) => {
   console.info('💣 stopInteractions')
   const isCardsSelected = store.state.currentDraggingCardId || store.state.multipleCardsSelectedIds.length
-  if (isCardsSelected && store.state.cardsWereDragged) {
-    store.dispatch('currentCards/afterMove')
-  }
+  // TODO no need for aftermove
+  // if (isCardsSelected && store.state.cardsWereDragged) {
+  //   store.dispatch('currentCards/afterMove')
+  // }
   if (store.state.boxesWereDragged) {
     store.dispatch('currentBoxes/afterMove')
   }

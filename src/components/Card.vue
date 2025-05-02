@@ -2,6 +2,8 @@
 import { reactive, computed, onMounted, onBeforeUnmount, onUnmounted, watch, ref, nextTick } from 'vue'
 import { useStore, mapState, mapGetters } from 'vuex'
 
+import { useCardStore } from '@/stores/useCardStore'
+
 import utils from '@/utils.js'
 import Frames from '@/components/Frames.vue'
 import Loader from '@/components/Loader.vue'
@@ -26,6 +28,7 @@ import isToday from 'dayjs/plugin/isToday'
 import qs from '@aguezz/qs-parse'
 import randomColor from 'randomcolor'
 import { nanoid } from 'nanoid'
+const cardStore = useCardStore()
 
 dayjs.extend(isToday)
 
@@ -1206,6 +1209,12 @@ const startDraggingCard = (event) => {
   store.commit('parentCardId', props.card.id)
   store.commit('childCardId', '')
   checkIfShouldDragMultipleCards(event)
+
+  // increment z
+  cardStore.updateCard({
+    id: props.card.id,
+    z: props.card.z + 1
+  })
 }
 const notifyPressAndHoldToDrag = () => {
   if (isLocked.value) { return }

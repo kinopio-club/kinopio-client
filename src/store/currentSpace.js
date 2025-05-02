@@ -6,6 +6,8 @@ import cache from '@/cache.js'
 import consts from '@/consts.js'
 import postMessage from '@/postMessage.js'
 
+import { useCardStore } from '@/stores/useCardStore'
+
 import { nextTick } from 'vue'
 import randomColor from 'randomcolor'
 import { nanoid } from 'nanoid'
@@ -599,105 +601,117 @@ const currentSpace = {
       context.dispatch('currentConnections/updateSpaceId', space.id, { root: true })
       context.dispatch('currentBoxes/updateSpaceId', space.id, { root: true })
     },
+    // todo chunks not needed?
     restoreSpaceInChunks: (context, { space, isRemote, addCards, addConnections, addConnectionTypes, addBoxes }) => {
       if (!utils.objectHasKeys(space)) { return }
-      space.connections = utils.migrationConnections(space.connections)
-      addConnections = utils.migrationConnections(addConnections)
-      console.info('🌱 Restoring space', space, { isRemote, addCards, addConnections, addConnectionTypes, addBoxes })
-      context.commit('isLoadingSpace', true, { root: true })
-      const chunkSize = 50
-      const timeStart = utils.unixTime()
-      const origin = { x: window.scrollX, y: window.scrollY }
-      // init items
-      let cards = addCards || space.cards || []
-      let connectionTypes = addConnectionTypes || space.connectionTypes || []
-      connectionTypes = connectionTypes.filter(type => Boolean(type))
-      let connections = addConnections || space.connections || []
-      cards = utils.normalizeItems(cards)
-      connections = utils.normalizeItems(connections)
-      const boxes = addBoxes || space.boxes || []
-      // sort cards
-      const cardIds = Object.keys(cards)
-      cards = cardIds.map(id => {
-        const card = cards[id]
-        card.distanceFromOrigin = utils.distanceBetweenTwoPoints(card, origin)
-        return card
-      })
-      cards = sortBy(cards, ['distanceFromOrigin'])
-      // page size
-      const itemsRect = utils.pageSizeFromItems(cards)
+
+      context.dispatch('restoreSpaceComplete', { space, isRemote })
+      const itemsRect = utils.pageSizeFromItems(space.cards)
       context.commit('resetPageSizes', null, { root: true })
       context.commit('updatePageSizes', itemsRect, { root: true })
-      // sort connections
-      const connectionIds = Object.keys(connections)
-      connections = connectionIds.map(id => {
-        const connection = connections[id]
-        const pathIsEmpty = connection.path === 'm0,0 q00,00 0,0'
-        if (connection.path && !pathIsEmpty) {
-          const coords = utils.startCoordsFromConnectionPath(connection.path)
-          connection.distanceFromOrigin = utils.distanceBetweenTwoPoints(coords, origin)
-        }
-        return connection
-      })
-      connections = sortBy(connections, ['distanceFromOrigin'])
-      // restore space
-      if (!isRemote) {
-        context.commit('currentCards/clear', null, { root: true })
-        context.commit('currentConnections/clear', null, { root: true })
-        context.commit('currentBoxes/clear', null, { root: true })
-        context.dispatch('updateModulesSpaceId', space)
-      }
-      context.commit('isLoadingSpace', true, { root: true })
-      context.commit('restoreSpace', space)
-      // split into chunks
-      const cardChunks = utils.splitArrayIntoChunks(cards, chunkSize)
-      const connectionChunks = utils.splitArrayIntoChunks(connections, chunkSize)
-      let primaryIsCards = true
-      let primaryChunks = cardChunks
-      let secondaryChunks = connectionChunks
-      if (connectionChunks.length > cardChunks.length) {
-        primaryIsCards = false
-        primaryChunks = connectionChunks
-        secondaryChunks = cardChunks
-      }
-      // restore space
-      if (!primaryChunks.length) {
-        context.commit('currentBoxes/restore', boxes, { root: true })
-        context.commit('currentConnections/restoreTypes', connectionTypes, { root: true })
-        context.dispatch('restoreSpaceComplete', { space, isRemote, timeStart })
-        return
-      }
-      // restore types
-      context.commit('currentConnections/restoreTypes', connectionTypes, { root: true })
-      // restore boxes
-      context.commit('currentBoxes/restore', boxes, { root: true })
-      // restore chunks
-      primaryChunks.forEach((chunk, index) => {
-        defer(function () {
-          if (space.id !== context.state.id) { return }
-          if (!isRemote && isLoadingRemoteSpace) { return }
-          // primary
-          if (primaryIsCards) {
-            context.commit('currentCards/restore', chunk, { root: true })
-          } else {
-            context.commit('currentConnections/restore', chunk, { root: true })
-          }
-          // secondary
-          chunk = secondaryChunks[index]
-          if (chunk && primaryIsCards) {
-            context.commit('currentConnections/restore', chunk, { root: true })
-          } else if (chunk) {
-            context.commit('currentCards/restore', chunk, { root: true })
-          }
-          // complete
-          const isRestoreComplete = index === primaryChunks.length - 1
-          if (isRestoreComplete) {
-            context.dispatch('restoreSpaceComplete', { space, isRemote, timeStart })
-          }
-        })
-      })
+
+      // space.connections = utils.migrationConnections(space.connections)
+      // addConnections = utils.migrationConnections(addConnections)
+      // console.info('🌱 Restoring space', space, { isRemote, addCards, addConnections, addConnectionTypes, addBoxes })
+      // context.commit('isLoadingSpace', true, { root: true })
+      // const chunkSize = 50
+      // const timeStart = utils.unixTime()
+      // const origin = { x: window.scrollX, y: window.scrollY }
+      // // init items
+      // let cards = addCards || space.cards || []
+      // let connectionTypes = addConnectionTypes || space.connectionTypes || []
+      // connectionTypes = connectionTypes.filter(type => Boolean(type))
+      // let connections = addConnections || space.connections || []
+      // cards = utils.normalizeItems(cards)
+      // connections = utils.normalizeItems(connections)
+      // const boxes = addBoxes || space.boxes || []
+      // // sort cards
+      // const cardIds = Object.keys(cards)
+      // cards = cardIds.map(id => {
+      //   const card = cards[id]
+      //   card.distanceFromOrigin = utils.distanceBetweenTwoPoints(card, origin)
+      //   return card
+      // })
+      // cards = sortBy(cards, ['distanceFromOrigin'])
+      // // page size
+      // const itemsRect = utils.pageSizeFromItems(cards)
+      // context.commit('resetPageSizes', null, { root: true })
+      // context.commit('updatePageSizes', itemsRect, { root: true })
+      // // sort connections
+      // const connectionIds = Object.keys(connections)
+      // connections = connectionIds.map(id => {
+      //   const connection = connections[id]
+      //   const pathIsEmpty = connection.path === 'm0,0 q00,00 0,0'
+      //   if (connection.path && !pathIsEmpty) {
+      //     const coords = utils.startCoordsFromConnectionPath(connection.path)
+      //     connection.distanceFromOrigin = utils.distanceBetweenTwoPoints(coords, origin)
+      //   }
+      //   return connection
+      // })
+      // connections = sortBy(connections, ['distanceFromOrigin'])
+      // // restore space
+      // if (!isRemote) {
+      //   context.commit('currentCards/clear', null, { root: true })
+      //   context.commit('currentConnections/clear', null, { root: true })
+      //   context.commit('currentBoxes/clear', null, { root: true })
+      //   context.dispatch('updateModulesSpaceId', space)
+      // }
+      // context.commit('isLoadingSpace', true, { root: true })
+      // context.commit('restoreSpace', space)
+      // // split into chunks
+      // const cardChunks = utils.splitArrayIntoChunks(cards, chunkSize)
+      // const connectionChunks = utils.splitArrayIntoChunks(connections, chunkSize)
+      // let primaryIsCards = true
+      // let primaryChunks = cardChunks
+      // let secondaryChunks = connectionChunks
+      // if (connectionChunks.length > cardChunks.length) {
+      //   primaryIsCards = false
+      //   primaryChunks = connectionChunks
+      //   secondaryChunks = cardChunks
+      // }
+      // // restore space
+      // if (!primaryChunks.length) {
+      //   context.commit('currentBoxes/restore', boxes, { root: true })
+      //   context.commit('currentConnections/restoreTypes', connectionTypes, { root: true })
+      //   context.dispatch('restoreSpaceComplete', { space, isRemote, timeStart })
+      //   return
+      // }
+      // // restore types
+      // context.commit('currentConnections/restoreTypes', connectionTypes, { root: true })
+      // // restore boxes
+      // context.commit('currentBoxes/restore', boxes, { root: true })
+      // // restore chunks
+      // primaryChunks.forEach((chunk, index) => {
+      //   defer(function () {
+      //     if (space.id !== context.state.id) { return }
+      //     if (!isRemote && isLoadingRemoteSpace) { return }
+      //     // primary
+      //     if (primaryIsCards) {
+      //       context.commit('currentCards/restore', chunk, { root: true })
+
+      //     } else {
+      //       context.commit('currentConnections/restore', chunk, { root: true })
+      //     }
+      //     // secondary
+      //     chunk = secondaryChunks[index]
+      //     if (chunk && primaryIsCards) {
+      //       context.commit('currentConnections/restore', chunk, { root: true })
+      //     } else if (chunk) {
+      //       context.commit('currentCards/restore', chunk, { root: true })
+
+      //     }
+      //     // complete
+      //     const isRestoreComplete = index === primaryChunks.length - 1
+      //     if (isRestoreComplete) {
+      //       context.dispatch('restoreSpaceComplete', { space, isRemote, timeStart })
+      //     }
+      //   })
+      // })
     },
     restoreSpaceComplete: async (context, { space, isRemote, timeStart }) => {
+      const cardStore = useCardStore()
+      await cardStore.initializeCards(space.cards)
+
       context.dispatch('history/reset', null, { root: true })
       postMessage.send({ name: 'restoreSpaceComplete', value: true })
       const timeEnd = utils.unixTime()
