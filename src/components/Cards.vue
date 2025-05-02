@@ -20,14 +20,13 @@ const unlockedCards = computed(() => cards.value.filter(card => !card.isLocked))
 const currentHoveredCard = computed(() => {
   const cardId = store.state.currentUserIsHoveringOverCardId
   if (!cardId) { return }
-  const card = store.getters['currentCards/byId'](cardId)
+  const card = cardStore.getCard(cardId)
   return card
 })
 const currentHoveredCardIsComment = computed(() => {
   const card = currentHoveredCard.value
   if (!card) { return }
-  const isComment = store.getters['currentCards/isComment'](card)
-  return isComment
+  return card.isComment
 })
 const cardCommentPreviewIsVisible = computed(() => {
   if (shouldPrevent.value) { return }
