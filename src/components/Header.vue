@@ -659,24 +659,29 @@ header(v-if="isVisible" :style="state.position" :class="{'fade-out': isFadingOut
                     img.icon.inbox-icon(src="@/assets/inbox.svg")
                   span(v-if="currentSpaceIsTemplate")
                     img.icon.templates(src="@/assets/templates.svg")
-                  span {{currentSpaceName}}
+                  span
+                    span.space-name {{currentSpaceName}}
                     PrivacyIcon(:privacy="currentSpace.privacy" :closedIsNotVisible="true")
-                  img.icon.sunglasses.explore(src="@/assets/sunglasses.svg" v-if="shouldShowInExplore" title="Shown in Explore")
               SpaceDetails(:visible="state.spaceDetailsIsVisible")
               ImportArenaChannel(:visible="importArenaChannelIsVisible")
               SpaceDetailsInfo(:visible="state.spaceDetailsInfoIsVisible")
               ImportExport(:visible="state.importIsVisible" :isImport="true")
-
-              //- read only badge
-              .label-badge.space-name-badge-wrap(v-if="!userCanEditSpace")
-                span(:class="{'invisible': state.readOnlyJiggle}")
-                  span Read Only
-                span.invisible-badge(ref="readOnlyElement" :class="{'badge-jiggle': state.readOnlyJiggle, 'invisible': !state.readOnlyJiggle}")
-                  span Read Only
-              //- comment only badge
-              .label-badge.space-name-badge-wrap.success(v-else-if="userCanOnlyComment")
-                span(:class="{'invisible': state.readOnlyJiggle}")
-                  span Comment Only
+              //- space name badges
+              .label-badge-row.row
+                //- read only badge
+                .label-badge(v-if="!userCanEditSpace")
+                  span(:class="{'invisible': state.readOnlyJiggle}")
+                    span Read Only
+                  span.invisible-badge(ref="readOnlyElement" :class="{'badge-jiggle': state.readOnlyJiggle, 'invisible': !state.readOnlyJiggle}")
+                    span Read Only
+                //- comment only badge
+                .label-badge.success(v-else-if="userCanOnlyComment")
+                  span(:class="{'invisible': state.readOnlyJiggle}")
+                    span Comment Only
+                //- in explore badge
+                .label-badge.secondary(v-if="shouldShowInExplore")
+                  span
+                    img.icon.sunglasses.explore(src="@/assets/sunglasses.svg")
 
               //- Loading State
               .button-wrap.space-status-button-wrap(v-if="spaceHasStatusAndStatusDialogIsNotVisible")
@@ -888,20 +893,36 @@ header
     .view-hidden
       margin-left 5px
 
-  .space-name-badge-wrap
-    min-width 63px
-    width max-content
-    pointer-events none
+  .label-badge-row
     position absolute
-    background-color var(--info-background)
-    bottom -8px
-    left 5px
-    z-index 1
-    span
-      width 100%
-      color var(--primary)
-    &.success
-      background-color var(--success-background)
+    left 7px
+    margin-top 4px
+    width max-content
+    flex-wrap nowrap
+    display flex
+    .explore
+      width 16px
+      vertical-align -2px
+    .label-badge
+      width max-content
+      pointer-events none
+      position relative
+      background-color var(--info-background)
+      z-index 1
+      span
+        width 100%
+        color var(--primary)
+      &.success
+        background-color var(--success-background)
+      &.secondary
+        background-color var(--secondary-background)
+
+  .space-name
+    max-width 20dvw
+    display table-cell
+    white-space nowrap
+    overflow hidden
+    text-overflow ellipsis
 
   .invisible
     visibility hidden
