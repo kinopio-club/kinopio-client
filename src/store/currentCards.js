@@ -261,6 +261,8 @@ export default {
           x += offset
           y += offset
         }
+
+        // use getNormalizedNewCard
         return {
           id: card.id || nanoid(),
           x,
@@ -272,6 +274,7 @@ export default {
           height: Math.round(card.height),
           userId: context.rootState.currentUser.id,
           backgroundColor: card.backgroundColor,
+
           shouldUpdateUrlPreview: true,
           urlPreviewIsVisible: true,
           urlPreviewDescription: card.urlPreviewDescription,

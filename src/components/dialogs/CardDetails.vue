@@ -116,7 +116,6 @@ const state = reactive({
 const card = computed(() => {
   const cardId = store.state.cardDetailsIsVisibleForCardId
   return cardStore.getCard(cardId) || {}
-  // return store.getters['currentCards/byId'](cardId) || {}
 })
 const visible = computed(() => utils.objectHasKeys(card.value))
 watch(() => visible.value, (value, prevValue) => {
@@ -495,9 +494,8 @@ const updateCardName = async (newName) => {
     nameUpdatedAt: new Date(),
     nameUpdatedByUserId: userId
   }
-  console.log('🍇', cardId, update)
   cardStore.updateCards([update])
-
+  cardStore.updateCardsDimensions([cardId])
   // TODO
   // updateCardsDimensions(ids)
   // update connectionpaths for item (id)
