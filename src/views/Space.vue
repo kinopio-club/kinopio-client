@@ -263,7 +263,7 @@ const tiltCards = (event) => {
   if (endCursor.x - prevCursor.x > 0 || endCursor.y - prevCursor.y > 0) {
     delta = -delta
   }
-  store.dispatch('currentCards/tilt', { cardIds, delta })
+  cardStore.tiltCards(cardIds, delta)
 }
 const stopTiltingCards = () => {
   if (!store.state.currentUserIsTiltingCard) { return }

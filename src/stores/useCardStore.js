@@ -396,6 +396,22 @@ export const useCardStore = defineStore('cards', {
         store.dispatch('broadcast/update', { updates: card, storeName: 'cardStore', actionName: 'createCard' }, { root: true })
       }
       await store.dispatch('api/addToQueue', { name: 'createCard', body: card }, { root: true })
+    },
+    tiltCards (ids, delta) {
+      const maxDegrees = 25
+      const updates = []
+      ids.forEach(id => {
+        const card = this.getCard(id)
+        let tilt = card.tilt || 0
+        tilt = tilt + delta
+        tilt = Math.min(maxDegrees, tilt)
+        tilt = Math.max(-maxDegrees, tilt)
+        tilt = Math.round(tilt)
+        updates.push({ id, tilt })
+        // const connections = context.rootGetters['currentConnections/byItemId'](id)
+        // context.dispatch('currentConnections/updatePathsWhileDragging', { connections }, { root: true })
+      })
+      this.updateCards(updates)
     }
 
   }
