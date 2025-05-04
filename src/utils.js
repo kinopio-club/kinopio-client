@@ -999,10 +999,13 @@ export default {
 
   // Cards
 
+  cardElement (card) {
+    return document.querySelector(`.card-wrap[data-card-id="${card.id}"]`)
+  },
   cardElementDimensions (card) {
     if (!card) { return }
     card = this.clone(card)
-    const element = document.querySelector(`.card-wrap[data-card-id="${card.id}"]`)
+    const element = this.cardElement(card)
     if (!element) { return }
     const cardId = card.id
     card.shouldRender = element.dataset.shouldRender
@@ -1032,7 +1035,7 @@ export default {
   },
   updateCardDimensionsDataWhileDragging (card) {
     if (!card) { return }
-    const element = document.querySelector(`.card-wrap[data-card-id="${card.id}"]`)
+    const element = this.cardElement(card)
     if (!element) { return }
     element.dataset.x = card.x
     element.dataset.y = card.y

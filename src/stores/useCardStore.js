@@ -1,9 +1,13 @@
+import { nextTick } from 'vue'
 import { defineStore } from 'pinia'
 import store from '@/store/store.js' // TEMP Import Vuex store
 
 import utils from '@/utils.js'
+import consts from '@/consts.js'
 
 import debounce from 'lodash/debounce'
+
+let tallestCardHeight = 0
 
 export const useCardStore = defineStore('cards', {
   state: () => ({
@@ -18,45 +22,76 @@ export const useCardStore = defineStore('cards', {
     getCard: (state) => {
       return (id) => state.byId[id]
     },
-
-    getAllCards: (state) => {
-      return state.allIds.map(id => state.byId[id])
+    getCards: (state) => {
+      return (ids) => ids.map(id => this.getCard(id))
     },
-
+    getAllCards: (state) => {
+      let cards = state.allIds.map(id => state.byId[id])
+      cards = cards.filter(card => !card.isRemoved)
+      return cards
+    },
     getDirtyCards: (state) => {
       return Array.from(state.dirtyCardIds).map(id => state.byId[id])
     },
-
-    getVisibleCards: (state) => {
-      return (visibleIds) => visibleIds.map(id => state.byId[id])
+    getIsCardComment: (state) => {
+      return (card) => card.isComment || utils.isNameComment(card.name)
+    },
+    getVerticallyAlignedCardsBelow: (state) => {
+      return (id, deltaHeight = 0) => {
+        const card = this.getCard(id)
+        const parentCard = {
+          y: card.y,
+          height: card.height - deltaHeight
+        }
+        let cards = this.getAllCards
+        cards = cards.filter(card => {
+          const isAlignedX = card.x === parentCard.x
+          const isBelow = card.y > parentCard.y
+          return isAlignedX && isBelow
+        })
+        // recursion: match cards alignedY successively
+        const alignedCards = []
+        let prevAlignedCard
+        do {
+          const parent = prevAlignedCard || parentCard
+          const match = cards.find(card => {
+            const isAlignedY = parent.y + parent.height + consts.spaceBetweenCards === card.y
+            return isAlignedY
+          })
+          if (match) {
+            prevAlignedCard = match
+            alignedCards.push(match)
+            cards = cards.filter(card => card.id !== match.id)
+          } else {
+            prevAlignedCard = null
+          }
+        } while (prevAlignedCard)
+        return alignedCards
+      }
     }
+
   },
 
   actions: {
 
-    updateCard (update) {
-      this.updateCards([update])
+    clear () {
+      this.ids = []
+      this.cards = {}
+      // state.removedCards = []
+      tallestCardHeight = 0
     },
-
-    updateCards (updates) {
-      updates.forEach(({ id, ...changes }) => {
-        this.pendingUpdates.set(id, {
-          ...this.pendingUpdates.get(id) || {},
-          ...changes
-        })
-        this.dirtyCardIds.add(id)
+    initializeCards (cards) {
+      const byId = {}
+      const allIds = []
+      cards.forEach(card => {
+        byId[card.id] = card
+        allIds.push(card.id)
       })
-      if (!this.isUpdating) {
-        requestAnimationFrame(() => this.processPendingUpdates())
-        this.isUpdating = true
-      }
-      // server tasks
-      if (!updates.isBroadcast) {
-        store.dispatch('broadcast/update', { updates, storeName: 'cardStore', actionName: 'updateCards' }, { root: true })
-      }
-      store.dispatch('api/addToQueue', { name: 'updateMultipleCards', body: { cards: updates } }, { root: true })
+      this.byId = byId
+      this.allIds = allIds
+      tallestCardHeight = 0
+      // console.log('🍍', cards, this.byId, this.allIds)
     },
-
     processPendingUpdates () {
       const updatedCards = {}
       this.pendingUpdates.forEach((updates, id) => {
@@ -75,20 +110,42 @@ export const useCardStore = defineStore('cards', {
       this.dirtyCardIds.clear()
       this.isUpdating = false
     },
-
-    initializeCards (cards) {
-      const byId = {}
-      const allIds = []
-      cards.forEach(card => {
-        byId[card.id] = card
-        allIds.push(card.id)
+    updateCard (update) {
+      this.updateCards([update])
+    },
+    async updateCards (updates) {
+      const canEditSpace = store.getters['currentUser/canEditSpace']()
+      if (!canEditSpace) { return }
+      updates.forEach(({ id, ...changes }) => {
+        this.pendingUpdates.set(id, {
+          ...this.pendingUpdates.get(id) || {},
+          ...changes
+        })
+        this.dirtyCardIds.add(id)
       })
-      this.byId = byId
-      this.allIds = allIds
-      console.log('🍍', cards, this.byId, this.allIds)
+      if (!this.isUpdating) {
+        requestAnimationFrame(() => this.processPendingUpdates())
+        this.isUpdating = true
+      }
+      // server tasks
+      if (!updates.isBroadcast) {
+        store.dispatch('broadcast/update', { updates, storeName: 'cardStore', actionName: 'updateCards' }, { root: true })
+      }
+      await store.dispatch('api/addToQueue', { name: 'updateMultipleCards', body: { cards: updates } }, { root: true })
+      // TODO history? if unpaused
+    },
+    async deleteCards (cards) {
+      const canEditSpace = store.getters['currentUser/canEditSpace']()
+      if (!canEditSpace) { return }
+      for (const card of cards) {
+        const idIndex = this.ids.indexOf(card.id)
+        this.byId.splice(idIndex, 1)
+        delete this.allIds[card.id]
+        await store.dispatch('api/addToQueue', { name: 'deleteCard', body: card }, { root: true })
+      }
     },
 
-    // move
+    // Convenience methods
 
     moveCards ({ ids, endCursor, prevCursor }) {
       if (!endCursor || !prevCursor) { return }
@@ -108,9 +165,6 @@ export const useCardStore = defineStore('cards', {
       })
       this.updateCards(updates)
     },
-
-    // z-index
-
     clearAllCardsZ () {
       const cards = this.getAllCards
       const updates = cards.map(card => {
@@ -121,7 +175,6 @@ export const useCardStore = defineStore('cards', {
       })
       this.updateCards(updates)
     },
-
     incrementCardsZ (id) {
       // highest z
       const cards = this.getAllCards
@@ -132,8 +185,8 @@ export const useCardStore = defineStore('cards', {
         highestZ = 1
       }
       // update
-      let ids = store.state.multipleCardsSelectedIds
       const updates = []
+      let ids = store.state.multipleCardsSelectedIds
       if (!ids.length) {
         ids = [id]
       }
@@ -145,6 +198,146 @@ export const useCardStore = defineStore('cards', {
         updates.push(update)
       })
       this.updateCards(updates)
+    },
+    removeCards (ids) {
+      const cardsToRemove = []
+      const updates = []
+      const cardsToDelete = []
+      ids.forEach(id => {
+        const card = this.getCard(id)
+        if (card.name) {
+          cardsToRemove.push(card)
+        } else {
+          cardsToDelete.push(card)
+        }
+      })
+      cardsToRemove.forEach(card => {
+        updates.push({
+          id: card.id,
+          isRemoved: true
+        })
+      })
+      this.updateCards(updates)
+      this.deleteCards(cardsToDelete)
+      // store.dispatch('history/add', { cards, isRemoved: true }, { root: true })
+      // await cache.updateSpace('removedCards', state.removedCards, currentSpaceId)
+    },
+    showCardDetails (id) {
+      this.incrementCardsZ(id)
+      store.commit('cardDetailsIsVisibleForCardId', id, { root: true })
+      store.commit('parentCardId', id, { root: true })
+      store.commit('loadSpaceFocusOnCardId', '', { root: true })
+    },
+    toggleCardChecked (id, value) {
+      const card = this.getCard(id)
+      let { name } = card
+      const checkbox = utils.checkboxFromString(name)
+      name = name.replace(checkbox, '')
+      if (value) {
+        name = `[x] ${name}`
+      } else {
+        name = `[] ${name}`
+      }
+      const update = {
+        id,
+        name,
+        nameUpdatedAt: new Date()
+      }
+      this.updateCards([update])
+    },
+    async updateTallestCardHeight (card) {
+      await nextTick()
+      if (!card.height) {
+        card = utils.cardElementDimensions(card)
+      }
+      const height = card.height
+      if (height > tallestCardHeight) {
+        tallestCardHeight = Math.ceil(height)
+      }
+    },
+
+    async distributeCardsVertically (cards) {
+      const zoom = store.getters.spaceCounterZoomDecimal
+      let prevCard
+      let index = 0
+      for (const card of cards) {
+        if (index === 0) {
+          prevCard = card
+        } else {
+          const prevCardElement = utils.cardElement(prevCard)
+          const prevCardRect = prevCardElement.getBoundingClientRect()
+          card.y = prevCard.y + (prevCardRect.height * zoom) + consts.spaceBetweenCards
+          prevCard = card
+        }
+        const rect = utils.cardRectFromId(card.id)
+        const update = {
+          id: card.id,
+          y: card.y,
+          width: rect.width,
+          height: rect.height
+        }
+        await this.updateCard(update)
+        index += 1
+      }
+    },
+
+    async updateBelowCardsPosition (updates) {
+      for (const update of updates) {
+        // calc height delta
+        const card = this.getCard(update.id)
+        if (!card) { return }
+        const deltaHeight = update.height - update.prevHeight
+        if (deltaHeight === 0) { return }
+        // distributeVertically aligned cards below
+        const alignedCards = this.getVerticallyAlignedCardsBelow(card.id, deltaHeight)
+        if (!alignedCards.length) { return }
+        alignedCards.unshift(card)
+        await this.distributeCardsVertically(alignedCards)
+        await store.dispatch('currentConnections/updateMultiplePaths', alignedCards, { root: true })
+      }
+    },
+
+    async updateCardsDimensions (ids) {
+      const zoom = store.getters.spaceCounterZoomDecimal
+      ids = ids || this.allIds
+      const cards = this.getCards(ids)
+      await nextTick()
+      const updatedCards = []
+      store.commit('shouldExplicitlyRenderCardIds', ids, { root: true })
+      const updates = []
+      cards.forEach(card => {
+        card.prevWidth = card.width
+        card.prevHeight = card.height
+        const element = utils.cardElement(card)
+        if (!element) { return }
+        const isCardRenderedInDOM = element.dataset.shouldRender === 'true'
+        if (isCardRenderedInDOM) {
+          const rect = element.getBoundingClientRect()
+          card = {
+            id: card.id,
+            width: Math.round(rect.width * zoom),
+            height: Math.round(rect.height * zoom)
+          }
+        } else {
+          card = utils.cardElementDimensions(card)
+        }
+        const isUnchanged = card.width === card.prevWidth && card.height === card.prevHeight
+        const isMissingDimensions = utils.isMissingDimensions(card)
+        if (isUnchanged) { return }
+        if (isMissingDimensions) { return }
+        const body = {
+          id: card.id,
+          prevWidth: card.prevWidth,
+          prevHeight: card.prevHeight,
+          width: Math.round(card.width),
+          height: Math.round(card.height)
+        }
+        updates.push(body)
+        this.updateTallestCardHeight(card)
+      })
+      await this.updateCards(updates)
+      await this.updateBelowCardsPosition(updates)
     }
+
   }
 })

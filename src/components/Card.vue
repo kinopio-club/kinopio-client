@@ -184,7 +184,7 @@ const changeSpaceAndCard = async (spaceId, cardId) => {
   // card in current space
   } else {
     await nextTick()
-    store.dispatch('currentCards/showCardDetails', cardId)
+    cardStore.showCardDetails(cardId)
   }
 }
 
@@ -224,7 +224,8 @@ const currentBackgroundColorIsDark = computed(() => {
 
 // comment
 
-const isComment = computed(() => store.getters['currentCards/isComment'](props.card))
+const isComment = computed(() => cardStore.getIsCardComment(props.card))
+
 const removeCommentBrackets = (name) => {
   if (!isComment.value) { return name }
   if (props.card.isComment) { return name }
@@ -254,7 +255,7 @@ const toggleCardChecked = () => {
   if (!canEditCard.value) { return }
   const value = !isChecked.value
   store.dispatch('closeAllDialogs')
-  store.dispatch('currentCards/toggleChecked', { cardId: props.card.id, value })
+  cardStore.toggleCardChecked(props.card.id, value)
   postMessage.sendHaptics({ name: 'heavyImpact' })
   cancelLocking()
   store.commit('currentUserIsDraggingCard', false)
@@ -526,7 +527,7 @@ const updateDimensionsAndPaths = () => {
 }
 const checkIfShouldUpdateDimensions = () => {
   if (utils.isMissingDimensions(props.card)) {
-    store.dispatch('currentCards/updateDimensions', { cards: [props.card] })
+    cardStore.updateCardsDimensions([props.card.id])
   }
 }
 const width = computed(() => {
@@ -718,7 +719,7 @@ const dateIsToday = computed(() => {
   return dayjs(date).isToday()
 })
 const toggleFilterShowAbsoluteDates = () => {
-  store.dispatch('currentCards/incrementZ', props.card.id)
+  cardStore.incrementCardsZ(props.card.id)
   store.dispatch('closeAllDialogs')
   const value = !store.state.currentUser.filterShowAbsoluteDates
   store.dispatch('currentUser/toggleFilterShowAbsoluteDates', value)
@@ -799,7 +800,7 @@ const addFile = (file) => {
     id: props.card.id,
     name: utils.trim(name)
   }
-  store.dispatch('currentCards/update', { card: update })
+  cardStore.updateCard(update)
   store.commit('triggerUpdateHeaderAndFooterPosition')
 }
 const clearErrors = () => {
@@ -826,7 +827,7 @@ const removeUploadIsDraggedOver = () => {
 }
 const uploadFile = async (event) => {
   removeUploadIsDraggedOver()
-  store.dispatch('currentCards/incrementZ', props.card.id)
+  cardStore.incrementCardsZ(props.card.id)
   // pre-upload errors
   if (!currentUserIsSignedIn.value) {
     state.error.signUpToUpload = true
@@ -965,7 +966,7 @@ const showTagDetailsIsVisible = ({ event, tag }) => {
   if (isMultiTouch) { return }
   if (!canEditCard.value) { store.commit('triggerReadOnlyJiggle') }
   if (state.preventDraggedButtonBadgeFromShowingDetails) { return }
-  store.dispatch('currentCards/incrementZ', props.card.id)
+  cardStore.incrementCardsZ(props.card.id)
   store.dispatch('closeAllDialogs')
   store.commit('currentUserIsDraggingCard', false)
   const tagRect = event.target.getBoundingClientRect()
@@ -1044,7 +1045,7 @@ const updateUrlPreviewOnload = async () => {
     id: props.card.id,
     shouldUpdateUrlPreview: false
   }
-  store.dispatch('currentCards/update', { card: update })
+  cardStore.updateCard(update)
   if (isUpdatedSuccess) {
     store.commit('triggerUpdateUrlPreviewComplete', props.card.id)
   }
@@ -1063,7 +1064,7 @@ const updateUrlPreview = () => {
       id: props.card.id,
       shouldUpdateUrlPreview: true
     }
-    store.dispatch('currentCards/update', { card: update })
+    cardStore.updateCard(update)
   } else {
     updateUrlPreviewOnline()
   }
@@ -1103,7 +1104,7 @@ const updateUrlPreviewSuccess = async (url, data) => {
     return
   }
   data.name = utils.addHiddenQueryStringToURLs(props.card.name)
-  store.dispatch('currentCards/update', { card: data })
+  cardStore.updateCard(data)
   store.commit('removeUrlPreviewLoadingForCardIds', cardId)
   await store.dispatch('api/addToQueue', { name: 'updateUrlPreviewImage', body: data })
 }
@@ -1114,7 +1115,7 @@ const retryUrlPreview = () => {
     id: props.card.id,
     shouldUpdateUrlPreview: true
   }
-  store.dispatch('currentCards/update', { card: update })
+  cardStore.updateCard(update)
   updateUrlPreview()
 }
 const shouldUpdateUrlPreview = (url) => {
@@ -1149,7 +1150,7 @@ const updateUrlPreviewErrorUrl = (url) => {
     urlPreviewUrl: url,
     name: props.card.name
   }
-  store.dispatch('currentCards/update', { card: update })
+  cardStore.updateCard(update)
 }
 
 // drag cards
@@ -1789,7 +1790,7 @@ const unlockCard = (event) => {
     id: props.card.id,
     isLocked: false
   }
-  store.dispatch('currentCards/update', { card: update })
+  cardStore.update(update)
 }
 const lockingFrameStyle = computed(() => {
   const initialPadding = 65 // matches initialLockCircleRadius in paintSelect
@@ -1821,7 +1822,7 @@ const updateOtherItems = () => {
       linkToSpaceId: null,
       linkToCardId: null
     }
-    store.dispatch('currentCards/update', { card: update })
+    cardStore.update(update)
     return
   }
   if (!url) { return }
@@ -1845,7 +1846,7 @@ const updateOtherSpaceOrCardItems = (url) => {
     linkToCardId: cardId,
     linkToSpaceCollaboratorKey: null
   }
-  store.dispatch('currentCards/update', { card: update })
+  cardStore.update(update)
   store.dispatch('currentSpace/updateOtherItems', { spaceId, cardId })
 }
 const updateOtherInviteItems = (url) => {
@@ -1858,7 +1859,7 @@ const updateOtherInviteItems = (url) => {
       linkToCardId: null,
       linkToSpaceCollaboratorKey: collaboratorKey
     }
-    store.dispatch('currentCards/update', { card: update })
+    cardStore.update(update)
   }
   store.dispatch('currentSpace/updateOtherItems', { spaceId, collaboratorKey })
 }
@@ -1872,7 +1873,7 @@ const updateOtherGroupItems = (url) => {
 const removeCard = () => {
   if (isLocked.value) { return }
   if (canEditCard.value) {
-    store.dispatch('currentCards/remove', props.card)
+    cardStore.removeCards([props.card.id])
   }
 }
 const closeAllDialogs = () => {
