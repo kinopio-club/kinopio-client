@@ -71,8 +71,10 @@ export const useCardStore = defineStore('cards', {
         } while (prevAlignedCard)
         return alignedCards
       }
+    },
+    getCardsIsNotLocked: (state) => {
+      return (cards) => cards.filter(card => !card.isLocked)
     }
-
   },
 
   actions: {
