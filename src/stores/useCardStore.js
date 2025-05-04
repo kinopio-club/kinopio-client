@@ -97,29 +97,6 @@ export const useCardStore = defineStore('cards', {
       tallestCardHeight = 0
       // console.log('🍍', cards, this.byId, this.allIds)
     },
-
-    // async createCard (updates) {
-
-    // },
-    // create: (state, { card, shouldPreventCache }) => {
-    //   if (!card.id) {
-    //     console.warn('🚑 could not create card', card)
-    //     return
-    //   }
-    //   state.ids.push(card.id)
-    //   state.cards[card.id] = card
-    //   if (shouldPreventCache) { return }
-    //   cache.updateSpace('cards', state.cards, currentSpaceId)
-
-    // server tasks
-    // if (!updates.isBroadcast) {
-    //   store.dispatch('broadcast/update', { updates, storeName: 'cardStore', actionName: 'updateCards' }, { root: true })
-    // }
-    // await store.dispatch('api/addToQueue', { name: 'updateMultipleCards', body: { cards: updates } }, { root: true })
-    // // TODO history? if unpaused
-
-    // },
-
     processPendingUpdates () {
       const updatedCards = {}
       this.pendingUpdates.forEach((updates, id) => {
