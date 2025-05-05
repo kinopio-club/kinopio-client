@@ -52,7 +52,7 @@ const showInExplore = computed(() => {
 })
 const currentUserIsSignedIn = computed(() => store.getters['currentUser/isSignedIn'])
 const spaceIsHelloKinopio = computed(() => store.getters['currentSpace/isHelloKinopio'])
-const spaceCardsCount = computed(() => store.getters['currentCards/all'].length)
+const spaceCardsCount = computed(() => cardStore.getAllCards.length)
 
 const checkIfShouldPrevent = (event) => {
   if (props.space) { return }
