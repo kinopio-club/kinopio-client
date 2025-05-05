@@ -1,8 +1,11 @@
 <script setup>
 import { reactive, computed, onMounted, onBeforeUnmount, watch, ref, nextTick } from 'vue'
 import { useStore } from 'vuex'
+import { useCardStore } from '@/stores/useCardStore'
 
 import utils from '@/utils.js'
+
+const cardStore = useCardStore()
 const store = useStore()
 
 let unsubscribe

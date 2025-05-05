@@ -695,7 +695,7 @@ const handlePastePlainText = async (data, position) => {
 const afterPaste = ({ cards, boxes }) => {
   cards.forEach(card => {
     store.dispatch('checkIfItemShouldIncreasePageSize', card)
-    store.dispatch('currentCards/updateURLQueryStrings', { cardId: card.id })
+    store.dispatch('currentCards/normalizeCardUrls', { cardId: card.id })
   })
   boxes.forEach(box => {
     store.dispatch('checkIfItemShouldIncreasePageSize', box)

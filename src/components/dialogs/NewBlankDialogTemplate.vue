@@ -6,7 +6,6 @@ import { useCardStore } from '@/stores/useCardStore'
 import utils from '@/utils.js'
 
 const cardStore = useCardStore()
-
 const store = useStore()
 
 // let unsubscribe

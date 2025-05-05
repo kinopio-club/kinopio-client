@@ -1790,7 +1790,7 @@ const unlockCard = (event) => {
     id: props.card.id,
     isLocked: false
   }
-  cardStore.update(update)
+  cardStore.updateCard(update)
 }
 const lockingFrameStyle = computed(() => {
   const initialPadding = 65 // matches initialLockCircleRadius in paintSelect

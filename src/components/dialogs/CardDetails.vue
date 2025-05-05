@@ -42,8 +42,10 @@ const store = useStore()
 const dialogElement = ref(null)
 const nameElement = ref(null)
 
+let unsubscribe
+
 onMounted(() => {
-  store.subscribe(async (mutation, state) => {
+  unsubscribe = store.subscribe(async (mutation, state) => {
     if (mutation.type === 'triggerUnloadPage' && visible.value) {
       closeCard()
     } else if (mutation.type === 'triggerSplitCard' && visible.value) {
@@ -69,6 +71,9 @@ onMounted(() => {
       await updateDimensionsAndPaths()
     }
   })
+})
+onBeforeUnmount(() => {
+  unsubscribe()
 })
 
 const state = reactive({
@@ -224,7 +229,7 @@ const triggerUpdatePaintSelectCanvasPositionOffset = () => {
 
 const updateDimensions = async (cardId) => {
   await nextTick()
-  cardStore.updateCardsDimensions(cardId)
+  cardStore.updateCardDimensions(cardId)
   await nextTick()
   await nextTick()
 }
@@ -1357,6 +1362,9 @@ dialog.card-details(v-if="visible" :open="visible" ref="dialogElement" @click.le
   section
     .textarea-wrap
       textarea.name(
+        data-1p-ignore="true"
+        autocomplete="off"
+
         :disabled="!canEditCard"
         ref="nameElement"
         rows="1"

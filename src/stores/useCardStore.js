@@ -80,7 +80,7 @@ export const useCardStore = defineStore('cards', {
   actions: {
 
     clear () {
-      this.ids = []
+      this.byId = []
       this.allIds = {}
       // state.removedCards = []
       tallestCardHeight = 0
@@ -225,9 +225,9 @@ export const useCardStore = defineStore('cards', {
       const canEditSpace = store.getters['currentUser/canEditSpace']()
       if (!canEditSpace) { return }
       for (const card of cards) {
-        const idIndex = this.ids.indexOf(card.id)
-        this.byId.splice(idIndex, 1)
-        delete this.allIds[card.id]
+        const idIndex = this.allIds.indexOf(card.id)
+        this.allIds.splice(idIndex, 1)
+        delete this.byId[card.id]
         await store.dispatch('api/addToQueue', { name: 'deleteCard', body: card }, { root: true })
       }
     },
@@ -365,7 +365,9 @@ export const useCardStore = defineStore('cards', {
     async updateCardsDimensions (ids) {
       const zoom = store.getters.spaceCounterZoomDecimal
       ids = ids || this.allIds
-      const cards = ids.map(id => this.getCard(id))
+      let cards = ids.map(id => this.getCard(id))
+      cards = cards.filter(card => Boolean(card))
+      if (!cards.length) { return }
       await nextTick()
       const updatedCards = []
       store.commit('shouldExplicitlyRenderCardIds', ids, { root: true })
@@ -403,7 +405,7 @@ export const useCardStore = defineStore('cards', {
       await this.updateCards(updates)
       await this.updateBelowCardsPosition(updates)
     },
-    async updateCardDimension (id) {
+    async updateCardDimensions (id) {
       this.updateCardsDimensions([id])
     },
 
