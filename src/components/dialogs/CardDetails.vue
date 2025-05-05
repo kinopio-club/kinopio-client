@@ -454,7 +454,9 @@ const focusName = async (position) => {
   const element = nameElement.value
   const length = name.value.length
   if (!element) { return }
-  element.focus()
+  setTimeout(() => { // use setTimeout focus to prevent 1password lag
+    element.focus()
+  }, 1)
   if (position) {
     element.setSelectionRange(position, position)
   }
@@ -1362,7 +1364,7 @@ dialog.card-details(v-if="visible" :open="visible" ref="dialogElement" @click.le
   section
     .textarea-wrap
       textarea.name(
-        data-1p-ignore="true"
+        data-1p-ignore
         autocomplete="off"
 
         :disabled="!canEditCard"
