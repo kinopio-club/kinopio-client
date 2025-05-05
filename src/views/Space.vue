@@ -47,6 +47,7 @@ import consts from '@/consts.js'
 import sortBy from 'lodash-es/sortBy'
 import uniq from 'lodash-es/uniq'
 import debounce from 'lodash-es/debounce'
+
 const cardStore = useCardStore()
 
 const store = useStore()
@@ -269,8 +270,8 @@ const stopTiltingCards = () => {
   if (!store.state.currentUserIsTiltingCard) { return }
   store.dispatch('history/resume')
   const cardIds = store.state.currentUserIsTiltingCardIds
-  const cards = cardIds.map(id => store.getters['currentCards/byId'](id))
-  store.dispatch('currentCards/updateDimensions', { cards })
+  cardStore.updateCardsDimensions(cardIds)
+  const cards = cardIds.map(id => cardStore.getCard(id))
   store.dispatch('history/add', { cards, useSnapshot: true })
   store.commit('currentUserIsTiltingCard', false)
   store.commit('broadcast/updateStore', { updates: { userId: currentUser.value.id }, type: 'removeRemoteUserTiltingCards' })
@@ -280,15 +281,15 @@ const resizeCards = (event) => {
   if (utils.isMultiTouch(event)) { return }
   const cardIds = store.state.currentUserIsResizingCardIds
   const deltaX = endCursor.x - prevCursor.x
-  store.dispatch('currentCards/resize', { cardIds, deltaX })
+  cardStore.resizeCards(cardIds, deltaX)
 }
 const stopResizingCards = async () => {
   if (!store.state.currentUserIsResizingCard) { return }
   store.dispatch('history/resume')
   const cardIds = store.state.currentUserIsResizingCardIds
-  const cards = cardIds.map(id => store.getters['currentCards/byId'](id))
+  const cards = cardIds.map(id => cardStore.getCard(id))
   store.dispatch('history/add', { cards, useSnapshot: true })
-  await store.dispatch('currentCards/updateDimensions', { cards })
+  await cardStore.updateCardsDimensions(cardIds)
   store.commit('currentUserIsResizingCard', false)
   store.commit('broadcast/updateStore', { updates: { userId: currentUser.value.id }, type: 'removeRemoteUserResizingCards' })
 }
@@ -296,11 +297,11 @@ const afterResizeCards = () => {
   if (!store.state.shouldSnapToGrid) { return }
   const cardIds = store.state.currentUserIsResizingCardIds
   const cards = cardIds.map(cardId => {
-    let { id, resizeWidth } = store.getters['currentCards/byId'](cardId)
+    let { id, resizeWidth } = cardStore.getCard(cardId)
     resizeWidth = utils.roundToNearest(resizeWidth)
     return { id, resizeWidth }
   })
-  store.dispatch('currentCards/updateMultiple', cards)
+  cardStore.updateCards(cards)
 }
 const addCardFromOutsideAppContext = (event) => {
   if (!consts.isSecureAppContext) { return }
@@ -309,7 +310,7 @@ const addCardFromOutsideAppContext = (event) => {
   if (data.name !== 'addedCardFromAddPage') { return }
   const card = data.value
   if (card.spaceId !== currentSpace.id) { return }
-  store.commit('currentCards/create', { card, shouldPreventCache: true })
+  cardStore.createCard(card)
 }
 
 // boxes
@@ -620,7 +621,7 @@ const handleTouchEnd = (event) => {
 const stopInteractions = async (event) => {
   console.info('💣 stopInteractions')
   const isCardsSelected = store.state.currentDraggingCardId || store.state.multipleCardsSelectedIds.length
-  // TODO no need for aftermove
+  // TODO no need for aftermove?? or maybe this is where history happens instead of in cardstore?
   // if (isCardsSelected && store.state.cardsWereDragged) {
   //   store.dispatch('currentCards/afterMove')
   // }
