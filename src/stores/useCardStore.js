@@ -97,6 +97,84 @@ export const useCardStore = defineStore('cards', {
       tallestCardHeight = 0
       // console.log('🍍', cards, this.byId, this.allIds)
     },
+
+    // create
+
+    normailzeNewCard (card) {
+      const { x, y, z, position, isParentCard, name, id, backgroundColor, width, height } = card
+      const cards = this.getAllCards
+      const highestCardZ = utils.highestItemZ(cards)
+      const defaultBackgroundColor = store.state.currentUser.defaultCardBackgroundColor
+      const isComment = store.state.isCommentMode || store.getters['currentUser/canOnlyComment']()
+      card.id = id || nanoid()
+      card.x = x || position.x
+      card.y = y || position.y
+      card.z = z || highestCardZ + 1
+      card.name = name || ''
+      card.frameId = 0
+      card.userId = store.state.currentUser.id
+      card.urlPreviewIsVisible = true
+      card.width = Math.round(width) || consts.emptyCard().width
+      card.height = Math.round(height) || consts.emptyCard().height
+      card.isLocked = false
+      card.backgroundColor = backgroundColor || defaultBackgroundColor
+      card.isRemoved = false
+      card.headerFontId = store.state.currentUser.prevHeaderFontId || 0
+      card.maxWidth = Math.round(card.maxWidth) || store.state.currentUser.cardSettingsMaxCardWidth
+      card.spaceId = store.state.currentSpace.id // currentSpaceId
+      card.isComment = isComment
+      card.shouldShowOtherSpacePreviewImage = true
+      return card
+    },
+    async createCard (card, skipCardDetailsIsVisible) {
+      if (store.getters['currentSpace/shouldPreventAddCard']) {
+        store.commit('notifyCardsCreatedIsOverLimit', true, { root: true })
+        return
+      }
+      card = this.normailzeNewCard(card)
+      // update state
+      this.byId[card.id] = card
+      this.allIds.push(card.id)
+
+      if (!skipCardDetailsIsVisible) {
+        store.commit('cardDetailsIsVisibleForCardId', card.id, { root: true })
+      }
+      if (card.isParentCard) { store.commit('parentCardId', card.id, { root: true }) }
+      store.dispatch('currentUser/cardsCreatedCountUpdateBy', {
+        cards: [card]
+      }, { root: true })
+      store.dispatch('currentSpace/checkIfShouldNotifyCardsCreatedIsNearLimit', null, { root: true })
+      store.dispatch('userNotifications/addCardUpdated', { cardId: card.id, type: 'createCard' }, { root: true })
+      // server/disk/save tasks TODO dry
+      // await cache.updateSpace('editedAt', utils.unixTime(), store.state.currentSpace.id)
+      if (!card.isBroadcast) {
+        store.dispatch('broadcast/update', { updates: card, storeName: 'cardStore', actionName: 'createCard' }, { root: true })
+      }
+      await store.dispatch('api/addToQueue', { name: 'createCard', body: card }, { root: true })
+    },
+    async createCards (cards, shouldOffsetPosition) {
+      cards = cards.map(card => {
+        let x = card.x
+        let y = card.y
+        if (shouldOffsetPosition) {
+          const offset = 100
+          x += offset
+          y += offset
+        }
+        card = this.normailzeNewCard(card)
+        card.shouldUpdateUrlPreview = true
+        card.urlPreviewIsVisible = true
+      })
+      cards.forEach(card => {
+        this.createCard(card)
+      })
+      store.dispatch('currentUser/cardsCreatedCountUpdateBy', {
+        cards
+      }, { root: true })
+    },
+
+    // update
+
     processPendingUpdates () {
       const updatedCards = {}
       this.pendingUpdates.forEach((updates, id) => {
@@ -140,6 +218,9 @@ export const useCardStore = defineStore('cards', {
       // TODO history? if unpaused
       // cache
     },
+
+    // delete
+
     async deleteCards (cards) {
       const canEditSpace = store.getters['currentUser/canEditSpace']()
       if (!canEditSpace) { return }
@@ -150,8 +231,34 @@ export const useCardStore = defineStore('cards', {
         await store.dispatch('api/addToQueue', { name: 'deleteCard', body: card }, { root: true })
       }
     },
+    removeCards (ids) {
+      const cardsToRemove = []
+      const updates = []
+      const cardsToDelete = []
+      ids.forEach(id => {
+        const card = this.getCard(id)
+        if (card.name) {
+          cardsToRemove.push(card)
+        } else {
+          cardsToDelete.push(card)
+        }
+      })
+      cardsToRemove.forEach(card => {
+        updates.push({
+          id: card.id,
+          isRemoved: true
+        })
+      })
+      this.updateCards(updates)
+      this.deleteCards(cardsToDelete)
+      // store.dispatch('history/add', { cards, isRemoved: true }, { root: true })
+      // await cache.updateSpace('removedCards', state.removedCards, currentSpaceId)
+    },
+    removeCard (id) {
+      this.removeCards([id])
+    },
 
-    // Convenience methods
+    // position
 
     moveCards ({ ids, endCursor, prevCursor }) {
       if (!endCursor || !prevCursor) { return }
@@ -205,52 +312,6 @@ export const useCardStore = defineStore('cards', {
       })
       this.updateCards(updates)
     },
-    removeCards (ids) {
-      const cardsToRemove = []
-      const updates = []
-      const cardsToDelete = []
-      ids.forEach(id => {
-        const card = this.getCard(id)
-        if (card.name) {
-          cardsToRemove.push(card)
-        } else {
-          cardsToDelete.push(card)
-        }
-      })
-      cardsToRemove.forEach(card => {
-        updates.push({
-          id: card.id,
-          isRemoved: true
-        })
-      })
-      this.updateCards(updates)
-      this.deleteCards(cardsToDelete)
-      // store.dispatch('history/add', { cards, isRemoved: true }, { root: true })
-      // await cache.updateSpace('removedCards', state.removedCards, currentSpaceId)
-    },
-    showCardDetails (id) {
-      this.incrementCardsZ(id)
-      store.commit('cardDetailsIsVisibleForCardId', id, { root: true })
-      store.commit('parentCardId', id, { root: true })
-      store.commit('loadSpaceFocusOnCardId', '', { root: true })
-    },
-    toggleCardChecked (id, value) {
-      const card = this.getCard(id)
-      let { name } = card
-      const checkbox = utils.checkboxFromString(name)
-      name = name.replace(checkbox, '')
-      if (value) {
-        name = `[x] ${name}`
-      } else {
-        name = `[] ${name}`
-      }
-      const update = {
-        id,
-        name,
-        nameUpdatedAt: new Date()
-      }
-      this.updateCards([update])
-    },
     async updateTallestCardHeight (card) {
       await nextTick()
       if (!card.height) {
@@ -261,7 +322,6 @@ export const useCardStore = defineStore('cards', {
         tallestCardHeight = Math.ceil(height)
       }
     },
-
     async distributeCardsVertically (cards) {
       const zoom = store.getters.spaceCounterZoomDecimal
       let prevCard
@@ -286,7 +346,6 @@ export const useCardStore = defineStore('cards', {
         index += 1
       }
     },
-
     async updateBelowCardsPosition (updates) {
       for (const update of updates) {
         // calc height delta
@@ -303,7 +362,6 @@ export const useCardStore = defineStore('cards', {
         await store.dispatch('currentConnections/updateMultiplePaths', alignedCards, { root: true })
       }
     },
-
     async updateCardsDimensions (ids) {
       const zoom = store.getters.spaceCounterZoomDecimal
       ids = ids || this.allIds
@@ -345,58 +403,41 @@ export const useCardStore = defineStore('cards', {
       await this.updateCards(updates)
       await this.updateBelowCardsPosition(updates)
     },
-    normailzeNewCard (card) {
-      const { x, y, z, position, isParentCard, name, id, backgroundColor, width, height } = card
-      const cards = this.getAllCards
-      const highestCardZ = utils.highestItemZ(cards)
-      const defaultBackgroundColor = store.state.currentUser.defaultCardBackgroundColor
-      const isComment = store.state.isCommentMode || store.getters['currentUser/canOnlyComment']()
-      card.id = id || nanoid()
-      card.x = x || position.x
-      card.y = y || position.y
-      card.z = z || highestCardZ + 1
-      card.name = name || ''
-      card.frameId = 0
-      card.userId = store.state.currentUser.id
-      card.urlPreviewIsVisible = true
-      card.width = Math.round(width) || consts.emptyCard().width
-      card.height = Math.round(height) || consts.emptyCard().height
-      card.isLocked = false
-      card.backgroundColor = backgroundColor || defaultBackgroundColor
-      card.isRemoved = false
-      card.headerFontId = store.state.currentUser.prevHeaderFontId || 0
-      card.maxWidth = Math.round(card.maxWidth) || store.state.currentUser.cardSettingsMaxCardWidth
-      card.spaceId = store.state.currentSpace.id // currentSpaceId
-      card.isComment = isComment
-      card.shouldShowOtherSpacePreviewImage = true
-      return card
+    async updateCardDimension (id) {
+      this.updateCardsDimensions([id])
     },
-    async createCard (card, skipCardDetailsIsVisible) {
-      if (store.getters['currentSpace/shouldPreventAddCard']) {
-        store.commit('notifyCardsCreatedIsOverLimit', true, { root: true })
-        return
-      }
-      card = this.normailzeNewCard(card)
-      // update state
-      this.byId[card.id] = card
-      this.allIds.push(card.id)
 
-      if (!skipCardDetailsIsVisible) {
-        store.commit('cardDetailsIsVisibleForCardId', card.id, { root: true })
-      }
-      if (card.isParentCard) { store.commit('parentCardId', card.id, { root: true }) }
-      store.dispatch('currentUser/cardsCreatedCountUpdateBy', {
-        cards: [card]
-      }, { root: true })
-      store.dispatch('currentSpace/checkIfShouldNotifyCardsCreatedIsNearLimit', null, { root: true })
-      store.dispatch('userNotifications/addCardUpdated', { cardId: card.id, type: 'createCard' }, { root: true })
-      // server/disk/save tasks TODO dry
-      // await cache.updateSpace('editedAt', utils.unixTime(), store.state.currentSpace.id)
-      if (!card.isBroadcast) {
-        store.dispatch('broadcast/update', { updates: card, storeName: 'cardStore', actionName: 'createCard' }, { root: true })
-      }
-      await store.dispatch('api/addToQueue', { name: 'createCard', body: card }, { root: true })
+    // card details
+
+    showCardDetails (id) {
+      this.incrementCardsZ(id)
+      store.commit('cardDetailsIsVisibleForCardId', id, { root: true })
+      store.commit('parentCardId', id, { root: true })
+      store.commit('loadSpaceFocusOnCardId', '', { root: true })
     },
+
+    // checked
+
+    toggleCardChecked (id, value) {
+      const card = this.getCard(id)
+      let { name } = card
+      const checkbox = utils.checkboxFromString(name)
+      name = name.replace(checkbox, '')
+      if (value) {
+        name = `[x] ${name}`
+      } else {
+        name = `[] ${name}`
+      }
+      const update = {
+        id,
+        name,
+        nameUpdatedAt: new Date()
+      }
+      this.updateCards([update])
+    },
+
+    // tilt
+
     tiltCards (ids, delta) {
       const maxDegrees = 25
       const updates = []
@@ -412,6 +453,65 @@ export const useCardStore = defineStore('cards', {
         // context.dispatch('currentConnections/updatePathsWhileDragging', { connections }, { root: true })
       })
       this.updateCards(updates)
+    },
+    clearTiltCards (ids) {
+      ids.forEach(id => {
+        const update = { id, tilt: 0 }
+        this.updateCard(update)
+        utils.removeAllCardDimensions({ id })
+      })
+      this.updateCardsDimensions(ids)
+    },
+
+    // resize
+
+    resizeCards (ids, deltaX) {
+      const minImageWidth = 64
+      const updates = []
+      ids.forEach(id => {
+        const card = this.getCard(id)
+        let width = card.resizeWidth || card.width
+        width = width + deltaX
+        width = Math.max(minImageWidth, width)
+        width = Math.round(width)
+        updates.push({ id, resizeWidth: width })
+        // context.dispatch('broadcast/update', { updates, type: 'resizeCard', handler: 'currentCards/update' }, { root: true })
+        // context.dispatch('currentConnections/updateMultiplePaths', [card], { root: true })
+      })
+      this.updateCards(updates)
+    },
+    async clearResizeCards (ids, shouldRemoveResizeWidth) {
+      const updates = []
+      ids.forEach(id => {
+        const update = { id, width: null }
+        if (shouldRemoveResizeWidth) {
+          update.resizeWidth = null
+        }
+        updates.push(update)
+        utils.removeAllCardDimensions({ id })
+      })
+      this.updateCards(updates)
+      this.updateCardsDimensions(ids)
+      // await nextTick()
+      // await nextTick()
+      // let connections = context.rootGetters['currentConnections/byMultipleItemIds'](cardIds)
+      // connections = utils.clone(connections)
+      // context.dispatch('currentConnections/updatePaths', { connections }, { root: true })
+    },
+
+    // paste
+
+    normalizeCardUrls (id) {
+      setTimeout(() => {
+        const card = this.getCard(id)
+        const urls = utils.urlsFromString(card.name)
+        if (!urls) { return }
+        let name = card.name
+        name = utils.removeTrackingQueryStringsFromURLs(name)
+        name = utils.removeTrailingSlash(name)
+        const update = { id, name }
+        this.updateCard(update)
+      }, 100)
     }
 
   }

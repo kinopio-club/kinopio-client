@@ -433,7 +433,7 @@ export default {
         context.dispatch('updateDimensions', { cards: [card] })
       })
     },
-    updateURLQueryStrings: (context, { cardId }) => {
+    normalizeCardUrls: (context, { cardId }) => {
       setTimeout(() => {
         const card = context.getters.byId(cardId)
         const urls = utils.urlsFromString(card.name)

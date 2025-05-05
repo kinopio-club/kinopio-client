@@ -26,6 +26,7 @@ import consts from '@/consts.js'
 import debounce from 'lodash-es/debounce'
 import qs from '@aguezz/qs-parse'
 import { nanoid } from 'nanoid'
+
 const cardStore = useCardStore()
 
 let prevCardId, prevCardName
@@ -113,9 +114,9 @@ const state = reactive({
   shareCardIsVisible: false
 })
 
+const cardId = computed(() => store.state.cardDetailsIsVisibleForCardId)
 const card = computed(() => {
-  const cardId = store.state.cardDetailsIsVisibleForCardId
-  return cardStore.getCard(cardId) || {}
+  return cardStore.getCard(cardId.value) || {}
 })
 const visible = computed(() => utils.objectHasKeys(card.value))
 watch(() => visible.value, (value, prevValue) => {
@@ -222,13 +223,8 @@ const triggerUpdatePaintSelectCanvasPositionOffset = () => {
 // dimensions and connection paths
 
 const updateDimensions = async (cardId) => {
-  let cards = [card.value]
-  if (cardId) {
-    const item = store.getters['currentCards/byId'](cardId)
-    cards = [item]
-  }
   await nextTick()
-  store.dispatch('currentCards/updateDimensions', { cards })
+  cardStore.updateCardsDimensions(cardId)
   await nextTick()
   await nextTick()
 }
@@ -329,7 +325,7 @@ const handleEnterKey = (event) => {
 const removeCard = () => {
   if (!canEditCard.value) { return }
   store.dispatch('history/resume')
-  store.dispatch('currentCards/remove', card.value)
+  cardStore.removeCards([cardId.value])
   store.commit('cardDetailsIsVisibleForCardId', '')
   triggerUpdateHeaderAndFooterPosition()
 }
@@ -365,7 +361,7 @@ const showCard = async (cardId) => {
   resetTextareaHeight()
   await nextTick()
   startOpening()
-  const item = store.getters['currentCards/byId'](cardId)
+  const item = cardStore.getCard(cardId)
   store.dispatch('checkIfItemShouldIncreasePageSize', item)
   state.previousSelectedTag = {}
   updateMediaUrls()
@@ -378,7 +374,7 @@ const showCard = async (cardId) => {
 const closeCard = async () => {
   store.commit('triggerHideTouchInterface')
   const cardId = prevCardId
-  const item = store.getters['currentCards/byId'](cardId)
+  const item = cardStore.getCard(cardId)
   nameElement.value.blur() // safari scroll fix
   closeDialogs(true)
   cancelOpening()
@@ -390,7 +386,7 @@ const closeCard = async () => {
   const cardHasName = Boolean(item.name)
   const cardHasPendingUpload = store.getters['upload/hasPendingUploadForCardId'](cardId)
   if (!cardHasName && !cardHasPendingUpload) {
-    store.dispatch('currentCards/remove', { id: cardId })
+    cardStore.removeCard(cardId)
   }
   store.dispatch('updatePageSizes')
   updateDimensionsAndPaths(cardId)
@@ -494,12 +490,10 @@ const updateCardName = async (newName) => {
     nameUpdatedAt: new Date(),
     nameUpdatedByUserId: userId
   }
-  cardStore.updateCards([update])
-  cardStore.updateCardsDimensions([cardId])
+  cardStore.updateCard(update)
+  cardStore.updateCardsDimension(cardId)
   // TODO
-  // updateCardsDimensions(ids)
   // update connectionpaths for item (id)
-  // store.dispatch('currentCards/update', { card: item, shouldPreventUpdateDimensionsAndPaths: true })
 
   updateMediaUrls()
   await updateTags()
@@ -1036,7 +1030,7 @@ const removeUrlPreview = async () => {
     urlPreviewIframeUrl: ''
   }
   store.commit('removeUrlPreviewLoadingForCardIds', cardId)
-  store.dispatch('currentCards/update', { card: update })
+  cardStore.updateCard(update)
 }
 
 // group invite preview
@@ -1169,8 +1163,7 @@ const addSplitCards = async (newCards) => {
   const spaceBetweenCards = 12
   let prevCard = utils.clone(card.value)
   store.dispatch('closeAllDialogs')
-  // create new cards
-  store.dispatch('currentCards/addMultiple', { cards: newCards })
+  cardStore.createCards(newCards)
   // update y positions
   // wait for cards to be added to dom
   setTimeout(() => {
@@ -1178,7 +1171,7 @@ const addSplitCards = async (newCards) => {
       const element = document.querySelector(`.card-wrap [data-card-id="${prevCard.id}"]`)
       const prevCardRect = element.getBoundingClientRect()
       newCard.y = prevCard.y + (prevCardRect.height * store.getters.spaceCounterZoomDecimal) + spaceBetweenCards
-      store.dispatch('currentCards/update', { card: newCard })
+      cardStore.updateCard(newCard)
       store.commit('triggerUpdateUrlPreview', newCard.id)
       prevCard = newCard
     }
@@ -1197,7 +1190,7 @@ const updatePastedName = (event) => {
     state.pastedName = text
   }
   state.wasPasted = true
-  store.dispatch('currentCards/updateURLQueryStrings', { cardId: card.value.id })
+  cardStore.normalizeCardUrls(cardId.value)
 }
 
 // line break
@@ -1295,7 +1288,7 @@ const replaceSlashCommandWithSpaceUrl = async (space) => {
     id: card.value.id,
     shouldShowOtherSpacePreviewImage: true
   }
-  store.dispatch('currentCards/update', { card: update })
+  cardStore.updateCard(update)
   textareaSizes()
 }
 
