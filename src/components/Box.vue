@@ -1,6 +1,7 @@
 <script setup>
 import { reactive, computed, onMounted, onBeforeUnmount, onUpdated, onUnmounted, watch, ref, nextTick } from 'vue'
 import { useStore } from 'vuex'
+import { useCardStore } from '@/stores/useCardStore'
 
 import utils from '@/utils.js'
 import consts from '@/consts.js'
@@ -11,7 +12,9 @@ import postMessage from '@/postMessage.js'
 
 import randomColor from 'randomcolor'
 import { colord, extend } from 'colord'
+
 const store = useStore()
+const cardStore = useCardStore()
 
 let unsubscribe
 
@@ -388,7 +391,7 @@ const endBoxInfoInteraction = (event) => {
   const isMeta = event.metaKey || event.ctrlKey
   const userId = store.state.currentUser.id
   store.dispatch('currentBoxes/afterMove')
-  store.dispatch('currentCards/afterMove')
+  // store.dispatch('currentCards/afterMove')
   if (store.state.currentUserIsPainting) { return }
   if (isMultiTouch) { return }
   if (store.state.currentUserIsPanningReady || store.state.currentUserIsPanning) { return }
@@ -423,7 +426,7 @@ const containedItems = () => {
   const cards = []
   const boxes = []
   // cards
-  selectableCards().forEach(card => {
+  selectableCards.value.forEach(card => {
     if (isItemInSelectedBoxes(card, 'card')) {
       cards.push(card)
     }
@@ -447,10 +450,10 @@ const selectContainedBoxes = () => {
     store.dispatch('addToMultipleBoxesSelected', box.id)
   })
 }
-const selectableCards = () => {
-  store.dispatch('currentCards/updateCanBeSelectedSortedByY')
-  return store.getters['currentCards/canBeSelectedSortedByY'].cards
-}
+const selectableCards = computed(() => {
+  const cards = cardStore.getAllCards
+  return cardStore.getCardsSelectableByY(cards)
+})
 const selectContainedCards = () => {
   const cards = containedItems().cards
   cards.forEach(card => {

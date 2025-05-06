@@ -1,12 +1,14 @@
 <script setup>
 import { reactive, computed, onMounted, onBeforeUnmount, watch, ref, nextTick } from 'vue'
 import { useStore } from 'vuex'
+import { useCardStore } from '@/stores/useCardStore'
 
 import utils from '@/utils.js'
 import consts from '@/consts.js'
 
 import uniqBy from 'lodash-es/uniqBy'
 
+const cardStore = useCardStore()
 const store = useStore()
 
 let unsubscribe
@@ -291,12 +293,14 @@ const normalizeBoxes = (boxes) => {
 // update items
 
 const updateItem = (item, type) => {
-  if (type === 'cards') { store.dispatch('currentCards/update', { card: item }) }
+  if (type === 'cards') {
+    cardStore.updateCard(item)
+  }
   if (type === 'boxes') { store.dispatch('currentBoxes/update', item) }
 }
 const updateCardDimensions = async () => {
   await nextTick()
-  store.dispatch('currentCards/updateDimensions', { cards: props.cards })
+  cardStore.updateCardsDimensions(props.cards)
   await nextTick()
   await nextTick()
 }

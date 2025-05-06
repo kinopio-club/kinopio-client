@@ -5,8 +5,9 @@ import store from '@/store/store.js' // TEMP Import Vuex store
 import utils from '@/utils.js'
 import consts from '@/consts.js'
 
-import debounce from 'lodash/debounce'
 import { nanoid } from 'nanoid'
+import debounce from 'lodash/debounce'
+import sortBy from 'lodash-es/sortBy'
 
 let tallestCardHeight = 0
 
@@ -74,6 +75,24 @@ export const useCardStore = defineStore('cards', {
     },
     getCardsIsNotLocked: (state) => {
       return (cards) => cards.filter(card => !card.isLocked)
+    },
+    getCardsSelectableByY: (state) => {
+      return (cards) => {
+        // filter
+        cards = cards.filter(card => {
+          if (!card.isLocked) { return }
+          if (store.state.filterComments && card.isComment) { return }
+          return true
+        })
+        // sort by y
+        cards = sortBy(cards, ['y'])
+        const yIndex = []
+        cards.forEach(card => yIndex.push(card.y))
+        return {
+          cards,
+          yIndex
+        }
+      }
     }
   },
 
@@ -515,6 +534,5 @@ export const useCardStore = defineStore('cards', {
         this.updateCard(update)
       }, 100)
     }
-
   }
 })
