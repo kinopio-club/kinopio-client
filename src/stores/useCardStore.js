@@ -225,9 +225,6 @@ export const useCardStore = defineStore('cards', {
       cards.forEach(card => {
         this.createCard(card)
       })
-      store.dispatch('currentUser/cardsCreatedCountUpdateBy', {
-        cards
-      }, { root: true })
     },
 
     // update
@@ -599,6 +596,27 @@ export const useCardStore = defineStore('cards', {
         const update = { id, name }
         this.updateCard(update)
       }, 100)
+    },
+    async pasteCard (card, id) {
+      card.id = id || nanoid()
+      const spaceId = store.state.currentSpace.id
+      card.spaceId = spaceId
+      card.isCreatedThroughPublicApi = false
+      const prevCards = this.getAllCards
+      utils.uniqueCardPosition(card, prevCards)
+      const tags = utils.tagsFromStringWithoutBrackets(card.name)
+      if (tags) {
+        tags.forEach(tag => {
+          tag = store.getters.newTag({
+            name: tag,
+            defaultColor: store.state.currentUser.color,
+            cardId: card.id,
+            spaceId
+          }, { root: true })
+          store.dispatch('currentSpace/addTag', tag, { root: true })
+        })
+      }
+      this.createCard(card)
     },
 
     // name

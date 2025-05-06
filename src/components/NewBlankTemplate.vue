@@ -8,7 +8,7 @@ import { useCardStore } from '@/stores/useCardStore'
 const cardStore = useCardStore()
 const store = useStore()
 
-// let unsubscribe
+// let unsubscribes
 
 onMounted(() => {
   console.info('🐴 the component is now mounted.', store.state.currentSpace)
@@ -19,12 +19,12 @@ onMounted(() => {
   //     }
   //   }
   // )
-  // unsubscribe = () => {
+  // unsubscribes = () => {
   //   cardStoreUnsubscribe()
   // }
 })
 // onBeforeUnmount(() => {
-//   unsubscribe()
+//   unsubscribes()
 // })
 
 const emit = defineEmits(['updateCount'])

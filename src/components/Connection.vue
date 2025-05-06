@@ -9,6 +9,7 @@ const store = useStore()
 const cardStore = useCardStore()
 
 let unsubscribe
+let unsubscribes
 
 let animationTimer, isMultiTouch, startCursor, currentCursor
 
@@ -16,8 +17,6 @@ let observer
 
 const connectionElement = ref(null)
 const connectionPathElement = ref(null)
-
-let cleanup // TODO replace and rename to unsubscribe
 
 onMounted(() => {
   initViewportObserver()
@@ -51,14 +50,14 @@ onMounted(() => {
       }
     }
   )
-  cleanup = () => {
+  unsubscribes = () => {
     cardStoreUnsubscribe()
   }
 })
 onBeforeUnmount(() => {
   removeViewportObserver()
   unsubscribe()
-  cleanup()
+  unsubscribes()
 })
 
 const props = defineProps({

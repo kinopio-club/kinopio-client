@@ -8,7 +8,7 @@ import utils from '@/utils.js'
 const cardStore = useCardStore()
 const store = useStore()
 
-// let unsubscribe
+// let unsubscribes
 
 const dialogElement = ref(null)
 
@@ -21,13 +21,13 @@ onMounted(() => {
   //     }
   //   }
   // )
-  // unsubscribe = () => {
+  // unsubscribes = () => {
   //   cardStoreUnsubscribe()
   // }
 })
 onBeforeUnmount(() => {
   window.removeEventListener('resize', updateDialogHeight)
-//   unsubscribe()
+//   unsubscribes()
 })
 
 const emit = defineEmits(['updateCount'])

@@ -1,11 +1,13 @@
 <script setup>
 import { reactive, computed, onMounted, onBeforeUnmount, watch, ref, nextTick } from 'vue'
 import { useStore } from 'vuex'
+import { useCardStore } from '@/stores/useCardStore'
 
 import utils from '@/utils.js'
 import cache from '@/cache.js'
 
 const store = useStore()
+const cardStore = useCardStore()
 
 let canvas, context
 let startPanningPosition
@@ -13,6 +15,7 @@ const itemRadius = 1
 const canvasElement = ref(null)
 
 let unsubscribe
+let unsubscribes
 
 onMounted(async () => {
   init()
@@ -25,14 +28,6 @@ onMounted(async () => {
     const mutations = [
       'isLoadingSpace',
       'currentSpace/loadSpace',
-      'currentCards/update',
-      'currentCards/updateMultiple',
-      'currentCards/remove',
-      'currentCards/removeResize',
-      'currentCards/move',
-      'currentCards/resize',
-      'currentCards/paste',
-      'currentCards/add',
       'currentBoxes/add',
       'currentBoxes/update',
       'currentBoxes/resize',
@@ -49,6 +44,25 @@ onMounted(async () => {
       init()
     }
   })
+  const cardStoreActions = [
+    'updateCards',
+    'removeCards',
+    'clearResizeCards',
+    'moveCards',
+    'createCard',
+    'resizeCards',
+    'pasteCards'
+  ]
+  const cardStoreUnsubscribe = cardStore.$onAction(
+    ({ name, args }) => {
+      if (cardStoreActions.includes(name)) {
+        init()
+      }
+    }
+  )
+  unsubscribes = () => {
+    cardStoreUnsubscribe()
+  }
 })
 onBeforeUnmount(() => {
   unsubscribe()
@@ -56,6 +70,7 @@ onBeforeUnmount(() => {
   window.removeEventListener('resize', init)
   window.removeEventListener('pointerup', endPanningViewport)
   window.removeEventListener('pointermove', panViewport)
+  unsubscribes()
 })
 
 const emit = defineEmits(['updateCount'])
@@ -109,6 +124,7 @@ const styles = computed(() => {
 // canvas
 
 const init = async () => {
+  await nextTick()
   if (!props.visible) { return }
   await initCanvas()
   if (!canvas) { return }
@@ -217,7 +233,7 @@ const drawBoxes = () => {
 // cards
 
 const mapCards = computed(() => {
-  return props.space?.cards || store.getters['currentCards/all']
+  return props.space?.cards || cardStore.getAllCards
 })
 const drawCards = () => {
   const defaultColor = utils.cssVariable('secondary-background')
