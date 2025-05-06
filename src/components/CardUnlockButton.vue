@@ -1,9 +1,12 @@
 <script setup>
 import { reactive, computed, onMounted, onBeforeUnmount, onUnmounted, watch, ref, nextTick } from 'vue'
 import { useStore } from 'vuex'
+import { useCardStore } from '@/stores/useCardStore'
 
 import utils from '@/utils.js'
+
 const store = useStore()
+const cardStore = useCardStore()
 
 onMounted(() => {
   store.subscribe(async (mutation, state) => {
@@ -74,7 +77,7 @@ const unlockCard = (event) => {
     id: props.card.id,
     isLocked: false
   }
-  store.dispatch('currentCards/update', { card: update })
+  cardStore.updateCard(update)
 }
 
 </script>

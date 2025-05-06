@@ -14,11 +14,16 @@ const dialogElement = ref(null)
 
 onMounted(() => {
   window.addEventListener('resize', updateDialogHeight)
-  // unsubscribe = store.subscribe(mutation => {
-  //   if (mutation.type === 'abc') {
-  //     xyz()
+  // const cardStoreUnsubscribe = cardStore.$onAction(
+  //   ({name, args}) => {
+  //     if (name === 'moveCards') {
+  //       cancelAnimation()
+  //     }
   //   }
-  // })
+  // )
+  // unsubscribe = () => {
+  //   cardStoreUnsubscribe()
+  // }
 })
 onBeforeUnmount(() => {
   window.removeEventListener('resize', updateDialogHeight)

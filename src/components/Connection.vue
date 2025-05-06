@@ -1,9 +1,12 @@
 <script setup>
 import { reactive, computed, onMounted, onBeforeUnmount, onUnmounted, watch, ref, nextTick } from 'vue'
 import { useStore } from 'vuex'
+import { useCardStore } from '@/stores/useCardStore'
 
 import utils from '@/utils.js'
+
 const store = useStore()
+const cardStore = useCardStore()
 
 let unsubscribe
 
@@ -14,7 +17,10 @@ let observer
 const connectionElement = ref(null)
 const connectionPathElement = ref(null)
 
+let cleanup // TODO replace and rename to unsubscribe
+
 onMounted(() => {
+  initViewportObserver()
   unsubscribe = store.subscribe((mutation, state) => {
     if (mutation.type === 'clearMultipleSelected') {
       const selectedIds = store.state.multipleConnectionsSelectedIds
@@ -22,8 +28,6 @@ onMounted(() => {
       if (!selected) {
         cancelAnimation()
       }
-    } else if (mutation.type === 'currentCards/move') {
-      cancelAnimation()
     } else if (mutation.type === 'triggerConnectionDetailsIsVisible') {
       if (mutation.payload.connectionId === props.connection.id) {
         const isFromStore = true
@@ -40,11 +44,21 @@ onMounted(() => {
       updatePathWhileDragging(null)
     }
   })
-  initViewportObserver()
+  const cardStoreUnsubscribe = cardStore.$onAction(
+    ({ name, args }) => {
+      if (name === 'moveCards') {
+        cancelAnimation()
+      }
+    }
+  )
+  cleanup = () => {
+    cardStoreUnsubscribe()
+  }
 })
 onBeforeUnmount(() => {
   removeViewportObserver()
   unsubscribe()
+  cleanup()
 })
 
 const props = defineProps({
@@ -130,7 +144,7 @@ const typeName = computed(() => {
 // items
 
 const items = computed(() => {
-  const cards = store.getters['currentCards/all']
+  const cards = cardStore.getAllCards
   const boxes = store.getters['currentBoxes/all']
   const items = cards.concat(boxes)
   const startItem = items.find(item => item.id === props.connection.startItemId)

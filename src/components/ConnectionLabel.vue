@@ -1,9 +1,12 @@
 <script setup>
 import { reactive, computed, onMounted, onUnmounted, watch, ref, nextTick } from 'vue'
 import { useStore } from 'vuex'
+import { useCardStore } from '@/stores/useCardStore'
 
 import utils from '@/utils.js'
+
 const store = useStore()
+const cardStore = useCardStore()
 
 const labelElement = ref(null)
 
@@ -108,7 +111,7 @@ const toggleConnectionDetails = (event) => {
   }
 }
 const items = computed(() => {
-  const cards = store.getters['currentCards/all']
+  const cards = cardStore.getAllCards
   const boxes = store.getters['currentBoxes/all']
   const items = cards.concat(boxes)
   const startItem = items.find(item => item.id === props.connection.startItemId)
@@ -135,7 +138,7 @@ const isConnectionFilteredByType = computed(() => {
 })
 const isCardsFilteredByFrame = computed(() => {
   const frameIds = store.state.filteredFrameIds
-  const cards = utils.clone(store.getters['currentCards/all'])
+  const cards = cardStore.getAllCards
   const startItemId = props.connection.startItemId
   const endItemId = props.connection.endItemId
   const startCard = cards.filter(card => card.id === startItemId)[0]

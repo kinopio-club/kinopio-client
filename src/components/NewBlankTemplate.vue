@@ -12,11 +12,16 @@ const store = useStore()
 
 onMounted(() => {
   console.info('🐴 the component is now mounted.', store.state.currentSpace)
-  // unsubscribe = store.subscribe(mutation => {
-  //   if (mutation.type === 'triggerUpdateOtherCard') {
-  //     mutation.payload
+  // const cardStoreUnsubscribe = cardStore.$onAction(
+  //   ({name, args}) => {
+  //     if (name === 'moveCards') {
+  //       cancelAnimation()
+  //     }
   //   }
-  // })
+  // )
+  // unsubscribe = () => {
+  //   cardStoreUnsubscribe()
+  // }
 })
 // onBeforeUnmount(() => {
 //   unsubscribe()

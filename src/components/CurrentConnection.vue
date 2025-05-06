@@ -1,11 +1,14 @@
 <script setup>
 import { reactive, computed, onMounted, onBeforeUnmount, onUnmounted, watch, ref, nextTick } from 'vue'
 import { useStore } from 'vuex'
+import { useCardStore } from '@/stores/useCardStore'
 
 import utils from '@/utils.js'
 
 import { nanoid } from 'nanoid'
+
 const store = useStore()
+const cardStore = useCardStore()
 
 let prevType
 
@@ -94,7 +97,7 @@ const checkCurrentConnectionSuccess = (event) => {
     store.commit('broadcast/updateStore', { updates, type: 'updateRemoteCurrentConnection' })
   // connected to card
   } else if (isCurrentConnectionConnected && cardElement) {
-    const card = store.getters['currentCards/byId'](cardElement.dataset.cardId)
+    const card = cardStore.getCard(cardElement.dataset.cardId)
     if (card.isLocked) {
       store.commit('currentConnectionSuccess', {})
       return
