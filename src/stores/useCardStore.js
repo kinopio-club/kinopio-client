@@ -298,6 +298,8 @@ export const useCardStore = defineStore('cards', {
       this.removeCards([id])
     },
 
+    // ------
+
     // position
 
     moveCards ({ ids, endCursor, prevCursor }) {
@@ -541,6 +543,22 @@ export const useCardStore = defineStore('cards', {
       // context.dispatch('currentConnections/updatePaths', { connections }, { root: true })
     },
 
+    // vote
+
+    updateCardCounter ({ card, shouldIncrement, shouldDecrement }) {
+      const isSignedIn = store.getters['currentUser/isSignedIn']
+      const update = {
+        id: card.id,
+        cardId: card.id,
+        shouldIncrement,
+        shouldDecrement
+      }
+      this.updateCard(update)
+      if (!isSignedIn) {
+        store.dispatch('api/updateCardCounter', update, { root: true })
+      }
+    },
+
     // paste
 
     normalizeCardUrls (id) {
@@ -554,6 +572,43 @@ export const useCardStore = defineStore('cards', {
         const update = { id, name }
         this.updateCard(update)
       }, 100)
+    },
+
+    // name
+
+    cardWithNameSegments (card) {
+      let name = card.name
+      const url = utils.urlFromString(name)
+      let imageUrl
+      if (utils.urlIsImage(url)) {
+        imageUrl = url
+        name = name.replace(url, '')
+      }
+      const segments = utils.cardNameSegments(name)
+      if (imageUrl) {
+        segments.unshift({
+          isImage: true,
+          url: imageUrl
+        })
+      }
+      card.nameSegments = segments.map(segment => {
+        if (!segment.isTag) { return segment }
+        segment.color = this.cardSegmentTagColor(segment)
+        return segment
+      })
+      return card
+    },
+    cardSegmentTagColor (segment) {
+      const spaceTag = store.getters['currentSpace/tagByName'](segment.name)
+      const userTag = store.getters['currentUser/tagByName'](segment.name)
+      if (spaceTag) {
+        return spaceTag.color
+      } else if (userTag) {
+        return userTag.color
+      } else {
+        return store.state.currentUser.color
+      }
     }
+
   }
 })
