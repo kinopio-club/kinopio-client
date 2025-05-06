@@ -332,6 +332,7 @@ export const useCardStore = defineStore('cards', {
       this.deleteCards(cardsToDelete)
       // store.dispatch('history/add', { cards, isRemoved: true }, { root: true })
       // await cache.updateSpace('removedCards', state.removedCards, currentSpaceId)
+      // store.dispatch('currentConnections/removeFromItem', card) // to plural
     },
     removeCard (id) {
       this.removeCards([id])
@@ -678,6 +679,16 @@ export const useCardStore = defineStore('cards', {
       } else {
         return store.state.currentUser.color
       }
+    },
+    clearCardNameUploadPlaceholder (id) {
+      const card = this.getCard(id)
+      if (!card) { return }
+      const name = card.name.replaceAll(consts.uploadPlaceholder, '')
+      const update = {
+        id,
+        name
+      }
+      this.updateCard(update)
     }
 
   }

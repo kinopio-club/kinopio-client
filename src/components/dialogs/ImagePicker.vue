@@ -1,6 +1,7 @@
 <script setup>
 import { reactive, computed, onMounted, onUnmounted, watch, ref, nextTick } from 'vue'
 import { useStore } from 'vuex'
+import { useCardStore } from '@/stores/useCardStore'
 
 import Loader from '@/components/Loader.vue'
 import utils from '@/utils.js'
@@ -9,7 +10,9 @@ import consts from '@/consts.js'
 
 import debounce from 'lodash-es/debounce'
 import sample from 'lodash-es/sample'
+
 const store = useStore()
+const cardStore = useCardStore()
 
 const dialogElement = ref(null)
 const searchInputElement = ref(null)
@@ -69,7 +72,7 @@ const triggerUpgradeUserIsVisible = () => {
   store.commit('triggerUpgradeUserIsVisible')
 }
 const closeImagePicker = () => {
-  store.dispatch('currentCards/updateNameRemovePlaceholders', props.cardId)
+  cardStore.clearCardNameUploadPlaceholder(props.cardId)
 }
 
 // input
@@ -287,7 +290,7 @@ const uploadOtherSelectedFiles = (otherSelectedFiles) => {
   if (!otherSelectedFiles.length) { return }
   try {
     const cardId = props.cardId
-    const card = store.getters['currentCards/byId'](cardId)
+    const card = cardStore.getCard(cardId)
     const positionOffset = 20
     const position = {
       x: card.x + positionOffset,
@@ -323,13 +326,13 @@ const uploadFiles = async (event) => {
 }
 const addPlaceholderToCardName = (event) => {
   // prevents empty cards from being removed on blur by the @change event on iOS
-  const card = store.getters['currentCards/byId'](props.cardId)
+  const card = cardStore.getCard(props.cardId)
   if (!card.name) {
     const update = {
       id: card.id,
       name: consts.uploadPlaceholder
     }
-    store.dispatch('currentCards/update', { card: update, shouldPreventUpdateDimensionsAndPaths: true })
+    cardStore.updateCard(update)
   }
 }
 

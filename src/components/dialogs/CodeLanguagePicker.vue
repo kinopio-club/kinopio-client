@@ -1,12 +1,14 @@
 <script setup>
 import { reactive, computed, onMounted, watch, ref, nextTick } from 'vue'
 import { useStore } from 'vuex'
+import { useCardStore } from '@/stores/useCardStore'
 
 import ResultsFilter from '@/components/ResultsFilter.vue'
 import codeLanguages from '@/data/codeLanguages.json'
 import utils from '@/utils.js'
 
 const store = useStore()
+const cardStore = useCardStore()
 
 const dialog = ref(null)
 const placeholder = 'Search Languages'
@@ -31,7 +33,7 @@ const cardId = computed(() => store.state.codeLanguagePickerCardId)
 // languages
 
 const languageIsActive = (language) => {
-  const card = store.getters['currentCards/byId'](cardId.value)
+  const card = cardStore.getCard(cardId.value)
   const cardLanguage = card.codeBlockLanguage || 'txt'
   return language.name === cardLanguage
 }
@@ -40,11 +42,11 @@ const languageIsFocused = (language) => {
 }
 const selectLanguage = (language) => {
   if (!language) { return }
-  const card = {
+  const update = {
     id: cardId.value,
     codeBlockLanguage: language.name
   }
-  store.dispatch('currentCards/update', { card })
+  cardStore.updateCard(update)
   store.dispatch('closeAllDialogs')
 }
 

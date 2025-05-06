@@ -1,12 +1,15 @@
 <script setup>
 import { reactive, computed, onMounted, onUnmounted, watch, ref, nextTick } from 'vue'
 import { useStore } from 'vuex'
+import { useCardStore } from '@/stores/useCardStore'
 
 import cache from '@/cache.js'
 import utils from '@/utils.js'
 import SpacePicker from '@/components/dialogs/SpacePicker.vue'
 import Loader from '@/components/Loader.vue'
+
 const store = useStore()
+const cardStore = useCardStore()
 
 const dialogElement = ref(null)
 
@@ -146,7 +149,8 @@ const copyToSelectedSpace = async (items) => {
   await cache.addToSpace(newItems, selectedSpaceId)
   // update current space
   if (selectedSpaceisCurrentSpace) {
-    store.dispatch('currentCards/addMultiple', { cards: newItems.cards, shouldOffsetPosition: true })
+    const shouldOffsetPosition = true
+    cardStore.createCards(newItems.cards, shouldOffsetPosition)
     newItems.connectionTypes.forEach(connectionType => store.dispatch('currentConnections/addType', connectionType))
     newItems.connections.forEach(connection => store.dispatch('currentConnections/add', { connection, type: { id: connection.connectionTypeId } }))
     newItems.boxes.forEach(box => store.dispatch('currentBoxes/add', { box }))
@@ -191,10 +195,8 @@ const moveOrCopyToSpace = async () => {
   store.dispatch('closeAllDialogs')
 }
 const removeCards = (cards) => {
-  cards.forEach(card => {
-    store.dispatch('currentCards/remove', card)
-    store.dispatch('currentConnections/removeFromItem', card)
-  })
+  const ids = cards.map(card => card.id)
+  cardStore.removeCard(ids)
 }
 const removeBoxes = (boxes) => {
   boxes.forEach(box => {

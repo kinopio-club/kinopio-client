@@ -1,11 +1,13 @@
 <script setup>
 import { reactive, computed, onMounted, watch, ref, nextTick } from 'vue'
 import { useStore } from 'vuex'
+import { useCardStore } from '@/stores/useCardStore'
 
 import utils from '@/utils.js'
 import consts from '@/consts.js'
 
 const store = useStore()
+const cardStore = useCardStore()
 
 let hasRetried
 
@@ -84,7 +86,7 @@ const toggleShouldDisplayIframe = (event) => {
   event.stopPropagation()
   if (isTwitterUrl.value) { return }
   store.dispatch('closeAllDialogs')
-  store.dispatch('currentCards/incrementZ', props.card.id)
+  cardStore.incrementCardsZ(props.card.id)
   const iframeIsVisibleForCardId = store.state.iframeIsVisibleForCardId
   let value
   if (props.card.id === iframeIsVisibleForCardId) {
@@ -158,11 +160,11 @@ const handleImageError = (event) => {
   const isInstagram = url.includes('instagram')
   // generic image error
   if (!isInstagram) {
-    const card = {
+    const update = {
       id: props.card.id,
       shouldHideUrlPreviewImage: true
     }
-    store.commit('currentCards/update', { card })
+    cardStore.updateCard(update)
     return
   }
   // instagram url signature expiry
