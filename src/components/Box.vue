@@ -426,7 +426,7 @@ const containedItems = () => {
   const cards = []
   const boxes = []
   // cards
-  selectableCards.value.forEach(card => {
+  selectableCards.value.cards.forEach(card => {
     if (isItemInSelectedBoxes(card, 'card')) {
       cards.push(card)
     }
@@ -451,8 +451,7 @@ const selectContainedBoxes = () => {
   })
 }
 const selectableCards = computed(() => {
-  const cards = cardStore.getAllCards
-  return cardStore.getCardsSelectableByY(cards)
+  return cardStore.getCardsSelectableByY
 })
 const selectContainedCards = () => {
   const cards = containedItems().cards

@@ -95,7 +95,7 @@ onMounted(() => {
     store.commit('webfontIsLoaded', true)
   })
   unsubscribe = store.subscribe((mutation, state) => {
-    if (mutation.type === 'triggerRestoreSpaceRemoteComplete') {
+    if (mutation.type === 'triggerRestoreSpaceRemoteComplete') { // TODO replace w spacestore restoreSpace
       dragItemsOnNextTick()
     } else if (mutation.type === 'triggerAddBox') {
       const event = mutation.payload

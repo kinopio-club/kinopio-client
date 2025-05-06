@@ -18,6 +18,7 @@ import qs from '@aguezz/qs-parse'
 import getCurvePoints from '@/libs/curve_calc.js'
 import random from 'lodash-es/random'
 import cloneDeep from 'lodash-es/cloneDeep'
+// import merge from 'lodash-es/merge'
 import randomColor from 'randomcolor'
 // https://data.iana.org/TLD/tlds-alpha-by-domain.txt
 // Updated Jun 9 2021 UTC
@@ -875,6 +876,28 @@ export default {
     return classes
   },
 
+  // restore space
+
+  // mergeSpaceObjectUpdates (space, itemType, newItems) {
+  //   newItems.forEach(newItem => {
+  //     let shouldUpdate
+  //     const prevItem = space.
+  //     // context.getters.byId(newItem.id)
+  //     const card = { id: newItem.id }
+  //     let keys = Object.keys(newItem)
+  //     keys = keys.filter(key => key !== 'id')
+  //     keys.forEach(key => {
+  //       if (prevItem[key] !== newItem[key]) {
+  //         card[key] = newItem[key]
+  //         shouldUpdate = true
+  //       }
+  //     })
+  //     if (!shouldUpdate) { return }
+  //     context.commit('update', card)
+  //   })
+
+  // },
+
   // normalize items
 
   normalizeItems (items) {
@@ -1528,45 +1551,71 @@ export default {
     }
     return cardsCountIsUnchanged && boxesCountIsUnchanged // && editedAtIsUnchanged
   },
-  mergeSpaceKeyValues ({ prevItems, newItems, selectedItemIds }) {
-    prevItems = prevItems.filter(item => Boolean(item))
-    newItems = newItems.filter(item => Boolean(item))
-    selectedItemIds = selectedItemIds || []
-    const prevIds = prevItems.map(item => item.id)
-    const newIds = newItems.map(item => item.id)
-    newItems = this.normalizeItems(newItems)
-    prevItems = this.normalizeItems(prevItems)
-    const addItems = []
-    const updateItems = []
-    const removeItems = []
-    newIds.forEach(id => {
-      const selectedItem = selectedItemIds.find(selectedItemId => selectedItemId === id)
-      const itemExists = prevIds.includes(id)
-      if (selectedItem) {
-        const prevItem = prevItems[id]
-        const newItem = newItems[id]
-        // use prevItem position to avoid ppsition item jumping while selected items dragging
-        newItem.x = prevItem.x
-        newItem.y = prevItem.y
-        updateItems.push(newItem)
-      } else if (itemExists) {
-        updateItems.push(newItems[id])
-      } else {
-        addItems.push(newItems[id])
-      }
-    })
-    prevIds.forEach(id => {
-      const prevItemNotFoundInNewItems = !newIds.includes(id)
-      const threshold = 30 * 1000 // 30 seconds
-      const prevItemUpdatedInCurrentSession = dayjs(Date.now()).diff(prevItems[id].updatedAt) < threshold
-      const selectedItem = selectedItemIds.find(selectedItemId => selectedItemId === id)
-      const itemIsRemoved = prevItemNotFoundInNewItems && !prevItemUpdatedInCurrentSession && !selectedItem
-      if (itemIsRemoved) {
-        removeItems.push(prevItems[id])
-      }
-    })
-    return { addItems, updateItems, removeItems }
-  },
+  // mergeSpaceItems({ prevItems, newItems, selectedItemIds = [] }) {
+  //   const filteredPrevItems = prevItems.filter(Boolean)
+  //   const filteredNewItems = newItems.filter(Boolean)
+  //   const prevIds = filteredPrevItems.map(({ id }) => id)
+  //   const newIds = filteredNewItems.map(({ id }) => id)
+  //   const normalizedNew = this.normalizeItems(filteredNewItems)
+  //   const normalizedPrev = this.normalizeItems(filteredPrevItems)
+  //   const items = normalizedNew // [ id: {object } ]
+  //   const threshold = 30 * 1000 // 30 seconds
+  //   const now = Date.now()
+
+  //   // const addItems = []
+  //   // const updateItems = []
+  //   // const removeItems = []
+
+  //   newIds.forEach(id => {
+  //     const isSelected = selectedItemIds.includes(id)
+  //     const isUpdated = prevIds.includes(id)
+  //     const prevItem = normalizedPrev[id]
+  //     const newItem = normalizedNew[id]
+  //     const threshold = 30 * 1000 // 30 seconds
+  //     const now = Date.now()
+  //     // const isNewUpdate = dayjs(now).diff(prevItem.updatedAt) >= threshold
+
+  //     // add prev to new
+
+  //     // merge prev updates
+
+  //     // use selected prev positions to avoid ppsition jumping while dragging
+  //     if (isSelected) {
+  //       const { x, y } = prevItem
+  //       items[id].x = x
+  //       items[id].y = y
+  //     }
+
+  //     prevIds.filter(prevId => {
+  //       // .filter(id => {
+  //       // const isNew = !newIds.includes(prevId)
+  //         const isNotInNewItems = !newIds.includes(id)
+  //         const isOldUpdate = dayjs(now).diff(normalizedPrev[id].updatedAt) >= threshold
+  //         return isNotInNewItems && isOldUpdate
+  //       // })
+  //     })
+
+  //     if (isUpdated) {
+  //       items[id] = { ...prevItem, ...newItem}
+  //     } else {
+  //       items.push()
+  //       addItems.push(normalizedNew[id])
+  //     }
+  //   })
+  //   // Handle removals
+  //   removeItems.push(
+  //     ...prevIds
+  //       .filter(id => {
+  //         const isNotInNewItems = !newIds.includes(id)
+  //         const isNotSelected = !selectedItemIds.includes(id)
+  //         const isOldUpdate = dayjs(now).diff(normalizedPrev[id].updatedAt) >= threshold
+  //         return isNotInNewItems && isNotSelected && isOldUpdate
+  //       })
+  //       .map(id => normalizedPrev[id])
+  //   )
+  //   // return items , denomarlized
+  //   return { addItems, updateItems, removeItems }
+  // },
   newSpaceBackground (space, currentUser) {
     if (currentUser.defaultSpaceBackgroundGradient) {
       space.backgroundGradient = currentUser.defaultSpaceBackgroundGradient

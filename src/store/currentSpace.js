@@ -335,7 +335,7 @@ const currentSpace = {
         space = await cache.updateIdsInSpace(space)
         context.commit('clearSearch', null, { root: true })
         context.commit('resetPageSizes', null, { root: true })
-        context.dispatch('restoreSpaceInChunks', { space })
+        context.dispatch('restoreSpace', { space })
         context.commit('addUserToSpace', user)
         context.dispatch('updateOtherUsers')
         context.dispatch('updateOtherItems')
@@ -398,7 +398,7 @@ const currentSpace = {
       context.commit('clearSearch', null, { root: true })
       isLoadingRemoteSpace = false
       context.commit('resetPageSizes', null, { root: true })
-      context.dispatch('restoreSpaceInChunks', { space: uniqueNewSpace })
+      context.dispatch('restoreSpace', { space: uniqueNewSpace })
     },
     createNewInboxSpace: async (context, shouldCreateWithoutLoading) => {
       const cardStore = useCardStore()
@@ -422,7 +422,7 @@ const currentSpace = {
         context.commit('clearSearch', null, { root: true })
         isLoadingRemoteSpace = false
         context.commit('resetPageSizes', null, { root: true })
-        context.dispatch('restoreSpaceInChunks', { space })
+        context.dispatch('restoreSpace', { space })
         nextTick(() => {
           cardStore.updateCardsDimensions()
         })
@@ -469,7 +469,7 @@ const currentSpace = {
       context.commit('clearSearch', null, { root: true })
       isLoadingRemoteSpace = false
       context.commit('resetPageSizes', null, { root: true })
-      context.dispatch('restoreSpaceInChunks', { space: uniqueNewSpace })
+      context.dispatch('restoreSpace', { space: uniqueNewSpace })
       await context.dispatch('saveNewSpace')
       context.commit('addNotification', { message: 'Duplicated Space', type: 'success' }, { root: true })
     },
@@ -608,14 +608,24 @@ const currentSpace = {
       context.dispatch('currentConnections/updateSpaceId', space.id, { root: true })
       context.dispatch('currentBoxes/updateSpaceId', space.id, { root: true })
     },
-    // todo chunks not needed?
-    restoreSpaceInChunks: (context, { space, isRemote, addCards, addConnections, addConnectionTypes, addBoxes }) => {
-      if (!utils.objectHasKeys(space)) { return }
 
-      context.dispatch('restoreSpaceComplete', { space, isRemote })
-      const itemsRect = utils.pageSizeFromItems(space.cards)
-      context.commit('resetPageSizes', null, { root: true })
-      context.commit('updatePageSizes', itemsRect, { root: true })
+    restoreSpace: async (context, { space, isRemote }) => {
+      // if (!utils.objectHasKeys(space)) { return }
+
+      const cardStore = useCardStore()
+      await cardStore.initializeCards(space.cards)
+
+      // ☎️ connections are the slow down causer. but not dom limited bc it's slow on a space w lots of cards but few connections
+
+      // context.commit('currentConnections/restoreTypes', space.connectionTypes, { root: true })
+
+      context.commit('currentConnections/restore', space.connections, { root: true })
+
+      context.commit('currentBoxes/restore', space.boxes, { root: true }) // replace
+
+      context.dispatch('restoreRemoteSpaceComplete', { space, isRemote })
+
+      // TODO merge diffs bw local loaded/edited and loaded from remote
 
       // space.connections = utils.migrationConnections(space.connections)
       // addConnections = utils.migrationConnections(addConnections)
@@ -680,7 +690,7 @@ const currentSpace = {
       // if (!primaryChunks.length) {
       //   context.commit('currentBoxes/restore', boxes, { root: true })
       //   context.commit('currentConnections/restoreTypes', connectionTypes, { root: true })
-      //   context.dispatch('restoreSpaceComplete', { space, isRemote, timeStart })
+      //   context.dispatch('restoreRemoteSpaceComplete', { space, isRemote, timeStart })
       //   return
       // }
       // // restore types
@@ -710,33 +720,37 @@ const currentSpace = {
       //     // complete
       //     const isRestoreComplete = index === primaryChunks.length - 1
       //     if (isRestoreComplete) {
-      //       context.dispatch('restoreSpaceComplete', { space, isRemote, timeStart })
+      //       context.dispatch('restoreRemoteSpaceComplete', { space, isRemote, timeStart })
       //     }
       //   })
       // })
     },
-    restoreSpaceComplete: async (context, { space, isRemote, timeStart }) => {
-      const cardStore = useCardStore()
-      await cardStore.initializeCards(space.cards)
 
+    // merge into restorespace
+    restoreRemoteSpaceComplete: async (context, { space, isRemote }) => {
       context.dispatch('history/reset', null, { root: true })
-      postMessage.send({ name: 'restoreSpaceComplete', value: true })
-      const timeEnd = utils.unixTime()
-      let emoji = '🌳'
-      if (isRemote) {
-        emoji = '🌳🌏'
-      }
-      const cards = cardStore.allIds.length
-      const connections = context.rootState.currentConnections.ids.length
-      const boxes = context.rootState.currentBoxes.ids.length
-      console.info(`${emoji} Restore space complete in ${timeEnd - timeStart}ms,`, {
-        cards,
-        connections,
-        boxes,
-        spaceName: space.name,
-        isRemote
-      })
-      context.dispatch('updatePageSizes', null, { root: true })
+      postMessage.send({ name: 'restoreRemoteSpaceComplete', value: true })
+      // const timeEnd = utils.unixTime()
+      // let emoji = '🌳'
+      // if (isRemote) {
+      //   emoji = '🌳🌏'
+      // }
+      // const cards = cardStore.allIds.length
+      // const connections = context.rootState.currentConnections.ids.length
+      // const boxes = context.rootState.currentBoxes.ids.length
+      // console.info(`${emoji} Restore space complete in ${timeEnd - timeStart}ms,`, {
+      //   cards,
+      //   connections,
+      //   boxes,
+      //   spaceName: space.name,
+      //   isRemote
+      // })
+
+      const itemsRect = utils.pageSizeFromItems(space.cards)
+      context.commit('resetPageSizes', null, { root: true })
+      context.commit('updatePageSizes', itemsRect, { root: true })
+      context.dispatch('updatePageSizes', null, { root: true }) // ?
+
       if (isRemote) {
         context.dispatch('checkIfShouldNotifySignUpToEditSpace', space)
         context.dispatch('checkIfShouldNotifySpaceIsRemoved', space)
@@ -835,61 +849,71 @@ const currentSpace = {
       context.commit('shouldPreventNextEnterKey', false, { root: true })
     },
     restoreSpaceLocal: (context, space) => {
-      console.time('🎑⏱️ restoreSpaceLocal')
       const emptySpace = utils.emptySpace(space.id)
       context.commit('restoreSpace', emptySpace)
       context.dispatch('history/reset', null, { root: true })
-      context.dispatch('restoreSpaceInChunks', { space })
+      context.dispatch('restoreSpace', { space })
       console.info('🎑 local space', space)
-      context.commit('triggerRestoreSpaceLocalComplete', null, { root: true })
-      console.timeEnd('🎑⏱️ restoreSpaceLocal')
       return space
     },
     restoreSpaceRemote: async (context, remoteSpace) => {
-      console.time('🎑⏱️ restoreSpaceRemote')
-      isLoadingRemoteSpace = true
+      const cardStore = useCardStore()
+      isLoadingRemoteSpace = true // TODO why is this a local var?? instead of store state
       remoteSpace = utils.normalizeSpace(remoteSpace)
+
       // cards
-      const cards = context.rootGetters['currentCards/all']
-      const selectedCardIds = context.rootState.multipleCardsSelectedIds.concat(context.rootState.multipleCardsSelectedIdsToLoad)
-      const cardResults = utils.mergeSpaceKeyValues({ prevItems: cards, newItems: remoteSpace.cards, selectedItemIds: selectedCardIds })
-      context.dispatch('currentCards/mergeUnique', cardResults.updateItems, { root: true })
-      context.dispatch('currentCards/mergeRemove', cardResults.removeItems, { root: true })
-      // connectionTypes
-      const connectionTypes = context.rootGetters['currentConnections/allTypes']
-      const selectedConnectionTypeIds = context.rootState.multipleConnectionTypesSelectedIdsToLoad
-      const connectionTypeReults = utils.mergeSpaceKeyValues({ prevItems: connectionTypes, newItems: remoteSpace.connectionTypes, selectedItemIds: selectedConnectionTypeIds })
-      context.dispatch('currentConnections/mergeUnique', { newItems: connectionTypeReults.updateItems, itemType: 'type' }, { root: true })
-      context.dispatch('currentConnections/mergeRemove', { removeItems: connectionTypeReults.removeItems, itemType: 'type' }, { root: true })
-      // connections
-      const connections = context.rootGetters['currentConnections/all']
-      const selectedConnectionIds = context.rootState.multipleConnectionsSelectedIds.concat(context.rootState.multipleConnectionsSelectedIdsToLoad)
-      const connectionResults = utils.mergeSpaceKeyValues({ prevItems: connections, newItems: remoteSpace.connections, selectedItemIds: selectedConnectionIds })
-      context.dispatch('currentConnections/mergeUnique', { newItems: connectionResults.updateItems, itemType: 'connection' }, { root: true })
-      context.dispatch('currentConnections/mergeRemove', { removeItems: connectionResults.removeItems, itemType: 'connection' }, { root: true })
-      // boxes
-      const boxes = context.rootGetters['currentBoxes/all']
-      const selectedBoxIds = context.rootState.multipleBoxesSelectedIds.concat(context.rootState.multipleBoxesSelectedIdsToLoad)
-      const boxResults = utils.mergeSpaceKeyValues({ prevItems: boxes, newItems: remoteSpace.boxes, selectedItemIds: selectedBoxIds })
-      context.dispatch('currentBoxes/mergeUnique', { newItems: boxResults.updateItems, itemType: 'box' }, { root: true })
-      context.dispatch('currentBoxes/mergeRemove', { removeItems: boxResults.removeItems, itemType: 'box' }, { root: true })
-      context.dispatch('history/redoLocalUpdates', null, { root: true })
-      console.info('🎑 merged remote space', {
-        cards: cardResults,
-        types: connectionTypeReults,
-        connections: connectionResults,
-        boxes: boxResults
-      })
-      context.dispatch('restoreSpaceInChunks', {
-        space: remoteSpace,
-        isRemote: true,
-        addCards: cardResults.addItems,
-        addConnectionTypes: connectionTypeReults.addItems,
-        addConnections: connectionResults.addItems,
-        addBoxes: boxResults.addItems
-      })
-      context.commit('triggerRestoreSpaceRemoteComplete', null, { root: true })
-      console.timeEnd('🎑⏱️ restoreSpaceRemote')
+      // const prevCards = cardStore.getAllCards
+      // const selectedCardIds = context.rootState.multipleCardsSelectedIds.concat(context.rootState.multipleCardsSelectedIdsToLoad)
+      // const cardDiffs = utils.diffSpaceItems({ prevItems: prevCards, newItems: remoteSpace.cards, selectedItemIds: selectedCardIds })
+      // cardDiffs.addItems.forEach(prevCard => {
+      //   remoteSpace.cards.push(prevCard)
+      // })
+      // cardDiffs.updateItems.forEach(update => {
+      //   // const newCard = context.getters.byId(newCard.id)
+
+      //   // remoteSpace.cards
+      // })
+
+      // removeSpace.cards
+
+      // context.dispatch('currentCards/mergeUnique', cardResults.updateItems, { root: true })
+      // context.dispatch('currentCards/mergeRemove', cardResults.removeItems, { root: true })
+
+      // // connectionTypes
+      // const connectionTypes = context.rootGetters['currentConnections/allTypes']
+      // const selectedConnectionTypeIds = context.rootState.multipleConnectionTypesSelectedIdsToLoad
+      // const connectionTypeReults = utils.mergeSpaceKeyValues({ prevItems: connectionTypes, newItems: remoteSpace.connectionTypes, selectedItemIds: selectedConnectionTypeIds })
+      // context.dispatch('currentConnections/mergeUnique', { newItems: connectionTypeReults.updateItems, itemType: 'type' }, { root: true })
+      // context.dispatch('currentConnections/mergeRemove', { removeItems: connectionTypeReults.removeItems, itemType: 'type' }, { root: true })
+      // // connections
+      // const connections = context.rootGetters['currentConnections/all']
+      // const selectedConnectionIds = context.rootState.multipleConnectionsSelectedIds.concat(context.rootState.multipleConnectionsSelectedIdsToLoad)
+      // const connectionResults = utils.mergeSpaceKeyValues({ prevItems: connections, newItems: remoteSpace.connections, selectedItemIds: selectedConnectionIds })
+      // context.dispatch('currentConnections/mergeUnique', { newItems: connectionResults.updateItems, itemType: 'connection' }, { root: true })
+      // context.dispatch('currentConnections/mergeRemove', { removeItems: connectionResults.removeItems, itemType: 'connection' }, { root: true })
+      // // boxes
+      // const boxes = context.rootGetters['currentBoxes/all']
+      // const selectedBoxIds = context.rootState.multipleBoxesSelectedIds.concat(context.rootState.multipleBoxesSelectedIdsToLoad)
+      // const boxResults = utils.mergeSpaceKeyValues({ prevItems: boxes, newItems: remoteSpace.boxes, selectedItemIds: selectedBoxIds })
+      // context.dispatch('currentBoxes/mergeUnique', { newItems: boxResults.updateItems, itemType: 'box' }, { root: true })
+      // context.dispatch('currentBoxes/mergeRemove', { removeItems: boxResults.removeItems, itemType: 'box' }, { root: true })
+      // context.dispatch('history/redoLocalUpdates', null, { root: true })
+      // console.info('🎑 merged remote space', {
+      //   remoteSpace,
+      //   cards: cardResults,
+      //   types: connectionTypeReults,
+      //   connections: connectionResults,
+      //   boxes: boxResults
+      // })
+
+      // TODO merge changed items in localspace session (from history??) into remotespace
+
+      context.dispatch('restoreSpace', { space: remoteSpace, isRemote: true })
+      // addCards: cardResults.addItems,
+      // addConnectionTypes: connectionTypeReults.addItems,
+      // addConnections: connectionResults.addItems,
+      // addBoxes: boxResults.addItems
+      // context.commit('triggerRestoreSpaceRemoteComplete', null, { root: true })
     },
     loadLastSpace: async (context, prevFailedSpace) => {
       let space

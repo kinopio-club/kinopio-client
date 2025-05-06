@@ -55,10 +55,10 @@ onMounted(() => {
       undo()
     } else if (mutation.type === 'triggerDrawingRedo') {
       redo()
-    } else if (mutation.type === 'triggerRestoreSpaceLocalComplete') {
+    } else if (mutation.type === 'triggerRestoreSpaceLocalComplete') { // TODO replace w spaceStore restoreSpace watcher
       clearCanvas()
       redraw()
-    } else if (mutation.type === 'triggerRestoreSpaceRemoteComplete' || mutation.type === 'triggerDrawingRedraw') {
+    } else if (mutation.type === 'triggerDrawingRedraw') {
       redraw()
     }
     unsubscribeActions = store.subscribeAction(action => {
