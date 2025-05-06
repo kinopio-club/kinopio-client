@@ -7,6 +7,7 @@ import consts from '@/consts.js'
 
 import { nanoid } from 'nanoid'
 import debounce from 'lodash/debounce'
+import uniq from 'lodash/uniq'
 import sortBy from 'lodash-es/sortBy'
 
 let tallestCardHeight = 0
@@ -140,6 +141,19 @@ export const useCardStore = defineStore('cards', {
       ids = ids.filter(id => Boolean(id))
       const cards = ids.map(id => state.byId[id])
       return cards
+    },
+    getCardCommenters: (state) => {
+      let users = []
+      let cards = state.allIds.map(id => state.byId[id])
+      cards = cards.filter(card => !card.isRemoved)
+      cards.forEach(card => {
+        users.push(card.userId)
+        users.push(card.nameUpdatedByUserId)
+      })
+      users = uniq(users)
+      users = users.map(id => store['currentSpace/userById'](id))
+      users = users.filter(user => Boolean(user))
+      return users
     }
   },
 
