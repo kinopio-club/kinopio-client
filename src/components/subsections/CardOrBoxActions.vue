@@ -1,6 +1,7 @@
 <script setup>
 import { reactive, computed, onMounted, onBeforeUnmount, onUnmounted, watch, ref, nextTick } from 'vue'
 import { useStore } from 'vuex'
+import { useCardStore } from '@/stores/useCardStore'
 
 import FramePicker from '@/components/dialogs/FramePicker.vue'
 import TagPickerStyleActions from '@/components/dialogs/TagPickerStyleActions.vue'
@@ -13,6 +14,7 @@ import uniq from 'lodash-es/uniq'
 import { nanoid } from 'nanoid'
 
 const store = useStore()
+const cardStore = useCardStore()
 
 onMounted(() => {
   store.subscribe((mutation, state) => {
@@ -181,11 +183,12 @@ const prependToItemNames = (pattern) => {
 }
 const updateName = async (item, newName) => {
   if (item.isCard) {
-    const card = store.getters['currentCards/byId'](item.id)
-    store.dispatch('currentCards/updateName', { card, newName })
-    await nextTick()
-    await nextTick()
-    store.dispatch('currentConnections/updatePaths', { itemId: card.id })
+    const card = cardStore.getCard(item.id)
+    const update = {
+      id: card.id,
+      name: newName
+    }
+    cardStore.updateCard(update)
   }
   if (item.isBox) {
     const box = store.getters['currentBoxes/byId'](item.id)
@@ -413,15 +416,15 @@ const toggleIsComment = async () => {
   if (isNotCollaborator.value) { return }
   const value = !isComment.value
   props.cards.forEach(card => {
-    card = {
+    const update = {
       id: card.id,
       name: utils.nameWithoutCommentPattern(card.name),
       isComment: value
     }
     if (!card.name) {
-      delete card.name
+      delete update.name
     }
-    store.dispatch('currentCards/update', { card })
+    cardStore.updateCard(update)
   })
   await nextTick()
   await updateCardDimensions()
@@ -440,12 +443,12 @@ const toggleCounterIsVisible = () => {
     counterIsVisible = false
   }
   props.cards.forEach(card => {
-    card = {
+    const update = {
       id: card.id,
       counterIsVisible,
       counterValue: card.counterValue || 1
     }
-    store.dispatch('currentCards/update', { card })
+    cardStore.updateCard(update)
   })
 }
 
@@ -453,7 +456,8 @@ const toggleCounterIsVisible = () => {
 
 const updateCardDimensions = async () => {
   await nextTick()
-  store.dispatch('currentCards/updateDimensions', { cards: props.cards })
+  const ids = props.cards.map(card => card.id)
+  cardStore.updateCardsDimensions(ids)
   await nextTick()
   await nextTick()
 }
@@ -463,7 +467,7 @@ const updateCard = async (card, updates) => {
   keys.forEach(key => {
     card[key] = updates[key]
   })
-  store.dispatch('currentCards/update', { card })
+  cardStore.updateCard(card)
   await updateCardDimensions()
   store.dispatch('currentConnections/updatePaths', { itemId: card.id })
 }

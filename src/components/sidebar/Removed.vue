@@ -139,23 +139,24 @@ const loadRemoteRemovedCards = async () => {
     state.loading.cards = false
     if (!utils.arrayHasItems(remoteCards)) { return }
     state.removedCards = remoteCards
-    store.commit('currentCards/removedCards', remoteCards)
+    const ids = remoteCards.map(card => card.id)
+    cardStore.removeCards(ids)
   } catch (error) {
     console.error('🚒 loadRemoteRemovedCards', error)
   }
 }
 const restoreCard = async (card) => {
-  store.dispatch('currentCards/restoreRemoved', card)
+  cardStore.restoreRemovedCard(card)
   await nextTick()
   scrollIntoView(card)
   removeRemovedCard(card)
 }
 const deleteCard = (card) => {
-  store.dispatch('currentCards/deleteCard', card)
+  cardStore.deleteCard(card)
   removeRemovedCard(card)
 }
 const deleteAllCards = () => {
-  store.dispatch('currentCards/deleteAllRemoved')
+  cardStore.deleteAllRemovedCards()
   state.removedCards = []
 }
 const scrollIntoView = (card) => {

@@ -211,16 +211,17 @@ export const useCardStore = defineStore('cards', {
       card.shouldShowOtherSpacePreviewImage = true
       return card
     },
+    addCardToState (card) {
+      this.byId[card.id] = card
+      this.allIds.push(card.id)
+    },
     async createCard (card, skipCardDetailsIsVisible) {
       if (store.getters['currentSpace/shouldPreventAddCard']) {
         store.commit('notifyCardsCreatedIsOverLimit', true, { root: true })
         return
       }
       card = this.normailzeNewCard(card)
-      // update state
-      this.byId[card.id] = card
-      this.allIds.push(card.id)
-
+      this.addCardToState(card)
       if (!skipCardDetailsIsVisible) {
         store.commit('cardDetailsIsVisibleForCardId', card.id, { root: true })
       }
@@ -300,6 +301,11 @@ export const useCardStore = defineStore('cards', {
       await store.dispatch('api/addToQueue', { name: 'updateMultipleCards', body: { cards: updates } }, { root: true })
       // TODO history? if unpaused
       // cache
+
+      // if (update.name) // updates contain name or pos? or just always do it
+      // await nextTick()
+      // await nextTick()
+      // store.dispatch('currentConnections/updatePaths', { itemId: card.id }) // TODO search to remove excess updatepaths
     },
 
     // delete
@@ -313,6 +319,16 @@ export const useCardStore = defineStore('cards', {
         delete this.byId[card.id]
         await store.dispatch('api/addToQueue', { name: 'deleteCard', body: card }, { root: true })
       }
+    },
+    async deleteCard (card) {
+      await this.deleteCards([card])
+    },
+    async deleteAllRemovedCards () {
+      const spaceId = store.state.currentSpace.id
+      const userId = store.state.currentUser.id
+      const cards = this.getAllRemovedCards
+      await this.deleteCards(cards)
+      await store.dispatch('api/addToQueue', { name: 'deleteAllRemovedCards', body: { userId, spaceId } }, { root: true })
     },
     removeCards (ids) {
       const cardsToRemove = []
@@ -340,6 +356,20 @@ export const useCardStore = defineStore('cards', {
     },
     removeCard (id) {
       this.removeCards([id])
+    },
+    restoreRemovedCard (card) {
+      card.isRemoved = false
+      const isLocal = this.getCard(card.id)
+      if (isLocal) {
+        this.updateCard(card)
+      } else {
+        this.addCardToState(card)
+        // await cache.updateSpace('cards', context.state.cards, currentSpaceId)
+        // await context.dispatch('api/addToQueue', { name: 'restoreRemovedCard', body: card }, { root: true })
+        store.dispatch('currentUser/cardsCreatedCountUpdateBy', {
+          cards: [card]
+        }, { root: true })
+      }
     },
 
     // position

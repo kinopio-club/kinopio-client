@@ -1,6 +1,7 @@
 <script setup>
 import { reactive, computed, onMounted, watch, ref, nextTick } from 'vue'
 import { useStore } from 'vuex'
+import { useCardStore } from '@/stores/useCardStore'
 
 import utils from '@/utils.js'
 import consts from '@/consts.js'
@@ -10,7 +11,9 @@ import Loader from '@/components/Loader.vue'
 import sortBy from 'lodash-es/sortBy'
 import dayjs from 'dayjs'
 import { nanoid } from 'nanoid'
+
 const store = useStore()
+const cardStore = useCardStore()
 
 onMounted(() => {
   updateSortedCards()
@@ -93,7 +96,7 @@ const updateName = (event, card) => {
   const element = event.target
   updateTextareaSize(element)
 }
-const cards = computed(() => store.getters['currentCards/all'])
+const cards = computed(() => cardStore.getAllCards)
 const addCardAtIndex = (event) => {
   if (!canEditSpace.value) {
     const position = utils.cursorPositionInPage(event)
