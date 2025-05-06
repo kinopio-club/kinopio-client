@@ -73,9 +73,6 @@ export const useCardStore = defineStore('cards', {
         return alignedCards
       }
     },
-    getCardsIsNotLocked: (state) => {
-      return (cards) => cards.filter(card => !card.isLocked)
-    },
     getCardsSelectableByY: (state) => {
       return (cards) => {
         // filter
@@ -119,6 +116,10 @@ export const useCardStore = defineStore('cards', {
 
   actions: {
 
+    getCardsIsNotLocked: (state) => {
+      const cards = this.getAllCards
+      return cards.filter(card => !card.isLocked)
+    },
     clear () {
       this.byId = []
       this.allIds = {}

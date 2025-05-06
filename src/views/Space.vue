@@ -141,10 +141,7 @@ const state = reactive({
   startCursor: {}
 })
 
-const unlockedCards = computed(() => {
-  const cards = cardStore.getAllCards
-  return cardStore.getCardsIsNotLocked(cards)
-})
+const unlockedCards = computed(() => cardStore.getCardsIsNotLocked)
 const isPainting = computed(() => store.state.currentUserIsPainting)
 const isPanningReady = computed(() => store.state.currentUserIsPanningReady)
 const isPanning = computed(() => store.state.currentUserIsPanning)
