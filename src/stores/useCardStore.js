@@ -111,15 +111,32 @@ export const useCardStore = defineStore('cards', {
         cards.push(card)
       })
       return cards
+    },
+    getCardsIsLocked: (state) => {
+      return (cards) => cards.filter(card => card.isLocked)
+    },
+    getCardsIsNotLocked: (state) => {
+      return (cards) => cards.filter(card => !card.isLocked)
+    },
+    getCardsBelowY: (state) => {
+      return (y, zoom = 1, cards) => cards.filter(card => (card.y * zoom) > y)
+    },
+    getCardsAboveY: (state) => {
+      return (y, zoom = 1, cards) => cards.filter(card => (card.y * zoom) < y)
+    },
+    getCardsRightOfX: (state) => {
+      return (x, zoom = 1, cards) => cards.filter(card => (card.x * zoom) > x)
+    },
+    getCardsLeftOfX: (state) => {
+      return (x, zoom = 1, cards) => cards.filter(card => (card.x * zoom) > x)
     }
+
   },
 
   actions: {
 
-    getCardsIsNotLocked: (state) => {
-      const cards = this.getAllCards
-      return cards.filter(card => !card.isLocked)
-    },
+    // init
+
     clear () {
       this.byId = []
       this.allIds = {}
@@ -136,7 +153,6 @@ export const useCardStore = defineStore('cards', {
       this.byId = byId
       this.allIds = allIds
       tallestCardHeight = 0
-      // console.log('🍍', cards, this.byId, this.allIds)
     },
 
     // create
@@ -298,8 +314,6 @@ export const useCardStore = defineStore('cards', {
     removeCard (id) {
       this.removeCards([id])
     },
-
-    // ------
 
     // position
 
@@ -478,7 +492,7 @@ export const useCardStore = defineStore('cards', {
         name,
         nameUpdatedAt: new Date()
       }
-      this.updateCards([update])
+      this.updateCard(update)
     },
     removeCardChecked (id) {
       const card = this.getCard(id)

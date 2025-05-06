@@ -15,7 +15,10 @@ const props = defineProps({
 })
 
 const lockedBoxes = computed(() => store.getters['currentBoxes/isLocked'])
-const lockedCards = computed(() => cardStore.getCardsIsNotLocked)
+const lockedCards = computed(() => {
+  const cards = cardStore.getAllCards
+  return cardStore.getCardsIsLocked(cards)
+})
 const isThemeDark = computed(() => store.state.currentUser.theme === 'dark')
 </script>
 
