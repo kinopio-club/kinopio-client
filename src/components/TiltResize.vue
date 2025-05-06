@@ -1,9 +1,12 @@
 <script setup>
+import { reactive, computed, onMounted, watch, ref, nextTick } from 'vue'
+import { useStore } from 'vuex'
+import { useCardStore } from '@/stores/useCardStore'
+
 import utils from '@/utils.js'
 import consts from '@/consts.js'
 
-import { reactive, computed, onMounted, watch, ref, nextTick } from 'vue'
-import { useStore } from 'vuex'
+const cardStore = useCardStore()
 const store = useStore()
 
 const props = defineProps({
@@ -20,7 +23,7 @@ const start = (event, action) => {
   store.dispatch('history/pause')
   store.dispatch('closeAllDialogs')
   store.commit('preventDraggedCardFromShowingDetails', true)
-  store.dispatch('currentCards/incrementZ', props.card.id)
+  cardStore.incrementCardsZ(props.card.id)
   let cardIds = [props.card.id]
   const multipleCardsSelectedIds = store.state.multipleCardsSelectedIds
   if (multipleCardsSelectedIds.includes(props.card.id)) {
@@ -48,9 +51,10 @@ const remove = (action) => {
     cardIds = store.state.multipleCardsSelectedIds
   }
   if (action === 'resize') {
-    store.dispatch('currentCards/removeResize', { cardIds, shouldRemoveResizeWidth: true })
+    const shouldRemoveResizeWidth = true
+    cardStore.clearResizeCards(cardIds, shouldRemoveResizeWidth)
   } else if (action === 'tilt') {
-    store.dispatch('currentCards/removeTilt', { cardIds })
+    cardStore.clearTiltCards(cardIds)
   }
 }
 const colorClass = computed(() => {
@@ -75,7 +79,7 @@ const isTilting = computed(() => {
 
 // resize
 
-const isComment = computed(() => store.getters['currentCards/isComment'](props.card))
+const isComment = computed(() => cardStore.getIsCardComment(props.card))
 const resizeIsVisible = computed(() => {
   return props.visible && !isComment.value
 })
