@@ -498,7 +498,7 @@ const updateCardName = async (newName) => {
     nameUpdatedByUserId: userId
   }
   cardStore.updateCard(update)
-  cardStore.updateCardsDimension(cardId)
+  cardStore.updateCardDimensions(cardId)
   // TODO
   // update connectionpaths for item (id)
 
