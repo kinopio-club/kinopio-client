@@ -59,7 +59,7 @@ const spaceUsers = computed(() => {
   if (props.users) {
     items = props.users
   } else {
-    const groupUsers = store.getters['currentCards/groupUsersWhoAddedCards']
+    const groupUsers = store.getters['groups/groupUsersWhoAddedCards']
     items = utils.clone(currentSpace.value.users)
     items = items.concat(currentSpace.value.collaborators)
     items = items.concat(groupUsers)

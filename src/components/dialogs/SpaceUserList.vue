@@ -68,7 +68,7 @@ const users = computed(() => {
   if (isSpectatorsList.value) {
     items = currentSpace.value.spectators
   } else {
-    const groupUsers = store.getters['currentCards/groupUsersWhoAddedCards']
+    const groupUsers = store.getters['groups/groupUsersWhoAddedCards']
     items = utils.clone(currentSpace.value.users)
     items = items.concat(currentSpace.value.collaborators)
     items = items.concat(groupUsers)

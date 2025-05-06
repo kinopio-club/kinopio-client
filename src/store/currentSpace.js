@@ -727,8 +727,7 @@ const currentSpace = {
         connections,
         boxes,
         spaceName: space.name,
-        isRemote,
-        cardUsers: context.rootGetters['currentCards/userIds']
+        isRemote
       })
       context.dispatch('updatePageSizes', null, { root: true })
       if (isRemote) {

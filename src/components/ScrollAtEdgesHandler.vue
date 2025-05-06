@@ -241,7 +241,6 @@ const scrollBy = (delta) => {
     store.dispatch('history/pause')
     if (isDraggingCard || isDraggingBox) {
       cardStore.moveCards({ endCursor, prevCursor, delta: itemDelta })
-      // store.dispatch('currentCards/move', { endCursor, prevCursor, delta: itemDelta })
       store.dispatch('currentBoxes/move', { endCursor, prevCursor, delta: itemDelta })
     }
   }
