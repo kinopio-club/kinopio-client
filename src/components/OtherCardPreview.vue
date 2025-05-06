@@ -1,10 +1,13 @@
 <script setup>
+import { reactive, computed, onMounted, watch, ref, nextTick } from 'vue'
+import { useStore } from 'vuex'
+import { useCardStore } from '@/stores/useCardStore'
+
 import Loader from '@/components/Loader.vue'
 import NameSegment from '@/components/NameSegment.vue'
 import utils from '@/utils.js'
 
-import { reactive, computed, onMounted, watch, ref, nextTick } from 'vue'
-import { useStore } from 'vuex'
+const cardStore = useCardStore()
 const store = useStore()
 
 onMounted(() => {
@@ -89,7 +92,7 @@ const updateNameSegments = () => {
   if (props.shouldTruncateName) {
     card.name = utils.truncated(card.name, 25)
   }
-  card = store.getters['currentCards/nameSegments'](card)
+  card = cardStore.cardWithNameSegments(card)
   card.nameSegments = card.nameSegments.map(segment => {
     if (segment.isLink) {
       segment.isLink = false
@@ -115,7 +118,7 @@ const showOtherCardDetailsIsVisible = async (event) => {
   }
   if (props.parentCardId) {
     otherItem.parentCardId = props.parentCardId
-    store.dispatch('currentCards/incrementZ', props.parentCardId)
+    cardStore.incrementCardsZ(props.parentCardId)
   }
   if (props.shouldCloseAllDialogs) {
     store.dispatch('closeAllDialogs')
