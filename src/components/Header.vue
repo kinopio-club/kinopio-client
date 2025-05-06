@@ -630,14 +630,14 @@ header(v-if="isVisible" :style="state.position" :class="{'fade-out': isFadingOut
         UserGroups
         //- Share
         .button-wrap
-          button(@click.left.stop="toggleShareIsVisible" :class="{active: state.shareIsVisible, 'translucent-button': !shouldIncreaseUIContrast}")
-            span Share
+          .segmented-buttons
+            button(@click.left.stop="toggleShareIsVisible" :class="{active: state.shareIsVisible, 'translucent-button': !shouldIncreaseUIContrast}")
+              span Share
+            //- Notifications
+            button(@click.left.stop="toggleNotificationsIsVisible" :class="{active: state.notificationsIsVisible, 'translucent-button': !shouldIncreaseUIContrast}" title="Notifications")
+              span {{notificationsUnreadCount}}
+              .badge.new-unread-badge.notification-button-badge(v-if="notificationsUnreadCount")
           Share(:visible="state.shareIsVisible")
-        //- Notifications
-        .button-wrap
-          button(@click.left.stop="toggleNotificationsIsVisible" :class="{active: state.notificationsIsVisible, 'translucent-button': !shouldIncreaseUIContrast}" title="Notifications")
-            span {{notificationsUnreadCount}}
-            .badge.new-unread-badge.notification-button-badge(v-if="notificationsUnreadCount")
           UserNotifications(:visible="state.notificationsIsVisible" :loading="state.notificationsIsLoading" :notifications="state.notifications" :unreadCount="notificationsUnreadCount" @markAllAsRead="markAllAsRead" @markAsRead="markAsRead")
 
     //- 2nd row
