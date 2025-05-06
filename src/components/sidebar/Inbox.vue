@@ -1,6 +1,7 @@
 <script setup>
 import { reactive, computed, onMounted, onUnmounted, watch, ref, nextTick } from 'vue'
 import { useStore } from 'vuex'
+import { useCardStore } from '@/stores/useCardStore'
 
 import cache from '@/cache.js'
 import CardList from '@/components/CardList.vue'
@@ -12,7 +13,9 @@ import utils from '@/utils.js'
 import sortBy from 'lodash-es/sortBy'
 import dayjs from 'dayjs'
 import { nanoid } from 'nanoid'
+
 const store = useStore()
+const cardStore = useCardStore()
 
 let prevPosition
 
@@ -112,9 +115,9 @@ const selectCard = async (card) => {
   newCard.spaceId = store.state.currentSpace.id
   newCard.x = scroll.x + 100 // matches KeyboardShortcutsHandler.addCard
   newCard.y = scroll.y + 120 // matches KeyboardShortcutsHandler.addCard
-  const spaceCards = store.getters['currentCards/all']
+  const spaceCards = cardStore.getAllCards
   newCard = utils.uniqueCardPosition(newCard, spaceCards)
-  store.dispatch('currentCards/add', { card: newCard, skipCardDetailsIsVisible })
+  cardStore.createCard(newCard, skipCardDetailsIsVisible)
   store.dispatch('focusOnCardId', newCard.id)
   removeCardFromInbox(card)
 }

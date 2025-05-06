@@ -170,8 +170,6 @@ const clearHightlightedItems = () => {
 
 const updateSelectableCardsInViewport = () => {
   const selectableCards = cardStore.getAllCards
-  // TODO is isSelectableInViewport not needed anymore?
-  // store.getters['currentCards/isSelectableInViewport']
   if (!selectableCards) { return }
   selectableCardsInViewport = selectableCards
   selectableCardsGrid = collisionDetection.createGrid(selectableCards)
@@ -437,7 +435,6 @@ const startPainting = (event) => {
   updateSelectableConnectionsInViewport()
   startCursor = utils.cursorPositionInViewport(event)
   state.currentCursor = startCursor
-  store.dispatch('currentCards/updateCanBeSelectedSortedByY')
   if (utils.isMultiTouch(event)) { return }
   startLocking()
   if (event.touches) {

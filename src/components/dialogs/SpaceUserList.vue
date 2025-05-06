@@ -1,6 +1,7 @@
 <script setup>
 import { reactive, computed, onMounted, onBeforeUnmount, watch, ref, nextTick } from 'vue'
 import { useStore } from 'vuex'
+import { useCardStore } from '@/stores/useCardStore'
 
 import utils from '@/utils.js'
 import GroupDetails from '@/components/dialogs/GroupDetails.vue'
@@ -10,6 +11,7 @@ import GroupLabel from '@/components/GroupLabel.vue'
 import uniqBy from 'lodash-es/uniqBy'
 
 const store = useStore()
+const cardStore = useCardStore()
 
 const dialogElement = ref(null)
 
@@ -80,7 +82,7 @@ const users = computed(() => {
 
 // commenters
 
-const commenters = computed(() => utils.clone(store.getters['currentCards/commenters']))
+const commenters = computed(() => cardStore.getCardCommenters)
 
 // handle userlist events
 

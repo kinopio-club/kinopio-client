@@ -30,6 +30,11 @@ export const useCardStore = defineStore('cards', {
       cards = cards.filter(card => !card.isRemoved)
       return cards
     },
+    getAllRemovedCards: (state) => {
+      let cards = state.allIds.map(id => state.byId[id])
+      cards = cards.filter(card => card.isRemoved)
+      return cards
+    },
     getDirtyCards: (state) => {
       return Array.from(state.dirtyCardIds).map(id => state.byId[id])
     },
@@ -164,7 +169,6 @@ export const useCardStore = defineStore('cards', {
     clear () {
       this.byId = []
       this.allIds = {}
-      // state.removedCards = []
       tallestCardHeight = 0
     },
     initializeCards (cards) {

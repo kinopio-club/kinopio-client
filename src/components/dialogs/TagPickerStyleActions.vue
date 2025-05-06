@@ -1,6 +1,7 @@
 <script setup>
 import { reactive, computed, onMounted, onBeforeUnmount, onUnmounted, watch, ref, nextTick } from 'vue'
 import { useStore } from 'vuex'
+import { useCardStore } from '@/stores/useCardStore'
 
 import TagList from '@/components/TagList.vue'
 import cache from '@/cache.js'
@@ -9,6 +10,7 @@ import utils from '@/utils.js'
 import randomColor from 'randomcolor'
 
 const store = useStore()
+const cardStore = useCardStore()
 
 const dialogElement = ref(null)
 const resultsElement = ref(null)
@@ -98,7 +100,11 @@ const removeFromCards = (tagString) => {
   props.cards.forEach(card => {
     const newName = card.name.replace(tagString, '').trim()
     if (newName === card.name) { return }
-    store.dispatch('currentCards/updateName', { card, newName })
+    const update = {
+      id: card.id,
+      name: newName
+    }
+    cardStore.updateCard(update)
   })
   updateCardDimensions()
 }
@@ -106,14 +112,18 @@ const addToCards = (tagString) => {
   props.cards.forEach(card => {
     const newName = card.name + ' ' + tagString
     if (newName === card.name) { return }
-    store.dispatch('currentCards/updateName', { card, newName })
+    const update = {
+      id: card.id,
+      name: newName
+    }
+    cardStore.updateCard(update)
   })
   updateCardDimensions()
 }
 const updateCardDimensions = () => {
   const cards = utils.clone(props.cards)
   const cardIds = cards.map(card => card.id)
-  store.dispatch('currentCards/removeResize', { cardIds })
+  cardStore.clearResizeCards(cardIds)
 }
 const addTag = (name) => {
   let tag = state.tags.find(item => item.name === name)

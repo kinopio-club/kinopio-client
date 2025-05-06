@@ -1,6 +1,7 @@
 <script setup>
 import { reactive, computed, onMounted, onBeforeUnmount, watch, ref, nextTick } from 'vue'
 import { useStore } from 'vuex'
+import { useCardStore } from '@/stores/useCardStore'
 
 import merge from 'lodash-es/merge'
 
@@ -8,7 +9,9 @@ import cache from '@/cache.js'
 import Loader from '@/components/Loader.vue'
 import PrivacyIcon from '@/components/PrivacyIcon.vue'
 import utils from '@/utils.js'
+
 const store = useStore()
+const cardStore = useCardStore()
 
 const resultsElement = ref(null)
 
@@ -118,7 +121,7 @@ const showCards = () => {
   updateRemovedCards()
 }
 const updateLocalRemovedCards = () => {
-  state.removedCards = store.state.currentCards.removedCards
+  state.removedCards = cardStore.getAllRemovedCards
 }
 const updateRemovedCards = async () => {
   updateLocalRemovedCards()
