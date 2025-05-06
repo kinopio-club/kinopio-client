@@ -479,6 +479,18 @@ export const useCardStore = defineStore('cards', {
       }
       this.updateCards([update])
     },
+    removeCardChecked (id) {
+      const card = this.getCard(id)
+      let name = card.name
+      name = name.replace('[x]', '').trim()
+      const update = {
+        id,
+        name,
+        nameUpdatedAt: new Date()
+      }
+      this.updateCard(update)
+      this.updateCardDimensions(id)
+    },
 
     // tilt
 

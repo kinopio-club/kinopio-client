@@ -138,14 +138,14 @@ const addConnections = async (event) => {
     const color = startItem.color || startItem.backgroundColor
     endItemId = nanoid()
     const newCard = { position, id: endItemId, isParentCard: true, backgroundColor: color }
-    store.dispatch('currentCards/add', { card: newCard })
+    cardStore.createCard(newCard)
     store.commit('childCardId', '')
     estimatedEndItemConnectorPosition = utils.estimatedNewCardConnectorPosition(position)
   }
   // create connections to endItemId
   await nextTick()
+  cardStore.updateCardsDimensions(startItemIds)
   startItemIds.forEach(startItemId => {
-    store.dispatch('currentCards/updateDimensions', { cards: [{ id: startItemId }] })
     const controlPoint = store.state.currentUser.defaultConnectionControlPoint
     const path = store.getters['currentConnections/connectionPathBetweenItems']({
       startItemId,
