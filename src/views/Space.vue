@@ -433,14 +433,7 @@ const dragItems = () => {
   const shouldPrevent = !store.getters['currentUser/canEditSpace']()
   if (shouldPrevent) { return }
   // cards
-  let cardIds = store.state.multipleCardsSelectedIds
-  if (!cardIds.length) {
-    cardIds = [store.state.currentDraggingCardId]
-  }
-  cardIds = cardIds.filter(id => Boolean(id))
-  if (!cardIds.length) { return }
-  cardStore.moveCards({ ids: cardIds, endCursor, prevCursor })
-
+  cardStore.moveCards({ endCursor, prevCursor })
   // boxes
   checkShouldShowDetails()
   store.dispatch('currentBoxes/move', {

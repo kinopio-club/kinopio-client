@@ -129,6 +129,15 @@ export const useCardStore = defineStore('cards', {
     },
     getCardsLeftOfX: (state) => {
       return (x, zoom = 1, cards) => cards.filter(card => (card.x * zoom) > x)
+    },
+    getCardsSelected: (state) => {
+      let ids = store.state.multipleCardsSelectedIds
+      if (!ids.length) {
+        ids = [store.state.currentDraggingCardId]
+      }
+      ids = ids.filter(id => Boolean(id))
+      const cards = ids.map(id => state.byId[id])
+      return cards
     }
 
   },
@@ -253,6 +262,7 @@ export const useCardStore = defineStore('cards', {
     async updateCards (updates) {
       const canEditSpace = store.getters['currentUser/canEditSpace']()
       if (!canEditSpace) { return }
+      updates = updates.filter(update => store.getters['currentUser/canEditCard'](update))
       updates.forEach(({ id, ...changes }) => {
         this.pendingUpdates.set(id, {
           ...this.pendingUpdates.get(id) || {},
@@ -314,17 +324,17 @@ export const useCardStore = defineStore('cards', {
 
     // position
 
-    moveCards ({ ids, endCursor, prevCursor }) {
+    moveCards ({ endCursor, prevCursor, delta }) {
       if (!endCursor || !prevCursor) { return }
-      const delta = {
+      delta = delta || {
         x: endCursor.x - prevCursor.x,
         y: endCursor.y - prevCursor.y
       }
+      const cards = this.getCardsSelected
       const updates = []
-      ids.forEach(id => {
-        const card = this.getCard(id)
+      cards.forEach(card => {
         const update = {
-          id,
+          id: card.id,
           x: card.x + delta.x,
           y: card.y + delta.y
         }
