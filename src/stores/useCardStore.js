@@ -93,6 +93,27 @@ export const useCardStore = defineStore('cards', {
           yIndex
         }
       }
+    },
+    getCardsSelectableInViewport: (state) => {
+      const elements = document.querySelectorAll('.card-wrap')
+      const cards = []
+      elements.forEach(element => {
+        if (element.dataset.isVisibleInViewport === 'false') { return }
+        if (element.dataset.isLocked === 'true') { return }
+        const id = element.dataset.cardId
+        const data = state.byId[id]
+        const rect = element.getBoundingClientRect()
+        const card = {
+          id: data.id,
+          x: data.x,
+          y: data.y,
+          width: Math.round(rect.width || data.width),
+          height: Math.round(rect.height || data.height),
+          tilt: data.tilt
+        }
+        cards.push(card)
+      })
+      return cards
     }
   },
 

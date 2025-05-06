@@ -1,6 +1,7 @@
 <script setup>
 import { reactive, computed, onMounted, onBeforeUnmount, watch, ref, nextTick } from 'vue'
 import { useStore } from 'vuex'
+import { useCardStore } from '@/stores/useCardStore'
 
 import utils from '@/utils.js'
 
@@ -11,6 +12,7 @@ import { nanoid } from 'nanoid'
 import { colord } from 'colord'
 
 const store = useStore()
+const cardStore = useCardStore()
 
 let unsubscribe
 
@@ -203,7 +205,7 @@ const updateItems = (items) => {
   return selectable
 }
 const updateSelectableItems = () => {
-  let cards = utils.clone(store.getters['currentCards/isSelectableInViewport'])
+  let cards = cardStore.getCardsSelectableInViewport
   let boxes = utils.clone(store.getters['currentBoxes/isSelectableInViewport'])
   cards = cards.map(card => {
     card.isCard = true
