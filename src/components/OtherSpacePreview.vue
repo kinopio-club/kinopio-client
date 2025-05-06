@@ -1,11 +1,14 @@
 <script setup>
 import { reactive, computed, onMounted, watch, ref, nextTick } from 'vue'
 import { useStore } from 'vuex'
+import { useCardStore } from '@/stores/useCardStore'
 
 import Loader from '@/components/Loader.vue'
 import UserLabelInline from '@/components/UserLabelInline.vue'
 import utils from '@/utils.js'
+
 const store = useStore()
+const cardStore = useCardStore()
 
 const props = defineProps({
   otherSpace: Object,
@@ -64,7 +67,7 @@ const togglePreviewImageIsVisible = (value) => {
     id: props.card.id,
     shouldShowOtherSpacePreviewImage: value
   }
-  store.dispatch('currentCards/update', { card: update })
+  cardStore.updateCard(update)
 }
 const previewImageHover = (value) => {
   state.previewImageIsHover = value
