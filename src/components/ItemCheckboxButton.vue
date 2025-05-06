@@ -53,7 +53,7 @@ const itemCheckboxes = computed({
     // remove checkbox
     if (state.itemsCheckboxIsChecked) {
       props.cards.forEach(card => {
-        cardStore.removeCardChecked(card.id)
+        cardStore.clearCardChecked(card.id)
       })
       props.boxes.forEach(box => {
         store.dispatch('currentBoxes/removeChecked', box.id)

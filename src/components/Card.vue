@@ -1018,7 +1018,7 @@ const cardUrlPreviewIsVisible = computed(() => {
   // TEMP experiment: remove card.urlPreviewErrorUrl checking to eliminate false positives. Observe if there's a downside irl and if this attribute should be removed entirely?
   // const isErrorUrl = props.card.urlPreviewErrorUrl && (props.card.urlPreviewUrl === props.card.urlPreviewErrorUrl)
   let url = props.card.urlPreviewUrl
-  url = utils.removeTrailingSlash(url)
+  url = utils.clearTrailingSlash(url)
   cardHasUrlPreviewInfo = Boolean(cardHasUrlPreviewInfo && url)
   const nameHasUrl = props.card.name?.includes(url)
   return (props.card.urlPreviewIsVisible && cardHasUrlPreviewInfo && nameHasUrl) && !isComment.value
@@ -1129,7 +1129,7 @@ const shouldUpdateUrlPreview = (url) => {
 }
 const nameIncludesUrl = (url) => {
   const name = props.card.name
-  const normalizedUrl = utils.removeTrailingSlash(url)
+  const normalizedUrl = utils.clearTrailingSlash(url)
   return name.includes(url) || name.includes(normalizedUrl) || normalizedUrl.includes(name)
 }
 const updateUrlPreviewImage = (update) => {

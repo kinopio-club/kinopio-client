@@ -439,8 +439,8 @@ export default {
         const urls = utils.urlsFromString(card.name)
         if (!urls) { return }
         let name = card.name
-        name = utils.removeTrackingQueryStringsFromURLs(name)
-        name = utils.removeTrailingSlash(name)
+        name = utils.clearTrackingQueryStringsFromUrls(name)
+        name = utils.clearTrailingSlash(name)
         const update = {
           id: cardId,
           name
@@ -564,7 +564,7 @@ export default {
           body.resizeWidth = null
         }
         updates.push(body)
-        utils.removeAllCardDimensions({ id: cardId })
+        utils.clearAllCardDimensions({ id: cardId })
       })
       context.dispatch('updateMultiple', updates)
       const cards = cardIds.map(cardId => {
@@ -602,7 +602,7 @@ export default {
       cardIds.forEach(cardId => {
         const body = { id: cardId, tilt: 0 }
         context.dispatch('update', { card: body })
-        utils.removeAllCardDimensions({ id: cardId })
+        utils.clearAllCardDimensions({ id: cardId })
         const cards = [{ id: cardId }]
         context.dispatch('updateDimensions', { cards })
       })

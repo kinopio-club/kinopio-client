@@ -1,6 +1,7 @@
 <script setup>
 import { reactive, computed, onMounted, onBeforeUnmount, onUnmounted, watch, ref, nextTick } from 'vue'
 import { useStore } from 'vuex'
+import { useCardStore } from '@/stores/useCardStore'
 
 import utils from '@/utils.js'
 import MoveOrCopyItems from '@/components/dialogs/MoveOrCopyItems.vue'
@@ -15,6 +16,7 @@ import last from 'lodash-es/last'
 import consts from '@/consts.js'
 
 const store = useStore()
+const cardStore = useCardStore()
 
 const dialogElement = ref(null)
 
@@ -170,7 +172,7 @@ const cardsIsSelected = computed(() => multipleCardsSelectedIds.value.length > 0
 const multipleCardsIsSelected = computed(() => multipleCardsSelectedIds.value.length > 1)
 const cards = computed(() => {
   let cards = multipleCardsSelectedIds.value.map(cardId => {
-    return store.getters['currentCards/byId'](cardId)
+    cardStore.getCard(cardId)
   })
   cards = cards.filter(card => Boolean(card))
   prevCards = cards
@@ -346,7 +348,7 @@ const positionNewCards = async (newCards) => {
       height: card.height
     }
   })
-  store.dispatch('currentCards/updateMultiple', newCards)
+  cardStore.updateCards(newCards)
   store.dispatch('closeAllDialogs')
 }
 const cardsSortedByY = () => {
@@ -399,7 +401,7 @@ const mergeSelectedCards = () => {
     backgroundColor: cardBackgroundColor || userCardBackgroundColor,
     ...urlPreview
   }
-  store.dispatch('currentCards/add', { card: newCard })
+  cardStore.createCard(newCard)
   prevCards = [newCard] // for history
   setTimeout(() => {
     positionNewCards([newCard])
@@ -454,7 +456,8 @@ const toggleShouldShowMultipleSelectedBoxActions = () => {
 const remove = ({ shouldRemoveCardsOnly }) => {
   store.dispatch('history/resume')
   editableConnections.value.forEach(connection => store.dispatch('currentConnections/remove', connection))
-  editableCards.value.forEach(card => store.dispatch('currentCards/remove', card))
+  const cardIds = editableCards.value.map(card => card.id)
+  cardStore.removeCards(cardIds)
   if (!shouldRemoveCardsOnly) {
     editableBoxes.value.forEach(box => store.dispatch('currentBoxes/remove', box))
   }

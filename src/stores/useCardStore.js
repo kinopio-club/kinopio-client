@@ -517,7 +517,7 @@ export const useCardStore = defineStore('cards', {
       }
       this.updateCard(update)
     },
-    removeCardChecked (id) {
+    clearCardChecked (id) {
       const card = this.getCard(id)
       let name = card.name
       name = name.replace('[x]', '').trim()
@@ -552,7 +552,7 @@ export const useCardStore = defineStore('cards', {
       ids.forEach(id => {
         const update = { id, tilt: 0 }
         this.updateCard(update)
-        utils.removeAllCardDimensions({ id })
+        utils.clearAllCardDimensions({ id })
       })
       this.updateCardsDimensions(ids)
     },
@@ -582,7 +582,7 @@ export const useCardStore = defineStore('cards', {
           update.resizeWidth = null
         }
         updates.push(update)
-        utils.removeAllCardDimensions({ id })
+        utils.clearAllCardDimensions({ id })
       })
       this.updateCards(updates)
       this.updateCardsDimensions(ids)
@@ -617,8 +617,8 @@ export const useCardStore = defineStore('cards', {
         const urls = utils.urlsFromString(card.name)
         if (!urls) { return }
         let name = card.name
-        name = utils.removeTrackingQueryStringsFromURLs(name)
-        name = utils.removeTrailingSlash(name)
+        name = utils.clearTrackingQueryStringsFromUrls(name)
+        name = utils.clearTrailingSlash(name)
         const update = { id, name }
         this.updateCard(update)
       }, 100)

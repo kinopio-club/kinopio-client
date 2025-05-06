@@ -622,7 +622,7 @@ export default {
     // https://regexr.com/5784j
     return string.replace(/\.$/g, '')
   },
-  removeTrailingSlash (string) {
+  clearTrailingSlash (string) {
     if (!string) { return }
     // https://regexr.com/68l08
     return string.replace(/\/$/g, '')
@@ -1042,7 +1042,7 @@ export default {
     element.dataset.width = card.width
     element.dataset.height = card.height
   },
-  removeAllCardDimensions (card) {
+  clearAllCardDimensions (card) {
     const cardWrapElement = document.querySelector(`.card-wrap[data-card-id="${card.id}"]`)
     const cardElement = document.querySelector(`.card[data-card-id="${card.id}"]`)
     const contentWrapElement = cardWrapElement.querySelector('.card-content-wrap')
@@ -2352,14 +2352,14 @@ export default {
       return 'link'
     }
   },
-  removeTrackingQueryStringsFromURLs (name) {
+  clearTrackingQueryStringsFromUrls (name) {
     const urls = this.urlsFromString(name)
     // https://www.bleepingcomputer.com/PoC/qs.html
     // https://www.bleepingcomputer.com/news/security/new-firefox-privacy-feature-strips-urls-of-tracking-parameters
     const trackingKeys = ['is_copy_url', 'is_from_webapp', 'utm_', 'oly_enc_id', 'oly_anon_id', '__s', 'vero_id', '_hsenc', 'mkt_tok', 'fbclid', 'mc_eid', 'pf_', 'pd_']
     urls.forEach(url => {
       url = url.trim()
-      url = this.removeTrailingSlash(url)
+      url = this.clearTrailingSlash(url)
       const queryString = this.queryString(url)
       const domain = this.urlWithoutQueryString(url)
       if (!queryString) { return }
@@ -2386,7 +2386,7 @@ export default {
     urls.forEach(url => {
       if (url.includes('https://www.icloud.com')) { return } // https://club.kinopio.club/t/icloud-albums-dont-work-with-hidden-true/1153
       url = url.trim()
-      url = this.removeTrailingSlash(url)
+      url = this.clearTrailingSlash(url)
       if (!this.urlIsWebsite(url)) { return }
       const queryString = this.queryString(url) || ''
       const domain = this.urlWithoutQueryString(url)
