@@ -159,6 +159,26 @@ export const useCardStore = defineStore('cards', {
       users = users.map(id => store['currentSpace/userById'](id))
       users = users.filter(user => Boolean(user))
       return users
+    },
+    getCardsWithSpaceOrInviteLinks: (state) => {
+      const cardIds = []
+      const spaceIds = []
+      const invites = []
+      let cards = state.allIds.map(id => state.byId[id])
+      cards = cards.filter(card => !card.isRemoved)
+      cards.forEach(card => {
+        const cardIdIsValid = utils.idIsValid(card.linkToCardId)
+        const collaboratorKeyIsValid = utils.idIsValid(card.linkToSpaceCollaboratorKey)
+        const spaceIdIsValid = utils.idIsValid(card.linkToSpaceId)
+        if (collaboratorKeyIsValid && spaceIdIsValid) {
+          invites.push({ spaceId: card.linkToSpaceId, collaboratorKey: card.linkToSpaceCollaboratorKey })
+        } else if (cardIdIsValid) {
+          cardIds.push(card.linkToCardId)
+        } else if (spaceIdIsValid) {
+          spaceIds.push(card.linkToSpaceId)
+        }
+      })
+      return { cardIds, spaceIds, invites }
     }
   },
 

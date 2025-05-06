@@ -1,3 +1,5 @@
+import { useCardStore } from '@/stores/useCardStore'
+
 import inboxSpace from '@/data/inbox.json'
 import newSpace from '@/data/new.json'
 
@@ -5,8 +7,6 @@ import utils from '@/utils.js'
 import cache from '@/cache.js'
 import consts from '@/consts.js'
 import postMessage from '@/postMessage.js'
-
-import { useCardStore } from '@/stores/useCardStore'
 
 import { nextTick } from 'vue'
 import randomColor from 'randomcolor'
@@ -247,7 +247,8 @@ const currentSpace = {
     // Other Items
 
     updateOtherUsers: async (context) => {
-      const cards = utils.clone(context.rootGetters['currentCards/all'])
+      const cardStore = useCardStore()
+      const cards = cardStore.getAllCards
       let userIds = []
       const spaceMemberIds = utils.clone(context.state.users).map(user => user.id)
       const spaceCollaboratorIds = utils.clone(context.state.collaborators).map(user => user.id)
@@ -272,6 +273,7 @@ const currentSpace = {
       }
     },
     updateOtherItems: async (context, options) => {
+      const cardStore = useCardStore()
       const canEditSpace = context.rootGetters['currentUser/canEditSpace']()
       // other items to fetch
       let invites = []
@@ -298,7 +300,7 @@ const currentSpace = {
         }
       // no param items
       } else {
-        const otherItemIds = context.rootGetters['currentCards/linkedItems']
+        const otherItemIds = cardStore.getCardsWithSpaceOrInviteLinks
         invites = otherItemIds.invites
         cardIds = otherItemIds.cardIds
         spaceIds = otherItemIds.spaceIds
@@ -399,6 +401,7 @@ const currentSpace = {
       context.dispatch('restoreSpaceInChunks', { space: uniqueNewSpace })
     },
     createNewInboxSpace: async (context, shouldCreateWithoutLoading) => {
+      const cardStore = useCardStore()
       let space = utils.clone(inboxSpace)
       space.id = nanoid()
       space.createdAt = new Date()
@@ -421,18 +424,19 @@ const currentSpace = {
         context.commit('resetPageSizes', null, { root: true })
         context.dispatch('restoreSpaceInChunks', { space })
         nextTick(() => {
-          context.dispatch('currentCards/updateDimensions', {}, { root: true })
+          cardStore.updateCardsDimensions()
         })
       }
     },
     saveNewSpace: async (context) => {
+      const cardStore = useCardStore()
       const space = utils.clone(context.state)
       const user = context.rootState.currentUser
       console.info('✨ saveNewSpace', space, user)
       cache.saveSpace(space)
       context.commit('addUserToSpace', user)
       nextTick(() => {
-        context.dispatch('currentCards/updateDimensions', {}, { root: true })
+        cardStore.updateCardsDimensions()
       })
       context.dispatch('updateModulesSpaceId', space)
       context.dispatch('incrementCardsCreatedCountFromSpace', space)
@@ -565,18 +569,20 @@ const currentSpace = {
       context.commit('addNotification', { message: `You were removed as a collaborator from ${name}`, type: 'info' }, { root: true })
     },
     removeEmptyCards: (context) => {
-      const cards = context.rootGetters['currentCards/all']
+      const cardStore = useCardStore()
+      const cards = cardStore.getAllCards
       cards.forEach(card => {
         if (!card.name) {
-          context.dispatch('currentCards/remove', card, { root: true })
+          cardStore.removeCard(card)
         }
       })
     },
     checkIfShouldResetDimensions: (context) => {
+      const cardStore = useCardStore()
       const shouldReset = context.rootState.shouldResetDimensionsOnLoad
       if (!shouldReset) { return }
-      const cardIds = context.rootState.currentCards.ids
-      context.dispatch('currentCards/resetDimensions', { cardIds }, { root: true })
+      const cardIds = cardStore.allIds
+      cardStore.clearResizeCards(cardIds)
       context.commit('shouldResetDimensionsOnLoad', false, { root: true })
     },
     loadInboxSpace: async (context) => {
@@ -595,9 +601,10 @@ const currentSpace = {
       context.dispatch('changeSpace', space)
     },
     updateModulesSpaceId: (context, space) => {
+      const cardStore = useCardStore()
       space = space || context.state
-      console.info('💕 update modules space id', space.id)
-      context.dispatch('currentCards/updateSpaceId', space.id, { root: true })
+      console.info('💕 update modules space id', space.id) // deprecated
+      // context.dispatch('currentCards/updateSpaceId', space.id, { root: true })
       context.dispatch('currentConnections/updateSpaceId', space.id, { root: true })
       context.dispatch('currentBoxes/updateSpaceId', space.id, { root: true })
     },
@@ -719,7 +726,7 @@ const currentSpace = {
       if (isRemote) {
         emoji = '🌳🌏'
       }
-      const cards = context.rootState.currentCards.ids.length
+      const cards = cardStore.allIds.length
       const connections = context.rootState.currentConnections.ids.length
       const boxes = context.rootState.currentBoxes.ids.length
       console.info(`${emoji} Restore space complete in ${timeEnd - timeStart}ms,`, {
