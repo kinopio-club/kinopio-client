@@ -74,21 +74,21 @@ export const useCardStore = defineStore('cards', {
       }
     },
     getCardsSelectableByY: (state) => {
-      return (cards) => {
-        // filter
-        cards = cards.filter(card => {
-          if (!card.isLocked) { return }
-          if (store.state.filterComments && card.isComment) { return }
-          return true
-        })
-        // sort by y
-        cards = sortBy(cards, ['y'])
-        const yIndex = []
-        cards.forEach(card => yIndex.push(card.y))
-        return {
-          cards,
-          yIndex
-        }
+      let cards = state.allIds.map(id => state.byId[id])
+      // filter
+      cards = cards.filter(card => {
+        if (card.isLocked) { return }
+        if (card.isRemoved) { return }
+        if (store.state.filterComments && card.isComment) { return }
+        return true
+      })
+      // sort by y
+      cards = sortBy(cards, ['y'])
+      const yIndex = []
+      cards.forEach(card => yIndex.push(card.y))
+      return {
+        cards,
+        yIndex
       }
     },
     getCardsSelectableInViewport: (state) => {
@@ -113,10 +113,12 @@ export const useCardStore = defineStore('cards', {
       return cards
     },
     getCardsIsLocked: (state) => {
-      return (cards) => cards.filter(card => card.isLocked)
+      const cards = state.allIds.map(id => state.byId[id])
+      return cards.filter(card => card.isLocked && !card.isRemoved)
     },
     getCardsIsNotLocked: (state) => {
-      return (cards) => cards.filter(card => !card.isLocked)
+      const cards = state.allIds.map(id => state.byId[id])
+      return cards.filter(card => !card.isLocked && !card.isRemoved)
     },
     getCardsBelowY: (state) => {
       return (y, zoom = 1, cards) => cards.filter(card => (card.y * zoom) > y)
@@ -139,7 +141,6 @@ export const useCardStore = defineStore('cards', {
       const cards = ids.map(id => state.byId[id])
       return cards
     }
-
   },
 
   actions: {
