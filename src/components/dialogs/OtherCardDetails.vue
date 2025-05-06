@@ -1,19 +1,22 @@
 <script setup>
 import { reactive, computed, onMounted, onUpdated, watch, ref, nextTick } from 'vue'
 import { useStore } from 'vuex'
+import { useCardStore } from '@/stores/useCardStore'
 
 import utils from '@/utils.js'
 import Loader from '@/components/Loader.vue'
 import consts from '@/consts.js'
 import OtherSpacePreview from '@/components/OtherSpacePreview.vue'
+
 const store = useStore()
+const cardStore = useCardStore()
 
 onMounted(() => {
   store.subscribe((mutation, state) => {
     // update otherCard if dialog is visible before otherCard is loaded
     if (mutation.type === 'updateOtherItems') {
       if (!visible.value) { return }
-      const parentCard = store.getters['currentCards/byId'](parentCardId.value)
+      const parentCard = cardStore.getCard(parentCardId.value)
       let otherCard = store.getters.otherCardById(parentCard.linkToCardId)
       otherCard = utils.clone(otherCard)
       store.commit('currentSelectedOtherItem', otherCard)
@@ -87,7 +90,7 @@ const parentCardId = computed(() => store.state.currentSelectedOtherItem.parentC
 const cardDetailsIsVisibleForCardId = computed(() => store.state.cardDetailsIsVisibleForCardId)
 const showCardDetails = () => {
   store.commit('otherCardDetailsIsVisible', false)
-  store.dispatch('currentCards/showCardDetails', parentCardId.value)
+  cardStore.showCardDetails(parentCardId.value)
 }
 
 // edit card
@@ -103,14 +106,14 @@ const updateName = async (newName) => {
   // update input
   textareaStyles()
   updateErrorMaxCharacterLimit(newName)
-  store.dispatch('currentCards/updateDimensions', { cards: [card] })
+  cardStore.updateCardDimensions(card)
   // update remote
   await store.dispatch('api/addToQueue', { name: 'updateCard', body: card, spaceId })
 }
 const updateOtherNameInCurrentSpace = ({ card, spaceId }) => {
   const currentSpaceId = store.state.currentSpace.id
   if (currentSpaceId !== spaceId) { return }
-  store.commit('currentCards/update', card)
+  cardStore.updateCard(card)
 }
 const updateErrorMaxCharacterLimit = (newName) => {
   const name = newName || otherCard.value.name
