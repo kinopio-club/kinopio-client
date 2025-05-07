@@ -527,7 +527,6 @@ svg.connection(
     @mouseenter="handleMouseEnter"
     @mouseleave="handleMouseLeave"
   )
-  //- path d updated while dragging by currentConnections/updatePathsWhileDragging
 
   defs(v-if="state.isVisibleInViewport")
     linearGradient(:id="gradientId")

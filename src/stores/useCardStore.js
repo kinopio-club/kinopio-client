@@ -300,6 +300,7 @@ export const useCardStore = defineStore('cards', {
       this.updateCards([update])
     },
     async updateCards (updates) {
+      const connectionStore = useConnectionStore()
       const canEditSpace = store.getters['currentUser/canEditSpace']()
       if (!canEditSpace) { return }
       updates = updates.filter(update => store.getters['currentUser/canEditCard'](update))
@@ -320,13 +321,13 @@ export const useCardStore = defineStore('cards', {
       }
       await store.dispatch('api/addToQueue', { name: 'updateMultipleCards', body: { cards: updates } }, { root: true })
       // TODO history? if unpaused
-      // cache
       await cache.updateSpace('cards', this.getAllCards, store.state.currentSpace.id)
-
-      // if (update.name) // updates contain name or pos? or just always do it
-      // await nextTick()
-      // await nextTick()
-      // store.dispatch('currentConnections/updatePaths', { itemId: card.id }) // TODO search to remove excess updatepaths
+      // update connection paths
+      const isNameUpdated = updates.find(update => Boolean(update.name))
+      if (isNameUpdated) {
+        const ids = updates.map(update => update.id)
+        connectionStore.updateConnectionPaths(ids)
+      }
     },
 
     // delete
