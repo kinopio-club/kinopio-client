@@ -490,7 +490,8 @@ const shouldJiggle = computed(() => {
   const isMultipleItemsSelected = store.getters.isMultipleItemsSelected
   const isShiftKeyDown = store.state.currentUserIsBoxSelecting
   if (isMultipleItemsSelected || isShiftKeyDown) { return }
-  return isConnectingTo.value || isConnectingFrom.value || state.isRemoteConnecting || currentCardIsBeingDragged.value || isRemoteCardDragging.value
+  const isDragging = currentCardIsBeingDragged.value && store.state.cardsWereDragged
+  return isConnectingTo.value || isConnectingFrom.value || state.isRemoteConnecting || isDragging || isRemoteCardDragging.value
 })
 const updateStylesWithWidth = (styles) => {
   const cardHasExtendedContent = cardUrlPreviewIsVisible.value || otherCardIsVisible.value || isVisualCard.value || isAudioCard.value
