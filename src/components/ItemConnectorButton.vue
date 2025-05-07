@@ -64,6 +64,7 @@ const isLightInDarkTheme = computed(() => {
 
 const updateConnectedConnectionTypes = async () => {
   await nextTick()
+  await nextTick()
   state.connectedConnectionTypes = connectionStore.getItemConnectionTypes(item.value.id)
 }
 const currentConnectionColor = computed(() => store.state.currentConnectionColor)

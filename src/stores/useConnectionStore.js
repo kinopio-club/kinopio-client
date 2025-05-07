@@ -5,6 +5,7 @@ import store from '@/store/store.js' // TEMP Import Vuex store
 
 import utils from '@/utils.js'
 import consts from '@/consts.js'
+import cache from '@/cache.js'
 
 import { nanoid } from 'nanoid'
 import randomColor from 'randomcolor'
@@ -147,6 +148,8 @@ export const useConnectionStore = defineStore('connections', {
       await store.dispatch('api/addToQueue', { name: 'updateMultipleConnections', body: { connections: updates } }, { root: true })
       // TODO history? if unpaused
       // cache
+      await cache.updateSpace('connections', this.getAllConnections, store.state.currentSpace.id)
+
       // if (update.name) // updates contain name or pos? or just always do it
       // await nextTick()
       // await nextTick()
@@ -205,6 +208,7 @@ export const useConnectionStore = defineStore('connections', {
         store.dispatch('broadcast/update', { updates: connectionType, storeName: 'connectionStore', actionName: 'createConnectionType' }, { root: true })
       }
       await store.dispatch('api/addToQueue', { name: 'createConnectionType', body: connectionType }, { root: true })
+      await cache.updateSpace('connectionsTypes', this.getAllConnectionTypes, store.state.currentSpace.id)
     },
 
     // remove
