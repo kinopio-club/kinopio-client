@@ -147,7 +147,6 @@ export const useConnectionStore = defineStore('connections', {
       }
       await store.dispatch('api/addToQueue', { name: 'updateMultipleConnections', body: { connections: updates } }, { root: true })
       // TODO history? if unpaused
-      // cache
       await cache.updateSpace('connections', this.getAllConnections, store.state.currentSpace.id)
 
       // if (update.name) // updates contain name or pos? or just always do it
@@ -178,6 +177,19 @@ export const useConnectionStore = defineStore('connections', {
     },
     updatePrevConnectionTypeId (id) {
       this.prevConnectionTypeId = id
+    },
+    async updateConnectionType (update) {
+      const connectionType = this.getConnectionType(update.id)
+      const keys = Object.keys(update)
+      keys.forEach(key => {
+        connectionType[key] = update[key]
+      })
+      this.typeByIds[connectionType.id] = connectionType
+      await cache.updateSpace('connectionTypes', this.getAllConnectionTypes, store.state.currentSpace.id)
+      await store.dispatch('api/addToQueue', { name: 'updateConnectionType', body: connectionType }, { root: true })
+      // context.dispatch('history/add', { connectionTypes: [type] }, { root: true })
+      // if (!updates.isBroadcast) {
+      // context.dispatch('broadcast/update', { updates: type, type: 'updateConnectionType', handler: 'currentConnections/updateType' }, { root: true })
     },
 
     // create

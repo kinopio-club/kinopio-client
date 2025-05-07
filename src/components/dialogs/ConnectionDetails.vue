@@ -262,12 +262,12 @@ const typeName = computed({
     return currentConnectionType.value.name
   },
   set (newName) {
-    const connectionType = {
+    const update = {
       id: currentConnectionType.value.id,
       name: newName,
       updatedAt: new Date()
     }
-    store.dispatch('currentConnections/updateType', connectionType)
+    connectionStore.updateConnectionType(update)
   }
 })
 const focusName = async () => {
