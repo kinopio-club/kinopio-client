@@ -2,6 +2,7 @@
 import { reactive, computed, onMounted, onBeforeUnmount, onUpdated, onUnmounted, watch, ref, nextTick } from 'vue'
 import { useStore } from 'vuex'
 import { useCardStore } from '@/stores/useCardStore'
+import { useConnectionStore } from '@/stores/useConnectionStore'
 
 import utils from '@/utils.js'
 import consts from '@/consts.js'
@@ -15,6 +16,7 @@ import { colord, extend } from 'colord'
 
 const store = useStore()
 const cardStore = useCardStore()
+const connectionStore = useConnectionStore()
 
 let unsubscribe
 
@@ -340,7 +342,7 @@ const infoStyles = computed(() => {
 
 const updateCurrentConnections = async () => {
   await nextTick()
-  state.currentConnections = store.getters['currentConnections/byItemId'](props.box.id)
+  state.currentConnections = connectionStore.getItemsConnections(props.box.id)
 }
 const isPainting = computed(() => store.state.currentUserIsPainting)
 const canEditSpace = computed(() => store.getters['currentUser/canEditSpace']())
@@ -709,7 +711,7 @@ const isConnectingTo = computed(() => {
 const isConnectingFrom = computed(() => {
   return store.state.currentConnectionStartItemIds.includes(props.box.id)
 })
-const connectedConnectionTypes = computed(() => store.getters['currentConnections/typesByItemId'](props.box.id))
+const connectedConnectionTypes = computed(() => connectionStore.getItemConnectionTypes(props.box.id))
 const connectorIsVisible = computed(() => {
   const spaceIsOpen = store.state.currentSpace.privacy === 'open' && currentUserIsSignedIn.value
   let isVisible

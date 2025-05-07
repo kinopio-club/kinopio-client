@@ -2,11 +2,13 @@
 import { reactive, computed, onMounted, onBeforeUnmount, onUnmounted, watch, ref, nextTick } from 'vue'
 import { useStore } from 'vuex'
 import { useCardStore } from '@/stores/useCardStore'
+import { useConnectionStore } from '@/stores/useConnectionStore'
 
 import utils from '@/utils.js'
 
 const store = useStore()
 const cardStore = useCardStore()
+const connectionStore = useConnectionStore()
 
 onMounted(() => {
   store.subscribe(async (mutation, state) => {
@@ -29,7 +31,7 @@ const state = reactive({
 
 const canEditCard = computed(() => store.getters['currentUser/canEditCard'](props.card))
 const canEditSpace = computed(() => store.getters['currentUser/canEditSpace']())
-const connectionTypes = computed(() => store.getters['currentConnections/typesByItemId'](props.card.id))
+const connectionTypes = computed(() => connectionStore.getItemConnectionTypes(props.card.id))
 
 // theme
 
