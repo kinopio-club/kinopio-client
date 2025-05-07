@@ -211,7 +211,7 @@ dialog.narrow.user-notifications(v-if="props.visible" :open="props.visible" ref=
     ul.results-list(v-if="state.filteredNotifications.length")
       template(v-for="notification in state.filteredNotifications")
         a(:href="spaceUrl(notification)")
-          li(@click.stop.prevent="primaryAction(notification)" :class="{ active: isCurrentSpace(notification.spaceId) }" :data-notification-id="notification.id")
+          li(@click.stop.prevent="primaryAction(notification)" :class="{ active: isCurrentSpace(notification.spaceId) }" :data-notification-id="notification.id" :data-notification-icon-class="notification.iconClass")
             div
               //- new
               .badge.info.new-unread-badge(v-if="!notification.isRead")
