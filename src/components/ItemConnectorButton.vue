@@ -1,10 +1,12 @@
 <script setup>
 import { reactive, computed, onMounted, onBeforeUnmount, watch, ref, nextTick } from 'vue'
 import { useStore } from 'vuex'
+import { useConnectionStore } from '@/stores/useConnectionStore'
 
 import utils from '@/utils.js'
 
 const store = useStore()
+const connectionStore = useConnectionStore()
 
 const emit = defineEmits(['shouldRenderParent'])
 
@@ -75,17 +77,16 @@ const connectionsFromMultipleItemsConnectedToCurrentItem = (otherItemIds) => {
   })
   return currentItemConnection
 }
-const connectedConnectionTypes = computed(() => store.getters['currentConnections/typesByItemId'](item.value.id))
-const connectedConnectionTypeById = (typeId) => {
-  return connectedConnectionTypes.value.find(type => type.id === typeId)
-}
+const connectedConnectionTypes = computed(() => {
+  return connectionStore.getItemConnectionTypes(item.value.id)
+})
 const connectionTypeColorisDark = computed(() => {
   const type = connectedConnectionTypes.value[connectedConnectionTypes.value.length - 1]
   if (!type) { return }
   return utils.colorIsDark(type.color)
 })
 const hasConnections = computed(() => {
-  const connections = store.getters['currentConnections/byItemId'](item.value.id)
+  const connections = connectionStore.getItemConnections(item.value.id)
   return Boolean(connections.length)
 })
 const createCurrentConnection = (event) => {
@@ -101,18 +102,18 @@ const createCurrentConnection = (event) => {
 const addConnectionType = (event) => {
   const shouldUseLastConnectionType = store.state.currentUser.shouldUseLastConnectionType
   const shiftKey = event.shiftKey
-  const connectionType = store.getters['currentConnections/typeForNewConnections']
+  const connectionType = connectionStore.getNewConnectionType
   if (!connectionType) {
-    store.dispatch('currentConnections/addType')
+    connectionStore.createConnectionType()
   }
   if (shouldUseLastConnectionType && shiftKey) {
-    store.dispatch('currentConnections/addType')
+    connectionStore.createConnectionType()
     return
   }
   if (shiftKey || shouldUseLastConnectionType) {
     return
   }
-  store.dispatch('currentConnections/addType')
+  connectionStore.createConnectionType()
 }
 
 // connector button
@@ -147,7 +148,7 @@ const connectorGlowStyle = computed(() => {
 })
 const connectionColor = (connection) => {
   if (!connection) { return }
-  const connectionType = connectedConnectionTypeById(connection.connectionTypeId)
+  const connectionType = connectionStore.getConnectionType(connection.connectionTypeId)
   return connectionType?.color
 }
 // another item that is connected to this one is being edited
@@ -179,7 +180,7 @@ const connectedToConnectionDetailsIsVisibleColor = computed(() => {
   if (!connectionDetailsVisibleId) { return }
   const connectionWithDetailsVisible = props.itemConnections.find(connection => connection.id === connectionDetailsVisibleId)
   if (!connectionWithDetailsVisible) { return }
-  const connectionType = connectedConnectionTypeById(connectionWithDetailsVisible.connectionTypeId)
+  const connectionType = connectionStore.getConnectionType(connectionWithDetailsVisible.connectionTypeId)
   return connectionType?.color
 })
 // a connection that is connected to this item connector that is being hovered over
@@ -267,7 +268,7 @@ const handleMouseLeaveConnector = () => {
     template(v-else-if="props.isRemoteConnecting")
       .color(:style="{ background: props.remoteConnectionColor }")
     template(v-else v-for="type in connectedConnectionTypes")
-      .color(:style="{ background: type.color}")
+      .color(:style="{ background: type?.color}")
 
   button.inline-button.connector-button(
     :class="{ active: props.isConnectingTo || props.isConnectingFrom, 'is-light-in-dark-theme': isConnectorLightInDarkTheme, 'is-dark-in-light-theme': isConnectorDarkInLightTheme}"

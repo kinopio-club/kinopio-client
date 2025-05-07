@@ -6,6 +6,11 @@ import store from '@/store/store.js' // TEMP Import Vuex store
 import utils from '@/utils.js'
 import consts from '@/consts.js'
 
+import { nanoid } from 'nanoid'
+import randomColor from 'randomcolor'
+import last from 'lodash-es/last'
+import uniq from 'lodash-es/uniq'
+
 export const useConnectionStore = defineStore('connections', {
   state: () => ({
     byId: {},
@@ -14,7 +19,8 @@ export const useConnectionStore = defineStore('connections', {
     typeAllIds: [],
     dirtyConnectionIds: new Set(),
     pendingUpdates: new Map(),
-    isUpdating: false
+    isUpdating: false,
+    prevConnectionTypeId: ''
   }),
 
   getters: {
@@ -32,6 +38,20 @@ export const useConnectionStore = defineStore('connections', {
     },
     getAllConnectionTypes: (state) => {
       return state.typeAllIds.map(id => state.typeById[id])
+    },
+    getNewConnectionType: (state) => {
+      const userId = store.currentUser.id
+      const shouldUseLastConnectionType = store.currentUser.shouldUseLastConnectionType
+      const connectionTypes = state.typeAllIds.map(id => state.typeById[id])
+      let prevConnectionType
+      if (this.prevConnectionTypeId) {
+        prevConnectionType = state.typeById[this.prevConnectionTypeId]
+      }
+      if (shouldUseLastConnectionType) {
+        return prevConnectionType || last(connectionTypes)
+      } else {
+        return last(connectionTypes)
+      }
     }
 
   },
@@ -55,7 +75,6 @@ export const useConnectionStore = defineStore('connections', {
       })
       this.byId = byId
       this.allIds = allIds
-      console.log('🍍', byId)
     },
     initializeConnectionTypes (connectionTypes) {
       const byId = {}
@@ -66,23 +85,35 @@ export const useConnectionStore = defineStore('connections', {
       })
       this.typeById = byId
       this.typeAllIds = allIds
-      console.log('🍍🍍', byId)
+    },
+
+    // find
+
+    getItemsConnections (itemIds) {
+      let connections = this.getAllConnections
+      connections = connections.filter(connection => {
+        const start = itemIds.includes(connection.startItemId)
+        const end = itemIds.includes(connection.endItemId)
+        return start || end
+      })
+      return connections
+    },
+    getItemConnections (itemId) {
+      return this.getItemsConnections([itemId])
+    },
+    getItemConnectionTypes (itemId) {
+      const connections = this.getItemConnections(itemId)
+      const typeIds = connections.map(connection => connection.connectionTypeId)
+      const connectionTypes = typeIds.map(id => this.getConnectionType(id))
+      return connectionTypes
     },
 
     // update
 
-    updateConnection (id, updates) {
-      if (!this.isUpdating) {
-        requestAnimationFrame(() => this.processPendingUpdates())
-      }
-      this.pendingUpdates.set(id, {
-        ...this.pendingUpdates.get(id) || {},
-        ...updates
-      })
-      this.dirtyConnectionIds.add(id)
-      this.isUpdating = true
-    },
-    updateConnections (updates) {
+    async updateConnections (updates) {
+      const canEditSpace = store.getters['currentUser/canEditSpace']()
+      if (!canEditSpace) { return }
+      updates = updates.filter(update => store.getters['currentUser/canEditConnection'](update))
       updates.forEach(({ id, ...changes }) => {
         this.pendingUpdates.set(id, {
           ...this.pendingUpdates.get(id) || {},
@@ -94,6 +125,20 @@ export const useConnectionStore = defineStore('connections', {
         requestAnimationFrame(() => this.processPendingUpdates())
         this.isUpdating = true
       }
+      // server tasks
+      if (!updates.isBroadcast) {
+        store.dispatch('broadcast/update', { updates, storeName: 'connectionStore', actionName: 'updateConnections' }, { root: true })
+      }
+      await store.dispatch('api/addToQueue', { name: 'updateMultipleConnections', body: { connections: updates } }, { root: true })
+      // TODO history? if unpaused
+      // cache
+      // if (update.name) // updates contain name or pos? or just always do it
+      // await nextTick()
+      // await nextTick()
+      // store.dispatch('currentConnections/updatePaths', { itemId: card.id }) // TODO search to remove excess updatepaths
+    },
+    updateConnection (update) {
+      this.updateConnections([update])
     },
     processPendingUpdates () {
       const updatedConnections = {}
@@ -112,6 +157,39 @@ export const useConnectionStore = defineStore('connections', {
       this.pendingUpdates.clear()
       this.dirtyConnectionIds.clear()
       this.isUpdating = false
+    },
+
+    // create
+
+    addConnectionTypeToState (type) {
+      this.typeById[type.id] = type
+      this.typeAllIds.push(type.id)
+    },
+    async createConnectionType (type) {
+      const isThemeDark = store.currentUser.theme === 'dark'
+      let color = randomColor({ luminosity: 'light' })
+      if (isThemeDark) {
+        color = randomColor({ luminosity: 'dark' })
+      }
+      const connectionType = {
+        id: nanoid(),
+        name: `Connection Type ${this.typeAllIds.length + 1}`,
+        color,
+        spaceId: store.currentSpace.id
+      }
+      if (type) {
+        const keys = Object.keys(type)
+        keys.forEach(key => {
+          connectionType[key] = type[key]
+        })
+      }
+      connectionType.userId = store.currentUser.id
+      this.addConnectionTypeToState(connectionType)
+      this.prevConnectionTypeId = connectionType.id
+      if (!connectionType.isBroadcast) {
+        store.dispatch('broadcast/update', { updates: connectionType, storeName: 'connectionStore', actionName: 'createConnectionType' }, { root: true })
+      }
+      await store.dispatch('api/addToQueue', { name: 'createConnectionType', body: connectionType }, { root: true })
     },
 
     // remove
@@ -158,6 +236,34 @@ export const useConnectionStore = defineStore('connections', {
       typesToRemove.forEach(type => {
         this.deleteConnectionTypes([type.id])
       })
+    },
+
+    // path
+
+    async updateConnectionPaths (itemIds) {
+      const connections = this.getItemsConnections(itemIds)
+      const updates = []
+      connections.forEach(connection => {
+        const startItem = utils.itemElementDimensions({ id: connection.startItemId })
+        const endItem = utils.itemElementDimensions({ id: connection.endItemId })
+        const path = store.getters.connectionPathBetweenItems({
+          startItem,
+          endItem,
+          controlPoint: connection.controlPoint
+        })
+        if (!path) { return }
+        const update = {
+          id: connection.id,
+          path
+        }
+        updates.push(update)
+      })
+      this.updateConnections(updates)
+      store.commit('clearShouldExplicitlyRenderCardIds', null, { root: true })
+    },
+    updateConnectionPath (itemId) {
+      this.updateConnectionPaths([itemId])
     }
+
   }
 })

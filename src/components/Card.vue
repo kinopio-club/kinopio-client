@@ -1,7 +1,7 @@
 <script setup>
 import { reactive, computed, onMounted, onBeforeUnmount, onUnmounted, watch, ref, nextTick } from 'vue'
 import { useStore, mapState, mapGetters } from 'vuex'
-
+import { useConnectionStore } from '@/stores/useConnectionStore'
 import { useCardStore } from '@/stores/useCardStore'
 
 import utils from '@/utils.js'
@@ -28,11 +28,12 @@ import isToday from 'dayjs/plugin/isToday'
 import qs from '@aguezz/qs-parse'
 import randomColor from 'randomcolor'
 import { nanoid } from 'nanoid'
-const cardStore = useCardStore()
 
 dayjs.extend(isToday)
 
 const store = useStore()
+const cardStore = useCardStore()
+const connectionStore = useConnectionStore()
 
 const cardElement = ref(null)
 
@@ -611,7 +612,7 @@ const isConnectingTo = computed(() => {
 const isConnectingFrom = computed(() => {
   return store.state.currentConnectionStartItemIds.includes(props.card.id)
 })
-const connectedConnectionTypes = computed(() => store.getters['currentConnections/typesByItemId'](props.card.id))
+const connectedConnectionTypes = computed(() => useConnectionStore.getItemConnections(props.card.id))
 
 // card buttons
 
@@ -1030,7 +1031,7 @@ const isLoadingUrlPreview = computed(() => {
   if (isLoading) {
     prevIsLoadingUrlPreview = true
   } else if (prevIsLoadingUrlPreview) {
-    store.dispatch('currentConnections/updatePaths', { itemId: props.card.id })
+    connectionStore.updateConnectionPath(props.card.id)
   }
   return isLoading
   // if (!isLoading) { return }
@@ -1344,7 +1345,7 @@ const selectAllConnectedCards = (event) => {
   if (!isMeta) { return }
   if (!canEditSpace.value) { return }
   store.dispatch('closeAllDialogs')
-  const connections = store.getters['currentConnections/all']
+  const connections = connectionStore.getAllConnections
   const selectedCards = [props.card.id]
   let shouldSearch = true
   while (shouldSearch) {
@@ -1590,7 +1591,7 @@ const handleMouseLeaveCheckbox = () => {
   store.commit('currentUserIsHoveringOverCheckboxCardId', '')
 }
 const updateCurrentConnections = () => {
-  state.currentConnections = store.getters['currentConnections/byItemId'](props.card.id)
+  state.currentConnections = connectionStore.getItemConnections(props.card.id)
 }
 const handleMouseEnterUrlButton = () => {
   store.commit('currentUserIsHoveringOverUrlButtonCardId', props.card.id)
