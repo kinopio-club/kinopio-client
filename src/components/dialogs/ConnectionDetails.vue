@@ -183,7 +183,7 @@ const addConnectionType = () => {
   updateNextConnectionColor()
 }
 const removeConnection = () => {
-  connectionStore.removeConnections(currentConnection.value.id)
+  connectionStore.removeConnection(currentConnection.value.id)
   store.dispatch('closeAllDialogs')
   connectionStore.removeAllUnusedConnectionTypes()
 }
