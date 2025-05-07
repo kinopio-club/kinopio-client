@@ -111,6 +111,7 @@ const isCanvasScope = (event) => {
 // on key up
 const handleShortcuts = (event) => {
   const key = event.key.toLowerCase()
+  const keyCode = event.code // physical key on the keyboard
   // console.warn('🎹', key)
   // const isFromCard = event.target.classList[0] === 'card'
   const isSpaceScope = checkIsSpaceScope(event)
@@ -167,7 +168,7 @@ const handleShortcuts = (event) => {
     store.commit('currentUserIsPanningReady', false)
     spaceKeyIsDown = false
   // b
-  } else if (key === 'b' && isSpaceScope) {
+  } else if ((key === 'b' || keyCode === 'KeyB') && isSpaceScope) {
     let cards
     const multipleCardIds = store.state.multipleCardsSelectedIds
     const cardId = store.state.cardDetailsIsVisibleForCardId
