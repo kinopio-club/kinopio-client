@@ -1,10 +1,12 @@
 <script setup>
 import { reactive, computed, onMounted, onBeforeUnmount, watch, ref, nextTick } from 'vue'
 import { useStore } from 'vuex'
+import { useConnectionStore } from '@/stores/useConnectionStore'
 
 import utils from '@/utils.js'
 
 const store = useStore()
+const connectionStore = useConnectionStore()
 
 const props = defineProps({
   connections: Array
@@ -32,10 +34,11 @@ const isSomeDirectionsIsVisible = computed(() => {
 const showDirectionsIsVisible = () => {
   const value = !isSomeDirectionsIsVisible.value
   props.connections.forEach(connection => {
-    store.dispatch('currentConnections/update', {
+    const update = {
       id: connection.id,
       directionIsVisible: value
-    })
+    }
+    connectionStore.updateConnection(update)
   })
 }
 
@@ -48,10 +51,11 @@ const isSomeLabelsVisible = computed(() => {
 const showLabelsIsVisible = () => {
   const value = !isSomeLabelsVisible.value
   props.connections.forEach(connection => {
-    store.dispatch('currentConnections/update', {
+    const update = {
       id: connection.id,
       labelIsVisible: value
-    })
+    }
+    connectionStore.updateConnection(update)
   })
 }
 
@@ -61,13 +65,15 @@ const reverseConnections = () => {
   props.connections.forEach(connection => {
     const startItemId = connection.endItemId
     const endItemId = connection.startItemId
-    store.dispatch('currentConnections/update', {
+    const update = {
       id: connection.id,
       startItemId,
       endItemId
-    })
+    }
+    connectionStore.updateConnection(update)
   })
-  store.dispatch('currentConnections/updatePaths', { connections: props.connections })
+  const ids = props.connections.map(connection => connection.id)
+  connectionStore.updateConnectionPaths(ids)
 }
 
 // curve or straight
@@ -99,13 +105,16 @@ const togglePathIsStraight = (isStraight) => {
   if (isStraight) {
     controlPoint = 'q00,00'
   }
+  const updates = []
   props.connections.forEach(connection => {
-    store.dispatch('currentConnections/update', {
+    updates.push({
       id: connection.id,
       controlPoint
     })
   })
-  store.dispatch('currentConnections/updatePaths', { connections: props.connections })
+  connectionStore.updateConnections(updates)
+  const ids = props.connections.map(connection => connection.id)
+  connectionStore.updateConnectionPaths(ids)
   store.dispatch('currentUser/update', { defaultConnectionControlPoint: controlPoint })
 }
 </script>
