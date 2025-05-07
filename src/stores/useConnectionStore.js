@@ -77,6 +77,11 @@ export const useConnectionStore = defineStore('connections', {
       const connectionTypes = typeIds.map(id => this.getConnectionType(id))
       return connectionTypes
     },
+    getConnectionConnectionType (connectionId) {
+      const connection = this.getConnection(connectionId)
+      const type = this.getConnectionType(connection.connectionTypeId)
+      return type
+    },
     getConnectionPathBetweenCoords (start, end, controlPoint) {
       if (!start || !end) { return }
       const delta = {

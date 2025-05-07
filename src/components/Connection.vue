@@ -295,15 +295,9 @@ const isFiltered = computed(() => {
 const gradientId = computed(() => `gradient-${props.connection.id}`)
 const gradientIdReference = computed(() => `url('#${gradientId.value}')`)
 const directionIsVisible = computed(() => {
-  checkIfShouldPauseConnectionDirections()
   if (!visible.value) { return }
   return props.connection.directionIsVisible
 })
-const checkIfShouldPauseConnectionDirections = async () => {
-  store.dispatch('currentSpace/unpauseConnectionDirections')
-  await nextTick()
-  store.dispatch('currentSpace/checkIfShouldPauseConnectionDirections')
-}
 
 // path
 
@@ -324,40 +318,6 @@ const multipleItemsSelectedIds = computed(() => {
   const cards = utils.clone(store.state.multipleCardsSelectedIds)
   const boxes = utils.clone(store.state.multipleBoxesSelectedIds)
   return cards.concat(boxes)
-})
-const isUpdatingPath = computed(() => {
-  let shouldHide
-  const currentUserIsDragging = store.state.currentUserIsDraggingCard
-  let items = []
-  const currentItemId = store.state.currentDraggingCardId || store.state.currentDraggingBoxId
-  // local multiple
-  if (multipleItemsSelectedIds.value.length && currentUserIsDragging) {
-    items = multipleItemsSelectedIds.value.map(id => store.getters['currentSpace/itemById'](id))
-  // local single
-  } else if (currentItemId && currentUserIsDragging) {
-    const currentItem = store.getters['currentSpace/itemById'](currentItemId)
-    items = [currentItem]
-  // remote multiple
-  } else if (remoteItemsIsDragging.value && remoteItemsSelected.value.length) {
-    items = remoteItemsSelected.value.map(item => {
-      item.id = item.cardId || item.boxId
-      return item
-    })
-  // remote single
-  } else if (remoteItemsIsDragging.value) {
-    items = remoteItemsDragging.value.map(item => {
-      item.id = item.cardId || item.boxId
-      return item
-    })
-  }
-  items = items.filter(item => Boolean(item))
-  items.forEach(item => {
-    if (item.id === props.connection.startItemId || item.id === props.connection.endItemId) {
-      shouldHide = true
-    }
-  })
-  checkIfShouldPauseConnectionDirections()
-  return shouldHide
 })
 const updatedPath = (path, controlPoint, x, y) => {
   return path.replace(controlPoint, `q${x},${y}`)
