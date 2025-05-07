@@ -282,6 +282,32 @@ export const useConnectionStore = defineStore('connections', {
     },
     updateConnectionPath (itemId) {
       this.updateConnectionPaths([itemId])
+    },
+
+    // label
+
+    async updateConnectionLabelPosition ({ id, labelRelativePositionX, labelRelativePositionY }) {
+      const prevConnection = this.getConnection(id)
+      if (utils.isUndefinedOrNull(labelRelativePositionX)) {
+        labelRelativePositionX = utils.roundFloat(prevConnection.labelRelativePositionX)
+      }
+      if (utils.isUndefinedOrNull(labelRelativePositionY)) {
+        labelRelativePositionY = utils.roundFloat(prevConnection.labelRelativePositionY)
+      }
+      const update = {
+        id,
+        labelRelativePositionX,
+        labelRelativePositionY
+      }
+      this.updateConnection(update)
+    },
+    clearConnectionLabelPosition (id) {
+      const update = {
+        id,
+        labelRelativePositionX: 0.5,
+        labelRelativePositionY: 0.5
+      }
+      this.updateConnection(update)
     }
 
   }

@@ -2,11 +2,13 @@
 import { reactive, computed, onMounted, onUnmounted, watch, ref, nextTick } from 'vue'
 import { useStore } from 'vuex'
 import { useCardStore } from '@/stores/useCardStore'
+import { useConnectionStore } from '@/stores/useConnectionStore'
 
 import utils from '@/utils.js'
 
 const store = useStore()
 const cardStore = useCardStore()
+const connectionStore = useConnectionStore()
 
 const labelElement = ref(null)
 
@@ -53,7 +55,7 @@ watch(() => props.connection.labelIsVisible, (value, prevValue) => {
     updateConnectionRect()
     state.connectionIsVisible = true
   } else {
-    store.dispatch('currentConnections/clearLabelPosition', props.connection)
+    connectionStore.clearConnectionLabelPosition(props.connection.id)
   }
 })
 
@@ -171,7 +173,7 @@ const isHiddenByCommentFilter = computed(() => {
 // parent connection type
 
 const connectionTypeId = computed(() => props.connection.connectionTypeId)
-const connectionType = computed(() => store.getters['currentConnections/typeByTypeId'](connectionTypeId.value))
+const connectionType = computed(() => connectionStore.getConnectionType(connectionTypeId.value))
 const typeName = computed(() => {
   if (connectionType.value) {
     return connectionType.value.name
@@ -244,7 +246,7 @@ const styles = computed(() => {
   return styles
 })
 const removeOffsets = () => {
-  store.dispatch('currentConnections/clearLabelPosition', props.connection)
+  connectionStore.clearConnectionLabelPosition(props.connection.id)
   stopDragging()
   wasDragged = false
 }
@@ -332,8 +334,8 @@ const drag = (event) => {
     y: positionAbsolute.y / state.connectionRect.height
   }
   positionRelative = normalizeRelativePosition(positionRelative)
-  store.dispatch('currentConnections/updateLabelPosition', {
-    connection: props.connection,
+  connectionStore.updateConnectionLabelPosition({
+    id: props.connection.id,
     labelRelativePositionX: positionRelative.x,
     labelRelativePositionY: positionRelative.y
   })
