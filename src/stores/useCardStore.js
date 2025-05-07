@@ -35,9 +35,6 @@ export const useCardStore = defineStore('cards', {
       cards = cards.filter(card => card.isRemoved)
       return cards
     },
-    getDirtyCards: (state) => {
-      return Array.from(state.dirtyCardIds).map(id => state.byId[id])
-    },
     getIsCardComment: (state) => {
       return (card) => card.isComment || utils.isNameComment(card.name)
     },

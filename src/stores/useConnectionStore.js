@@ -1,5 +1,6 @@
 import { nextTick } from 'vue'
 import { defineStore } from 'pinia'
+
 import store from '@/store/store.js' // TEMP Import Vuex store
 
 import utils from '@/utils.js'
@@ -9,43 +10,66 @@ export const useConnectionStore = defineStore('connections', {
   state: () => ({
     byId: {},
     allIds: [],
+    typeById: {},
+    typeAllIds: [],
     dirtyConnectionIds: new Set(),
     pendingUpdates: new Map(),
     isUpdating: false
-    // worker: null
   }),
 
   getters: {
     getConnection: (state) => {
       return (id) => state.byId[id]
     },
-
     getAllConnections: (state) => {
       return state.allIds.map(id => state.byId[id])
     },
-
-    getDirtyConnections: (state) => {
-      return Array.from(state.dirtyConnectionIds).map(id => state.byId[id])
-    },
-
     getVisibleConnections: (state) => {
       return (visibleIds) => visibleIds.map(id => state.byId[id])
+    },
+    getConnectionType: (state) => {
+      return (id) => state.typeById[id]
+    },
+    getAllConnectionTypes: (state) => {
+      return state.typeAllIds.map(id => state.typeById[id])
     }
+
   },
 
   actions: {
-    // initializeWorker() {
-    //   this.worker = new Worker(new URL('../workers/cardWorker.js', import.meta.url))
-    //   this.worker.onmessage = (e) => {
-    //     const { type, data } = e.data
-    //     switch(type) {
-    //       case 'BATCH_UPDATE':
-    //         this.updateConnections(data)
-    //         break
-    //       // Add other worker message handlers as needed
-    //     }
-    //   }
-    // },
+
+    // init
+
+    clear () {
+      this.byId = []
+      this.allIds = {}
+      this.typeById = []
+      this.typeAllIds = {}
+    },
+    initializeConnections (connections) {
+      const byId = {}
+      const allIds = []
+      connections.forEach(connection => {
+        byId[connection.id] = connection
+        allIds.push(connection.id)
+      })
+      this.byId = byId
+      this.allIds = allIds
+      console.log('🍍', byId)
+    },
+    initializeConnectionTypes (connectionTypes) {
+      const byId = {}
+      const allIds = []
+      connectionTypes.forEach(type => {
+        byId[type.id] = type
+        allIds.push(type.id)
+      })
+      this.typeById = byId
+      this.typeAllIds = allIds
+      console.log('🍍🍍', byId)
+    },
+
+    // update
 
     updateConnection (id, updates) {
       if (!this.isUpdating) {
@@ -58,7 +82,6 @@ export const useConnectionStore = defineStore('connections', {
       this.dirtyConnectionIds.add(id)
       this.isUpdating = true
     },
-
     updateConnections (updates) {
       updates.forEach(({ id, ...changes }) => {
         this.pendingUpdates.set(id, {
@@ -72,7 +95,6 @@ export const useConnectionStore = defineStore('connections', {
         this.isUpdating = true
       }
     },
-
     processPendingUpdates () {
       const updatedConnections = {}
       this.pendingUpdates.forEach((updates, id) => {
@@ -92,35 +114,50 @@ export const useConnectionStore = defineStore('connections', {
       this.isUpdating = false
     },
 
-    initializeConnections (connections) {
-      const byId = {}
-      const allIds = []
-      connections.forEach(connection => {
-        byId[connection.id] = connection
-        allIds.push(connection.id)
+    // remove
+
+    async deleteConnections (connections) {
+      const canEditSpace = store.getters['currentUser/canEditSpace']()
+      if (!canEditSpace) { return }
+      for (const connection of connections) {
+        const idIndex = this.allIds.indexOf(connection.id)
+        this.allIds.splice(idIndex, 1)
+        delete this.byId[connection.id]
+        await store.dispatch('api/addToQueue', { name: 'deleteConnection', body: connection }, { root: true })
+      }
+    },
+    async deleteConnection (connection) {
+      await this.deleteConnections([connection])
+    },
+    removeConnections (ids) {
+      const connections = ids.map(id => this.getConnection(id))
+      this.deleteConnections(connections)
+      // await context.dispatch('api/addToQueue', { name: 'removeConnection', body: connection }, { root: true })
+      // context.dispatch('broadcast/update', { updates: connection, type: 'removeConnection', handler: 'currentConnections/remove' }, { root: true })
+      // context.dispatch('history/add', { connections: [connection], isRemoved: true }, { root: true })
+    },
+    removeConnection (id) {
+      this.removeConnections([id])
+    },
+    async deleteConnectionTypes (ids) {
+      const types = ids.map(id => this.getConnectionType(id))
+      for (const type of types) {
+        const idIndex = this.typeAllIds.indexOf(type.id)
+        this.typeAllIds.splice(idIndex, 1)
+        delete this.typeById[type.id]
+        await store.dispatch('api/addToQueue', { name: 'deleteConnection', body: type }, { root: true })
+      }
+    },
+    removeAllUnusedConnectionTypes () {
+      const connections = this.getAllConnections
+      if (!utils.arrayHasItems(connections)) { return }
+      const usedTypes = connections.map(connection => connection.connectionTypeId)
+      let types = this.getAllConnectionTypes
+      types = types.filter(type => Boolean(type))
+      const typesToRemove = types.filter(type => !usedTypes.includes(type.id))
+      typesToRemove.forEach(type => {
+        this.deleteConnectionTypes([type.id])
       })
-      this.byId = byId
-      this.allIds = allIds
-      console.log('🍍', byId)
     }
-
-    // processConnectionsInWorker(operation, cards = this.getAllConnections) {
-    //   if (!this.worker) {
-    //     this.initializeWorker()
-    //   }
-
-    //   this.worker.postMessage({
-    //     type: operation,
-    //     cards
-    //   })
-    // },
-
-    // Cleanup
-    // dispose() {
-    //   if (this.worker) {
-    //     this.worker.terminate()
-    //     this.worker = null
-    //   }
-    // }
   }
 })

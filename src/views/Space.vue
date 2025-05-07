@@ -3,6 +3,7 @@ import { reactive, computed, onMounted, onBeforeUnmount, onUnmounted, watch, ref
 import { useStore } from 'vuex'
 
 import { useCardStore } from '@/stores/useCardStore'
+import { useConnectionStore } from '@/stores/useConnectionStore'
 
 import CardDetails from '@/components/dialogs/CardDetails.vue'
 import OtherCardDetails from '@/components/dialogs/OtherCardDetails.vue'
@@ -49,6 +50,7 @@ import uniq from 'lodash-es/uniq'
 import debounce from 'lodash-es/debounce'
 
 const cardStore = useCardStore()
+const connectionStore = useConnectionStore()
 
 const store = useStore()
 

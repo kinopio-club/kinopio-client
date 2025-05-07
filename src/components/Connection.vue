@@ -2,11 +2,13 @@
 import { reactive, computed, onMounted, onBeforeUnmount, onUnmounted, watch, ref, nextTick } from 'vue'
 import { useStore } from 'vuex'
 import { useCardStore } from '@/stores/useCardStore'
+import { useConnectionStore } from '@/stores/useConnectionStore'
 
 import utils from '@/utils.js'
 
 const store = useStore()
 const cardStore = useCardStore()
+const connectionStore = useConnectionStore()
 
 let unsubscribe
 let unsubscribes
@@ -130,7 +132,7 @@ const connectionPathClasses = computed(() => {
 
 // connection type
 
-const connectionType = computed(() => store.getters['currentConnections/typeByTypeId'](props.connection.connectionTypeId))
+const connectionType = computed(() => connectionStore.getConnectionType(props.connection.connectionTypeId))
 const typeColor = computed(() => {
   if (!connectionType.value) { return }
   return connectionType.value.color
@@ -241,7 +243,7 @@ const showConnectionDetailsOnKeyup = (event) => {
 const isDraggingCurrentConnectionLabel = computed(() => {
   const connectionId = store.state.currentUserIsDraggingConnectionIdLabel
   if (!connectionId) { return }
-  const connection = store.getters['currentConnections/byId'](connectionId)
+  const connection = connectionStore.getConnection(connectionId)
   if (!connection) { return }
   return connection.id === props.connection.id
 })
@@ -442,8 +444,8 @@ const relativePath = computed(() => {
 
 const removeConnection = () => {
   if (!isSpaceMember.value) { return }
-  store.dispatch('currentConnections/remove', props.connection)
-  store.dispatch('currentConnections/removeUnusedTypes')
+  connectionStore.removeConnection(props.connection.id)
+  connectionStore.removeAllUnusedConnectionTypes()
 }
 const focusOnDialog = async (event) => {
   await nextTick()
