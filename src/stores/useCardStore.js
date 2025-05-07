@@ -33,6 +33,19 @@ export const useCardStore = defineStore('cards', {
       cards = cards.filter(card => !card.isRemoved)
       return cards
     },
+    getAllCardsSortedByX: (state) => {
+      let cards = state.allIds.map(id => state.byId[id])
+      cards = cards.filter(card => !card.isRemoved)
+      cards = sortBy(cards, 'x')
+      return cards
+    },
+    getAllCardsSortedByY: (state) => {
+      let cards = state.allIds.map(id => state.byId[id])
+      cards = cards.filter(card => !card.isRemoved)
+      cards = sortBy(cards, 'y')
+      return cards
+    },
+
     getAllRemovedCards: (state) => {
       let cards = state.allIds.map(id => state.byId[id])
       cards = cards.filter(card => card.isRemoved)
@@ -127,16 +140,40 @@ export const useCardStore = defineStore('cards', {
       return cards.filter(card => !card.isLocked && !card.isRemoved)
     },
     getCardsBelowY: (state) => {
-      return (y, zoom = 1, cards) => cards.filter(card => (card.y * zoom) > y)
+      return (y, zoom = 1, cards) => {
+        let i = 0
+        while (i < cards.length && (cards[i].y * zoom) <= y) {
+          i++
+        }
+        return cards.slice(i)
+      }
     },
     getCardsAboveY: (state) => {
-      return (y, zoom = 1, cards) => cards.filter(card => (card.y * zoom) < y)
+      return (y, zoom = 1, cards) => {
+        let i = 0
+        while (i < cards.length && (cards[i].y * zoom) <= y) {
+          i++
+        }
+        return cards.slice(0, i)
+      }
     },
     getCardsRightOfX: (state) => {
-      return (x, zoom = 1, cards) => cards.filter(card => (card.x * zoom) > x)
+      return (x, zoom = 1, cards) => {
+        let i = 0
+        while (i < cards.length && (cards[i].x * zoom) <= x) {
+          i++
+        }
+        return cards.slice(i)
+      }
     },
     getCardsLeftOfX: (state) => {
-      return (x, zoom = 1, cards) => cards.filter(card => (card.x * zoom) > x)
+      return (x, zoom = 1, cards) => {
+        let i = 0
+        while (i < cards.length && (cards[i].x * zoom) <= x) {
+          i++
+        }
+        return cards.slice(0, i)
+      }
     },
     getCardsSelected: (state) => {
       let ids = store.state.multipleCardsSelectedIds

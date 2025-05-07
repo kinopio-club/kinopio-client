@@ -4,8 +4,6 @@ import { useStore } from 'vuex'
 
 import utils from '@/utils.js'
 
-import throttle from 'lodash-es/throttle'
-
 const store = useStore()
 
 const xCenterOffset = 12
@@ -98,7 +96,7 @@ const handleMouseMove = (event) => {
     state.isVisible = false
   }
   if (isSelectingX.value) {
-    throttledSelectItems(event)
+    selectItems(event)
   }
 }
 
@@ -106,19 +104,16 @@ const handleMouseMove = (event) => {
 
 const handleMouseDown = (event) => {
   updateIsSelectingX(true)
-  throttledSelectItems(event)
+  selectItems(event)
   updateIsMetaKey(event)
 }
 const handleMouseUp = (event) => {
   if (!isSelectingX.value) { return }
   updateIsSelectingX(false)
-  throttledSelectItems(event)
+  selectItems(event)
   updateIsMetaKey(event)
   state.isVisible = false
 }
-const throttledSelectItems = throttle((event) => {
-  selectItems(event)
-}, 20)
 
 const selectItems = (event) => {
   const position = utils.cursorPositionInSpace(event)

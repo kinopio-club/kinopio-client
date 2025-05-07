@@ -796,7 +796,7 @@ const selectAllItemsBelowCursor = (position) => {
     zoom = store.getters.spaceZoomDecimal
   }
   // cards
-  let cards = cardStore.getAllCards
+  let cards = cardStore.getAllCardsSortedByY
   cards = cardStore.getCardsBelowY(position.y, zoom, cards)
   const cardIds = cards.map(card => card.id)
   // boxes
@@ -815,7 +815,7 @@ const selectAllItemsAboveCursor = (position) => {
     zoom = store.getters.spaceZoomDecimal
   }
   // cards
-  let cards = cardStore.getAllCards
+  let cards = cardStore.getAllCardsSortedByY
   cards = cardStore.getCardsAboveY(position.y, zoom, cards)
   const cardIds = cards.map(card => card.id)
   // boxes
@@ -834,7 +834,7 @@ const selectAllItemsRightOfCursor = (position) => {
     zoom = store.getters.spaceZoomDecimal
   }
   // cards
-  let cards = cardStore.getAllCards
+  let cards = cardStore.getAllCardsSortedByX
   cards = cardStore.getCardsRightOfX(position.x, zoom, cards)
   const cardIds = cards.map(card => card.id)
   // boxes
@@ -855,7 +855,7 @@ const selectAllItemsLeftOfCursor = (position) => {
     zoom = store.getters.spaceZoomDecimal
   }
   // cards
-  let cards = cardStore.getAllCards
+  let cards = cardStore.getAllCardsSortedByX
   cards = cardStore.getCardsLeftOfX(position.x, zoom, cards)
   const cardIds = cards.map(card => card.id)
   // boxes
