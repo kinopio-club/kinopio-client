@@ -1,5 +1,7 @@
 import { nextTick } from 'vue'
 import { defineStore } from 'pinia'
+import { useConnectionStore } from '@/stores/useConnectionStore'
+
 import store from '@/store/store.js' // TEMP Import Vuex store
 
 import utils from '@/utils.js'
@@ -392,6 +394,7 @@ export const useCardStore = defineStore('cards', {
     // position
 
     moveCards ({ endCursor, prevCursor, delta }) {
+      const connectionStore = useConnectionStore()
       if (!endCursor || !prevCursor) { return }
       delta = delta || {
         x: endCursor.x - prevCursor.x,
@@ -408,6 +411,8 @@ export const useCardStore = defineStore('cards', {
         updates.push(update)
       })
       this.updateCards(updates)
+      const itemIds = updates.map(update => update.id)
+      connectionStore.updateConnectionPaths(itemIds)
     },
     clearAllCardsZ () {
       const cards = this.getAllCards

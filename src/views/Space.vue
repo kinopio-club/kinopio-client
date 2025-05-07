@@ -1,7 +1,6 @@
 <script setup>
 import { reactive, computed, onMounted, onBeforeUnmount, onUnmounted, watch, ref, nextTick } from 'vue'
 import { useStore } from 'vuex'
-
 import { useCardStore } from '@/stores/useCardStore'
 import { useConnectionStore } from '@/stores/useConnectionStore'
 
@@ -350,7 +349,7 @@ const stopResizingBoxes = () => {
   store.dispatch('history/resume')
   const boxIds = store.getters['currentBoxes/isResizingIds']
   const boxes = boxIds.map(id => store.getters['currentBoxes/byId'](id))
-  store.dispatch('currentConnections/updateMultiplePaths', boxes)
+  useConnectionStore.updateConnectionPaths(boxIds)
   store.dispatch('history/add', { boxes, useSnapshot: true })
   store.commit('currentUserIsResizingBox', false)
   store.dispatch('currentUserToolbar', 'card')

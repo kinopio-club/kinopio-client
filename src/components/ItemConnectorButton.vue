@@ -4,6 +4,7 @@ import { useStore } from 'vuex'
 import { useConnectionStore } from '@/stores/useConnectionStore'
 
 import utils from '@/utils.js'
+import last from 'lodash-es/last'
 
 const store = useStore()
 const connectionStore = useConnectionStore()
@@ -23,6 +24,12 @@ const props = defineProps({
   currentBackgroundColor: String,
   parentDetailsIsVisible: Boolean,
   backgroundIsTransparent: Boolean
+})
+const state = reactive({
+  connectedConnectionTypes: []
+})
+watch(() => props.itemConnections, (value, prevValue) => {
+  updateConnectedConnectionTypes()
 })
 
 const item = computed(() => props.card || props.box)
@@ -55,6 +62,10 @@ const isLightInDarkTheme = computed(() => {
 
 // connections
 
+const updateConnectedConnectionTypes = async () => {
+  await nextTick()
+  state.connectedConnectionTypes = connectionStore.getItemConnectionTypes(item.value.id)
+}
 const currentConnectionColor = computed(() => store.state.currentConnectionColor)
 const connectionFromAnotherItemConnectedToCurrentItem = (anotherItemId) => {
   return props.itemConnections.find(connection => {
@@ -77,16 +88,13 @@ const connectionsFromMultipleItemsConnectedToCurrentItem = (otherItemIds) => {
   })
   return currentItemConnection
 }
-const connectedConnectionTypes = computed(() => {
-  return connectionStore.getItemConnectionTypes(item.value.id)
-})
 const connectionTypeColorisDark = computed(() => {
-  const type = connectedConnectionTypes.value[connectedConnectionTypes.value.length - 1]
+  const type = last(state.connectedConnectionTypes)
   if (!type) { return }
   return utils.colorIsDark(type.color)
 })
 const hasConnections = computed(() => {
-  const connections = connectionStore.getItemConnections(item.value.id)
+  const connections = props.itemConnections
   return Boolean(connections.length)
 })
 const createCurrentConnection = (event) => {
@@ -134,7 +142,7 @@ const connectorButtonBackground = computed(() => {
 })
 const connectorGlowStyle = computed(() => {
   if (!props.isVisibleInViewport) { return }
-  if (!utils.arrayHasItems(connectedConnectionTypes.value) && !store.state.currentUserIsDrawingConnection) { return } // cards with no connections
+  if (!utils.arrayHasItems(state.connectedConnectionTypes) && !store.state.currentUserIsDrawingConnection) { return } // cards with no connections
   const color = connectedToAnotherItemDetailsVisibleColor.value ||
     connectedToAnotherItemBeingDraggedColor.value ||
     connectedToConnectionDetailsIsVisibleColor.value ||
@@ -267,7 +275,7 @@ const handleMouseLeaveConnector = () => {
       .color(:style="{ background: currentConnectionColor}")
     template(v-else-if="props.isRemoteConnecting")
       .color(:style="{ background: props.remoteConnectionColor }")
-    template(v-else v-for="type in connectedConnectionTypes")
+    template(v-else v-for="type in state.connectedConnectionTypes")
       .color(:style="{ background: type?.color}")
 
   button.inline-button.connector-button(

@@ -58,6 +58,43 @@ export const useConnectionStore = defineStore('connections', {
 
   actions: {
 
+    getItemsConnections (itemIds) {
+      let connections = this.getAllConnections
+      connections = connections.filter(connection => {
+        const start = itemIds.includes(connection.startItemId)
+        const end = itemIds.includes(connection.endItemId)
+        return start || end
+      })
+      return connections
+    },
+    getItemConnections (itemId) {
+      return this.getItemsConnections([itemId])
+    },
+    getItemConnectionTypes (itemId) {
+      const connections = this.getItemConnections(itemId)
+      const typeIds = connections.map(connection => connection.connectionTypeId)
+      const connectionTypes = typeIds.map(id => this.getConnectionType(id))
+      return connectionTypes
+    },
+    getConnectionPathBetweenCoords (start, end, controlPoint) {
+      if (!start || !end) { return }
+      const delta = {
+        x: parseInt(end.x - start.x),
+        y: parseInt(end.y - start.y)
+      }
+      const curve = controlPoint || consts.defaultConnectionPathCurveControlPoint
+      return `m${start.x},${start.y} ${curve} ${delta.x},${delta.y}`
+    },
+    getConnectionPathBetweenItems ({ startItem, endItem, startItemId, endItemId, controlPoint, estimatedEndItemConnectorPosition }) {
+      startItem = startItem || store.getters['currentSpace/itemById'](startItemId)
+      endItem = endItem || store.getters['currentSpace/itemById'](endItemId)
+      if (!startItem || !endItem) { return }
+      const start = utils.estimatedItemConnectorPosition(startItem)
+      const end = estimatedEndItemConnectorPosition || utils.estimatedItemConnectorPosition(endItem)
+      const path = this.getConnectionPathBetweenCoords(start, end, controlPoint)
+      return path
+    },
+
     // init
 
     clear () {
@@ -87,33 +124,11 @@ export const useConnectionStore = defineStore('connections', {
       this.typeAllIds = allIds
     },
 
-    // find
-
-    getItemsConnections (itemIds) {
-      let connections = this.getAllConnections
-      connections = connections.filter(connection => {
-        const start = itemIds.includes(connection.startItemId)
-        const end = itemIds.includes(connection.endItemId)
-        return start || end
-      })
-      return connections
-    },
-    getItemConnections (itemId) {
-      return this.getItemsConnections([itemId])
-    },
-    getItemConnectionTypes (itemId) {
-      const connections = this.getItemConnections(itemId)
-      const typeIds = connections.map(connection => connection.connectionTypeId)
-      const connectionTypes = typeIds.map(id => this.getConnectionType(id))
-      return connectionTypes
-    },
-
     // update
 
     async updateConnections (updates) {
       const canEditSpace = store.getters['currentUser/canEditSpace']()
       if (!canEditSpace) { return }
-      updates = updates.filter(update => store.getters['currentUser/canEditConnection'](update))
       updates.forEach(({ id, ...changes }) => {
         this.pendingUpdates.set(id, {
           ...this.pendingUpdates.get(id) || {},
@@ -246,7 +261,7 @@ export const useConnectionStore = defineStore('connections', {
       connections.forEach(connection => {
         const startItem = utils.itemElementDimensions({ id: connection.startItemId })
         const endItem = utils.itemElementDimensions({ id: connection.endItemId })
-        const path = store.getters.connectionPathBetweenItems({
+        const path = this.getConnectionPathBetweenItems({
           startItem,
           endItem,
           controlPoint: connection.controlPoint
