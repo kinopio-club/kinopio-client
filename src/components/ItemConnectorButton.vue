@@ -28,6 +28,9 @@ const props = defineProps({
 const state = reactive({
   connectedConnectionTypes: []
 })
+watch(() => props.visible, (value, prevValue) => {
+  updateConnectedConnectionTypes()
+})
 watch(() => props.itemConnections, (value, prevValue) => {
   updateConnectedConnectionTypes()
 })
@@ -63,7 +66,6 @@ const isLightInDarkTheme = computed(() => {
 // connections
 
 const updateConnectedConnectionTypes = async () => {
-  await nextTick()
   await nextTick()
   state.connectedConnectionTypes = connectionStore.getItemConnectionTypes(item.value.id)
 }
