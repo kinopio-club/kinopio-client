@@ -6,6 +6,7 @@ import store from '@/store/store.js' // TEMP Import Vuex store
 
 import utils from '@/utils.js'
 import consts from '@/consts.js'
+import cache from '@/cache.js'
 
 import { nanoid } from 'nanoid'
 import debounce from 'lodash/debounce'
@@ -320,6 +321,7 @@ export const useCardStore = defineStore('cards', {
       await store.dispatch('api/addToQueue', { name: 'updateMultipleCards', body: { cards: updates } }, { root: true })
       // TODO history? if unpaused
       // cache
+      await cache.updateSpace('cards', this.getAllCards, store.state.currentSpace.id)
 
       // if (update.name) // updates contain name or pos? or just always do it
       // await nextTick()
@@ -376,14 +378,14 @@ export const useCardStore = defineStore('cards', {
     removeCard (id) {
       this.removeCards([id])
     },
-    restoreRemovedCard (card) {
+    async restoreRemovedCard (card) {
       card.isRemoved = false
       const isLocal = this.getCard(card.id)
       if (isLocal) {
         this.updateCard(card)
       } else {
         this.addCardToState(card)
-        // await cache.updateSpace('cards', context.state.cards, currentSpaceId)
+        await cache.updateSpace('cards', this.getAllCards, store.state.currentSpace.id)
         // await context.dispatch('api/addToQueue', { name: 'restoreRemovedCard', body: card }, { root: true })
         store.dispatch('currentUser/cardsCreatedCountUpdateBy', {
           cards: [card]
