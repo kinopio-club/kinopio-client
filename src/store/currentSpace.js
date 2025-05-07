@@ -1,4 +1,5 @@
 import { useCardStore } from '@/stores/useCardStore'
+import { useConnectionStore } from '@/stores/useConnectionStore'
 
 import inboxSpace from '@/data/inbox.json'
 import newSpace from '@/data/new.json'
@@ -619,9 +620,12 @@ const currentSpace = {
 
       // context.commit('currentConnections/restoreTypes', space.connectionTypes, { root: true })
 
-      context.commit('currentConnections/restore', space.connections, { root: true })
+      const connectionStore = useConnectionStore()
+      await connectionStore.initializeConnections(space.connections)
 
-      context.commit('currentBoxes/restore', space.boxes, { root: true }) // replace
+      // context.commit('currentConnections/restore', space.connections, { root: true })
+
+      // context.commit('currentBoxes/restore', space.boxes, { root: true }) // replace
 
       context.dispatch('restoreRemoteSpaceComplete', { space, isRemote })
 

@@ -5,7 +5,7 @@ import store from '@/store/store.js' // TEMP Import Vuex store
 import utils from '@/utils.js'
 import consts from '@/consts.js'
 
-export const useConnectionStore = defineStore('cards', {
+export const useConnectionStore = defineStore('connections', {
   state: () => ({
     byId: {},
     allIds: [],
@@ -92,15 +92,16 @@ export const useConnectionStore = defineStore('cards', {
       this.isUpdating = false
     },
 
-    initializeConnections (cards) {
+    initializeConnections (connections) {
       const byId = {}
       const allIds = []
-      cards.forEach(card => {
-        byId[card.id] = card
-        allIds.push(card.id)
+      connections.forEach(connection => {
+        byId[connection.id] = connection
+        allIds.push(connection.id)
       })
       this.byId = byId
       this.allIds = allIds
+      console.log('🍍', byId)
     }
 
     // processConnectionsInWorker(operation, cards = this.getAllConnections) {
