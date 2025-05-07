@@ -1454,9 +1454,11 @@ const currentSpace = {
     // items
 
     itemById: (state, getters, rootState, rootGetters) => (itemId) => {
+      const cardStore = useCardStore()
+      const connectionStore = useConnectionStore()
       if (!itemId) { return }
-      const card = rootGetters['currentCards/byId'](itemId)
-      const box = rootGetters['currentBoxes/byId'](itemId)
+      const card = cardStore.getCard(itemId)
+      const box = connectionStore.getConnection(itemId)
       return card || box
     }
   }

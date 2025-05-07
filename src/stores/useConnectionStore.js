@@ -41,12 +41,12 @@ export const useConnectionStore = defineStore('connections', {
       return state.typeAllIds.map(id => state.typeById[id])
     },
     getNewConnectionType: (state) => {
-      const userId = store.currentUser.id
-      const shouldUseLastConnectionType = store.currentUser.shouldUseLastConnectionType
+      const userId = store.state.currentUser.id
+      const shouldUseLastConnectionType = store.state.currentUser.shouldUseLastConnectionType
       const connectionTypes = state.typeAllIds.map(id => state.typeById[id])
       let prevConnectionType
-      if (this.prevConnectionTypeId) {
-        prevConnectionType = state.typeById[this.prevConnectionTypeId]
+      if (state.prevConnectionTypeId) {
+        prevConnectionType = state.typeById[state.prevConnectionTypeId]
       }
       if (shouldUseLastConnectionType) {
         return prevConnectionType || last(connectionTypes)
@@ -199,12 +199,38 @@ export const useConnectionStore = defineStore('connections', {
 
     // create
 
+    addConnectionToState (connection) {
+      this.byId[connection.id] = connection
+      this.allIds.push(connection.id)
+    },
     addConnectionTypeToState (type) {
       this.typeById[type.id] = type
       this.typeAllIds.push(type.id)
     },
+    async createConnection (connection) {
+      const connections = this.getAllConnections
+      const isExistingConnection = connections.find(item => {
+        const isStart = item.startItemId === connection.startItemId
+        const isEnd = item.endItemId === connection.endItemId
+        return isStart && isEnd
+      })
+      if (isExistingConnection) { return }
+      if (connection.startItemId === connection.endItemId) { return }
+      const type = connection.type || this.getNewConnectionType
+      connection.id = connection.id || nanoid()
+      connection.spaceId = store.state.currentSpace.id
+      connection.userId = store.state.currentUser.id
+      connection.connectionTypeId = type.id
+      this.addConnectionToState(connection)
+      store.commit('triggerUpdateItemCurrentConnections', connection.endItemId, { root: true })
+      store.commit('triggerUpdateItemCurrentConnections', connection.startItemId, { root: true })
+      // if (!updates.isBroadcast) {
+      // store.dispatch('broadcast/update', { updates: connection, type: 'addConnection', handler: 'currentConnections/create' }, { root: true })
+      // store.dispatch('history/add', { connections: [connection] }, { root: true })
+      await store.dispatch('api/addToQueue', { name: 'createConnection', body: connection }, { root: true })
+    },
     async createConnectionType (type) {
-      const isThemeDark = store.currentUser.theme === 'dark'
+      const isThemeDark = store.state.currentUser.theme === 'dark'
       let color = randomColor({ luminosity: 'light' })
       if (isThemeDark) {
         color = randomColor({ luminosity: 'dark' })
@@ -221,7 +247,7 @@ export const useConnectionStore = defineStore('connections', {
           connectionType[key] = type[key]
         })
       }
-      connectionType.userId = store.currentUser.id
+      connectionType.userId = store.state.currentUser.id
       this.addConnectionTypeToState(connectionType)
       this.prevConnectionTypeId = connectionType.id
       if (!connectionType.isBroadcast) {

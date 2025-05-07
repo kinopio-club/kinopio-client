@@ -2,6 +2,7 @@
 import { reactive, computed, onMounted, onBeforeUnmount, onUnmounted, watch, ref, nextTick } from 'vue'
 import { useStore } from 'vuex'
 import { useCardStore } from '@/stores/useCardStore'
+import { useConnectionStore } from '@/stores/useConnectionStore'
 
 import utils from '@/utils.js'
 
@@ -9,6 +10,7 @@ import { nanoid } from 'nanoid'
 
 const store = useStore()
 const cardStore = useCardStore()
+const connectionStore = useConnectionStore()
 
 let prevType
 
@@ -20,7 +22,7 @@ onMounted(() => {
     } else if (mutation.type === 'closeAllDialogs') {
       if (isDrawingConnection.value) {
         store.commit('currentUserIsDrawingConnection', false)
-        store.dispatch('currentConnections/removeUnusedTypes')
+        connectionStore.removeAllUnusedConnectionTypes()
       }
     }
   })
@@ -58,10 +60,10 @@ const drawCurrentConnection = (event) => {
   let start = utils.connectorCoords(props.startItemId)
   start = utils.cursorPositionInSpace(null, start)
   const controlPoint = store.state.currentUser.defaultConnectionControlPoint
-  const path = store.getters['currentConnections/connectionPathBetweenCoords'](start, end, controlPoint)
+  const path = connectionStore.getConnectionPathBetweenCoords(start, end, controlPoint)
   checkCurrentConnectionSuccess(event)
   state.currentConnectionPath = path
-  const connectionType = store.getters['currentConnections/typeForNewConnections']
+  const connectionType = connectionStore.getNewConnectionType
   prevType = connectionType
   state.currentConnectionColor = connectionType.color
   store.commit('currentConnectionColor', connectionType.color)
@@ -147,14 +149,14 @@ const addConnections = async (event) => {
   cardStore.updateCardsDimensions(startItemIds)
   startItemIds.forEach(startItemId => {
     const controlPoint = store.state.currentUser.defaultConnectionControlPoint
-    const path = store.getters['currentConnections/connectionPathBetweenItems']({
+    const path = connectionStore.getConnectionPathBetweenItems({
       startItemId,
       endItemId,
       controlPoint,
       estimatedEndItemConnectorPosition
     })
-    const connection = { startItemId, endItemId, path, controlPoint }
-    store.dispatch('currentConnections/add', { connection, type: prevType })
+    const connection = { startItemId, endItemId, path, controlPoint, connectionTypeId: prevType }
+    connectionStore.createConnection(connection)
   })
 }
 
