@@ -266,7 +266,7 @@ export const useConnectionStore = defineStore('connections', {
         const idIndex = this.allIds.indexOf(connection.id)
         this.allIds.splice(idIndex, 1)
         delete this.byId[connection.id]
-        await store.dispatch('api/addToQueue', { name: 'deleteConnection', body: connection }, { root: true })
+        await store.dispatch('api/addToQueue', { name: 'removeConnection', body: connection }, { root: true })
       }
     },
     async deleteConnection (connection) {
@@ -288,7 +288,7 @@ export const useConnectionStore = defineStore('connections', {
         const idIndex = this.typeAllIds.indexOf(type.id)
         this.typeAllIds.splice(idIndex, 1)
         delete this.typeById[type.id]
-        await store.dispatch('api/addToQueue', { name: 'deleteConnection', body: type }, { root: true })
+        await store.dispatch('api/addToQueue', { name: 'removeConnection', body: type }, { root: true })
       }
     },
     removeAllUnusedConnectionTypes () {

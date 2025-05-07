@@ -617,19 +617,15 @@ const currentSpace = {
       const connectionStore = useConnectionStore()
 
       await cardStore.initializeCards(space.cards)
-
-      // ☎️ connections are the slow down causer. but not dom limited bc it's slow on a space w lots of cards but few connections
-
-      // await connectionTypesStore.initializeConnectionTypes(space.connectionTypes)
-
-      // context.commit('currentConnections/restoreTypes', space.connectionTypes, { root: true })
-
       await connectionStore.initializeConnections(space.connections)
       await connectionStore.initializeConnectionTypes(space.connectionTypes)
 
-      // context.commit('currentConnections/restore', space.connections, { root: true })
+      // delete space.cards
+      // delete space.connections
+      // delete space.connectionTypes
 
       // context.commit('currentBoxes/restore', space.boxes, { root: true }) // replace
+      context.commit('restoreSpace', space)
 
       context.dispatch('restoreRemoteSpaceComplete', { space, isRemote })
 
