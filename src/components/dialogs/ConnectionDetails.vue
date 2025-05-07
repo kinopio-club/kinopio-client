@@ -1,6 +1,7 @@
 <script setup>
 import { reactive, computed, onMounted, onUnmounted, watch, ref, nextTick } from 'vue'
 import { useStore } from 'vuex'
+import { useConnectionStore } from '@/stores/useConnectionStore'
 
 import ResultsFilter from '@/components/ResultsFilter.vue'
 import ConnectionTypeList from '@/components/ConnectionTypeList.vue'
@@ -14,6 +15,7 @@ import randomColor from 'randomcolor'
 import dayjs from 'dayjs'
 
 const store = useStore()
+const connectionStore = useConnectionStore()
 
 let prevConnectionType
 const dialogElement = ref(null)
@@ -134,28 +136,28 @@ const pinchCounterZoomDecimal = computed(() => store.state.pinchCounterZoomDecim
 
 const currentConnection = computed(() => {
   const id = store.state.connectionDetailsIsVisibleForConnectionId
-  return store.getters['currentConnections/byId'](id)
+  return connectionStore.getConnection(id)
 })
 watch(() => currentConnection.value, async (value, prevValue) => {
-  store.dispatch('currentConnections/removeUnusedTypes')
+  connectionStore.removeAllUnusedConnectionTypes()
   await nextTick()
   if (visible.value) {
     state.colorPickerIsVisible = false
     scrollIntoViewAndFocus()
-    store.commit('currentConnections/lastTypeId', currentConnectionType.value.id)
+    connectionStore.updatePrevConnectionTypeId(currentConnectionType.value.id)
   } else {
     store.commit('shouldHideConnectionOutline', false)
   }
 })
 const currentConnectionType = computed(() => {
-  const connectionType = store.getters['currentConnections/typeByConnection'](currentConnection.value)
+  const connectionType = connectionStore.getConnectionConnectionType(currentConnection.value.id)
   prevConnectionType = connectionType
   return connectionType
 })
 
 // type
 
-const connectionTypes = computed(() => store.getters['currentConnections/allTypes'])
+const connectionTypes = computed(() => connectionStore.getAllConnectionTypes)
 const connectionTypesByUpdatedAt = computed(() => {
   let types = connectionTypes.value
   types = sortBy(types, type => dayjs(type.updatedAt).valueOf())
@@ -174,23 +176,23 @@ const typeColorisDark = computed(() => {
   return utils.colorIsDark(typeColor.value)
 })
 const addConnectionType = () => {
-  store.dispatch('currentConnections/addType', { color: state.nextConnectionTypeColor })
+  connectionStore.createConnectionType({ color: state.nextConnectionTypeColor })
   const types = utils.clone(connectionTypes.value)
   const newType = last(types)
   changeConnectionType(newType)
   updateNextConnectionColor()
 }
 const removeConnection = () => {
-  store.dispatch('currentConnections/remove', currentConnection.value)
+  connectionStore.removeConnections(currentConnection.value.id)
   store.dispatch('closeAllDialogs')
-  store.dispatch('currentConnections/removeUnusedTypes')
+  connectionStore.removeAllUnusedConnectionTypes()
 }
 const changeConnectionType = (type) => {
-  store.dispatch('currentConnections/update', {
+  connectionStore.updateConnection({
     id: currentConnection.value.id,
     connectionTypeId: type.id
   })
-  store.commit('currentConnections/lastTypeId', type.id)
+  connectionStore.updatePrevConnectionTypeId(type.id)
 }
 
 // filters
@@ -217,7 +219,7 @@ const toggleFilteredInSpace = () => {
 // use last type
 
 const lastTypeColor = computed(() => {
-  const lastType = store.getters['currentConnections/lastType']
+  const lastType = connectionStore.prevConnectionTypeId
   return lastType?.color
 })
 const shouldUseLastConnectionType = computed(() => store.state.currentUser.shouldUseLastConnectionType)
@@ -238,11 +240,11 @@ const closeColorPicker = () => {
   store.commit('triggerCloseChildDialogs')
 }
 const updateTypeColor = (newColor) => {
-  const connectionType = {
+  const update = {
     id: currentConnectionType.value.id,
     color: newColor
   }
-  store.dispatch('currentConnections/updateType', connectionType)
+  connectionStore.updateConnectionType(update)
 }
 const updateNextConnectionColor = () => {
   const isThemeDark = store.state.currentUser.theme === 'dark'

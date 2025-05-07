@@ -176,6 +176,9 @@ export const useConnectionStore = defineStore('connections', {
       this.dirtyConnectionIds.clear()
       this.isUpdating = false
     },
+    updatePrevConnectionTypeId (id) {
+      this.prevConnectionTypeId = id
+    },
 
     // create
 
