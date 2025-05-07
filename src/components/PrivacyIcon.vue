@@ -18,6 +18,7 @@ const privacyState = computed(() => {
 const isOpen = computed(() => privacyState.value.name === 'open')
 const isClosed = computed(() => privacyState.value.name === 'closed' && !props.closedIsNotVisible)
 const isPrivate = computed(() => privacyState.value.name === 'private')
+const isLocalOnly = computed(() => privacyState.value.name === 'local-only')
 const friendlyName = computed(() => privacyState.value.friendlyName)
 </script>
 
@@ -40,6 +41,13 @@ img.icon.privacy-icon(
   :class="privacyState.name"
   :title="friendlyName"
 )
+img.icon.privacy-icon(
+  v-else-if="isLocalOnly"
+  src="@/assets/local.svg"
+  :class="privacyState.name"
+  :title="friendlyName"
+)
+
 </template>
 
 <style lang="stylus">
