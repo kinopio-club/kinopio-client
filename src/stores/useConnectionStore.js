@@ -161,11 +161,10 @@ export const useConnectionStore = defineStore('connections', {
       await store.dispatch('api/addToQueue', { name: 'updateMultipleConnections', body: { connections: updates } }, { root: true })
       // TODO history? if unpaused
       await cache.updateSpace('connections', this.getAllConnections, store.state.currentSpace.id)
-
       // if (update.name) // updates contain name or pos? or just always do it
       // await nextTick()
       // await nextTick()
-      // store.dispatch('currentConnections/updatePaths', { itemId: card.id }) // TODO search to remove excess updatepaths
+      // this.updateConnectionPaths ids // TODO search to remove excess updatepaths
     },
     updateConnection (update) {
       this.updateConnections([update])
