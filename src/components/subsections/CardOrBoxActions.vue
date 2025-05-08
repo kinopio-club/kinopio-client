@@ -2,6 +2,7 @@
 import { reactive, computed, onMounted, onBeforeUnmount, onUnmounted, watch, ref, nextTick } from 'vue'
 import { useStore } from 'vuex'
 import { useCardStore } from '@/stores/useCardStore'
+import { useConnectionStore } from '@/stores/useConnectionStore'
 
 import FramePicker from '@/components/dialogs/FramePicker.vue'
 import TagPickerStyleActions from '@/components/dialogs/TagPickerStyleActions.vue'
@@ -15,6 +16,7 @@ import { nanoid } from 'nanoid'
 
 const store = useStore()
 const cardStore = useCardStore()
+const connectionStore = useConnectionStore()
 
 onMounted(() => {
   store.subscribe((mutation, state) => {
@@ -125,6 +127,7 @@ const label = computed(() => {
   return label.toUpperCase()
 })
 const isBoxDetails = computed(() => Boolean(store.state.boxDetailsIsVisibleForBoxId))
+const cardIds = computed(() => props.cards.map(card => card.id))
 
 // update name
 
@@ -370,7 +373,7 @@ const updateHeaderFont = async (font) => {
   })
   store.dispatch('currentUser/update', { prevHeaderFontId: font.id })
   await nextTick()
-  store.dispatch('currentConnections/updateMultiplePaths', props.cards)
+  connectionStore.updateConnectionPaths(cardIds.value)
 }
 const udpateHeaderFontSize = async (size) => {
   props.cards.forEach(card => {
@@ -380,7 +383,7 @@ const udpateHeaderFontSize = async (size) => {
     updateBox(box, { headerFontSize: size })
   })
   await nextTick()
-  store.dispatch('currentConnections/updateMultiplePaths', props.cards)
+  connectionStore.updateConnectionPaths(cardIds.value)
 }
 
 // lock
@@ -428,7 +431,7 @@ const toggleIsComment = async () => {
   })
   await nextTick()
   await updateCardDimensions()
-  store.dispatch('currentConnections/updateMultiplePaths', props.cards)
+  connectionStore.updateConnectionPaths(cardIds.value)
 }
 
 // vote counter
@@ -469,7 +472,7 @@ const updateCard = async (card, updates) => {
   })
   cardStore.updateCard(card)
   await updateCardDimensions()
-  store.dispatch('currentConnections/updatePaths', { itemId: card.id })
+  connectionStore.updateConnectionPath(card.id)
 }
 
 // box
