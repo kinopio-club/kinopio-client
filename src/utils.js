@@ -3072,7 +3072,7 @@ export default {
           id: edge.id,
           startItemId: edge.fromNode,
           endItemId: edge.toNode,
-          controlPoint: 'q00,00', // straight line
+          controlPoint: consts.straightLineConnectionPathControlPoint,
           directionIsVisible: Boolean(edge.fromEnd === 'arrow' || edge.toEnd === 'arrow'),
           connectionTypeId: typeId,
           labelIsVisible: Boolean(edge.label)

@@ -4,6 +4,7 @@ import { useStore } from 'vuex'
 import { useConnectionStore } from '@/stores/useConnectionStore'
 
 import utils from '@/utils.js'
+import consts from '@/consts.js'
 
 const store = useStore()
 const connectionStore = useConnectionStore()
@@ -103,7 +104,7 @@ const allPathsIsStraight = computed(() => {
 const togglePathIsStraight = (isStraight) => {
   let controlPoint = null
   if (isStraight) {
-    controlPoint = 'q00,00'
+    controlPoint = consts.straightLineConnectionPathControlPoint
   }
   const updates = []
   props.connections.forEach(connection => {
