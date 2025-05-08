@@ -76,18 +76,6 @@ export const useCardStore = defineStore('cards', {
       this.dirtyCardIds.clear()
       this.isUpdating = false
     },
-    updateCard (id, updates) {
-      if (!this.isUpdating) {
-        requestAnimationFrame(() => this.processPendingUpdates())
-      }
-      this.pendingUpdates.set(id, {
-        ...this.pendingUpdates.get(id) || {},
-        ...updates
-      })
-      this.dirtyCardIds.add(id)
-      this.isUpdating = true
-    },
-
     updateCards (updates) {
       updates.forEach(({ id, ...changes }) => {
         this.pendingUpdates.set(id, {
@@ -101,21 +89,24 @@ export const useCardStore = defineStore('cards', {
         this.isUpdating = true
       }
     },
+    updateCard (update) {
+      this.updatedCards([update])
+    },
 
-    // delete
+    // remove
 
-    async deleteCards (cards) {
+    async removeCards (cards) {
       const canEditSpace = store.getters['currentUser/canEditSpace']()
       if (!canEditSpace) { return }
       for (const card of cards) {
         const idIndex = this.allIds.indexOf(card.id)
         this.allIds.splice(idIndex, 1)
         delete this.byId[card.id]
-        await store.dispatch('api/addToQueue', { name: 'deleteCard', body: card }, { root: true })
+        await store.dispatch('api/addToQueue', { name: 'removeCard', body: card }, { root: true })
       }
     },
-    async deleteCard (card) {
-      await this.deleteCards([card])
+    async removeCard (card) {
+      await this.removeCards([card])
     }
 
   }

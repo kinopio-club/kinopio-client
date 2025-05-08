@@ -221,10 +221,6 @@ export const useConnectionStore = defineStore('connections', {
       await store.dispatch('api/addToQueue', { name: 'updateMultipleConnections', body: { connections: updates } }, { root: true })
       // TODO history? if unpaused
       await cache.updateSpace('connections', this.getAllConnections, store.state.currentSpace.id)
-      // if (update.name) // updates contain name or pos? or just always do it
-      // await nextTick()
-      // await nextTick()
-      // this.updateConnectionPaths ids // TODO search to remove excess updatepaths
     },
     updateConnection (update) {
       this.updateConnections([update])
@@ -264,50 +260,38 @@ export const useConnectionStore = defineStore('connections', {
       // context.dispatch('broadcast/update', { updates: type, type: 'updateConnectionType', handler: 'currentConnections/updateType' }, { root: true })
     },
 
-    // delete
+    // remove
 
-    async deleteConnections (connections) {
+    async removeConnections (ids) {
       const canEditSpace = store.getters['currentUser/canEditSpace']()
       if (!canEditSpace) { return }
-      for (const connection of connections) {
-        const idIndex = this.allIds.indexOf(connection.id)
+      for (const id of ids) {
+        const idIndex = this.allIds.indexOf(id)
         this.allIds.splice(idIndex, 1)
-        delete this.byId[connection.id]
-        await store.dispatch('api/addToQueue', { name: 'removeConnection', body: connection }, { root: true })
+        delete this.byId[id]
+        await store.dispatch('api/addToQueue', { name: 'removeConnection', body: { id } }, { root: true })
+        // store.dispatch('broadcast/update', { updates: connection, type: 'removeConnection', handler: 'currentConnections/remove' }, { root: true })
       }
-    },
-    async deleteConnection (connection) {
-      await this.deleteConnections([connection])
-    },
-    removeConnections (ids) {
       const connections = ids.map(id => this.getConnection(id))
-      this.deleteConnections(connections)
-      // await context.dispatch('api/addToQueue', { name: 'removeConnection', body: connection }, { root: true })
-      // context.dispatch('broadcast/update', { updates: connection, type: 'removeConnection', handler: 'currentConnections/remove' }, { root: true })
-      // context.dispatch('history/add', { connections: [connection], isRemoved: true }, { root: true })
+      store.dispatch('history/add', { connections, isRemoved: true }, { root: true })
     },
-    removeConnection (id) {
-      this.removeConnections([id])
+    async removeConnection (id) {
+      await this.removeConnections([id])
     },
-    async deleteConnectionTypes (ids) {
-      const types = ids.map(id => this.getConnectionType(id))
-      for (const type of types) {
-        const idIndex = this.typeAllIds.indexOf(type.id)
-        this.typeAllIds.splice(idIndex, 1)
-        delete this.typeById[type.id]
-        await store.dispatch('api/addToQueue', { name: 'removeConnection', body: type }, { root: true })
-      }
-    },
-    removeAllUnusedConnectionTypes () {
+    async removeAllUnusedConnectionTypes () {
       const connections = this.getAllConnections
       if (!utils.arrayHasItems(connections)) { return }
       const usedTypes = connections.map(connection => connection.connectionTypeId)
       let types = this.getAllConnectionTypes
       types = types.filter(type => Boolean(type))
       const typesToRemove = types.filter(type => !usedTypes.includes(type.id))
-      typesToRemove.forEach(type => {
-        this.deleteConnectionTypes([type.id])
-      })
+      for (const type of typesToRemove) {
+        const idIndex = this.typeAllIds.indexOf(type.id)
+        this.typeAllIds.splice(idIndex, 1)
+        delete this.typeById[type.id]
+        // store.dispatch('broadcast/update', { updates: type, type: 'removeConnectionType', handler: 'currentConnections/removeType' }, { root: true })
+        await store.dispatch('api/addToQueue', { name: 'removeConnectionType', body: type }, { root: true })
+      }
     },
     removeConnectionsFromItems (itemIds) {
       const connections = this.getItemsConnections(itemIds)

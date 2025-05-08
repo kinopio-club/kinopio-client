@@ -337,7 +337,6 @@ export const useCardStore = defineStore('cards', {
       this.updateCards([update])
     },
     async updateCards (updates) {
-      const connectionStore = useConnectionStore()
       const canEditSpace = store.getters['currentUser/canEditSpace']()
       if (!canEditSpace) { return }
       updates = updates.filter(update => store.getters['currentUser/canEditCard'](update))
@@ -360,6 +359,7 @@ export const useCardStore = defineStore('cards', {
       // TODO history? if unpaused
       await cache.updateSpace('cards', this.getAllCards, store.state.currentSpace.id)
       // update connection paths
+      const connectionStore = useConnectionStore()
       const isNameUpdated = updates.find(update => Boolean(update.name))
       if (isNameUpdated) {
         const ids = updates.map(update => update.id)
@@ -367,7 +367,7 @@ export const useCardStore = defineStore('cards', {
       }
     },
 
-    // delete
+    // remove
 
     async deleteCards (cards) {
       const canEditSpace = store.getters['currentUser/canEditSpace']()
@@ -410,7 +410,7 @@ export const useCardStore = defineStore('cards', {
       this.updateCards(updates)
       this.deleteCards(cardsToDelete)
       // store.dispatch('history/add', { cards, isRemoved: true }, { root: true })
-      // await cache.updateSpace('removedCards', state.removedCards, currentSpaceId)
+      // ?await cache.updateSpace('removedCards', state.removedCards, currentSpaceId)
       const connectionStore = useConnectionStore()
       connectionStore.removeConnectionsFromItems(ids)
     },

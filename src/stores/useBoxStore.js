@@ -85,19 +85,7 @@ export const useBoxStore = defineStore('boxes', {
       this.dirtyBoxIds.clear()
       this.isUpdating = false
     },
-    updateBox (id, updates) {
-      if (!this.isUpdating) {
-        requestAnimationFrame(() => this.processPendingUpdates())
-      }
-      this.pendingUpdates.set(id, {
-        ...this.pendingUpdates.get(id) || {},
-        ...updates
-      })
-      this.dirtyBoxIds.add(id)
-      this.isUpdating = true
-    },
-
-    updateBoxes (updates) {
+    async updateBoxes (updates) {
       updates.forEach(({ id, ...changes }) => {
         this.pendingUpdates.set(id, {
           ...this.pendingUpdates.get(id) || {},
@@ -109,22 +97,65 @@ export const useBoxStore = defineStore('boxes', {
         requestAnimationFrame(() => this.processPendingUpdates())
         this.isUpdating = true
       }
-    },
-
-    // delete
-
-    async deleteBoxes (boxes) {
-      const canEditSpace = store.getters['currentUser/canEditSpace']()
-      if (!canEditSpace) { return }
-      for (const box of boxes) {
-        const idIndex = this.allIds.indexOf(box.id)
-        this.allIds.splice(idIndex, 1)
-        delete this.byId[box.id]
-        await store.dispatch('api/addToQueue', { name: 'deleteBox', body: box }, { root: true })
+      // server tasks
+      if (!updates.isBroadcast) {
+        // store.dispatch('broadcast/update', { updates, storeName: 'boxStore', actionName: 'updateBoxes' }, { root: true })
+      }
+      await store.dispatch('api/addToQueue', { name: 'updateMultipleBoxes', body: updates }, { root: true })
+      // TODO history? if unpaused
+      cache.updateSpace('boxes', this.getAllBoxes, store.state.currentSpace.id)
+      // update connection paths
+      const connectionStore = useConnectionStore()
+      const isNameUpdated = updates.find(update => Boolean(update.name))
+      if (isNameUpdated) {
+        const ids = updates.map(update => update.id)
+        connectionStore.updateConnectionPaths(ids)
       }
     },
-    async deleteBox (box) {
-      await this.deleteBoxes([box])
+    async updateBox (update) {
+      await this.updateBoxes([update])
+    },
+
+    // remove
+
+    async removeBoxes (ids) {
+      const canEditSpace = store.getters['currentUser/canEditSpace']()
+      if (!canEditSpace) { return }
+      const updates = []
+      for (const id of ids) {
+        const idIndex = this.allIds.indexOf(id)
+        this.allIds.splice(idIndex, 1)
+        delete this.byId[id]
+        await store.dispatch('api/addToQueue', { name: 'removeBox', body: { id } }, { root: true })
+        // store.dispatch('broadcast/update', { updates: box, type: 'removeBox', handler: 'currentBoxes/remove' }, { root: true })
+      }
+      const boxes = ids.map(id => this.getBox(id))
+      store.dispatch('history/add', { boxes, isRemoved: true }, { root: true })
+      await cache.updateSpace('boxes', this.getAllBoxes, store.state.currentSpace.id)
+      await nextTick()
+      const connectionStore = useConnectionStore()
+      connectionStore.removeConnectionsFromItems(ids)
+    },
+    removeBox (id) {
+      this.removeBoxes([id])
+    },
+
+    // dimensions
+
+    updateBoxesInfoDimensions (ids) {
+      for (const id of ids) {
+        const box = this.getBox(id)
+        const { infoWidth, infoHeight } = utils.boxInfoPositionFromId(box.id)
+        const update = {
+          id: box.id,
+          infoWidth,
+          infoHeight
+        }
+        this.updateBox(update)
+      }
+    },
+    updateBoxInfoDimensions (id) {
+      this.updateBoxesInfoDimensions([id])
     }
 
   }
