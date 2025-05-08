@@ -2,12 +2,14 @@
 import { reactive, computed, onMounted, onBeforeUnmount, watch, ref, nextTick } from 'vue'
 import { useStore } from 'vuex'
 import { useCardStore } from '@/stores/useCardStore'
+import { useConnectionStore } from '@/stores/useConnectionStore'
 
 import utils from '@/utils.js'
 import cache from '@/cache.js'
 
 const store = useStore()
 const cardStore = useCardStore()
+const connectionStore = useConnectionStore()
 
 let canvas, context
 let startPanningPosition
@@ -32,11 +34,6 @@ onMounted(async () => {
       'currentBoxes/update',
       'currentBoxes/resize',
       'currentBoxes/move',
-      'currentConnections/add',
-      'currentConnections/update',
-      'currentConnections/updatePaths',
-      'currentConnections/updateMultiplePaths',
-      'currentConnections/remove',
       'triggerEndDrawing'
     ]
     if (mutations.includes(mutation.type)) {
@@ -53,6 +50,11 @@ onMounted(async () => {
     'resizeCards',
     'pasteCards'
   ]
+  const connectionStoreActions = [
+    'createConnection',
+    'updateConnections',
+    'removeConnections'
+  ]
   const cardStoreUnsubscribe = cardStore.$onAction(
     ({ name, args }) => {
       if (cardStoreActions.includes(name)) {
@@ -60,8 +62,16 @@ onMounted(async () => {
       }
     }
   )
+  const connectionStoreUnsubscribe = connectionStore.$onAction(
+    ({ name, args }) => {
+      if (connectionStoreActions.includes(name)) {
+        init()
+      }
+    }
+  )
   unsubscribes = () => {
     cardStoreUnsubscribe()
+    connectionStoreUnsubscribe()
   }
 })
 onBeforeUnmount(() => {
@@ -166,10 +176,10 @@ const drawDrawing = async () => {
 // connections
 
 const mapConnections = computed(() => {
-  return props.space?.connections || store.getters['currentConnections/all']
+  return props.space?.connections || connectionStore.getAllConnections
 })
 const mapConnectionTypes = computed(() => {
-  return props.space?.connectionTypes || store.getters['currentConnections/allTypes']
+  return props.space?.connectionTypes || connectionStore.getAllConnectionTypes
 })
 const updatePointWithRatio = (point) => {
   point.x = point.x * ratio.value
