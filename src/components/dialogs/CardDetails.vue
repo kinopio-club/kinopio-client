@@ -1,8 +1,8 @@
 <script setup>
 import { reactive, computed, onMounted, onUpdated, onBeforeUnmount, watch, ref, nextTick } from 'vue'
 import { useStore, mapState, mapGetters } from 'vuex'
-
 import { useCardStore } from '@/stores/useCardStore'
+import { useConnectionStore } from '@/stores/useConnectionStore'
 
 import CardOrBoxActions from '@/components/subsections/CardOrBoxActions.vue'
 import ImagePicker from '@/components/dialogs/ImagePicker.vue'
@@ -28,6 +28,7 @@ import qs from '@aguezz/qs-parse'
 import { nanoid } from 'nanoid'
 
 const cardStore = useCardStore()
+const connectionStore = useConnectionStore()
 
 let prevCardId, prevCardName
 let previousTags = []
@@ -244,7 +245,7 @@ const updateDimensionsAndPaths = async (cardId) => {
 const updatePaths = async (cardId) => {
   cardId = cardId || card.value.id
   await nextTick()
-  store.dispatch('currentConnections/updatePaths', { itemId: cardId })
+  connectionStore.updateConnectionPath(cardId)
 }
 
 // space
@@ -370,7 +371,7 @@ const showCard = async (cardId) => {
   store.dispatch('checkIfItemShouldIncreasePageSize', item)
   state.previousSelectedTag = {}
   updateMediaUrls()
-  const connections = store.getters['currentConnections/byItemId'](cardId)
+  const connections = connectionStore.getItemConnections(cardId)
   store.commit('updateCurrentCardConnections', connections)
   prevCardName = card.value.name
   store.dispatch('history/pause')

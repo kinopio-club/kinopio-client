@@ -2,6 +2,7 @@
 import { reactive, computed, onMounted, onUnmounted, watch, ref, nextTick } from 'vue'
 import { useStore } from 'vuex'
 import { useCardStore } from '@/stores/useCardStore'
+import { useConnectionStore } from '@/stores/useConnectionStore'
 
 import cache from '@/cache.js'
 import utils from '@/utils.js'
@@ -10,6 +11,7 @@ import Loader from '@/components/Loader.vue'
 
 const store = useStore()
 const cardStore = useCardStore()
+const connectionStore = useConnectionStore()
 
 const dialogElement = ref(null)
 
@@ -151,8 +153,8 @@ const copyToSelectedSpace = async (items) => {
   if (selectedSpaceisCurrentSpace) {
     const shouldOffsetPosition = true
     cardStore.createCards(newItems.cards, shouldOffsetPosition)
-    newItems.connectionTypes.forEach(connectionType => store.dispatch('currentConnections/addType', connectionType))
-    newItems.connections.forEach(connection => store.dispatch('currentConnections/add', { connection, type: { id: connection.connectionTypeId } }))
+    newItems.connectionTypes.forEach(connectionType => connectionStore.createConnectionType(connectionType))
+    newItems.connections.forEach(connection => connectionStore.createConnection(connection))
     newItems.boxes.forEach(box => store.dispatch('currentBoxes/add', { box }))
   }
   // update server
@@ -190,7 +192,7 @@ const moveOrCopyToSpace = async () => {
   store.dispatch('currentUser/cardsCreatedCountUpdateBy', {
     cards: items.cards
   })
-  store.dispatch('currentConnections/removeUnusedTypes')
+  connectionStore.removeAllUnusedConnectionTypes()
   store.dispatch('clearMultipleSelected')
   store.dispatch('closeAllDialogs')
 }
