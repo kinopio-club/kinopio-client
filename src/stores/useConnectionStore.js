@@ -138,6 +138,66 @@ export const useConnectionStore = defineStore('connections', {
       this.typeAllIds = allIds
     },
 
+    // create
+
+    addConnectionToState (connection) {
+      this.byId[connection.id] = connection
+      this.allIds.push(connection.id)
+    },
+    addConnectionTypeToState (type) {
+      this.typeById[type.id] = type
+      this.typeAllIds.push(type.id)
+    },
+    async createConnection (connection) {
+      const connections = this.getAllConnections
+      const isExistingConnection = connections.find(item => {
+        const isStart = item.startItemId === connection.startItemId
+        const isEnd = item.endItemId === connection.endItemId
+        return isStart && isEnd
+      })
+      if (isExistingConnection) { return }
+      if (connection.startItemId === connection.endItemId) { return }
+      const type = connection.type || this.getNewConnectionType
+      connection.id = connection.id || nanoid()
+      connection.spaceId = store.state.currentSpace.id
+      connection.userId = store.state.currentUser.id
+      connection.connectionTypeId = type.id
+      this.addConnectionToState(connection)
+      store.commit('triggerUpdateItemCurrentConnections', connection.endItemId, { root: true })
+      store.commit('triggerUpdateItemCurrentConnections', connection.startItemId, { root: true })
+      // if (!updates.isBroadcast) {
+      // store.dispatch('broadcast/update', { updates: connection, type: 'addConnection', handler: 'currentConnections/create' }, { root: true })
+      // store.dispatch('history/add', { connections: [connection] }, { root: true })
+      await store.dispatch('api/addToQueue', { name: 'createConnection', body: connection }, { root: true })
+    },
+    async createConnectionType (type) {
+      const isThemeDark = store.state.currentUser.theme === 'dark'
+      let color = randomColor({ luminosity: 'light' })
+      if (isThemeDark) {
+        color = randomColor({ luminosity: 'dark' })
+      }
+      const connectionType = {
+        id: nanoid(),
+        name: `Connection Type ${this.typeAllIds.length + 1}`,
+        color,
+        spaceId: store.currentSpace.id
+      }
+      if (type) {
+        const keys = Object.keys(type)
+        keys.forEach(key => {
+          connectionType[key] = type[key]
+        })
+      }
+      connectionType.userId = store.state.currentUser.id
+      this.addConnectionTypeToState(connectionType)
+      this.prevConnectionTypeId = connectionType.id
+      if (!connectionType.isBroadcast) {
+        store.dispatch('broadcast/update', { updates: connectionType, storeName: 'connectionStore', actionName: 'createConnectionType' }, { root: true })
+      }
+      await store.dispatch('api/addToQueue', { name: 'createConnectionType', body: connectionType }, { root: true })
+      await cache.updateSpace('connectionsTypes', this.getAllConnectionTypes, store.state.currentSpace.id)
+    },
+
     // update
 
     async updateConnections (updates) {
@@ -204,67 +264,7 @@ export const useConnectionStore = defineStore('connections', {
       // context.dispatch('broadcast/update', { updates: type, type: 'updateConnectionType', handler: 'currentConnections/updateType' }, { root: true })
     },
 
-    // create
-
-    addConnectionToState (connection) {
-      this.byId[connection.id] = connection
-      this.allIds.push(connection.id)
-    },
-    addConnectionTypeToState (type) {
-      this.typeById[type.id] = type
-      this.typeAllIds.push(type.id)
-    },
-    async createConnection (connection) {
-      const connections = this.getAllConnections
-      const isExistingConnection = connections.find(item => {
-        const isStart = item.startItemId === connection.startItemId
-        const isEnd = item.endItemId === connection.endItemId
-        return isStart && isEnd
-      })
-      if (isExistingConnection) { return }
-      if (connection.startItemId === connection.endItemId) { return }
-      const type = connection.type || this.getNewConnectionType
-      connection.id = connection.id || nanoid()
-      connection.spaceId = store.state.currentSpace.id
-      connection.userId = store.state.currentUser.id
-      connection.connectionTypeId = type.id
-      this.addConnectionToState(connection)
-      store.commit('triggerUpdateItemCurrentConnections', connection.endItemId, { root: true })
-      store.commit('triggerUpdateItemCurrentConnections', connection.startItemId, { root: true })
-      // if (!updates.isBroadcast) {
-      // store.dispatch('broadcast/update', { updates: connection, type: 'addConnection', handler: 'currentConnections/create' }, { root: true })
-      // store.dispatch('history/add', { connections: [connection] }, { root: true })
-      await store.dispatch('api/addToQueue', { name: 'createConnection', body: connection }, { root: true })
-    },
-    async createConnectionType (type) {
-      const isThemeDark = store.state.currentUser.theme === 'dark'
-      let color = randomColor({ luminosity: 'light' })
-      if (isThemeDark) {
-        color = randomColor({ luminosity: 'dark' })
-      }
-      const connectionType = {
-        id: nanoid(),
-        name: `Connection Type ${this.typeAllIds.length + 1}`,
-        color,
-        spaceId: store.currentSpace.id
-      }
-      if (type) {
-        const keys = Object.keys(type)
-        keys.forEach(key => {
-          connectionType[key] = type[key]
-        })
-      }
-      connectionType.userId = store.state.currentUser.id
-      this.addConnectionTypeToState(connectionType)
-      this.prevConnectionTypeId = connectionType.id
-      if (!connectionType.isBroadcast) {
-        store.dispatch('broadcast/update', { updates: connectionType, storeName: 'connectionStore', actionName: 'createConnectionType' }, { root: true })
-      }
-      await store.dispatch('api/addToQueue', { name: 'createConnectionType', body: connectionType }, { root: true })
-      await cache.updateSpace('connectionsTypes', this.getAllConnectionTypes, store.state.currentSpace.id)
-    },
-
-    // remove
+    // delete
 
     async deleteConnections (connections) {
       const canEditSpace = store.getters['currentUser/canEditSpace']()
