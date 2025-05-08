@@ -98,7 +98,7 @@ const addCheckboxToItems = async () => {
       updatedCards.push(update)
     }
   })
-  cardStore.updatedCards(updatedCards)
+  cardStore.updateCards(updatedCards)
   // boxes
   props.boxes.forEach(box => {
     if (!utils.checkboxFromString(box.name)) {
