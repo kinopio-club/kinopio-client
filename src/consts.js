@@ -26,6 +26,7 @@ export default {
   boxSnapGuideWaitingDuration: 200,
   maxInviteEmailsAllowedToSend: 15,
   defaultConnectionPathCurveControlPoint: 'q90,40',
+  straightLineConnectionPathControlPoint: 'q00,00',
   defaultTimeout: 40000,
   AIImageLimitUpgradedUser: 50,
   AIImageLimitFreeUser: 10,

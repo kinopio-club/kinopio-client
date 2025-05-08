@@ -2,6 +2,7 @@
 import { reactive, computed, onMounted, onBeforeUnmount, onUnmounted, watch, ref, nextTick } from 'vue'
 import { useStore } from 'vuex'
 import { useCardStore } from '@/stores/useCardStore'
+import { useConnectionStore } from '@/stores/useConnectionStore'
 
 import utils from '@/utils.js'
 import MoveOrCopyItems from '@/components/dialogs/MoveOrCopyItems.vue'
@@ -17,6 +18,7 @@ import consts from '@/consts.js'
 
 const store = useStore()
 const cardStore = useCardStore()
+const connectionStore = useConnectionStore()
 
 const dialogElement = ref(null)
 
@@ -223,10 +225,10 @@ const connectCards = (event) => {
       const endItemId = cardIds[index + 1]
       if (connectionAlreadyExists(startItemId, endItemId)) { return }
       const id = nanoid()
-      const path = store.getters['currentConnections/connectionPathBetweenItems']({
+      const path = connectionStore.getConnectionPathBetweenItems({
         startItemId,
         endItemId,
-        controlPoint: 'q00,00' // straight line
+        controlPoint: consts.straightLineConnectionPathControlPoint
       })
       return {
         id, startItemId, endItemId, path
@@ -236,16 +238,17 @@ const connectCards = (event) => {
   connections = connections.filter(Boolean)
   const type = connectionType(event)
   connections.forEach(connection => {
-    store.dispatch('currentConnections/add', { connection, type })
+    connection.type = type
+    connectionStore.createConnection(connection)
     store.dispatch('addToMultipleConnectionsSelected', connection.id)
   })
 }
 const disconnectCards = () => {
   const cardIds = multipleCardsSelectedIds.value
-  cardIds.forEach(cardId => {
-    store.dispatch('currentConnections/removeFromSelectedItem', cardId)
-  })
-  store.dispatch('currentConnections/removeUnusedTypes')
+  const connections = connectionStore.getItemsConnections(cardIds)
+  const ids = connections.map(connection => connection.id)
+  connectionStore.removeConnections(ids)
+  connectionStore.removeAllUnusedConnectionTypes()
 }
 
 // connections
@@ -260,11 +263,7 @@ const moreLineOptionsLabel = computed(() => {
 const onlyConnectionsIsSelected = computed(() => connectionsIsSelected.value && !cardsIsSelected.value && !boxesIsSelected.value)
 const connectionsIsSelected = computed(() => Boolean(multipleConnectionsSelectedIds.value.length))
 const connections = computed(() => {
-  let connections = multipleConnectionsSelectedIds.value.map(id => {
-    return store.getters['currentConnections/byId'](id)
-  })
-  connections = connections.filter(connection => Boolean(connection))
-  return connections
+  return multipleConnectionsSelectedIds.value.map(id => connectionStore.getConnection(id))
 })
 const editableConnections = computed(() => {
   if (isSpaceMember.value) {
@@ -276,18 +275,18 @@ const editableConnections = computed(() => {
   }
 })
 const connectionType = (event) => {
-  let connectionType = last(store.getters['currentConnections/allTypes'])
+  let type = connectionStore.getNewConnectionType
   const shouldUseLastConnectionType = store.state.currentUser.shouldUseLastConnectionType
   const shiftKey = event.shiftKey
-  const shouldAddType = !connectionType || (shouldUseLastConnectionType && shiftKey) || (!shouldUseLastConnectionType && !shiftKey)
+  const shouldAddType = !type || (shouldUseLastConnectionType && shiftKey) || (!shouldUseLastConnectionType && !shiftKey)
   if (shouldAddType) {
-    store.dispatch('currentConnections/addType')
+    connectionStore.createConnectionType()
   }
-  connectionType = last(store.getters['currentConnections/allTypes'])
-  return connectionType
+  type = connectionStore.getNewConnectionType
+  return type
 }
 const connectionAlreadyExists = (startItemId, endItemId) => {
-  const connections = store.getters['currentConnections/all']
+  const connections = connectionStore.getAllConnections
   const existingConnection = connections.find(connection => {
     const isStart = connection.startItemId === startItemId
     const isEnd = connection.endItemId === endItemId
@@ -455,9 +454,10 @@ const toggleShouldShowMultipleSelectedBoxActions = () => {
 
 const remove = ({ shouldRemoveCardsOnly }) => {
   store.dispatch('history/resume')
-  editableConnections.value.forEach(connection => store.dispatch('currentConnections/remove', connection))
   const cardIds = editableCards.value.map(card => card.id)
+  const connectionIds = editableConnections.value.map(connection => connection.id)
   cardStore.removeCards(cardIds)
+  connectionStore.removeConnections(connectionIds)
   if (!shouldRemoveCardsOnly) {
     editableBoxes.value.forEach(box => store.dispatch('currentBoxes/remove', box))
   }
