@@ -62,7 +62,7 @@ const normalizeDisplayItems = (items, shouldShowUsersButton) => {
 // members
 
 const members = computed(() => {
-  const groupUsers = store.getters['currentCards/groupUsersWhoAddedCards']
+  const groupUsers = store.getters['groups/groupUsersWhoAddedCards']
   let members = utils.clone(currentSpace.value.users)
   members = members.concat(currentSpace.value.collaborators)
   if (groupUsers) {
@@ -81,7 +81,7 @@ const membersDisplay = computed(() => {
 // spectators
 
 const spectators = computed(() => {
-  const groupUsers = store.getters['currentCards/groupUsersWhoAddedCards']
+  const groupUsers = store.getters['groups/groupUsersWhoAddedCards']
   let spectators = utils.clone(currentSpace.value.spectators)
   // if not a space member, currentUser is specatator
   if (!currentUserIsSpaceMember.value) {

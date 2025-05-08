@@ -130,7 +130,7 @@ export default {
         recipients = members.concat(contributors)
       }
       // group users who added cards
-      let groupUsers = rootGetters['currentCards/groupUsersWhoAddedCards'] || []
+      let groupUsers = rootGetters['groups/groupUsersWhoAddedCards'] || []
       groupUsers = groupUsers.map(user => user.id)
       recipients = recipients.concat(groupUsers)
       recipients = uniq(recipients)
@@ -146,7 +146,7 @@ export default {
       members = members.map(member => member.id)
       let recipients = members
       // group users who added cards
-      let groupUsers = rootGetters['currentCards/groupUsersWhoAddedCards'] || []
+      let groupUsers = rootGetters['groups/groupUsersWhoAddedCards'] || []
       groupUsers = groupUsers.map(user => user.id)
       recipients = recipients.concat(groupUsers)
       recipients = uniq(recipients)

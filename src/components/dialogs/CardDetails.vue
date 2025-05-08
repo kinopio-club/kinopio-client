@@ -1,6 +1,8 @@
 <script setup>
 import { reactive, computed, onMounted, onUpdated, onBeforeUnmount, watch, ref, nextTick } from 'vue'
 import { useStore, mapState, mapGetters } from 'vuex'
+import { useCardStore } from '@/stores/useCardStore'
+import { useConnectionStore } from '@/stores/useConnectionStore'
 
 import CardOrBoxActions from '@/components/subsections/CardOrBoxActions.vue'
 import ImagePicker from '@/components/dialogs/ImagePicker.vue'
@@ -25,6 +27,9 @@ import debounce from 'lodash-es/debounce'
 import qs from '@aguezz/qs-parse'
 import { nanoid } from 'nanoid'
 
+const cardStore = useCardStore()
+const connectionStore = useConnectionStore()
+
 let prevCardId, prevCardName
 let previousTags = []
 let compositionEventEndTime = 0
@@ -38,8 +43,10 @@ const store = useStore()
 const dialogElement = ref(null)
 const nameElement = ref(null)
 
+let unsubscribe
+
 onMounted(() => {
-  store.subscribe(async (mutation, state) => {
+  unsubscribe = store.subscribe(async (mutation, state) => {
     if (mutation.type === 'triggerUnloadPage' && visible.value) {
       closeCard()
     } else if (mutation.type === 'triggerSplitCard' && visible.value) {
@@ -65,6 +72,9 @@ onMounted(() => {
       await updateDimensionsAndPaths()
     }
   })
+})
+onBeforeUnmount(() => {
+  unsubscribe()
 })
 
 const state = reactive({
@@ -110,9 +120,9 @@ const state = reactive({
   shareCardIsVisible: false
 })
 
+const cardId = computed(() => store.state.cardDetailsIsVisibleForCardId)
 const card = computed(() => {
-  const cardId = store.state.cardDetailsIsVisibleForCardId
-  return store.getters['currentCards/byId'](cardId) || {}
+  return cardStore.getCard(cardId.value) || {}
 })
 const visible = computed(() => utils.objectHasKeys(card.value))
 watch(() => visible.value, (value, prevValue) => {
@@ -219,13 +229,8 @@ const triggerUpdatePaintSelectCanvasPositionOffset = () => {
 // dimensions and connection paths
 
 const updateDimensions = async (cardId) => {
-  let cards = [card.value]
-  if (cardId) {
-    const item = store.getters['currentCards/byId'](cardId)
-    cards = [item]
-  }
   await nextTick()
-  store.dispatch('currentCards/updateDimensions', { cards })
+  cardStore.updateCardDimensions(cardId)
   await nextTick()
   await nextTick()
 }
@@ -240,7 +245,7 @@ const updateDimensionsAndPaths = async (cardId) => {
 const updatePaths = async (cardId) => {
   cardId = cardId || card.value.id
   await nextTick()
-  store.dispatch('currentConnections/updatePaths', { itemId: cardId })
+  connectionStore.updateConnectionPath(cardId)
 }
 
 // space
@@ -326,7 +331,7 @@ const handleEnterKey = (event) => {
 const removeCard = () => {
   if (!canEditCard.value) { return }
   store.dispatch('history/resume')
-  store.dispatch('currentCards/remove', card.value)
+  cardStore.removeCards([cardId.value])
   store.commit('cardDetailsIsVisibleForCardId', '')
   triggerUpdateHeaderAndFooterPosition()
 }
@@ -362,11 +367,11 @@ const showCard = async (cardId) => {
   resetTextareaHeight()
   await nextTick()
   startOpening()
-  const item = store.getters['currentCards/byId'](cardId)
+  const item = cardStore.getCard(cardId)
   store.dispatch('checkIfItemShouldIncreasePageSize', item)
   state.previousSelectedTag = {}
   updateMediaUrls()
-  const connections = store.getters['currentConnections/byItemId'](cardId)
+  const connections = connectionStore.getItemConnections(cardId)
   store.commit('updateCurrentCardConnections', connections)
   prevCardName = card.value.name
   store.dispatch('history/pause')
@@ -375,7 +380,7 @@ const showCard = async (cardId) => {
 const closeCard = async () => {
   store.commit('triggerHideTouchInterface')
   const cardId = prevCardId
-  const item = store.getters['currentCards/byId'](cardId)
+  const item = cardStore.getCard(cardId)
   nameElement.value.blur() // safari scroll fix
   closeDialogs(true)
   cancelOpening()
@@ -387,7 +392,7 @@ const closeCard = async () => {
   const cardHasName = Boolean(item.name)
   const cardHasPendingUpload = store.getters['upload/hasPendingUploadForCardId'](cardId)
   if (!cardHasName && !cardHasPendingUpload) {
-    store.dispatch('currentCards/remove', { id: cardId })
+    cardStore.removeCard(cardId)
   }
   store.dispatch('updatePageSizes')
   updateDimensionsAndPaths(cardId)
@@ -450,7 +455,9 @@ const focusName = async (position) => {
   const element = nameElement.value
   const length = name.value.length
   if (!element) { return }
-  element.focus()
+  setTimeout(() => { // use setTimeout focus to prevent 1password lag
+    element.focus()
+  }, 1)
   if (position) {
     element.setSelectionRange(position, position)
   }
@@ -485,23 +492,28 @@ const updateCardName = async (newName) => {
     return
   }
   const userId = store.state.currentUser.id
-  const item = {
+  const update = {
+    id: cardId,
     name: newName,
-    id: card.value.id,
     nameUpdatedAt: new Date(),
     nameUpdatedByUserId: userId
   }
-  store.dispatch('currentCards/update', { card: item, shouldPreventUpdateDimensionsAndPaths: true })
+  cardStore.updateCard(update)
+  cardStore.updateCardDimensions(cardId)
+  // TODO
+  // update connectionpaths for item (id)
+
   updateMediaUrls()
   await updateTags()
   updateDimensionsAndPathsDebounced()
   if (createdByUser.value.id !== store.state.currentUser.id) { return }
   if (state.notifiedMembers) { return } // send card update notifications only once per card, per session
-  if (item.name) {
+  if (newName) {
     store.dispatch('userNotifications/addCardUpdated', { cardId: card.value.id, type: 'updateCard' })
     state.notifiedMembers = true
   }
 }
+
 const normalizedName = computed(() => {
   let newName = name.value
   if (url.value) {
@@ -1026,7 +1038,7 @@ const removeUrlPreview = async () => {
     urlPreviewIframeUrl: ''
   }
   store.commit('removeUrlPreviewLoadingForCardIds', cardId)
-  store.dispatch('currentCards/update', { card: update })
+  cardStore.updateCard(update)
 }
 
 // group invite preview
@@ -1159,8 +1171,7 @@ const addSplitCards = async (newCards) => {
   const spaceBetweenCards = 12
   let prevCard = utils.clone(card.value)
   store.dispatch('closeAllDialogs')
-  // create new cards
-  store.dispatch('currentCards/addMultiple', { cards: newCards })
+  cardStore.createCards(newCards)
   // update y positions
   // wait for cards to be added to dom
   setTimeout(() => {
@@ -1168,7 +1179,7 @@ const addSplitCards = async (newCards) => {
       const element = document.querySelector(`.card-wrap [data-card-id="${prevCard.id}"]`)
       const prevCardRect = element.getBoundingClientRect()
       newCard.y = prevCard.y + (prevCardRect.height * store.getters.spaceCounterZoomDecimal) + spaceBetweenCards
-      store.dispatch('currentCards/update', { card: newCard })
+      cardStore.updateCard(newCard)
       store.commit('triggerUpdateUrlPreview', newCard.id)
       prevCard = newCard
     }
@@ -1187,7 +1198,7 @@ const updatePastedName = (event) => {
     state.pastedName = text
   }
   state.wasPasted = true
-  store.dispatch('currentCards/updateURLQueryStrings', { cardId: card.value.id })
+  cardStore.normalizeCardUrls(cardId.value)
 }
 
 // line break
@@ -1285,7 +1296,7 @@ const replaceSlashCommandWithSpaceUrl = async (space) => {
     id: card.value.id,
     shouldShowOtherSpacePreviewImage: true
   }
-  store.dispatch('currentCards/update', { card: update })
+  cardStore.updateCard(update)
   textareaSizes()
 }
 
@@ -1354,6 +1365,9 @@ dialog.card-details(v-if="visible" :open="visible" ref="dialogElement" @click.le
   section
     .textarea-wrap
       textarea.name(
+        data-1p-ignore
+        autocomplete="off"
+
         :disabled="!canEditCard"
         ref="nameElement"
         rows="1"

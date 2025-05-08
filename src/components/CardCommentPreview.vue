@@ -1,12 +1,14 @@
 <script setup>
 import { reactive, computed, onMounted, onBeforeUnmount, onUnmounted, watch, ref, nextTick } from 'vue'
 import { useStore } from 'vuex'
+import { useCardStore } from '@/stores/useCardStore'
 
 import UserLabelInline from '@/components/UserLabelInline.vue'
 import NameSegment from '@/components/NameSegment.vue'
 import utils from '@/utils.js'
 
 const store = useStore()
+const cardStore = useCardStore()
 
 const props = defineProps({
   visible: Boolean,
@@ -51,8 +53,7 @@ const backgroundColorIsDark = computed(() => {
 // name
 
 const normalizedCard = computed(() => {
-  let card = utils.clone(props.card)
-  card = store.getters['currentCards/nameSegments'](card)
+  const card = cardStore.cardWithNameSegments(props.card)
   card.nameSegments = card.nameSegments.map(segment => {
     if (segment.isText) {
       segment.markdown = utils.markdownSegments(segment.content)

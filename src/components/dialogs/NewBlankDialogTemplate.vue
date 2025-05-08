@@ -1,26 +1,33 @@
 <script setup>
 import { reactive, computed, onMounted, onBeforeUnmount, watch, ref, nextTick } from 'vue'
 import { useStore } from 'vuex'
+import { useCardStore } from '@/stores/useCardStore'
 
 import utils from '@/utils.js'
 
+const cardStore = useCardStore()
 const store = useStore()
 
-// let unsubscribe
+// let unsubscribes
 
 const dialogElement = ref(null)
 
 onMounted(() => {
   window.addEventListener('resize', updateDialogHeight)
-  // unsubscribe = store.subscribe(mutation => {
-  //   if (mutation.type === 'abc') {
-  //     xyz()
+  // const cardStoreUnsubscribe = cardStore.$onAction(
+  //   ({name, args}) => {
+  //     if (name === 'moveCards') {
+  //       cancelAnimation()
+  //     }
   //   }
-  // })
+  // )
+  // unsubscribes = () => {
+  //   cardStoreUnsubscribe()
+  // }
 })
 onBeforeUnmount(() => {
   window.removeEventListener('resize', updateDialogHeight)
-//   unsubscribe()
+//   unsubscribes()
 })
 
 const emit = defineEmits(['updateCount'])

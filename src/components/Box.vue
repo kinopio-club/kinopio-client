@@ -1,6 +1,9 @@
 <script setup>
 import { reactive, computed, onMounted, onBeforeUnmount, onUpdated, onUnmounted, watch, ref, nextTick } from 'vue'
 import { useStore } from 'vuex'
+import { useCardStore } from '@/stores/useCardStore'
+import { useConnectionStore } from '@/stores/useConnectionStore'
+import { useBoxStore } from '@/stores/useBoxStore'
 
 import utils from '@/utils.js'
 import consts from '@/consts.js'
@@ -11,7 +14,11 @@ import postMessage from '@/postMessage.js'
 
 import randomColor from 'randomcolor'
 import { colord, extend } from 'colord'
+
 const store = useStore()
+const cardStore = useCardStore()
+const connectionStore = useConnectionStore()
+const boxStore = useBoxStore()
 
 let unsubscribe
 
@@ -78,6 +85,10 @@ const canEditBox = computed(() => store.getters['currentUser/canEditBox'](props.
 const currentUserIsSignedIn = computed(() => store.getters['currentUser/isSignedIn'])
 const currentUserColor = computed(() => store.state.currentUser.color)
 const name = computed(() => props.box.name)
+const currentBoxIsSelected = computed(() => {
+  const selected = store.state.multipleBoxesSelectedIds
+  return selected.find(id => props.box.id === id)
+})
 
 // normalize
 
@@ -85,7 +96,6 @@ const normalizedBox = computed(() => {
   return normalizeBox(props.box)
 })
 const normalizeBox = (box) => {
-  box = utils.clone(box)
   box.resizeWidth = box.resizeWidth || consts.minItemXY
   box.resizeHeight = box.resizeHeight || consts.minItemXY
   box.width = box.resizeWidth
@@ -164,7 +174,6 @@ const styles = computed(() => {
     height: height + 'px',
     border: `${borderWidth}px solid ${color.value}`
   }
-  // dimensions set by currentBoxes/resize while resizing
   if (isResizing.value) {
     styles.width = normalizedBox.value.resizeWidth
     styles.height = normalizedBox.value.resizeHeight
@@ -292,14 +301,14 @@ const resizeColorClass = computed(() => {
 // shrink
 
 const shrinkToDefaultBoxSize = () => {
-  const updated = { id: props.box.id }
-  updated.resizeWidth = consts.defaultBoxWidth
-  updated.resizeHeight = consts.defaultBoxHeight
-  store.dispatch('currentBoxes/update', updated)
+  const update = { id: props.box.id }
+  update.resizeWidth = consts.defaultBoxWidth
+  update.resizeHeight = consts.defaultBoxHeight
+  boxStore.updateBox(update)
 }
 const shrink = () => {
   prevSelectedBox = props.box
-  const { cards, boxes } = containedItems()
+  const { cards, boxes } = boxStore.itemsContainedInSelectedBoxes()
   prevSelectedBox = null
   const items = cards.concat(boxes)
   if (!items.length) {
@@ -309,12 +318,12 @@ const shrink = () => {
   const rect = utils.boundaryRectFromItems(items)
   const padding = consts.spaceBetweenCards
   const paddingTop = 30 + padding
-  const updated = { id: props.box.id }
-  updated.x = rect.x - padding
-  updated.y = rect.y - paddingTop
-  updated.resizeWidth = rect.width + (padding * 2)
-  updated.resizeHeight = rect.height + (padding + paddingTop)
-  store.dispatch('currentBoxes/update', updated)
+  const update = { id: props.box.id }
+  update.x = rect.x - padding
+  update.y = rect.y - paddingTop
+  update.resizeWidth = rect.width + (padding * 2)
+  update.resizeHeight = rect.height + (padding + paddingTop)
+  boxStore.updateBox(update)
 }
 
 // locked to background
@@ -337,7 +346,7 @@ const infoStyles = computed(() => {
 
 const updateCurrentConnections = async () => {
   await nextTick()
-  state.currentConnections = store.getters['currentConnections/byItemId'](props.box.id)
+  state.currentConnections = connectionStore.getItemsConnections(props.box.id)
 }
 const isPainting = computed(() => store.state.currentUserIsPainting)
 const canEditSpace = computed(() => store.getters['currentUser/canEditSpace']())
@@ -362,15 +371,7 @@ const startBoxInfoInteraction = (event) => {
   store.dispatch('closeAllDialogs')
   store.commit('currentUserIsDraggingBox', true)
   store.commit('currentDraggingBoxId', props.box.id)
-  store.dispatch('currentBoxes/incrementZ', props.box.id)
-  const updates = {
-    boxId: props.box.id,
-    userId: store.state.currentUser.id
-  }
-  store.commit('broadcast/updateStore', { updates, type: 'addToRemoteBoxesDragging' })
-  if (event.altKey) { return } // should not select contained items if alt/option key
-  selectContainedCards()
-  selectContainedBoxes()
+  boxStore.incrementBoxZ(props.box.id)
 }
 const updateIsHover = (value) => {
   if (store.state.currentUserIsDraggingBox) { return }
@@ -387,8 +388,8 @@ const endBoxInfoInteraction = (event) => {
   if (isConnectingTo.value) { return }
   const isMeta = event.metaKey || event.ctrlKey
   const userId = store.state.currentUser.id
-  store.dispatch('currentBoxes/afterMove')
-  store.dispatch('currentCards/afterMove')
+  // store.dispatch('currentBoxes/afterMove')
+  // store.dispatch('currentCards/afterMove')
   if (store.state.currentUserIsPainting) { return }
   if (isMultiTouch) { return }
   if (store.state.currentUserIsPanningReady || store.state.currentUserIsPanning) { return }
@@ -410,112 +411,6 @@ const endBoxInfoInteraction = (event) => {
 const currentBoxDetailsIsVisible = computed(() => {
   return props.box.id === store.state.boxDetailsIsVisibleForBoxId
 })
-
-// select
-
-const multipleBoxesIsSelected = computed(() => Boolean(store.state.multipleBoxesSelectedIds.length))
-const currentBoxIsSelected = computed(() => {
-  const selected = store.state.multipleBoxesSelectedIds
-  return selected.find(id => props.box.id === id)
-})
-const selectedBoxes = computed(() => store.getters['currentBoxes/isSelected'])
-const containedItems = () => {
-  const cards = []
-  const boxes = []
-  // cards
-  selectableCards().forEach(card => {
-    if (isItemInSelectedBoxes(card, 'card')) {
-      cards.push(card)
-    }
-  })
-  // boxes
-  let selectableBoxes = store.getters['currentBoxes/all']
-  selectableBoxes = utils.clone(selectableBoxes)
-  selectableBoxes.forEach(box => {
-    if (box.id === props.box.id) { return }
-    box.width = box.resizeWidth
-    box.height = box.resizeHeight
-    if (isItemInSelectedBoxes(box)) {
-      boxes.push(box)
-    }
-  })
-  return { cards, boxes }
-}
-const selectContainedBoxes = () => {
-  const boxes = containedItems().boxes
-  boxes.forEach(box => {
-    store.dispatch('addToMultipleBoxesSelected', box.id)
-  })
-}
-const selectableCards = () => {
-  store.dispatch('currentCards/updateCanBeSelectedSortedByY')
-  return store.getters['currentCards/canBeSelectedSortedByY'].cards
-}
-const selectContainedCards = () => {
-  const cards = containedItems().cards
-  cards.forEach(card => {
-    store.dispatch('addToMultipleCardsSelected', card.id)
-  })
-  if (!multipleBoxesIsSelected.value) {
-    store.commit('preventMultipleSelectedActionsIsVisible', true)
-  }
-}
-const isItemInSelectedBoxes = (item, type) => {
-  if (type === 'card') {
-    const canEditCard = store.getters['currentUser/canEditCard'](item)
-    if (!canEditCard) { return }
-  }
-  if (item.isLocked) { return }
-  let boxes = selectedBoxes.value
-  if (prevSelectedBox) {
-    boxes = [prevSelectedBox]
-  }
-  const isInside = boxes.find(box => {
-    box = normalizeBox(box)
-    const { x, y } = box
-    const width = box.resizeWidth
-    const height = box.resizeHeight
-    // ┌─────────────────────────────────────┐
-    // │ Box                                 │
-    // │                                     │
-    // │                                     │
-    // │                                     │
-    // │      x1 = x          x2 = x + w     │
-    // │         ██───────────────██         │
-    // │         │                 │         │
-    // │         │      Item       │         │
-    // │         │                 │         │
-    // │         ██───────────────██         │
-    // │      y1 = y          y2 = y + h     │
-    // │                                     │
-    // │                                     │
-    // │                                     │
-    // │                                     │
-    // └─────────────────────────────────────┘
-    const x1 = utils.isBetween({
-      value: item.x,
-      min: x,
-      max: x + width
-    })
-    const x2 = utils.isBetween({
-      value: item.x + item.width,
-      min: x,
-      max: x + width
-    })
-    const y1 = utils.isBetween({
-      value: item.y,
-      min: y,
-      max: y + height
-    })
-    const y2 = utils.isBetween({
-      value: item.y + item.height,
-      min: y,
-      max: y + height
-    })
-    return x1 && x2 && y1 && y2
-  })
-  return isInside
-}
 
 // Remote
 
@@ -707,7 +602,7 @@ const isConnectingTo = computed(() => {
 const isConnectingFrom = computed(() => {
   return store.state.currentConnectionStartItemIds.includes(props.box.id)
 })
-const connectedConnectionTypes = computed(() => store.getters['currentConnections/typesByItemId'](props.box.id))
+const connectedConnectionTypes = computed(() => connectionStore.getItemConnectionTypes(props.box.id))
 const connectorIsVisible = computed(() => {
   const spaceIsOpen = store.state.currentSpace.privacy === 'open' && currentUserIsSignedIn.value
   let isVisible
@@ -723,7 +618,7 @@ const connectorIsHiddenByOpacity = computed(() => {
   if (utils.isMobile()) { return }
   const isPresentationMode = store.state.isPresentationMode
   const isNotHovering = !state.isHover
-  const isNotConnected = !isConnectingFrom.value && !isConnectingTo.value && !state.currentConnections.length
+  const isNotConnected = !isConnectingFrom.value && !isConnectingTo.value && !connectionStore.getAllConnections.length
   return isPresentationMode && isNotHovering && isNotConnected
 })
 
@@ -757,7 +652,7 @@ const toggleBoxChecked = () => {
   if (!canEditBox.value) { return }
   const value = !isChecked.value
   store.dispatch('closeAllDialogs')
-  store.dispatch('currentBoxes/toggleChecked', { boxId: props.box.id, value })
+  boxStore.toggleBoxChecked(props.box.id, value)
   postMessage.sendHaptics({ name: 'heavyImpact' })
   cancelLocking()
   store.commit('currentUserIsDraggingBox', false)
@@ -776,7 +671,7 @@ const containingBoxes = computed(() => {
   if (currentBoxIsSelected.value) { return }
   if (isResizing.value) { return }
   if (store.state.boxDetailsIsVisibleForBoxId) { return }
-  let boxes = store.getters['currentBoxes/all']
+  let boxes = boxStore.getAllBoxes
   boxes = utils.clone(boxes)
   boxes = boxes.filter(box => {
     const currentBox = utils.clone(props.box)

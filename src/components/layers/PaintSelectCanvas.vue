@@ -1,6 +1,9 @@
 <script setup>
 import { reactive, computed, onMounted, onBeforeUnmount, onUnmounted, watch, ref, nextTick } from 'vue'
 import { useStore } from 'vuex'
+import { useConnectionStore } from '@/stores/useConnectionStore'
+
+import { useCardStore } from '@/stores/useCardStore'
 
 import utils from '@/utils.js'
 import collisionDetection from '@/collisionDetection.js'
@@ -8,6 +11,9 @@ import postMessage from '@/postMessage.js'
 import DropGuideLine from '@/components/layers/DropGuideLine.vue'
 
 import { colord, extend } from 'colord'
+
+const cardStore = useCardStore()
+const connectionStore = useConnectionStore()
 const store = useStore()
 
 // a sequence of circles that's broadcasted to others and is used for multi-card selection
@@ -166,7 +172,7 @@ const clearHightlightedItems = () => {
 // selectable items
 
 const updateSelectableCardsInViewport = () => {
-  const selectableCards = store.getters['currentCards/isSelectableInViewport']
+  const selectableCards = cardStore.getAllCards
   if (!selectableCards) { return }
   selectableCardsInViewport = selectableCards
   selectableCardsGrid = collisionDetection.createGrid(selectableCards)
@@ -192,7 +198,7 @@ const updateSelectableBoxesInViewport = () => {
   selectableBoxes = array
 }
 const updateSelectableConnectionsInViewport = () => {
-  const selectableConnections = store.getters['currentConnections/isSelectableInViewport']()
+  const selectableConnections = connectionStore.getAllConnectionsInViewport
   if (!selectableConnections) { return }
   selectableConnectionsInViewport = selectableConnections
 }
@@ -432,7 +438,6 @@ const startPainting = (event) => {
   updateSelectableConnectionsInViewport()
   startCursor = utils.cursorPositionInViewport(event)
   state.currentCursor = startCursor
-  store.dispatch('currentCards/updateCanBeSelectedSortedByY')
   if (utils.isMultiTouch(event)) { return }
   startLocking()
   if (event.touches) {

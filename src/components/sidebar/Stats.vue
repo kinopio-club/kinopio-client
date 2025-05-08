@@ -1,6 +1,8 @@
 <script setup>
 import { reactive, computed, onMounted, onBeforeUnmount, onUnmounted, watch, ref, nextTick } from 'vue'
 import { useStore } from 'vuex'
+import { useCardStore } from '@/stores/useCardStore'
+import { useConnectionStore } from '@/stores/useConnectionStore'
 
 import Loader from '@/components/Loader.vue'
 import UserList from '@/components/UserList.vue'
@@ -9,6 +11,8 @@ import utils from '@/utils.js'
 import dayjs from 'dayjs'
 
 const store = useStore()
+const cardStore = useCardStore()
+const connectionStore = useConnectionStore()
 
 onMounted(() => {
   store.subscribe(mutation => {
@@ -63,8 +67,8 @@ const toggleFilterShowAbsoluteDates = () => {
 // items
 
 const tags = computed(() => store.getters['currentSpace/spaceTags'])
-const cards = computed(() => store.getters['currentCards/all'])
-const connections = computed(() => store.getters['currentConnections/all'])
+const cards = computed(() => cardStore.getAllCards)
+const connections = computed(() => connectionStore.getAllConnections)
 const boxes = computed(() => store.getters['currentBoxes/all'])
 
 // word count

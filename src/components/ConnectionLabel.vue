@@ -1,9 +1,14 @@
 <script setup>
 import { reactive, computed, onMounted, onUnmounted, watch, ref, nextTick } from 'vue'
 import { useStore } from 'vuex'
+import { useCardStore } from '@/stores/useCardStore'
+import { useConnectionStore } from '@/stores/useConnectionStore'
 
 import utils from '@/utils.js'
+
 const store = useStore()
+const cardStore = useCardStore()
+const connectionStore = useConnectionStore()
 
 const labelElement = ref(null)
 
@@ -50,7 +55,7 @@ watch(() => props.connection.labelIsVisible, (value, prevValue) => {
     updateConnectionRect()
     state.connectionIsVisible = true
   } else {
-    store.dispatch('currentConnections/clearLabelPosition', props.connection)
+    connectionStore.clearConnectionLabelPosition(props.connection.id)
   }
 })
 
@@ -108,7 +113,7 @@ const toggleConnectionDetails = (event) => {
   }
 }
 const items = computed(() => {
-  const cards = store.getters['currentCards/all']
+  const cards = cardStore.getAllCards
   const boxes = store.getters['currentBoxes/all']
   const items = cards.concat(boxes)
   const startItem = items.find(item => item.id === props.connection.startItemId)
@@ -135,7 +140,7 @@ const isConnectionFilteredByType = computed(() => {
 })
 const isCardsFilteredByFrame = computed(() => {
   const frameIds = store.state.filteredFrameIds
-  const cards = utils.clone(store.getters['currentCards/all'])
+  const cards = cardStore.getAllCards
   const startItemId = props.connection.startItemId
   const endItemId = props.connection.endItemId
   const startCard = cards.filter(card => card.id === startItemId)[0]
@@ -168,7 +173,7 @@ const isHiddenByCommentFilter = computed(() => {
 // parent connection type
 
 const connectionTypeId = computed(() => props.connection.connectionTypeId)
-const connectionType = computed(() => store.getters['currentConnections/typeByTypeId'](connectionTypeId.value))
+const connectionType = computed(() => connectionStore.getConnectionType(connectionTypeId.value))
 const typeName = computed(() => {
   if (connectionType.value) {
     return connectionType.value.name
@@ -241,7 +246,7 @@ const styles = computed(() => {
   return styles
 })
 const removeOffsets = () => {
-  store.dispatch('currentConnections/clearLabelPosition', props.connection)
+  connectionStore.clearConnectionLabelPosition(props.connection.id)
   stopDragging()
   wasDragged = false
 }
@@ -329,8 +334,8 @@ const drag = (event) => {
     y: positionAbsolute.y / state.connectionRect.height
   }
   positionRelative = normalizeRelativePosition(positionRelative)
-  store.dispatch('currentConnections/updateLabelPosition', {
-    connection: props.connection,
+  connectionStore.updateConnectionLabelPosition({
+    id: props.connection.id,
     labelRelativePositionX: positionRelative.x,
     labelRelativePositionY: positionRelative.y
   })

@@ -1,6 +1,7 @@
 <script setup>
 import { reactive, computed, onMounted, onBeforeUnmount, watch, ref, nextTick } from 'vue'
 import { useStore } from 'vuex'
+import { useCardStore } from '@/stores/useCardStore'
 
 import ResultsFilter from '@/components/ResultsFilter.vue'
 import SearchFilters from '@/components/SearchFilters.vue'
@@ -12,6 +13,7 @@ import dayjs from 'dayjs'
 import orderBy from 'lodash-es/orderBy'
 
 const store = useStore()
+const cardStore = useCardStore()
 
 const dialogElement = ref(null)
 const resultsElement = ref(null)
@@ -148,7 +150,7 @@ const cardsToSearch = computed(() => {
   }
 })
 const recentlyUpdatedCards = computed(() => {
-  let cards = utils.clone(store.getters['currentCards/all'])
+  let cards = cardStore.getAllCards
   cards = cards.filter(card => card.name)
   cards = cards.map(card => {
     const date = card.nameUpdatedAt || card.createdAt

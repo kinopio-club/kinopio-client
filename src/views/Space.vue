@@ -1,8 +1,10 @@
 <script setup>
 import { reactive, computed, onMounted, onBeforeUnmount, onUnmounted, watch, ref, nextTick } from 'vue'
 import { useStore } from 'vuex'
+import { useCardStore } from '@/stores/useCardStore'
+import { useConnectionStore } from '@/stores/useConnectionStore'
+import { useBoxStore } from '@/stores/useBoxStore'
 
-import Card from '@/components/Card.vue'
 import CardDetails from '@/components/dialogs/CardDetails.vue'
 import OtherCardDetails from '@/components/dialogs/OtherCardDetails.vue'
 import BoxDetails from '@/components/dialogs/BoxDetails.vue'
@@ -47,6 +49,9 @@ import sortBy from 'lodash-es/sortBy'
 import uniq from 'lodash-es/uniq'
 import debounce from 'lodash-es/debounce'
 
+const cardStore = useCardStore()
+const connectionStore = useConnectionStore()
+const boxStore = useBoxStore()
 const store = useStore()
 
 let unsubscribe
@@ -92,7 +97,7 @@ onMounted(() => {
     store.commit('webfontIsLoaded', true)
   })
   unsubscribe = store.subscribe((mutation, state) => {
-    if (mutation.type === 'triggerRestoreSpaceRemoteComplete') {
+    if (mutation.type === 'triggerRestoreSpaceRemoteComplete') { // TODO replace w spacestore restoreSpace
       dragItemsOnNextTick()
     } else if (mutation.type === 'triggerAddBox') {
       const event = mutation.payload
@@ -138,7 +143,7 @@ const state = reactive({
   startCursor: {}
 })
 
-const unlockedCards = computed(() => store.getters['currentCards/isNotLocked'])
+const unlockedCards = computed(() => cardStore.getCardsIsNotLocked)
 const isPainting = computed(() => store.state.currentUserIsPainting)
 const isPanningReady = computed(() => store.state.currentUserIsPanningReady)
 const isPanning = computed(() => store.state.currentUserIsPanning)
@@ -230,7 +235,7 @@ const addCard = (event) => {
   store.dispatch('currentUser/notifyReadOnly', position)
   if (spaceIsReadOnly.value) { return }
   const newCard = { position, isParentCard }
-  store.dispatch('currentCards/add', { card: newCard })
+  cardStore.createCard(newCard)
   store.commit('childCardId', '')
 }
 const addOrCloseCard = (event) => {
@@ -258,14 +263,14 @@ const tiltCards = (event) => {
   if (endCursor.x - prevCursor.x > 0 || endCursor.y - prevCursor.y > 0) {
     delta = -delta
   }
-  store.dispatch('currentCards/tilt', { cardIds, delta })
+  cardStore.tiltCards(cardIds, delta)
 }
 const stopTiltingCards = () => {
   if (!store.state.currentUserIsTiltingCard) { return }
   store.dispatch('history/resume')
   const cardIds = store.state.currentUserIsTiltingCardIds
-  const cards = cardIds.map(id => store.getters['currentCards/byId'](id))
-  store.dispatch('currentCards/updateDimensions', { cards })
+  cardStore.updateCardsDimensions(cardIds)
+  const cards = cardIds.map(id => cardStore.getCard(id))
   store.dispatch('history/add', { cards, useSnapshot: true })
   store.commit('currentUserIsTiltingCard', false)
   store.commit('broadcast/updateStore', { updates: { userId: currentUser.value.id }, type: 'removeRemoteUserTiltingCards' })
@@ -275,15 +280,15 @@ const resizeCards = (event) => {
   if (utils.isMultiTouch(event)) { return }
   const cardIds = store.state.currentUserIsResizingCardIds
   const deltaX = endCursor.x - prevCursor.x
-  store.dispatch('currentCards/resize', { cardIds, deltaX })
+  cardStore.resizeCards(cardIds, deltaX)
 }
 const stopResizingCards = async () => {
   if (!store.state.currentUserIsResizingCard) { return }
   store.dispatch('history/resume')
   const cardIds = store.state.currentUserIsResizingCardIds
-  const cards = cardIds.map(id => store.getters['currentCards/byId'](id))
+  const cards = cardIds.map(id => cardStore.getCard(id))
   store.dispatch('history/add', { cards, useSnapshot: true })
-  await store.dispatch('currentCards/updateDimensions', { cards })
+  await cardStore.updateCardsDimensions(cardIds)
   store.commit('currentUserIsResizingCard', false)
   store.commit('broadcast/updateStore', { updates: { userId: currentUser.value.id }, type: 'removeRemoteUserResizingCards' })
 }
@@ -291,11 +296,11 @@ const afterResizeCards = () => {
   if (!store.state.shouldSnapToGrid) { return }
   const cardIds = store.state.currentUserIsResizingCardIds
   const cards = cardIds.map(cardId => {
-    let { id, resizeWidth } = store.getters['currentCards/byId'](cardId)
+    let { id, resizeWidth } = cardStore.getCard(cardId)
     resizeWidth = utils.roundToNearest(resizeWidth)
     return { id, resizeWidth }
   })
-  store.dispatch('currentCards/updateMultiple', cards)
+  cardStore.updateCards(cards)
 }
 const addCardFromOutsideAppContext = (event) => {
   if (!consts.isSecureAppContext) { return }
@@ -304,7 +309,7 @@ const addCardFromOutsideAppContext = (event) => {
   if (data.name !== 'addedCardFromAddPage') { return }
   const card = data.value
   if (card.spaceId !== currentSpace.id) { return }
-  store.commit('currentCards/create', { card, shouldPreventCache: true })
+  cardStore.createCard(card)
 }
 
 // boxes
@@ -345,7 +350,7 @@ const stopResizingBoxes = () => {
   store.dispatch('history/resume')
   const boxIds = store.getters['currentBoxes/isResizingIds']
   const boxes = boxIds.map(id => store.getters['currentBoxes/byId'](id))
-  store.dispatch('currentConnections/updateMultiplePaths', boxes)
+  useConnectionStore.updateConnectionPaths(boxIds)
   store.dispatch('history/add', { boxes, useSnapshot: true })
   store.commit('currentUserIsResizingBox', false)
   store.dispatch('currentUserToolbar', 'card')
@@ -426,17 +431,25 @@ const dragItems = () => {
   store.dispatch('currentUser/notifyReadOnly', prevCursor)
   const shouldPrevent = !store.getters['currentUser/canEditSpace']()
   if (shouldPrevent) { return }
-  store.dispatch('currentCards/move', {
-    endCursor,
-    prevCursor
-  })
+  // cards
+  cardStore.moveCards({ endCursor, prevCursor })
+  // boxes
   checkShouldShowDetails()
-  store.dispatch('currentBoxes/move', {
-    endCursor,
-    prevCursor
-  })
+  boxStore.moveBoxes({ endCursor, prevCursor })
 }
-
+const dragBoxes = (event) => {
+  const isInitialDrag = !store.state.boxesWereDragged
+  if (isInitialDrag) {
+    const updates = {
+      boxId: store.state.currentDraggingBoxId,
+      userId: store.state.currentUser.id
+    }
+    store.commit('broadcast/updateStore', { updates, type: 'addToRemoteBoxesDragging' })
+    boxStore.selectItemsInSelectedBoxes()
+  }
+  if (event.altKey) { return } // should not select contained items if alt/option key
+  dragItems()
+}
 // footer
 
 const footerDialogIsVisible = () => {
@@ -534,7 +547,7 @@ const interact = (event) => {
     dragItems()
   } else if (isDraggingBox.value) {
     store.commit('currentDraggingCardId', '')
-    dragItems()
+    dragBoxes(event)
   } else if (isResizingCard.value) {
     resizeCards(event)
   } else if (isTiltingCard.value) {
@@ -609,9 +622,10 @@ const handleTouchEnd = (event) => {
 const stopInteractions = async (event) => {
   console.info('💣 stopInteractions')
   const isCardsSelected = store.state.currentDraggingCardId || store.state.multipleCardsSelectedIds.length
-  if (isCardsSelected && store.state.cardsWereDragged) {
-    store.dispatch('currentCards/afterMove')
-  }
+  // TODO no need for aftermove?? or maybe this is where history happens instead of in cardstore?
+  // if (isCardsSelected && store.state.cardsWereDragged) {
+  //   store.dispatch('currentCards/afterMove')
+  // }
   if (store.state.boxesWereDragged) {
     store.dispatch('currentBoxes/afterMove')
   }

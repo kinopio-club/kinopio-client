@@ -1,6 +1,8 @@
 <script setup>
 import { reactive, computed, onMounted, onBeforeUnmount, onUnmounted, watch, ref, nextTick } from 'vue'
 import { useStore } from 'vuex'
+import { useCardStore } from '@/stores/useCardStore'
+import { useConnectionStore } from '@/stores/useConnectionStore'
 
 import FramePicker from '@/components/dialogs/FramePicker.vue'
 import TagPickerStyleActions from '@/components/dialogs/TagPickerStyleActions.vue'
@@ -13,6 +15,8 @@ import uniq from 'lodash-es/uniq'
 import { nanoid } from 'nanoid'
 
 const store = useStore()
+const cardStore = useCardStore()
+const connectionStore = useConnectionStore()
 
 onMounted(() => {
   store.subscribe((mutation, state) => {
@@ -123,6 +127,7 @@ const label = computed(() => {
   return label.toUpperCase()
 })
 const isBoxDetails = computed(() => Boolean(store.state.boxDetailsIsVisibleForBoxId))
+const cardIds = computed(() => props.cards.map(card => card.id))
 
 // update name
 
@@ -181,11 +186,12 @@ const prependToItemNames = (pattern) => {
 }
 const updateName = async (item, newName) => {
   if (item.isCard) {
-    const card = store.getters['currentCards/byId'](item.id)
-    store.dispatch('currentCards/updateName', { card, newName })
-    await nextTick()
-    await nextTick()
-    store.dispatch('currentConnections/updatePaths', { itemId: card.id })
+    const card = cardStore.getCard(item.id)
+    const update = {
+      id: card.id,
+      name: newName
+    }
+    cardStore.updateCard(update)
   }
   if (item.isBox) {
     const box = store.getters['currentBoxes/byId'](item.id)
@@ -367,7 +373,7 @@ const updateHeaderFont = async (font) => {
   })
   store.dispatch('currentUser/update', { prevHeaderFontId: font.id })
   await nextTick()
-  store.dispatch('currentConnections/updateMultiplePaths', props.cards)
+  connectionStore.updateConnectionPaths(cardIds.value)
 }
 const udpateHeaderFontSize = async (size) => {
   props.cards.forEach(card => {
@@ -377,7 +383,7 @@ const udpateHeaderFontSize = async (size) => {
     updateBox(box, { headerFontSize: size })
   })
   await nextTick()
-  store.dispatch('currentConnections/updateMultiplePaths', props.cards)
+  connectionStore.updateConnectionPaths(cardIds.value)
 }
 
 // lock
@@ -413,19 +419,19 @@ const toggleIsComment = async () => {
   if (isNotCollaborator.value) { return }
   const value = !isComment.value
   props.cards.forEach(card => {
-    card = {
+    const update = {
       id: card.id,
       name: utils.nameWithoutCommentPattern(card.name),
       isComment: value
     }
     if (!card.name) {
-      delete card.name
+      delete update.name
     }
-    store.dispatch('currentCards/update', { card })
+    cardStore.updateCard(update)
   })
   await nextTick()
   await updateCardDimensions()
-  store.dispatch('currentConnections/updateMultiplePaths', props.cards)
+  connectionStore.updateConnectionPaths(cardIds.value)
 }
 
 // vote counter
@@ -440,12 +446,12 @@ const toggleCounterIsVisible = () => {
     counterIsVisible = false
   }
   props.cards.forEach(card => {
-    card = {
+    const update = {
       id: card.id,
       counterIsVisible,
       counterValue: card.counterValue || 1
     }
-    store.dispatch('currentCards/update', { card })
+    cardStore.updateCard(update)
   })
 }
 
@@ -453,7 +459,8 @@ const toggleCounterIsVisible = () => {
 
 const updateCardDimensions = async () => {
   await nextTick()
-  store.dispatch('currentCards/updateDimensions', { cards: props.cards })
+  const ids = props.cards.map(card => card.id)
+  cardStore.updateCardsDimensions(ids)
   await nextTick()
   await nextTick()
 }
@@ -463,9 +470,9 @@ const updateCard = async (card, updates) => {
   keys.forEach(key => {
     card[key] = updates[key]
   })
-  store.dispatch('currentCards/update', { card })
+  cardStore.updateCard(card)
   await updateCardDimensions()
-  store.dispatch('currentConnections/updatePaths', { itemId: card.id })
+  connectionStore.updateConnectionPath(card.id)
 }
 
 // box

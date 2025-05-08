@@ -16,7 +16,7 @@ let prevMoveDelta = { x: 0, y: 0 }
 let tallestCardHeight = 0
 let canBeSelectedSortedByY = {}
 
-const incrementCardsZ = (context, cards) => {
+const incrementCardZ = (context, cards) => {
   cards = cards.map(card => {
     if (card.isLocked) { return card }
     const cards = context.getters.all
@@ -261,6 +261,8 @@ export default {
           x += offset
           y += offset
         }
+
+        // use getNormalizedNewCard
         return {
           id: card.id || nanoid(),
           x,
@@ -272,6 +274,7 @@ export default {
           height: Math.round(card.height),
           userId: context.rootState.currentUser.id,
           backgroundColor: card.backgroundColor,
+
           shouldUpdateUrlPreview: true,
           urlPreviewIsVisible: true,
           urlPreviewDescription: card.urlPreviewDescription,
@@ -430,14 +433,14 @@ export default {
         context.dispatch('updateDimensions', { cards: [card] })
       })
     },
-    updateURLQueryStrings: (context, { cardId }) => {
+    normalizeCardUrls: (context, { cardId }) => {
       setTimeout(() => {
         const card = context.getters.byId(cardId)
         const urls = utils.urlsFromString(card.name)
         if (!urls) { return }
         let name = card.name
-        name = utils.removeTrackingQueryStringsFromURLs(name)
-        name = utils.removeTrailingSlash(name)
+        name = utils.clearTrackingQueryStringsFromUrls(name)
+        name = utils.clearTrailingSlash(name)
         const update = {
           id: cardId,
           name
@@ -561,7 +564,7 @@ export default {
           body.resizeWidth = null
         }
         updates.push(body)
-        utils.removeAllCardDimensions({ id: cardId })
+        utils.clearAllCardDimensions({ id: cardId })
       })
       context.dispatch('updateMultiple', updates)
       const cards = cardIds.map(cardId => {
@@ -599,7 +602,7 @@ export default {
       cardIds.forEach(cardId => {
         const body = { id: cardId, tilt: 0 }
         context.dispatch('update', { card: body })
-        utils.removeAllCardDimensions({ id: cardId })
+        utils.clearAllCardDimensions({ id: cardId })
         const cards = [{ id: cardId }]
         context.dispatch('updateDimensions', { cards })
       })
@@ -713,7 +716,7 @@ export default {
         return { id, x, y, z }
       })
       cards = cards.filter(card => Boolean(card))
-      cards = incrementCardsZ(context, cards)
+      cards = incrementCardZ(context, cards)
       context.commit('move', { cards, spaceId })
       cards = cards.filter(card => card)
       await context.dispatch('api/addToQueue', {
@@ -1055,36 +1058,36 @@ export default {
         }
       })
     },
-    userIds: (state, getters) => {
-      const cards = getters.all
-      let users = []
-      cards.forEach(card => {
-        users.push(card.userId)
-        users.push(card.nameUpdatedByUserId)
-      })
-      users = users.filter(user => Boolean(user))
-      users = uniq(users)
-      return users
-    },
-    users: (state, getters, rootState, rootGetters) => {
-      let users = getters.userIds.map(id => {
-        const user = rootGetters['currentSpace/userById'](id)
-        return user
-      })
-      users = users.filter(user => Boolean(user))
-      return users
-    },
-    groupUsersWhoAddedCards: (state, getters, rootState, rootGetters) => {
-      const spaceGroup = rootGetters['groups/spaceGroup']()
-      const groupUsers = spaceGroup?.users
-      if (!groupUsers) { return }
-      let users = getters.users
-      users = users.filter(user => {
-        const isGroupUser = groupUsers.find(groupUser => groupUser.id === user.id)
-        return isGroupUser
-      })
-      return users
-    },
+    // userIds: (state, getters) => {
+    //   const cards = getters.all
+    //   let users = []
+    //   cards.forEach(card => {
+    //     users.push(card.userId)
+    //     users.push(card.nameUpdatedByUserId)
+    //   })
+    //   users = users.filter(user => Boolean(user))
+    //   users = uniq(users)
+    //   return users
+    // },
+    // users: (state, getters, rootState, rootGetters) => {
+    //   let users = getters.userIds.map(id => {
+    //     const user = rootGetters['currentSpace/userById'](id)
+    //     return user
+    //   })
+    //   users = users.filter(user => Boolean(user))
+    //   return users
+    // },
+    // groupUsersWhoAddedCards: (state, getters, rootState, rootGetters) => {
+    //   const spaceGroup = rootGetters['groups/spaceGroup']()
+    //   const groupUsers = spaceGroup?.users
+    //   if (!groupUsers) { return }
+    //   let users = getters.users
+    //   users = users.filter(user => {
+    //     const isGroupUser = groupUsers.find(groupUser => groupUser.id === user.id)
+    //     return isGroupUser
+    //   })
+    //   return users
+    // },
     commenters: (state, getters, rootState, rootGetters) => {
       const currentUserId = state.id
       let items = getters.users

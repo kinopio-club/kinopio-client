@@ -49,7 +49,7 @@ const initialState = {
   defaultSpaceBackgroundGradient: undefined,
   defaultSpaceBackgroundTint: undefined,
   defaultCardBackgroundColor: undefined,
-  defaultConnectionControlPoint: 'q00,00', // null, 'q00,00'
+  defaultConnectionControlPoint: consts.straightLineConnectionPathControlPoint,
   downgradeAt: null,
   shouldUseStickyCards: true,
   shouldIncreaseUIContrast: false,

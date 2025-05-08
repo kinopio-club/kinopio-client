@@ -1,6 +1,7 @@
 <script setup>
 import { reactive, computed, onMounted, onBeforeUnmount, watch, ref, nextTick } from 'vue'
 import { useStore } from 'vuex'
+import { useCardStore } from '@/stores/useCardStore'
 
 import Loader from '@/components/Loader.vue'
 import UserLabelInline from '@/components/UserLabelInline.vue'
@@ -13,6 +14,7 @@ import OfflineBadge from '@/components/OfflineBadge.vue'
 import GroupLabel from '@/components/GroupLabel.vue'
 
 const store = useStore()
+const cardStore = useCardStore()
 
 const dialogElement = ref(null)
 
@@ -87,7 +89,7 @@ const showCardDetails = (notification) => {
     store.commit('loadSpaceFocusOnCardId', card.id)
     store.dispatch('currentSpace/changeSpace', space)
   } else {
-    store.dispatch('currentCards/showCardDetails', card.id)
+    cardStore.showCardDetails(card.id)
   }
   emit('markAsRead', notification.id)
 }

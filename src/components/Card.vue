@@ -1,6 +1,8 @@
 <script setup>
 import { reactive, computed, onMounted, onBeforeUnmount, onUnmounted, watch, ref, nextTick } from 'vue'
 import { useStore, mapState, mapGetters } from 'vuex'
+import { useConnectionStore } from '@/stores/useConnectionStore'
+import { useCardStore } from '@/stores/useCardStore'
 
 import utils from '@/utils.js'
 import Frames from '@/components/Frames.vue'
@@ -30,6 +32,8 @@ import { nanoid } from 'nanoid'
 dayjs.extend(isToday)
 
 const store = useStore()
+const cardStore = useCardStore()
+const connectionStore = useConnectionStore()
 
 const cardElement = ref(null)
 
@@ -181,7 +185,7 @@ const changeSpaceAndCard = async (spaceId, cardId) => {
   // card in current space
   } else {
     await nextTick()
-    store.dispatch('currentCards/showCardDetails', cardId)
+    cardStore.showCardDetails(cardId)
   }
 }
 
@@ -221,7 +225,8 @@ const currentBackgroundColorIsDark = computed(() => {
 
 // comment
 
-const isComment = computed(() => store.getters['currentCards/isComment'](props.card))
+const isComment = computed(() => cardStore.getIsCardComment(props.card))
+
 const removeCommentBrackets = (name) => {
   if (!isComment.value) { return name }
   if (props.card.isComment) { return name }
@@ -251,7 +256,7 @@ const toggleCardChecked = () => {
   if (!canEditCard.value) { return }
   const value = !isChecked.value
   store.dispatch('closeAllDialogs')
-  store.dispatch('currentCards/toggleChecked', { cardId: props.card.id, value })
+  cardStore.toggleCardChecked(props.card.id, value)
   postMessage.sendHaptics({ name: 'heavyImpact' })
   cancelLocking()
   store.commit('currentUserIsDraggingCard', false)
@@ -485,8 +490,7 @@ const shouldJiggle = computed(() => {
   const isMultipleItemsSelected = store.getters.isMultipleItemsSelected
   const isShiftKeyDown = store.state.currentUserIsBoxSelecting
   if (isMultipleItemsSelected || isShiftKeyDown) { return }
-  const isDragging = currentCardIsBeingDragged.value && store.state.cardsWereDragged
-  return isConnectingTo.value || isConnectingFrom.value || state.isRemoteConnecting || isDragging || isRemoteCardDragging.value
+  return isConnectingTo.value || isConnectingFrom.value
 })
 const updateStylesWithWidth = (styles) => {
   const cardHasExtendedContent = cardUrlPreviewIsVisible.value || otherCardIsVisible.value || isVisualCard.value || isAudioCard.value
@@ -524,7 +528,7 @@ const updateDimensionsAndPaths = () => {
 }
 const checkIfShouldUpdateDimensions = () => {
   if (utils.isMissingDimensions(props.card)) {
-    store.dispatch('currentCards/updateDimensions', { cards: [props.card] })
+    cardStore.updateCardsDimensions([props.card.id])
   }
 }
 const width = computed(() => {
@@ -608,7 +612,7 @@ const isConnectingTo = computed(() => {
 const isConnectingFrom = computed(() => {
   return store.state.currentConnectionStartItemIds.includes(props.card.id)
 })
-const connectedConnectionTypes = computed(() => store.getters['currentConnections/typesByItemId'](props.card.id))
+const connectedConnectionTypes = computed(() => connectionStore.getItemConnections(props.card.id))
 
 // card buttons
 
@@ -629,7 +633,7 @@ const connectorIsHiddenByOpacity = computed(() => {
   if (utils.isMobile()) { return }
   const isPresentationMode = store.state.isPresentationMode
   const isNotHovering = store.state.currentUserIsHoveringOverCardId !== props.card.id
-  const isNotConnected = !isConnectingFrom.value && !isConnectingTo.value && !state.currentConnections.length
+  const isNotConnected = !isConnectingFrom.value && !isConnectingTo.value && !connectionStore.getAllConnections.length
   return isPresentationMode && isNotHovering && isNotConnected
 })
 const isCardButtonsVisible = computed(() => {
@@ -716,7 +720,7 @@ const dateIsToday = computed(() => {
   return dayjs(date).isToday()
 })
 const toggleFilterShowAbsoluteDates = () => {
-  store.dispatch('currentCards/incrementZ', props.card.id)
+  cardStore.incrementCardZ(props.card.id)
   store.dispatch('closeAllDialogs')
   const value = !store.state.currentUser.filterShowAbsoluteDates
   store.dispatch('currentUser/toggleFilterShowAbsoluteDates', value)
@@ -797,7 +801,7 @@ const addFile = (file) => {
     id: props.card.id,
     name: utils.trim(name)
   }
-  store.dispatch('currentCards/update', { card: update })
+  cardStore.updateCard(update)
   store.commit('triggerUpdateHeaderAndFooterPosition')
 }
 const clearErrors = () => {
@@ -824,7 +828,7 @@ const removeUploadIsDraggedOver = () => {
 }
 const uploadFile = async (event) => {
   removeUploadIsDraggedOver()
-  store.dispatch('currentCards/incrementZ', props.card.id)
+  cardStore.incrementCardZ(props.card.id)
   // pre-upload errors
   if (!currentUserIsSignedIn.value) {
     state.error.signUpToUpload = true
@@ -963,7 +967,7 @@ const showTagDetailsIsVisible = ({ event, tag }) => {
   if (isMultiTouch) { return }
   if (!canEditCard.value) { store.commit('triggerReadOnlyJiggle') }
   if (state.preventDraggedButtonBadgeFromShowingDetails) { return }
-  store.dispatch('currentCards/incrementZ', props.card.id)
+  cardStore.incrementCardZ(props.card.id)
   store.dispatch('closeAllDialogs')
   store.commit('currentUserIsDraggingCard', false)
   const tagRect = event.target.getBoundingClientRect()
@@ -1015,7 +1019,7 @@ const cardUrlPreviewIsVisible = computed(() => {
   // TEMP experiment: remove card.urlPreviewErrorUrl checking to eliminate false positives. Observe if there's a downside irl and if this attribute should be removed entirely?
   // const isErrorUrl = props.card.urlPreviewErrorUrl && (props.card.urlPreviewUrl === props.card.urlPreviewErrorUrl)
   let url = props.card.urlPreviewUrl
-  url = utils.removeTrailingSlash(url)
+  url = utils.clearTrailingSlash(url)
   cardHasUrlPreviewInfo = Boolean(cardHasUrlPreviewInfo && url)
   const nameHasUrl = props.card.name?.includes(url)
   return (props.card.urlPreviewIsVisible && cardHasUrlPreviewInfo && nameHasUrl) && !isComment.value
@@ -1027,7 +1031,7 @@ const isLoadingUrlPreview = computed(() => {
   if (isLoading) {
     prevIsLoadingUrlPreview = true
   } else if (prevIsLoadingUrlPreview) {
-    store.dispatch('currentConnections/updatePaths', { itemId: props.card.id })
+    connectionStore.updateConnectionPath(props.card.id)
   }
   return isLoading
   // if (!isLoading) { return }
@@ -1042,7 +1046,7 @@ const updateUrlPreviewOnload = async () => {
     id: props.card.id,
     shouldUpdateUrlPreview: false
   }
-  store.dispatch('currentCards/update', { card: update })
+  cardStore.updateCard(update)
   if (isUpdatedSuccess) {
     store.commit('triggerUpdateUrlPreviewComplete', props.card.id)
   }
@@ -1061,7 +1065,7 @@ const updateUrlPreview = () => {
       id: props.card.id,
       shouldUpdateUrlPreview: true
     }
-    store.dispatch('currentCards/update', { card: update })
+    cardStore.updateCard(update)
   } else {
     updateUrlPreviewOnline()
   }
@@ -1101,7 +1105,7 @@ const updateUrlPreviewSuccess = async (url, data) => {
     return
   }
   data.name = utils.addHiddenQueryStringToURLs(props.card.name)
-  store.dispatch('currentCards/update', { card: data })
+  cardStore.updateCard(data)
   store.commit('removeUrlPreviewLoadingForCardIds', cardId)
   await store.dispatch('api/addToQueue', { name: 'updateUrlPreviewImage', body: data })
 }
@@ -1112,7 +1116,7 @@ const retryUrlPreview = () => {
     id: props.card.id,
     shouldUpdateUrlPreview: true
   }
-  store.dispatch('currentCards/update', { card: update })
+  cardStore.updateCard(update)
   updateUrlPreview()
 }
 const shouldUpdateUrlPreview = (url) => {
@@ -1126,7 +1130,7 @@ const shouldUpdateUrlPreview = (url) => {
 }
 const nameIncludesUrl = (url) => {
   const name = props.card.name
-  const normalizedUrl = utils.removeTrailingSlash(url)
+  const normalizedUrl = utils.clearTrailingSlash(url)
   return name.includes(url) || name.includes(normalizedUrl) || normalizedUrl.includes(name)
 }
 const updateUrlPreviewImage = (update) => {
@@ -1147,7 +1151,7 @@ const updateUrlPreviewErrorUrl = (url) => {
     urlPreviewUrl: url,
     name: props.card.name
   }
-  store.dispatch('currentCards/update', { card: update })
+  cardStore.updateCard(update)
 }
 
 // drag cards
@@ -1207,6 +1211,7 @@ const startDraggingCard = (event) => {
   store.commit('parentCardId', props.card.id)
   store.commit('childCardId', '')
   checkIfShouldDragMultipleCards(event)
+  cardStore.incrementCardZ(props.card.id)
 }
 const notifyPressAndHoldToDrag = () => {
   if (isLocked.value) { return }
@@ -1340,7 +1345,7 @@ const selectAllConnectedCards = (event) => {
   if (!isMeta) { return }
   if (!canEditSpace.value) { return }
   store.dispatch('closeAllDialogs')
-  const connections = store.getters['currentConnections/all']
+  const connections = connectionStore.getAllConnections
   const selectedCards = [props.card.id]
   let shouldSearch = true
   while (shouldSearch) {
@@ -1586,7 +1591,7 @@ const handleMouseLeaveCheckbox = () => {
   store.commit('currentUserIsHoveringOverCheckboxCardId', '')
 }
 const updateCurrentConnections = () => {
-  state.currentConnections = store.getters['currentConnections/byItemId'](props.card.id)
+  state.currentConnections = connectionStore.getItemConnections(props.card.id)
 }
 const handleMouseEnterUrlButton = () => {
   store.commit('currentUserIsHoveringOverUrlButtonCardId', props.card.id)
@@ -1786,7 +1791,7 @@ const unlockCard = (event) => {
     id: props.card.id,
     isLocked: false
   }
-  store.dispatch('currentCards/update', { card: update })
+  cardStore.updateCard(update)
 }
 const lockingFrameStyle = computed(() => {
   const initialPadding = 65 // matches initialLockCircleRadius in paintSelect
@@ -1818,7 +1823,7 @@ const updateOtherItems = () => {
       linkToSpaceId: null,
       linkToCardId: null
     }
-    store.dispatch('currentCards/update', { card: update })
+    cardStore.update(update)
     return
   }
   if (!url) { return }
@@ -1842,7 +1847,7 @@ const updateOtherSpaceOrCardItems = (url) => {
     linkToCardId: cardId,
     linkToSpaceCollaboratorKey: null
   }
-  store.dispatch('currentCards/update', { card: update })
+  cardStore.update(update)
   store.dispatch('currentSpace/updateOtherItems', { spaceId, cardId })
 }
 const updateOtherInviteItems = (url) => {
@@ -1855,7 +1860,7 @@ const updateOtherInviteItems = (url) => {
       linkToCardId: null,
       linkToSpaceCollaboratorKey: collaboratorKey
     }
-    store.dispatch('currentCards/update', { card: update })
+    cardStore.update(update)
   }
   store.dispatch('currentSpace/updateOtherItems', { spaceId, collaboratorKey })
 }
@@ -1869,7 +1874,7 @@ const updateOtherGroupItems = (url) => {
 const removeCard = () => {
   if (isLocked.value) { return }
   if (canEditCard.value) {
-    store.dispatch('currentCards/remove', props.card)
+    cardStore.removeCards([props.card.id])
   }
 }
 const closeAllDialogs = () => {

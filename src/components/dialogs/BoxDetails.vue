@@ -1,6 +1,7 @@
 <script setup>
 import { reactive, computed, onMounted, onBeforeUnmount, onUnmounted, watch, ref, nextTick } from 'vue'
 import { useStore } from 'vuex'
+import { useBoxStore } from '@/stores/useBoxStore'
 
 import ColorPicker from '@/components/dialogs/ColorPicker.vue'
 import CardOrBoxActions from '@/components/subsections/CardOrBoxActions.vue'
@@ -12,6 +13,7 @@ import utils from '@/utils.js'
 import { colord, extend } from 'colord'
 
 const store = useStore()
+const boxStore = useBoxStore()
 
 const dialogElement = ref(null)
 const nameElement = ref(null)
@@ -26,12 +28,11 @@ const state = reactive({
 
 const spaceCounterZoomDecimal = computed(() => store.getters.spaceCounterZoomDecimal)
 const canEditBox = computed(() => store.getters['currentUser/canEditBox'](currentBox.value))
-
+const id = computed(() => store.state.boxDetailsIsVisibleForBoxId)
 // box state
 
 const currentBox = computed(() => {
-  const id = store.state.boxDetailsIsVisibleForBoxId
-  return store.getters['currentBoxes/byId'](id) || {}
+  return boxStore.getBox(id.value) || {}
 })
 watch(() => currentBox.value, async (value, prevValue) => {
   await nextTick()
@@ -48,8 +49,8 @@ watch(() => currentBox.value, async (value, prevValue) => {
     store.dispatch('history/resume')
     if (!state.isUpdated) { return }
     state.isUpdated = false
-    const box = store.getters['currentBoxes/byId'](prevBoxId)
-    store.dispatch('currentBoxes/updateInfoDimensions', { boxes: [box] })
+    const box = boxStore.getBox(prevBoxId)
+    boxStore.updateBoxInfoDimensions(prevBoxId)
     if (!box) { return }
     store.dispatch('history/add', { boxes: [box], useSnapshot: true })
   }
@@ -62,7 +63,7 @@ watch(() => visible.value, async (value, prevValue) => {
     store.commit('currentDraggingBoxId', '')
     store.dispatch('multipleBoxesSelectedIds', [])
     store.commit('preventMultipleSelectedActionsIsVisible', false)
-    store.dispatch('currentBoxes/updateInfoDimensions', { boxes: [{ id: prevBoxId }] })
+    boxStore.updateBoxInfoDimensions(prevBoxId)
   }
 })
 
@@ -75,11 +76,11 @@ const broadcastShowBoxDetails = () => {
 }
 const update = (updates) => {
   const keys = Object.keys(updates)
-  const box = { id: currentBox.value.id }
+  const update = { id: currentBox.value.id }
   keys.forEach(key => {
-    box[key] = updates[key]
+    update[key] = updates[key]
   })
-  store.dispatch('currentBoxes/update', box)
+  boxStore.updateBox(update)
   state.isUpdated = true
 }
 
@@ -202,7 +203,7 @@ const toggleBackgroundPickerIsVisible = () => {
 
 const removeBox = () => {
   store.dispatch('history/resume')
-  store.dispatch('currentBoxes/remove', currentBox.value)
+  boxStore.removeBox(currentBox.value.id)
 }
 
 // dialog state

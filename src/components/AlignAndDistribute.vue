@@ -1,13 +1,17 @@
 <script setup>
 import { reactive, computed, onMounted, onBeforeUnmount, watch, ref, nextTick } from 'vue'
 import { useStore } from 'vuex'
+import { useCardStore } from '@/stores/useCardStore'
+import { useConnectionStore } from '@/stores/useConnectionStore'
 
 import utils from '@/utils.js'
 import consts from '@/consts.js'
 
 import uniqBy from 'lodash-es/uniqBy'
 
+const cardStore = useCardStore()
 const store = useStore()
+const connectionStore = useConnectionStore()
 
 let unsubscribe
 
@@ -291,12 +295,14 @@ const normalizeBoxes = (boxes) => {
 // update items
 
 const updateItem = (item, type) => {
-  if (type === 'cards') { store.dispatch('currentCards/update', { card: item }) }
+  if (type === 'cards') {
+    cardStore.updateCard(item)
+  }
   if (type === 'boxes') { store.dispatch('currentBoxes/update', item) }
 }
 const updateCardDimensions = async () => {
   await nextTick()
-  store.dispatch('currentCards/updateDimensions', { cards: props.cards })
+  cardStore.updateCardsDimensions(props.cards)
   await nextTick()
   await nextTick()
 }
@@ -309,13 +315,14 @@ const updateConnectionPaths = async () => {
   // store.commit('clearMultipleSelected')
   if (!cardIds.length) { return }
   cardIds.forEach(cardId => {
-    connections = connections.concat(store.getters['currentConnections/byItemId'](cardId))
+    const cardConnections = connectionStore.getItemsConnections(cardId)
+    connections = connections.concat(cardConnections)
   })
   store.commit('multipleCardsSelectedIds', cardIds)
   store.commit('multipleConnectionsSelectedIds', connectionIds)
   // updates
   connections = uniqBy(connections, 'id')
-  store.dispatch('currentConnections/updatePaths', { connections })
+  connectionStore.updateConnectionPaths(connectionIds)
 }
 
 // update positions

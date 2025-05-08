@@ -958,6 +958,18 @@ li
       background-image url('assets/checkmark.svg')
       background-repeat no-repeat
       background-position center
+    // &.add
+    //   background-image url('assets/add.svg')
+    //   background-repeat no-repeat
+    //   background-position center
+    //   background-size 60%
+.is-dark-theme
+  label
+    input[type="checkbox"]
+      &:checked
+        background-image url('assets/checkmark-invert.svg')
+      // &.add
+      //   background-image url('assets/add-invert.svg')
 
 details
   summary
@@ -983,14 +995,6 @@ details[open]
     border-bottom-left-radius 0
 details + details
   margin-top 2px
-
-.is-dark-theme
-  label
-    input[type="checkbox"]
-      &:checked
-        background-image url('assets/checkmark-invert.svg')
-      &.add
-        background-image url('assets/add-invert.svg')
 
 li
   input[type="checkbox"]

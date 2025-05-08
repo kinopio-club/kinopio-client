@@ -1,6 +1,7 @@
 <script setup>
 import { reactive, computed, onMounted, onBeforeUnmount, watch, ref, nextTick } from 'vue'
 import { useStore } from 'vuex'
+import { useCardStore } from '@/stores/useCardStore'
 
 import User from '@/components/User.vue'
 import utils from '@/utils.js'
@@ -10,6 +11,7 @@ import uniqBy from 'lodash-es/uniqBy'
 import last from 'lodash-es/last'
 
 const store = useStore()
+const cardStore = useCardStore()
 
 const buttonElement = ref(null)
 
@@ -59,7 +61,7 @@ const spaceUsers = computed(() => {
   if (props.users) {
     items = props.users
   } else {
-    const groupUsers = store.getters['currentCards/groupUsersWhoAddedCards']
+    const groupUsers = store.getters['groups/groupUsersWhoAddedCards']
     items = utils.clone(currentSpace.value.users)
     items = items.concat(currentSpace.value.collaborators)
     items = items.concat(groupUsers)
@@ -76,7 +78,7 @@ const recentUser = computed(() => {
   return last(spaceUsers.value)
 })
 const isCommenters = computed(() => Boolean(commenters.value.length))
-const commenters = computed(() => store.getters['currentCards/commenters'])
+const commenters = computed(() => cardStore.getCardCommenters) // TODO move to userStore
 const spaceUsersLabel = computed(() => {
   const condition = spaceUsers.value.length !== 1
   let collaboratorsString = utils.pluralize('Collaborator', condition)

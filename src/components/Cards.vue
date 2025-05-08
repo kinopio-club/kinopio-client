@@ -2,28 +2,31 @@
 import { reactive, computed, onMounted, onUnmounted, watch, ref, nextTick } from 'vue'
 import { useStore } from 'vuex'
 
+import { useCardStore } from '@/stores/useCardStore'
+
 import Card from '@/components/Card.vue'
 import CardCommentPreview from '@/components/CardCommentPreview.vue'
 import utils from '@/utils.js'
+const cardStore = useCardStore()
 
 const store = useStore()
 
-const unlockedCards = computed(() => store.getters['currentCards/isNotLocked'])
-const lockedCards = computed(() => store.getters['currentCards/isLocked'])
+const cards = computed(() => cardStore.getAllCards)
+const lockedCards = computed(() => cards.value.filter(card => card.isLocked))
+const unlockedCards = computed(() => cards.value.filter(card => !card.isLocked))
 
 // card comment preview
 
 const currentHoveredCard = computed(() => {
   const cardId = store.state.currentUserIsHoveringOverCardId
   if (!cardId) { return }
-  const card = store.getters['currentCards/byId'](cardId)
+  const card = cardStore.getCard(cardId)
   return card
 })
 const currentHoveredCardIsComment = computed(() => {
   const card = currentHoveredCard.value
   if (!card) { return }
-  const isComment = store.getters['currentCards/isComment'](card)
-  return isComment
+  return card.isComment
 })
 const cardCommentPreviewIsVisible = computed(() => {
   if (shouldPrevent.value) { return }

@@ -5,6 +5,10 @@
 // 🌛 Send
 // 🌜 Receive
 
+import { getActivePinia } from 'pinia'
+// import { useCardStore } from '@/stores/useCardStore'
+// const cardStore = useCardStore()
+
 import { nanoid } from 'nanoid'
 
 import utils from '@/utils.js'
@@ -133,13 +137,21 @@ export default function createWebSocketPlugin () {
           if (data.space) {
             if (data.space.id !== store.state.currentSpace.id) { return }
           }
-          const { message, handler, user, updates } = data
+          const { message, handler, user, updates, storeName, actionName } = data // TODO deprecate unused
           if (message === 'connected') {
           // presence
           } else if (handler) {
             store.commit(handler, updates)
             checkIfShouldUpdateLinkToItem(store, data)
             checkIfShouldNotifyOffscreenCardCreated(store, data)
+
+          // pinia
+          } else if (storeName && actionName) {
+            updates.isBroadcast = true
+            const pinia = getActivePinia()
+            if (!pinia) return
+            const piniaStore = pinia._s.get(storeName)
+            piniaStore[actionName](updates)
           // users
           } else if (message === 'userJoinedRoom') {
             store.dispatch('currentSpace/addUserToJoinedSpace', user)

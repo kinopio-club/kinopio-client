@@ -1,3 +1,5 @@
+import { useCardStore } from '@/stores/useCardStore'
+
 import utils from '@/utils.js'
 import consts from '@/consts.js'
 import cache from '@/cache.js'
@@ -480,9 +482,10 @@ export default {
       return paths
     },
     connectionsWithValidItems: (state, getters, rootState, rootGetters) => (connections) => {
+      const cardStore = useCardStore()
       connections = connections.filter(connection => {
-        const startItem = rootGetters['currentCards/byId'](connection.startItemId) || rootGetters['currentBoxes/byId'](connection.startItemId)
-        const endItem = rootGetters['currentCards/byId'](connection.endItemId) || rootGetters['currentBoxes/byId'](connection.endItemId)
+        const startItem = cardStore.getCard(connection.startItemId) || rootGetters['currentBoxes/byId'](connection.startItemId)
+        const endItem = cardStore.getCard(connection.endItemId) || rootGetters['currentBoxes/byId'](connection.endItemId)
         return startItem && endItem
       })
       return connections

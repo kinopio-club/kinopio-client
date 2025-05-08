@@ -1,6 +1,7 @@
 <script setup>
 import { reactive, computed, onMounted, onBeforeUnmount, watch, ref, nextTick } from 'vue'
 import { useStore } from 'vuex'
+import { useConnectionStore } from '@/stores/useConnectionStore'
 
 import Loader from '@/components/Loader.vue'
 import MinimapCanvas from '@/components/MinimapCanvas.vue'
@@ -14,6 +15,7 @@ import randomColor from 'randomcolor'
 import sample from 'lodash-es/sample'
 
 const store = useStore()
+const connectionStore = useConnectionStore()
 
 const rowElement = ref(null)
 const textareaElement = ref(null)
@@ -142,7 +144,7 @@ const connectionPaths = (space) => {
     startItem.y += heightOffset
     endItem.y += heightOffset
     // calc path
-    connection.path = store.getters['currentConnections/connectionPathBetweenCoords'](startItem, endItem, controlPoint)
+    connection.path = connectionStore.getConnectionPathBetweenCoords(startItem, endItem, controlPoint)
     return connection
   })
   return space

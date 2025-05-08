@@ -247,6 +247,39 @@ export default {
         groupUser = getters.groupUser({ userId, space })
       }
       return groupUser?.role === 'admin'
+    },
+    groupUsersWhoAddedCards: (state) => {
+      return []
+      // userIds: (state, getters) => {
+      //   const cards = getters.all
+      //   let users = []
+      //   cards.forEach(card => {
+      //     users.push(card.userId)
+      //     users.push(card.nameUpdatedByUserId)
+      //   })
+      //   users = users.filter(user => Boolean(user))
+      //   users = uniq(users)
+      //   return users
+      // },
+      // users: (state, getters, rootState, rootGetters) => {
+      //   let users = getters.userIds.map(id => {
+      //     const user = rootGetters['currentSpace/userById'](id)
+      //     return user
+      //   })
+      //   users = users.filter(user => Boolean(user))
+      //   return users
+      // },
+      // groupUsersWhoAddedCards: (state, getters, rootState, rootGetters) => {
+      //   const spaceGroup = rootGetters['groups/spaceGroup']()
+      //   const groupUsers = spaceGroup?.users
+      //   if (!groupUsers) { return }
+      //   let users = getters.users
+      //   users = users.filter(user => {
+      //     const isGroupUser = groupUsers.find(groupUser => groupUser.id === user.id)
+      //     return isGroupUser
+      //   })
+      //   return users
+      // },
     }
   }
 }
