@@ -1,12 +1,15 @@
 import { nextTick } from 'vue'
 import { defineStore } from 'pinia'
 import { useConnectionStore } from '@/stores/useConnectionStore'
+import { useCardStore } from '@/stores/useCardStore'
 
 import store from '@/store/store.js' // TEMP Import Vuex store
 
 import utils from '@/utils.js'
 import consts from '@/consts.js'
 import cache from '@/cache.js'
+
+import sortBy from 'lodash-es/sortBy'
 
 export const useBoxStore = defineStore('boxes', {
   state: () => ({
@@ -40,7 +43,21 @@ export const useBoxStore = defineStore('boxes', {
       ids = ids.filter(id => Boolean(id))
       const boxes = ids.map(id => state.byId[id])
       return boxes
+    },
+    getBoxesSelectableByY: (state) => {
+      let boxes = state.allIds.map(id => state.byId[id])
+      // filter
+      boxes = boxes.filter(box => !box.isLocked)
+      // sort by y
+      boxes = sortBy(boxes, ['y'])
+      const yIndex = []
+      boxes.forEach(box => yIndex.push(box.y))
+      return {
+        boxes,
+        yIndex
+      }
     }
+
   },
 
   actions: {
@@ -110,7 +127,7 @@ export const useBoxStore = defineStore('boxes', {
       if (!updates.isBroadcast) {
         // store.dispatch('broadcast/update', { updates, storeName: 'boxStore', actionName: 'updateBoxes' }, { root: true })
       }
-      await store.dispatch('api/addToQueue', { name: 'updateMultipleBoxes', body: updates }, { root: true })
+      await store.dispatch('api/addToQueue', { name: 'updateMultipleBoxes', body: { boxes: updates } }, { root: true })
       // TODO history? if unpaused
       cache.updateSpace('boxes', this.getAllBoxes, store.state.currentSpace.id)
       // update connection paths
@@ -149,8 +166,40 @@ export const useBoxStore = defineStore('boxes', {
       this.removeBoxes([id])
     },
 
-    // dimensions
+    // position
 
+    moveBoxes ({ endCursor, prevCursor, delta }) {
+      const connectionStore = useConnectionStore()
+      const zoom = store.getters.spaceCounterZoomDecimal
+      if (!endCursor || !prevCursor) { return }
+      endCursor = {
+        x: endCursor.x * zoom,
+        y: endCursor.y * zoom
+      }
+      if (store.state.shouldSnapToGrid) {
+        prevCursor = utils.cursorPositionSnapToGrid(prevCursor)
+        endCursor = utils.cursorPositionSnapToGrid(endCursor)
+      }
+      delta = delta || {
+        x: endCursor.x - prevCursor.x,
+        y: endCursor.y - prevCursor.y
+      }
+      const boxes = this.getBoxesSelected
+      const updates = []
+      boxes.forEach(box => {
+        const update = {
+          id: box.id,
+          x: box.x + delta.x,
+          y: box.y + delta.y
+        }
+        updates.push(update)
+      })
+      this.updateBoxes(updates)
+      store.commit('boxesWereDragged', true, { root: true })
+      const itemIds = updates.map(update => update.id)
+      connectionStore.updateConnectionPaths(itemIds)
+      // boxStore.updateSnapGuides({ boxes: updates }) ? from currentBoxes to store
+    },
     updateBoxesInfoDimensions (ids) {
       for (const id of ids) {
         const box = this.getBox(id)
@@ -166,9 +215,6 @@ export const useBoxStore = defineStore('boxes', {
     updateBoxInfoDimensions (id) {
       this.updateBoxesInfoDimensions([id])
     },
-
-    // z
-
     clearAllBoxesZ () {
       const boxes = this.getAllBoxes
       const updates = boxes.map(box => {
@@ -225,6 +271,67 @@ export const useBoxStore = defineStore('boxes', {
       }
       this.updateBox(update)
       this.updateBoxDimensions(id)
+    },
+
+    // contained items
+
+    isItemInSelectedBoxes (item, type) {
+      item.width = item.width || item.resizeWidth
+      item.height = item.height || item.resizeHeight
+      const selectedBoxes = this.getBoxesSelected
+      return selectedBoxes.find(box => {
+        box.width = box.resizeWidth
+        box.height = box.resizeHeight
+        const isTopLeft = utils.isPointInsideRect({
+          x: item.x,
+          y: item.y
+        }, box)
+        const isTopRight = utils.isPointInsideRect({
+          x: item.x + item.width,
+          y: item.y
+        }, box)
+        const isBottomLeft = utils.isPointInsideRect({
+          x: item.x,
+          y: item.y + item.height
+        }, box)
+        const isBottomRight = utils.isPointInsideRect({
+          x: item.x + item.width,
+          y: item.y + item.height
+        }, box)
+        return isTopLeft && isTopRight && isBottomLeft && isBottomRight
+      })
+    },
+    itemsContainedInSelectedBoxes () {
+      const cards = []
+      const boxes = []
+      // cards
+      const cardStore = useCardStore()
+      cardStore.getCardsSelectableByY.cards.forEach(card => {
+        if (this.isItemInSelectedBoxes(card, 'card')) {
+          cards.push(card)
+        }
+      })
+      // boxes
+      const selectableBoxes = this.getAllBoxes
+      this.getBoxesSelectableByY.boxes.forEach(box => {
+        if (this.isItemInSelectedBoxes(box, 'box')) {
+          boxes.push(box)
+        }
+      })
+      return { cards, boxes }
+    },
+    selectItemsInSelectedBoxes () {
+      const { boxes, cards } = this.itemsContainedInSelectedBoxes()
+      // boxes
+      const boxIds = boxes.map(box => box.id)
+      store.dispatch('multipleBoxesSelectedIds', boxIds)
+      // cards
+      const isMultipleBoxesSelected = Boolean(store.state.multipleBoxesSelectedIds.length)
+      const cardIds = cards.map(card => card.id)
+      store.dispatch('multipleCardsSelectedIds', cardIds)
+      if (!isMultipleBoxesSelected) {
+        store.commit('preventMultipleSelectedActionsIsVisible', true)
+      }
     }
 
   }

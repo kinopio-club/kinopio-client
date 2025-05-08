@@ -3,6 +3,7 @@ import { reactive, computed, onMounted, onBeforeUnmount, onUnmounted, watch, ref
 import { useStore } from 'vuex'
 import { useCardStore } from '@/stores/useCardStore'
 import { useConnectionStore } from '@/stores/useConnectionStore'
+import { useBoxStore } from '@/stores/useBoxStore'
 
 import CardDetails from '@/components/dialogs/CardDetails.vue'
 import OtherCardDetails from '@/components/dialogs/OtherCardDetails.vue'
@@ -50,7 +51,7 @@ import debounce from 'lodash-es/debounce'
 
 const cardStore = useCardStore()
 const connectionStore = useConnectionStore()
-
+const boxStore = useBoxStore()
 const store = useStore()
 
 let unsubscribe
@@ -434,12 +435,21 @@ const dragItems = () => {
   cardStore.moveCards({ endCursor, prevCursor })
   // boxes
   checkShouldShowDetails()
-  store.dispatch('currentBoxes/move', {
-    endCursor,
-    prevCursor
-  })
+  boxStore.moveBoxes({ endCursor, prevCursor })
 }
-
+const dragBoxes = (event) => {
+  const isInitialDrag = !store.state.boxesWereDragged
+  if (isInitialDrag) {
+    const updates = {
+      boxId: store.state.currentDraggingBoxId,
+      userId: store.state.currentUser.id
+    }
+    store.commit('broadcast/updateStore', { updates, type: 'addToRemoteBoxesDragging' })
+    boxStore.selectItemsInSelectedBoxes()
+  }
+  if (event.altKey) { return } // should not select contained items if alt/option key
+  dragItems()
+}
 // footer
 
 const footerDialogIsVisible = () => {
@@ -537,7 +547,7 @@ const interact = (event) => {
     dragItems()
   } else if (isDraggingBox.value) {
     store.commit('currentDraggingCardId', '')
-    dragItems()
+    dragBoxes(event)
   } else if (isResizingCard.value) {
     resizeCards(event)
   } else if (isTiltingCard.value) {

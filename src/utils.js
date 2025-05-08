@@ -1056,15 +1056,6 @@ export default {
     box.infoHeight = parseInt(element.dataset.infoHeight)
     return box
   },
-  updateCardDimensionsDataWhileDragging (card) {
-    if (!card) { return }
-    const element = this.cardElement(card)
-    if (!element) { return }
-    element.dataset.x = card.x
-    element.dataset.y = card.y
-    element.dataset.width = card.width
-    element.dataset.height = card.height
-  },
   clearAllCardDimensions (card) {
     const cardWrapElement = document.querySelector(`.card-wrap[data-card-id="${card.id}"]`)
     const cardElement = document.querySelector(`.card[data-card-id="${card.id}"]`)

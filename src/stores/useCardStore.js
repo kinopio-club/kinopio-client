@@ -9,7 +9,6 @@ import consts from '@/consts.js'
 import cache from '@/cache.js'
 
 import { nanoid } from 'nanoid'
-import debounce from 'lodash/debounce'
 import uniq from 'lodash/uniq'
 import sortBy from 'lodash-es/sortBy'
 
@@ -425,7 +424,7 @@ export const useCardStore = defineStore('cards', {
       } else {
         this.addCardToState(card)
         await cache.updateSpace('cards', this.getAllCards, store.state.currentSpace.id)
-        // await context.dispatch('api/addToQueue', { name: 'restoreRemovedCard', body: card }, { root: true })
+        // await store.dispatch('api/addToQueue', { name: 'restoreRemovedCard', body: card }, { root: true })
         store.dispatch('currentUser/cardsCreatedCountUpdateBy', {
           cards: [card]
         }, { root: true })
@@ -434,9 +433,28 @@ export const useCardStore = defineStore('cards', {
 
     // position
 
+    updatePageSize (card) {
+      const cardY = card.y + card.height
+      if (cardY >= store.state.pageHeight) {
+        store.commit('pageHeight', cardY, { root: true })
+      }
+      const cardX = card.x + card.width
+      if (cardX >= store.state.pageWidth) {
+        store.commit('pageWidth', cardX, { root: true })
+      }
+    },
     moveCards ({ endCursor, prevCursor, delta }) {
       const connectionStore = useConnectionStore()
+      const zoom = store.getters.spaceCounterZoomDecimal
       if (!endCursor || !prevCursor) { return }
+      endCursor = {
+        x: endCursor.x * zoom,
+        y: endCursor.y * zoom
+      }
+      if (store.state.shouldSnapToGrid) {
+        prevCursor = utils.cursorPositionSnapToGrid(prevCursor)
+        endCursor = utils.cursorPositionSnapToGrid(endCursor)
+      }
       delta = delta || {
         x: endCursor.x - prevCursor.x,
         y: endCursor.y - prevCursor.y
@@ -447,13 +465,18 @@ export const useCardStore = defineStore('cards', {
         const update = {
           id: card.id,
           x: card.x + delta.x,
-          y: card.y + delta.y
+          y: card.y + delta.y,
+          width: card.width,
+          height: card.height
         }
+        this.updatePageSize(update)
         updates.push(update)
       })
       this.updateCards(updates)
+      store.commit('cardsWereDragged', true, { root: true })
       const itemIds = updates.map(update => update.id)
       connectionStore.updateConnectionPaths(itemIds)
+      // boxStore.updateSnapGuides({ cards: updates }) ? to store
     },
     clearAllCardsZ () {
       const cards = this.getAllCards
@@ -668,7 +691,7 @@ export const useCardStore = defineStore('cards', {
         width = Math.max(minImageWidth, width)
         width = Math.round(width)
         updates.push({ id, resizeWidth: width })
-        // context.dispatch('broadcast/update', { updates, type: 'resizeCard', handler: 'currentCards/update' }, { root: true })
+        // store.dispatch('broadcast/update', { updates, type: 'resizeCard', handler: 'currentCards/update' }, { root: true })
       })
       const connectionStore = useConnectionStore()
       connectionStore.updateConnectionPaths(ids)

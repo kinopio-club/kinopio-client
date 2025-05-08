@@ -85,6 +85,10 @@ const canEditBox = computed(() => store.getters['currentUser/canEditBox'](props.
 const currentUserIsSignedIn = computed(() => store.getters['currentUser/isSignedIn'])
 const currentUserColor = computed(() => store.state.currentUser.color)
 const name = computed(() => props.box.name)
+const currentBoxIsSelected = computed(() => {
+  const selected = store.state.multipleBoxesSelectedIds
+  return selected.find(id => props.box.id === id)
+})
 
 // normalize
 
@@ -92,7 +96,6 @@ const normalizedBox = computed(() => {
   return normalizeBox(props.box)
 })
 const normalizeBox = (box) => {
-  box = utils.clone(box)
   box.resizeWidth = box.resizeWidth || consts.minItemXY
   box.resizeHeight = box.resizeHeight || consts.minItemXY
   box.width = box.resizeWidth
@@ -305,7 +308,7 @@ const shrinkToDefaultBoxSize = () => {
 }
 const shrink = () => {
   prevSelectedBox = props.box
-  const { cards, boxes } = containedItems()
+  const { cards, boxes } = boxStore.itemsContainedInSelectedBoxes()
   prevSelectedBox = null
   const items = cards.concat(boxes)
   if (!items.length) {
@@ -369,14 +372,6 @@ const startBoxInfoInteraction = (event) => {
   store.commit('currentUserIsDraggingBox', true)
   store.commit('currentDraggingBoxId', props.box.id)
   boxStore.incrementBoxZ(props.box.id)
-  const updates = {
-    boxId: props.box.id,
-    userId: store.state.currentUser.id
-  }
-  store.commit('broadcast/updateStore', { updates, type: 'addToRemoteBoxesDragging' })
-  if (event.altKey) { return } // should not select contained items if alt/option key
-  selectContainedCards()
-  selectContainedBoxes()
 }
 const updateIsHover = (value) => {
   if (store.state.currentUserIsDraggingBox) { return }
@@ -416,111 +411,6 @@ const endBoxInfoInteraction = (event) => {
 const currentBoxDetailsIsVisible = computed(() => {
   return props.box.id === store.state.boxDetailsIsVisibleForBoxId
 })
-
-// select
-
-const multipleBoxesIsSelected = computed(() => Boolean(store.state.multipleBoxesSelectedIds.length))
-const currentBoxIsSelected = computed(() => {
-  const selected = store.state.multipleBoxesSelectedIds
-  return selected.find(id => props.box.id === id)
-})
-const selectedBoxes = computed(() => boxStore.getBoxesSelected)
-const containedItems = () => {
-  const cards = []
-  const boxes = []
-  // cards
-  selectableCards.value.cards.forEach(card => {
-    if (isItemInSelectedBoxes(card, 'card')) {
-      cards.push(card)
-    }
-  })
-  // boxes
-  let selectableBoxes = boxStore.getAllBoxes
-  selectableBoxes = utils.clone(selectableBoxes)
-  selectableBoxes.forEach(box => {
-    if (box.id === props.box.id) { return }
-    box.width = box.resizeWidth
-    box.height = box.resizeHeight
-    if (isItemInSelectedBoxes(box)) {
-      boxes.push(box)
-    }
-  })
-  return { cards, boxes }
-}
-const selectContainedBoxes = () => {
-  const boxes = containedItems().boxes
-  boxes.forEach(box => {
-    store.dispatch('addToMultipleBoxesSelected', box.id)
-  })
-}
-const selectableCards = computed(() => {
-  return cardStore.getCardsSelectableByY
-})
-const selectContainedCards = () => {
-  const cards = containedItems().cards
-  cards.forEach(card => {
-    store.dispatch('addToMultipleCardsSelected', card.id)
-  })
-  if (!multipleBoxesIsSelected.value) {
-    store.commit('preventMultipleSelectedActionsIsVisible', true)
-  }
-}
-const isItemInSelectedBoxes = (item, type) => {
-  if (type === 'card') {
-    const canEditCard = store.getters['currentUser/canEditCard'](item)
-    if (!canEditCard) { return }
-  }
-  if (item.isLocked) { return }
-  let boxes = selectedBoxes.value
-  if (prevSelectedBox) {
-    boxes = [prevSelectedBox]
-  }
-  const isInside = boxes.find(box => {
-    box = normalizeBox(box)
-    const { x, y } = box
-    const width = box.resizeWidth
-    const height = box.resizeHeight
-    // ┌─────────────────────────────────────┐
-    // │ Box                                 │
-    // │                                     │
-    // │                                     │
-    // │                                     │
-    // │      x1 = x          x2 = x + w     │
-    // │         ██───────────────██         │
-    // │         │                 │         │
-    // │         │      Item       │         │
-    // │         │                 │         │
-    // │         ██───────────────██         │
-    // │      y1 = y          y2 = y + h     │
-    // │                                     │
-    // │                                     │
-    // │                                     │
-    // │                                     │
-    // └─────────────────────────────────────┘
-    const x1 = utils.isBetween({
-      value: item.x,
-      min: x,
-      max: x + width
-    })
-    const x2 = utils.isBetween({
-      value: item.x + item.width,
-      min: x,
-      max: x + width
-    })
-    const y1 = utils.isBetween({
-      value: item.y,
-      min: y,
-      max: y + height
-    })
-    const y2 = utils.isBetween({
-      value: item.y + item.height,
-      min: y,
-      max: y + height
-    })
-    return x1 && x2 && y1 && y2
-  })
-  return isInside
-}
 
 // Remote
 
