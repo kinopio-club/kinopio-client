@@ -23,6 +23,14 @@ export const useBoxStore = defineStore('boxes', {
     },
     getAllBoxes: (state) => {
       return state.allIds.map(id => state.byId[id])
+    },
+    getBoxesIsLocked: (state) => {
+      const boxes = state.allIds.map(id => state.byId[id])
+      return boxes.filter(box => box.isLocked)
+    },
+    getBoxesIsNotLocked: (state) => {
+      const boxes = state.allIds.map(id => state.byId[id])
+      return boxes.filter(box => !box.isLocked)
     }
   },
 
