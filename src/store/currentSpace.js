@@ -1,5 +1,6 @@
 import { useCardStore } from '@/stores/useCardStore'
 import { useConnectionStore } from '@/stores/useConnectionStore'
+import { useBoxStore } from '@/stores/useBoxStore'
 
 import inboxSpace from '@/data/inbox.json'
 import newSpace from '@/data/new.json'
@@ -615,11 +616,12 @@ const currentSpace = {
 
       const cardStore = useCardStore()
       const connectionStore = useConnectionStore()
+      const boxStore = useBoxStore()
 
       await cardStore.initializeCards(space.cards)
       await connectionStore.initializeConnections(space.connections)
       await connectionStore.initializeConnectionTypes(space.connectionTypes)
-
+      await boxStore.initializeBoxes(space.boxes)
       // delete space.cards
       // delete space.connections
       // delete space.connectionTypes
