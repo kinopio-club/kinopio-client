@@ -2,6 +2,7 @@
 import { reactive, computed, onMounted, onBeforeUnmount, watch, ref, nextTick } from 'vue'
 import { useStore } from 'vuex'
 import { useCardStore } from '@/stores/useCardStore'
+import { useConnectionStore } from '@/stores/useConnectionStore'
 
 import utils from '@/utils.js'
 import consts from '@/consts.js'
@@ -10,6 +11,7 @@ import { nanoid } from 'nanoid'
 
 const store = useStore()
 const cardStore = useCardStore()
+const connectionStore = useConnectionStore()
 
 let useSiblingConnectionType
 let browserZoomLevel = 0
@@ -515,10 +517,10 @@ const nonOverlappingCardPosition = (position) => {
 }
 
 const addConnectionType = () => {
-  const hasConnectionType = Boolean(store.getters['currentConnections/typeForNewConnections'])
+  const hasConnectionType = connectionStore.getNewConnectionType
   const shouldUseLastConnectionType = store.state.currentUser.shouldUseLastConnectionType
   if ((shouldUseLastConnectionType || useSiblingConnectionType) && hasConnectionType) { return }
-  store.dispatch('currentConnections/addType')
+  connectionStore.createConnectionType()
   useSiblingConnectionType = true
 }
 
@@ -533,20 +535,20 @@ const addConnection = (baseCardId, position) => {
   if (!baseCard) { return }
   const controlPoint = store.state.currentUser.defaultConnectionControlPoint
   const estimatedEndItemConnectorPosition = utils.estimatedNewCardConnectorPosition(position)
+  const path = connectionStore.getConnectionPathBetweenItems({
+    startItemId: baseCardId,
+    endItemId: endCurrentCardId,
+    controlPoint,
+    estimatedEndItemConnectorPosition
+  })
   const connection = {
     startItemId: baseCardId,
     endItemId: endCurrentCardId,
-    path: store.getters['currentConnections/connectionPathBetweenItems']({
-      startItemId: baseCardId,
-      endItemId: endCurrentCardId,
-      controlPoint,
-      estimatedEndItemConnectorPosition
-    }),
+    path,
     controlPoint
   }
   addConnectionType()
-  const type = store.getters['currentConnections/typeForNewConnections']
-  store.dispatch('currentConnections/add', { connection, type })
+  connectionStore.createConnection(connection)
 }
 
 const selectedCardIds = () => {
@@ -577,7 +579,7 @@ const canEditCardById = (cardId) => {
 
 const canEditConnectionById = (connectionId) => {
   const isSpaceMember = store.getters['currentUser/isSpaceMember']()
-  const connection = store.getters['currentConnections/byId'](connectionId)
+  const connection = connectionStore.getConnection(connectionId)
   const connectionIsCreatedByCurrentUser = store.getters['currentUser/connectionIsCreatedByCurrentUser'](connection)
   const canEditSpace = store.getters['currentUser/canEditSpace']()
   if (isSpaceMember) { return true }
@@ -592,8 +594,7 @@ const remove = () => {
   const boxes = store.getters['currentBoxes/isSelected']
   selectedConnectionIds.forEach(connectionId => {
     if (canEditConnectionById(connectionId)) {
-      const connection = store.getters['currentConnections/byId'](connectionId)
-      store.dispatch('currentConnections/remove', connection)
+      connectionStore.removeConnection(connectionId)
     }
   })
   cardIds.forEach(cardId => {
@@ -607,7 +608,7 @@ const remove = () => {
       store.dispatch('currentBoxes/remove', box)
     }
   })
-  store.dispatch('currentConnections/removeUnusedTypes')
+  connectionStore.removeAllUnusedConnectionTypes()
   clearAllSelectedCards()
   store.dispatch('closeAllDialogs')
 }
@@ -773,7 +774,8 @@ const handlePasteEvent = async (event) => {
     store.dispatch('addMultipleToMultipleCardsSelected', cardIds)
     store.dispatch('addMultipleToMultipleBoxesSelected', boxIds)
     await nextTick()
-    store.dispatch('currentConnections/updatePaths', { connections: items.connections })
+    const connectionIds = items.connections.map(connection => connection.map)
+    connectionStore.updateConnectionPaths(connectionIds)
   // add plain text cards
   } else {
     data.text = utils.decodeEntitiesFromHTML(data.text)
@@ -888,7 +890,7 @@ const selectItemIds = ({ position, cardIds, boxIds }) => {
 }
 const selectAllItems = () => {
   const cardIds = cardStore.allIds
-  const connectionIds = utils.clone(store.state.currentConnections.ids)
+  const connectionIds = connectionStore.allIds
   const boxIds = utils.clone(store.state.currentBoxes.ids)
   const dialogOffset = {
     width: 200 / 2,

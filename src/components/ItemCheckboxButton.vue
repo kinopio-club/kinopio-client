@@ -2,11 +2,13 @@
 import { reactive, computed, onMounted, onBeforeUnmount, watch, ref, nextTick } from 'vue'
 import { useStore } from 'vuex'
 import { useCardStore } from '@/stores/useCardStore'
+import { useConnectionStore } from '@/stores/useConnectionStore'
 
 import utils from '@/utils.js'
 
 const store = useStore()
 const cardStore = useCardStore()
+const connectionStore = useConnectionStore()
 
 onMounted(() => {
   checkItemsHaveCheckboxes()
@@ -119,7 +121,7 @@ const updateDimensionsAndPaths = async () => {
   cardStore.updateCardsDimensions(ids)
   await nextTick()
   await nextTick()
-  store.dispatch('currentConnections/updateMultiplePaths', props.cards)
+  connectionStore.updateConnectionPaths(ids)
 }
 </script>
 

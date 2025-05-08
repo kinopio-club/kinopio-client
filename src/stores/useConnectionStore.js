@@ -59,6 +59,8 @@ export const useConnectionStore = defineStore('connections', {
 
   actions: {
 
+    // utils
+
     getItemsConnections (itemIds) {
       let connections = this.getAllConnections
       connections = connections.filter(connection => {

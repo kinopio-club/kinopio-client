@@ -1,10 +1,13 @@
 <script setup>
 import { reactive, computed, onMounted, onUnmounted, watch, ref, nextTick } from 'vue'
 import { useStore } from 'vuex'
+import { useConnectionStore } from '@/stores/useConnectionStore'
 
 import Loader from '@/components/Loader.vue'
 import utils from '@/utils.js'
+
 const store = useStore()
+const connectionStore = useConnectionStore()
 
 const emit = defineEmits(['updateSpaces'])
 
@@ -154,7 +157,7 @@ const convertToCanvas = (space) => {
       }
     })
     space.connections.forEach(connection => {
-      const type = store.getters['currentConnections/typeByConnection'](connection)
+      const type = connectionStore.getConnectionConnectionType(connection.id)
       // direction
       let toEnd = 'none'
       if (connection.directionIsVisible) {
