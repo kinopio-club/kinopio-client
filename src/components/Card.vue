@@ -720,7 +720,7 @@ const dateIsToday = computed(() => {
   return dayjs(date).isToday()
 })
 const toggleFilterShowAbsoluteDates = () => {
-  cardStore.incrementCardsZ(props.card.id)
+  cardStore.incrementCardZ(props.card.id)
   store.dispatch('closeAllDialogs')
   const value = !store.state.currentUser.filterShowAbsoluteDates
   store.dispatch('currentUser/toggleFilterShowAbsoluteDates', value)
@@ -828,7 +828,7 @@ const removeUploadIsDraggedOver = () => {
 }
 const uploadFile = async (event) => {
   removeUploadIsDraggedOver()
-  cardStore.incrementCardsZ(props.card.id)
+  cardStore.incrementCardZ(props.card.id)
   // pre-upload errors
   if (!currentUserIsSignedIn.value) {
     state.error.signUpToUpload = true
@@ -967,7 +967,7 @@ const showTagDetailsIsVisible = ({ event, tag }) => {
   if (isMultiTouch) { return }
   if (!canEditCard.value) { store.commit('triggerReadOnlyJiggle') }
   if (state.preventDraggedButtonBadgeFromShowingDetails) { return }
-  cardStore.incrementCardsZ(props.card.id)
+  cardStore.incrementCardZ(props.card.id)
   store.dispatch('closeAllDialogs')
   store.commit('currentUserIsDraggingCard', false)
   const tagRect = event.target.getBoundingClientRect()
@@ -1211,7 +1211,7 @@ const startDraggingCard = (event) => {
   store.commit('parentCardId', props.card.id)
   store.commit('childCardId', '')
   checkIfShouldDragMultipleCards(event)
-  cardStore.incrementCardsZ(props.card.id)
+  cardStore.incrementCardZ(props.card.id)
 }
 const notifyPressAndHoldToDrag = () => {
   if (isLocked.value) { return }

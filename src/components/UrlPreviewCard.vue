@@ -86,7 +86,7 @@ const toggleShouldDisplayIframe = (event) => {
   event.stopPropagation()
   if (isTwitterUrl.value) { return }
   store.dispatch('closeAllDialogs')
-  cardStore.incrementCardsZ(props.card.id)
+  cardStore.incrementCardZ(props.card.id)
   const iframeIsVisibleForCardId = store.state.iframeIsVisibleForCardId
   let value
   if (props.card.id === iframeIsVisibleForCardId) {

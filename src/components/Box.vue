@@ -3,6 +3,7 @@ import { reactive, computed, onMounted, onBeforeUnmount, onUpdated, onUnmounted,
 import { useStore } from 'vuex'
 import { useCardStore } from '@/stores/useCardStore'
 import { useConnectionStore } from '@/stores/useConnectionStore'
+import { useBoxStore } from '@/stores/useBoxStore'
 
 import utils from '@/utils.js'
 import consts from '@/consts.js'
@@ -17,6 +18,7 @@ import { colord, extend } from 'colord'
 const store = useStore()
 const cardStore = useCardStore()
 const connectionStore = useConnectionStore()
+const boxStore = useBoxStore()
 
 let unsubscribe
 
@@ -169,7 +171,6 @@ const styles = computed(() => {
     height: height + 'px',
     border: `${borderWidth}px solid ${color.value}`
   }
-  // dimensions set by currentBoxes/resize while resizing
   if (isResizing.value) {
     styles.width = normalizedBox.value.resizeWidth
     styles.height = normalizedBox.value.resizeHeight
@@ -297,10 +298,10 @@ const resizeColorClass = computed(() => {
 // shrink
 
 const shrinkToDefaultBoxSize = () => {
-  const updated = { id: props.box.id }
-  updated.resizeWidth = consts.defaultBoxWidth
-  updated.resizeHeight = consts.defaultBoxHeight
-  store.dispatch('currentBoxes/update', updated)
+  const update = { id: props.box.id }
+  update.resizeWidth = consts.defaultBoxWidth
+  update.resizeHeight = consts.defaultBoxHeight
+  boxStore.updateBox(update)
 }
 const shrink = () => {
   prevSelectedBox = props.box
@@ -314,12 +315,12 @@ const shrink = () => {
   const rect = utils.boundaryRectFromItems(items)
   const padding = consts.spaceBetweenCards
   const paddingTop = 30 + padding
-  const updated = { id: props.box.id }
-  updated.x = rect.x - padding
-  updated.y = rect.y - paddingTop
-  updated.resizeWidth = rect.width + (padding * 2)
-  updated.resizeHeight = rect.height + (padding + paddingTop)
-  store.dispatch('currentBoxes/update', updated)
+  const update = { id: props.box.id }
+  update.x = rect.x - padding
+  update.y = rect.y - paddingTop
+  update.resizeWidth = rect.width + (padding * 2)
+  update.resizeHeight = rect.height + (padding + paddingTop)
+  boxStore.updateBox(update)
 }
 
 // locked to background
@@ -367,7 +368,7 @@ const startBoxInfoInteraction = (event) => {
   store.dispatch('closeAllDialogs')
   store.commit('currentUserIsDraggingBox', true)
   store.commit('currentDraggingBoxId', props.box.id)
-  store.dispatch('currentBoxes/incrementZ', props.box.id)
+  boxStore.incrementBoxZ(props.box.id)
   const updates = {
     boxId: props.box.id,
     userId: store.state.currentUser.id
@@ -392,7 +393,7 @@ const endBoxInfoInteraction = (event) => {
   if (isConnectingTo.value) { return }
   const isMeta = event.metaKey || event.ctrlKey
   const userId = store.state.currentUser.id
-  store.dispatch('currentBoxes/afterMove')
+  // store.dispatch('currentBoxes/afterMove')
   // store.dispatch('currentCards/afterMove')
   if (store.state.currentUserIsPainting) { return }
   if (isMultiTouch) { return }
@@ -423,7 +424,7 @@ const currentBoxIsSelected = computed(() => {
   const selected = store.state.multipleBoxesSelectedIds
   return selected.find(id => props.box.id === id)
 })
-const selectedBoxes = computed(() => store.getters['currentBoxes/isSelected'])
+const selectedBoxes = computed(() => boxStore.getBoxesSelected)
 const containedItems = () => {
   const cards = []
   const boxes = []
@@ -434,7 +435,7 @@ const containedItems = () => {
     }
   })
   // boxes
-  let selectableBoxes = store.getters['currentBoxes/all']
+  let selectableBoxes = boxStore.getAllBoxes
   selectableBoxes = utils.clone(selectableBoxes)
   selectableBoxes.forEach(box => {
     if (box.id === props.box.id) { return }
@@ -761,7 +762,7 @@ const toggleBoxChecked = () => {
   if (!canEditBox.value) { return }
   const value = !isChecked.value
   store.dispatch('closeAllDialogs')
-  store.dispatch('currentBoxes/toggleChecked', { boxId: props.box.id, value })
+  boxStore.toggleBoxChecked(props.box.id, value)
   postMessage.sendHaptics({ name: 'heavyImpact' })
   cancelLocking()
   store.commit('currentUserIsDraggingBox', false)
@@ -780,7 +781,7 @@ const containingBoxes = computed(() => {
   if (currentBoxIsSelected.value) { return }
   if (isResizing.value) { return }
   if (store.state.boxDetailsIsVisibleForBoxId) { return }
-  let boxes = store.getters['currentBoxes/all']
+  let boxes = boxStore.getAllBoxes
   boxes = utils.clone(boxes)
   boxes = boxes.filter(box => {
     const currentBox = utils.clone(props.box)

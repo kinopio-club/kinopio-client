@@ -465,7 +465,7 @@ export const useCardStore = defineStore('cards', {
       })
       this.updateCards(updates)
     },
-    incrementCardsZ (id) {
+    incrementCardZ (id) {
       // highest z
       const cards = this.getAllCards
       const maxInt = Number.MAX_SAFE_INTEGER - 1000
@@ -591,7 +591,7 @@ export const useCardStore = defineStore('cards', {
     // card details
 
     showCardDetails (id) {
-      this.incrementCardsZ(id)
+      this.incrementCardZ(id)
       store.commit('cardDetailsIsVisibleForCardId', id, { root: true })
       store.commit('parentCardId', id, { root: true })
       store.commit('loadSpaceFocusOnCardId', '', { root: true })

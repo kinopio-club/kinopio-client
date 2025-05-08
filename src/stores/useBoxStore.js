@@ -31,6 +31,15 @@ export const useBoxStore = defineStore('boxes', {
     getBoxesIsNotLocked: (state) => {
       const boxes = state.allIds.map(id => state.byId[id])
       return boxes.filter(box => !box.isLocked)
+    },
+    getBoxesSelected: (state) => {
+      let ids = store.state.multipleBoxesSelectedIds
+      if (!ids.length) {
+        ids = [store.state.currentDraggingBoxId]
+      }
+      ids = ids.filter(id => Boolean(id))
+      const boxes = ids.map(id => state.byId[id])
+      return boxes
     }
   },
 
@@ -156,6 +165,66 @@ export const useBoxStore = defineStore('boxes', {
     },
     updateBoxInfoDimensions (id) {
       this.updateBoxesInfoDimensions([id])
+    },
+
+    // z
+
+    clearAllBoxesZ () {
+      const boxes = this.getAllBoxes
+      const updates = boxes.map(box => {
+        return {
+          id: box.id,
+          z: 0
+        }
+      })
+      this.updateBoxes(updates)
+    },
+    incrementBoxZ (id) {
+      // highest z
+      const boxes = this.getAllBoxes
+      const maxInt = Number.MAX_SAFE_INTEGER - 1000
+      let highestZ = utils.highestItemZ(boxes)
+      if (highestZ > maxInt) {
+        this.clearAllBoxesZ()
+        highestZ = 1
+      }
+      const update = {
+        id,
+        z: highestZ + 1
+      }
+      this.updateBox(update)
+    },
+
+    // checked
+
+    toggleBoxChecked (id, value) {
+      const box = this.getBox(id)
+      let { name } = box
+      const checkbox = utils.checkboxFromString(name)
+      name = name.replace(checkbox, '')
+      if (value) {
+        name = `[x] ${name}`
+      } else {
+        name = `[] ${name}`
+      }
+      const update = {
+        id,
+        name,
+        nameUpdatedAt: new Date()
+      }
+      this.updateBox(update)
+    },
+    clearBoxChecked (id) {
+      const box = this.getBox(id)
+      let name = box.name
+      name = name.replace('[x]', '').trim()
+      const update = {
+        id,
+        name,
+        nameUpdatedAt: new Date()
+      }
+      this.updateBox(update)
+      this.updateBoxDimensions(id)
     }
 
   }

@@ -16,7 +16,7 @@ let prevMoveDelta = { x: 0, y: 0 }
 let tallestCardHeight = 0
 let canBeSelectedSortedByY = {}
 
-const incrementCardsZ = (context, cards) => {
+const incrementCardZ = (context, cards) => {
   cards = cards.map(card => {
     if (card.isLocked) { return card }
     const cards = context.getters.all
@@ -716,7 +716,7 @@ export default {
         return { id, x, y, z }
       })
       cards = cards.filter(card => Boolean(card))
-      cards = incrementCardsZ(context, cards)
+      cards = incrementCardZ(context, cards)
       context.commit('move', { cards, spaceId })
       cards = cards.filter(card => card)
       await context.dispatch('api/addToQueue', {

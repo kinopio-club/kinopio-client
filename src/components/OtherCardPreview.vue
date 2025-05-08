@@ -118,7 +118,7 @@ const showOtherCardDetailsIsVisible = async (event) => {
   }
   if (props.parentCardId) {
     otherItem.parentCardId = props.parentCardId
-    cardStore.incrementCardsZ(props.parentCardId)
+    cardStore.incrementCardZ(props.parentCardId)
   }
   if (props.shouldCloseAllDialogs) {
     store.dispatch('closeAllDialogs')

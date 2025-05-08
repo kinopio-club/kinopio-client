@@ -23,7 +23,7 @@ const start = (event, action) => {
   store.dispatch('history/pause')
   store.dispatch('closeAllDialogs')
   store.commit('preventDraggedCardFromShowingDetails', true)
-  cardStore.incrementCardsZ(props.card.id)
+  cardStore.incrementCardZ(props.card.id)
   let cardIds = [props.card.id]
   const multipleCardsSelectedIds = store.state.multipleCardsSelectedIds
   if (multipleCardsSelectedIds.includes(props.card.id)) {
