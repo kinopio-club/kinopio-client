@@ -411,7 +411,8 @@ export const useCardStore = defineStore('cards', {
       this.deleteCards(cardsToDelete)
       // store.dispatch('history/add', { cards, isRemoved: true }, { root: true })
       // await cache.updateSpace('removedCards', state.removedCards, currentSpaceId)
-      // store.dispatch('currentConnections/removeFromItem', card) // to plural
+      const connectionStore = useConnectionStore()
+      connectionStore.removeConnectionsFromItems(ids)
     },
     removeCard (id) {
       this.removeCards([id])
@@ -535,7 +536,9 @@ export const useCardStore = defineStore('cards', {
         if (!alignedCards.length) { return }
         alignedCards.unshift(card)
         await this.distributeCardsVertically(alignedCards)
-        await store.dispatch('currentConnections/updateMultiplePaths', alignedCards, { root: true })
+        const cardIds = alignedCards.map(card => card.id)
+        const connectionStore = useConnectionStore()
+        connectionStore.updateConnectionPaths(cardIds)
       }
     },
     async updateCardsDimensions (ids) {
@@ -639,10 +642,10 @@ export const useCardStore = defineStore('cards', {
         tilt = Math.max(-maxDegrees, tilt)
         tilt = Math.round(tilt)
         updates.push({ id, tilt })
-        // const connections = context.rootGetters['currentConnections/byItemId'](id)
-        // context.dispatch('currentConnections/updatePathsWhileDragging', { connections }, { root: true })
       })
       this.updateCards(updates)
+      const connectionStore = useConnectionStore()
+      connectionStore.updateConnectionPaths(ids)
     },
     clearTiltCards (ids) {
       ids.forEach(id => {
@@ -666,8 +669,9 @@ export const useCardStore = defineStore('cards', {
         width = Math.round(width)
         updates.push({ id, resizeWidth: width })
         // context.dispatch('broadcast/update', { updates, type: 'resizeCard', handler: 'currentCards/update' }, { root: true })
-        // context.dispatch('currentConnections/updateMultiplePaths', [card], { root: true })
       })
+      const connectionStore = useConnectionStore()
+      connectionStore.updateConnectionPaths(ids)
       this.updateCards(updates)
     },
     async clearResizeCards (ids, shouldRemoveResizeWidth) {
@@ -682,11 +686,10 @@ export const useCardStore = defineStore('cards', {
       })
       this.updateCards(updates)
       this.updateCardsDimensions(ids)
-      // await nextTick()
-      // await nextTick()
-      // let connections = context.rootGetters['currentConnections/byMultipleItemIds'](cardIds)
-      // connections = utils.clone(connections)
-      // context.dispatch('currentConnections/updatePaths', { connections }, { root: true })
+      await nextTick()
+      await nextTick()
+      const connectionStore = useConnectionStore()
+      connectionStore.updateConnectionPaths(ids)
     },
 
     // vote

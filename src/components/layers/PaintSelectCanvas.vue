@@ -1,6 +1,7 @@
 <script setup>
 import { reactive, computed, onMounted, onBeforeUnmount, onUnmounted, watch, ref, nextTick } from 'vue'
 import { useStore } from 'vuex'
+import { useConnectionStore } from '@/stores/useConnectionStore'
 
 import { useCardStore } from '@/stores/useCardStore'
 
@@ -10,7 +11,9 @@ import postMessage from '@/postMessage.js'
 import DropGuideLine from '@/components/layers/DropGuideLine.vue'
 
 import { colord, extend } from 'colord'
+
 const cardStore = useCardStore()
+const connectionStore = useConnectionStore()
 const store = useStore()
 
 // a sequence of circles that's broadcasted to others and is used for multi-card selection
@@ -195,7 +198,7 @@ const updateSelectableBoxesInViewport = () => {
   selectableBoxes = array
 }
 const updateSelectableConnectionsInViewport = () => {
-  const selectableConnections = store.getters['currentConnections/isSelectableInViewport']()
+  const selectableConnections = connectionStore.getAllConnectionsInViewport
   if (!selectableConnections) { return }
   selectableConnectionsInViewport = selectableConnections
 }

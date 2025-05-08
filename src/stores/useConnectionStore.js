@@ -31,9 +31,6 @@ export const useConnectionStore = defineStore('connections', {
     getAllConnections: (state) => {
       return state.allIds.map(id => state.byId[id])
     },
-    getVisibleConnections: (state) => {
-      return (visibleIds) => visibleIds.map(id => state.byId[id])
-    },
     getConnectionType: (state) => {
       return (id) => state.typeById[id]
     },
@@ -53,8 +50,17 @@ export const useConnectionStore = defineStore('connections', {
       } else {
         return last(connectionTypes)
       }
+    },
+    getAllConnectionsInViewport: (state) => {
+      const elements = document.querySelectorAll('svg.connection')
+      const paths = []
+      elements.forEach(path => {
+        if (path.dataset.isVisibleInViewport === 'false') { return }
+        if (path.dataset.isHiddenByCommentFilter === 'true') { return }
+        paths.push(path)
+      })
+      return paths
     }
-
   },
 
   actions: {
@@ -303,6 +309,14 @@ export const useConnectionStore = defineStore('connections', {
       typesToRemove.forEach(type => {
         this.deleteConnectionTypes([type.id])
       })
+    },
+    removeConnectionsFromItems (itemIds) {
+      const connections = this.getItemsConnections(itemIds)
+      const connectionIds = connections.map(connection => connection.id)
+      this.removeConnections(connectionIds)
+    },
+    removeConnectionsFromItem (itemId) {
+      this.removeConnectionsFromItems([itemId])
     },
 
     // path

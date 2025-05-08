@@ -606,7 +606,7 @@ const currentSpace = {
       space = space || context.state
       console.info('💕 update modules space id', space.id) // deprecated
       // context.dispatch('currentCards/updateSpaceId', space.id, { root: true })
-      context.dispatch('currentConnections/updateSpaceId', space.id, { root: true })
+      // context.dispatch('currentConnections/updateSpaceId', space.id, { root: true })
       context.dispatch('currentBoxes/updateSpaceId', space.id, { root: true })
     },
 
