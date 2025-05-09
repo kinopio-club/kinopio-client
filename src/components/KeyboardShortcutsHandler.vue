@@ -110,7 +110,10 @@ const isCanvasScope = (event) => {
 const handleShortcuts = (event) => {
   const key = event.key.toLowerCase()
   const keyCode = event.code // physical key on the keyboard
-  // console.warn('🎹', key)
+  const keyB = key === 'b' || keyCode === 'KeyB'
+  const keyN = key === 'n' || keyCode === 'KeyN'
+  const keyM = key === 'm' || keyCode === 'KeyM'
+  const keyT = key === 't' || keyCode === 'KeyT'
   // const isFromCard = event.target.classList[0] === 'card'
   const isSpaceScope = checkIsSpaceScope(event)
   const isMinimapDialogScope = checkIsMinimapDialogScope(event)
@@ -120,17 +123,17 @@ const handleShortcuts = (event) => {
   if (key === '?' && isSpaceScope) {
     store.commit('triggerKeyboardShortcutsIsVisible')
   // n
-  } else if (key === 'n' && isSpaceScope) {
+  } else if (keyN && isSpaceScope) {
     if (store.state.isAddPage) { return }
     if (isDisabledKeyboardShortcut('newSpace')) { return }
     store.dispatch('currentSpace/addSpace')
     store.commit('addNotification', { message: 'New space created (N)', icon: 'add', type: 'success' })
     store.commit('triggerSpaceDetailsInfoIsVisible')
   // m
-  } else if (key === 'm' && (isSpaceScope || isMinimapDialogScope)) {
+  } else if (keyM && (isSpaceScope || isMinimapDialogScope)) {
     store.commit('triggerMinimapIsVisible')
   // t
-  } else if (key === 't' && isSpaceScope) {
+  } else if (keyT && isSpaceScope) {
     store.commit('addNotification', { message: 'Theme toggled (T)', type: 'info' })
     store.dispatch('themes/toggle')
     store.dispatch('themes/isSystem', false)
@@ -166,7 +169,7 @@ const handleShortcuts = (event) => {
     store.commit('currentUserIsPanningReady', false)
     spaceKeyIsDown = false
   // b
-  } else if ((key === 'b' || keyCode === 'KeyB') && isSpaceScope) {
+  } else if (keyB && isSpaceScope) {
     let cards
     const multipleCardIds = store.state.multipleCardsSelectedIds
     const cardId = store.state.cardDetailsIsVisibleForCardId
@@ -200,6 +203,14 @@ const handleShortcuts = (event) => {
 // on key down
 const handleMetaKeyShortcuts = (event) => {
   const key = event.key.toLowerCase()
+  const keyCode = event.code // physical key on the keyboard
+  const keyZ = key === 'z' || keyCode === 'KeyZ'
+  const keyA = key === 'a' || keyCode === 'KeyA'
+  const keyK = key === 'k' || keyCode === 'KeyK'
+  const keyF = key === 'f' || keyCode === 'KeyF'
+  const keyG = key === 'g' || keyCode === 'KeyG'
+  const keyP = key === 'p' || keyCode === 'KeyP'
+  const keyL = key === 'l' || keyCode === 'KeyL'
   const isMeta = event.metaKey || event.ctrlKey
   const isCardScope = checkIsCardScope(event)
   const isSpaceScope = checkIsSpaceScope(event)
@@ -214,35 +225,35 @@ const handleMetaKeyShortcuts = (event) => {
   } else if (key === 'enter' && isSpaceScope) {
     addCard()
   // Redo
-  } else if (event.shiftKey && isMeta && key === 'z' && !isFromInput) {
+  } else if (event.shiftKey && isMeta && keyZ && !isFromInput) {
     event.preventDefault()
     store.dispatch('history/redo')
   // Undo
-  } else if (isMeta && key === 'z' && !isFromInput) {
+  } else if (isMeta && keyZ && !isFromInput) {
     event.preventDefault()
     store.dispatch('history/undo')
   // Select All Cards Below Cursor
-  } else if (isMeta && event.shiftKey && key === 'a' && isSpaceScope && !toolbarIsDrawing) {
+  } else if (isMeta && event.shiftKey && keyA && isSpaceScope && !toolbarIsDrawing) {
     event.preventDefault()
     selectAllItemsBelowCursor()
   // Select All Cards and Connections
-  } else if (isMeta && key === 'a' && isSpaceScope && !toolbarIsDrawing) {
+  } else if (isMeta && keyA && isSpaceScope && !toolbarIsDrawing) {
     event.preventDefault()
     selectAllItems()
   // Search/Jump-to Space
-  } else if (isMeta && key === 'k' && isSpaceScope) {
+  } else if (isMeta && keyK && isSpaceScope) {
     event.preventDefault()
     focusOnSpaceDetailsFilter()
   // Search/Jump-to Card
-  } else if (isMeta && key === 'f') {
+  } else if (isMeta && keyF) {
     event.preventDefault()
     focusOnSearchCardFilter(event)
   // Show previous search card
-  } else if (isMeta && event.shiftKey && key === 'g') {
+  } else if (isMeta && event.shiftKey && keyG) {
     event.preventDefault()
     store.commit('triggerShowPreviousSearchCard')
   // Show next search card
-  } else if (isMeta && key === 'g') {
+  } else if (isMeta && keyG) {
     event.preventDefault()
     store.commit('triggerShowNextSearchCard')
   // Zoom Reset
@@ -268,10 +279,10 @@ const handleMetaKeyShortcuts = (event) => {
     store.commit('triggerCenterZoomOrigin')
     store.dispatch('zoomSpace', { shouldZoomIn: true, speed: 10 })
     // Toggle Zoom Out
-  } else if (key === 'z' && isSpaceScope) {
+  } else if (keyZ && isSpaceScope) {
     event.preventDefault()
     store.commit('triggerSpaceZoomOutMax')
-  } else if (key === 'p' && isSpaceScope && !isMeta) {
+  } else if (keyP && isSpaceScope && !isMeta) {
     const value = !store.state.isPresentationMode
     store.commit('isPresentationMode', value)
     event.preventDefault()
@@ -281,7 +292,7 @@ const handleMetaKeyShortcuts = (event) => {
     spaceKeyIsDown = true
     store.commit('currentUserIsPanningReady', true)
   // Lock Cards
-  } else if (event.shiftKey && isMeta && key === 'l') {
+  } else if (event.shiftKey && isMeta && keyL) {
     event.preventDefault()
     toggleLockCards()
   }
