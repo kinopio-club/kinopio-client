@@ -515,7 +515,6 @@ export const useBoxStore = defineStore('boxes', {
       })
       const normalizedGuideKeys = Object.keys(normalizedGuides)
       snapGuides = normalizedGuideKeys.map(key => normalizedGuides[key])
-      console.log(snapGuides)
       this.boxSnapGuides = snapGuides
     },
     async updateBoxSnapPosition (snapGuide) {

@@ -400,7 +400,7 @@ const currentSpace = {
       context.commit('clearSearch', null, { root: true })
       isLoadingRemoteSpace = false
       context.commit('resetPageSizes', null, { root: true })
-      context.dispatch('restoreSpace', { space: uniqueNewSpace })
+      await context.dispatch('restoreSpace', { space: uniqueNewSpace })
     },
     createNewInboxSpace: async (context, shouldCreateWithoutLoading) => {
       const cardStore = useCardStore()
@@ -446,8 +446,9 @@ const currentSpace = {
         name: 'createSpace',
         body: space
       }, { root: true })
-      const cardStore = useCardStore()
-      cardStore.updateCardsDimensions()
+
+      // const cardStore = useCardStore()
+      // cardStore.updateCardsDimensions()
     },
     saveSpace: async (context, space) => {
       const user = context.rootState.currentUser
@@ -625,7 +626,6 @@ const currentSpace = {
       // delete space.cards
       // delete space.connections
       // delete space.connectionTypes
-
       // context.commit('currentBoxes/restore', space.boxes, { root: true }) // replace
       context.commit('restoreSpace', space)
 
