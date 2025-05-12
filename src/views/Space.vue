@@ -170,12 +170,12 @@ watch(() => store.state.currentUserIsResizingCard, (value, prevValue) => {
 watch(() => store.state.currentUserIsDraggingBox, (value, prevValue) => {
   updatePageSizeFromMutation(value)
 })
-watch(() => store.state.currentUserIsResizingBox, (value, prevValue) => {
-  if (prevValue && !value) {
-    afterResizeBoxes()
-  }
-  updatePageSizeFromMutation(value)
-})
+// watch(() => store.state.currentUserIsResizingBox, (value, prevValue) => {
+//   if (prevValue && !value) {
+//     afterResizeBoxes()
+//   }
+//   updatePageSizeFromMutation(value)
+// })
 const updatePageSizeFromMutation = async (value) => {
   if (!value) {
     await nextTick()
@@ -327,13 +327,16 @@ const addBox = (event) => {
     store.dispatch('currentUserToolbar', 'card')
     return
   }
-  store.dispatch('currentBoxes/add', { box: position, shouldResize: true })
+  const isResizing = true
+  boxStore.createBox(position, isResizing)
   store.commit('currentBoxIsNew', true)
   event.preventDefault() // allows dragging boxes without scrolling on touch
 }
 const resizeBoxes = () => {
   if (!prevCursor) { return }
-  const boxIds = store.getters['currentBoxes/isResizingIds']
+  const boxes = boxStore.getBoxesResizing
+  const ids = boxes.map(box => box.id)
+
   const zoom = store.getters.spaceCounterZoomDecimal
   let delta = {
     x: endCursor.x - prevCursor.x,
@@ -343,54 +346,58 @@ const resizeBoxes = () => {
     x: Math.round(delta.x * zoom),
     y: Math.round(delta.y * zoom)
   }
-  store.dispatch('currentBoxes/resize', { boxIds, delta })
+  boxStore.resizeBoxes(ids, delta)
 }
 const stopResizingBoxes = () => {
   if (!store.state.currentUserIsResizingBox) { return }
   store.dispatch('history/resume')
-  const boxIds = store.getters['currentBoxes/isResizingIds']
-  const boxes = boxIds.map(id => store.getters['currentBoxes/byId'](id))
-  useConnectionStore.updateConnectionPaths(boxIds)
-  store.dispatch('history/add', { boxes, useSnapshot: true })
+
+  // const boxes = boxStore.getBoxesResizing
+  // const ids = boxes.map(box => box.id)
+
+  // useConnectionStore.updateConnectionPaths(boxIds)
+  // store.dispatch('history/add', { boxes, useSnapshot: true })
   store.commit('currentUserIsResizingBox', false)
   store.dispatch('currentUserToolbar', 'card')
   store.commit('broadcast/updateStore', { updates: { userId: currentUser.value.id }, type: 'removeRemoteUserResizingBoxes' })
-  store.dispatch('checkIfItemShouldIncreasePageSize', boxes[0])
+  // store.dispatch('checkIfItemShouldIncreasePageSize', boxes[0])
 }
-const afterResizeBoxes = () => {
-  const boxIds = store.getters['currentBoxes/isResizingIds']
-  const boxes = boxIds.map(boxId => {
-    let { resizeWidth, resizeHeight } = utils.boxElementDimensions({ id: boxId })
-    if (store.state.shouldSnapToGrid) {
-      resizeWidth = utils.roundToNearest(resizeWidth)
-      resizeHeight = utils.roundToNearest(resizeHeight)
-    }
-    return { id: boxId, resizeWidth, resizeHeight }
-  })
-  store.dispatch('currentBoxes/updateMultiple', boxes)
-}
+// const afterResizeBoxes = () => {
+
+//   const boxIds = store.getters['currentBoxes/isResizingIds']
+//   const boxes = boxIds.map(boxId => {
+//     let { resizeWidth, resizeHeight } = utils.boxElementDimensions({ id: boxId })
+//     if (store.state.shouldSnapToGrid) {
+//       resizeWidth = utils.roundToNearest(resizeWidth)
+//       resizeHeight = utils.roundToNearest(resizeHeight)
+//     }
+//     return { id: boxId, resizeWidth, resizeHeight }
+//   })
+
+//   store.dispatch('currentBoxes/updateMultiple', boxes)
+// }
 const checkIfShouldSnapBoxes = (event) => {
   if (!store.state.boxesWereDragged) { return }
   if (event.shiftKey) { return }
-  const snapGuides = store.state.currentBoxes.snapGuides
+  const snapGuides = boxStore.boxSnapGuides
   if (!snapGuides.length) { return }
   snapGuides.forEach(snapGuide => {
     const elapsedTime = Date.now() - snapGuide.time
     const shouldSnap = elapsedTime >= consts.boxSnapGuideWaitingDuration
     if (!shouldSnap) { return }
-    store.dispatch('currentBoxes/snap', snapGuide)
+    boxStore.updateBoxSnapPosition(snapGuide)
   })
 }
 const checkIfShouldExpandBoxes = (event) => {
   if (!store.state.cardsWereDragged) { return }
   if (event.shiftKey) { return }
-  const snapGuides = store.state.currentBoxes.snapGuides
+  const snapGuides = boxStore.boxSnapGuides
   if (!snapGuides.length) { return }
   snapGuides.forEach(snapGuide => {
     const elapsedTime = Date.now() - snapGuide.time
     const shouldSnap = elapsedTime >= consts.boxSnapGuideWaitingDuration
     if (!shouldSnap) { return }
-    store.dispatch('currentBoxes/expand', snapGuide)
+    boxStore.updateBoxSnapSize(snapGuide)
   })
 }
 const unselectCardsInDraggedBox = () => {
@@ -408,15 +415,15 @@ const showBoxDetails = async (event) => {
   store.commit('boxDetailsIsVisibleForBoxId', boxId)
 }
 const updateSizeForNewBox = (boxId) => {
-  const box = store.getters['currentBoxes/byId'](boxId)
+  const box = boxStore.getBox(boxId)
   const isMinSize = box.resizeWidth === consts.minBoxSize && box.resizeHeight === consts.minBoxSize
   if (!isMinSize) { return }
-  const newBox = {
+  const update = {
     id: box.id,
     resizeWidth: consts.defaultBoxWidth,
     resizeHeight: consts.defaultBoxHeight
   }
-  store.dispatch('currentBoxes/update', newBox)
+  boxStore.update(update)
 }
 
 // drag items
@@ -626,9 +633,9 @@ const stopInteractions = async (event) => {
   // if (isCardsSelected && store.state.cardsWereDragged) {
   //   store.dispatch('currentCards/afterMove')
   // }
-  if (store.state.boxesWereDragged) {
-    store.dispatch('currentBoxes/afterMove')
-  }
+  // if (store.state.boxesWereDragged) {
+  //   store.dispatch('currentBoxes/afterMove')
+  // }
   updateIconsNotDraggable()
   blurButtonClick(event)
   if (event.touches) {

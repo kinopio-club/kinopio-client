@@ -308,19 +308,19 @@ export default {
 
     // resize
 
-    resize: (context, { boxIds, delta }) => {
+    resize: (context, { ids, delta }) => {
       let connections = []
       const boxes = []
-      boxIds.forEach(boxId => {
-        const rect = utils.boxElementDimensions({ id: boxId })
+      ids.forEach(id => {
+        const rect = utils.boxElementDimensions({ id })
         let width = rect.width
         let height = rect.height
         width = width + delta.x
         height = height + delta.y
-        const infoPosition = utils.boxInfoPositionFromId(boxId)
+        const infoPosition = utils.boxInfoPositionFromId(id)
         if (!infoPosition) { return }
         const { infoWidth, infoHeight } = infoPosition
-        const box = { id: boxId, resizeWidth: width, resizeHeight: height, infoWidth, infoHeight }
+        const box = { id, resizeWidth: width, resizeHeight: height, infoWidth, infoHeight }
         boxes.push(box)
         connections = connections.concat(context.rootGetters['currentConnections/byItemId'](box.id))
         context.commit('currentUserIsResizingBox', true, { root: true })
@@ -393,7 +393,6 @@ export default {
             min: targetBox.y + snapThreshold,
             max: targetBox.y + targetBox.height - snapThreshold
           })
-          // let time = 1
           // item sides
           const itemLeft = item.x
           const itemRight = item.x + item.width

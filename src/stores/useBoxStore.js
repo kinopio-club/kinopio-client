@@ -9,7 +9,9 @@ import utils from '@/utils.js'
 import consts from '@/consts.js'
 import cache from '@/cache.js'
 
+import { nanoid } from 'nanoid'
 import sortBy from 'lodash-es/sortBy'
+import randomColor from 'randomcolor'
 
 export const useBoxStore = defineStore('boxes', {
   state: () => ({
@@ -17,7 +19,8 @@ export const useBoxStore = defineStore('boxes', {
     allIds: [],
     dirtyBoxIds: new Set(),
     pendingUpdates: new Map(),
-    isUpdating: false
+    isUpdating: false,
+    boxSnapGuides: [] // { side, origin, target }, { ... }
   }),
 
   getters: {
@@ -56,11 +59,30 @@ export const useBoxStore = defineStore('boxes', {
         boxes,
         yIndex
       }
+    },
+    getBoxesResizing: (state) => {
+      const ids = store.state.currentUserIsResizingBoxIds
+      // if (getters.isSelectedIds.length) {
+      //   boxIds = getters.isSelectedIds
+      // }
+      const boxes = ids.map(id => state.byId[id])
+      return boxes
     }
-
   },
 
   actions: {
+
+    getBoxesSelectableInViewport () {
+      const elements = document.querySelectorAll('.box')
+      let boxes = []
+      elements.forEach(box => {
+        if (box.dataset.isVisibleInViewport === 'false') { return }
+        if (box.dataset.isLocked === 'true') { return }
+        boxes.push(box)
+      })
+      boxes = boxes.map(box => this.getBox(box.dataset.boxId))
+      return boxes
+    },
 
     // init
 
@@ -78,16 +100,44 @@ export const useBoxStore = defineStore('boxes', {
 
     // create
 
+    normalizeNewBox (box) {
+      const count = this.allIds.length
+      const minBoxSize = consts.minBoxSize
+      const isThemeDark = store.state.currentUser.theme === 'dark'
+      const color = randomColor({ luminosity: 'dark' })
+      return {
+        id: box.id || nanoid(),
+        spaceId: store.state.currentSpace.id,
+        userId: store.state.currentUser.id,
+        x: box.x,
+        y: box.y,
+        resizeWidth: box.resizeWidth || minBoxSize,
+        resizeHeight: box.resizeHeight || minBoxSize,
+        color: box.color || color,
+        fill: box.fill || 'filled', // empty, filled
+        name: box.name || `Box ${count}`,
+        infoHeight: 57,
+        infoWidth: 34,
+        headerFontId: store.state.currentUser.prevHeaderFontId || 0,
+        background: box.background,
+        backgroundIsStretch: box.backgroundIsStretch
+      }
+    },
     addBoxToState (box) {
       this.byId[box.id] = box
       this.allIds.push(box.id)
     },
-    async createBox (box) {
-      // normalize box
+    async createBox (box, isResizing) {
+      box = this.normalizeNewBox(box)
       this.addBoxToState(box)
       // if (!updates.isBroadcast) {
-      // store.dispatch('broadcast/update', { updates: connection, type: 'addConnection', handler: 'currentConnections/create' }, { root: true })
-      // store.dispatch('history/add', { connections: [connection] }, { root: true })
+      // context.dispatch('broadcast/update', { updates: box, type: 'createBox', handler: 'currentBoxes/create' }, { root: true })
+      // context.dispatch('history/add', { boxes: [box] }, { root: true })
+      if (isResizing) {
+        // store.dispatch('history/pause', null, { root: true })
+        store.commit('currentUserIsResizingBox', true, { root: true })
+        store.commit('currentUserIsResizingBoxIds', [box.id], { root: true })
+      }
       await store.dispatch('api/addToQueue', { name: 'createBox', body: box }, { root: true })
     },
 
@@ -156,7 +206,7 @@ export const useBoxStore = defineStore('boxes', {
         // store.dispatch('broadcast/update', { updates: box, type: 'removeBox', handler: 'currentBoxes/remove' }, { root: true })
       }
       const boxes = ids.map(id => this.getBox(id))
-      store.dispatch('history/add', { boxes, isRemoved: true }, { root: true })
+      // store.dispatch('history/add', { boxes, isRemoved: true }, { root: true })
       await cache.updateSpace('boxes', this.getAllBoxes, store.state.currentSpace.id)
       await nextTick()
       const connectionStore = useConnectionStore()
@@ -168,6 +218,16 @@ export const useBoxStore = defineStore('boxes', {
 
     // position
 
+    updatePageSize (box) {
+      const boxY = box.y + box.resizeHeight
+      if (boxY >= store.state.pageHeight) {
+        store.commit('pageHeight', boxY, { root: true })
+      }
+      const boxX = box.x + box.resizeWidth
+      if (boxX >= store.state.pageWidth) {
+        store.commit('pageWidth', boxX, { root: true })
+      }
+    },
     moveBoxes ({ endCursor, prevCursor, delta }) {
       const connectionStore = useConnectionStore()
       const zoom = store.getters.spaceCounterZoomDecimal
@@ -193,12 +253,13 @@ export const useBoxStore = defineStore('boxes', {
           y: box.y + delta.y
         }
         updates.push(update)
+        this.updatePageSize(update)
       })
       this.updateBoxes(updates)
       store.commit('boxesWereDragged', true, { root: true })
       const itemIds = updates.map(update => update.id)
       connectionStore.updateConnectionPaths(itemIds)
-      // boxStore.updateSnapGuides({ boxes: updates }) ? from currentBoxes to store
+      this.updateBoxSnapGuides({ boxes: updates })
     },
     updateBoxesInfoDimensions (ids) {
       for (const id of ids) {
@@ -239,6 +300,27 @@ export const useBoxStore = defineStore('boxes', {
         z: highestZ + 1
       }
       this.updateBox(update)
+    },
+    resizeBoxes (ids, delta) {
+      const updates = []
+      ids.forEach(id => {
+        const rect = utils.boxElementDimensions({ id })
+        let width = rect.width
+        let height = rect.height
+        width = width + delta.x
+        height = height + delta.y
+        const infoPosition = utils.boxInfoPositionFromId(id)
+        if (!infoPosition) { return }
+        const { infoWidth, infoHeight } = infoPosition
+        const box = { id, resizeWidth: width, resizeHeight: height, infoWidth, infoHeight }
+        updates.push(box)
+        this.updatePageSize(box)
+        store.commit('currentUserIsResizingBox', true, { root: true })
+        store.commit('currentUserIsResizingBoxIds', [box.id], { root: true })
+      })
+      const connectionStore = useConnectionStore()
+      connectionStore.updateConnectionPaths(ids)
+      this.updateBoxes(updates)
     },
 
     // checked
@@ -332,7 +414,182 @@ export const useBoxStore = defineStore('boxes', {
       if (!isMultipleBoxesSelected) {
         store.commit('preventMultipleSelectedActionsIsVisible', true)
       }
-    }
+    },
 
+    // snap guides
+
+    getBoxSnapGuide ({ side, item, targetBox }) {
+      let time = Date.now()
+      const prevGuide = this.boxSnapGuides.find(guide => guide.side === side)
+      if (prevGuide) {
+        time = prevGuide.time
+      }
+      return { side, origin: item, target: targetBox, time }
+    },
+    updateBoxSnapGuides ({ cards, boxes }) {
+      if (store.state.shouldSnapToGrid) { return }
+      const snapThreshold = 6
+      const spaceEdgeThreshold = 100
+      const targetBoxes = this.getBoxesSelectableInViewport()
+      const prevSnapGuides = store.state.snapGuides
+      let snapGuides = []
+      // normalize items
+      let items = boxes
+      if (cards) {
+        items = [utils.boundaryRectFromItems(cards)]
+      }
+      items = items.map(item => {
+        item.width = item.resizeWidth || item.width
+        item.height = item.resizeheight || item.height
+        return item
+      })
+      // find
+      items.forEach(item => {
+        targetBoxes.forEach(targetBox => {
+          if (targetBox.id === item.id) { return }
+          targetBox.width = targetBox.resizeWidth
+          targetBox.height = targetBox.resizeHeight
+          const isBetweenTargetBoxPointsX = utils.isBetween({
+            value: item.x,
+            min: targetBox.x + snapThreshold,
+            max: targetBox.x + targetBox.width - snapThreshold
+          })
+          const isBetweenTargetBoxPointsY = utils.isBetween({
+            value: item.y,
+            min: targetBox.y + snapThreshold,
+            max: targetBox.y + targetBox.height - snapThreshold
+          })
+          // item sides
+          const itemLeft = item.x
+          const itemRight = item.x + item.width
+          const itemTop = item.y
+          const itemBottom = item.y + item.height
+          // target sides
+          const targetBoxLeft = targetBox.x
+          const targetBoxRight = targetBox.x + targetBox.width
+          const targetBoxTop = targetBox.y
+          const targetBoxBottom = targetBox.y + targetBox.height
+          const targetBoxIsMinX = targetBox.x <= spaceEdgeThreshold
+          const targetBoxIsMinY = targetBox.y <= spaceEdgeThreshold
+          // snap left
+          const isSnapLeftFromItemRight = Math.abs(itemRight - targetBoxLeft) <= snapThreshold
+          const isSnapLeftFromItemLeft = Math.abs(itemLeft - targetBoxLeft) <= snapThreshold
+          if (!targetBoxIsMinX && isBetweenTargetBoxPointsY && (isSnapLeftFromItemRight || isSnapLeftFromItemLeft)) {
+            const snapGuide = this.getBoxSnapGuide({ side: 'left', item, targetBox })
+            snapGuides.push(snapGuide)
+          }
+          // snap right
+          const isSnapRightFromItemLeft = Math.abs(itemLeft - targetBoxRight) <= snapThreshold
+          const isSnapRightFromItemRight = Math.abs(itemRight - targetBoxRight) <= snapThreshold
+          if (isBetweenTargetBoxPointsY && (isSnapRightFromItemLeft || isSnapRightFromItemRight)) {
+            const snapGuide = this.getBoxSnapGuide({ side: 'right', item, targetBox })
+            snapGuides.push(snapGuide)
+          }
+          // snap top
+          const isSnapTopFromItemBottom = Math.abs(itemBottom - targetBoxTop) <= snapThreshold
+          const isSnapTopFromItemTop = Math.abs(itemTop - targetBoxTop) <= snapThreshold
+          if (!targetBoxIsMinY && isBetweenTargetBoxPointsX && (isSnapTopFromItemBottom || isSnapTopFromItemTop)) {
+            const snapGuide = this.getBoxSnapGuide({ side: 'top', item, targetBox })
+            snapGuides.push(snapGuide)
+          }
+          // snap bottom
+          const isSnapBottomFromItemTop = Math.abs(itemTop - targetBoxBottom) <= snapThreshold
+          const isSnapBottomFromItemBottom = Math.abs(itemBottom - targetBoxBottom) <= snapThreshold
+          if (isBetweenTargetBoxPointsX && (isSnapBottomFromItemTop || isSnapBottomFromItemBottom)) {
+            const snapGuide = this.getBoxSnapGuide({ side: 'bottom', item, targetBox })
+            snapGuides.push(snapGuide)
+          }
+        })
+      })
+      // limit each origin item to it's closest target
+      const normalizedGuides = {}
+      snapGuides.forEach(snapGuide => {
+        const originGuide = normalizedGuides[snapGuide.origin.id]
+        if (originGuide) {
+          if (snapGuide.distance < originGuide.distance) {
+            normalizedGuides[snapGuide.origin.id] = snapGuide
+          }
+        } else {
+          normalizedGuides[snapGuide.origin.id] = snapGuide
+        }
+      })
+      const normalizedGuideKeys = Object.keys(normalizedGuides)
+      snapGuides = normalizedGuideKeys.map(key => normalizedGuides[key])
+      console.log(snapGuides)
+      this.boxSnapGuides = snapGuides
+    },
+    async updateBoxSnapPosition (snapGuide) {
+      let { side, origin, target } = snapGuide
+      const borderWidth = 2
+      const update = { id: origin.id }
+      origin = this.byId[origin.id]
+      const alignWithOriginY = side === 'right' || side === 'left'
+      // size
+      if (alignWithOriginY) {
+        update.y = target.y
+        update.resizeHeight = Math.max(target.resizeHeight, origin.resizeHeight)
+      } else {
+        update.x = target.x
+        update.resizeWidth = Math.max(target.resizeWidth, origin.resizeWidth)
+      }
+      // position
+      if (side === 'right') {
+        update.x = target.x + target.resizeWidth - borderWidth
+      } else if (side === 'left') {
+        update.x = target.x - origin.resizeWidth + borderWidth
+      } else if (side === 'top') {
+        update.y = target.y - origin.resizeHeight + borderWidth
+      } else if (side === 'bottom') {
+        update.y = target.y + target.resizeHeight - borderWidth
+      }
+      // context.dispatch('history/resume', null, { root: true })
+      this.boxSnapGuides = []
+      await nextTick()
+      this.updateBox(update)
+    },
+    async updateBoxSnapSize (snapGuide) {
+      const { side, origin, target } = snapGuide
+      const padding = consts.spaceBetweenCards
+      const update = { id: target.id }
+      const delta = {
+        x: origin.x - target.x,
+        y: origin.y - target.y
+      }
+      if (side === 'right') {
+        // increase width
+        update.resizeWidth = target.width + origin.width + padding
+        // increase height if origin is taller than target
+        if (origin.height + delta.y > target.resizeHeight) {
+          update.resizeHeight = origin.height + delta.y + padding
+        }
+      } else if (side === 'left') {
+        // increase width and shift left
+        update.resizeWidth = target.width + origin.width + padding
+        update.x = target.x - origin.width - padding
+        // increase height if origin is taller than target
+        if (origin.height + delta.y > target.resizeHeight) {
+          update.resizeHeight = origin.height + delta.y + padding
+        }
+      } else if (side === 'top') {
+        // increase height and shift up
+        const paddingTop = 30 + padding
+        update.resizeHeight = target.resizeHeight + origin.height + paddingTop
+        update.y = target.y - origin.height - paddingTop
+        // increase width if origin is wider than target
+        if (origin.width + delta.x > target.resizeWidth) {
+          update.resizeWidth = origin.width + delta.x + padding
+        }
+      } else if (side === 'bottom') {
+        // increase width
+        update.resizeHeight = target.resizeHeight + origin.height + padding
+        // increase width if origin is wider than target
+        if (origin.width + delta.x > target.resizeWidth) {
+          update.resizeWidth = origin.width + delta.x + padding
+        }
+      }
+      // context.dispatch('history/resume', null, { root: true })
+      this.updateBox(update)
+      this.boxSnapGuides = []
+    }
   }
 })

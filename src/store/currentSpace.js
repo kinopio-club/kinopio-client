@@ -431,15 +431,13 @@ const currentSpace = {
       }
     },
     saveNewSpace: async (context) => {
-      const cardStore = useCardStore()
       const space = utils.clone(context.state)
       const user = context.rootState.currentUser
       console.info('✨ saveNewSpace', space, user)
       cache.saveSpace(space)
       context.commit('addUserToSpace', user)
-      nextTick(() => {
-        cardStore.updateCardsDimensions()
-      })
+      // nextTick(() => {
+      // })
       context.dispatch('updateModulesSpaceId', space)
       context.dispatch('incrementCardsCreatedCountFromSpace', space)
       context.commit('isLoadingSpace', false, { root: true })
@@ -448,6 +446,8 @@ const currentSpace = {
         name: 'createSpace',
         body: space
       }, { root: true })
+      const cardStore = useCardStore()
+      cardStore.updateCardsDimensions()
     },
     saveSpace: async (context, space) => {
       const user = context.rootState.currentUser

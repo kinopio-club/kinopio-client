@@ -1,6 +1,7 @@
 import { nextTick } from 'vue'
 import { defineStore } from 'pinia'
 import { useConnectionStore } from '@/stores/useConnectionStore'
+import { useBoxStore } from '@/stores/useBoxStore'
 
 import store from '@/store/store.js' // TEMP Import Vuex store
 
@@ -445,6 +446,7 @@ export const useCardStore = defineStore('cards', {
     },
     moveCards ({ endCursor, prevCursor, delta }) {
       const connectionStore = useConnectionStore()
+      const boxStore = useBoxStore()
       const zoom = store.getters.spaceCounterZoomDecimal
       if (!endCursor || !prevCursor) { return }
       endCursor = {
@@ -476,7 +478,7 @@ export const useCardStore = defineStore('cards', {
       store.commit('cardsWereDragged', true, { root: true })
       const itemIds = updates.map(update => update.id)
       connectionStore.updateConnectionPaths(itemIds)
-      // boxStore.updateSnapGuides({ cards: updates }) ? to store
+      boxStore.updateBoxSnapGuides({ cards: updates })
     },
     clearAllCardsZ () {
       const cards = this.getAllCards
@@ -569,6 +571,7 @@ export const useCardStore = defineStore('cards', {
       ids = ids || this.allIds
       let cards = ids.map(id => this.getCard(id))
       cards = cards.filter(card => Boolean(card))
+      // cards = utils.clone(cards) // temp?
       if (!cards.length) { return }
       await nextTick()
       const updatedCards = []

@@ -174,10 +174,6 @@ const styles = computed(() => {
     height: height + 'px',
     border: `${borderWidth}px solid ${color.value}`
   }
-  if (isResizing.value) {
-    styles.width = normalizedBox.value.resizeWidth
-    styles.height = normalizedBox.value.resizeHeight
-  }
   if (hasFill.value && !background) {
     let fillColor = color.value
     fillColor = colord(fillColor).alpha(0.5).toRgbString()
