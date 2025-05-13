@@ -380,24 +380,20 @@ const checkIfShouldSnapBoxes = (event) => {
   if (!store.state.boxesWereDragged) { return }
   if (event.shiftKey) { return }
   const snapGuides = boxStore.boxSnapGuides
-  if (!snapGuides.length) { return }
+  if (!snapGuides.size) { return }
   snapGuides.forEach(snapGuide => {
-    const elapsedTime = Date.now() - snapGuide.time
-    const shouldSnap = elapsedTime >= consts.boxSnapGuideWaitingDuration
-    if (!shouldSnap) { return }
-    boxStore.updateBoxSnapPosition(snapGuide)
+    if (!store.state.notifyBoxSnappingIsReady) { return }
+    boxStore.updateBoxSnapToPosition(snapGuide)
   })
 }
 const checkIfShouldExpandBoxes = (event) => {
   if (!store.state.cardsWereDragged) { return }
   if (event.shiftKey) { return }
   const snapGuides = boxStore.boxSnapGuides
-  if (!snapGuides.length) { return }
+  if (!snapGuides.size) { return }
   snapGuides.forEach(snapGuide => {
-    const elapsedTime = Date.now() - snapGuide.time
-    const shouldSnap = elapsedTime >= consts.boxSnapGuideWaitingDuration
-    if (!shouldSnap) { return }
-    boxStore.updateBoxSnapSize(snapGuide)
+    if (!store.state.notifyBoxSnappingIsReady) { return }
+    boxStore.updateBoxSnapToSize(snapGuide)
   })
 }
 const unselectCardsInDraggedBox = () => {
