@@ -3,6 +3,7 @@ import { reactive, computed, onMounted, onBeforeUnmount, watch, ref, nextTick } 
 import { useStore } from 'vuex'
 import { useCardStore } from '@/stores/useCardStore'
 import { useConnectionStore } from '@/stores/useConnectionStore'
+import { useBoxStore } from '@/stores/useBoxStore'
 
 import utils from '@/utils.js'
 import consts from '@/consts.js'
@@ -12,6 +13,7 @@ import uniqBy from 'lodash-es/uniqBy'
 const cardStore = useCardStore()
 const store = useStore()
 const connectionStore = useConnectionStore()
+const boxStore = useBoxStore()
 
 let unsubscribe
 
@@ -298,7 +300,9 @@ const updateItem = (item, type) => {
   if (type === 'cards') {
     cardStore.updateCard(item)
   }
-  if (type === 'boxes') { store.dispatch('currentBoxes/update', item) }
+  if (type === 'boxes') {
+    boxStore.updateBox(item)
+  }
 }
 const updateCardDimensions = async () => {
   await nextTick()
