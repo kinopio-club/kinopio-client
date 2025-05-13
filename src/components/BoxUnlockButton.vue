@@ -2,11 +2,13 @@
 import { reactive, computed, onMounted, onBeforeUnmount, onUnmounted, watch, ref, nextTick } from 'vue'
 import { useStore } from 'vuex'
 import { useConnectionStore } from '@/stores/useConnectionStore'
+import { useBoxStore } from '@/stores/useBoxStore'
 
 import utils from '@/utils.js'
 
 const store = useStore()
 const connectionStore = useConnectionStore()
+const boxStore = useBoxStore()
 
 const props = defineProps({
   box: Object
@@ -68,7 +70,7 @@ const unlockBox = (event) => {
     return
   }
   store.commit('currentUserIsDraggingBox', false)
-  store.dispatch('currentBoxes/update', {
+  boxStore.updateBox({
     id: props.box.id,
     isLocked: false
   })

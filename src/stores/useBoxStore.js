@@ -67,12 +67,8 @@ export const useBoxStore = defineStore('boxes', {
       // }
       const boxes = ids.map(id => state.byId[id])
       return boxes
-    }
-  },
-
-  actions: {
-
-    getBoxesSelectableInViewport () {
+    },
+    getBoxesSelectableInViewport: (state) => {
       const elements = document.querySelectorAll('.box')
       let boxes = []
       elements.forEach(box => {
@@ -82,7 +78,10 @@ export const useBoxStore = defineStore('boxes', {
       })
       boxes = boxes.map(box => this.getBox(box.dataset.boxId))
       return boxes
-    },
+    }
+  },
+
+  actions: {
 
     // init
 
@@ -433,7 +432,7 @@ export const useBoxStore = defineStore('boxes', {
       if (store.state.shouldSnapToGrid) { return }
       const snapThreshold = 6
       const spaceEdgeThreshold = 100
-      const targetBoxes = this.getBoxesSelectableInViewport()
+      const targetBoxes = this.getBoxesSelectableInViewport
       const prevSnapGuides = store.state.snapGuides
       let snapGuides = []
       if (isCards) {

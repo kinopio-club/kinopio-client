@@ -3,6 +3,7 @@ import { reactive, computed, onMounted, onBeforeUnmount, onUnmounted, watch, ref
 import { useStore } from 'vuex'
 import { useCardStore } from '@/stores/useCardStore'
 import { useConnectionStore } from '@/stores/useConnectionStore'
+import { useBoxStore } from '@/stores/useBoxStore'
 
 import utils from '@/utils.js'
 
@@ -11,6 +12,7 @@ import { nanoid } from 'nanoid'
 const store = useStore()
 const cardStore = useCardStore()
 const connectionStore = useConnectionStore()
+const boxStore = useBoxStore()
 
 let prevType
 
@@ -109,7 +111,7 @@ const checkCurrentConnectionSuccess = (event) => {
     store.commit('broadcast/updateStore', { updates, type: 'updateRemoteCurrentConnection' })
   // connected to box
   } else if (isCurrentConnectionConnected && boxElement) {
-    const box = store.getters['currentBoxes/byId'](boxElement.dataset.boxId)
+    const box = boxStore.getBox(boxElement.dataset.boxId)
     if (box.isLocked) {
       store.commit('currentConnectionSuccess', {})
       return

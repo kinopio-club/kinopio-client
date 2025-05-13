@@ -3,12 +3,14 @@ import { reactive, computed, onMounted, onBeforeUnmount, watch, ref, nextTick } 
 import { useStore } from 'vuex'
 import { useCardStore } from '@/stores/useCardStore'
 import { useConnectionStore } from '@/stores/useConnectionStore'
+import { useBoxStore } from '@/stores/useBoxStore'
 
 import utils from '@/utils.js'
 
 const store = useStore()
 const cardStore = useCardStore()
 const connectionStore = useConnectionStore()
+const boxStore = useBoxStore()
 
 onMounted(() => {
   checkItemsHaveCheckboxes()
@@ -58,7 +60,7 @@ const itemCheckboxes = computed({
         cardStore.clearCardChecked(card.id)
       })
       props.boxes.forEach(box => {
-        store.dispatch('currentBoxes/removeChecked', box.id)
+        boxStore.clearBoxChecked(box.id)
       })
     // add checkbox
     } else {
@@ -66,7 +68,7 @@ const itemCheckboxes = computed({
         cardStore.toggleCardChecked(card.id, value)
       })
       props.boxes.forEach(box => {
-        store.dispatch('currentBoxes/toggleChecked', { boxId: box.id, value })
+        boxStore.toggleBoxChecked(box.id, value)
       })
     }
     checkItemsHaveCheckboxes()
@@ -109,7 +111,7 @@ const addCheckboxToItems = async () => {
       updatedBoxes.push(update)
     }
   })
-  store.dispatch('currentBoxes/updateMultiple', updatedBoxes)
+  boxStore.updateBoxes(updatedBoxes)
   state.itemsHaveCheckboxes = true
   updateDimensionsAndPaths()
 }

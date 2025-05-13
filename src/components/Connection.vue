@@ -3,12 +3,14 @@ import { reactive, computed, onMounted, onBeforeUnmount, onUnmounted, watch, ref
 import { useStore } from 'vuex'
 import { useCardStore } from '@/stores/useCardStore'
 import { useConnectionStore } from '@/stores/useConnectionStore'
+import { useBoxStore } from '@/stores/useBoxStore'
 
 import utils from '@/utils.js'
 
 const store = useStore()
 const cardStore = useCardStore()
 const connectionStore = useConnectionStore()
+const boxStore = useBoxStore()
 
 let unsubscribe
 let unsubscribes
@@ -146,7 +148,7 @@ const typeName = computed(() => {
 
 const items = computed(() => {
   const cards = cardStore.getAllCards
-  const boxes = store.getters['currentBoxes/all']
+  const boxes = boxStore.getAllBoxes
   const items = cards.concat(boxes)
   const startItem = items.find(item => item.id === props.connection.startItemId)
   const endItem = items.find(item => item.id === props.connection.endItemId)

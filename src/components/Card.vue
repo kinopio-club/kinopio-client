@@ -3,6 +3,7 @@ import { reactive, computed, onMounted, onBeforeUnmount, onUnmounted, watch, ref
 import { useStore, mapState, mapGetters } from 'vuex'
 import { useConnectionStore } from '@/stores/useConnectionStore'
 import { useCardStore } from '@/stores/useCardStore'
+import { useBoxStore } from '@/stores/useBoxStore'
 
 import utils from '@/utils.js'
 import Frames from '@/components/Frames.vue'
@@ -34,6 +35,7 @@ dayjs.extend(isToday)
 const store = useStore()
 const cardStore = useCardStore()
 const connectionStore = useConnectionStore()
+const boxStore = useBoxStore()
 
 const cardElement = ref(null)
 
@@ -1896,7 +1898,7 @@ const containingBoxes = computed(() => {
   if (currentCardIsBeingDragged.value) { return }
   if (store.state.boxDetailsIsVisibleForBoxId) { return }
   // check boxes
-  let boxes = store.getters['currentBoxes/all']
+  let boxes = boxStore.getAllBoxes
   boxes = boxes.filter(box => {
     const boxRect = {
       x: box.x,
