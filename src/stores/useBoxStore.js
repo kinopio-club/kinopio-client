@@ -523,6 +523,7 @@ export const useBoxStore = defineStore('boxes', {
       const borderWidth = 2
       const update = { id: origin.id }
       origin = this.byId[origin.id]
+      if (!origin) { return }
       const alignWithOriginY = side === 'right' || side === 'left'
       // size
       if (alignWithOriginY) {
