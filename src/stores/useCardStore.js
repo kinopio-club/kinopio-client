@@ -478,7 +478,7 @@ export const useCardStore = defineStore('cards', {
       store.commit('cardsWereDragged', true, { root: true })
       const itemIds = updates.map(update => update.id)
       connectionStore.updateConnectionPaths(itemIds)
-      boxStore.updateBoxSnapGuides({ cards: updates })
+      boxStore.updateBoxSnapGuides(cards, true)
     },
     clearAllCardsZ () {
       const cards = this.getAllCards

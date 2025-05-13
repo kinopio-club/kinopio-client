@@ -259,7 +259,7 @@ export const useBoxStore = defineStore('boxes', {
       store.commit('boxesWereDragged', true, { root: true })
       const itemIds = updates.map(update => update.id)
       connectionStore.updateConnectionPaths(itemIds)
-      this.updateBoxSnapGuides({ boxes: updates })
+      this.updateBoxSnapGuides(updates)
     },
     updateBoxesInfoDimensions (ids) {
       for (const id of ids) {
@@ -426,17 +426,16 @@ export const useBoxStore = defineStore('boxes', {
       }
       return { side, origin: item, target: targetBox, time }
     },
-    updateBoxSnapGuides ({ cards, boxes }) {
+    updateBoxSnapGuides (items, isCards) {
+      if (!items.length) { return }
       if (store.state.shouldSnapToGrid) { return }
       const snapThreshold = 6
       const spaceEdgeThreshold = 100
       const targetBoxes = this.getBoxesSelectableInViewport()
       const prevSnapGuides = store.state.snapGuides
       let snapGuides = []
-      // normalize items
-      let items = boxes
-      if (cards) {
-        items = [utils.boundaryRectFromItems(cards)]
+      if (isCards) {
+        items = [utils.boundaryRectFromItems(items)]
       }
       items = items.map(item => {
         item.width = item.resizeWidth || item.width
