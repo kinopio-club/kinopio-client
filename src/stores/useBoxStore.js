@@ -250,7 +250,9 @@ export const useBoxStore = defineStore('boxes', {
         const update = {
           id: box.id,
           x: box.x + delta.x,
-          y: box.y + delta.y
+          y: box.y + delta.y,
+          resizeWidth: box.resizeWidth,
+          resizeHeight: box.resizeHeight
         }
         updates.push(update)
         this.updatePageSize(update)
@@ -439,7 +441,7 @@ export const useBoxStore = defineStore('boxes', {
       }
       items = items.map(item => {
         item.width = item.resizeWidth || item.width
-        item.height = item.resizeheight || item.height
+        item.height = item.resizeHeight || item.height
         return item
       })
       // find
@@ -485,8 +487,8 @@ export const useBoxStore = defineStore('boxes', {
             snapGuides.push(snapGuide)
           }
           // snap top
-          const isSnapTopFromItemBottom = Math.abs(itemBottom - targetBoxTop) <= snapThreshold
-          const isSnapTopFromItemTop = Math.abs(itemTop - targetBoxTop) <= snapThreshold
+          const isSnapTopFromItemBottom = Math.abs(itemTop - targetBoxTop) <= snapThreshold
+          const isSnapTopFromItemTop = Math.abs(itemBottom - targetBoxTop) <= snapThreshold
           if (!targetBoxIsMinY && isBetweenTargetBoxPointsX && (isSnapTopFromItemBottom || isSnapTopFromItemTop)) {
             const snapGuide = this.getBoxSnapGuide({ side: 'top', item, targetBox })
             snapGuides.push(snapGuide)
