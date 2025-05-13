@@ -380,7 +380,7 @@ const checkIfShouldSnapBoxes = (event) => {
   if (!store.state.boxesWereDragged) { return }
   if (event.shiftKey) { return }
   const snapGuides = boxStore.boxSnapGuides
-  if (!snapGuides.size) { return }
+  if (!snapGuides.length) { return }
   snapGuides.forEach(snapGuide => {
     if (!store.state.notifyBoxSnappingIsReady) { return }
     boxStore.updateBoxSnapToPosition(snapGuide)
@@ -390,9 +390,10 @@ const checkIfShouldExpandBoxes = (event) => {
   if (!store.state.cardsWereDragged) { return }
   if (event.shiftKey) { return }
   const snapGuides = boxStore.boxSnapGuides
-  if (!snapGuides.size) { return }
+  if (!snapGuides.length) { return }
   snapGuides.forEach(snapGuide => {
     if (!store.state.notifyBoxSnappingIsReady) { return }
+    console.log(snapGuide)
     boxStore.updateBoxSnapToSize(snapGuide)
   })
 }

@@ -517,7 +517,7 @@ export const useBoxStore = defineStore('boxes', {
       snapGuides = normalizedGuideKeys.map(key => normalizedGuides[key])
       this.boxSnapGuides = snapGuides
     },
-    async updateBoxSnapPosition (snapGuide) {
+    async updateBoxSnapToPosition (snapGuide) {
       let { side, origin, target } = snapGuide
       const borderWidth = 2
       const update = { id: origin.id }
@@ -546,7 +546,7 @@ export const useBoxStore = defineStore('boxes', {
       await nextTick()
       this.updateBox(update)
     },
-    async updateBoxSnapSize (snapGuide) {
+    async updateBoxSnapToSize (snapGuide) {
       const { side, origin, target } = snapGuide
       const padding = consts.spaceBetweenCards
       const update = { id: target.id }
@@ -588,7 +588,7 @@ export const useBoxStore = defineStore('boxes', {
       }
       // context.dispatch('history/resume', null, { root: true })
       this.updateBox(update)
-      this.boxSnapGuides = []
+      // this.boxSnapGuides = []
     }
   }
 })
