@@ -102,6 +102,7 @@ const connectionPathStyles = computed(() => {
   return styles
 })
 const connectionPathClasses = computed(() => {
+  if (!state.isVisibleInViewport) { return }
   const styles = {
     active: isActive.value,
     filtered: isFiltered.value,
@@ -111,7 +112,6 @@ const connectionPathClasses = computed(() => {
     'is-connected-to-comment': isConnectedToCommentCard.value,
     'is-connected-to-checked-item': isConnectedToCheckedItem.value
   }
-  if (!state.isVisibleInViewport) { return }
   return styles
 })
 
@@ -478,6 +478,7 @@ const checkIsMultiTouch = (event) => {
 // is visible in viewport
 
 const initViewportObserver = async () => {
+  if (store.state.disableViewportOptimizations) { return }
   await nextTick()
   try {
     const callback = (entries, observer) => {
