@@ -207,8 +207,8 @@ const updateItems = (items) => {
   return selectable
 }
 const updateSelectableItems = () => {
-  let cards = cardStore.getCardsSelectableInViewport
-  let boxes = boxStore.getBoxesSelectableInViewport
+  let cards = cardStore.getCardsSelectableInViewport()
+  let boxes = boxStore.getBoxesSelectableInViewport()
   cards = cards.map(card => {
     card.isCard = true
     return card

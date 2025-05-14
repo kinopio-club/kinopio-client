@@ -3,6 +3,7 @@ import { reactive, computed, onMounted, onBeforeUnmount, watch, ref, nextTick } 
 import { useStore } from 'vuex'
 import { useCardStore } from '@/stores/useCardStore'
 import { useConnectionStore } from '@/stores/useConnectionStore'
+import { useBoxStore } from '@/stores/useBoxStore'
 
 import utils from '@/utils.js'
 import consts from '@/consts.js'
@@ -12,6 +13,7 @@ import { nanoid } from 'nanoid'
 const store = useStore()
 const cardStore = useCardStore()
 const connectionStore = useConnectionStore()
+const boxStore = useBoxStore()
 
 let useSiblingConnectionType
 let browserZoomLevel = 0
@@ -504,7 +506,7 @@ const addChildCard = async (options) => {
 // recursive
 const nonOverlappingCardPosition = (position) => {
   const spaceBetweenCards = consts.spaceBetweenCards
-  const cards = cardStore.getCardsSelectableInViewport
+  const cards = cardStore.getCardsSelectableInViewport()
   if (!utils.arrayHasItems(cards)) { return position }
   const overlappingCard = cards.find(card => {
     const isBetweenX = utils.isBetween({
@@ -602,7 +604,7 @@ const remove = () => {
   store.dispatch('history/resume')
   const selectedConnectionIds = store.state.multipleConnectionsSelectedIds
   const cardIds = selectedCardIds()
-  const boxes = store.getters['currentBoxes/isSelected']
+  const boxes = boxStore.getBoxesSelected
   selectedConnectionIds.forEach(connectionId => {
     if (canEditConnectionById(connectionId)) {
       connectionStore.removeConnection(connectionId)
