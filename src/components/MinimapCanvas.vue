@@ -3,6 +3,7 @@ import { reactive, computed, onMounted, onBeforeUnmount, watch, ref, nextTick } 
 import { useStore } from 'vuex'
 import { useCardStore } from '@/stores/useCardStore'
 import { useConnectionStore } from '@/stores/useConnectionStore'
+import { useBoxStore } from '@/stores/useBoxStore'
 
 import utils from '@/utils.js'
 import cache from '@/cache.js'
@@ -10,6 +11,7 @@ import cache from '@/cache.js'
 const store = useStore()
 const cardStore = useCardStore()
 const connectionStore = useConnectionStore()
+const boxStore = useBoxStore()
 
 let canvas, context
 let startPanningPosition
@@ -30,10 +32,6 @@ onMounted(async () => {
     const mutations = [
       'isLoadingSpace',
       'currentSpace/loadSpace',
-      'currentBoxes/add',
-      'currentBoxes/update',
-      'currentBoxes/resize',
-      'currentBoxes/move',
       'triggerEndDrawing'
     ]
     if (mutations.includes(mutation.type)) {
@@ -41,6 +39,10 @@ onMounted(async () => {
       init()
     }
   })
+  const boxStoreActions = [
+    'updateBoxes',
+    'createBox'
+  ]
   const cardStoreActions = [
     'updateCards',
     'removeCards',
@@ -69,9 +71,17 @@ onMounted(async () => {
       }
     }
   )
+  const boxStoreUnsubscribe = boxStore.$onAction(
+    ({ name, args }) => {
+      if (boxStoreActions.includes(name)) {
+        init()
+      }
+    }
+  )
   unsubscribes = () => {
     cardStoreUnsubscribe()
     connectionStoreUnsubscribe()
+    boxStoreUnsubscribe()
   }
 })
 onBeforeUnmount(() => {
@@ -213,7 +223,7 @@ const drawConnections = () => {
 // boxes
 
 const mapBoxes = computed(() => {
-  return props.space?.boxes || store.getters['currentBoxes/all']
+  return props.space?.boxes || boxStore.getAllBoxes
 })
 const drawBoxes = () => {
   let boxes = mapBoxes.value

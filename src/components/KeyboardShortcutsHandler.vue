@@ -618,7 +618,7 @@ const remove = () => {
   boxes.forEach(box => {
     const canEditBox = store.getters['currentUser/canEditBox'](box)
     if (canEditBox) {
-      store.dispatch('currentBoxes/remove', box)
+      boxStore.removeBox(box)
     }
   })
   connectionStore.removeAllUnusedConnectionTypes()
@@ -815,7 +815,7 @@ const selectAllItemsBelowCursor = (position) => {
   cards = cardStore.getCardsBelowY(position.y, zoom, cards)
   const cardIds = cards.map(card => card.id)
   // boxes
-  let boxes = utils.clone(store.getters['currentBoxes/all'])
+  let boxes = boxStore.getAllBoxes
   boxes = boxes.filter(box => (box.y * zoom) > position.y)
   const boxIds = boxes.map(box => box.id)
   selectItemIds({ position, cardIds, boxIds })
@@ -834,7 +834,7 @@ const selectAllItemsAboveCursor = (position) => {
   cards = cardStore.getCardsAboveY(position.y, zoom, cards)
   const cardIds = cards.map(card => card.id)
   // boxes
-  let boxes = utils.clone(store.getters['currentBoxes/all'])
+  let boxes = boxStore.getAllBoxes
   boxes = boxes.filter(box => (box.y * zoom) < position.y)
   const boxIds = boxes.map(box => box.id)
   selectItemIds({ position, cardIds, boxIds })
@@ -853,7 +853,7 @@ const selectAllItemsRightOfCursor = (position) => {
   cards = cardStore.getCardsRightOfX(position.x, zoom, cards)
   const cardIds = cards.map(card => card.id)
   // boxes
-  let boxes = utils.clone(store.getters['currentBoxes/all'])
+  let boxes = boxStore.getAllBoxes
   boxes = boxes.filter(box => {
     return (box.x * zoom) >= position.x
   })
@@ -874,7 +874,7 @@ const selectAllItemsLeftOfCursor = (position) => {
   cards = cardStore.getCardsLeftOfX(position.x, zoom, cards)
   const cardIds = cards.map(card => card.id)
   // boxes
-  let boxes = utils.clone(store.getters['currentBoxes/all'])
+  let boxes = boxStore.getAllBoxes
   boxes = boxes.filter(box => {
     return (box.x * zoom) <= position.x
   })
@@ -986,7 +986,7 @@ const containItemsInNewBox = async (cards) => {
     resizeWidth: rect.width + (padding * 2),
     resizeHeight: rect.height + (padding + paddingTop)
   }
-  store.dispatch('currentBoxes/add', { box })
+  boxStore.createBox(box)
   store.dispatch('closeAllDialogs')
   await nextTick()
   await nextTick()

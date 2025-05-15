@@ -1,6 +1,7 @@
 <script setup>
 import { reactive, computed, onMounted, onBeforeUnmount, watch, ref, nextTick } from 'vue'
 import { useStore } from 'vuex'
+import { useBoxStore } from '@/stores/useBoxStore'
 
 import ColorPicker from '@/components/dialogs/ColorPicker.vue'
 import Loader from '@/components/Loader.vue'
@@ -17,7 +18,9 @@ import uniq from 'lodash-es/uniq'
 import debounce from 'lodash-es/debounce'
 import times from 'lodash-es/times'
 import { nanoid } from 'nanoid'
+
 const store = useStore()
+const boxStore = useBoxStore()
 
 const searchInputElement = ref(null)
 const inputElement = ref(null)
@@ -274,7 +277,7 @@ const updateBackground = async (url) => {
       id: props.box.id,
       background: url
     }
-    await store.dispatch('currentBoxes/update', updates)
+    await boxStore.updateBox(updates)
   } else {
     const updates = {
       backgroundIsGradient: false,
@@ -459,7 +462,7 @@ const toggleBackgroundIsStretch = () => {
     id: props.box.id,
     backgroundIsStretch: value
   }
-  store.dispatch('currentBoxes/update', update)
+  boxStore.updateBox(update)
 }
 
 </script>
