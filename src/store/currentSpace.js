@@ -1033,7 +1033,7 @@ const currentSpace = {
       const spaceIsReadOnlyInvite = isPrivate && !canEdit
       if (spaceIsReadOnlyInvite) { return }
       const space = context.state
-      userStore.update({ lastSpaceId: space.id })
+      userStore.updateUser({ lastSpaceId: space.id })
     },
     removeCurrentSpace: async (context) => {
       const space = utils.clone(context.state)

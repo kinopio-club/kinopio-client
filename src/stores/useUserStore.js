@@ -62,7 +62,6 @@ export const useUserStore = defineStore('users', {
     shouldPauseConnectionDirections: false,
     shouldInvertZoom: false,
     lastUsedImagePickerService: '',
-    AIImages: [],
     theme: null,
     themeIsSystem: false,
     outsideSpaceBackgroundIsStatic: false,
@@ -435,6 +434,7 @@ export const useUserStore = defineStore('users', {
       store.dispatch('themes/restore', null, { root: true })
       store.commit('triggerUserIsLoaded', null, { root: true })
       this.checkIfShouldJoinGroup()
+      console.log('🍍', { ...this.$state })
     },
 
     // update

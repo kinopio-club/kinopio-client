@@ -172,7 +172,7 @@ export const useCardStore = defineStore('cards', {
         users.push(card.nameUpdatedByUserId)
       })
       users = uniq(users)
-      users = users.map(id => store['currentSpace/userById'](id))
+      users = users.map(id => store.getters['currentSpace/userById'](id))
       users = users.filter(user => Boolean(user))
       return users
     },
