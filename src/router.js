@@ -1,9 +1,12 @@
+import { useUserStore } from '@/stores/useUserStore'
+
 import Space from '@/views/Space.vue'
 import store from '@/store/store.js'
-
 import consts from './consts.js'
 
 import { createRouter, createWebHistory } from 'vue-router'
+
+const userStore = useUserStore()
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -187,7 +190,7 @@ const router = createRouter({
         const isPresentationMode = urlParams.get('present') || false
         const isDisableViewportOptimizations = Boolean(urlParams.get('disableViewportOptimizations'))
         store.commit('disableViewportOptimizations', isDisableViewportOptimizations)
-        store.dispatch('currentUser/init')
+        userStore.initializeUser()
         store.commit('isLoadingSpace', true)
         if (!spaceId) {
           store.commit('addNotification', { message: 'Invalid invite URL', type: 'danger' })
@@ -226,7 +229,7 @@ const router = createRouter({
 export default router
 
 const inviteToEdit = async ({ next, store, spaceId, collaboratorKey }) => {
-  await store.dispatch('currentUser/init')
+  await userStore.initializeUser()
   const apiKey = store.state.currentUser.apiKey
   if (!apiKey) {
     store.commit('spaceUrlToLoad', spaceId)

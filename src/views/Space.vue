@@ -4,6 +4,7 @@ import { useStore } from 'vuex'
 import { useCardStore } from '@/stores/useCardStore'
 import { useConnectionStore } from '@/stores/useConnectionStore'
 import { useBoxStore } from '@/stores/useBoxStore'
+import { useUserStore } from '@/stores/useUserStore'
 
 import CardDetails from '@/components/dialogs/CardDetails.vue'
 import OtherCardDetails from '@/components/dialogs/OtherCardDetails.vue'
@@ -53,6 +54,7 @@ const cardStore = useCardStore()
 const connectionStore = useConnectionStore()
 const boxStore = useBoxStore()
 const store = useStore()
+const userStore = useUserStore()
 
 let unsubscribe
 
@@ -67,7 +69,7 @@ const init = async () => {
   store.dispatch('api/updateDateImage')
   store.dispatch('analytics/event', 'pageview')
   await cache.migrateFromLocalStorage()
-  await store.dispatch('currentUser/init')
+  await userStore.initializeUser()
   await store.dispatch('currentSpace/init')
   await store.commit('broadcast/connect')
   await store.dispatch('groups/init')

@@ -1,6 +1,7 @@
 <script setup>
 import { reactive, computed, onMounted, onUnmounted, onBeforeUnmount, watch, ref, nextTick } from 'vue'
 import { useStore } from 'vuex'
+import { useUserStore } from '@/stores/useUserStore'
 
 import inboxSpace from '@/data/inbox.json'
 import Loader from '@/components/Loader.vue'
@@ -12,7 +13,9 @@ import consts from '@/consts.js'
 import postMessage from '@/postMessage.js'
 
 import { nanoid } from 'nanoid'
+
 const store = useStore()
+const userStore = useUserStore()
 
 const state = reactive({
   email: '',
@@ -79,7 +82,7 @@ const name = computed({
   }
 })
 const initUser = async () => {
-  store.dispatch('currentUser/init')
+  userStore.initializeUser()
 }
 const initCardTextarea = async () => {
   await nextTick()

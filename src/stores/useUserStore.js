@@ -395,7 +395,7 @@ export const useUserStore = defineStore('users', {
         store.commit('notifySignUpToJoinGroup', true, { root: true })
       }
     },
-    async initializeUser (users) {
+    async initializeUser () {
       const cachedUser = await cache.user()
       if (utils.objectHasKeys(cachedUser)) {
         console.info('🌸 Initialize user from cache', cachedUser.id)
@@ -433,22 +433,6 @@ export const useUserStore = defineStore('users', {
       }
       await store.dispatch('api/addToQueue', { name: 'updateUser', body: update }, { root: true })
     },
-
-    // remove
-
-    // async removeUsers (users) {
-    //   const canEditSpace = store.getters['currentUser/canEditSpace']()
-    //   if (!canEditSpace) { return }
-    //   for (const user of users) {
-    //     const idIndex = this.allIds.indexOf(user.id)
-    //     this.allIds.splice(idIndex, 1)
-    //     delete this.byId[user.id]
-    //     await store.dispatch('api/addToQueue', { name: 'removeUser', body: user }, { root: true })
-    //   }
-    // },
-    // async removeUser (user) {
-    //   await this.removeUsers([user])
-    // }
 
     // keyboard shortcuts
 
