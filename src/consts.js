@@ -16,6 +16,7 @@ export default {
   normalCardMaxWidth: 200,
   wideCardMaxWidth: 390,
   minCardIframeWidth: 260,
+  cardsCreatedLimit: 100,
   emptyCard () {
     return { width: this.defaultCardWidth, height: 32 }
   },

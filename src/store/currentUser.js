@@ -378,16 +378,6 @@ export default {
       utils.typeCheck({ value, type: 'string' })
       state.prevSettingsSection = value
     },
-    addToDisabledKeyboardShortcuts: (state, value) => {
-      utils.typeCheck({ value, type: 'string' })
-      state.disabledKeyboardShortcuts.push(value)
-      cache.updateUser('disabledKeyboardShortcuts', value)
-    },
-    removeFromDisabledKeyboardShortcuts: (state, value) => {
-      utils.typeCheck({ value, type: 'string' })
-      state.disabledKeyboardShortcuts = state.disabledKeyboardShortcuts.filter(shortcutName => value !== shortcutName)
-      cache.updateUser('disabledKeyboardShortcuts', value)
-    },
     tags: (state, value) => {
       utils.typeCheck({ value, type: 'array' })
       state.tags = value
@@ -401,7 +391,19 @@ export default {
       utils.typeCheck({ value, type: 'string' })
       state.drawingBrushSize = value
       cache.updateUser('drawingBrushSize', value)
+    },
+
+    addToDisabledKeyboardShortcuts: (state, value) => {
+      utils.typeCheck({ value, type: 'string' })
+      state.disabledKeyboardShortcuts.push(value)
+      cache.updateUser('disabledKeyboardShortcuts', value)
+    },
+    removeFromDisabledKeyboardShortcuts: (state, value) => {
+      utils.typeCheck({ value, type: 'string' })
+      state.disabledKeyboardShortcuts = state.disabledKeyboardShortcuts.filter(shortcutName => value !== shortcutName)
+      cache.updateUser('disabledKeyboardShortcuts', value)
     }
+
   },
   actions: {
     init: async (context) => {
@@ -492,6 +494,7 @@ export default {
         context.dispatch('lastSpaceId', '')
       }
     },
+
     restoreRemoteUser: async (context, cachedUser) => {
       if (!context.getters.isSignedIn) { return }
       const remoteUser = await context.dispatch('api/getUser', null, { root: true })
@@ -860,12 +863,12 @@ export default {
       return Boolean(state.apiKey)
     },
     cardsCreatedIsOverLimit: (state, getters, rootState) => {
-      const cardsCreatedLimit = rootState.cardsCreatedLimit
+      const cardsCreatedLimit = consts.cardsCreatedLimit
       if (state.isUpgraded) { return }
       if (state.cardsCreatedCount >= cardsCreatedLimit) { return true }
     },
     cardsCreatedWillBeOverLimit: (state, getters, rootState) => (count) => {
-      const cardsCreatedLimit = rootState.cardsCreatedLimit
+      const cardsCreatedLimit = consts.cardsCreatedLimit
       if (state.isUpgraded) { return }
       if (state.cardsCreatedCount + count >= cardsCreatedLimit) { return true }
     },

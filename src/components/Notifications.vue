@@ -87,7 +87,7 @@ const privacyState = computed(() => {
   })
 })
 const cardsCreatedCountFromLimit = computed(() => {
-  const cardsCreatedLimit = store.state.cardsCreatedLimit
+  const cardsCreatedLimit = consts.cardsCreatedLimit
   const cardsCreatedCount = store.state.currentUser.cardsCreatedCount
   return Math.max(cardsCreatedLimit - cardsCreatedCount, 0)
 })

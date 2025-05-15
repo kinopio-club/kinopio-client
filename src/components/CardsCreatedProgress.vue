@@ -1,9 +1,10 @@
 <script setup>
-// import utils from '@/utils.js'
-
 import { reactive, computed, onMounted } from 'vue'
 import { useStore } from 'vuex'
 import FreeLimitFAQ from '@/components/dialogs/FreeLimitFAQ.vue'
+
+import consts from '@/consts.js'
+
 const store = useStore()
 
 onMounted(() => {
@@ -19,7 +20,7 @@ const state = reactive({
 })
 
 const cardsCreatedCount = computed(() => store.state.currentUser.cardsCreatedCount || 0)
-const cardsCreatedLimit = computed(() => store.state.cardsCreatedLimit)
+const cardsCreatedLimit = computed(() => consts.cardsCreatedLimit)
 
 const triggerUpgradeUserIsVisible = () => {
   const currentUserIsSignedIn = store.getters['currentUser/isSignedIn']

@@ -6,16 +6,17 @@ import postMessage from '@/postMessage.js'
 import api from '@/store/api.js'
 import broadcast from '@/store/broadcast.js'
 import history from '@/store/history.js'
-import currentUser from '@/store/currentUser.js'
 import currentSpace from '@/store/currentSpace.js'
-import currentCards from '@/store/currentCards.js'
-import currentConnections from '@/store/currentConnections.js'
-import currentBoxes from '@/store/currentBoxes.js'
 import upload from '@/store/upload.js'
 import userNotifications from '@/store/userNotifications.js'
 import groups from '@/store/groups.js'
 import themes from '@/store/themes.js'
 import analytics from '@/store/analytics.js'
+import currentUser from '@/store/currentUser.js'
+// temp, converted to pinia
+import currentCards from '@/store/currentCards.js'
+import currentConnections from '@/store/currentConnections.js'
+import currentBoxes from '@/store/currentBoxes.js'
 // store plugins
 import websocket from '@/store/plugins/websocket.js'
 
@@ -43,7 +44,7 @@ const store = createStore({
     shouldHideFooter: false,
     shouldExplicitlyHideFooter: false,
     isTouchDevice: false,
-    cardsCreatedLimit: 100,
+    // cardsCreatedLimit: 100,
     prevCursorPosition: { x: 0, y: 0 },
     currentSpacePath: '/',
     webfontIsLoaded: false,
