@@ -1,6 +1,7 @@
 import { useCardStore } from '@/stores/useCardStore'
 import { useConnectionStore } from '@/stores/useConnectionStore'
 import { useBoxStore } from '@/stores/useBoxStore'
+import { useUserStore } from '@/stores/useUserStore'
 
 import inboxSpace from '@/data/inbox.json'
 import newSpace from '@/data/new.json'
@@ -477,7 +478,8 @@ const currentSpace = {
       context.commit('addNotification', { message: 'Duplicated Space', type: 'success' }, { root: true })
     },
     addSpace: async (context, space) => {
-      const user = { id: context.rootState.currentUser.id }
+      const userStore = useUserStore()
+      const user = { id: userStore.id }
       context.commit('broadcast/leaveSpaceRoom', { user, type: 'userLeftRoom' }, { root: true })
       await context.dispatch('createNewSpace', space)
       await context.dispatch('saveNewSpace')
@@ -485,7 +487,8 @@ const currentSpace = {
       context.commit('notifySignUpToEditSpace', false, { root: true })
     },
     addInboxSpace: async (context) => {
-      const user = { id: context.rootState.currentUser.id }
+      const userStore = useUserStore()
+      const user = { id: userStore.id }
       context.commit('broadcast/leaveSpaceRoom', { user, type: 'userLeftRoom' }, { root: true })
       await context.dispatch('createNewInboxSpace')
       await context.dispatch('saveNewSpace')
@@ -493,11 +496,12 @@ const currentSpace = {
       context.commit('notifySignUpToEditSpace', false, { root: true })
     },
     getRemoteSpace: async (context, space) => {
+      const userStore = useUserStore()
       const collaboratorKey = context.rootState.spaceCollaboratorKeys.find(key => key.spaceId === space.id)
       if (collaboratorKey) {
         space.collaboratorKey = collaboratorKey.collaboratorKey
       }
-      const currentUserIsSignedIn = context.rootGetters['currentUser/isSignedIn']
+      const currentUserIsSignedIn = userStore.getUserIsSignedIn
       const currentSpaceIsRemote = context.rootGetters['currentSpace/isRemote']
       let remoteSpace
       try {
@@ -519,6 +523,7 @@ const currentSpace = {
       }
     },
     loadRemoteSpace: async (context, space) => {
+      const userStore = useUserStore()
       let remoteSpace
       try {
         remoteSpace = await context.dispatch('getRemoteSpace', space)
@@ -538,7 +543,7 @@ const currentSpace = {
           context.dispatch('removeLocalSpaceIfUserIsRemoved', space)
           context.dispatch('loadLastSpace', space)
           cache.removeInvitedSpace(space)
-          context.dispatch('currentUser/updateFavoriteSpace', { space, value: false }, { root: true })
+          userStore.updateUserFavoriteSpace(space, false)
         }
         if (error.status === 500) {
           context.commit('notifyConnectionError', true, { root: true })
@@ -553,11 +558,12 @@ const currentSpace = {
       return utils.normalizeRemoteSpace(remoteSpace)
     },
     removeLocalSpaceIfUserIsRemoved: async (context, space) => {
+      const userStore = useUserStore()
       const cachedSpace = await cache.space(space.id)
       const currentUserIsRemovedFromSpace = utils.objectHasKeys(cachedSpace)
-      context.dispatch('currentUser/updateFavoriteSpace', { space, value: false }, { root: true })
+      userStore.updateUserFavoriteSpace(space, false)
       if (currentUserIsRemovedFromSpace) {
-        context.dispatch('currentUser/resetLastSpaceId', null, { root: true })
+        userStore.clearUserLastSpaceId()
         cache.deleteSpace(space)
         const emptySpace = utils.emptySpace(space.id)
         context.commit('restoreSpace', emptySpace)

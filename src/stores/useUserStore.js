@@ -387,7 +387,7 @@ export const useUserStore = defineStore('users', {
         console.error('🚒 restoreUserAssociatedData', error)
       }
     },
-    checkIfShouldJoinGroup: (context) => {
+    checkIfShouldJoinGroup () {
       if (!store.state.groupToJoinOnLoad) { return }
       if (this.userIsSignedIn) {
         store.dispatch('groups/joinGroup', null, { root: true })
@@ -428,10 +428,52 @@ export const useUserStore = defineStore('users', {
     async updateUser (update) {
       const keys = Object.keys(update)
       for (const key of keys) {
+        this[key] = update[key]
         await cache.updateUser(key, update[key])
         this.broadcastUpdate({ [key]: update[key] })
       }
       await store.dispatch('api/addToQueue', { name: 'updateUser', body: update }, { root: true })
+    },
+
+    // favorites
+
+    async updateUserFavoriteSpace (space, shouldAdd) {
+      if (shouldAdd) {
+        this.favoriteSpaces.push(space)
+        store.dispatch('userNotifications/addFavoriteSpace', space, { root: true })
+      } else {
+        this.favoriteSpaces = this.favoriteSpaces.filter(favoriteSpace => {
+          return favoriteSpace.id !== space.id
+        })
+        store.dispatch('userNotifications/removeFavoriteSpace', space, { root: true })
+      }
+      const body = { spaceId: space.id, value: shouldAdd }
+      await store.dispatch('api/addToQueue', { name: 'updateFavoriteSpace', body, spaceId: space.id }, { root: true })
+    },
+    async updateUserFavoriteUser (user, shouldAdd) {
+      if (shouldAdd) {
+        this.favoriteUsers.push(user)
+        store.dispatch('userNotifications/addFavoriteUser', user, { root: true })
+      } else {
+        this.favoriteUsers = this.favoriteUsers.filter(favoriteUser => {
+          return favoriteUser.id !== user.id
+        })
+        store.dispatch('userNotifications/removeFavoriteUser', user, { root: true })
+      }
+      const body = { favoriteUserId: user.id, value: shouldAdd }
+      await store.dispatch('api/addToQueue', { name: 'updateFavoriteUser', body }, { root: true })
+    },
+    async updateUserFavoriteColor (color, shouldAdd) {
+      color = color.color
+      if (shouldAdd) {
+        this.favoriteColors.push(color)
+      } else {
+        this.favoriteColors = this.favoriteColors.filter(favoriteColor => {
+          return favoriteColor !== color
+        })
+      }
+      const body = { color, value: shouldAdd }
+      await store.dispatch('api/addToQueue', { name: 'updateFavoriteColor', body }, { root: true })
     },
 
     // keyboard shortcuts
@@ -443,6 +485,18 @@ export const useUserStore = defineStore('users', {
     removeFromDisabledKeyboardShortcuts (value) {
       this.disabledKeyboardShortcuts = this.disabledKeyboardShortcuts.filter(shortcutName => value !== shortcutName)
       cache.updateUser('disabledKeyboardShortcuts', value)
+    },
+
+    // last space id
+
+    async clearUserLastSpaceId () {
+      const spaces = await cache.getAllSpaces()
+      const lastSpace = spaces[1]
+      if (lastSpace) {
+        this.updateUser({ lastSpace: lastSpace.id })
+      } else {
+        this.updateUser({ lastSpace: '' })
+      }
     }
 
   }
