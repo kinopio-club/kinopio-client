@@ -99,10 +99,10 @@ export const useUserStore = defineStore('users', {
 
   getters: {
     getUserIsSignedIn: (state) => {
-      return Boolean(this.apiKey)
+      return Boolean(state.apiKey)
     },
     getUserIsCurrentUser: (state) => {
-      return (user) => Boolean(this.id === user.id)
+      return (user) => Boolean(state.id === user.id)
     },
     getUserCardsCreatedIsOverLimit: (state) => {
       const cardsCreatedLimit = consts.cardsCreatedLimit
