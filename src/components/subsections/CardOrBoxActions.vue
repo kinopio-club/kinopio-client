@@ -3,6 +3,7 @@ import { reactive, computed, onMounted, onBeforeUnmount, onUnmounted, watch, ref
 import { useStore } from 'vuex'
 import { useCardStore } from '@/stores/useCardStore'
 import { useConnectionStore } from '@/stores/useConnectionStore'
+import { useBoxStore } from '@/stores/useBoxStore'
 
 import FramePicker from '@/components/dialogs/FramePicker.vue'
 import TagPickerStyleActions from '@/components/dialogs/TagPickerStyleActions.vue'
@@ -17,6 +18,7 @@ import { nanoid } from 'nanoid'
 const store = useStore()
 const cardStore = useCardStore()
 const connectionStore = useConnectionStore()
+const boxStore = useBoxStore()
 
 onMounted(() => {
   store.subscribe((mutation, state) => {
@@ -194,8 +196,11 @@ const updateName = async (item, newName) => {
     cardStore.updateCard(update)
   }
   if (item.isBox) {
-    const box = store.getters['currentBoxes/byId'](item.id)
-    store.dispatch('currentBoxes/updateName', { box, newName })
+    const update = {
+      id: item.id,
+      name: newName
+    }
+    boxStore.update(update)
   }
 }
 
@@ -227,7 +232,7 @@ const containItemsInNewBox = async () => {
     resizeWidth: rect.width + (padding * 2),
     resizeHeight: rect.height + (padding + paddingTop)
   }
-  store.dispatch('currentBoxes/add', { box })
+  boxStore.createBox(box)
   store.dispatch('closeAllDialogs')
   await nextTick()
   await nextTick()
@@ -483,7 +488,7 @@ const updateBox = (box, updates) => {
   keys.forEach(key => {
     box[key] = updates[key]
   })
-  store.dispatch('currentBoxes/update', box)
+  boxStore.updateBox(box)
 }
 </script>
 

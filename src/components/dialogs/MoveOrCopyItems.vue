@@ -3,6 +3,7 @@ import { reactive, computed, onMounted, onUnmounted, watch, ref, nextTick } from
 import { useStore } from 'vuex'
 import { useCardStore } from '@/stores/useCardStore'
 import { useConnectionStore } from '@/stores/useConnectionStore'
+import { useBoxStore } from '@/stores/useBoxStore'
 
 import cache from '@/cache.js'
 import utils from '@/utils.js'
@@ -12,6 +13,7 @@ import Loader from '@/components/Loader.vue'
 const store = useStore()
 const cardStore = useCardStore()
 const connectionStore = useConnectionStore()
+const boxStore = useBoxStore()
 
 const dialogElement = ref(null)
 
@@ -155,7 +157,7 @@ const copyToSelectedSpace = async (items) => {
     cardStore.createCards(newItems.cards, shouldOffsetPosition)
     newItems.connectionTypes.forEach(connectionType => connectionStore.createConnectionType(connectionType))
     newItems.connections.forEach(connection => connectionStore.createConnection(connection))
-    newItems.boxes.forEach(box => store.dispatch('currentBoxes/add', { box }))
+    newItems.boxes.forEach(box => boxStore.createBox(box))
   }
   // update server
   for (const card of newItems.cards) {
@@ -198,12 +200,11 @@ const moveOrCopyToSpace = async () => {
 }
 const removeCards = (cards) => {
   const ids = cards.map(card => card.id)
-  cardStore.removeCard(ids)
+  cardStore.removeCards(ids)
 }
 const removeBoxes = (boxes) => {
-  boxes.forEach(box => {
-    store.dispatch('currentBoxes/remove', box)
-  })
+  const ids = boxes.map(box => box.id)
+  boxStore.removeBoxes(ids)
 }
 
 // should upgrade user

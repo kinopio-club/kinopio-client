@@ -3,6 +3,7 @@ import { reactive, computed, onMounted, onBeforeUnmount, watch, ref, nextTick } 
 import { useStore } from 'vuex'
 import { useCardStore } from '@/stores/useCardStore'
 import { useConnectionStore } from '@/stores/useConnectionStore'
+import { useBoxStore } from '@/stores/useBoxStore'
 
 import ResultsFilter from '@/components/ResultsFilter.vue'
 import frames from '@/data/frames.js'
@@ -14,6 +15,7 @@ import uniq from 'lodash-es/uniq'
 const store = useStore()
 const cardStore = useCardStore()
 const connectionStore = useConnectionStore()
+const boxStore = useBoxStore()
 
 const dialogElement = ref(null)
 const resultsElement = ref(null)
@@ -69,7 +71,7 @@ const spaceFrames = computed(() => {
   return framesInUse.map(frame => frames[frame])
 })
 const tags = computed(() => utils.clone(store.getters['currentSpace/spaceTags']))
-const boxes = computed(() => utils.clone(store.getters['currentBoxes/all']))
+const boxes = computed(() => boxStore.getAllBoxes)
 
 // all items
 

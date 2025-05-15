@@ -3,6 +3,7 @@ import { reactive, computed, onMounted, onBeforeUnmount, onUnmounted, watch, ref
 import { useStore } from 'vuex'
 import { useCardStore } from '@/stores/useCardStore'
 import { useConnectionStore } from '@/stores/useConnectionStore'
+import { useBoxStore } from '@/stores/useBoxStore'
 
 import utils from '@/utils.js'
 import MoveOrCopyItems from '@/components/dialogs/MoveOrCopyItems.vue'
@@ -19,6 +20,7 @@ import consts from '@/consts.js'
 const store = useStore()
 const cardStore = useCardStore()
 const connectionStore = useConnectionStore()
+const boxStore = useBoxStore()
 
 const dialogElement = ref(null)
 
@@ -300,11 +302,8 @@ const connectionAlreadyExists = (startItemId, endItemId) => {
 const onlyBoxesIsSelected = computed(() => boxesIsSelected.value && !cardsIsSelected.value && !connectionsIsSelected.value)
 const boxesIsSelected = computed(() => multipleBoxesSelectedIds.value.length > 0)
 const boxes = computed(() => {
-  let boxes = multipleBoxesSelectedIds.value.map(boxId => {
-    return store.getters['currentBoxes/byId'](boxId)
-  })
-  boxes = boxes.filter(box => Boolean(box))
-  prevBoxes = boxes
+  const seletectBoxes = boxStore.getBoxesSelected
+  prevBoxes = seletectBoxes
   return boxes
 })
 const editableBoxes = computed(() => {
@@ -459,7 +458,7 @@ const remove = ({ shouldRemoveCardsOnly }) => {
   cardStore.removeCards(cardIds)
   connectionStore.removeConnections(connectionIds)
   if (!shouldRemoveCardsOnly) {
-    editableBoxes.value.forEach(box => store.dispatch('currentBoxes/remove', box))
+    editableBoxes.value.forEach(box => boxStore.removeBox(box.id))
   }
   store.dispatch('closeAllDialogs')
   store.dispatch('clearMultipleSelected')

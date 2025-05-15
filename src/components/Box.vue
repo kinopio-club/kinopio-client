@@ -384,8 +384,6 @@ const endBoxInfoInteraction = (event) => {
   if (isConnectingTo.value) { return }
   const isMeta = event.metaKey || event.ctrlKey
   const userId = store.state.currentUser.id
-  // store.dispatch('currentBoxes/afterMove')
-  // store.dispatch('currentCards/afterMove')
   if (store.state.currentUserIsPainting) { return }
   if (isMultiTouch) { return }
   if (store.state.currentUserIsPanningReady || store.state.currentUserIsPanning) { return }

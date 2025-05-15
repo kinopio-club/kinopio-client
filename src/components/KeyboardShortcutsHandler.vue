@@ -618,7 +618,7 @@ const remove = () => {
   boxes.forEach(box => {
     const canEditBox = store.getters['currentUser/canEditBox'](box)
     if (canEditBox) {
-      boxStore.removeBox(box)
+      boxStore.removeBox(box.id)
     }
   })
   connectionStore.removeAllUnusedConnectionTypes()
@@ -904,7 +904,7 @@ const selectItemIds = ({ position, cardIds, boxIds }) => {
 const selectAllItems = () => {
   const cardIds = cardStore.allIds
   const connectionIds = connectionStore.allIds
-  const boxIds = utils.clone(store.state.currentBoxes.ids)
+  const boxIds = boxStore.allIds
   const dialogOffset = {
     width: 200 / 2,
     height: 150 / 2

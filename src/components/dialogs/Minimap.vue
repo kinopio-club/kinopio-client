@@ -1,11 +1,13 @@
 <script setup>
 import { reactive, computed, onMounted, onBeforeUnmount, watch, ref, nextTick } from 'vue'
 import { useStore } from 'vuex'
+import { useBoxStore } from '@/stores/useBoxStore'
 
 import MinimapCanvas from '@/components/MinimapCanvas.vue'
 import utils from '@/utils.js'
 
 const store = useStore()
+const boxStore = useBoxStore()
 
 const dialogElement = ref(null)
 const rowElement = ref(null)
@@ -58,7 +60,7 @@ const toggleDialogIsPinned = () => {
 // boxes
 
 const boxes = computed(() => {
-  let items = store.getters['currentBoxes/all']
+  let items = boxStore.getAllBoxes
   items = utils.sortByDistanceFromOrigin(items)
   return items
 })

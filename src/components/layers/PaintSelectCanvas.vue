@@ -2,6 +2,7 @@
 import { reactive, computed, onMounted, onBeforeUnmount, onUnmounted, watch, ref, nextTick } from 'vue'
 import { useStore } from 'vuex'
 import { useConnectionStore } from '@/stores/useConnectionStore'
+import { useBoxStore } from '@/stores/useBoxStore'
 
 import { useCardStore } from '@/stores/useCardStore'
 
@@ -15,6 +16,7 @@ import { colord, extend } from 'colord'
 const cardStore = useCardStore()
 const connectionStore = useConnectionStore()
 const store = useStore()
+const boxStore = useBoxStore()
 
 // a sequence of circles that's broadcasted to others and is used for multi-card selection
 const circleRadius = 20
@@ -178,7 +180,7 @@ const updateSelectableCardsInViewport = () => {
   selectableCardsGrid = collisionDetection.createGrid(selectableCards)
 }
 const updateSelectableBoxesInViewport = () => {
-  const boxes = store.getters['currentBoxes/isNotLocked']
+  const boxes = boxStore.getBoxesIsNotLocked
   const array = []
   boxes.forEach(box => {
     const element = document.querySelector(`.box-info[data-box-id="${box.id}"]`)
