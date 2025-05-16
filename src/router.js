@@ -47,7 +47,8 @@ const router = createRouter({
       name: 'confirm-email',
       component: Space,
       redirect: to => {
-        store.dispatch('currentUser/confirmEmail')
+        const userStore = useUserStore()
+        userStore.updateUserEmailIsVerified()
         store.commit('addNotification', { message: 'Email Confirmed', type: 'success' })
         return '/'
       }
@@ -74,7 +75,8 @@ const router = createRouter({
         const arenaReturnedCode = urlParams.get('code')
         next()
         history.replaceState({}, document.title, window.location.origin)
-        store.dispatch('currentUser/updateArenaAccessToken', arenaReturnedCode)
+        const userStore = useUserStore()
+        userStore.updateUserArenaAccessToken(arenaReturnedCode)
       }
     }, {
       path: '/explore',
@@ -229,7 +231,7 @@ export default router
 const inviteToEdit = async ({ next, store, spaceId, collaboratorKey }) => {
   const userStore = useUserStore()
   await userStore.initializeUser()
-  const apiKey = store.state.currentUser.apiKey
+  const apiKey = userStore.apiKey
   if (!apiKey) {
     store.commit('spaceUrlToLoad', spaceId)
     store.commit('addToSpaceCollaboratorKeys', { spaceId, collaboratorKey })

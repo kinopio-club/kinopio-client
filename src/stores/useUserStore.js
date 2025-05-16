@@ -555,6 +555,33 @@ export const useUserStore = defineStore('users', {
         }
       }
       return space
+    },
+
+    // email
+
+    async updateUserEmailIsVerified () {
+      await store.dispatch('api/addToQueue', {
+        name: 'updateUser',
+        body: {
+          emailIsVerified: true
+        }
+      }, { root: true })
+    },
+
+    // are.na
+
+    async updateUserArenaAccessToken (arenaReturnedCode) {
+      console.info('updateArenaAccessToken')
+      store.commit('importArenaChannelIsVisible', true, { root: true })
+      store.commit('isAuthenticatingWithArena', true, { root: true })
+      const { arenaAccessToken } = await store.dispatch('api/updateArenaAccessToken', arenaReturnedCode, { root: true })
+      this.arenaAccessToken = arenaAccessToken
+      store.commit('importArenaChannelIsVisible', true, { root: true })
+      store.commit('isAuthenticatingWithArena', false, { root: true })
+      await store.dispatch('api/addToQueue', {
+        name: 'updateUser',
+        body: { arenaAccessToken }
+      }, { root: true })
     }
 
   }
