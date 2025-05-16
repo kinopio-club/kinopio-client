@@ -773,6 +773,7 @@ const clearHighlightedStyles = () => {
   // const boxIds = Object.keys(highlightedItems.boxIds)
   // const connectionIds = Object.keys(highlightedItems.connectionIds)
   cardIds.forEach(cardId => {
+    if (!cardId) { return }
     const cardWrapElement = utils.cardElementFromId(cardId)
     const nameSegmentsElement = cardWrapElement.querySelectorAll('.name-segments')
     nameSegmentsElement.forEach(element => {
