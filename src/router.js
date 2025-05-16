@@ -1,12 +1,9 @@
-import { useUserStore } from '@/stores/useUserStore'
-
 import Space from '@/views/Space.vue'
 import store from '@/store/store.js'
 import consts from './consts.js'
 
 import { createRouter, createWebHistory } from 'vue-router'
-
-const userStore = useUserStore()
+import { useUserStore } from '@/stores/useUserStore'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -177,6 +174,7 @@ const router = createRouter({
       name: 'invite',
       component: Space,
       beforeEnter: (to, from, next) => {
+        const userStore = useUserStore()
         const urlParams = new URLSearchParams(window.location.search)
         if (urlParams.get('present')) {
           store.commit('isPresentationMode', true)
@@ -229,6 +227,7 @@ const router = createRouter({
 export default router
 
 const inviteToEdit = async ({ next, store, spaceId, collaboratorKey }) => {
+  const userStore = useUserStore()
   await userStore.initializeUser()
   const apiKey = store.state.currentUser.apiKey
   if (!apiKey) {

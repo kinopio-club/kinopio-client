@@ -94,7 +94,6 @@ export const useBoxStore = defineStore('boxes', {
       })
       this.byId = byId
       this.allIds = allIds
-      console.log('🍍', this.byId)
     },
 
     // create

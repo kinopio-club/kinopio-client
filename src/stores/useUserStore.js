@@ -62,7 +62,6 @@ export const useUserStore = defineStore('users', {
     shouldPauseConnectionDirections: false,
     shouldInvertZoom: false,
     lastUsedImagePickerService: '',
-    AIImages: [],
     theme: null,
     themeIsSystem: false,
     outsideSpaceBackgroundIsStatic: false,
@@ -98,16 +97,21 @@ export const useUserStore = defineStore('users', {
   }),
 
   getters: {
-    userIsSignedIn: (state) => {
-      return Boolean(this.apiKey)
+    getUserIsSignedIn: (state) => {
+      return Boolean(state.apiKey)
     },
-    userIsCurrentUser: (state) => {
-      return (user) => Boolean(this.id === user.id)
+    getUserIsCurrentUser: (state) => {
+      return (user) => Boolean(state.id === user.id)
     },
-    userCardsCreatedIsOverLimit: (state) => {
+    getUserCardsCreatedIsOverLimit: (state) => {
       const cardsCreatedLimit = consts.cardsCreatedLimit
       if (state.isUpgraded) { return }
       if (state.cardsCreatedCount >= cardsCreatedLimit) { return true }
+    },
+    getShouldPreventCardsCreatedCountUpdate: (state) => {
+      const isUpgraded = store.getters['currentSpace/spaceCreatorIsUpgraded']
+      const isCurrentUser = store.getters['currentSpace/spaceCreatorIsCurrentUser']
+      return (isUpgraded && !isCurrentUser)
     }
 
     // cardsCreatedWillBeOverLimit: (state, getters, rootState) => (count) => {
@@ -164,14 +168,6 @@ export const useUserStore = defineStore('users', {
     // },
     // connectionIsCreatedByCurrentUser: (state, getters, rootState) => (connection) => {
     //   return state.id === connection.userId
-    // },
-    // isSpaceMember: (state, getters, rootState, rootGetters) => (space) => {
-    //   // a member is a user, collaborator, or group member
-    //   space = space || rootState.currentSpace
-    //   const isSpaceUser = getters.isSpaceUser(space)
-    //   const isSpaceCollaborator = getters.isSpaceCollaborator(space)
-    //   const isGroupMember = rootGetters['groups/currentUserIsCurrentSpaceGroupUser']
-    //   return Boolean(isSpaceUser || isSpaceCollaborator || isGroupMember)
     // },
     // isSpaceUser: (state, getters, rootState) => (space) => {
     //   let userIsInSpace = Boolean(space.users?.find(user => {
@@ -291,21 +287,27 @@ export const useUserStore = defineStore('users', {
 
   actions: {
 
-    getUserIsSpaceUser (space = store.state.currentSpace) {
+    // TODO refactor these into standard getters if space always = store.state.currentSpace
+    // const spaceStore = useSpaceStore()
+
+    getUserIsSpaceUser (space) {
+      space = space || store.state.currentSpace
       let userIsInSpace = Boolean(space.users?.find(user => {
         return user.id === this.id
       }))
       userIsInSpace = userIsInSpace || space.userId === this.id
       return userIsInSpace
     },
-    getUserIsSpaceCollaborator (space = store.state.currentSpace) {
+    getUserIsSpaceCollaborator (space) {
+      space = space || store.state.currentSpace
       if (space.collaborators) {
         return Boolean(space.collaborators.find(collaborator => {
           return collaborator.id === this.id
         }))
       }
     },
-    getUserSpacePermission (space = store.state.currentSpace) {
+    getUserSpacePermission (space) {
+      space = space || store.state.currentSpace
       const isSpaceUser = this.getUserIsSpaceUser(space)
       const isSpaceCollaborator = this.getUserIsSpaceCollaborator(space)
       const spaceHasNoUsers = !space.users.length
@@ -316,6 +318,28 @@ export const useUserStore = defineStore('users', {
       } else {
         return 'spectator'
       }
+    },
+    getUserIsSpaceMember (space) {
+      space = space || store.state.currentSpace
+      const isSpaceUser = this.getUserIsSpaceUser(space)
+      const isSpaceCollaborator = this.getUserIsSpaceCollaborator(space)
+      const isGroupMember = store.getters['groups/currentUserIsCurrentSpaceGroupUser']
+      return Boolean(isSpaceUser || isSpaceCollaborator || isGroupMember)
+    },
+    getUserCanEditSpace (space) {
+      space = space || store.state.currentSpace
+      const spaceIsOpen = space.privacy === 'open'
+      const currentUserIsSignedIn = this.getUserIsSignedIn
+      const canEditOpenSpace = spaceIsOpen && currentUserIsSignedIn
+      const isSpaceMember = this.getUserIsSpaceMember(space)
+      return canEditOpenSpace || isSpaceMember
+    },
+
+    // TODO refactor to getter after store -> rootStore
+
+    getUserIsReadOnlyInvitedToSpace (space) {
+      // space always currentspace?
+      return store.state.spaceReadOnlyKey.spaceId === space.id
     },
 
     // init
@@ -332,7 +356,7 @@ export const useUserStore = defineStore('users', {
       cache.saveUser(allState)
     },
     async restoreRemoteUser () {
-      if (!this.userIsSignedIn) { return }
+      if (!this.getUserIsSignedIn) { return }
       const user = await store.dispatch('api/getUser', null, { root: true })
       if (!user) { return }
       user.updatedAt = utils.unixTime(user.updatedAt)
@@ -351,7 +375,7 @@ export const useUserStore = defineStore('users', {
     async restoreUserAssociatedData () {
       try {
         store.commit('isLoadingFavorites', true, { root: true })
-        if (!this.userIsSignedIn) {
+        if (!this.getUserIsSignedIn) {
           store.commit('isLoadingFavorites', false, { root: true })
           return
         }
@@ -389,7 +413,7 @@ export const useUserStore = defineStore('users', {
     },
     checkIfShouldJoinGroup () {
       if (!store.state.groupToJoinOnLoad) { return }
-      if (this.userIsSignedIn) {
+      if (this.getUserIsSignedIn) {
         store.dispatch('groups/joinGroup', null, { root: true })
       } else {
         store.commit('notifySignUpToJoinGroup', true, { root: true })
@@ -410,6 +434,7 @@ export const useUserStore = defineStore('users', {
       store.dispatch('themes/restore', null, { root: true })
       store.commit('triggerUserIsLoaded', null, { root: true })
       this.checkIfShouldJoinGroup()
+      console.log('🍍', { ...this.$state })
     },
 
     // update
@@ -497,6 +522,39 @@ export const useUserStore = defineStore('users', {
       } else {
         this.updateUser({ lastSpace: '' })
       }
+    },
+
+    // card limit
+
+    async updateUserCardsCreatedCount (cards, shouldDecrement) {
+      cards = cards.filter(card => !card.isCreatedThroughPublicApi)
+      cards = cards.filter(card => this.getUserIsCurrentUser({ id: card.userId }))
+      let delta = cards.length
+      if (shouldDecrement) {
+        delta = -delta
+      }
+      const count = this.cardsCreatedCount + delta
+      // update raw vanity count
+      store.commit('cardsCreatedCountRaw', count)
+      await store.dispatch('api/addToQueue', { name: 'updateUserCardsCreatedCountRaw', body: { delta } }, { root: true })
+      // update count
+      if (this.getShouldPreventCardsCreatedCountUpdate) { return }
+      this.cardsCreatedCount = count
+      await store.dispatch('api/addToQueue', { name: 'updateUserCardsCreatedCount', body: { delta } }, { root: true })
+    },
+
+    // inbox
+
+    async getInboxSpace () {
+      let space = await cache.getInboxSpace()
+      if (!space) {
+        try {
+          space = await store.dispatch('api/getUserInboxSpace', null, { root: true })
+        } catch (error) {
+          console.warn('🚑 inboxSpace', error)
+        }
+      }
+      return space
     }
 
   }
