@@ -2,11 +2,13 @@
 import { reactive, computed, onMounted, onBeforeUnmount, watch, ref, nextTick } from 'vue'
 import { useStore } from 'vuex'
 import { useCardStore } from '@/stores/useCardStore'
+import { useUserStore } from '@/stores/useUserStore'
 
 import utils from '@/utils.js'
 
 const cardStore = useCardStore()
 const store = useStore()
+const userStore = useUserStore()
 
 let unsubscribe
 
@@ -43,14 +45,14 @@ watch(() => props.visible, (value, prevValue) => {
   }
 })
 
-const isVisible = computed(() => props.visible || store.getters['currentUser/isSpaceMember']())
+const isVisible = computed(() => props.visible || userStore.getUserIsSpaceMember())
 const showInExplore = computed(() => {
   const space = props.space || store.state.currentSpace
   const showInExplore = space.showInExplore
   const isNotPrivate = space.privacy !== 'private'
   return showInExplore && isNotPrivate
 })
-const currentUserIsSignedIn = computed(() => store.getters['currentUser/isSignedIn'])
+const currentUserIsSignedIn = computed(() => userStore.getUserIsSignedIn)
 const spaceIsHelloKinopio = computed(() => store.getters['currentSpace/isHelloKinopio'])
 const spaceCardsCount = computed(() => cardStore.getAllCards.length)
 

@@ -4,6 +4,7 @@ import { useStore } from 'vuex'
 import { useCardStore } from '@/stores/useCardStore'
 import { useConnectionStore } from '@/stores/useConnectionStore'
 import { useBoxStore } from '@/stores/useBoxStore'
+import { useUserStore } from '@/stores/useUserStore'
 
 import utils from '@/utils.js'
 import consts from '@/consts.js'
@@ -14,6 +15,7 @@ const cardStore = useCardStore()
 const store = useStore()
 const connectionStore = useConnectionStore()
 const boxStore = useBoxStore()
+const userStore = useUserStore()
 
 let unsubscribe
 
@@ -42,11 +44,11 @@ const props = defineProps({
 })
 
 const spaceCounterZoomDecimal = computed(() => store.getters.spaceCounterZoomDecimal)
-const moreOptionsIsVisible = computed(() => store.state.currentUser.shouldShowMoreAlignOptions)
+const moreOptionsIsVisible = computed(() => userStore.shouldShowMoreAlignOptions)
 const multipleCardsSelectedIds = computed(() => store.state.multipleCardsSelectedIds)
 const multipleConnectionsSelectedIds = computed(() => store.state.multipleConnectionsSelectedIds)
 const multipleBoxesSelectedIds = computed(() => store.state.multipleBoxesSelectedIds)
-const isSpaceMember = computed(() => store.getters['currentUser/isSpaceMember']())
+const isSpaceMember = computed(() => userStore.getUserIsSpaceMember())
 const spaceBetween = computed(() => consts.spaceBetweenCards * spaceCounterZoomDecimal.value)
 const canDistribute = computed(() => {
   const minimumRequiredToDistribute = 3
@@ -66,7 +68,7 @@ const items = computed(() => {
 })
 const toggleMoreOptionsIsVisible = () => {
   const value = !moreOptionsIsVisible.value
-  store.dispatch('currentUser/shouldShowMoreAlignOptions', value)
+  userStore.updateUser({ shouldShowMoreAlignOptions: value })
 }
 
 // verify positioning
