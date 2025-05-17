@@ -4,6 +4,7 @@ import { useStore } from 'vuex'
 import { useCardStore } from '@/stores/useCardStore'
 import { useConnectionStore } from '@/stores/useConnectionStore'
 import { useBoxStore } from '@/stores/useBoxStore'
+import { useUserStore } from '@/stores/useUserStore'
 
 import utils from '@/utils.js'
 import consts from '@/consts.js'
@@ -19,6 +20,7 @@ const store = useStore()
 const cardStore = useCardStore()
 const connectionStore = useConnectionStore()
 const boxStore = useBoxStore()
+const userStore = useUserStore()
 
 let unsubscribe
 
@@ -81,9 +83,9 @@ const state = reactive({
 })
 
 const spaceCounterZoomDecimal = computed(() => store.getters.spaceCounterZoomDecimal)
-const canEditBox = computed(() => store.getters['currentUser/canEditBox'](props.box))
-const currentUserIsSignedIn = computed(() => store.getters['currentUser/isSignedIn'])
-const currentUserColor = computed(() => store.state.currentUser.color)
+const canEditBox = computed(() => userStore.getUserCanEditBox(props.box))
+const currentUserIsSignedIn = computed(() => userStore.getUserIsSignedIn)
+const currentUserColor = computed(() => userStore.color)
 const name = computed(() => props.box.name)
 const currentBoxIsSelected = computed(() => {
   const selected = store.state.multipleBoxesSelectedIds
@@ -197,7 +199,7 @@ const backgroundStyles = computed(() => {
   }
   return newStyles
 })
-const userColor = computed(() => store.state.currentUser.color)
+const userColor = computed(() => userStore.color)
 const color = computed(() => {
   const remoteColor = remoteBoxDetailsVisibleColor.value || remoteSelectedColor.value || remoteUserResizingBoxesColor.value || remoteBoxDraggingColor.value
   if (remoteColor) {
@@ -245,10 +247,10 @@ const classes = computed(() => {
 // space filters
 
 const filtersIsActive = computed(() => {
-  return Boolean(store.getters['currentUser/totalItemFadingFiltersActive'])
+  return Boolean(userStore.getUserTotalItemFadingFiltersActive)
 })
 const isFilteredByUnchecked = computed(() => {
-  const filterUncheckedIsActive = store.state.currentUser.filterUnchecked
+  const filterUncheckedIsActive = userStore.filterUnchecked
   if (!filterUncheckedIsActive) { return }
   return !isChecked.value && hasCheckbox.value
 })
@@ -283,7 +285,7 @@ const startResizing = (event) => {
   }
   store.commit('currentUserIsResizingBoxIds', boxIds)
   const updates = {
-    userId: store.state.currentUser.id,
+    userId: userStore.id,
     boxIds
   }
   store.commit('broadcast/updateStore', { updates, type: 'updateRemoteUserResizingBoxes' })
@@ -345,7 +347,7 @@ const updateCurrentConnections = async () => {
   state.currentConnections = connectionStore.getItemsConnections(props.box.id)
 }
 const isPainting = computed(() => store.state.currentUserIsPainting)
-const canEditSpace = computed(() => store.getters['currentUser/canEditSpace']())
+const canEditSpace = computed(() => userStore.getUserCanEditSpace())
 const currentBoxIsBeingDragged = computed(() => {
   const isDragging = store.state.currentUserIsDraggingBox
   const isCurrent = store.state.currentDraggingBoxId === props.box.id
@@ -383,7 +385,7 @@ const updateIsHover = (value) => {
 const endBoxInfoInteraction = (event) => {
   if (isConnectingTo.value) { return }
   const isMeta = event.metaKey || event.ctrlKey
-  const userId = store.state.currentUser.id
+  const userId = userStore.id
   if (store.state.currentUserIsPainting) { return }
   if (isMultiTouch) { return }
   if (store.state.currentUserIsPanningReady || store.state.currentUserIsPanning) { return }
@@ -650,7 +652,7 @@ const toggleBoxChecked = () => {
   postMessage.sendHaptics({ name: 'heavyImpact' })
   cancelLocking()
   store.commit('currentUserIsDraggingBox', false)
-  const userId = store.state.currentUser.id
+  const userId = userStore.id
   store.commit('broadcast/updateStore', { updates: { userId }, type: 'clearRemoteBoxesDragging' })
   event.stopPropagation()
   store.commit('preventMultipleSelectedActionsIsVisible', false)

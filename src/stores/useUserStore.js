@@ -112,6 +112,17 @@ export const useUserStore = defineStore('users', {
       const isUpgraded = store.getters['currentSpace/spaceCreatorIsUpgraded']
       const isCurrentUser = store.getters['currentSpace/spaceCreatorIsCurrentUser']
       return (isUpgraded && !isCurrentUser)
+    },
+    getUserTotalItemFadingFiltersActive: (state) => {
+      let userFilters = 0
+      if (state.filterUnchecked) {
+        userFilters += 1
+      }
+      const tagNames = store.state.filteredTagNames
+      const connections = store.state.filteredConnectionTypeIds
+      const frames = store.state.filteredFrameIds
+      const boxes = store.state.filteredBoxIds
+      return userFilters + tagNames.length + connections.length + frames.length + boxes.length
     }
 
     // cardsCreatedWillBeOverLimit: (state, getters, rootState) => (count) => {
@@ -140,11 +151,6 @@ export const useUserStore = defineStore('users', {
     //   const isNoUser = !card.userId && !card.nameUpdatedByUserId
     //   return isCreatedByUser || isUpdatedByUser || isNoUser
     // },
-    // boxIsCreatedByCurrentUser: (state, getters, rootState) => (box) => {
-    //   const isCreatedByUser = state.id === box.userId
-    //   const isNoUser = !box.userId
-    //   return isCreatedByUser || isNoUser
-    // },
     // canEditCard: (state, getters, rootState, rootGetters) => (card) => {
     //   const isSpaceMember = getters.isSpaceMember()
     //   if (isSpaceMember) { return true }
@@ -157,14 +163,6 @@ export const useUserStore = defineStore('users', {
     //   const canEditSpace = getters.canEditSpace()
     //   const isSpaceMember = getters.isSpaceMember()
     //   return canEditSpace && !isSpaceMember
-    // },
-    // canEditBox: (state, getters, rootState, rootGetters) => (box) => {
-    //   const isSpaceMember = getters.isSpaceMember()
-    //   if (isSpaceMember) { return true }
-    //   const canEditSpace = getters.canEditSpace()
-    //   const boxIsCreatedByCurrentUser = getters.boxIsCreatedByCurrentUser(box)
-    //   if (canEditSpace && boxIsCreatedByCurrentUser) { return true }
-    //   return false
     // },
     // connectionIsCreatedByCurrentUser: (state, getters, rootState) => (connection) => {
     //   return state.id === connection.userId
@@ -197,30 +195,6 @@ export const useUserStore = defineStore('users', {
     //   if (spaceCreatorIsUpgraded && !spaceCreatorIsCurrentUser) {
     //     return true
     //   }
-    // },
-    // totalFiltersActive: (state, getters) => {
-    //   let userFilters = getters.totalItemFadingFiltersActive
-    //   if (state.filterShowUsers) {
-    //     userFilters += 1
-    //   }
-    //   if (state.filterShowDateUpdated) {
-    //     userFilters += 1
-    //   }
-    //   if (state.filterComments) {
-    //     userFilters += 1
-    //   }
-    //   return userFilters
-    // },
-    // totalItemFadingFiltersActive: (state, getters, rootState) => {
-    //   let userFilters = 0
-    //   if (state.filterUnchecked) {
-    //     userFilters += 1
-    //   }
-    //   const tagNames = rootState.filteredTagNames
-    //   const connections = rootState.filteredConnectionTypeIds
-    //   const frames = rootState.filteredFrameIds
-    //   const boxes = rootState.filteredBoxIds
-    //   return userFilters + tagNames.length + connections.length + frames.length + boxes.length
     // },
 
     // // AI Images
@@ -334,12 +308,39 @@ export const useUserStore = defineStore('users', {
       const isSpaceMember = this.getUserIsSpaceMember(space)
       return canEditOpenSpace || isSpaceMember
     },
+    getUserCanEditBox (box) {
+      const isSpaceMember = this.getUserIsSpaceMember()
+      if (isSpaceMember) { return true }
+      const canEditSpace = this.getUserCanEditSpace()
+      const createdBox = this.getBoxIsCreatedByCurrentUser(box)
+      if (canEditSpace && createdBox) { return true }
+      return false
+    },
+    getBoxIsCreatedByCurrentUser (box) {
+      const isCreatedByUser = this.id === box.userId
+      const isNoUser = !box.userId
+      return isCreatedByUser || isNoUser
+    },
 
     // TODO refactor to getter after store -> rootStore
 
     getUserIsReadOnlyInvitedToSpace (space) {
       // space always currentspace?
       return store.state.spaceReadOnlyKey.spaceId === space.id
+    },
+
+    getUserTotalFiltersActive () {
+      let userFilters = this.totalItemFadingFiltersActive
+      if (this.filterShowUsers) {
+        userFilters += 1
+      }
+      if (this.filterShowDateUpdated) {
+        userFilters += 1
+      }
+      if (this.filterComments) {
+        userFilters += 1
+      }
+      return userFilters
     },
 
     // init
