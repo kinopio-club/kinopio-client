@@ -8,7 +8,6 @@ import Links from '@/components/sidebar/Links.vue'
 import Tags from '@/components/sidebar/Tags.vue'
 import Removed from '@/components/sidebar/Removed.vue'
 import Stats from '@/components/sidebar/Stats.vue'
-import Text from '@/components/sidebar/Text.vue'
 import Inbox from '@/components/sidebar/Inbox.vue'
 import Favorites from '@/components/sidebar/Favorites.vue'
 import History from '@/components/sidebar/History.vue'
@@ -46,7 +45,6 @@ const state = reactive({
   removedIsVisible: false,
   inboxIsVisible: false,
   statsIsVisible: false,
-  textIsVisible: false,
   favoritesIsVisible: false,
   historyIsVisible: false
 })
@@ -57,7 +55,6 @@ const clearVisible = () => {
   state.removedIsVisible = false
   state.inboxIsVisible = false
   state.statsIsVisible = false
-  state.textIsVisible = false
   state.favoritesIsVisible = false
   state.historyIsVisible = false
 }
@@ -94,7 +91,7 @@ const toggleSection = (value) => {
 const restoreUserLastSidebarSection = () => {
   clearVisible()
   const section = store.state.currentUser.lastSidebarSection
-  const values = ['text', 'stats', 'inbox', 'removed', 'links', 'tags', 'favorites', 'history'] // listed in api docs
+  const values = ['stats', 'inbox', 'removed', 'links', 'tags', 'favorites', 'history'] // listed in api docs
   const isValid = values.includes(section)
   if (section && isValid) {
     state[section + 'IsVisible'] = true
@@ -126,9 +123,6 @@ dialog#sidebar.sidebar.is-pinnable(
           //- Inbox
           button(@click.left="toggleSection('inbox')" :class="{ active: state.inboxIsVisible}" title="Move from Inbox")
             img.icon(src="@/assets/inbox.svg")
-          //- Text
-          button(@click.left="toggleSection('text')" :class="{active: state.textIsVisible}" title="Card Text Editor")
-            span Text
           //- Tags
           button(@click.left="toggleSection('tags')" :class="{ active: state.tagsIsVisible}" title="Space Tags")
             span Tags
@@ -161,7 +155,6 @@ dialog#sidebar.sidebar.is-pinnable(
   Links(:visible="state.linksIsVisible" :parentIsPinned="dialogIsPinned")
   Removed(:visible="state.removedIsVisible")
   Stats(:visible="state.statsIsVisible")
-  Text(:visible="state.textIsVisible")
   Inbox(:visible="state.inboxIsVisible")
   Favorites(:visible="state.favoritesIsVisible")
   History(:visible="state.historyIsVisible")
