@@ -3,12 +3,14 @@ import { reactive, computed, onMounted, onBeforeUnmount, onUnmounted, watch, ref
 import { useStore } from 'vuex'
 import { useConnectionStore } from '@/stores/useConnectionStore'
 import { useBoxStore } from '@/stores/useBoxStore'
+import { useUserStore } from '@/stores/useUserStore'
 
 import utils from '@/utils.js'
 
 const store = useStore()
 const connectionStore = useConnectionStore()
 const boxStore = useBoxStore()
+const userStore = useUserStore()
 
 const props = defineProps({
   box: Object
@@ -17,7 +19,7 @@ const state = reactive({
   position: null
 })
 
-const canEditBox = computed(() => store.getters['currentUser/canEditBox'](props.box))
+const canEditBox = computed(() => userStore.getUserCanEditBox(props.box))
 const connectionTypes = computed(() => connectionStore.getItemConnectionTypes(props.box.id))
 
 // styles

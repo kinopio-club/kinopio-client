@@ -129,34 +129,11 @@ export const useUserStore = defineStore('users', {
     //   if (state.isUpgraded) { return }
     //   if (state.cardsCreatedCount + count >= cardsCreatedLimit) { return true }
     // },
-    // canEditSpace: (state, getters, rootState, rootGetters) => (space) => {
-    //   space = space || rootState.currentSpace
-    //   const spaceIsOpen = space.privacy === 'open'
-    //   const currentUserIsSignedIn = getters.isSignedIn
-    //   const canEditOpenSpace = spaceIsOpen && currentUserIsSignedIn
-    //   const isSpaceMember = getters.isSpaceMember(space)
-    //   return canEditOpenSpace || isSpaceMember
-    // },
     // cannotEditUnlessSignedIn: (state, getters, rootState) => (space) => {
     //   space = space || rootState.currentSpace
     //   const spaceIsOpen = space.privacy === 'open'
     //   const currentUserIsSignedIn = getters.isSignedIn
     //   return !currentUserIsSignedIn && spaceIsOpen
-    // },
-    // cardIsCreatedByCurrentUser: (state, getters, rootState) => (card) => {
-    //   if (!card) { return }
-    //   const isCreatedByUser = state.id === card.userId
-    //   const isUpdatedByUser = state.id === card.nameUpdatedByUserId
-    //   const isNoUser = !card.userId && !card.nameUpdatedByUserId
-    //   return isCreatedByUser || isUpdatedByUser || isNoUser
-    // },
-    // canEditCard: (state, getters, rootState, rootGetters) => (card) => {
-    //   const isSpaceMember = getters.isSpaceMember()
-    //   if (isSpaceMember) { return true }
-    //   const canEditSpace = getters.canEditSpace()
-    //   const cardIsCreatedByCurrentUser = getters.cardIsCreatedByCurrentUser(card)
-    //   if (canEditSpace && cardIsCreatedByCurrentUser) { return true }
-    //   return false
     // },
     // canOnlyComment: (state, getters, rootState, rootGetters) => () => {
     //   const canEditSpace = getters.canEditSpace()
@@ -228,7 +205,6 @@ export const useUserStore = defineStore('users', {
 
     // TODO refactor these into standard getters if space always = store.state.currentSpace
     // const spaceStore = useSpaceStore()
-
     getUserIsSpaceUser (space) {
       space = space || store.state.currentSpace
       let userIsInSpace = Boolean(space.users?.find(user => {
@@ -273,6 +249,7 @@ export const useUserStore = defineStore('users', {
       const isSpaceMember = this.getUserIsSpaceMember(space)
       return canEditOpenSpace || isSpaceMember
     },
+
     getUserCanEditBox (box) {
       const isSpaceMember = this.getUserIsSpaceMember()
       if (isSpaceMember) { return true }
@@ -286,14 +263,21 @@ export const useUserStore = defineStore('users', {
       const isNoUser = !box.userId
       return isCreatedByUser || isNoUser
     },
-
-    // TODO refactor to getter after store -> rootStore
-
-    getUserIsReadOnlyInvitedToSpace (space) {
-      // space always currentspace?
-      return store.state.spaceReadOnlyKey.spaceId === space.id
+    getUserIsCardCreator (card) {
+      if (!card) { return }
+      const isCreatedByUser = this.id === card.userId
+      const isUpdatedByUser = this.id === card.nameUpdatedByUserId
+      const isNoUser = !card.userId && !card.nameUpdatedByUserId
+      return isCreatedByUser || isUpdatedByUser || isNoUser
     },
-
+    getUserCanEditCard (card) {
+      const isSpaceMember = this.getUserIsSpaceMember()
+      if (isSpaceMember) { return true }
+      const canEditSpace = this.getUserCanEditSpace()
+      const getUserIsCardCreator = this.getUserIsCardCreator(card)
+      if (canEditSpace && getUserIsCardCreator) { return true }
+      return false
+    },
     getUserTotalFiltersActive () {
       let userFilters = this.totalItemFadingFiltersActive
       if (this.filterShowUsers) {
@@ -306,6 +290,13 @@ export const useUserStore = defineStore('users', {
         userFilters += 1
       }
       return userFilters
+    },
+
+    // TODO refactor to getter after store -> rootStore
+
+    getUserIsReadOnlyInvitedToSpace (space) {
+      // space always currentspace?
+      return store.state.spaceReadOnlyKey.spaceId === space.id
     },
 
     // init

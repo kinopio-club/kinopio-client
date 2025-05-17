@@ -4,6 +4,7 @@ import { useStore, mapState, mapGetters } from 'vuex'
 import { useConnectionStore } from '@/stores/useConnectionStore'
 import { useCardStore } from '@/stores/useCardStore'
 import { useBoxStore } from '@/stores/useBoxStore'
+import { useUserStore } from '@/stores/useUserStore'
 
 import utils from '@/utils.js'
 import Frames from '@/components/Frames.vue'
@@ -36,6 +37,7 @@ const store = useStore()
 const cardStore = useCardStore()
 const connectionStore = useConnectionStore()
 const boxStore = useBoxStore()
+const userStore = useUserStore()
 
 const cardElement = ref(null)
 
@@ -157,7 +159,7 @@ const updateUrlData = () => {
   updateUrlPreview()
 }
 
-const canEditCard = computed(() => store.getters['currentUser/canEditCard'](props.card))
+const canEditCard = computed(() => userStore.getUserCanEditCard(props.card))
 const isSelectedOrDragging = computed(() => {
   return Boolean(isSelected.value || isRemoteSelected.value || isRemoteCardDetailsVisible.value || isRemoteCardDragging.value || state.uploadIsDraggedOver || remoteUploadDraggedOverCardColor.value || remoteUserResizingCardsColor.value || remoteUserTiltingCardsColor.value)
 })

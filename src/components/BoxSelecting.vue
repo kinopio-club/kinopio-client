@@ -3,6 +3,7 @@ import { reactive, computed, onMounted, onBeforeUnmount, watch, ref, nextTick } 
 import { useStore } from 'vuex'
 import { useCardStore } from '@/stores/useCardStore'
 import { useBoxStore } from '@/stores/useBoxStore'
+import { useUserStore } from '@/stores/useUserStore'
 
 import utils from '@/utils.js'
 
@@ -15,6 +16,7 @@ import { colord } from 'colord'
 const store = useStore()
 const cardStore = useCardStore()
 const boxStore = useBoxStore()
+const userStore = useUserStore()
 
 let unsubscribe
 
@@ -69,7 +71,7 @@ const state = reactive({
 const currentUserIsBoxSelecting = computed(() => store.state.currentUserIsBoxSelecting)
 const startPoint = computed(() => positionInSpace(store.state.currentUserBoxSelectStart))
 const endPoint = computed(() => positionInSpace(store.state.currentUserBoxSelectMove))
-const userCantEditSpace = computed(() => !store.getters['currentUser/canEditSpace']())
+const userCantEditSpace = computed(() => !userStore.getUserCanEditSpace())
 const toolbarIsDrawing = computed(() => store.state.currentUserToolbar === 'drawing')
 const shouldPreventBoxSelecting = computed(() => {
   if (toolbarIsDrawing.value) { return true }
