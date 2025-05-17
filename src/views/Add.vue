@@ -61,7 +61,7 @@ onBeforeUnmount(() => {
 })
 
 const isOffline = computed(() => !store.state.isOnline)
-const currentUserIsSignedIn = computed(() => store.getters['currentUser/isSignedIn'])
+const currentUserIsSignedIn = computed(() => userStore.getUserIsSignedIn)
 const kinopioDomain = computed(() => consts.kinopioDomain())
 const cardsCreatedIsOverLimit = computed(() => store.getters['currentUser/cardsCreatedIsOverLimit'])
 const maxCardCharacterLimit = computed(() => consts.cardCharacterLimit)

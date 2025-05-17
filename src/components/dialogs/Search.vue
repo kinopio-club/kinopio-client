@@ -2,6 +2,7 @@
 import { reactive, computed, onMounted, onBeforeUnmount, watch, ref, nextTick } from 'vue'
 import { useStore } from 'vuex'
 import { useCardStore } from '@/stores/useCardStore'
+import { useUserStore } from '@/stores/useUserStore'
 
 import ResultsFilter from '@/components/ResultsFilter.vue'
 import SearchFilters from '@/components/SearchFilters.vue'
@@ -14,6 +15,7 @@ import orderBy from 'lodash-es/orderBy'
 
 const store = useStore()
 const cardStore = useCardStore()
+const userStore = useUserStore()
 
 const dialogElement = ref(null)
 const resultsElement = ref(null)
@@ -61,7 +63,7 @@ const triggerFocusResultsFilter = async () => {
   store.commit('triggerFocusResultsFilter')
 }
 const currentUser = computed(() => store.state.currentUser)
-const currentUserIsSignedIn = computed(() => store.getters['currentUser/isSignedIn'])
+const currentUserIsSignedIn = computed(() => userStore.getUserIsSignedIn)
 
 // search
 

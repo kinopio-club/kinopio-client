@@ -3,6 +3,7 @@ import { reactive, computed, onMounted, onUpdated, onBeforeUnmount, watch, ref, 
 import { useStore, mapState, mapGetters } from 'vuex'
 import { useCardStore } from '@/stores/useCardStore'
 import { useConnectionStore } from '@/stores/useConnectionStore'
+import { useUserStore } from '@/stores/useUserStore'
 
 import CardOrBoxActions from '@/components/subsections/CardOrBoxActions.vue'
 import ImagePicker from '@/components/dialogs/ImagePicker.vue'
@@ -29,6 +30,7 @@ import { nanoid } from 'nanoid'
 
 const cardStore = useCardStore()
 const connectionStore = useConnectionStore()
+const userStore = useUserStore()
 
 let prevCardId, prevCardName
 let previousTags = []
@@ -265,7 +267,7 @@ const isInvitedButCannotEditSpace = computed(() => store.state.currentUserIsInvi
 const isSpaceMember = computed(() => store.getters['currentUser/isSpaceMember']())
 const isFavoriteSpace = computed(() => store.getters['currentSpace/isFavorite']())
 const canEditCard = computed(() => store.getters['currentUser/canEditCard'](card.value))
-const currentUserIsSignedIn = computed(() => store.getters['currentUser/isSignedIn'])
+const currentUserIsSignedIn = computed(() => userStore.getUserIsSignedIn)
 const createdByUser = computed(() => {
   const userId = card.value.userId
   const user = store.getters['currentSpace/userById'](userId)

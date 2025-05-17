@@ -1,6 +1,7 @@
 <script setup>
 import { reactive, computed, onMounted, onUnmounted, onBeforeUnmount, watch, ref, nextTick } from 'vue'
 import { useStore } from 'vuex'
+import { useUserStore } from '@/stores/useUserStore'
 
 import About from '@/components/dialogs/About.vue'
 import SpaceDetails from '@/components/dialogs/SpaceDetails.vue'
@@ -41,7 +42,9 @@ import UserGroups from '@/components/dialogs/UserGroups.vue'
 import consts from '@/consts.js'
 
 import sortBy from 'lodash-es/sortBy'
+
 const store = useStore()
+const userStore = useUserStore()
 
 let unsubscribe
 
@@ -169,7 +172,7 @@ const userCanEditSpace = computed(() => store.getters['currentUser/canEditSpace'
 const userCanOnlyComment = computed(() => store.getters['currentUser/canOnlyComment']())
 const isUpgraded = computed(() => store.state.currentUser.isUpgraded)
 const isOnline = computed(() => store.state.isOnline)
-const currentUserIsSignedIn = computed(() => store.getters['currentUser/isSignedIn'])
+const currentUserIsSignedIn = computed(() => userStore.getUserIsSignedIn)
 const shouldIncreaseUIContrast = computed(() => store.state.currentUser.shouldIncreaseUIContrast)
 const isMobile = computed(() => utils.isMobile())
 const toolbarIsVisible = computed(() => {

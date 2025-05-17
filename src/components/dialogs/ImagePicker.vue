@@ -2,6 +2,7 @@
 import { reactive, computed, onMounted, onUnmounted, watch, ref, nextTick } from 'vue'
 import { useStore } from 'vuex'
 import { useCardStore } from '@/stores/useCardStore'
+import { useUserStore } from '@/stores/useUserStore'
 
 import Loader from '@/components/Loader.vue'
 import utils from '@/utils.js'
@@ -13,6 +14,7 @@ import sample from 'lodash-es/sample'
 
 const store = useStore()
 const cardStore = useCardStore()
+const userStore = useUserStore()
 
 const dialogElement = ref(null)
 const searchInputElement = ref(null)
@@ -62,7 +64,7 @@ const state = reactive({
   }
 })
 
-const currentUserIsSignedIn = computed(() => store.getters['currentUser/isSignedIn'])
+const currentUserIsSignedIn = computed(() => userStore.getUserIsSignedIn)
 const triggerSignUpOrInIsVisible = () => {
   store.dispatch('closeAllDialogs')
   store.commit('triggerSignUpOrInIsVisible')

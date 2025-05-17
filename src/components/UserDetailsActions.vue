@@ -1,6 +1,7 @@
 <script setup>
 import { reactive, computed, onMounted, onBeforeUnmount, watch, ref, nextTick } from 'vue'
 import { useStore } from 'vuex'
+import { useUserStore } from '@/stores/useUserStore'
 
 import SpacePicker from '@/components/dialogs/SpacePicker.vue'
 import Loader from '@/components/Loader.vue'
@@ -12,6 +13,7 @@ import cache from '@/cache.js'
 import postMessage from '@/postMessage.js'
 
 const store = useStore()
+const userStore = useUserStore()
 
 const dialogElement = ref(null)
 
@@ -84,7 +86,7 @@ const toggleUserSettingsIsVisible = () => {
   store.dispatch('closeAllDialogs')
   store.commit('userSettingsIsVisible', value)
 }
-const currentUserIsSignedIn = computed(() => store.getters['currentUser/isSignedIn'])
+const currentUserIsSignedIn = computed(() => userStore.getUserIsSignedIn)
 const signOut = async () => {
   postMessage.send({ name: 'onLogout' })
   await store.dispatch('currentUser/resetLastSpaceId')

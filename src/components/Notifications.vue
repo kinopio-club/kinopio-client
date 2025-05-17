@@ -1,6 +1,7 @@
 <script setup>
 import { reactive, computed, onMounted, onBeforeUnmount, watch, ref, nextTick } from 'vue'
 import { useStore } from 'vuex'
+import { useUserStore } from '@/stores/useUserStore'
 
 import cache from '@/cache.js'
 import consts from '@/consts.js'
@@ -15,6 +16,7 @@ import Loader from '@/components/Loader.vue'
 import dayjs from 'dayjs'
 
 const store = useStore()
+const userStore = useUserStore()
 
 let unsubscribe
 
@@ -74,7 +76,7 @@ const currentUserIsResizingBox = computed(() => store.state.currentUserIsResizin
 const currentUserIsTiltingCard = computed(() => store.state.currentUserIsTiltingCard)
 const currentUserIsPanning = computed(() => store.state.currentUserIsPanning)
 const currentUserIsPanningReady = computed(() => store.state.currentUserIsPanningReady)
-const currentUserIsSignedIn = computed(() => store.getters['currentUser/isSignedIn'])
+const currentUserIsSignedIn = computed(() => userStore.getUserIsSignedIn)
 const currentUserIsUpgraded = computed(() => store.state.currentUser.isUpgraded)
 const isTouchDevice = computed(() => store.state.isTouchDevice)
 const shouldSnapToGrid = computed(() => store.state.shouldSnapToGrid)

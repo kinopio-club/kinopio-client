@@ -1,6 +1,7 @@
 <script setup>
 import { reactive, computed, onMounted, watch, ref, nextTick } from 'vue'
 import { useStore } from 'vuex'
+import { useUserStore } from '@/stores/useUserStore'
 
 import UpgradeUserStripe from '@/components/UpgradeUserStripe.vue'
 import UpgradeUserApple from '@/components/UpgradeUserApple.vue'
@@ -10,6 +11,8 @@ import utils from '@/utils.js'
 import consts from '@/consts.js'
 
 const store = useStore()
+const userStore = useUserStore()
+
 const dialog = ref(null)
 
 onMounted(() => {
@@ -41,7 +44,7 @@ const state = reactive({
   period: 'year' // year, life
 })
 
-const currentUserIsSignedIn = computed(() => store.getters['currentUser/isSignedIn'])
+const currentUserIsSignedIn = computed(() => userStore.getUserIsSignedIn)
 const isSecureAppContextIOS = computed(() => consts.isSecureAppContextIOS)
 const toggleUpgradeFAQIsVisible = () => {
   state.upgradeFAQIsVisible = !state.upgradeFAQIsVisible

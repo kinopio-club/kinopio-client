@@ -2,11 +2,13 @@
 import { reactive, computed, onMounted, onUnmounted, watch, ref, nextTick } from 'vue'
 import { useStore } from 'vuex'
 import { useConnectionStore } from '@/stores/useConnectionStore'
+import { useUserStore } from '@/stores/useUserStore'
 
 import Loader from '@/components/Loader.vue'
 import utils from '@/utils.js'
 
 const store = useStore()
+const userStore = useUserStore()
 const connectionStore = useConnectionStore()
 
 const emit = defineEmits(['updateSpaces'])
@@ -30,7 +32,7 @@ const state = reactive({
   pdfIsVisible: false
 })
 
-const currentUserIsSignedIn = computed(() => store.getters['currentUser/isSignedIn'])
+const currentUserIsSignedIn = computed(() => userStore.getUserIsSignedIn)
 const currentSpace = computed(() => store.getters['currentSpace/all'])
 const text = computed(() => utils.nameStringFromItems(currentSpace.value.cards))
 

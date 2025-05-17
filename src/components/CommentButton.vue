@@ -1,10 +1,12 @@
 <script setup>
 import { reactive, computed, onMounted, onBeforeUnmount, watch, ref, nextTick } from 'vue'
 import { useStore } from 'vuex'
+import { useUserStore } from '@/stores/useUserStore'
 
 import Comments from '@/components/dialogs/Comments.vue'
 
 const store = useStore()
+const userStore = useUserStore()
 
 const buttonElement = ref(null)
 
@@ -20,7 +22,7 @@ const state = reactive({
   commentsIsVisible: false
 })
 
-const currentUserIsSignedIn = computed(() => store.getters['currentUser/isSignedIn'])
+const currentUserIsSignedIn = computed(() => userStore.getUserIsSignedIn)
 const canOnlyComment = computed(() => store.getters['currentUser/canOnlyComment']())
 const isVisible = computed(() => {
   if (canOnlyComment.value) { return }

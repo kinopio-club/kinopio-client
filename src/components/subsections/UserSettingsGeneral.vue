@@ -1,6 +1,7 @@
 <script setup>
 import { reactive, computed, onMounted, onUnmounted, watch, ref, nextTick } from 'vue'
 import { useStore } from 'vuex'
+import { useUserStore } from '@/stores/useUserStore'
 
 import UserBillingSettings from '@/components/dialogs/UserBillingSettings.vue'
 import UserAccountSettings from '@/components/dialogs/UserAccountSettings.vue'
@@ -14,6 +15,7 @@ import User from '@/components/User.vue'
 import consts from '@/consts.js'
 
 const store = useStore()
+const userStore = useUserStore()
 
 onMounted(() => {
   store.subscribe((mutation, state) => {
@@ -27,7 +29,7 @@ const props = defineProps({
   visible: Boolean
 })
 
-const isSignedIn = computed(() => store.getters['currentUser/isSignedIn'])
+const isSignedIn = computed(() => userStore.getUserIsSignedIn)
 const isUpgraded = computed(() => store.state.currentUser.isUpgraded)
 const currentUser = computed(() => store.state.currentUser)
 const isSecureAppContextIOS = computed(() => consts.isSecureAppContextIOS)

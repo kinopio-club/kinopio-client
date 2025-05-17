@@ -2,10 +2,12 @@
 import { reactive, computed, onMounted } from 'vue'
 import { useStore } from 'vuex'
 import FreeLimitFAQ from '@/components/dialogs/FreeLimitFAQ.vue'
+import { useUserStore } from '@/stores/useUserStore'
 
 import consts from '@/consts.js'
 
 const store = useStore()
+const userStore = useUserStore()
 
 onMounted(() => {
   store.subscribe((mutation, state) => {
@@ -23,7 +25,7 @@ const cardsCreatedCount = computed(() => store.state.currentUser.cardsCreatedCou
 const cardsCreatedLimit = computed(() => consts.cardsCreatedLimit)
 
 const triggerUpgradeUserIsVisible = () => {
-  const currentUserIsSignedIn = store.getters['currentUser/isSignedIn']
+  const currentUserIsSignedIn = userStore.getUserIsSignedIn
   store.dispatch('closeAllDialogs')
   if (currentUserIsSignedIn) {
     store.commit('triggerUpgradeUserIsVisible')

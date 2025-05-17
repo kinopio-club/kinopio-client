@@ -1,6 +1,7 @@
 <script setup>
 import { reactive, computed, onMounted, onBeforeUnmount, onUnmounted, watch, ref, nextTick } from 'vue'
 import { useStore } from 'vuex'
+import { useUserStore } from '@/stores/useUserStore'
 
 import cache from '@/cache.js'
 import Loader from '@/components/Loader.vue'
@@ -12,6 +13,7 @@ import last from 'lodash-es/last'
 import randomColor from 'randomcolor'
 
 const store = useStore()
+const userStore = useUserStore()
 
 const dialogElement = ref(null)
 const resultsElement = ref(null)
@@ -68,7 +70,7 @@ watch(() => state.randomColor, (value, prevValue) => {
   }
 })
 
-const currentUserIsSignedIn = computed(() => store.getters['currentUser/isSignedIn'])
+const currentUserIsSignedIn = computed(() => userStore.getUserIsSignedIn)
 const closeDialog = () => {
   emit('closeDialog')
 }

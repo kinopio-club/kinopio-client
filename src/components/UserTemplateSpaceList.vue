@@ -1,6 +1,7 @@
 <script setup>
 import { reactive, computed, onMounted, onBeforeUnmount, watch, ref, nextTick } from 'vue'
 import { useStore } from 'vuex'
+import { useUserStore } from '@/stores/useUserStore'
 
 import SpaceList from '@/components/SpaceList.vue'
 import cache from '@/cache.js'
@@ -9,6 +10,7 @@ import utils from '@/utils.js'
 import dayjs from 'dayjs'
 
 const store = useStore()
+const userStore = useUserStore()
 
 const resultsSectionElement = ref(null)
 
@@ -65,7 +67,7 @@ const updateLocalSpaces = async () => {
   state.localSpaces = spaces
 }
 const updateRemoteSpaces = async () => {
-  const currentUserIsSignedIn = store.getters['currentUser/isSignedIn']
+  const currentUserIsSignedIn = userStore.getUserIsSignedIn
   if (!currentUserIsSignedIn) { return }
   emit('isLoading', true)
   try {

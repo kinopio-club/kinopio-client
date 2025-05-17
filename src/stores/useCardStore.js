@@ -2,6 +2,7 @@ import { nextTick } from 'vue'
 import { defineStore } from 'pinia'
 import { useConnectionStore } from '@/stores/useConnectionStore'
 import { useBoxStore } from '@/stores/useBoxStore'
+import { useUserStore } from '@/stores/useUserStore'
 
 import store from '@/store/store.js' // TEMP Import Vuex store
 
@@ -722,7 +723,8 @@ export const useCardStore = defineStore('cards', {
     // vote
 
     updateCardCounter ({ card, shouldIncrement, shouldDecrement }) {
-      const isSignedIn = store.getters['currentUser/isSignedIn']
+      const userStore = useUserStore()
+      const isSignedIn = userStore.getUserIsSignedIn
       const update = {
         id: card.id,
         cardId: card.id,

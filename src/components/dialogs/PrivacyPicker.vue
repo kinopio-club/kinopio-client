@@ -1,12 +1,14 @@
 <script setup>
 import { reactive, computed, onMounted, onBeforeUnmount, watch, ref, nextTick } from 'vue'
 import { useStore } from 'vuex'
+import { useUserStore } from '@/stores/useUserStore'
 
 import PrivacyIcon from '@/components/PrivacyIcon.vue'
 import privacy from '@/data/privacy.js'
 import utils from '@/utils.js'
 
 const store = useStore()
+const userStore = useUserStore()
 
 const dialogElement = ref(null)
 
@@ -30,13 +32,13 @@ const updateDialogHeight = async () => {
   state.dialogHeight = utils.elementHeight(element)
 }
 
-const currentUserIsSignedIn = computed(() => store.getters['currentUser/isSignedIn'])
+const currentUserIsSignedIn = computed(() => userStore.getUserIsSignedIn)
 const currentSpaceIsInGroup = computed(() => store.state.currentSpace.groupId)
 
 // privacy states
 
 const privacyStates = computed(() => {
-  const currentUserIsSignedIn = store.getters['currentUser/isSignedIn']
+  const currentUserIsSignedIn = userStore.getUserIsSignedIn
   const privacyStates = privacy.states()
   if (currentUserIsSignedIn) {
     return privacyStates

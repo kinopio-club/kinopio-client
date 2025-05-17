@@ -2,6 +2,7 @@
 import { reactive, computed, onMounted, onBeforeUnmount, onUnmounted, watch, ref, nextTick } from 'vue'
 import { useStore } from 'vuex'
 import { useCardStore } from '@/stores/useCardStore'
+import { useUserStore } from '@/stores/useUserStore'
 
 import TagList from '@/components/TagList.vue'
 import cache from '@/cache.js'
@@ -11,6 +12,7 @@ import randomColor from 'randomcolor'
 
 const store = useStore()
 const cardStore = useCardStore()
+const userStore = useUserStore()
 
 const dialogElement = ref(null)
 const resultsElement = ref(null)
@@ -40,7 +42,7 @@ const state = reactive({
 })
 
 const isThemeDark = computed(() => store.state.currentUser.theme === 'dark')
-const currentUserIsSignedIn = computed(() => store.getters['currentUser/isSignedIn'])
+const currentUserIsSignedIn = computed(() => userStore.getUserIsSignedIn)
 const scrollIntoView = async () => {
   await nextTick()
   const element = dialogElement.value

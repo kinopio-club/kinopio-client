@@ -2,6 +2,7 @@
 import { reactive, computed, onMounted, onBeforeUnmount, watch, ref, nextTick } from 'vue'
 import { useStore } from 'vuex'
 import { useCardStore } from '@/stores/useCardStore'
+import { useUserStore } from '@/stores/useUserStore'
 
 import ResultsFilter from '@/components/ResultsFilter.vue'
 import ColorPicker from '@/components/dialogs/ColorPicker.vue'
@@ -16,6 +17,7 @@ import dayjs from 'dayjs'
 
 const store = useStore()
 const cardStore = useCardStore()
+const userStore = useUserStore()
 
 const dialogElement = ref(null)
 const resultsElement = ref(null)
@@ -48,7 +50,7 @@ watch(() => visible.value, (value, prevValue) => {
 })
 const canEditSpace = computed(() => store.getters['currentUser/canEditSpace']())
 const currentSpaceId = computed(() => store.state.currentSpace.id)
-const currentUserIsSignedIn = computed(() => store.getters['currentUser/isSignedIn'])
+const currentUserIsSignedIn = computed(() => userStore.getUserIsSignedIn)
 const currentUser = computed(() => store.state.currentUser)
 const isDark = computed(() => utils.colorIsDark(color.value))
 

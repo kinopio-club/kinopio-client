@@ -1,6 +1,7 @@
 <script setup>
 import { reactive, computed, onMounted, onBeforeUnmount, watch, ref, nextTick } from 'vue'
 import { useStore } from 'vuex'
+import { useUserStore } from '@/stores/useUserStore'
 
 import utils from '@/utils.js'
 import consts from '@/consts.js'
@@ -10,6 +11,7 @@ import debounce from 'lodash-es/debounce'
 import { nanoid } from 'nanoid'
 
 const store = useStore()
+const userStore = useUserStore()
 
 const canvasElement = ref(null)
 let canvas, context
@@ -85,7 +87,7 @@ const viewportHeight = computed(() => store.state.viewportHeight)
 const viewportWidth = computed(() => store.state.viewportWidth)
 const pageHeight = computed(() => store.state.pageHeight)
 const pageWidth = computed(() => store.state.pageWidth)
-const currentUserIsSignedIn = computed(() => store.getters['currentUser/isSignedIn'])
+const currentUserIsSignedIn = computed(() => userStore.getUserIsSignedIn)
 const toolbarIsDrawing = computed(() => store.state.currentUserToolbar === 'drawing')
 const styles = computed(() => {
   const value = {

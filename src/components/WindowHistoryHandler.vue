@@ -2,11 +2,14 @@
 import { reactive, computed, onMounted, onBeforeUnmount, watch, ref, nextTick } from 'vue'
 import { useStore } from 'vuex'
 import { useRouter } from 'vue-router'
+import { useUserStore } from '@/stores/useUserStore'
 
 import utils from '@/utils.js'
 import consts from '@/consts.js'
 
 const store = useStore()
+const userStore = useUserStore()
+
 const router = useRouter()
 
 let unsubscribe
@@ -34,7 +37,7 @@ const updateWindowHistory = async (space) => {
   const spaceUrl = utils.url(space)
   const preventUpdate = window.location.pathname.includes(spaceUrl) || spaceUrl.startsWith('loading--')
   if (preventUpdate) { return }
-  const currentUserIsSignedIn = store.getters['currentUser/isSignedIn']
+  const currentUserIsSignedIn = userStore.getUserIsSignedIn
   store.commit('currentSpacePath', spaceUrl, { root: true })
   if (navigator.standalone || isEmbedMode) { return }
   await router.push('/' + spaceUrl)

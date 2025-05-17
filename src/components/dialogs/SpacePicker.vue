@@ -1,6 +1,7 @@
 <script setup>
 import { reactive, computed, onMounted, onBeforeUnmount, watch, ref, nextTick } from 'vue'
 import { useStore } from 'vuex'
+import { useUserStore } from '@/stores/useUserStore'
 
 import User from '@/components/User.vue'
 import SpaceList from '@/components/SpaceList.vue'
@@ -16,6 +17,7 @@ import dayjs from 'dayjs'
 import sortBy from 'lodash-es/sortBy'
 
 const store = useStore()
+const userStore = useUserStore()
 
 const dialogElement = ref(null)
 const newSpaceNameElement = ref(null)
@@ -121,7 +123,7 @@ const filteredSpaces = computed(() => {
   }
   return spaces
 })
-const currentUserIsSignedIn = computed(() => store.getters['currentUser/isSignedIn'])
+const currentUserIsSignedIn = computed(() => userStore.getUserIsSignedIn)
 
 const handleFocusBeforeFirstItem = () => {
   if (state.newSpaceIsVisible) { return }

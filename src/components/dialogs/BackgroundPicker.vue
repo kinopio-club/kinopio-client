@@ -2,6 +2,7 @@
 import { reactive, computed, onMounted, onBeforeUnmount, watch, ref, nextTick } from 'vue'
 import { useStore } from 'vuex'
 import { useBoxStore } from '@/stores/useBoxStore'
+import { useUserStore } from '@/stores/useUserStore'
 
 import ColorPicker from '@/components/dialogs/ColorPicker.vue'
 import Loader from '@/components/Loader.vue'
@@ -21,6 +22,7 @@ import { nanoid } from 'nanoid'
 
 const store = useStore()
 const boxStore = useBoxStore()
+const userStore = useUserStore()
 
 const searchInputElement = ref(null)
 const inputElement = ref(null)
@@ -107,7 +109,7 @@ const updateDialogHeight = async () => {
   state.dialogHeight = utils.elementHeight(element)
 }
 
-const currentUserIsSignedIn = computed(() => store.getters['currentUser/isSignedIn'])
+const currentUserIsSignedIn = computed(() => userStore.getUserIsSignedIn)
 const currentUser = computed(() => store.state.currentUser)
 const currentUserIsMember = computed(() => store.getters['currentUser/isSpaceMember']())
 const itemTypeString = computed(() => {

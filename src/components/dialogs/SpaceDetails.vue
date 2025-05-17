@@ -1,6 +1,7 @@
 <script setup>
 import { reactive, computed, onMounted, onBeforeUnmount, watch, ref, nextTick } from 'vue'
 import { useStore } from 'vuex'
+import { useUserStore } from '@/stores/useUserStore'
 
 import cache from '@/cache.js'
 import SpaceDetailsInfo from '@/components/SpaceDetailsInfo.vue'
@@ -14,6 +15,7 @@ import uniqBy from 'lodash-es/uniqBy'
 import dayjs from 'dayjs'
 
 const store = useStore()
+const userStore = useUserStore()
 
 const maxIterations = 30
 let currentIteration, updatePositionTimer
@@ -296,7 +298,7 @@ const updateLocalSpaces = async () => {
   state.spaces = cacheSpaces
 }
 const updateWithRemoteSpaces = async () => {
-  const currentUserIsSignedIn = store.getters['currentUser/isSignedIn']
+  const currentUserIsSignedIn = userStore.getUserIsSignedIn
   const isOffline = computed(() => !store.state.isOnline)
   if (!currentUserIsSignedIn || isOffline.value) { return }
   try {
