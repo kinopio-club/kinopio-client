@@ -95,7 +95,7 @@ const showCardDetails = () => {
 
 // edit card
 
-const maxCardCharacterLimit = () => { return consts.defaultCharacterLimit }
+const maxCardCharacterLimit = () => { return consts.cardCharacterLimit }
 const updateName = async (newName) => {
   const spaceId = otherCard.value.spaceId
   const card = { id: otherCard.value.id, name: newName }

@@ -537,14 +537,7 @@ const clickName = (event) => {
 
 // character limit
 
-const maxCardCharacterLimit = computed(() => {
-  let value = store.state.currentUser.cardSettingsDefaultCharacterLimit || consts.defaultCharacterLimit
-  const isCodeblock = card.value.name?.includes('```')
-  if (isCodeblock) {
-    value = consts.highCharacterLimit
-  }
-  return value
-})
+const maxCardCharacterLimit = computed(() => consts.cardCharacterLimit)
 const currentCardLength = computed(() => {
   if (!card.value.name) { return 0 }
   return card.value.name.length
@@ -1549,7 +1542,7 @@ dialog.card-details(v-if="visible" :open="visible" ref="dialogElement" @click.le
         span.badge.danger
           img.icon.cancel(src="@/assets/add.svg")
           span Max Length
-      p To fit small screens, cards can't be longer than {{maxCardCharacterLimit}} characters
+      p Cards can't be longer than {{maxCardCharacterLimit}} characters
     template(v-if="state.error.signUpToUpload")
       p
         span To upload files,

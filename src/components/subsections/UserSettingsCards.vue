@@ -34,15 +34,6 @@ const closeChildDialogs = () => {
   state.colorPickerIsVisible = false
 }
 
-// character limit
-
-const defaultCharacterLimit = computed(() => store.state.currentUser.cardSettingsDefaultCharacterLimit)
-const limitIsDefault = computed(() => !defaultCharacterLimit.value || defaultCharacterLimit.value === consts.defaultCharacterLimit)
-const limitIsMax = computed(() => defaultCharacterLimit.value === consts.highCharacterLimit)
-const updateLimit = (value) => {
-  store.dispatch('currentUser/update', { cardSettingsDefaultCharacterLimit: value })
-}
-
 // shift-enter
 
 const shiftEnterShouldAddChildCard = computed(() => store.state.currentUser.cardSettingsShiftEnterShouldAddChildCard)
@@ -113,17 +104,6 @@ const initDefaultColor = () => {
         span Child Card
       button(@click="updateShiftEnter(false)" :class="{ active: !shiftEnterShouldAddChildCard }")
         span Line Break
-  section
-    p Character Limit
-    .segmented-buttons
-      button(@click="updateLimit(consts.defaultCharacterLimit)" :class="{ active: limitIsDefault }")
-        span {{consts.defaultCharacterLimit}}
-      button(@click="updateLimit(consts.highCharacterLimit)" :class="{ active: limitIsMax }")
-        span {{consts.highCharacterLimit}}
-    p.badge.secondary
-      span(v-if="limitIsDefault") Best for ideas and thoughts
-      span(v-if="!limitIsDefault") Best for long-form writing and documenting
-
   section
     p Max Card Width
     .segmented-buttons

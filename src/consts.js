@@ -8,8 +8,7 @@ export default {
     min: 20
   },
   spaceBetweenCards: 12,
-  defaultCharacterLimit: 300,
-  highCharacterLimit: 4000,
+  cardCharacterLimit: 4000,
   defaultCardWidth: 58,
   defaultCardHeight: 70,
   minItemXY: 70,

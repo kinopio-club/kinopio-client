@@ -319,7 +319,8 @@ const store = createStore({
       behavior = behavior || 'smooth'
       if (!element) { return }
       const sidebarIsVisible = document.querySelector('dialog#sidebar')
-      const isViewportNarrow = state.viewportWidth < (consts.defaultCharacterLimit * 2)
+      const smallCardCharacterLimit = 300
+      const isViewportNarrow = state.viewportWidth < (smallCardCharacterLimit * 2)
       let horizontal = 'nearest'
       let vertical = 'nearest'
       if (sidebarIsVisible || positionIsCenter) {

@@ -32,9 +32,9 @@ const state = reactive({
 
 const cardsCreatedIsOverLimit = computed(() => userStore.getUserCardsCreatedIsOverLimit)
 const textareaPlaceholder = computed(() => 'Type here, or paste a URL')
-const maxCardCharacterLimit = computed(() => consts.defaultCharacterLimit)
+const maxCardCharacterLimit = computed(() => consts.cardCharacterLimit)
 const updateMaxLengthError = () => {
-  if (state.newName.length >= consts.defaultCharacterLimit - 1) {
+  if (state.newName.length >= consts.cardCharacterLimit - 1) {
     state.error.maxLength = true
   } else {
     state.error.maxLength = false

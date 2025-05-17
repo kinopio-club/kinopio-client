@@ -561,7 +561,7 @@ export default {
     }
   },
   splitCardNameByParagraphAndSentence (prevName) {
-    const maxCardCharacterLimit = consts.defaultCharacterLimit
+    const maxCardCharacterLimit = consts.cardCharacterLimit
     const paragraphs = this.splitByParagraphs(prevName) || []
     let cardNames = paragraphs.map(paragraph => {
       let sentences

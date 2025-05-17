@@ -72,7 +72,6 @@ export const useUserStore = defineStore('users', {
     lastSidebarSection: '',
     prevInviteEmails: '',
     prevHeaderFontId: 0,
-    cardSettingsDefaultCharacterLimit: consts.defaultCharacterLimit,
     cardSettingsShiftEnterShouldAddChildCard: true,
     cardSettingsMaxCardWidth: consts.normalCardMaxWidth,
     prevSettingsSection: null,
