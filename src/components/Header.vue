@@ -98,7 +98,7 @@ onMounted(() => {
       hidden()
     } else if (type === 'triggerTemplatesIsVisible') {
       updateTemplatesIsVisible(true)
-    } else if (type === 'triggerRemovedIsVisible' || type === 'triggerAIImagesIsVisible') {
+    } else if (type === 'triggerRemovedIsVisible') {
       updateSidebarIsVisible(true)
     } else if (type === 'triggerImportIsVisible') {
       updateImportIsVisible(true)

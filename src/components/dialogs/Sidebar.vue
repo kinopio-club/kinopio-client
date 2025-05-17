@@ -7,7 +7,6 @@ import utils from '@/utils.js'
 import Links from '@/components/sidebar/Links.vue'
 import Tags from '@/components/sidebar/Tags.vue'
 import Removed from '@/components/sidebar/Removed.vue'
-import AIImages from '@/components/sidebar/AIImages.vue'
 import Stats from '@/components/sidebar/Stats.vue'
 import Text from '@/components/sidebar/Text.vue'
 import Inbox from '@/components/sidebar/Inbox.vue'
@@ -23,8 +22,6 @@ onMounted(() => {
   store.subscribe((mutation, state) => {
     if (mutation.type === 'triggerRemovedIsVisible') {
       toggleSection('removed')
-    } else if (mutation.type === 'triggerAIImagesIsVisible') {
-      toggleSection('AIImages')
     }
   })
 })
@@ -47,7 +44,6 @@ const state = reactive({
   tagsIsVisible: false,
   linksIsVisible: false,
   removedIsVisible: false,
-  AIImagesIsVisible: false,
   inboxIsVisible: false,
   statsIsVisible: false,
   textIsVisible: false,
@@ -59,7 +55,6 @@ const clearVisible = () => {
   state.linksIsVisible = false
   state.tagsIsVisible = false
   state.removedIsVisible = false
-  state.AIImagesIsVisible = false
   state.inboxIsVisible = false
   state.statsIsVisible = false
   state.textIsVisible = false
@@ -99,7 +94,7 @@ const toggleSection = (value) => {
 const restoreUserLastSidebarSection = () => {
   clearVisible()
   const section = store.state.currentUser.lastSidebarSection
-  const values = ['text', 'stats', 'AIImages', 'inbox', 'removed', 'links', 'tags', 'favorites', 'history'] // listed in api docs
+  const values = ['text', 'stats', 'inbox', 'removed', 'links', 'tags', 'favorites', 'history'] // listed in api docs
   const isValid = values.includes(section)
   if (section && isValid) {
     state[section + 'IsVisible'] = true
@@ -148,10 +143,6 @@ dialog#sidebar.sidebar.is-pinnable(
           //- Stats
           button(@click.left="toggleSection('stats')" :class="{active: state.statsIsVisible}" title="Stats")
             img.icon.stats(src="@/assets/stats.svg")
-          //- AI Images
-          button(@click.left="toggleSection('AIImages')" :class="{ active: state.AIImagesIsVisible}" title="AI Images")
-            img.icon.flower(src="@/assets/flower.svg")
-            span AI
           //- Removed
           button(@click.left="toggleSection('removed')" :class="{ active: state.removedIsVisible}" title="Removed Cards and Spaces")
             img.icon(src="@/assets/remove.svg")
@@ -169,7 +160,6 @@ dialog#sidebar.sidebar.is-pinnable(
   Tags(:visible="state.tagsIsVisible" :parentIsPinned="dialogIsPinned")
   Links(:visible="state.linksIsVisible" :parentIsPinned="dialogIsPinned")
   Removed(:visible="state.removedIsVisible")
-  AIImages(:visible="state.AIImagesIsVisible")
   Stats(:visible="state.statsIsVisible")
   Text(:visible="state.textIsVisible")
   Inbox(:visible="state.inboxIsVisible")

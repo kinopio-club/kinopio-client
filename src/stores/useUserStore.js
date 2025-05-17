@@ -197,40 +197,6 @@ export const useUserStore = defineStore('users', {
     //   }
     // },
 
-    // // AI Images
-
-    // AIImagesThisMonth: (state, getters) => {
-    //   if (state.isUpgraded) {
-    //     const currentMonth = dayjs().month()
-    //     const currentYear = dayjs().year()
-    //     return state.AIImages.filter(image => {
-    //       const month = dayjs(image.createdAt).month()
-    //       const year = dayjs(image.createdAt).year()
-    //       const isInCurrentMonth = month === currentMonth
-    //       const isInCurrentYear = year === currentYear
-    //       return isInCurrentMonth && isInCurrentYear
-    //     })
-    //   } else {
-    //     return state.AIImages
-    //   }
-    // },
-    // AIImagesThisMonthCount: (state, getters) => {
-    //   const images = getters.AIImagesThisMonth
-    //   return Math.floor(images.length / 2)
-    // },
-    // AIImagesLimit: (state, getters) => {
-    //   if (state.isUpgraded) {
-    //     return consts.AIImageLimitUpgradedUser
-    //   } else {
-    //     return consts.AIImageLimitFreeUser
-    //   }
-    // },
-    // AIImagesIsUnderLimit: (state, getters) => {
-    //   const current = getters.AIImagesThisMonthCount
-    //   const limit = getters.AIImagesLimit
-    //   return current < limit
-    // },
-
     // // Billing
 
     // subscriptionIsApple: (state) => {
