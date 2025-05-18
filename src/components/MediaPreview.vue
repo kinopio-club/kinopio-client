@@ -34,8 +34,8 @@ export default {
   },
   computed: {
     canEditCard () {
-      const canEditSpace = this.$store.getters['currentUser/canEditSpace']()
-      const isSpaceMember = this.$store.getters['currentUser/isSpaceMember']()
+      const canEditSpace = this.$userStore.getUserCanEditSpace()
+      const isSpaceMember = this.$userStore.getUserIsSpaceMember()
       const cardIsCreatedByCurrentUser = this.$store.getters['currentUser/cardIsCreatedByCurrentUser'](this.card)
       if (isSpaceMember) { return true }
       if (canEditSpace && cardIsCreatedByCurrentUser) { return true }

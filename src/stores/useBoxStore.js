@@ -195,7 +195,8 @@ export const useBoxStore = defineStore('boxes', {
     // remove
 
     async removeBoxes (ids) {
-      const canEditSpace = store.getters['currentUser/canEditSpace']()
+      const userStore = useUserStore()
+      const canEditSpace = userStore.getUserCanEditSpace()
       if (!canEditSpace) { return }
       const updates = []
       for (const id of ids) {

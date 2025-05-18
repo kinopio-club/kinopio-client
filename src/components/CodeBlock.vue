@@ -2,6 +2,7 @@
 import { reactive, computed, onMounted, watch, ref, nextTick } from 'vue'
 import { useStore } from 'vuex'
 import { useCardStore } from '@/stores/useCardStore'
+import { useUserStore } from '@/stores/useUserStore'
 
 import { highlight } from 'macrolight'
 
@@ -10,6 +11,7 @@ import utils from '@/utils.js'
 
 const store = useStore()
 const cardStore = useCardStore()
+const userStore = useUserStore()
 
 const defaultLanguageName = 'txt'
 
@@ -19,7 +21,7 @@ const props = defineProps({
 })
 
 const parentCard = computed(() => cardStore.getCard(props.parentCardId))
-const canEditCard = computed(() => store.getters['currentUser/canEditCard']({ id: props.parentCardId }))
+const canEditCard = computed(() => userStore.getUserCanEditCard({ id: props.parentCardId }))
 
 // syntax highlight
 

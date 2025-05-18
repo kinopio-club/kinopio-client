@@ -2,6 +2,7 @@
 import { reactive, computed, onMounted, onBeforeUnmount, watch, ref, nextTick } from 'vue'
 import { useStore } from 'vuex'
 import { useCardStore } from '@/stores/useCardStore'
+import { useUserStore } from '@/stores/useUserStore'
 
 import merge from 'lodash-es/merge'
 
@@ -12,6 +13,7 @@ import utils from '@/utils.js'
 
 const store = useStore()
 const cardStore = useCardStore()
+const userStore = useUserStore()
 
 const resultsElement = ref(null)
 
@@ -55,7 +57,7 @@ const cardsOrSpacesLabel = computed(() => {
 const currentSpace = computed(() => store.state.currentSpace)
 const currentSpaceName = computed(() => currentSpace.value.name)
 const currentUserCanEditSpace = computed(() => {
-  return store.getters['currentUser/canEditSpace']()
+  return userStore.getUserCanEditSpace()
 })
 
 const updateResultsSectionHeight = async () => {

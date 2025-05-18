@@ -2,18 +2,20 @@
 import { reactive, computed, onMounted, onBeforeUnmount, watch, ref, nextTick } from 'vue'
 import { useStore } from 'vuex'
 import { useConnectionStore } from '@/stores/useConnectionStore'
+import { useUserStore } from '@/stores/useUserStore'
 
 import utils from '@/utils.js'
 import consts from '@/consts.js'
 
 const store = useStore()
 const connectionStore = useConnectionStore()
+const userStore = useUserStore()
 
 const props = defineProps({
   connections: Array
 })
 
-const isSpaceMember = computed(() => store.getters['currentUser/isSpaceMember']())
+const isSpaceMember = computed(() => userStore.getUserIsSpaceMember())
 const canEditAll = computed(() => {
   if (isSpaceMember.value) { return true }
   if (!props.connections.length) { return }

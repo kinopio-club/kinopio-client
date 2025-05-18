@@ -1,9 +1,11 @@
 <script setup>
 import { reactive, computed, onMounted, watch } from 'vue'
 import { useStore } from 'vuex'
+import { useUserStore } from '@/stores/useUserStore'
 
 import GroupLabel from '@/components/GroupLabel.vue'
 
+const userStore = useUserStore()
 const store = useStore()
 
 const props = defineProps({
@@ -11,7 +13,7 @@ const props = defineProps({
   visible: Boolean
 })
 
-const isSpaceMember = computed(() => store.getters['currentUser/isSpaceMember']())
+const isSpaceMember = computed(() => userStore.getUserIsSpaceMember())
 const spacePrivacyIsOpen = computed(() => store.state.currentSpace.privacy === 'open')
 const showInExplore = computed(() => store.state.currentSpace.showInExplore)
 const isTemplate = computed(() => store.state.currentSpace.isTemplate)

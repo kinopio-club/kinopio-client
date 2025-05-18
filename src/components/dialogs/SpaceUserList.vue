@@ -2,6 +2,7 @@
 import { reactive, computed, onMounted, onBeforeUnmount, watch, ref, nextTick } from 'vue'
 import { useStore } from 'vuex'
 import { useCardStore } from '@/stores/useCardStore'
+import { useUserStore } from '@/stores/useUserStore'
 
 import utils from '@/utils.js'
 import GroupDetails from '@/components/dialogs/GroupDetails.vue'
@@ -12,6 +13,7 @@ import uniqBy from 'lodash-es/uniqBy'
 
 const store = useStore()
 const cardStore = useCardStore()
+const userStore = useUserStore()
 
 const dialogElement = ref(null)
 
@@ -38,7 +40,7 @@ const updateDialogHeight = async () => {
 }
 
 const currentUser = computed(() => store.state.currentUser)
-const currentUserCanEditSpace = computed(() => store.getters['currentUser/canEditSpace']())
+const currentUserCanEditSpace = computed(() => userStore.getUserCanEditSpace())
 const currentSpace = computed(() => store.state.currentSpace)
 
 // list type

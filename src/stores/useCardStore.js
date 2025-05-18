@@ -340,9 +340,10 @@ export const useCardStore = defineStore('cards', {
       this.updateCards([update])
     },
     async updateCards (updates) {
-      const canEditSpace = store.getters['currentUser/canEditSpace']()
+      const userStore = useUserStore()
+      const canEditSpace = userStore.getUserCanEditSpace()
       if (!canEditSpace) { return }
-      updates = updates.filter(update => store.getters['currentUser/canEditCard'](update))
+      updates = updates.filter(update => userStore.getUserCanEditCard(update))
       updates.forEach(({ id, ...changes }) => {
         this.pendingUpdates.set(id, {
           ...this.pendingUpdates.get(id) || {},
@@ -373,7 +374,8 @@ export const useCardStore = defineStore('cards', {
     // remove
 
     async deleteCards (cards) {
-      const canEditSpace = store.getters['currentUser/canEditSpace']()
+      const userStore = useUserStore()
+      const canEditSpace = userStore.getUserCanEditSpace()
       if (!canEditSpace) { return }
       for (const card of cards) {
         const idIndex = this.allIds.indexOf(card.id)

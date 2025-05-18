@@ -72,7 +72,7 @@ const dateUpdatedAt = computed(() => {
 const toggleFilterShowAbsoluteDates = () => {
   closeDialogs()
   const value = !userStore.filterShowAbsoluteDates
-  store.dispatch('currentUser/toggleFilterShowAbsoluteDates', value)
+  userStore.updateUser('filterShowAbsoluteDates', value)
 }
 
 // user
@@ -88,8 +88,7 @@ const userDetailsIsUser = (user) => {
 // settings
 
 const showCardSettings = () => {
-  store.dispatch('currentUser/update', { prevSettingsSection: 'cards' })
-  // store.dispatch('closeAllDialogs')
+  userStore.updateUser({ prevSettingsSection: 'cards' })
   store.commit('userSettingsIsVisible', true)
 }
 </script>

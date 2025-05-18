@@ -149,8 +149,8 @@ const unlockedCards = computed(() => cardStore.getCardsIsNotLocked)
 const isPainting = computed(() => store.state.currentUserIsPainting)
 const isPanningReady = computed(() => store.state.currentUserIsPanningReady)
 const isPanning = computed(() => store.state.currentUserIsPanning)
-const spaceIsReadOnly = computed(() => !store.getters['currentUser/canEditSpace']())
-const canEditSpace = computed(() => store.getters['currentUser/canEditSpace']())
+const spaceIsReadOnly = computed(() => !userStore.getUserCanEditSpace())
+const canEditSpace = computed(() => userStore.getUserCanEditSpace())
 const isDrawingConnection = computed(() => store.state.currentUserIsDrawingConnection)
 const isResizingCard = computed(() => store.state.currentUserIsResizingCard)
 const isTiltingCard = computed(() => store.state.currentUserIsTiltingCard)
@@ -324,7 +324,7 @@ const addBox = (event) => {
     return
   }
   store.dispatch('currentUser/notifyReadOnly', position)
-  const shouldPrevent = !store.getters['currentUser/canEditSpace']()
+  const shouldPrevent = !userStore.getUserCanEditSpace()
   if (shouldPrevent) {
     store.dispatch('currentUserToolbar', 'card')
     return
@@ -435,7 +435,7 @@ const dragItems = () => {
   store.dispatch('history/pause')
   const prevCursor = cursor()
   store.dispatch('currentUser/notifyReadOnly', prevCursor)
-  const shouldPrevent = !store.getters['currentUser/canEditSpace']()
+  const shouldPrevent = !userStore.getUserCanEditSpace()
   if (shouldPrevent) { return }
   // cards
   cardStore.moveCards({ endCursor, prevCursor })

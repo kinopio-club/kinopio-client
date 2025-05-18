@@ -138,11 +138,6 @@ export const useUserStore = defineStore('users', {
     //   const currentUserIsSignedIn = getters.isSignedIn
     //   return !currentUserIsSignedIn && spaceIsOpen
     // },
-    // canOnlyComment: (state, getters, rootState, rootGetters) => () => {
-    //   const canEditSpace = getters.canEditSpace()
-    //   const isSpaceMember = getters.isSpaceMember()
-    //   return canEditSpace && !isSpaceMember
-    // },
     // connectionIsCreatedByCurrentUser: (state, getters, rootState) => (connection) => {
     //   return state.id === connection.userId
     // },
@@ -293,6 +288,12 @@ export const useUserStore = defineStore('users', {
         userFilters += 1
       }
       return userFilters
+    },
+
+    canOnlyComment () {
+      const canEditSpace = this.getUserCanEditSpace()
+      const isSpaceMember = this.getUserIsSpaceMember()
+      return canEditSpace && !isSpaceMember
     },
 
     // TODO refactor to getter after store -> rootStore

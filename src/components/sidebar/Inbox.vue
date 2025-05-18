@@ -2,6 +2,7 @@
 import { reactive, computed, onMounted, onUnmounted, watch, ref, nextTick } from 'vue'
 import { useStore } from 'vuex'
 import { useCardStore } from '@/stores/useCardStore'
+import { useUserStore } from '@/stores/useUserStore'
 
 import cache from '@/cache.js'
 import CardList from '@/components/CardList.vue'
@@ -16,6 +17,7 @@ import { nanoid } from 'nanoid'
 
 const store = useStore()
 const cardStore = useCardStore()
+const userStore = useUserStore()
 
 let prevPosition
 
@@ -39,7 +41,7 @@ const state = reactive({
 })
 
 const isOnline = computed(() => store.state.isOnline)
-const canEditSpace = computed(() => store.getters['currentUser/canEditSpace']())
+const canEditSpace = computed(() => userStore.getUserCanEditSpace())
 const updatePrevPosition = (event) => {
   if (!props.visible) { return }
   prevPosition = utils.cursorPositionInPage(event)

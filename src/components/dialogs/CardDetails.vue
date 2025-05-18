@@ -259,14 +259,14 @@ const isInSearchResultsCards = computed(() => {
   if (!results.length) { return }
   return Boolean(results.find(cardResult => card.value.id === cardResult.id))
 })
-const canEditSpace = computed(() => store.getters['currentUser/canEditSpace']())
+const canEditSpace = computed(() => userStore.getUserCanEditSpace())
 const isInvitedButCannotEditSpace = computed(() => store.state.currentUserIsInvitedButCannotEditCurrentSpace)
 
 // user
 
-const isSpaceMember = computed(() => store.getters['currentUser/isSpaceMember']())
+const isSpaceMember = computed(() => userStore.getUserIsSpaceMember())
 const isFavoriteSpace = computed(() => store.getters['currentSpace/isFavorite']())
-const canEditCard = computed(() => store.getters['currentUser/canEditCard'](card.value))
+const canEditCard = computed(() => userStore.getUserCanEditCard(card.value))
 const currentUserIsSignedIn = computed(() => userStore.getUserIsSignedIn)
 const createdByUser = computed(() => {
   const userId = card.value.userId

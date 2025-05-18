@@ -204,7 +204,8 @@ export const useConnectionStore = defineStore('connections', {
     // update
 
     async updateConnections (updates) {
-      const canEditSpace = store.getters['currentUser/canEditSpace']()
+      const userStore = useUserStore()
+      const canEditSpace = userStore.getUserCanEditSpace()
       if (!canEditSpace) { return }
       updates.forEach(({ id, ...changes }) => {
         this.pendingUpdates.set(id, {
@@ -266,7 +267,8 @@ export const useConnectionStore = defineStore('connections', {
     // remove
 
     async removeConnections (ids) {
-      const canEditSpace = store.getters['currentUser/canEditSpace']()
+      const userStore = useUserStore()
+      const canEditSpace = userStore.getUserCanEditSpace()
       if (!canEditSpace) { return }
       for (const id of ids) {
         const idIndex = this.allIds.indexOf(id)

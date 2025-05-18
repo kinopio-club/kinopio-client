@@ -86,8 +86,8 @@ const visible = computed(() => {
   if (!state.isVisibleInViewport) { return }
   return items.value.startItem && items.value.endItem
 })
-const isSpaceMember = computed(() => store.getters['currentUser/isSpaceMember']())
-const canEditSpace = computed(() => store.getters['currentUser/canEditSpace']())
+const isSpaceMember = computed(() => userStore.getUserIsSpaceMember())
+const canEditSpace = computed(() => userStore.getUserCanEditSpace())
 
 // styles and position
 

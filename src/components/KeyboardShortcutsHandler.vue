@@ -126,7 +126,7 @@ const handleShortcuts = (event) => {
   const isSpaceScope = checkIsSpaceScope(event)
   const isMinimapDialogScope = checkIsMinimapDialogScope(event)
   const toolbarIsDrawing = store.state.currentUserToolbar === 'drawing'
-  const canEditSpace = store.getters['currentUser/canEditSpace']()
+  const canEditSpace = userStore.getUserCanEditSpace()
   // ?
   if (key === '?' && isSpaceScope) {
     store.commit('triggerKeyboardShortcutsIsVisible')
@@ -416,7 +416,7 @@ const addCard = async (options) => {
     store.commit('shouldPreventNextEnterKey', false)
     return
   }
-  const canEditSpace = store.getters['currentUser/canEditSpace']()
+  const canEditSpace = userStore.getUserCanEditSpace()
   if (!canEditSpace) { return }
   const parentCardId = store.state.parentCardId
   let parentCard = document.querySelector(`.card[data-card-id="${parentCardId}"]`)
@@ -583,20 +583,20 @@ const clearAllSelectedCards = () => {
 }
 
 const canEditCardById = (cardId) => {
-  const isSpaceMember = store.getters['currentUser/isSpaceMember']()
+  const isSpaceMember = userStore.getUserIsSpaceMember()
   const card = cardStore.getCard(cardId)
   const cardIsCreatedByCurrentUser = store.getters['currentUser/cardIsCreatedByCurrentUser'](card)
-  const canEditSpace = store.getters['currentUser/canEditSpace']()
+  const canEditSpace = userStore.getUserCanEditSpace()
   if (isSpaceMember) { return true }
   if (canEditSpace && cardIsCreatedByCurrentUser) { return true }
   return false
 }
 
 const canEditConnectionById = (connectionId) => {
-  const isSpaceMember = store.getters['currentUser/isSpaceMember']()
+  const isSpaceMember = userStore.getUserIsSpaceMember()
   const connection = connectionStore.getConnection(connectionId)
   const connectionIsCreatedByCurrentUser = store.getters['currentUser/connectionIsCreatedByCurrentUser'](connection)
-  const canEditSpace = store.getters['currentUser/canEditSpace']()
+  const canEditSpace = userStore.getUserCanEditSpace()
   if (isSpaceMember) { return true }
   if (canEditSpace && connectionIsCreatedByCurrentUser) { return true }
   return false
@@ -765,7 +765,7 @@ const handlePasteEvent = async (event) => {
   }
   // check read only
   store.dispatch('currentUser/notifyReadOnly', position)
-  const canEditSpace = store.getters['currentUser/canEditSpace']()
+  const canEditSpace = userStore.getUserCanEditSpace()
   if (!canEditSpace) { return }
   // get clipboard data
   const data = await getClipboardData()
@@ -974,7 +974,7 @@ const toggleLockCards = () => {
 // Create Boxes
 
 const containItemsInNewBox = async (cards) => {
-  const isSpaceMember = store.getters['currentUser/isSpaceMember']()
+  const isSpaceMember = userStore.getUserIsSpaceMember()
   if (!isSpaceMember) { return }
   const rect = utils.boundaryRectFromItems(cards)
   // box size

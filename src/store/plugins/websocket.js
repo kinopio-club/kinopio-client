@@ -192,7 +192,7 @@ export default function createWebSocketPlugin () {
       } else if (mutation.type === 'broadcast/updateUser') {
         sendEvent(store, mutation)
       } else if (mutation.type === 'broadcast/updateStore') {
-        const canEditSpace = store.getters['currentUser/canEditSpace']()
+        const canEditSpace = userStore.getUserCanEditSpace()
         if (!canEditSpace) { return }
         sendEvent(store, mutation, 'store')
       } else if (mutation.type === 'broadcast/close') {

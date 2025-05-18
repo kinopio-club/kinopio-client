@@ -92,7 +92,7 @@ const checkIfShouldShowCurrentUserSpaces = (space) => {
     state.currentUserSpacesIsVisible = true
   }
 }
-const isSpaceMemberOfCurrentSpace = computed(() => store.getters['currentUser/isSpaceMember']())
+const isSpaceMemberOfCurrentSpace = computed(() => userStore.getUserIsSpaceMember())
 const changeSpace = (space) => {
   store.dispatch('currentSpace/changeSpace', space)
 }

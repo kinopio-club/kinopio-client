@@ -4,6 +4,7 @@ import { useStore } from 'vuex'
 import { useCardStore } from '@/stores/useCardStore'
 import { useConnectionStore } from '@/stores/useConnectionStore'
 import { useBoxStore } from '@/stores/useBoxStore'
+import { useUserStore } from '@/stores/useUserStore'
 
 import FramePicker from '@/components/dialogs/FramePicker.vue'
 import TagPickerStyleActions from '@/components/dialogs/TagPickerStyleActions.vue'
@@ -19,6 +20,7 @@ const store = useStore()
 const cardStore = useCardStore()
 const connectionStore = useConnectionStore()
 const boxStore = useBoxStore()
+const userStore = useUserStore()
 
 onMounted(() => {
   store.subscribe((mutation, state) => {
@@ -64,11 +66,11 @@ const state = reactive({
   defaultColor: '#e3e3e3'
 })
 
-const canEditSpace = computed(() => store.getters['currentUser/canEditSpace']())
-const isSpaceMember = computed(() => store.getters['currentUser/isSpaceMember']())
+const canEditSpace = computed(() => userStore.getUserCanEditSpace())
+const isSpaceMember = computed(() => userStore.getUserIsSpaceMember())
 const canEditAll = computed(() => {
   if (isSpaceMember.value) { return true }
-  const editableCards = props.cards.filter(card => store.getters['currentUser/canEditCard'](card))
+  const editableCards = props.cards.filter(card => userStore.getUserCanEditCard(card))
   const canEditCards = editableCards.length === props.cards.length
   const editableBoxes = props.boxes.filter(box => store.getters['currentUser/canEditBox'](box))
   const canEditBoxes = editableBoxes.length === props.boxes.length

@@ -41,7 +41,7 @@ const item = computed(() => props.card || props.box)
 
 // space
 
-const canEditSpace = computed(() => store.getters['currentUser/canEditSpace']())
+const canEditSpace = computed(() => userStore.getUserCanEditSpace())
 const backgroundColorIsDark = computed(() => {
   const color = props.currentBackgroundColor || props.defaultBackgroundColor
   return utils.colorIsDark(color)

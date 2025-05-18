@@ -2,6 +2,7 @@
 import { reactive, computed, onMounted, onUnmounted, watch, ref, nextTick } from 'vue'
 import { useStore } from 'vuex'
 import { useCardStore } from '@/stores/useCardStore'
+import { useUserStore } from '@/stores/useUserStore'
 
 import Loader from '@/components/Loader.vue'
 import utils from '@/utils.js'
@@ -10,6 +11,7 @@ import { nanoid } from 'nanoid'
 
 const cardStore = useCardStore()
 const store = useStore()
+const userStore = useUserStore()
 
 let position
 
@@ -29,8 +31,8 @@ const state = reactive({
   previewImageIsHover: false
 })
 
-const isSpaceMember = computed(() => store.getters['currentUser/isSpaceMember']())
-const canEditSpace = computed(() => store.getters['currentUser/canEditSpace']())
+const isSpaceMember = computed(() => userStore.getUserIsSpaceMember())
+const canEditSpace = computed(() => userStore.getUserCanEditSpace())
 const cardIsCreatedByCurrentUser = computed(() => store.getters['currentUser/cardIsCreatedByCurrentUser'](props.card))
 const canEditCard = computed(() => {
   if (isSpaceMember.value) { return true }

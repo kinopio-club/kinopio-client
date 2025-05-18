@@ -26,7 +26,7 @@ const props = defineProps({
 
 const currentUser = computed(() => store.state.currentUser)
 const currentSpace = computed(() => store.state.currentSpace)
-const currentUserIsSpaceMember = computed(() => store.getters['currentUser/isSpaceMember']())
+const currentUserIsSpaceMember = computed(() => userStore.getUserIsSpaceMember())
 
 const spaceUserListIsVisible = computed(() => store.state.spaceUserListIsVisible)
 const dialogIsVisible = computed(() => {

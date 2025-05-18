@@ -80,7 +80,7 @@ const usersFiltered = computed(() => {
 const isCurrentUser = (user) => {
   return userStore.id === user.id
 }
-const currentUserIsMember = computed(() => store.getters['currentUser/isSpaceMember']())
+const currentUserIsMember = computed(() => userStore.getUserIsSpaceMember())
 const placeholder = computed(() => {
   return props.filterPlaceholder || 'Search'
 })

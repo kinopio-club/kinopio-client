@@ -48,7 +48,7 @@ watch(() => visible.value, (value, prevValue) => {
     closeDialogs()
   }
 })
-const canEditSpace = computed(() => store.getters['currentUser/canEditSpace']())
+const canEditSpace = computed(() => userStore.getUserCanEditSpace())
 const currentSpaceId = computed(() => store.state.currentSpace.id)
 const currentUserIsSignedIn = computed(() => userStore.getUserIsSignedIn)
 const currentUser = computed(() => store.state.currentUser)

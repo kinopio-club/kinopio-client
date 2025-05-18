@@ -34,7 +34,7 @@ const comments = computed(() => {
 const showCardDetails = (card) => {
   const filterComments = userStore.filterComments
   if (filterComments) {
-    store.dispatch('currentUser/toggleFilterComments', false)
+    userStore.updateCard({ filterComments: false })
   }
   cardStore.showCardDetails(card.id)
 }

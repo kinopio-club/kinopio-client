@@ -2,6 +2,7 @@
 import { reactive, computed, onMounted, watch, ref, nextTick } from 'vue'
 import { useStore } from 'vuex'
 import { useCardStore } from '@/stores/useCardStore'
+import { useUserStore } from '@/stores/useUserStore'
 
 import Loader from '@/components/Loader.vue'
 import UserLabelInline from '@/components/UserLabelInline.vue'
@@ -9,6 +10,7 @@ import utils from '@/utils.js'
 
 const store = useStore()
 const cardStore = useCardStore()
+const userStore = useUserStore()
 
 const props = defineProps({
   otherSpace: Object,
@@ -28,8 +30,8 @@ const canEditCard = computed(() => {
   if (canEditSpace.value && cardIsCreatedByCurrentUser.value) { return true }
   return false
 })
-const canEditSpace = computed(() => store.getters['currentUser/canEditSpace']())
-const isSpaceMember = computed(() => store.getters['currentUser/isSpaceMember']())
+const canEditSpace = computed(() => userStore.getUserCanEditSpace())
+const isSpaceMember = computed(() => userStore.getUserIsSpaceMember())
 const isLoadingOtherItems = computed(() => store.state.isLoadingOtherItems)
 const changeSpace = () => {
   if (isInvite.value) {

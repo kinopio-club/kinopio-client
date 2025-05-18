@@ -238,7 +238,7 @@ const stopPaintingGuides = () => {
   broadcastStopPaintingGuide()
 }
 const broadcastCursorAndCurve = ({ startPoint, color }) => {
-  const canEditSpace = store.getters['currentUser/canEditSpace']()
+  const canEditSpace = userStore.getUserCanEditSpace()
   if (!canEditSpace) { return }
   const updates = {}
   updates.x = state.currentCursorInSpace.x

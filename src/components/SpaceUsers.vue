@@ -1,6 +1,7 @@
 <script setup>
 import { reactive, computed, onMounted, onUnmounted, onBeforeUnmount, watch, ref, nextTick } from 'vue'
 import { useStore } from 'vuex'
+import { useUserStore } from '@/stores/useUserStore'
 
 import User from '@/components/User.vue'
 import SpaceUsersButton from '@/components/SpaceUsersButton.vue'
@@ -10,6 +11,7 @@ import uniqBy from 'lodash-es/uniqBy'
 import last from 'lodash-es/last'
 
 const store = useStore()
+const userStore = useUserStore()
 
 const spaceUsersElement = ref(null)
 
@@ -37,7 +39,7 @@ const isEmbedMode = computed(() => store.state.isEmbedMode)
 const isAddPage = computed(() => store.state.isAddPage)
 const currentUser = computed(() => store.state.currentUser)
 const currentSpace = computed(() => store.state.currentSpace)
-const currentUserIsSpaceMember = computed(() => store.getters['currentUser/isSpaceMember']())
+const currentUserIsSpaceMember = computed(() => userStore.getUserIsSpaceMember())
 
 const appendCurrentUser = (items) => {
   const isCurrentUser = Boolean(items.find(user => user.id === currentUser.value.id))
