@@ -95,7 +95,7 @@ const updateEmailsWithMatches = (value) => {
   state.emailsList.forEach(email => {
     state.emailsStringWithMatches = state.emailsStringWithMatches.replace(email, `<span class="match">${email}</span>`)
   })
-  store.dispatch('currentUser/update', { prevInviteEmails: value })
+  userStore.updateUser({ prevInviteEmails: value })
   updateDialogHeight()
 }
 const emailsPlaceholder = computed(() => 'space@jam.com, hi@kinopio.club')

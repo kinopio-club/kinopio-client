@@ -36,7 +36,7 @@ const toggleShouldDisableHapticFeedback = () => {
 const shouldDisableRightClickToPan = computed(() => userStore.shouldDisableRightClickToPan)
 const toggleShouldDisableRightClickToPan = () => {
   const value = !shouldDisableRightClickToPan.value
-  store.dispatch('currentUser/update', { shouldDisableRightClickToPan: value })
+  userStore.updateUser({ shouldDisableRightClickToPan: value })
 }
 
 // zoom
@@ -53,7 +53,7 @@ const shouldDisableStickyCards = computed(() => !userStore.shouldUseStickyCards)
 const toggleShouldUseStickyCards = () => {
   let value = userStore.shouldUseStickyCards
   value = !value
-  store.dispatch('currentUser/update', { shouldUseStickyCards: value })
+  userStore.updateUser({ shouldUseStickyCards: value })
 }
 
 // pause connection directions
@@ -61,7 +61,7 @@ const toggleShouldUseStickyCards = () => {
 const shouldPauseConnectionDirections = computed(() => userStore.shouldPauseConnectionDirections)
 const toggleShouldPauseConnectionDirections = () => {
   const value = !shouldPauseConnectionDirections.value
-  store.dispatch('currentUser/update', { shouldPauseConnectionDirections: value })
+  userStore.updateUser({ shouldPauseConnectionDirections: value })
   store.dispatch('currentSpace/checkIfShouldPauseConnectionDirections')
 }
 
@@ -70,13 +70,13 @@ const toggleShouldPauseConnectionDirections = () => {
 const shouldIncreaseUIContrast = computed(() => userStore.shouldIncreaseUIContrast)
 const toggleShouldIncreaseUIContrast = () => {
   const value = !shouldIncreaseUIContrast.value
-  store.dispatch('currentUser/update', { shouldIncreaseUIContrast: value })
+  userStore.updateUser({ shouldIncreaseUIContrast: value })
 }
 
 // outside space background
 
 const updateOutsideSpaceBackgroundIsStatic = (value) => {
-  store.dispatch('currentUser/update', { outsideSpaceBackgroundIsStatic: value })
+  userStore.updateUser({ outsideSpaceBackgroundIsStatic: value })
 }
 const outsideSpaceBackgroundIsStatic = computed(() => userStore.outsideSpaceBackgroundIsStatic)
 const outsideSpaceStyles = computed(() => {

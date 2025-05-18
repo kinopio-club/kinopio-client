@@ -60,7 +60,7 @@ const clearAllFilters = () => {
   updateGroupFilter({})
   updateUserFilter({})
   updateSortBy(null)
-  store.dispatch('currentUser/update', {
+  userStore.updateUser({
     dialogSpaceFilterShowHidden: false,
     dialogSpaceFilterByTemplates: false
   })
@@ -97,7 +97,7 @@ const showHiddenSpace = computed({
 })
 const toggleShowHiddenSpace = () => {
   const value = !dialogSpaceFilterShowHidden.value
-  store.dispatch('currentUser/update', { dialogSpaceFilterShowHidden: value })
+  userStore.updateUser({ dialogSpaceFilterShowHidden: value })
 }
 
 // sort by
@@ -119,7 +119,7 @@ const isSortByGroups = computed(() => {
   return value === 'groups'
 })
 const updateSortBy = (value) => {
-  store.dispatch('currentUser/update', { dialogSpaceFilterSortBy: value })
+  userStore.updateUser({ dialogSpaceFilterSortBy: value })
 }
 
 // templates
@@ -130,7 +130,7 @@ const isTemplates = computed(() => {
 })
 const toggleFilterByTemplates = () => {
   const value = !dialogSpaceFilterByTemplates.value
-  store.dispatch('currentUser/update', { dialogSpaceFilterByTemplates: value })
+  userStore.updateUser({ dialogSpaceFilterByTemplates: value })
 }
 
 // groups
@@ -148,7 +148,7 @@ const filterByGroup = (event, group) => {
   }
 }
 const updateGroupFilter = (value) => {
-  store.dispatch('currentUser/update', { dialogSpaceFilterByGroup: value })
+  userStore.updateUser({ dialogSpaceFilterByGroup: value })
 }
 
 // collaborators
@@ -162,7 +162,7 @@ const spaceUsers = computed(() => {
   return users
 })
 const updateUserFilter = (value) => {
-  store.dispatch('currentUser/update', { dialogSpaceFilterByUser: value })
+  userStore.updateUser({ dialogSpaceFilterByUser: value })
 }
 const filterByUser = (event, user) => {
   if (user.id === dialogSpaceFilterByUser.value.id) {

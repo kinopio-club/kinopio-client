@@ -40,10 +40,10 @@ const toggleColorPickerIsVisible = () => {
   store.commit('drawingEraserIsActive', false)
 }
 const drawingColor = computed(() => {
-  return store.getters['currentUser/drawingColor']
+  return userStore.drawingColor || userStore.color
 })
 const updateDrawingColor = (value) => {
-  store.commit('currentUser/drawingColor', value)
+  userStore.updateUser({ drawingColor: value })
 }
 const recentColors = computed(() => store.state.drawingStrokeColors)
 
@@ -55,7 +55,7 @@ const toggleBrushSizePickerIsVisible = () => {
   state.brushSizePickerIsVisible = value
 }
 const updateBrushSize = (value) => {
-  store.commit('currentUser/drawingBrushSize', value)
+  userStore.updateUser({ drawingBrushSize: value })
 }
 const currentBrushSize = computed(() => userStore.drawingBrushSize)
 

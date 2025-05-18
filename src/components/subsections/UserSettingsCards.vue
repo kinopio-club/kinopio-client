@@ -40,7 +40,7 @@ const closeChildDialogs = () => {
 
 const shiftEnterShouldAddChildCard = computed(() => userStore.cardSettingsShiftEnterShouldAddChildCard)
 const updateShiftEnter = (value) => {
-  store.dispatch('currentUser/update', { cardSettingsShiftEnterShouldAddChildCard: value })
+  userStore.updateUser({ cardSettingsShiftEnterShouldAddChildCard: value })
 }
 
 //  max card width
@@ -53,13 +53,13 @@ const updateMaxCardWidthIsWide = (isWide) => {
   if (isWide) {
     value = consts.wideCardMaxWidth
   }
-  store.dispatch('currentUser/update', { cardSettingsMaxCardWidth: value })
+  userStore.updateUser({ cardSettingsMaxCardWidth: value })
 }
 
 // card color
 
 const updateDefaultCardColor = (color) => {
-  store.dispatch('currentUser/update', { defaultCardBackgroundColor: color })
+  userStore.updateUser({ defaultCardBackgroundColor: color })
 }
 const removeDefaultCardColor = () => {
   updateDefaultCardColor(null)

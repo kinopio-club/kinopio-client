@@ -142,7 +142,7 @@ const toggleServiceIsGifs = () => {
   updateLastUsedImagePickerService()
 }
 const updateLastUsedImagePickerService = () => {
-  store.dispatch('currentUser/update', { lastUsedImagePickerService: state.service })
+  userStore.updateUser({ lastUsedImagePickerService: state.service })
 }
 const updateServiceFromLastUsedService = () => {
   if (!lastUsedImagePickerService.value) { return }

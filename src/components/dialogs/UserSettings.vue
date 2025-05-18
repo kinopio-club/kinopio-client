@@ -52,7 +52,7 @@ const updateCurrentSettings = async (value) => {
   state.currentSettings = value
   await nextTick()
   updateDialogHeight()
-  store.dispatch('currentUser/update', { prevSettingsSection: value })
+  userStore.updateUser({ prevSettingsSection: value })
 }
 const restoreUserPrevSettingsSection = () => {
   const section = userStore.prevSettingsSection

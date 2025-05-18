@@ -62,10 +62,10 @@ const updateBackground = () => {
     }
   }
   updates.defaultSpaceBackgroundTint = currentSpace.value.backgroundTint
-  store.dispatch('currentUser/update', updates)
+  userStore.updateUser(updates)
 }
 const removeBackground = () => {
-  store.dispatch('currentUser/update', { defaultSpaceBackground: null, defaultSpaceBackgroundTint: null, defaultSpaceBackgroundGradient: null })
+  userStore.updateUser({ defaultSpaceBackground: null, defaultSpaceBackgroundTint: null, defaultSpaceBackgroundGradient: null })
 }
 </script>
 

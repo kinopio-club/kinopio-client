@@ -2143,12 +2143,12 @@ const store = createStore({
     // drawing
 
     currentUserToolbar: (context, value) => {
-      const canOnlyComment = context.getters['currentUser/canOnlyComment']()
+      const canOnlyComment = userStore.getIsUserCommentOnly()
       if (canOnlyComment) { return }
       context.commit('currentUserToolbar', value)
     },
     toggleCurrentUserToolbar: (context, value) => {
-      const canOnlyComment = context.getters['currentUser/canOnlyComment']()
+      const canOnlyComment = userStore.getIsUserCommentOnly()
       const prevValue = context.state.currentUserToolbar
       if (canOnlyComment) { return }
       if (value === prevValue) {

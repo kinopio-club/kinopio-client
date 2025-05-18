@@ -1,13 +1,16 @@
 <script setup>
 import { reactive, computed, onMounted, onUnmounted, watch, ref, nextTick } from 'vue'
 import { useStore } from 'vuex'
+import { useUserStore } from '@/stores/useUserStore'
 
 import ColorPicker from '@/components/dialogs/ColorPicker.vue'
 import UserBadges from '@/components/UserBadges.vue'
 import User from '@/components/User.vue'
 import cache from '@/cache.js'
 import utils from '@/utils.js'
+
 const store = useStore()
+const userStore = useUserStore()
 
 const descriptionElement = ref(null)
 
@@ -84,7 +87,7 @@ const websiteUrl = computed(() => {
 // update user
 
 const updateUser = (update) => {
-  store.dispatch('currentUser/update', update)
+  userStore.updateUser(update)
 }
 const updateUserColor = (newValue) => {
   updateUser({ color: newValue })

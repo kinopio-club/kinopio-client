@@ -102,7 +102,7 @@ const restoreUserLastSidebarSection = () => {
   }
 }
 const updateUserLastSidebarSection = (name) => {
-  store.dispatch('currentUser/update', { lastSidebarSection: name })
+  userStore.updateUser({ lastSidebarSection: name })
 }
 
 </script>

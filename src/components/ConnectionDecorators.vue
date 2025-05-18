@@ -118,7 +118,7 @@ const togglePathIsStraight = (isStraight) => {
   connectionStore.updateConnections(updates)
   const ids = props.connections.map(connection => connection.id)
   connectionStore.updateConnectionPaths(ids)
-  store.dispatch('currentUser/update', { defaultConnectionControlPoint: controlPoint })
+  userStore.updateUser({ defaultConnectionControlPoint: controlPoint })
 }
 </script>
 

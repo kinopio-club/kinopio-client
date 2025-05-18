@@ -40,8 +40,7 @@ const toggleMarkdownInfoIsVisible = () => {
   }
 }
 const showCardSettings = () => {
-  store.dispatch('currentUser/update', { prevSettingsSection: 'cards' })
-  // store.dispatch('closeAllDialogs')
+  userStore.updateUser({ prevSettingsSection: 'cards' })
   store.commit('userSettingsIsVisible', true)
 }
 

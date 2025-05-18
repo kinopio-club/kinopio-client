@@ -378,7 +378,7 @@ const updateHeaderFont = async (font) => {
   props.boxes.forEach(box => {
     updateBox(box, { headerFontId: font.id })
   })
-  store.dispatch('currentUser/update', { prevHeaderFontId: font.id })
+  userStore.updateUser({ prevHeaderFontId: font.id })
   await nextTick()
   connectionStore.updateConnectionPaths(cardIds.value)
 }

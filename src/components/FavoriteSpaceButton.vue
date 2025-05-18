@@ -22,7 +22,7 @@ const isFavoriteSpace = computed(() => store.getters['currentSpace/isFavorite'](
 const toggleIsFavoriteSpace = () => {
   const space = store.state.currentSpace
   const value = !isFavoriteSpace.value
-  store.dispatch('currentUser/updateFavoriteSpace', { space, value })
+  userStore.updateUserFavoriteSpace(space, value)
   emit('updateLocalSpaces')
 }
 </script>

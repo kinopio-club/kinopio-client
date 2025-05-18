@@ -290,7 +290,7 @@ export const useUserStore = defineStore('users', {
       return userFilters
     },
 
-    canOnlyComment () {
+    getIsUserCommentOnly () {
       const canEditSpace = this.getUserCanEditSpace()
       const isSpaceMember = this.getUserIsSpaceMember()
       return canEditSpace && !isSpaceMember
