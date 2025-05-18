@@ -168,7 +168,7 @@ const currentUserColor = computed(() => userStore.color)
 
 // current space
 
-const canEditSpace = computed(() => store.getters['currentUser/canEditSpace']())
+const canEditSpace = computed(() => userStore.getUserCanEditSpace())
 const changeSpace = async (url) => {
   const { spaceId, spaceUrl, cardId } = utils.spaceAndCardIdFromUrl(url)
   if (cardId) {
@@ -727,7 +727,7 @@ const toggleFilterShowAbsoluteDates = () => {
   cardStore.incrementCardZ(props.card.id)
   store.dispatch('closeAllDialogs')
   const value = !userStore.filterShowAbsoluteDates
-  store.dispatch('currentUser/toggleFilterShowAbsoluteDates', value)
+  userStore.updateUser({ filterShowAbsoluteDates: value })
 }
 const updateRemoteConnections = () => {
   const connection = store.state.remoteCurrentConnections.find(remoteConnection => {
@@ -1459,9 +1459,7 @@ const touchIsNearTouchPosition = (event) => {
 
 // space filters
 
-const filtersIsActive = computed(() => {
-  return Boolean(store.getters['currentUser/totalItemFadingFiltersActive'])
-})
+const filtersIsActive = computed(() => Boolean(userStore.getUserTotalItemFadingFiltersActive))
 const isFilteredByTags = computed(() => {
   const tagNames = store.state.filteredTagNames
   if (!tagNames.length) { return }
