@@ -1,6 +1,7 @@
 <script setup>
 import { reactive, computed, onMounted, onBeforeUnmount, watch, ref, nextTick } from 'vue'
 import { useStore } from 'vuex'
+import { useUserStore } from '@/stores/useUserStore'
 
 import utils from '@/utils.js'
 import Loader from '@/components/Loader.vue'
@@ -13,6 +14,7 @@ import helloSpace from '@/data/hello.json'
 import { nanoid } from 'nanoid'
 
 const store = useStore()
+const userStore = useUserStore()
 
 let shouldLoadLastSpace
 let sessionToken
@@ -171,7 +173,7 @@ const isSignUpPasswordTooShort = (password) => {
   }
 }
 const migrationAppleAppAccountToken = () => {
-  const appleToken = store.state.currentUser.appleAppAccountToken
+  const appleToken = userStore.appleAppAccountToken
   if (!appleToken) {
     store.commit('currentUser/updateAppleAppAccountToken')
   }
@@ -293,7 +295,7 @@ const migrationSpacesConnections = async () => {
   })
 }
 const updateSpacesUserId = async () => {
-  const userId = store.state.currentUser.id
+  const userId = userStore.id
   const spaces = await cache.getAllSpaces()
   const newSpaces = utils.updateSpacesUserId(userId, spaces)
   for (const space of newSpaces) {
@@ -355,7 +357,7 @@ const addCollaboratorToCurrentSpace = async () => {
 const addCollaboratorToInvitedSpaces = async () => {
   let invitedSpaces = await cache.invitedSpaces()
   invitedSpaces = invitedSpaces.map(space => {
-    space.userId = store.state.currentUser.id
+    space.userId = userStore.id
     return space
   })
   await addCollaboratorToCurrentSpace()

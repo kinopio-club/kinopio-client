@@ -2,11 +2,13 @@
 import { reactive, computed, onMounted, onBeforeUnmount, watch, ref, nextTick } from 'vue'
 import { useStore } from 'vuex'
 import { useCardStore } from '@/stores/useCardStore'
+import { useUserStore } from '@/stores/useUserStore'
 
 import utils from '@/utils.js'
 
 const cardStore = useCardStore()
 const store = useStore()
+const userStore = useUserStore()
 
 // let unsubscribes
 
@@ -53,7 +55,7 @@ const updateDialogHeight = async () => {
   state.dialogHeight = utils.elementHeight(element)
 }
 
-const themeName = computed(() => store.state.currentUser.theme)
+const themeName = computed(() => userStore.theme)
 const incrementBy = () => {
   state.count = state.count + 1
   emit('updateCount', state.count)

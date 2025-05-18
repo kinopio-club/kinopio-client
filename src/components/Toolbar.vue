@@ -1,15 +1,18 @@
 <script setup>
 import { reactive, computed, onMounted, onUnmounted, watch, ref, nextTick } from 'vue'
 import { useStore } from 'vuex'
+import { useUserStore } from '@/stores/useUserStore'
 
 import DrawingToolbar from '@/components/DrawingToolbar.vue'
+
 const store = useStore()
+const userStore = useUserStore()
 
 const props = defineProps({
   visible: Boolean
 })
 
-const shouldIncreaseUIContrast = computed(() => store.state.currentUser.shouldIncreaseUIContrast)
+const shouldIncreaseUIContrast = computed(() => userStore.shouldIncreaseUIContrast)
 
 const currentUserToolbar = computed(() => store.state.currentUserToolbar)
 watch(() => currentUserToolbar.value, (value, prevValue) => {

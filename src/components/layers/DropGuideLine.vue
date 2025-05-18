@@ -1,11 +1,14 @@
 <script setup>
 import { reactive, computed, onMounted, onBeforeUnmount, watch, ref, nextTick } from 'vue'
 import { useStore } from 'vuex'
+import { useUserStore } from '@/stores/useUserStore'
 
 import utils from '@/utils.js'
 
 import { nanoid } from 'nanoid'
+
 const store = useStore()
+const userStore = useUserStore()
 
 let canvas, context, remoteCanvas, remoteContext, paintingGuidesTimer, remotePaintingGuidesTimer
 
@@ -64,7 +67,7 @@ const state = reactive({
   currentCursorInSpace: {}
 })
 
-const currentUserColor = computed(() => store.state.currentUser.color)
+const currentUserColor = computed(() => userStore.color)
 
 // Upload Files
 
@@ -241,7 +244,7 @@ const broadcastCursorAndCurve = ({ startPoint, color }) => {
   updates.x = state.currentCursorInSpace.x
   updates.y = state.currentCursorInSpace.y
   updates.color = color
-  updates.userId = store.state.currentUser.id
+  updates.userId = userStore.id
   store.commit('broadcast/update', { updates, type: 'updateRemoteUserCursor', handler: 'triggerUpdateRemoteUserCursor' })
   updates.startPoint = startPoint
   updates.color = color
@@ -249,7 +252,7 @@ const broadcastCursorAndCurve = ({ startPoint, color }) => {
   store.commit('broadcast/update', { updates, type: 'updateRemoteUserDropGuideLine', handler: 'triggerUpdateRemoteDropGuideLine' })
 }
 const broadcastStopPaintingGuide = () => {
-  const updates = { userId: store.state.currentUser.id }
+  const updates = { userId: userStore.id }
   store.commit('broadcast/update', { updates, type: 'updateStopRemoteUserDropGuideLine', handler: 'triggerUpdateStopRemoteUserDropGuideLine' })
 }
 

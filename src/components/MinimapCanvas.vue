@@ -4,6 +4,7 @@ import { useStore } from 'vuex'
 import { useCardStore } from '@/stores/useCardStore'
 import { useConnectionStore } from '@/stores/useConnectionStore'
 import { useBoxStore } from '@/stores/useBoxStore'
+import { useUserStore } from '@/stores/useUserStore'
 
 import utils from '@/utils.js'
 import cache from '@/cache.js'
@@ -12,6 +13,7 @@ const store = useStore()
 const cardStore = useCardStore()
 const connectionStore = useConnectionStore()
 const boxStore = useBoxStore()
+const userStore = useUserStore()
 
 let canvas, context
 let startPanningPosition
@@ -284,7 +286,7 @@ const updateScroll = () => {
 }
 const viewportStyle = computed(() => {
   const zoom = store.getters.spaceCounterZoomDecimal
-  const color = store.state.currentUser.color
+  const color = userStore.color
   // viewport box
   let width = (store.state.viewportWidth * zoom) * ratio.value
   let height = (store.state.viewportHeight * zoom) * ratio.value

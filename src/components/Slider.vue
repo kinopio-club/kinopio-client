@@ -1,11 +1,13 @@
 <script setup>
 import { reactive, computed, onMounted, onBeforeUnmount, watch, ref, nextTick } from 'vue'
 import { useStore } from 'vuex'
+import { useUserStore } from '@/stores/useUserStore'
 
 import utils from '@/utils.js'
 import consts from '@/consts.js'
 
 const store = useStore()
+const userStore = useUserStore()
 
 const badgeElement = ref(null)
 const progressElement = ref(null)
@@ -121,7 +123,7 @@ const dragPlayheadWheel = (event) => {
   let shouldZoomIn = deltaY < 0
   let shouldZoomOut = deltaY > 0
   let invertZoom = event.webkitDirectionInvertedFromDevice
-  if (store.state.currentUser.shouldInvertZoom) {
+  if (userStore.shouldInvertZoom) {
     invertZoom = !invertZoom
   }
   if (invertZoom) {

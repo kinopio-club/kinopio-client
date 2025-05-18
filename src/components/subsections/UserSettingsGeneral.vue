@@ -30,8 +30,8 @@ const props = defineProps({
 })
 
 const isSignedIn = computed(() => userStore.getUserIsSignedIn)
-const isUpgraded = computed(() => store.state.currentUser.isUpgraded)
-const currentUser = computed(() => store.state.currentUser)
+const isUpgraded = computed(() => userStore.isUpgraded)
+const currentUser = computed(() => userStore.getUserAllState)
 const isSecureAppContextIOS = computed(() => consts.isSecureAppContextIOS)
 
 const state = reactive({
@@ -99,9 +99,9 @@ const toggleUserDeveloperInfoIsVisible = () => {
 
 const deleteUserPermanent = async () => {
   state.loading.deleteUserPermanent = true
-  if (store.state.currentUser.isUpgraded) {
+  if (userStore.isUpgraded) {
     await store.dispatch('api/cancelSubscription', {
-      userId: store.state.currentUser.id
+      userId: userStore.id
     })
   }
   await store.dispatch('api/deleteUserPermanent')

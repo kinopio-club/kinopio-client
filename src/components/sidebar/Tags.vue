@@ -84,7 +84,7 @@ const filteredTags = computed(() => {
   return tags
 })
 
-const shouldShowCurrentSpaceTags = computed(() => store.state.currentUser.shouldShowCurrentSpaceTags)
+const shouldShowCurrentSpaceTags = computed(() => userStore.shouldShowCurrentSpaceTags)
 const toggleShouldShowCurrentSpaceTags = () => {
   const value = !shouldShowCurrentSpaceTags.value
   store.dispatch('currentUser/update', { shouldShowCurrentSpaceTags: value })

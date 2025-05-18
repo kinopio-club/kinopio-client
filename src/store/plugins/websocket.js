@@ -6,13 +6,14 @@
 // 🌜 Receive
 
 import { getActivePinia } from 'pinia'
-// import { useCardStore } from '@/stores/useCardStore'
-// const cardStore = useCardStore()
+import { useUserStore } from '@/stores/useUserStore'
 
 import { nanoid } from 'nanoid'
 
 import utils from '@/utils.js'
 import consts from '@/consts.js'
+
+const userStore = useUserStore()
 
 let websocket, currentSpaceRoom, currentUserIsConnected
 const clientId = nanoid()
@@ -163,7 +164,7 @@ export default function createWebSocketPlugin () {
             store.commit('clearRemoteMultipleSelected', data)
           } else if (message === 'userLeftSpace') {
             store.commit('currentSpace/removeCollaboratorFromSpace', updates.user)
-            if (updates.user.id === store.state.currentUser.id) {
+            if (updates.user.id === userStore.id) {
               store.dispatch('currentSpace/removeCurrentUserFromSpace', updates.user)
             }
           // other

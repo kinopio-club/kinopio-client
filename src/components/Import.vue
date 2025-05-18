@@ -1,6 +1,7 @@
 <script setup>
 import { reactive, computed, onMounted, onUnmounted, watch, ref, nextTick } from 'vue'
 import { useStore } from 'vuex'
+import { useUserStore } from '@/stores/useUserStore'
 
 import Loader from '@/components/Loader.vue'
 import cache from '@/cache.js'
@@ -12,6 +13,7 @@ import randomColor from 'randomcolor'
 import dayjs from 'dayjs'
 
 const store = useStore()
+const userStore = useUserStore()
 
 const inputElement = ref(null)
 
@@ -37,7 +39,7 @@ const toggleImportArenaChannelIsVisible = () => {
 }
 
 const newTypeColor = () => {
-  const isThemeDark = store.state.currentUser.theme === 'dark'
+  const isThemeDark = userStore.theme === 'dark'
   let color = randomColor({ luminosity: 'light' })
   if (isThemeDark) {
     color = randomColor({ luminosity: 'dark' })

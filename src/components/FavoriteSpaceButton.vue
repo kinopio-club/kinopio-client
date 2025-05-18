@@ -1,6 +1,9 @@
 <script setup>
 import { reactive, computed, onMounted, onBeforeUnmount, onUnmounted, watch, ref, nextTick } from 'vue'
 import { useStore } from 'vuex'
+import { useUserStore } from '@/stores/useUserStore'
+
+const userStore = useUserStore()
 const store = useStore()
 
 const emit = defineEmits(['updateLocalSpaces'])
@@ -11,7 +14,7 @@ const props = defineProps({
 
 const isTranslucentButton = computed(() => {
   if (props.parentIsDialog) { return }
-  return !store.state.currentUser.shouldIncreaseUIContrast
+  return !userStore.shouldIncreaseUIContrast
 })
 const isOnline = computed(() => store.state.isOnline)
 

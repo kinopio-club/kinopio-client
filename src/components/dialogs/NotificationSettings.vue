@@ -44,9 +44,9 @@ const updateDialogHeight = async () => {
 
 const isSignedIn = computed(() => userStore.getUserIsSignedIn)
 const currentUserIsSignedIn = computed(() => userStore.getUserIsSignedIn)
-const shouldEmailNotifications = computed(() => store.state.currentUser.shouldEmailNotifications)
-const shouldEmailBulletin = computed(() => store.state.currentUser.shouldEmailBulletin)
-const shouldEmailWeeklyReview = computed(() => store.state.currentUser.shouldEmailWeeklyReview)
+const shouldEmailNotifications = computed(() => userStore.shouldEmailNotifications)
+const shouldEmailBulletin = computed(() => userStore.shouldEmailBulletin)
+const shouldEmailWeeklyReview = computed(() => userStore.shouldEmailWeeklyReview)
 const parentDialog = computed(() => 'notificationSettings')
 
 const toggleShouldEmailNotifications = () => {

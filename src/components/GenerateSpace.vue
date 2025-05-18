@@ -2,6 +2,7 @@
 import { reactive, computed, onMounted, onBeforeUnmount, watch, ref, nextTick } from 'vue'
 import { useStore } from 'vuex'
 import { useConnectionStore } from '@/stores/useConnectionStore'
+import { useUserStore } from '@/stores/useUserStore'
 
 import Loader from '@/components/Loader.vue'
 import MinimapCanvas from '@/components/MinimapCanvas.vue'
@@ -16,6 +17,7 @@ import sample from 'lodash-es/sample'
 
 const store = useStore()
 const connectionStore = useConnectionStore()
+const userStore = useUserStore()
 
 const rowElement = ref(null)
 const textareaElement = ref(null)
@@ -87,7 +89,7 @@ const validateSchema = (space, schema) => {
 }
 
 const newTypeColor = () => {
-  const isThemeDark = store.state.currentUser.theme === 'dark'
+  const isThemeDark = userStore.theme === 'dark'
   let color = randomColor({ luminosity: 'light' })
   if (isThemeDark) {
     color = randomColor({ luminosity: 'dark' })
@@ -116,7 +118,7 @@ const updateSize = (space) => {
 
 // background color
 
-const isThemeDark = computed(() => store.state.currentUser.theme === 'dark')
+const isThemeDark = computed(() => userStore.theme === 'dark')
 const updateBackground = () => {
   let images = backgroundImagesJSON
   images = images.filter(image => !image.isArchived || !image.shouldSkipInGenerateSpace)

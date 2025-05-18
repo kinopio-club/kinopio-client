@@ -154,7 +154,7 @@ const searchTag = computed(() => {
 // select tag
 
 const color = () => {
-  const isThemeDark = store.state.currentUser.theme === 'dark'
+  const isThemeDark = userStore.theme === 'dark'
   let newColor = randomColor({ luminosity: 'light' })
   if (isThemeDark) {
     newColor = randomColor({ luminosity: 'dark' })

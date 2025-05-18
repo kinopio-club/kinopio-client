@@ -1,6 +1,7 @@
 <script setup>
 import { reactive, computed, onMounted, onBeforeUnmount, onUnmounted, watch, ref, nextTick } from 'vue'
 import { useStore } from 'vuex'
+import { useUserStore } from '@/stores/useUserStore'
 
 import UserTemplateSpaceList from '@/components/UserTemplateSpaceList.vue'
 import UserSettingsNewSpaces from '@/components/subsections/UserSettingsNewSpaces.vue'
@@ -13,6 +14,7 @@ import last from 'lodash-es/last'
 import { nanoid } from 'nanoid'
 
 const store = useStore()
+const userStore = useUserStore()
 
 const dialogElement = ref(null)
 
@@ -46,7 +48,7 @@ const state = reactive({
   settingsIsVisible: false
 })
 
-const currentUserId = computed(() => store.state.currentUser.id)
+const currentUserId = computed(() => userStore.id)
 const closeAll = () => {
   state.urlIsCopied = false
   state.settingsIsVisible = false

@@ -2,12 +2,14 @@
 import { reactive, computed, onMounted, onBeforeUnmount, watch, ref, nextTick } from 'vue'
 import { useStore } from 'vuex'
 import { useConnectionStore } from '@/stores/useConnectionStore'
+import { useUserStore } from '@/stores/useUserStore'
 
 import utils from '@/utils.js'
 import last from 'lodash-es/last'
 
 const store = useStore()
 const connectionStore = useConnectionStore()
+const userStore = useUserStore()
 
 const emit = defineEmits(['shouldRenderParent'])
 
@@ -47,7 +49,7 @@ const backgroundColorIsDark = computed(() => {
 
 // user
 
-const isThemeDark = computed(() => store.state.currentUser.theme === 'dark')
+const isThemeDark = computed(() => userStore.theme === 'dark')
 const isDarkInLightTheme = computed(() => {
   if (props.box?.fill === 'empty') {
     return isThemeDark.value
@@ -111,7 +113,7 @@ const createCurrentConnection = (event) => {
   store.commit('currentConnectionCursorStart', cursor)
 }
 const addConnectionType = (event) => {
-  const shouldUseLastConnectionType = store.state.currentUser.shouldUseLastConnectionType
+  const shouldUseLastConnectionType = userStore.shouldUseLastConnectionType
   const shiftKey = event.shiftKey
   const connectionType = connectionStore.getNewConnectionType
   if (!connectionType) {

@@ -2,11 +2,13 @@
 import { reactive, computed, onMounted, onBeforeUnmount, watch, ref, nextTick } from 'vue'
 import { useStore } from 'vuex'
 import { useCardStore } from '@/stores/useCardStore'
+import { useUserStore } from '@/stores/useUserStore'
 
 // import utils from '@/utils.js'
 
 const cardStore = useCardStore()
 const store = useStore()
+const userStore = useUserStore()
 
 // let unsubscribes
 
@@ -42,7 +44,7 @@ watch(() => props.visible, (value, prevValue) => {
   }
 })
 
-const themeName = computed(() => store.state.currentUser.theme)
+const themeName = computed(() => userStore.theme)
 const incrementBy = () => {
   const theme = themeName.value
   console.info('🧢', theme)

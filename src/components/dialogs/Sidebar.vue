@@ -1,6 +1,7 @@
 <script setup>
 import { reactive, computed, onMounted, onBeforeUnmount, onUnmounted, watch, ref, nextTick } from 'vue'
 import { useStore } from 'vuex'
+import { useUserStore } from '@/stores/useUserStore'
 
 import utils from '@/utils.js'
 
@@ -13,6 +14,7 @@ import Favorites from '@/components/sidebar/Favorites.vue'
 import History from '@/components/sidebar/History.vue'
 
 const store = useStore()
+const userStore = useUserStore()
 
 const dialogElement = ref(null)
 
@@ -90,7 +92,7 @@ const toggleSection = (value) => {
 
 const restoreUserLastSidebarSection = () => {
   clearVisible()
-  const section = store.state.currentUser.lastSidebarSection
+  const section = userStore.lastSidebarSection
   const values = ['stats', 'inbox', 'removed', 'links', 'tags', 'favorites', 'history'] // listed in api docs
   const isValid = values.includes(section)
   if (section && isValid) {

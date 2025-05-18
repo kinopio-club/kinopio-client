@@ -1,6 +1,7 @@
 <script setup>
 import { reactive, computed, onMounted, onUnmounted, watch, ref, nextTick } from 'vue'
 import { useStore } from 'vuex'
+import { useUserStore } from '@/stores/useUserStore'
 
 import UserLabelInline from '@/components/UserLabelInline.vue'
 import Textarea from '@/components/Textarea.vue'
@@ -8,7 +9,9 @@ import Loader from '@/components/Loader.vue'
 import utils from '@/utils.js'
 import consts from '@/consts.js'
 import { nanoid } from 'nanoid'
+
 const store = useStore()
+const userStore = useUserStore()
 
 const dialogElement = ref(null)
 const textareaWrapElement = ref(null)
@@ -70,7 +73,7 @@ const createSessionToken = () => {
 
 // requires upgraded user (temp)
 
-const currentUserIsUpgraded = computed(() => store.state.currentUser.isUpgraded)
+const currentUserIsUpgraded = computed(() => userStore.isUpgraded)
 const triggerUpgradeUserIsVisible = () => {
   store.dispatch('closeAllDialogs')
   store.commit('triggerUpgradeUserIsVisible')
@@ -79,8 +82,8 @@ const triggerUpgradeUserIsVisible = () => {
 // emails
 
 const restorePrevInviteEmails = () => {
-  if (store.state.currentUser.prevInviteEmails) {
-    state.defaultEmailsValue = store.state.currentUser.prevInviteEmails
+  if (userStore.prevInviteEmails) {
+    state.defaultEmailsValue = userStore.prevInviteEmails
     updateEmailsWithMatches(state.defaultEmailsValue)
   }
 }

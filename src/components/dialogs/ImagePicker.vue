@@ -125,7 +125,7 @@ const provider = computed(() => {
 const serviceIsPexels = computed(() => state.service === 'pexels')
 const serviceIsStickers = computed(() => state.service === 'stickers')
 const serviceIsGifs = computed(() => state.service === 'gifs')
-const lastUsedImagePickerService = computed(() => store.state.currentUser.lastUsedImagePickerService)
+const lastUsedImagePickerService = computed(() => userStore.lastUsedImagePickerService)
 const toggleServiceIsPexels = () => {
   state.service = 'pexels'
   searchAgain()

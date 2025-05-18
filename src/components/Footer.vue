@@ -1,13 +1,16 @@
 <script setup>
 import { reactive, computed, onMounted, onBeforeUnmount, watch, ref, nextTick } from 'vue'
 import { useStore } from 'vuex'
+import { useUserStore } from '@/stores/useUserStore'
 
 import Notifications from '@/components/Notifications.vue'
 import SpaceZoom from '@/components/SpaceZoom.vue'
 import Loader from '@/components/Loader.vue'
 import Minimap from '@/components/dialogs/Minimap.vue'
 import utils from '@/utils.js'
+
 const store = useStore()
+const userStore = useUserStore()
 
 let unsubscribe
 
@@ -79,7 +82,7 @@ const isTouchDevice = computed(() => store.getters.isTouchDevice)
 const isMobile = computed(() => utils.isMobile())
 const isMobileStandalone = computed(() => utils.isMobile() && navigator.standalone) // is homescreen app
 const isFadingOut = computed(() => store.state.isFadingOutDuringTouch)
-const shouldIncreaseUIContrast = computed(() => store.state.currentUser.shouldIncreaseUIContrast)
+const shouldIncreaseUIContrast = computed(() => userStore.shouldIncreaseUIContrast)
 
 // visible
 

@@ -1,11 +1,13 @@
 <script setup>
 import { reactive, computed, onMounted, onBeforeUnmount, watch, ref, nextTick } from 'vue'
 import { useStore } from 'vuex'
+import { useUserStore } from '@/stores/useUserStore'
 
 import ColorPicker from '@/components/dialogs/ColorPicker.vue'
 import BrushSizePicker from '@/components/dialogs/BrushSizePicker.vue'
 
 const store = useStore()
+const userStore = useUserStore()
 
 onMounted(() => {
   store.subscribe(mutation => {
@@ -23,7 +25,7 @@ const state = reactive({
   colorPickerIsVisible: false
 })
 
-const shouldIncreaseUIContrast = computed(() => store.state.currentUser.shouldIncreaseUIContrast)
+const shouldIncreaseUIContrast = computed(() => userStore.shouldIncreaseUIContrast)
 const closeAllDialogs = () => {
   state.brushSizePickerIsVisible = false
   state.colorPickerIsVisible = false
@@ -55,7 +57,7 @@ const toggleBrushSizePickerIsVisible = () => {
 const updateBrushSize = (value) => {
   store.commit('currentUser/drawingBrushSize', value)
 }
-const currentBrushSize = computed(() => store.state.currentUser.drawingBrushSize)
+const currentBrushSize = computed(() => userStore.drawingBrushSize)
 
 // eraser
 

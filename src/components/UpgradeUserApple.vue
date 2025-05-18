@@ -1,13 +1,16 @@
 <script setup>
 import { reactive, computed, onMounted, watch, ref, nextTick } from 'vue'
 import { useStore } from 'vuex'
+import { useUserStore } from '@/stores/useUserStore'
 
 import User from '@/components/User.vue'
 import Loader from '@/components/Loader.vue'
 import postMessage from '@/postMessage.js'
 import consts from '@/consts.js'
 import utils from '@/utils.js'
+
 const store = useStore()
+const userStore = useUserStore()
 
 onMounted(() => {
   window.addEventListener('message', handleSubscriptionSuccess) // iOS IAP subscription sheet transaction completes
@@ -28,8 +31,8 @@ const state = reactive({
 })
 
 const user = computed(() => store.state.currentUser)
-const isUpgraded = computed(() => store.state.currentUser.isUpgraded)
-const appleAppAccountToken = computed(() => store.state.currentUser.appleAppAccountToken)
+const isUpgraded = computed(() => userStore.isUpgraded)
+const appleAppAccountToken = computed(() => userStore.appleAppAccountToken)
 
 const clearErrors = () => {
   state.error.unknownServerError = false

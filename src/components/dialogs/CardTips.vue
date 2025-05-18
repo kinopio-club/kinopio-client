@@ -1,11 +1,13 @@
 <script setup>
 import { reactive, computed, onMounted, onBeforeUnmount, watch, ref, nextTick } from 'vue'
 import { useStore } from 'vuex'
+import { useUserStore } from '@/stores/useUserStore'
 
 import utils from '@/utils.js'
 import consts from '@/consts.js'
 
 const store = useStore()
+const userStore = useUserStore()
 
 const dialogElement = ref(null)
 
@@ -26,7 +28,7 @@ watch(() => props.visible, (value, prevValue) => {
 })
 
 const maxCardCharacterLimit = computed(() => consts.cardCharacterLimit)
-const shiftEnterShouldAddChildCard = computed(() => store.state.currentUser.cardSettingsShiftEnterShouldAddChildCard)
+const shiftEnterShouldAddChildCard = computed(() => userStore.cardSettingsShiftEnterShouldAddChildCard)
 const meta = computed(() => utils.metaKey())
 
 // buttons

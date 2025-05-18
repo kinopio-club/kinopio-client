@@ -1,10 +1,13 @@
 <script setup>
 import { reactive, computed, onMounted, onUnmounted, watch, ref, nextTick } from 'vue'
 import { useStore } from 'vuex'
+import { useUserStore } from '@/stores/useUserStore'
 
 import BackgroundPreview from '@/components/BackgroundPreview.vue'
 import utils from '@/utils.js'
+
 const store = useStore()
+const userStore = useUserStore()
 
 const dialogElement = ref(null)
 
@@ -17,7 +20,7 @@ const currentSpace = computed(() => store.state.currentSpace)
 
 // theme
 
-const themeIsSystem = computed(() => store.state.currentUser.themeIsSystem)
+const themeIsSystem = computed(() => userStore.themeIsSystem)
 const toggleThemeIsSystem = () => {
   store.dispatch('themes/toggleIsSystem')
 }

@@ -1,6 +1,7 @@
 <script setup>
 import { reactive, computed, onMounted, onBeforeUnmount, watch, ref, nextTick } from 'vue'
 import { useStore } from 'vuex'
+import { useUserStore } from '@/stores/useUserStore'
 
 import utils from '@/utils.js'
 import consts from '@/consts.js'
@@ -8,6 +9,7 @@ import consts from '@/consts.js'
 import throttle from 'lodash-es/throttle'
 
 const store = useStore()
+const userStore = useUserStore()
 
 onMounted(() => {
   window.addEventListener('pointerup', endDrawing)
@@ -26,7 +28,7 @@ const toolbarIsDrawing = computed(() => store.state.currentUserToolbar === 'draw
 const strokeColor = computed(() => store.getters['currentUser/drawingColor'])
 
 const strokeDiameter = computed(() => {
-  const diameter = store.state.currentUser.drawingBrushSize
+  const diameter = userStore.drawingBrushSize
   return consts.drawingBrushSizeDiameter[diameter]
 })
 

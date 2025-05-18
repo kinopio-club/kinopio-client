@@ -1,12 +1,15 @@
 <script setup>
 import { reactive, computed, onMounted, watch, ref, nextTick } from 'vue'
 import { useStore } from 'vuex'
+import { useUserStore } from '@/stores/useUserStore'
 
 import utils from '@/utils.js'
 import consts from '@/consts.js'
 import BackgroundPreview from '@/components/BackgroundPreview.vue'
 import UserSettingsNewSpaces from '@/components/subsections/UserSettingsNewSpaces.vue'
+
 const store = useStore()
+const userStore = useUserStore()
 
 const props = defineProps({
   visible: Boolean
@@ -22,7 +25,7 @@ const deviceSupportsHapticFeedback = computed(() => consts.isSecureAppContext &&
 
 // haptic feedback
 
-const shouldDisableHapticFeedback = computed(() => { return store.state.currentUser.shouldDisableHapticFeedback })
+const shouldDisableHapticFeedback = computed(() => { return userStore.shouldDisableHapticFeedback })
 const toggleShouldDisableHapticFeedback = () => {
   const value = !shouldDisableHapticFeedback.value
   store.commit('currentUser/shouldDisableHapticFeedback', value)
@@ -30,7 +33,7 @@ const toggleShouldDisableHapticFeedback = () => {
 
 // panning
 
-const shouldDisableRightClickToPan = computed(() => store.state.currentUser.shouldDisableRightClickToPan)
+const shouldDisableRightClickToPan = computed(() => userStore.shouldDisableRightClickToPan)
 const toggleShouldDisableRightClickToPan = () => {
   const value = !shouldDisableRightClickToPan.value
   store.dispatch('currentUser/update', { shouldDisableRightClickToPan: value })
@@ -38,7 +41,7 @@ const toggleShouldDisableRightClickToPan = () => {
 
 // zoom
 
-const shouldInvertZoom = computed(() => store.state.currentUser.shouldInvertZoom)
+const shouldInvertZoom = computed(() => userStore.shouldInvertZoom)
 const toggleShouldInvertZoom = () => {
   const value = !shouldInvertZoom.value
   store.commit('currentUser/shouldInvertZoom', value)
@@ -46,16 +49,16 @@ const toggleShouldInvertZoom = () => {
 
 // disable sticky cards
 
-const shouldDisableStickyCards = computed(() => !store.state.currentUser.shouldUseStickyCards)
+const shouldDisableStickyCards = computed(() => !userStore.shouldUseStickyCards)
 const toggleShouldUseStickyCards = () => {
-  let value = store.state.currentUser.shouldUseStickyCards
+  let value = userStore.shouldUseStickyCards
   value = !value
   store.dispatch('currentUser/update', { shouldUseStickyCards: value })
 }
 
 // pause connection directions
 
-const shouldPauseConnectionDirections = computed(() => store.state.currentUser.shouldPauseConnectionDirections)
+const shouldPauseConnectionDirections = computed(() => userStore.shouldPauseConnectionDirections)
 const toggleShouldPauseConnectionDirections = () => {
   const value = !shouldPauseConnectionDirections.value
   store.dispatch('currentUser/update', { shouldPauseConnectionDirections: value })
@@ -64,7 +67,7 @@ const toggleShouldPauseConnectionDirections = () => {
 
 // increase UI Contrast
 
-const shouldIncreaseUIContrast = computed(() => store.state.currentUser.shouldIncreaseUIContrast)
+const shouldIncreaseUIContrast = computed(() => userStore.shouldIncreaseUIContrast)
 const toggleShouldIncreaseUIContrast = () => {
   const value = !shouldIncreaseUIContrast.value
   store.dispatch('currentUser/update', { shouldIncreaseUIContrast: value })
@@ -75,7 +78,7 @@ const toggleShouldIncreaseUIContrast = () => {
 const updateOutsideSpaceBackgroundIsStatic = (value) => {
   store.dispatch('currentUser/update', { outsideSpaceBackgroundIsStatic: value })
 }
-const outsideSpaceBackgroundIsStatic = computed(() => store.state.currentUser.outsideSpaceBackgroundIsStatic)
+const outsideSpaceBackgroundIsStatic = computed(() => userStore.outsideSpaceBackgroundIsStatic)
 const outsideSpaceStyles = computed(() => {
   return {
     backgroundColor: store.state.outsideSpaceBackgroundColor

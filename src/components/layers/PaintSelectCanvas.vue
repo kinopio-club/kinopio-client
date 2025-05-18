@@ -3,7 +3,7 @@ import { reactive, computed, onMounted, onBeforeUnmount, onUnmounted, watch, ref
 import { useStore } from 'vuex'
 import { useConnectionStore } from '@/stores/useConnectionStore'
 import { useBoxStore } from '@/stores/useBoxStore'
-
+import { useUserStore } from '@/stores/useUserStore'
 import { useCardStore } from '@/stores/useCardStore'
 
 import utils from '@/utils.js'
@@ -17,6 +17,7 @@ const cardStore = useCardStore()
 const connectionStore = useConnectionStore()
 const store = useStore()
 const boxStore = useBoxStore()
+const userStore = useUserStore()
 
 // a sequence of circles that's broadcasted to others and is used for multi-card selection
 const circleRadius = 20
@@ -149,7 +150,7 @@ const isCanvasScope = (event) => {
 
 // current user
 
-const currentUserColor = computed(() => store.state.currentUser.color)
+const currentUserColor = computed(() => userStore.color)
 const currentUserColorIsDark = computed(() => utils.colorIsDark(currentUserColor.value))
 const boxFillColor = computed(() => colord(currentUserColor.value).alpha(0.5).toRgbString())
 const userCannotEditSpace = computed(() => !store.getters['currentUser/canEditSpace']())
@@ -417,7 +418,7 @@ const createPaintingCircles = (event) => {
     prevCursor = state.currentCursor
     return
   }
-  const color = store.state.currentUser.color
+  const color = userStore.color
   const points = utils.pointsBetweenTwoPoints(prevCursor, state.currentCursor)
   points.forEach(point => {
     const circle = { x: point.x, y: point.y, color, iteration: 0 }
@@ -525,7 +526,7 @@ const broadcastCircle = (event, circle) => {
   const position = utils.cursorPositionInSpace(event)
   store.commit('broadcast/update', {
     updates: {
-      userId: store.state.currentUser.id,
+      userId: userStore.id,
       x: position.x,
       y: position.y,
       color: circle.color,

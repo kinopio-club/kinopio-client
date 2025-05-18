@@ -1,6 +1,7 @@
 <script setup>
 import { reactive, computed, onMounted, onBeforeUnmount, watch, ref, nextTick } from 'vue'
 import { useStore } from 'vuex'
+import { useUserStore } from '@/stores/useUserStore'
 
 import BackgroundPicker from '@/components/dialogs/BackgroundPicker.vue'
 import BackgroundPreview from '@/components/BackgroundPreview.vue'
@@ -16,6 +17,7 @@ import utils from '@/utils.js'
 import consts from '@/consts.js'
 
 const store = useStore()
+const userStore = useUserStore()
 
 const nameElement = ref(null)
 
@@ -189,7 +191,7 @@ const userGroups = computed(() => store.getters['groups/byUser']())
 const spaceGroup = computed(() => store.getters['groups/spaceGroup']())
 const currentUserIsGroupAdmin = (group) => {
   return store.getters['groups/groupUserIsAdmin']({
-    userId: store.state.currentUser.id,
+    userId: userStore.id,
     groupId: group.id
   })
 }

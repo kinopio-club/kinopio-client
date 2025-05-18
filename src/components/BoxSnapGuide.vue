@@ -2,12 +2,14 @@
 import { reactive, computed, onMounted, onBeforeUnmount, watch, ref, nextTick } from 'vue'
 import { useStore } from 'vuex'
 import { useBoxStore } from '@/stores/useBoxStore'
+import { useUserStore } from '@/stores/useUserStore'
 
 import utils from '@/utils.js'
 import consts from '@/consts.js'
 
 const store = useStore()
 const boxStore = useBoxStore()
+const userStore = useUserStore()
 
 let unsubscribe
 
@@ -74,7 +76,7 @@ watch(() => currentBoxSnapGuide.value, (value, prevValue) => {
 
 // styles
 
-const userColor = computed(() => store.state.currentUser.color)
+const userColor = computed(() => userStore.color)
 const snapGuideSide = computed(() => {
   const isDraggingItem = store.state.currentUserIsDraggingBox || store.state.currentUserIsDraggingCard
   if (!isDraggingItem) { return }

@@ -2,6 +2,7 @@
 import { reactive, computed, onMounted, onBeforeUnmount, watch, ref, nextTick } from 'vue'
 import { useStore } from 'vuex'
 import { useCardStore } from '@/stores/useCardStore'
+import { useUserStore } from '@/stores/useUserStore'
 
 import User from '@/components/User.vue'
 import utils from '@/utils.js'
@@ -12,6 +13,7 @@ import last from 'lodash-es/last'
 
 const store = useStore()
 const cardStore = useCardStore()
+const userStore = useUserStore()
 
 const buttonElement = ref(null)
 
@@ -92,7 +94,7 @@ const spaceUsersLabel = computed(() => {
   return string
 })
 const isTranslucentButton = computed(() => {
-  const shouldIncreaseUIContrast = store.state.currentUser.shouldIncreaseUIContrast
+  const shouldIncreaseUIContrast = userStore.shouldIncreaseUIContrast
   return props.isParentSpaceUsers && !shouldIncreaseUIContrast
 })
 

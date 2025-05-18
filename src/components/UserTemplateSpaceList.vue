@@ -61,7 +61,7 @@ const selectSpace = (space) => {
 const updateLocalSpaces = async () => {
   const cachedSpaces = await cache.getAllSpaces()
   const spaces = cachedSpaces.filter(space => {
-    const isUser = store.state.currentUser.id === space.userId
+    const isUser = userStore.id === space.userId
     return space.isTemplate && isUser
   })
   state.localSpaces = spaces

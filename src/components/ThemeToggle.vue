@@ -2,9 +2,12 @@
 import { reactive, computed, onMounted } from 'vue'
 // https://vuex.vuejs.org/guide/composition-api.html#accessing-state-and-getters
 import { useStore } from 'vuex'
+import { useUserStore } from '@/stores/useUserStore'
+
+const userStore = useUserStore()
 const store = useStore()
 
-const themeName = computed(() => store.state.currentUser.theme)
+const themeName = computed(() => userStore.theme)
 const updateTheme = (themeName) => {
   store.dispatch('themes/update', themeName)
   store.dispatch('themes/isSystem', false)

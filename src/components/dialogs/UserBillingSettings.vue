@@ -1,13 +1,16 @@
 <script setup>
 import { reactive, computed, onMounted, watch, ref, nextTick } from 'vue'
 import { useStore } from 'vuex'
+import { useUserStore } from '@/stores/useUserStore'
 
 import Loader from '@/components/Loader.vue'
 import utils from '@/utils.js'
 import consts from '@/consts.js'
 
 import dayjs from 'dayjs'
+
 const store = useStore()
+const userStore = useUserStore()
 
 const dialog = ref(null)
 
@@ -40,7 +43,7 @@ const triggerUpgradeUserIsVisible = () => {
 
 const subscriptionIsApple = computed(() => store.getters['currentUser/subscriptionIsApple'])
 const subscriptionIsStripe = computed(() => store.getters['currentUser/subscriptionIsStripe'])
-const stripePlanIsPurchased = computed(() => store.state.currentUser.stripePlanIsPurchased)
+const stripePlanIsPurchased = computed(() => userStore.stripePlanIsPurchased)
 const subscriptionIsFree = computed(() => store.getters['currentUser/subscriptionIsFree'])
 const isSecureAppContextIOS = computed(() => consts.isSecureAppContextIOS)
 
@@ -62,7 +65,7 @@ const customerPortal = async () => {
     clearState()
     state.loading = true
     const result = await store.dispatch('api/customerPortalUrl', {
-      userId: store.state.currentUser.id
+      userId: userStore.id
     })
     window.location = result.url
   } catch (error) {

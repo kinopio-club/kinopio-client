@@ -205,7 +205,7 @@ const updateDialogHeight = async () => {
   const element = dialogElement.value
   state.dialogHeight = utils.elementHeight(element)
 }
-const shouldShowItemActions = computed(() => store.state.currentUser.shouldShowItemActions)
+const shouldShowItemActions = computed(() => userStore.shouldShowItemActions)
 const rowIsBelowItemActions = computed(() => nameMetaRowIsVisible.value || badgesRowIsVisible.value || shouldShowItemActions.value || cardHasMedia.value || cardUrlPreviewIsVisible.value)
 const nameMetaRowIsVisible = computed(() => state.nameSplitIntoCardsCount)
 const badgesRowIsVisible = computed(() => tagsInCard.value.length || isInSearchResultsCards.value)
@@ -295,7 +295,7 @@ const updatedByUser = computed(() => {
 const broadcastShowCardDetails = () => {
   const updates = {
     cardId: card.value.id,
-    userId: store.state.currentUser.id
+    userId: userStore.id
   }
   store.commit('broadcast/updateStore', { updates, type: 'updateRemoteCardDetailsVisible' })
 }
@@ -493,7 +493,7 @@ const updateCardName = async (newName) => {
   if (card.value.id !== cardId) {
     return
   }
-  const userId = store.state.currentUser.id
+  const userId = userStore.id
   const update = {
     id: cardId,
     name: newName,
@@ -508,7 +508,7 @@ const updateCardName = async (newName) => {
   updateMediaUrls()
   await updateTags()
   updateDimensionsAndPathsDebounced()
-  if (createdByUser.value.id !== store.state.currentUser.id) { return }
+  if (createdByUser.value.id !== userStore.id) { return }
   if (state.notifiedMembers) { return } // send card update notifications only once per card, per session
   if (newName) {
     store.dispatch('userNotifications/addCardUpdated', { cardId: card.value.id, type: 'updateCard' })
@@ -563,7 +563,7 @@ const openingFrameStyle = computed(() => {
   const initialPadding = 200
   const initialBorderRadius = 60
   const padding = initialPadding * state.openingPercent
-  const userColor = store.state.currentUser.color
+  const userColor = userStore.color
   const borderRadius = Math.max((state.openingPercent * initialBorderRadius), 5) + 'px'
   const size = `calc(100% + ${padding}px)`
   const position = -(padding / 2) + 'px'
@@ -732,7 +732,7 @@ const addNewTags = async (newTagNames) => {
   for (const tagName of addTagsNames) {
     const tag = store.getters.newTag({
       name: tagName,
-      defaultColor: state.newTagColor || store.state.currentUser.color,
+      defaultColor: state.newTagColor || userStore.color,
       cardId: card.value.id,
       spaceId: store.state.currentSpace.id
     })
@@ -1205,7 +1205,7 @@ const checkIfIsInsertLineBreak = (event) => {
   }
 }
 const conditionalInsertLineBreak = (event) => {
-  const shouldAddChildCard = store.state.currentUser.cardSettingsShiftEnterShouldAddChildCard
+  const shouldAddChildCard = userStore.cardSettingsShiftEnterShouldAddChildCard
   if (shouldAddChildCard) { return }
   insertLineBreak(event)
 }

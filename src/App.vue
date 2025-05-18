@@ -1,10 +1,13 @@
 <script setup>
 import { reactive, computed, onMounted, onBeforeUnmount, onUnmounted, watch, ref, nextTick } from 'vue'
 import { useStore } from 'vuex'
+import { useUserStore } from '@/stores/useUserStore'
 
 import utils from '@/utils.js'
 import consts from '@/consts.js'
+
 const store = useStore()
+const userStore = useUserStore()
 
 let statusRetryCount = 0
 
@@ -60,7 +63,7 @@ const spaceZoomDecimal = computed(() => store.getters.spaceZoomDecimal)
 
 // users
 
-const currentUserId = computed(() => store.state.currentUser.id)
+const currentUserId = computed(() => userStore.id)
 
 // online
 
@@ -97,7 +100,7 @@ const updateServerIsOnline = async () => {
 
 const isThemeDark = computed(() => store.getters['themes/isThemeDark'])
 const themeFromSystem = () => {
-  const themeIsSystem = store.state.currentUser.themeIsSystem
+  const themeIsSystem = userStore.themeIsSystem
   if (!themeIsSystem) { return }
   const theme = window.matchMedia('(prefers-color-scheme: dark)')
   let themeName
@@ -109,7 +112,7 @@ const themeFromSystem = () => {
   return themeName
 }
 const logMatchMediaChange = (event) => {
-  const themeIsSystem = store.state.currentUser.themeIsSystem
+  const themeIsSystem = userStore.themeIsSystem
   console.warn('🌓 logMatchMediaChange', window.matchMedia('(prefers-color-scheme: dark)'), event, { themeIsSystem })
 }
 const updateThemeFromSystem = () => {
@@ -124,7 +127,7 @@ const broadcastUserLabelCursor = (event) => {
   if (!store.getters.isSpacePage) { return }
   const updates = utils.cursorPositionInSpace(event)
   if (!updates) { return }
-  updates.userId = store.state.currentUser.id
+  updates.userId = userStore.id
   updates.zoom = spaceZoomDecimal.value
   store.commit('broadcast/update', { updates, type: 'updateRemoteUserCursor', handler: 'triggerUpdateRemoteUserCursor' })
 }

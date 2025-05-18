@@ -28,7 +28,7 @@ const isVisible = computed(() => {
   if (canOnlyComment.value) { return }
   return currentUserIsSignedIn.value
 })
-const shouldIncreaseUIContrast = computed(() => store.state.currentUser.shouldIncreaseUIContrast)
+const shouldIncreaseUIContrast = computed(() => userStore.shouldIncreaseUIContrast)
 const blur = () => {
   const element = buttonElement.value
   element.blur()

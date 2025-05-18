@@ -1,6 +1,7 @@
 <script setup>
 import { reactive, computed, onMounted, onBeforeUnmount, watch, ref, nextTick } from 'vue'
 import { useStore } from 'vuex'
+import { useUserStore } from '@/stores/useUserStore'
 
 import utils from '@/utils.js'
 import GroupList from '@/components/GroupList.vue'
@@ -11,6 +12,7 @@ import Loader from '@/components/Loader.vue'
 import uniqBy from 'lodash-es/uniqBy'
 
 const store = useStore()
+const userStore = useUserStore()
 
 const dialogElement = ref(null)
 
@@ -49,7 +51,7 @@ const closeDialogs = () => {
   state.groupDetailsIsVisibleForGroupId = ''
 }
 
-const currentUserIsUpgraded = computed(() => store.state.currentUser.isUpgraded)
+const currentUserIsUpgraded = computed(() => userStore.isUpgraded)
 const isLoadingGroups = computed(() => store.state.isLoadingGroups)
 
 // groups

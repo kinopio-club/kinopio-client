@@ -1,11 +1,14 @@
 <script setup>
 import { reactive, computed, onMounted, watch, ref, nextTick } from 'vue'
 import { useStore } from 'vuex'
+import { useUserStore } from '@/stores/useUserStore'
 
 import User from '@/components/User.vue'
 import Loader from '@/components/Loader.vue'
 import utils from '@/utils.js'
+
 const store = useStore()
+const userStore = useUserStore()
 
 const props = defineProps({
   visible: Boolean,
@@ -34,7 +37,7 @@ const isLifetimePlan = computed(() => props.price.period === 'life')
 const subscribeUrl = async () => {
   const result = await store.dispatch('api/subscriptionUrl', {
     priceId: props.price.stripePriceId,
-    userId: store.state.currentUser.id,
+    userId: userStore.id,
     period: props.price.period
   })
   return result
@@ -43,7 +46,7 @@ const subscribeUrl = async () => {
 const checkoutUrl = async () => {
   const result = await store.dispatch('api/checkoutUrl', {
     priceId: props.price.stripePriceId,
-    userId: store.state.currentUser.id,
+    userId: userStore.id,
     period: props.price.period
   })
   return result

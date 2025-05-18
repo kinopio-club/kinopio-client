@@ -1,5 +1,236 @@
+<script setup>
+import { reactive, computed, onMounted, onBeforeUnmount, watch, ref, nextTick } from 'vue'
+import { useStore } from 'vuex'
+import { useCardStore } from '@/stores/useCardStore'
+import { useUserStore } from '@/stores/useUserStore'
+
+import Loader from '@/components/Loader.vue'
+import utils from '@/utils.js'
+import cache from '@/cache.js'
+import consts from '@/consts.js'
+
+import { nanoid } from 'nanoid'
+
+const cardStore = useCardStore()
+const store = useStore()
+const userStore = useUserStore()
+
+// let unsubscribes
+let unsubscribe
+
+onMounted(() => {
+  unsubscribe = store.subscribe((mutation, state) => {
+    if (mutation.type === 'triggerArenaAuthenticationError') {
+      state.error.unknownServerError = true
+    }
+  })
+})
+onBeforeUnmount(() => {
+  unsubscribe()
+  // unsubscribes()
+})
+
+let arena = {}
+// arena apps registered to hi@kinopio.club
+if (consts.isDevelopment()) {
+  arena = {
+    clientId: '19f13b17093a5f1c9b227426cbb50571c18ffe50855a7e5f98dafb71f10d71f8',
+    redirectUri: 'urn:ietf:wg:oauth:2.0:oob'
+  }
+} else {
+  arena = {
+    clientId: 'adadc4aae0148aa84b14c18ce44392a33d1e564996bfcd1cf44d64ca6324c734',
+    redirectUri: 'https://kinopio.club/update-arena-access-token'
+  }
+}
+
+const dialogElement = ref(null)
+
+const emit = defineEmits(['updateSpaces'])
+
+const props = defineProps({
+  visible: Boolean
+})
+const state = reactive({
+  channelUrl: '',
+  loading: false,
+  error: {
+    invalidUrl: false,
+    channelNotFound: false,
+    channelNotFoundName: '',
+    unknownServerError: false
+  },
+  dialogHeight: null
+})
+
+const updateDialogHeight = async () => {
+  if (!props.visible) { return }
+  await nextTick()
+  const element = dialogElement.value
+  state.dialogHeight = utils.elementHeight(element)
+}
+
+const arenaAccessToken = computed(() => userStore.arenaAccessToken)
+const isAuthenticatingWithArena = computed(() => store.state.isAuthenticatingWithArena)
+const authorizeUrl = computed(() => {
+  if (isAuthenticatingWithArena.value) { return }
+  return `http://dev.are.na/oauth/authorize?client_id=${arena.clientId}&redirect_uri=${arena.redirectUri}&response_type=code`
+})
+
+const forgetArenaAccessToken = () => {
+  store.dispatch('currentUser/arenaAccessToken', '')
+  store.commit('addNotification', { message: 'Removed your Are.na access token from Kinopio', type: 'success' })
+}
+const importChannel = async () => {
+  if (state.loading) { return }
+  state.loading = true
+  const channelPath = channelPathFromUrl()
+  if (!channelPath) {
+    state.error.invalidUrl = true
+    state.loading = false
+    return
+  }
+  const channel = await getChannelContents(channelPath)
+  await createSpace(channel)
+  clearForm()
+  state.loading = false
+  emit('updateSpaces')
+}
+const clearErrors = () => {
+  for (const errorType in state.error) {
+    state.error[errorType] = false
+  }
+}
+const clearForm = () => {
+  state.channelUrl = ''
+  clearErrors()
+}
+const channelPathFromUrl = () => {
+  const urlPattern = new RegExp(/(http[s]?:\/\/)?[^\s(["<,>]*\.[^\s.[",><]+/igm)
+  const urls = state.channelUrl.match(urlPattern)
+  if (!urls) { return }
+  const url = utils.normalizeUrl(urls[0])
+  const index = url.lastIndexOf('/') + 1
+  return url.slice(index, url.length)
+}
+const getChannelContents = async (channel) => {
+  try {
+    const maxBlocks = 100
+    const headers = new Headers({ 'Content-Type': 'application/x-www-form-urlencoded' })
+    headers.append('Authorization', `Bearer ${arenaAccessToken.value}`)
+    const options = {
+      method: 'GET',
+      headers
+    }
+    const response = await fetch(`https://api.are.na/v2/channels/${channel}?per=${maxBlocks}&sort=position&direction=desc`, options)
+    if (response.status !== 200) {
+      throw { response, status: response.status }
+    }
+    return response.json()
+  } catch (error) {
+    console.error('🚒', error)
+    if (error.status === 404) {
+      state.error.channelNotFoundName = channel
+      state.error.channelNotFound = true
+    } else {
+      state.error.unknownServerError = true
+    }
+    state.loading = false
+  }
+}
+const trimName = (name) => {
+  return name.substring(0, consts.cardCharacterLimit)
+}
+const createSpace = async (channel) => {
+  const space = utils.emptySpace(nanoid())
+  space.cacheDate = new Date().getTime()
+  space.name = channel.title
+  const metaCard = {
+    id: nanoid(),
+    x: 40,
+    y: 100,
+    z: channel.contents.length + 1,
+    name: trimName(state.channelUrl),
+    frameId: 2
+  }
+  space.cards.push(metaCard)
+  channel.contents.forEach(block => {
+    const currentIndex = space.cards.length
+    const lastCard = space.cards[currentIndex - 1]
+    const card = createCard(block, { currentIndex, lastCard })
+    space.cards.push(card)
+  })
+  await importSpace(space)
+}
+const importSpace = async (space) => {
+  console.info('🌳 importSpace', space)
+  try {
+    cache.saveSpace(space)
+    await store.dispatch('api/createSpace', space)
+    store.dispatch('currentSpace/changeSpace', space)
+    store.commit('addNotification', { message: 'Are.na channel imported', type: 'success' })
+    store.dispatch('closeAllDialogs')
+  } catch (error) {
+    console.error('🚒 importSpace', error)
+  }
+}
+const createCard = (block, position) => {
+  const card = { id: nanoid() }
+  const type = block.class
+  const title = block.title
+  console.info('**', block, type)
+  if (type === 'Link') {
+    let url = block.image.display.url
+    if (!utils.urlIsImage(url)) {
+      url = block.image.original.url
+    }
+    card.name = `${url} ${block.source.url}`
+  } else if (type === 'Text') {
+    card.name = `${title} – ${block.content}`
+  } else if (type === 'Media') {
+    card.name = `${title} – ${block.image.original.url}`
+  } else if (type === 'Attachment') {
+    card.name = block.attachment.url
+  } else if (type === 'Channel') {
+    card.name = `${title} – https://are.na/${block.owner_slug}/${block.slug}`
+  } else if (type === 'Image') {
+    card.name = block.image.original.url
+  } else {
+    card.name = `${title} ${type}`
+  }
+  card.name = trimName(card.name)
+  const { x, y, z } = cardPositions(position)
+  card.x = x
+  card.y = y
+  card.z = z
+  return card
+}
+const cardPositions = ({ currentIndex, lastCard }) => {
+  let x, y
+  const startX = 40
+  const startY = 50
+  const cardWidth = 235
+  const cardHeight = 235
+  const cardMargin = 20
+  const viewportWidth = store.state.viewportWidth - (cardWidth + cardMargin)
+  x = startX
+  y = startY
+  if (lastCard) {
+    const currentRow = Math.floor((currentIndex * (cardWidth + cardMargin)) / viewportWidth)
+    const lastCardRow = Math.floor(((currentIndex - 1) * (cardWidth + cardMargin)) / viewportWidth)
+    x = lastCard.x + cardWidth + cardMargin + startX
+    y = ((cardHeight + cardMargin) * currentRow) + startY
+    if (lastCardRow !== currentRow) {
+      x = startX
+    }
+  }
+  const z = currentIndex
+  return { x, y, z }
+}
+</script>
+
 <template lang="pug">
-dialog.import-arena-channel.narrow(v-if="visible" :open="visible" @click.left.stop ref="dialog")
+dialog.import-arena-channel.narrow(v-if="visible" :open="visible" @click.left.stop ref="dialogElement")
   section
     p Import Are.na Channel
 
@@ -36,224 +267,7 @@ dialog.import-arena-channel.narrow(v-if="visible" :open="visible" @click.left.st
 
     section
       button(@click.left="forgetArenaAccessToken") Forget Me
-
 </template>
-
-<script>
-import Loader from '@/components/Loader.vue'
-import utils from '@/utils.js'
-import cache from '@/cache.js'
-import consts from '@/consts.js'
-
-import { nanoid } from 'nanoid'
-
-let arena = {}
-// arena apps registered to hi@kinopio.club
-if (consts.isDevelopment()) {
-  arena = {
-    clientId: '19f13b17093a5f1c9b227426cbb50571c18ffe50855a7e5f98dafb71f10d71f8',
-    redirectUri: 'urn:ietf:wg:oauth:2.0:oob'
-  }
-} else {
-  arena = {
-    clientId: 'adadc4aae0148aa84b14c18ce44392a33d1e564996bfcd1cf44d64ca6324c734',
-    redirectUri: 'https://kinopio.club/update-arena-access-token'
-  }
-}
-
-export default {
-  name: 'ImportArenaChannel',
-  components: {
-    Loader
-  },
-  props: {
-    visible: Boolean
-  },
-  emits: [
-    'updateSpaces'
-  ],
-  data () {
-    return {
-      channelUrl: '',
-      loading: false,
-      error: {
-        invalidUrl: false,
-        channelNotFound: false,
-        channelNotFoundName: '',
-        unknownServerError: false
-      }
-    }
-  },
-
-  computed: {
-    authorizeUrl () {
-      if (this.isAuthenticatingWithArena) { return }
-      return `http://dev.are.na/oauth/authorize?client_id=${arena.clientId}&redirect_uri=${arena.redirectUri}&response_type=code`
-    },
-    arenaAccessToken () { return this.$store.state.currentUser.arenaAccessToken },
-    isAuthenticatingWithArena () { return this.$store.state.isAuthenticatingWithArena }
-  },
-  created () {
-    this.$store.subscribe((mutation, state) => {
-      if (mutation.type === 'triggerArenaAuthenticationError') {
-        this.error.unknownServerError = true
-      }
-    })
-  },
-  methods: {
-    forgetArenaAccessToken () {
-      this.$store.dispatch('currentUser/arenaAccessToken', '')
-      this.$store.commit('addNotification', { message: 'Removed your Are.na access token from Kinopio', type: 'success' })
-    },
-    async importChannel () {
-      if (this.loading) { return }
-      this.loading = true
-      const channelPath = this.channelPathFromUrl()
-      if (!channelPath) {
-        this.error.invalidUrl = true
-        this.loading = false
-        return
-      }
-      const channel = await this.getChannelContents(channelPath)
-      await this.createSpace(channel)
-      this.clearForm()
-      this.loading = false
-      this.$emit('updateSpaces')
-    },
-    clearErrors () {
-      for (const errorType in this.error) {
-        this.error[errorType] = false
-      }
-    },
-    clearForm () {
-      this.channelUrl = ''
-      this.clearErrors()
-    },
-    channelPathFromUrl () {
-      const urlPattern = new RegExp(/(http[s]?:\/\/)?[^\s(["<,>]*\.[^\s.[",><]+/igm)
-      const urls = this.channelUrl.match(urlPattern)
-      if (!urls) { return }
-      const url = utils.normalizeUrl(urls[0])
-      const index = url.lastIndexOf('/') + 1
-      return url.slice(index, url.length)
-    },
-    async getChannelContents (channel) {
-      try {
-        const maxBlocks = 100
-        const headers = new Headers({ 'Content-Type': 'application/x-www-form-urlencoded' })
-        headers.append('Authorization', `Bearer ${this.arenaAccessToken}`)
-        const options = {
-          method: 'GET',
-          headers
-        }
-        const response = await fetch(`https://api.are.na/v2/channels/${channel}?per=${maxBlocks}&sort=position&direction=desc`, options)
-        if (response.status !== 200) {
-          throw { response, status: response.status }
-        }
-        return response.json()
-      } catch (error) {
-        console.error('🚒', error)
-        if (error.status === 404) {
-          this.error.channelNotFoundName = channel
-          this.error.channelNotFound = true
-        } else {
-          this.error.unknownServerError = true
-        }
-        this.loading = false
-      }
-    },
-    trimName (name) {
-      return name.substring(0, consts.cardCharacterLimit)
-    },
-    async createSpace (channel) {
-      const space = utils.emptySpace(nanoid())
-      space.cacheDate = new Date().getTime()
-      space.name = channel.title
-      const metaCard = {
-        id: nanoid(),
-        x: 40,
-        y: 100,
-        z: channel.contents.length + 1,
-        name: this.trimName(this.channelUrl),
-        frameId: 2
-      }
-      space.cards.push(metaCard)
-      channel.contents.forEach(block => {
-        const currentIndex = space.cards.length
-        const lastCard = space.cards[currentIndex - 1]
-        const card = this.createCard(block, { currentIndex, lastCard })
-        space.cards.push(card)
-      })
-      await this.importSpace(space)
-    },
-    async importSpace (space) {
-      console.info('🌳 importSpace', space)
-      try {
-        cache.saveSpace(space)
-        await this.$store.dispatch('api/createSpace', space)
-        this.$store.dispatch('currentSpace/changeSpace', space)
-        this.$store.commit('addNotification', { message: 'Are.na channel imported', type: 'success' })
-        this.$store.dispatch('closeAllDialogs')
-      } catch (error) {
-        console.error('🚒 importSpace', error)
-      }
-    },
-    createCard (block, position) {
-      const card = { id: nanoid() }
-      const type = block.class
-      const title = block.title
-      console.info('**', block, type)
-      if (type === 'Link') {
-        let url = block.image.display.url
-        if (!utils.urlIsImage(url)) {
-          url = block.image.original.url
-        }
-        card.name = `${url} ${block.source.url}`
-      } else if (type === 'Text') {
-        card.name = `${title} – ${block.content}`
-      } else if (type === 'Media') {
-        card.name = `${title} – ${block.image.original.url}`
-      } else if (type === 'Attachment') {
-        card.name = block.attachment.url
-      } else if (type === 'Channel') {
-        card.name = `${title} – https://are.na/${block.owner_slug}/${block.slug}`
-      } else if (type === 'Image') {
-        card.name = block.image.original.url
-      } else {
-        card.name = `${title} ${type}`
-      }
-      card.name = this.trimName(card.name)
-      const { x, y, z } = this.cardPositions(position)
-      card.x = x
-      card.y = y
-      card.z = z
-      return card
-    },
-    cardPositions ({ currentIndex, lastCard }) {
-      let x, y
-      const startX = 40
-      const startY = 50
-      const cardWidth = 235
-      const cardHeight = 235
-      const cardMargin = 20
-      const viewportWidth = this.$store.state.viewportWidth - (cardWidth + cardMargin)
-      x = startX
-      y = startY
-      if (lastCard) {
-        const currentRow = Math.floor((currentIndex * (cardWidth + cardMargin)) / viewportWidth)
-        const lastCardRow = Math.floor(((currentIndex - 1) * (cardWidth + cardMargin)) / viewportWidth)
-        x = lastCard.x + cardWidth + cardMargin + startX
-        y = ((cardHeight + cardMargin) * currentRow) + startY
-        if (lastCardRow !== currentRow) {
-          x = startX
-        }
-      }
-      const z = currentIndex
-      return { x, y, z }
-    }
-  }
-}
-</script>
 
 <style lang="stylus">
 .import-arena-channel

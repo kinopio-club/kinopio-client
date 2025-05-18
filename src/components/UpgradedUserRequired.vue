@@ -11,7 +11,7 @@ const props = defineProps({
 })
 
 const currentUserIsSignedIn = computed(() => userStore.getUserIsSignedIn)
-const currentUserIsUpgraded = computed(() => store.state.currentUser.isUpgraded)
+const currentUserIsUpgraded = computed(() => userStore.isUpgraded)
 const visible = computed(() => {
   return !currentUserIsSignedIn.value || !currentUserIsUpgraded.value
 })

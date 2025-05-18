@@ -123,11 +123,11 @@ const updateResultsSectionHeight = async () => {
 
 // filters
 
-const dialogSpaceFilterSortBy = computed(() => store.state.currentUser.dialogSpaceFilterSortBy)
-const dialogSpaceFilterByUser = computed(() => store.state.currentUser.dialogSpaceFilterByUser)
-const dialogSpaceFilterShowHidden = computed(() => store.state.currentUser.dialogSpaceFilterShowHidden)
-const dialogSpaceFilterByGroup = computed(() => store.state.currentUser.dialogSpaceFilterByGroup)
-const dialogSpaceFilterByTemplates = computed(() => store.state.currentUser.dialogSpaceFilterByTemplates)
+const dialogSpaceFilterSortBy = computed(() => userStore.dialogSpaceFilterSortBy)
+const dialogSpaceFilterByUser = computed(() => userStore.dialogSpaceFilterByUser)
+const dialogSpaceFilterShowHidden = computed(() => userStore.dialogSpaceFilterShowHidden)
+const dialogSpaceFilterByGroup = computed(() => userStore.dialogSpaceFilterByGroup)
+const dialogSpaceFilterByTemplates = computed(() => userStore.dialogSpaceFilterByTemplates)
 
 const spaceFiltersIsActive = computed(() => {
   return Boolean(dialogSpaceFilterShowHidden.value || utils.objectHasKeys(dialogSpaceFilterByUser.value) || dialogSpaceFilterSortByIsActive.value) || utils.objectHasKeys(dialogSpaceFilterByGroup.value)

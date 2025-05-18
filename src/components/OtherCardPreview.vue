@@ -2,6 +2,7 @@
 import { reactive, computed, onMounted, watch, ref, nextTick } from 'vue'
 import { useStore } from 'vuex'
 import { useCardStore } from '@/stores/useCardStore'
+import { useUserStore } from '@/stores/useUserStore'
 
 import Loader from '@/components/Loader.vue'
 import NameSegment from '@/components/NameSegment.vue'
@@ -9,6 +10,7 @@ import utils from '@/utils.js'
 
 const cardStore = useCardStore()
 const store = useStore()
+const userStore = useUserStore()
 
 onMounted(() => {
   updateNameSegments()
@@ -133,7 +135,7 @@ const showOtherCardDetailsIsVisible = async (event) => {
   event.stopPropagation()
   // broadcast
   const updates = {
-    userId: store.state.currentUser.id,
+    userId: userStore.id,
     cardId: props.parentCardId
   }
   store.commit('broadcast/updateStore', { updates, type: 'clearRemoteCardsDragging' })

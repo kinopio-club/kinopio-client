@@ -37,7 +37,7 @@ const state = reactive({
 watch(() => props.visible, (value, prevValue) => {
   if (value) {
     updateDialogHeight()
-    state.email = store.state.currentUser.email
+    state.email = userStore.email
     clearStatus()
   }
 })
@@ -56,7 +56,7 @@ const triggerSignUpOrInIsVisible = () => {
 const updateEmail = async () => {
   if (state.loading) { return }
   if (!state.email) { return }
-  if (state.email === store.state.currentUser.email) { return }
+  if (state.email === userStore.email) { return }
   clearStatus()
   state.loading = true
   const response = await store.dispatch('api/updateEmail', state.email)

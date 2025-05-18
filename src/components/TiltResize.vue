@@ -2,11 +2,13 @@
 import { reactive, computed, onMounted, watch, ref, nextTick } from 'vue'
 import { useStore } from 'vuex'
 import { useCardStore } from '@/stores/useCardStore'
+import { useUserStore } from '@/stores/useUserStore'
 
 import utils from '@/utils.js'
 import consts from '@/consts.js'
 
 const cardStore = useCardStore()
+const userStore = useUserStore()
 const store = useStore()
 
 const props = defineProps({
@@ -32,7 +34,7 @@ const start = (event, action) => {
     store.commit('clearMultipleSelected')
   }
   const updates = {
-    userId: store.state.currentUser.id,
+    userId: userStore.id,
     cardIds
   }
   if (action === 'resize') {

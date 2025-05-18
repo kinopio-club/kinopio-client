@@ -4,6 +4,7 @@ import { useStore } from 'vuex'
 import { useCardStore } from '@/stores/useCardStore'
 import { useConnectionStore } from '@/stores/useConnectionStore'
 import { useBoxStore } from '@/stores/useBoxStore'
+import { useUserStore } from '@/stores/useUserStore'
 
 import Loader from '@/components/Loader.vue'
 import UserList from '@/components/UserList.vue'
@@ -15,6 +16,7 @@ const store = useStore()
 const cardStore = useCardStore()
 const connectionStore = useConnectionStore()
 const boxStore = useBoxStore()
+const userStore = useUserStore()
 
 onMounted(() => {
   store.subscribe(mutation => {
@@ -48,7 +50,7 @@ const visits = computed(() => store.state.currentSpace.visits + 1)
 
 // dates
 
-const showAbsoluteDate = computed(() => store.state.currentUser.filterShowAbsoluteDates)
+const showAbsoluteDate = computed(() => userStore.filterShowAbsoluteDates)
 const date = (date) => {
   if (showAbsoluteDate.value) {
     return dayjs(date).format('YYYY-MM-DD')
@@ -62,7 +64,7 @@ const date = (date) => {
   }
 }
 const toggleFilterShowAbsoluteDates = () => {
-  const value = !store.state.currentUser.filterShowAbsoluteDates
+  const value = !userStore.filterShowAbsoluteDates
   store.dispatch('currentUser/toggleFilterShowAbsoluteDates', value)
 }
 

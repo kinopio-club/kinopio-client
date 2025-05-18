@@ -2,6 +2,7 @@
 import { reactive, computed, onMounted, onBeforeUnmount, watch, ref, nextTick } from 'vue'
 import { useStore } from 'vuex'
 import { useCardStore } from '@/stores/useCardStore'
+import { useUserStore } from '@/stores/useUserStore'
 
 import UserLabelInline from '@/components/UserLabelInline.vue'
 import NameSegment from '@/components/NameSegment.vue'
@@ -16,6 +17,7 @@ dayjs.extend(isToday)
 
 const store = useStore()
 const cardStore = useCardStore()
+const userStore = useUserStore()
 
 const itemsPerPage = 15
 
@@ -95,7 +97,7 @@ const relativeDate = (card) => {
   return utils.shortRelativeTime(date)
 }
 const userIsNotCurrentUser = (userId) => {
-  return store.state.currentUser.id !== userId
+  return userStore.id !== userId
 }
 const isStrikeThrough = (card) => {
   return card.name.startsWith('[x]')

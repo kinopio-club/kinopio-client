@@ -2,6 +2,7 @@
 import { reactive, computed, onMounted, onBeforeUnmount, watch, ref, nextTick } from 'vue'
 import { useStore } from 'vuex'
 import { useCardStore } from '@/stores/useCardStore'
+import { useUserStore } from '@/stores/useUserStore'
 
 import CardList from '@/components/CardList.vue'
 import utils from '@/utils.js'
@@ -11,6 +12,7 @@ import dayjs from 'dayjs'
 
 const store = useStore()
 const cardStore = useCardStore()
+const userStore = useUserStore()
 
 const comments = computed(() => {
   let cards = cardStore.getAllCards
@@ -30,7 +32,7 @@ const comments = computed(() => {
 })
 
 const showCardDetails = (card) => {
-  const filterComments = store.state.currentUser.filterComments
+  const filterComments = userStore.filterComments
   if (filterComments) {
     store.dispatch('currentUser/toggleFilterComments', false)
   }

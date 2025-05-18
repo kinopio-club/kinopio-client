@@ -4,6 +4,7 @@ import { useStore } from 'vuex'
 import { useCardStore } from '@/stores/useCardStore'
 import { useConnectionStore } from '@/stores/useConnectionStore'
 import { useBoxStore } from '@/stores/useBoxStore'
+import { useUserStore } from '@/stores/useUserStore'
 
 import utils from '@/utils.js'
 import MoveOrCopyItems from '@/components/dialogs/MoveOrCopyItems.vue'
@@ -21,6 +22,7 @@ const store = useStore()
 const cardStore = useCardStore()
 const connectionStore = useConnectionStore()
 const boxStore = useBoxStore()
+const userStore = useUserStore()
 
 const dialogElement = ref(null)
 
@@ -72,7 +74,7 @@ const scrollIntoView = () => {
 }
 
 const isThemeDarkAndUserColorLight = computed(() => {
-  const isThemeDark = store.state.currentUser.theme === 'dark'
+  const isThemeDark = userStore.theme === 'dark'
   const userColorIsLight = !utils.colorIsDark(userColor.value)
   return isThemeDark && userColorIsLight
 })
@@ -80,7 +82,7 @@ const colorClasses = computed(() => {
   return utils.colorClasses({ backgroundColor: userColor.value })
 })
 const maxCardCharacterLimit = computed(() => consts.cardCharacterLimit)
-const userColor = computed(() => store.state.currentUser.color)
+const userColor = computed(() => userStore.color)
 const spaceCounterZoomDecimal = computed(() => store.getters.spaceCounterZoomDecimal)
 const pinchCounterZoomDecimal = computed(() => store.state.pinchCounterZoomDecimal)
 const spaceZoomDecimal = computed(() => store.getters.spaceZoomDecimal)
@@ -278,7 +280,7 @@ const editableConnections = computed(() => {
 })
 const connectionType = (event) => {
   let type = connectionStore.getNewConnectionType
-  const shouldUseLastConnectionType = store.state.currentUser.shouldUseLastConnectionType
+  const shouldUseLastConnectionType = userStore.shouldUseLastConnectionType
   const shiftKey = event.shiftKey
   const shouldAddType = !type || (shouldUseLastConnectionType && shiftKey) || (!shouldUseLastConnectionType && !shiftKey)
   if (shouldAddType) {
@@ -390,7 +392,7 @@ const mergeSelectedCards = () => {
   remove({ shouldRemoveCardsOnly: true })
   const cardWithBackgroundColor = cards.find(card => card.backgroundColor)
   const cardBackgroundColor = cardWithBackgroundColor?.backgroundColor
-  const userCardBackgroundColor = store.state.currentUser.defaultCardBackgroundColor
+  const userCardBackgroundColor = userStore.defaultCardBackgroundColor
   const newCard = {
     id: nanoid(),
     name: newName,
@@ -429,9 +431,9 @@ const toggleMoveItemsIsVisible = () => {
 
 // more options
 
-const moreOptionsIsVisible = computed(() => store.state.currentUser.shouldShowMoreAlignOptions)
-const shouldShowMultipleSelectedLineActions = computed(() => store.state.currentUser.shouldShowMultipleSelectedLineActions)
-const shouldShowMultipleSelectedBoxActions = computed(() => store.state.currentUser.shouldShowMultipleSelectedBoxActions)
+const moreOptionsIsVisible = computed(() => userStore.shouldShowMoreAlignOptions)
+const shouldShowMultipleSelectedLineActions = computed(() => userStore.shouldShowMultipleSelectedLineActions)
+const shouldShowMultipleSelectedBoxActions = computed(() => userStore.shouldShowMultipleSelectedBoxActions)
 const toggleShouldShowMultipleSelectedLineActions = () => {
   closeDialogs()
   const isVisible = !shouldShowMultipleSelectedLineActions.value

@@ -77,7 +77,7 @@ const currentUserIsTiltingCard = computed(() => store.state.currentUserIsTilting
 const currentUserIsPanning = computed(() => store.state.currentUserIsPanning)
 const currentUserIsPanningReady = computed(() => store.state.currentUserIsPanningReady)
 const currentUserIsSignedIn = computed(() => userStore.getUserIsSignedIn)
-const currentUserIsUpgraded = computed(() => store.state.currentUser.isUpgraded)
+const currentUserIsUpgraded = computed(() => userStore.isUpgraded)
 const isTouchDevice = computed(() => store.state.isTouchDevice)
 const shouldSnapToGrid = computed(() => store.state.shouldSnapToGrid)
 
@@ -90,7 +90,7 @@ const privacyState = computed(() => {
 })
 const cardsCreatedCountFromLimit = computed(() => {
   const cardsCreatedLimit = consts.cardsCreatedLimit
-  const cardsCreatedCount = store.state.currentUser.cardsCreatedCount
+  const cardsCreatedCount = userStore.cardsCreatedCount
   return Math.max(cardsCreatedLimit - cardsCreatedCount, 0)
 })
 const currentSpaceIsTemplate = computed(() => {

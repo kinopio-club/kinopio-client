@@ -245,10 +245,11 @@ export const useCardStore = defineStore('cards', {
     // create
 
     normailzeNewCard (card) {
+      const userStore = useUserStore()
       const { x, y, z, position, isParentCard, name, id, backgroundColor, width, height } = card
       const cards = this.getAllCards
       const highestCardZ = utils.highestItemZ(cards)
-      const defaultBackgroundColor = store.state.currentUser.defaultCardBackgroundColor
+      const defaultBackgroundColor = userStore.defaultCardBackgroundColor
       const isComment = store.state.isCommentMode || store.getters['currentUser/canOnlyComment']()
       card.id = id || nanoid()
       card.x = x || position.x
@@ -256,15 +257,15 @@ export const useCardStore = defineStore('cards', {
       card.z = z || highestCardZ + 1
       card.name = name || ''
       card.frameId = 0
-      card.userId = store.state.currentUser.id
+      card.userId = userStore.id
       card.urlPreviewIsVisible = true
       card.width = Math.round(width) || consts.emptyCard().width
       card.height = Math.round(height) || consts.emptyCard().height
       card.isLocked = false
       card.backgroundColor = backgroundColor || defaultBackgroundColor
       card.isRemoved = false
-      card.headerFontId = store.state.currentUser.prevHeaderFontId || 0
-      card.maxWidth = Math.round(card.maxWidth) || store.state.currentUser.cardSettingsMaxCardWidth
+      card.headerFontId = userStore.prevHeaderFontId || 0
+      card.maxWidth = Math.round(card.maxWidth) || userStore.cardSettingsMaxCardWidth
       card.spaceId = store.state.currentSpace.id // currentSpaceId
       card.isComment = isComment
       card.shouldShowOtherSpacePreviewImage = true
@@ -385,8 +386,9 @@ export const useCardStore = defineStore('cards', {
       await this.deleteCards([card])
     },
     async deleteAllRemovedCards () {
+      const userStore = useUserStore()
       const spaceId = store.state.currentSpace.id
-      const userId = store.state.currentUser.id
+      const userId = userStore.id
       const cards = this.getAllRemovedCards
       await this.deleteCards(cards)
       await store.dispatch('api/addToQueue', { name: 'deleteAllRemovedCards', body: { userId, spaceId } }, { root: true })
@@ -752,6 +754,7 @@ export const useCardStore = defineStore('cards', {
       }, 100)
     },
     async pasteCard (card, id) {
+      const userStore = useUserStore()
       card.id = id || nanoid()
       const spaceId = store.state.currentSpace.id
       card.spaceId = spaceId
@@ -763,7 +766,7 @@ export const useCardStore = defineStore('cards', {
         tags.forEach(tag => {
           tag = store.getters.newTag({
             name: tag,
-            defaultColor: store.state.currentUser.color,
+            defaultColor: userStore.color,
             cardId: card.id,
             spaceId
           }, { root: true })
@@ -798,6 +801,7 @@ export const useCardStore = defineStore('cards', {
       return card
     },
     cardSegmentTagColor (segment) {
+      const userStore = useUserStore()
       const spaceTag = store.getters['currentSpace/tagByName'](segment.name)
       const userTag = store.getters['currentUser/tagByName'](segment.name)
       if (spaceTag) {
@@ -805,7 +809,7 @@ export const useCardStore = defineStore('cards', {
       } else if (userTag) {
         return userTag.color
       } else {
-        return store.state.currentUser.color
+        return userStore.color
       }
     },
     clearCardNameUploadPlaceholder (id) {

@@ -1,6 +1,6 @@
 import { nextTick } from 'vue'
 import { defineStore } from 'pinia'
-
+import { useUserStore } from '@/stores/useUserStore'
 import store from '@/store/store.js' // TEMP Import Vuex store
 
 import utils from '@/utils.js'
@@ -38,8 +38,9 @@ export const useConnectionStore = defineStore('connections', {
       return state.typeAllIds.map(id => state.typeById[id])
     },
     getNewConnectionType: (state) => {
-      const userId = store.state.currentUser.id
-      const shouldUseLastConnectionType = store.state.currentUser.shouldUseLastConnectionType
+      const userStore = useUserStore()
+      const userId = userStore.id
+      const shouldUseLastConnectionType = userStore.shouldUseLastConnectionType
       const connectionTypes = state.typeAllIds.map(id => state.typeById[id])
       let prevConnectionType
       if (state.prevConnectionTypeId) {
@@ -149,6 +150,7 @@ export const useConnectionStore = defineStore('connections', {
       this.typeAllIds.push(type.id)
     },
     async createConnection (connection) {
+      const userStore = useUserStore()
       const connections = this.getAllConnections
       const isExistingConnection = connections.find(item => {
         const isStart = item.startItemId === connection.startItemId
@@ -160,7 +162,7 @@ export const useConnectionStore = defineStore('connections', {
       const type = connection.type || this.getNewConnectionType
       connection.id = connection.id || nanoid()
       connection.spaceId = store.state.currentSpace.id
-      connection.userId = store.state.currentUser.id
+      connection.userId = userStore.id
       connection.connectionTypeId = type.id
       this.addConnectionToState(connection)
       store.commit('triggerUpdateItemCurrentConnections', connection.endItemId, { root: true })
@@ -171,7 +173,8 @@ export const useConnectionStore = defineStore('connections', {
       await store.dispatch('api/addToQueue', { name: 'createConnection', body: connection }, { root: true })
     },
     async createConnectionType (type) {
-      const isThemeDark = store.state.currentUser.theme === 'dark'
+      const userStore = useUserStore()
+      const isThemeDark = userStore.theme === 'dark'
       let color = randomColor({ luminosity: 'light' })
       if (isThemeDark) {
         color = randomColor({ luminosity: 'dark' })
@@ -188,7 +191,7 @@ export const useConnectionStore = defineStore('connections', {
           connectionType[key] = type[key]
         })
       }
-      connectionType.userId = store.state.currentUser.id
+      connectionType.userId = userStore.id
       this.addConnectionTypeToState(connectionType)
       this.prevConnectionTypeId = connectionType.id
       if (!connectionType.isBroadcast) {

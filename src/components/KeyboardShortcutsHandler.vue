@@ -4,6 +4,7 @@ import { useStore } from 'vuex'
 import { useCardStore } from '@/stores/useCardStore'
 import { useConnectionStore } from '@/stores/useConnectionStore'
 import { useBoxStore } from '@/stores/useBoxStore'
+import { useUserStore } from '@/stores/useUserStore'
 
 import utils from '@/utils.js'
 import consts from '@/consts.js'
@@ -14,6 +15,7 @@ const store = useStore()
 const cardStore = useCardStore()
 const connectionStore = useConnectionStore()
 const boxStore = useBoxStore()
+const userStore = useUserStore()
 
 let useSiblingConnectionType
 let browserZoomLevel = 0
@@ -69,7 +71,7 @@ onBeforeUnmount(() => {
 })
 
 const isDisabledKeyboardShortcut = (value) => {
-  const disabledKeyboardShortcuts = store.state.currentUser.disabledKeyboardShortcuts
+  const disabledKeyboardShortcuts = userStore.disabledKeyboardShortcuts
   const isDisabled = disabledKeyboardShortcuts.includes(value)
   return isDisabled
 }
@@ -151,22 +153,22 @@ const handleShortcuts = (event) => {
     store.dispatch('closeAllDialogs')
     store.dispatch('currentUserToolbar', 'card')
   } else if (key === '1' && isSpaceScope) {
-    let value = store.state.currentUser.filterShowUsers
+    let value = userStore.filterShowUsers
     value = !value
     store.dispatch('currentUser/toggleFilterShowUsers', value)
   // 2
   } else if (key === '2' && isSpaceScope) {
-    let value = store.state.currentUser.filterShowDateUpdated
+    let value = userStore.filterShowDateUpdated
     value = !value
     store.dispatch('currentUser/toggleFilterShowDateUpdated', value)
   // 3
   } else if (key === '3' && isSpaceScope) {
-    let value = store.state.currentUser.filterUnchecked
+    let value = userStore.filterUnchecked
     value = !value
     store.dispatch('currentUser/toggleFilterUnchecked', value)
   // 4
   } else if (key === '4' && isSpaceScope) {
-    let value = store.state.currentUser.filterComments
+    let value = userStore.filterComments
     value = !value
     store.dispatch('currentUser/toggleFilterComments', value)
   // ' '
@@ -224,7 +226,7 @@ const handleMetaKeyShortcuts = (event) => {
   const toolbarIsDrawing = store.state.currentUserToolbar === 'drawing'
   // Add Child Card
   if (event.shiftKey && key === 'enter' && (isSpaceScope || isCardScope)) {
-    const shouldAddChildCard = store.state.currentUser.cardSettingsShiftEnterShouldAddChildCard
+    const shouldAddChildCard = userStore.cardSettingsShiftEnterShouldAddChildCard
     if (!shouldAddChildCard) { return }
     addChildCard()
   // Add Card
@@ -318,7 +320,7 @@ const handleMouseDownEvents = (event) => {
   const toolbarIsBox = store.state.currentUserToolbar === 'box'
   const isNotConnecting = !store.state.currentUserIsDrawingConnection
   const shouldBoxSelect = event.shiftKey && isPanScope && !toolbarIsBox && isNotConnecting && !store.state.currentUserIsResizingBox
-  const userDisablePan = store.state.currentUser.shouldDisableRightClickToPan
+  const userDisablePan = userStore.shouldDisableRightClickToPan
   const shouldPan = (isRightClick || isMiddleClick) && isPanScope && !userDisablePan
   const position = utils.cursorPositionInPage(event)
   const isButtonScope = checkIsButtonScope(event)
@@ -531,7 +533,7 @@ const nonOverlappingCardPosition = (position) => {
 
 const addConnectionType = () => {
   const hasConnectionType = connectionStore.getNewConnectionType
-  const shouldUseLastConnectionType = store.state.currentUser.shouldUseLastConnectionType
+  const shouldUseLastConnectionType = userStore.shouldUseLastConnectionType
   if ((shouldUseLastConnectionType || useSiblingConnectionType) && hasConnectionType) { return }
   connectionStore.createConnectionType()
   useSiblingConnectionType = true
@@ -546,7 +548,7 @@ const addConnection = (baseCardId, position) => {
   }
   const baseCard = document.querySelector(`.card[data-card-id="${baseCardId}"]`)
   if (!baseCard) { return }
-  const controlPoint = store.state.currentUser.defaultConnectionControlPoint
+  const controlPoint = userStore.defaultConnectionControlPoint
   const estimatedEndItemConnectorPosition = utils.estimatedNewCardConnectorPosition(position)
   const path = connectionStore.getConnectionPathBetweenItems({
     startItemId: baseCardId,

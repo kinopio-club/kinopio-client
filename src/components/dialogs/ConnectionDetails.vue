@@ -2,6 +2,7 @@
 import { reactive, computed, onMounted, onUnmounted, watch, ref, nextTick } from 'vue'
 import { useStore } from 'vuex'
 import { useConnectionStore } from '@/stores/useConnectionStore'
+import { useUserStore } from '@/stores/useUserStore'
 
 import ResultsFilter from '@/components/ResultsFilter.vue'
 import ConnectionTypeList from '@/components/ConnectionTypeList.vue'
@@ -16,6 +17,7 @@ import dayjs from 'dayjs'
 
 const store = useStore()
 const connectionStore = useConnectionStore()
+const userStore = useUserStore()
 
 let prevConnectionType
 const dialogElement = ref(null)
@@ -52,7 +54,7 @@ watch(() => visible.value, (value, prevValue) => {
 })
 
 const isThemeDarkAndTypeColorLight = computed(() => {
-  const isThemeDark = store.state.currentUser.theme === 'dark'
+  const isThemeDark = userStore.theme === 'dark'
   const typeColorIsLight = !utils.colorIsDark(typeColor.value)
   return isThemeDark && typeColorIsLight
 })
@@ -222,7 +224,7 @@ const lastTypeColor = computed(() => {
   const lastType = connectionStore.prevConnectionTypeId
   return lastType?.color
 })
-const shouldUseLastConnectionType = computed(() => store.state.currentUser.shouldUseLastConnectionType)
+const shouldUseLastConnectionType = computed(() => userStore.shouldUseLastConnectionType)
 const toggleShouldUseLastConnectionType = () => {
   const value = !shouldUseLastConnectionType.value
   store.dispatch('currentUser/shouldUseLastConnectionType', value)
@@ -230,7 +232,7 @@ const toggleShouldUseLastConnectionType = () => {
 
 // color
 
-const userColor = computed(() => store.state.currentUser.color)
+const userColor = computed(() => userStore.color)
 const typeColor = computed(() => currentConnectionType.value.color)
 const toggleColorPicker = () => {
   state.colorPickerIsVisible = !state.colorPickerIsVisible
@@ -247,7 +249,7 @@ const updateTypeColor = (newColor) => {
   connectionStore.updateConnectionType(update)
 }
 const updateNextConnectionColor = () => {
-  const isThemeDark = store.state.currentUser.theme === 'dark'
+  const isThemeDark = userStore.theme === 'dark'
   let color = randomColor({ luminosity: 'light' })
   if (isThemeDark) {
     color = randomColor({ luminosity: 'dark' })

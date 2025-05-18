@@ -112,7 +112,7 @@ const clearStrokes = () => {
 
 const strokeColor = computed(() => store.getters['currentUser/drawingColor'])
 const strokeDiameter = computed(() => {
-  const diameter = store.state.currentUser.drawingBrushSize
+  const diameter = userStore.drawingBrushSize
   return consts.drawingBrushSizeDiameter[diameter]
 })
 const createPoint = (event) => {
@@ -133,7 +133,7 @@ const broadcastAddStroke = (stroke, shouldPreventBroadcast) => {
   if (shouldPreventBroadcast) { return }
   store.commit('broadcast/update', {
     updates: {
-      userId: store.state.currentUser.id,
+      userId: userStore.id,
       stroke
     },
     type: 'addRemoteDrawingStroke',
@@ -144,7 +144,7 @@ const broadcastRemoveStroke = (stroke, shouldPreventBroadcast) => {
   if (shouldPreventBroadcast) { return }
   store.commit('broadcast/update', {
     updates: {
-      userId: store.state.currentUser.id,
+      userId: userStore.id,
       stroke
     },
     type: 'removeRemoteDrawingStroke',

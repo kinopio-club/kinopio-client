@@ -1,12 +1,14 @@
 <script setup>
 import { reactive, computed, onMounted, onBeforeUnmount, watch, ref, nextTick } from 'vue'
 import { useStore } from 'vuex'
+import { useUserStore } from '@/stores/useUserStore'
 
 import ColorPicker from '@/components/dialogs/ColorPicker.vue'
 import consts from '@/consts.js'
 import utils from '@/utils.js'
 
 const store = useStore()
+const userStore = useUserStore()
 
 onMounted(() => {
   initDefaultColor()
@@ -36,14 +38,14 @@ const closeChildDialogs = () => {
 
 // shift-enter
 
-const shiftEnterShouldAddChildCard = computed(() => store.state.currentUser.cardSettingsShiftEnterShouldAddChildCard)
+const shiftEnterShouldAddChildCard = computed(() => userStore.cardSettingsShiftEnterShouldAddChildCard)
 const updateShiftEnter = (value) => {
   store.dispatch('currentUser/update', { cardSettingsShiftEnterShouldAddChildCard: value })
 }
 
 //  max card width
 
-const maxCardWidth = computed(() => store.state.currentUser.cardSettingsMaxCardWidth)
+const maxCardWidth = computed(() => userStore.cardSettingsMaxCardWidth)
 const maxCardWidthIsNormal = computed(() => maxCardWidth.value === consts.normalCardMaxWidth)
 const maxCardWidthIsWide = computed(() => maxCardWidth.value === consts.wideCardMaxWidth)
 const updateMaxCardWidthIsWide = (isWide) => {

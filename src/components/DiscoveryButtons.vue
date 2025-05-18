@@ -1,14 +1,16 @@
 <script setup>
 import { reactive, computed, onMounted, onUnmounted, onBeforeUnmount, watch, ref } from 'vue'
 import { useStore } from 'vuex'
+import { useUserStore } from '@/stores/useUserStore'
 
 import dayjs from 'dayjs'
 
 import Explore from '@/components/dialogs/Explore.vue'
 import Live from '@/components/dialogs/Live.vue'
-
 import utils from '@/utils.js'
+
 const store = useStore()
+const userStore = useUserStore()
 
 let updateLiveSpacesIntervalTimer, updateSpacesIntervalTimer
 const maxUnreadCountCharacter = '+'
@@ -70,7 +72,7 @@ const closeDialogs = () => {
   state.liveIsVisible = false
   state.favoritesIsVisible = false
 }
-const shouldIncreaseUIContrast = computed(() => store.state.currentUser.shouldIncreaseUIContrast)
+const shouldIncreaseUIContrast = computed(() => userStore.shouldIncreaseUIContrast)
 const isOnline = computed(() => store.state.isOnline)
 
 const normalizeCount = (count) => {
@@ -88,7 +90,7 @@ const spaceIsCurrentSpace = (space) => {
   return space.id === currentSpace.id
 }
 const unreadSpaces = (spaces, type) => {
-  let readDate = store.state.currentUser.showInExploreUpdatedAt
+  let readDate = userStore.showInExploreUpdatedAt
   readDate = dayjs(readDate)
   const unreadSpaces = spaces?.filter(space => {
     if (spaceIsCurrentSpace(space)) { return }
@@ -99,7 +101,7 @@ const unreadSpaces = (spaces, type) => {
   return unreadSpaces || []
 }
 const updateUnreadSpacesCounts = () => {
-  const readDate = store.state.currentUser.showInExploreUpdatedAt
+  const readDate = userStore.showInExploreUpdatedAt
   if (!readDate) { return maxUnreadCountCharacter }
   state.unreadExploreSpacesCount = unreadSpaces(state.exploreSpaces, 'explore').length
   state.unreadFollowingSpacesCount = unreadSpaces(state.followingSpaces, 'following').length
@@ -157,7 +159,7 @@ const updateLiveSpaces = async () => {
     state.isLoadingLiveSpaces = false
     return
   }
-  spaces = spaces.filter(space => space.user.id !== store.state.currentUser.id)
+  spaces = spaces.filter(space => space.user.id !== userStore.id)
   spaces = normalizeLiveSpaces(spaces)
   state.liveSpaces = spaces
   state.isLoadingLiveSpaces = false

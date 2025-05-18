@@ -164,7 +164,7 @@ const isSelectedOrDragging = computed(() => {
   return Boolean(isSelected.value || isRemoteSelected.value || isRemoteCardDetailsVisible.value || isRemoteCardDragging.value || state.uploadIsDraggedOver || remoteUploadDraggedOverCardColor.value || remoteUserResizingCardsColor.value || remoteUserTiltingCardsColor.value)
 })
 const currentUserIsSignedIn = computed(() => userStore.getUserIsSignedIn)
-const currentUserColor = computed(() => store.state.currentUser.color)
+const currentUserColor = computed(() => userStore.color)
 
 // current space
 
@@ -195,7 +195,7 @@ const changeSpaceAndCard = async (spaceId, cardId) => {
 
 // user theme
 
-const isThemeDark = computed(() => store.state.currentUser.theme === 'dark')
+const isThemeDark = computed(() => userStore.theme === 'dark')
 const isDarkInLightTheme = computed(() => backgroundColorIsDark.value && !isThemeDark.value)
 const isLightInDarkTheme = computed(() => !backgroundColorIsDark.value && isThemeDark.value)
 
@@ -264,7 +264,7 @@ const toggleCardChecked = () => {
   postMessage.sendHaptics({ name: 'heavyImpact' })
   cancelLocking()
   store.commit('currentUserIsDraggingCard', false)
-  const userId = store.state.currentUser.id
+  const userId = userStore.id
   store.commit('broadcast/updateStore', { updates: { userId }, type: 'clearRemoteCardsDragging' })
   event.stopPropagation()
 }
@@ -375,8 +375,8 @@ const isInSearchResultsCards = computed(() => {
   if (!results.length) { return }
   return Boolean(results.find(card => props.card.id === card.id))
 })
-const filterShowUsers = computed(() => store.state.currentUser.filterShowUsers)
-const filterShowDateUpdated = computed(() => store.state.currentUser.filterShowDateUpdated)
+const filterShowUsers = computed(() => userStore.filterShowUsers)
+const filterShowDateUpdated = computed(() => userStore.filterShowDateUpdated)
 const safeColor = (color) => {
   let newColor = state.safeColors[color]
   if (newColor) {
@@ -707,7 +707,7 @@ const openUrl = async (event, url) => {
 const updatedAt = computed(() => props.card.nameUpdatedAt || props.card.createdAt)
 const dateUpdatedAt = computed(() => {
   const date = updatedAt.value
-  const showAbsoluteDate = store.state.currentUser.filterShowAbsoluteDates
+  const showAbsoluteDate = userStore.filterShowAbsoluteDates
   if (date) {
     if (showAbsoluteDate) {
       return new Date(date).toLocaleString()
@@ -726,7 +726,7 @@ const dateIsToday = computed(() => {
 const toggleFilterShowAbsoluteDates = () => {
   cardStore.incrementCardZ(props.card.id)
   store.dispatch('closeAllDialogs')
-  const value = !store.state.currentUser.filterShowAbsoluteDates
+  const value = !userStore.filterShowAbsoluteDates
   store.dispatch('currentUser/toggleFilterShowAbsoluteDates', value)
 }
 const updateRemoteConnections = () => {
@@ -820,14 +820,14 @@ const checkIfUploadIsDraggedOver = (event) => {
     state.uploadIsDraggedOver = true
     const updates = {
       cardId: props.card.id,
-      userId: store.state.currentUser.id
+      userId: userStore.id
     }
     store.commit('broadcast/updateStore', { updates, type: 'addToRemoteUploadDraggedOverCards' })
   }
 }
 const removeUploadIsDraggedOver = () => {
   state.uploadIsDraggedOver = false
-  const userId = store.state.currentUser.id
+  const userId = userStore.id
   store.commit('broadcast/updateStore', { updates: { userId }, type: 'clearRemoteUploadDraggedOverCards' })
 }
 const uploadFile = async (event) => {
@@ -946,7 +946,7 @@ const nameSegments = computed(() => {
 // tags
 
 const newTagColor = () => {
-  const isThemeDark = store.state.currentUser.theme === 'dark'
+  const isThemeDark = userStore.theme === 'dark'
   let color = randomColor({ luminosity: 'light' })
   if (isThemeDark) {
     color = randomColor({ luminosity: 'dark' })
@@ -1209,7 +1209,7 @@ const startDraggingCard = (event) => {
   postMessage.sendHaptics({ name: 'softImpact' })
   const updates = {
     cardId: props.card.id,
-    userId: store.state.currentUser.id
+    userId: userStore.id
   }
   store.commit('broadcast/updateStore', { updates, type: 'addToRemoteCardsDragging' })
   store.commit('parentCardId', props.card.id)
@@ -1411,7 +1411,7 @@ const showCardDetails = (event) => {
     store.commit('currentUserIsDraggingCard', false)
     return
   }
-  const userId = store.state.currentUser.id
+  const userId = userStore.id
   store.commit('broadcast/updateStore', { updates: { userId }, type: 'clearRemoteCardsDragging' })
   state.preventDraggedButtonBadgeFromShowingDetails = store.state.preventDraggedCardFromShowingDetails
   if (store.state.preventDraggedCardFromShowingDetails) { return }
@@ -1436,7 +1436,7 @@ const showCardDetailsTouch = (event) => {
   if (touchIsNearTouchPosition(event)) {
     showCardDetails(event)
   }
-  const userId = store.state.currentUser.id
+  const userId = userStore.id
   store.commit('broadcast/updateStore', { updates: { userId }, type: 'clearRemoteCardsDragging' })
 }
 const touchIsNearTouchPosition = (event) => {
@@ -1487,12 +1487,12 @@ const isFilteredByFrame = computed(() => {
   return hasFrame
 })
 const isFilteredByUnchecked = computed(() => {
-  const filterUncheckedIsActive = store.state.currentUser.filterUnchecked
+  const filterUncheckedIsActive = userStore.filterUnchecked
   if (!filterUncheckedIsActive) { return }
   return !isChecked.value && hasCheckbox.value
 })
 const isHiddenByCommentFilter = computed(() => {
-  const filterCommentsIsActive = store.state.currentUser.filterComments
+  const filterCommentsIsActive = userStore.filterComments
   if (!filterCommentsIsActive) { return }
   return isComment.value
 })
@@ -1607,7 +1607,7 @@ const handleMouseLeaveUrlButton = () => {
 // sticky
 
 const shouldNotStick = computed(() => {
-  if (!store.state.currentUser.shouldUseStickyCards) { return true }
+  if (!userStore.shouldUseStickyCards) { return true }
   if (iframeIsVisible.value) { return true }
   if (store.state.codeLanguagePickerIsVisible) { return true }
   if (store.state.currentUserIsDraggingConnectionIdLabel) { return true }

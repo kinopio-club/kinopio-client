@@ -1,6 +1,7 @@
 <script setup>
 import { reactive, computed, onMounted, onUnmounted, watch, ref, nextTick } from 'vue'
 import { useStore } from 'vuex'
+import { useUserStore } from '@/stores/useUserStore'
 
 import Loader from '@/components/Loader.vue'
 import SpaceList from '@/components/SpaceList.vue'
@@ -9,6 +10,7 @@ import utils from '@/utils.js'
 import User from '@/components/User.vue'
 
 const store = useStore()
+const userStore = useUserStore()
 
 onMounted(() => {
   store.dispatch('currentUser/restoreUserAssociatedData')
@@ -30,8 +32,8 @@ const state = reactive({
 })
 
 const currentUser = computed(() => store.state.currentUser)
-const favoriteUsers = computed(() => store.state.currentUser.favoriteUsers)
-const favoriteSpaces = computed(() => store.state.currentUser.favoriteSpaces)
+const favoriteUsers = computed(() => userStore.favoriteUsers)
+const favoriteSpaces = computed(() => userStore.favoriteSpaces)
 const loading = computed(() => store.state.isLoadingFavorites)
 const isEmpty = computed(() => {
   const noSpaces = state.spacesIsVisible && !favoriteSpaces.value.length

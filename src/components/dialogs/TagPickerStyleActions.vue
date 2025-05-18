@@ -41,7 +41,7 @@ const state = reactive({
   loading: false
 })
 
-const isThemeDark = computed(() => store.state.currentUser.theme === 'dark')
+const isThemeDark = computed(() => userStore.theme === 'dark')
 const currentUserIsSignedIn = computed(() => userStore.getUserIsSignedIn)
 const scrollIntoView = async () => {
   await nextTick()

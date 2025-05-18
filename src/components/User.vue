@@ -1,10 +1,13 @@
 <script setup>
 import { reactive, computed, onMounted, onUnmounted, watch, ref, nextTick } from 'vue'
 import { useStore } from 'vuex'
+import { useUserStore } from '@/stores/useUserStore'
 
 import UserDetailsInline from '@/components/dialogs/UserDetailsInline.vue'
 import utils from '@/utils.js'
+
 const store = useStore()
+const userStore = useUserStore()
 
 const userElement = ref(null)
 
@@ -43,7 +46,7 @@ const userColor = computed(() => {
 })
 const isCurrentUser = computed(() => {
   if (!props.user) { return }
-  return props.user.id === store.state.currentUser.id
+  return props.user.id === userStore.id
 })
 const userDetailsIsVisible = computed(() => store.state.userDetailsIsVisible)
 const userDetailsIsUser = computed(() => {

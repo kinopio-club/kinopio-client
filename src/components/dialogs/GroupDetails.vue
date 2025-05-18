@@ -1,6 +1,7 @@
 <script setup>
 import { reactive, computed, onMounted, onBeforeUnmount, watch, ref, nextTick } from 'vue'
 import { useStore } from 'vuex'
+import { useUserStore } from '@/stores/useUserStore'
 
 import UserList from '@/components/UserList.vue'
 import User from '@/components/User.vue'
@@ -14,6 +15,7 @@ import GroupDetailsInfo from '@/components/GroupDetailsInfo.vue'
 import uniqBy from 'lodash-es/uniqBy'
 
 const store = useStore()
+const userStore = useUserStore()
 
 const dialogElement = ref(null)
 
@@ -64,14 +66,14 @@ const currentUser = computed(() => store.state.currentUser)
 
 const groupUser = computed(() => {
   return store.getters['groups/groupUser']({
-    userId: store.state.currentUser.id,
+    userId: userStore.id,
     groupId: props.group.id
   })
 })
 const isGroupUser = computed(() => Boolean(groupUser.value))
 const currentUserIsGroupAdmin = computed(() => {
   return store.getters['groups/groupUserIsAdmin']({
-    userId: store.state.currentUser.id,
+    userId: userStore.id,
     groupId: props.group.id
   })
 })

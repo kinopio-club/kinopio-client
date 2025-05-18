@@ -1,6 +1,7 @@
 <script setup>
 import { reactive, computed, onMounted, onUnmounted, watch, ref, nextTick } from 'vue'
 import { useStore } from 'vuex'
+import { useUserStore } from '@/stores/useUserStore'
 
 import UserSettingsGeneral from '@/components/subsections/UserSettingsGeneral.vue'
 import UserSettingsControls from '@/components/subsections/UserSettingsControls.vue'
@@ -8,6 +9,7 @@ import UserSettingsCards from '@/components/subsections/UserSettingsCards.vue'
 import utils from '@/utils.js'
 
 const store = useStore()
+const userStore = useUserStore()
 
 const dialogElement = ref(null)
 
@@ -53,7 +55,7 @@ const updateCurrentSettings = async (value) => {
   store.dispatch('currentUser/update', { prevSettingsSection: value })
 }
 const restoreUserPrevSettingsSection = () => {
-  const section = store.state.currentUser.prevSettingsSection
+  const section = userStore.prevSettingsSection
   const values = ['general', 'controls', 'cards'] // listed in api docs
   const isValid = values.includes(section)
   if (section && isValid) {

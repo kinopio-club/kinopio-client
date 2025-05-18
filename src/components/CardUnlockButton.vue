@@ -3,12 +3,14 @@ import { reactive, computed, onMounted, onBeforeUnmount, onUnmounted, watch, ref
 import { useStore } from 'vuex'
 import { useCardStore } from '@/stores/useCardStore'
 import { useConnectionStore } from '@/stores/useConnectionStore'
+import { useUserStore } from '@/stores/useUserStore'
 
 import utils from '@/utils.js'
 
 const store = useStore()
 const cardStore = useCardStore()
 const connectionStore = useConnectionStore()
+const userStore = useUserStore()
 
 onMounted(() => {
   store.subscribe(async (mutation, state) => {
@@ -42,7 +44,7 @@ const backgroundColorIsDark = computed(() => {
   const color = props.card.backgroundColor || state.defaultColor
   return utils.colorIsDark(color)
 })
-const isThemeDark = computed(() => store.state.currentUser.theme === 'dark')
+const isThemeDark = computed(() => userStore.theme === 'dark')
 const isDarkInLightTheme = computed(() => backgroundColorIsDark.value && !isThemeDark.value)
 const isLightInDarkTheme = computed(() => !backgroundColorIsDark.value && isThemeDark.value)
 

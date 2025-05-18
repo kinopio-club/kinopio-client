@@ -44,7 +44,7 @@ const backgroundColorIsDark = computed(() => {
   const color = props.box.color
   return utils.colorIsDark(color)
 })
-const isThemeDark = computed(() => store.state.currentUser.theme === 'dark')
+const isThemeDark = computed(() => userStore.theme === 'dark')
 const isDarkInLightTheme = computed(() => {
   if (props.box.fill === 'empty') {
     return isThemeDark.value

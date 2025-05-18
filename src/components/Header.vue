@@ -170,10 +170,10 @@ const isSpace = computed(() => {
 })
 const userCanEditSpace = computed(() => store.getters['currentUser/canEditSpace']())
 const userCanOnlyComment = computed(() => store.getters['currentUser/canOnlyComment']())
-const isUpgraded = computed(() => store.state.currentUser.isUpgraded)
+const isUpgraded = computed(() => userStore.isUpgraded)
 const isOnline = computed(() => store.state.isOnline)
 const currentUserIsSignedIn = computed(() => userStore.getUserIsSignedIn)
-const shouldIncreaseUIContrast = computed(() => store.state.currentUser.shouldIncreaseUIContrast)
+const shouldIncreaseUIContrast = computed(() => userStore.shouldIncreaseUIContrast)
 const isMobile = computed(() => utils.isMobile())
 const toolbarIsVisible = computed(() => {
   if (!isSpace.value) { return }

@@ -2,6 +2,7 @@
 import { reactive, computed, onMounted, onBeforeUnmount, onUnmounted, watch, ref, nextTick } from 'vue'
 import { useStore } from 'vuex'
 import { useBoxStore } from '@/stores/useBoxStore'
+import { useUserStore } from '@/stores/useUserStore'
 
 import ColorPicker from '@/components/dialogs/ColorPicker.vue'
 import CardOrBoxActions from '@/components/subsections/CardOrBoxActions.vue'
@@ -14,6 +15,7 @@ import { colord, extend } from 'colord'
 
 const store = useStore()
 const boxStore = useBoxStore()
+const userStore = useUserStore()
 
 const dialogElement = ref(null)
 const nameElement = ref(null)
@@ -70,7 +72,7 @@ watch(() => visible.value, async (value, prevValue) => {
 const broadcastShowBoxDetails = () => {
   const updates = {
     boxId: currentBox.value.id,
-    userId: store.state.currentUser.id
+    userId: userStore.id
   }
   store.commit('broadcast/updateStore', { updates, type: 'updateRemoteBoxDetailsVisible' })
 }
@@ -187,7 +189,7 @@ const updateColor = (color) => {
   update({ color })
 }
 const isThemeDarkAndUserColorLight = computed(() => {
-  const isThemeDark = store.state.currentUser.theme === 'dark'
+  const isThemeDark = userStore.theme === 'dark'
   return isThemeDark && !colorisDark.value
 })
 

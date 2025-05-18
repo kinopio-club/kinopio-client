@@ -1,3 +1,5 @@
+import { useUserStore } from '@/stores/useUserStore'
+
 import utils from '@/utils.js'
 import consts from '@/consts.js'
 import cache from '@/cache.js'
@@ -26,6 +28,8 @@ import { nanoid } from 'nanoid'
 import uniqBy from 'lodash-es/uniqBy'
 import last from 'lodash-es/last'
 import dayjs from 'dayjs'
+
+const userStore = useUserStore()
 
 const store = createStore({
   strict: consts.isDevelopment(),
@@ -2060,7 +2064,7 @@ const store = createStore({
     },
     triggerSonarPing: (context, event) => {
       const ping = utils.cursorPositionInSpace(event)
-      ping.color = store.state.currentUser.color
+      ping.color = userStore.color
       context.commit('triggerSonarPing', ping)
       context.commit('broadcast/updateStore', { updates: ping, type: 'triggerSonarPing' })
     },

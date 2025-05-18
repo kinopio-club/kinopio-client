@@ -1,10 +1,12 @@
 <script setup>
 import { reactive, computed, onMounted, onBeforeUnmount, watch, ref, nextTick } from 'vue'
 import { useStore } from 'vuex'
+import { useUserStore } from '@/stores/useUserStore'
 
 import utils from '@/utils.js'
 
 const store = useStore()
+const userStore = useUserStore()
 
 const xCenterOffset = 12
 
@@ -43,7 +45,7 @@ const isVisible = computed(() => {
 
 // style
 
-const userColor = computed(() => store.state.currentUser.color)
+const userColor = computed(() => userStore.color)
 const iconClasses = computed(() => {
   const classes = utils.colorClasses({ backgroundColor: userColor.value })
   if (state.isMetaKey) {

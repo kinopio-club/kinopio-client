@@ -448,7 +448,7 @@ const dragBoxes = (event) => {
   if (isInitialDrag) {
     const updates = {
       boxId: store.state.currentDraggingBoxId,
-      userId: store.state.currentUser.id
+      userId: userStore.id
     }
     store.commit('broadcast/updateStore', { updates, type: 'addToRemoteBoxesDragging' })
     boxStore.selectItemsInSelectedBoxes()

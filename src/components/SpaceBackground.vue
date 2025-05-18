@@ -1,6 +1,7 @@
 <script setup>
 import { reactive, computed, onMounted, watch, ref, nextTick } from 'vue'
 import { useStore } from 'vuex'
+import { useUserStore } from '@/stores/useUserStore'
 
 import backgroundImages from '@/data/backgroundImages.json'
 import SpaceBackgroundGradients from '@/components/SpaceBackgroundGradients.vue'
@@ -8,6 +9,7 @@ import utils from '@/utils.js'
 import consts from '@/consts.js'
 
 const store = useStore()
+const userStore = useUserStore()
 
 const spaceShouldHaveBorderRadius = computed(() => store.getters.spaceShouldHaveBorderRadius)
 const isSecureAppContext = computed(() => consts.isSecureAppContext)
@@ -16,7 +18,7 @@ const isSpacePage = computed(() => {
   const isSpace = !isOther
   return isSpace
 })
-const isThemeDark = computed(() => store.state.currentUser.theme === 'dark')
+const isThemeDark = computed(() => userStore.theme === 'dark')
 const currentSpace = computed(() => store.state.currentSpace)
 const backgroundIsDefault = computed(() => !currentSpace.value.background)
 const pageHeight = computed(() => store.state.pageHeight)

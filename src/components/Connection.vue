@@ -4,6 +4,7 @@ import { useStore } from 'vuex'
 import { useCardStore } from '@/stores/useCardStore'
 import { useConnectionStore } from '@/stores/useConnectionStore'
 import { useBoxStore } from '@/stores/useBoxStore'
+import { useUserStore } from '@/stores/useUserStore'
 
 import utils from '@/utils.js'
 
@@ -11,6 +12,7 @@ const store = useStore()
 const cardStore = useCardStore()
 const connectionStore = useConnectionStore()
 const boxStore = useBoxStore()
+const userStore = useUserStore()
 
 let unsubscribe
 let unsubscribes
@@ -253,7 +255,7 @@ const isDraggingCurrentConnectionLabel = computed(() => {
 // space filters
 
 const isHiddenByCommentFilter = computed(() => {
-  const filterCommentsIsActive = store.state.currentUser.filterComments
+  const filterCommentsIsActive = userStore.filterComments
   if (!filterCommentsIsActive) { return }
   const startItem = items.value.startItem
   const endItem = items.value.endItem

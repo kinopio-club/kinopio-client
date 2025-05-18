@@ -4,6 +4,7 @@ import { useStore } from 'vuex'
 import { useCardStore } from '@/stores/useCardStore'
 import { useConnectionStore } from '@/stores/useConnectionStore'
 import { useBoxStore } from '@/stores/useBoxStore'
+import { useUserStore } from '@/stores/useUserStore'
 
 import utils from '@/utils.js'
 
@@ -11,6 +12,7 @@ const store = useStore()
 const cardStore = useCardStore()
 const connectionStore = useConnectionStore()
 const boxStore = useBoxStore()
+const userStore = useUserStore()
 
 const labelElement = ref(null)
 
@@ -162,7 +164,7 @@ const isFiltered = computed(() => {
   } else { return false }
 })
 const isHiddenByCommentFilter = computed(() => {
-  const filterCommentsIsActive = store.state.currentUser.filterComments
+  const filterCommentsIsActive = userStore.filterComments
   if (!filterCommentsIsActive) { return }
   const startItem = items.value.startItem
   const endItem = items.value.endItem
@@ -279,8 +281,8 @@ const startDragging = (event) => {
   state.isDragging = true
   wasDragged = false
   const updates = {
-    userId: store.state.currentUser.id,
-    userColor: store.state.currentUser.color,
+    userId: userStore.id,
+    userColor: userStore.color,
     connectionId: props.connection.id
   }
   store.commit('broadcast/updateStore', { updates, type: 'updateRemoteUserDraggingConnectionLabel' })
@@ -303,7 +305,7 @@ const stopDragging = () => {
   state.isDragging = false
   state.outOfBounds = {}
   cursorStart = {}
-  store.commit('broadcast/updateStore', { updates: { userId: store.state.currentUser.id }, type: 'removeRemoteUserDraggingConnectionLabel' })
+  store.commit('broadcast/updateStore', { updates: { userId: userStore.id }, type: 'removeRemoteUserDraggingConnectionLabel' })
   if (!labelRelativePosition.value.x) { return }
   store.dispatch('history/add', {
     connections: [{
@@ -363,7 +365,7 @@ const lockingFrameStyle = computed(() => {
     height: size,
     left: position,
     top: position,
-    background: store.state.currentUser.color,
+    background: userStore.color,
     opacity: state.lockingAlpha,
     borderRadius
   }

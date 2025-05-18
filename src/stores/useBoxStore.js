@@ -2,6 +2,7 @@ import { nextTick } from 'vue'
 import { defineStore } from 'pinia'
 import { useConnectionStore } from '@/stores/useConnectionStore'
 import { useCardStore } from '@/stores/useCardStore'
+import { useUserStore } from '@/stores/useUserStore'
 
 import store from '@/store/store.js' // TEMP Import Vuex store
 
@@ -99,14 +100,15 @@ export const useBoxStore = defineStore('boxes', {
     // create
 
     normalizeNewBox (box) {
+      const userStore = useUserStore()
       const count = this.allIds.length
       const minBoxSize = consts.minBoxSize
-      const isThemeDark = store.state.currentUser.theme === 'dark'
+      const isThemeDark = userStore.theme === 'dark'
       const color = randomColor({ luminosity: 'dark' })
       return {
         id: box.id || nanoid(),
         spaceId: store.state.currentSpace.id,
-        userId: store.state.currentUser.id,
+        userId: userStore.id,
         x: box.x,
         y: box.y,
         resizeWidth: box.resizeWidth || minBoxSize,
@@ -116,7 +118,7 @@ export const useBoxStore = defineStore('boxes', {
         name: box.name || `Box ${count}`,
         infoHeight: 57,
         infoWidth: 34,
-        headerFontId: store.state.currentUser.prevHeaderFontId || 0,
+        headerFontId: userStore.prevHeaderFontId || 0,
         background: box.background,
         backgroundIsStretch: box.backgroundIsStretch
       }

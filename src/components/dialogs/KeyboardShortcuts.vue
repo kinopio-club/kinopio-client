@@ -1,6 +1,7 @@
 <script setup>
 import { reactive, computed, onMounted, onBeforeUnmount, watch, ref, nextTick } from 'vue'
 import { useStore } from 'vuex'
+import { useUserStore } from '@/stores/useUserStore'
 
 import UserLabelInline from '@/components/UserLabelInline.vue'
 import keyboardShortcutsCategories from '@/data/keyboardShortcutsCategories.js'
@@ -8,6 +9,7 @@ import postMessage from '@/postMessage.js'
 import utils from '@/utils.js'
 
 const store = useStore()
+const userStore = useUserStore()
 
 const dialogElement = ref(null)
 
@@ -36,7 +38,7 @@ const meta = computed(() => utils.metaKey())
 const option = computed(() => utils.optionKey())
 const currentUser = computed(() => store.state.currentUser)
 const isMobile = computed(() => utils.isMobile())
-const shouldUseLastConnectionType = computed(() => store.state.currentUser.shouldUseLastConnectionType)
+const shouldUseLastConnectionType = computed(() => userStore.shouldUseLastConnectionType)
 const lastOrNewConnectionTypeControlSetting = computed(() => {
   if (shouldUseLastConnectionType.value) {
     return 'New'
@@ -76,7 +78,7 @@ const checkboxStateNewSpace = computed({
   }
 })
 const isChecked = (value) => {
-  const disabledKeyboardShortcuts = store.state.currentUser.disabledKeyboardShortcuts
+  const disabledKeyboardShortcuts = userStore.disabledKeyboardShortcuts
   const isEnabled = !disabledKeyboardShortcuts.includes(value)
   return isEnabled
 }

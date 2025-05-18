@@ -133,7 +133,7 @@ const updateFavoriteUser = () => {
   store.dispatch('currentUser/updateFavoriteUser', { user, value })
 }
 const isFavoriteUser = computed(() => {
-  const favoriteUsers = store.state.currentUser.favoriteUsers
+  const favoriteUsers = userStore.favoriteUsers
   const isFavoriteUser = Boolean(favoriteUsers.find(favoriteUser => {
     return favoriteUser.id === props.user.id
   }))

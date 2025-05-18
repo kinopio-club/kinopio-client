@@ -82,7 +82,7 @@ const currentUserStyles = computed(() => {
   if (shouldPreventBoxSelecting.value) { return }
   const { start, end } = orderedPoints(startPoint.value, endPoint.value)
   const { left, top, width, height } = boxSelection(start, end)
-  const color = store.state.currentUser.color
+  const color = userStore.color
   const color1 = colord(color).alpha(0.5).toRgbString()
   const color2 = colord(color).alpha(1).toRgbString()
   const gradient = `radial-gradient(farthest-corner at ${state.direction}, ${color1}, ${color2})`
@@ -92,7 +92,7 @@ const currentUserStyles = computed(() => {
     width: width + 'px',
     height: height + 'px',
     background: gradient,
-    userId: store.state.currentUser.id,
+    userId: userStore.id,
     currentBoxSelectId
   }
   return styles

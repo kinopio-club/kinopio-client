@@ -52,7 +52,7 @@ const toggleUpgradeFAQIsVisible = () => {
 const closeUpgradeFAQ = () => {
   state.upgradeFAQIsVisible = false
 }
-const studentDiscountIsAvailable = computed(() => store.state.currentUser.studentDiscountIsAvailable)
+const studentDiscountIsAvailable = computed(() => userStore.studentDiscountIsAvailable)
 const paymentProcessor = computed(() => {
   if (isSecureAppContextIOS.value) {
     return 'Apple'

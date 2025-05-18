@@ -96,6 +96,9 @@ export const useUserStore = defineStore('users', {
   }),
 
   getters: {
+    getUserAllState: (state) => {
+      return { ...state }
+    },
     getUserIsSignedIn: (state) => {
       return Boolean(state.apiKey)
     },

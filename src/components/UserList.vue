@@ -1,6 +1,7 @@
 <script setup>
 import { reactive, computed, onMounted, onBeforeUnmount, watch, ref, nextTick } from 'vue'
 import { useStore } from 'vuex'
+import { useUserStore } from '@/stores/useUserStore'
 
 import ResultsFilter from '@/components/ResultsFilter.vue'
 import UserLabelInline from '@/components/UserLabelInline.vue'
@@ -8,7 +9,9 @@ import GroupUserRolePicker from '@/components/dialogs/GroupUserRolePicker.vue'
 import Loader from '@/components/Loader.vue'
 import GroupLabel from '@/components/GroupLabel.vue'
 import utils from '@/utils.js'
+
 const store = useStore()
+const userStore = useUserStore()
 
 onMounted(() => {
   store.subscribe(mutation => {
@@ -75,7 +78,7 @@ const usersFiltered = computed(() => {
   return items
 })
 const isCurrentUser = (user) => {
-  return store.state.currentUser.id === user.id
+  return userStore.id === user.id
 }
 const currentUserIsMember = computed(() => store.getters['currentUser/isSpaceMember']())
 const placeholder = computed(() => {
@@ -122,7 +125,7 @@ const groupUserRole = (user) => {
 }
 const currentUserIsGroupAdmin = computed(() => {
   return store.getters['groups/groupUserIsAdmin']({
-    userId: store.state.currentUser.id,
+    userId: userStore.id,
     groupId: group.value.id
   })
 })

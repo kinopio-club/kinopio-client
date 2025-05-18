@@ -4,6 +4,7 @@ import { useStore } from 'vuex'
 import { useCardStore } from '@/stores/useCardStore'
 import { useConnectionStore } from '@/stores/useConnectionStore'
 import { useBoxStore } from '@/stores/useBoxStore'
+import { useUserStore } from '@/stores/useUserStore'
 
 import utils from '@/utils.js'
 
@@ -13,6 +14,7 @@ const store = useStore()
 const cardStore = useCardStore()
 const connectionStore = useConnectionStore()
 const boxStore = useBoxStore()
+const userStore = useUserStore()
 
 let prevType
 
@@ -61,7 +63,7 @@ const drawCurrentConnection = (event) => {
   const end = utils.cursorPositionInSpace(event)
   let start = utils.connectorCoords(props.startItemId)
   start = utils.cursorPositionInSpace(null, start)
-  const controlPoint = store.state.currentUser.defaultConnectionControlPoint
+  const controlPoint = userStore.defaultConnectionControlPoint
   const path = connectionStore.getConnectionPathBetweenCoords(start, end, controlPoint)
   checkCurrentConnectionSuccess(event)
   state.currentConnectionPath = path
@@ -70,7 +72,7 @@ const drawCurrentConnection = (event) => {
   state.currentConnectionColor = connectionType.color
   store.commit('currentConnectionColor', connectionType.color)
   const updates = {
-    userId: store.state.currentUser.id,
+    userId: userStore.id,
     connectionTypeId: connectionType.id,
     color: connectionType.color,
     startItemId: props.startItemId,
@@ -86,7 +88,7 @@ const checkCurrentConnectionSuccess = (event) => {
   const position = utils.cursorPositionInViewport(event)
   const cardElement = utils.cardElementFromPosition(position.x, position.y)
   const boxElement = utils.boxElementFromConnectorPosition(position.x, position.y)
-  const updates = { userId: store.state.currentUser.id }
+  const updates = { userId: userStore.id }
   let isCurrentConnectionConnected
   if (cardElement) {
     isCurrentConnectionConnected = props.startItemId !== cardElement.dataset.cardId
@@ -150,7 +152,7 @@ const addConnections = async (event) => {
   await nextTick()
   cardStore.updateCardsDimensions(startItemIds)
   startItemIds.forEach(startItemId => {
-    const controlPoint = store.state.currentUser.defaultConnectionControlPoint
+    const controlPoint = userStore.defaultConnectionControlPoint
     const path = connectionStore.getConnectionPathBetweenItems({
       startItemId,
       endItemId,
@@ -173,7 +175,7 @@ const stopInteractions = (event) => {
   const isCurrentConnection = store.state.currentConnectionStartItemIds.length
   if (isCurrentConnection) {
     store.commit('currentConnectionStartItemIds', [])
-    const updates = { userId: store.state.currentUser.id }
+    const updates = { userId: userStore.id }
     store.commit('broadcast/updateStore', { updates, type: 'removeRemoteCurrentConnection' })
   }
   store.commit('currentUserIsDrawingConnection', false)
