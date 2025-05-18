@@ -168,7 +168,7 @@ const connectionTypesByUpdatedAt = computed(() => {
 })
 const canEditConnection = computed(() => {
   const isSpaceMember = userStore.getUserIsSpaceMember()
-  const connectionIsCreatedByCurrentUser = store.getters['currentUser/connectionIsCreatedByCurrentUser'](currentConnection.value)
+  const connectionIsCreatedByCurrentUser = userStore.getItemIsCreatedByUser(currentConnection.value)
   const canEditSpace = userStore.getUserCanEditSpace()
   if (isSpaceMember) { return true }
   if (canEditSpace && connectionIsCreatedByCurrentUser) { return true }

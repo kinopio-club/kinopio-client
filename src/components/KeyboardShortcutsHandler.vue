@@ -595,7 +595,7 @@ const canEditCardById = (cardId) => {
 const canEditConnectionById = (connectionId) => {
   const isSpaceMember = userStore.getUserIsSpaceMember()
   const connection = connectionStore.getConnection(connectionId)
-  const connectionIsCreatedByCurrentUser = store.getters['currentUser/connectionIsCreatedByCurrentUser'](connection)
+  const connectionIsCreatedByCurrentUser = userStore.getItemIsCreatedByUser(connection)
   const canEditSpace = userStore.getUserCanEditSpace()
   if (isSpaceMember) { return true }
   if (canEditSpace && connectionIsCreatedByCurrentUser) { return true }

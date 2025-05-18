@@ -302,6 +302,9 @@ export const useUserStore = defineStore('users', {
       // space always currentspace?
       return store.state.spaceReadOnlyKey.spaceId === space.id
     },
+    getItemIsCreatedByUser (connection) {
+      return this.id === connection.userId
+    },
 
     // init
 

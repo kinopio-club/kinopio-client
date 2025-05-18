@@ -123,7 +123,7 @@ const selectedItemsIsEditableByCurrentUser = computed(() => {
 const numberOfSelectedItemsCreatedByCurrentUser = computed(() => {
   const connectionsCreatedByCurrentUser = connections.value?.filter(connection => {
     if (!connection) { return }
-    return store.getters['currentUser/connectionIsCreatedByCurrentUser'](connection)
+    return userStore.getItemIsCreatedByUser(connection)
   })
   const cardsCreatedByCurrentUser = cards.value?.filter(card => {
     if (!card) { return }
@@ -274,7 +274,7 @@ const editableConnections = computed(() => {
     return connections.value
   } else {
     return connections.value.filter(connection => {
-      return store.getters['currentUser/connectionIsCreatedByCurrentUser'](connection)
+      return userStore.getItemIsCreatedByUser(connection)
     })
   }
 })

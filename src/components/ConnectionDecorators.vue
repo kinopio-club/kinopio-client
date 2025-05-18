@@ -21,7 +21,7 @@ const canEditAll = computed(() => {
   if (!props.connections.length) { return }
   const connectionsCreatedByCurrentUser = props.connections.filter(connection => {
     if (!connection) { return }
-    return store.getters['currentUser/connectionIsCreatedByCurrentUser'](connection)
+    return userStore.getItemIsCreatedByUser(connection)
   })
   return connectionsCreatedByCurrentUser.length === props.connections.length
 })
