@@ -340,7 +340,7 @@ const removeCard = () => {
 const toggleShouldShowItemActions = async () => {
   closeDialogs()
   const isVisible = !shouldShowItemActions.value
-  store.dispatch('currentUser/shouldShowItemActions', isVisible)
+  userStore.updateUser({ shouldShowItemActions: isVisible })
   await nextTick()
   scrollIntoView()
 }

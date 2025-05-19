@@ -31,7 +31,7 @@ const state = reactive({
   defaultColor: '#e3e3e3'
 })
 
-const currentUser = computed(() => store.state.currentUser)
+const currentUser = computed(() => userStore.getUserAllState)
 const closeChildDialogs = () => {
   state.colorPickerIsVisible = false
 }

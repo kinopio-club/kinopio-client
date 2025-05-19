@@ -37,7 +37,7 @@ const state = reactive({
 
 const isEmbedMode = computed(() => store.state.isEmbedMode)
 const isAddPage = computed(() => store.state.isAddPage)
-const currentUser = computed(() => store.state.currentUser)
+const currentUser = computed(() => userStore.getUserAllState)
 const currentSpace = computed(() => store.state.currentSpace)
 const currentUserIsSpaceMember = computed(() => userStore.getUserIsSpaceMember())
 

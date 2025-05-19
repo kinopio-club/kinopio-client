@@ -62,7 +62,7 @@ const triggerFocusResultsFilter = async () => {
   await nextTick()
   store.commit('triggerFocusResultsFilter')
 }
-const currentUser = computed(() => store.state.currentUser)
+const currentUser = computed(() => userStore.getUserAllState)
 const currentUserIsSignedIn = computed(() => userStore.getUserIsSignedIn)
 
 // search

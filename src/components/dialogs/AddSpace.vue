@@ -131,7 +131,7 @@ const toggleSettingsIsVisible = () => {
 // inbox space
 
 const checkIfUserHasInboxSpace = async () => {
-  const inboxSpace = await store.dispatch('currentUser/inboxSpace')
+  const inboxSpace = await userStore.getInboxSpace()
   state.hasInboxSpace = Boolean(inboxSpace)
 }
 

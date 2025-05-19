@@ -39,7 +39,7 @@ const updateDialogHeight = async () => {
   state.dialogHeight = utils.elementHeight(element)
 }
 
-const currentUser = computed(() => store.state.currentUser)
+const currentUser = computed(() => userStore.getUserAllState)
 const currentUserCanEditSpace = computed(() => userStore.getUserCanEditSpace())
 const currentSpace = computed(() => store.state.currentSpace)
 

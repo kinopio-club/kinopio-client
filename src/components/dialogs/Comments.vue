@@ -1,11 +1,13 @@
 <script setup>
 import { reactive, computed, onMounted, onBeforeUnmount, watch, ref, nextTick } from 'vue'
 import { useStore } from 'vuex'
+import { useUserStore } from '@/stores/useUserStore'
 
 import utils from '@/utils.js'
 import CommentList from '@/components/CommentList.vue'
 
 const store = useStore()
+const userStore = useUserStore()
 
 const dialogElement = ref(null)
 
@@ -36,11 +38,10 @@ const updateDialogHeight = async () => {
   state.dialogHeight = utils.elementHeight(element)
 }
 
-const currentUser = computed(() => store.state.currentUser)
-const filterComments = computed(() => currentUser.value.filterComments)
+const filterComments = computed(() => userStore.filterComments)
 const toggleFilterComments = () => {
   const value = !filterComments.value
-  store.dispatch('currentUser/toggleFilterComments', value)
+  userStore.updateUser({ filterComments: value })
 }
 
 // comment mode

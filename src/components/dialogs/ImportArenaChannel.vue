@@ -78,7 +78,7 @@ const authorizeUrl = computed(() => {
 })
 
 const forgetArenaAccessToken = () => {
-  store.dispatch('currentUser/arenaAccessToken', '')
+  userStore.updateUser({ arenaAccessToken: '' })
   store.commit('addNotification', { message: 'Removed your Are.na access token from Kinopio', type: 'success' })
 }
 const importChannel = async () => {

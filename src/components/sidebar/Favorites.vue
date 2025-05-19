@@ -31,7 +31,7 @@ const state = reactive({
   currentUserSpacesIsVisible: true
 })
 
-const currentUser = computed(() => store.state.currentUser)
+const currentUser = computed(() => userStore.getUserAllState)
 const favoriteUsers = computed(() => userStore.favoriteUsers)
 const favoriteSpaces = computed(() => userStore.favoriteSpaces)
 const loading = computed(() => store.state.isLoadingFavorites)

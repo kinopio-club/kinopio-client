@@ -24,7 +24,7 @@ const props = defineProps({
   users: Array
 })
 
-const currentUser = computed(() => store.state.currentUser)
+const currentUser = computed(() => userStore.getUserAllState)
 const currentSpace = computed(() => store.state.currentSpace)
 const currentUserIsSpaceMember = computed(() => userStore.getUserIsSpaceMember())
 

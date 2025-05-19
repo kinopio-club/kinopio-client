@@ -72,7 +72,7 @@ watch(() => isTouchScrolling.value, (value, prevValue) => {
 
 const isAddPage = computed(() => store.state.isAddPage)
 const isEmbedMode = computed(() => store.state.isEmbedMode)
-const currentUser = computed(() => store.state.currentUser)
+const currentUser = computed(() => userStore.getUserAllState)
 const shouldExplicitlyHideFooter = computed(() => store.state.shouldExplicitlyHideFooter)
 const cardDetailsIsVisibleForCardId = computed(() => store.state.cardDetailsIsVisibleForCardId)
 const multipleSelectedActionsIsVisible = computed(() => store.state.multipleSelectedActionsIsVisible)

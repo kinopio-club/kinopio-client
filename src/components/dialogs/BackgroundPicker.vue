@@ -110,7 +110,7 @@ const updateDialogHeight = async () => {
 }
 
 const currentUserIsSignedIn = computed(() => userStore.getUserIsSignedIn)
-const currentUser = computed(() => store.state.currentUser)
+const currentUser = computed(() => userStore.getUserAllState)
 const currentUserIsMember = computed(() => userStore.getUserIsSpaceMember())
 const itemTypeString = computed(() => {
   if (props.space) {

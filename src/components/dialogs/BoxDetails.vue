@@ -29,7 +29,7 @@ const state = reactive({
 })
 
 const spaceCounterZoomDecimal = computed(() => store.getters.spaceCounterZoomDecimal)
-const canEditBox = computed(() => store.getters['currentUser/canEditBox'](currentBox.value))
+const canEditBox = computed(() => userStore.getUserCanEditBox(currentBox.value))
 const id = computed(() => store.state.boxDetailsIsVisibleForBoxId)
 // box state
 

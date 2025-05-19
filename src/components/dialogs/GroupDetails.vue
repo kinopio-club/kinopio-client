@@ -60,7 +60,7 @@ const childDialogIsVisible = computed(() => {
 const updateChildDialogIsVisible = (value) => {
   state.childDialogIsVisible = value
 }
-const currentUser = computed(() => store.state.currentUser)
+const currentUser = computed(() => userStore.getUserAllState)
 
 // group
 

@@ -60,7 +60,7 @@ const customAmount = computed({
     state.currentAmount = value
   }
 })
-const currentUser = computed(() => store.state.currentUser)
+const currentUser = computed(() => userStore.getUserAllState)
 const currentUserIsUpgraded = computed(() => userStore.isUpgraded)
 
 const triggerUpgradeUserIsVisible = () => {

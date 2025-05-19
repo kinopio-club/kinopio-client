@@ -227,7 +227,7 @@ const lastTypeColor = computed(() => {
 const shouldUseLastConnectionType = computed(() => userStore.shouldUseLastConnectionType)
 const toggleShouldUseLastConnectionType = () => {
   const value = !shouldUseLastConnectionType.value
-  store.dispatch('currentUser/shouldUseLastConnectionType', value)
+  userStore.updateUser({ shouldUseLastConnectionType: value })
 }
 
 // color

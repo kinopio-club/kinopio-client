@@ -145,7 +145,7 @@ const updateUserShowInExploreUpdatedAt = async () => {
   state.userShowInExploreDate = userStore.showInExploreUpdatedAt
   let serverDate = await store.dispatch('api/getDate')
   serverDate = serverDate.date
-  store.dispatch('currentUser/showInExploreUpdatedAt', serverDate)
+  userStore.updateUser({ showInExploreUpdatedAt: serverDate })
 }
 
 // search explore spaces

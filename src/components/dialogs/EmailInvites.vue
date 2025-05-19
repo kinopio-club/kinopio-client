@@ -52,7 +52,7 @@ const state = reactive({
 })
 
 const isDarkTheme = computed(() => store.getters['themes/isThemeDark'])
-const currentUser = computed(() => store.state.currentUser)
+const currentUser = computed(() => userStore.getUserAllState)
 const updateDialogHeight = async () => {
   if (!props.visible) { return }
   await nextTick()

@@ -24,7 +24,7 @@ const state = reactive({
   }
 })
 
-const currentUser = computed(() => store.state.currentUser)
+const currentUser = computed(() => userStore.getUserAllState)
 
 const clearState = () => {
   state.loading.subscribe = false

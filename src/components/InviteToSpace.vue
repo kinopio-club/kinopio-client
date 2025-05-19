@@ -36,7 +36,7 @@ const state = reactive({
   inviteType: 'edit' // 'edit', 'readOnly'
 })
 
-const currentUser = computed(() => store.state.currentUser)
+const currentUser = computed(() => userStore.getUserAllState)
 const currentUserIsUpgraded = computed(() => userStore.isUpgraded)
 const spaceName = computed(() => store.state.currentSpace.name)
 const randomUser = computed(() => {

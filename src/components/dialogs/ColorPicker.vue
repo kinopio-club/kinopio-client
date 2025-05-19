@@ -212,7 +212,7 @@ const currentColorIsFavorite = computed(() => favoriteColors.value.includes(prop
 const toggleFavoriteColor = () => {
   const color = { color: props.currentColor }
   const value = !currentColorIsFavorite.value
-  store.dispatch('currentUser/updateFavoriteColor', { color, value })
+  userStore.updateUserFavoriteColor(color, value)
 }
 
 // opacity

@@ -36,7 +36,7 @@ const updateDialogHeight = async () => {
 const categories = computed(() => keyboardShortcutsCategories)
 const meta = computed(() => utils.metaKey())
 const option = computed(() => utils.optionKey())
-const currentUser = computed(() => store.state.currentUser)
+const currentUser = computed(() => userStore.getUserAllState)
 const isMobile = computed(() => utils.isMobile())
 const shouldUseLastConnectionType = computed(() => userStore.shouldUseLastConnectionType)
 const lastOrNewConnectionTypeControlSetting = computed(() => {
@@ -85,9 +85,9 @@ const isChecked = (value) => {
 const toggleChecked = (name) => {
   const prevValue = isChecked(name)
   if (prevValue) {
-    store.commit('currentUser/addToDisabledKeyboardShortcuts', name)
+    userStore.addToDisabledKeyboardShortcuts(name)
   } else {
-    store.commit('currentUser/removeFromDisabledKeyboardShortcuts', name)
+    userStore.removeFromDisabledKeyboardShortcuts(name)
   }
   postMessage.sendHaptics({ name: 'heavyImpact' })
   event.stopPropagation()
