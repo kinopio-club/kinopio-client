@@ -276,6 +276,7 @@ export const useCardStore = defineStore('cards', {
       this.allIds.push(card.id)
     },
     async createCard (card, skipCardDetailsIsVisible) {
+      const userStore = useUserStore()
       if (store.getters['currentSpace/shouldPreventAddCard']) {
         store.commit('notifyCardsCreatedIsOverLimit', true, { root: true })
         return
@@ -286,9 +287,7 @@ export const useCardStore = defineStore('cards', {
         store.commit('cardDetailsIsVisibleForCardId', card.id, { root: true })
       }
       if (card.isParentCard) { store.commit('parentCardId', card.id, { root: true }) }
-      store.dispatch('currentUser/cardsCreatedCountUpdateBy', {
-        cards: [card]
-      }, { root: true })
+      userStore.updateUserCardsCreatedCount([card])
       store.dispatch('currentSpace/checkIfShouldNotifyCardsCreatedIsNearLimit', null, { root: true })
       store.dispatch('userNotifications/addCardUpdated', { cardId: card.id, type: 'createCard' }, { root: true })
       // server/disk/save tasks TODO dry
@@ -424,6 +423,7 @@ export const useCardStore = defineStore('cards', {
       this.removeCards([id])
     },
     async restoreRemovedCard (card) {
+      const userStore = useUserStore()
       card.isRemoved = false
       const isLocal = this.getCard(card.id)
       if (isLocal) {
@@ -431,10 +431,8 @@ export const useCardStore = defineStore('cards', {
       } else {
         this.addCardToState(card)
         await cache.updateSpace('cards', this.getAllCards, store.state.currentSpace.id)
-        // await store.dispatch('api/addToQueue', { name: 'restoreRemovedCard', body: card }, { root: true })
-        store.dispatch('currentUser/cardsCreatedCountUpdateBy', {
-          cards: [card]
-        }, { root: true })
+        await store.dispatch('api/addToQueue', { name: 'restoreRemovedCard', body: card }, { root: true })
+        userStore.updateUserCardsCreatedCount([card])
       }
     },
 

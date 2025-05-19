@@ -292,10 +292,6 @@ export const useUserStore = defineStore('users', {
     getItemIsCreatedByUser (connection) {
       return this.id === connection.userId
     },
-    getUserCardsCreatedWillBeOverLimit (count) {
-      if (this.isUpgraded) { return }
-      if (this.cardsCreatedCount + count >= consts.cardsCreatedLimit) { return true }
-    },
 
     // init
 
@@ -500,12 +496,16 @@ export const useUserStore = defineStore('users', {
       }
       const count = this.cardsCreatedCount + delta
       // update raw vanity count
-      store.commit('cardsCreatedCountRaw', count)
+      this.cardsCreatedCountRaw = count
       await store.dispatch('api/addToQueue', { name: 'updateUserCardsCreatedCountRaw', body: { delta } }, { root: true })
       // update count
       if (this.getShouldPreventCardsCreatedCountUpdate) { return }
       this.cardsCreatedCount = count
       await store.dispatch('api/addToQueue', { name: 'updateUserCardsCreatedCount', body: { delta } }, { root: true })
+    },
+    getUserCardsCreatedWillBeOverLimit (count) {
+      if (this.isUpgraded) { return }
+      if (this.cardsCreatedCount + count >= consts.cardsCreatedLimit) { return true }
     },
 
     // inbox
