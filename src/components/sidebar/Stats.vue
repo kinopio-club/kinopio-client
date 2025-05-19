@@ -65,7 +65,7 @@ const date = (date) => {
 }
 const toggleFilterShowAbsoluteDates = () => {
   const value = !userStore.filterShowAbsoluteDates
-  store.dispatch('currentUser/toggleFilterShowAbsoluteDates', value)
+  userStore.updateUser({ filterShowAbsoluteDates: value })
 }
 
 // items

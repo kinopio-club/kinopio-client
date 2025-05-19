@@ -28,7 +28,7 @@ const deviceSupportsHapticFeedback = computed(() => consts.isSecureAppContext &&
 const shouldDisableHapticFeedback = computed(() => { return userStore.shouldDisableHapticFeedback })
 const toggleShouldDisableHapticFeedback = () => {
   const value = !shouldDisableHapticFeedback.value
-  store.commit('currentUser/shouldDisableHapticFeedback', value)
+  userStore.updateUser({ shouldDisableHapticFeedback: value })
 }
 
 // panning
@@ -44,7 +44,7 @@ const toggleShouldDisableRightClickToPan = () => {
 const shouldInvertZoom = computed(() => userStore.shouldInvertZoom)
 const toggleShouldInvertZoom = () => {
   const value = !shouldInvertZoom.value
-  store.commit('currentUser/shouldInvertZoom', value)
+  userStore.updateUser({ shouldInvertZoom: value })
 }
 
 // disable sticky cards

@@ -12,7 +12,7 @@ const dateImageUrl = computed(() => store.state.dateImageUrl)
 const shouldHideDateCards = computed(() => { return userStore.shouldHideDateCards })
 const toggleShouldHideDateCards = () => {
   const value = !shouldHideDateCards.value
-  store.dispatch('currentUser/shouldHideDateCards', value)
+  userStore.updateUser({ shouldHideDateCards: value })
 }
 
 // tutorial cards
@@ -20,7 +20,7 @@ const toggleShouldHideDateCards = () => {
 const shouldHideTutorialCards = computed(() => { return userStore.shouldHideTutorialCards })
 const toggleShouldHideTutorialCards = () => {
   const value = !shouldHideTutorialCards.value
-  store.dispatch('currentUser/shouldHideTutorialCards', value)
+  userStore.updateUser({ shouldHideTutorialCards: value })
 }
 </script>
 

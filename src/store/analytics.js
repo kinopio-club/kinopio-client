@@ -1,5 +1,8 @@
 import utils from '@/utils.js'
 import consts from '@/consts.js'
+import { useUserStore } from '@/stores/useUserStore'
+
+const userStore = useUserStore()
 
 export default {
   namespaced: true,
@@ -17,7 +20,7 @@ export default {
         url: window.location.href,
         referrer: document.referrer,
         props: {
-          isSignedIn: context.rootGetters['currentUser/isSignedIn']
+          isSignedIn: userStore.getUserIsSignedIn
         }
       }
       context.dispatch('send', body)
