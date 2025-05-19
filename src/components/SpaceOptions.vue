@@ -1,6 +1,7 @@
 <script setup>
 import { reactive, computed, onMounted, onBeforeUnmount, watch, ref, nextTick } from 'vue'
 import { useStore } from 'vuex'
+import { useUserStore } from '@/stores/useUserStore'
 
 import cache from '@/cache.js'
 import templates from '@/data/templates.js'
@@ -9,6 +10,7 @@ import AddToExplore from '@/components/AddToExplore.vue'
 import ImportExportButton from '@/components/ImportExportButton.vue'
 
 const store = useStore()
+const userStore = useUserStore()
 
 const emit = defineEmits(['closeDialogsAndEmit', 'updateLocalSpaces', 'removeSpaceId', 'addSpace'])
 
@@ -19,7 +21,7 @@ const props = defineProps({
 })
 
 const currentSpace = computed(() => store.state.currentSpace)
-const currentUserIsSpaceCollaborator = computed(() => store.getters['currentUser/isSpaceCollaborator']())
+const currentUserIsSpaceCollaborator = computed(() => userStore.getUserIsSpaceCollaborator)
 const currentSpaceIsTemplate = computed(() => {
   const id = currentSpace.value.id
   const templateSpaceIds = templates.spaces().map(space => space.id)
@@ -53,10 +55,7 @@ const removeCurrentSpace = async () => {
 const changeToPrevSpace = async () => {
   const currentSpaceId = store.state.currentSpace.id
   const cachedSpaces = await cache.getAllSpaces()
-  let spaces = cachedSpaces.filter(space => {
-    return store.getters['currentUser/canEditSpace'](space)
-  })
-  spaces = spaces.filter(space => space.id !== currentSpaceId)
+  const spaces = cachedSpaces.filter(space => space.id !== currentSpaceId)
   const recentSpace = spaces[0]
   if (store.state.prevSpaceIdInSession) {
     store.dispatch('currentSpace/loadPrevSpaceInSession')
@@ -72,7 +71,7 @@ const changeToPrevSpace = async () => {
 const toggleHideSpace = async () => {
   const value = !props.currentSpaceIsHidden
   const currentSpaceId = store.state.currentSpace.id
-  await store.dispatch('currentUser/updateHiddenSpace', { spaceId: currentSpaceId, isHidden: value })
+  await userStore.updateUserHiddenSpace(currentSpaceId, value)
   store.commit('notifySpaceIsHidden', value)
   emit('updateLocalSpaces')
 }

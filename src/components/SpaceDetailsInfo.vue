@@ -75,10 +75,7 @@ const removeSpaceId = (value) => {
 const currentUser = computed(() => store.state.currentUser)
 const currentUserIsSpaceCollaborator = computed(() => userStore.getUserIsSpaceCollaborator)
 const currentUserIsSpaceCreator = computed(() => userStore.getUserIsSpaceCreator)
-const isSpaceMember = computed(() => {
-  const currentSpace = store.state.currentSpace
-  return store.getters['currentUser/isSpaceMember'](currentSpace)
-})
+const isSpaceMember = computed(() => userStore.getUserIsSpaceMember())
 
 // current space
 

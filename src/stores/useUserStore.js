@@ -575,6 +575,26 @@ export const useUserStore = defineStore('users', {
       } else {
         store.commit('addNotificationWithPosition', { message: 'Space is Read Only', position, type: 'info', layer: 'space', icon: 'cancel' }, { root: true })
       }
+    },
+
+    // hidden spaces
+
+    async updateUserHiddenSpace (spaceId, isHidden) {
+      const space = { id: spaceId }
+      if (isHidden) {
+        this.hiddenSpaces.push(space)
+      } else {
+        this.hiddenSpaces = this.hiddenSpaces.filter(space => {
+          return space?.id !== spaceId
+        })
+      }
+      await store.dispatch('api/addToQueue', {
+        name: 'updateSpaceIsHidden',
+        body: {
+          spaceId,
+          isHidden
+        }
+      }, { root: true })
     }
 
   }
