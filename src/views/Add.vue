@@ -214,7 +214,7 @@ const addCard = async () => {
   }
   let space
   try {
-    const user = store.state.currentUser
+    const user = userStore.getUserAllState
     card.userId = user.id
     let spaceId
     // save to inbox

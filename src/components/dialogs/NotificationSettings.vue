@@ -51,15 +51,15 @@ const parentDialog = computed(() => 'notificationSettings')
 
 const toggleShouldEmailNotifications = () => {
   const value = !shouldEmailNotifications.value
-  store.dispatch('currentUser/shouldEmailNotifications', value)
+  userStore.updateUser({ shouldEmailNotifications: value })
 }
 const toggleShouldEmailBulletin = () => {
   const value = !shouldEmailBulletin.value
-  store.dispatch('currentUser/shouldEmailBulletin', value)
+  userStore.updateUser({ shouldEmailBulletin: value })
 }
 const toggleShouldEmailWeeklyReview = () => {
   const value = !shouldEmailWeeklyReview.value
-  store.dispatch('currentUser/shouldEmailWeeklyReview', value)
+  userStore.updateUser({ shouldEmailWeeklyReview: value })
 }
 const triggerSignUpOrInIsVisible = () => {
   store.dispatch('closeAllDialogs')

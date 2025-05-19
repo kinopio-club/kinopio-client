@@ -26,22 +26,9 @@ onMounted(() => {
   })
 })
 
-// state
 const state = reactive({
   errorMaxCharacterLimit: false
 })
-const otherCard = computed(() => store.state.currentSelectedOtherItem)
-const url = computed(() => utils.urlFromSpaceAndCard({ spaceId: otherSpace.value.id, cardId: otherCard.value.id }))
-const canEditOtherCard = computed(() => {
-  const canEditCard = userStore.getUserIsCardCreator(otherCard.value)
-  if (canEditCard) { return true }
-  const isMemberOfOtherSpace = store.getters['currentUser/isSpaceMember'](otherSpace.value)
-  return isMemberOfOtherSpace
-})
-const isLoadingOtherItems = computed(() => store.state.isLoadingOtherItems)
-const otherSpace = computed(() => store.getters.otherSpaceById(otherCard.value.spaceId))
-
-// visible
 
 const visible = computed(() => {
   const isVisible = store.state.otherCardDetailsIsVisible
@@ -53,6 +40,16 @@ const visible = computed(() => {
   }
   return isVisible
 })
+const otherSpace = computed(() => store.getters.otherSpaceById(otherCard.value.spaceId))
+const otherCard = computed(() => store.state.currentSelectedOtherItem)
+const url = computed(() => utils.urlFromSpaceAndCard({ spaceId: otherSpace.value.id, cardId: otherCard.value.id }))
+const canEditOtherCard = computed(() => {
+  const canEditCard = userStore.getUserIsCardCreator(otherCard.value)
+  if (canEditCard) { return true }
+  const isMemberOfOtherSpace = userStore.getUserIsSpaceMember(otherSpace.value)
+  return isMemberOfOtherSpace
+})
+const isLoadingOtherItems = computed(() => store.state.isLoadingOtherItems)
 
 // dialog styles
 

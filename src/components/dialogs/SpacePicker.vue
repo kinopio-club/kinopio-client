@@ -74,7 +74,7 @@ const updateDialogHeight = async () => {
 
 const parentDialog = computed(() => 'spacePicker')
 const activeUser = computed(() => {
-  const currentUser = store.state.currentUser
+  const currentUser = userStore.getUserAllState
   return props.user || currentUser
 })
 const hideFilter = computed(() => {
@@ -85,7 +85,7 @@ const hideFilter = computed(() => {
   }
 })
 const activeUserIsCurrentUser = computed(() => {
-  const currentUser = store.state.currentUser
+  const currentUser = userStore.getUserAllState
   return activeUser.value.id === currentUser.id
 })
 const dialogPositionTop = computed(() => {
@@ -147,7 +147,7 @@ const updateWithRemoteSpaces = async () => {
   if (!state.spaces.length) {
     state.isLoading = true
   }
-  const currentUser = store.state.currentUser
+  const currentUser = userStore.getUserAllState
   let spaces = await store.dispatch('api/getUserSpaces')
   spaces = utils.addCurrentUserIsCollaboratorToSpaces(spaces, currentUser)
   state.isLoading = false
@@ -178,7 +178,7 @@ const createNewSpace = async () => {
   if (!state.newSpaceName) {
     state.newSpaceName = utils.newSpaceName()
   }
-  const currentUser = store.state.currentUser
+  const currentUser = userStore.getUserAllState
   const user = { id: currentUser.id, color: currentUser.color, name: currentUser.name }
   state.isLoadingNewSpace = true
   let space = utils.clone(newSpace)

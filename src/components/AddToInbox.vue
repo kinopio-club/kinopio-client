@@ -101,7 +101,7 @@ const addCard = async () => {
     card.shouldUpdateUrlPreview = true
   }
   try {
-    const user = store.state.currentUser
+    const user = userStore.getUserAllState
     card.userId = user.id
     console.info('🛫 create card in inbox space', card)
     await store.dispatch('api/addToQueue', { name: 'createCardInInbox', body: card })

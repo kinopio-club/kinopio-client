@@ -1132,7 +1132,7 @@ const updateNameSplitIntoCardsCount = () => {
 const splitCards = (event, isPreview) => {
   const prevName = (state.pastedName || name.value).trim()
   const cardNames = utils.splitCardNameByParagraphAndSentence(prevName)
-  const user = store.state.currentUser
+  const user = userStore.getUserAllState
   // create new split cards
   const newCards = cardNames.map((cardName, index) => {
     const indentAmount = 50

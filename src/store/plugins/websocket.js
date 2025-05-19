@@ -25,7 +25,7 @@ const joinSpaceRoom = (store, mutation) => {
   console.info('🌙 joining', websocket)
   if (!websocket) { return }
   const space = store.state.currentSpace
-  const user = store.state.currentUser
+  const user = userStore.getUserAllState
   const currentSpaceIsRemote = store.getters['currentSpace/isRemote']
   if (!currentSpaceIsRemote) {
     store.commit('isJoiningSpace', false)

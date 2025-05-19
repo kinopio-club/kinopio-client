@@ -124,7 +124,7 @@ const validateSchema = (space, schema) => {
 
 const importSpace = async (space) => {
   try {
-    const user = store.state.currentUser
+    const user = userStore.getUserAllState
     store.commit('isLoadingSpace', true)
     validate(space)
     if (state.format === 'canvas') {

@@ -194,7 +194,7 @@ const importSpace = async () => {
   try {
     state.isLoadingSpace = true
     let space = utils.clone(state.newSpace)
-    const user = store.state.currentUser
+    const user = userStore.getUserAllState
     space = utils.resetSpaceMeta({ space, user })
     console.info('🧚 space to import', space)
     await store.dispatch('currentSpace/saveSpace', space)

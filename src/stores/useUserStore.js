@@ -306,6 +306,15 @@ export const useUserStore = defineStore('users', {
     // init
 
     async updateUserState (user) {
+      if (utils.userIsUpgraded(user)) {
+        user.isUpgraded = true
+      } else {
+        user.isUpgraded = false
+      }
+      if (user.apiKey) {
+        postMessage.send({ name: 'setApiKey', value: user.apiKey })
+      }
+      await cache.saveUser(user)
       Object.keys(user).forEach(item => {
         this[item] = user[item]
       })
@@ -322,15 +331,6 @@ export const useUserStore = defineStore('users', {
       if (!user) { return }
       user.updatedAt = utils.unixTime(user.updatedAt)
       console.info('🌸 Initialize user from remote', user)
-      await cache.saveUser(user)
-      if (utils.userIsUpgraded(user)) {
-        user.isUpgraded = true
-      } else {
-        user.isUpgraded = false
-      }
-      if (user.apiKey) {
-        postMessage.send({ name: 'setApiKey', value: user.apiKey })
-      }
       this.updateUserState(user)
     },
     async restoreUserAssociatedData () {
