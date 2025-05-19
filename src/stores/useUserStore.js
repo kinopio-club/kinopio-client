@@ -143,7 +143,14 @@ export const useUserStore = defineStore('users', {
           return collaborator.id === this.id
         }))
       }
+    },
+    getUserTagByName: (state) => {
+      return (name) => state.tags.find(tag => tag.name === name)
     }
+
+    // tagByName: (state, getters) => (name) => {
+    //   return
+    // },
 
     // cannotEditUnlessSignedIn: (state, getters, rootState) => (space) => {
     //   space = space || rootState.currentSpace
@@ -187,10 +194,6 @@ export const useUserStore = defineStore('users', {
     // },
 
     // // user tags
-
-    // tagByName: (state, getters) => (name) => {
-    //   return state.tags.find(tag => tag.name === name)
-    // },
 
     // // drawing
 

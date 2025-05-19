@@ -315,7 +315,7 @@ const segmentTagColor = (segment) => {
     return color.value
   }
   const spaceTag = store.getters['currentSpace/tagByName'](segment.name)
-  const userTag = store.getters['currentUser/tagByName'](segment.name)
+  const userTag = userStore.getUserTagByName(segment.name)
   if (spaceTag) {
     return spaceTag.color
   } else if (userTag) {
