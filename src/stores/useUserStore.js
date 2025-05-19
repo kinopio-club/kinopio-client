@@ -131,6 +131,18 @@ export const useUserStore = defineStore('users', {
       const spaceIsOpen = space.privacy === 'open'
       const isSignedIn = Boolean(state.apiKey)
       return !isSignedIn && spaceIsOpen
+    },
+    getUserIsSpaceCreator: (state) => {
+      const space = store.state.currentSpace
+      return space.userId === state.id
+    },
+    getUserIsSpaceCollaborator: (state) => {
+      const space = store.state.currentSpace
+      if (space.collaborators) {
+        return Boolean(space.collaborators.find(collaborator => {
+          return collaborator.id === this.id
+        }))
+      }
     }
 
     // cardsCreatedWillBeOverLimit: (state, getters, rootState) => (count) => {
@@ -153,18 +165,6 @@ export const useUserStore = defineStore('users', {
     //   }))
     //   userIsInSpace = userIsInSpace || space.userId === state.id
     //   return userIsInSpace
-    // },
-    // isSpaceCollaborator: (state, getters, rootState) => (space) => {
-    //   space = space || rootState.currentSpace
-    //   if (space.collaborators) {
-    //     return Boolean(space.collaborators.find(collaborator => {
-    //       return collaborator.id === state.id
-    //     }))
-    //   }
-    // },
-    // isSpaceCreator: (state, getters, rootState) => (space) => {
-    //   space = space || rootState.currentSpace
-    //   return space.userId === state.id
     // },
     // isReadOnlyInvitedToSpace: (state, getters, rootState) => (space) => {
     //   return rootState.spaceReadOnlyKey.spaceId === space.id
@@ -217,18 +217,10 @@ export const useUserStore = defineStore('users', {
       userIsInSpace = userIsInSpace || space.userId === this.id
       return userIsInSpace
     },
-    getUserIsSpaceCollaborator (space) {
-      space = space || store.state.currentSpace
-      if (space.collaborators) {
-        return Boolean(space.collaborators.find(collaborator => {
-          return collaborator.id === this.id
-        }))
-      }
-    },
     getUserSpacePermission (space) {
       space = space || store.state.currentSpace
       const isSpaceUser = this.getUserIsSpaceUser(space)
-      const isSpaceCollaborator = this.getUserIsSpaceCollaborator(space)
+      const isSpaceCollaborator = this.getUserIsSpaceCollaborator
       const spaceHasNoUsers = !space.users.length
       if (isSpaceUser || spaceHasNoUsers) {
         return 'user'
@@ -241,7 +233,7 @@ export const useUserStore = defineStore('users', {
     getUserIsSpaceMember (space) {
       space = space || store.state.currentSpace
       const isSpaceUser = this.getUserIsSpaceUser(space)
-      const isSpaceCollaborator = this.getUserIsSpaceCollaborator(space)
+      const isSpaceCollaborator = this.getUserIsSpaceCollaborator
       const isGroupMember = store.getters['groups/currentUserIsCurrentSpaceGroupUser']
       return Boolean(isSpaceUser || isSpaceCollaborator || isGroupMember)
     },
