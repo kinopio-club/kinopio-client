@@ -78,7 +78,7 @@ const userIsSignedIn = computed(() => {
 
 // current user
 
-const isCurrentUser = computed(() => store.getters['currentUser/isCurrentUser'](props.user))
+const isCurrentUser = computed(() => userStore.getUserIsCurrentUser(props.user))
 // const currentUserIsSpaceMember = computed(() => userStore.getUserIsSpaceMember())
 const userSettingsIsVisible = computed(() => store.state.userSettingsIsVisible)
 const toggleUserSettingsIsVisible = () => {
@@ -89,7 +89,7 @@ const toggleUserSettingsIsVisible = () => {
 const currentUserIsSignedIn = computed(() => userStore.getUserIsSignedIn)
 const signOut = async () => {
   postMessage.send({ name: 'onLogout' })
-  await store.dispatch('currentUser/resetLastSpaceId')
+  userStore.clearUserLastSpaceId()
   await cache.removeAll()
   // clear history wipe state from vue-router
   window.history.replaceState({}, 'Kinopio', '/')
@@ -130,7 +130,7 @@ const isLoadingFavorites = computed(() => store.state.isLoadingFavorites)
 const updateFavoriteUser = () => {
   const user = props.user
   const value = !isFavoriteUser.value
-  store.dispatch('currentUser/updateFavoriteUser', { user, value })
+  userStore.updateUserFavoriteUser(user, value)
 }
 const isFavoriteUser = computed(() => {
   const favoriteUsers = userStore.favoriteUsers

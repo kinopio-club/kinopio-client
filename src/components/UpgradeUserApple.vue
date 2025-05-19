@@ -30,7 +30,7 @@ const state = reactive({
   }
 })
 
-const user = computed(() => store.state.currentUser)
+const user = computed(() => userStore.getUserAllState)
 const isUpgraded = computed(() => userStore.isUpgraded)
 const appleAppAccountToken = computed(() => userStore.appleAppAccountToken)
 
@@ -74,8 +74,8 @@ const handleSubscriptionSuccess = (event) => {
     state.loading.subscriptionIsBeingCreated = false
     return
   }
-  store.commit('currentUser/isUpgraded', true)
-  store.commit('currentUser/appleSubscriptionIsActive', true)
+  userStore.isUpgraded = true
+  userStore.appleSubscriptionIsActive = true
   store.commit('notifyCardsCreatedIsOverLimit', false)
   if (!utils.dialogIsVisible()) {
     store.commit('addNotification', {
