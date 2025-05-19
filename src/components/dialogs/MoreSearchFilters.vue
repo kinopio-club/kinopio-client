@@ -4,6 +4,7 @@ import { useStore } from 'vuex'
 import { useCardStore } from '@/stores/useCardStore'
 import { useConnectionStore } from '@/stores/useConnectionStore'
 import { useBoxStore } from '@/stores/useBoxStore'
+import { useUserStore } from '@/stores/useUserStore'
 
 import ResultsFilter from '@/components/ResultsFilter.vue'
 import frames from '@/data/frames.js'
@@ -16,6 +17,7 @@ const store = useStore()
 const cardStore = useCardStore()
 const connectionStore = useConnectionStore()
 const boxStore = useBoxStore()
+const userStore = useUserStore()
 
 const dialogElement = ref(null)
 const resultsElement = ref(null)
@@ -62,7 +64,7 @@ const updateResultsSectionHeight = async () => {
 
 // items
 
-const totalFiltersActive = computed(() => store.getters['currentUser/totalFiltersActive'])
+const totalFiltersActive = computed(() => userStore.getUserTotalFiltersActive)
 const connectionTypes = computed(() => connectionStore.getAllConnectionTypes)
 const spaceFrames = computed(() => {
   const cards = cardStore.getAllCards

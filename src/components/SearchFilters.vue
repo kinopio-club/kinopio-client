@@ -1,6 +1,7 @@
 <script setup>
 import { reactive, computed, onMounted, onBeforeUnmount, watch, ref, nextTick } from 'vue'
 import { useStore } from 'vuex'
+import { useUserStore } from '@/stores/useUserStore'
 
 import MoreSearchFilters from '@/components/dialogs/MoreSearchFilters.vue'
 import utils from '@/utils.js'
@@ -9,6 +10,7 @@ import uniq from 'lodash-es/uniq'
 import UserLabelInline from '@/components/UserLabelInline.vue'
 
 const store = useStore()
+const userStore = useUserStore()
 
 onMounted(() => {
   store.subscribe(mutation => {
@@ -37,7 +39,7 @@ const toggleDialogIsPinned = () => {
 
 // filters
 
-const totalFiltersActive = computed(() => store.getters['currentUser/totalFiltersActive'])
+const totalFiltersActive = computed(() => userStore.getUserTotalFiltersActive)
 const filterShowUsers = computed(() => currentUser.value.filterShowUsers)
 const filterShowDateUpdated = computed(() => currentUser.value.filterShowDateUpdated)
 const filterUnchecked = computed(() => currentUser.value.filterUnchecked)
