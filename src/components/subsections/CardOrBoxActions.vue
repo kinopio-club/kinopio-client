@@ -72,7 +72,7 @@ const canEditAll = computed(() => {
   if (isSpaceMember.value) { return true }
   const editableCards = props.cards.filter(card => userStore.getUserCanEditCard(card))
   const canEditCards = editableCards.length === props.cards.length
-  const editableBoxes = props.boxes.filter(box => store.getters['currentUser/canEditBox'](box))
+  const editableBoxes = props.boxes.filter(box => userStore.getUserCanEditBox(box))
   const canEditBoxes = editableBoxes.length === props.boxes.length
   return canEditCards && canEditBoxes
 })
@@ -413,7 +413,7 @@ const toggleIsLocked = () => {
 
 // comment
 
-const canOnlyComment = computed(() => store.getters['currentUser/canOnlyComment']())
+const canOnlyComment = computed(() => userStore.getIsUserCommentOnly())
 const isNotCollaborator = computed(() => {
   if (canOnlyComment.value) { return true }
   return !canEditAll.value
