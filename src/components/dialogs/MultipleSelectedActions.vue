@@ -131,7 +131,7 @@ const numberOfSelectedItemsCreatedByCurrentUser = computed(() => {
   })
   const boxesCreatedByCurrentUser = boxes.value?.filter(box => {
     if (!box) { return }
-    return store.getters['currentUser/boxIsCreatedByCurrentUser'](box)
+    userStore.getUserIsBoxCreator(box)
   })
   return {
     connections: connectionsCreatedByCurrentUser.length,
@@ -313,7 +313,7 @@ const editableBoxes = computed(() => {
     return boxes.value
   } else {
     return boxes.value.filter(box => {
-      return store.getters['currentUser/boxIsCreatedByCurrentUser'](box)
+      userStore.getUserIsBoxCreator(box)
     })
   }
 })
@@ -437,7 +437,7 @@ const shouldShowMultipleSelectedBoxActions = computed(() => userStore.shouldShow
 const toggleShouldShowMultipleSelectedLineActions = () => {
   closeDialogs()
   const isVisible = !shouldShowMultipleSelectedLineActions.value
-  store.dispatch('currentUser/shouldShowMultipleSelectedLineActions', isVisible)
+  userStore.updateUser({ shouldShowMultipleSelectedLineActions, isVisible })
   nextTick(() => {
     scrollIntoView()
   })
@@ -445,7 +445,7 @@ const toggleShouldShowMultipleSelectedLineActions = () => {
 const toggleShouldShowMultipleSelectedBoxActions = () => {
   closeDialogs()
   const isVisible = !shouldShowMultipleSelectedBoxActions.value
-  store.dispatch('currentUser/shouldShowMultipleSelectedBoxActions', isVisible)
+  userStore.updateUser({ shouldShowMultipleSelectedBoxActions, isVisible })
   nextTick(() => {
     scrollIntoView()
   })
