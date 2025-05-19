@@ -125,6 +125,12 @@ export const useUserStore = defineStore('users', {
       const frames = store.state.filteredFrameIds
       const boxes = store.state.filteredBoxIds
       return userFilters + tagNames.length + connections.length + frames.length + boxes.length
+    },
+    getUserIsUnableToEditUnlessSignedIn: (state) => {
+      const space = store.state.currentSpace
+      const spaceIsOpen = space.privacy === 'open'
+      const isSignedIn = Boolean(state.apiKey)
+      return !isSignedIn && spaceIsOpen
     }
 
     // cardsCreatedWillBeOverLimit: (state, getters, rootState) => (count) => {
@@ -252,11 +258,11 @@ export const useUserStore = defineStore('users', {
       const isSpaceMember = this.getUserIsSpaceMember()
       if (isSpaceMember) { return true }
       const canEditSpace = this.getUserCanEditSpace()
-      const createdBox = this.getBoxIsCreatedByCurrentUser(box)
+      const createdBox = this.getUserIsBoxCreator(box)
       if (canEditSpace && createdBox) { return true }
       return false
     },
-    getBoxIsCreatedByCurrentUser (box) {
+    getUserIsBoxCreator (box) {
       const isCreatedByUser = this.id === box.userId
       const isNoUser = !box.userId
       return isCreatedByUser || isNoUser
@@ -546,6 +552,37 @@ export const useUserStore = defineStore('users', {
         name: 'updateUser',
         body: { arenaAccessToken }
       }, { root: true })
+    },
+
+    // drawing
+
+    cycleDrawingBrushSize () {
+      const prevValue = this.drawingBrushSize
+      let value
+      if (prevValue === 's') {
+        value = 'm'
+      }
+      if (prevValue === 'm') {
+        value = 'l'
+      }
+      if (prevValue === 'l') {
+        value = 's'
+      }
+      this.drawingBrushSize = value
+    },
+
+    // notify
+
+    notifyReadOnly (position) {
+      const canEditSpace = this.getUserCanEditSpace()
+      if (canEditSpace) { return }
+      const cannotEdit = this.getUserIsUnableToEditUnlessSignedIn
+      const notificationWithPosition = document.querySelector('.notifications-with-position .item')
+      if (cannotEdit) {
+        store.commit('addNotificationWithPosition', { message: 'Sign in to Edit', position, type: 'info', layer: 'space', icon: 'cancel' }, { root: true })
+      } else {
+        store.commit('addNotificationWithPosition', { message: 'Space is Read Only', position, type: 'info', layer: 'space', icon: 'cancel' }, { root: true })
+      }
     }
 
   }

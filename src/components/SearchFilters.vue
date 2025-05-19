@@ -46,7 +46,7 @@ const filterUnchecked = computed(() => currentUser.value.filterUnchecked)
 const filterComments = computed(() => currentUser.value.filterComments)
 const toggleFilterShowUsers = () => {
   const value = !filterShowUsers.value
-  store.dispatch('currentUser/toggleFilterShowUsers', value)
+  userStore.updateUser({ filterShowUsers: value })
 }
 const toggleFilterShowDateUpdated = () => {
   const value = !filterShowDateUpdated.value

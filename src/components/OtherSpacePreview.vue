@@ -24,7 +24,7 @@ const state = reactive({
   previewImageIsHover: false
 })
 
-const cardIsCreatedByCurrentUser = computed(() => store.getters['currentUser/cardIsCreatedByCurrentUser'](props.card))
+const cardIsCreatedByCurrentUser = computed(() => userStore.getUserIsCardCreator(props.card))
 const canEditCard = computed(() => {
   if (isSpaceMember.value) { return true }
   if (canEditSpace.value && cardIsCreatedByCurrentUser.value) { return true }

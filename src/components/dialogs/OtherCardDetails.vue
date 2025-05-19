@@ -2,6 +2,7 @@
 import { reactive, computed, onMounted, onUpdated, watch, ref, nextTick } from 'vue'
 import { useStore } from 'vuex'
 import { useCardStore } from '@/stores/useCardStore'
+import { useUserStore } from '@/stores/useUserStore'
 
 import utils from '@/utils.js'
 import Loader from '@/components/Loader.vue'
@@ -10,6 +11,7 @@ import OtherSpacePreview from '@/components/OtherSpacePreview.vue'
 
 const store = useStore()
 const cardStore = useCardStore()
+const userStore = useUserStore()
 
 onMounted(() => {
   store.subscribe((mutation, state) => {
@@ -31,7 +33,7 @@ const state = reactive({
 const otherCard = computed(() => store.state.currentSelectedOtherItem)
 const url = computed(() => utils.urlFromSpaceAndCard({ spaceId: otherSpace.value.id, cardId: otherCard.value.id }))
 const canEditOtherCard = computed(() => {
-  const canEditCard = store.getters['currentUser/cardIsCreatedByCurrentUser'](otherCard.value)
+  const canEditCard = userStore.getUserIsCardCreator(otherCard.value)
   if (canEditCard) { return true }
   const isMemberOfOtherSpace = store.getters['currentUser/isSpaceMember'](otherSpace.value)
   return isMemberOfOtherSpace

@@ -127,7 +127,7 @@ const numberOfSelectedItemsCreatedByCurrentUser = computed(() => {
   })
   const cardsCreatedByCurrentUser = cards.value?.filter(card => {
     if (!card) { return }
-    return store.getters['currentUser/cardIsCreatedByCurrentUser'](card)
+    return userStore.getUserIsCardCreator(card)
   })
   const boxesCreatedByCurrentUser = boxes.value?.filter(box => {
     if (!box) { return }
@@ -189,7 +189,7 @@ const editableCards = computed(() => {
     return cards.value
   } else {
     return cards.value.filter(card => {
-      return store.getters['currentUser/cardIsCreatedByCurrentUser'](card)
+      return userStore.getUserIsCardCreator(card)
     })
   }
 })

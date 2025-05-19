@@ -155,22 +155,22 @@ const handleShortcuts = (event) => {
   } else if (key === '1' && isSpaceScope) {
     let value = userStore.filterShowUsers
     value = !value
-    store.dispatch('currentUser/toggleFilterShowUsers', value)
+    userStore.updateUser({ filterShowUsers: value })
   // 2
   } else if (key === '2' && isSpaceScope) {
     let value = userStore.filterShowDateUpdated
     value = !value
-    store.dispatch('currentUser/toggleFilterShowDateUpdated', value)
+    userStore.updateUser({ filterShowDateUpdated: value })
   // 3
   } else if (key === '3' && isSpaceScope) {
     let value = userStore.filterUnchecked
     value = !value
-    store.dispatch('currentUser/toggleFilterUnchecked', value)
+    userStore.updateUser({ filterUnchecked: value })
   // 4
   } else if (key === '4' && isSpaceScope) {
     let value = userStore.filterComments
     value = !value
-    store.dispatch('currentUser/toggleFilterComments', value)
+    userStore.updateUser({ filterComments: value })
   // ' '
   } else if (key === ' ' && isSpaceScope) {
     store.dispatch('currentUserIsPanning', false)
@@ -205,7 +205,7 @@ const handleShortcuts = (event) => {
     store.dispatch('toggleDrawingEraserIsActive')
   // s
   } else if (key === 's' && isSpaceScope && toolbarIsDrawing) {
-    store.dispatch('currentUser/cycleDrawingBrushSize')
+    userStore.cycleDrawingBrushSize()
   }
 }
 // on key down
@@ -585,7 +585,7 @@ const clearAllSelectedCards = () => {
 const canEditCardById = (cardId) => {
   const isSpaceMember = userStore.getUserIsSpaceMember()
   const card = cardStore.getCard(cardId)
-  const cardIsCreatedByCurrentUser = store.getters['currentUser/cardIsCreatedByCurrentUser'](card)
+  const cardIsCreatedByCurrentUser = userStore.getUserIsCardCreator(card)
   const canEditSpace = userStore.getUserCanEditSpace()
   if (isSpaceMember) { return true }
   if (canEditSpace && cardIsCreatedByCurrentUser) { return true }
@@ -618,7 +618,7 @@ const remove = () => {
     }
   })
   boxes.forEach(box => {
-    const canEditBox = store.getters['currentUser/canEditBox'](box)
+    const canEditBox = cardStore.getUserCanEditBox(box)
     if (canEditBox) {
       boxStore.removeBox(box.id)
     }
@@ -764,7 +764,7 @@ const handlePasteEvent = async (event) => {
     return
   }
   // check read only
-  store.dispatch('currentUser/notifyReadOnly', position)
+  userStore.notifyReadOnly(position)
   const canEditSpace = userStore.getUserCanEditSpace()
   if (!canEditSpace) { return }
   // get clipboard data

@@ -1,49 +1,47 @@
+<script setup>
+import { reactive, computed, onMounted, onBeforeUnmount, watch, ref, nextTick } from 'vue'
+import { useUserStore } from '@/stores/useUserStore'
+
+import Audio from '@/components/Audio.vue'
+
+const userStore = useUserStore()
+
+const props = defineProps({
+  visible: Boolean,
+  card: Object,
+  formats: Object
+})
+
+const canEditCard = () => {
+  const canEditSpace = userStore.getUserCanEditSpace()
+  const isSpaceMember = userStore.getUserIsSpaceMember()
+  const cardIsCreatedByCurrentUser = userStore.getUserIsCardCreator(props.card)
+  if (isSpaceMember) { return true }
+  if (canEditSpace && cardIsCreatedByCurrentUser) { return true }
+  return false
+}
+</script>
+
 <template lang="pug">
-.media-preview.row(v-if="visible")
+.media-preview.row(v-if="props.visible")
   //- Image
-  .image-preview.row(v-if="formats.image")
-    a(:href="formats.image" target="_blank")
-      img.image.clickable-item(:src="formats.image" draggable="false")
+  .image-preview.row(v-if="props.formats.image")
+    a(:href="props.formats.image" target="_blank")
+      img.image.clickable-item(:src="props.formats.image" draggable="false")
   //- Video
-  .video-preview.row(v-if="formats.video")
-    a(:href="formats.video" target="_blank")
+  .video-preview.row(v-if="props.formats.video")
+    a(:href="props.formats.video" target="_blank")
       video.video.clickable-item(autoplay loop muted playsinline draggable="false")
-        source(:src="formats.video")
+        source(:src="props.formats.video")
   //- Audio
-  .row(v-if="formats.audio")
-    Audio(:visible="Boolean(formats.audio)" :url="formats.audio" :normalizedName="this.card.name" :parentIsCardDetails="true")
+  .row(v-if="props.formats.audio")
+    Audio(:visible="Boolean(props.formats.audio)" :url="props.formats.audio" :normalizedName="props.card.name" :parentIsCardDetails="true")
     .content-buttons
       .button-wrap
-        a(:href="formats.audio" target="_blank")
+        a(:href="props.formats.audio" target="_blank")
           button.small-button
             img.icon.visit(src="@/assets/visit.svg")
 </template>
-
-<script>
-import Audio from '@/components/Audio.vue'
-
-export default {
-  name: 'MediaPreview',
-  components: {
-    Audio
-  },
-  props: {
-    visible: Boolean,
-    card: Object,
-    formats: Object
-  },
-  computed: {
-    canEditCard () {
-      const canEditSpace = this.$userStore.getUserCanEditSpace()
-      const isSpaceMember = this.$userStore.getUserIsSpaceMember()
-      const cardIsCreatedByCurrentUser = this.$store.getters['currentUser/cardIsCreatedByCurrentUser'](this.card)
-      if (isSpaceMember) { return true }
-      if (canEditSpace && cardIsCreatedByCurrentUser) { return true }
-      return false
-    }
-  }
-}
-</script>
 
 <style lang="stylus">
 .media-preview
@@ -53,10 +51,8 @@ export default {
     .image,
     .video
       border-radius var(--entity-radius)
-
     .audio
       width 203px
-
     .content-buttons
       pointer-events none
       margin-left 6px
