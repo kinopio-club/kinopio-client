@@ -164,11 +164,11 @@ const shouldShowInExplore = computed(() => {
   return store.state.currentSpace.showInExplore
 })
 const isSpaceMember = computed(() => {
-  return store.getters['currentUser/isSpaceMember'](store.state.currentSpace)
+  return userStore.getUserIsSpaceMember(store.state.currentSpace)
 })
 const removeLabel = computed(() => {
-  const currentUserIsSpaceCollaborator = store.getters['currentUser/isSpaceCollaborator']()
-  if (currentUserIsSpaceCollaborator) {
+  const isSpaceCollaborator = userStore.getUserIsSpaceCollaborator
+  if (isSpaceCollaborator) {
     return 'Leave'
   } else {
     return 'Remove'

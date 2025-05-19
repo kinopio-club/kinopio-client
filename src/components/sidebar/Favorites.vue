@@ -87,7 +87,7 @@ const currentUserSpacesFilterIsVisible = computed(() => {
   return state.spacesIsVisible && spacesIncludeCurrentUserSpace
 })
 const checkIfShouldShowCurrentUserSpaces = (space) => {
-  const isSpaceMember = store.getters['currentUser/isSpaceMember'](space)
+  const isSpaceMember = userStore.getUserIsSpaceMember(space)
   if (isSpaceMember) {
     state.currentUserSpacesIsVisible = true
   }
