@@ -41,10 +41,13 @@ const triggerUpgradeUserIsVisible = () => {
   store.commit('triggerUpgradeUserIsVisible')
 }
 
-const subscriptionIsApple = computed(() => store.getters['currentUser/subscriptionIsApple'])
-const subscriptionIsStripe = computed(() => store.getters['currentUser/subscriptionIsStripe'])
+const subscriptionIsApple = computed(() => userStore.appleSubscriptionIsActive)
+const subscriptionIsStripe = computed(() => subscriptionIsFree.value || userStore.stripeSubscriptionId)
 const stripePlanIsPurchased = computed(() => userStore.stripePlanIsPurchased)
-const subscriptionIsFree = computed(() => store.getters['currentUser/subscriptionIsFree'])
+const subscriptionIsFree = computed(() => {
+  const strings = ['🌷free', '🌷 free', '🫧free']
+  return strings.includes(userStore.stripeSubscriptionId)
+})
 const isSecureAppContextIOS = computed(() => consts.isSecureAppContextIOS)
 
 const updateDialogHeight = async () => {

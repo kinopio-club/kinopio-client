@@ -184,14 +184,6 @@ export const useUserStore = defineStore('users', {
     // subscriptionIsApple: (state) => {
     //   return state.appleSubscriptionIsActive
     // },
-    // subscriptionIsStripe: (state, getters) => {
-    //   if (getters.subscriptionIsFree) { return }
-    //   return state.stripeSubscriptionId
-    // },
-    // subscriptionIsFree: (state) => {
-    //   const strings = ['🌷free', '🌷 free', '🫧free']
-    //   return strings.includes(state.stripeSubscriptionId)
-    // },
 
     // // user tags
 

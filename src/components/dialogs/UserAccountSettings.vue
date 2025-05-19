@@ -63,7 +63,7 @@ const updateEmail = async () => {
   const result = await response.json()
   if (isSuccess(response)) {
     state.success = true
-    store.commit('currentUser/email', state.email)
+    userStore.email = state.email
   } else {
     await handleErrors(result)
   }
