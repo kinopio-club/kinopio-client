@@ -1,19 +1,140 @@
+<script setup>
+import { reactive, computed, onMounted, onBeforeUnmount, watch, ref, nextTick } from 'vue'
+import { useStore } from 'vuex'
+import { useCardStore } from '@/stores/useCardStore'
+import { useUserStore } from '@/stores/useUserStore'
+
+import Loader from '@/components/Loader.vue'
+import SpaceList from '@/components/SpaceList.vue'
+import User from '@/components/User.vue'
+import utils from '@/utils.js'
+
+import debounce from 'lodash-es/debounce'
+
+const cardStore = useCardStore()
+const store = useStore()
+const userStore = useUserStore()
+
+// let unsubscribes
+let unsubscribe
+
+const resultsElement = ref(null)
+
+onMounted(() => {
+  updateLinks()
+  updateResultsSectionHeight()
+  window.addEventListener('resize', updateResultsSectionHeight)
+  unsubscribe = store.subscribe((mutation, state) => {
+    if (mutation.type === 'currentSpace/restoreSpace' && props.visible) {
+      updateLinks()
+    }
+  })
+  // const cardStoreUnsubscribe = cardStore.$onAction(
+  //   ({name, args}) => {
+  //     if (name === 'moveCards') {
+  //       cancelAnimation()
+  //     }
+  //   }
+  // )
+  // unsubscribes = () => {
+  //   cardStoreUnsubscribe()
+  // }
+})
+onBeforeUnmount(() => {
+  // unsubscribes()
+  unsubscribe()
+})
+
+const props = defineProps({
+  visible: Boolean,
+  parentIsPinned: Boolean
+})
+const state = reactive({
+  resultsSectionHeight: null,
+  links: [],
+  loading: false,
+  spaces: [],
+  prevSpaceId: '',
+  currentUserSpacesIsVisibleOnly: false
+})
+
+watch(() => props.visible, (value, prevValue) => {
+  if (value) {
+    updateLinks()
+    updateResultsSectionHeight()
+  }
+})
+watch(() => state.loading, (value, prevValue) => {
+  updateResultsSectionHeight()
+})
+
+const shouldShowSpaces = computed(() => {
+  const spaces = state.spaces || []
+  return !state.loading && spaces.length
+})
+const filteredSpaces = computed(() => {
+  if (state.currentUserSpacesIsVisibleOnly) {
+    return state.spaces.filter(space => space.userId === userStore.id)
+  } else {
+    return state.spaces
+  }
+})
+const userSpacesToggleShouldBeVisible = computed(() => {
+  const otherUserSpaces = state.spaces.filter(space => space.userId !== userStore.id) || []
+  const isOtherUserSpaces = Boolean(otherUserSpaces.length)
+  const shouldForceToggleVisible = !isOtherUserSpaces && state.spaces.length
+  if (isOtherUserSpaces || shouldForceToggleVisible) {
+    return true
+  } else {
+    return false
+  }
+})
+const parentDialog = computed(() => 'links')
+const toggleCurrentUserSpacesIsVisibleOnly = () => {
+  state.currentUserSpacesIsVisibleOnly = !state.currentUserSpacesIsVisibleOnly
+}
+const changeSpace = (space) => {
+  store.dispatch('currentSpace/changeSpace', space)
+  store.dispatch('closeAllDialogs')
+}
+const updateLinks = async () => {
+  const spaceId = store.state.currentSpace.id
+  if (state.prevSpaceId === spaceId) { return }
+  state.spaces = []
+  state.loading = true
+  debouncedUpdateLinks()
+}
+const debouncedUpdateLinks = debounce(async function () {
+  const spaceId = store.state.currentSpace.id
+  const links = await store.dispatch('api/getCardsWithLinkToSpaceId', spaceId)
+  state.loading = false
+  state.prevSpaceId = spaceId
+  if (!links) { return }
+  if (!links.spaces.length) { return }
+  if (links.spaces.length) {
+    state.spaces = links.spaces
+  }
+}, 350, { leading: true })
+const updateResultsSectionHeight = async () => {
+  if (!props.visible) { return }
+  await nextTick()
+  const element = resultsElement.value
+  state.resultsSectionHeight = utils.elementHeight(element, true)
+}
+</script>
+
 <template lang="pug">
-.links(v-if="visible")
+.links(v-if="props.visible")
   section
     p Backlinks
-    Loader(:visible="loading" :isSmall="true")
-      //- .button-wrap(v-if="userSpacesToggleShouldBeVisible" @click.left.prevent="toggleCurrentUserSpacesIsVisibleOnly" @keydown.stop.enter="toggleCurrentUserSpacesIsVisibleOnly")
-      //-   label(:class="{ active: currentUserSpacesIsVisibleOnly }")
-      //-     input(type="checkbox" v-model="currentUserSpacesIsVisibleOnly")
-      //-     User(:user="currentUser" :isClickable="false" :hideYouLabel="true" :isSmall="true")
-  section.results-section(v-if="shouldShowSpaces" ref="results" :style="{'max-height': resultsSectionHeight + 'px'}")
+    Loader(:visible="state.loading" :isSmall="true")
+  section.results-section(v-if="shouldShowSpaces" ref="resultsElement" :style="{'max-height': state.resultsSectionHeight + 'px'}")
     SpaceList(
       :spaces="filteredSpaces"
       :showUser="true"
       @selectSpace="changeSpace"
-      :parentIsPinned="parentIsPinned"
-      :resultsSectionHeight="resultsSectionHeight"
+      :parentIsPinned="props.parentIsPinned"
+      :resultsSectionHeight="state.resultsSectionHeight"
       :parentDialog="parentDialog"
       :disableListOptimizations="true"
     )
@@ -25,120 +146,6 @@
         span.badge.info /
         span when editing a card to create links
 </template>
-
-<script>
-import Loader from '@/components/Loader.vue'
-import SpaceList from '@/components/SpaceList.vue'
-import User from '@/components/User.vue'
-import utils from '@/utils.js'
-
-import debounce from 'lodash-es/debounce'
-
-export default {
-  name: 'Links',
-  components: {
-    Loader,
-    SpaceList,
-    User
-  },
-  props: {
-    visible: Boolean,
-    parentIsPinned: Boolean
-  },
-  data () {
-    return {
-      resultsSectionHeight: null,
-      links: [],
-      loading: false,
-      spaces: [],
-      prevSpaceId: '',
-      currentUserSpacesIsVisibleOnly: false
-    }
-  },
-  computed: {
-    currentUser () { return this.$store.state.currentUser },
-    shouldShowSpaces () {
-      const spaces = this.spaces || []
-      return !this.loading && spaces.length
-    },
-    filteredSpaces () {
-      if (this.currentUserSpacesIsVisibleOnly) {
-        return this.spaces.filter(space => space.userId === this.currentUser.id)
-      } else {
-        return this.spaces
-      }
-    },
-    userSpacesToggleShouldBeVisible () {
-      const otherUserSpaces = this.spaces.filter(space => space.userId !== this.currentUser.id) || []
-      const isOtherUserSpaces = Boolean(otherUserSpaces.length)
-      const shouldForceToggleVisible = !isOtherUserSpaces && this.spaces.length
-      if (isOtherUserSpaces || shouldForceToggleVisible) {
-        return true
-      } else {
-        return false
-      }
-    },
-    parentDialog () { return 'links' }
-  },
-  watch: {
-    visible (visible) {
-      if (visible) {
-        this.updateLinks()
-        this.updateResultsSectionHeight()
-      }
-    },
-    loading (loading) {
-      this.updateResultsSectionHeight()
-    }
-  },
-  created () {
-    window.addEventListener('resize', this.updateResultsSectionHeight)
-    this.$store.subscribe((mutation, state) => {
-      if (mutation.type === 'currentSpace/restoreSpace' && this.visible) {
-        this.updateLinks()
-      }
-    })
-  },
-  mounted () {
-    this.updateLinks()
-    this.updateResultsSectionHeight()
-  },
-  methods: {
-    toggleCurrentUserSpacesIsVisibleOnly () {
-      this.currentUserSpacesIsVisibleOnly = !this.currentUserSpacesIsVisibleOnly
-    },
-    changeSpace (space) {
-      this.$store.dispatch('currentSpace/changeSpace', space)
-      this.$store.dispatch('closeAllDialogs')
-    },
-    async updateLinks () {
-      const spaceId = this.$store.state.currentSpace.id
-      if (this.prevSpaceId === spaceId) { return }
-      this.spaces = []
-      this.loading = true
-      this.debouncedUpdateLinks()
-    },
-    debouncedUpdateLinks: debounce(async function () {
-      const spaceId = this.$store.state.currentSpace.id
-      const links = await this.$store.dispatch('api/getCardsWithLinkToSpaceId', spaceId)
-      this.loading = false
-      this.prevSpaceId = spaceId
-      if (!links) { return }
-      if (!links.spaces.length) { return }
-      if (links.spaces.length) {
-        this.spaces = links.spaces
-      }
-    }, 350, { leading: true }),
-    updateResultsSectionHeight () {
-      if (!this.visible) { return }
-      this.$nextTick(() => {
-        const element = this.$refs.results
-        this.resultsSectionHeight = utils.elementHeight(element, true)
-      })
-    }
-  }
-}
-</script>
 
 <style lang="stylus">
 .links
