@@ -1,4 +1,5 @@
-// import utils from '@/utils.js'
+import { useUserStore } from '@/stores/useUserStore'
+
 import cache from '@/cache.js'
 import utils from '@/utils.js'
 import consts from '@/consts.js'
@@ -7,6 +8,8 @@ import { nanoid } from 'nanoid'
 import randomColor from 'randomcolor'
 import uniq from 'lodash-es/uniq'
 import { nextTick } from 'vue'
+
+const userStore = useUserStore()
 
 // normalized state
 // https://github.com/vuejs/vuejs.org/issues/1636
@@ -199,12 +202,12 @@ export default {
     add: async (context, { box, shouldResize }) => {
       const count = context.state.ids.length
       const minBoxSize = consts.minBoxSize
-      const isThemeDark = context.rootState.currentUser.theme === 'dark'
+      const isThemeDark = userStore.theme === 'dark'
       const color = randomColor({ luminosity: 'dark' })
       box = {
         id: box.id || nanoid(),
         spaceId: currentSpaceId,
-        userId: context.rootState.currentUser.id,
+        userId: userStore.id,
         x: box.x,
         y: box.y,
         resizeWidth: box.resizeWidth || minBoxSize,
@@ -214,7 +217,7 @@ export default {
         name: box.name || `Box ${count}`,
         infoHeight: 57,
         infoWidth: 34,
-        headerFontId: context.rootState.currentUser.prevHeaderFontId || 0,
+        headerFontId: userStore.prevHeaderFontId || 0,
         background: box.background,
         backgroundIsStretch: box.backgroundIsStretch
       }
@@ -270,7 +273,7 @@ export default {
         context.dispatch('broadcast/update', { updates: box, type: 'updateBox', handler: 'currentBoxes/update' }, { root: true })
         context.commit('update', box)
       })
-      cache.updateSpace('editedByUserId', context.rootState.currentUser.id, currentSpaceId)
+      cache.updateSpace('editedByUserId', userStore.id, currentSpaceId)
       await context.dispatch('api/addToQueue', { name: 'updateMultipleBoxes', body: updates }, { root: true })
     },
 

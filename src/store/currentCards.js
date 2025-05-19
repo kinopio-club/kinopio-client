@@ -1,3 +1,5 @@
+import { useUserStore } from '@/stores/useUserStore'
+
 import utils from '@/utils.js'
 import cache from '@/cache.js'
 import consts from '@/consts.js'
@@ -7,6 +9,8 @@ import uniqBy from 'lodash-es/uniqBy'
 import uniq from 'lodash-es/uniq'
 import sortBy from 'lodash-es/sortBy'
 import { nextTick } from 'vue'
+
+const userStore = useUserStore()
 
 // normalized state
 // https://github.com/vuejs/vuejs.org/issues/1636
@@ -216,7 +220,7 @@ export default {
       const cards = context.getters.all
       // new card values
       const highestCardZ = utils.highestItemZ(cards)
-      const defaultBackgroundColor = context.rootState.currentUser.defaultCardBackgroundColor
+      const defaultBackgroundColor = userStore.defaultCardBackgroundColor
       const isComment = context.rootState.isCommentMode || context.rootGetters['currentUser/canOnlyComment']()
       card.id = id || nanoid()
       card.x = x || position.x
@@ -224,15 +228,15 @@ export default {
       card.z = highestCardZ + 1
       card.name = name || ''
       card.frameId = 0
-      card.userId = context.rootState.currentUser.id
+      card.userId = userStore.id
       card.urlPreviewIsVisible = true
       card.width = Math.round(width) || consts.emptyCard().width
       card.height = Math.round(height) || consts.emptyCard().height
       card.isLocked = false
       card.backgroundColor = backgroundColor || defaultBackgroundColor
       card.isRemoved = false
-      card.headerFontId = context.rootState.currentUser.prevHeaderFontId || 0
-      card.maxWidth = context.rootState.currentUser.cardSettingsMaxCardWidth
+      card.headerFontId = userStore.prevHeaderFontId || 0
+      card.maxWidth = userStore.cardSettingsMaxCardWidth
       card.spaceId = currentSpaceId
       card.isComment = isComment
       card.shouldShowOtherSpacePreviewImage = true
@@ -272,7 +276,7 @@ export default {
           frameId: card.frameId || 0,
           width: Math.round(card.width),
           height: Math.round(card.height),
-          userId: context.rootState.currentUser.id,
+          userId: userStore.id,
           backgroundColor: card.backgroundColor,
 
           shouldUpdateUrlPreview: true,
@@ -282,7 +286,7 @@ export default {
           urlPreviewImage: card.urlPreviewImage,
           urlPreviewTitle: card.urlPreviewTitle,
           urlPreviewUrl: card.urlPreviewUrl,
-          maxWidth: Math.round(card.maxWidth) || context.rootState.currentUser.cardSettingsMaxCardWidth
+          maxWidth: Math.round(card.maxWidth) || userStore.cardSettingsMaxCardWidth
         }
       })
       cards.forEach(card => {
@@ -305,7 +309,7 @@ export default {
         tags.forEach(tag => {
           tag = context.getters.newTag({
             name: tag,
-            defaultColor: context.rootState.currentUser.color,
+            defaultColor: userStore.color,
             cardId: card.id,
             spaceId: context.state.id
           }, { root: true })
@@ -343,7 +347,7 @@ export default {
         context.commit('updateCardNameInOtherItems', card, { root: true })
         context.commit('triggerUpdateOtherCard', card.id, { root: true })
       }
-      await cache.updateSpace('editedByUserId', context.rootState.currentUser.id, currentSpaceId)
+      await cache.updateSpace('editedByUserId', userStore.id, currentSpaceId)
       await cache.updateSpace('editedAt', utils.unixTime(), currentSpaceId)
       if (!shouldPreventUpdateDimensionsAndPaths) {
         context.commit('triggerUpdateCardDimensionsAndPaths', card.id, { root: true })
@@ -371,7 +375,7 @@ export default {
           context.commit('triggerUpdateOtherCard', card.id, { root: true })
         }
       })
-      cache.updateSpace('editedByUserId', context.rootState.currentUser.id, currentSpaceId)
+      cache.updateSpace('editedByUserId', userStore.id, currentSpaceId)
       await context.dispatch('api/addToQueue', { name: 'updateMultipleCards', body: updates }, { root: true })
       context.dispatch('currentSpace/updateSpacePreviewImage', null, { root: true })
     },
@@ -727,7 +731,7 @@ export default {
       const cardIds = cards.map(card => card.id)
       // broadcast changes
       context.dispatch('broadcast/update', { updates: { cards }, type: 'moveCards', handler: 'currentCards/moveBroadcast' }, { root: true })
-      context.commit('broadcast/updateStore', { updates: { userId: context.rootState.currentUser.id }, type: 'clearRemoteCardsDragging' }, { root: true })
+      context.commit('broadcast/updateStore', { updates: { userId: userStore.id }, type: 'clearRemoteCardsDragging' }, { root: true })
       // ..
       nextTick(() => {
         context.dispatch('history/resume', null, { root: true })
@@ -828,7 +832,7 @@ export default {
       context.dispatch('broadcast/update', { updates: card, type: 'removeCard', handler: 'currentCards/remove' }, { root: true })
       context.dispatch('currentConnections/removeFromItem', card, { root: true })
       context.commit('triggerUpdateHeaderAndFooterPosition', null, { root: true })
-      const cardIsUpdatedByCurrentUser = card.userId === context.rootState.currentUser.id
+      const cardIsUpdatedByCurrentUser = card.userId === userStore.id
       if (cardIsUpdatedByCurrentUser) {
         context.dispatch('currentUser/cardsCreatedCountUpdateBy', {
           cards: [card],
@@ -845,7 +849,7 @@ export default {
     },
     deleteAllRemoved: async (context) => {
       const spaceId = context.rootState.currentSpace.id
-      const userId = context.rootState.currentUser.id
+      const userId = userStore.id
       const removedCards = context.state.removedCards
       removedCards.forEach(card => context.commit('deleteCard', card))
       await context.dispatch('api/addToQueue', { name: 'deleteAllRemovedCards', body: { userId, spaceId } }, { root: true })
@@ -1148,7 +1152,7 @@ export default {
       } else if (userTag) {
         return userTag.color
       } else {
-        return rootState.currentUser.color
+        return userStore.color
       }
     },
     shouldSnapToGrid: (state, getters, rootState, rootGetters) => {

@@ -1,8 +1,11 @@
+import { useUserStore } from '@/stores/useUserStore'
 import utils from '@/utils.js'
 import cache from '@/cache.js'
 
 import uniqBy from 'lodash-es/uniqBy'
 import uniq from 'lodash-es/uniq'
+
+const userStore = useUserStore()
 
 // normalized state
 // https://github.com/vuejs/vuejs.org/issues/1636
@@ -103,7 +106,7 @@ export default {
       let group = space.group
       if (!group) { return }
       context.commit('update', group)
-      const groupUser = context.getters.groupUser({ userId: context.rootState.currentUser.id })
+      const groupUser = context.getters.groupUser({ userId: userStore.id })
       if (!groupUser) { return }
       try {
         group = await context.dispatch('api/getGroup', group.id, { root: true })
@@ -113,7 +116,7 @@ export default {
       }
     },
     joinGroup: async (context) => {
-      const userId = context.rootState.currentUser.id
+      const userId = userStore.id
       const group = context.rootState.groupToJoinOnLoad
       if (!group) { return }
       context.commit('notifyIsJoiningGroup', true, { root: true })
@@ -163,7 +166,7 @@ export default {
       await context.dispatch('api/addToQueue', { name: 'updateGroupUser', body: update }, { root: true })
     },
     addCurrentSpace: async (context, group) => {
-      const user = context.rootState.currentUser
+      const user = userStore
       const body = { groupId: group.id, addedToGroupByUserId: user.id }
       await context.dispatch('currentSpace/updateSpace', body, { root: true })
       await context.dispatch('userNotifications/addSpaceToGroup', body, { root: true })
@@ -230,7 +233,7 @@ export default {
       return group.users.find(user => user.id === userId)
     },
     currentUserIsCurrentSpaceGroupUser: (state, getters, rootState) => {
-      const userId = rootState.currentUser.id
+      const userId = userStore.id
       const groupId = rootState.currentSpace.groupId
       if (!groupId) { return }
       const group = getters.spaceGroup()

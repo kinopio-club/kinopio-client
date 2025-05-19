@@ -1,8 +1,10 @@
+import { useUserStore } from '@/stores/useUserStore'
 import utils from '@/utils.js'
 import consts from '@/consts.js'
 
 import { nanoid } from 'nanoid'
 import { nextTick } from 'vue'
+const userStore = useUserStore()
 
 export default {
   namespaced: true,
@@ -42,7 +44,7 @@ export default {
   },
   actions: {
     checkIfFileTooBig: (context, file) => {
-      const userIsUpgraded = context.rootState.currentUser.isUpgraded
+      const userIsUpgraded = userStore.isUpgraded
       const isFileTooBig = utils.isFileTooBig({ file, userIsUpgraded })
       if (isFileTooBig) {
         throw {
@@ -65,7 +67,7 @@ export default {
       const fileName = utils.normalizeFileUrl(file.name)
       const id = cardId || spaceId || boxId
       const key = `${id}/${fileName}`
-      const userIsUpgraded = context.rootState.currentUser.isUpgraded
+      const userIsUpgraded = userStore.isUpgraded
       context.dispatch('checkIfFileTooBig', file)
       // add presignedPostData to upload
       let presignedPostData
@@ -92,7 +94,7 @@ export default {
             spaceId,
             boxId,
             percentComplete: percentCompleteDisplay,
-            userId: context.rootState.currentUser.id,
+            userId: userStore.id,
             id: uploadId
           }
           context.commit('updatePendingUpload', updates)
@@ -127,7 +129,7 @@ export default {
     addCardsAndUploadFiles: async (context, { files, event, position }) => {
       position = position || utils.cursorPositionInSpace(event)
       context.dispatch('currentUser/notifyReadOnly', position, { root: true })
-      const userIsUpgraded = context.rootState.currentUser.isUpgraded
+      const userIsUpgraded = userStore.isUpgraded
       const canEditSpace = context.rootGetters['currentUser/canEditSpace']()
       if (!canEditSpace) {
         context.commit('addNotification', { message: 'You can only upload files on spaces you can edit', type: 'info' }, { root: true })

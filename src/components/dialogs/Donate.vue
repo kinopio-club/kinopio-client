@@ -102,7 +102,7 @@ const donate = async () => {
     const result = await store.dispatch('api/donationUrl', {
       amount,
       productId,
-      userId: state.currentUser.id
+      userId: userStore.id
     })
     window.location = result.url
   } catch (error) {

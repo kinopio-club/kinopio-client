@@ -1,3 +1,5 @@
+import { useUserStore } from '@/stores/useUserStore'
+
 // adapted from https://twitter.com/steveruizok/status/1487052071685734410
 
 // each `patch` contains `new` and `prev` updates
@@ -26,6 +28,7 @@
 
 import utils from '@/utils.js'
 import { nextTick } from 'vue'
+const userStore = useUserStore()
 
 const showDebugMessages = false
 const showLogMessages = true // true

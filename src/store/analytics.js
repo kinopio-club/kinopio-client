@@ -29,7 +29,7 @@ export default {
   getters: {
     shouldSend: (state, getters, rootState) => {
       if (consts.isDevelopment()) { return }
-      // if (rootState.currentUser.analyticsIsDisabled) { return }
+      // if (userStore.analyticsIsDisabled) { return }
       if (!rootState.isOnline) { return }
       return true
     }

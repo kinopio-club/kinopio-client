@@ -1,4 +1,5 @@
 import { useCardStore } from '@/stores/useCardStore'
+import { useUserStore } from '@/stores/useUserStore'
 
 import utils from '@/utils.js'
 import consts from '@/consts.js'
@@ -8,6 +9,8 @@ import { nanoid } from 'nanoid'
 import randomColor from 'randomcolor'
 import last from 'lodash-es/last'
 import uniq from 'lodash-es/uniq'
+
+const userStore = useUserStore()
 
 // normalized state
 // https://github.com/vuejs/vuejs.org/issues/1636
@@ -186,7 +189,7 @@ export default {
       type = type || context.getters.typeForNewConnections
       connection.id = connection.id || nanoid()
       connection.spaceId = currentSpaceId
-      connection.userId = context.rootState.currentUser.id
+      connection.userId = userStore.id
       connection.connectionTypeId = type.id
       context.dispatch('broadcast/update', { updates: connection, type: 'addConnection', handler: 'currentConnections/create' }, { root: true })
       if (!shouldNotRecordHistory) {
@@ -198,7 +201,7 @@ export default {
       await context.dispatch('api/addToQueue', { name: 'createConnection', body: connection }, { root: true })
     },
     addType: async (context, type) => {
-      const isThemeDark = context.rootState.currentUser.theme === 'dark'
+      const isThemeDark = userStore.theme === 'dark'
       let color = randomColor({ luminosity: 'light' })
       if (isThemeDark) {
         color = randomColor({ luminosity: 'dark' })
@@ -215,7 +218,7 @@ export default {
           connectionType[key] = type[key]
         })
       }
-      connectionType.userId = context.rootState.currentUser.id
+      connectionType.userId = userStore.id
       context.commit('createType', connectionType)
       context.commit('lastTypeId', connectionType.id)
       context.dispatch('broadcast/update', { updates: connectionType, type: 'addConnectionType', handler: 'currentConnections/createType' }, { root: true })
@@ -491,8 +494,8 @@ export default {
       return connections
     },
     typeForNewConnections: (state, getters, rootState, rootGetters) => {
-      const userId = rootState.currentUser.id
-      const shouldUseLastConnectionType = rootState.currentUser.shouldUseLastConnectionType
+      const userId = userStore.id
+      const shouldUseLastConnectionType = userStore.shouldUseLastConnectionType
       let types = getters.allTypes
       types = types.filter(type => type.userId === userId)
       if (shouldUseLastConnectionType) {
