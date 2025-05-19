@@ -110,7 +110,7 @@ const clearStrokes = () => {
 
 // points
 
-const strokeColor = computed(() => store.getters['currentUser/drawingColor'])
+const strokeColor = computed(() => userStore.getUserDrawingColor)
 const strokeDiameter = computed(() => {
   const diameter = userStore.drawingBrushSize
   return consts.drawingBrushSizeDiameter[diameter]

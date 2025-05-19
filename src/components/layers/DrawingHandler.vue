@@ -25,7 +25,7 @@ const props = defineProps({
 const viewportHeight = computed(() => store.state.viewportHeight)
 const viewportWidth = computed(() => store.state.viewportWidth)
 const toolbarIsDrawing = computed(() => store.state.currentUserToolbar === 'drawing')
-const strokeColor = computed(() => store.getters['currentUser/drawingColor'])
+const strokeColor = computed(() => userStore.getUserDrawingColor)
 
 const strokeDiameter = computed(() => {
   const diameter = userStore.drawingBrushSize

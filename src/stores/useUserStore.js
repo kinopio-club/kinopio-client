@@ -146,6 +146,9 @@ export const useUserStore = defineStore('users', {
     },
     getUserTagByName: (state) => {
       return (name) => state.tags.find(tag => tag.name === name)
+    },
+    getUserDrawingColor: (state) => {
+      return state.drawingColor || state.color
     }
 
     // tagByName: (state, getters) => (name) => {
@@ -188,10 +191,6 @@ export const useUserStore = defineStore('users', {
     // // user tags
 
     // // drawing
-
-    // drawingColor: (state) => {
-    //   return state.drawingColor || state.color
-    // }
 
   },
 
@@ -455,6 +454,16 @@ export const useUserStore = defineStore('users', {
       }
       const body = { color, value: shouldAdd }
       await store.dispatch('api/addToQueue', { name: 'updateFavoriteColor', body }, { root: true })
+    },
+
+    async updateUserFavoriteSpaceIsEdited (space) {
+      this.favoriteSpaces = this.favoriteSpaces.map(favoriteSpace => {
+        if (favoriteSpace.id === space.id) {
+          favoriteSpace.isEdited = false
+        }
+        return space
+      })
+      await cache.updateUser('favoriteSpaces', this.favoriteSpaces)
     },
 
     // keyboard shortcuts

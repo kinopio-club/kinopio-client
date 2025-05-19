@@ -13,7 +13,7 @@ const store = useStore()
 const userStore = useUserStore()
 
 onMounted(() => {
-  store.dispatch('currentUser/restoreUserAssociatedData')
+  userStore.restoreUserAssociatedData()
 })
 
 const props = defineProps({
@@ -127,7 +127,7 @@ const updateFavoriteSpaceIsEdited = async () => {
   const spaces = favoriteSpaces.value.filter(space => space.isEdited)
   if (!spaces.length) { return }
   spaces.forEach(space => {
-    store.commit('currentUser/updateFavoriteSpaceIsEdited', space.id)
+    userStore.updateUserFavoriteSpaceIsEdited(space)
   })
   await store.dispatch('api/addToQueue', {
     name: 'updateUserVisitSpaces',
