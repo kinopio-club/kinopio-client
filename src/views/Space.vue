@@ -234,7 +234,7 @@ const addCard = (event) => {
     x: position.x,
     y: position.y
   }
-  store.dispatch('currentUser/notifyReadOnly', position)
+  userStore.notifyReadOnly(position)
   if (spaceIsReadOnly.value) { return }
   const newCard = { position, isParentCard }
   cardStore.createCard(newCard)
@@ -323,7 +323,7 @@ const addBox = (event) => {
     store.commit('addNotificationWithPosition', { message: 'Outside Space', position, type: 'info', icon: 'cancel', layer: 'app' })
     return
   }
-  store.dispatch('currentUser/notifyReadOnly', position)
+  userStore.notifyReadOnly(position)
   const shouldPrevent = !userStore.getUserCanEditSpace()
   if (shouldPrevent) {
     store.dispatch('currentUserToolbar', 'card')
@@ -434,7 +434,7 @@ const dragItemsOnNextTick = async () => {
 const dragItems = () => {
   store.dispatch('history/pause')
   const prevCursor = cursor()
-  store.dispatch('currentUser/notifyReadOnly', prevCursor)
+  userStore.notifyReadOnly(prevCursor)
   const shouldPrevent = !userStore.getUserCanEditSpace()
   if (shouldPrevent) { return }
   // cards

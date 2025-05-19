@@ -1226,7 +1226,7 @@ const self = {
 
     updateArenaAccessToken: async (context, arenaReturnedCode) => {
       try {
-        const currentUserIsSignedIn = context.rootGetters['currentUser/isSignedIn']
+        const currentUserIsSignedIn = userStore.getUserIsSignedIn
         let userId
         if (currentUserIsSignedIn) {
           userId = userStore.id

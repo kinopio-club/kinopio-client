@@ -63,7 +63,7 @@ onBeforeUnmount(() => {
 const isOffline = computed(() => !store.state.isOnline)
 const currentUserIsSignedIn = computed(() => userStore.getUserIsSignedIn)
 const kinopioDomain = computed(() => consts.kinopioDomain())
-const cardsCreatedIsOverLimit = computed(() => store.getters['currentUser/cardsCreatedIsOverLimit'])
+const cardsCreatedIsOverLimit = computed(() => userStore.getUserCardsCreatedIsOverLimit)
 const maxCardCharacterLimit = computed(() => consts.cardCharacterLimit)
 const currentUser = computed(() => userStore.getUserAllState)
 const isAddPage = computed(() => store.state.isAddPage)
@@ -149,8 +149,7 @@ const signIn = async (event) => {
   const result = await response.json()
   state.loading.signIn = false
   if (isSuccess(response)) {
-    await cache.saveUser(result)
-    store.commit('currentUser/updateUser', result)
+    userStore.updateUserState(result)
     initUser()
   } else {
     handleSignInErrors(result)
