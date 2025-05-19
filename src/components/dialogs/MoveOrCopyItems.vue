@@ -4,6 +4,7 @@ import { useStore } from 'vuex'
 import { useCardStore } from '@/stores/useCardStore'
 import { useConnectionStore } from '@/stores/useConnectionStore'
 import { useBoxStore } from '@/stores/useBoxStore'
+import { useUserStore } from '@/stores/useUserStore'
 
 import cache from '@/cache.js'
 import utils from '@/utils.js'
@@ -14,6 +15,7 @@ const store = useStore()
 const cardStore = useCardStore()
 const connectionStore = useConnectionStore()
 const boxStore = useBoxStore()
+const userStore = useUserStore()
 
 const dialogElement = ref(null)
 
@@ -191,9 +193,7 @@ const moveOrCopyToSpace = async () => {
     store.dispatch('history/resume')
     store.dispatch('history/add', items)
   }
-  store.dispatch('currentUser/cardsCreatedCountUpdateBy', {
-    cards: items.cards
-  })
+  userStore.updateUserCardsCreatedCount(items.cards)
   connectionStore.removeAllUnusedConnectionTypes()
   store.dispatch('clearMultipleSelected')
   store.dispatch('closeAllDialogs')
@@ -216,7 +216,7 @@ const triggerUpgradeUserIsVisible = () => {
 const isCardsCreatedIsOverLimit = () => {
   if (props.actionIsMove) { return }
   const items = selectedItems.value.cards.length
-  return store.getters['currentUser/cardsCreatedWillBeOverLimit'](items)
+  return userStore.getUserCardsCreatedWillBeOverLimit(items)
 }
 
 // notify

@@ -145,11 +145,6 @@ export const useUserStore = defineStore('users', {
       }
     }
 
-    // cardsCreatedWillBeOverLimit: (state, getters, rootState) => (count) => {
-    //   const cardsCreatedLimit = consts.cardsCreatedLimit
-    //   if (state.isUpgraded) { return }
-    //   if (state.cardsCreatedCount + count >= cardsCreatedLimit) { return true }
-    // },
     // cannotEditUnlessSignedIn: (state, getters, rootState) => (space) => {
     //   space = space || rootState.currentSpace
     //   const spaceIsOpen = space.privacy === 'open'
@@ -302,6 +297,10 @@ export const useUserStore = defineStore('users', {
     },
     getItemIsCreatedByUser (connection) {
       return this.id === connection.userId
+    },
+    getUserCardsCreatedWillBeOverLimit (count) {
+      if (this.isUpgraded) { return }
+      if (this.cardsCreatedCount + count >= consts.cardsCreatedLimit) { return true }
     },
 
     // init
