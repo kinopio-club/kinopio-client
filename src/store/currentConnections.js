@@ -10,8 +10,6 @@ import randomColor from 'randomcolor'
 import last from 'lodash-es/last'
 import uniq from 'lodash-es/uniq'
 
-const userStore = useUserStore()
-
 // normalized state
 // https://github.com/vuejs/vuejs.org/issues/1636
 
@@ -180,6 +178,7 @@ export default {
     // create
 
     add: async (context, { connection, type, shouldNotRecordHistory }) => {
+      const userStore = useUserStore()
       const isExistingPath = context.getters.isExistingPath({
         startItemId: connection.startItemId,
         endItemId: connection.endItemId
@@ -201,6 +200,7 @@ export default {
       await context.dispatch('api/addToQueue', { name: 'createConnection', body: connection }, { root: true })
     },
     addType: async (context, type) => {
+      const userStore = useUserStore()
       const isThemeDark = userStore.theme === 'dark'
       let color = randomColor({ luminosity: 'light' })
       if (isThemeDark) {
@@ -494,6 +494,7 @@ export default {
       return connections
     },
     typeForNewConnections: (state, getters, rootState, rootGetters) => {
+      const userStore = useUserStore()
       const userId = userStore.id
       const shouldUseLastConnectionType = userStore.shouldUseLastConnectionType
       let types = getters.allTypes

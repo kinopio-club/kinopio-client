@@ -9,8 +9,6 @@ import randomColor from 'randomcolor'
 import uniq from 'lodash-es/uniq'
 import { nextTick } from 'vue'
 
-const userStore = useUserStore()
-
 // normalized state
 // https://github.com/vuejs/vuejs.org/issues/1636
 
@@ -200,6 +198,7 @@ export default {
     // create
 
     add: async (context, { box, shouldResize }) => {
+      const userStore = useUserStore()
       const count = context.state.ids.length
       const minBoxSize = consts.minBoxSize
       const isThemeDark = userStore.theme === 'dark'
@@ -259,6 +258,7 @@ export default {
       })
     },
     updateMultiple: async (context, boxes) => {
+      const userStore = useUserStore()
       const spaceId = context.rootState.currentSpace.id
       const updates = {
         boxes,
