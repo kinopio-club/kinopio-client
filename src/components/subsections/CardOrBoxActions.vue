@@ -128,7 +128,7 @@ const label = computed(() => {
   } else {
     label = cardLabel || boxLabel
   }
-  return label.toUpperCase()
+  return label?.toUpperCase()
 })
 const isBoxDetails = computed(() => Boolean(store.state.boxDetailsIsVisibleForBoxId))
 const cardIds = computed(() => props.cards.map(card => card.id))

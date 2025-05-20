@@ -310,6 +310,7 @@ export const useUserStore = defineStore('users', {
       })
     },
     async createNewUser () {
+      console.info('🌸 Create new user')
       this.themeIsSystem = true
       this.appleAppAccountToken = uuidv4()
       const allState = { ...this.$state }
@@ -379,8 +380,7 @@ export const useUserStore = defineStore('users', {
         await this.restoreRemoteUser(cachedUser)
         await this.restoreUserAssociatedData()
       } else {
-        console.info('🌸 Create new user')
-        store.dispatch('createNewUser')
+        this.createNewUser()
       }
       store.dispatch('themes/restore', null, { root: true })
       store.commit('triggerUserIsLoaded', null, { root: true })

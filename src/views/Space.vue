@@ -421,7 +421,7 @@ const updateSizeForNewBox = (boxId) => {
     resizeWidth: consts.defaultBoxWidth,
     resizeHeight: consts.defaultBoxHeight
   }
-  boxStore.update(update)
+  boxStore.updateBox(update)
 }
 
 // drag items

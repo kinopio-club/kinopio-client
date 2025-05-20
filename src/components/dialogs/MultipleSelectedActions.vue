@@ -304,8 +304,11 @@ const connectionAlreadyExists = (startItemId, endItemId) => {
 const onlyBoxesIsSelected = computed(() => boxesIsSelected.value && !cardsIsSelected.value && !connectionsIsSelected.value)
 const boxesIsSelected = computed(() => multipleBoxesSelectedIds.value.length > 0)
 const boxes = computed(() => {
-  const seletectBoxes = boxStore.getBoxesSelected
-  prevBoxes = seletectBoxes
+  let boxes = multipleBoxesSelectedIds.value.map(boxId => {
+    boxStore.getBox(boxId)
+  })
+  boxes = boxes.filter(box => Boolean(box))
+  prevBoxes = boxes
   return boxes
 })
 const editableBoxes = computed(() => {
@@ -501,8 +504,19 @@ dialog.narrow.multiple-selected-actions(
           span Box
           img.icon.down-arrow(src="@/assets/down-arrow.svg")
 
-    CardOrBoxActions(:visible="cardsIsSelected" :cards="cards" @closeDialogs="closeDialogs" :backgroundColor="userColor")
-    CardOrBoxActions(:labelIsVisible="true" :visible="(shouldShowMultipleSelectedBoxActions || onlyBoxesIsSelected) && boxesIsSelected" :boxes="boxes" @closeDialogs="closeDialogs" :backgroundColor="userColor")
+    CardOrBoxActions(
+      :visible="cardsIsSelected"
+      :cards="cards"
+      @closeDialogs="closeDialogs"
+      :backgroundColor="userColor"
+    )
+    CardOrBoxActions(
+      :labelIsVisible="true"
+      :visible="(shouldShowMultipleSelectedBoxActions || onlyBoxesIsSelected) && boxesIsSelected"
+      :boxes="boxes"
+      @closeDialogs="closeDialogs"
+      :backgroundColor="userColor"
+    )
 
       //- :class="{ 'last-row': !connectionsIsSelected }"
 
