@@ -240,7 +240,7 @@ const changeToPrevSpace = () => {
 // search filters
 
 const searchResultsCount = computed(() => store.state.searchResultsCards.length)
-const totalFiltersActive = computed(() => userStore.getUserTotalFiltersActive)
+const totalFiltersActive = computed(() => userStore.getUserTotalFiltersActive())
 const searchResultsOrFilters = computed(() => {
   if (searchResultsCount.value || totalFiltersActive.value) {
     return true

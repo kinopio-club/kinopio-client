@@ -64,7 +64,7 @@ const updateResultsSectionHeight = async () => {
 
 // items
 
-const totalFiltersActive = computed(() => userStore.getUserTotalFiltersActive)
+const totalFiltersActive = computed(() => userStore.getUserTotalFiltersActive())
 const connectionTypes = computed(() => connectionStore.getAllConnectionTypes)
 const spaceFrames = computed(() => {
   const cards = cardStore.getAllCards

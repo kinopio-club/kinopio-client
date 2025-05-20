@@ -39,7 +39,7 @@ const toggleDialogIsPinned = () => {
 
 // filters
 
-const totalFiltersActive = computed(() => userStore.getUserTotalFiltersActive)
+const totalFiltersActive = computed(() => userStore.getUserTotalFiltersActive())
 const filterShowUsers = computed(() => userStore.filterShowUsers)
 const filterShowDateUpdated = computed(() => userStore.filterShowDateUpdated)
 const filterUnchecked = computed(() => userStore.filterUnchecked)
