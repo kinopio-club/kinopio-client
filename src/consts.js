@@ -35,7 +35,7 @@ export default {
   isSecureAppContextIOS: navigator.isSecureAppContextIOS, // true = iOS app
   isSecureAppContext: navigator.isSecureAppContext, // true = iOS app
   cdnHost: 'https://cdn.kinopio.club',
-  defaultSpaceBackground: '',
+  defaultSpaceBackground: 'https://bk.kinopio.club/squiggle-background-2x.png',
   moderatorUserId: 'euGhpBrR9eBcjKnK16C_g',
   uploadPlaceholder: '⬬⬭',
   itemTypesWithPositions: ['boxes', 'cards'],
