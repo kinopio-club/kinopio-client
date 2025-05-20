@@ -13,8 +13,6 @@ import { nanoid } from 'nanoid'
 import utils from '@/utils.js'
 import consts from '@/consts.js'
 
-const userStore = useUserStore()
-
 let websocket, currentSpaceRoom, currentUserIsConnected
 const clientId = nanoid()
 
@@ -22,6 +20,7 @@ console.info('🌳 websocket clientId', clientId)
 const showDebugMessages = false
 
 const joinSpaceRoom = (store, mutation) => {
+  const userStore = useUserStore()
   console.info('🌙 joining', websocket)
   if (!websocket) { return }
   const space = store.state.currentSpace
@@ -104,6 +103,7 @@ const closeWebsocket = (store) => {
 export default function createWebSocketPlugin () {
   return store => {
     store.subscribe((mutation, state) => {
+      const userStore = useUserStore()
       if (mutation.type === 'broadcast/connect') {
         store.commit('isJoiningSpace', true)
         const host = consts.websocketHost()

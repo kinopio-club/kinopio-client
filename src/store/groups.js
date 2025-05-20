@@ -5,8 +5,6 @@ import cache from '@/cache.js'
 import uniqBy from 'lodash-es/uniqBy'
 import uniq from 'lodash-es/uniq'
 
-const userStore = useUserStore()
-
 // normalized state
 // https://github.com/vuejs/vuejs.org/issues/1636
 
@@ -102,6 +100,7 @@ export default {
       }
     },
     loadGroup: async (context, space) => {
+      const userStore = useUserStore()
       context.commit('currentSpace/updateGroupMeta', space, { root: true })
       let group = space.group
       if (!group) { return }
@@ -116,6 +115,7 @@ export default {
       }
     },
     joinGroup: async (context) => {
+      const userStore = useUserStore()
       const userId = userStore.id
       const group = context.rootState.groupToJoinOnLoad
       if (!group) { return }
@@ -166,6 +166,7 @@ export default {
       await context.dispatch('api/addToQueue', { name: 'updateGroupUser', body: update }, { root: true })
     },
     addCurrentSpace: async (context, group) => {
+      const userStore = useUserStore()
       const user = userStore
       const body = { groupId: group.id, addedToGroupByUserId: user.id }
       await context.dispatch('currentSpace/updateSpace', body, { root: true })
@@ -233,6 +234,7 @@ export default {
       return group.users.find(user => user.id === userId)
     },
     currentUserIsCurrentSpaceGroupUser: (state, getters, rootState) => {
+      const userStore = useUserStore()
       const userId = userStore.id
       const groupId = rootState.currentSpace.groupId
       if (!groupId) { return }

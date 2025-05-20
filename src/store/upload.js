@@ -4,7 +4,6 @@ import consts from '@/consts.js'
 
 import { nanoid } from 'nanoid'
 import { nextTick } from 'vue'
-const userStore = useUserStore()
 
 export default {
   namespaced: true,
@@ -44,6 +43,7 @@ export default {
   },
   actions: {
     checkIfFileTooBig: (context, file) => {
+      const userStore = useUserStore()
       const userIsUpgraded = userStore.isUpgraded
       const isFileTooBig = utils.isFileTooBig({ file, userIsUpgraded })
       if (isFileTooBig) {
@@ -63,6 +63,7 @@ export default {
       })
     },
     uploadFile: async (context, { file, cardId, spaceId, boxId }) => {
+      const userStore = useUserStore()
       const uploadId = nanoid()
       const fileName = utils.normalizeFileUrl(file.name)
       const id = cardId || spaceId || boxId
@@ -127,6 +128,7 @@ export default {
       })
     },
     addCardsAndUploadFiles: async (context, { files, event, position }) => {
+      const userStore = useUserStore()
       position = position || utils.cursorPositionInSpace(event)
       context.dispatch('currentUser/notifyReadOnly', position, { root: true })
       const userIsUpgraded = userStore.isUpgraded

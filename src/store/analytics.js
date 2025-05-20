@@ -2,8 +2,6 @@ import utils from '@/utils.js'
 import consts from '@/consts.js'
 import { useUserStore } from '@/stores/useUserStore'
 
-const userStore = useUserStore()
-
 export default {
   namespaced: true,
   actions: {
@@ -13,6 +11,7 @@ export default {
       console.info('👻 analytics event:', body.name)
     },
     event: (context, eventName) => {
+      const userStore = useUserStore()
       utils.typeCheck({ value: eventName, type: 'string' })
       const body = {
         domain: 'kinopio.club',

@@ -68,8 +68,7 @@ const init = async () => {
   }
   store.dispatch('api/updateDateImage')
   store.dispatch('analytics/event', 'pageview')
-  await cache.migrateFromLocalStorage()
-  await userStore.initializeUser()
+  await cache.migrateFromLocalStorage() // legacy
   await store.dispatch('currentSpace/init')
   await store.commit('broadcast/connect')
   await store.dispatch('groups/init')

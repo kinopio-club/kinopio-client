@@ -10,8 +10,6 @@ import uniq from 'lodash-es/uniq'
 import sortBy from 'lodash-es/sortBy'
 import { nextTick } from 'vue'
 
-const userStore = useUserStore()
-
 // normalized state
 // https://github.com/vuejs/vuejs.org/issues/1636
 
@@ -211,6 +209,7 @@ export default {
     // create
 
     add: async (context, { card, skipCardDetailsIsVisible }) => {
+      const userStore = useUserStore()
       if (context.rootGetters['currentSpace/shouldPreventAddCard']) {
         context.commit('notifyCardsCreatedIsOverLimit', true, { root: true })
         return
@@ -256,6 +255,7 @@ export default {
       await cache.updateSpace('editedAt', utils.unixTime(), currentSpaceId)
     },
     addMultiple: async (context, { cards, shouldOffsetPosition }) => {
+      const userStore = useUserStore()
       const spaceId = context.rootState.currentSpace.id
       cards = cards.map(card => {
         let x = card.x
@@ -298,6 +298,7 @@ export default {
       }, { root: true })
     },
     paste: async (context, { card, cardId }) => {
+      const userStore = useUserStore()
       utils.typeCheck({ value: card, type: 'object' })
       card.id = cardId || nanoid()
       card.spaceId = currentSpaceId
@@ -328,6 +329,7 @@ export default {
     // update
 
     update: async (context, { card, shouldPreventUpdateDimensionsAndPaths }) => {
+      const userStore = useUserStore()
       if (!card) { return }
       // prevent null position
       const keys = Object.keys(card)
@@ -356,6 +358,7 @@ export default {
       context.dispatch('currentSpace/updateSpacePreviewImage', null, { root: true })
     },
     updateMultiple: async (context, cards) => {
+      const userStore = useUserStore()
       if (!cards.length) { return }
       const spaceId = context.rootState.currentSpace.id
       const updates = {
@@ -698,6 +701,7 @@ export default {
       }
     },
     afterMove: async (context) => {
+      const userStore = useUserStore()
       const spaceId = context.rootState.currentSpace.id
       // update cards
       const currentDraggingCardId = context.rootState.currentDraggingCardId
@@ -817,6 +821,7 @@ export default {
     // remove
 
     remove: async (context, card) => {
+      const userStore = useUserStore()
       if (!card) { return }
       card = context.getters.byId(card.id)
       const cardHasContent = Boolean(card.name)
@@ -848,6 +853,7 @@ export default {
       await context.dispatch('api/addToQueue', { name: 'deleteCard', body: card }, { root: true })
     },
     deleteAllRemoved: async (context) => {
+      const userStore = useUserStore()
       const spaceId = context.rootState.currentSpace.id
       const userId = userStore.id
       const removedCards = context.state.removedCards
@@ -1145,6 +1151,7 @@ export default {
       return card
     },
     segmentTagColor: (state, getters, rootState, rootGetters) => (segment) => {
+      const userStore = useUserStore()
       const spaceTag = rootGetters['currentSpace/tagByName'](segment.name)
       const userTag = rootGetters['currentUser/tagByName'](segment.name)
       if (spaceTag) {

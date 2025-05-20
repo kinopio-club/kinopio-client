@@ -9,8 +9,6 @@ import mergeWith from 'lodash-es/mergeWith'
 import uniq from 'lodash-es/uniq'
 import { nanoid } from 'nanoid'
 
-const userStore = useUserStore()
-
 let otherItemsQueue
 
 // other items queue
@@ -156,6 +154,7 @@ const self = {
     },
 
     requestOptions: (context, options) => {
+      const userStore = useUserStore()
       const headers = new Headers({
         'Content-Type': 'application/json',
         'Cache-Control': 'must-revalidate, no-store, no-cache, private'
@@ -184,6 +183,7 @@ const self = {
     // Queue Operations
 
     addToQueue: async (context, { name, body, spaceId }) => {
+      const userStore = useUserStore()
       const canEditSpace = userStore.getUserCanEditSpace()
       const editOperations = ['updateUrlPreviewImage', 'updateCard', 'updateConnection']
       if (editOperations.includes(name) && !canEditSpace) { return }
@@ -234,6 +234,7 @@ const self = {
       context.commit('clearSendingQueue', null, { root: true })
     },
     sendQueue: async (context) => {
+      const userStore = useUserStore()
       const apiKey = userStore.apiKey
       const isOnline = context.rootState.isOnline
       const queue = await cache.queue()
@@ -363,6 +364,7 @@ const self = {
     // User
 
     getUser: async (context) => {
+      const userStore = useUserStore()
       const apiKey = userStore.apiKey
       const isOnline = context.rootState.isOnline
       if (!shouldRequest({ apiKey, isOnline })) { return }
@@ -375,6 +377,7 @@ const self = {
       }
     },
     getUserFavoriteSpaces: async (context) => {
+      const userStore = useUserStore()
       const apiKey = userStore.apiKey
       const isOnline = context.rootState.isOnline
       if (!shouldRequest({ apiKey, isOnline })) { return }
@@ -387,6 +390,7 @@ const self = {
       }
     },
     getUserFavoriteUsers: async (context) => {
+      const userStore = useUserStore()
       const apiKey = userStore.apiKey
       const isOnline = context.rootState.isOnline
       if (!shouldRequest({ apiKey, isOnline })) { return }
@@ -399,6 +403,7 @@ const self = {
       }
     },
     getUserFavoriteColors: async (context) => {
+      const userStore = useUserStore()
       const apiKey = userStore.apiKey
       const isOnline = context.rootState.isOnline
       if (!shouldRequest({ apiKey, isOnline })) { return }
@@ -411,6 +416,7 @@ const self = {
       }
     },
     getUserHiddenSpaces: async (context) => {
+      const userStore = useUserStore()
       const apiKey = userStore.apiKey
       const isOnline = context.rootState.isOnline
       if (!shouldRequest({ apiKey, isOnline })) { return }
@@ -423,6 +429,7 @@ const self = {
       }
     },
     getFollowingUsersSpaces: async (context) => {
+      const userStore = useUserStore()
       const apiKey = userStore.apiKey
       const isSpacePage = context.rootGetters.isSpacePage
       const isOnline = context.rootState.isOnline
@@ -438,6 +445,7 @@ const self = {
       }
     },
     getUserSpaces: async (context) => {
+      const userStore = useUserStore()
       const apiKey = userStore.apiKey
       const isOnline = context.rootState.isOnline
       if (!shouldRequest({ apiKey, isOnline })) { return }
@@ -452,6 +460,7 @@ const self = {
       }
     },
     getUserGroupSpaces: async (context) => {
+      const userStore = useUserStore()
       const groups = context.rootGetters['groups/byUser']()
       if (!groups.length) { return }
       const apiKey = userStore.apiKey
@@ -468,6 +477,7 @@ const self = {
       }
     },
     getUserRemovedSpaces: async (context) => {
+      const userStore = useUserStore()
       const apiKey = userStore.apiKey
       const isOnline = context.rootState.isOnline
       if (!shouldRequest({ apiKey, isOnline })) { return }
@@ -480,6 +490,7 @@ const self = {
       }
     },
     getUserInboxSpace: async (context) => {
+      const userStore = useUserStore()
       const apiKey = userStore.apiKey
       const isOnline = context.rootState.isOnline
       if (!shouldRequest({ apiKey, isOnline })) { return }
@@ -492,6 +503,7 @@ const self = {
       }
     },
     getSpacesNotificationUnsubscribed: async (context) => {
+      const userStore = useUserStore()
       const apiKey = userStore.apiKey
       const isOnline = context.rootState.isOnline
       if (!shouldRequest({ apiKey, isOnline })) { return }
@@ -504,6 +516,7 @@ const self = {
       }
     },
     getGroupsNotificationUnsubscribed: async (context) => {
+      const userStore = useUserStore()
       const apiKey = userStore.apiKey
       const isOnline = context.rootState.isOnline
       if (!shouldRequest({ apiKey, isOnline })) { return }
@@ -516,6 +529,7 @@ const self = {
       }
     },
     spaceNotificationResubscribe: async (context, space) => {
+      const userStore = useUserStore()
       const apiKey = userStore.apiKey
       const user = userStore
       const isOnline = context.rootState.isOnline
@@ -529,6 +543,7 @@ const self = {
       }
     },
     groupNotificationResubscribe: async (context, group) => {
+      const userStore = useUserStore()
       const apiKey = userStore.apiKey
       const user = userStore
       const isOnline = context.rootState.isOnline
@@ -542,6 +557,7 @@ const self = {
       }
     },
     deleteUserPermanent: async (context) => {
+      const userStore = useUserStore()
       const apiKey = userStore.apiKey
       const isOnline = context.rootState.isOnline
       if (!shouldRequest({ apiKey, isOnline })) { return }
@@ -586,6 +602,7 @@ const self = {
       }
     },
     updateUserFavorites: async (context, body) => {
+      const userStore = useUserStore()
       const apiKey = userStore.apiKey
       const isOnline = context.rootState.isOnline
       if (!shouldRequest({ apiKey, isOnline })) { return }
@@ -644,6 +661,7 @@ const self = {
       }
     },
     getSpace: async (context, { space, shouldRequestRemote, spaceReadOnlyKey }) => {
+      const userStore = useUserStore()
       try {
         const apiKey = userStore.apiKey
         const isOnline = context.rootState.isOnline
@@ -722,6 +740,7 @@ const self = {
       }
     },
     searchExploreSpaces: async (context, body) => {
+      const userStore = useUserStore()
       const apiKey = userStore.apiKey
       const isOnline = context.rootState.isOnline
       if (!shouldRequest({ apiKey, isOnline })) { return }
@@ -734,6 +753,7 @@ const self = {
       }
     },
     createSpaces: async (context) => {
+      const userStore = useUserStore()
       try {
         let spaces = await cache.getAllSpaces()
         if (!spaces.length) { return }
@@ -811,6 +831,7 @@ const self = {
       }
     },
     getSpaceRemovedCards: async (context, space) => {
+      const userStore = useUserStore()
       const apiKey = userStore.apiKey
       const isOnline = context.rootState.isOnline
       if (!shouldRequest({ apiKey, isOnline })) { return }
@@ -823,6 +844,7 @@ const self = {
       }
     },
     getSpaceCollaboratorKey: async (context, space) => {
+      const userStore = useUserStore()
       const apiKey = userStore.apiKey
       const isOnline = context.rootState.isOnline
       if (!shouldRequest({ apiKey, isOnline })) { return }
@@ -835,6 +857,7 @@ const self = {
       }
     },
     addSpaceCollaborator: async (context, { spaceId, collaboratorKey }) => {
+      const userStore = useUserStore()
       const apiKey = userStore.apiKey
       const isOnline = context.rootState.isOnline
       if (!shouldRequest({ apiKey, isOnline })) { return }
@@ -850,6 +873,7 @@ const self = {
       }
     },
     removeSpaceCollaborator: async (context, { space, user }) => {
+      const userStore = useUserStore()
       const apiKey = userStore.apiKey
       const isOnline = context.rootState.isOnline
       if (!shouldRequest({ apiKey, isOnline })) { return }
@@ -868,6 +892,7 @@ const self = {
       }
     },
     restoreRemovedSpace: async (context, space) => {
+      const userStore = useUserStore()
       const apiKey = userStore.apiKey
       const isOnline = context.rootState.isOnline
       if (!shouldRequest({ apiKey, isOnline })) { return }
@@ -880,6 +905,7 @@ const self = {
       }
     },
     sendSpaceInviteEmails: async (context, body) => {
+      const userStore = useUserStore()
       const apiKey = userStore.apiKey
       const isOnline = context.rootState.isOnline
       if (!shouldRequest({ apiKey, isOnline })) { return }
@@ -932,6 +958,7 @@ const self = {
     // Card
 
     getCardsWithLinkToSpaceId: async (context, spaceId) => {
+      const userStore = useUserStore()
       const apiKey = userStore.apiKey
       const isOnline = context.rootState.isOnline
       if (!shouldRequest({ apiKey, isOnline })) { return }
@@ -944,6 +971,7 @@ const self = {
       }
     },
     updateCards: async (context, body) => {
+      const userStore = useUserStore()
       const apiKey = userStore.apiKey
       const isOnline = context.rootState.isOnline
       if (!shouldRequest({ apiKey, isOnline })) { return }
@@ -956,6 +984,7 @@ const self = {
       }
     },
     createCards: async (context, body) => {
+      const userStore = useUserStore()
       const apiKey = userStore.apiKey
       const isOnline = context.rootState.isOnline
       if (!shouldRequest({ apiKey, isOnline })) { return }
@@ -968,6 +997,7 @@ const self = {
       }
     },
     createCard: async (context, body) => {
+      const userStore = useUserStore()
       const apiKey = userStore.apiKey
       const isOnline = context.rootState.isOnline
       if (!shouldRequest({ apiKey, isOnline })) { return }
@@ -980,6 +1010,7 @@ const self = {
       }
     },
     createCardInInbox: async (context, body) => {
+      const userStore = useUserStore()
       const apiKey = userStore.apiKey
       const isOnline = context.rootState.isOnline
       if (!shouldRequest({ apiKey, isOnline })) { return }
@@ -992,6 +1023,7 @@ const self = {
       }
     },
     searchCards: async (context, body) => {
+      const userStore = useUserStore()
       const apiKey = userStore.apiKey
       const isOnline = context.rootState.isOnline
       if (!shouldRequest({ apiKey, isOnline })) { return }
@@ -1025,6 +1057,7 @@ const self = {
     // ConnectionType
 
     updateConnectionTypes: async (context, body) => {
+      const userStore = useUserStore()
       const apiKey = userStore.apiKey
       const isOnline = context.rootState.isOnline
       if (!shouldRequest({ apiKey, isOnline })) { return }
@@ -1037,6 +1070,7 @@ const self = {
       }
     },
     createConnectionTypes: async (context, body) => {
+      const userStore = useUserStore()
       const apiKey = userStore.apiKey
       const isOnline = context.rootState.isOnline
       if (!shouldRequest({ apiKey, isOnline })) { return }
@@ -1052,6 +1086,7 @@ const self = {
     // Connection
 
     updateConnections: async (context, body) => {
+      const userStore = useUserStore()
       const apiKey = userStore.apiKey
       const isOnline = context.rootState.isOnline
       if (!shouldRequest({ apiKey, isOnline })) { return }
@@ -1064,6 +1099,7 @@ const self = {
       }
     },
     createConnections: async (context, body) => {
+      const userStore = useUserStore()
       const apiKey = userStore.apiKey
       const isOnline = context.rootState.isOnline
       if (!shouldRequest({ apiKey, isOnline })) { return }
@@ -1079,6 +1115,7 @@ const self = {
     // Boxes
 
     createBoxes: async (context, body) => {
+      const userStore = useUserStore()
       const apiKey = userStore.apiKey
       const isOnline = context.rootState.isOnline
       if (!shouldRequest({ apiKey, isOnline })) { return }
@@ -1094,6 +1131,7 @@ const self = {
     // Tag
 
     getCardsWithTag: async (context, name) => {
+      const userStore = useUserStore()
       const apiKey = userStore.apiKey
       const isOnline = context.rootState.isOnline
       if (!shouldRequest({ apiKey, isOnline })) { return }
@@ -1107,6 +1145,7 @@ const self = {
       }
     },
     getUserTags: async (context, removeUnusedTags) => {
+      const userStore = useUserStore()
       const apiKey = userStore.apiKey
       const isOnline = context.rootState.isOnline
       if (!shouldRequest({ apiKey, isOnline })) { return }
@@ -1197,6 +1236,7 @@ const self = {
     // Notifications
 
     getNotifications: async (context) => {
+      const userStore = useUserStore()
       const apiKey = userStore.apiKey
       const isOnline = context.rootState.isOnline
       if (!shouldRequest({ apiKey, isOnline })) { return }
@@ -1210,6 +1250,7 @@ const self = {
       }
     },
     deleteAllNotifications: async (context) => {
+      const userStore = useUserStore()
       const apiKey = userStore.apiKey
       const isOnline = context.rootState.isOnline
       if (!shouldRequest({ apiKey, isOnline })) { return }
@@ -1225,6 +1266,7 @@ const self = {
     // Services
 
     updateArenaAccessToken: async (context, arenaReturnedCode) => {
+      const userStore = useUserStore()
       try {
         const currentUserIsSignedIn = userStore.getUserIsSignedIn
         let userId
@@ -1317,6 +1359,7 @@ const self = {
     // Downloads
 
     downloadAllSpaces: async (context) => {
+      const userStore = useUserStore()
       const apiKey = userStore.apiKey
       const isOnline = context.rootState.isOnline
       if (!shouldRequest({ apiKey, isOnline })) { return }
@@ -1332,6 +1375,7 @@ const self = {
     // Group
 
     getUserGroups: async (context) => {
+      const userStore = useUserStore()
       const apiKey = userStore.apiKey
       const isOnline = context.rootState.isOnline
       if (!shouldRequest({ apiKey, isOnline })) { return }
@@ -1347,6 +1391,7 @@ const self = {
       context.commit('isLoadingGroups', false, { root: true })
     },
     getGroup: async (context, groupId) => {
+      const userStore = useUserStore()
       const apiKey = userStore.apiKey
       const isOnline = context.rootState.isOnline
       if (!shouldRequest({ apiKey, isOnline })) { return }
@@ -1360,6 +1405,7 @@ const self = {
       }
     },
     createGroup: async (context, body) => {
+      const userStore = useUserStore()
       const apiKey = userStore.apiKey
       const isOnline = context.rootState.isOnline
       if (!shouldRequest({ apiKey, isOnline })) { return }
@@ -1372,6 +1418,7 @@ const self = {
       }
     },
     createGroupUser: async (context, body) => {
+      const userStore = useUserStore()
       const apiKey = userStore.apiKey
       const isOnline = context.rootState.isOnline
       if (!shouldRequest({ apiKey, isOnline })) { return }
@@ -1384,6 +1431,7 @@ const self = {
       }
     },
     removeGroupUser: async (context, body) => {
+      const userStore = useUserStore()
       const apiKey = userStore.apiKey
       const isOnline = context.rootState.isOnline
       if (!shouldRequest({ apiKey, isOnline })) { return }
@@ -1396,6 +1444,7 @@ const self = {
       }
     },
     deleteGroupPermanent: async (context, body) => {
+      const userStore = useUserStore()
       const apiKey = userStore.apiKey
       const isOnline = context.rootState.isOnline
       if (!shouldRequest({ apiKey, isOnline })) { return }

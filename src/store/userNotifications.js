@@ -2,7 +2,6 @@ import { useUserStore } from '@/stores/useUserStore'
 import utils from '@/utils.js'
 
 import uniq from 'lodash-es/uniq'
-const userStore = useUserStore()
 
 const notifiedCardIds = []
 
@@ -13,6 +12,7 @@ export default {
     // User
 
     addFavoriteUser: async (context, favoriteUser) => {
+      const userStore = useUserStore()
       const userId = userStore.id
       const recipientUserIds = [favoriteUser.id]
       const notification = {
@@ -23,6 +23,7 @@ export default {
       await context.dispatch('api/addToQueue', { name: 'createUserNotification', body: notification }, { root: true })
     },
     removeFavoriteUser: async (context, favoriteUser) => {
+      const userStore = useUserStore()
       const userId = userStore.id
       const recipientUserIds = [favoriteUser.id]
       const notification = {
@@ -36,6 +37,7 @@ export default {
     // Space
 
     addFavoriteSpace: async (context, favoriteSpace) => {
+      const userStore = useUserStore()
       const userId = userStore.id
       const recipientUserIds = context.getters.recipientMemberIds
       const notification = {
@@ -47,6 +49,7 @@ export default {
       await context.dispatch('api/addToQueue', { name: 'createUserNotification', body: notification }, { root: true })
     },
     removeFavoriteSpace: async (context, favoriteSpace) => {
+      const userStore = useUserStore()
       const userId = userStore.id
       const recipientUserIds = context.getters.recipientUserIds
       const notification = {
@@ -61,6 +64,7 @@ export default {
     // Card
 
     addCardUpdated: async (context, { cardId, type }) => {
+      const userStore = useUserStore()
       if (!cardId) { return }
       if (context.state.name === 'Hello Kinopio') { return }
       if (notifiedCardIds.includes(cardId)) { return }
@@ -104,6 +108,7 @@ export default {
     // Ask to Add Space to Explore
 
     addAskToAddToExplore: async (context) => {
+      const userStore = useUserStore()
       const userId = userStore.id
       const spaceId = context.rootState.currentSpace.id
       const recipientUserIds = context.getters.recipientUserIds
@@ -120,6 +125,7 @@ export default {
   },
   getters: {
     recipientUserIds: (state, getters, rootState, rootGetters) => {
+      const userStore = useUserStore()
       const currentUserId = userStore.id
       const spaceIsOpen = rootState.currentSpace.privacy === 'open'
       // space members
@@ -142,6 +148,7 @@ export default {
       return recipients
     },
     recipientMemberIds: (state, getters, rootState, rootGetters) => {
+      const userStore = useUserStore()
       const currentUserId = userStore.id
       // space members
       let members = rootGetters['currentSpace/members'](true)

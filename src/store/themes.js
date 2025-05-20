@@ -1,6 +1,5 @@
 import { useUserStore } from '@/stores/useUserStore'
 import utils from '@/utils.js'
-const userStore = useUserStore()
 
 const themes = {
   light: {
@@ -88,6 +87,7 @@ export default {
       context.commit('triggerUpdateTheme', null, { root: true })
     },
     toggleIsSystem: (context) => {
+      const userStore = useUserStore()
       const value = !userStore.themeIsSystem
       context.dispatch('isSystem', value)
       if (value) {
@@ -108,6 +108,7 @@ export default {
       context.commit('triggerUpdateTheme', null, { root: true })
     },
     restore: (context) => {
+      const userStore = useUserStore()
       let themeName = userStore.theme
       const themeIsSystem = userStore.themeIsSystem
       if (themeIsSystem) {
@@ -116,6 +117,7 @@ export default {
       context.dispatch('update', themeName)
     },
     toggle: (context) => {
+      const userStore = useUserStore()
       const prevTheme = userStore.theme || 'light'
       let theme
       if (prevTheme === 'light') {
@@ -138,6 +140,7 @@ export default {
       return themeName
     },
     isThemeDark: (state, getters, rootState) => {
+      const userStore = useUserStore()
       const systemTheme = getters.themeFromSystem
       const userTheme = userStore.theme
       if (systemTheme) {

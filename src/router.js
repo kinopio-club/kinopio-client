@@ -226,11 +226,15 @@ const router = createRouter({
   ]
 })
 
+router.beforeEach(async (to, from) => {
+  const userStore = useUserStore()
+  await userStore.initializeUser()
+})
+
 export default router
 
 const inviteToEdit = async ({ next, store, spaceId, collaboratorKey }) => {
   const userStore = useUserStore()
-  await userStore.initializeUser()
   const apiKey = userStore.apiKey
   if (!apiKey) {
     store.commit('spaceUrlToLoad', spaceId)

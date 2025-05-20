@@ -29,8 +29,6 @@ import uniqBy from 'lodash-es/uniqBy'
 import last from 'lodash-es/last'
 import dayjs from 'dayjs'
 
-const userStore = useUserStore()
-
 const store = createStore({
   strict: consts.isDevelopment(),
   state: {
@@ -1902,6 +1900,7 @@ const store = createStore({
       }
     },
     addToMultipleCardsSelected: (context, cardId) => {
+      const userStore = useUserStore()
       utils.typeCheck({ value: cardId, type: 'string' })
       if (context.state.multipleCardsSelectedIds.includes(cardId)) { return }
       context.commit('addToMultipleCardsSelected', cardId)
@@ -1912,6 +1911,7 @@ const store = createStore({
       context.commit('broadcast/updateStore', { updates, type: 'addToRemoteCardsSelected' })
     },
     removeFromMultipleCardsSelected: (context, cardId) => {
+      const userStore = useUserStore()
       utils.typeCheck({ value: cardId, type: 'string' })
       if (!context.state.multipleCardsSelectedIds.includes(cardId)) { return }
       context.commit('removeFromMultipleCardsSelected', cardId)
@@ -1922,6 +1922,7 @@ const store = createStore({
       context.commit('broadcast/updateStore', { updates, type: 'removeFromRemoteCardsSelected' })
     },
     addMultipleToMultipleCardsSelected: (context, cardIds) => {
+      const userStore = useUserStore()
       utils.typeCheck({ value: cardIds, type: 'array' })
       if (!cardIds.length) { return }
       const set1 = new Set(cardIds)
@@ -1938,6 +1939,7 @@ const store = createStore({
       context.commit('broadcast/updateStore', { updates, type: 'updateRemoteCardsSelected' })
     },
     multipleCardsSelectedIds: (context, cardIds) => {
+      const userStore = useUserStore()
       utils.typeCheck({ value: cardIds, type: 'array' })
       context.commit('multipleCardsSelectedIds', cardIds)
       const updates = {
@@ -1947,6 +1949,7 @@ const store = createStore({
       context.commit('broadcast/updateStore', { updates, type: 'updateRemoteCardsSelected' })
     },
     multipleBoxesSelectedIds: (context, boxIds) => {
+      const userStore = useUserStore()
       utils.typeCheck({ value: boxIds, type: 'array' })
       context.commit('multipleBoxesSelectedIds', boxIds)
       const updates = {
@@ -1974,6 +1977,7 @@ const store = createStore({
       }
     },
     addToMultipleConnectionsSelected: (context, connectionId) => {
+      const userStore = useUserStore()
       utils.typeCheck({ value: connectionId, type: 'string' })
       if (context.state.multipleConnectionsSelectedIds.includes(connectionId)) { return }
       context.commit('addToMultipleConnectionsSelected', connectionId)
@@ -1984,6 +1988,7 @@ const store = createStore({
       context.commit('broadcast/updateStore', { updates, type: 'addToRemoteConnectionsSelected' })
     },
     removeFromMultipleConnectionsSelected: (context, connectionId) => {
+      const userStore = useUserStore()
       utils.typeCheck({ value: connectionId, type: 'string' })
       if (!context.state.multipleConnectionsSelectedIds.includes(connectionId)) { return }
       context.commit('removeFromMultipleConnectionsSelected', connectionId)
@@ -1994,6 +1999,7 @@ const store = createStore({
       context.commit('broadcast/updateStore', { updates, type: 'removeFromRemoteConnectionsSelected' })
     },
     multipleConnectionsSelectedIds: (context, connectionIds) => {
+      const userStore = useUserStore()
       utils.typeCheck({ value: connectionIds, type: 'array' })
       context.commit('multipleConnectionsSelectedIds', connectionIds)
       const updates = {
@@ -2003,6 +2009,7 @@ const store = createStore({
       context.commit('broadcast/updateStore', { updates, type: 'updateRemoteConnectionsSelected' })
     },
     addMultipleToMultipleConnectionsSelected: (context, connectionIds) => {
+      const userStore = useUserStore()
       utils.typeCheck({ value: connectionIds, type: 'array' })
       if (!connectionIds.length) { return }
       const set1 = new Set(connectionIds)
@@ -2019,6 +2026,7 @@ const store = createStore({
       context.commit('broadcast/updateStore', { updates, type: 'updateRemoteConnectionsSelected' })
     },
     connectionDetailsIsVisibleForConnectionId: (context, connectionId) => {
+      const userStore = useUserStore()
       context.commit('connectionDetailsIsVisibleForConnectionId', connectionId)
       const updates = {
         userId: userStore.id,
@@ -2027,6 +2035,7 @@ const store = createStore({
       context.commit('broadcast/updateStore', { updates, type: 'addToRemoteConnectionDetailsVisible' })
     },
     addToMultipleBoxesSelected: (context, boxId) => {
+      const userStore = useUserStore()
       utils.typeCheck({ value: boxId, type: 'string' })
       if (context.state.multipleBoxesSelectedIds.includes(boxId)) { return }
       context.commit('addToMultipleBoxesSelected', boxId)
@@ -2037,6 +2046,7 @@ const store = createStore({
       context.commit('broadcast/updateStore', { updates, type: 'addToRemoteBoxesSelected' })
     },
     addMultipleToMultipleBoxesSelected: (context, boxIds) => {
+      const userStore = useUserStore()
       utils.typeCheck({ value: boxIds, type: 'array' })
       if (!boxIds.length) { return }
       const set1 = new Set(boxIds)
@@ -2053,6 +2063,7 @@ const store = createStore({
       context.commit('broadcast/updateStore', { updates, type: 'updateRemoteBoxesSelected' })
     },
     removeFromMultipleBoxesSelected: (context, boxId) => {
+      const userStore = useUserStore()
       utils.typeCheck({ value: boxId, type: 'string' })
       if (!context.state.multipleBoxesSelectedIds.includes(boxId)) { return }
       context.commit('removeFromMultipleBoxesSelected', boxId)
@@ -2063,6 +2074,7 @@ const store = createStore({
       context.commit('broadcast/updateStore', { updates, type: 'removeFromRemoteBoxesSelected' })
     },
     triggerSonarPing: (context, event) => {
+      const userStore = useUserStore()
       const ping = utils.cursorPositionInSpace(event)
       ping.color = userStore.color
       context.commit('triggerSonarPing', ping)
@@ -2143,11 +2155,13 @@ const store = createStore({
     // drawing
 
     currentUserToolbar: (context, value) => {
+      const userStore = useUserStore()
       const canOnlyComment = userStore.getIsUserCommentOnly()
       if (canOnlyComment) { return }
       context.commit('currentUserToolbar', value)
     },
     toggleCurrentUserToolbar: (context, value) => {
+      const userStore = useUserStore()
       const canOnlyComment = userStore.getIsUserCommentOnly()
       const prevValue = context.state.currentUserToolbar
       if (canOnlyComment) { return }
@@ -2247,6 +2261,7 @@ const store = createStore({
       }
     },
     allTags: (state) => {
+      const userStore = useUserStore()
       const allTags = state.tags
       const userTags = userStore.tags
       const spaceTags = state.currentSpace.tags
