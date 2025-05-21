@@ -73,6 +73,7 @@ const init = async () => {
   await store.commit('broadcast/connect')
   await store.dispatch('groups/init')
   await store.dispatch('updateTags')
+  checkIfShouldShowExploreOnLoad()
 }
 init()
 
@@ -156,6 +157,13 @@ const isTiltingCard = computed(() => store.state.currentUserIsTiltingCard)
 const isDraggingCard = computed(() => store.state.currentUserIsDraggingCard)
 const isResizingBox = computed(() => store.state.currentUserIsResizingBox)
 const isDraggingBox = computed(() => store.state.currentUserIsDraggingBox)
+const checkIfShouldShowExploreOnLoad = () => {
+  const shouldShow = store.state.shouldShowExploreOnLoad
+  if (shouldShow) {
+    store.commit('triggerExploreIsVisible', null)
+  }
+  store.commit('shouldShowExploreOnLoad', false)
+}
 
 // page size
 
