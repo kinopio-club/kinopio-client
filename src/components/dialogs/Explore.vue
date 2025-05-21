@@ -2,6 +2,7 @@
 import { reactive, computed, onMounted, onBeforeUnmount, onUnmounted, watch, ref, nextTick } from 'vue'
 import { useStore } from 'vuex'
 import { useUserStore } from '@/stores/useUserStore'
+import { useSpaceStore } from '@/stores/useSpaceStore'
 
 import SpaceList from '@/components/SpaceList.vue'
 import Loader from '@/components/Loader.vue'
@@ -16,6 +17,7 @@ import randomColor from 'randomcolor'
 
 const store = useStore()
 const userStore = useUserStore()
+const spaceStore = useSpaceStore()
 
 const dialogElement = ref(null)
 const resultsElement = ref(null)

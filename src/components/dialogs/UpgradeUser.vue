@@ -2,6 +2,7 @@
 import { reactive, computed, onMounted, watch, ref, nextTick } from 'vue'
 import { useStore } from 'vuex'
 import { useUserStore } from '@/stores/useUserStore'
+import { useSpaceStore } from '@/stores/useSpaceStore'
 
 import UpgradeUserStripe from '@/components/UpgradeUserStripe.vue'
 import UpgradeUserApple from '@/components/UpgradeUserApple.vue'
@@ -12,6 +13,7 @@ import consts from '@/consts.js'
 
 const store = useStore()
 const userStore = useUserStore()
+const spaceStore = useSpaceStore()
 
 const dialog = ref(null)
 

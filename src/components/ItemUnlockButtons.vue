@@ -4,6 +4,7 @@ import { useStore } from 'vuex'
 import { useCardStore } from '@/stores/useCardStore'
 import { useBoxStore } from '@/stores/useBoxStore'
 import { useUserStore } from '@/stores/useUserStore'
+import { useSpaceStore } from '@/stores/useSpaceStore'
 
 import BoxUnlockButton from '@/components/BoxUnlockButton.vue'
 import CardUnlockButton from '@/components/CardUnlockButton.vue'
@@ -13,6 +14,7 @@ const store = useStore()
 const cardStore = useCardStore()
 const boxStore = useBoxStore()
 const userStore = useUserStore()
+const spaceStore = useSpaceStore()
 
 const props = defineProps({
   visible: Boolean

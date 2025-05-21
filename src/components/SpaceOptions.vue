@@ -2,6 +2,7 @@
 import { reactive, computed, onMounted, onBeforeUnmount, watch, ref, nextTick } from 'vue'
 import { useStore } from 'vuex'
 import { useUserStore } from '@/stores/useUserStore'
+import { useSpaceStore } from '@/stores/useSpaceStore'
 
 import cache from '@/cache.js'
 import templates from '@/data/templates.js'
@@ -11,6 +12,7 @@ import ImportExportButton from '@/components/ImportExportButton.vue'
 
 const store = useStore()
 const userStore = useUserStore()
+const spaceStore = useSpaceStore()
 
 const emit = defineEmits(['closeDialogsAndEmit', 'updateLocalSpaces', 'removeSpaceId', 'addSpace'])
 

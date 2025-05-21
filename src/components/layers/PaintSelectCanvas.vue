@@ -4,6 +4,7 @@ import { useStore } from 'vuex'
 import { useConnectionStore } from '@/stores/useConnectionStore'
 import { useBoxStore } from '@/stores/useBoxStore'
 import { useUserStore } from '@/stores/useUserStore'
+import { useSpaceStore } from '@/stores/useSpaceStore'
 import { useCardStore } from '@/stores/useCardStore'
 
 import utils from '@/utils.js'
@@ -18,6 +19,7 @@ const connectionStore = useConnectionStore()
 const store = useStore()
 const boxStore = useBoxStore()
 const userStore = useUserStore()
+const spaceStore = useSpaceStore()
 
 // a sequence of circles that's broadcasted to others and is used for multi-card selection
 const circleRadius = 20

@@ -2,6 +2,7 @@
 import { reactive, computed, onMounted, onBeforeUnmount, watch, ref, nextTick } from 'vue'
 import { useStore } from 'vuex'
 import { useUserStore } from '@/stores/useUserStore'
+import { useSpaceStore } from '@/stores/useSpaceStore'
 
 import cache from '@/cache.js'
 import consts from '@/consts.js'
@@ -17,6 +18,7 @@ import dayjs from 'dayjs'
 
 const store = useStore()
 const userStore = useUserStore()
+const spaceStore = useSpaceStore()
 
 let unsubscribe
 

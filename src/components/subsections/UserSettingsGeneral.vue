@@ -2,6 +2,7 @@
 import { reactive, computed, onMounted, onUnmounted, watch, ref, nextTick } from 'vue'
 import { useStore } from 'vuex'
 import { useUserStore } from '@/stores/useUserStore'
+import { useSpaceStore } from '@/stores/useSpaceStore'
 
 import UserBillingSettings from '@/components/dialogs/UserBillingSettings.vue'
 import UserAccountSettings from '@/components/dialogs/UserAccountSettings.vue'
@@ -16,6 +17,7 @@ import consts from '@/consts.js'
 
 const store = useStore()
 const userStore = useUserStore()
+const spaceStore = useSpaceStore()
 
 onMounted(() => {
   store.subscribe((mutation, state) => {

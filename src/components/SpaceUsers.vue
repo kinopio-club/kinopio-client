@@ -2,6 +2,7 @@
 import { reactive, computed, onMounted, onUnmounted, onBeforeUnmount, watch, ref, nextTick } from 'vue'
 import { useStore } from 'vuex'
 import { useUserStore } from '@/stores/useUserStore'
+import { useSpaceStore } from '@/stores/useSpaceStore'
 
 import User from '@/components/User.vue'
 import SpaceUsersButton from '@/components/SpaceUsersButton.vue'
@@ -12,6 +13,7 @@ import last from 'lodash-es/last'
 
 const store = useStore()
 const userStore = useUserStore()
+const spaceStore = useSpaceStore()
 
 const spaceUsersElement = ref(null)
 

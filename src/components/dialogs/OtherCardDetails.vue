@@ -3,6 +3,7 @@ import { reactive, computed, onMounted, onUpdated, watch, ref, nextTick } from '
 import { useStore } from 'vuex'
 import { useCardStore } from '@/stores/useCardStore'
 import { useUserStore } from '@/stores/useUserStore'
+import { useSpaceStore } from '@/stores/useSpaceStore'
 
 import utils from '@/utils.js'
 import Loader from '@/components/Loader.vue'
@@ -12,6 +13,7 @@ import OtherSpacePreview from '@/components/OtherSpacePreview.vue'
 const store = useStore()
 const cardStore = useCardStore()
 const userStore = useUserStore()
+const spaceStore = useSpaceStore()
 
 onMounted(() => {
   store.subscribe((mutation, state) => {

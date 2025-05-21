@@ -3,6 +3,7 @@ import { reactive, computed, onMounted, onUnmounted, watch, ref, nextTick } from
 import { useStore } from 'vuex'
 import { useConnectionStore } from '@/stores/useConnectionStore'
 import { useUserStore } from '@/stores/useUserStore'
+import { useSpaceStore } from '@/stores/useSpaceStore'
 
 import ResultsFilter from '@/components/ResultsFilter.vue'
 import ConnectionTypeList from '@/components/ConnectionTypeList.vue'
@@ -18,6 +19,7 @@ import dayjs from 'dayjs'
 const store = useStore()
 const connectionStore = useConnectionStore()
 const userStore = useUserStore()
+const spaceStore = useSpaceStore()
 
 let prevConnectionType
 const dialogElement = ref(null)

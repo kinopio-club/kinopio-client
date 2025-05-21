@@ -2,6 +2,7 @@
 import { reactive, computed, onMounted, onUnmounted, onBeforeUnmount, watch, ref } from 'vue'
 import { useStore } from 'vuex'
 import { useUserStore } from '@/stores/useUserStore'
+import { useSpaceStore } from '@/stores/useSpaceStore'
 
 import dayjs from 'dayjs'
 
@@ -11,6 +12,7 @@ import utils from '@/utils.js'
 
 const store = useStore()
 const userStore = useUserStore()
+const spaceStore = useSpaceStore()
 
 let updateLiveSpacesIntervalTimer, updateSpacesIntervalTimer
 const maxUnreadCountCharacter = '+'

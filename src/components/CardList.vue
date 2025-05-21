@@ -3,6 +3,7 @@ import { reactive, computed, onMounted, onBeforeUnmount, watch, ref, nextTick } 
 import { useStore } from 'vuex'
 import { useCardStore } from '@/stores/useCardStore'
 import { useUserStore } from '@/stores/useUserStore'
+import { useSpaceStore } from '@/stores/useSpaceStore'
 
 import UserLabelInline from '@/components/UserLabelInline.vue'
 import NameSegment from '@/components/NameSegment.vue'
@@ -18,6 +19,7 @@ dayjs.extend(isToday)
 const store = useStore()
 const cardStore = useCardStore()
 const userStore = useUserStore()
+const spaceStore = useSpaceStore()
 
 const itemsPerPage = 15
 

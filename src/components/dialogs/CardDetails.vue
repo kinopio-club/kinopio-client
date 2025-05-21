@@ -4,6 +4,7 @@ import { useStore, mapState, mapGetters } from 'vuex'
 import { useCardStore } from '@/stores/useCardStore'
 import { useConnectionStore } from '@/stores/useConnectionStore'
 import { useUserStore } from '@/stores/useUserStore'
+import { useSpaceStore } from '@/stores/useSpaceStore'
 
 import CardOrBoxActions from '@/components/subsections/CardOrBoxActions.vue'
 import ImagePicker from '@/components/dialogs/ImagePicker.vue'
@@ -31,6 +32,7 @@ import { nanoid } from 'nanoid'
 const cardStore = useCardStore()
 const connectionStore = useConnectionStore()
 const userStore = useUserStore()
+const spaceStore = useSpaceStore()
 
 let prevCardId, prevCardName
 let previousTags = []

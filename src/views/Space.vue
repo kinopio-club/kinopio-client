@@ -5,6 +5,7 @@ import { useCardStore } from '@/stores/useCardStore'
 import { useConnectionStore } from '@/stores/useConnectionStore'
 import { useBoxStore } from '@/stores/useBoxStore'
 import { useUserStore } from '@/stores/useUserStore'
+import { useSpaceStore } from '@/stores/useSpaceStore'
 
 import CardDetails from '@/components/dialogs/CardDetails.vue'
 import OtherCardDetails from '@/components/dialogs/OtherCardDetails.vue'
@@ -55,6 +56,7 @@ const connectionStore = useConnectionStore()
 const boxStore = useBoxStore()
 const store = useStore()
 const userStore = useUserStore()
+const spaceStore = useSpaceStore()
 
 let unsubscribe
 

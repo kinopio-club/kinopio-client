@@ -2,6 +2,7 @@
 import { reactive, computed, onMounted, onBeforeUnmount, watch, ref, nextTick } from 'vue'
 import { useStore } from 'vuex'
 import { useUserStore } from '@/stores/useUserStore'
+import { useSpaceStore } from '@/stores/useSpaceStore'
 
 import utils from '@/utils.js'
 import Loader from '@/components/Loader.vue'
@@ -16,6 +17,7 @@ import { v4 as uuidv4 } from 'uuid' // polyfill for self.crypto.randomUUID(), fo
 
 const store = useStore()
 const userStore = useUserStore()
+const spaceStore = useSpaceStore()
 
 let shouldLoadLastSpace
 let sessionToken

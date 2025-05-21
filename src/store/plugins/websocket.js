@@ -7,6 +7,7 @@
 
 import { getActivePinia } from 'pinia'
 import { useUserStore } from '@/stores/useUserStore'
+import { useSpaceStore } from '@/stores/useSpaceStore'
 
 import { nanoid } from 'nanoid'
 

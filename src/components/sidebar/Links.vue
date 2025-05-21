@@ -3,6 +3,7 @@ import { reactive, computed, onMounted, onBeforeUnmount, watch, ref, nextTick } 
 import { useStore } from 'vuex'
 import { useCardStore } from '@/stores/useCardStore'
 import { useUserStore } from '@/stores/useUserStore'
+import { useSpaceStore } from '@/stores/useSpaceStore'
 
 import Loader from '@/components/Loader.vue'
 import SpaceList from '@/components/SpaceList.vue'
@@ -14,6 +15,7 @@ import debounce from 'lodash-es/debounce'
 const cardStore = useCardStore()
 const store = useStore()
 const userStore = useUserStore()
+const spaceStore = useSpaceStore()
 
 // let unsubscribes
 let unsubscribe

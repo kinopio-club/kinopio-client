@@ -3,6 +3,7 @@ import { reactive, computed, onMounted, onUnmounted, watch, ref, nextTick } from
 import { useStore } from 'vuex'
 import { useCardStore } from '@/stores/useCardStore'
 import { useUserStore } from '@/stores/useUserStore'
+import { useSpaceStore } from '@/stores/useSpaceStore'
 
 import cache from '@/cache.js'
 import CardList from '@/components/CardList.vue'
@@ -18,6 +19,7 @@ import { nanoid } from 'nanoid'
 const store = useStore()
 const cardStore = useCardStore()
 const userStore = useUserStore()
+const spaceStore = useSpaceStore()
 
 let prevPosition
 

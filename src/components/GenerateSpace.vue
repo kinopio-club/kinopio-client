@@ -3,6 +3,7 @@ import { reactive, computed, onMounted, onBeforeUnmount, watch, ref, nextTick } 
 import { useStore } from 'vuex'
 import { useConnectionStore } from '@/stores/useConnectionStore'
 import { useUserStore } from '@/stores/useUserStore'
+import { useSpaceStore } from '@/stores/useSpaceStore'
 
 import Loader from '@/components/Loader.vue'
 import MinimapCanvas from '@/components/MinimapCanvas.vue'
@@ -18,6 +19,7 @@ import sample from 'lodash-es/sample'
 const store = useStore()
 const connectionStore = useConnectionStore()
 const userStore = useUserStore()
+const spaceStore = useSpaceStore()
 
 const rowElement = ref(null)
 const textareaElement = ref(null)

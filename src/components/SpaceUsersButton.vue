@@ -3,6 +3,7 @@ import { reactive, computed, onMounted, onBeforeUnmount, watch, ref, nextTick } 
 import { useStore } from 'vuex'
 import { useCardStore } from '@/stores/useCardStore'
 import { useUserStore } from '@/stores/useUserStore'
+import { useSpaceStore } from '@/stores/useSpaceStore'
 
 import User from '@/components/User.vue'
 import utils from '@/utils.js'
@@ -14,6 +15,7 @@ import last from 'lodash-es/last'
 const store = useStore()
 const cardStore = useCardStore()
 const userStore = useUserStore()
+const spaceStore = useSpaceStore()
 
 const buttonElement = ref(null)
 

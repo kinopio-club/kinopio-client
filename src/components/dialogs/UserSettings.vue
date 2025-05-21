@@ -2,6 +2,7 @@
 import { reactive, computed, onMounted, onUnmounted, watch, ref, nextTick } from 'vue'
 import { useStore } from 'vuex'
 import { useUserStore } from '@/stores/useUserStore'
+import { useSpaceStore } from '@/stores/useSpaceStore'
 
 import UserSettingsGeneral from '@/components/subsections/UserSettingsGeneral.vue'
 import UserSettingsControls from '@/components/subsections/UserSettingsControls.vue'
@@ -10,6 +11,7 @@ import utils from '@/utils.js'
 
 const store = useStore()
 const userStore = useUserStore()
+const spaceStore = useSpaceStore()
 
 const dialogElement = ref(null)
 

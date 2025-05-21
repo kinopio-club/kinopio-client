@@ -2,6 +2,7 @@
 import { reactive, computed, onMounted, onBeforeUnmount, watch, ref, nextTick } from 'vue'
 import { useStore } from 'vuex'
 import { useUserStore } from '@/stores/useUserStore'
+import { useSpaceStore } from '@/stores/useSpaceStore'
 
 import MoreSearchFilters from '@/components/dialogs/MoreSearchFilters.vue'
 import utils from '@/utils.js'
@@ -11,6 +12,7 @@ import UserLabelInline from '@/components/UserLabelInline.vue'
 
 const store = useStore()
 const userStore = useUserStore()
+const spaceStore = useSpaceStore()
 
 onMounted(() => {
   store.subscribe(mutation => {

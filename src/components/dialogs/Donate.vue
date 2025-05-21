@@ -3,6 +3,7 @@ import { reactive, computed, onMounted, onBeforeUnmount, watch, ref, nextTick } 
 import { useStore } from 'vuex'
 import { useCardStore } from '@/stores/useCardStore'
 import { useUserStore } from '@/stores/useUserStore'
+import { useSpaceStore } from '@/stores/useSpaceStore'
 
 import User from '@/components/User.vue'
 import Loader from '@/components/Loader.vue'
@@ -12,6 +13,7 @@ import utils from '@/utils.js'
 const cardStore = useCardStore()
 const store = useStore()
 const userStore = useUserStore()
+const spaceStore = useSpaceStore()
 
 let productId
 if (consts.isDevelopment()) {

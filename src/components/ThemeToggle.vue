@@ -3,8 +3,10 @@ import { reactive, computed, onMounted } from 'vue'
 // https://vuex.vuejs.org/guide/composition-api.html#accessing-state-and-getters
 import { useStore } from 'vuex'
 import { useUserStore } from '@/stores/useUserStore'
+import { useSpaceStore } from '@/stores/useSpaceStore'
 
 const userStore = useUserStore()
+const spaceStore = useSpaceStore()
 const store = useStore()
 
 const themeName = computed(() => userStore.theme)

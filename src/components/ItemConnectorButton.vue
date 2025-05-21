@@ -3,6 +3,7 @@ import { reactive, computed, onMounted, onBeforeUnmount, watch, ref, nextTick } 
 import { useStore } from 'vuex'
 import { useConnectionStore } from '@/stores/useConnectionStore'
 import { useUserStore } from '@/stores/useUserStore'
+import { useSpaceStore } from '@/stores/useSpaceStore'
 
 import utils from '@/utils.js'
 import last from 'lodash-es/last'
@@ -10,6 +11,7 @@ import last from 'lodash-es/last'
 const store = useStore()
 const connectionStore = useConnectionStore()
 const userStore = useUserStore()
+const spaceStore = useSpaceStore()
 
 const emit = defineEmits(['shouldRenderParent'])
 

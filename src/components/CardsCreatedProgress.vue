@@ -3,11 +3,13 @@ import { reactive, computed, onMounted } from 'vue'
 import { useStore } from 'vuex'
 import FreeLimitFAQ from '@/components/dialogs/FreeLimitFAQ.vue'
 import { useUserStore } from '@/stores/useUserStore'
+import { useSpaceStore } from '@/stores/useSpaceStore'
 
 import consts from '@/consts.js'
 
 const store = useStore()
 const userStore = useUserStore()
+const spaceStore = useSpaceStore()
 
 onMounted(() => {
   store.subscribe((mutation, state) => {

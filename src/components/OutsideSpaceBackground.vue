@@ -2,6 +2,7 @@
 import { reactive, computed, onMounted, onBeforeUnmount, watch, ref, nextTick } from 'vue'
 import { useStore } from 'vuex'
 import { useUserStore } from '@/stores/useUserStore'
+import { useSpaceStore } from '@/stores/useSpaceStore'
 
 import postMessage from '@/postMessage.js'
 import utils from '@/utils.js'
@@ -13,6 +14,7 @@ extend([mixPlugin])
 
 const store = useStore()
 const userStore = useUserStore()
+const spaceStore = useSpaceStore()
 
 // adapted from https://gist.github.com/pketh/3f62b807db3835d564c1
 let colorCycleTimer
