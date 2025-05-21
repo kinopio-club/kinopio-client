@@ -93,13 +93,6 @@ const router = createRouter({
         next()
       }
     }, {
-      path: '/blog',
-      component: Space,
-      beforeEnter: (to, from, next) => {
-        store.commit('loadBlogSpace', true)
-        next()
-      }
-    }, {
       path: '/inbox',
       component: Space,
       beforeEnter: (to, from, next) => {
