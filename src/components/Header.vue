@@ -643,6 +643,11 @@ header(v-if="isVisible" :style="state.position" :class="{'fade-out': isFadingOut
               .badge.new-unread-badge.notification-button-badge(v-if="notificationsUnreadCount")
           Share(:visible="state.shareIsVisible")
           UserNotifications(:visible="state.notificationsIsVisible" :loading="state.notificationsIsLoading" :notifications="state.notifications" :unreadCount="notificationsUnreadCount" @markAllAsRead="markAllAsRead" @markAsRead="markAsRead")
+        //- Sidebar
+        .button-wrap
+          button(@click.left.stop="toggleSidebarIsVisible" :class="{active: state.sidebarIsVisible, 'translucent-button': !shouldIncreaseUIContrast}" title="Sidebar")
+            img.icon.sidebar(src="@/assets/sidebar.svg")
+          Sidebar(:visible="state.sidebarIsVisible")
 
     //- 2nd row
     .row
@@ -701,16 +706,6 @@ header(v-if="isVisible" :style="state.position" :class="{'fade-out': isFadingOut
                 img.icon.offline(src="@/assets/offline.svg")
               Offline(:visible="offlineIsVisible")
       .right
-        //- Sidebar
-        .button-wrap
-          button(@click.left.stop="toggleSidebarIsVisible" :class="{active: state.sidebarIsVisible, 'translucent-button': !shouldIncreaseUIContrast}" title="Sidebar")
-            img.icon.sidebar(src="@/assets/sidebar.svg")
-          Sidebar(:visible="state.sidebarIsVisible")
-
-    //- 3rd row
-    .row
-      .left
-      .right
         //- Pricing
         .button-wrap.pricing-button-wrap(v-if="!isUpgraded")
           button(@click.left.stop="togglePricingIsVisible" :class="{active: pricingIsVisible, 'translucent-button': !shouldIncreaseUIContrast}")
@@ -727,6 +722,11 @@ header(v-if="isVisible" :style="state.position" :class="{'fade-out': isFadingOut
           button(@click.left.stop="toggleUpgradeUserIsVisible" :class="{active: state.upgradeUserIsVisible, 'translucent-button': !shouldIncreaseUIContrast}")
             span Upgrade
           UpgradeUser(:visible="state.upgradeUserIsVisible" @closeDialog="closeAllDialogs")
+
+    //- 3rd row
+    //- .row
+    //-   .left
+    //-   .right
         //- Donate
         //- .button-wrap
         //-   .segmented-buttons
