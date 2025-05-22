@@ -7,6 +7,7 @@ import { useSpaceStore } from '@/stores/useSpaceStore'
 import Notifications from '@/components/Notifications.vue'
 import SpaceZoom from '@/components/SpaceZoom.vue'
 import Loader from '@/components/Loader.vue'
+import DiscoveryButtons from '@/components/DiscoveryButtons.vue'
 import Minimap from '@/components/dialogs/Minimap.vue'
 import utils from '@/utils.js'
 
@@ -197,6 +198,7 @@ const updatePositionInVisualViewport = () => {
 .footer-wrap(:style="state.position" v-if="isVisible" :class="{'fade-out': isFadingOut}" ref="footerElement")
   .left(v-if="leftIsVisble")
     footer
+      DiscoveryButtons
       Notifications
 
   .right(v-if="controlsIsVisible" :class="{'is-embed': isEmbedMode}")
@@ -309,5 +311,26 @@ footer
     vertical-align 0px
     width 13px
     margin-left 6px
+
+  .space-functions-row
+    > .segmented-buttons,
+    &.segmented-buttons
+      display inline-block
+      > .button-wrap
+        > button
+          border-radius 0
+          border-right 0
+          .loader
+            margin 0
+        &:first-child
+          > button
+            border-top-left-radius var(--entity-radius)
+            border-bottom-left-radius var(--entity-radius)
+            border-right 0
+        &:last-child
+          > button
+            border-top-right-radius var(--entity-radius)
+            border-bottom-right-radius var(--entity-radius)
+            border-right 1px solid var(--primary-border)
 
   </style>

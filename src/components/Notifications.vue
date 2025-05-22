@@ -63,7 +63,8 @@ onBeforeUnmount(() => {
 const state = reactive({
   readOnlyJiggle: false,
   notifyCardsCreatedIsOverLimitJiggle: false,
-  notifySpaceOutOfSync: false
+  notifySpaceOutOfSync: false,
+  notifyCacheIsFull: false
 })
 
 const closeAllDialogs = () => {
@@ -217,9 +218,7 @@ const removeNotifyThanks = () => {
   store.commit('notifyThanksForUpgrading', false)
 }
 const cacheErrorIsVisible = () => {
-  const element = document.getElementById('notify-cache-is-full')
-  const isHidden = element.className.includes('hidden')
-  return Boolean(!isHidden)
+  state.notifyCacheIsFull = !state.notifyCacheIsFull
 }
 const update = async () => {
   await nextTick()
@@ -342,9 +341,7 @@ aside.notifications(@click.left="closeAllDialogs")
       button.small-button(@click="removeById(item)")
         img.icon.cancel(src="@/assets/add.svg")
 
-  .persistent-item.danger.hidden#notify-cache-is-full
-    p Local storage error has occured, please refresh
-    .row
+  .persistent-item.danger(v-if="state.notifyCacheIsFull")
       .button-wrap
         button(@click.left="refreshBrowser")
           img.refresh.icon(src="@/assets/refresh.svg")
@@ -527,10 +524,13 @@ aside.notifications(@click.left="closeAllDialogs")
 <style lang="stylus">
 .notifications
   margin-bottom 10px
+  margin-top 10px
   display flex
   flex-direction column
   align-items flex-start
   max-width 276px
+  &:empty
+    margin 0
   .item,
   .persistent-item
     pointer-events all

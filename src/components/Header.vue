@@ -32,7 +32,6 @@ import Donate from '@/components/dialogs/Donate.vue'
 import Toolbar from '@/components/Toolbar.vue'
 import ImportExport from '@/components/dialogs/ImportExport.vue'
 import Pricing from '@/components/dialogs/Pricing.vue'
-import DiscoveryButtons from '@/components/DiscoveryButtons.vue'
 import UserSettings from '@/components/dialogs/UserSettings.vue'
 import SpaceUserList from '@/components/dialogs/SpaceUserList.vue'
 import CommentButton from '@/components/CommentButton.vue'
@@ -702,7 +701,6 @@ header(v-if="isVisible" :style="state.position" :class="{'fade-out': isFadingOut
                 img.icon.offline(src="@/assets/offline.svg")
               Offline(:visible="offlineIsVisible")
       .right
-        DiscoveryButtons
         //- Sidebar
         .button-wrap
           button(@click.left.stop="toggleSidebarIsVisible" :class="{active: state.sidebarIsVisible, 'translucent-button': !shouldIncreaseUIContrast}" title="Sidebar")
