@@ -8,6 +8,7 @@ import Notifications from '@/components/Notifications.vue'
 import SpaceZoom from '@/components/SpaceZoom.vue'
 import Loader from '@/components/Loader.vue'
 import DiscoveryButtons from '@/components/DiscoveryButtons.vue'
+import FavoriteSpaceButton from '@/components/FavoriteSpaceButton.vue'
 import Minimap from '@/components/dialogs/Minimap.vue'
 import utils from '@/utils.js'
 
@@ -89,23 +90,31 @@ const shouldIncreaseUIContrast = computed(() => userStore.shouldIncreaseUIContra
 
 // visible
 
+const contentDialogIsVisible = computed(() => Boolean(cardDetailsIsVisibleForCardId.value || multipleSelectedActionsIsVisible.value || connectionDetailsIsVisibleForConnectionId.value))
 const isVisible = computed(() => {
   if (isAddPage.value) { return }
   return true
 })
 const leftIsVisble = computed(() => {
-  // if (isPresentationMode.value) { return }
   if (isEmbedMode.value) { return }
   return true
 })
-const controlsIsVisible = computed(() => {
+const leftControlsIsVisible = computed(() => {
+  if (isPresentationMode.value) { return }
+  if (shouldExplicitlyHideFooter.value) { return }
+  // const isTouchDevice = store.state.isTouchDevice
+  // if (!isTouchDevice) { return true }
+  if (contentDialogIsVisible.value) { return }
+  if (shouldHideFooter.value) { return }
+  return true
+})
+const rightControlsIsVisible = computed(() => {
   // if (isPresentationMode.value) { return }
   if (store.state.minimapIsPinned) { return true }
   if (shouldExplicitlyHideFooter.value) { return }
-  const isTouchDevice = store.state.isTouchDevice
-  if (!isTouchDevice) { return true }
-  const contentDialogIsVisible = Boolean(cardDetailsIsVisibleForCardId.value || multipleSelectedActionsIsVisible.value || connectionDetailsIsVisibleForConnectionId.value)
-  if (contentDialogIsVisible) { return }
+  // const isTouchDevice = store.state.isTouchDevice
+  // if (!isTouchDevice) { return true }
+  if (contentDialogIsVisible.value) { return }
   if (shouldHideFooter.value) { return }
   return true
 })
@@ -198,10 +207,14 @@ const updatePositionInVisualViewport = () => {
 .footer-wrap(:style="state.position" v-if="isVisible" :class="{'fade-out': isFadingOut}" ref="footerElement")
   .left(v-if="leftIsVisble")
     footer
-      DiscoveryButtons
+      .footer-button-wrap(v-if="leftControlsIsVisible")
+        DiscoveryButtons
+      //- TEMP move fav button into share?
+      .footer-button-wrap(v-if="leftControlsIsVisible")
+        FavoriteSpaceButton(:isSmall="true")
       Notifications
 
-  .right(v-if="controlsIsVisible" :class="{'is-embed': isEmbedMode}")
+  .right(v-if="rightControlsIsVisible" :class="{'is-embed': isEmbedMode}")
     SpaceZoom(v-if="!isPresentationMode")
     //- minimap
     .button-wrap.input-button-wrap.footer-button-wrap(@click.stop="toggleMinimap" @touchend.stop :class="{'hidden': state.isHiddenOnTouch}")

@@ -196,7 +196,7 @@ const liveSpacesCount = computed(() => {
 </script>
 
 <template lang="pug">
-.button-wrap.discovery-buttons.footer-button-wrap(v-if="isOnline")
+.button-wrap.discovery-buttons(v-if="isOnline")
   .segmented-buttons.space-functions-row
     //- Explore
     .button-wrap

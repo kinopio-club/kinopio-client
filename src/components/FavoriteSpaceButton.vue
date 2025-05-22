@@ -11,7 +11,8 @@ const store = useStore()
 const emit = defineEmits(['updateLocalSpaces'])
 
 const props = defineProps({
-  parentIsDialog: Boolean
+  parentIsDialog: Boolean,
+  isSmall: Boolean
 })
 
 const isTranslucentButton = computed(() => {
@@ -30,7 +31,7 @@ const toggleIsFavoriteSpace = () => {
 </script>
 
 <template lang="pug">
-  button.favorite-space-button(v-if="isOnline" :class="{active: isFavoriteSpace && props.parentIsDialog, 'translucent-button': isTranslucentButton}" @click.left.prevent="toggleIsFavoriteSpace" title="Favorite Space")
+  button.favorite-space-button(v-if="isOnline" :class="{active: isFavoriteSpace && props.parentIsDialog, 'translucent-button': isTranslucentButton, 'small-button': props.isSmall}" @click.left.prevent="toggleIsFavoriteSpace" title="Favorite Space")
     img.icon(v-show="isFavoriteSpace" src="@/assets/heart.svg")
     img.icon(v-show="!isFavoriteSpace" src="@/assets/heart-empty.svg")
 </template>

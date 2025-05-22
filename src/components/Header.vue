@@ -35,7 +35,6 @@ import Pricing from '@/components/dialogs/Pricing.vue'
 import UserSettings from '@/components/dialogs/UserSettings.vue'
 import SpaceUserList from '@/components/dialogs/SpaceUserList.vue'
 import CommentButton from '@/components/CommentButton.vue'
-import FavoriteSpaceButton from '@/components/FavoriteSpaceButton.vue'
 import GroupLabel from '@/components/GroupLabel.vue'
 import AddSpaceButtons from '@/components/AddSpaceButtons.vue'
 import UserGroups from '@/components/dialogs/UserGroups.vue'
@@ -634,20 +633,20 @@ header(v-if="isVisible" :style="state.position" :class="{'fade-out': isFadingOut
         UserGroups
         //- Share
         .button-wrap
+          button(@click.left.stop="toggleShareIsVisible" :class="{active: state.shareIsVisible, 'translucent-button': !shouldIncreaseUIContrast}")
+            span Share
+          Share(:visible="state.shareIsVisible")
+        .button-wrap
           .segmented-buttons
-            button(@click.left.stop="toggleShareIsVisible" :class="{active: state.shareIsVisible, 'translucent-button': !shouldIncreaseUIContrast}")
-              span Share
             //- Notifications
             button(@click.left.stop="toggleNotificationsIsVisible" :class="{active: state.notificationsIsVisible, 'translucent-button': !shouldIncreaseUIContrast}" title="Notifications")
               span {{notificationsUnreadCount}}
               .badge.new-unread-badge.notification-button-badge(v-if="notificationsUnreadCount")
-          Share(:visible="state.shareIsVisible")
-          UserNotifications(:visible="state.notificationsIsVisible" :loading="state.notificationsIsLoading" :notifications="state.notifications" :unreadCount="notificationsUnreadCount" @markAllAsRead="markAllAsRead" @markAsRead="markAsRead")
-        //- Sidebar
-        .button-wrap
-          button(@click.left.stop="toggleSidebarIsVisible" :class="{active: state.sidebarIsVisible, 'translucent-button': !shouldIncreaseUIContrast}" title="Sidebar")
-            img.icon.sidebar(src="@/assets/sidebar.svg")
+            //- Sidebar
+            button(@click.left.stop="toggleSidebarIsVisible" :class="{active: state.sidebarIsVisible, 'translucent-button': !shouldIncreaseUIContrast}" title="Sidebar")
+              img.icon.sidebar(src="@/assets/sidebar.svg")
           Sidebar(:visible="state.sidebarIsVisible")
+          UserNotifications(:visible="state.notificationsIsVisible" :loading="state.notificationsIsLoading" :notifications="state.notifications" :unreadCount="notificationsUnreadCount" @markAllAsRead="markAllAsRead" @markAsRead="markAsRead")
 
     //- 2nd row
     .row
@@ -698,8 +697,6 @@ header(v-if="isVisible" :style="state.position" :class="{'fade-out': isFadingOut
                   Loader(:visible="spaceHasStatus" :isStatic="true")
                   .badge.success.space-status-success(v-if="!spaceHasStatus")
                 SpaceStatus(:visible="state.spaceStatusIsVisible")
-            //- favorite
-            FavoriteSpaceButton(v-if="isOnline")
             //- Offline
             .button-wrap(v-if="!isOnline")
               button(@click.left.stop="toggleOfflineIsVisible" :class="{ active: offlineIsVisible, 'translucent-button': !shouldIncreaseUIContrast}")
