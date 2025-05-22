@@ -42,13 +42,13 @@ const updateDialogHeight = async () => {
   if (!props.visible) { return }
   await nextTick()
   const element = dialogElement.value
-  state.dialogHeight = utils.elementHeight(element)
+  state.dialogHeight = utils.elementHeightFromHeader(element)
 }
 const updateResultsSectionHeight = async () => {
   if (!props.visible) { return }
   await nextTick()
   const element = resultsElement.value
-  state.resultsSectionHeight = utils.elementHeight(element, true)
+  state.resultsSectionHeight = utils.elementHeightFromHeader(element, true)
 }
 
 const parentDialog = computed(() => 'live')
@@ -81,9 +81,11 @@ dialog.live(v-if="props.visible" :open="props.visible" ref="dialog" :style="{'ma
 </template>
 
 <style lang="stylus">
-.live
-  left initial
-  right 8px
+dialog.live
+  top initial
+  bottom 18px
+  overflow auto
+  position absolute
   max-height calc(100vh - 100px)
   .icon.camera
     vertical-align 1px

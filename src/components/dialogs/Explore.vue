@@ -86,13 +86,13 @@ const updateDialogHeight = async () => {
   if (!props.visible) { return }
   await nextTick()
   const element = dialogElement.value
-  state.dialogHeight = utils.elementHeight(element)
+  state.dialogHeight = utils.elementHeightFromHeader(element)
 }
 const updateResultsSectionHeight = async () => {
   if (!props.visible) { return }
   await nextTick()
   const element = resultsElement.value
-  state.resultsSectionHeight = utils.elementHeight(element, true)
+  state.resultsSectionHeight = utils.elementHeightFromHeader(element, true)
 }
 
 // unread sections
@@ -285,9 +285,10 @@ dialog.explore.wide(v-if="visible" :open="visible" ref="dialogElement" :style="{
 
 <style lang="stylus">
 dialog.explore
-  left initial
-  right -35px
+  top initial
+  bottom 18px
   overflow auto
+  position absolute
   &.wide
     width 320px
   .loader
