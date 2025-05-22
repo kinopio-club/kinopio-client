@@ -745,13 +745,6 @@ Preload
   position relative // used by svg connections
   transform-origin top left
   z-index 0
-  .card-overlap-indicator
-    position absolute
-    z-index calc(var(--max-z) - 70)
-    pointer-events all
-    cursor pointer
-    span
-      line-height 1.5
 
 .is-interacting
   pointer-events all

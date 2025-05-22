@@ -216,15 +216,18 @@ const updatePositionInVisualViewport = () => {
 
   .right(v-if="rightControlsIsVisible" :class="{'is-embed': isEmbedMode}")
     SpaceZoom(v-if="!isPresentationMode")
+    //- presentation mode
+    .button-wrap.input-button-wrap.footer-button-wrap(@click="togglePresentationMode" @touchend.stop :class="{'hidden': state.isHiddenOnTouch}")
+      button.small-button(:class="{active: isPresentationMode, 'translucent-button': !shouldIncreaseUIContrast}" title="Focus/Presentation Mode (P)")
+        img.icon.settings(src="@/assets/presentation.svg")
+    .button-wrap.input-button-wrap.footer-button-wrap
+      button.small-button(:class="{'translucent-button': !shouldIncreaseUIContrast}" title="Settings")
+        span S
     //- minimap
     .button-wrap.input-button-wrap.footer-button-wrap(@click.stop="toggleMinimap" @touchend.stop :class="{'hidden': state.isHiddenOnTouch}")
       button.small-button(:class="{active: state.minimapIsVisible, 'translucent-button': !shouldIncreaseUIContrast}" title="Toggle Minimap (M)")
         img.icon.minimap(src="@/assets/minimap.svg")
       Minimap(:visible="state.minimapIsVisible")
-    //- presentation mode
-    .button-wrap.input-button-wrap.footer-button-wrap(@click="togglePresentationMode" @touchend.stop :class="{'hidden': state.isHiddenOnTouch}")
-      button.small-button(:class="{active: isPresentationMode, 'translucent-button': !shouldIncreaseUIContrast}" title="Focus/Presentation Mode (P)")
-        img.icon.settings(src="@/assets/presentation.svg")
 </template>
 
 <style lang="stylus">

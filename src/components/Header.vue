@@ -594,7 +594,15 @@ header(v-if="isVisible" :style="state.position" :class="{'fade-out': isFadingOut
               .logo-image
                 .label-badge.small-badge(v-if="shouldShowChangelogIsUpdated")
                   span NEW
-              img.down-arrow(src="@/assets/down-arrow.svg")
+
+              //- TODO SpaceStatusButton
+              //- Loading State
+              .button-wrap.space-status-button-wrap(v-if="spaceHasStatusAndStatusDialogIsNotVisible")
+                button.small-button(@click.left.stop="toggleSpaceStatusIsVisible" :class="{active: state.spaceStatusIsVisible, 'translucent-button': !shouldIncreaseUIContrast}")
+                  Loader(:visible="spaceHasStatus")
+                  .badge.success.space-status-success(v-if="!spaceHasStatus")
+                SpaceStatus(:visible="state.spaceStatusIsVisible")
+
             About(:visible="state.aboutIsVisible")
             KeyboardShortcuts(:visible="state.keyboardShortcutsIsVisible")
             Templates(:visible="state.templatesIsVisible")
@@ -602,8 +610,60 @@ header(v-if="isVisible" :style="state.position" :class="{'fade-out': isFadingOut
             AppsAndExtensions(:visible="state.appsAndExtensionsIsVisible")
         .space-meta-rows
           .space-functions-row
-            //- Add Space
+            //- Back
+            .button-wrap(v-if="backButtonIsVisible" title="Go Back" @click.stop="changeToPrevSpace")
+              button(:class="{ 'translucent-button': !shouldIncreaseUIContrast }")
+                img.icon.left-arrow(src="@/assets/down-arrow.svg")
+
+            //- TODO SpaceDetailsButton
+            //- Space Details
+            .button-wrap(:class="{ 'back-button-is-visible': backButtonIsVisible }")
+              button(@click.left.stop="toggleSpaceDetailsIsVisible" :class="{ active: state.spaceDetailsIsVisible, 'translucent-button': !shouldIncreaseUIContrast }" title="Space Details and Spaces List")
+                img.icon.sidebar.flip-left(src="@/assets/sidebar.svg" :class="{'space-is-hidden': currentSpaceIsHidden}")
+                //- span as
+              ImportArenaChannel(:visible="importArenaChannelIsVisible")
+              SpaceDetails(:visible="state.spaceDetailsIsVisible")
+              SpaceDetailsInfo(:visible="state.spaceDetailsInfoIsVisible")
+              ImportExport(:visible="state.importIsVisible" :isImport="true")
+
+              //- space name badges
+              .label-badge-row.row
+                //- .label-badge
+                //-   PrivacyIcon(:privacy="currentSpace.privacy" :closedIsNotVisible="true" :isSmall="true")
+
+                //- GroupLabel(:group="spaceGroup")
+                //- inbox badge
+                //- .label-badge.secondary(v-if="currentSpaceIsInbox")
+                //-   img.icon.inbox-icon(src="@/assets/inbox.svg")
+                //- template badge
+                //- .label-badge
+                //-   //- (v-if="currentSpaceIsTemplate")
+                //-   img.icon.templates(src="@/assets/templates.svg")
+
+                //- read only badge
+                .label-badge(v-if="!userCanEditSpace")
+                  span(:class="{'invisible': state.readOnlyJiggle}")
+                    span Read Only
+                  span.invisible-badge(ref="readOnlyElement" :class="{'badge-jiggle': state.readOnlyJiggle, 'invisible': !state.readOnlyJiggle}")
+                    span Read Only
+                //- comment only badge
+                .label-badge.success(v-else-if="userCanOnlyComment")
+                  span(:class="{'invisible': state.readOnlyJiggle}")
+                    span Comment Only
+                //- in explore badge
+                .label-badge.secondary(v-if="shouldShowInExplore")
+                  span
+                    img.icon.sunglasses.explore(src="@/assets/sunglasses.svg")
+
+            //- Offline
+            .button-wrap(v-if="!isOnline")
+              button(@click.left.stop="toggleOfflineIsVisible" :class="{ active: offlineIsVisible, 'translucent-button': !shouldIncreaseUIContrast}")
+                img.icon.offline(src="@/assets/offline.svg")
+              Offline(:visible="offlineIsVisible")
+
             AddSpaceButton
+
+            //- TODO SearchButtons
             //- Search
             .segmented-buttons
               .button-wrap
@@ -624,6 +684,7 @@ header(v-if="isVisible" :style="state.position" :class="{'fade-out': isFadingOut
                   img.icon.right-arrow(src="@/assets/down-arrow.svg")
               button(@click="clearSearchAndFilters" v-if="searchResultsOrFilters" :class="{ 'translucent-button': !shouldIncreaseUIContrast }")
                 img.icon.cancel(src="@/assets/add.svg")
+
       .right
         //- Users
         SpaceUsers(:userDetailsIsInline="true")
@@ -652,56 +713,7 @@ header(v-if="isVisible" :style="state.position" :class="{'fade-out': isFadingOut
     .row
       //- Current Space
       .left
-        .space-details-row
-          .segmented-buttons
-            //- Back
-            .button-wrap(v-if="backButtonIsVisible" title="Go Back" @click.stop="changeToPrevSpace")
-              button(:class="{ 'translucent-button': !shouldIncreaseUIContrast }")
-                img.icon.left-arrow(src="@/assets/down-arrow.svg")
-            //- Current Space Name and Info
-            .button-wrap.space-name-button-wrap(:class="{ 'back-button-is-visible': backButtonIsVisible }")
-              button.space-name-button(@click.left.stop="toggleSpaceDetailsIsVisible" :class="{ active: state.spaceDetailsIsVisible, 'translucent-button': !shouldIncreaseUIContrast }" title="Space Details and Spaces List")
-                .button-contents(:class="{'space-is-hidden': currentSpaceIsHidden}")
-                  GroupLabel(:group="spaceGroup")
-                  span(v-if="currentSpaceIsInbox")
-                    img.icon.inbox-icon(src="@/assets/inbox.svg")
-                  span(v-if="currentSpaceIsTemplate")
-                    img.icon.templates(src="@/assets/templates.svg")
-                  span
-                    span.space-name {{currentSpaceName}}
-                    PrivacyIcon(:privacy="currentSpace.privacy" :closedIsNotVisible="true")
-              SpaceDetails(:visible="state.spaceDetailsIsVisible")
-              ImportArenaChannel(:visible="importArenaChannelIsVisible")
-              SpaceDetailsInfo(:visible="state.spaceDetailsInfoIsVisible")
-              ImportExport(:visible="state.importIsVisible" :isImport="true")
-              //- space name badges
-              .label-badge-row.row
-                //- read only badge
-                .label-badge(v-if="!userCanEditSpace")
-                  span(:class="{'invisible': state.readOnlyJiggle}")
-                    span Read Only
-                  span.invisible-badge(ref="readOnlyElement" :class="{'badge-jiggle': state.readOnlyJiggle, 'invisible': !state.readOnlyJiggle}")
-                    span Read Only
-                //- comment only badge
-                .label-badge.success(v-else-if="userCanOnlyComment")
-                  span(:class="{'invisible': state.readOnlyJiggle}")
-                    span Comment Only
-                //- in explore badge
-                .label-badge.secondary(v-if="shouldShowInExplore")
-                  span
-                    img.icon.sunglasses.explore(src="@/assets/sunglasses.svg")
 
-              //- Loading State
-              .button-wrap.space-status-button-wrap(v-if="spaceHasStatusAndStatusDialogIsNotVisible")
-                button.small-button(@click.left.stop="toggleSpaceStatusIsVisible" :class="{active: state.spaceStatusIsVisible, 'translucent-button': !shouldIncreaseUIContrast}")
-                  Loader(:visible="spaceHasStatus" :isStatic="true")
-                  .badge.success.space-status-success(v-if="!spaceHasStatus")
-                SpaceStatus(:visible="state.spaceStatusIsVisible")
-            //- Offline
-            .button-wrap(v-if="!isOnline")
-              button(@click.left.stop="toggleOfflineIsVisible" :class="{ active: offlineIsVisible, 'translucent-button': !shouldIncreaseUIContrast}")
-                img.icon.offline(src="@/assets/offline.svg")
-              Offline(:visible="offlineIsVisible")
       .right
         //- Pricing
         .button-wrap.pricing-button-wrap(v-if="!isUpgraded")
@@ -765,7 +777,7 @@ header
       justify-content space-between
       // 2nd row onwards
       margin-top 6px
-      margin-left 52px
+      margin-left 39px
       @media(max-width 550px)
         margin-left 42px
       // 1st row
@@ -795,8 +807,9 @@ header
   .logo
     cursor pointer
     display flex
-      .label-badge
-        bottom -2px
+    .label-badge
+      bottom -2px
+
     img
       vertical-align middle
     .down-arrow
@@ -833,27 +846,27 @@ header
     > .search
       vertical-align 0
 
-  .space-details-row
-    button
-      white-space nowrap
-      overflow hidden
-      text-overflow ellipsis
-    .space-name-button
-      max-width 100%
-      .icon.templates
-        margin-right 4px
-    dialog
-      max-width initial
-    .space-name-button-wrap
-      max-width 55dvw
-      @media(max-width 550px)
-        max-width 35dvw
-      &.back-button-is-visible
-        @media(max-width 550px)
-          max-width 31dvw
-      > button
-        .privacy-icon
-          margin-left 6px
+  // .space-details-row
+  //   button
+  //     white-space nowrap
+  //     overflow hidden
+  //     text-overflow ellipsis
+  //   .space-name-button
+  //     max-width 100%
+  //     .icon.templates
+  //       margin-right 4px
+  //   dialog
+  //     max-width initial
+  //   .space-name-button-wrap
+  //     max-width 55dvw
+  //     @media(max-width 550px)
+  //       max-width 35dvw
+  //     &.back-button-is-visible
+  //       @media(max-width 550px)
+  //         max-width 31dvw
+  //     > button
+  //       .privacy-icon
+  //         margin-left 6px
 
   // should not bubble down into dialogs
   .space-details-row,
@@ -900,9 +913,11 @@ header
     width max-content
     flex-wrap nowrap
     display flex
-    .explore
+    .icon.explore
       width 16px
       vertical-align -2px
+    .icon.templates
+      width 11px
     .label-badge
       width max-content
       pointer-events none
@@ -917,13 +932,6 @@ header
       &.secondary
         background-color var(--secondary-background)
 
-  .space-name
-    max-width 20dvw
-    display table-cell
-    white-space nowrap
-    overflow hidden
-    text-overflow ellipsis
-
   .invisible
     visibility hidden
 
@@ -936,12 +944,13 @@ header
     vertical-align -1px
 
   .inbox-icon
-    margin-right 4px
     width 12px
     vertical-align 0
 
   .icon.sidebar
     vertical-align -1px
+    &.flip-left
+      transform rotate(180deg)
 
   .badge.space-status-success
     width 14px
@@ -987,9 +996,10 @@ header
 
 .button-wrap.space-status-button-wrap
   position absolute
-  top 4px
-  right 4px
+  // top 4px
+  bottom -12px
+  right 0
   left initial
   .loader
-    margin 2px 2px
+    margin 0
 </style>
