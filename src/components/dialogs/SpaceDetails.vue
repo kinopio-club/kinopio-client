@@ -8,7 +8,7 @@ import cache from '@/cache.js'
 import SpaceDetailsInfo from '@/components/SpaceDetailsInfo.vue'
 import SpaceFilters from '@/components/dialogs/SpaceFilters.vue'
 import SpaceList from '@/components/SpaceList.vue'
-import AddSpaceButtons from '@/components/AddSpaceButtons.vue'
+import AddSpaceButton from '@/components/AddSpaceButton.vue'
 import utils from '@/utils.js'
 
 import debounce from 'lodash-es/debounce'
@@ -361,7 +361,7 @@ dialog.space-details.is-pinnable.wide(v-if="props.visible" :open="props.visible"
     .row.title-row
       div
         //- New Space
-        AddSpaceButtons(:parentIsInDialog="true" @closeDialogs="closeDialogs" @addSpace="addSpace")
+        AddSpaceButton(:parentIsInDialog="true" @closeDialogs="closeDialogs" @addSpace="addSpace" isSmall="true")
       //- Filters
       .button-wrap
         // no filters

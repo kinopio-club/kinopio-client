@@ -36,7 +36,7 @@ import UserSettings from '@/components/dialogs/UserSettings.vue'
 import SpaceUserList from '@/components/dialogs/SpaceUserList.vue'
 import CommentButton from '@/components/CommentButton.vue'
 import GroupLabel from '@/components/GroupLabel.vue'
-import AddSpaceButtons from '@/components/AddSpaceButtons.vue'
+import AddSpaceButton from '@/components/AddSpaceButton.vue'
 import UserGroups from '@/components/dialogs/UserGroups.vue'
 import consts from '@/consts.js'
 
@@ -603,7 +603,7 @@ header(v-if="isVisible" :style="state.position" :class="{'fade-out': isFadingOut
         .space-meta-rows
           .space-functions-row
             //- Add Space
-            AddSpaceButtons
+            AddSpaceButton
             //- Search
             .segmented-buttons
               .button-wrap

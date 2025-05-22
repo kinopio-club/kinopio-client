@@ -2,43 +2,16 @@
 import { reactive, computed, onMounted, onBeforeUnmount, watch, ref, nextTick } from 'vue'
 import { useStore } from 'vuex'
 
-import AddSpace from '@/components/dialogs/AddSpace.vue'
 import cache from '@/cache.js'
 
 const store = useStore()
 
 const emit = defineEmits(['closeDialogs', 'addSpace'])
 
-onMounted(() => {
-  store.subscribe(mutation => {
-    if (mutation.type === 'closeAllDialogs') {
-      closeAllDialogs()
-    } else if (mutation.type === 'triggerCloseChildDialogs') {
-      closeAllDialogs()
-    }
-  })
-})
-
 const props = defineProps({
-  parentIsInDialog: Boolean
+  parentIsInDialog: Boolean,
+  isSmall: Boolean
 })
-
-const state = reactive({
-  addSpaceIsVisible: false
-})
-
-const closeAllDialogs = () => {
-  state.addSpaceIsVisible = false
-}
-const toggleAddSpaceIsVisible = () => {
-  const isVisible = state.addSpaceIsVisible
-  if (props.parentIsInDialog) {
-    closeDialogs()
-  } else {
-    store.dispatch('closeAllDialogs')
-  }
-  state.addSpaceIsVisible = !isVisible
-}
 
 // add space
 
@@ -66,7 +39,7 @@ const addNewSpace = async (event) => {
     await store.dispatch('currentSpace/addSpace')
     store.commit('triggerSpaceDetailsInfoIsVisible')
   }
-  store.dispatch('analytics/event', 'AddSpaceButtons')
+  store.dispatch('analytics/event', 'AddSpaceButton')
 }
 
 // emits
@@ -85,13 +58,10 @@ const addSpace = () => {
 
 <template lang="pug">
 .button-wrap
-  .segmented-buttons.add-space-buttons
+  .add-space-buttons
     a(href="/new" @click.left.stop.prevent="addNewSpace" title="New Space (N)")
-      button.success
+      button.success(:class="{ 'small-button': props.isSmall }")
         img.icon.add(src="@/assets/add.svg")
-    button.success(@click.left.stop="toggleAddSpaceIsVisible" :class="{ active: state.addSpaceIsVisible }" title="New Space Options")
-      img.icon.down-arrow(src="@/assets/down-arrow.svg")
-  AddSpace(:visible="state.addSpaceIsVisible" :shouldAddSpaceDirectly="shouldAddSpaceDirectly" @closeDialogs="closeDialogs" @addSpace="addSpace")
 </template>
 
 <style lang="stylus">
