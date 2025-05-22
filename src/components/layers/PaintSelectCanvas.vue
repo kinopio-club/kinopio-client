@@ -1,6 +1,11 @@
 <script setup>
 import { reactive, computed, onMounted, onBeforeUnmount, onUnmounted, watch, ref, nextTick } from 'vue'
 import { useStore } from 'vuex'
+import { useConnectionStore } from '@/stores/useConnectionStore'
+import { useBoxStore } from '@/stores/useBoxStore'
+import { useUserStore } from '@/stores/useUserStore'
+import { useSpaceStore } from '@/stores/useSpaceStore'
+import { useCardStore } from '@/stores/useCardStore'
 
 import utils from '@/utils.js'
 import collisionDetection from '@/collisionDetection.js'
@@ -8,7 +13,13 @@ import postMessage from '@/postMessage.js'
 import DropGuideLine from '@/components/layers/DropGuideLine.vue'
 
 import { colord, extend } from 'colord'
+
+const cardStore = useCardStore()
+const connectionStore = useConnectionStore()
 const store = useStore()
+const boxStore = useBoxStore()
+const userStore = useUserStore()
+const spaceStore = useSpaceStore()
 
 // a sequence of circles that's broadcasted to others and is used for multi-card selection
 const circleRadius = 20
@@ -141,10 +152,10 @@ const isCanvasScope = (event) => {
 
 // current user
 
-const currentUserColor = computed(() => store.state.currentUser.color)
+const currentUserColor = computed(() => userStore.color)
 const currentUserColorIsDark = computed(() => utils.colorIsDark(currentUserColor.value))
 const boxFillColor = computed(() => colord(currentUserColor.value).alpha(0.5).toRgbString())
-const userCannotEditSpace = computed(() => !store.getters['currentUser/canEditSpace']())
+const userCannotEditSpace = computed(() => !userStore.getUserCanEditSpace())
 const isPanning = computed(() => store.state.currentUserIsPanningReady)
 const isBoxSelecting = computed(() => store.state.currentUserIsBoxSelecting)
 const toolbarIsCard = computed(() => store.state.currentUserToolbar === 'card')
@@ -166,13 +177,13 @@ const clearHightlightedItems = () => {
 // selectable items
 
 const updateSelectableCardsInViewport = () => {
-  const selectableCards = store.getters['currentCards/isSelectableInViewport']
+  const selectableCards = cardStore.getAllCards
   if (!selectableCards) { return }
   selectableCardsInViewport = selectableCards
   selectableCardsGrid = collisionDetection.createGrid(selectableCards)
 }
 const updateSelectableBoxesInViewport = () => {
-  const boxes = store.getters['currentBoxes/isNotLocked']
+  const boxes = boxStore.getBoxesIsNotLocked
   const array = []
   boxes.forEach(box => {
     const element = document.querySelector(`.box-info[data-box-id="${box.id}"]`)
@@ -192,7 +203,7 @@ const updateSelectableBoxesInViewport = () => {
   selectableBoxes = array
 }
 const updateSelectableConnectionsInViewport = () => {
-  const selectableConnections = store.getters['currentConnections/isSelectableInViewport']()
+  const selectableConnections = connectionStore.getAllConnectionsInViewport
   if (!selectableConnections) { return }
   selectableConnectionsInViewport = selectableConnections
 }
@@ -409,7 +420,7 @@ const createPaintingCircles = (event) => {
     prevCursor = state.currentCursor
     return
   }
-  const color = store.state.currentUser.color
+  const color = userStore.color
   const points = utils.pointsBetweenTwoPoints(prevCursor, state.currentCursor)
   points.forEach(point => {
     const circle = { x: point.x, y: point.y, color, iteration: 0 }
@@ -432,7 +443,6 @@ const startPainting = (event) => {
   updateSelectableConnectionsInViewport()
   startCursor = utils.cursorPositionInViewport(event)
   state.currentCursor = startCursor
-  store.dispatch('currentCards/updateCanBeSelectedSortedByY')
   if (utils.isMultiTouch(event)) { return }
   startLocking()
   if (event.touches) {
@@ -518,7 +528,7 @@ const broadcastCircle = (event, circle) => {
   const position = utils.cursorPositionInSpace(event)
   store.commit('broadcast/update', {
     updates: {
-      userId: store.state.currentUser.id,
+      userId: userStore.id,
       x: position.x,
       y: position.y,
       color: circle.color,

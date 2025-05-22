@@ -1,3 +1,6 @@
+import { useUserStore } from '@/stores/useUserStore'
+import { useSpaceStore } from '@/stores/useSpaceStore'
+
 import utils from '@/utils.js'
 import consts from '@/consts.js'
 import cache from '@/cache.js'
@@ -6,16 +9,17 @@ import postMessage from '@/postMessage.js'
 import api from '@/store/api.js'
 import broadcast from '@/store/broadcast.js'
 import history from '@/store/history.js'
-import currentUser from '@/store/currentUser.js'
 import currentSpace from '@/store/currentSpace.js'
-import currentCards from '@/store/currentCards.js'
-import currentConnections from '@/store/currentConnections.js'
-import currentBoxes from '@/store/currentBoxes.js'
 import upload from '@/store/upload.js'
 import userNotifications from '@/store/userNotifications.js'
 import groups from '@/store/groups.js'
 import themes from '@/store/themes.js'
 import analytics from '@/store/analytics.js'
+import currentUser from '@/store/currentUser.js'
+// temp, converted to pinia
+import currentCards from '@/store/currentCards.js'
+import currentConnections from '@/store/currentConnections.js'
+import currentBoxes from '@/store/currentBoxes.js'
 // store plugins
 import websocket from '@/store/plugins/websocket.js'
 
@@ -43,7 +47,7 @@ const store = createStore({
     shouldHideFooter: false,
     shouldExplicitlyHideFooter: false,
     isTouchDevice: false,
-    cardsCreatedLimit: 100,
+    // cardsCreatedLimit: 100,
     prevCursorPosition: { x: 0, y: 0 },
     currentSpacePath: '/',
     webfontIsLoaded: false,
@@ -238,7 +242,6 @@ const store = createStore({
     loadNewSpace: false,
     urlPreviewLoadingForCardIds: [],
     loadInboxSpace: false,
-    loadBlogSpace: false,
     shouldResetDimensionsOnLoad: false,
     shouldShowExploreOnLoad: false,
     isLoadingGroups: false,
@@ -318,7 +321,8 @@ const store = createStore({
       behavior = behavior || 'smooth'
       if (!element) { return }
       const sidebarIsVisible = document.querySelector('dialog#sidebar')
-      const isViewportNarrow = state.viewportWidth < (consts.defaultCharacterLimit * 2)
+      const smallCardCharacterLimit = 300
+      const isViewportNarrow = state.viewportWidth < (smallCardCharacterLimit * 2)
       let horizontal = 'nearest'
       let vertical = 'nearest'
       if (sidebarIsVisible || positionIsCenter) {
@@ -398,10 +402,6 @@ const store = createStore({
     loadInboxSpace: (state, value) => {
       utils.typeCheck({ value, type: 'boolean' })
       state.loadInboxSpace = value
-    },
-    loadBlogSpace: (state, value) => {
-      utils.typeCheck({ value, type: 'boolean' })
-      state.loadBlogSpace = value
     },
     shouldResetDimensionsOnLoad: (state, value) => {
       utils.typeCheck({ value, type: 'boolean' })
@@ -643,7 +643,6 @@ const store = createStore({
     triggerUpdateUrlPreview: (state, cardId) => {},
     triggerUpdateUrlPreviewComplete: (state, cardId) => {},
     triggerRemovedIsVisible: () => {},
-    triggerAIImagesIsVisible: () => {},
     triggerMinimapIsVisible: () => {},
     triggerClearAllSpaceFilters: () => {},
     triggerScrollUserDetailsIntoView: () => {},
@@ -665,7 +664,6 @@ const store = createStore({
     triggerAppsAndExtensionsIsVisible: () => {},
     triggerUpdateWindowTitle: () => {},
     triggerRestoreSpaceRemoteComplete: () => {},
-    triggerRestoreSpaceLocalComplete: () => {},
     triggerCheckIfShouldNotifySpaceOutOfSync: () => {},
     triggerNotifyOffscreenCardCreated: (state, card) => {},
     triggerSonarPing: (state, event) => {},
@@ -1898,26 +1896,29 @@ const store = createStore({
       }
     },
     addToMultipleCardsSelected: (context, cardId) => {
+      const userStore = useUserStore()
       utils.typeCheck({ value: cardId, type: 'string' })
       if (context.state.multipleCardsSelectedIds.includes(cardId)) { return }
       context.commit('addToMultipleCardsSelected', cardId)
       const updates = {
-        userId: context.state.currentUser.id,
+        userId: userStore.id,
         cardId
       }
       context.commit('broadcast/updateStore', { updates, type: 'addToRemoteCardsSelected' })
     },
     removeFromMultipleCardsSelected: (context, cardId) => {
+      const userStore = useUserStore()
       utils.typeCheck({ value: cardId, type: 'string' })
       if (!context.state.multipleCardsSelectedIds.includes(cardId)) { return }
       context.commit('removeFromMultipleCardsSelected', cardId)
       const updates = {
-        userId: context.state.currentUser.id,
+        userId: userStore.id,
         cardId
       }
       context.commit('broadcast/updateStore', { updates, type: 'removeFromRemoteCardsSelected' })
     },
     addMultipleToMultipleCardsSelected: (context, cardIds) => {
+      const userStore = useUserStore()
       utils.typeCheck({ value: cardIds, type: 'array' })
       if (!cardIds.length) { return }
       const set1 = new Set(cardIds)
@@ -1928,25 +1929,27 @@ const store = createStore({
       cardIds = [...combinedSet]
       context.commit('multipleCardsSelectedIds', cardIds)
       const updates = {
-        userId: context.state.currentUser.id,
+        userId: userStore.id,
         cardIds
       }
       context.commit('broadcast/updateStore', { updates, type: 'updateRemoteCardsSelected' })
     },
     multipleCardsSelectedIds: (context, cardIds) => {
+      const userStore = useUserStore()
       utils.typeCheck({ value: cardIds, type: 'array' })
       context.commit('multipleCardsSelectedIds', cardIds)
       const updates = {
-        userId: context.state.currentUser.id,
+        userId: userStore.id,
         cardIds
       }
       context.commit('broadcast/updateStore', { updates, type: 'updateRemoteCardsSelected' })
     },
     multipleBoxesSelectedIds: (context, boxIds) => {
+      const userStore = useUserStore()
       utils.typeCheck({ value: boxIds, type: 'array' })
       context.commit('multipleBoxesSelectedIds', boxIds)
       const updates = {
-        userId: context.state.currentUser.id,
+        userId: userStore.id,
         boxIds
       }
       context.commit('broadcast/updateStore', { updates, type: 'updateRemoteBoxesSelected' })
@@ -1970,35 +1973,39 @@ const store = createStore({
       }
     },
     addToMultipleConnectionsSelected: (context, connectionId) => {
+      const userStore = useUserStore()
       utils.typeCheck({ value: connectionId, type: 'string' })
       if (context.state.multipleConnectionsSelectedIds.includes(connectionId)) { return }
       context.commit('addToMultipleConnectionsSelected', connectionId)
       const updates = {
-        userId: context.state.currentUser.id,
+        userId: userStore.id,
         connectionId
       }
       context.commit('broadcast/updateStore', { updates, type: 'addToRemoteConnectionsSelected' })
     },
     removeFromMultipleConnectionsSelected: (context, connectionId) => {
+      const userStore = useUserStore()
       utils.typeCheck({ value: connectionId, type: 'string' })
       if (!context.state.multipleConnectionsSelectedIds.includes(connectionId)) { return }
       context.commit('removeFromMultipleConnectionsSelected', connectionId)
       const updates = {
-        userId: context.state.currentUser.id,
+        userId: userStore.id,
         connectionId
       }
       context.commit('broadcast/updateStore', { updates, type: 'removeFromRemoteConnectionsSelected' })
     },
     multipleConnectionsSelectedIds: (context, connectionIds) => {
+      const userStore = useUserStore()
       utils.typeCheck({ value: connectionIds, type: 'array' })
       context.commit('multipleConnectionsSelectedIds', connectionIds)
       const updates = {
-        userId: context.state.currentUser.id,
+        userId: userStore.id,
         connectionIds
       }
       context.commit('broadcast/updateStore', { updates, type: 'updateRemoteConnectionsSelected' })
     },
     addMultipleToMultipleConnectionsSelected: (context, connectionIds) => {
+      const userStore = useUserStore()
       utils.typeCheck({ value: connectionIds, type: 'array' })
       if (!connectionIds.length) { return }
       const set1 = new Set(connectionIds)
@@ -2009,30 +2016,33 @@ const store = createStore({
       connectionIds = [...combinedSet]
       context.commit('multipleConnectionsSelectedIds', connectionIds)
       const updates = {
-        userId: context.state.currentUser.id,
+        userId: userStore.id,
         connectionIds
       }
       context.commit('broadcast/updateStore', { updates, type: 'updateRemoteConnectionsSelected' })
     },
     connectionDetailsIsVisibleForConnectionId: (context, connectionId) => {
+      const userStore = useUserStore()
       context.commit('connectionDetailsIsVisibleForConnectionId', connectionId)
       const updates = {
-        userId: context.state.currentUser.id,
+        userId: userStore.id,
         connectionId
       }
       context.commit('broadcast/updateStore', { updates, type: 'addToRemoteConnectionDetailsVisible' })
     },
     addToMultipleBoxesSelected: (context, boxId) => {
+      const userStore = useUserStore()
       utils.typeCheck({ value: boxId, type: 'string' })
       if (context.state.multipleBoxesSelectedIds.includes(boxId)) { return }
       context.commit('addToMultipleBoxesSelected', boxId)
       const updates = {
-        userId: context.state.currentUser.id,
+        userId: userStore.id,
         boxId
       }
       context.commit('broadcast/updateStore', { updates, type: 'addToRemoteBoxesSelected' })
     },
     addMultipleToMultipleBoxesSelected: (context, boxIds) => {
+      const userStore = useUserStore()
       utils.typeCheck({ value: boxIds, type: 'array' })
       if (!boxIds.length) { return }
       const set1 = new Set(boxIds)
@@ -2043,24 +2053,26 @@ const store = createStore({
       boxIds = [...combinedSet]
       context.commit('multipleBoxesSelectedIds', boxIds)
       const updates = {
-        userId: context.state.currentUser.id,
+        userId: userStore.id,
         boxIds
       }
       context.commit('broadcast/updateStore', { updates, type: 'updateRemoteBoxesSelected' })
     },
     removeFromMultipleBoxesSelected: (context, boxId) => {
+      const userStore = useUserStore()
       utils.typeCheck({ value: boxId, type: 'string' })
       if (!context.state.multipleBoxesSelectedIds.includes(boxId)) { return }
       context.commit('removeFromMultipleBoxesSelected', boxId)
       const updates = {
-        userId: context.state.currentUser.id,
+        userId: userStore.id,
         boxId
       }
       context.commit('broadcast/updateStore', { updates, type: 'removeFromRemoteBoxesSelected' })
     },
     triggerSonarPing: (context, event) => {
+      const userStore = useUserStore()
       const ping = utils.cursorPositionInSpace(event)
-      ping.color = store.state.currentUser.color
+      ping.color = userStore.color
       context.commit('triggerSonarPing', ping)
       context.commit('broadcast/updateStore', { updates: ping, type: 'triggerSonarPing' })
     },
@@ -2139,12 +2151,14 @@ const store = createStore({
     // drawing
 
     currentUserToolbar: (context, value) => {
-      const canOnlyComment = context.getters['currentUser/canOnlyComment']()
+      const userStore = useUserStore()
+      const canOnlyComment = userStore.getIsUserCommentOnly()
       if (canOnlyComment) { return }
       context.commit('currentUserToolbar', value)
     },
     toggleCurrentUserToolbar: (context, value) => {
-      const canOnlyComment = context.getters['currentUser/canOnlyComment']()
+      const userStore = useUserStore()
+      const canOnlyComment = userStore.getIsUserCommentOnly()
       const prevValue = context.state.currentUserToolbar
       if (canOnlyComment) { return }
       if (value === prevValue) {
@@ -2243,8 +2257,9 @@ const store = createStore({
       }
     },
     allTags: (state) => {
+      const userStore = useUserStore()
       const allTags = state.tags
-      const userTags = state.currentUser.tags
+      const userTags = userStore.tags
       const spaceTags = state.currentSpace.tags
       const tags = spaceTags.concat(userTags).concat(allTags)
       // tags = uniqBy(tags, 'name') // removed for perf reasons

@@ -1,6 +1,8 @@
 <script setup>
 import { reactive, computed, onMounted, onBeforeUnmount, watch, ref, nextTick } from 'vue'
 import { useStore } from 'vuex'
+import { useUserStore } from '@/stores/useUserStore'
+import { useSpaceStore } from '@/stores/useSpaceStore'
 
 import cache from '@/cache.js'
 import SpaceDetailsInfo from '@/components/SpaceDetailsInfo.vue'
@@ -14,6 +16,8 @@ import uniqBy from 'lodash-es/uniqBy'
 import dayjs from 'dayjs'
 
 const store = useStore()
+const userStore = useUserStore()
+const spaceStore = useSpaceStore()
 
 const maxIterations = 30
 let currentIteration, updatePositionTimer
@@ -121,11 +125,11 @@ const updateResultsSectionHeight = async () => {
 
 // filters
 
-const dialogSpaceFilterSortBy = computed(() => store.state.currentUser.dialogSpaceFilterSortBy)
-const dialogSpaceFilterByUser = computed(() => store.state.currentUser.dialogSpaceFilterByUser)
-const dialogSpaceFilterShowHidden = computed(() => store.state.currentUser.dialogSpaceFilterShowHidden)
-const dialogSpaceFilterByGroup = computed(() => store.state.currentUser.dialogSpaceFilterByGroup)
-const dialogSpaceFilterByTemplates = computed(() => store.state.currentUser.dialogSpaceFilterByTemplates)
+const dialogSpaceFilterSortBy = computed(() => userStore.dialogSpaceFilterSortBy)
+const dialogSpaceFilterByUser = computed(() => userStore.dialogSpaceFilterByUser)
+const dialogSpaceFilterShowHidden = computed(() => userStore.dialogSpaceFilterShowHidden)
+const dialogSpaceFilterByGroup = computed(() => userStore.dialogSpaceFilterByGroup)
+const dialogSpaceFilterByTemplates = computed(() => userStore.dialogSpaceFilterByTemplates)
 
 const spaceFiltersIsActive = computed(() => {
   return Boolean(dialogSpaceFilterShowHidden.value || utils.objectHasKeys(dialogSpaceFilterByUser.value) || dialogSpaceFilterSortByIsActive.value) || utils.objectHasKeys(dialogSpaceFilterByGroup.value)
@@ -162,11 +166,11 @@ const shouldShowInExplore = computed(() => {
   return store.state.currentSpace.showInExplore
 })
 const isSpaceMember = computed(() => {
-  return store.getters['currentUser/isSpaceMember'](store.state.currentSpace)
+  return userStore.getUserIsSpaceMember(store.state.currentSpace)
 })
 const removeLabel = computed(() => {
-  const currentUserIsSpaceCollaborator = store.getters['currentUser/isSpaceCollaborator']()
-  if (currentUserIsSpaceCollaborator) {
+  const isSpaceCollaborator = userStore.getUserIsSpaceCollaborator
+  if (isSpaceCollaborator) {
     return 'Leave'
   } else {
     return 'Remove'
@@ -296,7 +300,7 @@ const updateLocalSpaces = async () => {
   state.spaces = cacheSpaces
 }
 const updateWithRemoteSpaces = async () => {
-  const currentUserIsSignedIn = store.getters['currentUser/isSignedIn']
+  const currentUserIsSignedIn = userStore.getUserIsSignedIn
   const isOffline = computed(() => !store.state.isOnline)
   if (!currentUserIsSignedIn || isOffline.value) { return }
   try {

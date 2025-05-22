@@ -1,6 +1,8 @@
 <script setup>
 import { reactive, computed, onMounted, onBeforeUnmount, watch, ref, nextTick } from 'vue'
 import { useStore } from 'vuex'
+import { useUserStore } from '@/stores/useUserStore'
+import { useSpaceStore } from '@/stores/useSpaceStore'
 
 import utils from '@/utils.js'
 import consts from '@/consts.js'
@@ -10,6 +12,8 @@ import Loader from '@/components/Loader.vue'
 import { nanoid } from 'nanoid'
 
 const store = useStore()
+const userStore = useUserStore()
+const spaceStore = useSpaceStore()
 
 const textareaElement = ref(null)
 
@@ -28,11 +32,11 @@ const state = reactive({
   success: false
 })
 
-const cardsCreatedIsOverLimit = computed(() => store.getters['currentUser/cardsCreatedIsOverLimit'])
+const cardsCreatedIsOverLimit = computed(() => userStore.getUserCardsCreatedIsOverLimit)
 const textareaPlaceholder = computed(() => 'Type here, or paste a URL')
-const maxCardCharacterLimit = computed(() => consts.defaultCharacterLimit)
+const maxCardCharacterLimit = computed(() => consts.cardCharacterLimit)
 const updateMaxLengthError = () => {
-  if (state.newName.length >= consts.defaultCharacterLimit - 1) {
+  if (state.newName.length >= consts.cardCharacterLimit - 1) {
     state.error.maxLength = true
   } else {
     state.error.maxLength = false
@@ -99,7 +103,7 @@ const addCard = async () => {
     card.shouldUpdateUrlPreview = true
   }
   try {
-    const user = store.state.currentUser
+    const user = userStore.getUserAllState
     card.userId = user.id
     console.info('🛫 create card in inbox space', card)
     await store.dispatch('api/addToQueue', { name: 'createCardInInbox', body: card })

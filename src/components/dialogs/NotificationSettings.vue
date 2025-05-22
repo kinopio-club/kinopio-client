@@ -1,6 +1,8 @@
 <script setup>
 import { reactive, computed, onMounted, onBeforeUnmount, watch, ref, nextTick } from 'vue'
 import { useStore } from 'vuex'
+import { useUserStore } from '@/stores/useUserStore'
+import { useSpaceStore } from '@/stores/useSpaceStore'
 
 import Loader from '@/components/Loader.vue'
 import SpaceList from '@/components/SpaceList.vue'
@@ -8,6 +10,8 @@ import GroupList from '@/components/GroupList.vue'
 import utils from '@/utils.js'
 
 const store = useStore()
+const userStore = useUserStore()
+const spaceStore = useSpaceStore()
 
 const dialogElement = ref(null)
 
@@ -40,24 +44,24 @@ const updateDialogHeight = async () => {
   state.dialogHeight = utils.elementHeight(element)
 }
 
-const isSignedIn = computed(() => store.getters['currentUser/isSignedIn'])
-const currentUserIsSignedIn = computed(() => store.getters['currentUser/isSignedIn'])
-const shouldEmailNotifications = computed(() => store.state.currentUser.shouldEmailNotifications)
-const shouldEmailBulletin = computed(() => store.state.currentUser.shouldEmailBulletin)
-const shouldEmailWeeklyReview = computed(() => store.state.currentUser.shouldEmailWeeklyReview)
+const isSignedIn = computed(() => userStore.getUserIsSignedIn)
+const currentUserIsSignedIn = computed(() => userStore.getUserIsSignedIn)
+const shouldEmailNotifications = computed(() => userStore.shouldEmailNotifications)
+const shouldEmailBulletin = computed(() => userStore.shouldEmailBulletin)
+const shouldEmailWeeklyReview = computed(() => userStore.shouldEmailWeeklyReview)
 const parentDialog = computed(() => 'notificationSettings')
 
 const toggleShouldEmailNotifications = () => {
   const value = !shouldEmailNotifications.value
-  store.dispatch('currentUser/shouldEmailNotifications', value)
+  userStore.updateUser({ shouldEmailNotifications: value })
 }
 const toggleShouldEmailBulletin = () => {
   const value = !shouldEmailBulletin.value
-  store.dispatch('currentUser/shouldEmailBulletin', value)
+  userStore.updateUser({ shouldEmailBulletin: value })
 }
 const toggleShouldEmailWeeklyReview = () => {
   const value = !shouldEmailWeeklyReview.value
-  store.dispatch('currentUser/shouldEmailWeeklyReview', value)
+  userStore.updateUser({ shouldEmailWeeklyReview: value })
 }
 const triggerSignUpOrInIsVisible = () => {
   store.dispatch('closeAllDialogs')

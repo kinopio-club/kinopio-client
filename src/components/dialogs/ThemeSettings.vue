@@ -1,10 +1,15 @@
 <script setup>
 import { reactive, computed, onMounted, onUnmounted, watch, ref, nextTick } from 'vue'
 import { useStore } from 'vuex'
+import { useUserStore } from '@/stores/useUserStore'
+import { useSpaceStore } from '@/stores/useSpaceStore'
 
 import BackgroundPreview from '@/components/BackgroundPreview.vue'
 import utils from '@/utils.js'
+
 const store = useStore()
+const userStore = useUserStore()
+const spaceStore = useSpaceStore()
 
 const dialogElement = ref(null)
 
@@ -12,12 +17,12 @@ const props = defineProps({
   visible: Boolean
 })
 
-const currentUser = computed(() => store.state.currentUser)
+const currentUser = computed(() => userStore.getUserAllState)
 const currentSpace = computed(() => store.state.currentSpace)
 
 // theme
 
-const themeIsSystem = computed(() => store.state.currentUser.themeIsSystem)
+const themeIsSystem = computed(() => userStore.themeIsSystem)
 const toggleThemeIsSystem = () => {
   store.dispatch('themes/toggleIsSystem')
 }
@@ -59,10 +64,10 @@ const updateBackground = () => {
     }
   }
   updates.defaultSpaceBackgroundTint = currentSpace.value.backgroundTint
-  store.dispatch('currentUser/update', updates)
+  userStore.updateUser(updates)
 }
 const removeBackground = () => {
-  store.dispatch('currentUser/update', { defaultSpaceBackground: null, defaultSpaceBackgroundTint: null, defaultSpaceBackgroundGradient: null })
+  userStore.updateUser({ defaultSpaceBackground: null, defaultSpaceBackgroundTint: null, defaultSpaceBackgroundGradient: null })
 }
 </script>
 

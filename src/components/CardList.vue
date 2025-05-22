@@ -1,6 +1,9 @@
 <script setup>
 import { reactive, computed, onMounted, onBeforeUnmount, watch, ref, nextTick } from 'vue'
 import { useStore } from 'vuex'
+import { useCardStore } from '@/stores/useCardStore'
+import { useUserStore } from '@/stores/useUserStore'
+import { useSpaceStore } from '@/stores/useSpaceStore'
 
 import UserLabelInline from '@/components/UserLabelInline.vue'
 import NameSegment from '@/components/NameSegment.vue'
@@ -14,6 +17,9 @@ import isToday from 'dayjs/plugin/isToday'
 dayjs.extend(isToday)
 
 const store = useStore()
+const cardStore = useCardStore()
+const userStore = useUserStore()
+const spaceStore = useSpaceStore()
 
 const itemsPerPage = 15
 
@@ -52,10 +58,10 @@ const state = reactive({
 })
 
 const normalizedCards = computed(() => {
-  let items = utils.clone(props.cards)
-  items = items.filter(card => !state.removedCardIds.includes(card.id))
+  // let items = utils.clone(props.cards)
+  const items = props.cards.filter(card => !state.removedCardIds.includes(card.id))
   return items.map(card => {
-    card = store.getters['currentCards/nameSegments'](card)
+    card = cardStore.cardWithNameSegments(card)
     card.user = store.getters['currentSpace/userById'](card.userId)
     store.commit('updateOtherUsers', card.user)
     if (!card.user) {
@@ -93,7 +99,7 @@ const relativeDate = (card) => {
   return utils.shortRelativeTime(date)
 }
 const userIsNotCurrentUser = (userId) => {
-  return store.state.currentUser.id !== userId
+  return userStore.id !== userId
 }
 const isStrikeThrough = (card) => {
   return card.name.startsWith('[x]')

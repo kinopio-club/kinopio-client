@@ -1,10 +1,17 @@
 <script setup>
 import { reactive, computed, onMounted, onUnmounted, watch, ref, nextTick } from 'vue'
 import { useStore } from 'vuex'
+import { useConnectionStore } from '@/stores/useConnectionStore'
+import { useUserStore } from '@/stores/useUserStore'
+import { useSpaceStore } from '@/stores/useSpaceStore'
 
 import Loader from '@/components/Loader.vue'
 import utils from '@/utils.js'
+
 const store = useStore()
+const userStore = useUserStore()
+const spaceStore = useSpaceStore()
+const connectionStore = useConnectionStore()
 
 const emit = defineEmits(['updateSpaces'])
 
@@ -27,7 +34,7 @@ const state = reactive({
   pdfIsVisible: false
 })
 
-const currentUserIsSignedIn = computed(() => store.getters['currentUser/isSignedIn'])
+const currentUserIsSignedIn = computed(() => userStore.getUserIsSignedIn)
 const currentSpace = computed(() => store.getters['currentSpace/all'])
 const text = computed(() => utils.nameStringFromItems(currentSpace.value.cards))
 
@@ -154,7 +161,7 @@ const convertToCanvas = (space) => {
       }
     })
     space.connections.forEach(connection => {
-      const type = store.getters['currentConnections/typeByConnection'](connection)
+      const type = connectionStore.getConnectionConnectionType(connection.id)
       // direction
       let toEnd = 'none'
       if (connection.directionIsVisible) {

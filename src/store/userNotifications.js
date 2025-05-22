@@ -1,3 +1,5 @@
+import { useUserStore } from '@/stores/useUserStore'
+import { useSpaceStore } from '@/stores/useSpaceStore'
 import utils from '@/utils.js'
 
 import uniq from 'lodash-es/uniq'
@@ -11,7 +13,8 @@ export default {
     // User
 
     addFavoriteUser: async (context, favoriteUser) => {
-      const userId = context.rootState.currentUser.id
+      const userStore = useUserStore()
+      const userId = userStore.id
       const recipientUserIds = [favoriteUser.id]
       const notification = {
         type: 'addFavoriteUser',
@@ -21,7 +24,8 @@ export default {
       await context.dispatch('api/addToQueue', { name: 'createUserNotification', body: notification }, { root: true })
     },
     removeFavoriteUser: async (context, favoriteUser) => {
-      const userId = context.rootState.currentUser.id
+      const userStore = useUserStore()
+      const userId = userStore.id
       const recipientUserIds = [favoriteUser.id]
       const notification = {
         type: 'removeFavoriteUser',
@@ -34,7 +38,8 @@ export default {
     // Space
 
     addFavoriteSpace: async (context, favoriteSpace) => {
-      const userId = context.rootState.currentUser.id
+      const userStore = useUserStore()
+      const userId = userStore.id
       const recipientUserIds = context.getters.recipientMemberIds
       const notification = {
         type: 'addFavoriteSpace',
@@ -45,7 +50,8 @@ export default {
       await context.dispatch('api/addToQueue', { name: 'createUserNotification', body: notification }, { root: true })
     },
     removeFavoriteSpace: async (context, favoriteSpace) => {
-      const userId = context.rootState.currentUser.id
+      const userStore = useUserStore()
+      const userId = userStore.id
       const recipientUserIds = context.getters.recipientUserIds
       const notification = {
         type: 'removeFavoriteSpace',
@@ -59,12 +65,13 @@ export default {
     // Card
 
     addCardUpdated: async (context, { cardId, type }) => {
+      const userStore = useUserStore()
       if (!cardId) { return }
       if (context.state.name === 'Hello Kinopio') { return }
       if (notifiedCardIds.includes(cardId)) { return }
       const userCanEdit = context.rootGetters['currentUser/canEditSpace']()
       if (!userCanEdit) { return }
-      const userId = context.rootState.currentUser.id
+      const userId = userStore.id
       const recipientUserIds = context.getters.recipientUserIds
       if (!recipientUserIds.length) { return }
       const notification = {
@@ -102,7 +109,8 @@ export default {
     // Ask to Add Space to Explore
 
     addAskToAddToExplore: async (context) => {
-      const userId = context.rootState.currentUser.id
+      const userStore = useUserStore()
+      const userId = userStore.id
       const spaceId = context.rootState.currentSpace.id
       const recipientUserIds = context.getters.recipientUserIds
       if (!recipientUserIds.length) { return }
@@ -118,7 +126,8 @@ export default {
   },
   getters: {
     recipientUserIds: (state, getters, rootState, rootGetters) => {
-      const currentUserId = rootState.currentUser.id
+      const userStore = useUserStore()
+      const currentUserId = userStore.id
       const spaceIsOpen = rootState.currentSpace.privacy === 'open'
       // space members
       let members = rootGetters['currentSpace/members'](true)
@@ -130,7 +139,7 @@ export default {
         recipients = members.concat(contributors)
       }
       // group users who added cards
-      let groupUsers = rootGetters['currentCards/groupUsersWhoAddedCards'] || []
+      let groupUsers = rootGetters['groups/groupUsersWhoAddedCards'] || []
       groupUsers = groupUsers.map(user => user.id)
       recipients = recipients.concat(groupUsers)
       recipients = uniq(recipients)
@@ -140,13 +149,14 @@ export default {
       return recipients
     },
     recipientMemberIds: (state, getters, rootState, rootGetters) => {
-      const currentUserId = rootState.currentUser.id
+      const userStore = useUserStore()
+      const currentUserId = userStore.id
       // space members
       let members = rootGetters['currentSpace/members'](true)
       members = members.map(member => member.id)
       let recipients = members
       // group users who added cards
-      let groupUsers = rootGetters['currentCards/groupUsersWhoAddedCards'] || []
+      let groupUsers = rootGetters['groups/groupUsersWhoAddedCards'] || []
       groupUsers = groupUsers.map(user => user.id)
       recipients = recipients.concat(groupUsers)
       recipients = uniq(recipients)

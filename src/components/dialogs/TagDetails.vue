@@ -1,6 +1,9 @@
 <script setup>
 import { reactive, computed, onMounted, onBeforeUnmount, watch, ref, nextTick } from 'vue'
 import { useStore } from 'vuex'
+import { useCardStore } from '@/stores/useCardStore'
+import { useUserStore } from '@/stores/useUserStore'
+import { useSpaceStore } from '@/stores/useSpaceStore'
 
 import ResultsFilter from '@/components/ResultsFilter.vue'
 import ColorPicker from '@/components/dialogs/ColorPicker.vue'
@@ -14,6 +17,9 @@ import sortBy from 'lodash-es/sortBy'
 import dayjs from 'dayjs'
 
 const store = useStore()
+const cardStore = useCardStore()
+const userStore = useUserStore()
+const spaceStore = useSpaceStore()
 
 const dialogElement = ref(null)
 const resultsElement = ref(null)
@@ -44,10 +50,10 @@ watch(() => visible.value, (value, prevValue) => {
     closeDialogs()
   }
 })
-const canEditSpace = computed(() => store.getters['currentUser/canEditSpace']())
+const canEditSpace = computed(() => userStore.getUserCanEditSpace())
 const currentSpaceId = computed(() => store.state.currentSpace.id)
-const currentUserIsSignedIn = computed(() => store.getters['currentUser/isSignedIn'])
-const currentUser = computed(() => store.state.currentUser)
+const currentUserIsSignedIn = computed(() => userStore.getUserIsSignedIn)
+const currentUser = computed(() => userStore.getUserAllState)
 const isDark = computed(() => utils.colorIsDark(color.value))
 
 // current tag
@@ -95,7 +101,7 @@ const position = computed(() => {
   }
 })
 const styles = computed(() => {
-  const isChildDialog = cardDetailsIsVisibleForCardId.value.valye || visibleFromTagList.value
+  const isChildDialog = cardDetailsIsVisibleForCardId.value || visibleFromTagList.value
   let zoom = store.getters.spaceZoomDecimal
   if (isChildDialog) {
     zoom = 1
@@ -165,12 +171,12 @@ const cachedOrOtherSpaceById = async (spaceId) => {
 
 const cardDetailsIsVisibleForCardId = computed(() => store.state.cardDetailsIsVisibleForCardId)
 const currentCard = computed(() => {
-  const currentCardId = cardDetailsIsVisibleForCardId.value.valye
-  const currentCard = store.getters['currentCards/byId'](currentCardId)
-  const tagCard = store.getters['currentCards/byId'](store.state.currentSelectedTag.cardId)
-  return currentCard || tagCard
+  const currentCardId = cardDetailsIsVisibleForCardId.value
+  const card = cardStore.getCard(currentCardId)
+  const tagCard = cardStore.getCard(store.state.currentSelectedTag.cardId)
+  return card || tagCard
 })
-const showEditCard = computed(() => !cardDetailsIsVisibleForCardId.value.valye && !visibleFromTagList.value)
+const showEditCard = computed(() => !cardDetailsIsVisibleForCardId.value && !visibleFromTagList.value)
 const focusOnCard = async (card) => {
   card = card || currentCard.value
   store.dispatch('closeAllDialogs')
@@ -211,7 +217,7 @@ const remoteCards = async () => {
 }
 const updateCards = async () => {
   state.cards = []
-  const cardsInCurrentSpace = utils.clone(store.getters['currentCards/withTagName'](name.value))
+  const cardsInCurrentSpace = cardStore.getCardsWithTagName(name.value)
   const cardsInCachedSpaces = await cache.allCardsByTagName(name.value)
   // cache cards
   let cacheCards = cardsInCurrentSpace.concat(cardsInCachedSpaces)
@@ -285,9 +291,7 @@ const groupedItems = computed(() => {
   return groups
 })
 const selectCardsWithTag = () => {
-  let cards = store.getters['currentCards/withTagName'](currentTag.value.name)
-  cards = cards.filter(card => Boolean(card))
-  if (!cards.length) { return }
+  const cards = cardStore.getCardsWithTagName(currentTag.value.name)
   const cardIds = cards.map(card => card.id)
   store.dispatch('closeAllDialogs')
   store.commit('multipleCardsSelectedIds', cardIds)
@@ -313,7 +317,7 @@ const segmentTagColor = (segment) => {
     return color.value
   }
   const spaceTag = store.getters['currentSpace/tagByName'](segment.name)
-  const userTag = store.getters['currentUser/tagByName'](segment.name)
+  const userTag = userStore.getUserTagByName(segment.name)
   if (spaceTag) {
     return spaceTag.color
   } else if (userTag) {

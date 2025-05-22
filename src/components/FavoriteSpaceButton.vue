@@ -1,6 +1,11 @@
 <script setup>
 import { reactive, computed, onMounted, onBeforeUnmount, onUnmounted, watch, ref, nextTick } from 'vue'
 import { useStore } from 'vuex'
+import { useUserStore } from '@/stores/useUserStore'
+import { useSpaceStore } from '@/stores/useSpaceStore'
+
+const userStore = useUserStore()
+const spaceStore = useSpaceStore()
 const store = useStore()
 
 const emit = defineEmits(['updateLocalSpaces'])
@@ -11,7 +16,7 @@ const props = defineProps({
 
 const isTranslucentButton = computed(() => {
   if (props.parentIsDialog) { return }
-  return !store.state.currentUser.shouldIncreaseUIContrast
+  return !userStore.shouldIncreaseUIContrast
 })
 const isOnline = computed(() => store.state.isOnline)
 
@@ -19,7 +24,7 @@ const isFavoriteSpace = computed(() => store.getters['currentSpace/isFavorite'](
 const toggleIsFavoriteSpace = () => {
   const space = store.state.currentSpace
   const value = !isFavoriteSpace.value
-  store.dispatch('currentUser/updateFavoriteSpace', { space, value })
+  userStore.updateUserFavoriteSpace(space, value)
   emit('updateLocalSpaces')
 }
 </script>

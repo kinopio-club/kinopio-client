@@ -1,3 +1,5 @@
+import { useUserStore } from '@/stores/useUserStore'
+import { useSpaceStore } from '@/stores/useSpaceStore'
 import utils from '@/utils.js'
 
 const themes = {
@@ -86,7 +88,8 @@ export default {
       context.commit('triggerUpdateTheme', null, { root: true })
     },
     toggleIsSystem: (context) => {
-      const value = !context.rootState.currentUser.themeIsSystem
+      const userStore = useUserStore()
+      const value = !userStore.themeIsSystem
       context.dispatch('isSystem', value)
       if (value) {
         const themeName = context.getters.systemThemeName
@@ -106,15 +109,17 @@ export default {
       context.commit('triggerUpdateTheme', null, { root: true })
     },
     restore: (context) => {
-      let themeName = context.rootState.currentUser.theme
-      const themeIsSystem = context.rootState.currentUser.themeIsSystem
+      const userStore = useUserStore()
+      let themeName = userStore.theme
+      const themeIsSystem = userStore.themeIsSystem
       if (themeIsSystem) {
         themeName = context.getters.systemThemeName || themeName
       }
       context.dispatch('update', themeName)
     },
     toggle: (context) => {
-      const prevTheme = context.rootState.currentUser.theme || 'light'
+      const userStore = useUserStore()
+      const prevTheme = userStore.theme || 'light'
       let theme
       if (prevTheme === 'light') {
         theme = 'dark'
@@ -136,8 +141,9 @@ export default {
       return themeName
     },
     isThemeDark: (state, getters, rootState) => {
+      const userStore = useUserStore()
       const systemTheme = getters.themeFromSystem
-      const userTheme = rootState.currentUser.theme
+      const userTheme = userStore.theme
       if (systemTheme) {
         return systemTheme === 'dark'
       } else {

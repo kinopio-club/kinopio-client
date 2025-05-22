@@ -1,9 +1,16 @@
 <script setup>
 import { reactive, computed, onMounted, onBeforeUnmount, watch, ref, nextTick } from 'vue'
 import { useStore } from 'vuex'
+import { useCardStore } from '@/stores/useCardStore'
+import { useUserStore } from '@/stores/useUserStore'
+import { useSpaceStore } from '@/stores/useSpaceStore'
 
 import utils from '@/utils.js'
+
+const cardStore = useCardStore()
 const store = useStore()
+const userStore = useUserStore()
+const spaceStore = useSpaceStore()
 
 let unsubscribe
 
@@ -40,16 +47,16 @@ watch(() => props.visible, (value, prevValue) => {
   }
 })
 
-const isVisible = computed(() => props.visible || store.getters['currentUser/isSpaceMember']())
+const isVisible = computed(() => props.visible || userStore.getUserIsSpaceMember())
 const showInExplore = computed(() => {
   const space = props.space || store.state.currentSpace
   const showInExplore = space.showInExplore
   const isNotPrivate = space.privacy !== 'private'
   return showInExplore && isNotPrivate
 })
-const currentUserIsSignedIn = computed(() => store.getters['currentUser/isSignedIn'])
+const currentUserIsSignedIn = computed(() => userStore.getUserIsSignedIn)
 const spaceIsHelloKinopio = computed(() => store.getters['currentSpace/isHelloKinopio'])
-const spaceCardsCount = computed(() => store.getters['currentCards/all'].length)
+const spaceCardsCount = computed(() => cardStore.getAllCards.length)
 
 const checkIfShouldPrevent = (event) => {
   if (props.space) { return }

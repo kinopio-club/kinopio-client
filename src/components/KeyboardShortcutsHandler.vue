@@ -1,6 +1,11 @@
 <script setup>
 import { reactive, computed, onMounted, onBeforeUnmount, watch, ref, nextTick } from 'vue'
 import { useStore } from 'vuex'
+import { useCardStore } from '@/stores/useCardStore'
+import { useConnectionStore } from '@/stores/useConnectionStore'
+import { useBoxStore } from '@/stores/useBoxStore'
+import { useUserStore } from '@/stores/useUserStore'
+import { useSpaceStore } from '@/stores/useSpaceStore'
 
 import utils from '@/utils.js'
 import consts from '@/consts.js'
@@ -8,6 +13,11 @@ import consts from '@/consts.js'
 import { nanoid } from 'nanoid'
 
 const store = useStore()
+const cardStore = useCardStore()
+const connectionStore = useConnectionStore()
+const boxStore = useBoxStore()
+const userStore = useUserStore()
+const spaceStore = useSpaceStore()
 
 let useSiblingConnectionType
 let browserZoomLevel = 0
@@ -63,7 +73,7 @@ onBeforeUnmount(() => {
 })
 
 const isDisabledKeyboardShortcut = (value) => {
-  const disabledKeyboardShortcuts = store.state.currentUser.disabledKeyboardShortcuts
+  const disabledKeyboardShortcuts = userStore.disabledKeyboardShortcuts
   const isDisabled = disabledKeyboardShortcuts.includes(value)
   return isDisabled
 }
@@ -118,7 +128,7 @@ const handleShortcuts = (event) => {
   const isSpaceScope = checkIsSpaceScope(event)
   const isMinimapDialogScope = checkIsMinimapDialogScope(event)
   const toolbarIsDrawing = store.state.currentUserToolbar === 'drawing'
-  const canEditSpace = store.getters['currentUser/canEditSpace']()
+  const canEditSpace = userStore.getUserCanEditSpace()
   // ?
   if (key === '?' && isSpaceScope) {
     store.commit('triggerKeyboardShortcutsIsVisible')
@@ -145,24 +155,24 @@ const handleShortcuts = (event) => {
     store.dispatch('closeAllDialogs')
     store.dispatch('currentUserToolbar', 'card')
   } else if (key === '1' && isSpaceScope) {
-    let value = store.state.currentUser.filterShowUsers
+    let value = userStore.filterShowUsers
     value = !value
-    store.dispatch('currentUser/toggleFilterShowUsers', value)
+    userStore.updateUser({ filterShowUsers: value })
   // 2
   } else if (key === '2' && isSpaceScope) {
-    let value = store.state.currentUser.filterShowDateUpdated
+    let value = userStore.filterShowDateUpdated
     value = !value
-    store.dispatch('currentUser/toggleFilterShowDateUpdated', value)
+    userStore.updateUser({ filterShowDateUpdated: value })
   // 3
   } else if (key === '3' && isSpaceScope) {
-    let value = store.state.currentUser.filterUnchecked
+    let value = userStore.filterUnchecked
     value = !value
-    store.dispatch('currentUser/toggleFilterUnchecked', value)
+    userStore.updateUser({ filterUnchecked: value })
   // 4
   } else if (key === '4' && isSpaceScope) {
-    let value = store.state.currentUser.filterComments
+    let value = userStore.filterComments
     value = !value
-    store.dispatch('currentUser/toggleFilterComments', value)
+    userStore.updateUser({ filterComments: value })
   // ' '
   } else if (key === ' ' && isSpaceScope) {
     store.dispatch('currentUserIsPanning', false)
@@ -175,10 +185,10 @@ const handleShortcuts = (event) => {
     const cardId = store.state.cardDetailsIsVisibleForCardId
     // Surround Selected Cards with Box
     if (cardId) {
-      cards = [store.getters['currentCards/byId'](cardId)]
+      cards = [cardStore.getCard(cardId)]
       containItemsInNewBox(cards)
     } else if (multipleCardIds.length) {
-      cards = multipleCardIds.map(id => store.getters['currentCards/byId'](id))
+      cards = multipleCardIds.map(id => cardStore.getCard(id))
       containItemsInNewBox(cards)
     // Toolbar Box Mode
     } else {
@@ -197,7 +207,7 @@ const handleShortcuts = (event) => {
     store.dispatch('toggleDrawingEraserIsActive')
   // s
   } else if (key === 's' && isSpaceScope && toolbarIsDrawing) {
-    store.dispatch('currentUser/cycleDrawingBrushSize')
+    userStore.cycleDrawingBrushSize()
   }
 }
 // on key down
@@ -218,7 +228,7 @@ const handleMetaKeyShortcuts = (event) => {
   const toolbarIsDrawing = store.state.currentUserToolbar === 'drawing'
   // Add Child Card
   if (event.shiftKey && key === 'enter' && (isSpaceScope || isCardScope)) {
-    const shouldAddChildCard = store.state.currentUser.cardSettingsShiftEnterShouldAddChildCard
+    const shouldAddChildCard = userStore.cardSettingsShiftEnterShouldAddChildCard
     if (!shouldAddChildCard) { return }
     addChildCard()
   // Add Card
@@ -312,7 +322,7 @@ const handleMouseDownEvents = (event) => {
   const toolbarIsBox = store.state.currentUserToolbar === 'box'
   const isNotConnecting = !store.state.currentUserIsDrawingConnection
   const shouldBoxSelect = event.shiftKey && isPanScope && !toolbarIsBox && isNotConnecting && !store.state.currentUserIsResizingBox
-  const userDisablePan = store.state.currentUser.shouldDisableRightClickToPan
+  const userDisablePan = userStore.shouldDisableRightClickToPan
   const shouldPan = (isRightClick || isMiddleClick) && isPanScope && !userDisablePan
   const position = utils.cursorPositionInPage(event)
   const isButtonScope = checkIsButtonScope(event)
@@ -408,13 +418,13 @@ const addCard = async (options) => {
     store.commit('shouldPreventNextEnterKey', false)
     return
   }
-  const canEditSpace = store.getters['currentUser/canEditSpace']()
+  const canEditSpace = userStore.getUserCanEditSpace()
   if (!canEditSpace) { return }
   const parentCardId = store.state.parentCardId
   let parentCard = document.querySelector(`.card[data-card-id="${parentCardId}"]`)
   const childCardId = store.state.childCardId
   let childCard = document.querySelector(`.card[data-card-id="${childCardId}"]`)
-  const childCardData = store.getters['currentCards/byId'](childCardId)
+  const childCardData = cardStore.getCard(childCardId)
   const shouldOutdentChildToParent = childCard && !childCardData
   const spaceBetweenCards = consts.spaceBetweenCards
   let position = {}
@@ -447,14 +457,14 @@ const addCard = async (options) => {
     }
   }
   position = nonOverlappingCardPosition(position)
-  parentCard = store.getters['currentCards/byId'](parentCardId)
+  parentCard = cardStore.getCard(parentCardId)
   let backgroundColor
   if (parentCard) {
     backgroundColor = parentCard.backgroundColor
   }
   store.commit('shouldPreventNextEnterKey', true)
   const newCard = { position, isParentCard, backgroundColor, id: options.id }
-  store.dispatch('currentCards/add', { card: newCard })
+  cardStore.createCard(newCard)
   if (childCard) {
     store.commit('childCardId', store.state.cardDetailsIsVisibleForCardId)
     await nextTick()
@@ -488,10 +498,10 @@ const addChildCard = async (options) => {
     y: rect.y + rect.height + spaceBetweenCards
   }
   const position = nonOverlappingCardPosition(initialPosition)
-  const parentCard = store.getters['currentCards/byId'](parentCardId)
+  const parentCard = cardStore.getCard(parentCardId)
   const newChildCardId = options.id || nanoid()
   const newCard = { position, backgroundColor: parentCard.backgroundColor, id: newChildCardId }
-  store.dispatch('currentCards/add', { card: newCard })
+  cardStore.createCard(newCard)
   store.commit('childCardId', store.state.cardDetailsIsVisibleForCardId)
   await nextTick()
   addConnection(baseCardId, position)
@@ -500,7 +510,7 @@ const addChildCard = async (options) => {
 // recursive
 const nonOverlappingCardPosition = (position) => {
   const spaceBetweenCards = consts.spaceBetweenCards
-  const cards = store.getters['currentCards/isSelectable'](position)
+  const cards = cardStore.getCardsSelectableInViewport()
   if (!utils.arrayHasItems(cards)) { return position }
   const overlappingCard = cards.find(card => {
     const isBetweenX = utils.isBetween({
@@ -524,10 +534,10 @@ const nonOverlappingCardPosition = (position) => {
 }
 
 const addConnectionType = () => {
-  const hasConnectionType = Boolean(store.getters['currentConnections/typeForNewConnections'])
-  const shouldUseLastConnectionType = store.state.currentUser.shouldUseLastConnectionType
+  const hasConnectionType = connectionStore.getNewConnectionType
+  const shouldUseLastConnectionType = userStore.shouldUseLastConnectionType
   if ((shouldUseLastConnectionType || useSiblingConnectionType) && hasConnectionType) { return }
-  store.dispatch('currentConnections/addType')
+  connectionStore.createConnectionType()
   useSiblingConnectionType = true
 }
 
@@ -540,22 +550,22 @@ const addConnection = (baseCardId, position) => {
   }
   const baseCard = document.querySelector(`.card[data-card-id="${baseCardId}"]`)
   if (!baseCard) { return }
-  const controlPoint = store.state.currentUser.defaultConnectionControlPoint
+  const controlPoint = userStore.defaultConnectionControlPoint
   const estimatedEndItemConnectorPosition = utils.estimatedNewCardConnectorPosition(position)
+  const path = connectionStore.getConnectionPathBetweenItems({
+    startItemId: baseCardId,
+    endItemId: endCurrentCardId,
+    controlPoint,
+    estimatedEndItemConnectorPosition
+  })
   const connection = {
     startItemId: baseCardId,
     endItemId: endCurrentCardId,
-    path: store.getters['currentConnections/connectionPathBetweenItems']({
-      startItemId: baseCardId,
-      endItemId: endCurrentCardId,
-      controlPoint,
-      estimatedEndItemConnectorPosition
-    }),
+    path,
     controlPoint
   }
   addConnectionType()
-  const type = store.getters['currentConnections/typeForNewConnections']
-  store.dispatch('currentConnections/add', { connection, type })
+  connectionStore.createConnection(connection)
 }
 
 const selectedCardIds = () => {
@@ -565,8 +575,7 @@ const selectedCardIds = () => {
 // Remove
 
 const removeCardById = (cardId) => {
-  const card = store.getters['currentCards/byId'](cardId)
-  store.dispatch('currentCards/remove', card)
+  cardStore.removeCard(cardId)
 }
 
 const clearAllSelectedCards = () => {
@@ -576,20 +585,20 @@ const clearAllSelectedCards = () => {
 }
 
 const canEditCardById = (cardId) => {
-  const isSpaceMember = store.getters['currentUser/isSpaceMember']()
-  const card = store.getters['currentCards/byId'](cardId)
-  const cardIsCreatedByCurrentUser = store.getters['currentUser/cardIsCreatedByCurrentUser'](card)
-  const canEditSpace = store.getters['currentUser/canEditSpace']()
+  const isSpaceMember = userStore.getUserIsSpaceMember()
+  const card = cardStore.getCard(cardId)
+  const cardIsCreatedByCurrentUser = userStore.getUserIsCardCreator(card)
+  const canEditSpace = userStore.getUserCanEditSpace()
   if (isSpaceMember) { return true }
   if (canEditSpace && cardIsCreatedByCurrentUser) { return true }
   return false
 }
 
 const canEditConnectionById = (connectionId) => {
-  const isSpaceMember = store.getters['currentUser/isSpaceMember']()
-  const connection = store.getters['currentConnections/byId'](connectionId)
-  const connectionIsCreatedByCurrentUser = store.getters['currentUser/connectionIsCreatedByCurrentUser'](connection)
-  const canEditSpace = store.getters['currentUser/canEditSpace']()
+  const isSpaceMember = userStore.getUserIsSpaceMember()
+  const connection = connectionStore.getConnection(connectionId)
+  const connectionIsCreatedByCurrentUser = userStore.getItemIsCreatedByUser(connection)
+  const canEditSpace = userStore.getUserCanEditSpace()
   if (isSpaceMember) { return true }
   if (canEditSpace && connectionIsCreatedByCurrentUser) { return true }
   return false
@@ -599,11 +608,10 @@ const remove = () => {
   store.dispatch('history/resume')
   const selectedConnectionIds = store.state.multipleConnectionsSelectedIds
   const cardIds = selectedCardIds()
-  const boxes = store.getters['currentBoxes/isSelected']
+  const boxes = boxStore.getBoxesSelected
   selectedConnectionIds.forEach(connectionId => {
     if (canEditConnectionById(connectionId)) {
-      const connection = store.getters['currentConnections/byId'](connectionId)
-      store.dispatch('currentConnections/remove', connection)
+      connectionStore.removeConnection(connectionId)
     }
   })
   cardIds.forEach(cardId => {
@@ -612,12 +620,12 @@ const remove = () => {
     }
   })
   boxes.forEach(box => {
-    const canEditBox = store.getters['currentUser/canEditBox'](box)
+    const canEditBox = cardStore.getUserCanEditBox(box)
     if (canEditBox) {
-      store.dispatch('currentBoxes/remove', box)
+      boxStore.removeBox(box.id)
     }
   })
-  store.dispatch('currentConnections/removeUnusedTypes')
+  connectionStore.removeAllUnusedConnectionTypes()
   clearAllSelectedCards()
   store.dispatch('closeAllDialogs')
 }
@@ -690,15 +698,15 @@ const handlePastePlainText = async (data, position) => {
       y: position.y
     }
   })
-  store.dispatch('currentCards/addMultiple', { cards })
+  cardStore.createCards(cards)
   setTimeout(async () => {
-    store.dispatch('currentCards/distributeVertically', cards)
+    cardStore.distributeCardsVertically(cards)
     await nextTick()
     // select
     const cardIds = cards.map(card => card.id)
     store.commit('multipleCardsSelectedIds', cardIds)
     // ⏺ history
-    cards = cardIds.map(cardId => store.getters['currentCards/byId'](cardId))
+    cards = cardIds.map(cardId => cardStore.getCard(cardId))
     store.dispatch('history/resume')
     store.dispatch('history/add', { cards, useSnapshot: true })
   }, 100)
@@ -707,7 +715,7 @@ const handlePastePlainText = async (data, position) => {
 const afterPaste = ({ cards, boxes }) => {
   cards.forEach(card => {
     store.dispatch('checkIfItemShouldIncreasePageSize', card)
-    store.dispatch('currentCards/updateURLQueryStrings', { cardId: card.id })
+    cardStore.normalizeCardUrls(card.id)
   })
   boxes.forEach(box => {
     store.dispatch('checkIfItemShouldIncreasePageSize', box)
@@ -758,8 +766,8 @@ const handlePasteEvent = async (event) => {
     return
   }
   // check read only
-  store.dispatch('currentUser/notifyReadOnly', position)
-  const canEditSpace = store.getters['currentUser/canEditSpace']()
+  userStore.notifyReadOnly(position)
+  const canEditSpace = userStore.getUserCanEditSpace()
   if (!canEditSpace) { return }
   // get clipboard data
   const data = await getClipboardData()
@@ -783,7 +791,8 @@ const handlePasteEvent = async (event) => {
     store.dispatch('addMultipleToMultipleCardsSelected', cardIds)
     store.dispatch('addMultipleToMultipleBoxesSelected', boxIds)
     await nextTick()
-    store.dispatch('currentConnections/updatePaths', { connections: items.connections })
+    const connectionIds = items.connections.map(connection => connection.map)
+    connectionStore.updateConnectionPaths(connectionIds)
   // add plain text cards
   } else {
     data.text = utils.decodeEntitiesFromHTML(data.text)
@@ -806,10 +815,11 @@ const selectAllItemsBelowCursor = (position) => {
     zoom = store.getters.spaceZoomDecimal
   }
   // cards
-  const cards = store.getters['currentCards/isBelowY'](position.y, zoom)
+  let cards = cardStore.getAllCardsSortedByY
+  cards = cardStore.getCardsBelowY(position.y, zoom, cards)
   const cardIds = cards.map(card => card.id)
   // boxes
-  let boxes = utils.clone(store.getters['currentBoxes/all'])
+  let boxes = boxStore.getAllBoxes
   boxes = boxes.filter(box => (box.y * zoom) > position.y)
   const boxIds = boxes.map(box => box.id)
   selectItemIds({ position, cardIds, boxIds })
@@ -824,10 +834,11 @@ const selectAllItemsAboveCursor = (position) => {
     zoom = store.getters.spaceZoomDecimal
   }
   // cards
-  const cards = store.getters['currentCards/isAboveY'](position.y, zoom)
+  let cards = cardStore.getAllCardsSortedByY
+  cards = cardStore.getCardsAboveY(position.y, zoom, cards)
   const cardIds = cards.map(card => card.id)
   // boxes
-  let boxes = utils.clone(store.getters['currentBoxes/all'])
+  let boxes = boxStore.getAllBoxes
   boxes = boxes.filter(box => (box.y * zoom) < position.y)
   const boxIds = boxes.map(box => box.id)
   selectItemIds({ position, cardIds, boxIds })
@@ -842,10 +853,11 @@ const selectAllItemsRightOfCursor = (position) => {
     zoom = store.getters.spaceZoomDecimal
   }
   // cards
-  const cards = store.getters['currentCards/isRightOfX'](position.x, zoom)
+  let cards = cardStore.getAllCardsSortedByX
+  cards = cardStore.getCardsRightOfX(position.x, zoom, cards)
   const cardIds = cards.map(card => card.id)
   // boxes
-  let boxes = utils.clone(store.getters['currentBoxes/all'])
+  let boxes = boxStore.getAllBoxes
   boxes = boxes.filter(box => {
     return (box.x * zoom) >= position.x
   })
@@ -862,10 +874,11 @@ const selectAllItemsLeftOfCursor = (position) => {
     zoom = store.getters.spaceZoomDecimal
   }
   // cards
-  const cards = store.getters['currentCards/isLeftOfX'](position.x, zoom)
+  let cards = cardStore.getAllCardsSortedByX
+  cards = cardStore.getCardsLeftOfX(position.x, zoom, cards)
   const cardIds = cards.map(card => card.id)
   // boxes
-  let boxes = utils.clone(store.getters['currentBoxes/all'])
+  let boxes = boxStore.getAllBoxes
   boxes = boxes.filter(box => {
     return (box.x * zoom) <= position.x
   })
@@ -893,9 +906,9 @@ const selectItemIds = ({ position, cardIds, boxIds }) => {
   }
 }
 const selectAllItems = () => {
-  const cardIds = utils.clone(store.state.currentCards.ids)
-  const connectionIds = utils.clone(store.state.currentConnections.ids)
-  const boxIds = utils.clone(store.state.currentBoxes.ids)
+  const cardIds = cardStore.allIds
+  const connectionIds = connectionStore.allIds
+  const boxIds = boxStore.allIds
   const dialogOffset = {
     width: 200 / 2,
     height: 150 / 2
@@ -942,11 +955,11 @@ const toggleLockCards = () => {
   const cardId = store.state.cardDetailsIsVisibleForCardId
   let cards
   if (multipleCardIds.length) {
-    cards = multipleCardIds.map(id => store.getters['currentCards/byId'](id))
+    cards = multipleCardIds.map(id => cardStore.getCard(id))
   } else if (cardId) {
-    cards = [store.getters['currentCards/byId'](cardId)]
+    cards = [cardStore.getCard(cardId)]
   } else {
-    cards = store.getters['currentCards/all']
+    cards = cardStore.getAllCards
     cards = cards.filter(card => utils.isPointInsideRect(currentCursorPosition, card))
   }
   cards = cards.filter(card => Boolean(card))
@@ -956,14 +969,14 @@ const toggleLockCards = () => {
   const shouldLock = cards.length !== lockedCards.length
   cards.forEach(card => {
     const update = { id: card.id, isLocked: shouldLock }
-    store.dispatch('currentCards/update', { card: update })
+    cardStore.updateCard(update)
   })
 }
 
 // Create Boxes
 
 const containItemsInNewBox = async (cards) => {
-  const isSpaceMember = store.getters['currentUser/isSpaceMember']()
+  const isSpaceMember = userStore.getUserIsSpaceMember()
   if (!isSpaceMember) { return }
   const rect = utils.boundaryRectFromItems(cards)
   // box size
@@ -977,7 +990,7 @@ const containItemsInNewBox = async (cards) => {
     resizeWidth: rect.width + (padding * 2),
     resizeHeight: rect.height + (padding + paddingTop)
   }
-  store.dispatch('currentBoxes/add', { box })
+  boxStore.createBox(box)
   store.dispatch('closeAllDialogs')
   await nextTick()
   await nextTick()

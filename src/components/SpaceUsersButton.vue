@@ -1,6 +1,9 @@
 <script setup>
 import { reactive, computed, onMounted, onBeforeUnmount, watch, ref, nextTick } from 'vue'
 import { useStore } from 'vuex'
+import { useCardStore } from '@/stores/useCardStore'
+import { useUserStore } from '@/stores/useUserStore'
+import { useSpaceStore } from '@/stores/useSpaceStore'
 
 import User from '@/components/User.vue'
 import utils from '@/utils.js'
@@ -10,6 +13,9 @@ import uniqBy from 'lodash-es/uniqBy'
 import last from 'lodash-es/last'
 
 const store = useStore()
+const cardStore = useCardStore()
+const userStore = useUserStore()
+const spaceStore = useSpaceStore()
 
 const buttonElement = ref(null)
 
@@ -20,9 +26,9 @@ const props = defineProps({
   users: Array
 })
 
-const currentUser = computed(() => store.state.currentUser)
+const currentUser = computed(() => userStore.getUserAllState)
 const currentSpace = computed(() => store.state.currentSpace)
-const currentUserIsSpaceMember = computed(() => store.getters['currentUser/isSpaceMember']())
+const currentUserIsSpaceMember = computed(() => userStore.getUserIsSpaceMember())
 
 const spaceUserListIsVisible = computed(() => store.state.spaceUserListIsVisible)
 const dialogIsVisible = computed(() => {
@@ -59,7 +65,7 @@ const spaceUsers = computed(() => {
   if (props.users) {
     items = props.users
   } else {
-    const groupUsers = store.getters['currentCards/groupUsersWhoAddedCards']
+    const groupUsers = store.getters['groups/groupUsersWhoAddedCards']
     items = utils.clone(currentSpace.value.users)
     items = items.concat(currentSpace.value.collaborators)
     items = items.concat(groupUsers)
@@ -76,7 +82,7 @@ const recentUser = computed(() => {
   return last(spaceUsers.value)
 })
 const isCommenters = computed(() => Boolean(commenters.value.length))
-const commenters = computed(() => store.getters['currentCards/commenters'])
+const commenters = computed(() => cardStore.getCardCommenters) // TODO move to userStore
 const spaceUsersLabel = computed(() => {
   const condition = spaceUsers.value.length !== 1
   let collaboratorsString = utils.pluralize('Collaborator', condition)
@@ -90,7 +96,7 @@ const spaceUsersLabel = computed(() => {
   return string
 })
 const isTranslucentButton = computed(() => {
-  const shouldIncreaseUIContrast = store.state.currentUser.shouldIncreaseUIContrast
+  const shouldIncreaseUIContrast = userStore.shouldIncreaseUIContrast
   return props.isParentSpaceUsers && !shouldIncreaseUIContrast
 })
 

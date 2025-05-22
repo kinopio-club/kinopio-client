@@ -1,6 +1,8 @@
 <script setup>
 import { reactive, computed, onMounted, watch, ref, nextTick } from 'vue'
 import { useStore, mapState, mapGetters } from 'vuex'
+import { useUserStore } from '@/stores/useUserStore'
+import { useSpaceStore } from '@/stores/useSpaceStore'
 
 import Loader from '@/components/Loader.vue'
 import User from '@/components/User.vue'
@@ -9,7 +11,10 @@ import utils from '@/utils.js'
 import consts from '@/consts.js'
 
 import randomColor from 'randomcolor'
+
 const store = useStore()
+const userStore = useUserStore()
+const spaceStore = useSpaceStore()
 
 onMounted(() => {
   store.commit('clearNotificationsWithPosition')
@@ -33,11 +38,11 @@ const state = reactive({
   inviteType: 'edit' // 'edit', 'readOnly'
 })
 
-const currentUser = computed(() => store.state.currentUser)
-const currentUserIsUpgraded = computed(() => store.state.currentUser.isUpgraded)
+const currentUser = computed(() => userStore.getUserAllState)
+const currentUserIsUpgraded = computed(() => userStore.isUpgraded)
 const spaceName = computed(() => store.state.currentSpace.name)
 const randomUser = computed(() => {
-  const luminosity = store.state.currentUser.theme
+  const luminosity = userStore.theme
   const color = randomColor({ luminosity })
   return { color }
 })

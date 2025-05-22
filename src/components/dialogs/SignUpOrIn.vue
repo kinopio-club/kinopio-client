@@ -1,6 +1,8 @@
 <script setup>
 import { reactive, computed, onMounted, onBeforeUnmount, watch, ref, nextTick } from 'vue'
 import { useStore } from 'vuex'
+import { useUserStore } from '@/stores/useUserStore'
+import { useSpaceStore } from '@/stores/useSpaceStore'
 
 import utils from '@/utils.js'
 import Loader from '@/components/Loader.vue'
@@ -11,8 +13,11 @@ import inboxSpace from '@/data/inbox.json'
 import helloSpace from '@/data/hello.json'
 
 import { nanoid } from 'nanoid'
+import { v4 as uuidv4 } from 'uuid' // polyfill for self.crypto.randomUUID(), for legacy todesktop suppor
 
 const store = useStore()
+const userStore = useUserStore()
+const spaceStore = useSpaceStore()
 
 let shouldLoadLastSpace
 let sessionToken
@@ -171,9 +176,9 @@ const isSignUpPasswordTooShort = (password) => {
   }
 }
 const migrationAppleAppAccountToken = () => {
-  const appleToken = store.state.currentUser.appleAppAccountToken
+  const appleToken = userStore.appleAppAccountToken
   if (!appleToken) {
-    store.commit('currentUser/updateAppleAppAccountToken')
+    userStore.appleAppAccountToken = uuidv4()
   }
 }
 const signUp = async (event) => {
@@ -182,7 +187,7 @@ const signUp = async (event) => {
   const password = event.target[1].value
   const confirmPassword = event.target[2].value
   migrationAppleAppAccountToken()
-  const currentUser = utils.clone(store.state.currentUser)
+  const currentUser = userStore.getUserAllState
   if (!isPasswordMatchesEmail(email, password)) { return }
   if (!isSignUpPasswordTooShort(password)) { return }
   if (!isSignUpPasswordsMatch(password, confirmPassword)) { return }
@@ -191,10 +196,7 @@ const signUp = async (event) => {
   const newUser = await response.json()
   if (isSuccess(response)) {
     store.commit('clearAllNotifications')
-    // update user to remove user
-    await cache.saveUser(newUser)
-    store.commit('currentUser/updateUser', newUser)
-    postMessage.send({ name: 'setApiKey', value: newUser.apiKey })
+    userStore.updateUserState(newUser)
     // save spaces to remote
     await backupLocalSpaces()
     await migrationSpacesConnections()
@@ -203,7 +205,7 @@ const signUp = async (event) => {
     await store.dispatch('api/createSpaces')
     notifySignedIn()
     notifyIsJoiningGroup()
-    store.dispatch('currentUser/checkIfShouldJoinGroup')
+    userStore.checkIfShouldJoinGroup()
     await addCollaboratorToInvitedSpaces()
     store.commit('triggerUpdateWindowHistory')
     store.dispatch('themes/restore')
@@ -216,7 +218,7 @@ const signUp = async (event) => {
 
 const signIn = async (event) => {
   if (state.loading.signUpOrIn) { return }
-  const previousUser = utils.clone(store.state.currentUser)
+  const previousUser = userStore.getUserAllState
   const email = event.target[0].value.toLowerCase()
   const password = event.target[1].value
   state.loading.signUpOrIn = true
@@ -226,9 +228,7 @@ const signIn = async (event) => {
   if (isSuccess(response)) {
     store.commit('isLoadingSpace', true)
     store.commit('addNotification', { message: 'Signing In…' })
-    // update user to remote user
-    await cache.saveUser(result)
-    store.commit('currentUser/updateUser', result)
+    userStore.updateUserState(result)
     // update edited local spaces to remote user
     await removeUneditedSpace('Hello Kinopio')
     await removeUneditedSpace('Inbox')
@@ -237,7 +237,7 @@ const signIn = async (event) => {
     await store.dispatch('api/createSpaces')
     notifySignedIn()
     notifyIsJoiningGroup()
-    store.dispatch('currentUser/checkIfShouldJoinGroup')
+    userStore.checkIfShouldJoinGroup()
     // add remote spaces
     const spaces = await store.dispatch('api/getUserSpaces')
     await cache.addSpaces(spaces)
@@ -245,7 +245,7 @@ const signIn = async (event) => {
     await addCollaboratorToInvitedSpaces()
     store.commit('triggerSpaceDetailsVisible')
     store.commit('isLoadingFavorites', true)
-    store.dispatch('currentUser/restoreUserAssociatedData')
+    userStore.restoreUserAssociatedData()
     store.commit('triggerUpdateNotifications')
     store.dispatch('themes/restore')
     if (shouldLoadLastSpace) {
@@ -293,7 +293,7 @@ const migrationSpacesConnections = async () => {
   })
 }
 const updateSpacesUserId = async () => {
-  const userId = store.state.currentUser.id
+  const userId = userStore.id
   const spaces = await cache.getAllSpaces()
   const newSpaces = utils.updateSpacesUserId(userId, spaces)
   for (const space of newSpaces) {
@@ -301,8 +301,7 @@ const updateSpacesUserId = async () => {
   }
 }
 const updateCurrentSpaceWithNewUserId = (previousUser, newUser) => {
-  const currentSpace = store.state.currentSpace
-  const userIsSpaceUser = store.getters['currentUser/spaceUserPermission'](currentSpace) === 'user'
+  const userIsSpaceUser = userStore.getUserSpacePermission() === 'user'
   if (!userIsSpaceUser) { return }
   store.commit('currentSpace/removeUserFromSpace', previousUser)
   store.commit('currentSpace/addUserToSpace', newUser)
@@ -345,7 +344,7 @@ const addCollaboratorToCurrentSpace = async () => {
   const invitedSpaces = await cache.invitedSpaces()
   const invitedSpaceIds = invitedSpaces.map(space => space?.id)
   const currentSpace = store.state.currentSpace
-  const currentUser = store.state.currentUser
+  const currentUser = userStore.getUserAllState
   if (invitedSpaceIds.includes(currentSpace?.id)) {
     store.commit('currentSpace/addCollaboratorToSpace', currentUser)
     store.commit('broadcast/close')
@@ -355,7 +354,7 @@ const addCollaboratorToCurrentSpace = async () => {
 const addCollaboratorToInvitedSpaces = async () => {
   let invitedSpaces = await cache.invitedSpaces()
   invitedSpaces = invitedSpaces.map(space => {
-    space.userId = store.state.currentUser.id
+    space.userId = userStore.id
     return space
   })
   await addCollaboratorToCurrentSpace()

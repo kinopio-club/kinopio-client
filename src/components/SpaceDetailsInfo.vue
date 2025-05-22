@@ -1,6 +1,8 @@
 <script setup>
 import { reactive, computed, onMounted, onBeforeUnmount, watch, ref, nextTick } from 'vue'
 import { useStore } from 'vuex'
+import { useUserStore } from '@/stores/useUserStore'
+import { useSpaceStore } from '@/stores/useSpaceStore'
 
 import BackgroundPicker from '@/components/dialogs/BackgroundPicker.vue'
 import BackgroundPreview from '@/components/BackgroundPreview.vue'
@@ -16,6 +18,8 @@ import utils from '@/utils.js'
 import consts from '@/consts.js'
 
 const store = useStore()
+const userStore = useUserStore()
+const spaceStore = useSpaceStore()
 
 const nameElement = ref(null)
 
@@ -70,13 +74,10 @@ const removeSpaceId = (value) => {
 
 // user
 
-const currentUser = computed(() => store.state.currentUser)
-const currentUserIsSpaceCollaborator = computed(() => store.getters['currentUser/isSpaceCollaborator']())
-const currentUserIsSpaceCreator = computed(() => store.getters['currentUser/isSpaceCreator']())
-const isSpaceMember = computed(() => {
-  const currentSpace = store.state.currentSpace
-  return store.getters['currentUser/isSpaceMember'](currentSpace)
-})
+const currentUser = computed(() => userStore.getUserAllState)
+const currentUserIsSpaceCollaborator = computed(() => userStore.getUserIsSpaceCollaborator)
+const currentUserIsSpaceCreator = computed(() => userStore.getUserIsSpaceCreator)
+const isSpaceMember = computed(() => userStore.getUserIsSpaceMember())
 
 // current space
 
@@ -189,7 +190,7 @@ const userGroups = computed(() => store.getters['groups/byUser']())
 const spaceGroup = computed(() => store.getters['groups/spaceGroup']())
 const currentUserIsGroupAdmin = (group) => {
   return store.getters['groups/groupUserIsAdmin']({
-    userId: store.state.currentUser.id,
+    userId: userStore.id,
     groupId: group.id
   })
 }

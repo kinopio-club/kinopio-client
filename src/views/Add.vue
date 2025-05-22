@@ -1,6 +1,8 @@
 <script setup>
 import { reactive, computed, onMounted, onUnmounted, onBeforeUnmount, watch, ref, nextTick } from 'vue'
 import { useStore } from 'vuex'
+import { useUserStore } from '@/stores/useUserStore'
+import { useSpaceStore } from '@/stores/useSpaceStore'
 
 import inboxSpace from '@/data/inbox.json'
 import Loader from '@/components/Loader.vue'
@@ -12,7 +14,10 @@ import consts from '@/consts.js'
 import postMessage from '@/postMessage.js'
 
 import { nanoid } from 'nanoid'
+
 const store = useStore()
+const userStore = useUserStore()
+const spaceStore = useSpaceStore()
 
 const state = reactive({
   email: '',
@@ -58,11 +63,11 @@ onBeforeUnmount(() => {
 })
 
 const isOffline = computed(() => !store.state.isOnline)
-const currentUserIsSignedIn = computed(() => store.getters['currentUser/isSignedIn'])
+const currentUserIsSignedIn = computed(() => userStore.getUserIsSignedIn)
 const kinopioDomain = computed(() => consts.kinopioDomain())
-const cardsCreatedIsOverLimit = computed(() => store.getters['currentUser/cardsCreatedIsOverLimit'])
-const maxCardCharacterLimit = computed(() => consts.defaultCharacterLimit)
-const currentUser = computed(() => store.state.currentUser)
+const cardsCreatedIsOverLimit = computed(() => userStore.getUserCardsCreatedIsOverLimit)
+const maxCardCharacterLimit = computed(() => consts.cardCharacterLimit)
+const currentUser = computed(() => userStore.getUserAllState)
 const isAddPage = computed(() => store.state.isAddPage)
 const inboxUrl = computed(() => `${consts.kinopioDomain()}/inbox`)
 const selectedSpaceUrl = computed(() => `${consts.kinopioDomain()}/${state.selectedSpaceId}`)
@@ -79,7 +84,7 @@ const name = computed({
   }
 })
 const initUser = async () => {
-  store.dispatch('currentUser/init')
+  userStore.initializeUser()
 }
 const initCardTextarea = async () => {
   await nextTick()
@@ -146,8 +151,7 @@ const signIn = async (event) => {
   const result = await response.json()
   state.loading.signIn = false
   if (isSuccess(response)) {
-    await cache.saveUser(result)
-    store.commit('currentUser/updateUser', result)
+    userStore.updateUserState(result)
     initUser()
   } else {
     handleSignInErrors(result)
@@ -211,7 +215,7 @@ const addCard = async () => {
   }
   let space
   try {
-    const user = store.state.currentUser
+    const user = userStore.getUserAllState
     card.userId = user.id
     let spaceId
     // save to inbox
@@ -257,7 +261,7 @@ const clearErrorsAndSuccess = () => {
   state.success = false
 }
 const updateMaxLengthError = () => {
-  if (state.newName.length >= consts.defaultCharacterLimit - 1) {
+  if (state.newName.length >= consts.cardCharacterLimit - 1) {
     state.error.maxLength = true
   } else {
     state.error.maxLength = false

@@ -1,6 +1,8 @@
 <script setup>
 import { reactive, computed, onMounted, onBeforeUnmount, onUnmounted, watch, ref, nextTick } from 'vue'
 import { useStore } from 'vuex'
+import { useUserStore } from '@/stores/useUserStore'
+import { useSpaceStore } from '@/stores/useSpaceStore'
 
 import SpaceList from '@/components/SpaceList.vue'
 import Loader from '@/components/Loader.vue'
@@ -14,6 +16,8 @@ import AskToAddToExplore from '@/components/AskToAddToExplore.vue'
 import randomColor from 'randomcolor'
 
 const store = useStore()
+const userStore = useUserStore()
+const spaceStore = useSpaceStore()
 
 const dialogElement = ref(null)
 const resultsElement = ref(null)
@@ -140,10 +144,10 @@ const currentSpaces = computed(() => {
 
 const currentSpaceInExplore = computed(() => currentSpace.value.showInExplore)
 const updateUserShowInExploreUpdatedAt = async () => {
-  state.userShowInExploreDate = store.state.currentUser.showInExploreUpdatedAt
+  state.userShowInExploreDate = userStore.showInExploreUpdatedAt
   let serverDate = await store.dispatch('api/getDate')
   serverDate = serverDate.date
-  store.dispatch('currentUser/showInExploreUpdatedAt', serverDate)
+  userStore.updateUser({ showInExploreUpdatedAt: serverDate })
 }
 
 // search explore spaces
@@ -186,11 +190,11 @@ const selectItem = () => {
 // blank slate info
 
 const followInfoIsVisible = computed(() => {
-  const isFavorites = Boolean(store.state.currentUser.favoriteUsers.length || props.followingSpaces?.length)
+  const isFavorites = Boolean(userStore.favoriteUsers.length || props.followingSpaces?.length)
   return !props.loading && !isFavorites && currentSectionIsFollowing.value
 })
 const randomUser = computed(() => {
-  const luminosity = store.state.currentUser.theme
+  const luminosity = userStore.theme
   const color = randomColor({ luminosity })
   return { color, id: '123' }
 })

@@ -1,5 +1,6 @@
 import utils from '@/utils.js'
 import consts from '@/consts.js'
+import { useUserStore } from '@/stores/useUserStore'
 
 export default {
   namespaced: true,
@@ -10,6 +11,7 @@ export default {
       console.info('👻 analytics event:', body.name)
     },
     event: (context, eventName) => {
+      const userStore = useUserStore()
       utils.typeCheck({ value: eventName, type: 'string' })
       const body = {
         domain: 'kinopio.club',
@@ -17,7 +19,7 @@ export default {
         url: window.location.href,
         referrer: document.referrer,
         props: {
-          isSignedIn: context.rootGetters['currentUser/isSignedIn']
+          isSignedIn: userStore.getUserIsSignedIn
         }
       }
       context.dispatch('send', body)
@@ -26,7 +28,7 @@ export default {
   getters: {
     shouldSend: (state, getters, rootState) => {
       if (consts.isDevelopment()) { return }
-      // if (rootState.currentUser.analyticsIsDisabled) { return }
+      // if (userStore.analyticsIsDisabled) { return }
       if (!rootState.isOnline) { return }
       return true
     }

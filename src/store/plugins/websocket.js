@@ -5,6 +5,10 @@
 // 🌛 Send
 // 🌜 Receive
 
+import { getActivePinia } from 'pinia'
+import { useUserStore } from '@/stores/useUserStore'
+import { useSpaceStore } from '@/stores/useSpaceStore'
+
 import { nanoid } from 'nanoid'
 
 import utils from '@/utils.js'
@@ -17,10 +21,11 @@ console.info('🌳 websocket clientId', clientId)
 const showDebugMessages = false
 
 const joinSpaceRoom = (store, mutation) => {
+  const userStore = useUserStore()
   console.info('🌙 joining', websocket)
   if (!websocket) { return }
   const space = store.state.currentSpace
-  const user = store.state.currentUser
+  const user = userStore.getUserAllState
   const currentSpaceIsRemote = store.getters['currentSpace/isRemote']
   if (!currentSpaceIsRemote) {
     store.commit('isJoiningSpace', false)
@@ -99,6 +104,7 @@ const closeWebsocket = (store) => {
 export default function createWebSocketPlugin () {
   return store => {
     store.subscribe((mutation, state) => {
+      const userStore = useUserStore()
       if (mutation.type === 'broadcast/connect') {
         store.commit('isJoiningSpace', true)
         const host = consts.websocketHost()
@@ -133,13 +139,21 @@ export default function createWebSocketPlugin () {
           if (data.space) {
             if (data.space.id !== store.state.currentSpace.id) { return }
           }
-          const { message, handler, user, updates } = data
+          const { message, handler, user, updates, storeName, actionName } = data // TODO deprecate unused
           if (message === 'connected') {
           // presence
           } else if (handler) {
             store.commit(handler, updates)
             checkIfShouldUpdateLinkToItem(store, data)
             checkIfShouldNotifyOffscreenCardCreated(store, data)
+
+          // pinia
+          } else if (storeName && actionName) {
+            updates.isBroadcast = true
+            const pinia = getActivePinia()
+            if (!pinia) return
+            const piniaStore = pinia._s.get(storeName)
+            piniaStore[actionName](updates)
           // users
           } else if (message === 'userJoinedRoom') {
             store.dispatch('currentSpace/addUserToJoinedSpace', user)
@@ -151,7 +165,7 @@ export default function createWebSocketPlugin () {
             store.commit('clearRemoteMultipleSelected', data)
           } else if (message === 'userLeftSpace') {
             store.commit('currentSpace/removeCollaboratorFromSpace', updates.user)
-            if (updates.user.id === store.state.currentUser.id) {
+            if (updates.user.id === userStore.id) {
               store.dispatch('currentSpace/removeCurrentUserFromSpace', updates.user)
             }
           // other
@@ -179,7 +193,7 @@ export default function createWebSocketPlugin () {
       } else if (mutation.type === 'broadcast/updateUser') {
         sendEvent(store, mutation)
       } else if (mutation.type === 'broadcast/updateStore') {
-        const canEditSpace = store.getters['currentUser/canEditSpace']()
+        const canEditSpace = userStore.getUserCanEditSpace()
         if (!canEditSpace) { return }
         sendEvent(store, mutation, 'store')
       } else if (mutation.type === 'broadcast/close') {

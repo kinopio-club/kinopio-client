@@ -1,6 +1,11 @@
 <script setup>
 import { reactive, computed, onMounted, onBeforeUnmount, onUnmounted, watch, ref, nextTick } from 'vue'
 import { useStore } from 'vuex'
+import { useCardStore } from '@/stores/useCardStore'
+import { useConnectionStore } from '@/stores/useConnectionStore'
+import { useBoxStore } from '@/stores/useBoxStore'
+import { useUserStore } from '@/stores/useUserStore'
+import { useSpaceStore } from '@/stores/useSpaceStore'
 
 import Loader from '@/components/Loader.vue'
 import UserList from '@/components/UserList.vue'
@@ -9,6 +14,11 @@ import utils from '@/utils.js'
 import dayjs from 'dayjs'
 
 const store = useStore()
+const cardStore = useCardStore()
+const connectionStore = useConnectionStore()
+const boxStore = useBoxStore()
+const userStore = useUserStore()
+const spaceStore = useSpaceStore()
 
 onMounted(() => {
   store.subscribe(mutation => {
@@ -42,7 +52,7 @@ const visits = computed(() => store.state.currentSpace.visits + 1)
 
 // dates
 
-const showAbsoluteDate = computed(() => store.state.currentUser.filterShowAbsoluteDates)
+const showAbsoluteDate = computed(() => userStore.filterShowAbsoluteDates)
 const date = (date) => {
   if (showAbsoluteDate.value) {
     return dayjs(date).format('YYYY-MM-DD')
@@ -56,16 +66,16 @@ const date = (date) => {
   }
 }
 const toggleFilterShowAbsoluteDates = () => {
-  const value = !store.state.currentUser.filterShowAbsoluteDates
-  store.dispatch('currentUser/toggleFilterShowAbsoluteDates', value)
+  const value = !userStore.filterShowAbsoluteDates
+  userStore.updateUser({ filterShowAbsoluteDates: value })
 }
 
 // items
 
 const tags = computed(() => store.getters['currentSpace/spaceTags'])
-const cards = computed(() => store.getters['currentCards/all'])
-const connections = computed(() => store.getters['currentConnections/all'])
-const boxes = computed(() => store.getters['currentBoxes/all'])
+const cards = computed(() => cardStore.getAllCards)
+const connections = computed(() => connectionStore.getAllConnections)
+const boxes = computed(() => boxStore.getAllBoxes)
 
 // word count
 

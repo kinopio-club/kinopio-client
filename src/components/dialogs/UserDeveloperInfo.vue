@@ -1,10 +1,14 @@
 <script setup>
 import { reactive, computed, onMounted, onBeforeUnmount, watch, ref, nextTick } from 'vue'
 import { useStore } from 'vuex'
+import { useUserStore } from '@/stores/useUserStore'
+import { useSpaceStore } from '@/stores/useSpaceStore'
 
 import utils from '@/utils.js'
 
 const store = useStore()
+const userStore = useUserStore()
+const spaceStore = useSpaceStore()
 
 const dialogElement = ref(null)
 
@@ -37,11 +41,11 @@ const updateDialogHeight = async () => {
   state.dialogHeight = utils.elementHeight(element)
 }
 
-const userId = computed(() => store.state.currentUser.id)
+const userId = computed(() => userStore.id)
 const copy = async (event, type) => {
   store.commit('clearNotificationsWithPosition')
   const position = utils.cursorPositionInPage(event)
-  const apiKey = store.state.currentUser.apiKey
+  const apiKey = userStore.apiKey
   let text = userId.value
   if (type === 'apiKey') {
     text = apiKey

@@ -1,6 +1,8 @@
 <script setup>
 import { reactive, computed, onMounted, onUnmounted, onBeforeUnmount, watch, ref, nextTick } from 'vue'
 import { useStore } from 'vuex'
+import { useUserStore } from '@/stores/useUserStore'
+import { useSpaceStore } from '@/stores/useSpaceStore'
 
 import User from '@/components/User.vue'
 import SpaceUsersButton from '@/components/SpaceUsersButton.vue'
@@ -10,6 +12,8 @@ import uniqBy from 'lodash-es/uniqBy'
 import last from 'lodash-es/last'
 
 const store = useStore()
+const userStore = useUserStore()
+const spaceStore = useSpaceStore()
 
 const spaceUsersElement = ref(null)
 
@@ -35,9 +39,9 @@ const state = reactive({
 
 const isEmbedMode = computed(() => store.state.isEmbedMode)
 const isAddPage = computed(() => store.state.isAddPage)
-const currentUser = computed(() => store.state.currentUser)
+const currentUser = computed(() => userStore.getUserAllState)
 const currentSpace = computed(() => store.state.currentSpace)
-const currentUserIsSpaceMember = computed(() => store.getters['currentUser/isSpaceMember']())
+const currentUserIsSpaceMember = computed(() => userStore.getUserIsSpaceMember())
 
 const appendCurrentUser = (items) => {
   const isCurrentUser = Boolean(items.find(user => user.id === currentUser.value.id))
@@ -62,7 +66,7 @@ const normalizeDisplayItems = (items, shouldShowUsersButton) => {
 // members
 
 const members = computed(() => {
-  const groupUsers = store.getters['currentCards/groupUsersWhoAddedCards']
+  const groupUsers = store.getters['groups/groupUsersWhoAddedCards']
   let members = utils.clone(currentSpace.value.users)
   members = members.concat(currentSpace.value.collaborators)
   if (groupUsers) {
@@ -81,7 +85,7 @@ const membersDisplay = computed(() => {
 // spectators
 
 const spectators = computed(() => {
-  const groupUsers = store.getters['currentCards/groupUsersWhoAddedCards']
+  const groupUsers = store.getters['groups/groupUsersWhoAddedCards']
   let spectators = utils.clone(currentSpace.value.spectators)
   // if not a space member, currentUser is specatator
   if (!currentUserIsSpaceMember.value) {

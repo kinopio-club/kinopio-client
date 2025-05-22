@@ -1,6 +1,9 @@
 <script setup>
 import { reactive, computed, onMounted, onBeforeUnmount, watch, ref, nextTick } from 'vue'
 import { useStore } from 'vuex'
+import { useCardStore } from '@/stores/useCardStore'
+import { useUserStore } from '@/stores/useUserStore'
+import { useSpaceStore } from '@/stores/useSpaceStore'
 
 import Loader from '@/components/Loader.vue'
 import UserLabelInline from '@/components/UserLabelInline.vue'
@@ -13,6 +16,9 @@ import OfflineBadge from '@/components/OfflineBadge.vue'
 import GroupLabel from '@/components/GroupLabel.vue'
 
 const store = useStore()
+const cardStore = useCardStore()
+const userStore = useUserStore()
+const spaceStore = useSpaceStore()
 
 const dialogElement = ref(null)
 
@@ -58,7 +64,7 @@ const updateDialogHeight = async () => {
   state.dialogHeight = utils.elementHeight(element)
 }
 
-const currentUser = computed(() => store.state.currentUser)
+const currentUser = computed(() => userStore.getUserAllState)
 
 // space
 
@@ -87,13 +93,13 @@ const showCardDetails = (notification) => {
     store.commit('loadSpaceFocusOnCardId', card.id)
     store.dispatch('currentSpace/changeSpace', space)
   } else {
-    store.dispatch('currentCards/showCardDetails', card.id)
+    cardStore.showCardDetails(card.id)
   }
   emit('markAsRead', notification.id)
 }
 const segmentTagColor = (segment) => {
   const spaceTag = store.getters['currentSpace/tagByName'](segment.name)
-  const userTag = store.getters['currentUser/tagByName'](segment.name)
+  const userTag = userStore.getUserTagByName(segment.name)
   if (spaceTag) {
     return spaceTag.color
   } else if (userTag) {

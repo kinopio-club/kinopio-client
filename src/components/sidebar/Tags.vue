@@ -1,6 +1,8 @@
 <script setup>
 import { reactive, computed, onMounted, onBeforeUnmount, watch, ref, nextTick } from 'vue'
 import { useStore } from 'vuex'
+import { useUserStore } from '@/stores/useUserStore'
+import { useSpaceStore } from '@/stores/useSpaceStore'
 
 import TagList from '@/components/TagList.vue'
 import utils from '@/utils.js'
@@ -10,6 +12,8 @@ import uniqBy from 'lodash-es/uniqBy'
 import debounce from 'lodash-es/debounce'
 
 const store = useStore()
+const userStore = useUserStore()
+const spaceStore = useSpaceStore()
 
 let unsubscribe
 
@@ -72,7 +76,7 @@ const updateResultsSectionHeight = async () => {
   const element = resultsElement.value
   state.resultsSectionHeight = utils.elementHeight(element, true)
 }
-const currentUserIsSignedIn = computed(() => store.getters['currentUser/isSignedIn'])
+const currentUserIsSignedIn = computed(() => userStore.getUserIsSignedIn)
 const filteredTags = computed(() => {
   let tags = state.tags
   if (shouldShowCurrentSpaceTags.value) {
@@ -82,10 +86,10 @@ const filteredTags = computed(() => {
   return tags
 })
 
-const shouldShowCurrentSpaceTags = computed(() => store.state.currentUser.shouldShowCurrentSpaceTags)
+const shouldShowCurrentSpaceTags = computed(() => userStore.shouldShowCurrentSpaceTags)
 const toggleShouldShowCurrentSpaceTags = () => {
   const value = !shouldShowCurrentSpaceTags.value
-  store.dispatch('currentUser/update', { shouldShowCurrentSpaceTags: value })
+  userStore.updateUser({ shouldShowCurrentSpaceTags: value })
 }
 
 // update tag

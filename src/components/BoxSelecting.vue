@@ -1,6 +1,10 @@
 <script setup>
 import { reactive, computed, onMounted, onBeforeUnmount, watch, ref, nextTick } from 'vue'
 import { useStore } from 'vuex'
+import { useCardStore } from '@/stores/useCardStore'
+import { useBoxStore } from '@/stores/useBoxStore'
+import { useUserStore } from '@/stores/useUserStore'
+import { useSpaceStore } from '@/stores/useSpaceStore'
 
 import utils from '@/utils.js'
 
@@ -11,6 +15,10 @@ import { nanoid } from 'nanoid'
 import { colord } from 'colord'
 
 const store = useStore()
+const cardStore = useCardStore()
+const boxStore = useBoxStore()
+const userStore = useUserStore()
+const spaceStore = useSpaceStore()
 
 let unsubscribe
 
@@ -65,7 +73,7 @@ const state = reactive({
 const currentUserIsBoxSelecting = computed(() => store.state.currentUserIsBoxSelecting)
 const startPoint = computed(() => positionInSpace(store.state.currentUserBoxSelectStart))
 const endPoint = computed(() => positionInSpace(store.state.currentUserBoxSelectMove))
-const userCantEditSpace = computed(() => !store.getters['currentUser/canEditSpace']())
+const userCantEditSpace = computed(() => !userStore.getUserCanEditSpace())
 const toolbarIsDrawing = computed(() => store.state.currentUserToolbar === 'drawing')
 const shouldPreventBoxSelecting = computed(() => {
   if (toolbarIsDrawing.value) { return true }
@@ -76,7 +84,7 @@ const currentUserStyles = computed(() => {
   if (shouldPreventBoxSelecting.value) { return }
   const { start, end } = orderedPoints(startPoint.value, endPoint.value)
   const { left, top, width, height } = boxSelection(start, end)
-  const color = store.state.currentUser.color
+  const color = userStore.color
   const color1 = colord(color).alpha(0.5).toRgbString()
   const color2 = colord(color).alpha(1).toRgbString()
   const gradient = `radial-gradient(farthest-corner at ${state.direction}, ${color1}, ${color2})`
@@ -86,7 +94,7 @@ const currentUserStyles = computed(() => {
     width: width + 'px',
     height: height + 'px',
     background: gradient,
-    userId: store.state.currentUser.id,
+    userId: userStore.id,
     currentBoxSelectId
   }
   return styles
@@ -203,8 +211,8 @@ const updateItems = (items) => {
   return selectable
 }
 const updateSelectableItems = () => {
-  let cards = utils.clone(store.getters['currentCards/isSelectableInViewport'])
-  let boxes = utils.clone(store.getters['currentBoxes/isSelectableInViewport'])
+  let cards = cardStore.getCardsSelectableInViewport()
+  let boxes = boxStore.getBoxesSelectableInViewport()
   cards = cards.map(card => {
     card.isCard = true
     return card

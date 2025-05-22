@@ -1,3 +1,6 @@
+import { useUserStore } from '@/stores/useUserStore'
+import { useSpaceStore } from '@/stores/useSpaceStore'
+
 import utils from '@/utils.js'
 import cache from '@/cache.js'
 import consts from '@/consts.js'
@@ -16,7 +19,7 @@ let prevMoveDelta = { x: 0, y: 0 }
 let tallestCardHeight = 0
 let canBeSelectedSortedByY = {}
 
-const incrementCardsZ = (context, cards) => {
+const incrementCardZ = (context, cards) => {
   cards = cards.map(card => {
     if (card.isLocked) { return card }
     const cards = context.getters.all
@@ -207,6 +210,7 @@ export default {
     // create
 
     add: async (context, { card, skipCardDetailsIsVisible }) => {
+      const userStore = useUserStore()
       if (context.rootGetters['currentSpace/shouldPreventAddCard']) {
         context.commit('notifyCardsCreatedIsOverLimit', true, { root: true })
         return
@@ -216,7 +220,7 @@ export default {
       const cards = context.getters.all
       // new card values
       const highestCardZ = utils.highestItemZ(cards)
-      const defaultBackgroundColor = context.rootState.currentUser.defaultCardBackgroundColor
+      const defaultBackgroundColor = userStore.defaultCardBackgroundColor
       const isComment = context.rootState.isCommentMode || context.rootGetters['currentUser/canOnlyComment']()
       card.id = id || nanoid()
       card.x = x || position.x
@@ -224,15 +228,15 @@ export default {
       card.z = highestCardZ + 1
       card.name = name || ''
       card.frameId = 0
-      card.userId = context.rootState.currentUser.id
+      card.userId = userStore.id
       card.urlPreviewIsVisible = true
       card.width = Math.round(width) || consts.emptyCard().width
       card.height = Math.round(height) || consts.emptyCard().height
       card.isLocked = false
       card.backgroundColor = backgroundColor || defaultBackgroundColor
       card.isRemoved = false
-      card.headerFontId = context.rootState.currentUser.prevHeaderFontId || 0
-      card.maxWidth = context.rootState.currentUser.cardSettingsMaxCardWidth
+      card.headerFontId = userStore.prevHeaderFontId || 0
+      card.maxWidth = userStore.cardSettingsMaxCardWidth
       card.spaceId = currentSpaceId
       card.isComment = isComment
       card.shouldShowOtherSpacePreviewImage = true
@@ -252,6 +256,7 @@ export default {
       await cache.updateSpace('editedAt', utils.unixTime(), currentSpaceId)
     },
     addMultiple: async (context, { cards, shouldOffsetPosition }) => {
+      const userStore = useUserStore()
       const spaceId = context.rootState.currentSpace.id
       cards = cards.map(card => {
         let x = card.x
@@ -261,6 +266,8 @@ export default {
           x += offset
           y += offset
         }
+
+        // use getNormalizedNewCard
         return {
           id: card.id || nanoid(),
           x,
@@ -270,8 +277,9 @@ export default {
           frameId: card.frameId || 0,
           width: Math.round(card.width),
           height: Math.round(card.height),
-          userId: context.rootState.currentUser.id,
+          userId: userStore.id,
           backgroundColor: card.backgroundColor,
+
           shouldUpdateUrlPreview: true,
           urlPreviewIsVisible: true,
           urlPreviewDescription: card.urlPreviewDescription,
@@ -279,7 +287,7 @@ export default {
           urlPreviewImage: card.urlPreviewImage,
           urlPreviewTitle: card.urlPreviewTitle,
           urlPreviewUrl: card.urlPreviewUrl,
-          maxWidth: Math.round(card.maxWidth) || context.rootState.currentUser.cardSettingsMaxCardWidth
+          maxWidth: Math.round(card.maxWidth) || userStore.cardSettingsMaxCardWidth
         }
       })
       cards.forEach(card => {
@@ -291,6 +299,7 @@ export default {
       }, { root: true })
     },
     paste: async (context, { card, cardId }) => {
+      const userStore = useUserStore()
       utils.typeCheck({ value: card, type: 'object' })
       card.id = cardId || nanoid()
       card.spaceId = currentSpaceId
@@ -302,7 +311,7 @@ export default {
         tags.forEach(tag => {
           tag = context.getters.newTag({
             name: tag,
-            defaultColor: context.rootState.currentUser.color,
+            defaultColor: userStore.color,
             cardId: card.id,
             spaceId: context.state.id
           }, { root: true })
@@ -321,6 +330,7 @@ export default {
     // update
 
     update: async (context, { card, shouldPreventUpdateDimensionsAndPaths }) => {
+      const userStore = useUserStore()
       if (!card) { return }
       // prevent null position
       const keys = Object.keys(card)
@@ -340,7 +350,7 @@ export default {
         context.commit('updateCardNameInOtherItems', card, { root: true })
         context.commit('triggerUpdateOtherCard', card.id, { root: true })
       }
-      await cache.updateSpace('editedByUserId', context.rootState.currentUser.id, currentSpaceId)
+      await cache.updateSpace('editedByUserId', userStore.id, currentSpaceId)
       await cache.updateSpace('editedAt', utils.unixTime(), currentSpaceId)
       if (!shouldPreventUpdateDimensionsAndPaths) {
         context.commit('triggerUpdateCardDimensionsAndPaths', card.id, { root: true })
@@ -349,6 +359,7 @@ export default {
       context.dispatch('currentSpace/updateSpacePreviewImage', null, { root: true })
     },
     updateMultiple: async (context, cards) => {
+      const userStore = useUserStore()
       if (!cards.length) { return }
       const spaceId = context.rootState.currentSpace.id
       const updates = {
@@ -368,7 +379,7 @@ export default {
           context.commit('triggerUpdateOtherCard', card.id, { root: true })
         }
       })
-      cache.updateSpace('editedByUserId', context.rootState.currentUser.id, currentSpaceId)
+      cache.updateSpace('editedByUserId', userStore.id, currentSpaceId)
       await context.dispatch('api/addToQueue', { name: 'updateMultipleCards', body: updates }, { root: true })
       context.dispatch('currentSpace/updateSpacePreviewImage', null, { root: true })
     },
@@ -430,14 +441,14 @@ export default {
         context.dispatch('updateDimensions', { cards: [card] })
       })
     },
-    updateURLQueryStrings: (context, { cardId }) => {
+    normalizeCardUrls: (context, { cardId }) => {
       setTimeout(() => {
         const card = context.getters.byId(cardId)
         const urls = utils.urlsFromString(card.name)
         if (!urls) { return }
         let name = card.name
-        name = utils.removeTrackingQueryStringsFromURLs(name)
-        name = utils.removeTrailingSlash(name)
+        name = utils.clearTrackingQueryStringsFromUrls(name)
+        name = utils.clearTrailingSlash(name)
         const update = {
           id: cardId,
           name
@@ -561,7 +572,7 @@ export default {
           body.resizeWidth = null
         }
         updates.push(body)
-        utils.removeAllCardDimensions({ id: cardId })
+        utils.clearAllCardDimensions({ id: cardId })
       })
       context.dispatch('updateMultiple', updates)
       const cards = cardIds.map(cardId => {
@@ -599,7 +610,7 @@ export default {
       cardIds.forEach(cardId => {
         const body = { id: cardId, tilt: 0 }
         context.dispatch('update', { card: body })
-        utils.removeAllCardDimensions({ id: cardId })
+        utils.clearAllCardDimensions({ id: cardId })
         const cards = [{ id: cardId }]
         context.dispatch('updateDimensions', { cards })
       })
@@ -691,6 +702,7 @@ export default {
       }
     },
     afterMove: async (context) => {
+      const userStore = useUserStore()
       const spaceId = context.rootState.currentSpace.id
       // update cards
       const currentDraggingCardId = context.rootState.currentDraggingCardId
@@ -713,7 +725,7 @@ export default {
         return { id, x, y, z }
       })
       cards = cards.filter(card => Boolean(card))
-      cards = incrementCardsZ(context, cards)
+      cards = incrementCardZ(context, cards)
       context.commit('move', { cards, spaceId })
       cards = cards.filter(card => card)
       await context.dispatch('api/addToQueue', {
@@ -724,7 +736,7 @@ export default {
       const cardIds = cards.map(card => card.id)
       // broadcast changes
       context.dispatch('broadcast/update', { updates: { cards }, type: 'moveCards', handler: 'currentCards/moveBroadcast' }, { root: true })
-      context.commit('broadcast/updateStore', { updates: { userId: context.rootState.currentUser.id }, type: 'clearRemoteCardsDragging' }, { root: true })
+      context.commit('broadcast/updateStore', { updates: { userId: userStore.id }, type: 'clearRemoteCardsDragging' }, { root: true })
       // ..
       nextTick(() => {
         context.dispatch('history/resume', null, { root: true })
@@ -810,6 +822,7 @@ export default {
     // remove
 
     remove: async (context, card) => {
+      const userStore = useUserStore()
       if (!card) { return }
       card = context.getters.byId(card.id)
       const cardHasContent = Boolean(card.name)
@@ -825,7 +838,7 @@ export default {
       context.dispatch('broadcast/update', { updates: card, type: 'removeCard', handler: 'currentCards/remove' }, { root: true })
       context.dispatch('currentConnections/removeFromItem', card, { root: true })
       context.commit('triggerUpdateHeaderAndFooterPosition', null, { root: true })
-      const cardIsUpdatedByCurrentUser = card.userId === context.rootState.currentUser.id
+      const cardIsUpdatedByCurrentUser = card.userId === userStore.id
       if (cardIsUpdatedByCurrentUser) {
         context.dispatch('currentUser/cardsCreatedCountUpdateBy', {
           cards: [card],
@@ -841,8 +854,9 @@ export default {
       await context.dispatch('api/addToQueue', { name: 'deleteCard', body: card }, { root: true })
     },
     deleteAllRemoved: async (context) => {
+      const userStore = useUserStore()
       const spaceId = context.rootState.currentSpace.id
-      const userId = context.rootState.currentUser.id
+      const userId = userStore.id
       const removedCards = context.state.removedCards
       removedCards.forEach(card => context.commit('deleteCard', card))
       await context.dispatch('api/addToQueue', { name: 'deleteAllRemovedCards', body: { userId, spaceId } }, { root: true })
@@ -1055,36 +1069,36 @@ export default {
         }
       })
     },
-    userIds: (state, getters) => {
-      const cards = getters.all
-      let users = []
-      cards.forEach(card => {
-        users.push(card.userId)
-        users.push(card.nameUpdatedByUserId)
-      })
-      users = users.filter(user => Boolean(user))
-      users = uniq(users)
-      return users
-    },
-    users: (state, getters, rootState, rootGetters) => {
-      let users = getters.userIds.map(id => {
-        const user = rootGetters['currentSpace/userById'](id)
-        return user
-      })
-      users = users.filter(user => Boolean(user))
-      return users
-    },
-    groupUsersWhoAddedCards: (state, getters, rootState, rootGetters) => {
-      const spaceGroup = rootGetters['groups/spaceGroup']()
-      const groupUsers = spaceGroup?.users
-      if (!groupUsers) { return }
-      let users = getters.users
-      users = users.filter(user => {
-        const isGroupUser = groupUsers.find(groupUser => groupUser.id === user.id)
-        return isGroupUser
-      })
-      return users
-    },
+    // userIds: (state, getters) => {
+    //   const cards = getters.all
+    //   let users = []
+    //   cards.forEach(card => {
+    //     users.push(card.userId)
+    //     users.push(card.nameUpdatedByUserId)
+    //   })
+    //   users = users.filter(user => Boolean(user))
+    //   users = uniq(users)
+    //   return users
+    // },
+    // users: (state, getters, rootState, rootGetters) => {
+    //   let users = getters.userIds.map(id => {
+    //     const user = rootGetters['currentSpace/userById'](id)
+    //     return user
+    //   })
+    //   users = users.filter(user => Boolean(user))
+    //   return users
+    // },
+    // groupUsersWhoAddedCards: (state, getters, rootState, rootGetters) => {
+    //   const spaceGroup = rootGetters['groups/spaceGroup']()
+    //   const groupUsers = spaceGroup?.users
+    //   if (!groupUsers) { return }
+    //   let users = getters.users
+    //   users = users.filter(user => {
+    //     const isGroupUser = groupUsers.find(groupUser => groupUser.id === user.id)
+    //     return isGroupUser
+    //   })
+    //   return users
+    // },
     commenters: (state, getters, rootState, rootGetters) => {
       const currentUserId = state.id
       let items = getters.users
@@ -1138,6 +1152,7 @@ export default {
       return card
     },
     segmentTagColor: (state, getters, rootState, rootGetters) => (segment) => {
+      const userStore = useUserStore()
       const spaceTag = rootGetters['currentSpace/tagByName'](segment.name)
       const userTag = rootGetters['currentUser/tagByName'](segment.name)
       if (spaceTag) {
@@ -1145,7 +1160,7 @@ export default {
       } else if (userTag) {
         return userTag.color
       } else {
-        return rootState.currentUser.color
+        return userStore.color
       }
     },
     shouldSnapToGrid: (state, getters, rootState, rootGetters) => {

@@ -1,6 +1,11 @@
 <script setup>
 import { reactive, computed, onMounted, onBeforeUnmount, watch, ref, nextTick } from 'vue'
 import { useStore } from 'vuex'
+import { useCardStore } from '@/stores/useCardStore'
+import { useConnectionStore } from '@/stores/useConnectionStore'
+import { useBoxStore } from '@/stores/useBoxStore'
+import { useUserStore } from '@/stores/useUserStore'
+import { useSpaceStore } from '@/stores/useSpaceStore'
 
 import ResultsFilter from '@/components/ResultsFilter.vue'
 import frames from '@/data/frames.js'
@@ -10,6 +15,11 @@ import FrameBadge from '@/components/FrameBadge.vue'
 import uniq from 'lodash-es/uniq'
 
 const store = useStore()
+const cardStore = useCardStore()
+const connectionStore = useConnectionStore()
+const boxStore = useBoxStore()
+const userStore = useUserStore()
+const spaceStore = useSpaceStore()
 
 const dialogElement = ref(null)
 const resultsElement = ref(null)
@@ -56,16 +66,16 @@ const updateResultsSectionHeight = async () => {
 
 // items
 
-const totalFiltersActive = computed(() => store.getters['currentUser/totalFiltersActive'])
-const connectionTypes = computed(() => utils.clone(store.getters['currentConnections/allTypes']))
+const totalFiltersActive = computed(() => userStore.getUserTotalFiltersActive())
+const connectionTypes = computed(() => connectionStore.getAllConnectionTypes)
 const spaceFrames = computed(() => {
-  const cards = utils.clone(store.getters['currentCards/all'])
+  const cards = cardStore.getAllCards
   let framesInUse = cards.map(card => card.frameId)
   framesInUse = uniq(framesInUse.filter(frame => frame))
   return framesInUse.map(frame => frames[frame])
 })
 const tags = computed(() => utils.clone(store.getters['currentSpace/spaceTags']))
-const boxes = computed(() => utils.clone(store.getters['currentBoxes/all']))
+const boxes = computed(() => boxStore.getAllBoxes)
 
 // all items
 

@@ -1,6 +1,8 @@
 <script setup>
 import { reactive, computed, onMounted, onBeforeUnmount, onUnmounted, watch, ref, nextTick } from 'vue'
 import { useStore } from 'vuex'
+import { useUserStore } from '@/stores/useUserStore'
+import { useSpaceStore } from '@/stores/useSpaceStore'
 
 import templates from '@/data/templates.js'
 import ResultsFilter from '@/components/ResultsFilter.vue'
@@ -19,6 +21,8 @@ import dayjs from 'dayjs'
 import last from 'lodash-es/last'
 
 const store = useStore()
+const userStore = useUserStore()
+const spaceStore = useSpaceStore()
 
 let unsubscribe
 
@@ -103,7 +107,7 @@ const state = reactive({
 
 const isOnline = computed(() => store.state.isOnline)
 const isOffline = computed(() => !isOnline.value)
-const currentUser = computed(() => store.state.currentUser)
+const currentUser = computed(() => userStore.getUserAllState)
 
 // spaces
 

@@ -1,7 +1,11 @@
 <script setup>
 import { reactive, computed, onMounted, onBeforeUnmount, watch, ref, nextTick } from 'vue'
 import { useStore } from 'vuex'
+import { useUserStore } from '@/stores/useUserStore'
+import { useSpaceStore } from '@/stores/useSpaceStore'
 
+const userStore = useUserStore()
+const spaceStore = useSpaceStore()
 const store = useStore()
 
 const isVisible = computed(() => store.state.shouldSnapToGrid)
@@ -11,7 +15,7 @@ const origin = computed(() => {
     y: store.state.snapGuideLinesOrigin.y + 'px'
   }
 })
-const color = computed(() => store.state.currentUser.color)
+const color = computed(() => userStore.color)
 </script>
 
 <template lang="pug">

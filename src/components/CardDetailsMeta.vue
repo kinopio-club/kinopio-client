@@ -1,10 +1,15 @@
 <script setup>
 import { reactive, computed, onMounted, onUnmounted, watch, ref, nextTick } from 'vue'
 import { useStore } from 'vuex'
+import { useUserStore } from '@/stores/useUserStore'
+import { useSpaceStore } from '@/stores/useSpaceStore'
 
 import UserLabelInline from '@/components/UserLabelInline.vue'
 import utils from '@/utils.js'
+
 const store = useStore()
+const userStore = useUserStore()
+const spaceStore = useSpaceStore()
 
 let dateIsUpdated
 let updatedAbsoluteDate
@@ -37,7 +42,7 @@ watch(() => props.visible, async (value, prevValue) => {
   }
 })
 
-const shouldShowItemActions = computed(() => store.state.currentUser.shouldShowItemActions)
+const shouldShowItemActions = computed(() => userStore.shouldShowItemActions)
 const closeDialogsFromParent = () => {
   store.commit('userDetailsIsVisible', false)
 }
@@ -55,7 +60,7 @@ const scrollParentIntoView = () => {
 
 const dateUpdatedAt = computed(() => {
   const date = props.card.nameUpdatedAt || props.card.createdAt
-  const showAbsoluteDate = store.state.currentUser.filterShowAbsoluteDates
+  const showAbsoluteDate = userStore.filterShowAbsoluteDates
   if (date) {
     if (showAbsoluteDate) {
       return new Date(date).toLocaleString()
@@ -68,8 +73,8 @@ const dateUpdatedAt = computed(() => {
 })
 const toggleFilterShowAbsoluteDates = () => {
   closeDialogs()
-  const value = !store.state.currentUser.filterShowAbsoluteDates
-  store.dispatch('currentUser/toggleFilterShowAbsoluteDates', value)
+  const value = !userStore.filterShowAbsoluteDates
+  userStore.updateUser('filterShowAbsoluteDates', value)
 }
 
 // user
@@ -85,8 +90,7 @@ const userDetailsIsUser = (user) => {
 // settings
 
 const showCardSettings = () => {
-  store.dispatch('currentUser/update', { prevSettingsSection: 'cards' })
-  // store.dispatch('closeAllDialogs')
+  userStore.updateUser({ prevSettingsSection: 'cards' })
   store.commit('userSettingsIsVisible', true)
 }
 </script>

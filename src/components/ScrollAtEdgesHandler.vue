@@ -1,10 +1,14 @@
 <script setup>
 import { reactive, computed, onMounted, onBeforeUnmount, watch, ref, nextTick } from 'vue'
 import { useStore } from 'vuex'
+import { useCardStore } from '@/stores/useCardStore'
+import { useBoxStore } from '@/stores/useBoxStore'
 
 import utils from '@/utils.js'
 
 const store = useStore()
+const cardStore = useCardStore()
+const boxStore = useBoxStore()
 
 const threshold = 50
 let startCursor, prevCursor, prevCursorPage, endCursor, scrollTimer, maxHeight, maxWidth, currentEvent
@@ -238,8 +242,8 @@ const scrollBy = (delta) => {
     }
     store.dispatch('history/pause')
     if (isDraggingCard || isDraggingBox) {
-      store.dispatch('currentCards/move', { endCursor, prevCursor, delta: itemDelta })
-      store.dispatch('currentBoxes/move', { endCursor, prevCursor, delta: itemDelta })
+      cardStore.moveCards({ endCursor, prevCursor, delta: itemDelta })
+      boxStore.moveBoxes({ endCursor, prevCursor, delta: itemDelta })
     }
   }
   if (isDrawingConnection.value) {

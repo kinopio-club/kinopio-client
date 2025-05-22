@@ -1,11 +1,23 @@
 <script setup>
 import { reactive, computed, onMounted, onBeforeUnmount, onUnmounted, watch, ref, nextTick } from 'vue'
 import { useStore } from 'vuex'
+import { useCardStore } from '@/stores/useCardStore'
+import { useConnectionStore } from '@/stores/useConnectionStore'
+import { useBoxStore } from '@/stores/useBoxStore'
+import { useUserStore } from '@/stores/useUserStore'
+import { useSpaceStore } from '@/stores/useSpaceStore'
 
 import utils from '@/utils.js'
+
 const store = useStore()
+const cardStore = useCardStore()
+const connectionStore = useConnectionStore()
+const boxStore = useBoxStore()
+const userStore = useUserStore()
+const spaceStore = useSpaceStore()
 
 let unsubscribe
+let unsubscribes
 
 let animationTimer, isMultiTouch, startCursor, currentCursor
 
@@ -15,6 +27,7 @@ const connectionElement = ref(null)
 const connectionPathElement = ref(null)
 
 onMounted(() => {
+  initViewportObserver()
   unsubscribe = store.subscribe((mutation, state) => {
     if (mutation.type === 'clearMultipleSelected') {
       const selectedIds = store.state.multipleConnectionsSelectedIds
@@ -22,8 +35,6 @@ onMounted(() => {
       if (!selected) {
         cancelAnimation()
       }
-    } else if (mutation.type === 'currentCards/move') {
-      cancelAnimation()
     } else if (mutation.type === 'triggerConnectionDetailsIsVisible') {
       if (mutation.payload.connectionId === props.connection.id) {
         const isFromStore = true
@@ -40,11 +51,21 @@ onMounted(() => {
       updatePathWhileDragging(null)
     }
   })
-  initViewportObserver()
+  const cardStoreUnsubscribe = cardStore.$onAction(
+    ({ name, args }) => {
+      if (name === 'moveCards') {
+        cancelAnimation()
+      }
+    }
+  )
+  unsubscribes = () => {
+    cardStoreUnsubscribe()
+  }
 })
 onBeforeUnmount(() => {
   removeViewportObserver()
   unsubscribe()
+  unsubscribes()
 })
 
 const props = defineProps({
@@ -67,8 +88,8 @@ const visible = computed(() => {
   if (!state.isVisibleInViewport) { return }
   return items.value.startItem && items.value.endItem
 })
-const isSpaceMember = computed(() => store.getters['currentUser/isSpaceMember']())
-const canEditSpace = computed(() => store.getters['currentUser/canEditSpace']())
+const isSpaceMember = computed(() => userStore.getUserIsSpaceMember())
+const canEditSpace = computed(() => userStore.getUserCanEditSpace())
 
 // styles and position
 
@@ -117,7 +138,7 @@ const connectionPathClasses = computed(() => {
 
 // connection type
 
-const connectionType = computed(() => store.getters['currentConnections/typeByTypeId'](props.connection.connectionTypeId))
+const connectionType = computed(() => connectionStore.getConnectionType(props.connection.connectionTypeId))
 const typeColor = computed(() => {
   if (!connectionType.value) { return }
   return connectionType.value.color
@@ -130,8 +151,8 @@ const typeName = computed(() => {
 // items
 
 const items = computed(() => {
-  const cards = store.getters['currentCards/all']
-  const boxes = store.getters['currentBoxes/all']
+  const cards = cardStore.getAllCards
+  const boxes = boxStore.getAllBoxes
   const items = cards.concat(boxes)
   const startItem = items.find(item => item.id === props.connection.startItemId)
   const endItem = items.find(item => item.id === props.connection.endItemId)
@@ -228,7 +249,7 @@ const showConnectionDetailsOnKeyup = (event) => {
 const isDraggingCurrentConnectionLabel = computed(() => {
   const connectionId = store.state.currentUserIsDraggingConnectionIdLabel
   if (!connectionId) { return }
-  const connection = store.getters['currentConnections/byId'](connectionId)
+  const connection = connectionStore.getConnection(connectionId)
   if (!connection) { return }
   return connection.id === props.connection.id
 })
@@ -236,7 +257,7 @@ const isDraggingCurrentConnectionLabel = computed(() => {
 // space filters
 
 const isHiddenByCommentFilter = computed(() => {
-  const filterCommentsIsActive = store.state.currentUser.filterComments
+  const filterCommentsIsActive = userStore.filterComments
   if (!filterCommentsIsActive) { return }
   const startItem = items.value.startItem
   const endItem = items.value.endItem
@@ -280,15 +301,9 @@ const isFiltered = computed(() => {
 const gradientId = computed(() => `gradient-${props.connection.id}`)
 const gradientIdReference = computed(() => `url('#${gradientId.value}')`)
 const directionIsVisible = computed(() => {
-  checkIfShouldPauseConnectionDirections()
   if (!visible.value) { return }
   return props.connection.directionIsVisible
 })
-const checkIfShouldPauseConnectionDirections = async () => {
-  store.dispatch('currentSpace/unpauseConnectionDirections')
-  await nextTick()
-  store.dispatch('currentSpace/checkIfShouldPauseConnectionDirections')
-}
 
 // path
 
@@ -309,40 +324,6 @@ const multipleItemsSelectedIds = computed(() => {
   const cards = utils.clone(store.state.multipleCardsSelectedIds)
   const boxes = utils.clone(store.state.multipleBoxesSelectedIds)
   return cards.concat(boxes)
-})
-const isUpdatingPath = computed(() => {
-  let shouldHide
-  const currentUserIsDragging = store.state.currentUserIsDraggingCard
-  let items = []
-  const currentItemId = store.state.currentDraggingCardId || store.state.currentDraggingBoxId
-  // local multiple
-  if (multipleItemsSelectedIds.value.length && currentUserIsDragging) {
-    items = multipleItemsSelectedIds.value.map(id => store.getters['currentSpace/itemById'](id))
-  // local single
-  } else if (currentItemId && currentUserIsDragging) {
-    const currentItem = store.getters['currentSpace/itemById'](currentItemId)
-    items = [currentItem]
-  // remote multiple
-  } else if (remoteItemsIsDragging.value && remoteItemsSelected.value.length) {
-    items = remoteItemsSelected.value.map(item => {
-      item.id = item.cardId || item.boxId
-      return item
-    })
-  // remote single
-  } else if (remoteItemsIsDragging.value) {
-    items = remoteItemsDragging.value.map(item => {
-      item.id = item.cardId || item.boxId
-      return item
-    })
-  }
-  items = items.filter(item => Boolean(item))
-  items.forEach(item => {
-    if (item.id === props.connection.startItemId || item.id === props.connection.endItemId) {
-      shouldHide = true
-    }
-  })
-  checkIfShouldPauseConnectionDirections()
-  return shouldHide
 })
 const updatedPath = (path, controlPoint, x, y) => {
   return path.replace(controlPoint, `q${x},${y}`)
@@ -429,8 +410,8 @@ const relativePath = computed(() => {
 
 const removeConnection = () => {
   if (!isSpaceMember.value) { return }
-  store.dispatch('currentConnections/remove', props.connection)
-  store.dispatch('currentConnections/removeUnusedTypes')
+  connectionStore.removeConnection(props.connection.id)
+  connectionStore.removeAllUnusedConnectionTypes()
 }
 const focusOnDialog = async (event) => {
   await nextTick()
@@ -553,7 +534,6 @@ svg.connection(
     @mouseenter="handleMouseEnter"
     @mouseleave="handleMouseLeave"
   )
-  //- path d updated while dragging by currentConnections/updatePathsWhileDragging
 
   defs(v-if="state.isVisibleInViewport")
     linearGradient(:id="gradientId")

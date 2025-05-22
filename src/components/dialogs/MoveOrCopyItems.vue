@@ -1,12 +1,23 @@
 <script setup>
 import { reactive, computed, onMounted, onUnmounted, watch, ref, nextTick } from 'vue'
 import { useStore } from 'vuex'
+import { useCardStore } from '@/stores/useCardStore'
+import { useConnectionStore } from '@/stores/useConnectionStore'
+import { useBoxStore } from '@/stores/useBoxStore'
+import { useUserStore } from '@/stores/useUserStore'
+import { useSpaceStore } from '@/stores/useSpaceStore'
 
 import cache from '@/cache.js'
 import utils from '@/utils.js'
 import SpacePicker from '@/components/dialogs/SpacePicker.vue'
 import Loader from '@/components/Loader.vue'
+
 const store = useStore()
+const cardStore = useCardStore()
+const connectionStore = useConnectionStore()
+const boxStore = useBoxStore()
+const userStore = useUserStore()
+const spaceStore = useSpaceStore()
 
 const dialogElement = ref(null)
 
@@ -146,10 +157,11 @@ const copyToSelectedSpace = async (items) => {
   await cache.addToSpace(newItems, selectedSpaceId)
   // update current space
   if (selectedSpaceisCurrentSpace) {
-    store.dispatch('currentCards/addMultiple', { cards: newItems.cards, shouldOffsetPosition: true })
-    newItems.connectionTypes.forEach(connectionType => store.dispatch('currentConnections/addType', connectionType))
-    newItems.connections.forEach(connection => store.dispatch('currentConnections/add', { connection, type: { id: connection.connectionTypeId } }))
-    newItems.boxes.forEach(box => store.dispatch('currentBoxes/add', { box }))
+    const shouldOffsetPosition = true
+    cardStore.createCards(newItems.cards, shouldOffsetPosition)
+    newItems.connectionTypes.forEach(connectionType => connectionStore.createConnectionType(connectionType))
+    newItems.connections.forEach(connection => connectionStore.createConnection(connection))
+    newItems.boxes.forEach(box => boxStore.createBox(box))
   }
   // update server
   for (const card of newItems.cards) {
@@ -183,23 +195,18 @@ const moveOrCopyToSpace = async () => {
     store.dispatch('history/resume')
     store.dispatch('history/add', items)
   }
-  store.dispatch('currentUser/cardsCreatedCountUpdateBy', {
-    cards: items.cards
-  })
-  store.dispatch('currentConnections/removeUnusedTypes')
+  userStore.updateUserCardsCreatedCount(items.cards)
+  connectionStore.removeAllUnusedConnectionTypes()
   store.dispatch('clearMultipleSelected')
   store.dispatch('closeAllDialogs')
 }
 const removeCards = (cards) => {
-  cards.forEach(card => {
-    store.dispatch('currentCards/remove', card)
-    store.dispatch('currentConnections/removeFromItem', card)
-  })
+  const ids = cards.map(card => card.id)
+  cardStore.removeCards(ids)
 }
 const removeBoxes = (boxes) => {
-  boxes.forEach(box => {
-    store.dispatch('currentBoxes/remove', box)
-  })
+  const ids = boxes.map(box => box.id)
+  boxStore.removeBoxes(ids)
 }
 
 // should upgrade user
@@ -211,7 +218,7 @@ const triggerUpgradeUserIsVisible = () => {
 const isCardsCreatedIsOverLimit = () => {
   if (props.actionIsMove) { return }
   const items = selectedItems.value.cards.length
-  return store.getters['currentUser/cardsCreatedWillBeOverLimit'](items)
+  return userStore.getUserCardsCreatedWillBeOverLimit(items)
 }
 
 // notify

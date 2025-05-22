@@ -1,10 +1,15 @@
 <script setup>
 import { reactive, computed, onMounted, onBeforeUnmount, onUnmounted, watch, ref, nextTick } from 'vue'
 import { useStore } from 'vuex'
+import { useUserStore } from '@/stores/useUserStore'
+import { useSpaceStore } from '@/stores/useSpaceStore'
 
 import utils from '@/utils.js'
 import consts from '@/consts.js'
+
 const store = useStore()
+const userStore = useUserStore()
+const spaceStore = useSpaceStore()
 
 let statusRetryCount = 0
 
@@ -60,7 +65,7 @@ const spaceZoomDecimal = computed(() => store.getters.spaceZoomDecimal)
 
 // users
 
-const currentUserId = computed(() => store.state.currentUser.id)
+const currentUserId = computed(() => userStore.id)
 
 // online
 
@@ -97,7 +102,7 @@ const updateServerIsOnline = async () => {
 
 const isThemeDark = computed(() => store.getters['themes/isThemeDark'])
 const themeFromSystem = () => {
-  const themeIsSystem = store.state.currentUser.themeIsSystem
+  const themeIsSystem = userStore.themeIsSystem
   if (!themeIsSystem) { return }
   const theme = window.matchMedia('(prefers-color-scheme: dark)')
   let themeName
@@ -109,7 +114,7 @@ const themeFromSystem = () => {
   return themeName
 }
 const logMatchMediaChange = (event) => {
-  const themeIsSystem = store.state.currentUser.themeIsSystem
+  const themeIsSystem = userStore.themeIsSystem
   console.warn('🌓 logMatchMediaChange', window.matchMedia('(prefers-color-scheme: dark)'), event, { themeIsSystem })
 }
 const updateThemeFromSystem = () => {
@@ -124,7 +129,7 @@ const broadcastUserLabelCursor = (event) => {
   if (!store.getters.isSpacePage) { return }
   const updates = utils.cursorPositionInSpace(event)
   if (!updates) { return }
-  updates.userId = store.state.currentUser.id
+  updates.userId = userStore.id
   updates.zoom = spaceZoomDecimal.value
   store.commit('broadcast/update', { updates, type: 'updateRemoteUserCursor', handler: 'triggerUpdateRemoteUserCursor' })
 }
@@ -958,6 +963,18 @@ li
       background-image url('assets/checkmark.svg')
       background-repeat no-repeat
       background-position center
+    // &.add
+    //   background-image url('assets/add.svg')
+    //   background-repeat no-repeat
+    //   background-position center
+    //   background-size 60%
+.is-dark-theme
+  label
+    input[type="checkbox"]
+      &:checked
+        background-image url('assets/checkmark-invert.svg')
+      // &.add
+      //   background-image url('assets/add-invert.svg')
 
 details
   summary
@@ -983,14 +1000,6 @@ details[open]
     border-bottom-left-radius 0
 details + details
   margin-top 2px
-
-.is-dark-theme
-  label
-    input[type="checkbox"]
-      &:checked
-        background-image url('assets/checkmark-invert.svg')
-      &.add
-        background-image url('assets/add-invert.svg')
 
 li
   input[type="checkbox"]

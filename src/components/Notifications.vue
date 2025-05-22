@@ -1,6 +1,8 @@
 <script setup>
 import { reactive, computed, onMounted, onBeforeUnmount, watch, ref, nextTick } from 'vue'
 import { useStore } from 'vuex'
+import { useUserStore } from '@/stores/useUserStore'
+import { useSpaceStore } from '@/stores/useSpaceStore'
 
 import cache from '@/cache.js'
 import consts from '@/consts.js'
@@ -15,6 +17,8 @@ import Loader from '@/components/Loader.vue'
 import dayjs from 'dayjs'
 
 const store = useStore()
+const userStore = useUserStore()
+const spaceStore = useSpaceStore()
 
 let unsubscribe
 
@@ -74,8 +78,8 @@ const currentUserIsResizingBox = computed(() => store.state.currentUserIsResizin
 const currentUserIsTiltingCard = computed(() => store.state.currentUserIsTiltingCard)
 const currentUserIsPanning = computed(() => store.state.currentUserIsPanning)
 const currentUserIsPanningReady = computed(() => store.state.currentUserIsPanningReady)
-const currentUserIsSignedIn = computed(() => store.getters['currentUser/isSignedIn'])
-const currentUserIsUpgraded = computed(() => store.state.currentUser.isUpgraded)
+const currentUserIsSignedIn = computed(() => userStore.getUserIsSignedIn)
+const currentUserIsUpgraded = computed(() => userStore.isUpgraded)
 const isTouchDevice = computed(() => store.state.isTouchDevice)
 const shouldSnapToGrid = computed(() => store.state.shouldSnapToGrid)
 
@@ -87,8 +91,8 @@ const privacyState = computed(() => {
   })
 })
 const cardsCreatedCountFromLimit = computed(() => {
-  const cardsCreatedLimit = store.state.cardsCreatedLimit
-  const cardsCreatedCount = store.state.currentUser.cardsCreatedCount
+  const cardsCreatedLimit = consts.cardsCreatedLimit
+  const cardsCreatedCount = userStore.cardsCreatedCount
   return Math.max(cardsCreatedLimit - cardsCreatedCount, 0)
 })
 const currentSpaceIsTemplate = computed(() => {

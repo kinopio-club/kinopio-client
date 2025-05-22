@@ -1,10 +1,15 @@
 <script setup>
 import { reactive, computed, onMounted, watch, ref, nextTick } from 'vue'
 import { useStore } from 'vuex'
+import { useUserStore } from '@/stores/useUserStore'
+import { useSpaceStore } from '@/stores/useSpaceStore'
 
 // import utils from '@/utils.js'
 import Loader from '@/components/Loader.vue'
+
 const store = useStore()
+const userStore = useUserStore()
+const spaceStore = useSpaceStore()
 
 const state = reactive({
   password: '',
@@ -79,7 +84,7 @@ const updatePassword = async (event) => {
   if (!isPasswordTooShort(password)) { return }
   if (!isPasswordsMatch(password, confirmPassword)) { return }
   state.loading.updatePassword = true
-  const apiKey = store.state.updatePasswordApiKey || store.state.currentUser.apiKey
+  const apiKey = store.state.updatePasswordApiKey || userStore.apiKey
   const response = await store.dispatch('api/updatePassword', { password, apiKey })
   const result = await response.json()
   if (isSuccess(response)) {

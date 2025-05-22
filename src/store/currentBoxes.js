@@ -1,4 +1,6 @@
-// import utils from '@/utils.js'
+import { useUserStore } from '@/stores/useUserStore'
+import { useSpaceStore } from '@/stores/useSpaceStore'
+
 import cache from '@/cache.js'
 import utils from '@/utils.js'
 import consts from '@/consts.js'
@@ -197,14 +199,15 @@ export default {
     // create
 
     add: async (context, { box, shouldResize }) => {
+      const userStore = useUserStore()
       const count = context.state.ids.length
       const minBoxSize = consts.minBoxSize
-      const isThemeDark = context.rootState.currentUser.theme === 'dark'
+      const isThemeDark = userStore.theme === 'dark'
       const color = randomColor({ luminosity: 'dark' })
       box = {
         id: box.id || nanoid(),
         spaceId: currentSpaceId,
-        userId: context.rootState.currentUser.id,
+        userId: userStore.id,
         x: box.x,
         y: box.y,
         resizeWidth: box.resizeWidth || minBoxSize,
@@ -214,7 +217,7 @@ export default {
         name: box.name || `Box ${count}`,
         infoHeight: 57,
         infoWidth: 34,
-        headerFontId: context.rootState.currentUser.prevHeaderFontId || 0,
+        headerFontId: userStore.prevHeaderFontId || 0,
         background: box.background,
         backgroundIsStretch: box.backgroundIsStretch
       }
@@ -256,6 +259,7 @@ export default {
       })
     },
     updateMultiple: async (context, boxes) => {
+      const userStore = useUserStore()
       const spaceId = context.rootState.currentSpace.id
       const updates = {
         boxes,
@@ -270,7 +274,7 @@ export default {
         context.dispatch('broadcast/update', { updates: box, type: 'updateBox', handler: 'currentBoxes/update' }, { root: true })
         context.commit('update', box)
       })
-      cache.updateSpace('editedByUserId', context.rootState.currentUser.id, currentSpaceId)
+      cache.updateSpace('editedByUserId', userStore.id, currentSpaceId)
       await context.dispatch('api/addToQueue', { name: 'updateMultipleBoxes', body: updates }, { root: true })
     },
 
@@ -308,19 +312,19 @@ export default {
 
     // resize
 
-    resize: (context, { boxIds, delta }) => {
+    resize: (context, { ids, delta }) => {
       let connections = []
       const boxes = []
-      boxIds.forEach(boxId => {
-        const rect = utils.boxElementDimensions({ id: boxId })
+      ids.forEach(id => {
+        const rect = utils.boxElementDimensions({ id })
         let width = rect.width
         let height = rect.height
         width = width + delta.x
         height = height + delta.y
-        const infoPosition = utils.boxInfoPositionFromId(boxId)
+        const infoPosition = utils.boxInfoPositionFromId(id)
         if (!infoPosition) { return }
         const { infoWidth, infoHeight } = infoPosition
-        const box = { id: boxId, resizeWidth: width, resizeHeight: height, infoWidth, infoHeight }
+        const box = { id, resizeWidth: width, resizeHeight: height, infoWidth, infoHeight }
         boxes.push(box)
         connections = connections.concat(context.rootGetters['currentConnections/byItemId'](box.id))
         context.commit('currentUserIsResizingBox', true, { root: true })
@@ -393,7 +397,6 @@ export default {
             min: targetBox.y + snapThreshold,
             max: targetBox.y + targetBox.height - snapThreshold
           })
-          // let time = 1
           // item sides
           const itemLeft = item.x
           const itemRight = item.x + item.width

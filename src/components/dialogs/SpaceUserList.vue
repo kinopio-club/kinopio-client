@@ -1,6 +1,9 @@
 <script setup>
 import { reactive, computed, onMounted, onBeforeUnmount, watch, ref, nextTick } from 'vue'
 import { useStore } from 'vuex'
+import { useCardStore } from '@/stores/useCardStore'
+import { useUserStore } from '@/stores/useUserStore'
+import { useSpaceStore } from '@/stores/useSpaceStore'
 
 import utils from '@/utils.js'
 import GroupDetails from '@/components/dialogs/GroupDetails.vue'
@@ -10,6 +13,9 @@ import GroupLabel from '@/components/GroupLabel.vue'
 import uniqBy from 'lodash-es/uniqBy'
 
 const store = useStore()
+const cardStore = useCardStore()
+const userStore = useUserStore()
+const spaceStore = useSpaceStore()
 
 const dialogElement = ref(null)
 
@@ -35,8 +41,8 @@ const updateDialogHeight = async () => {
   state.dialogHeight = utils.elementHeight(element)
 }
 
-const currentUser = computed(() => store.state.currentUser)
-const currentUserCanEditSpace = computed(() => store.getters['currentUser/canEditSpace']())
+const currentUser = computed(() => userStore.getUserAllState)
+const currentUserCanEditSpace = computed(() => userStore.getUserCanEditSpace())
 const currentSpace = computed(() => store.state.currentSpace)
 
 // list type
@@ -68,7 +74,7 @@ const users = computed(() => {
   if (isSpectatorsList.value) {
     items = currentSpace.value.spectators
   } else {
-    const groupUsers = store.getters['currentCards/groupUsersWhoAddedCards']
+    const groupUsers = store.getters['groups/groupUsersWhoAddedCards']
     items = utils.clone(currentSpace.value.users)
     items = items.concat(currentSpace.value.collaborators)
     items = items.concat(groupUsers)
@@ -80,7 +86,7 @@ const users = computed(() => {
 
 // commenters
 
-const commenters = computed(() => utils.clone(store.getters['currentCards/commenters']))
+const commenters = computed(() => cardStore.getCardCommenters)
 
 // handle userlist events
 

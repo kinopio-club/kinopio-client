@@ -1,13 +1,18 @@
 <script setup>
 import { reactive, computed, onMounted, watch, ref, nextTick } from 'vue'
 import { useStore } from 'vuex'
+import { useUserStore } from '@/stores/useUserStore'
+import { useSpaceStore } from '@/stores/useSpaceStore'
 
 import Loader from '@/components/Loader.vue'
 import utils from '@/utils.js'
 import consts from '@/consts.js'
 
 import dayjs from 'dayjs'
+
 const store = useStore()
+const userStore = useUserStore()
+const spaceStore = useSpaceStore()
 
 const dialog = ref(null)
 
@@ -38,10 +43,13 @@ const triggerUpgradeUserIsVisible = () => {
   store.commit('triggerUpgradeUserIsVisible')
 }
 
-const subscriptionIsApple = computed(() => store.getters['currentUser/subscriptionIsApple'])
-const subscriptionIsStripe = computed(() => store.getters['currentUser/subscriptionIsStripe'])
-const stripePlanIsPurchased = computed(() => store.state.currentUser.stripePlanIsPurchased)
-const subscriptionIsFree = computed(() => store.getters['currentUser/subscriptionIsFree'])
+const subscriptionIsApple = computed(() => userStore.appleSubscriptionIsActive)
+const subscriptionIsStripe = computed(() => subscriptionIsFree.value || userStore.stripeSubscriptionId)
+const stripePlanIsPurchased = computed(() => userStore.stripePlanIsPurchased)
+const subscriptionIsFree = computed(() => {
+  const strings = ['🌷free', '🌷 free', '🫧free']
+  return strings.includes(userStore.stripeSubscriptionId)
+})
 const isSecureAppContextIOS = computed(() => consts.isSecureAppContextIOS)
 
 const updateDialogHeight = async () => {
@@ -62,7 +70,7 @@ const customerPortal = async () => {
     clearState()
     state.loading = true
     const result = await store.dispatch('api/customerPortalUrl', {
-      userId: store.state.currentUser.id
+      userId: userStore.id
     })
     window.location = result.url
   } catch (error) {

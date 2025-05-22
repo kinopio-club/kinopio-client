@@ -1,11 +1,15 @@
 <script setup>
 import { reactive, computed, onMounted, onBeforeUnmount, watch, ref, nextTick } from 'vue'
 import { useStore } from 'vuex'
+import { useUserStore } from '@/stores/useUserStore'
+import { useSpaceStore } from '@/stores/useSpaceStore'
 
 import utils from '@/utils.js'
 import consts from '@/consts.js'
 
 const store = useStore()
+const userStore = useUserStore()
+const spaceStore = useSpaceStore()
 
 const dialogElement = ref(null)
 
@@ -25,8 +29,8 @@ watch(() => props.visible, (value, prevValue) => {
   }
 })
 
-const maxCardCharacterLimit = computed(() => store.state.currentUser.cardSettingsDefaultCharacterLimit || consts.defaultCharacterLimit)
-const shiftEnterShouldAddChildCard = computed(() => store.state.currentUser.cardSettingsShiftEnterShouldAddChildCard)
+const maxCardCharacterLimit = computed(() => consts.cardCharacterLimit)
+const shiftEnterShouldAddChildCard = computed(() => userStore.cardSettingsShiftEnterShouldAddChildCard)
 const meta = computed(() => utils.metaKey())
 
 // buttons
@@ -38,8 +42,7 @@ const toggleMarkdownInfoIsVisible = () => {
   }
 }
 const showCardSettings = () => {
-  store.dispatch('currentUser/update', { prevSettingsSection: 'cards' })
-  // store.dispatch('closeAllDialogs')
+  userStore.updateUser({ prevSettingsSection: 'cards' })
   store.commit('userSettingsIsVisible', true)
 }
 

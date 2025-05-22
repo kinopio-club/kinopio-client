@@ -1,6 +1,9 @@
 <script setup>
 import { reactive, computed, onMounted, onUnmounted, watch, ref, nextTick } from 'vue'
 import { useStore } from 'vuex'
+import { useCardStore } from '@/stores/useCardStore'
+import { useUserStore } from '@/stores/useUserStore'
+import { useSpaceStore } from '@/stores/useSpaceStore'
 
 import Loader from '@/components/Loader.vue'
 import utils from '@/utils.js'
@@ -9,7 +12,11 @@ import consts from '@/consts.js'
 
 import debounce from 'lodash-es/debounce'
 import sample from 'lodash-es/sample'
+
 const store = useStore()
+const cardStore = useCardStore()
+const userStore = useUserStore()
+const spaceStore = useSpaceStore()
 
 const dialogElement = ref(null)
 const searchInputElement = ref(null)
@@ -59,7 +66,7 @@ const state = reactive({
   }
 })
 
-const currentUserIsSignedIn = computed(() => store.getters['currentUser/isSignedIn'])
+const currentUserIsSignedIn = computed(() => userStore.getUserIsSignedIn)
 const triggerSignUpOrInIsVisible = () => {
   store.dispatch('closeAllDialogs')
   store.commit('triggerSignUpOrInIsVisible')
@@ -69,7 +76,7 @@ const triggerUpgradeUserIsVisible = () => {
   store.commit('triggerUpgradeUserIsVisible')
 }
 const closeImagePicker = () => {
-  store.dispatch('currentCards/updateNameRemovePlaceholders', props.cardId)
+  cardStore.clearCardNameUploadPlaceholder(props.cardId)
 }
 
 // input
@@ -120,7 +127,7 @@ const provider = computed(() => {
 const serviceIsPexels = computed(() => state.service === 'pexels')
 const serviceIsStickers = computed(() => state.service === 'stickers')
 const serviceIsGifs = computed(() => state.service === 'gifs')
-const lastUsedImagePickerService = computed(() => store.state.currentUser.lastUsedImagePickerService)
+const lastUsedImagePickerService = computed(() => userStore.lastUsedImagePickerService)
 const toggleServiceIsPexels = () => {
   state.service = 'pexels'
   searchAgain()
@@ -137,7 +144,7 @@ const toggleServiceIsGifs = () => {
   updateLastUsedImagePickerService()
 }
 const updateLastUsedImagePickerService = () => {
-  store.dispatch('currentUser/update', { lastUsedImagePickerService: state.service })
+  userStore.updateUser({ lastUsedImagePickerService: state.service })
 }
 const updateServiceFromLastUsedService = () => {
   if (!lastUsedImagePickerService.value) { return }
@@ -287,7 +294,7 @@ const uploadOtherSelectedFiles = (otherSelectedFiles) => {
   if (!otherSelectedFiles.length) { return }
   try {
     const cardId = props.cardId
-    const card = store.getters['currentCards/byId'](cardId)
+    const card = cardStore.getCard(cardId)
     const positionOffset = 20
     const position = {
       x: card.x + positionOffset,
@@ -323,13 +330,13 @@ const uploadFiles = async (event) => {
 }
 const addPlaceholderToCardName = (event) => {
   // prevents empty cards from being removed on blur by the @change event on iOS
-  const card = store.getters['currentCards/byId'](props.cardId)
+  const card = cardStore.getCard(props.cardId)
   if (!card.name) {
     const update = {
       id: card.id,
       name: consts.uploadPlaceholder
     }
-    store.dispatch('currentCards/update', { card: update, shouldPreventUpdateDimensionsAndPaths: true })
+    cardStore.updateCard(update)
   }
 }
 

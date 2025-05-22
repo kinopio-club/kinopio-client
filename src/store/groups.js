@@ -1,3 +1,5 @@
+import { useUserStore } from '@/stores/useUserStore'
+import { useSpaceStore } from '@/stores/useSpaceStore'
 import utils from '@/utils.js'
 import cache from '@/cache.js'
 
@@ -99,11 +101,12 @@ export default {
       }
     },
     loadGroup: async (context, space) => {
+      const userStore = useUserStore()
       context.commit('currentSpace/updateGroupMeta', space, { root: true })
       let group = space.group
       if (!group) { return }
       context.commit('update', group)
-      const groupUser = context.getters.groupUser({ userId: context.rootState.currentUser.id })
+      const groupUser = context.getters.groupUser({ userId: userStore.id })
       if (!groupUser) { return }
       try {
         group = await context.dispatch('api/getGroup', group.id, { root: true })
@@ -113,7 +116,8 @@ export default {
       }
     },
     joinGroup: async (context) => {
-      const userId = context.rootState.currentUser.id
+      const userStore = useUserStore()
+      const userId = userStore.id
       const group = context.rootState.groupToJoinOnLoad
       if (!group) { return }
       context.commit('notifyIsJoiningGroup', true, { root: true })
@@ -163,7 +167,8 @@ export default {
       await context.dispatch('api/addToQueue', { name: 'updateGroupUser', body: update }, { root: true })
     },
     addCurrentSpace: async (context, group) => {
-      const user = context.rootState.currentUser
+      const userStore = useUserStore()
+      const user = userStore
       const body = { groupId: group.id, addedToGroupByUserId: user.id }
       await context.dispatch('currentSpace/updateSpace', body, { root: true })
       await context.dispatch('userNotifications/addSpaceToGroup', body, { root: true })
@@ -230,7 +235,8 @@ export default {
       return group.users.find(user => user.id === userId)
     },
     currentUserIsCurrentSpaceGroupUser: (state, getters, rootState) => {
-      const userId = rootState.currentUser.id
+      const userStore = useUserStore()
+      const userId = userStore.id
       const groupId = rootState.currentSpace.groupId
       if (!groupId) { return }
       const group = getters.spaceGroup()
@@ -247,6 +253,39 @@ export default {
         groupUser = getters.groupUser({ userId, space })
       }
       return groupUser?.role === 'admin'
+    },
+    groupUsersWhoAddedCards: (state) => {
+      return []
+      // userIds: (state, getters) => {
+      //   const cards = getters.all
+      //   let users = []
+      //   cards.forEach(card => {
+      //     users.push(card.userId)
+      //     users.push(card.nameUpdatedByUserId)
+      //   })
+      //   users = users.filter(user => Boolean(user))
+      //   users = uniq(users)
+      //   return users
+      // },
+      // users: (state, getters, rootState, rootGetters) => {
+      //   let users = getters.userIds.map(id => {
+      //     const user = rootGetters['currentSpace/userById'](id)
+      //     return user
+      //   })
+      //   users = users.filter(user => Boolean(user))
+      //   return users
+      // },
+      // groupUsersWhoAddedCards: (state, getters, rootState, rootGetters) => {
+      //   const spaceGroup = rootGetters['groups/spaceGroup']()
+      //   const groupUsers = spaceGroup?.users
+      //   if (!groupUsers) { return }
+      //   let users = getters.users
+      //   users = users.filter(user => {
+      //     const isGroupUser = groupUsers.find(groupUser => groupUser.id === user.id)
+      //     return isGroupUser
+      //   })
+      //   return users
+      // },
     }
   }
 }

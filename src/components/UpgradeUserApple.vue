@@ -1,13 +1,18 @@
 <script setup>
 import { reactive, computed, onMounted, watch, ref, nextTick } from 'vue'
 import { useStore } from 'vuex'
+import { useUserStore } from '@/stores/useUserStore'
+import { useSpaceStore } from '@/stores/useSpaceStore'
 
 import User from '@/components/User.vue'
 import Loader from '@/components/Loader.vue'
 import postMessage from '@/postMessage.js'
 import consts from '@/consts.js'
 import utils from '@/utils.js'
+
 const store = useStore()
+const userStore = useUserStore()
+const spaceStore = useSpaceStore()
 
 onMounted(() => {
   window.addEventListener('message', handleSubscriptionSuccess) // iOS IAP subscription sheet transaction completes
@@ -27,9 +32,9 @@ const state = reactive({
   }
 })
 
-const user = computed(() => store.state.currentUser)
-const isUpgraded = computed(() => store.state.currentUser.isUpgraded)
-const appleAppAccountToken = computed(() => store.state.currentUser.appleAppAccountToken)
+const user = computed(() => userStore.getUserAllState)
+const isUpgraded = computed(() => userStore.isUpgraded)
+const appleAppAccountToken = computed(() => userStore.appleAppAccountToken)
 
 const clearErrors = () => {
   state.error.unknownServerError = false
@@ -71,8 +76,8 @@ const handleSubscriptionSuccess = (event) => {
     state.loading.subscriptionIsBeingCreated = false
     return
   }
-  store.commit('currentUser/isUpgraded', true)
-  store.commit('currentUser/appleSubscriptionIsActive', true)
+  userStore.isUpgraded = true
+  userStore.appleSubscriptionIsActive = true
   store.commit('notifyCardsCreatedIsOverLimit', false)
   if (!utils.dialogIsVisible()) {
     store.commit('addNotification', {

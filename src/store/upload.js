@@ -1,3 +1,5 @@
+import { useUserStore } from '@/stores/useUserStore'
+import { useSpaceStore } from '@/stores/useSpaceStore'
 import utils from '@/utils.js'
 import consts from '@/consts.js'
 
@@ -42,9 +44,9 @@ export default {
   },
   actions: {
     checkIfFileTooBig: (context, file) => {
-      const userIsUpgraded = context.rootState.currentUser.isUpgraded
-      const spaceCreatorIsUpgraded = context.rootGetters['currentSpace/spaceCreatorIsUpgraded']
-      const isFileTooBig = utils.isFileTooBig({ file, userIsUpgraded, spaceCreatorIsUpgraded })
+      const userStore = useUserStore()
+      const userIsUpgraded = userStore.isUpgraded
+      const isFileTooBig = utils.isFileTooBig({ file, userIsUpgraded })
       if (isFileTooBig) {
         throw {
           type: 'sizeLimit',
@@ -62,19 +64,19 @@ export default {
       })
     },
     uploadFile: async (context, { file, cardId, spaceId, boxId }) => {
+      const userStore = useUserStore()
       const uploadId = nanoid()
       const fileName = utils.normalizeFileUrl(file.name)
       const id = cardId || spaceId || boxId
       const key = `${id}/${fileName}`
-      const userIsUpgraded = context.rootState.currentUser.isUpgraded
-      const spaceCreatorIsUpgraded = context.rootGetters['currentSpace/spaceCreatorIsUpgraded']
+      const userIsUpgraded = userStore.isUpgraded
       context.dispatch('checkIfFileTooBig', file)
       // add presignedPostData to upload
       let presignedPostData
       if (file.presignedPostData) {
         presignedPostData = file.presignedPostData
       } else {
-        presignedPostData = await context.dispatch('api/createPresignedPost', { key, userIsUpgraded, type: file.type, spaceCreatorIsUpgraded }, { root: true })
+        presignedPostData = await context.dispatch('api/createPresignedPost', { key, userIsUpgraded, type: file.type }, { root: true })
       }
       const formData = new FormData()
       Object.keys(presignedPostData.fields).forEach(key => {
@@ -94,7 +96,7 @@ export default {
             spaceId,
             boxId,
             percentComplete: percentCompleteDisplay,
-            userId: context.rootState.currentUser.id,
+            userId: userStore.id,
             id: uploadId
           }
           context.commit('updatePendingUpload', updates)
@@ -127,10 +129,10 @@ export default {
       })
     },
     addCardsAndUploadFiles: async (context, { files, event, position }) => {
+      const userStore = useUserStore()
       position = position || utils.cursorPositionInSpace(event)
       context.dispatch('currentUser/notifyReadOnly', position, { root: true })
-      const userIsUpgraded = context.rootState.currentUser.isUpgraded
-      const spaceCreatorIsUpgraded = context.rootGetters['currentSpace/spaceCreatorIsUpgraded']
+      const userIsUpgraded = userStore.isUpgraded
       const canEditSpace = context.rootGetters['currentUser/canEditSpace']()
       if (!canEditSpace) {
         context.commit('addNotification', { message: 'You can only upload files on spaces you can edit', type: 'info' }, { root: true })
@@ -152,7 +154,7 @@ export default {
       }
       // check sizeLimit
       const filesTooBig = files.find(file => {
-        return utils.isFileTooBig({ file, userIsUpgraded, spaceCreatorIsUpgraded })
+        return utils.isFileTooBig({ file, userIsUpgraded })
       })
       if (filesTooBig) {
         context.commit('addNotificationWithPosition', { message: 'Too Big', position, type: 'danger', layer: 'space', icon: 'cancel' }, { root: true })
@@ -183,7 +185,7 @@ export default {
         console.info('🍡 addCardsAndUploadFiles', file.type, file)
       }
       // add presignedPostData to files
-      const multiplePresignedPostData = await context.dispatch('api/createMultiplePresignedPosts', { files: filesPostData, userIsUpgraded, spaceCreatorIsUpgraded }, { root: true })
+      const multiplePresignedPostData = await context.dispatch('api/createMultiplePresignedPosts', { files: filesPostData, userIsUpgraded }, { root: true })
       files.map((file, index) => {
         file.presignedPostData = multiplePresignedPostData[index]
       })

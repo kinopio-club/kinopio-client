@@ -1,6 +1,8 @@
 <script setup>
 import { reactive, computed, onMounted, onBeforeUnmount, watch, ref, nextTick } from 'vue'
 import { useStore } from 'vuex'
+import { useUserStore } from '@/stores/useUserStore'
+import { useSpaceStore } from '@/stores/useSpaceStore'
 
 import utils from '@/utils.js'
 import consts from '@/consts.js'
@@ -10,6 +12,8 @@ import debounce from 'lodash-es/debounce'
 import { nanoid } from 'nanoid'
 
 const store = useStore()
+const userStore = useUserStore()
+const spaceStore = useSpaceStore()
 
 const canvasElement = ref(null)
 let canvas, context
@@ -55,10 +59,10 @@ onMounted(() => {
       undo()
     } else if (mutation.type === 'triggerDrawingRedo') {
       redo()
-    } else if (mutation.type === 'triggerRestoreSpaceLocalComplete') {
+    } else if (mutation.type === 'triggerRestoreSpaceLocalComplete') { // TODO replace w spaceStore restoreSpace watcher
       clearCanvas()
       redraw()
-    } else if (mutation.type === 'triggerRestoreSpaceRemoteComplete' || mutation.type === 'triggerDrawingRedraw') {
+    } else if (mutation.type === 'triggerDrawingRedraw') {
       redraw()
     }
     unsubscribeActions = store.subscribeAction(action => {
@@ -85,7 +89,7 @@ const viewportHeight = computed(() => store.state.viewportHeight)
 const viewportWidth = computed(() => store.state.viewportWidth)
 const pageHeight = computed(() => store.state.pageHeight)
 const pageWidth = computed(() => store.state.pageWidth)
-const currentUserIsSignedIn = computed(() => store.getters['currentUser/isSignedIn'])
+const currentUserIsSignedIn = computed(() => userStore.getUserIsSignedIn)
 const toolbarIsDrawing = computed(() => store.state.currentUserToolbar === 'drawing')
 const styles = computed(() => {
   const value = {
@@ -108,9 +112,9 @@ const clearStrokes = () => {
 
 // points
 
-const strokeColor = computed(() => store.getters['currentUser/drawingColor'])
+const strokeColor = computed(() => userStore.getUserDrawingColor)
 const strokeDiameter = computed(() => {
-  const diameter = store.state.currentUser.drawingBrushSize
+  const diameter = userStore.drawingBrushSize
   return consts.drawingBrushSizeDiameter[diameter]
 })
 const createPoint = (event) => {
@@ -131,7 +135,7 @@ const broadcastAddStroke = (stroke, shouldPreventBroadcast) => {
   if (shouldPreventBroadcast) { return }
   store.commit('broadcast/update', {
     updates: {
-      userId: store.state.currentUser.id,
+      userId: userStore.id,
       stroke
     },
     type: 'addRemoteDrawingStroke',
@@ -142,7 +146,7 @@ const broadcastRemoveStroke = (stroke, shouldPreventBroadcast) => {
   if (shouldPreventBroadcast) { return }
   store.commit('broadcast/update', {
     updates: {
-      userId: store.state.currentUser.id,
+      userId: userStore.id,
       stroke
     },
     type: 'removeRemoteDrawingStroke',

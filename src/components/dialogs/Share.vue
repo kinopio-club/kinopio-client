@@ -1,6 +1,8 @@
 <script setup>
 import { reactive, computed, onMounted, watch, ref, nextTick } from 'vue'
 import { useStore } from 'vuex'
+import { useUserStore } from '@/stores/useUserStore'
+import { useSpaceStore } from '@/stores/useSpaceStore'
 
 import PrivacyButton from '@/components/PrivacyButton.vue'
 import InviteToSpace from '@/components/InviteToSpace.vue'
@@ -13,7 +15,10 @@ import AddToExplore from '@/components/AddToExplore.vue'
 import AskToAddToExplore from '@/components/AskToAddToExplore.vue'
 import SpaceUsersButton from '@/components/SpaceUsersButton.vue'
 import consts from '@/consts.js'
+
 const store = useStore()
+const userStore = useUserStore()
+const spaceStore = useSpaceStore()
 
 const dialog = ref(null)
 
@@ -49,8 +54,8 @@ const state = reactive({
 })
 
 const isSecureAppContextIOS = computed(() => consts.isSecureAppContextIOS)
-const currentUserIsSignedIn = computed(() => store.getters['currentUser/isSignedIn'])
-const isSpaceMember = computed(() => store.getters['currentUser/isSpaceMember']())
+const currentUserIsSignedIn = computed(() => userStore.getUserIsSignedIn)
+const isSpaceMember = computed(() => userStore.getUserIsSpaceMember())
 const spaceIsRemote = computed(() => store.getters['currentSpace/isRemote'])
 const spaceIsPublic = computed(() => store.state.currentSpace.privacy !== 'private')
 const spaceIsPrivate = computed(() => store.state.currentSpace.privacy === 'private')

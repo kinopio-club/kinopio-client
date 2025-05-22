@@ -1,6 +1,9 @@
 <script setup>
 import { reactive, computed, onMounted, onBeforeUnmount, watch, ref, nextTick } from 'vue'
 import { useStore } from 'vuex'
+import { useCardStore } from '@/stores/useCardStore'
+import { useUserStore } from '@/stores/useUserStore'
+import { useSpaceStore } from '@/stores/useSpaceStore'
 
 import merge from 'lodash-es/merge'
 
@@ -8,7 +11,11 @@ import cache from '@/cache.js'
 import Loader from '@/components/Loader.vue'
 import PrivacyIcon from '@/components/PrivacyIcon.vue'
 import utils from '@/utils.js'
+
 const store = useStore()
+const cardStore = useCardStore()
+const userStore = useUserStore()
+const spaceStore = useSpaceStore()
 
 const resultsElement = ref(null)
 
@@ -52,7 +59,7 @@ const cardsOrSpacesLabel = computed(() => {
 const currentSpace = computed(() => store.state.currentSpace)
 const currentSpaceName = computed(() => currentSpace.value.name)
 const currentUserCanEditSpace = computed(() => {
-  return store.getters['currentUser/canEditSpace']()
+  return userStore.getUserCanEditSpace()
 })
 
 const updateResultsSectionHeight = async () => {
@@ -118,7 +125,7 @@ const showCards = () => {
   updateRemovedCards()
 }
 const updateLocalRemovedCards = () => {
-  state.removedCards = store.state.currentCards.removedCards
+  state.removedCards = cardStore.getAllRemovedCards
 }
 const updateRemovedCards = async () => {
   updateLocalRemovedCards()
@@ -136,23 +143,24 @@ const loadRemoteRemovedCards = async () => {
     state.loading.cards = false
     if (!utils.arrayHasItems(remoteCards)) { return }
     state.removedCards = remoteCards
-    store.commit('currentCards/removedCards', remoteCards)
+    const ids = remoteCards.map(card => card.id)
+    cardStore.removeCards(ids)
   } catch (error) {
     console.error('🚒 loadRemoteRemovedCards', error)
   }
 }
 const restoreCard = async (card) => {
-  store.dispatch('currentCards/restoreRemoved', card)
+  cardStore.restoreRemovedCard(card)
   await nextTick()
   scrollIntoView(card)
   removeRemovedCard(card)
 }
 const deleteCard = (card) => {
-  store.dispatch('currentCards/deleteCard', card)
+  cardStore.deleteCard(card)
   removeRemovedCard(card)
 }
 const deleteAllCards = () => {
-  store.dispatch('currentCards/deleteAllRemoved')
+  cardStore.deleteAllRemovedCards()
   state.removedCards = []
 }
 const scrollIntoView = (card) => {

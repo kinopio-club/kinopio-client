@@ -1,6 +1,8 @@
 <script setup>
 import { reactive, computed, onMounted, onUnmounted, onBeforeUnmount, watch, ref, nextTick } from 'vue'
 import { useStore } from 'vuex'
+import { useUserStore } from '@/stores/useUserStore'
+import { useSpaceStore } from '@/stores/useSpaceStore'
 
 import About from '@/components/dialogs/About.vue'
 import SpaceDetails from '@/components/dialogs/SpaceDetails.vue'
@@ -41,7 +43,10 @@ import UserGroups from '@/components/dialogs/UserGroups.vue'
 import consts from '@/consts.js'
 
 import sortBy from 'lodash-es/sortBy'
+
 const store = useStore()
+const userStore = useUserStore()
+const spaceStore = useSpaceStore()
 
 let unsubscribe
 
@@ -98,7 +103,7 @@ onMounted(() => {
       hidden()
     } else if (type === 'triggerTemplatesIsVisible') {
       updateTemplatesIsVisible(true)
-    } else if (type === 'triggerRemovedIsVisible' || type === 'triggerAIImagesIsVisible') {
+    } else if (type === 'triggerRemovedIsVisible') {
       updateSidebarIsVisible(true)
     } else if (type === 'triggerImportIsVisible') {
       updateImportIsVisible(true)
@@ -165,12 +170,12 @@ const isSpace = computed(() => {
   const isSpace = !isOther
   return isSpace
 })
-const userCanEditSpace = computed(() => store.getters['currentUser/canEditSpace']())
-const userCanOnlyComment = computed(() => store.getters['currentUser/canOnlyComment']())
-const isUpgraded = computed(() => store.state.currentUser.isUpgraded)
+const userCanEditSpace = computed(() => userStore.getUserCanEditSpace())
+const userCanOnlyComment = computed(() => userStore.getIsUserCommentOnly())
+const isUpgraded = computed(() => userStore.isUpgraded)
 const isOnline = computed(() => store.state.isOnline)
-const currentUserIsSignedIn = computed(() => store.getters['currentUser/isSignedIn'])
-const shouldIncreaseUIContrast = computed(() => store.state.currentUser.shouldIncreaseUIContrast)
+const currentUserIsSignedIn = computed(() => userStore.getUserIsSignedIn)
+const shouldIncreaseUIContrast = computed(() => userStore.shouldIncreaseUIContrast)
 const isMobile = computed(() => utils.isMobile())
 const toolbarIsVisible = computed(() => {
   if (!isSpace.value) { return }
@@ -237,7 +242,7 @@ const changeToPrevSpace = () => {
 // search filters
 
 const searchResultsCount = computed(() => store.state.searchResultsCards.length)
-const totalFiltersActive = computed(() => store.getters['currentUser/totalFiltersActive'])
+const totalFiltersActive = computed(() => userStore.getUserTotalFiltersActive())
 const searchResultsOrFilters = computed(() => {
   if (searchResultsCount.value || totalFiltersActive.value) {
     return true

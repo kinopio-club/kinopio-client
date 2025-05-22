@@ -1,6 +1,8 @@
 <script setup>
 import { reactive, computed, onMounted, watch, ref, nextTick } from 'vue'
 import { useStore } from 'vuex'
+import { useUserStore } from '@/stores/useUserStore'
+import { useSpaceStore } from '@/stores/useSpaceStore'
 
 import DiscountRow from '@/components/DiscountRow.vue'
 import UserLabelInline from '@/components/UserLabelInline.vue'
@@ -10,7 +12,10 @@ import UpgradeFAQ from '@/components/dialogs/UpgradeFAQ.vue'
 import AboutGroups from '@/components/dialogs/AboutGroups.vue'
 import consts from '@/consts.js'
 import utils from '@/utils.js'
+
 const store = useStore()
+const userStore = useUserStore()
+const spaceStore = useSpaceStore()
 
 const props = defineProps({
   visible: Boolean
@@ -49,10 +54,10 @@ const updateDialogHeight = async () => {
 }
 
 const isSecureAppContextIOS = computed(() => consts.isSecureAppContextIOS)
-const studentDiscountIsAvailable = computed(() => store.state.currentUser.studentDiscountIsAvailable)
+const studentDiscountIsAvailable = computed(() => userStore.studentDiscountIsAvailable)
 const monthlyPrice = computed(() => consts.price('month').amount)
 const yearlyPrice = computed(() => {
-  const isStudentDiscount = store.state.currentUser.studentDiscountIsAvailable
+  const isStudentDiscount = userStore.studentDiscountIsAvailable
   return consts.price('year', isStudentDiscount).amount
 })
 const lifePrice = computed(() => consts.price('life').amount)

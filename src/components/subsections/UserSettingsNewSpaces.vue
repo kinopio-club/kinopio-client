@@ -1,24 +1,28 @@
 <script setup>
 import { reactive, computed, onMounted, onBeforeUnmount, watch, ref, nextTick } from 'vue'
 import { useStore } from 'vuex'
+import { useUserStore } from '@/stores/useUserStore'
+import { useSpaceStore } from '@/stores/useSpaceStore'
 
+const userStore = useUserStore()
+const spaceStore = useSpaceStore()
 const store = useStore()
 
 // date cards
 
 const dateImageUrl = computed(() => store.state.dateImageUrl)
-const shouldHideDateCards = computed(() => { return store.state.currentUser.shouldHideDateCards })
+const shouldHideDateCards = computed(() => { return userStore.shouldHideDateCards })
 const toggleShouldHideDateCards = () => {
   const value = !shouldHideDateCards.value
-  store.dispatch('currentUser/shouldHideDateCards', value)
+  userStore.updateUser({ shouldHideDateCards: value })
 }
 
 // tutorial cards
 
-const shouldHideTutorialCards = computed(() => { return store.state.currentUser.shouldHideTutorialCards })
+const shouldHideTutorialCards = computed(() => { return userStore.shouldHideTutorialCards })
 const toggleShouldHideTutorialCards = () => {
   const value = !shouldHideTutorialCards.value
-  store.dispatch('currentUser/shouldHideTutorialCards', value)
+  userStore.updateUser({ shouldHideTutorialCards: value })
 }
 </script>
 

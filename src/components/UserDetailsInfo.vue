@@ -1,13 +1,18 @@
 <script setup>
 import { reactive, computed, onMounted, onUnmounted, watch, ref, nextTick } from 'vue'
 import { useStore } from 'vuex'
+import { useUserStore } from '@/stores/useUserStore'
+import { useSpaceStore } from '@/stores/useSpaceStore'
 
 import ColorPicker from '@/components/dialogs/ColorPicker.vue'
 import UserBadges from '@/components/UserBadges.vue'
 import User from '@/components/User.vue'
 import cache from '@/cache.js'
 import utils from '@/utils.js'
+
 const store = useStore()
+const userStore = useUserStore()
+const spaceStore = useSpaceStore()
 
 const descriptionElement = ref(null)
 
@@ -48,7 +53,7 @@ const closeDialogs = () => {
 const userColor = computed(() => props.user.color)
 const userIsMember = computed(() => Boolean(store.getters['currentSpace/memberById'](props.user.id)))
 const userIsUpgraded = computed(() => props.user.isUpgraded)
-const isCurrentUser = computed(() => store.getters['currentUser/isCurrentUser'](props.user))
+const isCurrentUser = computed(() => userStore.getUserIsCurrentUser(props.user))
 const userName = computed({
   get () {
     return props.user.name
@@ -84,7 +89,7 @@ const websiteUrl = computed(() => {
 // update user
 
 const updateUser = (update) => {
-  store.dispatch('currentUser/update', update)
+  userStore.updateUser(update)
 }
 const updateUserColor = (newValue) => {
   updateUser({ color: newValue })

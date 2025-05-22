@@ -1,11 +1,17 @@
 <script setup>
 import { reactive, computed, onMounted, onBeforeUnmount, watch, ref, nextTick } from 'vue'
 import { useStore } from 'vuex'
+import { useBoxStore } from '@/stores/useBoxStore'
+import { useUserStore } from '@/stores/useUserStore'
+import { useSpaceStore } from '@/stores/useSpaceStore'
 
 import utils from '@/utils.js'
 import consts from '@/consts.js'
 
 const store = useStore()
+const boxStore = useBoxStore()
+const userStore = useUserStore()
+const spaceStore = useSpaceStore()
 
 let unsubscribe
 
@@ -49,8 +55,7 @@ const currentBoxIsBeingDragged = computed(() => {
   return isDragging && (isCurrent || currentBoxIsSelected.value)
 })
 const otherBoxes = computed(() => {
-  const boxes = store.getters['currentBoxes/isSelectableInViewport']
-  return boxes.filter(box => box?.id !== props.box.id)
+  return boxStore.getBoxesSelectableInViewport()
 })
 
 // is snapping
@@ -58,7 +63,7 @@ const otherBoxes = computed(() => {
 const currentBoxSnapGuide = computed(() => {
   const isMultipleBoxesSelectedIds = store.state.multipleBoxesSelectedIds.length > 1
   if (isMultipleBoxesSelectedIds) { return }
-  const guides = store.state.currentBoxes.snapGuides
+  const guides = boxStore.boxSnapGuides
   return guides.find(guide => {
     const isTarget = guide.target.id === props.box.id
     const isOrigin = guide.origin.id === props.box.id
@@ -73,7 +78,7 @@ watch(() => currentBoxSnapGuide.value, (value, prevValue) => {
 
 // styles
 
-const userColor = computed(() => store.state.currentUser.color)
+const userColor = computed(() => userStore.color)
 const snapGuideSide = computed(() => {
   const isDraggingItem = store.state.currentUserIsDraggingBox || store.state.currentUserIsDraggingCard
   if (!isDraggingItem) { return }
