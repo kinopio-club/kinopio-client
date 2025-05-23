@@ -111,7 +111,20 @@ export const useSpaceStore = defineStore('space', {
     // load
 
     restoreSpace (space) {
+      const cardStore = useCardStore()
+      const boxStore = useBoxStore()
+      const connectionStore = useConnectionStore()
       space = utils.removeRemovedCardsFromSpace(space)
+      // initialize items
+      cardStore.initializeCards(space.cards)
+      boxStore.initializeBoxes(space.boxes)
+      connectionStore.initializeConnections(space.connections)
+      connectionStore.initializeConnectionTypes(space.connectionTypes)
+      // remove unused attrs
+      delete space.cards
+      delete space.boxes
+      delete space.connections
+      delete space.connectionTypes
       this.$patch(space)
     },
     async getRemoteSpace (space) {
