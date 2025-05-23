@@ -595,95 +595,36 @@ header(v-if="isVisible" :style="state.position" :class="{'fade-out': isFadingOut
                 .label-badge.small-badge(v-if="shouldShowChangelogIsUpdated")
                   span NEW
 
-              //- TODO SpaceStatusButton
-              //- Loading State
-              .button-wrap.space-status-button-wrap(v-if="spaceHasStatusAndStatusDialogIsNotVisible")
-                button.small-button(@click.left.stop="toggleSpaceStatusIsVisible" :class="{active: state.spaceStatusIsVisible, 'translucent-button': !shouldIncreaseUIContrast}")
-                  Loader(:visible="spaceHasStatus")
-                  .badge.success.space-status-success(v-if="!spaceHasStatus")
-                SpaceStatus(:visible="state.spaceStatusIsVisible")
-
             About(:visible="state.aboutIsVisible")
             KeyboardShortcuts(:visible="state.keyboardShortcutsIsVisible")
             Templates(:visible="state.templatesIsVisible")
             Donate(:visible="state.donateIsVisible")
             AppsAndExtensions(:visible="state.appsAndExtensionsIsVisible")
-        .space-meta-rows
-          .space-functions-row
-            //- Back
-            .button-wrap(v-if="backButtonIsVisible" title="Go Back" @click.stop="changeToPrevSpace")
-              button(:class="{ 'translucent-button': !shouldIncreaseUIContrast }")
+        .space-functions-row
+
+          AddSpaceButton
+
+          //- TODO SearchButtons
+          //- Search
+          .segmented-buttons
+            .button-wrap
+              button.search-button(@click.stop="toggleSearchIsVisible" :class="{ active: searchIsVisible || totalFiltersActive || searchResultsCount, 'translucent-button': !shouldIncreaseUIContrast }" :title="searchAndFilterTitle")
+                template(v-if="!searchResultsCount")
+                  img.icon.search(src="@/assets/search.svg")
+                .badge.search.search-count-badge(v-if="searchResultsCount")
+                  img.icon.search(src="@/assets/search.svg")
+                  span {{searchResultsCount}}
+                span.badge.info(v-if="totalFiltersActive")
+                  img.icon(src="@/assets/filter.svg")
+                  span {{totalFiltersActive}}
+              Search(:visible="searchIsVisible")
+            template(v-if="!isMobile")
+              button(@click="showPreviousSearchCard" v-if="searchResultsCount" :class="{ 'translucent-button': !shouldIncreaseUIContrast }")
                 img.icon.left-arrow(src="@/assets/down-arrow.svg")
-
-            //- TODO SpaceDetailsButton
-            //- Space Details
-            .button-wrap(:class="{ 'back-button-is-visible': backButtonIsVisible }")
-              button(@click.left.stop="toggleSpaceDetailsIsVisible" :class="{ active: state.spaceDetailsIsVisible, 'translucent-button': !shouldIncreaseUIContrast }" title="Space Details and Spaces List")
-                img.icon.sidebar.flip-left(src="@/assets/sidebar.svg" :class="{'space-is-hidden': currentSpaceIsHidden}")
-                //- span as
-              ImportArenaChannel(:visible="importArenaChannelIsVisible")
-              SpaceDetails(:visible="state.spaceDetailsIsVisible")
-              SpaceDetailsInfo(:visible="state.spaceDetailsInfoIsVisible")
-              ImportExport(:visible="state.importIsVisible" :isImport="true")
-
-              //- space name badges
-              .label-badge-row.row
-                //- .label-badge
-                //-   PrivacyIcon(:privacy="currentSpace.privacy" :closedIsNotVisible="true" :isSmall="true")
-
-                //- GroupLabel(:group="spaceGroup")
-                //- inbox badge
-                //- .label-badge.secondary(v-if="currentSpaceIsInbox")
-                //-   img.icon.inbox-icon(src="@/assets/inbox.svg")
-                //- template badge
-                //- .label-badge
-                //-   //- (v-if="currentSpaceIsTemplate")
-                //-   img.icon.templates(src="@/assets/templates.svg")
-
-                //- read only badge
-                .label-badge(v-if="!userCanEditSpace")
-                  span(:class="{'invisible': state.readOnlyJiggle}")
-                    span Read Only
-                  span.invisible-badge(ref="readOnlyElement" :class="{'badge-jiggle': state.readOnlyJiggle, 'invisible': !state.readOnlyJiggle}")
-                    span Read Only
-                //- comment only badge
-                .label-badge.success(v-else-if="userCanOnlyComment")
-                  span(:class="{'invisible': state.readOnlyJiggle}")
-                    span Comment Only
-                //- in explore badge
-                .label-badge.secondary(v-if="shouldShowInExplore")
-                  span
-                    img.icon.sunglasses.explore(src="@/assets/sunglasses.svg")
-
-            //- Offline
-            .button-wrap(v-if="!isOnline")
-              button(@click.left.stop="toggleOfflineIsVisible" :class="{ active: offlineIsVisible, 'translucent-button': !shouldIncreaseUIContrast}")
-                img.icon.offline(src="@/assets/offline.svg")
-              Offline(:visible="offlineIsVisible")
-
-            AddSpaceButton
-
-            //- TODO SearchButtons
-            //- Search
-            .segmented-buttons
-              .button-wrap
-                button.search-button(@click.stop="toggleSearchIsVisible" :class="{ active: searchIsVisible || totalFiltersActive || searchResultsCount, 'translucent-button': !shouldIncreaseUIContrast }" :title="searchAndFilterTitle")
-                  template(v-if="!searchResultsCount")
-                    img.icon.search(src="@/assets/search.svg")
-                  .badge.search.search-count-badge(v-if="searchResultsCount")
-                    img.icon.search(src="@/assets/search.svg")
-                    span {{searchResultsCount}}
-                  span.badge.info(v-if="totalFiltersActive")
-                    img.icon(src="@/assets/filter.svg")
-                    span {{totalFiltersActive}}
-                Search(:visible="searchIsVisible")
-              template(v-if="!isMobile")
-                button(@click="showPreviousSearchCard" v-if="searchResultsCount" :class="{ 'translucent-button': !shouldIncreaseUIContrast }")
-                  img.icon.left-arrow(src="@/assets/down-arrow.svg")
-                button(@click="showNextSearchCard" v-if="searchResultsCount" :class="{ 'translucent-button': !shouldIncreaseUIContrast }")
-                  img.icon.right-arrow(src="@/assets/down-arrow.svg")
-              button(@click="clearSearchAndFilters" v-if="searchResultsOrFilters" :class="{ 'translucent-button': !shouldIncreaseUIContrast }")
-                img.icon.cancel(src="@/assets/add.svg")
+              button(@click="showNextSearchCard" v-if="searchResultsCount" :class="{ 'translucent-button': !shouldIncreaseUIContrast }")
+                img.icon.right-arrow(src="@/assets/down-arrow.svg")
+            button(@click="clearSearchAndFilters" v-if="searchResultsOrFilters" :class="{ 'translucent-button': !shouldIncreaseUIContrast }")
+              img.icon.cancel(src="@/assets/add.svg")
 
       .right
         //- Users
@@ -713,6 +654,75 @@ header(v-if="isVisible" :style="state.position" :class="{'fade-out': isFadingOut
     .row
       //- Current Space
       .left
+        .space-functions-row
+
+          //- TODO SpaceDetailsButton
+          .segmented-buttons.space-details-button
+            //- Back
+            .button-wrap(v-if="backButtonIsVisible" title="Go Back" @click.stop="changeToPrevSpace")
+              button(:class="{ 'translucent-button': !shouldIncreaseUIContrast }")
+                img.icon.left-arrow(src="@/assets/down-arrow.svg")
+            //- Name
+            .button-wrap(:class="{ 'back-button-is-visible': backButtonIsVisible }")
+              button(@click.left.stop="toggleSpaceDetailsIsVisible" :class="{ active: state.spaceDetailsIsVisible, 'translucent-button': !shouldIncreaseUIContrast }" title="Space Details and Spaces List")
+                .button-contents(:class="{'space-is-hidden': currentSpaceIsHidden}")
+                  GroupLabel(:group="spaceGroup")
+                  span(v-if="currentSpaceIsInbox")
+                    img.icon.inbox-icon(src="@/assets/inbox.svg")
+                  //- span(v-if="currentSpaceIsTemplate")
+                  //-   img.icon.templates(src="@/assets/templates.svg")
+                  //- span
+                  span.space-name {{currentSpaceName}}
+                  //- PrivacyIcon(:privacy="currentSpace.privacy" :closedIsNotVisible="true")
+
+                //- img.icon.sidebar.flip-left(src="@/assets/sidebar.svg" :class="{'space-is-hidden': currentSpaceIsHidden}")
+                //- span as
+              ImportArenaChannel(:visible="importArenaChannelIsVisible")
+              SpaceDetails(:visible="state.spaceDetailsIsVisible")
+              SpaceDetailsInfo(:visible="state.spaceDetailsInfoIsVisible")
+              ImportExport(:visible="state.importIsVisible" :isImport="true")
+
+              //- space name badges
+              .label-badge-row.row
+                //- .label-badge
+                //-   PrivacyIcon(:privacy="currentSpace.privacy" :closedIsNotVisible="true" :isSmall="true")
+
+                GroupLabel(:group="spaceGroup")
+                //- inbox badge
+                .label-badge.secondary(v-if="currentSpaceIsInbox")
+                  img.icon.inbox-icon(src="@/assets/inbox.svg")
+                //- template badge
+                //- .label-badge
+                //-   //- (v-if="currentSpaceIsTemplate")
+                //-   img.icon.templates(src="@/assets/templates.svg")
+
+                //- read only badge
+                .label-badge(v-if="!userCanEditSpace")
+                  span(:class="{'invisible': state.readOnlyJiggle}")
+                    span Read Only
+                  span.invisible-badge(ref="readOnlyElement" :class="{'badge-jiggle': state.readOnlyJiggle, 'invisible': !state.readOnlyJiggle}")
+                    span Read Only
+                //- comment only badge
+                .label-badge.success(v-else-if="userCanOnlyComment")
+                  span(:class="{'invisible': state.readOnlyJiggle}")
+                    span Comment Only
+                //- in explore badge
+                .label-badge.secondary(v-if="shouldShowInExplore")
+                  span
+                    img.icon.sunglasses.explore(src="@/assets/sunglasses.svg")
+
+              //- space status loader
+              .button-wrap.space-status-button-wrap(v-if="spaceHasStatusAndStatusDialogIsNotVisible")
+                button.small-button(@click.left.stop="toggleSpaceStatusIsVisible" :class="{active: state.spaceStatusIsVisible, 'translucent-button': !shouldIncreaseUIContrast}")
+                  Loader(:visible="spaceHasStatus")
+                  .badge.success.space-status-success(v-if="!spaceHasStatus")
+                SpaceStatus(:visible="state.spaceStatusIsVisible")
+
+            //- Offline
+            .button-wrap(v-if="!isOnline")
+              button(@click.left.stop="toggleOfflineIsVisible" :class="{ active: offlineIsVisible, 'translucent-button': !shouldIncreaseUIContrast}")
+                img.icon.offline(src="@/assets/offline.svg")
+              Offline(:visible="offlineIsVisible")
 
       .right
         //- Pricing
@@ -949,8 +959,6 @@ header
 
   .icon.sidebar
     vertical-align -1px
-    &.flip-left
-      transform rotate(180deg)
 
   .badge.space-status-success
     width 14px
@@ -996,9 +1004,8 @@ header
 
 .button-wrap.space-status-button-wrap
   position absolute
-  // top 4px
-  bottom -12px
-  right 0
+  top 5px
+  right 4px
   left initial
   .loader
     margin 0
