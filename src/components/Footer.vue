@@ -159,6 +159,14 @@ const cancelHidden = () => {
   state.isHiddenOnTouch = false
 }
 
+// settings
+
+const userSettingsIsVisible = computed(() => store.state.userSettingsIsVisible)
+const toggleUserSettingsIsVisible = () => {
+  const value = !store.state.userSettingsIsVisible
+  store.commit('userSettingsIsVisible', value)
+}
+
 // position
 
 const updatePosition = async () => {
@@ -221,7 +229,7 @@ const updatePositionInVisualViewport = () => {
       button.small-button(:class="{active: isPresentationMode, 'translucent-button': !shouldIncreaseUIContrast}" title="Focus/Presentation Mode (P)")
         img.icon.settings(src="@/assets/presentation.svg")
     .button-wrap.input-button-wrap.footer-button-wrap
-      button.small-button(:class="{'translucent-button': !shouldIncreaseUIContrast}" title="Settings")
+      button.small-button(@click="toggleUserSettingsIsVisible" :class="{active: userSettingsIsVisible, 'translucent-button': !shouldIncreaseUIContrast}" title="Settings")
         span S
     //- minimap
     .button-wrap.input-button-wrap.footer-button-wrap(@click.stop="toggleMinimap" @touchend.stop :class="{'hidden': state.isHiddenOnTouch}")
