@@ -413,8 +413,8 @@ dialog.space-details
     border-radius 100px
     margin-left 3px
   &.is-pinned
-    left -45px
-    top -13px
+    left -40px
+    top -36px
   .space-list
     .inline-favorite-wrap
       padding-top 4px

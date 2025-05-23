@@ -173,7 +173,8 @@ dialog#sidebar.sidebar.is-pinnable(
   max-height calc(100vh - 25px)
   overflow auto
   &.is-pinned
-    top -13px
+    top 0
+    right 0
   .title-row-flex
     align-items flex-start
   .right-pin

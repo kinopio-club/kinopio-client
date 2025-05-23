@@ -148,8 +148,6 @@ dialog.pricing
   table
     td
       max-width 120px
-  @media(max-height 650px)
-    top -60px !important
   .title-row
     align-items flex-start
     .button-wrap,
