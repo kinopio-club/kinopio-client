@@ -72,7 +72,9 @@ const updateSearch = async (search) => {
   if (!search) {
     clearSearch()
   }
-  if (search && !state.scopeIsCurrentSpace) {
+  if (search && state.scopeIsCurrentSpace) {
+    updateResultsFromResultsFilter(cardsToSearch.value)
+  } else if (search && !state.scopeIsCurrentSpace) {
     await searchRemoteCards(search)
   }
   await nextTick()
