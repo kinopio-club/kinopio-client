@@ -190,12 +190,11 @@ const shouldShowChangelogIsUpdated = computed(() => {
 
 // current space
 
-const currentSpaceUrl = computed(() => store.getters['currentSpace/url'])
-const currentSpace = computed(() => store.state.currentSpace)
-const currentSpaceIsHidden = computed(() => store.getters['currentSpace/isHidden']())
+const currentSpaceUrl = computed(() => spaceStore.getSpaceUrl)
+const currentSpaceIsHidden = computed(() => spaceStore.getSpaceIsHidden())
 const currentSpaceName = computed(() => {
-  const id = currentSpace.value.id
-  const name = currentSpace.value.name
+  const id = spaceStore.id
+  const name = spaceStore.name
   if (name) {
     return name
   } else {
@@ -217,22 +216,22 @@ const spaceHasStatusAndStatusDialogIsNotVisible = computed(() => {
   }
 })
 const currentSpaceIsTemplate = computed(() => {
-  if (currentSpace.value.isTemplate) { return true }
+  if (spaceStore.isTemplate) { return true }
   const templateSpaceIds = templates.spaces().map(space => space.id)
-  return templateSpaceIds.includes(currentSpace.value.id)
+  return templateSpaceIds.includes(spaceStore.id)
 })
-const currentSpaceIsInbox = computed(() => currentSpace.value.name === 'Inbox')
+const currentSpaceIsInbox = computed(() => spaceStore.name === 'Inbox')
 const shouldShowInExplore = computed(() => {
-  if (currentSpace.value.privacy === 'private') { return false }
-  return currentSpace.value.showInExplore
+  if (spaceStore.getSpaceIsPrivate) { return false }
+  return spaceStore.showInExplore
 })
 const backButtonIsVisible = computed(() => {
   const spaceId = store.state.prevSpaceIdInSession
-  return spaceId && spaceId !== currentSpace.value.id
+  return spaceId && spaceId !== spaceStore.id
 })
 const changeToPrevSpace = () => {
   store.dispatch('closeAllDialogs')
-  const id = currentSpace.value.id
+  const id = spaceStore.id
   store.dispatch('currentSpace/loadPrevSpaceInSession')
   store.commit('prevSpaceIdInSession', id)
 }

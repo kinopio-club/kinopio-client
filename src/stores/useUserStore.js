@@ -1,6 +1,7 @@
 import { nextTick } from 'vue'
 import { defineStore } from 'pinia'
 import { useConnectionStore } from '@/stores/useConnectionStore'
+import { useSpaceStore } from '@/stores/useSpaceStore'
 
 import store from '@/store/store.js' // TEMP Import Vuex store
 
@@ -127,20 +128,28 @@ export const useUserStore = defineStore('users', {
       return userFilters + tagNames.length + connections.length + frames.length + boxes.length
     },
     getUserIsUnableToEditUnlessSignedIn: (state) => {
-      const space = store.state.currentSpace
-      const spaceIsOpen = space.privacy === 'open'
+      const spaceStore = useSpaceStore()
+      const spaceIsOpen = spaceStore.privacy === 'open'
       const isSignedIn = Boolean(state.apiKey)
       return !isSignedIn && spaceIsOpen
     },
     getUserIsSpaceCreator: (state) => {
-      const space = store.state.currentSpace
-      return space.userId === state.id
+      const spaceStore = useSpaceStore()
+      return spaceStore.userId === state.id
+    },
+    getUserIsSpaceUser: (state) => {
+      const spaceStore = useSpaceStore()
+      let userIsInSpace = Boolean(spaceStore.users?.find(user => {
+        return user.id === state.id
+      }))
+      userIsInSpace = userIsInSpace || spaceStore.userId === state.id
+      return userIsInSpace
     },
     getUserIsSpaceCollaborator: (state) => {
-      const space = store.state.currentSpace
-      if (space.collaborators) {
-        return Boolean(space.collaborators.find(collaborator => {
-          return collaborator.id === this.id
+      const spaceStore = useSpaceStore()
+      if (spaceStore.collaborators) {
+        return Boolean(spaceStore.collaborators.find(collaborator => {
+          return collaborator.id === state.id
         }))
       }
     },
@@ -196,19 +205,12 @@ export const useUserStore = defineStore('users', {
 
   actions: {
 
-    // TODO refactor these into standard getters if space always = store.state.currentSpace
+    // TODO refactor these into standard getters if space always = spaceStore.getSpaceAllState
     // const spaceStore = useSpaceStore()
-    getUserIsSpaceUser (space) {
-      space = space || store.state.currentSpace
-      let userIsInSpace = Boolean(space.users?.find(user => {
-        return user.id === this.id
-      }))
-      userIsInSpace = userIsInSpace || space.userId === this.id
-      return userIsInSpace
-    },
     getUserSpacePermission (space) {
-      space = space || store.state.currentSpace
-      const isSpaceUser = this.getUserIsSpaceUser(space)
+      const spaceStore = useSpaceStore()
+      space = space || spaceStore.getSpaceAllState
+      const isSpaceUser = this.getUserIsSpaceUser
       const isSpaceCollaborator = this.getUserIsSpaceCollaborator
       const spaceHasNoUsers = !space.users.length
       if (isSpaceUser || spaceHasNoUsers) {
@@ -220,21 +222,21 @@ export const useUserStore = defineStore('users', {
       }
     },
     getUserIsSpaceMember (space) {
-      space = space || store.state.currentSpace
-      const isSpaceUser = this.getUserIsSpaceUser(space)
+      const spaceStore = useSpaceStore()
+      space = space || spaceStore.getSpaceAllState
+      const isSpaceUser = this.getUserIsSpaceUser
       const isSpaceCollaborator = this.getUserIsSpaceCollaborator
       const isGroupMember = store.getters['groups/currentUserIsCurrentSpaceGroupUser']
       return Boolean(isSpaceUser || isSpaceCollaborator || isGroupMember)
     },
-    getUserCanEditSpace (space) {
-      space = space || store.state.currentSpace
-      const spaceIsOpen = space.privacy === 'open'
+    getUserCanEditSpace () {
+      const spaceStore = useSpaceStore()
+      const spaceIsOpen = spaceStore.privacy === 'open'
       const currentUserIsSignedIn = this.getUserIsSignedIn
       const canEditOpenSpace = spaceIsOpen && currentUserIsSignedIn
-      const isSpaceMember = this.getUserIsSpaceMember(space)
+      const isSpaceMember = this.getUserIsSpaceMember()
       return canEditOpenSpace || isSpaceMember
     },
-
     getUserCanEditBox (box) {
       const isSpaceMember = this.getUserIsSpaceMember()
       if (isSpaceMember) { return true }
@@ -391,7 +393,8 @@ export const useUserStore = defineStore('users', {
     // update
 
     broadcastUpdate (updates) {
-      const space = store.state.currentSpace
+      const spaceStore = useSpaceStore()
+      const space = spaceStore.getSpaceAllState
       const spacePermission = utils.capitalizeFirstLetter(this.getUserSpacePermission(space)) // User, Collaborator, Spectator
       const type = `update${spacePermission}`
       store.commit('broadcast/updateUser', { id: space.id, updates, type, userId: this.id }, { root: true })

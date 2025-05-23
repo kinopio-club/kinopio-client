@@ -71,7 +71,7 @@ const exploreSectionIsVisible = computed(() => {
 // copy url
 
 const spaceUrl = computed(() => {
-  let url = store.getters['currentSpace/url']
+  let url = spaceStore.getSpaceUrl
   url = new URL(url)
   if (state.isShareInPresentationMode) {
     url.searchParams.set('present', true)
