@@ -230,7 +230,7 @@ export default {
   },
   async saveSpace (space) {
     if (!space) { return }
-    space = utils.clone(space)
+    space = JSON.parse(JSON.stringify(space)) // removes functions from objects
     if (!space.id) {
       console.warn('☎️ error caching space. This is expected if currentUser is read only', space)
       return

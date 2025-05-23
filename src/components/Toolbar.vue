@@ -72,7 +72,7 @@ nav#toolbar.toolbar(v-if="visible")
 <style lang="stylus">
 nav.toolbar
   position absolute
-  top 55px
+  top 44px
   .toolbar-badge-wrap
     pointer-events none
     position absolute

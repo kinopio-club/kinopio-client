@@ -36,16 +36,34 @@ export const useSpaceStore = defineStore('space', {
     getSpaceAllState: (state) => {
       return { ...state }
     },
-    getSpaceIsRemote: (state) => {
+    getSpaceIsPrivate: (state) => {
+      return state.privacy === 'private'
+    },
+    getSpaceUrl: (state) => {
+      const domain = consts.kinopioDomain()
+      const spaceUrl = utils.url({ name: state.name, id: state.id })
+      return `${domain}/${spaceUrl}`
+    }
+  },
+
+  actions: {
+
+    getSpaceIsRemote () {
       const userStore = useUserStore()
       const isSpaceMember = userStore.getUserIsSpaceMember()
       const isOtherSpace = !isSpaceMember
       const isSignedIn = userStore.getUserIsSignedIn
       return isOtherSpace || isSignedIn
-    }
-  },
+    },
 
-  actions: {
+    getSpaceIsHidden (spaceId) {
+      const userStore = useUserStore()
+      spaceId = spaceId || this.id
+      const hiddenSpaces = userStore.hiddenSpaces || []
+      let value = hiddenSpaces.find(hiddenSpace => hiddenSpace?.id === spaceId)
+      value = Boolean(value)
+      return value
+    },
 
     // init
 
@@ -71,14 +89,16 @@ export const useSpaceStore = defineStore('space', {
       // restore last space
       } else if (userStore.lastSpaceId) {
         console.info('🚃 Restore last space', userStore.lastSpaceId)
-        await this.loadLastSpace() // TODO
+        await this.loadLastSpace()
       // hello kinopio
       } else {
         console.info('🚃 Create and restore hello space')
         shouldLoadNewHelloSpace = true
       }
-      await this.checkIfShouldCreateNewUserSpaces() // TODO
+      await this.checkIfShouldCreateNewUserSpaces()
       store.commit('triggerUpdateWindowHistory', null, { root: true })
+      console.log('🍍', this.getSpaceAllState, store.state.loadNewSpace, userStore.lastSpaceId, userStore.lastSpaceId, spaceUrl)
+      store.commit('isLoadingSpace', false, { root: true })
     },
     saveSpaceToCache () {
       const userStore = useUserStore()
@@ -109,7 +129,7 @@ export const useSpaceStore = defineStore('space', {
           remoteSpace = await store.dispatch('api/getSpaceAnonymously', space, { root: true })
           cache.saveInvitedSpace(remoteSpace)
           store.commit('clearSpaceCollaboratorKeys', null, { root: true })
-        } else if (this.getSpaceIsRemote) {
+        } else if (this.getSpaceIsRemote()) {
           remoteSpace = await store.dispatch('api/getSpaceAnonymously', space, { root: true })
         }
         return remoteSpace
@@ -175,9 +195,16 @@ export const useSpaceStore = defineStore('space', {
       console.info('🎑 local space', space)
       return space
     },
+    async restoreSpaceRemote (space) {
+      const cardStore = useCardStore()
+      isLoadingRemoteSpace = true
+      space = utils.normalizeSpace(space)
+      store.dispatch('history/redoLocalUpdates', null, { root: true })
+      this.restoreSpace(space)
+    },
     async loadSpace (space) {
       space.connections = utils.migrationConnections(space.connections)
-      if (!store.rootState.isEmbedMode) {
+      if (!store.state.isEmbedMode) {
         store.commit('triggerSpaceZoomReset', null, { root: true })
       }
       store.commit('isAddPage', false, { root: true })
@@ -208,16 +235,17 @@ export const useSpaceStore = defineStore('space', {
           store.commit('triggerDrawingRedraw', null, { root: true })
           return
         }
-        await this.restoreSpaceRemote(remoteSpace) //
+        await this.restoreSpaceRemote(remoteSpace)
         this.saveSpaceToCache()
         this.notifySpaceIsOpen()
+        this.updateUserLastSpaceId()
       } catch (error) {
         console.error('🚒 Error fetching remoteSpace', error)
       }
       store.dispatch('updateCurrentSpaceIsUnavailableOffline', space.id, { root: true })
       store.dispatch('updateCurrentUserIsInvitedButCannotEditCurrentSpace', space, { root: true })
       // focus card
-      const cardId = store.rootState.focusOnCardId
+      const cardId = store.state.focusOnCardId
       if (cardId) {
         store.commit('triggerScrollCardIntoView', cardId, { root: true })
       }
@@ -245,7 +273,33 @@ export const useSpaceStore = defineStore('space', {
       // load space
       if (space) {
         await this.loadSpace(space)
-        this.updateUserLastSpaceId() //
+      } else {
+        this.initializeSpace()
+      }
+    },
+    async loadLastSpace (prevFailedSpace) {
+      const userStore = useUserStore()
+      let space
+      let spaceToRestore = await cache.space(userStore.lastSpaceId)
+      if (!spaceToRestore.id) {
+        spaceToRestore = null
+      } else if (spaceToRestore?.id === prevFailedSpace?.id) {
+        spaceToRestore = null
+      }
+      const cachedHelloSpace = await cache.getSpaceByName('Hello Kinopio')
+      const cachedSpace = await cache.getAllSpaces()[0]
+      const prevSpace = cachedHelloSpace || cachedSpace
+      if (spaceToRestore?.id) {
+        space = spaceToRestore
+      } else if (userStore.lastSpaceId) {
+        space = { id: userStore.lastSpaceId }
+      } else if (prevSpace) {
+        space = prevSpace
+        await cache.saveSpace(space)
+      }
+      // load space
+      if (space) {
+        await this.loadSpace(space)
       } else {
         this.initializeSpace()
       }
@@ -253,32 +307,156 @@ export const useSpaceStore = defineStore('space', {
 
     // create
 
-    // addCardToState (card) {
-    //   this.byId[card.id] = card
-    //   this.allIds.push(card.id)
-    // },
-    // async createCard (card) {
-    //   // normalize card
-    //   this.addCardToState(card)
-    //   // if (!updates.isBroadcast) {
-    //   // store.dispatch('broadcast/update', { updates: connection, type: 'addConnection', handler: 'currentConnections/create' }, { root: true })
-    //   // store.dispatch('history/add', { connections: [connection] }, { root: true })
-    //   await store.dispatch('api/addToQueue', { name: 'createCard', body: card }, { root: true })
-    // },
+    async createNewHelloSpace () {
+      const userStore = useUserStore()
+      const user = userStore.getUserAllState
+      let space = utils.newHelloSpace(user)
+      space = utils.updateSpaceCardsCreatedThroughPublicApi(space)
+      space.id = nanoid()
+      space.collaboratorKey = nanoid()
+      space.readOnlyKey = nanoid()
+      if (shouldLoadNewHelloSpace) {
+        space = await cache.updateIdsInSpace(space)
+        store.commit('clearSearch', null, { root: true })
+        store.commit('resetPageSizes', null, { root: true })
+        this.restoreSpace(space)
+        this.addUserToSpace(user)
+        this.updateOtherUsers()
+        this.updateOtherItems()
+      } else {
+        space.users = [user]
+        const nullCardUsers = true
+        await cache.updateIdsInSpace(space, nullCardUsers)
+      }
+      store.commit('triggerUpdateWindowTitle', null, { root: true })
+    },
+    async createNewInboxSpace (shouldCreateWithoutLoading) {
+      const cardStore = useCardStore()
+      const userStore = useUserStore()
+      let space = utils.clone(inboxSpace)
+      space.id = nanoid()
+      space.createdAt = new Date()
+      space.editedAt = new Date()
+      space.userId = userStore.id
+      space.cards = space.cards.map(card => {
+        card.id = nanoid()
+        card.userId = userStore.id
+        return card
+      })
+      space = utils.updateSpaceCardsCreatedThroughPublicApi(space)
+      if (shouldCreateWithoutLoading) {
+        space.users = [userStore]
+        const nullCardUsers = true
+        await cache.updateIdsInSpace(space, nullCardUsers) // saves space
+      } else {
+        store.commit('isLoadingSpace', true, { root: true })
+        store.commit('clearSearch', null, { root: true })
+        isLoadingRemoteSpace = false
+        store.commit('resetPageSizes', null, { root: true })
+        this.restoreSpace(space)
+        await nextTick()
+        cardStore.updateCardsDimensions()
+      }
+    },
+    async checkIfShouldCreateNewUserSpaces () {
+      const userStore = useUserStore()
+      const spaces = await cache.getAllSpaces()
+      if (userStore.getUserIsSignedIn) { return }
+      if (spaces.length) { return }
+      await this.createNewInboxSpace(true)
+      await this.createNewHelloSpace()
+      this.updateUserLastSpaceId()
+    },
 
     // update
 
     updateSpacePreviewImage: throttle(async () => {
       const userStore = useUserStore()
-      const currentUserIsSignedIn = userStore.getUserIsSignedIn
+      const isSignedIn = userStore.getUserIsSignedIn
       const canEditSpace = userStore.getUserCanEditSpace()
-      const isPrivate = this.privacy === 'private'
-      if (!currentUserIsSignedIn) { return }
+      const isPrivate = this.getSpaceIsPrivate
+      if (!isSignedIn) { return }
       if (!canEditSpace) { return }
       if (isPrivate) { return }
       const response = await store.dispatch('api/updateSpacePreviewImage', this.id, { root: true })
       console.info('🙈 updated space preview image', response?.urls)
     }, 10 * 1000), // 10 seconds
+    updateUserLastSpaceId () {
+      const userStore = useUserStore()
+      const isSignedIn = userStore.getUserIsSignedIn
+      const isPrivate = this.getSpaceIsPrivate
+      const canEdit = userStore.getUserCanEditSpace()
+      const isReadOnlyInvite = isPrivate && !canEdit
+      if (isReadOnlyInvite) { return }
+      userStore.updateUser({ lastSpaceId: this.id })
+    },
+    async updateOtherUsers () {
+      const cardStore = useCardStore()
+      const cards = cardStore.getAllCards
+      let userIds = []
+      const spaceMemberIds = this.users.map(user => user.id)
+      const spaceCollaboratorIds = this.collaborators.map(user => user.id)
+      userIds = userIds.concat(spaceMemberIds)
+      userIds = userIds.concat(spaceCollaboratorIds)
+      let otherUserIds = []
+      cards.forEach(card => {
+        if (!card.nameUpdatedByUserId) { return }
+        if (!userIds.includes(card.nameUpdatedByUserId)) {
+          otherUserIds.push(card.nameUpdatedByUserId)
+        }
+      })
+      otherUserIds = uniq(otherUserIds)
+      if (!otherUserIds.length) { return }
+      try {
+        const users = await store.dispatch('api/getPublicUsers', otherUserIds, { root: true })
+        users.forEach(user => {
+          store.commit('updateOtherUsers', user, { root: true })
+        })
+      } catch (error) {
+        console.warn('🚑 updateOtherUsers', error)
+      }
+    },
+    async updateOtherItems (options) {
+      const cardStore = useCardStore()
+      const userStore = useUserStore()
+      const canEditSpace = userStore.getUserCanEditSpace()
+      // other items to fetch
+      let invites = []
+      let cardIds = []
+      let spaceIds = []
+      // param items
+      if (options) {
+        const { cardId, spaceId, collaboratorKey } = options
+        let space, card
+        // don't update if item already exists
+        if (spaceId) {
+          const space = store.getters.otherSpaceById(spaceId)
+        } else if (cardId) {
+          const card = store.getters.otherCardById(cardId)
+        }
+        if (space || card) { return }
+        // add options to items to fetch
+        if (collaboratorKey) {
+          invites.push({ spaceId, collaboratorKey })
+        } else if (cardId) {
+          cardIds.push(cardId)
+        } else if (spaceId) {
+          spaceIds.push(spaceId)
+        }
+      // no param items
+      } else {
+        const otherItemIds = cardStore.getCardsWithSpaceOrInviteLinks
+        invites = otherItemIds.invites
+        cardIds = otherItemIds.cardIds
+        spaceIds = otherItemIds.spaceIds
+      }
+      spaceIds = spaceIds || []
+      cardIds = cardIds || []
+      invites = invites || []
+      const isEmpty = !cardIds.length && !spaceIds.length && !invites.length
+      if (isEmpty) { return }
+      await store.dispatch('api/addToGetOtherItemsQueue', { spaceIds, cardIds, invites }, { root: true })
+    },
 
     // remove
 
@@ -296,6 +474,15 @@ export const useSpaceStore = defineStore('space', {
     // async removeCard (card) {
     //   await this.removeCards([card])
     // }
+
+    // users
+
+    addUserToSpace (newUser) {
+      const userExists = this.users.find(user => user.id === newUser.id)
+      if (userExists) { return }
+      this.users.push(newUser)
+      cache.updateSpace('users', this.users, this.id)
+    },
 
     // notify
 

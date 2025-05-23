@@ -71,7 +71,7 @@ const init = async () => {
 // current space
 
 const isLoadingSpace = computed(() => store.state.isLoadingSpace)
-const currentSpaceIsHidden = computed(() => store.getters['currentSpace/isHidden']())
+const currentSpaceIsHidden = computed(() => spaceStore.getSpaceIsHidden())
 const spaceName = computed(() => store.state.currentSpace.name)
 
 // dialog
@@ -166,7 +166,7 @@ const shouldShowInExplore = computed(() => {
   return store.state.currentSpace.showInExplore
 })
 const isSpaceMember = computed(() => {
-  return userStore.getUserIsSpaceMember(store.state.currentSpace)
+  return userStore.getUserIsSpaceMember()
 })
 const removeLabel = computed(() => {
   const isSpaceCollaborator = userStore.getUserIsSpaceCollaborator
