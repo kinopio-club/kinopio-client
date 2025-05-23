@@ -44,6 +44,9 @@ export const useSpaceStore = defineStore('space', {
       const spaceUrl = utils.url({ name: state.name, id: state.id })
       return `${domain}/${spaceUrl}`
     }
+    // getSpaceAllTags: (state) => {
+    //   return state.tags
+    // }
   },
 
   actions: {
@@ -63,6 +66,12 @@ export const useSpaceStore = defineStore('space', {
       let value = hiddenSpaces.find(hiddenSpace => hiddenSpace?.id === spaceId)
       value = Boolean(value)
       return value
+    },
+    getSpaceTagByName (name) {
+      const tags = this.tags.find(tag => {
+        return tag.name === name
+      })
+      return tags
     },
 
     // init
@@ -97,7 +106,6 @@ export const useSpaceStore = defineStore('space', {
       }
       await this.checkIfShouldCreateNewUserSpaces()
       store.commit('triggerUpdateWindowHistory', null, { root: true })
-      console.log('🍍', this.getSpaceAllState, store.state.loadNewSpace, userStore.lastSpaceId, userStore.lastSpaceId, spaceUrl)
       store.commit('isLoadingSpace', false, { root: true })
     },
     saveSpaceToCache () {
@@ -118,14 +126,15 @@ export const useSpaceStore = defineStore('space', {
       // initialize items
       cardStore.initializeCards(space.cards)
       boxStore.initializeBoxes(space.boxes)
-      connectionStore.initializeConnections(space.connections)
       connectionStore.initializeConnectionTypes(space.connectionTypes)
+      connectionStore.initializeConnections(space.connections)
       // remove unused attrs
       delete space.cards
       delete space.boxes
-      delete space.connections
       delete space.connectionTypes
+      delete space.connections
       this.$patch(space)
+      console.log('🍍', space)
     },
     async getRemoteSpace (space) {
       const userStore = useUserStore()
@@ -507,6 +516,43 @@ export const useSpaceStore = defineStore('space', {
       if (!isSpaceMember && spaceIsOpen) {
         store.commit('addNotification', { message: 'This space is open to comments', icon: 'comment', type: 'success' }, { root: true })
       }
+    },
+
+    // tags
+
+    addTag (tag) {
+      this.tags.push(tag)
+      cache.updateSpace('tags', this.tags, this.id)
+    },
+    removeTag (tag) {
+      this.tags = this.tags.filter(spaceTag => spaceTag.id !== tag.id)
+      cache.updateSpace('tags', this.tags, this.id)
+    },
+    removeTags (tag) {
+      this.tags = this.tags.filter(spaceTag => spaceTag.name !== tag.name)
+      cache.removeTagsByNameInAllSpaces(tag)
+    },
+    removeTagsFromCard (card) {
+      this.tags = this.tags.filter(spaceTag => {
+        return spaceTag.cardId !== card.id
+      })
+      cache.updateSpace('tags', this.tags, this.id)
+    },
+    deleteTagsFromAllRemovedCardsPermanent () {
+      const cardIds = this.removedCards.map(card => card.id)
+      this.tags = this.tags.filter(spaceTag => {
+        return !cardIds.includes(spaceTag.cardId)
+      })
+      cache.updateSpace('tags', this.tags, this.id)
+    },
+    updateTagNameColor (updatedTag) {
+      this.tags = this.tags.map(tag => {
+        if (tag.name === updatedTag.name) {
+          tag.color = updatedTag.color
+        }
+        return tag
+      })
+      cache.updateTagColorInAllSpaces(updatedTag)
     }
 
   }

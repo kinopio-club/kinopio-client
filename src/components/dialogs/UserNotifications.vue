@@ -98,7 +98,7 @@ const showCardDetails = (notification) => {
   emit('markAsRead', notification.id)
 }
 const segmentTagColor = (segment) => {
-  const spaceTag = store.getters['currentSpace/tagByName'](segment.name)
+  const spaceTag = spaceStore.getSpaceTagByName(segment.name)
   const userTag = userStore.getUserTagByName(segment.name)
   if (spaceTag) {
     return spaceTag.color

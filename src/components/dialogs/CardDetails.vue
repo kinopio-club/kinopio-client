@@ -718,7 +718,7 @@ const updatePreviousTags = async () => {
     } else if (state.currentSearchTag.name === tagName) {
       tag = state.currentSearchTag
     } else {
-      tag = await store.getters['currentSpace/tagByName'](tagName)
+      tag = await spaceStore.getSpaceTagByName(tagName)
       tag = utils.clone(tag, state.previousSelectedTag, tagName)
       tag.color = state.previousSelectedTag.color || tag.color
     }
@@ -917,7 +917,7 @@ const tagsInCard = computed(() => {
   if (!tagNames) { return [] }
   const tags = []
   tagNames.forEach(name => {
-    const tag = store.getters['currentSpace/tagByName'](name)
+    const tag = spaceStore.getSpaceTagByName(name)
     tags.push(tag)
   })
   return tags

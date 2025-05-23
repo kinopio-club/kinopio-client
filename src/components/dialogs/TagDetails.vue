@@ -64,7 +64,7 @@ const currentTag = computed(() => {
   if (tag.spaceId) {
     return tag
   } else {
-    return store.getters['currentSpace/tagByName'](tag.name)
+    return spaceStore.getSpaceTagByName(tag.name)
   }
 })
 watch(() => currentTag.value, async (tag, prevValue) => {
@@ -316,7 +316,7 @@ const segmentTagColor = (segment) => {
   if (name.value === segment.name) {
     return color.value
   }
-  const spaceTag = store.getters['currentSpace/tagByName'](segment.name)
+  const spaceTag = spaceStore.getSpaceTagByName(segment.name)
   const userTag = userStore.getUserTagByName(segment.name)
   if (spaceTag) {
     return spaceTag.color

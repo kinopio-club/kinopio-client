@@ -1153,7 +1153,8 @@ export default {
     },
     segmentTagColor: (state, getters, rootState, rootGetters) => (segment) => {
       const userStore = useUserStore()
-      const spaceTag = rootGetters['currentSpace/tagByName'](segment.name)
+      const spaceStore = useSpaceStore()
+      const spaceTag = spaceStore.getSpaceTagByName(segment.name)
       const userTag = rootGetters['currentUser/tagByName'](segment.name)
       if (spaceTag) {
         return spaceTag.color

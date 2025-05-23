@@ -913,7 +913,7 @@ const nameSegments = computed(() => {
     segment.isDark = backgroundColorIsDark.value
     // tags
     if (segment.isTag) {
-      let tag = store.getters['currentSpace/tagByName'](segment.name)
+      let tag = spaceStore.getSpaceTagByName(segment.name)
       if (!tag) {
         tag = {
           id: nanoid(),
@@ -923,7 +923,7 @@ const nameSegments = computed(() => {
           spaceId: store.state.currentSpace.id
         }
         console.warn('🦋 create missing tag', segment.name, tag, props.card)
-        store.dispatch('currentSpace/addTag', tag)
+        spaceStore.addTag(tag)
       }
       segment.color = tag.color
       segment.id = tag.id

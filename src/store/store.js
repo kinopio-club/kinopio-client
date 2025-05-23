@@ -2259,9 +2259,10 @@ const store = createStore({
     },
     allTags: (state) => {
       const userStore = useUserStore()
+      const spaceStore = useSpaceStore()
       const allTags = state.tags
       const userTags = userStore.tags
-      const spaceTags = state.currentSpace.tags
+      const spaceTags = spaceStore.tags
       const tags = spaceTags.concat(userTags).concat(allTags)
       // tags = uniqBy(tags, 'name') // removed for perf reasons
       return tags || []
