@@ -581,6 +581,7 @@ const store = createStore({
       state.previousResultItem = value
     },
     clearSearch: (state) => {
+      if (state.searchIsVisible) { return }
       state.search = ''
       state.searchResultsCards = []
       state.previousResultItem = {}

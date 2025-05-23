@@ -43,8 +43,6 @@ const state = reactive({
   dialogHeight: null,
   resultsSectionHeight: null,
   isLoading: false,
-  cardsBySpace: [],
-  cardsBySpaceFlattened: [],
   scopeIsCurrentSpace: true,
   hasSearched: false
 })
@@ -70,7 +68,7 @@ const currentUserIsSignedIn = computed(() => userStore.getUserIsSignedIn)
 // search
 
 const search = computed(() => store.state.search)
-const noResults = computed(() => state.hasSearched && !state.cardsBySpace.length)
+const noResults = computed(() => state.hasSearched && !cards.value.length)
 const updateScopeIsCurrentSpace = (value) => {
   state.scopeIsCurrentSpace = value
   updateSearch(search.value)
@@ -80,7 +78,9 @@ const updateSearch = async (search) => {
   if (!search) {
     clearSearch()
   }
-  if (search && !state.scopeIsCurrentSpace) {
+  if (search && state.scopeIsCurrentSpace) {
+    updateResultsFromResultsFilter(cardsToSearch.value)
+  } else if (search && !state.scopeIsCurrentSpace) {
     await searchRemoteCards(search)
   }
   await nextTick()
@@ -91,38 +91,9 @@ const updateSearch = async (search) => {
 const searchRemoteCards = async (search) => {
   state.isLoading = true
   const results = await store.dispatch('api/searchCards', { query: search })
-  const groups = results.spaces.map(space => {
-    return {
-      spaceName: space.name,
-      spaceId: space.id,
-      space,
-      background: space.background,
-      backgroundTint: space.backgroundTint,
-      cards: []
-    }
-  })
-  results.cards.forEach(card => {
-    const index = groups.findIndex(group => group.spaceId === card.spaceId)
-    groups[index].cards.push(card)
-  })
-  const cardsInCurrentSpace = results.cards.filter(card => card.spaceId === store.state.currentSpace.id)
-  state.cardsBySpace = groups
-  updateCardsBySpaceFlattened(groups)
-  // cardsInAllSpaces = results.cards
-  store.commit('searchResultsCards', cardsInCurrentSpace)
+  store.commit('searchResultsCards', results)
   state.isLoading = false
   state.hasSearched = true
-}
-const updateCardsBySpaceFlattened = (groups) => {
-  const items = []
-  groups.forEach(group => {
-    group.space.isSpace = true
-    items.push(group.space)
-    group.cards.forEach(card => {
-      items.push(card)
-    })
-  })
-  state.cardsBySpaceFlattened = items
 }
 const updateResultsFromResultsFilter = (cards) => {
   store.commit('previousResultItem', {})
@@ -130,9 +101,6 @@ const updateResultsFromResultsFilter = (cards) => {
 }
 const clearSearch = async () => {
   await nextTick()
-  state.cardsBySpace = []
-  state.cardsBySpaceFlattened = []
-  // cardsInCurrentSpace = []
   store.commit('clearSearch')
   state.hasSearched = false
 }
@@ -168,45 +136,34 @@ const recentlyUpdatedCards = computed(() => {
 // select items
 
 const selectCard = (card) => {
-  store.dispatch('closeAllDialogs')
-  store.dispatch('focusOnCardId', card.id)
-  focusItem(card)
+  const isCardInCurrentSpace = card.spaceId === store.state.currentSpace.id
+  if (isCardInCurrentSpace) {
+    store.dispatch('focusOnCardId', card.id)
+    focusItem(card)
+  } else {
+    selectSpaceCard(card)
+  }
+  closeDialogs()
 }
 const changeSpace = (spaceId) => {
   if (store.state.currentSpace.id === spaceId) { return }
   const space = { id: spaceId }
   store.dispatch('currentSpace/changeSpace', space)
-  closeDialogs()
-  store.dispatch('closeAllDialogs')
 }
 const selectSpaceCard = (card) => {
-  store.dispatch('closeAllDialogs')
-  const isCardInCurrentSpace = card.spaceId === store.state.currentSpace.id
-  if (isCardInCurrentSpace) {
-    selectCard(card)
-  } else {
-    store.commit('loadSpaceFocusOnCardId', card.id)
-    changeSpace(card.spaceId)
-  }
+  changeSpace(card.spaceId)
+  store.commit('loadSpaceFocusOnCardId', card.id)
 }
 
 // keyboard nav
 
-const selectCurrentFocusedItem = (event) => {
+const selectCurrentFocusedItem = () => {
   store.commit('shouldPreventNextEnterKey', true)
-  store.dispatch('closeAllDialogs')
-  if (state.scopeIsCurrentSpace) {
-    selectCard(previousResultItem.value)
-  } else {
-    if (previousResultItem.value.isSpace) {
-      changeSpace(previousResultItem.value.id)
-    } else {
-      selectSpaceCard(previousResultItem.value)
-    }
-  }
+  const card = previousResultItem.value
+  selectCard(card)
 }
 const focusNextItem = () => {
-  const items = itemsToFocus.value
+  const items = cards.value
   if (!previousResultItem.value.id) {
     focusFirstItem()
     return
@@ -219,7 +176,7 @@ const focusNextItem = () => {
   focusItem(items[index])
 }
 const focusPreviousItem = () => {
-  const items = itemsToFocus.value
+  const items = cards.value
   if (!previousResultItem.value.id) {
     focusItem(items[0])
     return
@@ -232,19 +189,12 @@ const focusPreviousItem = () => {
   focusItem(items[index])
 }
 const focusFirstItem = () => {
-  const items = itemsToFocus.value
+  const items = cards.value
   focusItem(items[0])
 }
 const focusItem = (item) => {
   store.commit('previousResultItem', item)
 }
-const itemsToFocus = computed(() => {
-  if (state.scopeIsCurrentSpace) {
-    return cards.value
-  } else {
-    return state.cardsBySpaceFlattened
-  }
-})
 
 // dialog
 
@@ -328,12 +278,9 @@ dialog.search.is-pinnable(@click="closeDialogs" v-if="visible" :open="visible" r
       button(@click="updateScopeIsCurrentSpace(false)" :class="{ active: !state.scopeIsCurrentSpace }")
         span All Spaces
 
-    template(v-if="state.scopeIsCurrentSpace")
-      CardList(:cards="cards" :search="search" @selectCard="selectCard")
-    template(v-else)
-      SpaceCardList(:groupedItems="state.cardsBySpace" :search="search" :isLoading="state.isLoading" @selectSpace="changeSpace" @selectCard="selectSpaceCard")
-      p.description(v-if="noResults")
-        span No matches found
+    CardList(:cards="cards" :search="search" @selectCard="selectCard")
+    p.description(v-if="noResults")
+      span No matches found
 
   section(v-if="!currentUserIsSignedIn")
     .row.badge.info
