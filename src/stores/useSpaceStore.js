@@ -135,6 +135,7 @@ export const useSpaceStore = defineStore('space', {
       delete space.connections
       this.$patch(space)
       console.log('🍍', space)
+      store.dispatch('updatePageSizes')
     },
     async getRemoteSpace (space) {
       const userStore = useUserStore()

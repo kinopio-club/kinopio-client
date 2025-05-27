@@ -1,5 +1,7 @@
 import { useUserStore } from '@/stores/useUserStore'
 import { useSpaceStore } from '@/stores/useSpaceStore'
+import { useCardStore } from '@/stores/useCardStore'
+import { useBoxStore } from '@/stores/useBoxStore'
 
 import utils from '@/utils.js'
 import consts from '@/consts.js'
@@ -1831,8 +1833,10 @@ const store = createStore({
       }
     },
     updatePageSizes: async (context) => {
-      const cards = context.getters['currentCards/all']
-      const boxes = context.getters['currentBoxes/all']
+      const cardStore = useCardStore()
+      const boxStore = useBoxStore()
+      const cards = cardStore.getAllCards
+      const boxes = boxStore.getAllBoxes
       const items = cards.concat(boxes)
       items.push({
         x: 0, y: 0, width: 500, height: 500 // minimum page size

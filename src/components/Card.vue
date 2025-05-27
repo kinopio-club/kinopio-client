@@ -1037,7 +1037,7 @@ const isLoadingUrlPreview = computed(() => {
   if (isLoading) {
     prevIsLoadingUrlPreview = true
   } else if (prevIsLoadingUrlPreview) {
-    connectionStore.updateConnectionPath(props.card.id)
+    // connectionStore.updateConnectionPath(props.card.id)
   }
   return isLoading
   // if (!isLoading) { return }
