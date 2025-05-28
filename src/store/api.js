@@ -53,15 +53,23 @@ const merge = (accumulator, currentValue) => {
       const allEntities = [...objValue, ...srcValue]
       // Create object using reduce
       const entityMap = allEntities.reduce((acc, entity) => {
-        // For each entity, add to accumulator using id as key
-        // e.g. { '1': {id: '1'}, '2': {id: '2'}, '3': {id: '3'} }
-        acc[entity.id] = entity
+        // For each entity, merge with existing entity if it exists to preserve null values
+        if (acc[entity.id]) {
+          acc[entity.id] = mergeWith({}, acc[entity.id], entity, (objVal, srcVal) => {
+            // Preserve null values when merging individual entities
+            return srcVal === null ? null : undefined
+          })
+        } else {
+          acc[entity.id] = entity
+        }
         return acc
       }, {}) // Start with empty object
       // Get array of values from object
       // e.g. [{id: '1'}, {id: '2'}, {id: '3'}]
       return Object.values(entityMap)
     }
+    // Return undefined to let lodash handle the default merging behavior
+    return undefined
   })
 }
 const squashQueue = (queue) => {
