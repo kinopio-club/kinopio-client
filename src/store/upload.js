@@ -43,7 +43,8 @@ export default {
   actions: {
     checkIfFileTooBig: (context, file) => {
       const userIsUpgraded = context.rootState.currentUser.isUpgraded
-      const isFileTooBig = utils.isFileTooBig({ file, userIsUpgraded })
+      const spaceCreatorIsUpgraded = context.rootGetters['currentSpace/spaceCreatorIsUpgraded']
+      const isFileTooBig = utils.isFileTooBig({ file, userIsUpgraded, spaceCreatorIsUpgraded })
       if (isFileTooBig) {
         throw {
           type: 'sizeLimit',
@@ -60,19 +61,20 @@ export default {
         imageDataUrl: URL.createObjectURL(file)
       })
     },
-    uploadFile: async (context, { file, cardId, boxId, spaceId }) => {
+    uploadFile: async (context, { file, cardId, spaceId, boxId }) => {
       const uploadId = nanoid()
       const fileName = utils.normalizeFileUrl(file.name)
-      const id = cardId || boxId || spaceId
+      const id = cardId || spaceId || boxId
       const key = `${id}/${fileName}`
       const userIsUpgraded = context.rootState.currentUser.isUpgraded
+      const spaceCreatorIsUpgraded = context.rootGetters['currentSpace/spaceCreatorIsUpgraded']
       context.dispatch('checkIfFileTooBig', file)
       // add presignedPostData to upload
       let presignedPostData
       if (file.presignedPostData) {
         presignedPostData = file.presignedPostData
       } else {
-        presignedPostData = await context.dispatch('api/createPresignedPost', { key, userIsUpgraded, type: file.type, spaceId }, { root: true })
+        presignedPostData = await context.dispatch('api/createPresignedPost', { key, userIsUpgraded, type: file.type, spaceCreatorIsUpgraded }, { root: true })
       }
       const formData = new FormData()
       Object.keys(presignedPostData.fields).forEach(key => {
@@ -124,10 +126,11 @@ export default {
         context.dispatch('addImageDataUrl', { file, cardId, spaceId, boxId })
       })
     },
-    addCardsAndUploadFiles: async (context, { files, event, position, spaceId }) => {
+    addCardsAndUploadFiles: async (context, { files, event, position }) => {
       position = position || utils.cursorPositionInSpace(event)
       context.dispatch('currentUser/notifyReadOnly', position, { root: true })
       const userIsUpgraded = context.rootState.currentUser.isUpgraded
+      const spaceCreatorIsUpgraded = context.rootGetters['currentSpace/spaceCreatorIsUpgraded']
       const canEditSpace = context.rootGetters['currentUser/canEditSpace']()
       if (!canEditSpace) {
         context.commit('addNotification', { message: 'You can only upload files on spaces you can edit', type: 'info' }, { root: true })
@@ -149,7 +152,7 @@ export default {
       }
       // check sizeLimit
       const filesTooBig = files.find(file => {
-        return utils.isFileTooBig({ file, userIsUpgraded })
+        return utils.isFileTooBig({ file, userIsUpgraded, spaceCreatorIsUpgraded })
       })
       if (filesTooBig) {
         context.commit('addNotificationWithPosition', { message: 'Too Big', position, type: 'danger', layer: 'space', icon: 'cancel' }, { root: true })
@@ -180,7 +183,7 @@ export default {
         console.info('🍡 addCardsAndUploadFiles', file.type, file)
       }
       // add presignedPostData to files
-      const multiplePresignedPostData = await context.dispatch('api/createMultiplePresignedPosts', { files: filesPostData, spaceId }, { root: true })
+      const multiplePresignedPostData = await context.dispatch('api/createMultiplePresignedPosts', { files: filesPostData, userIsUpgraded, spaceCreatorIsUpgraded }, { root: true })
       files.map((file, index) => {
         file.presignedPostData = multiplePresignedPostData[index]
       })

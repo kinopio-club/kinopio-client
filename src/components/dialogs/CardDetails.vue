@@ -1099,7 +1099,7 @@ const uploadFile = async (file) => {
     return
   }
   try {
-    await store.dispatch('upload/uploadFile', { file, cardId: card.value.id, spaceId: store.state.currentSpace.id })
+    await store.dispatch('upload/uploadFile', { file, cardId: card.value.id })
   } catch (error) {
     console.warn('🚒', error)
     if (error.type === 'sizeLimit') {

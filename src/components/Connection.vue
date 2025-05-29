@@ -171,7 +171,7 @@ const addCardsAndUploadFiles = (event) => {
   let files = event.dataTransfer.files
   files = Array.from(files)
   const position = utils.cursorPositionInViewport(event)
-  store.dispatch('upload/addCardsAndUploadFiles', { files, position, spaceId: store.state.currentSpace.id })
+  store.dispatch('upload/addCardsAndUploadFiles', { files, position })
 }
 
 // selected

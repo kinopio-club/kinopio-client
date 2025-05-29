@@ -295,8 +295,7 @@ const uploadOtherSelectedFiles = (otherSelectedFiles) => {
     }
     store.dispatch('upload/addCardsAndUploadFiles', {
       files: otherSelectedFiles,
-      position,
-      spaceId: store.state.currentSpace.id
+      position
     })
   } catch (error) {
     console.warn('🚒', error)
@@ -305,7 +304,7 @@ const uploadOtherSelectedFiles = (otherSelectedFiles) => {
 const uploadSelectedFile = async (selectedFile) => {
   const cardId = props.cardId
   try {
-    await store.dispatch('upload/uploadFile', { file: selectedFile, cardId, spaceId: store.state.currentSpace.id })
+    await store.dispatch('upload/uploadFile', { file: selectedFile, cardId })
   } catch (error) {
     console.warn('🚒', error)
     if (error.type === 'sizeLimit') {

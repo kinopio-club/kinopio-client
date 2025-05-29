@@ -769,7 +769,7 @@ const handlePasteEvent = async (event) => {
   store.commit('clearMultipleSelected')
   // add data items
   if (data.file) {
-    store.dispatch('upload/addCardsAndUploadFiles', { files: [data.file], position, spaceId: store.state.currentSpace.id })
+    store.dispatch('upload/addCardsAndUploadFiles', { files: [data.file], position })
   // add kinopio items
   } else if (data.kinopio) {
     items = utils.updateSpaceItemsAddPosition(data.kinopio, position)
