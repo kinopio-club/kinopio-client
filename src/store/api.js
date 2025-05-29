@@ -1197,6 +1197,7 @@ const self = {
 
     createPresignedPost: async (context, body) => {
       try {
+        body.requestSpaceId = context.rootState.currentSpace.id
         const options = await context.dispatch('requestOptions', { body, method: 'POST', space: context.rootState.currentSpace })
         const response = await fetch(`${consts.apiHost()}/upload/presigned-post`, options)
         return normalizeResponse(response)
@@ -1206,6 +1207,7 @@ const self = {
     },
     createMultiplePresignedPosts: async (context, body) => {
       try {
+        body.requestSpaceId = context.rootState.currentSpace.id
         const options = await context.dispatch('requestOptions', { body, method: 'POST', space: context.rootState.currentSpace })
         const response = await fetch(`${consts.apiHost()}/upload/presigned-post/multiple`, options)
         return normalizeResponse(response)
