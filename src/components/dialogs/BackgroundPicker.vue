@@ -306,18 +306,14 @@ const selectFile = (event) => {
   const input = inputElement.value
   input.click()
 }
-const isFileTooBig = (file) => {
-  const sizeLimit = 1024 * 1024 * 1.250 // ~1mb
-  if (file.size > sizeLimit) {
-    return true
-  }
-}
 const uploadFile = async () => {
   clearErrors()
   const spaceId = props.space?.id
   const input = inputElement.value
   const file = input.files[0]
-  if (isFileTooBig(file)) {
+  const userIsUpgraded = store.state.currentUser.isUpgraded
+  const isFileTooBig = utils.isFileTooBig({ file, userIsUpgraded })
+  if (isFileTooBig) {
     state.error.sizeLimit = true
     return
   }
