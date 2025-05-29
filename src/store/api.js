@@ -160,6 +160,7 @@ const self = {
       context.commit('notifyConnectionErrorName', name, { root: true })
     },
 
+    // adds auth credentials to fetch options
     requestOptions: (context, options) => {
       const headers = new Headers({
         'Content-Type': 'application/json',
