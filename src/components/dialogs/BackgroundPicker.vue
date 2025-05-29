@@ -323,7 +323,7 @@ const uploadFile = async () => {
   }
   try {
     if (props.box) {
-      await store.dispatch('upload/uploadFile', { file, boxId: props.box.id })
+      await store.dispatch('upload/uploadFile', { file, boxId: props.box.id, spaceId })
     } else {
       await store.dispatch('upload/uploadFile', { file, spaceId })
     }

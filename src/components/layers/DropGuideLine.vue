@@ -88,7 +88,8 @@ const addCardsAndUploadFiles = (event) => {
   removeUploadIsDraggedOver()
   store.dispatch('upload/addCardsAndUploadFiles', {
     files,
-    event
+    event,
+    spaceId: store.state.currentSpace.id
   })
 }
 

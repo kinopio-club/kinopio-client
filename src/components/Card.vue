@@ -840,7 +840,7 @@ const uploadFile = async (event) => {
   const cardId = props.card.id
   // upload
   try {
-    await store.dispatch('upload/uploadFile', { file, cardId })
+    await store.dispatch('upload/uploadFile', { file, cardId, spaceId: store.state.currentSpace.id })
   } catch (error) {
     console.warn('🚒', error)
     if (error.type === 'sizeLimit') {
