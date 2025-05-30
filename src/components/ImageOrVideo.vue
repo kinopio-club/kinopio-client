@@ -10,7 +10,7 @@ const store = useStore()
 const videoElement = ref(null)
 const imageElement = ref(null)
 
-function transformURL (url) {
+const transformURL = (url) => {
   if (!url) {
     return url
   }
