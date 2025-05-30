@@ -41,7 +41,8 @@ const props = defineProps({
   cardsShowRemoveButton: Boolean,
   dateIsCreatedAt: Boolean,
   resultsSectionHeight: Number,
-  currentCard: Object
+  currentCard: Object,
+  showSpaces: Boolean
 })
 
 const state = reactive({
@@ -179,6 +180,8 @@ span
         span.badge.status.inline-badge(:class="{'date-is-today': dateIsToday(card)}")
           img.icon.time(src="@/assets/time.svg")
           span {{ relativeDate(card) }}
+        span.badge.status.inline-badge(v-if="card.space")
+          span {{ card.space.name }}
         //- user
         UserLabelInline(v-if="card.user.id && userIsNotCurrentUser(card.user.id)" :user="card.user")
         //- name

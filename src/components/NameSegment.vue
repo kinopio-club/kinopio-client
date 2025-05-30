@@ -103,7 +103,6 @@ const matchIndexes = (name) => {
     getText: (item) => [item.name, item.urlPreviewTitle, item.urlPreviewDescription]
   })
   const results = fuzzySearch(props.search)
-  console.info(results)
   let matchIndexes = []
   results.forEach(result => {
     result.matches = result.matches.filter(match => Boolean(match))
