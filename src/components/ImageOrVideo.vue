@@ -3,14 +3,30 @@ import { reactive, computed, onMounted, onBeforeUnmount, watch, ref, nextTick } 
 import { useStore } from 'vuex'
 
 import utils from '@/utils.js'
+import consts from '@/consts.js'
 
 const store = useStore()
 
 const videoElement = ref(null)
 const imageElement = ref(null)
 
+function transformURL (url) {
+  if (!url) {
+    return url
+  }
+  if (url.includes(consts.cdnHost)) {
+    if (window.location.search.includes('keycdn')) { // KeyCDN
+      return `${url}?format=webp&height=400&width=400`
+    } else { // imgproxy
+      return `${consts.imgproxyHost}/_/rs:fit:400:400:0/f:webp/plain/${url}`
+    }
+  } else {
+    return url
+  }
+}
+
 onMounted(() => {
-  state.imageUrl = props.image || props.pendingUploadDataUrl
+  state.imageUrl = transformURL(props.image) || props.pendingUploadDataUrl
   window.addEventListener('mousemove', updateCanvasSelectedClass)
   window.addEventListener('touchmove', updateCanvasSelectedClass)
 })
@@ -33,7 +49,7 @@ watch(() => props.image, (url) => {
     state.imageUrl = null
   }
   const onLoaded = () => {
-    state.imageUrl = url
+    state.imageUrl = transformURL(url)
   }
   const image = new Image()
   image.addEventListener('load', onLoaded)
