@@ -10,23 +10,9 @@ const store = useStore()
 const videoElement = ref(null)
 const imageElement = ref(null)
 
-const transformURL = (url) => {
-  if (!url) {
-    return url
-  }
-  if (url.includes(consts.cdnHost)) {
-    if (window.location.search.includes('keycdn')) { // KeyCDN
-      return `${url}?format=webp&height=400&width=400`
-    } else { // imgproxy
-      return `${consts.imgproxyHost}/_/rs:fit:400:400:0/f:webp/plain/${url}`
-    }
-  } else {
-    return url
-  }
-}
-
 onMounted(() => {
-  state.imageUrl = transformURL(props.image) || props.pendingUploadDataUrl
+  state.imageUrl = props.image || props.pendingUploadDataUrl
+  updateImageProxySrcSet()
   window.addEventListener('mousemove', updateCanvasSelectedClass)
   window.addEventListener('touchmove', updateCanvasSelectedClass)
 })
@@ -47,9 +33,11 @@ const props = defineProps({
 watch(() => props.image, (url) => {
   if (!url && !props.pendingUploadDataUrl) {
     state.imageUrl = null
+    state.imageProxySrcSet = null
   }
   const onLoaded = () => {
-    state.imageUrl = transformURL(url)
+    state.imageUrl = url
+    updateImageProxySrcSet()
   }
   const image = new Image()
   image.addEventListener('load', onLoaded)
@@ -62,11 +50,13 @@ watch(() => props.image, (url) => {
 watch(() => props.pendingUploadDataUrl, (url) => {
   if (url) {
     state.imageUrl = url
+    updateImageProxySrcSet()
   }
 })
 
 const state = reactive({
-  imageUrl: null
+  imageUrl: null,
+  imageProxySrcSet: null
 })
 
 const isTouching = computed(() => store.state.isPinchZooming || store.state.isTouchScrolling)
@@ -177,6 +167,24 @@ const removeCanvasSelectedClass = () => {
   canvas.classList.remove('selected')
 }
 
+// serve smaller images w imgproxy
+
+const proxyUrl = (url, maxDimension) => {
+  return `${consts.imgproxyHost}/_/rs:fit:${maxDimension}:${maxDimension}:0/f:webp/plain/${url}`
+}
+const updateImageProxySrcSet = () => {
+  const url = state.imageUrl
+  if (!url) { return }
+  if (url.includes(consts.cdnHost)) {
+    state.imageProxySrcSet = `
+      ${proxyUrl(url, 400)} 400w
+      ${proxyUrl(url, 400)} 600w
+      ${proxyUrl(url, 400)} 800w
+      ${proxyUrl(url, 400)} 1200w
+    `
+  }
+}
+
 // events
 
 const handleSuccess = (event) => {
@@ -191,7 +199,16 @@ const handleError = (event) => {
 video(v-if="Boolean(video)" autoplay loop muted playsinline :key="video" :class="{selected: isSelectedOrDragging}" @canplay="handleSuccess" ref="videoElement" @load="handleSuccess")
   source(:src="video")
 //- Image
-img.image(v-if="state.imageUrl" ref="imageElement" :src="state.imageUrl" :class="{selected: isSelectedOrDragging}" @load="handleSuccess" @error="handleError" loading="lazy")
+img.image(
+  v-if="state.imageUrl"
+  ref="imageElement"
+  :src="state.imageUrl"
+  :srcset="state.imageProxySrcSet"
+  :class="{selected: isSelectedOrDragging}"
+  @load="handleSuccess"
+  @error="handleError"
+  loading="lazy"
+)
 </template>
 
 <style lang="stylus">
