@@ -11,8 +11,11 @@ const videoElement = ref(null)
 const imageElement = ref(null)
 
 onMounted(() => {
-  state.imageUrl = props.image || props.pendingUploadDataUrl
-  updateImageProxySrcSet()
+  if (props.pendingUploadDataUrl) {
+    state.imageUrl = props.pendingUploadDataUrl
+  } else {
+    state.imageUrl = getImageURL(props.image, props.width, props.height)
+  }
   window.addEventListener('mousemove', updateCanvasSelectedClass)
   window.addEventListener('touchmove', updateCanvasSelectedClass)
 })
@@ -28,7 +31,9 @@ const props = defineProps({
   pendingUploadDataUrl: String,
   image: String,
   video: String,
-  cardId: String
+  cardId: String,
+  width: Number,
+  height: Number
 })
 watch(() => props.image, (url) => {
   if (!url && !props.pendingUploadDataUrl) {
@@ -36,8 +41,7 @@ watch(() => props.image, (url) => {
     state.imageProxySrcSet = null
   }
   const onLoaded = () => {
-    state.imageUrl = url
-    updateImageProxySrcSet()
+    state.imageUrl = getImageURL(url, props.width, props.height)
   }
   const image = new Image()
   image.addEventListener('load', onLoaded)
@@ -50,7 +54,20 @@ watch(() => props.image, (url) => {
 watch(() => props.pendingUploadDataUrl, (url) => {
   if (url) {
     state.imageUrl = url
-    updateImageProxySrcSet()
+  }
+})
+watch(() => props.width, (width) => {
+  if (props.pendingUploadDataUrl) {
+    state.imageUrl = props.pendingUploadDataUrl
+  } else {
+    state.imageUrl = getImageURL(props.image, props.width, props.height)
+  }
+})
+watch(() => props.height, (height) => {
+  if (props.pendingUploadDataUrl) {
+    state.imageUrl = props.pendingUploadDataUrl
+  } else {
+    state.imageUrl = getImageURL(props.image, props.width, props.height)
   }
 })
 
@@ -172,17 +189,17 @@ const removeCanvasSelectedClass = () => {
 const proxyUrl = (url, maxDimension) => {
   return `${consts.imgproxyHost}/_/rs:fit:${maxDimension}:${maxDimension}:0/f:webp/plain/${url}`
 }
-const updateImageProxySrcSet = () => {
-  const url = state.imageUrl
-  if (!url) { return }
-  if (url.includes(consts.cdnHost)) {
-    state.imageProxySrcSet = `
-      ${proxyUrl(url, 400)} 400w
-      ${proxyUrl(url, 400)} 600w
-      ${proxyUrl(url, 400)} 800w
-      ${proxyUrl(url, 400)} 1200w
-    `
+
+const getImageURL = (imageURL, width, height) => {
+  const containerBreakpoints = [400, 600, 800, 1200]
+  const devicePixelRatio = window.devicePixelRatio
+  const maxDimension = Math.max(width, height)
+  for (const breakpoint of containerBreakpoints) {
+    if (maxDimension <= breakpoint) {
+      return proxyUrl(imageURL, breakpoint * devicePixelRatio)
+    }
   }
+  return proxyUrl(imageURL, containerBreakpoints[containerBreakpoints.length - 1] * devicePixelRatio)
 }
 
 // events
@@ -203,7 +220,6 @@ img.image(
   v-if="state.imageUrl"
   ref="imageElement"
   :src="state.imageUrl"
-  :srcset="state.imageProxySrcSet"
   :class="{selected: isSelectedOrDragging}"
   @load="handleSuccess"
   @error="handleError"

@@ -1992,7 +1992,17 @@ const focusColor = computed(() => {
     Frames(:card="card")
 
     template(v-if="!isComment")
-      ImageOrVideo(:isSelectedOrDragging="isSelectedOrDragging" :pendingUploadDataUrl="pendingUploadDataUrl" :image="state.formats.image" :video="state.formats.video" @loadSuccess="updateDimensionsAndPaths" :cardId="card.id" )
+      ImageOrVideo(
+        :isSelectedOrDragging="isSelectedOrDragging"
+        :pendingUploadDataUrl="pendingUploadDataUrl"
+        :image="state.formats.image"
+        :video="state.formats.video"
+        @loadSuccess="updateDimensionsAndPaths"
+        :cardId="card.id"
+        :isComment="isComment"
+        :width="props.card.width"
+        :height="props.card.height"
+      )
 
     TiltResize(:card="card" :visible="tiltResizeIsVisible")
 
