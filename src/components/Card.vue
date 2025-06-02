@@ -1991,7 +1991,7 @@ const focusColor = computed(() => {
     .locking-frame(v-if="state.isLocking" :style="lockingFrameStyle")
     Frames(:card="card")
 
-    template(v-if="!isComment")
+    template(v-if="isVisualCard")
       ImageOrVideo(
         :isSelectedOrDragging="isSelectedOrDragging"
         :pendingUploadDataUrl="pendingUploadDataUrl"
