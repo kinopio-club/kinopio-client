@@ -11,11 +11,7 @@ const videoElement = ref(null)
 const imageElement = ref(null)
 
 onMounted(() => {
-  if (props.pendingUploadDataUrl) {
-    state.imageUrl = props.pendingUploadDataUrl
-  } else {
-    state.imageUrl = getImageURL(props.image, props.width, props.height)
-  }
+  state.imageUrl = imgproxyUrl(props.image, props.width, props.height)
   window.addEventListener('mousemove', updateCanvasSelectedClass)
   window.addEventListener('touchmove', updateCanvasSelectedClass)
 })
@@ -41,7 +37,7 @@ watch(() => props.image, (url) => {
     state.imageProxySrcSet = null
   }
   const onLoaded = () => {
-    state.imageUrl = getImageURL(url, props.width, props.height)
+    state.imageUrl = imgproxyUrl(url, props.width, props.height)
   }
   const image = new Image()
   image.addEventListener('load', onLoaded)
@@ -60,14 +56,14 @@ watch(() => props.width, (width) => {
   if (props.pendingUploadDataUrl) {
     state.imageUrl = props.pendingUploadDataUrl
   } else {
-    state.imageUrl = getImageURL(props.image, props.width, props.height)
+    state.imageUrl = imgproxyUrl(props.image, props.width, props.height)
   }
 })
 watch(() => props.height, (height) => {
   if (props.pendingUploadDataUrl) {
     state.imageUrl = props.pendingUploadDataUrl
   } else {
-    state.imageUrl = getImageURL(props.image, props.width, props.height)
+    state.imageUrl = imgproxyUrl(props.image, props.width, props.height)
   }
 })
 
@@ -186,7 +182,10 @@ const removeCanvasSelectedClass = () => {
 
 // serve smaller images w imgproxy
 
-const getImageURL = (imageURL, width, height) => {
+const imgproxyUrl = (imageURL, width, height) => {
+  if (props.pendingUploadDataUrl) {
+    return props.pendingUploadDataUrl
+  }
   const containerBreakpoints = [400, 600, 800, 1200]
   const devicePixelRatio = window.devicePixelRatio
   const maxDimensions = Math.max(width, height)
