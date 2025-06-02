@@ -44,8 +44,21 @@ export default {
       image.src = src
     })
   },
+  isKinopioUploadUrl (url) {
+    // https://regexr.com/8f4h5
+    // matches https://*.kinopio.club/
+    const urlPattern = /^https:\/\/.+\.kinopio\.club\/?/i
+    return urlPattern.test(url)
+  },
   imgproxyUrl (url, maxDimensions) {
-    return `${consts.imgproxyHost}/_/rs:fit:${maxDimensions}:${maxDimensions}:0/f:webp/plain/${url}`
+    if (!this.isKinopioUploadUrl(url)) {
+      return url
+    }
+    if (maxDimensions) {
+      return `${consts.imgproxyHost}/_/rs:fit:${maxDimensions}:${maxDimensions}:0/f:webp/plain/${url}`
+    } else {
+      return `${consts.imgproxyHost}/_/f:webp/plain/${url}`
+    }
   },
   mobileTouchPosition (event, type) {
     let touch
