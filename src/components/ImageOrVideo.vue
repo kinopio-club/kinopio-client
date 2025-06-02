@@ -53,18 +53,10 @@ watch(() => props.pendingUploadDataUrl, (url) => {
   }
 })
 watch(() => props.width, (width) => {
-  if (props.pendingUploadDataUrl) {
-    state.imageUrl = props.pendingUploadDataUrl
-  } else {
-    state.imageUrl = imgproxyUrl(props.image, props.width, props.height)
-  }
+  state.imageUrl = imgproxyUrl(props.image, props.width, props.height)
 })
 watch(() => props.height, (height) => {
-  if (props.pendingUploadDataUrl) {
-    state.imageUrl = props.pendingUploadDataUrl
-  } else {
-    state.imageUrl = imgproxyUrl(props.image, props.width, props.height)
-  }
+  state.imageUrl = imgproxyUrl(props.image, props.width, props.height)
 })
 
 const state = reactive({
