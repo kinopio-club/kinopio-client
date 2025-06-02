@@ -44,6 +44,9 @@ export default {
       image.src = src
     })
   },
+  imgproxyUrl (url, maxDimensions) {
+    return `${consts.imgproxyHost}/_/rs:fit:${maxDimensions}:${maxDimensions}:0/f:webp/plain/${url}`
+  },
   mobileTouchPosition (event, type) {
     let touch
     if (event.touches[0]) {

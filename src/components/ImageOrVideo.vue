@@ -186,20 +186,16 @@ const removeCanvasSelectedClass = () => {
 
 // serve smaller images w imgproxy
 
-const proxyUrl = (url, maxDimension) => {
-  return `${consts.imgproxyHost}/_/rs:fit:${maxDimension}:${maxDimension}:0/f:webp/plain/${url}`
-}
-
 const getImageURL = (imageURL, width, height) => {
   const containerBreakpoints = [400, 600, 800, 1200]
   const devicePixelRatio = window.devicePixelRatio
-  const maxDimension = Math.max(width, height)
+  const maxDimensions = Math.max(width, height)
   for (const breakpoint of containerBreakpoints) {
-    if (maxDimension <= breakpoint) {
-      return proxyUrl(imageURL, breakpoint * devicePixelRatio)
+    if (maxDimensions <= breakpoint) {
+      return utils.imgproxyUrl(imageURL, breakpoint * devicePixelRatio)
     }
   }
-  return proxyUrl(imageURL, containerBreakpoints[containerBreakpoints.length - 1] * devicePixelRatio)
+  return utils.imgproxyUrl(imageURL, containerBreakpoints[containerBreakpoints.length - 1] * devicePixelRatio)
 }
 
 // events
