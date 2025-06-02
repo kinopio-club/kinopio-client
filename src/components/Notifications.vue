@@ -119,14 +119,17 @@ const checkIfShouldNotifySpaceOutOfSync = async () => {
   try {
     if (!currentUserIsSignedIn.value) { return }
     store.commit('isLoadingSpace', true)
-    if (!store.state.currentSpace.updatedAt) { return } // don't check unloaded spaces
+    if (!store.state.currentSpace.updatedAt) {
+      store.commit('isLoadingSpace', false)
+      return
+    } // don't check unloaded spaces
     const remoteSpace = await store.dispatch('api/getSpaceUpdatedAt', { id: store.state.currentSpace.id })
     store.commit('isLoadingSpace', false)
     if (!remoteSpace) { return }
     const space = store.state.currentSpace
     const spaceeditedAt = dayjs(space.editedAt)
     const remoteSpaceeditedAt = dayjs(remoteSpace.editedAt)
-    const deltaMinutes = spaceeditedAt.diff(remoteSpaceeditedAt, 'minute')
+    const deltaMinutes = remoteSpaceeditedAt.diff(spaceeditedAt, 'minute')
     const editedAtIsChanged = deltaMinutes >= 1
     console.info('☎️ checkIfShouldNotifySpaceOutOfSync result', {
       editedAtIsChanged,
