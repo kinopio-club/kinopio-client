@@ -2391,7 +2391,7 @@ const focusColor = computed(() => {
       animation-timing-function ease-out
 
     &.is-playing-audio
-      animation bounce 1.2s infinite ease-in-out forwards
+      animation bounce 1.2s infinite ease-in-out alternate
     @media (prefers-reduced-motion)
       &.is-playing-audio
         animation none
