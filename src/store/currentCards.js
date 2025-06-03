@@ -331,6 +331,7 @@ export default {
 
     update: async (context, { card, shouldPreventUpdateDimensionsAndPaths }) => {
       const userStore = useUserStore()
+      const spaceStore = useSpaceStore()
       if (!card) { return }
       // prevent null position
       const keys = Object.keys(card)
@@ -358,10 +359,11 @@ export default {
         context.commit('triggerUpdateCardDimensionsAndPaths', card.id, { root: true })
       }
       await context.dispatch('api/addToQueue', { name: 'updateCard', body: card }, { root: true })
-      context.dispatch('currentSpace/updateSpacePreviewImage', null, { root: true })
+      spaceStore.updateSpacePreviewImage()
     },
     updateMultiple: async (context, cards) => {
       const userStore = useUserStore()
+      const spaceStore = useSpaceStore()
       if (!cards.length) { return }
       const spaceId = context.rootState.currentSpace.id
       const updates = {
@@ -383,7 +385,7 @@ export default {
       })
       cache.updateSpace('editedByUserId', userStore.id, currentSpaceId)
       await context.dispatch('api/addToQueue', { name: 'updateMultipleCards', body: updates }, { root: true })
-      context.dispatch('currentSpace/updateSpacePreviewImage', null, { root: true })
+      spaceStore.updateSpacePreviewImage()
     },
     updateCounter: async (context, { card, shouldIncrement, shouldDecrement }) => {
       const isSignedIn = context.rootGetters['currentUser/isSignedIn']

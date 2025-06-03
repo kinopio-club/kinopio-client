@@ -36,7 +36,7 @@ watch(() => props.visible, (value, prevValue) => {
   if (value) {
     updateDialogHeight()
     store.commit('shouldExplicitlyHideFooter', true)
-    store.dispatch('currentSpace/updateSpacePreviewImage')
+    spaceStore.updateSpacePreviewImage()
   } else {
     store.commit('shouldExplicitlyHideFooter', false)
   }

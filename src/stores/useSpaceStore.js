@@ -317,7 +317,7 @@ export const useSpaceStore = defineStore('space', {
         const spaceIsUnchanged = utils.spaceIsUnchanged(cachedSpace, remoteSpace)
         if (spaceIsUnchanged) {
           store.commit('isLoadingSpace', false, { root: true })
-          this.updateSpacePreviewImage() //
+          this.updateSpacePreviewImage()
           // always update drawing
           this.drawingImage = remoteSpace.drawingImage
           await cache.updateSpaceByUpdates({ drawingImage: remoteSpace.drawingImage }, this.id)

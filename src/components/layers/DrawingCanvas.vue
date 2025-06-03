@@ -349,7 +349,7 @@ const updateCache = async (strokes) => {
   const currentSpaceId = store.state.currentSpace.id
   await cache.updateSpace('drawingImage', dataUrl, currentSpaceId)
   store.commit('triggerEndDrawing')
-  store.dispatch('currentSpace/updateSpacePreviewImage')
+  spaceStore.updateSpacePreviewImage()
 }
 const saveStroke = async ({ stroke, isRemovedStroke }) => {
   const strokes = currentStrokes.concat(remoteStrokes)

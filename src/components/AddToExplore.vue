@@ -95,7 +95,7 @@ const toggleShowInExplore = async (event) => {
     await updateShowInExplore()
   }
   notifyShowInExplore(event)
-  store.dispatch('currentSpace/updateSpacePreviewImage')
+  spaceStore.updateSpacePreviewImage()
 }
 const notifyShowInExplore = (event) => {
   const shouldShow = showInExplore.value
