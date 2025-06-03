@@ -83,8 +83,8 @@ export default {
   namespaced: true,
   actions: {
     isSystem: (context, value) => {
-      utils.typeCheck({ value, type: 'boolean' })
-      context.dispatch('currentUser/update', { themeIsSystem: value }, { root: true })
+      const userStore = useUserStore()
+      userStore.updateUser({ themeIsSystem: value })
       context.commit('triggerUpdateTheme', null, { root: true })
     },
     toggleIsSystem: (context) => {
@@ -97,6 +97,7 @@ export default {
       }
     },
     update: (context, themeName) => {
+      const userStore = useUserStore()
       const normalizedThemeName = themeName || 'light'
       // colors
       const theme = themes[normalizedThemeName]
@@ -105,7 +106,7 @@ export default {
       keys.forEach(key => {
         utils.setCssVariable(key, colors[key])
       })
-      context.dispatch('currentUser/update', { theme: normalizedThemeName }, { root: true })
+      userStore.updateUser({ theme: normalizedThemeName })
       context.commit('triggerUpdateTheme', null, { root: true })
     },
     restore: (context) => {
