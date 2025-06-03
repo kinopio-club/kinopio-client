@@ -506,11 +506,12 @@ const currentSpace = {
     },
     getRemoteSpace: async (context, space) => {
       const userStore = useUserStore()
+      const spaceStore = useSpaceStore()
       const collaboratorKey = context.rootState.spaceCollaboratorKeys.find(key => key.spaceId === space.id)
       if (collaboratorKey) {
         space.collaboratorKey = collaboratorKey.collaboratorKey
       }
-      const currentSpaceIsRemote = context.rootGetters['currentSpace/isRemote']
+      const currentSpaceIsRemote = spaceStore.getSpaceIsRemote
       let remoteSpace
       try {
         if (userStore.getUserIsSignedIn) {
@@ -1097,8 +1098,9 @@ const currentSpace = {
       context.commit('shouldShowExploreOnLoad', false, { root: true })
     },
     checkIfIsLoadingSpace: (context, isRemote) => {
+      const spaceStore = useSpaceStore()
       const isOffline = !context.rootState.isOnline
-      const currentSpaceIsRemote = context.rootGetters['currentSpace/isRemote']
+      const currentSpaceIsRemote = spaceStore.getSpaceIsRemote
       if (isOffline) {
         context.commit('isLoadingSpace', false, { root: true })
       } else if (!currentSpaceIsRemote) {
