@@ -279,10 +279,7 @@ const startDragging = (event) => {
   store.commit('broadcast/updateStore', { updates, type: 'updateRemoteUserDraggingConnectionLabel' })
   // save start positions
   if (!cursorStart.x) {
-    cursorStart = {
-      x: event.pageX,
-      y: event.pageY
-    }
+    cursorStart = utils.cursorPositionInSpace(event)
     positionAbsoluteStart = {
       x: Math.round(labelRelativePosition.value.x * state.connectionRect.width),
       y: Math.round(labelRelativePosition.value.y * state.connectionRect.height)
@@ -311,10 +308,7 @@ const drag = (event) => {
   if (!canEditSpace.value) { return }
   if (!state.isDragging) { return }
   if (isMultiTouch) { return }
-  state.currentCursor = {
-    x: event.pageX,
-    y: event.pageY
-  }
+  state.currentCursor = utils.cursorPositionInSpace(event)
   const cursorDelta = {
     x: state.currentCursor.x - cursorStart.x,
     y: state.currentCursor.y - cursorStart.y
