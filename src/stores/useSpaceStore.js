@@ -480,6 +480,15 @@ export const useSpaceStore = defineStore('space', {
       if (isEmpty) { return }
       await store.dispatch('api/addToGetOtherItemsQueue', { spaceIds, cardIds, invites }, { root: true })
     },
+    async updateSpace (update) {
+      const keys = Object.keys(update)
+      for (const key of keys) {
+        this[key] = update[key]
+      }
+      store.dispatch('broadcast/update', { update, type: 'updateSpace' }, { root: true })
+      await store.dispatch('api/addToQueue', { name: 'updateUser', body: update }, { root: true })
+      await cache.updateSpaceByUpdates(update, this.id)
+    },
 
     // remove
 

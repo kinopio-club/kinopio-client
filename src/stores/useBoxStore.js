@@ -163,6 +163,8 @@ export const useBoxStore = defineStore('boxes', {
       this.isUpdating = false
     },
     async updateBoxes (updates) {
+      const userStore = useUserStore()
+      const spaceStore = useSpaceStore()
       updates.forEach(({ id, ...changes }) => {
         this.pendingUpdates.set(id, {
           ...this.pendingUpdates.get(id) || {},
@@ -179,8 +181,12 @@ export const useBoxStore = defineStore('boxes', {
         // store.dispatch('broadcast/update', { updates, storeName: 'boxStore', actionName: 'updateBoxes' }, { root: true })
       }
       await store.dispatch('api/addToQueue', { name: 'updateMultipleBoxes', body: { boxes: updates } }, { root: true })
+      await spaceStore.updateSpace({
+        editedAt: new Date(),
+        editedByUserId: userStore.id
+      })
       // TODO history? if unpaused
-      cache.updateSpace('boxes', this.getAllBoxes, store.state.currentSpace.id)
+      await cache.updateSpace('boxes', this.getAllBoxes, store.state.currentSpace.id)
       // update connection paths
       const connectionStore = useConnectionStore()
       const isNameUpdated = updates.find(update => Boolean(update.name))

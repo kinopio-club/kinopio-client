@@ -278,6 +278,7 @@ export const useCardStore = defineStore('cards', {
     },
     async createCard (card, skipCardDetailsIsVisible) {
       const userStore = useUserStore()
+      const spaceStore = useSpaceStore()
       if (store.getters['currentSpace/shouldPreventAddCard']) {
         store.commit('notifyCardsCreatedIsOverLimit', true, { root: true })
         return
@@ -292,11 +293,14 @@ export const useCardStore = defineStore('cards', {
       store.dispatch('currentSpace/checkIfShouldNotifyCardsCreatedIsNearLimit', null, { root: true })
       store.dispatch('userNotifications/addCardUpdated', { cardId: card.id, type: 'createCard' }, { root: true })
       // server/disk/save tasks TODO dry
-      // await cache.updateSpace('editedAt', utils.unixTime(), store.state.currentSpace.id)
       if (!card.isBroadcast) {
         store.dispatch('broadcast/update', { updates: card, storeName: 'cardStore', actionName: 'createCard' }, { root: true })
       }
       await store.dispatch('api/addToQueue', { name: 'createCard', body: card }, { root: true })
+      await spaceStore.updateSpace({
+        editedAt: new Date(),
+        editedByUserId: userStore.id
+      })
     },
     async createCards (cards, shouldOffsetPosition) {
       cards = cards.map(card => {
