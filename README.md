@@ -71,6 +71,7 @@ Use the [Vue devtools](https://github.com/vuejs/vue-devtools) for Firefox and Ch
 | `desktop zoom out` | using the zoom bar or cmd+/- |
 | `pinch zoom out/in` | using native touch gesture on mobile |
 | `group member or admin` | can see and edit all spaces in the group |
+| `space is local only` | can see and edit space, without sending api operations |
 
 ## Post Messages
 
