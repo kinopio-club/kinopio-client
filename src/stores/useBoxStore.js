@@ -26,28 +26,31 @@ export const useBoxStore = defineStore('boxes', {
   }),
 
   getters: {
-    getAllBoxes () {
-      return this.allIds.map(id => this.byId[id])
+    getBox: (state) => {
+      return (id) => state.byId[id]
     },
-    getBoxesIsLocked () {
-      const boxes = this.allIds.map(id => this.byId[id])
+    getAllBoxes: (state) => {
+      return state.allIds.map(id => state.byId[id])
+    },
+    getBoxesIsLocked: (state) => {
+      const boxes = state.allIds.map(id => state.byId[id])
       return boxes.filter(box => box.isLocked)
     },
-    getBoxesIsNotLocked () {
-      const boxes = this.allIds.map(id => this.byId[id])
+    getBoxesIsNotLocked: (state) => {
+      const boxes = state.allIds.map(id => state.byId[id])
       return boxes.filter(box => !box.isLocked)
     },
-    getBoxesSelected () {
+    getBoxesSelected: (state) => {
       let ids = store.state.multipleBoxesSelectedIds
       if (!ids.length) {
         ids = [store.state.currentDraggingBoxId]
       }
       ids = ids.filter(id => Boolean(id))
-      const boxes = ids.map(id => this.byId[id])
+      const boxes = ids.map(id => state.byId[id])
       return boxes
     },
-    getBoxesSelectableByY () {
-      let boxes = this.allIds.map(id => this.byId[id])
+    getBoxesSelectableByY: (state) => {
+      let boxes = state.allIds.map(id => state.byId[id])
       // filter
       boxes = boxes.filter(box => !box.isLocked)
       // sort by y
@@ -59,21 +62,18 @@ export const useBoxStore = defineStore('boxes', {
         yIndex
       }
     },
-    getBoxesResizing () {
+    getBoxesResizing: (state) => {
       const ids = store.state.currentUserIsResizingBoxIds
-      // if (this.isSelectedIds.length) {
-      //   boxIds = this.isSelectedIds
+      // if (getters.isSelectedIds.length) {
+      //   boxIds = getters.isSelectedIds
       // }
-      const boxes = ids.map(id => this.byId[id])
+      const boxes = ids.map(id => state.byId[id])
       return boxes
     }
   },
 
   actions: {
 
-    getBox (id) {
-      return this.byId[id]
-    },
     getBoxesSelectableInViewport () {
       const elements = document.querySelectorAll('.box')
       let boxes = []

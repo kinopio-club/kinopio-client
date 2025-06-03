@@ -26,20 +26,26 @@ export const useConnectionStore = defineStore('connections', {
   }),
 
   getters: {
-    getAllConnections () {
-      return this.allIds.map(id => this.byId[id])
+    getConnection: (state) => {
+      return (id) => state.byId[id]
     },
-    getAllConnectionTypes () {
-      return this.typeAllIds.map(id => this.typeById[id])
+    getAllConnections: (state) => {
+      return state.allIds.map(id => state.byId[id])
     },
-    getNewConnectionType () {
+    getConnectionType: (state) => {
+      return (id) => state.typeById[id]
+    },
+    getAllConnectionTypes: (state) => {
+      return state.typeAllIds.map(id => state.typeById[id])
+    },
+    getNewConnectionType: (state) => {
       const userStore = useUserStore()
       const userId = userStore.id
       const shouldUseLastConnectionType = userStore.shouldUseLastConnectionType
-      const connectionTypes = this.typeAllIds.map(id => this.typeById[id])
+      const connectionTypes = state.typeAllIds.map(id => state.typeById[id])
       let prevConnectionType
-      if (this.prevConnectionTypeId) {
-        prevConnectionType = this.typeById[this.prevConnectionTypeId]
+      if (state.prevConnectionTypeId) {
+        prevConnectionType = state.typeById[state.prevConnectionTypeId]
       }
       if (shouldUseLastConnectionType) {
         return prevConnectionType || last(connectionTypes)
@@ -47,7 +53,7 @@ export const useConnectionStore = defineStore('connections', {
         return last(connectionTypes)
       }
     },
-    getAllConnectionsInViewport () {
+    getAllConnectionsInViewport: (state) => {
       const elements = document.querySelectorAll('svg.connection')
       const paths = []
       elements.forEach(path => {
@@ -61,12 +67,8 @@ export const useConnectionStore = defineStore('connections', {
 
   actions: {
 
-    getConnection (id) {
-      return this.byId[id]
-    },
-    getConnectionType (id) {
-      return this.typeById[id]
-    },
+    // utils
+
     getItemsConnections (itemIds) {
       let connections = this.getAllConnections
       connections = connections.filter(connection => {

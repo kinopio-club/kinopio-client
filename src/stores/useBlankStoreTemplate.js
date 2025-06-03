@@ -20,18 +20,15 @@ export const useCardStore = defineStore('cards', {
   }),
 
   getters: {
-    // getters take no params, and are invoked like object properties
-    // blankStore.getAllCards
-    getAllCards () {
-      return this.allIds.map(id => this.byId[id])
+    getCard: (state) => {
+      return (id) => state.byId[id]
+    },
+    getAllCards: (state) => {
+      return state.allIds.map(id => state.byId[id])
     }
   },
 
   actions: {
-
-    getCard (id) {
-      return this.byId[id]
-    },
 
     // init
 

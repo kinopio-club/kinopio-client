@@ -97,25 +97,28 @@ export const useUserStore = defineStore('users', {
   }),
 
   getters: {
-    getUserAllState () {
-      return { ...this }
+    getUserAllState: (state) => {
+      return { ...state }
     },
-    getUserIsSignedIn () {
-      return Boolean(this.apiKey)
+    getUserIsSignedIn: (state) => {
+      return Boolean(state.apiKey)
     },
-    getUserCardsCreatedIsOverLimit () {
+    getUserIsCurrentUser: (state) => {
+      return (user) => Boolean(state.id === user?.id)
+    },
+    getUserCardsCreatedIsOverLimit: (state) => {
       const cardsCreatedLimit = consts.cardsCreatedLimit
-      if (this.isUpgraded) { return }
-      if (this.cardsCreatedCount >= cardsCreatedLimit) { return true }
+      if (state.isUpgraded) { return }
+      if (state.cardsCreatedCount >= cardsCreatedLimit) { return true }
     },
-    getShouldPreventCardsCreatedCountUpdate () {
+    getShouldPreventCardsCreatedCountUpdate: (state) => {
       const isUpgraded = store.getters['currentSpace/spaceCreatorIsUpgraded']
       const isCurrentUser = store.getters['currentSpace/spaceCreatorIsCurrentUser']
       return (isUpgraded && !isCurrentUser)
     },
-    getUserTotalItemFadingFiltersActive () {
+    getUserTotalItemFadingFiltersActive: (state) => {
       let userFilters = 0
-      if (this.filterUnchecked) {
+      if (state.filterUnchecked) {
         userFilters += 1
       }
       const tagNames = store.state.filteredTagNames
@@ -124,73 +127,86 @@ export const useUserStore = defineStore('users', {
       const boxes = store.state.filteredBoxIds
       return userFilters + tagNames.length + connections.length + frames.length + boxes.length
     },
-    getUserIsUnableToEditUnlessSignedIn () {
+    getUserIsUnableToEditUnlessSignedIn: (state) => {
       const spaceStore = useSpaceStore()
       const spaceIsOpen = spaceStore.privacy === 'open'
-      const isSignedIn = Boolean(this.apiKey)
+      const isSignedIn = Boolean(state.apiKey)
       return !isSignedIn && spaceIsOpen
     },
-    getUserIsSpaceCreator () {
+    getUserIsSpaceCreator: (state) => {
       const spaceStore = useSpaceStore()
-      return spaceStore.userId === this.id
+      return spaceStore.userId === state.id
     },
-    getUserIsSpaceUser () {
+    getUserIsSpaceUser: (state) => {
       const spaceStore = useSpaceStore()
       let userIsInSpace = Boolean(spaceStore.users?.find(user => {
-        return user.id === this.id
+        return user.id === state.id
       }))
-      userIsInSpace = userIsInSpace || spaceStore.userId === this.id
+      userIsInSpace = userIsInSpace || spaceStore.userId === state.id
       return userIsInSpace
     },
-    getUserIsSpaceCollaborator () {
+    getUserIsSpaceCollaborator: (state) => {
       const spaceStore = useSpaceStore()
       if (spaceStore.collaborators) {
         return Boolean(spaceStore.collaborators.find(collaborator => {
-          return collaborator.id === this.id
+          return collaborator.id === state.id
         }))
-      } else {
-        return false
       }
     },
-    getUserDrawingColor () {
-      return this.drawingColor || this.color
+    getUserTagByName: (state) => {
+      return (name) => state.tags.find(tag => tag.name === name)
     },
-    getUserCanEditSpace () {
-      const spaceStore = useSpaceStore()
-      const spaceIsOpen = spaceStore.privacy === 'open'
-      const currentUserIsSignedIn = this.getUserIsSignedIn
-      const canEditOpenSpace = spaceIsOpen && currentUserIsSignedIn
-      const isSpaceMember = this.getUserIsSpaceMember()
-      return canEditOpenSpace || isSpaceMember
-    },
-    getUserTotalFiltersActive () {
-      let userFilters = this.totalItemFadingFiltersActive
-      if (this.filterShowUsers) {
-        userFilters += 1
-      }
-      if (this.filterShowDateUpdated) {
-        userFilters += 1
-      }
-      if (this.filterComments) {
-        userFilters += 1
-      }
-      return userFilters
-    },
-    getIsUserCommentOnly () {
-      const canEditSpace = this.getUserCanEditSpace()
-      const isSpaceMember = this.getUserIsSpaceMember()
-      return canEditSpace && !isSpaceMember
+    getUserDrawingColor: (state) => {
+      return state.drawingColor || state.color
     }
+
+    // tagByName: (state, getters) => (name) => {
+    //   return
+    // },
+
+    // cannotEditUnlessSignedIn: (state, getters, rootState) => (space) => {
+    //   space = space || rootState.currentSpace
+    //   const spaceIsOpen = space.privacy === 'open'
+    //   const currentUserIsSignedIn = getters.isSignedIn
+    //   return !currentUserIsSignedIn && spaceIsOpen
+    // },
+    // connectionIsCreatedByCurrentUser: (state, getters, rootState) => (connection) => {
+    //   return state.id === connection.userId
+    // },
+    // isSpaceUser: (state, getters, rootState) => (space) => {
+    //   let userIsInSpace = Boolean(space.users?.find(user => {
+    //     return user.id === state.id
+    //   }))
+    //   userIsInSpace = userIsInSpace || space.userId === state.id
+    //   return userIsInSpace
+    // },
+    // isReadOnlyInvitedToSpace: (state, getters, rootState) => (space) => {
+    //   return rootState.spaceReadOnlyKey.spaceId === space.id
+    // },
+    // shouldPreventCardsCreatedCountUpdate: (state, getters, rootState, rootGetters) => {
+    //   const spaceCreatorIsUpgraded = rootGetters['currentSpace/spaceCreatorIsUpgraded']
+    //   const spaceCreatorIsCurrentUser = rootGetters['currentSpace/spaceCreatorIsCurrentUser']
+    //   if (spaceCreatorIsUpgraded && !spaceCreatorIsCurrentUser) {
+    //     return true
+    //   }
+    // },
+
+    // // Billing
+
+    // subscriptionIsApple: (state) => {
+    //   return state.appleSubscriptionIsActive
+    // },
+
+    // // user tags
+
+    // // drawing
+
   },
 
   actions: {
 
-    getUserIsCurrentUser (user) {
-      return Boolean(this.id === user?.id)
-    },
-    getUserTagByName (name) {
-      return this.tags.find(tag => tag.name === name)
-    },
+    // TODO refactor these into standard getters if space always = spaceStore.getSpaceAllState
+    // const spaceStore = useSpaceStore()
     getUserSpacePermission (space) {
       const spaceStore = useSpaceStore()
       space = space || spaceStore.getSpaceAllState
@@ -212,6 +228,14 @@ export const useUserStore = defineStore('users', {
       const isSpaceCollaborator = this.getUserIsSpaceCollaborator
       const isGroupMember = store.getters['groups/currentUserIsCurrentSpaceGroupUser']
       return Boolean(isSpaceUser || isSpaceCollaborator || isGroupMember)
+    },
+    getUserCanEditSpace () {
+      const spaceStore = useSpaceStore()
+      const spaceIsOpen = spaceStore.privacy === 'open'
+      const currentUserIsSignedIn = this.getUserIsSignedIn
+      const canEditOpenSpace = spaceIsOpen && currentUserIsSignedIn
+      const isSpaceMember = this.getUserIsSpaceMember()
+      return canEditOpenSpace || isSpaceMember
     },
     getUserCanEditBox (box) {
       const isSpaceMember = this.getUserIsSpaceMember()
@@ -240,6 +264,25 @@ export const useUserStore = defineStore('users', {
       const getUserIsCardCreator = this.getUserIsCardCreator(card)
       if (canEditSpace && getUserIsCardCreator) { return true }
       return false
+    },
+    getUserTotalFiltersActive () {
+      let userFilters = this.totalItemFadingFiltersActive
+      if (this.filterShowUsers) {
+        userFilters += 1
+      }
+      if (this.filterShowDateUpdated) {
+        userFilters += 1
+      }
+      if (this.filterComments) {
+        userFilters += 1
+      }
+      return userFilters
+    },
+
+    getIsUserCommentOnly () {
+      const canEditSpace = this.getUserCanEditSpace()
+      const isSpaceMember = this.getUserIsSpaceMember()
+      return canEditSpace && !isSpaceMember
     },
 
     // TODO refactor to getter after store -> rootStore
