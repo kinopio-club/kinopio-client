@@ -21,8 +21,7 @@ const isSpacePage = computed(() => {
   return isSpace
 })
 const isThemeDark = computed(() => userStore.theme === 'dark')
-const currentSpace = computed(() => store.state.currentSpace)
-const backgroundIsDefault = computed(() => !currentSpace.value.background)
+const backgroundIsDefault = computed(() => !spaceStore.background)
 const pageHeight = computed(() => store.state.pageHeight)
 const pageWidth = computed(() => store.state.pageWidth)
 
@@ -30,7 +29,7 @@ const pageWidth = computed(() => store.state.pageWidth)
 
 const backgroundStyles = computed(() => {
   let url = backgroundUrl.value
-  const tintColor = currentSpace.value.backgroundTint
+  const tintColor = spaceStore.backgroundTint
   const styles = {}
   if (tintColor) {
     styles.background = 'transparent'
@@ -54,7 +53,7 @@ const backgroundStyles = computed(() => {
 
 const kinopioBackgroundImageData = computed(() => {
   const data = backgroundImages.find(item => {
-    const background = currentSpace.value.background
+    const background = spaceStore.background
     return background === item.url
   })
   return data
@@ -69,7 +68,7 @@ const backgroundUrl = computed(() => {
   } else if (data) {
     url = data.url
   } else {
-    url = currentSpace.value.background
+    url = spaceStore.background
   }
   return url
 })
@@ -77,15 +76,15 @@ const backgroundUrl = computed(() => {
 // Background Gradient
 
 const gradientLayers = computed(() => {
-  if (!currentSpace.value.backgroundIsGradient) { return }
-  const layers = currentSpace.value.backgroundGradient
+  if (!spaceStore.backgroundIsGradient) { return }
+  const layers = spaceStore.backgroundGradient
   return layers
 })
 </script>
 
 <template lang="pug">
 //- gradient
-template(v-if="currentSpace.backgroundIsGradient")
+template(v-if="spaceStore.backgroundIsGradient")
   SpaceBackgroundGradients(:visible="true" :layers="gradientLayers" :backgroundStyles="backgroundStyles")
 //- or image
 template(v-else)
