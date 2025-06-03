@@ -109,7 +109,7 @@ const emitUpdateShowInExplore = () => {
 const updateShowInExplore = async () => {
   await updateSpacePrivacy()
   const shouldShow = !showInExplore.value
-  await store.dispatch('currentSpace/updateSpace', { showInExplore: shouldShow })
+  await spaceStore.updateSpace({ showInExplore: shouldShow })
   emit('updateLocalSpaces')
 }
 const updateSpacePrivacy = async () => {
@@ -118,11 +118,11 @@ const updateSpacePrivacy = async () => {
   if (shouldShow) {
     prevPrivacy = currentPrivacy
     if (currentPrivacy === 'private') {
-      await store.dispatch('currentSpace/updateSpace', { privacy: 'closed' })
+      await spaceStore.updateSpace({ privacy: 'closed' })
     }
   } else {
     prevPrivacy = prevPrivacy || 'closed'
-    await store.dispatch('currentSpace/updateSpace', { privacy: prevPrivacy })
+    await spaceStore.updateSpace({ privacy: prevPrivacy })
   }
 }
 const triggerSignUpOrInIsVisible = () => {
