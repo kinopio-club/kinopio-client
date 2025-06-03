@@ -196,13 +196,14 @@ watch(() => path.value, (value, prevValue) => {
 const updateConnectionRect = () => {
   if (!props.connection.labelIsVisible) { return }
   const element = document.querySelector(`.connection-path[data-id="${id.value}"]`)
-  if (!element) {
+  let rect
+  if (element) {
+    rect = utils.rectFromConnectionPath(element.getAttribute('d'))
+  } else {
     // compute position from path if element isn't rendered yet
-    state.connectionRect = utils.rectFromConnectionPath(path.value)
-    return
+    rect = utils.rectFromConnectionPath(path.value)
   }
-  const rect = element.getBoundingClientRect()
-  state.connectionRect = utils.rectDimensions(rect)
+  state.connectionRect = rect
 }
 const connectionLabelWrapStyles = computed(() => {
   if (!state.connectionRect) { return }
