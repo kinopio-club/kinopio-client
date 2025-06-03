@@ -136,7 +136,7 @@ const handleShortcuts = (event) => {
   } else if (keyN && isSpaceScope) {
     if (store.state.isAddPage) { return }
     if (isDisabledKeyboardShortcut('newSpace')) { return }
-    store.dispatch('currentSpace/addSpace')
+    spaceStore.createSpace()
     store.commit('addNotification', { message: 'New space created (N)', icon: 'add', type: 'success' })
     store.commit('triggerSpaceDetailsInfoIsVisible')
   // m

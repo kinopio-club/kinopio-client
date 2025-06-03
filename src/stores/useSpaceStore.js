@@ -163,7 +163,7 @@ export const useSpaceStore = defineStore('space', {
       // create new space
       } else if (store.state.loadNewSpace) {
         console.info('🚃 Create new space')
-        await this.addSpace() // TODO,  createSpace
+        await this.createSpace()
         store.commit('loadNewSpace', false, { root: true })
       // restore last space
       } else if (userStore.lastSpaceId) {
@@ -177,13 +177,6 @@ export const useSpaceStore = defineStore('space', {
       await this.checkIfShouldCreateNewUserSpaces()
       store.commit('triggerUpdateWindowHistory', null, { root: true })
       store.commit('isLoadingSpace', false, { root: true })
-    },
-    saveSpaceToCache () {
-      const userStore = useUserStore()
-      const isSpaceMember = userStore.getUserIsSpaceMember
-      if (!isSpaceMember) { return }
-      if (this.isRemoved) { return }
-      cache.saveSpace(this.getSpaceAllState)
     },
 
     // load
@@ -398,8 +391,99 @@ export const useSpaceStore = defineStore('space', {
       }
     },
 
+    // save
+
+    async saveSpace () {
+      const userStore = useUserStore()
+      const space = this.getSpaceAllState
+      const user = userStore.getUserAllState
+      console.info('✨ saveNewSpace', space, user)
+      cache.saveSpace(space)
+      this.addUserToSpace(user)
+      this.incrementCardsCreatedCountFromSpace(space)
+      store.commit('isLoadingSpace', false, { root: true })
+      store.commit('triggerUpdateWindowHistory', null, { root: true })
+      await store.dispatch('api/addToQueue', {
+        name: 'createSpace',
+        body: space
+      }, { root: true })
+      // const cardStore = useCardStore()
+      // cardStore.updateCardsDimensions()
+    },
+    saveSpaceToCache () {
+      const userStore = useUserStore()
+      const isSpaceMember = userStore.getUserIsSpaceMember
+      if (!isSpaceMember) { return }
+      if (this.isRemoved) { return }
+      cache.saveSpace(this.getSpaceAllState)
+    },
+
     // create
 
+    async createNewSpace (space) {
+      const userStore = useUserStore()
+      const user = userStore.getUserAllState
+      store.commit('triggerSpaceZoomReset', null, { root: true })
+      let name
+      if (space) {
+        name = space.name
+      }
+      space = utils.clone(newSpace)
+      space.name = name || utils.newSpaceName()
+      space.id = nanoid()
+      space.createdAt = new Date()
+      space.editedAt = new Date()
+      space.collaboratorKey = nanoid()
+      space.readOnlyKey = nanoid()
+      space.moonPhase = utils.moonPhase()
+      const shouldHideTutorialCards = userStore.shouldHideTutorialCards
+      if (shouldHideTutorialCards) {
+        space.connectionTypes = []
+        space.connections = []
+        space.cards = []
+        space.boxes = []
+      } else {
+        space.connectionTypes[0].color = randomColor({ luminosity: 'light' })
+      }
+      const shouldHideDateCards = userStore.shouldHideDateCards
+      if (!shouldHideDateCards) {
+        const date = dayjs().format('dddd') // Sunday
+        const moonPhaseSystemCommandIcon = '::systemCommand=moonPhase'
+        const dateCard = {
+          id: nanoid(),
+          x: 73,
+          y: 125,
+          z: 0,
+          name: `${moonPhaseSystemCommandIcon} ${date} ${store.getters.dateImageUrl}`,
+          width: 144,
+          height: 144,
+          resizeWidth: 144
+        }
+        space.cards.push(dateCard)
+      }
+      space = utils.updateSpaceCardsCreatedThroughPublicApi(space)
+      space.userId = userStore.id
+      space = utils.newSpaceBackground(space, user)
+      space.background = space.background || consts.defaultSpaceBackground
+      space.isTemplate = false
+      space.previewImage = null
+      space.previewThumbnailImage = null
+      const nullCardUsers = true
+      const uniqueNewSpace = await cache.updateIdsInSpace(space, nullCardUsers)
+      store.commit('clearSearch', null, { root: true })
+      isLoadingRemoteSpace = false
+      store.commit('resetPageSizes', null, { root: true })
+      await this.restoreSpace(uniqueNewSpace)
+    },
+    async createSpace () {
+      const userStore = useUserStore()
+      const user = { id: userStore.id }
+      store.commit('broadcast/leaveSpaceRoom', { user: { id: user.id }, type: 'userLeftRoom' }, { root: true })
+      await this.createNewSpace()
+      await this.saveSpace()
+      this.updateUserLastSpaceId()
+      store.commit('notifySignUpToEditSpace', false, { root: true })
+    },
     async createNewHelloSpace () {
       const userStore = useUserStore()
       const user = userStore.getUserAllState
@@ -596,6 +680,33 @@ export const useSpaceStore = defineStore('space', {
       if (!isSpaceMember && spaceIsOpen) {
         store.commit('addNotification', { message: 'This space is open to comments', icon: 'comment', type: 'success' }, { root: true })
       }
+    },
+
+    // user card count
+
+    checkIfShouldNotifyCardsCreatedIsNearLimit () {
+      const userStore = useUserStore()
+      if (this.getSpaceCreatorIsUpgraded) { return }
+      if (userStore.isUpgraded) { return }
+      const cardsCreatedLimit = consts.cardsCreatedLimit
+      const value = cardsCreatedLimit - userStore.cardsCreatedCount
+      if (utils.isBetween({ value, min: 0, max: 15 })) {
+        store.commit('notifyCardsCreatedIsNearLimit', true, { root: true })
+      }
+    },
+    incrementCardsCreatedCountFromSpace (space) {
+      const userStore = useUserStore()
+      const updatedCards = space.cards.filter(card => {
+        return userStore.getUserIsCurrentUser({ id: card.userId })
+      })
+      userStore.updateUserCardsCreatedCount(updatedCards)
+    },
+    decrementCardsCreatedCountFromSpace (space) {
+      const userStore = useUserStore()
+      space.cards = space.cards.filter(card => {
+        return userStore.getUserIsCurrentUser({ id: card.userId })
+      })
+      userStore.updateUserCardsCreatedCount(space.cards, true)
     },
 
     // tags

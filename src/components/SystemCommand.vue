@@ -1,6 +1,9 @@
 <script setup>
 import { reactive, computed, onMounted, watch, ref, nextTick } from 'vue'
 import { useStore } from 'vuex'
+import { useSpaceStore } from '@/stores/useSpaceStore'
+
+const spaceStore = useSpaceStore()
 const store = useStore()
 
 const props = defineProps({
@@ -24,7 +27,7 @@ const clickCommand = () => {
   } else if (templates) {
     store.commit('triggerTemplatesIsVisible')
   } else if (newSpace) {
-    store.dispatch('currentSpace/addSpace')
+    spaceStore.createSpace()
     store.commit('addNotification', { message: 'New space created (N)', icon: 'add', type: 'success' })
     store.commit('triggerSpaceDetailsInfoIsVisible')
   } else if (apps) {

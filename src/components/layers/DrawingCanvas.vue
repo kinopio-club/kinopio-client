@@ -25,7 +25,8 @@ let remoteStrokes = []
 let redoStrokes = []
 let drawingImage, drawingImageUrl
 
-let unsubscribe, unsubscribeActions
+let unsubscribe
+let unsubscribes
 
 onMounted(() => {
   canvas = canvasElement.value
@@ -37,6 +38,18 @@ onMounted(() => {
   updatePrevScroll()
   clearCanvas()
   clearStrokes()
+  const spaceStoreUnsubscribe = spaceStore.$onAction(
+    ({ name, args }) => {
+      const actions = ['loadSpace', 'changeSpace', 'createSpace']
+      if (actions.includes(name)) {
+        clearStrokes()
+      }
+    }
+  )
+  unsubscribes = () => {
+    spaceStoreUnsubscribe()
+  }
+  // TODO replace legacy subscribe
   unsubscribe = store.subscribe(mutation => {
     if (mutation.type === 'triggerStartDrawing') {
       startDrawing(mutation.payload)
@@ -65,20 +78,15 @@ onMounted(() => {
     } else if (mutation.type === 'triggerDrawingRedraw') {
       redraw()
     }
-    unsubscribeActions = store.subscribeAction(action => {
-      const actions = ['currentSpace/loadSpace', 'currentSpace/changeSpace', 'currentSpace/addSpace']
-      if (actions.includes(action.type)) {
-        clearStrokes()
-      }
-    })
   })
 })
 onBeforeUnmount(() => {
   window.removeEventListener('pointerup', endDrawing)
   window.removeEventListener('scroll', scroll)
   window.removeEventListener('resize', updateCanvasSize)
+  unsubscribes()
+  // TODO replace legacy subscribe
   unsubscribe()
-  unsubscribeActions()
 })
 
 const state = reactive({

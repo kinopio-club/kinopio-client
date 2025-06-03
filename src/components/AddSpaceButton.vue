@@ -1,10 +1,12 @@
 <script setup>
 import { reactive, computed, onMounted, onBeforeUnmount, watch, ref, nextTick } from 'vue'
 import { useStore } from 'vuex'
+import { useSpaceStore } from '@/stores/useSpaceStore'
 
 import cache from '@/cache.js'
 
 const store = useStore()
+const spaceStore = useSpaceStore()
 
 const emit = defineEmits(['closeDialogs', 'addSpace'])
 
@@ -36,7 +38,7 @@ const addNewSpace = async (event) => {
   }
   if (shouldAddSpaceDirectly.value) {
     store.dispatch('closeAllDialogs')
-    await store.dispatch('currentSpace/addSpace')
+    await spaceStore.createSpace()
     store.commit('triggerSpaceDetailsInfoIsVisible')
   }
   store.dispatch('analytics/event', 'AddSpaceButton')

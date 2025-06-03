@@ -348,8 +348,8 @@ export const useUserStore = defineStore('users', {
         await this.restoreUserAssociatedData()
       } else {
         this.createNewUser()
+        store.dispatch('themes/restore', null, { root: true })
       }
-      store.dispatch('themes/restore', null, { root: true })
       store.commit('triggerUserIsLoaded', null, { root: true })
       this.checkIfShouldJoinGroup()
       console.log('🍍', { ...this.$state })

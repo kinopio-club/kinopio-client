@@ -272,7 +272,7 @@ const sort = (spaces) => {
 
 const addSpace = async () => {
   window.scrollTo(0, 0)
-  await store.dispatch('currentSpace/addSpace')
+  await spaceStore.createSpace()
   updateLocalSpaces()
   store.commit('triggerFocusSpaceDetailsName')
 }

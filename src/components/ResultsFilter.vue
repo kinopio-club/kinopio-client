@@ -1,6 +1,7 @@
 <script setup>
 import { reactive, computed, onMounted, onUnmounted, onBeforeUnmount, watch, ref, nextTick } from 'vue'
 import { useStore } from 'vuex'
+import { useSpaceStore } from '@/stores/useSpaceStore'
 
 import Loader from '@/components/Loader.vue'
 import utils from '@/utils.js'
@@ -9,6 +10,7 @@ import createFuzzySearch from '@nozbe/microfuzz'
 import dayjs from 'dayjs'
 
 const store = useStore()
+const spaceStore = useSpaceStore()
 
 const resultsFilterElement = ref(null)
 const filterInputElement = ref(null)
@@ -86,7 +88,7 @@ const addSpaceIsVisible = computed(() => props.showCreateNewSpaceFromSearch && s
 const addSpace = async () => {
   const name = state.filter
   window.scrollTo(0, 0)
-  await store.dispatch('currentSpace/addSpace', { name })
+  await store.dispatch('currentSpace/createSpace', { name })
   await nextTick()
   const shouldClearFilterInfo = true
   clearFilter(shouldClearFilterInfo)
