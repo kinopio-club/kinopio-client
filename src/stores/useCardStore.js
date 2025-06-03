@@ -303,6 +303,8 @@ export const useCardStore = defineStore('cards', {
       })
     },
     async createCards (cards, shouldOffsetPosition) {
+      const userStore = useUserStore()
+      const spaceStore = useSpaceStore()
       cards = cards.map(card => {
         let x = card.x
         let y = card.y
@@ -314,6 +316,10 @@ export const useCardStore = defineStore('cards', {
         card = this.normailzeNewCard(card)
         card.shouldUpdateUrlPreview = true
         card.urlPreviewIsVisible = true
+      })
+      await spaceStore.updateSpace({
+        editedAt: new Date(),
+        editedByUserId: userStore.id
       })
       cards.forEach(card => {
         this.createCard(card)

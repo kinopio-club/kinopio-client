@@ -247,7 +247,7 @@ export default {
           context.dispatch('currentConnections/updatePaths', { itemId: box.id }, { root: true })
         })
       }
-      await cache.updateSpace('editedAt', utils.unixTime(), currentSpaceId)
+      await context.dispatch('currentSpace/updateSpace', { editedAt: new Date() }, { root: true })
       await context.dispatch('api/addToQueue', { name: 'updateBox', body: box }, { root: true })
     },
     updateName (context, { box, newName }) {
