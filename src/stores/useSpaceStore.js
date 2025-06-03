@@ -577,7 +577,7 @@ export const useSpaceStore = defineStore('space', {
 
     // update
 
-    updateSpacePreviewImage: throttle(async () => {
+    updateSpacePreviewImage: throttle(async function () {
       const userStore = useUserStore()
       const isSignedIn = userStore.getUserIsSignedIn
       const canEditSpace = userStore.getUserCanEditSpace()
