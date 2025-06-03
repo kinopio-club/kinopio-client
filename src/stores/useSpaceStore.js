@@ -96,6 +96,9 @@ export const useSpaceStore = defineStore('space', {
       let value = hiddenSpaces.find(hiddenSpace => hiddenSpace?.id === this.id)
       value = Boolean(value)
       return value
+    },
+    getSpaceIsHello () {
+      return this.name === 'Hello Kinopio'
     }
 
   },

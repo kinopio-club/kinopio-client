@@ -184,8 +184,8 @@ const toolbarIsVisible = computed(() => {
 // new stuff
 
 const shouldShowChangelogIsUpdated = computed(() => {
-  const isNotDefaultSpace = !store.getters['currentSpace/isHelloKinopio']
-  return store.state.changelogIsUpdated && isNotDefaultSpace && userCanEditSpace.value
+  const isNotHelloSpace = !spaceStore.getSpaceIsHello
+  return store.state.changelogIsUpdated && isNotHelloSpace && userCanEditSpace.value
 })
 
 // current space

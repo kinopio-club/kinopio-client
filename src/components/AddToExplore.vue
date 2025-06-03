@@ -54,13 +54,13 @@ watch(() => props.visible, (value, prevValue) => {
 
 const isVisible = computed(() => props.visible || userStore.getUserIsSpaceMember)
 const showInExplore = computed(() => {
-  const space = props.space || store.state.currentSpace
+  const space = props.space || spaceStore.getSpaceAllState
   const showInExplore = space.showInExplore
   const isNotPrivate = space.privacy !== 'private'
   return showInExplore && isNotPrivate
 })
 const currentUserIsSignedIn = computed(() => userStore.getUserIsSignedIn)
-const spaceIsHelloKinopio = computed(() => store.getters['currentSpace/isHelloKinopio'])
+const spaceIsHelloKinopio = computed(() => spaceStore.getSpaceIsHello)
 const spaceCardsCount = computed(() => cardStore.getAllCards.length)
 
 const checkIfShouldPrevent = (event) => {
