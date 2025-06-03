@@ -142,7 +142,7 @@ const addConnections = async (event) => {
     endItemId = currentConnectionSuccess.id
   } else {
     // create new card
-    const startItem = store.getters['currentSpace/itemById'](startItemIds[0])
+    const startItem = spaceStore.getSpaceItemById(startItemIds[0])
     const color = startItem.color || startItem.backgroundColor
     endItemId = nanoid()
     const newCard = { position, id: endItemId, isParentCard: true, backgroundColor: color }

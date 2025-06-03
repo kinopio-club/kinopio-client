@@ -100,8 +100,9 @@ export const useConnectionStore = defineStore('connections', {
       return `m${start.x},${start.y} ${curve} ${delta.x},${delta.y}`
     },
     getConnectionPathBetweenItems ({ startItem, endItem, startItemId, endItemId, controlPoint, estimatedEndItemConnectorPosition }) {
-      startItem = startItem || store.getters['currentSpace/itemById'](startItemId)
-      endItem = endItem || store.getters['currentSpace/itemById'](endItemId)
+      const spaceStore = useSpaceStore()
+      startItem = startItem || spaceStore.getSpaceItemById(startItemId)
+      endItem = endItem || spaceStore.getSpaceItemById(endItemId)
       if (!startItem || !endItem) { return }
       const start = utils.estimatedItemConnectorPosition(startItem)
       const end = estimatedEndItemConnectorPosition || utils.estimatedItemConnectorPosition(endItem)

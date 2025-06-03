@@ -534,8 +534,9 @@ export default {
       return Boolean(existing.length)
     },
     connectionPathBetweenItems: (state, getters, rootState, rootGetters) => ({ startItem, endItem, startItemId, endItemId, controlPoint, estimatedEndItemConnectorPosition }) => {
-      startItem = startItem || rootGetters['currentSpace/itemById'](startItemId)
-      endItem = endItem || rootGetters['currentSpace/itemById'](endItemId)
+      const spaceStore = useSpaceStore()
+      startItem = startItem || spaceStore.getSpaceItemById(startItemId)
+      endItem = endItem || spaceStore.getSpaceItemById(endItemId)
       if (!startItem || !endItem) { return }
       const start = utils.estimatedItemConnectorPosition(startItem)
       const end = estimatedEndItemConnectorPosition || utils.estimatedItemConnectorPosition(endItem)

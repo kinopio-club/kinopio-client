@@ -111,6 +111,14 @@ export const useSpaceStore = defineStore('space', {
       })
       return tags
     },
+    getSpaceItemById (itemId) {
+      if (!itemId) { return }
+      const cardStore = useCardStore()
+      const boxStore = useBoxStore()
+      const card = cardStore.getCard(itemId)
+      const box = boxStore.getBox(itemId)
+      return card || box
+    },
 
     // user getters
 
