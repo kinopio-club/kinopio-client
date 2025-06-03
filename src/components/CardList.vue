@@ -63,7 +63,7 @@ const normalizedCards = computed(() => {
   const items = props.cards.filter(card => !state.removedCardIds.includes(card.id))
   return items.map(card => {
     card = cardStore.cardWithNameSegments(card)
-    card.user = store.getters['currentSpace/userById'](card.userId)
+    card.user = spaceStore.getSpaceUserById(card.userId)
     store.commit('updateOtherUsers', card.user)
     if (!card.user) {
       card.user = {

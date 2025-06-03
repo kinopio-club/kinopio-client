@@ -91,7 +91,7 @@ const isSelected = (operation) => {
 // meta
 
 const user = (operation) => {
-  const user = store.getters['currentSpace/userById'](operation.userId)
+  const user = spaceStore.getSpaceUserById(operation.userId)
   return user
 }
 const relativeDate = (operation) => {

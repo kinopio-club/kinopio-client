@@ -272,7 +272,7 @@ const canEditCard = computed(() => userStore.getUserCanEditCard(card.value))
 const currentUserIsSignedIn = computed(() => userStore.getUserIsSignedIn)
 const createdByUser = computed(() => {
   const userId = card.value.userId
-  const user = store.getters['currentSpace/userById'](userId)
+  const user = spaceStore.getSpaceUserById(userId)
   if (user) {
     return user
   } else {
@@ -284,7 +284,7 @@ const createdByUser = computed(() => {
 })
 const updatedByUser = computed(() => {
   const userId = card.value.nameUpdatedByUserId || card.value.userId
-  const user = store.getters['currentSpace/userById'](userId)
+  const user = spaceStore.getSpaceUserById(userId)
   if (user) {
     return user
   } else {

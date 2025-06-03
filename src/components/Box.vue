@@ -426,7 +426,7 @@ const remoteBoxDetailsVisibleColor = computed(() => {
   const remoteBoxDetailsVisible = store.state.remoteBoxDetailsVisible
   const visibleBox = remoteBoxDetailsVisible.find(box => box.boxId === props.box.id)
   if (visibleBox) {
-    const user = store.getters['currentSpace/userById'](visibleBox.userId)
+    const user = spaceStore.getSpaceUserById(visibleBox.userId)
     return user.color
   } else {
     return undefined
@@ -441,7 +441,7 @@ const remoteSelectedColor = computed(() => {
   const remoteBoxesSelected = store.state.remoteBoxesSelected
   const selectedBox = remoteBoxesSelected.find(box => box.boxId === props.box.id)
   if (selectedBox) {
-    const user = store.getters['currentSpace/userById'](selectedBox.userId)
+    const user = spaceStore.getSpaceUserById(selectedBox.userId)
     return user.color
   } else {
     return undefined
@@ -452,7 +452,7 @@ const remoteUserResizingBoxesColor = computed(() => {
   if (!remoteUserResizingBoxes.length) { return }
   let user = remoteUserResizingBoxes.find(user => user.boxIds.includes(props.box.id))
   if (user) {
-    user = store.getters['currentSpace/userById'](user.userId)
+    user = spaceStore.getSpaceUserById(user.userId)
     return user.color
   } else {
     return undefined
@@ -462,7 +462,7 @@ const remoteBoxDraggingColor = computed(() => {
   const remoteBoxesDragging = store.state.remoteBoxesDragging
   const draggingBox = remoteBoxesDragging.find(box => box.boxId === props.box.id)
   if (draggingBox) {
-    const user = store.getters['currentSpace/userById'](draggingBox.userId)
+    const user = spaceStore.getSpaceUserById(draggingBox.userId)
     return user.color
   } else {
     return undefined

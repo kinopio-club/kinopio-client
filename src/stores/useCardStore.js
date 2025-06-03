@@ -85,6 +85,7 @@ export const useCardStore = defineStore('cards', {
       return cards
     },
     getCardCommenters () {
+      const spaceStore = useSpaceStore()
       let users = []
       let cards = this.allIds.map(id => this.byId[id])
       cards = cards.filter(card => !card.isRemoved)
@@ -93,7 +94,7 @@ export const useCardStore = defineStore('cards', {
         users.push(card.nameUpdatedByUserId)
       })
       users = uniq(users)
-      users = users.map(id => store.getters['currentSpace/userById'](id))
+      users = users.map(id => spaceStore.getSpaceUserById(id))
       users = users.filter(user => Boolean(user))
       return users
     },

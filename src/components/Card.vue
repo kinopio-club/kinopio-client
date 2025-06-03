@@ -589,7 +589,7 @@ const remoteUserResizingCardsColor = computed(() => {
   if (!store.state.remoteUserResizingCards.length) { return }
   let user = store.state.remoteUserResizingCards.find(user => user.cardIds.includes(props.card.id))
   if (user) {
-    user = store.getters['currentSpace/userById'](user.userId)
+    user = spaceStore.getSpaceUserById(user.userId)
     return user.color
   } else {
     return undefined
@@ -599,7 +599,7 @@ const remoteUserTiltingCardsColor = computed(() => {
   if (!store.state.remoteUserTiltingCards.length) { return }
   let user = store.state.remoteUserTiltingCards.find(user => user.cardIds.includes(props.card.id))
   if (user) {
-    user = store.getters['currentSpace/userById'](user.userId)
+    user = spaceStore.getSpaceUserById(user.userId)
     return user.color
   } else {
     return undefined
@@ -773,7 +773,7 @@ const selectedColorUpload = computed(() => {
 const remoteUploadDraggedOverCardColor = computed(() => {
   const draggedOverCard = store.state.remoteUploadDraggedOverCards.find(card => card.cardId === props.card.id)
   if (draggedOverCard) {
-    const user = store.getters['currentSpace/userById'](draggedOverCard.userId)
+    const user = spaceStore.getSpaceUserById(draggedOverCard.userId)
     return user.color
   } else {
     return undefined
@@ -1178,7 +1178,7 @@ const isRemoteCardDragging = computed(() => {
 const remoteCardDraggingColor = computed(() => {
   const draggingCard = store.state.remoteCardsDragging.find(card => card.cardId === props.card.id)
   if (draggingCard) {
-    const user = store.getters['currentSpace/userById'](draggingCard.userId)
+    const user = spaceStore.getSpaceUserById(draggingCard.userId)
     return user.color
   } else {
     return undefined
@@ -1340,7 +1340,7 @@ const isRemoteSelected = computed(() => {
 const remoteSelectedColor = computed(() => {
   const selectedCard = store.state.remoteCardsSelected.find(card => card.cardId === props.card.id)
   if (selectedCard) {
-    const user = store.getters['currentSpace/userById'](selectedCard.userId)
+    const user = spaceStore.getSpaceUserById(selectedCard.userId)
     return user.color
   } else {
     return undefined
@@ -1390,7 +1390,7 @@ const isRemoteCardDetailsVisible = computed(() => {
 const remoteCardDetailsVisibleColor = computed(() => {
   const visibleCard = store.state.remoteCardDetailsVisible.find(card => card.cardId === props.card.id)
   if (visibleCard) {
-    const user = store.getters['currentSpace/userById'](visibleCard.userId)
+    const user = spaceStore.getSpaceUserById(visibleCard.userId)
     return user.color
   } else {
     return undefined
@@ -1514,7 +1514,7 @@ const cardCreatedByUser = computed(() => {
   // same as userDetailsWrap.cardCreatedByUser
   const userId = props.card.userId
   if (!userId) { return }
-  let user = store.getters['currentSpace/userById'](userId)
+  let user = spaceStore.getSpaceUserById(userId)
   if (!user) {
     user = {
       name: '',

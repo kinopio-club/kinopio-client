@@ -82,7 +82,7 @@ onMounted(() => {
       createRemotePaintingCircle(circle)
     } else if (mutation.type === 'triggerNotifyOffscreenCardCreated') {
       const card = mutation.payload
-      const user = store.getters['currentSpace/userById'](card.userId)
+      const user = spaceStore.getSpaceUserById(card.userId)
       const color = user.color
       const position = updateRemotePosition(card)
       const circle = {

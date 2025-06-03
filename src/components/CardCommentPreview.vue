@@ -2,6 +2,7 @@
 import { reactive, computed, onMounted, onBeforeUnmount, onUnmounted, watch, ref, nextTick } from 'vue'
 import { useStore } from 'vuex'
 import { useCardStore } from '@/stores/useCardStore'
+import { useSpaceStore } from '@/stores/useSpaceStore'
 
 import UserLabelInline from '@/components/UserLabelInline.vue'
 import NameSegment from '@/components/NameSegment.vue'
@@ -9,6 +10,7 @@ import utils from '@/utils.js'
 
 const store = useStore()
 const cardStore = useCardStore()
+const spaceStore = useSpaceStore()
 
 const props = defineProps({
   visible: Boolean,
@@ -32,7 +34,7 @@ const styles = computed(() => {
 const createdByUser = computed(() => {
   // same as userDetailsWrap.cardCreatedByUser
   const userId = props.card.userId
-  let user = store.getters['currentSpace/userById'](userId)
+  let user = spaceStore.getSpaceUserById(userId)
   if (!user) {
     user = {
       name: '',

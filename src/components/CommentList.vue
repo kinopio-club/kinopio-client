@@ -41,7 +41,7 @@ const showCardDetails = (card) => {
   cardStore.showCardDetails(card.id)
 }
 const userById = (userId) => {
-  return store.getters['currentSpace/userById'](userId)
+  return spaceStore.getSpaceUserById(userId)
 }
 </script>
 
