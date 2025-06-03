@@ -12,19 +12,24 @@ const store = useStore()
 const userStore = useUserStore()
 const spaceStore = useSpaceStore()
 
-let unsubscribe
+let unsubscribes
 
 let prevPrivacy = ''
 
 onMounted(() => {
-  unsubscribe = store.subscribe((mutation, state) => {
-    if (mutation.type === 'currentSpace/restoreSpace') {
-      clearErrors()
+  const spaceStoreUnsubscribe = spaceStore.$onAction(
+    ({ name, args }) => {
+      if (name === 'restoreSpace') {
+        clearErrors()
+      }
     }
-  })
+  )
+  unsubscribes = () => {
+    spaceStoreUnsubscribe()
+  }
 })
 onBeforeUnmount(() => {
-  unsubscribe()
+  unsubscribes()
 })
 
 const emit = defineEmits(['updateLocalSpaces', 'updateAddToExplore'])
