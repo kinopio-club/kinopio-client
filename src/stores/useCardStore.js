@@ -27,75 +27,30 @@ export const useCardStore = defineStore('cards', {
   }),
 
   getters: {
-    getCard: (state) => {
-      return (id) => state.byId[id]
-    },
-    getAllCards: (state) => {
-      let cards = state.allIds.map(id => state.byId[id])
+    getAllCards () {
+      let cards = this.allIds.map(id => this.byId[id])
       cards = cards.filter(card => !card.isRemoved)
       return cards
     },
-    getAllCardsSortedByX: (state) => {
-      let cards = state.allIds.map(id => state.byId[id])
+    getAllCardsSortedByX () {
+      let cards = this.allIds.map(id => this.byId[id])
       cards = cards.filter(card => !card.isRemoved)
       cards = sortBy(cards, 'x')
       return cards
     },
-    getAllCardsSortedByY: (state) => {
-      let cards = state.allIds.map(id => state.byId[id])
+    getAllCardsSortedByY () {
+      let cards = this.allIds.map(id => this.byId[id])
       cards = cards.filter(card => !card.isRemoved)
       cards = sortBy(cards, 'y')
       return cards
     },
-
-    getAllRemovedCards: (state) => {
-      let cards = state.allIds.map(id => state.byId[id])
+    getAllRemovedCards () {
+      let cards = this.allIds.map(id => this.byId[id])
       cards = cards.filter(card => card.isRemoved)
       return cards
     },
-    getIsCardComment: (state) => {
-      return (card) => card.isComment || utils.isNameComment(card.name)
-    },
-    getVerticallyAlignedCardsBelow: (state) => {
-      return (cards, id, deltaHeight = 0) => {
-        const card = state.byId[id]
-        const parentCard = {
-          y: card.y,
-          x: card.x,
-          height: card.height - deltaHeight
-        }
-        cards = cards.filter(card => {
-          const isAlignedX = card.x === parentCard.x
-          // utils.isBetween({
-          //   value: card.x,
-          //   min: parentCard.x - 10,
-          //   max: parentCard.x + 10
-          // })
-          const isBelow = card.y > parentCard.y
-          return isAlignedX && isBelow
-        })
-        // recursion: match cards alignedY successively
-        const alignedCards = []
-        let prevAlignedCard
-        do {
-          const parent = prevAlignedCard || parentCard
-          const match = cards.find(card => {
-            const isAlignedY = parent.y + parent.height + consts.spaceBetweenCards === card.y
-            return isAlignedY
-          })
-          if (match) {
-            prevAlignedCard = match
-            alignedCards.push(match)
-            cards = cards.filter(card => card.id !== match.id)
-          } else {
-            prevAlignedCard = null
-          }
-        } while (prevAlignedCard)
-        return alignedCards
-      }
-    },
-    getCardsSelectableByY: (state) => {
-      let cards = state.allIds.map(id => state.byId[id])
+    getCardsSelectableByY () {
+      let cards = this.allIds.map(id => this.byId[id])
       // filter
       cards = cards.filter(card => {
         if (card.isLocked) { return }
@@ -112,62 +67,26 @@ export const useCardStore = defineStore('cards', {
         yIndex
       }
     },
-    getCardsIsLocked: (state) => {
-      const cards = state.allIds.map(id => state.byId[id])
+    getCardsIsLocked () {
+      const cards = this.allIds.map(id => this.byId[id])
       return cards.filter(card => card.isLocked && !card.isRemoved)
     },
-    getCardsIsNotLocked: (state) => {
-      const cards = state.allIds.map(id => state.byId[id])
+    getCardsIsNotLocked () {
+      const cards = this.allIds.map(id => this.byId[id])
       return cards.filter(card => !card.isLocked && !card.isRemoved)
     },
-    getCardsBelowY: (state) => {
-      return (y, zoom = 1, cards) => {
-        let i = 0
-        while (i < cards.length && (cards[i].y * zoom) <= y) {
-          i++
-        }
-        return cards.slice(i)
-      }
-    },
-    getCardsAboveY: (state) => {
-      return (y, zoom = 1, cards) => {
-        let i = 0
-        while (i < cards.length && (cards[i].y * zoom) <= y) {
-          i++
-        }
-        return cards.slice(0, i)
-      }
-    },
-    getCardsRightOfX: (state) => {
-      return (x, zoom = 1, cards) => {
-        let i = 0
-        while (i < cards.length && (cards[i].x * zoom) <= x) {
-          i++
-        }
-        return cards.slice(i)
-      }
-    },
-    getCardsLeftOfX: (state) => {
-      return (x, zoom = 1, cards) => {
-        let i = 0
-        while (i < cards.length && (cards[i].x * zoom) <= x) {
-          i++
-        }
-        return cards.slice(0, i)
-      }
-    },
-    getCardsSelected: (state) => {
+    getCardsSelected () {
       let ids = store.state.multipleCardsSelectedIds
       if (!ids.length) {
         ids = [store.state.currentDraggingCardId]
       }
       ids = ids.filter(id => Boolean(id))
-      const cards = ids.map(id => state.byId[id])
+      const cards = ids.map(id => this.byId[id])
       return cards
     },
-    getCardCommenters: (state) => {
+    getCardCommenters () {
       let users = []
-      let cards = state.allIds.map(id => state.byId[id])
+      let cards = this.allIds.map(id => this.byId[id])
       cards = cards.filter(card => !card.isRemoved)
       cards.forEach(card => {
         users.push(card.userId)
@@ -178,11 +97,11 @@ export const useCardStore = defineStore('cards', {
       users = users.filter(user => Boolean(user))
       return users
     },
-    getCardsWithSpaceOrInviteLinks: (state) => {
+    getCardsWithSpaceOrInviteLinks () {
       const cardIds = []
       const spaceIds = []
       const invites = []
-      let cards = state.allIds.map(id => state.byId[id])
+      let cards = this.allIds.map(id => this.byId[id])
       cards = cards.filter(card => !card.isRemoved)
       cards.forEach(card => {
         const cardIdIsValid = utils.idIsValid(card.linkToCardId)
@@ -202,6 +121,76 @@ export const useCardStore = defineStore('cards', {
 
   actions: {
 
+    getCard (id) {
+      return this.byId[id]
+    },
+    getIsCardComment (card) {
+      return card.isComment || utils.isNameComment(card.name)
+    },
+    getVerticallyAlignedCardsBelow (cards, id, deltaHeight = 0) {
+      const card = this.byId[id]
+      const parentCard = {
+        y: card.y,
+        x: card.x,
+        height: card.height - deltaHeight
+      }
+      cards = cards.filter(card => {
+        const isAlignedX = card.x === parentCard.x
+        // utils.isBetween({
+        //   value: card.x,
+        //   min: parentCard.x - 10,
+        //   max: parentCard.x + 10
+        // })
+        const isBelow = card.y > parentCard.y
+        return isAlignedX && isBelow
+      })
+      // recursion: match cards alignedY successively
+      const alignedCards = []
+      let prevAlignedCard
+      do {
+        const parent = prevAlignedCard || parentCard
+        const match = cards.find(card => {
+          const isAlignedY = parent.y + parent.height + consts.spaceBetweenCards === card.y
+          return isAlignedY
+        })
+        if (match) {
+          prevAlignedCard = match
+          alignedCards.push(match)
+          cards = cards.filter(card => card.id !== match.id)
+        } else {
+          prevAlignedCard = null
+        }
+      } while (prevAlignedCard)
+      return alignedCards
+    },
+    getCardsBelowY (y, zoom = 1, cards) {
+      let i = 0
+      while (i < cards.length && (cards[i].y * zoom) <= y) {
+        i++
+      }
+      return cards.slice(i)
+    },
+    getCardsAboveY (y, zoom = 1, cards) {
+      let i = 0
+      while (i < cards.length && (cards[i].y * zoom) <= y) {
+        i++
+      }
+      return cards.slice(0, i)
+    },
+    getCardsRightOfX (x, zoom = 1, cards) {
+      let i = 0
+      while (i < cards.length && (cards[i].x * zoom) <= x) {
+        i++
+      }
+      return cards.slice(i)
+    },
+    getCardsLeftOfX (x, zoom = 1, cards) {
+      let i = 0
+      while (i < cards.length && (cards[i].x * zoom) <= x) {
+        i++
+      }
+      return cards.slice(0, i)
+    },
     getCardsSelectableInViewport () {
       const elements = document.querySelectorAll('.card-wrap')
       const cards = []
