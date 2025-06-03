@@ -199,7 +199,7 @@ const importSpace = async () => {
     const user = userStore.getUserAllState
     space = utils.resetSpaceMeta({ space, user })
     console.info('🧚 space to import', space)
-    await store.dispatch('currentSpace/saveSpace', space)
+    await spaceStore.saveSpace(space)
     await store.dispatch('currentSpace/loadSpace', { space })
     store.dispatch('closeAllDialogs')
   } catch (error) {
