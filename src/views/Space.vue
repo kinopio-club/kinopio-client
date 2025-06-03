@@ -373,20 +373,6 @@ const stopResizingBoxes = () => {
   store.commit('broadcast/updateStore', { updates: { userId: currentUser.value.id }, type: 'removeRemoteUserResizingBoxes' })
   // store.dispatch('checkIfItemShouldIncreasePageSize', boxes[0])
 }
-// const afterResizeBoxes = () => {
-
-//   const boxIds = store.getters['currentBoxes/isResizingIds']
-//   const boxes = boxIds.map(boxId => {
-//     let { resizeWidth, resizeHeight } = utils.boxElementDimensions({ id: boxId })
-//     if (store.state.shouldSnapToGrid) {
-//       resizeWidth = utils.roundToNearest(resizeWidth)
-//       resizeHeight = utils.roundToNearest(resizeHeight)
-//     }
-//     return { id: boxId, resizeWidth, resizeHeight }
-//   })
-
-//   store.dispatch('currentBoxes/updateMultiple', boxes)
-// }
 const checkIfShouldSnapBoxes = (event) => {
   if (!store.state.boxesWereDragged) { return }
   if (event.shiftKey) { return }
@@ -637,13 +623,6 @@ const handleTouchEnd = (event) => {
 const stopInteractions = async (event) => {
   console.info('💣 stopInteractions')
   const isCardsSelected = store.state.currentDraggingCardId || store.state.multipleCardsSelectedIds.length
-  // TODO no need for aftermove?? or maybe this is where history happens instead of in cardstore?
-  // if (isCardsSelected && store.state.cardsWereDragged) {
-  //   store.dispatch('currentCards/afterMove')
-  // }
-  // if (store.state.boxesWereDragged) {
-  //   store.dispatch('currentBoxes/afterMove')
-  // }
   updateIconsNotDraggable()
   blurButtonClick(event)
   if (event.touches) {

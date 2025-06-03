@@ -132,7 +132,7 @@ export const useBoxStore = defineStore('boxes', {
       box = this.normalizeNewBox(box)
       this.addBoxToState(box)
       // if (!updates.isBroadcast) {
-      // context.dispatch('broadcast/update', { updates: box, type: 'createBox', handler: 'currentBoxes/create' }, { root: true })
+      // context.dispatch('broadcast/update', { updates: box, type: 'createBox', handler: 'currentBoxes/addBoxToState' }, { root: true })
       // context.dispatch('history/add', { boxes: [box] }, { root: true })
       if (isResizing) {
         // store.dispatch('history/pause', null, { root: true })
