@@ -226,10 +226,11 @@ const labelRelativePosition = computed(() => {
 const styles = computed(() => {
   const label = labelElement.value
   if (!label) { return }
-  const labelRect = label.getBoundingClientRect()
+  let labelRect = label.getBoundingClientRect()
+  labelRect = utils.rectDimensions(labelRect)
   const labelCenter = {
-    x: Math.round(labelRect.width / 4),
-    y: Math.round(labelRect.height / 4)
+    x: Math.round(labelRect.width / 2),
+    y: Math.round(labelRect.height / 2)
   }
   const styles = {
     background: typeColor.value,
