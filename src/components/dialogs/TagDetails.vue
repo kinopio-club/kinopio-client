@@ -189,7 +189,7 @@ const focusOnCard = async (card) => {
     } else {
       space = await cache.space(card.spaceId)
     }
-    store.dispatch('currentSpace/changeSpace', space)
+    spaceStore.changeSpace(space)
   } else {
     const cardId = card.id || currentTag.value.cardId
     store.dispatch('focusOnCardId', cardId)
@@ -433,7 +433,7 @@ const changeSpace = (spaceId) => {
   store.dispatch('closeAllDialogs')
   if (spaceIsCurrentSpace(spaceId)) { return }
   const space = { id: spaceId }
-  store.dispatch('currentSpace/changeSpace', space)
+  spaceStore.changeSpace(space)
 }
 
 </script>

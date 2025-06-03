@@ -177,7 +177,7 @@ const changeSpace = async (url) => {
     changeSpaceAndCard(spaceId, cardId)
   } else {
     const space = { id: spaceId }
-    store.dispatch('currentSpace/changeSpace', space)
+    spaceStore.changeSpace(space)
   }
   store.dispatch('closeAllDialogs')
 }
@@ -187,7 +187,7 @@ const changeSpaceAndCard = async (spaceId, cardId) => {
   if (currentSpaceId !== spaceId) {
     store.commit('loadSpaceFocusOnCardId', cardId)
     const space = { id: spaceId }
-    store.dispatch('currentSpace/changeSpace', space)
+    spaceStore.changeSpace(space)
   // card in current space
   } else {
     await nextTick()

@@ -91,7 +91,7 @@ const showCardDetails = (notification) => {
   const card = utils.clone(notification.card)
   if (currentSpaceId.value !== space.id) {
     store.commit('loadSpaceFocusOnCardId', card.id)
-    store.dispatch('currentSpace/changeSpace', space)
+    spaceStore.changeSpace(space)
   } else {
     cardStore.showCardDetails(card.id)
   }
@@ -168,7 +168,7 @@ const changeSpace = (spaceId) => {
   store.commit('cardDetailsIsVisibleForCardId', null)
   if (isCurrentSpace(spaceId)) { return }
   const space = { id: spaceId }
-  store.dispatch('currentSpace/changeSpace', space)
+  spaceStore.changeSpace(space)
 }
 
 // explore

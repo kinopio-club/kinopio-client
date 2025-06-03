@@ -148,7 +148,7 @@ const selectCard = (card) => {
 const changeSpace = (spaceId) => {
   if (store.state.currentSpace.id === spaceId) { return }
   const space = { id: spaceId }
-  store.dispatch('currentSpace/changeSpace', space)
+  spaceStore.changeSpace(space)
 }
 const selectSpaceCard = (card) => {
   changeSpace(card.spaceId)

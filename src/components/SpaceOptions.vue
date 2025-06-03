@@ -62,7 +62,7 @@ const changeToPrevSpace = async () => {
   if (store.state.prevSpaceIdInSession) {
     store.dispatch('currentSpace/loadPrevSpaceInSession')
   } else if (recentSpace) {
-    store.dispatch('currentSpace/changeSpace', recentSpace)
+    spaceStore.changeSpace(recentSpace)
   } else {
     emit('addSpace')
   }

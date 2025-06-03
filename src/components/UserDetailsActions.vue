@@ -101,7 +101,7 @@ const signOut = async () => {
 // spaces
 
 const changeSpace = (space) => {
-  store.dispatch('currentSpace/changeSpace', space)
+  spaceStore.changeSpace(space)
 }
 const getUserSpaces = async () => {
   state.error.unknownServerError = false

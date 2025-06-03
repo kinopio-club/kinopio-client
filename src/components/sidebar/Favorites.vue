@@ -96,7 +96,7 @@ const checkIfShouldShowCurrentUserSpaces = (space) => {
 }
 const isSpaceMemberOfCurrentSpace = computed(() => userStore.getUserIsSpaceMember)
 const changeSpace = (space) => {
-  store.dispatch('currentSpace/changeSpace', space)
+  spaceStore.changeSpace(space)
 }
 const parentDialog = computed(() => 'favorites')
 

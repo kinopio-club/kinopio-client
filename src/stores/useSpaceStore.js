@@ -393,6 +393,33 @@ export const useSpaceStore = defineStore('space', {
         this.initializeSpace()
       }
     },
+    async changeSpace (space) {
+      const userStore = useUserStore()
+      store.dispatch('prevSpaceIdInSession', this.id, { root: true })
+      store.commit('clearAllInteractingWithAndSelected', null, { root: true })
+      console.info('🚟 Change space', space)
+      store.commit('isLoadingSpace', true, { root: true })
+      store.commit('notifySpaceIsRemoved', false, { root: true })
+      store.commit('currentUserToolbar', 'card', { root: true })
+      space = utils.migrationEnsureRemovedCards(space)
+      await this.loadSpace(space)
+      store.commit('triggerUpdateWindowHistory', space, { root: true })
+      const userIsMember = userStore.getUserIsSpaceMember
+      if (!userIsMember) { return }
+      store.commit('parentCardId', '', { root: true })
+      this.updateUserLastSpaceId()
+      const cardId = store.state.loadSpaceFocusOnCardId
+      if (cardId) {
+        store.dispatch('focusOnCardId', cardId, { root: true })
+      }
+      store.commit('restoreMultipleSelectedItemsToLoad', null, { root: true })
+      const body = { id: space.id, updatedAt: new Date() }
+      await store.dispatch('api/addToQueue', {
+        name: 'updateSpace',
+        body
+      }, { root: true })
+      await cache.updateSpace('updatedAt', body.updatedAt, space.id)
+    },
 
     // save
 

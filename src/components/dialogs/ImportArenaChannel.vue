@@ -169,7 +169,7 @@ const importSpace = async (space) => {
   try {
     cache.saveSpace(space)
     await store.dispatch('api/createSpace', space)
-    store.dispatch('currentSpace/changeSpace', space)
+    spaceStore.changeSpace(space)
     store.commit('addNotification', { message: 'Are.na channel imported', type: 'success' })
     store.dispatch('closeAllDialogs')
   } catch (error) {

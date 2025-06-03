@@ -64,7 +64,7 @@ const state = reactive({
 const currentSpace = computed(() => store.state.currentSpace)
 const changeSpace = (space) => {
   closeDialogs()
-  store.dispatch('currentSpace/changeSpace', space)
+  spaceStore.changeSpace(space)
   state.readSpaceIds.push(space.id)
 }
 const closeDialogs = () => {

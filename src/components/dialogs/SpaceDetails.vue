@@ -280,7 +280,7 @@ const addSpace = async () => {
 // select space
 
 const changeSpace = (space) => {
-  store.dispatch('currentSpace/changeSpace', space)
+  spaceStore.changeSpace(space)
   store.dispatch('closeAllDialogs')
   closeDialogs()
 }

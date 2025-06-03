@@ -40,7 +40,7 @@ const changeSpace = () => {
     window.location = props.url
   }
   store.commit('closeAllDialogs')
-  store.dispatch('currentSpace/changeSpace', props.otherSpace)
+  spaceStore.changeSpace(props.otherSpace)
 }
 
 // space info

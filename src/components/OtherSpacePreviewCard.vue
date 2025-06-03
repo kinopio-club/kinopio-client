@@ -1,11 +1,14 @@
 <script setup>
 import { reactive, computed, onMounted, watch, ref, nextTick } from 'vue'
 import { useStore } from 'vuex'
+import { useSpaceStore } from '@/stores/useSpaceStore'
 
 import Loader from '@/components/Loader.vue'
 import UserLabelInline from '@/components/UserLabelInline.vue'
 import utils from '@/utils.js'
+
 const store = useStore()
+const spaceStore = useSpaceStore()
 
 onMounted(() => {
   window.addEventListener('touchend', disableIsActive)
@@ -108,7 +111,7 @@ const openUrl = async (event) => {
       event.stopPropagation()
     }
   }
-  store.dispatch('currentSpace/changeSpace', props.otherSpace)
+  spaceStore.changeSpace(props.otherSpace)
   store.dispatch('closeAllDialogs')
 }
 </script>

@@ -207,7 +207,7 @@ const latestChangelogPost = computed(() => {
 })
 const changeSpaceToChangelog = () => {
   const space = { id: consts.changelogSpaceId() }
-  store.dispatch('currentSpace/changeSpace', space)
+  spaceStore.changeSpace(space)
   store.commit('addNotification', { message: 'Changelog space opened', type: 'success' })
 }
 
@@ -295,7 +295,7 @@ const duplicateSpace = async () => {
 }
 const changeSpace = (spaceId) => {
   const space = { id: spaceId }
-  store.dispatch('currentSpace/changeSpace', space)
+  spaceStore.changeSpace(space)
   store.dispatch('closeAllDialogs')
 }
 const changeSpaceAndSelectItems = (spaceId, items) => {

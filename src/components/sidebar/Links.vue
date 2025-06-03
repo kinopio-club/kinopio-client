@@ -96,7 +96,7 @@ const toggleCurrentUserSpacesIsVisibleOnly = () => {
   state.currentUserSpacesIsVisibleOnly = !state.currentUserSpacesIsVisibleOnly
 }
 const changeSpace = (space) => {
-  store.dispatch('currentSpace/changeSpace', space)
+  spaceStore.changeSpace(space)
   store.dispatch('closeAllDialogs')
 }
 const updateLinks = async () => {

@@ -1,6 +1,7 @@
 <script setup>
 import { reactive, computed, onMounted, onBeforeUnmount, onUnmounted, watch, ref, nextTick } from 'vue'
 import { useStore } from 'vuex'
+import { useSpaceStore } from '@/stores/useSpaceStore'
 
 import AppsAndExtensions from '@/components/dialogs/AppsAndExtensions.vue'
 import Help from '@/components/dialogs/Help.vue'
@@ -12,6 +13,7 @@ import AboutMe from '@/components/AboutMe.vue'
 import dayjs from 'dayjs'
 
 const store = useStore()
+const spaceStore = useSpaceStore()
 
 const dialogElement = ref(null)
 
@@ -105,7 +107,7 @@ const changeSpaceToChangelog = () => {
   const changelogId = changelog.value[0].id
   cache.updatePrevReadChangelogId(changelogId)
   store.commit('changelogIsUpdated', false)
-  store.dispatch('currentSpace/changeSpace', space)
+  spaceStore.changeSpace(space)
   store.commit('addNotification', { message: 'Changelog space opened', type: 'success' })
 }
 
@@ -143,7 +145,7 @@ const toggleHelpIsVisible = () => {
 
 const changeSpaceToRoadmap = () => {
   const space = { id: consts.roadmapSpaceId() }
-  store.dispatch('currentSpace/changeSpace', space)
+  spaceStore.changeSpace(space)
   store.commit('addNotification', { message: 'Roadmap space opened', type: 'success' })
 }
 

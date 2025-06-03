@@ -132,7 +132,7 @@ const changeSpace = (spaceId) => {
   if (store.state.currentSpace.id === spaceId) { return }
   const space = { id: spaceId }
   store.dispatch('closeAllDialogs')
-  store.dispatch('currentSpace/changeSpace', space)
+  spaceStore.changeSpace(space)
 }
 const selectSpaceCard = () => {
   const isCardInCurrentSpace = otherCard.value.spaceId === store.state.currentSpace.id
