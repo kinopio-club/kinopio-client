@@ -9,6 +9,7 @@ import UserBadges from '@/components/UserBadges.vue'
 import User from '@/components/User.vue'
 import cache from '@/cache.js'
 import utils from '@/utils.js'
+import consts from '@/consts.js'
 
 const store = useStore()
 const userStore = useUserStore()
@@ -50,6 +51,7 @@ const closeDialogs = () => {
 
 // user info
 
+const isDevelopment = computed(() => consts.isDevelopment())
 const userColor = computed(() => props.user.color)
 const userIsMember = computed(() => Boolean(store.getters['currentSpace/memberById'](props.user.id)))
 const userIsUpgraded = computed(() => props.user.isUpgraded)
@@ -134,6 +136,10 @@ const updateUserColor = (newValue) => {
             img.icon.visit.arrow-icon(src="@/assets/visit.svg")
       //- badges
       UserBadges(:user="user" :isCurrentUser="isCurrentUser")
+  section(v-if="isDevelopment")
+    .badge.secondary
+      p USER ID: {{ props.user.id }}
+      p APIKEY: {{ props.user.apiKey }}
 </template>
 
 <style lang="stylus">

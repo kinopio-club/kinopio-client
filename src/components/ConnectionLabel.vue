@@ -207,13 +207,14 @@ watch(() => path.value, (value, prevValue) => {
 const updateConnectionRect = () => {
   if (!props.connection.labelIsVisible) { return }
   const element = document.querySelector(`.connection-path[data-id="${id.value}"]`)
-  if (!element) {
+  let rect
+  if (element) {
+    rect = utils.rectFromConnectionPath(element.getAttribute('d'))
+  } else {
     // compute position from path if element isn't rendered yet
-    state.connectionRect = utils.rectFromConnectionPath(path.value)
-    return
+    rect = utils.rectFromConnectionPath(path.value)
   }
-  const rect = element.getBoundingClientRect()
-  state.connectionRect = utils.rectDimensions(rect)
+  state.connectionRect = rect
 }
 const connectionLabelWrapStyles = computed(() => {
   if (!state.connectionRect) { return }
@@ -236,10 +237,11 @@ const labelRelativePosition = computed(() => {
 const styles = computed(() => {
   const label = labelElement.value
   if (!label) { return }
-  const labelRect = label.getBoundingClientRect()
+  let labelRect = label.getBoundingClientRect()
+  labelRect = utils.rectDimensions(labelRect)
   const labelCenter = {
-    x: Math.round(labelRect.width / 4),
-    y: Math.round(labelRect.height / 4)
+    x: Math.round(labelRect.width / 2),
+    y: Math.round(labelRect.height / 2)
   }
   const styles = {
     background: typeColor.value,
@@ -290,10 +292,7 @@ const startDragging = (event) => {
   store.commit('broadcast/updateStore', { updates, type: 'updateRemoteUserDraggingConnectionLabel' })
   // save start positions
   if (!cursorStart.x) {
-    cursorStart = {
-      x: event.pageX,
-      y: event.pageY
-    }
+    cursorStart = utils.cursorPositionInSpace(event)
     positionAbsoluteStart = {
       x: Math.round(labelRelativePosition.value.x * state.connectionRect.width),
       y: Math.round(labelRelativePosition.value.y * state.connectionRect.height)
@@ -322,10 +321,7 @@ const drag = (event) => {
   if (!canEditSpace.value) { return }
   if (!state.isDragging) { return }
   if (isMultiTouch) { return }
-  state.currentCursor = {
-    x: event.pageX,
-    y: event.pageY
-  }
+  state.currentCursor = utils.cursorPositionInSpace(event)
   const cursorDelta = {
     x: state.currentCursor.x - cursorStart.x,
     y: state.currentCursor.y - cursorStart.y

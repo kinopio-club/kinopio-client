@@ -29,7 +29,7 @@ const pageWidth = computed(() => store.state.pageWidth)
 // Styles
 
 const backgroundStyles = computed(() => {
-  const url = backgroundUrl.value
+  let url = backgroundUrl.value
   const tintColor = currentSpace.value.backgroundTint
   const styles = {}
   if (tintColor) {
@@ -39,6 +39,7 @@ const backgroundStyles = computed(() => {
     return styles
   }
   const isRetina = utils.urlIsRetina(url)
+  url = utils.imgproxyUrl(url)
   let backgroundImage = `url('${url}')`
   if (isRetina) {
     backgroundImage = `image-set(${backgroundImage} 2x)`

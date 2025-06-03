@@ -69,14 +69,13 @@ export default {
       const fileName = utils.normalizeFileUrl(file.name)
       const id = cardId || spaceId || boxId
       const key = `${id}/${fileName}`
-      const userIsUpgraded = userStore.isUpgraded
       context.dispatch('checkIfFileTooBig', file)
       // add presignedPostData to upload
       let presignedPostData
       if (file.presignedPostData) {
         presignedPostData = file.presignedPostData
       } else {
-        presignedPostData = await context.dispatch('api/createPresignedPost', { key, userIsUpgraded, type: file.type }, { root: true })
+        presignedPostData = await context.dispatch('api/createPresignedPost', { key, type: file.type }, { root: true })
       }
       const formData = new FormData()
       Object.keys(presignedPostData.fields).forEach(key => {
@@ -132,7 +131,6 @@ export default {
       const userStore = useUserStore()
       position = position || utils.cursorPositionInSpace(event)
       context.dispatch('currentUser/notifyReadOnly', position, { root: true })
-      const userIsUpgraded = userStore.isUpgraded
       const canEditSpace = context.rootGetters['currentUser/canEditSpace']()
       if (!canEditSpace) {
         context.commit('addNotification', { message: 'You can only upload files on spaces you can edit', type: 'info' }, { root: true })
@@ -153,6 +151,7 @@ export default {
         return
       }
       // check sizeLimit
+      const userIsUpgraded = userStore.isUpgraded
       const filesTooBig = files.find(file => {
         return utils.isFileTooBig({ file, userIsUpgraded })
       })
@@ -185,7 +184,7 @@ export default {
         console.info('🍡 addCardsAndUploadFiles', file.type, file)
       }
       // add presignedPostData to files
-      const multiplePresignedPostData = await context.dispatch('api/createMultiplePresignedPosts', { files: filesPostData, userIsUpgraded }, { root: true })
+      const multiplePresignedPostData = await context.dispatch('api/createMultiplePresignedPosts', { files: filesPostData }, { root: true })
       files.map((file, index) => {
         file.presignedPostData = multiplePresignedPostData[index]
       })

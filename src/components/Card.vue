@@ -2000,8 +2000,17 @@ const focusColor = computed(() => {
     .locking-frame(v-if="state.isLocking" :style="lockingFrameStyle")
     Frames(:card="card")
 
-    template(v-if="!isComment")
-      ImageOrVideo(:isSelectedOrDragging="isSelectedOrDragging" :pendingUploadDataUrl="pendingUploadDataUrl" :image="state.formats.image" :video="state.formats.video" @loadSuccess="updateDimensionsAndPaths" :cardId="card.id" )
+    template(v-if="isVisualCard || pendingUploadDataUrl")
+      ImageOrVideo(
+        :isSelectedOrDragging="isSelectedOrDragging"
+        :pendingUploadDataUrl="pendingUploadDataUrl"
+        :image="state.formats.image"
+        :video="state.formats.video"
+        @loadSuccess="updateDimensionsAndPaths"
+        :cardId="card.id"
+        :width="props.card.width"
+        :height="props.card.height"
+      )
 
     TiltResize(:card="card" :visible="tiltResizeIsVisible")
 
@@ -2391,7 +2400,7 @@ const focusColor = computed(() => {
       animation-timing-function ease-out
 
     &.is-playing-audio
-      animation bounce 1.2s infinite ease-in-out forwards
+      animation bounce 1.2s infinite ease-in-out alternate
     @media (prefers-reduced-motion)
       &.is-playing-audio
         animation none

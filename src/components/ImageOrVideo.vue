@@ -3,6 +3,7 @@ import { reactive, computed, onMounted, onBeforeUnmount, watch, ref, nextTick } 
 import { useStore } from 'vuex'
 
 import utils from '@/utils.js'
+import consts from '@/consts.js'
 
 const store = useStore()
 
@@ -10,7 +11,7 @@ const videoElement = ref(null)
 const imageElement = ref(null)
 
 onMounted(() => {
-  state.imageUrl = props.image || props.pendingUploadDataUrl
+  state.imageUrl = imgproxyUrl(props.image, props.width, props.height)
   window.addEventListener('mousemove', updateCanvasSelectedClass)
   window.addEventListener('touchmove', updateCanvasSelectedClass)
 })
@@ -26,14 +27,17 @@ const props = defineProps({
   pendingUploadDataUrl: String,
   image: String,
   video: String,
-  cardId: String
+  cardId: String,
+  width: Number,
+  height: Number
 })
 watch(() => props.image, (url) => {
   if (!url && !props.pendingUploadDataUrl) {
     state.imageUrl = null
+    state.imageProxySrcSet = null
   }
   const onLoaded = () => {
-    state.imageUrl = url
+    state.imageUrl = imgproxyUrl(url, props.width, props.height)
   }
   const image = new Image()
   image.addEventListener('load', onLoaded)
@@ -48,9 +52,16 @@ watch(() => props.pendingUploadDataUrl, (url) => {
     state.imageUrl = url
   }
 })
+watch(() => props.width, (width) => {
+  state.imageUrl = imgproxyUrl(props.image, props.width, props.height)
+})
+watch(() => props.height, (height) => {
+  state.imageUrl = imgproxyUrl(props.image, props.width, props.height)
+})
 
 const state = reactive({
-  imageUrl: null
+  imageUrl: null,
+  imageProxySrcSet: null
 })
 
 const isTouching = computed(() => store.state.isPinchZooming || store.state.isTouchScrolling)
@@ -161,6 +172,23 @@ const removeCanvasSelectedClass = () => {
   canvas.classList.remove('selected')
 }
 
+// serve smaller images w imgproxy
+
+const imgproxyUrl = (imageURL, width, height) => {
+  if (props.pendingUploadDataUrl) {
+    return props.pendingUploadDataUrl
+  }
+  const containerBreakpoints = [400, 600, 800, 1200]
+  const devicePixelRatio = window.devicePixelRatio
+  const maxDimensions = Math.max(width, height)
+  for (const breakpoint of containerBreakpoints) {
+    if (maxDimensions <= breakpoint) {
+      return utils.imgproxyUrl(imageURL, breakpoint * devicePixelRatio)
+    }
+  }
+  return utils.imgproxyUrl(imageURL, containerBreakpoints[containerBreakpoints.length - 1] * devicePixelRatio)
+}
+
 // events
 
 const handleSuccess = (event) => {
@@ -175,7 +203,15 @@ const handleError = (event) => {
 video(v-if="Boolean(video)" autoplay loop muted playsinline :key="video" :class="{selected: isSelectedOrDragging}" @canplay="handleSuccess" ref="videoElement" @load="handleSuccess")
   source(:src="video")
 //- Image
-img.image(v-if="state.imageUrl" ref="imageElement" :src="state.imageUrl" :class="{selected: isSelectedOrDragging}" @load="handleSuccess" @error="handleError" loading="lazy")
+img.image(
+  v-if="state.imageUrl"
+  ref="imageElement"
+  :src="state.imageUrl"
+  :class="{selected: isSelectedOrDragging}"
+  @load="handleSuccess"
+  @error="handleError"
+  loading="lazy"
+)
 </template>
 
 <style lang="stylus">

@@ -54,16 +54,21 @@ const merge = (accumulator, currentValue) => {
     if (isObjectArrays) {
       const allEntities = [...objValue, ...srcValue]
       const entityMap = allEntities.reduce((acc, entity) => {
-        if (!acc[entity.id]) {
-          acc[entity.id] = entity
+        // For each entity, merge with existing entity if it exists to preserve null values
+        if (acc[entity.id]) {
+          acc[entity.id] = mergeWith({}, acc[entity.id], entity, (objVal, srcVal) => {
+            // Preserve null values when merging individual entities
+            return srcVal === null ? null : undefined
+          })
         } else {
-          // Deep merge when entity already exists
-          acc[entity.id] = mergeWith({}, acc[entity.id], entity)
+          acc[entity.id] = entity
         }
         return acc
       }, {})
       return Object.values(entityMap)
     }
+    // Return undefined to let lodash handle the default merging behavior
+    return undefined
   })
 }
 const squashQueue = (queue) => {
@@ -154,6 +159,7 @@ const self = {
       context.commit('notifyConnectionErrorName', name, { root: true })
     },
 
+    // adds auth credentials to fetch options
     requestOptions: (context, options) => {
       const userStore = useUserStore()
       const headers = new Headers({
@@ -1217,6 +1223,7 @@ const self = {
 
     createPresignedPost: async (context, body) => {
       try {
+        body.requestSpaceId = context.rootState.currentSpace.id
         const options = await context.dispatch('requestOptions', { body, method: 'POST', space: context.rootState.currentSpace })
         const response = await fetch(`${consts.apiHost()}/upload/presigned-post`, options)
         return normalizeResponse(response)
@@ -1226,6 +1233,7 @@ const self = {
     },
     createMultiplePresignedPosts: async (context, body) => {
       try {
+        body.requestSpaceId = context.rootState.currentSpace.id
         const options = await context.dispatch('requestOptions', { body, method: 'POST', space: context.rootState.currentSpace })
         const response = await fetch(`${consts.apiHost()}/upload/presigned-post/multiple`, options)
         return normalizeResponse(response)
