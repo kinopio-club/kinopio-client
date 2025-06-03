@@ -21,12 +21,13 @@ console.info('🌳 websocket clientId', clientId)
 const showDebugMessages = false
 
 const joinSpaceRoom = (store, mutation) => {
+  const spaceStore = useSpaceStore()
   const userStore = useUserStore()
   console.info('🌙 joining', websocket)
   if (!websocket) { return }
-  const space = store.state.currentSpace
+  const space = spaceStore.getSpaceAllState
   const user = userStore.getUserAllState
-  const currentSpaceIsRemote = store.getters['currentSpace/isRemote']
+  const currentSpaceIsRemote = spaceStore.getSpaceIsRemote
   if (!currentSpaceIsRemote) {
     store.commit('isJoiningSpace', false)
     return
@@ -92,7 +93,8 @@ const checkIfShouldNotifyOffscreenCardCreated = (store, data) => {
   }
 }
 const checkIfShouldPreventBroadcast = (store) => {
-  const spaceIsRemote = store.getters['currentSpace/isRemote']
+  const spaceStore = useSpaceStore()
+  const spaceIsRemote = spaceStore.getSpaceIsRemote
   return !spaceIsRemote
 }
 const closeWebsocket = (store) => {

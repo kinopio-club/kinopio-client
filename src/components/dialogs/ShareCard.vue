@@ -1,9 +1,12 @@
 <script setup>
+import { reactive, computed, onMounted, watch, ref, nextTick } from 'vue'
+import { useStore } from 'vuex'
+import { useSpaceStore } from '@/stores/useSpaceStore'
+
 import utils from '@/utils.js'
 import consts from '@/consts.js'
 
-import { reactive, computed, onMounted, watch, ref, nextTick } from 'vue'
-import { useStore } from 'vuex'
+const spaceStore = useSpaceStore()
 const store = useStore()
 
 const dialog = ref(null)
@@ -18,7 +21,7 @@ const spaceIsPrivate = computed(() => store.state.currentSpace.privacy === 'priv
 
 // anon user
 
-const canShare = computed(() => store.getters['currentSpace/isRemote'])
+const canShare = computed(() => spaceStore.getSpaceIsRemote)
 const triggerSignUpOrInIsVisible = () => {
   store.dispatch('closeAllDialogs')
   store.commit('triggerSignUpOrInIsVisible')

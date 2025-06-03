@@ -147,7 +147,7 @@ const clearMetaRSSFeed = () => {
 }
 const updateMetaRSSFeed = () => {
   const spaceIsPrivate = store.state.currentSpace.privacy === 'private'
-  const spaceIsRemote = store.getters['currentSpace/isRemote']
+  const spaceIsRemote = spaceStore.getSpaceIsRemote
   clearMetaRSSFeed()
   if (!spaceIsRemote) { return }
   if (spaceIsPrivate) { return }

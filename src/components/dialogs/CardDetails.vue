@@ -417,7 +417,7 @@ const cardUrl = () => {
 }
 const copyCardUrl = async (event) => {
   if (!state.shareCardIsVisible) { return }
-  const canShare = store.getters['currentSpace/isRemote']
+  const canShare = spaceStore.getSpaceIsRemote
   if (!canShare) { return }
   store.commit('clearNotificationsWithPosition')
   const position = utils.cursorPositionInPage(event)
