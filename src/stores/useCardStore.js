@@ -247,6 +247,7 @@ export const useCardStore = defineStore('cards', {
 
     normailzeNewCard (card) {
       const userStore = useUserStore()
+      const spaceStore = useSpaceStore()
       const { x, y, z, position, isParentCard, name, id, backgroundColor, width, height } = card
       const cards = this.getAllCards
       const highestCardZ = utils.highestItemZ(cards)
@@ -267,7 +268,7 @@ export const useCardStore = defineStore('cards', {
       card.isRemoved = false
       card.headerFontId = userStore.prevHeaderFontId || 0
       card.maxWidth = Math.round(card.maxWidth) || userStore.cardSettingsMaxCardWidth
-      card.spaceId = store.state.currentSpace.id // currentSpaceId
+      card.spaceId = spaceStore.id // currentSpaceId
       card.isComment = isComment
       card.shouldShowOtherSpacePreviewImage = true
       return card
@@ -351,6 +352,7 @@ export const useCardStore = defineStore('cards', {
     },
     async updateCards (updates) {
       const userStore = useUserStore()
+      const spaceStore = useSpaceStore()
       const canEditSpace = userStore.getUserCanEditSpace()
       if (!canEditSpace) { return }
       updates = updates.filter(update => userStore.getUserCanEditCard(update))
@@ -371,7 +373,7 @@ export const useCardStore = defineStore('cards', {
       }
       await store.dispatch('api/addToQueue', { name: 'updateMultipleCards', body: { cards: updates } }, { root: true })
       // TODO history? if unpaused
-      await cache.updateSpace('cards', this.getAllCards, store.state.currentSpace.id)
+      await cache.updateSpace('cards', this.getAllCards, spaceStore.id)
       // update connection paths
       const connectionStore = useConnectionStore()
       const isNameUpdated = updates.find(update => Boolean(update.name))
@@ -399,7 +401,8 @@ export const useCardStore = defineStore('cards', {
     },
     async deleteAllRemovedCards () {
       const userStore = useUserStore()
-      const spaceId = store.state.currentSpace.id
+      const spaceStore = useSpaceStore()
+      const spaceId = spaceStore.id
       const userId = userStore.id
       const cards = this.getAllRemovedCards
       await this.deleteCards(cards)
@@ -435,13 +438,14 @@ export const useCardStore = defineStore('cards', {
     },
     async restoreRemovedCard (card) {
       const userStore = useUserStore()
+      const spaceStore = useSpaceStore()
       card.isRemoved = false
       const isLocal = this.getCard(card.id)
       if (isLocal) {
         this.updateCard(card)
       } else {
         this.addCardToState(card)
-        await cache.updateSpace('cards', this.getAllCards, store.state.currentSpace.id)
+        await cache.updateSpace('cards', this.getAllCards, spaceStore.id)
         await store.dispatch('api/addToQueue', { name: 'restoreRemovedCard', body: card }, { root: true })
         userStore.updateUserCardsCreatedCount([card])
       }
@@ -766,8 +770,9 @@ export const useCardStore = defineStore('cards', {
     },
     async pasteCard (card, id) {
       const userStore = useUserStore()
+      const spaceStore = useSpaceStore()
       card.id = id || nanoid()
-      const spaceId = store.state.currentSpace.id
+      const spaceId = spaceStore.id
       card.spaceId = spaceId
       card.isCreatedThroughPublicApi = false
       const prevCards = this.getAllCards

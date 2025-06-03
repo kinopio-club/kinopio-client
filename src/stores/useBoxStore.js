@@ -186,7 +186,7 @@ export const useBoxStore = defineStore('boxes', {
         editedByUserId: userStore.id
       })
       // TODO history? if unpaused
-      await cache.updateSpace('boxes', this.getAllBoxes, store.state.currentSpace.id)
+      await cache.updateSpace('boxes', this.getAllBoxes, spaceStore.id)
       // update connection paths
       const connectionStore = useConnectionStore()
       const isNameUpdated = updates.find(update => Boolean(update.name))
@@ -203,6 +203,7 @@ export const useBoxStore = defineStore('boxes', {
 
     async removeBoxes (ids) {
       const userStore = useUserStore()
+      const spaceStore = useSpaceStore()
       const canEditSpace = userStore.getUserCanEditSpace()
       if (!canEditSpace) { return }
       const updates = []
@@ -215,7 +216,7 @@ export const useBoxStore = defineStore('boxes', {
       }
       const boxes = ids.map(id => this.getBox(id))
       // store.dispatch('history/add', { boxes, isRemoved: true }, { root: true })
-      await cache.updateSpace('boxes', this.getAllBoxes, store.state.currentSpace.id)
+      await cache.updateSpace('boxes', this.getAllBoxes, spaceStore.id)
       await nextTick()
       const connectionStore = useConnectionStore()
       connectionStore.removeConnectionsFromItems(ids)

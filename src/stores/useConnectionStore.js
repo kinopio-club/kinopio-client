@@ -152,6 +152,7 @@ export const useConnectionStore = defineStore('connections', {
     },
     async createConnection (connection) {
       const userStore = useUserStore()
+      const spaceStore = useSpaceStore()
       const connections = this.getAllConnections
       const isExistingConnection = connections.find(item => {
         const isStart = item.startItemId === connection.startItemId
@@ -162,7 +163,7 @@ export const useConnectionStore = defineStore('connections', {
       if (connection.startItemId === connection.endItemId) { return }
       const type = connection.type || this.getNewConnectionType
       connection.id = connection.id || nanoid()
-      connection.spaceId = store.state.currentSpace.id
+      connection.spaceId = spaceStore.id
       connection.userId = userStore.id
       connection.connectionTypeId = type.id
       this.addConnectionToState(connection)
@@ -175,6 +176,7 @@ export const useConnectionStore = defineStore('connections', {
     },
     async createConnectionType (type) {
       const userStore = useUserStore()
+      const spaceStore = useSpaceStore()
       const isThemeDark = userStore.theme === 'dark'
       let color = randomColor({ luminosity: 'light' })
       if (isThemeDark) {
@@ -199,13 +201,14 @@ export const useConnectionStore = defineStore('connections', {
         store.dispatch('broadcast/update', { updates: connectionType, storeName: 'connectionStore', actionName: 'createConnectionType' }, { root: true })
       }
       await store.dispatch('api/addToQueue', { name: 'createConnectionType', body: connectionType }, { root: true })
-      await cache.updateSpace('connectionsTypes', this.getAllConnectionTypes, store.state.currentSpace.id)
+      await cache.updateSpace('connectionsTypes', this.getAllConnectionTypes, spaceStore.id)
     },
 
     // update
 
     async updateConnections (updates) {
       const userStore = useUserStore()
+      const spaceStore = useSpaceStore()
       const canEditSpace = userStore.getUserCanEditSpace()
       if (!canEditSpace) { return }
       updates.forEach(({ id, ...changes }) => {
@@ -225,7 +228,7 @@ export const useConnectionStore = defineStore('connections', {
       }
       await store.dispatch('api/addToQueue', { name: 'updateMultipleConnections', body: { connections: updates } }, { root: true })
       // TODO history? if unpaused
-      await cache.updateSpace('connections', this.getAllConnections, store.state.currentSpace.id)
+      await cache.updateSpace('connections', this.getAllConnections, spaceStore.id)
     },
     updateConnection (update) {
       this.updateConnections([update])
@@ -252,13 +255,14 @@ export const useConnectionStore = defineStore('connections', {
       this.prevConnectionTypeId = id
     },
     async updateConnectionType (update) {
+      const spaceStore = useSpaceStore()
       const connectionType = this.getConnectionType(update.id)
       const keys = Object.keys(update)
       keys.forEach(key => {
         connectionType[key] = update[key]
       })
       this.typeByIds[connectionType.id] = connectionType
-      await cache.updateSpace('connectionTypes', this.getAllConnectionTypes, store.state.currentSpace.id)
+      await cache.updateSpace('connectionTypes', this.getAllConnectionTypes, spaceStore.id)
       await store.dispatch('api/addToQueue', { name: 'updateConnectionType', body: connectionType }, { root: true })
       // context.dispatch('history/add', { connectionTypes: [type] }, { root: true })
       // if (!updates.isBroadcast) {
