@@ -666,8 +666,6 @@ header(v-if="isVisible" :style="state.position" :class="{'fade-out': isFadingOut
               button(@click.left.stop="toggleSpaceDetailsIsVisible" :class="{ active: state.spaceDetailsIsVisible, 'translucent-button': !shouldIncreaseUIContrast }" title="Space Details and Spaces List")
                 .button-contents(:class="{'space-is-hidden': currentSpaceIsHidden}")
                   GroupLabel(:group="spaceGroup")
-                  span(v-if="currentSpaceIsInbox")
-                    img.icon.inbox-icon(src="@/assets/inbox.svg")
                   //- span(v-if="currentSpaceIsTemplate")
                   //-   img.icon.templates(src="@/assets/templates.svg")
                   //- span
