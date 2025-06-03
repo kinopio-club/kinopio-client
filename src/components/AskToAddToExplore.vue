@@ -19,7 +19,7 @@ const state = reactive({
 
 const showInExplore = computed(() => userStore.showInExplore)
 const currentUserIsSignedIn = computed(() => userStore.getUserIsSignedIn)
-const isSpaceMember = computed(() => userStore.getUserIsSpaceMember())
+const isSpaceMember = computed(() => userStore.getUserIsSpaceMember)
 const isVisible = computed(() => {
   return !isSpaceMember.value && !showInExplore.value
 })

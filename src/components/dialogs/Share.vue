@@ -55,7 +55,7 @@ const state = reactive({
 
 const isSecureAppContextIOS = computed(() => consts.isSecureAppContextIOS)
 const currentUserIsSignedIn = computed(() => userStore.getUserIsSignedIn)
-const isSpaceMember = computed(() => userStore.getUserIsSpaceMember())
+const isSpaceMember = computed(() => userStore.getUserIsSpaceMember)
 const spaceIsRemote = computed(() => store.getters['currentSpace/isRemote'])
 const spaceIsPublic = computed(() => store.state.currentSpace.privacy !== 'private')
 const spaceIsPrivate = computed(() => store.state.currentSpace.privacy === 'private')

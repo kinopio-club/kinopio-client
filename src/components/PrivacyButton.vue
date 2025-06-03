@@ -22,7 +22,7 @@ const props = defineProps({
 })
 
 const spaceGroup = computed(() => store.getters['groups/spaceGroup']())
-const isSpaceMember = computed(() => userStore.getUserIsSpaceMember())
+const isSpaceMember = computed(() => userStore.getUserIsSpaceMember)
 const isInvitedButCannotEditSpace = computed(() => store.state.currentUserIsInvitedButCannotEditCurrentSpace)
 
 // privacy state

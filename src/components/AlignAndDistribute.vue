@@ -50,7 +50,7 @@ const moreOptionsIsVisible = computed(() => userStore.shouldShowMoreAlignOptions
 const multipleCardsSelectedIds = computed(() => store.state.multipleCardsSelectedIds)
 const multipleConnectionsSelectedIds = computed(() => store.state.multipleConnectionsSelectedIds)
 const multipleBoxesSelectedIds = computed(() => store.state.multipleBoxesSelectedIds)
-const isSpaceMember = computed(() => userStore.getUserIsSpaceMember())
+const isSpaceMember = computed(() => userStore.getUserIsSpaceMember)
 const spaceBetween = computed(() => consts.spaceBetweenCards * spaceCounterZoomDecimal.value)
 const canDistribute = computed(() => {
   const minimumRequiredToDistribute = 3

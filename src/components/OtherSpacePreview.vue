@@ -33,7 +33,7 @@ const canEditCard = computed(() => {
   return false
 })
 const canEditSpace = computed(() => userStore.getUserCanEditSpace())
-const isSpaceMember = computed(() => userStore.getUserIsSpaceMember())
+const isSpaceMember = computed(() => userStore.getUserIsSpaceMember)
 const isLoadingOtherItems = computed(() => store.state.isLoadingOtherItems)
 const changeSpace = () => {
   if (isInvite.value) {

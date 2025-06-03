@@ -158,7 +158,7 @@ export const useUserStore = defineStore('users', {
     },
     getUserDrawingColor: (state) => {
       return state.drawingColor || state.color
-    }
+    },
 
     // tagByName: (state, getters) => (name) => {
     //   return
@@ -200,6 +200,12 @@ export const useUserStore = defineStore('users', {
     // // user tags
 
     // // drawing
+    getUserIsSpaceMember () {
+      const isSpaceUser = this.getUserIsSpaceUser
+      const isSpaceCollaborator = this.getUserIsSpaceCollaborator
+      const isGroupMember = store.getters['groups/currentUserIsCurrentSpaceGroupUser']
+      return Boolean(isSpaceUser || isSpaceCollaborator || isGroupMember)
+    }
 
   },
 
@@ -221,7 +227,7 @@ export const useUserStore = defineStore('users', {
         return 'spectator'
       }
     },
-    getUserIsSpaceMember (space) {
+    getUserIsOtherSpaceMember (space) {
       const spaceStore = useSpaceStore()
       space = space || spaceStore.getSpaceAllState
       const isSpaceUser = this.getUserIsSpaceUser
@@ -234,11 +240,11 @@ export const useUserStore = defineStore('users', {
       const spaceIsOpen = spaceStore.privacy === 'open'
       const currentUserIsSignedIn = this.getUserIsSignedIn
       const canEditOpenSpace = spaceIsOpen && currentUserIsSignedIn
-      const isSpaceMember = this.getUserIsSpaceMember()
+      const isSpaceMember = this.getUserIsSpaceMember
       return canEditOpenSpace || isSpaceMember
     },
     getUserCanEditBox (box) {
-      const isSpaceMember = this.getUserIsSpaceMember()
+      const isSpaceMember = this.getUserIsSpaceMember
       if (isSpaceMember) { return true }
       const canEditSpace = this.getUserCanEditSpace()
       const createdBox = this.getUserIsBoxCreator(box)
@@ -258,7 +264,7 @@ export const useUserStore = defineStore('users', {
       return isCreatedByUser || isUpdatedByUser || isNoUser
     },
     getUserCanEditCard (card) {
-      const isSpaceMember = this.getUserIsSpaceMember()
+      const isSpaceMember = this.getUserIsSpaceMember
       if (isSpaceMember) { return true }
       const canEditSpace = this.getUserCanEditSpace()
       const getUserIsCardCreator = this.getUserIsCardCreator(card)
@@ -281,7 +287,7 @@ export const useUserStore = defineStore('users', {
 
     getIsUserCommentOnly () {
       const canEditSpace = this.getUserCanEditSpace()
-      const isSpaceMember = this.getUserIsSpaceMember()
+      const isSpaceMember = this.getUserIsSpaceMember
       return canEditSpace && !isSpaceMember
     },
 

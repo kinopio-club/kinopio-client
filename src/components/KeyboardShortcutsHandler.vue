@@ -585,7 +585,7 @@ const clearAllSelectedCards = () => {
 }
 
 const canEditCardById = (cardId) => {
-  const isSpaceMember = userStore.getUserIsSpaceMember()
+  const isSpaceMember = userStore.getUserIsSpaceMember
   const card = cardStore.getCard(cardId)
   const cardIsCreatedByCurrentUser = userStore.getUserIsCardCreator(card)
   const canEditSpace = userStore.getUserCanEditSpace()
@@ -595,7 +595,7 @@ const canEditCardById = (cardId) => {
 }
 
 const canEditConnectionById = (connectionId) => {
-  const isSpaceMember = userStore.getUserIsSpaceMember()
+  const isSpaceMember = userStore.getUserIsSpaceMember
   const connection = connectionStore.getConnection(connectionId)
   const connectionIsCreatedByCurrentUser = userStore.getItemIsCreatedByUser(connection)
   const canEditSpace = userStore.getUserCanEditSpace()
@@ -976,7 +976,7 @@ const toggleLockCards = () => {
 // Create Boxes
 
 const containItemsInNewBox = async (cards) => {
-  const isSpaceMember = userStore.getUserIsSpaceMember()
+  const isSpaceMember = userStore.getUserIsSpaceMember
   if (!isSpaceMember) { return }
   const rect = utils.boundaryRectFromItems(cards)
   // box size

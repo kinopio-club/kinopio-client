@@ -191,7 +191,7 @@ const shouldShowChangelogIsUpdated = computed(() => {
 // current space
 
 const currentSpaceUrl = computed(() => spaceStore.getSpaceUrl)
-const currentSpaceIsHidden = computed(() => spaceStore.getSpaceIsHidden())
+const currentSpaceIsHidden = computed(() => spaceStore.getSpaceIsHidden)
 const currentSpaceName = computed(() => {
   const id = spaceStore.id
   const name = spaceStore.name

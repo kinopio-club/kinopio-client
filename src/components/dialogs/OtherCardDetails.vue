@@ -48,7 +48,7 @@ const url = computed(() => utils.urlFromSpaceAndCard({ spaceId: otherSpace.value
 const canEditOtherCard = computed(() => {
   const canEditCard = userStore.getUserIsCardCreator(otherCard.value)
   if (canEditCard) { return true }
-  const isMemberOfOtherSpace = userStore.getUserIsSpaceMember(otherSpace.value)
+  const isMemberOfOtherSpace = userStore.getUserIsOtherSpaceMember(otherSpace.value)
   return isMemberOfOtherSpace
 })
 const isLoadingOtherItems = computed(() => store.state.isLoadingOtherItems)

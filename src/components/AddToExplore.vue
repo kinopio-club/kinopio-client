@@ -47,7 +47,7 @@ watch(() => props.visible, (value, prevValue) => {
   }
 })
 
-const isVisible = computed(() => props.visible || userStore.getUserIsSpaceMember())
+const isVisible = computed(() => props.visible || userStore.getUserIsSpaceMember)
 const showInExplore = computed(() => {
   const space = props.space || store.state.currentSpace
   const showInExplore = space.showInExplore

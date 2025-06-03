@@ -15,7 +15,7 @@ const props = defineProps({
   visible: Boolean
 })
 
-const isSpaceMember = computed(() => userStore.getUserIsSpaceMember())
+const isSpaceMember = computed(() => userStore.getUserIsSpaceMember)
 const spacePrivacyIsOpen = computed(() => store.state.currentSpace.privacy === 'open')
 const showInExplore = computed(() => store.state.currentSpace.showInExplore)
 const isTemplate = computed(() => store.state.currentSpace.isTemplate)

@@ -844,7 +844,7 @@ const currentSpace = {
     },
     saveCurrentSpaceToCache: (context) => {
       const userStore = useUserStore()
-      const isSpaceMember = userStore.getUserIsSpaceMember(context.space)
+      const isSpaceMember = userStore.getUserIsOtherSpaceMember(context.space)
       if (!isSpaceMember) { return }
       if (context.state.isRemoved) { return }
       cache.saveSpace(context.space)
@@ -852,7 +852,7 @@ const currentSpace = {
     notifySpaceIsOpen: (context) => {
       if (context.state.isRemoved) { return }
       const userStore = useUserStore()
-      const isSpaceMember = userStore.getUserIsSpaceMember(context.space)
+      const isSpaceMember = userStore.getUserIsOtherSpaceMember(context.space)
       const spaceIsOpen = context.state.privacy === 'open'
       if (!isSpaceMember && spaceIsOpen) {
         context.commit('addNotification', { message: 'This space is open to comments', icon: 'comment', type: 'success' }, { root: true })
@@ -1010,7 +1010,7 @@ const currentSpace = {
       space = utils.migrationEnsureRemovedCards(space)
       await context.dispatch('loadSpace', { space })
       context.commit('triggerUpdateWindowHistory', space, { root: true })
-      const userIsMember = userStore.getUserIsSpaceMember()
+      const userIsMember = userStore.getUserIsSpaceMember
       if (!userIsMember) { return }
       context.commit('parentCardId', '', { root: true })
       context.dispatch('updateUserLastSpaceId')
@@ -1313,7 +1313,7 @@ const currentSpace = {
     },
     isRemote: (state, getters, rootState, rootGetters) => {
       const userStore = useUserStore()
-      const isSpaceMember = userStore.getUserIsSpaceMember()
+      const isSpaceMember = userStore.getUserIsSpaceMember
       const isOtherSpace = !isSpaceMember
       const currentUserIsSignedIn = userStore.getUserIsSignedIn
       return isOtherSpace || currentUserIsSignedIn
@@ -1329,7 +1329,7 @@ const currentSpace = {
     },
     shouldUpdateApi: (state, getters, rootState, rootGetters) => {
       const userStore = useUserStore()
-      const isSpaceMember = userStore.getUserIsSpaceMember()
+      const isSpaceMember = userStore.getUserIsSpaceMember
       const isSignedIn = userStore.getUserIsSignedIn
       return isSpaceMember && isSignedIn
     },

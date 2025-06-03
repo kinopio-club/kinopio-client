@@ -33,7 +33,7 @@ const state = reactive({
   previewImageIsHover: false
 })
 
-const isSpaceMember = computed(() => userStore.getUserIsSpaceMember())
+const isSpaceMember = computed(() => userStore.getUserIsSpaceMember)
 const canEditSpace = computed(() => userStore.getUserCanEditSpace())
 const cardIsCreatedByCurrentUser = computed(() => userStore.getUserIsCardCreator(props.card))
 const canEditCard = computed(() => {

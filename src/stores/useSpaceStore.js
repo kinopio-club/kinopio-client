@@ -33,45 +33,115 @@ export const useSpaceStore = defineStore('space', {
   state: () => (newSpace),
 
   getters: {
-    getSpaceAllState: (state) => {
-      return { ...state }
+    getSpaceAllState () {
+      return { ...this } // In method syntax, 'this' refers to the store instance
     },
-    getSpaceIsPrivate: (state) => {
-      return state.privacy === 'private'
+    getSpaceIsPrivate () {
+      return this.privacy === 'private'
     },
-    getSpaceUrl: (state) => {
+    getSpaceUrl () {
       const domain = consts.kinopioDomain()
-      const spaceUrl = utils.url({ name: state.name, id: state.id })
+      const spaceUrl = utils.url({ name: this.name, id: this.id })
       return `${domain}/${spaceUrl}`
-    }
-    // getSpaceAllTags: (state) => {
-    //   return state.tags
-    // }
-  },
-
-  actions: {
-
+    },
+    // getSpaceAllTags() {
+    //   return this.tags
+    // },
+    getSpaceCreator () {
+      return this.getSpaceMemberById(this.userId)
+    },
+    getSpaceCreatorIsUpgraded () {
+      const creatorUser = this.getSpaceCreator
+      return creatorUser?.isUpgraded
+    },
+    getSpaceCreatorIsCurrentUser () {
+      const userStore = useUserStore()
+      const creatorUser = this.creator
+      return userStore.getUserIsCurrentUser(creatorUser)
+    },
+    getShouldPreventAddCard () {
+      const userStore = useUserStore()
+      const cardsCreatedIsOverLimit = userStore.getUserCardsCreatedIsOverLimit
+      return cardsCreatedIsOverLimit && !this.getSpaceCreatorIsUpgraded
+    },
     getSpaceIsRemote () {
       const userStore = useUserStore()
-      const isSpaceMember = userStore.getUserIsSpaceMember()
+      const isSpaceMember = userStore.getUserIsSpaceMember
       const isOtherSpace = !isSpaceMember
       const isSignedIn = userStore.getUserIsSignedIn
       return isOtherSpace || isSignedIn
     },
-
-    getSpaceIsHidden (spaceId) {
+    getSpaceAllUsers () {
       const userStore = useUserStore()
-      spaceId = spaceId || this.id
+      let users = this.getSpaceMembers
+      users = users.concat(this.spectators)
+      // if (excludeCurrentUser) {
+      //   users = users.filter(user => user.id !== userStore.id)
+      // }
+      return users
+    },
+    getSpaceMembers () {
+      const userStore = useUserStore()
+      let users = this.users
+      const collaborators = this.collaborators || []
+      users = users.concat(collaborators)
+      // if (excludeCurrentUser) {
+      //   users = users.filter(user => user.id !== userStore.id)
+      // }
+      return users
+    },
+    getSpaceIsHidden () {
+      const userStore = useUserStore()
       const hiddenSpaces = userStore.hiddenSpaces || []
-      let value = hiddenSpaces.find(hiddenSpace => hiddenSpace?.id === spaceId)
+      let value = hiddenSpaces.find(hiddenSpace => hiddenSpace?.id === this.id)
       value = Boolean(value)
       return value
-    },
+    }
+
+  },
+
+  actions: {
+
     getSpaceTagByName (name) {
       const tags = this.tags.find(tag => {
         return tag.name === name
       })
       return tags
+    },
+
+    // user getters
+
+    getSpaceMemberById (userId) {
+      const members = this.getSpaceMembers
+      return members.find(member => member.id === userId)
+    },
+    getSpaceUserById (userId) {
+      const userStore = useUserStore()
+      // current user
+      if (userStore.id === userId) {
+        return userStore
+      }
+      // collaborators
+      const user = this.memberById(userId)
+      if (user?.id === userId) {
+        return user
+      }
+      // commenters
+      const otherUser = store.getters.otherUserById(userId)
+      if (otherUser) {
+        return otherUser
+      }
+      // group user
+      const groupUser = store.getters['groups/groupUser']({ userId })
+      return groupUser
+    },
+    getSpaceReadOnlyKey (space) {
+      const readOnlyKey = store.state.spaceReadOnlyKey
+      if (space.id === readOnlyKey.spaceId) {
+        return readOnlyKey.key
+      } else {
+        return null
+      }
     },
 
     // init
@@ -110,7 +180,7 @@ export const useSpaceStore = defineStore('space', {
     },
     saveSpaceToCache () {
       const userStore = useUserStore()
-      const isSpaceMember = userStore.getUserIsSpaceMember()
+      const isSpaceMember = userStore.getUserIsSpaceMember
       if (!isSpaceMember) { return }
       if (this.isRemoved) { return }
       cache.saveSpace(this.getSpaceAllState)
@@ -152,7 +222,7 @@ export const useSpaceStore = defineStore('space', {
           remoteSpace = await store.dispatch('api/getSpaceAnonymously', space, { root: true })
           cache.saveInvitedSpace(remoteSpace)
           store.commit('clearSpaceCollaboratorKeys', null, { root: true })
-        } else if (this.getSpaceIsRemote()) {
+        } else if (this.getSpaceIsRemote) {
           remoteSpace = await store.dispatch('api/getSpaceAnonymously', space, { root: true })
         }
         return remoteSpace
@@ -521,7 +591,7 @@ export const useSpaceStore = defineStore('space', {
     notifySpaceIsOpen () {
       if (this.isRemoved) { return }
       const userStore = useUserStore()
-      const isSpaceMember = userStore.getUserIsSpaceMember()
+      const isSpaceMember = userStore.getUserIsSpaceMember
       const spaceIsOpen = this.privacy === 'open'
       if (!isSpaceMember && spaceIsOpen) {
         store.commit('addNotification', { message: 'This space is open to comments', icon: 'comment', type: 'success' }, { root: true })

@@ -69,7 +69,7 @@ const state = reactive({
 })
 
 const canEditSpace = computed(() => userStore.getUserCanEditSpace())
-const isSpaceMember = computed(() => userStore.getUserIsSpaceMember())
+const isSpaceMember = computed(() => userStore.getUserIsSpaceMember)
 const canEditAll = computed(() => {
   if (isSpaceMember.value) { return true }
   const editableCards = props.cards.filter(card => userStore.getUserCanEditCard(card))

@@ -266,7 +266,7 @@ const isInvitedButCannotEditSpace = computed(() => store.state.currentUserIsInvi
 
 // user
 
-const isSpaceMember = computed(() => userStore.getUserIsSpaceMember())
+const isSpaceMember = computed(() => userStore.getUserIsSpaceMember)
 const isFavoriteSpace = computed(() => store.getters['currentSpace/isFavorite']())
 const canEditCard = computed(() => userStore.getUserCanEditCard(card.value))
 const currentUserIsSignedIn = computed(() => userStore.getUserIsSignedIn)

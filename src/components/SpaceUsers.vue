@@ -41,7 +41,7 @@ const isEmbedMode = computed(() => store.state.isEmbedMode)
 const isAddPage = computed(() => store.state.isAddPage)
 const currentUser = computed(() => userStore.getUserAllState)
 const currentSpace = computed(() => store.state.currentSpace)
-const currentUserIsSpaceMember = computed(() => userStore.getUserIsSpaceMember())
+const currentUserIsSpaceMember = computed(() => userStore.getUserIsSpaceMember)
 
 // const appendCurrentUser = (items) => {
 //   const isCurrentUser = Boolean(items.find(user => user.id === currentUser.value.id))

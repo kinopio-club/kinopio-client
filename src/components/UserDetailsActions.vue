@@ -81,7 +81,7 @@ const userIsSignedIn = computed(() => {
 // current user
 
 const isCurrentUser = computed(() => userStore.getUserIsCurrentUser(props.user))
-// const currentUserIsSpaceMember = computed(() => userStore.getUserIsSpaceMember())
+// const currentUserIsSpaceMember = computed(() => userStore.getUserIsSpaceMember)
 const userSettingsIsVisible = computed(() => store.state.userSettingsIsVisible)
 const toggleUserSettingsIsVisible = () => {
   const value = !store.state.userSettingsIsVisible
