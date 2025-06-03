@@ -361,7 +361,7 @@ dialog.space-details.is-pinnable.wide(v-if="props.visible" :open="props.visible"
     .row.title-row
       div
         //- New Space
-        AddSpaceButton(:parentIsInDialog="true" @closeDialogs="closeDialogs" @addSpace="addSpace" isSmall="true")
+        AddSpaceButton(:parentIsInDialog="true" @closeDialogs="closeDialogs" @addSpace="addSpace" :isSmall="true")
       //- Filters
       .button-wrap
         // no filters
