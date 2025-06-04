@@ -1,9 +1,13 @@
+import { nextTick } from 'vue'
+import { defineStore } from 'pinia'
 import { useUserStore } from '@/stores/useUserStore'
 import { useSpaceStore } from '@/stores/useSpaceStore'
 
-import cache from '@/cache.js'
+import store from '@/store/store.js' // TEMP Import Vuex store
+
 import utils from '@/utils.js'
 import consts from '@/consts.js'
+import cache from '@/cache.js'
 
 import debounce from 'lodash-es/debounce'
 import mergeWith from 'lodash-es/mergeWith'
@@ -146,21 +150,17 @@ const normalizeCollaboratorKey = (space) => {
   }
 }
 
-const self = {
-  namespaced: true,
-  state: {},
-  mutations: {},
+export const useApiStore = defineStore('api', {
   actions: {
-
-    handleServerError: (context, { name, error, shouldNotNotifyUser }) => {
+    handleServerError ({ name, error, shouldNotNotifyUser }) {
       console.error('🚒 handleServerError', name, error)
       if (!shouldNotNotifyUser) { return }
-      context.commit('notifyConnectionError', true, { root: true })
-      context.commit('notifyConnectionErrorName', name, { root: true })
+      store.commit('notifyConnectionError', true, { root: true })
+      store.commit('notifyConnectionErrorName', name, { root: true })
     },
 
     // adds auth credentials to fetch options
-    requestOptions: (context, options) => {
+    requestOptions (options) {
       const userStore = useUserStore()
       const spaceStore = useSpaceStore()
       const headers = new Headers({
@@ -191,7 +191,7 @@ const self = {
 
     // Queue Operations
 
-    addToQueue: async (context, { name, body, spaceId }) => {
+    async addToQueue ({ name, body, spaceId }) {
       const userStore = useUserStore()
       const spaceStore = useSpaceStore()
       const canEditSpace = userStore.getUserCanEditSpace()
@@ -209,19 +209,19 @@ const self = {
         body
       }
       await cache.addToQueue(request)
-      context.dispatch('debouncedSendQueue')
+      this.debouncedSendQueue()
     },
 
-    debouncedSendQueue: debounce(({ dispatch }) => {
-      dispatch('sendQueue')
+    debouncedSendQueue: debounce(function () {
+      this.sendQueue()
     }, 500),
 
     // Send Queue Operations
 
-    handleServerOperationsError: async (context, { error, response }) => {
+    async handleServerOperationsError ({ error, response }) {
       if (!response) {
         console.error('🚒 handleServerOperationsError', error, response)
-        context.commit('notifyServerCouldNotSave', true, { root: true })
+        store.commit('notifyServerCouldNotSave', true, { root: true })
         return
       }
       const data = await response.json()
@@ -234,25 +234,25 @@ const self = {
         const isCritical = !nonCriticalErrorStatusCodes.includes(error.status)
         if (isCritical) {
           console.error('🚒 critical serverOperationsError operation', operation)
-          context.commit('notifyServerCouldNotSave', true, { root: true })
+          store.commit('notifyServerCouldNotSave', true, { root: true })
         } else {
           console.warn('🚑 non-critical serverOperationsError operation', operation)
         }
-        // context.dispatch('moveFailedSendingQueueOperationBackIntoQueue', operation, { root: true })
+        // store.dispatch('moveFailedSendingQueueOperationBackIntoQueue', operation, { root: true })
       })
       // clear sending queue
-      context.commit('clearSendingQueue', null, { root: true })
+      store.commit('clearSendingQueue', null, { root: true })
     },
-    sendQueue: async (context) => {
+    async sendQueue () {
       const userStore = useUserStore()
       const spaceStore = useSpaceStore()
       const apiKey = userStore.apiKey
-      const isOnline = context.rootState.isOnline
+      const isOnline = store.state.isOnline
       const queue = await cache.queue()
       if (!shouldRequest({ apiKey, isOnline }) || !queue.length) { return } // offline check
       // empty queue into sendingQueue
       const body = squashQueue(queue)
-      context.commit('sendingQueue', body, { root: true })
+      store.commit('sendingQueue', body, { root: true })
       cache.clearQueue()
       // send
       let response
@@ -260,28 +260,28 @@ const self = {
         const requestId = nanoid()
         console.warn('🛫 sending operations', body, `●requestId=${requestId}`)
         if (!spaceStore.id) { throw 'operation missing spaceId' }
-        const options = await context.dispatch('requestOptions', { body, method: 'POST', requestId })
+        const options = await this.requestOptions({ body, method: 'POST', requestId })
         response = await fetch(`${consts.apiHost()}/operations`, options)
         if (response.ok) {
           console.info('🛬 operations ok', body)
           // clear sendingQueue on success
-          context.commit('clearSendingQueue', null, { root: true })
+          store.commit('clearSendingQueue', null, { root: true })
         } else {
           throw response.statusText
         }
-        if (context.rootState.notifyServerCouldNotSave) {
-          context.commit('addNotification', { message: 'Reconnected to server', type: 'success' }, { root: true })
+        if (store.state.notifyServerCouldNotSave) {
+          store.commit('addNotification', { message: 'Reconnected to server', type: 'success' }, { root: true })
         }
       } catch (error) {
         console.error('🚑 sendQueue', error)
         // move failed sendingQueue operations back into queue
-        context.dispatch('handleServerOperationsError', { error, response })
+        this.handleServerOperationsError({ error, response })
       }
     },
 
     // Meta
 
-    getStatus: async (context) => {
+    async getStatus () {
       try {
         const response = await fetch(`${consts.apiHost()}/`)
         return normalizeResponse(response)
@@ -290,445 +290,445 @@ const self = {
         return false
       }
     },
-    getDate: async (context) => {
+    async getDate () {
       try {
         const response = await fetch(`${consts.apiHost()}/meta/date`)
         return normalizeResponse(response)
       } catch (error) {
-        context.dispatch('handleServerError', { name: 'getDate', error })
+        this.handleServerError({ name: 'getDate', error })
       }
     },
-    getChangelog: async (context) => {
-      const isOnline = context.rootState.isOnline
+    async getChangelog () {
+      const isOnline = store.state.isOnline
       if (!shouldRequest({ shouldRequestRemote: true, isOnline })) { return }
-      const isSpacePage = context.rootGetters.isSpacePage
+      const isSpacePage = store.getters.isSpacePage
       if (!isSpacePage) { return }
       try {
         const response = await fetch(`${consts.apiHost()}/meta/changelog`)
         return normalizeResponse(response)
       } catch (error) {
-        context.dispatch('handleServerError', { name: 'getChangelog', error })
+        this.handleServerError({ name: 'getChangelog', error })
       }
     },
-    updateDateImage: async (context) => {
+    async updateDateImage () {
       try {
         const response = await fetch(`${consts.apiHost()}/space/date-image`)
         const data = await normalizeResponse(response)
-        context.commit('dateImageUrl', data.url, { root: true })
+        store.commit('dateImageUrl', data.url, { root: true })
         return data.url
       } catch (error) {
-        context.dispatch('handleServerError', { name: 'updateDateImage', error })
+        this.handleServerError({ name: 'updateDateImage', error })
       }
     },
-    getEmojis: async (context) => {
+    async getEmojis () {
       try {
         const response = await fetch(`${consts.apiHost()}/meta/emojis`)
         return normalizeResponse(response)
       } catch (error) {
-        context.dispatch('handleServerError', { name: 'getEmojis', error })
+        this.handleServerError({ name: 'getEmojis', error })
       }
     },
 
     // Session Token (sign up spam mitigation)
 
-    createSessionToken: async (context, token) => {
+    async createSessionToken (token) {
       const body = { token }
-      const options = await context.dispatch('requestOptions', { body, method: 'POST' })
+      const options = await this.requestOptions({ body, method: 'POST' })
       return fetch(`${consts.apiHost()}/session-token/create`, options)
     },
 
     // Sign Up or In
 
-    signUp: async (context, { email, password, currentUser, sessionToken }) => {
+    async signUp ({ email, password, currentUser, sessionToken }) {
       const body = currentUser
       body.email = email
       body.password = password
       body.sessionToken = sessionToken
-      const options = await context.dispatch('requestOptions', { body, method: 'POST' })
+      const options = await this.requestOptions({ body, method: 'POST' })
       return fetch(`${consts.apiHost()}/user/sign-up`, options)
     },
-    signIn: async (context, { email, password }) => {
+    async signIn ({ email, password }) {
       const body = {
         email,
         password
       }
-      const options = await context.dispatch('requestOptions', { body, method: 'POST' })
+      const options = await this.requestOptions({ body, method: 'POST' })
       return fetch(`${consts.apiHost()}/user/sign-in`, options)
     },
-    resetPassword: async (context, email) => {
+    async resetPassword (email) {
       const body = { email }
-      const options = await context.dispatch('requestOptions', { body, method: 'POST' })
+      const options = await this.requestOptions({ body, method: 'POST' })
       return fetch(`${consts.apiHost()}/user/reset-password`, options)
     },
-    updatePassword: async (context, { password, apiKey }) => {
+    async updatePassword ({ password, apiKey }) {
       const body = { password, apiKey }
-      const options = await context.dispatch('requestOptions', { body, method: 'PATCH', apiKey })
+      const options = await this.requestOptions({ body, method: 'PATCH', apiKey })
       return fetch(`${consts.apiHost()}/user/update-password`, options)
     },
-    updateEmail: async (context, email) => {
+    async updateEmail (email) {
       const body = { email }
-      const options = await context.dispatch('requestOptions', { body, method: 'PATCH' })
+      const options = await this.requestOptions({ body, method: 'PATCH' })
       return fetch(`${consts.apiHost()}/user/update-email`, options)
     },
 
     // User
 
-    getUser: async (context) => {
+    async getUser () {
       const userStore = useUserStore()
       const apiKey = userStore.apiKey
-      const isOnline = context.rootState.isOnline
+      const isOnline = store.state.isOnline
       if (!shouldRequest({ apiKey, isOnline })) { return }
       try {
-        const options = await context.dispatch('requestOptions', { method: 'GET' })
+        const options = await this.requestOptions({ method: 'GET' })
         const response = await fetch(`${consts.apiHost()}/user`, options)
         return normalizeResponse(response)
       } catch (error) {
-        context.dispatch('handleServerError', { name: 'getUser', error })
+        this.handleServerError({ name: 'getUser', error })
       }
     },
-    getUserFavoriteSpaces: async (context) => {
+    async getUserFavoriteSpaces () {
       const userStore = useUserStore()
       const apiKey = userStore.apiKey
-      const isOnline = context.rootState.isOnline
+      const isOnline = store.state.isOnline
       if (!shouldRequest({ apiKey, isOnline })) { return }
       try {
-        const options = await context.dispatch('requestOptions', { method: 'GET' })
+        const options = await this.requestOptions({ method: 'GET' })
         const response = await fetch(`${consts.apiHost()}/user/favorite-spaces`, options)
         return normalizeResponse(response)
       } catch (error) {
-        context.dispatch('handleServerError', { name: 'getUserFavoriteSpaces', error })
+        this.handleServerError({ name: 'getUserFavoriteSpaces', error })
       }
     },
-    getUserFavoriteUsers: async (context) => {
+    async getUserFavoriteUsers () {
       const userStore = useUserStore()
       const apiKey = userStore.apiKey
-      const isOnline = context.rootState.isOnline
+      const isOnline = store.state.isOnline
       if (!shouldRequest({ apiKey, isOnline })) { return }
       try {
-        const options = await context.dispatch('requestOptions', { method: 'GET' })
+        const options = await this.requestOptions({ method: 'GET' })
         const response = await fetch(`${consts.apiHost()}/user/favorite-users`, options)
         return normalizeResponse(response)
       } catch (error) {
-        context.dispatch('handleServerError', { name: 'getUserFavoriteUsers', error })
+        this.handleServerError({ name: 'getUserFavoriteUsers', error })
       }
     },
-    getUserFavoriteColors: async (context) => {
+    async getUserFavoriteColors () {
       const userStore = useUserStore()
       const apiKey = userStore.apiKey
-      const isOnline = context.rootState.isOnline
+      const isOnline = store.state.isOnline
       if (!shouldRequest({ apiKey, isOnline })) { return }
       try {
-        const options = await context.dispatch('requestOptions', { method: 'GET' })
+        const options = await this.requestOptions({ method: 'GET' })
         const response = await fetch(`${consts.apiHost()}/user/favorite-colors`, options)
         return normalizeResponse(response)
       } catch (error) {
-        context.dispatch('handleServerError', { name: 'getUserFavoriteUsers', error })
+        this.handleServerError({ name: 'getUserFavoriteUsers', error })
       }
     },
-    getUserHiddenSpaces: async (context) => {
+    async getUserHiddenSpaces () {
       const userStore = useUserStore()
       const apiKey = userStore.apiKey
-      const isOnline = context.rootState.isOnline
+      const isOnline = store.state.isOnline
       if (!shouldRequest({ apiKey, isOnline })) { return }
       try {
-        const options = await context.dispatch('requestOptions', { method: 'GET' })
+        const options = await this.requestOptions({ method: 'GET' })
         const response = await fetch(`${consts.apiHost()}/user/hidden-spaces`, options)
         return normalizeResponse(response)
       } catch (error) {
-        context.dispatch('handleServerError', { name: 'getUserHiddenSpaces', error })
+        this.handleServerError({ name: 'getUserHiddenSpaces', error })
       }
     },
-    getFollowingUsersSpaces: async (context) => {
+    async getFollowingUsersSpaces () {
       const userStore = useUserStore()
       const apiKey = userStore.apiKey
-      const isSpacePage = context.rootGetters.isSpacePage
-      const isOnline = context.rootState.isOnline
+      const isSpacePage = store.getters.isSpacePage
+      const isOnline = store.state.isOnline
       if (!shouldRequest({ apiKey, isOnline })) { return }
       if (!isSpacePage) { return }
       try {
         console.info('🛬 getting following users spaces')
-        const options = await context.dispatch('requestOptions', { method: 'GET' })
+        const options = await this.requestOptions({ method: 'GET' })
         const response = await fetch(`${consts.apiHost()}/user/favorite-users-spaces`, options)
         return normalizeResponse(response)
       } catch (error) {
-        context.dispatch('handleServerError', { name: 'getFollowingUsersSpaces', error })
+        this.handleServerError({ name: 'getFollowingUsersSpaces', error })
       }
     },
-    getUserSpaces: async (context) => {
+    async getUserSpaces () {
       const userStore = useUserStore()
       const apiKey = userStore.apiKey
-      const isOnline = context.rootState.isOnline
+      const isOnline = store.state.isOnline
       if (!shouldRequest({ apiKey, isOnline })) { return }
       try {
-        const options = await context.dispatch('requestOptions', { method: 'GET' })
+        const options = await this.requestOptions({ method: 'GET' })
         const response = await fetch(`${consts.apiHost()}/user/spaces`, options)
         const currentUser = userStore
         const spaces = await normalizeResponse(response)
         return utils.addCurrentUserIsCollaboratorToSpaces(spaces, currentUser)
       } catch (error) {
-        context.dispatch('handleServerError', { name: 'getUserSpaces', error })
+        this.handleServerError({ name: 'getUserSpaces', error })
       }
     },
-    getUserGroupSpaces: async (context) => {
+    async getUserGroupSpaces () {
       const userStore = useUserStore()
-      const groups = context.rootGetters['groups/byUser']()
+      const groups = store.getters['groups/byUser']()
       if (!groups.length) { return }
       const apiKey = userStore.apiKey
-      const isOnline = context.rootState.isOnline
+      const isOnline = store.state.isOnline
       if (!shouldRequest({ apiKey, isOnline })) { return }
       try {
-        const options = await context.dispatch('requestOptions', { method: 'GET' })
+        const options = await this.requestOptions({ method: 'GET' })
         const response = await fetch(`${consts.apiHost()}/user/group-spaces`, options)
         const currentUser = userStore
         const spaces = await normalizeResponse(response)
         return utils.addCurrentUserIsCollaboratorToSpaces(spaces, currentUser)
       } catch (error) {
-        context.dispatch('handleServerError', { name: 'getUserGroupSpaces', error })
+        this.handleServerError({ name: 'getUserGroupSpaces', error })
       }
     },
-    getUserRemovedSpaces: async (context) => {
+    async getUserRemovedSpaces () {
       const userStore = useUserStore()
       const apiKey = userStore.apiKey
-      const isOnline = context.rootState.isOnline
+      const isOnline = store.state.isOnline
       if (!shouldRequest({ apiKey, isOnline })) { return }
       try {
-        const options = await context.dispatch('requestOptions', { method: 'GET' })
+        const options = await this.requestOptions({ method: 'GET' })
         const response = await fetch(`${consts.apiHost()}/user/removed-spaces`, options)
         return normalizeResponse(response)
       } catch (error) {
-        context.dispatch('handleServerError', { name: 'getUserRemovedSpaces', error })
+        this.handleServerError({ name: 'getUserRemovedSpaces', error })
       }
     },
-    getUserInboxSpace: async (context) => {
+    async getUserInboxSpace () {
       const userStore = useUserStore()
       const apiKey = userStore.apiKey
-      const isOnline = context.rootState.isOnline
+      const isOnline = store.state.isOnline
       if (!shouldRequest({ apiKey, isOnline })) { return }
       try {
-        const options = await context.dispatch('requestOptions', { method: 'GET' })
+        const options = await this.requestOptions({ method: 'GET' })
         const response = await fetch(`${consts.apiHost()}/user/inbox-space`, options)
         return normalizeResponse(response)
       } catch (error) {
-        context.dispatch('handleServerError', { name: 'getUserInboxSpace', error })
+        this.handleServerError({ name: 'getUserInboxSpace', error })
       }
     },
-    getSpacesNotificationUnsubscribed: async (context) => {
+    async getSpacesNotificationUnsubscribed () {
       const userStore = useUserStore()
       const apiKey = userStore.apiKey
-      const isOnline = context.rootState.isOnline
+      const isOnline = store.state.isOnline
       if (!shouldRequest({ apiKey, isOnline })) { return }
       try {
-        const options = await context.dispatch('requestOptions', { method: 'GET' })
+        const options = await this.requestOptions({ method: 'GET' })
         const response = await fetch(`${consts.apiHost()}/user/spaces-notification-unsubscribed`, options)
         return normalizeResponse(response)
       } catch (error) {
-        context.dispatch('handleServerError', { name: 'getSpacesNotificationUnsubscribed', error })
+        this.handleServerError({ name: 'getSpacesNotificationUnsubscribed', error })
       }
     },
-    getGroupsNotificationUnsubscribed: async (context) => {
+    async getGroupsNotificationUnsubscribed () {
       const userStore = useUserStore()
       const apiKey = userStore.apiKey
-      const isOnline = context.rootState.isOnline
+      const isOnline = store.state.isOnline
       if (!shouldRequest({ apiKey, isOnline })) { return }
       try {
-        const options = await context.dispatch('requestOptions', { method: 'GET' })
+        const options = await this.requestOptions({ method: 'GET' })
         const response = await fetch(`${consts.apiHost()}/user/groups-notification-unsubscribed`, options)
         return normalizeResponse(response)
       } catch (error) {
-        context.dispatch('handleServerError', { name: 'getGroupsNotificationUnsubscribed', error })
+        this.handleServerError({ name: 'getGroupsNotificationUnsubscribed', error })
       }
     },
-    spaceNotificationResubscribe: async (context, space) => {
+    async spaceNotificationResubscribe (space) {
       const userStore = useUserStore()
       const apiKey = userStore.apiKey
       const user = userStore
-      const isOnline = context.rootState.isOnline
+      const isOnline = store.state.isOnline
       if (!shouldRequest({ apiKey, isOnline })) { return }
       try {
-        const options = await context.dispatch('requestOptions', { method: 'GET' })
+        const options = await this.requestOptions({ method: 'GET' })
         const response = await fetch(`${consts.apiHost()}/space/${space.id}/notification-resubscribe?userId=${user.id}`, options)
         return normalizeResponse(response)
       } catch (error) {
-        context.dispatch('handleServerError', { name: 'spaceNotificationResubscribe', error })
+        this.handleServerError({ name: 'spaceNotificationResubscribe', error })
       }
     },
-    groupNotificationResubscribe: async (context, group) => {
+    async groupNotificationResubscribe (group) {
       const userStore = useUserStore()
       const apiKey = userStore.apiKey
       const user = userStore
-      const isOnline = context.rootState.isOnline
+      const isOnline = store.state.isOnline
       if (!shouldRequest({ apiKey, isOnline })) { return }
       try {
-        const options = await context.dispatch('requestOptions', { method: 'GET' })
+        const options = await this.requestOptions({ method: 'GET' })
         const response = await fetch(`${consts.apiHost()}/group/${group.id}/notification-resubscribe?userId=${user.id}`, options)
         return normalizeResponse(response)
       } catch (error) {
-        context.dispatch('handleServerError', { name: 'groupNotificationResubscribe', error })
+        this.handleServerError({ name: 'groupNotificationResubscribe', error })
       }
     },
-    deleteUserPermanent: async (context) => {
+    async deleteUserPermanent () {
       const userStore = useUserStore()
       const apiKey = userStore.apiKey
-      const isOnline = context.rootState.isOnline
+      const isOnline = store.state.isOnline
       if (!shouldRequest({ apiKey, isOnline })) { return }
       try {
-        const options = await context.dispatch('requestOptions', { method: 'DELETE' })
+        const options = await this.requestOptions({ method: 'DELETE' })
         const response = await fetch(`${consts.apiHost()}/user/permanent`, options)
         return normalizeResponse(response)
       } catch (error) {
-        context.dispatch('handleServerError', { name: 'deleteUserPermanent', error })
+        this.handleServerError({ name: 'deleteUserPermanent', error })
       }
     },
-    getPublicUser: async (context, user) => {
+    async getPublicUser (user) {
       try {
-        const options = await context.dispatch('requestOptions', { method: 'GET' })
+        const options = await this.requestOptions({ method: 'GET' })
         const response = await fetch(`${consts.apiHost()}/user/public/${user.id}`, options)
         return normalizeResponse(response)
       } catch (error) {
-        context.dispatch('handleServerError', { name: 'getPublicUser', error })
+        this.handleServerError({ name: 'getPublicUser', error })
       }
     },
-    getPublicUsers: async (context, userIds) => {
+    async getPublicUsers (userIds) {
       const max = 60
       try {
         userIds = userIds.slice(0, max)
         userIds = userIds.join(',')
         console.info('🛬🛬 getting remote public users', userIds)
-        const options = await context.dispatch('requestOptions', { method: 'GET' })
+        const options = await this.requestOptions({ method: 'GET' })
         const response = await utils.timeout(consts.defaultTimeout, fetch(`${consts.apiHost()}/user/public/multiple?userIds=${userIds}`, options))
         // notifyConnectionError
         return normalizeResponse(response)
       } catch (error) {
-        context.dispatch('handleServerError', { name: 'getPublicUsers', error })
+        this.handleServerError({ name: 'getPublicUsers', error })
       }
     },
-    getPublicUserExploreSpaces: async (context, user) => {
+    async getPublicUserExploreSpaces (user) {
       try {
-        const options = await context.dispatch('requestOptions', { method: 'GET' })
+        const options = await this.requestOptions({ method: 'GET' })
         const response = await fetch(`${consts.apiHost()}/user/public/explore-spaces/${user.id}`, options)
         return normalizeResponse(response)
       } catch (error) {
-        context.dispatch('handleServerError', { name: 'getPublicUserExploreSpaces', error })
+        this.handleServerError({ name: 'getPublicUserExploreSpaces', error })
       }
     },
-    updateUserFavorites: async (context, body) => {
+    async updateUserFavorites (body) {
       const userStore = useUserStore()
       const apiKey = userStore.apiKey
-      const isOnline = context.rootState.isOnline
+      const isOnline = store.state.isOnline
       if (!shouldRequest({ apiKey, isOnline })) { return }
       try {
-        const options = await context.dispatch('requestOptions', { body, method: 'PATCH' })
+        const options = await this.requestOptions({ body, method: 'PATCH' })
         const response = await fetch(`${consts.apiHost()}/user/favorites`, options)
         return normalizeResponse(response)
       } catch (error) {
-        context.dispatch('handleServerError', { name: 'updateUserFavorites', error, shouldNotNotifyUser: true })
+        this.handleServerError({ name: 'updateUserFavorites', error, shouldNotNotifyUser: true })
       }
     },
 
     // Space
 
-    getExploreSpaces: async (context) => {
-      const isSpacePage = context.rootGetters.isSpacePage
-      const isOnline = context.rootState.isOnline
+    async getExploreSpaces () {
+      const isSpacePage = store.getters.isSpacePage
+      const isOnline = store.state.isOnline
       if (!shouldRequest({ shouldRequestRemote: true, isOnline })) { return }
       if (!isSpacePage) { return }
       try {
         console.info('🛬 getting explore spaces')
-        const options = await context.dispatch('requestOptions', { method: 'GET' })
+        const options = await this.requestOptions({ method: 'GET' })
         const response = await utils.timeout(consts.defaultTimeout, fetch(`${consts.apiHost()}/space/explore-spaces`, options))
         return normalizeResponse(response)
       } catch (error) {
-        context.dispatch('handleServerError', { name: 'getExploreSpaces', error })
+        this.handleServerError({ name: 'getExploreSpaces', error })
       }
     },
 
-    getEveryoneSpaces: async (context) => {
-      const isSpacePage = context.rootGetters.isSpacePage
-      const isOnline = context.rootState.isOnline
+    async getEveryoneSpaces () {
+      const isSpacePage = store.getters.isSpacePage
+      const isOnline = store.state.isOnline
       if (!shouldRequest({ shouldRequestRemote: true, isOnline })) { return }
       if (!isSpacePage) { return }
       try {
         console.info('🛬 getting everyone spaces')
-        const options = await context.dispatch('requestOptions', { method: 'GET' })
+        const options = await this.requestOptions({ method: 'GET' })
         const response = await utils.timeout(consts.defaultTimeout, fetch(`${consts.apiHost()}/space/everyone-spaces`, options))
         return normalizeResponse(response)
       } catch (error) {
-        context.dispatch('handleServerError', { name: 'getEveryoneSpaces', error })
+        this.handleServerError({ name: 'getEveryoneSpaces', error })
       }
     },
-    getLiveSpaces: async (context) => {
-      const isSpacePage = context.rootGetters.isSpacePage
-      const isOnline = context.rootState.isOnline
+    async getLiveSpaces () {
+      const isSpacePage = store.getters.isSpacePage
+      const isOnline = store.state.isOnline
       if (!shouldRequest({ shouldRequestRemote: true, isOnline })) { return }
       if (!isSpacePage) { return }
       try {
         console.info('🛬 getting live spaces')
-        const options = await context.dispatch('requestOptions', { method: 'GET' })
+        const options = await this.requestOptions({ method: 'GET' })
         const response = await utils.timeout(consts.defaultTimeout, fetch(`${consts.apiHost()}/space/live-spaces`, options))
         return normalizeResponse(response)
       } catch (error) {
-        context.dispatch('handleServerError', { name: 'getLiveSpaces', error })
+        this.handleServerError({ name: 'getLiveSpaces', error })
       }
     },
-    getSpace: async (context, { space, shouldRequestRemote, spaceReadOnlyKey }) => {
+    async getSpace ({ space, shouldRequestRemote, spaceReadOnlyKey }) {
       const userStore = useUserStore()
       const spaceStore = useSpaceStore()
       try {
         const apiKey = userStore.apiKey
-        const isOnline = context.rootState.isOnline
+        const isOnline = store.state.isOnline
         if (!shouldRequest({ shouldRequestRemote, apiKey, isOnline })) { return }
         const spaceReadOnlyKey = spaceStore.getSpaceReadOnlyKey(space)
         console.info('🛬 getting remote space', space.id)
-        const options = await context.dispatch('requestOptions', { method: 'GET', space, spaceReadOnlyKey })
+        const options = await this.requestOptions({ method: 'GET', space, spaceReadOnlyKey })
         const response = await utils.timeout(consts.defaultTimeout, fetch(`${consts.apiHost()}/space/${space.id}`, options))
         return normalizeResponse(response)
       } catch (error) {
-        context.dispatch('handleServerError', { name: 'getSpace', error })
+        this.handleServerError({ name: 'getSpace', error })
       }
     },
-    getSpaceUpdatedAt: async (context, space) => {
+    async getSpaceUpdatedAt (space) {
       try {
-        const isOnline = context.rootState.isOnline
+        const isOnline = store.state.isOnline
         if (!isOnline) { return }
         // console.info('🛬 getting remote space updatedAt', space.id)
-        const options = await context.dispatch('requestOptions', { method: 'GET' })
+        const options = await this.requestOptions({ method: 'GET' })
         const response = await utils.timeout(consts.defaultTimeout, fetch(`${consts.apiHost()}/space/updated-at/${space.id}`, options))
         return normalizeResponse(response)
       } catch (error) {
-        context.dispatch('handleServerError', { name: 'getSpace', error })
+        this.handleServerError({ name: 'getSpace', error })
       }
     },
-    getSpaceFavorites: async (context) => {
+    async getSpaceFavorites () {
       const spaceStore = useSpaceStore()
       try {
-        const isOnline = context.rootState.isOnline
+        const isOnline = store.state.isOnline
         if (!isOnline) { return }
         const spaceId = spaceStore.id
         console.info('🛬 getting remote space favorites', spaceId)
-        const options = await context.dispatch('requestOptions', { method: 'GET' })
+        const options = await this.requestOptions({ method: 'GET' })
         const response = await utils.timeout(consts.defaultTimeout, fetch(`${consts.apiHost()}/space/${spaceId}/favorites`, options))
         return normalizeResponse(response)
       } catch (error) {
-        context.dispatch('handleServerError', { name: 'getSpaceFavorites', error })
+        this.handleServerError({ name: 'getSpaceFavorites', error })
       }
     },
-    getSpaceHistory: async (context) => {
+    async getSpaceHistory () {
       const spaceStore = useSpaceStore()
       try {
-        const isOnline = context.rootState.isOnline
+        const isOnline = store.state.isOnline
         if (!isOnline) { return }
         const spaceId = spaceStore.id
         console.info('🛬 getting remote space history', spaceId)
-        const options = await context.dispatch('requestOptions', { method: 'GET' })
+        const options = await this.requestOptions({ method: 'GET' })
         const response = await utils.timeout(consts.defaultTimeout, fetch(`${consts.apiHost()}/space/${spaceId}/history`, options))
         return normalizeResponse(response)
       } catch (error) {
-        context.dispatch('handleServerError', { name: 'getSpaceFavorites', error })
+        this.handleServerError({ name: 'getSpaceFavorites', error })
       }
     },
-    getSpaceAnonymously: async (context, space) => {
+    async getSpaceAnonymously (space) {
       const spaceStore = useSpaceStore()
-      const isOnline = context.rootState.isOnline
+      const isOnline = store.state.isOnline
       if (!isOnline) { return }
       const invitedSpaces = await cache.invitedSpaces()
       const invite = invitedSpaces.find(invitedSpace => invitedSpace.id === space.id) || {}
@@ -736,37 +736,37 @@ const self = {
       const spaceReadOnlyKey = spaceStore.getSpaceReadOnlyKey(space)
       try {
         console.info('🛬 getting remote space anonymously', space.id, space.collaboratorKey, spaceReadOnlyKey)
-        const options = await context.dispatch('requestOptions', { method: 'GET', space, spaceReadOnlyKey })
+        const options = await this.requestOptions({ method: 'GET', space, spaceReadOnlyKey })
         const response = await utils.timeout(consts.defaultTimeout, fetch(`${consts.apiHost()}/space/${space.id}`, options))
         return normalizeResponse(response)
       } catch (error) {
-        context.dispatch('handleServerError', { name: 'getSpaceAnonymously', error })
+        this.handleServerError({ name: 'getSpaceAnonymously', error })
       }
     },
-    getInboxSpace: async (context) => {
+    async getInboxSpace () {
       try {
         console.info('🛬 getting inbox space')
-        const options = await context.dispatch('requestOptions', { method: 'GET' })
+        const options = await this.requestOptions({ method: 'GET' })
         const response = await utils.timeout(consts.defaultTimeout, fetch(`${consts.apiHost()}/space/inbox`, options))
         return normalizeResponse(response)
       } catch (error) {
-        context.dispatch('handleServerError', { name: 'getInboxSpace', error })
+        this.handleServerError({ name: 'getInboxSpace', error })
       }
     },
-    searchExploreSpaces: async (context, body) => {
+    async searchExploreSpaces (body) {
       const userStore = useUserStore()
       const apiKey = userStore.apiKey
-      const isOnline = context.rootState.isOnline
+      const isOnline = store.state.isOnline
       if (!shouldRequest({ apiKey, isOnline })) { return }
       try {
-        const options = await context.dispatch('requestOptions', { body, method: 'POST' })
+        const options = await this.requestOptions({ body, method: 'POST' })
         const response = await fetch(`${consts.apiHost()}/space/search-explore-spaces`, options)
         return normalizeResponse(response)
       } catch (error) {
-        context.dispatch('handleServerError', { name: 'search', error })
+        this.handleServerError({ name: 'search', error })
       }
     },
-    createSpaces: async (context) => {
+    async createSpaces () {
       const userStore = useUserStore()
       try {
         let spaces = await cache.getAllSpaces()
@@ -792,14 +792,14 @@ const self = {
         })
         removedSpaces.forEach(space => spaces.push(space))
         spaces = spaces.filter(space => space)
-        const options = await context.dispatch('requestOptions', { body: spaces, method: 'POST' })
+        const options = await this.requestOptions({ body: spaces, method: 'POST' })
         const response = await fetch(`${consts.apiHost()}/space/multiple`, options)
         // upload drawing images
         for (const body of drawingImages) {
           const isDataUrl = body.dataUrl.startsWith('data:')
           if (!isDataUrl) { continue }
           try {
-            const imageOptions = await context.dispatch('requestOptions', { body, method: 'POST', space: { id: body.spaceId } })
+            const imageOptions = await this.requestOptions({ body, method: 'POST', space: { id: body.spaceId } })
             const imageResponse = await fetch(`${consts.apiHost()}/space/drawing-image`, imageOptions)
             const imageData = await imageResponse.json()
           } catch (error) {
@@ -808,380 +808,380 @@ const self = {
         }
         return normalizeResponse(response)
       } catch (error) {
-        context.dispatch('handleServerError', { name: 'createSpaces', error })
+        this.handleServerError({ name: 'createSpaces', error })
       }
     },
-    createSpace: async (context, space) => {
+    async createSpace (space) {
       try {
         space = normalizeRemovedCards(space)
         const body = space
-        const options = await context.dispatch('requestOptions', { body, method: 'POST' })
+        const options = await this.requestOptions({ body, method: 'POST' })
         const response = await fetch(`${consts.apiHost()}/space`, options)
         return normalizeResponse(response)
       } catch (error) {
-        context.dispatch('handleServerError', { name: 'createSpace', error })
+        this.handleServerError({ name: 'createSpace', error })
       }
     },
-    updateSpacePreviewImage: async (context, spaceId) => {
+    async updateSpacePreviewImage (spaceId) {
       const spaceStore = useSpaceStore()
       try {
         spaceId = spaceId || spaceStore.id
-        const themeOptions = context.rootGetters['themes/previewImageThemeOptions']
+        const themeOptions = store.getters['themes/previewImageThemeOptions']
         const body = { spaceId, themeOptions }
-        const options = await context.dispatch('requestOptions', { body, method: 'POST' })
+        const options = await this.requestOptions({ body, method: 'POST' })
         const response = await fetch(`${consts.apiHost()}/space/preview-image`, options)
         return normalizeResponse(response)
       } catch (error) {
-        context.dispatch('handleServerError', { name: 'updateSpacePreviewImage', error, shouldNotNotifyUser: false })
+        this.handleServerError({ name: 'updateSpacePreviewImage', error, shouldNotNotifyUser: false })
       }
     },
-    updateSpace: async (context, space) => {
+    async updateSpace (space) {
       try {
         const body = space
-        const options = await context.dispatch('requestOptions', { body, method: 'PATCH', space })
+        const options = await this.requestOptions({ body, method: 'PATCH', space })
         const response = await fetch(`${consts.apiHost()}/space`, options)
         return normalizeResponse(response)
       } catch (error) {
-        context.dispatch('handleServerError', { name: 'updateSpace', error })
+        this.handleServerError({ name: 'updateSpace', error })
       }
     },
-    getSpaceRemovedCards: async (context, space) => {
+    async getSpaceRemovedCards (space) {
       const userStore = useUserStore()
       const apiKey = userStore.apiKey
-      const isOnline = context.rootState.isOnline
+      const isOnline = store.state.isOnline
       if (!shouldRequest({ apiKey, isOnline })) { return }
       try {
-        const options = await context.dispatch('requestOptions', { method: 'GET' })
+        const options = await this.requestOptions({ method: 'GET' })
         const response = await fetch(`${consts.apiHost()}/space/${space.id}/removed-cards`, options)
         return normalizeResponse(response)
       } catch (error) {
-        context.dispatch('handleServerError', { name: 'getSpaceRemovedCards', error })
+        this.handleServerError({ name: 'getSpaceRemovedCards', error })
       }
     },
-    getSpaceCollaboratorKey: async (context, space) => {
+    async getSpaceCollaboratorKey (space) {
       const userStore = useUserStore()
       const apiKey = userStore.apiKey
-      const isOnline = context.rootState.isOnline
+      const isOnline = store.state.isOnline
       if (!shouldRequest({ apiKey, isOnline })) { return }
       try {
-        const options = await context.dispatch('requestOptions', { method: 'GET' })
+        const options = await this.requestOptions({ method: 'GET' })
         const response = await fetch(`${consts.apiHost()}/space/${space.id}/collaborator-key`, options)
         return normalizeResponse(response)
       } catch (error) {
-        context.dispatch('handleServerError', { name: 'getSpaceCollaboratorKey', error })
+        this.handleServerError({ name: 'getSpaceCollaboratorKey', error })
       }
     },
-    addSpaceCollaborator: async (context, { spaceId, collaboratorKey }) => {
+    async addSpaceCollaborator ({ spaceId, collaboratorKey }) {
       const userStore = useUserStore()
       const apiKey = userStore.apiKey
-      const isOnline = context.rootState.isOnline
+      const isOnline = store.state.isOnline
       if (!shouldRequest({ apiKey, isOnline })) { return }
       const userId = userStore.id
       try {
         const body = { userId, spaceId, collaboratorKey }
         const space = { id: spaceId, collaboratorKey }
-        const options = await context.dispatch('requestOptions', { body, method: 'PATCH', space })
+        const options = await this.requestOptions({ body, method: 'PATCH', space })
         const response = await fetch(`${consts.apiHost()}/space/collaborator`, options)
         return normalizeResponse(response)
       } catch (error) {
-        context.dispatch('handleServerError', { name: 'addSpaceCollaborator', error })
+        this.handleServerError({ name: 'addSpaceCollaborator', error })
       }
     },
-    removeSpaceCollaborator: async (context, { space, user }) => {
+    async removeSpaceCollaborator ({ space, user }) {
       const userStore = useUserStore()
       const spaceStore = useSpaceStore()
       const apiKey = userStore.apiKey
-      const isOnline = context.rootState.isOnline
+      const isOnline = store.state.isOnline
       if (!shouldRequest({ apiKey, isOnline })) { return }
       try {
         const body = {
           spaceId: space.id,
           userId: user.id
         }
-        const options = await context.dispatch('requestOptions', { body, method: 'DELETE' })
+        const options = await this.requestOptions({ body, method: 'DELETE' })
         const response = await fetch(`${consts.apiHost()}/space/collaborator`, options)
         const data = await normalizeResponse(response)
         const collaboratorKey = data.collaboratorKey
         spaceStore.updateSpace({ collaboratorKey })
       } catch (error) {
-        context.dispatch('handleServerError', { name: 'removeSpaceCollaborator', error })
+        this.handleServerError({ name: 'removeSpaceCollaborator', error })
       }
     },
-    restoreRemovedSpace: async (context, space) => {
+    async restoreRemovedSpace (space) {
       const userStore = useUserStore()
       const apiKey = userStore.apiKey
-      const isOnline = context.rootState.isOnline
+      const isOnline = store.state.isOnline
       if (!shouldRequest({ apiKey, isOnline })) { return }
       try {
-        const options = await context.dispatch('requestOptions', { method: 'PATCH' })
+        const options = await this.requestOptions({ method: 'PATCH' })
         const response = await fetch(`${consts.apiHost()}/space/restore/${space.id}`, options)
         return normalizeResponse(response)
       } catch (error) {
-        context.dispatch('handleServerError', { name: 'restoreRemovedSpace', error })
+        this.handleServerError({ name: 'restoreRemovedSpace', error })
       }
     },
-    sendSpaceInviteEmails: async (context, body) => {
+    async sendSpaceInviteEmails (body) {
       const userStore = useUserStore()
       const apiKey = userStore.apiKey
-      const isOnline = context.rootState.isOnline
+      const isOnline = store.state.isOnline
       if (!shouldRequest({ apiKey, isOnline })) { return }
       try {
-        const options = await context.dispatch('requestOptions', { body, method: 'POST' })
+        const options = await this.requestOptions({ body, method: 'POST' })
         const response = await fetch(`${consts.apiHost()}/space/email-invites/${body.spaceId}`, options)
         return normalizeResponse(response)
       } catch (error) {
-        context.dispatch('handleServerError', { name: 'sendSpaceInviteEmails', error })
+        this.handleServerError({ name: 'sendSpaceInviteEmails', error })
       }
     },
 
     // Other Items Queue
 
-    addToGetOtherItemsQueue: async (context, { cardIds, spaceIds, invites }) => {
-      const isOnline = context.rootState.isOnline
+    async addToGetOtherItemsQueue ({ cardIds, spaceIds, invites }) {
+      const isOnline = store.state.isOnline
       if (!isOnline) { return }
       otherItemsQueue = {
         cardIds: uniq(otherItemsQueue.cardIds.concat(cardIds)),
         spaceIds: uniq(otherItemsQueue.spaceIds.concat(spaceIds)),
         invites: uniq(otherItemsQueue.invites.concat(invites))
       }
-      context.dispatch('debouncedSendOtherItemsQueue')
+      this.debouncedSendOtherItemsQueue()
     },
 
-    debouncedSendOtherItemsQueue: debounce(({ dispatch }) => {
-      dispatch('sendOtherItemsQueue')
+    debouncedSendOtherItemsQueue: debounce(async function () {
+      this.sendOtherItemsQueue()
     }, 500),
 
     // Get Other Items Queue
 
-    sendOtherItemsQueue: async (context) => {
-      context.commit('isLoadingOtherItems', true, { root: true })
+    async sendOtherItemsQueue () {
+      store.commit('isLoadingOtherItems', true, { root: true })
       const { cardIds, spaceIds, invites } = otherItemsQueue
       clearOtherItemsQueue()
       const body = { cardIds, spaceIds, invites }
       try {
         console.info('🛬🛬 getting remote other items', { cardIds, spaceIds, invites })
-        const options = await context.dispatch('requestOptions', { body, method: 'POST' })
+        const options = await this.requestOptions({ body, method: 'POST' })
         const response = await utils.timeout(consts.defaultTimeout, fetch(`${consts.apiHost()}/item/multiple`, options))
         const data = await normalizeResponse(response)
-        context.commit('updateOtherItems', data, { root: true })
+        store.commit('updateOtherItems', data, { root: true })
       } catch (error) {
-        context.dispatch('handleServerError', { name: 'getSpaces', error })
+        this.handleServerError({ name: 'getSpaces', error })
       }
       clearOtherItemsQueue()
-      context.commit('isLoadingOtherItems', false, { root: true })
+      store.commit('isLoadingOtherItems', false, { root: true })
     },
 
     // Card
 
-    getCardsWithLinkToSpaceId: async (context, spaceId) => {
+    async getCardsWithLinkToSpaceId (spaceId) {
       const userStore = useUserStore()
       const apiKey = userStore.apiKey
-      const isOnline = context.rootState.isOnline
+      const isOnline = store.state.isOnline
       if (!shouldRequest({ apiKey, isOnline })) { return }
       try {
-        const options = await context.dispatch('requestOptions', { method: 'GET' })
+        const options = await this.requestOptions({ method: 'GET' })
         const response = await fetch(`${consts.apiHost()}/card/by-link-to-space/${spaceId}`, options)
         return normalizeResponse(response)
       } catch (error) {
-        context.dispatch('handleServerError', { name: 'getCardsWithLinkToSpaceId', error })
+        this.handleServerError({ name: 'getCardsWithLinkToSpaceId', error })
       }
     },
-    updateCards: async (context, body) => {
+    async updateCards (body) {
       const userStore = useUserStore()
       const apiKey = userStore.apiKey
-      const isOnline = context.rootState.isOnline
+      const isOnline = store.state.isOnline
       if (!shouldRequest({ apiKey, isOnline })) { return }
       try {
-        const options = await context.dispatch('requestOptions', { body, method: 'PATCH' })
+        const options = await this.requestOptions({ body, method: 'PATCH' })
         const response = await fetch(`${consts.apiHost()}/card/multiple`, options)
         return normalizeResponse(response)
       } catch (error) {
-        context.dispatch('handleServerError', { name: 'updateCards', error })
+        this.handleServerError({ name: 'updateCards', error })
       }
     },
-    createCards: async (context, body) => {
+    async createCards (body) {
       const userStore = useUserStore()
       const apiKey = userStore.apiKey
-      const isOnline = context.rootState.isOnline
+      const isOnline = store.state.isOnline
       if (!shouldRequest({ apiKey, isOnline })) { return }
       try {
-        const options = await context.dispatch('requestOptions', { body, method: 'POST' })
+        const options = await this.requestOptions({ body, method: 'POST' })
         const response = await fetch(`${consts.apiHost()}/card/multiple`, options)
         return normalizeResponse(response)
       } catch (error) {
-        context.dispatch('handleServerError', { name: 'createCards', error })
+        this.handleServerError({ name: 'createCards', error })
       }
     },
-    createCard: async (context, body) => {
+    async createCard (body) {
       const userStore = useUserStore()
       const apiKey = userStore.apiKey
-      const isOnline = context.rootState.isOnline
+      const isOnline = store.state.isOnline
       if (!shouldRequest({ apiKey, isOnline })) { return }
       try {
-        const options = await context.dispatch('requestOptions', { body, method: 'POST' })
+        const options = await this.requestOptions({ body, method: 'POST' })
         const response = await fetch(`${consts.apiHost()}/card`, options)
         return normalizeResponse(response)
       } catch (error) {
-        context.dispatch('handleServerError', { name: 'createCard', error })
+        this.handleServerError({ name: 'createCard', error })
       }
     },
-    createCardInInbox: async (context, body) => {
+    async createCardInInbox (body) {
       const userStore = useUserStore()
       const apiKey = userStore.apiKey
-      const isOnline = context.rootState.isOnline
+      const isOnline = store.state.isOnline
       if (!shouldRequest({ apiKey, isOnline })) { return }
       try {
-        const options = await context.dispatch('requestOptions', { body, method: 'POST' })
+        const options = await this.requestOptions({ body, method: 'POST' })
         const response = await fetch(`${consts.apiHost()}/card/to-inbox`, options)
         return normalizeResponse(response)
       } catch (error) {
-        context.dispatch('handleServerError', { name: 'createCardInInbox', error })
+        this.handleServerError({ name: 'createCardInInbox', error })
       }
     },
-    searchCards: async (context, body) => {
+    async searchCards (body) {
       const userStore = useUserStore()
       const apiKey = userStore.apiKey
-      const isOnline = context.rootState.isOnline
+      const isOnline = store.state.isOnline
       if (!shouldRequest({ apiKey, isOnline })) { return }
       try {
-        const options = await context.dispatch('requestOptions', { body, method: 'POST' })
+        const options = await this.requestOptions({ body, method: 'POST' })
         const response = await fetch(`${consts.apiHost()}/card/search`, options)
         return normalizeResponse(response)
       } catch (error) {
-        context.dispatch('handleServerError', { name: 'search', error })
+        this.handleServerError({ name: 'search', error })
       }
     },
-    updateCardCounter: async (context, body) => {
+    async updateCardCounter (body) {
       try {
-        const options = await context.dispatch('requestOptions', { body, method: 'PATCH' })
+        const options = await this.requestOptions({ body, method: 'PATCH' })
         const response = await fetch(`${consts.apiHost()}/card/update-counter`, options)
         return normalizeResponse(response)
       } catch (error) {
-        context.dispatch('handleServerError', { name: 'update-counter', error })
+        this.handleServerError({ name: 'update-counter', error })
       }
     },
-    updateUrlPreviewImage: async (context, body) => {
+    async updateUrlPreviewImage (body) {
       try {
-        const options = await context.dispatch('requestOptions', { body, method: 'PATCH' })
+        const options = await this.requestOptions({ body, method: 'PATCH' })
         const response = await fetch(`${consts.apiHost()}/card/update-url-preview-image`, options)
         return normalizeResponse(response)
       } catch (error) {
-        context.dispatch('handleServerError', { name: 'update-counter', error })
+        this.handleServerError({ name: 'update-counter', error })
       }
     },
 
     // ConnectionType
 
-    updateConnectionTypes: async (context, body) => {
+    async updateConnectionTypes (body) {
       const userStore = useUserStore()
       const apiKey = userStore.apiKey
-      const isOnline = context.rootState.isOnline
+      const isOnline = store.state.isOnline
       if (!shouldRequest({ apiKey, isOnline })) { return }
       try {
-        const options = await context.dispatch('requestOptions', { body, method: 'PATCH' })
+        const options = await this.requestOptions({ body, method: 'PATCH' })
         const response = await fetch(`${consts.apiHost()}/connection-type/multiple`, options)
         return normalizeResponse(response)
       } catch (error) {
-        context.dispatch('handleServerError', { name: 'updateConnectionTypes', error })
+        this.handleServerError({ name: 'updateConnectionTypes', error })
       }
     },
-    createConnectionTypes: async (context, body) => {
+    async createConnectionTypes (body) {
       const userStore = useUserStore()
       const apiKey = userStore.apiKey
-      const isOnline = context.rootState.isOnline
+      const isOnline = store.state.isOnline
       if (!shouldRequest({ apiKey, isOnline })) { return }
       try {
-        const options = await context.dispatch('requestOptions', { body, method: 'POST' })
+        const options = await this.requestOptions({ body, method: 'POST' })
         const response = await fetch(`${consts.apiHost()}/connection-type/multiple`, options)
         return normalizeResponse(response)
       } catch (error) {
-        context.dispatch('handleServerError', { name: 'createConnectionTypes', error })
+        this.handleServerError({ name: 'createConnectionTypes', error })
       }
     },
 
     // Connection
 
-    updateConnections: async (context, body) => {
+    async updateConnections (body) {
       const userStore = useUserStore()
       const apiKey = userStore.apiKey
-      const isOnline = context.rootState.isOnline
+      const isOnline = store.state.isOnline
       if (!shouldRequest({ apiKey, isOnline })) { return }
       try {
-        const options = await context.dispatch('requestOptions', { body, method: 'PATCH' })
+        const options = await this.requestOptions({ body, method: 'PATCH' })
         const response = await fetch(`${consts.apiHost()}/connection/multiple`, options)
         return normalizeResponse(response)
       } catch (error) {
-        context.dispatch('handleServerError', { name: 'updateConnections', error })
+        this.handleServerError({ name: 'updateConnections', error })
       }
     },
-    createConnections: async (context, body) => {
+    async createConnections (body) {
       const userStore = useUserStore()
       const apiKey = userStore.apiKey
-      const isOnline = context.rootState.isOnline
+      const isOnline = store.state.isOnline
       if (!shouldRequest({ apiKey, isOnline })) { return }
       try {
-        const options = await context.dispatch('requestOptions', { body, method: 'POST' })
+        const options = await this.requestOptions({ body, method: 'POST' })
         const response = await fetch(`${consts.apiHost()}/connection/multiple`, options)
         return normalizeResponse(response)
       } catch (error) {
-        context.dispatch('handleServerError', { name: 'createConnections', error })
+        this.handleServerError({ name: 'createConnections', error })
       }
     },
 
     // Boxes
 
-    createBoxes: async (context, body) => {
+    async createBoxes (body) {
       const userStore = useUserStore()
       const apiKey = userStore.apiKey
-      const isOnline = context.rootState.isOnline
+      const isOnline = store.state.isOnline
       if (!shouldRequest({ apiKey, isOnline })) { return }
       try {
-        const options = await context.dispatch('requestOptions', { body, method: 'POST' })
+        const options = await this.requestOptions({ body, method: 'POST' })
         const response = await fetch(`${consts.apiHost()}/box/multiple`, options)
         return normalizeResponse(response)
       } catch (error) {
-        context.dispatch('handleServerError', { name: 'createBoxes', error })
+        this.handleServerError({ name: 'createBoxes', error })
       }
     },
 
     // Tag
 
-    getCardsWithTag: async (context, name) => {
+    async getCardsWithTag (name) {
       const userStore = useUserStore()
       const apiKey = userStore.apiKey
-      const isOnline = context.rootState.isOnline
+      const isOnline = store.state.isOnline
       if (!shouldRequest({ apiKey, isOnline })) { return }
       name = encodeURI(name)
       try {
-        const options = await context.dispatch('requestOptions', { method: 'GET' })
+        const options = await this.requestOptions({ method: 'GET' })
         const response = await fetch(`${consts.apiHost()}/card/by-tag-name/${name}`, options)
         return normalizeResponse(response)
       } catch (error) {
-        context.dispatch('handleServerError', { name: 'getCardsWithTag', error })
+        this.handleServerError({ name: 'getCardsWithTag', error })
       }
     },
-    getUserTags: async (context, removeUnusedTags) => {
+    async getUserTags (removeUnusedTags) {
       const userStore = useUserStore()
       const apiKey = userStore.apiKey
-      const isOnline = context.rootState.isOnline
+      const isOnline = store.state.isOnline
       if (!shouldRequest({ apiKey, isOnline })) { return }
       try {
         let params = ''
         if (removeUnusedTags) {
           params = '?removeUnusedTags=true'
         }
-        const options = await context.dispatch('requestOptions', { method: 'GET' })
+        const options = await this.requestOptions({ method: 'GET' })
         const response = await fetch(`${consts.apiHost()}/user/tags${params}`, options)
         return normalizeResponse(response)
       } catch (error) {
-        context.dispatch('handleServerError', { name: 'getUserTags', error })
+        this.handleServerError({ name: 'getUserTags', error })
       }
     },
-    // updateUserTagsColor: async (context, tag) => {
+    // async updateUserTagsColor (tag) {
     // const apiKey = userStore.apiKey
     //   if (!shouldRequest({apiKey})) { return }
     //   try {
-    //     const options = await context.dispatch('requestOptions', { method: 'PATCH', tag })
+    //     const options = await this.requestOptions({ method: 'PATCH', tag })
     //     const response = await fetch(`${consts.apiHost()}/tags/color`, options)
     //     return normalizeResponse(response)
     //   } catch (error) {
@@ -1191,101 +1191,101 @@ const self = {
 
     // Billing Stripe
 
-    checkoutUrl: async (context, body) => {
+    async checkoutUrl (body) {
       try {
-        const options = await context.dispatch('requestOptions', { body, method: 'POST' })
+        const options = await this.requestOptions({ body, method: 'POST' })
         const response = await fetch(`${consts.apiHost()}/billing/stripe/checkout-url`, options)
         return normalizeResponse(response)
       } catch (error) {
-        context.dispatch('handleServerError', { name: 'subscriptionUrl', error })
+        this.handleServerError({ name: 'subscriptionUrl', error })
       }
     },
-    subscriptionUrl: async (context, body) => {
+    async subscriptionUrl (body) {
       try {
-        const options = await context.dispatch('requestOptions', { body, method: 'POST' })
+        const options = await this.requestOptions({ body, method: 'POST' })
         const response = await fetch(`${consts.apiHost()}/billing/stripe/subscription-url`, options)
         return normalizeResponse(response)
       } catch (error) {
-        context.dispatch('handleServerError', { name: 'subscriptionUrl', error })
+        this.handleServerError({ name: 'subscriptionUrl', error })
       }
     },
-    customerPortalUrl: async (context, body) => {
+    async customerPortalUrl (body) {
       try {
-        const options = await context.dispatch('requestOptions', { body, method: 'POST' })
+        const options = await this.requestOptions({ body, method: 'POST' })
         const response = await fetch(`${consts.apiHost()}/billing/stripe/customer-portal-url`, options)
         return normalizeResponse(response)
       } catch (error) {
-        context.dispatch('handleServerError', { name: 'customerPortalUrl', error })
+        this.handleServerError({ name: 'customerPortalUrl', error })
       }
     },
-    donationUrl: async (context, body) => {
+    async donationUrl (body) {
       try {
-        const options = await context.dispatch('requestOptions', { body, method: 'POST' })
+        const options = await this.requestOptions({ body, method: 'POST' })
         const response = await fetch(`${consts.apiHost()}/billing/stripe/donation-url`, options)
         return normalizeResponse(response)
       } catch (error) {
-        context.dispatch('handleServerError', { name: 'donationUrl', error })
+        this.handleServerError({ name: 'donationUrl', error })
       }
     },
 
     // Upload
 
-    createPresignedPost: async (context, body) => {
+    async createPresignedPost (body) {
       const spaceStore = useSpaceStore()
       try {
         body.requestSpaceId = spaceStore.id
-        const options = await context.dispatch('requestOptions', { body, method: 'POST' })
+        const options = await this.requestOptions({ body, method: 'POST' })
         const response = await fetch(`${consts.apiHost()}/upload/presigned-post`, options)
         return normalizeResponse(response)
       } catch (error) {
-        context.dispatch('handleServerError', { name: 'createPresignedPost', error })
+        this.handleServerError({ name: 'createPresignedPost', error })
       }
     },
-    createMultiplePresignedPosts: async (context, body) => {
+    async createMultiplePresignedPosts (body) {
       const spaceStore = useSpaceStore()
       try {
         body.requestSpaceId = spaceStore.id
-        const options = await context.dispatch('requestOptions', { body, method: 'POST' })
+        const options = await this.requestOptions({ body, method: 'POST' })
         const response = await fetch(`${consts.apiHost()}/upload/presigned-post/multiple`, options)
         return normalizeResponse(response)
       } catch (error) {
-        context.dispatch('handleServerError', { name: 'createMultiplePresignedPosts', error })
+        this.handleServerError({ name: 'createMultiplePresignedPosts', error })
       }
     },
 
     // Notifications
 
-    getNotifications: async (context) => {
+    async getNotifications () {
       const userStore = useUserStore()
       const apiKey = userStore.apiKey
-      const isOnline = context.rootState.isOnline
+      const isOnline = store.state.isOnline
       if (!shouldRequest({ apiKey, isOnline })) { return }
       try {
-        const options = await context.dispatch('requestOptions', { method: 'GET' })
+        const options = await this.requestOptions({ method: 'GET' })
         const response = await fetch(`${consts.apiHost()}/notification`, options)
         const notifications = await normalizeResponse(response)
         return notifications
       } catch (error) {
-        context.dispatch('handleServerError', { name: 'getNotifications', error })
+        this.handleServerError({ name: 'getNotifications', error })
       }
     },
-    deleteAllNotifications: async (context) => {
+    async deleteAllNotifications () {
       const userStore = useUserStore()
       const apiKey = userStore.apiKey
-      const isOnline = context.rootState.isOnline
+      const isOnline = store.state.isOnline
       if (!shouldRequest({ apiKey, isOnline })) { return }
       try {
-        const options = await context.dispatch('requestOptions', { method: 'DELETE' })
+        const options = await this.requestOptions({ method: 'DELETE' })
         const response = await fetch(`${consts.apiHost()}/notification/all`, options)
         return normalizeResponse(response)
       } catch (error) {
-        context.dispatch('handleServerError', { name: 'deleteGroupPermanent', error })
+        this.handleServerError({ name: 'deleteGroupPermanent', error })
       }
     },
 
     // Services
 
-    updateArenaAccessToken: async (context, arenaReturnedCode) => {
+    async updateArenaAccessToken (arenaReturnedCode) {
       const userStore = useUserStore()
       try {
         const currentUserIsSignedIn = userStore.getUserIsSignedIn
@@ -1297,19 +1297,19 @@ const self = {
           userId,
           arenaReturnedCode
         }
-        const options = await context.dispatch('requestOptions', { body, method: 'PATCH' })
+        const options = await this.requestOptions({ body, method: 'PATCH' })
         const response = await fetch(`${consts.apiHost()}/user/update-arena-access-token`, options)
         return normalizeResponse(response)
       } catch (error) {
         console.error('🚒 updateArenaAccessToken', error)
-        context.commit('triggerArenaAuthenticationError', null, { root: true })
-        context.commit('isAuthenticatingWithArena', false, { root: true })
+        store.commit('triggerArenaAuthenticationError', null, { root: true })
+        store.commit('isAuthenticatingWithArena', false, { root: true })
       }
     },
-    urlPreview: async (context, { url, card }) => {
+    async urlPreview ({ url, card }) {
       try {
         const body = { url, card }
-        const options = await context.dispatch('requestOptions', { body, method: 'POST' })
+        const options = await this.requestOptions({ body, method: 'POST' })
         const response = await fetch(`${consts.apiHost()}/services/url-preview`, options)
         if (response.status !== 200) {
           throw new Error(response.status)
@@ -1317,33 +1317,33 @@ const self = {
         const data = await normalizeResponse(response)
         return { url, data, response }
       } catch (error) {
-        context.dispatch('handleServerError', { name: 'urlPreview', error })
+        this.handleServerError({ name: 'urlPreview', error })
       }
     },
-    imageSearch: async (context, search) => {
+    async imageSearch (search) {
       try {
         const body = { search }
-        const options = await context.dispatch('requestOptions', { body, method: 'POST' })
+        const options = await this.requestOptions({ body, method: 'POST' })
         const response = await fetch(`${consts.apiHost()}/services/image-search`, options)
         const data = await normalizeResponse(response)
         return data
       } catch (error) {
-        context.dispatch('handleServerError', { name: 'imageSearch', error })
+        this.handleServerError({ name: 'imageSearch', error })
       }
     },
-    gifImageSearch: async (context, body) => {
+    async gifImageSearch (body) {
       try {
-        const options = await context.dispatch('requestOptions', { body, method: 'POST' })
+        const options = await this.requestOptions({ body, method: 'POST' })
         const response = await fetch(`${consts.apiHost()}/services/gif-image-search`, options)
         const data = await normalizeResponse(response)
         return data
       } catch (error) {
-        context.dispatch('handleServerError', { name: 'imageSearch', error })
+        this.handleServerError({ name: 'imageSearch', error })
       }
     },
-    communityBackgrounds: async (context) => {
+    async communityBackgrounds () {
       try {
-        const options = await context.dispatch('requestOptions', { method: 'GET' })
+        const options = await this.requestOptions({ method: 'GET' })
         const response = await fetch(`${consts.apiHost()}/services/community-backgrounds`, options)
         const data = await normalizeResponse(response)
         return data
@@ -1351,23 +1351,23 @@ const self = {
         console.error('🚒 communityBackgrounds', error)
       }
     },
-    pdf: async (context) => {
+    async pdf () {
       const spaceStore = useSpaceStore()
       const spaceId = spaceStore.id
       try {
-        const options = await context.dispatch('requestOptions', { method: 'POST' })
+        const options = await this.requestOptions({ method: 'POST' })
         const response = await fetch(`${consts.apiHost()}/services/pdf/${spaceId}`, options)
         let url = await normalizeResponse(response)
         url = url.url
         return url
       } catch (error) {
-        context.dispatch('handleServerError', { name: 'pdf', error })
+        this.handleServerError({ name: 'pdf', error })
       }
     },
-    generateSpace: async (context, prompt) => {
+    async generateSpace (prompt) {
       try {
         const body = { prompt }
-        const options = await context.dispatch('requestOptions', { body, method: 'POST' })
+        const options = await this.requestOptions({ body, method: 'POST' })
         const response = await fetch(`${consts.apiHost()}/services/generate-space`, options)
         const data = await normalizeResponse(response)
         return data
@@ -1379,105 +1379,105 @@ const self = {
 
     // Downloads
 
-    downloadAllSpaces: async (context) => {
+    async downloadAllSpaces () {
       const userStore = useUserStore()
       const apiKey = userStore.apiKey
-      const isOnline = context.rootState.isOnline
+      const isOnline = store.state.isOnline
       if (!shouldRequest({ apiKey, isOnline })) { return }
       try {
-        const options = await context.dispatch('requestOptions', { method: 'GET' })
+        const options = await this.requestOptions({ method: 'GET' })
         const response = await fetch(`${consts.apiHost()}/space/download-all`, options)
         return response.blob()
       } catch (error) {
-        context.dispatch('handleServerError', { name: 'downloadAllSpaces', error })
+        this.handleServerError({ name: 'downloadAllSpaces', error })
       }
     },
 
     // Group
 
-    getUserGroups: async (context) => {
+    async getUserGroups () {
       const userStore = useUserStore()
       const apiKey = userStore.apiKey
-      const isOnline = context.rootState.isOnline
+      const isOnline = store.state.isOnline
       if (!shouldRequest({ apiKey, isOnline })) { return }
       try {
-        context.commit('isLoadingGroups', true, { root: true })
-        const options = await context.dispatch('requestOptions', { method: 'GET' })
+        store.commit('isLoadingGroups', true, { root: true })
+        const options = await this.requestOptions({ method: 'GET' })
         const response = await fetch(`${consts.apiHost()}/user/groups`, options)
-        context.commit('isLoadingGroups', false, { root: true })
+        store.commit('isLoadingGroups', false, { root: true })
         return normalizeResponse(response)
       } catch (error) {
-        context.dispatch('handleServerError', { name: 'getUserGroups', error })
+        this.handleServerError({ name: 'getUserGroups', error })
       }
-      context.commit('isLoadingGroups', false, { root: true })
+      store.commit('isLoadingGroups', false, { root: true })
     },
-    getGroup: async (context, groupId) => {
+    async getGroup (groupId) {
       const userStore = useUserStore()
       const apiKey = userStore.apiKey
-      const isOnline = context.rootState.isOnline
+      const isOnline = store.state.isOnline
       if (!shouldRequest({ apiKey, isOnline })) { return }
       try {
         console.info('🛬 getting remote group', groupId)
-        const options = await context.dispatch('requestOptions', { method: 'GET' })
+        const options = await this.requestOptions({ method: 'GET' })
         const response = await fetch(`${consts.apiHost()}/group/${groupId}`, options)
         return normalizeResponse(response)
       } catch (error) {
-        context.dispatch('handleServerError', { name: 'getGroup', error })
+        this.handleServerError({ name: 'getGroup', error })
       }
     },
-    createGroup: async (context, body) => {
+    async createGroup (body) {
       const userStore = useUserStore()
       const apiKey = userStore.apiKey
-      const isOnline = context.rootState.isOnline
+      const isOnline = store.state.isOnline
       if (!shouldRequest({ apiKey, isOnline })) { return }
       try {
-        const options = await context.dispatch('requestOptions', { body, method: 'POST' })
+        const options = await this.requestOptions({ body, method: 'POST' })
         const response = await fetch(`${consts.apiHost()}/group/`, options)
         return normalizeResponse(response)
       } catch (error) {
-        context.dispatch('handleServerError', { name: 'createGroup', error })
+        this.handleServerError({ name: 'createGroup', error })
       }
     },
-    createGroupUser: async (context, body) => {
+    async createGroupUser (body) {
       const userStore = useUserStore()
       const apiKey = userStore.apiKey
-      const isOnline = context.rootState.isOnline
+      const isOnline = store.state.isOnline
       if (!shouldRequest({ apiKey, isOnline })) { return }
       try {
-        const options = await context.dispatch('requestOptions', { body, method: 'POST' })
+        const options = await this.requestOptions({ body, method: 'POST' })
         const response = await fetch(`${consts.apiHost()}/group/group-user`, options)
         return normalizeResponse(response)
       } catch (error) {
-        context.dispatch('handleServerError', { name: 'createGroupUser', error })
+        this.handleServerError({ name: 'createGroupUser', error })
       }
     },
-    removeGroupUser: async (context, body) => {
+    async removeGroupUser (body) {
       const userStore = useUserStore()
       const apiKey = userStore.apiKey
-      const isOnline = context.rootState.isOnline
+      const isOnline = store.state.isOnline
       if (!shouldRequest({ apiKey, isOnline })) { return }
       try {
-        const options = await context.dispatch('requestOptions', { body, method: 'DELETE' })
+        const options = await this.requestOptions({ body, method: 'DELETE' })
         const response = await fetch(`${consts.apiHost()}/group/group-user`, options)
         return normalizeResponse(response)
       } catch (error) {
-        context.dispatch('handleServerError', { name: 'removeGroupUser', error })
+        this.handleServerError({ name: 'removeGroupUser', error })
       }
     },
-    deleteGroupPermanent: async (context, body) => {
+    async deleteGroupPermanent (body) {
       const userStore = useUserStore()
       const apiKey = userStore.apiKey
-      const isOnline = context.rootState.isOnline
+      const isOnline = store.state.isOnline
       if (!shouldRequest({ apiKey, isOnline })) { return }
       try {
-        const options = await context.dispatch('requestOptions', { body, method: 'DELETE' })
+        const options = await this.requestOptions({ body, method: 'DELETE' })
         const response = await fetch(`${consts.apiHost()}/group/`, options)
         return normalizeResponse(response)
       } catch (error) {
-        context.dispatch('handleServerError', { name: 'deleteGroupPermanent', error })
+        this.handleServerError({ name: 'deleteGroupPermanent', error })
       }
     },
-    sendAnalyticsEvent: async (context, body) => {
+    async sendAnalyticsEvent (body) {
       try {
         const headers = new Headers({
           'Content-Type': 'application/json'
@@ -1492,6 +1492,4 @@ const self = {
       }
     }
   }
-}
-
-export default self
+})

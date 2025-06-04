@@ -8,7 +8,6 @@ import consts from '@/consts.js'
 import cache from '@/cache.js'
 import postMessage from '@/postMessage.js'
 // store modules
-import api from '@/store/api.js'
 import broadcast from '@/store/broadcast.js'
 import history from '@/store/history.js'
 import upload from '@/store/upload.js'
@@ -16,6 +15,7 @@ import userNotifications from '@/store/userNotifications.js'
 import groups from '@/store/groups.js'
 import themes from '@/store/themes.js'
 import analytics from '@/store/analytics.js'
+// import api from '@/store/api.js'
 // temp, converted to pinia
 // import currentSpace from '@/store/currentSpace.js'
 // import currentUser from '@/store/currentUser.js'
@@ -2295,7 +2295,7 @@ const store = createStore({
   },
 
   modules: {
-    api,
+    // api,
     broadcast,
     history,
     // currentUser,
