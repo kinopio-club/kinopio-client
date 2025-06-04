@@ -11,7 +11,7 @@ import postMessage from '@/postMessage.js'
 import broadcast from '@/store/broadcast.js'
 import history from '@/store/history.js'
 import upload from '@/store/upload.js'
-import userNotifications from '@/store/userNotifications.js'
+// import userNotifications from '@/store/userNotifications.js'
 import groups from '@/store/groups.js'
 import themes from '@/store/themes.js'
 import analytics from '@/store/analytics.js'
@@ -2304,7 +2304,7 @@ const store = createStore({
     // currentConnections,
     // currentBoxes,
     upload,
-    userNotifications,
+    // userNotifications,
     groups,
     themes,
     analytics
