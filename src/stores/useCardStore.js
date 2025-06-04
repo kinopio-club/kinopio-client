@@ -5,6 +5,7 @@ import { useBoxStore } from '@/stores/useBoxStore'
 import { useUserStore } from '@/stores/useUserStore'
 import { useSpaceStore } from '@/stores/useSpaceStore'
 import { useApiStore } from '@/stores/useApiStore'
+import { useUserNotificationStore } from '@/stores/useUserNotificationStore'
 
 import store from '@/store/store.js' // TEMP Import Vuex store
 
@@ -279,6 +280,7 @@ export const useCardStore = defineStore('cards', {
       const apiStore = useApiStore()
       const userStore = useUserStore()
       const spaceStore = useSpaceStore()
+      const userNotificationStore = useUserNotificationStore()
       if (spaceStore.getShouldPreventAddCard) {
         store.commit('notifyCardsCreatedIsOverLimit', true, { root: true })
         return
@@ -291,7 +293,7 @@ export const useCardStore = defineStore('cards', {
       if (card.isParentCard) { store.commit('parentCardId', card.id, { root: true }) }
       userStore.updateUserCardsCreatedCount([card])
       spaceStore.checkIfShouldNotifyCardsCreatedIsNearLimit()
-      store.dispatch('userNotifications/addCardUpdated', { cardId: card.id, type: 'createCard' }, { root: true })
+      userNotificationStore.addCardUpdated({ cardId: card.id, type: 'createCard' })
       // server/disk/save tasks TODO dry
       if (!card.isBroadcast) {
         store.dispatch('broadcast/update', { updates: card, storeName: 'cardStore', actionName: 'createCard' }, { root: true })

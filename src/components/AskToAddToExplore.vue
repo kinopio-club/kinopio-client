@@ -3,9 +3,11 @@ import { reactive, computed, onMounted, onBeforeUnmount, watch, ref, nextTick } 
 import { useStore } from 'vuex'
 import { useUserStore } from '@/stores/useUserStore'
 import { useSpaceStore } from '@/stores/useSpaceStore'
+import { useUserNotificationStore } from '@/stores/useUserNotificationStore'
 
 const userStore = useUserStore()
 const spaceStore = useSpaceStore()
+const userNotificationStore = useUserNotificationStore()
 const store = useStore()
 
 const emit = defineEmits(['updateDialogHeight'])
@@ -30,7 +32,7 @@ const askToAddToExplore = () => {
     state.error.userNeedsToSignUpOrIn = true
     return
   }
-  store.dispatch('userNotifications/addAskToAddToExplore')
+  userNotificationStore.addAskToAddToExplore()
   state.isAsked = true
   emit('updateDialogHeight')
 }

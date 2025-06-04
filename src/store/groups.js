@@ -1,6 +1,8 @@
 import { useUserStore } from '@/stores/useUserStore'
 import { useSpaceStore } from '@/stores/useSpaceStore'
 import { useApiStore } from '@/stores/useApiStore'
+import { useUserNotificationStore } from '@/stores/useUserNotificationStore'
+
 import utils from '@/utils.js'
 import cache from '@/cache.js'
 
@@ -176,10 +178,11 @@ export default {
     addCurrentSpace: async (context, group) => {
       const spaceStore = useSpaceStore()
       const userStore = useUserStore()
+      const userNotificationStore = useUserNotificationStore()
       const user = userStore
       const body = { groupId: group.id, addedToGroupByUserId: user.id }
       await spaceStore.updateSpace(body)
-      await context.dispatch('userNotifications/addSpaceToGroup', body, { root: true })
+      await userNotificationStore.addSpaceToGroup(body)
     },
     removeCurrentSpace: async (context) => {
       const spaceStore = useSpaceStore()

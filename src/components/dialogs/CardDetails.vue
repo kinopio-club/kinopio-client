@@ -5,6 +5,7 @@ import { useCardStore } from '@/stores/useCardStore'
 import { useConnectionStore } from '@/stores/useConnectionStore'
 import { useUserStore } from '@/stores/useUserStore'
 import { useSpaceStore } from '@/stores/useSpaceStore'
+import { useUserNotificationStore } from '@/stores/useUserNotificationStore'
 
 import CardOrBoxActions from '@/components/subsections/CardOrBoxActions.vue'
 import ImagePicker from '@/components/dialogs/ImagePicker.vue'
@@ -33,6 +34,7 @@ const cardStore = useCardStore()
 const connectionStore = useConnectionStore()
 const userStore = useUserStore()
 const spaceStore = useSpaceStore()
+const userNotificationStore = useUserNotificationStore()
 
 let prevCardId, prevCardName
 let previousTags = []
@@ -513,7 +515,7 @@ const updateCardName = async (newName) => {
   if (createdByUser.value.id !== userStore.id) { return }
   if (state.notifiedMembers) { return } // send card update notifications only once per card, per session
   if (newName) {
-    store.dispatch('userNotifications/addCardUpdated', { cardId: card.value.id, type: 'updateCard' })
+    userNotificationStore.addCardUpdated({ cardId: card.value.id, type: 'updateCard' })
     state.notifiedMembers = true
   }
 }

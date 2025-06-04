@@ -3,6 +3,7 @@ import { defineStore } from 'pinia'
 import { useConnectionStore } from '@/stores/useConnectionStore'
 import { useSpaceStore } from '@/stores/useSpaceStore'
 import { useApiStore } from '@/stores/useApiStore'
+import { useUserNotificationStore } from '@/stores/useUserNotificationStore'
 
 import store from '@/store/store.js' // TEMP Import Vuex store
 
@@ -389,28 +390,30 @@ export const useUserStore = defineStore('users', {
 
     async updateUserFavoriteSpace (space, shouldAdd) {
       const apiStore = useApiStore()
+      const userNotificationStore = useUserNotificationStore()
       if (shouldAdd) {
         this.favoriteSpaces.push(space)
-        store.dispatch('userNotifications/addFavoriteSpace', space, { root: true })
+        userNotificationStore.addFavoriteSpace(space)
       } else {
         this.favoriteSpaces = this.favoriteSpaces.filter(favoriteSpace => {
           return favoriteSpace.id !== space.id
         })
-        store.dispatch('userNotifications/removeFavoriteSpace', space, { root: true })
+        userNotificationStore.removeFavoriteSpace(space)
       }
       const body = { spaceId: space.id, value: shouldAdd }
       await apiStore.addToQueue({ name: 'updateFavoriteSpace', body, spaceId: space.id }, { root: true })
     },
     async updateUserFavoriteUser (user, shouldAdd) {
       const apiStore = useApiStore()
+      const userNotificationStore = useUserNotificationStore()
       if (shouldAdd) {
         this.favoriteUsers.push(user)
-        store.dispatch('userNotifications/addFavoriteUser', user, { root: true })
+        userNotificationStore.addFavoriteUser(user)
       } else {
         this.favoriteUsers = this.favoriteUsers.filter(favoriteUser => {
           return favoriteUser.id !== user.id
         })
-        store.dispatch('userNotifications/removeFavoriteUser', user, { root: true })
+        userNotificationStore.removeFavoriteUser(user)
       }
       const body = { favoriteUserId: user.id, value: shouldAdd }
       await apiStore.addToQueue({ name: 'updateFavoriteUser', body }, { root: true })
