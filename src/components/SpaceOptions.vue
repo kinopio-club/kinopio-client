@@ -44,7 +44,7 @@ const duplicateSpace = async () => {
 const removeCurrentSpace = async () => {
   const currentSpaceId = store.state.currentSpace.id
   if (currentUserIsSpaceCollaborator.value) {
-    store.dispatch('currentSpace/removeCollaboratorFromSpace', store.state.currentUser)
+    spaceStore.removeCollaboratorFromSpace(userStore.getUserAllState)
   } else {
     spaceStore.removeSpace()
     store.commit('notifyCurrentSpaceIsNowRemoved', true)

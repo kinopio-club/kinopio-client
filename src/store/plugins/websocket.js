@@ -108,6 +108,7 @@ export default function createWebSocketPlugin () {
   return store => {
     store.subscribe((mutation, state) => {
       const userStore = useUserStore()
+      const spaceStore = useSpaceStore()
       if (mutation.type === 'broadcast/connect') {
         store.commit('isJoiningSpace', true)
         const host = consts.websocketHost()
@@ -167,7 +168,7 @@ export default function createWebSocketPlugin () {
             store.commit('currentSpace/removeIdleClientFromSpace', user || updates.user)
             store.commit('clearRemoteMultipleSelected', data)
           } else if (message === 'userLeftSpace') {
-            store.commit('currentSpace/removeCollaboratorFromSpace', updates.user)
+            spaceStore.removeCollaboratorFromSpace(updates.user)
             if (updates.user.id === userStore.id) {
               store.dispatch('currentSpace/removeCurrentUserFromSpace', updates.user)
             }

@@ -100,7 +100,7 @@ const userIsSelected = (user) => {
 // space
 
 const removeCollaborator = async (user) => {
-  store.dispatch('currentSpace/removeCollaboratorFromSpace', user)
+  spaceStore.removeCollaboratorFromSpace(user)
   if (isCurrentUser(user)) {
     store.dispatch('closeAllDialogs')
   }

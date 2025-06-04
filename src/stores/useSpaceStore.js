@@ -803,6 +803,26 @@ export const useSpaceStore = defineStore('space', {
       this.users.push(newUser)
       cache.updateSpace('users', this.users, this.id)
     },
+    async removeCollaboratorFromSpace (user) {
+      const userStore = useUserStore()
+      const space = this.getSpaceAllState
+      store.dispatch('broadcast/update', { user, type: 'userLeftSpace' }, { root: true })
+      store.dispatch('api/removeSpaceCollaborator', { space, user }, { root: true })
+      this.collaborators = this.collaborators.filter(collaborator => {
+        return collaborator.id !== user.id
+      })
+      await cache.updateSpace('collaborators', this.collaborators, this.id)
+      const isCurrentUser = userStore.getUserIsCurrentUser(user)
+      if (isCurrentUser) {
+        this.loadLastSpace()
+        cache.removeInvitedSpace(space)
+        cache.deleteSpace(space)
+        store.commit('addNotification', { message: `You left ${space.name}`, type: 'success' }, { root: true })
+      } else {
+        const userName = user.name || 'User'
+        store.commit('addNotification', { message: `${userName} removed from space`, type: 'success' }, { root: true })
+      }
+    },
 
     // notify
 
