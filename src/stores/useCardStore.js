@@ -288,7 +288,7 @@ export const useCardStore = defineStore('cards', {
       }
       if (card.isParentCard) { store.commit('parentCardId', card.id, { root: true }) }
       userStore.updateUserCardsCreatedCount([card])
-      store.dispatch('currentSpace/checkIfShouldNotifyCardsCreatedIsNearLimit', null, { root: true })
+      spaceStore.checkIfShouldNotifyCardsCreatedIsNearLimit()
       store.dispatch('userNotifications/addCardUpdated', { cardId: card.id, type: 'createCard' }, { root: true })
       // server/disk/save tasks TODO dry
       if (!card.isBroadcast) {

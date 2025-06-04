@@ -251,7 +251,7 @@ export default {
       context.dispatch('currentUser/cardsCreatedCountUpdateBy', {
         cards: [card]
       }, { root: true })
-      context.dispatch('currentSpace/checkIfShouldNotifyCardsCreatedIsNearLimit', null, { root: true })
+      spaceStore.checkIfShouldNotifyCardsCreatedIsNearLimit()
       context.dispatch('userNotifications/addCardUpdated', { cardId: card.id, type: 'createCard' }, { root: true })
       await context.dispatch('api/addToQueue', { name: 'createCard', body: card }, { root: true })
       await spaceStore.updateSpace({ editedAt: new Date() })
