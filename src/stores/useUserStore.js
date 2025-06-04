@@ -109,7 +109,8 @@ export const useUserStore = defineStore('users', {
       if (this.cardsCreatedCount >= cardsCreatedLimit) { return true }
     },
     getShouldPreventCardsCreatedCountUpdate () {
-      const isUpgraded = store.getters['currentSpace/spaceCreatorIsUpgraded']
+      const spaceStore = useSpaceStore()
+      const isUpgraded = spaceStore.getSpaceCreatorIsUpgraded
       const isCurrentUser = store.getters['currentSpace/spaceCreatorIsCurrentUser']
       return (isUpgraded && !isCurrentUser)
     },

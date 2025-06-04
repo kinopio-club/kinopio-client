@@ -966,11 +966,11 @@ export default {
       return rootState.spaceReadOnlyKey.spaceId === space.id
     },
     shouldPreventCardsCreatedCountUpdate: (state, getters, rootState, rootGetters) => {
-      const spaceCreatorIsUpgraded = rootGetters['currentSpace/spaceCreatorIsUpgraded']
-      const spaceCreatorIsCurrentUser = rootGetters['currentSpace/spaceCreatorIsCurrentUser']
-      if (spaceCreatorIsUpgraded && !spaceCreatorIsCurrentUser) {
-        return true
-      }
+      // const spaceCreatorIsUpgraded = rootGetters['currentSpace/spaceCreatorIsUpgraded']
+      // const spaceCreatorIsCurrentUser = rootGetters['currentSpace/spaceCreatorIsCurrentUser']
+      // if (spaceCreatorIsUpgraded && !spaceCreatorIsCurrentUser) {
+      //   return true
+      // }
     },
     totalFiltersActive: (state, getters) => {
       let userFilters = getters.totalItemFadingFiltersActive
