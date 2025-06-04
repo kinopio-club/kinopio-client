@@ -5,6 +5,7 @@ import { useCardStore } from '@/stores/useCardStore'
 import { useUserStore } from '@/stores/useUserStore'
 import { useSpaceStore } from '@/stores/useSpaceStore'
 import { useApiStore } from '@/stores/useApiStore'
+import { useUploadStore } from '@/stores/useUploadStore'
 
 import Loader from '@/components/Loader.vue'
 import utils from '@/utils.js'
@@ -19,6 +20,7 @@ const cardStore = useCardStore()
 const userStore = useUserStore()
 const spaceStore = useSpaceStore()
 const apiStore = useApiStore()
+const uploadStore = useUploadStore()
 
 const dialogElement = ref(null)
 const searchInputElement = ref(null)
@@ -302,7 +304,7 @@ const uploadOtherSelectedFiles = (otherSelectedFiles) => {
       x: card.x + positionOffset,
       y: card.y + positionOffset
     }
-    store.dispatch('upload/addCardsAndUploadFiles', {
+    uploadStore.addCardsAndUploadFiles({
       files: otherSelectedFiles,
       position
     })
@@ -313,7 +315,7 @@ const uploadOtherSelectedFiles = (otherSelectedFiles) => {
 const uploadSelectedFile = async (selectedFile) => {
   const cardId = props.cardId
   try {
-    await store.dispatch('upload/uploadFile', { file: selectedFile, cardId })
+    await uploadStore.uploadFile({ file: selectedFile, cardId })
   } catch (error) {
     console.warn('🚒', error)
     if (error.type === 'sizeLimit') {

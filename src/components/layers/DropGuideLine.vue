@@ -3,6 +3,7 @@ import { reactive, computed, onMounted, onBeforeUnmount, watch, ref, nextTick } 
 import { useStore } from 'vuex'
 import { useUserStore } from '@/stores/useUserStore'
 import { useSpaceStore } from '@/stores/useSpaceStore'
+import { useUploadStore } from '@/stores/useUploadStore'
 
 import utils from '@/utils.js'
 
@@ -11,6 +12,7 @@ import { nanoid } from 'nanoid'
 const store = useStore()
 const userStore = useUserStore()
 const spaceStore = useSpaceStore()
+const uploadStore = useUploadStore()
 
 let canvas, context, remoteCanvas, remoteContext, paintingGuidesTimer, remotePaintingGuidesTimer
 
@@ -91,7 +93,7 @@ const addCardsAndUploadFiles = (event) => {
   let files = event.dataTransfer.files
   files = Array.from(files)
   removeUploadIsDraggedOver()
-  store.dispatch('upload/addCardsAndUploadFiles', {
+  uploadStore.addCardsAndUploadFiles({
     files,
     event
   })

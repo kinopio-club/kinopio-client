@@ -6,6 +6,7 @@ import { useConnectionStore } from '@/stores/useConnectionStore'
 import { useUserStore } from '@/stores/useUserStore'
 import { useSpaceStore } from '@/stores/useSpaceStore'
 import { useUserNotificationStore } from '@/stores/useUserNotificationStore'
+import { useUploadStore } from '@/stores/useUploadStore'
 
 import CardOrBoxActions from '@/components/subsections/CardOrBoxActions.vue'
 import ImagePicker from '@/components/dialogs/ImagePicker.vue'
@@ -35,6 +36,7 @@ const connectionStore = useConnectionStore()
 const userStore = useUserStore()
 const spaceStore = useSpaceStore()
 const userNotificationStore = useUserNotificationStore()
+const uploadStore = useUploadStore()
 
 let prevCardId, prevCardName
 let previousTags = []
@@ -396,7 +398,7 @@ const closeCard = async () => {
   store.commit('shouldPreventNextEnterKey', false)
   if (!item) { return }
   const cardHasName = Boolean(item.name)
-  const cardHasPendingUpload = store.getters['upload/hasPendingUploadForCardId'](cardId)
+  const cardHasPendingUpload = uploadStore.hasPendingUploadForCardId(cardId)
   if (!cardHasName && !cardHasPendingUpload) {
     cardStore.removeCard(cardId)
   }
@@ -1110,7 +1112,7 @@ const uploadFile = async (file) => {
     return
   }
   try {
-    await store.dispatch('upload/uploadFile', { file, cardId: card.value.id })
+    await uploadStore.uploadFile({ file, cardId: card.value.id })
   } catch (error) {
     console.warn('🚒', error)
     if (error.type === 'sizeLimit') {

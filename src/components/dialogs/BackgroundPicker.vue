@@ -5,6 +5,7 @@ import { useBoxStore } from '@/stores/useBoxStore'
 import { useUserStore } from '@/stores/useUserStore'
 import { useSpaceStore } from '@/stores/useSpaceStore'
 import { useApiStore } from '@/stores/useApiStore'
+import { useUploadStore } from '@/stores/useUploadStore'
 
 import ColorPicker from '@/components/dialogs/ColorPicker.vue'
 import Loader from '@/components/Loader.vue'
@@ -27,6 +28,7 @@ const boxStore = useBoxStore()
 const userStore = useUserStore()
 const spaceStore = useSpaceStore()
 const apiStore = useApiStore()
+const uploadStore = useUploadStore()
 
 const searchInputElement = ref(null)
 const inputElement = ref(null)
@@ -328,9 +330,9 @@ const uploadFile = async () => {
   }
   try {
     if (props.box) {
-      await store.dispatch('upload/uploadFile', { file, boxId: props.box.id })
+      await uploadStore.uploadFile({ file, boxId: props.box.id })
     } else {
-      await store.dispatch('upload/uploadFile', { file, spaceId })
+      await uploadStore.uploadFile({ file, spaceId })
     }
   } catch (error) {
     console.warn('🚒', error)

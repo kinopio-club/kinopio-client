@@ -8,6 +8,7 @@ import { useUserStore } from '@/stores/useUserStore'
 import { useSpaceStore } from '@/stores/useSpaceStore'
 import { useApiStore } from '@/stores/useApiStore'
 import { useGroupStore } from '@/stores/useGroupStore'
+import { useUploadStore } from '@/stores/useUploadStore'
 
 import utils from '@/utils.js'
 import Frames from '@/components/Frames.vue'
@@ -33,6 +34,7 @@ import isToday from 'dayjs/plugin/isToday'
 import qs from '@aguezz/qs-parse'
 import randomColor from 'randomcolor'
 import { nanoid } from 'nanoid'
+const uploadStore = useUploadStore()
 
 dayjs.extend(isToday)
 
@@ -854,7 +856,7 @@ const uploadFile = async (event) => {
   const cardId = props.card.id
   // upload
   try {
-    await store.dispatch('upload/uploadFile', { file, cardId })
+    await uploadStore.uploadFile({ file, cardId })
   } catch (error) {
     console.warn('🚒', error)
     if (error.type === 'sizeLimit') {

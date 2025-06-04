@@ -6,6 +6,7 @@ import { useConnectionStore } from '@/stores/useConnectionStore'
 import { useBoxStore } from '@/stores/useBoxStore'
 import { useUserStore } from '@/stores/useUserStore'
 import { useSpaceStore } from '@/stores/useSpaceStore'
+import { useUploadStore } from '@/stores/useUploadStore'
 
 import utils from '@/utils.js'
 
@@ -15,6 +16,7 @@ const connectionStore = useConnectionStore()
 const boxStore = useBoxStore()
 const userStore = useUserStore()
 const spaceStore = useSpaceStore()
+const uploadStore = useUploadStore()
 
 let unsubscribe
 let unsubscribes
@@ -192,7 +194,7 @@ const addCardsAndUploadFiles = (event) => {
   let files = event.dataTransfer.files
   files = Array.from(files)
   const position = utils.cursorPositionInViewport(event)
-  store.dispatch('upload/addCardsAndUploadFiles', { files, position })
+  uploadStore.addCardsAndUploadFiles({ files, position })
 }
 
 // selected

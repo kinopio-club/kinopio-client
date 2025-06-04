@@ -6,6 +6,7 @@ import { useConnectionStore } from '@/stores/useConnectionStore'
 import { useBoxStore } from '@/stores/useBoxStore'
 import { useUserStore } from '@/stores/useUserStore'
 import { useSpaceStore } from '@/stores/useSpaceStore'
+import { useUploadStore } from '@/stores/useUploadStore'
 
 import utils from '@/utils.js'
 import consts from '@/consts.js'
@@ -18,6 +19,7 @@ const connectionStore = useConnectionStore()
 const boxStore = useBoxStore()
 const userStore = useUserStore()
 const spaceStore = useSpaceStore()
+const uploadStore = useUploadStore()
 
 let useSiblingConnectionType
 let browserZoomLevel = 0
@@ -777,7 +779,7 @@ const handlePasteEvent = async (event) => {
   store.commit('clearMultipleSelected')
   // add data items
   if (data.file) {
-    store.dispatch('upload/addCardsAndUploadFiles', { files: [data.file], position })
+    uploadStore.addCardsAndUploadFiles({ files: [data.file], position })
   // add kinopio items
   } else if (data.kinopio) {
     items = utils.updateSpaceItemsAddPosition(data.kinopio, position)
