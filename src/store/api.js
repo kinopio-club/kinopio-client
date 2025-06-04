@@ -669,11 +669,12 @@ const self = {
     },
     getSpace: async (context, { space, shouldRequestRemote, spaceReadOnlyKey }) => {
       const userStore = useUserStore()
+      const spaceStore = useSpaceStore()
       try {
         const apiKey = userStore.apiKey
         const isOnline = context.rootState.isOnline
         if (!shouldRequest({ shouldRequestRemote, apiKey, isOnline })) { return }
-        const spaceReadOnlyKey = context.rootGetters['currentSpace/readOnlyKey'](space)
+        const spaceReadOnlyKey = spaceStore.getSpaceReadOnlyKey(space)
         console.info('🛬 getting remote space', space.id)
         const options = await context.dispatch('requestOptions', { method: 'GET', space, spaceReadOnlyKey })
         const response = await utils.timeout(consts.defaultTimeout, fetch(`${consts.apiHost()}/space/${space.id}`, options))
@@ -721,12 +722,13 @@ const self = {
       }
     },
     getSpaceAnonymously: async (context, space) => {
+      const spaceStore = useSpaceStore()
       const isOnline = context.rootState.isOnline
       if (!isOnline) { return }
       const invitedSpaces = await cache.invitedSpaces()
       const invite = invitedSpaces.find(invitedSpace => invitedSpace.id === space.id) || {}
       space.collaboratorKey = space.collaboratorKey || invite.collaboratorKey
-      const spaceReadOnlyKey = context.rootGetters['currentSpace/readOnlyKey'](space)
+      const spaceReadOnlyKey = spaceStore.getSpaceReadOnlyKey(space)
       try {
         console.info('🛬 getting remote space anonymously', space.id, space.collaboratorKey, spaceReadOnlyKey)
         const options = await context.dispatch('requestOptions', { method: 'GET', space, spaceReadOnlyKey })
