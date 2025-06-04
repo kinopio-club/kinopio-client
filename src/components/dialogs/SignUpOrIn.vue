@@ -303,7 +303,7 @@ const updateSpacesUserId = async () => {
   }
 }
 const updateCurrentSpaceWithNewUserId = (previousUser, newUser) => {
-  const userIsSpaceUser = userStore.getUserSpacePermission() === 'user'
+  const userIsSpaceUser = userStore.getUserSpacePermission === 'user'
   if (!userIsSpaceUser) { return }
   spaceStore.removeUserFromSpace(previousUser)
   spaceStore.addUserToSpace(newUser)

@@ -172,6 +172,19 @@ export const useUserStore = defineStore('users', {
       const canEditOpenSpace = spaceIsOpen && currentUserIsSignedIn
       const isSpaceMember = this.getUserIsSpaceMember
       return canEditOpenSpace || isSpaceMember
+    },
+    getUserSpacePermission () {
+      const spaceStore = useSpaceStore()
+      const isSpaceUser = this.getUserIsSpaceUser
+      const isSpaceCollaborator = this.getUserIsSpaceCollaborator
+      const spaceHasNoUsers = !spaceStore.users?.length
+      if (isSpaceUser || spaceHasNoUsers) {
+        return 'user'
+      } else if (isSpaceCollaborator) {
+        return 'collaborator'
+      } else {
+        return 'spectator'
+      }
     }
   },
 
@@ -182,22 +195,6 @@ export const useUserStore = defineStore('users', {
     },
     getUserTagByName (name) {
       return this.tags.find(tag => tag.name === name)
-    },
-    // TODO refactor these into standard getters if space always = spaceStore.getSpaceAllState
-    // const spaceStore = useSpaceStore()
-    getUserSpacePermission (space) {
-      const spaceStore = useSpaceStore()
-      space = space || spaceStore.getSpaceAllState
-      const isSpaceUser = this.getUserIsSpaceUser
-      const isSpaceCollaborator = this.getUserIsSpaceCollaborator
-      const spaceHasNoUsers = !space.users.length
-      if (isSpaceUser || spaceHasNoUsers) {
-        return 'user'
-      } else if (isSpaceCollaborator) {
-        return 'collaborator'
-      } else {
-        return 'spectator'
-      }
     },
     getUserIsOtherSpaceMember (space) {
       const spaceStore = useSpaceStore()
@@ -211,7 +208,7 @@ export const useUserStore = defineStore('users', {
     getUserCanEditBox (box) {
       const isSpaceMember = this.getUserIsSpaceMember
       if (isSpaceMember) { return true }
-      const canEditSpace = this.getUserCanEditSpace()
+      const canEditSpace = this.getUserCanEditSpace
       const createdBox = this.getUserIsBoxCreator(box)
       if (canEditSpace && createdBox) { return true }
       return false
@@ -231,7 +228,7 @@ export const useUserStore = defineStore('users', {
     getUserCanEditCard (card) {
       const isSpaceMember = this.getUserIsSpaceMember
       if (isSpaceMember) { return true }
-      const canEditSpace = this.getUserCanEditSpace()
+      const canEditSpace = this.getUserCanEditSpace
       const getUserIsCardCreator = this.getUserIsCardCreator(card)
       if (canEditSpace && getUserIsCardCreator) { return true }
       return false
@@ -251,7 +248,7 @@ export const useUserStore = defineStore('users', {
     },
 
     getIsUserCommentOnly () {
-      const canEditSpace = this.getUserCanEditSpace()
+      const canEditSpace = this.getUserCanEditSpace
       const isSpaceMember = this.getUserIsSpaceMember
       return canEditSpace && !isSpaceMember
     },
@@ -369,10 +366,9 @@ export const useUserStore = defineStore('users', {
 
     broadcastUpdate (updates) {
       const spaceStore = useSpaceStore()
-      const space = spaceStore.getSpaceAllState
-      const spacePermission = utils.capitalizeFirstLetter(this.getUserSpacePermission(space)) // User, Collaborator, Spectator
-      const type = `update${spacePermission}`
-      store.commit('broadcast/updateUser', { id: space.id, updates, type, userId: this.id }, { root: true })
+      const permission = utils.capitalizeFirstLetter(this.getUserSpacePermission) // User, Collaborator, Spectator
+      const type = `update${permission}`
+      store.commit('broadcast/updateUser', { id: spaceStore.id, updates, type, userId: this.id }, { root: true })
       const user = { ...this.$state }
       user.userId = user.id
       spaceStore.updateUser(user)
@@ -557,7 +553,7 @@ export const useUserStore = defineStore('users', {
     // notify
 
     notifyReadOnly (position) {
-      const canEditSpace = this.getUserCanEditSpace()
+      const canEditSpace = this.getUserCanEditSpace
       if (canEditSpace) { return }
       const cannotEdit = this.getUserIsUnableToEditUnlessSignedIn
       const notificationWithPosition = document.querySelector('.notifications-with-position .item')
