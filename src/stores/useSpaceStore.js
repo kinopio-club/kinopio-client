@@ -140,7 +140,6 @@ export const useSpaceStore = defineStore('space', {
     getSpaceTags () {
       return uniqBy(this.tags, 'name')
     }
-
   },
 
   actions: {
@@ -187,6 +186,10 @@ export const useSpaceStore = defineStore('space', {
       let value = hiddenSpaces.find(hiddenSpace => hiddenSpace?.id === spaceId)
       value = Boolean(value)
       return value
+    },
+    getSpaceIsInbox (spaceName) {
+      spaceName = spaceName || this.name
+      return spaceName === 'Inbox'
     },
 
     // user getters
