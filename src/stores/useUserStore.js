@@ -196,6 +196,7 @@ export const useUserStore = defineStore('users', {
       const isGroupMember = store.getters['groups/currentUserIsCurrentSpaceGroupUser']
       return Boolean(isSpaceUser || isSpaceCollaborator || isGroupMember)
     },
+    // TODO refactor these into standard getters if space always = spaceStore.getSpaceAllState
     getUserCanEditSpace () {
       const spaceStore = useSpaceStore()
       const spaceIsOpen = spaceStore.privacy === 'open'
