@@ -3,6 +3,7 @@ import { reactive, computed, onMounted, onBeforeUnmount, onUnmounted, watch, ref
 import { useStore } from 'vuex'
 import { useUserStore } from '@/stores/useUserStore'
 import { useSpaceStore } from '@/stores/useSpaceStore'
+import { useApiStore } from '@/stores/useApiStore'
 
 import utils from '@/utils.js'
 import consts from '@/consts.js'
@@ -10,6 +11,7 @@ import consts from '@/consts.js'
 const store = useStore()
 const userStore = useUserStore()
 const spaceStore = useSpaceStore()
+const apiStore = useApiStore()
 
 let statusRetryCount = 0
 
@@ -80,7 +82,7 @@ const updateIsOnline = () => {
 const updateServerIsOnline = async () => {
   const maxIterations = 10
   const initialDelay = 1000 // 1 second
-  const serverStatus = await store.dispatch('api/getStatus')
+  const serverStatus = await apiStore.getStatus()
   console.info('server online status', serverStatus)
   if (serverStatus) {
     store.dispatch('isOnline', true)
