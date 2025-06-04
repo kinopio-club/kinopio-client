@@ -6,6 +6,7 @@ import { useConnectionStore } from '@/stores/useConnectionStore'
 import { useBoxStore } from '@/stores/useBoxStore'
 import { useUserStore } from '@/stores/useUserStore'
 import { useSpaceStore } from '@/stores/useSpaceStore'
+import { useAnalyticsStore } from '@/stores/useAnalyticsStore'
 
 import FramePicker from '@/components/dialogs/FramePicker.vue'
 import TagPickerStyleActions from '@/components/dialogs/TagPickerStyleActions.vue'
@@ -23,6 +24,7 @@ const connectionStore = useConnectionStore()
 const boxStore = useBoxStore()
 const userStore = useUserStore()
 const spaceStore = useSpaceStore()
+const analyticsStore = useAnalyticsStore()
 
 onMounted(() => {
   store.subscribe((mutation, state) => {
@@ -241,7 +243,7 @@ const containItemsInNewBox = async () => {
   await nextTick()
   await nextTick()
   store.commit('boxDetailsIsVisibleForBoxId', box.id)
-  store.dispatch('analytics/event', 'containItemsInNewBox')
+  analyticsStore.event('containItemsInNewBox')
 }
 
 // box fill
@@ -261,7 +263,7 @@ const updateBoxFill = (fill) => {
     updateBox(box, { fill })
   })
   if (fill === 'empty') {
-    store.dispatch('analytics/event', 'UpdateBoxFillToEmpty')
+    analyticsStore.event('UpdateBoxFillToEmpty')
   }
 }
 

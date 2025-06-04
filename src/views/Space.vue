@@ -8,6 +8,7 @@ import { useUserStore } from '@/stores/useUserStore'
 import { useSpaceStore } from '@/stores/useSpaceStore'
 import { useApiStore } from '@/stores/useApiStore'
 import { useGroupStore } from '@/stores/useGroupStore'
+import { useAnalyticsStore } from '@/stores/useAnalyticsStore'
 
 import CardDetails from '@/components/dialogs/CardDetails.vue'
 import OtherCardDetails from '@/components/dialogs/OtherCardDetails.vue'
@@ -61,6 +62,7 @@ const userStore = useUserStore()
 const spaceStore = useSpaceStore()
 const apiStore = useApiStore()
 const groupStore = useGroupStore()
+const analyticsStore = useAnalyticsStore()
 
 let unsubscribe
 
@@ -73,7 +75,7 @@ const init = async () => {
     store.commit('notifyIsJoiningGroup', true)
   }
   apiStore.updateDateImage()
-  store.dispatch('analytics/event', 'pageview')
+  analyticsStore.event('pageview')
   await cache.migrateFromLocalStorage() // legacy
   await spaceStore.initializeSpace()
   await store.commit('broadcast/connect')

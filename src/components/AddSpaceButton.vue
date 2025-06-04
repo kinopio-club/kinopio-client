@@ -2,11 +2,13 @@
 import { reactive, computed, onMounted, onBeforeUnmount, watch, ref, nextTick } from 'vue'
 import { useStore } from 'vuex'
 import { useSpaceStore } from '@/stores/useSpaceStore'
+import { useAnalyticsStore } from '@/stores/useAnalyticsStore'
 
 import cache from '@/cache.js'
 
 const store = useStore()
 const spaceStore = useSpaceStore()
+const analyticsStore = useAnalyticsStore()
 
 const emit = defineEmits(['closeDialogs', 'addSpace'])
 
@@ -41,7 +43,7 @@ const addNewSpace = async (event) => {
     await spaceStore.createSpace()
     store.commit('triggerSpaceDetailsInfoIsVisible')
   }
-  store.dispatch('analytics/event', 'AddSpaceButton')
+  analyticsStore.event('AddSpaceButton')
 }
 
 // emits
