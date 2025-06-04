@@ -221,16 +221,18 @@ export default {
       return groupUserGroups
     },
     spaceGroup: (state, getters, rootState) => (space) => {
-      const currentSpace = rootState.currentSpace
+      const spaceStore = useSpaceStore()
+      const currentSpace = spaceStore.getSpaceAllState
       space = space || currentSpace
       return state.groups[space.groupId]
     },
     groupUser: (state, getters, rootState) => ({ userId, space, groupId }) => {
+      const spaceStore = useSpaceStore()
       let group
       if (groupId) {
         group = getters.byId(groupId)
       } else {
-        const currentSpace = rootState.currentSpace
+        const currentSpace = spaceStore.getSpaceAllState
         space = space || currentSpace
         group = getters.spaceGroup(space)
       }
