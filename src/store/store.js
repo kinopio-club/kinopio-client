@@ -24,7 +24,7 @@ import themes from '@/store/themes.js'
 // import currentConnections from '@/store/currentConnections.js'
 // import currentBoxes from '@/store/currentBoxes.js'
 // store plugins
-import websocket from '@/store/plugins/websocket.js'
+// import websocket from '@/store/plugins/websocket.js'
 
 import { createStore } from 'vuex'
 import { nextTick } from 'vue'
@@ -2325,8 +2325,8 @@ const store = createStore({
     // groups,
     themes
     // analytics
-  },
-  plugins: [websocket()]
+  }
+  // plugins: [websocket()]
 })
 
 export default store
