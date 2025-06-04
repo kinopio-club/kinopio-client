@@ -210,7 +210,7 @@ const restoreSpace = (space) => {
   removeRemovedSpace(space)
 }
 const deleteSpace = (space) => {
-  store.dispatch('currentSpace/deleteSpace', space)
+  spaceStore.deleteSpace(space)
   removeRemovedSpace(space)
 }
 const deleteAllSpaces = () => {

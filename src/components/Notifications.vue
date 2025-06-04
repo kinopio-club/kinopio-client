@@ -257,7 +257,7 @@ const restoreSpace = () => {
 }
 const deleteSpace = async () => {
   const space = store.state.currentSpace
-  store.dispatch('currentSpace/deleteSpace', space)
+  spaceStore.deleteSpace(space)
   store.commit('notifySpaceIsRemoved', false)
   const cachedSpaces = await cache.getAllSpaces()
   const firstSpace = cachedSpaces[0]

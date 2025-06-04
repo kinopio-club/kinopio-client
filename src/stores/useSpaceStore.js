@@ -772,20 +772,24 @@ export const useSpaceStore = defineStore('space', {
 
     // remove
 
-    // async removeCards (cards) {
-    //   const userStore = useUserStore()
-    //   const canEditSpace = userStore.getUserCanEditSpace()
-    //   if (!canEditSpace) { return }
-    //   for (const card of cards) {
-    //     const idIndex = this.allIds.indexOf(card.id)
-    //     this.allIds.splice(idIndex, 1)
-    //     delete this.byId[card.id]
-    //     await store.dispatch('api/addToQueue', { name: 'removeCard', body: card }, { root: true })
-    //   }
-    // },
-    // async removeCard (card) {
-    //   await this.removeCards([card])
-    // }
+    async removeSpace () {
+      const space = this.getSpaceAllState
+      this.decrementCardsCreatedCountFromSpace(space)
+      await cache.removeSpace(space)
+      store.commit('prevSpaceIdInSession', '', { root: true })
+      await store.dispatch('api/addToQueue', {
+        name: 'removeSpace',
+        body: { id: space.id }
+      }, { root: true })
+    },
+    async deleteSpace (space) {
+      await cache.deleteSpace(space)
+      store.commit('prevSpaceIdInSession', '', { root: true })
+      await store.dispatch('api/addToQueue', {
+        name: 'deleteSpace',
+        body: space
+      }, { root: true })
+    },
 
     // users
 
