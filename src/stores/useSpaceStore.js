@@ -131,6 +131,14 @@ export const useSpaceStore = defineStore('space', {
       const connectionTypeIds = connections.map(connection => connection.connectionTypeId)
       const connectionTypes = connectionTypeIds.map(id => connectionStore.getConnectionType(id))
       return { cards, connectionTypes, connections, boxes }
+    },
+    getSpaceItemColors () {
+      const cardStore = useCardStore()
+      const boxStore = useBoxStore()
+      const cardColors = cardStore.getCardColors
+      const boxColors = boxStore.getboxColors
+      const colors = cardColors.concat(boxColors)
+      return uniq(colors)
     }
 
   },

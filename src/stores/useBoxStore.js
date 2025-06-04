@@ -14,6 +14,7 @@ import cache from '@/cache.js'
 import { nanoid } from 'nanoid'
 import sortBy from 'lodash-es/sortBy'
 import randomColor from 'randomcolor'
+import uniq from 'lodash/uniq'
 
 export const useBoxStore = defineStore('boxes', {
   state: () => ({
@@ -66,7 +67,14 @@ export const useBoxStore = defineStore('boxes', {
       // }
       const boxes = ids.map(id => this.byId[id])
       return boxes
+    },
+    getBoxColors () {
+      const boxes = this.getAllBoxes
+      let colors = boxes.map(box => box.color)
+      colors = colors.filter(color => Boolean(color))
+      return uniq(colors)
     }
+
   },
 
   actions: {

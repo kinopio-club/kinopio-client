@@ -117,7 +117,14 @@ export const useCardStore = defineStore('cards', {
         }
       })
       return { cardIds, spaceIds, invites }
+    },
+    getCardColors () {
+      const cards = this.getAllCards
+      let colors = cards.map(card => card.backgroundColor)
+      colors = colors.filter(color => Boolean(color))
+      return uniq(colors)
     }
+
   },
 
   actions: {

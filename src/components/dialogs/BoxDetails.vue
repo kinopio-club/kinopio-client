@@ -177,7 +177,7 @@ const toggleTextEditAction = async (action) => {
 
 // colors
 
-const itemColors = computed(() => store.getters['currentSpace/itemColors'])
+const itemColors = computed(() => spaceStore.getSpaceItemColors)
 const colorisDark = computed(() => {
   const color = currentBox.value.color
   return utils.colorIsDark(color)
