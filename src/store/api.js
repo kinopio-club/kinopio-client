@@ -162,11 +162,13 @@ const self = {
     // adds auth credentials to fetch options
     requestOptions: (context, options) => {
       const userStore = useUserStore()
+      const spaceStore = useSpaceStore()
       const headers = new Headers({
         'Content-Type': 'application/json',
         'Cache-Control': 'must-revalidate, no-store, no-cache, private'
       })
-      const collaboratorKey = normalizeCollaboratorKey(options.space)
+      const space = options.space || spaceStore.getSpaceAllState
+      const collaboratorKey = normalizeCollaboratorKey(space)
       const apiKey = userStore.apiKey
       if (collaboratorKey) {
         headers.append('Space-Authorization', collaboratorKey)
@@ -243,6 +245,7 @@ const self = {
     },
     sendQueue: async (context) => {
       const userStore = useUserStore()
+      const spaceStore = useSpaceStore()
       const apiKey = userStore.apiKey
       const isOnline = context.rootState.isOnline
       const queue = await cache.queue()
@@ -256,9 +259,8 @@ const self = {
       try {
         const requestId = nanoid()
         console.warn('🛫 sending operations', body, `●requestId=${requestId}`)
-        const space = context.rootState.currentSpace
-        if (!space.id) { throw 'operation missing spaceId' }
-        const options = await context.dispatch('requestOptions', { body, method: 'POST', space, requestId })
+        if (!spaceStore.id) { throw 'operation missing spaceId' }
+        const options = await context.dispatch('requestOptions', { body, method: 'POST', requestId })
         response = await fetch(`${consts.apiHost()}/operations`, options)
         if (response.ok) {
           console.info('🛬 operations ok', body)
@@ -331,7 +333,7 @@ const self = {
 
     createSessionToken: async (context, token) => {
       const body = { token }
-      const options = await context.dispatch('requestOptions', { body, method: 'POST', space: context.rootState.currentSpace })
+      const options = await context.dispatch('requestOptions', { body, method: 'POST' })
       return fetch(`${consts.apiHost()}/session-token/create`, options)
     },
 
@@ -342,7 +344,7 @@ const self = {
       body.email = email
       body.password = password
       body.sessionToken = sessionToken
-      const options = await context.dispatch('requestOptions', { body, method: 'POST', space: context.rootState.currentSpace })
+      const options = await context.dispatch('requestOptions', { body, method: 'POST' })
       return fetch(`${consts.apiHost()}/user/sign-up`, options)
     },
     signIn: async (context, { email, password }) => {
@@ -350,22 +352,22 @@ const self = {
         email,
         password
       }
-      const options = await context.dispatch('requestOptions', { body, method: 'POST', space: context.rootState.currentSpace })
+      const options = await context.dispatch('requestOptions', { body, method: 'POST' })
       return fetch(`${consts.apiHost()}/user/sign-in`, options)
     },
     resetPassword: async (context, email) => {
       const body = { email }
-      const options = await context.dispatch('requestOptions', { body, method: 'POST', space: context.rootState.currentSpace })
+      const options = await context.dispatch('requestOptions', { body, method: 'POST' })
       return fetch(`${consts.apiHost()}/user/reset-password`, options)
     },
     updatePassword: async (context, { password, apiKey }) => {
       const body = { password, apiKey }
-      const options = await context.dispatch('requestOptions', { body, method: 'PATCH', apiKey, space: context.rootState.currentSpace })
+      const options = await context.dispatch('requestOptions', { body, method: 'PATCH', apiKey })
       return fetch(`${consts.apiHost()}/user/update-password`, options)
     },
     updateEmail: async (context, email) => {
       const body = { email }
-      const options = await context.dispatch('requestOptions', { body, method: 'PATCH', space: context.rootState.currentSpace })
+      const options = await context.dispatch('requestOptions', { body, method: 'PATCH' })
       return fetch(`${consts.apiHost()}/user/update-email`, options)
     },
 
@@ -377,7 +379,7 @@ const self = {
       const isOnline = context.rootState.isOnline
       if (!shouldRequest({ apiKey, isOnline })) { return }
       try {
-        const options = await context.dispatch('requestOptions', { method: 'GET', space: context.rootState.currentSpace })
+        const options = await context.dispatch('requestOptions', { method: 'GET' })
         const response = await fetch(`${consts.apiHost()}/user`, options)
         return normalizeResponse(response)
       } catch (error) {
@@ -390,7 +392,7 @@ const self = {
       const isOnline = context.rootState.isOnline
       if (!shouldRequest({ apiKey, isOnline })) { return }
       try {
-        const options = await context.dispatch('requestOptions', { method: 'GET', space: context.rootState.currentSpace })
+        const options = await context.dispatch('requestOptions', { method: 'GET' })
         const response = await fetch(`${consts.apiHost()}/user/favorite-spaces`, options)
         return normalizeResponse(response)
       } catch (error) {
@@ -403,7 +405,7 @@ const self = {
       const isOnline = context.rootState.isOnline
       if (!shouldRequest({ apiKey, isOnline })) { return }
       try {
-        const options = await context.dispatch('requestOptions', { method: 'GET', space: context.rootState.currentSpace })
+        const options = await context.dispatch('requestOptions', { method: 'GET' })
         const response = await fetch(`${consts.apiHost()}/user/favorite-users`, options)
         return normalizeResponse(response)
       } catch (error) {
@@ -416,7 +418,7 @@ const self = {
       const isOnline = context.rootState.isOnline
       if (!shouldRequest({ apiKey, isOnline })) { return }
       try {
-        const options = await context.dispatch('requestOptions', { method: 'GET', space: context.rootState.currentSpace })
+        const options = await context.dispatch('requestOptions', { method: 'GET' })
         const response = await fetch(`${consts.apiHost()}/user/favorite-colors`, options)
         return normalizeResponse(response)
       } catch (error) {
@@ -429,7 +431,7 @@ const self = {
       const isOnline = context.rootState.isOnline
       if (!shouldRequest({ apiKey, isOnline })) { return }
       try {
-        const options = await context.dispatch('requestOptions', { method: 'GET', space: context.rootState.currentSpace })
+        const options = await context.dispatch('requestOptions', { method: 'GET' })
         const response = await fetch(`${consts.apiHost()}/user/hidden-spaces`, options)
         return normalizeResponse(response)
       } catch (error) {
@@ -445,7 +447,7 @@ const self = {
       if (!isSpacePage) { return }
       try {
         console.info('🛬 getting following users spaces')
-        const options = await context.dispatch('requestOptions', { method: 'GET', space: context.rootState.currentSpace })
+        const options = await context.dispatch('requestOptions', { method: 'GET' })
         const response = await fetch(`${consts.apiHost()}/user/favorite-users-spaces`, options)
         return normalizeResponse(response)
       } catch (error) {
@@ -458,7 +460,7 @@ const self = {
       const isOnline = context.rootState.isOnline
       if (!shouldRequest({ apiKey, isOnline })) { return }
       try {
-        const options = await context.dispatch('requestOptions', { method: 'GET', space: context.rootState.currentSpace })
+        const options = await context.dispatch('requestOptions', { method: 'GET' })
         const response = await fetch(`${consts.apiHost()}/user/spaces`, options)
         const currentUser = userStore
         const spaces = await normalizeResponse(response)
@@ -475,7 +477,7 @@ const self = {
       const isOnline = context.rootState.isOnline
       if (!shouldRequest({ apiKey, isOnline })) { return }
       try {
-        const options = await context.dispatch('requestOptions', { method: 'GET', space: context.rootState.currentSpace })
+        const options = await context.dispatch('requestOptions', { method: 'GET' })
         const response = await fetch(`${consts.apiHost()}/user/group-spaces`, options)
         const currentUser = userStore
         const spaces = await normalizeResponse(response)
@@ -490,7 +492,7 @@ const self = {
       const isOnline = context.rootState.isOnline
       if (!shouldRequest({ apiKey, isOnline })) { return }
       try {
-        const options = await context.dispatch('requestOptions', { method: 'GET', space: context.rootState.currentSpace })
+        const options = await context.dispatch('requestOptions', { method: 'GET' })
         const response = await fetch(`${consts.apiHost()}/user/removed-spaces`, options)
         return normalizeResponse(response)
       } catch (error) {
@@ -503,7 +505,7 @@ const self = {
       const isOnline = context.rootState.isOnline
       if (!shouldRequest({ apiKey, isOnline })) { return }
       try {
-        const options = await context.dispatch('requestOptions', { method: 'GET', space: context.rootState.currentSpace })
+        const options = await context.dispatch('requestOptions', { method: 'GET' })
         const response = await fetch(`${consts.apiHost()}/user/inbox-space`, options)
         return normalizeResponse(response)
       } catch (error) {
@@ -516,7 +518,7 @@ const self = {
       const isOnline = context.rootState.isOnline
       if (!shouldRequest({ apiKey, isOnline })) { return }
       try {
-        const options = await context.dispatch('requestOptions', { method: 'GET', space: context.rootState.currentSpace })
+        const options = await context.dispatch('requestOptions', { method: 'GET' })
         const response = await fetch(`${consts.apiHost()}/user/spaces-notification-unsubscribed`, options)
         return normalizeResponse(response)
       } catch (error) {
@@ -529,7 +531,7 @@ const self = {
       const isOnline = context.rootState.isOnline
       if (!shouldRequest({ apiKey, isOnline })) { return }
       try {
-        const options = await context.dispatch('requestOptions', { method: 'GET', space: context.rootState.currentSpace })
+        const options = await context.dispatch('requestOptions', { method: 'GET' })
         const response = await fetch(`${consts.apiHost()}/user/groups-notification-unsubscribed`, options)
         return normalizeResponse(response)
       } catch (error) {
@@ -543,7 +545,7 @@ const self = {
       const isOnline = context.rootState.isOnline
       if (!shouldRequest({ apiKey, isOnline })) { return }
       try {
-        const options = await context.dispatch('requestOptions', { method: 'GET', space: context.rootState.currentSpace })
+        const options = await context.dispatch('requestOptions', { method: 'GET' })
         const response = await fetch(`${consts.apiHost()}/space/${space.id}/notification-resubscribe?userId=${user.id}`, options)
         return normalizeResponse(response)
       } catch (error) {
@@ -557,7 +559,7 @@ const self = {
       const isOnline = context.rootState.isOnline
       if (!shouldRequest({ apiKey, isOnline })) { return }
       try {
-        const options = await context.dispatch('requestOptions', { method: 'GET', space: context.rootState.currentSpace })
+        const options = await context.dispatch('requestOptions', { method: 'GET' })
         const response = await fetch(`${consts.apiHost()}/group/${group.id}/notification-resubscribe?userId=${user.id}`, options)
         return normalizeResponse(response)
       } catch (error) {
@@ -570,7 +572,7 @@ const self = {
       const isOnline = context.rootState.isOnline
       if (!shouldRequest({ apiKey, isOnline })) { return }
       try {
-        const options = await context.dispatch('requestOptions', { method: 'DELETE', space: context.rootState.currentSpace })
+        const options = await context.dispatch('requestOptions', { method: 'DELETE' })
         const response = await fetch(`${consts.apiHost()}/user/permanent`, options)
         return normalizeResponse(response)
       } catch (error) {
@@ -579,7 +581,7 @@ const self = {
     },
     getPublicUser: async (context, user) => {
       try {
-        const options = await context.dispatch('requestOptions', { method: 'GET', space: context.rootState.currentSpace })
+        const options = await context.dispatch('requestOptions', { method: 'GET' })
         const response = await fetch(`${consts.apiHost()}/user/public/${user.id}`, options)
         return normalizeResponse(response)
       } catch (error) {
@@ -592,7 +594,7 @@ const self = {
         userIds = userIds.slice(0, max)
         userIds = userIds.join(',')
         console.info('🛬🛬 getting remote public users', userIds)
-        const options = await context.dispatch('requestOptions', { method: 'GET', space: context.rootState.currentSpace })
+        const options = await context.dispatch('requestOptions', { method: 'GET' })
         const response = await utils.timeout(consts.defaultTimeout, fetch(`${consts.apiHost()}/user/public/multiple?userIds=${userIds}`, options))
         // notifyConnectionError
         return normalizeResponse(response)
@@ -602,7 +604,7 @@ const self = {
     },
     getPublicUserExploreSpaces: async (context, user) => {
       try {
-        const options = await context.dispatch('requestOptions', { method: 'GET', space: context.rootState.currentSpace })
+        const options = await context.dispatch('requestOptions', { method: 'GET' })
         const response = await fetch(`${consts.apiHost()}/user/public/explore-spaces/${user.id}`, options)
         return normalizeResponse(response)
       } catch (error) {
@@ -615,7 +617,7 @@ const self = {
       const isOnline = context.rootState.isOnline
       if (!shouldRequest({ apiKey, isOnline })) { return }
       try {
-        const options = await context.dispatch('requestOptions', { body, method: 'PATCH', space: context.rootState.currentSpace })
+        const options = await context.dispatch('requestOptions', { body, method: 'PATCH' })
         const response = await fetch(`${consts.apiHost()}/user/favorites`, options)
         return normalizeResponse(response)
       } catch (error) {
@@ -632,7 +634,7 @@ const self = {
       if (!isSpacePage) { return }
       try {
         console.info('🛬 getting explore spaces')
-        const options = await context.dispatch('requestOptions', { method: 'GET', space: context.rootState.currentSpace })
+        const options = await context.dispatch('requestOptions', { method: 'GET' })
         const response = await utils.timeout(consts.defaultTimeout, fetch(`${consts.apiHost()}/space/explore-spaces`, options))
         return normalizeResponse(response)
       } catch (error) {
@@ -647,7 +649,7 @@ const self = {
       if (!isSpacePage) { return }
       try {
         console.info('🛬 getting everyone spaces')
-        const options = await context.dispatch('requestOptions', { method: 'GET', space: context.rootState.currentSpace })
+        const options = await context.dispatch('requestOptions', { method: 'GET' })
         const response = await utils.timeout(consts.defaultTimeout, fetch(`${consts.apiHost()}/space/everyone-spaces`, options))
         return normalizeResponse(response)
       } catch (error) {
@@ -661,7 +663,7 @@ const self = {
       if (!isSpacePage) { return }
       try {
         console.info('🛬 getting live spaces')
-        const options = await context.dispatch('requestOptions', { method: 'GET', space: context.rootState.currentSpace })
+        const options = await context.dispatch('requestOptions', { method: 'GET' })
         const response = await utils.timeout(consts.defaultTimeout, fetch(`${consts.apiHost()}/space/live-spaces`, options))
         return normalizeResponse(response)
       } catch (error) {
@@ -689,7 +691,7 @@ const self = {
         const isOnline = context.rootState.isOnline
         if (!isOnline) { return }
         // console.info('🛬 getting remote space updatedAt', space.id)
-        const options = await context.dispatch('requestOptions', { method: 'GET', space: context.rootState.currentSpace })
+        const options = await context.dispatch('requestOptions', { method: 'GET' })
         const response = await utils.timeout(consts.defaultTimeout, fetch(`${consts.apiHost()}/space/updated-at/${space.id}`, options))
         return normalizeResponse(response)
       } catch (error) {
@@ -703,7 +705,7 @@ const self = {
         if (!isOnline) { return }
         const spaceId = spaceStore.id
         console.info('🛬 getting remote space favorites', spaceId)
-        const options = await context.dispatch('requestOptions', { method: 'GET', space: context.rootState.currentSpace })
+        const options = await context.dispatch('requestOptions', { method: 'GET' })
         const response = await utils.timeout(consts.defaultTimeout, fetch(`${consts.apiHost()}/space/${spaceId}/favorites`, options))
         return normalizeResponse(response)
       } catch (error) {
@@ -717,7 +719,7 @@ const self = {
         if (!isOnline) { return }
         const spaceId = spaceStore.id
         console.info('🛬 getting remote space history', spaceId)
-        const options = await context.dispatch('requestOptions', { method: 'GET', space: context.rootState.currentSpace })
+        const options = await context.dispatch('requestOptions', { method: 'GET' })
         const response = await utils.timeout(consts.defaultTimeout, fetch(`${consts.apiHost()}/space/${spaceId}/history`, options))
         return normalizeResponse(response)
       } catch (error) {
@@ -744,7 +746,7 @@ const self = {
     getInboxSpace: async (context) => {
       try {
         console.info('🛬 getting inbox space')
-        const options = await context.dispatch('requestOptions', { method: 'GET', space: context.rootState.currentSpace })
+        const options = await context.dispatch('requestOptions', { method: 'GET' })
         const response = await utils.timeout(consts.defaultTimeout, fetch(`${consts.apiHost()}/space/inbox`, options))
         return normalizeResponse(response)
       } catch (error) {
@@ -757,7 +759,7 @@ const self = {
       const isOnline = context.rootState.isOnline
       if (!shouldRequest({ apiKey, isOnline })) { return }
       try {
-        const options = await context.dispatch('requestOptions', { body, method: 'POST', space: context.rootState.currentSpace })
+        const options = await context.dispatch('requestOptions', { body, method: 'POST' })
         const response = await fetch(`${consts.apiHost()}/space/search-explore-spaces`, options)
         return normalizeResponse(response)
       } catch (error) {
@@ -790,7 +792,7 @@ const self = {
         })
         removedSpaces.forEach(space => spaces.push(space))
         spaces = spaces.filter(space => space)
-        const options = await context.dispatch('requestOptions', { body: spaces, method: 'POST', space: context.rootState.currentSpace })
+        const options = await context.dispatch('requestOptions', { body: spaces, method: 'POST' })
         const response = await fetch(`${consts.apiHost()}/space/multiple`, options)
         // upload drawing images
         for (const body of drawingImages) {
@@ -813,7 +815,7 @@ const self = {
       try {
         space = normalizeRemovedCards(space)
         const body = space
-        const options = await context.dispatch('requestOptions', { body, method: 'POST', space: context.rootState.currentSpace })
+        const options = await context.dispatch('requestOptions', { body, method: 'POST' })
         const response = await fetch(`${consts.apiHost()}/space`, options)
         return normalizeResponse(response)
       } catch (error) {
@@ -826,7 +828,7 @@ const self = {
         spaceId = spaceId || spaceStore.id
         const themeOptions = context.rootGetters['themes/previewImageThemeOptions']
         const body = { spaceId, themeOptions }
-        const options = await context.dispatch('requestOptions', { body, method: 'POST', space: context.rootState.currentSpace })
+        const options = await context.dispatch('requestOptions', { body, method: 'POST' })
         const response = await fetch(`${consts.apiHost()}/space/preview-image`, options)
         return normalizeResponse(response)
       } catch (error) {
@@ -849,7 +851,7 @@ const self = {
       const isOnline = context.rootState.isOnline
       if (!shouldRequest({ apiKey, isOnline })) { return }
       try {
-        const options = await context.dispatch('requestOptions', { method: 'GET', space: context.rootState.currentSpace })
+        const options = await context.dispatch('requestOptions', { method: 'GET' })
         const response = await fetch(`${consts.apiHost()}/space/${space.id}/removed-cards`, options)
         return normalizeResponse(response)
       } catch (error) {
@@ -862,7 +864,7 @@ const self = {
       const isOnline = context.rootState.isOnline
       if (!shouldRequest({ apiKey, isOnline })) { return }
       try {
-        const options = await context.dispatch('requestOptions', { method: 'GET', space: context.rootState.currentSpace })
+        const options = await context.dispatch('requestOptions', { method: 'GET' })
         const response = await fetch(`${consts.apiHost()}/space/${space.id}/collaborator-key`, options)
         return normalizeResponse(response)
       } catch (error) {
@@ -896,7 +898,7 @@ const self = {
           spaceId: space.id,
           userId: user.id
         }
-        const options = await context.dispatch('requestOptions', { body, method: 'DELETE', space: context.rootState.currentSpace })
+        const options = await context.dispatch('requestOptions', { body, method: 'DELETE' })
         const response = await fetch(`${consts.apiHost()}/space/collaborator`, options)
         const data = await normalizeResponse(response)
         const collaboratorKey = data.collaboratorKey
@@ -911,7 +913,7 @@ const self = {
       const isOnline = context.rootState.isOnline
       if (!shouldRequest({ apiKey, isOnline })) { return }
       try {
-        const options = await context.dispatch('requestOptions', { method: 'PATCH', space: context.rootState.currentSpace })
+        const options = await context.dispatch('requestOptions', { method: 'PATCH' })
         const response = await fetch(`${consts.apiHost()}/space/restore/${space.id}`, options)
         return normalizeResponse(response)
       } catch (error) {
@@ -924,7 +926,7 @@ const self = {
       const isOnline = context.rootState.isOnline
       if (!shouldRequest({ apiKey, isOnline })) { return }
       try {
-        const options = await context.dispatch('requestOptions', { body, method: 'POST', space: context.rootState.currentSpace })
+        const options = await context.dispatch('requestOptions', { body, method: 'POST' })
         const response = await fetch(`${consts.apiHost()}/space/email-invites/${body.spaceId}`, options)
         return normalizeResponse(response)
       } catch (error) {
@@ -958,7 +960,7 @@ const self = {
       const body = { cardIds, spaceIds, invites }
       try {
         console.info('🛬🛬 getting remote other items', { cardIds, spaceIds, invites })
-        const options = await context.dispatch('requestOptions', { body, method: 'POST', space: context.rootState.currentSpace })
+        const options = await context.dispatch('requestOptions', { body, method: 'POST' })
         const response = await utils.timeout(consts.defaultTimeout, fetch(`${consts.apiHost()}/item/multiple`, options))
         const data = await normalizeResponse(response)
         context.commit('updateOtherItems', data, { root: true })
@@ -977,7 +979,7 @@ const self = {
       const isOnline = context.rootState.isOnline
       if (!shouldRequest({ apiKey, isOnline })) { return }
       try {
-        const options = await context.dispatch('requestOptions', { method: 'GET', space: context.rootState.currentSpace })
+        const options = await context.dispatch('requestOptions', { method: 'GET' })
         const response = await fetch(`${consts.apiHost()}/card/by-link-to-space/${spaceId}`, options)
         return normalizeResponse(response)
       } catch (error) {
@@ -990,7 +992,7 @@ const self = {
       const isOnline = context.rootState.isOnline
       if (!shouldRequest({ apiKey, isOnline })) { return }
       try {
-        const options = await context.dispatch('requestOptions', { body, method: 'PATCH', space: context.rootState.currentSpace })
+        const options = await context.dispatch('requestOptions', { body, method: 'PATCH' })
         const response = await fetch(`${consts.apiHost()}/card/multiple`, options)
         return normalizeResponse(response)
       } catch (error) {
@@ -1003,7 +1005,7 @@ const self = {
       const isOnline = context.rootState.isOnline
       if (!shouldRequest({ apiKey, isOnline })) { return }
       try {
-        const options = await context.dispatch('requestOptions', { body, method: 'POST', space: context.rootState.currentSpace })
+        const options = await context.dispatch('requestOptions', { body, method: 'POST' })
         const response = await fetch(`${consts.apiHost()}/card/multiple`, options)
         return normalizeResponse(response)
       } catch (error) {
@@ -1016,7 +1018,7 @@ const self = {
       const isOnline = context.rootState.isOnline
       if (!shouldRequest({ apiKey, isOnline })) { return }
       try {
-        const options = await context.dispatch('requestOptions', { body, method: 'POST', space: context.rootState.currentSpace })
+        const options = await context.dispatch('requestOptions', { body, method: 'POST' })
         const response = await fetch(`${consts.apiHost()}/card`, options)
         return normalizeResponse(response)
       } catch (error) {
@@ -1029,7 +1031,7 @@ const self = {
       const isOnline = context.rootState.isOnline
       if (!shouldRequest({ apiKey, isOnline })) { return }
       try {
-        const options = await context.dispatch('requestOptions', { body, method: 'POST', space: context.rootState.currentSpace })
+        const options = await context.dispatch('requestOptions', { body, method: 'POST' })
         const response = await fetch(`${consts.apiHost()}/card/to-inbox`, options)
         return normalizeResponse(response)
       } catch (error) {
@@ -1042,7 +1044,7 @@ const self = {
       const isOnline = context.rootState.isOnline
       if (!shouldRequest({ apiKey, isOnline })) { return }
       try {
-        const options = await context.dispatch('requestOptions', { body, method: 'POST', space: context.rootState.currentSpace })
+        const options = await context.dispatch('requestOptions', { body, method: 'POST' })
         const response = await fetch(`${consts.apiHost()}/card/search`, options)
         return normalizeResponse(response)
       } catch (error) {
@@ -1051,7 +1053,7 @@ const self = {
     },
     updateCardCounter: async (context, body) => {
       try {
-        const options = await context.dispatch('requestOptions', { body, method: 'PATCH', space: context.rootState.currentSpace })
+        const options = await context.dispatch('requestOptions', { body, method: 'PATCH' })
         const response = await fetch(`${consts.apiHost()}/card/update-counter`, options)
         return normalizeResponse(response)
       } catch (error) {
@@ -1060,7 +1062,7 @@ const self = {
     },
     updateUrlPreviewImage: async (context, body) => {
       try {
-        const options = await context.dispatch('requestOptions', { body, method: 'PATCH', space: context.rootState.currentSpace })
+        const options = await context.dispatch('requestOptions', { body, method: 'PATCH' })
         const response = await fetch(`${consts.apiHost()}/card/update-url-preview-image`, options)
         return normalizeResponse(response)
       } catch (error) {
@@ -1076,7 +1078,7 @@ const self = {
       const isOnline = context.rootState.isOnline
       if (!shouldRequest({ apiKey, isOnline })) { return }
       try {
-        const options = await context.dispatch('requestOptions', { body, method: 'PATCH', space: context.rootState.currentSpace })
+        const options = await context.dispatch('requestOptions', { body, method: 'PATCH' })
         const response = await fetch(`${consts.apiHost()}/connection-type/multiple`, options)
         return normalizeResponse(response)
       } catch (error) {
@@ -1089,7 +1091,7 @@ const self = {
       const isOnline = context.rootState.isOnline
       if (!shouldRequest({ apiKey, isOnline })) { return }
       try {
-        const options = await context.dispatch('requestOptions', { body, method: 'POST', space: context.rootState.currentSpace })
+        const options = await context.dispatch('requestOptions', { body, method: 'POST' })
         const response = await fetch(`${consts.apiHost()}/connection-type/multiple`, options)
         return normalizeResponse(response)
       } catch (error) {
@@ -1105,7 +1107,7 @@ const self = {
       const isOnline = context.rootState.isOnline
       if (!shouldRequest({ apiKey, isOnline })) { return }
       try {
-        const options = await context.dispatch('requestOptions', { body, method: 'PATCH', space: context.rootState.currentSpace })
+        const options = await context.dispatch('requestOptions', { body, method: 'PATCH' })
         const response = await fetch(`${consts.apiHost()}/connection/multiple`, options)
         return normalizeResponse(response)
       } catch (error) {
@@ -1118,7 +1120,7 @@ const self = {
       const isOnline = context.rootState.isOnline
       if (!shouldRequest({ apiKey, isOnline })) { return }
       try {
-        const options = await context.dispatch('requestOptions', { body, method: 'POST', space: context.rootState.currentSpace })
+        const options = await context.dispatch('requestOptions', { body, method: 'POST' })
         const response = await fetch(`${consts.apiHost()}/connection/multiple`, options)
         return normalizeResponse(response)
       } catch (error) {
@@ -1134,7 +1136,7 @@ const self = {
       const isOnline = context.rootState.isOnline
       if (!shouldRequest({ apiKey, isOnline })) { return }
       try {
-        const options = await context.dispatch('requestOptions', { body, method: 'POST', space: context.rootState.currentSpace })
+        const options = await context.dispatch('requestOptions', { body, method: 'POST' })
         const response = await fetch(`${consts.apiHost()}/box/multiple`, options)
         return normalizeResponse(response)
       } catch (error) {
@@ -1151,7 +1153,7 @@ const self = {
       if (!shouldRequest({ apiKey, isOnline })) { return }
       name = encodeURI(name)
       try {
-        const options = await context.dispatch('requestOptions', { method: 'GET', space: context.rootState.currentSpace })
+        const options = await context.dispatch('requestOptions', { method: 'GET' })
         const response = await fetch(`${consts.apiHost()}/card/by-tag-name/${name}`, options)
         return normalizeResponse(response)
       } catch (error) {
@@ -1168,7 +1170,7 @@ const self = {
         if (removeUnusedTags) {
           params = '?removeUnusedTags=true'
         }
-        const options = await context.dispatch('requestOptions', { method: 'GET', space: context.rootState.currentSpace })
+        const options = await context.dispatch('requestOptions', { method: 'GET' })
         const response = await fetch(`${consts.apiHost()}/user/tags${params}`, options)
         return normalizeResponse(response)
       } catch (error) {
@@ -1179,7 +1181,7 @@ const self = {
     // const apiKey = userStore.apiKey
     //   if (!shouldRequest({apiKey})) { return }
     //   try {
-    //     const options = await context.dispatch('requestOptions', { method: 'PATCH', space: context.rootState.currentSpace, tag })
+    //     const options = await context.dispatch('requestOptions', { method: 'PATCH', tag })
     //     const response = await fetch(`${consts.apiHost()}/tags/color`, options)
     //     return normalizeResponse(response)
     //   } catch (error) {
@@ -1191,7 +1193,7 @@ const self = {
 
     checkoutUrl: async (context, body) => {
       try {
-        const options = await context.dispatch('requestOptions', { body, method: 'POST', space: context.rootState.currentSpace })
+        const options = await context.dispatch('requestOptions', { body, method: 'POST' })
         const response = await fetch(`${consts.apiHost()}/billing/stripe/checkout-url`, options)
         return normalizeResponse(response)
       } catch (error) {
@@ -1200,7 +1202,7 @@ const self = {
     },
     subscriptionUrl: async (context, body) => {
       try {
-        const options = await context.dispatch('requestOptions', { body, method: 'POST', space: context.rootState.currentSpace })
+        const options = await context.dispatch('requestOptions', { body, method: 'POST' })
         const response = await fetch(`${consts.apiHost()}/billing/stripe/subscription-url`, options)
         return normalizeResponse(response)
       } catch (error) {
@@ -1209,7 +1211,7 @@ const self = {
     },
     customerPortalUrl: async (context, body) => {
       try {
-        const options = await context.dispatch('requestOptions', { body, method: 'POST', space: context.rootState.currentSpace })
+        const options = await context.dispatch('requestOptions', { body, method: 'POST' })
         const response = await fetch(`${consts.apiHost()}/billing/stripe/customer-portal-url`, options)
         return normalizeResponse(response)
       } catch (error) {
@@ -1218,7 +1220,7 @@ const self = {
     },
     donationUrl: async (context, body) => {
       try {
-        const options = await context.dispatch('requestOptions', { body, method: 'POST', space: context.rootState.currentSpace })
+        const options = await context.dispatch('requestOptions', { body, method: 'POST' })
         const response = await fetch(`${consts.apiHost()}/billing/stripe/donation-url`, options)
         return normalizeResponse(response)
       } catch (error) {
@@ -1232,7 +1234,7 @@ const self = {
       const spaceStore = useSpaceStore()
       try {
         body.requestSpaceId = spaceStore.id
-        const options = await context.dispatch('requestOptions', { body, method: 'POST', space: context.rootState.currentSpace })
+        const options = await context.dispatch('requestOptions', { body, method: 'POST' })
         const response = await fetch(`${consts.apiHost()}/upload/presigned-post`, options)
         return normalizeResponse(response)
       } catch (error) {
@@ -1243,7 +1245,7 @@ const self = {
       const spaceStore = useSpaceStore()
       try {
         body.requestSpaceId = spaceStore.id
-        const options = await context.dispatch('requestOptions', { body, method: 'POST', space: context.rootState.currentSpace })
+        const options = await context.dispatch('requestOptions', { body, method: 'POST' })
         const response = await fetch(`${consts.apiHost()}/upload/presigned-post/multiple`, options)
         return normalizeResponse(response)
       } catch (error) {
@@ -1259,7 +1261,7 @@ const self = {
       const isOnline = context.rootState.isOnline
       if (!shouldRequest({ apiKey, isOnline })) { return }
       try {
-        const options = await context.dispatch('requestOptions', { method: 'GET', space: context.rootState.currentSpace })
+        const options = await context.dispatch('requestOptions', { method: 'GET' })
         const response = await fetch(`${consts.apiHost()}/notification`, options)
         const notifications = await normalizeResponse(response)
         return notifications
@@ -1273,7 +1275,7 @@ const self = {
       const isOnline = context.rootState.isOnline
       if (!shouldRequest({ apiKey, isOnline })) { return }
       try {
-        const options = await context.dispatch('requestOptions', { method: 'DELETE', space: context.rootState.currentSpace })
+        const options = await context.dispatch('requestOptions', { method: 'DELETE' })
         const response = await fetch(`${consts.apiHost()}/notification/all`, options)
         return normalizeResponse(response)
       } catch (error) {
@@ -1295,7 +1297,7 @@ const self = {
           userId,
           arenaReturnedCode
         }
-        const options = await context.dispatch('requestOptions', { body, method: 'PATCH', space: context.rootState.currentSpace })
+        const options = await context.dispatch('requestOptions', { body, method: 'PATCH' })
         const response = await fetch(`${consts.apiHost()}/user/update-arena-access-token`, options)
         return normalizeResponse(response)
       } catch (error) {
@@ -1307,7 +1309,7 @@ const self = {
     urlPreview: async (context, { url, card }) => {
       try {
         const body = { url, card }
-        const options = await context.dispatch('requestOptions', { body, method: 'POST', space: context.rootState.currentSpace })
+        const options = await context.dispatch('requestOptions', { body, method: 'POST' })
         const response = await fetch(`${consts.apiHost()}/services/url-preview`, options)
         if (response.status !== 200) {
           throw new Error(response.status)
@@ -1321,7 +1323,7 @@ const self = {
     imageSearch: async (context, search) => {
       try {
         const body = { search }
-        const options = await context.dispatch('requestOptions', { body, method: 'POST', space: context.rootState.currentSpace })
+        const options = await context.dispatch('requestOptions', { body, method: 'POST' })
         const response = await fetch(`${consts.apiHost()}/services/image-search`, options)
         const data = await normalizeResponse(response)
         return data
@@ -1331,7 +1333,7 @@ const self = {
     },
     gifImageSearch: async (context, body) => {
       try {
-        const options = await context.dispatch('requestOptions', { body, method: 'POST', space: context.rootState.currentSpace })
+        const options = await context.dispatch('requestOptions', { body, method: 'POST' })
         const response = await fetch(`${consts.apiHost()}/services/gif-image-search`, options)
         const data = await normalizeResponse(response)
         return data
@@ -1341,7 +1343,7 @@ const self = {
     },
     communityBackgrounds: async (context) => {
       try {
-        const options = await context.dispatch('requestOptions', { method: 'GET', space: context.rootState.currentSpace })
+        const options = await context.dispatch('requestOptions', { method: 'GET' })
         const response = await fetch(`${consts.apiHost()}/services/community-backgrounds`, options)
         const data = await normalizeResponse(response)
         return data
@@ -1353,7 +1355,7 @@ const self = {
       const spaceStore = useSpaceStore()
       const spaceId = spaceStore.id
       try {
-        const options = await context.dispatch('requestOptions', { method: 'POST', space: context.rootState.currentSpace })
+        const options = await context.dispatch('requestOptions', { method: 'POST' })
         const response = await fetch(`${consts.apiHost()}/services/pdf/${spaceId}`, options)
         let url = await normalizeResponse(response)
         url = url.url
@@ -1365,7 +1367,7 @@ const self = {
     generateSpace: async (context, prompt) => {
       try {
         const body = { prompt }
-        const options = await context.dispatch('requestOptions', { body, method: 'POST', space: context.rootState.currentSpace })
+        const options = await context.dispatch('requestOptions', { body, method: 'POST' })
         const response = await fetch(`${consts.apiHost()}/services/generate-space`, options)
         const data = await normalizeResponse(response)
         return data
@@ -1383,7 +1385,7 @@ const self = {
       const isOnline = context.rootState.isOnline
       if (!shouldRequest({ apiKey, isOnline })) { return }
       try {
-        const options = await context.dispatch('requestOptions', { method: 'GET', space: context.rootState.currentSpace })
+        const options = await context.dispatch('requestOptions', { method: 'GET' })
         const response = await fetch(`${consts.apiHost()}/space/download-all`, options)
         return response.blob()
       } catch (error) {
@@ -1400,7 +1402,7 @@ const self = {
       if (!shouldRequest({ apiKey, isOnline })) { return }
       try {
         context.commit('isLoadingGroups', true, { root: true })
-        const options = await context.dispatch('requestOptions', { method: 'GET', space: context.rootState.currentSpace })
+        const options = await context.dispatch('requestOptions', { method: 'GET' })
         const response = await fetch(`${consts.apiHost()}/user/groups`, options)
         context.commit('isLoadingGroups', false, { root: true })
         return normalizeResponse(response)
@@ -1416,7 +1418,7 @@ const self = {
       if (!shouldRequest({ apiKey, isOnline })) { return }
       try {
         console.info('🛬 getting remote group', groupId)
-        const options = await context.dispatch('requestOptions', { method: 'GET', space: context.rootState.currentSpace })
+        const options = await context.dispatch('requestOptions', { method: 'GET' })
         const response = await fetch(`${consts.apiHost()}/group/${groupId}`, options)
         return normalizeResponse(response)
       } catch (error) {
@@ -1429,7 +1431,7 @@ const self = {
       const isOnline = context.rootState.isOnline
       if (!shouldRequest({ apiKey, isOnline })) { return }
       try {
-        const options = await context.dispatch('requestOptions', { body, method: 'POST', space: context.rootState.currentSpace })
+        const options = await context.dispatch('requestOptions', { body, method: 'POST' })
         const response = await fetch(`${consts.apiHost()}/group/`, options)
         return normalizeResponse(response)
       } catch (error) {
@@ -1442,7 +1444,7 @@ const self = {
       const isOnline = context.rootState.isOnline
       if (!shouldRequest({ apiKey, isOnline })) { return }
       try {
-        const options = await context.dispatch('requestOptions', { body, method: 'POST', space: context.rootState.currentSpace })
+        const options = await context.dispatch('requestOptions', { body, method: 'POST' })
         const response = await fetch(`${consts.apiHost()}/group/group-user`, options)
         return normalizeResponse(response)
       } catch (error) {
@@ -1455,7 +1457,7 @@ const self = {
       const isOnline = context.rootState.isOnline
       if (!shouldRequest({ apiKey, isOnline })) { return }
       try {
-        const options = await context.dispatch('requestOptions', { body, method: 'DELETE', space: context.rootState.currentSpace })
+        const options = await context.dispatch('requestOptions', { body, method: 'DELETE' })
         const response = await fetch(`${consts.apiHost()}/group/group-user`, options)
         return normalizeResponse(response)
       } catch (error) {
@@ -1468,7 +1470,7 @@ const self = {
       const isOnline = context.rootState.isOnline
       if (!shouldRequest({ apiKey, isOnline })) { return }
       try {
-        const options = await context.dispatch('requestOptions', { body, method: 'DELETE', space: context.rootState.currentSpace })
+        const options = await context.dispatch('requestOptions', { body, method: 'DELETE' })
         const response = await fetch(`${consts.apiHost()}/group/`, options)
         return normalizeResponse(response)
       } catch (error) {

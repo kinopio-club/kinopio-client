@@ -10,6 +10,8 @@ import dayjs from 'dayjs'
 import { v4 as uuidv4 } from 'uuid' // polyfill for self.crypto.randomUUID(), for legacy todesktop support
 import uniqBy from 'lodash-es/uniqBy'
 
+import { useSpaceStore } from '@/stores/useSpaceStore'
+
 const initialState = {
   id: nanoid(),
   lastSpaceId: '',
@@ -465,7 +467,8 @@ export default {
       cache.saveUser(context.state)
     },
     broadcastUpdate: (context, updates) => {
-      const space = context.rootState.currentSpace
+      const spaceStore = useSpaceStore()
+      const space = spaceStore.getSpaceAllState
       const spaceUserPermission = utils.capitalizeFirstLetter(context.getters.spaceUserPermission(space)) // User, Collaborator, Spectator
       const type = `update${spaceUserPermission}`
       const userId = context.state.id
