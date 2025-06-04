@@ -5,6 +5,7 @@ import { useSpaceStore } from '@/stores/useSpaceStore'
 import { useApiStore } from '@/stores/useApiStore'
 import { useUserNotificationStore } from '@/stores/useUserNotificationStore'
 import { useGroupStore } from '@/stores/useGroupStore'
+import { useBroadcastStore } from '@/stores/useBroadcastStore'
 
 import store from '@/store/store.js' // TEMP Import Vuex store
 
@@ -361,9 +362,10 @@ export const useUserStore = defineStore('users', {
 
     broadcastUpdate (updates) {
       const spaceStore = useSpaceStore()
+      const broadcastStore = useBroadcastStore()
       const permission = utils.capitalizeFirstLetter(this.getUserSpacePermission) // User, Collaborator, Spectator
       const type = `update${permission}`
-      store.commit('broadcast/updateUser', { id: spaceStore.id, updates, type, userId: this.id }, { root: true })
+      broadcastStore.updateUser({ id: spaceStore.id, updates, type, userId: this.id })
       const user = { ...this.$state }
       user.userId = user.id
       spaceStore.updateUser(user)

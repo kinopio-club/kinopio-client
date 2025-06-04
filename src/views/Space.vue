@@ -80,7 +80,7 @@ const init = async () => {
   analyticsStore.event('pageview')
   await cache.migrateFromLocalStorage() // legacy
   await spaceStore.initializeSpace()
-  await store.commit('broadcast/connect')
+  broadcastStore.connect()
   await groupStore.initializeGroups()
   await store.dispatch('updateTags')
   checkIfShouldShowExploreOnLoad()
