@@ -761,7 +761,7 @@ const handlePasteEvent = async (event) => {
   let position = currentCursorPosition || prevCursorPosition
   position = utils.cursorPositionInSpace(null, position)
   // check card limits
-  if (store.getters['currentSpace/shouldPreventAddCard']) {
+  if (spaceStore.getShouldPreventAddCard) {
     store.commit('notifyCardsCreatedIsOverLimit', true)
     return
   }

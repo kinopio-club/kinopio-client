@@ -270,7 +270,7 @@ export const useCardStore = defineStore('cards', {
     async createCard (card, skipCardDetailsIsVisible) {
       const userStore = useUserStore()
       const spaceStore = useSpaceStore()
-      if (store.getters['currentSpace/shouldPreventAddCard']) {
+      if (spaceStore.getShouldPreventAddCard) {
         store.commit('notifyCardsCreatedIsOverLimit', true, { root: true })
         return
       }

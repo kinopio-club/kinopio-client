@@ -211,7 +211,8 @@ export default {
 
     add: async (context, { card, skipCardDetailsIsVisible }) => {
       const userStore = useUserStore()
-      if (context.rootGetters['currentSpace/shouldPreventAddCard']) {
+      const spaceStore = useSpaceStore()
+      if (spaceStore.getShouldPreventAddCard) {
         context.commit('notifyCardsCreatedIsOverLimit', true, { root: true })
         return
       }
