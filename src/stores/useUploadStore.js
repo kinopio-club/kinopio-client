@@ -1,35 +1,36 @@
+import { nextTick } from 'vue'
+import { defineStore } from 'pinia'
+import { useConnectionStore } from '@/stores/useConnectionStore'
 import { useUserStore } from '@/stores/useUserStore'
 import { useSpaceStore } from '@/stores/useSpaceStore'
 import { useApiStore } from '@/stores/useApiStore'
+
+import store from '@/store/store.js' // TEMP Import Vuex store
 
 import utils from '@/utils.js'
 import consts from '@/consts.js'
 
 import { nanoid } from 'nanoid'
-import { nextTick } from 'vue'
 
-export default {
-  namespaced: true,
-  state: {
+export const useUploadStore = defineStore('upload', {
+  state: () => ({
     pendingUploads: []
-  },
-  getters: {
-    hasPendingUploadForCardId: (state) => (id) => {
-      return state.pendingUploads.some(item => item.cardId === id)
-    }
-  },
-  mutations: {
-    s3Policy: (state, value) => {
+  }),
+  actions: {
+    hasPendingUploadForCardId (id) {
+      return this.pendingUploads.some(item => item.cardId === id)
+    },
+    s3Policy (value) {
       utils.typeCheck({ value, type: 'object', origin: 's3Policy' })
-      state.s3Policy = value
+      this.s3Policy = value
     },
-    addPendingUpload: (state, upload) => { // key, fileName, cardId, spaceId
+    addPendingUpload (upload) { // key, fileName, spaceId
       upload.percentComplete = 0
-      state.pendingUploads = state.pendingUploads.filter(item => (item.cardId !== upload.cardId || item.spaceId === upload.spaceId))
-      state.pendingUploads.push(upload)
+      this.pendingUploads = this.pendingUploads.filter(item => (item.cardId !== upload.cardId || item.spaceId === upload.spaceId))
+      this.pendingUploads.push(upload)
     },
-    updatePendingUpload: (state, { cardId, spaceId, percentComplete, imageDataUrl }) => {
-      state.pendingUploads = state.pendingUploads.map(item => {
+    updatePendingUpload ({ cardId, spaceId, percentComplete, imageDataUrl }) {
+      this.pendingUploads = this.pendingUploads.map(item => {
         if (percentComplete && item.cardId === cardId) {
           item.percentComplete = percentComplete
         }
@@ -38,14 +39,13 @@ export default {
         }
         return item
       })
-      state.pendingUploads = state.pendingUploads.filter(item => item.percentComplete !== 100)
+      this.pendingUploads = this.pendingUploads.filter(item => item.percentComplete !== 100)
     },
-    removePendingUpload: (state, { cardId, spaceId, boxId }) => {
-      state.pendingUploads = state.pendingUploads.filter(item => (item.cardId !== cardId || item.spaceId === spaceId || item.boxId !== boxId))
-    }
-  },
-  actions: {
-    checkIfFileTooBig: (context, file) => {
+    removePendingUpload ({ cardId, spaceId, boxId }) {
+      this.pendingUploads = this.pendingUploads.filter(item => (item.cardId !== cardId || item.spaceId === spaceId || item.boxId !== boxId))
+    },
+
+    checkIfFileTooBig (file) {
       const userStore = useUserStore()
       const userIsUpgraded = userStore.isUpgraded
       const isFileTooBig = utils.isFileTooBig({ file, userIsUpgraded })
@@ -56,23 +56,23 @@ export default {
         }
       }
     },
-    addImageDataUrl: (context, { file, cardId, spaceId }) => {
+    addImageDataUrl ({ file, cardId, spaceId }) {
       const isImage = file.type.includes('image')
       if (!isImage) { return null }
-      context.commit('updatePendingUpload', {
+      this.updatePendingUpload({
         cardId,
         spaceId,
         imageDataUrl: URL.createObjectURL(file)
       })
     },
-    uploadFile: async (context, { file, cardId, spaceId, boxId }) => {
+    async uploadFile ({ file, cardId, spaceId, boxId }) {
       const apiStore = useApiStore()
       const userStore = useUserStore()
       const uploadId = nanoid()
       const fileName = utils.normalizeFileUrl(file.name)
       const id = cardId || spaceId || boxId
       const key = `${id}/${fileName}`
-      context.dispatch('checkIfFileTooBig', file)
+      this.checkIfFileTooBig(file)
       // add presignedPostData to upload
       let presignedPostData
       if (file.presignedPostData) {
@@ -101,8 +101,8 @@ export default {
             userId: userStore.id,
             id: uploadId
           }
-          context.commit('updatePendingUpload', updates)
-          context.commit('broadcast/updateStore', { updates, type: 'updateRemotePendingUploads' }, { root: true })
+          this.updatePendingUpload(updates)
+          store.commit('broadcast/updateStore', { updates, type: 'updateRemotePendingUploads' }, { root: true })
           // end
           if (percentComplete >= 100) {
             const complete = {
@@ -112,13 +112,13 @@ export default {
               url: `${consts.cdnHost}/${key}`
             }
             console.info('🛬 Upload completed or failed', event, complete)
-            context.commit('triggerUploadComplete', complete, { root: true })
-            context.commit('removePendingUpload', { cardId, spaceId, boxId })
+            store.commit('triggerUploadComplete', complete, { root: true })
+            this.removePendingUpload({ cardId, spaceId, boxId })
             resolve(request.response)
             nextTick(() => {
               nextTick(() => {
                 const card = { id: cardId }
-                context.dispatch('currentCards/updateNameRemovePlaceholders', cardId, { root: true })
+                store.dispatch('currentCards/updateNameRemovePlaceholders', cardId, { root: true })
               })
             })
           }
@@ -126,32 +126,31 @@ export default {
         // start
         request.open('POST', presignedPostData.url)
         request.send(formData)
-        context.commit('addPendingUpload', { key, fileName, cardId, spaceId, boxId })
-        context.dispatch('addImageDataUrl', { file, cardId, spaceId, boxId })
+        this.addPendingUpload({ key, fileName, cardId, spaceId, boxId })
+        this.addImageDataUrl({ file, cardId, spaceId, boxId })
       })
     },
-    addCardsAndUploadFiles: async (context, { files, event, position }) => {
+    async addCardsAndUploadFiles ({ files, event, position }) {
       const apiStore = useApiStore()
       const userStore = useUserStore()
       position = position || utils.cursorPositionInSpace(event)
-      context.dispatch('currentUser/notifyReadOnly', position, { root: true })
-      const canEditSpace = context.rootGetters['currentUser/canEditSpace']()
+      store.dispatch('currentUser/notifyReadOnly', position, { root: true })
+      const canEditSpace = userStore.getUserCanEditSpace
       if (!canEditSpace) {
-        context.commit('addNotification', { message: 'You can only upload files on spaces you can edit', type: 'info' }, { root: true })
+        store.commit('addNotification', { message: 'You can only upload files on spaces you can edit', type: 'info' }, { root: true })
         return
       }
       const cardIds = []
-      const currentUserIsSignedIn = context.rootGetters['currentUser/isSignedIn']
-      if (!currentUserIsSignedIn) {
-        context.commit('addNotificationWithPosition', { message: 'Sign Up or In', position, type: 'info', layer: 'space', icon: 'cancel' }, { root: true })
-        context.commit('addNotification', { message: 'To upload files, you need to Sign Up or In', type: 'info' }, { root: true })
+      if (!userStore.getUserIsSignedIn) {
+        store.commit('addNotificationWithPosition', { message: 'Sign Up or In', position, type: 'info', layer: 'space', icon: 'cancel' }, { root: true })
+        store.commit('addNotification', { message: 'To upload files, you need to Sign Up or In', type: 'info' }, { root: true })
         return
       }
       // check if outside space
       const isOutsideSpace = utils.isPositionOutsideOfSpace(position)
       if (isOutsideSpace) {
         position = utils.cursorPositionInPage(event)
-        context.commit('addNotificationWithPosition', { message: 'Outside Space', position, type: 'info', icon: 'cancel', layer: 'app' }, { root: true })
+        store.commit('addNotificationWithPosition', { message: 'Outside Space', position, type: 'info', icon: 'cancel', layer: 'app' }, { root: true })
         return
       }
       // check sizeLimit
@@ -160,8 +159,8 @@ export default {
         return utils.isFileTooBig({ file, userIsUpgraded })
       })
       if (filesTooBig) {
-        context.commit('addNotificationWithPosition', { message: 'Too Big', position, type: 'danger', layer: 'space', icon: 'cancel' }, { root: true })
-        context.commit('addNotification', { message: 'To upload files over 5mb, upgrade for unlimited size uploads', type: 'danger' }, { root: true })
+        store.commit('addNotificationWithPosition', { message: 'Too Big', position, type: 'danger', layer: 'space', icon: 'cancel' }, { root: true })
+        store.commit('addNotification', { message: 'To upload files over 5mb, upgrade for unlimited size uploads', type: 'danger' }, { root: true })
         return
       }
       // add cards
@@ -178,7 +177,7 @@ export default {
           name: consts.uploadPlaceholder,
           id: cardId
         }
-        context.dispatch('currentCards/add', { card: newCard }, { root: true })
+        store.dispatch('currentCards/add', { card: newCard }, { root: true })
         const fileName = utils.normalizeFileUrl(file.name)
         const key = `${cardIds[index]}/${fileName}`
         filesPostData.push({
@@ -196,18 +195,19 @@ export default {
       await Promise.all(files.map(async (file, index) => {
         const cardId = cardIds[index]
         try {
-          await context.dispatch('uploadFile', { file, cardId })
+          await this.uploadFile({ file, cardId })
         } catch (error) {
           console.error('🚒', error)
-          context.commit('addNotificationWithPosition', { message: error.message, position, type: 'danger', layer: 'space', icon: 'cancel' }, { root: true })
-          context.commit('addNotification', { message: error.message, type: 'danger' }, { root: true })
+          store.commit('addNotificationWithPosition', { message: error.message, position, type: 'danger', layer: 'space', icon: 'cancel' }, { root: true })
+          store.commit('addNotification', { message: error.message, type: 'danger' }, { root: true })
         }
       }))
       // remove placeholders from card names
       files.forEach((file, index) => {
         const cardId = cardIds[index]
-        context.dispatch('currentCards/updateNameRemovePlaceholders', cardId, { root: true })
+        store.dispatch('currentCards/updateNameRemovePlaceholders', cardId, { root: true })
       })
     }
+
   }
-}
+})

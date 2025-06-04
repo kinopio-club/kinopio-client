@@ -10,7 +10,7 @@ import postMessage from '@/postMessage.js'
 // store modules
 import broadcast from '@/store/broadcast.js'
 import history from '@/store/history.js'
-import upload from '@/store/upload.js'
+// import upload from '@/store/upload.js'
 // import userNotifications from '@/store/userNotifications.js'
 // import groups from '@/store/groups.js'
 import themes from '@/store/themes.js'
@@ -2303,7 +2303,7 @@ const store = createStore({
     // currentCards,
     // currentConnections,
     // currentBoxes,
-    upload,
+    // upload,
     // userNotifications,
     // groups,
     themes,
