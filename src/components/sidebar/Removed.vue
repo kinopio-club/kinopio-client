@@ -206,7 +206,7 @@ const loadRemoteRemovedSpaces = async () => {
   state.removedSpaces = removedSpaces
 }
 const restoreSpace = (space) => {
-  store.dispatch('currentSpace/restoreRemovedSpace', space)
+  spaceStore.restoreRemovedSpace(space)
   removeRemovedSpace(space)
 }
 const deleteSpace = (space) => {

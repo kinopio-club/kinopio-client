@@ -252,7 +252,7 @@ const removeNotifyConnectionError = () => {
 
 const restoreSpace = () => {
   const space = store.state.currentSpace
-  store.dispatch('currentSpace/restoreRemovedSpace', space)
+  spaceStore.restoreRemovedSpace(space)
   store.commit('notifySpaceIsRemoved', false)
 }
 const deleteSpace = async () => {

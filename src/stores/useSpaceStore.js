@@ -525,6 +525,13 @@ export const useSpaceStore = defineStore('space', {
 
     // create
 
+    async restoreRemovedSpace (space) {
+      await cache.restoreRemovedSpace(space)
+      const restoredSpace = await store.dispatch('api/restoreRemovedSpace', space, { root: true })
+      space = restoredSpace || space
+      this.incrementCardsCreatedCountFromSpace(space)
+      this.changeSpace(space)
+    },
     async duplicateSpace () {
       const userStore = useUserStore()
       const space = this.getSpaceAllItems
