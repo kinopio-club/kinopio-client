@@ -286,14 +286,16 @@ export const useUserStore = defineStore('users', {
       cache.saveUser(allState)
     },
     async restoreRemoteUser () {
+      const apiStore = useApiStore()
       if (!this.getUserIsSignedIn) { return }
-      const user = await store.dispatch('api/getUser', null, { root: true })
+      const user = await apiStore.getUser()
       if (!user) { return }
       user.updatedAt = utils.unixTime(user.updatedAt)
       console.info('🌸 Initialize user from remote', user)
       this.updateUserState(user)
     },
     async restoreUserAssociatedData () {
+      const apiStore = useApiStore()
       try {
         store.commit('isLoadingFavorites', true, { root: true })
         if (!this.getUserIsSignedIn) {
@@ -301,12 +303,12 @@ export const useUserStore = defineStore('users', {
           return
         }
         const [favoriteSpaces, favoriteUsers, favoriteColors, hiddenSpaces, tags, groups] = await Promise.all([
-          store.dispatch('api/getUserFavoriteSpaces', null, { root: true }),
-          store.dispatch('api/getUserFavoriteUsers', null, { root: true }),
-          store.dispatch('api/getUserFavoriteColors', null, { root: true }),
-          store.dispatch('api/getUserHiddenSpaces', null, { root: true }),
-          store.dispatch('api/getUserTags', null, { root: true }),
-          store.dispatch('api/getUserGroups', null, { root: true })
+          apiStore.getUserFavoriteSpaces(),
+          apiStore.getUserFavoriteUsers(),
+          apiStore.getUserFavoriteColors(),
+          apiStore.getUserHiddenSpaces(),
+          apiStore.getUserTags(),
+          apiStore.getUserGroups()
         ])
         if (favoriteUsers) {
           this.favoriteUsers = favoriteUsers
@@ -486,10 +488,11 @@ export const useUserStore = defineStore('users', {
     // inbox
 
     async getInboxSpace () {
+      const apiStore = useApiStore()
       let space = await cache.getInboxSpace()
       if (!space) {
         try {
-          space = await store.dispatch('api/getUserInboxSpace', null, { root: true })
+          space = await apiStore.getUserInboxSpace()
         } catch (error) {
           console.warn('🚑 inboxSpace', error)
         }
@@ -516,7 +519,7 @@ export const useUserStore = defineStore('users', {
       console.info('updateArenaAccessToken')
       store.commit('importArenaChannelIsVisible', true, { root: true })
       store.commit('isAuthenticatingWithArena', true, { root: true })
-      const { arenaAccessToken } = await store.dispatch('api/updateArenaAccessToken', arenaReturnedCode, { root: true })
+      const { arenaAccessToken } = await apiStore.updateArenaAccessToken(arenaReturnedCode)
       this.arenaAccessToken = arenaAccessToken
       store.commit('importArenaChannelIsVisible', true, { root: true })
       store.commit('isAuthenticatingWithArena', false, { root: true })

@@ -3,6 +3,7 @@ import { reactive, computed, onMounted, watch, ref, nextTick } from 'vue'
 import { useStore } from 'vuex'
 import { useUserStore } from '@/stores/useUserStore'
 import { useSpaceStore } from '@/stores/useSpaceStore'
+import { useApiStore } from '@/stores/useApiStore'
 
 import User from '@/components/User.vue'
 import Loader from '@/components/Loader.vue'
@@ -11,6 +12,7 @@ import utils from '@/utils.js'
 const store = useStore()
 const userStore = useUserStore()
 const spaceStore = useSpaceStore()
+const apiStore = useApiStore()
 
 const props = defineProps({
   visible: Boolean,
@@ -37,7 +39,7 @@ const isLifetimePlan = computed(() => props.price.period === 'life')
 // subscribe
 
 const subscribeUrl = async () => {
-  const result = await store.dispatch('api/subscriptionUrl', {
+  const result = await apiStore.subscriptionUrl({
     priceId: props.price.stripePriceId,
     userId: userStore.id,
     period: props.price.period
@@ -46,7 +48,7 @@ const subscribeUrl = async () => {
 }
 
 const checkoutUrl = async () => {
-  const result = await store.dispatch('api/checkoutUrl', {
+  const result = await apiStore.checkoutUrl({
     priceId: props.price.stripePriceId,
     userId: userStore.id,
     period: props.price.period

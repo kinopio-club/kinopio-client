@@ -4,6 +4,7 @@ import { useStore } from 'vuex'
 import { useCardStore } from '@/stores/useCardStore'
 import { useUserStore } from '@/stores/useUserStore'
 import { useSpaceStore } from '@/stores/useSpaceStore'
+import { useApiStore } from '@/stores/useApiStore'
 
 import TagList from '@/components/TagList.vue'
 import cache from '@/cache.js'
@@ -15,6 +16,7 @@ const store = useStore()
 const cardStore = useCardStore()
 const userStore = useUserStore()
 const spaceStore = useSpaceStore()
+const apiStore = useApiStore()
 
 const dialogElement = ref(null)
 const resultsElement = ref(null)
@@ -74,7 +76,7 @@ const updateRemoteTags = async () => {
     remoteTags = store.state.remoteTags
   } else {
     state.loading = true
-    remoteTags = await store.dispatch('api/getUserTags') || []
+    remoteTags = await apiStore.getUserTags() || []
     store.commit('remoteTags', remoteTags)
     store.commit('remoteTagsIsFetched', true)
     state.loading = false

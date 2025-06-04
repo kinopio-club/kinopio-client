@@ -3,6 +3,7 @@ import { reactive, computed, onMounted, onBeforeUnmount, onUnmounted, watch, ref
 import { useStore } from 'vuex'
 import { useUserStore } from '@/stores/useUserStore'
 import { useSpaceStore } from '@/stores/useSpaceStore'
+import { useApiStore } from '@/stores/useApiStore'
 
 import SpaceList from '@/components/SpaceList.vue'
 import Loader from '@/components/Loader.vue'
@@ -18,6 +19,7 @@ import randomColor from 'randomcolor'
 const store = useStore()
 const userStore = useUserStore()
 const spaceStore = useSpaceStore()
+const apiStore = useApiStore()
 
 const dialogElement = ref(null)
 const resultsElement = ref(null)
@@ -145,7 +147,7 @@ const currentSpaces = computed(() => {
 const currentSpaceInExplore = computed(() => currentSpace.value.showInExplore)
 const updateUserShowInExploreUpdatedAt = async () => {
   state.userShowInExploreDate = userStore.showInExploreUpdatedAt
-  let serverDate = await store.dispatch('api/getDate')
+  let serverDate = await apiStore.getDate()
   serverDate = serverDate.date
   userStore.updateUser({ showInExploreUpdatedAt: serverDate })
 }
@@ -167,7 +169,7 @@ const updateFilter = async (value) => {
   }
   try {
     state.isLoadingExploreSearchResults = true
-    const results = await store.dispatch('api/searchExploreSpaces', { query: value })
+    const results = await apiStore.searchExploreSpaces({ query: value })
     state.exploreSearchResults = results
   } catch (error) {
     console.error('🚒 updateFilter', error, value)

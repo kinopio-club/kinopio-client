@@ -1,6 +1,7 @@
 <script setup>
 import { reactive, computed, onMounted, onBeforeUnmount, watch, ref, nextTick } from 'vue'
 import { useStore } from 'vuex'
+import { useApiStore } from '@/stores/useApiStore'
 
 import utils from '@/utils.js'
 import cache from '@/cache.js'
@@ -9,6 +10,7 @@ import ResultsFilter from '@/components/ResultsFilter.vue'
 import fuzzy from '@/libs/fuzzy.js'
 
 const store = useStore()
+const apiStore = useApiStore()
 
 const dialogElement = ref(null)
 const resultsListElement = ref(null)
@@ -68,7 +70,7 @@ const initEmojis = async () => {
 }
 const remoteEmojis = async () => {
   try {
-    const newEmojis = await store.dispatch('api/getEmojis')
+    const newEmojis = await apiStore.getEmojis()
     await cache.updateEmojis({
       emojis: newEmojis.emojis,
       version: newEmojis.version

@@ -4,6 +4,7 @@ import { useStore } from 'vuex'
 import { useCardStore } from '@/stores/useCardStore'
 import { useUserStore } from '@/stores/useUserStore'
 import { useSpaceStore } from '@/stores/useSpaceStore'
+import { useApiStore } from '@/stores/useApiStore'
 
 import Loader from '@/components/Loader.vue'
 import utils from '@/utils.js'
@@ -16,6 +17,7 @@ const cardStore = useCardStore()
 const store = useStore()
 const userStore = useUserStore()
 const spaceStore = useSpaceStore()
+const apiStore = useApiStore()
 
 // let unsubscribes
 let unsubscribe
@@ -168,7 +170,7 @@ const importSpace = async (space) => {
   console.info('🌳 importSpace', space)
   try {
     cache.saveSpace(space)
-    await store.dispatch('api/createSpace', space)
+    await apiStore.createSpace(space)
     spaceStore.changeSpace(space)
     store.commit('addNotification', { message: 'Are.na channel imported', type: 'success' })
     store.dispatch('closeAllDialogs')

@@ -3,6 +3,7 @@ import { reactive, computed, onMounted, onBeforeUnmount, watch, ref, nextTick } 
 import { useStore } from 'vuex'
 import { useUserStore } from '@/stores/useUserStore'
 import { useSpaceStore } from '@/stores/useSpaceStore'
+import { useApiStore } from '@/stores/useApiStore'
 
 import TagList from '@/components/TagList.vue'
 import utils from '@/utils.js'
@@ -14,6 +15,7 @@ import debounce from 'lodash-es/debounce'
 const store = useStore()
 const userStore = useUserStore()
 const spaceStore = useSpaceStore()
+const apiStore = useApiStore()
 
 let unsubscribes, unsubscribe
 
@@ -142,7 +144,7 @@ const debouncedUpdateRemoteTags = debounce(async () => {
     remoteTags = store.state.remoteTags
   } else {
     state.isLoadingRemoteTags = true
-    remoteTags = await store.dispatch('api/getUserTags', true) || []
+    remoteTags = await apiStore.getUserTags(true) || []
     store.commit('remoteTags', remoteTags)
     store.commit('remoteTagsIsFetched', true)
     state.isLoadingRemoteTags = false

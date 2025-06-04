@@ -743,6 +743,7 @@ export const useCardStore = defineStore('cards', {
     // vote
 
     updateCardCounter ({ card, shouldIncrement, shouldDecrement }) {
+      const apiStore = useApiStore()
       const userStore = useUserStore()
       const isSignedIn = userStore.getUserIsSignedIn
       const update = {
@@ -753,7 +754,7 @@ export const useCardStore = defineStore('cards', {
       }
       this.updateCard(update)
       if (!isSignedIn) {
-        store.dispatch('api/updateCardCounter', update, { root: true })
+        apiStore.updateCardCounter(update)
       }
     },
 

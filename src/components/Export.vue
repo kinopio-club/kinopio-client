@@ -4,6 +4,7 @@ import { useStore } from 'vuex'
 import { useConnectionStore } from '@/stores/useConnectionStore'
 import { useUserStore } from '@/stores/useUserStore'
 import { useSpaceStore } from '@/stores/useSpaceStore'
+import { useApiStore } from '@/stores/useApiStore'
 
 import Loader from '@/components/Loader.vue'
 import utils from '@/utils.js'
@@ -12,6 +13,7 @@ const store = useStore()
 const userStore = useUserStore()
 const spaceStore = useSpaceStore()
 const connectionStore = useConnectionStore()
+const apiStore = useApiStore()
 
 const emit = defineEmits(['updateSpaces'])
 
@@ -78,7 +80,7 @@ const downloadAllSpacesRemote = async () => {
   state.unknownServerError = false
   state.isLoadingAllSpaces = true
   try {
-    const blob = await store.dispatch('api/downloadAllSpaces')
+    const blob = await apiStore.downloadAllSpaces()
     downloadBlob(blob, 'kinopio-spaces')
   } catch (error) {
     console.error('🚒', error)
@@ -107,7 +109,7 @@ const togglePdfIsVisible = () => {
 }
 const pdf = async () => {
   try {
-    const url = await store.dispatch('api/pdf')
+    const url = await apiStore.pdf()
     console.info('🌎 pdf url', url)
   } catch (error) {
     console.error('🚒 pdf', error)

@@ -324,6 +324,7 @@ export const useSpaceStore = defineStore('space', {
     },
     async getRemoteSpace (space) {
       const userStore = useUserStore()
+      const apiStore = useApiStore()
       const collaboratorKey = store.state.spaceCollaboratorKeys.find(key => key.spaceId === space.id)
       if (collaboratorKey) {
         space.collaboratorKey = collaboratorKey.collaboratorKey
@@ -331,14 +332,14 @@ export const useSpaceStore = defineStore('space', {
       let remoteSpace
       try {
         if (userStore.getUserIsSignedIn) {
-          remoteSpace = await store.dispatch('api/getSpace', { space }, { root: true })
+          remoteSpace = await apiStore.getSpace({ space })
         } else if (collaboratorKey) {
           space.collaboratorKey = collaboratorKey
-          remoteSpace = await store.dispatch('api/getSpaceAnonymously', space, { root: true })
+          remoteSpace = await apiStore.getSpaceAnonymously(space)
           cache.saveInvitedSpace(remoteSpace)
           store.commit('clearSpaceCollaboratorKeys', null, { root: true })
         } else if (this.getSpaceIsRemote) {
-          remoteSpace = await store.dispatch('api/getSpaceAnonymously', space, { root: true })
+          remoteSpace = await apiStore.getSpaceAnonymously(space)
         }
         return remoteSpace
       } catch (error) {
@@ -572,8 +573,9 @@ export const useSpaceStore = defineStore('space', {
     // create
 
     async restoreRemovedSpace (space) {
+      const apiStore = useApiStore()
       await cache.restoreRemovedSpace(space)
-      const restoredSpace = await store.dispatch('api/restoreRemovedSpace', space, { root: true })
+      const restoredSpace = await apiStore.restoreRemovedSpace(space)
       space = restoredSpace || space
       this.incrementCardsCreatedCountFromSpace(space)
       this.changeSpace(space)
@@ -717,13 +719,14 @@ export const useSpaceStore = defineStore('space', {
 
     updateSpacePreviewImage: throttle(async function () {
       const userStore = useUserStore()
+      const apiStore = useApiStore()
       const isSignedIn = userStore.getUserIsSignedIn
       const canEditSpace = userStore.getUserCanEditSpace()
       const isPrivate = this.getSpaceIsPrivate
       if (!isSignedIn) { return }
       if (!canEditSpace) { return }
       if (isPrivate) { return }
-      const response = await store.dispatch('api/updateSpacePreviewImage', this.id, { root: true })
+      const response = await apiStore.updateSpacePreviewImage(this.id)
       console.info('🙈 updated space preview image', response?.urls)
     }, 10 * 1000), // 10 seconds
     updateUserLastSpaceId () {
@@ -736,6 +739,7 @@ export const useSpaceStore = defineStore('space', {
       userStore.updateUser({ lastSpaceId: this.id })
     },
     async updateOtherUsers () {
+      const apiStore = useApiStore()
       const cardStore = useCardStore()
       const cards = cardStore.getAllCards
       let userIds = []
@@ -753,7 +757,7 @@ export const useSpaceStore = defineStore('space', {
       otherUserIds = uniq(otherUserIds)
       if (!otherUserIds.length) { return }
       try {
-        const users = await store.dispatch('api/getPublicUsers', otherUserIds, { root: true })
+        const users = await apiStore.getPublicUsers(otherUserIds)
         users.forEach(user => {
           store.commit('updateOtherUsers', user, { root: true })
         })
@@ -764,6 +768,7 @@ export const useSpaceStore = defineStore('space', {
     async updateOtherItems (options) {
       const cardStore = useCardStore()
       const userStore = useUserStore()
+      const apiStore = useApiStore()
       const canEditSpace = userStore.getUserCanEditSpace()
       // other items to fetch
       let invites = []
@@ -800,7 +805,7 @@ export const useSpaceStore = defineStore('space', {
       invites = invites || []
       const isEmpty = !cardIds.length && !spaceIds.length && !invites.length
       if (isEmpty) { return }
-      await store.dispatch('api/addToGetOtherItemsQueue', { spaceIds, cardIds, invites }, { root: true })
+      await apiStore.addToGetOtherItemsQueue({ spaceIds, cardIds, invites })
     },
     async updateSpace (update) {
       const apiStore = useApiStore()
@@ -927,10 +932,11 @@ export const useSpaceStore = defineStore('space', {
       }
     },
     async removeCollaboratorFromSpace (user) {
+      const apiStore = useApiStore()
       const userStore = useUserStore()
       const space = this.getSpaceAllState
       store.dispatch('broadcast/update', { user, type: 'userLeftSpace' }, { root: true })
-      store.dispatch('api/removeSpaceCollaborator', { space, user }, { root: true })
+      apiStore.removeSpaceCollaborator({ space, user })
       this.collaborators = this.collaborators.filter(collaborator => {
         return collaborator.id !== user.id
       })
@@ -1094,13 +1100,14 @@ export const useSpaceStore = defineStore('space', {
     // inbox
 
     async updateInboxCache () {
+      const apiStore = useApiStore()
       const userStore = useUserStore()
       const isSignedIn = userStore.getUserIsSignedIn
       const isOffline = !store.state.isOnline
       if (this.getSpaceIsInbox) { return }
       if (!isSignedIn) { return }
       if (isOffline) { return }
-      const inbox = await store.dispatch('api/getUserInboxSpace', null, { root: true })
+      const inbox = await apiStore.getUserInboxSpace()
       console.info('🌍 updateInboxCache')
       await cache.saveSpace(inbox)
     }

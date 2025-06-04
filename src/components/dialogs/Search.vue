@@ -4,6 +4,7 @@ import { useStore } from 'vuex'
 import { useCardStore } from '@/stores/useCardStore'
 import { useUserStore } from '@/stores/useUserStore'
 import { useSpaceStore } from '@/stores/useSpaceStore'
+import { useApiStore } from '@/stores/useApiStore'
 
 import ResultsFilter from '@/components/ResultsFilter.vue'
 import SearchFilters from '@/components/SearchFilters.vue'
@@ -18,6 +19,7 @@ const store = useStore()
 const cardStore = useCardStore()
 const userStore = useUserStore()
 const spaceStore = useSpaceStore()
+const apiStore = useApiStore()
 
 const dialogElement = ref(null)
 const resultsElement = ref(null)
@@ -90,7 +92,7 @@ const updateSearch = async (search) => {
 }
 const searchRemoteCards = async (search) => {
   state.isLoading = true
-  const results = await store.dispatch('api/searchCards', { query: search })
+  const results = await apiStore.searchCards({ query: search })
   store.commit('searchResultsCards', results)
   state.isLoading = false
   state.hasSearched = true

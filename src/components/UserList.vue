@@ -3,6 +3,7 @@ import { reactive, computed, onMounted, onBeforeUnmount, watch, ref, nextTick } 
 import { useStore } from 'vuex'
 import { useUserStore } from '@/stores/useUserStore'
 import { useSpaceStore } from '@/stores/useSpaceStore'
+import { useApiStore } from '@/stores/useApiStore'
 
 import ResultsFilter from '@/components/ResultsFilter.vue'
 import UserLabelInline from '@/components/UserLabelInline.vue'
@@ -14,6 +15,7 @@ import utils from '@/utils.js'
 const store = useStore()
 const userStore = useUserStore()
 const spaceStore = useSpaceStore()
+const apiStore = useApiStore()
 
 onMounted(() => {
   store.subscribe(mutation => {
@@ -186,7 +188,7 @@ const removeGroupUser = async (event, user) => {
       groupId: group.value.id,
       userId: user.id
     }
-    const response = await store.dispatch('api/removeGroupUser', options, { root: true })
+    const response = await apiStore.removeGroupUser(options)
     store.dispatch('groups/removeGroupUser', options)
   } catch (error) {
     console.error('🚒 removeGroupUser', user, error)

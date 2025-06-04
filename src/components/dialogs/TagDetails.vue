@@ -4,6 +4,7 @@ import { useStore } from 'vuex'
 import { useCardStore } from '@/stores/useCardStore'
 import { useUserStore } from '@/stores/useUserStore'
 import { useSpaceStore } from '@/stores/useSpaceStore'
+import { useApiStore } from '@/stores/useApiStore'
 
 import ResultsFilter from '@/components/ResultsFilter.vue'
 import ColorPicker from '@/components/dialogs/ColorPicker.vue'
@@ -20,6 +21,7 @@ const store = useStore()
 const cardStore = useCardStore()
 const userStore = useUserStore()
 const spaceStore = useSpaceStore()
+const apiStore = useApiStore()
 
 const dialogElement = ref(null)
 const resultsElement = ref(null)
@@ -203,7 +205,7 @@ const remoteCards = async () => {
   state.loading = true
   try {
     let cards
-    cards = await store.dispatch('api/getCardsWithTag', name.value) || []
+    cards = await apiStore.getCardsWithTag(name.value) || []
     cards = utils.clone(cards)
     cards = sortBy(cards, card => dayjs(card.updatedAt).valueOf())
     cards = cards.reverse()

@@ -3,6 +3,7 @@ import { reactive, computed, onMounted, onBeforeUnmount, watch, ref, nextTick } 
 import { useStore } from 'vuex'
 import { useUserStore } from '@/stores/useUserStore'
 import { useSpaceStore } from '@/stores/useSpaceStore'
+import { useApiStore } from '@/stores/useApiStore'
 
 import cache from '@/cache.js'
 import consts from '@/consts.js'
@@ -19,6 +20,7 @@ import dayjs from 'dayjs'
 const store = useStore()
 const userStore = useUserStore()
 const spaceStore = useSpaceStore()
+const apiStore = useApiStore()
 
 let unsubscribe, unsubscribes
 
@@ -137,7 +139,7 @@ const checkIfShouldNotifySpaceOutOfSync = async () => {
       store.commit('isLoadingSpace', false)
       return
     } // don't check unloaded spaces
-    const remoteSpace = await store.dispatch('api/getSpaceUpdatedAt', { id: spaceStore.id })
+    const remoteSpace = await apiStore.getSpaceUpdatedAt({ id: spaceStore.id })
     store.commit('isLoadingSpace', false)
     if (!remoteSpace) { return }
     const space = spaceStore.getSpaceAllState

@@ -6,6 +6,7 @@ import { useConnectionStore } from '@/stores/useConnectionStore'
 import { useBoxStore } from '@/stores/useBoxStore'
 import { useUserStore } from '@/stores/useUserStore'
 import { useSpaceStore } from '@/stores/useSpaceStore'
+import { useApiStore } from '@/stores/useApiStore'
 
 import Loader from '@/components/Loader.vue'
 import UserList from '@/components/UserList.vue'
@@ -19,6 +20,7 @@ const connectionStore = useConnectionStore()
 const boxStore = useBoxStore()
 const userStore = useUserStore()
 const spaceStore = useSpaceStore()
+const apiStore = useApiStore()
 
 onMounted(() => {
   store.subscribe(mutation => {
@@ -94,7 +96,7 @@ const loadFavoriteUsers = async () => {
   if (state.isLoadingFavorites) { return }
   try {
     state.isLoadingFavorites = true
-    state.favoriteUsers = await store.dispatch('api/getSpaceFavorites')
+    state.favoriteUsers = await apiStore.getSpaceFavorites()
   } catch (error) {
     console.error('🚒 loadFavoriteUsers', error)
   }

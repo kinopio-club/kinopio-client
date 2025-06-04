@@ -4,6 +4,7 @@ import { useStore } from 'vuex'
 import { useCardStore } from '@/stores/useCardStore'
 import { useUserStore } from '@/stores/useUserStore'
 import { useSpaceStore } from '@/stores/useSpaceStore'
+import { useApiStore } from '@/stores/useApiStore'
 
 import Loader from '@/components/Loader.vue'
 import utils from '@/utils.js'
@@ -17,6 +18,7 @@ const store = useStore()
 const cardStore = useCardStore()
 const userStore = useUserStore()
 const spaceStore = useSpaceStore()
+const apiStore = useApiStore()
 
 const dialogElement = ref(null)
 const searchInputElement = ref(null)
@@ -171,7 +173,7 @@ const searchPexels = async () => {
   const defaultSearches = ['animals', 'flowers', 'forest', 'ocean']
   const defaultSearch = sample(defaultSearches)
   const search = state.search || defaultSearch
-  const data = await store.dispatch('api/imageSearch', search)
+  const data = await apiStore.imageSearch(search)
   normalizeResults(data, 'pexels')
 }
 const searchGiphy = async (isStickers) => {
@@ -189,7 +191,7 @@ const searchGiphy = async (isStickers) => {
   } else {
     body.rating = 'g'
   }
-  const data = await store.dispatch('api/gifImageSearch', body)
+  const data = await apiStore.gifImageSearch(body)
   normalizeResults(data, 'giphy')
 }
 const searchService = debounce(async () => {

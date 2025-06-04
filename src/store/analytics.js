@@ -1,13 +1,15 @@
 import utils from '@/utils.js'
 import consts from '@/consts.js'
 import { useUserStore } from '@/stores/useUserStore'
+import { useApiStore } from '@/stores/useApiStore'
 
 export default {
   namespaced: true,
   actions: {
     send: async (context, body) => {
+      const apiStore = useApiStore()
       if (!context.getters.shouldSend) { return }
-      context.dispatch('api/sendAnalyticsEvent', body, { root: true })
+      apiStore.sendAnalyticsEvent(body)
       console.info('👻 analytics event:', body.name)
     },
     event: (context, eventName) => {

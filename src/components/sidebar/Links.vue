@@ -4,6 +4,7 @@ import { useStore } from 'vuex'
 import { useCardStore } from '@/stores/useCardStore'
 import { useUserStore } from '@/stores/useUserStore'
 import { useSpaceStore } from '@/stores/useSpaceStore'
+import { useApiStore } from '@/stores/useApiStore'
 
 import Loader from '@/components/Loader.vue'
 import SpaceList from '@/components/SpaceList.vue'
@@ -16,6 +17,7 @@ const cardStore = useCardStore()
 const store = useStore()
 const userStore = useUserStore()
 const spaceStore = useSpaceStore()
+const apiStore = useApiStore()
 
 let unsubscribes
 
@@ -101,7 +103,7 @@ const updateLinks = async () => {
 }
 const debouncedUpdateLinks = debounce(async function () {
   const spaceId = spaceStore.id
-  const links = await store.dispatch('api/getCardsWithLinkToSpaceId', spaceId)
+  const links = await apiStore.getCardsWithLinkToSpaceId(spaceId)
   state.loading = false
   state.prevSpaceId = spaceId
   if (!links) { return }

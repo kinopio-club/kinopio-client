@@ -3,6 +3,7 @@ import { reactive, computed, onMounted, onBeforeUnmount, watch, ref, nextTick } 
 import { useStore } from 'vuex'
 import { useUserStore } from '@/stores/useUserStore'
 import { useSpaceStore } from '@/stores/useSpaceStore'
+import { useApiStore } from '@/stores/useApiStore'
 
 import utils from '@/utils.js'
 import UpdatePassword from '@/components/UpdatePassword.vue'
@@ -12,6 +13,7 @@ import cache from '@/cache.js'
 const store = useStore()
 const userStore = useUserStore()
 const spaceStore = useSpaceStore()
+const apiStore = useApiStore()
 
 const dialogElement = ref(null)
 
@@ -61,7 +63,7 @@ const updateEmail = async () => {
   if (state.email === userStore.email) { return }
   clearStatus()
   state.loading = true
-  const response = await store.dispatch('api/updateEmail', state.email)
+  const response = await apiStore.updateEmail(state.email)
   const result = await response.json()
   if (isSuccess(response)) {
     state.success = true

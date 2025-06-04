@@ -89,8 +89,9 @@ export default {
       // remote groups restored in restoreRemoteUser
     },
     createGroup: async (context, group) => {
+      const apiStore = useApiStore()
       try {
-        const response = await context.dispatch('api/createGroup', group, { root: true })
+        const response = await apiStore.createGroup(group)
         const newGroup = response.group
         const groupUser = response.groupUser
         groupUser.id = groupUser.userId
@@ -104,6 +105,7 @@ export default {
     loadGroup: async (context, space) => {
       const userStore = useUserStore()
       const spaceStore = useSpaceStore()
+      const apiStore = useApiStore()
       spaceStore.updateGroupMeta(space)
       let group = space.group
       if (!group) { return }
@@ -111,24 +113,25 @@ export default {
       const groupUser = context.getters.groupUser({ userId: userStore.id })
       if (!groupUser) { return }
       try {
-        group = await context.dispatch('api/getGroup', group.id, { root: true })
+        group = await apiStore.getGroup(group.id)
         context.commit('update', group)
       } catch (error) {
         console.error('🚒 loadGroup', error, group)
       }
     },
     joinGroup: async (context) => {
+      const apiStore = useApiStore()
       const userStore = useUserStore()
       const userId = userStore.id
       const group = context.rootState.groupToJoinOnLoad
       if (!group) { return }
       context.commit('notifyIsJoiningGroup', true, { root: true })
       try {
-        const response = await context.dispatch('api/createGroupUser', {
+        const response = await apiStore.createGroupUser({
           groupId: group.groupId,
           collaboratorKey: group.collaboratorKey,
           userId
-        }, { root: true })
+        })
         context.commit('addNotification', {
           badge: 'Joined Group',
           message: `${response.group.name}`,
@@ -193,13 +196,15 @@ export default {
       context.commit('update', updatedGroup)
     },
     updateOtherGroups: async (context, otherGroup) => {
+      const apiStore = useApiStore()
       let group = context.getters.byId(otherGroup.id)
       if (group) { return }
-      group = await context.dispatch('api/getGroup', otherGroup.id, { root: true })
+      group = await apiStore.getGroup(otherGroup.id)
       context.commit('create', group)
     },
     remove: async (context, group) => {
-      await context.dispatch('api/deleteGroupPermanent', group, { root: true })
+      const apiStore = useApiStore()
+      await apiStore.deleteGroupPermanent(group)
       context.commit('remove', group)
     }
   },

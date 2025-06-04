@@ -149,7 +149,7 @@ const signIn = async (event) => {
   const email = event.target[0].value.toLowerCase()
   const password = event.target[1].value
   state.loading.signIn = true
-  const response = await store.dispatch('api/signIn', { email, password })
+  const response = await apiStore.signIn({ email, password })
   const result = await response.json()
   state.loading.signIn = false
   if (isSuccess(response)) {
@@ -178,7 +178,7 @@ const updateSpacesLocal = async () => {
   state.spaces = spaces
 }
 const updateSpacesRemote = async () => {
-  let spaces = await store.dispatch('api/getUserSpaces')
+  let spaces = await apiStore.getUserSpaces()
   if (!spaces) { return }
   spaces = spaces.filter(space => space.name !== 'Inbox')
   state.spaces = spaces

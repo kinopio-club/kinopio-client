@@ -4,6 +4,7 @@ import { useStore } from 'vuex'
 import { useConnectionStore } from '@/stores/useConnectionStore'
 import { useUserStore } from '@/stores/useUserStore'
 import { useSpaceStore } from '@/stores/useSpaceStore'
+import { useApiStore } from '@/stores/useApiStore'
 
 import Loader from '@/components/Loader.vue'
 import MinimapCanvas from '@/components/MinimapCanvas.vue'
@@ -20,6 +21,7 @@ const store = useStore()
 const connectionStore = useConnectionStore()
 const userStore = useUserStore()
 const spaceStore = useSpaceStore()
+const apiStore = useApiStore()
 
 const rowElement = ref(null)
 const textareaElement = ref(null)
@@ -161,7 +163,7 @@ const generatePreview = async () => {
   try {
     clear()
     state.isGeneratingPreview = true
-    const { data, name } = await store.dispatch('api/generateSpace', state.prompt)
+    const { data, name } = await apiStore.generateSpace(state.prompt)
     isValidCanvas(data)
     const typeColor = newTypeColor()
     let space = utils.convertFromJsonCanvas(data, typeColor)

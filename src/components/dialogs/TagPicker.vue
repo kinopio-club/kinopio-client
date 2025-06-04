@@ -3,6 +3,7 @@ import { reactive, computed, onMounted, onBeforeUnmount, onUnmounted, watch, ref
 import { useStore } from 'vuex'
 import { useUserStore } from '@/stores/useUserStore'
 import { useSpaceStore } from '@/stores/useSpaceStore'
+import { useApiStore } from '@/stores/useApiStore'
 
 import cache from '@/cache.js'
 import Loader from '@/components/Loader.vue'
@@ -16,6 +17,7 @@ import randomColor from 'randomcolor'
 const store = useStore()
 const userStore = useUserStore()
 const spaceStore = useSpaceStore()
+const apiStore = useApiStore()
 
 const dialogElement = ref(null)
 const resultsElement = ref(null)
@@ -117,7 +119,7 @@ const updateRemoteTags = async () => {
     remoteTags = store.state.remoteTags
   } else {
     state.loading = true
-    remoteTags = await store.dispatch('api/getUserTags') || []
+    remoteTags = await apiStore.getUserTags() || []
     store.commit('remoteTags', remoteTags)
     store.commit('remoteTagsIsFetched', true)
     state.loading = false

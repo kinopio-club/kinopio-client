@@ -6,6 +6,7 @@ import { useConnectionStore } from '@/stores/useConnectionStore'
 import { useBoxStore } from '@/stores/useBoxStore'
 import { useUserStore } from '@/stores/useUserStore'
 import { useSpaceStore } from '@/stores/useSpaceStore'
+import { useApiStore } from '@/stores/useApiStore'
 
 import CardDetails from '@/components/dialogs/CardDetails.vue'
 import OtherCardDetails from '@/components/dialogs/OtherCardDetails.vue'
@@ -57,6 +58,7 @@ const boxStore = useBoxStore()
 const store = useStore()
 const userStore = useUserStore()
 const spaceStore = useSpaceStore()
+const apiStore = useApiStore()
 
 let unsubscribe
 
@@ -68,7 +70,7 @@ const init = async () => {
   if (store.state.shouldNotifyIsJoiningGroup) {
     store.commit('notifyIsJoiningGroup', true)
   }
-  store.dispatch('api/updateDateImage')
+  apiStore.updateDateImage()
   store.dispatch('analytics/event', 'pageview')
   await cache.migrateFromLocalStorage() // legacy
   await spaceStore.initializeSpace()
@@ -117,12 +119,12 @@ onMounted(() => {
   // ⏰ scheduled tasks
   // retry failed sync operations
   processQueueIntervalTimer = setInterval(() => {
-    store.dispatch('api/sendQueue')
+    apiStore.sendQueue()
   }, 5000) // every 5 seconds
   // update inbox space in local storage, one time
   hourlyTasks = setInterval(() => {
     spaceStore.updateInboxCache()
-    store.dispatch('api/updateDateImage')
+    apiStore.updateDateImage()
   }, 1000 * 60 * 60 * 1) // every 1 hour
 })
 

@@ -3,6 +3,7 @@ import { reactive, computed, onMounted, onUnmounted, watch, ref, nextTick } from
 import { useStore } from 'vuex'
 import { useUserStore } from '@/stores/useUserStore'
 import { useSpaceStore } from '@/stores/useSpaceStore'
+import { useApiStore } from '@/stores/useApiStore'
 
 import UserBillingSettings from '@/components/dialogs/UserBillingSettings.vue'
 import UserAccountSettings from '@/components/dialogs/UserAccountSettings.vue'
@@ -18,6 +19,7 @@ import consts from '@/consts.js'
 const store = useStore()
 const userStore = useUserStore()
 const spaceStore = useSpaceStore()
+const apiStore = useApiStore()
 
 onMounted(() => {
   store.subscribe((mutation, state) => {
@@ -102,11 +104,11 @@ const toggleUserDeveloperInfoIsVisible = () => {
 const deleteUserPermanent = async () => {
   state.loading.deleteUserPermanent = true
   if (userStore.isUpgraded) {
-    await store.dispatch('api/cancelSubscription', {
+    await apiStore.cancelSubscription({
       userId: userStore.id
     })
   }
-  await store.dispatch('api/deleteUserPermanent')
+  await apiStore.deleteUserPermanent()
   await cache.removeAll()
   // clear history wipe state from vue-router
   window.history.replaceState({}, 'Kinopio', '/')

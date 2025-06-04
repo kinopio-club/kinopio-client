@@ -4,6 +4,7 @@ import { useStore } from 'vuex'
 import { useBoxStore } from '@/stores/useBoxStore'
 import { useUserStore } from '@/stores/useUserStore'
 import { useSpaceStore } from '@/stores/useSpaceStore'
+import { useApiStore } from '@/stores/useApiStore'
 
 import ColorPicker from '@/components/dialogs/ColorPicker.vue'
 import Loader from '@/components/Loader.vue'
@@ -25,6 +26,7 @@ const store = useStore()
 const boxStore = useBoxStore()
 const userStore = useUserStore()
 const spaceStore = useSpaceStore()
+const apiStore = useApiStore()
 
 const searchInputElement = ref(null)
 const inputElement = ref(null)
@@ -235,7 +237,7 @@ const updateCommunityBackgroundImages = async () => {
     state.communityBackgroundsIsLoading = false
     return
   }
-  let images = await store.dispatch('api/communityBackgrounds')
+  let images = await apiStore.communityBackgrounds()
   images = images.map(image => {
     return {
       url: image.original,
@@ -434,7 +436,7 @@ const searchPexels = async () => {
     const defaultSearches = ['animals', 'flowers', 'forest', 'ocean']
     const defaultSearch = sample(defaultSearches)
     const search = state.search || defaultSearch
-    const data = await store.dispatch('api/imageSearch', search)
+    const data = await apiStore.imageSearch(search)
     state.images = data.photos.map(image => {
       return {
         id: image.id,

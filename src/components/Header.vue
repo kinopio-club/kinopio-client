@@ -536,7 +536,7 @@ const updatePositionInVisualViewport = () => {
 
 const updateNotifications = async () => {
   state.notificationsIsLoading = true
-  const notifications = await store.dispatch('api/getNotifications') || []
+  const notifications = await apiStore.getNotifications() || []
   state.notifications = sortBy(notifications, 'isRead')
   state.notificationsIsLoading = false
 }

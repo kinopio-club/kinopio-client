@@ -3,6 +3,7 @@ import { reactive, computed, onMounted, onBeforeUnmount, watch, ref, nextTick } 
 import { useStore } from 'vuex'
 import { useUserStore } from '@/stores/useUserStore'
 import { useSpaceStore } from '@/stores/useSpaceStore'
+import { useApiStore } from '@/stores/useApiStore'
 
 import SpacePicker from '@/components/dialogs/SpacePicker.vue'
 import Loader from '@/components/Loader.vue'
@@ -16,6 +17,7 @@ import postMessage from '@/postMessage.js'
 const store = useStore()
 const userStore = useUserStore()
 const spaceStore = useSpaceStore()
+const apiStore = useApiStore()
 
 const dialogElement = ref(null)
 
@@ -113,7 +115,7 @@ const getUserSpaces = async () => {
   state.loading.userSpaces = true
   state.spacePickerIsVisible = true
   try {
-    const publicUser = await store.dispatch('api/getPublicUser', props.user)
+    const publicUser = await apiStore.getPublicUser(props.user)
     state.userSpaces = publicUser.spaces
   } catch (error) {
     state.error.unknownServerError = true
@@ -148,7 +150,7 @@ const exploreSpacesIsVisible = computed(() => state.exploreSpaces?.length && !st
 const updateExploreSpaces = async () => {
   if (!props.showExploreSpaces) { return }
   state.loading.exploreSpaces = true
-  const spaces = await store.dispatch('api/getPublicUserExploreSpaces', props.user)
+  const spaces = await apiStore.getPublicUserExploreSpaces(props.user)
   state.exploreSpaces = spaces
   state.loading.exploreSpaces = false
 }

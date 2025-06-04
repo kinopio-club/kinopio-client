@@ -3,6 +3,7 @@ import { reactive, computed, onMounted, watch, ref, nextTick } from 'vue'
 import { useStore } from 'vuex'
 import { useUserStore } from '@/stores/useUserStore'
 import { useSpaceStore } from '@/stores/useSpaceStore'
+import { useApiStore } from '@/stores/useApiStore'
 
 import Loader from '@/components/Loader.vue'
 import utils from '@/utils.js'
@@ -13,6 +14,7 @@ import dayjs from 'dayjs'
 const store = useStore()
 const userStore = useUserStore()
 const spaceStore = useSpaceStore()
+const apiStore = useApiStore()
 
 const dialog = ref(null)
 
@@ -69,7 +71,7 @@ const customerPortal = async () => {
   try {
     clearState()
     state.loading = true
-    const result = await store.dispatch('api/customerPortalUrl', {
+    const result = await apiStore.customerPortalUrl({
       userId: userStore.id
     })
     window.location = result.url

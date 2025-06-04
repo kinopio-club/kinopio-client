@@ -82,7 +82,7 @@ const hideSignUpVisible = () => {
 }
 const createSessionToken = () => {
   sessionToken = nanoid()
-  store.dispatch('api/createSessionToken', sessionToken)
+  apiStore.createSessionToken(sessionToken)
 }
 const focusEmail = async () => {
   await nextTick()
@@ -150,7 +150,7 @@ const resetPassword = async (event) => {
   if (state.loading.resetPassword || state.resetSuccess) { return }
   const email = event.target[0].value.toLowerCase()
   state.loading.resetPassword = true
-  const response = await store.dispatch('api/resetPassword', email)
+  const response = await apiStore.resetPassword(email)
   state.loading.resetPassword = false
   if (response.status === 404) {
     state.error.resetUserEmailNotFound = true
@@ -194,7 +194,7 @@ const signUp = async (event) => {
   if (!isSignUpPasswordTooShort(password)) { return }
   if (!isSignUpPasswordsMatch(password, confirmPassword)) { return }
   state.loading.signUpOrIn = true
-  const response = await store.dispatch('api/signUp', { email, password, currentUser, sessionToken })
+  const response = await apiStore.signUp({ email, password, currentUser, sessionToken })
   const newUser = await response.json()
   if (isSuccess(response)) {
     store.commit('clearAllNotifications')
@@ -204,7 +204,7 @@ const signUp = async (event) => {
     await migrationSpacesConnections()
     await updateSpacesUserId()
     updateCurrentSpaceWithNewUserId(currentUser, newUser)
-    await store.dispatch('api/createSpaces')
+    await apiStore.createSpaces()
     notifySignedIn()
     notifyIsJoiningGroup()
     userStore.checkIfShouldJoinGroup()
@@ -224,7 +224,7 @@ const signIn = async (event) => {
   const email = event.target[0].value.toLowerCase()
   const password = event.target[1].value
   state.loading.signUpOrIn = true
-  const response = await store.dispatch('api/signIn', { email, password })
+  const response = await apiStore.signIn({ email, password })
   const result = await response.json()
   state.loading.signUpOrIn = false
   if (isSuccess(response)) {
@@ -236,12 +236,12 @@ const signIn = async (event) => {
     await removeUneditedSpace('Inbox')
     await migrationSpacesConnections()
     await updateSpacesUserId()
-    await store.dispatch('api/createSpaces')
+    await apiStore.createSpaces()
     notifySignedIn()
     notifyIsJoiningGroup()
     userStore.checkIfShouldJoinGroup()
     // add remote spaces
-    const spaces = await store.dispatch('api/getUserSpaces')
+    const spaces = await apiStore.getUserSpaces()
     await cache.addSpaces(spaces)
     store.commit('clearAllNotifications')
     await addCollaboratorToInvitedSpaces()

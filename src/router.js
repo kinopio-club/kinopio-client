@@ -5,6 +5,7 @@ import consts from './consts.js'
 import { createRouter, createWebHistory } from 'vue-router'
 import { useUserStore } from '@/stores/useUserStore'
 import { useSpaceStore } from '@/stores/useSpaceStore'
+import { useApiStore } from '@/stores/useApiStore'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -229,6 +230,7 @@ export default router
 
 const inviteToEdit = async ({ next, store, spaceId, collaboratorKey }) => {
   const userStore = useUserStore()
+  const apiStore = useApiStore()
   const apiKey = userStore.apiKey
   if (!apiKey) {
     store.commit('spaceUrlToLoad', spaceId)
@@ -238,7 +240,7 @@ const inviteToEdit = async ({ next, store, spaceId, collaboratorKey }) => {
   }
   // join
   try {
-    await store.dispatch('api/addSpaceCollaborator', { spaceId, collaboratorKey })
+    await apiStore.addSpaceCollaborator({ spaceId, collaboratorKey })
     store.commit('spaceUrlToLoad', spaceId)
     store.commit('addNotification', { message: 'You can now edit this space', type: 'success' })
     store.commit('addToSpaceCollaboratorKeys', { spaceId, collaboratorKey })

@@ -4,6 +4,7 @@ import { useStore } from 'vuex'
 import { useCardStore } from '@/stores/useCardStore'
 import { useUserStore } from '@/stores/useUserStore'
 import { useSpaceStore } from '@/stores/useSpaceStore'
+import { useApiStore } from '@/stores/useApiStore'
 
 import merge from 'lodash-es/merge'
 
@@ -16,6 +17,7 @@ const store = useStore()
 const cardStore = useCardStore()
 const userStore = useUserStore()
 const spaceStore = useSpaceStore()
+const apiStore = useApiStore()
 
 const resultsElement = ref(null)
 
@@ -139,7 +141,7 @@ const loadRemoteRemovedCards = async () => {
   try {
     state.loading.cards = true
     const space = spaceStore.getSpaceAllState
-    const remoteCards = await store.dispatch('api/getSpaceRemovedCards', space)
+    const remoteCards = await apiStore.getSpaceRemovedCards(space)
     state.loading.cards = false
     if (!utils.arrayHasItems(remoteCards)) { return }
     state.removedCards = remoteCards
@@ -188,7 +190,7 @@ const removeRemovedSpace = (space) => {
 const loadRemoteRemovedSpaces = async () => {
   let removedSpaces
   state.loading.spaces = true
-  removedSpaces = await store.dispatch('api/getUserRemovedSpaces')
+  removedSpaces = await apiStore.getUserRemovedSpaces()
   state.loading.spaces = false
   if (!removedSpaces) { return }
   removedSpaces = removedSpaces.map(remote => {

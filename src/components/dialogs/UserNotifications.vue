@@ -4,6 +4,7 @@ import { useStore } from 'vuex'
 import { useCardStore } from '@/stores/useCardStore'
 import { useUserStore } from '@/stores/useUserStore'
 import { useSpaceStore } from '@/stores/useSpaceStore'
+import { useApiStore } from '@/stores/useApiStore'
 
 import Loader from '@/components/Loader.vue'
 import UserLabelInline from '@/components/UserLabelInline.vue'
@@ -19,6 +20,7 @@ const store = useStore()
 const cardStore = useCardStore()
 const userStore = useUserStore()
 const spaceStore = useSpaceStore()
+const apiStore = useApiStore()
 
 const dialogElement = ref(null)
 
@@ -154,7 +156,7 @@ const userName = (notification) => {
 }
 const deleteUserNotifications = async () => {
   store.commit('triggerClearUserNotifications')
-  await store.dispatch('api/deleteAllNotifications')
+  await apiStore.deleteAllNotifications()
 }
 
 // actions
@@ -191,7 +193,7 @@ const updateAddToExplore = async (space) => {
     await spaceStore.updateSpace({ showInExplore: space.showInExplore })
   } else {
     space = { id: space.id, showInExplore: space.showInExplore }
-    store.dispatch('api/updateSpace', space)
+    apiStore.updateSpace(space)
   }
 }
 

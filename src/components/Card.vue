@@ -1093,9 +1093,8 @@ const updateUrlPreviewOnline = async () => {
   }
   try {
     url = utils.removeHiddenQueryStringFromURLs(url)
-    const response = await store.dispatch('api/urlPreview', { url, card: props.card })
-    if (!response) { throw 'api/urlPreview request failed' }
-
+    const response = await apiStore.urlPreview({ url, card: props.card })
+    if (!response) { throw 'urlPreview request failed' }
     const { data, host } = response
     console.info('🚗 link preview', url, data)
     updateUrlPreviewSuccess(url, data)
@@ -1148,7 +1147,7 @@ const updateUrlPreviewImage = (update) => {
   update.cardId = update.id
   update.spaceId = spaceStore.id
   delete update.id
-  store.dispatch('api/updateUrlPreviewImage', update)
+  apiStore.updateUrlPreviewImage(update)
 }
 const updateUrlPreviewErrorUrl = (url) => {
   const cardId = props.card.id

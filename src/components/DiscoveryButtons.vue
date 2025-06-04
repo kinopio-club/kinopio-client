@@ -3,6 +3,7 @@ import { reactive, computed, onMounted, onUnmounted, onBeforeUnmount, watch, ref
 import { useStore } from 'vuex'
 import { useUserStore } from '@/stores/useUserStore'
 import { useSpaceStore } from '@/stores/useSpaceStore'
+import { useApiStore } from '@/stores/useApiStore'
 
 import dayjs from 'dayjs'
 
@@ -13,6 +14,7 @@ import utils from '@/utils.js'
 const store = useStore()
 const userStore = useUserStore()
 const spaceStore = useSpaceStore()
+const apiStore = useApiStore()
 
 let updateLiveSpacesIntervalTimer, updateSpacesIntervalTimer
 const maxUnreadCountCharacter = '+'
@@ -129,9 +131,9 @@ const updateSpaces = async () => {
   try {
     state.isLoadingSpaces = true
     const [exploreSpaces, followingSpaces, everyoneSpaces] = await Promise.all([
-      store.dispatch('api/getExploreSpaces'),
-      store.dispatch('api/getFollowingUsersSpaces'),
-      store.dispatch('api/getEveryoneSpaces')
+      apiStore.getExploreSpaces(),
+      apiStore.getFollowingUsersSpaces(),
+      apiStore.getEveryoneSpaces()
     ])
     state.exploreSpaces = exploreSpaces
     state.followingSpaces = followingSpaces
@@ -156,7 +158,7 @@ const toggleLiveIsVisible = () => {
 }
 const updateLiveSpaces = async () => {
   state.isLoadingLiveSpaces = true
-  let spaces = await store.dispatch('api/getLiveSpaces')
+  let spaces = await apiStore.getLiveSpaces()
   if (!spaces || !spaces.length) {
     state.isLoadingLiveSpaces = false
     return

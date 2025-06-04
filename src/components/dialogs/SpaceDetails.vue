@@ -3,6 +3,7 @@ import { reactive, computed, onMounted, onBeforeUnmount, watch, ref, nextTick } 
 import { useStore } from 'vuex'
 import { useUserStore } from '@/stores/useUserStore'
 import { useSpaceStore } from '@/stores/useSpaceStore'
+import { useApiStore } from '@/stores/useApiStore'
 
 import cache from '@/cache.js'
 import SpaceDetailsInfo from '@/components/SpaceDetailsInfo.vue'
@@ -18,6 +19,7 @@ import dayjs from 'dayjs'
 const store = useStore()
 const userStore = useUserStore()
 const spaceStore = useSpaceStore()
+const apiStore = useApiStore()
 
 const maxIterations = 30
 let currentIteration, updatePositionTimer
@@ -306,8 +308,8 @@ const updateWithRemoteSpaces = async () => {
   try {
     state.isLoadingRemoteSpaces = true
     const [userSpaces, groupSpaces] = await Promise.all([
-      store.dispatch('api/getUserSpaces'),
-      store.dispatch('api/getUserGroupSpaces')
+      apiStore.getUserSpaces(),
+      apiStore.getUserGroupSpaces()
     ])
     let spaces = userSpaces || []
     if (groupSpaces) {

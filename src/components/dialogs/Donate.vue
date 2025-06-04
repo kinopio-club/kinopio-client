@@ -4,6 +4,7 @@ import { useStore } from 'vuex'
 import { useCardStore } from '@/stores/useCardStore'
 import { useUserStore } from '@/stores/useUserStore'
 import { useSpaceStore } from '@/stores/useSpaceStore'
+import { useApiStore } from '@/stores/useApiStore'
 
 import User from '@/components/User.vue'
 import Loader from '@/components/Loader.vue'
@@ -14,6 +15,7 @@ const cardStore = useCardStore()
 const store = useStore()
 const userStore = useUserStore()
 const spaceStore = useSpaceStore()
+const apiStore = useApiStore()
 
 let productId
 if (consts.isDevelopment()) {
@@ -101,7 +103,7 @@ const donate = async () => {
   try {
     if (!amount) { throw `invalid amount, ${amount}` }
     amount = amount * 100
-    const result = await store.dispatch('api/donationUrl', {
+    const result = await apiStore.donationUrl({
       amount,
       productId,
       userId: userStore.id

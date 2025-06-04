@@ -3,6 +3,7 @@ import { reactive, computed, onMounted, onBeforeUnmount, watch, ref, nextTick } 
 import { useStore } from 'vuex'
 import { useUserStore } from '@/stores/useUserStore'
 import { useSpaceStore } from '@/stores/useSpaceStore'
+import { useApiStore } from '@/stores/useApiStore'
 
 import Loader from '@/components/Loader.vue'
 import SpaceList from '@/components/SpaceList.vue'
@@ -12,6 +13,7 @@ import utils from '@/utils.js'
 const store = useStore()
 const userStore = useUserStore()
 const spaceStore = useSpaceStore()
+const apiStore = useApiStore()
 
 const dialogElement = ref(null)
 
@@ -73,8 +75,8 @@ const triggerSignUpOrInIsVisible = () => {
 const updateUnsubscribed = async () => {
   try {
     state.isLoading = true
-    state.unsubscribedSpaces = await store.dispatch('api/getSpacesNotificationUnsubscribed')
-    state.unsubscribedGroups = await store.dispatch('api/getGroupsNotificationUnsubscribed')
+    state.unsubscribedSpaces = await apiStore.getSpacesNotificationUnsubscribed()
+    state.unsubscribedGroups = await apiStore.getGroupsNotificationUnsubscribed()
     console.info(state.unsubscribedGroups)
   } catch (error) {
     console.error('🚒 updateUnsubscribed', error)
@@ -83,12 +85,12 @@ const updateUnsubscribed = async () => {
 }
 const resubscribeToSpace = (space) => {
   state.unsubscribedSpaces = state.unsubscribedSpaces.filter(item => item.id !== space.id)
-  store.dispatch('api/spaceNotificationResubscribe', space)
+  apiStore.spaceNotificationResubscribe(space)
   store.commit('addNotification', { message: `Resubscribed to notifications from ${space.name}`, type: 'success' })
 }
 const resubscribeToGroup = (event, group) => {
   state.unsubscribedGroups = state.unsubscribedGroups.filter(item => item.id !== group.id)
-  store.dispatch('api/groupNotificationResubscribe', group)
+  apiStore.groupNotificationResubscribe(group)
   store.commit('addNotification', { message: `Resubscribed to notifications from ${group.name}`, type: 'success' })
 }
 </script>

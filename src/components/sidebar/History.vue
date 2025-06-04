@@ -3,6 +3,7 @@ import { reactive, computed, onMounted, onBeforeUnmount, watch, ref, nextTick } 
 import { useStore } from 'vuex'
 import { useUserStore } from '@/stores/useUserStore'
 import { useSpaceStore } from '@/stores/useSpaceStore'
+import { useApiStore } from '@/stores/useApiStore'
 
 import Loader from '@/components/Loader.vue'
 import OfflineBadge from '@/components/OfflineBadge.vue'
@@ -12,6 +13,7 @@ import utils from '@/utils.js'
 const store = useStore()
 const userStore = useUserStore()
 const spaceStore = useSpaceStore()
+const apiStore = useApiStore()
 
 let prevPosition
 
@@ -69,7 +71,7 @@ const updateOperations = async () => {
   if (state.isLoading) { return }
   try {
     state.isLoading = true
-    state.operations = await store.dispatch('api/getSpaceHistory')
+    state.operations = await apiStore.getSpaceHistory()
     // api/
   } catch (error) {
     console.error('🚒 updateOperations', error)

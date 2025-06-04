@@ -1,5 +1,7 @@
 import { useUserStore } from '@/stores/useUserStore'
 import { useSpaceStore } from '@/stores/useSpaceStore'
+import { useApiStore } from '@/stores/useApiStore'
+
 import utils from '@/utils.js'
 import consts from '@/consts.js'
 
@@ -64,6 +66,7 @@ export default {
       })
     },
     uploadFile: async (context, { file, cardId, spaceId, boxId }) => {
+      const apiStore = useApiStore()
       const userStore = useUserStore()
       const uploadId = nanoid()
       const fileName = utils.normalizeFileUrl(file.name)
@@ -75,7 +78,7 @@ export default {
       if (file.presignedPostData) {
         presignedPostData = file.presignedPostData
       } else {
-        presignedPostData = await context.dispatch('api/createPresignedPost', { key, type: file.type }, { root: true })
+        presignedPostData = await apiStore.createPresignedPost({ key, type: file.type })
       }
       const formData = new FormData()
       Object.keys(presignedPostData.fields).forEach(key => {
@@ -128,6 +131,7 @@ export default {
       })
     },
     addCardsAndUploadFiles: async (context, { files, event, position }) => {
+      const apiStore = useApiStore()
       const userStore = useUserStore()
       position = position || utils.cursorPositionInSpace(event)
       context.dispatch('currentUser/notifyReadOnly', position, { root: true })
@@ -184,7 +188,7 @@ export default {
         console.info('🍡 addCardsAndUploadFiles', file.type, file)
       }
       // add presignedPostData to files
-      const multiplePresignedPostData = await context.dispatch('api/createMultiplePresignedPosts', { files: filesPostData }, { root: true })
+      const multiplePresignedPostData = await apiStore.createMultiplePresignedPosts({ files: filesPostData })
       files.map((file, index) => {
         file.presignedPostData = multiplePresignedPostData[index]
       })
