@@ -246,7 +246,7 @@ const updateCardsWithTagColor = (name, newColor) => {
 const updateTagNameColor = (newColor) => {
   const tag = utils.clone(currentTag.value)
   tag.color = newColor
-  store.dispatch('currentSpace/updateTagNameColor', tag)
+  spaceStore.updateTagNameColor(tag)
   updateCardsWithTagColor(tag.name, newColor)
 }
 
