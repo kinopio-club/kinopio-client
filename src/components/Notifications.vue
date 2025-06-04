@@ -20,7 +20,7 @@ const store = useStore()
 const userStore = useUserStore()
 const spaceStore = useSpaceStore()
 
-let unsubscribe
+let unsubscribe, unsubscribes
 
 let checkIfShouldNotifySpaceOutOfSyncIntervalTimer
 
@@ -41,12 +41,20 @@ onMounted(() => {
       addReadOnlyJiggle()
     } else if (mutation.type === 'notifyCardsCreatedIsOverLimit') {
       toggleNotifyCardsCreatedIsOverLimit(true)
-    } else if (mutation.type === 'currentSpace/restoreSpace') {
-      toggleNotifySpaceOutOfSync(false)
     } else if (mutation.type === 'triggerCheckIfShouldNotifySpaceOutOfSync') {
       checkIfShouldNotifySpaceOutOfSync()
     }
   })
+  const spaceStoreUnsubscribe = spaceStore.$onAction(
+    ({ name, args }) => {
+      if (name === 'restoreSpace') {
+        toggleNotifySpaceOutOfSync(false)
+      }
+    }
+  )
+  unsubscribes = () => {
+    spaceStoreUnsubscribe()
+  }
   window.addEventListener('visibilitychange', updatePageVisibilityChange)
   window.addEventListener('focus', updatePageVisibilityChangeOnFocus)
   checkIfShouldNotifySpaceOutOfSyncIntervalTimer = setInterval(() => {
@@ -58,6 +66,7 @@ onBeforeUnmount(() => {
   window.removeEventListener('focus', updatePageVisibilityChangeOnFocus)
   clearInterval(checkIfShouldNotifySpaceOutOfSyncIntervalTimer)
   unsubscribe()
+  unsubscribes()
 })
 
 const state = reactive({

@@ -24,7 +24,7 @@ const store = useStore()
 const userStore = useUserStore()
 const spaceStore = useSpaceStore()
 
-let unsubscribe
+let unsubscribe, unsubscribes
 
 let shouldPreventSelectSpace
 
@@ -50,8 +50,6 @@ onMounted(() => {
       const currentSpace = spaces.find(space => space.id === state.focusOnId)
       selectSpace(null, currentSpace)
       store.commit('shouldPreventNextEnterKey', true)
-    } else if (mutation.type === 'currentSpace/restoreSpace') {
-      state.focusOnId = store.state.currentSpace.id
     }
   })
   updateScroll()
@@ -59,10 +57,21 @@ onMounted(() => {
   if (props.disableListOptimizations) {
     state.currentPage = totalPages.value
   }
+  const spaceStoreUnsubscribe = spaceStore.$onAction(
+    ({ name, args }) => {
+      if (name === 'restoreSpace') {
+        state.focusOnId = store.state.currentSpace.id
+      }
+    }
+  )
+  unsubscribes = () => {
+    spaceStoreUnsubscribe()
+  }
 })
 
 onBeforeUnmount(() => {
   unsubscribe()
+  unsubscribes()
   spaceListElement.value.closest('section').removeEventListener('scroll', updateScroll)
 })
 

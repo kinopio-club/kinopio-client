@@ -17,8 +17,7 @@ const store = useStore()
 const userStore = useUserStore()
 const spaceStore = useSpaceStore()
 
-// let unsubscribes
-let unsubscribe
+let unsubscribes
 
 const resultsElement = ref(null)
 
@@ -26,25 +25,19 @@ onMounted(() => {
   updateLinks()
   updateResultsSectionHeight()
   window.addEventListener('resize', updateResultsSectionHeight)
-  unsubscribe = store.subscribe((mutation, state) => {
-    if (mutation.type === 'currentSpace/restoreSpace' && props.visible) {
-      updateLinks()
+  const spaceStoreUnsubscribe = spaceStore.$onAction(
+    ({ name, args }) => {
+      if (name === 'restoreSpace') {
+        updateLinks()
+      }
     }
-  })
-  // const cardStoreUnsubscribe = cardStore.$onAction(
-  //   ({name, args}) => {
-  //     if (name === 'moveCards') {
-  //       cancelAnimation()
-  //     }
-  //   }
-  // )
-  // unsubscribes = () => {
-  //   cardStoreUnsubscribe()
-  // }
+  )
+  unsubscribes = () => {
+    spaceStoreUnsubscribe()
+  }
 })
 onBeforeUnmount(() => {
-  // unsubscribes()
-  unsubscribe()
+  unsubscribes()
 })
 
 const props = defineProps({

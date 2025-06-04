@@ -22,6 +22,7 @@ const userStore = useUserStore()
 const spaceStore = useSpaceStore()
 
 const nameElement = ref(null)
+let unsubscribes
 
 onMounted(() => {
   store.subscribe(async (mutation) => {
@@ -34,17 +35,28 @@ onMounted(() => {
       if (!element) { return }
       element.focus()
       element.setSelectionRange(0, element.value.length)
-    } else if (mutation.type === 'currentSpace/restoreSpace') {
-      // reset and update textareaSize
-      if (!dialogIsPinned.value) { return }
-      const element = nameElement.value
-      if (!element) { return }
-      element.style.height = 0
-      await nextTick()
-      textareaSize()
     }
   })
   textareaSize()
+  const spaceStoreUnsubscribe = spaceStore.$onAction(
+    async ({ name, args }) => {
+      if (name === 'restoreSpace') {
+        // reset and update textareaSize
+        if (!dialogIsPinned.value) { return }
+        const element = nameElement.value
+        if (!element) { return }
+        element.style.height = 0
+        await nextTick()
+        textareaSize()
+      }
+    }
+  )
+  unsubscribes = () => {
+    spaceStoreUnsubscribe()
+  }
+})
+onBeforeUnmount(() => {
+  unsubscribes()
 })
 
 const emit = defineEmits(['updateLocalSpaces', 'closeDialogs', 'updateDialogHeight', 'addSpace', 'removeSpaceId'])
