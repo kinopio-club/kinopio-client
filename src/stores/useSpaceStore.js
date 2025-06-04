@@ -388,12 +388,13 @@ export const useSpaceStore = defineStore('space', {
     },
     clearStateMeta () {
       const userStore = useUserStore()
+      const broadcastStore = useBroadcastStore()
       const user = { id: userStore.id }
       isLoadingRemoteSpace = false
       store.commit('notifySpaceIsRemoved', false, { root: true })
       store.commit('spaceUrlToLoad', '', { root: true })
       store.commit('userHasScrolled', false, { root: true })
-      store.commit('broadcast/leaveSpaceRoom', { user, type: 'userLeftRoom' }, { root: true })
+      broadcastStore.leaveSpaceRoom({ user, type: 'userLeftRoom' })
       store.commit('clearAllNotifications', null, { root: true })
       store.commit('clearSpaceFilters', null, { root: true })
       store.commit('clearSearch', null, { root: true })
@@ -586,9 +587,10 @@ export const useSpaceStore = defineStore('space', {
     },
     async duplicateSpace () {
       const userStore = useUserStore()
+      const broadcastStore = useBroadcastStore()
       const space = this.getSpaceAllItems
       const user = userStore.getUserAllState
-      store.commit('broadcast/leaveSpaceRoom', { user: { id: user.id }, type: 'userLeftRoom' }, { root: true })
+      broadcastStore.leaveSpaceRoom({ user: { id: user.id }, type: 'userLeftRoom' })
       let uniqueNewSpace = utils.resetSpaceMeta({ space, user, type: 'copy' })
       uniqueNewSpace = await cache.updateIdsInSpace(space)
       store.commit('clearSearch', null, { root: true })
@@ -651,8 +653,9 @@ export const useSpaceStore = defineStore('space', {
     },
     async createSpace () {
       const userStore = useUserStore()
+      const broadcastStore = useBroadcastStore()
       const user = { id: userStore.id }
-      store.commit('broadcast/leaveSpaceRoom', { user: { id: user.id }, type: 'userLeftRoom' }, { root: true })
+      broadcastStore.leaveSpaceRoom({ user: { id: user.id }, type: 'userLeftRoom' })
       await this.createNewSpace()
       await this.saveSpace()
       this.updateUserLastSpaceId()
