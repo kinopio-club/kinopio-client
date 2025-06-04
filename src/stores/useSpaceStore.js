@@ -36,6 +36,17 @@ export const useSpaceStore = defineStore('space', {
     getSpaceAllState () {
       return { ...this } // In method syntax, 'this' refers to the store instance
     },
+    getSpaceAllItems () {
+      const cardStore = useCardStore()
+      const connectionStore = useConnectionStore()
+      const boxStore = useBoxStore()
+      const space = this.getSpaceAllState
+      space.cards = cardStore.getAllCards
+      space.connections = connectionStore.getAllConnections
+      space.connectionTypes = connectionStore.getAllConnectionTypes
+      space.boxes = boxStore.getAllBoxes
+      return space
+    },
     getSpaceIsPrivate () {
       return this.privacy === 'private'
     },
