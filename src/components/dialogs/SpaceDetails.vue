@@ -229,7 +229,7 @@ const prependFavoriteSpaces = (spaces) => {
   const favoriteSpaces = []
   const otherSpaces = []
   spaces.forEach(space => {
-    const isFavorite = store.getters['currentSpace/isFavorite'](space.id)
+    const isFavorite = spaceStore.getSpaceIsFavorite(space.id)
     if (isFavorite) {
       favoriteSpaces.push(space)
     } else {

@@ -130,6 +130,14 @@ export const useSpaceStore = defineStore('space', {
       const box = boxStore.getBox(itemId)
       return card || box
     },
+    getSpaceIsFavorite (spaceId) {
+      const userStore = useUserStore()
+      spaceId = spaceId || this.id
+      const favoriteSpaces = userStore.favoriteSpaces
+      let value = favoriteSpaces.find(favoriteSpace => favoriteSpace.id === spaceId)
+      value = Boolean(value)
+      return value
+    },
 
     // user getters
 

@@ -223,7 +223,7 @@ const selectSpace = (event, space) => {
 // favorites
 
 const isFavorite = (space) => {
-  return store.getters['currentSpace/isFavorite'](space.id)
+  return spaceStore.getSpaceIsFavorite(space.id)
 }
 
 // scroll
