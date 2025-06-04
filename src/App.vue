@@ -17,13 +17,13 @@ const broadcastStore = useBroadcastStore()
 
 let statusRetryCount = 0
 
+let unsubscribes
+
 onMounted(() => {
   console.info('🐢 kinopio-client build mode', import.meta.env.MODE)
   console.info('🐸 kinopio-server URL', consts.apiHost())
   store.subscribe((mutation, state) => {
-    if (mutation.type === 'broadcast/joinSpaceRoom') {
-      updateMetaRSSFeed()
-    } else if (mutation.type === 'triggerUserIsLoaded') {
+    if (mutation.type === 'triggerUserIsLoaded') {
       updateThemeFromSystem()
     }
   })
@@ -35,6 +35,19 @@ onMounted(() => {
   updateIsOnline()
   window.addEventListener('online', updateIsOnline)
   window.addEventListener('offline', updateIsOnline)
+  const broadcastStoreUnsubscribe = broadcastStore.$onAction(
+    ({ name, args }) => {
+      if (name === 'joinSpaceRoom') {
+        updateMetaRSSFeed()
+      }
+    }
+  )
+  unsubscribes = () => {
+    broadcastStoreUnsubscribe()
+  }
+})
+onBeforeUnmount(() => {
+  unsubscribes()
 })
 
 const spaceName = computed(() => spaceStore.name)
