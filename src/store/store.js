@@ -12,7 +12,7 @@ import broadcast from '@/store/broadcast.js'
 import history from '@/store/history.js'
 import upload from '@/store/upload.js'
 // import userNotifications from '@/store/userNotifications.js'
-import groups from '@/store/groups.js'
+// import groups from '@/store/groups.js'
 import themes from '@/store/themes.js'
 import analytics from '@/store/analytics.js'
 // import api from '@/store/api.js'
@@ -2305,7 +2305,7 @@ const store = createStore({
     // currentBoxes,
     upload,
     // userNotifications,
-    groups,
+    // groups,
     themes,
     analytics
   },

@@ -7,6 +7,7 @@ import { useBoxStore } from '@/stores/useBoxStore'
 import { useUserStore } from '@/stores/useUserStore'
 import { useSpaceStore } from '@/stores/useSpaceStore'
 import { useApiStore } from '@/stores/useApiStore'
+import { useGroupStore } from '@/stores/useGroupStore'
 
 import CardDetails from '@/components/dialogs/CardDetails.vue'
 import OtherCardDetails from '@/components/dialogs/OtherCardDetails.vue'
@@ -59,6 +60,7 @@ const store = useStore()
 const userStore = useUserStore()
 const spaceStore = useSpaceStore()
 const apiStore = useApiStore()
+const groupStore = useGroupStore()
 
 let unsubscribe
 
@@ -75,7 +77,7 @@ const init = async () => {
   await cache.migrateFromLocalStorage() // legacy
   await spaceStore.initializeSpace()
   await store.commit('broadcast/connect')
-  await store.dispatch('groups/init')
+  await groupStore.initializeGroups()
   await store.dispatch('updateTags')
   checkIfShouldShowExploreOnLoad()
 }

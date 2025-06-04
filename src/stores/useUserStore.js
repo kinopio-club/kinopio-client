@@ -301,6 +301,7 @@ export const useUserStore = defineStore('users', {
     },
     async restoreUserAssociatedData () {
       const apiStore = useApiStore()
+      const groupStore = useGroupStore()
       try {
         store.commit('isLoadingFavorites', true, { root: true })
         if (!this.getUserIsSignedIn) {
@@ -332,7 +333,7 @@ export const useUserStore = defineStore('users', {
           this.tags = newTags
         }
         if (groups) {
-          store.commit('groups/restore', groups, { root: true })
+          groupStore.restoreGroup(groups)
         }
         store.commit('isLoadingFavorites', false, { root: true })
       } catch (error) {

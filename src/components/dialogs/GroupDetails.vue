@@ -83,7 +83,7 @@ const currentUserIsGroupAdmin = computed(() => {
 })
 const updateGroup = (update) => {
   update.id = props.group.id
-  store.dispatch('groups/update', update)
+  groupStore.updateGroup(update)
 }
 
 // select user
@@ -136,7 +136,7 @@ const toggleRemoveGroupConfirmationIsVisible = () => {
 const deleteGroupPermanent = async () => {
   state.loading.deleteGroupPermanent = true
   try {
-    await store.dispatch('groups/remove', props.group)
+    await groupStore.removeGroup(props.group)
     store.commit('triggerCloseGroupDetailsDialog')
   } catch (error) {
     state.removeGroupConfirmationIsVisible = false

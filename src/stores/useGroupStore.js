@@ -13,7 +13,7 @@ import cache from '@/cache.js'
 import uniqBy from 'lodash-es/uniqBy'
 import uniq from 'lodash-es/uniq'
 
-export const useCardStore = defineStore('cards', {
+export const useGroupStore = defineStore('groups', {
   state: () => ({
     ids: [],
     groups: {} // {id, {group}}
@@ -87,7 +87,6 @@ export const useCardStore = defineStore('cards', {
       // },
     }
   },
-
   actions: {
 
     getGroup (id) {
@@ -115,6 +114,193 @@ export const useCardStore = defineStore('cards', {
         groupUser = this.getGroupUser({ userId, space })
       }
       return groupUser?.role === 'admin'
+    },
+
+    // init
+
+    async initializeGroups () {
+      let groups = await cache.groups()
+      groups = utils.denormalizeItems(groups)
+      this.restoreGroup(groups)
+      // remote groups restored in restoreRemoteUser
+    },
+    restoreGroup (groups) {
+      this.ids = []
+      this.groups = {}
+      const groupIds = []
+      groups.forEach(group => {
+        groupIds.push(group.id)
+        this.groups[group.id] = group
+      })
+      this.ids = this.ids.concat(groupIds)
+      console.info('👫 groups', this.groups)
+      cache.saveGroups(this.groups)
+    },
+
+    // load
+
+    async loadGroup (space) {
+      const userStore = useUserStore()
+      const spaceStore = useSpaceStore()
+      const apiStore = useApiStore()
+      spaceStore.updateGroupMeta(space)
+      let group = space.group
+      if (!group) { return }
+      this.update(group)
+      const groupUser = this.getGroupUser({ userId: userStore.id })
+      if (!groupUser) { return }
+      try {
+        group = await apiStore.getGroup(group.id)
+        this.update(group)
+      } catch (error) {
+        console.error('🚒 loadGroup', error, group)
+      }
+    },
+
+    // create
+
+    async createGroup (group) {
+      const apiStore = useApiStore()
+      try {
+        const response = await apiStore.createGroup(group)
+        const newGroup = response.group
+        const groupUser = response.groupUser
+        groupUser.id = groupUser.userId
+        newGroup.groupUser = groupUser
+        newGroup.users = [response.groupUser]
+        this.groups[newGroup.id] = newGroup
+        this.ids.unshift(newGroup.id)
+        cache.saveGroups(this.groups)
+      } catch (error) {
+        console.error('🚒 createGroup', error, group)
+      }
+    },
+
+    // update
+
+    update (group) {
+      if (!group.id) {
+        console.warn('🚑 could not update group', group)
+        return
+      }
+      const prevGroup = this.groups[group.id]
+      if (prevGroup) {
+        const keys = Object.keys(group)
+        const updatedGroup = utils.clone(prevGroup)
+        keys.forEach(key => {
+          updatedGroup[key] = group[key]
+        })
+        this.groups[group.id] = updatedGroup
+      } else {
+        this.ids.push(group.id)
+        this.groups[group.id] = group
+      }
+      cache.saveGroups(this.groups)
+    },
+    async updateGroup (group) {
+      const apiStore = useApiStore()
+      this.update(group)
+      await apiStore.addToQueue({ name: 'updateGroup', body: group }, { root: true })
+    },
+    async updateUserRole (update) {
+      const apiStore = useApiStore()
+      const { userId, groupId, role } = update
+      let group = this.getGroup(groupId)
+      group = utils.clone(group)
+      group.users = group.users.map(user => {
+        if (user.id === userId) {
+          user.role = role
+        }
+        return user
+      })
+      this.update(group)
+      await apiStore.addToQueue({ name: 'updateGroupUser', body: update }, { root: true })
+    },
+    async updateOtherGroups (otherGroup) {
+      const apiStore = useApiStore()
+      let group = this.getGroup(otherGroup.id)
+      if (group) { return }
+      group = await apiStore.getGroup(otherGroup.id)
+      this.createGroup(group)
+    },
+
+    // user
+
+    async joinGroup () {
+      const apiStore = useApiStore()
+      const userStore = useUserStore()
+      const userId = userStore.id
+      const group = store.state.groupToJoinOnLoad
+      if (!group) { return }
+      store.commit('notifyIsJoiningGroup', true, { root: true })
+      try {
+        const response = await apiStore.createGroupUser({
+          groupId: group.groupId,
+          collaboratorKey: group.collaboratorKey,
+          userId
+        })
+        store.commit('addNotification', {
+          badge: 'Joined Group',
+          message: `${response.group.name}`,
+          type: 'success',
+          isPersistentItem: true,
+          group: response.group
+        }, { root: true })
+        store.commit('triggerSpaceDetailsVisible', null, { root: true })
+        this.update(response.group)
+        console.info('👫 joined group', response.group)
+      } catch (error) {
+        console.error('🚒 joinGroup', error)
+        store.commit('addNotification', {
+          message: 'Failed to Join Group',
+          type: 'danger',
+          icon: 'group',
+          isPersistentItem: true
+        }, { root: true })
+      }
+      store.commit('notifyIsJoiningGroup', false, { root: true })
+      store.commit('groupToJoinOnLoad', null, { root: true })
+    },
+    removeGroupUser ({ groupId, userId }) {
+      let group = this.getGroup(groupId)
+      group = utils.clone(group)
+      group.users = group.users.filter(user => user.id !== userId)
+      const updatedGroup = {
+        id: group.id,
+        users: group.users
+      }
+      this.update(updatedGroup)
+    },
+
+    // space
+
+    async addCurrentSpace (group) {
+      const spaceStore = useSpaceStore()
+      const userStore = useUserStore()
+      const userNotificationStore = useUserNotificationStore()
+      const user = userStore
+      const body = { groupId: group.id, addedToGroupByUserId: user.id }
+      await spaceStore.updateSpace(body)
+      await userNotificationStore.addSpaceToGroup(body)
+    },
+    async removeCurrentSpace () {
+      const spaceStore = useSpaceStore()
+      await spaceStore.updateSpace({ groupId: null, addedToGroupByUserId: null })
+    },
+
+    // remove
+
+    async removeGroup (group) {
+      const apiStore = useApiStore()
+      await apiStore.deleteGroupPermanent(group)
+      if (!group) { return }
+      group = this.groups[group.id]
+      if (!group) { return }
+      let ids = utils.clone(this.ids)
+      ids = ids.filter(id => id !== group.id)
+      this.ids = ids
+      delete this.groups[group.id]
+      cache.saveGroups(this.groups)
     }
 
   }
