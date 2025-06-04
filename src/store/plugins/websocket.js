@@ -1,7 +1,6 @@
-// broadcast/store ←→ [websocket] ←→ server
+// broadcast ←→ websocket ←→ server
 
 // handles websockets, and delegates events to broadcast
-
 // 🌛 Send
 // 🌜 Receive
 
@@ -21,7 +20,7 @@ const clientId = nanoid()
 console.info('🌳 websocket clientId', clientId)
 const showDebugMessages = false
 
-const joinSpaceRoom = (store, mutation) => {
+const joinSpaceRoom = (store, payload) => {
   const spaceStore = useSpaceStore()
   const userStore = useUserStore()
   console.info('🌙 joining', websocket)
@@ -58,12 +57,12 @@ const joinSpaceRoom = (store, mutation) => {
   store.commit('isJoiningSpace', false)
 }
 
-const sendEvent = (store, mutation, type) => {
+const sendEvent = (store, payload, type) => {
   const spaceStore = useSpaceStore()
   if (!websocket || !currentUserIsConnected) { return }
   const shouldBroadcast = spaceStore.getSpaceShouldBroadcast
   if (!shouldBroadcast) { return }
-  const { message, handler, updates } = utils.normalizeBroadcastUpdates(mutation.payload)
+  const { message, handler, updates } = utils.normalizeBroadcastUpdates(payload)
   const hidden = ['updateRemoteUserCursor', 'addRemotePaintingCircle', 'clearRemoteCardDetailsVisible', 'clearRemoteConnectionDetailsVisible', 'addRemoteDrawingStroke', 'removeRemoteDrawingStroke']
   if (showDebugMessages && !hidden.includes(updates.type)) {
     console.info('🌜 sent', message, handler, updates, { clientId })
@@ -108,110 +107,111 @@ const closeWebsocket = (store) => {
 
 export default function createWebSocketPlugin () {
   return store => {
-    store.subscribe((mutation, state) => {
-      const userStore = useUserStore()
-      const spaceStore = useSpaceStore()
-      const broadcastStore = useBroadcastStore()
-      if (mutation.type === 'broadcast/connect') {
-        store.commit('isJoiningSpace', true)
-        const host = consts.websocketHost()
-        websocket = new WebSocket(host)
-        websocket.onopen = (event) => {
-          currentUserIsConnected = true
-          broadcastStore.joinSpaceRoom()
-          if (store.state.isReconnectingToBroadcast) {
-            store.commit('isReconnectingToBroadcast', false)
-          }
-        }
-        websocket.onclose = (event) => {
-          console.warn('🌚', event)
+    const userStore = useUserStore()
+    const spaceStore = useSpaceStore()
+    const broadcastStore = useBroadcastStore()
+    broadcastStore.$onAction(
+      ({ name, args }) => {
+      // on connect
+        if (name === 'connect') {
           store.commit('isJoiningSpace', true)
-          store.dispatch('broadcast/reconnect')
-        }
-        websocket.onerror = (event) => {
-          const shouldPrevent = checkIfShouldPreventBroadcast(store)
-          console.warn('🌌', event, shouldPrevent)
-          if (shouldPrevent) { return }
-          store.commit('isReconnectingToBroadcast', true)
-        }
-
-        // receive 🌜
-
-        websocket.onmessage = ({ data }) => {
-          data = JSON.parse(data)
-          if (data.clientId === clientId) { return }
-          if (data.message !== 'updateRemoteUserCursor' && showDebugMessages) {
-            console.info('🌛 received', data, data.clientId)
-          }
-          if (data.space) {
-            if (data.space.id !== spaceStore.id) { return }
-          }
-          const { message, handler, user, updates, storeName, actionName } = data // TODO deprecate unused
-          if (message === 'connected') {
-          // presence
-          } else if (handler) {
-            store.commit(handler, updates)
-            checkIfShouldUpdateLinkToItem(store, data)
-            checkIfShouldNotifyOffscreenCardCreated(store, data)
-
-          // pinia
-          } else if (storeName && actionName) {
-            updates.isBroadcast = true
-            const pinia = getActivePinia()
-            if (!pinia) return
-            const piniaStore = pinia._s.get(storeName)
-            piniaStore[actionName](updates)
-          // users
-          } else if (message === 'userJoinedRoom') {
-            spaceStore.addUserToJoinedSpace(user)
-          } else if (message === 'updateUserPresence') {
-            spaceStore.updateUserPresence(updates)
-            store.commit('updateOtherUsers', updates.user, { root: true })
-          } else if (message === 'userLeftRoom') {
-            spaceStore.removeIdleClientFromSpace(user || updates.user)
-            store.commit('clearRemoteMultipleSelected', data)
-          } else if (message === 'userLeftSpace') {
-            spaceStore.removeCollaboratorFromSpace(updates.user)
-            if (updates.user.id === userStore.id) {
-              spaceStore.removeCurrentUserFromSpace()
+          const host = consts.websocketHost()
+          websocket = new WebSocket(host)
+          websocket.onopen = (event) => {
+            currentUserIsConnected = true
+            broadcastStore.joinSpaceRoom()
+            if (store.state.isReconnectingToBroadcast) {
+              store.commit('isReconnectingToBroadcast', false)
             }
-          // other
-          } else if (data.type === 'store') {
-            store.commit(`${message}`, updates)
-          } else {
-            spaceStore[message](updates)
+          }
+          websocket.onclose = (event) => {
+            console.warn('🌚', event)
+            store.commit('isJoiningSpace', true)
+            broadcastStore.reconnect()
+          }
+          websocket.onerror = (event) => {
+            const shouldPrevent = checkIfShouldPreventBroadcast(store)
+            console.warn('🌌', event, shouldPrevent)
+            if (shouldPrevent) { return }
+            store.commit('isReconnectingToBroadcast', true)
+          }
+
+          // receive 🌜
+
+          websocket.onmessage = ({ data }) => {
+            data = JSON.parse(data)
+            if (data.clientId === clientId) { return }
+            if (data.message !== 'updateRemoteUserCursor' && showDebugMessages) {
+              console.info('🌛 received', data, data.clientId)
+            }
+            if (data.space) {
+              if (data.space.id !== spaceStore.id) { return }
+            }
+            const { message, handler, user, updates, storeName, actionName } = data // TODO deprecate unused
+            if (message === 'connected') {
+              // presence
+            } else if (handler) {
+              store.commit(handler, updates)
+              checkIfShouldUpdateLinkToItem(store, data)
+              checkIfShouldNotifyOffscreenCardCreated(store, data)
+              // pinia
+            } else if (storeName && actionName) {
+              updates.isBroadcast = true
+              const pinia = getActivePinia()
+              if (!pinia) return
+              const piniaStore = pinia._s.get(storeName)
+              piniaStore[actionName](updates)
+              // users
+            } else if (message === 'userJoinedRoom') {
+              spaceStore.addUserToJoinedSpace(user)
+            } else if (message === 'updateUserPresence') {
+              spaceStore.updateUserPresence(updates)
+              store.commit('updateOtherUsers', updates.user, { root: true })
+            } else if (message === 'userLeftRoom') {
+              spaceStore.removeIdleClientFromSpace(user || updates.user)
+              store.commit('clearRemoteMultipleSelected', data)
+            } else if (message === 'userLeftSpace') {
+              spaceStore.removeCollaboratorFromSpace(updates.user)
+              if (updates.user.id === userStore.id) {
+                spaceStore.removeCurrentUserFromSpace()
+              }
+              // other
+            } else if (data.type === 'store') {
+              store.commit(`${message}`, updates)
+            } else {
+              spaceStore[message](updates)
+            }
           }
         }
-      }
 
-      // send 🌛
+        // send 🌛
 
-      if (mutation.type === 'broadcast/joinSpaceRoom') {
-        if (!currentUserIsConnected) {
-          store.commit('broadcast/connect')
-          return
+        if (name === 'joinSpaceRoom') {
+          if (!currentUserIsConnected) {
+            broadcastStore.connect()
+            return
+          }
+          joinSpaceRoom(store, args[0])
+        } else if (name === 'leaveSpaceRoom') {
+          spaceStore.clients = []
+          sendEvent(store, args[0])
+        } else if (name === 'update') {
+          sendEvent(store, args[0])
+        } else if (name === 'updateUser') {
+          sendEvent(store, args[0])
+        } else if (name === 'updateStore') {
+          const canEditSpace = userStore.getUserCanEditSpace
+          if (!canEditSpace) { return }
+          sendEvent(store, args[0], 'store')
+        } else if (name === 'close') {
+          closeWebsocket(store)
+        } else if (name === 'reconnect') {
+          console.info('🌝 reconnecting')
+          closeWebsocket(store)
+          currentUserIsConnected = false
+          currentSpaceRoom = null
+          broadcastStore.joinSpaceRoom()
         }
-        joinSpaceRoom(store, mutation)
-      } else if (mutation.type === 'broadcast/leaveSpaceRoom') {
-        spaceStore.clients = []
-        sendEvent(store, mutation)
-      } else if (mutation.type === 'broadcast/update') {
-        sendEvent(store, mutation)
-      } else if (mutation.type === 'broadcast/updateUser') {
-        sendEvent(store, mutation)
-      } else if (mutation.type === 'broadcast/updateStore') {
-        const canEditSpace = userStore.getUserCanEditSpace
-        if (!canEditSpace) { return }
-        sendEvent(store, mutation, 'store')
-      } else if (mutation.type === 'broadcast/close') {
-        closeWebsocket(store)
-      } else if (mutation.type === 'broadcast/reconnect') {
-        console.info('🌝 reconnecting')
-        closeWebsocket(store)
-        currentUserIsConnected = false
-        currentSpaceRoom = null
-        broadcastStore.joinSpaceRoom()
-      }
-    })
+      })
   }
 }
