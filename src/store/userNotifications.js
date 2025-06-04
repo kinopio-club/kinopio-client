@@ -127,10 +127,12 @@ export default {
   getters: {
     recipientUserIds: (state, getters, rootState, rootGetters) => {
       const userStore = useUserStore()
+      const spaceStore = useSpaceStore()
       const currentUserId = userStore.id
       const spaceIsOpen = rootState.currentSpace.privacy === 'open'
       // space members
-      let members = rootGetters['currentSpace/members'](true)
+      let members = spaceStore.getSpaceMembers
+      members = utils.excludeCurrentUser(members, userStore.id)
       members = members.map(member => member.id)
       let recipients = members
       if (spaceIsOpen) {
@@ -150,9 +152,11 @@ export default {
     },
     recipientMemberIds: (state, getters, rootState, rootGetters) => {
       const userStore = useUserStore()
+      const spaceStore = useSpaceStore()
       const currentUserId = userStore.id
       // space members
-      let members = rootGetters['currentSpace/members'](true)
+      let members = spaceStore.getSpaceMembers
+      members = utils.excludeCurrentUser(members, userStore.id)
       members = members.map(member => member.id)
       let recipients = members
       // group users who added cards

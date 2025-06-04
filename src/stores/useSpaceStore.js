@@ -787,6 +787,10 @@ export const useSpaceStore = defineStore('space', {
       await store.dispatch('api/addToQueue', { name: 'updateUser', body: update }, { root: true })
       await cache.updateSpaceByUpdates(update, this.id)
     },
+    updateGroupMeta (space) {
+      this.groupId = space.groupId
+      this.addedToGroupByUserId = space.addedToGroupByUserId
+    },
 
     // remove
 

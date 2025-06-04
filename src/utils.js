@@ -1730,6 +1730,10 @@ export default {
     space.editedByUserId = userId
     return space
   },
+  excludeCurrentUser (users, currentUserId) {
+    users = users.filter(user => user.id !== currentUserId)
+    return users
+  },
   itemUserId (user, item, nullItemUsers) {
     let userId
     if (nullItemUsers) {

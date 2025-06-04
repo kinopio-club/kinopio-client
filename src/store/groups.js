@@ -102,7 +102,8 @@ export default {
     },
     loadGroup: async (context, space) => {
       const userStore = useUserStore()
-      context.commit('currentSpace/updateGroupMeta', space, { root: true })
+      const spaceStore = useSpaceStore()
+      spaceStore.updateGroupMeta(space)
       let group = space.group
       if (!group) { return }
       context.commit('update', group)

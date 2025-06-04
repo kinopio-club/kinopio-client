@@ -202,7 +202,7 @@ const updateViewportSizes = () => {
 const currentUser = computed(() => userStore.getUserAllState)
 const users = computed(() => {
   let users = spaceStore.getSpaceAllUsers
-  users = users.filter(user => user.id !== userStore.id) // exclude current user
+  users = utils.excludeCurrentUser(users, userStore.id)
   return users
 })
 
