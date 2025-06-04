@@ -111,7 +111,7 @@ onMounted(() => {
   updateIconsNotDraggable()
 
   setTimeout(() => {
-    store.dispatch('currentSpace/updateInboxCache')
+    spaceStore.updateInboxCache()
   }, 15000) // 15 seconds after mounted
 
   // ⏰ scheduled tasks
@@ -121,7 +121,7 @@ onMounted(() => {
   }, 5000) // every 5 seconds
   // update inbox space in local storage, one time
   hourlyTasks = setInterval(() => {
-    store.dispatch('currentSpace/updateInboxCache')
+    spaceStore.updateInboxCache()
     store.dispatch('api/updateDateImage')
   }, 1000 * 60 * 60 * 1) // every 1 hour
 })
@@ -231,7 +231,7 @@ const loadSpaceOnBackOrForward = (event) => {
 }
 const unloadPage = () => {
   store.commit('broadcast/close')
-  store.dispatch('currentSpace/removeEmptyCards')
+  spaceStore.removeEmptyCards()
   store.commit('triggerUnloadPage')
 }
 

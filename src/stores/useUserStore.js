@@ -111,8 +111,8 @@ export const useUserStore = defineStore('users', {
     getShouldPreventCardsCreatedCountUpdate () {
       const spaceStore = useSpaceStore()
       const isUpgraded = spaceStore.getSpaceCreatorIsUpgraded
-      const isCurrentUser = store.getters['currentSpace/spaceCreatorIsCurrentUser']
-      return (isUpgraded && !isCurrentUser)
+      const isCreator = spaceStore.getSpaceCreatorIsCurrentUser
+      return (isUpgraded && !isCreator)
     },
     getUserTotalItemFadingFiltersActive () {
       let userFilters = 0
@@ -366,8 +366,8 @@ export const useUserStore = defineStore('users', {
       store.commit('broadcast/updateUser', { id: space.id, updates, type, userId: this.id }, { root: true })
       const user = { ...this.$state }
       user.userId = user.id
-      store.commit('currentSpace/updateUser', user, { root: true })
-      store.commit('currentSpace/updateCollaborator', user, { root: true })
+      spaceStore.updateUser(user)
+      spaceStore.updateCollaborator(user)
     },
 
     async updateUser (update) {

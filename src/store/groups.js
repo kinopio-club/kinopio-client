@@ -258,6 +258,7 @@ export default {
       return groupUser?.role === 'admin'
     },
     groupUsersWhoAddedCards: (state) => {
+      // TODO get all cards, get users, uniq by id, filter by users in current group
       return []
       // userIds: (state, getters) => {
       //   const cards = getters.all

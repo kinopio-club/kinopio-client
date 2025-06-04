@@ -153,6 +153,18 @@ export const useSpaceStore = defineStore('space', {
 
   actions: {
 
+    // websocket receive
+    updateUser (updatedUser) {
+      this.users = utils.updateUsersWithUser(this.users, updatedUser)
+    },
+    // websocket receive
+    updateCollaborator (updatedUser) {
+      this.collaborators = utils.updateUsersWithUser(this.collaborators, updatedUser)
+    },
+    // websocket receive
+    updateSpectator (updatedUser) {
+      this.spectators = utils.updateUsersWithUser(this.spectators, updatedUser)
+    },
     getSpaceTagByName (name) {
       const tags = this.tags.find(tag => {
         return tag.name === name
