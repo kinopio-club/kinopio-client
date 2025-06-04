@@ -57,7 +57,7 @@ const currentTags = computed(() => {
   return props.tagNamesInCard || store.getters.allTags
 })
 const updateTags = async () => {
-  const spaceTags = store.getters['currentSpace/spaceTags']
+  const spaceTags = spaceStore.getSpaceTags
   state.tags = spaceTags || []
   const cachedTags = await cache.allTags()
   const mergedTags = utils.mergeArrays({ previous: spaceTags, updated: cachedTags, key: 'name' })
@@ -133,7 +133,7 @@ const addTag = (name) => {
   let tag = state.tags.find(item => item.name === name)
   const color = newTagColor()
   tag = { name, color }
-  store.dispatch('currentSpace/addTag', tag)
+  spaceStore.addTag(tag)
   state.tags.unshift(tag)
   selectTag(tag)
 }

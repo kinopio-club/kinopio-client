@@ -72,7 +72,7 @@ const toggleFilterShowAbsoluteDates = () => {
 
 // items
 
-const tags = computed(() => store.getters['currentSpace/spaceTags'])
+const tags = computed(() => spaceStore.getSpaceTags)
 const cards = computed(() => cardStore.getAllCards)
 const connections = computed(() => connectionStore.getAllConnections)
 const boxes = computed(() => boxStore.getAllBoxes)

@@ -388,7 +388,7 @@ const closeCard = async () => {
   nameElement.value.blur() // safari scroll fix
   closeDialogs(true)
   cancelOpening()
-  store.dispatch('currentSpace/removeUnusedTagsFromCard', cardId)
+  spaceStore.removeUnusedTagsFromCard(cardId)
   store.commit('updateCurrentCardConnections')
   store.commit('triggerUpdateHeaderAndFooterPosition')
   store.commit('shouldPreventNextEnterKey', false)
@@ -743,7 +743,7 @@ const addNewTags = async (newTagNames) => {
     } else if (state.currentSearchTag.name === tagName) {
       tag.color = state.currentSearchTag.color
     }
-    await store.dispatch('currentSpace/addTag', tag)
+    await spaceStore.addTag(tag)
   }
 }
 const updateTags = async () => {
@@ -800,7 +800,7 @@ const hidePickers = () => {
 }
 const hideTagPicker = () => {
   state.tag.pickerIsVisible = false
-  store.dispatch('currentSpace/removeUnusedTagsFromCard', card.value.id)
+  spaceStore.removeUnusedTagsFromCard(card.value.id)
 }
 const hideSpacePicker = () => {
   state.space.pickerSearch = ''

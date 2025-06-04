@@ -56,9 +56,6 @@ export const useSpaceStore = defineStore('space', {
       const spaceUrl = utils.url({ name: this.name, id: this.id })
       return `${domain}/${spaceUrl}`
     },
-    // getSpaceAllTags() {
-    //   return this.tags
-    // },
     getSpaceCreator () {
       return this.getSpaceMemberById(this.userId)
     },
@@ -139,6 +136,9 @@ export const useSpaceStore = defineStore('space', {
       const boxColors = boxStore.getboxColors
       const colors = cardColors.concat(boxColors)
       return uniq(colors)
+    },
+    getSpaceTags () {
+      return uniqBy(this.tags, 'name')
     }
 
   },
@@ -150,6 +150,9 @@ export const useSpaceStore = defineStore('space', {
         return tag.name === name
       })
       return tags
+    },
+    getSpaceTagsInCard (card) {
+      return this.tags.filter(tag => tag.cardId === card.id)
     },
     getSpaceItemById (itemId) {
       if (!itemId) { return }
@@ -873,39 +876,50 @@ export const useSpaceStore = defineStore('space', {
 
     // tags
 
-    addTag (tag) {
+    async addTag (tag) {
       this.tags.push(tag)
-      cache.updateSpace('tags', this.tags, this.id)
+      await cache.updateSpace('tags', this.tags, this.id)
     },
-    removeTag (tag) {
+    async removeTag (tag) {
       this.tags = this.tags.filter(spaceTag => spaceTag.id !== tag.id)
-      cache.updateSpace('tags', this.tags, this.id)
+      await cache.updateSpace('tags', this.tags, this.id)
     },
-    removeTags (tag) {
+    async removeTags (tag) {
       this.tags = this.tags.filter(spaceTag => spaceTag.name !== tag.name)
-      cache.removeTagsByNameInAllSpaces(tag)
+      await cache.removeTagsByNameInAllSpaces(tag)
     },
-    removeTagsFromCard (card) {
+    async removeTagsFromCard (card) {
       this.tags = this.tags.filter(spaceTag => {
         return spaceTag.cardId !== card.id
       })
-      cache.updateSpace('tags', this.tags, this.id)
+      await cache.updateSpace('tags', this.tags, this.id)
     },
-    deleteTagsFromAllRemovedCardsPermanent () {
+    async deleteTagsFromAllRemovedCardsPermanent () {
       const cardIds = this.removedCards.map(card => card.id)
       this.tags = this.tags.filter(spaceTag => {
         return !cardIds.includes(spaceTag.cardId)
       })
-      cache.updateSpace('tags', this.tags, this.id)
+      await cache.updateSpace('tags', this.tags, this.id)
     },
-    updateTagNameColor (updatedTag) {
+    async updateTagNameColor (updatedTag) {
       this.tags = this.tags.map(tag => {
         if (tag.name === updatedTag.name) {
           tag.color = updatedTag.color
         }
         return tag
       })
-      cache.updateTagColorInAllSpaces(updatedTag)
+      await cache.updateTagColorInAllSpaces(updatedTag)
+    },
+    async removeUnusedTagsFromCard (cardId) {
+      const cardStore = useCardStore()
+      const card = cardStore.getCard(cardId)
+      if (!card) { return }
+      const cardTagNames = utils.tagsFromStringWithoutBrackets(card.name) || []
+      const tagsInCard = this.getSpaceTagsInCard({ id: cardId })
+      const tagsToRemove = tagsInCard.filter(tag => !cardTagNames.includes(tag.name))
+      for (const tag of tagsToRemove) {
+        await this.removeTag(tag)
+      }
     },
 
     // items

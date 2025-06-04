@@ -15,33 +15,42 @@ const store = useStore()
 const userStore = useUserStore()
 const spaceStore = useSpaceStore()
 
-let unsubscribe
+let unsubscribes, unsubscribe
 
 const resultsElement = ref(null)
 
 onMounted(() => {
   window.addEventListener('resize', updateResultsSectionHeight)
   init()
-  const tagMutations = [
-    'currentSpace/addTag',
-    'currentSpace/removeTag',
-    'currentSpace/removeTags',
-    'currentSpace/removeTagsFromCard',
-    'currentSpace/deleteTagsFromAllRemovedCardsPermanent'
-  ]
   unsubscribe = store.subscribe(mutation => {
-    if (mutation.type === 'currentSpace/removeTags') {
-      removeTag(mutation.payload)
-    } else if (mutation.type === 'currentSpace/updateTagNameColor') {
-      updateTagColor(mutation.payload)
-    } else if (tagMutations.includes(mutation.type) && props.visible) {
-      updateTags()
-    } else if (mutation.type === 'shouldHideFooter' && props.visible) {
+    if (mutation.type === 'shouldHideFooter' && props.visible) {
       updateTags()
     }
   })
+  const tagMutations = [
+    'addTag',
+    'removeTag',
+    'removeTags',
+    'removeTagsFromCard',
+    'deleteTagsFromAllRemovedCardsPermanent'
+  ]
+  const spaceStoreUnsubscribe = spaceStore.$onAction(
+    ({ name, args }) => {
+      if (name === 'removeTags') {
+        removeTag(args[0])
+      } else if (name === 'updateTagNameColor') {
+        updateTagColor(args[0])
+      } else if (tagMutations.includes(name) && props.visible) {
+        updateTags()
+      }
+    }
+  )
+  unsubscribes = () => {
+    spaceStoreUnsubscribe()
+  }
 })
 onBeforeUnmount(() => {
+  unsubscribes()
   unsubscribe()
 })
 
@@ -80,7 +89,7 @@ const currentUserIsSignedIn = computed(() => userStore.getUserIsSignedIn)
 const filteredTags = computed(() => {
   let tags = state.tags
   if (shouldShowCurrentSpaceTags.value) {
-    tags = store.getters['currentSpace/spaceTags']
+    tags = spaceStore.getSpaceTags
   }
   console.info('♠︎ filteredTags', tags)
   return tags
@@ -118,7 +127,7 @@ const updateTagColor = (updated) => {
 // tags list
 
 const updateTags = async () => {
-  const spaceTags = store.getters['currentSpace/spaceTags']
+  const spaceTags = spaceStore.getSpaceTags
   state.tags = spaceTags || []
   const cachedTags = await cache.allTags()
   const mergedTags = utils.mergeArrays({ previous: spaceTags, updated: cachedTags, key: 'name' })

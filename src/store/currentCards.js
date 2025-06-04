@@ -301,6 +301,7 @@ export default {
     },
     paste: async (context, { card, cardId }) => {
       const userStore = useUserStore()
+      const spaceStore = useSpaceStore()
       utils.typeCheck({ value: card, type: 'object' })
       card.id = cardId || nanoid()
       card.spaceId = currentSpaceId
@@ -316,7 +317,7 @@ export default {
             cardId: card.id,
             spaceId: context.state.id
           }, { root: true })
-          context.dispatch('currentSpace/addTag', tag, { root: true }) // TODO to tag module?
+          spaceStore.addTag(tag)
         })
       }
       context.dispatch('broadcast/update', { updates: { card }, type: 'createCard', handler: 'currentCards/create' }, { root: true })

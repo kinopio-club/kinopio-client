@@ -74,7 +74,7 @@ const spaceFrames = computed(() => {
   framesInUse = uniq(framesInUse.filter(frame => frame))
   return framesInUse.map(frame => frames[frame])
 })
-const tags = computed(() => utils.clone(store.getters['currentSpace/spaceTags']))
+const tags = computed(() => spaceStore.getSpaceTags)
 const boxes = computed(() => boxStore.getAllBoxes)
 
 // all items

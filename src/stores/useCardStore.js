@@ -783,7 +783,7 @@ export const useCardStore = defineStore('cards', {
             cardId: card.id,
             spaceId
           }, { root: true })
-          store.dispatch('currentSpace/addTag', tag, { root: true })
+          spaceStore.addTag(tag)
         })
       }
       this.createCard(card)
