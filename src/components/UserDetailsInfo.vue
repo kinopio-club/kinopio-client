@@ -53,7 +53,7 @@ const closeDialogs = () => {
 
 const isDevelopment = computed(() => consts.isDevelopment())
 const userColor = computed(() => props.user.color)
-const userIsMember = computed(() => Boolean(store.getters['currentSpace/memberById'](props.user.id)))
+const userIsMember = computed(() => Boolean(spaceStore.getSpaceMemberById(props.user.id)))
 const userIsUpgraded = computed(() => props.user.isUpgraded)
 const isCurrentUser = computed(() => userStore.getUserIsCurrentUser(props.user))
 const userName = computed({
