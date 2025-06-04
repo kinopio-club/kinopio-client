@@ -1805,8 +1805,9 @@ const store = createStore({
       context.commit('isOnline', isOnline)
     },
     updateCurrentSpaceIsUnavailableOffline: async (context, spaceId) => {
+      const spaceStore = useSpaceStore()
       const isOffline = !context.state.isOnline
-      const isNotCached = await context.dispatch('currentSpace/spaceIsNotCached', spaceId)
+      const isNotCached = await spaceStore.getSpaceIsNotCached(spaceId)
       const currentSpaceIsRemote = context.getters['currentSpace/isRemote']
       const value = isOffline && isNotCached && currentSpaceIsRemote
       context.commit('currentSpaceIsUnavailableOffline', value)

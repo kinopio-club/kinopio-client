@@ -158,6 +158,17 @@ export const useSpaceStore = defineStore('space', {
       value = Boolean(value)
       return value
     },
+    async getSpaceIsNotCached (spaceId) {
+      const spaceCardsCount = await cache.space(spaceId).cards?.length
+      return Boolean(!spaceCardsCount)
+    },
+    async getNewItems (items, spaceId) {
+      items = items || this.selectedItems
+      spaceId = spaceId || this.id
+      let newItems = await utils.uniqueSpaceItems(items)
+      newItems = await utils.updateSpaceItemsSpaceId(newItems, spaceId)
+      return newItems
+    },
 
     // user getters
 

@@ -127,7 +127,7 @@ const spacesFiltered = computed(() => {
   return spaces
 })
 const isNotCached = (spaceId) => {
-  return store.dispatch('currentSpace/spaceIsNotCached', spaceId)
+  return spaceStore.getSpaceIsNotCached(spaceId)
 }
 const isNew = (space) => {
   if (props.readSpaceIds?.includes(space.id)) { return }

@@ -147,7 +147,7 @@ const copyToSelectedSpace = async (items) => {
   state.loading = true
   const selectedSpaceId = state.selectedSpace.id
   const selectedSpaceisCurrentSpace = selectedSpaceId === store.state.currentSpace.id
-  newItems = await store.dispatch('currentSpace/newItems', { items, spaceId: selectedSpaceId })
+  newItems = await spaceStore.getNewItems(items, selectedSpaceId)
   // update cache
   const space = await cache.space(selectedSpaceId).cards
   const spaceIsCached = Boolean(space)
