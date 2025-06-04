@@ -1,5 +1,6 @@
 import { useUserStore } from '@/stores/useUserStore'
 import { useSpaceStore } from '@/stores/useSpaceStore'
+import { useApiStore } from '@/stores/useApiStore'
 import utils from '@/utils.js'
 import cache from '@/cache.js'
 
@@ -151,10 +152,12 @@ export default {
       context.commit('groupToJoinOnLoad', null, { root: true })
     },
     update: async (context, group) => {
+      const apiStore = useApiStore()
       context.commit('update', group)
-      await context.dispatch('api/addToQueue', { name: 'updateGroup', body: group }, { root: true })
+      await apiStore.addToQueue({ name: 'updateGroup', body: group }, { root: true })
     },
     updateUserRole: async (context, update) => {
+      const apiStore = useApiStore()
       const { userId, groupId, role } = update
       let group = context.getters.byId(groupId)
       group = utils.clone(group)
@@ -165,7 +168,7 @@ export default {
         return user
       })
       context.commit('update', group)
-      await context.dispatch('api/addToQueue', { name: 'updateGroupUser', body: update }, { root: true })
+      await apiStore.addToQueue({ name: 'updateGroupUser', body: update }, { root: true })
     },
     addCurrentSpace: async (context, group) => {
       const spaceStore = useSpaceStore()

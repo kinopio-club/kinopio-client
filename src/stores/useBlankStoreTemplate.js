@@ -3,6 +3,7 @@ import { defineStore } from 'pinia'
 import { useConnectionStore } from '@/stores/useConnectionStore'
 import { useUserStore } from '@/stores/useUserStore'
 import { useSpaceStore } from '@/stores/useSpaceStore'
+import { useApiStore } from '@/stores/useApiStore'
 
 import store from '@/store/store.js' // TEMP Import Vuex store
 
@@ -53,12 +54,13 @@ export const useCardStore = defineStore('cards', {
       this.allIds.push(card.id)
     },
     async createCard (card) {
+      const apiStore = useApiStore()
       // normalize card
       this.addCardToState(card)
       // if (!updates.isBroadcast) {
       // store.dispatch('broadcast/update', { updates: connection, type: 'addConnection', handler: 'currentConnections/create' }, { root: true })
       // store.dispatch('history/add', { connections: [connection] }, { root: true })
-      await store.dispatch('api/addToQueue', { name: 'createCard', body: card }, { root: true })
+      await apiStore.addToQueue({ name: 'createCard', body: card }, { root: true })
     },
 
     // update
@@ -101,6 +103,7 @@ export const useCardStore = defineStore('cards', {
     // remove
 
     async removeCards (cards) {
+      const apiStore = useApiStore()
       const userStore = useUserStore()
       const canEditSpace = userStore.getUserCanEditSpace()
       if (!canEditSpace) { return }
@@ -108,7 +111,7 @@ export const useCardStore = defineStore('cards', {
         const idIndex = this.allIds.indexOf(card.id)
         this.allIds.splice(idIndex, 1)
         delete this.byId[card.id]
-        await store.dispatch('api/addToQueue', { name: 'removeCard', body: card }, { root: true })
+        await apiStore.addToQueue({ name: 'removeCard', body: card }, { root: true })
       }
     },
     async removeCard (card) {

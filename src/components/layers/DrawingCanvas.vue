@@ -3,6 +3,7 @@ import { reactive, computed, onMounted, onBeforeUnmount, watch, ref, nextTick } 
 import { useStore } from 'vuex'
 import { useUserStore } from '@/stores/useUserStore'
 import { useSpaceStore } from '@/stores/useSpaceStore'
+import { useApiStore } from '@/stores/useApiStore'
 
 import utils from '@/utils.js'
 import consts from '@/consts.js'
@@ -14,6 +15,7 @@ import { nanoid } from 'nanoid'
 const store = useStore()
 const userStore = useUserStore()
 const spaceStore = useSpaceStore()
+const apiStore = useApiStore()
 
 const canvasElement = ref(null)
 let canvas, context
@@ -356,9 +358,9 @@ const saveStroke = async ({ stroke, isRemovedStroke }) => {
   updateCache(strokes)
   updatePageSizes(strokes)
   if (isRemovedStroke) {
-    await store.dispatch('api/addToQueue', { name: 'removeDrawingStroke', body: { stroke } })
+    await apiStore.addToQueue({ name: 'removeDrawingStroke', body: { stroke } })
   } else {
-    await store.dispatch('api/addToQueue', { name: 'createDrawingStroke', body: { stroke } })
+    await apiStore.addToQueue({ name: 'createDrawingStroke', body: { stroke } })
   }
 }
 const endDrawing = async (event) => {

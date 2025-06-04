@@ -3,6 +3,7 @@ import { reactive, computed, onMounted, onUnmounted, onBeforeUnmount, watch, ref
 import { useStore } from 'vuex'
 import { useUserStore } from '@/stores/useUserStore'
 import { useSpaceStore } from '@/stores/useSpaceStore'
+import { useApiStore } from '@/stores/useApiStore'
 
 import inboxSpace from '@/data/inbox.json'
 import Loader from '@/components/Loader.vue'
@@ -18,6 +19,7 @@ import { nanoid } from 'nanoid'
 const store = useStore()
 const userStore = useUserStore()
 const spaceStore = useSpaceStore()
+const apiStore = useApiStore()
 
 const state = reactive({
   email: '',
@@ -221,13 +223,13 @@ const addCard = async () => {
     // save to inbox
     if (state.selectedSpaceId === 'inbox') {
       console.info('🛫 create card in inbox space', card)
-      await store.dispatch('api/addToQueue', { name: 'createCardInInbox', body: card })
+      await apiStore.addToQueue({ name: 'createCardInInbox', body: card })
     // save to space
     } else {
       spaceId = state.selectedSpaceId
       card.spaceId = spaceId
       console.info('🛫 create card in space', card, state.selectedSpaceId)
-      await store.dispatch('api/addToQueue', { name: 'createCard', body: card, spaceId })
+      await apiStore.addToQueue({ name: 'createCard', body: card, spaceId })
     }
     space = { id: spaceId }
   } catch (error) {

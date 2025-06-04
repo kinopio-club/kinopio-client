@@ -6,6 +6,7 @@ import { useConnectionStore } from '@/stores/useConnectionStore'
 import { useBoxStore } from '@/stores/useBoxStore'
 import { useUserStore } from '@/stores/useUserStore'
 import { useSpaceStore } from '@/stores/useSpaceStore'
+import { useApiStore } from '@/stores/useApiStore'
 
 import cache from '@/cache.js'
 import utils from '@/utils.js'
@@ -18,6 +19,7 @@ const connectionStore = useConnectionStore()
 const boxStore = useBoxStore()
 const userStore = useUserStore()
 const spaceStore = useSpaceStore()
+const apiStore = useApiStore()
 
 const dialogElement = ref(null)
 
@@ -165,16 +167,16 @@ const copyToSelectedSpace = async (items) => {
   }
   // update server
   for (const card of newItems.cards) {
-    await store.dispatch('api/addToQueue', { name: 'createCard', body: card, spaceId: selectedSpaceId })
+    await apiStore.addToQueue({ name: 'createCard', body: card, spaceId: selectedSpaceId })
   }
   for (const connectionType of newItems.connectionTypes) {
-    await store.dispatch('api/addToQueue', { name: 'createConnectionType', body: connectionType, spaceId: selectedSpaceId })
+    await apiStore.addToQueue({ name: 'createConnectionType', body: connectionType, spaceId: selectedSpaceId })
   }
   for (const connection of newItems.connections) {
-    await store.dispatch('api/addToQueue', { name: 'createConnection', body: connection, spaceId: selectedSpaceId })
+    await apiStore.addToQueue({ name: 'createConnection', body: connection, spaceId: selectedSpaceId })
   }
   for (const box of newItems.boxes) {
-    await store.dispatch('api/addToQueue', { name: 'createBox', body: box, spaceId: selectedSpaceId })
+    await apiStore.addToQueue({ name: 'createBox', body: box, spaceId: selectedSpaceId })
   }
   console.info('🚚 copies created', newItems)
   state.loading = false

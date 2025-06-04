@@ -4,6 +4,7 @@ import { useStore } from 'vuex'
 import { useCardStore } from '@/stores/useCardStore'
 import { useUserStore } from '@/stores/useUserStore'
 import { useSpaceStore } from '@/stores/useSpaceStore'
+import { useApiStore } from '@/stores/useApiStore'
 
 import cache from '@/cache.js'
 import CardList from '@/components/CardList.vue'
@@ -20,6 +21,7 @@ const store = useStore()
 const cardStore = useCardStore()
 const userStore = useUserStore()
 const spaceStore = useSpaceStore()
+const apiStore = useApiStore()
 
 let prevPosition
 
@@ -92,7 +94,7 @@ const removeFromCardList = (removedCard) => {
 }
 const removeCardFromInbox = async (card) => {
   removeFromCardList(card)
-  await store.dispatch('api/addToQueue', { name: 'removeCard', body: card, spaceId: card.spaceId })
+  await apiStore.addToQueue({ name: 'removeCard', body: card, spaceId: card.spaceId })
 }
 
 // update card

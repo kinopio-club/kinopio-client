@@ -2,6 +2,7 @@ import { nextTick } from 'vue'
 import { defineStore } from 'pinia'
 import { useConnectionStore } from '@/stores/useConnectionStore'
 import { useSpaceStore } from '@/stores/useSpaceStore'
+import { useApiStore } from '@/stores/useApiStore'
 
 import store from '@/store/store.js' // TEMP Import Vuex store
 
@@ -371,18 +372,20 @@ export const useUserStore = defineStore('users', {
     },
 
     async updateUser (update) {
+      const apiStore = useApiStore()
       const keys = Object.keys(update)
       for (const key of keys) {
         this[key] = update[key]
         await cache.updateUser(key, update[key])
         this.broadcastUpdate({ [key]: update[key] })
       }
-      await store.dispatch('api/addToQueue', { name: 'updateUser', body: update }, { root: true })
+      await apiStore.addToQueue({ name: 'updateUser', body: update }, { root: true })
     },
 
     // favorites
 
     async updateUserFavoriteSpace (space, shouldAdd) {
+      const apiStore = useApiStore()
       if (shouldAdd) {
         this.favoriteSpaces.push(space)
         store.dispatch('userNotifications/addFavoriteSpace', space, { root: true })
@@ -393,9 +396,10 @@ export const useUserStore = defineStore('users', {
         store.dispatch('userNotifications/removeFavoriteSpace', space, { root: true })
       }
       const body = { spaceId: space.id, value: shouldAdd }
-      await store.dispatch('api/addToQueue', { name: 'updateFavoriteSpace', body, spaceId: space.id }, { root: true })
+      await apiStore.addToQueue({ name: 'updateFavoriteSpace', body, spaceId: space.id }, { root: true })
     },
     async updateUserFavoriteUser (user, shouldAdd) {
+      const apiStore = useApiStore()
       if (shouldAdd) {
         this.favoriteUsers.push(user)
         store.dispatch('userNotifications/addFavoriteUser', user, { root: true })
@@ -406,9 +410,10 @@ export const useUserStore = defineStore('users', {
         store.dispatch('userNotifications/removeFavoriteUser', user, { root: true })
       }
       const body = { favoriteUserId: user.id, value: shouldAdd }
-      await store.dispatch('api/addToQueue', { name: 'updateFavoriteUser', body }, { root: true })
+      await apiStore.addToQueue({ name: 'updateFavoriteUser', body }, { root: true })
     },
     async updateUserFavoriteColor (color, shouldAdd) {
+      const apiStore = useApiStore()
       color = color.color
       if (shouldAdd) {
         this.favoriteColors.push(color)
@@ -418,7 +423,7 @@ export const useUserStore = defineStore('users', {
         })
       }
       const body = { color, value: shouldAdd }
-      await store.dispatch('api/addToQueue', { name: 'updateFavoriteColor', body }, { root: true })
+      await apiStore.addToQueue({ name: 'updateFavoriteColor', body }, { root: true })
     },
 
     async updateUserFavoriteSpaceIsEdited (space) {
@@ -457,6 +462,7 @@ export const useUserStore = defineStore('users', {
     // card limit
 
     async updateUserCardsCreatedCount (cards, shouldDecrement) {
+      const apiStore = useApiStore()
       cards = cards.filter(card => !card.isCreatedThroughPublicApi)
       cards = cards.filter(card => this.getUserIsCurrentUser({ id: card.userId }))
       let delta = cards.length
@@ -466,11 +472,11 @@ export const useUserStore = defineStore('users', {
       const count = this.cardsCreatedCount + delta
       // update raw vanity count
       this.cardsCreatedCountRaw = count
-      await store.dispatch('api/addToQueue', { name: 'updateUserCardsCreatedCountRaw', body: { delta } }, { root: true })
+      await apiStore.addToQueue({ name: 'updateUserCardsCreatedCountRaw', body: { delta } }, { root: true })
       // update count
       if (this.getShouldPreventCardsCreatedCountUpdate) { return }
       this.cardsCreatedCount = count
-      await store.dispatch('api/addToQueue', { name: 'updateUserCardsCreatedCount', body: { delta } }, { root: true })
+      await apiStore.addToQueue({ name: 'updateUserCardsCreatedCount', body: { delta } }, { root: true })
     },
     getUserCardsCreatedWillBeOverLimit (count) {
       if (this.isUpgraded) { return }
@@ -494,7 +500,8 @@ export const useUserStore = defineStore('users', {
     // email
 
     async updateUserEmailIsVerified () {
-      await store.dispatch('api/addToQueue', {
+      const apiStore = useApiStore()
+      await apiStore.addToQueue({
         name: 'updateUser',
         body: {
           emailIsVerified: true
@@ -505,6 +512,7 @@ export const useUserStore = defineStore('users', {
     // are.na
 
     async updateUserArenaAccessToken (arenaReturnedCode) {
+      const apiStore = useApiStore()
       console.info('updateArenaAccessToken')
       store.commit('importArenaChannelIsVisible', true, { root: true })
       store.commit('isAuthenticatingWithArena', true, { root: true })
@@ -512,7 +520,7 @@ export const useUserStore = defineStore('users', {
       this.arenaAccessToken = arenaAccessToken
       store.commit('importArenaChannelIsVisible', true, { root: true })
       store.commit('isAuthenticatingWithArena', false, { root: true })
-      await store.dispatch('api/addToQueue', {
+      await apiStore.addToQueue({
         name: 'updateUser',
         body: { arenaAccessToken }
       }, { root: true })
@@ -552,6 +560,7 @@ export const useUserStore = defineStore('users', {
     // hidden spaces
 
     async updateUserHiddenSpace (spaceId, isHidden) {
+      const apiStore = useApiStore()
       const space = { id: spaceId }
       if (isHidden) {
         this.hiddenSpaces.push(space)
@@ -560,7 +569,7 @@ export const useUserStore = defineStore('users', {
           return space?.id !== spaceId
         })
       }
-      await store.dispatch('api/addToQueue', {
+      await apiStore.addToQueue({
         name: 'updateSpaceIsHidden',
         body: {
           spaceId,

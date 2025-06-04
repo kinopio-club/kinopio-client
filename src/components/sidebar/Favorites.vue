@@ -3,6 +3,7 @@ import { reactive, computed, onMounted, onUnmounted, watch, ref, nextTick } from
 import { useStore } from 'vuex'
 import { useUserStore } from '@/stores/useUserStore'
 import { useSpaceStore } from '@/stores/useSpaceStore'
+import { useApiStore } from '@/stores/useApiStore'
 
 import Loader from '@/components/Loader.vue'
 import SpaceList from '@/components/SpaceList.vue'
@@ -13,6 +14,7 @@ import User from '@/components/User.vue'
 const store = useStore()
 const userStore = useUserStore()
 const spaceStore = useSpaceStore()
+const apiStore = useApiStore()
 
 onMounted(() => {
   userStore.restoreUserAssociatedData()
@@ -131,7 +133,7 @@ const updateFavoriteSpaceIsEdited = async () => {
   spaces.forEach(space => {
     userStore.updateUserFavoriteSpaceIsEdited(space)
   })
-  await store.dispatch('api/addToQueue', {
+  await apiStore.addToQueue({
     name: 'updateUserVisitSpaces',
     body: spaces
   })

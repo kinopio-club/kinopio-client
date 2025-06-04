@@ -4,6 +4,7 @@ import { useConnectionStore } from '@/stores/useConnectionStore'
 import { useUserStore } from '@/stores/useUserStore'
 import { useCardStore } from '@/stores/useCardStore'
 import { useBoxStore } from '@/stores/useBoxStore'
+import { useApiStore } from '@/stores/useApiStore'
 
 import store from '@/store/store.js' // TEMP Import Vuex store
 
@@ -512,6 +513,7 @@ export const useSpaceStore = defineStore('space', {
       }
     },
     async changeSpace (space) {
+      const apiStore = useApiStore()
       const userStore = useUserStore()
       store.dispatch('prevSpaceIdInSession', this.id, { root: true })
       store.commit('clearAllInteractingWithAndSelected', null, { root: true })
@@ -532,7 +534,7 @@ export const useSpaceStore = defineStore('space', {
       }
       store.commit('restoreMultipleSelectedItemsToLoad', null, { root: true })
       const body = { id: space.id, updatedAt: new Date() }
-      await store.dispatch('api/addToQueue', {
+      await apiStore.addToQueue({
         name: 'updateSpace',
         body
       }, { root: true })
@@ -542,6 +544,7 @@ export const useSpaceStore = defineStore('space', {
     // save
 
     async saveSpace () {
+      const apiStore = useApiStore()
       const userStore = useUserStore()
       const space = this.getSpaceAllState
       const user = userStore.getUserAllState
@@ -551,7 +554,7 @@ export const useSpaceStore = defineStore('space', {
       this.incrementCardsCreatedCountFromSpace(space)
       store.commit('isLoadingSpace', false, { root: true })
       store.commit('triggerUpdateWindowHistory', null, { root: true })
-      await store.dispatch('api/addToQueue', {
+      await apiStore.addToQueue({
         name: 'createSpace',
         body: space
       }, { root: true })
@@ -800,12 +803,13 @@ export const useSpaceStore = defineStore('space', {
       await store.dispatch('api/addToGetOtherItemsQueue', { spaceIds, cardIds, invites }, { root: true })
     },
     async updateSpace (update) {
+      const apiStore = useApiStore()
       const keys = Object.keys(update)
       for (const key of keys) {
         this[key] = update[key]
       }
       store.dispatch('broadcast/update', { update, type: 'updateSpace' }, { root: true })
-      await store.dispatch('api/addToQueue', { name: 'updateUser', body: update }, { root: true })
+      await apiStore.addToQueue({ name: 'updateUser', body: update }, { root: true })
       await cache.updateSpaceByUpdates(update, this.id)
     },
     updateGroupMeta (space) {
@@ -816,31 +820,34 @@ export const useSpaceStore = defineStore('space', {
     // remove
 
     async removeSpace () {
+      const apiStore = useApiStore()
       const space = this.getSpaceAllState
       this.decrementCardsCreatedCountFromSpace(space)
       await cache.removeSpace(space)
       store.commit('prevSpaceIdInSession', '', { root: true })
-      await store.dispatch('api/addToQueue', {
+      await apiStore.addToQueue({
         name: 'removeSpace',
         body: { id: space.id }
       }, { root: true })
     },
     async deleteSpace (space) {
+      const apiStore = useApiStore()
       await cache.deleteSpace(space)
       store.commit('prevSpaceIdInSession', '', { root: true })
-      await store.dispatch('api/addToQueue', {
+      await apiStore.addToQueue({
         name: 'deleteSpace',
         body: space
       }, { root: true })
     },
     async deleteAllRemovedSpaces () {
+      const apiStore = useApiStore()
       const userStore = useUserStore()
       const userId = userStore.id
       const removedSpaces = await cache.getAllRemovedSpaces()
       for (const space of removedSpaces) {
         await cache.deleteSpace(space)
       }
-      await store.dispatch('api/addToQueue', { name: 'deleteAllRemovedSpaces', body: { userId } }, { root: true })
+      await apiStore.addToQueue({ name: 'deleteAllRemovedSpaces', body: { userId } }, { root: true })
     },
     async removeCurrentUserFromSpace () {
       const spaceIdToRemove = this.id

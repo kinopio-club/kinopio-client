@@ -4,6 +4,7 @@ import { useConnectionStore } from '@/stores/useConnectionStore'
 import { useBoxStore } from '@/stores/useBoxStore'
 import { useUserStore } from '@/stores/useUserStore'
 import { useSpaceStore } from '@/stores/useSpaceStore'
+import { useApiStore } from '@/stores/useApiStore'
 
 import store from '@/store/store.js' // TEMP Import Vuex store
 
@@ -275,6 +276,7 @@ export const useCardStore = defineStore('cards', {
       this.allIds.push(card.id)
     },
     async createCard (card, skipCardDetailsIsVisible) {
+      const apiStore = useApiStore()
       const userStore = useUserStore()
       const spaceStore = useSpaceStore()
       if (spaceStore.getShouldPreventAddCard) {
@@ -294,7 +296,7 @@ export const useCardStore = defineStore('cards', {
       if (!card.isBroadcast) {
         store.dispatch('broadcast/update', { updates: card, storeName: 'cardStore', actionName: 'createCard' }, { root: true })
       }
-      await store.dispatch('api/addToQueue', { name: 'createCard', body: card }, { root: true })
+      await apiStore.addToQueue({ name: 'createCard', body: card }, { root: true })
       await spaceStore.updateSpace({
         editedAt: new Date(),
         editedByUserId: userStore.id
@@ -348,6 +350,7 @@ export const useCardStore = defineStore('cards', {
       this.updateCards([update])
     },
     async updateCards (updates) {
+      const apiStore = useApiStore()
       const userStore = useUserStore()
       const spaceStore = useSpaceStore()
       const canEditSpace = userStore.getUserCanEditSpace()
@@ -368,7 +371,7 @@ export const useCardStore = defineStore('cards', {
       if (!updates.isBroadcast) {
         store.dispatch('broadcast/update', { updates, storeName: 'cardStore', actionName: 'updateCards' }, { root: true })
       }
-      await store.dispatch('api/addToQueue', { name: 'updateMultipleCards', body: { cards: updates } }, { root: true })
+      await apiStore.addToQueue({ name: 'updateMultipleCards', body: { cards: updates } }, { root: true })
       // TODO history? if unpaused
       await cache.updateSpace('cards', this.getAllCards, spaceStore.id)
       // update connection paths
@@ -383,6 +386,7 @@ export const useCardStore = defineStore('cards', {
     // remove
 
     async deleteCards (cards) {
+      const apiStore = useApiStore()
       const userStore = useUserStore()
       const canEditSpace = userStore.getUserCanEditSpace()
       if (!canEditSpace) { return }
@@ -390,20 +394,21 @@ export const useCardStore = defineStore('cards', {
         const idIndex = this.allIds.indexOf(card.id)
         this.allIds.splice(idIndex, 1)
         delete this.byId[card.id]
-        await store.dispatch('api/addToQueue', { name: 'deleteCard', body: card }, { root: true })
+        await apiStore.addToQueue({ name: 'deleteCard', body: card }, { root: true })
       }
     },
     async deleteCard (card) {
       await this.deleteCards([card])
     },
     async deleteAllRemovedCards () {
+      const apiStore = useApiStore()
       const userStore = useUserStore()
       const spaceStore = useSpaceStore()
       const spaceId = spaceStore.id
       const userId = userStore.id
       const cards = this.getAllRemovedCards
       await this.deleteCards(cards)
-      await store.dispatch('api/addToQueue', { name: 'deleteAllRemovedCards', body: { userId, spaceId } }, { root: true })
+      await apiStore.addToQueue({ name: 'deleteAllRemovedCards', body: { userId, spaceId } }, { root: true })
     },
     removeCards (ids) {
       const cardsToRemove = []
@@ -434,6 +439,7 @@ export const useCardStore = defineStore('cards', {
       this.removeCards([id])
     },
     async restoreRemovedCard (card) {
+      const apiStore = useApiStore()
       const userStore = useUserStore()
       const spaceStore = useSpaceStore()
       card.isRemoved = false
@@ -443,7 +449,7 @@ export const useCardStore = defineStore('cards', {
       } else {
         this.addCardToState(card)
         await cache.updateSpace('cards', this.getAllCards, spaceStore.id)
-        await store.dispatch('api/addToQueue', { name: 'restoreRemovedCard', body: card }, { root: true })
+        await apiStore.addToQueue({ name: 'restoreRemovedCard', body: card }, { root: true })
         userStore.updateUserCardsCreatedCount([card])
       }
     },

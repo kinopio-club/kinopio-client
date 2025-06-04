@@ -3,6 +3,7 @@ import { reactive, computed, onMounted, onBeforeUnmount, watch, ref, nextTick } 
 import { useStore } from 'vuex'
 import { useUserStore } from '@/stores/useUserStore'
 import { useSpaceStore } from '@/stores/useSpaceStore'
+import { useApiStore } from '@/stores/useApiStore'
 
 import utils from '@/utils.js'
 import consts from '@/consts.js'
@@ -14,6 +15,7 @@ import { nanoid } from 'nanoid'
 const store = useStore()
 const userStore = useUserStore()
 const spaceStore = useSpaceStore()
+const apiStore = useApiStore()
 
 const textareaElement = ref(null)
 
@@ -106,7 +108,7 @@ const addCard = async () => {
     const user = userStore.getUserAllState
     card.userId = user.id
     console.info('🛫 create card in inbox space', card)
-    await store.dispatch('api/addToQueue', { name: 'createCardInInbox', body: card })
+    await apiStore.addToQueue({ name: 'createCardInInbox', body: card })
   } catch (error) {
     console.error('🚒 addCard', error)
     state.error.unknownServerError = true

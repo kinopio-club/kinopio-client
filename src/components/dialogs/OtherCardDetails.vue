@@ -4,6 +4,7 @@ import { useStore } from 'vuex'
 import { useCardStore } from '@/stores/useCardStore'
 import { useUserStore } from '@/stores/useUserStore'
 import { useSpaceStore } from '@/stores/useSpaceStore'
+import { useApiStore } from '@/stores/useApiStore'
 
 import utils from '@/utils.js'
 import Loader from '@/components/Loader.vue'
@@ -14,6 +15,7 @@ const store = useStore()
 const cardStore = useCardStore()
 const userStore = useUserStore()
 const spaceStore = useSpaceStore()
+const apiStore = useApiStore()
 
 onMounted(() => {
   store.subscribe((mutation, state) => {
@@ -109,7 +111,7 @@ const updateName = async (newName) => {
   updateErrorMaxCharacterLimit(newName)
   cardStore.updateCardDimensions(card)
   // update remote
-  await store.dispatch('api/addToQueue', { name: 'updateCard', body: card, spaceId })
+  await apiStore.addToQueue({ name: 'updateCard', body: card, spaceId })
 }
 const updateOtherNameInCurrentSpace = ({ card, spaceId }) => {
   const currentSpaceId = spaceStore.id

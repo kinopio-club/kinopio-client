@@ -3,6 +3,7 @@ import { reactive, computed, onMounted, onBeforeUnmount, watch, ref, nextTick } 
 import { useStore } from 'vuex'
 import { useUserStore } from '@/stores/useUserStore'
 import { useSpaceStore } from '@/stores/useSpaceStore'
+import { useApiStore } from '@/stores/useApiStore'
 
 import utils from '@/utils.js'
 import Loader from '@/components/Loader.vue'
@@ -18,6 +19,7 @@ import { v4 as uuidv4 } from 'uuid' // polyfill for self.crypto.randomUUID(), fo
 const store = useStore()
 const userStore = useUserStore()
 const spaceStore = useSpaceStore()
+const apiStore = useApiStore()
 
 let shouldLoadLastSpace
 let sessionToken
@@ -358,7 +360,7 @@ const addCollaboratorToInvitedSpaces = async () => {
     return space
   })
   await addCollaboratorToCurrentSpace()
-  await store.dispatch('api/addToQueue', { name: 'addCollaboratorToSpaces', body: invitedSpaces })
+  await apiStore.addToQueue({ name: 'addCollaboratorToSpaces', body: invitedSpaces })
 }
 </script>
 

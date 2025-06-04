@@ -1,5 +1,7 @@
 import { useUserStore } from '@/stores/useUserStore'
 import { useSpaceStore } from '@/stores/useSpaceStore'
+import { useApiStore } from '@/stores/useApiStore'
+
 import utils from '@/utils.js'
 
 import uniq from 'lodash-es/uniq'
@@ -13,6 +15,7 @@ export default {
     // User
 
     addFavoriteUser: async (context, favoriteUser) => {
+      const apiStore = useApiStore()
       const userStore = useUserStore()
       const userId = userStore.id
       const recipientUserIds = [favoriteUser.id]
@@ -21,9 +24,10 @@ export default {
         userId,
         recipientUserIds
       }
-      await context.dispatch('api/addToQueue', { name: 'createUserNotification', body: notification }, { root: true })
+      await apiStore.addToQueue({ name: 'createUserNotification', body: notification }, { root: true })
     },
     removeFavoriteUser: async (context, favoriteUser) => {
+      const apiStore = useApiStore()
       const userStore = useUserStore()
       const userId = userStore.id
       const recipientUserIds = [favoriteUser.id]
@@ -32,12 +36,13 @@ export default {
         userId,
         recipientUserIds
       }
-      await context.dispatch('api/addToQueue', { name: 'removeUserNotification', body: notification }, { root: true })
+      await apiStore.addToQueue({ name: 'removeUserNotification', body: notification }, { root: true })
     },
 
     // Space
 
     addFavoriteSpace: async (context, favoriteSpace) => {
+      const apiStore = useApiStore()
       const userStore = useUserStore()
       const userId = userStore.id
       const recipientUserIds = context.getters.recipientMemberIds
@@ -47,9 +52,10 @@ export default {
         recipientUserIds,
         spaceId: favoriteSpace.id
       }
-      await context.dispatch('api/addToQueue', { name: 'createUserNotification', body: notification }, { root: true })
+      await apiStore.addToQueue({ name: 'createUserNotification', body: notification }, { root: true })
     },
     removeFavoriteSpace: async (context, favoriteSpace) => {
+      const apiStore = useApiStore()
       const userStore = useUserStore()
       const userId = userStore.id
       const recipientUserIds = context.getters.recipientUserIds
@@ -59,12 +65,13 @@ export default {
         recipientUserIds,
         spaceId: favoriteSpace.id
       }
-      await context.dispatch('api/addToQueue', { name: 'removeUserNotification', body: notification }, { root: true })
+      await apiStore.addToQueue({ name: 'removeUserNotification', body: notification }, { root: true })
     },
 
     // Card
 
     addCardUpdated: async (context, { cardId, type }) => {
+      const apiStore = useApiStore()
       const userStore = useUserStore()
       if (!cardId) { return }
       if (context.state.name === 'Hello Kinopio') { return }
@@ -82,12 +89,13 @@ export default {
         spaceId: context.state.id
       }
       notifiedCardIds.push(cardId)
-      await context.dispatch('api/addToQueue', { name: 'createUserNotification', body: notification }, { root: true })
+      await apiStore.addToQueue({ name: 'createUserNotification', body: notification }, { root: true })
     },
 
     // Group
 
     addSpaceToGroup: async (context, { groupId, addedToGroupByUserId }) => {
+      const apiStore = useApiStore()
       const userCanEdit = context.rootGetters['currentUser/canEditSpace']()
       if (!userCanEdit) { return }
       const group = context.rootGetters['groups/byId'](groupId)
@@ -103,12 +111,13 @@ export default {
         spaceId: context.state.id,
         groupId
       }
-      await context.dispatch('api/addToQueue', { name: 'createUserNotification', body: notification }, { root: true })
+      await apiStore.addToQueue({ name: 'createUserNotification', body: notification }, { root: true })
     },
 
     // Ask to Add Space to Explore
 
     addAskToAddToExplore: async (context) => {
+      const apiStore = useApiStore()
       const userStore = useUserStore()
       const spaceStore = useSpaceStore()
       const userId = userStore.id
@@ -121,7 +130,7 @@ export default {
         spaceId,
         recipientUserIds
       }
-      await context.dispatch('api/addToQueue', { name: 'createUserNotification', body: notification }, { root: true })
+      await apiStore.addToQueue({ name: 'createUserNotification', body: notification }, { root: true })
     }
 
   },

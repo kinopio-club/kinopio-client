@@ -6,6 +6,7 @@ import { useCardStore } from '@/stores/useCardStore'
 import { useBoxStore } from '@/stores/useBoxStore'
 import { useUserStore } from '@/stores/useUserStore'
 import { useSpaceStore } from '@/stores/useSpaceStore'
+import { useApiStore } from '@/stores/useApiStore'
 
 import utils from '@/utils.js'
 import Frames from '@/components/Frames.vue'
@@ -40,6 +41,7 @@ const connectionStore = useConnectionStore()
 const boxStore = useBoxStore()
 const userStore = useUserStore()
 const spaceStore = useSpaceStore()
+const apiStore = useApiStore()
 
 const cardElement = ref(null)
 
@@ -1113,7 +1115,7 @@ const updateUrlPreviewSuccess = async (url, data) => {
   data.name = utils.addHiddenQueryStringToURLs(props.card.name)
   cardStore.updateCard(data)
   store.commit('removeUrlPreviewLoadingForCardIds', cardId)
-  await store.dispatch('api/addToQueue', { name: 'updateUrlPreviewImage', body: data })
+  await apiStore.addToQueue({ name: 'updateUrlPreviewImage', body: data })
 }
 // remove after 2025
 const retryUrlPreview = () => {

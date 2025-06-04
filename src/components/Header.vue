@@ -3,6 +3,7 @@ import { reactive, computed, onMounted, onUnmounted, onBeforeUnmount, watch, ref
 import { useStore } from 'vuex'
 import { useUserStore } from '@/stores/useUserStore'
 import { useSpaceStore } from '@/stores/useSpaceStore'
+import { useApiStore } from '@/stores/useApiStore'
 
 import About from '@/components/dialogs/About.vue'
 import SpaceDetails from '@/components/dialogs/SpaceDetails.vue'
@@ -45,6 +46,7 @@ import sortBy from 'lodash-es/sortBy'
 const store = useStore()
 const userStore = useUserStore()
 const spaceStore = useSpaceStore()
+const apiStore = useApiStore()
 
 let unsubscribe
 
@@ -554,7 +556,7 @@ const updateNotificationsIsRead = async (notificationIds) => {
     }
     return notification
   })
-  await store.dispatch('api/addToQueue', {
+  await apiStore.addToQueue({
     name: 'updateNotificationsIsRead',
     body: notificationIds
   })

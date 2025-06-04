@@ -4,6 +4,7 @@ import { useConnectionStore } from '@/stores/useConnectionStore'
 import { useCardStore } from '@/stores/useCardStore'
 import { useUserStore } from '@/stores/useUserStore'
 import { useSpaceStore } from '@/stores/useSpaceStore'
+import { useApiStore } from '@/stores/useApiStore'
 
 import store from '@/store/store.js' // TEMP Import Vuex store
 
@@ -138,6 +139,7 @@ export const useBoxStore = defineStore('boxes', {
       this.allIds.push(box.id)
     },
     async createBox (box, isResizing) {
+      const apiStore = useApiStore()
       box = this.normalizeNewBox(box)
       this.addBoxToState(box)
       // if (!updates.isBroadcast) {
@@ -148,7 +150,7 @@ export const useBoxStore = defineStore('boxes', {
         store.commit('currentUserIsResizingBox', true, { root: true })
         store.commit('currentUserIsResizingBoxIds', [box.id], { root: true })
       }
-      await store.dispatch('api/addToQueue', { name: 'createBox', body: box }, { root: true })
+      await apiStore.addToQueue({ name: 'createBox', body: box }, { root: true })
     },
 
     // update
@@ -172,6 +174,7 @@ export const useBoxStore = defineStore('boxes', {
       this.isUpdating = false
     },
     async updateBoxes (updates) {
+      const apiStore = useApiStore()
       const userStore = useUserStore()
       const spaceStore = useSpaceStore()
       updates.forEach(({ id, ...changes }) => {
@@ -189,7 +192,7 @@ export const useBoxStore = defineStore('boxes', {
       if (!updates.isBroadcast) {
         // store.dispatch('broadcast/update', { updates, storeName: 'boxStore', actionName: 'updateBoxes' }, { root: true })
       }
-      await store.dispatch('api/addToQueue', { name: 'updateMultipleBoxes', body: { boxes: updates } }, { root: true })
+      await apiStore.addToQueue({ name: 'updateMultipleBoxes', body: { boxes: updates } }, { root: true })
       await spaceStore.updateSpace({
         editedAt: new Date(),
         editedByUserId: userStore.id
@@ -211,6 +214,7 @@ export const useBoxStore = defineStore('boxes', {
     // remove
 
     async removeBoxes (ids) {
+      const apiStore = useApiStore()
       const userStore = useUserStore()
       const spaceStore = useSpaceStore()
       const canEditSpace = userStore.getUserCanEditSpace()
@@ -220,7 +224,7 @@ export const useBoxStore = defineStore('boxes', {
         const idIndex = this.allIds.indexOf(id)
         this.allIds.splice(idIndex, 1)
         delete this.byId[id]
-        await store.dispatch('api/addToQueue', { name: 'removeBox', body: { id } }, { root: true })
+        await apiStore.addToQueue({ name: 'removeBox', body: { id } }, { root: true })
         // store.dispatch('broadcast/update', { updates: box, type: 'removeBox', handler: 'currentBoxes/remove' }, { root: true })
       }
       const boxes = ids.map(id => this.getBox(id))
