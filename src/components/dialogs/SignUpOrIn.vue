@@ -4,6 +4,7 @@ import { useStore } from 'vuex'
 import { useUserStore } from '@/stores/useUserStore'
 import { useSpaceStore } from '@/stores/useSpaceStore'
 import { useApiStore } from '@/stores/useApiStore'
+import { useBroadcastStore } from '@/stores/useBroadcastStore'
 
 import utils from '@/utils.js'
 import Loader from '@/components/Loader.vue'
@@ -20,6 +21,7 @@ const store = useStore()
 const userStore = useUserStore()
 const spaceStore = useSpaceStore()
 const apiStore = useApiStore()
+const broadcastStore = useBroadcastStore()
 
 let shouldLoadLastSpace
 let sessionToken
@@ -349,7 +351,7 @@ const addCollaboratorToCurrentSpace = async () => {
   const currentUser = userStore.getUserAllState
   if (invitedSpaceIds.includes(currentSpace?.id)) {
     spaceStore.addCollaboratorToSpace(currentUser)
-    store.commit('broadcast/close')
+    broadcastStore.close()
     store.commit('broadcast/joinSpaceRoom')
   }
 }

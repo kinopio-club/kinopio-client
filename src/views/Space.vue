@@ -238,7 +238,7 @@ const loadSpaceOnBackOrForward = (event) => {
   spaceStore.loadSpace(space)
 }
 const unloadPage = () => {
-  store.commit('broadcast/close')
+  broadcastStore.close()
   spaceStore.removeEmptyCards()
   store.commit('triggerUnloadPage')
 }
