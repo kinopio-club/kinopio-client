@@ -4,6 +4,7 @@ import { useStore } from 'vuex'
 import { useUserStore } from '@/stores/useUserStore'
 import { useSpaceStore } from '@/stores/useSpaceStore'
 import { useApiStore } from '@/stores/useApiStore'
+import { useBroadcastStore } from '@/stores/useBroadcastStore'
 
 import utils from '@/utils.js'
 import consts from '@/consts.js'
@@ -16,6 +17,7 @@ const store = useStore()
 const userStore = useUserStore()
 const spaceStore = useSpaceStore()
 const apiStore = useApiStore()
+const broadcastStore = useBroadcastStore()
 
 const canvasElement = ref(null)
 let canvas, context
@@ -143,7 +145,7 @@ const createPoint = (event) => {
 
 const broadcastAddStroke = (stroke, shouldPreventBroadcast) => {
   if (shouldPreventBroadcast) { return }
-  store.commit('broadcast/update', {
+  broadcastStore.update({
     updates: {
       userId: userStore.id,
       stroke
@@ -154,7 +156,7 @@ const broadcastAddStroke = (stroke, shouldPreventBroadcast) => {
 }
 const broadcastRemoveStroke = (stroke, shouldPreventBroadcast) => {
   if (shouldPreventBroadcast) { return }
-  store.commit('broadcast/update', {
+  broadcastStore.update({
     updates: {
       userId: userStore.id,
       stroke

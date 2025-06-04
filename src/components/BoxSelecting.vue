@@ -5,6 +5,7 @@ import { useCardStore } from '@/stores/useCardStore'
 import { useBoxStore } from '@/stores/useBoxStore'
 import { useUserStore } from '@/stores/useUserStore'
 import { useSpaceStore } from '@/stores/useSpaceStore'
+import { useBroadcastStore } from '@/stores/useBroadcastStore'
 
 import utils from '@/utils.js'
 
@@ -19,6 +20,7 @@ const cardStore = useCardStore()
 const boxStore = useBoxStore()
 const userStore = useUserStore()
 const spaceStore = useSpaceStore()
+const broadcastStore = useBroadcastStore()
 
 let unsubscribe
 
@@ -104,7 +106,7 @@ const remoteUserBoxSelectStyles = computed(() => store.state.remoteUserBoxSelect
 const remotePreviousUserBoxSelectStyles = computed(() => store.state.remotePreviousUserBoxSelectStyles)
 
 const broadcast = (operation) => {
-  store.commit('broadcast/update', { updates: currentUserStyles.value, type: operation, handler: operation })
+  broadcastStore.update({ updates: currentUserStyles.value, type: operation, handler: operation })
 }
 const removePreviousBoxStyle = () => {
   state.previousBoxStyles.shift()

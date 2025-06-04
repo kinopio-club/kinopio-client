@@ -6,6 +6,7 @@ import { useBoxStore } from '@/stores/useBoxStore'
 import { useUserStore } from '@/stores/useUserStore'
 import { useSpaceStore } from '@/stores/useSpaceStore'
 import { useCardStore } from '@/stores/useCardStore'
+import { useBroadcastStore } from '@/stores/useBroadcastStore'
 
 import utils from '@/utils.js'
 import collisionDetection from '@/collisionDetection.js'
@@ -20,6 +21,7 @@ const store = useStore()
 const boxStore = useBoxStore()
 const userStore = useUserStore()
 const spaceStore = useSpaceStore()
+const broadcastStore = useBroadcastStore()
 
 // a sequence of circles that's broadcasted to others and is used for multi-card selection
 const circleRadius = 20
@@ -526,7 +528,7 @@ const circlesAnimationFrame = (timestamp) => {
 }
 const broadcastCircle = (event, circle) => {
   const position = utils.cursorPositionInSpace(event)
-  store.commit('broadcast/update', {
+  broadcastStore.update({
     updates: {
       userId: userStore.id,
       x: position.x,

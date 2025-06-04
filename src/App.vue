@@ -4,6 +4,7 @@ import { useStore } from 'vuex'
 import { useUserStore } from '@/stores/useUserStore'
 import { useSpaceStore } from '@/stores/useSpaceStore'
 import { useApiStore } from '@/stores/useApiStore'
+import { useBroadcastStore } from '@/stores/useBroadcastStore'
 
 import utils from '@/utils.js'
 import consts from '@/consts.js'
@@ -12,6 +13,7 @@ const store = useStore()
 const userStore = useUserStore()
 const spaceStore = useSpaceStore()
 const apiStore = useApiStore()
+const broadcastStore = useBroadcastStore()
 
 let statusRetryCount = 0
 
@@ -133,7 +135,7 @@ const broadcastUserLabelCursor = (event) => {
   if (!updates) { return }
   updates.userId = userStore.id
   updates.zoom = spaceZoomDecimal.value
-  store.commit('broadcast/update', { updates, type: 'updateRemoteUserCursor', handler: 'triggerUpdateRemoteUserCursor' })
+  broadcastStore.update({ updates, type: 'updateRemoteUserCursor', handler: 'triggerUpdateRemoteUserCursor' })
 }
 const isTouchDevice = () => {
   store.commit('isTouchDevice', true)
