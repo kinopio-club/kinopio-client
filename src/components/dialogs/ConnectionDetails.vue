@@ -129,7 +129,7 @@ const closeAllDialogs = () => {
 
 // space
 
-const canEditSpace = computed(() => userStore.getUserCanEditSpace())
+const canEditSpace = computed(() => userStore.getUserCanEditSpace)
 const spacePrivacyIsOpen = computed(() => spaceStore.privacy === 'open')
 const spacePrivacyIsClosed = computed(() => spaceStore.privacy === 'closed')
 const isInvitedButCannotEditSpace = computed(() => store.state.currentUserIsInvitedButCannotEditCurrentSpace)
@@ -171,7 +171,7 @@ const connectionTypesByUpdatedAt = computed(() => {
 const canEditConnection = computed(() => {
   const isSpaceMember = userStore.getUserIsSpaceMember
   const connectionIsCreatedByCurrentUser = userStore.getItemIsCreatedByUser(currentConnection.value)
-  const canEditSpace = userStore.getUserCanEditSpace()
+  const canEditSpace = userStore.getUserCanEditSpace
   if (isSpaceMember) { return true }
   if (canEditSpace && connectionIsCreatedByCurrentUser) { return true }
   return false

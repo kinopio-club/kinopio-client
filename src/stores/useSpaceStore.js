@@ -724,7 +724,7 @@ export const useSpaceStore = defineStore('space', {
       const userStore = useUserStore()
       const apiStore = useApiStore()
       const isSignedIn = userStore.getUserIsSignedIn
-      const canEditSpace = userStore.getUserCanEditSpace()
+      const canEditSpace = userStore.getUserCanEditSpace
       const isPrivate = this.getSpaceIsPrivate
       if (!isSignedIn) { return }
       if (!canEditSpace) { return }
@@ -736,7 +736,7 @@ export const useSpaceStore = defineStore('space', {
       const userStore = useUserStore()
       const isSignedIn = userStore.getUserIsSignedIn
       const isPrivate = this.getSpaceIsPrivate
-      const canEdit = userStore.getUserCanEditSpace()
+      const canEdit = userStore.getUserCanEditSpace
       const isReadOnlyInvite = isPrivate && !canEdit
       if (isReadOnlyInvite) { return }
       userStore.updateUser({ lastSpaceId: this.id })
@@ -772,7 +772,7 @@ export const useSpaceStore = defineStore('space', {
       const cardStore = useCardStore()
       const userStore = useUserStore()
       const apiStore = useApiStore()
-      const canEditSpace = userStore.getUserCanEditSpace()
+      const canEditSpace = userStore.getUserCanEditSpace
       // other items to fetch
       let invites = []
       let cardIds = []

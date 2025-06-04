@@ -355,7 +355,7 @@ export const useCardStore = defineStore('cards', {
       const apiStore = useApiStore()
       const userStore = useUserStore()
       const spaceStore = useSpaceStore()
-      const canEditSpace = userStore.getUserCanEditSpace()
+      const canEditSpace = userStore.getUserCanEditSpace
       if (!canEditSpace) { return }
       updates = updates.filter(update => userStore.getUserCanEditCard(update))
       updates.forEach(({ id, ...changes }) => {
@@ -390,7 +390,7 @@ export const useCardStore = defineStore('cards', {
     async deleteCards (cards) {
       const apiStore = useApiStore()
       const userStore = useUserStore()
-      const canEditSpace = userStore.getUserCanEditSpace()
+      const canEditSpace = userStore.getUserCanEditSpace
       if (!canEditSpace) { return }
       for (const card of cards) {
         const idIndex = this.allIds.indexOf(card.id)

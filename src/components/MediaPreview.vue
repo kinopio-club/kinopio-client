@@ -15,7 +15,7 @@ const props = defineProps({
 })
 
 const canEditCard = () => {
-  const canEditSpace = userStore.getUserCanEditSpace()
+  const canEditSpace = userStore.getUserCanEditSpace
   const isSpaceMember = userStore.getUserIsSpaceMember
   const cardIsCreatedByCurrentUser = userStore.getUserIsCardCreator(props.card)
   if (isSpaceMember) { return true }

@@ -34,7 +34,7 @@ const state = reactive({
 })
 
 const isSpaceMember = computed(() => userStore.getUserIsSpaceMember)
-const canEditSpace = computed(() => userStore.getUserCanEditSpace())
+const canEditSpace = computed(() => userStore.getUserCanEditSpace)
 const cardIsCreatedByCurrentUser = computed(() => userStore.getUserIsCardCreator(props.card))
 const canEditCard = computed(() => {
   if (isSpaceMember.value) { return true }

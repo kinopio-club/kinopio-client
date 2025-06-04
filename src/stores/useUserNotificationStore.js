@@ -131,7 +131,7 @@ export const useUserNotificationStore = defineStore('userNotifications', {
       if (!cardId) { return }
       if (spaceStore.name === 'Hello Kinopio') { return }
       if (notifiedCardIds.includes(cardId)) { return }
-      const userCanEdit = userStore.getUserCanEditSpace()
+      const userCanEdit = userStore.getUserCanEditSpace
       if (!userCanEdit) { return }
       const userId = userStore.id
       const recipientUserIds = this.recipientUserIds
@@ -154,7 +154,7 @@ export const useUserNotificationStore = defineStore('userNotifications', {
       const spaceStore = useSpaceStore()
       const userStore = useUserStore()
       const groupStore = useGroupStore()
-      const userCanEdit = userStore.getUserCanEditSpace()
+      const userCanEdit = userStore.getUserCanEditSpace
       if (!userCanEdit) { return }
       const group = groupStore.getGroup(groupId)
       // recipients are all other group users

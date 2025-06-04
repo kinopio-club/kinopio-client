@@ -349,7 +349,7 @@ const updateCurrentConnections = async () => {
   state.currentConnections = connectionStore.getItemsConnections(props.box.id)
 }
 const isPainting = computed(() => store.state.currentUserIsPainting)
-const canEditSpace = computed(() => userStore.getUserCanEditSpace())
+const canEditSpace = computed(() => userStore.getUserCanEditSpace)
 const currentBoxIsBeingDragged = computed(() => {
   const isDragging = store.state.currentUserIsDraggingBox
   const isCurrent = store.state.currentDraggingBoxId === props.box.id

@@ -174,7 +174,7 @@ const currentUserColor = computed(() => userStore.color)
 
 // current space
 
-const canEditSpace = computed(() => userStore.getUserCanEditSpace())
+const canEditSpace = computed(() => userStore.getUserCanEditSpace)
 const changeSpace = async (url) => {
   const { spaceId, spaceUrl, cardId } = utils.spaceAndCardIdFromUrl(url)
   if (cardId) {

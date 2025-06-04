@@ -55,7 +55,7 @@ const state = reactive({
 })
 
 const isOnline = computed(() => store.state.isOnline)
-const canEditSpace = computed(() => userStore.getUserCanEditSpace())
+const canEditSpace = computed(() => userStore.getUserCanEditSpace)
 const updatePrevPosition = (event) => {
   if (!props.visible) { return }
   prevPosition = utils.cursorPositionInPage(event)

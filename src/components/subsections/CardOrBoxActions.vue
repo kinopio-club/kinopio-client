@@ -68,7 +68,7 @@ const state = reactive({
   defaultColor: '#e3e3e3'
 })
 
-const canEditSpace = computed(() => userStore.getUserCanEditSpace())
+const canEditSpace = computed(() => userStore.getUserCanEditSpace)
 const isSpaceMember = computed(() => userStore.getUserIsSpaceMember)
 const canEditAll = computed(() => {
   if (isSpaceMember.value) { return true }

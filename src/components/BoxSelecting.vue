@@ -73,7 +73,7 @@ const state = reactive({
 const currentUserIsBoxSelecting = computed(() => store.state.currentUserIsBoxSelecting)
 const startPoint = computed(() => positionInSpace(store.state.currentUserBoxSelectStart))
 const endPoint = computed(() => positionInSpace(store.state.currentUserBoxSelectMove))
-const userCantEditSpace = computed(() => !userStore.getUserCanEditSpace())
+const userCantEditSpace = computed(() => !userStore.getUserCanEditSpace)
 const toolbarIsDrawing = computed(() => store.state.currentUserToolbar === 'drawing')
 const shouldPreventBoxSelecting = computed(() => {
   if (toolbarIsDrawing.value) { return true }

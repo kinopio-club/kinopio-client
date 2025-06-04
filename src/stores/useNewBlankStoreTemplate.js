@@ -105,7 +105,7 @@ export const useCardStore = defineStore('cards', {
     async removeCards (cards) {
       const apiStore = useApiStore()
       const userStore = useUserStore()
-      const canEditSpace = userStore.getUserCanEditSpace()
+      const canEditSpace = userStore.getUserCanEditSpace
       if (!canEditSpace) { return }
       for (const card of cards) {
         const idIndex = this.allIds.indexOf(card.id)

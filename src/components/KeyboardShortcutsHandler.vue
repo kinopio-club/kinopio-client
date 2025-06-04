@@ -128,7 +128,7 @@ const handleShortcuts = (event) => {
   const isSpaceScope = checkIsSpaceScope(event)
   const isMinimapDialogScope = checkIsMinimapDialogScope(event)
   const toolbarIsDrawing = store.state.currentUserToolbar === 'drawing'
-  const canEditSpace = userStore.getUserCanEditSpace()
+  const canEditSpace = userStore.getUserCanEditSpace
   // ?
   if (key === '?' && isSpaceScope) {
     store.commit('triggerKeyboardShortcutsIsVisible')
@@ -418,7 +418,7 @@ const addCard = async (options) => {
     store.commit('shouldPreventNextEnterKey', false)
     return
   }
-  const canEditSpace = userStore.getUserCanEditSpace()
+  const canEditSpace = userStore.getUserCanEditSpace
   if (!canEditSpace) { return }
   const parentCardId = store.state.parentCardId
   let parentCard = document.querySelector(`.card[data-card-id="${parentCardId}"]`)
@@ -588,7 +588,7 @@ const canEditCardById = (cardId) => {
   const isSpaceMember = userStore.getUserIsSpaceMember
   const card = cardStore.getCard(cardId)
   const cardIsCreatedByCurrentUser = userStore.getUserIsCardCreator(card)
-  const canEditSpace = userStore.getUserCanEditSpace()
+  const canEditSpace = userStore.getUserCanEditSpace
   if (isSpaceMember) { return true }
   if (canEditSpace && cardIsCreatedByCurrentUser) { return true }
   return false
@@ -598,7 +598,7 @@ const canEditConnectionById = (connectionId) => {
   const isSpaceMember = userStore.getUserIsSpaceMember
   const connection = connectionStore.getConnection(connectionId)
   const connectionIsCreatedByCurrentUser = userStore.getItemIsCreatedByUser(connection)
-  const canEditSpace = userStore.getUserCanEditSpace()
+  const canEditSpace = userStore.getUserCanEditSpace
   if (isSpaceMember) { return true }
   if (canEditSpace && connectionIsCreatedByCurrentUser) { return true }
   return false
@@ -767,7 +767,7 @@ const handlePasteEvent = async (event) => {
   }
   // check read only
   userStore.notifyReadOnly(position)
-  const canEditSpace = userStore.getUserCanEditSpace()
+  const canEditSpace = userStore.getUserCanEditSpace
   if (!canEditSpace) { return }
   // get clipboard data
   const data = await getClipboardData()

@@ -29,7 +29,7 @@ const state = reactive({
   isMetaKey: false
 })
 
-const canEditSpace = computed(() => userStore.getUserCanEditSpace())
+const canEditSpace = computed(() => userStore.getUserCanEditSpace)
 const isSelectingX = computed(() => store.state.isSelectingX)
 const updateIsSelectingX = (value) => {
   if (store.state.isSelectingY) {

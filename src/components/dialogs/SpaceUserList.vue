@@ -44,7 +44,7 @@ const updateDialogHeight = async () => {
 }
 
 const currentUser = computed(() => userStore.getUserAllState)
-const currentUserCanEditSpace = computed(() => userStore.getUserCanEditSpace())
+const currentUserCanEditSpace = computed(() => userStore.getUserCanEditSpace)
 const currentSpace = computed(() => spaceStore.getSpaceAllState)
 
 // list type

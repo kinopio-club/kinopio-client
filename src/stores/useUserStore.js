@@ -164,6 +164,14 @@ export const useUserStore = defineStore('users', {
       const isSpaceCollaborator = this.getUserIsSpaceCollaborator
       const isGroupMember = groupStore.getIsCurrentSpaceGroupUser
       return Boolean(isSpaceUser || isSpaceCollaborator || isGroupMember)
+    },
+    getUserCanEditSpace () {
+      const spaceStore = useSpaceStore()
+      const spaceIsOpen = spaceStore.privacy === 'open'
+      const currentUserIsSignedIn = this.getUserIsSignedIn
+      const canEditOpenSpace = spaceIsOpen && currentUserIsSignedIn
+      const isSpaceMember = this.getUserIsSpaceMember
+      return canEditOpenSpace || isSpaceMember
     }
   },
 
@@ -199,15 +207,6 @@ export const useUserStore = defineStore('users', {
       const isSpaceCollaborator = this.getUserIsSpaceCollaborator
       const isGroupMember = groupStore.getIsCurrentSpaceGroupUser
       return Boolean(isSpaceUser || isSpaceCollaborator || isGroupMember)
-    },
-    // TODO refactor these into standard getters if space always = spaceStore.getSpaceAllState
-    getUserCanEditSpace () {
-      const spaceStore = useSpaceStore()
-      const spaceIsOpen = spaceStore.privacy === 'open'
-      const currentUserIsSignedIn = this.getUserIsSignedIn
-      const canEditOpenSpace = spaceIsOpen && currentUserIsSignedIn
-      const isSpaceMember = this.getUserIsSpaceMember
-      return canEditOpenSpace || isSpaceMember
     },
     getUserCanEditBox (box) {
       const isSpaceMember = this.getUserIsSpaceMember

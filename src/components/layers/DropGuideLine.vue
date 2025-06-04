@@ -240,7 +240,7 @@ const stopPaintingGuides = () => {
   broadcastStopPaintingGuide()
 }
 const broadcastCursorAndCurve = ({ startPoint, color }) => {
-  const canEditSpace = userStore.getUserCanEditSpace()
+  const canEditSpace = userStore.getUserCanEditSpace
   if (!canEditSpace) { return }
   const updates = {}
   updates.x = state.currentCursorInSpace.x

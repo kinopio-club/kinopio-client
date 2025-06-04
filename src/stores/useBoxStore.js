@@ -217,7 +217,7 @@ export const useBoxStore = defineStore('boxes', {
       const apiStore = useApiStore()
       const userStore = useUserStore()
       const spaceStore = useSpaceStore()
-      const canEditSpace = userStore.getUserCanEditSpace()
+      const canEditSpace = userStore.getUserCanEditSpace
       if (!canEditSpace) { return }
       const updates = []
       for (const id of ids) {

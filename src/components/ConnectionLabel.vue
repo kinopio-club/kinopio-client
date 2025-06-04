@@ -92,7 +92,7 @@ watch(() => state.isDragging, (value, prevValue) => {
   }
 })
 
-const canEditSpace = computed(() => userStore.getUserCanEditSpace())
+const canEditSpace = computed(() => userStore.getUserCanEditSpace)
 const isDark = computed(() => utils.colorIsDark(typeColor.value))
 const checkIsMultiTouch = (event) => {
   isMultiTouch = false

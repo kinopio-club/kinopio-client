@@ -155,7 +155,7 @@ const isCanvasScope = (event) => {
 const currentUserColor = computed(() => userStore.color)
 const currentUserColorIsDark = computed(() => utils.colorIsDark(currentUserColor.value))
 const boxFillColor = computed(() => colord(currentUserColor.value).alpha(0.5).toRgbString())
-const userCannotEditSpace = computed(() => !userStore.getUserCanEditSpace())
+const userCannotEditSpace = computed(() => !userStore.getUserCanEditSpace)
 const isPanning = computed(() => store.state.currentUserIsPanningReady)
 const isBoxSelecting = computed(() => store.state.currentUserIsBoxSelecting)
 const toolbarIsCard = computed(() => store.state.currentUserToolbar === 'card')

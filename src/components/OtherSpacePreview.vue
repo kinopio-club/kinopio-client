@@ -32,7 +32,7 @@ const canEditCard = computed(() => {
   if (canEditSpace.value && cardIsCreatedByCurrentUser.value) { return true }
   return false
 })
-const canEditSpace = computed(() => userStore.getUserCanEditSpace())
+const canEditSpace = computed(() => userStore.getUserCanEditSpace)
 const isSpaceMember = computed(() => userStore.getUserIsSpaceMember)
 const isLoadingOtherItems = computed(() => store.state.isLoadingOtherItems)
 const changeSpace = () => {

@@ -61,7 +61,7 @@ const cardsOrSpacesLabel = computed(() => {
 const currentSpace = computed(() => spaceStore.getSpaceAllState)
 const currentSpaceName = computed(() => currentSpace.value.name)
 const currentUserCanEditSpace = computed(() => {
-  return userStore.getUserCanEditSpace()
+  return userStore.getUserCanEditSpace
 })
 
 const updateResultsSectionHeight = async () => {

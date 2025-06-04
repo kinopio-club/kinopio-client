@@ -195,7 +195,7 @@ export const useApiStore = defineStore('api', {
     async addToQueue ({ name, body, spaceId }) {
       const userStore = useUserStore()
       const spaceStore = useSpaceStore()
-      const canEditSpace = userStore.getUserCanEditSpace()
+      const canEditSpace = userStore.getUserCanEditSpace
       const editOperations = ['updateUrlPreviewImage', 'updateCard', 'updateConnection']
       if (editOperations.includes(name) && !canEditSpace) { return }
       body = utils.clone(body)

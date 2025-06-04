@@ -34,7 +34,7 @@ const state = reactive({
 })
 
 const canEditCard = computed(() => userStore.getUserCanEditCard(props.card))
-const canEditSpace = computed(() => userStore.getUserCanEditSpace())
+const canEditSpace = computed(() => userStore.getUserCanEditSpace)
 const connectionTypes = computed(() => connectionStore.getItemConnectionTypes(props.card.id))
 
 // theme
