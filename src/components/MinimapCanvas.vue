@@ -35,7 +35,6 @@ onMounted(async () => {
     const type = mutation.type
     const mutations = [
       'isLoadingSpace',
-      'currentSpace/loadSpace',
       'triggerEndDrawing'
     ]
     if (mutations.includes(mutation.type)) {
@@ -61,6 +60,9 @@ onMounted(async () => {
     'updateConnections',
     'removeConnections'
   ]
+  const spaceStoreActions = [
+    'loadSpace'
+  ]
   const cardStoreUnsubscribe = cardStore.$onAction(
     ({ name, args }) => {
       if (cardStoreActions.includes(name)) {
@@ -82,10 +84,18 @@ onMounted(async () => {
       }
     }
   )
+  const spaceStoreUnsubscribe = spaceStore.$onAction(
+    ({ name, args }) => {
+      if (spaceStoreActions.includes(name)) {
+        init()
+      }
+    }
+  )
   unsubscribes = () => {
     cardStoreUnsubscribe()
     connectionStoreUnsubscribe()
     boxStoreUnsubscribe()
+    spaceStoreUnsubscribe()
   }
 })
 onBeforeUnmount(() => {

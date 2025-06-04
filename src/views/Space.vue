@@ -227,7 +227,7 @@ const loadSpaceOnBackOrForward = (event) => {
   if (!utils.urlIsSpace(url)) { return }
   const spaceId = utils.spaceIdFromUrl(url)
   const space = { id: spaceId }
-  store.dispatch('currentSpace/loadSpace', { space })
+  spaceStore.loadSpace(space)
 }
 const unloadPage = () => {
   store.commit('broadcast/close')

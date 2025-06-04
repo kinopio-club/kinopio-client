@@ -200,7 +200,7 @@ const importSpace = async () => {
     space = utils.resetSpaceMeta({ space, user })
     console.info('🧚 space to import', space)
     await spaceStore.saveSpace(space)
-    await store.dispatch('currentSpace/loadSpace', { space })
+    await spaceStore.loadSpace(space)
     store.dispatch('closeAllDialogs')
   } catch (error) {
     console.error('🚒 importSpace', error, state.newSpace)

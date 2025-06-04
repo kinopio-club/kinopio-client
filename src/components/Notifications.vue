@@ -252,7 +252,7 @@ const deleteSpace = async () => {
   store.commit('notifySpaceIsRemoved', false)
   const cachedSpaces = await cache.getAllSpaces()
   const firstSpace = cachedSpaces[0]
-  store.dispatch('currentSpace/loadSpace', { space: firstSpace })
+  spaceStore.loadSpace(firstSpace)
 }
 const resetNotifySpaceIsHidden = () => {
   store.commit('notifySpaceIsHidden', false)

@@ -138,7 +138,7 @@ const importSpace = async (space) => {
     const uniqueNewSpace = await cache.updateIdsInSpace(space)
     console.info('🧚 space to import', uniqueNewSpace)
     await spaceStore.saveSpace(uniqueNewSpace)
-    await store.dispatch('currentSpace/loadSpace', { space: uniqueNewSpace })
+    await spaceStore.loadSpace(uniqueNewSpace)
     updateSpaces()
     store.commit('triggerFocusSpaceDetailsName')
   } catch (error) {
