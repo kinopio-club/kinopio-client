@@ -6,6 +6,7 @@ import { useConnectionStore } from '@/stores/useConnectionStore'
 import { useBoxStore } from '@/stores/useBoxStore'
 import { useUserStore } from '@/stores/useUserStore'
 import { useSpaceStore } from '@/stores/useSpaceStore'
+import { useBroadcastStore } from '@/stores/useBroadcastStore'
 
 import utils from '@/utils.js'
 
@@ -17,6 +18,7 @@ const connectionStore = useConnectionStore()
 const boxStore = useBoxStore()
 const userStore = useUserStore()
 const spaceStore = useSpaceStore()
+const broadcastStore = useBroadcastStore()
 
 let prevType
 
@@ -80,7 +82,7 @@ const drawCurrentConnection = (event) => {
     startItemId: props.startItemId,
     path
   }
-  store.commit('broadcast/updateStore', { updates, type: 'updateRemoteCurrentConnection' })
+  broadcastStore.updateStore({ updates, type: 'updateRemoteCurrentConnection' })
 }
 
 // connect to item
@@ -102,7 +104,7 @@ const checkCurrentConnectionSuccess = (event) => {
   if (!cardElement && !boxElement) {
     store.commit('currentConnectionSuccess', {})
     updates.endItemId = null
-    store.commit('broadcast/updateStore', { updates, type: 'updateRemoteCurrentConnection' })
+    broadcastStore.updateStore({ updates, type: 'updateRemoteCurrentConnection' })
   // connected to card
   } else if (isCurrentConnectionConnected && cardElement) {
     const card = cardStore.getCard(cardElement.dataset.cardId)
@@ -112,7 +114,7 @@ const checkCurrentConnectionSuccess = (event) => {
     }
     store.commit('currentConnectionSuccess', card)
     updates.endItemId = card.id
-    store.commit('broadcast/updateStore', { updates, type: 'updateRemoteCurrentConnection' })
+    broadcastStore.updateStore({ updates, type: 'updateRemoteCurrentConnection' })
   // connected to box
   } else if (isCurrentConnectionConnected && boxElement) {
     const box = boxStore.getBox(boxElement.dataset.boxId)
@@ -122,7 +124,7 @@ const checkCurrentConnectionSuccess = (event) => {
     }
     store.commit('currentConnectionSuccess', box)
     updates.endItemId = box.id
-    store.commit('broadcast/updateStore', { updates, type: 'updateRemoteCurrentConnection' })
+    broadcastStore.updateStore({ updates, type: 'updateRemoteCurrentConnection' })
   } else {
     store.commit('currentConnectionSuccess', {})
   }
@@ -178,7 +180,7 @@ const stopInteractions = (event) => {
   if (isCurrentConnection) {
     store.commit('currentConnectionStartItemIds', [])
     const updates = { userId: userStore.id }
-    store.commit('broadcast/updateStore', { updates, type: 'removeRemoteCurrentConnection' })
+    broadcastStore.updateStore({ updates, type: 'removeRemoteCurrentConnection' })
   }
   store.commit('currentUserIsDrawingConnection', false)
   state.currentConnectionPath = undefined

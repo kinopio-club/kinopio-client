@@ -4,6 +4,7 @@ import { useStore } from 'vuex'
 import { useBoxStore } from '@/stores/useBoxStore'
 import { useUserStore } from '@/stores/useUserStore'
 import { useSpaceStore } from '@/stores/useSpaceStore'
+import { useBroadcastStore } from '@/stores/useBroadcastStore'
 
 import ColorPicker from '@/components/dialogs/ColorPicker.vue'
 import CardOrBoxActions from '@/components/subsections/CardOrBoxActions.vue'
@@ -18,6 +19,7 @@ const store = useStore()
 const boxStore = useBoxStore()
 const userStore = useUserStore()
 const spaceStore = useSpaceStore()
+const broadcastStore = useBroadcastStore()
 
 const dialogElement = ref(null)
 const nameElement = ref(null)
@@ -76,7 +78,7 @@ const broadcastShowBoxDetails = () => {
     boxId: currentBox.value.id,
     userId: userStore.id
   }
-  store.commit('broadcast/updateStore', { updates, type: 'updateRemoteBoxDetailsVisible' })
+  broadcastStore.updateStore({ updates, type: 'updateRemoteBoxDetailsVisible' })
 }
 const update = (updates) => {
   const keys = Object.keys(updates)

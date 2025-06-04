@@ -4,6 +4,7 @@ import { useStore } from 'vuex'
 import { useCardStore } from '@/stores/useCardStore'
 import { useUserStore } from '@/stores/useUserStore'
 import { useSpaceStore } from '@/stores/useSpaceStore'
+import { useBroadcastStore } from '@/stores/useBroadcastStore'
 
 import Loader from '@/components/Loader.vue'
 import NameSegment from '@/components/NameSegment.vue'
@@ -13,6 +14,7 @@ const cardStore = useCardStore()
 const store = useStore()
 const userStore = useUserStore()
 const spaceStore = useSpaceStore()
+const broadcastStore = useBroadcastStore()
 
 onMounted(() => {
   updateNameSegments()
@@ -140,9 +142,9 @@ const showOtherCardDetailsIsVisible = async (event) => {
     userId: userStore.id,
     cardId: props.parentCardId
   }
-  store.commit('broadcast/updateStore', { updates, type: 'clearRemoteCardsDragging' })
+  broadcastStore.updateStore({ updates, type: 'clearRemoteCardsDragging' })
   await nextTick()
-  store.commit('broadcast/updateStore', { updates, type: 'updateRemoteCardDetailsVisible' })
+  broadcastStore.updateStore({ updates, type: 'updateRemoteCardDetailsVisible' })
 }
 const disableIsActive = () => {
   state.isActive = false

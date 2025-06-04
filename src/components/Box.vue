@@ -6,6 +6,7 @@ import { useConnectionStore } from '@/stores/useConnectionStore'
 import { useBoxStore } from '@/stores/useBoxStore'
 import { useUserStore } from '@/stores/useUserStore'
 import { useSpaceStore } from '@/stores/useSpaceStore'
+import { useBroadcastStore } from '@/stores/useBroadcastStore'
 
 import utils from '@/utils.js'
 import consts from '@/consts.js'
@@ -23,6 +24,7 @@ const connectionStore = useConnectionStore()
 const boxStore = useBoxStore()
 const userStore = useUserStore()
 const spaceStore = useSpaceStore()
+const broadcastStore = useBroadcastStore()
 
 let unsubscribe
 
@@ -290,7 +292,7 @@ const startResizing = (event) => {
     userId: userStore.id,
     boxIds
   }
-  store.commit('broadcast/updateStore', { updates, type: 'updateRemoteUserResizingBoxes' })
+  broadcastStore.updateStore({ updates, type: 'updateRemoteUserResizingBoxes' })
   event.preventDefault() // allows resizing box without scrolling on mobile
 }
 const resizeColorClass = computed(() => {
@@ -392,7 +394,7 @@ const endBoxInfoInteraction = (event) => {
   if (isMultiTouch) { return }
   if (store.state.currentUserIsPanningReady || store.state.currentUserIsPanning) { return }
   if (!canEditBox.value) { store.commit('triggerReadOnlyJiggle') }
-  store.commit('broadcast/updateStore', { updates: { userId }, type: 'clearRemoteBoxesDragging' })
+  broadcastStore.updateStore({ updates: { userId }, type: 'clearRemoteBoxesDragging' })
   store.dispatch('closeAllDialogs')
   if (isMeta) {
     store.dispatch('multipleBoxesSelectedIds', [])
@@ -655,7 +657,7 @@ const toggleBoxChecked = () => {
   cancelLocking()
   store.commit('currentUserIsDraggingBox', false)
   const userId = userStore.id
-  store.commit('broadcast/updateStore', { updates: { userId }, type: 'clearRemoteBoxesDragging' })
+  broadcastStore.updateStore({ updates: { userId }, type: 'clearRemoteBoxesDragging' })
   event.stopPropagation()
   store.commit('preventMultipleSelectedActionsIsVisible', false)
   store.dispatch('clearMultipleSelected')

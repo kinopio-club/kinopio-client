@@ -9,6 +9,7 @@ import { useSpaceStore } from '@/stores/useSpaceStore'
 import { useApiStore } from '@/stores/useApiStore'
 import { useGroupStore } from '@/stores/useGroupStore'
 import { useUploadStore } from '@/stores/useUploadStore'
+import { useBroadcastStore } from '@/stores/useBroadcastStore'
 
 import utils from '@/utils.js'
 import Frames from '@/components/Frames.vue'
@@ -46,6 +47,7 @@ const userStore = useUserStore()
 const spaceStore = useSpaceStore()
 const apiStore = useApiStore()
 const groupStore = useGroupStore()
+const broadcastStore = useBroadcastStore()
 
 const cardElement = ref(null)
 
@@ -273,7 +275,7 @@ const toggleCardChecked = () => {
   cancelLocking()
   store.commit('currentUserIsDraggingCard', false)
   const userId = userStore.id
-  store.commit('broadcast/updateStore', { updates: { userId }, type: 'clearRemoteCardsDragging' })
+  broadcastStore.updateStore({ updates: { userId }, type: 'clearRemoteCardsDragging' })
   event.stopPropagation()
 }
 
@@ -830,13 +832,13 @@ const checkIfUploadIsDraggedOver = (event) => {
       cardId: props.card.id,
       userId: userStore.id
     }
-    store.commit('broadcast/updateStore', { updates, type: 'addToRemoteUploadDraggedOverCards' })
+    broadcastStore.updateStore({ updates, type: 'addToRemoteUploadDraggedOverCards' })
   }
 }
 const removeUploadIsDraggedOver = () => {
   state.uploadIsDraggedOver = false
   const userId = userStore.id
-  store.commit('broadcast/updateStore', { updates: { userId }, type: 'clearRemoteUploadDraggedOverCards' })
+  broadcastStore.updateStore({ updates: { userId }, type: 'clearRemoteUploadDraggedOverCards' })
 }
 const uploadFile = async (event) => {
   removeUploadIsDraggedOver()
@@ -1218,7 +1220,7 @@ const startDraggingCard = (event) => {
     cardId: props.card.id,
     userId: userStore.id
   }
-  store.commit('broadcast/updateStore', { updates, type: 'addToRemoteCardsDragging' })
+  broadcastStore.updateStore({ updates, type: 'addToRemoteCardsDragging' })
   store.commit('parentCardId', props.card.id)
   store.commit('childCardId', '')
   checkIfShouldDragMultipleCards(event)
@@ -1419,7 +1421,7 @@ const showCardDetails = (event) => {
     return
   }
   const userId = userStore.id
-  store.commit('broadcast/updateStore', { updates: { userId }, type: 'clearRemoteCardsDragging' })
+  broadcastStore.updateStore({ updates: { userId }, type: 'clearRemoteCardsDragging' })
   state.preventDraggedButtonBadgeFromShowingDetails = store.state.preventDraggedCardFromShowingDetails
   if (store.state.preventDraggedCardFromShowingDetails) { return }
   store.dispatch('closeAllDialogs')
@@ -1444,7 +1446,7 @@ const showCardDetailsTouch = (event) => {
     showCardDetails(event)
   }
   const userId = userStore.id
-  store.commit('broadcast/updateStore', { updates: { userId }, type: 'clearRemoteCardsDragging' })
+  broadcastStore.updateStore({ updates: { userId }, type: 'clearRemoteCardsDragging' })
 }
 const touchIsNearTouchPosition = (event) => {
   const currentPosition = utils.cursorPositionInViewport(event)

@@ -9,6 +9,7 @@ import { useSpaceStore } from '@/stores/useSpaceStore'
 import { useApiStore } from '@/stores/useApiStore'
 import { useGroupStore } from '@/stores/useGroupStore'
 import { useAnalyticsStore } from '@/stores/useAnalyticsStore'
+import { useBroadcastStore } from '@/stores/useBroadcastStore'
 
 import CardDetails from '@/components/dialogs/CardDetails.vue'
 import OtherCardDetails from '@/components/dialogs/OtherCardDetails.vue'
@@ -63,6 +64,7 @@ const spaceStore = useSpaceStore()
 const apiStore = useApiStore()
 const groupStore = useGroupStore()
 const analyticsStore = useAnalyticsStore()
+const broadcastStore = useBroadcastStore()
 
 let unsubscribe
 
@@ -291,7 +293,7 @@ const stopTiltingCards = () => {
   const cards = cardIds.map(id => cardStore.getCard(id))
   store.dispatch('history/add', { cards, useSnapshot: true })
   store.commit('currentUserIsTiltingCard', false)
-  store.commit('broadcast/updateStore', { updates: { userId: currentUser.value.id }, type: 'removeRemoteUserTiltingCards' })
+  broadcastStore.updateStore({ updates: { userId: currentUser.value.id }, type: 'removeRemoteUserTiltingCards' })
 }
 const resizeCards = (event) => {
   if (!prevCursor) { return }
@@ -308,7 +310,7 @@ const stopResizingCards = async () => {
   store.dispatch('history/add', { cards, useSnapshot: true })
   await cardStore.updateCardsDimensions(cardIds)
   store.commit('currentUserIsResizingCard', false)
-  store.commit('broadcast/updateStore', { updates: { userId: currentUser.value.id }, type: 'removeRemoteUserResizingCards' })
+  broadcastStore.updateStore({ updates: { userId: currentUser.value.id }, type: 'removeRemoteUserResizingCards' })
 }
 const afterResizeCards = () => {
   if (!store.state.shouldSnapToGrid) { return }
@@ -377,7 +379,7 @@ const stopResizingBoxes = () => {
   // store.dispatch('history/add', { boxes, useSnapshot: true })
   store.commit('currentUserIsResizingBox', false)
   store.dispatch('currentUserToolbar', 'card')
-  store.commit('broadcast/updateStore', { updates: { userId: currentUser.value.id }, type: 'removeRemoteUserResizingBoxes' })
+  broadcastStore.updateStore({ updates: { userId: currentUser.value.id }, type: 'removeRemoteUserResizingBoxes' })
   // store.dispatch('checkIfItemShouldIncreasePageSize', boxes[0])
 }
 const checkIfShouldSnapBoxes = (event) => {
@@ -452,7 +454,7 @@ const dragBoxes = (event) => {
       boxId: store.state.currentDraggingBoxId,
       userId: userStore.id
     }
-    store.commit('broadcast/updateStore', { updates, type: 'addToRemoteBoxesDragging' })
+    broadcastStore.updateStore({ updates, type: 'addToRemoteBoxesDragging' })
     boxStore.selectItemsInSelectedBoxes()
   }
   if (event.altKey) { return } // should not select contained items if alt/option key

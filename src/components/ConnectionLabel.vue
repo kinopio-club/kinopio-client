@@ -6,6 +6,7 @@ import { useConnectionStore } from '@/stores/useConnectionStore'
 import { useBoxStore } from '@/stores/useBoxStore'
 import { useUserStore } from '@/stores/useUserStore'
 import { useSpaceStore } from '@/stores/useSpaceStore'
+import { useBroadcastStore } from '@/stores/useBroadcastStore'
 
 import utils from '@/utils.js'
 
@@ -15,6 +16,7 @@ const connectionStore = useConnectionStore()
 const boxStore = useBoxStore()
 const userStore = useUserStore()
 const spaceStore = useSpaceStore()
+const broadcastStore = useBroadcastStore()
 
 const labelElement = ref(null)
 
@@ -289,7 +291,7 @@ const startDragging = (event) => {
     userColor: userStore.color,
     connectionId: props.connection.id
   }
-  store.commit('broadcast/updateStore', { updates, type: 'updateRemoteUserDraggingConnectionLabel' })
+  broadcastStore.updateStore({ updates, type: 'updateRemoteUserDraggingConnectionLabel' })
   // save start positions
   if (!cursorStart.x) {
     cursorStart = utils.cursorPositionInSpace(event)
@@ -306,7 +308,7 @@ const stopDragging = () => {
   state.isDragging = false
   state.outOfBounds = {}
   cursorStart = {}
-  store.commit('broadcast/updateStore', { updates: { userId: userStore.id }, type: 'removeRemoteUserDraggingConnectionLabel' })
+  broadcastStore.updateStore({ updates: { userId: userStore.id }, type: 'removeRemoteUserDraggingConnectionLabel' })
   if (!labelRelativePosition.value.x) { return }
   store.dispatch('history/add', {
     connections: [{

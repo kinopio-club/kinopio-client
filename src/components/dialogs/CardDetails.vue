@@ -7,6 +7,7 @@ import { useUserStore } from '@/stores/useUserStore'
 import { useSpaceStore } from '@/stores/useSpaceStore'
 import { useUserNotificationStore } from '@/stores/useUserNotificationStore'
 import { useUploadStore } from '@/stores/useUploadStore'
+import { useBroadcastStore } from '@/stores/useBroadcastStore'
 
 import CardOrBoxActions from '@/components/subsections/CardOrBoxActions.vue'
 import ImagePicker from '@/components/dialogs/ImagePicker.vue'
@@ -37,6 +38,7 @@ const userStore = useUserStore()
 const spaceStore = useSpaceStore()
 const userNotificationStore = useUserNotificationStore()
 const uploadStore = useUploadStore()
+const broadcastStore = useBroadcastStore()
 
 let prevCardId, prevCardName
 let previousTags = []
@@ -303,7 +305,7 @@ const broadcastShowCardDetails = () => {
     cardId: card.value.id,
     userId: userStore.id
   }
-  store.commit('broadcast/updateStore', { updates, type: 'updateRemoteCardDetailsVisible' })
+  broadcastStore.updateStore({ updates, type: 'updateRemoteCardDetailsVisible' })
 }
 
 // card

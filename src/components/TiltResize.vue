@@ -4,6 +4,7 @@ import { useStore } from 'vuex'
 import { useCardStore } from '@/stores/useCardStore'
 import { useUserStore } from '@/stores/useUserStore'
 import { useSpaceStore } from '@/stores/useSpaceStore'
+import { useBroadcastStore } from '@/stores/useBroadcastStore'
 
 import utils from '@/utils.js'
 import consts from '@/consts.js'
@@ -11,6 +12,7 @@ import consts from '@/consts.js'
 const cardStore = useCardStore()
 const userStore = useUserStore()
 const spaceStore = useSpaceStore()
+const broadcastStore = useBroadcastStore()
 const store = useStore()
 
 const props = defineProps({
@@ -42,11 +44,11 @@ const start = (event, action) => {
   if (action === 'resize') {
     store.commit('currentUserIsResizingCard', true)
     store.commit('currentUserIsResizingCardIds', cardIds)
-    store.commit('broadcast/updateStore', { updates, type: 'updateRemoteUserResizingCards' })
+    broadcastStore.updateStore({ updates, type: 'updateRemoteUserResizingCards' })
   } else if (action === 'tilt') {
     store.commit('currentUserIsTiltingCard', true)
     store.commit('currentUserIsTiltingCardIds', cardIds)
-    store.commit('broadcast/updateStore', { updates, type: 'updateRemoteUserTiltingCards' })
+    broadcastStore.updateStore({ updates, type: 'updateRemoteUserTiltingCards' })
   }
 }
 const remove = (action) => {

@@ -4,6 +4,7 @@ import { useConnectionStore } from '@/stores/useConnectionStore'
 import { useUserStore } from '@/stores/useUserStore'
 import { useSpaceStore } from '@/stores/useSpaceStore'
 import { useApiStore } from '@/stores/useApiStore'
+import { useBroadcastStore } from '@/stores/useBroadcastStore'
 
 import store from '@/store/store.js' // TEMP Import Vuex store
 
@@ -66,6 +67,7 @@ export const useUploadStore = defineStore('upload', {
       })
     },
     async uploadFile ({ file, cardId, spaceId, boxId }) {
+      const broadcastStore = useBroadcastStore()
       const apiStore = useApiStore()
       const userStore = useUserStore()
       const uploadId = nanoid()
@@ -102,7 +104,7 @@ export const useUploadStore = defineStore('upload', {
             id: uploadId
           }
           this.updatePendingUpload(updates)
-          store.commit('broadcast/updateStore', { updates, type: 'updateRemotePendingUploads' }, { root: true })
+          broadcastStore.updateStore({ updates, type: 'updateRemotePendingUploads' }, { root: true })
           // end
           if (percentComplete >= 100) {
             const complete = {
