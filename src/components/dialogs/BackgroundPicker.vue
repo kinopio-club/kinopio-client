@@ -344,7 +344,7 @@ const uploadFile = async () => {
   }
 }
 const pendingUpload = computed(() => {
-  const pendingUploads = store.state.upload.pendingUploads
+  const pendingUploads = uploadStore.pendingUploads
   return pendingUploads.find(upload => {
     const isCurrentSpace = upload.spaceId === props.space?.id
     const isInProgress = upload.percentComplete < 100

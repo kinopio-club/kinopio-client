@@ -4,6 +4,7 @@ import { useStore } from 'vuex'
 import { useUserStore } from '@/stores/useUserStore'
 import { useSpaceStore } from '@/stores/useSpaceStore'
 import { useGroupStore } from '@/stores/useGroupStore'
+import { useUploadStore } from '@/stores/useUploadStore'
 
 import BackgroundPicker from '@/components/dialogs/BackgroundPicker.vue'
 import BackgroundPreview from '@/components/BackgroundPreview.vue'
@@ -22,6 +23,7 @@ const store = useStore()
 const userStore = useUserStore()
 const spaceStore = useSpaceStore()
 const groupStore = useGroupStore()
+const uploadStore = useUploadStore()
 
 const nameElement = ref(null)
 let unsubscribes
@@ -103,7 +105,7 @@ const isLoadingSpace = computed(() => store.state.isLoadingSpace)
 const currentSpaceIsUserTemplate = computed(() => currentSpace.value.isTemplate)
 const pendingUpload = computed(() => {
   const currentSpace = spaceStore.getSpaceAllState
-  const pendingUploads = store.state.upload.pendingUploads
+  const pendingUploads = uploadStore.pendingUploads
   return pendingUploads.find(upload => {
     const isCurrentSpace = upload.spaceId === currentSpace.id
     const isInProgress = upload.percentComplete < 100

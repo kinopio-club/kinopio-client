@@ -754,7 +754,7 @@ const updateRemoteConnections = () => {
 // upload
 
 const cardPendingUpload = computed(() => {
-  const pendingUploads = store.state.upload.pendingUploads
+  const pendingUploads = uploadStore.pendingUploads
   return pendingUploads.find(upload => upload.cardId === props.card.id)
 })
 const remoteCardPendingUpload = computed(() => {

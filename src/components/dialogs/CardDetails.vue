@@ -1103,7 +1103,7 @@ const toggleImagePickerIsVisible = () => {
 // upload
 
 const cardPendingUpload = computed(() => {
-  const pendingUploads = store.state.upload.pendingUploads
+  const pendingUploads = uploadStore.pendingUploads
   return pendingUploads.find(upload => upload.cardId === card.value.id)
 })
 const uploadFile = async (file) => {
