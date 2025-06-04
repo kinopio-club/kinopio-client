@@ -35,7 +35,7 @@ const closeDialogsAndEmit = computed(() => emit('closeDialogsAndEmit'))
 // duplicate
 
 const duplicateSpace = async () => {
-  await store.dispatch('currentSpace/duplicateSpace')
+  await spaceStore.duplicateSpace()
   emit('updateLocalSpaces')
 }
 

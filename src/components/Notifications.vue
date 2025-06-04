@@ -291,7 +291,7 @@ const updateChangelogAndRefreshBrowser = () => {
   refreshBrowser()
 }
 const duplicateSpace = async () => {
-  await store.dispatch('currentSpace/duplicateSpace')
+  await spaceStore.duplicateSpace()
 }
 const changeSpace = (spaceId) => {
   const space = { id: spaceId }

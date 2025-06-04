@@ -446,7 +446,7 @@ export const useSpaceStore = defineStore('space', {
       const userStore = useUserStore()
       const space = this.getSpaceAllState
       const user = userStore.getUserAllState
-      console.info('✨ saveNewSpace', space, user)
+      console.info('✨ saveSpace', space, user)
       cache.saveSpace(space)
       this.addUserToSpace(user)
       this.incrementCardsCreatedCountFromSpace(space)
@@ -469,6 +469,20 @@ export const useSpaceStore = defineStore('space', {
 
     // create
 
+    async duplicateSpace () {
+      const userStore = useUserStore()
+      const space = this.getSpaceAllItems
+      const user = userStore.getUserAllState
+      store.commit('broadcast/leaveSpaceRoom', { user: { id: user.id }, type: 'userLeftRoom' }, { root: true })
+      let uniqueNewSpace = utils.resetSpaceMeta({ space, user, type: 'copy' })
+      uniqueNewSpace = await cache.updateIdsInSpace(space)
+      store.commit('clearSearch', null, { root: true })
+      isLoadingRemoteSpace = false
+      store.commit('resetPageSizes', null, { root: true })
+      this.restoreSpace(uniqueNewSpace)
+      await this.saveSpace()
+      store.commit('addNotification', { message: 'Duplicated Space', type: 'success' }, { root: true })
+    },
     async createNewSpace (space) {
       const userStore = useUserStore()
       const user = userStore.getUserAllState
