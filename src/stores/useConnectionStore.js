@@ -109,6 +109,10 @@ export const useConnectionStore = defineStore('connections', {
       const path = this.getConnectionPathBetweenCoords(start, end, controlPoint)
       return path
     },
+    getConnectionTypeByName (name) {
+      const types = this.getAllConnectionTypes
+      return types.find(type => type.name === name)
+    },
 
     // init
 

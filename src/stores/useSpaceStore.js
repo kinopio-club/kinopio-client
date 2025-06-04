@@ -863,6 +863,31 @@ export const useSpaceStore = defineStore('space', {
         return tag
       })
       cache.updateTagColorInAllSpaces(updatedTag)
+    },
+
+    // items
+
+    createSpaceItems (items) {
+      const userStore = useUserStore()
+      const cardStore = useCardStore()
+      const connectionStore = useConnectionStore()
+      const boxStore = useBoxStore()
+      const { cards, boxes, connections, connectionTypes, tags } = items
+      cards.forEach(card => cardStore.createCard(card))
+      boxes.forEach(box => boxStore.createBox(box))
+      connections.forEach(connection => {
+        let type = connectionTypes.find(connectionType => connectionType.id === connection.connectionTypeId)
+        const prevTypeInCurrentSpace = connectionStore.getConnectionTypeByName(type.name)
+        type = prevTypeInCurrentSpace || type
+        connectionStore.createConnectionType(type)
+        connection.connectionTypeId = type.id
+        connection.type = type
+        connectionStore.createConnection(connection)
+      })
+      tags.forEach(tag => {
+        tag.userId = userStore.id
+        this.addTag(tag)
+      })
     }
 
   }
