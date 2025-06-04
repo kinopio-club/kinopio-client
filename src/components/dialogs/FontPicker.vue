@@ -1,10 +1,13 @@
 <script setup>
 import { reactive, computed, onMounted, onUnmounted, watch, ref, nextTick } from 'vue'
 import { useStore } from 'vuex'
+import { useThemeStore } from '@/stores/useThemeStore'
 
 import fonts from '@/data/fonts.js'
 import utils from '@/utils.js'
+
 const store = useStore()
+const themeStore = useThemeStore()
 
 const dialogElement = ref(null)
 
@@ -42,7 +45,7 @@ const scrollIntoView = () => {
   const element = dialogElement.value
   store.commit('scrollElementIntoView', { element })
 }
-const isThemeDark = computed(() => store.getters['themes/isThemeDark'])
+const isThemeDark = computed(() => themeStore.isThemeDark)
 
 const items = computed(() => {
   let array = props.cards.concat(props.boxes)

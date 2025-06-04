@@ -2,6 +2,7 @@
 import { reactive, computed, onMounted, watch, ref, nextTick } from 'vue'
 import { useStore } from 'vuex'
 import { useSpaceStore } from '@/stores/useSpaceStore'
+import { useThemeStore } from '@/stores/useThemeStore'
 
 import Loader from '@/components/Loader.vue'
 import UserLabelInline from '@/components/UserLabelInline.vue'
@@ -9,6 +10,7 @@ import utils from '@/utils.js'
 
 const store = useStore()
 const spaceStore = useSpaceStore()
+const themeStore = useThemeStore()
 
 onMounted(() => {
   window.addEventListener('touchend', disableIsActive)
@@ -51,7 +53,7 @@ const urlIsSpaceInvite = computed(() => utils.urlIsSpaceInvite(props.url))
 
 // colors
 
-const isThemeDark = computed(() => store.getters['themes/isThemeDark'])
+const isThemeDark = computed(() => themeStore.isThemeDark)
 const background = computed(() => {
   const color = props.selectedColor || props.card.backgroundColor
   const defaultColor = utils.cssVariable('secondary-background')

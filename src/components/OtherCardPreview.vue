@@ -5,6 +5,7 @@ import { useCardStore } from '@/stores/useCardStore'
 import { useUserStore } from '@/stores/useUserStore'
 import { useSpaceStore } from '@/stores/useSpaceStore'
 import { useBroadcastStore } from '@/stores/useBroadcastStore'
+import { useThemeStore } from '@/stores/useThemeStore'
 
 import Loader from '@/components/Loader.vue'
 import NameSegment from '@/components/NameSegment.vue'
@@ -15,6 +16,7 @@ const store = useStore()
 const userStore = useUserStore()
 const spaceStore = useSpaceStore()
 const broadcastStore = useBroadcastStore()
+const themeStore = useThemeStore()
 
 onMounted(() => {
   updateNameSegments()
@@ -66,7 +68,7 @@ const backgroundColorIsDark = computed(() => {
 })
 const styles = computed(() => {
   if (!props.otherCard) { return }
-  const isThemeDark = store.getters['themes/isThemeDark']
+  const isThemeDark = themeStore.isThemeDark
   let color = utils.cssVariable('primary-on-light-background')
   if (isThemeDark) {
     color = utils.cssVariable('primary-on-dark-background')

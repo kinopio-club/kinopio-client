@@ -1,5 +1,7 @@
+import { defineStore } from 'pinia'
 import { useUserStore } from '@/stores/useUserStore'
 import { useSpaceStore } from '@/stores/useSpaceStore'
+
 import utils from '@/utils.js'
 
 const themes = {
@@ -79,59 +81,18 @@ const themes = {
   }
 }
 
-export default {
-  namespaced: true,
-  actions: {
-    isSystem: (context, value) => {
-      const userStore = useUserStore()
-      userStore.updateUser({ themeIsSystem: value })
-      context.commit('triggerUpdateTheme', null, { root: true })
-    },
-    toggleIsSystem: (context) => {
-      const userStore = useUserStore()
-      const value = !userStore.themeIsSystem
-      context.dispatch('isSystem', value)
-      if (value) {
-        const themeName = context.getters.systemThemeName
-        context.dispatch('update', themeName)
-      }
-    },
-    update: (context, themeName) => {
-      const userStore = useUserStore()
-      const normalizedThemeName = themeName || 'light'
-      // colors
-      const theme = themes[normalizedThemeName]
-      const colors = theme.colors
-      const keys = Object.keys(colors)
-      keys.forEach(key => {
-        utils.setCssVariable(key, colors[key])
-      })
-      userStore.updateUser({ theme: normalizedThemeName })
-      context.commit('triggerUpdateTheme', null, { root: true })
-    },
-    restore: (context) => {
-      const userStore = useUserStore()
-      let themeName = userStore.theme
-      const themeIsSystem = userStore.themeIsSystem
-      if (themeIsSystem) {
-        themeName = context.getters.systemThemeName || themeName
-      }
-      context.dispatch('update', themeName)
-    },
-    toggle: (context) => {
-      const userStore = useUserStore()
-      const prevTheme = userStore.theme || 'light'
-      let theme
-      if (prevTheme === 'light') {
-        theme = 'dark'
-      } else {
-        theme = 'light'
-      }
-      context.dispatch('update', theme)
-    }
-  },
+export const useThemeStore = defineStore('theme', {
+  state: () => ({
+    byId: {},
+    allIds: [],
+    dirtyCardIds: new Set(),
+    pendingUpdates: new Map(),
+    isUpdating: false
+  }),
+
   getters: {
-    systemThemeName: (state) => {
+
+    systemThemeName () {
       const isDarkModeOS = window.matchMedia('(prefers-color-scheme: dark)').matches
       let themeName
       if (isDarkModeOS) {
@@ -141,9 +102,9 @@ export default {
       }
       return themeName
     },
-    isThemeDark: (state, getters, rootState) => {
+    isThemeDark () {
       const userStore = useUserStore()
-      const systemTheme = getters.themeFromSystem
+      const systemTheme = this.themeFromSystem()
       const userTheme = userStore.theme
       if (systemTheme) {
         return systemTheme === 'dark'
@@ -151,8 +112,8 @@ export default {
         return userTheme === 'dark'
       }
     },
-    currentThemeName: (state, getters) => {
-      const isThemeDark = getters.isThemeDark
+    currentThemeName () {
+      const isThemeDark = this.isThemeDark
       let themeName
       if (isThemeDark) {
         return 'dark'
@@ -160,13 +121,13 @@ export default {
         return 'light'
       }
     },
-    themeColors: (state, getters) => {
-      const themeName = getters.currentThemeName
+    themeColors () {
+      const themeName = this.currentThemeName
       return themes[themeName].colors
     },
-    previewImageThemeOptions: (state, getters, rootState) => {
+    previewImageThemeOptions () {
       const spaceStore = useSpaceStore()
-      const isDarkTheme = getters.isThemeDark
+      const isDarkTheme = this.isThemeDark
       let background = spaceStore.background
       let backgroundTint = spaceStore.backgroundTint
       const backgroundElement = document.querySelector('#space-background-image')
@@ -180,16 +141,33 @@ export default {
         const domBackgroundTint = backgroundTintElement.style.backgroundColor
         backgroundTint = domBackgroundTint || backgroundTint
       }
-      const themeColors = getters.themeColors
       const theme = {
-        secondaryBackground: themeColors['secondary-background'],
-        primaryBorder: themeColors['primary-border'],
-        primaryBackground: themeColors['primary-background'],
+        secondaryBackground: this.themeColors['secondary-background'],
+        primaryBorder: this.themeColors['primary-border'],
+        primaryBackground: this.themeColors['primary-background'],
         entityRadius: 6,
         backgroundTint,
         background
       }
       return { isDarkTheme, theme }
     }
+
+  },
+
+  actions: {
+    themeFromSystem () {
+      const userStore = useUserStore()
+      const themeIsSystem = userStore.themeIsSystem
+      if (!themeIsSystem) { return }
+      const theme = window.matchMedia('(prefers-color-scheme: dark)')
+      let themeName
+      if (theme.matches) {
+        themeName = 'dark'
+      } else {
+        themeName = 'light'
+      }
+      return themeName
+    }
+
   }
-}
+})

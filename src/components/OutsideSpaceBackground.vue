@@ -3,6 +3,7 @@ import { reactive, computed, onMounted, onBeforeUnmount, watch, ref, nextTick } 
 import { useStore } from 'vuex'
 import { useUserStore } from '@/stores/useUserStore'
 import { useSpaceStore } from '@/stores/useSpaceStore'
+import { useThemeStore } from '@/stores/useThemeStore'
 
 import postMessage from '@/postMessage.js'
 import utils from '@/utils.js'
@@ -15,6 +16,7 @@ extend([mixPlugin])
 const store = useStore()
 const userStore = useUserStore()
 const spaceStore = useSpaceStore()
+const themeStore = useThemeStore()
 
 // adapted from https://gist.github.com/pketh/3f62b807db3835d564c1
 let colorCycleTimer
@@ -90,7 +92,7 @@ const cancel = () => {
 const spaceZoomDecimal = computed(() => store.getters.spaceZoomDecimal)
 const outsideSpaceBackgroundIsStatic = computed(() => userStore.outsideSpaceBackgroundIsStatic)
 const backgroundTintColor = computed(() => spaceStore.backgroundTint)
-const isThemeDark = computed(() => store.getters['themes/isThemeDark'])
+const isThemeDark = computed(() => themeStore.isThemeDark)
 const preventTouchScrolling = (event) => {
   const shouldPrevent = store.state.currentUserIsResizingBox || store.state.currentUserIsPaintingLocked
   if (shouldPrevent) {

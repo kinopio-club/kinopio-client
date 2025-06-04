@@ -3,6 +3,7 @@ import { reactive, computed, onMounted, onBeforeUnmount, onUnmounted, watch, ref
 import { useStore } from 'vuex'
 import { useCardStore } from '@/stores/useCardStore'
 import { useSpaceStore } from '@/stores/useSpaceStore'
+import { useThemeStore } from '@/stores/useThemeStore'
 
 import UserLabelInline from '@/components/UserLabelInline.vue'
 import NameSegment from '@/components/NameSegment.vue'
@@ -11,6 +12,7 @@ import utils from '@/utils.js'
 const store = useStore()
 const cardStore = useCardStore()
 const spaceStore = useSpaceStore()
+const themeStore = useThemeStore()
 
 const props = defineProps({
   visible: Boolean,
@@ -48,7 +50,7 @@ const backgroundColorIsDark = computed(() => {
   if (backgroundColor.value) {
     return utils.colorIsDark(backgroundColor.value)
   } else {
-    return store.getters['themes/isThemeDark']
+    return themeStore.isThemeDark
   }
 })
 

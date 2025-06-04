@@ -4,6 +4,7 @@ import { useStore } from 'vuex'
 import { useUserStore } from '@/stores/useUserStore'
 import { useSpaceStore } from '@/stores/useSpaceStore'
 import { useApiStore } from '@/stores/useApiStore'
+import { useThemeStore } from '@/stores/useThemeStore'
 
 import UserLabelInline from '@/components/UserLabelInline.vue'
 import Textarea from '@/components/Textarea.vue'
@@ -16,6 +17,7 @@ const store = useStore()
 const userStore = useUserStore()
 const spaceStore = useSpaceStore()
 const apiStore = useApiStore()
+const themeStore = useThemeStore()
 
 const dialogElement = ref(null)
 const textareaWrapElement = ref(null)
@@ -55,7 +57,7 @@ const state = reactive({
   isSuccess: false
 })
 
-const isDarkTheme = computed(() => store.getters['themes/isThemeDark'])
+const isDarkTheme = computed(() => themeStore.isThemeDark)
 const currentUser = computed(() => userStore.getUserAllState)
 const updateDialogHeight = async () => {
   if (!props.visible) { return }

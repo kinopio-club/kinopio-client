@@ -2,6 +2,7 @@
 import { reactive, computed, onMounted, onBeforeUnmount, watch, ref, nextTick } from 'vue'
 import { useStore } from 'vuex'
 import { useGroupStore } from '@/stores/useGroupStore'
+import { useThemeStore } from '@/stores/useThemeStore'
 
 import Loader from '@/components/Loader.vue'
 import GroupLabel from '@/components/GroupLabel.vue'
@@ -9,6 +10,7 @@ import utils from '@/utils.js'
 
 const store = useStore()
 const groupStore = useGroupStore()
+const themeStore = useThemeStore()
 
 onMounted(() => {
   updateGroup()
@@ -72,7 +74,7 @@ const openUrl = async (event) => {
 
 // colors
 
-const isThemeDark = computed(() => store.getters['themes/isThemeDark'])
+const isThemeDark = computed(() => themeStore.isThemeDark)
 const background = computed(() => {
   const color = props.selectedColor || props.card.backgroundColor
   const defaultColor = utils.cssVariable('secondary-background')

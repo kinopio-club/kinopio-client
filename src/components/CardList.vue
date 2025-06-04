@@ -4,6 +4,7 @@ import { useStore } from 'vuex'
 import { useCardStore } from '@/stores/useCardStore'
 import { useUserStore } from '@/stores/useUserStore'
 import { useSpaceStore } from '@/stores/useSpaceStore'
+import { useThemeStore } from '@/stores/useThemeStore'
 
 import UserLabelInline from '@/components/UserLabelInline.vue'
 import NameSegment from '@/components/NameSegment.vue'
@@ -20,6 +21,7 @@ const store = useStore()
 const cardStore = useCardStore()
 const userStore = useUserStore()
 const spaceStore = useSpaceStore()
+const themeStore = useThemeStore()
 
 const itemsPerPage = 15
 
@@ -105,7 +107,7 @@ const userIsNotCurrentUser = (userId) => {
 const isStrikeThrough = (card) => {
   return card.name.startsWith('[x]')
 }
-const isThemeDark = computed(() => store.getters['themes/isThemeDark'])
+const isThemeDark = computed(() => themeStore.isThemeDark)
 const colorIsDark = (card) => {
   if (!card.backgroundColor) {
     return isThemeDark.value

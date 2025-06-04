@@ -5,6 +5,7 @@ import { useCardStore } from '@/stores/useCardStore'
 import { useUserStore } from '@/stores/useUserStore'
 import { useSpaceStore } from '@/stores/useSpaceStore'
 import { useApiStore } from '@/stores/useApiStore'
+import { useThemeStore } from '@/stores/useThemeStore'
 
 import Loader from '@/components/Loader.vue'
 import UserLabelInline from '@/components/UserLabelInline.vue'
@@ -21,6 +22,7 @@ const cardStore = useCardStore()
 const userStore = useUserStore()
 const spaceStore = useSpaceStore()
 const apiStore = useApiStore()
+const themeStore = useThemeStore()
 
 const dialogElement = ref(null)
 
@@ -133,7 +135,7 @@ const cardNameSegments = (name) => {
 const markAllAsRead = () => {
   emit('markAllAsRead')
 }
-const isThemeDark = computed(() => store.getters['themes/isThemeDark'])
+const isThemeDark = computed(() => themeStore.isThemeDark)
 const cardBackgroundIsDark = (card) => {
   if (card.backgroundColor) {
     return utils.colorIsDark(card.backgroundColor)

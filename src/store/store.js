@@ -14,7 +14,7 @@ import history from '@/store/history.js'
 // import upload from '@/store/upload.js'
 // import userNotifications from '@/store/userNotifications.js'
 // import groups from '@/store/groups.js'
-import themes from '@/store/themes.js'
+// import themes from '@/store/themes.js'
 // import analytics from '@/store/analytics.js'
 // import api from '@/store/api.js'
 // temp, converted to pinia
@@ -2314,7 +2314,7 @@ const store = createStore({
   modules: {
     // api,
     // broadcast,
-    history,
+    history
     // currentUser,
     // currentSpace,
     // currentCards,
@@ -2323,7 +2323,7 @@ const store = createStore({
     // upload,
     // userNotifications,
     // groups,
-    themes
+    // themes
     // analytics
   }
   // plugins: [websocket()]

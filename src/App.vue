@@ -5,6 +5,7 @@ import { useUserStore } from '@/stores/useUserStore'
 import { useSpaceStore } from '@/stores/useSpaceStore'
 import { useApiStore } from '@/stores/useApiStore'
 import { useBroadcastStore } from '@/stores/useBroadcastStore'
+import { useThemeStore } from '@/stores/useThemeStore'
 
 import utils from '@/utils.js'
 import consts from '@/consts.js'
@@ -14,6 +15,7 @@ const userStore = useUserStore()
 const spaceStore = useSpaceStore()
 const apiStore = useApiStore()
 const broadcastStore = useBroadcastStore()
+const themeStore = useThemeStore()
 
 let statusRetryCount = 0
 
@@ -117,25 +119,13 @@ const updateServerIsOnline = async () => {
 
 // theme
 
-const isThemeDark = computed(() => store.getters['themes/isThemeDark'])
-const themeFromSystem = () => {
-  const themeIsSystem = userStore.themeIsSystem
-  if (!themeIsSystem) { return }
-  const theme = window.matchMedia('(prefers-color-scheme: dark)')
-  let themeName
-  if (theme.matches) {
-    themeName = 'dark'
-  } else {
-    themeName = 'light'
-  }
-  return themeName
-}
+const isThemeDark = computed(() => themeStore.isThemeDark)
 const logMatchMediaChange = (event) => {
   const themeIsSystem = userStore.themeIsSystem
   console.warn('🌓 logMatchMediaChange', window.matchMedia('(prefers-color-scheme: dark)'), event, { themeIsSystem })
 }
 const updateThemeFromSystem = () => {
-  const themeName = themeFromSystem()
+  const themeName = themeStore.themeFromSystem()
   if (!themeName) { return }
   store.dispatch('themes/update', themeName)
 }

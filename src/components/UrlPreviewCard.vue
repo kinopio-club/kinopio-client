@@ -2,12 +2,14 @@
 import { reactive, computed, onMounted, watch, ref, nextTick } from 'vue'
 import { useStore } from 'vuex'
 import { useCardStore } from '@/stores/useCardStore'
+import { useThemeStore } from '@/stores/useThemeStore'
 
 import utils from '@/utils.js'
 import consts from '@/consts.js'
 
 const store = useStore()
 const cardStore = useCardStore()
+const themeStore = useThemeStore()
 
 let hasRetried
 
@@ -46,7 +48,7 @@ const isInteractingWithItem = computed(() => store.getters.isInteractingWithItem
 
 // colors
 
-const isThemeDark = computed(() => store.getters['themes/isThemeDark'])
+const isThemeDark = computed(() => themeStore.isThemeDark)
 const background = computed(() => {
   const color = props.backgroundColor
   const defaultColor = utils.cssVariable('secondary-background')

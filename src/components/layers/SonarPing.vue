@@ -1,12 +1,14 @@
 <script setup>
 import { reactive, computed, onMounted, onBeforeUnmount, watch, ref, nextTick } from 'vue'
 import { useStore } from 'vuex'
+import { useThemeStore } from '@/stores/useThemeStore'
 
 import utils from '@/utils.js'
 
 import { colord } from 'colord'
 
 const store = useStore()
+const themeStore = useThemeStore()
 
 // adapted from https://codepen.io/pillowmermaid/details/xrwVPQ
 let canvas, context
@@ -45,7 +47,7 @@ const spaceZoomDecimal = computed(() => store.getters.spaceZoomDecimal)
 const spaceCounterZoomDecimal = computed(() => store.getters.spaceCounterZoomDecimal)
 const viewportHeight = computed(() => store.state.viewportHeight)
 const viewportWidth = computed(() => store.state.viewportWidth)
-const isDarkTheme = computed(() => store.getters['themes/isThemeDark'])
+const isDarkTheme = computed(() => themeStore.isThemeDark)
 const styles = computed(() => {
   return {
     left: state.scroll.x + 'px',
