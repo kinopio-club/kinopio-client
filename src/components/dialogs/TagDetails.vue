@@ -256,7 +256,7 @@ const toggleColorPicker = () => {
   state.colorPickerIsVisible = !state.colorPickerIsVisible
 }
 const removeTag = () => {
-  store.dispatch('currentSpace/removeTags', currentTag.value)
+  spaceStore.removeTags(currentTag.value)
 }
 
 // cards list
