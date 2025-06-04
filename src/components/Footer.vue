@@ -215,11 +215,17 @@ const updatePositionInVisualViewport = () => {
 .footer-wrap(:style="state.position" v-if="isVisible" :class="{'fade-out': isFadingOut}" ref="footerElement")
   .left(v-if="leftIsVisble")
     footer
-      .footer-button-wrap(v-if="leftControlsIsVisible")
+      template(v-if="leftControlsIsVisible")
+      .footer-button-wrap
         DiscoveryButtons
       //- TEMP move fav button into share?
-      .footer-button-wrap(v-if="leftControlsIsVisible")
+      .footer-button-wrap
         FavoriteSpaceButton(:isSmall="true")
+      .button-wrap.input-button-wrap.footer-button-wrap
+        button.small-button.translucent-button
+          span C
+          //- TODO color swatch for current card color, opens dialog to let user choose default user card color, and space user card color
+          //- remove from user settings
       Notifications
 
   .right(v-if="rightControlsIsVisible" :class="{'is-embed': isEmbedMode}")
