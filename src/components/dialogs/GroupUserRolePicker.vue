@@ -1,12 +1,14 @@
 <script setup>
 import { reactive, computed, onMounted, onBeforeUnmount, watch, ref, nextTick } from 'vue'
 import { useStore } from 'vuex'
+import { useGroupStore } from '@/stores/useGroupStore'
 
 import utils from '@/utils.js'
 import groupUserRoles from '@/data/groupUserRoles.js'
 import User from '@/components/User.vue'
 
 const store = useStore()
+const groupStore = useGroupStore()
 
 const dialogElement = ref(null)
 
@@ -50,7 +52,7 @@ const updateIsPositionBottom = async () => {
   state.isPositionBottom = dialogIsBelowViewport
 }
 
-const currentSpaceGroup = computed(() => store.getters['groups/spaceGroup']())
+const currentSpaceGroup = computed(() => groupStore.getCurrentSpaceGroup)
 
 const roles = computed(() => {
   return groupUserRoles.states()

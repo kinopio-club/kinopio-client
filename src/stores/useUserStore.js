@@ -4,6 +4,7 @@ import { useConnectionStore } from '@/stores/useConnectionStore'
 import { useSpaceStore } from '@/stores/useSpaceStore'
 import { useApiStore } from '@/stores/useApiStore'
 import { useUserNotificationStore } from '@/stores/useUserNotificationStore'
+import { useGroupStore } from '@/stores/useGroupStore'
 
 import store from '@/store/store.js' // TEMP Import Vuex store
 
@@ -158,9 +159,10 @@ export const useUserStore = defineStore('users', {
       return this.drawingColor || this.color
     },
     getUserIsSpaceMember () {
+      const groupStore = useGroupStore()
       const isSpaceUser = this.getUserIsSpaceUser
       const isSpaceCollaborator = this.getUserIsSpaceCollaborator
-      const isGroupMember = store.getters['groups/currentUserIsCurrentSpaceGroupUser']
+      const isGroupMember = groupStore.getIsCurrentSpaceGroupUser
       return Boolean(isSpaceUser || isSpaceCollaborator || isGroupMember)
     }
   },
@@ -191,10 +193,11 @@ export const useUserStore = defineStore('users', {
     },
     getUserIsOtherSpaceMember (space) {
       const spaceStore = useSpaceStore()
+      const groupStore = useGroupStore()
       space = space || spaceStore.getSpaceAllState
       const isSpaceUser = this.getUserIsSpaceUser
       const isSpaceCollaborator = this.getUserIsSpaceCollaborator
-      const isGroupMember = store.getters['groups/currentUserIsCurrentSpaceGroupUser']
+      const isGroupMember = groupStore.getIsCurrentSpaceGroupUser
       return Boolean(isSpaceUser || isSpaceCollaborator || isGroupMember)
     },
     // TODO refactor these into standard getters if space always = spaceStore.getSpaceAllState

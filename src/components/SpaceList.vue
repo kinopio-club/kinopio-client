@@ -3,6 +3,7 @@ import { reactive, computed, onMounted, onBeforeUnmount, onUnmounted, watch, ref
 import { useStore } from 'vuex'
 import { useUserStore } from '@/stores/useUserStore'
 import { useSpaceStore } from '@/stores/useSpaceStore'
+import { useGroupStore } from '@/stores/useGroupStore'
 
 import templates from '@/data/templates.js'
 import ResultsFilter from '@/components/ResultsFilter.vue'
@@ -23,6 +24,7 @@ import last from 'lodash-es/last'
 const store = useStore()
 const userStore = useUserStore()
 const spaceStore = useSpaceStore()
+const groupStore = useGroupStore()
 
 let unsubscribe, unsubscribes
 
@@ -390,7 +392,7 @@ const selectItemFromFilter = () => {
 
 const group = (groupId) => {
   if (!groupId) { return }
-  return store.getters['groups/byId'](groupId)
+  return groupStore.getGroup(groupId)
 }
 </script>
 

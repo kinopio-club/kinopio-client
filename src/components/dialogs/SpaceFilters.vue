@@ -3,6 +3,7 @@ import { reactive, computed, onMounted, onBeforeUnmount, watch, ref, nextTick } 
 import { useStore } from 'vuex'
 import { useUserStore } from '@/stores/useUserStore'
 import { useSpaceStore } from '@/stores/useSpaceStore'
+import { useGroupStore } from '@/stores/useGroupStore'
 
 import UserList from '@/components/UserList.vue'
 import utils from '@/utils.js'
@@ -14,6 +15,7 @@ import uniqBy from 'lodash-es/uniqBy'
 const store = useStore()
 const userStore = useUserStore()
 const spaceStore = useSpaceStore()
+const groupStore = useGroupStore()
 
 const dialogElement = ref(null)
 
@@ -141,7 +143,7 @@ const isGroups = computed(() => {
   if (!groups.value) { return }
   return groups.value.length
 })
-const groups = computed(() => store.getters['groups/byUser']())
+const groups = computed(() => groupStore.getCurrentUserGroup)
 const filterByGroup = (event, group) => {
   if (group.id === dialogSpaceFilterByGroup.value.id) {
     updateGroupFilter({})

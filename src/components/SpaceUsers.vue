@@ -3,6 +3,7 @@ import { reactive, computed, onMounted, onUnmounted, onBeforeUnmount, watch, ref
 import { useStore } from 'vuex'
 import { useUserStore } from '@/stores/useUserStore'
 import { useSpaceStore } from '@/stores/useSpaceStore'
+import { useGroupStore } from '@/stores/useGroupStore'
 
 import User from '@/components/User.vue'
 import SpaceUsersButton from '@/components/SpaceUsersButton.vue'
@@ -14,6 +15,7 @@ import last from 'lodash-es/last'
 const store = useStore()
 const userStore = useUserStore()
 const spaceStore = useSpaceStore()
+const groupStore = useGroupStore()
 
 const spaceUsersElement = ref(null)
 
@@ -66,7 +68,7 @@ const currentUserIsSpaceMember = computed(() => userStore.getUserIsSpaceMember)
 // users
 
 const members = computed(() => {
-  const groupUsers = store.getters['groups/groupUsersWhoAddedCards'] || []
+  const groupUsers = groupStore.getGroupUsersWhoAddedCards || []
   let members = utils.clone(currentSpace.value.users)
   members = members.concat(currentSpace.value.collaborators)
   // if (groupUsers) {
@@ -98,7 +100,7 @@ const users = computed(() => {
 // spectators
 
 // const spectators = computed(() => {
-//   const groupUsers = store.getters['groups/groupUsersWhoAddedCards']
+//   const groupUsers = groupStore.getGroupUsersWhoAddedCards
 //   let spectators = utils.clone(currentSpace.value.spectators)
 //   // if not a space member, currentUser is specatator
 //   if (!currentUserIsSpaceMember.value) {

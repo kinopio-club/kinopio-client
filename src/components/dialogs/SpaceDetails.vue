@@ -4,6 +4,7 @@ import { useStore } from 'vuex'
 import { useUserStore } from '@/stores/useUserStore'
 import { useSpaceStore } from '@/stores/useSpaceStore'
 import { useApiStore } from '@/stores/useApiStore'
+import { useGroupStore } from '@/stores/useGroupStore'
 
 import cache from '@/cache.js'
 import SpaceDetailsInfo from '@/components/SpaceDetailsInfo.vue'
@@ -20,6 +21,7 @@ const store = useStore()
 const userStore = useUserStore()
 const spaceStore = useSpaceStore()
 const apiStore = useApiStore()
+const groupStore = useGroupStore()
 
 const maxIterations = 30
 let currentIteration, updatePositionTimer
@@ -191,7 +193,7 @@ const toggleSpaceFiltersIsVisible = () => {
 // sort by groups
 
 const spaceGroupsByAlphabetical = (spaces) => {
-  const groups = store.getters['groups/all']
+  const groups = groupStore.getAllGroups
   const spaceGroups = []
   spaces.forEach(space => {
     if (!space.groupId) { return }

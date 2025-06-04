@@ -3,6 +3,7 @@ import { reactive, computed, onMounted, watch, ref, nextTick } from 'vue'
 import { useStore } from 'vuex'
 import { useUserStore } from '@/stores/useUserStore'
 import { useSpaceStore } from '@/stores/useSpaceStore'
+import { useGroupStore } from '@/stores/useGroupStore'
 
 import PrivacyButton from '@/components/PrivacyButton.vue'
 import InviteToSpace from '@/components/InviteToSpace.vue'
@@ -19,6 +20,7 @@ import consts from '@/consts.js'
 const store = useStore()
 const userStore = useUserStore()
 const spaceStore = useSpaceStore()
+const groupStore = useGroupStore()
 
 const dialog = ref(null)
 
@@ -164,8 +166,8 @@ const users = computed(() => {
 
 // groups
 
-const currentUserIsCurrentSpaceGroupUser = computed(() => store.getters['groups/currentUserIsCurrentSpaceGroupUser'])
-const spaceGroup = computed(() => store.getters['groups/spaceGroup']())
+const currentUserIsCurrentSpaceGroupUser = computed(() => groupStore.getIsCurrentSpaceGroupUser)
+const spaceGroup = computed(() => groupStore.getCurrentSpaceGroup)
 
 </script>
 

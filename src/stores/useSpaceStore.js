@@ -5,6 +5,7 @@ import { useUserStore } from '@/stores/useUserStore'
 import { useCardStore } from '@/stores/useCardStore'
 import { useBoxStore } from '@/stores/useBoxStore'
 import { useApiStore } from '@/stores/useApiStore'
+import { useGroupStore } from '@/stores/useGroupStore'
 
 import store from '@/store/store.js' // TEMP Import Vuex store
 
@@ -222,6 +223,7 @@ export const useSpaceStore = defineStore('space', {
     },
     getSpaceUserById (userId) {
       const userStore = useUserStore()
+      const groupStore = useGroupStore()
       // current user
       if (userStore.id === userId) {
         return userStore
@@ -237,7 +239,7 @@ export const useSpaceStore = defineStore('space', {
         return otherUser
       }
       // group user
-      const groupUser = store.getters['groups/groupUser']({ userId })
+      const groupUser = groupStore.getGroupUser({ userId })
       return groupUser
     },
     getSpaceReadOnlyKey (space) {

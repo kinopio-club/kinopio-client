@@ -212,12 +212,15 @@ export default {
     }
   },
   getters: {
+    // getGroup
     byId: (state) => (id) => {
       return state.groups[id]
     },
+    // getAllGroups
     all: (state) => {
       return state.ids.map(id => state.groups[id])
     },
+    // getCurrentUserGroup
     byUser: (state, getters, rootState) => (user) => {
       user = user || rootState.currentUser
       const groups = getters.all
@@ -231,12 +234,14 @@ export default {
       groupUserGroups = uniqBy(groupUserGroups, 'id')
       return groupUserGroups
     },
+    // getCurrentSpaceGroup getter
     spaceGroup: (state, getters, rootState) => (space) => {
       const spaceStore = useSpaceStore()
       const currentSpace = spaceStore.getSpaceAllState
       space = space || currentSpace
       return state.groups[space.groupId]
     },
+    // getGroupUser
     groupUser: (state, getters, rootState) => ({ userId, space, groupId }) => {
       const spaceStore = useSpaceStore()
       let group
@@ -250,6 +255,7 @@ export default {
       if (!group) { return }
       return group.users.find(user => user.id === userId)
     },
+    // getIsCurrentSpaceGroupUser
     currentUserIsCurrentSpaceGroupUser: (state, getters, rootState) => {
       const userStore = useUserStore()
       const spaceStore = useSpaceStore()
@@ -261,6 +267,7 @@ export default {
       const user = group.users.find(user => user.id === userId)
       return Boolean(user)
     },
+    // getGroupUserIsAdmin
     groupUserIsAdmin: (state, getters, rootState) => ({ userId, space, groupId }) => {
       let groupUser
       if (groupId) {
@@ -271,6 +278,7 @@ export default {
       }
       return groupUser?.role === 'admin'
     },
+    // getGroupUsersWhoAddedCards
     groupUsersWhoAddedCards: (state) => {
       // TODO get all cards, get users, uniq by id, filter by users in current group
       return []
@@ -294,7 +302,7 @@ export default {
       //   return users
       // },
       // groupUsersWhoAddedCards: (state, getters, rootState, rootGetters) => {
-      //   const spaceGroup = rootGetters['groups/spaceGroup']()
+      //   const spaceGroup = groupStore.getCurrentSpaceGroup
       //   const groupUsers = spaceGroup?.users
       //   if (!groupUsers) { return }
       //   let users = getters.users

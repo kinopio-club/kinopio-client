@@ -4,6 +4,7 @@ import { useStore } from 'vuex'
 import { useUserStore } from '@/stores/useUserStore'
 import { useSpaceStore } from '@/stores/useSpaceStore'
 import { useApiStore } from '@/stores/useApiStore'
+import { useGroupStore } from '@/stores/useGroupStore'
 
 import About from '@/components/dialogs/About.vue'
 import SpaceDetails from '@/components/dialogs/SpaceDetails.vue'
@@ -47,6 +48,7 @@ const store = useStore()
 const userStore = useUserStore()
 const spaceStore = useSpaceStore()
 const apiStore = useApiStore()
+const groupStore = useGroupStore()
 
 let unsubscribe
 
@@ -203,7 +205,7 @@ const currentSpaceName = computed(() => {
     return `Space ${id}`
   }
 })
-const spaceGroup = computed(() => store.getters['groups/spaceGroup']())
+const spaceGroup = computed(() => groupStore.getCurrentSpaceGroup)
 const spaceHasStatus = computed(() => {
   if (!isOnline.value) { return }
   return Boolean(store.state.isLoadingSpace || store.state.isJoiningSpace || store.state.isReconnectingToBroadcast || store.state.isLoadingOtherItems || store.state.sendingQueue.length)

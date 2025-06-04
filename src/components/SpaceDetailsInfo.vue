@@ -3,6 +3,7 @@ import { reactive, computed, onMounted, onBeforeUnmount, watch, ref, nextTick } 
 import { useStore } from 'vuex'
 import { useUserStore } from '@/stores/useUserStore'
 import { useSpaceStore } from '@/stores/useSpaceStore'
+import { useGroupStore } from '@/stores/useGroupStore'
 
 import BackgroundPicker from '@/components/dialogs/BackgroundPicker.vue'
 import BackgroundPreview from '@/components/BackgroundPreview.vue'
@@ -20,6 +21,7 @@ import consts from '@/consts.js'
 const store = useStore()
 const userStore = useUserStore()
 const spaceStore = useSpaceStore()
+const groupStore = useGroupStore()
 
 const nameElement = ref(null)
 let unsubscribes
@@ -198,10 +200,10 @@ const closeAllDialogs = () => {
 
 // group
 
-const userGroups = computed(() => store.getters['groups/byUser']())
-const spaceGroup = computed(() => store.getters['groups/spaceGroup']())
+const userGroups = computed(() => groupStore.getCurrentUserGroup)
+const spaceGroup = computed(() => groupStore.getCurrentSpaceGroup)
 const currentUserIsGroupAdmin = (group) => {
-  return store.getters['groups/groupUserIsAdmin']({
+  return groupStore.getGroupUserIsAdmin({
     userId: userStore.id,
     groupId: group.id
   })

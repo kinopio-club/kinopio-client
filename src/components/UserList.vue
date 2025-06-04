@@ -4,6 +4,7 @@ import { useStore } from 'vuex'
 import { useUserStore } from '@/stores/useUserStore'
 import { useSpaceStore } from '@/stores/useSpaceStore'
 import { useApiStore } from '@/stores/useApiStore'
+import { useGroupStore } from '@/stores/useGroupStore'
 
 import ResultsFilter from '@/components/ResultsFilter.vue'
 import UserLabelInline from '@/components/UserLabelInline.vue'
@@ -16,6 +17,7 @@ const store = useStore()
 const userStore = useUserStore()
 const spaceStore = useSpaceStore()
 const apiStore = useApiStore()
+const groupStore = useGroupStore()
 
 onMounted(() => {
   store.subscribe(mutation => {
@@ -116,19 +118,19 @@ const userIsSpaceCreator = (user) => {
 // group
 
 const group = computed(() => {
-  return props.group || store.getters['groups/spaceGroup']()
+  return props.group || groupStore.getCurrentSpaceGroup
 })
 const groupUser = (user) => {
   if (!group.value) { return }
   const groupId = group.value.id
-  return store.getters['groups/groupUser']({ userId: user.id, groupId })
+  return groupStore.getGroupUser({ userId: user.id, groupId })
 }
 const groupUserRole = (user) => {
   const role = groupUser(user).role
   return utils.capitalizeFirstLetter(role)
 }
 const currentUserIsGroupAdmin = computed(() => {
-  return store.getters['groups/groupUserIsAdmin']({
+  return groupStore.getGroupUserIsAdmin({
     userId: userStore.id,
     groupId: group.value.id
   })

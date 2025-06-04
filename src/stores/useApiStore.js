@@ -2,6 +2,7 @@ import { nextTick } from 'vue'
 import { defineStore } from 'pinia'
 import { useUserStore } from '@/stores/useUserStore'
 import { useSpaceStore } from '@/stores/useSpaceStore'
+import { useGroupStore } from '@/stores/useGroupStore'
 
 import store from '@/store/store.js' // TEMP Import Vuex store
 
@@ -471,7 +472,8 @@ export const useApiStore = defineStore('api', {
     },
     async getUserGroupSpaces () {
       const userStore = useUserStore()
-      const groups = store.getters['groups/byUser']()
+      const groupStore = useGroupStore()
+      const groups = groupStore.getCurrentUserGroup
       if (!groups.length) { return }
       const apiKey = userStore.apiKey
       const isOnline = store.state.isOnline

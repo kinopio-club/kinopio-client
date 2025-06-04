@@ -1,12 +1,14 @@
 <script setup>
 import { reactive, computed, onMounted, onBeforeUnmount, watch, ref, nextTick } from 'vue'
 import { useStore } from 'vuex'
+import { useGroupStore } from '@/stores/useGroupStore'
 
 import Loader from '@/components/Loader.vue'
 import GroupLabel from '@/components/GroupLabel.vue'
 import utils from '@/utils.js'
 
 const store = useStore()
+const groupStore = useGroupStore()
 
 onMounted(() => {
   updateGroup()
@@ -100,12 +102,12 @@ const updateGroup = async () => {
   state.isLoading = true
   try {
     const groupFromUrl = utils.groupFromGroupInviteUrl(url.value)
-    let group = store.getters['groups/byId'](groupFromUrl.id)
+    let group = groupStore.getGroup(groupFromUrl.id)
     if (group) {
       state.group = group
     } else {
       await store.dispatch('groups/updateOtherGroups', groupFromUrl)
-      group = store.getters['groups/byId'](groupFromUrl.id)
+      group = groupStore.getGroup(groupFromUrl.id)
       state.group = group
     }
   } catch (error) {

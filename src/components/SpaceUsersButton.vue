@@ -4,6 +4,7 @@ import { useStore } from 'vuex'
 import { useCardStore } from '@/stores/useCardStore'
 import { useUserStore } from '@/stores/useUserStore'
 import { useSpaceStore } from '@/stores/useSpaceStore'
+import { useGroupStore } from '@/stores/useGroupStore'
 
 import User from '@/components/User.vue'
 import utils from '@/utils.js'
@@ -16,6 +17,7 @@ const store = useStore()
 const cardStore = useCardStore()
 const userStore = useUserStore()
 const spaceStore = useSpaceStore()
+const groupStore = useGroupStore()
 
 const buttonElement = ref(null)
 
@@ -56,7 +58,7 @@ const isActive = computed(() => {
 
 // group
 
-const group = computed(() => store.getters['groups/spaceGroup'](currentSpace.value))
+const group = computed(() => groupStore.getCurrentSpaceGroup)
 
 // users
 
@@ -65,7 +67,7 @@ const spaceUsers = computed(() => {
   if (props.users) {
     items = props.users
   } else {
-    const groupUsers = store.getters['groups/groupUsersWhoAddedCards']
+    const groupUsers = groupStore.getGroupUsersWhoAddedCards
     items = utils.clone(currentSpace.value.users)
     items = items.concat(currentSpace.value.collaborators)
     items = items.concat(groupUsers)

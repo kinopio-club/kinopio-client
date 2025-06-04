@@ -4,6 +4,7 @@ import { useStore } from 'vuex'
 import { useCardStore } from '@/stores/useCardStore'
 import { useUserStore } from '@/stores/useUserStore'
 import { useSpaceStore } from '@/stores/useSpaceStore'
+import { useGroupStore } from '@/stores/useGroupStore'
 
 import utils from '@/utils.js'
 import GroupDetails from '@/components/dialogs/GroupDetails.vue'
@@ -16,6 +17,7 @@ const store = useStore()
 const cardStore = useCardStore()
 const userStore = useUserStore()
 const spaceStore = useSpaceStore()
+const groupStore = useGroupStore()
 
 const dialogElement = ref(null)
 
@@ -59,7 +61,7 @@ const label = computed(() => {
 
 // group
 
-const spaceGroup = computed(() => store.getters['groups/spaceGroup']())
+const spaceGroup = computed(() => groupStore.getCurrentSpaceGroup)
 const toggleGroupIsVisible = () => {
   const value = !state.groupIsVisible
   closeDialogs()
@@ -74,7 +76,7 @@ const users = computed(() => {
   if (isSpectatorsList.value) {
     items = currentSpace.value.spectators
   } else {
-    const groupUsers = store.getters['groups/groupUsersWhoAddedCards']
+    const groupUsers = groupStore.getGroupUsersWhoAddedCards
     items = utils.clone(currentSpace.value.users)
     items = items.concat(currentSpace.value.collaborators)
     items = items.concat(groupUsers)

@@ -4,6 +4,7 @@ import { useConnectionStore } from '@/stores/useConnectionStore'
 import { useUserStore } from '@/stores/useUserStore'
 import { useSpaceStore } from '@/stores/useSpaceStore'
 import { useApiStore } from '@/stores/useApiStore'
+import { useGroupStore } from '@/stores/useGroupStore'
 
 import store from '@/store/store.js' // TEMP Import Vuex store
 
@@ -18,6 +19,7 @@ export const useUserNotificationStore = defineStore('userNotifications', {
     recipientUserIds () {
       const userStore = useUserStore()
       const spaceStore = useSpaceStore()
+      const groupStore = useGroupStore()
       const currentUserId = userStore.id
       const spaceIsOpen = spaceStore.privacy === 'open'
       // space members
@@ -31,7 +33,7 @@ export const useUserNotificationStore = defineStore('userNotifications', {
         recipients = members.concat(contributors)
       }
       // group users who added cards
-      let groupUsers = store.getters['groups/groupUsersWhoAddedCards'] || []
+      let groupUsers = groupStore.getGroupUsersWhoAddedCards || []
       groupUsers = groupUsers.map(user => user.id)
       recipients = recipients.concat(groupUsers)
       recipients = uniq(recipients)
@@ -43,6 +45,7 @@ export const useUserNotificationStore = defineStore('userNotifications', {
     recipientMemberIds () {
       const userStore = useUserStore()
       const spaceStore = useSpaceStore()
+      const groupStore = useGroupStore()
       const currentUserId = userStore.id
       // space members
       let members = spaceStore.getSpaceMembers
@@ -50,7 +53,7 @@ export const useUserNotificationStore = defineStore('userNotifications', {
       members = members.map(member => member.id)
       let recipients = members
       // group users who added cards
-      let groupUsers = store.getters['groups/groupUsersWhoAddedCards'] || []
+      let groupUsers = groupStore.getGroupUsersWhoAddedCards || []
       groupUsers = groupUsers.map(user => user.id)
       recipients = recipients.concat(groupUsers)
       recipients = uniq(recipients)
@@ -150,9 +153,10 @@ export const useUserNotificationStore = defineStore('userNotifications', {
       const apiStore = useApiStore()
       const spaceStore = useSpaceStore()
       const userStore = useUserStore()
+      const groupStore = useGroupStore()
       const userCanEdit = userStore.getUserCanEditSpace()
       if (!userCanEdit) { return }
-      const group = store.getters['groups/byId'](groupId)
+      const group = groupStore.getGroup(groupId)
       // recipients are all other group users
       const recipients = group.users.filter(user => user.id !== addedToGroupByUserId)
       let recipientUserIds = recipients.map(recipient => recipient.id)

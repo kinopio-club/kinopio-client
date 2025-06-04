@@ -3,6 +3,7 @@ import { reactive, computed, onMounted, onBeforeUnmount, watch, ref, nextTick } 
 import { useStore } from 'vuex'
 import { useUserStore } from '@/stores/useUserStore'
 import { useSpaceStore } from '@/stores/useSpaceStore'
+import { useGroupStore } from '@/stores/useGroupStore'
 
 import utils from '@/utils.js'
 import GroupList from '@/components/GroupList.vue'
@@ -15,6 +16,7 @@ import uniqBy from 'lodash-es/uniqBy'
 const store = useStore()
 const userStore = useUserStore()
 const spaceStore = useSpaceStore()
+const groupStore = useGroupStore()
 
 const dialogElement = ref(null)
 
@@ -58,7 +60,7 @@ const isLoadingGroups = computed(() => store.state.isLoadingGroups)
 
 // groups
 
-const groups = computed(() => store.getters['groups/byUser']())
+const groups = computed(() => groupStore.getCurrentUserGroup)
 
 // add group
 
