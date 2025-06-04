@@ -834,6 +834,13 @@ export const useSpaceStore = defineStore('space', {
         store.commit('addNotification', { message: `${userName} removed from space`, type: 'success' }, { root: true })
       }
     },
+    async removeUserFromSpace (removeUser) {
+      utils.typeCheck({ value: removeUser, type: 'object' })
+      this.users = this.users.filter(user => {
+        return user.id !== removeUser.id
+      })
+      await cache.updateSpace('users', this.users, this.id)
+    },
 
     // notify
 

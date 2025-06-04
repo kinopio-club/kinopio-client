@@ -303,8 +303,8 @@ const updateSpacesUserId = async () => {
 const updateCurrentSpaceWithNewUserId = (previousUser, newUser) => {
   const userIsSpaceUser = userStore.getUserSpacePermission() === 'user'
   if (!userIsSpaceUser) { return }
-  store.commit('currentSpace/removeUserFromSpace', previousUser)
-  store.commit('currentSpace/addUserToSpace', newUser)
+  spaceStore.removeUserFromSpace(previousUser)
+  spaceStore.addUserToSpace(newUser)
 }
 const removeUneditedSpace = async (spaceName) => {
   const currentSpace = await cache.getSpaceByName(spaceName)
