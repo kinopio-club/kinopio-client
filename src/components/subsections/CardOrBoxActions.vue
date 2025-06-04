@@ -415,7 +415,7 @@ const toggleIsLocked = () => {
 
 // comment
 
-const canOnlyComment = computed(() => userStore.getIsUserCommentOnly())
+const canOnlyComment = computed(() => userStore.getUserIsCommentOnly)
 const isNotCollaborator = computed(() => {
   if (canOnlyComment.value) { return true }
   return !canEditAll.value

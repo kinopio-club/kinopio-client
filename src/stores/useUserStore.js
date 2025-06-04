@@ -185,6 +185,11 @@ export const useUserStore = defineStore('users', {
       } else {
         return 'spectator'
       }
+    },
+    getUserIsCommentOnly () {
+      const canEditSpace = this.getUserCanEditSpace
+      const isSpaceMember = this.getUserIsSpaceMember
+      return canEditSpace && !isSpaceMember
     }
   },
 
@@ -246,17 +251,7 @@ export const useUserStore = defineStore('users', {
       }
       return userFilters
     },
-
-    getIsUserCommentOnly () {
-      const canEditSpace = this.getUserCanEditSpace
-      const isSpaceMember = this.getUserIsSpaceMember
-      return canEditSpace && !isSpaceMember
-    },
-
-    // TODO refactor to getter after store -> rootStore
-
     getUserIsReadOnlyInvitedToSpace (space) {
-      // space always currentspace?
       return store.state.spaceReadOnlyKey.spaceId === space.id
     },
     getItemIsCreatedByUser (connection) {

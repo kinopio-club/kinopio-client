@@ -25,7 +25,7 @@ const state = reactive({
 })
 
 const currentUserIsSignedIn = computed(() => userStore.getUserIsSignedIn)
-const canOnlyComment = computed(() => userStore.getIsUserCommentOnly())
+const canOnlyComment = computed(() => userStore.getUserIsCommentOnly)
 const isVisible = computed(() => {
   if (canOnlyComment.value) { return }
   return currentUserIsSignedIn.value

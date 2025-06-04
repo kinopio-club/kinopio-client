@@ -173,7 +173,7 @@ const isSpace = computed(() => {
   return isSpace
 })
 const userCanEditSpace = computed(() => userStore.getUserCanEditSpace)
-const userCanOnlyComment = computed(() => userStore.getIsUserCommentOnly())
+const userCanOnlyComment = computed(() => userStore.getUserIsCommentOnly)
 const isUpgraded = computed(() => userStore.isUpgraded)
 const isOnline = computed(() => store.state.isOnline)
 const currentUserIsSignedIn = computed(() => userStore.getUserIsSignedIn)
