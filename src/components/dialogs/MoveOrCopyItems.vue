@@ -93,7 +93,7 @@ const multipleCardsIsSelected = computed(() => {
   return Boolean(numberOfCards > 1)
 })
 const itemsCount = computed(() => multipleCardsSelectedIds.value.length + multipleBoxesSelectedIds.value.length)
-const selectedItems = computed(() => store.getters['currentSpace/selectedItems'])
+const selectedItems = computed(() => spaceStore.selectedItems)
 const names = computed(() => selectedItems.value.cards.map(card => card.name))
 const sortedByY = (items) => {
   items = items.sort((a, b) => {

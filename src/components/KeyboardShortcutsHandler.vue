@@ -633,7 +633,7 @@ const remove = () => {
 // Copy, Cut
 
 const writeSelectedToClipboard = async (position) => {
-  const selectedItems = store.getters['currentSpace/selectedItems']
+  const selectedItems = spaceStore.selectedItems
   let { cards, connectionTypes, connections, boxes } = selectedItems
   // data
   cards = utils.sortByY(cards)

@@ -110,6 +110,26 @@ export const useSpaceStore = defineStore('space', {
     },
     getSpaceIsHello () {
       return this.name === 'Hello Kinopio'
+    },
+    selectedItems () {
+      const cardStore = useCardStore()
+      const connectionStore = useConnectionStore()
+      const boxStore = useBoxStore()
+      const cards = store.state.multipleCardsSelectedIds.map(cardId => {
+        return cardStore.getCard(cardId)
+      })
+      const boxes = store.state.multipleBoxesSelectedIds.map(boxId => {
+        return boxStore.getBox(boxId)
+      })
+      const connections = connectionStore.getAllConnections.filter(connection => {
+        const selectedIds = store.state.multipleCardsSelectedIds.concat(store.state.multipleBoxesSelectedIds)
+        const isStartCardMatch = selectedIds.includes(connection.startItemId)
+        const isEndCardMatch = selectedIds.includes(connection.endItemId)
+        return isStartCardMatch && isEndCardMatch
+      })
+      const connectionTypeIds = connections.map(connection => connection.connectionTypeId)
+      const connectionTypes = connectionTypeIds.map(id => connectionStore.getConnectionType(id))
+      return { cards, connectionTypes, connections, boxes }
     }
 
   },
