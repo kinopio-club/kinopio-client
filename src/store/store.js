@@ -1808,8 +1808,8 @@ const store = createStore({
       const spaceStore = useSpaceStore()
       const isOffline = !context.state.isOnline
       const isNotCached = await spaceStore.getSpaceIsNotCached(spaceId)
-      const currentSpaceIsRemote = context.getters['currentSpace/isRemote']
-      const value = isOffline && isNotCached && currentSpaceIsRemote
+      const isRemote = spaceStore.getSpaceIsRemote
+      const value = isOffline && isNotCached && isRemote
       context.commit('currentSpaceIsUnavailableOffline', value)
     },
     updateSpaceAndCardUrlToLoad: (context, path) => {
