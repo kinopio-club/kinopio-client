@@ -106,7 +106,7 @@ const updateGroup = async () => {
     if (group) {
       state.group = group
     } else {
-      await store.dispatch('groups/updateOtherGroups', groupFromUrl)
+      await groupStore.updateOtherGroups(groupFromUrl)
       group = groupStore.getGroup(groupFromUrl.id)
       state.group = group
     }

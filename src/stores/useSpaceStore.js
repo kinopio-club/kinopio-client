@@ -414,6 +414,7 @@ export const useSpaceStore = defineStore('space', {
       this.restoreSpace(space)
     },
     async loadSpace (space) {
+      const groupStore = useGroupStore()
       space.connections = utils.migrationConnections(space.connections)
       if (!store.state.isEmbedMode) {
         store.commit('triggerSpaceZoomReset', null, { root: true })
@@ -435,7 +436,7 @@ export const useSpaceStore = defineStore('space', {
         console.info('🎑 remoteSpace', remoteSpace)
         if (!remoteSpace) { return }
         store.commit('triggerUpdateWindowTitle', null, { root: true })
-        store.dispatch('groups/loadGroup', remoteSpace, { root: true })
+        groupStore.loadGroup(remoteSpace)
         const spaceIsUnchanged = utils.spaceIsUnchanged(cachedSpace, remoteSpace)
         if (spaceIsUnchanged) {
           store.commit('isLoadingSpace', false, { root: true })

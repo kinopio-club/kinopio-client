@@ -221,7 +221,7 @@ const toggleSpaceGroup = async (group) => {
 const updateSpaceGroup = (group) => {
   const isSpaceCreator = currentUserIsSpaceCreator.value
   if (isSpaceCreator) {
-    store.dispatch('groups/addCurrentSpace', group)
+    groupStore.addSpaceToGroup(group)
     updateLocalSpaces()
   } else {
     state.error.updateSpaceGroup = true
@@ -231,7 +231,7 @@ const removeSpaceGroup = (group) => {
   const isGroupAdmin = currentUserIsGroupAdmin(group)
   const isSpaceCreator = currentUserIsSpaceCreator.value
   if (isGroupAdmin || isSpaceCreator) {
-    store.dispatch('groups/removeCurrentSpace')
+    groupStore.removeSpaceFromGroup()
     updateLocalSpaces()
   } else {
     state.error.removeSpaceGroup = true

@@ -86,7 +86,7 @@ const updateRole = (role) => {
     groupId: currentSpaceGroup.value.id,
     role: role.name
   }
-  store.dispatch('groups/updateUserRole', update)
+  groupStore.updateUserRole(update)
 }
 
 </script>

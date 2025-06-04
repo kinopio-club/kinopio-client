@@ -274,7 +274,7 @@ export const useGroupStore = defineStore('groups', {
 
     // space
 
-    async addCurrentSpace (group) {
+    async addSpaceToGroup (group) {
       const spaceStore = useSpaceStore()
       const userStore = useUserStore()
       const userNotificationStore = useUserNotificationStore()
@@ -283,7 +283,7 @@ export const useGroupStore = defineStore('groups', {
       await spaceStore.updateSpace(body)
       await userNotificationStore.addSpaceToGroup(body)
     },
-    async removeCurrentSpace () {
+    async removeSpaceFromGroup () {
       const spaceStore = useSpaceStore()
       await spaceStore.updateSpace({ groupId: null, addedToGroupByUserId: null })
     },

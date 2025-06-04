@@ -341,9 +341,10 @@ export const useUserStore = defineStore('users', {
       }
     },
     checkIfShouldJoinGroup () {
+      const groupStore = useGroupStore()
       if (!store.state.groupToJoinOnLoad) { return }
       if (this.getUserIsSignedIn) {
-        store.dispatch('groups/joinGroup', null, { root: true })
+        groupStore.joinGroup()
       } else {
         store.commit('notifySignUpToJoinGroup', true, { root: true })
       }

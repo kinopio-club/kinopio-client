@@ -7,6 +7,7 @@ import { useBoxStore } from '@/stores/useBoxStore'
 import { useUserStore } from '@/stores/useUserStore'
 import { useSpaceStore } from '@/stores/useSpaceStore'
 import { useApiStore } from '@/stores/useApiStore'
+import { useGroupStore } from '@/stores/useGroupStore'
 
 import utils from '@/utils.js'
 import Frames from '@/components/Frames.vue'
@@ -42,6 +43,7 @@ const boxStore = useBoxStore()
 const userStore = useUserStore()
 const spaceStore = useSpaceStore()
 const apiStore = useApiStore()
+const groupStore = useGroupStore()
 
 const cardElement = ref(null)
 
@@ -1871,7 +1873,7 @@ const updateOtherInviteItems = (url) => {
 }
 const updateOtherGroupItems = (url) => {
   const groupFromUrl = utils.groupFromGroupInviteUrl(url)
-  store.dispatch('groups/updateOtherGroups', groupFromUrl)
+  groupStore.updateOtherGroups(groupFromUrl)
 }
 
 // utils

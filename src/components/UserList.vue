@@ -191,7 +191,7 @@ const removeGroupUser = async (event, user) => {
       userId: user.id
     }
     const response = await apiStore.removeGroupUser(options)
-    store.dispatch('groups/removeGroupUser', options)
+    groupStore.removeGroupUser(options)
   } catch (error) {
     console.error('🚒 removeGroupUser', user, error)
     state.error.removeGroupUserId = user.id
