@@ -1887,7 +1887,7 @@ const store = createStore({
       context.commit('closeAllDialogs', origin)
       const space = context.state.currentSpace
       const user = context.state.currentUser
-      context.commit('broadcast/updateUser', { user: utils.userMeta(user, space), type: 'updateUserPresence' })
+      broadcastStore.updateUser({ user: utils.userMeta(user, space), type: 'updateUserPresence' })
       broadcastStore.updateStore({ updates: { userId: user.id }, type: 'clearRemoteCardDetailsVisible' })
       broadcastStore.updateStore({ updates: { userId: user.id }, type: 'clearRemoteConnectionDetailsVisible' })
       broadcastStore.updateStore({ updates: { userId: user.id }, type: 'clearRemoteBoxDetailsVisible' })
