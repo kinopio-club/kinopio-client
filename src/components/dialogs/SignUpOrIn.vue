@@ -346,7 +346,7 @@ const addCollaboratorToCurrentSpace = async () => {
   const currentSpace = store.state.currentSpace
   const currentUser = userStore.getUserAllState
   if (invitedSpaceIds.includes(currentSpace?.id)) {
-    store.commit('currentSpace/addCollaboratorToSpace', currentUser)
+    spaceStore.addCollaboratorToSpace(currentUser)
     store.commit('broadcast/close')
     store.commit('broadcast/joinSpaceRoom')
   }

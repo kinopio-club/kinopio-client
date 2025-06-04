@@ -811,27 +811,63 @@ export const useSpaceStore = defineStore('space', {
 
     // users
 
-    addUserToSpace (newUser) {
+    async addUserToSpace (newUser) {
       const userExists = this.users.find(user => user.id === newUser.id)
       if (userExists) { return }
       this.users.push(newUser)
-      cache.updateSpace('users', this.users, this.id)
+      await cache.updateSpace('users', this.users, this.id)
     },
-
-    // addCollaboratorToSpace: (state, newUser) => {
-    //   utils.typeCheck({ value: newUser, type: 'object' })
-    //   const collaboratorExists = state.collaborators.find(collaborator => collaborator.id === newUser.id)
-    //   if (collaboratorExists) { return }
-    //   state.collaborators.push(newUser)
-    //   const space = utils.clone(state)
-    //   cache.saveSpace(space)
-    //   cache.updateSpace('collaborators', space.collaborators, space.id)
-    // },
-    // addSpectatorToSpace: (state, newUser) => {
-    //   state.spectators.push(newUser)
-    //   state.spectators = uniqBy(state.spectators, 'id')
-    // },
-
+    async addCollaboratorToSpace (newUser) {
+      const collaboratorExists = this.collaborators.find(collaborator => collaborator.id === newUser.id)
+      if (collaboratorExists) { return }
+      this.collaborators.push(newUser)
+      const space = this.getSpaceAllState
+      await cache.saveSpace(space)
+      await cache.updateSpace('collaborators', space.collaborators, space.id)
+    },
+    addSpectatorToSpace (newUser) {
+      this.spectators.push(newUser)
+      this.spectators = uniqBy(this.spectators, 'id')
+    },
+    updateSpaceClients (updates) {
+      this.clients = this.clients.concat(updates)
+    },
+    removeIdleClientFromSpace (removeUser) {
+      const spectators = this.spectators || []
+      const clients = this.clients || []
+      this.spectators = spectators.filter(user => {
+        return user.id !== removeUser.id
+      })
+      this.clients = clients.filter(user => {
+        return user.id !== removeUser.id
+      })
+    },
+    updateUserPresence (update) {
+      const newUser = update.user || update
+      const member = this.getSpaceMemberById(newUser.id)
+      if (member) {
+        this.updateSpaceClients([newUser])
+      } else {
+        this.addSpectatorToSpace(newUser)
+      }
+      // ping idle client timer
+      const idleClientTime = 60 * 1000 // 60 seconds
+      clearTimeout(idleClientTimers[newUser.id])
+      const removeIdleClient = (newUser) => {
+        this.removeIdleClientFromSpace(newUser)
+      }
+      idleClientTimers[newUser.id] = setTimeout(() => {
+        removeIdleClient(newUser)
+      }, 60 * 1000) // 60 seconds
+    },
+    addUserToJoinedSpace (newUser) {
+      if (newUser.isCollaborator) {
+        this.addCollaboratorToSpace(newUser)
+        this.removeIdleClientFromSpace(newUser)
+      } else {
+        this.updateUserPresence(newUser)
+      }
+    },
     async removeCollaboratorFromSpace (user) {
       const userStore = useUserStore()
       const space = this.getSpaceAllState

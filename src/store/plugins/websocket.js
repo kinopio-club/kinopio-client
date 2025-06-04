@@ -160,12 +160,12 @@ export default function createWebSocketPlugin () {
             piniaStore[actionName](updates)
           // users
           } else if (message === 'userJoinedRoom') {
-            store.dispatch('currentSpace/addUserToJoinedSpace', user)
+            spaceStore.addUserToJoinedSpace(user)
           } else if (message === 'updateUserPresence') {
-            store.dispatch('currentSpace/updateUserPresence', updates)
+            spaceStore.updateUserPresence(updates)
             store.commit('updateOtherUsers', updates.user, { root: true })
           } else if (message === 'userLeftRoom') {
-            store.commit('currentSpace/removeIdleClientFromSpace', user || updates.user)
+            spaceStore.removeIdleClientFromSpace(user || updates.user)
             store.commit('clearRemoteMultipleSelected', data)
           } else if (message === 'userLeftSpace') {
             spaceStore.removeCollaboratorFromSpace(updates.user)
