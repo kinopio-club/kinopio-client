@@ -817,6 +817,21 @@ export const useSpaceStore = defineStore('space', {
       this.users.push(newUser)
       cache.updateSpace('users', this.users, this.id)
     },
+
+    // addCollaboratorToSpace: (state, newUser) => {
+    //   utils.typeCheck({ value: newUser, type: 'object' })
+    //   const collaboratorExists = state.collaborators.find(collaborator => collaborator.id === newUser.id)
+    //   if (collaboratorExists) { return }
+    //   state.collaborators.push(newUser)
+    //   const space = utils.clone(state)
+    //   cache.saveSpace(space)
+    //   cache.updateSpace('collaborators', space.collaborators, space.id)
+    // },
+    // addSpectatorToSpace: (state, newUser) => {
+    //   state.spectators.push(newUser)
+    //   state.spectators = uniqBy(state.spectators, 'id')
+    // },
+
     async removeCollaboratorFromSpace (user) {
       const userStore = useUserStore()
       const space = this.getSpaceAllState
