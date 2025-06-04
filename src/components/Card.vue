@@ -1852,7 +1852,7 @@ const updateOtherSpaceOrCardItems = (url) => {
     linkToSpaceCollaboratorKey: null
   }
   cardStore.update(update)
-  store.dispatch('currentSpace/updateOtherItems', { spaceId, cardId })
+  spaceStore.updateOtherItems({ spaceId, cardId })
 }
 const updateOtherInviteItems = (url) => {
   const { spaceId, collaboratorKey } = qs.decode(url.search)
@@ -1866,7 +1866,7 @@ const updateOtherInviteItems = (url) => {
     }
     cardStore.update(update)
   }
-  store.dispatch('currentSpace/updateOtherItems', { spaceId, collaboratorKey })
+  spaceStore.updateOtherItems({ spaceId, collaboratorKey })
 }
 const updateOtherGroupItems = (url) => {
   const groupFromUrl = utils.groupFromGroupInviteUrl(url)

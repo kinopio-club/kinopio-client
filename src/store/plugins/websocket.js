@@ -77,6 +77,7 @@ const sendEvent = (store, mutation, type) => {
   }))
 }
 const checkIfShouldUpdateLinkToItem = (store, { message, updates }) => {
+  const spaceStore = useSpaceStore()
   if (message !== 'updateCard') { return }
   let options
   if (updates.linkToCardId) {
@@ -85,7 +86,7 @@ const checkIfShouldUpdateLinkToItem = (store, { message, updates }) => {
     options = { cardId: updates.linkToSpaceId }
   }
   if (!options) { return }
-  store.dispatch('currentSpace/updateOtherItems', options)
+  spaceStore.updateOtherItems(options)
 }
 const checkIfShouldNotifyOffscreenCardCreated = (store, data) => {
   if (data.message === 'createCard') {
