@@ -4,6 +4,8 @@
 // 🌛 Send
 // 🌜 Receive
 
+// TODO convert to pinia action subscriber plugin
+
 import { getActivePinia } from 'pinia'
 import { useUserStore } from '@/stores/useUserStore'
 import { useSpaceStore } from '@/stores/useSpaceStore'
