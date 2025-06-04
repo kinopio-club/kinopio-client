@@ -88,7 +88,7 @@ const addSpaceIsVisible = computed(() => props.showCreateNewSpaceFromSearch && s
 const addSpace = async () => {
   const name = state.filter
   window.scrollTo(0, 0)
-  await store.dispatch('currentSpace/createSpace', { name })
+  await spaceStore.createNewSpace(name)
   await nextTick()
   const shouldClearFilterInfo = true
   clearFilter(shouldClearFilterInfo)

@@ -546,15 +546,11 @@ export const useSpaceStore = defineStore('space', {
       await this.saveSpace()
       store.commit('addNotification', { message: 'Duplicated Space', type: 'success' }, { root: true })
     },
-    async createNewSpace (space) {
+    async createNewSpace (name) {
       const userStore = useUserStore()
       const user = userStore.getUserAllState
       store.commit('triggerSpaceZoomReset', null, { root: true })
-      let name
-      if (space) {
-        name = space.name
-      }
-      space = utils.clone(newSpace)
+      let space = utils.clone(newSpace)
       space.name = name || utils.newSpaceName()
       space.id = nanoid()
       space.createdAt = new Date()
