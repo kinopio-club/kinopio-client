@@ -352,7 +352,7 @@ const addCollaboratorToCurrentSpace = async () => {
   if (invitedSpaceIds.includes(currentSpace?.id)) {
     spaceStore.addCollaboratorToSpace(currentUser)
     broadcastStore.close()
-    store.commit('broadcast/joinSpaceRoom')
+    broadcastStore.joinSpaceRoom()
   }
 }
 const addCollaboratorToInvitedSpaces = async () => {

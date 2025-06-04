@@ -8,6 +8,7 @@
 import { getActivePinia } from 'pinia'
 import { useUserStore } from '@/stores/useUserStore'
 import { useSpaceStore } from '@/stores/useSpaceStore'
+import { useBroadcastStore } from '@/stores/useBroadcastStore'
 
 import { nanoid } from 'nanoid'
 
@@ -110,13 +111,14 @@ export default function createWebSocketPlugin () {
     store.subscribe((mutation, state) => {
       const userStore = useUserStore()
       const spaceStore = useSpaceStore()
+      const broadcastStore = useBroadcastStore()
       if (mutation.type === 'broadcast/connect') {
         store.commit('isJoiningSpace', true)
         const host = consts.websocketHost()
         websocket = new WebSocket(host)
         websocket.onopen = (event) => {
           currentUserIsConnected = true
-          store.commit('broadcast/joinSpaceRoom')
+          broadcastStore.joinSpaceRoom()
           if (store.state.isReconnectingToBroadcast) {
             store.commit('isReconnectingToBroadcast', false)
           }
@@ -208,7 +210,7 @@ export default function createWebSocketPlugin () {
         closeWebsocket(store)
         currentUserIsConnected = false
         currentSpaceRoom = null
-        store.commit('broadcast/joinSpaceRoom')
+        broadcastStore.joinSpaceRoom()
       }
     })
   }
