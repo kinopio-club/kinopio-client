@@ -58,8 +58,9 @@ const joinSpaceRoom = (store, mutation) => {
 }
 
 const sendEvent = (store, mutation, type) => {
+  const spaceStore = useSpaceStore()
   if (!websocket || !currentUserIsConnected) { return }
-  const shouldBroadcast = store.getters['currentSpace/shouldBroadcast']
+  const shouldBroadcast = spaceStore.getSpaceShouldBroadcast
   if (!shouldBroadcast) { return }
   const { message, handler, updates } = utils.normalizeBroadcastUpdates(mutation.payload)
   const hidden = ['updateRemoteUserCursor', 'addRemotePaintingCircle', 'clearRemoteCardDetailsVisible', 'clearRemoteConnectionDetailsVisible', 'addRemoteDrawingStroke', 'removeRemoteDrawingStroke']
@@ -170,13 +171,13 @@ export default function createWebSocketPlugin () {
           } else if (message === 'userLeftSpace') {
             spaceStore.removeCollaboratorFromSpace(updates.user)
             if (updates.user.id === userStore.id) {
-              store.dispatch('currentSpace/removeCurrentUserFromSpace', updates.user)
+              spaceStore.removeCurrentUserFromSpace()
             }
           // other
           } else if (data.type === 'store') {
             store.commit(`${message}`, updates)
           } else {
-            store.commit(`currentSpace/${message}`, updates)
+            spaceStore[message](updates)
           }
         }
       }
@@ -190,7 +191,7 @@ export default function createWebSocketPlugin () {
         }
         joinSpaceRoom(store, mutation)
       } else if (mutation.type === 'broadcast/leaveSpaceRoom') {
-        store.commit('currentSpace/removeClientsFromSpace')
+        spaceStore.clients = []
         sendEvent(store, mutation)
       } else if (mutation.type === 'broadcast/update') {
         sendEvent(store, mutation)
