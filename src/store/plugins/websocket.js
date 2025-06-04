@@ -67,7 +67,7 @@ const sendEvent = (store, mutation, type) => {
   if (showDebugMessages && !hidden.includes(updates.type)) {
     console.info('🌜 sent', message, handler, updates, { clientId })
   }
-  const space = store.state.currentSpace
+  const space = spaceStore.getSpaceAllState
   websocket.send(JSON.stringify({
     message,
     handler,

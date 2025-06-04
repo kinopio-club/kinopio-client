@@ -343,7 +343,7 @@ const removeUneditedSpace = async (spaceName) => {
 const addCollaboratorToCurrentSpace = async () => {
   const invitedSpaces = await cache.invitedSpaces()
   const invitedSpaceIds = invitedSpaces.map(space => space?.id)
-  const currentSpace = store.state.currentSpace
+  const currentSpace = spaceStore.getSpaceAllState
   const currentUser = userStore.getUserAllState
   if (invitedSpaceIds.includes(currentSpace?.id)) {
     spaceStore.addCollaboratorToSpace(currentUser)

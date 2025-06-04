@@ -23,7 +23,7 @@ const isOnline = computed(() => store.state.isOnline)
 
 const isFavoriteSpace = computed(() => spaceStore.getSpaceIsFavorite())
 const toggleIsFavoriteSpace = () => {
-  const space = store.state.currentSpace
+  const space = spaceStore.getSpaceAllState
   const value = !isFavoriteSpace.value
   userStore.updateUserFavoriteSpace(space, value)
   emit('updateLocalSpaces')

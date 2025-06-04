@@ -22,7 +22,7 @@ const props = defineProps({
   currentSpaceIsHidden: Boolean
 })
 
-const currentSpace = computed(() => store.state.currentSpace)
+const currentSpace = computed(() => spaceStore.getSpaceAllState)
 const currentUserIsSpaceCollaborator = computed(() => userStore.getUserIsSpaceCollaborator)
 const currentSpaceIsTemplate = computed(() => {
   const id = currentSpace.value.id

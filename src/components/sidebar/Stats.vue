@@ -43,7 +43,7 @@ const state = reactive({
   favoriteUsers: []
 })
 
-const currentSpace = computed(() => store.state.currentSpace)
+const currentSpace = computed(() => spaceStore.getSpaceAllState)
 const isLoadingSpace = computed(() => store.state.isLoadingSpace)
 
 // visits

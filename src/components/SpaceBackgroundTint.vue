@@ -1,6 +1,7 @@
 <script setup>
 import { reactive, computed, onMounted, onBeforeUnmount, watch, ref, nextTick } from 'vue'
 import { useStore } from 'vuex'
+import { useSpaceStore } from '@/stores/useSpaceStore'
 
 import postMessage from '@/postMessage.js'
 import utils from '@/utils.js'
@@ -8,10 +9,11 @@ import utils from '@/utils.js'
 import { colord, extend } from 'colord'
 
 const store = useStore()
+const spaceStore = useSpaceStore()
 
 const visible = computed(() => store.getters.isSpacePage)
 const isThemeDark = computed(() => store.getters['themes/isThemeDark'])
-const currentSpace = computed(() => store.state.currentSpace)
+const currentSpace = computed(() => spaceStore.getSpaceAllState)
 
 // tint
 

@@ -18,7 +18,7 @@ const props = defineProps({
 })
 
 const currentUser = computed(() => userStore.getUserAllState)
-const currentSpace = computed(() => store.state.currentSpace)
+const currentSpace = computed(() => spaceStore.getSpaceAllState)
 
 // theme
 

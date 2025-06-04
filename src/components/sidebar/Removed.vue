@@ -56,7 +56,7 @@ const cardsOrSpacesLabel = computed(() => {
     return 'spaces'
   }
 })
-const currentSpace = computed(() => store.state.currentSpace)
+const currentSpace = computed(() => spaceStore.getSpaceAllState)
 const currentSpaceName = computed(() => currentSpace.value.name)
 const currentUserCanEditSpace = computed(() => {
   return userStore.getUserCanEditSpace()
@@ -138,7 +138,7 @@ const loadRemoteRemovedCards = async () => {
   if (!currentUserCanEditSpace.value) { return }
   try {
     state.loading.cards = true
-    const space = store.state.currentSpace
+    const space = spaceStore.getSpaceAllState
     const remoteCards = await store.dispatch('api/getSpaceRemovedCards', space)
     state.loading.cards = false
     if (!utils.arrayHasItems(remoteCards)) { return }

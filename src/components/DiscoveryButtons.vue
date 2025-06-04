@@ -88,7 +88,7 @@ const normalizeCount = (count) => {
 // Unread Counts
 
 const spaceIsCurrentSpace = (space) => {
-  const currentSpace = store.state.currentSpace
+  const currentSpace = spaceStore.getSpaceAllState
   return space.id === currentSpace.id
 }
 const unreadSpaces = (spaces, type) => {

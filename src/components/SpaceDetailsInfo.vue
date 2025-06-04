@@ -96,11 +96,11 @@ const isSpaceMember = computed(() => userStore.getUserIsSpaceMember)
 const updateLocalSpaces = () => {
   emit('updateLocalSpaces')
 }
-const currentSpace = computed(() => store.state.currentSpace)
+const currentSpace = computed(() => spaceStore.getSpaceAllState)
 const isLoadingSpace = computed(() => store.state.isLoadingSpace)
 const currentSpaceIsUserTemplate = computed(() => currentSpace.value.isTemplate)
 const pendingUpload = computed(() => {
-  const currentSpace = store.state.currentSpace
+  const currentSpace = spaceStore.getSpaceAllState
   const pendingUploads = store.state.upload.pendingUploads
   return pendingUploads.find(upload => {
     const isCurrentSpace = upload.spaceId === currentSpace.id
@@ -109,7 +109,7 @@ const pendingUpload = computed(() => {
   })
 })
 const remotePendingUpload = computed(() => {
-  const currentSpace = store.state.currentSpace
+  const currentSpace = spaceStore.getSpaceAllState
   const remotePendingUploads = store.state.remotePendingUploads
   return remotePendingUploads.find(upload => {
     const inProgress = upload.percentComplete < 100

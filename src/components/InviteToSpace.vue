@@ -67,14 +67,14 @@ const toggleInviteType = (type) => {
 // urls
 
 const editUrl = computed(() => {
-  const currentSpace = store.state.currentSpace
+  const currentSpace = spaceStore.getSpaceAllState
   const spaceId = currentSpace.id
   const url = utils.inviteUrl({ spaceId, spaceName: spaceName.value, collaboratorKey: collaboratorKey.value })
   console.info('🍇 invite edit url', url)
   return url
 })
 const readOnlyUrl = computed(() => {
-  const currentSpace = store.state.currentSpace
+  const currentSpace = spaceStore.getSpaceAllState
   const spaceId = currentSpace.id
   const readOnlyKey = currentSpace.readOnlyKey
   const url = utils.inviteUrl({ spaceId, spaceName: spaceName.value, readOnlyKey })
@@ -82,7 +82,7 @@ const readOnlyUrl = computed(() => {
   return url
 })
 const commentOnlyUrl = computed(() => {
-  const currentSpace = store.state.currentSpace
+  const currentSpace = spaceStore.getSpaceAllState
   const spaceId = currentSpace.id
   const url = utils.inviteUrl({ spaceId, spaceName: spaceName.value, collaboratorKey: collaboratorKey.value, isCommentMode: true })
   console.info('🍇 invite comment only url', url)

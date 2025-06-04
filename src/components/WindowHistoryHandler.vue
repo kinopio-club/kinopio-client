@@ -35,7 +35,7 @@ const update = async (space) => {
 }
 const updateWindowHistory = async (space) => {
   const isEmbedMode = store.state.isEmbedMode
-  space = space || store.state.currentSpace
+  space = space || spaceStore.getSpaceAllState
   const spaceUrl = utils.url(space)
   const preventUpdate = window.location.pathname.includes(spaceUrl) || spaceUrl.startsWith('loading--')
   if (preventUpdate) { return }
@@ -47,7 +47,7 @@ const updateWindowHistory = async (space) => {
   history.replaceState({ ...history.state, ...state }, '')
 }
 const updateWindowTitle = () => {
-  const space = store.state.currentSpace
+  const space = spaceStore.getSpaceAllState
   let title
   if (space.name === 'Hello Kinopio') {
     title = 'Kinopio'

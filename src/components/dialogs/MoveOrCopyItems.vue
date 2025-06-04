@@ -57,7 +57,7 @@ const isOnline = computed(() => state.isOnline)
 
 // spaces
 
-const currentSpace = computed(() => store.state.currentSpace)
+const currentSpace = computed(() => spaceStore.getSpaceAllState)
 const updateSpaces = async () => {
   const spaces = await cache.getAllSpaces()
   state.spaces = spaces.filter(space => {

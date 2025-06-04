@@ -107,7 +107,7 @@ const cardsCreatedCountFromLimit = computed(() => {
 })
 const currentSpaceIsTemplate = computed(() => {
   if (store.state.isLoadingSpace) { return }
-  const currentSpace = store.state.currentSpace
+  const currentSpace = spaceStore.getSpaceAllState
   if (currentSpace.isTemplate) { return true }
   const templateSpaceIds = templates.spaces().map(space => space.id)
   return templateSpaceIds.includes(currentSpace.id)
@@ -140,7 +140,7 @@ const checkIfShouldNotifySpaceOutOfSync = async () => {
     const remoteSpace = await store.dispatch('api/getSpaceUpdatedAt', { id: spaceStore.id })
     store.commit('isLoadingSpace', false)
     if (!remoteSpace) { return }
-    const space = store.state.currentSpace
+    const space = spaceStore.getSpaceAllState
     const spaceeditedAt = dayjs(space.editedAt)
     const remoteSpaceeditedAt = dayjs(remoteSpace.editedAt)
     const deltaMinutes = remoteSpaceeditedAt.diff(spaceeditedAt, 'minute')
@@ -251,12 +251,12 @@ const removeNotifyConnectionError = () => {
 // buttons
 
 const restoreSpace = () => {
-  const space = store.state.currentSpace
+  const space = spaceStore.getSpaceAllState
   spaceStore.restoreRemovedSpace(space)
   store.commit('notifySpaceIsRemoved', false)
 }
 const deleteSpace = async () => {
-  const space = store.state.currentSpace
+  const space = spaceStore.getSpaceAllState
   spaceStore.deleteSpace(space)
   store.commit('notifySpaceIsRemoved', false)
   const cachedSpaces = await cache.getAllSpaces()

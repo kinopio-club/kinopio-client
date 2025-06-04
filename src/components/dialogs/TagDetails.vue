@@ -156,7 +156,7 @@ const updateDialogHeight = async () => {
 // spaces
 
 const cachedOrOtherSpaceById = async (spaceId) => {
-  const currentSpace = store.state.currentSpace
+  const currentSpace = spaceStore.getSpaceAllState
   const cachedSpace = await cache.space(spaceId)
   if (spaceId === currentSpace.id) {
     return utils.clone(currentSpace)

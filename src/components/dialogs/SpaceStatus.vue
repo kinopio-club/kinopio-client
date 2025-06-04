@@ -1,11 +1,14 @@
 <script setup>
 import { reactive, computed, onMounted, watch, ref, nextTick } from 'vue'
 import { useStore } from 'vuex'
+import { useSpaceStore } from '@/stores/useSpaceStore'
 
 import Loader from '@/components/Loader.vue'
 import cache from '@/cache.js'
 import utils from '@/utils.js'
+
 const store = useStore()
+const spaceStore = useSpaceStore()
 
 const props = defineProps({
   visible: Boolean
@@ -21,7 +24,7 @@ const state = reactive({
   spaceIsCached: false
 })
 
-const currentSpace = computed(() => store.state.currentSpace)
+const currentSpace = computed(() => spaceStore.getSpaceAllState)
 
 const refreshBrowser = () => {
   window.location.reload()

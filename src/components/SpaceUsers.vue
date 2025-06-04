@@ -40,7 +40,7 @@ const state = reactive({
 const isEmbedMode = computed(() => store.state.isEmbedMode)
 const isAddPage = computed(() => store.state.isAddPage)
 const currentUser = computed(() => userStore.getUserAllState)
-const currentSpace = computed(() => store.state.currentSpace)
+const currentSpace = computed(() => spaceStore.getSpaceAllState)
 const currentUserIsSpaceMember = computed(() => userStore.getUserIsSpaceMember)
 
 // const appendCurrentUser = (items) => {

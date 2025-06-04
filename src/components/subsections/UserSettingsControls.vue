@@ -21,7 +21,7 @@ const state = reactive({
   outsideSpaceColorTipsIsVisible: false
 })
 
-const currentSpace = computed(() => store.state.currentSpace)
+const currentSpace = computed(() => spaceStore.getSpaceAllState)
 const isMobile = computed(() => utils.isMobile())
 const deviceSupportsHapticFeedback = computed(() => consts.isSecureAppContext && isMobile.value)
 

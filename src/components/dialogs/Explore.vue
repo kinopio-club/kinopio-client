@@ -61,7 +61,7 @@ const state = reactive({
   tipsIsVisible: false
 })
 
-const currentSpace = computed(() => store.state.currentSpace)
+const currentSpace = computed(() => spaceStore.getSpaceAllState)
 const changeSpace = (space) => {
   closeDialogs()
   spaceStore.changeSpace(space)

@@ -316,7 +316,7 @@ const afterResizeCards = () => {
 }
 const addCardFromOutsideAppContext = (event) => {
   if (!consts.isSecureAppContext) { return }
-  const currentSpace = store.state.currentSpace
+  const currentSpace = spaceStore.getSpaceAllState
   const data = event.data
   if (data.name !== 'addedCardFromAddPage') { return }
   const card = data.value

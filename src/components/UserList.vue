@@ -107,7 +107,7 @@ const removeCollaborator = async (user) => {
   closeDialogs()
 }
 const userIsSpaceCreator = (user) => {
-  const space = store.state.currentSpace
+  const space = spaceStore.getSpaceAllState
   return user.id === space.userId
 }
 

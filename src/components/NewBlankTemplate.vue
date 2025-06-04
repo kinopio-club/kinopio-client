@@ -15,7 +15,7 @@ const spaceStore = useSpaceStore()
 // let unsubscribes
 
 onMounted(() => {
-  console.info('🐴 the component is now mounted.', store.state.currentSpace)
+  console.info('🐴 the component is now mounted.', spaceStore.getSpaceAllState)
   // const cardStoreUnsubscribe = cardStore.$onAction(
   //   ({name, args}) => {
   //     if (name === 'moveCards') {

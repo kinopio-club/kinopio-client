@@ -133,7 +133,7 @@ const handleFocusBeforeFirstItem = () => {
 }
 const excludeCurrentSpace = () => {
   if (!props.shouldExcludeCurrentSpace) { return }
-  const currentSpace = store.state.currentSpace
+  const currentSpace = spaceStore.getSpaceAllState
   state.spaces = state.spaces.filter(space => space.id !== currentSpace.id)
 }
 const updateSpaces = async () => {
