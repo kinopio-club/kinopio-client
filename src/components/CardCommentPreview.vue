@@ -50,7 +50,7 @@ const backgroundColorIsDark = computed(() => {
   if (backgroundColor.value) {
     return utils.colorIsDark(backgroundColor.value)
   } else {
-    return themeStore.isThemeDark
+    return themeStore.getIsThemeDark
   }
 })
 

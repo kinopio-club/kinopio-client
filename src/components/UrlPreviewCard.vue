@@ -48,7 +48,7 @@ const isInteractingWithItem = computed(() => store.getters.isInteractingWithItem
 
 // colors
 
-const isThemeDark = computed(() => themeStore.isThemeDark)
+const isThemeDark = computed(() => themeStore.getIsThemeDark)
 const background = computed(() => {
   const color = props.backgroundColor
   const defaultColor = utils.cssVariable('secondary-background')

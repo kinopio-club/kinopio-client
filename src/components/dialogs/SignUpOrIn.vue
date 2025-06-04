@@ -5,6 +5,7 @@ import { useUserStore } from '@/stores/useUserStore'
 import { useSpaceStore } from '@/stores/useSpaceStore'
 import { useApiStore } from '@/stores/useApiStore'
 import { useBroadcastStore } from '@/stores/useBroadcastStore'
+import { useThemeStore } from '@/stores/useThemeStore'
 
 import utils from '@/utils.js'
 import Loader from '@/components/Loader.vue'
@@ -22,6 +23,7 @@ const userStore = useUserStore()
 const spaceStore = useSpaceStore()
 const apiStore = useApiStore()
 const broadcastStore = useBroadcastStore()
+const themeStore = useThemeStore()
 
 let shouldLoadLastSpace
 let sessionToken
@@ -212,7 +214,7 @@ const signUp = async (event) => {
     userStore.checkIfShouldJoinGroup()
     await addCollaboratorToInvitedSpaces()
     store.commit('triggerUpdateWindowHistory')
-    store.dispatch('themes/restore')
+    themeStore.restoreTheme()
   } else {
     await handleErrors(newUser)
   }
@@ -251,7 +253,7 @@ const signIn = async (event) => {
     store.commit('isLoadingFavorites', true)
     userStore.restoreUserAssociatedData()
     store.commit('triggerUpdateNotifications')
-    store.dispatch('themes/restore')
+    themeStore.restoreTheme()
     if (shouldLoadLastSpace) {
       await spaceStore.loadLastSpace()
       store.commit('triggerUpdateWindowHistory')

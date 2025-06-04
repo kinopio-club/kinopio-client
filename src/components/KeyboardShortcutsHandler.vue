@@ -7,6 +7,7 @@ import { useBoxStore } from '@/stores/useBoxStore'
 import { useUserStore } from '@/stores/useUserStore'
 import { useSpaceStore } from '@/stores/useSpaceStore'
 import { useUploadStore } from '@/stores/useUploadStore'
+import { useThemeStore } from '@/stores/useThemeStore'
 
 import utils from '@/utils.js'
 import consts from '@/consts.js'
@@ -20,6 +21,7 @@ const boxStore = useBoxStore()
 const userStore = useUserStore()
 const spaceStore = useSpaceStore()
 const uploadStore = useUploadStore()
+const themeStore = useThemeStore()
 
 let useSiblingConnectionType
 let browserZoomLevel = 0
@@ -147,8 +149,8 @@ const handleShortcuts = (event) => {
   // t
   } else if (keyT && isSpaceScope) {
     store.commit('addNotification', { message: 'Theme toggled (T)', type: 'info' })
-    store.dispatch('themes/toggle')
-    store.dispatch('themes/isSystem', false)
+    themeStore.toggleTheme()
+    themeStore.updateThemeIsSystem(false)
   // Backspace, Clear, Delete
   } else if ((key === 'backspace' || key === 'clear' || key === 'delete') && isSpaceScope) {
     remove()

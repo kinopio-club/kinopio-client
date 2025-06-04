@@ -26,14 +26,14 @@ onMounted(() => {
   console.info('🐸 kinopio-server URL', consts.apiHost())
   store.subscribe((mutation, state) => {
     if (mutation.type === 'triggerUserIsLoaded') {
-      updateThemeFromSystem()
+      updateSystemTheme()
     }
   })
   if (utils.isLinux()) {
     utils.setCssVariable('sans-serif-font', '"Noto Sans", "Helvetica Neue", Helvetica, Arial, sans-serif')
   }
-  window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', logMatchMediaChange)
-  window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', updateThemeFromSystem)
+  window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', logSystemThemeChange)
+  window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', updateSystemTheme)
   updateIsOnline()
   window.addEventListener('online', updateIsOnline)
   window.addEventListener('offline', updateIsOnline)
@@ -119,15 +119,13 @@ const updateServerIsOnline = async () => {
 
 // theme
 
-const isThemeDark = computed(() => themeStore.isThemeDark)
-const logMatchMediaChange = (event) => {
+const isThemeDark = computed(() => themeStore.getIsThemeDark)
+const logSystemThemeChange = (event) => {
   const themeIsSystem = userStore.themeIsSystem
-  console.warn('🌓 logMatchMediaChange', window.matchMedia('(prefers-color-scheme: dark)'), event, { themeIsSystem })
+  console.warn('🌓 logSystemThemeChange', window.matchMedia('(prefers-color-scheme: dark)'), event, { themeIsSystem })
 }
-const updateThemeFromSystem = () => {
-  const themeName = themeStore.themeFromSystem()
-  if (!themeName) { return }
-  store.dispatch('themes/update', themeName)
+const updateSystemTheme = () => {
+  themeStore.updateSystemTheme()
 }
 
 // remote

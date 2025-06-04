@@ -57,7 +57,7 @@ const state = reactive({
   isSuccess: false
 })
 
-const isDarkTheme = computed(() => themeStore.isThemeDark)
+const isDarkTheme = computed(() => themeStore.getIsThemeDark)
 const currentUser = computed(() => userStore.getUserAllState)
 const updateDialogHeight = async () => {
   if (!props.visible) { return }

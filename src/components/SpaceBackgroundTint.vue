@@ -14,7 +14,7 @@ const spaceStore = useSpaceStore()
 const themeStore = useThemeStore()
 
 const visible = computed(() => store.getters.isSpacePage)
-const isThemeDark = computed(() => themeStore.isThemeDark)
+const isThemeDark = computed(() => themeStore.getIsThemeDark)
 const currentSpace = computed(() => spaceStore.getSpaceAllState)
 
 // tint

@@ -107,7 +107,7 @@ const userIsNotCurrentUser = (userId) => {
 const isStrikeThrough = (card) => {
   return card.name.startsWith('[x]')
 }
-const isThemeDark = computed(() => themeStore.isThemeDark)
+const isThemeDark = computed(() => themeStore.getIsThemeDark)
 const colorIsDark = (card) => {
   if (!card.backgroundColor) {
     return isThemeDark.value

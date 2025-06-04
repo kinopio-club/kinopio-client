@@ -3,6 +3,7 @@ import { reactive, computed, onMounted, onUnmounted, watch, ref, nextTick } from
 import { useStore } from 'vuex'
 import { useUserStore } from '@/stores/useUserStore'
 import { useSpaceStore } from '@/stores/useSpaceStore'
+import { useThemeStore } from '@/stores/useThemeStore'
 
 import BackgroundPreview from '@/components/BackgroundPreview.vue'
 import utils from '@/utils.js'
@@ -10,6 +11,7 @@ import utils from '@/utils.js'
 const store = useStore()
 const userStore = useUserStore()
 const spaceStore = useSpaceStore()
+const themeStore = useThemeStore()
 
 const dialogElement = ref(null)
 
@@ -24,10 +26,10 @@ const currentSpace = computed(() => spaceStore.getSpaceAllState)
 
 const themeIsSystem = computed(() => userStore.themeIsSystem)
 const toggleThemeIsSystem = () => {
-  store.dispatch('themes/toggleIsSystem')
+  themeStore.toggleThemeIsSystem()
 }
 const updateTheme = (themeName) => {
-  store.dispatch('themes/update', themeName)
+  themeStore.updateTheme(themeName)
 }
 
 // user default values

@@ -52,7 +52,7 @@ const incrementBy = () => {
   console.info('🧢', theme)
   state.count = state.count + 1
   emit('updateCount', state.count)
-  // store.dispatch('themes/isSystem', false)
+  // themeStore.updateThemeIsSystem(false)
 }
 </script>
 

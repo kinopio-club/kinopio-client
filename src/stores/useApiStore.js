@@ -3,6 +3,7 @@ import { defineStore } from 'pinia'
 import { useUserStore } from '@/stores/useUserStore'
 import { useSpaceStore } from '@/stores/useSpaceStore'
 import { useGroupStore } from '@/stores/useGroupStore'
+import { useThemeStore } from '@/stores/useThemeStore'
 
 import store from '@/store/store.js' // TEMP Import Vuex store
 
@@ -826,9 +827,10 @@ export const useApiStore = defineStore('api', {
     },
     async updateSpacePreviewImage (spaceId) {
       const spaceStore = useSpaceStore()
+      const themeStore = useThemeStore()
       try {
         spaceId = spaceId || spaceStore.id
-        const themeOptions = store.getters['themes/previewImageThemeOptions']
+        const themeOptions = themeStore.previewImageThemeOptions()
         const body = { spaceId, themeOptions }
         const options = await this.requestOptions({ body, method: 'POST' })
         const response = await fetch(`${consts.apiHost()}/space/preview-image`, options)

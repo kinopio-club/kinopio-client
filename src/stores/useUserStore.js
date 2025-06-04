@@ -6,6 +6,7 @@ import { useApiStore } from '@/stores/useApiStore'
 import { useUserNotificationStore } from '@/stores/useUserNotificationStore'
 import { useGroupStore } from '@/stores/useGroupStore'
 import { useBroadcastStore } from '@/stores/useBroadcastStore'
+import { useThemeStore } from '@/stores/useThemeStore'
 
 import store from '@/store/store.js' // TEMP Import Vuex store
 
@@ -342,16 +343,17 @@ export const useUserStore = defineStore('users', {
       }
     },
     async initializeUser () {
+      const themeStore = useThemeStore()
       const cachedUser = await cache.user()
       if (utils.objectHasKeys(cachedUser)) {
         console.info('🌸 Initialize user from cache', cachedUser.id)
         this.updateUserState(cachedUser)
-        store.dispatch('themes/restore', null, { root: true })
+        themeStore.restoreTheme()
         await this.restoreRemoteUser(cachedUser)
         await this.restoreUserAssociatedData()
       } else {
         this.createNewUser()
-        store.dispatch('themes/restore', null, { root: true })
+        themeStore.restoreTheme()
       }
       store.commit('triggerUserIsLoaded', null, { root: true })
       this.checkIfShouldJoinGroup()

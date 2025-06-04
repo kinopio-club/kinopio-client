@@ -45,7 +45,7 @@ const scrollIntoView = () => {
   const element = dialogElement.value
   store.commit('scrollElementIntoView', { element })
 }
-const isThemeDark = computed(() => themeStore.isThemeDark)
+const isThemeDark = computed(() => themeStore.getIsThemeDark)
 
 const items = computed(() => {
   let array = props.cards.concat(props.boxes)

@@ -92,7 +92,7 @@ const cancel = () => {
 const spaceZoomDecimal = computed(() => store.getters.spaceZoomDecimal)
 const outsideSpaceBackgroundIsStatic = computed(() => userStore.outsideSpaceBackgroundIsStatic)
 const backgroundTintColor = computed(() => spaceStore.backgroundTint)
-const isThemeDark = computed(() => themeStore.isThemeDark)
+const isThemeDark = computed(() => themeStore.getIsThemeDark)
 const preventTouchScrolling = (event) => {
   const shouldPrevent = store.state.currentUserIsResizingBox || store.state.currentUserIsPaintingLocked
   if (shouldPrevent) {

@@ -53,7 +53,7 @@ const urlIsSpaceInvite = computed(() => utils.urlIsSpaceInvite(props.url))
 
 // colors
 
-const isThemeDark = computed(() => themeStore.isThemeDark)
+const isThemeDark = computed(() => themeStore.getIsThemeDark)
 const background = computed(() => {
   const color = props.selectedColor || props.card.backgroundColor
   const defaultColor = utils.cssVariable('secondary-background')

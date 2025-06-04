@@ -47,7 +47,7 @@ const spaceZoomDecimal = computed(() => store.getters.spaceZoomDecimal)
 const spaceCounterZoomDecimal = computed(() => store.getters.spaceCounterZoomDecimal)
 const viewportHeight = computed(() => store.state.viewportHeight)
 const viewportWidth = computed(() => store.state.viewportWidth)
-const isDarkTheme = computed(() => themeStore.isThemeDark)
+const isDarkTheme = computed(() => themeStore.getIsThemeDark)
 const styles = computed(() => {
   return {
     left: state.scroll.x + 'px',

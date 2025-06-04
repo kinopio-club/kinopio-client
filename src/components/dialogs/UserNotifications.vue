@@ -135,7 +135,7 @@ const cardNameSegments = (name) => {
 const markAllAsRead = () => {
   emit('markAllAsRead')
 }
-const isThemeDark = computed(() => themeStore.isThemeDark)
+const isThemeDark = computed(() => themeStore.getIsThemeDark)
 const cardBackgroundIsDark = (card) => {
   if (card.backgroundColor) {
     return utils.colorIsDark(card.backgroundColor)
