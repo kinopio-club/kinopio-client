@@ -166,7 +166,7 @@ const spaceIsActive = (space) => {
   }
 }
 const spaceIsHidden = (space) => {
-  const isHidden = store.getters['currentSpace/isHidden'](space.id)
+  const isHidden = spaceStore.getSpaceIsHiddenById(space.id)
   return isHidden
 }
 const isLoadingSpace = (space) => {

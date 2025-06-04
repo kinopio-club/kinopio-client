@@ -101,7 +101,7 @@ const filteredSpaces = computed(() => {
   let spaces = state.spaces
   if (!props.parentIsCardDetails) { return spaces }
   spaces = spaces.filter(space => {
-    const isHidden = store.getters['currentSpace/isHidden'](space.id)
+    const isHidden = spaceStore.getSpaceIsHiddenById(space.id)
     return !isHidden
   })
   if (props.search) {

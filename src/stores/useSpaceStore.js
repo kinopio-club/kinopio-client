@@ -169,6 +169,13 @@ export const useSpaceStore = defineStore('space', {
       newItems = await utils.updateSpaceItemsSpaceId(newItems, spaceId)
       return newItems
     },
+    getSpaceIsHiddenById (spaceId) {
+      const userStore = useUserStore()
+      const hiddenSpaces = userStore.hiddenSpaces || []
+      let value = hiddenSpaces.find(hiddenSpace => hiddenSpace?.id === spaceId)
+      value = Boolean(value)
+      return value
+    },
 
     // user getters
 

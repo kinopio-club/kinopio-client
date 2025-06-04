@@ -140,7 +140,7 @@ const filteredSpaces = computed(() => {
   // hide by hidden spaces unless filter active
   if (!dialogSpaceFilterShowHidden.value) {
     spaces = spaces.filter(space => {
-      const isHidden = store.getters['currentSpace/isHidden'](space.id)
+      const isHidden = spaceStore.getSpaceIsHiddenById(space.id)
       return !isHidden
     })
   }
