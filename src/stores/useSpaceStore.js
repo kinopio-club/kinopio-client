@@ -6,6 +6,7 @@ import { useCardStore } from '@/stores/useCardStore'
 import { useBoxStore } from '@/stores/useBoxStore'
 import { useApiStore } from '@/stores/useApiStore'
 import { useGroupStore } from '@/stores/useGroupStore'
+import { useBroadcastStore } from '@/stores/useBroadcastStore'
 
 import store from '@/store/store.js' // TEMP Import Vuex store
 
@@ -813,10 +814,11 @@ export const useSpaceStore = defineStore('space', {
     async updateSpace (update) {
       const apiStore = useApiStore()
       const keys = Object.keys(update)
+      const broadcastStore = useBroadcastStore()
       for (const key of keys) {
         this[key] = update[key]
       }
-      store.dispatch('broadcast/update', { update, type: 'updateSpace' }, { root: true })
+      broadcastStore.update({ update, type: 'updateSpace' }, { root: true })
       await apiStore.addToQueue({ name: 'updateUser', body: update }, { root: true })
       await cache.updateSpaceByUpdates(update, this.id)
     },
@@ -937,8 +939,9 @@ export const useSpaceStore = defineStore('space', {
     async removeCollaboratorFromSpace (user) {
       const apiStore = useApiStore()
       const userStore = useUserStore()
+      const broadcastStore = useBroadcastStore()
       const space = this.getSpaceAllState
-      store.dispatch('broadcast/update', { user, type: 'userLeftSpace' }, { root: true })
+      broadcastStore.update({ user, type: 'userLeftSpace' }, { root: true })
       apiStore.removeSpaceCollaborator({ space, user })
       this.collaborators = this.collaborators.filter(collaborator => {
         return collaborator.id !== user.id

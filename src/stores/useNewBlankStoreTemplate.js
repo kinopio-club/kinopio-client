@@ -4,6 +4,7 @@ import { useConnectionStore } from '@/stores/useConnectionStore'
 import { useUserStore } from '@/stores/useUserStore'
 import { useSpaceStore } from '@/stores/useSpaceStore'
 import { useApiStore } from '@/stores/useApiStore'
+import { useBroadcastStore } from '@/stores/useBroadcastStore'
 
 import store from '@/store/store.js' // TEMP Import Vuex store
 
@@ -55,10 +56,11 @@ export const useCardStore = defineStore('cards', {
     },
     async createCard (card) {
       const apiStore = useApiStore()
+      // const broadcastStore = useBroadcastStore()
       // normalize card
       this.addCardToState(card)
       // if (!updates.isBroadcast) {
-      // store.dispatch('broadcast/update', { updates: connection, type: 'addConnection', handler: 'currentConnections/create' }, { root: true })
+      // broadcastStore.update({ updates: connection, type: 'addConnection', handler: 'currentConnections/create' }, { root: true })
       // store.dispatch('history/add', { connections: [connection] }, { root: true })
       await apiStore.addToQueue({ name: 'createCard', body: card }, { root: true })
     },

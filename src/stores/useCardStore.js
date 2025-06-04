@@ -6,6 +6,7 @@ import { useUserStore } from '@/stores/useUserStore'
 import { useSpaceStore } from '@/stores/useSpaceStore'
 import { useApiStore } from '@/stores/useApiStore'
 import { useUserNotificationStore } from '@/stores/useUserNotificationStore'
+import { useBroadcastStore } from '@/stores/useBroadcastStore'
 
 import store from '@/store/store.js' // TEMP Import Vuex store
 
@@ -280,6 +281,7 @@ export const useCardStore = defineStore('cards', {
       const apiStore = useApiStore()
       const userStore = useUserStore()
       const spaceStore = useSpaceStore()
+      const broadcastStore = useBroadcastStore()
       const userNotificationStore = useUserNotificationStore()
       if (spaceStore.getShouldPreventAddCard) {
         store.commit('notifyCardsCreatedIsOverLimit', true, { root: true })
@@ -296,7 +298,7 @@ export const useCardStore = defineStore('cards', {
       userNotificationStore.addCardUpdated({ cardId: card.id, type: 'createCard' })
       // server/disk/save tasks TODO dry
       if (!card.isBroadcast) {
-        store.dispatch('broadcast/update', { updates: card, storeName: 'cardStore', actionName: 'createCard' }, { root: true })
+        broadcastStore.update({ updates: card, storeName: 'cardStore', actionName: 'createCard' }, { root: true })
       }
       await apiStore.addToQueue({ name: 'createCard', body: card }, { root: true })
       await spaceStore.updateSpace({
@@ -355,6 +357,7 @@ export const useCardStore = defineStore('cards', {
       const apiStore = useApiStore()
       const userStore = useUserStore()
       const spaceStore = useSpaceStore()
+      const broadcastStore = useBroadcastStore()
       const canEditSpace = userStore.getUserCanEditSpace
       if (!canEditSpace) { return }
       updates = updates.filter(update => userStore.getUserCanEditCard(update))
@@ -371,7 +374,7 @@ export const useCardStore = defineStore('cards', {
       }
       // server tasks
       if (!updates.isBroadcast) {
-        store.dispatch('broadcast/update', { updates, storeName: 'cardStore', actionName: 'updateCards' }, { root: true })
+        broadcastStore.update({ updates, storeName: 'cardStore', actionName: 'updateCards' }, { root: true })
       }
       await apiStore.addToQueue({ name: 'updateMultipleCards', body: { cards: updates } }, { root: true })
       // TODO history? if unpaused
@@ -709,6 +712,7 @@ export const useCardStore = defineStore('cards', {
     // resize
 
     resizeCards (ids, deltaX) {
+      // const broadcastStore = useBroadcastStore()
       const minImageWidth = 64
       const updates = []
       ids.forEach(id => {
@@ -718,7 +722,7 @@ export const useCardStore = defineStore('cards', {
         width = Math.max(minImageWidth, width)
         width = Math.round(width)
         updates.push({ id, resizeWidth: width })
-        // store.dispatch('broadcast/update', { updates, type: 'resizeCard', handler: 'currentCards/update' }, { root: true })
+        // broadcastStore.update({ updates, type: 'resizeCard', handler: 'currentCards/update' }, { root: true })
       })
       const connectionStore = useConnectionStore()
       connectionStore.updateConnectionPaths(ids)

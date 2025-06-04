@@ -5,6 +5,7 @@ import { useCardStore } from '@/stores/useCardStore'
 import { useUserStore } from '@/stores/useUserStore'
 import { useSpaceStore } from '@/stores/useSpaceStore'
 import { useApiStore } from '@/stores/useApiStore'
+import { useBroadcastStore } from '@/stores/useBroadcastStore'
 
 import store from '@/store/store.js' // TEMP Import Vuex store
 
@@ -140,10 +141,11 @@ export const useBoxStore = defineStore('boxes', {
     },
     async createBox (box, isResizing) {
       const apiStore = useApiStore()
+      // const broadcastStore = useBroadcastStore()
       box = this.normalizeNewBox(box)
       this.addBoxToState(box)
       // if (!updates.isBroadcast) {
-      // context.dispatch('broadcast/update', { updates: box, type: 'createBox', handler: 'currentBoxes/addBoxToState' }, { root: true })
+      // broadcastStore.update({ updates: box, type: 'createBox', handler: 'currentBoxes/addBoxToState' }, { root: true })
       // context.dispatch('history/add', { boxes: [box] }, { root: true })
       if (isResizing) {
         // store.dispatch('history/pause', null, { root: true })
@@ -177,6 +179,7 @@ export const useBoxStore = defineStore('boxes', {
       const apiStore = useApiStore()
       const userStore = useUserStore()
       const spaceStore = useSpaceStore()
+      // const broadcastStore = useBroadcastStore()
       updates.forEach(({ id, ...changes }) => {
         this.pendingUpdates.set(id, {
           ...this.pendingUpdates.get(id) || {},
@@ -190,7 +193,7 @@ export const useBoxStore = defineStore('boxes', {
       }
       // server tasks
       if (!updates.isBroadcast) {
-        // store.dispatch('broadcast/update', { updates, storeName: 'boxStore', actionName: 'updateBoxes' }, { root: true })
+        // broadcastStore.update({ updates, storeName: 'boxStore', actionName: 'updateBoxes' }, { root: true })
       }
       await apiStore.addToQueue({ name: 'updateMultipleBoxes', body: { boxes: updates } }, { root: true })
       await spaceStore.updateSpace({
@@ -217,6 +220,7 @@ export const useBoxStore = defineStore('boxes', {
       const apiStore = useApiStore()
       const userStore = useUserStore()
       const spaceStore = useSpaceStore()
+      // const broadcastStore = useBroadcastStore()
       const canEditSpace = userStore.getUserCanEditSpace
       if (!canEditSpace) { return }
       const updates = []
@@ -225,7 +229,7 @@ export const useBoxStore = defineStore('boxes', {
         this.allIds.splice(idIndex, 1)
         delete this.byId[id]
         await apiStore.addToQueue({ name: 'removeBox', body: { id } }, { root: true })
-        // store.dispatch('broadcast/update', { updates: box, type: 'removeBox', handler: 'currentBoxes/remove' }, { root: true })
+        // broadcastStore.update({ updates: box, type: 'removeBox', handler: 'currentBoxes/remove' }, { root: true })
       }
       const boxes = ids.map(id => this.getBox(id))
       // store.dispatch('history/add', { boxes, isRemoved: true }, { root: true })
