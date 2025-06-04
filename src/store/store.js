@@ -11,17 +11,17 @@ import postMessage from '@/postMessage.js'
 import api from '@/store/api.js'
 import broadcast from '@/store/broadcast.js'
 import history from '@/store/history.js'
-import currentSpace from '@/store/currentSpace.js'
 import upload from '@/store/upload.js'
 import userNotifications from '@/store/userNotifications.js'
 import groups from '@/store/groups.js'
 import themes from '@/store/themes.js'
 import analytics from '@/store/analytics.js'
-import currentUser from '@/store/currentUser.js'
 // temp, converted to pinia
-import currentCards from '@/store/currentCards.js'
-import currentConnections from '@/store/currentConnections.js'
-import currentBoxes from '@/store/currentBoxes.js'
+// import currentSpace from '@/store/currentSpace.js'
+// import currentUser from '@/store/currentUser.js'
+// import currentCards from '@/store/currentCards.js'
+// import currentConnections from '@/store/currentConnections.js'
+// import currentBoxes from '@/store/currentBoxes.js'
 // store plugins
 import websocket from '@/store/plugins/websocket.js'
 
@@ -2094,11 +2094,12 @@ const store = createStore({
     // current space
 
     updateCurrentUserIsInvitedButCannotEditCurrentSpace: async (context, space) => {
+      const userStore = useUserStore()
       space = space || context.state.currentSpace
-      const currentUserIsSignedIn = context.getters['currentUser/isSignedIn']
+      const currentUserIsSignedIn = userStore.getUserIsSignedIn
       const invitedSpaces = await cache.invitedSpaces()
       const isInvitedToSpace = Boolean(invitedSpaces.find(invitedSpace => invitedSpace.id === space.id))
-      const isReadOnlyInvitedToSpace = context.getters['currentUser/isReadOnlyInvitedToSpace'](space)
+      const isReadOnlyInvitedToSpace = userStore.getUserIsReadOnlyInvitedToSpace(space)
       const inviteRequiresSignIn = !currentUserIsSignedIn && isInvitedToSpace
       const value = isReadOnlyInvitedToSpace || inviteRequiresSignIn
       context.commit('currentUserIsInvitedButCannotEditCurrentSpace', value)
@@ -2274,6 +2275,8 @@ const store = createStore({
       return tags || []
     },
     currentInteractingItem: (state, getters, rootState, rootGetters) => {
+      const boxStore = useBoxStore()
+      const cardStore = useCardStore()
       let boxId = state.currentDraggingBoxId
       if (state.currentUserIsResizingBox) {
         boxId = state.currentUserIsResizingBoxIds[0]
@@ -2283,10 +2286,10 @@ const store = createStore({
         cardId = state.currentUserIsResizingCardIds[0]
       }
       if (boxId) {
-        return rootGetters['currentBoxes/byId'](boxId)
+        return boxStore.getBox(boxId)
       }
       if (cardId) {
-        return rootGetters['currentCards/byId'](cardId)
+        return cardStore.getCard(cardId)
       }
     }
   },
@@ -2295,11 +2298,11 @@ const store = createStore({
     api,
     broadcast,
     history,
-    currentUser,
-    currentSpace,
-    currentCards,
-    currentConnections,
-    currentBoxes,
+    // currentUser,
+    // currentSpace,
+    // currentCards,
+    // currentConnections,
+    // currentBoxes,
     upload,
     userNotifications,
     groups,

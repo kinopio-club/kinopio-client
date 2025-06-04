@@ -24,6 +24,7 @@
 //                    └──────────────────────┘░                ▼
 //                     ░░░░░░░░░░░░░░░░░░░░░░░░
 
+import { useSpaceStore } from '@/stores/useSpaceStore'
 import utils from '@/utils.js'
 import { nextTick } from 'vue'
 
@@ -142,10 +143,9 @@ const self = {
       context.dispatch('snapshots')
     },
     snapshots: (context) => {
-      const cards = utils.clone(context.rootState.currentCards.cards)
-      const connections = utils.clone(context.rootState.currentConnections.connections)
-      const connectionTypes = utils.clone(context.rootState.currentConnections.types)
-      const boxes = utils.clone(context.rootState.currentBoxes.boxes)
+      const spaceStore = useSpaceStore()
+      const space = spaceStore.getSpaceAllItems
+      const { cards, connections, connectionTypes, boxes } = space
       context.commit('snapshots', { cards, connections, connectionTypes, boxes })
     },
     pause: (context) => {
