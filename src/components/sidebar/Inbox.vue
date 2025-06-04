@@ -50,7 +50,7 @@ const updatePrevPosition = (event) => {
 }
 
 const loadInboxSpace = () => {
-  store.dispatch('currentSpace/loadInboxSpace')
+  spaceStore.loadInboxSpace()
 }
 
 // list cards
@@ -64,7 +64,7 @@ const updateInboxCardsLocal = async () => {
 }
 const updateInboxCardsRemote = async () => {
   if (!store.state.isOnline) { return }
-  await store.dispatch('currentSpace/updateInboxCache')
+  await spaceStore.updateInboxCache()
   updateInboxCardsLocal()
 }
 const sortCards = () => {

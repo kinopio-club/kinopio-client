@@ -64,7 +64,7 @@ const shouldPauseConnectionDirections = computed(() => userStore.shouldPauseConn
 const toggleShouldPauseConnectionDirections = () => {
   const value = !shouldPauseConnectionDirections.value
   userStore.updateUser({ shouldPauseConnectionDirections: value })
-  store.dispatch('currentSpace/checkIfShouldPauseConnectionDirections')
+  spaceStore.checkIfShouldPauseConnectionDirections()
 }
 
 // increase UI Contrast

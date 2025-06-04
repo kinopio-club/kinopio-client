@@ -808,6 +808,15 @@ export const useSpaceStore = defineStore('space', {
         body: space
       }, { root: true })
     },
+    async deleteAllRemovedSpaces () {
+      const userStore = useUserStore()
+      const userId = userStore.id
+      const removedSpaces = await cache.getAllRemovedSpaces()
+      for (const space of removedSpaces) {
+        await cache.deleteSpace(space)
+      }
+      await store.dispatch('api/addToQueue', { name: 'deleteAllRemovedSpaces', body: { userId } }, { root: true })
+    },
 
     // users
 
@@ -1006,6 +1015,45 @@ export const useSpaceStore = defineStore('space', {
         tag.userId = userStore.id
         this.addTag(tag)
       })
+    },
+    pauseConnectionDirections (space) {
+      const svgs = document.querySelectorAll('svg.connection')
+      svgs.forEach(svg => {
+        svg.pauseAnimations()
+        svg.setCurrentTime(1.5)
+      })
+    },
+    unpauseConnectionDirections (space) {
+      const svgs = document.querySelectorAll('svg.connection')
+      svgs.forEach(svg => {
+        svg.unpauseAnimations()
+      })
+    },
+    checkIfShouldPauseConnectionDirections () {
+      const userStore = useUserStore()
+      const prefersReducedMotion = consts.userPrefersReducedMotion()
+      const userSetting = userStore.shouldPauseConnectionDirections
+      const isInteracting = store.getters.isInteractingWithItem
+      const shouldPause = prefersReducedMotion || userSetting || isInteracting
+      if (shouldPause) {
+        this.pauseConnectionDirections()
+      } else {
+        this.unpauseConnectionDirections()
+      }
+    },
+
+    // inbox
+
+    async updateInboxCache () {
+      const userStore = useUserStore()
+      const isSignedIn = userStore.getUserIsSignedIn
+      const isOffline = !store.state.isOnline
+      if (this.getSpaceIsInbox) { return }
+      if (!isSignedIn) { return }
+      if (isOffline) { return }
+      const inbox = await store.dispatch('api/getUserInboxSpace', null, { root: true })
+      console.info('🌍 updateInboxCache')
+      await cache.saveSpace(inbox)
     }
 
   }

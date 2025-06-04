@@ -214,7 +214,7 @@ const deleteSpace = (space) => {
   removeRemovedSpace(space)
 }
 const deleteAllSpaces = () => {
-  store.dispatch('currentSpace/deleteAllRemovedSpaces')
+  spaceStore.deleteAllRemovedSpaces()
   state.removedSpaces = []
 }
 
