@@ -15,20 +15,25 @@ const spaceStore = useSpaceStore()
 
 let prevPosition
 
-let unsubscribe
+let unsubscribes
 
 onMounted(() => {
   updateOperations()
   window.addEventListener('pointerdown', updatePrevPosition)
-  unsubscribe = store.subscribe(mutation => {
-    if (mutation.type === 'currentSpace/changeSpace') {
-      clearOperations()
+  const spaceStoreUnsubscribe = spaceStore.$onAction(
+    ({ name, args }) => {
+      if (name === 'changeSpace') {
+        clearOperations()
+      }
     }
-  })
+  )
+  unsubscribes = () => {
+    spaceStoreUnsubscribe()
+  }
 })
 onBeforeUnmount(() => {
   window.removeEventListener('pointerdown', updatePrevPosition)
-  unsubscribe()
+  unsubscribes()
 })
 
 const props = defineProps({
