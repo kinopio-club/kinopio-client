@@ -145,7 +145,7 @@ export const useBoxStore = defineStore('boxes', {
       box = this.normalizeNewBox(box)
       this.addBoxToState(box)
       // if (!updates.isBroadcast) {
-      // broadcastStore.update({ updates: box, type: 'createBox', handler: 'currentBoxes/addBoxToState' }, { root: true })
+      // broadcastStore.update({ updates: box, type: 'createBox', handler: 'currentBoxes/addBoxToState' })
       // context.dispatch('history/add', { boxes: [box] }, { root: true })
       if (isResizing) {
         // store.dispatch('history/pause', null, { root: true })
@@ -193,7 +193,7 @@ export const useBoxStore = defineStore('boxes', {
       }
       // server tasks
       if (!updates.isBroadcast) {
-        // broadcastStore.update({ updates, storeName: 'boxStore', actionName: 'updateBoxes' }, { root: true })
+        // broadcastStore.update({ updates, storeName: 'boxStore', actionName: 'updateBoxes' })
       }
       await apiStore.addToQueue({ name: 'updateMultipleBoxes', body: { boxes: updates } }, { root: true })
       await spaceStore.updateSpace({
@@ -229,7 +229,7 @@ export const useBoxStore = defineStore('boxes', {
         this.allIds.splice(idIndex, 1)
         delete this.byId[id]
         await apiStore.addToQueue({ name: 'removeBox', body: { id } }, { root: true })
-        // broadcastStore.update({ updates: box, type: 'removeBox', handler: 'currentBoxes/remove' }, { root: true })
+        // broadcastStore.update({ updates: box, type: 'removeBox', handler: 'currentBoxes/remove' })
       }
       const boxes = ids.map(id => this.getBox(id))
       // store.dispatch('history/add', { boxes, isRemoved: true }, { root: true })

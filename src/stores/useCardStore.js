@@ -298,9 +298,9 @@ export const useCardStore = defineStore('cards', {
       userNotificationStore.addCardUpdated({ cardId: card.id, type: 'createCard' })
       // server/disk/save tasks TODO dry
       if (!card.isBroadcast) {
-        broadcastStore.update({ updates: card, storeName: 'cardStore', actionName: 'createCard' }, { root: true })
+        broadcastStore.update({ updates: card, storeName: 'cardStore', actionName: 'createCard' })
       }
-      await apiStore.addToQueue({ name: 'createCard', body: card }, { root: true })
+      await apiStore.addToQueue({ name: 'createCard', body: card })
       await spaceStore.updateSpace({
         editedAt: new Date(),
         editedByUserId: userStore.id
@@ -374,9 +374,9 @@ export const useCardStore = defineStore('cards', {
       }
       // server tasks
       if (!updates.isBroadcast) {
-        broadcastStore.update({ updates, storeName: 'cardStore', actionName: 'updateCards' }, { root: true })
+        broadcastStore.update({ updates, storeName: 'cardStore', actionName: 'updateCards' })
       }
-      await apiStore.addToQueue({ name: 'updateMultipleCards', body: { cards: updates } }, { root: true })
+      await apiStore.addToQueue({ name: 'updateMultipleCards', body: { cards: updates } })
       // TODO history? if unpaused
       await cache.updateSpace('cards', this.getAllCards, spaceStore.id)
       // update connection paths
@@ -399,7 +399,7 @@ export const useCardStore = defineStore('cards', {
         const idIndex = this.allIds.indexOf(card.id)
         this.allIds.splice(idIndex, 1)
         delete this.byId[card.id]
-        await apiStore.addToQueue({ name: 'deleteCard', body: card }, { root: true })
+        await apiStore.addToQueue({ name: 'deleteCard', body: card })
       }
     },
     async deleteCard (card) {
@@ -413,7 +413,7 @@ export const useCardStore = defineStore('cards', {
       const userId = userStore.id
       const cards = this.getAllRemovedCards
       await this.deleteCards(cards)
-      await apiStore.addToQueue({ name: 'deleteAllRemovedCards', body: { userId, spaceId } }, { root: true })
+      await apiStore.addToQueue({ name: 'deleteAllRemovedCards', body: { userId, spaceId } })
     },
     removeCards (ids) {
       const cardsToRemove = []
