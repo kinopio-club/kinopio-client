@@ -126,7 +126,7 @@ const spaceName = computed({
   },
   set (newName) {
     textareaSize()
-    store.dispatch('currentSpace/updateSpace', { name: newName })
+    spaceStore.updateSpace({ name: newName })
     updateLocalSpaces()
     store.commit('triggerUpdateWindowTitle')
   }
@@ -141,7 +141,7 @@ const textareaSize = () => {
 
 const toggleCurrentSpaceIsUserTemplate = async () => {
   const value = !currentSpaceIsUserTemplate.value
-  await store.dispatch('currentSpace/updateSpace', { isTemplate: value })
+  await spaceStore.updateSpace({ isTemplate: value })
   updateLocalSpaces()
 }
 

@@ -67,7 +67,7 @@ const privacyStateIsActive = (privacyState) => {
 // update
 
 const select = async (privacyState) => {
-  await store.dispatch('currentSpace/updateSpace', { privacy: privacyState.name })
+  await spaceStore.updateSpace({ privacy: privacyState.name })
   updateLocalSpaces()
   emit('closeDialogs')
 }

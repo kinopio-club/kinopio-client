@@ -881,6 +881,7 @@ const self = {
     },
     removeSpaceCollaborator: async (context, { space, user }) => {
       const userStore = useUserStore()
+      const spaceStore = useSpaceStore()
       const apiKey = userStore.apiKey
       const isOnline = context.rootState.isOnline
       if (!shouldRequest({ apiKey, isOnline })) { return }
@@ -893,7 +894,7 @@ const self = {
         const response = await fetch(`${consts.apiHost()}/space/collaborator`, options)
         const data = await normalizeResponse(response)
         const collaboratorKey = data.collaboratorKey
-        context.dispatch('currentSpace/updateSpace', { collaboratorKey }, { root: true })
+        spaceStore.updateSpace({ collaboratorKey })
       } catch (error) {
         context.dispatch('handleServerError', { name: 'removeSpaceCollaborator', error })
       }

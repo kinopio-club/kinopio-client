@@ -207,7 +207,7 @@ const selectGradient = async (index) => {
     backgroundIsGradient: true,
     backgroundGradient: gradient
   }
-  await store.dispatch('currentSpace/updateSpace', updates)
+  await spaceStore.updateSpace(updates)
   updatePreviewImage()
 }
 const gradientIsActive = (gradient) => {
@@ -287,7 +287,7 @@ const updateBackground = async (url) => {
       backgroundIsGradient: false,
       background: url
     }
-    await store.dispatch('currentSpace/updateSpace', updates)
+    await spaceStore.updateSpace(updates)
   }
   updatePreviewImage()
   checkIfImageIsUrl()
@@ -371,7 +371,7 @@ const backgroundTintBadgeColor = computed(() => {
 const updateBackgroundTint = async (value) => {
   state.backgroundTint = value
   if (props.space) {
-    await store.dispatch('currentSpace/updateSpace', { backgroundTint: value })
+    await spaceStore.updateSpace({ backgroundTint: value })
     emit('updateSpaces')
     updatePreviewImage()
   }

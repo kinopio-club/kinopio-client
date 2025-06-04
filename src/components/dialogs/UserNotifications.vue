@@ -188,7 +188,7 @@ const updateAddToExplore = async (space) => {
     return notification
   })
   if (isCurrentSpace) {
-    await store.dispatch('currentSpace/updateSpace', { showInExplore: space.showInExplore })
+    await spaceStore.updateSpace({ showInExplore: space.showInExplore })
   } else {
     space = { id: space.id, showInExplore: space.showInExplore }
     store.dispatch('api/updateSpace', space)

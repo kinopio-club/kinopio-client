@@ -235,6 +235,7 @@ export default {
     // update
 
     update: async (context, box) => {
+      const spaceStore = useSpaceStore()
       context.dispatch('broadcast/update', { updates: box, type: 'updateBox', handler: 'currentBoxes/update' }, { root: true })
       context.dispatch('history/add', { boxes: [box] }, { root: true })
       context.commit('update', box)
@@ -247,7 +248,7 @@ export default {
           context.dispatch('currentConnections/updatePaths', { itemId: box.id }, { root: true })
         })
       }
-      await context.dispatch('currentSpace/updateSpace', { editedAt: new Date() }, { root: true })
+      await spaceStore.updateSpace({ editedAt: new Date() })
       await context.dispatch('api/addToQueue', { name: 'updateBox', body: box }, { root: true })
     },
     updateName (context, { box, newName }) {

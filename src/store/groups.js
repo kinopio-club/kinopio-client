@@ -167,14 +167,16 @@ export default {
       await context.dispatch('api/addToQueue', { name: 'updateGroupUser', body: update }, { root: true })
     },
     addCurrentSpace: async (context, group) => {
+      const spaceStore = useSpaceStore()
       const userStore = useUserStore()
       const user = userStore
       const body = { groupId: group.id, addedToGroupByUserId: user.id }
-      await context.dispatch('currentSpace/updateSpace', body, { root: true })
+      await spaceStore.updateSpace(body)
       await context.dispatch('userNotifications/addSpaceToGroup', body, { root: true })
     },
     removeCurrentSpace: async (context) => {
-      await context.dispatch('currentSpace/updateSpace', { groupId: null, addedToGroupByUserId: null }, { root: true })
+      const spaceStore = useSpaceStore()
+      await spaceStore.updateSpace({ groupId: null, addedToGroupByUserId: null })
     },
     removeGroupUser: (context, { groupId, userId }) => {
       let group = context.getters.byId(groupId)

@@ -43,7 +43,7 @@ let shouldNotUpdate
 
 let canvas, context
 
-let unsubscribe
+let unsubscribes
 
 // start, stop
 
@@ -51,18 +51,21 @@ onMounted(() => {
   canvas = document.getElementById('outside-space-background')
   context = canvas.getContext('2d')
   context.scale(window.devicePixelRatio, window.devicePixelRatio)
-  unsubscribe = store.subscribe(mutation => {
-    if (mutation.type === 'currentSpace/updateSpace') {
-      if (mutation.payload.backgroundTint) {
+  start()
+  const spaceStoreUnsubscribe = spaceStore.$onAction(
+    ({ name, args }) => {
+      if (args[0].backgroundTint) {
         updateBackgroundColor()
       }
     }
-  })
-  start()
+  )
+  unsubscribes = () => {
+    spaceStoreUnsubscribe()
+  }
 })
 onBeforeUnmount(() => {
   cancel()
-  unsubscribe()
+  unsubscribes()
 })
 const isTouching = computed(() => store.state.isPinchZooming || store.state.isTouchScrolling)
 watch(() => isTouching.value, (value, prevValue) => {
