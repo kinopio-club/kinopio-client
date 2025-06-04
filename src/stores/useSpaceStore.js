@@ -112,7 +112,7 @@ export const useSpaceStore = defineStore('space', {
     getSpaceIsHello () {
       return this.name === 'Hello Kinopio'
     },
-    selectedItems () {
+    getSpaceSelectedItems () {
       const cardStore = useCardStore()
       const connectionStore = useConnectionStore()
       const boxStore = useBoxStore()
@@ -164,7 +164,7 @@ export const useSpaceStore = defineStore('space', {
       return Boolean(!spaceCardsCount)
     },
     async getNewItems (items, spaceId) {
-      items = items || this.selectedItems
+      items = items || this.getSpaceSelectedItems
       spaceId = spaceId || this.id
       let newItems = await utils.uniqueSpaceItems(items)
       newItems = await utils.updateSpaceItemsSpaceId(newItems, spaceId)
