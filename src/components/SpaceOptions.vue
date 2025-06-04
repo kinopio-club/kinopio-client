@@ -60,7 +60,7 @@ const changeToPrevSpace = async () => {
   const spaces = cachedSpaces.filter(space => space.id !== currentSpaceId)
   const recentSpace = spaces[0]
   if (store.state.prevSpaceIdInSession) {
-    store.dispatch('currentSpace/loadPrevSpaceInSession')
+    spaceStore.loadPrevSpaceInSession()
   } else if (recentSpace) {
     spaceStore.changeSpace(recentSpace)
   } else {

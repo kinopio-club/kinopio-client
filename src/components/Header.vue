@@ -232,7 +232,7 @@ const backButtonIsVisible = computed(() => {
 const changeToPrevSpace = () => {
   store.dispatch('closeAllDialogs')
   const id = spaceStore.id
-  store.dispatch('currentSpace/loadPrevSpaceInSession')
+  spaceStore.loadPrevSpaceInSession()
   store.commit('prevSpaceIdInSession', id)
 }
 

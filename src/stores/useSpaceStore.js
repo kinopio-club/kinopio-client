@@ -211,6 +211,23 @@ export const useSpaceStore = defineStore('space', {
 
     // load
 
+    async loadPrevSpaceInSession () {
+      const prevSpaceIdInSession = store.state.prevSpaceIdInSession
+      const prevSpacePosition = store.state.prevSpaceIdInSessionPagePosition
+      if (!prevSpaceIdInSession) { return }
+      let space = await cache.space(prevSpaceIdInSession)
+      if (space.id) {
+        await this.changeSpace(space)
+      } else if (prevSpaceIdInSession) {
+        space = { id: prevSpaceIdInSession }
+        await this.changeSpace(space)
+      }
+      window.scroll({
+        left: prevSpacePosition.x,
+        top: prevSpacePosition.y,
+        behavior: 'instant'
+      })
+    },
     restoreSpace (space) {
       const cardStore = useCardStore()
       const boxStore = useBoxStore()
