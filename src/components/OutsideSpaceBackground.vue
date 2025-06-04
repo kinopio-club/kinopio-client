@@ -54,8 +54,10 @@ onMounted(() => {
   start()
   const spaceStoreUnsubscribe = spaceStore.$onAction(
     ({ name, args }) => {
-      if (args[0].backgroundTint) {
-        updateBackgroundColor()
+      if (name === 'updateSpace') {
+        if (args[0].backgroundTint) {
+          updateBackgroundColor()
+        }
       }
     }
   )

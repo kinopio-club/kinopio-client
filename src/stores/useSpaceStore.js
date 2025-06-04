@@ -41,6 +41,7 @@ export const useSpaceStore = defineStore('space', {
       const connectionStore = useConnectionStore()
       const boxStore = useBoxStore()
       const space = this.getSpaceAllState
+      if (!space) { return }
       space.cards = cardStore.getAllCards
       space.connections = connectionStore.getAllConnections
       space.connectionTypes = connectionStore.getAllConnectionTypes
