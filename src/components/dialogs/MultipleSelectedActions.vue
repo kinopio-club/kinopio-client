@@ -95,7 +95,7 @@ const cardOrBoxIsSelected = computed(() => cards.value.length || boxes.value.len
 
 const isSpaceMember = computed(() => userStore.getUserIsSpaceMember)
 const canEditAsNonMember = computed(() => {
-  const spaceIsOpen = store.state.currentSpace.privacy === 'open'
+  const spaceIsOpen = spaceStore.privacy === 'open'
   const isSpaceMember = userStore.getUserIsSpaceMember
   return spaceIsOpen && !isSpaceMember
 })

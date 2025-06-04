@@ -27,7 +27,7 @@ const isInvitedButCannotEditSpace = computed(() => store.state.currentUserIsInvi
 
 // privacy state
 
-const spacePrivacy = computed(() => store.state.currentSpace.privacy)
+const spacePrivacy = computed(() => spaceStore.privacy)
 const privacyState = computed(() => {
   return privacy.states().find(state => {
     return state.name === spacePrivacy.value

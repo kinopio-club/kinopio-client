@@ -85,7 +85,7 @@ const closeChildDialogs = () => {
 // free cards from space member
 
 const spaceCreatorIsUpgraded = computed(() => spaceStore.getSpaceCreatorIsUpgraded)
-const spaceUser = computed(() => store.state.currentSpace.users[0])
+const spaceUser = computed(() => spaceStore.users[0])
 
 </script>
 

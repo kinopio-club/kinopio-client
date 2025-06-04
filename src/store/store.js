@@ -1836,6 +1836,7 @@ const store = createStore({
     updatePageSizes: async (context) => {
       const cardStore = useCardStore()
       const boxStore = useBoxStore()
+      const spaceStore = useSpaceStore()
       const cards = cardStore.getAllCards
       const boxes = boxStore.getAllBoxes
       const items = cards.concat(boxes)
@@ -1843,7 +1844,7 @@ const store = createStore({
         x: 0, y: 0, width: 500, height: 500 // minimum page size
       })
       const itemsRect = utils.pageSizeFromItems(items)
-      const drawingRect = await utils.imageSize(context.state.currentSpace.drawingImage)
+      const drawingRect = await utils.imageSize(spaceStore.drawingImage)
       const rect = utils.mergeRectSizes(itemsRect, drawingRect)
       context.commit('updatePageSizes', rect)
     },

@@ -112,7 +112,7 @@ const updateName = async (newName) => {
   await store.dispatch('api/addToQueue', { name: 'updateCard', body: card, spaceId })
 }
 const updateOtherNameInCurrentSpace = ({ card, spaceId }) => {
-  const currentSpaceId = store.state.currentSpace.id
+  const currentSpaceId = spaceStore.id
   if (currentSpaceId !== spaceId) { return }
   cardStore.updateCard(card)
 }
@@ -129,13 +129,13 @@ const selectCard = (card) => {
   store.dispatch('focusOnCardId', card.id)
 }
 const changeSpace = (spaceId) => {
-  if (store.state.currentSpace.id === spaceId) { return }
+  if (spaceStore.id === spaceId) { return }
   const space = { id: spaceId }
   store.dispatch('closeAllDialogs')
   spaceStore.changeSpace(space)
 }
 const selectSpaceCard = () => {
-  const isCardInCurrentSpace = otherCard.value.spaceId === store.state.currentSpace.id
+  const isCardInCurrentSpace = otherCard.value.spaceId === spaceStore.id
   if (isCardInCurrentSpace) {
     selectCard(otherCard.value)
   } else {

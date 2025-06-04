@@ -182,7 +182,7 @@ const changeSpace = async (url) => {
   store.dispatch('closeAllDialogs')
 }
 const changeSpaceAndCard = async (spaceId, cardId) => {
-  const currentSpaceId = store.state.currentSpace.id
+  const currentSpaceId = spaceStore.id
   // space and card
   if (currentSpaceId !== spaceId) {
     store.commit('loadSpaceFocusOnCardId', cardId)
@@ -626,7 +626,7 @@ const currentUserIsHoveringOverUrlButton = computed(() => {
   return store.state.currentUserIsHoveringOverUrlButtonCardId === props.card.id
 })
 const connectorIsVisible = computed(() => {
-  const spaceIsOpen = store.state.currentSpace.privacy === 'open' && currentUserIsSignedIn.value
+  const spaceIsOpen = spaceStore.privacy === 'open' && currentUserIsSignedIn.value
   let isVisible
   if (state.isRemoteConnecting) {
     isVisible = true
@@ -920,7 +920,7 @@ const nameSegments = computed(() => {
           name: segment.name,
           color: newTagColor(),
           cardId: props.card.id,
-          spaceId: store.state.currentSpace.id
+          spaceId: spaceStore.id
         }
         console.warn('🦋 create missing tag', segment.name, tag, props.card)
         spaceStore.addTag(tag)
@@ -1144,7 +1144,7 @@ const updateUrlPreviewImage = (update) => {
   if (!update.urlPreviewImage) { return }
   if (!canEditSpace.value) { return }
   update.cardId = update.id
-  update.spaceId = store.state.currentSpace.id
+  update.spaceId = spaceStore.id
   delete update.id
   store.dispatch('api/updateUrlPreviewImage', update)
 }

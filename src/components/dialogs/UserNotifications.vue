@@ -68,7 +68,7 @@ const currentUser = computed(() => userStore.getUserAllState)
 
 // space
 
-const currentSpaceId = computed(() => store.state.currentSpace.id)
+const currentSpaceId = computed(() => spaceStore.id)
 const isCurrentSpace = (spaceId) => {
   return spaceId === currentSpaceId.value
 }
@@ -177,7 +177,7 @@ const isAskToAddToExplore = (notification) => {
   return notification.type === 'askToAddToExplore'
 }
 const updateAddToExplore = async (space) => {
-  const isCurrentSpace = space.id === store.state.currentSpace.id
+  const isCurrentSpace = space.id === spaceStore.id
   state.filteredNotifications = state.filteredNotifications.map(notification => {
     if (!notification.space) {
       return notification

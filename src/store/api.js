@@ -191,12 +191,13 @@ const self = {
 
     addToQueue: async (context, { name, body, spaceId }) => {
       const userStore = useUserStore()
+      const spaceStore = useSpaceStore()
       const canEditSpace = userStore.getUserCanEditSpace()
       const editOperations = ['updateUrlPreviewImage', 'updateCard', 'updateConnection']
       if (editOperations.includes(name) && !canEditSpace) { return }
       body = utils.clone(body)
       body.operationId = nanoid()
-      body.spaceId = spaceId || context.rootState.currentSpace.id
+      body.spaceId = spaceId || spaceStore.id
       body.userId = userStore.id
       body.clientCreatedAt = new Date()
       const isSignedIn = userStore.getUserIsSignedIn
@@ -696,10 +697,11 @@ const self = {
       }
     },
     getSpaceFavorites: async (context) => {
+      const spaceStore = useSpaceStore()
       try {
         const isOnline = context.rootState.isOnline
         if (!isOnline) { return }
-        const spaceId = context.rootState.currentSpace.id
+        const spaceId = spaceStore.id
         console.info('🛬 getting remote space favorites', spaceId)
         const options = await context.dispatch('requestOptions', { method: 'GET', space: context.rootState.currentSpace })
         const response = await utils.timeout(consts.defaultTimeout, fetch(`${consts.apiHost()}/space/${spaceId}/favorites`, options))
@@ -709,10 +711,11 @@ const self = {
       }
     },
     getSpaceHistory: async (context) => {
+      const spaceStore = useSpaceStore()
       try {
         const isOnline = context.rootState.isOnline
         if (!isOnline) { return }
-        const spaceId = context.rootState.currentSpace.id
+        const spaceId = spaceStore.id
         console.info('🛬 getting remote space history', spaceId)
         const options = await context.dispatch('requestOptions', { method: 'GET', space: context.rootState.currentSpace })
         const response = await utils.timeout(consts.defaultTimeout, fetch(`${consts.apiHost()}/space/${spaceId}/history`, options))
@@ -818,8 +821,9 @@ const self = {
       }
     },
     updateSpacePreviewImage: async (context, spaceId) => {
+      const spaceStore = useSpaceStore()
       try {
-        spaceId = spaceId || context.rootState.currentSpace.id
+        spaceId = spaceId || spaceStore.id
         const themeOptions = context.rootGetters['themes/previewImageThemeOptions']
         const body = { spaceId, themeOptions }
         const options = await context.dispatch('requestOptions', { body, method: 'POST', space: context.rootState.currentSpace })
@@ -1225,8 +1229,9 @@ const self = {
     // Upload
 
     createPresignedPost: async (context, body) => {
+      const spaceStore = useSpaceStore()
       try {
-        body.requestSpaceId = context.rootState.currentSpace.id
+        body.requestSpaceId = spaceStore.id
         const options = await context.dispatch('requestOptions', { body, method: 'POST', space: context.rootState.currentSpace })
         const response = await fetch(`${consts.apiHost()}/upload/presigned-post`, options)
         return normalizeResponse(response)
@@ -1235,8 +1240,9 @@ const self = {
       }
     },
     createMultiplePresignedPosts: async (context, body) => {
+      const spaceStore = useSpaceStore()
       try {
-        body.requestSpaceId = context.rootState.currentSpace.id
+        body.requestSpaceId = spaceStore.id
         const options = await context.dispatch('requestOptions', { body, method: 'POST', space: context.rootState.currentSpace })
         const response = await fetch(`${consts.apiHost()}/upload/presigned-post/multiple`, options)
         return normalizeResponse(response)
@@ -1344,7 +1350,8 @@ const self = {
       }
     },
     pdf: async (context) => {
-      const spaceId = context.rootState.currentSpace.id
+      const spaceStore = useSpaceStore()
+      const spaceId = spaceStore.id
       try {
         const options = await context.dispatch('requestOptions', { method: 'POST', space: context.rootState.currentSpace })
         const response = await fetch(`${consts.apiHost()}/services/pdf/${spaceId}`, options)

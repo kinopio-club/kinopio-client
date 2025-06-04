@@ -16,9 +16,9 @@ const props = defineProps({
 })
 
 const isSpaceMember = computed(() => userStore.getUserIsSpaceMember)
-const spacePrivacyIsOpen = computed(() => store.state.currentSpace.privacy === 'open')
-const showInExplore = computed(() => store.state.currentSpace.showInExplore)
-const isTemplate = computed(() => store.state.currentSpace.isTemplate)
+const spacePrivacyIsOpen = computed(() => spaceStore.privacy === 'open')
+const showInExplore = computed(() => spaceStore.showInExplore)
+const isTemplate = computed(() => spaceStore.isTemplate)
 const isHidden = computed(() => {
   return isSpaceMember.value && !showInExplore.value && !isTemplate.value && !props.spaceGroup
 })

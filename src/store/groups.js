@@ -239,8 +239,9 @@ export default {
     },
     currentUserIsCurrentSpaceGroupUser: (state, getters, rootState) => {
       const userStore = useUserStore()
+      const spaceStore = useSpaceStore()
       const userId = userStore.id
-      const groupId = rootState.currentSpace.groupId
+      const groupId = spaceStore.groupId
       if (!groupId) { return }
       const group = getters.spaceGroup()
       if (!group) { return }

@@ -110,8 +110,9 @@ export default {
 
     addAskToAddToExplore: async (context) => {
       const userStore = useUserStore()
+      const spaceStore = useSpaceStore()
       const userId = userStore.id
-      const spaceId = context.rootState.currentSpace.id
+      const spaceId = spaceStore.id
       const recipientUserIds = context.getters.recipientUserIds
       if (!recipientUserIds.length) { return }
       const notification = {
@@ -129,7 +130,7 @@ export default {
       const userStore = useUserStore()
       const spaceStore = useSpaceStore()
       const currentUserId = userStore.id
-      const spaceIsOpen = rootState.currentSpace.privacy === 'open'
+      const spaceIsOpen = spaceStore.privacy === 'open'
       // space members
       let members = spaceStore.getSpaceMembers
       members = utils.excludeCurrentUser(members, userStore.id)
@@ -137,7 +138,7 @@ export default {
       let recipients = members
       if (spaceIsOpen) {
         let contributors = []
-        contributors = rootState.currentSpace.cards.map(card => card.userId)
+        contributors = spaceStore.cards.map(card => card.userId)
         recipients = members.concat(contributors)
       }
       // group users who added cards

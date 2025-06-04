@@ -602,7 +602,7 @@ const isConnectingFrom = computed(() => {
 })
 const connectedConnectionTypes = computed(() => connectionStore.getItemConnectionTypes(props.box.id))
 const connectorIsVisible = computed(() => {
-  const spaceIsOpen = store.state.currentSpace.privacy === 'open' && currentUserIsSignedIn.value
+  const spaceIsOpen = spaceStore.privacy === 'open' && currentUserIsSignedIn.value
   let isVisible
   if (isLocked.value) { return }
   if (state.isRemoteConnecting) {

@@ -116,7 +116,7 @@ const selectCard = async (card) => {
   const skipCardDetailsIsVisible = true
   let newCard = utils.clone(card)
   newCard.id = nanoid()
-  newCard.spaceId = store.state.currentSpace.id
+  newCard.spaceId = spaceStore.id
   newCard.x = scroll.x + 100 // matches KeyboardShortcutsHandler.addCard
   newCard.y = scroll.y + 120 // matches KeyboardShortcutsHandler.addCard
   const spaceCards = cardStore.getAllCards

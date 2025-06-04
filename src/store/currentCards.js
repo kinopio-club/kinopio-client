@@ -258,7 +258,8 @@ export default {
     },
     addMultiple: async (context, { cards, shouldOffsetPosition }) => {
       const userStore = useUserStore()
-      const spaceId = context.rootState.currentSpace.id
+      const spaceStore = useSpaceStore()
+      const spaceId = spaceStore.id
       cards = cards.map(card => {
         let x = card.x
         let y = card.y
@@ -367,10 +368,10 @@ export default {
       const userStore = useUserStore()
       const spaceStore = useSpaceStore()
       if (!cards.length) { return }
-      const spaceId = context.rootState.currentSpace.id
+      const spaceId = spaceStore.id
       const updates = {
         cards,
-        spaceId: context.rootState.currentSpace.id
+        spaceId: spaceStore.id
       }
       updates.cards.map(card => {
         delete card.userId
@@ -472,6 +473,7 @@ export default {
     // dimensions
 
     updateDimensions: async (context, { cards }) => {
+      const spaceStore = useSpaceStore()
       const canEditSpace = context.rootGetters['currentUser/canEditSpace']()
       const zoom = context.rootGetters.spaceCounterZoomDecimal
       if (!cards) {
@@ -529,7 +531,7 @@ export default {
             name: 'updateMultipleCards',
             body: {
               cards: newCards,
-              spaceId: context.rootState.currentSpace.id
+              spaceId: spaceStore.id
             }
           }, { root: true })
         }
@@ -625,7 +627,8 @@ export default {
     // move
 
     move: (context, { endCursor, prevCursor, delta }) => {
-      const spaceId = context.rootState.currentSpace.id
+      const spaceStore = useSpaceStore()
+      const spaceId = spaceStore.id
       const zoom = context.rootGetters.spaceCounterZoomDecimal
       if (!endCursor || !prevCursor) { return }
       endCursor = {
@@ -709,7 +712,8 @@ export default {
     },
     afterMove: async (context) => {
       const userStore = useUserStore()
-      const spaceId = context.rootState.currentSpace.id
+      const spaceStore = useSpaceStore()
+      const spaceId = spaceStore.id
       // update cards
       const currentDraggingCardId = context.rootState.currentDraggingCardId
       const currentDraggingCard = context.getters.byId(currentDraggingCardId)
@@ -861,7 +865,8 @@ export default {
     },
     deleteAllRemoved: async (context) => {
       const userStore = useUserStore()
-      const spaceId = context.rootState.currentSpace.id
+      const spaceStore = useSpaceStore()
+      const spaceId = spaceStore.id
       const userId = userStore.id
       const removedCards = context.state.removedCards
       removedCards.forEach(card => context.commit('deleteCard', card))

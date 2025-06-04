@@ -41,7 +41,7 @@ const joinSpaceRoom = (store, mutation) => {
     store.commit('isJoiningSpace', false)
     return
   }
-  const spaceIsLoadedOrCached = Boolean(store.state.currentSpace.cards.length) // proxy for checking if user can view space
+  const spaceIsLoadedOrCached = Boolean(spaceStore.cards.length) // proxy for checking if user can view space
   if (!spaceIsLoadedOrCached) {
     store.commit('isJoiningSpace', false)
     return
@@ -142,7 +142,7 @@ export default function createWebSocketPlugin () {
             console.info('🌛 received', data, data.clientId)
           }
           if (data.space) {
-            if (data.space.id !== store.state.currentSpace.id) { return }
+            if (data.space.id !== spaceStore.id) { return }
           }
           const { message, handler, user, updates, storeName, actionName } = data // TODO deprecate unused
           if (message === 'connected') {

@@ -186,7 +186,7 @@ const initCanvas = async () => {
 // drawing
 
 const drawDrawing = async () => {
-  const space = await cache.space(store.state.currentSpace.id)
+  const space = await cache.space(spaceStore.id)
   if (!space.drawingImage) { return }
   const image = new Image()
   image.onload = () => {

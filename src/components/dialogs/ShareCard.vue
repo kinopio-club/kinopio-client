@@ -17,7 +17,7 @@ const props = defineProps({
   isReadOnly: Boolean
 })
 
-const spaceIsPrivate = computed(() => store.state.currentSpace.privacy === 'private')
+const spaceIsPrivate = computed(() => spaceStore.privacy === 'private')
 
 // anon user
 
@@ -66,7 +66,7 @@ const webShareIsSupported = computed(() => navigator.share)
 const webShare = () => {
   const data = {
     title: props.card.name,
-    text: store.state.currentSpace.name,
+    text: spaceStore.name,
     url: cardUrl()
   }
   navigator.share(data)

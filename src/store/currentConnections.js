@@ -201,6 +201,7 @@ export default {
       await context.dispatch('api/addToQueue', { name: 'createConnection', body: connection }, { root: true })
     },
     addType: async (context, type) => {
+      const spaceStore = useSpaceStore()
       const userStore = useUserStore()
       const isThemeDark = userStore.theme === 'dark'
       let color = randomColor({ luminosity: 'light' })
@@ -211,7 +212,7 @@ export default {
         id: nanoid(),
         name: `Connection Type ${context.state.typeIds.length + 1}`,
         color,
-        spaceId: context.rootState.currentSpace.id
+        spaceId: spaceStore.id
       }
       if (type) {
         const keys = Object.keys(type)
@@ -265,6 +266,7 @@ export default {
       context.dispatch('history/add', { connections }, { root: true })
     },
     updateMultiplePaths: async (context, items) => {
+      const spaceStore = useSpaceStore()
       const canEditSpace = context.rootGetters['currentUser/canEditSpace']()
       const itemIds = items.map(item => item.id)
       const connections = context.getters.byMultipleItemIds(itemIds)
@@ -299,7 +301,7 @@ export default {
           name: 'updateMultipleConnections',
           body: {
             connections: newConnections,
-            spaceId: context.rootState.currentSpace.id
+            spaceId: spaceStore.id
           }
         }, { root: true })
       }

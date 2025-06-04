@@ -39,8 +39,8 @@ const currentSpace = computed(() => spaceStore.getSpaceAllItems)
 const text = computed(() => utils.nameStringFromItems(currentSpace.value.cards))
 
 const fileName = () => {
-  const spaceName = store.state.currentSpace.name
-  const spaceId = store.state.currentSpace.id
+  const spaceName = spaceStore.name
+  const spaceId = spaceStore.id
   const fileName = spaceName || `kinopio-space-${spaceId}`
   return fileName
 }

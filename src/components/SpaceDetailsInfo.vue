@@ -122,7 +122,7 @@ const remotePendingUpload = computed(() => {
 
 const spaceName = computed({
   get () {
-    return store.state.currentSpace.name
+    return spaceStore.name
   },
   set (newName) {
     textareaSize()

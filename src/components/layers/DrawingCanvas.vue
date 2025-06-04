@@ -271,7 +271,7 @@ const redrawSpaceDrawingImage = () => {
 }
 const restoreSpaceDrawingImage = async () => {
   return new Promise((resolve, reject) => {
-    let url = store.state.currentSpace.drawingImage
+    let url = spaceStore.drawingImage
     if (!url) {
       resolve()
       return
@@ -346,7 +346,7 @@ const redraw = async () => {
 
 const updateCache = async (strokes) => {
   const dataUrl = await imageDataUrl(strokes)
-  const currentSpaceId = store.state.currentSpace.id
+  const currentSpaceId = spaceStore.id
   await cache.updateSpace('drawingImage', dataUrl, currentSpaceId)
   store.commit('triggerEndDrawing')
   spaceStore.updateSpacePreviewImage()

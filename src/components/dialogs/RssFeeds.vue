@@ -1,10 +1,13 @@
 <script setup>
 import { reactive, computed, onMounted, onBeforeUnmount, onUnmounted, watch, ref, nextTick } from 'vue'
 import { useStore } from 'vuex'
+import { useSpaceStore } from '@/stores/useSpaceStore'
 
 import utils from '@/utils.js'
 import consts from '@/consts.js'
+
 const store = useStore()
+const spaceStore = useSpaceStore()
 
 const props = defineProps({
   visible: Boolean
@@ -17,10 +20,10 @@ const state = reactive({
   urlIsCopied: false
 })
 
-const spaceIsPrivate = computed(() => store.state.currentSpace.privacy === 'private')
+const spaceIsPrivate = computed(() => spaceStore.privacy === 'private')
 
 const spaceUrl = computed(() => {
-  const spaceId = store.state.currentSpace.id
+  const spaceId = spaceStore.id
   return `${consts.apiHost()}/space/${spaceId}/feed.json`
 })
 const exploreUrl = computed(() => `${consts.apiHost()}/space/explore-spaces/feed.json`)

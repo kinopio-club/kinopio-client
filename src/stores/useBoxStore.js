@@ -110,13 +110,14 @@ export const useBoxStore = defineStore('boxes', {
 
     normalizeNewBox (box) {
       const userStore = useUserStore()
+      const spaceStore = useSpaceStore()
       const count = this.allIds.length
       const minBoxSize = consts.minBoxSize
       const isThemeDark = userStore.theme === 'dark'
       const color = randomColor({ luminosity: 'dark' })
       return {
         id: box.id || nanoid(),
-        spaceId: store.state.currentSpace.id,
+        spaceId: spaceStore.id,
         userId: userStore.id,
         x: box.x,
         y: box.y,

@@ -33,7 +33,7 @@ onMounted(() => {
   window.addEventListener('offline', updateIsOnline)
 })
 
-const spaceName = computed(() => store.state.currentSpace.name)
+const spaceName = computed(() => spaceStore.name)
 const isSpacePage = computed(() => store.getters.isSpacePage)
 
 // styles and position
@@ -146,13 +146,13 @@ const clearMetaRSSFeed = () => {
   }
 }
 const updateMetaRSSFeed = () => {
-  const spaceIsPrivate = store.state.currentSpace.privacy === 'private'
+  const spaceIsPrivate = spaceStore.privacy === 'private'
   const spaceIsRemote = spaceStore.getSpaceIsRemote
   clearMetaRSSFeed()
   if (!spaceIsRemote) { return }
   if (spaceIsPrivate) { return }
   const head = document.querySelector('head')
-  const spaceId = store.state.currentSpace.id
+  const spaceId = spaceStore.id
   const url = `${consts.apiHost()}/space/${spaceId}/feed.json`
   const link = document.createElement('link')
   link.rel = 'alternative'

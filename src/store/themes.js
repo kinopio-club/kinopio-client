@@ -165,9 +165,10 @@ export default {
       return themes[themeName].colors
     },
     previewImageThemeOptions: (state, getters, rootState) => {
+      const spaceStore = useSpaceStore()
       const isDarkTheme = getters.isThemeDark
-      let background = rootState.currentSpace.background
-      let backgroundTint = rootState.currentSpace.backgroundTint
+      let background = spaceStore.background
+      let backgroundTint = spaceStore.backgroundTint
       const backgroundElement = document.querySelector('#space-background-image')
       const backgroundTintElement = document.querySelector('#space-background-tint')
       if (background && backgroundElement) {

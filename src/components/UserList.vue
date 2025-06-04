@@ -53,7 +53,7 @@ const closeDialogs = () => {
 // users
 
 const users = computed(() => {
-  const onlineUsers = store.state.currentSpace.clients
+  const onlineUsers = spaceStore.clients
   let items = utils.clone(props.users)
   items = items.map(user => {
     const isOnline = onlineUsers.find(onlineUser => onlineUser.id === user.id)

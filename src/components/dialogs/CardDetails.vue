@@ -254,8 +254,8 @@ const updatePaths = async (cardId) => {
 
 // space
 
-const spacePrivacyIsOpen = computed(() => store.state.currentSpace.privacy === 'open')
-const spacePrivacyIsClosed = computed(() => store.state.currentSpace.privacy === 'closed')
+const spacePrivacyIsOpen = computed(() => spaceStore.privacy === 'open')
+const spacePrivacyIsClosed = computed(() => spaceStore.privacy === 'closed')
 const isInSearchResultsCards = computed(() => {
   const results = store.state.searchResultsCards
   if (!results.length) { return }
@@ -736,7 +736,7 @@ const addNewTags = async (newTagNames) => {
       name: tagName,
       defaultColor: state.newTagColor || userStore.color,
       cardId: card.value.id,
-      spaceId: store.state.currentSpace.id
+      spaceId: spaceStore.id
     })
     if (state.previousSelectedTag.name === tagName) {
       tag.color = state.previousSelectedTag.color
@@ -1051,7 +1051,7 @@ const urlIsAudio = computed(() => utils.urlIsAudio(url.value))
 const cardHasMedia = computed(() => Boolean(state.formats.image || state.formats.video || state.formats.audio))
 const addImageOrFile = async (file) => {
   const cardId = card.value.id
-  const spaceId = store.state.currentSpace.id
+  const spaceId = spaceStore.id
   // remove existing image url
   const prevImageOrFile = state.formats.image || state.formats.video || state.formats.file
   if (prevImageOrFile) {

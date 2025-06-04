@@ -42,7 +42,7 @@ const duplicateSpace = async () => {
 // remove
 
 const removeCurrentSpace = async () => {
-  const currentSpaceId = store.state.currentSpace.id
+  const currentSpaceId = spaceStore.id
   if (currentUserIsSpaceCollaborator.value) {
     spaceStore.removeCollaboratorFromSpace(userStore.getUserAllState)
   } else {
@@ -55,7 +55,7 @@ const removeCurrentSpace = async () => {
   emit('updateLocalSpaces')
 }
 const changeToPrevSpace = async () => {
-  const currentSpaceId = store.state.currentSpace.id
+  const currentSpaceId = spaceStore.id
   const cachedSpaces = await cache.getAllSpaces()
   const spaces = cachedSpaces.filter(space => space.id !== currentSpaceId)
   const recentSpace = spaces[0]
@@ -72,7 +72,7 @@ const changeToPrevSpace = async () => {
 
 const toggleHideSpace = async () => {
   const value = !props.currentSpaceIsHidden
-  const currentSpaceId = store.state.currentSpace.id
+  const currentSpaceId = spaceStore.id
   await userStore.updateUserHiddenSpace(currentSpaceId, value)
   store.commit('notifySpaceIsHidden', value)
   emit('updateLocalSpaces')

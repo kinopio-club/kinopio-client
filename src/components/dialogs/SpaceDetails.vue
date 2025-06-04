@@ -72,7 +72,7 @@ const init = async () => {
 
 const isLoadingSpace = computed(() => store.state.isLoadingSpace)
 const currentSpaceIsHidden = computed(() => spaceStore.getSpaceIsHidden)
-const spaceName = computed(() => store.state.currentSpace.name)
+const spaceName = computed(() => spaceStore.name)
 
 // dialog
 
@@ -82,7 +82,7 @@ const style = computed(() => {
 })
 const backButtonIsVisible = computed(() => {
   const spaceId = store.state.prevSpaceIdInSession
-  return spaceId && spaceId !== store.state.currentSpace.id
+  return spaceId && spaceId !== spaceStore.id
 })
 const closeDialogs = () => {
   state.spaceFiltersIsVisible = false
@@ -161,9 +161,9 @@ const filteredSpaces = computed(() => {
   return spaces
 })
 const shouldShowInExplore = computed(() => {
-  const privacy = store.state.currentSpace.privacy
+  const privacy = spaceStore.privacy
   if (privacy === 'private') { return false }
-  return store.state.currentSpace.showInExplore
+  return spaceStore.showInExplore
 })
 const isSpaceMember = computed(() => {
   return userStore.getUserIsSpaceMember

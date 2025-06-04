@@ -119,7 +119,7 @@ const updateShowInExplore = async () => {
 }
 const updateSpacePrivacy = async () => {
   const shouldShow = !showInExplore.value
-  const currentPrivacy = store.state.currentSpace.privacy
+  const currentPrivacy = spaceStore.privacy
   if (shouldShow) {
     prevPrivacy = currentPrivacy
     if (currentPrivacy === 'private') {

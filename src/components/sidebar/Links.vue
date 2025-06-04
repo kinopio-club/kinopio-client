@@ -93,14 +93,14 @@ const changeSpace = (space) => {
   store.dispatch('closeAllDialogs')
 }
 const updateLinks = async () => {
-  const spaceId = store.state.currentSpace.id
+  const spaceId = spaceStore.id
   if (state.prevSpaceId === spaceId) { return }
   state.spaces = []
   state.loading = true
   debouncedUpdateLinks()
 }
 const debouncedUpdateLinks = debounce(async function () {
-  const spaceId = store.state.currentSpace.id
+  const spaceId = spaceStore.id
   const links = await store.dispatch('api/getCardsWithLinkToSpaceId', spaceId)
   state.loading = false
   state.prevSpaceId = spaceId

@@ -97,7 +97,7 @@ const shouldSnapToGrid = computed(() => store.state.shouldSnapToGrid)
 
 const privacyState = computed(() => {
   return privacy.states().find(state => {
-    return state.name === store.state.currentSpace.privacy
+    return state.name === spaceStore.privacy
   })
 })
 const cardsCreatedCountFromLimit = computed(() => {
@@ -133,11 +133,11 @@ const checkIfShouldNotifySpaceOutOfSync = async () => {
   try {
     if (!currentUserIsSignedIn.value) { return }
     store.commit('isLoadingSpace', true)
-    if (!store.state.currentSpace.updatedAt) {
+    if (!spaceStore.updatedAt) {
       store.commit('isLoadingSpace', false)
       return
     } // don't check unloaded spaces
-    const remoteSpace = await store.dispatch('api/getSpaceUpdatedAt', { id: store.state.currentSpace.id })
+    const remoteSpace = await store.dispatch('api/getSpaceUpdatedAt', { id: spaceStore.id })
     store.commit('isLoadingSpace', false)
     if (!remoteSpace) { return }
     const space = store.state.currentSpace

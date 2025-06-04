@@ -40,18 +40,18 @@ const state = reactive({
 
 const currentUser = computed(() => userStore.getUserAllState)
 const currentUserIsUpgraded = computed(() => userStore.isUpgraded)
-const spaceName = computed(() => store.state.currentSpace.name)
+const spaceName = computed(() => spaceStore.name)
 const randomUser = computed(() => {
   const luminosity = userStore.theme
   const color = randomColor({ luminosity })
   return { color }
 })
-const collaboratorKey = computed(() => store.state.currentSpace.collaboratorKey)
+const collaboratorKey = computed(() => spaceStore.collaboratorKey)
 const toggleTipsIsVisible = () => {
   state.tipsIsVisible = !state.tipsIsVisible
 }
 const isSecureAppContextIOS = computed(() => consts.isSecureAppContextIOS)
-const spaceIsPrivate = computed(() => store.state.currentSpace.privacy === 'private')
+const spaceIsPrivate = computed(() => spaceStore.privacy === 'private')
 const closeDialogs = () => {
   emit('closeDialogs')
 }

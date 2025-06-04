@@ -51,7 +51,7 @@ watch(() => visible.value, (value, prevValue) => {
   }
 })
 const canEditSpace = computed(() => userStore.getUserCanEditSpace())
-const currentSpaceId = computed(() => store.state.currentSpace.id)
+const currentSpaceId = computed(() => spaceStore.id)
 const currentUserIsSignedIn = computed(() => userStore.getUserIsSignedIn)
 const currentUser = computed(() => userStore.getUserAllState)
 const isDark = computed(() => utils.colorIsDark(color.value))

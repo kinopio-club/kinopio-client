@@ -48,7 +48,7 @@ const isLoadingSpace = computed(() => store.state.isLoadingSpace)
 
 // visits
 
-const visits = computed(() => store.state.currentSpace.visits + 1)
+const visits = computed(() => spaceStore.visits + 1)
 
 // dates
 

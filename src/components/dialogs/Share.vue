@@ -57,13 +57,13 @@ const isSecureAppContextIOS = computed(() => consts.isSecureAppContextIOS)
 const currentUserIsSignedIn = computed(() => userStore.getUserIsSignedIn)
 const isSpaceMember = computed(() => userStore.getUserIsSpaceMember)
 const spaceIsRemote = computed(() => spaceStore.getSpaceIsRemote)
-const spaceIsPublic = computed(() => store.state.currentSpace.privacy !== 'private')
-const spaceIsPrivate = computed(() => store.state.currentSpace.privacy === 'private')
+const spaceIsPublic = computed(() => spaceStore.privacy !== 'private')
+const spaceIsPrivate = computed(() => spaceStore.privacy === 'private')
 
 // add to explore
 
 const exploreSectionIsVisible = computed(() => {
-  const showInExplore = store.state.currentSpace.showInExplore
+  const showInExplore = spaceStore.showInExplore
   const shouldShowAskToAddToExplore = !isSpaceMember.value && !showInExplore
   return spaceIsPublic.value && (isSpaceMember.value || shouldShowAskToAddToExplore)
 })
@@ -91,7 +91,7 @@ const copySpaceUrl = async (event) => {
 }
 const webShareIsSupported = computed(() => navigator.share)
 const webShare = () => {
-  const spaceName = store.state.currentSpace.name
+  const spaceName = spaceStore.name
   const data = {
     title: 'Kinopio Space',
     text: spaceName,
@@ -157,8 +157,8 @@ const emailInvitesIsVisible = (value) => {
 // users
 
 const users = computed(() => {
-  let items = utils.clone(store.state.currentSpace.users)
-  items = items.concat(store.state.currentSpace.collaborators)
+  let items = utils.clone(spaceStore.users)
+  items = items.concat(spaceStore.collaborators)
   return items
 })
 

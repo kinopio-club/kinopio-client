@@ -136,7 +136,7 @@ const recentlyUpdatedCards = computed(() => {
 // select items
 
 const selectCard = (card) => {
-  const isCardInCurrentSpace = card.spaceId === store.state.currentSpace.id
+  const isCardInCurrentSpace = card.spaceId === spaceStore.id
   if (isCardInCurrentSpace) {
     store.dispatch('focusOnCardId', card.id)
     focusItem(card)
@@ -146,7 +146,7 @@ const selectCard = (card) => {
   closeDialogs()
 }
 const changeSpace = (spaceId) => {
-  if (store.state.currentSpace.id === spaceId) { return }
+  if (spaceStore.id === spaceId) { return }
   const space = { id: spaceId }
   spaceStore.changeSpace(space)
 }

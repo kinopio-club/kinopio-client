@@ -51,7 +51,7 @@ const updateDialogHeight = async () => {
 }
 
 const currentUserIsSignedIn = computed(() => userStore.getUserIsSignedIn)
-const spacePrivacy = computed(() => store.state.currentSpace.privacy)
+const spacePrivacy = computed(() => spaceStore.privacy)
 const spaceIsPublic = computed(() => {
   return spacePrivacy.value !== 'private'
 })
@@ -60,7 +60,7 @@ const isEmbedable = computed(() => {
 })
 const spaceZoomPercent = computed(() => store.state.spaceZoomPercent)
 const url = computed(() => {
-  const spaceId = store.state.currentSpace.id
+  const spaceId = spaceStore.id
   const zoom = spaceZoomPercent.value
   return `${consts.kinopioDomain()}/embed/?spaceId=${spaceId}&zoom=${zoom}`
 })

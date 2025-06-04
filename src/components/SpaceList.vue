@@ -60,7 +60,7 @@ onMounted(() => {
   const spaceStoreUnsubscribe = spaceStore.$onAction(
     ({ name, args }) => {
       if (name === 'restoreSpace') {
-        state.focusOnId = store.state.currentSpace.id
+        state.focusOnId = spaceStore.id
       }
     }
   )
@@ -174,7 +174,7 @@ const isLoadingSpace = (space) => {
   return isLoadingSpace && spaceIsCurrentSpace(space)
 }
 const spaceIsCurrentSpace = (space) => {
-  const currentSpace = store.state.currentSpace.id
+  const currentSpace = spaceStore.id
   return Boolean(currentSpace === space.id)
 }
 const spaceIsTemplate = (space) => {

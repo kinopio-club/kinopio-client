@@ -260,11 +260,12 @@ export default {
       })
     },
     updateMultiple: async (context, boxes) => {
+      const spaceStore = useSpaceStore()
       const userStore = useUserStore()
-      const spaceId = context.rootState.currentSpace.id
+      const spaceId = spaceStore.id
       const updates = {
         boxes,
-        spaceId: context.rootState.currentSpace.id
+        spaceId: spaceStore.id
       }
       updates.boxes.map(box => {
         delete box.userId
@@ -605,10 +606,11 @@ export default {
       context.dispatch('updateSnapGuides', { boxes })
     },
     afterMove: async (context) => {
+      const spaceStore = useSpaceStore()
       prevMovePositions = {}
       const currentDraggingBoxId = context.rootState.currentDraggingBoxId
       const currentDraggingBox = context.getters.byId(currentDraggingBoxId)
-      const spaceId = context.rootState.currentSpace.id
+      const spaceId = spaceStore.id
       let boxIds = context.getters.isSelectedIds
       boxIds = boxIds.filter(box => Boolean(box))
       if (!boxIds.length) { return }
