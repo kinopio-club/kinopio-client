@@ -413,7 +413,1473 @@ export const useGlobalStore = defineStore('global', {
       if (cardId) {
         return cardStore.getCard(cardId)
       }
-    }
+    },
 
+    // subscribe triggers
+
+    triggerSpaceDetailsVisible () {},
+    triggerSpaceDetailsInfoIsVisible () {},
+    triggerFocusResultsFilter () {},
+    triggerFocusSpaceDetailsName () {},
+    triggerSpaceDetailsUpdateLocalSpaces () {},
+    triggerSignUpOrInIsVisible () {},
+    triggerArenaAuthenticationError () {},
+    triggerKeyboardShortcutsIsVisible () {},
+    triggerReadOnlyJiggle () {},
+    triggerSelectTemplateCategory () {},
+    triggerUpdatePaintSelectCanvasPositionOffset () {},
+    triggerPaintFramePosition (event) {},
+    triggerAddRemotePaintingCircle () {},
+    triggerUpdateRemoteUserCursor () {},
+    triggerUpdateRemoteDropGuideLine () {},
+    triggerUpdateStopRemoteUserDropGuideLine () {},
+    triggerUpdateHeaderAndFooterPosition () {},
+    triggerHideTouchInterface () {},
+    triggerUpgradeUserIsVisible () {},
+    triggerDonateIsVisible () {},
+    triggerUploadComplete () {},
+    triggerPauseAllAudio () {},
+    triggerScrollCardIntoView (cardId) {},
+    triggerPickerNavigationKey (key) {},
+    triggerPickerSelect () {},
+    triggerUpdateNotifications () {},
+    triggerSpaceZoomReset () {},
+    triggerSpaceZoomOutMax (options) {},
+    triggerUnloadPage () {},
+    triggerShowNextSearchCard () {},
+    triggerShowPreviousSearchCard () {},
+    triggerMoreFiltersIsNotVisible () {},
+    triggerConnectionDetailsIsVisible (options) {},
+    triggerUpdateWindowHistory (options) {},
+    triggerAddCard (options) {},
+    triggerAddChildCard (options) {},
+    triggerTemplatesIsVisible () {},
+    triggerImportIsVisible () {},
+    triggerSplitCard (cardId) {},
+    triggerUpdateUrlPreview (cardId) {},
+    triggerUpdateUrlPreviewComplete (cardId) {},
+    triggerRemovedIsVisible () {},
+    triggerMinimapIsVisible () {},
+    triggerClearAllSpaceFilters () {},
+    triggerScrollUserDetailsIntoView () {},
+    triggerUpdateLockedItemButtonPositionCardId (cardId) {},
+    triggerCenterZoomOrigin () {},
+    triggerRemoveCardFromCardList (card) {},
+    triggerUpdateTheme () {},
+    triggerUserIsLoaded () {},
+    triggerSearchScopeIsRemote () {},
+    triggerSearchScopeIsLocal () {},
+    triggerCardIdUpdatePastedName (options) {},
+    triggerExploreIsVisible () {},
+    triggerDrawConnectionFrame (event) {},
+    triggerCancelLocking () {},
+    triggerUpdateOtherCard (cardId) {},
+    triggerUpdateCardDetailsCardName (options) {},
+    triggerCloseChildDialogs () {},
+    triggerOfflineIsVisible () {},
+    triggerAppsAndExtensionsIsVisible () {},
+    triggerUpdateWindowTitle () {},
+    triggerRestoreSpaceRemoteComplete () {},
+    triggerCheckIfShouldNotifySpaceOutOfSync () {},
+    triggerNotifyOffscreenCardCreated (card) {},
+    triggerSonarPing (event) {},
+    triggerUpdatePathWhileDragging (connections) {},
+    triggerUpdateCardDimensionsAndPaths (cardId) {},
+    triggerUpdateItemCurrentConnections (itemId) {},
+    triggerCloseGroupDetailsDialog () {},
+    triggerPanningStart () {},
+    triggerClearUserNotifications () {},
+    triggerAddBox (event) {},
+    triggerUpdateDrawingBackground () {},
+    // select all below
+    triggerSelectAllItemsBelowCursor (position) {},
+    triggerSelectAllItemsAboveCursor (position) {},
+    // select all right
+    triggerSelectAllItemsLeftOfCursor (position) {},
+    triggerSelectAllItemsRightOfCursor (position) {},
+    // Used by extensions only
+    triggerSelectedCardsContainInBox () {},
+    triggerSelectedItemsAlignLeft () {},
+    // drawing
+    triggerStartDrawing (event) {},
+    triggerDraw (event) {},
+    triggerDrawingUndo () {},
+    triggerDrawingRedo () {},
+    triggerAddRemoteDrawingStroke () {},
+    triggerRemoveRemoteDrawingStroke () {},
+    triggerDrawingRedraw () {},
+    triggerEndDrawing () {},
+
+    resetPageSizes () {
+      this.pageWidth = 0
+      this.pageHeight = 0
+    },
+    updatePageSizes (itemsRect) {
+      if (!itemsRect) { return }
+      const pageWidth = Math.max(this.viewportWidth, itemsRect.width, this.pageWidth)
+      const pageHeight = Math.max(this.viewportHeight, itemsRect.height, this.pageHeight)
+      this.pageWidth = Math.round(pageWidth)
+      this.pageHeight = Math.round(pageHeight)
+    },
+    updateViewportSizes (viewport) {
+      this.viewportWidth = Math.round(viewport.width)
+      this.viewportHeight = Math.round(viewport.height)
+    },
+    pageHeight (height) {
+      utils.typeCheck({ value: height, type: 'number' })
+      this.pageHeight = height
+    },
+    pageWidth (width) {
+      utils.typeCheck({ value: width, type: 'number' })
+      this.pageWidth = width
+    },
+    scrollElementIntoView ({ element, behavior, positionIsCenter }) {
+      behavior = behavior || 'smooth'
+      if (!element) { return }
+      const sidebarIsVisible = document.querySelector('dialog#sidebar')
+      const smallCardCharacterLimit = 300
+      const isViewportNarrow = this.viewportWidth < (smallCardCharacterLimit * 2)
+      let horizontal = 'nearest'
+      let vertical = 'nearest'
+      if (sidebarIsVisible || positionIsCenter) {
+        horizontal = 'center'
+        vertical = 'center'
+      }
+      if (sidebarIsVisible && isViewportNarrow) {
+        horizontal = 'start'
+      }
+      // increase page size by amount to scroll beyond page size
+      const rect = element.getBoundingClientRect()
+      if (window.scrollX + rect.x + rect.width > this.pageWidth) {
+        this.pageWidth += rect.width
+      }
+      if (window.scrollY + rect.y + rect.height > this.pageHeight) {
+        this.pageHeight += rect.height
+      }
+      // scroll page
+      nextTick(() => {
+        element.scrollIntoView({
+          behavior,
+          block: vertical,
+          inline: horizontal
+        })
+      })
+    },
+
+    closeAllDialogs () {
+      const dialogs = document.querySelectorAll('dialog')
+      const dialogIsVisible = Boolean(dialogs.length)
+      if (!dialogIsVisible) { return }
+      if (utils.unpinnedDialogIsVisible()) {
+        this.shouldAddCard = false
+      }
+      if (!this.searchIsPinned) {
+        this.searchIsVisible = false
+      }
+      if (!this.userSettingsIsPinned) {
+        this.userSettingsIsVisible = false
+      }
+      this.multipleSelectedActionsIsVisible = false
+      this.cardDetailsIsVisibleForCardId = ''
+      this.connectionDetailsIsVisibleForConnectionId = ''
+      this.boxDetailsIsVisibleForBoxId = ''
+      this.tagDetailsIsVisible = false
+      this.tagDetailsIsVisibleFromTagList = false
+      this.currentSelectedTag = {}
+      this.otherCardDetailsIsVisible = false
+      this.currentSelectedOtherItem = {}
+      this.cardsWereDragged = false
+      this.boxesWereDragged = false
+      this.userDetailsIsVisible = false
+      this.pricingIsVisible = false
+      this.codeLanguagePickerIsVisible = false
+      this.offlineIsVisible = false
+      this.spaceUserListIsVisible = false
+      this.importArenaChannelIsVisible = false
+      this.groupsIsVisible = false
+      this.shouldSnapToGrid = false
+    },
+    isOnline (value) {
+      utils.typeCheck({ value, type: 'boolean' })
+      this.isOnline = value
+    },
+    isReconnectingToBroadcast (value) {
+      utils.typeCheck({ value, type: 'boolean' })
+      this.isReconnectingToBroadcast = value
+    },
+    isBeta (value) {
+      utils.typeCheck({ value, type: 'boolean' })
+      this.isBeta = value
+    },
+    loadNewSpace (value) {
+      utils.typeCheck({ value, type: 'boolean' })
+      this.loadNewSpace = value
+    },
+    loadInboxSpace (value) {
+      utils.typeCheck({ value, type: 'boolean' })
+      this.loadInboxSpace = value
+    },
+    shouldResetDimensionsOnLoad (value) {
+      utils.typeCheck({ value, type: 'boolean' })
+      this.shouldResetDimensionsOnLoad = value
+    },
+    shouldShowExploreOnLoad (value) {
+      utils.typeCheck({ value, type: 'boolean' })
+      this.shouldShowExploreOnLoad = value
+    },
+    isLoadingGroups (value) {
+      utils.typeCheck({ value, type: 'boolean' })
+      this.isLoadingGroups = value
+    },
+    addUrlPreviewLoadingForCardIds (cardId) {
+      utils.typeCheck({ value: cardId, type: 'string' })
+      this.urlPreviewLoadingForCardIds.push(cardId)
+    },
+    removeUrlPreviewLoadingForCardIds (cardId) {
+      utils.typeCheck({ value: cardId, type: 'string' })
+      let cardIds = utils.clone(this.urlPreviewLoadingForCardIds)
+      cardIds = cardIds.filter(id => cardId !== id) || []
+      this.urlPreviewLoadingForCardIds = cardIds
+    },
+    shouldHideConnectionOutline (value) {
+      utils.typeCheck({ value, type: 'boolean' })
+      this.shouldHideConnectionOutline = value
+    },
+    changelogIsUpdated (value) {
+      utils.typeCheck({ value, type: 'boolean' })
+      this.changelogIsUpdated = value
+    },
+    changelog (value) {
+      utils.typeCheck({ value, type: 'array' })
+      this.changelog = value
+    },
+    stripeIsLoaded (value) {
+      utils.typeCheck({ value, type: 'boolean' })
+      this.stripeIsLoaded = value
+    },
+    shouldHideFooter (value) {
+      utils.typeCheck({ value, type: 'boolean' })
+      this.shouldHideFooter = value
+    },
+    shouldExplicitlyHideFooter (value) {
+      utils.typeCheck({ value, type: 'boolean' })
+      this.shouldExplicitlyHideFooter = value
+    },
+    isTouchDevice (value) {
+      utils.typeCheck({ value, type: 'boolean' })
+      this.isTouchDevice = value
+    },
+    prevCursorPosition (cursor) {
+      this.prevCursorPosition = cursor
+    },
+    spaceZoomPercent (value) {
+      utils.typeCheck({ value, type: 'number' })
+      this.spaceZoomPercent = value
+    },
+    pinchCounterZoomDecimal (value) {
+      utils.typeCheck({ value, type: 'number' })
+      this.pinchCounterZoomDecimal = value
+    },
+    zoomOrigin (value) {
+      this.zoomOrigin = value
+    },
+    isPinchZooming (value) {
+      this.isPinchZooming = value
+    },
+    isTouchScrolling (value) {
+      this.isTouchScrolling = value
+    },
+    currentSpacePath (value) {
+      utils.typeCheck({ value, type: 'string' })
+      this.currentSpacePath = value
+    },
+    webfontIsLoaded (value) {
+      utils.typeCheck({ value, type: 'boolean' })
+      this.webfontIsLoaded = value
+    },
+    userHasScrolled (value) {
+      utils.typeCheck({ value, type: 'boolean' })
+      this.userHasScrolled = value
+    },
+    shouldPreventNextEnterKey (value) {
+      utils.typeCheck({ value, type: 'boolean' })
+      this.shouldPreventNextEnterKey = value
+    },
+    shouldPreventNextFocusOnName (value) {
+      utils.typeCheck({ value, type: 'boolean' })
+      this.shouldPreventNextFocusOnName = value
+    },
+    isEmbedMode (value) {
+      utils.typeCheck({ value, type: 'boolean' })
+      this.isEmbedMode = value
+    },
+    isAddPage (value) {
+      utils.typeCheck({ value, type: 'boolean' })
+      this.isAddPage = value
+    },
+    isPresentationMode (value) {
+      utils.typeCheck({ value, type: 'boolean' })
+      this.isPresentationMode = value
+    },
+    isCommentMode (value) {
+      utils.typeCheck({ value, type: 'boolean' })
+      this.isCommentMode = value
+    },
+    pricingIsVisible (value) {
+      utils.typeCheck({ value, type: 'boolean' })
+      this.pricingIsVisible = value
+    },
+    userSettingsIsVisible (value) {
+      utils.typeCheck({ value, type: 'boolean' })
+      this.userSettingsIsVisible = value
+    },
+    disableViewportOptimizations (value) {
+      utils.typeCheck({ value, type: 'boolean', allowUndefined: true })
+      this.disableViewportOptimizations = value
+    },
+    offlineIsVisible (value) {
+      utils.typeCheck({ value, type: 'boolean' })
+      this.offlineIsVisible = value
+    },
+    spaceUserListIsVisible (value) {
+      utils.typeCheck({ value, type: 'boolean' })
+      this.spaceUserListIsVisible = value
+    },
+    spaceUserListIsSpectators (value) {
+      utils.typeCheck({ value, type: 'boolean' })
+      this.spaceUserListIsSpectators = value
+    },
+    isFadingOutDuringTouch (value) {
+      utils.typeCheck({ value, type: 'boolean' })
+      this.isFadingOutDuringTouch = value
+    },
+    prevSpaceIdInSession (value) {
+      if (value === this.prevSpaceIdInSession) {
+        this.prevSpaceIdInSession = ''
+      } else {
+        this.prevSpaceIdInSession = value
+      }
+    },
+    prevSpaceIdInSessionPagePosition (value) {
+      utils.typeCheck({ value, type: 'object' })
+      this.prevSpaceIdInSessionPagePosition = value
+    },
+    outsideSpaceBackgroundColor (value) {
+      utils.typeCheck({ value, type: 'string' })
+      this.outsideSpaceBackgroundColor = value
+    },
+    groupsIsVisible (value) {
+      utils.typeCheck({ value, type: 'boolean' })
+      this.groupsIsVisible = value
+    },
+    dateImageUrl (value) {
+      utils.typeCheck({ value, type: 'string' })
+      this.dateImageUrl = value
+    },
+    currentSpaceIsUnavailableOffline (value) {
+      utils.typeCheck({ value, type: 'boolean' })
+      this.currentSpaceIsUnavailableOffline = value
+    },
+    searchIsVisible (value) {
+      utils.typeCheck({ value, type: 'boolean' })
+      this.searchIsVisible = value
+    },
+    search (value) {
+      utils.typeCheck({ value, type: 'string' })
+      this.search = value
+    },
+    searchResultsCards (results) {
+      utils.typeCheck({ value: results, type: 'array' })
+      this.searchResultsCards = results
+    },
+    previousResultItem (value) {
+      utils.typeCheck({ value, type: 'object' })
+      this.previousResultItem = value
+    },
+    clearSearch () {
+      if (this.searchIsVisible) { return }
+      this.search = ''
+      this.searchResultsCards = []
+      this.previousResultItem = {}
+    },
+    updatePasswordApiKey (apiKey) {
+      utils.typeCheck({ value: apiKey, type: 'string' })
+      this.updatePasswordApiKey = apiKey
+    },
+    passwordResetIsVisible (value) {
+      utils.typeCheck({ value, type: 'boolean' })
+      this.passwordResetIsVisible = value
+    },
+    importArenaChannelIsVisible (value) {
+      utils.typeCheck({ value, type: 'boolean' })
+      this.importArenaChannelIsVisible = value
+    },
+    isAuthenticatingWithArena (value) {
+      utils.typeCheck({ value, type: 'boolean' })
+      this.isAuthenticatingWithArena = value
+    },
+
+    // Cards
+
+    shouldExplicitlyRenderCardIds (cardIds) {
+      utils.typeCheck({ value: cardIds, type: 'array' })
+      const object = {}
+      cardIds.forEach(cardId => {
+        object[cardId] = true
+      })
+      this.shouldExplicitlyRenderCardIds = object
+    },
+    clearShouldExplicitlyRenderCardIds () {
+      this.shouldExplicitlyRenderCardIds = {}
+    },
+    shouldAddCard (value) {
+      utils.typeCheck({ value, type: 'boolean' })
+      this.shouldAddCard = value
+    },
+    currentUserIsHoveringOverCardId (cardId) {
+      utils.typeCheck({ value: cardId, type: 'string' })
+      this.currentUserIsHoveringOverCardId = cardId
+    },
+    currentUserIsHoveringOverCheckboxCardId (cardId) {
+      utils.typeCheck({ value: cardId, type: 'string' })
+      this.currentUserIsHoveringOverCheckboxCardId = cardId
+    },
+    currentUserIsHoveringOverUrlButtonCardId (cardId) {
+      utils.typeCheck({ value: cardId, type: 'string' })
+      this.currentUserIsHoveringOverUrlButtonCardId = cardId
+    },
+    cardDetailsIsVisibleForCardId (cardId) {
+      utils.typeCheck({ value: cardId, type: 'string' })
+      this.cardDetailsIsVisibleForCardId = cardId
+      if (cardId) {
+        postMessage.sendHaptics({ name: 'lightImpact' })
+      }
+    },
+    parentCardId (cardId) {
+      utils.typeCheck({ value: cardId, type: 'string' })
+      this.parentCardId = cardId
+    },
+    childCardId (cardId) {
+      utils.typeCheck({ value: cardId, type: 'string' })
+      this.childCardId = cardId
+    },
+    updateRemoteCardDetailsVisible (update) {
+      utils.typeCheck({ value: update, type: 'object' })
+      delete update.type
+      let cardDetailsVisible = utils.clone(this.remoteCardDetailsVisible)
+      cardDetailsVisible = cardDetailsVisible.filter(card => card.id !== update.cardId) || []
+      cardDetailsVisible.push(update)
+      this.remoteCardDetailsVisible = cardDetailsVisible
+    },
+    clearRemoteCardDetailsVisible (update) {
+      utils.typeCheck({ value: update, type: 'object' })
+      this.remoteCardDetailsVisible = this.remoteCardDetailsVisible.filter(card => card.userId !== update.userId) || []
+    },
+    preventCardDetailsOpeningAnimation (value) {
+      utils.typeCheck({ value, type: 'boolean' })
+      this.preventCardDetailsOpeningAnimation = value
+    },
+    iframeIsVisibleForCardId (cardId) {
+      utils.typeCheck({ value: cardId, type: 'string' })
+      this.iframeIsVisibleForCardId = cardId
+    },
+    focusOnCardId (cardId) {
+      utils.typeCheck({ value: cardId, type: 'string' })
+      this.focusOnCardId = cardId
+    },
+
+    // Connections
+
+    currentUserIsHoveringOverConnectorItemId (itemId) {
+      utils.typeCheck({ value: itemId, type: 'string' })
+      this.currentUserIsHoveringOverConnectorItemId = itemId
+    },
+    currentUserIsHoveringOverConnectionId (connectionId) {
+      utils.typeCheck({ value: connectionId, type: 'string' })
+      this.currentUserIsHoveringOverConnectionId = connectionId
+    },
+    currentUserIsDrawingConnection (value) {
+      utils.typeCheck({ value, type: 'boolean' })
+      this.currentUserIsDrawingConnection = value
+      if (value) {
+        postMessage.sendHaptics({ name: 'mediumImpact' })
+      }
+    },
+    currentConnectionSuccess (object) {
+      utils.typeCheck({ value: object, type: 'object', allowUndefined: true })
+      this.currentConnectionSuccess = object
+    },
+    currentConnectionCursorStart (object) {
+      utils.typeCheck({ value: object, type: 'object' })
+      this.currentConnectionCursorStart = object
+    },
+    currentConnectionStartItemIds (cardIds) {
+      utils.typeCheck({ value: cardIds, type: 'array' })
+      this.currentConnectionStartItemIds = cardIds
+    },
+    updateRemoteCurrentConnection (updates) {
+      utils.typeCheck({ value: updates, type: 'object' })
+      const index = this.remoteCurrentConnections.findIndex(remoteConnection => {
+        const isUserId = remoteConnection.userId === updates.userId
+        const isStartCardId = remoteConnection.startItemId === updates.startItemId
+        return isUserId && isStartCardId
+      })
+      if (index >= 0) {
+        const connection = this.remoteCurrentConnections[index]
+        const keys = Object.keys(updates)
+        keys.forEach(key => {
+          connection[key] = updates[key]
+        })
+        this.remoteCurrentConnections[index] = connection
+      } else {
+        this.remoteCurrentConnections.push(updates)
+      }
+    },
+    removeRemoteCurrentConnection (updates) {
+      this.remoteCurrentConnections = this.remoteCurrentConnections.filter(remoteConnection => remoteConnection.userId !== updates.userId)
+    },
+    updateCurrentCardConnections (connections) {
+      connections = connections || []
+      connections = connections.map(connection => connection.id)
+      this.currentItemConnections = connections
+    },
+
+    // Connection Labels
+
+    updateRemoteUserDraggingConnectionLabel (update) {
+      this.remoteUserDraggingConnectionLabel = this.remoteUserDraggingConnectionLabel.filter(remoteUser => remoteUser.userId !== update.userId)
+      this.remoteUserDraggingConnectionLabel = this.remoteUserDraggingConnectionLabel.concat(update)
+    },
+    removeRemoteUserDraggingConnectionLabel (update) {
+      this.remoteUserDraggingConnectionLabel = this.remoteUserDraggingConnectionLabel.filter(remoteUser => remoteUser.userId !== update.userId)
+    },
+
+    // Painting
+
+    currentUserIsPainting (value) {
+      utils.typeCheck({ value, type: 'boolean' })
+      this.currentUserIsPainting = value
+    },
+    currentUserIsPaintingLocked (value) {
+      utils.typeCheck({ value, type: 'boolean' })
+      this.currentUserIsPaintingLocked = value
+    },
+
+    // box selecting
+
+    currentBoxIsNew (value) {
+      utils.typeCheck({ value, type: 'boolean' })
+      this.currentBoxIsNew = value
+    },
+    currentUserIsBoxSelecting (value) {
+      utils.typeCheck({ value, type: 'boolean' })
+      this.currentUserIsBoxSelecting = value
+    },
+    currentUserBoxSelectStart (object) {
+      utils.typeCheck({ value: object, type: 'object' })
+      this.currentUserBoxSelectStart = object
+    },
+    currentUserBoxSelectMove (object) {
+      utils.typeCheck({ value: object, type: 'object' })
+      this.currentUserBoxSelectMove = object
+    },
+    updateRemoteUserBoxSelectStyles (object) {
+      utils.typeCheck({ value: object, type: 'object' })
+      this.remoteUserBoxSelectStyles = this.remoteUserBoxSelectStyles.filter(styles => styles.currentBoxSelectId !== object.currentBoxSelectId)
+      this.remoteUserBoxSelectStyles.push(object)
+    },
+    updateRemotePreviousBoxSelectStyles (object) {
+      utils.typeCheck({ value: object, type: 'object' })
+      this.remoteUserBoxSelectStyles = this.remoteUserBoxSelectStyles.filter(styles => styles.currentBoxSelectId !== object.currentBoxSelectId)
+      this.remotePreviousUserBoxSelectStyles = this.remotePreviousUserBoxSelectStyles.filter(styles => styles.currentBoxSelectId !== object.currentBoxSelectId)
+      this.remotePreviousUserBoxSelectStyles.push(object)
+    },
+    removeRemotePreviousBoxSelectStyle () {
+      this.remotePreviousUserBoxSelectStyles.shift()
+    },
+
+    // Resizing Cards
+
+    currentUserIsResizingCard (value) {
+      utils.typeCheck({ value, type: 'boolean' })
+      this.currentUserIsResizingCard = value
+    },
+    currentUserIsResizingCardIds (cardIds) {
+      utils.typeCheck({ value: cardIds, type: 'array' })
+      this.currentUserIsResizingCardIds = cardIds
+    },
+    removeRemoteUserResizingCards (update) {
+      this.remoteUserResizingCards = this.remoteUserResizingCards.filter(remoteUser => remoteUser.userId !== update.userId)
+    },
+    updateRemoteUserResizingCards (update) {
+      this.remoteUserResizingCards = this.remoteUserResizingCards.filter(remoteUser => remoteUser.userId !== update.userId)
+      this.remoteUserResizingCards = this.remoteUserResizingCards.concat(update)
+    },
+
+    // Tilting Cards
+
+    currentUserIsTiltingCard (value) {
+      utils.typeCheck({ value, type: 'boolean' })
+      this.currentUserIsTiltingCard = value
+    },
+    currentUserIsTiltingCardIds (cardIds) {
+      utils.typeCheck({ value: cardIds, type: 'array' })
+      this.currentUserIsTiltingCardIds = cardIds
+    },
+    removeRemoteUserTiltingCards (update) {
+      this.remoteUserTiltingCards = this.remoteUserTiltingCards.filter(remoteUser => remoteUser.userId !== update.userId)
+    },
+    updateRemoteUserTiltingCards (update) {
+      this.remoteUserTiltingCards = this.remoteUserTiltingCards.filter(remoteUser => remoteUser.userId !== update.userId)
+      this.remoteUserTiltingCards = this.remoteUserTiltingCards.concat(update)
+    },
+
+    // Boxes
+
+    currentUserIsHoveringOverBoxId (boxId) {
+      utils.typeCheck({ value: boxId, type: 'string' })
+      this.currentUserIsHoveringOverBoxId = boxId
+    },
+    focusOnBoxId (boxId) {
+      utils.typeCheck({ value: boxId, type: 'string' })
+      this.focusOnBoxId = boxId
+    },
+    boxDetailsIsVisibleForBoxId (value) {
+      utils.typeCheck({ value, type: 'string' })
+      this.boxDetailsIsVisibleForBoxId = value
+      if (value) {
+        postMessage.sendHaptics({ name: 'lightImpact' })
+      }
+    },
+    currentUserIsResizingBox (value) {
+      utils.typeCheck({ value, type: 'boolean' })
+      this.currentUserIsResizingBox = value
+    },
+    currentUserIsResizingBoxIds (cardIds) {
+      utils.typeCheck({ value: cardIds, type: 'array' })
+      this.currentUserIsResizingBoxIds = cardIds
+    },
+    currentUserIsDraggingBox (value) {
+      utils.typeCheck({ value, type: 'boolean' })
+      this.currentUserIsDraggingBox = value
+    },
+    updateRemoteBoxDetailsVisible (update) {
+      utils.typeCheck({ value: update, type: 'object' })
+      delete update.type
+      let boxDetailsVisible = utils.clone(this.remoteBoxDetailsVisible)
+      boxDetailsVisible = boxDetailsVisible.filter(box => box.id !== update.boxId) || []
+      boxDetailsVisible.push(update)
+      this.remoteBoxDetailsVisible = boxDetailsVisible
+    },
+    clearRemoteBoxDetailsVisible (update) {
+      utils.typeCheck({ value: update, type: 'object' })
+      this.remoteBoxDetailsVisible = this.remoteBoxDetailsVisible.filter(box => box.userId !== update.userId) || []
+    },
+    removeRemoteUserResizingBoxes (update) {
+      this.remoteUserResizingBoxes = this.remoteUserResizingBoxes.filter(remoteUser => remoteUser.userId !== update.userId)
+    },
+    updateRemoteUserResizingBoxes (update) {
+      this.remoteUserResizingBoxes = this.remoteUserResizingBoxes.filter(remoteUser => remoteUser.userId !== update.userId)
+      this.remoteUserResizingBoxes = this.remoteUserResizingBoxes.concat(update)
+    },
+
+    // Toolbar Mode
+
+    currentUserToolbar (value) {
+      utils.typeCheck({ value, type: 'string' })
+      this.currentUserToolbar = value
+      this.drawingEraserIsActive = false
+    },
+
+    // drawing
+
+    drawingEraserIsActive (value) {
+      this.drawingEraserIsActive = value
+    },
+    addToDrawingStrokeColors (color) {
+      if (this.drawingStrokeColors.includes(color)) { return }
+      this.drawingStrokeColors.push(color)
+    },
+
+    // Dragging
+
+    currentUserIsPanningReady (value) {
+      utils.typeCheck({ value, type: 'boolean' })
+      this.currentUserIsPanningReady = value
+    },
+    currentUserIsPanning (value) {
+      utils.typeCheck({ value, type: 'boolean' })
+      this.currentUserIsPanning = value
+    },
+    currentUserIsDraggingConnectionIdLabel (value) {
+      utils.typeCheck({ value, type: 'string' })
+      this.currentUserIsDraggingConnectionIdLabel = value
+    },
+    clipboardData (data) {
+      utils.typeCheck({ value: data, type: 'object' })
+      this.clipboardData = data
+    },
+    shouldCancelNextMouseUpInteraction (value) {
+      utils.typeCheck({ value, type: 'boolean' })
+      this.shouldCancelNextMouseUpInteraction = value
+    },
+    currentUserIsDrawing (value) {
+      utils.typeCheck({ value, type: 'boolean' })
+      this.currentUserIsDrawing = value
+    },
+
+    // Dragging Cards
+
+    currentUserIsDraggingCard (value) {
+      utils.typeCheck({ value, type: 'boolean' })
+      this.currentUserIsDraggingCard = value
+    },
+    preventDraggedCardFromShowingDetails (value) {
+      utils.typeCheck({ value, type: 'boolean' })
+      this.preventDraggedCardFromShowingDetails = value
+    },
+    triggeredTouchCardDragPosition (cursor) {
+      this.triggeredTouchCardDragPosition = cursor
+    },
+    cardsWereDragged (value) {
+      utils.typeCheck({ value, type: 'boolean' })
+      this.cardsWereDragged = value
+    },
+    currentDraggingCardId (cardId) {
+      utils.typeCheck({ value: cardId, type: 'string' })
+      this.currentDraggingCardId = cardId
+    },
+    addToRemoteCardsDragging (update) {
+      utils.typeCheck({ value: update, type: 'object' })
+      delete update.type
+      let cards = utils.clone(this.remoteCardsDragging)
+      cards = cards.filter(card => card.userId !== update.userId) || []
+      cards.push(update)
+      this.remoteCardsDragging = cards
+    },
+    clearRemoteCardsDragging (update) {
+      utils.typeCheck({ value: update, type: 'object' })
+      this.remoteCardsDragging = this.remoteCardsDragging.filter(card => card.userId !== update.userId)
+    },
+    addToRemoteUploadDraggedOverCards (update) {
+      utils.typeCheck({ value: update, type: 'object' })
+      delete update.type
+      let cards = utils.clone(this.remoteUploadDraggedOverCards)
+      cards = cards.filter(card => card.userId !== update.userId) || []
+      cards.push(update)
+      this.remoteUploadDraggedOverCards = cards
+    },
+    clearRemoteUploadDraggedOverCards (update) {
+      utils.typeCheck({ value: update, type: 'object' })
+      this.remoteUploadDraggedOverCards = this.remoteUploadDraggedOverCards.filter(card => card.userId !== update.userId)
+    },
+
+    // Dragging Boxes
+
+    currentDraggingBoxId (boxId) {
+      utils.typeCheck({ value: boxId, type: 'string' })
+      this.currentDraggingBoxId = boxId
+    },
+    boxesWereDragged (value) {
+      utils.typeCheck({ value, type: 'boolean' })
+      this.boxesWereDragged = value
+    },
+    addToRemoteBoxesDragging (update) {
+      utils.typeCheck({ value: update, type: 'object' })
+      delete update.type
+      let boxes = utils.clone(this.remoteBoxesDragging)
+      boxes = boxes.filter(box => box.userId !== update.userId) || []
+      boxes.push(update)
+      this.remoteBoxesDragging = boxes
+    },
+    clearRemoteBoxesDragging (update) {
+      utils.typeCheck({ value: update, type: 'object' })
+      this.remoteBoxesDragging = this.remoteBoxesDragging.filter(box => box.userId !== update.userId)
+    },
+    preventDraggedBoxFromShowingDetails (value) {
+      utils.typeCheck({ value, type: 'boolean' })
+      this.preventDraggedBoxFromShowingDetails = value
+    },
+
+    // Dragging Items
+
+    shouldSnapToGrid (value) {
+      utils.typeCheck({ value, type: 'boolean' })
+      this.shouldSnapToGrid = value
+    },
+
+    // User Details
+
+    userDetailsIsVisible (value) {
+      utils.typeCheck({ value, type: 'boolean' })
+      this.userDetailsIsVisible = value
+    },
+    userDetailsPosition (position) {
+      utils.typeCheck({ value: position, type: 'object' })
+      this.userDetailsPosition = position
+    },
+    userDetailsUser (user) {
+      utils.typeCheck({ value: user, type: 'object' })
+      this.userDetailsUser = user
+    },
+
+    // Tag Details
+
+    tagDetailsIsVisible (value) {
+      utils.typeCheck({ value, type: 'boolean' })
+      this.tagDetailsIsVisible = value
+    },
+    tagDetailsIsVisibleFromTagList (value) {
+      utils.typeCheck({ value, type: 'boolean' })
+      this.tagDetailsIsVisibleFromTagList = value
+    },
+    tagDetailsPosition (position) {
+      utils.typeCheck({ value: position, type: 'object' })
+      this.tagDetailsPosition = position
+    },
+    tagDetailsPositionShouldUpdate (value) {
+      utils.typeCheck({ value, type: 'boolean' })
+      this.tagDetailsPositionShouldUpdate = value
+    },
+    currentSelectedTag (tag) {
+      utils.typeCheck({ value: tag, type: 'object' })
+      this.currentSelectedTag = tag
+    },
+    remoteTags (tags) {
+      utils.typeCheck({ value: tags, type: 'array' })
+      this.remoteTags = tags
+    },
+    remoteTagsIsFetched (value) {
+      utils.typeCheck({ value, type: 'boolean' })
+      this.remoteTagsIsFetched = value
+    },
+    tags (tags) {
+      utils.typeCheck({ value: tags, type: 'array' })
+      this.tags = tags
+    },
+
+    // Link Details
+
+    otherCardDetailsIsVisible (value) {
+      utils.typeCheck({ value, type: 'boolean' })
+      this.otherCardDetailsIsVisible = value
+    },
+    otherItemDetailsPosition (position) {
+      utils.typeCheck({ value: position, type: 'object' })
+      this.otherItemDetailsPosition = position
+    },
+    currentSelectedOtherItem (link) {
+      utils.typeCheck({ value: link, type: 'object' })
+      this.currentSelectedOtherItem = link
+    },
+
+    // Pinned Dialogs
+
+    sidebarIsPinned (value) {
+      utils.typeCheck({ value, type: 'boolean' })
+      this.sidebarIsPinned = value
+    },
+    minimapIsPinned (value) {
+      utils.typeCheck({ value, type: 'boolean' })
+      this.minimapIsPinned = value
+    },
+    spaceDetailsIsPinned (value) {
+      utils.typeCheck({ value, type: 'boolean' })
+      this.spaceDetailsIsPinned = value
+    },
+    searchIsPinned (value) {
+      utils.typeCheck({ value, type: 'boolean' })
+      this.searchIsPinned = value
+    },
+    userSettingsIsPinned (value) {
+      utils.typeCheck({ value, type: 'boolean' })
+      this.userSettingsIsPinned = value
+    },
+
+    // Connection Details
+
+    connectionDetailsIsVisibleForConnectionId (connectionId) {
+      utils.typeCheck({ value: connectionId, type: 'string' })
+      this.connectionDetailsIsVisibleForConnectionId = connectionId
+      if (connectionId) {
+        postMessage.sendHaptics({ name: 'lightImpact' })
+      }
+    },
+    currentConnectionColor (color) {
+      utils.typeCheck({ value: color, type: 'string' })
+      this.currentConnectionColor = color
+    },
+    connectionDetailsPosition (position) {
+      utils.typeCheck({ value: position, type: 'object' })
+      this.connectionDetailsPosition = position
+    },
+    addToRemoteConnectionDetailsVisible (update) {
+      utils.typeCheck({ value: update, type: 'object' })
+      delete update.type
+      let connections = utils.clone(this.remoteConnectionDetailsVisible)
+      connections = connections.filter(connection => connection.userId !== update.userId) || []
+      connections.push(update)
+      this.remoteConnectionDetailsVisible = connections
+    },
+    clearRemoteConnectionDetailsVisible (update) {
+      utils.typeCheck({ value: update, type: 'object' })
+      this.remoteConnectionDetailsVisible = this.remoteConnectionDetailsVisible.filter(connection => connection.userId !== update.userId)
+    },
+
+    // Multiple Selection
+
+    multipleSelectedActionsIsVisible (value) {
+      utils.typeCheck({ value, type: 'boolean' })
+      this.multipleSelectedActionsIsVisible = value
+      if (value) {
+        postMessage.sendHaptics({ name: 'lightImpact' })
+      }
+    },
+    preventMultipleSelectedActionsIsVisible (value) {
+      utils.typeCheck({ value, type: 'boolean' })
+      this.preventMultipleSelectedActionsIsVisible = value
+    },
+    multipleSelectedActionsPosition (position) {
+      utils.typeCheck({ value: position, type: 'object' })
+      this.multipleSelectedActionsPosition = position
+    },
+    clearMultipleSelected () {
+      this.multipleCardsSelectedIds = []
+      this.multipleConnectionsSelectedIds = []
+      this.multipleBoxesSelectedIds = []
+    },
+    clearDraggingItems () {
+      this.currentDraggingCardId = ''
+      this.currentDraggingBoxId = ''
+    },
+    multipleSelectedItemsToLoad (items) {
+      utils.typeCheck({ value: items, type: 'object' })
+      console.info('multipleSelectedItemsToLoad', items)
+      this.multipleCardsSelectedIdsToLoad = items.cards.map(card => card.id)
+      this.multipleConnectionsSelectedIdsToLoad = items.connections.map(connection => connection.id)
+      this.multipleBoxesSelectedIdsToLoad = items.boxes.map(box => box.id)
+      this.multipleConnectionTypesSelectedIdsToLoad = items.connectionTypes.map(type => type.id)
+    },
+    restoreMultipleSelectedItemsToLoad () {
+      this.multipleCardsSelectedIds = this.multipleCardsSelectedIdsToLoad
+      this.multipleConnectionsSelectedIds = this.multipleConnectionsSelectedIdsToLoad
+      this.multipleBoxesSelectedIds = this.multipleBoxesSelectedIdsToLoad
+      this.multipleCardsSelectedIdsToLoad = []
+      this.multipleConnectionsSelectedIdsToLoad = []
+      this.multipleConnectionTypesSelectedIdsToLoad = []
+      this.multipleBoxesSelectedIdsToLoad = []
+    },
+
+    // multiple cards
+
+    multipleCardsSelectedIds (cardIds) {
+      utils.typeCheck({ value: cardIds, type: 'array' })
+      this.multipleCardsSelectedIds = cardIds
+    },
+    addToMultipleCardsSelected (cardId) {
+      utils.typeCheck({ value: cardId, type: 'string' })
+      postMessage.sendHaptics({ name: 'selection' })
+      this.multipleCardsSelectedIds.push(cardId)
+    },
+    addMultipleToMultipleCardsSelected (cardIds) {
+      postMessage.sendHaptics({ name: 'selection' })
+      this.multipleCardsSelectedIds = cardIds
+    },
+    removeFromMultipleCardsSelected (cardId) {
+      utils.typeCheck({ value: cardId, type: 'string' })
+      this.multipleCardsSelectedIds = this.multipleCardsSelectedIds.filter(id => {
+        return id !== cardId
+      })
+    },
+    addToRemoteCardsSelected (update) {
+      utils.typeCheck({ value: update, type: 'object' })
+      delete update.type
+      const isSelected = this.remoteCardsSelected.find(card => {
+        const cardIsSelected = card.cardId === update.cardId
+        const selectedByUser = card.userId === update.userId
+        return cardIsSelected && selectedByUser
+      })
+      if (isSelected) { return }
+      this.remoteCardsSelected.push(update)
+    },
+    removeFromRemoteCardsSelected (update) {
+      utils.typeCheck({ value: update, type: 'object' })
+      delete update.type
+      this.remoteCardsSelected = this.remoteCardsSelected.filter(card => {
+        const cardIsSelected = card.cardId === update.cardId
+        const selectedByUser = card.userId === update.userId
+        const cardIsUpdate = cardIsSelected && selectedByUser
+        return !cardIsUpdate
+      })
+    },
+    updateRemoteCardsSelected (update) {
+      this.remoteCardsSelected = this.remoteCardsSelected.filter(card => card.userId !== update.userId)
+      const updates = update.cardIds.map(cardId => {
+        return {
+          userId: update.userId,
+          cardId
+        }
+      })
+      this.remoteCardsSelected = this.remoteCardsSelected.concat(updates)
+    },
+    previousMultipleCardsSelectedIds (cardIds) {
+      utils.typeCheck({ value: cardIds, type: 'array' })
+      this.previousMultipleCardsSelectedIds = cardIds
+    },
+
+    // muiltiple connections
+
+    multipleConnectionsSelectedIds (connectionIds) {
+      utils.typeCheck({ value: connectionIds, type: 'array' })
+      this.multipleConnectionsSelectedIds = connectionIds
+    },
+    updateRemoteConnectionsSelected (update) {
+      this.remoteConnectionsSelected = this.remoteConnectionsSelected.filter(connection => connection.userId !== update.userId)
+      const updates = update.connectionIds.map(connectionId => {
+        return {
+          userId: update.userId,
+          connectionId
+        }
+      })
+      this.remoteConnectionsSelected = this.remoteConnectionsSelected.concat(updates)
+    },
+    addToMultipleConnectionsSelected (connectionId) {
+      utils.typeCheck({ value: connectionId, type: 'string' })
+      postMessage.sendHaptics({ name: 'selection' })
+      this.multipleConnectionsSelectedIds.push(connectionId)
+    },
+    removeFromMultipleConnectionsSelected (connectionId) {
+      utils.typeCheck({ value: connectionId, type: 'string' })
+      this.multipleConnectionsSelectedIds = this.multipleConnectionsSelectedIds.filter(id => {
+        return id !== connectionId
+      })
+    },
+    addToRemoteConnectionsSelected (update) {
+      utils.typeCheck({ value: update, type: 'object' })
+      delete update.type
+      const isSelected = this.remoteConnectionsSelected.find(connection => {
+        const connectionIsSelected = connection.connectionId === update.connectionId
+        const selectedByUser = connection.userId === update.userId
+        return connectionIsSelected && selectedByUser
+      })
+      if (isSelected) { return }
+      this.remoteConnectionsSelected.push(update)
+    },
+    removeFromRemoteConnectionsSelected (update) {
+      utils.typeCheck({ value: update, type: 'object' })
+      delete update.type
+      this.remoteConnectionsSelected = this.remoteConnectionsSelected.filter(connection => {
+        const connectionIsSelected = connection.connectionId === update.connectionId
+        const selectedByUser = connection.userId === update.userId
+        const connectionIsUpdate = connectionIsSelected && selectedByUser
+        return !connectionIsUpdate
+      })
+    },
+    clearRemoteMultipleSelected (update) {
+      utils.typeCheck({ value: update, type: 'object' })
+      const user = update.user || update.updates.user
+      this.remoteCardsSelected = this.remoteCardsSelected.filter(card => card.userId !== user.id)
+      this.remoteConnectionsSelected = this.remoteConnectionsSelected.filter(connection => connection.userId !== user.id)
+      this.remoteBoxesSelected = this.remoteBoxesSelected.filter(box => box.userId !== user.id)
+    },
+    previousMultipleConnectionsSelectedIds (connectionIds) {
+      utils.typeCheck({ value: connectionIds, type: 'array' })
+      this.previousMultipleConnectionsSelectedIds = connectionIds
+    },
+
+    // multiple boxes
+
+    multipleBoxesSelectedIds (boxIds) {
+      utils.typeCheck({ value: boxIds, type: 'array' })
+      this.multipleBoxesSelectedIds = boxIds
+    },
+    addToMultipleBoxesSelected (boxId) {
+      utils.typeCheck({ value: boxId, type: 'string' })
+      postMessage.sendHaptics({ name: 'selection' })
+      this.multipleBoxesSelectedIds.push(boxId)
+    },
+    removeFromMultipleBoxesSelected (boxId) {
+      utils.typeCheck({ value: boxId, type: 'string' })
+      this.multipleBoxesSelectedIds = this.multipleBoxesSelectedIds.filter(id => {
+        return id !== boxId
+      })
+    },
+    previousMultipleBoxesSelectedIds (boxIds) {
+      utils.typeCheck({ value: boxIds, type: 'array' })
+      this.previousMultipleBoxesSelectedIds = boxIds
+    },
+    addToRemoteBoxesSelected (update) {
+      utils.typeCheck({ value: update, type: 'object' })
+      delete update.type
+      const isSelected = this.remoteBoxesSelected.find(box => {
+        const boxIsSelected = box.boxId === update.boxId
+        const selectedByUser = box.userId === update.userId
+        return boxIsSelected && selectedByUser
+      })
+      if (isSelected) { return }
+      this.remoteBoxesSelected.push(update)
+    },
+    removeFromRemoteBoxesSelected (update) {
+      utils.typeCheck({ value: update, type: 'object' })
+      delete update.type
+      this.remoteBoxesSelected = this.remoteBoxesSelected.filter(box => {
+        const boxIsSelected = box.boxId === update.boxId
+        const selectedByUser = box.userId === update.userId
+        const boxIsUpdate = boxIsSelected && selectedByUser
+        return !boxIsUpdate
+      })
+    },
+    updateRemoteBoxesSelected (update) {
+      this.remoteBoxesSelected = this.remoteBoxesSelected.filter(box => box.userId !== update.userId)
+      const updates = update.boxIds.map(boxId => {
+        return {
+          userId: update.userId,
+          boxId
+        }
+      })
+      this.remoteBoxesSelected = this.remoteBoxesSelected.concat(updates)
+    },
+
+    // selecting
+
+    isSelectingX (value) {
+      utils.typeCheck({ value, type: 'boolean' })
+      this.isSelectingX = value
+    },
+    isSelectingY (value) {
+      utils.typeCheck({ value, type: 'boolean' })
+      this.isSelectingY = value
+    },
+
+    // Loading
+
+    isLoadingSpace (value) {
+      utils.typeCheck({ value, type: 'boolean' })
+      this.isLoadingSpace = value
+    },
+    isJoiningSpace (value) {
+      utils.typeCheck({ value, type: 'boolean' })
+      this.isJoiningSpace = value
+    },
+    isLoadingOtherItems (value) {
+      utils.typeCheck({ value, type: 'boolean' })
+      this.isLoadingOtherItems = value
+    },
+    clearSpaceCollaboratorKeys () {
+      this.spaceCollaboratorKeys = []
+    },
+    addToSpaceCollaboratorKeys (spaceCollaboratorKey) {
+      utils.typeCheck({ value: spaceCollaboratorKey, type: 'object' })
+      this.spaceCollaboratorKeys.push(spaceCollaboratorKey) // { spaceId, collaboratorKey }
+    },
+    updateRemotePendingUploads (update) {
+      utils.typeCheck({ value: update, type: 'object' })
+      delete update.type
+      const existingUpload = this.remotePendingUploads.find(item => {
+        const card = item.cardId === update.cardId
+        const space = item.spaceId === update.spaceId
+        return card || space
+      })
+      if (existingUpload) {
+        this.remotePendingUploads = this.remotePendingUploads.map(item => {
+          console.info('item', item, item.id, existingUpload.id, item.id === existingUpload.id)
+          if (item.id === existingUpload.id) {
+            item.percentComplete = update.percentComplete
+          }
+          return item
+        })
+      } else {
+        this.remotePendingUploads.push(update)
+      }
+      this.remotePendingUploads = this.remotePendingUploads.filter(item => item.percentComplete !== 100)
+    },
+    isLoadingFavorites (value) {
+      utils.typeCheck({ value, type: 'boolean' })
+      this.isLoadingFavorites = value
+    },
+    loadSpaceFocusOnCardId (cardId) {
+      utils.typeCheck({ value: cardId, type: 'string' })
+      this.loadSpaceFocusOnCardId = cardId
+    },
+    spaceUrlToLoad (spaceUrl) {
+      utils.typeCheck({ value: spaceUrl, type: 'string' })
+      this.spaceUrlToLoad = spaceUrl
+    },
+    spaceReadOnlyKey (value) {
+      utils.typeCheck({ value, type: 'object' })
+      this.spaceReadOnlyKey = value
+    },
+    groupToJoinOnLoad (value) {
+      utils.typeCheck({ value, type: 'object' })
+      this.groupToJoinOnLoad = value
+    },
+
+    // Notifications
+
+    addNotification (notification) {
+      this.notifications = this.notifications.filter(item => item.message !== notification.message)
+      notification.id = nanoid()
+      this.notifications.push(notification)
+    },
+    removeNotificationByMessage (message) {
+      this.notifications = this.notifications.filter(item => item.message !== message)
+    },
+    removePreviousNotification () {
+      const removableNotifications = this.notifications.filter(notification => notification.isPersistentItem === false)
+      const prevNotification = last(removableNotifications)
+      if (!prevNotification) { return }
+      this.notifications = this.notifications.filter(notification => notification.id !== prevNotification.id)
+    },
+    removeNotificationById (id) {
+      this.notifications = this.notifications.filter(notification => notification.id !== id)
+    },
+    clearAllNotifications () {
+      this.notifyConnectionError = false
+      this.notifyServerCouldNotSave = false
+      this.notifySignUpToEditSpace = false
+      this.notifySignUpToJoinGroup = false
+      this.notifyCardsCreatedIsNearLimit = false
+      this.notifyCardsCreatedIsOverLimit = false
+      this.notifyMoveOrCopyToSpace = false
+      this.notificationsWithPosition = []
+    },
+    clearAllInteractingWithAndSelected () {
+      this.currentUserIsDraggingCard = false
+      this.currentUserIsDrawingConnection = false
+      this.currentUserIsResizingCard = false
+      this.currentUserIsResizingBox = false
+      this.currentUserIsDraggingBox = false
+      this.multipleCardsSelectedIds = []
+      this.multipleConnectionsSelectedIds = []
+      this.multipleBoxesSelectedIds = []
+    },
+    notifySpaceNotFound (value) {
+      utils.typeCheck({ value, type: 'boolean' })
+      this.notifySpaceNotFound = value
+      if (value) {
+        postMessage.sendHaptics({ name: 'error' })
+      }
+    },
+    notifyConnectionError (value) {
+      utils.typeCheck({ value, type: 'boolean' })
+      this.notifyConnectionError = value
+      if (value) {
+        postMessage.sendHaptics({ name: 'error' })
+      }
+    },
+    notifyConnectionErrorName (value) {
+      utils.typeCheck({ value, type: 'string' })
+      this.notifyConnectionErrorName = value
+      if (value) {
+        postMessage.sendHaptics({ name: 'error' })
+      }
+    },
+    notifyServerCouldNotSave (value) {
+      utils.typeCheck({ value, type: 'boolean' })
+      this.notifyServerCouldNotSave = value
+      if (value) {
+        postMessage.sendHaptics({ name: 'error' })
+      }
+    },
+    notifySpaceIsRemoved (value) {
+      utils.typeCheck({ value, type: 'boolean' })
+      this.notifySpaceIsRemoved = value
+    },
+    notifyCurrentSpaceIsNowRemoved (value) {
+      utils.typeCheck({ value, type: 'boolean' })
+      this.notifyCurrentSpaceIsNowRemoved = value
+    },
+    notifySignUpToEditSpace (value) {
+      utils.typeCheck({ value, type: 'boolean' })
+      this.notifySignUpToEditSpace = value
+    },
+    notifySignUpToJoinGroup (value) {
+      utils.typeCheck({ value, type: 'boolean' })
+      this.notifySignUpToJoinGroup = value
+    },
+    notifyCardsCreatedIsNearLimit (value) {
+      utils.typeCheck({ value, type: 'boolean' })
+      this.notifyCardsCreatedIsNearLimit = value
+    },
+    notifyCardsCreatedIsOverLimit (value) {
+      utils.typeCheck({ value, type: 'boolean' })
+      this.notifyCardsCreatedIsOverLimit = value
+      if (value === true) {
+        this.notifyCardsCreatedIsNearLimit = false
+      }
+    },
+    notifyMoveOrCopyToSpace (value) {
+      utils.typeCheck({ value, type: 'boolean' })
+      this.notifyMoveOrCopyToSpace = value
+    },
+    notifyMoveOrCopyToSpaceDetails (value) {
+      utils.typeCheck({ value, type: 'object' })
+      this.notifyMoveOrCopyToSpaceDetails = value
+    },
+    hasNotifiedPressAndHoldToDrag (value) {
+      utils.typeCheck({ value, type: 'boolean' })
+      this.hasNotifiedPressAndHoldToDrag = value
+    },
+    notifySpaceIsHidden (value) {
+      utils.typeCheck({ value, type: 'boolean' })
+      this.notifySpaceIsHidden = value
+    },
+    notifyThanksForDonating (value) {
+      utils.typeCheck({ value, type: 'boolean' })
+      this.notifyThanksForDonating = value
+    },
+    notifyThanksForUpgrading (value) {
+      utils.typeCheck({ value, type: 'boolean' })
+      this.notifyThanksForUpgrading = value
+    },
+    shouldNotifyIsJoiningGroup (value) {
+      utils.typeCheck({ value, type: 'boolean' })
+      this.shouldNotifyIsJoiningGroup = value
+    },
+    notifyIsJoiningGroup (value) {
+      utils.typeCheck({ value, type: 'boolean' })
+      this.notifyIsJoiningGroup = value
+      if (value) {
+        this.shouldNotifyIsJoiningGroup = false
+      }
+    },
+    notifyIsDuplicatingSpace (value) {
+      utils.typeCheck({ value, type: 'boolean' })
+      this.notifyIsDuplicatingSpace = value
+    },
+    notifyBoxSnappingIsReady (value) {
+      utils.typeCheck({ value, type: 'boolean' })
+      this.notifyBoxSnappingIsReady = value
+    },
+
+    // Notifications with Position
+
+    addNotificationWithPosition (notification) {
+      if (!notification.layer) {
+        console.error('🚒 addNotificationWithPosition missing param layer')
+        return
+      }
+      notification.id = nanoid()
+      this.notificationsWithPosition.push(notification)
+    },
+    removeNotificationWithPosition () {
+      this.notificationsWithPosition.shift()
+    },
+    clearNotificationsWithPosition () {
+      this.notificationsWithPosition = []
+    },
+
+    // Filters
+
+    clearSpaceFilters () {
+      this.filteredConnectionTypeIds = []
+      this.filteredFrameIds = []
+      this.filteredTagNames = []
+      this.filteredBoxIds = []
+    },
+    addToFilteredConnectionTypeId (id) {
+      utils.typeCheck({ value: id, type: 'string' })
+      this.filteredConnectionTypeIds.push(id)
+    },
+    removeFromFilteredConnectionTypeId (id) {
+      utils.typeCheck({ value: id, type: 'string' })
+      this.filteredConnectionTypeIds = this.filteredConnectionTypeIds.filter(typeId => typeId !== id)
+    },
+    addToFilteredFrameIds (id) {
+      utils.typeCheck({ value: id, type: 'number' })
+      this.filteredFrameIds.push(id)
+    },
+    removeFromFilteredFrameIds (id) {
+      utils.typeCheck({ value: id, type: 'number' })
+      this.filteredFrameIds = this.filteredFrameIds.filter(frameId => frameId !== id)
+    },
+    addToFilteredTagNames (name) {
+      utils.typeCheck({ value: name, type: 'string' })
+      this.filteredTagNames.push(name)
+    },
+    removeFromFilteredTagNames (name) {
+      utils.typeCheck({ value: name, type: 'string' })
+      this.filteredTagNames = this.filteredTagNames.filter(tagName => tagName !== name)
+    },
+    spaceListFilterInfo (value) {
+      utils.typeCheck({ value, type: 'object' })
+      this.spaceListFilterInfo = value
+    },
+    addToFilteredBoxId (id) {
+      utils.typeCheck({ value: id, type: 'string' })
+      this.filteredBoxIds.push(id)
+    },
+    removeFromFilteredBoxId (id) {
+      utils.typeCheck({ value: id, type: 'string' })
+      this.filteredBoxIds = this.filteredBoxIds.filter(typeId => typeId !== id)
+    },
+
+    // Session Data
+
+    updateOtherUsers (updatedUser) {
+      if (!updatedUser) { return }
+      utils.typeCheck({ value: updatedUser, type: 'object' })
+      this.otherUsers[updatedUser.id] = updatedUser
+    },
+    updateOtherItems ({ cards, spaces }) {
+      utils.typeCheck({ value: cards, type: 'array' })
+      utils.typeCheck({ value: spaces, type: 'array' })
+      const otherItems = utils.clone(this.otherItems)
+      if (cards.length) {
+        otherItems.cards = otherItems.cards.concat(cards)
+        otherItems.cards = uniqBy(otherItems.cards, 'id')
+      }
+      if (spaces.length) {
+        otherItems.spaces = otherItems.spaces.concat(spaces)
+        otherItems.spaces = uniqBy(otherItems.spaces, 'id')
+      }
+      this.otherItems = otherItems
+    },
+    updateCardNameInOtherItems ({ id, name }) {
+      const cards = this.otherItems.cards
+      const index = cards.findIndex(card => card.id === id)
+      const card = cards[index]
+      if (card) {
+        card.name = name
+      }
+    },
+    currentUserIsInvitedButCannotEditCurrentSpace (value) {
+      this.currentUserIsInvitedButCannotEditCurrentSpace = value
+    },
+
+    // Sync Session Data
+
+    sendingQueue (value) {
+      utils.typeCheck({ value, type: 'array' })
+      this.sendingQueue = value
+      // cache.saveSendingQueue(value)
+    },
+    clearSendingQueue () {
+      this.sendingQueue = []
+      // cache.clearSendingQueue()
+    },
+
+    // Code Blocks
+
+    codeLanguagePickerIsVisible (value) {
+      utils.typeCheck({ value, type: 'boolean' })
+      this.codeLanguagePickerIsVisible = value
+    },
+    codeLanguagePickerPosition (position) {
+      utils.typeCheck({ value: position, type: 'object' })
+      this.codeLanguagePickerPosition = position
+    },
+    codeLanguagePickerCardId (cardId) {
+      utils.typeCheck({ value: cardId, type: 'string' })
+      this.codeLanguagePickerCardId = cardId
+    },
+
+    // Snap Guide Lines
+
+    snapGuideLinesOrigin (position) {
+      utils.typeCheck({ value: position, type: 'object' })
+      this.snapGuideLinesOrigin = position
+    }
   }
+
 })
