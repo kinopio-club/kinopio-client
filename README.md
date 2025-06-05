@@ -46,8 +46,8 @@ Use the [Vue devtools](https://github.com/vuejs/vue-devtools) for Firefox and Ch
 | ------------- |-------------|
 | `router` | Client-side routes |
 | `App.vue` | Root component, used by all routes|
-| `useStore.js` | [Pinia](https://pinia.vuejs.org//) store with global interaction state |
-| `useSpaceStore.js` | Pinia store module that handles loading spaces
+| `stores/useGlobalStore.js` | [Pinia](https://pinia.vuejs.org//) store with global interaction state |
+| `stores/useSpaceStore.js` | Pinia store module that handles loading spaces. Each item type in a space has it's own store, e.g. `useCardStore.js`, `useBoxStore.js`, …
 | `utils.js` | Functional methods that just do dom manipulations or common tasks. These can't access components or store directly |
 | `views/Space.vue` | Contains the core interaction layer which sends user inputs to painting, connecting, dragging etc. components. Also where new connections are created and checked to see if they connect |
 | `views/Add.vue` | `kinopio.club/add` page for browser extensions and iOS share sheet |

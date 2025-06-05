@@ -2197,6 +2197,7 @@ const store = createStore({
       context.commit('drawingEraserIsActive', value)
     }
   },
+
   getters: {
     isSpacePage: (state) => {
       if (window.location.pathname === '/add') { return }

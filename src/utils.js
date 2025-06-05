@@ -892,28 +892,6 @@ export default {
     return classes
   },
 
-  // restore space
-
-  // mergeSpaceObjectUpdates (space, itemType, newItems) {
-  //   newItems.forEach(newItem => {
-  //     let shouldUpdate
-  //     const prevItem = space.
-  //     // context.getters.byId(newItem.id)
-  //     const card = { id: newItem.id }
-  //     let keys = Object.keys(newItem)
-  //     keys = keys.filter(key => key !== 'id')
-  //     keys.forEach(key => {
-  //       if (prevItem[key] !== newItem[key]) {
-  //         card[key] = newItem[key]
-  //         shouldUpdate = true
-  //       }
-  //     })
-  //     if (!shouldUpdate) { return }
-  //     context.commit('update', card)
-  //   })
-
-  // },
-
   // normalize items
 
   normalizeItems (items) {
