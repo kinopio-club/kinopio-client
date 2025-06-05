@@ -4,6 +4,7 @@ import { useUserStore } from '@/stores/useUserStore'
 import { useSpaceStore } from '@/stores/useSpaceStore'
 import { useApiStore } from '@/stores/useApiStore'
 import { useBroadcastStore } from '@/stores/useBroadcastStore'
+import { useHistoryStore } from '@/stores/useHistoryStore'
 
 import store from '@/store/store.js' // TEMP Import Vuex store
 
@@ -160,6 +161,7 @@ export const useConnectionStore = defineStore('connections', {
       const apiStore = useApiStore()
       const userStore = useUserStore()
       const spaceStore = useSpaceStore()
+      const historyStore = useHistoryStore()
       // const broadcastStore = useBroadcastStore()
       const connections = this.getAllConnections
       const isExistingConnection = connections.find(item => {
@@ -179,7 +181,7 @@ export const useConnectionStore = defineStore('connections', {
       store.commit('triggerUpdateItemCurrentConnections', connection.startItemId, { root: true })
       // if (!updates.isBroadcast) {
       // broadcastStore.update({ updates: connection, type: 'addConnection', handler: 'currentConnections/create' }, { root: true })
-      // store.dispatch('history/add', { connections: [connection] }, { root: true })
+      // historyStore.add({ connections: [connection] }, { root: true })
       await apiStore.addToQueue({ name: 'createConnection', body: connection }, { root: true })
     },
     async createConnectionType (type) {
@@ -270,6 +272,7 @@ export const useConnectionStore = defineStore('connections', {
       const apiStore = useApiStore()
       const spaceStore = useSpaceStore()
       const connectionType = this.getConnectionType(update.id)
+      const historyStore = useHistoryStore()
       // const broadcastStore = useBroadcastStore()
       const keys = Object.keys(update)
       keys.forEach(key => {
@@ -278,7 +281,7 @@ export const useConnectionStore = defineStore('connections', {
       this.typeByIds[connectionType.id] = connectionType
       await cache.updateSpace('connectionTypes', this.getAllConnectionTypes, spaceStore.id)
       await apiStore.addToQueue({ name: 'updateConnectionType', body: connectionType }, { root: true })
-      // context.dispatch('history/add', { connectionTypes: [type] }, { root: true })
+      // historyStore.add({ connectionTypes: [type] }, { root: true })
       // if (!updates.isBroadcast) {
       // broadcastStore.update({ updates: type, type: 'updateConnectionType', handler: 'currentConnections/updateType' }, { root: true })
     },
@@ -288,6 +291,7 @@ export const useConnectionStore = defineStore('connections', {
     async removeConnections (ids) {
       const apiStore = useApiStore()
       const userStore = useUserStore()
+      const historyStore = useHistoryStore()
       // const broadcastStore = useBroadcastStore()
       const canEditSpace = userStore.getUserCanEditSpace
       if (!canEditSpace) { return }
@@ -299,7 +303,7 @@ export const useConnectionStore = defineStore('connections', {
         // broadcastStore.update({ updates: connection, type: 'removeConnection', handler: 'currentConnections/remove' }, { root: true })
       }
       const connections = ids.map(id => this.getConnection(id))
-      store.dispatch('history/add', { connections, isRemoved: true }, { root: true })
+      historyStore.add({ connections, isRemoved: true }, { root: true })
     },
     async removeConnection (id) {
       await this.removeConnections([id])

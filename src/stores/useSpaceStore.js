@@ -7,6 +7,7 @@ import { useBoxStore } from '@/stores/useBoxStore'
 import { useApiStore } from '@/stores/useApiStore'
 import { useGroupStore } from '@/stores/useGroupStore'
 import { useBroadcastStore } from '@/stores/useBroadcastStore'
+import { useHistoryStore } from '@/stores/useHistoryStore'
 
 import store from '@/store/store.js' // TEMP Import Vuex store
 
@@ -401,18 +402,20 @@ export const useSpaceStore = defineStore('space', {
       store.commit('shouldPreventNextEnterKey', false, { root: true })
     },
     restoreSpaceLocal (space) {
+      const historyStore = useHistoryStore()
       const emptySpace = utils.emptySpace(space.id)
       this.restoreSpace(emptySpace)
-      store.dispatch('history/reset', null, { root: true })
+      historyStore.reset()
       this.restoreSpace(space)
       console.info('🎑 local space', space)
       return space
     },
     async restoreSpaceRemote (space) {
+      const historyStore = useHistoryStore()
       const cardStore = useCardStore()
       isLoadingRemoteSpace = true
       space = utils.normalizeSpace(space)
-      store.dispatch('history/redoLocalUpdates', null, { root: true })
+      historyStore.redoLocalUpdates()
       this.restoreSpace(space)
     },
     async loadSpace (space) {

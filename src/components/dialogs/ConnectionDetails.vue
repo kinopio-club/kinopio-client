@@ -4,6 +4,7 @@ import { useStore } from 'vuex'
 import { useConnectionStore } from '@/stores/useConnectionStore'
 import { useUserStore } from '@/stores/useUserStore'
 import { useSpaceStore } from '@/stores/useSpaceStore'
+import { useHistoryStore } from '@/stores/useHistoryStore'
 
 import ResultsFilter from '@/components/ResultsFilter.vue'
 import ConnectionTypeList from '@/components/ConnectionTypeList.vue'
@@ -20,6 +21,7 @@ const store = useStore()
 const connectionStore = useConnectionStore()
 const userStore = useUserStore()
 const spaceStore = useSpaceStore()
+const historyStore = useHistoryStore()
 
 let prevConnectionType
 const dialogElement = ref(null)
@@ -46,10 +48,10 @@ watch(() => visible.value, (value, prevValue) => {
     updatePinchCounterZoomDecimal()
     updateNextConnectionColor()
   } else {
-    store.dispatch('history/resume')
+    historyStore.resume()
     state.resultsSectionMaxHeight = undefined
     if (state.inputIsFocused) {
-      store.dispatch('history/add', { connectionTypes: [prevConnectionType], useSnapshot: true })
+      historyStore.add({ connectionTypes: [prevConnectionType], useSnapshot: true })
       state.inputIsFocused = false
     }
   }
@@ -110,7 +112,7 @@ const triggerSignUpOrInIsVisible = () => {
 }
 const focus = () => {
   store.commit('pinchCounterZoomDecimal', 1)
-  store.dispatch('history/pause')
+  historyStore.pause()
   state.inputIsFocused = true
 }
 const updatePinchCounterZoomDecimal = () => {
@@ -118,9 +120,9 @@ const updatePinchCounterZoomDecimal = () => {
 }
 const blur = () => {
   store.commit('triggerUpdateHeaderAndFooterPosition')
-  store.dispatch('history/resume')
+  historyStore.resume()
   const connectionType = utils.clone(currentConnectionType.value)
-  store.dispatch('history/add', { connectionTypes: [connectionType], useSnapshot: true })
+  historyStore.add({ connectionTypes: [connectionType], useSnapshot: true })
   state.inputIsFocused = false
 }
 const closeAllDialogs = () => {

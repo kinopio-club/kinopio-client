@@ -91,7 +91,7 @@ export const useHistoryStore = defineStore('history', {
   actions: {
 
     addPatch (patch) {
-      utils.typeCheck({ value: patch, type: 'array', origin: 'history/add' })
+      utils.typeCheck({ value: patch, type: 'array', origin: 'addPatch' })
       patch = patch.filter(item => Boolean(item))
       if (!patch.length) { return }
       // remove patches above pointer

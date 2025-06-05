@@ -7,6 +7,7 @@ import { useBoxStore } from '@/stores/useBoxStore'
 import { useUserStore } from '@/stores/useUserStore'
 import { useSpaceStore } from '@/stores/useSpaceStore'
 import { useApiStore } from '@/stores/useApiStore'
+import { useHistoryStore } from '@/stores/useHistoryStore'
 
 import cache from '@/cache.js'
 import utils from '@/utils.js'
@@ -20,6 +21,7 @@ const boxStore = useBoxStore()
 const userStore = useUserStore()
 const spaceStore = useSpaceStore()
 const apiStore = useApiStore()
+const historyStore = useHistoryStore()
 
 const dialogElement = ref(null)
 
@@ -194,8 +196,8 @@ const moveOrCopyToSpace = async () => {
     removeCards(items.cards)
     removeBoxes(items.boxes)
     items.isRemoved = true
-    store.dispatch('history/resume')
-    store.dispatch('history/add', items)
+    historyStore.resume()
+    historyStore.add(items)
   }
   userStore.updateUserCardsCreatedCount(items.cards)
   connectionStore.removeAllUnusedConnectionTypes()

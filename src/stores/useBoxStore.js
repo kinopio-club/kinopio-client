@@ -6,6 +6,7 @@ import { useUserStore } from '@/stores/useUserStore'
 import { useSpaceStore } from '@/stores/useSpaceStore'
 import { useApiStore } from '@/stores/useApiStore'
 import { useBroadcastStore } from '@/stores/useBroadcastStore'
+import { useHistoryStore } from '@/stores/useHistoryStore'
 
 import store from '@/store/store.js' // TEMP Import Vuex store
 
@@ -141,14 +142,15 @@ export const useBoxStore = defineStore('boxes', {
     },
     async createBox (box, isResizing) {
       const apiStore = useApiStore()
+      const historyStore = useHistoryStore()
       // const broadcastStore = useBroadcastStore()
       box = this.normalizeNewBox(box)
       this.addBoxToState(box)
       // if (!updates.isBroadcast) {
       // broadcastStore.update({ updates: box, type: 'createBox', handler: 'currentBoxes/addBoxToState' })
-      // context.dispatch('history/add', { boxes: [box] }, { root: true })
+      // historyStore.add({ boxes: [box] }, { root: true })
       if (isResizing) {
-        // store.dispatch('history/pause', null, { root: true })
+        historyStore.pause()
         store.commit('currentUserIsResizingBox', true, { root: true })
         store.commit('currentUserIsResizingBoxIds', [box.id], { root: true })
       }
@@ -220,6 +222,7 @@ export const useBoxStore = defineStore('boxes', {
       const apiStore = useApiStore()
       const userStore = useUserStore()
       const spaceStore = useSpaceStore()
+      const historyStore = useHistoryStore()
       // const broadcastStore = useBroadcastStore()
       const canEditSpace = userStore.getUserCanEditSpace
       if (!canEditSpace) { return }
@@ -232,7 +235,7 @@ export const useBoxStore = defineStore('boxes', {
         // broadcastStore.update({ updates: box, type: 'removeBox', handler: 'currentBoxes/remove' })
       }
       const boxes = ids.map(id => this.getBox(id))
-      // store.dispatch('history/add', { boxes, isRemoved: true }, { root: true })
+      // historyStore.add({ boxes, isRemoved: true }, { root: true })
       await cache.updateSpace('boxes', this.getAllBoxes, spaceStore.id)
       await nextTick()
       const connectionStore = useConnectionStore()
@@ -569,7 +572,7 @@ export const useBoxStore = defineStore('boxes', {
       } else if (side === 'bottom') {
         update.y = target.y + target.resizeHeight - borderWidth
       }
-      // context.dispatch('history/resume', null, { root: true })
+      // historyStore.resume()
       this.boxSnapGuides = []
       await nextTick()
       this.updateBox(update)
@@ -614,7 +617,7 @@ export const useBoxStore = defineStore('boxes', {
           update.resizeWidth = origin.width + delta.x + padding
         }
       }
-      // context.dispatch('history/resume', null, { root: true })
+      // historyStore.resume()
       this.updateBox(update)
       // this.boxSnapGuides = []
     }

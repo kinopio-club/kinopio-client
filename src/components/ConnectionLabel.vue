@@ -7,6 +7,7 @@ import { useBoxStore } from '@/stores/useBoxStore'
 import { useUserStore } from '@/stores/useUserStore'
 import { useSpaceStore } from '@/stores/useSpaceStore'
 import { useBroadcastStore } from '@/stores/useBroadcastStore'
+import { useHistoryStore } from '@/stores/useHistoryStore'
 
 import utils from '@/utils.js'
 
@@ -17,6 +18,7 @@ const boxStore = useBoxStore()
 const userStore = useUserStore()
 const spaceStore = useSpaceStore()
 const broadcastStore = useBroadcastStore()
+const historyStore = useHistoryStore()
 
 const labelElement = ref(null)
 
@@ -310,7 +312,7 @@ const stopDragging = () => {
   cursorStart = {}
   broadcastStore.updateStore({ updates: { userId: userStore.id }, type: 'removeRemoteUserDraggingConnectionLabel' })
   if (!labelRelativePosition.value.x) { return }
-  store.dispatch('history/add', {
+  historyStore.add({
     connections: [{
       id: props.connection.id,
       labelRelativePositionX: labelRelativePosition.value.x,

@@ -5,6 +5,7 @@ import { useBoxStore } from '@/stores/useBoxStore'
 import { useUserStore } from '@/stores/useUserStore'
 import { useSpaceStore } from '@/stores/useSpaceStore'
 import { useBroadcastStore } from '@/stores/useBroadcastStore'
+import { useHistoryStore } from '@/stores/useHistoryStore'
 
 import ColorPicker from '@/components/dialogs/ColorPicker.vue'
 import CardOrBoxActions from '@/components/subsections/CardOrBoxActions.vue'
@@ -20,6 +21,7 @@ const boxStore = useBoxStore()
 const userStore = useUserStore()
 const spaceStore = useSpaceStore()
 const broadcastStore = useBroadcastStore()
+const historyStore = useHistoryStore()
 
 const dialogElement = ref(null)
 const nameElement = ref(null)
@@ -44,7 +46,7 @@ watch(() => currentBox.value, async (value, prevValue) => {
   await nextTick()
   // open
   if (visible.value) {
-    store.dispatch('history/pause')
+    historyStore.pause()
     prevBoxId = value.id
     closeDialogs()
     broadcastShowBoxDetails()
@@ -52,13 +54,13 @@ watch(() => currentBox.value, async (value, prevValue) => {
     textareaSizes()
   // close
   } else {
-    store.dispatch('history/resume')
+    historyStore.resume()
     if (!state.isUpdated) { return }
     state.isUpdated = false
     const box = boxStore.getBox(prevBoxId)
     boxStore.updateBoxInfoDimensions(prevBoxId)
     if (!box) { return }
-    store.dispatch('history/add', { boxes: [box], useSnapshot: true })
+    historyStore.add({ boxes: [box], useSnapshot: true })
   }
 })
 
@@ -208,7 +210,7 @@ const toggleBackgroundPickerIsVisible = () => {
 // remove
 
 const removeBox = () => {
-  store.dispatch('history/resume')
+  historyStore.resume()
   boxStore.removeBox(currentBox.value.id)
 }
 

@@ -6,6 +6,7 @@ import { useConnectionStore } from '@/stores/useConnectionStore'
 import { useBoxStore } from '@/stores/useBoxStore'
 import { useUserStore } from '@/stores/useUserStore'
 import { useSpaceStore } from '@/stores/useSpaceStore'
+import { useHistoryStore } from '@/stores/useHistoryStore'
 
 import utils from '@/utils.js'
 import MoveOrCopyItems from '@/components/dialogs/MoveOrCopyItems.vue'
@@ -25,6 +26,7 @@ const connectionStore = useConnectionStore()
 const boxStore = useBoxStore()
 const userStore = useUserStore()
 const spaceStore = useSpaceStore()
+const historyStore = useHistoryStore()
 
 const dialogElement = ref(null)
 
@@ -61,11 +63,11 @@ watch(() => visible.value, async (value, prevValue) => {
     checkIsCardsConnected()
     scrollIntoView()
     closeDialogs()
-    store.dispatch('history/snapshots')
+    historyStore.snapshots()
     store.commit('shouldExplicitlyHideFooter', true)
   } else {
-    store.dispatch('history/resume')
-    store.dispatch('history/add', { cards: prevCards, boxes: prevBoxes, useSnapshot: true })
+    historyStore.resume()
+    historyStore.add({ cards: prevCards, boxes: prevBoxes, useSnapshot: true })
     store.commit('shouldExplicitlyHideFooter', false)
   }
 })
@@ -214,14 +216,14 @@ const checkIsCardsConnected = () => {
   }
 }
 const toggleConnectCards = (event) => {
-  store.dispatch('history/resume')
+  historyStore.resume()
   if (state.cardsIsConnected) {
     disconnectCards()
   } else {
     connectCards(event)
   }
   checkIsCardsConnected()
-  store.dispatch('history/pause')
+  historyStore.pause()
 }
 const connectCards = (event) => {
   const cardIds = multipleCardsSelectedIds.value
@@ -459,7 +461,7 @@ const toggleShouldShowMultipleSelectedBoxActions = () => {
 // remove
 
 const remove = ({ shouldRemoveCardsOnly }) => {
-  store.dispatch('history/resume')
+  historyStore.resume()
   const cardIds = editableCards.value.map(card => card.id)
   const connectionIds = editableConnections.value.map(connection => connection.id)
   cardStore.removeCards(cardIds)

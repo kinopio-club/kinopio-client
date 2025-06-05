@@ -7,6 +7,7 @@ import { useSpaceStore } from '@/stores/useSpaceStore'
 import { useApiStore } from '@/stores/useApiStore'
 import { useUserNotificationStore } from '@/stores/useUserNotificationStore'
 import { useBroadcastStore } from '@/stores/useBroadcastStore'
+import { useHistoryStore } from '@/stores/useHistoryStore'
 
 import store from '@/store/store.js' // TEMP Import Vuex store
 
@@ -416,6 +417,7 @@ export const useCardStore = defineStore('cards', {
       await apiStore.addToQueue({ name: 'deleteAllRemovedCards', body: { userId, spaceId } })
     },
     removeCards (ids) {
+      const historyStore = useHistoryStore()
       const cardsToRemove = []
       const updates = []
       const cardsToDelete = []
@@ -435,7 +437,7 @@ export const useCardStore = defineStore('cards', {
       })
       this.updateCards(updates)
       this.deleteCards(cardsToDelete)
-      // store.dispatch('history/add', { cards, isRemoved: true }, { root: true })
+      // historyStore.add({ cards, isRemoved: true }, { root: true })
       // ?await cache.updateSpace('removedCards', state.removedCards, currentSpaceId)
       const connectionStore = useConnectionStore()
       connectionStore.removeConnectionsFromItems(ids)

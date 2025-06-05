@@ -10,6 +10,7 @@ import { useApiStore } from '@/stores/useApiStore'
 import { useGroupStore } from '@/stores/useGroupStore'
 import { useAnalyticsStore } from '@/stores/useAnalyticsStore'
 import { useBroadcastStore } from '@/stores/useBroadcastStore'
+import { useHistoryStore } from '@/stores/useHistoryStore'
 
 import CardDetails from '@/components/dialogs/CardDetails.vue'
 import OtherCardDetails from '@/components/dialogs/OtherCardDetails.vue'
@@ -65,6 +66,7 @@ const apiStore = useApiStore()
 const groupStore = useGroupStore()
 const analyticsStore = useAnalyticsStore()
 const broadcastStore = useBroadcastStore()
+const historyStore = useHistoryStore()
 
 let unsubscribe
 
@@ -287,11 +289,11 @@ const tiltCards = (event) => {
 }
 const stopTiltingCards = () => {
   if (!store.state.currentUserIsTiltingCard) { return }
-  store.dispatch('history/resume')
+  historyStore.resume()
   const cardIds = store.state.currentUserIsTiltingCardIds
   cardStore.updateCardsDimensions(cardIds)
   const cards = cardIds.map(id => cardStore.getCard(id))
-  store.dispatch('history/add', { cards, useSnapshot: true })
+  historyStore.add({ cards, useSnapshot: true })
   store.commit('currentUserIsTiltingCard', false)
   broadcastStore.updateStore({ updates: { userId: currentUser.value.id }, type: 'removeRemoteUserTiltingCards' })
 }
@@ -304,10 +306,10 @@ const resizeCards = (event) => {
 }
 const stopResizingCards = async () => {
   if (!store.state.currentUserIsResizingCard) { return }
-  store.dispatch('history/resume')
+  historyStore.resume()
   const cardIds = store.state.currentUserIsResizingCardIds
   const cards = cardIds.map(id => cardStore.getCard(id))
-  store.dispatch('history/add', { cards, useSnapshot: true })
+  historyStore.add({ cards, useSnapshot: true })
   await cardStore.updateCardsDimensions(cardIds)
   store.commit('currentUserIsResizingCard', false)
   broadcastStore.updateStore({ updates: { userId: currentUser.value.id }, type: 'removeRemoteUserResizingCards' })
@@ -370,13 +372,13 @@ const resizeBoxes = () => {
 }
 const stopResizingBoxes = () => {
   if (!store.state.currentUserIsResizingBox) { return }
-  store.dispatch('history/resume')
+  historyStore.resume()
 
   // const boxes = boxStore.getBoxesResizing
   // const ids = boxes.map(box => box.id)
 
   // useConnectionStore.updateConnectionPaths(boxIds)
-  // store.dispatch('history/add', { boxes, useSnapshot: true })
+  // historyStore.add({ boxes, useSnapshot: true })
   store.commit('currentUserIsResizingBox', false)
   store.dispatch('currentUserToolbar', 'card')
   broadcastStore.updateStore({ updates: { userId: currentUser.value.id }, type: 'removeRemoteUserResizingBoxes' })
@@ -436,7 +438,7 @@ const dragItemsOnNextTick = async () => {
   dragItems()
 }
 const dragItems = () => {
-  store.dispatch('history/pause')
+  historyStore.pause()
   const prevCursor = cursor()
   userStore.notifyReadOnly(prevCursor)
   const shouldPrevent = !userStore.getUserCanEditSpace

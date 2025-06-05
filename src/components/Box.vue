@@ -7,6 +7,7 @@ import { useBoxStore } from '@/stores/useBoxStore'
 import { useUserStore } from '@/stores/useUserStore'
 import { useSpaceStore } from '@/stores/useSpaceStore'
 import { useBroadcastStore } from '@/stores/useBroadcastStore'
+import { useHistoryStore } from '@/stores/useHistoryStore'
 
 import utils from '@/utils.js'
 import consts from '@/consts.js'
@@ -25,6 +26,7 @@ const boxStore = useBoxStore()
 const userStore = useUserStore()
 const spaceStore = useSpaceStore()
 const broadcastStore = useBroadcastStore()
+const historyStore = useHistoryStore()
 
 let unsubscribe
 
@@ -278,7 +280,7 @@ const resizeIsVisible = computed(() => {
 const startResizing = (event) => {
   if (!canEditSpace.value) { return }
   if (utils.isMultiTouch(event)) { return }
-  store.dispatch('history/pause')
+  historyStore.pause()
   store.dispatch('closeAllDialogs')
   store.commit('currentUserIsResizingBox', true)
   store.commit('preventMultipleSelectedActionsIsVisible', true)

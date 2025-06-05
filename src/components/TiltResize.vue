@@ -5,6 +5,7 @@ import { useCardStore } from '@/stores/useCardStore'
 import { useUserStore } from '@/stores/useUserStore'
 import { useSpaceStore } from '@/stores/useSpaceStore'
 import { useBroadcastStore } from '@/stores/useBroadcastStore'
+import { useHistoryStore } from '@/stores/useHistoryStore'
 
 import utils from '@/utils.js'
 import consts from '@/consts.js'
@@ -13,6 +14,7 @@ const cardStore = useCardStore()
 const userStore = useUserStore()
 const spaceStore = useSpaceStore()
 const broadcastStore = useBroadcastStore()
+const historyStore = useHistoryStore()
 const store = useStore()
 
 const props = defineProps({
@@ -26,7 +28,7 @@ const isPresentationMode = computed(() => store.state.isPresentationMode)
 
 const start = (event, action) => {
   if (utils.isMultiTouch(event)) { return }
-  store.dispatch('history/pause')
+  historyStore.pause()
   store.dispatch('closeAllDialogs')
   store.commit('preventDraggedCardFromShowingDetails', true)
   cardStore.incrementCardZ(props.card.id)

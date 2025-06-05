@@ -8,6 +8,7 @@ import { useSpaceStore } from '@/stores/useSpaceStore'
 import { useUserNotificationStore } from '@/stores/useUserNotificationStore'
 import { useUploadStore } from '@/stores/useUploadStore'
 import { useBroadcastStore } from '@/stores/useBroadcastStore'
+import { useHistoryStore } from '@/stores/useHistoryStore'
 
 import CardOrBoxActions from '@/components/subsections/CardOrBoxActions.vue'
 import ImagePicker from '@/components/dialogs/ImagePicker.vue'
@@ -39,6 +40,7 @@ const spaceStore = useSpaceStore()
 const userNotificationStore = useUserNotificationStore()
 const uploadStore = useUploadStore()
 const broadcastStore = useBroadcastStore()
+const historyStore = useHistoryStore()
 
 let prevCardId, prevCardName
 let previousTags = []
@@ -340,7 +342,7 @@ const handleEnterKey = (event) => {
 }
 const removeCard = () => {
   if (!canEditCard.value) { return }
-  store.dispatch('history/resume')
+  historyStore.resume()
   cardStore.removeCards([cardId.value])
   store.commit('cardDetailsIsVisibleForCardId', '')
   triggerUpdateHeaderAndFooterPosition()
@@ -384,7 +386,7 @@ const showCard = async (cardId) => {
   const connections = connectionStore.getItemConnections(cardId)
   store.commit('updateCurrentCardConnections', connections)
   prevCardName = card.value.name
-  store.dispatch('history/pause')
+  historyStore.pause()
   textareaSizes()
 }
 const closeCard = async () => {
@@ -407,9 +409,9 @@ const closeCard = async () => {
   store.dispatch('updatePageSizes')
   updateDimensionsAndPaths(cardId)
   store.dispatch('checkIfItemShouldIncreasePageSize', item)
-  store.dispatch('history/resume')
+  historyStore.resume()
   if (item.name || prevCardName) {
-    store.dispatch('history/add', { cards: [item], useSnapshot: true })
+    historyStore.add({ cards: [item], useSnapshot: true })
   }
 }
 
@@ -1164,9 +1166,9 @@ const splitCards = (event, isPreview) => {
   if (isPreview) { return newCards }
   state.pastedName = ''
   updateCardName(newCards[0].name)
-  store.dispatch('history/resume')
-  store.dispatch('history/add', { cards: newCards, useSnapshot: true })
-  store.dispatch('history/pause')
+  historyStore.resume()
+  historyStore.add({ cards: newCards, useSnapshot: true })
+  historyStore.pause()
   newCards.shift()
   addSplitCards(newCards)
 }

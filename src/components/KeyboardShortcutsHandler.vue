@@ -8,6 +8,7 @@ import { useUserStore } from '@/stores/useUserStore'
 import { useSpaceStore } from '@/stores/useSpaceStore'
 import { useUploadStore } from '@/stores/useUploadStore'
 import { useThemeStore } from '@/stores/useThemeStore'
+import { useHistoryStore } from '@/stores/useHistoryStore'
 
 import utils from '@/utils.js'
 import consts from '@/consts.js'
@@ -22,6 +23,7 @@ const userStore = useUserStore()
 const spaceStore = useSpaceStore()
 const uploadStore = useUploadStore()
 const themeStore = useThemeStore()
+const historyStore = useHistoryStore()
 
 let useSiblingConnectionType
 let browserZoomLevel = 0
@@ -241,11 +243,11 @@ const handleMetaKeyShortcuts = (event) => {
   // Redo
   } else if (event.shiftKey && isMeta && keyZ && !isFromInput) {
     event.preventDefault()
-    store.dispatch('history/redo')
+    historyStore.redo()
   // Undo
   } else if (isMeta && keyZ && !isFromInput) {
     event.preventDefault()
-    store.dispatch('history/undo')
+    historyStore.undo()
   // Select All Cards Below Cursor
   } else if (isMeta && event.shiftKey && keyA && isSpaceScope && !toolbarIsDrawing) {
     event.preventDefault()
@@ -609,7 +611,7 @@ const canEditConnectionById = (connectionId) => {
 }
 
 const remove = () => {
-  store.dispatch('history/resume')
+  historyStore.resume()
   const selectedConnectionIds = store.state.multipleConnectionsSelectedIds
   const cardIds = selectedCardIds()
   const boxes = boxStore.getBoxesSelected
@@ -691,7 +693,7 @@ const normalizePasteData = (data) => {
 }
 
 const handlePastePlainText = async (data, position) => {
-  store.dispatch('history/pause')
+  historyStore.pause()
   const cardNames = utils.splitCardNameByParagraphAndSentence(data.text)
   // add card(s)
   let cards = cardNames.map(name => {
@@ -711,8 +713,8 @@ const handlePastePlainText = async (data, position) => {
     store.commit('multipleCardsSelectedIds', cardIds)
     // ⏺ history
     cards = cardIds.map(cardId => cardStore.getCard(cardId))
-    store.dispatch('history/resume')
-    store.dispatch('history/add', { cards, useSnapshot: true })
+    historyStore.resume()
+    historyStore.add({ cards, useSnapshot: true })
   }, 100)
 }
 
