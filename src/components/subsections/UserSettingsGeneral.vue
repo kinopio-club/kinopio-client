@@ -103,11 +103,6 @@ const toggleUserDeveloperInfoIsVisible = () => {
 
 const deleteUserPermanent = async () => {
   state.loading.deleteUserPermanent = true
-  if (userStore.isUpgraded) {
-    await apiStore.cancelSubscription({
-      userId: userStore.id
-    })
-  }
   await apiStore.deleteUserPermanent()
   await cache.removeAll()
   // clear history wipe state from vue-router
