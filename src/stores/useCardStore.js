@@ -551,6 +551,13 @@ export const useCardStore = defineStore('cards', {
         tallestCardHeight = Math.ceil(height)
       }
     },
+    resetDimensions ({ cardIds, cardId }) {
+      if (cardId) {
+        this.clearResizeCards([cardId])
+      } else if (cardIds) {
+        this.clearResizeCards(cardIds)
+      }
+    },
     async distributeCardsVertically (cards) {
       const zoom = store.getters.spaceCounterZoomDecimal
       let prevCard

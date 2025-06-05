@@ -24,10 +24,19 @@
 //                    └──────────────────────┘░                ▼
 //                     ░░░░░░░░░░░░░░░░░░░░░░░░
 
+import { nextTick } from 'vue'
+import { defineStore } from 'pinia'
+import { useUserStore } from '@/stores/useUserStore'
 import { useSpaceStore } from '@/stores/useSpaceStore'
+import { useApiStore } from '@/stores/useApiStore'
+import { useCardStore } from '@/stores/useCardStore'
+import { useConnectionStore } from '@/stores/useConnectionStore'
+import { useBoxStore } from '@/stores/useBoxStore'
+import { useBroadcastStore } from '@/stores/useBroadcastStore'
+
+import store from '@/store/store.js' // TEMP Import Vuex store
 
 import utils from '@/utils.js'
-import { nextTick } from 'vue'
 
 const showDebugMessages = false
 const showLogMessages = true // true
@@ -78,10 +87,10 @@ const normalizeUpdates = ({ item, itemType, previous, isRemoved }) => {
   }
 }
 
-const self = {
-  namespaced: true,
-  mutations: {
-    add: (state, patch) => {
+export const useHistoryStore = defineStore('history', {
+  actions: {
+
+    addPatch (patch) {
       utils.typeCheck({ value: patch, type: 'array', origin: 'history/add' })
       patch = patch.filter(item => Boolean(item))
       if (!patch.length) { return }
@@ -94,19 +103,19 @@ const self = {
         console.info('⏺ add history patch', { newPatch: patch, pointer })
       }
     },
-    addToPrevPatch: (state, patch) => {
+    addToPrevPatch (patch) {
       const prevPatch = patches[patches.length - 1]
       const updatedPatch = prevPatch.concat(patch)
       patches[patches.length - 1] = updatedPatch
       console.info('⏺ updated prev history patch', { updatedPatch, pointer })
     },
-    trim: (state) => {
+    trimPatches () {
       if (patches.length > max) {
         patches.shift()
         pointer = pointer - 1
       }
     },
-    clear: (state) => {
+    clearHistory () {
       patches = []
       pointer = 0
       snapshots = { cards: {}, connections: {}, connectionTypes: {} }
@@ -114,13 +123,13 @@ const self = {
         console.info('⏹ clear history')
       }
     },
-    isPaused: (state, value) => {
+    updateIsPaused (value) {
       isPaused = value
       if (showDebugMessages && showLogMessages) {
         console.info('⏸ history is paused', isPaused)
       }
     },
-    pointer: (state, { increment, decrement, value }) => {
+    updatePointer ({ increment, decrement, value }) {
       if (increment) {
         pointer = pointer + 1
         pointer = Math.min(patches.length, pointer)
@@ -131,36 +140,34 @@ const self = {
         pointer = value
       }
     },
-    snapshots: (state, object) => {
-      snapshots = object
-    }
-  },
-  actions: {
 
     // History System State
 
-    reset: (context) => {
-      context.commit('clear')
-      context.dispatch('snapshots')
+    reset () {
+      this.clearHistory()
+      this.snapshots()
     },
-    snapshots: (context) => {
+    snapshots () {
       const spaceStore = useSpaceStore()
       const space = spaceStore.getSpaceAllItems
       const { cards, connections, connectionTypes, boxes } = space
-      context.commit('snapshots', { cards, connections, connectionTypes, boxes })
+      snapshots = { cards, connections, connectionTypes, boxes }
     },
-    pause: (context) => {
+    pause () {
       if (isPaused) { return }
-      context.commit('isPaused', true)
-      context.dispatch('snapshots')
+      this.updateIsPaused(true)
+      this.snapshots()
     },
-    resume: (context) => {
-      context.commit('isPaused', false)
+    resume () {
+      this.updateIsPaused(false)
     },
 
     // Add Patch
 
-    add: (context, { cards, connections, connectionTypes, boxes, useSnapshot, isRemoved }) => {
+    add ({ cards, connections, connectionTypes, boxes, useSnapshot, isRemoved }) {
+      const cardStore = useCardStore()
+      const connectionStore = useConnectionStore()
+      const boxStore = useBoxStore()
       if (isPaused) { return }
       const groupTime = 1000
       const time = new Date()
@@ -170,7 +177,7 @@ const self = {
       // cards
       if (cards) {
         cards = cards.map(card => {
-          let previous = context.rootGetters['currentCards/byId'](card.id)
+          let previous = cardStore.getCard(card.id)
           if (useSnapshot) {
             previous = snapshots.cards[card.id]
           }
@@ -181,7 +188,7 @@ const self = {
       // connections
       if (connections) {
         connections = connections.map(connection => {
-          let previous = context.rootGetters['currentConnections/byId'](connection.id)
+          let previous = connectionStore.getConnection(connection.id)
           if (useSnapshot) {
             previous = snapshots.connections[connection.id]
           }
@@ -192,7 +199,7 @@ const self = {
       // connection types
       if (connectionTypes) {
         connectionTypes = connectionTypes.map(type => {
-          let previous = context.rootGetters['currentConnections/typeByTypeId'](type.id)
+          let previous = connectionStore.getConnectionType(type.id)
           if (useSnapshot) {
             previous = snapshots.connectionTypes[type.id]
           }
@@ -203,7 +210,7 @@ const self = {
       // boxes
       if (boxes) {
         boxes = boxes.map(box => {
-          let previous = context.rootGetters['currentBoxes/byId'](box.id)
+          let previous = boxStore.getBox(box.id)
           if (useSnapshot) {
             previous = snapshots.boxes[box.id]
           }
@@ -213,30 +220,33 @@ const self = {
       }
       patch = patch.filter(item => Boolean(item))
       if (patches.length && shouldAddToPreviousPatch) {
-        context.commit('addToPrevPatch', patch)
+        this.addToPrevPatch(patch)
       } else {
-        context.commit('add', patch)
+        this.addPatch(patch)
       }
-      context.commit('trim')
+      this.trimPatches()
       prevPatchTime = time
     },
 
     // Undo
 
-    undo: (context) => {
-      const toolbarIsDrawing = context.rootState.currentUserToolbar === 'drawing'
+    undo () {
+      const cardStore = useCardStore()
+      const connectionStore = useConnectionStore()
+      const boxStore = useBoxStore()
+      const toolbarIsDrawing = store.state.currentUserToolbar === 'drawing'
       if (toolbarIsDrawing) {
-        context.commit('triggerDrawingUndo', null, { root: true })
+        store.commit('triggerDrawingUndo', null, { root: true })
         return
       }
       if (isPaused) { return }
       if (pointer <= 0) {
-        context.commit('pointer', { value: 0 })
+        this.updatePointer({ value: 0 })
         return
       }
       const index = pointer - 1
       const patch = patches[index]
-      context.commit('isPaused', true)
+      this.updateIsPaused(true)
       patch.forEach(item => {
         console.info('⏪ undo', item, { pointer, totalPatches: patches.length })
         const { action } = item
@@ -244,68 +254,72 @@ const self = {
         switch (action) {
           case 'cardUpdated':
             card = item.prev
-            context.dispatch('currentCards/update', { card }, { root: true })
+            cardStore.updateCard(card)
             nextTick(() => {
-              context.dispatch('currentCards/resetDimensions', { cardId: card.id }, { root: true })
-              context.dispatch('currentConnections/updatePaths', { itemId: card.id }, { root: true })
+              cardStore.resetDimensions({ cardId: card.id })
+              connectionStore.updateConnectionPath(card.id)
             })
             break
           case 'cardCreated':
             card = item.new
-            context.dispatch('currentCards/remove', card, { root: true })
+            cardStore.removeCard(card)
             break
           case 'cardRemoved':
             card = item.new
-            context.dispatch('currentCards/restoreRemoved', card, { root: true })
+            cardStore.restoreRemovedCard(card)
             break
           case 'connectionUpdated':
             connection = item.prev
-            context.dispatch('currentConnections/update', connection, { root: true })
+            connectionStore.updateConnection(connection)
             break
           case 'connectionCreated':
             connection = item.new
-            context.dispatch('currentConnections/remove', connection, { root: true })
+            connectionStore.removeConnection(connection)
             break
           case 'connectionRemoved':
             connection = utils.clone(item.new)
-            connection.connectionTypeId = context.rootGetters['currentConnections/typeOrTypeForNewConnections'](connection.connectionTypeId)
+            connection.connectionTypeId = connectionStore.getNewConnectionType
             if (!connection.connectionTypeId) {
-              context.dispatch('currentConnections/addType', null, { root: true })
-              connection.connectionTypeId = context.rootGetters['currentConnections/typeForNewConnections']
+              connectionStore.createConnectionType()
+              connection.connectionTypeId = connectionStore.getNewConnectionType
             }
-            context.dispatch('currentConnections/add', { connection }, { root: true })
+            connectionStore.createConnection(connection)
             break
           case 'connectionTypeUpdated':
             type = item.prev
-            context.dispatch('currentConnections/updateType', type, { root: true })
+
+            connectionStore.updateConnectionType(type)
             break
           case 'boxCreated':
             box = item.new
-            context.dispatch('currentBoxes/remove', box, { root: true })
+            boxStore.removeBox(box)
             break
           case 'boxRemoved':
             box = item.new
-            context.dispatch('currentBoxes/add', { box }, { root: true })
+            boxStore.createBox(box)
             break
           case 'boxUpdated':
             box = item.prev
-            context.dispatch('currentBoxes/update', box, { root: true })
+            boxStore.updateBox(box)
             nextTick(() => {
-              context.dispatch('currentConnections/updatePaths', { itemId: box.id }, { root: true })
+              connectionStore.updateConnectionPath(box.id)
             })
             break
         }
       })
-      context.dispatch('resume')
-      context.commit('pointer', { decrement: true })
+      this.resume()
+      this.updatePointer({ decrement: true })
     },
 
     // Redo
 
-    redo: (context, patch) => {
-      const toolbarIsDrawing = context.rootState.currentUserToolbar === 'drawing'
+    redo (patch) {
+      const cardStore = useCardStore()
+      const connectionStore = useConnectionStore()
+      const boxStore = useBoxStore()
+      const toolbarIsDrawing = store.state.currentUserToolbar === 'drawing'
       if (toolbarIsDrawing) {
-        context.commit('triggerDrawingRedo', null, { root: true })
+        store.commit('triggerDrawingRedo', null, { root: true })
         return
       }
       if (!patch) {
@@ -314,7 +328,7 @@ const self = {
         if (pointerIsNewest) { return }
         patch = patches[pointer]
       }
-      context.commit('isPaused', true)
+      this.updateIsPaused(true)
       patch.forEach(item => {
         console.info('⏩ redo', item, { pointer, totalPatches: patches.length })
         const { action } = item
@@ -322,65 +336,64 @@ const self = {
         switch (action) {
           case 'cardUpdated':
             card = item.new
-            context.dispatch('currentCards/update', { card }, { root: true })
+            cardStore.updateCard(card)
             // nextTick(() => {
-            //   context.dispatch('currentCards/resetDimensions', { cardId: card.id }, { root: true })
-            //   context.dispatch('currentConnections/updatePaths', { itemId: card.id }, { root: true })
+            //   cardStore.resetDimensions({ cardId: card.id })
+            //   connectionStore.updateConnectionPath(card.id)
             // })
             break
           case 'cardCreated':
             card = item.new
-            context.dispatch('currentCards/restoreRemoved', card, { root: true })
+            cardStore.restoreRemovedCard(card)
             break
           case 'cardRemoved':
             card = item.new
-            context.dispatch('currentCards/remove', card, { root: true })
+            cardStore.removeCard(card)
             break
           case 'connectionUpdated':
             connection = item.new
-            context.dispatch('currentConnections/update', connection, { root: true })
+            connectionStore.updateConnection(connection)
             break
           case 'connectionCreated':
             connection = utils.clone(item.new)
-            context.dispatch('currentConnections/add', { connection }, { root: true })
+            connectionStore.createConnection(connection)
             break
           case 'connectionRemoved':
             connection = item.new
-            context.dispatch('currentConnections/remove', connection, { root: true })
+            connectionStore.removeConnection(connection)
             break
           case 'connectionTypeUpdated':
             type = item.new
-            context.dispatch('currentConnections/updateType', type, { root: true })
+            connectionStore.updateConnectionType(type)
             break
           case 'boxCreated':
             box = item.new
-            context.dispatch('currentBoxes/add', { box }, { root: true })
+            boxStore.createBox(box)
             break
           case 'boxRemoved':
             box = item.new
-            context.dispatch('currentBoxes/remove', box, { root: true })
+            boxStore.removeBox(box)
             break
           case 'boxUpdated':
             box = item.new
-            context.dispatch('currentBoxes/update', box, { root: true })
+            boxStore.updateBox(box)
             break
         }
       })
-      context.dispatch('resume')
-      context.commit('pointer', { increment: true })
+      this.resume()
+      this.updatePointer({ increment: true })
     },
 
     // Restore local changes over remote space
     // replays patches between the time local space is loaded to when remote space is loaded
 
-    redoLocalUpdates: (context) => {
+    redoLocalUpdates () {
       patches.forEach(patch => {
         const actions = ['cardUpdated', 'boxUpdated']
         const isUpdate = actions.includes(patch[0].action)
-        context.dispatch('redo', patch)
+        this.redo(patch)
       })
     }
-  }
-}
 
-export default self
+  }
+})
