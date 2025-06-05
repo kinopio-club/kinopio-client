@@ -1,13 +1,20 @@
 <script setup>
 import { reactive, computed, onMounted, onBeforeUnmount, watch, ref, nextTick } from 'vue'
 import { useStore } from 'vuex'
+import { useUserStore } from '@/stores/useUserStore'
+import { useSpaceStore } from '@/stores/useSpaceStore'
 
 import Notifications from '@/components/Notifications.vue'
 import SpaceZoom from '@/components/SpaceZoom.vue'
 import Loader from '@/components/Loader.vue'
+import DiscoveryButtons from '@/components/DiscoveryButtons.vue'
+import FavoriteSpaceButton from '@/components/FavoriteSpaceButton.vue'
 import Minimap from '@/components/dialogs/Minimap.vue'
 import utils from '@/utils.js'
+
 const store = useStore()
+const userStore = useUserStore()
+const spaceStore = useSpaceStore()
 
 let unsubscribe
 
@@ -69,7 +76,7 @@ watch(() => isTouchScrolling.value, (value, prevValue) => {
 
 const isAddPage = computed(() => store.state.isAddPage)
 const isEmbedMode = computed(() => store.state.isEmbedMode)
-const currentUser = computed(() => store.state.currentUser)
+const currentUser = computed(() => userStore.getUserAllState)
 const shouldExplicitlyHideFooter = computed(() => store.state.shouldExplicitlyHideFooter)
 const cardDetailsIsVisibleForCardId = computed(() => store.state.cardDetailsIsVisibleForCardId)
 const multipleSelectedActionsIsVisible = computed(() => store.state.multipleSelectedActionsIsVisible)
@@ -79,27 +86,35 @@ const isTouchDevice = computed(() => store.getters.isTouchDevice)
 const isMobile = computed(() => utils.isMobile())
 const isMobileStandalone = computed(() => utils.isMobile() && navigator.standalone) // is homescreen app
 const isFadingOut = computed(() => store.state.isFadingOutDuringTouch)
-const shouldIncreaseUIContrast = computed(() => store.state.currentUser.shouldIncreaseUIContrast)
+const shouldIncreaseUIContrast = computed(() => userStore.shouldIncreaseUIContrast)
 
 // visible
 
+const contentDialogIsVisible = computed(() => Boolean(cardDetailsIsVisibleForCardId.value || multipleSelectedActionsIsVisible.value || connectionDetailsIsVisibleForConnectionId.value))
 const isVisible = computed(() => {
   if (isAddPage.value) { return }
   return true
 })
 const leftIsVisble = computed(() => {
-  // if (isPresentationMode.value) { return }
   if (isEmbedMode.value) { return }
   return true
 })
-const controlsIsVisible = computed(() => {
+const leftControlsIsVisible = computed(() => {
+  if (isPresentationMode.value) { return }
+  if (shouldExplicitlyHideFooter.value) { return }
+  // const isTouchDevice = store.state.isTouchDevice
+  // if (!isTouchDevice) { return true }
+  if (contentDialogIsVisible.value) { return }
+  if (shouldHideFooter.value) { return }
+  return true
+})
+const rightControlsIsVisible = computed(() => {
   // if (isPresentationMode.value) { return }
   if (store.state.minimapIsPinned) { return true }
   if (shouldExplicitlyHideFooter.value) { return }
-  const isTouchDevice = store.state.isTouchDevice
-  if (!isTouchDevice) { return true }
-  const contentDialogIsVisible = Boolean(cardDetailsIsVisibleForCardId.value || multipleSelectedActionsIsVisible.value || connectionDetailsIsVisibleForConnectionId.value)
-  if (contentDialogIsVisible) { return }
+  // const isTouchDevice = store.state.isTouchDevice
+  // if (!isTouchDevice) { return true }
+  if (contentDialogIsVisible.value) { return }
   if (shouldHideFooter.value) { return }
   return true
 })
@@ -142,6 +157,14 @@ const cancelHidden = () => {
   window.cancelAnimationFrame(hiddenOnTouchTimer)
   hiddenOnTouchTimer = undefined
   state.isHiddenOnTouch = false
+}
+
+// settings
+
+const userSettingsIsVisible = computed(() => store.state.userSettingsIsVisible)
+const toggleUserSettingsIsVisible = () => {
+  const value = !store.state.userSettingsIsVisible
+  store.commit('userSettingsIsVisible', value)
 }
 
 // position
@@ -192,19 +215,33 @@ const updatePositionInVisualViewport = () => {
 .footer-wrap(:style="state.position" v-if="isVisible" :class="{'fade-out': isFadingOut}" ref="footerElement")
   .left(v-if="leftIsVisble")
     footer
+      template(v-if="leftControlsIsVisible")
+      .footer-button-wrap
+        DiscoveryButtons
+      //- TEMP move fav button into share?
+      .footer-button-wrap
+        FavoriteSpaceButton(:isSmall="true")
+      .button-wrap.input-button-wrap.footer-button-wrap
+        button.small-button.translucent-button
+          span C
+          //- TODO color swatch for current card color, opens dialog to let user choose default user card color, and space user card color
+          //- remove from user settings
       Notifications
 
-  .right(v-if="controlsIsVisible" :class="{'is-embed': isEmbedMode}")
+  .right(v-if="rightControlsIsVisible" :class="{'is-embed': isEmbedMode}")
     SpaceZoom(v-if="!isPresentationMode")
+    //- presentation mode
+    .button-wrap.input-button-wrap.footer-button-wrap(@click="togglePresentationMode" @touchend.stop :class="{'hidden': state.isHiddenOnTouch}")
+      button.small-button(:class="{active: isPresentationMode, 'translucent-button': !shouldIncreaseUIContrast}" title="Focus/Presentation Mode (P)")
+        img.icon.settings(src="@/assets/presentation.svg")
+    .button-wrap.input-button-wrap.footer-button-wrap
+      button.small-button(@click="toggleUserSettingsIsVisible" :class="{active: userSettingsIsVisible, 'translucent-button': !shouldIncreaseUIContrast}" title="Settings")
+        span S
     //- minimap
     .button-wrap.input-button-wrap.footer-button-wrap(@click.stop="toggleMinimap" @touchend.stop :class="{'hidden': state.isHiddenOnTouch}")
       button.small-button(:class="{active: state.minimapIsVisible, 'translucent-button': !shouldIncreaseUIContrast}" title="Toggle Minimap (M)")
         img.icon.minimap(src="@/assets/minimap.svg")
       Minimap(:visible="state.minimapIsVisible")
-    //- presentation mode
-    .button-wrap.input-button-wrap.footer-button-wrap(@click="togglePresentationMode" @touchend.stop :class="{'hidden': state.isHiddenOnTouch}")
-      button.small-button(:class="{active: isPresentationMode, 'translucent-button': !shouldIncreaseUIContrast}" title="Focus/Presentation Mode (P)")
-        img.icon.settings(src="@/assets/presentation.svg")
 </template>
 
 <style lang="stylus">
@@ -304,5 +341,26 @@ footer
     vertical-align 0px
     width 13px
     margin-left 6px
+
+  .space-functions-row
+    > .segmented-buttons,
+    &.segmented-buttons
+      display inline-block
+      > .button-wrap
+        > button
+          border-radius 0
+          border-right 0
+          .loader
+            margin 0
+        &:first-child
+          > button
+            border-top-left-radius var(--entity-radius)
+            border-bottom-left-radius var(--entity-radius)
+            border-right 0
+        &:last-child
+          > button
+            border-top-right-radius var(--entity-radius)
+            border-bottom-right-radius var(--entity-radius)
+            border-right 1px solid var(--primary-border)
 
   </style>

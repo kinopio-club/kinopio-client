@@ -1,8 +1,8 @@
 <script setup>
 import { reactive, computed, onMounted, onBeforeUnmount, watch, ref, nextTick } from 'vue'
-import { useStore } from 'vuex'
+import { useSpaceStore } from '@/stores/useSpaceStore'
 
-const store = useStore()
+const spaceStore = useSpaceStore()
 
 const props = defineProps({
   command: String
@@ -13,7 +13,7 @@ const isMoonPhase = computed(() => {
 })
 const moonPhase = computed(() => {
   if (!isMoonPhase.value) { return }
-  return store.state.currentSpace.moonPhase
+  return spaceStore.moonPhase
 })
 </script>
 

@@ -1,3 +1,9 @@
+import { defineStore } from 'pinia'
+import { useUserStore } from '@/stores/useUserStore'
+import { useSpaceStore } from '@/stores/useSpaceStore'
+
+import store from '@/store/store.js' // TEMP Import Vuex store
+
 import utils from '@/utils.js'
 
 const themes = {
@@ -77,23 +83,77 @@ const themes = {
   }
 }
 
-export default {
-  namespaced: true,
-  actions: {
-    isSystem: (context, value) => {
-      utils.typeCheck({ value, type: 'boolean' })
-      context.dispatch('currentUser/update', { themeIsSystem: value }, { root: true })
-      context.commit('triggerUpdateTheme', null, { root: true })
-    },
-    toggleIsSystem: (context) => {
-      const value = !context.rootState.currentUser.themeIsSystem
-      context.dispatch('isSystem', value)
-      if (value) {
-        const themeName = context.getters.systemThemeName
-        context.dispatch('update', themeName)
+export const useThemeStore = defineStore('theme', {
+  state: () => ({
+    systemTheme: 'light'
+  }),
+  getters: {
+    getIsThemeDark () {
+      const userStore = useUserStore()
+      if (userStore.themeIsSystem) {
+        return this.systemTheme === 'dark'
+      } else {
+        return userStore.theme === 'dark'
       }
     },
-    update: (context, themeName) => {
+    getThemeName () {
+      const isThemeDark = this.getIsThemeDark
+      let themeName
+      if (isThemeDark) {
+        return 'dark'
+      } else {
+        return 'light'
+      }
+    },
+    getThemeColors () {
+      const themeName = this.getThemeName
+      return themes[themeName].colors
+    }
+
+  },
+
+  actions: {
+    updateSystemTheme () {
+      const isDarkModeOS = window.matchMedia('(prefers-color-scheme: dark)').matches
+      if (isDarkModeOS) {
+        this.systemTheme = 'dark'
+      } else {
+        this.systemTheme = 'light'
+      }
+    },
+
+    // theme is system
+
+    updateThemeIsSystem (value) {
+      const userStore = useUserStore()
+      userStore.updateUser({ themeIsSystem: value })
+      store.commit('triggerUpdateTheme', null, { root: true })
+    },
+    toggleThemeIsSystem () {
+      const userStore = useUserStore()
+      const value = !userStore.themeIsSystem
+      this.updateThemeIsSystem(value)
+      if (value) {
+        const themeName = this.systemTheme
+        this.updateTheme(themeName)
+      }
+    },
+
+    // update
+
+    toggleTheme () {
+      const userStore = useUserStore()
+      const prevTheme = userStore.theme || 'light'
+      let theme
+      if (prevTheme === 'light') {
+        theme = 'dark'
+      } else {
+        theme = 'light'
+      }
+      this.updateTheme(theme)
+    },
+    updateTheme (themeName) {
+      const userStore = useUserStore()
       const normalizedThemeName = themeName || 'light'
       // colors
       const theme = themes[normalizedThemeName]
@@ -102,65 +162,26 @@ export default {
       keys.forEach(key => {
         utils.setCssVariable(key, colors[key])
       })
-      context.dispatch('currentUser/update', { theme: normalizedThemeName }, { root: true })
-      context.commit('triggerUpdateTheme', null, { root: true })
+      userStore.updateUser({ theme: normalizedThemeName })
+      store.commit('triggerUpdateTheme', null, { root: true })
     },
-    restore: (context) => {
-      let themeName = context.rootState.currentUser.theme
-      const themeIsSystem = context.rootState.currentUser.themeIsSystem
+    restoreTheme () {
+      const userStore = useUserStore()
+      let themeName = userStore.theme
+      const themeIsSystem = userStore.themeIsSystem
       if (themeIsSystem) {
-        themeName = context.getters.systemThemeName || themeName
+        themeName = this.systemTheme || themeName
       }
-      context.dispatch('update', themeName)
+      this.updateTheme(themeName)
     },
-    toggle: (context) => {
-      const prevTheme = context.rootState.currentUser.theme || 'light'
-      let theme
-      if (prevTheme === 'light') {
-        theme = 'dark'
-      } else {
-        theme = 'light'
-      }
-      context.dispatch('update', theme)
-    }
-  },
-  getters: {
-    systemThemeName: (state) => {
-      const isDarkModeOS = window.matchMedia('(prefers-color-scheme: dark)').matches
-      let themeName
-      if (isDarkModeOS) {
-        themeName = 'dark'
-      } else {
-        themeName = 'light'
-      }
-      return themeName
-    },
-    isThemeDark: (state, getters, rootState) => {
-      const systemTheme = getters.themeFromSystem
-      const userTheme = rootState.currentUser.theme
-      if (systemTheme) {
-        return systemTheme === 'dark'
-      } else {
-        return userTheme === 'dark'
-      }
-    },
-    currentThemeName: (state, getters) => {
-      const isThemeDark = getters.isThemeDark
-      let themeName
-      if (isThemeDark) {
-        return 'dark'
-      } else {
-        return 'light'
-      }
-    },
-    themeColors: (state, getters) => {
-      const themeName = getters.currentThemeName
-      return themes[themeName].colors
-    },
-    previewImageThemeOptions: (state, getters, rootState) => {
-      const isDarkTheme = getters.isThemeDark
-      let background = rootState.currentSpace.background
-      let backgroundTint = rootState.currentSpace.backgroundTint
+
+    // preview image
+
+    previewImageThemeOptions () {
+      const spaceStore = useSpaceStore()
+      const isDarkTheme = this.getIsThemeDark
+      let background = spaceStore.background
+      let backgroundTint = spaceStore.backgroundTint
       const backgroundElement = document.querySelector('#space-background-image')
       const backgroundTintElement = document.querySelector('#space-background-tint')
       if (background && backgroundElement) {
@@ -172,11 +193,10 @@ export default {
         const domBackgroundTint = backgroundTintElement.style.backgroundColor
         backgroundTint = domBackgroundTint || backgroundTint
       }
-      const themeColors = getters.themeColors
       const theme = {
-        secondaryBackground: themeColors['secondary-background'],
-        primaryBorder: themeColors['primary-border'],
-        primaryBackground: themeColors['primary-background'],
+        secondaryBackground: this.getThemeColors['secondary-background'],
+        primaryBorder: this.getThemeColors['primary-border'],
+        primaryBackground: this.getThemeColors['primary-background'],
         entityRadius: 6,
         backgroundTint,
         background
@@ -184,4 +204,4 @@ export default {
       return { isDarkTheme, theme }
     }
   }
-}
+})

@@ -1,12 +1,16 @@
 <script setup>
 import { reactive, computed, onMounted, onBeforeUnmount, watch, ref, nextTick } from 'vue'
 import { useStore } from 'vuex'
+import { useUserStore } from '@/stores/useUserStore'
+import { useSpaceStore } from '@/stores/useSpaceStore'
 
 import ColorPicker from '@/components/dialogs/ColorPicker.vue'
 import consts from '@/consts.js'
 import utils from '@/utils.js'
 
 const store = useStore()
+const userStore = useUserStore()
+const spaceStore = useSpaceStore()
 
 onMounted(() => {
   initDefaultColor()
@@ -29,30 +33,21 @@ const state = reactive({
   defaultColor: '#e3e3e3'
 })
 
-const currentUser = computed(() => store.state.currentUser)
+const currentUser = computed(() => userStore.getUserAllState)
 const closeChildDialogs = () => {
   state.colorPickerIsVisible = false
 }
 
-// character limit
-
-const defaultCharacterLimit = computed(() => store.state.currentUser.cardSettingsDefaultCharacterLimit)
-const limitIsDefault = computed(() => !defaultCharacterLimit.value || defaultCharacterLimit.value === consts.defaultCharacterLimit)
-const limitIsMax = computed(() => defaultCharacterLimit.value === consts.highCharacterLimit)
-const updateLimit = (value) => {
-  store.dispatch('currentUser/update', { cardSettingsDefaultCharacterLimit: value })
-}
-
 // shift-enter
 
-const shiftEnterShouldAddChildCard = computed(() => store.state.currentUser.cardSettingsShiftEnterShouldAddChildCard)
+const shiftEnterShouldAddChildCard = computed(() => userStore.cardSettingsShiftEnterShouldAddChildCard)
 const updateShiftEnter = (value) => {
-  store.dispatch('currentUser/update', { cardSettingsShiftEnterShouldAddChildCard: value })
+  userStore.updateUser({ cardSettingsShiftEnterShouldAddChildCard: value })
 }
 
 //  max card width
 
-const maxCardWidth = computed(() => store.state.currentUser.cardSettingsMaxCardWidth)
+const maxCardWidth = computed(() => userStore.cardSettingsMaxCardWidth)
 const maxCardWidthIsNormal = computed(() => maxCardWidth.value === consts.normalCardMaxWidth)
 const maxCardWidthIsWide = computed(() => maxCardWidth.value === consts.wideCardMaxWidth)
 const updateMaxCardWidthIsWide = (isWide) => {
@@ -60,13 +55,13 @@ const updateMaxCardWidthIsWide = (isWide) => {
   if (isWide) {
     value = consts.wideCardMaxWidth
   }
-  store.dispatch('currentUser/update', { cardSettingsMaxCardWidth: value })
+  userStore.updateUser({ cardSettingsMaxCardWidth: value })
 }
 
 // card color
 
 const updateDefaultCardColor = (color) => {
-  store.dispatch('currentUser/update', { defaultCardBackgroundColor: color })
+  userStore.updateUser({ defaultCardBackgroundColor: color })
 }
 const removeDefaultCardColor = () => {
   updateDefaultCardColor(null)
@@ -113,17 +108,6 @@ const initDefaultColor = () => {
         span Child Card
       button(@click="updateShiftEnter(false)" :class="{ active: !shiftEnterShouldAddChildCard }")
         span Line Break
-  section
-    p Character Limit
-    .segmented-buttons
-      button(@click="updateLimit(consts.defaultCharacterLimit)" :class="{ active: limitIsDefault }")
-        span {{consts.defaultCharacterLimit}}
-      button(@click="updateLimit(consts.highCharacterLimit)" :class="{ active: limitIsMax }")
-        span {{consts.highCharacterLimit}}
-    p.badge.secondary
-      span(v-if="limitIsDefault") Best for ideas and thoughts
-      span(v-if="!limitIsDefault") Best for long-form writing and documenting
-
   section
     p Max Card Width
     .segmented-buttons

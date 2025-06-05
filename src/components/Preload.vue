@@ -1,7 +1,9 @@
 <script setup>
 import { reactive, computed, onMounted, onBeforeUnmount, watch, ref, nextTick } from 'vue'
 import { useStore } from 'vuex'
+import { useCardStore } from '@/stores/useCardStore'
 
+const cardStore = useCardStore()
 const store = useStore()
 
 let unsubscribe
@@ -22,7 +24,7 @@ const state = reactive({
 })
 
 const updateImageUrls = () => {
-  const cards = store.getters['currentCards/all']
+  const cards = cardStore.getAllCards
   let urls = cards.map(card => card.urlPreviewImage)
   urls = urls.filter(url => Boolean(url))
   state.imageUrls = urls

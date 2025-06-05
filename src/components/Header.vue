@@ -1,6 +1,10 @@
 <script setup>
 import { reactive, computed, onMounted, onUnmounted, onBeforeUnmount, watch, ref, nextTick } from 'vue'
 import { useStore } from 'vuex'
+import { useUserStore } from '@/stores/useUserStore'
+import { useSpaceStore } from '@/stores/useSpaceStore'
+import { useApiStore } from '@/stores/useApiStore'
+import { useGroupStore } from '@/stores/useGroupStore'
 
 import About from '@/components/dialogs/About.vue'
 import SpaceDetails from '@/components/dialogs/SpaceDetails.vue'
@@ -30,18 +34,21 @@ import Donate from '@/components/dialogs/Donate.vue'
 import Toolbar from '@/components/Toolbar.vue'
 import ImportExport from '@/components/dialogs/ImportExport.vue'
 import Pricing from '@/components/dialogs/Pricing.vue'
-import DiscoveryButtons from '@/components/DiscoveryButtons.vue'
 import UserSettings from '@/components/dialogs/UserSettings.vue'
 import SpaceUserList from '@/components/dialogs/SpaceUserList.vue'
 import CommentButton from '@/components/CommentButton.vue'
-import FavoriteSpaceButton from '@/components/FavoriteSpaceButton.vue'
 import GroupLabel from '@/components/GroupLabel.vue'
-import AddSpaceButtons from '@/components/AddSpaceButtons.vue'
+import AddSpaceButton from '@/components/AddSpaceButton.vue'
 import UserGroups from '@/components/dialogs/UserGroups.vue'
 import consts from '@/consts.js'
 
 import sortBy from 'lodash-es/sortBy'
+
 const store = useStore()
+const userStore = useUserStore()
+const spaceStore = useSpaceStore()
+const apiStore = useApiStore()
+const groupStore = useGroupStore()
 
 let unsubscribe
 
@@ -98,7 +105,7 @@ onMounted(() => {
       hidden()
     } else if (type === 'triggerTemplatesIsVisible') {
       updateTemplatesIsVisible(true)
-    } else if (type === 'triggerRemovedIsVisible' || type === 'triggerAIImagesIsVisible') {
+    } else if (type === 'triggerRemovedIsVisible') {
       updateSidebarIsVisible(true)
     } else if (type === 'triggerImportIsVisible') {
       updateImportIsVisible(true)
@@ -165,12 +172,12 @@ const isSpace = computed(() => {
   const isSpace = !isOther
   return isSpace
 })
-const userCanEditSpace = computed(() => store.getters['currentUser/canEditSpace']())
-const userCanOnlyComment = computed(() => store.getters['currentUser/canOnlyComment']())
-const isUpgraded = computed(() => store.state.currentUser.isUpgraded)
+const userCanEditSpace = computed(() => userStore.getUserCanEditSpace)
+const userCanOnlyComment = computed(() => userStore.getUserIsCommentOnly)
+const isUpgraded = computed(() => userStore.isUpgraded)
 const isOnline = computed(() => store.state.isOnline)
-const currentUserIsSignedIn = computed(() => store.getters['currentUser/isSignedIn'])
-const shouldIncreaseUIContrast = computed(() => store.state.currentUser.shouldIncreaseUIContrast)
+const currentUserIsSignedIn = computed(() => userStore.getUserIsSignedIn)
+const shouldIncreaseUIContrast = computed(() => userStore.shouldIncreaseUIContrast)
 const isMobile = computed(() => utils.isMobile())
 const toolbarIsVisible = computed(() => {
   if (!isSpace.value) { return }
@@ -181,25 +188,24 @@ const toolbarIsVisible = computed(() => {
 // new stuff
 
 const shouldShowChangelogIsUpdated = computed(() => {
-  const isNotDefaultSpace = !store.getters['currentSpace/isHelloKinopio']
-  return store.state.changelogIsUpdated && isNotDefaultSpace && userCanEditSpace.value
+  const isNotHelloSpace = !spaceStore.getSpaceIsHello
+  return store.state.changelogIsUpdated && isNotHelloSpace && userCanEditSpace.value
 })
 
 // current space
 
-const currentSpaceUrl = computed(() => store.getters['currentSpace/url'])
-const currentSpace = computed(() => store.state.currentSpace)
-const currentSpaceIsHidden = computed(() => store.getters['currentSpace/isHidden']())
+const currentSpaceUrl = computed(() => spaceStore.getSpaceUrl)
+const currentSpaceIsHidden = computed(() => spaceStore.getSpaceIsHidden)
 const currentSpaceName = computed(() => {
-  const id = currentSpace.value.id
-  const name = currentSpace.value.name
+  const id = spaceStore.id
+  const name = spaceStore.name
   if (name) {
     return name
   } else {
     return `Space ${id}`
   }
 })
-const spaceGroup = computed(() => store.getters['groups/spaceGroup']())
+const spaceGroup = computed(() => groupStore.getCurrentSpaceGroup)
 const spaceHasStatus = computed(() => {
   if (!isOnline.value) { return }
   return Boolean(store.state.isLoadingSpace || store.state.isJoiningSpace || store.state.isReconnectingToBroadcast || store.state.isLoadingOtherItems || store.state.sendingQueue.length)
@@ -214,30 +220,30 @@ const spaceHasStatusAndStatusDialogIsNotVisible = computed(() => {
   }
 })
 const currentSpaceIsTemplate = computed(() => {
-  if (currentSpace.value.isTemplate) { return true }
+  if (spaceStore.isTemplate) { return true }
   const templateSpaceIds = templates.spaces().map(space => space.id)
-  return templateSpaceIds.includes(currentSpace.value.id)
+  return templateSpaceIds.includes(spaceStore.id)
 })
-const currentSpaceIsInbox = computed(() => currentSpace.value.name === 'Inbox')
+const currentSpaceIsInbox = computed(() => spaceStore.name === 'Inbox')
 const shouldShowInExplore = computed(() => {
-  if (currentSpace.value.privacy === 'private') { return false }
-  return currentSpace.value.showInExplore
+  if (spaceStore.getSpaceIsPrivate) { return false }
+  return spaceStore.showInExplore
 })
 const backButtonIsVisible = computed(() => {
   const spaceId = store.state.prevSpaceIdInSession
-  return spaceId && spaceId !== currentSpace.value.id
+  return spaceId && spaceId !== spaceStore.id
 })
 const changeToPrevSpace = () => {
   store.dispatch('closeAllDialogs')
-  const id = currentSpace.value.id
-  store.dispatch('currentSpace/loadPrevSpaceInSession')
+  const id = spaceStore.id
+  spaceStore.loadPrevSpaceInSession()
   store.commit('prevSpaceIdInSession', id)
 }
 
 // search filters
 
 const searchResultsCount = computed(() => store.state.searchResultsCards.length)
-const totalFiltersActive = computed(() => store.getters['currentUser/totalFiltersActive'])
+const totalFiltersActive = computed(() => userStore.getUserTotalFiltersActive())
 const searchResultsOrFilters = computed(() => {
   if (searchResultsCount.value || totalFiltersActive.value) {
     return true
@@ -532,7 +538,7 @@ const updatePositionInVisualViewport = () => {
 
 const updateNotifications = async () => {
   state.notificationsIsLoading = true
-  const notifications = await store.dispatch('api/getNotifications') || []
+  const notifications = await apiStore.getNotifications() || []
   state.notifications = sortBy(notifications, 'isRead')
   state.notificationsIsLoading = false
 }
@@ -552,7 +558,7 @@ const updateNotificationsIsRead = async (notificationIds) => {
     }
     return notification
   })
-  await store.dispatch('api/addToQueue', {
+  await apiStore.addToQueue({
     name: 'updateNotificationsIsRead',
     body: notificationIds
   })
@@ -591,36 +597,38 @@ header(v-if="isVisible" :style="state.position" :class="{'fade-out': isFadingOut
               .logo-image
                 .label-badge.small-badge(v-if="shouldShowChangelogIsUpdated")
                   span NEW
-              img.down-arrow(src="@/assets/down-arrow.svg")
+
             About(:visible="state.aboutIsVisible")
             KeyboardShortcuts(:visible="state.keyboardShortcutsIsVisible")
             Templates(:visible="state.templatesIsVisible")
             Donate(:visible="state.donateIsVisible")
             AppsAndExtensions(:visible="state.appsAndExtensionsIsVisible")
-        .space-meta-rows
-          .space-functions-row
-            //- Add Space
-            AddSpaceButtons
-            //- Search
-            .segmented-buttons
-              .button-wrap
-                button.search-button(@click.stop="toggleSearchIsVisible" :class="{ active: searchIsVisible || totalFiltersActive || searchResultsCount, 'translucent-button': !shouldIncreaseUIContrast }" :title="searchAndFilterTitle")
-                  template(v-if="!searchResultsCount")
-                    img.icon.search(src="@/assets/search.svg")
-                  .badge.search.search-count-badge(v-if="searchResultsCount")
-                    img.icon.search(src="@/assets/search.svg")
-                    span {{searchResultsCount}}
-                  span.badge.info(v-if="totalFiltersActive")
-                    img.icon(src="@/assets/filter.svg")
-                    span {{totalFiltersActive}}
-                Search(:visible="searchIsVisible")
-              template(v-if="!isMobile")
-                button(@click="showPreviousSearchCard" v-if="searchResultsCount" :class="{ 'translucent-button': !shouldIncreaseUIContrast }")
-                  img.icon.left-arrow(src="@/assets/down-arrow.svg")
-                button(@click="showNextSearchCard" v-if="searchResultsCount" :class="{ 'translucent-button': !shouldIncreaseUIContrast }")
-                  img.icon.right-arrow(src="@/assets/down-arrow.svg")
-              button(@click="clearSearchAndFilters" v-if="searchResultsOrFilters" :class="{ 'translucent-button': !shouldIncreaseUIContrast }")
-                img.icon.cancel(src="@/assets/add.svg")
+        .space-functions-row
+
+          AddSpaceButton
+
+          //- TODO SearchButtons
+          //- Search
+          .segmented-buttons
+            .button-wrap
+              button.search-button(@click.stop="toggleSearchIsVisible" :class="{ active: searchIsVisible || totalFiltersActive || searchResultsCount, 'translucent-button': !shouldIncreaseUIContrast }" :title="searchAndFilterTitle")
+                template(v-if="!searchResultsCount")
+                  img.icon.search(src="@/assets/search.svg")
+                .badge.search.search-count-badge(v-if="searchResultsCount")
+                  img.icon.search(src="@/assets/search.svg")
+                  span {{searchResultsCount}}
+                span.badge.info(v-if="totalFiltersActive")
+                  img.icon(src="@/assets/filter.svg")
+                  span {{totalFiltersActive}}
+              Search(:visible="searchIsVisible")
+            template(v-if="!isMobile")
+              button(@click="showPreviousSearchCard" v-if="searchResultsCount" :class="{ 'translucent-button': !shouldIncreaseUIContrast }")
+                img.icon.left-arrow(src="@/assets/down-arrow.svg")
+              button(@click="showNextSearchCard" v-if="searchResultsCount" :class="{ 'translucent-button': !shouldIncreaseUIContrast }")
+                img.icon.right-arrow(src="@/assets/down-arrow.svg")
+            button(@click="clearSearchAndFilters" v-if="searchResultsOrFilters" :class="{ 'translucent-button': !shouldIncreaseUIContrast }")
+              img.icon.cancel(src="@/assets/add.svg")
+
       .right
         //- Users
         SpaceUsers(:userDetailsIsInline="true")
@@ -630,44 +638,65 @@ header(v-if="isVisible" :style="state.position" :class="{'fade-out': isFadingOut
         UserGroups
         //- Share
         .button-wrap
+          button(@click.left.stop="toggleShareIsVisible" :class="{active: state.shareIsVisible, 'translucent-button': !shouldIncreaseUIContrast}")
+            span Share
+          Share(:visible="state.shareIsVisible")
+        .button-wrap
           .segmented-buttons
-            button(@click.left.stop="toggleShareIsVisible" :class="{active: state.shareIsVisible, 'translucent-button': !shouldIncreaseUIContrast}")
-              span Share
             //- Notifications
             button(@click.left.stop="toggleNotificationsIsVisible" :class="{active: state.notificationsIsVisible, 'translucent-button': !shouldIncreaseUIContrast}" title="Notifications")
               span {{notificationsUnreadCount}}
               .badge.new-unread-badge.notification-button-badge(v-if="notificationsUnreadCount")
-          Share(:visible="state.shareIsVisible")
+            //- Sidebar
+            button(@click.left.stop="toggleSidebarIsVisible" :class="{active: state.sidebarIsVisible, 'translucent-button': !shouldIncreaseUIContrast}" title="Sidebar")
+              img.icon.sidebar(src="@/assets/sidebar.svg")
+          Sidebar(:visible="state.sidebarIsVisible")
           UserNotifications(:visible="state.notificationsIsVisible" :loading="state.notificationsIsLoading" :notifications="state.notifications" :unreadCount="notificationsUnreadCount" @markAllAsRead="markAllAsRead" @markAsRead="markAsRead")
 
     //- 2nd row
     .row
       //- Current Space
       .left
-        .space-details-row
-          .segmented-buttons
+        .space-functions-row
+
+          //- TODO SpaceDetailsButton
+          .segmented-buttons.space-details-button
             //- Back
             .button-wrap(v-if="backButtonIsVisible" title="Go Back" @click.stop="changeToPrevSpace")
               button(:class="{ 'translucent-button': !shouldIncreaseUIContrast }")
                 img.icon.left-arrow(src="@/assets/down-arrow.svg")
-            //- Current Space Name and Info
-            .button-wrap.space-name-button-wrap(:class="{ 'back-button-is-visible': backButtonIsVisible }")
-              button.space-name-button(@click.left.stop="toggleSpaceDetailsIsVisible" :class="{ active: state.spaceDetailsIsVisible, 'translucent-button': !shouldIncreaseUIContrast }" title="Space Details and Spaces List")
+            //- Name
+            .button-wrap(:class="{ 'back-button-is-visible': backButtonIsVisible }")
+              button(@click.left.stop="toggleSpaceDetailsIsVisible" :class="{ active: state.spaceDetailsIsVisible, 'translucent-button': !shouldIncreaseUIContrast }" title="Space Details and Spaces List")
                 .button-contents(:class="{'space-is-hidden': currentSpaceIsHidden}")
                   GroupLabel(:group="spaceGroup")
-                  span(v-if="currentSpaceIsInbox")
-                    img.icon.inbox-icon(src="@/assets/inbox.svg")
-                  span(v-if="currentSpaceIsTemplate")
-                    img.icon.templates(src="@/assets/templates.svg")
-                  span
-                    span.space-name {{currentSpaceName}}
-                    PrivacyIcon(:privacy="currentSpace.privacy" :closedIsNotVisible="true")
-              SpaceDetails(:visible="state.spaceDetailsIsVisible")
+                  //- span(v-if="currentSpaceIsTemplate")
+                  //-   img.icon.templates(src="@/assets/templates.svg")
+                  //- span
+                  span.space-name {{currentSpaceName}}
+                  //- PrivacyIcon(:privacy="currentSpace.privacy" :closedIsNotVisible="true")
+
+                //- img.icon.sidebar.flip-left(src="@/assets/sidebar.svg" :class="{'space-is-hidden': currentSpaceIsHidden}")
+                //- span as
               ImportArenaChannel(:visible="importArenaChannelIsVisible")
+              SpaceDetails(:visible="state.spaceDetailsIsVisible")
               SpaceDetailsInfo(:visible="state.spaceDetailsInfoIsVisible")
               ImportExport(:visible="state.importIsVisible" :isImport="true")
+
               //- space name badges
               .label-badge-row.row
+                //- .label-badge
+                //-   PrivacyIcon(:privacy="currentSpace.privacy" :closedIsNotVisible="true" :isSmall="true")
+
+                GroupLabel(:group="spaceGroup")
+                //- inbox badge
+                .label-badge.secondary(v-if="currentSpaceIsInbox")
+                  img.icon.inbox-icon(src="@/assets/inbox.svg")
+                //- template badge
+                //- .label-badge
+                //-   //- (v-if="currentSpaceIsTemplate")
+                //-   img.icon.templates(src="@/assets/templates.svg")
+
                 //- read only badge
                 .label-badge(v-if="!userCanEditSpace")
                   span(:class="{'invisible': state.readOnlyJiggle}")
@@ -683,30 +712,19 @@ header(v-if="isVisible" :style="state.position" :class="{'fade-out': isFadingOut
                   span
                     img.icon.sunglasses.explore(src="@/assets/sunglasses.svg")
 
-              //- Loading State
+              //- space status loader
               .button-wrap.space-status-button-wrap(v-if="spaceHasStatusAndStatusDialogIsNotVisible")
                 button.small-button(@click.left.stop="toggleSpaceStatusIsVisible" :class="{active: state.spaceStatusIsVisible, 'translucent-button': !shouldIncreaseUIContrast}")
-                  Loader(:visible="spaceHasStatus" :isStatic="true")
+                  Loader(:visible="spaceHasStatus")
                   .badge.success.space-status-success(v-if="!spaceHasStatus")
                 SpaceStatus(:visible="state.spaceStatusIsVisible")
-            //- favorite
-            FavoriteSpaceButton(v-if="isOnline")
+
             //- Offline
             .button-wrap(v-if="!isOnline")
               button(@click.left.stop="toggleOfflineIsVisible" :class="{ active: offlineIsVisible, 'translucent-button': !shouldIncreaseUIContrast}")
                 img.icon.offline(src="@/assets/offline.svg")
               Offline(:visible="offlineIsVisible")
-      .right
-        DiscoveryButtons
-        //- Sidebar
-        .button-wrap
-          button(@click.left.stop="toggleSidebarIsVisible" :class="{active: state.sidebarIsVisible, 'translucent-button': !shouldIncreaseUIContrast}" title="Sidebar")
-            img.icon.sidebar(src="@/assets/sidebar.svg")
-          Sidebar(:visible="state.sidebarIsVisible")
 
-    //- 3rd row
-    .row
-      .left
       .right
         //- Pricing
         .button-wrap.pricing-button-wrap(v-if="!isUpgraded")
@@ -724,6 +742,11 @@ header(v-if="isVisible" :style="state.position" :class="{'fade-out': isFadingOut
           button(@click.left.stop="toggleUpgradeUserIsVisible" :class="{active: state.upgradeUserIsVisible, 'translucent-button': !shouldIncreaseUIContrast}")
             span Upgrade
           UpgradeUser(:visible="state.upgradeUserIsVisible" @closeDialog="closeAllDialogs")
+
+    //- 3rd row
+    //- .row
+    //-   .left
+    //-   .right
         //- Donate
         //- .button-wrap
         //-   .segmented-buttons
@@ -765,7 +788,7 @@ header
       justify-content space-between
       // 2nd row onwards
       margin-top 6px
-      margin-left 52px
+      margin-left 39px
       @media(max-width 550px)
         margin-left 42px
       // 1st row
@@ -795,8 +818,9 @@ header
   .logo
     cursor pointer
     display flex
-      .label-badge
-        bottom -2px
+    .label-badge
+      bottom -2px
+
     img
       vertical-align middle
     .down-arrow
@@ -833,27 +857,27 @@ header
     > .search
       vertical-align 0
 
-  .space-details-row
-    button
-      white-space nowrap
-      overflow hidden
-      text-overflow ellipsis
-    .space-name-button
-      max-width 100%
-      .icon.templates
-        margin-right 4px
-    dialog
-      max-width initial
-    .space-name-button-wrap
-      max-width 55dvw
-      @media(max-width 550px)
-        max-width 35dvw
-      &.back-button-is-visible
-        @media(max-width 550px)
-          max-width 31dvw
-      > button
-        .privacy-icon
-          margin-left 6px
+  // .space-details-row
+  //   button
+  //     white-space nowrap
+  //     overflow hidden
+  //     text-overflow ellipsis
+  //   .space-name-button
+  //     max-width 100%
+  //     .icon.templates
+  //       margin-right 4px
+  //   dialog
+  //     max-width initial
+  //   .space-name-button-wrap
+  //     max-width 55dvw
+  //     @media(max-width 550px)
+  //       max-width 35dvw
+  //     &.back-button-is-visible
+  //       @media(max-width 550px)
+  //         max-width 31dvw
+  //     > button
+  //       .privacy-icon
+  //         margin-left 6px
 
   // should not bubble down into dialogs
   .space-details-row,
@@ -900,9 +924,11 @@ header
     width max-content
     flex-wrap nowrap
     display flex
-    .explore
+    .icon.explore
       width 16px
       vertical-align -2px
+    .icon.templates
+      width 11px
     .label-badge
       width max-content
       pointer-events none
@@ -917,13 +943,6 @@ header
       &.secondary
         background-color var(--secondary-background)
 
-  .space-name
-    max-width 20dvw
-    display table-cell
-    white-space nowrap
-    overflow hidden
-    text-overflow ellipsis
-
   .invisible
     visibility hidden
 
@@ -936,7 +955,6 @@ header
     vertical-align -1px
 
   .inbox-icon
-    margin-right 4px
     width 12px
     vertical-align 0
 
@@ -987,9 +1005,9 @@ header
 
 .button-wrap.space-status-button-wrap
   position absolute
-  top 4px
+  top 5px
   right 4px
   left initial
   .loader
-    margin 2px 2px
+    margin 0
 </style>

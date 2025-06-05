@@ -1,6 +1,9 @@
 <script setup>
 import { reactive, computed, onMounted, onBeforeUnmount, watch, ref, nextTick } from 'vue'
 import { useStore } from 'vuex'
+import { useUserStore } from '@/stores/useUserStore'
+import { useSpaceStore } from '@/stores/useSpaceStore'
+import { useApiStore } from '@/stores/useApiStore'
 
 import cache from '@/cache.js'
 import consts from '@/consts.js'
@@ -15,8 +18,11 @@ import Loader from '@/components/Loader.vue'
 import dayjs from 'dayjs'
 
 const store = useStore()
+const userStore = useUserStore()
+const spaceStore = useSpaceStore()
+const apiStore = useApiStore()
 
-let unsubscribe
+let unsubscribe, unsubscribes
 
 let checkIfShouldNotifySpaceOutOfSyncIntervalTimer
 
@@ -37,12 +43,20 @@ onMounted(() => {
       addReadOnlyJiggle()
     } else if (mutation.type === 'notifyCardsCreatedIsOverLimit') {
       toggleNotifyCardsCreatedIsOverLimit(true)
-    } else if (mutation.type === 'currentSpace/restoreSpace') {
-      toggleNotifySpaceOutOfSync(false)
     } else if (mutation.type === 'triggerCheckIfShouldNotifySpaceOutOfSync') {
       checkIfShouldNotifySpaceOutOfSync()
     }
   })
+  const spaceStoreUnsubscribe = spaceStore.$onAction(
+    ({ name, args }) => {
+      if (name === 'restoreSpace') {
+        toggleNotifySpaceOutOfSync(false)
+      }
+    }
+  )
+  unsubscribes = () => {
+    spaceStoreUnsubscribe()
+  }
   window.addEventListener('visibilitychange', updatePageVisibilityChange)
   window.addEventListener('focus', updatePageVisibilityChangeOnFocus)
   checkIfShouldNotifySpaceOutOfSyncIntervalTimer = setInterval(() => {
@@ -54,12 +68,14 @@ onBeforeUnmount(() => {
   window.removeEventListener('focus', updatePageVisibilityChangeOnFocus)
   clearInterval(checkIfShouldNotifySpaceOutOfSyncIntervalTimer)
   unsubscribe()
+  unsubscribes()
 })
 
 const state = reactive({
   readOnlyJiggle: false,
   notifyCardsCreatedIsOverLimitJiggle: false,
-  notifySpaceOutOfSync: false
+  notifySpaceOutOfSync: false,
+  notifyCacheIsFull: false
 })
 
 const closeAllDialogs = () => {
@@ -74,8 +90,8 @@ const currentUserIsResizingBox = computed(() => store.state.currentUserIsResizin
 const currentUserIsTiltingCard = computed(() => store.state.currentUserIsTiltingCard)
 const currentUserIsPanning = computed(() => store.state.currentUserIsPanning)
 const currentUserIsPanningReady = computed(() => store.state.currentUserIsPanningReady)
-const currentUserIsSignedIn = computed(() => store.getters['currentUser/isSignedIn'])
-const currentUserIsUpgraded = computed(() => store.state.currentUser.isUpgraded)
+const currentUserIsSignedIn = computed(() => userStore.getUserIsSignedIn)
+const currentUserIsUpgraded = computed(() => userStore.isUpgraded)
 const isTouchDevice = computed(() => store.state.isTouchDevice)
 const shouldSnapToGrid = computed(() => store.state.shouldSnapToGrid)
 
@@ -83,17 +99,17 @@ const shouldSnapToGrid = computed(() => store.state.shouldSnapToGrid)
 
 const privacyState = computed(() => {
   return privacy.states().find(state => {
-    return state.name === store.state.currentSpace.privacy
+    return state.name === spaceStore.privacy
   })
 })
 const cardsCreatedCountFromLimit = computed(() => {
-  const cardsCreatedLimit = store.state.cardsCreatedLimit
-  const cardsCreatedCount = store.state.currentUser.cardsCreatedCount
+  const cardsCreatedLimit = consts.cardsCreatedLimit
+  const cardsCreatedCount = userStore.cardsCreatedCount
   return Math.max(cardsCreatedLimit - cardsCreatedCount, 0)
 })
 const currentSpaceIsTemplate = computed(() => {
   if (store.state.isLoadingSpace) { return }
-  const currentSpace = store.state.currentSpace
+  const currentSpace = spaceStore.getSpaceAllState
   if (currentSpace.isTemplate) { return true }
   const templateSpaceIds = templates.spaces().map(space => space.id)
   return templateSpaceIds.includes(currentSpace.id)
@@ -119,14 +135,14 @@ const checkIfShouldNotifySpaceOutOfSync = async () => {
   try {
     if (!currentUserIsSignedIn.value) { return }
     store.commit('isLoadingSpace', true)
-    if (!store.state.currentSpace.updatedAt) {
+    if (!spaceStore.updatedAt) {
       store.commit('isLoadingSpace', false)
       return
     } // don't check unloaded spaces
-    const remoteSpace = await store.dispatch('api/getSpaceUpdatedAt', { id: store.state.currentSpace.id })
+    const remoteSpace = await apiStore.getSpaceUpdatedAt({ id: spaceStore.id })
     store.commit('isLoadingSpace', false)
     if (!remoteSpace) { return }
-    const space = store.state.currentSpace
+    const space = spaceStore.getSpaceAllState
     const spaceeditedAt = dayjs(space.editedAt)
     const remoteSpaceeditedAt = dayjs(remoteSpace.editedAt)
     const deltaMinutes = remoteSpaceeditedAt.diff(spaceeditedAt, 'minute')
@@ -202,7 +218,7 @@ const latestChangelogPost = computed(() => {
 })
 const changeSpaceToChangelog = () => {
   const space = { id: consts.changelogSpaceId() }
-  store.dispatch('currentSpace/changeSpace', space)
+  spaceStore.changeSpace(space)
   store.commit('addNotification', { message: 'Changelog space opened', type: 'success' })
 }
 
@@ -216,9 +232,7 @@ const removeNotifyThanks = () => {
   store.commit('notifyThanksForUpgrading', false)
 }
 const cacheErrorIsVisible = () => {
-  const element = document.getElementById('notify-cache-is-full')
-  const isHidden = element.className.includes('hidden')
-  return Boolean(!isHidden)
+  state.notifyCacheIsFull = !state.notifyCacheIsFull
 }
 const update = async () => {
   await nextTick()
@@ -239,17 +253,17 @@ const removeNotifyConnectionError = () => {
 // buttons
 
 const restoreSpace = () => {
-  const space = store.state.currentSpace
-  store.dispatch('currentSpace/restoreRemovedSpace', space)
+  const space = spaceStore.getSpaceAllState
+  spaceStore.restoreRemovedSpace(space)
   store.commit('notifySpaceIsRemoved', false)
 }
 const deleteSpace = async () => {
-  const space = store.state.currentSpace
-  store.dispatch('currentSpace/deleteSpace', space)
+  const space = spaceStore.getSpaceAllState
+  spaceStore.deleteSpace(space)
   store.commit('notifySpaceIsRemoved', false)
   const cachedSpaces = await cache.getAllSpaces()
   const firstSpace = cachedSpaces[0]
-  store.dispatch('currentSpace/loadSpace', { space: firstSpace })
+  spaceStore.loadSpace(firstSpace)
 }
 const resetNotifySpaceIsHidden = () => {
   store.commit('notifySpaceIsHidden', false)
@@ -288,11 +302,11 @@ const updateChangelogAndRefreshBrowser = () => {
   refreshBrowser()
 }
 const duplicateSpace = async () => {
-  await store.dispatch('currentSpace/duplicateSpace')
+  await spaceStore.duplicateSpace()
 }
 const changeSpace = (spaceId) => {
   const space = { id: spaceId }
-  store.dispatch('currentSpace/changeSpace', space)
+  spaceStore.changeSpace(space)
   store.dispatch('closeAllDialogs')
 }
 const changeSpaceAndSelectItems = (spaceId, items) => {
@@ -341,9 +355,7 @@ aside.notifications(@click.left="closeAllDialogs")
       button.small-button(@click="removeById(item)")
         img.icon.cancel(src="@/assets/add.svg")
 
-  .persistent-item.danger.hidden#notify-cache-is-full
-    p Local storage error has occured, please refresh
-    .row
+  .persistent-item.danger(v-if="state.notifyCacheIsFull")
       .button-wrap
         button(@click.left="refreshBrowser")
           img.refresh.icon(src="@/assets/refresh.svg")
@@ -530,6 +542,8 @@ aside.notifications(@click.left="closeAllDialogs")
   flex-direction column
   align-items flex-start
   max-width 276px
+  &:empty
+    margin 0
   .item,
   .persistent-item
     pointer-events all

@@ -1,6 +1,9 @@
 <script setup>
 import { reactive, computed, onMounted, onBeforeUnmount, watch, ref, nextTick } from 'vue'
 import { useStore } from 'vuex'
+import { useUserStore } from '@/stores/useUserStore'
+import { useSpaceStore } from '@/stores/useSpaceStore'
+import { useApiStore } from '@/stores/useApiStore'
 
 import SpacePicker from '@/components/dialogs/SpacePicker.vue'
 import Loader from '@/components/Loader.vue'
@@ -12,6 +15,9 @@ import cache from '@/cache.js'
 import postMessage from '@/postMessage.js'
 
 const store = useStore()
+const userStore = useUserStore()
+const spaceStore = useSpaceStore()
+const apiStore = useApiStore()
 
 const dialogElement = ref(null)
 
@@ -76,18 +82,18 @@ const userIsSignedIn = computed(() => {
 
 // current user
 
-const isCurrentUser = computed(() => store.getters['currentUser/isCurrentUser'](props.user))
-// const currentUserIsSpaceMember = computed(() => store.getters['currentUser/isSpaceMember']())
+const isCurrentUser = computed(() => userStore.getUserIsCurrentUser(props.user))
+// const currentUserIsSpaceMember = computed(() => userStore.getUserIsSpaceMember)
 const userSettingsIsVisible = computed(() => store.state.userSettingsIsVisible)
 const toggleUserSettingsIsVisible = () => {
   const value = !store.state.userSettingsIsVisible
   store.dispatch('closeAllDialogs')
   store.commit('userSettingsIsVisible', value)
 }
-const currentUserIsSignedIn = computed(() => store.getters['currentUser/isSignedIn'])
+const currentUserIsSignedIn = computed(() => userStore.getUserIsSignedIn)
 const signOut = async () => {
   postMessage.send({ name: 'onLogout' })
-  await store.dispatch('currentUser/resetLastSpaceId')
+  userStore.clearUserLastSpaceId()
   await cache.removeAll()
   // clear history wipe state from vue-router
   window.history.replaceState({}, 'Kinopio', '/')
@@ -97,7 +103,7 @@ const signOut = async () => {
 // spaces
 
 const changeSpace = (space) => {
-  store.dispatch('currentSpace/changeSpace', space)
+  spaceStore.changeSpace(space)
 }
 const getUserSpaces = async () => {
   state.error.unknownServerError = false
@@ -109,7 +115,7 @@ const getUserSpaces = async () => {
   state.loading.userSpaces = true
   state.spacePickerIsVisible = true
   try {
-    const publicUser = await store.dispatch('api/getPublicUser', props.user)
+    const publicUser = await apiStore.getPublicUser(props.user)
     state.userSpaces = publicUser.spaces
   } catch (error) {
     state.error.unknownServerError = true
@@ -128,10 +134,10 @@ const isLoadingFavorites = computed(() => store.state.isLoadingFavorites)
 const updateFavoriteUser = () => {
   const user = props.user
   const value = !isFavoriteUser.value
-  store.dispatch('currentUser/updateFavoriteUser', { user, value })
+  userStore.updateUserFavoriteUser(user, value)
 }
 const isFavoriteUser = computed(() => {
-  const favoriteUsers = store.state.currentUser.favoriteUsers
+  const favoriteUsers = userStore.favoriteUsers
   const isFavoriteUser = Boolean(favoriteUsers.find(favoriteUser => {
     return favoriteUser.id === props.user.id
   }))
@@ -144,7 +150,7 @@ const exploreSpacesIsVisible = computed(() => state.exploreSpaces?.length && !st
 const updateExploreSpaces = async () => {
   if (!props.showExploreSpaces) { return }
   state.loading.exploreSpaces = true
-  const spaces = await store.dispatch('api/getPublicUserExploreSpaces', props.user)
+  const spaces = await apiStore.getPublicUserExploreSpaces(props.user)
   state.exploreSpaces = spaces
   state.loading.exploreSpaces = false
 }

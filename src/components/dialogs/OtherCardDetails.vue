@@ -1,19 +1,28 @@
 <script setup>
 import { reactive, computed, onMounted, onUpdated, watch, ref, nextTick } from 'vue'
 import { useStore } from 'vuex'
+import { useCardStore } from '@/stores/useCardStore'
+import { useUserStore } from '@/stores/useUserStore'
+import { useSpaceStore } from '@/stores/useSpaceStore'
+import { useApiStore } from '@/stores/useApiStore'
 
 import utils from '@/utils.js'
 import Loader from '@/components/Loader.vue'
 import consts from '@/consts.js'
 import OtherSpacePreview from '@/components/OtherSpacePreview.vue'
+
 const store = useStore()
+const cardStore = useCardStore()
+const userStore = useUserStore()
+const spaceStore = useSpaceStore()
+const apiStore = useApiStore()
 
 onMounted(() => {
   store.subscribe((mutation, state) => {
     // update otherCard if dialog is visible before otherCard is loaded
     if (mutation.type === 'updateOtherItems') {
       if (!visible.value) { return }
-      const parentCard = store.getters['currentCards/byId'](parentCardId.value)
+      const parentCard = cardStore.getCard(parentCardId.value)
       let otherCard = store.getters.otherCardById(parentCard.linkToCardId)
       otherCard = utils.clone(otherCard)
       store.commit('currentSelectedOtherItem', otherCard)
@@ -21,22 +30,9 @@ onMounted(() => {
   })
 })
 
-// state
 const state = reactive({
   errorMaxCharacterLimit: false
 })
-const otherCard = computed(() => store.state.currentSelectedOtherItem)
-const url = computed(() => utils.urlFromSpaceAndCard({ spaceId: otherSpace.value.id, cardId: otherCard.value.id }))
-const canEditOtherCard = computed(() => {
-  const canEditCard = store.getters['currentUser/cardIsCreatedByCurrentUser'](otherCard.value)
-  if (canEditCard) { return true }
-  const isMemberOfOtherSpace = store.getters['currentUser/isSpaceMember'](otherSpace.value)
-  return isMemberOfOtherSpace
-})
-const isLoadingOtherItems = computed(() => store.state.isLoadingOtherItems)
-const otherSpace = computed(() => store.getters.otherSpaceById(otherCard.value.spaceId))
-
-// visible
 
 const visible = computed(() => {
   const isVisible = store.state.otherCardDetailsIsVisible
@@ -48,6 +44,16 @@ const visible = computed(() => {
   }
   return isVisible
 })
+const otherSpace = computed(() => store.getters.otherSpaceById(otherCard.value.spaceId))
+const otherCard = computed(() => store.state.currentSelectedOtherItem)
+const url = computed(() => utils.urlFromSpaceAndCard({ spaceId: otherSpace.value.id, cardId: otherCard.value.id }))
+const canEditOtherCard = computed(() => {
+  const canEditCard = userStore.getUserIsCardCreator(otherCard.value)
+  if (canEditCard) { return true }
+  const isMemberOfOtherSpace = userStore.getUserIsOtherSpaceMember(otherSpace.value)
+  return isMemberOfOtherSpace
+})
+const isLoadingOtherItems = computed(() => store.state.isLoadingOtherItems)
 
 // dialog styles
 
@@ -87,12 +93,12 @@ const parentCardId = computed(() => store.state.currentSelectedOtherItem.parentC
 const cardDetailsIsVisibleForCardId = computed(() => store.state.cardDetailsIsVisibleForCardId)
 const showCardDetails = () => {
   store.commit('otherCardDetailsIsVisible', false)
-  store.dispatch('currentCards/showCardDetails', parentCardId.value)
+  cardStore.showCardDetails(parentCardId.value)
 }
 
 // edit card
 
-const maxCardCharacterLimit = () => { return consts.defaultCharacterLimit }
+const maxCardCharacterLimit = () => { return consts.cardCharacterLimit }
 const updateName = async (newName) => {
   const spaceId = otherCard.value.spaceId
   const card = { id: otherCard.value.id, name: newName }
@@ -103,14 +109,14 @@ const updateName = async (newName) => {
   // update input
   textareaStyles()
   updateErrorMaxCharacterLimit(newName)
-  store.dispatch('currentCards/updateDimensions', { cards: [card] })
+  cardStore.updateCardDimensions(card)
   // update remote
-  await store.dispatch('api/addToQueue', { name: 'updateCard', body: card, spaceId })
+  await apiStore.addToQueue({ name: 'updateCard', body: card, spaceId })
 }
 const updateOtherNameInCurrentSpace = ({ card, spaceId }) => {
-  const currentSpaceId = store.state.currentSpace.id
+  const currentSpaceId = spaceStore.id
   if (currentSpaceId !== spaceId) { return }
-  store.commit('currentCards/update', card)
+  cardStore.updateCard(card)
 }
 const updateErrorMaxCharacterLimit = (newName) => {
   const name = newName || otherCard.value.name
@@ -125,13 +131,13 @@ const selectCard = (card) => {
   store.dispatch('focusOnCardId', card.id)
 }
 const changeSpace = (spaceId) => {
-  if (store.state.currentSpace.id === spaceId) { return }
+  if (spaceStore.id === spaceId) { return }
   const space = { id: spaceId }
   store.dispatch('closeAllDialogs')
-  store.dispatch('currentSpace/changeSpace', space)
+  spaceStore.changeSpace(space)
 }
 const selectSpaceCard = () => {
-  const isCardInCurrentSpace = otherCard.value.spaceId === store.state.currentSpace.id
+  const isCardInCurrentSpace = otherCard.value.spaceId === spaceStore.id
   if (isCardInCurrentSpace) {
     selectCard(otherCard.value)
   } else {

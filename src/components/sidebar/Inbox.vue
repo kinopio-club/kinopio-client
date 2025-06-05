@@ -1,6 +1,10 @@
 <script setup>
 import { reactive, computed, onMounted, onUnmounted, watch, ref, nextTick } from 'vue'
 import { useStore } from 'vuex'
+import { useCardStore } from '@/stores/useCardStore'
+import { useUserStore } from '@/stores/useUserStore'
+import { useSpaceStore } from '@/stores/useSpaceStore'
+import { useApiStore } from '@/stores/useApiStore'
 
 import cache from '@/cache.js'
 import CardList from '@/components/CardList.vue'
@@ -12,7 +16,12 @@ import utils from '@/utils.js'
 import sortBy from 'lodash-es/sortBy'
 import dayjs from 'dayjs'
 import { nanoid } from 'nanoid'
+
 const store = useStore()
+const cardStore = useCardStore()
+const userStore = useUserStore()
+const spaceStore = useSpaceStore()
+const apiStore = useApiStore()
 
 let prevPosition
 
@@ -36,14 +45,14 @@ const state = reactive({
 })
 
 const isOnline = computed(() => store.state.isOnline)
-const canEditSpace = computed(() => store.getters['currentUser/canEditSpace']())
+const canEditSpace = computed(() => userStore.getUserCanEditSpace)
 const updatePrevPosition = (event) => {
   if (!props.visible) { return }
   prevPosition = utils.cursorPositionInPage(event)
 }
 
 const loadInboxSpace = () => {
-  store.dispatch('currentSpace/loadInboxSpace')
+  spaceStore.loadInboxSpace()
 }
 
 // list cards
@@ -57,7 +66,7 @@ const updateInboxCardsLocal = async () => {
 }
 const updateInboxCardsRemote = async () => {
   if (!store.state.isOnline) { return }
-  await store.dispatch('currentSpace/updateInboxCache')
+  await spaceStore.updateInboxCache()
   updateInboxCardsLocal()
 }
 const sortCards = () => {
@@ -85,7 +94,7 @@ const removeFromCardList = (removedCard) => {
 }
 const removeCardFromInbox = async (card) => {
   removeFromCardList(card)
-  await store.dispatch('api/addToQueue', { name: 'removeCard', body: card, spaceId: card.spaceId })
+  await apiStore.addToQueue({ name: 'removeCard', body: card, spaceId: card.spaceId })
 }
 
 // update card
@@ -109,12 +118,12 @@ const selectCard = async (card) => {
   const skipCardDetailsIsVisible = true
   let newCard = utils.clone(card)
   newCard.id = nanoid()
-  newCard.spaceId = store.state.currentSpace.id
+  newCard.spaceId = spaceStore.id
   newCard.x = scroll.x + 100 // matches KeyboardShortcutsHandler.addCard
   newCard.y = scroll.y + 120 // matches KeyboardShortcutsHandler.addCard
-  const spaceCards = store.getters['currentCards/all']
+  const spaceCards = cardStore.getAllCards
   newCard = utils.uniqueCardPosition(newCard, spaceCards)
-  store.dispatch('currentCards/add', { card: newCard, skipCardDetailsIsVisible })
+  cardStore.createCard(newCard, skipCardDetailsIsVisible)
   store.dispatch('focusOnCardId', newCard.id)
   removeCardFromInbox(card)
 }

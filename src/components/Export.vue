@@ -1,10 +1,19 @@
 <script setup>
 import { reactive, computed, onMounted, onUnmounted, watch, ref, nextTick } from 'vue'
 import { useStore } from 'vuex'
+import { useConnectionStore } from '@/stores/useConnectionStore'
+import { useUserStore } from '@/stores/useUserStore'
+import { useSpaceStore } from '@/stores/useSpaceStore'
+import { useApiStore } from '@/stores/useApiStore'
 
 import Loader from '@/components/Loader.vue'
 import utils from '@/utils.js'
+
 const store = useStore()
+const userStore = useUserStore()
+const spaceStore = useSpaceStore()
+const connectionStore = useConnectionStore()
+const apiStore = useApiStore()
 
 const emit = defineEmits(['updateSpaces'])
 
@@ -27,13 +36,13 @@ const state = reactive({
   pdfIsVisible: false
 })
 
-const currentUserIsSignedIn = computed(() => store.getters['currentUser/isSignedIn'])
-const currentSpace = computed(() => store.getters['currentSpace/all'])
+const currentUserIsSignedIn = computed(() => userStore.getUserIsSignedIn)
+const currentSpace = computed(() => spaceStore.getSpaceAllItems)
 const text = computed(() => utils.nameStringFromItems(currentSpace.value.cards))
 
 const fileName = () => {
-  const spaceName = store.state.currentSpace.name
-  const spaceId = store.state.currentSpace.id
+  const spaceName = spaceStore.name
+  const spaceId = spaceStore.id
   const fileName = spaceName || `kinopio-space-${spaceId}`
   return fileName
 }
@@ -71,7 +80,7 @@ const downloadAllSpacesRemote = async () => {
   state.unknownServerError = false
   state.isLoadingAllSpaces = true
   try {
-    const blob = await store.dispatch('api/downloadAllSpaces')
+    const blob = await apiStore.downloadAllSpaces()
     downloadBlob(blob, 'kinopio-spaces')
   } catch (error) {
     console.error('🚒', error)
@@ -80,7 +89,7 @@ const downloadAllSpacesRemote = async () => {
   state.isLoadingAllSpaces = false
 }
 const duplicateSpace = async () => {
-  await store.dispatch('currentSpace/duplicateSpace')
+  await spaceStore.duplicateSpace()
   state.spaceIsDuplicated = true
   emit('updateSpaces')
 }
@@ -100,7 +109,7 @@ const togglePdfIsVisible = () => {
 }
 const pdf = async () => {
   try {
-    const url = await store.dispatch('api/pdf')
+    const url = await apiStore.pdf()
     console.info('🌎 pdf url', url)
   } catch (error) {
     console.error('🚒 pdf', error)
@@ -154,7 +163,7 @@ const convertToCanvas = (space) => {
       }
     })
     space.connections.forEach(connection => {
-      const type = store.getters['currentConnections/typeByConnection'](connection)
+      const type = connectionStore.getConnectionConnectionType(connection.id)
       // direction
       let toEnd = 'none'
       if (connection.directionIsVisible) {

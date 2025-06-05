@@ -1,12 +1,14 @@
 <script setup>
 import { reactive, computed, onMounted, onBeforeUnmount, watch, ref, nextTick } from 'vue'
 import { useStore } from 'vuex'
+import { useUserStore } from '@/stores/useUserStore'
+import { useSpaceStore } from '@/stores/useSpaceStore'
 
 import utils from '@/utils.js'
 
-import throttle from 'lodash-es/throttle'
-
 const store = useStore()
+const userStore = useUserStore()
+const spaceStore = useSpaceStore()
 
 onMounted(() => {
   window.addEventListener('mousedown', updateIsMetaKey)
@@ -25,7 +27,7 @@ const state = reactive({
   isMetaKey: false
 })
 
-const canEditSpace = computed(() => store.getters['currentUser/canEditSpace']())
+const canEditSpace = computed(() => userStore.getUserCanEditSpace)
 const isSelectingY = computed(() => store.state.isSelectingY)
 const updateIsSelectingY = (value) => {
   if (store.state.isSelectingX) {
@@ -43,7 +45,7 @@ const isVisible = computed(() => {
 
 // style
 
-const userColor = computed(() => store.state.currentUser.color)
+const userColor = computed(() => userStore.color)
 const iconClasses = computed(() => {
   const classes = utils.colorClasses({ backgroundColor: userColor.value })
   if (state.isMetaKey) {
@@ -92,7 +94,7 @@ const handleMouseMove = (event) => {
     state.isVisible = false
   }
   if (isSelectingY.value) {
-    throttledSelectItems(event)
+    selectItems(event)
   }
 }
 
@@ -100,19 +102,16 @@ const handleMouseMove = (event) => {
 
 const handleMouseDown = (event) => {
   updateIsSelectingY(true)
-  throttledSelectItems(event)
+  selectItems(event)
   updateIsMetaKey(event)
 }
 const handleMouseUp = (event) => {
   if (!isSelectingY.value) { return }
   updateIsSelectingY(false)
-  throttledSelectItems(event)
+  selectItems(event)
   updateIsMetaKey(event)
   state.isVisible = false
 }
-const throttledSelectItems = throttle((event) => {
-  selectItems(event)
-}, 20)
 
 const selectItems = (event) => {
   const position = utils.cursorPositionInSpace(event)

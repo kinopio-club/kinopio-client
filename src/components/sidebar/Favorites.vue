@@ -1,6 +1,9 @@
 <script setup>
 import { reactive, computed, onMounted, onUnmounted, watch, ref, nextTick } from 'vue'
 import { useStore } from 'vuex'
+import { useUserStore } from '@/stores/useUserStore'
+import { useSpaceStore } from '@/stores/useSpaceStore'
+import { useApiStore } from '@/stores/useApiStore'
 
 import Loader from '@/components/Loader.vue'
 import SpaceList from '@/components/SpaceList.vue'
@@ -9,9 +12,12 @@ import utils from '@/utils.js'
 import User from '@/components/User.vue'
 
 const store = useStore()
+const userStore = useUserStore()
+const spaceStore = useSpaceStore()
+const apiStore = useApiStore()
 
 onMounted(() => {
-  store.dispatch('currentUser/restoreUserAssociatedData')
+  userStore.restoreUserAssociatedData()
 })
 
 const props = defineProps({
@@ -29,9 +35,9 @@ const state = reactive({
   currentUserSpacesIsVisible: true
 })
 
-const currentUser = computed(() => store.state.currentUser)
-const favoriteUsers = computed(() => store.state.currentUser.favoriteUsers)
-const favoriteSpaces = computed(() => store.state.currentUser.favoriteSpaces)
+const currentUser = computed(() => userStore.getUserAllState)
+const favoriteUsers = computed(() => userStore.favoriteUsers)
+const favoriteSpaces = computed(() => userStore.favoriteSpaces)
 const loading = computed(() => store.state.isLoadingFavorites)
 const isEmpty = computed(() => {
   const noSpaces = state.spacesIsVisible && !favoriteSpaces.value.length
@@ -85,14 +91,14 @@ const currentUserSpacesFilterIsVisible = computed(() => {
   return state.spacesIsVisible && spacesIncludeCurrentUserSpace
 })
 const checkIfShouldShowCurrentUserSpaces = (space) => {
-  const isSpaceMember = store.getters['currentUser/isSpaceMember'](space)
+  const isSpaceMember = userStore.getUserIsSpaceMember
   if (isSpaceMember) {
     state.currentUserSpacesIsVisible = true
   }
 }
-const isSpaceMemberOfCurrentSpace = computed(() => store.getters['currentUser/isSpaceMember']())
+const isSpaceMemberOfCurrentSpace = computed(() => userStore.getUserIsSpaceMember)
 const changeSpace = (space) => {
-  store.dispatch('currentSpace/changeSpace', space)
+  spaceStore.changeSpace(space)
 }
 const parentDialog = computed(() => 'favorites')
 
@@ -125,9 +131,9 @@ const updateFavoriteSpaceIsEdited = async () => {
   const spaces = favoriteSpaces.value.filter(space => space.isEdited)
   if (!spaces.length) { return }
   spaces.forEach(space => {
-    store.commit('currentUser/updateFavoriteSpaceIsEdited', space.id)
+    userStore.updateUserFavoriteSpaceIsEdited(space)
   })
-  await store.dispatch('api/addToQueue', {
+  await apiStore.addToQueue({
     name: 'updateUserVisitSpaces',
     body: spaces
   })

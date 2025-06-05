@@ -1,6 +1,9 @@
 <script setup>
 import { reactive, computed, onMounted, onBeforeUnmount, watch, ref, nextTick } from 'vue'
 import { useStore } from 'vuex'
+import { useUserStore } from '@/stores/useUserStore'
+import { useSpaceStore } from '@/stores/useSpaceStore'
+import { useApiStore } from '@/stores/useApiStore'
 
 import SpaceList from '@/components/SpaceList.vue'
 import cache from '@/cache.js'
@@ -9,6 +12,9 @@ import utils from '@/utils.js'
 import dayjs from 'dayjs'
 
 const store = useStore()
+const userStore = useUserStore()
+const spaceStore = useSpaceStore()
+const apiStore = useApiStore()
 
 const resultsSectionElement = ref(null)
 
@@ -59,17 +65,17 @@ const selectSpace = (space) => {
 const updateLocalSpaces = async () => {
   const cachedSpaces = await cache.getAllSpaces()
   const spaces = cachedSpaces.filter(space => {
-    const isUser = store.state.currentUser.id === space.userId
+    const isUser = userStore.id === space.userId
     return space.isTemplate && isUser
   })
   state.localSpaces = spaces
 }
 const updateRemoteSpaces = async () => {
-  const currentUserIsSignedIn = store.getters['currentUser/isSignedIn']
+  const currentUserIsSignedIn = userStore.getUserIsSignedIn
   if (!currentUserIsSignedIn) { return }
   emit('isLoading', true)
   try {
-    const remoteSpaces = await store.dispatch('api/getUserSpaces')
+    const remoteSpaces = await apiStore.getUserSpaces()
     state.remoteSpaces = remoteSpaces.filter(space => space.isTemplate)
   } catch (error) {
     console.error('🚒 updateRemoteSpaces', error)

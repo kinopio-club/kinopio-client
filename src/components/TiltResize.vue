@@ -1,9 +1,20 @@
 <script setup>
+import { reactive, computed, onMounted, watch, ref, nextTick } from 'vue'
+import { useStore } from 'vuex'
+import { useCardStore } from '@/stores/useCardStore'
+import { useUserStore } from '@/stores/useUserStore'
+import { useSpaceStore } from '@/stores/useSpaceStore'
+import { useBroadcastStore } from '@/stores/useBroadcastStore'
+import { useHistoryStore } from '@/stores/useHistoryStore'
+
 import utils from '@/utils.js'
 import consts from '@/consts.js'
 
-import { reactive, computed, onMounted, watch, ref, nextTick } from 'vue'
-import { useStore } from 'vuex'
+const cardStore = useCardStore()
+const userStore = useUserStore()
+const spaceStore = useSpaceStore()
+const broadcastStore = useBroadcastStore()
+const historyStore = useHistoryStore()
 const store = useStore()
 
 const props = defineProps({
@@ -17,10 +28,10 @@ const isPresentationMode = computed(() => store.state.isPresentationMode)
 
 const start = (event, action) => {
   if (utils.isMultiTouch(event)) { return }
-  store.dispatch('history/pause')
+  historyStore.pause()
   store.dispatch('closeAllDialogs')
   store.commit('preventDraggedCardFromShowingDetails', true)
-  store.dispatch('currentCards/incrementZ', props.card.id)
+  cardStore.incrementCardZ(props.card.id)
   let cardIds = [props.card.id]
   const multipleCardsSelectedIds = store.state.multipleCardsSelectedIds
   if (multipleCardsSelectedIds.includes(props.card.id)) {
@@ -29,17 +40,17 @@ const start = (event, action) => {
     store.commit('clearMultipleSelected')
   }
   const updates = {
-    userId: store.state.currentUser.id,
+    userId: userStore.id,
     cardIds
   }
   if (action === 'resize') {
     store.commit('currentUserIsResizingCard', true)
     store.commit('currentUserIsResizingCardIds', cardIds)
-    store.commit('broadcast/updateStore', { updates, type: 'updateRemoteUserResizingCards' })
+    broadcastStore.updateStore({ updates, type: 'updateRemoteUserResizingCards' })
   } else if (action === 'tilt') {
     store.commit('currentUserIsTiltingCard', true)
     store.commit('currentUserIsTiltingCardIds', cardIds)
-    store.commit('broadcast/updateStore', { updates, type: 'updateRemoteUserTiltingCards' })
+    broadcastStore.updateStore({ updates, type: 'updateRemoteUserTiltingCards' })
   }
 }
 const remove = (action) => {
@@ -48,9 +59,10 @@ const remove = (action) => {
     cardIds = store.state.multipleCardsSelectedIds
   }
   if (action === 'resize') {
-    store.dispatch('currentCards/removeResize', { cardIds, shouldRemoveResizeWidth: true })
+    const shouldRemoveResizeWidth = true
+    cardStore.clearResizeCards(cardIds, shouldRemoveResizeWidth)
   } else if (action === 'tilt') {
-    store.dispatch('currentCards/removeTilt', { cardIds })
+    cardStore.clearTiltCards(cardIds)
   }
 }
 const colorClass = computed(() => {
@@ -75,7 +87,7 @@ const isTilting = computed(() => {
 
 // resize
 
-const isComment = computed(() => store.getters['currentCards/isComment'](props.card))
+const isComment = computed(() => cardStore.getIsCardComment(props.card))
 const resizeIsVisible = computed(() => {
   return props.visible && !isComment.value
 })

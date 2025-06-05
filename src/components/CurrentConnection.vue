@@ -1,11 +1,24 @@
 <script setup>
 import { reactive, computed, onMounted, onBeforeUnmount, onUnmounted, watch, ref, nextTick } from 'vue'
 import { useStore } from 'vuex'
+import { useCardStore } from '@/stores/useCardStore'
+import { useConnectionStore } from '@/stores/useConnectionStore'
+import { useBoxStore } from '@/stores/useBoxStore'
+import { useUserStore } from '@/stores/useUserStore'
+import { useSpaceStore } from '@/stores/useSpaceStore'
+import { useBroadcastStore } from '@/stores/useBroadcastStore'
 
 import utils from '@/utils.js'
 
 import { nanoid } from 'nanoid'
+
 const store = useStore()
+const cardStore = useCardStore()
+const connectionStore = useConnectionStore()
+const boxStore = useBoxStore()
+const userStore = useUserStore()
+const spaceStore = useSpaceStore()
+const broadcastStore = useBroadcastStore()
 
 let prevType
 
@@ -17,7 +30,7 @@ onMounted(() => {
     } else if (mutation.type === 'closeAllDialogs') {
       if (isDrawingConnection.value) {
         store.commit('currentUserIsDrawingConnection', false)
-        store.dispatch('currentConnections/removeUnusedTypes')
+        connectionStore.removeAllUnusedConnectionTypes()
       }
     }
   })
@@ -54,22 +67,22 @@ const drawCurrentConnection = (event) => {
   const end = utils.cursorPositionInSpace(event)
   let start = utils.connectorCoords(props.startItemId)
   start = utils.cursorPositionInSpace(null, start)
-  const controlPoint = store.state.currentUser.defaultConnectionControlPoint
-  const path = store.getters['currentConnections/connectionPathBetweenCoords'](start, end, controlPoint)
+  const controlPoint = userStore.defaultConnectionControlPoint
+  const path = connectionStore.getConnectionPathBetweenCoords(start, end, controlPoint)
   checkCurrentConnectionSuccess(event)
   state.currentConnectionPath = path
-  const connectionType = store.getters['currentConnections/typeForNewConnections']
+  const connectionType = connectionStore.getNewConnectionType
   prevType = connectionType
   state.currentConnectionColor = connectionType.color
   store.commit('currentConnectionColor', connectionType.color)
   const updates = {
-    userId: store.state.currentUser.id,
+    userId: userStore.id,
     connectionTypeId: connectionType.id,
     color: connectionType.color,
     startItemId: props.startItemId,
     path
   }
-  store.commit('broadcast/updateStore', { updates, type: 'updateRemoteCurrentConnection' })
+  broadcastStore.updateStore({ updates, type: 'updateRemoteCurrentConnection' })
 }
 
 // connect to item
@@ -79,7 +92,7 @@ const checkCurrentConnectionSuccess = (event) => {
   const position = utils.cursorPositionInViewport(event)
   const cardElement = utils.cardElementFromPosition(position.x, position.y)
   const boxElement = utils.boxElementFromConnectorPosition(position.x, position.y)
-  const updates = { userId: store.state.currentUser.id }
+  const updates = { userId: userStore.id }
   let isCurrentConnectionConnected
   if (cardElement) {
     isCurrentConnectionConnected = props.startItemId !== cardElement.dataset.cardId
@@ -91,27 +104,27 @@ const checkCurrentConnectionSuccess = (event) => {
   if (!cardElement && !boxElement) {
     store.commit('currentConnectionSuccess', {})
     updates.endItemId = null
-    store.commit('broadcast/updateStore', { updates, type: 'updateRemoteCurrentConnection' })
+    broadcastStore.updateStore({ updates, type: 'updateRemoteCurrentConnection' })
   // connected to card
   } else if (isCurrentConnectionConnected && cardElement) {
-    const card = store.getters['currentCards/byId'](cardElement.dataset.cardId)
+    const card = cardStore.getCard(cardElement.dataset.cardId)
     if (card.isLocked) {
       store.commit('currentConnectionSuccess', {})
       return
     }
     store.commit('currentConnectionSuccess', card)
     updates.endItemId = card.id
-    store.commit('broadcast/updateStore', { updates, type: 'updateRemoteCurrentConnection' })
+    broadcastStore.updateStore({ updates, type: 'updateRemoteCurrentConnection' })
   // connected to box
   } else if (isCurrentConnectionConnected && boxElement) {
-    const box = store.getters['currentBoxes/byId'](boxElement.dataset.boxId)
+    const box = boxStore.getBox(boxElement.dataset.boxId)
     if (box.isLocked) {
       store.commit('currentConnectionSuccess', {})
       return
     }
     store.commit('currentConnectionSuccess', box)
     updates.endItemId = box.id
-    store.commit('broadcast/updateStore', { updates, type: 'updateRemoteCurrentConnection' })
+    broadcastStore.updateStore({ updates, type: 'updateRemoteCurrentConnection' })
   } else {
     store.commit('currentConnectionSuccess', {})
   }
@@ -131,27 +144,27 @@ const addConnections = async (event) => {
     endItemId = currentConnectionSuccess.id
   } else {
     // create new card
-    const startItem = store.getters['currentSpace/itemById'](startItemIds[0])
+    const startItem = spaceStore.getSpaceItemById(startItemIds[0])
     const color = startItem.color || startItem.backgroundColor
     endItemId = nanoid()
     const newCard = { position, id: endItemId, isParentCard: true, backgroundColor: color }
-    store.dispatch('currentCards/add', { card: newCard })
+    cardStore.createCard(newCard)
     store.commit('childCardId', '')
     estimatedEndItemConnectorPosition = utils.estimatedNewCardConnectorPosition(position)
   }
   // create connections to endItemId
   await nextTick()
+  cardStore.updateCardsDimensions(startItemIds)
   startItemIds.forEach(startItemId => {
-    store.dispatch('currentCards/updateDimensions', { cards: [{ id: startItemId }] })
-    const controlPoint = store.state.currentUser.defaultConnectionControlPoint
-    const path = store.getters['currentConnections/connectionPathBetweenItems']({
+    const controlPoint = userStore.defaultConnectionControlPoint
+    const path = connectionStore.getConnectionPathBetweenItems({
       startItemId,
       endItemId,
       controlPoint,
       estimatedEndItemConnectorPosition
     })
-    const connection = { startItemId, endItemId, path, controlPoint }
-    store.dispatch('currentConnections/add', { connection, type: prevType })
+    const connection = { startItemId, endItemId, path, controlPoint, connectionTypeId: prevType }
+    connectionStore.createConnection(connection)
   })
 }
 
@@ -166,8 +179,8 @@ const stopInteractions = (event) => {
   const isCurrentConnection = store.state.currentConnectionStartItemIds.length
   if (isCurrentConnection) {
     store.commit('currentConnectionStartItemIds', [])
-    const updates = { userId: store.state.currentUser.id }
-    store.commit('broadcast/updateStore', { updates, type: 'removeRemoteCurrentConnection' })
+    const updates = { userId: userStore.id }
+    broadcastStore.updateStore({ updates, type: 'removeRemoteCurrentConnection' })
   }
   store.commit('currentUserIsDrawingConnection', false)
   state.currentConnectionPath = undefined

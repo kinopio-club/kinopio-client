@@ -1,6 +1,8 @@
 <script setup>
 import { reactive, computed, onMounted, onBeforeUnmount, watch, ref, nextTick } from 'vue'
 import { useStore } from 'vuex'
+import { useUserStore } from '@/stores/useUserStore'
+import { useSpaceStore } from '@/stores/useSpaceStore'
 
 import MoreSearchFilters from '@/components/dialogs/MoreSearchFilters.vue'
 import utils from '@/utils.js'
@@ -9,6 +11,8 @@ import uniq from 'lodash-es/uniq'
 import UserLabelInline from '@/components/UserLabelInline.vue'
 
 const store = useStore()
+const userStore = useUserStore()
+const spaceStore = useSpaceStore()
 
 onMounted(() => {
   store.subscribe(mutation => {
@@ -22,7 +26,7 @@ const state = reactive({
   moreSearchFiltersVisible: false
 })
 
-const currentUser = computed(() => store.state.currentUser)
+const currentUser = computed(() => userStore.getUserAllState)
 const toggleMoreSearchFiltersVisible = () => {
   state.moreSearchFiltersVisible = !state.moreSearchFiltersVisible
 }
@@ -37,26 +41,26 @@ const toggleDialogIsPinned = () => {
 
 // filters
 
-const totalFiltersActive = computed(() => store.getters['currentUser/totalFiltersActive'])
-const filterShowUsers = computed(() => currentUser.value.filterShowUsers)
-const filterShowDateUpdated = computed(() => currentUser.value.filterShowDateUpdated)
-const filterUnchecked = computed(() => currentUser.value.filterUnchecked)
-const filterComments = computed(() => currentUser.value.filterComments)
+const totalFiltersActive = computed(() => userStore.getUserTotalFiltersActive())
+const filterShowUsers = computed(() => userStore.filterShowUsers)
+const filterShowDateUpdated = computed(() => userStore.filterShowDateUpdated)
+const filterUnchecked = computed(() => userStore.filterUnchecked)
+const filterComments = computed(() => userStore.filterComments)
 const toggleFilterShowUsers = () => {
   const value = !filterShowUsers.value
-  store.dispatch('currentUser/toggleFilterShowUsers', value)
+  userStore.updateUser({ filterShowUsers: value })
 }
 const toggleFilterShowDateUpdated = () => {
   const value = !filterShowDateUpdated.value
-  store.dispatch('currentUser/toggleFilterShowDateUpdated', value)
+  userStore.updateUser({ filterShowDateUpdated: value })
 }
 const toggleFilterUnchecked = () => {
   const value = !filterUnchecked.value
-  store.dispatch('currentUser/toggleFilterUnchecked', value)
+  userStore.updateUser({ filterUnchecked: value })
 }
 const toggleFilterComments = () => {
   const value = !filterComments.value
-  store.dispatch('currentUser/toggleFilterComments', value)
+  userStore.updateUser({ filterComments: value })
 }
 const clearSearchAndFilters = () => {
   store.commit('clearSearch')

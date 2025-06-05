@@ -1,6 +1,9 @@
 <script setup>
 import { reactive, computed, onMounted, onBeforeUnmount, watch, ref, nextTick } from 'vue'
 import { useStore } from 'vuex'
+import { useUserStore } from '@/stores/useUserStore'
+import { useSpaceStore } from '@/stores/useSpaceStore'
+import { useApiStore } from '@/stores/useApiStore'
 
 import User from '@/components/User.vue'
 import SpaceList from '@/components/SpaceList.vue'
@@ -16,6 +19,9 @@ import dayjs from 'dayjs'
 import sortBy from 'lodash-es/sortBy'
 
 const store = useStore()
+const userStore = useUserStore()
+const spaceStore = useSpaceStore()
+const apiStore = useApiStore()
 
 const dialogElement = ref(null)
 const newSpaceNameElement = ref(null)
@@ -72,7 +78,7 @@ const updateDialogHeight = async () => {
 
 const parentDialog = computed(() => 'spacePicker')
 const activeUser = computed(() => {
-  const currentUser = store.state.currentUser
+  const currentUser = userStore.getUserAllState
   return props.user || currentUser
 })
 const hideFilter = computed(() => {
@@ -83,7 +89,7 @@ const hideFilter = computed(() => {
   }
 })
 const activeUserIsCurrentUser = computed(() => {
-  const currentUser = store.state.currentUser
+  const currentUser = userStore.getUserAllState
   return activeUser.value.id === currentUser.id
 })
 const dialogPositionTop = computed(() => {
@@ -97,7 +103,7 @@ const filteredSpaces = computed(() => {
   let spaces = state.spaces
   if (!props.parentIsCardDetails) { return spaces }
   spaces = spaces.filter(space => {
-    const isHidden = store.getters['currentSpace/isHidden'](space.id)
+    const isHidden = spaceStore.getSpaceIsHiddenById(space.id)
     return !isHidden
   })
   if (props.search) {
@@ -121,7 +127,7 @@ const filteredSpaces = computed(() => {
   }
   return spaces
 })
-const currentUserIsSignedIn = computed(() => store.getters['currentUser/isSignedIn'])
+const currentUserIsSignedIn = computed(() => userStore.getUserIsSignedIn)
 
 const handleFocusBeforeFirstItem = () => {
   if (state.newSpaceIsVisible) { return }
@@ -129,7 +135,7 @@ const handleFocusBeforeFirstItem = () => {
 }
 const excludeCurrentSpace = () => {
   if (!props.shouldExcludeCurrentSpace) { return }
-  const currentSpace = store.state.currentSpace
+  const currentSpace = spaceStore.getSpaceAllState
   state.spaces = state.spaces.filter(space => space.id !== currentSpace.id)
 }
 const updateSpaces = async () => {
@@ -145,8 +151,8 @@ const updateWithRemoteSpaces = async () => {
   if (!state.spaces.length) {
     state.isLoading = true
   }
-  const currentUser = store.state.currentUser
-  let spaces = await store.dispatch('api/getUserSpaces')
+  const currentUser = userStore.getUserAllState
+  let spaces = await apiStore.getUserSpaces()
   spaces = utils.addCurrentUserIsCollaboratorToSpaces(spaces, currentUser)
   state.isLoading = false
   if (!spaces) { return }
@@ -176,7 +182,7 @@ const createNewSpace = async () => {
   if (!state.newSpaceName) {
     state.newSpaceName = utils.newSpaceName()
   }
-  const currentUser = store.state.currentUser
+  const currentUser = userStore.getUserAllState
   const user = { id: currentUser.id, color: currentUser.color, name: currentUser.name }
   state.isLoadingNewSpace = true
   let space = utils.clone(newSpace)
@@ -193,7 +199,7 @@ const createNewSpace = async () => {
   space = await cache.updateIdsInSpace(space)
   console.info('🚚 create new space', space)
   if (currentUserIsSignedIn.value) {
-    await store.dispatch('api/createSpace', space)
+    await apiStore.createSpace(space)
   }
   state.isLoadingNewSpace = false
   selectSpace(space)

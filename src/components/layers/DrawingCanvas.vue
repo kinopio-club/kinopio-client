@@ -1,6 +1,10 @@
 <script setup>
 import { reactive, computed, onMounted, onBeforeUnmount, watch, ref, nextTick } from 'vue'
 import { useStore } from 'vuex'
+import { useUserStore } from '@/stores/useUserStore'
+import { useSpaceStore } from '@/stores/useSpaceStore'
+import { useApiStore } from '@/stores/useApiStore'
+import { useBroadcastStore } from '@/stores/useBroadcastStore'
 
 import utils from '@/utils.js'
 import consts from '@/consts.js'
@@ -10,6 +14,10 @@ import debounce from 'lodash-es/debounce'
 import { nanoid } from 'nanoid'
 
 const store = useStore()
+const userStore = useUserStore()
+const spaceStore = useSpaceStore()
+const apiStore = useApiStore()
+const broadcastStore = useBroadcastStore()
 
 const canvasElement = ref(null)
 let canvas, context
@@ -21,7 +29,8 @@ let remoteStrokes = []
 let redoStrokes = []
 let drawingImage, drawingImageUrl
 
-let unsubscribe, unsubscribeActions
+let unsubscribe
+let unsubscribes
 
 onMounted(() => {
   canvas = canvasElement.value
@@ -33,6 +42,18 @@ onMounted(() => {
   updatePrevScroll()
   clearCanvas()
   clearStrokes()
+  const spaceStoreUnsubscribe = spaceStore.$onAction(
+    ({ name, args }) => {
+      const actions = ['loadSpace', 'changeSpace', 'createSpace']
+      if (actions.includes(name)) {
+        clearStrokes()
+      }
+    }
+  )
+  unsubscribes = () => {
+    spaceStoreUnsubscribe()
+  }
+  // TODO replace legacy subscribe
   unsubscribe = store.subscribe(mutation => {
     if (mutation.type === 'triggerStartDrawing') {
       startDrawing(mutation.payload)
@@ -55,26 +76,21 @@ onMounted(() => {
       undo()
     } else if (mutation.type === 'triggerDrawingRedo') {
       redo()
-    } else if (mutation.type === 'triggerRestoreSpaceLocalComplete') {
+    } else if (mutation.type === 'triggerRestoreSpaceLocalComplete') { // TODO replace w spaceStore restoreSpace watcher
       clearCanvas()
       redraw()
-    } else if (mutation.type === 'triggerRestoreSpaceRemoteComplete' || mutation.type === 'triggerDrawingRedraw') {
+    } else if (mutation.type === 'triggerDrawingRedraw') {
       redraw()
     }
-    unsubscribeActions = store.subscribeAction(action => {
-      const actions = ['currentSpace/loadSpace', 'currentSpace/changeSpace', 'currentSpace/addSpace']
-      if (actions.includes(action.type)) {
-        clearStrokes()
-      }
-    })
   })
 })
 onBeforeUnmount(() => {
   window.removeEventListener('pointerup', endDrawing)
   window.removeEventListener('scroll', scroll)
   window.removeEventListener('resize', updateCanvasSize)
+  unsubscribes()
+  // TODO replace legacy subscribe
   unsubscribe()
-  unsubscribeActions()
 })
 
 const state = reactive({
@@ -85,7 +101,7 @@ const viewportHeight = computed(() => store.state.viewportHeight)
 const viewportWidth = computed(() => store.state.viewportWidth)
 const pageHeight = computed(() => store.state.pageHeight)
 const pageWidth = computed(() => store.state.pageWidth)
-const currentUserIsSignedIn = computed(() => store.getters['currentUser/isSignedIn'])
+const currentUserIsSignedIn = computed(() => userStore.getUserIsSignedIn)
 const toolbarIsDrawing = computed(() => store.state.currentUserToolbar === 'drawing')
 const styles = computed(() => {
   const value = {
@@ -108,9 +124,9 @@ const clearStrokes = () => {
 
 // points
 
-const strokeColor = computed(() => store.getters['currentUser/drawingColor'])
+const strokeColor = computed(() => userStore.getUserDrawingColor)
 const strokeDiameter = computed(() => {
-  const diameter = store.state.currentUser.drawingBrushSize
+  const diameter = userStore.drawingBrushSize
   return consts.drawingBrushSizeDiameter[diameter]
 })
 const createPoint = (event) => {
@@ -129,9 +145,9 @@ const createPoint = (event) => {
 
 const broadcastAddStroke = (stroke, shouldPreventBroadcast) => {
   if (shouldPreventBroadcast) { return }
-  store.commit('broadcast/update', {
+  broadcastStore.update({
     updates: {
-      userId: store.state.currentUser.id,
+      userId: userStore.id,
       stroke
     },
     type: 'addRemoteDrawingStroke',
@@ -140,9 +156,9 @@ const broadcastAddStroke = (stroke, shouldPreventBroadcast) => {
 }
 const broadcastRemoveStroke = (stroke, shouldPreventBroadcast) => {
   if (shouldPreventBroadcast) { return }
-  store.commit('broadcast/update', {
+  broadcastStore.update({
     updates: {
-      userId: store.state.currentUser.id,
+      userId: userStore.id,
       stroke
     },
     type: 'removeRemoteDrawingStroke',
@@ -259,7 +275,7 @@ const redrawSpaceDrawingImage = () => {
 }
 const restoreSpaceDrawingImage = async () => {
   return new Promise((resolve, reject) => {
-    let url = store.state.currentSpace.drawingImage
+    let url = spaceStore.drawingImage
     if (!url) {
       resolve()
       return
@@ -334,19 +350,19 @@ const redraw = async () => {
 
 const updateCache = async (strokes) => {
   const dataUrl = await imageDataUrl(strokes)
-  const currentSpaceId = store.state.currentSpace.id
+  const currentSpaceId = spaceStore.id
   await cache.updateSpace('drawingImage', dataUrl, currentSpaceId)
   store.commit('triggerEndDrawing')
-  store.dispatch('currentSpace/updateSpacePreviewImage')
+  spaceStore.updateSpacePreviewImage()
 }
 const saveStroke = async ({ stroke, isRemovedStroke }) => {
   const strokes = currentStrokes.concat(remoteStrokes)
   updateCache(strokes)
   updatePageSizes(strokes)
   if (isRemovedStroke) {
-    await store.dispatch('api/addToQueue', { name: 'removeDrawingStroke', body: { stroke } })
+    await apiStore.addToQueue({ name: 'removeDrawingStroke', body: { stroke } })
   } else {
-    await store.dispatch('api/addToQueue', { name: 'createDrawingStroke', body: { stroke } })
+    await apiStore.addToQueue({ name: 'createDrawingStroke', body: { stroke } })
   }
 }
 const endDrawing = async (event) => {

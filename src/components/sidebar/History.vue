@@ -1,6 +1,9 @@
 <script setup>
 import { reactive, computed, onMounted, onBeforeUnmount, watch, ref, nextTick } from 'vue'
 import { useStore } from 'vuex'
+import { useUserStore } from '@/stores/useUserStore'
+import { useSpaceStore } from '@/stores/useSpaceStore'
+import { useApiStore } from '@/stores/useApiStore'
 
 import Loader from '@/components/Loader.vue'
 import OfflineBadge from '@/components/OfflineBadge.vue'
@@ -8,23 +11,31 @@ import User from '@/components/User.vue'
 import utils from '@/utils.js'
 
 const store = useStore()
+const userStore = useUserStore()
+const spaceStore = useSpaceStore()
+const apiStore = useApiStore()
 
 let prevPosition
 
-let unsubscribe
+let unsubscribes
 
 onMounted(() => {
   updateOperations()
   window.addEventListener('pointerdown', updatePrevPosition)
-  unsubscribe = store.subscribe(mutation => {
-    if (mutation.type === 'currentSpace/changeSpace') {
-      clearOperations()
+  const spaceStoreUnsubscribe = spaceStore.$onAction(
+    ({ name, args }) => {
+      if (name === 'changeSpace') {
+        clearOperations()
+      }
     }
-  })
+  )
+  unsubscribes = () => {
+    spaceStoreUnsubscribe()
+  }
 })
 onBeforeUnmount(() => {
   window.removeEventListener('pointerdown', updatePrevPosition)
-  unsubscribe()
+  unsubscribes()
 })
 
 const props = defineProps({
@@ -44,7 +55,7 @@ const state = reactive({
 })
 
 const isOnline = computed(() => store.state.isOnline)
-const canEditSpace = computed(() => store.getters['currentUser/canEditSpace']())
+const canEditSpace = computed(() => userStore.getUserCanEditSpace)
 const updatePrevPosition = (event) => {
   if (!props.visible) { return }
   prevPosition = utils.cursorPositionInPage(event)
@@ -60,7 +71,7 @@ const updateOperations = async () => {
   if (state.isLoading) { return }
   try {
     state.isLoading = true
-    state.operations = await store.dispatch('api/getSpaceHistory')
+    state.operations = await apiStore.getSpaceHistory()
     // api/
   } catch (error) {
     console.error('🚒 updateOperations', error)
@@ -87,7 +98,7 @@ const isSelected = (operation) => {
 // meta
 
 const user = (operation) => {
-  const user = store.getters['currentSpace/userById'](operation.userId)
+  const user = spaceStore.getSpaceUserById(operation.userId)
   return user
 }
 const relativeDate = (operation) => {

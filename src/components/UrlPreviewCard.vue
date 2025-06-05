@@ -1,11 +1,15 @@
 <script setup>
 import { reactive, computed, onMounted, watch, ref, nextTick } from 'vue'
 import { useStore } from 'vuex'
+import { useCardStore } from '@/stores/useCardStore'
+import { useThemeStore } from '@/stores/useThemeStore'
 
 import utils from '@/utils.js'
 import consts from '@/consts.js'
 
 const store = useStore()
+const cardStore = useCardStore()
+const themeStore = useThemeStore()
 
 let hasRetried
 
@@ -44,7 +48,7 @@ const isInteractingWithItem = computed(() => store.getters.isInteractingWithItem
 
 // colors
 
-const isThemeDark = computed(() => store.getters['themes/isThemeDark'])
+const isThemeDark = computed(() => themeStore.getIsThemeDark)
 const background = computed(() => {
   const color = props.backgroundColor
   const defaultColor = utils.cssVariable('secondary-background')
@@ -84,7 +88,7 @@ const toggleShouldDisplayIframe = (event) => {
   event.stopPropagation()
   if (isTwitterUrl.value) { return }
   store.dispatch('closeAllDialogs')
-  store.dispatch('currentCards/incrementZ', props.card.id)
+  cardStore.incrementCardZ(props.card.id)
   const iframeIsVisibleForCardId = store.state.iframeIsVisibleForCardId
   let value
   if (props.card.id === iframeIsVisibleForCardId) {
@@ -158,11 +162,11 @@ const handleImageError = (event) => {
   const isInstagram = url.includes('instagram')
   // generic image error
   if (!isInstagram) {
-    const card = {
+    const update = {
       id: props.card.id,
       shouldHideUrlPreviewImage: true
     }
-    store.commit('currentCards/update', { card })
+    cardStore.updateCard(update)
     return
   }
   // instagram url signature expiry

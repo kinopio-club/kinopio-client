@@ -1,6 +1,10 @@
 <script setup>
 import { reactive, computed, onMounted, onBeforeUnmount, onUnmounted, watch, ref, nextTick } from 'vue'
 import { useStore } from 'vuex'
+import { useCardStore } from '@/stores/useCardStore'
+import { useUserStore } from '@/stores/useUserStore'
+import { useSpaceStore } from '@/stores/useSpaceStore'
+import { useApiStore } from '@/stores/useApiStore'
 
 import TagList from '@/components/TagList.vue'
 import cache from '@/cache.js'
@@ -9,6 +13,10 @@ import utils from '@/utils.js'
 import randomColor from 'randomcolor'
 
 const store = useStore()
+const cardStore = useCardStore()
+const userStore = useUserStore()
+const spaceStore = useSpaceStore()
+const apiStore = useApiStore()
 
 const dialogElement = ref(null)
 const resultsElement = ref(null)
@@ -37,8 +45,8 @@ const state = reactive({
   loading: false
 })
 
-const isThemeDark = computed(() => store.state.currentUser.theme === 'dark')
-const currentUserIsSignedIn = computed(() => store.getters['currentUser/isSignedIn'])
+const isThemeDark = computed(() => userStore.theme === 'dark')
+const currentUserIsSignedIn = computed(() => userStore.getUserIsSignedIn)
 const scrollIntoView = async () => {
   await nextTick()
   const element = dialogElement.value
@@ -51,7 +59,7 @@ const currentTags = computed(() => {
   return props.tagNamesInCard || store.getters.allTags
 })
 const updateTags = async () => {
-  const spaceTags = store.getters['currentSpace/spaceTags']
+  const spaceTags = spaceStore.getSpaceTags
   state.tags = spaceTags || []
   const cachedTags = await cache.allTags()
   const mergedTags = utils.mergeArrays({ previous: spaceTags, updated: cachedTags, key: 'name' })
@@ -68,7 +76,7 @@ const updateRemoteTags = async () => {
     remoteTags = store.state.remoteTags
   } else {
     state.loading = true
-    remoteTags = await store.dispatch('api/getUserTags') || []
+    remoteTags = await apiStore.getUserTags() || []
     store.commit('remoteTags', remoteTags)
     store.commit('remoteTagsIsFetched', true)
     state.loading = false
@@ -98,7 +106,11 @@ const removeFromCards = (tagString) => {
   props.cards.forEach(card => {
     const newName = card.name.replace(tagString, '').trim()
     if (newName === card.name) { return }
-    store.dispatch('currentCards/updateName', { card, newName })
+    const update = {
+      id: card.id,
+      name: newName
+    }
+    cardStore.updateCard(update)
   })
   updateCardDimensions()
 }
@@ -106,20 +118,24 @@ const addToCards = (tagString) => {
   props.cards.forEach(card => {
     const newName = card.name + ' ' + tagString
     if (newName === card.name) { return }
-    store.dispatch('currentCards/updateName', { card, newName })
+    const update = {
+      id: card.id,
+      name: newName
+    }
+    cardStore.updateCard(update)
   })
   updateCardDimensions()
 }
 const updateCardDimensions = () => {
   const cards = utils.clone(props.cards)
   const cardIds = cards.map(card => card.id)
-  store.dispatch('currentCards/removeResize', { cardIds })
+  cardStore.clearResizeCards(cardIds)
 }
 const addTag = (name) => {
   let tag = state.tags.find(item => item.name === name)
   const color = newTagColor()
   tag = { name, color }
-  store.dispatch('currentSpace/addTag', tag)
+  spaceStore.addTag(tag)
   state.tags.unshift(tag)
   selectTag(tag)
 }

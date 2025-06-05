@@ -1,11 +1,15 @@
 <script setup>
 import { reactive, computed, onMounted, onBeforeUnmount, watch, ref, nextTick } from 'vue'
 import { useStore } from 'vuex'
+import { useUserStore } from '@/stores/useUserStore'
+import { useSpaceStore } from '@/stores/useSpaceStore'
 
 import ColorPicker from '@/components/dialogs/ColorPicker.vue'
 import BrushSizePicker from '@/components/dialogs/BrushSizePicker.vue'
 
 const store = useStore()
+const userStore = useUserStore()
+const spaceStore = useSpaceStore()
 
 onMounted(() => {
   store.subscribe(mutation => {
@@ -23,7 +27,7 @@ const state = reactive({
   colorPickerIsVisible: false
 })
 
-const shouldIncreaseUIContrast = computed(() => store.state.currentUser.shouldIncreaseUIContrast)
+const shouldIncreaseUIContrast = computed(() => userStore.shouldIncreaseUIContrast)
 const closeAllDialogs = () => {
   state.brushSizePickerIsVisible = false
   state.colorPickerIsVisible = false
@@ -38,10 +42,10 @@ const toggleColorPickerIsVisible = () => {
   store.commit('drawingEraserIsActive', false)
 }
 const drawingColor = computed(() => {
-  return store.getters['currentUser/drawingColor']
+  return userStore.drawingColor || userStore.color
 })
 const updateDrawingColor = (value) => {
-  store.commit('currentUser/drawingColor', value)
+  userStore.updateUser({ drawingColor: value })
 }
 const recentColors = computed(() => store.state.drawingStrokeColors)
 
@@ -53,9 +57,9 @@ const toggleBrushSizePickerIsVisible = () => {
   state.brushSizePickerIsVisible = value
 }
 const updateBrushSize = (value) => {
-  store.commit('currentUser/drawingBrushSize', value)
+  userStore.updateUser({ drawingBrushSize: value })
 }
-const currentBrushSize = computed(() => store.state.currentUser.drawingBrushSize)
+const currentBrushSize = computed(() => userStore.drawingBrushSize)
 
 // eraser
 

@@ -1,14 +1,19 @@
 <script setup>
 import { reactive, computed, onMounted, onBeforeUnmount, watch, ref, nextTick } from 'vue'
 import { useStore } from 'vuex'
+import { useUserStore } from '@/stores/useUserStore'
+import { useSpaceStore } from '@/stores/useSpaceStore'
+
+const userStore = useUserStore()
+const spaceStore = useSpaceStore()
 const store = useStore()
 
 const props = defineProps({
   message: String
 })
 
-const currentUserIsSignedIn = computed(() => store.getters['currentUser/isSignedIn'])
-const currentUserIsUpgraded = computed(() => store.state.currentUser.isUpgraded)
+const currentUserIsSignedIn = computed(() => userStore.getUserIsSignedIn)
+const currentUserIsUpgraded = computed(() => userStore.isUpgraded)
 const visible = computed(() => {
   return !currentUserIsSignedIn.value || !currentUserIsUpgraded.value
 })

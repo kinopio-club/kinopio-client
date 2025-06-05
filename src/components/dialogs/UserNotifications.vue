@@ -1,6 +1,11 @@
 <script setup>
 import { reactive, computed, onMounted, onBeforeUnmount, watch, ref, nextTick } from 'vue'
 import { useStore } from 'vuex'
+import { useCardStore } from '@/stores/useCardStore'
+import { useUserStore } from '@/stores/useUserStore'
+import { useSpaceStore } from '@/stores/useSpaceStore'
+import { useApiStore } from '@/stores/useApiStore'
+import { useThemeStore } from '@/stores/useThemeStore'
 
 import Loader from '@/components/Loader.vue'
 import UserLabelInline from '@/components/UserLabelInline.vue'
@@ -13,6 +18,11 @@ import OfflineBadge from '@/components/OfflineBadge.vue'
 import GroupLabel from '@/components/GroupLabel.vue'
 
 const store = useStore()
+const cardStore = useCardStore()
+const userStore = useUserStore()
+const spaceStore = useSpaceStore()
+const apiStore = useApiStore()
+const themeStore = useThemeStore()
 
 const dialogElement = ref(null)
 
@@ -58,11 +68,11 @@ const updateDialogHeight = async () => {
   state.dialogHeight = utils.elementHeight(element)
 }
 
-const currentUser = computed(() => store.state.currentUser)
+const currentUser = computed(() => userStore.getUserAllState)
 
 // space
 
-const currentSpaceId = computed(() => store.state.currentSpace.id)
+const currentSpaceId = computed(() => spaceStore.id)
 const isCurrentSpace = (spaceId) => {
   return spaceId === currentSpaceId.value
 }
@@ -85,15 +95,15 @@ const showCardDetails = (notification) => {
   const card = utils.clone(notification.card)
   if (currentSpaceId.value !== space.id) {
     store.commit('loadSpaceFocusOnCardId', card.id)
-    store.dispatch('currentSpace/changeSpace', space)
+    spaceStore.changeSpace(space)
   } else {
-    store.dispatch('currentCards/showCardDetails', card.id)
+    cardStore.showCardDetails(card.id)
   }
   emit('markAsRead', notification.id)
 }
 const segmentTagColor = (segment) => {
-  const spaceTag = store.getters['currentSpace/tagByName'](segment.name)
-  const userTag = store.getters['currentUser/tagByName'](segment.name)
+  const spaceTag = spaceStore.getSpaceTagByName(segment.name)
+  const userTag = userStore.getUserTagByName(segment.name)
   if (spaceTag) {
     return spaceTag.color
   } else if (userTag) {
@@ -125,7 +135,7 @@ const cardNameSegments = (name) => {
 const markAllAsRead = () => {
   emit('markAllAsRead')
 }
-const isThemeDark = computed(() => store.getters['themes/isThemeDark'])
+const isThemeDark = computed(() => themeStore.getIsThemeDark)
 const cardBackgroundIsDark = (card) => {
   if (card.backgroundColor) {
     return utils.colorIsDark(card.backgroundColor)
@@ -148,7 +158,7 @@ const userName = (notification) => {
 }
 const deleteUserNotifications = async () => {
   store.commit('triggerClearUserNotifications')
-  await store.dispatch('api/deleteAllNotifications')
+  await apiStore.deleteAllNotifications()
 }
 
 // actions
@@ -162,7 +172,7 @@ const changeSpace = (spaceId) => {
   store.commit('cardDetailsIsVisibleForCardId', null)
   if (isCurrentSpace(spaceId)) { return }
   const space = { id: spaceId }
-  store.dispatch('currentSpace/changeSpace', space)
+  spaceStore.changeSpace(space)
 }
 
 // explore
@@ -171,7 +181,7 @@ const isAskToAddToExplore = (notification) => {
   return notification.type === 'askToAddToExplore'
 }
 const updateAddToExplore = async (space) => {
-  const isCurrentSpace = space.id === store.state.currentSpace.id
+  const isCurrentSpace = space.id === spaceStore.id
   state.filteredNotifications = state.filteredNotifications.map(notification => {
     if (!notification.space) {
       return notification
@@ -182,10 +192,10 @@ const updateAddToExplore = async (space) => {
     return notification
   })
   if (isCurrentSpace) {
-    await store.dispatch('currentSpace/updateSpace', { showInExplore: space.showInExplore })
+    await spaceStore.updateSpace({ showInExplore: space.showInExplore })
   } else {
     space = { id: space.id, showInExplore: space.showInExplore }
-    store.dispatch('api/updateSpace', space)
+    apiStore.updateSpace(space)
   }
 }
 

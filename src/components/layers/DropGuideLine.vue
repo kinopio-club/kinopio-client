@@ -1,11 +1,20 @@
 <script setup>
 import { reactive, computed, onMounted, onBeforeUnmount, watch, ref, nextTick } from 'vue'
 import { useStore } from 'vuex'
+import { useUserStore } from '@/stores/useUserStore'
+import { useSpaceStore } from '@/stores/useSpaceStore'
+import { useUploadStore } from '@/stores/useUploadStore'
+import { useBroadcastStore } from '@/stores/useBroadcastStore'
 
 import utils from '@/utils.js'
 
 import { nanoid } from 'nanoid'
+
 const store = useStore()
+const userStore = useUserStore()
+const spaceStore = useSpaceStore()
+const uploadStore = useUploadStore()
+const broadcastStore = useBroadcastStore()
 
 let canvas, context, remoteCanvas, remoteContext, paintingGuidesTimer, remotePaintingGuidesTimer
 
@@ -64,7 +73,7 @@ const state = reactive({
   currentCursorInSpace: {}
 })
 
-const currentUserColor = computed(() => store.state.currentUser.color)
+const currentUserColor = computed(() => userStore.color)
 
 // Upload Files
 
@@ -86,7 +95,7 @@ const addCardsAndUploadFiles = (event) => {
   let files = event.dataTransfer.files
   files = Array.from(files)
   removeUploadIsDraggedOver()
-  store.dispatch('upload/addCardsAndUploadFiles', {
+  uploadStore.addCardsAndUploadFiles({
     files,
     event
   })
@@ -235,22 +244,22 @@ const stopPaintingGuides = () => {
   broadcastStopPaintingGuide()
 }
 const broadcastCursorAndCurve = ({ startPoint, color }) => {
-  const canEditSpace = store.getters['currentUser/canEditSpace']()
+  const canEditSpace = userStore.getUserCanEditSpace
   if (!canEditSpace) { return }
   const updates = {}
   updates.x = state.currentCursorInSpace.x
   updates.y = state.currentCursorInSpace.y
   updates.color = color
-  updates.userId = store.state.currentUser.id
-  store.commit('broadcast/update', { updates, type: 'updateRemoteUserCursor', handler: 'triggerUpdateRemoteUserCursor' })
+  updates.userId = userStore.id
+  broadcastStore.update({ updates, type: 'updateRemoteUserCursor', handler: 'triggerUpdateRemoteUserCursor' })
   updates.startPoint = startPoint
   updates.color = color
   updates.frameId = nanoid()
-  store.commit('broadcast/update', { updates, type: 'updateRemoteUserDropGuideLine', handler: 'triggerUpdateRemoteDropGuideLine' })
+  broadcastStore.update({ updates, type: 'updateRemoteUserDropGuideLine', handler: 'triggerUpdateRemoteDropGuideLine' })
 }
 const broadcastStopPaintingGuide = () => {
-  const updates = { userId: store.state.currentUser.id }
-  store.commit('broadcast/update', { updates, type: 'updateStopRemoteUserDropGuideLine', handler: 'triggerUpdateStopRemoteUserDropGuideLine' })
+  const updates = { userId: userStore.id }
+  broadcastStore.update({ updates, type: 'updateStopRemoteUserDropGuideLine', handler: 'triggerUpdateStopRemoteUserDropGuideLine' })
 }
 
 const isMobile = computed(() => utils.isMobile())

@@ -1,9 +1,24 @@
 <script setup>
 import { reactive, computed, onMounted, onUnmounted, watch, ref, nextTick } from 'vue'
 import { useStore } from 'vuex'
+import { useCardStore } from '@/stores/useCardStore'
+import { useConnectionStore } from '@/stores/useConnectionStore'
+import { useBoxStore } from '@/stores/useBoxStore'
+import { useUserStore } from '@/stores/useUserStore'
+import { useSpaceStore } from '@/stores/useSpaceStore'
+import { useBroadcastStore } from '@/stores/useBroadcastStore'
+import { useHistoryStore } from '@/stores/useHistoryStore'
 
 import utils from '@/utils.js'
+
 const store = useStore()
+const cardStore = useCardStore()
+const connectionStore = useConnectionStore()
+const boxStore = useBoxStore()
+const userStore = useUserStore()
+const spaceStore = useSpaceStore()
+const broadcastStore = useBroadcastStore()
+const historyStore = useHistoryStore()
 
 const labelElement = ref(null)
 
@@ -50,7 +65,7 @@ watch(() => props.connection.labelIsVisible, (value, prevValue) => {
     updateConnectionRect()
     state.connectionIsVisible = true
   } else {
-    store.dispatch('currentConnections/clearLabelPosition', props.connection)
+    connectionStore.clearConnectionLabelPosition(props.connection.id)
   }
 })
 
@@ -81,7 +96,7 @@ watch(() => state.isDragging, (value, prevValue) => {
   }
 })
 
-const canEditSpace = computed(() => store.getters['currentUser/canEditSpace']())
+const canEditSpace = computed(() => userStore.getUserCanEditSpace)
 const isDark = computed(() => utils.colorIsDark(typeColor.value))
 const checkIsMultiTouch = (event) => {
   isMultiTouch = false
@@ -108,8 +123,8 @@ const toggleConnectionDetails = (event) => {
   }
 }
 const items = computed(() => {
-  const cards = store.getters['currentCards/all']
-  const boxes = store.getters['currentBoxes/all']
+  const cards = cardStore.getAllCards
+  const boxes = boxStore.getAllBoxes
   const items = cards.concat(boxes)
   const startItem = items.find(item => item.id === props.connection.startItemId)
   const endItem = items.find(item => item.id === props.connection.endItemId)
@@ -135,7 +150,7 @@ const isConnectionFilteredByType = computed(() => {
 })
 const isCardsFilteredByFrame = computed(() => {
   const frameIds = store.state.filteredFrameIds
-  const cards = utils.clone(store.getters['currentCards/all'])
+  const cards = cardStore.getAllCards
   const startItemId = props.connection.startItemId
   const endItemId = props.connection.endItemId
   const startCard = cards.filter(card => card.id === startItemId)[0]
@@ -155,7 +170,7 @@ const isFiltered = computed(() => {
   } else { return false }
 })
 const isHiddenByCommentFilter = computed(() => {
-  const filterCommentsIsActive = store.state.currentUser.filterComments
+  const filterCommentsIsActive = userStore.filterComments
   if (!filterCommentsIsActive) { return }
   const startItem = items.value.startItem
   const endItem = items.value.endItem
@@ -168,7 +183,7 @@ const isHiddenByCommentFilter = computed(() => {
 // parent connection type
 
 const connectionTypeId = computed(() => props.connection.connectionTypeId)
-const connectionType = computed(() => store.getters['currentConnections/typeByTypeId'](connectionTypeId.value))
+const connectionType = computed(() => connectionStore.getConnectionType(connectionTypeId.value))
 const typeName = computed(() => {
   if (connectionType.value) {
     return connectionType.value.name
@@ -243,7 +258,7 @@ const styles = computed(() => {
   return styles
 })
 const removeOffsets = () => {
-  store.dispatch('currentConnections/clearLabelPosition', props.connection)
+  connectionStore.clearConnectionLabelPosition(props.connection.id)
   stopDragging()
   wasDragged = false
 }
@@ -274,11 +289,11 @@ const startDragging = (event) => {
   state.isDragging = true
   wasDragged = false
   const updates = {
-    userId: store.state.currentUser.id,
-    userColor: store.state.currentUser.color,
+    userId: userStore.id,
+    userColor: userStore.color,
     connectionId: props.connection.id
   }
-  store.commit('broadcast/updateStore', { updates, type: 'updateRemoteUserDraggingConnectionLabel' })
+  broadcastStore.updateStore({ updates, type: 'updateRemoteUserDraggingConnectionLabel' })
   // save start positions
   if (!cursorStart.x) {
     cursorStart = utils.cursorPositionInSpace(event)
@@ -295,9 +310,9 @@ const stopDragging = () => {
   state.isDragging = false
   state.outOfBounds = {}
   cursorStart = {}
-  store.commit('broadcast/updateStore', { updates: { userId: store.state.currentUser.id }, type: 'removeRemoteUserDraggingConnectionLabel' })
+  broadcastStore.updateStore({ updates: { userId: userStore.id }, type: 'removeRemoteUserDraggingConnectionLabel' })
   if (!labelRelativePosition.value.x) { return }
-  store.dispatch('history/add', {
+  historyStore.add({
     connections: [{
       id: props.connection.id,
       labelRelativePositionX: labelRelativePosition.value.x,
@@ -325,8 +340,8 @@ const drag = (event) => {
     y: positionAbsolute.y / state.connectionRect.height
   }
   positionRelative = normalizeRelativePosition(positionRelative)
-  store.dispatch('currentConnections/updateLabelPosition', {
-    connection: props.connection,
+  connectionStore.updateConnectionLabelPosition({
+    id: props.connection.id,
     labelRelativePositionX: positionRelative.x,
     labelRelativePositionY: positionRelative.y
   })
@@ -352,7 +367,7 @@ const lockingFrameStyle = computed(() => {
     height: size,
     left: position,
     top: position,
-    background: store.state.currentUser.color,
+    background: userStore.color,
     opacity: state.lockingAlpha,
     borderRadius
   }

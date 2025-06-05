@@ -1,11 +1,17 @@
 <script setup>
 import { reactive, computed, onMounted, onUnmounted, onBeforeUnmount, watch, ref, nextTick } from 'vue'
 import { useStore } from 'vuex'
+import { useUserStore } from '@/stores/useUserStore'
+import { useSpaceStore } from '@/stores/useSpaceStore'
+import { useHistoryStore } from '@/stores/useHistoryStore'
 
 import utils from '@/utils.js'
 import consts from '@/consts.js'
 
 const store = useStore()
+const userStore = useUserStore()
+const spaceStore = useSpaceStore()
+const historyStore = useHistoryStore()
 
 let multiTouchAction, shouldCancelUndo
 
@@ -44,7 +50,7 @@ const handleMouseWheelEvents = (event) => {
   let shouldZoomIn = deltaY < 0
   let shouldZoomOut = deltaY > 0
   let invertZoom = event.webkitDirectionInvertedFromDevice
-  if (store.state.currentUser.shouldInvertZoom) {
+  if (userStore.shouldInvertZoom) {
     invertZoom = !invertZoom
   }
   if (invertZoom) {
@@ -111,10 +117,10 @@ const touchEnd = () => {
   }
   if (!multiTouchAction) { return }
   if (multiTouchAction === 'undo') {
-    store.dispatch('history/undo')
+    historyStore.undo()
     store.commit('addNotification', { message: 'Undo', icon: 'undo' })
   } else if (multiTouchAction === 'redo') {
-    store.dispatch('history/redo')
+    historyStore.redo()
     store.commit('addNotification', { message: 'Redo', icon: 'redo' })
   }
   multiTouchAction = null

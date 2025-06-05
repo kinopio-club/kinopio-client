@@ -1,6 +1,10 @@
 <script setup>
 import { reactive, computed, onMounted, onBeforeUnmount, watch, ref, nextTick } from 'vue'
 import { useStore } from 'vuex'
+import { useCardStore } from '@/stores/useCardStore'
+import { useUserStore } from '@/stores/useUserStore'
+import { useSpaceStore } from '@/stores/useSpaceStore'
+import { useApiStore } from '@/stores/useApiStore'
 
 import ResultsFilter from '@/components/ResultsFilter.vue'
 import SearchFilters from '@/components/SearchFilters.vue'
@@ -12,6 +16,10 @@ import dayjs from 'dayjs'
 import orderBy from 'lodash-es/orderBy'
 
 const store = useStore()
+const cardStore = useCardStore()
+const userStore = useUserStore()
+const spaceStore = useSpaceStore()
+const apiStore = useApiStore()
 
 const dialogElement = ref(null)
 const resultsElement = ref(null)
@@ -56,8 +64,8 @@ const triggerFocusResultsFilter = async () => {
   await nextTick()
   store.commit('triggerFocusResultsFilter')
 }
-const currentUser = computed(() => store.state.currentUser)
-const currentUserIsSignedIn = computed(() => store.getters['currentUser/isSignedIn'])
+const currentUser = computed(() => userStore.getUserAllState)
+const currentUserIsSignedIn = computed(() => userStore.getUserIsSignedIn)
 
 // search
 
@@ -84,7 +92,7 @@ const updateSearch = async (search) => {
 }
 const searchRemoteCards = async (search) => {
   state.isLoading = true
-  const results = await store.dispatch('api/searchCards', { query: search })
+  const results = await apiStore.searchCards({ query: search })
   store.commit('searchResultsCards', results)
   state.isLoading = false
   state.hasSearched = true
@@ -116,7 +124,7 @@ const cardsToSearch = computed(() => {
   }
 })
 const recentlyUpdatedCards = computed(() => {
-  let cards = utils.clone(store.getters['currentCards/all'])
+  let cards = cardStore.getAllCards
   cards = cards.filter(card => card.name)
   cards = cards.map(card => {
     const date = card.nameUpdatedAt || card.createdAt
@@ -130,7 +138,7 @@ const recentlyUpdatedCards = computed(() => {
 // select items
 
 const selectCard = (card) => {
-  const isCardInCurrentSpace = card.spaceId === store.state.currentSpace.id
+  const isCardInCurrentSpace = card.spaceId === spaceStore.id
   if (isCardInCurrentSpace) {
     store.dispatch('focusOnCardId', card.id)
     focusItem(card)
@@ -140,9 +148,9 @@ const selectCard = (card) => {
   closeDialogs()
 }
 const changeSpace = (spaceId) => {
-  if (store.state.currentSpace.id === spaceId) { return }
+  if (spaceStore.id === spaceId) { return }
   const space = { id: spaceId }
-  store.dispatch('currentSpace/changeSpace', space)
+  spaceStore.changeSpace(space)
 }
 const selectSpaceCard = (card) => {
   changeSpace(card.spaceId)

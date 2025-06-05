@@ -1,23 +1,35 @@
 <script setup>
 import { reactive, computed, onMounted, onBeforeUnmount, watch, ref, nextTick } from 'vue'
 import { useStore } from 'vuex'
+import { useCardStore } from '@/stores/useCardStore'
+import { useUserStore } from '@/stores/useUserStore'
+import { useSpaceStore } from '@/stores/useSpaceStore'
 
 import utils from '@/utils.js'
-const store = useStore()
 
-let unsubscribe
+const cardStore = useCardStore()
+const store = useStore()
+const userStore = useUserStore()
+const spaceStore = useSpaceStore()
+
+let unsubscribes
 
 let prevPrivacy = ''
 
 onMounted(() => {
-  unsubscribe = store.subscribe((mutation, state) => {
-    if (mutation.type === 'currentSpace/restoreSpace') {
-      clearErrors()
+  const spaceStoreUnsubscribe = spaceStore.$onAction(
+    ({ name, args }) => {
+      if (name === 'restoreSpace') {
+        clearErrors()
+      }
     }
-  })
+  )
+  unsubscribes = () => {
+    spaceStoreUnsubscribe()
+  }
 })
 onBeforeUnmount(() => {
-  unsubscribe()
+  unsubscribes()
 })
 
 const emit = defineEmits(['updateLocalSpaces', 'updateAddToExplore'])
@@ -40,16 +52,16 @@ watch(() => props.visible, (value, prevValue) => {
   }
 })
 
-const isVisible = computed(() => props.visible || store.getters['currentUser/isSpaceMember']())
+const isVisible = computed(() => props.visible || userStore.getUserIsSpaceMember)
 const showInExplore = computed(() => {
-  const space = props.space || store.state.currentSpace
+  const space = props.space || spaceStore.getSpaceAllState
   const showInExplore = space.showInExplore
   const isNotPrivate = space.privacy !== 'private'
   return showInExplore && isNotPrivate
 })
-const currentUserIsSignedIn = computed(() => store.getters['currentUser/isSignedIn'])
-const spaceIsHelloKinopio = computed(() => store.getters['currentSpace/isHelloKinopio'])
-const spaceCardsCount = computed(() => store.getters['currentCards/all'].length)
+const currentUserIsSignedIn = computed(() => userStore.getUserIsSignedIn)
+const spaceIsHelloKinopio = computed(() => spaceStore.getSpaceIsHello)
+const spaceCardsCount = computed(() => cardStore.getAllCards.length)
 
 const checkIfShouldPrevent = (event) => {
   if (props.space) { return }
@@ -83,7 +95,7 @@ const toggleShowInExplore = async (event) => {
     await updateShowInExplore()
   }
   notifyShowInExplore(event)
-  store.dispatch('currentSpace/updateSpacePreviewImage')
+  spaceStore.updateSpacePreviewImage()
 }
 const notifyShowInExplore = (event) => {
   const shouldShow = showInExplore.value
@@ -102,20 +114,20 @@ const emitUpdateShowInExplore = () => {
 const updateShowInExplore = async () => {
   await updateSpacePrivacy()
   const shouldShow = !showInExplore.value
-  await store.dispatch('currentSpace/updateSpace', { showInExplore: shouldShow })
+  await spaceStore.updateSpace({ showInExplore: shouldShow })
   emit('updateLocalSpaces')
 }
 const updateSpacePrivacy = async () => {
   const shouldShow = !showInExplore.value
-  const currentPrivacy = store.state.currentSpace.privacy
+  const currentPrivacy = spaceStore.privacy
   if (shouldShow) {
     prevPrivacy = currentPrivacy
     if (currentPrivacy === 'private') {
-      await store.dispatch('currentSpace/updateSpace', { privacy: 'closed' })
+      await spaceStore.updateSpace({ privacy: 'closed' })
     }
   } else {
     prevPrivacy = prevPrivacy || 'closed'
-    await store.dispatch('currentSpace/updateSpace', { privacy: prevPrivacy })
+    await spaceStore.updateSpace({ privacy: prevPrivacy })
   }
 }
 const triggerSignUpOrInIsVisible = () => {

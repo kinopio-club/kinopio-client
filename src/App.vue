@@ -1,34 +1,58 @@
 <script setup>
 import { reactive, computed, onMounted, onBeforeUnmount, onUnmounted, watch, ref, nextTick } from 'vue'
 import { useStore } from 'vuex'
+import { useUserStore } from '@/stores/useUserStore'
+import { useSpaceStore } from '@/stores/useSpaceStore'
+import { useApiStore } from '@/stores/useApiStore'
+import { useBroadcastStore } from '@/stores/useBroadcastStore'
+import { useThemeStore } from '@/stores/useThemeStore'
 
 import utils from '@/utils.js'
 import consts from '@/consts.js'
+
 const store = useStore()
+const userStore = useUserStore()
+const spaceStore = useSpaceStore()
+const apiStore = useApiStore()
+const broadcastStore = useBroadcastStore()
+const themeStore = useThemeStore()
 
 let statusRetryCount = 0
+
+let unsubscribes
 
 onMounted(() => {
   console.info('🐢 kinopio-client build mode', import.meta.env.MODE)
   console.info('🐸 kinopio-server URL', consts.apiHost())
   store.subscribe((mutation, state) => {
-    if (mutation.type === 'broadcast/joinSpaceRoom') {
-      updateMetaRSSFeed()
-    } else if (mutation.type === 'triggerUserIsLoaded') {
-      updateThemeFromSystem()
+    if (mutation.type === 'triggerUserIsLoaded') {
+      updateSystemTheme()
     }
   })
   if (utils.isLinux()) {
     utils.setCssVariable('sans-serif-font', '"Noto Sans", "Helvetica Neue", Helvetica, Arial, sans-serif')
   }
-  window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', logMatchMediaChange)
-  window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', updateThemeFromSystem)
+  window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', logSystemThemeChange)
+  window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', updateSystemTheme)
   updateIsOnline()
   window.addEventListener('online', updateIsOnline)
   window.addEventListener('offline', updateIsOnline)
+  const broadcastStoreUnsubscribe = broadcastStore.$onAction(
+    ({ name, args }) => {
+      if (name === 'joinSpaceRoom') {
+        updateMetaRSSFeed()
+      }
+    }
+  )
+  unsubscribes = () => {
+    broadcastStoreUnsubscribe()
+  }
+})
+onBeforeUnmount(() => {
+  unsubscribes()
 })
 
-const spaceName = computed(() => store.state.currentSpace.name)
+const spaceName = computed(() => spaceStore.name)
 const isSpacePage = computed(() => store.getters.isSpacePage)
 
 // styles and position
@@ -60,7 +84,7 @@ const spaceZoomDecimal = computed(() => store.getters.spaceZoomDecimal)
 
 // users
 
-const currentUserId = computed(() => store.state.currentUser.id)
+const currentUserId = computed(() => userStore.id)
 
 // online
 
@@ -75,7 +99,7 @@ const updateIsOnline = () => {
 const updateServerIsOnline = async () => {
   const maxIterations = 10
   const initialDelay = 1000 // 1 second
-  const serverStatus = await store.dispatch('api/getStatus')
+  const serverStatus = await apiStore.getStatus()
   console.info('server online status', serverStatus)
   if (serverStatus) {
     store.dispatch('isOnline', true)
@@ -95,27 +119,13 @@ const updateServerIsOnline = async () => {
 
 // theme
 
-const isThemeDark = computed(() => store.getters['themes/isThemeDark'])
-const themeFromSystem = () => {
-  const themeIsSystem = store.state.currentUser.themeIsSystem
-  if (!themeIsSystem) { return }
-  const theme = window.matchMedia('(prefers-color-scheme: dark)')
-  let themeName
-  if (theme.matches) {
-    themeName = 'dark'
-  } else {
-    themeName = 'light'
-  }
-  return themeName
+const isThemeDark = computed(() => themeStore.getIsThemeDark)
+const logSystemThemeChange = (event) => {
+  const themeIsSystem = userStore.themeIsSystem
+  console.warn('🌓 logSystemThemeChange', window.matchMedia('(prefers-color-scheme: dark)'), event, { themeIsSystem })
 }
-const logMatchMediaChange = (event) => {
-  const themeIsSystem = store.state.currentUser.themeIsSystem
-  console.warn('🌓 logMatchMediaChange', window.matchMedia('(prefers-color-scheme: dark)'), event, { themeIsSystem })
-}
-const updateThemeFromSystem = () => {
-  const themeName = themeFromSystem()
-  if (!themeName) { return }
-  store.dispatch('themes/update', themeName)
+const updateSystemTheme = () => {
+  themeStore.updateSystemTheme()
 }
 
 // remote
@@ -124,9 +134,9 @@ const broadcastUserLabelCursor = (event) => {
   if (!store.getters.isSpacePage) { return }
   const updates = utils.cursorPositionInSpace(event)
   if (!updates) { return }
-  updates.userId = store.state.currentUser.id
+  updates.userId = userStore.id
   updates.zoom = spaceZoomDecimal.value
-  store.commit('broadcast/update', { updates, type: 'updateRemoteUserCursor', handler: 'triggerUpdateRemoteUserCursor' })
+  broadcastStore.update({ updates, type: 'updateRemoteUserCursor', handler: 'triggerUpdateRemoteUserCursor' })
 }
 const isTouchDevice = () => {
   store.commit('isTouchDevice', true)
@@ -141,13 +151,13 @@ const clearMetaRSSFeed = () => {
   }
 }
 const updateMetaRSSFeed = () => {
-  const spaceIsPrivate = store.state.currentSpace.privacy === 'private'
-  const spaceIsRemote = store.getters['currentSpace/isRemote']
+  const spaceIsPrivate = spaceStore.privacy === 'private'
+  const spaceIsRemote = spaceStore.getSpaceIsRemote
   clearMetaRSSFeed()
   if (!spaceIsRemote) { return }
   if (spaceIsPrivate) { return }
   const head = document.querySelector('head')
-  const spaceId = store.state.currentSpace.id
+  const spaceId = spaceStore.id
   const url = `${consts.apiHost()}/space/${spaceId}/feed.json`
   const link = document.createElement('link')
   link.rel = 'alternative'
@@ -471,6 +481,9 @@ label // used for checkbox buttons
       width 10px
       height 10px
       vertical-align 0
+    span
+      font-size 12px
+      vertical-align 1px
   &.fixed-height
     height var(--button-fixed-height)
 .unselectable
@@ -958,6 +971,18 @@ li
       background-image url('assets/checkmark.svg')
       background-repeat no-repeat
       background-position center
+    // &.add
+    //   background-image url('assets/add.svg')
+    //   background-repeat no-repeat
+    //   background-position center
+    //   background-size 60%
+.is-dark-theme
+  label
+    input[type="checkbox"]
+      &:checked
+        background-image url('assets/checkmark-invert.svg')
+      // &.add
+      //   background-image url('assets/add-invert.svg')
 
 details
   summary
@@ -983,14 +1008,6 @@ details[open]
     border-bottom-left-radius 0
 details + details
   margin-top 2px
-
-.is-dark-theme
-  label
-    input[type="checkbox"]
-      &:checked
-        background-image url('assets/checkmark-invert.svg')
-      &.add
-        background-image url('assets/add-invert.svg')
 
 li
   input[type="checkbox"]
@@ -1290,8 +1307,9 @@ code
   background-image url('assets/logo-base.png')
 .logo
   .logo-image
-    width 36px
-    height 33px
+    margin-top 1px
+    width 33px
+    height 28px
     background-repeat no-repeat
     background-size contain
     display inline-block

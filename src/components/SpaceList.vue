@@ -1,6 +1,9 @@
 <script setup>
 import { reactive, computed, onMounted, onBeforeUnmount, onUnmounted, watch, ref, nextTick } from 'vue'
 import { useStore } from 'vuex'
+import { useUserStore } from '@/stores/useUserStore'
+import { useSpaceStore } from '@/stores/useSpaceStore'
+import { useGroupStore } from '@/stores/useGroupStore'
 
 import templates from '@/data/templates.js'
 import ResultsFilter from '@/components/ResultsFilter.vue'
@@ -19,8 +22,11 @@ import dayjs from 'dayjs'
 import last from 'lodash-es/last'
 
 const store = useStore()
+const userStore = useUserStore()
+const spaceStore = useSpaceStore()
+const groupStore = useGroupStore()
 
-let unsubscribe
+let unsubscribe, unsubscribes
 
 let shouldPreventSelectSpace
 
@@ -46,8 +52,6 @@ onMounted(() => {
       const currentSpace = spaces.find(space => space.id === state.focusOnId)
       selectSpace(null, currentSpace)
       store.commit('shouldPreventNextEnterKey', true)
-    } else if (mutation.type === 'currentSpace/restoreSpace') {
-      state.focusOnId = store.state.currentSpace.id
     }
   })
   updateScroll()
@@ -55,10 +59,21 @@ onMounted(() => {
   if (props.disableListOptimizations) {
     state.currentPage = totalPages.value
   }
+  const spaceStoreUnsubscribe = spaceStore.$onAction(
+    ({ name, args }) => {
+      if (name === 'restoreSpace') {
+        state.focusOnId = spaceStore.id
+      }
+    }
+  )
+  unsubscribes = () => {
+    spaceStoreUnsubscribe()
+  }
 })
 
 onBeforeUnmount(() => {
   unsubscribe()
+  unsubscribes()
   spaceListElement.value.closest('section').removeEventListener('scroll', updateScroll)
 })
 
@@ -103,7 +118,7 @@ const state = reactive({
 
 const isOnline = computed(() => store.state.isOnline)
 const isOffline = computed(() => !isOnline.value)
-const currentUser = computed(() => store.state.currentUser)
+const currentUser = computed(() => userStore.getUserAllState)
 
 // spaces
 
@@ -123,7 +138,7 @@ const spacesFiltered = computed(() => {
   return spaces
 })
 const isNotCached = (spaceId) => {
-  return store.dispatch('currentSpace/spaceIsNotCached', spaceId)
+  return spaceStore.getSpaceIsNotCached(spaceId)
 }
 const isNew = (space) => {
   if (props.readSpaceIds?.includes(space.id)) { return }
@@ -153,7 +168,7 @@ const spaceIsActive = (space) => {
   }
 }
 const spaceIsHidden = (space) => {
-  const isHidden = store.getters['currentSpace/isHidden'](space.id)
+  const isHidden = spaceStore.getSpaceIsHiddenById(space.id)
   return isHidden
 }
 const isLoadingSpace = (space) => {
@@ -161,7 +176,7 @@ const isLoadingSpace = (space) => {
   return isLoadingSpace && spaceIsCurrentSpace(space)
 }
 const spaceIsCurrentSpace = (space) => {
-  const currentSpace = store.state.currentSpace.id
+  const currentSpace = spaceStore.id
   return Boolean(currentSpace === space.id)
 }
 const spaceIsTemplate = (space) => {
@@ -219,7 +234,7 @@ const selectSpace = (event, space) => {
 // favorites
 
 const isFavorite = (space) => {
-  return store.getters['currentSpace/isFavorite'](space.id)
+  return spaceStore.getSpaceIsFavorite(space.id)
 }
 
 // scroll
@@ -377,7 +392,7 @@ const selectItemFromFilter = () => {
 
 const group = (groupId) => {
   if (!groupId) { return }
-  return store.getters['groups/byId'](groupId)
+  return groupStore.getGroup(groupId)
 }
 </script>
 

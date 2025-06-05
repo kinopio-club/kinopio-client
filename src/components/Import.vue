@@ -1,6 +1,8 @@
 <script setup>
 import { reactive, computed, onMounted, onUnmounted, watch, ref, nextTick } from 'vue'
 import { useStore } from 'vuex'
+import { useUserStore } from '@/stores/useUserStore'
+import { useSpaceStore } from '@/stores/useSpaceStore'
 
 import Loader from '@/components/Loader.vue'
 import cache from '@/cache.js'
@@ -12,6 +14,8 @@ import randomColor from 'randomcolor'
 import dayjs from 'dayjs'
 
 const store = useStore()
+const userStore = useUserStore()
+const spaceStore = useSpaceStore()
 
 const inputElement = ref(null)
 
@@ -37,7 +41,7 @@ const toggleImportArenaChannelIsVisible = () => {
 }
 
 const newTypeColor = () => {
-  const isThemeDark = store.state.currentUser.theme === 'dark'
+  const isThemeDark = userStore.theme === 'dark'
   let color = randomColor({ luminosity: 'light' })
   if (isThemeDark) {
     color = randomColor({ luminosity: 'dark' })
@@ -122,7 +126,7 @@ const validateSchema = (space, schema) => {
 
 const importSpace = async (space) => {
   try {
-    const user = store.state.currentUser
+    const user = userStore.getUserAllState
     store.commit('isLoadingSpace', true)
     validate(space)
     if (state.format === 'canvas') {
@@ -133,8 +137,8 @@ const importSpace = async (space) => {
     space.connections = utils.migrationConnections(space.connections)
     const uniqueNewSpace = await cache.updateIdsInSpace(space)
     console.info('🧚 space to import', uniqueNewSpace)
-    await store.dispatch('currentSpace/saveSpace', uniqueNewSpace)
-    await store.dispatch('currentSpace/loadSpace', { space: uniqueNewSpace })
+    await spaceStore.saveSpace(uniqueNewSpace)
+    await spaceStore.loadSpace(uniqueNewSpace)
     updateSpaces()
     store.commit('triggerFocusSpaceDetailsName')
   } catch (error) {

@@ -1,6 +1,9 @@
 <script setup>
 import { reactive, computed, onMounted, onBeforeUnmount, watch, ref, nextTick } from 'vue'
 import { useStore } from 'vuex'
+import { useUserStore } from '@/stores/useUserStore'
+import { useSpaceStore } from '@/stores/useSpaceStore'
+import { useApiStore } from '@/stores/useApiStore'
 
 import utils from '@/utils.js'
 import UpdatePassword from '@/components/UpdatePassword.vue'
@@ -8,6 +11,9 @@ import Loader from '@/components/Loader.vue'
 import cache from '@/cache.js'
 
 const store = useStore()
+const userStore = useUserStore()
+const spaceStore = useSpaceStore()
+const apiStore = useApiStore()
 
 const dialogElement = ref(null)
 
@@ -35,7 +41,7 @@ const state = reactive({
 watch(() => props.visible, (value, prevValue) => {
   if (value) {
     updateDialogHeight()
-    state.email = store.state.currentUser.email
+    state.email = userStore.email
     clearStatus()
   }
 })
@@ -46,7 +52,7 @@ const updateDialogHeight = async () => {
   const element = dialogElement.value
   state.dialogHeight = utils.elementHeight(element)
 }
-const currentUserIsSignedIn = computed(() => store.getters['currentUser/isSignedIn'])
+const currentUserIsSignedIn = computed(() => userStore.getUserIsSignedIn)
 const triggerSignUpOrInIsVisible = () => {
   store.dispatch('closeAllDialogs')
   store.commit('triggerSignUpOrInIsVisible')
@@ -54,14 +60,14 @@ const triggerSignUpOrInIsVisible = () => {
 const updateEmail = async () => {
   if (state.loading) { return }
   if (!state.email) { return }
-  if (state.email === store.state.currentUser.email) { return }
+  if (state.email === userStore.email) { return }
   clearStatus()
   state.loading = true
-  const response = await store.dispatch('api/updateEmail', state.email)
+  const response = await apiStore.updateEmail(state.email)
   const result = await response.json()
   if (isSuccess(response)) {
     state.success = true
-    store.commit('currentUser/email', state.email)
+    userStore.email = state.email
   } else {
     await handleErrors(result)
   }

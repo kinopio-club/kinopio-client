@@ -1,9 +1,12 @@
 <script setup>
+import { reactive, computed, onMounted, watch, ref, nextTick } from 'vue'
+import { useStore } from 'vuex'
+import { useSpaceStore } from '@/stores/useSpaceStore'
+
 import utils from '@/utils.js'
 import consts from '@/consts.js'
 
-import { reactive, computed, onMounted, watch, ref, nextTick } from 'vue'
-import { useStore } from 'vuex'
+const spaceStore = useSpaceStore()
 const store = useStore()
 
 const dialog = ref(null)
@@ -14,11 +17,11 @@ const props = defineProps({
   isReadOnly: Boolean
 })
 
-const spaceIsPrivate = computed(() => store.state.currentSpace.privacy === 'private')
+const spaceIsPrivate = computed(() => spaceStore.privacy === 'private')
 
 // anon user
 
-const canShare = computed(() => store.getters['currentSpace/isRemote'])
+const canShare = computed(() => spaceStore.getSpaceIsRemote)
 const triggerSignUpOrInIsVisible = () => {
   store.dispatch('closeAllDialogs')
   store.commit('triggerSignUpOrInIsVisible')
@@ -63,7 +66,7 @@ const webShareIsSupported = computed(() => navigator.share)
 const webShare = () => {
   const data = {
     title: props.card.name,
-    text: store.state.currentSpace.name,
+    text: spaceStore.name,
     url: cardUrl()
   }
   navigator.share(data)

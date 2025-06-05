@@ -1,11 +1,22 @@
 <script setup>
+import { reactive, computed, onMounted, watch, ref, nextTick } from 'vue'
+import { useStore } from 'vuex'
+import { useCardStore } from '@/stores/useCardStore'
+import { useUserStore } from '@/stores/useUserStore'
+import { useSpaceStore } from '@/stores/useSpaceStore'
+import { useBroadcastStore } from '@/stores/useBroadcastStore'
+import { useThemeStore } from '@/stores/useThemeStore'
+
 import Loader from '@/components/Loader.vue'
 import NameSegment from '@/components/NameSegment.vue'
 import utils from '@/utils.js'
 
-import { reactive, computed, onMounted, watch, ref, nextTick } from 'vue'
-import { useStore } from 'vuex'
+const cardStore = useCardStore()
 const store = useStore()
+const userStore = useUserStore()
+const spaceStore = useSpaceStore()
+const broadcastStore = useBroadcastStore()
+const themeStore = useThemeStore()
 
 onMounted(() => {
   updateNameSegments()
@@ -57,7 +68,7 @@ const backgroundColorIsDark = computed(() => {
 })
 const styles = computed(() => {
   if (!props.otherCard) { return }
-  const isThemeDark = store.getters['themes/isThemeDark']
+  const isThemeDark = themeStore.getIsThemeDark
   let color = utils.cssVariable('primary-on-light-background')
   if (isThemeDark) {
     color = utils.cssVariable('primary-on-dark-background')
@@ -89,7 +100,7 @@ const updateNameSegments = () => {
   if (props.shouldTruncateName) {
     card.name = utils.truncated(card.name, 25)
   }
-  card = store.getters['currentCards/nameSegments'](card)
+  card = cardStore.cardWithNameSegments(card)
   card.nameSegments = card.nameSegments.map(segment => {
     if (segment.isLink) {
       segment.isLink = false
@@ -115,7 +126,7 @@ const showOtherCardDetailsIsVisible = async (event) => {
   }
   if (props.parentCardId) {
     otherItem.parentCardId = props.parentCardId
-    store.dispatch('currentCards/incrementZ', props.parentCardId)
+    cardStore.incrementCardZ(props.parentCardId)
   }
   if (props.shouldCloseAllDialogs) {
     store.dispatch('closeAllDialogs')
@@ -130,12 +141,12 @@ const showOtherCardDetailsIsVisible = async (event) => {
   event.stopPropagation()
   // broadcast
   const updates = {
-    userId: store.state.currentUser.id,
+    userId: userStore.id,
     cardId: props.parentCardId
   }
-  store.commit('broadcast/updateStore', { updates, type: 'clearRemoteCardsDragging' })
+  broadcastStore.updateStore({ updates, type: 'clearRemoteCardsDragging' })
   await nextTick()
-  store.commit('broadcast/updateStore', { updates, type: 'updateRemoteCardDetailsVisible' })
+  broadcastStore.updateStore({ updates, type: 'updateRemoteCardDetailsVisible' })
 }
 const disableIsActive = () => {
   state.isActive = false

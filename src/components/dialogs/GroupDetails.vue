@@ -1,6 +1,9 @@
 <script setup>
 import { reactive, computed, onMounted, onBeforeUnmount, watch, ref, nextTick } from 'vue'
 import { useStore } from 'vuex'
+import { useUserStore } from '@/stores/useUserStore'
+import { useSpaceStore } from '@/stores/useSpaceStore'
+import { useGroupStore } from '@/stores/useGroupStore'
 
 import UserList from '@/components/UserList.vue'
 import User from '@/components/User.vue'
@@ -14,6 +17,9 @@ import GroupDetailsInfo from '@/components/GroupDetailsInfo.vue'
 import uniqBy from 'lodash-es/uniqBy'
 
 const store = useStore()
+const userStore = useUserStore()
+const spaceStore = useSpaceStore()
+const groupStore = useGroupStore()
 
 const dialogElement = ref(null)
 
@@ -58,26 +64,26 @@ const childDialogIsVisible = computed(() => {
 const updateChildDialogIsVisible = (value) => {
   state.childDialogIsVisible = value
 }
-const currentUser = computed(() => store.state.currentUser)
+const currentUser = computed(() => userStore.getUserAllState)
 
 // group
 
 const groupUser = computed(() => {
-  return store.getters['groups/groupUser']({
-    userId: store.state.currentUser.id,
+  return groupStore.getGroupUser({
+    userId: userStore.id,
     groupId: props.group.id
   })
 })
 const isGroupUser = computed(() => Boolean(groupUser.value))
 const currentUserIsGroupAdmin = computed(() => {
-  return store.getters['groups/groupUserIsAdmin']({
-    userId: store.state.currentUser.id,
+  return groupStore.getGroupUserIsAdmin({
+    userId: userStore.id,
     groupId: props.group.id
   })
 })
 const updateGroup = (update) => {
   update.id = props.group.id
-  store.dispatch('groups/update', update)
+  groupStore.updateGroup(update)
 }
 
 // select user
@@ -130,7 +136,7 @@ const toggleRemoveGroupConfirmationIsVisible = () => {
 const deleteGroupPermanent = async () => {
   state.loading.deleteGroupPermanent = true
   try {
-    await store.dispatch('groups/remove', props.group)
+    await groupStore.removeGroup(props.group)
     store.commit('triggerCloseGroupDetailsDialog')
   } catch (error) {
     state.removeGroupConfirmationIsVisible = false

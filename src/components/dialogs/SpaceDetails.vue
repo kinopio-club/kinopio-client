@@ -1,12 +1,16 @@
 <script setup>
 import { reactive, computed, onMounted, onBeforeUnmount, watch, ref, nextTick } from 'vue'
 import { useStore } from 'vuex'
+import { useUserStore } from '@/stores/useUserStore'
+import { useSpaceStore } from '@/stores/useSpaceStore'
+import { useApiStore } from '@/stores/useApiStore'
+import { useGroupStore } from '@/stores/useGroupStore'
 
 import cache from '@/cache.js'
 import SpaceDetailsInfo from '@/components/SpaceDetailsInfo.vue'
 import SpaceFilters from '@/components/dialogs/SpaceFilters.vue'
 import SpaceList from '@/components/SpaceList.vue'
-import AddSpaceButtons from '@/components/AddSpaceButtons.vue'
+import AddSpaceButton from '@/components/AddSpaceButton.vue'
 import utils from '@/utils.js'
 
 import debounce from 'lodash-es/debounce'
@@ -14,6 +18,10 @@ import uniqBy from 'lodash-es/uniqBy'
 import dayjs from 'dayjs'
 
 const store = useStore()
+const userStore = useUserStore()
+const spaceStore = useSpaceStore()
+const apiStore = useApiStore()
+const groupStore = useGroupStore()
 
 const maxIterations = 30
 let currentIteration, updatePositionTimer
@@ -61,14 +69,14 @@ const init = async () => {
   }
   await updateWithRemoteSpaces()
   updateHeights()
-  store.dispatch('currentSpace/updateSpacePreviewImage')
+  spaceStore.updateSpacePreviewImage()
 }
 
 // current space
 
 const isLoadingSpace = computed(() => store.state.isLoadingSpace)
-const currentSpaceIsHidden = computed(() => store.getters['currentSpace/isHidden']())
-const spaceName = computed(() => store.state.currentSpace.name)
+const currentSpaceIsHidden = computed(() => spaceStore.getSpaceIsHidden)
+const spaceName = computed(() => spaceStore.name)
 
 // dialog
 
@@ -78,7 +86,7 @@ const style = computed(() => {
 })
 const backButtonIsVisible = computed(() => {
   const spaceId = store.state.prevSpaceIdInSession
-  return spaceId && spaceId !== store.state.currentSpace.id
+  return spaceId && spaceId !== spaceStore.id
 })
 const closeDialogs = () => {
   state.spaceFiltersIsVisible = false
@@ -121,11 +129,11 @@ const updateResultsSectionHeight = async () => {
 
 // filters
 
-const dialogSpaceFilterSortBy = computed(() => store.state.currentUser.dialogSpaceFilterSortBy)
-const dialogSpaceFilterByUser = computed(() => store.state.currentUser.dialogSpaceFilterByUser)
-const dialogSpaceFilterShowHidden = computed(() => store.state.currentUser.dialogSpaceFilterShowHidden)
-const dialogSpaceFilterByGroup = computed(() => store.state.currentUser.dialogSpaceFilterByGroup)
-const dialogSpaceFilterByTemplates = computed(() => store.state.currentUser.dialogSpaceFilterByTemplates)
+const dialogSpaceFilterSortBy = computed(() => userStore.dialogSpaceFilterSortBy)
+const dialogSpaceFilterByUser = computed(() => userStore.dialogSpaceFilterByUser)
+const dialogSpaceFilterShowHidden = computed(() => userStore.dialogSpaceFilterShowHidden)
+const dialogSpaceFilterByGroup = computed(() => userStore.dialogSpaceFilterByGroup)
+const dialogSpaceFilterByTemplates = computed(() => userStore.dialogSpaceFilterByTemplates)
 
 const spaceFiltersIsActive = computed(() => {
   return Boolean(dialogSpaceFilterShowHidden.value || utils.objectHasKeys(dialogSpaceFilterByUser.value) || dialogSpaceFilterSortByIsActive.value) || utils.objectHasKeys(dialogSpaceFilterByGroup.value)
@@ -136,7 +144,7 @@ const filteredSpaces = computed(() => {
   // hide by hidden spaces unless filter active
   if (!dialogSpaceFilterShowHidden.value) {
     spaces = spaces.filter(space => {
-      const isHidden = store.getters['currentSpace/isHidden'](space.id)
+      const isHidden = spaceStore.getSpaceIsHiddenById(space.id)
       return !isHidden
     })
   }
@@ -157,16 +165,16 @@ const filteredSpaces = computed(() => {
   return spaces
 })
 const shouldShowInExplore = computed(() => {
-  const privacy = store.state.currentSpace.privacy
+  const privacy = spaceStore.privacy
   if (privacy === 'private') { return false }
-  return store.state.currentSpace.showInExplore
+  return spaceStore.showInExplore
 })
 const isSpaceMember = computed(() => {
-  return store.getters['currentUser/isSpaceMember'](store.state.currentSpace)
+  return userStore.getUserIsSpaceMember
 })
 const removeLabel = computed(() => {
-  const currentUserIsSpaceCollaborator = store.getters['currentUser/isSpaceCollaborator']()
-  if (currentUserIsSpaceCollaborator) {
+  const isSpaceCollaborator = userStore.getUserIsSpaceCollaborator
+  if (isSpaceCollaborator) {
     return 'Leave'
   } else {
     return 'Remove'
@@ -185,7 +193,7 @@ const toggleSpaceFiltersIsVisible = () => {
 // sort by groups
 
 const spaceGroupsByAlphabetical = (spaces) => {
-  const groups = store.getters['groups/all']
+  const groups = groupStore.getAllGroups
   const spaceGroups = []
   spaces.forEach(space => {
     if (!space.groupId) { return }
@@ -225,7 +233,7 @@ const prependFavoriteSpaces = (spaces) => {
   const favoriteSpaces = []
   const otherSpaces = []
   spaces.forEach(space => {
-    const isFavorite = store.getters['currentSpace/isFavorite'](space.id)
+    const isFavorite = spaceStore.getSpaceIsFavorite(space.id)
     if (isFavorite) {
       favoriteSpaces.push(space)
     } else {
@@ -238,7 +246,7 @@ const prependInboxSpaces = (spaces) => {
   const inboxSpaces = []
   const otherSpaces = []
   spaces.forEach(space => {
-    const isInbox = store.getters['currentSpace/isInbox'](space.name)
+    const isInbox = spaceStore.getSpaceIsInbox(space.name)
     if (isInbox) {
       inboxSpaces.push(space)
     } else {
@@ -268,7 +276,7 @@ const sort = (spaces) => {
 
 const addSpace = async () => {
   window.scrollTo(0, 0)
-  await store.dispatch('currentSpace/addSpace')
+  await spaceStore.createSpace()
   updateLocalSpaces()
   store.commit('triggerFocusSpaceDetailsName')
 }
@@ -276,7 +284,7 @@ const addSpace = async () => {
 // select space
 
 const changeSpace = (space) => {
-  store.dispatch('currentSpace/changeSpace', space)
+  spaceStore.changeSpace(space)
   store.dispatch('closeAllDialogs')
   closeDialogs()
 }
@@ -296,14 +304,14 @@ const updateLocalSpaces = async () => {
   state.spaces = cacheSpaces
 }
 const updateWithRemoteSpaces = async () => {
-  const currentUserIsSignedIn = store.getters['currentUser/isSignedIn']
+  const currentUserIsSignedIn = userStore.getUserIsSignedIn
   const isOffline = computed(() => !store.state.isOnline)
   if (!currentUserIsSignedIn || isOffline.value) { return }
   try {
     state.isLoadingRemoteSpaces = true
     const [userSpaces, groupSpaces] = await Promise.all([
-      store.dispatch('api/getUserSpaces'),
-      store.dispatch('api/getUserGroupSpaces')
+      apiStore.getUserSpaces(),
+      apiStore.getUserGroupSpaces()
     ])
     let spaces = userSpaces || []
     if (groupSpaces) {
@@ -357,7 +365,7 @@ dialog.space-details.is-pinnable.wide(v-if="props.visible" :open="props.visible"
     .row.title-row
       div
         //- New Space
-        AddSpaceButtons(:parentIsInDialog="true" @closeDialogs="closeDialogs" @addSpace="addSpace")
+        AddSpaceButton(:parentIsInDialog="true" @closeDialogs="closeDialogs" @addSpace="addSpace" :isSmall="true")
       //- Filters
       .button-wrap
         // no filters
@@ -409,8 +417,8 @@ dialog.space-details
     border-radius 100px
     margin-left 3px
   &.is-pinned
-    left -45px
-    top -13px
+    left -40px
+    top -36px
   .space-list
     .inline-favorite-wrap
       padding-top 4px

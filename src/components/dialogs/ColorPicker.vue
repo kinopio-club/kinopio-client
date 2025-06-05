@@ -1,6 +1,8 @@
 <script setup>
 import { reactive, computed, onMounted, onBeforeUnmount, watch, ref, nextTick } from 'vue'
 import { useStore } from 'vuex'
+import { useUserStore } from '@/stores/useUserStore'
+import { useSpaceStore } from '@/stores/useSpaceStore'
 
 import Slider from '@/components/Slider.vue'
 import utils from '@/utils.js'
@@ -14,6 +16,8 @@ import labPlugin from 'colord/plugins/lab'
 extend([labPlugin])
 
 const store = useStore()
+const userStore = useUserStore()
+const spaceStore = useSpaceStore()
 
 const dialogElement = ref(null)
 
@@ -160,7 +164,7 @@ const updateLuminosityFromTheme = () => {
     updateLuminosity('light')
     return
   }
-  const isThemeDark = store.state.currentUser.theme === 'dark'
+  const isThemeDark = userStore.theme === 'dark'
   if (isThemeDark) {
     updateLuminosity('dark')
   } else {
@@ -175,7 +179,7 @@ const hueIsRed = computed(() => state.currentHue === 'red')
 const hueIsGreen = computed(() => state.currentHue === 'green')
 const hueIsBlue = computed(() => state.currentHue === 'blue')
 const isDark = computed(() => {
-  const isThemeDark = store.state.currentUser.theme === 'dark'
+  const isThemeDark = userStore.theme === 'dark'
   if (isTransparent.value && isThemeDark) {
     return utils.cssVariable('primary')
   }
@@ -205,12 +209,12 @@ const updateButtonHues = () => {
 
 // favorites
 
-const favoriteColors = computed(() => store.state.currentUser.favoriteColors || [])
+const favoriteColors = computed(() => userStore.favoriteColors || [])
 const currentColorIsFavorite = computed(() => favoriteColors.value.includes(props.currentColor))
 const toggleFavoriteColor = () => {
   const color = { color: props.currentColor }
   const value = !currentColorIsFavorite.value
-  store.dispatch('currentUser/updateFavoriteColor', { color, value })
+  userStore.updateUserFavoriteColor(color, value)
 }
 
 // opacity

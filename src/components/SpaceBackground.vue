@@ -1,6 +1,8 @@
 <script setup>
 import { reactive, computed, onMounted, watch, ref, nextTick } from 'vue'
 import { useStore } from 'vuex'
+import { useUserStore } from '@/stores/useUserStore'
+import { useSpaceStore } from '@/stores/useSpaceStore'
 
 import backgroundImages from '@/data/backgroundImages.json'
 import SpaceBackgroundGradients from '@/components/SpaceBackgroundGradients.vue'
@@ -8,6 +10,8 @@ import utils from '@/utils.js'
 import consts from '@/consts.js'
 
 const store = useStore()
+const userStore = useUserStore()
+const spaceStore = useSpaceStore()
 
 const spaceShouldHaveBorderRadius = computed(() => store.getters.spaceShouldHaveBorderRadius)
 const isSecureAppContext = computed(() => consts.isSecureAppContext)
@@ -16,9 +20,8 @@ const isSpacePage = computed(() => {
   const isSpace = !isOther
   return isSpace
 })
-const isThemeDark = computed(() => store.state.currentUser.theme === 'dark')
-const currentSpace = computed(() => store.state.currentSpace)
-const backgroundIsDefault = computed(() => !currentSpace.value.background)
+const isThemeDark = computed(() => userStore.theme === 'dark')
+const backgroundIsDefault = computed(() => !spaceStore.background)
 const pageHeight = computed(() => store.state.pageHeight)
 const pageWidth = computed(() => store.state.pageWidth)
 
@@ -26,7 +29,7 @@ const pageWidth = computed(() => store.state.pageWidth)
 
 const backgroundStyles = computed(() => {
   let url = backgroundUrl.value
-  const tintColor = currentSpace.value.backgroundTint
+  const tintColor = spaceStore.backgroundTint
   const styles = {}
   if (tintColor) {
     styles.background = 'transparent'
@@ -50,7 +53,7 @@ const backgroundStyles = computed(() => {
 
 const kinopioBackgroundImageData = computed(() => {
   const data = backgroundImages.find(item => {
-    const background = currentSpace.value.background
+    const background = spaceStore.background
     return background === item.url
   })
   return data
@@ -65,7 +68,7 @@ const backgroundUrl = computed(() => {
   } else if (data) {
     url = data.url
   } else {
-    url = currentSpace.value.background
+    url = spaceStore.background
   }
   return url
 })
@@ -73,15 +76,15 @@ const backgroundUrl = computed(() => {
 // Background Gradient
 
 const gradientLayers = computed(() => {
-  if (!currentSpace.value.backgroundIsGradient) { return }
-  const layers = currentSpace.value.backgroundGradient
+  if (!spaceStore.backgroundIsGradient) { return }
+  const layers = spaceStore.backgroundGradient
   return layers
 })
 </script>
 
 <template lang="pug">
 //- gradient
-template(v-if="currentSpace.backgroundIsGradient")
+template(v-if="spaceStore.backgroundIsGradient")
   SpaceBackgroundGradients(:visible="true" :layers="gradientLayers" :backgroundStyles="backgroundStyles")
 //- or image
 template(v-else)

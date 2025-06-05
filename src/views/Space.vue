@@ -1,8 +1,17 @@
 <script setup>
 import { reactive, computed, onMounted, onBeforeUnmount, onUnmounted, watch, ref, nextTick } from 'vue'
 import { useStore } from 'vuex'
+import { useCardStore } from '@/stores/useCardStore'
+import { useConnectionStore } from '@/stores/useConnectionStore'
+import { useBoxStore } from '@/stores/useBoxStore'
+import { useUserStore } from '@/stores/useUserStore'
+import { useSpaceStore } from '@/stores/useSpaceStore'
+import { useApiStore } from '@/stores/useApiStore'
+import { useGroupStore } from '@/stores/useGroupStore'
+import { useAnalyticsStore } from '@/stores/useAnalyticsStore'
+import { useBroadcastStore } from '@/stores/useBroadcastStore'
+import { useHistoryStore } from '@/stores/useHistoryStore'
 
-import Card from '@/components/Card.vue'
 import CardDetails from '@/components/dialogs/CardDetails.vue'
 import OtherCardDetails from '@/components/dialogs/OtherCardDetails.vue'
 import BoxDetails from '@/components/dialogs/BoxDetails.vue'
@@ -47,7 +56,17 @@ import sortBy from 'lodash-es/sortBy'
 import uniq from 'lodash-es/uniq'
 import debounce from 'lodash-es/debounce'
 
+const cardStore = useCardStore()
+const connectionStore = useConnectionStore()
+const boxStore = useBoxStore()
 const store = useStore()
+const userStore = useUserStore()
+const spaceStore = useSpaceStore()
+const apiStore = useApiStore()
+const groupStore = useGroupStore()
+const analyticsStore = useAnalyticsStore()
+const broadcastStore = useBroadcastStore()
+const historyStore = useHistoryStore()
 
 let unsubscribe
 
@@ -59,14 +78,14 @@ const init = async () => {
   if (store.state.shouldNotifyIsJoiningGroup) {
     store.commit('notifyIsJoiningGroup', true)
   }
-  store.dispatch('api/updateDateImage')
-  store.dispatch('analytics/event', 'pageview')
-  await cache.migrateFromLocalStorage()
-  await store.dispatch('currentUser/init')
-  await store.dispatch('currentSpace/init')
-  await store.commit('broadcast/connect')
-  await store.dispatch('groups/init')
+  apiStore.updateDateImage()
+  analyticsStore.event('pageview')
+  await cache.migrateFromLocalStorage() // legacy
+  await spaceStore.initializeSpace()
+  broadcastStore.connect()
+  await groupStore.initializeGroups()
   await store.dispatch('updateTags')
+  checkIfShouldShowExploreOnLoad()
 }
 init()
 
@@ -92,7 +111,7 @@ onMounted(() => {
     store.commit('webfontIsLoaded', true)
   })
   unsubscribe = store.subscribe((mutation, state) => {
-    if (mutation.type === 'triggerRestoreSpaceRemoteComplete') {
+    if (mutation.type === 'triggerRestoreSpaceRemoteComplete') { // TODO replace w spacestore restoreSpace
       dragItemsOnNextTick()
     } else if (mutation.type === 'triggerAddBox') {
       const event = mutation.payload
@@ -102,18 +121,18 @@ onMounted(() => {
   updateIconsNotDraggable()
 
   setTimeout(() => {
-    store.dispatch('currentSpace/updateInboxCache')
+    spaceStore.updateInboxCache()
   }, 15000) // 15 seconds after mounted
 
   // ⏰ scheduled tasks
   // retry failed sync operations
   processQueueIntervalTimer = setInterval(() => {
-    store.dispatch('api/sendQueue')
+    apiStore.sendQueue()
   }, 5000) // every 5 seconds
   // update inbox space in local storage, one time
   hourlyTasks = setInterval(() => {
-    store.dispatch('currentSpace/updateInboxCache')
-    store.dispatch('api/updateDateImage')
+    spaceStore.updateInboxCache()
+    apiStore.updateDateImage()
   }, 1000 * 60 * 60 * 1) // every 1 hour
 })
 
@@ -138,18 +157,25 @@ const state = reactive({
   startCursor: {}
 })
 
-const unlockedCards = computed(() => store.getters['currentCards/isNotLocked'])
+const unlockedCards = computed(() => cardStore.getCardsIsNotLocked)
 const isPainting = computed(() => store.state.currentUserIsPainting)
 const isPanningReady = computed(() => store.state.currentUserIsPanningReady)
 const isPanning = computed(() => store.state.currentUserIsPanning)
-const spaceIsReadOnly = computed(() => !store.getters['currentUser/canEditSpace']())
-const canEditSpace = computed(() => store.getters['currentUser/canEditSpace']())
+const spaceIsReadOnly = computed(() => !userStore.getUserCanEditSpace)
+const canEditSpace = computed(() => userStore.getUserCanEditSpace)
 const isDrawingConnection = computed(() => store.state.currentUserIsDrawingConnection)
 const isResizingCard = computed(() => store.state.currentUserIsResizingCard)
 const isTiltingCard = computed(() => store.state.currentUserIsTiltingCard)
 const isDraggingCard = computed(() => store.state.currentUserIsDraggingCard)
 const isResizingBox = computed(() => store.state.currentUserIsResizingBox)
 const isDraggingBox = computed(() => store.state.currentUserIsDraggingBox)
+const checkIfShouldShowExploreOnLoad = () => {
+  const shouldShow = store.state.shouldShowExploreOnLoad
+  if (shouldShow) {
+    store.commit('triggerExploreIsVisible', null)
+  }
+  store.commit('shouldShowExploreOnLoad', false)
+}
 
 // page size
 
@@ -165,12 +191,12 @@ watch(() => store.state.currentUserIsResizingCard, (value, prevValue) => {
 watch(() => store.state.currentUserIsDraggingBox, (value, prevValue) => {
   updatePageSizeFromMutation(value)
 })
-watch(() => store.state.currentUserIsResizingBox, (value, prevValue) => {
-  if (prevValue && !value) {
-    afterResizeBoxes()
-  }
-  updatePageSizeFromMutation(value)
-})
+// watch(() => store.state.currentUserIsResizingBox, (value, prevValue) => {
+//   if (prevValue && !value) {
+//     afterResizeBoxes()
+//   }
+//   updatePageSizeFromMutation(value)
+// })
 const updatePageSizeFromMutation = async (value) => {
   if (!value) {
     await nextTick()
@@ -183,10 +209,11 @@ const updateViewportSizes = () => {
 
 // user
 
-const currentUser = computed(() => store.state.currentUser)
+const currentUser = computed(() => userStore.getUserAllState)
 const users = computed(() => {
-  const excludeCurrentUser = true
-  return store.getters['currentSpace/allUsers'](excludeCurrentUser)
+  let users = spaceStore.getSpaceAllUsers
+  users = utils.excludeCurrentUser(users, userStore.id)
+  return users
 })
 
 // styles
@@ -210,11 +237,11 @@ const loadSpaceOnBackOrForward = (event) => {
   if (!utils.urlIsSpace(url)) { return }
   const spaceId = utils.spaceIdFromUrl(url)
   const space = { id: spaceId }
-  store.dispatch('currentSpace/loadSpace', { space })
+  spaceStore.loadSpace(space)
 }
 const unloadPage = () => {
-  store.commit('broadcast/close')
-  store.dispatch('currentSpace/removeEmptyCards')
+  broadcastStore.close()
+  spaceStore.removeEmptyCards()
   store.commit('triggerUnloadPage')
 }
 
@@ -227,10 +254,10 @@ const addCard = (event) => {
     x: position.x,
     y: position.y
   }
-  store.dispatch('currentUser/notifyReadOnly', position)
+  userStore.notifyReadOnly(position)
   if (spaceIsReadOnly.value) { return }
   const newCard = { position, isParentCard }
-  store.dispatch('currentCards/add', { card: newCard })
+  cardStore.createCard(newCard)
   store.commit('childCardId', '')
 }
 const addOrCloseCard = (event) => {
@@ -258,53 +285,53 @@ const tiltCards = (event) => {
   if (endCursor.x - prevCursor.x > 0 || endCursor.y - prevCursor.y > 0) {
     delta = -delta
   }
-  store.dispatch('currentCards/tilt', { cardIds, delta })
+  cardStore.tiltCards(cardIds, delta)
 }
 const stopTiltingCards = () => {
   if (!store.state.currentUserIsTiltingCard) { return }
-  store.dispatch('history/resume')
+  historyStore.resume()
   const cardIds = store.state.currentUserIsTiltingCardIds
-  const cards = cardIds.map(id => store.getters['currentCards/byId'](id))
-  store.dispatch('currentCards/updateDimensions', { cards })
-  store.dispatch('history/add', { cards, useSnapshot: true })
+  cardStore.updateCardsDimensions(cardIds)
+  const cards = cardIds.map(id => cardStore.getCard(id))
+  historyStore.add({ cards, useSnapshot: true })
   store.commit('currentUserIsTiltingCard', false)
-  store.commit('broadcast/updateStore', { updates: { userId: currentUser.value.id }, type: 'removeRemoteUserTiltingCards' })
+  broadcastStore.updateStore({ updates: { userId: currentUser.value.id }, type: 'removeRemoteUserTiltingCards' })
 }
 const resizeCards = (event) => {
   if (!prevCursor) { return }
   if (utils.isMultiTouch(event)) { return }
   const cardIds = store.state.currentUserIsResizingCardIds
   const deltaX = endCursor.x - prevCursor.x
-  store.dispatch('currentCards/resize', { cardIds, deltaX })
+  cardStore.resizeCards(cardIds, deltaX)
 }
 const stopResizingCards = async () => {
   if (!store.state.currentUserIsResizingCard) { return }
-  store.dispatch('history/resume')
+  historyStore.resume()
   const cardIds = store.state.currentUserIsResizingCardIds
-  const cards = cardIds.map(id => store.getters['currentCards/byId'](id))
-  store.dispatch('history/add', { cards, useSnapshot: true })
-  await store.dispatch('currentCards/updateDimensions', { cards })
+  const cards = cardIds.map(id => cardStore.getCard(id))
+  historyStore.add({ cards, useSnapshot: true })
+  await cardStore.updateCardsDimensions(cardIds)
   store.commit('currentUserIsResizingCard', false)
-  store.commit('broadcast/updateStore', { updates: { userId: currentUser.value.id }, type: 'removeRemoteUserResizingCards' })
+  broadcastStore.updateStore({ updates: { userId: currentUser.value.id }, type: 'removeRemoteUserResizingCards' })
 }
 const afterResizeCards = () => {
   if (!store.state.shouldSnapToGrid) { return }
   const cardIds = store.state.currentUserIsResizingCardIds
   const cards = cardIds.map(cardId => {
-    let { id, resizeWidth } = store.getters['currentCards/byId'](cardId)
+    let { id, resizeWidth } = cardStore.getCard(cardId)
     resizeWidth = utils.roundToNearest(resizeWidth)
     return { id, resizeWidth }
   })
-  store.dispatch('currentCards/updateMultiple', cards)
+  cardStore.updateCards(cards)
 }
 const addCardFromOutsideAppContext = (event) => {
   if (!consts.isSecureAppContext) { return }
-  const currentSpace = store.state.currentSpace
+  const currentSpace = spaceStore.getSpaceAllState
   const data = event.data
   if (data.name !== 'addedCardFromAddPage') { return }
   const card = data.value
   if (card.spaceId !== currentSpace.id) { return }
-  store.commit('currentCards/create', { card, shouldPreventCache: true })
+  cardStore.createCard(card)
 }
 
 // boxes
@@ -316,19 +343,22 @@ const addBox = (event) => {
     store.commit('addNotificationWithPosition', { message: 'Outside Space', position, type: 'info', icon: 'cancel', layer: 'app' })
     return
   }
-  store.dispatch('currentUser/notifyReadOnly', position)
-  const shouldPrevent = !store.getters['currentUser/canEditSpace']()
+  userStore.notifyReadOnly(position)
+  const shouldPrevent = !userStore.getUserCanEditSpace
   if (shouldPrevent) {
     store.dispatch('currentUserToolbar', 'card')
     return
   }
-  store.dispatch('currentBoxes/add', { box: position, shouldResize: true })
+  const isResizing = true
+  boxStore.createBox(position, isResizing)
   store.commit('currentBoxIsNew', true)
   event.preventDefault() // allows dragging boxes without scrolling on touch
 }
 const resizeBoxes = () => {
   if (!prevCursor) { return }
-  const boxIds = store.getters['currentBoxes/isResizingIds']
+  const boxes = boxStore.getBoxesResizing
+  const ids = boxes.map(box => box.id)
+
   const zoom = store.getters.spaceCounterZoomDecimal
   let delta = {
     x: endCursor.x - prevCursor.x,
@@ -338,54 +368,41 @@ const resizeBoxes = () => {
     x: Math.round(delta.x * zoom),
     y: Math.round(delta.y * zoom)
   }
-  store.dispatch('currentBoxes/resize', { boxIds, delta })
+  boxStore.resizeBoxes(ids, delta)
 }
 const stopResizingBoxes = () => {
   if (!store.state.currentUserIsResizingBox) { return }
-  store.dispatch('history/resume')
-  const boxIds = store.getters['currentBoxes/isResizingIds']
-  const boxes = boxIds.map(id => store.getters['currentBoxes/byId'](id))
-  store.dispatch('currentConnections/updateMultiplePaths', boxes)
-  store.dispatch('history/add', { boxes, useSnapshot: true })
+  historyStore.resume()
+
+  // const boxes = boxStore.getBoxesResizing
+  // const ids = boxes.map(box => box.id)
+
+  // useConnectionStore.updateConnectionPaths(boxIds)
+  // historyStore.add({ boxes, useSnapshot: true })
   store.commit('currentUserIsResizingBox', false)
   store.dispatch('currentUserToolbar', 'card')
-  store.commit('broadcast/updateStore', { updates: { userId: currentUser.value.id }, type: 'removeRemoteUserResizingBoxes' })
-  store.dispatch('checkIfItemShouldIncreasePageSize', boxes[0])
-}
-const afterResizeBoxes = () => {
-  const boxIds = store.getters['currentBoxes/isResizingIds']
-  const boxes = boxIds.map(boxId => {
-    let { resizeWidth, resizeHeight } = utils.boxElementDimensions({ id: boxId })
-    if (store.state.shouldSnapToGrid) {
-      resizeWidth = utils.roundToNearest(resizeWidth)
-      resizeHeight = utils.roundToNearest(resizeHeight)
-    }
-    return { id: boxId, resizeWidth, resizeHeight }
-  })
-  store.dispatch('currentBoxes/updateMultiple', boxes)
+  broadcastStore.updateStore({ updates: { userId: currentUser.value.id }, type: 'removeRemoteUserResizingBoxes' })
+  // store.dispatch('checkIfItemShouldIncreasePageSize', boxes[0])
 }
 const checkIfShouldSnapBoxes = (event) => {
   if (!store.state.boxesWereDragged) { return }
   if (event.shiftKey) { return }
-  const snapGuides = store.state.currentBoxes.snapGuides
+  const snapGuides = boxStore.boxSnapGuides
   if (!snapGuides.length) { return }
   snapGuides.forEach(snapGuide => {
-    const elapsedTime = Date.now() - snapGuide.time
-    const shouldSnap = elapsedTime >= consts.boxSnapGuideWaitingDuration
-    if (!shouldSnap) { return }
-    store.dispatch('currentBoxes/snap', snapGuide)
+    if (!store.state.notifyBoxSnappingIsReady) { return }
+    boxStore.updateBoxSnapToPosition(snapGuide)
   })
 }
 const checkIfShouldExpandBoxes = (event) => {
   if (!store.state.cardsWereDragged) { return }
   if (event.shiftKey) { return }
-  const snapGuides = store.state.currentBoxes.snapGuides
+  const snapGuides = boxStore.boxSnapGuides
   if (!snapGuides.length) { return }
   snapGuides.forEach(snapGuide => {
-    const elapsedTime = Date.now() - snapGuide.time
-    const shouldSnap = elapsedTime >= consts.boxSnapGuideWaitingDuration
-    if (!shouldSnap) { return }
-    store.dispatch('currentBoxes/expand', snapGuide)
+    if (!store.state.notifyBoxSnappingIsReady) { return }
+    console.log(snapGuide)
+    boxStore.updateBoxSnapToSize(snapGuide)
   })
 }
 const unselectCardsInDraggedBox = () => {
@@ -403,15 +420,15 @@ const showBoxDetails = async (event) => {
   store.commit('boxDetailsIsVisibleForBoxId', boxId)
 }
 const updateSizeForNewBox = (boxId) => {
-  const box = store.getters['currentBoxes/byId'](boxId)
+  const box = boxStore.getBox(boxId)
   const isMinSize = box.resizeWidth === consts.minBoxSize && box.resizeHeight === consts.minBoxSize
   if (!isMinSize) { return }
-  const newBox = {
+  const update = {
     id: box.id,
     resizeWidth: consts.defaultBoxWidth,
     resizeHeight: consts.defaultBoxHeight
   }
-  store.dispatch('currentBoxes/update', newBox)
+  boxStore.updateBox(update)
 }
 
 // drag items
@@ -421,22 +438,30 @@ const dragItemsOnNextTick = async () => {
   dragItems()
 }
 const dragItems = () => {
-  store.dispatch('history/pause')
+  historyStore.pause()
   const prevCursor = cursor()
-  store.dispatch('currentUser/notifyReadOnly', prevCursor)
-  const shouldPrevent = !store.getters['currentUser/canEditSpace']()
+  userStore.notifyReadOnly(prevCursor)
+  const shouldPrevent = !userStore.getUserCanEditSpace
   if (shouldPrevent) { return }
-  store.dispatch('currentCards/move', {
-    endCursor,
-    prevCursor
-  })
+  // cards
+  cardStore.moveCards({ endCursor, prevCursor })
+  // boxes
   checkShouldShowDetails()
-  store.dispatch('currentBoxes/move', {
-    endCursor,
-    prevCursor
-  })
+  boxStore.moveBoxes({ endCursor, prevCursor })
 }
-
+const dragBoxes = (event) => {
+  const isInitialDrag = !store.state.boxesWereDragged
+  if (isInitialDrag) {
+    const updates = {
+      boxId: store.state.currentDraggingBoxId,
+      userId: userStore.id
+    }
+    broadcastStore.updateStore({ updates, type: 'addToRemoteBoxesDragging' })
+    boxStore.selectItemsInSelectedBoxes()
+  }
+  if (event.altKey) { return } // should not select contained items if alt/option key
+  dragItems()
+}
 // footer
 
 const footerDialogIsVisible = () => {
@@ -534,7 +559,7 @@ const interact = (event) => {
     dragItems()
   } else if (isDraggingBox.value) {
     store.commit('currentDraggingCardId', '')
-    dragItems()
+    dragBoxes(event)
   } else if (isResizingCard.value) {
     resizeCards(event)
   } else if (isTiltingCard.value) {
@@ -609,12 +634,6 @@ const handleTouchEnd = (event) => {
 const stopInteractions = async (event) => {
   console.info('💣 stopInteractions')
   const isCardsSelected = store.state.currentDraggingCardId || store.state.multipleCardsSelectedIds.length
-  if (isCardsSelected && store.state.cardsWereDragged) {
-    store.dispatch('currentCards/afterMove')
-  }
-  if (store.state.boxesWereDragged) {
-    store.dispatch('currentBoxes/afterMove')
-  }
   updateIconsNotDraggable()
   blurButtonClick(event)
   if (event.touches) {
@@ -716,13 +735,6 @@ Preload
   position relative // used by svg connections
   transform-origin top left
   z-index 0
-  .card-overlap-indicator
-    position absolute
-    z-index calc(var(--max-z) - 70)
-    pointer-events all
-    cursor pointer
-    span
-      line-height 1.5
 
 .is-interacting
   pointer-events all

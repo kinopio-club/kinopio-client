@@ -1,9 +1,11 @@
 import Space from '@/views/Space.vue'
 import store from '@/store/store.js'
-
 import consts from './consts.js'
 
 import { createRouter, createWebHistory } from 'vue-router'
+import { useUserStore } from '@/stores/useUserStore'
+import { useSpaceStore } from '@/stores/useSpaceStore'
+import { useApiStore } from '@/stores/useApiStore'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -47,7 +49,8 @@ const router = createRouter({
       name: 'confirm-email',
       component: Space,
       redirect: to => {
-        store.dispatch('currentUser/confirmEmail')
+        const userStore = useUserStore()
+        userStore.updateUserEmailIsVerified()
         store.commit('addNotification', { message: 'Email Confirmed', type: 'success' })
         return '/'
       }
@@ -74,7 +77,8 @@ const router = createRouter({
         const arenaReturnedCode = urlParams.get('code')
         next()
         history.replaceState({}, document.title, window.location.origin)
-        store.dispatch('currentUser/updateArenaAccessToken', arenaReturnedCode)
+        const userStore = useUserStore()
+        userStore.updateUserArenaAccessToken(arenaReturnedCode)
       }
     }, {
       path: '/explore',
@@ -88,13 +92,6 @@ const router = createRouter({
       component: Space,
       beforeEnter: (to, from, next) => {
         store.commit('loadNewSpace', true)
-        next()
-      }
-    }, {
-      path: '/blog',
-      component: Space,
-      beforeEnter: (to, from, next) => {
-        store.commit('loadBlogSpace', true)
         next()
       }
     }, {
@@ -174,6 +171,7 @@ const router = createRouter({
       name: 'invite',
       component: Space,
       beforeEnter: (to, from, next) => {
+        const userStore = useUserStore()
         const urlParams = new URLSearchParams(window.location.search)
         if (urlParams.get('present')) {
           store.commit('isPresentationMode', true)
@@ -187,7 +185,7 @@ const router = createRouter({
         const isPresentationMode = urlParams.get('present') || false
         const isDisableViewportOptimizations = Boolean(urlParams.get('disableViewportOptimizations'))
         store.commit('disableViewportOptimizations', isDisableViewportOptimizations)
-        store.dispatch('currentUser/init')
+        userStore.initializeUser()
         store.commit('isLoadingSpace', true)
         if (!spaceId) {
           store.commit('addNotification', { message: 'Invalid invite URL', type: 'danger' })
@@ -223,11 +221,17 @@ const router = createRouter({
   ]
 })
 
+router.beforeEach(async (to, from) => {
+  const userStore = useUserStore()
+  await userStore.initializeUser()
+})
+
 export default router
 
 const inviteToEdit = async ({ next, store, spaceId, collaboratorKey }) => {
-  await store.dispatch('currentUser/init')
-  const apiKey = store.state.currentUser.apiKey
+  const userStore = useUserStore()
+  const apiStore = useApiStore()
+  const apiKey = userStore.apiKey
   if (!apiKey) {
     store.commit('spaceUrlToLoad', spaceId)
     store.commit('addToSpaceCollaboratorKeys', { spaceId, collaboratorKey })
@@ -236,7 +240,7 @@ const inviteToEdit = async ({ next, store, spaceId, collaboratorKey }) => {
   }
   // join
   try {
-    await store.dispatch('api/addSpaceCollaborator', { spaceId, collaboratorKey })
+    await apiStore.addSpaceCollaborator({ spaceId, collaboratorKey })
     store.commit('spaceUrlToLoad', spaceId)
     store.commit('addNotification', { message: 'You can now edit this space', type: 'success' })
     store.commit('addToSpaceCollaboratorKeys', { spaceId, collaboratorKey })

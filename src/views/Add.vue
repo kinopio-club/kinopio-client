@@ -1,6 +1,9 @@
 <script setup>
 import { reactive, computed, onMounted, onUnmounted, onBeforeUnmount, watch, ref, nextTick } from 'vue'
 import { useStore } from 'vuex'
+import { useUserStore } from '@/stores/useUserStore'
+import { useSpaceStore } from '@/stores/useSpaceStore'
+import { useApiStore } from '@/stores/useApiStore'
 
 import inboxSpace from '@/data/inbox.json'
 import Loader from '@/components/Loader.vue'
@@ -12,7 +15,11 @@ import consts from '@/consts.js'
 import postMessage from '@/postMessage.js'
 
 import { nanoid } from 'nanoid'
+
 const store = useStore()
+const userStore = useUserStore()
+const spaceStore = useSpaceStore()
+const apiStore = useApiStore()
 
 const state = reactive({
   email: '',
@@ -58,11 +65,11 @@ onBeforeUnmount(() => {
 })
 
 const isOffline = computed(() => !store.state.isOnline)
-const currentUserIsSignedIn = computed(() => store.getters['currentUser/isSignedIn'])
+const currentUserIsSignedIn = computed(() => userStore.getUserIsSignedIn)
 const kinopioDomain = computed(() => consts.kinopioDomain())
-const cardsCreatedIsOverLimit = computed(() => store.getters['currentUser/cardsCreatedIsOverLimit'])
-const maxCardCharacterLimit = computed(() => consts.defaultCharacterLimit)
-const currentUser = computed(() => store.state.currentUser)
+const cardsCreatedIsOverLimit = computed(() => userStore.getUserCardsCreatedIsOverLimit)
+const maxCardCharacterLimit = computed(() => consts.cardCharacterLimit)
+const currentUser = computed(() => userStore.getUserAllState)
 const isAddPage = computed(() => store.state.isAddPage)
 const inboxUrl = computed(() => `${consts.kinopioDomain()}/inbox`)
 const selectedSpaceUrl = computed(() => `${consts.kinopioDomain()}/${state.selectedSpaceId}`)
@@ -79,7 +86,7 @@ const name = computed({
   }
 })
 const initUser = async () => {
-  store.dispatch('currentUser/init')
+  userStore.initializeUser()
 }
 const initCardTextarea = async () => {
   await nextTick()
@@ -142,12 +149,11 @@ const signIn = async (event) => {
   const email = event.target[0].value.toLowerCase()
   const password = event.target[1].value
   state.loading.signIn = true
-  const response = await store.dispatch('api/signIn', { email, password })
+  const response = await apiStore.signIn({ email, password })
   const result = await response.json()
   state.loading.signIn = false
   if (isSuccess(response)) {
-    await cache.saveUser(result)
-    store.commit('currentUser/updateUser', result)
+    userStore.updateUserState(result)
     initUser()
   } else {
     handleSignInErrors(result)
@@ -172,7 +178,7 @@ const updateSpacesLocal = async () => {
   state.spaces = spaces
 }
 const updateSpacesRemote = async () => {
-  let spaces = await store.dispatch('api/getUserSpaces')
+  let spaces = await apiStore.getUserSpaces()
   if (!spaces) { return }
   spaces = spaces.filter(space => space.name !== 'Inbox')
   state.spaces = spaces
@@ -211,19 +217,19 @@ const addCard = async () => {
   }
   let space
   try {
-    const user = store.state.currentUser
+    const user = userStore.getUserAllState
     card.userId = user.id
     let spaceId
     // save to inbox
     if (state.selectedSpaceId === 'inbox') {
       console.info('🛫 create card in inbox space', card)
-      await store.dispatch('api/addToQueue', { name: 'createCardInInbox', body: card })
+      await apiStore.addToQueue({ name: 'createCardInInbox', body: card })
     // save to space
     } else {
       spaceId = state.selectedSpaceId
       card.spaceId = spaceId
       console.info('🛫 create card in space', card, state.selectedSpaceId)
-      await store.dispatch('api/addToQueue', { name: 'createCard', body: card, spaceId })
+      await apiStore.addToQueue({ name: 'createCard', body: card, spaceId })
     }
     space = { id: spaceId }
   } catch (error) {
@@ -257,7 +263,7 @@ const clearErrorsAndSuccess = () => {
   state.success = false
 }
 const updateMaxLengthError = () => {
-  if (state.newName.length >= consts.defaultCharacterLimit - 1) {
+  if (state.newName.length >= consts.cardCharacterLimit - 1) {
     state.error.maxLength = true
   } else {
     state.error.maxLength = false

@@ -1,11 +1,21 @@
 <script setup>
 import { reactive, computed, onMounted, onBeforeUnmount, watch, ref, nextTick } from 'vue'
 import { useStore } from 'vuex'
+import { useCardStore } from '@/stores/useCardStore'
+import { useConnectionStore } from '@/stores/useConnectionStore'
+import { useBoxStore } from '@/stores/useBoxStore'
+import { useUserStore } from '@/stores/useUserStore'
+import { useSpaceStore } from '@/stores/useSpaceStore'
 
 import utils from '@/utils.js'
 import cache from '@/cache.js'
 
 const store = useStore()
+const cardStore = useCardStore()
+const connectionStore = useConnectionStore()
+const boxStore = useBoxStore()
+const userStore = useUserStore()
+const spaceStore = useSpaceStore()
 
 let canvas, context
 let startPanningPosition
@@ -13,6 +23,7 @@ const itemRadius = 1
 const canvasElement = ref(null)
 
 let unsubscribe
+let unsubscribes
 
 onMounted(async () => {
   init()
@@ -24,24 +35,6 @@ onMounted(async () => {
     const type = mutation.type
     const mutations = [
       'isLoadingSpace',
-      'currentSpace/loadSpace',
-      'currentCards/update',
-      'currentCards/updateMultiple',
-      'currentCards/remove',
-      'currentCards/removeResize',
-      'currentCards/move',
-      'currentCards/resize',
-      'currentCards/paste',
-      'currentCards/add',
-      'currentBoxes/add',
-      'currentBoxes/update',
-      'currentBoxes/resize',
-      'currentBoxes/move',
-      'currentConnections/add',
-      'currentConnections/update',
-      'currentConnections/updatePaths',
-      'currentConnections/updateMultiplePaths',
-      'currentConnections/remove',
       'triggerEndDrawing'
     ]
     if (mutations.includes(mutation.type)) {
@@ -49,6 +42,61 @@ onMounted(async () => {
       init()
     }
   })
+  const boxStoreActions = [
+    'updateBoxes',
+    'createBox'
+  ]
+  const cardStoreActions = [
+    'updateCards',
+    'removeCards',
+    'clearResizeCards',
+    'moveCards',
+    'createCard',
+    'resizeCards',
+    'pasteCards'
+  ]
+  const connectionStoreActions = [
+    'createConnection',
+    'updateConnections',
+    'removeConnections'
+  ]
+  const spaceStoreActions = [
+    'loadSpace'
+  ]
+  const cardStoreUnsubscribe = cardStore.$onAction(
+    ({ name, args }) => {
+      if (cardStoreActions.includes(name)) {
+        init()
+      }
+    }
+  )
+  const connectionStoreUnsubscribe = connectionStore.$onAction(
+    ({ name, args }) => {
+      if (connectionStoreActions.includes(name)) {
+        init()
+      }
+    }
+  )
+  const boxStoreUnsubscribe = boxStore.$onAction(
+    ({ name, args }) => {
+      if (boxStoreActions.includes(name)) {
+        init()
+      }
+    }
+  )
+  const spaceStoreUnsubscribe = spaceStore.$onAction(
+    ({ name, args }) => {
+      if (spaceStoreActions.includes(name)) {
+        init()
+      }
+    }
+  )
+  unsubscribes = () => {
+    cardStoreUnsubscribe()
+    connectionStoreUnsubscribe()
+    boxStoreUnsubscribe()
+    spaceStoreUnsubscribe()
+  }
 })
 onBeforeUnmount(() => {
   unsubscribe()
@@ -56,6 +104,7 @@ onBeforeUnmount(() => {
   window.removeEventListener('resize', init)
   window.removeEventListener('pointerup', endPanningViewport)
   window.removeEventListener('pointermove', panViewport)
+  unsubscribes()
 })
 
 const emit = defineEmits(['updateCount'])
@@ -109,6 +158,7 @@ const styles = computed(() => {
 // canvas
 
 const init = async () => {
+  await nextTick()
   if (!props.visible) { return }
   await initCanvas()
   if (!canvas) { return }
@@ -136,7 +186,7 @@ const initCanvas = async () => {
 // drawing
 
 const drawDrawing = async () => {
-  const space = await cache.space(store.state.currentSpace.id)
+  const space = await cache.space(spaceStore.id)
   if (!space.drawingImage) { return }
   const image = new Image()
   image.onload = () => {
@@ -150,10 +200,10 @@ const drawDrawing = async () => {
 // connections
 
 const mapConnections = computed(() => {
-  return props.space?.connections || store.getters['currentConnections/all']
+  return props.space?.connections || connectionStore.getAllConnections
 })
 const mapConnectionTypes = computed(() => {
-  return props.space?.connectionTypes || store.getters['currentConnections/allTypes']
+  return props.space?.connectionTypes || connectionStore.getAllConnectionTypes
 })
 const updatePointWithRatio = (point) => {
   point.x = point.x * ratio.value
@@ -187,7 +237,7 @@ const drawConnections = () => {
 // boxes
 
 const mapBoxes = computed(() => {
-  return props.space?.boxes || store.getters['currentBoxes/all']
+  return props.space?.boxes || boxStore.getAllBoxes
 })
 const drawBoxes = () => {
   let boxes = mapBoxes.value
@@ -217,7 +267,7 @@ const drawBoxes = () => {
 // cards
 
 const mapCards = computed(() => {
-  return props.space?.cards || store.getters['currentCards/all']
+  return props.space?.cards || cardStore.getAllCards
 })
 const drawCards = () => {
   const defaultColor = utils.cssVariable('secondary-background')
@@ -248,7 +298,7 @@ const updateScroll = () => {
 }
 const viewportStyle = computed(() => {
   const zoom = store.getters.spaceCounterZoomDecimal
-  const color = store.state.currentUser.color
+  const color = userStore.color
   // viewport box
   let width = (store.state.viewportWidth * zoom) * ratio.value
   let height = (store.state.viewportHeight * zoom) * ratio.value
