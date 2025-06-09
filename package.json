@@ -28,8 +28,7 @@
     "smartquotes": "^2.3.2",
     "uuid": "^9.0.0",
     "vue": "^3.5",
-    "vue-router": "^4.0.11",
-    "vuex": "^4.0.2"
+    "vue-router": "^4.0.11"
   },
   "devDependencies": {
     "@babel/core": "^7.26.10",
