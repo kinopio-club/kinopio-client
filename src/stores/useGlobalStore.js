@@ -1486,10 +1486,10 @@ export const useGlobalStore = defineStore('global', {
 
     // selecting
 
-    isSelectingX (value) {
-      utils.typeCheck({ value, type: 'boolean' })
-      this.isSelectingX = value
-    },
+    // isSelectingX (value) {
+    //   utils.typeCheck({ value, type: 'boolean' })
+    //   this.isSelectingX = value
+    // },
     // isSelectingY (value) {
     //   utils.typeCheck({ value, type: 'boolean' })
     //   this.isSelectingY = value
@@ -1687,10 +1687,10 @@ export const useGlobalStore = defineStore('global', {
         this.shouldNotifyIsJoiningGroup = false
       }
     },
-    notifyIsDuplicatingSpace (value) {
-      utils.typeCheck({ value, type: 'boolean' })
-      this.notifyIsDuplicatingSpace = value
-    },
+    // notifyIsDuplicatingSpace (value) {
+    //   utils.typeCheck({ value, type: 'boolean' })
+    //   this.notifyIsDuplicatingSpace = value
+    // },
     // notifyBoxSnappingIsReady (value) {
     //   utils.typeCheck({ value, type: 'boolean' })
     //   this.notifyBoxSnappingIsReady = value
